@@ -48,7 +48,7 @@ ICONVCOMPILEDIR="libiconv-1.14"
 ICONVHOMEPAGE="https://www.gnu.org/software/libiconv/"
 ICONVLICENSE=">=LGPL-2"
 ICONVBASEURL="http://ftp.gnu.org/pub/gnu/libiconv/"
-ICNOVNEED_WEB_BROWSER=0
+ICONVNEED_WEB_BROWSER=0
 ICONVPATCHES="fromgentoo/libiconv-1.14-no-gets.patch"
 
 NCURSESTITLE="ncurses"
@@ -95,7 +95,7 @@ PCREPATCHES="fromgentoo/libpcre-8.38-CVE-2016-1283.patch fromgentoo/libpcre-8.38
 
 LIBPNGTITLE="libpng"
 LIBPNGVER="1.6.21"
-LIBPNGPKG="libpng-1.6.21.tar.xz"a
+LIBPNGPKG="libpng-1.6.21.tar.xz"
 LIBPNGCOMPILEDIR="libpng-1.6.21"
 LIBPNGHOMEPAGE="http://www.libpng.org/"
 LIBPNGLICENSE="libpng"
