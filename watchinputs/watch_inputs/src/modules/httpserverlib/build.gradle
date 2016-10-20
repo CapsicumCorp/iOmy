@@ -1,0 +1,3 @@
+apply from: '../../../../WatchInputsAndroid/common_c_ndkbuild.gradle'
+
+ext.thismodulename='httpserverlib'

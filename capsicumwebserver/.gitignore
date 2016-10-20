@@ -1,0 +1,32 @@
+# Android Studio files
+*.iml
+build/
+.gradle/
+.idea/
+local.properties
+lint.xml
+*.apk
+
+# autoconf files to not commit
+*.in
+Makefile
+config.log
+config.status
+autom4te.cache
+aclocal.m4
+configure
+libtool
+
+config/*
+m4/*
+!m4/boost.m4
+.deps
+
+# other files
+*.kdev4
+*~
+
+# Archive files
+*.tar.*
+assets.zip
+

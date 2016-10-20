@@ -1,0 +1,66 @@
+apply plugin: 'com.android.model.native'
+
+final local_APP_ABIS=APP_ABIS
+
+model {
+    android {
+        compileSdkVersion NDKCOMPILESDKVERSION
+    }
+    android.ndk {
+        moduleName 'userspaceusbserialandroidlib'
+        if (rootProject.ext.has('NDKTOOLCHAIN')) {
+            toolchain NDKTOOLCHAIN
+        }
+        if (rootProject.ext.has('NDKTOOLCHAINVER')) {
+            toolchainVersion NDKTOOLCHAINVER
+        }
+        CFlags.addAll(COMMON_CFLAGS)
+        cppFlags.addAll(COMMON_CPPFLAGS)
+        if (rootProject.ext.has('USERSPACEUSBSERIALANDROIDLIB_LOCKDEBUG')) {
+          logger.quiet('DEBUG: userspaceusbserialandandroidlib: Enabling Lock debugging')
+          CFlags.add('-DUSERSPACEUSBSERIALANDROIDLIB_LOCKDEBUG')
+          cppFlags.add('-DUSERSPACEUSBSERIALANDROIDLIB_LOCKDEBUG')
+        }
+        if (rootProject.ext.has('USERSPACEUSBSERIALANDROIDLIB_MOREDEBUG')) {
+          logger.quiet('DEBUG: userspaceusbserialandandroidlib: Enabling More debugging')
+          CFlags.add('-DUSERSPACEUSBSERIALANDROIDLIB_MOREDEBUG')
+          cppFlags.add('-DUSERSPACEUSBSERIALANDROIDLIB_MOREDEBUG')
+        }
+        ldLibs.add("log")
+    }
+    android.sources {
+        main {
+            jni {
+                exportedHeaders {
+                    srcDir "../.."
+                }
+                source {
+                    srcDir "."
+                }
+            }
+        }
+    }
+    android.productFlavors {
+        local_APP_ABIS.each { abi ->
+            create(getFlavorName(abi)) {
+                ndk.with {
+                    abiFilters.add(abi)
+                    getPrebuiltLibPaths(abi).each { path ->
+                        ldFlags.addAll("-L" + path)
+                    }
+
+                }
+            }
+        }
+        create("fat") {
+            ndk {
+                local_APP_ABIS.each { abi ->
+                    abiFilters.add(abi)
+                    getPrebuiltLibPaths(abi).each { path ->
+                        ldFlags.addAll("-L" + path)
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,184 @@
+Table Of Contents
+
+1.0: Introduction
+    1.1: About
+    1.2: Prerequisites
+    1.3: Startup and switching users and UI elements
+    1.4: App Menu
+2.0: How to Use
+    2.1: Device Overview
+        2.1.1: Types of Devices
+        2.1.2: Specialised Devices
+            2.1.2.1: Health
+            2.1.2.2: Security
+                2.1.2.2.1: IP Cameras
+    2.2: Premise Overview
+        2.2.1: Link List
+        2.2.2: Room Overview
+        2.2.3: Editing a Room
+        2.2.4: Adding a Room
+    2.3: Activity Log
+        2.3.1: Premise Log
+        2.3.2: User Log
+        2.3.3: Device Log
+    2.4: Settings
+        2.4.1: Device List
+        2.4.2: Premise List
+
+||============================================================================||
+|| 1.0: INTRODUCTION                                                          ||
+||============================================================================||
+
+-----1.1: About-----------------------------------------------------------------
+IOMy is an app that will allow you to list all your devices that are connected
+to any Zigbee Netvox smart plugs. You can use this app to switch them on or off,
+alter the names of these devices, and view the electricity usage of each device
+in Volts, Amps, kiloWatts and kiloWatts/hour.
+
+-----1.2: Prerequisites---------------------------------------------------------
+Before you can start using IOMy for the first time you will need to install and
+run IOMy WatchInputs. This will create the initial user to login to the app with
+and add a new premise or make use of an existing one if one is already
+available. Run WatchInputs and follow the prompts to get started.
+
+-----1.3: Startup, switching users and UI elements------------------------------
+To use this program, you must register a user in the app database. After a new
+user is created, you can enter your username and password access the start page.
+Switching between users is easy. Every page has a button (three lines) that when
+pressed will bring up the main navigation popup for the app. This button is
+located in the top left corner in the header. Also located in the header is the
+IOMy logo, which will take the user back to the home page (Premise Overview)
+when tapped. Some pages also require an extras menu. This is to the right of the
+IOMy logo as a column of dots. What links that are in this menu depend on the
+current page.
+
+-----1.4: App Menu--------------------------------------------------------------
+The main menu consists of a button with a green background and the current
+user's username. Once clicked, its sub menu appears with links to edit
+information about the user: personal details, address, and password.
+
+The User Information page is used to change personal and contact details about
+the current user: title, given names, surname, display name, email and phone.
+
+The Change Password requires the user to enter his/her current password as well
+as the new password twice to ensure that there are no mistakes.
+
+Details about the current user's address can be changed in the Edit Address
+link.
+
+Next are links to the Device, Premise, Health, and Security Overview pages.
+After those are two menu entries with sub menus, Activity Logs, and Settings.
+The sub menu for the Activity Log has three links, premise log, device log, and
+user log. The sub menu for the Settings has two categories: Premise and Rooms,
+and Devices.
+
+At the bottom of the main menu is a button called "Switch Users". Pressing it
+will take you to a page to enter the username and password. It looks and works
+like the main login page. Switching users, will end the current session.
+
+||============================================================================||
+|| 2.0: How to Use                                                            ||
+||============================================================================||
+
+-----2.1: Device Overview-------------------------------------------------------
+This is the first page that will be displayed once logged in to the program. On
+this page is a list of every device that the current user can access regardless
+of the location of each device.
+
+----------2.1.1: Types of Devices-----------------------------------------------
+First, a list of regular devices is shown. These devices are attached to a wide
+variety of pathways (devices that connect to a Comms).
+
+----------2.1.2: Specialised Devices--------------------------------------------
+There may be certain devices in the list that perform specific functions. These
+can be for health or security.
+
+---------------2.1.2.1: Health--------------------------------------------------
+Health devices measure bodily functions (e.g. heartbeat, respiration, blood
+pressure, etc.).
+
+There is a separate page for listing only health devices (Health Overview). The 
+health page will read blood pressure, heart beat, and respiratory rate data from
+any connected health monitoring device. The data gathered is represented in a
+line graph with the average heart rate and respiratory rate listed below.
+
+---------------2.1.2.2: Security------------------------------------------------
+These devices can include IP Cameras and motion sensors.
+
+Each entry in the security list shows the name the camera is referred to. This
+is a link to its information page. This page displays the camera stream if the
+camera is on, its activity log, and controls to record the stream or to capture
+a screenshot of the stream or to enable/disable the motion sensor.
+
+A separate page lists all IP Cameras and motion sensors in each room. Rooms with
+no cameras are not listed.
+
+-----2.2: Premise Overview------------------------------------------------------
+There is a combo box with a list of available premises that the user has access
+to. Below that is a list of room the premise has with devices attached. Each
+item displays number of devices attached to the room, the name of the room in
+the centre (a link to edit the room), and to the right a button to expand its
+device list.
+
+A room is only listed on this page when there are devices attached to it. For a
+full list of rooms see the premise and rooms settings page.
+
+It has an extras menu that contains links to add a new room, edit the address
+and information of the currently selected premise.
+
+----------2.2.1: Device List----------------------------------------------------
+Once the button on the right of the room name is clicked, a list of device names
+is either shown or hidden. By tapping a device name, the user is taken to a page
+that shows all the data gathered from the device's sensors (volt, amp, kiloWatts
+and kiloWatts/hour).
+
+----------2.2.2: Room Overview--------------------------------------------------
+This page lists all the devices associated with the currently selected room and
+their sensors (eg. volt, amp, kiloWatts and kiloWatts/hour) with their values.
+You can also turn a device on or off.
+
+Its extras menu has the option to edit the currently selected room.
+
+----------2.2.3: Editing a Room-------------------------------------------------
+Clicking on the room name will lead to the edit room page. Here you can change
+the name of the room, its description, and the type of room it's classified as.
+
+In this page there is a button to delete the currently selected room.
+
+----------2.2.4: Adding a Room--------------------------------------------------
+This page is similar to the edit room page. It adds instead of edits, and has no
+delete button.
+
+-----2.3: Activity Log----------------------------------------------------------
+The activity log is separated into three categories: premise, user and device.
+Each is its own link.
+
+----------2.3.1: Premise Log----------------------------------------------------
+All activity on every accessible premise for the current user is listed here.
+
+----------2.3.2: User Log-------------------------------------------------------
+User account activity is recorded and shown on this page.
+
+----------2.3.3: Device Log-----------------------------------------------------
+All activity on all accessible devices is logged here.
+
+-----2.4: Settings--------------------------------------------------------------
+There are two main categories of settings: devices, and premises and rooms.
+
+----------2.4.1: Link List------------------------------------------------------
+The link list is simply a list of links and their objects. Each object is shown
+under its link. Every link and object button will direct the user to their
+respective editing pages.
+
+----------2.4.2: Premise List---------------------------------------------------
+The premise list lists all the premises that the users have access to. There are
+two columns, number of hubs attached on the left and the name of the premise to
+the right. The premise name is a link to a page that will show information
+relating to the selected premise. If the current user has permission to edit the
+details of the premise, then it the page will have a form with editable fields.
+Otherwise the page will simply list the details in a similar fashion to the edit
+page.
+
+The edit page will also have an extras menu with the option to edit the address
+of the current premise and, if the current user has permission to do so, another
+button to edit premise permissions.

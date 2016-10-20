@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".DatabaseProgressPage"
+    android:weightSum="1">
+
+    <!-- SERVER LOCATION FIELD -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Server Name/IP Address (Default is localhost. Change if it's remote.)"/>
+
+    <EditText
+        android:id="@+id/dbServerAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="localhost"/>
+
+    <!-- SERVER PORT FIELD -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Server Port"/>
+
+    <EditText
+        android:id="@+id/dbServerPort"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="3306"/>
+
+    <!-- USERNAME FIELD -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Username"/>
+
+    <EditText
+        android:id="@+id/dbUsernameField"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <!-- PASSWORD FIELD -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Password"/>
+
+    <EditText
+        android:id="@+id/dbPasswordField"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword" />
+
+    <!-- CONFIRM PASSWORD FIELD -->
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Confirm Password"/>
+
+    <EditText
+        android:id="@+id/dbConfirmPasswordField"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword" />
+
+    <!-- ACCEPT BUTTON -->
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="nextPage"
+        android:text="Accept"
+        android:layout_gravity="center_horizontal" />
+
+</LinearLayout>

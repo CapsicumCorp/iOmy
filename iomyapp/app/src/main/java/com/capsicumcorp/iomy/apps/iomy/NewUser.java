@@ -1,0 +1,132 @@
+/*
+Title: New User Class
+Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+Description: Defines the activity title and the function for the 'Accept' button.
+Copyright: Capsicum Corporation 2016
+
+This file is part of iOmy.
+
+iOmy is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+iOmy is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with iOmy. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package com.capsicumcorp.iomy.apps.iomy;
+
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
+
+public class NewUser extends AppCompatActivity {
+
+    private InstallWizard installWizard = Constants.installWizard;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_new_owner);
+        this.setTitle(Titles.premiseHubOwnerTitle);
+    }
+
+    /**
+     * Validates the username and password. If one or both is present and valid, the next activity
+     * will begin to create the user, premise, and hub. Otherwise, it will bring up a Snackbar
+     * notice at the bottom of the screen.
+     *
+     * @param view              Button that calls this procedure.
+     */
+    public void nextPage(View view) {
+        // Lock the button
+        view.setEnabled(false);
+        //------------------------------------------------------------//
+        // Gather form data
+        //------------------------------------------------------------//
+        EditText et = (EditText) findViewById(R.id.owner_username);
+        installWizard.ownerUsername = et.getText().toString();
+
+        et = (EditText) findViewById(R.id.owner_password);
+        installWizard.ownerPassword = et.getText().toString();
+
+        et = (EditText) findViewById(R.id.owner_confirm_password);
+        installWizard.confirmOwnerPassword = et.getText().toString();
+
+        if (this.isValidData() == true) {
+            //------------------------------------------------------------//
+            // Proceed to create the premise, hub, and a new user, the owner.
+            //------------------------------------------------------------//
+            installWizard.summonNextPage(this, installWizard.PROCEED);
+        } else {
+            // Compile the error message
+            String errorMessages = "";
+            for (int i = 0; i < this.installWizard.validationErrorMessages.size(); i++) {
+                if (i > 0) {
+                    errorMessages += "\n";
+                }
+                errorMessages += this.installWizard.validationErrorMessages.get(i);
+            }
+            // Bring up the notice.
+            Snackbar errorNotice = Snackbar.make(findViewById(R.id.owner_form), errorMessages, 5000);
+            // Retrieve the text view that holds the message(s)
+            View errorNoticeView =  errorNotice.getView();
+            TextView textView = (TextView) errorNoticeView.findViewById(android.support.design.R.id.snackbar_text);
+            textView.setMaxLines(6);  // We wish to have a maximum 6 lines
+            errorNotice.show();
+            // Clear the error log
+            this.installWizard.validationErrorMessages.clear();
+        }
+        // Unlock the button
+        view.setEnabled(true);
+    }
+
+    public boolean isValidData() {
+        boolean valid = true;
+        TextView tv;
+        String label;
+
+        // Does the username exist?
+        if (installWizard.ownerUsername.length() == 0) {
+            valid = false;
+            this.installWizard.validationErrorMessages.add("Username must be filled out.");
+        }
+
+        // Run the password check
+        if (installWizard.ownerPassword.length() == 0) {
+            valid = false;
+            installWizard.validationErrorMessages.add("Password must be entered.");
+        } else {
+            if (this.installWizard.confirmOwnerPassword.length() == 0) {
+                valid = false;
+                installWizard.validationErrorMessages.add("You must re-enter password to confirm.");
+            } else {
+                if (!this.installWizard.ownerPassword.equals(this.installWizard.confirmOwnerPassword)) {
+                    valid = false;
+                    this.installWizard.validationErrorMessages.add("Passwords don't match.");
+                } else {
+                    valid = installWizard.isValidPassword(installWizard.ownerPassword);
+                    if (valid) {
+                        Log.v("New User", "Valid");
+                    } else {
+                        Log.v("New User", "Not Valid");
+                    }
+                    // Confirm password
+
+                }
+            }
+        }
+
+        return valid;
+    }
+}

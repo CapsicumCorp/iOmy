@@ -1,0 +1,87 @@
+/*
+Title: Responsive CSS Rules
+Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+Description: CSS rules for responsive web design using CSS3 media queries.
+Copyright: Capsicum Corporation 2016
+
+This file is part of iOmy.
+
+iOmy is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+iOmy is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+/**
+RESPONSIVE.CSS MUST ONLY CONTAIN STYLES WITHIN MEDIA QUERIES!
+*/
+
+/*******************************************\
+DYNAMIC BUTTONS
+\*******************************************/
+
+
+/* Configuration for 2 buttons side by side */
+/*@media only screen and (max-width: 500px) {
+    .FlexWrap {
+        flex-wrap: wrap;
+        flex-direction: column;
+    }
+
+    .DynamicButton {
+        width: 100%;
+    }
+}
+
+@media only screen and (min-width: 501px) {
+    .FlexWrap {
+        flex-wrap: wrap;
+        flex-direction: row;
+    }
+
+    .DynamicButton {
+        width: 50%;
+    }
+}*/
+
+/*******************************************\
+IP CAMERA PAGE
+\*******************************************/
+
+/* Configuration for 2 columns side by side */
+@media only screen and (max-width: 800px) {
+    .IPCameraFlexWrap {
+        flex-wrap: wrap;
+        flex-direction: column;
+    }
+
+    .IPCameraLeftColumn {
+        width: 100%;
+    }
+    .IPCameraRightColumn {
+        width: 100%;
+    }
+}
+
+@media only screen and (min-width: 801px) {
+    .FlexWrap {
+        flex-wrap: wrap;
+        flex-direction: row;
+    }
+
+    .IPCameraLeftColumn {
+        width: 70%;
+    }
+    .IPCameraRightColumn {
+        width: 30%;
+    }
+}

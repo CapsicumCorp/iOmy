@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    android:key="pref_key_main_settings"
+    android:title="Main Settings"
+    android:persistent="false">
+
+    <CheckBoxPreference
+        android:key="pref_run_at_boot"
+        android:title="Start when Android boots"
+        android:summary="Start the application when Android boots"
+        android:defaultValue="true" />
+
+    <PreferenceCategory
+        android:title="Services"
+        android:key="pref_key_service_settings">
+        <CheckBoxPreference
+            android:key="pref_lighttpdphp_enabled"
+            android:title='Lighttpd &amp; PHP Enabled'
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="pref_mysql_enabled"
+            android:title='MySQL Enabled'
+            android:defaultValue="true" />
+
+    </PreferenceCategory>
+</PreferenceScreen>

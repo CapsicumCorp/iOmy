@@ -1,0 +1,12 @@
+diff -Naur php-5.6.24/ext/standard/string.c php-5.6.24-2/ext/standard/string.c
+--- php-5.6.24/ext/standard/string.c	2016-08-31 09:45:07.126833923 +1000
++++ php-5.6.24-2/ext/standard/string.c	2016-08-31 09:45:34.189831794 +1000
+@@ -3426,7 +3426,7 @@
+ 		return(sys_errlist[errnum]);
+ 	}
+ 
+-	(void) snprintf(BG(str_ebuf), sizeof(php_basic_globals.str_ebuf), "Unknown error: %d", errnum);
++	(void) snprintf(BG(str_ebuf), sizeof(BG(str_ebuf)), "Unknown error: %d", errnum);
+ 	return(BG(str_ebuf));
+ }
+ /* }}} */

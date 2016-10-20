@@ -1,0 +1,30 @@
+diff -Naur mysql-5.6.31/cmd-line-utils/libedit/chartype.h mysql-5.6.31-2/cmd-line-utils/libedit/chartype.h
+--- mysql-5.6.31/cmd-line-utils/libedit/chartype.h	2016-05-17 08:19:37.000000000 +1000
++++ mysql-5.6.31-2/cmd-line-utils/libedit/chartype.h	2016-09-01 17:13:29.125799752 +1000
+@@ -47,16 +47,16 @@
+ 
+ /* XXXMYSQL : Added FreeBSD & AIX to bypass this check.
+   TODO : Verify if FreeBSD & AIX stores ISO 10646 in wchar_t. */
+-#if !defined(__NetBSD__) && !defined(__sun) \
+-  && !(defined(__APPLE__) && defined(__MACH__)) \
+-  && !defined(__FreeBSD__) && !defined(_AIX)
+-#ifndef __STDC_ISO_10646__
+-/* In many places it is assumed that the first 127 code points are ASCII
+- * compatible, so ensure wchar_t indeed does ISO 10646 and not some other
+- * funky encoding that could break us in weird and wonderful ways. */
+-	#error wchar_t must store ISO 10646 characters
+-#endif
+-#endif
++//#if !defined(__NetBSD__) && !defined(__sun) \
++//  && !(defined(__APPLE__) && defined(__MACH__)) \
++//  && !defined(__FreeBSD__) && !defined(_AIX)
++//#ifndef __STDC_ISO_10646__
++///* In many places it is assumed that the first 127 code points are ASCII
++// * compatible, so ensure wchar_t indeed does ISO 10646 and not some other
++// * funky encoding that could break us in weird and wonderful ways. */
++//	#error wchar_t must store ISO 10646 characters
++//#endif
++//#endif
+ 
+ /* Oh for a <uchar.h> with char32_t and __STDC_UTF_32__ in it...
+  * ref: ISO/IEC DTR 19769

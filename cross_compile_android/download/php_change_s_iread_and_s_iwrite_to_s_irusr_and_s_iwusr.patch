@@ -1,0 +1,45 @@
+diff -Naur php-5.6.24/Zend/zend_virtual_cwd.c php-5.6.24-2/Zend/zend_virtual_cwd.c
+--- php-5.6.24/Zend/zend_virtual_cwd.c	2016-07-21 10:23:03.000000000 +1000
++++ php-5.6.24-2/Zend/zend_virtual_cwd.c	2016-08-30 16:56:31.794417304 +1000
+@@ -365,7 +365,7 @@
+ 
+ 		if(pbuffer->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
+ 			buf->st_mode = S_IFLNK;
+-			buf->st_mode |= (data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)) : (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)|S_IWRITE|(S_IWRITE>>3)|(S_IWRITE>>6));
++			buf->st_mode |= (data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? (S_IRUSR|(S_IRUSR>>3)|(S_IRUSR>>6)) : (S_IRUSR|(S_IRUSR>>3)|(S_IRUSR>>6)|S_IWUSR|(S_IWUSR>>3)|(S_IWUSR>>6));
+ 		}
+ 
+ #if 0 /* Not used yet */
+@@ -376,7 +376,7 @@
+ 		free_alloca(pbuffer, use_heap_large);
+ 	} else {
+ 		buf->st_mode = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? (S_IFDIR|S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6)) : S_IFREG;
+-		buf->st_mode |= (data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)) : (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)|S_IWRITE|(S_IWRITE>>3)|(S_IWRITE>>6));
++		buf->st_mode |= (data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? (S_IRUSR|(S_IRUSR>>3)|(S_IRUSR>>6)) : (S_IRUSR|(S_IRUSR>>3)|(S_IRUSR>>6)|S_IWUSR|(S_IWUSR>>3)|(S_IWUSR>>6));
+ 	}
+ 
+ 	if ((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
+diff -Naur php-5.6.24/ext/soap/php_sdl.c php-5.6.24-2/ext/soap/php_sdl.c
+--- php-5.6.24/ext/soap/php_sdl.c	2016-07-21 10:23:03.000000000 +1000
++++ php-5.6.24-2/ext/soap/php_sdl.c	2016-08-30 16:57:17.845391019 +1000
+@@ -2126,7 +2126,7 @@
+ #ifdef ZEND_WIN32
+ 	f = open(fn,O_CREAT|O_WRONLY|O_EXCL|O_BINARY,S_IREAD|S_IWRITE);
+ #else
+-	f = open(fn,O_CREAT|O_WRONLY|O_EXCL|O_BINARY,S_IREAD|S_IWRITE);
++	f = open(fn,O_CREAT|O_WRONLY|O_EXCL|O_BINARY,S_IRUSR|S_IWUSR);
+ #endif
+ 	if (f < 0) {return;}
+ 
+diff -Naur php-5.6.24/ext/zip/lib/mkstemp.c php-5.6.24-2/ext/zip/lib/mkstemp.c
+--- php-5.6.24/ext/zip/lib/mkstemp.c	2016-07-21 10:23:03.000000000 +1000
++++ php-5.6.24-2/ext/zip/lib/mkstemp.c	2016-08-30 16:58:01.014366295 +1000
+@@ -55,7 +55,7 @@
+ {
+ #ifdef _WIN32
+ 	int ret;
+-	ret = _creat(_mktemp(path), _S_IREAD|_S_IWRITE);
++	ret = _creat(_mktemp(path), S_IRUSR|S_IWUSR);
+ 	if (ret == -1) {
+ 		return 0;
+ 	} else {

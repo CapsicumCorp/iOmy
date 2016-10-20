@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Watch Inputs</string>
+    <string name="app_title">Watch Inputs</string>
+    <string name="menu_settings">Settings</string>
+    <string name="AppName">Watch Inputs</string>
+    <integer name="debug">1</integer>
+    <string name="StorageFolderName">iomy</string>
+
+</resources>

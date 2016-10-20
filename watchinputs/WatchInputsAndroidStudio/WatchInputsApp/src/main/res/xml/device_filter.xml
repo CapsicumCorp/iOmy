@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 0x10C4 / 0x8293 Telegesis ETRX2USB (Legacy MMB RapidHA Module) -->
+    <usb-device vendor-id="4292" product-id="33427" />
+
+    <!-- 0x10C4 / 0x88a4 MMB Networks ZigBee USB Device -->
+    <usb-device vendor-id="4292" product-id="34980" />
+
+    <!-- 0x0403 / 0x6001 FTDI USB to Serial Device -->
+    <usb-device vendor-id="1027" product-id="24577" />
+</resources>

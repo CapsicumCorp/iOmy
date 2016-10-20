@@ -1,0 +1,13 @@
+diff -Naur mysql-5.6.31/include/my_global.h mysql-5.6.31-2/include/my_global.h
+--- mysql-5.6.31/include/my_global.h	2016-05-17 08:19:37.000000000 +1000
++++ mysql-5.6.31-2/include/my_global.h	2016-09-01 19:07:09.720752058 +1000
+@@ -874,7 +874,9 @@
+ #endif
+ 
+ #if !defined(HAVE_ULONG) && !defined(__USE_MISC)
++typedef unsigned short int ushort;
+ typedef unsigned long	ulong;		  /* Short for unsigned long */
++typedef unsigned int uint;
+ #endif
+ #ifndef longlong_defined
+ /* 

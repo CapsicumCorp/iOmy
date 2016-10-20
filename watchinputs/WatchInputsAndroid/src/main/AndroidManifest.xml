@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="org.capsicumcorp.watchinputs"
+    android:versionCode="1"
+    android:versionName="1.0">
+    <!--
+      overrideLibrary is to override the minSdkVersion in the usb library as we do
+        sufficient checks in the main program before using this library at runtime
+    -->
+    <uses-sdk
+        tools:overrideLibrary="com.hoho.android.usbserial"
+        />
+</manifest>

@@ -1,0 +1,5 @@
+When we use mutexes to make a library thread safe it is
+  not always just to protect against accessing a single variable.
+It is also sometimes used to ensure that a library stays in the same expected
+  state during the entire execution of a function.
+

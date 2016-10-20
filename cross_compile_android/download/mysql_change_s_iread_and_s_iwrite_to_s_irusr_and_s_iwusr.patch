@@ -1,0 +1,16 @@
+diff -Naur mysql-5.6.31/include/my_dir.h mysql-5.6.31-2/include/my_dir.h
+--- mysql-5.6.31/include/my_dir.h	2016-05-17 08:19:37.000000000 +1000
++++ mysql-5.6.31-2/include/my_dir.h	2016-09-01 17:50:16.327495189 +1000
+@@ -35,9 +35,9 @@
+ #define MY_S_ISUID	S_ISUID /* set user id on execution */
+ #define MY_S_ISGID	S_ISGID /* set group id on execution */
+ #define MY_S_ISVTX	S_ISVTX /* save swapped text even after use */
+-#define MY_S_IREAD	S_IREAD /* read permission, owner */
+-#define MY_S_IWRITE	S_IWRITE	/* write permission, owner */
+-#define MY_S_IEXEC	S_IEXEC /* execute/search permission, owner */
++#define MY_S_IREAD	S_IRUSR /* read permission, owner */
++#define MY_S_IWRITE	S_IWUSR	/* write permission, owner */
++#define MY_S_IEXEC	S_IXUSR /* execute/search permission, owner */
+ 
+ #define MY_S_ISDIR(m)	(((m) & MY_S_IFMT) == MY_S_IFDIR)
+ #define MY_S_ISCHR(m)	(((m) & MY_S_IFMT) == MY_S_IFCHR)

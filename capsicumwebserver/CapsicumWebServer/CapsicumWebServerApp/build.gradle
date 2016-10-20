@@ -1,0 +1,31 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion "24.0.2"
+
+    //Android < 4.1 doesn't support PIE executables and we don't have non-PIE executables yet so
+    //  keeping the min version at 16 for now
+    //Target version is 22 until we can get runtime permissions working
+    defaultConfig {
+        applicationId "com.capsicumcorp.iomy.apps.webserver"
+        minSdkVersion 16
+        targetSdkVersion 22
+        versionCode 1
+        versionName "0.4"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'com.android.support:design:24.2.1'
+    compile 'com.android.volley:volley:1.0.0'
+}

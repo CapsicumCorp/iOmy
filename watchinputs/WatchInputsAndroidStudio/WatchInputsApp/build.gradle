@@ -1,0 +1,174 @@
+apply plugin: 'com.android.model.application'
+
+final local_APP_ABIS=APP_ABIS
+final local_BOOST_SHARED_LIBS = BOOST_SHARED_LIBS
+
+model {
+    android {
+        compileSdkVersion 24
+        buildToolsVersion "24.0.2"
+
+        // Require Android 2.3.3 or higher
+        defaultConfig {
+            applicationId "com.capsicumcorp.iomy.apps.watchinputs"
+            minSdkVersion.apiLevel 10
+            targetSdkVersion.apiLevel 22
+            versionCode 1
+            versionName "0.6.0"
+        }
+    }
+
+    //NOTE: This is a dummy entry needed to activate compiling the jni project dependencies
+    android.ndk {
+        moduleName = "mainapp"
+    }
+    android.sources {
+        main {
+            jni {
+                dependencies {
+                    project ":ndksimclist"
+                    project ":ndkdebuglib"
+                    project ":ndkzigbeelib"
+                    project ':ndkcommonserverlib'
+                    project ':ndkcmdserverlib'
+                    project ':ndkdbcounterlib'
+                    project ':ndkconfiglib'
+                    project ':ndkhttpserverlib'
+                    project ':ndkxbeelib'
+                    project ':ndkcommonlib'
+                    project ':ndkdblib'
+                    project ':ndkrapidhalib'
+                    project ':ndkserialportlib'
+                    project ':ndkmysqllib'
+                    project ':ndkuserspaceusbserialandroidlib'
+                    project ':ndkwebapiclientlib'
+                    project ':ndklocklib'
+                    project ':ndkwatchinputs'
+                }
+            }
+        }
+    }
+    android.buildTypes {
+        debug {
+        }
+        release {
+            minifyEnabled=true
+            useProguard=true
+            proguardFiles.add(file('proguard-rules.txt'))
+        }
+    }
+
+    android.productFlavors {
+        // To include all cpu architectures, leave abiFilters empty
+        local_APP_ABIS.each { abi ->
+            create(getFlavorName(abi)) {
+                ndk.with {
+                    //ndk.abiFilters.add("armeabi")
+                    abiFilters.add(abi)
+                    getPrebuiltLibPaths(abi).each { path ->
+                        ldFlags.addAll("-L" + path)
+                    }
+
+                }
+            }
+        }
+        create("fat") {
+            ndk {
+                local_APP_ABIS.each { abi ->
+                    abiFilters.add(abi)
+                    getPrebuiltLibPaths(abi).each { path ->
+                        ldFlags.addAll("-L" + path)
+                    }
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    compile project(':WatchInputsAndroid')
+    compile 'com.android.support:support-v4:24.2.1'
+}
+
+//--------------------------------------------------
+//Code copied from https://www.crystax.net/en/blog/7
+//--------------------------------------------------
+
+tasks.all {
+    task ->
+        if (task.name.startsWith('link')) {
+            task.dependsOn tasks.copyNativeLibs, tasks.stripNativeLibs
+        }
+}
+
+task copyNativeLibs() {
+    ["debug", "release"].each { buildType ->
+        local_APP_ABIS.each { abi ->
+            def libs = [:]
+            local_BOOST_SHARED_LIBS.each { name ->
+                libs[name] = "${getBoostLibDir(abi)}/lib${name}.so"
+            }
+            libs.crystax = getLibCrystax(abi)
+
+            libs.each { name, file ->
+                dependsOn tasks.create(name: "copy-native-library-${name}-${abi}-${buildType}", type: Copy) {
+                    from file
+                    into getTargetLibDir(abi, abi, buildType)
+                }
+            }
+        }
+        ["fat"].each { flavor ->
+            local_APP_ABIS.each { abi ->
+                def libs = [:]
+                local_BOOST_SHARED_LIBS.each { name ->
+                    libs[name] = "${getBoostLibDir(abi)}/lib${name}.so"
+                }
+                libs.crystax = getLibCrystax(abi)
+
+                libs.each { name, file ->
+                    dependsOn tasks.create(name: "copy-native-library-${name}-${flavor}-${abi}-${buildType}", type: Copy) {
+                        from file
+                        into getTargetLibDir(flavor, abi, buildType)
+                    }
+                }
+            }
+        }
+    }
+}
+
+task stripNativeLibs(dependsOn: copyNativeLibs) {
+    ["debug", "release"].each { buildType ->
+        local_APP_ABIS.each { abi ->
+            def libs = []
+            libs.addAll(local_BOOST_SHARED_LIBS)
+            libs.add("crystax")
+
+            libs.each { name ->
+                dependsOn tasks.create(name: "strip-native-library-${name}-${abi}-${buildType}", type: Exec) {
+                    commandLine getStripExecutable(abi), "--strip-unneeded", "${getTargetLibDir(abi, abi, buildType)}/lib${name}.so"
+                }
+            }
+
+        }
+        ["fat"].each { flavor ->
+            local_APP_ABIS.each { abi ->
+                def libs = []
+                libs.addAll(local_BOOST_SHARED_LIBS)
+                libs.add("crystax")
+
+                libs.each { name ->
+                    dependsOn tasks.create(name: "strip-native-library-${name}-${flavor}-${abi}-${buildType}", type: Exec) {
+                        commandLine getStripExecutable(abi), "--strip-unneeded", "${getTargetLibDir(flavor, abi, buildType)}/lib${name}.so"
+                    }
+                }
+
+            }
+        }
+    }
+}
+
+def getTargetLibDir(flavor, abi, buildType) {
+    return "${buildDir}/intermediates/binaries/${buildType}/${getFlavorName(flavor)}/lib/${abi}"
+}
+
+//--------------------------------------------------

@@ -1,0 +1,93 @@
+/*
+Title: Float and Alignment CSS rules
+Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
+Description: A set of commonly used rules for float, and text and element alignment.
+Copyright: Capsicum Corporation 2015, 2016
+
+This file is part of iOmy.
+
+iOmy is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+iOmy is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
+	/************************************************************/
+	/* This is an OPTIONAL styling used to force the "body" tag	*/
+	/* to at least be the height of the web browser window.		*/ 
+	/************************************************************/
+/*	html, body {
+		min-height:				100%;
+	}*/
+
+	/************************************************************/
+	/* This is used to make the cursor change to a pointer		*/
+	/* when hoving over a links on the web page					*/
+	/************************************************************/
+/*	a:hover {
+		cursor:					pointer;
+	}*/
+	
+	/************************************************************/
+	/* IE default blue border fix								*/
+	/* IE applies a blue border to images by default			*/
+	/************************************************************/
+/*	a img {
+		border: none; 
+	} */
+
+
+.FloatLeft {
+	float: left;
+}
+
+.FloatRight {
+	float: right;
+}
+
+.FloatClear {
+	/* Clears Floating															*/
+	/* NOTE: Needs to be applied to a dummy element below the floating elements	*/
+	clear: both;
+}
+
+.ElementCenter {
+	/* Div auto centers if the Div is smaller than its parent Div */
+	/* NOTE: The child Div(the one that gets this as its class) should be the only child of the parent Div */
+	margin: auto;
+}
+
+.ElementHidden {
+	/* Element is not visible and doesn't occupy space on the web browser */
+	display: none;
+}
+
+.ElementInvisible {
+	/* Element is not visible but still occupies space on the web browser */
+	visibility: hidden;
+}
+
+.TextCenter {
+	text-align: 					center;
+}
+
+.TextLeft {
+	text-align: 					left;
+}
+
+.TextRight {
+	text-align: 					right;
+}
+
+
+

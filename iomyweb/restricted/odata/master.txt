@@ -1,0 +1,2431 @@
+<?php
+/**
+ * VR_DATABIGINT entity type.
+ * 
+ * @category  Service
+ * @package	Service_DatabigintView
+ * @author	Yash K. Kothari <odataphpproducer_alias@microsoft.com>
+ * @copyright 2011 Microsoft Corp. (http://www.microsoft.com)
+ * @license	New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
+ * @version	Release: 1.0
+ * @link	  http://odataphpproducer.codeplex.com
+ */
+class VR_DATABIGINT{
+	public $CALCEDVALUE;
+	public $UTS;
+	public $DATABIGINT_PK;
+	public $DATABIGINT_DATE;
+	public $DATABIGINT_VALUE;
+	public $DATATYPE_PK;
+	public $DATATYPE_NAME;
+	public $USERS_PK;
+	public $USERS_USERNAME;
+	public $PREMISE_PK;
+	public $PREMISE_NAME;
+	public $PERMISSIONS_PK;
+	public $PERMISSIONS_OWNER;
+	public $PERMISSIONS_WRITE;
+	public $PERMISSIONS_READ;
+	public $PERMISSIONS_STATETOGGLE;
+	public $UNITS_PK;
+	public $UNITS_NAME;
+	public $UNITSTYPE_PK;
+	public $UNITSTYPE_NAME;
+	public $IO_PK;
+	public $IO_SERIALCODE;
+	public $IO_NAME;
+	public $IO_CONNECTED;
+	public $IO_STATE;
+	public $IO_STATECHANGECODE;
+	public $IOTECHTYPE_PK;
+	public $IOTECHTYPE_NAME;
+	public $IOPORTS_PK;
+	public $IOPORTS_HWID;
+	public $IOPORTS_OUTPUTHWID;
+	public $IOPORTS_STATE;
+	public $IOPORTS_STATECHANGEID;
+	public $IOPORTS_NAME;
+	public $IOPORTTYPE_PK;
+	public $IOPORTTYPE_NAME;
+	public $SENSOR_BASECONVERT;
+	public $SENSOR_PK;
+	public $SENSOR_NAME;
+	public $SENSOR_SAMPLERATELIMIT;
+	public $SENSOR_SAMPLERATEMAX;
+	public $SENSOR_SAMPLERATECURRENT;
+	public $SENSOR_STATECHANGEID;
+	public $SENSOR_STATE;
+	public $SENSORTYPE_PK;
+	public $SENSORTYPE_NAME;
+	public $SENSORTYPE_ENUM;
+	public $RSCAT_PK;
+	public $RSCAT_NAME;
+	public $RSSUBCAT_PK;
+	public $RSSUBCAT_NAME;
+	public $RSSUBCAT_TYPE;
+	public $RSTARIFF_PK;
+	public $RSTARIFF_NAME;
+	public $RSTYPE_PK;
+	public $RSTYPE_NAME;
+	public $RSTYPE_MAIN;
+	public $UOMCAT_PK;
+	public $UOMCAT_NAME;
+	public $UOMSUBCAT_PK;
+	public $UOMSUBCAT_NAME;
+	public $UOM_PK;
+	public $UOM_NAME;
+	public $UOM_RATE;
+
+}
+
+//Register the entity (resource) type 'VR_DATABIGINT'
+		$VR_DATABIGINTEntityType = $metadata->addEntityType(
+			new ReflectionClass('VR_DATABIGINT'), 'VR_DATABIGINT', 'DatabigintView'
+		);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'CALCEDVALUE', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'UTS', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'DATABIGINT_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'DATABIGINT_DATE', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'DATABIGINT_VALUE', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'DATATYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'DATATYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'USERS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'USERS_USERNAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'PREMISE_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'PREMISE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'PERMISSIONS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'PERMISSIONS_OWNER', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'PERMISSIONS_WRITE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'PERMISSIONS_READ', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'PERMISSIONS_STATETOGGLE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'UNITS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'UNITS_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'UNITSTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'UNITSTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'IO_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'IO_SERIALCODE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'IO_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'IO_CONNECTED', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'IO_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'IO_STATECHANGECODE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'IOTECHTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'IOTECHTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'IOPORTS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'IOPORTS_HWID', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'IOPORTS_OUTPUTHWID', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'IOPORTS_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'IOPORTS_STATECHANGEID', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'IOPORTS_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'IOPORTTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'IOPORTTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'SENSOR_BASECONVERT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'SENSOR_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'SENSOR_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'SENSOR_SAMPLERATELIMIT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'SENSOR_SAMPLERATEMAX', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'SENSOR_SAMPLERATECURRENT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'SENSOR_STATECHANGEID', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'SENSOR_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'SENSORTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'SENSORTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'SENSORTYPE_ENUM', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'RSCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'RSCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'RSSUBCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'RSSUBCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'RSSUBCAT_TYPE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'RSTARIFF_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'RSTARIFF_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'RSTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'RSTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'RSTYPE_MAIN', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'UOMCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'UOMCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'UOMSUBCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'UOMSUBCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'UOM_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'UOM_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATABIGINTEntityType, 'UOM_RATE', EdmPrimitiveType::CHARARRAY);
+		
+		$VR_DATABIGINTsResourceSet = $metadata->addResourceSet(
+			'VR_DATABIGINTs', $VR_DATABIGINTEntityType
+		);
+
+/**
+		 * Serialize the sql row into RSCAT object
+		 * 
+		 * @param array $record each row of RSCAT
+		 * 
+		 * @return Object
+		 */
+		private function _serializeVR_DATABIGINT($record)
+		{
+			$VR_DATABIGINT = new VR_DATABIGINT();
+			$VR_DATABIGINT->CALCEDVALUE = $record['CALCEDVALUE'];
+			$VR_DATABIGINT->UTS = $record['UTS'];
+			$VR_DATABIGINT->DATABIGINT_PK = $record['DATABIGINT_PK'];
+			$VR_DATABIGINT->DATABIGINT_DATE = $record['DATABIGINT_DATE'];
+			$VR_DATABIGINT->DATABIGINT_VALUE = $record['DATABIGINT_VALUE'];
+			$VR_DATABIGINT->DATATYPE_PK = $record['DATATYPE_PK'];
+			$VR_DATABIGINT->DATATYPE_NAME = $record['DATATYPE_NAME'];
+			$VR_DATABIGINT->USERS_PK = $record['USERS_PK'];
+			$VR_DATABIGINT->USERS_USERNAME = $record['USERS_USERNAME'];
+			$VR_DATABIGINT->PREMISE_PK = $record['PREMISE_PK'];
+			$VR_DATABIGINT->PREMISE_NAME = $record['PREMISE_NAME'];
+			$VR_DATABIGINT->PERMISSIONS_PK = $record['PERMISSIONS_PK'];
+			$VR_DATABIGINT->PERMISSIONS_OWNER = $record['PERMISSIONS_OWNER'];
+			$VR_DATABIGINT->PERMISSIONS_WRITE = $record['PERMISSIONS_WRITE'];
+			$VR_DATABIGINT->PERMISSIONS_READ = $record['PERMISSIONS_READ'];
+			$VR_DATABIGINT->PERMISSIONS_STATETOGGLE = $record['PERMISSIONS_STATETOGGLE'];
+			$VR_DATABIGINT->UNITS_PK = $record['UNITS_PK'];
+			$VR_DATABIGINT->UNITS_NAME = $record['UNITS_NAME'];
+			$VR_DATABIGINT->UNITSTYPE_PK = $record['UNITSTYPE_PK'];
+			$VR_DATABIGINT->UNITSTYPE_NAME = $record['UNITSTYPE_NAME'];
+			$VR_DATABIGINT->IO_PK = $record['IO_PK'];
+			$VR_DATABIGINT->IO_SERIALCODE = $record['IO_SERIALCODE'];
+			$VR_DATABIGINT->IO_NAME = $record['IO_NAME'];
+			$VR_DATABIGINT->IO_CONNECTED = $record['IO_CONNECTED'];
+			$VR_DATABIGINT->IO_STATE = $record['IO_STATE'];
+			$VR_DATABIGINT->IO_STATECHANGECODE = $record['IO_STATECHANGECODE'];
+			$VR_DATABIGINT->IOTECHTYPE_PK = $record['IOTECHTYPE_PK'];
+			$VR_DATABIGINT->IOTECHTYPE_NAME = $record['IOTECHTYPE_NAME'];
+			$VR_DATABIGINT->IOPORTS_PK = $record['IOPORTS_PK'];
+			$VR_DATABIGINT->IOPORTS_HWID = $record['IOPORTS_HWID'];
+			$VR_DATABIGINT->IOPORTS_OUTPUTHWID = $record['IOPORTS_OUTPUTHWID'];
+			$VR_DATABIGINT->IOPORTS_STATE = $record['IOPORTS_STATE'];
+			$VR_DATABIGINT->IOPORTS_STATECHANGEID = $record['IOPORTS_STATECHANGEID'];
+			$VR_DATABIGINT->IOPORTS_NAME = $record['IOPORTS_NAME'];
+			$VR_DATABIGINT->IOPORTTYPE_PK = $record['IOPORTTYPE_PK'];
+			$VR_DATABIGINT->IOPORTTYPE_NAME = $record['IOPORTTYPE_NAME'];
+			$VR_DATABIGINT->SENSOR_BASECONVERT = $record['SENSOR_BASECONVERT'];
+			$VR_DATABIGINT->SENSOR_PK = $record['SENSOR_PK'];
+			$VR_DATABIGINT->SENSOR_NAME = $record['SENSOR_NAME'];
+			$VR_DATABIGINT->SENSOR_SAMPLERATELIMIT = $record['SENSOR_SAMPLERATELIMIT'];
+			$VR_DATABIGINT->SENSOR_SAMPLERATEMAX = $record['SENSOR_SAMPLERATEMAX'];
+			$VR_DATABIGINT->SENSOR_SAMPLERATECURRENT = $record['SENSOR_SAMPLERATECURRENT'];
+			$VR_DATABIGINT->SENSOR_STATECHANGEID = $record['SENSOR_STATECHANGEID'];
+			$VR_DATABIGINT->SENSOR_STATE = $record['SENSOR_STATE'];
+			$VR_DATABIGINT->SENSORTYPE_PK = $record['SENSORTYPE_PK'];
+			$VR_DATABIGINT->SENSORTYPE_NAME = $record['SENSORTYPE_NAME'];
+			$VR_DATABIGINT->SENSORTYPE_ENUM = $record['SENSORTYPE_ENUM'];
+			$VR_DATABIGINT->RSCAT_PK = $record['RSCAT_PK'];
+			$VR_DATABIGINT->RSCAT_NAME = $record['RSCAT_NAME'];
+			$VR_DATABIGINT->RSSUBCAT_PK = $record['RSSUBCAT_PK'];
+			$VR_DATABIGINT->RSSUBCAT_NAME = $record['RSSUBCAT_NAME'];
+			$VR_DATABIGINT->RSSUBCAT_TYPE = $record['RSSUBCAT_TYPE'];
+			$VR_DATABIGINT->RSTARIFF_PK = $record['RSTARIFF_PK'];
+			$VR_DATABIGINT->RSTARIFF_NAME = $record['RSTARIFF_NAME'];
+			$VR_DATABIGINT->RSTYPE_PK = $record['RSTYPE_PK'];
+			$VR_DATABIGINT->RSTYPE_NAME = $record['RSTYPE_NAME'];
+			$VR_DATABIGINT->RSTYPE_MAIN = $record['RSTYPE_MAIN'];
+			$VR_DATABIGINT->UOMCAT_PK = $record['UOMCAT_PK'];
+			$VR_DATABIGINT->UOMCAT_NAME = $record['UOMCAT_NAME'];
+			$VR_DATABIGINT->UOMSUBCAT_PK = $record['UOMSUBCAT_PK'];
+			$VR_DATABIGINT->UOMSUBCAT_NAME = $record['UOMSUBCAT_NAME'];
+			$VR_DATABIGINT->UOM_PK = $record['UOM_PK'];
+			$VR_DATABIGINT->UOM_NAME = $record['UOM_NAME'];
+			$VR_DATABIGINT->UOM_RATE = $record['UOM_RATE'];
+
+			return $VR_DATABIGINT;
+		}
+
+============================================================================================================
+============================================================================================================
+============================================================================================================
+
+/**
+ * VR_DATAFLOAT entity type.
+ * 
+ * @category  Service
+ * @package	Service_DatafloatView
+ * @author	Yash K. Kothari <odataphpproducer_alias@microsoft.com>
+ * @copyright 2011 Microsoft Corp. (http://www.microsoft.com)
+ * @license	New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
+ * @version	Release: 1.0
+ * @link	  http://odataphpproducer.codeplex.com
+ */
+class VR_DATAFLOAT{
+	public $CALCEDVALUE;
+	public $UTS;
+	public $DATAFLOAT_PK;
+	public $DATAFLOAT_DATE;
+	public $DATAFLOAT_VALUE;
+	public $DATATYPE_PK;
+	public $DATATYPE_NAME;
+	public $USERS_PK;
+	public $USERS_USERNAME;
+	public $PREMISE_PK;
+	public $PREMISE_NAME;
+	public $PERMISSIONS_PK;
+	public $PERMISSIONS_OWNER;
+	public $PERMISSIONS_WRITE;
+	public $PERMISSIONS_READ;
+	public $PERMISSIONS_STATETOGGLE;
+	public $UNITS_PK;
+	public $UNITS_NAME;
+	public $UNITSTYPE_PK;
+	public $UNITSTYPE_NAME;
+	public $IO_PK;
+	public $IO_SERIALCODE;
+	public $IO_NAME;
+	public $IO_CONNECTED;
+	public $IO_STATE;
+	public $IO_STATECHANGECODE;
+	public $IOTECHTYPE_PK;
+	public $IOTECHTYPE_NAME;
+	public $IOPORTS_PK;
+	public $IOPORTS_HWID;
+	public $IOPORTS_OUTPUTHWID;
+	public $IOPORTS_STATE;
+	public $IOPORTS_STATECHANGEID;
+	public $IOPORTS_NAME;
+	public $IOPORTTYPE_PK;
+	public $IOPORTTYPE_NAME;
+	public $SENSOR_BASECONVERT;
+	public $SENSOR_PK;
+	public $SENSOR_NAME;
+	public $SENSOR_SAMPLERATELIMIT;
+	public $SENSOR_SAMPLERATEMAX;
+	public $SENSOR_SAMPLERATECURRENT;
+	public $SENSOR_STATECHANGEID;
+	public $SENSOR_STATE;
+	public $SENSORTYPE_PK;
+	public $SENSORTYPE_NAME;
+	public $SENSORTYPE_ENUM;
+	public $RSCAT_PK;
+	public $RSCAT_NAME;
+	public $RSSUBCAT_PK;
+	public $RSSUBCAT_NAME;
+	public $RSSUBCAT_TYPE;
+	public $RSTARIFF_PK;
+	public $RSTARIFF_NAME;
+	public $RSTYPE_PK;
+	public $RSTYPE_NAME;
+	public $RSTYPE_MAIN;
+	public $UOMCAT_PK;
+	public $UOMCAT_NAME;
+	public $UOMSUBCAT_PK;
+	public $UOMSUBCAT_NAME;
+	public $UOM_PK;
+	public $UOM_NAME;
+	public $UOM_RATE;
+
+}
+
+//Register the entity (resource) type 'VR_DATAFLOAT'
+		$VR_DATAFLOATEntityType = $metadata->addEntityType(
+			new ReflectionClass('VR_DATAFLOAT'), 'VR_DATAFLOAT', 'DatafloatView'
+		);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'CALCEDVALUE', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'UTS', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'DATAFLOAT_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'DATAFLOAT_DATE', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'DATAFLOAT_VALUE', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'DATATYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'DATATYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'USERS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'USERS_USERNAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'PREMISE_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'PREMISE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'PERMISSIONS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'PERMISSIONS_OWNER', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'PERMISSIONS_WRITE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'PERMISSIONS_READ', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'PERMISSIONS_STATETOGGLE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'UNITS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'UNITS_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'UNITSTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'UNITSTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'IO_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'IO_SERIALCODE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'IO_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'IO_CONNECTED', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'IO_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'IO_STATECHANGECODE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'IOTECHTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'IOTECHTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'IOPORTS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'IOPORTS_HWID', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'IOPORTS_OUTPUTHWID', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'IOPORTS_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'IOPORTS_STATECHANGEID', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'IOPORTS_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'IOPORTTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'IOPORTTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'SENSOR_BASECONVERT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'SENSOR_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'SENSOR_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'SENSOR_SAMPLERATELIMIT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'SENSOR_SAMPLERATEMAX', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'SENSOR_SAMPLERATECURRENT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'SENSOR_STATECHANGEID', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'SENSOR_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'SENSORTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'SENSORTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'SENSORTYPE_ENUM', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'RSCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'RSCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'RSSUBCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'RSSUBCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'RSSUBCAT_TYPE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'RSTARIFF_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'RSTARIFF_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'RSTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'RSTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'RSTYPE_MAIN', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'UOMCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'UOMCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'UOMSUBCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'UOMSUBCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'UOM_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'UOM_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAFLOATEntityType, 'UOM_RATE', EdmPrimitiveType::CHARARRAY);
+		
+		$VR_DATAFLOATsResourceSet = $metadata->addResourceSet(
+			'VR_DATAFLOATs', $VR_DATAFLOATEntityType
+		);
+
+/**
+		 * Serialize the sql row into RSCAT object
+		 * 
+		 * @param array $record each row of RSCAT
+		 * 
+		 * @return Object
+		 */
+		private function _serializeVR_DATAFLOAT($record)
+		{
+			$VR_DATAFLOAT = new VR_DATAFLOAT();
+			$VR_DATAFLOAT->CALCEDVALUE = $record['CALCEDVALUE'];
+			$VR_DATAFLOAT->UTS = $record['UTS'];
+			$VR_DATAFLOAT->DATAFLOAT_PK = $record['DATAFLOAT_PK'];
+			$VR_DATAFLOAT->DATAFLOAT_DATE = $record['DATAFLOAT_DATE'];
+			$VR_DATAFLOAT->DATAFLOAT_VALUE = $record['DATAFLOAT_VALUE'];
+			$VR_DATAFLOAT->DATATYPE_PK = $record['DATATYPE_PK'];
+			$VR_DATAFLOAT->DATATYPE_NAME = $record['DATATYPE_NAME'];
+			$VR_DATAFLOAT->USERS_PK = $record['USERS_PK'];
+			$VR_DATAFLOAT->USERS_USERNAME = $record['USERS_USERNAME'];
+			$VR_DATAFLOAT->PREMISE_PK = $record['PREMISE_PK'];
+			$VR_DATAFLOAT->PREMISE_NAME = $record['PREMISE_NAME'];
+			$VR_DATAFLOAT->PERMISSIONS_PK = $record['PERMISSIONS_PK'];
+			$VR_DATAFLOAT->PERMISSIONS_OWNER = $record['PERMISSIONS_OWNER'];
+			$VR_DATAFLOAT->PERMISSIONS_WRITE = $record['PERMISSIONS_WRITE'];
+			$VR_DATAFLOAT->PERMISSIONS_READ = $record['PERMISSIONS_READ'];
+			$VR_DATAFLOAT->PERMISSIONS_STATETOGGLE = $record['PERMISSIONS_STATETOGGLE'];
+			$VR_DATAFLOAT->UNITS_PK = $record['UNITS_PK'];
+			$VR_DATAFLOAT->UNITS_NAME = $record['UNITS_NAME'];
+			$VR_DATAFLOAT->UNITSTYPE_PK = $record['UNITSTYPE_PK'];
+			$VR_DATAFLOAT->UNITSTYPE_NAME = $record['UNITSTYPE_NAME'];
+			$VR_DATAFLOAT->IO_PK = $record['IO_PK'];
+			$VR_DATAFLOAT->IO_SERIALCODE = $record['IO_SERIALCODE'];
+			$VR_DATAFLOAT->IO_NAME = $record['IO_NAME'];
+			$VR_DATAFLOAT->IO_CONNECTED = $record['IO_CONNECTED'];
+			$VR_DATAFLOAT->IO_STATE = $record['IO_STATE'];
+			$VR_DATAFLOAT->IO_STATECHANGECODE = $record['IO_STATECHANGECODE'];
+			$VR_DATAFLOAT->IOTECHTYPE_PK = $record['IOTECHTYPE_PK'];
+			$VR_DATAFLOAT->IOTECHTYPE_NAME = $record['IOTECHTYPE_NAME'];
+			$VR_DATAFLOAT->IOPORTS_PK = $record['IOPORTS_PK'];
+			$VR_DATAFLOAT->IOPORTS_HWID = $record['IOPORTS_HWID'];
+			$VR_DATAFLOAT->IOPORTS_OUTPUTHWID = $record['IOPORTS_OUTPUTHWID'];
+			$VR_DATAFLOAT->IOPORTS_STATE = $record['IOPORTS_STATE'];
+			$VR_DATAFLOAT->IOPORTS_STATECHANGEID = $record['IOPORTS_STATECHANGEID'];
+			$VR_DATAFLOAT->IOPORTS_NAME = $record['IOPORTS_NAME'];
+			$VR_DATAFLOAT->IOPORTTYPE_PK = $record['IOPORTTYPE_PK'];
+			$VR_DATAFLOAT->IOPORTTYPE_NAME = $record['IOPORTTYPE_NAME'];
+			$VR_DATAFLOAT->SENSOR_BASECONVERT = $record['SENSOR_BASECONVERT'];
+			$VR_DATAFLOAT->SENSOR_PK = $record['SENSOR_PK'];
+			$VR_DATAFLOAT->SENSOR_NAME = $record['SENSOR_NAME'];
+			$VR_DATAFLOAT->SENSOR_SAMPLERATELIMIT = $record['SENSOR_SAMPLERATELIMIT'];
+			$VR_DATAFLOAT->SENSOR_SAMPLERATEMAX = $record['SENSOR_SAMPLERATEMAX'];
+			$VR_DATAFLOAT->SENSOR_SAMPLERATECURRENT = $record['SENSOR_SAMPLERATECURRENT'];
+			$VR_DATAFLOAT->SENSOR_STATECHANGEID = $record['SENSOR_STATECHANGEID'];
+			$VR_DATAFLOAT->SENSOR_STATE = $record['SENSOR_STATE'];
+			$VR_DATAFLOAT->SENSORTYPE_PK = $record['SENSORTYPE_PK'];
+			$VR_DATAFLOAT->SENSORTYPE_NAME = $record['SENSORTYPE_NAME'];
+			$VR_DATAFLOAT->SENSORTYPE_ENUM = $record['SENSORTYPE_ENUM'];
+			$VR_DATAFLOAT->RSCAT_PK = $record['RSCAT_PK'];
+			$VR_DATAFLOAT->RSCAT_NAME = $record['RSCAT_NAME'];
+			$VR_DATAFLOAT->RSSUBCAT_PK = $record['RSSUBCAT_PK'];
+			$VR_DATAFLOAT->RSSUBCAT_NAME = $record['RSSUBCAT_NAME'];
+			$VR_DATAFLOAT->RSSUBCAT_TYPE = $record['RSSUBCAT_TYPE'];
+			$VR_DATAFLOAT->RSTARIFF_PK = $record['RSTARIFF_PK'];
+			$VR_DATAFLOAT->RSTARIFF_NAME = $record['RSTARIFF_NAME'];
+			$VR_DATAFLOAT->RSTYPE_PK = $record['RSTYPE_PK'];
+			$VR_DATAFLOAT->RSTYPE_NAME = $record['RSTYPE_NAME'];
+			$VR_DATAFLOAT->RSTYPE_MAIN = $record['RSTYPE_MAIN'];
+			$VR_DATAFLOAT->UOMCAT_PK = $record['UOMCAT_PK'];
+			$VR_DATAFLOAT->UOMCAT_NAME = $record['UOMCAT_NAME'];
+			$VR_DATAFLOAT->UOMSUBCAT_PK = $record['UOMSUBCAT_PK'];
+			$VR_DATAFLOAT->UOMSUBCAT_NAME = $record['UOMSUBCAT_NAME'];
+			$VR_DATAFLOAT->UOM_PK = $record['UOM_PK'];
+			$VR_DATAFLOAT->UOM_NAME = $record['UOM_NAME'];
+			$VR_DATAFLOAT->UOM_RATE = $record['UOM_RATE'];
+
+			return $VR_DATAFLOAT;
+		}
+
+==========================================================================================================
+==========================================================================================================
+==========================================================================================================
+
+/**
+ * VR_DATAINT entity type.
+ * 
+ * @category  Service
+ * @package	Service_DataintView
+ * @author	Yash K. Kothari <odataphpproducer_alias@microsoft.com>
+ * @copyright 2011 Microsoft Corp. (http://www.microsoft.com)
+ * @license	New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
+ * @version	Release: 1.0
+ * @link	  http://odataphpproducer.codeplex.com
+ */
+class VR_DATAINT{
+	public $CALCEDVALUE;
+	public $UTS;
+	public $DATAINT_PK;
+	public $DATAINT_DATE;
+	public $DATAINT_VALUE;
+	public $DATATYPE_PK;
+	public $DATATYPE_NAME;
+	public $USERS_PK;
+	public $USERS_USERNAME;
+	public $PREMISE_PK;
+	public $PREMISE_NAME;
+	public $PERMISSIONS_PK;
+	public $PERMISSIONS_OWNER;
+	public $PERMISSIONS_WRITE;
+	public $PERMISSIONS_READ;
+	public $PERMISSIONS_STATETOGGLE;
+	public $UNITS_PK;
+	public $UNITS_NAME;
+	public $UNITSTYPE_PK;
+	public $UNITSTYPE_NAME;
+	public $IO_PK;
+	public $IO_SERIALCODE;
+	public $IO_NAME;
+	public $IO_CONNECTED;
+	public $IO_STATE;
+	public $IO_STATECHANGECODE;
+	public $IOTECHTYPE_PK;
+	public $IOTECHTYPE_NAME;
+	public $IOPORTS_PK;
+	public $IOPORTS_HWID;
+	public $IOPORTS_OUTPUTHWID;
+	public $IOPORTS_STATE;
+	public $IOPORTS_STATECHANGEID;
+	public $IOPORTS_NAME;
+	public $IOPORTTYPE_PK;
+	public $IOPORTTYPE_NAME;
+	public $SENSOR_BASECONVERT;
+	public $SENSOR_PK;
+	public $SENSOR_NAME;
+	public $SENSOR_SAMPLERATELIMIT;
+	public $SENSOR_SAMPLERATEMAX;
+	public $SENSOR_SAMPLERATECURRENT;
+	public $SENSOR_STATECHANGEID;
+	public $SENSOR_STATE;
+	public $SENSORTYPE_PK;
+	public $SENSORTYPE_NAME;
+	public $SENSORTYPE_ENUM;
+	public $RSCAT_PK;
+	public $RSCAT_NAME;
+	public $RSSUBCAT_PK;
+	public $RSSUBCAT_NAME;
+	public $RSSUBCAT_TYPE;
+	public $RSTARIFF_PK;
+	public $RSTARIFF_NAME;
+	public $RSTYPE_PK;
+	public $RSTYPE_NAME;
+	public $RSTYPE_MAIN;
+	public $UOMCAT_PK;
+	public $UOMCAT_NAME;
+	public $UOMSUBCAT_PK;
+	public $UOMSUBCAT_NAME;
+	public $UOM_PK;
+	public $UOM_NAME;
+	public $UOM_RATE;
+
+}
+
+//Register the entity (resource) type 'VR_DATAINT'
+		$VR_DATAINTEntityType = $metadata->addEntityType(
+			new ReflectionClass('VR_DATAINT'), 'VR_DATAINT', 'DataintView'
+		);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'CALCEDVALUE', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'UTS', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'DATAINT_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'DATAINT_DATE', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'DATAINT_VALUE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'DATATYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'DATATYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'USERS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'USERS_USERNAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'PREMISE_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'PREMISE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'PERMISSIONS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'PERMISSIONS_OWNER', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'PERMISSIONS_WRITE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'PERMISSIONS_READ', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'PERMISSIONS_STATETOGGLE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'UNITS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'UNITS_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'UNITSTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'UNITSTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'IO_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'IO_SERIALCODE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'IO_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'IO_CONNECTED', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'IO_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'IO_STATECHANGECODE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'IOTECHTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'IOTECHTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'IOPORTS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'IOPORTS_HWID', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'IOPORTS_OUTPUTHWID', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'IOPORTS_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'IOPORTS_STATECHANGEID', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'IOPORTS_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'IOPORTTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'IOPORTTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'SENSOR_BASECONVERT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'SENSOR_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'SENSOR_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'SENSOR_SAMPLERATELIMIT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'SENSOR_SAMPLERATEMAX', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'SENSOR_SAMPLERATECURRENT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'SENSOR_STATECHANGEID', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'SENSOR_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'SENSORTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'SENSORTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'SENSORTYPE_ENUM', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'RSCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'RSCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'RSSUBCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'RSSUBCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'RSSUBCAT_TYPE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'RSTARIFF_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'RSTARIFF_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'RSTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'RSTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'RSTYPE_MAIN', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'UOMCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'UOMCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'UOMSUBCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'UOMSUBCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'UOM_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'UOM_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAINTEntityType, 'UOM_RATE', EdmPrimitiveType::CHARARRAY);
+		
+		$VR_DATAINTsResourceSet = $metadata->addResourceSet(
+			'VR_DATAINTs', $VR_DATAINTEntityType
+		);
+
+/**
+		 * Serialize the sql row into RSCAT object
+		 * 
+		 * @param array $record each row of RSCAT
+		 * 
+		 * @return Object
+		 */
+		private function _serializeVR_DATAINT($record)
+		{
+			$VR_DATAINT = new VR_DATAINT();
+			$VR_DATAINT->CALCEDVALUE = $record['CALCEDVALUE'];
+			$VR_DATAINT->UTS = $record['UTS'];
+			$VR_DATAINT->DATAINT_PK = $record['DATAINT_PK'];
+			$VR_DATAINT->DATAINT_DATE = $record['DATAINT_DATE'];
+			$VR_DATAINT->DATAINT_VALUE = $record['DATAINT_VALUE'];
+			$VR_DATAINT->DATATYPE_PK = $record['DATATYPE_PK'];
+			$VR_DATAINT->DATATYPE_NAME = $record['DATATYPE_NAME'];
+			$VR_DATAINT->USERS_PK = $record['USERS_PK'];
+			$VR_DATAINT->USERS_USERNAME = $record['USERS_USERNAME'];
+			$VR_DATAINT->PREMISE_PK = $record['PREMISE_PK'];
+			$VR_DATAINT->PREMISE_NAME = $record['PREMISE_NAME'];
+			$VR_DATAINT->PERMISSIONS_PK = $record['PERMISSIONS_PK'];
+			$VR_DATAINT->PERMISSIONS_OWNER = $record['PERMISSIONS_OWNER'];
+			$VR_DATAINT->PERMISSIONS_WRITE = $record['PERMISSIONS_WRITE'];
+			$VR_DATAINT->PERMISSIONS_READ = $record['PERMISSIONS_READ'];
+			$VR_DATAINT->PERMISSIONS_STATETOGGLE = $record['PERMISSIONS_STATETOGGLE'];
+			$VR_DATAINT->UNITS_PK = $record['UNITS_PK'];
+			$VR_DATAINT->UNITS_NAME = $record['UNITS_NAME'];
+			$VR_DATAINT->UNITSTYPE_PK = $record['UNITSTYPE_PK'];
+			$VR_DATAINT->UNITSTYPE_NAME = $record['UNITSTYPE_NAME'];
+			$VR_DATAINT->IO_PK = $record['IO_PK'];
+			$VR_DATAINT->IO_SERIALCODE = $record['IO_SERIALCODE'];
+			$VR_DATAINT->IO_NAME = $record['IO_NAME'];
+			$VR_DATAINT->IO_CONNECTED = $record['IO_CONNECTED'];
+			$VR_DATAINT->IO_STATE = $record['IO_STATE'];
+			$VR_DATAINT->IO_STATECHANGECODE = $record['IO_STATECHANGECODE'];
+			$VR_DATAINT->IOTECHTYPE_PK = $record['IOTECHTYPE_PK'];
+			$VR_DATAINT->IOTECHTYPE_NAME = $record['IOTECHTYPE_NAME'];
+			$VR_DATAINT->IOPORTS_PK = $record['IOPORTS_PK'];
+			$VR_DATAINT->IOPORTS_HWID = $record['IOPORTS_HWID'];
+			$VR_DATAINT->IOPORTS_OUTPUTHWID = $record['IOPORTS_OUTPUTHWID'];
+			$VR_DATAINT->IOPORTS_STATE = $record['IOPORTS_STATE'];
+			$VR_DATAINT->IOPORTS_STATECHANGEID = $record['IOPORTS_STATECHANGEID'];
+			$VR_DATAINT->IOPORTS_NAME = $record['IOPORTS_NAME'];
+			$VR_DATAINT->IOPORTTYPE_PK = $record['IOPORTTYPE_PK'];
+			$VR_DATAINT->IOPORTTYPE_NAME = $record['IOPORTTYPE_NAME'];
+			$VR_DATAINT->SENSOR_BASECONVERT = $record['SENSOR_BASECONVERT'];
+			$VR_DATAINT->SENSOR_PK = $record['SENSOR_PK'];
+			$VR_DATAINT->SENSOR_NAME = $record['SENSOR_NAME'];
+			$VR_DATAINT->SENSOR_SAMPLERATELIMIT = $record['SENSOR_SAMPLERATELIMIT'];
+			$VR_DATAINT->SENSOR_SAMPLERATEMAX = $record['SENSOR_SAMPLERATEMAX'];
+			$VR_DATAINT->SENSOR_SAMPLERATECURRENT = $record['SENSOR_SAMPLERATECURRENT'];
+			$VR_DATAINT->SENSOR_STATECHANGEID = $record['SENSOR_STATECHANGEID'];
+			$VR_DATAINT->SENSOR_STATE = $record['SENSOR_STATE'];
+			$VR_DATAINT->SENSORTYPE_PK = $record['SENSORTYPE_PK'];
+			$VR_DATAINT->SENSORTYPE_NAME = $record['SENSORTYPE_NAME'];
+			$VR_DATAINT->SENSORTYPE_ENUM = $record['SENSORTYPE_ENUM'];
+			$VR_DATAINT->RSCAT_PK = $record['RSCAT_PK'];
+			$VR_DATAINT->RSCAT_NAME = $record['RSCAT_NAME'];
+			$VR_DATAINT->RSSUBCAT_PK = $record['RSSUBCAT_PK'];
+			$VR_DATAINT->RSSUBCAT_NAME = $record['RSSUBCAT_NAME'];
+			$VR_DATAINT->RSSUBCAT_TYPE = $record['RSSUBCAT_TYPE'];
+			$VR_DATAINT->RSTARIFF_PK = $record['RSTARIFF_PK'];
+			$VR_DATAINT->RSTARIFF_NAME = $record['RSTARIFF_NAME'];
+			$VR_DATAINT->RSTYPE_PK = $record['RSTYPE_PK'];
+			$VR_DATAINT->RSTYPE_NAME = $record['RSTYPE_NAME'];
+			$VR_DATAINT->RSTYPE_MAIN = $record['RSTYPE_MAIN'];
+			$VR_DATAINT->UOMCAT_PK = $record['UOMCAT_PK'];
+			$VR_DATAINT->UOMCAT_NAME = $record['UOMCAT_NAME'];
+			$VR_DATAINT->UOMSUBCAT_PK = $record['UOMSUBCAT_PK'];
+			$VR_DATAINT->UOMSUBCAT_NAME = $record['UOMSUBCAT_NAME'];
+			$VR_DATAINT->UOM_PK = $record['UOM_PK'];
+			$VR_DATAINT->UOM_NAME = $record['UOM_NAME'];
+			$VR_DATAINT->UOM_RATE = $record['UOM_RATE'];
+
+			return $VR_DATAINT;
+		}
+
+===================================================================================================
+===================================================================================================
+===================================================================================================
+
+/**
+ * VR_DATAMEDSTRING entity type.
+ * 
+ * @category  Service
+ * @package	Service_DatamedstringView
+ * @author	Yash K. Kothari <odataphpproducer_alias@microsoft.com>
+ * @copyright 2011 Microsoft Corp. (http://www.microsoft.com)
+ * @license	New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
+ * @version	Release: 1.0
+ * @link	  http://odataphpproducer.codeplex.com
+ */
+class VR_DATAMEDSTRING{
+	public $CALCEDVALUE;
+	public $UTS;
+	public $DATAMEDSTRING_PK;
+	public $DATAMEDSTRING_DATE;
+	public $DATAMEDSTRING_VALUE;
+	public $DATATYPE_PK;
+	public $DATATYPE_NAME;
+	public $USERS_PK;
+	public $USERS_USERNAME;
+	public $PREMISE_PK;
+	public $PREMISE_NAME;
+	public $PERMISSIONS_PK;
+	public $PERMISSIONS_OWNER;
+	public $PERMISSIONS_WRITE;
+	public $PERMISSIONS_READ;
+	public $PERMISSIONS_STATETOGGLE;
+	public $UNITS_PK;
+	public $UNITS_NAME;
+	public $UNITSTYPE_PK;
+	public $UNITSTYPE_NAME;
+	public $IO_PK;
+	public $IO_SERIALCODE;
+	public $IO_NAME;
+	public $IO_CONNECTED;
+	public $IO_STATE;
+	public $IO_STATECHANGECODE;
+	public $IOTECHTYPE_PK;
+	public $IOTECHTYPE_NAME;
+	public $IOPORTS_PK;
+	public $IOPORTS_HWID;
+	public $IOPORTS_OUTPUTHWID;
+	public $IOPORTS_STATE;
+	public $IOPORTS_STATECHANGEID;
+	public $IOPORTS_NAME;
+	public $IOPORTTYPE_PK;
+	public $IOPORTTYPE_NAME;
+	public $SENSOR_BASECONVERT;
+	public $SENSOR_PK;
+	public $SENSOR_NAME;
+	public $SENSOR_SAMPLERATELIMIT;
+	public $SENSOR_SAMPLERATEMAX;
+	public $SENSOR_SAMPLERATECURRENT;
+	public $SENSOR_STATECHANGEID;
+	public $SENSOR_STATE;
+	public $SENSORTYPE_PK;
+	public $SENSORTYPE_NAME;
+	public $SENSORTYPE_ENUM;
+	public $RSCAT_PK;
+	public $RSCAT_NAME;
+	public $RSSUBCAT_PK;
+	public $RSSUBCAT_NAME;
+	public $RSSUBCAT_TYPE;
+	public $RSTARIFF_PK;
+	public $RSTARIFF_NAME;
+	public $RSTYPE_PK;
+	public $RSTYPE_NAME;
+	public $RSTYPE_MAIN;
+	public $UOMCAT_PK;
+	public $UOMCAT_NAME;
+	public $UOMSUBCAT_PK;
+	public $UOMSUBCAT_NAME;
+	public $UOM_PK;
+	public $UOM_NAME;
+	public $UOM_RATE;
+
+}
+
+//Register the entity (resource) type 'VR_DATAMEDSTRING'
+		$VR_DATAMEDSTRINGEntityType = $metadata->addEntityType(
+			new ReflectionClass('VR_DATAMEDSTRING'), 'VR_DATAMEDSTRING', 'DatamedstringView'
+		);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'CALCEDVALUE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'UTS', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'DATAMEDSTRING_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'DATAMEDSTRING_DATE', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'DATAMEDSTRING_VALUE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'DATATYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'DATATYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'USERS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'USERS_USERNAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'PREMISE_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'PREMISE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'PERMISSIONS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'PERMISSIONS_OWNER', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'PERMISSIONS_WRITE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'PERMISSIONS_READ', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'PERMISSIONS_STATETOGGLE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'UNITS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'UNITS_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'UNITSTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'UNITSTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'IO_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'IO_SERIALCODE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'IO_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'IO_CONNECTED', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'IO_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'IO_STATECHANGECODE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'IOTECHTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'IOTECHTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'IOPORTS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'IOPORTS_HWID', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'IOPORTS_OUTPUTHWID', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'IOPORTS_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'IOPORTS_STATECHANGEID', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'IOPORTS_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'IOPORTTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'IOPORTTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'SENSOR_BASECONVERT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'SENSOR_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'SENSOR_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'SENSOR_SAMPLERATELIMIT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'SENSOR_SAMPLERATEMAX', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'SENSOR_SAMPLERATECURRENT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'SENSOR_STATECHANGEID', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'SENSOR_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'SENSORTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'SENSORTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'SENSORTYPE_ENUM', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'RSCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'RSCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'RSSUBCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'RSSUBCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'RSSUBCAT_TYPE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'RSTARIFF_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'RSTARIFF_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'RSTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'RSTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'RSTYPE_MAIN', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'UOMCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'UOMCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'UOMSUBCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'UOMSUBCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'UOM_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'UOM_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATAMEDSTRINGEntityType, 'UOM_RATE', EdmPrimitiveType::CHARARRAY);
+		
+		$VR_DATAMEDSTRINGsResourceSet = $metadata->addResourceSet(
+			'VR_DATAMEDSTRINGs', $VR_DATAMEDSTRINGEntityType
+		);
+
+/**
+		 * Serialize the sql row into RSCAT object
+		 * 
+		 * @param array $record each row of RSCAT
+		 * 
+		 * @return Object
+		 */
+		private function _serializeVR_DATAMEDSTRING($record)
+		{
+			$VR_DATAMEDSTRING = new VR_DATAMEDSTRING();
+			$VR_DATAMEDSTRING->CALCEDVALUE = $record['CALCEDVALUE'];
+			$VR_DATAMEDSTRING->UTS = $record['UTS'];
+			$VR_DATAMEDSTRING->DATAMEDSTRING_PK = $record['DATAMEDSTRING_PK'];
+			$VR_DATAMEDSTRING->DATAMEDSTRING_DATE = $record['DATAMEDSTRING_DATE'];
+			$VR_DATAMEDSTRING->DATAMEDSTRING_VALUE = $record['DATAMEDSTRING_VALUE'];
+			$VR_DATAMEDSTRING->DATATYPE_PK = $record['DATATYPE_PK'];
+			$VR_DATAMEDSTRING->DATATYPE_NAME = $record['DATATYPE_NAME'];
+			$VR_DATAMEDSTRING->USERS_PK = $record['USERS_PK'];
+			$VR_DATAMEDSTRING->USERS_USERNAME = $record['USERS_USERNAME'];
+			$VR_DATAMEDSTRING->PREMISE_PK = $record['PREMISE_PK'];
+			$VR_DATAMEDSTRING->PREMISE_NAME = $record['PREMISE_NAME'];
+			$VR_DATAMEDSTRING->PERMISSIONS_PK = $record['PERMISSIONS_PK'];
+			$VR_DATAMEDSTRING->PERMISSIONS_OWNER = $record['PERMISSIONS_OWNER'];
+			$VR_DATAMEDSTRING->PERMISSIONS_WRITE = $record['PERMISSIONS_WRITE'];
+			$VR_DATAMEDSTRING->PERMISSIONS_READ = $record['PERMISSIONS_READ'];
+			$VR_DATAMEDSTRING->PERMISSIONS_STATETOGGLE = $record['PERMISSIONS_STATETOGGLE'];
+			$VR_DATAMEDSTRING->UNITS_PK = $record['UNITS_PK'];
+			$VR_DATAMEDSTRING->UNITS_NAME = $record['UNITS_NAME'];
+			$VR_DATAMEDSTRING->UNITSTYPE_PK = $record['UNITSTYPE_PK'];
+			$VR_DATAMEDSTRING->UNITSTYPE_NAME = $record['UNITSTYPE_NAME'];
+			$VR_DATAMEDSTRING->IO_PK = $record['IO_PK'];
+			$VR_DATAMEDSTRING->IO_SERIALCODE = $record['IO_SERIALCODE'];
+			$VR_DATAMEDSTRING->IO_NAME = $record['IO_NAME'];
+			$VR_DATAMEDSTRING->IO_CONNECTED = $record['IO_CONNECTED'];
+			$VR_DATAMEDSTRING->IO_STATE = $record['IO_STATE'];
+			$VR_DATAMEDSTRING->IO_STATECHANGECODE = $record['IO_STATECHANGECODE'];
+			$VR_DATAMEDSTRING->IOTECHTYPE_PK = $record['IOTECHTYPE_PK'];
+			$VR_DATAMEDSTRING->IOTECHTYPE_NAME = $record['IOTECHTYPE_NAME'];
+			$VR_DATAMEDSTRING->IOPORTS_PK = $record['IOPORTS_PK'];
+			$VR_DATAMEDSTRING->IOPORTS_HWID = $record['IOPORTS_HWID'];
+			$VR_DATAMEDSTRING->IOPORTS_OUTPUTHWID = $record['IOPORTS_OUTPUTHWID'];
+			$VR_DATAMEDSTRING->IOPORTS_STATE = $record['IOPORTS_STATE'];
+			$VR_DATAMEDSTRING->IOPORTS_STATECHANGEID = $record['IOPORTS_STATECHANGEID'];
+			$VR_DATAMEDSTRING->IOPORTS_NAME = $record['IOPORTS_NAME'];
+			$VR_DATAMEDSTRING->IOPORTTYPE_PK = $record['IOPORTTYPE_PK'];
+			$VR_DATAMEDSTRING->IOPORTTYPE_NAME = $record['IOPORTTYPE_NAME'];
+			$VR_DATAMEDSTRING->SENSOR_BASECONVERT = $record['SENSOR_BASECONVERT'];
+			$VR_DATAMEDSTRING->SENSOR_PK = $record['SENSOR_PK'];
+			$VR_DATAMEDSTRING->SENSOR_NAME = $record['SENSOR_NAME'];
+			$VR_DATAMEDSTRING->SENSOR_SAMPLERATELIMIT = $record['SENSOR_SAMPLERATELIMIT'];
+			$VR_DATAMEDSTRING->SENSOR_SAMPLERATEMAX = $record['SENSOR_SAMPLERATEMAX'];
+			$VR_DATAMEDSTRING->SENSOR_SAMPLERATECURRENT = $record['SENSOR_SAMPLERATECURRENT'];
+			$VR_DATAMEDSTRING->SENSOR_STATECHANGEID = $record['SENSOR_STATECHANGEID'];
+			$VR_DATAMEDSTRING->SENSOR_STATE = $record['SENSOR_STATE'];
+			$VR_DATAMEDSTRING->SENSORTYPE_PK = $record['SENSORTYPE_PK'];
+			$VR_DATAMEDSTRING->SENSORTYPE_NAME = $record['SENSORTYPE_NAME'];
+			$VR_DATAMEDSTRING->SENSORTYPE_ENUM = $record['SENSORTYPE_ENUM'];
+			$VR_DATAMEDSTRING->RSCAT_PK = $record['RSCAT_PK'];
+			$VR_DATAMEDSTRING->RSCAT_NAME = $record['RSCAT_NAME'];
+			$VR_DATAMEDSTRING->RSSUBCAT_PK = $record['RSSUBCAT_PK'];
+			$VR_DATAMEDSTRING->RSSUBCAT_NAME = $record['RSSUBCAT_NAME'];
+			$VR_DATAMEDSTRING->RSSUBCAT_TYPE = $record['RSSUBCAT_TYPE'];
+			$VR_DATAMEDSTRING->RSTARIFF_PK = $record['RSTARIFF_PK'];
+			$VR_DATAMEDSTRING->RSTARIFF_NAME = $record['RSTARIFF_NAME'];
+			$VR_DATAMEDSTRING->RSTYPE_PK = $record['RSTYPE_PK'];
+			$VR_DATAMEDSTRING->RSTYPE_NAME = $record['RSTYPE_NAME'];
+			$VR_DATAMEDSTRING->RSTYPE_MAIN = $record['RSTYPE_MAIN'];
+			$VR_DATAMEDSTRING->UOMCAT_PK = $record['UOMCAT_PK'];
+			$VR_DATAMEDSTRING->UOMCAT_NAME = $record['UOMCAT_NAME'];
+			$VR_DATAMEDSTRING->UOMSUBCAT_PK = $record['UOMSUBCAT_PK'];
+			$VR_DATAMEDSTRING->UOMSUBCAT_NAME = $record['UOMSUBCAT_NAME'];
+			$VR_DATAMEDSTRING->UOM_PK = $record['UOM_PK'];
+			$VR_DATAMEDSTRING->UOM_NAME = $record['UOM_NAME'];
+			$VR_DATAMEDSTRING->UOM_RATE = $record['UOM_RATE'];
+
+			return $VR_DATAMEDSTRING;
+		}
+
+===================================================================================================
+===================================================================================================
+===================================================================================================
+
+/**
+ * VR_DATASHORTSTRING entity type.
+ * 
+ * @category  Service
+ * @package	Service_DatashortstringView
+ * @author	Yash K. Kothari <odataphpproducer_alias@microsoft.com>
+ * @copyright 2011 Microsoft Corp. (http://www.microsoft.com)
+ * @license	New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
+ * @version	Release: 1.0
+ * @link	  http://odataphpproducer.codeplex.com
+ */
+class VR_DATASHORTSTRING{
+	public $CALCEDVALUE;
+	public $UTS;
+	public $DATASHORTSTRING_PK;
+	public $DATASHORTSTRING_DATE;
+	public $DATASHORTSTRING_VALUE;
+	public $DATATYPE_PK;
+	public $DATATYPE_NAME;
+	public $USERS_PK;
+	public $USERS_USERNAME;
+	public $PREMISE_PK;
+	public $PREMISE_NAME;
+	public $PERMISSIONS_PK;
+	public $PERMISSIONS_OWNER;
+	public $PERMISSIONS_WRITE;
+	public $PERMISSIONS_READ;
+	public $PERMISSIONS_STATETOGGLE;
+	public $UNITS_PK;
+	public $UNITS_NAME;
+	public $UNITSTYPE_PK;
+	public $UNITSTYPE_NAME;
+	public $IO_PK;
+	public $IO_SERIALCODE;
+	public $IO_NAME;
+	public $IO_CONNECTED;
+	public $IO_STATE;
+	public $IO_STATECHANGECODE;
+	public $IOTECHTYPE_PK;
+	public $IOTECHTYPE_NAME;
+	public $IOPORTS_PK;
+	public $IOPORTS_HWID;
+	public $IOPORTS_OUTPUTHWID;
+	public $IOPORTS_STATE;
+	public $IOPORTS_STATECHANGEID;
+	public $IOPORTS_NAME;
+	public $IOPORTTYPE_PK;
+	public $IOPORTTYPE_NAME;
+	public $SENSOR_BASECONVERT;
+	public $SENSOR_PK;
+	public $SENSOR_NAME;
+	public $SENSOR_SAMPLERATELIMIT;
+	public $SENSOR_SAMPLERATEMAX;
+	public $SENSOR_SAMPLERATECURRENT;
+	public $SENSOR_STATECHANGEID;
+	public $SENSOR_STATE;
+	public $SENSORTYPE_PK;
+	public $SENSORTYPE_NAME;
+	public $SENSORTYPE_ENUM;
+	public $RSCAT_PK;
+	public $RSCAT_NAME;
+	public $RSSUBCAT_PK;
+	public $RSSUBCAT_NAME;
+	public $RSSUBCAT_TYPE;
+	public $RSTARIFF_PK;
+	public $RSTARIFF_NAME;
+	public $RSTYPE_PK;
+	public $RSTYPE_NAME;
+	public $RSTYPE_MAIN;
+	public $UOMCAT_PK;
+	public $UOMCAT_NAME;
+	public $UOMSUBCAT_PK;
+	public $UOMSUBCAT_NAME;
+	public $UOM_PK;
+	public $UOM_NAME;
+	public $UOM_RATE;
+
+}
+
+//Register the entity (resource) type 'VR_DATASHORTSTRING'
+		$VR_DATASHORTSTRINGEntityType = $metadata->addEntityType(
+			new ReflectionClass('VR_DATASHORTSTRING'), 'VR_DATASHORTSTRING', 'DatashortstringView'
+		);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'CALCEDVALUE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'UTS', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'DATASHORTSTRING_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'DATASHORTSTRING_DATE', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'DATASHORTSTRING_VALUE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'DATATYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'DATATYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'USERS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'USERS_USERNAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'PREMISE_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'PREMISE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'PERMISSIONS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'PERMISSIONS_OWNER', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'PERMISSIONS_WRITE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'PERMISSIONS_READ', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'PERMISSIONS_STATETOGGLE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'UNITS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'UNITS_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'UNITSTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'UNITSTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'IO_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'IO_SERIALCODE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'IO_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'IO_CONNECTED', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'IO_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'IO_STATECHANGECODE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'IOTECHTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'IOTECHTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'IOPORTS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'IOPORTS_HWID', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'IOPORTS_OUTPUTHWID', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'IOPORTS_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'IOPORTS_STATECHANGEID', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'IOPORTS_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'IOPORTTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'IOPORTTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'SENSOR_BASECONVERT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'SENSOR_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'SENSOR_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'SENSOR_SAMPLERATELIMIT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'SENSOR_SAMPLERATEMAX', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'SENSOR_SAMPLERATECURRENT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'SENSOR_STATECHANGEID', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'SENSOR_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'SENSORTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'SENSORTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'SENSORTYPE_ENUM', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'RSCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'RSCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'RSSUBCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'RSSUBCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'RSSUBCAT_TYPE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'RSTARIFF_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'RSTARIFF_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'RSTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'RSTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'RSTYPE_MAIN', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'UOMCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'UOMCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'UOMSUBCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'UOMSUBCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'UOM_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'UOM_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATASHORTSTRINGEntityType, 'UOM_RATE', EdmPrimitiveType::CHARARRAY);
+		
+		$VR_DATASHORTSTRINGsResourceSet = $metadata->addResourceSet(
+			'VR_DATASHORTSTRINGs', $VR_DATASHORTSTRINGEntityType
+		);
+
+/**
+		 * Serialize the sql row into RSCAT object
+		 * 
+		 * @param array $record each row of RSCAT
+		 * 
+		 * @return Object
+		 */
+		private function _serializeVR_DATASHORTSTRING($record)
+		{
+			$VR_DATASHORTSTRING = new VR_DATASHORTSTRING();
+			$VR_DATASHORTSTRING->CALCEDVALUE = $record['CALCEDVALUE'];
+			$VR_DATASHORTSTRING->UTS = $record['UTS'];
+			$VR_DATASHORTSTRING->DATASHORTSTRING_PK = $record['DATASHORTSTRING_PK'];
+			$VR_DATASHORTSTRING->DATASHORTSTRING_DATE = $record['DATASHORTSTRING_DATE'];
+			$VR_DATASHORTSTRING->DATASHORTSTRING_VALUE = $record['DATASHORTSTRING_VALUE'];
+			$VR_DATASHORTSTRING->DATATYPE_PK = $record['DATATYPE_PK'];
+			$VR_DATASHORTSTRING->DATATYPE_NAME = $record['DATATYPE_NAME'];
+			$VR_DATASHORTSTRING->USERS_PK = $record['USERS_PK'];
+			$VR_DATASHORTSTRING->USERS_USERNAME = $record['USERS_USERNAME'];
+			$VR_DATASHORTSTRING->PREMISE_PK = $record['PREMISE_PK'];
+			$VR_DATASHORTSTRING->PREMISE_NAME = $record['PREMISE_NAME'];
+			$VR_DATASHORTSTRING->PERMISSIONS_PK = $record['PERMISSIONS_PK'];
+			$VR_DATASHORTSTRING->PERMISSIONS_OWNER = $record['PERMISSIONS_OWNER'];
+			$VR_DATASHORTSTRING->PERMISSIONS_WRITE = $record['PERMISSIONS_WRITE'];
+			$VR_DATASHORTSTRING->PERMISSIONS_READ = $record['PERMISSIONS_READ'];
+			$VR_DATASHORTSTRING->PERMISSIONS_STATETOGGLE = $record['PERMISSIONS_STATETOGGLE'];
+			$VR_DATASHORTSTRING->UNITS_PK = $record['UNITS_PK'];
+			$VR_DATASHORTSTRING->UNITS_NAME = $record['UNITS_NAME'];
+			$VR_DATASHORTSTRING->UNITSTYPE_PK = $record['UNITSTYPE_PK'];
+			$VR_DATASHORTSTRING->UNITSTYPE_NAME = $record['UNITSTYPE_NAME'];
+			$VR_DATASHORTSTRING->IO_PK = $record['IO_PK'];
+			$VR_DATASHORTSTRING->IO_SERIALCODE = $record['IO_SERIALCODE'];
+			$VR_DATASHORTSTRING->IO_NAME = $record['IO_NAME'];
+			$VR_DATASHORTSTRING->IO_CONNECTED = $record['IO_CONNECTED'];
+			$VR_DATASHORTSTRING->IO_STATE = $record['IO_STATE'];
+			$VR_DATASHORTSTRING->IO_STATECHANGECODE = $record['IO_STATECHANGECODE'];
+			$VR_DATASHORTSTRING->IOTECHTYPE_PK = $record['IOTECHTYPE_PK'];
+			$VR_DATASHORTSTRING->IOTECHTYPE_NAME = $record['IOTECHTYPE_NAME'];
+			$VR_DATASHORTSTRING->IOPORTS_PK = $record['IOPORTS_PK'];
+			$VR_DATASHORTSTRING->IOPORTS_HWID = $record['IOPORTS_HWID'];
+			$VR_DATASHORTSTRING->IOPORTS_OUTPUTHWID = $record['IOPORTS_OUTPUTHWID'];
+			$VR_DATASHORTSTRING->IOPORTS_STATE = $record['IOPORTS_STATE'];
+			$VR_DATASHORTSTRING->IOPORTS_STATECHANGEID = $record['IOPORTS_STATECHANGEID'];
+			$VR_DATASHORTSTRING->IOPORTS_NAME = $record['IOPORTS_NAME'];
+			$VR_DATASHORTSTRING->IOPORTTYPE_PK = $record['IOPORTTYPE_PK'];
+			$VR_DATASHORTSTRING->IOPORTTYPE_NAME = $record['IOPORTTYPE_NAME'];
+			$VR_DATASHORTSTRING->SENSOR_BASECONVERT = $record['SENSOR_BASECONVERT'];
+			$VR_DATASHORTSTRING->SENSOR_PK = $record['SENSOR_PK'];
+			$VR_DATASHORTSTRING->SENSOR_NAME = $record['SENSOR_NAME'];
+			$VR_DATASHORTSTRING->SENSOR_SAMPLERATELIMIT = $record['SENSOR_SAMPLERATELIMIT'];
+			$VR_DATASHORTSTRING->SENSOR_SAMPLERATEMAX = $record['SENSOR_SAMPLERATEMAX'];
+			$VR_DATASHORTSTRING->SENSOR_SAMPLERATECURRENT = $record['SENSOR_SAMPLERATECURRENT'];
+			$VR_DATASHORTSTRING->SENSOR_STATECHANGEID = $record['SENSOR_STATECHANGEID'];
+			$VR_DATASHORTSTRING->SENSOR_STATE = $record['SENSOR_STATE'];
+			$VR_DATASHORTSTRING->SENSORTYPE_PK = $record['SENSORTYPE_PK'];
+			$VR_DATASHORTSTRING->SENSORTYPE_NAME = $record['SENSORTYPE_NAME'];
+			$VR_DATASHORTSTRING->SENSORTYPE_ENUM = $record['SENSORTYPE_ENUM'];
+			$VR_DATASHORTSTRING->RSCAT_PK = $record['RSCAT_PK'];
+			$VR_DATASHORTSTRING->RSCAT_NAME = $record['RSCAT_NAME'];
+			$VR_DATASHORTSTRING->RSSUBCAT_PK = $record['RSSUBCAT_PK'];
+			$VR_DATASHORTSTRING->RSSUBCAT_NAME = $record['RSSUBCAT_NAME'];
+			$VR_DATASHORTSTRING->RSSUBCAT_TYPE = $record['RSSUBCAT_TYPE'];
+			$VR_DATASHORTSTRING->RSTARIFF_PK = $record['RSTARIFF_PK'];
+			$VR_DATASHORTSTRING->RSTARIFF_NAME = $record['RSTARIFF_NAME'];
+			$VR_DATASHORTSTRING->RSTYPE_PK = $record['RSTYPE_PK'];
+			$VR_DATASHORTSTRING->RSTYPE_NAME = $record['RSTYPE_NAME'];
+			$VR_DATASHORTSTRING->RSTYPE_MAIN = $record['RSTYPE_MAIN'];
+			$VR_DATASHORTSTRING->UOMCAT_PK = $record['UOMCAT_PK'];
+			$VR_DATASHORTSTRING->UOMCAT_NAME = $record['UOMCAT_NAME'];
+			$VR_DATASHORTSTRING->UOMSUBCAT_PK = $record['UOMSUBCAT_PK'];
+			$VR_DATASHORTSTRING->UOMSUBCAT_NAME = $record['UOMSUBCAT_NAME'];
+			$VR_DATASHORTSTRING->UOM_PK = $record['UOM_PK'];
+			$VR_DATASHORTSTRING->UOM_NAME = $record['UOM_NAME'];
+			$VR_DATASHORTSTRING->UOM_RATE = $record['UOM_RATE'];
+
+			return $VR_DATASHORTSTRING;
+		}
+
+===================================================================================================
+===================================================================================================
+===================================================================================================
+
+/**
+ * VR_DATATINYINT entity type.
+ * 
+ * @category  Service
+ * @package	Service_DatatinyintView
+ * @author	Yash K. Kothari <odataphpproducer_alias@microsoft.com>
+ * @copyright 2011 Microsoft Corp. (http://www.microsoft.com)
+ * @license	New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
+ * @version	Release: 1.0
+ * @link	  http://odataphpproducer.codeplex.com
+ */
+class VR_DATATINYINT{
+	public $CALCEDVALUE;
+	public $UTS;
+	public $DATATINYINT_PK;
+	public $DATATINYINT_DATE;
+	public $DATATINYINT_VALUE;
+	public $DATATYPE_PK;
+	public $DATATYPE_NAME;
+	public $USERS_PK;
+	public $USERS_USERNAME;
+	public $PREMISE_PK;
+	public $PREMISE_NAME;
+	public $PERMISSIONS_PK;
+	public $PERMISSIONS_OWNER;
+	public $PERMISSIONS_WRITE;
+	public $PERMISSIONS_READ;
+	public $PERMISSIONS_STATETOGGLE;
+	public $UNITS_PK;
+	public $UNITS_NAME;
+	public $UNITSTYPE_PK;
+	public $UNITSTYPE_NAME;
+	public $IO_PK;
+	public $IO_SERIALCODE;
+	public $IO_NAME;
+	public $IO_CONNECTED;
+	public $IO_STATE;
+	public $IO_STATECHANGECODE;
+	public $IOTECHTYPE_PK;
+	public $IOTECHTYPE_NAME;
+	public $IOPORTS_PK;
+	public $IOPORTS_HWID;
+	public $IOPORTS_OUTPUTHWID;
+	public $IOPORTS_STATE;
+	public $IOPORTS_STATECHANGEID;
+	public $IOPORTS_NAME;
+	public $IOPORTTYPE_PK;
+	public $IOPORTTYPE_NAME;
+	public $SENSOR_BASECONVERT;
+	public $SENSOR_PK;
+	public $SENSOR_NAME;
+	public $SENSOR_SAMPLERATELIMIT;
+	public $SENSOR_SAMPLERATEMAX;
+	public $SENSOR_SAMPLERATECURRENT;
+	public $SENSOR_STATECHANGEID;
+	public $SENSOR_STATE;
+	public $SENSORTYPE_PK;
+	public $SENSORTYPE_NAME;
+	public $SENSORTYPE_ENUM;
+	public $RSCAT_PK;
+	public $RSCAT_NAME;
+	public $RSSUBCAT_PK;
+	public $RSSUBCAT_NAME;
+	public $RSSUBCAT_TYPE;
+	public $RSTARIFF_PK;
+	public $RSTARIFF_NAME;
+	public $RSTYPE_PK;
+	public $RSTYPE_NAME;
+	public $RSTYPE_MAIN;
+	public $UOMCAT_PK;
+	public $UOMCAT_NAME;
+	public $UOMSUBCAT_PK;
+	public $UOMSUBCAT_NAME;
+	public $UOM_PK;
+	public $UOM_NAME;
+	public $UOM_RATE;
+
+}
+
+//Register the entity (resource) type 'VR_DATATINYINT'
+		$VR_DATATINYINTEntityType = $metadata->addEntityType(
+			new ReflectionClass('VR_DATATINYINT'), 'VR_DATATINYINT', 'DatatinyintView'
+		);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'CALCEDVALUE', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'UTS', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'DATATINYINT_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'DATATINYINT_DATE', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'DATATINYINT_VALUE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'DATATYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'DATATYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'USERS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'USERS_USERNAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'PREMISE_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'PREMISE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'PERMISSIONS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'PERMISSIONS_OWNER', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'PERMISSIONS_WRITE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'PERMISSIONS_READ', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'PERMISSIONS_STATETOGGLE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'UNITS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'UNITS_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'UNITSTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'UNITSTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'IO_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'IO_SERIALCODE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'IO_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'IO_CONNECTED', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'IO_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'IO_STATECHANGECODE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'IOTECHTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'IOTECHTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'IOPORTS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'IOPORTS_HWID', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'IOPORTS_OUTPUTHWID', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'IOPORTS_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'IOPORTS_STATECHANGEID', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'IOPORTS_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'IOPORTTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'IOPORTTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'SENSOR_BASECONVERT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'SENSOR_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'SENSOR_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'SENSOR_SAMPLERATELIMIT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'SENSOR_SAMPLERATEMAX', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'SENSOR_SAMPLERATECURRENT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'SENSOR_STATECHANGEID', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'SENSOR_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'SENSORTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'SENSORTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'SENSORTYPE_ENUM', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'RSCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'RSCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'RSSUBCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'RSSUBCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'RSSUBCAT_TYPE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'RSTARIFF_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'RSTARIFF_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'RSTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'RSTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'RSTYPE_MAIN', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'UOMCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'UOMCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'UOMSUBCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'UOMSUBCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'UOM_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'UOM_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYINTEntityType, 'UOM_RATE', EdmPrimitiveType::CHARARRAY);
+		
+		$VR_DATATINYINTsResourceSet = $metadata->addResourceSet(
+			'VR_DATATINYINTs', $VR_DATATINYINTEntityType
+		);
+
+/**
+		 * Serialize the sql row into RSCAT object
+		 * 
+		 * @param array $record each row of RSCAT
+		 * 
+		 * @return Object
+		 */
+		private function _serializeVR_DATATINYINT($record)
+		{
+			$VR_DATATINYINT = new VR_DATATINYINT();
+			$VR_DATATINYINT->CALCEDVALUE = $record['CALCEDVALUE'];
+			$VR_DATATINYINT->UTS = $record['UTS'];
+			$VR_DATATINYINT->DATATINYINT_PK = $record['DATATINYINT_PK'];
+			$VR_DATATINYINT->DATATINYINT_DATE = $record['DATATINYINT_DATE'];
+			$VR_DATATINYINT->DATATINYINT_VALUE = $record['DATATINYINT_VALUE'];
+			$VR_DATATINYINT->DATATYPE_PK = $record['DATATYPE_PK'];
+			$VR_DATATINYINT->DATATYPE_NAME = $record['DATATYPE_NAME'];
+			$VR_DATATINYINT->USERS_PK = $record['USERS_PK'];
+			$VR_DATATINYINT->USERS_USERNAME = $record['USERS_USERNAME'];
+			$VR_DATATINYINT->PREMISE_PK = $record['PREMISE_PK'];
+			$VR_DATATINYINT->PREMISE_NAME = $record['PREMISE_NAME'];
+			$VR_DATATINYINT->PERMISSIONS_PK = $record['PERMISSIONS_PK'];
+			$VR_DATATINYINT->PERMISSIONS_OWNER = $record['PERMISSIONS_OWNER'];
+			$VR_DATATINYINT->PERMISSIONS_WRITE = $record['PERMISSIONS_WRITE'];
+			$VR_DATATINYINT->PERMISSIONS_READ = $record['PERMISSIONS_READ'];
+			$VR_DATATINYINT->PERMISSIONS_STATETOGGLE = $record['PERMISSIONS_STATETOGGLE'];
+			$VR_DATATINYINT->UNITS_PK = $record['UNITS_PK'];
+			$VR_DATATINYINT->UNITS_NAME = $record['UNITS_NAME'];
+			$VR_DATATINYINT->UNITSTYPE_PK = $record['UNITSTYPE_PK'];
+			$VR_DATATINYINT->UNITSTYPE_NAME = $record['UNITSTYPE_NAME'];
+			$VR_DATATINYINT->IO_PK = $record['IO_PK'];
+			$VR_DATATINYINT->IO_SERIALCODE = $record['IO_SERIALCODE'];
+			$VR_DATATINYINT->IO_NAME = $record['IO_NAME'];
+			$VR_DATATINYINT->IO_CONNECTED = $record['IO_CONNECTED'];
+			$VR_DATATINYINT->IO_STATE = $record['IO_STATE'];
+			$VR_DATATINYINT->IO_STATECHANGECODE = $record['IO_STATECHANGECODE'];
+			$VR_DATATINYINT->IOTECHTYPE_PK = $record['IOTECHTYPE_PK'];
+			$VR_DATATINYINT->IOTECHTYPE_NAME = $record['IOTECHTYPE_NAME'];
+			$VR_DATATINYINT->IOPORTS_PK = $record['IOPORTS_PK'];
+			$VR_DATATINYINT->IOPORTS_HWID = $record['IOPORTS_HWID'];
+			$VR_DATATINYINT->IOPORTS_OUTPUTHWID = $record['IOPORTS_OUTPUTHWID'];
+			$VR_DATATINYINT->IOPORTS_STATE = $record['IOPORTS_STATE'];
+			$VR_DATATINYINT->IOPORTS_STATECHANGEID = $record['IOPORTS_STATECHANGEID'];
+			$VR_DATATINYINT->IOPORTS_NAME = $record['IOPORTS_NAME'];
+			$VR_DATATINYINT->IOPORTTYPE_PK = $record['IOPORTTYPE_PK'];
+			$VR_DATATINYINT->IOPORTTYPE_NAME = $record['IOPORTTYPE_NAME'];
+			$VR_DATATINYINT->SENSOR_BASECONVERT = $record['SENSOR_BASECONVERT'];
+			$VR_DATATINYINT->SENSOR_PK = $record['SENSOR_PK'];
+			$VR_DATATINYINT->SENSOR_NAME = $record['SENSOR_NAME'];
+			$VR_DATATINYINT->SENSOR_SAMPLERATELIMIT = $record['SENSOR_SAMPLERATELIMIT'];
+			$VR_DATATINYINT->SENSOR_SAMPLERATEMAX = $record['SENSOR_SAMPLERATEMAX'];
+			$VR_DATATINYINT->SENSOR_SAMPLERATECURRENT = $record['SENSOR_SAMPLERATECURRENT'];
+			$VR_DATATINYINT->SENSOR_STATECHANGEID = $record['SENSOR_STATECHANGEID'];
+			$VR_DATATINYINT->SENSOR_STATE = $record['SENSOR_STATE'];
+			$VR_DATATINYINT->SENSORTYPE_PK = $record['SENSORTYPE_PK'];
+			$VR_DATATINYINT->SENSORTYPE_NAME = $record['SENSORTYPE_NAME'];
+			$VR_DATATINYINT->SENSORTYPE_ENUM = $record['SENSORTYPE_ENUM'];
+			$VR_DATATINYINT->RSCAT_PK = $record['RSCAT_PK'];
+			$VR_DATATINYINT->RSCAT_NAME = $record['RSCAT_NAME'];
+			$VR_DATATINYINT->RSSUBCAT_PK = $record['RSSUBCAT_PK'];
+			$VR_DATATINYINT->RSSUBCAT_NAME = $record['RSSUBCAT_NAME'];
+			$VR_DATATINYINT->RSSUBCAT_TYPE = $record['RSSUBCAT_TYPE'];
+			$VR_DATATINYINT->RSTARIFF_PK = $record['RSTARIFF_PK'];
+			$VR_DATATINYINT->RSTARIFF_NAME = $record['RSTARIFF_NAME'];
+			$VR_DATATINYINT->RSTYPE_PK = $record['RSTYPE_PK'];
+			$VR_DATATINYINT->RSTYPE_NAME = $record['RSTYPE_NAME'];
+			$VR_DATATINYINT->RSTYPE_MAIN = $record['RSTYPE_MAIN'];
+			$VR_DATATINYINT->UOMCAT_PK = $record['UOMCAT_PK'];
+			$VR_DATATINYINT->UOMCAT_NAME = $record['UOMCAT_NAME'];
+			$VR_DATATINYINT->UOMSUBCAT_PK = $record['UOMSUBCAT_PK'];
+			$VR_DATATINYINT->UOMSUBCAT_NAME = $record['UOMSUBCAT_NAME'];
+			$VR_DATATINYINT->UOM_PK = $record['UOM_PK'];
+			$VR_DATATINYINT->UOM_NAME = $record['UOM_NAME'];
+			$VR_DATATINYINT->UOM_RATE = $record['UOM_RATE'];
+
+			return $VR_DATATINYINT;
+		}
+
+===================================================================================================
+===================================================================================================
+===================================================================================================
+
+/**
+ * VR_DATATINYSTRING entity type.
+ * 
+ * @category  Service
+ * @package	Service_DatatinystringView
+ * @author	Yash K. Kothari <odataphpproducer_alias@microsoft.com>
+ * @copyright 2011 Microsoft Corp. (http://www.microsoft.com)
+ * @license	New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
+ * @version	Release: 1.0
+ * @link	  http://odataphpproducer.codeplex.com
+ */
+class VR_DATATINYSTRING{
+	public $CALCEDVALUE;
+	public $UTS;
+	public $DATATINYSTRING_PK;
+	public $DATATINYSTRING_DATE;
+	public $DATATINYSTRING_VALUE;
+	public $DATATYPE_PK;
+	public $DATATYPE_NAME;
+	public $USERS_PK;
+	public $USERS_USERNAME;
+	public $PREMISE_PK;
+	public $PREMISE_NAME;
+	public $PERMISSIONS_PK;
+	public $PERMISSIONS_OWNER;
+	public $PERMISSIONS_WRITE;
+	public $PERMISSIONS_READ;
+	public $PERMISSIONS_STATETOGGLE;
+	public $UNITS_PK;
+	public $UNITS_NAME;
+	public $UNITSTYPE_PK;
+	public $UNITSTYPE_NAME;
+	public $IO_PK;
+	public $IO_SERIALCODE;
+	public $IO_NAME;
+	public $IO_CONNECTED;
+	public $IO_STATE;
+	public $IO_STATECHANGECODE;
+	public $IOTECHTYPE_PK;
+	public $IOTECHTYPE_NAME;
+	public $IOPORTS_PK;
+	public $IOPORTS_HWID;
+	public $IOPORTS_OUTPUTHWID;
+	public $IOPORTS_STATE;
+	public $IOPORTS_STATECHANGEID;
+	public $IOPORTS_NAME;
+	public $IOPORTTYPE_PK;
+	public $IOPORTTYPE_NAME;
+	public $SENSOR_BASECONVERT;
+	public $SENSOR_PK;
+	public $SENSOR_NAME;
+	public $SENSOR_SAMPLERATELIMIT;
+	public $SENSOR_SAMPLERATEMAX;
+	public $SENSOR_SAMPLERATECURRENT;
+	public $SENSOR_STATECHANGEID;
+	public $SENSOR_STATE;
+	public $SENSORTYPE_PK;
+	public $SENSORTYPE_NAME;
+	public $SENSORTYPE_ENUM;
+	public $RSCAT_PK;
+	public $RSCAT_NAME;
+	public $RSSUBCAT_PK;
+	public $RSSUBCAT_NAME;
+	public $RSSUBCAT_TYPE;
+	public $RSTARIFF_PK;
+	public $RSTARIFF_NAME;
+	public $RSTYPE_PK;
+	public $RSTYPE_NAME;
+	public $RSTYPE_MAIN;
+	public $UOMCAT_PK;
+	public $UOMCAT_NAME;
+	public $UOMSUBCAT_PK;
+	public $UOMSUBCAT_NAME;
+	public $UOM_PK;
+	public $UOM_NAME;
+	public $UOM_RATE;
+
+}
+
+//Register the entity (resource) type 'VR_DATATINYSTRING'
+		$VR_DATATINYSTRINGEntityType = $metadata->addEntityType(
+			new ReflectionClass('VR_DATATINYSTRING'), 'VR_DATATINYSTRING', 'DatatinystringView'
+		);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'CALCEDVALUE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'UTS', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'DATATINYSTRING_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'DATATINYSTRING_DATE', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'DATATINYSTRING_VALUE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'DATATYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'DATATYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'USERS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'USERS_USERNAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'PREMISE_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'PREMISE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'PERMISSIONS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'PERMISSIONS_OWNER', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'PERMISSIONS_WRITE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'PERMISSIONS_READ', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'PERMISSIONS_STATETOGGLE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'UNITS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'UNITS_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'UNITSTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'UNITSTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'IO_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'IO_SERIALCODE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'IO_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'IO_CONNECTED', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'IO_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'IO_STATECHANGECODE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'IOTECHTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'IOTECHTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'IOPORTS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'IOPORTS_HWID', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'IOPORTS_OUTPUTHWID', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'IOPORTS_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'IOPORTS_STATECHANGEID', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'IOPORTS_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'IOPORTTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'IOPORTTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'SENSOR_BASECONVERT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'SENSOR_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'SENSOR_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'SENSOR_SAMPLERATELIMIT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'SENSOR_SAMPLERATEMAX', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'SENSOR_SAMPLERATECURRENT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'SENSOR_STATECHANGEID', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'SENSOR_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'SENSORTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'SENSORTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'SENSORTYPE_ENUM', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'RSCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'RSCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'RSSUBCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'RSSUBCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'RSSUBCAT_TYPE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'RSTARIFF_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'RSTARIFF_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'RSTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'RSTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'RSTYPE_MAIN', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'UOMCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'UOMCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'UOMSUBCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'UOMSUBCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'UOM_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'UOM_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_DATATINYSTRINGEntityType, 'UOM_RATE', EdmPrimitiveType::CHARARRAY);
+		
+		$VR_DATATINYSTRINGsResourceSet = $metadata->addResourceSet(
+			'VR_DATATINYSTRINGs', $VR_DATATINYSTRINGEntityType
+		);
+
+/**
+		 * Serialize the sql row into RSCAT object
+		 * 
+		 * @param array $record each row of RSCAT
+		 * 
+		 * @return Object
+		 */
+		private function _serializeVR_DATATINYSTRING($record)
+		{
+			$VR_DATATINYSTRING = new VR_DATATINYSTRING();
+			$VR_DATATINYSTRING->CALCEDVALUE = $record['CALCEDVALUE'];
+			$VR_DATATINYSTRING->UTS = $record['UTS'];
+			$VR_DATATINYSTRING->DATATINYSTRING_PK = $record['DATATINYSTRING_PK'];
+			$VR_DATATINYSTRING->DATATINYSTRING_DATE = $record['DATATINYSTRING_DATE'];
+			$VR_DATATINYSTRING->DATATINYSTRING_VALUE = $record['DATATINYSTRING_VALUE'];
+			$VR_DATATINYSTRING->DATATYPE_PK = $record['DATATYPE_PK'];
+			$VR_DATATINYSTRING->DATATYPE_NAME = $record['DATATYPE_NAME'];
+			$VR_DATATINYSTRING->USERS_PK = $record['USERS_PK'];
+			$VR_DATATINYSTRING->USERS_USERNAME = $record['USERS_USERNAME'];
+			$VR_DATATINYSTRING->PREMISE_PK = $record['PREMISE_PK'];
+			$VR_DATATINYSTRING->PREMISE_NAME = $record['PREMISE_NAME'];
+			$VR_DATATINYSTRING->PERMISSIONS_PK = $record['PERMISSIONS_PK'];
+			$VR_DATATINYSTRING->PERMISSIONS_OWNER = $record['PERMISSIONS_OWNER'];
+			$VR_DATATINYSTRING->PERMISSIONS_WRITE = $record['PERMISSIONS_WRITE'];
+			$VR_DATATINYSTRING->PERMISSIONS_READ = $record['PERMISSIONS_READ'];
+			$VR_DATATINYSTRING->PERMISSIONS_STATETOGGLE = $record['PERMISSIONS_STATETOGGLE'];
+			$VR_DATATINYSTRING->UNITS_PK = $record['UNITS_PK'];
+			$VR_DATATINYSTRING->UNITS_NAME = $record['UNITS_NAME'];
+			$VR_DATATINYSTRING->UNITSTYPE_PK = $record['UNITSTYPE_PK'];
+			$VR_DATATINYSTRING->UNITSTYPE_NAME = $record['UNITSTYPE_NAME'];
+			$VR_DATATINYSTRING->IO_PK = $record['IO_PK'];
+			$VR_DATATINYSTRING->IO_SERIALCODE = $record['IO_SERIALCODE'];
+			$VR_DATATINYSTRING->IO_NAME = $record['IO_NAME'];
+			$VR_DATATINYSTRING->IO_CONNECTED = $record['IO_CONNECTED'];
+			$VR_DATATINYSTRING->IO_STATE = $record['IO_STATE'];
+			$VR_DATATINYSTRING->IO_STATECHANGECODE = $record['IO_STATECHANGECODE'];
+			$VR_DATATINYSTRING->IOTECHTYPE_PK = $record['IOTECHTYPE_PK'];
+			$VR_DATATINYSTRING->IOTECHTYPE_NAME = $record['IOTECHTYPE_NAME'];
+			$VR_DATATINYSTRING->IOPORTS_PK = $record['IOPORTS_PK'];
+			$VR_DATATINYSTRING->IOPORTS_HWID = $record['IOPORTS_HWID'];
+			$VR_DATATINYSTRING->IOPORTS_OUTPUTHWID = $record['IOPORTS_OUTPUTHWID'];
+			$VR_DATATINYSTRING->IOPORTS_STATE = $record['IOPORTS_STATE'];
+			$VR_DATATINYSTRING->IOPORTS_STATECHANGEID = $record['IOPORTS_STATECHANGEID'];
+			$VR_DATATINYSTRING->IOPORTS_NAME = $record['IOPORTS_NAME'];
+			$VR_DATATINYSTRING->IOPORTTYPE_PK = $record['IOPORTTYPE_PK'];
+			$VR_DATATINYSTRING->IOPORTTYPE_NAME = $record['IOPORTTYPE_NAME'];
+			$VR_DATATINYSTRING->SENSOR_BASECONVERT = $record['SENSOR_BASECONVERT'];
+			$VR_DATATINYSTRING->SENSOR_PK = $record['SENSOR_PK'];
+			$VR_DATATINYSTRING->SENSOR_NAME = $record['SENSOR_NAME'];
+			$VR_DATATINYSTRING->SENSOR_SAMPLERATELIMIT = $record['SENSOR_SAMPLERATELIMIT'];
+			$VR_DATATINYSTRING->SENSOR_SAMPLERATEMAX = $record['SENSOR_SAMPLERATEMAX'];
+			$VR_DATATINYSTRING->SENSOR_SAMPLERATECURRENT = $record['SENSOR_SAMPLERATECURRENT'];
+			$VR_DATATINYSTRING->SENSOR_STATECHANGEID = $record['SENSOR_STATECHANGEID'];
+			$VR_DATATINYSTRING->SENSOR_STATE = $record['SENSOR_STATE'];
+			$VR_DATATINYSTRING->SENSORTYPE_PK = $record['SENSORTYPE_PK'];
+			$VR_DATATINYSTRING->SENSORTYPE_NAME = $record['SENSORTYPE_NAME'];
+			$VR_DATATINYSTRING->SENSORTYPE_ENUM = $record['SENSORTYPE_ENUM'];
+			$VR_DATATINYSTRING->RSCAT_PK = $record['RSCAT_PK'];
+			$VR_DATATINYSTRING->RSCAT_NAME = $record['RSCAT_NAME'];
+			$VR_DATATINYSTRING->RSSUBCAT_PK = $record['RSSUBCAT_PK'];
+			$VR_DATATINYSTRING->RSSUBCAT_NAME = $record['RSSUBCAT_NAME'];
+			$VR_DATATINYSTRING->RSSUBCAT_TYPE = $record['RSSUBCAT_TYPE'];
+			$VR_DATATINYSTRING->RSTARIFF_PK = $record['RSTARIFF_PK'];
+			$VR_DATATINYSTRING->RSTARIFF_NAME = $record['RSTARIFF_NAME'];
+			$VR_DATATINYSTRING->RSTYPE_PK = $record['RSTYPE_PK'];
+			$VR_DATATINYSTRING->RSTYPE_NAME = $record['RSTYPE_NAME'];
+			$VR_DATATINYSTRING->RSTYPE_MAIN = $record['RSTYPE_MAIN'];
+			$VR_DATATINYSTRING->UOMCAT_PK = $record['UOMCAT_PK'];
+			$VR_DATATINYSTRING->UOMCAT_NAME = $record['UOMCAT_NAME'];
+			$VR_DATATINYSTRING->UOMSUBCAT_PK = $record['UOMSUBCAT_PK'];
+			$VR_DATATINYSTRING->UOMSUBCAT_NAME = $record['UOMSUBCAT_NAME'];
+			$VR_DATATINYSTRING->UOM_PK = $record['UOM_PK'];
+			$VR_DATATINYSTRING->UOM_NAME = $record['UOM_NAME'];
+			$VR_DATATINYSTRING->UOM_RATE = $record['UOM_RATE'];
+
+			return $VR_DATATINYSTRING;
+		}
+
+===================================================================================================
+===================================================================================================
+===================================================================================================
+
+/**
+ * VR_USERSPREMISELOCATIONS entity type.
+ * 
+ * @category  Service
+ * @package	Service_UserspremiselocationsView
+ * @author	Yash K. Kothari <odataphpproducer_alias@microsoft.com>
+ * @copyright 2011 Microsoft Corp. (http://www.microsoft.com)
+ * @license	New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
+ * @version	Release: 1.0
+ * @link	  http://odataphpproducer.codeplex.com
+ */
+class VR_USERSPREMISELOCATIONS{
+	public $USERS_PK;
+	public $USERS_USERNAME;
+	public $PERMISSIONS_PK;
+	public $PERMISSIONS_OWNER;
+	public $PERMISSIONS_WRITE;
+	public $PERMISSIONS_STATETOGGLE;
+	public $PERMISSIONS_READ;
+	public $PREMISE_PK;
+	public $PREMISE_NAME;
+	public $PREMISE_DESCRIPTION;
+	public $ADDRESSSETTINGS_PK;
+	public $ADDRESSSETTINGS_LINE1;
+	public $ADDRESSSETTINGS_LINE2;
+	public $ADDRESSSETTINGS_LINE3;
+	public $LANGUAGE_PK;
+	public $LANGUAGE_NAME;
+	public $LANGUAGE_LANGUAGE;
+	public $LANGUAGE_VARIANT;
+	public $LANGUAGE_ENCODING;
+	public $COUNTRIES_PK;
+	public $COUNTRIES_NAME_EN;
+	public $COUNTRIES_NAME_ZH;
+	public $COUNTRIES_ABREVIATION;
+	public $STATEPROVINCE_PK;
+	public $STATEPROVINCE_SHORTNAME;
+	public $STATEPROVINCE_NAME_EN;
+	public $STATEPROVINCE_NAME_ZH;
+	public $POSTCODE_PK;
+	public $POSTCODE_NAME;
+	public $TIMEZONE_PK;
+	public $TIMEZONE_CC;
+	public $TIMEZONE_LATITUDE;
+	public $TIMEZONE_LONGITUDE;
+	public $TIMEZONE_TZ;
+	public $TIMEZONE_UTCOFFSET;
+	public $TIMEZONE_UTCDSTOFFSET;
+	public $TIMEZONE_HANACODE;
+	public $TIMEZONE_UTCFLOAT;
+	public $GEOLOCATION_PK;
+	public $GEOLOCATION_LONGTITUDE;
+	public $GEOLOCATION_LATTITUDE;
+	public $USERS_STATE;
+	public $PERMISSIONS_TARGETS;
+	public $PERMISSIONS_UTILITIES;
+	public $CURRENCIES_PK;
+	public $CURRENCIES_NAME;
+	public $CURRENCIES_ABREVIATION;
+
+}
+
+//Register the entity (resource) type 'VR_USERSPREMISELOCATIONS'
+		$VR_USERSPREMISELOCATIONSEntityType = $metadata->addEntityType(
+			new ReflectionClass('VR_USERSPREMISELOCATIONS'), 'VR_USERSPREMISELOCATIONS', 'UserspremiselocationsView'
+		);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'USERS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'USERS_USERNAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'PERMISSIONS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'PERMISSIONS_OWNER', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'PERMISSIONS_WRITE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'PERMISSIONS_STATETOGGLE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'PERMISSIONS_READ', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'PREMISE_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'PREMISE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'PREMISE_DESCRIPTION', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'ADDRESSSETTINGS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'ADDRESSSETTINGS_LINE1', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'ADDRESSSETTINGS_LINE2', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'ADDRESSSETTINGS_LINE3', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'LANGUAGE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'LANGUAGE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'LANGUAGE_LANGUAGE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'LANGUAGE_VARIANT', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'LANGUAGE_ENCODING', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'COUNTRIES_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'COUNTRIES_NAME_EN', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'COUNTRIES_NAME_ZH', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'COUNTRIES_ABREVIATION', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'STATEPROVINCE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'STATEPROVINCE_SHORTNAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'STATEPROVINCE_NAME_EN', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'STATEPROVINCE_NAME_ZH', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'POSTCODE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'POSTCODE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'TIMEZONE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'TIMEZONE_CC', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'TIMEZONE_LATITUDE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'TIMEZONE_LONGITUDE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'TIMEZONE_TZ', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'TIMEZONE_UTCOFFSET', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'TIMEZONE_UTCDSTOFFSET', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'TIMEZONE_HANACODE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'TIMEZONE_UTCFLOAT', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'GEOLOCATION_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'GEOLOCATION_LONGTITUDE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'GEOLOCATION_LATTITUDE', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'USERS_STATE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'PERMISSIONS_TARGETS', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'PERMISSIONS_UTILITIES', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'CURRENCIES_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'CURRENCIES_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOCATIONSEntityType, 'CURRENCIES_ABREVIATION', EdmPrimitiveType::CHARARRAY);
+		
+		$VR_USERSPREMISELOCATIONSsResourceSet = $metadata->addResourceSet(
+			'VR_USERSPREMISELOCATIONSs', $VR_USERSPREMISELOCATIONSEntityType
+		);
+
+/**
+		 * Serialize the sql row into RSCAT object
+		 * 
+		 * @param array $record each row of RSCAT
+		 * 
+		 * @return Object
+		 */
+		private function _serializeVR_USERSPREMISELOCATIONS($record)
+		{
+			$VR_USERSPREMISELOCATIONS = new VR_USERSPREMISELOCATIONS();
+			$VR_USERSPREMISELOCATIONS->USERS_PK = $record['USERS_PK'];
+			$VR_USERSPREMISELOCATIONS->USERS_USERNAME = $record['USERS_USERNAME'];
+			$VR_USERSPREMISELOCATIONS->PERMISSIONS_PK = $record['PERMISSIONS_PK'];
+			$VR_USERSPREMISELOCATIONS->PERMISSIONS_OWNER = $record['PERMISSIONS_OWNER'];
+			$VR_USERSPREMISELOCATIONS->PERMISSIONS_WRITE = $record['PERMISSIONS_WRITE'];
+			$VR_USERSPREMISELOCATIONS->PERMISSIONS_STATETOGGLE = $record['PERMISSIONS_STATETOGGLE'];
+			$VR_USERSPREMISELOCATIONS->PERMISSIONS_READ = $record['PERMISSIONS_READ'];
+			$VR_USERSPREMISELOCATIONS->PREMISE_PK = $record['PREMISE_PK'];
+			$VR_USERSPREMISELOCATIONS->PREMISE_NAME = $record['PREMISE_NAME'];
+			$VR_USERSPREMISELOCATIONS->PREMISE_DESCRIPTION = $record['PREMISE_DESCRIPTION'];
+			$VR_USERSPREMISELOCATIONS->ADDRESSSETTINGS_PK = $record['ADDRESSSETTINGS_PK'];
+			$VR_USERSPREMISELOCATIONS->ADDRESSSETTINGS_LINE1 = $record['ADDRESSSETTINGS_LINE1'];
+			$VR_USERSPREMISELOCATIONS->ADDRESSSETTINGS_LINE2 = $record['ADDRESSSETTINGS_LINE2'];
+			$VR_USERSPREMISELOCATIONS->ADDRESSSETTINGS_LINE3 = $record['ADDRESSSETTINGS_LINE3'];
+			$VR_USERSPREMISELOCATIONS->LANGUAGE_PK = $record['LANGUAGE_PK'];
+			$VR_USERSPREMISELOCATIONS->LANGUAGE_NAME = $record['LANGUAGE_NAME'];
+			$VR_USERSPREMISELOCATIONS->LANGUAGE_LANGUAGE = $record['LANGUAGE_LANGUAGE'];
+			$VR_USERSPREMISELOCATIONS->LANGUAGE_VARIANT = $record['LANGUAGE_VARIANT'];
+			$VR_USERSPREMISELOCATIONS->LANGUAGE_ENCODING = $record['LANGUAGE_ENCODING'];
+			$VR_USERSPREMISELOCATIONS->COUNTRIES_PK = $record['COUNTRIES_PK'];
+			$VR_USERSPREMISELOCATIONS->COUNTRIES_NAME_EN = $record['COUNTRIES_NAME_EN'];
+			$VR_USERSPREMISELOCATIONS->COUNTRIES_NAME_ZH = $record['COUNTRIES_NAME_ZH'];
+			$VR_USERSPREMISELOCATIONS->COUNTRIES_ABREVIATION = $record['COUNTRIES_ABREVIATION'];
+			$VR_USERSPREMISELOCATIONS->STATEPROVINCE_PK = $record['STATEPROVINCE_PK'];
+			$VR_USERSPREMISELOCATIONS->STATEPROVINCE_SHORTNAME = $record['STATEPROVINCE_SHORTNAME'];
+			$VR_USERSPREMISELOCATIONS->STATEPROVINCE_NAME_EN = $record['STATEPROVINCE_NAME_EN'];
+			$VR_USERSPREMISELOCATIONS->STATEPROVINCE_NAME_ZH = $record['STATEPROVINCE_NAME_ZH'];
+			$VR_USERSPREMISELOCATIONS->POSTCODE_PK = $record['POSTCODE_PK'];
+			$VR_USERSPREMISELOCATIONS->POSTCODE_NAME = $record['POSTCODE_NAME'];
+			$VR_USERSPREMISELOCATIONS->TIMEZONE_PK = $record['TIMEZONE_PK'];
+			$VR_USERSPREMISELOCATIONS->TIMEZONE_CC = $record['TIMEZONE_CC'];
+			$VR_USERSPREMISELOCATIONS->TIMEZONE_LATITUDE = $record['TIMEZONE_LATITUDE'];
+			$VR_USERSPREMISELOCATIONS->TIMEZONE_LONGITUDE = $record['TIMEZONE_LONGITUDE'];
+			$VR_USERSPREMISELOCATIONS->TIMEZONE_TZ = $record['TIMEZONE_TZ'];
+			$VR_USERSPREMISELOCATIONS->TIMEZONE_UTCOFFSET = $record['TIMEZONE_UTCOFFSET'];
+			$VR_USERSPREMISELOCATIONS->TIMEZONE_UTCDSTOFFSET = $record['TIMEZONE_UTCDSTOFFSET'];
+			$VR_USERSPREMISELOCATIONS->TIMEZONE_HANACODE = $record['TIMEZONE_HANACODE'];
+			$VR_USERSPREMISELOCATIONS->TIMEZONE_UTCFLOAT = $record['TIMEZONE_UTCFLOAT'];
+			$VR_USERSPREMISELOCATIONS->GEOLOCATION_PK = $record['GEOLOCATION_PK'];
+			$VR_USERSPREMISELOCATIONS->GEOLOCATION_LONGTITUDE = $record['GEOLOCATION_LONGTITUDE'];
+			$VR_USERSPREMISELOCATIONS->GEOLOCATION_LATTITUDE = $record['GEOLOCATION_LATTITUDE'];
+			$VR_USERSPREMISELOCATIONS->USERS_STATE = $record['USERS_STATE'];
+			$VR_USERSPREMISELOCATIONS->PERMISSIONS_TARGETS = $record['PERMISSIONS_TARGETS'];
+			$VR_USERSPREMISELOCATIONS->PERMISSIONS_UTILITIES = $record['PERMISSIONS_UTILITIES'];
+			$VR_USERSPREMISELOCATIONS->CURRENCIES_PK = $record['CURRENCIES_PK'];
+			$VR_USERSPREMISELOCATIONS->CURRENCIES_NAME = $record['CURRENCIES_NAME'];
+			$VR_USERSPREMISELOCATIONS->CURRENCIES_ABREVIATION = $record['CURRENCIES_ABREVIATION'];
+
+			return $VR_USERSPREMISELOCATIONS;
+		}
+
+===================================================================================================
+===================================================================================================
+===================================================================================================
+
+/**
+ * VR_USERSPREMISELOG entity type.
+ * 
+ * @category  Service
+ * @package	Service_UserspremiselogView
+ * @author	Yash K. Kothari <odataphpproducer_alias@microsoft.com>
+ * @copyright 2011 Microsoft Corp. (http://www.microsoft.com)
+ * @license	New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
+ * @version	Release: 1.0
+ * @link	  http://odataphpproducer.codeplex.com
+ */
+class VR_USERSPREMISELOG{
+	public $PERMISSIONS_READ;
+	public $PREMISELOGACTION_NAME;
+	public $PREMISELOGACTION_DESC;
+	public $PREMISELOG_USERS_FK;
+	public $PREMISE_PK;
+	public $PREMISE_NAME;
+	public $PREMISE_DESCRIPTION;
+	public $PREMISELOGACTION_PK;
+	public $PREMISELOG_PK;
+	public $PREMISELOG_UTS;
+	public $PREMISELOG_CUSTOM1;
+	public $USERSINFO_DISPLAYNAME;
+
+}
+
+//Register the entity (resource) type 'VR_USERSPREMISELOG'
+		$VR_USERSPREMISELOGEntityType = $metadata->addEntityType(
+			new ReflectionClass('VR_USERSPREMISELOG'), 'VR_USERSPREMISELOG', 'UserspremiselogView'
+		);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOGEntityType, 'PERMISSIONS_READ', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOGEntityType, 'PREMISELOGACTION_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOGEntityType, 'PREMISELOGACTION_DESC', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOGEntityType, 'PREMISELOG_USERS_FK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOGEntityType, 'PREMISE_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOGEntityType, 'PREMISE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOGEntityType, 'PREMISE_DESCRIPTION', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOGEntityType, 'PREMISELOGACTION_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOGEntityType, 'PREMISELOG_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOGEntityType, 'PREMISELOG_UTS', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOGEntityType, 'PREMISELOG_CUSTOM1', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSPREMISELOGEntityType, 'USERSINFO_DISPLAYNAME', EdmPrimitiveType::CHARARRAY);
+		
+		$VR_USERSPREMISELOGsResourceSet = $metadata->addResourceSet(
+			'VR_USERSPREMISELOGs', $VR_USERSPREMISELOGEntityType
+		);
+
+/**
+		 * Serialize the sql row into RSCAT object
+		 * 
+		 * @param array $record each row of RSCAT
+		 * 
+		 * @return Object
+		 */
+		private function _serializeVR_USERSPREMISELOG($record)
+		{
+			$VR_USERSPREMISELOG = new VR_USERSPREMISELOG();
+			$VR_USERSPREMISELOG->PERMISSIONS_READ = $record['PERMISSIONS_READ'];
+			$VR_USERSPREMISELOG->PREMISELOGACTION_NAME = $record['PREMISELOGACTION_NAME'];
+			$VR_USERSPREMISELOG->PREMISELOGACTION_DESC = $record['PREMISELOGACTION_DESC'];
+			$VR_USERSPREMISELOG->PREMISELOG_USERS_FK = $record['PREMISELOG_USERS_FK'];
+			$VR_USERSPREMISELOG->PREMISE_PK = $record['PREMISE_PK'];
+			$VR_USERSPREMISELOG->PREMISE_NAME = $record['PREMISE_NAME'];
+			$VR_USERSPREMISELOG->PREMISE_DESCRIPTION = $record['PREMISE_DESCRIPTION'];
+			$VR_USERSPREMISELOG->PREMISELOGACTION_PK = $record['PREMISELOGACTION_PK'];
+			$VR_USERSPREMISELOG->PREMISELOG_PK = $record['PREMISELOG_PK'];
+			$VR_USERSPREMISELOG->PREMISELOG_UTS = $record['PREMISELOG_UTS'];
+			$VR_USERSPREMISELOG->PREMISELOG_CUSTOM1 = $record['PREMISELOG_CUSTOM1'];
+			$VR_USERSPREMISELOG->USERSINFO_DISPLAYNAME = $record['USERSINFO_DISPLAYNAME'];
+
+			return $VR_USERSPREMISELOG;
+		}
+
+===================================================================================================
+===================================================================================================
+===================================================================================================
+
+/**
+ * VR_USERSROOMS entity type.
+ * 
+ * @category  Service
+ * @package	Service_UsersroomsView
+ * @author	Yash K. Kothari <odataphpproducer_alias@microsoft.com>
+ * @copyright 2011 Microsoft Corp. (http://www.microsoft.com)
+ * @license	New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
+ * @version	Release: 1.0
+ * @link	  http://odataphpproducer.codeplex.com
+ */
+class VR_USERSROOMS{
+	public $USERS_PK;
+	public $USERS_USERNAME;
+	public $PERMISSIONS_OWNER;
+	public $PERMISSIONS_WRITE;
+	public $PERMISSIONS_STATETOGGLE;
+	public $PERMISSIONS_READ;
+	public $PREMISE_PK;
+	public $PREMISE_NAME;
+	public $ROOMS_PK;
+	public $ROOMS_NAME;
+	public $ROOMS_FLOOR;
+	public $ROOMS_DESC;
+	public $ROOMTYPE_PK;
+	public $ROOMTYPE_NAME;
+	public $ROOMTYPE_OUTDOORS;
+
+}
+
+//Register the entity (resource) type 'VR_USERSROOMS'
+		$VR_USERSROOMSEntityType = $metadata->addEntityType(
+			new ReflectionClass('VR_USERSROOMS'), 'VR_USERSROOMS', 'UsersroomsView'
+		);
+	$metadata->addPrimitiveProperty($VR_USERSROOMSEntityType, 'USERS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERSROOMSEntityType, 'USERS_USERNAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSROOMSEntityType, 'PERMISSIONS_OWNER', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERSROOMSEntityType, 'PERMISSIONS_WRITE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERSROOMSEntityType, 'PERMISSIONS_STATETOGGLE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERSROOMSEntityType, 'PERMISSIONS_READ', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERSROOMSEntityType, 'PREMISE_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERSROOMSEntityType, 'PREMISE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSROOMSEntityType, 'ROOMS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERSROOMSEntityType, 'ROOMS_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSROOMSEntityType, 'ROOMS_FLOOR', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERSROOMSEntityType, 'ROOMS_DESC', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSROOMSEntityType, 'ROOMTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERSROOMSEntityType, 'ROOMTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERSROOMSEntityType, 'ROOMTYPE_OUTDOORS', EdmPrimitiveType::INT16);
+		
+		$VR_USERSROOMSsResourceSet = $metadata->addResourceSet(
+			'VR_USERSROOMSs', $VR_USERSROOMSEntityType
+		);
+
+/**
+		 * Serialize the sql row into RSCAT object
+		 * 
+		 * @param array $record each row of RSCAT
+		 * 
+		 * @return Object
+		 */
+		private function _serializeVR_USERSROOMS($record)
+		{
+			$VR_USERSROOMS = new VR_USERSROOMS();
+			$VR_USERSROOMS->USERS_PK = $record['USERS_PK'];
+			$VR_USERSROOMS->USERS_USERNAME = $record['USERS_USERNAME'];
+			$VR_USERSROOMS->PERMISSIONS_OWNER = $record['PERMISSIONS_OWNER'];
+			$VR_USERSROOMS->PERMISSIONS_WRITE = $record['PERMISSIONS_WRITE'];
+			$VR_USERSROOMS->PERMISSIONS_STATETOGGLE = $record['PERMISSIONS_STATETOGGLE'];
+			$VR_USERSROOMS->PERMISSIONS_READ = $record['PERMISSIONS_READ'];
+			$VR_USERSROOMS->PREMISE_PK = $record['PREMISE_PK'];
+			$VR_USERSROOMS->PREMISE_NAME = $record['PREMISE_NAME'];
+			$VR_USERSROOMS->ROOMS_PK = $record['ROOMS_PK'];
+			$VR_USERSROOMS->ROOMS_NAME = $record['ROOMS_NAME'];
+			$VR_USERSROOMS->ROOMS_FLOOR = $record['ROOMS_FLOOR'];
+			$VR_USERSROOMS->ROOMS_DESC = $record['ROOMS_DESC'];
+			$VR_USERSROOMS->ROOMTYPE_PK = $record['ROOMTYPE_PK'];
+			$VR_USERSROOMS->ROOMTYPE_NAME = $record['ROOMTYPE_NAME'];
+			$VR_USERSROOMS->ROOMTYPE_OUTDOORS = $record['ROOMTYPE_OUTDOORS'];
+
+			return $VR_USERSROOMS;
+		}
+
+===================================================================================================
+===================================================================================================
+===================================================================================================
+
+/**
+ * VR_USERUNITS entity type.
+ * 
+ * @category  Service
+ * @package	Service_UserunitsView
+ * @author	Yash K. Kothari <odataphpproducer_alias@microsoft.com>
+ * @copyright 2011 Microsoft Corp. (http://www.microsoft.com)
+ * @license	New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
+ * @version	Release: 1.0
+ * @link	  http://odataphpproducer.codeplex.com
+ */
+class VR_USERUNITS{
+	public $USERS_PK;
+	public $USERS_USERNAME;
+	public $PERMISSIONS_TARGETS;
+	public $PERMISSIONS_UTILITIES;
+	public $PERMISSIONS_OWNER;
+	public $PERMISSIONS_WRITE;
+	public $PERMISSIONS_STATETOGGLE;
+	public $PERMISSIONS_READ;
+	public $PREMISE_PK;
+	public $PREMISE_NAME;
+	public $UNITS_PK;
+	public $UNITS_NAME;
+	public $UNITS_SERIALNUMBER;
+	public $UNITS_INITED;
+	public $UNITS_IPADDRESS;
+	public $UNITSTYPE_PK;
+	public $UNITSTYPE_NAME;
+
+}
+
+//Register the entity (resource) type 'VR_USERUNITS'
+		$VR_USERUNITSEntityType = $metadata->addEntityType(
+			new ReflectionClass('VR_USERUNITS'), 'VR_USERUNITS', 'UserunitsView'
+		);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'USERS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'USERS_USERNAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'PERMISSIONS_TARGETS', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'PERMISSIONS_UTILITIES', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'PERMISSIONS_OWNER', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'PERMISSIONS_WRITE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'PERMISSIONS_STATETOGGLE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'PERMISSIONS_READ', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'PREMISE_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'PREMISE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'UNITS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'UNITS_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'UNITS_SERIALNUMBER', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'UNITS_INITED', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'UNITS_IPADDRESS', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'UNITSTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERUNITSEntityType, 'UNITSTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+		
+		$VR_USERUNITSsResourceSet = $metadata->addResourceSet(
+			'VR_USERUNITSs', $VR_USERUNITSEntityType
+		);
+
+/**
+		 * Serialize the sql row into RSCAT object
+		 * 
+		 * @param array $record each row of RSCAT
+		 * 
+		 * @return Object
+		 */
+		private function _serializeVR_USERUNITS($record)
+		{
+			$VR_USERUNITS = new VR_USERUNITS();
+			$VR_USERUNITS->USERS_PK = $record['USERS_PK'];
+			$VR_USERUNITS->USERS_USERNAME = $record['USERS_USERNAME'];
+			$VR_USERUNITS->PERMISSIONS_TARGETS = $record['PERMISSIONS_TARGETS'];
+			$VR_USERUNITS->PERMISSIONS_UTILITIES = $record['PERMISSIONS_UTILITIES'];
+			$VR_USERUNITS->PERMISSIONS_OWNER = $record['PERMISSIONS_OWNER'];
+			$VR_USERUNITS->PERMISSIONS_WRITE = $record['PERMISSIONS_WRITE'];
+			$VR_USERUNITS->PERMISSIONS_STATETOGGLE = $record['PERMISSIONS_STATETOGGLE'];
+			$VR_USERUNITS->PERMISSIONS_READ = $record['PERMISSIONS_READ'];
+			$VR_USERUNITS->PREMISE_PK = $record['PREMISE_PK'];
+			$VR_USERUNITS->PREMISE_NAME = $record['PREMISE_NAME'];
+			$VR_USERUNITS->UNITS_PK = $record['UNITS_PK'];
+			$VR_USERUNITS->UNITS_NAME = $record['UNITS_NAME'];
+			$VR_USERUNITS->UNITS_SERIALNUMBER = $record['UNITS_SERIALNUMBER'];
+			$VR_USERUNITS->UNITS_INITED = $record['UNITS_INITED'];
+			$VR_USERUNITS->UNITS_IPADDRESS = $record['UNITS_IPADDRESS'];
+			$VR_USERUNITS->UNITSTYPE_PK = $record['UNITSTYPE_PK'];
+			$VR_USERUNITS->UNITSTYPE_NAME = $record['UNITSTYPE_NAME'];
+
+			return $VR_USERUNITS;
+		}
+
+===================================================================================================
+===================================================================================================
+===================================================================================================
+
+/**
+ * VR_USERUTILITY entity type.
+ * 
+ * @category  Service
+ * @package	Service_UserutilityView
+ * @author	Yash K. Kothari <odataphpproducer_alias@microsoft.com>
+ * @copyright 2011 Microsoft Corp. (http://www.microsoft.com)
+ * @license	New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
+ * @version	Release: 1.0
+ * @link	  http://odataphpproducer.codeplex.com
+ */
+class VR_USERUTILITY{
+	public $CURRENCIES_PK;
+	public $CURRENCIES_NAME;
+	public $CURRENCIES_ABREVIATION;
+	public $MID_RATE;
+	public $MID_START_S11;
+	public $MID_START_S12;
+	public $MID_START_S13;
+	public $MID_START_S21;
+	public $MID_START_S22;
+	public $MID_START_S23;
+	public $MID_START_W11;
+	public $MID_START_W12;
+	public $MID_START_W13;
+	public $MID_START_W21;
+	public $MID_START_W22;
+	public $MID_START_W23;
+	public $MID_END_S11;
+	public $MID_END_S12;
+	public $MID_END_S13;
+	public $MID_END_S21;
+	public $MID_END_S22;
+	public $MID_END_S23;
+	public $MID_END_W11;
+	public $MID_END_W12;
+	public $MID_END_W13;
+	public $MID_END_W21;
+	public $MID_END_W22;
+	public $MID_END_W23;
+	public $OFF_RATE;
+	public $OFF_START_S11;
+	public $OFF_START_S12;
+	public $OFF_START_S13;
+	public $OFF_START_S21;
+	public $OFF_START_S22;
+	public $OFF_START_S23;
+	public $OFF_START_W11;
+	public $OFF_START_W12;
+	public $OFF_START_W13;
+	public $OFF_START_W21;
+	public $OFF_START_W22;
+	public $OFF_START_W23;
+	public $OFF_END_S11;
+	public $OFF_END_S12;
+	public $OFF_END_S13;
+	public $OFF_END_S21;
+	public $OFF_END_S22;
+	public $OFF_END_S23;
+	public $OFF_END_W11;
+	public $OFF_END_W12;
+	public $OFF_END_W13;
+	public $OFF_END_W21;
+	public $OFF_END_W22;
+	public $OFF_END_W23;
+	public $PEAK_RATE;
+	public $PEAK_START_S11;
+	public $PEAK_START_S12;
+	public $PEAK_START_S13;
+	public $PEAK_START_S21;
+	public $PEAK_START_S22;
+	public $PEAK_START_S23;
+	public $PEAK_START_W11;
+	public $PEAK_START_W12;
+	public $PEAK_START_W13;
+	public $PEAK_START_W21;
+	public $PEAK_START_W22;
+	public $PEAK_START_W23;
+	public $PEAK_END_S11;
+	public $PEAK_END_S12;
+	public $PEAK_END_S13;
+	public $PEAK_END_S21;
+	public $PEAK_END_S22;
+	public $PEAK_END_S23;
+	public $PEAK_END_W11;
+	public $PEAK_END_W12;
+	public $PEAK_END_W13;
+	public $PEAK_END_W21;
+	public $PEAK_END_W22;
+	public $PEAK_END_W23;
+	public $PERMISSIONS_OWNER;
+	public $PERMISSIONS_WRITE;
+	public $PERMISSIONS_STATETOGGLE;
+	public $PERMISSIONS_READ;
+	public $PERMISSIONS_UTILITIES;
+	public $PERMISSIONS_TARGETS;
+	public $PREMISE_PK;
+	public $PREMISE_NAME;
+	public $PREMISE_DESCRIPTION;
+	public $RSCAT_PK;
+	public $RSCAT_NAME;
+	public $RSSUBCAT_PK;
+	public $RSSUBCAT_TYPE;
+	public $RSSUBCAT_NAME;
+	public $RSTARIFF_PK;
+	public $RSTARIFF_NAME;
+	public $USERS_PK;
+	public $USERS_USERNAME;
+	public $UTILITYTYPE_PK;
+	public $UTILITYTYPE_NAME;
+	public $UTILITYPRICE_PK;
+	public $UTILITYPRICE_NOTAPPEARING;
+	public $UTILITYPRICE_NAME;
+	public $UTILITYPRICE_RATES;
+	public $UTILITYPRICE_START;
+	public $UTILITYPRICE_END;
+
+}
+
+//Register the entity (resource) type 'VR_USERUTILITY'
+		$VR_USERUTILITYEntityType = $metadata->addEntityType(
+			new ReflectionClass('VR_USERUTILITY'), 'VR_USERUTILITY', 'UserutilityView'
+		);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'CURRENCIES_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'CURRENCIES_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'CURRENCIES_ABREVIATION', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_RATE', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_START_S11', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_START_S12', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_START_S13', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_START_S21', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_START_S22', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_START_S23', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_START_W11', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_START_W12', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_START_W13', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_START_W21', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_START_W22', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_START_W23', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_END_S11', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_END_S12', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_END_S13', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_END_S21', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_END_S22', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_END_S23', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_END_W11', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_END_W12', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_END_W13', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_END_W21', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_END_W22', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'MID_END_W23', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_RATE', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_START_S11', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_START_S12', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_START_S13', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_START_S21', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_START_S22', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_START_S23', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_START_W11', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_START_W12', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_START_W13', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_START_W21', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_START_W22', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_START_W23', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_END_S11', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_END_S12', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_END_S13', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_END_S21', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_END_S22', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_END_S23', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_END_W11', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_END_W12', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_END_W13', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_END_W21', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_END_W22', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'OFF_END_W23', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_RATE', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_START_S11', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_START_S12', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_START_S13', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_START_S21', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_START_S22', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_START_S23', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_START_W11', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_START_W12', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_START_W13', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_START_W21', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_START_W22', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_START_W23', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_END_S11', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_END_S12', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_END_S13', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_END_S21', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_END_S22', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_END_S23', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_END_W11', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_END_W12', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_END_W13', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_END_W21', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_END_W22', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PEAK_END_W23', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PERMISSIONS_OWNER', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PERMISSIONS_WRITE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PERMISSIONS_STATETOGGLE', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PERMISSIONS_READ', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PERMISSIONS_UTILITIES', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PERMISSIONS_TARGETS', EdmPrimitiveType::INT16);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PREMISE_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PREMISE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'PREMISE_DESCRIPTION', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'RSCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'RSCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'RSSUBCAT_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'RSSUBCAT_TYPE', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'RSSUBCAT_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'RSTARIFF_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'RSTARIFF_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'USERS_PK', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'USERS_USERNAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'UTILITYTYPE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'UTILITYTYPE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'UTILITYPRICE_PK', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'UTILITYPRICE_NOTAPPEARING', EdmPrimitiveType::INT32);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'UTILITYPRICE_NAME', EdmPrimitiveType::CHARARRAY);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'UTILITYPRICE_RATES', EdmPrimitiveType::DOUBLE);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'UTILITYPRICE_START', EdmPrimitiveType::INT64);
+	$metadata->addPrimitiveProperty($VR_USERUTILITYEntityType, 'UTILITYPRICE_END', EdmPrimitiveType::INT64);
+		
+		$VR_USERUTILITYsResourceSet = $metadata->addResourceSet(
+			'VR_USERUTILITYs', $VR_USERUTILITYEntityType
+		);
+
+/**
+		 * Serialize the sql row into RSCAT object
+		 * 
+		 * @param array $record each row of RSCAT
+		 * 
+		 * @return Object
+		 */
+		private function _serializeVR_USERUTILITY($record)
+		{
+			$VR_USERUTILITY = new VR_USERUTILITY();
+			$VR_USERUTILITY->CURRENCIES_PK = $record['CURRENCIES_PK'];
+			$VR_USERUTILITY->CURRENCIES_NAME = $record['CURRENCIES_NAME'];
+			$VR_USERUTILITY->CURRENCIES_ABREVIATION = $record['CURRENCIES_ABREVIATION'];
+			$VR_USERUTILITY->MID_RATE = $record['MID_RATE'];
+			$VR_USERUTILITY->MID_START_S11 = $record['MID_START_S11'];
+			$VR_USERUTILITY->MID_START_S12 = $record['MID_START_S12'];
+			$VR_USERUTILITY->MID_START_S13 = $record['MID_START_S13'];
+			$VR_USERUTILITY->MID_START_S21 = $record['MID_START_S21'];
+			$VR_USERUTILITY->MID_START_S22 = $record['MID_START_S22'];
+			$VR_USERUTILITY->MID_START_S23 = $record['MID_START_S23'];
+			$VR_USERUTILITY->MID_START_W11 = $record['MID_START_W11'];
+			$VR_USERUTILITY->MID_START_W12 = $record['MID_START_W12'];
+			$VR_USERUTILITY->MID_START_W13 = $record['MID_START_W13'];
+			$VR_USERUTILITY->MID_START_W21 = $record['MID_START_W21'];
+			$VR_USERUTILITY->MID_START_W22 = $record['MID_START_W22'];
+			$VR_USERUTILITY->MID_START_W23 = $record['MID_START_W23'];
+			$VR_USERUTILITY->MID_END_S11 = $record['MID_END_S11'];
+			$VR_USERUTILITY->MID_END_S12 = $record['MID_END_S12'];
+			$VR_USERUTILITY->MID_END_S13 = $record['MID_END_S13'];
+			$VR_USERUTILITY->MID_END_S21 = $record['MID_END_S21'];
+			$VR_USERUTILITY->MID_END_S22 = $record['MID_END_S22'];
+			$VR_USERUTILITY->MID_END_S23 = $record['MID_END_S23'];
+			$VR_USERUTILITY->MID_END_W11 = $record['MID_END_W11'];
+			$VR_USERUTILITY->MID_END_W12 = $record['MID_END_W12'];
+			$VR_USERUTILITY->MID_END_W13 = $record['MID_END_W13'];
+			$VR_USERUTILITY->MID_END_W21 = $record['MID_END_W21'];
+			$VR_USERUTILITY->MID_END_W22 = $record['MID_END_W22'];
+			$VR_USERUTILITY->MID_END_W23 = $record['MID_END_W23'];
+			$VR_USERUTILITY->OFF_RATE = $record['OFF_RATE'];
+			$VR_USERUTILITY->OFF_START_S11 = $record['OFF_START_S11'];
+			$VR_USERUTILITY->OFF_START_S12 = $record['OFF_START_S12'];
+			$VR_USERUTILITY->OFF_START_S13 = $record['OFF_START_S13'];
+			$VR_USERUTILITY->OFF_START_S21 = $record['OFF_START_S21'];
+			$VR_USERUTILITY->OFF_START_S22 = $record['OFF_START_S22'];
+			$VR_USERUTILITY->OFF_START_S23 = $record['OFF_START_S23'];
+			$VR_USERUTILITY->OFF_START_W11 = $record['OFF_START_W11'];
+			$VR_USERUTILITY->OFF_START_W12 = $record['OFF_START_W12'];
+			$VR_USERUTILITY->OFF_START_W13 = $record['OFF_START_W13'];
+			$VR_USERUTILITY->OFF_START_W21 = $record['OFF_START_W21'];
+			$VR_USERUTILITY->OFF_START_W22 = $record['OFF_START_W22'];
+			$VR_USERUTILITY->OFF_START_W23 = $record['OFF_START_W23'];
+			$VR_USERUTILITY->OFF_END_S11 = $record['OFF_END_S11'];
+			$VR_USERUTILITY->OFF_END_S12 = $record['OFF_END_S12'];
+			$VR_USERUTILITY->OFF_END_S13 = $record['OFF_END_S13'];
+			$VR_USERUTILITY->OFF_END_S21 = $record['OFF_END_S21'];
+			$VR_USERUTILITY->OFF_END_S22 = $record['OFF_END_S22'];
+			$VR_USERUTILITY->OFF_END_S23 = $record['OFF_END_S23'];
+			$VR_USERUTILITY->OFF_END_W11 = $record['OFF_END_W11'];
+			$VR_USERUTILITY->OFF_END_W12 = $record['OFF_END_W12'];
+			$VR_USERUTILITY->OFF_END_W13 = $record['OFF_END_W13'];
+			$VR_USERUTILITY->OFF_END_W21 = $record['OFF_END_W21'];
+			$VR_USERUTILITY->OFF_END_W22 = $record['OFF_END_W22'];
+			$VR_USERUTILITY->OFF_END_W23 = $record['OFF_END_W23'];
+			$VR_USERUTILITY->PEAK_RATE = $record['PEAK_RATE'];
+			$VR_USERUTILITY->PEAK_START_S11 = $record['PEAK_START_S11'];
+			$VR_USERUTILITY->PEAK_START_S12 = $record['PEAK_START_S12'];
+			$VR_USERUTILITY->PEAK_START_S13 = $record['PEAK_START_S13'];
+			$VR_USERUTILITY->PEAK_START_S21 = $record['PEAK_START_S21'];
+			$VR_USERUTILITY->PEAK_START_S22 = $record['PEAK_START_S22'];
+			$VR_USERUTILITY->PEAK_START_S23 = $record['PEAK_START_S23'];
+			$VR_USERUTILITY->PEAK_START_W11 = $record['PEAK_START_W11'];
+			$VR_USERUTILITY->PEAK_START_W12 = $record['PEAK_START_W12'];
+			$VR_USERUTILITY->PEAK_START_W13 = $record['PEAK_START_W13'];
+			$VR_USERUTILITY->PEAK_START_W21 = $record['PEAK_START_W21'];
+			$VR_USERUTILITY->PEAK_START_W22 = $record['PEAK_START_W22'];
+			$VR_USERUTILITY->PEAK_START_W23 = $record['PEAK_START_W23'];
+			$VR_USERUTILITY->PEAK_END_S11 = $record['PEAK_END_S11'];
+			$VR_USERUTILITY->PEAK_END_S12 = $record['PEAK_END_S12'];
+			$VR_USERUTILITY->PEAK_END_S13 = $record['PEAK_END_S13'];
+			$VR_USERUTILITY->PEAK_END_S21 = $record['PEAK_END_S21'];
+			$VR_USERUTILITY->PEAK_END_S22 = $record['PEAK_END_S22'];
+			$VR_USERUTILITY->PEAK_END_S23 = $record['PEAK_END_S23'];
+			$VR_USERUTILITY->PEAK_END_W11 = $record['PEAK_END_W11'];
+			$VR_USERUTILITY->PEAK_END_W12 = $record['PEAK_END_W12'];
+			$VR_USERUTILITY->PEAK_END_W13 = $record['PEAK_END_W13'];
+			$VR_USERUTILITY->PEAK_END_W21 = $record['PEAK_END_W21'];
+			$VR_USERUTILITY->PEAK_END_W22 = $record['PEAK_END_W22'];
+			$VR_USERUTILITY->PEAK_END_W23 = $record['PEAK_END_W23'];
+			$VR_USERUTILITY->PERMISSIONS_OWNER = $record['PERMISSIONS_OWNER'];
+			$VR_USERUTILITY->PERMISSIONS_WRITE = $record['PERMISSIONS_WRITE'];
+			$VR_USERUTILITY->PERMISSIONS_STATETOGGLE = $record['PERMISSIONS_STATETOGGLE'];
+			$VR_USERUTILITY->PERMISSIONS_READ = $record['PERMISSIONS_READ'];
+			$VR_USERUTILITY->PERMISSIONS_UTILITIES = $record['PERMISSIONS_UTILITIES'];
+			$VR_USERUTILITY->PERMISSIONS_TARGETS = $record['PERMISSIONS_TARGETS'];
+			$VR_USERUTILITY->PREMISE_PK = $record['PREMISE_PK'];
+			$VR_USERUTILITY->PREMISE_NAME = $record['PREMISE_NAME'];
+			$VR_USERUTILITY->PREMISE_DESCRIPTION = $record['PREMISE_DESCRIPTION'];
+			$VR_USERUTILITY->RSCAT_PK = $record['RSCAT_PK'];
+			$VR_USERUTILITY->RSCAT_NAME = $record['RSCAT_NAME'];
+			$VR_USERUTILITY->RSSUBCAT_PK = $record['RSSUBCAT_PK'];
+			$VR_USERUTILITY->RSSUBCAT_TYPE = $record['RSSUBCAT_TYPE'];
+			$VR_USERUTILITY->RSSUBCAT_NAME = $record['RSSUBCAT_NAME'];
+			$VR_USERUTILITY->RSTARIFF_PK = $record['RSTARIFF_PK'];
+			$VR_USERUTILITY->RSTARIFF_NAME = $record['RSTARIFF_NAME'];
+			$VR_USERUTILITY->USERS_PK = $record['USERS_PK'];
+			$VR_USERUTILITY->USERS_USERNAME = $record['USERS_USERNAME'];
+			$VR_USERUTILITY->UTILITYTYPE_PK = $record['UTILITYTYPE_PK'];
+			$VR_USERUTILITY->UTILITYTYPE_NAME = $record['UTILITYTYPE_NAME'];
+			$VR_USERUTILITY->UTILITYPRICE_PK = $record['UTILITYPRICE_PK'];
+			$VR_USERUTILITY->UTILITYPRICE_NOTAPPEARING = $record['UTILITYPRICE_NOTAPPEARING'];
+			$VR_USERUTILITY->UTILITYPRICE_NAME = $record['UTILITYPRICE_NAME'];
+			$VR_USERUTILITY->UTILITYPRICE_RATES = $record['UTILITYPRICE_RATES'];
+			$VR_USERUTILITY->UTILITYPRICE_START = $record['UTILITYPRICE_START'];
+			$VR_USERUTILITY->UTILITYPRICE_END = $record['UTILITYPRICE_END'];
+
+			return $VR_USERUTILITY;
+		}
+
+?>

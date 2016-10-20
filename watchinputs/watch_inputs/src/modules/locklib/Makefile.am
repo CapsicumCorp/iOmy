@@ -1,0 +1,13 @@
+lib_LTLIBRARIES = locklib.la
+locklib_la_SOURCES = locklib.cpp
+locklib_la_LDFLAGS = -module -version-info 0:0:0
+if LINK_LIBPTHREAD
+  USE_LIBPTHREAD=-lpthread
+endif
+if LOCKLIB_LOCKDEBUG
+  ENABLE_LOCKLIB_LOCKDEBUG=-DLOCKLIB_LOCKDEBUG
+endif
+locklib_la_LIBADD=$(USE_LIBPTHREAD) -lrt
+
+AM_CFLAGS=-I$(top_srcdir)/src $(COMMONCFLAGS) $(ENABLE_LOCKLIB_LOCKDEBUG)
+AM_CXXFLAGS=-I$(top_srcdir)/src $(COMMONCPPFLAGS) $(ENABLE_LOCKLIB_LOCKDEBUG)

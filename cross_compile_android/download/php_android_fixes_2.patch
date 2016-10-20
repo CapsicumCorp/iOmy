@@ -1,0 +1,48 @@
+diff -Naur php-5.6.24/ext/standard/dns.c php-5.6.24-2/ext/standard/dns.c
+--- php-5.6.24/ext/standard/dns.c	2016-07-21 10:23:03.000000000 +1000
++++ php-5.6.24-2/ext/standard/dns.c	2016-08-31 14:50:08.759673261 +1000
+@@ -938,7 +938,7 @@
+ 
+ 			/* Skip QD entries, they're only used by dn_expand later on */
+ 			while (qd-- > 0) {
+-				n = dn_skipname(cp, end);
++				n = __dn_skipname(cp, end);
+ 				if (n < 0) {
+ 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to parse DNS data received");
+ 					zval_dtor(return_value);
+@@ -1049,14 +1049,14 @@
+ 	cp = (u_char *)&ans + HFIXEDSZ;
+ 	end = (u_char *)&ans +i;
+ 	for (qdc = ntohs((unsigned short)hp->qdcount); qdc--; cp += i + QFIXEDSZ) {
+-		if ((i = dn_skipname(cp, end)) < 0 ) {
++		if ((i = __dn_skipname(cp, end)) < 0 ) {
+ 			php_dns_free_handle(handle);
+ 			RETURN_FALSE;
+ 		}
+ 	}
+ 	count = ntohs((unsigned short)hp->ancount);
+ 	while (--count >= 0 && cp < end) {
+-		if ((i = dn_skipname(cp, end)) < 0 ) {
++		if ((i = __dn_skipname(cp, end)) < 0 ) {
+ 			php_dns_free_handle(handle);
+ 			RETURN_FALSE;
+ 		}
+diff -Naur php-5.6.24/ext/standard/php_fopen_wrapper.c php-5.6.24-2/ext/standard/php_fopen_wrapper.c
+--- php-5.6.24/ext/standard/php_fopen_wrapper.c	2016-07-21 10:23:03.000000000 +1000
++++ php-5.6.24-2/ext/standard/php_fopen_wrapper.c	2016-08-31 14:50:48.355661903 +1000
+@@ -311,11 +311,11 @@
+ 			return NULL;
+ 		}
+ 
+-#if HAVE_UNISTD_H
+-		dtablesize = getdtablesize();
+-#else
++//#if HAVE_UNISTD_H
++//		dtablesize = getdtablesize();
++//#else
+ 		dtablesize = INT_MAX;
+-#endif
++//#endif
+ 
+ 		if (fildes_ori < 0 || fildes_ori >= dtablesize) {
+ 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC,

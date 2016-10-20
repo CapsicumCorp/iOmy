@@ -1,0 +1,12 @@
+diff -Naur php-5.6.24/ext/mysql/php_mysql.c php-5.6.24-2/ext/mysql/php_mysql.c
+--- php-5.6.24/ext/mysql/php_mysql.c	2016-07-21 10:23:03.000000000 +1000
++++ php-5.6.24-2/ext/mysql/php_mysql.c	2016-08-30 16:26:37.904390016 +1000
+@@ -25,6 +25,8 @@
+  * ? Safe mode implementation
+  */
+ 
++typedef unsigned short int ushort;
++
+ #ifdef HAVE_CONFIG_H
+ # include "config.h"
+ #endif

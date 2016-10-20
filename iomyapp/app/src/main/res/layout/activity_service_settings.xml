@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".ServiceSettings"
+    android:weightSum="1">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="WARNING: Disabling these services will require manual configuration of iOmy!"
+        android:id="@+id/textView"
+        android:textSize="@dimen/abc_text_size_medium_material"
+        android:layout_weight="0.08" />
+
+    <android.support.v7.widget.SwitchCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="WatchInputs"
+        android:id="@+id/watchInputsEnableSwitch"
+        android:textOn="On"
+        android:textOff="Off"
+        android:layout_weight="0.08"
+        android:checked="true"
+        style="@style/AppTheme" />
+
+    <android.support.v7.widget.SwitchCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Lighttpd &amp; PHP"
+        android:id="@+id/lighttpdEnableSwitch"
+        android:textOn="On"
+        android:textOff="Off"
+        android:layout_weight="0.08"
+        android:checked="true" />
+
+    <android.support.v7.widget.SwitchCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="MySQL"
+        android:id="@+id/mySQLEnableSwitch"
+        android:textOn="On"
+        android:textOff="Off"
+        android:layout_weight="0.08"
+        android:checked="true" />
+
+</LinearLayout>

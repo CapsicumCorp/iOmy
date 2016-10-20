@@ -1,0 +1,44 @@
+include ':usbSerialForAndroid'
+include ':WatchInputsAndroid'
+include ':WatchInputsApp'
+include ':ndksimclist'
+include ':ndkdebuglib'
+include ':ndkcommonserverlib'
+include ':ndkcmdserverlib'
+include ':ndkdbcounterlib'
+include ':ndkconfiglib'
+include ':ndkhttpserverlib'
+include ':ndkxbeelib'
+include ':ndkcommonlib'
+include ':ndkdblib'
+include ':ndkrapidhalib'
+include ':ndkserialportlib'
+include ':ndkzigbeelib'
+include ':ndkmysqllib'
+include ':ndkuserspaceusbserialandroidlib'
+include ':ndkwebapiclientlib'
+include ':ndklocklib'
+include ':ndkwatchinputs'
+
+final watchinputsdir="../"
+
+project(":usbSerialForAndroid").projectDir=file(watchinputsdir+"/usbSerialForAndroid")
+project(":WatchInputsAndroid").projectDir=file(watchinputsdir+"/WatchInputsAndroid")
+project(":ndksimclist").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/simclist")
+project(":ndkdebuglib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/debuglib")
+project(":ndkcommonserverlib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/commonserverlib")
+project(":ndkcmdserverlib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/cmdserverlib")
+project(":ndkdbcounterlib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/dbcounterlib")
+project(":ndkconfiglib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/configlib")
+project(":ndkhttpserverlib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/httpserverlib")
+project(":ndkxbeelib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/xbeelib")
+project(":ndkcommonlib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/commonlib")
+project(":ndkdblib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/dblib")
+project(":ndkrapidhalib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/rapidhalib")
+project(":ndkserialportlib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/serialportlib")
+project(":ndkzigbeelib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/zigbeelib")
+project(":ndkmysqllib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/mysqllib")
+project(":ndkuserspaceusbserialandroidlib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/userspaceusbserialandroidlib")
+project(":ndkwebapiclientlib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/webapiclientlib")
+project(":ndklocklib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/locklib")
+project(":ndkwatchinputs").projectDir=file(watchinputsdir+"/watch_inputs/src/main")

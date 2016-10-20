@@ -1,0 +1,79 @@
+apply plugin: 'com.android.model.native'
+
+final local_APP_ABIS=APP_ABIS
+
+model {
+    android {
+        compileSdkVersion NDKCOMPILESDKVERSION
+    }
+    android.ndk {
+        moduleName 'zigbeelib'
+        if (rootProject.ext.has('NDKTOOLCHAIN')) {
+            toolchain NDKTOOLCHAIN
+        }
+        if (rootProject.ext.has('NDKTOOLCHAINVER')) {
+            toolchainVersion NDKTOOLCHAINVER
+        }
+        CFlags.addAll(COMMON_CFLAGS)
+        cppFlags.addAll(COMMON_CPPFLAGS)
+        if (rootProject.ext.has('ZIGBEELIB_LOCKDEBUG')) {
+          logger.quiet('DEBUG: zigbeelib: Enabling Lock debugging')
+          CFlags.add('-DZIGBEELIB_LOCKDEBUG')
+          cppFlags.add('-DZIGBEELIB_LOCKDEBUG')
+        }
+        if (rootProject.ext.has('ZIGBEELIB_MOREDEBUG')) {
+          logger.quiet('DEBUG: zigbeelib: Enabling More debugging')
+          CFlags.add('-DZIGBEELIB_MOREDEBUG')
+          cppFlags.add('-DZIGBEELIB_MOREDEBUG')
+        }
+        if (rootProject.ext.has('ZIGBEELIB_SENDDEBUG')) {
+          logger.quiet('DEBUG: zigbeelib: Enabling Send debugging')
+          CFlags.add('-DZIGBEELIB_SENDDEBUG')
+          cppFlags.add('-DZIGBEELIB_SENDDEBUG')
+        }
+        if (rootProject.ext.has('ZIGBEELIB_DEBUGWITHOUTDATABASE')) {
+          logger.quiet('DEBUG: zigbeelib: Enabling debugging without database')
+          CFlags.add('-DZIGBEELIB_DEBUGWITHOUTDATABASE')
+          cppFlags.add('-DZIGBEELIB_DEBUGWITHOUTDATABASE')
+        }
+        cppFlags.add("-I" + getBoostIncDir())
+        if (rootProject.ext.has('NDKSTL')) {
+            stl NDKSTL
+        }
+    }
+    android.sources {
+        main {
+            jni {
+                exportedHeaders {
+                    srcDir "../.."
+                }
+                source {
+                    srcDir "."
+                }
+            }
+        }
+    }
+    android.productFlavors {
+        local_APP_ABIS.each { abi ->
+            create(getFlavorName(abi)) {
+                ndk.with {
+                    abiFilters.add(abi)
+                    getPrebuiltLibPaths(abi).each { path ->
+                        ldFlags.addAll("-L" + path)
+                    }
+
+                }
+            }
+        }
+        create("fat") {
+            ndk {
+                local_APP_ABIS.each { abi ->
+                    abiFilters.add(abi)
+                    getPrebuiltLibPaths(abi).each { path ->
+                        ldFlags.addAll("-L" + path)
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,952 @@
+/*
+Title: Widths CSS Rules
+Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
+    Daniel Scott-Smith (Capsicum Corporation) <daniel@capsicumcorp.com>
+    Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+Description: A set of commonly used width sizes
+Copyright: Capsicum Corporation 2015, 2016
+
+This file is part of iOmy.
+
+iOmy is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+iOmy is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+/*********************************************
+ * 		CONTENTS
+ *********************************************
+ 1.0 - Widths
+ 2.0 - Min-Widths
+ 3.0 - Widths %
+ 4.0 - Min-Widths %
+ 5.0 - Max-Widths
+ 6.0 - Max-Widths %
+  *********************************************/
+ 
+ 
+ 
+/*********************************************
+ * 1.0 - Widths
+ *********************************************/
+
+.width1px {
+	width:	1px;
+}
+
+.width2px {
+	width:	2px;
+}
+
+.width3px {
+	width:	3px;
+}
+
+.width4px {
+	width:	4px;
+}
+
+.width5px {
+	width:	5px;
+}
+
+.width6px {
+	width:	6px;
+}
+
+.width7px {
+	width:	7px;
+}
+
+.width8px {
+	width:	8px;
+}
+
+.width9px {
+	width:	9px;
+}
+
+.width10px {
+	width:	10px;
+}
+
+.width15px {
+	width:	15px;
+}
+
+.width20px {
+	width:	20px;
+}
+
+.width25px {
+	width:	25px;
+}
+
+.width30px {
+	width:	30px;
+}
+
+.width40px {
+	width:	40px;
+}
+
+.width50px {
+	width:	50px;
+}
+
+.width60px {
+	width:	60px;
+}
+
+.width70px {
+	width:	70px;
+}
+
+.width80px {
+	width:	80px;
+}
+
+.width90px {
+	width:	90px;
+}
+
+.width100px {
+	width:	100px;
+}
+
+.width110px {
+	width:	110px;
+}
+
+.width120px {
+	width:	120px;
+}
+
+.width140px {
+	width:	140px;
+}
+
+.width150px {
+	width:	150px;
+}
+
+.width160px {
+	width:	160px;
+}
+
+.width170px {
+	width:	170px;
+}
+
+.width180px {
+	width:	180px;
+}
+
+.width200px {
+	width:	200px;
+}
+
+.width220px {
+	width:	220px;
+}
+
+.width240px {
+	width:	240px;
+}
+
+.width250px {
+	width:	250px;
+}
+
+.width260px {
+	width:	260px;
+}
+
+.width280px {
+	width:	280px;
+}
+
+.width300px {
+	width:	300px;
+}
+
+.width320px {
+	width:	320px;
+}
+
+.width340px {
+	width:	340px;
+}
+
+.width350px {
+	width:	350px;
+}
+
+.width360px {
+	width:	360px;
+}
+
+.width380px {
+	width:	380px;
+}
+
+.width390px {
+	width:	390px;
+}
+
+.width400px {
+	width:	400px;
+}
+
+.width420px {
+	width:	420px;
+}
+
+.width440px {
+	width:	440px;
+}
+
+.width450px {
+	width:	450px;
+}
+
+.width460px {
+	width:	460px;
+}
+
+.width480px {
+	width:	480px;
+}
+
+.width500px {
+	width:	500px;
+}
+
+.width520px {
+	width:	520px;
+}
+
+.width540px {
+	width:	540px;
+}
+
+.width550px {
+	width:	550px;
+}
+
+.width560px {
+	width:	560px;
+}
+
+.width580px {
+	width:	580px;
+}
+
+.width600px {
+	width:	600px;
+}
+
+.width620px {
+	width:	620px;
+}
+
+.width640px {
+	width:	640px;
+}
+
+.width650px {
+	width:	650px;
+}
+
+.width660px {
+	width:	660px;
+}
+
+.width680px {
+	width:	680px;
+}
+
+.width700px {
+	width:	700px;
+}
+
+.width900px {
+	width:	900px;
+}
+
+/* AUTO WIDTH */
+.widthAuto {
+        width:  auto;
+}
+
+
+/*********************************************
+ * 2.0 - Min-Widths
+ *********************************************/
+
+.minwidth10px {
+	min-width:	10px;
+}
+
+.minwidth15px {
+	min-width:	15px;
+}
+
+.minwidth20px {
+	min-width:	20px;
+}
+
+.minwidth25px {
+	min-width:	25px;
+}
+
+.minwidth30px {
+	min-width:	30px;
+}
+
+.minwidth40px {
+	min-width:	40px;
+}
+
+.minwidth50px {
+	min-width:	50px;
+}
+
+.minwidth60px {
+	min-width:	60px;
+}
+
+.minwidth70px {
+	min-width:	70px;
+}
+
+.minwidth80px {
+	min-width:	80px;
+}
+
+.minwidth90px {
+	min-width:	90px;
+}
+
+.minwidth100px {
+	min-width:	100px;
+}
+
+.minwidth110px {
+	min-width:	110px;
+}
+
+.minwidth120px {
+	min-width:	120px;
+}
+
+.minwidth140px {
+	min-width:	140px;
+}
+
+.minwidth150px {
+	min-width:	150px;
+}
+
+.minwidth160px {
+	min-width:	160px;
+}
+
+.minwidth170px {
+	min-width:	170px;
+}
+
+.minwidth180px {
+	min-width:	180px;
+}
+
+.minwidth200px {
+	min-width:	200px;
+}
+
+.minwidth220px {
+	min-width:	220px;
+}
+
+.minwidth240px {
+	min-width:	240px;
+}
+
+.minwidth250px {
+	min-width:	250px;
+}
+
+.minwidth260px {
+	min-width:	260px;
+}
+
+.minwidth280px {
+	min-width:	280px;
+}
+
+.minwidth300px {
+	min-width:	300px;
+}
+
+.minwidth320px {
+	min-width:	320px;
+}
+
+.minwidth340px {
+	min-width:	340px;
+}
+
+.minwidth350px {
+	min-width:	350px;
+}
+
+.minwidth360px {
+	min-width:	360px;
+}
+
+.minwidth380px {
+	min-width:	380px;
+}
+
+.minwidth400px {
+	min-width:	400px;
+}
+
+.minwidth420px {
+	min-width:	420px;
+}
+
+.minwidth440px {
+	min-width:	440px;
+}
+
+.minwidth450px {
+	min-width:	450px;
+}
+
+.minwidth460px {
+	min-width:	460px;
+}
+
+.minwidth480px {
+	min-width:	480px;
+}
+
+.minwidth500px {
+	min-width:	500px;
+}
+
+.minwidth520px {
+	min-width:	520px;
+}
+
+.minwidth540px {
+	min-width:	540px;
+}
+
+.minwidth550px {
+	min-width:	550px;
+}
+
+.minwidth560px {
+	min-width:	560px;
+}
+
+.minwidth580px {
+	min-width:	580px;
+}
+
+.minwidth600px {
+	min-width:	600px;
+}
+
+.minwidth620px {
+	min-width:	620px;
+}
+
+.minwidth640px {
+	min-width:	640px;
+}
+
+.minwidth650px {
+	min-width:	650px;
+}
+
+.minwidth660px {
+	min-width:	660px;
+}
+
+.minwidth680px {
+	min-width:	680px;
+}
+
+.minwidth700px {
+	min-width:	700px;
+}
+
+/*********************************************
+ * 3.0 - Widths %
+ *********************************************/
+ 
+ .width5Percent {
+	width:	5%;
+}
+
+.width10Percent {
+	width:	10%;
+}
+
+.width15Percent {
+	width:	15%;
+}
+
+.width20Percent {
+	width:	20%;
+}
+
+.width25Percent {
+	width:	25%;
+}
+
+.width30Percent {
+	width:	30%;
+}
+
+.width35Percent {
+	width:	35%;
+}
+
+.width40Percent {
+	width:	40%;
+}
+
+.width45Percent {
+	width:	45%;
+}
+
+.width50Percent {
+	width:	50%;
+}
+
+.width55Percent {
+	width:	55%;
+}
+
+.width60Percent {
+	width:	60%;
+}
+
+.width65Percent {
+	width:	65%;
+}
+
+.width70Percent {
+	width:	70%;
+}
+
+.width75Percent {
+	width:	75%;
+}
+
+.width80Percent {
+	width:	80%;
+}
+
+.width85Percent {
+	width:	85%;
+}
+
+.width90Percent {
+	width:	90%;
+}
+
+.width92Percent {
+	width:	92%;
+}
+
+.width95Percent {
+	width:	95%;
+}
+
+.width100Percent {
+	width:	100%;
+}
+
+/*********************************************
+ * 4.0 - Min-Widths %
+ *********************************************/
+ 
+ .minwidth5Percent {
+	min-width:	5%;
+}
+
+.minwidth10Percent {
+	min-width:	10%;
+}
+
+.minwidth15Percent {
+	min-width:	15%;
+}
+
+.minwidth20Percent {
+	min-width:	20%;
+}
+
+.minwidth25Percent {
+	min-width:	25%;
+}
+
+.minwidth30Percent {
+	min-width:	30%;
+}
+
+.minwidth35Percent {
+	min-width:	35%;
+}
+
+.minwidth40Percent {
+	min-width:	40%;
+}
+
+.minwidth45Percent {
+	min-width:	45%;
+}
+
+.minwidth50Percent {
+	min-width:	50%;
+}
+
+.minwidth55Percent {
+	min-width:	55%;
+}
+
+.minwidth60Percent {
+	min-width:	60%;
+}
+
+.minwidth65Percent {
+	min-width:	65%;
+}
+
+.minwidth70Percent {
+	min-width:	70%;
+}
+
+.minwidth75Percent {
+	min-width:	75%;
+}
+
+.minwidth80Percent {
+	min-width:	80%;
+}
+
+.minwidth85Percent {
+	min-width:	85%;
+}
+
+.minwidth90Percent {
+	min-width:	90%;
+}
+
+.minwidth95Percent {
+	min-width:	95%;
+}
+
+.minwidth100Percent {
+	min-width:	100%;
+}
+
+
+/*********************************************
+ * 5.0 - Max-Widths
+ *********************************************/
+ 
+.maxwidth10px {
+	max-width:	10px;
+}
+
+.maxwidth15px {
+	max-width:	15px;
+}
+
+.maxwidth20px {
+	max-width:	20px;
+}
+
+.maxwidth25px {
+	max-width:	25px;
+}
+
+.maxwidth30px {
+	max-width:	30px;
+}
+
+.maxwidth40px {
+	max-width:	40px;
+}
+
+.maxwidth50px {
+	max-width:	50px;
+}
+
+.maxwidth60px {
+	max-width:	60px;
+}
+
+.maxwidth70px {
+	max-width:	70px;
+}
+
+.maxwidth80px {
+	max-width:	80px;
+}
+
+.maxwidth90px {
+	max-width:	90px;
+}
+
+.maxwidth100px {
+	max-width:	100px;
+}
+
+.maxwidth120px {
+	max-width:	120px;
+}
+
+.maxwidth140px {
+	max-width:	140px;
+}
+
+.maxwidth150px {
+	max-width:	150px;
+}
+
+.maxwidth160px {
+	max-width:	160px;
+}
+
+.maxwidth170px {
+	max-width:	170px;
+}
+
+.maxwidth180px {
+	max-width:	180px;
+}
+
+.maxwidth200px {
+	max-width:	200px;
+}
+
+.maxwidth220px {
+	max-width:	220px;
+}
+
+.maxwidth240px {
+	max-width:	240px;
+}
+
+.maxwidth250px {
+	max-width:	250px;
+}
+
+.maxwidth260px {
+	max-width:	260px;
+}
+
+.maxwidth280px {
+	max-width:	280px;
+}
+
+.maxwidth300px {
+	max-width:	300px;
+}
+
+.maxwidth320px {
+	max-width:	320px;
+}
+
+.maxwidth340px {
+	max-width:	340px;
+}
+
+.maxwidth350px {
+	max-width:	350px;
+}
+
+.maxwidth360px {
+	max-width:	360px;
+}
+
+.maxwidth380px {
+	max-width:	380px;
+}
+
+.maxwidth400px {
+	max-width:	400px;
+}
+
+.maxwidth420px {
+	max-width:	420px;
+}
+
+.maxwidth440px {
+	max-width:	440px;
+}
+
+.maxwidth450px {
+	max-width:	450px;
+}
+
+.maxwidth460px {
+	max-width:	460px;
+}
+
+.maxwidth480px {
+	max-width:	480px;
+}
+
+.maxwidth500px {
+	max-width:	500px;
+}
+
+.maxwidth520px {
+	max-width:	520px;
+}
+
+.maxwidth540px {
+	max-width:	540px;
+}
+
+.maxwidth550px {
+	max-width:	550px;
+}
+
+.maxwidth560px {
+	max-width:	560px;
+}
+
+.maxwidth580px {
+	max-width:	580px;
+}
+
+.maxwidth600px {
+	max-width:	600px;
+}
+
+.maxwidth620px {
+	max-width:	620px;
+}
+
+.maxwidth640px {
+	max-width:	640px;
+}
+
+.maxwidth650px {
+	max-width:	650px;
+}
+
+.maxwidth660px {
+	max-width:	660px;
+}
+
+.maxwidth680px {
+	max-width:	680px;
+}
+
+.maxwidth700px {
+	max-width:	700px;
+}
+
+/*********************************************
+ * 6.0 - Max-Widths %
+ *********************************************/
+ 
+ .maxwidth5Percent {
+	max-width:	5%;
+}
+
+.maxwidth10Percent {
+	max-width:	10%;
+}
+
+.maxwidth15Percent {
+	max-width:	15%;
+}
+
+.maxwidth20Percent {
+	max-width:	20%;
+}
+
+.maxwidth25Percent {
+	max-width:	25%;
+}
+
+.maxwidth30Percent {
+	max-width:	30%;
+}
+
+.maxwidth35Percent {
+	max-width:	35%;
+}
+
+.maxwidth40Percent {
+	max-width:	40%;
+}
+
+.maxwidth45Percent {
+	max-width:	45%;
+}
+
+.maxwidth50Percent {
+	max-width:	50%;
+}
+
+.maxwidth55Percent {
+	max-width:	55%;
+}
+
+.maxwidth60Percent {
+	max-width:	60%;
+}
+
+.maxwidth65Percent {
+	max-width:	65%;
+}
+
+.maxwidth70Percent {
+	max-width:	70%;
+}
+
+.maxwidth75Percent {
+	max-width:	75%;
+}
+
+.maxwidth80Percent {
+	max-width:	80%;
+}
+
+.maxwidth85Percent {
+	max-width:	85%;
+}
+
+.maxwidth90Percent {
+	max-width:	90%;
+}
+
+.maxwidth95Percent {
+	max-width:	95%;
+}
+
+.maxwidth100Percent {
+	max-width:	100%;
+}

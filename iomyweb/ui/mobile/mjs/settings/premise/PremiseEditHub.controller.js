@@ -1,0 +1,195 @@
+/*
+Title: Edit Hub Information Page (UI5 Controller)
+Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+Description: Draws a form that allows you to edit information about a given hub.
+Copyright: Capsicum Corporation 2016
+
+This file is part of iOmy.
+
+iOmy is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+iOmy is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
+	api : IOMy.apiphp,
+	functions : IOMy.functions,
+    
+    hubID : 0,
+/**
+* Called when a controller is instantiated and its View controls (if available) are already created.
+* Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
+* @memberOf mjs.settings.premise.PremiseEditHub
+*/
+	onInit: function() {
+		var me = this;
+		var thisView = me.getView();
+		
+		thisView.addEventDelegate({
+			// Everything is rendered in this function run before rendering.
+			onBeforeShow : function (evt) {
+				//-- Refresh the Navigational buttons --//
+				IOMy.common.NavigationRefreshButtons( me );
+				
+                var aHub = evt.data.hub;
+                var iID = aHub.HubId;
+                var sName = aHub.HubName;
+				// Start rendering the page
+				me.functions.destroyItemsByIdFromView(me, [
+	                "hubID", "hubField"
+	            ]);
+                
+                var oHubTitle = new sap.m.Text({
+                    text : " Name",
+                    textAlign : "Center"
+                });
+    		    
+				var oHubNameField = new sap.m.Input(me.createId("hubField"), {
+					value : sName
+				}).addStyleClass("width100Percent SettingsTextInput");
+				
+				// Hub ID
+				me.hubID = iID;
+				
+				var oEditButton = new sap.m.VBox({
+					items : [
+						new sap.m.Link({
+							text : "Update",
+                            press : function () {
+								this.setEnabled(false);
+								
+								var sHubText = me.byId("hubField").getValue();
+								var iHubID = me.hubID;
+								
+                                if (sHubText === "") {
+                                    jQuery.sap.log.error("Hub must have a name");
+                                    IOMy.common.showError("Hub must have a name", "Error");
+                                } else {
+                                    // Run the API to update the name of the hub
+                                    try {
+                                        IOMy.apiphp.AjaxRequest({
+                                            url : IOMy.apiphp.APILocation("hubs"),
+                                            data : {"Mode" : "EditName", "Id" : iHubID, "Name" : sHubText},
+                                            onSuccess : function () {
+                                                IOMy.common.showSuccess("Update successful.", "Success", 
+                                                function () {
+                                                    IOMy.common.NavigationTriggerBackForward(false);
+                                                }, "UpdateMessageBox");
+                                                
+                                                IOMy.common.RefreshHubList({
+                                                    onSuccess : function () {
+                                                        //-- REFRESH SENSORS --//
+                                                        IOMy.apiphp.RefreshThingList({
+                                                            onSuccess: $.proxy(function() {
+                                                                var viewPremiseList = oApp.getPage("pSettingsPremiseList");
+                                                                var controllerPremiseList = viewPremiseList.getController();
+                                                                
+                                                                //-- STEP 1 of 4 - EMPTY THE PREMISE LIST PAGE --//
+                                                                controllerPremiseList.RemoveExistingSettingsPremiseList( controllerPremiseList, viewPremiseList );
+
+                                                                //-- STEP 2 of 4 - REFRESH PREMISE LIST --//
+                                                                IOMy.common.RefreshPremiseList({
+                                                                    onSuccess : function () {
+
+                                                                        //-- STEP 3 of 4 - REFRESH GATEWAY LIST --//
+                                                                        IOMy.common.RefreshHubList({
+                                                                            onSuccess: function () {
+
+                                                                                //-- STEP 4 of 4 - REDRAW THE PAGE --//
+                                                                                controllerPremiseList.RedrawSettingsPremiseList( controllerPremiseList, viewPremiseList );
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                });
+
+                                                            }, me)
+                                                        }); //-- END SENSORS LIST --//
+                                                    }
+                                                });
+                                            },
+                                            error : function () {
+                                                IOMy.common.showError("Update failed.", "Error");
+                                            }
+                                        });
+                                    } catch (e00033) {
+                                        IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
+                                    }
+                                }
+								this.setEnabled(true);
+							}
+						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
+					]
+				}).addStyleClass("TextCenter MarTop12px");
+        		
+				var oVertBox = new sap.m.VBox({
+					items : [oHubTitle, oHubNameField, oEditButton]
+				});
+    		    
+		    	// Destroys the actual panel of the page. This is done to ensure that there
+				// are no elements left over which would increase the page size each time
+				// the page is visited.
+				if (me.byId("hubPanel") !== undefined)
+					me.byId("hubPanel").destroy();
+    		    
+    		    var oPanel = new sap.m.Panel(me.createId("hubPanel"), {
+    		    	backgroundDesign: "Transparent",
+					content: [oVertBox] //-- End of Panel Content --//
+				});
+				
+				thisView.byId("page").addContent(oPanel);
+                
+                thisView.byId("extrasMenuHolder").addItem(
+                    IOMy.widgets.getExtrasButton({
+                        id : me.createId("extrasMenu"),        // Uses the page ID
+                        icon : "sap-icon://GoogleMaterial/more_vert",
+                        items : [
+                            {
+                                // TODO: Make the delete hub function
+                                text: "Delete "+sName,
+                            }
+                        ]
+                    })
+                );
+			}
+		});
+	},
+
+/**
+* Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered
+* (NOT before the first rendering! onInit() is used for that one!).
+* @memberOf mjs.settings.premise.PremiseEditHub
+*/
+//	onBeforeRendering: function() {
+//
+//	},
+
+/**
+* Called when the View has been rendered (so its HTML is part of the document). Post-rendering manipulations of the HTML could be done here.
+* This hook is the same one that SAPUI5 controls get after being rendered.
+* @memberOf mjs.settings.premise.PremiseEditHub
+*/
+//	onAfterRendering: function() {
+//		
+//	},
+	
+	
+	
+/**
+* Called when the Controller is destroyed. Use this one to free resources and finalize activities.
+* @memberOf mjs.settings.premise.PremiseEditHub
+*/
+//	onExit: function() {
+//
+//	}
+
+});

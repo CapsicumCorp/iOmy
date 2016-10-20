@@ -1,0 +1,28 @@
+diff -Naur php-5.6.24/ext/mysqli/mysqli_warning.c php-5.6.24-2/ext/mysqli/mysqli_warning.c
+--- php-5.6.24/ext/mysqli/mysqli_warning.c	2016-07-21 10:23:03.000000000 +1000
++++ php-5.6.24-2/ext/mysqli/mysqli_warning.c	2016-08-30 16:32:03.250200440 +1000
+@@ -137,7 +137,7 @@
+ 
+ 	for (;;) {
+ 		zval **entry;
+-		int errno;
++		int lerrno;
+ 
+ 		MAKE_STD_ZVAL(row);
+ 		mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, row, MYSQLND_MYSQLI);
+@@ -152,13 +152,13 @@
+ 		/* 1. Here comes the error no */
+ 		zend_hash_get_current_data(Z_ARRVAL_P(row), (void **)&entry);
+ 		convert_to_long_ex(entry);
+-		errno = Z_LVAL_PP(entry);
++		lerrno = Z_LVAL_PP(entry);
+ 		zend_hash_move_forward(Z_ARRVAL_P(row));
+ 
+ 		/* 2. Here comes the reason */
+ 		zend_hash_get_current_data(Z_ARRVAL_P(row), (void **)&entry);
+ 
+-		w = php_new_warning(*entry, errno TSRMLS_CC);
++		w = php_new_warning(*entry, lerrno TSRMLS_CC);
+ 		/*
+ 		  Don't destroy entry, because the row destroy will decrease
+ 		  the refcounter. Decreased twice then mysqlnd_free_result()

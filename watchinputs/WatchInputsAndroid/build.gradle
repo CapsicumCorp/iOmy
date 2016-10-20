@@ -1,0 +1,28 @@
+apply plugin: 'com.android.model.library'
+
+final local_APP_ABIS=APP_ABIS
+
+model {
+    android {
+        compileSdkVersion = 24
+        buildToolsVersion = "24.0.2"
+
+        defaultConfig.with {
+            minSdkVersion.apiLevel = 10
+            targetSdkVersion.apiLevel = 22
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+//NOTE: Using MySQL JDBC Connector 5.0 series as >=5.1 contains JDBC4 classes which were compiled with Java 8 and can't be excluded
+dependencies {
+    compile project(':usbSerialForAndroid')
+
+    // https://mvnrepository.com/artifact/mysql/mysql-connector-java
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.0.8'
+
+}

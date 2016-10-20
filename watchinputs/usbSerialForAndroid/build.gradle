@@ -1,0 +1,17 @@
+apply plugin: 'com.android.model.library'
+
+final local_APP_ABIS=APP_ABIS
+
+model {
+    android {
+        compileSdkVersion = 24
+        buildToolsVersion = "24.0.2"
+
+        defaultConfig.with {
+            //NOTE: This library heavily uses features that require min api level 12
+            minSdkVersion.apiLevel = 12
+            targetSdkVersion.apiLevel = 22
+        }
+    }
+}
+

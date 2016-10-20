@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    android:key="pref_key_main_settings"
+    android:title="Main Settings"
+    android:persistent="false">
+
+    <EditTextPreference
+        android:key="pref_webserver_hostname"
+        android:title="Webserver Hostname"
+        android:summary="hostname"
+        android:enabled="false"
+        android:selectable="false"
+        android:shouldDisableView="false"
+        android:defaultValue="localhost" />
+
+    <EditTextPreference
+        android:key="pref_webserver_port"
+        android:title="Webserver Port"
+        android:summary="port"
+        android:enabled="false"
+        android:selectable="false"
+        android:shouldDisableView="false"
+        android:defaultValue="8080"
+        android:numeric="integer"
+        android:maxLength="5"/>
+
+    <EditTextPreference
+        android:key="pref_mysql_hostname"
+        android:title="MySQL Hostname"
+        android:summary="hostname"
+        android:enabled="false"
+        android:selectable="false"
+        android:shouldDisableView="false"
+        android:defaultValue="localhost" />
+
+    <EditTextPreference
+        android:key="pref_mysql_port"
+        android:title="MySQL Port"
+        android:summary="port"
+        android:enabled="false"
+        android:selectable="false"
+        android:shouldDisableView="false"
+        android:defaultValue="3306"
+        android:numeric="integer"
+        android:maxLength="5"/>
+
+    <EditTextPreference
+        android:key="pref_mysql_root_password"
+        android:title="MySQL Root Password"
+        android:summary="The MySQL Root Password"
+        android:enabled="false"
+        android:selectable="false"
+        android:shouldDisableView="false"
+        android:defaultValue="" />
+
+    <EditTextPreference
+        android:key="pref_mysql_owner_username"
+        android:title="MySQL Owner Username"
+        android:summary="The main owner username"
+        android:enabled="false"
+        android:selectable="false"
+        android:shouldDisableView="false"
+        android:defaultValue="" />
+
+    <EditTextPreference
+        android:key="pref_mysql_owner_password"
+        android:title="MySQL Owner Password"
+        android:summary="The main owner user password"
+        android:inputType="textPassword"
+        android:enabled="false"
+        android:selectable="false"
+        android:shouldDisableView="false"
+        android:defaultValue="" />
+
+    <!-- <CheckBoxPreference
+        android:key="pref_run_first_run_wizard"
+        android:title="Run First Run Wizard"
+        android:summary="Run the first run wizard on next app start"
+        android:defaultValue="true" /> -->
+
+    <PreferenceCategory
+        android:title="Services"
+        android:key="pref_key_service_settings">
+        <CheckBoxPreference
+            android:key="pref_watch_inputs_enabled"
+            android:title='Watch Inputs Enabled'
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="pref_lighttpdphp_enabled"
+            android:title='Lighttpd &amp; PHP Enabled'
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="pref_mysql_enabled"
+            android:title='MySQL Enabled'
+            android:defaultValue="true" />
+
+        <PreferenceScreen
+            android:title="Service Settings"
+            android:key="server_settings_key"
+            />
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -1,0 +1,56 @@
+apply plugin: 'com.android.model.native'
+
+final local_APP_ABIS=APP_ABIS
+
+model {
+    android {
+        compileSdkVersion NDKCOMPILESDKVERSION
+    }
+    android.ndk {
+        moduleName 'debuglib'
+        if (rootProject.ext.has('NDKTOOLCHAIN')) {
+            toolchain NDKTOOLCHAIN
+        }
+        if (rootProject.ext.has('NDKTOOLCHAINVER')) {
+            toolchainVersion NDKTOOLCHAINVER
+        }
+        CFlags.addAll(COMMON_CFLAGS)
+        cppFlags.addAll(COMMON_CPPFLAGS)
+        ldLibs.add("log")
+    }
+    android.sources {
+        main {
+            jni {
+                exportedHeaders {
+                    srcDir "../.."
+                }
+                source {
+                    srcDir "."
+                }
+            }
+        }
+    }
+    android.productFlavors {
+        local_APP_ABIS.each { abi ->
+            create(getFlavorName(abi)) {
+                ndk.with {
+                    abiFilters.add(abi)
+                    getPrebuiltLibPaths(abi).each { path ->
+                        ldFlags.addAll("-L" + path)
+                    }
+
+                }
+            }
+        }
+        create("fat") {
+            ndk {
+                local_APP_ABIS.each { abi ->
+                    abiFilters.add(abi)
+                    getPrebuiltLibPaths(abi).each { path ->
+                        ldFlags.addAll("-L" + path)
+                    }
+                }
+            }
+        }
+    }
+}

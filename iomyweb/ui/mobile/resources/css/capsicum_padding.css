@@ -1,0 +1,615 @@
+/*
+Title: Padding CSS rules
+Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
+    Daniel Scott-Smith (Capsicum Corporation) <daniel@capsicumcorp.com>
+    Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+Description: A set of commonly used padding sizes
+Copyright: Capsicum Corporation 2015, 2016
+
+This file is part of iOmy.
+
+iOmy is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+iOmy is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+/*********************************************
+ * 		CONTENTS
+ *********************************************
+ #1.0# - Special Padding
+ #2.0# - Pad All
+ #3.0# - Pad Top
+ #4.0# - Pad Bottom
+ #5.0# - Pad Left
+ #6.0# - Pad Right
+  ********************************************/
+
+  
+  
+/*********************************************
+ * #1.0# - SPECIAL PADDING
+ *********************************************/
+.PadAll7em {
+padding: 0.7em;
+}
+
+.PadAll3em {
+padding: 0.3em;
+}
+
+
+/*********************************************
+ * #2.0# - PAD ALL
+ *********************************************/
+
+.PadAll0px {
+	padding: 0px;
+}
+ 
+.PadAll1px {
+	padding: 1px;
+}
+
+.PadAll2px {
+	padding: 2px;
+}
+
+.PadAll3px {
+	padding: 3px;
+}
+
+.PadAll4px {
+	padding: 4px;
+}
+
+.PadAll5px {
+	padding: 5px;
+}
+
+.PadAll6px {
+	padding: 6px;
+}
+
+.PadAll7px {
+	padding: 7px;
+}
+
+.PadAll8px {
+	padding: 8px;
+}
+
+.PadAll9px {
+	padding: 9px;
+}
+
+.PadAll10px {
+	padding: 10px;
+}
+
+.PadAll11px {
+	padding: 11px;
+}
+
+.PadAll12px {
+	padding: 12px;
+}
+
+.PadAll13px {
+	padding: 13px;
+}
+
+.PadAll14px {
+	padding: 14px;
+}
+
+.PadAll15px {
+	padding: 15px;
+}
+
+.PadAll16px {
+	padding: 16px;
+}
+
+.PadAll17px {
+	padding: 17px;
+}
+
+.PadAll18px {
+	padding: 18px;
+}
+
+.PadAll19px {
+	padding: 19px;
+}
+
+.PadAll20px {
+	padding: 20px;
+}
+
+.PadAll25px {
+	padding: 25px;
+}
+
+.PadAll30px {
+	padding: 30px;
+}
+
+.PadAll35px {
+	padding: 35px;
+}
+
+.PadAll40px {
+	padding: 40px;
+}
+
+.PadAll45px {
+	padding: 45px;
+}
+
+.PadAll50px {
+	padding: 50px;
+}
+/*********************************************
+ * #3.0# - PAD TOP
+ *********************************************/
+
+.PadTop0px {
+	padding-top: 0px;
+}
+ 
+.PadTop1px {
+	padding-top: 1px;
+}
+
+.PadTop2px {
+	padding-top: 2px;
+}
+
+.PadTop3px {
+	padding-top: 3px;
+}
+
+.PadTop4px {
+	padding-top: 4px;
+}
+
+.PadTop5px {
+	padding-top: 5px;
+}
+
+.PadTop6px {
+	padding-top: 6px;
+}
+
+.PadTop7px {
+	padding-top: 7px;
+}
+
+.PadTop8px {
+	padding-top: 8px;
+}
+
+.PadTop9px {
+	padding-top: 9px;
+}
+
+.PadTop10px {
+	padding-top: 10px;
+}
+
+.PadTop11px {
+	padding-top: 11px;
+}
+
+.PadTop12px {
+	padding-top: 12px;
+}
+
+.PadTop13px {
+	padding-top: 13px;
+}
+
+.PadTop14px {
+	padding-top: 14px;
+}
+
+.PadTop15px {
+	padding-top: 15px;
+}
+
+.PadTop16px {
+	padding-top: 16px;
+}
+
+.PadTop17px {
+	padding-top: 17px;
+}
+
+.PadTop18px {
+	padding-top: 18px;
+}
+
+.PadTop19px {
+	padding-top: 19px;
+}
+
+.PadTop20px {
+	padding-top: 20px;
+}
+
+.PadTop25px {
+	padding-top: 25px;
+}
+
+.PadTop30px {
+	padding-top: 30px;
+}
+
+.PadTop35px {
+	padding-top: 35px;
+}
+
+.PadTop40px {
+	padding-top: 40px;
+}
+
+.PadTop45px {
+	padding-top: 45px;
+}
+
+.PadTop50px {
+	padding-top: 50px;
+}
+
+/*********************************************
+ * #4.0# - PAD BOTTOM
+ *********************************************/
+
+.PadBottom0px {
+	padding-bottom: 0px;
+}
+ 
+.PadBottom1px {
+	padding-bottom: 1px;
+}
+
+.PadBottom2px {
+	padding-bottom: 2px;
+}
+
+.PadBottom3px {
+	padding-bottom: 3px;
+}
+
+.PadBottom4px {
+	padding-bottom: 4px;
+}
+
+.PadBottom5px {
+	padding-bottom: 5px;
+}
+
+.PadBottom6px {
+	padding-bottom: 6px;
+}
+
+.PadBottom7px {
+	padding-bottom: 7px;
+}
+
+.PadBottom8px {
+	padding-bottom: 8px;
+}
+
+.PadBottom9px {
+	padding-bottom: 9px;
+}
+
+.PadBottom10px {
+	padding-bottom: 10px;
+}
+
+.PadBottom11px {
+	padding-bottom: 11px;
+}
+
+.PadBottom12px {
+	padding-bottom: 12px;
+}
+
+.PadBottom13px {
+	padding-bottom: 13px;
+}
+
+.PadBottom14px {
+	padding-bottom: 14px;
+}
+
+.PadBottom15px {
+	padding-bottom: 15px;
+}
+
+.PadBottom16px {
+	padding-bottom: 16px;
+}
+
+.PadBottom17px {
+	padding-bottom: 17px;
+}
+
+.PadBottom18px {
+	padding-bottom: 18px;
+}
+
+.PadBottom19px {
+	padding-bottom: 19px;
+}
+
+.PadBottom20px {
+	padding-bottom: 20px;
+}
+
+.PadBottom25px {
+	padding-bottom: 25px;
+}
+
+.PadBottom30px {
+	padding-bottom: 30px;
+}
+
+.PadBottom35px {
+	padding-bottom: 35px;
+}
+
+.PadBottom40px {
+	padding-bottom: 40px;
+}
+
+.PadBottom45px {
+	padding-bottom: 45px;
+}
+
+.PadBottom50px {
+	padding-bottom: 50px;
+}
+
+/*********************************************
+ * #5.0# - PAD LEFT
+ *********************************************/
+
+.PadLeft0px {
+	padding-left: 0px;
+}
+ 
+.PadLeft1px {
+	padding-left: 1px;
+}
+
+.PadLeft2px {
+	padding-left: 2px;
+}
+
+.PadLeft3px {
+	padding-left: 3px;
+}
+
+.PadLeft4px {
+	padding-left: 4px;
+}
+
+.PadLeft5px {
+	padding-left: 5px;
+}
+
+.PadLeft6px {
+	padding-left: 6px;
+}
+
+.PadLeft7px {
+	padding-left: 7px;
+}
+
+.PadLeft8px {
+	padding-left: 8px;
+}
+
+.PadLeft9px {
+	padding-left: 9px;
+}
+
+.PadLeft10px {
+	padding-left: 10px;
+}
+
+.PadLeft11px {
+	padding-left: 11px;
+}
+
+.PadLeft12px {
+	padding-left: 12px;
+}
+
+.PadLeft13px {
+	padding-left: 13px;
+}
+
+.PadLeft14px {
+	padding-left: 14px;
+}
+
+.PadLeft15px {
+	padding-left: 15px;
+}
+
+.PadLeft16px {
+	padding-left: 16px;
+}
+
+.PadLeft17px {
+	padding-left: 17px;
+}
+
+.PadLeft18px {
+	padding-left: 18px;
+}
+
+.PadLeft19px {
+	padding-left: 19px;
+}
+
+.PadLeft20px {
+	padding-left: 20px;
+}
+
+.PadLeft25px {
+	padding-left: 25px;
+}
+
+.PadLeft30px {
+	padding-left: 30px;
+}
+
+.PadLeft35px {
+	padding-left: 35px;
+}
+
+.PadLeft40px {
+	padding-left: 40px;
+}
+
+.PadLeft45px {
+	padding-left: 45px;
+}
+
+.PadLeft50px {
+	padding-left: 50px;
+}
+
+/*********************************************
+ * #6.0# - PAD RIGHT
+ *********************************************/
+
+.PadRight0px {
+	padding-right: 0px;
+}
+ 
+.PadRight1px {
+	padding-right: 1px;
+}
+
+.PadRight2px {
+	padding-right: 2px;
+}
+
+.PadRight3px {
+	padding-right: 3px;
+}
+
+.PadRight4px {
+	padding-right: 4px;
+}
+
+.PadRight5px {
+	padding-right: 5px;
+}
+
+.PadRight6px {
+	padding-right: 6px;
+}
+
+.PadRight7px {
+	padding-right: 7px;
+}
+
+.PadRight8px {
+	padding-right: 8px;
+}
+
+.PadRight9px {
+	padding-right: 9px;
+}
+
+.PadRight10px {
+	padding-right: 10px;
+}
+
+.PadRight11px {
+	padding-right: 11px;
+}
+
+.PadRight12px {
+	padding-right: 12px;
+}
+
+.PadRight13px {
+	padding-right: 13px;
+}
+
+.PadRight14px {
+	padding-right: 14px;
+}
+
+.PadRight15px {
+	padding-right: 15px;
+}
+
+.PadRight16px {
+	padding-right: 16px;
+}
+
+.PadRight17px {
+	padding-right: 17px;
+}
+
+.PadRight18px {
+	padding-right: 18px;
+}
+
+.PadRight19px {
+	padding-right: 19px;
+}
+
+.PadRight20px {
+	padding-right: 20px;
+}
+
+.PadRight25px {
+	padding-right: 25px;
+}
+
+.PadRight30px {
+	padding-right: 30px;
+}
+
+.PadRight35px {
+	padding-right: 35px;
+}
+
+.PadRight40px {
+	padding-right: 40px;
+}
+
+.PadRight45px {
+	padding-right: 45px;
+}
+
+.PadRight50px {
+	padding-right: 50px;
+}
+
+
+
+
+.PadChildNone > div {
+	padding: 0px;
+}
