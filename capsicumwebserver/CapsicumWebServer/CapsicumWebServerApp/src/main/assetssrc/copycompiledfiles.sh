@@ -18,8 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
-# Path of cross compile relative to capsicumwebserver htdocs
-compilepath="/usr/local/cross_compile_android"
+# Path of cross compile relative to capsicumwebserver components
+compilepath="../../../../../../../cross_compile_android"
 
 basedir=$(dirname $0)
 

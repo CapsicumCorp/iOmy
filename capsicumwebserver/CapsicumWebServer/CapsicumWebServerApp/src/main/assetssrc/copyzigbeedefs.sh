@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
-# Path of watchinputs relative to capsicumwebserver htdocs
+# Path of watchinputs relative to capsicumwebserver
 watchinputspath="../../../../../../watchinputs"
 
 basedir=$(dirname $0)

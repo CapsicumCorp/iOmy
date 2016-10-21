@@ -37,8 +37,8 @@ fi
 rm -vfr LICENSE README iomyserver.php public restricted ui 2> /dev/null
 
 # Copy new install
-rsync -av --stats --exclude restricted/libraries/config.php --exclude .git --exclude ui/mobile_rev01 --exclude ui/mobile/NEWOpenUI5 --exclude ui/mobile/_Old_OpenUI5 "${iomywebpath}/" .
+rsync -av --stats --exclude restricted/config/iomy_vanilla.php restricted/config/iomy_vanilla.php_template --exclude .git "${iomywebpath}/" .
 
 # Final tasks
-truncate -s 0 restricted/libraries/config.php
+truncate -s 0 restricted/config/iomy_vanilla.php
 

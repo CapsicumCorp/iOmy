@@ -18,9 +18,6 @@
 # You should have received a copy of the GNU General Public License
 # along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
-# Path of iomyweb relative to capsicumwebserver htdocs
-iomywebpath="../../../../../../../iomyweb"
-
 basedir=$(dirname $0)
 
 cd "${basedir}/htdocs"
@@ -34,5 +31,5 @@ if [ ! -d "${iomywebpath}" ] ; then
 fi
 
 # Cleanup old install
-rm -vfr LICENSE README iomyserver.php public restricted ui 2> /dev/null
+rm -vfr LICENSE README iomyserver.php index.php public restricted ui 2> /dev/null
 
