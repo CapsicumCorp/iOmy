@@ -91,18 +91,18 @@ public class DBSetupProgressPage extends ProgressPage {
         final String modeparamCreateTables4 = "02_CreateTables4";
         final String modeparamCreateTables5 = "02_CreateTables5";
         final String modeparamCreateTables6 = "02_CreateTables6";
-        final String modeparamCreateViewPublic1 = "DB_CreateViewsPublic1";
-        final String modeparamCreateViewPublic2 = "DB_CreateViewsPublic2";
-        final String modeparamCreateViewPublic3 = "DB_CreateViewsPublic3";
-        final String modeparamCreateViewPublic4 = "DB_CreateViewsPublic4";
-        final String modeparamCreateViewPublic5 = "DB_CreateViewsPublic5";
-        final String modeparamCreateViewPublic6 = "DB_CreateViewsPublic6";
-        final String modeparamCreateViewRestricted1 = "DB_CreateViewsRestricted1";
-        final String modeparamCreateViewRestricted2 = "DB_CreateViewsRestricted2";
-        final String modeparamCreateViewRestricted3 = "DB_CreateViewsRestricted3";
-        final String modeparamCreateViewRestricted4 = "DB_CreateViewsRestricted4";
-        final String modeparamCreateViewRestricted5 = "DB_CreateViewsRestricted5";
-        final String modeparamCreateViewRestricted6 = "DB_CreateViewsRestricted6";
+        final String modeparamCreateViewPublic1 = "02_CreateViewsPublic1";
+        final String modeparamCreateViewPublic2 = "02_CreateViewsPublic2";
+        final String modeparamCreateViewPublic3 = "02_CreateViewsPublic3";
+        final String modeparamCreateViewPublic4 = "02_CreateViewsPublic4";
+        final String modeparamCreateViewPublic5 = "02_CreateViewsPublic5";
+        final String modeparamCreateViewPublic6 = "02_CreateViewsPublic6";
+        final String modeparamCreateViewRestricted1 = "02_CreateViewsRestricted1";
+        final String modeparamCreateViewRestricted2 = "02_CreateViewsRestricted2";
+        final String modeparamCreateViewRestricted3 = "02_CreateViewsRestricted3";
+        final String modeparamCreateViewRestricted4 = "02_CreateViewsRestricted4";
+        final String modeparamCreateViewRestricted5 = "02_CreateViewsRestricted5";
+        final String modeparamCreateViewRestricted6 = "02_CreateViewsRestricted6";
         final String modeparamCreateDefaultData1 = "02_CreateDefaultData1";
         final String modeparamCreateDefaultData2 = "02_CreateDefaultData2";
         final String modeparamCreateDefaultData3 = "02_CreateDefaultData3";
@@ -110,6 +110,9 @@ public class DBSetupProgressPage extends ProgressPage {
         final String modeparamCreateForeignKeys1 = "02_CreateForeignKeys1";
         final String modeparamCreateForeignKeys2 = "02_CreateForeignKeys2";
         final String modeparamCreateForeignKeys3 = "02_CreateForeignKeys3";
+        final String modeparamCreateForeignKeys4 = "02_CreateForeignKeys4";
+        final String modeparamCreateForeignKeys5 = "02_CreateForeignKeys5";
+        final String modeparamCreateForeignKeys6 = "02_CreateForeignKeys6";
 
         final Map<String, String> baseparams = new HashMap<String, String>();
         baseparams.put("Access", "{\"URI\":\"" + installWizard.dbURI + "\",\"Port\":\"" + installWizard.dbServerPort + "\",\"Username\":\"" + installWizard.dbUsername + "\",\"Password\":\"" + installWizard.dbPassword + "\"}");
@@ -118,12 +121,87 @@ public class DBSetupProgressPage extends ProgressPage {
         baseparams2.put("DBName", installWizard.databaseSchema);
 
         //-----------------------------------------------------------------//
+        // Create the foreign keys - Part 6
+        //-----------------------------------------------------------------//
+        requests++;
+
+        final StringRequest createForeignKeys6 = new StringRequest(Request.Method.POST, sUrl,
+                createSuccessRequestListenerOnComplete("Create FKs - Part 6"),
+                createErrorRequestListener("Create FKs - Part 6")) {
+            protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>(baseparams2);
+
+                // Update the notification text
+                me.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        me.changeNotificationText("Creating Foreign Keys");
+                        me.changePercentageText();
+                    }
+                });
+
+                params.put("Mode", modeparamCreateForeignKeys6);
+                return params;
+            }
+        };
+
+        //-----------------------------------------------------------------//
+        // Create the foreign keys - Part 5
+        //-----------------------------------------------------------------//
+        requests++;
+
+        final StringRequest createForeignKeys5 = new StringRequest(Request.Method.POST, sUrl,
+                createSuccessRequestListener("Create FKs - Part 5"),
+                createErrorRequestListener("Create FKs - Part 5")) {
+            protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>(baseparams2);
+
+                // Update the notification text
+                me.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        me.changeNotificationText("Creating Foreign Keys");
+                        me.changePercentageText();
+                    }
+                });
+
+                params.put("Mode", modeparamCreateForeignKeys5);
+                return params;
+            }
+        };
+
+        //-----------------------------------------------------------------//
+        // Create the foreign keys - Part 4
+        //-----------------------------------------------------------------//
+        requests++;
+
+        final StringRequest createForeignKeys4 = new StringRequest(Request.Method.POST, sUrl,
+                createSuccessRequestListener("Create FKs - Part 4"),
+                createErrorRequestListener("Create FKs - Part 4")) {
+            protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>(baseparams2);
+
+                // Update the notification text
+                me.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        me.changeNotificationText("Creating Foreign Keys");
+                        me.changePercentageText();
+                    }
+                });
+
+                params.put("Mode", modeparamCreateForeignKeys4);
+                return params;
+            }
+        };
+
+        //-----------------------------------------------------------------//
         // Create the foreign keys - Part 3
         //-----------------------------------------------------------------//
         requests++;
 
         final StringRequest createForeignKeys3 = new StringRequest(Request.Method.POST, sUrl,
-                createSuccessRequestListenerOnComplete("Create FKs - Part 3"),
+                createSuccessRequestListener("Create FKs - Part 3"),
                 createErrorRequestListener("Create FKs - Part 3")) {
             protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>(baseparams2);
@@ -823,6 +901,9 @@ public class DBSetupProgressPage extends ProgressPage {
         createForeignKeys1.setRetryPolicy(new DefaultRetryPolicy(20 * 1000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         createForeignKeys2.setRetryPolicy(new DefaultRetryPolicy(20 * 1000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         createForeignKeys3.setRetryPolicy(new DefaultRetryPolicy(20 * 1000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        createForeignKeys4.setRetryPolicy(new DefaultRetryPolicy(20 * 1000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        createForeignKeys5.setRetryPolicy(new DefaultRetryPolicy(20 * 1000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        createForeignKeys6.setRetryPolicy(new DefaultRetryPolicy(20 * 1000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
         //Don't return a cached result for these requests
         testConnection.setShouldCache(false);
@@ -852,6 +933,9 @@ public class DBSetupProgressPage extends ProgressPage {
         createForeignKeys1.setShouldCache(false);
         createForeignKeys2.setShouldCache(false);
         createForeignKeys3.setShouldCache(false);
+        createForeignKeys4.setShouldCache(false);
+        createForeignKeys5.setShouldCache(false);
+        createForeignKeys6.setShouldCache(false);
 
         // Add the requests to the RequestQueue.
         this.fullQueue.add(testConnection);
@@ -881,6 +965,9 @@ public class DBSetupProgressPage extends ProgressPage {
         this.fullQueue.add(createForeignKeys1);
         this.fullQueue.add(createForeignKeys2);
         this.fullQueue.add(createForeignKeys3);
+        this.fullQueue.add(createForeignKeys4);
+        this.fullQueue.add(createForeignKeys5);
+        this.fullQueue.add(createForeignKeys6);
 
         //Start the requests
         this.fullQueue.start();
