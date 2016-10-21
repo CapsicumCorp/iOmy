@@ -91,10 +91,10 @@ mysqllogfile="${app}/var/log/mysql.log"
 
 # Args: webport server name
 template_to_conf_lighttpd() {
-  if [ -f "${sbin}/lighttpd/conf/lighttpd.conf" ] ; then
-    #echo "lighttpd.conf has already been generated"
-    return
-  fi
+  #if [ -f "${sbin}/lighttpd/conf/lighttpd.conf" ] ; then
+  #  #echo "lighttpd.conf has already been generated"
+  #  return
+  #fi
   if [ "$1" == "" ] ; then
     webport="8080"
   else
@@ -107,10 +107,10 @@ template_to_conf_lighttpd() {
 
 # Args: docpath webport server name
 template_to_conf_lighttpd_with_docpath() {
-  if [ -f "${sbin}/lighttpd/conf/lighttpd.conf" ] ; then
-    #echo "lighttpd.conf has already been generated"
-    return
-  fi
+  #if [ -f "${sbin}/lighttpd/conf/lighttpd.conf" ] ; then
+  #  #echo "lighttpd.conf has already been generated"
+  #  return
+  #fi
   if [ "$1" == "" ] ; then
     docpath="${app}"
   else
@@ -128,10 +128,10 @@ template_to_conf_lighttpd_with_docpath() {
 
 # Args: datapath ram timezone
 template_to_conf_php() {
-  if [ -f "${sbin}/php/conf/php.ini" ] ; then
-    #echo "php.ini has already been generated"
-    return
-  fi
+  #if [ -f "${sbin}/php/conf/php.ini" ] ; then
+  #  #echo "php.ini has already been generated"
+  #  return
+  #fi
   if [ "$1" == "" ] ; then
     phpram="128M"
   else
@@ -147,10 +147,10 @@ template_to_conf_php() {
 
 # Args: mysqlport
 template_to_conf_mysql() {
-  if [ -f "${sbin}/mysql/conf/mysql.ini" ] ; then
-    #echo "mysql.ini has already been generated"
-    return
-  fi
+  #if [ -f "${sbin}/mysql/conf/mysql.ini" ] ; then
+  #  #echo "mysql.ini has already been generated"
+  #  return
+  #fi
   if [ "$1" == "" ] ; then
     mysqlport="3306"
   else
@@ -182,8 +182,7 @@ is_running() {
   local pidfile=$2
   if [ -f ${pidfile} ] ; then
     thepid=$(cat "${pidfile}")
-    ${PS} -p ${thepid} | grep ${thepid} > /dev/null 2> /dev/null
-    if [ $? = 0 ] ; then
+		if [ -d /proc/${thepid} ] ; then
       #echo "${appname} is currently running"
       return 0
     fi
