@@ -33,12 +33,12 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
     android:weightSum="1"
     android:gravity="center_vertical">
 
-    <TextView
+    <!-- <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="iOmy is bundled with modified versions of Lighttpd, MySQL, and PHP. All have the GPL v3 or greater License."
         android:paddingBottom="25px"
-        android:layout_weight="0" />
+        android:layout_weight="0" /> -->
 
     <ScrollView
         android:layout_width="match_parent"
