@@ -396,11 +396,8 @@ public class ExtractServerServices extends Thread {
     public void setConfigsFromTemplates() {
         try {
             execWithWait(SystemDirectory + "/bin/sh " + INTERNAL_LOCATION + "/scripts/manage_services.sh " + SystemDirectory + " " + INTERNAL_LOCATION + " template_to_conf_lighttpd 8080 ioMy Web Server");
-            execWithWait(SystemDirectory + "/bin/sh " + INTERNAL_LOCATION + "/scripts/manage_services.sh " + SystemDirectory + " " + INTERNAL_LOCATION + " template_to_conf_php 8080 128M Australia/Brisbane");
+            execWithWait(SystemDirectory + "/bin/sh " + INTERNAL_LOCATION + "/scripts/manage_services.sh " + SystemDirectory + " " + INTERNAL_LOCATION + " template_to_conf_php 128M Australia/Brisbane");
             execWithWait(SystemDirectory + "/bin/sh " + INTERNAL_LOCATION + "/scripts/manage_services.sh " + SystemDirectory + " " + INTERNAL_LOCATION + " template_to_conf_mysql 3306");
-
-            //TODO: Fix the hard coded paths in the web files to be dynamic
-            execWithWait(SystemDirectory + "/bin/sh " + INTERNAL_LOCATION + "/scripts/manage_services.sh " + SystemDirectory + " " + INTERNAL_LOCATION + " template_hostname_to_webfiles");
         } catch (Exception e) {
             e.printStackTrace();
         }

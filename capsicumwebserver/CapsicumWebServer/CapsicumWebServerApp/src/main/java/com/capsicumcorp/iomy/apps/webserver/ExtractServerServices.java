@@ -450,11 +450,8 @@ public class ExtractServerServices extends Thread {
     public void setConfigsFromTemplates() {
         try {
             execWithWait(getSystemFolder() + "/bin/sh " + getInternalStorageFolder() + "/scripts/manage_services.sh " + getSystemFolder() + " " + getInternalStorageFolder() + " template_to_conf_lighttpd_with_docpath "+getExternalStorageFolder()+"/htdocs 8080 ioMy Web Server");
-            execWithWait(getSystemFolder() + "/bin/sh " + getInternalStorageFolder() + "/scripts/manage_services.sh " + getSystemFolder() + " " + getInternalStorageFolder() + " template_to_conf_php 8080 128M Australia/Brisbane");
+            execWithWait(getSystemFolder() + "/bin/sh " + getInternalStorageFolder() + "/scripts/manage_services.sh " + getSystemFolder() + " " + getInternalStorageFolder() + " template_to_conf_php 128M Australia/Brisbane");
             execWithWait(getSystemFolder() + "/bin/sh " + getInternalStorageFolder() + "/scripts/manage_services.sh " + getSystemFolder() + " " + getInternalStorageFolder() + " template_to_conf_mysql 3306");
-
-            //TODO: Fix the hard coded paths in the web files to be dynamic
-            execWithWait(getSystemFolder() + "/bin/sh " + getInternalStorageFolder() + "/scripts/manage_services.sh " + getSystemFolder() + " " + getInternalStorageFolder() + " template_hostname_to_webfiles");
         } catch (Exception e) {
             e.printStackTrace();
         }
