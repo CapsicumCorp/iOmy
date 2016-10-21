@@ -99,7 +99,8 @@ public class InstallWizard {
     public void setInitialSettings(Context context) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 
-        this.hostname=sharedPref.getString("pref_webserver_hostname", getHostName("localhost"));
+        //Using localhost is okay for the local web server
+        this.hostname=sharedPref.getString("pref_webserver_hostname", "localhost");
         this.webserverport=Integer.parseInt(sharedPref.getString("pref_webserver_port", "8080"));
         this.setupAPI="http://"+this.hostname+":"+this.webserverport+"/iomyserver.php";
         this.dbURI=sharedPref.getString("pref_mysql_hostname", "localhost");

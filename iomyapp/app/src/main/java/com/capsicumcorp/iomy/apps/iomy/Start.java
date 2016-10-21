@@ -63,18 +63,18 @@ public class Start extends AppCompatActivity {
         } else {
             //Setup initial preference values
             SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putString("pref_webserver_hostname", installWizard.getHostName("localhost"));
+            editor.putString("pref_webserver_hostname", "localhost");
             editor.putString("pref_webserver_port", "8080");
             editor.putString("pref_mysql_hostname", "localhost");
             editor.putString("pref_mysql_port", "3306");
             editor.putString("pref_mysql_root_password", "");
             editor.putString("pref_mysql_owner_username", "");
-        editor.putString("pref_mysql_owner_password", "");
-        editor.putBoolean("pref_watch_inputs_enabled", true);
-        editor.putBoolean("pref_lighttpdphp_enabled", true);
-        editor.putBoolean("pref_mysql_enabled", true);
-        editor.commit();
-    }
+            editor.putString("pref_mysql_owner_password", "");
+            editor.putBoolean("pref_watch_inputs_enabled", true);
+            editor.putBoolean("pref_lighttpdphp_enabled", true);
+            editor.putBoolean("pref_mysql_enabled", true);
+            editor.commit();
+        }
         installWizard.setInitialSettings(this);
     }
 
