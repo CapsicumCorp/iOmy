@@ -1,5 +1,152 @@
-                    GNU GENERAL PUBLIC LICENSE
-                       Version 3, 29 June 2007
+iOmy is an Automation and monitoring platform it is Free software Developed by Capsicum Corporation
+Copyright (C) 2015 Capsicum Corporation Pty Ltd
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+This program ships with other free software or parts of, some of which carries other licences besides GNU GPL 3.0.
+Some software components of this product incorporate source code covered under Lesser General Public License(LGPL), the Apache License, BSD License, OpenSSL License and SSLeay License.
+If modifying this source be sure to check the files that you are modifying and comply with any requirements of the individual licences.
+
+Programs and licences contained in iOmy platform.
+
+================================================================
+Name: OpenUI5
+Link: http://openui5.org/
+License: Apache 2.0, (https://www.apache.org/licenses/LICENSE-2.0)
+================================================================ 
+Name: Roboto Condensed (Google Font)
+Link: https://fonts.google.com/specimen/Roboto+Condensed
+License: Apache 2.0, (https://www.apache.org/licenses/LICENSE-2.0)
+================================================================
+Name: Google Material Icons
+Link: http://google.github.io/material-design-icons/#icon-font-for-the-web
+License: Apache 2.0, (https://www.apache.org/licenses/LICENSE-2.0)
+================================================================
+Name: ODataPHPProd
+Link: https://github.com/MSOpenTech/odataphpprod
+License: New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
+================================================================
+Name: DroidPHP 
+Link: https://github.com/DroidPHP/DroidPHP
+License: Apache 2.0, (https://www.apache.org/licenses/LICENSE-2.0)
+================================================================
+================================================================
+Name: simclist
+Link: https://github.com/mij/simclist
+License: BSD revised (see http://www.opensource.org/licenses/bsd-license.php)
+================================================================
+Name: usb-serial-for-android
+Link: https://github.com/mik3y/usb-serial-for-android
+License: LGPL https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html
+================================================================
+Name: zlib
+Link: https://github.com/madler/zlib
+License: zlib http://zlib.net/zlib_license.html
+================================================================
+Name: bzip2
+Link: http://www.bzip.org/
+License: BSD-style license http://www.bzip.org/index.html
+================================================================
+Name: openssl
+Link: https://github.com/openssl/openssl
+License: OpenSSL License, SSLeay https://github.com/openssl/openssl/blob/master/LICENSE
+================================================================
+Name: curl
+Link: https://curl.haxx.se
+License: Curl https://curl.haxx.se/docs/copyright.html
+================================================================
+Name: libiconv
+Link: https://www.gnu.org/software/libiconv/
+License: LGPL https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html
+================================================================
+Name: ncurses
+Link: https://www.gnu.org/software/ncurses/
+License: maybe MIT WTF http://invisible-island.net/ncurses/ncurses-license.html
+================================================================
+Name: Mhash
+Link: http://mhash.sourceforge.net/
+License: LGPL https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html
+================================================================
+Name: libmcrypt
+Link: http://mcrypt.hellug.gr/lib/
+License: LGPL https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html
+================================================================
+Name: libpcre
+Link: http://www.pcre.org/
+License: BSD http://www.pcre.org/licence.txt
+================================================================
+Name: libpng
+Link: http://www.libpng.org/pub/png/libpng.html
+License: libpng http://www.libpng.org/pub/png/src/libpng-LICENSE.txt
+================================================================
+Name: libjpeg-turbo
+Link: http://libjpeg-turbo.virtualgl.org/
+License: BSD style https://github.com/libjpeg-turbo/libjpeg-turbo/blob/master/LICENSE.md
+================================================================
+Name: readline
+Link: https://cnswww.cns.cwru.edu/php/chet/readline/rltop.html
+License: GNU GPL 3.0 http://www.gnu.org/licenses/
+================================================================
+Name: libxml2
+Link: http://www.xmlsoft.org/
+License: MIT https://opensource.org/licenses/mit-license.html
+================================================================
+Name: freetype
+Link: https://www.freetype.org/
+License: GNU GPL 2.0 > http://www.gnu.org/licenses/
+================================================================
+Name: gzip
+Link: http://www.gzip.org/
+License: zlib http://zlib.net/zlib_license.html
+================================================================
+Name: libaio
+Link: https://git.fedorahosted.org/cgit/libaio.git
+License: LGPL https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html
+================================================================
+Name: sdl
+Link: https://www.libsdl.org
+License: LGPL https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html
+================================================================
+Name: FFmpeg
+Link: https://www.ffmpeg.org/
+License: LGPL https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html + MIT/X11/BSD-style (Check source files)
+================================================================
+Name: lighttpd
+Link: https://www.lighttpd.net/
+License: New BSD http://www.lighttpd.net/assets/COPYING
+================================================================
+Name: php
+Link: https://secure.php.net/
+License: PHP-3 https://en.wikipedia.org/wiki/PHP_License
+================================================================
+Name: mysql
+Link: https://www.mysql.com/
+License: https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+================================================================
+Name: phpmyadmin
+Link: https://www.phpmyadmin.net/downloads/
+License: https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+================================================================
+Name: iOmy
+Link: http://www.iomy.org
+License: GNU GPL 3.0 > https://www.gnu.org/licenses/gpl-3.0.en.html
+================================================================
+ 		
+
+		GNU GENERAL PUBLIC LICENSE
+                      Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
  Everyone is permitted to copy and distribute verbatim copies
@@ -672,3 +819,5 @@ may consider it more useful to permit linking proprietary applications with
 the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
+
+
