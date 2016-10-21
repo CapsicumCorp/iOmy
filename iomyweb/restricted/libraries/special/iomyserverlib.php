@@ -47,7 +47,7 @@ function DB_CreateDatabase( $sDatabaseName ) {
 			//----------------------------------------//
 			//-- SQL Query - Insert Database        --//
 			//----------------------------------------//
-			$sSQL .= "CREATE DATABASE ".$sDatabaseName." CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;";
+			$sSQL .= "CREATE DATABASE ".$sDatabaseName." CHARACTER SET utf8 COLLATE utf8_unicode_ci;";
 			
 			
 			//-- Run the SQL Query and save the results --//
@@ -606,8 +606,8 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "   LINKCONN_PORT        integer comment 'Port Number', \n";
 			$sSQL .= "   LINKCONN_LAST_MODIFIED timestamp default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \n";
 			$sSQL .= "   primary key (LINKCONN_PK)\n";
-			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
-			$sSQL .= "alter table `".$sDBName."`.`LINKCONN` comment 'Connection information for how the HUB connects to the LINK.';\n";
+			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset."; \n";
+			$sSQL .= "alter table `".$sDBName."`.`LINKCONN` comment 'Connection information for how the HUB connects to the LINK.'; \n";
 			
 			$sSQL .= "create table `".$sDBName."`.`LINKPROTOCOL` \n";
 			$sSQL .= "(\n";
@@ -1506,7 +1506,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "    `TIMEZONE_CC`, \n";
 			$sSQL .= "    `TIMEZONE_LATITUDE`, \n";
 			$sSQL .= "    `TIMEZONE_LONGITUDE`, \n";
-			$sSQL .= "    `TIMEZONE_TZ`, \n";
+			$sSQL .= "    `TIMEZONE_TZ` \n";
 			$sSQL .= "FROM `".$sDBName."`.`POSTCODE` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`TIMEZONE` ON `POSTCODE_TIMEZONES_FK`=`TIMEZONE_PK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`STATEPROVINCE` ON `POSTCODE_STATEPROVINCE_FK`=`STATEPROVINCE_PK` \n";
@@ -4902,7 +4902,7 @@ function DB_InsertPremise( $sDBName, $iPremiseInfoId, $sPremiseName, $sPremiseDe
 }
 
 
-function DB_InsertPermission( $sDBName, $iUserId, $iPremiseId, $iPermOwner, $iPermWriter, $iPermStateToggle, $iPermRead, $iPermRoomAdmin ) {
+function DB_InsertPermPremise( $sDBName, $iUserId, $iPremiseId, $iPermOwner, $iPermWriter, $iPermStateToggle, $iPermRead, $iPermRoomAdmin ) {
 	//------------------------------------------------------------------------//
 	//-- DESCRIPTION:                                                       --//
 	//--    This function is used to add the default data to the database.  --//
@@ -4939,9 +4939,9 @@ function DB_InsertPermission( $sDBName, $iUserId, $iPremiseId, $iPermOwner, $iPe
 			$sSQL .= "    :UserId,          :PremiseId, ";
 			$sSQL .= "    :PermOwner,       :PermWriter, ";
 			$sSQL .= "    :PermStateToggle, :PermRead, ";
-			$sSQL .= "    :RoomAdmin ";
+			$sSQL .= "    :PermRoomAdmin ";
 			$sSQL .= ") ";
-			
+
 			
 			//-- Input binding --//
 			$aInputValsInsert = array(
@@ -4951,7 +4951,7 @@ function DB_InsertPermission( $sDBName, $iUserId, $iPremiseId, $iPermOwner, $iPe
 				array( "Name"=>"PermWriter",              "type"=>"INT",          "value"=>$iPermWriter         ),
 				array( "Name"=>"PermStateToggle",         "type"=>"INT",          "value"=>$iPermStateToggle    ),
 				array( "Name"=>"PermRead",                "type"=>"INT",          "value"=>$iPermRead           ),
-				array( "Name"=>"PermRoomAdmin",           "type"=>"INT",          "value"=>$iPermRoomAdmin      ),
+				array( "Name"=>"PermRoomAdmin",           "type"=>"INT",          "value"=>$iPermRoomAdmin      )
 			);
 			
 			//-- Run the SQL Query and save the results --//
@@ -4986,11 +4986,93 @@ function DB_InsertPermission( $sDBName, $iUserId, $iPremiseId, $iPermOwner, $iPe
 		return $aResultInsert;
 		
 	} else {
-		var_dump( $oRestrictedDB->QueryLogs );
-		return array( "Error"=>true, "ErrMesg"=>"InsertPermission: ".$sErrMesg );
+//		var_dump( $oRestrictedDB->QueryLogs );
+		return array( "Error"=>true, "ErrMesg"=>"InsertPermission1: ".$sErrMesg );
 	}
 }
 
+
+
+function DB_InsertPermServer( $sDBName, $iUserId, $iPermAddUser, $iPermAddPremiseHub, $iPermUpgrade ) {
+	//------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                       --//
+	//--    This function is used to add the default data to the database.  --//
+	//------------------------------------------------------------------------//
+	
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedDB;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught. --//
+	$aInputValsInsert   = array();      //-- ARRAY:     SQL bind input parameters. --//
+	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function. --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			//----------------------------------------//
+			//-- SQL Query - Create Default Data    --//
+			//----------------------------------------//
+			$sSQL .= "INSERT INTO `".$sDBName."`.`PERMSERVER` ";
+			$sSQL .= "( ";
+			$sSQL .= "    `PERMSERVER_USERS_FK`,             `PERMSERVER_ADDUSER`, ";
+			$sSQL .= "    `PERMSERVER_ADDPREMISEHUB`,        `PERMSERVER_UPGRADE` ";
+			$sSQL .= ") VALUES ( ";
+			$sSQL .= "    :UserId,                  :PermAddUser, ";
+			$sSQL .= "    :PermAddPremiseHub,       :PermUpgrade ";
+			$sSQL .= ") ";
+			
+			//-- Input binding --//
+			$aInputValsInsert = array(
+				array( "Name"=>"UserId",                  "type"=>"INT",          "value"=>$iUserId               ),
+				array( "Name"=>"PermAddUser",             "type"=>"INT",          "value"=>$iPermAddUser          ),
+				array( "Name"=>"PermAddPremiseHub",       "type"=>"INT",          "value"=>$iPermAddPremiseHub    ),
+				array( "Name"=>"PermUpgrade",             "type"=>"INT",          "value"=>$iPermUpgrade          )
+			);
+			
+			//-- Run the SQL Query and save the results --//
+			$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResultInsert["Error"]===true ) {
+				$bError    = true;
+				$sErrMesg .= $aResultInsert["ErrMesg"];
+			}
+		} catch( Exception $e3) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return $aResultInsert;
+		
+	} else {
+//		var_dump( $oRestrictedDB->QueryLogs );
+		return array( "Error"=>true, "ErrMesg"=>"InsertPermServer2: ".$sErrMesg );
+	}
+}
 
 
 function DB_InsertHub( $sDBName, $iPremiseId, $iHubTypeId, $sHubName, $sHubSerialCode, $sHubIPAddress ) {

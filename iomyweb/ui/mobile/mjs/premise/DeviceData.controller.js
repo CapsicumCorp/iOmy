@@ -293,7 +293,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 						//------------------------------------//
 						//-- CREATE THE TILE DATA           --//
 						//------------------------------------//
-						//-- NOTE: This is commented out temporarily until we go back to using 4 sensor values --//
+						//-- NOTE: This is commented out temporarily until we go back to using 4 IO values --//
 /*
 						aTempTileData = {
 							"Data":		{

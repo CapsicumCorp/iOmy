@@ -1,57 +1,34 @@
 <?php
 
- /**
- * The specialized expression provider for MySQL
- *
- * PHP version 5.3
- *
- * @category  Service
- * @package   Service_Private
- * @author    Yash K. Kothari <odataphpproducer_alias@microsoft.com>
- * @copyright 2011 Microsoft Corp. (http://www.microsoft.com)
- * @license   New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
- * @version   SVN: 1.0
- * @link      http://odataphpproducer.codeplex.com
- * 
- */
+
 use ODataProducer\UriProcessor\QueryProcessor\ExpressionParser\Expressions\ExpressionType;
 use ODataProducer\Providers\Metadata\Type\IType;
 use ODataProducer\Common\NotImplementedException;
 use ODataProducer\Common\ODataConstants;
 use ODataProducer\UriProcessor\QueryProcessor\ExpressionParser\IExpressionProvider;
 use ODataProducer\Providers\Metadata\ResourceType;
-/**
- * DSExpression provider for MySQL.
- *
- * @category  Service
- * @package   Service_Private
- * @author    Yash K. Kothari <odataphpproducer_alias@microsoft.com>
- * @copyright 2011 Microsoft Corp. (http://www.microsoft.com)
- * @license   New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
- * @version   Release: 1.0
- * @link      http://odataphpproducer.codeplex.com
- */
 
-class PrivateDSExpressionProvider implements IExpressionProvider {
-	const ADD					= '+';
-	const CLOSE_BRACKET			= ')';
-	const COMMA					= ',';
-	const DIVIDE				= '/';
-	const SUBTRACT				= '-';
-	const EQUAL					= '=';
-	const GREATERTHAN			= '>';
-	const GREATERTHAN_OR_EQUAL	= '>=';
-	const LESSTHAN				= '<';
-	const LESSTHAN_OR_EQUAL		= '<=';
-	const LOGICAL_AND			= '&&';
-	const LOGICAL_NOT			= '!';
-	const LOGICAL_OR			= '||';
-	const MEMBERACCESS			= '';
-	const MODULO				= '%';
-	const MULTIPLY				= '*';
-	const NEGATE				= '-';
-	const NOTEQUAL				= '!=';
-	const OPEN_BRAKET			= '(';
+
+class MainDSExpressionProvider implements IExpressionProvider {
+	const ADD                   = '+';
+	const CLOSE_BRACKET         = ')';
+	const COMMA                 = ',';
+	const DIVIDE                = '/';
+	const SUBTRACT              = '-';
+	const EQUAL                 = '=';
+	const GREATERTHAN           = '>';
+	const GREATERTHAN_OR_EQUAL  = '>=';
+	const LESSTHAN              = '<';
+	const LESSTHAN_OR_EQUAL     = '<=';
+	const LOGICAL_AND           = '&&';
+	const LOGICAL_NOT           = '!';
+	const LOGICAL_OR            = '||';
+	const MEMBERACCESS          = '';
+	const MODULO                = '%';
+	const MULTIPLY              = '*';
+	const NEGATE                = '-';
+	const NOTEQUAL              = '!=';
+	const OPEN_BRAKET           = '(';
 
    /**
     * The type of the resource pointed by the resource path segement

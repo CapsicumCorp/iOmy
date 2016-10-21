@@ -1,41 +1,19 @@
 <?php
- 
 
-	/** 
-	 * Implementation of IDataServiceQueryProvider.
-	 * 
-	 * PHP version 5.3
-	 * 
-	 * @category	Service
-	 * @package		Private;
-	 * @author		MySQLConnector <odataphpproducer_alias@microsoft.com>
-	 * @copyright	2011 Microsoft Corp. (http://www.microsoft.com)
-	 * @license		New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
-	 * @version		SVN: 1.0
-	 * @link		http://odataphpproducer.codeplex.com
-	 */
+
+
 	
 	
 	use ODataProducer\UriProcessor\ResourcePathProcessor\SegmentParser\KeyDescriptor;
 	use ODataProducer\Providers\Metadata\ResourceSet;
 	use ODataProducer\Providers\Metadata\ResourceProperty;
 	use ODataProducer\Providers\Query\IDataServiceQueryProvider2;
-	require_once "PrivateMetadata.php";
+	require_once "MainMetadata.php";
 	require_once "ODataProducer/Providers/Query/IDataServiceQueryProvider2.php";
 
 
 
-	/**
-	 * PrivateQueryProvider implemetation of IDataServiceQueryProvider2.
-	 * @category	Service
-	 * @package		Private;
-	 * @author		MySQLConnector <odataphpproducer_alias@microsoft.com>
-	 * @copyright	2011 Microsoft Corp. (http://www.microsoft.com)
-	 * @license		New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
-	 * @version		Release: 1.0
-	 * @link		http://odataphpproducer.codeplex.com
-	 */
-	class PrivateQueryProvider implements IDataServiceQueryProvider2 {
+	class MainQueryProvider implements IDataServiceQueryProvider2 {
 		/**
 		 * Handle to connection to Database
 		 */
@@ -44,7 +22,7 @@
 		private $_expressionProvider = null;
 
 		/**
-		 * Constructs a new instance of PrivateQueryProvider
+		 * Constructs a new instance of MainQueryProvider
 		 * 
 		 */
 		public function __construct() {
@@ -88,10 +66,6 @@
 			$aReturnResults = array();
 			
 			$sResourceSetName =  $resourceSet->getName();
-
-			//if( $sResourceSetName!=='VR_USERSPREMISES' && $sResourceSetName!=='VR_USERSLINK' ) {
-			//	die('(PrivateQueryProvider) Unknown resource set ' . $sResourceSetName);
-			//}
 			
 			switch($sResourceSetName) {
 				case 'VR_USERSINFO':
@@ -128,8 +102,48 @@
 					break;
 				case 'VR_USERSCOMM':
 					break;
+				case 'VP_COUNTRIES':
+					break;
+				case 'VP_CURRENCIES':
+					break;
+				case 'VP_LANGUAGES':
+					break;
+				case 'VP_POSTCODES':
+					break;
+				case 'VP_TIMEZONES':
+					break;
+				case 'VP_STATEPROVINCE':
+					break;
+				case 'VP_PREMISEBEDROOMS':
+					break;
+				case 'VP_PREMISEFLOORS':
+					break;
+				case 'VP_PREMISEOCCUPANTS':
+					break;
+				case 'VP_PREMISEROOMS':
+					break;
+				case 'VP_PREMISETYPES':
+					break;
+				case 'VP_ICONS':
+					break;
+				case 'VP_RSCAT':
+					break;
+				case 'VP_RSSUBCAT':
+					break;
+				case 'VP_RSTARIFF':
+					break;
+				case 'VP_RSTYPES':
+					break;
+				case 'VP_UOMS':
+					break;
+				case 'VP_USERSGENDER':
+					break;
+				case 'VP_ROOMTYPE':
+					break;
+				case 'VP_LINKTYPE':
+					break;
 				default:
-					die('(PrivateQueryProvider) Unknown resource set ' . $sResourceSetName);
+					die('(MainQueryProvider) Unknown resource set ' . $sResourceSetName);
 				
 			}
 
@@ -222,6 +236,66 @@
 						case 'VR_USERSCOMM':
 							$aReturnResults[] = $this->_serializeVR_USERSCOMM($aRow);
 							break;
+						case 'VP_COUNTRIES':
+							$aReturnResults[] = $this->_serializeVP_COUNTRIES($aRow);
+							break;
+						case 'VP_CURRENCIES':
+							$aReturnResults[] = $this->_serializeVP_CURRENCIES($aRow);
+							break;
+						case 'VP_LANGUAGES':
+							$aReturnResults[] = $this->_serializeVP_LANGUAGES($aRow);
+							break;
+						case 'VP_POSTCODES':
+							$aReturnResults[] = $this->_serializeVP_POSTCODES($aRow);
+							break;
+						case 'VP_TIMEZONES':
+							$aReturnResults[] = $this->_serializeVP_TIMEZONES($aRow);
+							break;
+						case 'VP_STATEPROVINCE':
+							$aReturnResults[] = $this->_serializeVP_STATEPROVINCE($aRow);
+							break;
+						case 'VP_PREMISEBEDROOMS':
+							$aReturnResults[] = $this->_serializeVP_PREMISEBEDROOMS($aRow);
+							break;
+						case 'VP_PREMISEFLOORS':
+							$aReturnResults[] = $this->_serializeVP_PREMISEFLOORS($aRow);
+							break;
+						case 'VP_PREMISEOCCUPANTS':
+							$aReturnResults[] = $this->_serializeVP_PREMISEOCCUPANTS($aRow);
+							break;
+						case 'VP_PREMISEROOMS':
+							$aReturnResults[] = $this->_serializeVP_PREMISEROOMS($aRow);
+							break;
+						case 'VP_PREMISETYPES':
+							$aReturnResults[] = $this->_serializeVP_PREMISETYPES($aRow);
+							break;
+						case 'VP_ICONS':
+							$aReturnResults[] = $this->_serializeVP_ICONS($aRow);
+							break;
+						case 'VP_RSCAT':
+							$aReturnResults[] = $this->_serializeVP_RSCAT($aRow);
+							break;
+						case 'VP_RSSUBCAT':
+							$aReturnResults[] = $this->_serializeVP_RSSUBCAT($aRow);
+							break;
+						case 'VP_RSTARIFF':
+							$aReturnResults[] = $this->_serializeVP_RSTARIFF($aRow);
+							break;
+						case 'VP_RSTYPES':
+							$aReturnResults[] = $this->_serializeVP_RSTYPES($aRow);
+							break;
+						case 'VP_UOMS':
+							$aReturnResults[] = $this->_serializeVP_UOMS($aRow);
+							break;
+						case 'VP_USERSGENDER':
+							$aReturnResults[] = $this->_serializeVP_USERSGENDER($aRow);
+							break;
+						case 'VP_ROOMTYPE':
+							$aReturnResults[] = $this->_serializeVP_ROOMTYPE($aRow);
+							break;
+						case 'VP_LINKTYPE':
+							$aReturnResults[] = $this->_serializeVP_LINKTYPE($aRow);
+							break;
 					}
 				}
 			}
@@ -232,8 +306,8 @@
 
 		/**
 		 * Gets an entity instance from an entity set identifed by a key
-		 * @param ResourceSet	$resourceSet   The entity set from which an entity needs to be fetched
-		 * @param KeyDescriptor $keyDescriptor The key to identify the entity to be fetched
+		 * @param ResourceSet      $resourceSet     The entity set from which an entity needs to be fetched
+		 * @param KeyDescriptor    $keyDescriptor   The key to identify the entity to be fetched
 		 * @return Object/NULL Returns entity instance if found else null
 		 */
 		public function getResourceFromResourceSet(ResourceSet $resourceSet, KeyDescriptor $keyDescriptor) {
@@ -275,8 +349,48 @@
 					break;
 				case 'VR_USERSCOMM':
 					break;
+				case 'VP_COUNTRIES':
+					break;
+				case 'VP_CURRENCIES':
+					break;
+				case 'VP_LANGUAGES':
+					break;
+				case 'VP_POSTCODES':
+					break;
+				case 'VP_TIMEZONES':
+					break;
+				case 'VP_STATEPROVINCE':
+					break;
+				case 'VP_PREMISEBEDROOMS':
+					break;
+				case 'VP_PREMISEFLOORS':
+					break;
+				case 'VP_PREMISEOCCUPANTS':
+					break;
+				case 'VP_PREMISEROOMS':
+					break;
+				case 'VP_PREMISETYPES':
+					break;
+				case 'VP_ICONS':
+					break;
+				case 'VP_RSCAT':
+					break;
+				case 'VP_RSSUBCAT':
+					break;
+				case 'VP_RSTARIFF':
+					break;
+				case 'VP_RSTYPES':
+					break;
+				case 'VP_UOMS':
+					break;
+				case 'VP_USERSGENDER':
+					break;
+				case 'VP_ROOMTYPE':
+					break;
+				case 'VP_LINKTYPE':
+					break;
 				default:
-					die('(PrivateQueryProvider) Unknown resource set ' . $sResourceSetName);
+					die('(MainQueryProvider) Unknown resource set ' . $sResourceSetName);
 				
 			}
 			
@@ -289,21 +403,12 @@
 			$len = strlen($condition);
 			$condition = substr($condition, 0, $len - 5); 
 			
-			
-			
 			$sSQL = "SELECT * FROM $sResourceSetName WHERE $condition";
-			
 			
 			//-- DEBUGGING --//
 			$sSQL .= ' LIMIT 10000 ';
 			
-			//if( $sResourceSetName==="VR_USERSPREMISES" ) {
-			//	echo "Test2";
-			//	var_dump($sSQL);
-			//}
-			
 			$aSQLResult = $this->_connectionHandle->InputBindQuery($sSQL, array(), 1) ;
-			
 			
 			$aReturnResults = array();
 			
@@ -377,6 +482,66 @@
 						case 'VR_USERSCOMM':
 							$aReturnResults = $this->_serializeVR_USERSCOMM($aSQLResult["Data"]);
 							break;
+						case 'VP_COUNTRIES':
+							$aReturnResults = $this->_serializeVP_COUNTRIES($aSQLResult["Data"]);
+							break;
+						case 'VP_CURRENCIES':
+							$aReturnResults = $this->_serializeVP_CURRENCIES($aSQLResult["Data"]);
+							break;
+						case 'VP_LANGUAGES':
+							$aReturnResults = $this->_serializeVP_LANGUAGES($aSQLResult["Data"]);
+							break;
+						case 'VP_POSTCODES':
+							$aReturnResults = $this->_serializeVP_POSTCODES($aSQLResult["Data"]);
+							break;
+						case 'VP_TIMEZONES':
+							$aReturnResults = $this->_serializeVP_TIMEZONES($aSQLResult["Data"]);
+							break;
+						case 'VP_STATEPROVINCE':
+							$aReturnResults = $this->_serializeVP_STATEPROVINCE($aSQLResult["Data"]);
+							break;
+						case 'VP_PREMISEBEDROOMS':
+							$aReturnResults = $this->_serializeVP_PREMISEBEDROOMS($aSQLResult["Data"]);
+							break;
+						case 'VP_PREMISEFLOORS':
+							$aReturnResults = $this->_serializeVP_PREMISEFLOORS($aSQLResult["Data"]);
+							break;
+						case 'VP_PREMISEOCCUPANTS':
+							$aReturnResults = $this->_serializeVP_PREMISEOCCUPANTS($aSQLResult["Data"]);
+							break;
+						case 'VP_PREMISEROOMS':
+							$aReturnResults = $this->_serializeVP_PREMISEROOMS($aSQLResult["Data"]);
+							break;
+						case 'VP_PREMISETYPES':
+							$aReturnResults = $this->_serializeVP_PREMISETYPES($aSQLResult["Data"]);
+							break;
+						case 'VP_ICONS':
+							$aReturnResults = $this->_serializeVP_ICONS($aSQLResult["Data"]);
+							break;
+						case 'VP_RSCAT':
+							$aReturnResults = $this->_serializeVP_RSCAT($aSQLResult["Data"]);
+							break;
+						case 'VP_RSSUBCAT':
+							$aReturnResults = $this->_serializeVP_RSSUBCAT($aSQLResult["Data"]);
+							break;
+						case 'VP_RSTARIFF':
+							$aReturnResults = $this->_serializeVP_RSTARIFF($aSQLResult["Data"]);
+							break;
+						case 'VP_RSTYPES':
+							$aReturnResults = $this->_serializeVP_RSTYPES($aSQLResult["Data"]);
+							break;
+						case 'VP_UOMS':
+							$aReturnResults = $this->_serializeVP_UOMS($aSQLResult["Data"]);
+							break;
+						case 'VP_USERSGENDER':
+							$aReturnResults = $this->_serializeVP_USERSGENDER($aSQLResult["Data"]);
+							break;
+						case 'VP_ROOMTYPE':
+							$aReturnResults = $this->_serializeVP_ROOMTYPE($aSQLResult["Data"]);
+							break;
+						case 'VP_LINKTYPE':
+							$aReturnResults = $this->_serializeVP_LINKTYPE($aSQLResult["Data"]);
+							break;
 					}
 				//}
 			}
@@ -392,9 +557,9 @@
 		/**
 		 * Gets a related entity instance from an entity set identifed by a key
 		 * 
-		 * @param ResourceSet			$sourceResourceSet		The entity set related to the entity to be fetched.
-		 * @param object				$sourceEntityInstance	The related entity instance.entity needs to be fetched.
-		 * @param ResourceProperty		$targetProperty			The metadata of the target  property.
+		 * @param ResourceSet           $sourceResourceSet		The entity set related to the entity to be fetched.
+		 * @param object                $sourceEntityInstance	The related entity instance.entity needs to be fetched.
+		 * @param ResourceProperty      $targetProperty			The metadata of the target  property.
 		 * @param KeyDescriptor			$keyDescriptor			The key to identify the entity to be fetched.
 		 * 
 		 * @return Object/NULL Returns entity instance if found else null
@@ -412,10 +577,7 @@
 			foreach ($keyDescriptor->getValidatedNamedValues() as $keyName => $valueDescription) {
 				$key = $key . $keyName . '=' . $valueDescription[0] . ' and ';
 			}
-			$key = rtrim($key, ' and ');
-			if($srcClass === 'VR_USERSPREMISES' ) {
-				
-			}
+			$key = rtrim($key,    ' and ');
 			
 			return empty($result) ? null : $result[0];	
 		}
@@ -440,10 +602,6 @@
 			$result = array();
 			$srcClass = get_class($sourceEntityInstance);
 			$navigationPropName = $targetProperty->getName();
-			if($srcClass === 'VR_USERSPREMISES') {
-				
-			}
-			
 			return $result;
 		}
 		
@@ -465,9 +623,6 @@
 			$result = null;
 			$srcClass = get_class($sourceEntityInstance);
 			$navigationPropName = $targetProperty->getName();
-			if($srcClass==='VR_USERSPREMISES') {
-
-			}
 			return $result;
 		}
 			
@@ -476,44 +631,44 @@
 		
 		private function _serializeVR_USERSINFO($record)	{
 		 	$VR_USERSINFO = new VR_USERSINFO();
-			$VR_USERSINFO->USERS_PK							= $record['USERS_PK'];
-			$VR_USERSINFO->USERS_STATE						= $record['USERS_STATE'];
-			$VR_USERSINFO->USERS_USERNAME					= $record['USERS_USERNAME'];
-			$VR_USERSINFO->USERADDRESS_PK					= $record['USERADDRESS_PK'];
-			$VR_USERSINFO->USERADDRESS_LINE3				= $record['USERADDRESS_LINE3'];
-			$VR_USERSINFO->USERADDRESS_LINE2				= $record['USERADDRESS_LINE2'];
-			$VR_USERSINFO->USERADDRESS_LINE1				= $record['USERADDRESS_LINE1'];
-			$VR_USERSINFO->USERADDRESS_POSTALLINE3			= $record['USERADDRESS_POSTALLINE3'];
-			$VR_USERSINFO->USERADDRESS_POSTALLINE2			= $record['USERADDRESS_POSTALLINE2'];
-			$VR_USERSINFO->USERADDRESS_POSTALLINE1			= $record['USERADDRESS_POSTALLINE1'];
-			$VR_USERSINFO->COUNTRIES_PK						= $record['COUNTRIES_PK'];
-			$VR_USERSINFO->COUNTRIES_NAME				= $record['COUNTRIES_NAME'];
-			$VR_USERSINFO->COUNTRIES_ABREVIATION			= $record['COUNTRIES_ABREVIATION'];
-			$VR_USERSINFO->LANGUAGE_PK						= $record['LANGUAGE_PK'];
-			$VR_USERSINFO->LANGUAGE_NAME					= $record['LANGUAGE_NAME'];
-			$VR_USERSINFO->LANGUAGE_LANGUAGE				= $record['LANGUAGE_LANGUAGE'];
-			$VR_USERSINFO->LANGUAGE_VARIANT					= $record['LANGUAGE_VARIANT'];
-			$VR_USERSINFO->LANGUAGE_ENCODING				= $record['LANGUAGE_ENCODING'];
-			$VR_USERSINFO->POSTCODE_PK						= $record['POSTCODE_PK'];
-			$VR_USERSINFO->POSTCODE_NAME					= $record['POSTCODE_NAME'];
-			$VR_USERSINFO->STATEPROVINCE_PK					= $record['STATEPROVINCE_PK'];
-			$VR_USERSINFO->STATEPROVINCE_SHORTNAME			= $record['STATEPROVINCE_SHORTNAME'];
-			$VR_USERSINFO->STATEPROVINCE_NAME			= $record['STATEPROVINCE_NAME'];
-			$VR_USERSINFO->TIMEZONE_PK						= $record['TIMEZONE_PK'];
-			$VR_USERSINFO->TIMEZONE_CC						= $record['TIMEZONE_CC'];
-			$VR_USERSINFO->TIMEZONE_LATITUDE				= $record['TIMEZONE_LATITUDE'];
-			$VR_USERSINFO->TIMEZONE_LONGITUDE				= $record['TIMEZONE_LONGITUDE'];
-			$VR_USERSINFO->TIMEZONE_TZ						= $record['TIMEZONE_TZ'];
-			$VR_USERSINFO->USERSINFO_PK						= $record['USERSINFO_PK'];
-			$VR_USERSINFO->USERSINFO_TITLE					= $record['USERSINFO_TITLE'];
-			$VR_USERSINFO->USERSINFO_GIVENNAMES				= $record['USERSINFO_GIVENNAMES'];
-			$VR_USERSINFO->USERSINFO_SURNAMES				= $record['USERSINFO_SURNAMES'];
-			$VR_USERSINFO->USERSINFO_DISPLAYNAME			= $record['USERSINFO_DISPLAYNAME'];
-			$VR_USERSINFO->USERSINFO_EMAIL					= $record['USERSINFO_EMAIL'];
-			$VR_USERSINFO->USERSINFO_PHONENUMBER			= $record['USERSINFO_PHONENUMBER'];
-			$VR_USERSINFO->USERSINFO_DOB					= $record['USERSINFO_DOB'];
-			$VR_USERSINFO->USERSGENDER_PK					= $record['USERSGENDER_PK'];
-			$VR_USERSINFO->USERSGENDER_NAME					= $record['USERSGENDER_NAME'];
+			$VR_USERSINFO->USERS_PK                         = $record['USERS_PK'];
+			$VR_USERSINFO->USERS_STATE                      = $record['USERS_STATE'];
+			$VR_USERSINFO->USERS_USERNAME                   = $record['USERS_USERNAME'];
+			$VR_USERSINFO->USERADDRESS_PK                   = $record['USERADDRESS_PK'];
+			$VR_USERSINFO->USERADDRESS_LINE3                = $record['USERADDRESS_LINE3'];
+			$VR_USERSINFO->USERADDRESS_LINE2                = $record['USERADDRESS_LINE2'];
+			$VR_USERSINFO->USERADDRESS_LINE1                = $record['USERADDRESS_LINE1'];
+			$VR_USERSINFO->USERADDRESS_POSTALLINE3          = $record['USERADDRESS_POSTALLINE3'];
+			$VR_USERSINFO->USERADDRESS_POSTALLINE2          = $record['USERADDRESS_POSTALLINE2'];
+			$VR_USERSINFO->USERADDRESS_POSTALLINE1          = $record['USERADDRESS_POSTALLINE1'];
+			$VR_USERSINFO->COUNTRIES_PK                     = $record['COUNTRIES_PK'];
+			$VR_USERSINFO->COUNTRIES_NAME                   = $record['COUNTRIES_NAME'];
+			$VR_USERSINFO->COUNTRIES_ABREVIATION            = $record['COUNTRIES_ABREVIATION'];
+			$VR_USERSINFO->LANGUAGE_PK                      = $record['LANGUAGE_PK'];
+			$VR_USERSINFO->LANGUAGE_NAME                    = $record['LANGUAGE_NAME'];
+			$VR_USERSINFO->LANGUAGE_LANGUAGE                = $record['LANGUAGE_LANGUAGE'];
+			$VR_USERSINFO->LANGUAGE_VARIANT                 = $record['LANGUAGE_VARIANT'];
+			$VR_USERSINFO->LANGUAGE_ENCODING                = $record['LANGUAGE_ENCODING'];
+			$VR_USERSINFO->POSTCODE_PK                      = $record['POSTCODE_PK'];
+			$VR_USERSINFO->POSTCODE_NAME                    = $record['POSTCODE_NAME'];
+			$VR_USERSINFO->STATEPROVINCE_PK                 = $record['STATEPROVINCE_PK'];
+			$VR_USERSINFO->STATEPROVINCE_SHORTNAME          = $record['STATEPROVINCE_SHORTNAME'];
+			$VR_USERSINFO->STATEPROVINCE_NAME               = $record['STATEPROVINCE_NAME'];
+			$VR_USERSINFO->TIMEZONE_PK                      = $record['TIMEZONE_PK'];
+			$VR_USERSINFO->TIMEZONE_CC                      = $record['TIMEZONE_CC'];
+			$VR_USERSINFO->TIMEZONE_LATITUDE                = $record['TIMEZONE_LATITUDE'];
+			$VR_USERSINFO->TIMEZONE_LONGITUDE               = $record['TIMEZONE_LONGITUDE'];
+			$VR_USERSINFO->TIMEZONE_TZ                      = $record['TIMEZONE_TZ'];
+			$VR_USERSINFO->USERSINFO_PK                     = $record['USERSINFO_PK'];
+			$VR_USERSINFO->USERSINFO_TITLE                  = $record['USERSINFO_TITLE'];
+			$VR_USERSINFO->USERSINFO_GIVENNAMES             = $record['USERSINFO_GIVENNAMES'];
+			$VR_USERSINFO->USERSINFO_SURNAMES               = $record['USERSINFO_SURNAMES'];
+			$VR_USERSINFO->USERSINFO_DISPLAYNAME            = $record['USERSINFO_DISPLAYNAME'];
+			$VR_USERSINFO->USERSINFO_EMAIL                  = $record['USERSINFO_EMAIL'];
+			$VR_USERSINFO->USERSINFO_PHONENUMBER            = $record['USERSINFO_PHONENUMBER'];
+			$VR_USERSINFO->USERSINFO_DOB                    = $record['USERSINFO_DOB'];
+			$VR_USERSINFO->USERSGENDER_PK                   = $record['USERSGENDER_PK'];
+			$VR_USERSINFO->USERSGENDER_NAME                 = $record['USERSGENDER_NAME'];
 			return $VR_USERSINFO;
 		}
 		
@@ -710,7 +865,6 @@
 			$VR_USERSTHING->PERMISSIONS_WRITE				= $record['PERMISSIONS_WRITE'];
 			$VR_USERSTHING->PERMISSIONS_STATETOGGLE		= $record['PERMISSIONS_STATETOGGLE'];
 			$VR_USERSTHING->PERMISSIONS_READ				= $record['PERMISSIONS_READ'];
-//			$VR_USERSTHING->PERMISSIONS_PK				= $record['PERMISSIONS_PK'];
 			$VR_USERSTHING->PREMISE_PK					= $record['PREMISE_PK'];
 			$VR_USERSTHING->PREMISE_NAME					= $record['PREMISE_NAME'];
 			$VR_USERSTHING->HUB_PK						= $record['HUB_PK'];
@@ -1391,6 +1545,365 @@
 			return $VR_USERSCOMM;
 		}
 		
+		
+		/**
+		 * Serialize the sql row into RSCAT object
+		 * 
+		 * @param array $record each row of RSCAT
+		 * 
+		 * @return Object
+		 */
+		private function _serializeVP_PREMISETYPES($record)
+		{
+			$VP_PREMISETYPES = new VP_PREMISETYPES();
+			$VP_PREMISETYPES->PREMISETYPE_PK					= $record['PREMISETYPE_PK'];
+			$VP_PREMISETYPES->PREMISETYPE_NAME					= $record['PREMISETYPE_NAME'];
+
+			return $VP_PREMISETYPES;
+		}
+		
+		
+		
+		/**
+		 * Serialize the sql row into RSCAT object
+		 * @param array $record each row of RSCAT
+		 * @return Object
+		 */
+		private function _serializeVP_PREMISEOCCUPANTS($record)
+		{
+			$VP_PREMISEOCCUPANTS = new VP_PREMISEOCCUPANTS();
+			$VP_PREMISEOCCUPANTS->PREMISEOCCUPANTS_PK					= $record['PREMISEOCCUPANTS_PK'];
+			$VP_PREMISEOCCUPANTS->PREMISEOCCUPANTS_NAME					= $record['PREMISEOCCUPANTS_NAME'];
+
+			return $VP_PREMISEOCCUPANTS;
+		}
+		
+		
+		/**
+		 * Serialize the sql row into RSCAT object
+		 * @param array $record each row of RSCAT
+		 * @return Object
+		 */
+		private function _serializeVP_PREMISEBEDROOMS($record)
+		{
+			$VP_PREMISEBEDROOMS = new VP_PREMISEBEDROOMS();
+			$VP_PREMISEBEDROOMS->PREMISEBEDROOMS_PK					= $record['PREMISEBEDROOMS_PK'];
+			$VP_PREMISEBEDROOMS->PREMISEBEDROOMS_COUNT					= $record['PREMISEBEDROOMS_COUNT'];
+
+			return $VP_PREMISEBEDROOMS;
+		}
+
+
+		/**
+		 * Serialize the sql row into RSCAT object
+		 * @param array $record each row of RSCAT
+		 * @return Object
+		 */
+		private function _serializeVP_PREMISEFLOORS($record)
+		{
+			$VP_PREMISEFLOORS = new VP_PREMISEFLOORS();
+			$VP_PREMISEFLOORS->PREMISEFLOORS_PK					= $record['PREMISEFLOORS_PK'];
+			$VP_PREMISEFLOORS->PREMISEFLOORS_NAME				= $record['PREMISEFLOORS_NAME'];
+
+			return $VP_PREMISEFLOORS;
+		}
+		
+		/**
+		 * Serialize the sql row into RSCAT object
+		 * @param array $record each row of RSCAT
+		 * @return Object
+		 */
+		private function _serializeVP_PREMISEROOMS($record)
+		{
+			$VP_PREMISEROOMS = new VP_PREMISEROOMS();
+			$VP_PREMISEROOMS->PREMISEROOMS_PK					= $record['PREMISEROOMS_PK'];
+			$VP_PREMISEROOMS->PREMISEROOMS_NAME					= $record['PREMISEROOMS_NAME'];
+
+			return $VP_PREMISEROOMS;
+		}
+		
+		/**
+		 * Serialize the sql row into RSCAT object
+		 * @param array $record each row of RSCAT
+		 * @return Object
+		 */
+		private function _serializeVP_POSTCODES($record)
+		{
+			$VP_POSTCODES = new VP_POSTCODES();
+			$VP_POSTCODES->POSTCODE_PK							= $record['POSTCODE_PK'];
+			$VP_POSTCODES->POSTCODE_NAME						= $record['POSTCODE_NAME'];
+			$VP_POSTCODES->STATEPROVINCE_PK = $record['STATEPROVINCE_PK'];
+			$VP_POSTCODES->STATEPROVINCE_SHORTNAME = $record['STATEPROVINCE_SHORTNAME'];
+			$VP_POSTCODES->STATEPROVINCE_NAME = $record['STATEPROVINCE_NAME'];
+			$VP_POSTCODES->COUNTRIES_PK = $record['COUNTRIES_PK'];
+			$VP_POSTCODES->COUNTRIES_NAME = $record['COUNTRIES_NAME'];
+			$VP_POSTCODES->COUNTRIES_ABREVIATION = $record['COUNTRIES_ABREVIATION'];
+			$VP_POSTCODES->TIMEZONE_PK = $record['TIMEZONE_PK'];
+			$VP_POSTCODES->TIMEZONE_CC = $record['TIMEZONE_CC'];
+			$VP_POSTCODES->TIMEZONE_LATITUDE = $record['TIMEZONE_LATITUDE'];
+			$VP_POSTCODES->TIMEZONE_LONGITUDE = $record['TIMEZONE_LONGITUDE'];
+			$VP_POSTCODES->TIMEZONE_TZ = $record['TIMEZONE_TZ'];
+
+			return $VP_POSTCODES;
+		}
+		
+		/**
+		 * Serialize the sql row into RSCAT object
+		 * @param array $record each row of RSCAT
+		 * @return Object
+		 */
+		private function _serializeVP_TIMEZONES($record)
+		{
+			$VP_TIMEZONES = new VP_TIMEZONES();
+			$VP_TIMEZONES->TIMEZONE_PK = $record['TIMEZONE_PK'];
+			$VP_TIMEZONES->TIMEZONE_CC = $record['TIMEZONE_CC'];
+			$VP_TIMEZONES->TIMEZONE_LATITUDE = $record['TIMEZONE_LATITUDE'];
+			$VP_TIMEZONES->TIMEZONE_LONGITUDE = $record['TIMEZONE_LONGITUDE'];
+			$VP_TIMEZONES->TIMEZONE_TZ = $record['TIMEZONE_TZ'];
+
+			return $VP_TIMEZONES;
+		}
+		
+		/**
+		 * Serialize the sql row into RSCAT object
+		 * @param array $record each row of RSCAT
+		 * @return Object
+		 */
+		private function _serializeVP_STATEPROVINCE($record)
+		{
+			$VP_STATEPROVINCE = new VP_STATEPROVINCE();
+			$VP_STATEPROVINCE->STATEPROVINCE_PK = $record['STATEPROVINCE_PK'];
+			$VP_STATEPROVINCE->STATEPROVINCE_SHORTNAME = $record['STATEPROVINCE_SHORTNAME'];
+			$VP_STATEPROVINCE->STATEPROVINCE_NAME = $record['STATEPROVINCE_NAME'];
+			$VP_STATEPROVINCE->COUNTRIES_PK = $record['COUNTRIES_PK'];
+			$VP_STATEPROVINCE->COUNTRIES_NAME = $record['COUNTRIES_NAME'];
+			$VP_STATEPROVINCE->COUNTRIES_ABREVIATION = $record['COUNTRIES_ABREVIATION'];
+
+			return $VP_STATEPROVINCE;
+		}
+		
+		
+		
+		/**
+		 * 3.110 - COUNTRIES
+		 * Serialize the sql row into RSCAT object
+		 * @param array $record each row of RSCAT
+		 * @return Object
+		 */
+		private function _serializeVP_COUNTRIES($record) {
+			$VP_COUNTRIES = new VP_COUNTRIES();
+			$VP_COUNTRIES->COUNTRIES_PK						= $record['COUNTRIES_PK'];
+			$VP_COUNTRIES->COUNTRIES_NAME				= $record['COUNTRIES_NAME'];
+			$VP_COUNTRIES->COUNTRIES_ABREVIATION			= $record['COUNTRIES_ABREVIATION'];
+			return $VP_COUNTRIES;
+		}
+		
+		
+		
+		
+		/**
+		 * 3.111 - CURRENCIES
+		 * Serialize the sql row into RSCAT object
+		 * @param array $record each row of RSCAT
+		 * @return Object
+		 */
+		
+		private function _serializeVP_CURRENCIES($record) {
+			$VP_CURRENCIES = new VP_CURRENCIES();
+			$VP_CURRENCIES->CURRENCIES_PK					= $record['CURRENCIES_PK'];
+			$VP_CURRENCIES->CURRENCIES_NAME					= $record['CURRENCIES_NAME'];
+			$VP_CURRENCIES->CURRENCIES_ABREVIATION			= $record['CURRENCIES_ABREVIATION'];
+			$VP_CURRENCIES->COUNTRIES_PK					= $record['COUNTRIES_PK'];
+			$VP_CURRENCIES->COUNTRIES_NAME				= $record['COUNTRIES_NAME'];
+			$VP_CURRENCIES->COUNTRIES_ABREVIATION			= $record['COUNTRIES_ABREVIATION'];
+			return $VP_CURRENCIES;
+		}
+		
+		/**
+		/* 3.112 - LANGUAGES
+		 * Serialize the sql row into RSCAT object
+		 * @param array $record each row of RSCAT
+		 * @return Object
+		 */
+		private function _serializeVP_LANGUAGES($record)
+		{
+			$VP_LANGUAGES = new VP_LANGUAGES();
+			$VP_LANGUAGES->LANGUAGE_PK = $record['LANGUAGE_PK'];
+			$VP_LANGUAGES->LANGUAGE_NAME = $record['LANGUAGE_NAME'];
+			$VP_LANGUAGES->LANGUAGE_LANGUAGE = $record['LANGUAGE_LANGUAGE'];
+			$VP_LANGUAGES->LANGUAGE_VARIANT = $record['LANGUAGE_VARIANT'];
+			$VP_LANGUAGES->LANGUAGE_ENCODING = $record['LANGUAGE_ENCODING'];
+			$VP_LANGUAGES->COUNTRIES_PK = $record['COUNTRIES_PK'];
+			$VP_LANGUAGES->COUNTRIES_NAME = $record['COUNTRIES_NAME'];
+			$VP_LANGUAGES->COUNTRIES_ABREVIATION = $record['COUNTRIES_ABREVIATION'];
+
+			return $VP_LANGUAGES;
+		}
+		
+		/**
+		 * 3.113 -
+		 * Serialize the sql row into RSCAT object
+		 * @param array $record each row of RSCAT
+		 * @return Object
+		 */
+		private function _serializeVP_RSCAT($record)
+		{
+			$VP_RSCAT = new VP_RSCAT();
+			$VP_RSCAT->RSCAT_PK					= $record['RSCAT_PK'];
+			$VP_RSCAT->RSCAT_NAME				= $record['RSCAT_NAME'];
+			$VP_RSCAT->RSCAT_FORMUTILITY		= $record['RSCAT_FORMUTILITY'];
+
+			return $VP_RSCAT;
+		}
+		
+		/**
+		 * 3.114 - 
+		 * Serialize the sql row into RSCAT object
+		 * @param array $record each row of RSCAT
+		 * @return Object
+		 */
+		private function _serializeVP_RSSUBCAT($record)
+		{
+			$VP_RSSUBCAT = new VP_RSSUBCAT();
+			$VP_RSSUBCAT->RSSUBCAT_PK			= $record['RSSUBCAT_PK'];
+			$VP_RSSUBCAT->RSSUBCAT_RSCAT_FK		= $record['RSSUBCAT_RSCAT_FK'];
+			$VP_RSSUBCAT->RSSUBCAT_NAME			= $record['RSSUBCAT_NAME'];
+			$VP_RSSUBCAT->RSSUBCAT_TYPE			= $record['RSSUBCAT_TYPE'];
+
+			return $VP_RSSUBCAT;
+		}
+		
+		
+		
+		/* 3.115 -
+		 * Serialize the sql row into RSCAT object
+		 * @param array $record each row of RSCAT
+		 * @return Object
+		 */
+		private function _serializeVP_RSTARIFF($record)
+		{
+			$VP_RSTARIFF = new VP_RSTARIFF();
+			$VP_RSTARIFF->RSTARIFF_NAME			= $record['RSTARIFF_NAME'];
+			$VP_RSTARIFF->RSTARIFF_PK			= $record['RSTARIFF_PK'];
+			$VP_RSTARIFF->RSCAT_PK				= $record['RSCAT_PK'];
+			$VP_RSTARIFF->RSCAT_NAME			= $record['RSCAT_NAME'];
+			$VP_RSTARIFF->RSSUBCAT_NAME			= $record['RSSUBCAT_NAME'];
+			$VP_RSTARIFF->RSSUBCAT_TYPE			= $record['RSSUBCAT_TYPE'];
+			$VP_RSTARIFF->RSSUBCAT_PK			= $record['RSSUBCAT_PK'];
+
+			return $VP_RSTARIFF;
+		}
+		
+		
+		
+		/* 3.116 - 
+		 * Serialize the sql row into RSCAT object
+		 * @param array $record each row of RSCAT
+		 * @return Object
+		 */
+		private function _serializeVP_RSTYPES($record)
+		{
+			$VP_RSTYPES = new VP_RSTYPES();
+			$VP_RSTYPES->RSSUBCAT_PK = $record['RSSUBCAT_PK'];
+			$VP_RSTYPES->RSSUBCAT_NAME = $record['RSSUBCAT_NAME'];
+			$VP_RSTYPES->RSSUBCAT_TYPE = $record['RSSUBCAT_TYPE'];
+			$VP_RSTYPES->RSTARIFF_PK = $record['RSTARIFF_PK'];
+			$VP_RSTYPES->RSTARIFF_NAME = $record['RSTARIFF_NAME'];
+			$VP_RSTYPES->RSTYPE_PK = $record['RSTYPE_PK'];
+			$VP_RSTYPES->RSTYPE_NAME = $record['RSTYPE_NAME'];
+			$VP_RSTYPES->RSTYPE_MAIN = $record['RSTYPE_MAIN'];
+			$VP_RSTYPES->RSCAT_PK = $record['RSCAT_PK'];
+			$VP_RSTYPES->RSCAT_NAME = $record['RSCAT_NAME'];
+
+			return $VP_RSTYPES;
+		}
+		
+		
+		
+		/* 3.117 -
+		 * Serialize the sql row into RSCAT object
+		 * @param array $record each row of RSCAT
+		 * @return Object
+		 */
+		private function _serializeVP_UOMS($record)
+		{
+			$VP_UOMS = new VP_UOMS();
+			$VP_UOMS->UOMCAT_PK = $record['UOMCAT_PK'];
+			$VP_UOMS->UOMCAT_NAME = $record['UOMCAT_NAME'];
+			$VP_UOMS->UOMSUBCAT_PK = $record['UOMSUBCAT_PK'];
+			$VP_UOMS->UOMSUBCAT_NAME = $record['UOMSUBCAT_NAME'];
+			$VP_UOMS->UOM_PK = $record['UOM_PK'];
+			$VP_UOMS->UOM_NAME = $record['UOM_NAME'];
+
+			return $VP_UOMS;
+		}
+		
+		
+		/* 3.118 - 
+		 * Serialize the sql row into RSCAT object
+		 * @param array $record each row of RSCAT
+		 * @return Object
+		 */
+		private function _serializeVP_ICONS($record)
+		{
+			$VP_ICONS = new VP_ICONS();
+			$VP_ICONS->ICONS_PK = $record['ICONS_PK'];
+			$VP_ICONS->ICONS_NAME = $record['ICONS_NAME'];
+			$VP_ICONS->ICONS_ICON = $record['ICONS_ICON'];
+			$VP_ICONS->ICONSTYPE_NAME = $record['ICONSTYPE_NAME'];
+			$VP_ICONS->ICONSTYPE_PK = $record['ICONSTYPE_PK'];
+
+			return $VP_ICONS;
+		}
+		
+		
+		/* 3.119 - 
+		 * Serialize the sql row into USERSGENDER object
+		 * @param array $record each row of USERSGENDER 
+		 * @return Object
+		 */
+		private function _serializeVP_USERSGENDER($record)
+		{
+			$VP_USERSGENDER = new VP_USERSGENDER();
+			$VP_USERSGENDER->USERSGENDER_PK = $record['USERSGENDER_PK'];
+			$VP_USERSGENDER->USERSGENDER_NAME = $record['USERSGENDER_NAME'];
+
+			return $VP_USERSGENDER;
+		}
+		
+		
+		/* 3.120 - 
+		 * Serialize the sql row into ROOMTYPE object
+		 * @param array $record each row of ROOMTYPE 
+		 * @return Object
+		 */
+		private function _serializeVP_ROOMTYPE($record)
+		{
+			$VP_ROOMTYPE = new VP_ROOMTYPE();
+			$VP_ROOMTYPE->ROOMTYPE_PK = $record['ROOMTYPE_PK'];
+			$VP_ROOMTYPE->ROOMTYPE_NAME = $record['ROOMTYPE_NAME'];
+			$VP_ROOMTYPE->ROOMTYPE_OUTDOORS = $record['ROOMTYPE_OUTDOORS'];
+
+			return $VP_ROOMTYPE;
+		}
+		
+		
+		/* 3.121 - 
+		 * Serialize the sql row into LINKTYPE object
+		 * @param array $record each row of LINKTYPE 
+		 * @return Object
+		 */
+		private function _serializeVP_LINKTYPE($record)
+		{
+			$VP_LINKTYPE = new VP_LINKTYPE();
+			$VP_LINKTYPE->LINKTYPE_PK = $record['LINKTYPE_PK'];
+			$VP_LINKTYPE->LINKTYPE_NAME = $record['LINKTYPE_NAME'];
+			
+			return $VP_LINKTYPE;
+		}
+	
+	
+	
 		/**
 		* The destructor
 		* NOTE: Because PDO is used connection closing isn't really able be to speed up
@@ -1405,7 +1918,7 @@
 		public function getExpressionProvider()
 		{
 			if (is_null($this->_expressionProvider)) {
-				$this->_expressionProvider = new PrivateDSExpressionProvider();
+				$this->_expressionProvider = new MainDSExpressionProvider();
 			}
 	
 			return $this->_expressionProvider;

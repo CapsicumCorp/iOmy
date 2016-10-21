@@ -1,5 +1,0 @@
-<IfModule mod_rewrite.c>
-RewriteEngine on
-RewriteRule (\.svc*) /websites/ctm02/restricted/odata/index.php
-</IfModule>
-php_value include_path ".:/var/www/localhost/htdocs/websites/ctm02/restricted/odata/library" 

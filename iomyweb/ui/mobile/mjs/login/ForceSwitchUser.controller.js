@@ -102,7 +102,7 @@ sap.ui.controller("mjs.login.ForceSwitchUser", {
 			this.byId("oSwitchUserMessage").destroy();
 		
 		var oSwitchUserMessage = new sap.m.Label( this.createId("oSwitchUserMessage"), {
-			text: "Please wait while we prepare to switch users...",
+			text: "Switching users...",
 			width: "400px"
 		});
         
@@ -137,13 +137,18 @@ sap.ui.controller("mjs.login.ForceSwitchUser", {
 		//--------------------------------------------//
 		//-- Input - Username						--//
 		//--------------------------------------------//
-		if (this.byId("oLoginTxtPleaseWait") !== undefined)
-			this.byId("oLoginTxtPleaseWait").destroy();
+		if (this.byId("SplashImage") !== undefined)
+			this.byId("SplashImage").destroy();
 		
-		var oLoginTxtPleaseWait = new sap.m.Label( this.createId("oLoginTxtPleaseWait"), {
-			text: "Please wait while we log you in...",
+		//--------------------------------------------//
+		//-- Splash Logo						--//
+		//--------------------------------------------//
+		var oLoginSplashImage = new sap.m.Image( this.createId("SplashImage"), {
+			src: "resources/images/iomy_splash.png",
+            densityAware : false,
 			width: "200px"
-		});
+		}).addStyleClass("MarTop10px");
+        
 		
 /*
 		oLoginInputSubmit.attachPress(
@@ -154,7 +159,7 @@ sap.ui.controller("mjs.login.ForceSwitchUser", {
 */
 		var oLoginLoadingContainer = new sap.m.FlexBox({
 			items: [
-				oLoginTxtPleaseWait,
+				oLoginSplashImage,
 			],
 			direction: "Column"
 		});

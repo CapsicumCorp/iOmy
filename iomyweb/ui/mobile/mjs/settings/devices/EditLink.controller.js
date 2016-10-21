@@ -91,7 +91,7 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
                                                 IOMy.common.RetrieveLinkList( {
                                                     onSuccess: $.proxy(function() {
                                                         
-                                                        //-- REFRESH SENSORS --//
+                                                        //-- REFRESH THINGS --//
                                                         IOMy.apiphp.RefreshThingList( {
                                                             onSuccess: $.proxy(function() {
 
@@ -99,7 +99,7 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
                                                                 IOMy.common.CoreVariablesInitialised = true;
                                                                 
                                                             }, me)
-                                                        }); //-- END SENSORS LIST --//
+                                                        }); //-- END THINGS LIST --//
                                                     }, me)
                                                 }); //-- END LINK LIST --//
                                                 IOMy.common.showSuccess("Update successful.", "Success", 

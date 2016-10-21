@@ -112,15 +112,15 @@ if( $aRestrictedApiCore['RestrictedDB']===false ) {
 //----------------------------------------------------//
 if($bError===false) {
 	$RequiredParmaters = array(
-		array( "Name"=>'Mode',                      "DataType"=>'STR' ),	
-		array( "Name"=>'DeviceNetworkAddress',      "DataType"=>'STR' ),	
-		array( "Name"=>'DevicePort',                "DataType"=>'INT' ),	
-		array( "Name"=>'DeviceUserToken',           "DataType"=>'STR' ),	
-		array( "Name"=>'HubId',                     "DataType"=>'INT' ),	
-		array( "Name"=>'ThingId',                   "DataType"=>'INT' ),	
-		array( "Name"=>'Hue',                       "DataType"=>'INT' ),	
-		array( "Name"=>'Saturation',                "DataType"=>'INT' ),	
-		array( "Name"=>'Brightness',                "DataType"=>'INT' )	
+		array( "Name"=>'Mode',                      "DataType"=>'STR' ),
+		array( "Name"=>'DeviceNetworkAddress',      "DataType"=>'STR' ),
+		array( "Name"=>'DevicePort',                "DataType"=>'INT' ),
+		array( "Name"=>'DeviceUserToken',           "DataType"=>'STR' ),
+		array( "Name"=>'HubId',                     "DataType"=>'INT' ),
+		array( "Name"=>'ThingId',                   "DataType"=>'INT' ),
+		array( "Name"=>'Hue',                       "DataType"=>'INT' ),
+		array( "Name"=>'Saturation',                "DataType"=>'INT' ),
+		array( "Name"=>'Brightness',                "DataType"=>'INT' )
 	);
 	
 	$aHTTPData = FetchHTTPDataParameters($RequiredParmaters);
@@ -145,7 +145,7 @@ if($bError===false) {
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
 			$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-			$sErrMesg .= "eg. \n \"AddNewBridge\", \"ChangeHueSatLig\" or \"???\" \n\n";
+			$sErrMesg .= "eg. \n \"AddNewBridge\" or \"ChangeHueSatLig\" \n\n";
 		}
 		
 	} catch( Exception $e0102 ) {
@@ -154,7 +154,7 @@ if($bError===false) {
 		$sErrMesg .= "Error Code:'0102' \n";
 		$sErrMesg .= "No \"Mode\" parameter! \n";
 		$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-		$sErrMesg .= "eg. \n \"AddNewBridge\", \"ChangeHueSatLig\" or \"???\" \n\n";
+		$sErrMesg .= "eg. \n \"AddNewBridge\" or  \"ChangeHueSatLig\" \n\n";
 		//sErrMesg .= e0102.message;
 	}
 	
@@ -841,7 +841,7 @@ if( $bError===false ) {
 								//-- If the User has Write Permission --//
 								if( $bWritePerm===true ) {
 									
-									//$oPHPPhilipsHue
+									$aTempFunctionResult4 = $oPHPPhilipsHue->AutoAddNewLights( $iLinkId );
 									
 									
 								}	//-- ENDIF User has the Write Permission --//

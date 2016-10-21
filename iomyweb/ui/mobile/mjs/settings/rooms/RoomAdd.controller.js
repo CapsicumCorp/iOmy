@@ -236,7 +236,7 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                                                     //-- REFRESH ROOMS --//
                                                     IOMy.common.RetreiveRoomList( {
                                                         onSuccess: $.proxy(function() {
-                                                            //-- REFRESH SENSORS --//
+                                                            //-- REFRESH THINGS --//
                                                             IOMy.apiphp.RefreshSensorList({
                                                                 onSuccess: $.proxy(function() {
 
@@ -251,7 +251,7 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                                                                         jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
                                                                     }
                                                                 }, me)
-                                                            }); //-- END SENSORS LIST --//
+                                                            }); //-- END THINGS LIST --//
                                                         }, me)
                                                     }); //-- END ROOMS LIST --//
                                                 }, "UpdateMessageBox");

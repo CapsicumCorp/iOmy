@@ -52,165 +52,165 @@ $.extend(IOMy.apiodata,{
 			//-- Public ODatas				--//
 			//--------------------------------//
 			case "countries":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_COUNTRIES';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_COUNTRIES';
 				break;
 				
 			case "currencies":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_CURRENCIES';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_CURRENCIES';
 				break;
 				
 			case "language":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_LANGUAGES';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_LANGUAGES';
 				break;
 				
 			case "postcode":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_POSTCODES';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_POSTCODES';
 				break;
 				
 			case "stateprovince":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_STATEPROVINCE';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_STATEPROVINCE';
 				break;
 				
 			case "timezones":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_TIMEZONES';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_TIMEZONES';
 				break;
 				
 			case "icons":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_ICONS';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_ICONS';
 				break;
 			
 			case "link_types":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_LINKTYPE';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_LINKTYPE';
 				break;
 				
 			case "thing_types":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_THINGTYPE';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_THINGTYPE';
 				break;
                 
             case "premise_occupants":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_PREMISEOCCUPANTS';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_PREMISEOCCUPANTS';
 				break;
 				
             case "premise_bedrooms":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_PREMISEBEDROOMS';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_PREMISEBEDROOMS';
 				break;
 				
             case "premise_floors":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_PREMISEFLOORS';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_PREMISEFLOORS';
 				break;
 				
             case "premise_rooms":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_PREMISEROOMS';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_PREMISEROOMS';
 				break;
 				
 			case "rscategories":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_RSCAT';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_RSCAT';
 				break;
 				
 			case "rssubcategories":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_RSSUBCAT';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_RSSUBCAT';
 				break;
 				
 			case "rstariff":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_RSTARIFF';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_RSTARIFF';
 				break;
 				
 			case "rstypes":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_RSTYPES';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_RSTYPES';
 				break;
 				
 			case "uom":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_UOMS';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_UOMS';
 				break;
                 
             case "gender":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_USERSGENDER';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_USERSGENDER';
 				break;
                 
             case "room_types":
-				sReturn = sUrlRestricted+'/odata/Public.svc.php/VP_ROOMTYPE';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_ROOMTYPE';
 				break;
 			
 			//--------------------------------//
 			//-- Restricted ODatas			--//
 			//--------------------------------//
 			case "link":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_USERSLINK';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_USERSLINK';
 				break;
 				
 			case "thing":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_USERSTHING';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_USERSTHING';
 				break;
 				
 			case "premises":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_USERSPREMISES';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_USERSPREMISES';
 				break;
                 
             case "premiselocation":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_USERSPREMISELOCATIONS';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_USERSPREMISELOCATIONS';
 				break;
 				
 			case "rooms":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_USERSROOMS';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_USERSROOMS';
 				break;
 				
 			case "io":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_USERSIO';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_USERSIO';
 				break;
 				
 			case "hubs":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_USERSHUB';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_USERSHUB';
 				break;
 				
 			case "comms":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_USERSCOMM';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_USERSCOMM';
 				break;
 				
 			case "users":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_USERSINFO';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_USERSINFO';
 				break;
 				
 			//--------------------------------//
 			//-- Restricted DATA ODatas		--//
 			//--------------------------------//
 			case "datatinyint":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_DATATINYINT';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_DATATINYINT';
 				break;
 				
 			case "datatinyinteger":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_DATATINYINT';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_DATATINYINT';
 				break;
 				
 			case "dataint":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_DATAINT';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_DATAINT';
 				break;
 				
 			case "datainteger":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_DATAINT';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_DATAINT';
 				break;
 				
 			case "databigint":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_DATABIGINT';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_DATABIGINT';
 				break;
 				
 			case "datafloat":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_DATAFLOAT';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_DATAFLOAT';
 				break;
 				
 			case "datatinystring":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_DATATINYSTRING';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_DATATINYSTRING';
 				break;
 				
 			case "datashortstring":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_DATASHORTSTRING';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_DATASHORTSTRING';
 				break;
 				
 			case "datamedstring":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_DATAMEDSTRING';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_DATAMEDSTRING';
 				break;
 				
 			case "datamediumstring":
-				sReturn = sUrlRestricted+'/odata/Private.svc.php/VR_DATAMEDSTRING';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_DATAMEDSTRING';
 				break;
 			
 		}

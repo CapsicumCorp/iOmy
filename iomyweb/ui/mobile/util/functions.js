@@ -265,9 +265,8 @@ $.extend(IOMy.functions,{
         //==============================
 		} else if ( oApp.getCurrentPage().getId() === "pDeviceOverview" ) {
 			sHelpMessage = "This is the home page.\n\nHere is a list of all the devices that the current user "
-                        + "has access to, regardless of their location. Most of these can be switched on or off "
-                        + "depending on whether the current user has permission to do this. Specialised devices, "
-                        + "like security, are also listed.";
+                        + "has access to, regardless of their location. Some of these can be switched on or off "
+                        + "depending on whether the current user has permission to do this.";
                 
         //==============================
         // ADD ROOM
@@ -325,7 +324,7 @@ $.extend(IOMy.functions,{
         // EDIT THING/ITEM
         //==============================
 		} else if ( oApp.getCurrentPage().getId() === "pSettingsEditThing" ) {
-			sHelpMessage = "You can change the name of an object in this page.";
+			sHelpMessage = "You can change the name of an item in this page.";
 			
         //==============================
         // ADD LINK
@@ -381,13 +380,6 @@ $.extend(IOMy.functions,{
 			sHelpMessage = "The user can change the name of the selected hub on this page.";
             
         //==============================
-        // HEALTH DEVICE INFORMATION
-        //==============================
-		} else if ( oApp.getCurrentPage().getId() === "pHealthDeviceInfo" ) {
-			sHelpMessage = "A graph representing data gathered from the health device is shown as well as "
-                        + "the data in writing.";
-            
-        //==============================
         // IP CAMERA INFORMATION
         //==============================
 		} else if ( oApp.getCurrentPage().getId() === "pOnvif" ) {
@@ -407,25 +399,7 @@ $.extend(IOMy.functions,{
 			sHelpMessage = "Before you can use the app, you need to enter your username and password to "
 						+ "view and manage your devices.";
                 
-        //==============================
-        // ACTIVITY LOG (DEVICE)
-        //==============================
-        } else if ( oApp.getCurrentPage().getId() === "pActivityDeviceLog" ) {
-			sHelpMessage = "Every event pertaining to all devices is listed in the device log.";
-                
-        //==============================
-        // ACTIVITY LOG (USER)
-        //==============================
-		} else if ( oApp.getCurrentPage().getId() === "pActivityUserLog" ) {
-			sHelpMessage = "All user activity is logged and displayed on this page.";
-                
-        //==============================
-        // ACTIVITY LOG (PREMISE)
-        //==============================
-		} else if ( oApp.getCurrentPage().getId() === "pActivityPremiseLog" ) {
-			sHelpMessage = "Each event within any premise is recorded here in this page.";
-                
-		} else {
+        } else {
             // This else statement is only run when there is no help info for
             // the current page. For DEVELOPMENT ASSISTANCE.
             //

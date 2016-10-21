@@ -128,7 +128,7 @@ if($bError===false) {
 	//----------------------------------------------------//
 	try {
 		$sPostMode = $aHTTPData["Mode"];
-		//-- NOTE: Valid modes are going to be "EditUserInfo", "EditPassword" --//
+		//-- NOTE: Valid modes are going to be "EditUserInfo", "EditUserAddress", "EditPassword", "AddUser" --//
 		
 		//-- Verify that the mode is supported --//
 		if( $sPostMode!=="EditUserInfo" && $sPostMode!=="EditUserAddress" && $sPostMode!=="EditPassword") {

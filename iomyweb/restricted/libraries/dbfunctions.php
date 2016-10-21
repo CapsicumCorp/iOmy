@@ -5152,7 +5152,6 @@ function dbGetIODataAggregation( $sAggregationType, $sDataType, $iIOId, $iStartU
 
 	$aTemporaryView     = array();      //-- ARRAY:     This variable is used to hold the response from the function that looks up the SQL View name --//
 	$sView              = "";           //-- STRING:    Used to hold the extracted string that contains the SQL View name  --//
-	$sUTSCol            = "";           //-- STRING:    Used to hold the name of the extracted name of the UTS Column --// //-- TODO: Check if this is still needed ??? --//
 	$aInputVals         = array();      //-- ARRAY:     Used to hold an array of values to do the SQL Input Binding --//
 	$aOutputCols        = array();      //-- ARRAY:     Used to hold an array of values to do the formatting of the SQL Output data --//
 	
@@ -5168,7 +5167,6 @@ function dbGetIODataAggregation( $sAggregationType, $sDataType, $iIOId, $iStartU
 			} else {
 				//-- store the view --//
 				$sView		= $aTemporaryView["View"];
-				$sUTSCol	= $aTemporaryView["UTS"];
 				//sValCol  = aTemporaryView.Value; 
 				
 				$sSQL .= "SELECT ";
@@ -5271,7 +5269,6 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 
 	$aTemporaryView     = array();      //-- ARRAY:     This variable is used to hold the response from the function that looks up the SQL View name --//
 	$sView              = "";           //-- STRING:    Used to hold the extracted string that contains the SQL View name  --//
-	$sUTSCol            = "";           //-- STRING:    Used to hold the name of the extracted name of the UTS Column --// //-- TODO: Check if this is still needed ??? --//
 	$aInputVals         = array();      //-- ARRAY:     Used to hold an array of values to do the SQL Input Binding --//
 	$aOutputCols        = array();      //-- ARRAY:     Used to hold an array of values to do the formatting of the SQL Output data --//
 	
@@ -5287,7 +5284,6 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 			} else {
 				//-- store the view --//
 				$sView		= $aTemporaryView["View"];
-				$sUTSCol	= $aTemporaryView["UTS"];
 				//sValCol  = aTemporaryView.Value; 
 				
 				$sSQL .= "SELECT ";

@@ -88,7 +88,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
                                                 
                                                 IOMy.common.RefreshHubList({
                                                     onSuccess : function () {
-                                                        //-- REFRESH SENSORS --//
+                                                        //-- REFRESH THINGS --//
                                                         IOMy.apiphp.RefreshThingList({
                                                             onSuccess: $.proxy(function() {
                                                                 var viewPremiseList = oApp.getPage("pSettingsPremiseList");

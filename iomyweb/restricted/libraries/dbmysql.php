@@ -1340,7 +1340,7 @@ class DBMySQL {
 						//$sErrMesg .= json_encode( $this->DBConn->errorInfo() );
 						$sErrMesg .= $sSQL;
 						//var_dump( $this->QueryLogs );
-						echo "\n\n";
+						//echo "\n\n";
 					}
 				}
 			} catch(PDOException $e3) {

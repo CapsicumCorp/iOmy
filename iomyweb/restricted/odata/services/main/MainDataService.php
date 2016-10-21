@@ -1,19 +1,6 @@
 <?php
 
- /**
- * Implementation of IServiceProvider.
- *
- * PHP version 5.3
- *
- * @category  Service
- * @package   Service_Private
- * @author	Yash K. Kothari <odataphpproducer_alias@microsoft.com>
- * @copyright 2011 Microsoft Corp. (http://www.microsoft.com)
- * @license   New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
- * @version   SVN: 1.0
- * @link	  http://odataphpproducer.codeplex.com
- * 
- */
+
 use ODataProducer\Configuration\EntitySetRights;
 require_once 'ODataProducer/IDataService.php';
 require_once 'ODataProducer/IRequestHandler.php';
@@ -24,25 +11,16 @@ use ODataProducer\Configuration\DataServiceConfiguration;
 use ODataProducer\IServiceProvider;
 use ODataProducer\DataService;
 
-require_once 'PrivateMetadata.php';
-require_once 'PrivateQueryProvider.php';
-require_once 'PrivateDSExpressionProvider.php';
+require_once 'MainMetadata.php';
+require_once 'MainQueryProvider.php';
+require_once 'MainDSExpressionProvider.php';
 
-/**
- * PrivateDataService that implements IServiceProvider.
- * 
- * @category  Service
- * @package   Service_Private
- * @author	Yash K Kothari <odataphpproducer_alias@microsoft.com>
- * @copyright 2011 Microsoft Corp. (http://www.microsoft.com)
- * @license   New BSD license, (http://www.opensource.org/licenses/bsd-license.php)
- * @version   Release: 1.0
- * @link	  http://odataphpproducer.codeplex.com
- */
-class PrivateDataService extends DataService implements IServiceProvider {
-	private $_PrivateMetadata						= null;
-	private $_PrivateQueryProvider					= null;
-	private $_PrivateExpressionProvider				= null;
+
+
+class MainDataService extends DataService implements IServiceProvider {
+	private $_MainMetadata                       = null;
+	private $_MainQueryProvider                  = null;
+	private $_MainExpressionProvider             = null;
 	
 	/**
 	 * This method is called only once to initialize service-wide policies
@@ -73,23 +51,23 @@ class PrivateDataService extends DataService implements IServiceProvider {
 			|| ($serviceType === 'IDataServiceQueryProvider2') 
 			|| ($serviceType === 'IDataServiceStreamProvider')
 		) {
-			if (is_null($this->_PrivateExpressionProvider)) {
-				$this->_PrivateExpressionProvider = new PrivateDSExpressionProvider();
+			if (is_null($this->_MainExpressionProvider)) {
+				$this->_MainExpressionProvider = new MainDSExpressionProvider();
 			}
 		}
 		
 		if ($serviceType === 'IDataServiceMetadataProvider') {
-			if (is_null($this->_PrivateMetadata)) {
-				$this->_PrivateMetadata = CreatePrivateMetadata::create();
+			if (is_null($this->_MainMetadata)) {
+				$this->_MainMetadata = CreateMainMetadata::create();
 			}
-			return $this->_PrivateMetadata;
+			return $this->_MainMetadata;
 		} else if ($serviceType === 'IDataServiceQueryProvider2') {
-			if (is_null($this->_PrivateQueryProvider)) {
-				$this->_PrivateQueryProvider = new PrivateQueryProvider();
+			if (is_null($this->_MainQueryProvider)) {
+				$this->_MainQueryProvider = new MainQueryProvider();
 			}
-			return $this->_PrivateQueryProvider;
+			return $this->_MainQueryProvider;
 		} else if ($serviceType === 'IDataServiceStreamProvider') {
-			return new PrivateStreamProvider();
+			return new MainStreamProvider();
 		}
 		return null;
 	}

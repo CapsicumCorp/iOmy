@@ -31,6 +31,8 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
     
     aElementsToDestroy : [],
     aElementsForAFormToDestroy : [],
+    
+    sThingNameField : "thingNameField",
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
@@ -43,110 +45,12 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 		thisView.addEventDelegate({
 			// Everything is rendered in this function run before rendering.
 			onBeforeShow : function (evt) {
-				//-- Refresh the Navigational buttons --//
-				IOMy.common.NavigationRefreshButtons( me );
-                
-                //-- Clear old instances of the UI --//
+                // Collect values parsed from the device list.
+                me.oThing = evt.data.device;
+        
+				//-- Clear old instances of the UI --//
                 me.DestroyUI();
-				
-				// Collect values parsed from the device list.
-				me.oThing = evt.data.device;
-                // Either it will come from the Device List settings page or the Device Data page.
-                // They use different variable name.
-				var sDeviceName = me.oThing.DeviceName;
-				me.thingID = me.oThing.DeviceId;
-				
-				// Start rendering the page
-				var oPortTitle = new sap.m.Text({
-                    text : "Name",
-                    textAlign : "Center"
-                });
-    		    
-                me.aElementsToDestroy.push("thingField");
-				var oPortNameField = new sap.m.Input(me.createId("thingField"), {
-					value : sDeviceName
-				}).addStyleClass("SettingsTextInput width100Percent");
-				
-				// Button to update the item
-                me.aElementsToDestroy.push("updateField");
-                var oEditButton = new sap.m.VBox({
-					items : [
-						new sap.m.Link(me.createId("updateField"), {
-							text : "Update",
-							press : function () {
-								this.setEnabled(false);
-								
-								var sThingText = me.byId("thingField").getValue();
-								var iThingID = me.oThing.DeviceId;
-								
-                                //==========================================================\\
-                                // Check that the name field is filled out.
-                                //==========================================================\\
-                                if (sThingText.length === 0) {
-                                    jQuery.sap.log.error("Device must have a name");
-                                    IOMy.common.showError("Device must have a name", "Error");
-                                } else {
-                                    // Run the API to update the device (thing) name
-                                    try {
-                                        IOMy.apiphp.AjaxRequest({
-                                            url : IOMy.apiphp.APILocation("thing"),
-                                            data : {"Mode" : "EditName", "Id" : iThingID, "Name" : sThingText},
-                                            onSuccess : function () {
-                                                //===== BRING UP THE SUCCESS DIALOG BECAUSE THE API RAN SUCCESSFULLY. =====\\
-                                                IOMy.common.showSuccess("Update successful.", "Success", 
-                                                function () {
-                                                    IOMy.common.NavigationTriggerBackForward(false);
-                                                }, "UpdateMessageBox");
-                                                
-                                                
-                                                //-- RENAME THE NAME IN THE DEVICE DATA PAGE --//
-                                                try {
-                                                    var oDevDataPage = oApp.getPage("pDeviceData");
-                                                    oDevDataPage.byId("NavSubHead_Title").setText(sThingText.toUpperCase());
-                                                } catch (e) {
-                                                    jQuery.sap.log.error("Error updating the Device Data page upon refresh: "+e.message);
-                                                }
-                                                
-                                                //-- REFRESH SENSORS --//
-                                                try {
-                                                    IOMy.apiphp.RefreshThingList( {
-                                                        onSuccess: $.proxy(function() {
-
-                                                            //-- Flag that the Core Variables have been configured --//
-                                                            IOMy.common.CoreVariablesInitialised = true;
-
-                                                        }, me)
-                                                    }); //-- END SENSORS LIST --//
-                                                } catch (e) {
-                                                    jQuery.sap.log.error("Error refreshing the Item List: "+e.message);
-                                                }
-                                            },
-                                            error : function () {
-                                                IOMy.common.showError("Update failed.", "Error");
-                                            }
-                                        });
-                                    } catch (e00033) {
-                                        //===== BRING UP THE ERROR DIALOG BECAUSE SOMETHING'S NOT RIGHT. =====\\
-                                        IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
-                                    }
-                                }
-								this.setEnabled(true);
-							}
-						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
-					]
-				}).addStyleClass("TextCenter MarTop12px");
-        		
-				var oVertBox = new sap.m.VBox({
-					items : [oPortTitle, oPortNameField, oEditButton]
-				});
-    		    
-		    	me.aElementsToDestroy.push("devicePanel");
-                var oPanel = new sap.m.Panel(me.createId("devicePanel"), {
-    		    	backgroundDesign: "Transparent",
-					content: [oVertBox] //-- End of Panel Content --//
-				});
-				
-				thisView.byId("page").addContent(oPanel);
+				me.DrawUI();
 			}
 		});
 	},
@@ -178,6 +82,32 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 //	onExit: function() {
 //
 //	}
+
+    ValidateThingName : function () {
+        var me                      = this;  // Scope of this controller
+        var bError                  = false;
+        var aErrorMessages          = [];
+        var mInfo                   = {}; // MAP: Contains the error status and any error messages.
+        
+        //-------------------------------------------------\\
+        // Is the name filled out?
+        //-------------------------------------------------\\
+        try {
+            if (me.byId(me.sThingNameField).getValue() === "") {
+                bError = true;
+                aErrorMessages.push("A name must be given for this item.");
+            }
+        } catch (e) {
+            bError = true;
+            aErrorMessages.push("There was an error checking the thing name: "+e.message);
+        }
+        
+        // Prepare the return value
+        mInfo.bError = bError;
+        mInfo.aErrorMessages = aErrorMessages;
+        
+        return mInfo;
+    },
 
     /**
      * Procedure that destroys the previous incarnation of the UI. Must be called by onInit before
@@ -215,5 +145,128 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         // Clear the array
         me.aElementsForAFormToDestroy = [];
     },
+    
+    /**
+     * Constructs the user interface for the form to add a thing.
+     */
+    DrawUI : function () {
+        //===============================================\\
+        // DECLARE VARIABLES
+        //===============================================\\
+        var me = this;
+        var thisView = me.getView();
+        
+        //-- Refresh the Navigational buttons --//
+        IOMy.common.NavigationRefreshButtons( me );
+
+        me.thingID = me.oThing.DeviceId;
+        //var iLinkId = me.oThing.LinkId;
+        
+        // Start rendering the page
+        
+        //-----------------------------------------------\\
+        // THING NAME
+        //-----------------------------------------------\\
+        var oThingNameLabel = new sap.m.Label({
+            text : "Display Name"
+        });
+        
+        me.aElementsToDestroy.push(me.sThingNameField);
+        var oThingNameField = new sap.m.Input(me.createId(me.sThingNameField), {
+            value : me.oThing.DeviceName
+        }).addStyleClass("width100Percent");
+        
+        //-----------------------------------------------\\
+        // FORM BOX FOR SPECIFIC DEVICE TYPES
+        //-----------------------------------------------\\
+        me.aElementsToDestroy.push("formBox");
+        var oFormBox = new sap.m.VBox(me.createId("formBox"), {});
+
+        //-----------------------------------------------\\
+        // UPDATE BUTTON
+        //-----------------------------------------------\\
+        me.aElementsToDestroy.push("updateButton");
+        var oEditButton = new sap.m.VBox({
+            items : [
+                new sap.m.Link(me.createId("updateButton"), {
+                    text : "Update",
+                    press : function () {
+                        this.setEnabled(false);
+
+                        var sThingText = me.byId("thingNameField").getValue();
+                        var iThingID = me.oThing.DeviceId;
+                        var mInfo = {};
+
+                        //==========================================================\\
+                        // Check that the name field is filled out.
+                        //==========================================================\\
+                        mInfo = me.ValidateThingName()
+                        
+                        if (mInfo.bError === false) {
+                            // Run the API to update the device (thing) name
+                            try {
+                                IOMy.apiphp.AjaxRequest({
+                                    url : IOMy.apiphp.APILocation("thing"),
+                                    data : {"Mode" : "EditName", "Id" : iThingID, "Name" : sThingText},
+                                    onSuccess : function () {
+                                        //===== BRING UP THE SUCCESS DIALOG BECAUSE THE API RAN SUCCESSFULLY. =====\\
+                                        IOMy.common.showSuccess("Update successful.", "Success", 
+                                        function () {
+                                            IOMy.common.NavigationTriggerBackForward(false);
+                                        }, "UpdateMessageBox");
+
+
+                                        //-- RENAME THE NAME IN THE DEVICE DATA PAGE --//
+                                        try {
+                                            var oDevDataPage = oApp.getPage("pDeviceData");
+                                            oDevDataPage.byId("NavSubHead_Title").setText(sThingText.toUpperCase());
+                                        } catch (e) {
+                                            jQuery.sap.log.error("Error updating the Device Data page upon refresh: "+e.message);
+                                        }
+
+                                        //-- REFRESH THINGS --//
+                                        try {
+                                            IOMy.apiphp.RefreshThingList( {
+                                                onSuccess: $.proxy(function() {
+
+                                                    //-- Flag that the Core Variables have been configured --//
+                                                    IOMy.common.CoreVariablesInitialised = true;
+
+                                                }, me)
+                                            }); //-- END THINGS LIST --//
+                                        } catch (e) {
+                                            jQuery.sap.log.error("Error refreshing the Item List: "+e.message);
+                                        }
+                                    },
+                                    error : function () {
+                                        IOMy.common.showError("Update failed.", "Error");
+                                    }
+                                });
+                            } catch (e00033) {
+                                //===== BRING UP THE ERROR DIALOG BECAUSE SOMETHING'S NOT RIGHT. =====\\
+                                IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
+                            }
+                        } else {
+                            IOMy.common.showError(mInfo.aErrorMessages.join("\n\n"));
+                            jQuery.sap.log.error(mInfo.aErrorMessages.join("\n"))
+                        }
+                        this.setEnabled(true);
+                    }
+                }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
+            ]
+        }).addStyleClass("TextCenter MarTop12px");
+
+        var oVertBox = new sap.m.VBox({
+            items : [oThingNameLabel, oThingNameField, oFormBox, oEditButton]
+        });
+
+        me.aElementsToDestroy.push("devicePanel");
+        var oPanel = new sap.m.Panel(me.createId("devicePanel"), {
+            backgroundDesign: "Transparent",
+            content: [oVertBox] //-- End of Panel Content --//
+        });
+
+        thisView.byId("page").addContent(oPanel);
+    }
 
 });

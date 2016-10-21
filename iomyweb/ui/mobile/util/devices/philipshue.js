@@ -38,8 +38,8 @@ $.extend(IOMy.devices.philipshue,{
         var oColourBox = new sap.m.FlexBox(sID, {}).addStyleClass("width40px height40px FlexNoShrink");
         return oColourBox;
     },
-	
-	GetCommonUI: function( sPrefix, oViewScope, aDeviceData, bIsUnassigned ) {
+    
+    GetCommonUI: function( sPrefix, oViewScope, aDeviceData, bIsUnassigned ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
@@ -104,7 +104,7 @@ $.extend(IOMy.devices.philipshue,{
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: aUIObjectItems
-        }).addStyleClass("ListItem");
+        }).addStyleClass("ListItem MarRight6px");
 
         //--------------------------------------------------------------------//
         //-- ADD THE STATUS BUTTON TO THE UI								--//
@@ -117,7 +117,6 @@ $.extend(IOMy.devices.philipshue,{
         //-- Store the Device Status --//
         var iDeviceStatus		= aDeviceData.DeviceStatus;
         var iTogglePermission	= aDeviceData.PermToggle;
-        //var iTogglePermission	= 0;
 
 
         //-- Set Text --//
@@ -190,7 +189,6 @@ $.extend(IOMy.devices.philipshue,{
         }
 
         oUIObject.addItem(oUIStatusContainer);
-        oUIObject.addItem(new sap.m.VBox({}).addStyleClass("width6px"));
 		
 		
 		//------------------------------------//
@@ -210,24 +208,10 @@ $.extend(IOMy.devices.philipshue,{
 		//-- 2.0 - Fetch TASKS				--//
 		//------------------------------------//
 		if( aDeviceData.IOs!==undefined ) {
-            $.each(aDeviceData.IOs, function (sIndex, aIO) {
-                // TODO: Replace with the IOs from the Philips Hue device.
-//                if( aIO.RSTypeId===102 || aIO.RSTypeId===103 ) {
-//                    aTasks.Low.push({
-//                        "Type":"DeviceValueKWHTotal", 
-//                        "Data":{ 
-//                            "IOId":			aIO.Id, 
-//                            "IODataType":	aIO.DataTypeName,
-//                            "IOUoMName":	aIO.UoMName,
-//                            "LabelId":			Prefix+"_kWh"
-//                        }
-//                    });
-//                    //jQuery.sap.log.debug(aIO.UoMName);
-//                }
-            });
+            
         } else {
             //-- TODO: Write a error message --//
-            jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+            jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
         }
 		return aTasks;
 	},
@@ -407,7 +391,7 @@ $.extend(IOMy.devices.philipshue,{
             });
         } else {
             //-- TODO: Write a error message --//
-            jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+            jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
         }
 		return aTasks;
 	},

@@ -141,7 +141,7 @@ $.extend(IOMy.devices,{
                 aTasks = IOMy.devices.zigbeesmartplug.GetCommonUITaskList( Prefix, oViewScope, aDeviceData );
             } else {
                 //-- TODO: Write a error message --//
-                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
             }
             
         //-- Philips Hue --//
@@ -150,7 +150,7 @@ $.extend(IOMy.devices,{
                 aTasks = IOMy.devices.philipshue.GetCommonUITaskList( Prefix, oViewScope, aDeviceData );
             } else {
                 //-- TODO: Write a error message --//
-                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
             }
             
         //-- Onvif Stream --//
@@ -159,7 +159,7 @@ $.extend(IOMy.devices,{
                 aTasks = IOMy.devices.onvif.GetCommonUITaskList( Prefix, oViewScope, aDeviceData );
             } else {
                 //-- TODO: Write a error message --//
-                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
             }
             
         //-- Motion Sensor --//
@@ -168,7 +168,7 @@ $.extend(IOMy.devices,{
                 aTasks = IOMy.devices.motionsensor.GetCommonUITaskListForDeviceOverview( Prefix, oViewScope, aDeviceData );
             } else {
                 //-- TODO: Write a error message --//
-                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
             }
             
         //-- Temperature Sensor --//
@@ -177,7 +177,7 @@ $.extend(IOMy.devices,{
                 aTasks = IOMy.devices.temperature.GetCommonUITaskListForDeviceOverview( Prefix, oViewScope, aDeviceData );
             } else {
                 //-- TODO: Write a error message --//
-                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
             }
             
         //-- DevelCo Energy Meter --//
@@ -186,7 +186,7 @@ $.extend(IOMy.devices,{
                 aTasks = IOMy.devices.develco.GetCommonUITaskListForDeviceOverview( Prefix, oViewScope, aDeviceData );
             } else {
                 //-- TODO: Write a error message --//
-                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
             }
 		}
 		return aTasks;
@@ -209,7 +209,7 @@ $.extend(IOMy.devices,{
                 aTasks = IOMy.devices.zigbeesmartplug.GetCommonUITaskListForDeviceOverview( Prefix, oViewScope, aDeviceData );
             } else {
                 //-- TODO: Write a error message --//
-                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
             }
             
         //-- Philips Hue --//
@@ -218,7 +218,7 @@ $.extend(IOMy.devices,{
                 aTasks = IOMy.devices.philipshue.GetCommonUITaskListForDeviceOverview( Prefix, oViewScope, aDeviceData );
             } else {
                 //-- TODO: Write a error message --//
-                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
             }
             
         //-- Onvif Stream --//
@@ -227,7 +227,7 @@ $.extend(IOMy.devices,{
                 aTasks = IOMy.devices.onvif.GetCommonUITaskListForDeviceOverview( Prefix, oViewScope, aDeviceData );
             } else {
                 //-- TODO: Write a error message --//
-                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
             }
             
         //-- Motion Sensor --//
@@ -236,7 +236,7 @@ $.extend(IOMy.devices,{
                 aTasks = IOMy.devices.motionsensor.GetCommonUITaskListForDeviceOverview( Prefix, oViewScope, aDeviceData );
             } else {
                 //-- TODO: Write a error message --//
-                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
             }
             
         //-- Temperature Sensor --//
@@ -245,7 +245,7 @@ $.extend(IOMy.devices,{
                 aTasks = IOMy.devices.temperaturesensor.GetCommonUITaskListForDeviceOverview( Prefix, oViewScope, aDeviceData );
             } else {
                 //-- TODO: Write a error message --//
-                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
             }
             
         //-- DevelCo Energy Meter --//
@@ -254,7 +254,7 @@ $.extend(IOMy.devices,{
                 aTasks = IOMy.devices.develco.GetCommonUITaskListForDeviceOverview( Prefix, oViewScope, aDeviceData );
             } else {
                 //-- TODO: Write a error message --//
-                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
             }
 		}
         

@@ -1834,12 +1834,10 @@ class PHPOnvif {
 				
 				if( $aProfiles['Error']===true ) {
 					$bError = true;
-					$sErrMesg .= "Error Code:0x????\n";
 					$sErrMesg .= "Failed to extract the Onvif Profiles!\n";
 				}
 			} else {
 				$bError = true;
-				$sErrMesg .= "Error Code:0x????\n";
 				$sErrMesg .= "Failed to fetch the Onvif Profiles!\n";
 			}
 		}

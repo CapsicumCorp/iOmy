@@ -1198,7 +1198,7 @@ sap.ui.controller("mjs.rooms.UnassignedDevices", {
 				});
 			} else {
 				//-- TODO: Write a error message --//
-				jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+				jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
 			}
 		}
 		return aTasks;

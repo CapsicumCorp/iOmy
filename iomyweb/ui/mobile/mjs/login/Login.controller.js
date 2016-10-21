@@ -151,16 +151,17 @@ sap.ui.controller("mjs.login.Login", {
 		//============================================//
 		
 		//--------------------------------------------//
-		//-- Input - Username						--//
+		//-- Splash Logo						--//
 		//--------------------------------------------//
-		var oLoginTxtPleaseWait = new sap.m.Label( this.createId("oLoginTxtPleaseWait"), {
-			text: "Please wait while we log you in...",
+		var oLoginSplashImage = new sap.m.Image( this.createId("SplashImage"), {
+			src: "resources/images/iomy_splash.png",
+            densityAware : false,
 			width: "200px"
-		});
+		}).addStyleClass("MarTop10px");
         
 		var oLoginLoadingContainer = new sap.m.FlexBox({
 			items: [
-				oLoginTxtPleaseWait,
+				oLoginSplashImage,
 			],
 			direction: "Column"
 		});

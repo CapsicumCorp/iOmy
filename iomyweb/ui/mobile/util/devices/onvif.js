@@ -35,8 +35,6 @@ $.extend(IOMy.devices.onvif,{
      * elements are used in forms that handle information about onvif devices.
      */
     uiIDs       : {
-        sCameraNameLabelID : "CameraNameLabel",
-        sCameraNameFieldID : "CameraNameField",
         sStreamProfileLabelID : "StreamProfileLabel",
         sStreamProfileFieldID : "StreamProfileField",
         sThumbnailProfileLabelID : "ThumbnailProfileLabel",
@@ -104,47 +102,35 @@ $.extend(IOMy.devices.onvif,{
         
     },
     
-    CreateOnvifStreamForm : function(oScope, iLinkId, oFormBox, oUpdateButton, oLinkCBox, mThingData) {
+    CreateThingForm : function(oScope, iLinkId, oFormBox, aElementsToEnableOnSuccess, aElementsToEnableOnFailure) {
         var me = this; // Scope of the Onvif module.
         
         // Disable the update button on its form
-        oUpdateButton.setEnabled(false);
+        //oUpdateButton.setEnabled(false);
         
         //===============================================\\
         // DECLARE VARIABLES
         //===============================================\\
-        var oCameraNameLabel;
-        var oCameraNameField;
         var oStreamProfileLabel;
         var oStreamProfileField;
         var oThumbnailProfileLabel;
         var oThumbnailProfileField;
         
-        if (mThingData === undefined) {
-            mThingData = {};
+        
+        //===============================================\\
+        // ASSIGN DEFAULT VALUES TO THE ELEMENT ARRAY
+        //===============================================\\
+        if (aElementsToEnableOnSuccess === undefined) {
+            aElementsToEnableOnSuccess = [];
+        }
+        
+        if (aElementsToEnableOnFailure === undefined) {
+            aElementsToEnableOnFailure = aElementsToEnableOnSuccess;
         }
         
         //===============================================\\
         // CONSTRUCT ELEMENTS
         //===============================================\\
-        
-        //-----------------------------------------------\\
-        // CAMERA NAME
-        //-----------------------------------------------\\
-        
-        // LABEL
-        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sCameraNameLabelID);
-        oCameraNameLabel = new sap.m.Label(oScope.createId(me.uiIDs.sCameraNameLabelID),{
-            text : "Name"
-        }).addStyleClass("width100Percent");
-        oFormBox.addItem(oCameraNameLabel);
-        
-        // FIELD
-        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sCameraNameFieldID);
-        oCameraNameField = new sap.m.Input(oScope.createId(me.uiIDs.sCameraNameFieldID),{
-            value : ""
-        }).addStyleClass("width100Percent");
-        oFormBox.addItem(oCameraNameField);
         
         //-----------------------------------------------\\
         // STREAM PROFILE
@@ -209,9 +195,14 @@ $.extend(IOMy.devices.onvif,{
                 oStreamProfileField.setSelectedKey(me.aProfiles[0].ProfileToken);
                 oThumbnailProfileField.setSelectedKey(me.aProfiles[0].ProfileToken);
                 
-                // Enable the update button and the link combo box once all the combo boxes are populated with choices.
-                oUpdateButton.setEnabled(true);
-                oLinkCBox.setEnabled(true);
+                // Enable the elements that are needed.
+                for (var i = 0; i < aElementsToEnableOnSuccess.length; i++) {
+                    try {
+                        aElementsToEnableOnSuccess[i].setEnabled(true);
+                    } catch (e) {
+                        jQuery.sap.log.error("Could not enable a particular element probably because it doesn't have an enabled property. Skipping.");
+                    }
+                }
             },
             
             // On Failure
@@ -220,37 +211,17 @@ $.extend(IOMy.devices.onvif,{
                 oStreamProfileField.setValue("Failed to load profiles.");
                 oThumbnailProfileField.setValue("Failed to load profiles.");
                 
-                // Enable the link combo box.
-                oLinkCBox.setEnabled(true);
+                // Enable the elements that are needed.
+                for (var i = 0; i < aElementsToEnableOnFailure.length; i++) {
+                    try {
+                        aElementsToEnableOnFailure[i].setEnabled(true);
+                    } catch (e) {
+                        jQuery.sap.log.error("Could not enable a UI5 element probably because it doesn't have an enabled property. Skipping.");
+                    }
+                }
             }
         );
         
-    },
-    
-    ValidateCameraName : function (oScope) {
-        var me                      = this;  // Scope of the onvif module
-        var bError                  = false;
-        var aErrorMessages          = [];
-        var mInfo                   = {}; // MAP: Contains the error status and any error messages.
-        
-        //-------------------------------------------------\\
-        // Is the camera name filled out?
-        //-------------------------------------------------\\
-        try {
-            if (oScope.byId(me.uiIDs.sCameraNameField).getValue() === "") {
-                bError = true;
-                aErrorMessages.push("A name must be given for the camera stream.");
-            }
-        } catch (e) {
-            bError = true;
-            aErrorMessages.push("Error 0x12000: There was an error checking the link type: "+e.message);
-        }
-        
-        // Prepare the return value
-        mInfo.bError = bError;
-        mInfo.aErrorMessages = aErrorMessages;
-        
-        return mInfo;
     },
     
     ValidateStreamProfile: function (oScope) {
@@ -263,7 +234,7 @@ $.extend(IOMy.devices.onvif,{
         // Is the stream profile valid? (does it have an ID)
         //-------------------------------------------------\\
         try {
-            if (oScope.byId(me.uiIDs.sStreamProfileField).getSelectedKey() === "") {
+            if (oScope.byId(me.uiIDs.sStreamProfileFieldID).getSelectedKey() === "") {
                 bError = true;
                 aErrorMessages.push("Stream profile is not valid");
             }
@@ -289,7 +260,7 @@ $.extend(IOMy.devices.onvif,{
         // Is the thumbnail profile valid? (does it have an ID)
         //-------------------------------------------------\\
         try {
-            if (oScope.byId(me.uiIDs.sThumbnailProfileField).getSelectedKey() === "") {
+            if (oScope.byId(me.uiIDs.sThumbnailProfileFieldID).getSelectedKey() === "") {
                 bError = true;
                 aErrorMessages.push("Thumbnail profile is not valid");
             }
@@ -305,12 +276,11 @@ $.extend(IOMy.devices.onvif,{
         return mInfo;
     },
     
-    ValidateOnvifStreamFormData : function (oScope) {
+    ValidateThingFormData : function (oScope) {
         var me                      = this; // Scope of the onvif module
         var bError                  = false;
         var aErrorMessages          = [];
         var mInfo                   = {}; // MAP: Contains the error status and any error messages.
-        var mCameraNameInfo         = {};
         var mStreamProfileInfo      = {};
         var mThumbnailProfileInfo   = {};
         
@@ -318,13 +288,6 @@ $.extend(IOMy.devices.onvif,{
         // Check the Onvif stream form data
         //-------------------------------------------------\\
         try {
-            // Check the camera name
-            mCameraNameInfo         = me.ValidateCameraName(oScope);
-            if (mCameraNameInfo.bError === true) {
-                bError = true;
-                aErrorMessages = aErrorMessages.concat(mCameraNameInfo.aErrorMessages);
-            }
-            
             // Check the stream profile
             mStreamProfileInfo      = me.ValidateStreamProfile(oScope);
             if (mStreamProfileInfo.bError === true) {
@@ -405,117 +368,13 @@ $.extend(IOMy.devices.onvif,{
             }).addStyleClass("width100Percent")
         );
 
-//        aUIObjectItems.push(
-//            //------------------------------------//
-//            //-- 2nd is the Device Data			--//
-//            //------------------------------------//
-//            new sap.m.VBox({
-//                items : [
-//                    new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
-//                        //--------------------------------//
-//                        //-- Draw the Data Boxes		--//
-//                        //--------------------------------//
-//
-//                        items: [
-//
-//                        ]
-//                    }).addStyleClass("width110px PadLeft5px MarBottom3px MarRight10px TextLeft")
-//                ]
-//            })
-//        );
-
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: aUIObjectItems
         }).addStyleClass("ListItem");
-
-        //--------------------------------------------------------------------//
-        //-- ADD THE STATUS BUTTON TO THE UI								--//
-        //--------------------------------------------------------------------//
-
-//        //-- Initialise Variables --//
-//        var sStatusButtonText			= "";
-//        var bButtonStatus				= false;
-//
-//        //-- Store the Device Status --//
-//        var iDeviceStatus		= aDeviceData.DeviceStatus;
-//        var iTogglePermission	= aDeviceData.PermToggle;
-//        //var iTogglePermission	= 0;
-//
-//
-//        //-- Set Text --//
-//        if( iDeviceStatus===0 ) {
-//            sStatusButtonText	= "Off";
-//            bButtonStatus		= false;
-//        } else {
-//            sStatusButtonText	= "On";
-//            bButtonStatus		= true;
-//        }
-//
-//        //-- DEBUGGING --//
-//        //jQuery.sap.log.debug("PERM = "+sPrefix+" "+iTogglePermission);
-//
-//        //------------------------------------//
-//        //-- Make the Container				--//
-//        //------------------------------------//
-//        var oUIStatusContainer = new sap.m.VBox( oViewScope.createId( sPrefix+"_StatusContainer"), {
-//            items:[] 
-//        }).addStyleClass("minwidth80px PadTop10px PadLeft5px");	//-- END of VBox that holds the Toggle Button
-
-
-        //-- Add the Button's background colour class --//
-//        if( iTogglePermission===0 ) {
-//
-//            //----------------------------//
-//            //-- NON TOGGLEABLE BUTTON	--//
-//            //----------------------------//
-//            oUIStatusContainer.addItem(
-//                new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
-//                    state: bButtonStatus,
-//                    enabled: false
-//                }).addStyleClass("DeviceOverviewStatusToggleSwitch")
-//            );
-//
-//        } else {
-//
-//            //----------------------------//
-//            //-- TOGGLEABLE BUTTON		--//
-//            //----------------------------//
-//            oUIStatusContainer.addItem(
-//                new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
-//                    state: bButtonStatus,
-//                    change: function () {
-//                        //-- Bind a link to this button for subfunctions --//
-//                        var oCurrentButton = this;
-//                        //-- AJAX --//
-//                        IOMy.apiphp.AjaxRequest({
-//                            url: IOMy.apiphp.APILocation("statechange"),
-//                            type: "POST",
-//                            data: { 
-//                                "Mode":"ThingToggleStatus", 
-//                                "Id": aDeviceData.DeviceId
-//                            },
-//                            onFail : function(response) {
-//                                IOMy.common.showError(response.message, "Error Changing Device Status");
-//                            },
-//                            onSuccess : function( sExpectedDataType, aAjaxData ) {
-//                                console.log(aAjaxData.ThingPortStatus);
-//                                //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
-//                                if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
-//                                    IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
-//                                }
-//                            }
-//                        });
-//                    }
-//                }).addStyleClass("DeviceOverviewStatusToggleSwitch") //-- END of ToggleButton --//
-//                //}).addStyleClass("DeviceOverviewStatusToggleButton TextWhite Font-RobotoCondensed Font-Large"); //-- END of ToggleButton --//
-//            );
-//        }
-
-        //oUIObject.addItem(oUIStatusContainer);
 		
 		
 		//------------------------------------//
-		//-- 9.0 - RETURN THE RESULTS		--//
+		//-- 3.0 - RETURN THE RESULTS		--//
 		//------------------------------------//
 		return oUIObject;
 	},
@@ -531,24 +390,10 @@ $.extend(IOMy.devices.onvif,{
 		//-- 2.0 - Fetch TASKS				--//
 		//------------------------------------//
 		if( aDeviceData.IOs!==undefined ) {
-            $.each(aDeviceData.IOs, function (sIndex, aIO) {
-                // TODO: Replace with the IOs from the Philips Hue device.
-//                if( aIO.RSTypeId===102 || aIO.RSTypeId===103 ) {
-//                    aTasks.Low.push({
-//                        "Type":"DeviceValueKWHTotal", 
-//                        "Data":{ 
-//                            "IOId":			aIO.Id, 
-//                            "IODataType":	aIO.DataTypeName,
-//                            "IOUoMName":	aIO.UoMName,
-//                            "LabelId":			Prefix+"_kWh"
-//                        }
-//                    });
-//                    //jQuery.sap.log.debug(aIO.UoMName);
-//                }
-            });
+            
         } else {
             //-- TODO: Write a error message --//
-            jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+            jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
         }
 		return aTasks;
 	},
@@ -581,120 +426,8 @@ $.extend(IOMy.devices.onvif,{
                         }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                     ]
                 }).addStyleClass("PadRight3px width100Percent minwidth170px"),
-
-                //------------------------------------//
-                //-- 2nd is the Device Data			--//
-                //------------------------------------//
-//                new sap.m.VBox({
-//                    items : [
-//                        new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
-//                            //--------------------------------//
-//                            //-- Draw the Data Boxes		--//
-//                            //--------------------------------//
-//
-//                            items: []
-//                        }).addStyleClass("PadLeft5px MarBottom3px MarRight10px TextLeft")
-//                    ]
-//                }).addStyleClass("width10Percent minwidth70px")
             ]
         }).addStyleClass("ListItem");
-
-        //--------------------------------------------------------------------//
-        //-- ADD THE STATUS BUTTON TO THE UI								--//
-        //--------------------------------------------------------------------//
-
-//        //-- Initialise Variables --//
-//        var sStatusButtonText			= "";
-//        var bButtonStatus				= false;
-//
-//        //-- Store the Device Status --//
-//        var iDeviceStatus		= aDeviceData.DeviceStatus;
-//        var iTogglePermission	= aDeviceData.PermToggle;
-//        //var iTogglePermission	= 0;
-//
-//
-//        //-- Set Text --//
-//        if( iDeviceStatus===0 ) {
-//            sStatusButtonText	= "Off";
-//            bButtonStatus		= false;
-//        } else {
-//            sStatusButtonText	= "On";
-//            bButtonStatus		= true;
-//        }
-//
-//        //-- DEBUGGING --//
-//        //jQuery.sap.log.debug("PERM = "+sPrefix+" "+iTogglePermission);
-//
-//        //------------------------------------//
-//        //-- Make the Container				--//
-//        //------------------------------------//
-//        var oUIStatusContainer = new sap.m.VBox( oViewScope.createId( sPrefix+"_StatusContainer"), {
-//            items:[] 
-//        }).addStyleClass("PadTop5px PadLeft5px width10Percent minwidth80px");	//-- END of VBox that holds the Toggle Button
-//
-//
-//        //-- Add the Button's background colour class --//
-//        if( iTogglePermission===0 ) {
-//
-//            //----------------------------//
-//            //-- NON TOGGLEABLE BUTTON	--//
-//            //----------------------------//
-//            oUIStatusContainer.addItem(
-//                new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
-//                    state: bButtonStatus,
-//                    enabled: false
-//                }).addStyleClass("DeviceOverviewStatusToggleSwitch ")
-//            );
-//
-//        } else {
-//
-//            //----------------------------//
-//            //-- TOGGLEABLE BUTTON		--//
-//            //----------------------------//
-//            oUIStatusContainer.addItem(
-//                new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
-//                    state: bButtonStatus,
-//                    change: function () {
-//                //new sap.m.ToggleButton( oViewScope.createId( sPrefix+"_StatusToggle"), {
-//                    //text: sStatusButtonText,
-//                    //pressed: bButtonStatus,
-//                    //press : function () {
-//                        //-- Bind a link to this button for subfunctions --//
-//                        var oCurrentButton = this;
-//                        //-- AJAX --//
-//                        IOMy.apiphp.AjaxRequest({
-//                            url: IOMy.apiphp.APILocation("statechange"),
-//                            type: "POST",
-//                            data: { 
-//                                "Mode":"ThingToggleStatus", 
-//                                "Id": aDeviceData.DeviceId
-//                            },
-//                            onFail : function(response) {
-//                                IOMy.common.showError(response.message, "Error Changing Device Status");
-//                            },
-//                            onSuccess : function( sExpectedDataType, aAjaxData ) {
-//                                //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
-//                                if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
-//                                    //-- If turned Off --//
-//                                    //if( aAjaxData.DevicePortStatus===0 ) {
-//                                        //oCurrentButton.setText("Off");
-//                                    //-- Else Turned On --//
-//                                    //} else {
-//                                        //oCurrentButton.setText("On");
-//                                    //}
-//
-//                                    IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
-//                                }
-//                            }
-//                        });
-//                    }
-//                }).addStyleClass("DeviceOverviewStatusToggleSwitch") //-- END of ToggleButton --//
-//                //}).addStyleClass("DeviceOverviewStatusToggleButton TextWhite Font-RobotoCondensed Font-Large"); //-- END of ToggleButton --//
-//            );
-//        }
-//
-//        oUIObject.addItem(oUIStatusContainer);
-        //oUIObject.addItem(new sap.m.VBox({}).addStyleClass("width6px"));
 
 
 		//------------------------------------//
@@ -719,7 +452,7 @@ $.extend(IOMy.devices.onvif,{
             });
         } else {
             //-- TODO: Write a error message --//
-            jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no sensors");
+            jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
         }
 		return aTasks;
 	},

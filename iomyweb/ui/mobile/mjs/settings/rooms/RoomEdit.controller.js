@@ -229,7 +229,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                                                     //-- REFRESH ROOMS --//
                                                     IOMy.common.RetreiveRoomList( {
                                                         onSuccess: $.proxy(function() {
-                                                            //-- REFRESH SENSORS --//
+                                                            //-- REFRESH THINGS --//
                                                             IOMy.apiphp.RefreshThingList({
                                                                 onSuccess: $.proxy(function() {
 
@@ -244,7 +244,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                                                                         jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
                                                                     }
                                                                 }, me)
-                                                            }); //-- END SENSORS LIST --//
+                                                            }); //-- END THINGS LIST --//
                                                         }, me)
                                                     }); //-- END ROOMS LIST --//
                                                 }, "UpdateMessageBox");
@@ -264,80 +264,6 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
 					]
 				}).addStyleClass("TextCenter MarTop12px");
-                
-                
-//                var oRoomDeleteButton = new sap.m.VBox({
-//                    items : [
-//                        new sap.m.Link({
-//                            text : "Delete This Room",
-//                            press : function () {
-//                                this.setEnabled(false);
-//                                
-//                                var iNumOfDevices = IOMy.functions.getNumberOfDevicesInRoom(me.iRoomID);
-//                                var sDevicesAttachedMessage = "";
-//                                console.log(JSON.stringify(IOMy.common.ThingList));
-//                                
-//                                //-- A ROOM SHOULD BE DELETED ONLY WHEN THERE ARE NO DEVICES ATTACHED TO IT --//
-//                                if (iNumOfDevices > 0) {
-//                                    sDevicesAttachedMessage += "There ";
-//                                    if (iNumOfDevices === 1)
-//                                        sDevicesAttachedMessage += "is "+iNumOfDevices+" device";
-//                                    else
-//                                        sDevicesAttachedMessage += "are "+iNumOfDevices+" devices";
-//                                    sDevicesAttachedMessage += " still assigned to this room.\n\n";
-//                                    sDevicesAttachedMessage += "Remove the devices from this room before deleting it.";
-//                                    
-//                                    jQuery.sap.log.error(sDevicesAttachedMessage);
-//                                    IOMy.common.showError(sDevicesAttachedMessage, "Devices still assigned");
-//                                } else {
-//                                    //-- CONFIRM THAT YOU WISH TO DELETE THIS ROOM --//
-//                                    IOMy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
-//                                    function (oAction) {
-//                                        if (oAction === sap.m.MessageBox.Action.OK) {
-//                                            IOMy.apiphp.AjaxRequest({
-//                                                url: IOMy.apiphp.APILocation("rooms"),
-//                                                data : {"Mode" : "DeleteRoom", "Id" : me.iRoomID},
-//
-//                                                onSuccess : function () {
-//                                                    IOMy.common.showSuccess(sRoomName+" successfully removed.", "Success", 
-//                                                    function () {
-//                                                        //-- REFRESH ROOMS --//
-//                                                        IOMy.common.RetreiveRoomList( {
-//                                                            onSuccess: $.proxy(function() {
-//                                                                //-- REFRESH SENSORS --//
-//                                                                IOMy.apiphp.RefreshThingList({
-//                                                                    onSuccess: $.proxy(function() {
-//
-//                                                                        try {
-//                                                                            //-- Flag that the Core Variables have been configured --//
-//                                                                            IOMy.common.CoreVariablesInitialised = true;
-//                                                                            // Refresh the room list after a deletion.
-//                                                                            oApp.getPage("pPremiseOverview").getController().composeRoomList();
-//                                                                            // Go back.
-//                                                                            IOMy.common.NavigationTriggerBackForward(false);
-//
-//                                                                        } catch(e654321) {
-//                                                                            //-- ERROR:  TODO: Write a better error message--//
-//                                                                            jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
-//                                                                        }
-//                                                                    }, me)
-//                                                                }); //-- END SENSORS LIST --//
-//                                                            }, me)
-//                                                        }); //-- END ROOMS LIST --//
-//                                                    }, "UpdateMessageBox");
-//                                                }
-//                                            });
-//                                        } else {
-//                                            //IOMy.common.NavigationTriggerBackForward(false);
-//                                        }
-//                                    });
-//                                }
-//
-//                                this.setEnabled(true);
-//                            }
-//                        }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
-//					]
-//				}).addStyleClass("TextCenter MarTop12px");
                 
                 if (me.byId("vbox_container") !== undefined)
                     me.byId("vbox_container").destroy();
@@ -403,7 +329,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                                                             //-- REFRESH ROOMS --//
                                                             IOMy.common.RetreiveRoomList( {
                                                                 onSuccess: $.proxy(function() {
-                                                                    //-- REFRESH SENSORS --//
+                                                                    //-- REFRESH THINGS --//
                                                                     IOMy.apiphp.RefreshThingList({
                                                                         onSuccess: $.proxy(function() {
 
@@ -420,7 +346,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                                                                                 jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
                                                                             }
                                                                         }, me)
-                                                                    }); //-- END SENSORS LIST --//
+                                                                    }); //-- END THINGS LIST --//
                                                                 }, me)
                                                             }); //-- END ROOMS LIST --//
                                                         }, "UpdateMessageBox");

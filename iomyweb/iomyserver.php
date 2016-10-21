@@ -90,7 +90,7 @@ $aTempResult5               = array();      //-- ARRAY:         --//
 $aTempResult6               = array();      //-- ARRAY:         --//
 $aTempResult7               = array();      //-- ARRAY:         --//
 $aTempResult8               = array();      //-- ARRAY:         --//
-
+$aTempResult9               = array();      //-- ARRAY:         --//
 
 
 //------------------------------------------------------------//
@@ -196,12 +196,12 @@ if($bError===false) {
 				$sPostMode!=="02_CreateForeignKeys1"     && $sPostMode!=="02_CreateForeignKeys2"     && 
 				$sPostMode!=="02_CreateForeignKeys3"     && $sPostMode!=="02_CreateForeignKeys4"     && 
 				$sPostMode!=="02_CreateForeignKeys5"     && $sPostMode!=="02_CreateForeignKeys6"     && 
-				$sPostMode!=="02_CreateViewPublic1"      && $sPostMode!=="02_CreateViewPublic2"      && 
-				$sPostMode!=="02_CreateViewPublic3"      && $sPostMode!=="02_CreateViewPublic4"      && 
-				$sPostMode!=="02_CreateViewPublic5"      && $sPostMode!=="02_CreateViewPublic6"      && 
-				$sPostMode!=="02_CreateViewRestricted1"  && $sPostMode!=="02_CreateViewRestricted2"  && 
-				$sPostMode!=="02_CreateViewRestricted3"  && $sPostMode!=="02_CreateViewRestricted4"  && 
-				$sPostMode!=="02_CreateViewRestricted5"  && $sPostMode!=="02_CreateViewRestricted6"  && 
+				$sPostMode!=="02_CreateViewsPublic1"     && $sPostMode!=="02_CreateViewsPublic2"     && 
+				$sPostMode!=="02_CreateViewsPublic3"     && $sPostMode!=="02_CreateViewsPublic4"     && 
+				$sPostMode!=="02_CreateViewsPublic5"     && $sPostMode!=="02_CreateViewsPublic6"     && 
+				$sPostMode!=="02_CreateViewsRestricted1" && $sPostMode!=="02_CreateViewsRestricted2" && 
+				$sPostMode!=="02_CreateViewsRestricted3" && $sPostMode!=="02_CreateViewsRestricted4" && 
+				$sPostMode!=="02_CreateViewsRestricted5" && $sPostMode!=="02_CreateViewsRestricted6" && 
 				$sPostMode!=="02_CreateDefaultData1"     && $sPostMode!=="02_CreateDefaultData2"     && 
 				$sPostMode!=="02_CreateDefaultData3"     && $sPostMode!=="02_CreateDefaultData4"     && 
 				
@@ -245,12 +245,12 @@ if($bError===false) {
 					$sPostMode==="02_CreateForeignKeys1"     || $sPostMode==="02_CreateForeignKeys2"     || 
 					$sPostMode==="02_CreateForeignKeys3"     || $sPostMode==="02_CreateForeignKeys4"     || 
 					$sPostMode==="02_CreateForeignKeys5"     || $sPostMode==="02_CreateForeignKeys6"     || 
-					$sPostMode==="02_CreateViewPublic1"      || $sPostMode==="02_CreateViewPublic2"      || 
-					$sPostMode==="02_CreateViewPublic3"      || $sPostMode==="02_CreateViewPublic4"      || 
-					$sPostMode==="02_CreateViewPublic5"      || $sPostMode==="02_CreateViewPublic6"      || 
-					$sPostMode==="02_CreateViewRestricted1"  || $sPostMode==="02_CreateViewRestricted2"  || 
-					$sPostMode==="02_CreateViewRestricted3"  || $sPostMode==="02_CreateViewRestricted4"  || 
-					$sPostMode==="02_CreateViewRestricted5"  || $sPostMode==="02_CreateViewRestricted6"  || 
+					$sPostMode==="02_CreateViewsPublic1"     || $sPostMode==="02_CreateViewsPublic2"     || 
+					$sPostMode==="02_CreateViewsPublic3"     || $sPostMode==="02_CreateViewsPublic4"     || 
+					$sPostMode==="02_CreateViewsPublic5"     || $sPostMode==="02_CreateViewsPublic6"     || 
+					$sPostMode==="02_CreateViewsRestricted1" || $sPostMode==="02_CreateViewsRestricted2" || 
+					$sPostMode==="02_CreateViewsRestricted3" || $sPostMode==="02_CreateViewsRestricted4" || 
+					$sPostMode==="02_CreateViewsRestricted5" || $sPostMode==="02_CreateViewsRestricted6" || 
 					$sPostMode==="02_CreateDefaultData1"     || $sPostMode==="02_CreateDefaultData2"     || 
 					$sPostMode==="02_CreateDefaultData3"     || $sPostMode==="02_CreateDefaultData4"     || 
 					$sPostMode==="02_CreatePHPConfig"
@@ -358,12 +358,12 @@ if($bError===false) {
 				$sPostMode==="02_CreateForeignKeys1"     || $sPostMode==="02_CreateForeignKeys2"     || 
 				$sPostMode==="02_CreateForeignKeys3"     || $sPostMode==="02_CreateForeignKeys4"     || 
 				$sPostMode==="02_CreateForeignKeys5"     || $sPostMode==="02_CreateForeignKeys6"     || 
-				$sPostMode==="02_CreateViewPublic1"      || $sPostMode==="02_CreateViewPublic2"      || 
-				$sPostMode==="02_CreateViewPublic3"      || $sPostMode==="02_CreateViewPublic4"      || 
-				$sPostMode==="02_CreateViewPublic5"      || $sPostMode==="02_CreateViewPublic6"      || 
-				$sPostMode==="02_CreateViewRestricted1"  || $sPostMode==="02_CreateViewRestricted2"  || 
-				$sPostMode==="02_CreateViewRestricted3"  || $sPostMode==="02_CreateViewRestricted4"  || 
-				$sPostMode==="02_CreateViewRestricted5"  || $sPostMode==="02_CreateViewRestricted6"  || 
+				$sPostMode==="02_CreateViewsPublic1"     || $sPostMode==="02_CreateViewsPublic2"     || 
+				$sPostMode==="02_CreateViewsPublic3"     || $sPostMode==="02_CreateViewsPublic4"     || 
+				$sPostMode==="02_CreateViewsPublic5"     || $sPostMode==="02_CreateViewsPublic6"     || 
+				$sPostMode==="02_CreateViewsRestricted1" || $sPostMode==="02_CreateViewsRestricted2" || 
+				$sPostMode==="02_CreateViewsRestricted3" || $sPostMode==="02_CreateViewsRestricted4" || 
+				$sPostMode==="02_CreateViewsRestricted5" || $sPostMode==="02_CreateViewsRestricted6" || 
 				$sPostMode==="02_CreateDefaultData1"     || $sPostMode==="02_CreateDefaultData2"     || 
 				$sPostMode==="02_CreateDefaultData3"     || $sPostMode==="02_CreateDefaultData4"     ||
 				$sPostMode==="02_CreatePHPConfig"        || $sPostMode==="03_AddHub"                 
@@ -926,12 +926,12 @@ if($bError===false) {
 			$sPostMode==="02_CreateForeignKeys1"     || $sPostMode==="02_CreateForeignKeys2"     || 
 			$sPostMode==="02_CreateForeignKeys3"     || $sPostMode==="02_CreateForeignKeys4"     || 
 			$sPostMode==="02_CreateForeignKeys5"     || $sPostMode==="02_CreateForeignKeys6"     || 
-			$sPostMode==="02_CreateViewPublic1"      || $sPostMode==="02_CreateViewPublic2"      || 
-			$sPostMode==="02_CreateViewPublic3"      || $sPostMode==="02_CreateViewPublic4"      || 
-			$sPostMode==="02_CreateViewPublic5"      || $sPostMode==="02_CreateViewPublic6"      || 
-			$sPostMode==="02_CreateViewRestricted1"  || $sPostMode==="02_CreateViewRestricted2"  || 
-			$sPostMode==="02_CreateViewRestricted3"  || $sPostMode==="02_CreateViewRestricted4"  || 
-			$sPostMode==="02_CreateViewRestricted5"  || $sPostMode==="02_CreateViewRestricted6"  || 
+			$sPostMode==="02_CreateViewsPublic1"     || $sPostMode==="02_CreateViewsPublic2"     || 
+			$sPostMode==="02_CreateViewsPublic3"     || $sPostMode==="02_CreateViewsPublic4"     || 
+			$sPostMode==="02_CreateViewsPublic5"     || $sPostMode==="02_CreateViewsPublic6"     || 
+			$sPostMode==="02_CreateViewsRestricted1" || $sPostMode==="02_CreateViewsRestricted2" || 
+			$sPostMode==="02_CreateViewsRestricted3" || $sPostMode==="02_CreateViewsRestricted4" || 
+			$sPostMode==="02_CreateViewsRestricted5" || $sPostMode==="02_CreateViewsRestricted6" || 
 			$sPostMode==="02_CreateDefaultData1"     || $sPostMode==="02_CreateDefaultData2"     || 
 			$sPostMode==="02_CreateDefaultData3"     || $sPostMode==="02_CreateDefaultData4"    
 		) {
@@ -1017,11 +1017,11 @@ if($bError===false) {
 							break;
 							
 						case "02_CreateForeignKeys3":
-							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "PremiseInfo1", "PremiseInfo2", "Rooms", "Hub", "Comm") );
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "PremiseInfo1", "Rooms", "Hub", "Comm") );
 							break;
 							
 						case "02_CreateForeignKeys4":
-							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Link", "LinkInfo", "LinkConn1", "Thing" ) );
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Link", "LinkConn1", "Thing" ) );
 							break;
 							
 						case "02_CreateForeignKeys5":
@@ -1029,60 +1029,60 @@ if($bError===false) {
 							break;
 							
 						case "02_CreateForeignKeys6":
-							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Data5", "RSCat", "RSType", "UoM" ) );
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Data5", "RSType", "UoM" ) );
 							break;
 							
 						//--------------------//
 						//-- Views          --//
 						//--------------------//
-						case "02_CreateViewPublic1":
+						case "02_CreateViewsPublic1":
 							//$aResult = DB_CreateViewsPublic( $sPostDatabaseName );
 							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PublicRSCat", "PublicRSSubCat", "PublicRSTariff", "PublicRSTypes" ) );
 							break;
 							
-						case "02_CreateViewPublic2":
+						case "02_CreateViewsPublic2":
 							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PublicUoM", "PublicCountries", "PublicCurrencies" ) );
 							break;
 							
-						case "02_CreateViewPublic3":
+						case "02_CreateViewsPublic3":
 							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PublicLanguages", "PublicPostcodes", "PublicStateProvince" ) );
 							break;
 							
-						case "02_CreateViewPublic4":
+						case "02_CreateViewsPublic4":
 							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PublicTimezones", "PublicGenders", "PublicRoomTypes" ) );
 							break;
 							
-						case "02_CreateViewPublic5":
+						case "02_CreateViewsPublic5":
 							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PublicLinkTypes", "PublicPremiseBedrooms", "PublicPremiseFloors" ) );
 							break;
 							
-						case "02_CreateViewPublic6":
+						case "02_CreateViewsPublic6":
 							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PublicPremiseRooms", "PublicPremiseOccupants" ) );
 							break;
 							
-						case "02_CreateViewRestricted1":
+						case "02_CreateViewsRestricted1":
 							//$aResult = DB_CreateViewsRestricted1( $sPostDatabaseName );
 							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateUsersInfo", "PrivateUsersPremises", "PrivateUsersPremiseLocations", "PrivateUsersPremiseLog" ) );
 							break;
 							
-						case "02_CreateViewRestricted2":
+						case "02_CreateViewsRestricted2":
 							//$aResult = DB_CreateViewsRestricted2( $sPostDatabaseName );
 							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateUsersHub", "PrivateUsersRooms", "PrivateUsersComm", "PrivateUsersLink" ) );
 							break;
 							
-						case "02_CreateViewRestricted3":
+						case "02_CreateViewsRestricted3":
 							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateUsersThing", "PrivateUsersIO" ) );
 							break;
 							
-						case "02_CreateViewRestricted4":
+						case "02_CreateViewsRestricted4":
 							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateDataTinyInt", "PrivateDataInt", "PrivateDataBigInt" ) );
 							break;
 							
-						case "02_CreateViewRestricted5":
+						case "02_CreateViewsRestricted5":
 							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateDataFloat", "PrivateDataTinyString", "PrivateDataShortString" ) );
 							break;
 							
-						case "02_CreateViewRestricted6":
+						case "02_CreateViewsRestricted6":
 							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateDataMedString" ) );
 							break;
 							
@@ -1317,13 +1317,14 @@ if($bError===false) {
 					//-- 5.7.3.6.A.8 - Give Ownership of the premise to the new User             --//
 					//-----------------------------------------------------------------------------//
 					if( $bError===false ) {
-						$aTempResult7 = DB_InsertPermission( $sPostDatabaseName, $iUserId, $iPremiseId, 1, 1, 1, 1, 1 );
+						$aTempResult7 = DB_InsertPermPremise( $sPostDatabaseName, $iUserId, $iPremiseId, 1, 1, 1, 1, 1 );
 						
 						if( $aTempResult7['Error']===true ) {
 							$bError    = true;
 							$iErrCode  = 7410;
 							$sErrMesg .= "Error Code:'7410' \n";
-							$sErrMesg .= "Problem inserting the Permissions! \n";
+							$sErrMesg .= "Problem inserting the Permissions1! \n";
+							$sErrMesg .= "User=".$iUserId."  Premise=".$iPremiseId."\n";
 							$sErrMesg .= $aTempResult7['ErrMesg'];
 						} else {
 							//-- Extract the PermissionId --//
@@ -1331,22 +1332,39 @@ if($bError===false) {
 						}
 					}
 					
-					
 					//-----------------------------------------------------------------------------//
-					//-- 5.7.3.6.A.9 - Add the Hub                                               --//
+					//-- 5.7.3.6.A.8 - Give the user permission to do admin modes                --//
 					//-----------------------------------------------------------------------------//
 					if( $bError===false ) {
-						$aTempResult8 = DB_InsertHub( $sPostDatabaseName, $iPremiseId, $iHubTypeId, $sHubName, $sHubSerialCode, "" );
+						$aTempResult8 = DB_InsertPermServer( $sPostDatabaseName, $iUserId, 1, 1, 1 );
 						
 						if( $aTempResult8['Error']===true ) {
 							$bError    = true;
 							$iErrCode  = 7412;
 							$sErrMesg .= "Error Code:'7412' \n";
-							$sErrMesg .= "Problem inserting the Hubs! \n";
+							$sErrMesg .= "Problem inserting the Permissions2! \n";
 							$sErrMesg .= $aTempResult8['ErrMesg'];
 						} else {
+							//-- Extract the PermissionId --//
+							$iPermissionId = $aTempResult8['LastId'];
+						}
+					}
+					
+					//-----------------------------------------------------------------------------//
+					//-- 5.7.3.6.A.9 - Add the Hub                                               --//
+					//-----------------------------------------------------------------------------//
+					if( $bError===false ) {
+						$aTempResult9 = DB_InsertHub( $sPostDatabaseName, $iPremiseId, $iHubTypeId, $sHubName, $sHubSerialCode, "" );
+						
+						if( $aTempResult9['Error']===true ) {
+							$bError    = true;
+							$iErrCode  = 7414;
+							$sErrMesg .= "Error Code:'7414' \n";
+							$sErrMesg .= "Problem inserting the Hubs! \n";
+							$sErrMesg .= $aTempResult9['ErrMesg'];
+						} else {
 							//-- Extract the HubId --//
-							$iHubId = $aTempResult8['LastId'];
+							$iHubId = $aTempResult9['LastId'];
 						}
 					}
 					
@@ -1362,7 +1380,8 @@ if($bError===false) {
 								"UserId"        => $iUserId,
 								"PremiseInfoId" => $iPremiseInfoId,
 								"PremiseId"     => $iPremiseId,
-								"PermissionId"  => $iPermissionId,
+								"PermPremiseId" => $iPermissionId,
+								"PermServerId"  => $iPermissionId,
 								"HubId"         => $iHubId
 							)
 						);
@@ -1433,8 +1452,8 @@ if( $bTransactionStarted===true ) {
 		
 	} else {
 		//-- Rollback changes --//
-		$oRestrictedDB->dbRollback();
-		
+		//$oRestrictedDB->dbRollback();
+		$oRestrictedDB->dbEndTransaction();
 	}
 }
 
