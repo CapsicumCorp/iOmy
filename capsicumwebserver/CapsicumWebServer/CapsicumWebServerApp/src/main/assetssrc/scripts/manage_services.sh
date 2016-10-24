@@ -99,6 +99,7 @@ template_to_conf_lighttpd() {
     webport="8080"
   else
     webport="$1"
+		shift
   fi
   servername=$*
 
@@ -115,11 +116,13 @@ template_to_conf_lighttpd_with_docpath() {
     docpath="${app}"
   else
     docpath="$1"
+		shift
   fi
   if [ "$1" == "" ] ; then
     webport="8080"
   else
     webport="$1"
+		shift
   fi
   servername=$*
 
@@ -136,11 +139,13 @@ template_to_conf_php() {
     phpram="128M"
   else
     phpram="$1"
+		shift
   fi
-  if [ "$2" == "" ] ; then
+  if [ "$1" == "" ] ; then
     phptimezone="Australia/Brisbane"
   else
-    phptimezone="$2"
+    phptimezone="$1"
+		shift
   fi
   cat "${sbin}/php/conf/php.ini.template" | ${SED} "s_%datafolder%_${app}_" | ${SED} "s_%phpram%_${phpram}_" | ${SED} "s_%phptimezone%_${phptimezone}_" > "${sbin}/php/conf/php.ini"
 }
@@ -155,6 +160,7 @@ template_to_conf_mysql() {
     mysqlport="3306"
   else
     mysqlport="$1"
+		shift
   fi
   cat "${sbin}/mysql/conf/mysql.ini.template" | ${SED} "s_%datafolder%_${app}_" | ${SED} "s_%mysqlport%_${mysqlport}_" > "${sbin}/mysql/conf/mysql.ini"
 }
