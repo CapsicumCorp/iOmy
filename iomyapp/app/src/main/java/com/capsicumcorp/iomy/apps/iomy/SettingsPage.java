@@ -35,6 +35,8 @@ import android.widget.LinearLayout;
 
 //The deprecation ignore is for findPreference as it is deprecated on newer Android APIs
 public class SettingsPage extends PreferenceActivity {
+    private SharedPreferences.OnSharedPreferenceChangeListener changeListener;
+
     @SuppressWarnings("deprecation")
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,7 +72,25 @@ public class SettingsPage extends PreferenceActivity {
         PreferenceScreen server_settings = (PreferenceScreen) getPreferenceScreen().findPreference("server_settings_key");
         Intent server_settings_intent = new Intent(this, ServiceSettings.class);
         server_settings.setIntent(server_settings_intent);
+
+        changeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+                    @Override
+                    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                        if (key.equals("pref_watch_inputs_enabled") || key.equals("pref_lighttpdphp_enabled") || key.equals("pref_mysql_enabled")) {
+                            Application.getInstance().wakeUpServerServicesThread();
+                        }
+                    }
+                };
+        sharedPref.registerOnSharedPreferenceChangeListener(changeListener);
     }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPref.unregisterOnSharedPreferenceChangeListener(changeListener);
+    }
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
