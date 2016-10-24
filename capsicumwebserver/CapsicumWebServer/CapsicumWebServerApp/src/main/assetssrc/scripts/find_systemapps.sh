@@ -33,14 +33,14 @@ find_app() {
   APPVAR=$1
   APPNAME=$2
   # First check native as that will normally be correct
-  if [ -f "${systempath}/xbin/${APPNAME}" ] ; then
-    # Success
-    eval export ${APPVAR}="${systempath}/xbin/${APPNAME}"
-    return 0
-  fi
   if [ -f "${systempath}/bin/${APPNAME}" ] ; then
     # Success
     eval export ${APPVAR}="${systempath}/bin/${APPNAME}"
+    return 0
+  fi
+  if [ -f "${systempath}/xbin/${APPNAME}" ] ; then
+    # Success
+    eval export ${APPVAR}="${systempath}/xbin/${APPNAME}"
     return 0
   fi
   # Next try with busybox as that normally has the most tools
