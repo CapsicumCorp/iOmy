@@ -69,7 +69,7 @@ class DBMySQL {
 			//----------------------------------------------------//
 			if( isset( $aConfig['charset'] ) ) {
 				if( strlen($aConfig['charset']) > 1 ) {
-					if( !version_compare( PHP_VERSION, '5.3.6', '<' )) {
+					if( !version_compare( PHP_VERSION,    '5.3.6',    '<' )) {
 						$sDBUrl    .= $aConfig['charset'].";";
 					}
 				}
@@ -115,7 +115,7 @@ class DBMySQL {
 				//----------------------------------------------------//
 				if( isset( $aConfig['charset'] ) ) {
 					if( strlen($aConfig['charset']) > 1 ) {
-						if( version_compare( PHP_VERSION, '5.3.6', '<' ) ){
+						if( version_compare( PHP_VERSION,    '5.3.6',    '<' ) ){
 							$this->DBConn->execute("SET NAMES ".$aConfig['charset']);
 						}
 					}

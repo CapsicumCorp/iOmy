@@ -20,7 +20,6 @@
 		private $_connectionHandle = null;
 
 		private $_expressionProvider = null;
-
 		/**
 		 * Constructs a new instance of MainQueryProvider
 		 * 
@@ -146,7 +145,6 @@
 					die('(MainQueryProvider) Unknown resource set ' . $sResourceSetName);
 				
 			}
-
 			
 			$sSQL = "SELECT * FROM $sResourceSetName";
 			

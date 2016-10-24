@@ -1407,8 +1407,8 @@ if($bError===false) {
 				} else {
 					//-- ERROR: Unsupported "InsertType" --//
 					$bError = true;
-					$iErrCode  = 7449;
-					$sErrMesg .= "Error Code:'7449' \n";
+					$iErrCode  = 7599;
+					$sErrMesg .= "Error Code:'7599' \n";
 					$sErrMesg .= "When attempting to 'InsertHub' a unsupported 'InsertType' was used! \n";
 				}
 				
@@ -1452,8 +1452,7 @@ if( $bTransactionStarted===true ) {
 		
 	} else {
 		//-- Rollback changes --//
-		//$oRestrictedDB->dbRollback();
-		$oRestrictedDB->dbEndTransaction();
+		$oRestrictedDB->dbRollback();
 	}
 }
 
@@ -1463,7 +1462,7 @@ if( $bTransactionStarted===true ) {
 //====================================================================//
 
 //----------------------------------------//
-//-- API didn't encounter an Error      --//
+//-- IF API didn't encounter an Error   --//
 //----------------------------------------//
 if( $bError===false && $aResult!=false ) {
 	try {
@@ -1490,7 +1489,7 @@ if( $bError===false && $aResult!=false ) {
 	
 	
 //----------------------------------------//
-//-- API Error has occurred             --//
+//-- ELSE API Error has occurred        --//
 //----------------------------------------//
 } else {
 	//-- Set the page to JSON when an error. Note this can be changed to "text/html" or "test/plain". --//

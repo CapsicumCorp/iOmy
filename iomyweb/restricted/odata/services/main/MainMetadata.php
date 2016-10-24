@@ -1,29 +1,46 @@
 <?php
 
+/*
+This file is part of iOmy.
 
- 
+iOmy is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+iOmy is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+
 //====================================================//
 //== Table of Contents                              ==//
 //====================================================//
 //------------------------------------------------//
 //-- 3.0  - CLASS DECLARATIONS                  --//
-//-- 3.1  - User Info                           --//
-//-- 3.2  - Users Premises                      --//
-//-- 3.3  - Premise Locations                   --//
-//-- 3.4  - Users Hubs                          --//
-//-- 3.5  - Users Rooms                         --//
-//-- 3.6  - Users IO                            --//
-//-- 3.7  - Users Thing                         --//
-//-- 3.8  - Users Sensors                       --//
-//-- 3.9  - Data TinyInt                        --//
-//-- 3.10 - Data Int                            --//
-//-- 3.11 - Data BigInt                         --//
-//-- 3.12 - Data Float                          --//
-//-- 3.13 - Data TinyString                     --//
-//-- 3.14 - Data ShortString                    --//
-//-- 3.15 - Data Medstring                      --//
-//-- 3.16 - Users Premise Log                   --//
-//-- 3.17 - Users Gateways                      --//
+//-- 3.1   - User Info                          --//
+//-- 3.2   - Users Premises                     --//
+//-- 3.3   - Premise Locations                  --//
+//-- 3.4   - Users Hubs                         --//
+//-- 3.5   - Users Rooms                        --//
+//-- 3.6   - Users IO                           --//
+//-- 3.7   - Users Thing                        --//
+//-- 3.8   - Users Sensors                      --//
+//-- 3.9   - Data TinyInt                       --//
+//-- 3.10  - Data Int                           --//
+//-- 3.11  - Data BigInt                        --//
+//-- 3.12  - Data Float                         --//
+//-- 3.13  - Data TinyString                    --//
+//-- 3.14  - Data ShortString                   --//
+//-- 3.15  - Data Medstring                     --//
+//-- 3.16  - Users Premise Log                  --//
+//-- 3.17  - Users Gateways                     --//
 //-- 3.101 - PREMISETYPES                       --//
 //-- 3.102 - PREMISEBUILDINGTYPES               --//
 //-- 3.103 - PREMISEOCCUPANTS                   --//
@@ -46,51 +63,45 @@
 //-- 3.120 - ROOMTYPE                           --//
 //-- 3.121 - LINKTYPE                           --//
 //------------------------------------------------//
-//-- 4.0  - METADATA DECLARATION                --//
-//-- 4.1  - User Info                           --//
-//-- 4.2  - Users Premises                      --//
-//-- 4.3  - Premise Locations                   --//
-//-- 4.4  - Users Units                         --//
-//-- 4.5  - Users Rooms                         --//
-//-- 4.6  - Users IO                            --//
-//-- 4.7  - Users Thing                         --//
-//-- 4.8  - Users Sensors                       --//
-//-- 4.9  - Data TinyInt                        --//
-//-- 4.10 - Data Int                            --//
-//-- 4.11 - Data BigInt                         --//
-//-- 4.12 - Data Float                          --//
-//-- 4.13 - Data TinyString                     --//
+//-- 4.0   - METADATA DECLARATION               --//
+//-- 4.1   - User Info                          --//
+//-- 4.2   - Users Premises                     --//
+//-- 4.3   - Premise Locations                  --//
+//-- 4.4   - Users Units                        --//
+//-- 4.5   - Users Rooms                        --//
+//-- 4.6   - Users IO                           --//
+//-- 4.7   - Users Thing                        --//
+//-- 4.8   - Users Sensors                      --//
+//-- 4.9   - Data TinyInt                       --//
+//-- 4.10  - Data Int                           --//
+//-- 4.11  - Data BigInt                        --//
+//-- 4.12  - Data Float                         --//
+//-- 4.13  - Data TinyString                    --//
 //-- 4.14 - Data ShortString                    --//
-//-- 4.15 - Data Medstring                      --//
-//-- 4.16 - Users Premise Log                   --//
-//-- 4.17 - Users Gateways                      --//
-//------------------------------------------------//
-
-//------------------------------------------------//
-
-//------------------------------------------------//
-//-- 4.0  - METADATA DECLARATION				--//
-//-- 4.1  - PREMISETYPES						--//
-//-- 4.2  - PREMISEBUILDINGTYPES				--//
-//-- 4.3  - PREMISEOCCUPANTS					--//
-//-- 4.4  - PREMISEBEDROOMS						--//
-//-- 4.5  - PREMISEFLOORS						--//
-//-- 4.6  - PREMISEROOMS						--//
-//-- 4.7  - POSTCODES							--//
-//-- 4.8  - TIMEZONES							--//
-//-- 4.9  - STATEPROVINCE						--//
-//-- 4.10 - COUNTRIES							--//
-//-- 4.11 - CURRENCIES							--//
-//-- 4.12 - LANGUAGES							--//
-//-- 4.13 - RSCAT								--//
-//-- 4.14 - RSSUBCAT							--//
-//-- 4.15 - RSTARIFF							--//
-//-- 4.16 - RSTYPES								--//
-//-- 4.17 - UOMS								--//
-//-- 4.18 - ICONS								--//
-//-- 4.19 - GENDER								--//
-//-- 4.20 - ROOMTYPE							--//
-//-- 4.21 - LINKTYPE							--//
+//-- 4.15  - Data Medstring                     --//
+//-- 4.16  - Users Premise Log                  --//
+//-- 4.17  - Users Gateways                     --//
+//-- 4.101 - PREMISETYPES                       --//
+//-- 4.102 - PREMISEBUILDINGTYPES               --//
+//-- 4.103 - PREMISEOCCUPANTS                   --//
+//-- 4.104 - PREMISEBEDROOMS                    --//
+//-- 4.105 - PREMISEFLOORS                      --//
+//-- 4.106 - PREMISEROOMS                       --//
+//-- 4.107 - POSTCODES                          --//
+//-- 4.108 - TIMEZONES                          --//
+//-- 4.109 - STATEPROVINCE                      --//
+//-- 4.110 - COUNTRIES                          --//
+//-- 4.111 - CURRENCIES                         --//
+//-- 4.112 - LANGUAGES                          --//
+//-- 4.113 - RSCAT                              --//
+//-- 4.114 - RSSUBCAT                           --//
+//-- 4.115 - RSTARIFF                           --//
+//-- 4.116 - RSTYPES                            --//
+//-- 4.117 - UOMS                               --//
+//-- 4.118 - ICONS                              --//
+//-- 4.119 - GENDER                             --//
+//-- 4.120 - ROOMTYPE                           --//
+//-- 4.121 - LINKTYPE                           --//
 //------------------------------------------------//
 
 
@@ -890,7 +901,6 @@ class VR_DATAMEDSTRING{
 	public $UOM_PK;
 	public $UOM_NAME;
 	public $UOM_RATE;
-
 }
 
 /**
