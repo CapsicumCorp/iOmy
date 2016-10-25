@@ -83,6 +83,8 @@ public class RunServerServices extends Thread {
 
     private ServiceSettings serviceSettings; //Used to update the switches when a service starts or stops
 
+    private int changeServiceCnt=0; //Every time a service change is requested this value will increment
+
     RunServerServices(Context context, String SystemDirectory, String StorageFolderName) {
         this.context = context;
         this.SystemDirectory = SystemDirectory;
@@ -100,7 +102,15 @@ public class RunServerServices extends Thread {
         int exitval;
 
         p=runtime.exec(cmd);
-        p.waitFor();
+        boolean waiting=true;
+        while (waiting) {
+            try {
+                p.waitFor();
+                waiting = false;
+            } catch (InterruptedException e) {
+                //Ignore interrupts while waiting for program to finish executing
+            }
+        }
         exitval=p.exitValue();
 
         //When finished with runtime.exec some Android devices don't close the connection to stdin, stdout, and stderr if not explicitly destroyed
@@ -114,7 +124,15 @@ public class RunServerServices extends Thread {
         int exitval;
 
         p=runtime.exec(cmd);
-        p.waitFor();
+        boolean waiting=true;
+        while (waiting) {
+            try {
+                p.waitFor();
+                waiting = false;
+            } catch (InterruptedException e) {
+                //Ignore interrupts while waiting for program to finish executing
+            }
+        }
         exitval=p.exitValue();
 
         //When finished with runtime.exec some Android devices don't close the connection to stdin, stdout, and stderr if not explicitly destroyed
@@ -140,39 +158,44 @@ public class RunServerServices extends Thread {
         }
         Log.println(Log.INFO, "RunServerServices", "run(): Starting services");
         setProgressNotificationText("Starting Web Server Services");
+        setChangeServiceCnt(0);
         while (!getQuit()) {
             //Keep the services running
-            if (Application.getInstance().getLighttpdServerEnabled()) {
-                if (!getBoolIsLighttpdRunning() && getLighttpdOverrideState()) {
+            if (!getBoolIsLighttpdRunning()) {
+                if (Application.getInstance().getLighttpdServerEnabled() && getLighttpdOverrideState()) {
                     startLighttpd();
                     startphp();
                     changeServiceSettingsLighttpdCheckbox(true);
-                } else if (getBoolIsLighttpdRunning() && !getLighttpdOverrideState()) {
+                }
+            } else {
+                if (!Application.getInstance().getLighttpdServerEnabled() || !getLighttpdOverrideState()) {
                     stopLighttpd();
                     stopphp();
                     changeServiceSettingsLighttpdCheckbox(false);
                 }
             }
-            if (Application.getInstance().getMySQLEnabled()) {
-                if (!getBoolIsMySQLRunning() && getMySQLOverrideState()) {
+            if (!getBoolIsMySQLRunning()) {
+                if (Application.getInstance().getMySQLEnabled() && getMySQLOverrideState()) {
                     startmysql();
                     bootstrap_mysql();
                     changeServiceSettingsMySQLCheckbox(true);
-                } else if (getBoolIsMySQLRunning() && !getMySQLOverrideState()) {
+                }
+            } else {
+                if (!Application.getInstance().getMySQLEnabled() || !getMySQLOverrideState()) {
                     stopmysql();
                     changeServiceSettingsMySQLCheckbox(false);
                 }
             }
-            if (Application.getInstance().getWatchInputsEnabled()) {
-                if (!getIsWatchInputsRunning() && getWatchInputsOverrideState()) {
+            if (!getIsWatchInputsRunning()) {
+                if (Application.getInstance().getWatchInputsEnabled() && getWatchInputsOverrideState()) {
                     startWatchInputs();
                     changeServiceSettingsWatchInputsCheckbox(true);
-                } else if (getIsWatchInputsRunning() && !getWatchInputsOverrideState()) {
+                }
+            } else {
+                if (!Application.getInstance().getWatchInputsEnabled() || !getWatchInputsOverrideState()) {
                     stopWatchInputs();
                     changeServiceSettingsWatchInputsCheckbox(false);
                 }
-            } else if (!Application.getInstance().getWatchInputsEnabled() && getIsWatchInputsRunning()) {
-                stopWatchInputs();
             }
             final ProgressPage progressPage=getProgressPage();
             if (progressPage!=null) {
@@ -184,6 +207,11 @@ public class RunServerServices extends Thread {
                         setProgressPage(null);
                     }
                 });
+            }
+            if (getChangeServiceCnt()>0) {
+                //Skip sleep until Change Service Count is 0
+                decChangeServiceCnt();
+                continue;
             }
             try {
                 Thread.sleep(5000);
@@ -230,6 +258,11 @@ public class RunServerServices extends Thread {
         } catch (InterruptedException e) {
             //Do nothing
         }
+    }
+    //Change the state of a service by interrupting the main loop
+    public void changeServiceState() {
+        incChangeServiceCnt();
+        interrupt();
     }
     //True=Start watch inputs if currently stopped
     //False=Stop watch inputs if currently running
@@ -512,5 +545,17 @@ public class RunServerServices extends Thread {
     }
     public synchronized boolean getQuit() {
         return quit;
+    }
+    private synchronized int getChangeServiceCnt() {
+        return changeServiceCnt;
+    }
+    private synchronized void setChangeServiceCnt(int val) {
+        this.changeServiceCnt=val;
+    }
+    private synchronized void decChangeServiceCnt() {
+        --this.changeServiceCnt;
+    }
+    private synchronized void incChangeServiceCnt() {
+        ++this.changeServiceCnt;
     }
 }

@@ -99,7 +99,15 @@ public class ExtractServerServices extends Thread {
         int exitval;
 
         p=runtime.exec(cmd);
-        p.waitFor();
+        boolean waiting=true;
+        while (waiting) {
+            try {
+                p.waitFor();
+                waiting = false;
+            } catch (InterruptedException e) {
+                //Ignore interrupts while waiting for program to finish executing
+            }
+        }
         exitval=p.exitValue();
 
         //When finished with runtime.exec some Android devices don't close the connection to stdin, stdout, and stderr if not explicitly destroyed
@@ -113,7 +121,15 @@ public class ExtractServerServices extends Thread {
         int exitval;
 
         p=runtime.exec(cmd);
-        p.waitFor();
+        boolean waiting=true;
+        while (waiting) {
+            try {
+                p.waitFor();
+                waiting = false;
+            } catch (InterruptedException e) {
+                //Ignore interrupts while waiting for program to finish executing
+            }
+        }
         exitval=p.exitValue();
 
         //When finished with runtime.exec some Android devices don't close the connection to stdin, stdout, and stderr if not explicitly destroyed

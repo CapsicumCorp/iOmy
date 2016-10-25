@@ -56,19 +56,16 @@ public class ServiceSettings extends AppCompatActivity {
         watchInputsEnableSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 changeWatchInputsCheckbox(!isChecked, true);
-                applicationInstance.runServerServices.overrideWatchInputsState(isChecked);
             }
         });
         lighttpdEnableSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 changeLighttpdCheckbox(!isChecked, true);
-                applicationInstance.runServerServices.overrideLighttpdState(isChecked);
             }
         });
         mySQLEnableSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 changeMySQLCheckbox(!isChecked, true);
-                applicationInstance.runServerServices.overrideMySQLState(isChecked);
             }
         });
     }
@@ -79,6 +76,7 @@ public class ServiceSettings extends AppCompatActivity {
     }
     //NOTE: Android will change the slider when the user clicks it, so we need to change it back then
     //  wait for the server service to change it when the service change has been applied
+    //  The checked listener will also be called when we change the checked value
     //From fromcheckedlistener=true means the checked listener called this function
     public void changeWatchInputsCheckbox(boolean checked, boolean fromcheckedlistener) {
         if (!fromcheckedlistener) {
@@ -88,6 +86,8 @@ public class ServiceSettings extends AppCompatActivity {
             if (ignoreWatchInputsCheckedListener) {
                 ignoreWatchInputsCheckedListener=false;
                 return;
+            } else {
+                applicationInstance.runServerServices.overrideWatchInputsState(!checked);
             }
         }
         SwitchCompat watchInputsEnableSwitch=(SwitchCompat) findViewById(R.id.watchInputsEnableSwitch);
@@ -101,6 +101,8 @@ public class ServiceSettings extends AppCompatActivity {
             if (ignoreLighttpdCheckedListener) {
                 ignoreLighttpdCheckedListener=false;
                 return;
+            } else {
+                applicationInstance.runServerServices.overrideLighttpdState(!checked);
             }
         }
         SwitchCompat lighttpdEnableSwitch=(SwitchCompat) findViewById(R.id.lighttpdEnableSwitch);
@@ -114,6 +116,8 @@ public class ServiceSettings extends AppCompatActivity {
             if (ignoreMySQLCheckedListener) {
                 ignoreMySQLCheckedListener=false;
                 return;
+            } else {
+                applicationInstance.runServerServices.overrideMySQLState(!checked);
             }
         }
         SwitchCompat mySQLEnableSwitch=(SwitchCompat) findViewById(R.id.mySQLEnableSwitch);

@@ -176,7 +176,7 @@ public class Application extends android.app.Application {
     }
 
     public synchronized void wakeUpServerServicesThread() {
-        runServerServices.interrupt();
+        runServerServices.changeServiceState();
     }
     public boolean getServiceStarted() {
         return this.serviceStarted;
