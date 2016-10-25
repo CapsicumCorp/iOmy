@@ -31,6 +31,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.HttpAuthHandler;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -42,6 +43,8 @@ import android.webkit.WebViewClient;
  */
 public class IOMy extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener {
+
+    private int menuItemId;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -60,14 +63,19 @@ public class IOMy extends AppCompatActivity
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().hide();
 
+        final NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view_iomy);
+        navigationView.setNavigationItemSelectedListener(this);
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_iomy);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                navigationView.getMenu().findItem(menuItemId).setChecked(false);
+            }
+        };
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view_iomy);
-        navigationView.setNavigationItemSelectedListener(this);
 
         // Configure the webview widget to use JavaScript (ESSENTIAL!)
         WebView iomy = (WebView) findViewById(R.id.iomy_view);
@@ -90,9 +98,9 @@ public class IOMy extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
+        menuItemId = item.getItemId();
 
-        if (id == R.id.nav_settings) {
+        if (menuItemId == R.id.nav_settings) {
             Intent intent = new Intent(this, SettingsPage.class);
             this.startActivity(intent);
         }
