@@ -271,10 +271,6 @@ public class InstallWizard {
 
         //--- Proceed from the license agreement to the question about using the device as the server. ---//
         } else if (title == Titles.licenseAgreementTitle) {
-            this.summonWebserverDevicePage(activity);
-
-        //--- If the user wishes to use the device as the server, setup the webserver with all the necessary configurations. ---/
-        } else if (title == Titles.webserverDeviceTitle && answer == this.YES) {
             this.loadServerDeviceProgress(activity);
 
         //--- After the server is setup, bring up the database setup. ---//
