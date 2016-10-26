@@ -33,8 +33,8 @@ binaries=""
 binaries="${binaries} components/bin/armeabi"
 binaries="${binaries} components/lib/armeabi"
 
-tar cv ${binaries} | xz -9ev > webserverarmbinaries_${datesuffix}.tar.xz
+tar --owner=root --group=root -cv ${binaries} | xz -9ev > webserverarmbinaries_${datesuffix}.tar.xz
 
 # Make archive file with architecture independent MySQL initial database
-tar cv components/mysql/sbin/data | xz -9ev > webservermysqlinitialdatabase_${datesuffix}.tar.xz
+tar --owner=root --group=root -cv components/mysql/sbin/data | xz -9ev > webservermysqlinitialdatabase_${datesuffix}.tar.xz
 
