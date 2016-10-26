@@ -225,9 +225,9 @@ function NonDataViewName($sViewType) {
 
 
 function getCurrentSchema() {
-	//-- TODO:	Legacy alias that doesn't need to be here anymore --//
-	//$sResult = $oRestrictedDB->DataSchema;
-	$sResult = "ctm02";
+	global$oRestrictedDB;
+	
+	$sResult = $oRestrictedDB->DataSchema;
 	
 	return $sResult;
 }
@@ -251,30 +251,30 @@ function dbAddPresetLogToPremiseLog( $iUserId, $iPresetLogActionId, $iUTS, $iPre
 	global $oRestrictedDB;
 	
 	//-- 1.2 - Other Varirables --//
-	$bValidNumeric          = false;            //-- BOOLEAN:	Used for checking if a number is valid or not --//
-	$bError                 = false;            //-- BOOL:		--//
-	$sErrMesg               = "";               //-- STRING:	--//
-	$aReturn                = array();          //-- ARRAY:		--//
+	$bValidNumeric          = false;            //-- BOOLEAN:   Used for checking if a number is valid or not --//
+	$bError                 = false;            //-- BOOL:      --//
+	$sErrMesg               = "";               //-- STRING:    --//
+	$aReturn                = array();          //-- ARRAY:     --//
 	
-	$sSchema				= "";				//-- STRING:	Used to store the Current Schema --//
-	$sQueryId				= "";				//-- STRING:	Used to store the SQL string that is used to retrieve the Sequence			--//
-	$sQueryInsert			= "";				//-- STRING:	Used to store the SQL string so it can be passed to the database functions	--//
+	$sSchema                = "";               //-- STRING:    Used to store the Current Schema --//
+	$sQueryId               = "";               //-- STRING:    Used to store the SQL string that is used to retrieve the Sequence			--//
+	$sQueryInsert           = "";               //-- STRING:    Used to store the SQL string so it can be passed to the database functions	--//
 	
-	$aResultId				= array();			//-- ARRAY:		--//
-	$aResultInsert			= array();			//-- ARRAY:		--//
-	$aOutputColsId			= array();			//-- ARRAY:		An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	$aResultId              = array();          //-- ARRAY:     --//
+	$aResultInsert          = array();          //-- ARRAY:     --//
+	$aOutputColsId          = array();          //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
 
-	$aInputValsInsert		= array();			//-- ARRAY:		SQL bind input parameters	--//
-	$iInsertId				= -1;				//-- INTEGER:	Used to store Sequence that will be used as the Primary Key in the "Insert Query" --//
+	$aInputValsInsert       = array();          //-- ARRAY:     SQL bind input parameters	--//
+	$iInsertId              = -1;               //-- INTEGER:   Used to store Sequence that will be used as the Primary Key in the "Insert Query" --//
 	
 	//----------------------------------------//
-	//-- 3.0 - Insert the new UserInfo		--//
+	//-- 3.0 - Insert the new UserInfo      --//
 	//----------------------------------------//
 	if( $bError===false ) {
 		try {
 			
 			//----------------------------------------//
-			//-- SQL Query - Insert PremiseLog		--//
+			//-- SQL Query - Insert PremiseLog      --//
 			//----------------------------------------//
 			$sQueryInsert .= "INSERT INTO `PREMISELOG` ";
 			$sQueryInsert .= "( ";
@@ -288,22 +288,22 @@ function dbAddPresetLogToPremiseLog( $iUserId, $iPresetLogActionId, $iUTS, $iPre
 			
 			//-- Input binding --//
 			$aInputValsInsert = array(
-				array( "Name"=>"PremiseId",						"type"=>"BINT",			"value"=>$iPremiseId			),
-				array( "Name"=>"UserId",						"type"=>"BINT",			"value"=>$iUserId				),
-				array( "Name"=>"LogPresetId",					"type"=>"INT",			"value"=>$iPresetLogActionId	),
-				array( "Name"=>"LogCustomId",					"type"=>"NUL",			"value"=>null					),
-				array( "Name"=>"UTS",							"type"=>"BINT",			"value"=>$iUTS					),
-				array( "Name"=>"String",						"type"=>"STR",			"value"=>$sCustom1				)
+				array( "Name"=>"PremiseId",         "type"=>"BINT",         "value"=>$iPremiseId            ),
+				array( "Name"=>"UserId",            "type"=>"BINT",         "value"=>$iUserId               ),
+				array( "Name"=>"LogPresetId",       "type"=>"INT",          "value"=>$iPresetLogActionId    ),
+				array( "Name"=>"LogCustomId",       "type"=>"NUL",          "value"=>null                   ),
+				array( "Name"=>"UTS",               "type"=>"BINT",         "value"=>$iUTS                  ),
+				array( "Name"=>"String",            "type"=>"STR",          "value"=>$sCustom1              )
 			);
 			
 			//-- Run the SQL Query and save the results --//
 			$aResultInsert = $oRestrictedDB->InputBindUpdateQuery( $sQueryInsert, $aInputValsInsert );
 			
 			//----------------------------//
-			//-- Error Checking			--//
+			//-- Error Checking         --//
 			//----------------------------//
 			if( $aResultInsert["Error"]===true ) {
-				//-- Error Occurred when Inserting		--//
+				//-- Error Occurred when Inserting --//
 				$bError     = true;
 				$sErrMesg  .= "Error inserting the new \"PremiseLog\"! \n";
 				$sErrMesg  .= $aResultInsert["ErrMesg"]." \n";
@@ -338,24 +338,24 @@ function dbAddPresetLogToPremiseLog( $iUserId, $iPresetLogActionId, $iUTS, $iPre
 
 function dbGetPremiseLogsBetweenUTS( $iPremiseId, $iStartstamp, $iEndstamp) {
 	//----------------------------------------//
-	//-- 1.0 - Declare Variables			--//
+	//-- 1.0 - Declare Variables            --//
 	//----------------------------------------//
 		
 	//-- 1.1 - Global Variables --//
 	global $oRestrictedDB;
 	
 	//-- 1.2 - Other Varirables --//
-	$aResult		= array();
-	$aReturn		= array();
-	$sSQL			= "";
-	$bError			= false;
-	$sErrMesg		= "";
+	$aResult        = array();
+	$aReturn        = array();
+	$sSQL           = "";
+	$bError         = false;
+	$sErrMesg       = "";
 	
 	$aTemporaryView = array();
-	$sView			= "";
+	$sView          = "";
 
 	//----------------------------------------//
-	//-- 3.0 - Insert the new Utility		--//
+	//-- 3.0 - Insert the new Utility       --//
 	//----------------------------------------//
 	//-- Retrieve the View in an array --//
 	$aTemporaryView = NonDataViewName("PremiseLogs");
@@ -390,22 +390,22 @@ function dbGetPremiseLogsBetweenUTS( $iPremiseId, $iStartstamp, $iEndstamp) {
 		
 		//-- SQL Input Values --//
 		$aInputVals = array(
-			array( "Name"=>"PremiseId",			"type"=>"BINT",		"value"=>$iPremiseId ),
-			array( "Name"=>"Startstamp",		"type"=>"BINT",		"value"=>$iStartstamp ),
-			array( "Name"=>"Endstamp",			"type"=>"BINT",		"value"=>$iEndstamp )
+			array( "Name"=>"PremiseId",         "type"=>"BINT",     "value"=>$iPremiseId ),
+			array( "Name"=>"Startstamp",        "type"=>"BINT",     "value"=>$iStartstamp ),
+			array( "Name"=>"Endstamp",          "type"=>"BINT",     "value"=>$iEndstamp )
 		);
 		
 		$aOutputCols = array(
-			array( "Name"=>"PremiseId",					"type"=>"INT" ),
-			array( "Name"=>"PremiseName",				"type"=>"STR" ),
-			array( "Name"=>"PremiseDesc",				"type"=>"STR" ),
-			array( "Name"=>"PremiseLogId",				"type"=>"INT" ),
-			array( "Name"=>"PremiseLogUTS",				"type"=>"INT" ),
-			array( "Name"=>"PremiseLogCustom1",			"type"=>"STR" ),
-			array( "Name"=>"PremiseLogUser",			"type"=>"STR" ),
-			array( "Name"=>"LogPresetId",				"type"=>"INT" ),
-			array( "Name"=>"LogPresetName",				"type"=>"STR" ),
-			array( "Name"=>"LogPresetDesc",				"type"=>"STR" )
+			array( "Name"=>"PremiseId",                 "type"=>"INT" ),
+			array( "Name"=>"PremiseName",               "type"=>"STR" ),
+			array( "Name"=>"PremiseDesc",               "type"=>"STR" ),
+			array( "Name"=>"PremiseLogId",              "type"=>"INT" ),
+			array( "Name"=>"PremiseLogUTS",             "type"=>"INT" ),
+			array( "Name"=>"PremiseLogCustom1",         "type"=>"STR" ),
+			array( "Name"=>"PremiseLogUser",            "type"=>"STR" ),
+			array( "Name"=>"LogPresetId",               "type"=>"INT" ),
+			array( "Name"=>"LogPresetName",             "type"=>"STR" ),
+			array( "Name"=>"LogPresetDesc",             "type"=>"STR" )
 		);
 
 		$aResult = $oRestrictedDB->FullBindQuery($sSQL, $aInputVals, $aOutputCols, 0);
@@ -3240,6 +3240,7 @@ function dbAddNewLink( $iCommId, $iLinkTypeId, $iInfoId, $iConnectionId, $sSeria
 //-- ADD LINK CONNECTION                                                    --//
 //----------------------------------------------------------------------------//
 function dbAddNewLinkConnectionInfo( $iConnProtocolId, $iConnFrequencyId, $iConnCryptTypeId, $sConnAddress, $iConnPort, $sConnName, $sConnUsername="", $sConnPassword="", $bSQLTransaction ) {
+	
 	//------------------------------------------------------------------------//
 	//-- DESCRIPTION:                                                       --//
 	//--    This function is used add the LINKCONN entry                    --//

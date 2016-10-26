@@ -57,10 +57,18 @@ class DBMySQL {
 				//-- Create the Database Url --//
 				$sDBUrl        = $aConfig['uri']."dbname=".$aConfig['schema'].";";
 				
+				//-- Setup the default Schema --//
+				$this->DataSchema = $aConfig['schema'];
+				
+				
 			//-- ELSE the database isn't present    --//
 			} else {
 				//-- Create the Database Url --//
 				$sDBUrl        = $aConfig['uri'];
+			}
+			
+			if( isset($aConfig['viewschema']) ) {
+				$this->ViewSchema = $aConfig['viewschema'];
 			}
 			
 			

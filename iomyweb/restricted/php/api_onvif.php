@@ -70,7 +70,7 @@ require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';       //--
 require_once SITE_BASE.'/restricted/php/special/versions/0.1.0.php';        //-- This library is used to perform the inserting of a new Onvif Server and Streams into the database --//
 
 //------------------------------------------------------------//
-//-- 1.4 - Flag an Error is there is no Database access     --//
+//-- 1.4 - Flag an Error as there is no Database access     --//
 //------------------------------------------------------------//
 if( $aRestrictedApiCore['RestrictedDB']===false ) {
 	$bError    = true;
@@ -549,7 +549,6 @@ if($bError===false) {
 			}
 		}
 	}
-	
 }
 
 
@@ -574,7 +573,8 @@ if( $bError===false ) {
 			//--------------------------------------------------------------------//
 			if( $bResult===false ) {
 				$bError    = true;
-				$sErrMesg .= "Error Code:'' \n";
+				$iErrCode  = 1202;
+				$sErrMesg .= "Error Code:'1202' \n";
 				$sErrMesg .= "Device isn't a valid Onvif Server! \n";
 				$sErrMesg .= "Please use the network address and port of a valid Onvif Server! \n";
 			}
@@ -599,8 +599,8 @@ if( $bError===false ) {
 					
 				} else {
 					$bError = true;
-					$iErrCode  = 1202;
-					$sErrMesg .= "Error Code:'1202' \n";
+					$iErrCode  = 1204;
+					$sErrMesg .= "Error Code:'1204' \n";
 					$sErrMesg .= "Problem looking up the data for the selected Hub\n";
 					$sErrMesg .= $aHubData['ErrMesg'];
 				}
@@ -1157,8 +1157,6 @@ if( $bError===false ) {
 				$sErrMesg .= "Error Code:'7400' \n";
 				$sErrMesg .= $e7400->getMessage();
 			}
-			
-			
 			
 		//================================================================//
 		//== Unsupported Mode                                           ==//
