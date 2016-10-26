@@ -62,6 +62,7 @@ public class Application extends android.app.Application {
     //Whether the various services have started
     private boolean monitoringStarted;
 
+    public ExtractServerServices extractServerServices;
     public RunServerServices runServerServices;
 
     public static Application getInstance() {
@@ -78,6 +79,7 @@ public class Application extends android.app.Application {
         ExternalStorageFolderName=null;
         SystemDirectory=null;
         serviceStarted = false;
+        extractServerServices=null;
         runServerServices=null;
     }
     public void onCreate() {
@@ -91,7 +93,10 @@ public class Application extends android.app.Application {
         this.InternalStorageFolderName =this.getFilesDir().getPath();
         this.ExternalStorageFolderName=Environment.getExternalStorageDirectory().getPath()+"/CapsicumWS";
 
-        //Create Server Services
+        //Create Extract Server Services object
+        extractServerServices=new ExtractServerServices(this);
+
+        //Create Run Server Services object
         runServerServices=new RunServerServices(this);
     }
     //Returns true if the first run wizard needs to be run
