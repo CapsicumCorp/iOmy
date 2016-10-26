@@ -42,13 +42,13 @@ public class ServerProgressPage extends ProgressPage {
         Application application=Application.getInstance();
 
         //Extract Server Services
-        ExtractServerServices extractServerServices=new ExtractServerServices(this, application.getSystemDirectory(), application.getStorageFolderName());
-        extractServerServices.setProgressPage(this);
+        application.extractServerServices.setProgressPage(this);
+        application.runServerServices.setProgressPage(this);
 
         //Set to start the server services straight after extracting
-        extractServerServices.setRunServerServices(true);
+        application.extractServerServices.setRunServerServices(true);
 
-        //The extract thread will call onComplete when extract is finished
-        extractServerServices.start();
+        //The the run thread will call onComplete when extract is finished
+        application.extractServerServices.start();
     }
 }

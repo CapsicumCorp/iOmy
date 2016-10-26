@@ -147,7 +147,7 @@ public class RunServerServices extends Thread {
         Log.println(Log.INFO, "RunServerServices", "run(): Waiting for extract");
         while (!getQuit()) {
             //Wait for assets to be extracted
-            if (getIsExtracted()) {
+            if (Application.getInstance().extractServerServices.areWebServerAssetsExtracted()) {
                 break;
             }
             try {
@@ -475,12 +475,6 @@ public class RunServerServices extends Thread {
         setWatchInputsRunning(false);
     }
 
-    public synchronized void setIsExtracted(boolean val) {
-        isExtracted=val;
-    }
-    public synchronized boolean getIsExtracted() {
-        return isExtracted;
-    }
     public synchronized int getIsLighttpdRunning() {
         try {
             String cmd[]={ SystemDirectory + "/bin/sh", INTERNAL_LOCATION + "/scripts/manage_services.sh", SystemDirectory, INTERNAL_LOCATION, "is_running_lighttpd" };

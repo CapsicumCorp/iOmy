@@ -142,7 +142,6 @@ public class ExtractServerServices extends Thread {
     public void run() {
         //Log.println(Log.INFO, "WebServer", "system directory=" + SystemDirectory + " , internal storage=" + context.getFilesDir().getPath());
         if (!areWebServerAssetsExtracted()) {
-            setIsExtracted(false);
             if (!extractAssets()) {
                 NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(Application.getInstance())
                         .setContentTitle(Application.getInstance().getAppName()+" Extract Error")
@@ -166,14 +165,10 @@ public class ExtractServerServices extends Thread {
         setPermissions();
         setConfigsFromTemplates();
 
-        setIsExtracted(true);
-
         Log.println(Log.INFO, "WebServer", "Extract complete");
 
         if (runServerServices) {
             Log.println(Log.INFO, "WebServer", "About to run server services");
-            Application.getInstance().runServerServices.setProgressPage(progressPage);
-            Application.getInstance().runServerServices.setIsExtracted(true);
             Application.getInstance().runServerServices.interrupt();
 
             //Only run the server services once per request
