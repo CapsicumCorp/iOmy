@@ -60,26 +60,21 @@ export app="$1"
 shift
 export sbin="${app}/components"
 
-source ${app}/scripts/find_systemapps.sh ${systempath} > /dev/null 2> /dev/null
+#source ${app}/scripts/find_systemapps.sh ${systempath} > /dev/null 2> /dev/null
+
+abi="armeabi"
+pie="pie"
+
+WHOAMI="${sbin}/bin/${abi}/busybox whoami"
+SED="${sbin}/bin/${abi}/busybox sed"
+PS="${sbin}/bin/${abi}/busybox ps"
+KILL="${sbin}/bin/${abi}/busybox kill"
+SLEEP="${sbin}/bin/${abi}/busybox sleep"
 
 USER=$(${WHOAMI})
 
 # Prioritise local libraries over system libraries
-export LD_LIBRARY_PATH="${sbin}/lib"
-
-# Find a busybox compatible tool
-if [ -f "${systempath}/xbin/busybox" ] ; then
-  BOX="${systempath}/xbin/busybox"
-fi
-if [ -f "${systempath}/bin/busybox" ] ; then
-  BOX="${systempath}/bin/busybox"
-fi
-if [ -f "${systempath}/bin/toybox" ] ; then
-  BOX="${systempath}/bin/toybox"
-fi
-if [ -f "${systempath}/bin/toolbox" ] ; then
-  BOX="${systempath}/bin/toolbox"
-fi
+export LD_LIBRARY_PATH="${sbin}/lib/${abi}"
 
 lighttpdpidfile="${app}/var/run/lighttpd.pid"
 phppidfile="${app}/var/run/php.pid"
@@ -103,7 +98,7 @@ template_to_conf_lighttpd() {
   fi
   servername=$*
 
-  cat "${sbin}/lighttpd/conf/lighttpd.conf.template" | ${SED} "s_%datafolder%_${app}_" | ${SED} "s_%docfolder%_${app}_" | ${SED} "s_%webport%_${webport}_" | ${SED} "s_%servername%_${servername}_" > "${sbin}/lighttpd/conf/lighttpd.conf"
+  cat "${sbin}/etc/lighttpd/lighttpd.conf.template" | ${SED} "s_%datafolder%_${app}_" | ${SED} "s_%docfolder%_${app}_" | ${SED} "s_%webport%_${webport}_" | ${SED} "s_%servername%_${servername}_" > "${sbin}/etc/lighttpd/lighttpd.conf"
 }
 
 # Args: docpath webport server name
@@ -126,7 +121,7 @@ template_to_conf_lighttpd_with_docpath() {
   fi
   servername=$*
 
-  cat "${sbin}/lighttpd/conf/lighttpd.conf.template" | ${SED} "s_%datafolder%_${app}_" | ${SED} "s_%docfolder%_${docpath}_" | ${SED} "s_%webport%_${webport}_" | ${SED} "s_%servername%_${servername}_" > "${sbin}/lighttpd/conf/lighttpd.conf"
+  cat "${sbin}/etc/lighttpd/lighttpd.conf.template" | ${SED} "s_%datafolder%_${app}_" | ${SED} "s_%docfolder%_${docpath}_" | ${SED} "s_%webport%_${webport}_" | ${SED} "s_%servername%_${servername}_" > "${sbin}/etc/lighttpd/lighttpd.conf"
 }
 
 # Args: datapath ram timezone
@@ -147,7 +142,7 @@ template_to_conf_php() {
     phptimezone="$1"
 		shift
   fi
-  cat "${sbin}/php/conf/php.ini.template" | ${SED} "s_%datafolder%_${app}_" | ${SED} "s_%phpram%_${phpram}_" | ${SED} "s_%phptimezone%_${phptimezone}_" > "${sbin}/php/conf/php.ini"
+  cat "${sbin}/etc/php/php.ini.template" | ${SED} "s_%datafolder%_${app}_" | ${SED} "s_%phpram%_${phpram}_" | ${SED} "s_%phptimezone%_${phptimezone}_" > "${sbin}/etc/php/php.ini"
 }
 
 # Args: mysqlport
@@ -162,7 +157,7 @@ template_to_conf_mysql() {
     mysqlport="$1"
 		shift
   fi
-  cat "${sbin}/mysql/conf/mysql.ini.template" | ${SED} "s_%datafolder%_${app}_" | ${SED} "s_%mysqlport%_${mysqlport}_" > "${sbin}/mysql/conf/mysql.ini"
+  cat "${sbin}/etc/mysql/mysql.ini.template" | ${SED} "s_%datafolder%_${app}_" | ${SED} "s_%mysqlport%_${mysqlport}_" > "${sbin}/etc/mysql/mysql.ini"
 }
 
 # Args: <none>
@@ -227,7 +222,7 @@ start_lighttpd() {
   rm "${lighttpdlogfile}" 2> /dev/null
 
   #echo "Starting lighttpd"
-  output=$($sbin/lighttpd/sbin/lighttpd -f $sbin/lighttpd/conf/lighttpd.conf 2>&1)
+  output=$(${sbin}/bin/${abi}/${pie}/lighttpd -f $sbin/etc/lighttpd/lighttpd.conf 2>&1)
 }
 
 start_php() {
@@ -240,7 +235,7 @@ start_php() {
   rm "${phperrorlogfile}" 2> /dev/null
 
   #echo "Starting php"
-  $sbin/php/sbin/php-cgi -b $app/var/run/php.sock -c $sbin/php/conf > /dev/null 2> /dev/null & PID_PHP=$!
+  $sbin/bin/${abi}/${pie}/php-cgi -b $app/var/run/php.sock -c $sbin/etc/php > /dev/null 2> /dev/null & PID_PHP=$!
   echo ${PID_PHP} > "${phppidfile}"
 }
 
@@ -254,7 +249,7 @@ start_mysql() {
   rm "${mysqllogfile}" 2> /dev/null
 
   #echo "Starting mysql"
-  $sbin/mysql/sbin/mysqld --defaults-file=$sbin/mysql/conf/mysql.ini --user=${USER} --language=$sbin/mysql/sbin/share/mysql/english > /dev/null 2> /dev/null & PID_MYSQL=$!
+  $sbin/bin/${abi}/${pie}/mysqld --defaults-file=$sbin/etc/mysql/mysql.ini --user=${USER} --language=$sbin/mysql/sbin/share/mysql/english > /dev/null 2> /dev/null & PID_MYSQL=$!
   echo ${PID_MYSQL} > "${mysqldpidfile}"
 
   # Always run mysql when mysql is started
@@ -504,11 +499,11 @@ bootstrap_mysql() {
   if [ ! -f "${app}/mysqlbootstrapped" ] ; then
     wait_mysql_started
     #echo "$(date)Running extra mysql import"
-    $sbin/mysql/sbin/mysql --defaults-file=$sbin/mysql/conf/mysql.ini -hlocalhost -uroot mysql < "$sbin/mysql/extra_bootstrap.sql" > /dev/null 2> /dev/null
+    $sbin/bin/${abi}/${pie}/mysql --defaults-file=$sbin/etc/mysql/mysql.ini -hlocalhost -uroot mysql < "$sbin/mysql/extra_bootstrap.sql" > /dev/null 2> /dev/null
     if [ $? != 0 ] ; then
       return 1
     fi
-    $sbin/mysql/sbin/mysql --defaults-file=$sbin/mysql/conf/mysql.ini -hlocalhost -uroot mysql < "$sbin/mysql/extra2_bootstrap.sql" > /dev/null 2> /dev/null
+    $sbin/bin/${abi}/${pie}/mysql --defaults-file=$sbin/etc/mysql/mysql.ini -hlocalhost -uroot mysql < "$sbin/mysql/extra2_bootstrap.sql" > /dev/null 2> /dev/null
     if [ $? != 0 ] ; then
       return 1
     fi
@@ -519,19 +514,19 @@ bootstrap_mysql() {
 mysql_sqlcommand() {
   wait_mysql_started
   sql=$*
-  $sbin/mysql/sbin/mysql --defaults-file=$sbin/mysql/conf/mysql.ini -hlocalhost -uroot -e "$sql" > /dev/null 2> /dev/null
+  $sbin/bin/${abi}/${pie}/mysql --defaults-file=$sbin/etc/mysql/mysql.ini -hlocalhost -uroot -e "$sql" > /dev/null 2> /dev/null
 }
 
 mysql_check() {
   wait_mysql_started
-  $sbin/mysql/sbin/mysqlcheck --defaults-file=$sbin/mysql/conf/mysql.ini -hlocalhost -uroot -A --auto-repair > /dev/null 2> /dev/null
+  $sbin/bin/${abi}/${pie}/mysqlcheck --defaults-file=$sbin/etc/mysql/mysql.ini -hlocalhost -uroot -A --auto-repair > /dev/null 2> /dev/null
 }
 
 # Run this when MySQL is updated
 # NOTE: mysql_upgrade segfaults when it tries to run mysqlcheck so we run mysqlcheck directly
 mysql_upgrade() {
   wait_mysql_started
-  $sbin/mysql/sbin/mysqlcheck --defaults-file=$sbin/mysql/conf/mysql.ini -hlocalhost -uroot -A -g -A --auto-repair > /dev/null 2> /dev/null
+  $sbin/bin/${abi}/${pie}/mysqlcheck --defaults-file=$sbin/etc/mysql/mysql.ini -hlocalhost -uroot -A -g -A --auto-repair > /dev/null 2> /dev/null
 
   # Now restart mysql as the upgrade may have changed some things
   stop_mysql

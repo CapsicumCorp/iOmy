@@ -25,10 +25,6 @@ if [ $? != 0 ] ; then
   echo "Could not cd to ${basedir}/htdocs"
 	exit 1
 fi
-if [ ! -d "${iomywebpath}" ] ; then
-  echo "ioMy web folder not found: ${iomywebpath}"
-	exit 1
-fi
 
 # Cleanup old install
 rm -vfr LICENSE README iomyserver.php index.php public restricted ui 2> /dev/null

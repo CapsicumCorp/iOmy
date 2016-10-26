@@ -43,6 +43,7 @@ public class ServerProgressPage extends ProgressPage {
 
         //Extract Server Services
         application.extractServerServices.setProgressPage(this);
+        application.runServerServices.setProgressPage(this);
 
         //Set to start the server services straight after extracting
         application.extractServerServices.setRunServerServices(true);

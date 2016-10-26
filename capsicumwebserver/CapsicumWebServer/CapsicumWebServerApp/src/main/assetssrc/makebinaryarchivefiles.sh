@@ -30,14 +30,8 @@ datesuffix=$(date +"%Y%m%d")
 
 # Make archive file with arm binaries
 binaries=""
-binaries="${binaries} components/bin"
-binaries="${binaries} components/lib"
-binaries="${binaries} components/lighttpd/sbin"
-binaries="${binaries} components/mysql/sbin/mysql"
-binaries="${binaries} components/mysql/sbin/mysqlcheck"
-binaries="${binaries} components/mysql/sbin/mysqld"
-binaries="${binaries} components/mysql/sbin/share"
-binaries="${binaries} components/php/sbin"
+binaries="${binaries} components/bin/armeabi"
+binaries="${binaries} components/lib/armeabi"
 
 tar cv ${binaries} | xz -9ev > webserverarmbinaries_${datesuffix}.tar.xz
 

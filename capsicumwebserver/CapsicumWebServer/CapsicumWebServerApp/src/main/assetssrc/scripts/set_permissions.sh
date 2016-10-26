@@ -52,14 +52,8 @@ shift
 export sbin="${app}/components"
 
 # Set app permissions so can execute the programs
-chmod 0755 $sbin/lighttpd/sbin/lighttpd 2>/dev/null
-chmod 0755 $sbin/php/sbin/php 2>/dev/null
-chmod 0755 $sbin/php/sbin/php-cgi 2>/dev/null
-chmod 0755 $sbin/mysql/sbin/mysql 2>/dev/null
-chmod 0755 $sbin/mysql/sbin/mysqld 2>/dev/null
-chmod 0755 $sbin/mysql/sbin/mysql_upgrade 2>/dev/null
-chmod 0755 $sbin/mysql/sbin/mysqlcheck 2>/dev/null
-chmod 0755 $sbin/bin/ffmpeg 2>/dev/null
+chmod 0755 $sbin/bin/armeabi/*
+chmod 0755 $sbin/bin/armeabi/pie/* 2>/dev/null
 chmod 0755 $app/scripts/manage_services.sh 2> /dev/null
 chmod 0755 $app/scripts/run_ffmpeg.sh 2> /dev/null
 

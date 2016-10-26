@@ -58,8 +58,11 @@ export app="$1"
 shift
 export sbin="${app}/components"
 
+abi="armeabi"
+pie="pie"
+
 # Prioritise local libraries over system libraries
 export LD_LIBRARY_PATH="${sbin}/lib"
 
-output=$($sbin/bin/ffmpeg $* 2>&1)
+output=$($sbin/bin/${abi}/${pie}/ffmpeg $* 2>&1)
 
