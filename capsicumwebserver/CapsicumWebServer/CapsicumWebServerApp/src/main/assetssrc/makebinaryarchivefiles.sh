@@ -32,6 +32,7 @@ datesuffix=$(date +"%Y%m%d")
 binaries=""
 binaries="${binaries} components/bin/armeabi"
 binaries="${binaries} components/lib/armeabi"
+binaries="${binaries} components/mysql/sbin/share"
 
 tar --owner=root --group=root -cv ${binaries} | xz -9ev > webserverarmbinaries_${datesuffix}.tar.xz
 
