@@ -21,18 +21,21 @@ allprojects {
 //NOTE2: clang with ndk 10d, 11, and 12 causes crashes in the c code, gcc 4.9 works fine
 //NOTE: Only armeabi, mips, and x86 are available with NDK Platform <= 19, only armeabi is available <= 8
 //NOTE: mips64 seems to have a build issue at the moment with CrystaX
+//NOTE: See https://code.google.com/p/android/issues/detail?id=73725 We are compiling NDK with SDK version 9 so binary code will run on older Android
+//  You will need to select 21 to compile for newer ABIs such as arm64-v8a, x86_64, or mips64
 //project.ext.NDKTOOLCHAIN="clang"
 //project.ext.NDKTOOLCHAINVER="3.8"
 project.ext.NDKTOOLCHAIN="gcc"
 project.ext.NDKTOOLCHAINVER="5"
 project.ext.NDKSTL="gnustl_shared"
-//project.ext.NDKCOMPILESDKVERSION="9" //9 (Gingerbread 2.3 - 2.3.2)
+project.ext.NDKCOMPILESDKVERSION="9" //9 (Gingerbread 2.3 - 2.3.2)
 //project.ext.NDKCOMPILESDKVERSION="21" // >=21 (Lollipop 5.0) needed for arm64-v8a
-project.ext.NDKCOMPILESDKVERSION="24" //Android 7.0 (Nougat)
+//project.ext.NDKCOMPILESDKVERSION="24" //Android 7.0 (Nougat)
 //project.ext.APP_ABIS = ["armeabi"]
 //project.ext.APP_ABIS = ["armeabi","armeabi-v7a"]
 //project.ext.APP_ABIS = ["arm64-v8a"]
-project.ext.APP_ABIS = ["armeabi","armeabi-v7a","arm64-v8a","x86","x86_64","mips"]
+project.ext.APP_ABIS = ["armeabi","armeabi-v7a","x86","mips"]
+//project.ext.APP_ABIS = ["armeabi","armeabi-v7a","arm64-v8a","x86","x86_64","mips"]
 
 //List all the boost libraries that are being used by all libraries
 project.ext.BOOST_SHARED_LIBS = ["boost_system", "boost_thread", "boost_chrono"]
