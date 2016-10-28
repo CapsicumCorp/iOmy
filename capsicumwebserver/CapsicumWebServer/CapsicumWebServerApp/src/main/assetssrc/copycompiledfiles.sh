@@ -34,15 +34,17 @@ if [ ! -d "${compilepath}" ] ; then
 fi
 
 # Cleanup old install
-rm -vfr bin lib lighttpd/sbin mysql/sbin php/sbin 2> /dev/null
+rm -vfr bin/armeabi/pie lib/armeabi mysql/sbin 2> /dev/null
 
 # Copy general binary files
-mkdir -v bin
-cp -aiv "${compilepath}/compiled/bin/curl" bin/
-cp -aiv "${compilepath}/compiled/bin/ffmpeg" bin/
+binfiles="curl ffmpeg ffplay"
+mkdir -vp bin/armeabi/pie
+for binfile in ${binfiles}; do
+  cp -vi --preserve=all "${compilepath}/compiled/bin/${binfile}" bin/armeabi/pie/
+done
 
 # Copy general library files
-mkdir -v lib
+mkdir -vp lib/armeabi
 
 libfiles="
 libSDL-1.2.so.0
@@ -55,26 +57,26 @@ libmcrypt.so.4
 libpng16.so.16
 libxml2.so.2
 libz.so.1
+libffmpeg.so
 "
 
 for library in ${libfiles}; do
-  cp -vi --preserve=all "${compilepath}/compiled/lib/${library}" lib
+  cp -vi --preserve=all "${compilepath}/compiled/lib/${library}" lib/armeabi/
 done
 
 # Copy ssl library files
 ssllibfiles="libcrypto.so.1.0.0 libssl.so.1.0.0"
 for library in ${ssllibfiles}; do
-  cp -vi --preserve=all "${compilepath}/compiled/usr/lib/${library}" lib
+  cp -vi --preserve=all "${compilepath}/compiled/usr/lib/${library}" lib/armeabi/
 done
 
 # Copy lighttpd binary files
-mkdir -v lighttpd/sbin
-cp -aiv "${compilepath}/compiled/lighttpd/sbin/lighttpd" lighttpd/sbin/
+cp -aiv "${compilepath}/compiled/lighttpd/sbin/lighttpd" bin/armeabi/pie/
 
 # Copy php binary files
 mkdir -v php/sbin
-cp -aiv "${compilepath}/compiled/php/bin/php" php/sbin/
-cp -aiv "${compilepath}/compiled/php/bin/php-cgi" php/sbin/
+cp -aiv "${compilepath}/compiled/php/bin/php" bin/armeabi/pie/
+cp -aiv "${compilepath}/compiled/php/bin/php-cgi" bin/armeabi/pie/
 
 # Copy MySQL binary files
 mkdir -v mysql/sbin
@@ -87,7 +89,7 @@ mkdir -v mysql/sbin/share/mysql
 mysqlbin="mysql mysqlcheck mysqld"
 
 for file in ${mysqlbin}; do
-  cp -aiv "${compilepath}/compiled/mysql_arm/bin/${file}" mysql/sbin/
+  cp -aiv "${compilepath}/compiled/mysql_arm/bin/${file}" bin/armeabi/pie/
 done
 cp -aiv "${compilepath}/compiled/mysql_arm/share/charsets" mysql/sbin/share/
 cp -aiv "${compilepath}/compiled/mysql_arm/share/english" mysql/sbin/share/mysql/
