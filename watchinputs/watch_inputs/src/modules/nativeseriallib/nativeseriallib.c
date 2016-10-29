@@ -497,7 +497,7 @@ static int nativeseriallib_serial_port_set_baud_rate(void *serialport, int32_t b
 int serial_port_wait_ready_to_receive(void *serialport) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=nativeseriallib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   nativeserialdevice_t *serialportptr=serialport;
-  int fd, lerrno;
+  int lerrno;
   struct pollfd fds[1];
   int result;
 
@@ -548,8 +548,7 @@ int serial_port_wait_ready_to_receive(void *serialport) {
 int serial_port_receive_data(void *serialport, char *serbuf, int count) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=nativeseriallib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   nativeserialdevice_t *serialportptr=serialport;
-  int serdevidx, fd, lerrno, serbufcnt;
-  int result;
+  int lerrno, serbufcnt;
 
   PTHREAD_LOCK(&nativeseriallibmutex);
   if (!serialportptr->inuse || serialportptr->removed) {
@@ -713,7 +712,6 @@ static int nativeserialib_adddevice(char *filename) {
   serialportlib_ifaceptrs_ver_1_t *serialportlibifaceptr=nativeseriallib_deps[SERIALPORTLIB_DEPIDX].ifaceptr;
   int i, fd, result, lerrno;
   struct termios oldserporttio;
-  nativeserialdevice_t *tmpptr;
 #ifdef HAVE_LINUX_SERIAL_H
   struct serial_struct serinfo;
 #endif

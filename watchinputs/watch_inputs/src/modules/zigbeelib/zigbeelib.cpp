@@ -3468,7 +3468,6 @@ STATIC int zigbeelib_get_zigbee_send_values(int localzigbeeindex, int zigbeedevi
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   localzigbeedevice_t *localzigbeedeviceptr;
   int numzigbeedevices;
-  uint16_t i;
 
   //No need to mark localzigbee in use here as marking a zigbee device inuse does that anyway
   //This might need to change if we change to marking zigbee as not in use before sending the packet
@@ -3669,7 +3668,6 @@ void zigbee_send_multi_attribute_write_request(int localzigbeeindex, int zigbeed
   uint8_t zclcmdlen;
   uint64_t addr;
   uint16_t netaddr, profileid=0, manufacturerid;
-	uint16_t i;
   int zigbeelength;
 
   if (zigbeelib_get_zigbee_send_values(localzigbeeindex, zigbeedeviceindex, destendpnt, &addr, &netaddr, &profileid, nullptr, &localzigbeelocked, &zigbeelocked)!=0) {
@@ -3878,7 +3876,6 @@ void zigbeelib_send_read_reporting_configuration_record(int localzigbeeindex, in
   uint8_t zclcmdlen;
   uint64_t addr;
   uint16_t netaddr, profileid=0, manufacturerid;
-  uint16_t i;
 
   if (zigbeelib_get_zigbee_send_values(localzigbeeindex, zigbeedeviceindex, destendpnt, &addr, &netaddr, &profileid, nullptr, localzigbeelocked, zigbeelocked)!=0) {
     MOREDEBUG_EXITINGFUNC();
@@ -3948,13 +3945,9 @@ void zigbee_send_discover_attributes_request(int localzigbeeindex, int zigbeedev
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   zcl_general_request_t *zclcmd;
   zigbee_zcl_command_discover_attributes_request_t *zclattrreq;
-  localzigbeedevice_t *localzigbeedeviceptr;
-  zigbeedevice_t *zigbeedevices;
-  int numzigbeedevices;
   uint8_t zclcmdlen;
   uint64_t addr;
   uint16_t netaddr, profileid=0, manufacturerid=0, *manuptr;
-  uint16_t i;
 
   //manufacturerid is only needed in this function if usemanu is requested
   if (usemanu) {
@@ -4181,7 +4174,6 @@ void zigbeelib_generic_process_zigbee_zdo_node_descriptor_response(int localzigb
   uint16_t netaddr, manu, maxinbufsize, maxoutbufsize;
   uint64_t addr;
   bool havezigbeeendpoints=false;
-  zigbeeendpoint_t *zigbeeendpoints;
 
   MOREDEBUG_ENTERINGFUNC();
   netaddr=htole16(zdocmd->netaddr);
@@ -4469,7 +4461,6 @@ void zigbeelib_process_zigbee_zdo_match_descriptor_response(int localzigbeeindex
   uint8_t numendpoints;
   uint64_t addr;
   uint16_t netaddr;
-  int i;
 
   MOREDEBUG_ENTERINGFUNC();
 
@@ -4923,7 +4914,6 @@ extern void zigbeelib_decode_zigbee_home_automation_attribute(int localzigbeeind
   if (status!=ZIGBEE_ZCL_STATUS_SUCCESS) {
     debuglibifaceptr->debuglib_printf(1, "%s: Error: %s (%02" PRIX8 ") from Zigbee device: %016" PRIX64 ", %04" PRIX16 " Endpoint ID: %02" PRIX8 ", Cluster ID: %s (0x%04" PRIX16 "), Attribute: %s (%04" PRIX16 "), Manu: %s (%04" PRIX16 ")\n", __func__, zigbeelib_get_zigbee_zclstatus_string(status), status, zigbeeaddr, netaddr, endpoint, clusterstr.c_str(), clusterid, attrnamestr.c_str(), attrid, manustr.c_str(), manu);
   } else {
-		int copyresult, attrsize;
 		zigbeeattr_t *attrptr=NULL;
 		zigbeeattrmultival attrval;
 
@@ -5118,7 +5108,6 @@ void zigbeelib_process_api_zigbee_public_profile_report_attributes_response(int 
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) zigbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   uint8_t attrsize;
   uint16_t attrlen, attributeid;
-  uint8_t zcl_status;
 
   MOREDEBUG_ENTERINGFUNC();
 
@@ -5764,7 +5753,6 @@ void zigbeelib_remove_all_zigbee_devices(int localzigbeeindex, long *localzigbee
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) zigbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   int i;
   localzigbeedevice_t *localzigbeedeviceptr;
-  zigbeedevice_t *zigbeedeviceptr;
 
   MOREDEBUG_ENTERINGFUNC();
   zigbeelib_lockzigbee(zigbeelocked);
@@ -5812,7 +5800,6 @@ void zigbeelib_remove_all_zigbee_devices(int localzigbeeindex, long *localzigbee
 //NOTE: You should mark the zigbee device inuse before calling this function
 STATIC zigbeeendpoint_t *zigbeelib_find_zigbee_endpointptr_match_profile(zigbeedevice_t *zigbeedeviceptr, uint16_t profileid, long *localzigbeelocked, long *zigbeelocked) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  int i;
   zigbeeendpoint_t *endpointptr=NULL;
 
   MOREDEBUG_ENTERINGFUNC();
@@ -5876,7 +5863,6 @@ STATIC uint8_t zigbeelib_find_zigbee_endpoint_match_profile(zigbeedevice_t *zigb
 //NOTE: You should mark the zigbee device inuse before calling this function
 STATIC zigbeeendpoint_t *_zigbeelib_find_zigbee_endpointptr_match_profile_match_icluster(zigbeedevice_t *zigbeedeviceptr, uint16_t profileid, uint16_t iclusterid, long *localzigbeelocked, long *zigbeelocked) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  int i;
   zigbeeendpoint_t *endpointptr=NULL;
 
   MOREDEBUG_ENTERINGFUNC();
@@ -6032,9 +6018,8 @@ void zigbeelib_get_zigbee_endpoints(int localzigbeeindex, uint64_t addr, uint16_
 void zigbeelib_get_zigbee_next_endpoint_info(int localzigbeeindex, uint64_t addr, uint16_t netaddr, long *localzigbeelocked, long *zigbeelocked) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) zigbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   localzigbeedevice_t *localzigbeedeviceptr;
-  int pos, i;
+  int pos;
   zigbeedevice_t *zigbeedeviceptr;
-  zigbeeendpoint_t *zigbeeendpointptr;
   uint64_t zigbeeaddr;
   uint16_t zigbeenetaddr;
 
@@ -6077,14 +6062,11 @@ void zigbeelib_get_zigbee_next_endpoint_info(int localzigbeeindex, uint64_t addr
   Returns: A CMDLISTENER definition depending on the result
 */
 STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) zigbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=(commonserverlib_ifaceptrs_ver_1_t *) zigbeelib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
-  char tmpstrbuf[50], onoff;
+  char tmpstrbuf[50];
 	std::string tmpstring;
-  int i, j, len, found;
+  int i, len, found;
   uint64_t addr, zigbeeaddr=0;
-  uint8_t endpointid=0;
-  int numzigbeedevices;
   long localzigbeelocked=0, zigbeelocked=0;
 
   if (!commonserverlibifaceptr) {
@@ -6315,8 +6297,6 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
       commonserverlibifaceptr->serverlib_netputs("NO ZIGBEE DEVICES FOUND\n", clientsock, NULL);
     }
   } else if (strncmp(buffer, "refresh_zigbee_info ", 20)==0 && len>=36) {
-    localzigbeedevice_t *localzigbeedeviceptr;
-
     //Format: refresh_zigbee_info <64-bit addr>
     sscanf(buffer+20, "%016llX", (unsigned long long *) &addr);
     found=-1;
@@ -6351,9 +6331,8 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
 //Remove zigbee devices that have been scheduled for removal
 STATIC void zigbeelib_remove_scheduled_for_removal_zigbeedevices(void) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) zigbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
-  dbcounterlib_ifaceptrs_ver_1_t *dbcounterlibifaceptr=(dbcounterlib_ifaceptrs_ver_1_t *) zigbeelib_deps[DBCOUNTERLIB_DEPIDX].ifaceptr;
   localzigbeedevice_t *localzigbeedeviceptr;
-  int i, k, l, numlocalzigbeedevices;
+  int i, numlocalzigbeedevices;
   long localzigbeelocked=0, zigbeelocked=0;
 
   MOREDEBUG_ENTERINGFUNC();
@@ -6445,7 +6424,7 @@ static void zigbeelib_add_localzigbee_device_to_webapiclient_queue(int localzigb
 //  If an error is returned, assume that the zigbee device wasn't added to this library
 int zigbeelib_add_localzigbeedevice(zigbeelib_localzigbeedevice_ver_1_t *localzigbeedevice, zigbeelib_localzigbeedevice_iface_ver_1_t *zigbeedeviceiface, unsigned long long features, long *localzigbeelocked, long *zigbeelocked) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) zigbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
-  int i, j;
+  int i;
 
   if (!localzigbeedevice->devicetype) {
     //Need a device type
@@ -6524,10 +6503,8 @@ int zigbeelib_add_localzigbeedevice(zigbeelib_localzigbeedevice_ver_1_t *localzi
 */
 int zigbeelib_remove_localzigbeedevice(int localzigbeeindex, long *localzigbeelocked, long *zigbeelocked) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) zigbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
-  dbcounterlib_ifaceptrs_ver_1_t *dbcounterlibifaceptr=(dbcounterlib_ifaceptrs_ver_1_t *) zigbeelib_deps[DBCOUNTERLIB_DEPIDX].ifaceptr;
-  int i, j, l;
+  int i;
   localzigbeedevice_t *localzigbeedeviceptr;
-  zigbeeendpoint_t *endpointptr;
   char *devicetype;
   uint64_t addr;
 
@@ -6637,7 +6614,6 @@ STATIC void zigbeelib_find_zigbee_devices(time_t currenttime) {
   numlocalzigbeedevices=zigbeelib_getnumlocalzigbeedevices(&localzigbeelocked);
   for (i=0; i<numlocalzigbeedevices; i++) {
     int send_neighbor_table_request=0;
-    time_t last_broadcasttime;
 
     localzigbeedeviceptr=&zigbeelib_localzigbeedevices[i];
     if (zigbeelib_marklocalzigbee_inuse(localzigbeedeviceptr, &localzigbeelocked, &zigbeelocked)<0) {
@@ -6747,7 +6723,7 @@ STATIC void zigbeelib_identify_known_zigbee_devices(void) {
   dblib_ifaceptrs_ver_1_t *dblibifaceptr=(dblib_ifaceptrs_ver_1_t *) zigbeelib_deps[DBLIB_DEPIDX].ifaceptr;
   localzigbeedevice_t *localzigbeedeviceptr;
   int numlocalzigbeedevices;
-  int i, j, k, l;
+  int i;
   long localzigbeelocked=0, zigbeelocked=0;
 
   MOREDEBUG_ENTERINGFUNC();
@@ -6763,9 +6739,7 @@ STATIC void zigbeelib_identify_known_zigbee_devices(void) {
     for (auto &zigbeedeviceit : localzigbeedeviceptr->zigbeedevices) {
       uint64_t addr;
       uint16_t netaddr;
-      uint8_t endpointid[5]={0, 0, 0, 0, 0};
       int dbschemaversion=0;
-      zigbeeendpoint_t *zigbeeendpointptr;
 
       if (zigbeelib_markzigbee_inuse(&zigbeedeviceit.second, &localzigbeelocked, &zigbeelocked)<0) {
         continue;
@@ -7189,10 +7163,8 @@ STATIC void zigbeelib_refresh_zigbee_data(void) {
       debuglibifaceptr->debuglib_printf(1, "%s: Using source endpoint id: %02hhX for Home Automation profile on %s device: %016llX\n", __func__, localzigbeedeviceptr->devicetype, localzigbeedeviceptr->haendpointid, localzigbeedeviceptr->addr);
     }*/
     for (auto &zigbeedeviceit : localzigbeedeviceptr->zigbeedevices) {
-      int k;
       uint64_t zigbeeaddr;
       uint16_t zigbeenetaddr;
-      zigbeeendpoint_t *zigbeeendpointptr;
       uint16_t zigbeemanu;
       char zigbeerxonidle;
 
@@ -7248,7 +7220,6 @@ STATIC void zigbeelib_refresh_zigbee_data(void) {
   NOTE: Don't need to thread lock since the functions this calls will do the thread locking, we just disable canceling of the thread
 */
 STATIC void *zigbeelib_mainloop(void* UNUSED(val)) {
-  dbcounterlib_ifaceptrs_ver_1_t *dbcounterlibifaceptr=(dbcounterlib_ifaceptrs_ver_1_t *) zigbeelib_deps[DBCOUNTERLIB_DEPIDX].ifaceptr;
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) zigbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   time_t currenttime;
   time_t prevzigbeescantime;
@@ -7763,7 +7734,6 @@ static void initZigbeeDefs(void) {
 //Add a zigbee device to the web api client queue
 //TODO: Add a check to see if this is the gateway device
 static void zigbeelib_add_device_to_webapiclient_queue(int localzigbeeindex, int zigbeeidx) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) zigbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   webapiclientlib_ifaceptrs_ver_1_t *webapiclientlibifaceptr=(webapiclientlib_ifaceptrs_ver_1_t *) zigbeelib_deps[WEBAPICLIENTLIB_DEPIDX].ifaceptr;
 	webapiclient_zigbeelink_t zigbeelink;
 
@@ -7829,12 +7799,6 @@ static void zigbeelib_add_device_to_webapiclient_queue(int localzigbeeindex, int
 */
 static void zigbeelib_match_zigbeedevice_basicinfo(int localzigbeeindex, int zigbeeidx, long *localzigbeelocked, long *zigbeelocked) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) zigbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
-  zigbee_zdo_node_clusters_t *iclusters, *oclusters;
-  uint8_t i, endpointid, localzigbee_haendpointid;
-  uint16_t netaddr, profile, devid, devver;
-  uint64_t localzigbee_addr, addr;
-  int pos;
-  zigbeeendpoint_t *zigbeeendpointptr;
   zigbeedevice_t *zigbeedeviceptr;
   localzigbeedevice_t *localzigbeedeviceptr;
 
@@ -8002,7 +7966,7 @@ void zigbeelib_shutdown(void) {
   dbcounterlib_ifaceptrs_ver_1_t *dbcounterlibifaceptr=(dbcounterlib_ifaceptrs_ver_1_t *) zigbeelib_deps[DBCOUNTERLIB_DEPIDX].ifaceptr;
   dblib_ifaceptrs_ver_1_t *dblibifaceptr=(dblib_ifaceptrs_ver_1_t *) zigbeelib_deps[DBLIB_DEPIDX].ifaceptr;
   webapiclientlib_ifaceptrs_ver_1_t *webapiclientlibifaceptr=(webapiclientlib_ifaceptrs_ver_1_t *) zigbeelib_deps[WEBAPICLIENTLIB_DEPIDX].ifaceptr;
-  int i, j, l;
+  int i, j;
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
   if (zigbeelib_inuse==0) {

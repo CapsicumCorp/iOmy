@@ -511,10 +511,7 @@ int configlib_readcfgfile(void) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) configlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   FILE *file;
   char *linebuf;
-  int blockmode=0;
-  int curdevice=-1, curinput=0, i;
-  int curtrigger=-2, curoverrideidx=-1, curtriggeronidx=-1, curtriggeroffidx=-1;
-  int result, abort=0;
+  int abort=0;
   std::string curblock="<global>"; //If we see an item outside of a block put it in block: <global>
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);

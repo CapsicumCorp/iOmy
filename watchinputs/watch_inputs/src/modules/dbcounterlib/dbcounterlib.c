@@ -637,7 +637,6 @@ static int dbcounterlib_updatedatabase(void) {
   int i, result, numcounters, curoutidx, updatestatus=0, curupdatestatus;
   time_t curtime;
   struct timespec semwaittime;
-  multitypeval_t val;
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
 
