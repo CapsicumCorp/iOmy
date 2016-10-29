@@ -185,7 +185,7 @@ COMMONCFLAGS="-std=c99"
 #COMMONCPPFLAGS="-std=c++98"
 COMMONCPPFLAGS="-std=c++11"
 AS_IF([test "x$debug" = xtrue], [
-  COMMONFLAGS="${COMMONFLAGS} -DDEBUG -fsanitize=address -fsanitize=thread"
+  COMMONFLAGS="${COMMONFLAGS} -DDEBUG -fsanitize=thread"
 ], [
   COMMONFLAGS="${COMMONFLAGS} -s -O2 -fomit-frame-pointer -ftree-vectorize -fpredictive-commoning"
 ])
