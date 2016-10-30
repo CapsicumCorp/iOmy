@@ -3512,12 +3512,16 @@ STATIC int zigbeelib_get_zigbee_send_values(int localzigbeeindex, int zigbeedevi
   return 0;
 }
 
-static zcl_general_request_t *zigbeelib_prepare_zcl_request(int localzigbeeindex, int zigbeedeviceindex, uint8_t srcendpnt, uint8_t destendpnt, uint16_t clusterid, const uint16_t *manu, uint8_t cmdid, uint8_t payloadlen, uint8_t& zclcmdlen, long *localzigbeelocked, long *zigbeelocked) {
+/*
+  Prepare the header of a zigbee ZCL request
+  Returns a pointer to the allocated zclcmd structure or null on error
+*/
+static zcl_general_request_t *zigbeelib_prepare_zcl_request(int localzigbeeindex, int zigbeedeviceindex, uint8_t srcendpnt, uint8_t destendpnt, uint16_t clusterid, const uint16_t *manu, uint8_t cmdid, uint8_t payloadlen, uint8_t& zclcmdlen, long& localzigbeelocked, long& zigbeelocked) {
   zcl_general_request_t *zclcmd;
   uint64_t addr;
   uint16_t netaddr, profileid=0, manufacturerid;
 
-  if (zigbeelib_get_zigbee_send_values(localzigbeeindex, zigbeedeviceindex, destendpnt, &addr, &netaddr, &profileid, nullptr, localzigbeelocked, zigbeelocked)!=0) {
+  if (zigbeelib_get_zigbee_send_values(localzigbeeindex, zigbeedeviceindex, destendpnt, &addr, &netaddr, &profileid, nullptr, &localzigbeelocked, &zigbeelocked)!=0) {
     return nullptr;
   }
   if (manu) {
@@ -3543,8 +3547,13 @@ static zcl_general_request_t *zigbeelib_prepare_zcl_request(int localzigbeeindex
   zclcmd->srcendpnt=srcendpnt;
   zclcmd->clusterid=htole16(clusterid);
   zclcmd->profileid=htole16(profileid);
-  zclcmd->frame_control=0x04; //Include Manufacturer ID in payload
-  zclcmd->manu=htole16(manufacturerid);
+  if (manu) {
+    zclcmd->frame_control=0x04; //Include Manufacturer ID in payload
+    zclcmd->manu=htole16(manufacturerid);
+  } else {
+    zclcmd->frame_control=0; //Don't include Manufacturer ID in payload
+    zclcmd->manu=0;
+  }
   zclcmd->cmdid=cmdid;
   zclcmd->zigbeelength=payloadlen;
 
@@ -3574,38 +3583,14 @@ static void zigbeelib_send_multi_attribute_read(int localzigbeeindex, int zigbee
   zcl_general_request_t *zclcmd;
   zigbee_zcl_command_read_attribute_list_t *zclattrlist;
   uint8_t zclcmdlen;
-  uint64_t addr;
-  uint16_t netaddr, profileid=0;
 
-  if (zigbeelib_get_zigbee_send_values(localzigbeeindex, zigbeedeviceindex, destendpnt, &addr, &netaddr, &profileid, nullptr, localzigbeelocked, zigbeelocked)!=0) {
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
-  if (profileid==0) {
-    //Since profile id of 0x0000 is ZDO it shouldn't appear in a normal endpoint
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
-  //NOTE: We do minus 1 as the zigbeepayload value will overlap with the first by of zclattrlist
-  zclcmdlen=sizeof(zcl_general_request_t)+(sizeof(uint16_t)*attributeids.size())-1;
-  zclcmd=(zcl_general_request_t *) calloc(1, zclcmdlen);
+  zclcmd=zigbeelib_prepare_zcl_request(localzigbeeindex, zigbeedeviceindex, srcendpnt, destendpnt, clusterid, nullptr, ZIGBEE_ZCL_CMD_READ_ATTRIB, sizeof(uint16_t)*attributeids.size(), zclcmdlen, *localzigbeelocked, *zigbeelocked);
   if (!zclcmd) {
     //Failed to alloc ram for the zigbee command
     MOREDEBUG_EXITINGFUNC();
     return;
   }
   //Fill in the entered values
-  zclcmd->addr=htole64(addr);
-  zclcmd->netaddr=htole16(netaddr);
-  zclcmd->destendpnt=destendpnt;
-  zclcmd->srcendpnt=srcendpnt;
-  zclcmd->clusterid=htole16(clusterid);
-  zclcmd->profileid=htole16(profileid);
-  zclcmd->frame_control=0x00; //Dont include Manufacturer ID in payload
-  zclcmd->manu=0;
-  zclcmd->cmdid=ZIGBEE_ZCL_CMD_READ_ATTRIB;
-  zclcmd->zigbeelength=sizeof(uint16_t)*attributeids.size();
-  zclattrlist=(zigbee_zcl_command_read_attribute_list_t *) &(zclcmd->zigbeepayload);
   uint16_t attridx=0;
   for (auto &attridit : attributeids) {
     zclattrlist->attr[attridx]=htole16(attridit);
@@ -3641,11 +3626,13 @@ static void zigbeelib_send_multi_attribute_read_with_manufacturer_request(int lo
   zcl_general_request_t *zclcmd;
   zigbee_zcl_command_read_attribute_list_t *zclattrlist;
   uint8_t zclcmdlen;
-  uint64_t addr;
-  uint16_t netaddr, profileid=0, manufacturerid;
 
-  zclcmd=zigbeelib_prepare_zcl_request(localzigbeeindex, zigbeedeviceindex, srcendpnt, destendpnt, clusterid, manu, ZIGBEE_ZCL_CMD_READ_ATTRIB, sizeof(uint16_t)*attributeids.size(), zclcmdlen, localzigbeelocked, zigbeelocked);
-
+  zclcmd=zigbeelib_prepare_zcl_request(localzigbeeindex, zigbeedeviceindex, srcendpnt, destendpnt, clusterid, manu, ZIGBEE_ZCL_CMD_READ_ATTRIB, sizeof(uint16_t)*attributeids.size(), zclcmdlen, *localzigbeelocked, *zigbeelocked);
+  if (!zclcmd) {
+    //Failed to alloc ram for the zigbee command
+    MOREDEBUG_EXITINGFUNC();
+    return;
+  }
   //Fill in the entered values
   zclattrlist=(zigbee_zcl_command_read_attribute_list_t *) &(zclcmd->zigbeepayload);
   uint16_t attridx=0;
@@ -3675,52 +3662,19 @@ void zigbee_send_multi_attribute_write_request(int localzigbeeindex, int zigbeed
   zcl_general_request_t *zclcmd;
   uint8_t *zclattrlist;
   uint8_t zclcmdlen;
-  uint64_t addr;
-  uint16_t netaddr, profileid=0, manufacturerid;
   int zigbeelength;
 
-  if (zigbeelib_get_zigbee_send_values(localzigbeeindex, zigbeedeviceindex, destendpnt, &addr, &netaddr, &profileid, nullptr, &localzigbeelocked, &zigbeelocked)!=0) {
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
-  if (manu) {
-    manufacturerid=*manu;
-  } else {
-    manufacturerid=0;
-  }
-  if (profileid==0) {
-    //Since profile id of 0x0000 is ZDO it shouldn't appear in a normal endpoint
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
-  //NOTE: We do minus 1 as the zigbeepayload value will overlap with the first by of zclattrlist
   int attrtotsize=0;
-	for (auto const &attrit : outattrs) {
-		attrtotsize+=attrit.second.getSize();
-	}
-  zclcmd=(zcl_general_request_t *) calloc(1, sizeof(zcl_general_request_t)+( (sizeof(uint16_t)+sizeof(uint8_t))*outattrs.size())+attrtotsize-1);
+  for (auto const &attrit : outattrs) {
+    attrtotsize+=attrit.second.getSize();
+  }
+  zclcmd=zigbeelib_prepare_zcl_request(localzigbeeindex, zigbeedeviceindex, srcendpnt, destendpnt, clusterid, manu, ZIGBEE_ZCL_CMD_WRITE_ATTRIB, ((sizeof(uint16_t)+sizeof(uint8_t))*outattrs.size())+attrtotsize, zclcmdlen, localzigbeelocked, zigbeelocked);
   if (!zclcmd) {
     //Failed to alloc ram for the zigbee command
     MOREDEBUG_EXITINGFUNC();
     return;
   }
-
   //Fill in the entered values
-  zclcmd->addr=htole64(addr);
-  zclcmd->netaddr=htole16(netaddr);
-  zclcmd->destendpnt=destendpnt;
-  zclcmd->srcendpnt=srcendpnt;
-  zclcmd->clusterid=htole16(clusterid);
-  zclcmd->profileid=htole16(profileid);
-  if (manu) {
-    zclcmd->frame_control=0x04; //Include Manufacturer ID in payload
-    zclcmd->manu=htole16(manufacturerid);
-  } else {
-    zclcmd->frame_control=0; //Don't include Manufacturer ID in payload
-    zclcmd->manu=0;
-  }
-  zclcmd->cmdid=ZIGBEE_ZCL_CMD_WRITE_ATTRIB;
-
   zclattrlist=(uint8_t *) &(zclcmd->zigbeepayload);
   zigbeelength=0;
 	for (auto const &attrit : outattrs) {
@@ -3770,49 +3724,16 @@ static void zigbee_send_multi_attribute_configure_reporting_request(int localzig
   zcl_general_request_t *zclcmd;
   uint8_t *zclattrlist;
   uint8_t zclcmdlen;
-  uint64_t addr;
-  uint16_t netaddr, profileid=0, manufacturerid;
   int zigbeelength;
 
-  if (zigbeelib_get_zigbee_send_values(localzigbeeindex, zigbeedeviceindex, destendpnt, &addr, &netaddr, &profileid, nullptr, localzigbeelocked, zigbeelocked)!=0) {
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
-  if (manu) {
-    manufacturerid=*manu;
-  } else {
-    manufacturerid=0;
-  }
-  if (profileid==0) {
-    //Since profile id of 0x0000 is ZDO it shouldn't appear in a normal endpoint
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
-  //NOTE: We do minus 1 as the zigbeepayload value will overlap with the first by of zclattrlist
   //Use a fixed size now for allocation as we don't know the size beforehand
-  zclcmd=(zcl_general_request_t *) calloc(1, sizeof(zcl_general_request_t)+(100)-1);
+  zclcmd=zigbeelib_prepare_zcl_request(localzigbeeindex, zigbeedeviceindex, srcendpnt, destendpnt, clusterid, manu, ZIGBEE_ZCL_CMD_CONFIG_REPORT, 100, zclcmdlen, *localzigbeelocked, *zigbeelocked);
   if (!zclcmd) {
     //Failed to alloc ram for the zigbee command
     MOREDEBUG_EXITINGFUNC();
     return;
   }
-
   //Fill in the entered values
-  zclcmd->addr=htole64(addr);
-  zclcmd->netaddr=htole16(netaddr);
-  zclcmd->destendpnt=destendpnt;
-  zclcmd->srcendpnt=srcendpnt;
-  zclcmd->clusterid=htole16(clusterid);
-  zclcmd->profileid=htole16(profileid);
-  if (manu) {
-    zclcmd->frame_control=0x04; //Include Manufacturer ID in payload
-    zclcmd->manu=htole16(manufacturerid);
-  } else {
-    zclcmd->frame_control=0; //Don't include Manufacturer ID in payload
-    zclcmd->manu=0;
-  }
-  zclcmd->cmdid=ZIGBEE_ZCL_CMD_CONFIG_REPORT;
-
   zclattrlist=(uint8_t *) &(zclcmd->zigbeepayload);
   zigbeelength=0;
   for (auto &attrit : attrs) {
@@ -3883,47 +3804,14 @@ void zigbeelib_send_read_reporting_configuration_record(int localzigbeeindex, in
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   zcl_general_request_t *zclcmd;
   uint8_t zclcmdlen;
-  uint64_t addr;
-  uint16_t netaddr, profileid=0, manufacturerid;
 
-  if (zigbeelib_get_zigbee_send_values(localzigbeeindex, zigbeedeviceindex, destendpnt, &addr, &netaddr, &profileid, nullptr, localzigbeelocked, zigbeelocked)!=0) {
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
-  if (manu) {
-    manufacturerid=*manu;
-  } else {
-    manufacturerid=0;
-  }
-  if (profileid==0) {
-    //Since profile id of 0x0000 is ZDO it shouldn't appear in a normal endpoint
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
-  //NOTE: We do minus 1 as the zigbeepayload value will overlap with the first by of zclattrlist
-  zclcmdlen=sizeof(zcl_general_request_t)+sizeof(zigbee_zcl_read_reporting_configuration_record_t)*numattribs-1;
-  zclcmd=(zcl_general_request_t *) calloc(1, zclcmdlen);
+  zclcmd=zigbeelib_prepare_zcl_request(localzigbeeindex, zigbeedeviceindex, srcendpnt, destendpnt, clusterid, manu, ZIGBEE_ZCL_CMD_READ_REPORT_CFG, sizeof(zigbee_zcl_read_reporting_configuration_record_t)*numattribs, zclcmdlen, *localzigbeelocked, *zigbeelocked);
   if (!zclcmd) {
     //Failed to alloc ram for the zigbee command
     MOREDEBUG_EXITINGFUNC();
     return;
   }
   //Fill in the entered values
-  zclcmd->addr=htole64(addr);
-  zclcmd->netaddr=htole16(netaddr);
-  zclcmd->destendpnt=destendpnt;
-  zclcmd->srcendpnt=srcendpnt;
-  zclcmd->clusterid=htole16(clusterid);
-  zclcmd->profileid=htole16(profileid);
-  if (manu) {
-    zclcmd->frame_control=0x04; //Include Manufacturer ID in payload
-    zclcmd->manu=htole16(manufacturerid);
-  } else {
-    zclcmd->frame_control=0; //Don't include Manufacturer ID in payload
-    zclcmd->manu=0;
-  }
-  zclcmd->cmdid=ZIGBEE_ZCL_CMD_READ_REPORT_CFG;
-  zclcmd->zigbeelength=sizeof(zigbee_zcl_read_reporting_configuration_record_t)*numattribs;
   memcpy(&zclcmd->zigbeepayload, attrs, sizeof(zigbee_zcl_read_reporting_configuration_record_t)*numattribs);
 
   __zigbeelib_add_packet_to_send_queue(localzigbeeindex, (uint8_t *) zclcmd, zclcmdlen, ZIGBEE_ZIGBEE_ZCL_GENERAL, 1, zclcmd->netaddr, zclcmd->clusterid, zclcmd->netaddr, zclcmd->clusterid, localzigbeelocked, zigbeelocked);
