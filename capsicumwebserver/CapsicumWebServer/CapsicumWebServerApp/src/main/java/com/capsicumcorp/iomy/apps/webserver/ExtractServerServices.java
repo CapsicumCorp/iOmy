@@ -285,23 +285,13 @@ public class ExtractServerServices extends Thread {
                 boolean destFolderIsExternal;
                 boolean skip=false;
                 final String zipEntryName=zipEntry.getName();
-                progressPage.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        progressPage.changeNotificationText("Extracting file: " + zipEntryName);
-                    }
-                });
+                doNotification("Extracting file: " + zipEntryName);
                 //Log.println(Log.INFO, "WebServer", "SUPER DEBUG: Extracting file: "+zipEntry.getName());
                 for(int i=0; i<skipextracts.length; i++) {
                     if (doskipextracts[i]) {
                         if (zipEntry.getName().startsWith(skipextracts[i])) {
                             skip = true;
-                            progressPage.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    progressPage.changeNotificationText("Skipping file: " + zipEntryName);
-                                }
-                            });
+                            doNotification("Skipping file: " + zipEntryName);
                             //Log.println(Log.INFO, "WebServer", "SUPER DEBUG: Skipping file: " + zipEntry.getName() + " in assets.zip as it already exists");
                             break;
                         }
@@ -365,6 +355,14 @@ public class ExtractServerServices extends Thread {
             return true;
         }
         return true;
+    }
+    private void doNotification(final String message) {
+        progressPage.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressPage.changeNotificationText(message);
+            }
+        });
     }
     /**
      * Responsible for creating directory inside application's data directory
