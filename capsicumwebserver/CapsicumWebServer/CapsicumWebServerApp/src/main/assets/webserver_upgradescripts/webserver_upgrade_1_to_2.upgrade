@@ -2,7 +2,7 @@
 ; skipfolderifexist skips files in that folder unless they don't exist
 ; skipfile will always re-extract if the file doesn't exist
 ; deletefolder will recursively delete everything in the folder
-; newfile entries will override skipfolder entries
+; changedfile entries will override skipfolder entries
 
 ;Move config files
 mkdir components/etc
@@ -47,7 +47,7 @@ skipfile components/mysql/extra_bootstrap.sql
 skipfile components/mysql/extra2_bootstrap.sql
 
 ;Always skip this folder as it contains the MySQL database
-skipfolder components/mysql/data
+skipfolder components/mysql/sbin/data
 
 skipfolderifexist components/mysql/sbin/share
 
