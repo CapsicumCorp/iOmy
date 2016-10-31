@@ -1,0 +1,81 @@
+; An upgrade script to migrate the web server files from version 1 to version 2
+; skipfolderifexist skips files in that folder unless they don't exist
+; skipfile will always re-extract if the file doesn't exist
+; deletefolder will recursively delete everything in the folder
+; newfile entries will override skipfolder entries
+
+;Move config files
+mkdir components/etc
+mkdir components/etc/lighttpd
+mkdir components/etc/mysql
+mkdir components/etc/php
+
+movefile components/lighttpd/conf/lighttpd.conf.template components/etc/lighttpd
+movefile components/mysql/conf/mysql.ini.template components/etc/mysql
+movefile components/php/conf/php.ini.template components/etc/php
+
+;Old folders
+deletefile components/lighttpd/sbin/lighttpd
+deletefolder components/lighttpd
+
+;Old binaries
+deletefile components/bin/curl
+deletefile components/bin/ffmpeg
+deletefile components/lib/libSDL-1.2.so.0
+deletefile components/lib/libaio.so.1
+deletefile components/lib/libcrypto.so.1.0.0
+deletefile components/lib/libcurl.so.5
+deletefile components/lib/libfreetype.so.6
+deletefile components/lib/libiconv.so.2
+deletefile components/lib/libjpeg.so.62
+deletefile components/lib/libmcrypt.so.4
+deletefile components/lib/libpng16.so.16
+deletefile components/lib/libssl.so.1.0.0
+deletefile components/lib/libxml2.so.2
+deletefile components/lib/libz.so.1
+
+deletefile components/mysql/sbin/mysql
+deletefile components/mysql/sbin/mysqlcheck
+deletefile components/mysql/sbin/mysqld
+
+;Files to skip in new extract
+skipfile components/etc/lighttpd/lighttpd.conf.template
+skipfile components/etc/mysql/mysql.ini.template
+skipfile components/etc/php/php.ini.template
+
+skipfile components/mysql/extra_bootstrap.sql
+skipfile components/mysql/extra2_bootstrap.sql
+
+;Always skip this folder as it contains the MySQL database
+skipfolder components/mysql/data
+
+skipfolderifexist components/mysql/sbin/share
+
+skipfile scripts/find_systemapps.sh
+
+;Web Files
+deletefile htdocs/restricted/config/iomy_vanilla.php_template
+
+skipfolderifexist htdocs
+
+changedfile htdocs/restricted/libraries/dbfunctions.php
+changedfile htdocs/restricted/libraries/dbmysql.php
+changedfile htdocs/restricted/libraries/functions.php
+changedfile htdocs/restricted/libraries/special/iomyserverlib.php
+changedfile htdocs/restricted/php/api_onvif.php
+changedfile htdocs/restricted/php/api_onvifthumbnail.php
+changedfile htdocs/restricted/php/api_philipshue.php
+changedfile htdocs/ui/mobile/app.js
+changedfile htdocs/ui/mobile/mjs/premise/Overview.controller.js
+changedfile htdocs/ui/mobile/mjs/rooms/UnassignedDevices.controller.js
+changedfile htdocs/ui/mobile/resources/css/app.css
+changedfile htdocs/ui/mobile/resources/css/capsicum_widths.css
+changedfile htdocs/ui/mobile/resources/css/experimental_brent.css
+changedfile htdocs/ui/mobile/resources/images/mainlogo.png
+changedfile htdocs/ui/mobile/resources/images/minilogo.png
+changedfile htdocs/ui/mobile/util/apiphp.js
+changedfile htdocs/ui/mobile/util/devices/weatherfeed.js
+changedfile htdocs/ui/mobile/util/devices.js
+changedfile htdocs/ui/mobile/util/functions.js
+changedfile htdocs/ui/mobile/util/widgets.js
+
