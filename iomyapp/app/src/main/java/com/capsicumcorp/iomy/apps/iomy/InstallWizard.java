@@ -30,6 +30,8 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
@@ -70,9 +72,17 @@ public class InstallWizard {
     public String hubName               = null;
     public String ownerUsername         = null;
     public String ownerPassword         = null;
-    public String confirmOwnerPassword = null;
+    public String confirmOwnerPassword  = null;
 
     public List<String> validationErrorMessages = new ArrayList<String>();
+
+    // JSON responses
+    public JSONObject lastJSONResponse  = null;
+
+    // New PKs
+    public int premiseID                = 0;
+    public int hubID                    = 0;
+    public int userID                   = 0;
 
     //==============================================//
     // Constructor

@@ -27,16 +27,21 @@ package com.capsicumcorp.iomy.apps.iomy;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Network;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.StringRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.HashMap;
@@ -95,8 +100,9 @@ public class UserPremiseHubProgressPage extends ProgressPage {
         //-----------------------------------------------------------------//
         requests++;
         final StringRequest addHub = new StringRequest(Request.Method.POST, sUrl,
-                createSuccessRequestListenerOnComplete("Add Premise, Hub, and User"),
+                createSuccessRequestHandleGatherIDs("Add Premise, Hub, and User"),
                 createErrorRequestListener("Add Premise, Hub, and User")) {
+
             protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>(baseparams);
 
@@ -154,5 +160,28 @@ public class UserPremiseHubProgressPage extends ProgressPage {
 
         //Start the requests
         this.fullQueue.start();
+    }
+
+    /**
+     * Creates the procedure to run when a HTTP request is successful. This does NOT call the
+     * onComplete() function.
+     *
+     * @param requestName           Used as a tag for logging
+     * @return                      Success Response Listener
+     */
+    Response.Listener<String> createSuccessRequestHandleGatherIDs(final String requestName) {
+        return new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(requestName, response);
+                try {
+                    JSONObject jsonResponse = new JSONObject(response);
+                    installWizard.lastJSONResponse = jsonResponse;
+
+                } catch (JSONException jsone) {
+                    Log.e(requestName, jsone.getMessage());
+                }
+            }
+        };
     }
 }
