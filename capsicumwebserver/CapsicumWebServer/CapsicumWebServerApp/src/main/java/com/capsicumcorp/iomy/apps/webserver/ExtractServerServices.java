@@ -298,12 +298,7 @@ public class ExtractServerServices extends Thread {
                     }
                 }
                 if (skip) {
-                    progressPage.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            progressPage.changePercentageText();
-                        }
-                    });
+                    changeProgressPagePercentageText();
                     continue;
                 }
                 if (zipEntry.getName().startsWith("htdocs")) {
@@ -330,12 +325,7 @@ public class ExtractServerServices extends Thread {
                     zipInputStream.closeEntry();
                     fout.close();
                 }
-                progressPage.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        progressPage.changePercentageText();
-                    }
-                });
+                changeProgressPagePercentageText();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -361,6 +351,14 @@ public class ExtractServerServices extends Thread {
             @Override
             public void run() {
                 progressPage.changeNotificationText(message);
+            }
+        });
+    }
+    private void changeProgressPagePercentageText() {
+        progressPage.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressPage.changePercentageText();
             }
         });
     }
