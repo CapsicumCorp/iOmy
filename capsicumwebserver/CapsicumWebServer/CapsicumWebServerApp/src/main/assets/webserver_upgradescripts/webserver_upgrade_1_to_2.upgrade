@@ -46,6 +46,8 @@ skipfile components/etc/php/php.ini.template
 skipfile components/mysql/extra_bootstrap.sql
 skipfile components/mysql/extra2_bootstrap.sql
 
+skipfile zigbeedefs.ini
+
 ;Always skip this folder as it contains the MySQL database
 skipfolder components/mysql/sbin/data
 
