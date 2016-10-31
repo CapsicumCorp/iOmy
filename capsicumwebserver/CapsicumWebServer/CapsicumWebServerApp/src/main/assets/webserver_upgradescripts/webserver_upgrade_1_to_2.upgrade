@@ -10,9 +10,9 @@ mkdir components/etc/lighttpd
 mkdir components/etc/mysql
 mkdir components/etc/php
 
-movefile components/lighttpd/conf/lighttpd.conf.template components/etc/lighttpd
-movefile components/mysql/conf/mysql.ini.template components/etc/mysql
-movefile components/php/conf/php.ini.template components/etc/php
+movefile components/lighttpd/conf/lighttpd.conf.template components/etc/lighttpd/lighttpd.conf.template
+movefile components/mysql/conf/mysql.ini.template components/etc/mysql/mysql.ini.template
+movefile components/php/conf/php.ini.template components/etc/php/php.ini.template
 
 ;Old folders
 deletefile components/lighttpd/sbin/lighttpd
