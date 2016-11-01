@@ -2,7 +2,7 @@
 ; skipfolderifexist skips files in that folder unless they don't exist
 ; skipfile will always re-extract if the file doesn't exist
 ; deletefolder will recursively delete everything in the folder
-; newfile entries will override skipfolder entries
+; changedfile entries will override skipfolder entries
 
 ;Move config files
 mkdir components/etc
@@ -10,13 +10,19 @@ mkdir components/etc/lighttpd
 mkdir components/etc/mysql
 mkdir components/etc/php
 
-movefile components/lighttpd/conf/lighttpd.conf.template components/etc/lighttpd
-movefile components/mysql/conf/mysql.ini.template components/etc/mysql
-movefile components/php/conf/php.ini.template components/etc/php
+movefile components/lighttpd/conf/lighttpd.conf.template components/etc/lighttpd/lighttpd.conf.template
+movefile components/mysql/conf/mysql.ini.template components/etc/mysql/mysql.ini.template
+movefile components/php/conf/php.ini.template components/etc/php/php.ini.template
+
+movefile components/lighttpd/conf/lighttpd.conf components/etc/lighttpd/lighttpd.conf
+movefile components/mysql/conf/mysql.ini components/etc/mysql/mysql.ini
+movefile components/php/conf/php.ini components/etc/php/php.ini
 
 ;Old folders
 deletefile components/lighttpd/sbin/lighttpd
 deletefolder components/lighttpd
+deletefolder components/php/conf
+deletefolder components/mysql/conf
 
 ;Old binaries
 deletefile components/bin/curl
@@ -46,8 +52,10 @@ skipfile components/etc/php/php.ini.template
 skipfile components/mysql/extra_bootstrap.sql
 skipfile components/mysql/extra2_bootstrap.sql
 
+skipfile zigbeedefs.ini
+
 ;Always skip this folder as it contains the MySQL database
-skipfolder components/mysql/data
+skipfolder components/mysql/sbin/data
 
 skipfolderifexist components/mysql/sbin/share
 
