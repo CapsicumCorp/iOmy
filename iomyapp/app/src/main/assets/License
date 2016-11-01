@@ -121,7 +121,7 @@ License: LGPL https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html
 ================================================================
 Name: FFmpeg
 Link: https://www.ffmpeg.org/
-License: LGPL https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html + MIT/X11/BSD-style (Check source files)
+License: GNU GPL 3.0 > https://www.gnu.org/licenses/gpl-3.0.en.html
 ================================================================
 Name: lighttpd
 Link: https://www.lighttpd.net/
@@ -137,6 +137,10 @@ License: https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 ================================================================
 Name: phpmyadmin
 Link: https://www.phpmyadmin.net/downloads/
+License: https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+================================================================
+Name: busybox
+Link: https://busybox.net/license.html
 License: https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 ================================================================
 Name: iOmy
