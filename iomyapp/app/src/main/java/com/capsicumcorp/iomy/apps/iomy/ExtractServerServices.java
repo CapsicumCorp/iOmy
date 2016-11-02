@@ -89,7 +89,15 @@ public class ExtractServerServices extends Thread {
         this.CHANGE_PERMISSION = SystemDirectory + "/bin/chmod 755 ";
         this.INTERNAL_LOCATION=StorageFolderName;
     }
-
+    private Application getApplication() {
+        return Application.getInstance();
+    }
+    private String getSystemFolder() {
+        return getApplication().getSystemDirectory();
+    }
+    private String getInternalStorageFolder() {
+        return getApplication().getStorageFolderName();
+    }
     public synchronized void setProgressPage(ProgressPage progressPage) {
         this.progressPage=progressPage;
     }
