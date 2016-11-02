@@ -234,6 +234,7 @@ BUSYBOXX86NEED_WEB_BROWSER=1
 PHPMYADMINTITLE="phpMyAdmin"
 PHPMYADMINVER="4.6.4"
 PHPMYADMINPKG="phpMyAdmin-4.6.4-english.tar.xz"
+PHPMYADMINCOMPILEDIR="phpMyAdmin-4.6.4-english"
 PHPMYADMINHOMEPAGE="https://www.phpmyadmin.net/"
 PHPMYADMINLICENSE="GPL-2"
 PHPMYADMINBASEURL="https://files.phpmyadmin.net/phpMyAdmin/4.6.4/"
