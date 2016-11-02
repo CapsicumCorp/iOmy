@@ -173,10 +173,14 @@ public class UserPremiseHubProgressPage extends ProgressPage {
         return new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d(requestName, response);
+                Log.d("IDs_"+requestName, response.toString());
                 try {
                     JSONObject jsonResponse = new JSONObject(response);
                     installWizard.lastJSONResponse = jsonResponse;
+
+                    installWizard.premiseID = jsonResponse.getInt("PremiseId");
+                    installWizard.hubID = jsonResponse.getInt("HubId");
+                    installWizard.userID = jsonResponse.getInt("UserId");
 
                 } catch (JSONException jsone) {
                     Log.e(requestName, jsone.getMessage());
