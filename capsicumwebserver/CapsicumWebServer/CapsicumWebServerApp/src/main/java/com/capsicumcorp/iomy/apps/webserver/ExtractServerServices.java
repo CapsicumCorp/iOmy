@@ -73,7 +73,6 @@ public class ExtractServerServices extends Thread {
     public static final String ASSETSVERSIONFILENAME = "webserverassetsversion.txt";
     private final Context context;
 
-    private boolean isExtracted=false;
     private boolean quit=false;
     private boolean runServerServices=false; //If true the service services will be started by this class after extracting the files
 
@@ -187,12 +186,8 @@ public class ExtractServerServices extends Thread {
                 return;
             }
         }
-        setIsExtracted(true);
-
         setPermissions();
         setConfigsFromTemplates();
-
-        setIsExtracted(true);
 
         Log.println(Log.INFO, "WebServer", "Extract complete");
 
@@ -676,12 +671,6 @@ public class ExtractServerServices extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-    public synchronized void setIsExtracted(boolean val) {
-        isExtracted=val;
-    }
-    public synchronized boolean getIsExtracted() {
-        return isExtracted;
     }
     public synchronized void setQuit(boolean val) {
         quit=val;
