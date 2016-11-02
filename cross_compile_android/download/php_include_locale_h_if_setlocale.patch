@@ -1,0 +1,52 @@
+diff -Naur php-5.6.26/ext/date/lib/parse_tz.c php-5.6.26-2/ext/date/lib/parse_tz.c
+--- php-5.6.26/ext/date/lib/parse_tz.c	2016-10-27 19:43:39.231555628 +1000
++++ php-5.6.26-2/ext/date/lib/parse_tz.c	2016-10-27 19:43:58.356547755 +1000
+@@ -29,6 +29,9 @@
+ #ifdef HAVE_LOCALE_H
+ #include <locale.h>
+ #endif
++#if HAVE_SETLOCALE
++#include <locale.h>
++#endif
+ 
+ #ifdef HAVE_STRING_H
+ #include <string.h>
+diff -Naur php-5.6.26/ext/pcre/php_pcre.h php-5.6.26-2/ext/pcre/php_pcre.h
+--- php-5.6.26/ext/pcre/php_pcre.h	2016-10-27 19:43:39.714555430 +1000
++++ php-5.6.26-2/ext/pcre/php_pcre.h	2016-10-27 19:43:58.356547755 +1000
+@@ -32,6 +32,9 @@
+ #if HAVE_LOCALE_H
+ #include <locale.h>
+ #endif
++#if HAVE_SETLOCALE
++#include <locale.h>
++#endif
+ 
+ PHPAPI char *php_pcre_replace(char *regex, int regex_len, char *subject, int subject_len, zval *replace_val, int is_callable_replace, int *result_len, int limit, int *replace_count TSRMLS_DC);
+ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *options TSRMLS_DC);
+diff -Naur php-5.6.26/ext/standard/basic_functions.c php-5.6.26-2/ext/standard/basic_functions.c
+--- php-5.6.26/ext/standard/basic_functions.c	2016-10-27 19:43:40.453555127 +1000
++++ php-5.6.26-2/ext/standard/basic_functions.c	2016-10-27 19:43:58.357547755 +1000
+@@ -85,6 +85,9 @@
+ #if HAVE_LOCALE_H
+ # include <locale.h>
+ #endif
++#if HAVE_SETLOCALE
++#include <locale.h>
++#endif
+ 
+ #if HAVE_SYS_MMAN_H
+ # include <sys/mman.h>
+diff -Naur php-5.6.26/ext/standard/string.c php-5.6.26-2/ext/standard/string.c
+--- php-5.6.26/ext/standard/string.c	2016-10-27 19:37:15.570946242 +1000
++++ php-5.6.26-2/ext/standard/string.c	2016-10-27 19:44:26.322536145 +1000
+@@ -30,6 +30,9 @@
+ #ifdef HAVE_LOCALE_H
+ # include <locale.h>
+ #endif
++#if HAVE_SETLOCALE
++#include <locale.h>
++#endif
+ #ifdef HAVE_LANGINFO_H
+ # include <langinfo.h>
+ #endif
