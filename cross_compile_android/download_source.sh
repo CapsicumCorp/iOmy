@@ -72,7 +72,7 @@ download_package() {
   if [ "${OVERRIDE_BASEURL}" != "" ] ; then
 	  PKGBASEURL="${OVERRIDE_BASEURL}"
 	fi
-  if [ "${DOWNLOAD_NEEDS_WEBBROWSER}" = 0 -a "${PKGNEED_WEB_BROWSER}" = 0 ] ; then
+  if [ "${DOWNLOAD_NEEDS_WEBBROWSER}" = 0 -a "${PKGNEED_WEB_BROWSER}" = 0 -a ${justreporturl} = 0 ] ; then
 	  echo "Downloading ${PKGTITLE}-${PKGVER} from ${PKGBASEURL}${PKGPKG}"
 		wget -N -c -P "${REPOSITORY}/" "${PKGBASEURL}${PKGPKG}"
 		mess "${PKGPKG}\n"
@@ -81,11 +81,12 @@ download_package() {
 	fi
 }
 
+justreporturl=0
 if [ ${I_AM_READY_TO_DOWNLOAD_ALL_THE_FILES} = 0 ] ; then
   echo "Downloading all the packages may take quite a while so"
 	echo "  you need to edit download_source.cfg and set I_AM_READY_TO_DOWNLOAD_ALL_THE_FILES to 1"
-	echo "  as well as other variables to make sure the download settings are correct"
-	exit 2
+	echo "  as well as other variables to make sure the download settings are correct for auto download"
+  justreporturl=1
 fi
 if [ ! -d "${REPOSITORY}" ] ; then
   # Create the download folder if it doesn't already exist
@@ -112,7 +113,7 @@ fi
 
 if [ "${DOWNLOADMESS}" != "" ] ; then
   echo
-	echo "You will need to download some files manually with a web browser:"
+	echo "You may need to download some files manually with a web browser."
 	echo
   echo -e "${DOWNLOADMESS}"
 	echo "------------------------------"
