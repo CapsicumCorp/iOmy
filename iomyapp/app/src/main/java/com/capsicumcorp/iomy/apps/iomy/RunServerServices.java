@@ -85,6 +85,8 @@ public class RunServerServices extends Thread {
 
     private int changeServiceCnt=0; //Every time a service change is requested this value will increment
 
+    private String dbPassword="";
+
     RunServerServices(Context context, String SystemDirectory, String StorageFolderName) {
         this.context = context;
         this.SystemDirectory = SystemDirectory;
@@ -177,6 +179,7 @@ public class RunServerServices extends Thread {
             if (!getBoolIsMySQLRunning()) {
                 if (Application.getInstance().getMySQLEnabled() && getMySQLOverrideState()) {
                     startmysql();
+                    checkmysql();
                     bootstrap_mysql();
                     changeServiceSettingsMySQLCheckbox(true);
                 }
@@ -263,6 +266,10 @@ public class RunServerServices extends Thread {
     public void changeServiceState() {
         incChangeServiceCnt();
         interrupt();
+    }
+    //Supply the mysql root password to this thread
+    public void supplyDBRootPassword(String dbPassword) {
+        this.dbPassword=dbPassword;
     }
     //True=Start watch inputs if currently stopped
     //False=Stop watch inputs if currently running
@@ -410,10 +417,19 @@ public class RunServerServices extends Thread {
         }
     }
     public void startmysql() {
-        Log.println(Log.INFO, "WebServer", "Starting mysql and checking database");
-        setProgressNotificationText("Starting MySQL and checking database");
+        Log.println(Log.INFO, "WebServer", "Starting MySQL");
+        setProgressNotificationText("Starting MySQL");
         try {
             execWithWait(SystemDirectory + "/bin/sh " + INTERNAL_LOCATION + "/scripts/manage_services.sh " + SystemDirectory + " " + INTERNAL_LOCATION + " start_mysql");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public void checkmysql() {
+        Log.println(Log.INFO, "WebServer", "Checking MySQL database");
+        setProgressNotificationText("Checking MySQL database");
+        try {
+            execWithWait(SystemDirectory + "/bin/sh " + INTERNAL_LOCATION + "/scripts/manage_services.sh " + SystemDirectory + " " + INTERNAL_LOCATION + " mysql_check "+dbPassword);
         } catch (Exception e) {
             e.printStackTrace();
         }

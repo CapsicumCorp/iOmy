@@ -120,6 +120,7 @@ public class InstallWizard {
         this.setupAPI="http://"+this.hostname+":"+this.webserverport+"/iomyserver.php";
         this.dbURI=sharedPref.getString("pref_mysql_hostname", "localhost");
         this.dbServerPort=Integer.parseInt(sharedPref.getString("pref_mysql_port", "3306"));
+        this.dbPassword=sharedPref.getString("pref_mysql_root_password", "");
     }
     /**
      * Generates a random password between 8 - 20 characters long.
@@ -298,6 +299,8 @@ public class InstallWizard {
 
             //--- Setup the database ---//
         } else if (title == Titles.webserverDatabaseRootPasswordSetupTitle) {
+            //Inform the service services thread about the current root password
+            Application.getInstance().runServerServices.supplyDBRootPassword(dbPassword);
             this.summonDBSetupPage(activity);
 
         //--- Once the database is set up, create a premise and a hub
