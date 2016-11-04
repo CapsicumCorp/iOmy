@@ -135,6 +135,11 @@ public class ProgressPage extends AppCompatActivity {
                 try {
                     JSONObject jsonResponse = new JSONObject(response);
                     installWizard.lastJSONResponse = jsonResponse;
+
+                    if (jsonResponse.getBoolean("Error")) {
+                        Log.e(requestName, jsonResponse.getString("ErrMesg"));
+                        installWizard.apiErrorMessages.add(jsonResponse.getString("ErrMesg"));
+                    }
                 } catch (JSONException jsone) {
                     Log.e(requestName, jsone.getMessage());
                 }
@@ -164,6 +169,12 @@ public class ProgressPage extends AppCompatActivity {
                 //notice.notify();
                 try {
                     JSONObject jsonResponse = new JSONObject(response);
+                    installWizard.lastJSONResponse = jsonResponse;
+
+                    if (jsonResponse.getBoolean("Error")) {
+                        Log.e(requestName, jsonResponse.getString("ErrMesg"));
+                        installWizard.apiErrorMessages.add(jsonResponse.getString("ErrMesg"));
+                    }
                     me.onComplete();
                 } catch (JSONException jsone) {
                     Log.e(requestName, jsone.getMessage());
@@ -186,7 +197,7 @@ public class ProgressPage extends AppCompatActivity {
                 Log.v(requestName, error.toString()+"");
                 // If a timeout occurs, show a dialog
                 if (error.toString() == "com.android.volley.TimeoutError") {
-                    Log.v(requestName, "Connection Timed Out: Server not accessible");
+                    Log.e(requestName, "Connection Timed Out: Server not accessible");
 //                    NotificationCompat.Builder mBuilder =
 //                            new NotificationCompat.Builder(getApplicationContext())
 //                                    .setSmallIcon(android.R.drawable.stat_notify_error)
@@ -207,12 +218,27 @@ public class ProgressPage extends AppCompatActivity {
                             .build();
                     errNotice.notify();
                 } else if (error.toString() == "com.android.volley.NoConnectionError") {
-                    Log.v(requestName, "Connection Timed Out: Server not accessible");
+                    Log.e(requestName, "Connection Timed Out: Server not accessible");
                     NotificationCompat.Builder mBuilder =
                             new NotificationCompat.Builder(getApplicationContext())
                                     .setSmallIcon(android.R.drawable.stat_notify_error)
                                     .setContentTitle("Timeout Error")
                                     .setContentText("Connection Timed Out");
+
+                    // Sets an ID for the notification
+                    int mNotificationId = 001;
+                    // Gets an instance of the NotificationManager service
+                    NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                    // Builds the notification and issues it.
+                    mNotifyMgr.notify(mNotificationId, mBuilder.build());
+                } else {
+                    Log.e(requestName, "Unknown Error Occurred");
+                    Log.e(requestName, error.toString());
+                    NotificationCompat.Builder mBuilder =
+                            new NotificationCompat.Builder(getApplicationContext())
+                                    .setSmallIcon(android.R.drawable.stat_notify_error)
+                                    .setContentTitle("Unknown Error")
+                                    .setContentText("An unexpected error occurred");
 
                     // Sets an ID for the notification
                     int mNotificationId = 001;

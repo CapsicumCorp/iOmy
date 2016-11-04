@@ -74,7 +74,11 @@ public class InstallWizard {
     public String ownerPassword         = null;
     public String confirmOwnerPassword  = null;
 
+    public String watchInputsUsername   = "WatchInputs001";
+    public String watchInputsPassword   = null;
+
     public List<String> validationErrorMessages = new ArrayList<String>();
+    public List<String> apiErrorMessages        = new ArrayList<String>();
 
     // JSON responses
     public JSONObject lastJSONResponse  = null;
@@ -88,6 +92,7 @@ public class InstallWizard {
     // Constructor
     //==============================================//
     public InstallWizard() {
+
     }
 
     /**
@@ -127,7 +132,7 @@ public class InstallWizard {
         int maxLength = 20;
         Random r = new Random();
         int length = r.nextInt((maxLength - minLength) + 1) + minLength;
-        String validChars = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()[]{}_+=-<>/?.,";
+        String validChars = "abcdefghijkmnpqrstuvwxyz23456789ABCDEFGHJKLMNPQRSTUVWXYZ!@#%^&*()[]{}_+=-<>?";
 
         // Until a valid password is generated...
         do {
