@@ -53,7 +53,7 @@ get_full_path() {
 	if [ $? != 0 ] ; then
 	  return 1
 	fi
-  popd ${folder} > /dev/null 2> /dev/null
+  popd > /dev/null 2> /dev/null
 	if [ $? != 0 ] ; then
 	  return 1
 	fi
@@ -114,6 +114,7 @@ fi
 if [ "${DOWNLOADMESS}" != "" ] ; then
   echo
 	echo "You may need to download some files manually with a web browser."
+	echo "and save them to directory: ${REPOSITORY}"
 	echo
   echo -e "${DOWNLOADMESS}"
 	echo "------------------------------"
