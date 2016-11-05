@@ -40,6 +40,7 @@ import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.StringRequest;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -130,7 +131,7 @@ public class UserPremiseHubProgressPage extends ProgressPage {
         //-----------------------------------------------------------------//
         requests++;
         final StringRequest createPHPConfig = new StringRequest(Request.Method.POST, sUrl,
-                createSuccessRequestListenerOnComplete("Create the PHP Config file"),
+                createSuccessRequestListener("Create the PHP Config file"),
                 createErrorRequestListener("Create the PHP Config file")) {
             protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>(baseparams);
@@ -187,11 +188,12 @@ public class UserPremiseHubProgressPage extends ProgressPage {
                         Log.e("IDs_"+requestName, jsonResponse.getString("ErrMesg"));
                         installWizard.apiErrorMessages.add(jsonResponse.getString("ErrMesg"));
                     } else {
-                        installWizard.premiseID = jsonResponse.getInt("PremiseId");
-                        installWizard.hubID = jsonResponse.getInt("HubId");
-                        installWizard.userID = jsonResponse.getInt("UserId");
+                        JSONObject array=jsonResponse.getJSONObject("Data");
+                        installWizard.premiseID = array.getInt("PremiseId");
+                        installWizard.hubID = array.getInt("HubId");
+                        installWizard.userID = array.getInt("UserId");
                     }
-
+                    me.onComplete();
                 } catch (JSONException jsone) {
                     Log.e(requestName, jsone.getMessage());
                 }
