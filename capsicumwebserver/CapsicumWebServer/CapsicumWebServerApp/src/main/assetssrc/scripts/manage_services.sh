@@ -252,8 +252,7 @@ start_mysql() {
   $sbin/bin/${abi}/${pie}/mysqld --defaults-file=$sbin/etc/mysql/mysql.ini --user=${USER} --language=$sbin/mysql/sbin/share/mysql/english > /dev/null 2> /dev/null & PID_MYSQL=$!
   echo ${PID_MYSQL} > "${mysqldpidfile}"
 
-  # Always run mysql when mysql is started
-  mysql_check
+  wait_mysql_started
 }
 
 prestop_lighttpd() {
@@ -519,15 +518,24 @@ mysql_sqlcommand() {
 
 mysql_check() {
   wait_mysql_started
-  $sbin/bin/${abi}/${pie}/mysqlcheck --defaults-file=$sbin/etc/mysql/mysql.ini -hlocalhost -uroot -A --auto-repair > /dev/null 2> /dev/null
+	dbpassword=$1
+	if [ "${dbpassword}" == "" ] ; then
+    $sbin/bin/${abi}/${pie}/mysqlcheck --defaults-file=$sbin/etc/mysql/mysql.ini -hlocalhost -uroot -A --auto-repair > /dev/null 2> /dev/null
+	else
+	  $sbin/bin/${abi}/${pie}/mysqlcheck --defaults-file=$sbin/etc/mysql/mysql.ini -hlocalhost -uroot -p"${dbpassword}" -A --auto-repair > /dev/null 2> /dev/null
+	fi
 }
 
 # Run this when MySQL is updated
 # NOTE: mysql_upgrade segfaults when it tries to run mysqlcheck so we run mysqlcheck directly
 mysql_upgrade() {
   wait_mysql_started
-  $sbin/bin/${abi}/${pie}/mysqlcheck --defaults-file=$sbin/etc/mysql/mysql.ini -hlocalhost -uroot -A -g -A --auto-repair > /dev/null 2> /dev/null
-
+	dbpassword=$1
+	if [ "${dbpassword}" == "" ] ; then
+    $sbin/bin/${abi}/${pie}/mysqlcheck --defaults-file=$sbin/etc/mysql/mysql.ini -hlocalhost -uroot -A -g -A --auto-repair > /dev/null 2> /dev/null
+  else
+    $sbin/bin/${abi}/${pie}/mysqlcheck --defaults-file=$sbin/etc/mysql/mysql.ini -hlocalhost -uroot -p"${dbpassword}" -A -g -A --auto-repair > /dev/null 2> /dev/null
+  fi
   # Now restart mysql as the upgrade may have changed some things
   stop_mysql
   start_mysql
