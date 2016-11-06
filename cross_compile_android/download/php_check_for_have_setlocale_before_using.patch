@@ -1,0 +1,80 @@
+diff -Naur php-5.6.26/ext/fileinfo/libmagic/funcs.c php-5.6.26-2/ext/fileinfo/libmagic/funcs.c
+--- php-5.6.26/ext/fileinfo/libmagic/funcs.c	2016-10-28 16:41:14.860622066 +1000
++++ php-5.6.26-2/ext/fileinfo/libmagic/funcs.c	2016-10-28 16:43:31.517492157 +1000
+@@ -447,8 +447,9 @@
+ 	int res_len, rep_cnt = 0;
+ 	TSRMLS_FETCH();
+ 
++#ifdef HAVE_SETLOCALE
+ 	(void)setlocale(LC_CTYPE, "C");
+-
++#endif
+ 	MAKE_STD_ZVAL(patt);
+ 	ZVAL_STRINGL(patt, pat, strlen(pat), 0);
+ 	opts |= PCRE_MULTILINE;
+@@ -481,6 +482,8 @@
+ 	efree(res);
+ 
+ out:
++#ifdef HAVE_SETLOCALE
+ 	(void)setlocale(LC_CTYPE, "");
++#endif
+ 	return rep_cnt;
+ }
+diff -Naur php-5.6.26/ext/fileinfo/libmagic/readcdf.c php-5.6.26-2/ext/fileinfo/libmagic/readcdf.c
+--- php-5.6.26/ext/fileinfo/libmagic/readcdf.c	2016-10-28 16:41:15.392621564 +1000
++++ php-5.6.26-2/ext/fileinfo/libmagic/readcdf.c	2016-10-28 16:43:31.517492157 +1000
+@@ -123,13 +123,17 @@
+ 	size_t i;
+ 	const char *rv = NULL;
+ 
++#ifdef HAVE_SETLOCALE
+ 	(void)setlocale(LC_CTYPE, "C");
++#endif
+ 	for (i = 0; nv[i].pattern != NULL; i++)
+ 		if (strcasestr(vbuf, nv[i].pattern) != NULL) {
+ 			rv = nv[i].mime;
+ 			break;
+ 		}
++#ifdef HAVE_SETLOCALE
+ 	(void)setlocale(LC_CTYPE, "");
++#endif
+ 	return rv;
+ }
+ 
+diff -Naur php-5.6.26/ext/fileinfo/libmagic/softmagic.c php-5.6.26-2/ext/fileinfo/libmagic/softmagic.c
+--- php-5.6.26/ext/fileinfo/libmagic/softmagic.c	2016-10-28 16:41:15.926621060 +1000
++++ php-5.6.26-2/ext/fileinfo/libmagic/softmagic.c	2016-10-28 16:43:31.517492157 +1000
+@@ -364,13 +364,17 @@
+ 	if (strchr(m->desc, '%') == NULL)
+ 		return 0;
+ 
++#ifdef HAVE_SETLOCALE
+ 	(void)setlocale(LC_CTYPE, "C");
++#endif
+ 	if ((pce = pcre_get_compiled_regex("~%[-0-9.]*s~", &re_extra, &re_options TSRMLS_CC)) == NULL) {
+ 		rv = -1;
+ 	} else {
+ 	 	rv = !pcre_exec(pce, re_extra, m->desc, strlen(m->desc), 0, re_options, NULL, 0);
+ 	}
++#ifdef HAVE_SETLOCALE
+ 	(void)setlocale(LC_CTYPE, "");
++#endif
+ 	return rv;
+ }
+ 
+diff -Naur php-5.6.26/ext/standard/basic_functions.c php-5.6.26-2/ext/standard/basic_functions.c
+--- php-5.6.26/ext/standard/basic_functions.c	2016-10-28 16:25:08.248481615 +1000
++++ php-5.6.26-2/ext/standard/basic_functions.c	2016-10-28 16:42:30.483550413 +1000
+@@ -3785,9 +3785,11 @@
+ 	/* Check if locale was changed and change it back
+ 	 * to the value in startup environment */
+ 	if (BG(locale_string) != NULL) {
++#ifdef HAVE_SETLOCALE
+ 		setlocale(LC_ALL, "C");
+ 		setlocale(LC_CTYPE, "");
+ 		zend_update_current_locale();
++#endif
+ 	}
+ 	STR_FREE(BG(locale_string));
+ 	BG(locale_string) = NULL;

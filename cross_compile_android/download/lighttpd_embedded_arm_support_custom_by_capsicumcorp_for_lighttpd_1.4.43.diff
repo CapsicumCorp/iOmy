@@ -1,0 +1,216 @@
+diff -Naur lighttpd-1.4.43/src/Makefile.in lighttpd-1.4.43-2/src/Makefile.in
+--- lighttpd-1.4.43/src/Makefile.in	2016-10-31 23:16:54.000000000 +1000
++++ lighttpd-1.4.43-2/src/Makefile.in	2016-11-04 12:07:59.729356859 +1000
+@@ -92,7 +92,7 @@
+ host_triplet = @host@
+ noinst_PROGRAMS = proc_open$(EXEEXT) test_buffer$(EXEEXT) \
+ 	test_base64$(EXEEXT) test_configfile$(EXEEXT)
+-sbin_PROGRAMS = lighttpd$(EXEEXT) lighttpd-angel$(EXEEXT)
++sbin_PROGRAMS = lighttpd$(EXEEXT)
+ @NO_RDYNAMIC_TRUE@am__append_1 = liblightcomp.la
+ @NO_RDYNAMIC_FALSE@am__append_2 = $(common_src)
+ @BUILD_WITH_GEOIP_TRUE@am__append_3 = mod_geoip.la
+@@ -170,6 +170,22 @@
+ @NO_RDYNAMIC_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+ @NO_RDYNAMIC_TRUE@	$(am__DEPENDENCIES_1)
+ am__liblightcomp_la_SOURCES_DIST = base64.c buffer.c log.c keyvalue.c \
+++am__liblightcomp_la_SOURCES_DIST = mod_rewrite.c mod_redirect.c \
++	mod_alias.c mod_extforward.c \
++	mod_access.c \
++	mod_setenv.c \
++	mod_flv_streaming.c mod_indexfile.c \
++	mod_userdir.c mod_dirlisting.c \
++	mod_status.c mod_simple_vhost.c \
++	mod_evhost.c mod_secdownload.c \
++	mod_cgi.c mod_fastcgi.c \
++	mod_scgi.c \
++	mod_proxy.c mod_staticfile.c \
++	mod_evasive.c \
++	mod_compress.c mod_usertrack.c \
++	mod_expire.c \
++	mod_accesslog.c \
++	base64.c buffer.c log.c keyvalue.c \
+ 	chunk.c http_chunk.c stream.c fdevent.c stat_cache.c plugin.c \
+ 	joblist.c etag.c array.c data_string.c data_array.c \
+ 	data_integer.c md5.c data_fastcgi.c vector.c fdevent_select.c \
+@@ -183,7 +199,23 @@
+ 	network_writev.c network_solaris_sendfilev.c network_openssl.c \
+ 	rand.c splaytree.c status_counter.c safe_memclear.c \
+ 	network_darwin_sendfile.c
+-am__objects_1 = liblightcomp_la-base64.lo liblightcomp_la-buffer.lo \
++am__objects_1 = liblightcomp_la-mod_rewrite.lo liblightcomp_la-mod_redirect.lo \
++	liblightcomp_la-mod_alias.lo liblightcomp_la-mod_extforward.lo \
++	liblightcomp_la-mod_access.lo \
++	liblightcomp_la-mod_setenv.lo \
++	liblightcomp_la-mod_flv_streaming.lo liblightcomp_la-mod_indexfile.lo \
++	liblightcomp_la-mod_userdir.lo liblightcomp_la-mod_dirlisting.lo \
++	liblightcomp_la-mod_status.lo liblightcomp_la-mod_simple_vhost.lo \
++	liblightcomp_la-mod_evhost.lo liblightcomp_la-mod_secdownload.lo \
++	liblightcomp_la-mod_cgi.lo liblightcomp_la-mod_fastcgi.lo \
++	liblightcomp_la-mod_scgi.lo liblightcomp_la-mod_ssi.lo \
++	liblightcomp_la-mod_proxy.lo liblightcomp_la-mod_staticfile.lo \
++	liblightcomp_la-mod_evasive.lo \
++	liblightcomp_la-mod_compress.lo liblightcomp_la-mod_usertrack.lo \
++	liblightcomp_la-mod_expire.lo \
++	liblightcomp_la-mod_accesslog.lo \
++	liblightcomp_la-buffer.lo liblightcomp_la-log.lo \
++	liblightcomp_la-base64.lo liblightcomp_la-buffer.lo \
+ 	liblightcomp_la-log.lo liblightcomp_la-keyvalue.lo \
+ 	liblightcomp_la-chunk.lo liblightcomp_la-http_chunk.lo \
+ 	liblightcomp_la-stream.lo liblightcomp_la-fdevent.lo \
+@@ -540,8 +572,23 @@
+ mod_webdav_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+ 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(mod_webdav_la_CFLAGS) \
+ 	$(CFLAGS) $(mod_webdav_la_LDFLAGS) $(LDFLAGS) -o $@
+-PROGRAMS = $(noinst_PROGRAMS) $(sbin_PROGRAMS)
+-am__lighttpd_SOURCES_DIST = server.c response.c connections.c \
++PROGRAMS = $(sbin_PROGRAMS)
++am__lighttpd_SOURCES_DIST = mod_rewrite.c mod_redirect.c \
++	mod_alias.c mod_extforward.c \
++	mod_access.c \
++	mod_setenv.c \
++	mod_flv_streaming.c mod_indexfile.c \
++	mod_userdir.c mod_dirlisting.c \
++	mod_status.c mod_simple_vhost.c \
++	mod_evhost.c mod_secdownload.c \
++	mod_cgi.c mod_fastcgi.c \
++	mod_scgi.c \
++	mod_proxy.c mod_staticfile.c \
++	mod_evasive.c \
++	mod_compress.c mod_usertrack.c \
++	mod_expire.c \
++	mod_accesslog.c \
++	server.c response.c connections.c \
+ 	network.c configfile.c configparser.c request.c proc_open.c \
+ 	base64.c buffer.c log.c keyvalue.c chunk.c http_chunk.c \
+ 	stream.c fdevent.c stat_cache.c plugin.c joblist.c etag.c \
+@@ -569,8 +616,23 @@
+ 	mod_cml_funcs.c mod_magnet.c mod_magnet_cache.c \
+ 	mod_authn_gssapi.c mod_authn_ldap.c mod_authn_mysql.c \
+ 	mod_mysql_vhost.c mod_trigger_b4_dl.c
+-am__objects_2 = lighttpd-base64.$(OBJEXT) lighttpd-buffer.$(OBJEXT) \
+-	lighttpd-log.$(OBJEXT) lighttpd-keyvalue.$(OBJEXT) \
++am__objects_2 = mod_rewrite.$(OBJEXT) mod_redirect.$(OBJEXT) \
++	mod_alias.$(OBJEXT) mod_extforward.$(OBJEXT) \
++	mod_access.$(OBJEXT) \
++	mod_setenv.$(OBJEXT) \
++	mod_flv_streaming.$(OBJEXT) mod_indexfile.$(OBJEXT) \
++	mod_userdir.$(OBJEXT) mod_dirlisting.$(OBJEXT) \
++	mod_status.$(OBJEXT) mod_simple_vhost.$(OBJEXT) \
++	mod_evhost.$(OBJEXT) mod_secdownload.$(OBJEXT) \
++	mod_cgi.$(OBJEXT) mod_fastcgi.$(OBJEXT) \
++	mod_scgi.$(OBJEXT) \
++	mod_proxy.$(OBJEXT) mod_staticfile.$(OBJEXT) \
++	mod_evasive.$(OBJEXT) \
++	mod_compress.$(OBJEXT) mod_usertrack.$(OBJEXT) \
++	mod_expire.$(OBJEXT) \
++	mod_accesslog.$(OBJEXT) \
++	lighttpd-base64.$(OBJEXT) lighttpd-buffer.$(OBJEXT) lighttpd-log.$(OBJEXT) \
++	lighttpd-keyvalue.$(OBJEXT) \
+ 	lighttpd-chunk.$(OBJEXT) lighttpd-http_chunk.$(OBJEXT) \
+ 	lighttpd-stream.$(OBJEXT) lighttpd-fdevent.$(OBJEXT) \
+ 	lighttpd-stat_cache.$(OBJEXT) lighttpd-plugin.$(OBJEXT) \
+@@ -1018,7 +1080,22 @@
+ BUILT_SOURCES = parsers versionstamp
+ MAINTAINERCLEANFILES = configparser.c configparser.h mod_ssi_exprparser.c mod_ssi_exprparser.h
+ CLEANFILES = versionstamp.h versionstamp.h.tmp lemon$(BUILD_EXEEXT)
+-common_src = base64.c buffer.c log.c \
++common_src = mod_rewrite.c mod_redirect.c \
++	mod_alias.c mod_extforward.c \
++	mod_access.c \
++	mod_setenv.c \
++	mod_flv_streaming.c mod_indexfile.c \
++	mod_userdir.c mod_dirlisting.c \
++	mod_status.c mod_simple_vhost.c \
++	mod_evhost.c mod_secdownload.c \
++	mod_cgi.c mod_fastcgi.c \
++	mod_scgi.c \
++	mod_proxy.c mod_staticfile.c \
++	mod_evasive.c \
++	mod_compress.c mod_usertrack.c \
++	mod_expire.c \
++	mod_accesslog.c \
++	base64.c buffer.c log.c \
+ 	keyvalue.c chunk.c  \
+ 	http_chunk.c stream.c fdevent.c \
+ 	stat_cache.c plugin.c joblist.c etag.c array.c \
+@@ -1073,7 +1150,7 @@
+ @NO_RDYNAMIC_TRUE@liblightcomp_la_LIBADD = $(PCRE_LIB) $(SSL_LIB) $(FAM_LIBS) $(LIBEV_LIBS) $(ATTR_LIB)
+ @NO_RDYNAMIC_FALSE@common_libadd = 
+ @NO_RDYNAMIC_TRUE@common_libadd = liblightcomp.la
+-common_module_ldflags = -module -export-dynamic $(common_ldflags)
++common_module_ldflags = -module -all-static $(common_ldflags)
+ mod_flv_streaming_la_SOURCES = mod_flv_streaming.c
+ mod_flv_streaming_la_LDFLAGS = $(common_module_ldflags)
+ mod_flv_streaming_la_LIBADD = $(common_libadd)
+diff -Naur lighttpd-1.4.43/src/plugin-static.h lighttpd-1.4.43-2/src/plugin-static.h
+--- lighttpd-1.4.43/src/plugin-static.h	1970-01-01 10:00:00.000000000 +1000
++++ lighttpd-1.4.43-2/src/plugin-static.h	2016-11-04 12:01:22.351409507 +1000
+@@ -0,0 +1,67 @@
++PLUGIN_INIT(mod_rewrite) /* PCRE */
++PLUGIN_INIT(mod_redirect) /* PCRE */
++PLUGIN_INIT(mod_alias)
++
++PLUGIN_INIT(mod_extforward)
++
++PLUGIN_INIT(mod_access)
++//ERROR
++//PLUGIN_INIT(mod_auth) /* CRYPT LDAP LBER */
++
++PLUGIN_INIT(mod_setenv)
++
++#ifdef HAVE_LUA
++//ERROR
++//PLUGIN_INIT(mod_magnet) /* LUA */
++#endif
++PLUGIN_INIT(mod_flv_streaming)
++
++/* * indexfile must come before dirlisting for dirlisting not to override
++*/
++PLUGIN_INIT(mod_indexfile)
++PLUGIN_INIT(mod_userdir)
++PLUGIN_INIT(mod_dirlisting)
++
++PLUGIN_INIT(mod_status)
++
++PLUGIN_INIT(mod_simple_vhost)
++PLUGIN_INIT(mod_evhost)
++#ifdef HAVE_MYSQL
++PLUGIN_INIT(mod_mysql_vhost) /* MySQL */
++#endif
++
++PLUGIN_INIT(mod_secdownload)
++
++PLUGIN_INIT(mod_cgi)
++PLUGIN_INIT(mod_fastcgi)
++PLUGIN_INIT(mod_scgi)
++
++//ERROR
++//PLUGIN_INIT(mod_ssi) /* PCRE */
++PLUGIN_INIT(mod_proxy)
++
++/* * staticfile must come after cgi/ssi/et al.
++*/
++PLUGIN_INIT(mod_staticfile)
++
++#ifdef HAVE_LUA
++//ERROR
++//PLUGIN_INIT(mod_cml) /* MEMCACHE LUA LUALIB */
++#endif
++
++//PLUGIN_INIT(mod_trigger_b4_dl) /* PCRE */
++
++//PLUGIN_INIT(mod_webdav) /* XML2 SQLITE3 UUID */
++
++/* * post-processing modules
++/**/
++PLUGIN_INIT(mod_evasive)
++PLUGIN_INIT(mod_compress) /* Z BZ2 */
++PLUGIN_INIT(mod_usertrack)
++PLUGIN_INIT(mod_expire)
++
++//we really dont need this
++//PLUGIN_INIT(mod_rrdtool)
++
++PLUGIN_INIT(mod_accesslog)
++
