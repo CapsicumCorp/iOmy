@@ -197,8 +197,8 @@ static void *httpparser(void *val) {
   char *sendbuffer;
   char *netgetc_buffer;
   int netgetc_pos=0, netgetc_received=0;
-  int received = -1, len;
-  int foundemptynewline=0, error=0;
+  int len;
+  int error=0;
   int commandcode=0, state=0;
   int listener_result;
 
@@ -481,7 +481,6 @@ static void httpserverlib_stop(void) {
 int httpserverlib_init(void) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=httpserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   simclist_ifaceptrs_ver_1_t *simclistifaceptr=httpserverlib_deps[SIMCLIST_DEPIDX].ifaceptr;
-	int result;
 
   debuglibifaceptr->debuglib_printf(1, "Entering httpserverlib_init\n");
 
@@ -516,7 +515,6 @@ int httpserverlib_init(void) {
 void httpserverlib_shutdown(void) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=httpserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   simclist_ifaceptrs_ver_1_t *simclistifaceptr=httpserverlib_deps[SIMCLIST_DEPIDX].ifaceptr;
-  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=httpserverlib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
 
   debuglibifaceptr->debuglib_printf(1, "Entering httpserverlib_shutdown\n");
   if (httpserverlib_inuse==0) {

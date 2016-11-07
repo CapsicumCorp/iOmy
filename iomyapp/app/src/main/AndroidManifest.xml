@@ -62,7 +62,19 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:name=".Application">
-        <activity android:name=".Start">
+        <activity
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:name=".SplashActivity"
+            android:theme="@style/SplashTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".Start"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -75,23 +87,49 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
         </activity>
-        <activity android:name=".WebserverServerDevice" />
-        <activity android:name=".LicenseAgreement" />
-        <activity android:name=".DatabaseProgressPage" />
-        <activity android:name=".WebServerSetupDB" />
-        <activity android:name=".PremiseAndHubSetup" />
-        <activity android:name=".ProgressPage" />
-        <activity android:name=".ServerProgressPage" />
-        <activity android:name=".NewUser" />
-        <activity android:name=".DBSetupProgressPage" />
-        <activity android:name=".ServiceSettings" />
-        <activity android:name=".UserPremiseHubProgressPage" />
-        <activity android:name=".DBConfigureRootPassword" />
+        <activity android:name=".WebserverServerDevice"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+
+        <activity android:name=".LicenseAgreement"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+
+        <activity android:name=".DatabaseProgressPage"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+
+        <activity android:name=".WebServerSetupDB"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+
+        <activity android:name=".PremiseAndHubSetup"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+
+        <activity android:name=".ProgressPage"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+
+        <activity android:name=".ServerProgressPage"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+
+        <activity android:name=".NewUser"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+
+        <activity android:name=".DBSetupProgressPage"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+
+        <activity android:name=".ServiceSettings"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+
+        <activity android:name=".UserPremiseHubProgressPage"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+
+        <activity android:name=".DBConfigureRootPassword"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
         <activity android:name=".IOMy"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
-            android:configChanges="keyboardHidden|orientation"></activity>
-        <activity android:name=".SettingsPage" />
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"></activity>
+
+        <activity android:name=".SettingsPage"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+
         <receiver android:name=".MyBroadcastReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

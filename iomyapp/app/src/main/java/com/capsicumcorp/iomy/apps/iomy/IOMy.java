@@ -44,7 +44,7 @@ import android.webkit.WebViewClient;
 public class IOMy extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener {
 
-    private int menuItemId;
+    private int menuItemId=-1;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -71,7 +71,10 @@ public class IOMy extends AppCompatActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                navigationView.getMenu().findItem(menuItemId).setChecked(false);
+                if (menuItemId!=-1) {
+                    navigationView.getMenu().findItem(menuItemId).setChecked(false);
+                    menuItemId = -1;
+                }
             }
         };
         drawer.setDrawerListener(toggle);

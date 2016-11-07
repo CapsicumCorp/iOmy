@@ -267,8 +267,6 @@ STATIC char needtoquit=0; //Set to 1 when xbeelib should exit
 
 static pthread_t xbeelib_mainthread=0;
 
-static const char *modulename="xbeelib";
-
 static int xbeelib_numxbeedevices=0;
 static xbeedevice_t xbeelib_newxbee; //Used for new xbee devices that haven't been fully detected yet
 static xbeedevice_t *xbeelib_xbeedevices; //A list of detected xbee devices
@@ -481,7 +479,7 @@ static void xbeelib_setnumxbeedevices(int numxbeedevices) {
   long xbeelocked=0;
 
   xbeelib_lockxbee(&xbeelocked);
-  xbeelib_setnumxbeedevices(numxbeedevices);
+  _xbeelib_setnumxbeedevices(numxbeedevices);
   xbeelib_unlockxbee(&xbeelocked);
 }
 
@@ -1126,7 +1124,7 @@ void xbeelib_send_xbee_at_command(xbeedevice_t *xbeedevice, char *atcmd, unsigne
 void __xbeelib_send_zigbee_zdo(xbeedevice_t *xbeedevice, zdo_general_request_t *zdocmd, int expect_response, char rxonidle, long *xbeelocked, long *zigbeelocked) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=xbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=xbeelib_deps[ZIGBEELIB_DEPIDX].ifaceptr;
-  int pos, idx, numzigbeedevices, zigbeelibindex;
+  int idx, zigbeelibindex;
   xbee_api_explicit_addressing_zigbee_cmd_t *apicmd;
   xbee_zdo_cmd_t *xbeezdocmd;
   xbee_packets_intransit_t *xbee_packets_intransit;
@@ -1231,7 +1229,7 @@ void __xbeelib_send_zigbee_zdo(xbeedevice_t *xbeedevice, zdo_general_request_t *
 void __xbeelib_send_zigbee_zcl(xbeedevice_t *xbeedevice, zcl_general_request_t *zclcmd, int expect_response, char rxonidle, long *xbeelocked, long *zigbeelocked) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=xbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=xbeelib_deps[ZIGBEELIB_DEPIDX].ifaceptr;
-  int pos, idx, numzigbeedevices, zigbeelibindex;
+  int idx, zigbeelibindex;
   xbee_api_explicit_addressing_zigbee_cmd_t *apicmd;
   xbee_zcl_cmd_t *xbeezclcmd;
   xbee_zcl_cmd_with_manu_t *xbeezclcmdwithmanu;
@@ -1362,7 +1360,6 @@ void xbeelib_send_xbee_form_network(xbeedevice_t *xbeedevice, uint16_t chanmask,
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=xbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   int result;
   multitypeval_t val;
-  unsigned char atparam[1];
   uint8_t key[16], device_type;
   uint64_t addr;
 
@@ -1674,7 +1671,6 @@ void xbeelib_process_api_transmit_status(xbeedevice_t *xbeedevice, long *xbeeloc
   xbee_api_zigbee_transmit_status_t *apicmd=(xbee_api_zigbee_transmit_status_t *) (xbeedevice->receivebuf);
   int zigbeelibindex;
   int idx;
-  uint64_t addr;
   uint16_t netaddr=0x0000, clusterid;
   uint8_t seqnumber;
   int packettype=0;
@@ -2388,14 +2384,13 @@ int xbeelib_isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx, c
   Returns: A CMDLISTENER definition depending on the result
 */
 STATIC int xbeelib_processcommand(const char *buffer, int clientsock) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=xbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=xbeelib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
-  char tmpstrbuf[100], onoff;
-  int i, j, len, found, result;
-  uint64_t addr, zigbeeaddr=0;
+  char tmpstrbuf[100];
+  int i, len, found;
+  uint64_t addr;
   int numxbeedevices;
   xbeedevice_t *xbeedeviceptr;
-  long xbeelocked=0, zigbeelocked=0;
+  long xbeelocked=0;
 
   if (!commonserverlibifaceptr) {
     return CMDLISTENER_NOTHANDLED;
@@ -2607,8 +2602,6 @@ int xbeelib_serial_device_removed(int serdevidx) {
 
 //Get info about the Xbee network status
 STATIC void xbeelib_get_xbee_network_status(xbeedevice_t *xbeedevice, long *xbeelocked, long *zigbeelocked) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=xbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
-  int result;
   struct timespec curtime;
 
   MOREDEBUG_ENTERINGFUNC();

@@ -134,6 +134,7 @@ public class ProgressPage extends AppCompatActivity {
                 Log.v(requestName, response);
                 try {
                     JSONObject jsonResponse = new JSONObject(response);
+                    installWizard.lastJSONResponse = jsonResponse;
                 } catch (JSONException jsone) {
                     Log.e(requestName, jsone.getMessage());
                 }

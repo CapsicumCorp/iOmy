@@ -246,8 +246,6 @@ STATIC char needtoquit=0; //Set to 1 when rapidhalib should exit
 
 static pthread_t rapidhalib_mainthread=0;
 
-static const char *modulename="rapidhalib";
-
 STATIC int rapidhalib_numrapidhadevices=0;
 STATIC rapidhadevice_t rapidhalib_newrapidha; //Used for new rapidha devices that haven't been fully detected yet
 STATIC rapidhadevice_t *rapidhalib_rapidhadevices; //A list of detected rapidha devices
@@ -1207,15 +1205,11 @@ void rapidhalib_send_rapidha_support_config_register_commands_pasthru(rapidhadev
 */
 //NOTE: This is a quick implementation to get this working on RapidHA
 void rapidhalib_send_rapidha_support_config_send_current_time(rapidhadevice_t *rapidhadevice, uint64_t addr, uint16_t netaddr, uint8_t srcendpnt, uint8_t destendpnt, long *rapidhalocked, long *zigbeelocked) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
   rapidha_support_config_attribute_write_t *apicmd;
   long curtimezone;
   time_t zigbeebasetime, zigbeecurlocaltime, zigbeecurutctime;
   struct timespec curtime;
   struct tm tm;
-  int pos;
-  uint16_t srcnetaddr;
-  uint16_t clusterid;
   uint32_t *attruint32ptr;
   uint8_t *attruint8ptr;
 
@@ -1439,7 +1433,6 @@ void __rapidhalib_send_zigbee_zcl_new(rapidhadevice_t *rapidhadevice, zcl_genera
 */
 void rapidhalib_send_zigbee_zcl_multi_attribute_read(rapidhadevice_t *rapidhadevice, zcl_general_request_t *zclcmd, long *rapidhalocked, long *zigbeelocked) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  int pos;
   rapidha_zcl_read_attribute_request_t *zclreadattr;
   uint16_t srcnetaddr;
   uint16_t numattribs;
@@ -1548,10 +1541,9 @@ void rapidhalib_process_network_comissioning_network_status_response(rapidhadevi
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
   zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=rapidhalib_getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1);
   rapidha_network_comissioning_network_status_response_t *apicmd=(rapidha_network_comissioning_network_status_response_t *) (rapidhadevice->receivebuf);
-  int i, j, zigbeelibindex;
+  int zigbeelibindex;
   uint8_t prev_network_state;
   uint64_t addr;
-  zigbeeendpoint_t *endpointptr;
 
   MOREDEBUG_ENTERINGFUNC();
   rapidhalib_lockrapidha(rapidhalocked);
@@ -1597,14 +1589,12 @@ void rapidhalib_process_network_comissioning_network_status_response(rapidhadevi
   Args: rapidhadevice A pointer to rapidhadevice structure used to store info about the rapidha device including the receive buffer containing the packet
 */
 STATIC void rapidhalib_process_zdo_response_received(rapidhadevice_t *rapidhadevice, long *rapidhalocked, long *zigbeelocked) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
   zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=rapidhalib_getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1);
   rapidha_zigbee_zdo_response_received_t *apicmd;
   zigbee_zdo_response_header_t *zdocmd;
   int zigbeelibindex;
   uint16_t netaddr, clusterid, profileid;
   uint8_t seqnumber;
-  uint8_t status;
   uint8_t zigbeelength;
 
   MOREDEBUG_ENTERINGFUNC();
@@ -1781,15 +1771,12 @@ STATIC void rapidhalib_process_zdo_response_timeout(rapidhadevice_t *rapidhadevi
   Args: rapidhadevice A pointer to rapidhadevice structure used to store info about the rapidha device including the receive buffer containing the packet
 */
 STATIC void rapidhalib_process_zdo_device_announce_received(rapidhadevice_t *rapidhadevice, long *rapidhalocked, long *zigbeelocked) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
   zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=rapidhalib_getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1);
   zigbee_zdo_device_announce_received_header_t *apicmd;
   zigbee_zdo_response_header_t *zdocmd;
   int zigbeelibindex;
-  uint64_t addr;
   uint16_t netaddr, clusterid, profileid;
   uint8_t seqnumber;
-  uint8_t status;
   uint8_t zigbeelength;
 
   MOREDEBUG_ENTERINGFUNC();
@@ -1828,15 +1815,10 @@ STATIC void rapidhalib_process_zdo_device_announce_received(rapidhadevice_t *rap
   Args: rapidhadevice A pointer to rapidhadevice structure used to store info about the rapidha device including the receive buffer containing the packet
 */
 STATIC void rapidhalib_process_zcl_response_received(rapidhadevice_t *rapidhadevice, long *rapidhalocked, long *zigbeelocked) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
   zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=rapidhalib_getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1);
   rapidha_zigbee_zcl_response_received_t *apicmd;
   zigbee_zcl_command_with_manu_t *zclcmd;
   int zigbeelibindex;
-  uint16_t netaddr, clusterid, profileid;
-  uint8_t seqnumber;
-  uint8_t status;
-  uint8_t zigbeelength;
 
   MOREDEBUG_ENTERINGFUNC();
   apicmd=(rapidha_zigbee_zcl_response_received_t *) (rapidhadevice->receivebuf);
@@ -1945,7 +1927,6 @@ STATIC void rapidhalib_process_zcl_write_attribute_response(rapidhadevice_t *rap
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
   zigbee_zcl_write_attribute_response_header_t *apicmd;
   uint16_t netaddr, clusterid;
-  long zigbeelocked=0;
 
   MOREDEBUG_ENTERINGFUNC();
   apicmd=(zigbee_zcl_write_attribute_response_header_t *) (rapidhadevice->receivebuf);
@@ -2374,7 +2355,7 @@ static int rapidhalib_initialRapidHAsetup(rapidhadevice_t *rapidhadevice, int lo
 */
 static int rapidhalib_detect_rapidha(rapidhadevice_t *rapidhadevice, int longdetect, long *rapidhalocked) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
-  int detectresult, result, retrycnt, maxretry;
+  int detectresult, result;
 
   detectresult=rapidhalib_initialRapidHAsetup(&rapidhalib_newrapidha, longdetect, rapidhalocked);
   if (detectresult<0) {
@@ -2428,8 +2409,6 @@ static int rapidhalib_detect_rapidha(rapidhadevice_t *rapidhadevice, int longdet
 int rapidhalib_isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx, const void *buf, size_t count)) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
   int i, detectresult, list_numitems;
-  //uint8_t tmpbyte;
-  rapidhadevice_t *tmpptr;
   long rapidhalocked=0;
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
@@ -2505,16 +2484,12 @@ int rapidhalib_isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx
   Returns: A CMDLISTENER definition depending on the result
 */
 STATIC int rapidhalib_processcommand(const char *buffer, int clientsock) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
   commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=rapidhalib_getmoduledepifaceptr("commonserverlib", COMMONSERVERLIBINTERFACE_VER_1);
-  char tmpstrbuf[100], onoff;
-  int i, j, len, found, result;
-  uint64_t addr, zigbeeaddr=0;
-  uint16_t zigbeenetaddr=0;
-  uint8_t endpointid=0;
+  char tmpstrbuf[100];
+  int i, len, found;
+  uint64_t addr;
   int numrapidhadevices;
-  rapidhadevice_t *rapidhadeviceptr;
-  long rapidhalocked=0, zigbeelocked=0;
+  long rapidhalocked=0;
 
   if (!commonserverlibifaceptr) {
     return CMDLISTENER_NOTHANDLED;
@@ -2690,10 +2665,9 @@ STATIC int rapidhalib_processcommand(const char *buffer, int clientsock) {
 int rapidhalib_serial_device_removed(int serdevidx) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
   zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=rapidhalib_getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1);
-  int i, j, index, result;
+  int i, index, result;
   int numrapidhadevices;
   rapidhadevice_t *rapidhadeviceptr=NULL;
-  zigbeeendpoint_t *endpointptr;
   long rapidhalocked=0, zigbeelocked=0;
 
   MOREDEBUG_ENTERINGFUNC();
@@ -3128,9 +3102,7 @@ int rapidhalib_init(void) {
 void rapidhalib_shutdown(void) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
   serialportlib_ifaceptrs_ver_1_t *serialportlibifaceptr=rapidhalib_getmoduledepifaceptr("serialportlib", SERIALPORTLIBINTERFACE_VER_1);
-  int i, j, k;
-  zigbeedevice_t *zigbeedeviceptr;
-  zigbeeendpoint_t *endpointptr;
+  int i;
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
   if (rapidhalib_inuse==0) {

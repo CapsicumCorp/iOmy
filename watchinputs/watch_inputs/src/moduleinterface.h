@@ -44,7 +44,7 @@ typedef struct {
 //Last entry should have modulename pointing to NULL
 typedef struct {
   const char * const modulename; //Name of the module we depend on
-  const void *ifaceptr; //The module loader will fill this in if the module interface can be found
+  void *ifaceptr; //The module loader will fill this in if the module interface can be found
   unsigned ifacever; //Version of the module interface we depend on
   char required; //1=This module interface is required, 0=The module can use this module interface but it isn't required
 } moduledep_ver_1_t;

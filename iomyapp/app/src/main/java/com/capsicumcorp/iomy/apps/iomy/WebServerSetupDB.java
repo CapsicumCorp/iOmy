@@ -26,8 +26,10 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -79,8 +81,16 @@ public class WebServerSetupDB extends AppCompatActivity {
                 errorMessages += this.installWizard.validationErrorMessages.get(i);
             }
             // Bring up the notice.
-            Snackbar errNotice = Snackbar.make(findViewById(R.id.webserverDBForm), errorMessages, Snackbar.LENGTH_LONG);
-            errNotice.show();
+            LinearLayout linearLayout=(LinearLayout)findViewById(R.id.webserverDBForm);
+            Snackbar errorNotice = Snackbar.make(linearLayout, errorMessages, 5000);
+            // Retrieve the text view that holds the message(s)
+            View errorNoticeView = errorNotice.getView();
+            LinearLayout.LayoutParams params=(LinearLayout.LayoutParams)view.getLayoutParams();
+            params.gravity = Gravity.TOP;
+            errorNoticeView.setLayoutParams(params);
+            TextView textView = (TextView) errorNoticeView.findViewById(android.support.design.R.id.snackbar_text);
+            textView.setMaxLines(6);  // We wish to have a maximum 6 lines
+            errorNotice.show();
             // Clear the error log
             this.installWizard.validationErrorMessages.clear();
         }

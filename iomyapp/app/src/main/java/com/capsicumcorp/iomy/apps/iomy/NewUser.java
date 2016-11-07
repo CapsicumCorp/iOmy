@@ -26,8 +26,10 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class NewUser extends AppCompatActivity {
@@ -78,9 +80,13 @@ public class NewUser extends AppCompatActivity {
                 errorMessages += this.installWizard.validationErrorMessages.get(i);
             }
             // Bring up the notice.
-            Snackbar errorNotice = Snackbar.make(findViewById(R.id.owner_form), errorMessages, 5000);
+            LinearLayout linearLayout=(LinearLayout)findViewById(R.id.owner_form);
+            Snackbar errorNotice = Snackbar.make(linearLayout, errorMessages, 5000);
             // Retrieve the text view that holds the message(s)
-            View errorNoticeView =  errorNotice.getView();
+            View errorNoticeView = errorNotice.getView();
+            LinearLayout.LayoutParams params=(LinearLayout.LayoutParams)view.getLayoutParams();
+            params.gravity = Gravity.TOP;
+            errorNoticeView.setLayoutParams(params);
             TextView textView = (TextView) errorNoticeView.findViewById(android.support.design.R.id.snackbar_text);
             textView.setMaxLines(6);  // We wish to have a maximum 6 lines
             errorNotice.show();

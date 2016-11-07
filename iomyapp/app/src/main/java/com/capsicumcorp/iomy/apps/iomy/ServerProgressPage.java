@@ -41,14 +41,16 @@ public class ServerProgressPage extends ProgressPage {
     private void startSettingUpWebserver() {
         Application application=Application.getInstance();
 
-        //Extract Server Services
-        application.extractServerServices.setProgressPage(this);
-        application.runServerServices.setProgressPage(this);
+        if (!application.extractServerServices.isAlive()) {
+            //Extract Server Services
+            application.extractServerServices.setProgressPage(this);
+            application.runServerServices.setProgressPage(this);
 
-        //Set to start the server services straight after extracting
-        application.extractServerServices.setRunServerServices(true);
+            //Set to start the server services straight after extracting
+            application.extractServerServices.setRunServerServices(true);
 
-        //The the run thread will call onComplete when extract is finished
-        application.extractServerServices.start();
+            //Then run the thread that will call onComplete when extract is finished
+            application.extractServerServices.start();
+        }
     }
 }

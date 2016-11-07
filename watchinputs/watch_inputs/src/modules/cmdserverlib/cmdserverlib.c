@@ -218,7 +218,6 @@ static void *cmdserverlib_networkClientLoop(void *thread_val) {
   int netgetc_pos=0, netgetc_received=0;
   size_t len;
   int listener_result;
-  int oldcancelstate=-1;
 
   threadslot=(int) thread_val;
   dataptr=&gcmdserv_clientthreaddata[threadslot];
@@ -300,7 +299,7 @@ static void cmdserverlib_MainServerLoop_cleanup() {
 static void *cmdserverlib_MainServerLoop(void *thread_val) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=cmdserverlib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
-  int oldcancelstate=-1, result, sock, clientsock, i;
+  int result, sock, clientsock, i;
   uint16_t tcpport=(unsigned short) ((unsigned) thread_val);
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
