@@ -84,13 +84,13 @@ $sNewPassword               = "";           //-- STRING:        Used to hold the
 
 $aTempResult1               = array();      //-- ARRAY:         --//
 $aTempResult2               = array();      //-- ARRAY:         --//
-$aTempResult3               = array();      //-- ARRAY:         --//
-$aTempResult4               = array();      //-- ARRAY:         --//
-$aTempResult5               = array();      //-- ARRAY:         --//
-$aTempResult6               = array();      //-- ARRAY:         --//
-$aTempResult7               = array();      //-- ARRAY:         --//
-$aTempResult8               = array();      //-- ARRAY:         --//
-$aTempResult9               = array();      //-- ARRAY:         --//
+$aTempResult3A              = array();      //-- ARRAY:         --//
+$aTempResult3B              = array();      //-- ARRAY:         --//
+$aTempResult3C              = array();      //-- ARRAY:         --//
+$aTempResult4A              = array();      //-- ARRAY:         --//
+$aTempResult4B              = array();      //-- ARRAY:         --//
+$aTempResult4C              = array();      //-- ARRAY:         --//
+$aTempResult4D              = array();      //-- ARRAY:         --//
 
 
 //------------------------------------------------------------//
@@ -616,55 +616,93 @@ if($bError===false) {
 									//-- Flag an error --//
 									$bError = true;
 									$iErrCode  = 0;
-									$sErrMesg .= "Error Code:'0000' \n";
+									$sErrMesg .= "Error Code:'7301' \n";
 									$sErrMesg .= "Problem extracting the 'PremiseName' from the 'Data' parameter! \n";
 								}
 							} else {
 								//-- Flag an error --//
 								$bError = true;
 								$iErrCode  = 0;
-								$sErrMesg .= "Error Code:'0000' \n";
+								$sErrMesg .= "Error Code:'7302' \n";
 								$sErrMesg .= "Problem with either the 'PremiseName' or the 'PremiseDesc' from the 'Data' parameter! \n";
 							}
 						}
 						
 						//--------------------------------------------------------------------//
-						//-- Check if the Username and password seem fine                   --//
+						//-- Check if the Owner Username and password seem fine             --//
 						//--------------------------------------------------------------------//
 						if( $bError===false ) {
 							//-- IF The Mode needs a "New User" Created --//
 							if( $aPostData['InsertType']==="NewAll" ) {
-								if( isset( $aPostData['UserName'] ) && isset( $aPostData['UserPassword'] ) ) {
+								if( isset( $aPostData['OwnerUsername'] ) && isset( $aPostData['OwnerPassword'] ) ) {
 									//-- Extract the username and password --//
-									$sOwnerUsername = $aPostData['UserName'];
-									$sOwnerPassword = $aPostData['UserPassword'];
+									$sOwnerUsername = $aPostData['OwnerUsername'];
+									$sOwnerPassword = $aPostData['OwnerPassword'];
 									
 									//-- Check the 'Username' isn't invalid --//
 									if( !( strlen( trim( $sOwnerUsername ) ) > 1 ) ) {
 										//-- Flag an error --//
 										$bError = true;
 										$iErrCode  = 0;
-										$sErrMesg .= "Error Code:'0000' \n";
-										$sErrMesg .= "Problem with the 'UserName' from the 'Data' parameter! \n";
+										$sErrMesg .= "Error Code:'7304' \n";
+										$sErrMesg .= "Problem with the 'OwnerUsername' from the 'Data' parameter! \n";
 										
 									//-- Check if the 'Password' isn't invalid --//
 									} else if( !( strlen( $sOwnerPassword ) > 6 ) ) {
 										//-- Flag an error --//
 										$bError = true;
 										$iErrCode  = 0;
+										$sErrMesg .= "Error Code:'7305' \n";
+										$sErrMesg .= "Problem with the 'OwnerPassword' from the 'Data' parameter! \n";
+									}
+								} else {
+									//-- Flag an error --//
+									$bError = true;
+									$iErrCode  = 0;
+									$sErrMesg .= "Error Code:'7306' \n";
+									$sErrMesg .= "Problem with either the 'OwnerUsername' or the 'OwnerPassword' from the 'Data' parameter! \n";
+								}
+							}
+						}
+						
+						//--------------------------------------------------------------------//
+						//-- Check if the WatchInputs Username and password seem fine       --//
+						//--------------------------------------------------------------------//
+						if( $bError===false ) {
+							//-- IF The Mode needs a "New User" Created --//
+							if( $aPostData['InsertType']==="NewAll" ) {
+								if( isset( $aPostData['WatchInputsUsername'] ) && isset( $aPostData['WatchInputsPassword'] ) ) {
+									//-- Extract the username and password --//
+									$sWatchInputsUsername = $aPostData['WatchInputsUsername'];
+									$sWatchInputsPassword = $aPostData['WatchInputsPassword'];
+									
+									//-- Check the 'Username' isn't invalid --//
+									if( !( strlen( trim( $sWatchInputsUsername ) ) > 1 ) ) {
+										//-- Flag an error --//
+										$bError = true;
+										$iErrCode  = 0;
 										$sErrMesg .= "Error Code:'0000' \n";
-										$sErrMesg .= "Problem with the 'UserPassword' from the 'Data' parameter! \n";
+										$sErrMesg .= "Problem with the 'WatchInputsUsername' from the 'Data' parameter! \n";
+										$sErrMesg .= "The WatchInputs Username might be insufficient length or have other issues.\n";
+										
+									//-- Check if the 'Password' isn't invalid --//
+									} else if( !( strlen( $sWatchInputsPassword ) > 6 ) ) {
+										//-- Flag an error --//
+										$bError = true;
+										$iErrCode  = 0;
+										$sErrMesg .= "Error Code:'0000' \n";
+										$sErrMesg .= "Problem with the 'WatchInputsPassword' from the 'Data' parameter! \n";
+										$sErrMesg .= "The WatchInputs Password might be insufficient length or have other issues.\n";
 									}
 								} else {
 									//-- Flag an error --//
 									$bError = true;
 									$iErrCode  = 0;
 									$sErrMesg .= "Error Code:'0000' \n";
-									$sErrMesg .= "Problem with either the 'UserName' or the 'UserPassword' from the 'Data' parameter! \n";
+									$sErrMesg .= "Problem with either the 'WatchInputsUsername' or the 'WatchInputsPassword' from the 'Data' parameter! \n";
 								}
 							}
 						}
-						
 						//--------------------------------------------------------------------//
 						//-- Check if the 'HubName', 'HubType' & 'HubSerialCode' seem fine  --//
 						//--------------------------------------------------------------------//
@@ -890,8 +928,8 @@ if($bError===false) {
 						
 						if( $sTemp==="information_schema" || $sTemp==="mysql" || $sTemp==="test" || $sTemp==="tmp" || $sTemp==="temp" ) {
 							$bError    = true;
-							$iErrCode  = 4002;
-							$sErrMesg .= "Error Code:'4002' \n";
+							$iErrCode  = 4402;
+							$sErrMesg .= "Error Code:'4402' \n";
 							$sErrMesg .= "Database Error! \n";
 							$sErrMesg .= "The provided Database schema name is a reserved word! \n";
 						} else {
@@ -900,8 +938,8 @@ if($bError===false) {
 					} else {
 						//-- Error message --//
 						$bError    = true;
-						$iErrCode  = 4001;
-						$sErrMesg .= "Error Code:'4001' \n";
+						$iErrCode  = 4401;
+						$sErrMesg .= "Error Code:'4401' \n";
 						$sErrMesg .= "Database Error! \n";
 						$sErrMesg .= "The provided Database schema name isn't valid! \n";
 					}
@@ -1238,135 +1276,185 @@ if($bError===false) {
 					}
 					
 					
+					
 					//-----------------------------------------------------------------------------//
-					//-- 5.7.3.6.A.4 - Add the UserInfo                                          --//
+					//-- 5.7.3.6.A.4 - Add the Premise, PremiseInfo & Hub                        --//
 					//-----------------------------------------------------------------------------//
 					if( $bError===false ) {
-						$aTempResult3 = DB_InsertUserInfo( $sPostDatabaseName, 1, "", "", "", $sOwnerUsername, "", "", "01/01/1990" );
+						$aTempResult3A = DB_InsertPremiseInfo( $sPostDatabaseName, 1, 1, 1, 1 );
 						
-						if( $aTempResult3['Error']===true ) {
+						if( $aTempResult3A['Error']===true ) {
 							$bError    = true;
 							$iErrCode  = 7406;
 							$sErrMesg .= "Error Code:'7406' \n";
-							$sErrMesg .= "Problem inserting the UserInfo! \n";
-							$sErrMesg .= $aTempResult3['ErrMesg'];
-						} else {
-							//-- Extract the User Id --//
-							$iUserInfoId = $aTempResult3['LastId'];
-						}
-					}
-					
-					
-					//-----------------------------------------------------------------------------//
-					//-- 5.7.3.6.A.5 - Add the new User                                          --//
-					//-----------------------------------------------------------------------------//
-					if( $bError===false ) {
-						$aTempResult4 = DB_InsertUser( $sPostDatabaseName, $iUserInfoId, $sOwnerUsername, 1 );
-						
-						if( $aTempResult4['Error']===true ) {
-							$bError    = true;
-							$iErrCode  = 7406;
-							$sErrMesg .= "Error Code:'7406' \n";
-							$sErrMesg .= "Problem inserting the User into the 'User' table! \n";
-							$sErrMesg .= $aTempResult4['ErrMesg'];
-						} else {
-							//-- Extract the User Id --//
-							$iUserId = $aTempResult4['LastId'];
-						}
-					}
-					
-					
-					//-----------------------------------------------------------------------------//
-					//-- 5.7.3.6.A.6 - Add the Premise Info                                      --//
-					//-----------------------------------------------------------------------------//
-					if( $bError===false ) {
-						$aTempResult5 = DB_InsertPremiseInfo( $sPostDatabaseName, 1, 1, 1, 1 );
-						
-						if( $aTempResult5['Error']===true ) {
-							$bError    = true;
-							$iErrCode  = 7407;
-							$sErrMesg .= "Error Code:'7407' \n";
 							$sErrMesg .= "Problem inserting the Premise Info! \n";
-							$sErrMesg .= $aTempResult5['ErrMesg'];
+							$sErrMesg .= $aTempResult3A['ErrMesg'];
+							
 						} else {
 							//-- Extract the PremiseInfoId --//
-							$iPremiseInfoId = $aTempResult5['LastId'];
+							$iPremiseInfoId = $aTempResult3A['LastId'];
+							
+							$aTempResult3B = DB_InsertPremise( $sPostDatabaseName, $iPremiseInfoId, $sPremiseName, $sPremiseDesc );
+						
+							if( $aTempResult3B['Error']===true ) {
+								$bError    = true;
+								$iErrCode  = 7407;
+								$sErrMesg .= "Error Code:'7407' \n";
+								$sErrMesg .= "Problem inserting the Premise! \n";
+								$sErrMesg .= $aTempResult3B['ErrMesg'];
+							} else {
+								//-- Extract the PremiseId --//
+								$iPremiseId = $aTempResult3B['LastId'];
+								
+								$aTempResult3C = DB_InsertHub( $sPostDatabaseName, $iPremiseId, $iHubTypeId, $sHubName, $sHubSerialCode, "" );
+								
+								if( $aTempResult3C['Error']===true ) {
+									$bError    = true;
+									$iErrCode  = 7408;
+									$sErrMesg .= "Error Code:'7408' \n";
+									$sErrMesg .= "Problem inserting the Hubs! \n";
+									$sErrMesg .= $aTempResult3C['ErrMesg'];
+									
+								} else {
+									//-- Extract the HubId --//
+									$iHubId = $aTempResult3C['LastId'];
+								}
+							}
 						}
 					}
 					
 					
 					//-----------------------------------------------------------------------------//
-					//-- 5.7.3.6.A.7 - Add the Premise                                           --//
+					//-- 5.7.3.6.A.5 - Add the UserInfo, User, Permissions                       --//
 					//-----------------------------------------------------------------------------//
 					if( $bError===false ) {
-						$aTempResult6 = DB_InsertPremise( $sPostDatabaseName, $iPremiseInfoId, $sPremiseName, $sPremiseDesc );
+						$aTempResult4A = DB_InsertUserInfo( $sPostDatabaseName, 1, "", "", "", $sOwnerUsername, "", "", "01/01/1990" );
 						
-						if( $aTempResult6['Error']===true ) {
-							$bError    = true;
-							$iErrCode  = 7408;
-							$sErrMesg .= "Error Code:'7408' \n";
-							$sErrMesg .= "Problem inserting the Premise! \n";
-							$sErrMesg .= $aTempResult6['ErrMesg'];
-						} else {
-							//-- Extract the PremiseId --//
-							$iPremiseId = $aTempResult6['LastId'];
-						}
-					}
-					
-					//-----------------------------------------------------------------------------//
-					//-- 5.7.3.6.A.8 - Give Ownership of the premise to the new User             --//
-					//-----------------------------------------------------------------------------//
-					if( $bError===false ) {
-						$aTempResult7 = DB_InsertPermPremise( $sPostDatabaseName, $iUserId, $iPremiseId, 1, 1, 1, 1, 1 );
-						
-						if( $aTempResult7['Error']===true ) {
+						if( $aTempResult4A['Error']===true ) {
 							$bError    = true;
 							$iErrCode  = 7410;
 							$sErrMesg .= "Error Code:'7410' \n";
-							$sErrMesg .= "Problem inserting the Permissions1! \n";
-							$sErrMesg .= "User=".$iUserId."  Premise=".$iPremiseId."\n";
-							$sErrMesg .= $aTempResult7['ErrMesg'];
+							$sErrMesg .= "Problem inserting the UserInfo! \n";
+							$sErrMesg .= $aTempResult4A['ErrMesg'];
+							
 						} else {
-							//-- Extract the PermissionId --//
-							$iPermissionId = $aTempResult7['LastId'];
+							//-- Extract the User Id --//
+							$iUserInfoId = $aTempResult4A['LastId'];
+							
+							$aTempResult4B = DB_InsertUser( $sPostDatabaseName, $iUserInfoId, $sOwnerUsername, 1 );
+							
+							if( $aTempResult4B['Error']===true ) {
+								$bError    = true;
+								$iErrCode  = 7411;
+								$sErrMesg .= "Error Code:'7411' \n";
+								$sErrMesg .= "Problem inserting the User into the 'User' table! \n";
+								$sErrMesg .= $aTempResult4B['ErrMesg'];
+								
+							} else {
+								//-- Extract the User Id --//
+								$iUserId = $aTempResult4B['LastId'];
+								
+								//-- Give the user permission to do admin modes --//
+								$aTempResult4C = DB_InsertPermPremise( $sPostDatabaseName, $iUserId, $iPremiseId, 1, 1, 1, 1, 1 );
+								
+								if( $aTempResult4C['Error']===true ) {
+									$bError    = true;
+									$iErrCode  = 7412;
+									$sErrMesg .= "Error Code:'7412' \n";
+									$sErrMesg .= "Problem inserting the Permissions1! \n";
+									$sErrMesg .= "User=".$iUserId."  Premise=".$iPremiseId."\n";
+									$sErrMesg .= $aTempResult4C['ErrMesg'];
+									
+								} else {
+									//-- Extract the PermissionId --//
+									$iPermissionId = $aTempResult4C['LastId'];
+									
+									//-- Grant the Owner all server permissions --//
+									$aTempResult4D = DB_InsertPermServer( $sPostDatabaseName, $iUserId, 1, 1, 1 );
+									
+									if( $aTempResult4D['Error']===true ) {
+										$bError    = true;
+										$iErrCode  = 7413;
+										$sErrMesg .= "Error Code:'7413' \n";
+										$sErrMesg .= "Problem inserting the Permissions2! \n";
+										$sErrMesg .= $aTempResult4D['ErrMesg'];
+										
+									} else {
+										//-- Extract the PermissionId --//
+										$iPermServerId = $aTempResult4D['LastId'];
+									}
+								}
+							}
 						}
 					}
 					
-					//-----------------------------------------------------------------------------//
-					//-- 5.7.3.6.A.8 - Give the user permission to do admin modes                --//
-					//-----------------------------------------------------------------------------//
-					if( $bError===false ) {
-						$aTempResult8 = DB_InsertPermServer( $sPostDatabaseName, $iUserId, 1, 1, 1 );
-						
-						if( $aTempResult8['Error']===true ) {
-							$bError    = true;
-							$iErrCode  = 7412;
-							$sErrMesg .= "Error Code:'7412' \n";
-							$sErrMesg .= "Problem inserting the Permissions2! \n";
-							$sErrMesg .= $aTempResult8['ErrMesg'];
-						} else {
-							//-- Extract the PermissionId --//
-							$iPermissionId = $aTempResult8['LastId'];
-						}
-					}
 					
 					//-----------------------------------------------------------------------------//
-					//-- 5.7.3.6.A.9 - Add the Hub                                               --//
+					//-- 5.7.3.6.A.6 - Add the Hub                                               --//
 					//-----------------------------------------------------------------------------//
 					if( $bError===false ) {
-						$aTempResult9 = DB_InsertHub( $sPostDatabaseName, $iPremiseId, $iHubTypeId, $sHubName, $sHubSerialCode, "" );
 						
-						if( $aTempResult9['Error']===true ) {
+						$aTempResult5A = DB_CreateDatabaseUser( $sPostDatabaseName, $sWatchInputsUsername, $sDBURI, $sWatchInputsPassword );
+						
+						if( $aTempResult5A['Error']===true ) {
 							$bError    = true;
-							$iErrCode  = 7414;
-							$sErrMesg .= "Error Code:'7414' \n";
-							$sErrMesg .= "Problem inserting the Hubs! \n";
-							$sErrMesg .= $aTempResult9['ErrMesg'];
+							$iErrCode  = 7416;
+							$sErrMesg .= "Error Code:'7416' \n";
+							$sErrMesg .= "Problem creating the \"WatchInputs\" database user! \n";
+							
 						} else {
-							//-- Extract the HubId --//
-							$iHubId = $aTempResult9['LastId'];
+							$aTempResult5B = DB_InsertUserInfo( $sPostDatabaseName, 1, "", "", "", $sWatchInputsUsername, "", "", "01/01/1990" );
+							
+							if( $aTempResult5B['Error']===true ) {
+								$bError    = true;
+								$iErrCode  = 7417;
+								$sErrMesg .= "Error Code:'7417' \n";
+								$sErrMesg .= "Problem inserting the \"WatchInputs\" UserInfo! \n";
+								$sErrMesg .= $aTempResult5B['ErrMesg'];
+								
+							} else {
+								$aTempResult5C = DB_InsertUser( $sPostDatabaseName, $aTempResult5B['LastId'], $sWatchInputsUsername, 1 );
+								
+								if( $aTempResult5C['Error']===true ) {
+									$bError    = true;
+									$iErrCode  = 7418;
+									$sErrMesg .= "Error Code:'7418' \n";
+									$sErrMesg .= "Problem inserting the \"WatchInputs\" user into the 'User' table! \n";
+									$sErrMesg .= $aTempResult5C['ErrMesg'];
+									
+								} else {
+									//-- Extract the User Id --//
+									$iWatchInputsUserId = $aTempResult5C['LastId'];
+									
+									//-- Give the WatchInputs User everything but the owner permission --//
+									$aTempResult5D = DB_InsertPermPremise( $sPostDatabaseName, $iWatchInputsUserId, $iPremiseId, 0, 1, 1, 1, 1 );
+									
+									if( $aTempResult5D['Error']===true ) {
+										$bError    = true;
+										$iErrCode  = 7419;
+										$sErrMesg .= "Error Code:'7419' \n";
+										$sErrMesg .= "Problem granting the \"WatchInputs\" user permission to the premise! \n";
+										$sErrMesg .= $aTempResult5D['ErrMesg'];
+										
+									} else {
+										//-- Extract the User Id --//
+										$iWatchInputsPermPremiseId = $aTempResult5D['LastId'];
+										
+										//-- Grant the WatchInputs User full server permissions --//
+										$aTempResult5E = DB_InsertPermServer( $sPostDatabaseName, $iWatchInputsUserId, 1, 1, 1 );
+										
+										if( $aTempResult5E['Error']===true ) {
+											$bError    = true;
+											$iErrCode  = 7420;
+											$sErrMesg .= "Error Code:'7420' \n";
+											$sErrMesg .= "Problem granting the \"WatchInputs\" user permission to the server! \n";
+											$sErrMesg .= $aTempResult5E['ErrMesg'];
+										}
+									}
+								}
+							}
 						}
-					}
+					}	//-- ENDIF No errors have occurred --//
 					
 					
 					if( $bError===false ) {
@@ -1376,13 +1464,14 @@ if($bError===false) {
 						$aResult = array(
 							"Error"     => false,
 							"Data"      => array(
-								"UserInfoId"    => $iUserInfoId,
-								"UserId"        => $iUserId,
-								"PremiseInfoId" => $iPremiseInfoId,
-								"PremiseId"     => $iPremiseId,
-								"PermPremiseId" => $iPermissionId,
-								"PermServerId"  => $iPermissionId,
-								"HubId"         => $iHubId
+								"UserInfoId"        => $iUserInfoId,
+								"UserId"            => $iUserId,
+								"PremiseInfoId"     => $iPremiseInfoId,
+								"PremiseId"         => $iPremiseId,
+								"PermPremiseId"     => $iPermissionId,
+								"PermServerId"      => $iPermissionId,
+								"HubId"             => $iHubId,
+								"WatchInputsUserId" => $iWatchInputsUserId
 							)
 						);
 					}
@@ -1409,7 +1498,7 @@ if($bError===false) {
 					$bError = true;
 					$iErrCode  = 7599;
 					$sErrMesg .= "Error Code:'7599' \n";
-					$sErrMesg .= "When attempting to 'InsertHub' a unsupported 'InsertType' was used! \n";
+					$sErrMesg .= "When attempting to 'InsertHub' an unsupported 'InsertType' was used! \n";
 				}
 				
 			} catch( Exception $e7400 ) {

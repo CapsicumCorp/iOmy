@@ -821,7 +821,7 @@ function dbChangeUserPassword( $sPassword ) {
 	//-- TODO: Make a fallback to use the "MySQL 5.7.6" Method for when this method is no longer supported --//
 	
 	//--------------------------------------------//
-	//-- 1.0 - Declare Variables				--//
+	//-- 1.0 - Declare Variables                --//
 	//--------------------------------------------//
 		
 	//-- 1.1 - Global Variables --//
@@ -868,16 +868,145 @@ function dbChangeUserPassword( $sPassword ) {
 		}
 	}
 	
+	
 	//--------------------------------------------//
-	//-- 5.0 Return Results or Error Message    --//
-	//--------------------------------------------// 
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
 	if( $bError===false ) {
 		//-- Return that it was successful --//
-		return array( "Error"=>false,	"Data"=>array("Result"=>"Updated succesfully")	);
+		return array( "Error"=>false,   "Data"=>array("Result"=>"Updated succesfully")  );
 	} else {
-		return array( "Error"=>true,	"ErrMesg"=>"ChangeUserPassword: ".$sErrMesg		);
+		return array( "Error"=>true,    "ErrMesg"=>"ChangeUserPassword: ".$sErrMesg     );
 	}
 }
+
+
+function dbGetUserServerPermissions() {
+	//--------------------------------------------//
+	//-- 1.0 - Declare Variables                --//
+	//--------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedDB;
+	
+	//-- 1.2 - Other Varirables --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;        //-- BOOL:      --//
+	$sErrMesg           = "";           //-- STRING:    --//
+	$aInputVals         = array();      //-- ARRAY:     --//
+	
+	
+	$sCurrentSchema     = getCurrentSchema();
+	
+	//----------------------------------------//
+	//-- 3.0 - SQL QUERY                    --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			
+			$sSQL .= "SELECT ";
+			$sSQL .= "	`USERS_PK`, ";
+			$sSQL .= "	`USERS_STATE`, ";
+			$sSQL .= "	`USERS_USERNAME`, ";
+			$sSQL .= "	`USERADDRESS_PK`, ";
+			$sSQL .= "	`USERADDRESS_LINE1`, ";
+			$sSQL .= "	`USERADDRESS_LINE2`, ";
+			$sSQL .= "	`USERADDRESS_LINE3`, ";
+			$sSQL .= "	`USERADDRESS_POSTALLINE1`, ";
+			$sSQL .= "	`USERADDRESS_POSTALLINE2`, ";
+
+			$sSQL .= "FROM `".$sView."` ";
+			$sSQL .= "LEFT JOIN `PERMSERVER` ON `USERS_PK` = `PERMSERVER_USERS_FK` ";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') ";
+				
+			$aInputVals = array();
+				
+			$aOutputCols = array(
+				array( "Name"=>"UserId",							"type"=>"INT" ),
+				array( "Name"=>"UserState",							"type"=>"STR" ),
+				array( "Name"=>"Username",							"type"=>"STR" ),
+				array( "Name"=>"UserAddressId",						"type"=>"STR" ),
+				array( "Name"=>"UserAddressLine1",					"type"=>"STR" ),
+				array( "Name"=>"UserAddressLine2",					"type"=>"STR" ),
+				array( "Name"=>"UserAddressLine3",					"type"=>"STR" ),
+				array( "Name"=>"UserAddressPostalLine1",			"type"=>"STR" ),
+				array( "Name"=>"UserAddressPostalLine2",			"type"=>"STR" ),
+				array( "Name"=>"UserAddressPostalLine3",			"type"=>"STR" ),
+				array( "Name"=>"UserAddressCountryId",				"type"=>"INT" ),
+				array( "Name"=>"UserAddressCountryName",			"type"=>"STR" ),
+				array( "Name"=>"UserAddressCountryAbrv",			"type"=>"STR" ),
+				array( "Name"=>"UserAddressLanguageId",				"type"=>"INT" ),
+				array( "Name"=>"UserAddressLanguageName",			"type"=>"STR" ),
+				array( "Name"=>"UserAddressLanguage",				"type"=>"STR" ),
+				array( "Name"=>"UserAddressLanguageVariant",		"type"=>"STR" ),
+				array( "Name"=>"UserAddressLanguageEncoding",		"type"=>"STR" ),
+				array( "Name"=>"UserAddressPostcodeId",				"type"=>"INT" ),
+				array( "Name"=>"UserAddressPostcodeName",			"type"=>"STR" ),
+				array( "Name"=>"UserAddressStateProvinceId",		"type"=>"INT" ),
+				array( "Name"=>"UserAddressStateProvinceShort",		"type"=>"STR" ),
+				array( "Name"=>"UserAddressStateProvinceName",		"type"=>"STR" ),
+				array( "Name"=>"UserAddressTimezoneId",				"type"=>"INT" ),
+				array( "Name"=>"UserAddressTimezoneCC",				"type"=>"STR" ),
+				array( "Name"=>"UserAddressTimezoneLatitude",		"type"=>"STR" ),
+				array( "Name"=>"UserAddressTimezoneLongitude",		"type"=>"STR" ),
+				array( "Name"=>"UserAddressTimezoneTZ",				"type"=>"STR" ),
+				array( "Name"=>"UserInfoId",						"type"=>"INT" ),
+				array( "Name"=>"UserInfoTitle",						"type"=>"STR" ),
+				array( "Name"=>"UserInfoGivennames",				"type"=>"STR" ),
+				array( "Name"=>"UserInfoSurnames",					"type"=>"STR" ),
+				array( "Name"=>"UserInfoDisplayname",				"type"=>"STR" ),
+				array( "Name"=>"UserInfoEmail",						"type"=>"STR" ),
+				array( "Name"=>"UserInfoPhonenumber",				"type"=>"STR" ),
+				array( "Name"=>"UserInfoDoB",						"type"=>"STR" ),
+				array( "Name"=>"UserInfoGenderId",					"type"=>"INT" ),
+				array( "Name"=>"UserInfoGenderName",				"type"=>"STR" )
+			);
+				
+			//----------------------------------------------//
+			//-- 
+			//----------------------------------------------//
+			$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	
+	
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 9.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if($bError===false) {
+		$aReturn = array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		$aReturn = array( "Error"=>true, "ErrMesg"=>"UserAddressInfo: ".$sErrMesg );
+	}
+	return $aReturn;
+}
+
+
+
+
+
 
 //========================================================================================================================//
 //== #5.0# - Premise Functions                                                                                          ==//
