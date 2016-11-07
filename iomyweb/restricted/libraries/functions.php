@@ -54,28 +54,68 @@ require_once("dbfunctions.php");
 function LookupFunctionConstant( $sValue ) {
 	//-- TODO: Decide if this is going to be the best spot and place to do this --//
 	switch( $sValue ) {
-		
-		//-- COMMS --//
+		//-------------//
+		//-- COMMS   --//
 		case "APICommTypeId":
 			return 2;
 			
-		//-- LINKS --//
+		//-------------//
+		//-- LINKS   --//
 		case "HueBridgeLinkTypeId":
 			return 7;
 			
 		case "OnvifLinkTypeId":
 			return 6;
 			
-		//-- THINGS --//
+		case "OWMLinkTypeId":
+			return 8;
+			
+		//-------------//
+		//-- THINGS  --//
 		case "HueThingTypeId":
 			return 13;
 			
 		case "OnvifThingTypeId":
 			return 12;
+		
+		case "WeatherThingTypeId":
+			return 14;
 			
+		//-------------//
 		//-- RSTYPES --//
+		case "WeatherStationRSTypeId":
+			return 1600;
+		
+		case "TemperatureRSTypeId":
+			return 1601;
+			
+		case "HumidityRSTypeId":
+			return 1602;
+			
+		case "PressureRSTypeId":
+			return 1603;
+			
+		case "ConditionsRSTypeId":
+			return 1604;
+			
+		case "WindDirectionRSTypeId":
+			return 1605;
+			
+		case "WindSpeedRSTypeId":
+			return 1606;
+		
+		case "LightHueRSTypeId":
+			return 3901;
+			
+		case "LightSaturationRSTypeId":
+			return 3902;
+			
+		case "LightBrightnessRSTypeId":
+			return 3903;
+			
 		case "OnvifThumbnailUrlRSTypeId":
 			return 3973;
+			
 			
 		default:
 			return false;
@@ -104,7 +144,7 @@ function ConvertDataTypeToName( $iDataType, $bTableName=false ) {
 	$aResult                = array();
 	
 	
-
+	
 	if( $bTableName===false ) {
 		//--------------------------------------------//
 		//-- Retrieve the DataType                  --//
@@ -197,7 +237,7 @@ function ConvertDataTypeToName( $iDataType, $bTableName=false ) {
 	//--------------------------------------------//
 	//-- Retrieve the DataType                  --//
 	//--------------------------------------------//
-
+	
 	
 	//--------------------------------------------//
 	//-- Return Error or Success!               --//
@@ -211,6 +251,7 @@ function ConvertDataTypeToName( $iDataType, $bTableName=false ) {
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
 }
+
 
 
 //========================================================================================================================//
@@ -238,7 +279,7 @@ function AddPresetLogToPremiseLog( $iPresetLogId, $iUTS, $iPremiseId, $sCustom1 
 		$aUserId = dbGetCurrentUserDetails();
 		
 		//------------------------------------------------//
-		//-- 2.2.A - If an error has been caught		--//
+		//-- 2.2.A - If an error has been caught        --//
 		if( $aUserId['Error']===true ) {
 			//-- Display the Error Message that the function returned --//
 			//-- TODO: Write an error message --//
@@ -349,7 +390,7 @@ function GetPremiseLogsBetweenUTS( $iPremiseId, $iStartstamp, $iEndstamp ) {
 
 	
 	//------------------------------------------------------------//
-	//-- 9.0 - Return the Results or Error Message				--//
+	//-- 9.0 - Return the Results or Error Message              --//
 	//------------------------------------------------------------//
 	if($bError===false) {
 		//-- No Errors --//
@@ -680,13 +721,13 @@ function ChangePremiseInfo( $aPremiseInfo, $sPostInfoOccupants, $sPostInfoBedroo
 
 function GetRoomInfoFromRoomId( $iRoomId ) {
 	//------------------------------------------------------------//
-	//-- 1.0 - Initialise										--//
+	//-- 1.0 - Initialise                                       --//
 	//------------------------------------------------------------//
-	$bError			= false;
-	$sErrMesg		= "";
-	$aResult		= array();
+	$bError         = false;
+	$sErrMesg       = "";
+	$aResult        = array();
 	//------------------------------------------------------------//
-	//-- 2.0 - Begin											--//
+	//-- 2.0 - Begin                                            --//
 	//------------------------------------------------------------//
 	try {
 		$aResult = dbGetRoomInfoFromRoomId( $iRoomId );
@@ -709,13 +750,13 @@ function GetRoomInfoFromRoomId( $iRoomId ) {
 	}
 	
 	//------------------------------------------------------------//
-	//-- 9.0 - Return the Results or Error Message				--//
+	//-- 9.0 - Return the Results or Error Message              --//
 	//------------------------------------------------------------//
 	if($bError===false) {
-		//-- 9.A - SUCCESS		--//
+		//-- 9.A - SUCCESS --//
 		return array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
-		//-- 9.B - FAILURE		--//
+		//-- 9.B - FAILURE --//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
 }
@@ -951,7 +992,7 @@ function GetCommsFromHubId( $iHubId ) {
 	
 	if( $aResult["Error"]===true ) {
 		//-- Display an Error --//
-		return array( "Error"=>true, "ErrMesg"=>"No Comms Found! \nCouldn't find IOs on that particular Hub.\n");
+		return array( "Error"=>true, "ErrMesg"=>"No Comms Found! \nCouldn't find Comms on that particular Hub.\n");
 	}
 	
 	
@@ -1178,7 +1219,7 @@ function ChangeLinkRoom( $iLinkId, $iRoomId ) {
 	//------------------------------------------------//
 	try {
 		
-		$aResult = dbChangeLinkRoom( $iIOId, $iRoomId );
+		$aResult = dbChangeLinkRoom( $iLinkId, $iRoomId );
 		
 		if( $aResult["Error"]===true ) {
 			$bError = true;
@@ -1273,7 +1314,7 @@ function CheckIfLinkAlreadyExists( $iCommId, $sSerialCode, $sConnAddress, $sInfo
 
 
 
-function AddNewLink( $iCommId, $iLinkTypeId, $iInfoId, $iConnectionId, $sSerialCode, $sName, $iState, $bSQLTransaction=false ) {
+function AddNewLink( $iCommId, $iLinkTypeId, $iInfoId, $iConnectionId, $sSerialCode, $sName, $iState, $iRoomId=null, $bSQLTransaction=false ) {
 	//------------------------------------------------//
 	//-- 1.0 - Initialise                           --//
 	//------------------------------------------------//
@@ -1285,7 +1326,7 @@ function AddNewLink( $iCommId, $iLinkTypeId, $iInfoId, $iConnectionId, $sSerialC
 	//-- 2.0 - Main                                 --//
 	//------------------------------------------------//
 	try {
-		$aResult = dbAddNewLink( $iCommId, $iLinkTypeId, $iInfoId, $iConnectionId, $sSerialCode, $sName, $iState, $bSQLTransaction );
+		$aResult = dbAddNewLink( $iCommId, $iLinkTypeId, $iInfoId, $iConnectionId, $sSerialCode, $sName, $iState, $iRoomId, $bSQLTransaction );
 		
 		if( $aResult["Error"]===true ) {
 			$bError = true;
@@ -1635,7 +1676,7 @@ function GetThingsFromLinkId( $iLinkId ) {
 	}
 	
 	//------------------------------------------------------------//
-	//-- 9.0 - Return the Results or Error Message				--//
+	//-- 9.0 - Return the Results or Error Message              --//
 	//------------------------------------------------------------//
 	if( $bError===false ) {
 		//-- No Errors --//
@@ -1702,7 +1743,7 @@ function AddNewThing( $iLinkId, $iThingTypeId, $iThingHWID, $iThingOutputID, $iT
 }
 
 //========================================================================================================================//
-//== #11.0# - IO Functions																							==//
+//== #11.0# - IO Functions                                                                                              ==//
 //========================================================================================================================//
 
 function GetIOInfo($sIOId) {
@@ -1909,7 +1950,7 @@ function GetIOsFromThingId( $iThingId ) {
 		return array( "Error"=>true, "ErrMesg"=>"No IOs Found! \nCouldn't find IOs on that particular Thing.\n");
 	} 
 	//------------------------------------------------------------//
-	//-- 9.0 - Return the Results or Error Message				--//
+	//-- 9.0 - Return the Results or Error Message              --//
 	//------------------------------------------------------------//
 	if( $bError===false ) {
 		//-- No Errors --//
@@ -2096,7 +2137,29 @@ function InsertNewIODataValue( $iIOId, $iUTS, $Value, $bNonCommited=false ) {
 
 
 
+function ExtractValueFromMultiArray( $aArray, $aArrayLocation ) {
+	//-- A recursive function used for extracting a value from a known location in a multi-dimensional array --// 
 
+	$sLocation      = array_shift($aArrayLocation);
+	$iLocationsToGo = count($aArrayLocation);
+	
+	if( isset( $aArray[$sLocation] ) ) {
+		//-- If more locations to go to the target then perform recursion --//
+		if( $iLocationsToGo>=1 ) {
+			//-- Recurse --//
+			return ExtractValueFromMultiArray( $aArray[$sLocation], $aArrayLocation);
+		} else {
+			//-- Success: Found it --//
+			return $aArray[$sLocation];
+		}
+	} else {
+		//-- Failure: Can't find it --//
+		return null;
+	}
+	
+	
+	
+}
 
 
 

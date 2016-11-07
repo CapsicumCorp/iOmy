@@ -575,7 +575,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			break;
 			
 		/*==============================================================*/
-		/* Table: LINKCONN                                              */
+		/* Table: LINKINFO                                              */
 		/*==============================================================*/
 		case 'LinkInfo':
 			$sSQL .= "create table `".$sDBName."`.`LINKINFO` \n";
@@ -3552,12 +3552,13 @@ function DB_CreateDefaultData1( $sDBName ) {
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1501,150,'Oil Sto T1',0); \n";
 
 			/* Weather */
-			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1601,160,'WU Temperature',0); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1602,160,'WU Humidity',0); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1603,160,'WU Pressure',0); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1604,160,'WU Conditions',0); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1605,160,'WU Wind Direction',0); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1606,160,'WU Wind Speed',0); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1600,160,'Weather Station Code',0); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1601,160,'Temperature',0); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1602,160,'Humidity',0); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1603,160,'Pressure',0); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1604,160,'Conditions',0); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1605,160,'Wind Direction',0); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1606,160,'Wind Speed',0); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1701,170,'Local Temperature',0); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1794,179,'Heating Max Temperature',0); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (1795,179,'Heating Min Temperature',0); \n";
@@ -4306,6 +4307,7 @@ function DB_CreateDefaultData4( $sDBName ) {
 			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Bluetooth Device' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Onvif IP Camera' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Philips Hue Bridge' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Open Weather Map Feed' ); \n";
 			
 			
 			/*============================================================
@@ -4324,6 +4326,7 @@ function DB_CreateDefaultData4( $sDBName ) {
 			$sSQL .= "INSERT INTO `".$sDBName."`.`THINGTYPE` ( `THINGTYPE_NAME` ) VALUES ( 'Zigbee Netvox SmartPlugPlus' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`THINGTYPE` ( `THINGTYPE_NAME` ) VALUES ( 'Onvif Camera Stream' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`THINGTYPE` ( `THINGTYPE_NAME` ) VALUES ( 'Philips Hue Light' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`THINGTYPE` ( `THINGTYPE_NAME` ) VALUES ( 'Weather Feed' ); \n";
 			
 			
 			/*============================================================
@@ -5193,7 +5196,7 @@ function InsertTheDatabaseCoreValues( $sDBName ) {
 		//----------------------------------------------------//
 		//-- 3.1 - Perform the insert                       --//
 		//----------------------------------------------------//
-		$aCoreResult = DB_InsertCore( $sDBName, "iOmy (Vanilla)", 0, 1, 1, $iCurrentUTS );
+		$aCoreResult = DB_InsertCore( $sDBName, "iOmy (Vanilla)", 0, 4, 2, $iCurrentUTS );
 		
 		//----------------------------------------------------//
 		//-- 3.2 - Check for errors                         --//
@@ -5218,7 +5221,7 @@ function InsertTheDatabaseCoreValues( $sDBName ) {
 		//----------------------------------------------------//
 		//-- 4.1 - Insert the Schema Name into the database --//
 		//----------------------------------------------------//
-		$aCoreAddonResult = DB_InsertCoreAddon( $sDBName, $iCoreId, "iOmy Schema", 0, 1, 1, $iCurrentUTS );
+		$aCoreAddonResult = DB_InsertCoreAddon( $sDBName, $iCoreId, "iOmy Schema", 0, 4, 2, $iCurrentUTS );
 		
 		//----------------------------------------------------//
 		//-- 4.2 - Check for errors                         --//

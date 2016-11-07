@@ -237,6 +237,7 @@ function PrepareAddNewLink( $aLink ) {
 	$sLinkConnUsername          = "";           //-- STRING:        Will hold the "Link Connection Username" if specified. --//
 	$sLinkConnPassword          = "";           //-- STRING:        Will hold the "Link Connection Password" if specified. --//
 	
+	$iLinkRoomId                = 0;            //-- INTEGER:       NOTE: This will be set to null if no value is provided --//
 	$iLinkInfoId                = 0;            //-- INTEGER:       --//
 	$iLinkConnectionId          = 0;            //-- INTEGER:       --//
 	$aThings                    = array();      //-- ARRAY:         --//
@@ -533,6 +534,24 @@ function PrepareAddNewLink( $aLink ) {
 			}
 		}
 		
+		//----------------------------------------------------//
+		//-- (Optional) Check Link 'RoomId'                 --//
+		//----------------------------------------------------//
+		
+		//-- TODO: Implement checks to make sure that the Room exists in the Premise --//
+		if( $bError===false ) {
+			if( isset( $aLink['RoomId'] ) ) {
+				if( is_string( $aLink['RoomId'] ) ) {
+					$iRoomId = intval( $aLink['RoomId'] );
+				} else if( is_int($aLink['RoomId']) && $aLink['RoomId']>=1 ) {
+					$iRoomId = intval( $aLink['RoomId'] );
+				} else {
+					$iRoomId = null;
+				}
+			} else {
+				$iRoomId = null;
+			}
+		}
 		
 		//----------------------------------------------------//
 		//-- (Optional) Check Link 'Things'                 --//
@@ -641,7 +660,7 @@ function PrepareAddNewLink( $aLink ) {
 		//----------------------------------------------------------------//
 		if( $bError===false ) {
 			
-			$aTempResult3 = AddNewLink( $iLinkCommId, $iLinkTypeId, $iLinkInfoId, $iLinkConnectionId, $sLinkSerialCode, $sLinkDisplayName, $iLinkState, true );
+			$aTempResult3 = AddNewLink( $iLinkCommId, $iLinkTypeId, $iLinkInfoId, $iLinkConnectionId, $sLinkSerialCode, $sLinkDisplayName, $iLinkState, $iRoomId, true );
 			
 			if( $aTempResult3['Error']===true ) {
 				//----------------------------------------------------//
@@ -819,7 +838,7 @@ function PrepareAddNewThing( $iLinkId, $aThing, $iThingDefaultHWID, $sLinkDispla
 	//----------------------------------------------------------------//
 	if( $bError===false ) {
 		if( isset($aThing['State']) ) {
-			if ( is_int( $aThing['State'] ) && $aThing['State']>0 ) {
+			if ( is_int( $aThing['State'] ) && $aThing['State']>=0 ) {
 				//-- INTEGER --//
 				$iThingState = $aThing['State'];
 				
@@ -831,6 +850,9 @@ function PrepareAddNewThing( $iLinkId, $aThing, $iThingDefaultHWID, $sLinkDispla
 				$iThingState = 1;
 				
 			} else if( $aThing['State']===false ) {
+				$iThingState = 0;
+				
+			} else if( $aThing['State']===null ) {
 				$iThingState = 0;
 				
 			} else {
@@ -848,9 +870,7 @@ function PrepareAddNewThing( $iLinkId, $aThing, $iThingDefaultHWID, $sLinkDispla
 			if( $iLinkState!=="" ) {
 				$iThingState = $iLinkState;
 			} else {
-				$bError = true;
-				$iErrCode  = 6;
-				$sErrMesg .= "Problem with the Thing 'State' in an element of the 'Things' array!\n";
+				$iThingState = 0;
 			}
 		}
 	}

@@ -24,8 +24,8 @@ class PHPPhilipsHue {
 	//========================================================================================================================//
 	//== #1.0# - INITIALISE VARIABLES                                                                                       ==//
 	//========================================================================================================================//
-	protected $sNetworkAddress      = '';           //-- STRING:    Holds the IP Address or Network name of the Device.		--//
-	protected $sNetworkPort         = '';           //-- STRING:    Holds the IP Port that is used for Onvif				--//
+	protected $sNetworkAddress      = '';           //-- STRING:    Holds the IP Address or Network name of the Device. --//
+	protected $sNetworkPort         = '';           //-- STRING:    Holds the IP Port that is used for Onvif. --//
 	protected $sUserToken           = '';           //-- STRING:    --//
 	protected $sAPIUrl              = '';           //-- STRING:    --//
 	public $bInitialised            = false;        //-- BOOLEAN:   --//

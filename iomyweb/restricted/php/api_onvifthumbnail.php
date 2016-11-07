@@ -343,7 +343,7 @@ if( $bError===false ) {
 							$sErrMesg .= "Error Code:'0311' \n";
 							$sErrMesg .= "Can not retrieve the 'ThumbnailUrl' IO Info.\n";
 							$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
-							$sErrMesg .= "\n".$iThumbUrlId;
+							//$sErrMesg .= "\n".$iThumbUrlId;
 						}
 						
 						//-- Lookup the most recent ThumbnailUrl from the database --//

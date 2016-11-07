@@ -77,11 +77,11 @@ $bFound                     = false;        //-- BOOLEAN:       Used to indicate
 
 
 //- Constants that need to be added to a function in the fuctions library --//
-$iHueThingTypeId            = 13;           //-- INTEGER:       This is used to hold the "ThingTypeId" of a Philips Hue Light. --//
-$iAPICommTypeId             = 2;            //-- INTEGER:       This is used to indicate the 
-$iHueRSTypeId               = 3901;         //-- INTEGER:       This is used to indicate the 
-$iSaturationRSTypeId        = 3902;         //-- INTEGER:       This is used to indicate the 
-$iBrightnessRSTypeId        = 3903;         //-- INTEGER:       This is used to indicate the 
+$iHueThingTypeId            = 0;            //-- INTEGER:       This is used to hold the "ThingTypeId" of a Philips Hue Light. --//
+$iAPICommTypeId             = 0;            //-- INTEGER:       This is used to indicate the 
+$iHueRSTypeId               = 0;            //-- INTEGER:       This is used to indicate the 
+$iSaturationRSTypeId        = 0;            //-- INTEGER:       This is used to indicate the 
+$iBrightnessRSTypeId        = 0;            //-- INTEGER:       This is used to indicate the 
 
 
 
@@ -101,11 +101,21 @@ if( $aRestrictedApiCore['RestrictedDB']===false ) {
 	$sErrMesg .= "Can't access the database! User may not be logged in";
 }
 
+//------------------------------------------------------------//
+//-- 1.5 - Fetch Constants (Will be replaced)               --//
+//------------------------------------------------------------//
+$iAPICommTypeId          = LookupFunctionConstant("APICommTypeId");
+$iHueThingTypeId         = LookupFunctionConstant("HueThingTypeId");
+$iHueRSTypeId            = LookupFunctionConstant("LightHueRSTypeId");
+$iSaturationRSTypeId     = LookupFunctionConstant("LightSaturationRSTypeId");
+$iBrightnessRSTypeId     = LookupFunctionConstant("LightBrightnessRSTypeId");
+
+
+
 
 //====================================================================//
 //== 2.0 - Retrieve POST                                            ==//
 //====================================================================//
-
 
 //----------------------------------------------------//
 //-- 2.1 - Fetch the Parameters                     --//
@@ -888,7 +898,7 @@ if( $bError===false ) {
 						if( $aTempFunctionResult4['Error']===true ) {
 							$bError     = true;
 							$iErrCode   = 3412;
-							$sErrMesg  .= "Error Code:'3412 \n";
+							$sErrMesg  .= "Error Code:'3412' \n";
 							$sErrMesg  .= "Critical Error updating the \"Hue\" value!\n";
 							$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
 						}

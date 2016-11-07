@@ -3135,7 +3135,7 @@ function dbCheckIfLinkAlreadyExists( $iCommId, $sSerialCode, $sAddress, $sInfoNa
 //----------------------------------------------------------------------------//
 //-- ADD LINK                                                               --//
 //----------------------------------------------------------------------------//
-function dbAddNewLink( $iCommId, $iLinkTypeId, $iInfoId, $iConnectionId, $sSerialCode, $sName, $iState, $bSQLTransaction ) {
+function dbAddNewLink( $iCommId, $iLinkTypeId, $iInfoId, $iConnectionId, $sSerialCode, $sName, $iState, $iRoomId, $bSQLTransaction ) {
 	//------------------------------------------------------------------------//
 	//-- DESCRIPTION:                                                       --//
 	//--    This function is used to add a new Link to the database.        --//
@@ -3187,7 +3187,7 @@ function dbAddNewLink( $iCommId, $iLinkTypeId, $iInfoId, $iConnectionId, $sSeria
 				array( "Name"=>"LinkTypeId",          "type"=>"INT",      "value"=>$iLinkTypeId      ),
 				array( "Name"=>"LinkInfoId",          "type"=>"BINT",     "value"=>$iInfoId          ),
 				array( "Name"=>"LinkConnectionId",    "type"=>"BINT",     "value"=>$iConnectionId    ),
-				array( "Name"=>"LinkRoomId",          "type"=>"NUL",      "value"=>null              ),
+				array( "Name"=>"LinkRoomId",          "type"=>"NUL",      "value"=>$iRoomId          ),
 				array( "Name"=>"LinkSerialCode",      "type"=>"STR",      "value"=>$sSerialCode      ),
 				array( "Name"=>"LinkName",            "type"=>"STR",      "value"=>$sName            ),
 				array( "Name"=>"LinkConnected",       "type"=>"INT",      "value"=>1                 ),
@@ -4294,6 +4294,7 @@ function dbIODetection() {
 				$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
 				$sSQL .= "	`PERMISSIONS_READ`, ";
 				$sSQL .= "	`PREMISE_PK`, ";
+				$sSQL .= "	`PREMISE_NAME`, ";
 				$sSQL .= "	`RSCAT_PK`, ";
 				$sSQL .= "	`RSCAT_NAME`, ";
 				$sSQL .= "	`RSSUBCAT_PK`, ";
@@ -4344,6 +4345,7 @@ function dbIODetection() {
 					array( "Name"=>"PermissionStateToggle",     "type"=>"INT" ),
 					array( "Name"=>"PermissionRead",            "type"=>"INT" ),
 					array( "Name"=>"PremiseId",                 "type"=>"INT" ),
+					array( "Name"=>"PremiseName",               "type"=>"STR" ),
 					array( "Name"=>"RSCatId",                   "type"=>"INT" ),
 					array( "Name"=>"RSCatName",                 "type"=>"STR" ),
 					array( "Name"=>"RSSubCatId",                "type"=>"INT" ),
@@ -5153,6 +5155,7 @@ function dbGetIODataAggregation( $sAggregationType, $sDataType, $iIOId, $iStartU
 
 	$aTemporaryView     = array();      //-- ARRAY:     This variable is used to hold the response from the function that looks up the SQL View name --//
 	$sView              = "";           //-- STRING:    Used to hold the extracted string that contains the SQL View name  --//
+	$sCalcedValueType   = "";           //-- STRING:    --//
 	$aInputVals         = array();      //-- ARRAY:     Used to hold an array of values to do the SQL Input Binding --//
 	$aOutputCols        = array();      //-- ARRAY:     Used to hold an array of values to do the formatting of the SQL Output data --//
 	
@@ -5167,7 +5170,8 @@ function dbGetIODataAggregation( $sAggregationType, $sDataType, $iIOId, $iStartU
 				$sErrMesg = "Debug: Unsupported datatype! \n datatype=".$sDataType;
 			} else {
 				//-- store the view --//
-				$sView		= $aTemporaryView["View"];
+				$sView              = $aTemporaryView["View"];
+				$sCalcedValueType   = $aTemporaryView["CalcedValueType"];
 				//sValCol  = aTemporaryView.Value; 
 				
 				$sSQL .= "SELECT ";
@@ -5202,9 +5206,9 @@ function dbGetIODataAggregation( $sAggregationType, $sDataType, $iIOId, $iStartU
 				
 				//-- Output Binding --//
 				$aOutputCols = array(
-					array( "Name"=>"Value",             "type"=>"DEC6"  ),
-					array( "Name"=>"IOId",              "type"=>"INT"   ),
-					array( "Name"=>"UOM_NAME",          "type"=>"STR"   )
+					array( "Name"=>"Value",             "type"=>$sCalcedValueType  ),
+					array( "Name"=>"IOId",              "type"=>"INT"              ),
+					array( "Name"=>"UOM_NAME",          "type"=>"STR"              )
 				);
 				
 				//-- Execute the SQL Query --//
@@ -5270,6 +5274,7 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 
 	$aTemporaryView     = array();      //-- ARRAY:     This variable is used to hold the response from the function that looks up the SQL View name --//
 	$sView              = "";           //-- STRING:    Used to hold the extracted string that contains the SQL View name  --//
+	$sCalcedValueType   = "";           //-- STRING:    --//
 	$aInputVals         = array();      //-- ARRAY:     Used to hold an array of values to do the SQL Input Binding --//
 	$aOutputCols        = array();      //-- ARRAY:     Used to hold an array of values to do the formatting of the SQL Output data --//
 	
@@ -5284,14 +5289,16 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 				$sErrMesg = "Debug: Unsupported datatype! \n datatype=".$sDataType;
 			} else {
 				//-- store the view --//
-				$sView		= $aTemporaryView["View"];
+				$sView              = $aTemporaryView["View"];
+				$sCalcedValueType   = $aTemporaryView['CalcedValueType'];
 				//sValCol  = aTemporaryView.Value; 
 				
 				$sSQL .= "SELECT ";
 				$sSQL .= "	`CALCEDVALUE`, ";
 				$sSQL .= "	`IO_PK`, ";
 				$sSQL .= "	`UTS`, ";
-				$sSQL .= "	`UOM_NAME` ";
+				$sSQL .= "	`UOM_NAME`, ";
+				$sSQL .= "	`UOM_PK` ";
 				$sSQL .= "FROM `".$sView."` ";
 				$sSQL .= "WHERE `IO_PK` = :IOId ";
 				$sSQL .= "AND `UTS` <= :EndUTS ";
@@ -5306,10 +5313,11 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 				
 				//-- Output Binding --//
 				$aOutputCols = array(
-					array( "Name"=>"Value",             "type"=>$aTemporaryView['CalcedValueType']  ),
+					array( "Name"=>"Value",             "type"=>$sCalcedValueType ),
 					array( "Name"=>"IOId",              "type"=>"INT"   ),
 					array( "Name"=>"UTS",               "type"=>"BINT"  ),
-					array( "Name"=>"UomName",           "type"=>"STR"   )
+					array( "Name"=>"UomName",           "type"=>"STR"   ),
+					array( "Name"=>"UomId",             "type"=>"INT"   )
 				);
 				
 				//-- Execute the SQL Query --//
@@ -5330,13 +5338,27 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 			if( $aResult["Error"]===true ) {
 				if( $aResult["ErrMesg"]==="No Rows Found! Code:1") {
 					//-- Return no results --//
-					$aResult = array(
-						"Error"	=> false,
-						"Data"	=> array(
-							"Value"		=> 0,
-							"IOId"		=> $iIOId
-						)
-					);
+					if( $sCalcedValueType==="STR" ) {
+						$aResult = array(
+							"Error"	=> false,
+							"Data"	=> array(
+								"Value"     => "",
+								"IOId"      => $iIOId,
+								"UTS"       => 0
+							)
+						);
+					} else {
+						$aResult = array(
+							"Error"    => false,
+							"Data"     => array(
+								"Value"     => 0,
+								"IOId"      => $iIOId,
+								"UTS"       => 0
+							)
+						);
+						
+					}
+
 				} else {
 					$bError = true;
 					$sErrMesg = $aResult["ErrMesg"];

@@ -384,9 +384,9 @@ class PHPOnvif {
 		//----------------------------------------------------------------//
 		//-- 2.0 - EXTRACT THE VALUES                                   --//
 		//----------------------------------------------------------------//
-		echo "\n-- dumping video source response --\n";
-		echo json_encode( $aXMLEnvelope );
-		echo "\n\n";
+		//echo "\n-- dumping video source response --\n";
+		//echo json_encode( $aXMLEnvelope );
+		//echo "\n\n";
 		
 		
 		//-- If the Body Tag of the Envelope exists --//
