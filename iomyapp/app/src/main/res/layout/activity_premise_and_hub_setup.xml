@@ -35,29 +35,42 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
     <!-- PREMISE FIELD -->
 
     <!-- HUB FIELD -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Premise Name"
-        android:id="@+id/premiseNameLabel" />
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/scrollView3"
+        android:layout_weight="1">
 
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/premiseNameField"
-        android:text="Home" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hub Name"
-        android:id="@+id/premiseHubNameLabel" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Premise Name"
+                android:id="@+id/premiseNameLabel" />
 
-    <EditText
-        android:id="@+id/premiseHubNameField"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="iOmyHub" />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/premiseNameField"
+                android:text="Home" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hub Name"
+                android:id="@+id/premiseHubNameLabel" />
+
+            <EditText
+                android:id="@+id/premiseHubNameField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="iOmyHub" />
+        </LinearLayout>
+    </ScrollView>
 
     <!-- USERNAME FIELD -->
 
