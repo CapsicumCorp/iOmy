@@ -19,13 +19,10 @@
 
 BASEDIR=$(dirname $0)
 
-OVERRIDE_BASEURL=""
-DOWNLOAD_NEEDS_WEBBROWSER=0
-
-source ${BASEDIR}/download_source.cfg
+source ${BASEDIR}/download_binaries.cfg
 source ${BASEDIR}/package_info.sh
 
-PACKAGES="ZLIB BZIP2 OPENSSL CURL ICONV NCURSES MHASH LIBMCRYPT PCRE LIBPNG LIBJPEG READLINE LIBXML2 FREETYPE LIBAIO SDL FFMPEG LIGHTTPD PHP MYSQL BUSYBOX BUSYBOXARM BUSYBOXX86 PHPMYADMIN"
+PACKAGES="WEBSERVER DATABASE PHPMYADMIN"
 
 # Queue a message for output at the end of the script
 MESS=""
@@ -72,7 +69,7 @@ download_package() {
   if [ "${OVERRIDE_BASEURL}" != "" ] ; then
 	  PKGBASEURL="${OVERRIDE_BASEURL}"
 	fi
-  if [ "${DOWNLOAD_NEEDS_WEBBROWSER}" = 0 -a "${PKGNEED_WEB_BROWSER}" = 0 -a ${justreporturl} = 0 ] ; then
+  if [ "${DOWNLOAD_NEEDS_WEBBROWSER}" = 0 -a "${PKGNEED_WEB_BROWSER}" = 0 ] ; then
 	  echo "Downloading ${PKGTITLE}-${PKGVER} from ${PKGBASEURL}${PKGPKG}"
 		wget -N -c -P "${REPOSITORY}/" "${PKGBASEURL}${PKGPKG}"
 		mess "${PKGPKG}\n"
@@ -81,13 +78,12 @@ download_package() {
 	fi
 }
 
-justreporturl=0
-if [ ${I_AM_READY_TO_DOWNLOAD_ALL_THE_FILES} = 0 ] ; then
-  echo "Downloading all the packages may take quite a while so"
-	echo "  you need to edit download_source.cfg and set I_AM_READY_TO_DOWNLOAD_ALL_THE_FILES to 1"
-	echo "  as well as other variables to make sure the download settings are correct for auto download"
-  justreporturl=1
-fi
+#if [ ${I_AM_READY_TO_DOWNLOAD_ALL_THE_FILES} = 0 ] ; then
+#  echo "Downloading all the packages may take quite a while so"
+#	echo "  you need to edit download_source.cfg and set I_AM_READY_TO_DOWNLOAD_ALL_THE_FILES to 1"
+#	echo "  as well as other variables to make sure the download settings are correct"
+#	exit 2
+#fi
 if [ ! -d "${REPOSITORY}" ] ; then
   # Create the download folder if it doesn't already exist
   mkdir -pv "${REPOSITORY}"
@@ -113,7 +109,7 @@ fi
 
 if [ "${DOWNLOADMESS}" != "" ] ; then
   echo
-	echo "You may need to download some files manually with a web browser."
+	echo "You will need to download some files manually with a web browser"
 	echo "and save them to directory: ${REPOSITORY}"
 	echo
   echo -e "${DOWNLOADMESS}"

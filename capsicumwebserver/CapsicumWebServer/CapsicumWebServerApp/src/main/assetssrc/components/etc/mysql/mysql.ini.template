@@ -41,7 +41,9 @@ default-character-set=utf8
 
     max_connections=100
 
-    query_cache_size=0
+query_cache_type = 1
+query_cache_size=1M
+query_cache_limit=256K
 
     table_open_cache=256
 

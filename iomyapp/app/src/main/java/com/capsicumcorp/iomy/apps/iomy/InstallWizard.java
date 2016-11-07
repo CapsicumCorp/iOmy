@@ -74,7 +74,11 @@ public class InstallWizard {
     public String ownerPassword         = null;
     public String confirmOwnerPassword  = null;
 
+    public String watchInputsUsername   = "WatchInputs001";
+    public String watchInputsPassword   = null;
+
     public List<String> validationErrorMessages = new ArrayList<String>();
+    public List<String> apiErrorMessages        = new ArrayList<String>();
 
     // JSON responses
     public JSONObject lastJSONResponse  = null;
@@ -88,6 +92,7 @@ public class InstallWizard {
     // Constructor
     //==============================================//
     public InstallWizard() {
+
     }
 
     /**
@@ -115,6 +120,7 @@ public class InstallWizard {
         this.setupAPI="http://"+this.hostname+":"+this.webserverport+"/iomyserver.php";
         this.dbURI=sharedPref.getString("pref_mysql_hostname", "localhost");
         this.dbServerPort=Integer.parseInt(sharedPref.getString("pref_mysql_port", "3306"));
+        this.dbPassword=sharedPref.getString("pref_mysql_root_password", "");
     }
     /**
      * Generates a random password between 8 - 20 characters long.
@@ -127,7 +133,7 @@ public class InstallWizard {
         int maxLength = 20;
         Random r = new Random();
         int length = r.nextInt((maxLength - minLength) + 1) + minLength;
-        String validChars = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()[]{}_+=-<>/?.,";
+        String validChars = "abcdefghijkmnpqrstuvwxyz23456789ABCDEFGHJKLMNPQRSTUVWXYZ!@#%^&*()[]{}_+=-<>?";
 
         // Until a valid password is generated...
         do {
@@ -293,6 +299,8 @@ public class InstallWizard {
 
             //--- Setup the database ---//
         } else if (title == Titles.webserverDatabaseRootPasswordSetupTitle) {
+            //Inform the service services thread about the current root password
+            Application.getInstance().runServerServices.supplyDBRootPassword(dbPassword);
             this.summonDBSetupPage(activity);
 
         //--- Once the database is set up, create a premise and a hub
@@ -323,6 +331,8 @@ public class InstallWizard {
             editor.putString("pref_mysql_root_password", this.dbPassword);
             editor.putString("pref_mysql_owner_username", this.ownerUsername);
             editor.putString("pref_mysql_owner_password", this.ownerPassword);
+            editor.putString("pref_mysql_watchInputs_username", this.watchInputsUsername);
+            editor.putString("pref_mysql_watchInputs_password", this.watchInputsPassword);
             editor.putBoolean("pref_watch_inputs_enabled", true);
             editor.putBoolean("pref_lighttpdphp_enabled", true);
             editor.putBoolean("pref_mysql_enabled", true);
@@ -401,20 +411,20 @@ public class InstallWizard {
             PrintWriter watchInputsTempFile = new PrintWriter(Application.getInstance().getStorageFolderName() +"/WatchInputs.cfg.tmp");
             watchInputsTempFile.println("# ioMy Watch Inputs Config");
             watchInputsTempFile.println("[general]");
-            watchInputsTempFile.println("hubpk=1");
+            watchInputsTempFile.println("hubpk=" + hubID);
             watchInputsTempFile.println("hubname=" + hubName);
             watchInputsTempFile.println("[dbconfig]");
             watchInputsTempFile.println("dbtype=mysql");
             watchInputsTempFile.println("dbname=" + databaseSchema);
             watchInputsTempFile.println("host=" + dbURI);
-            watchInputsTempFile.println("username=" + ownerUsername);
-            watchInputsTempFile.println("password=" + ownerPassword);
+            watchInputsTempFile.println("username=" + watchInputsUsername);
+            watchInputsTempFile.println("password=" + watchInputsPassword);
             watchInputsTempFile.println("[webapiconfig]");
             watchInputsTempFile.println("hostname=" + dbURI);
             watchInputsTempFile.println("port=8080");
             watchInputsTempFile.println("url=/restricted/php/special/watchinputs.php");
-            watchInputsTempFile.println("apiusername=" + ownerUsername);
-            watchInputsTempFile.println("apipassword=" + ownerPassword);
+            watchInputsTempFile.println("apiusername=" + watchInputsUsername);
+            watchInputsTempFile.println("apipassword=" + watchInputsPassword);
             watchInputsTempFile.println("[zigbeeconfig]");
             watchInputsTempFile.println("zigbeedefsfilename=" + Application.getInstance().getStorageFolderName() + "/zigbeedefs.ini");
             watchInputsTempFile.close();

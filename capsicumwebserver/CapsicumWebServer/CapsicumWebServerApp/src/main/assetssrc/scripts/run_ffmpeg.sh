@@ -62,7 +62,7 @@ abi="armeabi"
 pie="pie"
 
 # Prioritise local libraries over system libraries
-export LD_LIBRARY_PATH="${sbin}/lib"
+export LD_LIBRARY_PATH="${sbin}/lib/${abi}"
 
 output=$($sbin/bin/${abi}/${pie}/ffmpeg $* 2>&1)
 

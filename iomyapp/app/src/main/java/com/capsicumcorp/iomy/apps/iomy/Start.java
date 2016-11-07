@@ -25,6 +25,7 @@ package com.capsicumcorp.iomy.apps.iomy;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -54,8 +55,13 @@ public class Start extends AppCompatActivity {
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 
+        //Import default or current settings from Android preferences to the local variables
+        installWizard.setInitialSettings(this);
+
         boolean firstrunval=sharedPref.getBoolean("pref_run_first_run_wizard", true);
         if (firstrunval==false) {
+            Application.getInstance().runServerServices.supplyDBRootPassword(installWizard.dbPassword);
+
             //If the first run wizard has been run, then onComplete will now call installWizard.loadIOMy
             //TODO: Fix this so it can run an alternative multiple set of screens
             installWizard.loadServerDeviceProgress(this);
@@ -75,7 +81,6 @@ public class Start extends AppCompatActivity {
             editor.putBoolean("pref_mysql_enabled", true);
             editor.commit();
         }
-        installWizard.setInitialSettings(this);
     }
 
     /**

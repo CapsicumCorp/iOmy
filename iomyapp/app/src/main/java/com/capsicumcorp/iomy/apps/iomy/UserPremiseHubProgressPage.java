@@ -40,6 +40,7 @@ import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.StringRequest;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -69,6 +70,11 @@ public class UserPremiseHubProgressPage extends ProgressPage {
         me = this;     // Captures this activity to be referenced in subroutines
         int requests = 0;
 
+        // Create the WatchInputs passwords and ensure that it's different to the owner's password.
+        do {
+            installWizard.watchInputsPassword = installWizard.generateRandomPassword();
+        } while (installWizard.ownerPassword == installWizard.watchInputsPassword);
+
         //From Volley.newRequestQueue but modified to create a thread pool size of 1 so only do one query at a time
         File cacheDir = new File(this.getCacheDir(), "volley");
         String userAgent = "volley/0";
@@ -90,7 +96,7 @@ public class UserPremiseHubProgressPage extends ProgressPage {
         final Map<String, String> baseparams = new HashMap<String, String>();
         baseparams.put("Access", "{\"URI\":\"" + installWizard.dbURI + "\",\"Port\":\"" + installWizard.dbServerPort + "\",\"Username\":\"" + installWizard.dbUsername + "\",\"Password\":\"" + installWizard.dbPassword + "\"}");
         baseparams.put("DBName", installWizard.databaseSchema);
-        baseparams.put("Data", "{\"InsertType\":\"NewAll\",\"UserName\":\""+installWizard.ownerUsername+"\",\"UserPassword\":\""+installWizard.ownerPassword+"\",\"PremiseName\":\""+installWizard.premiseName+"\",\"PremiseDesc\":\"\",\"HubName\":\""+installWizard.hubName+"\",\"HubType\":\"2\"}");
+        baseparams.put("Data", "{\"InsertType\":\"NewAll\",\"OwnerUsername\":\""+installWizard.ownerUsername+"\",\"OwnerPassword\":\""+installWizard.ownerPassword+"\",\"PremiseName\":\""+installWizard.premiseName+"\",\"PremiseDesc\":\"\",\"HubName\":\""+installWizard.hubName+"\",\"HubType\":\"2\",\"WatchInputsUsername\":\""+installWizard.watchInputsUsername+"\",\"WatchInputsPassword\":\""+installWizard.watchInputsPassword+"\"}");
 
         final String modeAddHub             = "03_AddHub";
         final String modeCreatePHPConfig    = "02_CreatePHPConfig";
@@ -125,7 +131,7 @@ public class UserPremiseHubProgressPage extends ProgressPage {
         //-----------------------------------------------------------------//
         requests++;
         final StringRequest createPHPConfig = new StringRequest(Request.Method.POST, sUrl,
-                createSuccessRequestListenerOnComplete("Create the PHP Config file"),
+                createSuccessRequestListener("Create the PHP Config file"),
                 createErrorRequestListener("Create the PHP Config file")) {
             protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>(baseparams);
@@ -178,10 +184,16 @@ public class UserPremiseHubProgressPage extends ProgressPage {
                     JSONObject jsonResponse = new JSONObject(response);
                     installWizard.lastJSONResponse = jsonResponse;
 
-                    installWizard.premiseID = jsonResponse.getInt("PremiseId");
-                    installWizard.hubID = jsonResponse.getInt("HubId");
-                    installWizard.userID = jsonResponse.getInt("UserId");
-
+                    if (jsonResponse.getBoolean("Error")) {
+                        Log.e("IDs_"+requestName, jsonResponse.getString("ErrMesg"));
+                        installWizard.apiErrorMessages.add(jsonResponse.getString("ErrMesg"));
+                    } else {
+                        JSONObject array=jsonResponse.getJSONObject("Data");
+                        installWizard.premiseID = array.getInt("PremiseId");
+                        installWizard.hubID = array.getInt("HubId");
+                        installWizard.userID = array.getInt("UserId");
+                    }
+                    me.onComplete();
                 } catch (JSONException jsone) {
                     Log.e(requestName, jsone.getMessage());
                 }

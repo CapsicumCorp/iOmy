@@ -69,6 +69,12 @@ public class SettingsPage extends PreferenceActivity {
         textPref=(EditTextPreference)findPreference("pref_mysql_owner_password");
         textPref.setSummary(textPref.getText());
 
+        textPref=(EditTextPreference)findPreference("pref_mysql_watchInputs_username");
+        textPref.setSummary(textPref.getText());
+
+        textPref=(EditTextPreference)findPreference("pref_mysql_watchInputs_password");
+        textPref.setSummary(textPref.getText());
+
         PreferenceScreen server_settings = (PreferenceScreen) getPreferenceScreen().findPreference("server_settings_key");
         Intent server_settings_intent = new Intent(this, ServiceSettings.class);
         server_settings.setIntent(server_settings_intent);

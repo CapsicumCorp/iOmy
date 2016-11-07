@@ -4,6 +4,34 @@
     android:title="Main Settings"
     android:persistent="false">
 
+    <!-- <CheckBoxPreference
+        android:key="pref_run_first_run_wizard"
+        android:title="Run First Run Wizard"
+        android:summary="Run the first run wizard on next app start"
+        android:defaultValue="true" /> -->
+
+    <PreferenceCategory
+        android:title="Services"
+        android:key="pref_key_service_settings">
+        <CheckBoxPreference
+            android:key="pref_watch_inputs_enabled"
+            android:title='Watch Inputs Enabled'
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="pref_lighttpdphp_enabled"
+            android:title='Lighttpd &amp; PHP Enabled'
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="pref_mysql_enabled"
+            android:title='MySQL Enabled'
+            android:defaultValue="true" />
+
+        <PreferenceScreen
+            android:title="Service Settings"
+            android:key="server_settings_key"
+            />
+    </PreferenceCategory>
+
     <EditTextPreference
         android:key="pref_webserver_hostname"
         android:title="Webserver Hostname"
@@ -72,31 +100,22 @@
         android:shouldDisableView="false"
         android:defaultValue="" />
 
-    <!-- <CheckBoxPreference
-        android:key="pref_run_first_run_wizard"
-        android:title="Run First Run Wizard"
-        android:summary="Run the first run wizard on next app start"
-        android:defaultValue="true" /> -->
+    <EditTextPreference
+        android:key="pref_mysql_watchInputs_username"
+        android:title="MySQL Watch Inputs Username"
+        android:summary="The Watch Inputs username"
+        android:enabled="false"
+        android:selectable="false"
+        android:shouldDisableView="false"
+        android:defaultValue="" />
 
-    <PreferenceCategory
-        android:title="Services"
-        android:key="pref_key_service_settings">
-        <CheckBoxPreference
-            android:key="pref_watch_inputs_enabled"
-            android:title='Watch Inputs Enabled'
-            android:defaultValue="true" />
-        <CheckBoxPreference
-            android:key="pref_lighttpdphp_enabled"
-            android:title='Lighttpd &amp; PHP Enabled'
-            android:defaultValue="true" />
-        <CheckBoxPreference
-            android:key="pref_mysql_enabled"
-            android:title='MySQL Enabled'
-            android:defaultValue="true" />
-
-        <PreferenceScreen
-            android:title="Service Settings"
-            android:key="server_settings_key"
-            />
-    </PreferenceCategory>
+    <EditTextPreference
+        android:key="pref_mysql_watchInputs_password"
+        android:title="MySQL Watch Inputs Password"
+        android:summary="The Watch Inputs password"
+        android:inputType="textPassword"
+        android:enabled="false"
+        android:selectable="false"
+        android:shouldDisableView="false"
+        android:defaultValue="" />
 </PreferenceScreen>
