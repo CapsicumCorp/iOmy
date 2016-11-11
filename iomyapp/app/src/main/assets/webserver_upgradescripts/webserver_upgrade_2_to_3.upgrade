@@ -1,0 +1,113 @@
+; An upgrade script to migrate the web server files from version 2 to version 3
+; skipfolderifexist skips files in that folder unless they don't exist
+; skipfile will always re-extract if the file doesn't exist
+; deletefolder will recursively delete everything in the folder
+; changedfile entries will override skipfolder entries
+
+;Only some binaries have changed
+skipfolderifexist components
+
+changedfile components/bin/armeabi/pie/ffmpeg
+changedfile components/bin/armeabi/pie/ffplay
+changedfile components/bin/armeabi/pie/lighttpd
+changedfile components/bin/armeabi/pie/mysql
+changedfile components/bin/armeabi/pie/mysqlcheck
+changedfile components/bin/armeabi/pie/mysqld
+changedfile components/bin/armeabi/pie/php
+changedfile components/bin/armeabi/pie/php-cgi
+
+;Only some libraries have changed
+changedfile components/lib/armeabi/libcrypto.so.1.0.0
+changedfile components/lib/armeabi/libssl.so.1.0.0
+changedfile components/lib/armeabi/libpcre.so.1
+
+changedfile components/etc/mysql/mysql.ini.template
+
+;Files to skip in new extract
+skipfolderifexist scripts
+
+changedfile scripts/manage_services.sh
+changedfile scripts/run_ffmpeg.sh
+
+skipfolderifexist tmp
+skipfolderifexist var
+
+skipfile zigbeedefs.ini
+
+;Always skip this folder as it contains the MySQL database
+skipfolder components/mysql/sbin/data
+
+;Web Files
+skipfolderifexist htdocs
+
+;0.4.1 to 0.4.2
+changedfile htdocs/iomyserver.php
+changedfile htdocs/restricted/libraries/dbfunctions.php
+changedfile htdocs/restricted/libraries/dbmysql.php
+changedfile htdocs/restricted/libraries/functions.php
+changedfile htdocs/restricted/libraries/http_post.php
+changedfile htdocs/restricted/libraries/onvif.php
+changedfile htdocs/restricted/libraries/philipshue.php
+changedfile htdocs/restricted/libraries/restrictedapicore.php
+changedfile htdocs/restricted/libraries/special/iomyserverlib.php
+changedfile htdocs/restricted/libraries/userauth.php
+changedfile htdocs/restricted/odata/services/main/MainMetadata.php
+changedfile htdocs/restricted/odata/services/main/MainQueryProvider.php
+changedfile htdocs/restricted/php/api_onvif.php
+changedfile htdocs/restricted/php/api_philipshue.php
+changedfile htdocs/restricted/php/api_statechange.php
+changedfile htdocs/restricted/php/api_users.php
+changedfile htdocs/restricted/php/special/versions/0.1.0.php
+changedfile htdocs/ui/mobile/app.js
+changedfile htdocs/ui/mobile/index.html
+changedfile htdocs/ui/mobile/mjs/devices/DeviceOverview.controller.js
+changedfile htdocs/ui/mobile/mjs/devices/OnvifCamera.controller.js
+changedfile htdocs/ui/mobile/mjs/devices/PhilipsHue.controller.js
+changedfile htdocs/ui/mobile/mjs/fragments/NavMenu.fragment.js
+changedfile htdocs/ui/mobile/mjs/premise/Overview.controller.js
+changedfile htdocs/ui/mobile/mjs/rooms/Room.controller.js
+changedfile htdocs/ui/mobile/mjs/rooms/UnassignedDevices.controller.js
+changedfile htdocs/ui/mobile/mjs/settings/devices/EditLink.controller.js
+changedfile htdocs/ui/mobile/mjs/settings/devices/EditThing.controller.js
+changedfile htdocs/ui/mobile/mjs/settings/links/LinkAdd.controller.js
+changedfile htdocs/ui/mobile/mjs/settings/premise/PremiseEditAddress.controller.js
+changedfile htdocs/ui/mobile/mjs/settings/premise/PremiseEditHub.controller.js
+changedfile htdocs/ui/mobile/mjs/settings/premise/PremiseEditInfo.controller.js
+changedfile htdocs/ui/mobile/mjs/settings/rooms/RoomAdd.controller.js
+changedfile htdocs/ui/mobile/mjs/settings/rooms/RoomEdit.controller.js
+changedfile htdocs/ui/mobile/mjs/settings/things/ItemAdd.controller.js
+changedfile htdocs/ui/mobile/mjs/settings/user/EditUserAddress.controller.js
+changedfile htdocs/ui/mobile/mjs/settings/user/EditUserInformation.controller.js
+changedfile htdocs/ui/mobile/mjs/settings/user/UserEditPassword.controller.js
+changedfile htdocs/ui/mobile/resources/css/app.css
+changedfile htdocs/ui/mobile/resources/css/capsicum_margin.css
+changedfile htdocs/ui/mobile/resources/css/capsicum_widths.css
+changedfile htdocs/ui/mobile/util/apiodata.js
+changedfile htdocs/ui/mobile/util/apiphp.js
+changedfile htdocs/ui/mobile/util/devices/philipshue.js
+changedfile htdocs/ui/mobile/util/devices/weatherfeed.js
+changedfile htdocs/ui/mobile/util/devices/zigbeesmartplug.js
+changedfile htdocs/ui/mobile/util/functions.js
+changedfile htdocs/ui/mobile/util/widgets.js
+
+deletefile htdocs/ui/mobile/mjs/rooms/DeviceIPCamera.controller.js
+deletefile htdocs/ui/mobile/mjs/settings/EditUser.controller.js
+deletefile htdocs/ui/mobile/mjs/settings/EditUser.view.js
+deletefile htdocs/ui/mobile/mjs/settings/SettingsOverview.controller.js
+deletefile htdocs/ui/mobile/mjs/settings/SettingsOverview.view.js
+deletefile htdocs/ui/mobile/mjs/settings/devices/DeviceAddManually.controller.js
+deletefile htdocs/ui/mobile/mjs/settings/devices/DeviceAddManually.view.js
+deletefile htdocs/ui/mobile/mjs/settings/devices/DeviceInfo.controller.js
+deletefile htdocs/ui/mobile/mjs/settings/devices/DeviceInfo.view.js
+deletefile htdocs/ui/mobile/mjs/settings/premise/Premise.controller.js
+deletefile htdocs/ui/mobile/mjs/settings/premise/Premise.view.js
+deletefile htdocs/ui/mobile/mjs/settings/premise/PremiseViewInfo.controller.js
+deletefile htdocs/ui/mobile/mjs/settings/premise/PremiseViewInfo.view.js
+deletefile htdocs/ui/mobile/mjs/settings/rooms/RoomDevice.controller.js
+deletefile htdocs/ui/mobile/mjs/settings/rooms/RoomDevice.view.js
+
+;New Web Files
+;changedfile htdocs/restricted/libraries/weather_owm.php
+;changedfile htdocs/restricted/php/api_weather.php
+;changedfile htdocs/ui/mobile/resources/icons/favicon.png
+
