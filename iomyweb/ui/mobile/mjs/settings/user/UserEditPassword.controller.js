@@ -186,7 +186,7 @@ sap.ui.controller("mjs.settings.user.UserEditPassword", {
                             oNewPasswordLabel, oNewPasswordField,
                             oConfirmNewPasswordLabel, oConfirmNewPasswordField,
                             oEditButton]
-				});
+				}).addStyleClass("UserInputForm");
     		    
 		    	// Destroys the actual panel of the page. This is done to ensure that there
 				// are no elements left over which would increase the page size each time

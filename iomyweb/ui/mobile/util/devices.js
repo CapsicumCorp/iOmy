@@ -36,7 +36,7 @@ IOMy.devices = new sap.ui.base.Object();
 $.extend(IOMy.devices,{
 	Devices: [],
 	
-	GetCommonUI: function( sPrefix, oViewScope, aDeviceData ) {
+	GetCommonUI: function( sPrefix, oViewScope, aDeviceData, bIsUnassigned ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
@@ -49,27 +49,31 @@ $.extend(IOMy.devices,{
 		
 		//-- Zigbee Netvox Smart Plug --//
 		if( aDeviceData.DeviceTypeId===2 ) {
-            oUIObject = IOMy.devices.zigbeesmartplug.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.zigbeesmartplug.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
             
         //-- Philips Hue --//
         } else if( aDeviceData.DeviceTypeId===13 ) {
-            oUIObject = IOMy.devices.philipshue.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.philipshue.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
             
         //-- Onvif Stream --//
         } else if ( aDeviceData.DeviceTypeId===12) {
-            oUIObject = IOMy.devices.onvif.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.onvif.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
             
         //-- Motion Sensor --//
         } else if ( aDeviceData.DeviceTypeId===3) {
-            oUIObject = IOMy.devices.motionsensor.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.motionsensor.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
             
         //-- Temperature Sensor --//
         } else if ( aDeviceData.DeviceTypeId===4) {
-            oUIObject = IOMy.devices.temperaturesensor.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.temperaturesensor.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
             
         //-- DevelCo Energy Meter --//
         } else if ( aDeviceData.DeviceTypeId===10) {
-            oUIObject = IOMy.devices.develco.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.develco.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            
+        //-- Weather Feed --//
+        } else if ( aDeviceData.DeviceTypeId===14) {
+            oUIObject = IOMy.devices.weatherfeed.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
             
         }
 		
@@ -114,6 +118,10 @@ $.extend(IOMy.devices,{
         //-- DevelCo Energy Meter --//
         } else if ( aDeviceData.DeviceTypeId===10) {
             oUIObject = IOMy.devices.develco.GetCommonUIForDeviceOverview( sPrefix, oViewScope, aDeviceData );
+            
+        //-- Weather Feed --//
+        } else if ( aDeviceData.DeviceTypeId===14) {
+            oUIObject = IOMy.devices.weatherfeed.GetCommonUIForDeviceOverview( sPrefix, oViewScope, aDeviceData );
             
         }
 		
@@ -188,8 +196,18 @@ $.extend(IOMy.devices,{
                 //-- TODO: Write a error message --//
                 jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
             }
-		}
-		return aTasks;
+		//-- Weather Feed --//
+        } else if ( aDeviceData.DeviceTypeId===14) {
+            if( aDeviceData.IOs!==undefined ) {
+                aTasks = IOMy.devices.weatherfeed.GetCommonUITaskListForDeviceOverview( Prefix, oViewScope, aDeviceData );
+            } else {
+                //-- TODO: Write a error message --//
+                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
+            }
+            
+        }
+        
+        return aTasks;
 	},
     
     GetCommonUITaskListForDeviceOverview: function( Prefix, oViewScope, aDeviceData ) {
@@ -256,7 +274,17 @@ $.extend(IOMy.devices,{
                 //-- TODO: Write a error message --//
                 jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
             }
-		}
+            
+		//-- Weather Feed --//
+        } else if ( aDeviceData.DeviceTypeId===14) {
+            if( aDeviceData.IOs!==undefined ) {
+                aTasks = IOMy.devices.weatherfeed.GetCommonUITaskListForDeviceOverview( Prefix, oViewScope, aDeviceData );
+            } else {
+                //-- TODO: Write a error message --//
+                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
+            }
+            
+        }
         
 		return aTasks;
 	},

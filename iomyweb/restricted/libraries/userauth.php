@@ -201,7 +201,11 @@ function displayAuthMessage() {
 
 
 
-
+function UserAuth_ServerNotDeployed() {
+	header('HTTP/1.0 501 Not Implemented');
+	echo '<html><head><title>501 iOMy Server Not Deployed</title></head><body><h1>Please try setting up the server before accessing this API</h1></body></html>';
+	die();
+}
 
 
 

@@ -747,11 +747,18 @@ if( $bError===false ) {
 								} else {
 									//-- ERROR --//
 									$bError = true;
-									$iErrCode  = 1435;
-									$sErrMesg .= "Error Code:'1435' \n";
+									$iErrCode  = 1436;
+									$sErrMesg .= "Error Code:'1436' \n";
 									$sErrMesg .= "Problem adding the detectable lights on the Philips Hue Bridge to the Database!\n";
 									$sErrMesg .= $aTempFunctionResult4['ErrMesg'];
 								}
+							} else {
+								//-- ERROR --//
+								$bError = true;
+								$iErrCode  = 1435;
+								$sErrMesg .= "Error Code:'1435' \n";
+								$sErrMesg .= "Problem looking up the list of detectable lights on the Philips Hue Bridge!\n";
+								$sErrMesg .= $aTempFunctionResult5['ErrMesg'];
 							}
 							
 						} else {
@@ -858,22 +865,23 @@ if( $bError===false ) {
 							} else {
 								$bError     = true;
 								$iErrCode   = 3401;
-								$sErrMesg  .= "Error Code:'3406' \n";
-								$sErrMesg  .= "Problem with updating the 'Hue', 'Saturation' and/or 'Brightness' \n";
+								$sErrMesg  .= "Error Code:'3401' \n";
+								$sErrMesg  .= "Problem with updating the 'Hue', 'Saturation' and/or 'Brightness'. \n";
 							}
 							
 						} else {
 							$bError     = true;
 							$iErrCode   = 3402;
-							$sErrMesg  .= "Error Code:'3406' \n";
-							$sErrMesg  .= "Problem with looking up the specified Philips Hue Light \n";
+							$sErrMesg  .= "Error Code:'3402' \n";
+							$sErrMesg  .= "Problem with looking up the specified Philips Hue Light! \n";
+							$sErrMesg  .= "The Light may be disconnected or incorrect credentials have been used. \n";
 						}
 						
 					} else {
 						$bError     = true;
 						$iErrCode   = 3403;
 						$sErrMesg  .= "Error Code:'3403' \n";
-						$sErrMesg  .= "Problem when connecting to the Philips Hue Bridge\n";
+						$sErrMesg  .= "Problem when connecting to the Philips Hue Bridge! \n";
 						$sErrMesg  .= $oPHPPhilipsHue->aErrorMessges[0];
 						
 					}

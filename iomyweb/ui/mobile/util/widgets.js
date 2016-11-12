@@ -291,11 +291,11 @@ $.extend(IOMy.widgets,{
      * to another.
      * 
      * @param {string} sId          ID for the combo box.
-     * @param {Number} iPremiseId   ID of the given premise.
+     * @param {string} sPremiseId   ID of the given premise.
      * @param {Number} iRoomId      (optional) ID of the room currently set.
      * @returns {sap.m.ComboBox}    Combo box with the rooms in a given premise.
      */
-    getRoomSelector : function (sId, iPremiseId, iRoomId) {
+    getRoomSelector : function (sId, sPremiseId, iRoomId) {
         try {
             //====================================================================\\
             // Clean up                                                           \\
@@ -308,7 +308,7 @@ $.extend(IOMy.widgets,{
             //====================================================================\\
             var oCBox = new sap.m.ComboBox(sId,{}).addStyleClass("width100Percent");
             
-            $.each(IOMy.common.RoomsList[iPremiseId],function(sIndex,aRoom) {
+            $.each(IOMy.common.RoomsList[sPremiseId],function(sIndex,aRoom) {
                 //-- Verify that the Premise has rooms, other than the pseudo-room Unassigned --//
                 if( sIndex !== "Unassigned" && sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null ) {
                     oCBox.addItem(
@@ -500,7 +500,8 @@ $.extend(IOMy.widgets,{
             for (var i = 0; i < IOMy.common.LinkTypeList.length; i++) {
                 if (IOMy.common.LinkTypeList[i].LinkTypeId == 2 ||
                         IOMy.common.LinkTypeList[i].LinkTypeId == 6 ||
-                        IOMy.common.LinkTypeList[i].LinkTypeId == 7) 
+                        IOMy.common.LinkTypeList[i].LinkTypeId == 7 ||
+                        IOMy.common.LinkTypeList[i].LinkTypeId == 8) 
                 {
                     oCBox.addItem(
                         new sap.ui.core.Item({
@@ -527,43 +528,86 @@ $.extend(IOMy.widgets,{
         }
     },
     
-    getIPAddressAndPortField : function (oScope, sAddressFieldID, sPortFieldID) {
-        var me = oScope;
+    getIPAddressAndPortField : function (mSettings) {
+        // Check that there is a settings map.
+        if (mSettings === undefined) {
+            throw "Settings must be specified.";
+        } else {
+            var sErrors = ""; // Error string
+            
+            // Is the scope specified?
+            if (mSettings.scope === undefined) {
+                sErrors += "The scope of the controller must be parsed.";
+            }
+            
+            // Is the IP Address Field ID specified?
+            if (mSettings.ipAddressFieldID === undefined) {
+                if (sErrors.length === 0) {
+                    sErrors += "\n";
+                }
+                sErrors += "The HTML ID for the IP Address field must be given.";
+            }
+            
+            // Is the IP Port Field ID specified?
+            if (mSettings.ipPortFieldID === undefined) {
+                if (sErrors.length === 0) {
+                    sErrors += "\n";
+                }
+                sErrors += "The HTML ID for the IP Port field must be given.";
+            }
+            
+            // If one or more of the required fields are not specified, throw the errors
+            if (sErrors.length > 0) {
+                throw sErrors;
+            }
+        }
+        
+        // If the default IP address and port are not given, leave them blank.
+        if (mSettings.defaultIPAddress === undefined) {
+            mSettings.defaultIPAddress = "";
+        }
+        
+        if (mSettings.defaultIPPort === undefined) {
+            mSettings.defaultIPPort = "80";
+        }
+        
+        var me = mSettings.scope;
         var oIPAddressAndPortLabel;
         var oIPAddressField, oColon, oIPPort;
         var oIPAddressAndPortBox;
         var oWidget;
-        var aIDs = ["IPAddressLabel",sAddressFieldID,"Colon",sPortFieldID,"IPBox","IPWidget"];
         
         try {
-            //====================================================================\\
-            // Clean up                                                           \\
-            //====================================================================\\
-            for (var i = 0; i < aIDs.length; i++) {
-                if (me.byId(aIDs[i]) !== undefined)
-                    me.byId(aIDs[i]).destroy();
-            }
-            
             // LABEL
+            me.aElementsForAFormToDestroy.push("IPAddressLabel");
             oIPAddressAndPortLabel = new sap.m.Label(me.createId("IPAddressLabel"), {
                 text : "IP Address and port (eg. 10.9.9.9:80)"
             });
+            me.byId("formBox").addItem(oIPAddressAndPortLabel);
 
             // FIELD
-            oIPAddressField = new sap.m.Input(me.createId(sAddressFieldID), {}).addStyleClass("width100Percent SettingsTextInput");
+            me.aElementsForAFormToDestroy.push(mSettings.ipAddressFieldID);
+            oIPAddressField = new sap.m.Input(me.createId(mSettings.ipAddressFieldID), {
+                value : mSettings.defaultIPAddress
+            }).addStyleClass("width100Percent SettingsTextInput");
 
+            me.aElementsForAFormToDestroy.push("Colon");
             oColon = new sap.m.Text(me.createId("Colon"), {
                 text : ":"
             }).addStyleClass("PadLeft5px PadRight5px FlexNoShrink LineHeight45px");
 
-            oIPPort = new sap.m.Input(me.createId(sPortFieldID), {
-                value : "888"
+            me.aElementsForAFormToDestroy.push(mSettings.ipPortFieldID);
+            oIPPort = new sap.m.Input(me.createId(mSettings.ipPortFieldID), {
+                value : mSettings.defaultIPPort
             }).addStyleClass("width100px SettingsTextInput FlexNoShrink");
 
+            me.aElementsForAFormToDestroy.push("IPBox");
             oIPAddressAndPortBox = new sap.m.HBox(me.createId("IPBox"), {
                 items : [ oIPAddressField,oColon,oIPPort ]
             }).addStyleClass("width100Percent IPAddressBox");
+            me.byId("formBox").addItem(oIPAddressAndPortBox);
             
+            me.aElementsForAFormToDestroy.push("IPWidget");
             oWidget = new sap.m.VBox(me.createId("IPWidget"), {
                 items : [oIPAddressAndPortLabel,oIPAddressAndPortBox]
             });
@@ -601,8 +645,6 @@ $.extend(IOMy.widgets,{
                 //-- 'items' has not been found. Throw an error.                             --//
                 //-----------------------------------------------------------------------------//
                 var sErrMessage = "Expected a list of items, 'items' not declared.";
-                if (mSettings.item)
-                    sErrMessage += "'item' found. Did you mean 'items'?";
                 throw sErrMessage;
             } else {
                 for (var i = 0; i < mSettings.items.length; i++) {

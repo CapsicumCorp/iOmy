@@ -233,31 +233,46 @@ if( $bError===false ) {
 								$bUsePHPObject     = true;
 								$oSpecialPHPObject = new PHPPhilipsHue( $sNetworkAddress, $sNetworkPort, $sUserToken );
 								
+								
 								if( $oSpecialPHPObject->bInitialised===true ) {
+									
+									$aTempFunctionResult1   = $oSpecialPHPObject->GetLightsList();
+									
 									//----------------------------//
 									//-- LOOKUP THING STATE     --//
 									//----------------------------//
-									$aTemp = $oSpecialPHPObject->GetThingState($sHWId);
-									
-									if( $aTemp['Error']===false ) {
-										//-- Toggle Lights --//
-										if( $aTemp['State']===false ) {
-											//-- Turn "Thing" On --//
-											$iNewState = 1;
+									if( isset($aTempFunctionResult1[$sHWId]) ) {
+										
+										$aTemp = $oSpecialPHPObject->GetThingState($sHWId);
+										
+										if( $aTemp['Error']===false ) {
+											//-- Toggle Lights --//
+											if( $aTemp['State']===false ) {
+												//-- Turn "Thing" On --//
+												$iNewState = 1;
+												
+											} else if( $aTemp['State']===true ) {
+												//-- Turn "Thing" Off --//
+												$iNewState = 0;
+											}
 											
-										} else if( $aTemp['State']===true ) {
-											//-- Turn "Thing" Off --//
-											$iNewState = 0;
+											//----------------------------//
+											//-- CHANGE THING STATE     --//
+											//----------------------------//
+											$oSpecialPHPObject->ChangeThingState( $sHWId, $iNewState );
 										}
 										
-										//----------------------------//
-										//-- CHANGE THING STATE     --//
-										//----------------------------//
-										$oSpecialPHPObject->ChangeThingState( $sHWId, $iNewState );
-										
+									} else {
+										$bError = true;
+										$sErrMesg .= "Error Code:'2407' \n";
+										$sErrMesg .= "Device is unknown! \n";
+										$sErrMesg .= "That particular Philips Hue device may have been disconnected or invalid credentials used!\n";
 									}
+								} else {
+									$bError = true;
+									$sErrMesg .= "Error Code:'2407' \n";
+									$sErrMesg .= "Failed to setup the Philips Hue Gateway!\n";
 								}
-								
 							} else {
 								//-- API doesn't know what to do with that custom state --//
 								$bError = true;
@@ -382,6 +397,7 @@ if( $bError===false ) {
 					
 					//-- Extract the Result from the function data --//
 					$aResult = $aStateResults["Data"];
+					
 				} else {
 					//-- Display an Error message --//
 					$bError = true;

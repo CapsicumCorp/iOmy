@@ -258,7 +258,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 
         var oVertBox = new sap.m.VBox({
             items : [oThingNameLabel, oThingNameField, oFormBox, oEditButton]
-        });
+        }).addStyleClass("UserInputForm");
 
         me.aElementsToDestroy.push("devicePanel");
         var oPanel = new sap.m.Panel(me.createId("devicePanel"), {

@@ -123,7 +123,7 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
         		
 				var oVertBox = new sap.m.VBox(me.makeId("vbox"), {
 					items : [oLinkTitle, oLinkNameField, oEditButton]
-				});
+				}).addStyleClass("UserInputForm");
     		    
 		    	var oPanel = new sap.m.Panel(me.makeId("panel"), {
     		    	backgroundDesign: "Transparent",

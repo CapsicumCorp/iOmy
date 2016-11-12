@@ -105,6 +105,11 @@ $.extend(IOMy.apiphp,{
             case "philipshue":
 				sReturn = sUrlRestricted+'/php/api_philipshue.php';
 				break;
+				break;
+                
+            case "weather":
+				sReturn = sUrlRestricted+'/php/api_weather.php';
+				break;
 		}
 		
 		//--------------------------------------------------------//
@@ -167,11 +172,11 @@ $.extend(IOMy.apiphp,{
 				url: sUrl,                                     //-- The URL to the PHP API that needs to be called.                                          --//
 				crossDomain: true,                             //-- Allow calls to other servers                                                             --//
 				dataType: sDataType,                           //-- Expected Result                                                                          --//
-				type: (aConfig.data) ? 'POST' : 'GET',         //-- If there is anything in "data" then "POST" else "GET".                                   --//
+				type: (aConfig.data) ? 'POST' : 'GET',         //-- If there is anything in "type" then "POST" else "GET".                                   --//
 				data: aConfig.data || {},                      //-- If there is anything in "data" then include it here.                                     --//
 				async: bAsync,
 				RetryAttemptCount: 0,                          //-- The current count of how many attempts to get a successful Ajax request have been made.  --//
-				RetryAttemptLimit: 3,                          //-- Maximum amount of times the Ajax request should be retried before giving up.             --//
+				RetryAttemptLimit: 1,                          //-- Maximum amount of times the Ajax request should be retried before giving up.             --//
 				bApiComplete: false,                           //-- Indicates if the API is flagged as "still attempting" or "aborting/successful"           --//
 				DebugLogString: "",                            //-- This is used to store the DebuggingLog.                                                  --//
 				//============================================================================================//

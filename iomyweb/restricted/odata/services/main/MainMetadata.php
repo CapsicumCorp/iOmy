@@ -77,7 +77,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 //-- 4.11  - Data BigInt                        --//
 //-- 4.12  - Data Float                         --//
 //-- 4.13  - Data TinyString                    --//
-//-- 4.14 - Data ShortString                    --//
+//-- 4.14 -  Data ShortString                   --//
 //-- 4.15  - Data Medstring                     --//
 //-- 4.16  - Users Premise Log                  --//
 //-- 4.17  - Users Gateways                     --//
@@ -137,9 +137,6 @@ class VR_USERSINFO{
 	public $USERADDRESS_LINE3;
 	public $USERADDRESS_LINE2;
 	public $USERADDRESS_LINE1;
-	public $USERADDRESS_POSTALLINE3;
-	public $USERADDRESS_POSTALLINE2;
-	public $USERADDRESS_POSTALLINE1;
 	public $COUNTRIES_PK;
 	public $COUNTRIES_NAME;
 	public $COUNTRIES_ABREVIATION;
@@ -1214,9 +1211,6 @@ class CreateMainMetadata
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'USERADDRESS_LINE3',        EdmPrimitiveType::CHARARRAY     );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'USERADDRESS_LINE2',        EdmPrimitiveType::CHARARRAY     );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'USERADDRESS_LINE1',        EdmPrimitiveType::CHARARRAY     );
-		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'USERADDRESS_POSTALLINE3',  EdmPrimitiveType::CHARARRAY     );
-		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'USERADDRESS_POSTALLINE2',  EdmPrimitiveType::CHARARRAY     );
-		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'USERADDRESS_POSTALLINE1',  EdmPrimitiveType::CHARARRAY     );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'COUNTRIES_PK',             EdmPrimitiveType::INT32         );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'COUNTRIES_NAME',           EdmPrimitiveType::CHARARRAY     );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'COUNTRIES_ABREVIATION',    EdmPrimitiveType::CHARARRAY     );

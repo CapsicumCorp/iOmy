@@ -42,8 +42,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
             Columns : ["USERS_PK", "COUNTRIES_NAME", "COUNTRIES_PK", "LANGUAGE_PK", "LANGUAGE_NAME", 
                         "POSTCODE_PK", "POSTCODE_NAME", "STATEPROVINCE_PK", "STATEPROVINCE_NAME",
                         "TIMEZONE_PK", "TIMEZONE_TZ", "USERADDRESS_LINE1", "USERADDRESS_LINE2",
-                        "USERADDRESS_LINE3", "USERADDRESS_POSTALLINE1", "USERADDRESS_POSTALLINE2",
-                        "USERADDRESS_POSTALLINE3", "USERADDRESS_PK"],
+                        "USERADDRESS_LINE3", "USERADDRESS_PK"],
             WhereClause : [],
             OrderByClause : [],
 
@@ -51,19 +50,10 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                 var displayData = data[0];
                 iCountryId = displayData.COUNTRIES_PK;
                 
-                // Display the information retrieved from the Premise Location OData
-                // and set any foreign keys as item keys in the combo boxes.
-//                me.byId("addressCountry").setValue(displayData.COUNTRIES_NAME).setSelectedKey(displayData.COUNTRIES_PK);
-//                me.byId("addressLanguage").setValue(displayData.LANGUAGE_NAME).setSelectedKey(displayData.LANGUAGE_PK);
-//                me.byId("addressState").setValue(displayData.STATEPROVINCE_NAME).setSelectedKey(displayData.STATEPROVINCE_PK);
-//                me.byId("addressPostCode").setValue(displayData.POSTCODE_NAME).setSelectedKey(displayData.POSTCODE_PK);
-//                me.byId("addressTimezone").setValue(displayData.TIMEZONE_TZ).setSelectedKey(displayData.TIMEZONE_PK);
+                // Display the information retrieved from the User Information OData.
                 me.byId("addressLine1").setValue(displayData.USERADDRESS_LINE1);
                 me.byId("addressLine2").setValue(displayData.USERADDRESS_LINE2);
                 me.byId("addressLine3").setValue(displayData.USERADDRESS_LINE3);
-//                me.byId("addressPostalLine1").setValue(displayData.USERADDRESS_POSTALLINE1);
-//                me.byId("addressPostalLine2").setValue(displayData.USERADDRESS_POSTALLINE2);
-//                me.byId("addressPostalLine3").setValue(displayData.USERADDRESS_POSTALLINE3);
                 
                 me.userId = displayData.USERS_PK;
                 
@@ -306,9 +296,6 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                                                     "AddressLine1" : me.byId("addressLine1").getValue(),
                                                     "AddressLine2" : me.byId("addressLine2").getValue(),
                                                     "AddressLine3" : me.byId("addressLine3").getValue(),
-                                                    "AddressPostalLine1" : "",
-                                                    "AddressPostalLine2" : "",
-                                                    "AddressPostalLine3" : "",
                                                     "AddressCountry" : me.byId("addressCountry").getSelectedKey(),
                                                     "AddressStateProvince" : me.byId("addressState").getSelectedKey(),
                                                     "AddressPostcode" : me.byId("addressPostCode").getSelectedKey(),
@@ -344,7 +331,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 //                            oPostalLine2Field, oPostalLine3Title, oPostalLine3Field,
                             oEditButton, 
 					]
-				}).addStyleClass("PadLeft16px PadRight16px");
+				}).addStyleClass("PadLeft16px PadRight16px UserInputForm");
                 
                 // Destroys the actual panel of the page. This is done to ensure that there
 				// are no elements left over which would increase the page size each time

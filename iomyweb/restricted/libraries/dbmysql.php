@@ -30,11 +30,11 @@ class DBMySQL {
 	protected	$DBConn;						//-- OBJECT:	Declare the database connection													--//
 	
 	//-- 1.2 - Public Variables --//
-	public      $Initialised        = false;    //-- BOOLEAN:   If Database Connection succeeds then this variable is set to true				--//
-	public      $QueryLogs          = array();  //-- ARRAY:     An array used to store the various SQL Queries that get passed to this function	--//
-	public      $DataSchema         = "";       //-- STRING:    Used to store the Schema name for when doing SQL Inserts and Updates			--// 
-	public      $ViewSchema         = "";       //-- STRING:    Used to store the Schema name for when looking up views							--// 
-	public      $bTrasactionStarted = false;    //-- BOOLEAN:   --//
+	public      $Initialised        = false;        //-- BOOLEAN:   If Database Connection succeeds then this variable is set to true				--//
+	public      $QueryLogs          = array();      //-- ARRAY:     An array used to store the various SQL Queries that get passed to this function	--//
+	public      $DataSchema         = "";           //-- STRING:    Used to store the Schema name for when doing SQL Inserts and Updates			--// 
+	public      $ViewSchema         = "";           //-- STRING:    Used to store the Schema name for when looking up views							--// 
+	public      $bTrasactionStarted = false;        //-- BOOLEAN:   --//
 	
 	//====================================================//
 	//== 2.0 - Class Construction functions             ==//

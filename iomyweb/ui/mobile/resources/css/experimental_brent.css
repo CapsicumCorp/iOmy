@@ -164,3 +164,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
                 padding: 0.250rem 0px;
                 font-size: 18px;
         }
+        
+        .DeviceDataBox {
+                margin: auto 0px;
+        }

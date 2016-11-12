@@ -898,7 +898,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
                 /* You can set width to whatever you like */
                 width: 100%;
                 font-family: "Roboto Condensed", sans-serif;
-                font-size: 16px;
+                /*font-size: 16px;*/
                 margin: 0;
                 padding: 8px 8px 6px 8px;
                 position: relative;
@@ -1175,3 +1175,12 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
         .sapMRbSel .sapMRbBInn {
                 background-color: rgb(139, 197, 63);
         }
+        
+    /*================================================================*/
+    /* FORMS
+    /*================================================================*/
+    
+    .UserInputForm {
+        margin: 0 auto;
+        max-width: 550px;
+    }

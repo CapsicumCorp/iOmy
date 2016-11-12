@@ -90,7 +90,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                 var oCol1 = new sap.m.VBox({
                     items : [oOccupantsTitle,oOccupantsField,
                             oBedroomsTitle,oBedroomsField]
-                }).addStyleClass("PadRight5px");
+                }).addStyleClass("PadRight5px width50Percent");
                 
                 var oFloorsTitle = new sap.m.HBox({
                     items : [
@@ -125,7 +125,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                 var oCol2 = new sap.m.VBox({
                     items : [oFloorsTitle,oFloorsField,
                             oRoomsTitle,oRoomsField]
-                }).addStyleClass("");
+                }).addStyleClass("width50Percent");
                 
                 var oCBoxGrid = new sap.m.HBox({
                     items : [oCol1, oCol2]
@@ -364,7 +364,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                 var oVertBox = new sap.m.VBox({
 					items : [oPremiseTitle, oPremiseNameField, oPremiseDescTitle, oPremiseDescField,
                             oCBoxGrid, oEditButton]
-				});
+				}).addStyleClass("UserInputForm");
                 
 		    	// Destroys the actual panel of the page. This is done to ensure that there
 				// are no elements left over which would increase the page size each time

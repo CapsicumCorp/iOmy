@@ -61,15 +61,25 @@ require_once SITE_BASE.'/restricted/libraries/userauth.php';
 
 
 //------------------------------------------------//
-//-- #1.3# - Setup Objects                      --//
+//-- #1.4# - Setup Objects                      --//
 //------------------------------------------------//
 
 //-- Setup the Encryption Object --//
-$oAdvEncryption = new TestEncryption(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC, 10000, $Config['Core']['CryptKey']);
+
+if( isset($Config['Core'])  ) {
+	if( isset($Config['Core']['CryptKey']) ) {
+		$oAdvEncryption = new TestEncryption(MCRYPT_BLOWFISH, MCRYPT_MODE_CBC, 10000, $Config['Core']['CryptKey']);
+	} else {
+		UserAuth_ServerNotDeployed();
+	}
+} else {
+	UserAuth_ServerNotDeployed();
+}
+
 
 
 //------------------------------------------------//
-//-- #1.4# - PHP Session                        --//
+//-- #1.5# - PHP Session                        --//
 //------------------------------------------------//
 session_start();
 
@@ -251,6 +261,8 @@ function VerifyUserPassword($sCurrentPassword) {
 	}
 	
 }
+
+
 
 
 

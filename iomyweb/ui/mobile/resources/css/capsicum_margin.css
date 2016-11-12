@@ -680,3 +680,11 @@ margin-right: 0.3em;
         margin-top: auto;
         margin-bottom: auto;
 }
+
+.HorizontalCenter{
+    margin: 0 auto;
+}
+
+.VerticalCenter {
+    margin: auto 0;
+}

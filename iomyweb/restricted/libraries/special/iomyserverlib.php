@@ -285,9 +285,9 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "   USERADDRESS_STATEPROVINCE_FK int not null comment 'Foreign Key', \n";
 			$sSQL .= "   USERADDRESS_POSTCODE_FK int not null comment 'Foreign Key', \n";
 			$sSQL .= "   USERADDRESS_TIMEZONE_FK int not null comment 'Foreign Key', \n";
-			$sSQL .= "   USERADDRESS_POSTALLINE1 varchar(128) not null, \n";
-			$sSQL .= "   USERADDRESS_POSTALLINE2 varchar(128) not null, \n";
-			$sSQL .= "   USERADDRESS_POSTALLINE3 varchar(128) not null, \n";
+//			$sSQL .= "   USERADDRESS_POSTALLINE1 varchar(128) not null, \n";
+//			$sSQL .= "   USERADDRESS_POSTALLINE2 varchar(128) not null, \n";
+//			$sSQL .= "   USERADDRESS_POSTALLINE3 varchar(128) not null, \n";
 			$sSQL .= "   USERADDRESS_LINE1    varchar(128) not null, \n";
 			$sSQL .= "   USERADDRESS_LINE2    varchar(128) not null, \n";
 			$sSQL .= "   USERADDRESS_LINE3    varchar(128) not null, \n";
@@ -342,7 +342,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "   PERMSERVER_ADDPREMISEHUB tinyint not null, \n";
 			$sSQL .= "   PERMSERVER_UPGRADE   tinyint not null, \n";
 			$sSQL .= "   primary key (PERMSERVER_PK) \n";
-			$sSQL .= "); \n";
+			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset."; \n";
 			$sSQL .= "alter table ".$sDBName.".PERMSERVER comment 'Used to store what permissions a User has on the server'; \n";
 			break;
 
@@ -806,7 +806,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "   DATALONGSTRING_VALUE varchar(127) not null, \n";
 			$sSQL .= "   DATALONGSTRING_LAST_MODIFIED timestamp not null default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \n";
 			$sSQL .= "   primary key (DATALONGSTRING_PK) \n";
-			$sSQL .= "); \n";
+			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset."; \n";
 			$sSQL .= "alter table `".$sDBName."`.DATALONGSTRING comment 'Stores Long String data from the sensors.'; \n";
 			break;
 			
@@ -822,7 +822,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "   DATASTRING255_VALUE  varchar(255) not null, \n";
 			$sSQL .= "   DATASTRING255_LAST_MODIFIED timestamp not null default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \n";
 			$sSQL .= "   primary key (DATASTRING255_PK) \n";
-			$sSQL .= "); \n";
+			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset."; \n";
 			$sSQL .= "alter table `".$sDBName."`.`DATASTRING255` comment 'Stores String255 data from the sensors.'; \n";
 
 
@@ -1634,9 +1634,9 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "	`USERADDRESS_LINE3`, \n";
 			$sSQL .= "	`USERADDRESS_LINE2`, \n";
 			$sSQL .= "	`USERADDRESS_LINE1`, \n";
-			$sSQL .= "	`USERADDRESS_POSTALLINE3`, \n";
-			$sSQL .= "	`USERADDRESS_POSTALLINE2`, \n";
-			$sSQL .= "	`USERADDRESS_POSTALLINE1`, \n";
+//			$sSQL .= "	`USERADDRESS_POSTALLINE3`, \n";
+//			$sSQL .= "	`USERADDRESS_POSTALLINE2`, \n";
+//			$sSQL .= "	`USERADDRESS_POSTALLINE1`, \n";
 			$sSQL .= "	`COUNTRIES_PK`, \n";
 			$sSQL .= "	`COUNTRIES_NAME`, \n";
 			$sSQL .= "	`COUNTRIES_ABREVIATION`, \n";
@@ -2097,6 +2097,25 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "AND `PERMPREMISE_READ` = 1 \n";
 			$sSQL .= "AND `IO_BASECONVERT` <> 0; \n";
 			break;
+			
+			
+		/*============================================================
+		  == #4.11# - USERSSERVERPERMS                              ==
+		  ============================================================*/
+		case "PrivateUsersServerPerms":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSSERVERPERMS` AS \n";
+			$sSQL .= "SELECT ";
+			$sSQL .= "	`USERS_PK`, ";
+			$sSQL .= "	`USERS_USERNAME`, ";
+			$sSQL .= "	`PERMSERVER_PK`, ";
+			$sSQL .= "	`PERMSERVER_ADDUSER`, ";
+			$sSQL .= "	`PERMSERVER_ADDPREMISEHUB`, ";
+			$sSQL .= "	`PERMSERVER_UPGRADE` ";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` ";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`PERMSERVER` ON `USERS_PK` = `PERMSERVER_USERS_FK` ";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') ";
+			break;
+			
 			
 		/*============================================================
 		  == #5.1# - VR_DATATINYINT                                 ==
@@ -4746,6 +4765,100 @@ function DB_InsertUser( $sDBName, $iUserInfoId, $sUsername, $iUserState ) {
 	}
 }
 
+
+function DB_InsertUserAddress( $sDBName, $iUserId, $iLanguageId, $iCountriesId, $iStateProvinceId, $iPostcodeId, $iTimezoneId, $sLine1, $sLine2, $sLine3 ) {
+	//------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                       --//
+	//--    This function is used to add the new User to the database.      --//
+	//------------------------------------------------------------------------//
+	
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedDB;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught. --//
+	$aInputValsInsert   = array();      //-- ARRAY:     SQL bind input parameters. --//
+	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function. --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	
+	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			//----------------------------------------//
+			//-- SQL Query - Create Default Data    --//
+			//----------------------------------------//
+			$sSQL .= "INSERT INTO `".$sDBName."`.`USERADDRESS` ( ";
+			$sSQL .= "    `USERADDRESS_USERS_FK`,           `USERADDRESS_LANGUAGE_FK`, ";
+			$sSQL .= "    `USERADDRESS_COUNTRIES_FK`,       `USERADDRESS_STATEPROVINCE_FK`, ";
+			$sSQL .= "    `USERADDRESS_POSTCODE_FK`,        `USERADDRESS_TIMEZONE_FK`, ";
+			$sSQL .= "    `USERADDRESS_LINE1`,              `USERADDRESS_LINE2`, ";
+			$sSQL .= "    `USERADDRESS_LINE3` ";
+			$sSQL .= ") VALUES ( ";
+			$sSQL .= "    :UserId,          :LanguageId, ";
+			$sSQL .= "    :CountriesId,     :StateProvinceId, ";
+			$sSQL .= "    :PostcodeId,      :TimezoneId, ";
+			$sSQL .= "    :Line1,           :Line2, ";
+			$sSQL .= "    :Line3 ";
+			$sSQL .= ") ";
+			
+			
+			//----------------------------------------//
+			//-- Input binding                      --//
+			//----------------------------------------//
+			$aInputValsInsert = array(
+				array( "Name"=>"UserId",            "type"=>"INT",          "value"=>$iUserId                 ),
+				array( "Name"=>"LanguageId",        "type"=>"INT",          "value"=>$iLanguageId             ),
+				array( "Name"=>"CountriesId",       "type"=>"INT",          "value"=>$iCountriesId            ),
+				array( "Name"=>"StateProvinceId",   "type"=>"INT",          "value"=>$iStateProvinceId        ),
+				array( "Name"=>"PostcodeId",        "type"=>"INT",          "value"=>$iPostcodeId             ),
+				array( "Name"=>"TimezoneId",        "type"=>"INT",          "value"=>$iTimezoneId             ),
+				array( "Name"=>"Line1",             "type"=>"STR",          "value"=>$sLine1                  ),
+				array( "Name"=>"Line2",             "type"=>"STR",          "value"=>$sLine2                  ),
+				array( "Name"=>"Line3",             "type"=>"STR",          "value"=>$sLine3                  )
+			);
+			
+			//-- Run the SQL Query and save the results --//
+			$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+			
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResultInsert["Error"]===true ) {
+				$bError    = true;
+				$sErrMesg .= $aResultInsert["ErrMesg"];
+			}
+		} catch( Exception $e3) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return $aResultInsert;
+		
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"InsertUserAddress: ".$sErrMesg );
+	}
+}
 //============================================================================================================================//
 //== PREMEISE
 //============================================================================================================================//

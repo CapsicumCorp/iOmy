@@ -280,7 +280,7 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                             oRoomTitle, oRoomNameField, oRoomDescTitle, oRoomDescField,
                             /*oFloorsTitle, oFloorsField,*/ oRoomTypeTitle, oRoomTypeField,
                             oAddButton]
-				});
+				}).addStyleClass("UserInputForm");
                 
 		    	// Destroys the actual panel of the page. This is done to ensure that there
 				// are no elements left over which would increase the page size each time

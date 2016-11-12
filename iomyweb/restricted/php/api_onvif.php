@@ -631,6 +631,8 @@ if( $bError===false ) {
 					
 				}
 			}
+			
+			
 		}
 		
 		//================================================================//
@@ -909,7 +911,6 @@ if( $bError===false ) {
 					}
 				}
 				
-				
 			} catch( Exception $e4400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
@@ -1032,11 +1033,40 @@ if( $bError===false ) {
 					//--------------------------------------------------------------------//
 					//-- Add the Bridge to the database                                 --//
 					//--------------------------------------------------------------------//
+					if( $bFound===false ) {
+						
+						$aNewCommData = array(
+							"HubId"     => $iPostHubId,
+							"Type"      => "2",
+							"Name"      => "PHP API",
+							"Address"   => ""
+						);
+						
+						//-- Add the "PHP API" Comm to the Database --//
+						$aTempFunctionResult2 = PrepareAddNewComm( $aNewCommData, null );
+						
+						if( $aTempFunctionResult2['Error']===false ) {
+							//-- Extract the CommId from the Results --//
+							$iCommId = $aTempFunctionResult2['CommId'];
+							
+						} else {
+							//-- Display an error --//
+							$bError = true;
+							$iErrCode  = 6401+$aTempFunctionResult2['ErrCode'];
+							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg .= "Problem when adding the new Comm to the database\n";
+							$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
+						}
+					}
+					
+					//--------------------------------------------------------------------//
+					//-- Add the Bridge to the database                                 --//
+					//--------------------------------------------------------------------//
 					$aResult = $oPHPOnvifClient->AddThisBridgeToTheDatabase( $iCommId );
 					
 					if( $aResult['Error']===true ) {
 						$bError = true;
-						$sErrMesg .= "Error Code:'6401' \n";
+						$sErrMesg .= "Error Code:'6431' \n";
 						$sErrMesg .= "Error occurred while submitting the Thing into the Database\n";
 						$sErrMesg .= $aResult['ErrMesg'];
 					}
@@ -1047,7 +1077,7 @@ if( $bError===false ) {
 					//--------------------------------------------------------------------//
 					if( $iLinkPermWrite!==1 ) {
 						$bError = true;
-						$sErrMesg .= "Error Code:'6402' \n";
+						$sErrMesg .= "Error Code:'6432' \n";
 						$sErrMesg .= "Permission issue detected!\n";
 						$sErrMesg .= "The User doesn't appear to have the \"Write\" permission to add a Thing.\n";
 					}
@@ -1063,7 +1093,7 @@ if( $bError===false ) {
 						
 						if( $aResult['Error']===true ) {
 							$bError = true;
-							$sErrMesg .= "Error Code:'6403' \n";
+							$sErrMesg .= "Error Code:'6433' \n";
 							$sErrMesg .= "Error occurred while submitting the Thing into the Database\n";
 							$sErrMesg .= $aResult['ErrMesg'];
 						}

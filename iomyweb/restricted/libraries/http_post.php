@@ -67,8 +67,9 @@ function FetchHTTPDataParameters( $aParameters ) {
 					
 					//-- Check if the POST Value exists --//
 					if( isset($aHTTPData[$sKey]) ) {
-						
-						//-- INTEGER --//
+						//--------------------//
+						//-- INTEGER        --//
+						//--------------------//
 						if( $aParameter["DataType"]==="INT" ) {
 							try {
 								//-- Convert to a Integer --//
@@ -79,8 +80,10 @@ function FetchHTTPDataParameters( $aParameters ) {
 							} catch( Exception $e ) {
 								$aReturn[$sKey] = false;
 							}
-							
-						//-- FLOAT --//
+						
+						//--------------------//
+						//-- FLOAT          --//
+						//--------------------//
 						} else if( $aParameter["DataType"]==="FLO" ) {
 							
 							try {
@@ -98,20 +101,40 @@ function FetchHTTPDataParameters( $aParameters ) {
 								$bError = true;
 								$sErrMesg .= "Error Converting Float";
 							}
-							
-						//-- STRING --//
+						
+						//--------------------//
+						//-- STRING         --//
+						//--------------------//
 						} else if( $aParameter["DataType"]==="STR" ) {
 							
 							try {
-								//-- Convert to a String --//
-								$Value = (string)$aHTTPData[$sKey];
-								//-- Add the Value to the list of values to return --//
-								$aReturn[$sKey] = $Value;
+								if( $aHTTPData[$sKey]===null || $aHTTPData[$sKey]===false || $aHTTPData[$sKey]===true ) {
+									$aReturn[$sKey] = "";
+								} else {
+									if( is_string($aHTTPData[$sKey]) || is_int($aHTTPData[$sKey]) || is_float($aHTTPData[$sKey]) ) {
+										//----------------------------//
+										//-- Convert to a String    --//
+										//----------------------------//
+										$Value = (string)$aHTTPData[$sKey];
+										//-- Add the Value to the list of values to return --//
+										$aReturn[$sKey] = $Value;
+										
+										
+									} else {
+										//----------------------//
+										//-- Unsupported type --//
+										//----------------------//
+										$bError = true;
+										$sErrMesg .= "Error Converting String!\n";
+										$sErrMesg .= "The String is not in a suitable format.\n";
+									}
+								}
+								
 								
 							} catch( Exception $e ) {
 								$bError = true;
-								$sErrMesg .= "Error Converting String";
-								$sErrMesg .= "";
+								$sErrMesg .= "Error Converting String!\n";
+								$sErrMesg .= "Critical exception has occurred.\n";
 							}
 						}
 						
@@ -183,6 +206,9 @@ function ConvertPostStringToInteger($sNumber) {
 		return false;
 	}
 }
+
+
+
 
 
 function xssafe( $sData , $sEncoding='UTF-8' ) {

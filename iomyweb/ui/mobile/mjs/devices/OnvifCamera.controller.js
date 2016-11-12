@@ -49,7 +49,6 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         this.iDeviceOnvifPort = this.mLinkConnInfo.LinkConnPort;
         this.sOnvifUsername = this.mLinkConnInfo.LinkConnUsername;
         this.sOnvifPassword = this.mLinkConnInfo.LinkConnPassword;
-        this.sDeviceNetworkAddress = this.mLinkConnInfo.LinkConnAddress;
     },
     
     //---------------------------------------------------//
@@ -78,9 +77,16 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         this.byId("ptzRightButton").setEnabled(bStatus);
     },
     
+    updateThumnailTimestamp : function () {
+        var me = this;
+        me.dateThumbnailUpdate = new Date();
+        me.byId("SnapshotField").setText(IOMy.functions.getTimestampString(me.dateThumbnailUpdate));
+    },
+    
     //---------------------------------------------------//
     // Thumbnail Load
     //---------------------------------------------------//
+    dateThumbnailUpdate : null,
     
     /**
      * Loads a thumbnail from the current Onvif camera. Repeats every 5 minutes.
@@ -89,8 +95,13 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         var me = this;
         var sThumbnailUrl = IOMy.apiphp.APILocation("onvifthumbnail")+"?Mode=OpenThingThumbnail&ThingId="+me.iID;
         
+        
+        
         // Set the CSS rule using the API URL with parameters
         document.getElementById(me.createId("CameraThumbnail")).style = "background-image: url("+sThumbnailUrl+")";
+        
+        // Update the JS time stamp
+        me.updateThumnailTimestamp();
         
         // Clear the old timeout instance to avoid a race condition when either
         // accessing the page multiple times with the same or a different
@@ -174,9 +185,6 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
                             me.sStreamProfileUrl        = data[0].DATAMEDSTRING_VALUE;
                             me.sThumbnailProfileUrl     = data[1].DATAMEDSTRING_VALUE;
                         }
-                        
-                        // Enable the PTZ controls, if supported
-//                        me.setPTZButtonsEnabled(true);
                         me.loadThumbnail();
                     },
                     
@@ -214,6 +222,8 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
                 me.oThing = evt.data.Thing;
                 me.loadLinkConn(me.oThing.LinkId);
                 me.iID = me.oThing.DeviceId;
+                
+                console.log(me.oThing);
                 
                 // Create the title on the page.
                 me.byId("NavSubHead_Title").setText(me.oThing.DeviceName.toUpperCase());
@@ -388,11 +398,49 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
                     ]
                 }).addStyleClass("width100Percent height300px BG_grey_10 CameraThumbnail");
                 
-                if (me.byId("vbox_container") !== undefined)
-                    me.byId("vbox_container").destroy();
+                //==============================================\\
+                // DRAW DATE, TIME, AND ROOM                    \\
+                //==============================================\\
+                var oRoomInfo = IOMy.common.RoomsList["_"+me.oThing.PremiseId]["_"+me.oThing.RoomId];
                 
+                me.aElementsToDestroy.push("CameraInfoBox");
+                me.aElementsToDestroy.push("SnapshotField");
+                var oInfoBox = new sap.m.VBox(me.createId("CameraInfoBox"), {
+                    items : [
+                        //------------------------------------------------------------------//
+                        // Camera Location
+                        //------------------------------------------------------------------//
+                        new sap.m.HBox({
+                            items :[
+                                new sap.m.Label({
+                                    text : "Location:"
+                                }).addStyleClass("width120px"),
+                                
+                                new sap.m.Label({
+                                    text : oRoomInfo.RoomName + " in " + oRoomInfo.PremiseName
+                                })
+                            ]
+                        }),
+                        //------------------------------------------------------------------//
+                        // Time and Date
+                        //------------------------------------------------------------------//
+                        new sap.m.HBox({
+                            items :[
+                                new sap.m.Label({
+                                    text : "Snapshot Taken:"
+                                }).addStyleClass("width120px"),
+                                
+                                new sap.m.Label(me.createId("SnapshotField"), {
+                                    text : ""
+                                })
+                            ]
+                        })
+                    ]
+                });
+                
+                me.aElementsToDestroy.push("vbox_container");
                 var oVertBox = new sap.m.VBox(me.createId("vbox_container"), {
-					items : [ oCameraFeed ]
+					items : [ oCameraFeed, oInfoBox ]
 				});
                 
 		    	thisView.byId("Panel").addContent(oVertBox);

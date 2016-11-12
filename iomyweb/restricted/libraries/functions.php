@@ -339,7 +339,7 @@ function AddPresetLogToPremiseLog( $iPresetLogId, $iUTS, $iPremiseId, $sCustom1 
 		$bError = true;
 		$sErrMesg .= "Error Code:0x9805! \n";
 		$sErrMesg .= "Error submitting log to the PremiseLog! \n";
-		$sErrMesg .= "Critical Error \n";
+		$sErrMesg .= "Critical Error. \n";
 		$sErrMesg .= $e2->getMessage();
 	}
 	
@@ -349,7 +349,7 @@ function AddPresetLogToPremiseLog( $iPresetLogId, $iUTS, $iPremiseId, $sCustom1 
 	//------------------------------------------------------------//
 	if( $bError===false ) {
 		//-- No Errors --//
-		return array( "Error"=>false);
+		return array( "Error"=>false );
 
 	} else {
 		//-- Error Occurred --//
@@ -402,6 +402,7 @@ function GetPremiseLogsBetweenUTS( $iPremiseId, $iStartstamp, $iEndstamp ) {
 	}
 	return $aReturn;
 }
+
 
 
 //========================================================================================================================//
@@ -494,7 +495,7 @@ function ChangeUserPassword( $sPassword ) {
 }
 
 
-function ChangeUserAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressPostalLine1, $sAddressPostalLine2, $sAddressPostalLine3, $sAddressCountry, $sAddressStateProvince, $sAddressPostcode, $sAddressTimezone, $sAddressLanguage ) {
+function ChangeUserAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressCountry, $sAddressStateProvince, $sAddressPostcode, $sAddressTimezone, $sAddressLanguage ) {
 	//------------------------------------------------------------//
 	//-- 1.0 - Initialise										--//
 	//------------------------------------------------------------//
@@ -505,7 +506,7 @@ function ChangeUserAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddre
 	//-- 2.0 - Begin											--//
 	//------------------------------------------------------------//
 	try {
-		$aResult = dbChangeUserAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressPostalLine1, $sAddressPostalLine2, $sAddressPostalLine3, $sAddressCountry, $sAddressStateProvince, $sAddressPostcode, $sAddressTimezone, $sAddressLanguage );
+		$aResult = dbChangeUserAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressCountry, $sAddressStateProvince, $sAddressPostcode, $sAddressTimezone, $sAddressLanguage );
 		
 		if( $aResult["Error"]===true ) {
 			$bError = true;
@@ -519,13 +520,192 @@ function ChangeUserAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddre
 	}
 	
 	//------------------------------------------------------------//
-	//-- 9.0 - Return the Results or Error Message				--//
+	//-- 9.0 - Return the Results or Error Message              --//
 	//------------------------------------------------------------//
 	if($bError===false) {
-		//-- 9.A - SUCCESS		--//
+		//-- 9.A - SUCCESS --//
 		return array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
-		//-- 9.B - FAILURE		--//
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+function GetUserServerPermissions() {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError     = false;
+	$sErrMesg   = "";
+	$aResult    = array();
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	$aResult = dbGetUserServerPermissions();
+	
+	
+	//------------------------------------------------------------//
+	//-- 8.0 - Check for errors                                 --//
+	//------------------------------------------------------------//
+	if( $aResult['Error']===true ) {
+		$bError = true;
+		$sErrMesg = "Problem lookinging up the User's Server Permissions!";
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+function InsertUserInfo( $iGenderId, $sTitle, $sGivennames, $sSurnames, $sDisplayname, $sEmail, $sPhoneNumber, $sDoB ) {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError     = false;
+	$sErrMesg   = "";
+	$aResult    = array();
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	$aResult = dbInsertUserInfo( $iGenderId, $sTitle, $sGivennames, $sSurnames, $sDisplayname, $sEmail, $sPhoneNumber, $sDoB );
+	
+	//------------------------------------------------------------//
+	//-- 8.0 - Check for errors                                 --//
+	//------------------------------------------------------------//
+	if( $aResult['Error']===true ) {
+		$bError    = true;
+		$sErrMesg .= "Problem inserting the User's Info!\n";
+		$sErrMesg .= $aResult['ErrMesg'];
+	}
+	
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+function InsertUser( $iUserInfoId, $sUsername, $iUserState ) {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError     = false;
+	$sErrMesg   = "";
+	$aResult    = array();
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	$aResult = dbInsertUser( $iUserInfoId, $sUsername, $iUserState );
+	
+	//------------------------------------------------------------//
+	//-- 8.0 - Check for errors                                 --//
+	//------------------------------------------------------------//
+	if( $aResult['Error']===true ) {
+		$bError    = true;
+		$sErrMesg .= "Problem looking up the User's Address!\n";
+		$sErrMesg .= $aResult['ErrMesg'];
+	}
+	
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+function InsertUserAddress( $iUserId, $iLanguageId, $iCountriesId, $iStateProvinceId, $iPostcodeId, $iTimezoneId, $sLine1, $sLine2, $sLine3 ) {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError     = false;
+	$sErrMesg   = "";
+	$aResult    = array();
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	$aResult = dbInsertUserAddress( $iUserId, $iLanguageId, $iCountriesId, $iStateProvinceId, $iPostcodeId, $iTimezoneId, $sLine1, $sLine2, $sLine3 );
+	
+	//------------------------------------------------------------//
+	//-- 8.0 - Check for errors                                 --//
+	//------------------------------------------------------------//
+	if( $aResult['Error']===true ) {
+		$bError    = true;
+		$sErrMesg .= "Problem looking up the User's Server Permissions!\n";
+		$sErrMesg .= $aResult['ErrMesg'];
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+
+
+function CreateDatabaseUser( $sUsername, $sPassword, $sLocation ) {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError     = false;
+	$sErrMesg   = "";
+	$aResult    = array();
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	$aResult = dbCreateDatabaseUser( $sUsername, $sPassword, $sLocation );
+	
+	
+	//------------------------------------------------------------//
+	//-- 8.0 - Check for errors                                 --//
+	//------------------------------------------------------------//
+	if( $aResult['Error']===true ) {
+		$bError    = true;
+		$sErrMesg .= "Problem looking up the User's Server Permissions!\n";
+		$sErrMesg .= $aResult['ErrMesg'];
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- 9.B - FAILURE --//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
 }

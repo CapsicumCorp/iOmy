@@ -65,14 +65,18 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 								})
 							],
 							select:		function (oControlEvent) {
-								//--------------------------------//
-								//-- TOGGLE SELECTED STATUS     --//
-								//--------------------------------//
-								if( this.getExpanded() ) {
-									this.setExpanded(false);
-								} else {
-									this.setExpanded(true);
-								}
+								//---------------------------------------------------//
+								//-- TOGGLE SELECTED STATUS IF MEDIA IS MOBILE     --//
+								//---------------------------------------------------//
+                                var mSystem = sap.ui.Device.system;
+                                
+                                if (mSystem.desktop === false) {
+                                    if( this.getExpanded() ) {
+                                        this.setExpanded(false);
+                                    } else {
+                                        this.setExpanded(true);
+                                    }
+                                }
 							}
 						}),
 						//--------------------------------//
@@ -119,14 +123,18 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 								})
 							],
 							select:		function (oControlEvent) {
-								//--------------------------------//
-								//-- TOGGLE SELECTED STATUS     --//
-								//--------------------------------//
-								if( this.getExpanded() ) {
-									this.setExpanded(false);
-								} else {
-									this.setExpanded(true);
-								}
+								//---------------------------------------------------//
+								//-- TOGGLE SELECTED STATUS IF MEDIA IS MOBILE     --//
+								//---------------------------------------------------//
+                                var mSystem = sap.ui.Device.system;
+                                
+                                if (mSystem.desktop === false) {
+                                    if( this.getExpanded() ) {
+                                        this.setExpanded(false);
+                                    } else {
+                                        this.setExpanded(true);
+                                    }
+                                }
 							}
 						}),
 						//--------------------------------//

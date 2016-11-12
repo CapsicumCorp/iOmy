@@ -30,6 +30,8 @@ sap.ui.controller("mjs.premise.Overview", {
 	rooms : [],
 	aStoredDevices : [],
     
+    aElementsToDestroy : [],
+    
     roomsExpanded : {},
     
     lastUpdated : new Date(),
@@ -44,45 +46,41 @@ sap.ui.controller("mjs.premise.Overview", {
 		
 		thisView.addEventDelegate({
 			onBeforeShow : function (evt) {
-				//------------------------------------------------------------//
-				//-- Enable/Disable Navigational Forward Button             --//
-				//------------------------------------------------------------//
-				if( IOMy.common.NavigationForwardPresent()===true ) {
-					me.byId("NavSubHead_ForwardBtn").setVisible(true);
-				} else {
-					me.byId("NavSubHead_ForwardBtn").setVisible(false);
-				}
-				
-				if( IOMy.common.NavPagesCurrentIndex<=0 ) {
-					console.log("Disable back button");
-					//me.byId("NavSubHead_BackBtn").setVisible( false );
-				} else {
-					console.log("Don't disable back button");
-				}
-				
-				
+                me.DestroyUI();
                 
-                if (me.byId("verticalBox") !== undefined)
-                    me.byId("verticalBox").destroy();
+				//----------------------------------------------------//
+				//-- Refresh the Navigational buttons               --//
+                //----------------------------------------------------//
+				IOMy.common.NavigationRefreshButtons( me );
 				
+//				if( IOMy.common.NavPagesCurrentIndex<=0 ) {
+//					console.log("Disable back button");
+//				} else {
+//					console.log("Don't disable back button");
+//				}
+                
+                me.aElementsToDestroy.push("verticalBox");
+                me.aElementsToDestroy.push("premiseBox");
+                me.aElementsToDestroy.push("panel");
+                
                 //=== Create the Premise combo box ===//
                 var oPremiseCBox = IOMy.widgets.getPremiseSelector(me.createId("premiseBox")).addStyleClass("SettingsDropdownInput width100Percent");
                 oPremiseCBox.attachSelectionChange( function () {
                     me.composeRoomList(this.getSelectedKey());
                 });
                 
+                var oPremiseCBoxContainer = new sap.m.VBox({
+                    items : [oPremiseCBox]
+                }).addStyleClass("UserInputForm width100Percent");
+                
                 // Create the main placeholder
                 var oVertBox = new sap.m.VBox(me.createId("verticalBox"), {
-                    items: [oPremiseCBox]
+                    items: [oPremiseCBoxContainer]
                 });
                 
                 //me.byId("premiseBox").setSelectedKey(IOMy.common.PremiseList[0].Id);
 
                 me.composeRoomList();
-                
-                // Destroy the old panel if it exists.
-                if (me.byId("panel") !== undefined) 
-                    me.byId("panel").destroy();
                 
                 var oPanel = new sap.m.Panel(me.createId("panel"), {
                     backgroundDesign: "Transparent",
@@ -93,6 +91,24 @@ sap.ui.controller("mjs.premise.Overview", {
 			}
 		});
 	},
+    
+    /**
+     * Procedure that destroys the previous incarnation of the UI. Must be called by onInit before
+     * (re)creating the page.
+     */
+    DestroyUI : function() {
+        var me          = this;
+        var sCurrentID  = "";
+        
+        for (var i = 0; i < me.aElementsToDestroy.length; i++) {
+            sCurrentID = me.aElementsToDestroy[i];
+            if (me.byId(sCurrentID) !== undefined)
+                me.byId(sCurrentID).destroy();
+        }
+        
+        // Clear the array
+        me.aElementsToDestroy = [];
+    },
 	
     /**
      * Procedure for creating the UI elements that make up the entire list of
@@ -104,23 +120,23 @@ sap.ui.controller("mjs.premise.Overview", {
 	composeRoomList : function (iPremiseId) {
 		var me = this;
 		var thisView = me.getView();
-        var iNumOfButtons = 0;
-        var iPremiseKey = (iPremiseId !== undefined ? iPremiseId : null);
+//        var iNumOfButtons = 0;
+//        var iPremiseKey = (iPremiseId !== undefined ? iPremiseId : null);
 		
 		if (me.timerInterval !== null)
 			clearInterval(me.timerInterval);
         
-        if (me.byId("roomListBox") !== undefined)
-            me.byId("roomListBox").destroy();
+        me.aElementsToDestroy.push("roomListBox");
         
         var oVertBox = new sap.m.VBox(me.createId("roomListBox"), {
             items: []
         });
         
-        if (iPremiseId !== undefined && iPremiseId !== null)
+        if (iPremiseId !== undefined && iPremiseId !== null) {
             me.byId("premiseBox").setSelectedKey(iPremiseId);
-        else
+        } else {
             me.byId("premiseBox").setSelectedKey(IOMy.common.PremiseList[0].Id);
+        }
 
 		me.rooms = [];
 		
@@ -183,10 +199,8 @@ sap.ui.controller("mjs.premise.Overview", {
                         aRoom!==null && JSON.stringify(aRoom.Things) !== "{}" )
                 {
                     // Clean up any old elements with IDs.
-                    if (me.byId("roomName"+sIndex) !== undefined)
-                        me.byId("roomName"+sIndex).destroy();
-                    if (me.byId("roomLink"+sIndex) !== undefined)
-                        me.byId("roomLink"+sIndex).destroy();
+                    me.aElementsToDestroy.push("roomName"+sIndex);
+                    me.aElementsToDestroy.push("roomLink"+sIndex);
                     
                     // If we're processing Unassigned devices, the RoomId is 0.
                     if (aRoom.RoomId === null)
@@ -270,9 +284,7 @@ sap.ui.controller("mjs.premise.Overview", {
                             if (me.roomsExpanded[sIndex] === undefined)
                                 me.roomsExpanded[sIndex] = false;
 
-                            // Clean up any old elements with IDs.
-                            if (me.byId("device"+aDevice.DeviceId) !== undefined)
-                                me.byId("device"+aDevice.DeviceId).destroy();
+                            me.aElementsToDestroy.push("device"+aDevice.DeviceId);
 
                             // Retrieve number of devices/things in the room
                             iDevicesInRoom = IOMy.functions.getNumberOfDevicesInRoom(aDevice.DeviceId);
@@ -302,10 +314,13 @@ sap.ui.controller("mjs.premise.Overview", {
                                                         }
                                                         
                                                         // Determine which device page to enter according to the device type.
-                                                        if (me.aStoredDevices[i].DeviceTypeId === 2)
+                                                        if (me.aStoredDevices[i].DeviceTypeId === 2) {
                                                             sPageName = "pDeviceData"; // Zigbee
-                                                        else if (me.aStoredDevices[i].DeviceTypeId === 13)
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 13) {
                                                             sPageName = "pPhilipsHue"; // Philips Hue
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 6) {
+                                                            sPageName = "pOnvif"; // Philips Hue
+                                                        }
                                                         
                                                         IOMy.common.NavigationChangePage(sPageName, {Thing : oItem});
                                                         

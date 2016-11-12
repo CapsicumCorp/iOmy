@@ -97,28 +97,30 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                         format : 'json',
 
                         onSuccess : function (response, data) {
-                            data = data[0];
-                            console.log(JSON.stringify(data));
-                            //----------------------------------------------------//
-                            // If we're grabbing the HUE value
-                            //----------------------------------------------------//
-                            if (data.RSTYPE_PK === 3901) {
-                                me.iHue = data.CALCEDVALUE / me.fRate;
-                                me.byId("hueSlider").setValue(me.iHue);
+                            if (data.length > 0) {
+                                data = data[0];
+                                console.log(JSON.stringify(data));
+                                //----------------------------------------------------//
+                                // If we're grabbing the HUE value
+                                //----------------------------------------------------//
+                                if (data.RSTYPE_PK === 3901) {
+                                    me.iHue = data.CALCEDVALUE / me.fRate;
+                                    me.byId("hueSlider").setValue(me.iHue);
 
-                            //----------------------------------------------------//
-                            // If we're grabbing the SATURATION value
-                            //----------------------------------------------------//
-                            } else if (data.RSTYPE_PK === 3902) {
-                                me.iSat = data.CALCEDVALUE;
-                                me.byId("satSlider").setValue(me.iSat);
+                                //----------------------------------------------------//
+                                // If we're grabbing the SATURATION value
+                                //----------------------------------------------------//
+                                } else if (data.RSTYPE_PK === 3902) {
+                                    me.iSat = data.CALCEDVALUE;
+                                    me.byId("satSlider").setValue(me.iSat);
 
-                            //----------------------------------------------------//
-                            // If we're grabbing the BRIGHTNESS value
-                            //----------------------------------------------------//
-                            } else if (data.RSTYPE_PK === 3903) {
-                                me.iLight = data.CALCEDVALUE;
-                                me.byId("briSlider").setValue(me.iLight);
+                                //----------------------------------------------------//
+                                // If we're grabbing the BRIGHTNESS value
+                                //----------------------------------------------------//
+                                } else if (data.RSTYPE_PK === 3903) {
+                                    me.iLight = data.CALCEDVALUE;
+                                    me.byId("briSlider").setValue(me.iLight);
+                                }
                             }
 
                             this.onComplete();

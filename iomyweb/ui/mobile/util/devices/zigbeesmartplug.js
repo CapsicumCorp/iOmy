@@ -68,7 +68,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                         }
                     }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                 ]
-            }).addStyleClass("minwidth70px width70Percent BorderRight")
+            }).addStyleClass("width80Percent minwidth170px BorderRight")
         );
 
         aUIObjectItems.push(
@@ -88,14 +88,14 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("Font-RobotoCondensed"),
                             new sap.m.Text( oViewScope.createId( sPrefix+"_kWh" ),	{} ).addStyleClass("Font-RobotoCondensed")
                         ]
-                    }).addStyleClass("width110px PadLeft5px MarBottom3px MarRight10px TextLeft")
+                    }).addStyleClass("PadLeft5px MarBottom3px MarRight10px TextLeft")
                 ]
-            }).addStyleClass("minwidth100px width10Percent")
+            }).addStyleClass("minwidth70px width10Percent")
         );
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: aUIObjectItems
-        }).addStyleClass("ListItem");
+        }).addStyleClass("ListItem MarRight6px");
 
         //--------------------------------------------------------------------//
         //-- ADD THE STATUS BUTTON TO THE UI								--//
@@ -181,12 +181,10 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                         });
                     }
                 }).addStyleClass("DeviceOverviewStatusToggleSwitch") //-- END of ToggleButton --//
-                //}).addStyleClass("DeviceOverviewStatusToggleButton TextWhite Font-RobotoCondensed Font-Large"); //-- END of ToggleButton --//
             );
         }
 
         oUIObject.addItem(oUIStatusContainer);
-        oUIObject.addItem(new sap.m.VBox({}).addStyleClass("width6px"));
 		
 		
 		//------------------------------------//
@@ -217,7 +215,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             "LabelId":			Prefix+"_kWh"
                         }
                     });
-                    //jQuery.sap.log.debug(aIO.UoMName);
+
                 } else if( aIO.RSTypeId===2001 ) {
                     aTasks.High.push({
                         "Type":"DeviceValueKW", 
@@ -284,7 +282,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             }
                         }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                     ]
-                }).addStyleClass("BorderRight PadRight3px width80Percent minwidth170px"),
+                }).addStyleClass("BorderRight width80Percent minwidth170px"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
@@ -295,7 +293,6 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             //--------------------------------//
                             //-- Draw the Data Boxes		--//
                             //--------------------------------//
-
                             items: [
                                 new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("DeviceOverview-ItemLabel Font-RobotoCondensed")
                             ]
@@ -310,7 +307,6 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         //--------------------------------------------------------------------//
 
         //-- Initialise Variables --//
-        var sStatusButtonText			= "";
         var bButtonStatus				= false;
 
         //-- Store the Device Status --//
@@ -321,10 +317,8 @@ $.extend(IOMy.devices.zigbeesmartplug,{
 
         //-- Set Text --//
         if( iDeviceStatus===0 ) {
-            sStatusButtonText	= "Off";
             bButtonStatus		= false;
         } else {
-            sStatusButtonText	= "On";
             bButtonStatus		= true;
         }
 
@@ -361,10 +355,6 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                 new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
                     state: bButtonStatus,
                     change: function () {
-                //new sap.m.ToggleButton( oViewScope.createId( sPrefix+"_StatusToggle"), {
-                    //text: sStatusButtonText,
-                    //pressed: bButtonStatus,
-                    //press : function () {
                         //-- Bind a link to this button for subfunctions --//
                         var oCurrentButton = this;
                         //-- AJAX --//
@@ -379,16 +369,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                                 IOMy.common.showError(response.message, "Error Changing Device Status");
                             },
                             onSuccess : function( sExpectedDataType, aAjaxData ) {
-                                //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
                                 if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
-                                    //-- If turned Off --//
-                                    //if( aAjaxData.DevicePortStatus===0 ) {
-                                        //oCurrentButton.setText("Off");
-                                    //-- Else Turned On --//
-                                    //} else {
-                                        //oCurrentButton.setText("On");
-                                    //}
-
                                     IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
                                     IOMy.common.ThingList["_"+aDeviceData.DeviceId].UILastUpdate = new Date();
                                 }
@@ -396,7 +377,6 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                         });
                     }
                 }).addStyleClass("DeviceOverviewStatusToggleSwitch") //-- END of ToggleButton --//
-                //}).addStyleClass("DeviceOverviewStatusToggleButton TextWhite Font-RobotoCondensed Font-Large"); //-- END of ToggleButton --//
             );
         }
 

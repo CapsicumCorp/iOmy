@@ -67,6 +67,9 @@ $.sap.require("IOMy.devices.temperaturesensor");
 $.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
 $.sap.require("IOMy.devices.develco");
 
+$.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
+$.sap.require("IOMy.devices.weatherfeed");
+
 //================================================//
 //== 5.2 - INITIALISE APPLICATION				==//
 //================================================//
@@ -1092,22 +1095,10 @@ var aPages = [
 	},
     // --- Settings Views --- \\
     {
-		"Id":			"pSettingsOverview",
-		"Location":		"mjs.settings.SettingsOverview",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.SettingsOverview\" Page!\n"
-	},
-	{
 		"Id":			"pSettingsDeviceList",
 		"Location":		"mjs.settings.DeviceList",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.DeviceList (Navigation)\" Page!\n"
-	},
-    {
-		"Id":			"pSettingsDeviceInfo",
-		"Location":		"mjs.settings.devices.DeviceInfo",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.devices.DeviceInfo\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.DeviceList\" Page!\n"
 	},
     {
 		"Id":			"pSettingsEditLink",
@@ -1122,12 +1113,6 @@ var aPages = [
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.devices.EditThing\" Page!\n"
 	},
     {
-		"Id":			"pSettingsDeviceAddManually",
-		"Location":		"mjs.settings.devices.DeviceAddManually",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.devices.DeviceAddManually\" Page!\n"
-	},
-    {
 		"Id":			"pSettingsLinkAdd",
 		"Location":		"mjs.settings.links.LinkAdd",
 		"Type":			"JS",
@@ -1138,12 +1123,6 @@ var aPages = [
 		"Location":		"mjs.settings.things.ItemAdd",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.things.ItemAdd\" Page!\n"
-	},
-    {
-		"Id":			"pSettingsUser",
-		"Location":		"mjs.settings.EditUser",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.EditUser\" Page!\n"
 	},
     {
 		"Id":			"pSettingsUserInfo",
@@ -1168,12 +1147,6 @@ var aPages = [
 		"Location":		"mjs.settings.PremiseList",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.PremiseList\" Page!\n"
-	},
-    {
-		"Id":			"pSettingsPremise",
-		"Location":		"mjs.settings.premise.Premise",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.premise.Premise\" Page!\n"
 	},
     {
 		"Id":			"pSettingsPremiseInfo",
@@ -1205,12 +1178,6 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.rooms.RoomAdd\" Page!\n"
 	},
-    {
-		"Id":			"pSettingsRoomDevice",
-		"Location":		"mjs.settings.rooms.RoomDevice",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.rooms.RoomDevice\" Page!\n"
-    },
     {
 		"Id":			"pDeviceData",
 		"Location":		"mjs.premise.DeviceData",

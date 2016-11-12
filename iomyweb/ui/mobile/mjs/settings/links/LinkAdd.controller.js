@@ -86,6 +86,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         var mDeviceUserTokenInfo    = {};
         var mUsernameInfo           = {};
         var mPasswordInfo           = {};
+        var mOpenWeatherMapInfo     = {};
         var mValidationInfo         = {};
         var bError                  = false;
         var aErrorMessages          = [];
@@ -156,6 +157,16 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                     if (mDeviceUserTokenInfo.bError === true) {
                         bError = true;
                         aErrorMessages = aErrorMessages.concat(mDeviceUserTokenInfo.aErrorMessages);
+                    }
+                    
+                //====================================================================//
+                // OPEN WEATHER MAP
+                //====================================================================//
+                } else if (me.byId("linkTypeCBox").getSelectedKey() == 8) {
+                    mOpenWeatherMapInfo = IOMy.devices.weatherfeed.ValidateLinkFormData(me);
+                    if (mOpenWeatherMapInfo.bError === true) {
+                        bError = true;
+                        aErrorMessages = aErrorMessages.concat(mOpenWeatherMapInfo.aErrorMessages);
                     }
                 }
             } catch (e) {
@@ -442,6 +453,13 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                     "DevicePort" : me.byId("IPPortField").getValue(),
                     "DeviceUserToken" : me.byId("DeviceUserTokenField").getValue()
                 };
+            //--------------------------------------------------------------------//
+            // WEATHER STATION
+            //--------------------------------------------------------------------//
+            } else if (me.byId("linkTypeCBox").getSelectedKey() == 8) {
+                sLinkType = "Open Weather Map Feed";
+                
+                mData = IOMy.devices.weatherfeed.FetchAddLinkAPIAndParameters(me);
             }
         } catch (e2000) {
             throw "Error 0x2000: "+e2000.message;
@@ -455,11 +473,16 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                 //-- REFRESH LINK LIST --//
                 IOMy.common.ReloadVariableLinkList();
 
-                IOMy.common.showSuccess(sLinkType+" successfully created", "Success",
-                    function () {
-                        IOMy.common.NavigationTriggerBackForward(false);
-                    },
-                "UpdateMessageBox");
+                if (response.Error === false || response.Error === undefined) {
+                    IOMy.common.showSuccess(sLinkType+" successfully created", "Success",
+                        function () {
+                            IOMy.common.NavigationTriggerBackForward(false);
+                        },
+                    "UpdateMessageBox");
+                } else {
+                    jQuery.sap.log.error("Error creating "+sLinkType+":"+response.ErrMesg, "Error");
+                    IOMy.common.showError("Error creating "+sLinkType+":\n\n"+response.ErrMesg, "Error");
+                }
             } catch (e) {
                 jQuery.sap.log.error("Error refreshing core variables: "+e.message);
                 IOMy.common.showWarning(sLinkType+" successfully created but there was an error refreshing core variables: "+e.message, "Errors");
@@ -562,11 +585,15 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             //==---------------------------------==//
             
             //---- Onvif Server ----//
-            if (iLinkTypeId == 6)
+            if (iLinkTypeId == 6) {
                 me.CreateOnvifServerForm();
             //---- Philips Hue Bridge ----//
-            else if (iLinkTypeId == 7)
+            } else if (iLinkTypeId == 7) {
                 me.CreatePhilipsHueBridgeForm();
+            //---- Open Weather Map ----//
+            } else if (iLinkTypeId == 8) {
+                IOMy.devices.weatherfeed.CreateLinkForm(me, me.byId("formBox"));
+            }
         });
         
         //-------------------------------------------------------\\
@@ -586,7 +613,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                 oLinkTypeLabel,oLinkTypeCBox,
                 oFormBox
             ]
-        });
+        }).addStyleClass("UserInputForm");
         
         //-------------------------------------------------------\\
         // ADD LINK BUTTON
@@ -641,7 +668,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                                 }
                             } catch (e) {
                                 bError = true; // No.
-                                aErrorMessages.push("Error 0x1005: There was an error checking the IP Port: "+e.message);
+                                aErrorMessages.push("Error 0x1010: There was an error retrieving the API parameters: "+e.message);
                                 
                                 if (aErrorMessages.length === 1)
                                     sErrorMessage = "There was an error: \n\n"+aErrorMessages.join('\n');
@@ -751,7 +778,9 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         
         // FIELD
         me.aElementsForAFormToDestroy.push("Password");
-        oDeviceUserTokenField = new sap.m.Input(me.createId("Password"), {}).addStyleClass("width100Percent SettingsTextInput");
+        oDeviceUserTokenField = new sap.m.Input(me.createId("Password"), {
+            type : sap.m.InputType.Password
+        }).addStyleClass("width100Percent SettingsTextInput");
         me.byId("formBox").addItem(oDeviceUserTokenField);
     },
     

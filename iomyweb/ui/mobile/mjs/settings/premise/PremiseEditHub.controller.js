@@ -133,7 +133,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
         		
 				var oVertBox = new sap.m.VBox({
 					items : [oHubTitle, oHubNameField, oEditButton]
-				});
+				}).addStyleClass("UserInputForm");
     		    
 		    	// Destroys the actual panel of the page. This is done to ensure that there
 				// are no elements left over which would increase the page size each time

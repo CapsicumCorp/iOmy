@@ -270,7 +270,7 @@ class PHPPhilipsHue {
 		//----------------------------------------------------------------//
 		if( $aResult['Error']===true ) {
 			$bError = true;
-			$sErrMesg .= "Error changing Lights Hue,Sat,Bri! \n";
+			$sErrMesg .= "Error changing the Light's Hue, Saturation and Brightness! \n";
 			$sErrMesg .= $aResult["ErrMesg"];
 		} else {
 			//-- TODO: Implement a "try catch" here --//

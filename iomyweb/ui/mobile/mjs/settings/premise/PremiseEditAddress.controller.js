@@ -330,7 +330,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                             oTimezoneTitle, oTimezoneField, oLine1Title, oLine1Field,
                             oLine2Title, oLine2Field, oLine3Title, oLine3Field,
                             oEditButton]
-				});
+				}).addStyleClass("UserInputForm");
                 
                 // Destroys the actual panel of the page. This is done to ensure that there
 				// are no elements left over which would increase the page size each time

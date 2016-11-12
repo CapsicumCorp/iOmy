@@ -307,7 +307,7 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
             items : [
                 oLinkLabel,oLinkCBox,oThingNameLabel,oThingNameField,oFormBox
             ]
-        });
+        }).addStyleClass("UserInputForm");
         
         //-------------------------------------------------------\\
         // NEW ITEM BUTTON

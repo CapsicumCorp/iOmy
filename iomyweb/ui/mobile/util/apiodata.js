@@ -322,7 +322,7 @@ $.extend(IOMy.apiodata,{
 			type : sHTTPMethod,						//--  --//
 			//data : aData || {},					//-- If there is anything in "data" than include it here --//
 			RetryAttemptCount : 0,
-			RetryAttempLimit : 3,
+			RetryAttempLimit : 1,
 			bApiComplete: false,
 			DebugLogString:"",
 			

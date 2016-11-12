@@ -41,12 +41,12 @@ $aRequiredParameters        = array();      //-- ARRAY:         Used to store an
 $sPostMode                  = "";           //-- STRING:        Used to store which Mode the API should function in. --//
 $iPostId                    = "";           //-- STRING:        Used to store the "Gateway Id". --//
 
-$sPostTitle                 = "";           //-- STRING:        Used to store one of the "User Information" HTTP POST Parameters --//
-$sPostGivennames            = "";           //-- STRING:        Used to store one of the "User Information" HTTP POST Parameters --//
-$sPostSurname               = "";           //-- STRING:        Used to store one of the "User Information" HTTP POST Parameters --//
-$sPostDisplayname           = "";           //-- STRING:        Used to store one of the "User Information" HTTP POST Parameters --//
-$sPostEmail                 = "";           //-- STRING:        Used to store one of the "User Information" HTTP POST Parameters --//
-$sPostPhonenumber           = "";           //-- STRING:        Used to store one of the "User Information" HTTP POST Parameters --//
+$sPostTitle                 = "";           //-- STRING:        Used to store one of the "User Information" HTTP POST Parameters. --//
+$sPostGivennames            = "";           //-- STRING:        Used to store one of the "User Information" HTTP POST Parameters. --//
+$sPostSurname               = "";           //-- STRING:        Used to store one of the "User Information" HTTP POST Parameters. --//
+$sPostDisplayname           = "";           //-- STRING:        Used to store one of the "User Information" HTTP POST Parameters. --//
+$sPostEmail                 = "";           //-- STRING:        Used to store one of the "User Information" HTTP POST Parameters. --//
+$sPostPhoneNumber           = "";           //-- STRING:        Used to store one of the "User Information" HTTP POST Parameters. --//
 
 $sPostAddressLine1          = "";           //-- STRING:        Used to store the desired "User Address Line 1". --//
 $sPostAddressLine2          = "";           //-- STRING:        Used to store the desired "User Address Line 2". --//
@@ -64,6 +64,9 @@ $sPostOldPassword           = "";           //-- STRING:        Used to store on
 $sPostNewPassword           = "";           //-- STRING:        Used to store one of the "Change Password" HTTP POST Parameters --//
 
 $aUserInfo                  = array();      //-- ARRAY:         Used to store the "User Information" that most modes in this API depend on.  --//
+$aUserServerPermissions     = array();      //-- ARRAY:         --//
+
+$bTransactionStarted        = false;        //-- BOOLEAN:       Used to indicate if a transaction has been started --//
 
 $iLogNowUTS                 = 0;            //-- INTEGER:       --//
 $iPresetLogId               = 0;            //-- INTEGER:       --//
@@ -103,9 +106,9 @@ if($bError===false) {
 		array( "Name"=>'AddressLine1',          "DataType"=>'STR' ),
 		array( "Name"=>'AddressLine2',          "DataType"=>'STR' ),
 		array( "Name"=>'AddressLine3',          "DataType"=>'STR' ),
-		array( "Name"=>'AddressPostalLine1',    "DataType"=>'STR' ),
-		array( "Name"=>'AddressPostalLine2',    "DataType"=>'STR' ),
-		array( "Name"=>'AddressPostalLine3',    "DataType"=>'STR' ),
+//		array( "Name"=>'AddressPostalLine1',    "DataType"=>'STR' ),
+//		array( "Name"=>'AddressPostalLine2',    "DataType"=>'STR' ),
+//		array( "Name"=>'AddressPostalLine3',    "DataType"=>'STR' ),
 		array( "Name"=>'AddressCountry',        "DataType"=>'INT' ),
 		array( "Name"=>'AddressStateProvince',  "DataType"=>'INT' ),
 		array( "Name"=>'AddressPostcode',       "DataType"=>'INT' ),
@@ -131,7 +134,8 @@ if($bError===false) {
 		//-- NOTE: Valid modes are going to be "EditUserInfo", "EditUserAddress", "EditPassword", "AddUser" --//
 		
 		//-- Verify that the mode is supported --//
-		if( $sPostMode!=="EditUserInfo" && $sPostMode!=="EditUserAddress" && $sPostMode!=="EditPassword") {
+		//if( $sPostMode!=="EditUserInfo" && $sPostMode!=="EditUserAddress" && $sPostMode!=="EditPassword" && $sPostMode!=="AddUser" ) {
+		if( $sPostMode!=="EditUserInfo" && $sPostMode!=="EditUserAddress" && $sPostMode!=="EditPassword" ) {
 			$bError = true;
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
@@ -148,11 +152,12 @@ if($bError===false) {
 		//sErrMesg .= e0011.message;
 	}
 	
+	
 	//----------------------------------------------------//
 	//-- 2.2.2.A - Retrieve User Info "Title"           --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="EditUserInfo" ) {
+		if( $sPostMode==="EditUserInfo" || $sPostMode==="AddUser" ) {
 			try {
 				//-- Retrieve the "Title" --//
 				$sPostTitle = $aHTTPData["Title"];
@@ -176,7 +181,7 @@ if($bError===false) {
 	//-- 2.2.3.A - Retrieve User Info "Givenname"       --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="EditUserInfo" ) {
+		if( $sPostMode==="EditUserInfo" || $sPostMode==="AddUser" ) {
 			try {
 				//-- Retrieve the "Givennames" --//
 				$sPostGivennames = $aHTTPData["Givennames"];
@@ -196,11 +201,12 @@ if($bError===false) {
 		}
 	}
 	
+	
 	//----------------------------------------------------//
 	//-- 2.2.4.A - Retrieve User Info "Surname"         --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="EditUserInfo" ) {
+		if( $sPostMode==="EditUserInfo" || $sPostMode==="AddUser" ) {
 			try {
 				//-- Retrieve the "Surnames" --//
 				$sPostSurname = $aHTTPData["Surnames"];
@@ -220,11 +226,12 @@ if($bError===false) {
 		}
 	}
 	
+	
 	//----------------------------------------------------//
 	//-- 2.2.5.A - Retrieve User Info "Displayname"     --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="EditUserInfo" ) {
+		if( $sPostMode==="EditUserInfo" || $sPostMode==="AddUser" ) {
 			try {
 				//-- Retrieve the "Displayname" --//
 				$sPostDisplayname = $aHTTPData["Displayname"];
@@ -248,7 +255,7 @@ if($bError===false) {
 	//-- 2.2.6.A - Retrieve User Info "Email"           --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="EditUserInfo" ) {
+		if( $sPostMode==="EditUserInfo" || $sPostMode==="AddUser" ) {
 			try {
 				//-- Retrieve the "Email" --//
 				$sPostEmail = $aHTTPData["Email"];
@@ -272,12 +279,12 @@ if($bError===false) {
 	//-- 2.2.7.A - Retrieve User Info "Phone"           --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="EditUserInfo" ) {
+		if( $sPostMode==="EditUserInfo" || $sPostMode==="AddUser" ) {
 			try {
 				//-- Retrieve the "Phone" --//
-				$sPostPhonenumber = $aHTTPData["Phone"];
+				$sPostPhoneNumber = $aHTTPData["Phone"];
 				
-				if( $sPostPhonenumber===false ) {
+				if( $sPostPhoneNumber===false ) {
 					$bError = true;
 					$sErrMesg .= "Error Code:'0113' \n";
 					$sErrMesg .= "Invalid \"Phone\" parameter!\n";
@@ -296,7 +303,7 @@ if($bError===false) {
 	//-- 2.2.8.A - Retrieve User Info "Gender"          --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="EditUserInfo" ) {
+		if( $sPostMode==="EditUserInfo" || $sPostMode==="AddUser" ) {
 			try {
 				//-- Retrieve the "Phone" --//
 				$sPostGender = $aHTTPData["Gender"];
@@ -320,7 +327,7 @@ if($bError===false) {
 	//-- "Edit User Address" Mode specific parameters   --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="EditUserAddress" ) {
+		if( $sPostMode==="EditUserAddress" || $sPostMode==="AddUser" ) {
 			//----------------------------------------------------//
 			//-- 2.2.2.B - Retrieve User Address Line 1         --//
 			//----------------------------------------------------//
@@ -385,6 +392,7 @@ if($bError===false) {
 				}
 			}
 			
+/*
 			//----------------------------------------------------//
 			//-- 2.2.5.B - Retrieve User Address Line 1         --//
 			//----------------------------------------------------//
@@ -438,17 +446,18 @@ if($bError===false) {
 					if( $sPostAddressPostalLine3===false ) {
 						$bError = true;
 						$sErrMesg .= "Error Code:'0127' \n";
-						$sErrMesg .= "Non numeric \"AddressLine3\" parameter! \n";
-						$sErrMesg .= "Please use a valid \"AddressLine3\" parameter\n";
+						$sErrMesg .= "Non numeric \"AddressPostalLine3\" parameter! \n";
+						$sErrMesg .= "Please use a valid \"AddressPostalLine3\" parameter\n";
 					}
 				} catch( Exception $e0128 ) {
 					$bError = true;
 					$sErrMesg .= "Error Code:'0128' \n";
-					$sErrMesg .= "Incorrect \"AddressLine3\" parameter!\n";
-					$sErrMesg .= "Please use a valid \"AddressLine3\" parameter\n";
+					$sErrMesg .= "Incorrect \"AddressPostalLine3\" parameter!\n";
+					$sErrMesg .= "Please use a valid \"AddressPostalLine3\" parameter\n";
 				}
 			}
-			
+*/
+
 			//----------------------------------------------------//
 			//-- 2.2.8.B - Retrieve User Address Country        --//
 			//----------------------------------------------------//
@@ -589,7 +598,7 @@ if($bError===false) {
 	//-- 2.2.3.C - Retrieve User Info "NewPassword"     --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="EditPassword" ) {
+		if( $sPostMode==="EditPassword" || $sPostMode==="AddUser" ) {
 			try {
 				//-- Retrieve the "NewPassword" --//
 				$sPostNewPassword = $aHTTPData["NewPassword"];
@@ -606,6 +615,80 @@ if($bError===false) {
 				$sErrMesg .= "Incorrect \"NewPassword\" parameter!\n";
 				$sErrMesg .= "Please use a valid \"NewPassword\" parameter\n";
 			}
+		}
+	}
+
+	//----------------------------------------------------//
+	//-- 2.2.3.D - Retrieve User "Username"             --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		if( $sPostMode==="AddUser" ) {
+			try {
+				//-- Retrieve the "Username" --//
+				$sPostUsername = $aHTTPData["Username"];
+				
+				if( $sPostUsername===false ) {
+					$bError = true;
+					$sErrMesg .= "Error Code:'0141' \n";
+					$sErrMesg .= "Invalid \"Username\" parameter! \n";
+					$sErrMesg .= "Please use a valid \"Username\" parameter\n";
+				}
+			} catch( Exception $e0142 ) {
+				$bError = true;
+				$sErrMesg .= "Error Code:'0142' \n";
+				$sErrMesg .= "Incorrect \"Username\" parameter!\n";
+				$sErrMesg .= "Please use a valid \"Username\" parameter\n";
+			}
+		}
+	}
+}
+
+//====================================================================//
+//== 3.0 - PREPARATION                                              ==//
+//====================================================================//
+if( $bError===false ) {
+	//----------------------------------------//
+	//-- If Mode is Add User                --//
+	//----------------------------------------//
+	if( $sPostMode==="AddUser" ) {
+		try {
+			//-- Check if the User has Add User Permissions --//
+			$aUserServerPermissions = GetUserServerPermissions();
+			
+			//-- Check for errors --//
+			if( $aUserServerPermissions['Error']===false ) {
+				//-- Check if the variable is set --//
+				if( isset($aUserServerPermissions['Data']['PermServerAddUser']) ) {
+					if( $aUserServerPermissions['Data']['PermServerAddUser']!==1 ) {
+						//-- ERROR: User doesn't have permission --//
+						$bError    = false;
+						$sErrMesg .= "Error Code:'4301' \n";
+						$sErrMesg .= "Problem adding a new user!\n";
+						$sErrMesg .= "The user doesn't seem to have permission to add new users.\n";
+					}
+					
+				} else {
+					//-- ERROR: Can not see the correct permission --//
+					$bError    = false;
+					$sErrMesg .= "Error Code:'4302' \n";
+					$sErrMesg .= "Problem adding a new user!\n";
+					$sErrMesg .= "Unexpected error when looking up the current user's permissions to add new users.\n";
+				}
+			} else {
+				//-- ERROR:  --//
+				$bError    = false;
+				$sErrMesg .= "Error Code:'4303' \n";
+				$sErrMesg .= "Problem adding a new user!\n";
+				$sErrMesg .= "Problem looking up the current user's server permissions.\n";
+				$sErrMesg .= $aUserServerPermissions['ErrMesg'];
+			}
+		
+		} catch( Exception $e4300 ) {
+			//-- CRITICAL ERROR --//
+			$bError    = false;
+			$sErrMesg .= "Error Code:'4300' \n";
+			$sErrMesg .= "Problem adding a new user!\n";
+			$sErrMesg .= "Critical error has occurred when looking up the current user's password.\n";
 		}
 	}
 }
@@ -642,7 +725,7 @@ if( $bError===false ) {
 					if( $aUserInfo["Data"]["UserInfoId"]>=1 ) {
 						
 						//-- Change the Name of the Gateway --//
-						$aResult = ChangeUserInfo( $aUserInfo["Data"]["UserInfoId"], $sPostGender, $sPostTitle, $sPostGivennames, $sPostSurname, $sPostDisplayname, $sPostEmail, $sPostPhonenumber );
+						$aResult = ChangeUserInfo( $aUserInfo["Data"]["UserInfoId"], $sPostGender, $sPostTitle, $sPostGivennames, $sPostSurname, $sPostDisplayname, $sPostEmail, $sPostPhoneNumber );
 						
 						//-- Check for caught Errors --//
 						if( $aResult["Error"]===true ) {
@@ -704,7 +787,7 @@ if( $bError===false ) {
 					if( $aUserInfo["Data"]["UserAddressId"]>=1 ) {
 						
 						//-- If the Password matches then its fine to swap to the new password --//
-						$aResult = ChangeUserAddress( $aUserInfo["Data"]["UserAddressId"], $sPostAddressLine1, $sPostAddressLine2, $sPostAddressLine3, $sPostAddressPostalLine1, $sPostAddressPostalLine2, $sPostAddressPostalLine3, $sPostAddressCountry, $sPostAddressStateProvince, $sPostAddressPostcode, $sPostAddressTimezone, $sPostAddressLanguage);
+						$aResult = ChangeUserAddress( $aUserInfo["Data"]["UserAddressId"], $sPostAddressLine1, $sPostAddressLine2, $sPostAddressLine3, $sPostAddressCountry, $sPostAddressStateProvince, $sPostAddressPostcode, $sPostAddressTimezone, $sPostAddressLanguage);
 						
 						//-- Check for caught Errors --//
 						if( $aResult["Error"]===true ) {
@@ -721,6 +804,7 @@ if( $bError===false ) {
 							//$iUserLogId		= 13;
 							//$iUserId			= $aUserInfo["Data"]["UserId"];
 							//$sLogCustom1		= $aUserInfo["Data"][""];
+							
 						}
 						
 						
@@ -773,7 +857,7 @@ if( $bError===false ) {
 							//echo "-----------<br />\n";
 							//var_dump( $oRestrictedDB->QueryLogs );
 							//echo "-----------<br />\n";
-	
+							
 							//-- Check for caught Errors --//
 							if( $aResult["Error"]===true ) {
 								$bError = true;
@@ -796,7 +880,7 @@ if( $bError===false ) {
 							$bError = true;
 							$sErrMesg .= "Error Code:'3403' \n";
 							$sErrMesg .= "Internal API Error! \n";
-							$sErrMesg .= "Current Password doesn't match what is currently being used!\n";
+							$sErrMesg .= "Current Password doesn't match what is currently being used! \n";
 						}
 						
 					} else {
@@ -814,12 +898,146 @@ if( $bError===false ) {
 				$sErrMesg .= $e1300->getMessage();
 			}
 			
+			
+		//================================================================//
+		//== 5.4 - MODE: Add New User                                   ==//
+		//================================================================//
+		} else if( $sPostMode==="AddNewUser" ) {
+			try {
+				//----------------------------------------//
+				//-- Begin the Transaction              --//
+				//----------------------------------------//
+				$bTransactionStarted = $oRestrictedDB->dbBeginTransaction();
+				
+				if( $bTransactionStarted===false ) {
+					$bError    = true;
+					$iErrCode  = 16;
+					$sErrMesg .= "Error Code:'0016' \n";
+					$sErrMesg .= "Database Error! \n";
+					$sErrMesg .= "Problem when trying to start the transaction! \n";
+				}
+				
+				//----------------------------------------//
+				//-- Add UserInfo                       --//
+				//----------------------------------------//
+				
+				//-- TODO: Merge the InsertUserInfo, InsertUser, 
+				
+				
+				if( $bError===false ) {
+					//-- Add the user Info --//
+					$aUserInfoResult = InsertUserInfo( $iPostGender, $sPostTitle, $sPostGivennames, $sPostSurname, $sPostDisplayname, $sPostEmail, $sPostPhoneNumber, $sDoB );
+					
+					//-- IF No errors have occurred then extract the UserInfoId --//
+					if( $aUserInfoResult['Error']===false ) {
+						
+						$iUserInfoId = $aUserInfoResult['Data']['LastId'];
+						
+					} else {
+						$bError    = true;
+						$iErrCode  = 0;
+						$sErrMesg .= "Error Code:'????' \n";
+						$sErrMesg .= $aUserInfoResult['Data'];
+					}
+				}
+				
+				//----------------------------------------//
+				//-- Add User                           --//
+				//----------------------------------------//
+				if( $bError===false ) {
+					
+					$aUserResult = InsertUser( $iUserInfoId, $sUsername, 1 );
+					
+					//-- IF No errors have occurred then extract the UserId --//
+					if( $aUserResult['Error']===false ) {
+						$iUserId = $aUserResult['Data']['LastId'];
+						
+					//-- ELSE Error --//
+					} else {
+						$bError    = true;
+						$iErrCode  = 0;
+						$sErrMesg .= "Error Code:'????' \n";
+						$sErrMesg .= $aUserResult['Data'];
+					}
+				}
+				
+				//----------------------------------------//
+				//-- Add User Address                   --//
+				//----------------------------------------//
+				if( $bError===false ) {
+					
+					$aUserAddressResult = InsertUserAddress( $iUserId, $iLanguageId, $iCountriesId, $iStateProvinceId, $iPostcodeId, $iTimezoneId, $sLine1, $sLine2, $sLine3 );
+					
+					//-- IF No errors have occurred then extract the UserId --//
+					if( $aUserAddressResult['Error']===false ) {
+						$iUserAddressId = $aUserAddressResult['Data']['LastId'];
+						
+					//-- ELSE Error --//
+					} else {
+						$bError    = true;
+						$iErrCode  = 0;
+						$sErrMesg .= "Error Code:'????' \n";
+						$sErrMesg .= $aUserAddressResult['Data'];
+					}
+				}
+				
+				//----------------------------------------//
+				//-- Create Database User               --//
+				//----------------------------------------//
+				if( $bError===false ) {
+					
+					$aDatabaseUserResult = CreateDatabaseUser( $sMasterUsername, $sMasterPassword, $sNewUsername, $sNewPassword, $sLocation );
+					
+					//-- IF No errors have occurred then extract the UserId --//
+					if( $aDatabaseUserResult['Error']===false ) {
+						$iUserAddressId = $aDatabaseUserResult['Data']['LastId'];
+						
+					//-- ELSE Error --//
+					} else {
+						$bError    = true;
+						$iErrCode  = 0;
+						$sErrMesg .= "Error Code:'????' \n";
+						$sErrMesg .= $aDatabaseUserResult['Data'];
+					}
+				}
+				
+				//----------------------------------------//
+				//-- Commit or rollback the Changes     --//
+				//----------------------------------------//
+				if( $bTransactionStarted===true ) {
+					if( $bError===false ) {
+						//----------------//
+						//-- COMMIT     --//
+						//----------------//
+						$oRestrictedDB->dbEndTransaction();
+						
+					} else {
+						//----------------//
+						//-- ROLLBACK   --//
+						//----------------//
+						$oRestrictedDB->dbRollback();
+						
+					}
+				}
+				
+				
+				
+				
+			} catch( Exception $e1300 ) {
+				//-- Display an Error Message --//
+				$bError    = true;
+				$sErrMesg .= "Error Code:'3400' \n";
+				$sErrMesg .= $e1300->getMessage();
+			}
+			
+			
 		//================================================================//
 		//== Unsupported Mode                                           ==//
 		//================================================================//
 		} else {
 			$bError = true;
 			$sErrMesg .= "Error Code:'0401' \n";
+			$sErrMesg .= "Unsupported Mode! \n";
 		}
 		
 	} catch( Exception $e0400 ) {
@@ -895,7 +1113,7 @@ if( $bError===false && $aResult!=false ) {
 		//-- Error Message is blank --//
 		$sOutput  = "Error Code:'0004'!\n Critical Error has occured!";
 	}
-
+	
 	try {
 		//-- Text Error Message --//
 		echo $sOutput;	

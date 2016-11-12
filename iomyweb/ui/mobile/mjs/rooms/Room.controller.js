@@ -234,7 +234,8 @@ sap.ui.controller("mjs.rooms.Room", {
                             "LinkId":           aDevice.LinkId,
 							"PermToggle":		aDevice.PermToggle,
 							"IOs":              aDevice.IO,
-							"RoomId":			aDevice.RoomId
+							"RoomId":			aDevice.RoomId,
+                            "PremiseId":		aDevice.PremiseId
 						});
 					}
 				});

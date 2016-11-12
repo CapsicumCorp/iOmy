@@ -174,6 +174,9 @@ function NonDataViewName($sViewType) {
 	if( $sViewType==="Users" ) {
 		$aResult = array( "Error"=>false, "View"=>"VR_USERSINFO" );
 		
+	} else if( $sViewType==="UserServerPerms" ) {
+		$aResult = array( "Error"=>false, "View"=>"VR_USERSSERVERPERMS" );
+		
 	} else if( $sViewType==="Premises" ) {
 		$aResult = array( "Error"=>false, "View"=>"VR_USERSPREMISES" );
 		
@@ -224,7 +227,7 @@ function NonDataViewName($sViewType) {
 }
 
 
-function getCurrentSchema() {
+function dbGetCurrentSchema() {
 	global$oRestrictedDB;
 	
 	$sResult = $oRestrictedDB->DataSchema;
@@ -437,7 +440,7 @@ function dbGetPremiseLogsBetweenUTS( $iPremiseId, $iStartstamp, $iEndstamp) {
 
 function dbGetCurrentUserDetails() {
 	//----------------------------------------//
-	//-- 1.0 - Declare Variables			--//
+	//-- 1.0 - Declare Variables            --//
 	//----------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
@@ -536,9 +539,9 @@ function dbGetCurrentUserInfo() {
 				$sSQL .= "	`USERADDRESS_LINE1`, ";
 				$sSQL .= "	`USERADDRESS_LINE2`, ";
 				$sSQL .= "	`USERADDRESS_LINE3`, ";
-				$sSQL .= "	`USERADDRESS_POSTALLINE1`, ";
-				$sSQL .= "	`USERADDRESS_POSTALLINE2`, ";
-				$sSQL .= "	`USERADDRESS_POSTALLINE3`, ";
+//				$sSQL .= "	`USERADDRESS_POSTALLINE1`, ";
+//				$sSQL .= "	`USERADDRESS_POSTALLINE2`, ";
+//				$sSQL .= "	`USERADDRESS_POSTALLINE3`, ";
 				$sSQL .= "	`COUNTRIES_PK`, ";
 				$sSQL .= "	`COUNTRIES_NAME`, ";
 				$sSQL .= "	`COUNTRIES_ABREVIATION`, ";
@@ -579,9 +582,9 @@ function dbGetCurrentUserInfo() {
 					array( "Name"=>"UserAddressLine1",					"type"=>"STR" ),
 					array( "Name"=>"UserAddressLine2",					"type"=>"STR" ),
 					array( "Name"=>"UserAddressLine3",					"type"=>"STR" ),
-					array( "Name"=>"UserAddressPostalLine1",			"type"=>"STR" ),
-					array( "Name"=>"UserAddressPostalLine2",			"type"=>"STR" ),
-					array( "Name"=>"UserAddressPostalLine3",			"type"=>"STR" ),
+//					array( "Name"=>"UserAddressPostalLine1",			"type"=>"STR" ),
+//					array( "Name"=>"UserAddressPostalLine2",			"type"=>"STR" ),
+//					array( "Name"=>"UserAddressPostalLine3",			"type"=>"STR" ),
 					array( "Name"=>"UserAddressCountryId",				"type"=>"INT" ),
 					array( "Name"=>"UserAddressCountryName",			"type"=>"STR" ),
 					array( "Name"=>"UserAddressCountryAbrv",			"type"=>"STR" ),
@@ -652,7 +655,7 @@ function dbGetCurrentUserInfo() {
 
 function dbChangeUserInformation( $iUserInfoId, $iGender, $sTitle, $sGivenames, $sSurnames, $sDisplayname, $sEmail, $sPhoneNumber ) {
 	//--------------------------------------------//
-	//-- 1.0 - Declare Variables				--//
+	//-- 1.0 - Declare Variables                --//
 	//--------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
@@ -668,7 +671,7 @@ function dbChangeUserInformation( $iUserInfoId, $iGender, $sTitle, $sGivenames, 
 	
 	
 	//--------------------------------------------//
-	//-- 2.0 - SQL Query						--//
+	//-- 2.0 - SQL Query                        --//
 	//--------------------------------------------//
 	if( $bError===false ) {
 		try {
@@ -728,7 +731,7 @@ function dbChangeUserInformation( $iUserInfoId, $iGender, $sTitle, $sGivenames, 
 }
 
 
-function dbChangeUserAddress( $iUserAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressPostalLine1, $sAddressPostalLine2, $sAddressPostalLine3, $sAddressCountry, $sAddressStateProvince, $sAddressPostcode, $sAddressTimezone, $sAddressLanguage ) {
+function dbChangeUserAddress( $iUserAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressCountry, $sAddressStateProvince, $sAddressPostcode, $sAddressTimezone, $sAddressLanguage ) {
 	//--------------------------------------------//
 	//-- 1.0 - Declare Variables				--//
 	//--------------------------------------------//
@@ -754,9 +757,9 @@ function dbChangeUserAddress( $iUserAddressId, $sAddressLine1, $sAddressLine2, $
 			$sSQL .= "	`USERADDRESS_LINE1`				= :AddressLine1, ";
 			$sSQL .= "	`USERADDRESS_LINE2`				= :AddressLine2, ";
 			$sSQL .= "	`USERADDRESS_LINE3`				= :AddressLine3, ";
-			$sSQL .= "	`USERADDRESS_POSTALLINE1`		= :AddressPostalLine1, ";
-			$sSQL .= "	`USERADDRESS_POSTALLINE2`		= :AddressPostalLine2, ";
-			$sSQL .= "	`USERADDRESS_POSTALLINE3`		= :AddressPostalLine3, ";
+			//$sSQL .= "	`USERADDRESS_POSTALLINE1`		= :AddressPostalLine1, ";
+			//$sSQL .= "	`USERADDRESS_POSTALLINE2`		= :AddressPostalLine2, ";
+			//$sSQL .= "	`USERADDRESS_POSTALLINE3`		= :AddressPostalLine3, ";
 			$sSQL .= "	`USERADDRESS_COUNTRIES_FK`		= :AddressCountryId, ";
 			$sSQL .= "	`USERADDRESS_STATEPROVINCE_FK`	= :AddressProvinceId, ";
 			$sSQL .= "	`USERADDRESS_POSTCODE_FK`		= :AddressPostcodeId, ";
@@ -768,9 +771,9 @@ function dbChangeUserAddress( $iUserAddressId, $sAddressLine1, $sAddressLine2, $
 				array( "Name"=>"AddressLine1",			"type"=>"STR",		"value"=>$sAddressLine1			),
 				array( "Name"=>"AddressLine2",			"type"=>"STR",		"value"=>$sAddressLine2			),
 				array( "Name"=>"AddressLine3",			"type"=>"STR",		"value"=>$sAddressLine3			),
-				array( "Name"=>"AddressPostalLine1",	"type"=>"STR",		"value"=>$sAddressPostalLine1	),
-				array( "Name"=>"AddressPostalLine2",	"type"=>"STR",		"value"=>$sAddressPostalLine2	),
-				array( "Name"=>"AddressPostalLine3",	"type"=>"STR",		"value"=>$sAddressPostalLine3	),
+				//array( "Name"=>"AddressPostalLine1",	"type"=>"STR",		"value"=>$sAddressPostalLine1	),
+				//array( "Name"=>"AddressPostalLine2",	"type"=>"STR",		"value"=>$sAddressPostalLine2	),
+				//array( "Name"=>"AddressPostalLine3",	"type"=>"STR",		"value"=>$sAddressPostalLine3	),
 				array( "Name"=>"AddressCountryId",		"type"=>"INT",		"value"=>$sAddressCountry		),
 				array( "Name"=>"AddressProvinceId",		"type"=>"INT",		"value"=>$sAddressStateProvince	),
 				array( "Name"=>"AddressPostcodeId",		"type"=>"INT",		"value"=>$sAddressPostcode		),
@@ -823,16 +826,16 @@ function dbChangeUserPassword( $sPassword ) {
 	//--------------------------------------------//
 	//-- 1.0 - Declare Variables                --//
 	//--------------------------------------------//
-		
+	
 	//-- 1.1 - Global Variables --//
 	global $oRestrictedDB;
 	
 	//-- 1.2 - Other Varirables --//
-	$aResult			= array();	//-- ARRAY:		--//
-	$sSQL				= "";		//-- STRING:	Used to store the SQL string so it can be passed to the database functions. --//
-	$bError				= false;	//-- BOOL:		--//
-	$sErrMesg			= "";		//-- STRING:	--//
-	$aInputVals			= array();	//-- ARRAY:		--//
+	$aResult            = array();      //-- ARRAY:     --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;        //-- BOOLEAN:   --//
+	$sErrMesg           = "";           //-- STRING:    --//
+	$aInputVals         = array();      //-- ARRAY:     --//
 	
 	
 	//--------------------------------------------//
@@ -897,84 +900,59 @@ function dbGetUserServerPermissions() {
 	$aInputVals         = array();      //-- ARRAY:     --//
 	
 	
-	$sCurrentSchema     = getCurrentSchema();
+	$sCurrentSchema     = dbGetCurrentSchema();
 	
 	//----------------------------------------//
 	//-- 3.0 - SQL QUERY                    --//
 	//----------------------------------------//
-	if( $bError===false) {
-		try {
+	try {
+		$aTemporaryView = NonDataViewName("UserServerPerms");
+		
+		if($aTemporaryView["Error"]===true) {
+			//-- If an error has occurred --//
+			$aReturn = array( "Error"=>true, "ErrMesg"=>"Unsupported View" );
+			
+			//-- Return the Result --//
+			return $aReturn;
+			
+		} else {
+			//-- store the view --//
+			$sView = $aTemporaryView["View"]; 
 			
 			$sSQL .= "SELECT ";
 			$sSQL .= "	`USERS_PK`, ";
-			$sSQL .= "	`USERS_STATE`, ";
 			$sSQL .= "	`USERS_USERNAME`, ";
-			$sSQL .= "	`USERADDRESS_PK`, ";
-			$sSQL .= "	`USERADDRESS_LINE1`, ";
-			$sSQL .= "	`USERADDRESS_LINE2`, ";
-			$sSQL .= "	`USERADDRESS_LINE3`, ";
-			$sSQL .= "	`USERADDRESS_POSTALLINE1`, ";
-			$sSQL .= "	`USERADDRESS_POSTALLINE2`, ";
-
+			$sSQL .= "	`PERMSERVER_PK`, ";
+			$sSQL .= "	`PERMSERVER_ADDUSER`, ";
+			$sSQL .= "	`PERMSERVER_ADDPREMISEHUB`, ";
+			$sSQL .= "	`PERMSERVER_UPGRADE` ";
 			$sSQL .= "FROM `".$sView."` ";
-			$sSQL .= "LEFT JOIN `PERMSERVER` ON `USERS_PK` = `PERMSERVER_USERS_FK` ";
 			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') ";
-				
+			$sSQL .= "LIMIT 1";
+			
 			$aInputVals = array();
-				
+			
 			$aOutputCols = array(
-				array( "Name"=>"UserId",							"type"=>"INT" ),
-				array( "Name"=>"UserState",							"type"=>"STR" ),
-				array( "Name"=>"Username",							"type"=>"STR" ),
-				array( "Name"=>"UserAddressId",						"type"=>"STR" ),
-				array( "Name"=>"UserAddressLine1",					"type"=>"STR" ),
-				array( "Name"=>"UserAddressLine2",					"type"=>"STR" ),
-				array( "Name"=>"UserAddressLine3",					"type"=>"STR" ),
-				array( "Name"=>"UserAddressPostalLine1",			"type"=>"STR" ),
-				array( "Name"=>"UserAddressPostalLine2",			"type"=>"STR" ),
-				array( "Name"=>"UserAddressPostalLine3",			"type"=>"STR" ),
-				array( "Name"=>"UserAddressCountryId",				"type"=>"INT" ),
-				array( "Name"=>"UserAddressCountryName",			"type"=>"STR" ),
-				array( "Name"=>"UserAddressCountryAbrv",			"type"=>"STR" ),
-				array( "Name"=>"UserAddressLanguageId",				"type"=>"INT" ),
-				array( "Name"=>"UserAddressLanguageName",			"type"=>"STR" ),
-				array( "Name"=>"UserAddressLanguage",				"type"=>"STR" ),
-				array( "Name"=>"UserAddressLanguageVariant",		"type"=>"STR" ),
-				array( "Name"=>"UserAddressLanguageEncoding",		"type"=>"STR" ),
-				array( "Name"=>"UserAddressPostcodeId",				"type"=>"INT" ),
-				array( "Name"=>"UserAddressPostcodeName",			"type"=>"STR" ),
-				array( "Name"=>"UserAddressStateProvinceId",		"type"=>"INT" ),
-				array( "Name"=>"UserAddressStateProvinceShort",		"type"=>"STR" ),
-				array( "Name"=>"UserAddressStateProvinceName",		"type"=>"STR" ),
-				array( "Name"=>"UserAddressTimezoneId",				"type"=>"INT" ),
-				array( "Name"=>"UserAddressTimezoneCC",				"type"=>"STR" ),
-				array( "Name"=>"UserAddressTimezoneLatitude",		"type"=>"STR" ),
-				array( "Name"=>"UserAddressTimezoneLongitude",		"type"=>"STR" ),
-				array( "Name"=>"UserAddressTimezoneTZ",				"type"=>"STR" ),
-				array( "Name"=>"UserInfoId",						"type"=>"INT" ),
-				array( "Name"=>"UserInfoTitle",						"type"=>"STR" ),
-				array( "Name"=>"UserInfoGivennames",				"type"=>"STR" ),
-				array( "Name"=>"UserInfoSurnames",					"type"=>"STR" ),
-				array( "Name"=>"UserInfoDisplayname",				"type"=>"STR" ),
-				array( "Name"=>"UserInfoEmail",						"type"=>"STR" ),
-				array( "Name"=>"UserInfoPhonenumber",				"type"=>"STR" ),
-				array( "Name"=>"UserInfoDoB",						"type"=>"STR" ),
-				array( "Name"=>"UserInfoGenderId",					"type"=>"INT" ),
-				array( "Name"=>"UserInfoGenderName",				"type"=>"STR" )
+				array( "Name"=>"UserId",                        "type"=>"INT" ),
+				array( "Name"=>"Username",                      "type"=>"STR" ),
+				array( "Name"=>"PermServerId",                  "type"=>"INT" ),
+				array( "Name"=>"PermServerAddUser",             "type"=>"INT" ),
+				array( "Name"=>"PermServerAddPremiseHub",       "type"=>"INT" ),
+				array( "Name"=>"PermServerUpgrade",             "type"=>"INT" )
 			);
-				
+			
+			
 			//----------------------------------------------//
-			//-- 
+			//-- Execute the SQL Query                    --//
 			//----------------------------------------------//
 			$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
-				
 			
-		} catch( Exception $e2 ) {
-			$bError   = true;
-			$sErrMesg = $e2->getMessage();
+			
 		}
+	} catch( Exception $e2 ) {
+		$bError   = true;
+		$sErrMesg = $e2->getMessage();
 	}
-	
 	
 	
 	
@@ -998,15 +976,380 @@ function dbGetUserServerPermissions() {
 	if($bError===false) {
 		$aReturn = array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
-		$aReturn = array( "Error"=>true, "ErrMesg"=>"UserAddressInfo: ".$sErrMesg );
+		$aReturn = array( "Error"=>true, "ErrMesg"=>"UserServerPerms: ".$sErrMesg );
 	}
 	return $aReturn;
 }
 
 
 
+function dbInsertUserInfo( $iGenderId, $sTitle, $sGivennames, $sSurnames, $sDisplayname, $sEmail, $sPhoneNumber, $sDoB ) {
+	//------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                       --//
+	//--    This function is used to add the UserInfo to the database.      --//
+	//------------------------------------------------------------------------//
+	
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedDB;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught. --//
+	$aInputValsInsert   = array();      //-- ARRAY:     SQL bind input parameters. --//
+	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function. --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			$sDBName = dbGetCurrentSchema();
+			
+			//----------------------------------------//
+			//-- SQL Query - Create Default Data    --//
+			//----------------------------------------//
+			$sSQL .= "INSERT INTO `".$sDBName."`.`USERSINFO` (";
+			$sSQL .= "    `USERSINFO_USERSGENDER_FK`,      `USERSINFO_TITLE`, ";
+			$sSQL .= "    `USERSINFO_GIVENNAMES`,          `USERSINFO_SURNAMES`, ";
+			$sSQL .= "    `USERSINFO_DISPLAYNAME`,         `USERSINFO_EMAIL`, ";
+			$sSQL .= "    `USERSINFO_PHONENUMBER`,         `USERSINFO_DOB` ";
+			$sSQL .= ") VALUES ( ";
+			$sSQL .= "    :GenderId,        :Title, ";
+			$sSQL .= "    :Givennames,      :Surnames, ";
+			$sSQL .= "    :Displayname,     :Email, ";
+			$sSQL .= "    :PhoneNumber,     :DoB ";
+			$sSQL .= ") ";
+			
+			
+			//-- Input binding --//
+			$aInputValsInsert = array(
+				array( "Name"=>"GenderId",          "type"=>"INT",          "value"=>$iGenderId             ),
+				array( "Name"=>"Title",             "type"=>"STR",          "value"=>$sTitle                ),
+				array( "Name"=>"Givennames",        "type"=>"STR",          "value"=>$sGivennames           ),
+				array( "Name"=>"Surnames",          "type"=>"STR",          "value"=>$sSurnames             ),
+				array( "Name"=>"Displayname",       "type"=>"STR",          "value"=>$sDisplayname          ),
+				array( "Name"=>"Email",             "type"=>"STR",          "value"=>$sEmail                ),
+				array( "Name"=>"PhoneNumber",       "type"=>"INT",          "value"=>$sPhoneNumber          ),
+				array( "Name"=>"DoB",               "type"=>"STR",          "value"=>$sDoB                  )
+			);
+			
+			//-- Run the SQL Query and save the results --//
+			$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResultInsert["Error"]===true ) {
+				$bError    = true;
+				$sErrMesg .= $aResultInsert["ErrMesg"];
+			}
+		} catch( Exception $e3) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return $aResultInsert;
+		
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"InsertUserInfo: ".$sErrMesg );
+	}
+}
 
 
+function dbInsertUser( $iUserInfoId, $sUsername, $iUserState ) {
+	//------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                       --//
+	//--    This function is used to add the new User to the database.      --//
+	//------------------------------------------------------------------------//
+	
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedDB;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught. --//
+	$aInputValsInsert   = array();      //-- ARRAY:     SQL bind input parameters. --//
+	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function. --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			$sDBName = dbGetCurrentSchema();
+			
+			//----------------------------------------//
+			//-- SQL Query - Create Default Data    --//
+			//----------------------------------------//
+			$sSQL .= "INSERT INTO `".$sDBName."`.`USERS` ( ";
+			$sSQL .= "    `USERS_USERSINFO_FK`, `USERS_USERNAME`, `USERS_STATE` ";
+			$sSQL .= ") VALUES (";
+			$sSQL .= "    :UserInfo,    :Username,      :UserState ";
+			$sSQL .= ") ";
+			
+			//-- Input binding --//
+			$aInputValsInsert = array(
+				array( "Name"=>"UserInfo",          "type"=>"INT",          "value"=>$iUserInfoId             ),
+				array( "Name"=>"Username",          "type"=>"STR",          "value"=>$sUsername               ),
+				array( "Name"=>"UserState",         "type"=>"INT",          "value"=>$iUserState              )
+			);
+			
+			//-- Run the SQL Query and save the results --//
+			$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResultInsert["Error"]===true ) {
+				$bError    = true;
+				$sErrMesg .= $aResultInsert["ErrMesg"];
+			}
+		} catch( Exception $e3) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return $aResultInsert;
+		
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"InsertUser: ".$sErrMesg );
+	}
+}
+
+function dbInsertUserAddress( $iUserId, $iLanguageId, $iCountriesId, $iStateProvinceId, $iPostcodeId, $iTimezoneId, $sLine1, $sLine2, $sLine3 ) {
+	//------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                       --//
+	//--    This function is used to add the new User to the database.      --//
+	//------------------------------------------------------------------------//
+	
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedDB;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught. --//
+	$aInputValsInsert   = array();      //-- ARRAY:     SQL bind input parameters. --//
+	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function. --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			$sDBName = dbGetCurrentSchema();
+			
+			//----------------------------------------//
+			//-- SQL Query - Create Default Data    --//
+			//----------------------------------------//
+			$sSQL .= "INSERT INTO `".$sDBName."`.`USERADDRESS` ( ";
+			$sSQL .= "    `USERADDRESS_USERS_FK`,           `USERADDRESS_LANGUAGE_FK`, ";
+			$sSQL .= "    `USERADDRESS_COUNTRIES_FK`,       `USERADDRESS_STATEPROVINCE_FK`, ";
+			$sSQL .= "    `USERADDRESS_POSTCODE_FK`,        `USERADDRESS_TIMEZONE_FK`, ";
+			$sSQL .= "    `USERADDRESS_LINE1`,              `USERADDRESS_LINE2`, ";
+			$sSQL .= "    `USERADDRESS_LINE3` ";
+			$sSQL .= ") VALUES ( ";
+			$sSQL .= "    :UserId,          :LanguageId, ";
+			$sSQL .= "    :CountriesId,     :StateProvinceId, ";
+			$sSQL .= "    :PostcodeId,      :TimezoneId, ";
+			$sSQL .= "    :Line1,           :Line2, ";
+			$sSQL .= "    :Line3 ";
+			$sSQL .= ") ";
+			
+			//-- Input binding --//
+			$aInputValsInsert = array(
+				array( "Name"=>"UserId",            "type"=>"INT",          "value"=>$iUserId                 ),
+				array( "Name"=>"LanguageId",        "type"=>"INT",          "value"=>$iLanguageId             ),
+				array( "Name"=>"CountriesId",       "type"=>"INT",          "value"=>$iCountriesId            ),
+				array( "Name"=>"StateProvinceId",   "type"=>"INT",          "value"=>$iStateProvinceId        ),
+				array( "Name"=>"PostcodeId",        "type"=>"INT",          "value"=>$iPostcodeId             ),
+				array( "Name"=>"TimezoneId",        "type"=>"INT",          "value"=>$iTimezoneId             ),
+				array( "Name"=>"Line1",             "type"=>"STR",          "value"=>$sLine1                  ),
+				array( "Name"=>"Line2",             "type"=>"STR",          "value"=>$sLine2                  ),
+				array( "Name"=>"Line3",             "type"=>"STR",          "value"=>$sLine3                  )
+			);
+			
+			//-- Run the SQL Query and save the results --//
+			$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResultInsert["Error"]===true ) {
+				$bError    = true;
+				$sErrMesg .= $aResultInsert["ErrMesg"];
+			}
+		} catch( Exception $e3) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return $aResultInsert;
+		
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"InsertUserAddress: ".$sErrMesg );
+	}
+}
+
+
+function dbCreateDatabaseUser( $sUsername, $sPassword, $sLocation ) {
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+		
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedDB;
+	
+	//-- 1.2 - Other Varirables --//
+	$aResult        = array();
+	$aReturn        = array();
+	$sSQL1          = "";
+	$sSQL2          = "";
+	$bError         = false;
+	$sErrMesg       = "";
+	
+	//----------------------------------------------------//
+	//-- 3.0 - Fetch all users with that name           --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			$sDBName = dbGetCurrentSchema();
+			
+			
+			$aConfigArray = array(
+				'mode'       => 'EncryptedSession',
+				'type'       => 'MySQL',
+				'uri'        => 'mysql:host=devserver.capsicumcorp.com;port=3306;',
+				'charset'    => 'utf8',
+				'schema'     => 'ctm02',
+				'logschema'  => 'ctm02',
+				'viewschema' => 'ctm02'
+			);
+			
+			if( $oRestrictedDB->Initialised===true ) {
+			
+			
+				//----------------------------//
+				//-- CREATE THE USER        --//
+				//----------------------------//
+				$sSQL1 .= "CREATE USER '".$sUsername."'@'".$sLocation."' IDENTIFIED BY :Password;  ";
+				
+				//-- Input binding --//
+				$aInputValsInsert = array(
+					array( "Name"=>"Password",          "type"=>"STR",          "value"=>$sPassword             )
+				);
+				
+				//-- Run the SQL Query and save the results --//
+				$aResultInsert = $oRestrictedDB->InputBindNonCommittedCreateQuery( $sSQL1, $aInputValsInsert );
+				
+				
+				if( $aResultInsert["Error"]===true ) {
+					$bError    = true;
+					$sErrMesg .= $aResultInsert["ErrMesg"];
+				}
+				
+				if( $bError===false ) {
+					//------------------------------------------//
+					//-- SET THE DATABASE USER PERMISSIONS    --//
+					//------------------------------------------//
+					$sSQL2 .= "GRANT SELECT ON `".$sDBName."`.* TO '".$sUsername."'@'".$sLocation."'; ";
+					$sSQL2 .= "GRANT UPDATE ON `".$sDBName."`.* TO '".$sUsername."'@'".$sLocation."'; ";
+					$sSQL2 .= "GRANT INSERT ON `".$sDBName."`.* TO '".$sUsername."'@'".$sLocation."'; ";
+					$sSQL2 .= "GRANT DELETE ON `".$sDBName."`.* TO '".$sUsername."'@'".$sLocation."'; ";
+					$sSQL2 .= "GRANT EXECUTE ON `".$sDBName."`.* TO '".$sUsername."'@'".$sLocation."'; ";
+					$sSQL2 .= "GRANT SHOW VIEW ON `".$sDBName."`.* TO '".$sUsername."'@'".$sLocation."'; ";
+					
+					
+					$aResult = $oRestrictedDB->NonCommittedCreateQuery( $sSQL2 );
+					
+					if( $aResult["Error"]===true ) {
+						$bError    = true;
+						$sErrMesg .= $aResult["ErrMesg"];
+					}
+				}
+			}
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true ) {
+				$bError    = true;
+				$sErrMesg .= $aResult["ErrMesg"];
+			}
+		} catch( Exception $e3) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return $aResultInsert;
+		
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"CreateDatabaseUser: ".$sErrMesg );
+	}
+}
 
 //========================================================================================================================//
 //== #5.0# - Premise Functions                                                                                          ==//
@@ -1136,18 +1479,18 @@ function dbGetPremisesAddressFromPremiseId( $iPremiseId ) {
 	global $oRestrictedDB;
 	
 	//-- 1.2 - Other Varirables --//
-	$aResult			= array();		//-- ARRAY:		--//
-	$sSQL				= "";			//-- STRING:	Used to store the SQL string so it can be passed to the database functions. --//
-	$bError				= false;		//-- BOOLEAN:		--//
-	$sErrMesg			= "";			//-- STRING:		--//
-	$sView				= "";			//-- STRING:		--//
+	$aResult            = array();      //-- ARRAY:         --//
+	$sSQL               = "";           //-- STRING:        Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;        //-- BOOLEAN:       --//
+	$sErrMesg           = "";           //-- STRING:        --//
+	$sView              = "";           //-- STRING:        --//
 	
-	$aTemporaryView		= array();		//-- ARRAY:		A array to store information about which view to use like the viewname and columns. --//
-	$aInputVals			= array();		//-- ARRAY:		SQL bind input parameters --//
-	$aOutputCols		= array();		//-- ARRAY:		An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	$aTemporaryView     = array();      //-- ARRAY:     A array to store information about which view to use like the viewname and columns. --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
 	
 	//----------------------------------------//
-	//-- 2.0 - SQL Preperation				--//
+	//-- 2.0 - SQL Preperation              --//
 	//----------------------------------------//
 	if( $bError===false) {
 		try {
@@ -2328,7 +2671,7 @@ function dbAddNewHubComm( $iCommHubId, $iCommTypeId, $sCommName, $sCommAddress, 
 	if($bError===false) {
 		try {
 			//-- Retrieve the Schema name --//
-			$sSchema = getCurrentSchema();
+			$sSchema = dbGetCurrentSchema();
 			
 			//----------------------------------------//
 			//-- SQL Query - Insert Comm            --//
@@ -2426,7 +2769,7 @@ function dbUpdateCommDetails( $iCommId, $iCommTypeId, $sCommName, $sCommAddress 
 	if($bError===false) {
 		try {
 			//-- Retrieve the Schema name --//
-			$sSchema = getCurrentSchema();
+			$sSchema = dbGetCurrentSchema();
 			
 			$sSQL .= "UPDATE `".$sSchema."`.`COMM` ";
 			$sSQL .= "SET ";
@@ -2860,7 +3203,7 @@ function dbChangeLinkRoom( $iLinkId, $iRoomId ) {
 	if($bError===false) {
 		try {
 			//-- Retrieve the Schema name --//
-			$sSchema = getCurrentSchema();
+			$sSchema = dbGetCurrentSchema();
 
 			$sSQL .= "UPDATE `LINK` ";
 			$sSQL .= "SET `LINK_ROOMS_FK` = :RoomId ";
@@ -3103,7 +3446,7 @@ function dbChangeLinkState( $iLinkId, $iNewState ) {
 	if($bError===false) {
 		try {
 			//-- Retrieve the Schema name --//
-			$sSchema = getCurrentSchema();
+			$sSchema = dbGetCurrentSchema();
 
 			$sSQL .= "UPDATE `".$sSchema."`.`LINK` ";
 			$sSQL .= "SET `LINK_STATE` = :LinkState ";
@@ -3290,7 +3633,7 @@ function dbAddNewLink( $iCommId, $iLinkTypeId, $iInfoId, $iConnectionId, $sSeria
 	if($bError===false) {
 		try {
 			//-- Retrieve the Schema name --//
-			$sSchema = getCurrentSchema();
+			$sSchema = dbGetCurrentSchema();
 			
 			//----------------------------------------//
 			//-- SQL Query - Insert Link            --//
@@ -3397,7 +3740,7 @@ function dbAddNewLinkConnectionInfo( $iConnProtocolId, $iConnFrequencyId, $iConn
 	if($bError===false) {
 		try {
 			//-- Retrieve the Schema name --//
-			$sSchema = getCurrentSchema();
+			$sSchema = dbGetCurrentSchema();
 			
 			//----------------------------------------//
 			//-- SQL Query - Insert LinkConn        --//
@@ -3500,7 +3843,7 @@ function dbAddNewLinkInfo( $sLinkInfoName, $sLinkInfoManufacturer, $sLinkInfoMan
 	if($bError===false) {
 		try {
 			//-- Retrieve the Schema name --//
-			$sSchema = getCurrentSchema();
+			$sSchema = dbGetCurrentSchema();
 			
 			//----------------------------------------//
 			//-- SQL Query - Insert LinkInfo        --//
@@ -3594,7 +3937,7 @@ function dbUpdateLinkConnectionInfo( $iConnId, $iConnProtocolId, $iConnFrequency
 	if($bError===false) {
 		try {
 			//-- Retrieve the Schema name --//
-			$sSchema = getCurrentSchema();
+			$sSchema = dbGetCurrentSchema();
 			
 			$sSQL .= "UPDATE `".$sSchema."`.`LINKCONN` ";
 			$sSQL .= "SET ";
@@ -4232,7 +4575,7 @@ function dbChangeThingState( $iThingId, $iNewState ) {
 	if( $bError===false ) {
 		try {
 			//-- Retrieve the Schema name	--//
-			$sSchema = getCurrentSchema();
+			$sSchema = dbGetCurrentSchema();
 			
 			$sSQL .= "UPDATE `".$sSchema."`.`THING` ";
 			$sSQL .= "SET `THING_STATE`= :ThingState ";
@@ -4307,7 +4650,7 @@ function dbAddNewThing( $iLinkId, $iThingTypeId, $iThingHWID, $iThingOutputID, $
 	if($bError===false) {
 		try {
 			//-- Retrieve the Schema name --//
-			$sSchema = getCurrentSchema();
+			$sSchema = dbGetCurrentSchema();
 			
 			//----------------------------------------//
 			//-- SQL Query - Insert THING           --//
@@ -5186,7 +5529,7 @@ function dbAddNewIO( $iThingId, $iRSTypesId, $iUoMId, $iIOTypeId, $iIOState, $fS
 	if($bError===false) {
 		try {
 			//-- Retrieve the Schema name --//
-			$sSchema = getCurrentSchema();
+			$sSchema = dbGetCurrentSchema();
 			
 			//----------------------------------------//
 			//-- SQL Query - Insert IO              --//
@@ -5485,9 +5828,7 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 								"UTS"       => 0
 							)
 						);
-						
 					}
-
 				} else {
 					$bError = true;
 					$sErrMesg = $aResult["ErrMesg"];

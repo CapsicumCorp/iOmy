@@ -80,7 +80,7 @@ $.extend(IOMy.devices.philipshue,{
                         }
                     }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                 ]
-            }).addStyleClass("minwidth150px width60Percent BorderRight")
+            }).addStyleClass((bIsUnassigned ? "minwidth120px" : "minwidth170px")+" width80Percent BorderRight")
         );
 
         aUIObjectItems.push(
@@ -243,7 +243,7 @@ $.extend(IOMy.devices.philipshue,{
                             }
                         }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                     ]
-                }).addStyleClass("BorderRight PadRight3px width80Percent minwidth170px"),
+                }).addStyleClass("BorderRight width80Percent minwidth170px"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
