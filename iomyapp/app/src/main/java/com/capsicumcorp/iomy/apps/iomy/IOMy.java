@@ -52,6 +52,14 @@ public class IOMy extends AppCompatActivity
         iomy.saveState(outState);
     }
 
+    /**
+     * The back functionality should be disabled
+     */
+    @Override
+    public void onBackPressed() {
+        // DO NOTHING
+    }
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,13 +92,7 @@ public class IOMy extends AppCompatActivity
         WebView iomy = (WebView) findViewById(R.id.iomy_view);
         WebSettings iomySettings = iomy.getSettings();
         iomySettings.setJavaScriptEnabled(true);
-        iomy.setWebViewClient(new WebViewClient() {
-            @Override // TODO: Remove this once the local web server can be established on the device.
-            public void onReceivedHttpAuthRequest(WebView view,
-                                                  HttpAuthHandler handler, String host, String realm) {
-                handler.proceed("user", "keyway");
-            }
-        });
+        iomy.setWebViewClient(new WebViewClient() {});
         if (savedInstanceState != null) {
             iomy.restoreState(savedInstanceState);
         } else {

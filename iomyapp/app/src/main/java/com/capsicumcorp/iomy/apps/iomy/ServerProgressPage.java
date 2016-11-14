@@ -50,7 +50,11 @@ public class ServerProgressPage extends ProgressPage {
             application.extractServerServices.setRunServerServices(true);
 
             //Then run the thread that will call onComplete when extract is finished
-            application.extractServerServices.start();
+            try {
+                application.extractServerServices.start();
+            } catch (IllegalThreadStateException itse) {
+                Log.w("WARNING", "Server thread already started. Skipping");
+            }
         }
     }
 }
