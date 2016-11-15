@@ -44,11 +44,19 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
         android:layout_height="wrap_content"
         android:text="Enter the name of the database schema that iOmy will use"/>
 
-    <EditText
-        android:id="@+id/dbSchema"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="IOMY"/>
+        android:layout_height="match_parent"
+        android:id="@+id/db_name_form"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="1" >
+
+        <EditText
+            android:id="@+id/dbSchema"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="IOMY"/>
+    </ScrollView>
 
     <!-- SERVER PORT FIELD -->
 
