@@ -51,8 +51,6 @@ public class iOmyServices extends Service {
 
             //Using this makes Android less likely to kill the service during low ram situation
             startForeground(ONGOING_NOTIFICATION, notification);
-
-            Application.getInstance().onServiceStarted();
         }
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.

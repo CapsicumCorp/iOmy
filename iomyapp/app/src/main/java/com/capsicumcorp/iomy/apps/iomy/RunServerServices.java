@@ -87,6 +87,8 @@ public class RunServerServices extends Thread {
 
     private String dbPassword="";
 
+    private boolean okayToRunServices=false; //Only run when it is confirmed to be okay
+
     RunServerServices(Context context, String SystemDirectory, String StorageFolderName) {
         this.context = context;
         this.SystemDirectory = SystemDirectory;
@@ -143,10 +145,19 @@ public class RunServerServices extends Thread {
         return exitval;
     }
 
+    //Threads can only be started once for a single instance so stay in a loop mostly sleeping
+    //  so can be activated with an interrupt
     @Override
     public void run() {
         //Log.println(Log.INFO, "WebServer", "system directory=" + SystemDirectory + " , internal storage=" + context.getFilesDir().getPath());
         Log.println(Log.INFO, "RunServerServices", "run(): Waiting for extract");
+        while (!getQuit() && !getOkayToRunServices()) {
+            try {
+                Thread.sleep(60000);
+            } catch (InterruptedException e) {
+                Log.println(Log.INFO, "WebServer", "run(): Run Server thread has been interrupted");
+            }
+        }
         while (!getQuit()) {
             //Wait for assets to be extracted
             if (Application.getInstance().extractServerServices.areWebServerAssetsExtracted()) {
@@ -223,6 +234,7 @@ public class RunServerServices extends Thread {
             }
         }
         Log.println(Log.INFO, "WebServer", "run(): Stopping services");
+        stopWatchInputs();
         stopServices();
     }
     public synchronized ProgressPage getProgressPage() {
@@ -255,11 +267,15 @@ public class RunServerServices extends Thread {
         interrupt();
 
         //Wait for the thread to exit
-        try {
-            Log.println(Log.INFO, "WebServer", "stopWebServer(): Waiting for server thread to exit");
-            join();
-        } catch (InterruptedException e) {
-            //Do nothing
+        boolean waiting=true;
+        while (waiting) {
+            try {
+                Log.println(Log.INFO, "WebServer", "stopWebServer(): Waiting for server thread to exit");
+                join();
+                waiting = false;
+            } catch (InterruptedException e) {
+                //Do nothing
+            }
         }
     }
     //Change the state of a service by interrupting the main loop
@@ -550,6 +566,8 @@ public class RunServerServices extends Thread {
         }
         return false;
     }
+    public synchronized void setOkayToRunServices(boolean val) { okayToRunServices=val; interrupt(); }
+    public synchronized boolean getOkayToRunServices() { return okayToRunServices; }
     public synchronized void setQuit(boolean val) {
         quit=val;
     }

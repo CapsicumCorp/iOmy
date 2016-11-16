@@ -78,6 +78,7 @@ public class ExtractServerServices extends Thread {
     public static final String ASSETSVERSIONFILENAME = "webserverassetsversion.txt";
     private final Context context;
 
+    private boolean okayToExtract=false; //Only extract when it is confirmed to be okay
     private boolean isExtracted=false;
     private boolean quit=false;
     private boolean runServerServices=false; //If true the service services will be started by this class after extracting the files
@@ -175,42 +176,81 @@ public class ExtractServerServices extends Thread {
         mNotifyMgr.notify(mNotificationId, mNotification);
 
         // Close the activity
-        progressPage.finish();
+        if (progressPage!=null) {
+            progressPage.finish();
+        }
     }
 
+    //Threads can only be started once for a single instance so stay in a loop mostly sleeping
+    //  so can be activated with an interrupt
     @Override
     public void run() {
-        //Log.println(Log.INFO, "WebServer", "system directory=" + SystemDirectory + " , internal storage=" + context.getFilesDir().getPath());
-        if (!areWebServerAssetsExtracted()) {
-            int upgraderesult=doUpgrade();
-            if (upgraderesult<0) {
-                DoExtractErrorNotification("Upgrade Error", "Failed to upgrade the Web Server files");
-                return;
-            }
-            if (!extractAssets()) {
-                DoExtractErrorNotification("Extract Error", "Failed to extract the Web Server assets");
-                return;
-            }
-        }
-
-        setPermissions();
-        setConfigsFromTemplates();
-
-        Log.println(Log.INFO, "WebServer", "Extract complete");
-
-        if (runServerServices) {
-            Log.println(Log.INFO, "WebServer", "About to run server services");
-            Application.getInstance().runServerServices.interrupt();
-
-            //Only run the server services once per request
-            setRunServerServices(false);
-        } else {
-            progressPage.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    progressPage.onComplete();
+        while (!getQuit()) {
+            while (!getQuit() && !getOkayToExtract()) {
+                try {
+                    Thread.sleep(60000);
+                } catch (InterruptedException e) {
+                    Log.println(Log.INFO, "WebServer", "run(): Extract Server thread has been interrupted");
                 }
-            });
+            }
+            if (getQuit()) {
+                return;
+            }
+            //Log.println(Log.INFO, "WebServer", "system directory=" + SystemDirectory + " , internal storage=" + context.getFilesDir().getPath());
+            if (!areWebServerAssetsExtracted()) {
+                int upgraderesult = doUpgrade();
+                if (upgraderesult < 0) {
+                    DoExtractErrorNotification("Upgrade Error", "Failed to upgrade the Web Server files");
+                    return;
+                }
+                if (!extractAssets()) {
+                    DoExtractErrorNotification("Extract Error", "Failed to extract the Web Server assets");
+                    return;
+                }
+            }
+
+            setPermissions();
+            setConfigsFromTemplates();
+
+            Log.println(Log.INFO, "WebServer", "Extract complete");
+
+            if (runServerServices) {
+                Log.println(Log.INFO, "WebServer", "About to run server services");
+                Application.getInstance().runServerServices.setOkayToRunServices(true);
+
+                //Only run the server services once per request
+                setRunServerServices(false);
+            } else {
+                if (progressPage != null) {
+                    progressPage.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressPage.onComplete();
+                        }
+                    });
+                }
+            }
+            //Only extract at certain times
+            setOkayToExtract(false);
+        }
+    }
+    public void stopThread() {
+        setQuit(true);
+
+        //Interrupt the main loop
+        Log.println(Log.INFO, "WebServer", "stopThread(): Interrupting extract server thread");
+        interrupt();
+
+        //Wait for the thread to exit
+        boolean waiting=true;
+        while (waiting) {
+            try {
+                Log.println(Log.INFO, "WebServer", "stopThread(): Waiting for extract server thread to exit");
+                join();
+                waiting = false;
+            } catch (InterruptedException e) {
+                //Do nothing
+            }
         }
     }
 
@@ -260,7 +300,9 @@ public class ExtractServerServices extends Thread {
             if (!numFilesStr.equals("")) {
                 try {
                     int numfiles = Integer.parseInt(numFilesStr);
-                    progressPage.setTotalRequests(numfiles);
+                    if (progressPage!=null) {
+                        progressPage.setTotalRequests(numfiles);
+                    }
                 } catch (Exception e) {
                     //Do nothing
                 }
@@ -434,7 +476,9 @@ public class ExtractServerServices extends Thread {
             e.printStackTrace();
             return -4;
         }
-        progressPage.setTotalRequests(numoperations);
+        if (progressPage!=null) {
+            progressPage.setTotalRequests(numoperations);
+        }
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(upgradeScriptStream, "UTF-8"));
             String line;
@@ -536,6 +580,9 @@ public class ExtractServerServices extends Thread {
         return 0;
     }
     private void doNotification(final String message) {
+        if (progressPage==null) {
+            return;
+        }
         progressPage.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -544,6 +591,9 @@ public class ExtractServerServices extends Thread {
         });
     }
     private void changeProgressPagePercentageText() {
+        if (progressPage==null) {
+            return;
+        }
         progressPage.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -652,6 +702,8 @@ public class ExtractServerServices extends Thread {
             e.printStackTrace();
         }
     }
+    public synchronized void setOkayToExtract(boolean val) { okayToExtract=val; interrupt(); }
+    public synchronized boolean getOkayToExtract() { return okayToExtract; }
     public synchronized void setIsExtracted(boolean val) {
         isExtracted=val;
     }

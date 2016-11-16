@@ -32,6 +32,8 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import static com.capsicumcorp.iomy.apps.iomy.Constants.installWizard;
+
 public class Application extends android.app.Application {
     private static Application instance;
     private String AppName;
@@ -43,7 +45,7 @@ public class Application extends android.app.Application {
     private boolean serviceStarted;
 
     //Whether the various services have started
-    private boolean monitoringStarted;
+    private boolean backgroundTasksStarted=false;
 
     public ExtractServerServices extractServerServices;
     public RunServerServices runServerServices;
@@ -61,7 +63,6 @@ public class Application extends android.app.Application {
         StorageFolderName=null;
         SystemDirectory=null;
         serviceStarted = false;
-        monitoringStarted = false;
         extractServerServices=null;
         runServerServices=null;
     }
@@ -98,78 +99,92 @@ public class Application extends android.app.Application {
         }
         return false;
     }
-    //Called to start the monitoring system
-    //NOTE: It is okay to start the watch inputs and run server services threads even before the
-    //  first run wizard completes
-    public boolean startMonitoringSystem() {
-        Log.println(Log.INFO, this.AppName, "Entering Application.startMonitoringSystem");
-        if (monitoringStarted) {
-            Log.println(Log.INFO, this.AppName, "Application.startMonitoringSystem: Monitoring is already started");
+    //Called from a receiver to start the background tasks
+    public boolean startBackgroundTasksfromReceiver() {
+        Log.println(Log.INFO, this.AppName, "Entering Application.startBackgroundTasksfromReceiver");
+        if (backgroundTasksStarted) {
+            Log.println(Log.INFO, this.AppName, "Application.startBackgroundTasksfromReceiver: Background tasks are already started");
             return false;
         }
 
-        int result = 0;
+        //Start Extract Server Services Thread
+        try {
+            extractServerServices.setRunServerServices(true);
 
-        //Start Server Services Thread
-        runServerServices.start();
-        ++result;
-        if (result==0) {
-            Log.println(Log.INFO, this.AppName, "Application.startMonitoringSystem: Monitoring failed to start result=" + result);
+            extractServerServices.start();
+
+            //Start Server Services Thread
+            runServerServices.start();
+        } catch (Exception e) {
+            Log.println(Log.INFO, this.AppName, "Application.startBackgroundTasksfromReceiver: Background tasks failed to start result=");
             return false;
         }
-        monitoringStarted=true;
-        Log.println(Log.INFO, this.AppName, "Exiting Application.startMonitoringSystem");
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(Application.getInstance());
+
+        //Import default or current settings from Android preferences to the local variables
+        installWizard.setInitialSettings(this);
+
+        boolean firstrunval=sharedPref.getBoolean("pref_run_first_run_wizard", true);
+        if (firstrunval==false) {
+            Log.println(Log.INFO, this.AppName, "Application.startBackgroundTasksfromReceiver: Activating Extract Service");
+            Application.getInstance().runServerServices.supplyDBRootPassword(installWizard.dbPassword);
+            extractServerServices.setOkayToExtract(true);
+        }
+        backgroundTasksStarted=true;
+        Log.println(Log.INFO, this.AppName, "Exiting Application.startBackgroundTasksfromReceiver");
 
         return true;
     }
-    //Call to stop the monitoring system
-    public void stopMonitoringSystem() {
-        Log.println(Log.INFO, AppName, "Entering Application.stopMonitoringSystem");
-        if (monitoringStarted) {
-            runServerServices.stopWebServer();
-            try {
-                //Wait for the server services to stop
-                runServerServices.wait();
-            } catch (InterruptedException e) {
-                //Do nothing
-            }
-            monitoringStarted=false;
+    //Called from the app to start the background tasks
+    public boolean startBackgroundTasksfromApp() {
+        Log.println(Log.INFO, this.AppName, "Entering Application.startBackgroundTasksfromApp");
+        if (backgroundTasksStarted) {
+            Log.println(Log.INFO, this.AppName, "Application.startBackgroundTasksfromApp: Background tasks are already started");
+            return false;
         }
-        Log.println(Log.INFO, this.AppName, "Exiting Application.stopMonitoringSystem");
+
+        //Start Extract Server Services Thread
+        try {
+            extractServerServices.setRunServerServices(true);
+
+            extractServerServices.start();
+
+            //Start Server Services Thread
+            runServerServices.start();
+        } catch (Exception e) {
+            Log.println(Log.INFO, this.AppName, "Application.startBackgroundTasksfromApp: Background tasks failed to start result=");
+            return false;
+        }
+        backgroundTasksStarted=true;
+        Log.println(Log.INFO, this.AppName, "Exiting Application.startBackgroundTasksfromApp");
+
+        return true;
     }
-    //Call to start the monitoring service
-    public void startMonitoringService() {
-        Log.println(Log.INFO, this.AppName, "Application.startMonitoringService: Starting Monitoring Service");
+    //Call to stop the background tasks
+    public void stopBackgroundTasks() {
+        Log.println(Log.INFO, AppName, "Entering Application.stopBackgroundTasks");
+        if (backgroundTasksStarted) {
+            runServerServices.stopWebServer();
+            extractServerServices.stopThread();
+
+            backgroundTasksStarted=false;
+        }
+        Log.println(Log.INFO, this.AppName, "Exiting Application.stopBackgroundTasks");
+    }
+    //Call to start the background service
+    public void startBackgroundService() {
+        Log.println(Log.INFO, this.AppName, "Application.startBackgroundService: Starting Background Service");
         startService(iOmyServices.createIntent(this));
     }
-    //Call to stop the monitoring service
-    public void stopMonitoringService() {
-        Log.println(Log.INFO, this.AppName, "Application.startMonitoringService: Stopping Monitoring Service");
+    //Call to stop the background service
+    public void stopBackgroundService() {
+        Log.println(Log.INFO, this.AppName, "Application.stopBackgroTasks: Stopping Background Service");
         stopService(iOmyServices.createIntent(this));
-    }
-    //Called by the service when it is started
-    public void onServiceStarted() {
-
-        Log.println(Log.INFO, this.AppName, "Entering Application.onServiceStarted");
-        if (serviceStarted) {
-            //The service is already started
-            return;
-        }
-        if (!monitoringStarted) {
-            if (!startMonitoringSystem()) {
-                Log.println(Log.INFO, this.AppName, "Exiting Application.onServiceStarted");
-                return;
-            }
-        }
-        serviceStarted=true;
-        Log.println(Log.INFO, this.AppName, "Exiting Application.onServiceStarted");
     }
     //Called by the service when it is destroyed
     public void onServiceDestroy() {
         Log.println(Log.INFO, this.AppName, "Entering Application.onServiceDestroy");
-        if (monitoringStarted) {
-            stopMonitoringSystem();
-        }
+        stopBackgroundTasks();
         onUnload();
         Log.println(Log.INFO, this.AppName, "Exiting Application.onServiceDestroy: Shouldn't get here");
     }
@@ -186,7 +201,7 @@ public class Application extends android.app.Application {
     public boolean getServiceStarted() {
         return this.serviceStarted;
     }
-    public boolean getMonitoringStarted() { return this.monitoringStarted; }
+    public boolean getBackgroundTasksStarted() { return this.backgroundTasksStarted; }
 
     public synchronized boolean getWatchInputsEnabled() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);

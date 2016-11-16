@@ -49,7 +49,8 @@ public class Start extends AppCompatActivity {
         this.setContentView(R.layout.activity_start);
         this.setTitle(Titles.welcomePageTitle);
 
-        Application.getInstance().startMonitoringService();
+        Application.getInstance().startBackgroundService();
+        Application.getInstance().startBackgroundTasksfromApp();
 
         final Context context=this;
 
