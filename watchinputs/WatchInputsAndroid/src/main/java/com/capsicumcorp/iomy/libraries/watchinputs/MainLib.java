@@ -85,7 +85,7 @@ public class MainLib {
         mSerialPortLib=new SerialPortLib(AppName);
         mRapidHALib=new RapidHALib(AppName);
         mZigbeeLib=new ZigbeeLib(AppName);
-        mUserspaceUSBSerialAndroidLib=new UserspaceUSBSerialAndroidLib(AppName);
+        mUserspaceUSBSerialAndroidLib=new UserspaceUSBSerialAndroidLib(context, AppName);
         mWebApiClientLib=new WebApiClientLib(AppName);
         mLockLib=new LockLib(AppName);
     }

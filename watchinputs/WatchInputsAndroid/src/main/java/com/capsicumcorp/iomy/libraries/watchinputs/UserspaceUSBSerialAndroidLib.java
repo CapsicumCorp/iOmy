@@ -23,10 +23,17 @@ package com.capsicumcorp.iomy.libraries.watchinputs;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.List;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.BroadcastReceiver;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
@@ -37,6 +44,7 @@ import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 
 public class UserspaceUSBSerialAndroidLib extends Activity {
+    private Context context=null;
 	private static UsbManager mUsbManager;
 	private static List<UsbSerialDriver> mAvailableDrivers; //This is global as it might not be refreshed all the time
 
@@ -53,9 +61,51 @@ public class UserspaceUSBSerialAndroidLib extends Activity {
     private static String[] usbSerialDeviceFilename;
     private static UsbDeviceConnection[] usbSerialDeviceConnection;
     private static UsbSerialPort[] usbSerialDevicePort;
-    
-    public UserspaceUSBSerialAndroidLib(String AppName) {
+
+    //If this is set for a device then the app has requested permission from Android and is waiting for the user to either accept
+    //  or if they block, then this will stay true until the app is restarted
+    private static HashMap<String, Boolean> waitingForPermision=new HashMap<String, Boolean>();
+
+	private static final String ACTION_USB_PERMISSION = "com.capsicumcorp.iomy.libraries.watchinputs.USB_PERMISSION";
+    private static PendingIntent mPermissionIntent=null;
+
+    private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
+
+        @TargetApi(12)
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (ACTION_USB_PERMISSION.equals(action)) {
+                synchronized (context) {
+                    UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+
+                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                        if(device != null) {
+                            //http://stackoverflow.com/questions/13687346/java-hashmap-get-method-null-pointer-exception
+                            Boolean b = waitingForPermision.get(device.getDeviceName());
+                            if (b != null) {
+                                //Permission has been granted
+                                waitingForPermision.remove(device.getDeviceName());
+                            }
+                        }
+                    }
+                    else {
+                        Log.println(Log.INFO, MainLib.getInstance().getAppName(), "UserspaceUSBSerialAndroidLib.BroadcastReceiver: Permission denied for device: "+device.getDeviceName());
+                    }
+                }
+            }
+        }
+    };
+    public UserspaceUSBSerialAndroidLib(Context context, String AppName) {
+        this.context=context;
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR1) {
+            //This device doesn't support the USB host api
+            return;
+        }
     	mUsbManager=MainLib.getInstance().getUsbManager();
+        mPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
+        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+        context.registerReceiver(mUsbReceiver, filter);
     }
     public static int init() {
     	mAvailableDrivers=null;
@@ -64,6 +114,8 @@ public class UserspaceUSBSerialAndroidLib extends Activity {
     	usbSerialDeviceFilename=new String[MAX_SERIAL_PORTS];
     	usbSerialDeviceConnection=new UsbDeviceConnection[MAX_SERIAL_PORTS];
     	usbSerialDevicePort=new UsbSerialPort[MAX_SERIAL_PORTS];
+
+        waitingForPermision.clear();
 
         return 0;
     }
@@ -144,8 +196,16 @@ public class UserspaceUSBSerialAndroidLib extends Activity {
     		//Driver not found for the filename
     		return -2;
     	}
+        //http://stackoverflow.com/questions/13687346/java-hashmap-get-method-null-pointer-exception
+        Boolean b = waitingForPermision.get(filename);
+        if (b != null) {
+            //User hasn't accepted permission yet
+            return -6;
+        }
     	if (mUsbManager.hasPermission(lDriver.getDevice())==false) {
-    		//User doesn't have permission to open this device
+    		//User doesn't yet have permission to open this device
+            mUsbManager.requestPermission(lDriver.getDevice(), mPermissionIntent);
+            waitingForPermision.put(filename, true);
     		return -3;
     	}
     	tmpConnection = mUsbManager.openDevice(lDriver.getDevice());
