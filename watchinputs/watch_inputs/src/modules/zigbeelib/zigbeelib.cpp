@@ -3557,7 +3557,7 @@ static zcl_general_request_t *zigbeelib_prepare_zcl_request(int localzigbeeindex
   zclcmd->cmdid=cmdid;
   zclcmd->zigbeelength=payloadlen;
 
-  return nullptr;
+  return zclcmd;
 }
 
 /*
@@ -3591,6 +3591,7 @@ static void zigbeelib_send_multi_attribute_read(int localzigbeeindex, int zigbee
     return;
   }
   //Fill in the entered values
+  zclattrlist=(zigbee_zcl_command_read_attribute_list_t *) &(zclcmd->zigbeepayload);
   uint16_t attridx=0;
   for (auto &attridit : attributeids) {
     zclattrlist->attr[attridx]=htole16(attridit);
