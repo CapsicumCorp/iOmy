@@ -131,6 +131,11 @@ public class Cp21xxSerialDriver implements UsbSerialDriver {
             mConnection = connection;
             boolean opened = false;
             try {
+                //Added by Capsicum Corporation
+                if (mDevice.getInterfaceCount()==0) {
+                    Log.d(TAG, "No interfaces found on this usb device");
+                    throw new IOException("No interfaces found");
+                }
                 for (int i = 0; i < mDevice.getInterfaceCount(); i++) {
                     UsbInterface usbIface = mDevice.getInterface(i);
                     if (mConnection.claimInterface(usbIface, true)) {
