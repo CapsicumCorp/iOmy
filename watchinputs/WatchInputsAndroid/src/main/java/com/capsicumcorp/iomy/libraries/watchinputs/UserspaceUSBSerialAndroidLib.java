@@ -220,6 +220,8 @@ public class UserspaceUSBSerialAndroidLib extends Activity {
     		//Failed to open a connection to the usb serial port
     		tmpConnection=null;
 
+            displayException("openSerialDevice", e);
+
     		return -5;
     	}
     	//TODO: Add device to temp global storage ready for call to Java addDevice
