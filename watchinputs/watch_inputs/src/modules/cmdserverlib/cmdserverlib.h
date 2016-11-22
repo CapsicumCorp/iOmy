@@ -34,6 +34,10 @@ typedef void (*networkclientclose_func_ptr_t)(int clientsock);
 #pragma pack(push)
 #pragma pack(1) //Pack the structures to 1 byte boundary as pointers to the structure variables will be passed around between multiple libraries
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //Array of pointers to functions and variables we want to make available to other modules
 //Public interface for cmdserverlib module
 typedef struct {
@@ -44,6 +48,10 @@ typedef struct {
   int (*cmdserverlib_register_networkclientclose_listener)(networkclientclose_func_ptr_t funcptr);
   int (*cmdserverlib_unregister_networkclientclose_listener)(networkclientclose_func_ptr_t funcptr);
 } cmdserverlib_ifaceptrs_ver_1_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 #pragma pack(pop)
 

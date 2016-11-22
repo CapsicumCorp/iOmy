@@ -20,6 +20,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#include <boost/config.hpp>
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -76,6 +77,17 @@ static int cmdserverlib_unregister_cmd_listener(cmd_func_ptr_t funcptr);
 static int cmdserverlib_register_networkclientclose_listener(networkclientclose_func_ptr_t funcptr);
 static int cmdserverlib_unregister_networkclientclose_listener(networkclientclose_func_ptr_t funcptr);
 
+//C Exports
+extern "C" {
+
+BOOST_SYMBOL_EXPORT moduleinfo_ver_generic_t *cmdserverlib_getmoduleinfo();
+
+//JNI Exports
+#ifdef __ANDROID__
+JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_CmdServerLib_jnigetmodulesinfo( JNIEnv* env, jobject obj);
+#endif
+}
+
 //Module Interface Definitions
 #define DEBUGLIB_DEPIDX 0
 #define COMMONSERVERLIB_DEPIDX 1
@@ -93,7 +105,7 @@ static moduleiface_ver_1_t cmdserverlib_ifaces[]={
     CMDSERVERLIBINTERFACE_VER_1
   },
   {
-    NULL, 0
+    nullptr, 0
   }
 };
 
@@ -111,7 +123,7 @@ static moduledep_ver_1_t cmdserverlib_deps[]={
     1
   },
   {
-    NULL, NULL, 0, 0
+    nullptr, nullptr, 0, 0
   }
 };
 
@@ -122,10 +134,10 @@ static moduleinfo_ver_1_t cmdserverlib_moduleinfo_ver_1={
   cmdserverlib_shutdown,
   cmdserverlib_start,
   cmdserverlib_stop,
-  NULL,
-  NULL,
-  &cmdserverlib_ifaces,
-  &cmdserverlib_deps
+  nullptr,
+  nullptr,
+  (moduleiface_ver_1_t (* const)[]) &cmdserverlib_ifaces,
+  (moduledep_ver_1_t (*)[]) &cmdserverlib_deps
 };
 
 //Initialise global variables
@@ -184,10 +196,10 @@ static inline void cmdserverlib_call_networkclientclose_listeners(int clientsock
 //Call this just before exiting the client thread
 //NOTE: Only need to thread lock for clientthreaddata.thread since no other threads access client variables if it is set
 static void cmdserverlib_cleanupClientThread(void *val) {
-  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=cmdserverlib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
+  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=(commonserverlib_ifaceptrs_ver_1_t *) cmdserverlib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
   int threadslot;
 
-  threadslot=(int) val;
+  threadslot=(long) val;
   cmdserv_clientthreaddata_t *dataptr=&gcmdserv_clientthreaddata[threadslot];
 
   cmdserverlib_call_networkclientclose_listeners(dataptr->clientsock);
@@ -211,15 +223,15 @@ static void cmdserverlib_cleanupClientThread(void *val) {
 
 //NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
 static void *cmdserverlib_networkClientLoop(void *thread_val) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
-  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=cmdserverlib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=(commonserverlib_ifaceptrs_ver_1_t *) cmdserverlib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
   cmdserv_clientthreaddata_t *dataptr;
   int threadslot;
   int netgetc_pos=0, netgetc_received=0;
   size_t len;
   int listener_result;
 
-  threadslot=(int) thread_val;
+  threadslot=(long) thread_val;
   dataptr=&gcmdserv_clientthreaddata[threadslot];
 
   //Allocate buffer space
@@ -272,7 +284,7 @@ static void *cmdserverlib_networkClientLoop(void *thread_val) {
 }
 
 static void cmdserverlib_MainServerLoop_cleanup() {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   int i;
   pthread_t tmpthread;
 
@@ -297,10 +309,10 @@ static void cmdserverlib_MainServerLoop_cleanup() {
 //thread_val arg specifies the tcp port to listen on (unsigned short type) or 0 for default
 //NOTE: Only need to thread lock for clientthreaddata.thread since no other client variables are accessed if it is set
 static void *cmdserverlib_MainServerLoop(void *thread_val) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
-  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=cmdserverlib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=(commonserverlib_ifaceptrs_ver_1_t *) cmdserverlib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
   int result, sock, clientsock, i;
-  uint16_t tcpport=(unsigned short) ((unsigned) thread_val);
+  uint16_t tcpport=(long) thread_val;
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
 
@@ -367,7 +379,7 @@ static int cmdserverlib_getneedtoquit() {
 
 //NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
 static int cmdserverlib_start(void) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   int result=0;
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
@@ -386,7 +398,7 @@ static int cmdserverlib_start(void) {
 
 //NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
 static void cmdserverlib_stop(void) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
 
@@ -403,7 +415,7 @@ static void cmdserverlib_stop(void) {
 
 //NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
 static int cmdserverlib_init(void) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
 
@@ -421,7 +433,7 @@ static int cmdserverlib_init(void) {
 
 //NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
 static void cmdserverlib_shutdown(void) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
   if (cmdserverlib_inuse==0) {
@@ -463,11 +475,11 @@ static int cmdserverlib_register_cmd_listener(cmd_func_ptr_t funcptr) {
     return -1;
   }
   //Expand the array
-  tmpptr=(cmd_func_ptr_t *) realloc(cmdserverlib_cmd_listener_funcs_ptr, (cmdserverlib_num_cmd_listener_funcs+1)*sizeof(void *));
+  tmpptr=(void * *) realloc(cmdserverlib_cmd_listener_funcs_ptr, (cmdserverlib_num_cmd_listener_funcs+1)*sizeof(void *));
   if (tmpptr==NULL) {
     return -1;
   }
-  cmdserverlib_cmd_listener_funcs_ptr=tmpptr;
+  cmdserverlib_cmd_listener_funcs_ptr=(cmd_func_ptr_t *) tmpptr;
 
   cmdserverlib_cmd_listener_funcs_ptr[cmdserverlib_num_cmd_listener_funcs]=funcptr;
   ++cmdserverlib_num_cmd_listener_funcs;
@@ -515,11 +527,11 @@ static int cmdserverlib_register_networkclientclose_listener(networkclientclose_
     return -1;
   }
   //Expand the array
-  tmpptr=(networkclientclose_func_ptr_t *) realloc(cmdserverlib_networkclientclose_listener_funcs_ptr, (cmdserverlib_num_networkclientclose_listener_funcs+1)*sizeof(void *));
+  tmpptr=(void * *) realloc(cmdserverlib_networkclientclose_listener_funcs_ptr, (cmdserverlib_num_networkclientclose_listener_funcs+1)*sizeof(void *));
   if (tmpptr==NULL) {
     return -1;
   }
-  cmdserverlib_networkclientclose_listener_funcs_ptr=tmpptr;
+  cmdserverlib_networkclientclose_listener_funcs_ptr=(networkclientclose_func_ptr_t *) tmpptr;
 
   cmdserverlib_networkclientclose_listener_funcs_ptr[cmdserverlib_num_networkclientclose_listener_funcs]=funcptr;
   ++cmdserverlib_num_networkclientclose_listener_funcs;
