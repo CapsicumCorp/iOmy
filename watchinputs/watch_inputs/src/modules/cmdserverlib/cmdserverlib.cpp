@@ -27,6 +27,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <map>
+#include <string>
 #ifdef __ANDROID__
 #include <jni.h>
 #include <android/log.h>
@@ -42,12 +44,23 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #define MAX_CMDSERV_THREADS 10
 #define INTERFACE_VERSION "000600" /* The Version of the command interface implemented by this library */
 
+typedef struct cmdserver_cmdfunc cmdserver_cmdfunc_t;
+
 typedef struct {
   pthread_t thread;
   int clientsock;
   char *buffer;
   char *netgetc_buffer;
 } cmdserv_clientthreaddata_t;
+
+struct cmdserver_cmdfunc {
+  std::string cmdname;
+  std::string description;
+  cmd_func_ptr_t func;
+};
+
+//Command Name, The command struct
+static std::map<std::string, cmdserver_cmdfunc_t> cmdfuncs;
 
 static cmdserv_clientthreaddata_t gcmdserv_clientthreaddata[MAX_CMDSERV_THREADS];
 static pthread_mutex_t cmdserverlibmutex = PTHREAD_MUTEX_INITIALIZER;
@@ -70,6 +83,7 @@ static int cmdserverlib_start(void);
 static void cmdserverlib_stop(void);
 static int cmdserverlib_init(void);
 static void cmdserverlib_shutdown(void);
+static int cmdserverlib_register_cmd_function(const char *name, const char *description, cmd_func_ptr_t funcptr);
 static int cmdserverlib_register_cmd_listener(cmd_func_ptr_t funcptr);
 static int cmdserverlib_unregister_cmd_listener(cmd_func_ptr_t funcptr);
 
@@ -93,6 +107,7 @@ JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_CmdServerLib_jn
 #define COMMONSERVERLIB_DEPIDX 1
 
 static cmdserverlib_ifaceptrs_ver_1_t cmdserverlib_ifaceptrs_ver_1={
+  cmdserverlib_register_cmd_function,
   cmdserverlib_register_cmd_listener,
   cmdserverlib_unregister_cmd_listener,
   cmdserverlib_register_networkclientclose_listener,
@@ -151,6 +166,55 @@ static void cmdserverlib_initglobals() {
   }
 }
 
+static int cmdserverlib_processhelpcommand(const char *buffer, int clientsock) {
+  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=(commonserverlib_ifaceptrs_ver_1_t *) cmdserverlib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
+  size_t tmplen;
+
+  tmplen=strlen(buffer)-1;
+  if (tmplen>0 && buffer[tmplen] == '\n') {
+    //Remove the newline at the end of the line
+    --tmplen;
+  }
+  if (tmplen>0 && buffer[tmplen] == '\r') {
+    //Remove the carriage return at the end of the line
+    --tmplen;
+  }
+  ++tmplen; //Step up one to be length instead of pos
+  std::string thestring=buffer;
+  thestring=thestring.substr(0, tmplen);
+  if (tmplen==4) {
+    //Display a list of registered commands and their description
+    std::string helpline="Here is a list of commands:\n";
+    commonserverlibifaceptr->serverlib_netputs(helpline.c_str(), clientsock, NULL);
+    for (auto const &cmdfunc : cmdfuncs) {
+      helpline="  ";
+      helpline+=cmdfunc.second.cmdname;
+      helpline+=' ';
+      helpline+=cmdfunc.second.description;
+      helpline+='\n';
+      commonserverlibifaceptr->serverlib_netputs(helpline.c_str(), clientsock, NULL);
+    }
+  } else {
+    try {
+      //Use the parameter (assume a single space for now) as a command to display help for
+      std::string name=thestring.substr(5);
+      std::string nametmp=name;
+      nametmp+='\n';
+      commonserverlibifaceptr->serverlib_netputs(nametmp.c_str(), clientsock, NULL);
+      std::string description=cmdfuncs.at(thestring.substr(5)).description;
+      thestring="Command: ";
+      thestring+=name;
+      thestring+="\nDescription: ";
+      thestring+=description;
+      thestring+='\n';
+      commonserverlibifaceptr->serverlib_netputs(thestring.c_str(), clientsock, NULL);
+    } catch (std::out_of_range& e) {
+      //Do nothing as the command doesn't exist
+    }
+  }
+  return CMDLISTENER_NOERROR;
+}
+
 /*
   Call all listeners for cmd commands
   Input: cmdstr The cmd command to process
@@ -172,6 +236,31 @@ static inline int cmdserverlib_call_cmd_listeners(const char *cmdstr, int client
 				break;
 			}
 		}
+  }
+  if (listener_result==CMDLISTENER_NOTHANDLED) {
+    //See if the command is registered with a dedicated function
+    debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+    //Extract the command from the string
+    std::string cmdstring=cmdstr;
+
+    //Find the first occurance of whitespace
+    int pos=0;
+    while (pos<cmdstring.length()) {
+      if (cmdstring[pos]==' ' || cmdstring[pos]=='\n' || cmdstring[pos]=='\r') {
+        break;
+      }
+      ++pos;
+    }
+    std::string thecmd=cmdstring.substr(0, pos).c_str();
+    try {
+      cmd_func_ptr_t funcptr=cmdfuncs.at(thecmd).func;
+      if (funcptr!=NULL) {
+        listener_result=funcptr(cmdstr, clientsock);
+      }
+    } catch (std::out_of_range& e) {
+      //Do nothing as the command doesn't exist
+    }
   }
 	return listener_result;
 }
@@ -383,6 +472,10 @@ static int cmdserverlib_start(void) {
   int result=0;
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
+
+  //Register commands
+  cmdserverlib_register_cmd_function("help", "Get help for a command", cmdserverlib_processhelpcommand);
+
   if (cmdserverlib_thread==0) {
     debuglibifaceptr->debuglib_printf(1, "%s: Starting the Command Server thread\n", __func__);
     pthread_create(&cmdserverlib_thread, NULL, cmdserverlib_MainServerLoop, (void *) ((unsigned short) 0));
@@ -448,6 +541,7 @@ static void cmdserverlib_shutdown(void) {
 		return;
 	}
 	//No longer in use
+	cmdfuncs.clear();
 	if (cmdserverlib_cmd_listener_funcs_ptr) {
     free(cmdserverlib_cmd_listener_funcs_ptr);
     cmdserverlib_cmd_listener_funcs_ptr=NULL;
@@ -459,6 +553,36 @@ static void cmdserverlib_shutdown(void) {
     cmdserverlib_num_cmd_listener_funcs=0;
   }
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
+}
+
+/*
+  Register a cmd command with function
+  Input: name The name of the command
+         description A description of the command
+         funcptr A pointer to the function that handles the command
+  Returns: 0 if success or non-zero on error
+  NOTE: Don't need to search for a free slot since this function should only ever be called once at program startup
+  NOTE: Cleanup will automatically be handled by the cmdserverlib shutdown function
+*/
+static int cmdserverlib_register_cmd_function(const char *name, const char *description, cmd_func_ptr_t funcptr) {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  void * *tmpptr;
+
+  pthread_mutex_lock(&cmdserverlibmutex);
+  if (cmdserverlib_inuse==0) {
+    pthread_mutex_unlock(&cmdserverlibmutex);
+    return -1;
+  }
+  cmdserver_cmdfunc_t cmdfunc;
+  cmdfunc.cmdname=name;
+  cmdfunc.description=description;
+  cmdfunc.func=funcptr;
+
+  cmdfuncs[cmdfunc.cmdname]=cmdfunc;
+
+  pthread_mutex_unlock(&cmdserverlibmutex);
+
+  return 0;
 }
 
 /*
