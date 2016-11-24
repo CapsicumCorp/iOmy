@@ -100,9 +100,13 @@ public class UserspaceUSBSerialAndroidLib extends Activity {
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR1) {
             //This device doesn't support the USB host api
+			Log.println(Log.INFO, MainLib.getInstance().getAppName(), "UserspaceUSBSerialAndroidLib: This Android version doesn't support the USB host api");
             return;
         }
     	mUsbManager=MainLib.getInstance().getUsbManager();
+		if (mUsbManager==null) {
+			Log.println(Log.INFO, MainLib.getInstance().getAppName(), "UserspaceUSBSerialAndroidLib: Usb Manager isn't available");
+		}
         mPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         context.registerReceiver(mUsbReceiver, filter);
