@@ -21,7 +21,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-//NOTE: Currently only supports Android
 //NOTE: Some versions of Android may be limited to 512 local references so we need to delete them fairly rapidly
 
 #include <inttypes.h>
@@ -33,6 +32,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <unistd.h>
 #include <pthread.h>
 #include <semaphore.h>
+#ifndef __ANDROID__
+#include <mysql.h>
+#endif
 #ifdef __ANDROID__
 #include <jni.h>
 #endif
@@ -130,6 +132,11 @@ static int dbloaded = 0;
 
 static int dbschemaver=0; //We detect the version based on which prepared statements succeed
 
+#ifndef __ANDROID__
+static MYSQL *conn=nullptr;
+static MYSQL_STMT *preparedstmt[20];
+#endif
+
 #ifdef DEBUG
 static pthread_mutexattr_t errorcheckmutexattr;
 static pthread_mutex_t thislibmutex;
@@ -182,14 +189,16 @@ int mysqllib_getlinkpk(uint64_t addr, int64_t *linkpk);
 int mysqllib_getlinkcommpk(uint64_t addr, int64_t *commpk);
 void mysqllib_freeuniqueid(void *uniqueid);
 
+//C Exports
+extern "C" {
+
 extern moduleinfo_ver_generic_t *mysqllib_getmoduleinfo();
 
 //JNI Exports
 #ifdef __ANDROID__
-extern "C" {
 JNIEXPORT jlong JNICALL Java_com_capsicumcorp_iomy_libraries_watchinputs_MysqlLib_jnigetmodulesinfo( JNIEnv* UNUSED(env), jobject UNUSED(obj));
-}
 #endif
+}
 
 //Module Interface Definitions
 #define DEBUGLIB_DEPIDX 0
@@ -405,8 +414,8 @@ int mysqllib_loaddatabase(const char *hostname, const char *dbname, const char *
   int result, wasdetached=0, i;
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
-#ifdef __ANDROID__
   PTHREAD_LOCK(&thislibmutex);
+#ifdef __ANDROID__
   if (dbloaded) {
     //Database already loaded
     PTHREAD_UNLOCK(&thislibmutex);
@@ -431,7 +440,7 @@ int mysqllib_loaddatabase(const char *hostname, const char *dbname, const char *
   if (!result) {
     PTHREAD_UNLOCK(&thislibmutex);
     JNIDetachThread(wasdetached);
-    debuglibifaceptr->debuglib_printf(1, "Exiting %s, database hostname: %s failed to load\n", __func__, hostname);
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s, database hostname: %s failed to connect\n", __func__, hostname);
     return -2;
   }
   //Prepare the SQL statements
@@ -460,7 +469,6 @@ int mysqllib_loaddatabase(const char *hostname, const char *dbname, const char *
 
   PTHREAD_UNLOCK(&thislibmutex);
 #else
-  PTHREAD_LOCK(&thislibmutex);
   if (dbloaded) {
     //Database already loaded
     PTHREAD_UNLOCK(&thislibmutex);
@@ -468,7 +476,51 @@ int mysqllib_loaddatabase(const char *hostname, const char *dbname, const char *
     debuglibifaceptr->debuglib_printf(1, "Exiting %s, database file already loaded\n", __func__);
     return 0;
   }
+  if (!conn) {
+    conn = mysql_init(nullptr);
+  }
+  //Connect to database
+  if (!mysql_real_connect(conn, hostname,
+         username, password, dbname, 0, nullptr, 0)) {
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s, database hostname: %s failed to connect\n", __func__, hostname, mysql_error(conn));
+
+    mysql_close(conn);
+    conn=nullptr;
+    PTHREAD_UNLOCK(&thislibmutex);
+    return -2;
+  }
+  debuglibifaceptr->debuglib_printf(1, "%s, Successfully connected to MySQL database: %s at host: %s\n", __func__, dbname, hostname);
+
+  //Prepare the SQL statements
+  dbschemaver=0;
+
+  for (i=0; i<num_stmts; ++i) {
+    preparedstmt[i]=mysql_stmt_init(conn);
+    if (!preparedstmt[i]) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to prepare SQL statement: \"%s\", result=Out of Memory\n", __func__, mysqllib_stmts[i]);
+      continue;
+    }
+    result=mysql_stmt_prepare(preparedstmt[i], mysqllib_stmts[i], strlen(mysqllib_stmts[i]));
+    if (result) {
+      //Can't prepare the statement but continue to load since it might just be a query for an older or newer database
+      debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to prepare SQL statement: \"%s\", result=%s\n", __func__, mysqllib_stmts[i], mysql_error(conn));
+      mysql_stmt_close(preparedstmt[i]);
+      preparedstmt[i]=nullptr;
+    } else {
+      //Detect schema version using the index to the prepare statement that worked
+      switch (i) {
+        case 0:
+          dbschemaver=1;
+          break;
+      }
+    }
+  }
+  debuglibifaceptr->debuglib_printf(1, "%s: Detected db schema version: %d\n", __func__, dbschemaver);
+  dbloaded=1;
+
 #endif
+  PTHREAD_UNLOCK(&thislibmutex);
+
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 
   return 0;
@@ -512,6 +564,20 @@ int mysqllib_unloaddatabase(void) {
     if (!result) {
       debuglibifaceptr->debuglib_printf(1, "%s, Failed to unload database\n", __func__);
     }
+#else
+    //Unload prepared SQL statements
+    for (i=0; i<num_stmts; ++i) {
+      if (preparedstmt[i]) {
+        result=mysql_stmt_close(preparedstmt[i]);
+        if (result) {
+          //Can't unprepare the statements but continue to unload since it might just be a query for an older or newer database
+          debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to unload prepared statement: %s\n", __func__, mysqllib_stmts[i]);
+        }
+        preparedstmt[i]=nullptr;
+      }
+    }
+    //Close the connection
+    mysql_close(conn);
 #endif
     PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
     dbloaded=0;
