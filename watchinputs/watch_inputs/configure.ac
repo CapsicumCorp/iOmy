@@ -187,7 +187,7 @@ COMMONCPPFLAGS="-std=c++11"
 AS_IF([test "x$debug" = xtrue], [
   COMMONFLAGS="${COMMONFLAGS} -DDEBUG"
 ], [
-  COMMONFLAGS="${COMMONFLAGS} -s -O2 -fomit-frame-pointer -ftree-vectorize -fpredictive-commoning"
+  COMMONFLAGS="${COMMONFLAGS} -s -O2 -fomit-frame-pointer"
 ])
 AS_IF([test "x$pedantic" = xtrue], [
   COMMONFLAGS="${COMMONFLAGS} -pedantic"
