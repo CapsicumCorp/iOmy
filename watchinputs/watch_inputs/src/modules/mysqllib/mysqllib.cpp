@@ -557,7 +557,7 @@ int mysqllib_unloaddatabase(void) {
       result=env->CallStaticIntMethod(mysqllib_mysql_class, unprepareStmt_methodid, i);
       if (!result) {
         //Can't unprepare the statements but continue to load since it might just be a query for an older or newer database
-        debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to unload prepared statement: %s\n", __func__, mysqllib_stmts[i]);
+        debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to unload prepared statement: \"%s\", result=%s\n", __func__, mysqllib_stmts[i], mysql_error(conn));
       }
     }
     result=env->CallStaticIntMethod(mysqllib_mysql_class, unloaddatabase_methodid);
@@ -578,6 +578,7 @@ int mysqllib_unloaddatabase(void) {
     }
     //Close the connection
     mysql_close(conn);
+    conn=nullptr;
 #endif
     PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
     dbloaded=0;
@@ -623,10 +624,9 @@ int mysqllib_getschemaversion(void) {
   return result;
 }
 
-
 /*
   Begin a transaction
-  Returns 0 on success or other value on error
+  Returns 0 on success or negative value on error
 */
 int mysqllib_begin(void) {
 #ifdef __ANDROID__
@@ -634,9 +634,6 @@ int mysqllib_begin(void) {
   jmethodID begin_methodid;
 #endif
   int locdbloaded, result=0, wasdetached=0;
-
-  //Wait for any previous transactions to finish then start the transaction lock
-  PTHREAD_LOCK(&thislib_transaction_mutex);
 
   //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
   PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
@@ -647,6 +644,8 @@ int mysqllib_begin(void) {
     PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
     return -1;
   }
+  //Wait for any previous transactions to finish then start the transaction lock
+  PTHREAD_LOCK(&thislib_transaction_mutex);
 #ifdef __ANDROID__
   if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
     PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
@@ -657,6 +656,21 @@ int mysqllib_begin(void) {
   result=env->CallStaticIntMethod(mysqllib_mysql_class, begin_methodid);
   JNIDetachThread(wasdetached);
 
+  if (result!=0) {
+    PTHREAD_UNLOCK(&thislib_transaction_mutex);
+  }
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  //Disable auto commit
+  result=mysql_autocommit(conn, 0);
+  if (result!=0) {
+    PTHREAD_UNLOCK(&thislib_transaction_mutex);
+    debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to disable auto commit to begin a transaction, result=%s\n", __func__, mysql_error(conn));
+    result=-2;
+  } else {
+    debuglibifaceptr->debuglib_printf(1, "%s: Beginning transaction success\n", __func__);
+  }
 #endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
 
@@ -698,8 +712,22 @@ int mysqllib_end(void) {
   }
   JNIDetachThread(wasdetached);
 #else
-  //Transaction is complete
-  PTHREAD_UNLOCK(&thislib_transaction_mutex);
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  result=mysql_commit(conn);
+  if (result==0) {
+    //Transaction is complete
+    PTHREAD_UNLOCK(&thislib_transaction_mutex);
+    debuglibifaceptr->debuglib_printf(1, "%s: Ending transaction success\n", __func__);
+    //Re-enable auto commit
+    int result2=mysql_autocommit(conn, 1);
+    if (result2!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to re-eanble auto commit after ending a transaction, result=%s\n", __func__, mysql_error(conn));
+    }
+  } else {
+    debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to end, result=%s\n", __func__, mysql_error(conn));
+    result=-2;
+  }
 #endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
 
@@ -739,8 +767,23 @@ int mysqllib_rollback(void) {
   PTHREAD_UNLOCK(&thislib_transaction_mutex);
   JNIDetachThread(wasdetached);
 #else
-  //Transaction is complete
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  result=mysql_rollback(conn);
+  if (result!=0) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to rollback, result=%s\n", __func__, mysql_error(conn));
+    result=-2;
+  } else {
+    debuglibifaceptr->debuglib_printf(1, "%s: Rolling back transaction success\n", __func__);
+  }
+  //Always release the transaction mutex here as this is currently the last resort for the transaction operation
   PTHREAD_UNLOCK(&thislib_transaction_mutex);
+
+  //Re-enable auto commit
+  int result2=mysql_autocommit(conn, 1);
+  if (result2!=0) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to re-eanble auto commit after rolling back a transaction, result=%s\n", __func__, mysql_error(conn));
+  }
 #endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
 

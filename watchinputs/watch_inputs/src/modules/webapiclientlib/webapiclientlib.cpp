@@ -980,7 +980,7 @@ private:
 
     result=dblibifaceptr->begin();
     if (result<0) {
-      debuglibifaceptr->debuglib_printf(1, "%s: Failed to start database transaction\n");
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to start database transaction\n", __func__);
       return;
     }
 		for (auto &it=webapi_zigbeelinks_queueitbegin; it!=webapi_zigbeelinks_queueitend; it++) {
@@ -1020,7 +1020,7 @@ private:
 
 		result=dblibifaceptr->begin();
     if (result<0) {
-      debuglibifaceptr->debuglib_printf(1, "%s: Failed to start database transaction\n");
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to start database transaction\n", __func__);
       return;
     }
 		for (auto &it=webapi_zigbeecomms_queueitbegin; it!=webapi_zigbeecomms_queueitend; it++) {
@@ -1068,7 +1068,7 @@ private:
 
 		result=dblibifaceptr->begin();
     if (result<0) {
-      debuglibifaceptr->debuglib_printf(1, "%s: Failed to start database transaction\n");
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to start database transaction\n", __func__);
       return;
     }
 		for (auto &it=webapi_zigbeelinks_queueitbegin; it!=webapi_zigbeelinks_queueitend; it++) {
