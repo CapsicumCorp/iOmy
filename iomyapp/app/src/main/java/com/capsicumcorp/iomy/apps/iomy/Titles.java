@@ -27,6 +27,7 @@ package com.capsicumcorp.iomy.apps.iomy;
  */
 public interface Titles {
     String welcomePageTitle                 = "Welcome";
+    String setupQuestions                   = "iOmy Setup";
     String licenseAgreementTitle            = "License Information";
     String webserverQuestionTitle           = "Web Server Location";
     String webserverPageTitle               = "Web Server Setup";
