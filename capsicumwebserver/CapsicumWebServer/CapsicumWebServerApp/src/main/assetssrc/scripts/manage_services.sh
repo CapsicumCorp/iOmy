@@ -183,6 +183,10 @@ is_running() {
   local pidfile=$2
   if [ -f ${pidfile} ] ; then
     thepid=$(cat "${pidfile}")
+		if [ "${thepid}" = "" ] ; then
+		  #echo "${appname} is not currently running"
+		  return 1
+		fi
 		if [ -d /proc/${thepid} ] ; then
       #echo "${appname} is currently running"
       return 0
