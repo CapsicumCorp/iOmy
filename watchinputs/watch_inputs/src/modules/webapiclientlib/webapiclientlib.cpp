@@ -1033,7 +1033,7 @@ private:
 				debuglibifaceptr->debuglib_printf(1, "%s: Going to remove Comm device from queue: %016" PRIX64 " as it is already in the database\n", __func__, it->addr);
 				zigbeecomms_to_remove.push_back(it);
 			} else if (result<-1) {
-				debuglibifaceptr->debuglib_printf(1, "%s: Failed to check with database for Comm device: %016" PRIX64 ", postponding sending to webapi\n", __func__, it->addr);
+				debuglibifaceptr->debuglib_printf(1, "%s: Failed to check with database for Comm device: %016" PRIX64 ", postponing sending to webapi\n", __func__, it->addr);
 			} else {
 				it->okaytoadd=true;
 			}
