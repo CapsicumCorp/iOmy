@@ -557,7 +557,7 @@ int mysqllib_unloaddatabase(void) {
       result=env->CallStaticIntMethod(mysqllib_mysql_class, unprepareStmt_methodid, i);
       if (!result) {
         //Can't unprepare the statements but continue to load since it might just be a query for an older or newer database
-        debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to unload prepared statement: \"%s\", result=%s\n", __func__, mysqllib_stmts[i], mysql_error(conn));
+        debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to unload prepared statement: \"%s\", result=%s\n", __func__, mysqllib_stmts[i], result);
       }
     }
     result=env->CallStaticIntMethod(mysqllib_mysql_class, unloaddatabase_methodid);
@@ -571,7 +571,7 @@ int mysqllib_unloaddatabase(void) {
         result=mysql_stmt_close(preparedstmt[i]);
         if (result) {
           //Can't unprepare the statements but continue to unload since it might just be a query for an older or newer database
-          debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to unload prepared statement: %s\n", __func__, mysqllib_stmts[i]);
+          debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to unload prepared statement: \"%s\", result=\n", __func__, mysqllib_stmts[i], mysql_error(conn));
         }
         preparedstmt[i]=nullptr;
       }
