@@ -208,9 +208,11 @@ public class UserspaceUSBSerialAndroidLib extends Activity {
         }
     	if (mUsbManager.hasPermission(lDriver.getDevice())==false) {
     		//User doesn't yet have permission to open this device
-            mUsbManager.requestPermission(lDriver.getDevice(), mPermissionIntent);
-            waitingForPermision.put(filename, true);
-    		return -3;
+			if (!MainLib.getInstance().getStartedFromUsb()) {
+                mUsbManager.requestPermission(lDriver.getDevice(), mPermissionIntent);
+                waitingForPermision.put(filename, true);
+            }
+            return -3;
     	}
     	tmpConnection = mUsbManager.openDevice(lDriver.getDevice());
     	if (tmpConnection == null) {
