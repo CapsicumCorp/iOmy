@@ -47,6 +47,9 @@ public class Application extends android.app.Application {
     //Whether the various services have started
     private boolean backgroundTasksStarted=false;
 
+    //Whether the app was started from the usb device attached intent
+    private boolean startedFromUsb=false;
+
     public ExtractServerServices extractServerServices;
     public RunServerServices runServerServices;
 
@@ -228,6 +231,8 @@ public class Application extends android.app.Application {
     public UsbManager getUsbManager() {
     	return this.mUsbManager;
     }
+    public void setStartedFromUsb(boolean val) { startedFromUsb=val; }
+    public boolean getStartedFromUsb() { return startedFromUsb; }
 
     static {
         System.loadLibrary("crystax");
