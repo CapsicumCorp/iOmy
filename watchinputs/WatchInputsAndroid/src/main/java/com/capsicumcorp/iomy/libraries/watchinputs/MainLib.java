@@ -33,7 +33,7 @@ public class MainLib {
     private String AppName;
     private UsbManager usbManager;
     private String StorageFolderName;
-
+    private boolean startedFromUsb;
     private CmdServerLib mCmdServerLib;
     private CommonServerLib mCommonServerLib;
     private ConfigLib mConfigLib;
@@ -66,11 +66,12 @@ public class MainLib {
         return instance;
     }
 
-    public MainLib(Context context, String AppName, UsbManager usbManager, String StorageFolderName) {
+    public MainLib(Context context, String AppName, UsbManager usbManager, String StorageFolderName, boolean startedFromUsb) {
         instance=this;
         this.AppName=AppName;
         this.usbManager=usbManager;
         this.StorageFolderName=StorageFolderName;
+        this.startedFromUsb=startedFromUsb;
 
         mCmdServerLib=new CmdServerLib(AppName);
         mCommonServerLib=new CommonServerLib(AppName);
@@ -248,6 +249,7 @@ public class MainLib {
     public UsbManager getUsbManager() {
         return this.usbManager;
     }
+    public boolean getStartedFromUsb() { return startedFromUsb; }
 
     static {
         System.loadLibrary("watch_inputs");
