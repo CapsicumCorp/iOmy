@@ -1,9 +1,9 @@
-# Take web server source assets and compile into a zip file
+# Make archive files with just the binary files and MySQL initial database for archive storage
 
 # Author: Matthew Stapleton (Capsicum Corporation) <matthew@capsicumcorp.com>
 # Copyright: Capsicum Corporation 2016
 
-# This file is part of Capsicum Web Server which is part of the iOmy project.
+# This file is part of the iOmy project.
 
 # iOmy is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,11 +25,23 @@ if [ $? != 0 ] ; then
   echo "Could not cd to ${basedir}"
 	exit 1
 fi
-if [ -f ../assets/webserverassets.zip ] ; then
-  rm -v ../assets/webserverassets.zip
-fi
-zip -9r ../assets/webserverassets.zip components scripts tmp var htdocs zigbeedefs.ini
 
-numfiles=$(unzip -l ../assets/webserverassets.zip | tail -n 1 | awk '{print $2}')
-echo "NUMFILES=${numfiles}" > ../assets/webserverassetsnumfiles.txt
+basedir=$(pwd)
+
+cd "${basedir}/assetstmp"
+if [ $? != 0 ] ; then
+  exit 1
+fi
+datesuffix=$(date +"%Y%m%d")
+
+# Make archive file with arm binaries
+binaries=""
+binaries="${binaries} components/bin/armeabi"
+binaries="${binaries} components/lib/armeabi"
+binaries="${binaries} components/mysql/sbin/share"
+
+tar --owner=root --group=root -cv ${binaries} | xz -9ev > "${basedir}/webserverarmbinaries_${datesuffix}.tar.xz"
+
+# Make archive file with architecture independent MySQL initial database
+tar --owner=root --group=root -cv components/mysql/sbin/data | xz -9ev > "${basedir}/webservermysqlinitialdatabase_${datesuffix}.tar.xz"
 
