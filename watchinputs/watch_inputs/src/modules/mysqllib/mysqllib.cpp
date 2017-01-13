@@ -123,7 +123,7 @@ static const char *mysqllib_stmts[]={
 
 	"SELECT COMM_PK FROM VR_USERSCOMM WHERE COMM_ADDRESS = ?",
 	"SELECT LINK_PK FROM VR_USERSLINK WHERE LINK_SERIALCODE = ?",
-	"SELECT COMM_PK FROM VR_USERSLINK WHERE LINK_SERIALCODE = ?",
+	"SELECT LINK_COMM_FK FROM VR_USERSLINK WHERE LINK_SERIALCODE = ?",
 };
 
 static int num_stmts = sizeof(mysqllib_stmts)/sizeof(char *);
@@ -830,6 +830,88 @@ void *mysqllib_getport_uniqueid(uint64_t addr, int portid) {
 #ifdef __ANDROID__
   jtmpstr=env->NewStringUTF(thisaddr);
   thisvalue=env->CallStaticLongMethod(mysqllib_mysql_class, getPortUniqueId_methodid, jtmpstr, portid);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GETPORT_UNIQUEID];
+  if (stmt) {
+    int result;
+    size_t addrlen;
+    my_bool is_null=0;
+    MYSQL_BIND bind[2];
+
+    memset(bind, 0, sizeof(bind));
+    addrlen=strlen(thisaddr);
+
+    bind[0].buffer=thisaddr;
+    bind[0].buffer_type=MYSQL_TYPE_STRING;
+    bind[0].buffer_length=addrlen+1;
+    bind[0].is_null=&is_null;
+    bind[0].length=&addrlen;
+
+    bind[1].buffer=&portid;
+    bind[1].buffer_type=MYSQL_TYPE_LONG;
+    bind[1].is_null=0;
+    bind[1].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for Get Port UniqueID SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return NULL;
+    }
+    //Configure binding for result
+    long long longint_data;
+    unsigned long result_length[1];
+    my_bool result_is_null[1];
+    my_bool result_error[1];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer_type= MYSQL_TYPE_LONGLONG;
+    bind[0].buffer= (char *)&longint_data;
+    bind[0].is_null= &result_is_null[0];
+    bind[0].length= &result_length[0];
+    bind[0].error= &result_error[0];
+
+    //Bind the result buffers
+    if (mysql_stmt_bind_result(stmt, bind)) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for Get Port UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return NULL;
+    }
+    //NOTE: If result buffers are already bound, execute will use them so execute needs to be called
+    //  after binding the result buffers
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Get Port UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return NULL;
+    }
+    //Fetch the first row
+    result=mysql_stmt_fetch(stmt);
+    if (result==MYSQL_NO_DATA) {
+      //PK doesn't exist
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return NULL;
+    }
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to fetch result for Get Port UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return NULL;
+    }
+    thisvalue=longint_data;
+
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for Get Port UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return NULL;
+    }
+  }
 #endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
 #ifdef __ANDROID__
