@@ -851,6 +851,7 @@ void *mysqllib_getport_uniqueid(uint64_t addr, int portid) {
 
     bind[1].buffer=&portid;
     bind[1].buffer_type=MYSQL_TYPE_LONG;
+    bind[1].buffer_length=4;
     bind[1].is_null=0;
     bind[1].length=0;
 
@@ -865,17 +866,19 @@ void *mysqllib_getport_uniqueid(uint64_t addr, int portid) {
     unsigned long result_length[1];
     my_bool result_is_null[1];
     my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
 
-    memset(bind, 0, sizeof(bind));
+    memset(result_bind, 0, sizeof(result_bind));
 
-    bind[0].buffer_type= MYSQL_TYPE_LONGLONG;
-    bind[0].buffer= (char *)&longint_data;
-    bind[0].is_null= &result_is_null[0];
-    bind[0].length= &result_length[0];
-    bind[0].error= &result_error[0];
+    result_bind[0].buffer_type= MYSQL_TYPE_LONGLONG;
+    result_bind[0].buffer= (char *)&longint_data;
+    result_bind[0].buffer_length=8;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
 
     //Bind the result buffers
-    if (mysql_stmt_bind_result(stmt, bind)) {
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
       debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for Get Port UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
       mysql_stmt_free_result(stmt);
       PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
@@ -1608,17 +1611,19 @@ int mysqllib_getcommpk(uint64_t addr, int64_t *commpk) {
     unsigned long result_length[1];
     my_bool result_is_null[1];
     my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
 
-    memset(bind, 0, sizeof(bind));
+    memset(result_bind, 0, sizeof(result_bind));
 
-    bind[0].buffer_type= MYSQL_TYPE_LONGLONG;
-    bind[0].buffer= (char *)&longint_data;
-    bind[0].is_null= &result_is_null[0];
-    bind[0].length= &result_length[0];
-    bind[0].error= &result_error[0];
+    result_bind[0].buffer_type= MYSQL_TYPE_LONGLONG;
+    result_bind[0].buffer= (char *)&longint_data;
+    result_bind[0].buffer_length=8;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
 
     //Bind the result buffers
-    if (mysql_stmt_bind_result(stmt, bind)) {
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
       debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for Get Comm PK SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
       mysql_stmt_free_result(stmt);
       PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
@@ -1739,17 +1744,19 @@ int mysqllib_getlinkpk(uint64_t addr, int64_t *linkpk) {
     unsigned long result_length[1];
     my_bool result_is_null[1];
     my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
 
-    memset(bind, 0, sizeof(bind));
+    memset(result_bind, 0, sizeof(result_bind));
 
-    bind[0].buffer_type= MYSQL_TYPE_LONGLONG;
-    bind[0].buffer= (char *)&longint_data;
-    bind[0].is_null= &result_is_null[0];
-    bind[0].length= &result_length[0];
-    bind[0].error= &result_error[0];
+    result_bind[0].buffer_type= MYSQL_TYPE_LONGLONG;
+    result_bind[0].buffer= (char *)&longint_data;
+    result_bind[0].buffer_length=8;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
 
     //Bind the result buffers
-    if (mysql_stmt_bind_result(stmt, bind)) {
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
       debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for Get Link PK SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
       mysql_stmt_free_result(stmt);
       PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
@@ -1759,7 +1766,7 @@ int mysqllib_getlinkpk(uint64_t addr, int64_t *linkpk) {
     //  after binding the result buffers
     result=mysql_stmt_execute(stmt);
     if (result!=0) {
-      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Get Comm PK SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Get Link PK SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
       mysql_stmt_free_result(stmt);
       PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
       return -4;
