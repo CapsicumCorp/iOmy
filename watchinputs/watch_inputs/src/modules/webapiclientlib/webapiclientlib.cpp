@@ -430,7 +430,6 @@ private:
 	std::string apiusername, apipassword;
 	std::string httpusername;
 	std::string httppassword;
-	httpclient hc;
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr;
 	std::string http_version;
 	unsigned httpstatuscode;
@@ -438,6 +437,12 @@ private:
 	std::list<webapiclient_zigbeelink_t>::iterator zigbeelinksit;
 	std::list<webapiclient_zigbeecomm_t>::iterator zigbeecommsit;
 	int requestmode; //1=Adding Link, 2=Adding Comm
+
+	//See http://stackoverflow.com/questions/21120361/boostasioasync-write-and-buffers-over-65536-bytes
+	//These variables need to stay allocated while the asio request is active so can't be local to a single function
+  httpclient hc;
+  boost::asio::streambuf commrequest_;
+  boost::asio::streambuf linkrequest_;
 
 public:
 	asioclient(boost::asio::io_service& io_service)
@@ -598,13 +603,12 @@ private:
 
 			hc.addFormField("Mode", "AddComm");
 			hc.addFormField("Data", zigbeecomm_to_json(*zigbeecommsit));
-			boost::asio::streambuf request_;
-			std::ostream request_stream(&request_);
-			debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending request: %s\n", __func__, hc.toString().c_str());
+			std::ostream request_stream(&commrequest_);
+			debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending comm request: %s\n", __func__, hc.toString().c_str());
 			request_stream << hc.toString();
 
 			requestmode=2;
-			boost::asio::async_write(socket_, request_,
+			boost::asio::async_write(socket_, commrequest_,
 					boost::bind(&asioclient::handle_write_request, this,
 						boost::asio::placeholders::error));
 		} else if (!webapiclientlib_getneedtoquit()) {
@@ -639,13 +643,12 @@ private:
 
 			hc.addFormField("Mode", "AddLink");
 			hc.addFormField("Data", zigbeelink_to_json(*zigbeelinksit));
-			boost::asio::streambuf request_;
-			std::ostream request_stream(&request_);
-			debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending request: %s\n", __func__, hc.toString().c_str());
+			std::ostream request_stream(&linkrequest_);
+			debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending link request: %s\n", __func__, hc.toString().c_str());
 			request_stream << hc.toString();
 
 			requestmode=1;
-			boost::asio::async_write(socket_, request_,
+			boost::asio::async_write(socket_, linkrequest_,
 					boost::bind(&asioclient::handle_write_request, this,
 						boost::asio::placeholders::error));
 		} else {
