@@ -133,6 +133,7 @@ else
 	fi
 fi
 
+source "${basedir}/package_info.sh"
 if [ -f "${basedir}/download/${DEMODATABASEPKG}" ] ; then
   echo "Extracting MySQL demo database from ${DEMODATABASETITLE}-${DEMODATABASEVER}"
 	xz -dc "${basedir}/download/${DEMODATABASEPKG}" | tar x
