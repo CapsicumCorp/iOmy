@@ -134,6 +134,9 @@ else
 fi
 
 source "${basedir}/package_info.sh"
+
+echo "Changing to temp assets directory"
+cd "${basedir}/assetstmp"
 if [ -f "${basedir}/download/${DEMODATABASEPKG}" ] ; then
   echo "Extracting MySQL demo database from ${DEMODATABASETITLE}-${DEMODATABASEVER}"
 	xz -dc "${basedir}/download/${DEMODATABASEPKG}" | tar x
