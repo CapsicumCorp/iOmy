@@ -139,10 +139,15 @@ public class InstallWizard {
         // Until a valid password is generated...
         do {
             // ...generate the password.
+
+            // Ensure that the string is empty before the password is generated.
+            password = "";
+
             for (int i = 0; i < length; i++) {
                 r = new Random();
                 password += validChars.charAt(r.nextInt(validChars.length()));
             }
+
         } while (!this.isValidPassword(password));
 
         return password;
