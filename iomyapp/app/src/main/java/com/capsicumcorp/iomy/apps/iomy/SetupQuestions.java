@@ -54,6 +54,8 @@ public class SetupQuestions extends AppCompatActivity {
         //--------------------------------------------------------------------//
         if (chkboxInstallDemo.isChecked()) {
             installWizard.setInstallDemoData(true);
+        } else {
+            installWizard.setInstallDemoData(false);
         }
 
         installWizard.summonNextPage(this, installWizard.PROCEED);
