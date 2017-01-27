@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:text="Install the demonstration"
             android:id="@+id/installDemo"
-            android:onClick="nextPage" />
+            android:checked="true" />
     </LinearLayout>
 
     <Button

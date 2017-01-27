@@ -336,7 +336,7 @@ public class InstallWizard {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(activity);
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putBoolean("pref_run_first_run_wizard", false);
-            editor.putBoolean("pref_demo_data_mode", true);
+            editor.putBoolean("pref_demo_data_mode", this.getInstallDemoData());
 
             //Update other settings
             editor.putString("pref_webserver_hostname", this.hostname);
@@ -465,11 +465,7 @@ public class InstallWizard {
 //    public String getPremiseAndHubTitle()               {return this.premiseAndHubTitle;}
 
     public String getWelcomeMessage()               {return this.welcomeMessage;}
-    public boolean getInstallDemoData()             {
-        return this.installDemoData;
-    }
+    public boolean getInstallDemoData()             {return this.installDemoData;}
 
-    public void setInstallDemoData(boolean b)       {
-        this.installDemoData = b;
-    }
+    public void setInstallDemoData(boolean b)       {this.installDemoData = b;}
 }
