@@ -42,9 +42,9 @@ $aResult                    = array();      //-- ARRAY:         Used to store th
 
 $sPostMode                  = "";           //-- STRING:        Used to store which Mode the API should function in.			--//
 $sPostNetworkAddress        = "";           //-- STRING:        Used to store the "DeviceNetworkAddress" that is passed as a HTTP POST variable.		--//
-$iPostNetworkPort           = "";           //-- INTEGER:       Used to store the "".				--//
-$sPostUsername              = "";           //-- STRING:        Used to store the "".				--//
-$sPostPassword              = "";           //-- STRING:        Used to store the "".				--//
+$iPostNetworkPort           = "";           //-- INTEGER:       Used to store the "".	--//
+$sPostUsername              = "";           //-- STRING:        Used to store the "".	--//
+$sPostPassword              = "";           //-- STRING:        Used to store the "".	--//
 $sPostStreamProfileName     = "";           //-- STRING:        --//
 $sPostThumbProfileName      = "";           //-- STRING:        --//
 $sPostCapabilitiesType      = "";           //-- STRING:        --//
@@ -60,19 +60,19 @@ $aTempFunctionResult3       = array();      //-- ARRAY:         --//
 $bFound                     = false;        //-- BOOLEAN:       Used to indicate if a match is found or not --//
 $iAPICommTypeId             = 0;            //-- INTEGER:       Will hold the the CommTypeId for comparisons --//
 $iLinkPermWrite             = 0;            //-- INTEGER:       --//
-
+$aCommInfo                  = array();      //-- ARRAY:         --//
 
 //------------------------------------------------------------//
 //-- 1.3 - Import Required Libraries                        --//
 //------------------------------------------------------------//
 require_once SITE_BASE.'/restricted/libraries/onvif.php';
 require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';       //-- This should call all the additional libraries needed --//
-require_once SITE_BASE.'/restricted/php/special/versions/0.1.0.php';        //-- This library is used to perform the inserting of a new Onvif Server and Streams into the database --//
+require_once SITE_BASE.'/restricted/libraries/special/dbinsertfunctions.php';        //-- This library is used to perform the inserting of a new Onvif Server and Streams into the database --//
 
 //------------------------------------------------------------//
 //-- 1.4 - Flag an Error as there is no Database access     --//
 //------------------------------------------------------------//
-if( $aRestrictedApiCore['RestrictedDB']===false ) {
+if( $oRestrictedApiCore->bRestrictedDB===false ) {
 	$bError    = true;
 	$sErrMesg .= "Can't access the database! User may not be logged in";
 }
@@ -128,7 +128,7 @@ if($bError===false) {
 			$sPostMode!=="PTZAbsoluteMove"              && $sPostMode!=="PTZTimedMove"                  && 
 			$sPostMode!=="NetAddressCheckForOnvif"      && $sPostMode!=="NetAddressListCapabilities"    && 
 			$sPostMode!=="NetAddressLookupDeviceTime"   && $sPostMode!=="LookupVideoSources"            && 
-			$sPostMode!=="LookupProfiles"               && $sPostMode!=="FetchThumbnail"
+			$sPostMode!=="LookupProfiles"               
 		) {
 			$bError = true;
 			$sErrMesg .= "Error Code:'0101' \n";
@@ -631,8 +631,6 @@ if( $bError===false ) {
 					
 				}
 			}
-			
-			
 		}
 		
 		//================================================================//
@@ -691,7 +689,7 @@ if( $bError===false ) {
 				//-- Extract the desired variables out of the results --//
 				if( $aTempFunctionResult2['Error']===false ) {
 					//-- Extract the Desired Variables --//
-					$iLinkCommType          = $aTempFunctionResult2['Data']['CommTypeId'];
+					
 					//-- Extract the required variables from the function results --//
 					$sPostNetworkAddress    = $aTempFunctionResult2['Data']['LinkConnAddress'];
 					$iPostNetworkPort       = $aTempFunctionResult2['Data']['LinkConnPort'];
@@ -702,10 +700,25 @@ if( $bError===false ) {
 					//-- Flag that this request needs to use the "PhilipsHue" PHP Object to update the device --//
 					$bUsePHPObject = true;
 					
+					//-- Lookup the Comm Info --//
+					$aCommInfo = GetCommInfo( $aTempFunctionResult2['Data']['LinkCommId'] );
+					
+					if( $aCommInfo['Error']===false ) {
+						$iLinkCommType          = $aCommInfo['Data']['CommTypeId'];
+						
+						
+					} else {
+						$bError = true;
+						$iErrCode  = 0304;
+						$sErrMesg .= "Error Code:'0304' \n";
+						$sErrMesg .= "Problem when fetching the Link Comm Info\n";
+						$sErrMesg .= $aCommInfo['ErrMesg'];
+					}
+					
 				} else {
 					$bError = true;
-					$iErrCode  = 0304;
-					$sErrMesg .= "Error Code:'0304' \n";
+					$iErrCode  = 0305;
+					$sErrMesg .= "Error Code:'0305' \n";
 					$sErrMesg .= "Problem when fetching the Link info\n";
 					$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
 				}
@@ -730,8 +743,8 @@ if( $bError===false ) {
 				
 				if( $oPHPOnvifClient->bInitialised===false ) {
 					$bError = true;
-					$iErrCode  = 0305;
-					$sErrMesg .= "Error Code:'0305'\n";
+					$iErrCode  = 0308;
+					$sErrMesg .= "Error Code:'0308'\n";
 					$sErrMesg .= "Couldn't initialise Onvif Class!\n";
 					$sErrMesg .= json_encode( $oPHPOnvifClient->aErrorMessges );
 				}

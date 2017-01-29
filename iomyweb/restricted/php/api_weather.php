@@ -62,10 +62,8 @@ $iPressureIOId              = 0;            //-- INTEGER:       --//
 $iConditionsIOId            = 0;            //-- INTEGER:       --//
 $iWindDirectionIOId         = 0;            //-- INTEGER:       --//
 $iWindSpeedIOId             = 0;            //-- INTEGER:       --//
-
 $bFound                     = false;        //-- BOOLEAN:       --//
 $iCommId                    = 0;            //-- INTEGER:       --//
-
 $iAPICommTypeId             = 0;            //-- INTEGER:       --//
 $iWeatherStationRSTypeId    = 0;            //-- INTEGER:       --//
 
@@ -75,8 +73,6 @@ $iPressureRSTypeId          = 0;            //-- INTEGER:       --//
 $iConditionsRSTypeId        = 0;            //-- INTEGER:       --//
 $iWindDirectionRSTypeId     = 0;            //-- INTEGER:       --//
 $iWindSpeedRSTypeId         = 0;            //-- INTEGER:       --//
-
-
 $sLinkSerial                = "";           //-- STRING:        --//
 $sStationCode               = "";           //-- STRING:        --//
 
@@ -88,6 +84,7 @@ $aLinkResult                = array();      //-- ARRAY:         --//
 $aWeatherIOs                = array();      //-- ARRAY:         --//
 $aStationCodeResult         = array();      //-- ARRAY:         --//
 $aTempFunctionResult        = array();      //-- ARRAY:         --//
+$aCommInfo                  = array();      //-- ARRAY:         Used to hold the Comm Info--//
 
 $bTransactionStarted        = false;        //-- BOOLEAN:       --//
 $bTemp1                     = false;        //-- BOOLEAN:       --//
@@ -115,14 +112,14 @@ $aInsertResult              = array();      //-- ARRAY:         --//
 //-- 1.3 - IMPORT REQUIRED LIBRARIES                        --//
 //------------------------------------------------------------//
 require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';       //-- This should call all the additional libraries needed --//
-require_once SITE_BASE.'/restricted/php/special/versions/0.1.0.php';        //-- This library is used to perform the inserting of a new Onvif Server and Streams into the database --//
+require_once SITE_BASE.'/restricted/libraries/special/dbinsertfunctions.php';        //-- This library is used to perform the inserting of a new Onvif Server and Streams into the database --//
 
-require_once SITE_BASE.'/restricted/libraries/weather_owm.php';
+require_once SITE_BASE.'/restricted/libraries/weather/owm.php';
 
 //------------------------------------------------------------//
 //-- 1.4 - ERROR: There is no database access               --//
 //------------------------------------------------------------//
-if( $aRestrictedApiCore['RestrictedDB']===false ) {
+if( $oRestrictedApiCore->bRestrictedDB===false ) {
 	$bError    = true;
 	$sErrMesg .= "Can't access the database! User may not be logged in";
 }
@@ -275,7 +272,8 @@ if($bError===false) {
 					$sErrMesg .= "Non numeric \"StationCode\" parameter! \n";
 					$sErrMesg .= "Please use a valid \"StationCode\" parameter\n";
 					$sErrMesg .= "eg. \n \"\", \"\", \"\" \n\n";
-				} 
+				}
+				
 			} catch( Exception $e0108 ) {
 				$bError = true;
 				$iErrCode  = 108;
@@ -545,19 +543,29 @@ if( $bError===false ) {
 				
 				if( $aLinkInfo['Error']===false ) {
 					
-					//-- Extract the Desired Variables --//
-					$iLinkCommType    = $aLinkInfo['Data']['CommTypeId'];
-					
 					//-- Extract the required variables from the function results --//
 					$sNetworkPort     = $aLinkInfo['Data']['LinkConnPort'];
 					$sUserToken       = $aLinkInfo['Data']['LinkConnUsername'];
-				
+					
+					$aCommInfo = GetCommInfo( $aLinkInfo['Data']['LinkCommId'] );
+					
+					
+					if( $aCommInfo['Error']===false ) {
+						//-- Extract the Desired Variables --//
+						$iLinkCommType    = $aCommInfo['Data']['CommTypeId'];
+						
+					} else {
+						$bError = true;
+						$iErrCode   = 335;
+						$sErrMesg  .= "Error Code:'0335' \n";
+						$sErrMesg  .= "Problem when looking up the CommInfo!\n";
+						$sErrMesg  .= $aLinkInfo['ErrMesg'];
+					}
 					
 				} else {
-					//-- TODO: Add Error Message --//
 					$bError = true;
-					$iErrCode   = 335;
-					$sErrMesg  .= "Error Code:'0335' \n";
+					$iErrCode   = 336;
+					$sErrMesg  .= "Error Code:'0336' \n";
 					$sErrMesg  .= "Problem when looking up the ThingInfo!\n";
 					$sErrMesg  .= $aLinkInfo['ErrMesg'];
 				}
@@ -584,19 +592,22 @@ if( $bError===false ) {
 						
 						$oWeather = new Weather_OpenWeatherMap( $aWeatherObjectData );
 							
-							
 							if( $oWeather->bInitialised===false ) {
 								$bError = true;
-								$sErrMesg .= "Critical error \n";
+								$iErrCode  = 338;
+								$sErrMesg .= "Error Code:'0338' \n";
+								$sErrMesg .= "Critical error! \n";
+								$sErrMesg .= "Failed to initialise weather object. \n";
+								
 							}
-						
+							
 					//----------------------------------------------------------------------------//
 					//-- ELSE TYPE: Unsupported                                                 --//
 					//----------------------------------------------------------------------------//
 					} else {
 						$bError    = true;
-						$iErrCode  = 336;
-						$sErrMesg .= "Error Code:'0336' \n";
+						$iErrCode  = 339;
+						$sErrMesg .= "Error Code:'0339' \n";
 						$sErrMesg .= "Unsupported Weather Type!";
 					}
 					
@@ -629,7 +640,7 @@ if( $bError===false ) {
 				//--------------------------------------------//
 				//-- Start the Transaction                  --//
 				//--------------------------------------------//
-				$bTransactionStarted = $oRestrictedDB->dbBeginTransaction();
+				$bTransactionStarted = $oRestrictedApiCore->oRestrictedDB->dbBeginTransaction();
 				
 				
 				//----------------------------------------------------------------//
@@ -664,6 +675,7 @@ if( $bError===false ) {
 					}
 				}
 				
+				
 				//--------------------------------------------------------------------//
 				//-- 5.1.4 - If Comm is found then Add the Thing                    --//
 				//--------------------------------------------------------------------//
@@ -675,7 +687,8 @@ if( $bError===false ) {
 						//-----------------------------------------------------//
 						//-- CHECK TO SEE IF THE WEATHER FEED IS SUPPORTED   --//
 						//-----------------------------------------------------//
-							
+						
+						
 						//----------------------------------------------------------------------------//
 						//-- IF TYPE: OpenWeatherMap                                                --//
 						//----------------------------------------------------------------------------//
@@ -688,7 +701,6 @@ if( $bError===false ) {
 								"UserToken"   => $sPostUsername,
 								"WeatherCode" => $sPostStationCode
 							);
-							
 							
 							//----------------------------------------//
 							//-- Create the OpenWeatherMap Object   --//
@@ -790,11 +802,11 @@ if( $bError===false ) {
 			//--------------------------------//
 			if( $bError===true ) {
 				if( $bTransactionStarted===true ) {
-					$oRestrictedDB->dbRollback();
+					$oRestrictedApiCore->oRestrictedDB->dbRollback();
 				}
 			} else {
 				if( $bTransactionStarted===true ) {
-					$oRestrictedDB->dbEndTransaction();
+					$oRestrictedApiCore->oRestrictedDB->dbEndTransaction();
 				}
 			}
 			

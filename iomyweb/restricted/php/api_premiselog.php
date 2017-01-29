@@ -69,7 +69,7 @@ require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';		//-- This
 //------------------------------------------------------------//
 //-- 1.4 - Flag an Error is there is no Database access     --//
 //------------------------------------------------------------//
-if( $aRestrictedApiCore['RestrictedDB']===false ) {
+if( $oRestrictedApiCore->bRestrictedDB===false ) {
 	$bError    = true;
 	$sErrMesg .= "Can't access the database! User may not be logged in";
 }
@@ -248,7 +248,7 @@ if( $bError===false ) {
 					$sErrMesg .= "Error Code:'1307' \n";
 					$sErrMesg .= $aPremiseInfo["ErrMesg"];
 					
-					//var_dump($oRestrictedDB->QueryLogs);
+					//var_dump($oRestrictedApiCore->oRestrictedDB->QueryLogs);
 				}
 
 			} catch( Exception $e1308 ) {

@@ -61,7 +61,7 @@ require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';		//-- This
 //------------------------------------------------------------//
 //-- 1.4 - Flag an Error is there is no Database access     --//
 //------------------------------------------------------------//
-if( $aRestrictedApiCore['RestrictedDB']===false ) {
+if( $oRestrictedApiCore->bRestrictedDB===false ) {
 	$bError    = true;
 	$sErrMesg .= "Can't access the database! User may not be logged in";
 }
@@ -205,6 +205,23 @@ if( $bError===false ) {
 					}
 				}
 				
+				
+				//----------------------------------------------------------------------------//
+				//-- PART 3 - Lookup the Comm                                               --//
+				//----------------------------------------------------------------------------//
+				if( $bError===false ) {
+					$aCommInfo = GetCommInfo( $aLinkResults['Data']['LinkCommId'] );
+					
+					if( $aCommInfo["Error"]===true ) {
+						//-- Display an Error message --//
+						$bError = true;
+						$sErrMesg .= "Error Code:'2403' \n";
+						$sErrMesg .= "Internal API Error! \n";
+						$sErrMesg .= $aCommInfo["ErrMesg"];
+					}
+				}
+				
+				
 				//----------------------------------------------------------------------------//
 				//-- PART 4 - Work out which new ThingState the Thing needs to be set to    --//
 				//----------------------------------------------------------------------------//
@@ -215,7 +232,8 @@ if( $bError===false ) {
 						//----------------------------------------//
 						//-- IF THE API MANAGES THE THING       --//
 						//----------------------------------------//
-						if( $aLinkResults['Data']['CommTypeId']===LookupFunctionConstant("APICommTypeId") ) {
+						if( $aCommInfo['Data']['CommTypeId']===LookupFunctionConstant("APICommTypeId") ) {
+							
 							//----------------------------------------//
 							//-- PHILIPS HUE LIGHT                  --//
 							//----------------------------------------//

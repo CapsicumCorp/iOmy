@@ -219,6 +219,27 @@ function NonDataViewName($sViewType) {
 	} else if( $sViewType==="Icons" ) {
 		$aResult = array( "Error"=>false, "View"=>"VP_ICONS" );
 		
+	//------------------------//
+	//-- WATCHINPUTS VIEWS  --//
+	//------------------------//
+	} else if( $sViewType==="VW_Hub" ) {
+		$aResult = array( "Error"=>false, "View"=>"VW_HUB" );
+		
+	} else if( $sViewType==="VW_Comm" ) {
+		$aResult = array( "Error"=>false, "View"=>"VW_COMM" );
+		
+	} else if( $sViewType==="VW_Link" ) {
+		$aResult = array( "Error"=>false, "View"=>"VW_LINK" );
+		
+	} else if( $sViewType==="VW_Thing" ) {
+		$aResult = array( "Error"=>false, "View"=>"VW_THING" );
+		
+	} else if( $sViewType==="VW_IO" ) {
+		$aResult = array( "Error"=>false, "View"=>"VW_IO" );
+		
+		
+		
+		
 	} else {
 		//-- Unsupported type --//
 		$aResult = array( "Error"=>true, "ErrMesg"=>"Unsupported View" );
@@ -228,9 +249,9 @@ function NonDataViewName($sViewType) {
 
 
 function dbGetCurrentSchema() {
-	global$oRestrictedDB;
+	global $oRestrictedApiCore;
 	
-	$sResult = $oRestrictedDB->DataSchema;
+	$sResult = $oRestrictedApiCore->oRestrictedDB->DataSchema;
 	
 	return $sResult;
 }
@@ -251,7 +272,7 @@ function dbAddPresetLogToPremiseLog( $iUserId, $iPresetLogActionId, $iUTS, $iPre
 	//----------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$bValidNumeric          = false;            //-- BOOLEAN:   Used for checking if a number is valid or not --//
@@ -300,7 +321,7 @@ function dbAddPresetLogToPremiseLog( $iUserId, $iPresetLogActionId, $iUTS, $iPre
 			);
 			
 			//-- Run the SQL Query and save the results --//
-			$aResultInsert = $oRestrictedDB->InputBindUpdateQuery( $sQueryInsert, $aInputValsInsert );
+			$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sQueryInsert, $aInputValsInsert );
 			
 			//----------------------------//
 			//-- Error Checking         --//
@@ -324,7 +345,7 @@ function dbAddPresetLogToPremiseLog( $iUserId, $iPresetLogActionId, $iUTS, $iPre
 	}
 	
 	//echo "-----------<br />\n";
-	//var_dump( $oRestrictedDB->QueryLogs );
+	//var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
 	//echo "-----------<br />\n";
 	
 	//--------------------------------------------//
@@ -345,7 +366,7 @@ function dbGetPremiseLogsBetweenUTS( $iPremiseId, $iStartstamp, $iEndstamp) {
 	//----------------------------------------//
 		
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult        = array();
@@ -411,7 +432,7 @@ function dbGetPremiseLogsBetweenUTS( $iPremiseId, $iStartstamp, $iEndstamp) {
 			array( "Name"=>"LogPresetDesc",             "type"=>"STR" )
 		);
 
-		$aResult = $oRestrictedDB->FullBindQuery($sSQL, $aInputVals, $aOutputCols, 0);
+		$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery($sSQL, $aInputVals, $aOutputCols, 0);
 		//-- Error Catching --//
 		try {
 			if($aResult["Error"] === true) {
@@ -444,7 +465,7 @@ function dbGetCurrentUserDetails() {
 	//----------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult				= array();
@@ -475,7 +496,7 @@ function dbGetCurrentUserDetails() {
 		array( "Name"=>"Username",				"type"=>"STR" )
 	);
 
-	$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+	$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
 	//-- Error Catching --//
 	try {
 		if( $aResult["Error"]===true ) {
@@ -504,7 +525,7 @@ function dbGetCurrentUserInfo() {
 	//----------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult				= array();
@@ -618,7 +639,7 @@ function dbGetCurrentUserInfo() {
 				//----------------------------------------------//
 				//-- 
 				//----------------------------------------------//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
 				
 			}
 		} catch( Exception $e2 ) {
@@ -659,7 +680,7 @@ function dbChangeUserInformation( $iUserInfoId, $iGender, $sTitle, $sGivenames, 
 	//--------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult			= array();	//-- ARRAY:		--//
@@ -697,7 +718,7 @@ function dbChangeUserInformation( $iUserInfoId, $iGender, $sTitle, $sGivenames, 
 				array( "Name"=>"UserInfoId",		"type"=>"BINT",		"value"=>$iUserInfoId	)
 			);
 			
-			$aResult = $oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
 			
 		} catch( Exception $e2 ) {
 			$bError    = true;
@@ -737,7 +758,7 @@ function dbChangeUserAddress( $iUserAddressId, $sAddressLine1, $sAddressLine2, $
 	//--------------------------------------------//
 		
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult			= array();	//-- ARRAY:		--//
@@ -782,7 +803,7 @@ function dbChangeUserAddress( $iUserAddressId, $sAddressLine1, $sAddressLine2, $
 				array( "Name"=>"UserAddressId",			"type"=>"BINT",		"value"=>$iUserAddressId		)
 			);
 			
-			$aResult = $oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
 			
 		} catch( Exception $e2 ) {
 			$bError    = true;
@@ -807,7 +828,7 @@ function dbChangeUserAddress( $iUserAddressId, $sAddressLine1, $sAddressLine2, $
 	
 	//--------------------------------------------//
 	//-- 5.0 Return Results or Error Message    --//
-	//--------------------------------------------// 
+	//--------------------------------------------//
 	if( $bError===false ) {
 		//-- Return that it was successful --//
 		return array( "Error"=>false,	"Data"=>array("Result"=>"Updated succesfully"));
@@ -828,7 +849,7 @@ function dbChangeUserPassword( $sPassword ) {
 	//--------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult            = array();      //-- ARRAY:     --//
@@ -849,7 +870,7 @@ function dbChangeUserPassword( $sPassword ) {
 				array( "Name"=>"NewPassword",           "type"=>"STR",      "value"=>$sPassword     )
 			);
 			
-			$aResult = $oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
 			
 		} catch( Exception $e2 ) {
 			$bError    = true;
@@ -890,7 +911,7 @@ function dbGetUserServerPermissions() {
 	//--------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult            = array();      //-- ARRAY:     --//
@@ -945,7 +966,7 @@ function dbGetUserServerPermissions() {
 			//----------------------------------------------//
 			//-- Execute the SQL Query                    --//
 			//----------------------------------------------//
-			$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
 			
 			
 		}
@@ -993,7 +1014,7 @@ function dbInsertUserInfo( $iGenderId, $sTitle, $sGivennames, $sSurnames, $sDisp
 	//-- 1.0 - Declare Variables                        --//
 	//----------------------------------------------------//
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
@@ -1038,7 +1059,7 @@ function dbInsertUserInfo( $iGenderId, $sTitle, $sGivennames, $sSurnames, $sDisp
 			);
 			
 			//-- Run the SQL Query and save the results --//
-			$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+			$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
 			
 		} catch(Exception $e2) {
 			$bError   = true;
@@ -1083,7 +1104,7 @@ function dbInsertUser( $iUserInfoId, $sUsername, $iUserState ) {
 	//-- 1.0 - Declare Variables                        --//
 	//----------------------------------------------------//
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
@@ -1116,7 +1137,7 @@ function dbInsertUser( $iUserInfoId, $sUsername, $iUserState ) {
 			);
 			
 			//-- Run the SQL Query and save the results --//
-			$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+			$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
 			
 		} catch(Exception $e2) {
 			$bError   = true;
@@ -1160,7 +1181,7 @@ function dbInsertUserAddress( $iUserId, $iLanguageId, $iCountriesId, $iStateProv
 	//-- 1.0 - Declare Variables                        --//
 	//----------------------------------------------------//
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
@@ -1207,7 +1228,7 @@ function dbInsertUserAddress( $iUserId, $iLanguageId, $iCountriesId, $iStateProv
 			);
 			
 			//-- Run the SQL Query and save the results --//
-			$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+			$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
 			
 		} catch(Exception $e2) {
 			$bError   = true;
@@ -1248,7 +1269,7 @@ function dbCreateDatabaseUser( $sUsername, $sPassword, $sLocation ) {
 	//----------------------------------------------------//
 		
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult        = array();
@@ -1268,17 +1289,10 @@ function dbCreateDatabaseUser( $sUsername, $sPassword, $sLocation ) {
 			
 			$aConfigArray = array(
 				'mode'       => 'EncryptedSession',
-				'type'       => 'MySQL',
-				'uri'        => 'mysql:host=devserver.capsicumcorp.com;port=3306;',
-				'charset'    => 'utf8',
-				'schema'     => 'ctm02',
-				'logschema'  => 'ctm02',
-				'viewschema' => 'ctm02'
+				'type'       => 'MySQL'
 			);
 			
-			if( $oRestrictedDB->Initialised===true ) {
-			
-			
+			if( $oRestrictedApiCore->bSecondaryDB===true ) {
 				//----------------------------//
 				//-- CREATE THE USER        --//
 				//----------------------------//
@@ -1286,11 +1300,11 @@ function dbCreateDatabaseUser( $sUsername, $sPassword, $sLocation ) {
 				
 				//-- Input binding --//
 				$aInputValsInsert = array(
-					array( "Name"=>"Password",          "type"=>"STR",          "value"=>$sPassword             )
+					array( "Name"=>"Password",          "type"=>"STR",          "value"=>$sPassword )
 				);
 				
 				//-- Run the SQL Query and save the results --//
-				$aResultInsert = $oRestrictedDB->InputBindNonCommittedCreateQuery( $sSQL1, $aInputValsInsert );
+				$aResultInsert = $oRestrictedApiCore->oSecondaryDB->InputBindUpdateQuery( $sSQL1, $aInputValsInsert );
 				
 				
 				if( $aResultInsert["Error"]===true ) {
@@ -1310,14 +1324,346 @@ function dbCreateDatabaseUser( $sUsername, $sPassword, $sLocation ) {
 					$sSQL2 .= "GRANT SHOW VIEW ON `".$sDBName."`.* TO '".$sUsername."'@'".$sLocation."'; ";
 					
 					
-					$aResult = $oRestrictedDB->NonCommittedCreateQuery( $sSQL2 );
+					$aResult = $oRestrictedApiCore->oSecondaryDB->InputBindUpdateQuery( $sSQL2, array() );
 					
-					if( $aResult["Error"]===true ) {
+					if( $aResult["Error"]!==false ) {
 						$bError    = true;
 						$sErrMesg .= $aResult["ErrMesg"];
 					}
 				}
+			} else {
+				$bError    = true;
+				$sErrMesg .= "Secondary Database Connection is not active!\n";
 			}
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return array( "Error"=>false, "Data"=>array( "Success"=>true ) );
+		
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"CreateDatabaseUser: ".$sErrMesg );
+	}
+}
+
+
+
+function dbSpecialLookupUsersForPremisePerms() {
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+		
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$bError             = false;
+	$sErrMesg           = "";
+	$sSchema            = "";           //-- STRING:    --//
+	$sSQL               = "";           //-- STRING:    --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			
+			//-- Retrieve the Schema name --//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "SELECT \n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`USERSINFO_DISPLAYNAME` \n";
+			$sSQL .= "FROM `".$sSchema."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`USERSINFO` ON `USERS_USERSINFO_FK`=`USERSINFO_PK` \n";
+			$sSQL .= "ORDER BY `USERS_PK` ASC \n";
+			
+			//-- Set the SQL Output Columns --//
+			$aOutputCols = array(
+				array( "Name"=>"UsersId",               "type"=>"INT" ),
+				array( "Name"=>"UserDisplayName",       "type"=>"STR" )
+			);
+			
+			//-- Execute the SQL Query --//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0);
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"GetUsersForPremisePerms: ".$sErrMesg );
+	}
+}
+
+
+function dbSpecialLookupUsersForRoomPerms( $iPremiseId ) {
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+		
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$bError             = false;
+	$sErrMesg           = "";
+	$sSchema            = "";           //-- STRING:    --//
+	$sSQL               = "";           //-- STRING:    --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			
+			//-- Retrieve the Schema name --//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "SELECT \n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`USERSINFO_DISPLAYNAME` \n";
+			$sSQL .= "FROM `".$sSchema."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`USERSINFO` ON `USERS_USERSINFO_FK`=`USERSINFO_PK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`PREMISE` ON `PREMISE_PK`=`PERMPREMISE_PREMISE_FK` \n";
+			$sSQL .= "WHERE `PREMISE_PK` = :PremiseId ";
+			$sSQL .= "AND `PERMPREMISE_READ` = 1 ";
+			$sSQL .= "ORDER BY `USERS_PK` ASC \n";
+			
+			//-- Set the SQL Input Parameters --//
+			$aInputVals = array(
+				array( "Name"=>"PremiseId",     "type"=>"INT",      "value"=>$iPremiseId )
+			);
+			
+			//-- Set the SQL Output Columns --//
+			$aOutputCols = array(
+				array( "Name"=>"UsersId",               "type"=>"INT" ),
+				array( "Name"=>"UserDisplayName",       "type"=>"STR" )
+			);
+			
+			//-- Execute the SQL Query --//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0);
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"GetUsersForRoomPerms: ".$sErrMesg );
+	}
+}
+
+
+function dbSpecialOtherUsersPremisePermissions( $iUserId, $iPremiseId ) {
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+		
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$bError             = false;
+	$sErrMesg           = "";
+	$sSchema            = "";           //-- STRING:    --//
+	$sSQL               = "";           //-- STRING:    --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			//-- Retrieve the Schema name --//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "SELECT ";
+			$sSQL .= "    `USERS_PK`, ";
+			$sSQL .= "    `PERMPREMISE_PK`, ";
+			$sSQL .= "    `PERMPREMISE_OWNER`, ";
+			$sSQL .= "    `PERMPREMISE_ROOMADMIN`, ";
+			$sSQL .= "    `PERMPREMISE_WRITE`, ";
+			$sSQL .= "    `PERMPREMISE_STATETOGGLE`, ";
+			$sSQL .= "    `PERMPREMISE_READ`, ";
+			$sSQL .= "    `PREMISE_PK`, ";
+			$sSQL .= "    `PREMISE_NAME` ";
+			$sSQL .= "FROM `".$sSchema."`.`USERS` ";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`PREMISE` ON `PREMISE_PK`=`PERMPREMISE_PREMISE_FK` \n";
+			$sSQL .= "WHERE `PREMISE_PK` = :PremiseId ";
+			$sSQL .= "AND `USERS_PK` = :UserId ";
+			$sSQL .= "LIMIT 1 ";
+			
+			
+			//-- Set the SQL Input Parameters --//
+			$aInputVals = array(
+				array( "Name"=>"PremiseId",     "type"=>"INT",      "value"=>$iPremiseId ),
+				array( "Name"=>"UserId",        "type"=>"INT",      "value"=>$iUserId    )
+			);
+			
+			
+			//-- Set the SQL Output Columns --//
+			$aOutputCols = array(
+				array( "Name"=>"UsersId",               "type"=>"INT" ),
+				array( "Name"=>"PermId",                "type"=>"INT" ),
+				array( "Name"=>"PermOwner",             "type"=>"INT" ),
+				array( "Name"=>"PermRoomAdmin",         "type"=>"INT" ),
+				array( "Name"=>"PermWrite",             "type"=>"INT" ),
+				array( "Name"=>"PermStateToggle",       "type"=>"INT" ),
+				array( "Name"=>"PermRead",              "type"=>"INT" ),
+				array( "Name"=>"PremiseId",             "type"=>"INT" ),
+				array( "Name"=>"PremiseName",           "type"=>"STR" )
+			);
+			
+			//-- Execute the SQL Query --//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1);
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"GetOtherUsersPremisePerms: ".$sErrMesg );
+	}
+}
+
+
+function dbInsertUserPremisePermissions( $iUserId, $iPremiseId, $iPermRoomAdmin, $iPermWriter, $iPermStateToggle, $iPermRead ) {
+	//------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                       --//
+	//--    This function is used to add the default data to the database.  --//
+	//------------------------------------------------------------------------//
+	
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught. --//
+	$aInputValsInsert   = array();      //-- ARRAY:     SQL bind input parameters. --//
+	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function. --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			//-- Retrieve the Schema name --//
+			$sSchema = dbGetCurrentSchema();
+			
+			//----------------------------------------//
+			//-- SQL Query - Add Premise Perm       --//
+			//----------------------------------------//
+			$sSQL .= "INSERT INTO `".$sSchema."`.`PERMPREMISE` ";
+			$sSQL .= "( ";
+			$sSQL .= "    `PERMPREMISE_USERS_FK`,    `PERMPREMISE_PREMISE_FK`, ";
+			$sSQL .= "    `PERMPREMISE_OWNER`,       `PERMPREMISE_WRITE`, ";
+			$sSQL .= "    `PERMPREMISE_STATETOGGLE`, `PERMPREMISE_READ`, ";
+			$sSQL .= "    `PERMPREMISE_ROOMADMIN` ";
+			$sSQL .= ") VALUES ( ";
+			$sSQL .= "    :UserId,          :PremiseId, ";
+			$sSQL .= "    0,                :PermWriter, ";
+			$sSQL .= "    :PermStateToggle, :PermRead, ";
+			$sSQL .= "    :PermRoomAdmin ";
+			$sSQL .= ") ";
+			
+			
+			//-- Input binding --//
+			$aInputValsInsert = array(
+				array( "Name"=>"UserId",                  "type"=>"INT",          "value"=>$iUserId             ),
+				array( "Name"=>"PremiseId",               "type"=>"INT",          "value"=>$iPremiseId          ),
+				array( "Name"=>"PermWriter",              "type"=>"INT",          "value"=>$iPermWriter         ),
+				array( "Name"=>"PermStateToggle",         "type"=>"INT",          "value"=>$iPermStateToggle    ),
+				array( "Name"=>"PermRead",                "type"=>"INT",          "value"=>$iPermRead           ),
+				array( "Name"=>"PermRoomAdmin",           "type"=>"INT",          "value"=>$iPermRoomAdmin      )
+			);
+			
+			//-- Run the SQL Query and save the results --//
+			$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindInsertQuery( $sSQL, $aInputValsInsert );
 			
 		} catch(Exception $e2) {
 			$bError   = true;
@@ -1330,9 +1676,9 @@ function dbCreateDatabaseUser( $sUsername, $sPassword, $sLocation ) {
 	//----------------------------------------------------//
 	if( $bError===false ) {
 		try {
-			if( $aResult["Error"]===true ) {
+			if( $aResultInsert["Error"]===true ) {
 				$bError    = true;
-				$sErrMesg .= $aResult["ErrMesg"];
+				$sErrMesg .= $aResultInsert["ErrMesg"];
 			}
 		} catch( Exception $e3) {
 			//-- TODO: Write error message for when Database Library returns an unexpected result --//
@@ -1347,7 +1693,372 @@ function dbCreateDatabaseUser( $sUsername, $sPassword, $sLocation ) {
 		return $aResultInsert;
 		
 	} else {
-		return array( "Error"=>true, "ErrMesg"=>"CreateDatabaseUser: ".$sErrMesg );
+//		var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
+		return array( "Error"=>true, "ErrMesg"=>"InsertUserPremisePermission: ".$sErrMesg );
+	}
+}
+
+function dbUpdateUserPremisePermissions( $iPremisePermId, $iPermRoomAdmin , $iPermWriter, $iPermStateToggle, $iPermRead ) {
+	//------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                       --//
+	//--    This function is used to add the default data to the database.  --//
+	//------------------------------------------------------------------------//
+	
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught. --//
+	$aInputValsInsert   = array();      //-- ARRAY:     SQL bind input parameters. --//
+	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function. --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			//-- Retrieve the Schema name --//
+			$sSchema = dbGetCurrentSchema();
+			
+			//----------------------------------------//
+			//-- SQL Query - Update Premise Perm    --//
+			//----------------------------------------//
+			
+			$sSQL .= "UPDATE `".$sSchema."`.`PERMPREMISE` ";
+			$sSQL .= "SET ";
+			$sSQL .= "    `PERMPREMISE_WRITE`        = :PermWriter, ";
+			$sSQL .= "    `PERMPREMISE_STATETOGGLE`  = :PermStateToggle, ";
+			$sSQL .= "    `PERMPREMISE_READ`         = :PermRead, ";
+			$sSQL .= "    `PERMPREMISE_ROOMADMIN`    = :PermRoomAdmin ";
+			$sSQL .= "WHERE `PERMPREMISE_PK`         = :PermPremiseId ";
+			
+			//-- Input binding --//
+			$aInputValsInsert = array(
+				array( "Name"=>"PermWriter",              "type"=>"INT",          "value"=>$iPermWriter         ),
+				array( "Name"=>"PermStateToggle",         "type"=>"INT",          "value"=>$iPermStateToggle    ),
+				array( "Name"=>"PermRead",                "type"=>"INT",          "value"=>$iPermRead           ),
+				array( "Name"=>"PermRoomAdmin",           "type"=>"INT",          "value"=>$iPermRoomAdmin      ),
+				array( "Name"=>"PermPremiseId",           "type"=>"INT",          "value"=>$iPremisePermId      )
+			);
+			
+			//-- Run the SQL Query and save the results --//
+			$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputValsInsert );
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResultInsert["Error"]===true ) {
+				$bError    = true;
+				$sErrMesg .= $aResultInsert["ErrMesg"];
+			}
+		} catch( Exception $e3) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return $aResultInsert;
+		
+	} else {
+//		var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
+		return array( "Error"=>true, "ErrMesg"=>"InsertUserPremisePermission: ".$sErrMesg );
+	}
+}
+
+
+
+
+
+function dbSpecialOtherUsersRoomPermissions( $iUserId, $iRoomId ) {
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$bError             = false;
+	$sErrMesg           = "";
+	$sSchema            = "";           //-- STRING:    --//
+	$sSQL               = "";           //-- STRING:    --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			//-- Retrieve the Schema name --//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "SELECT ";
+			$sSQL .= "    `USERS_PK`, ";
+			$sSQL .= "    `PERMROOMS_PK`, ";
+			$sSQL .= "    `PERMROOMS_WRITE`, ";
+			$sSQL .= "    `PERMROOMS_READ`, ";
+			$sSQL .= "    `PERMROOMS_STATETOGGLE`, ";
+			$sSQL .= "    `PERMROOMS_DATAREAD`, ";
+			$sSQL .= "    `ROOMS_PK`, ";
+			$sSQL .= "    `ROOMS_NAME`, ";
+			$sSQL .= "    `ROOMS_FLOOR`, ";
+			$sSQL .= "    `ROOMS_DESC`, ";
+			$sSQL .= "    `ROOMTYPE_PK`, ";
+			$sSQL .= "    `ROOMTYPE_NAME`, ";
+			$sSQL .= "    `ROOMTYPE_OUTDOORS` ";
+			$sSQL .= "FROM `".$sSchema."`.`USERS` ";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` ";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` ";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`ROOMTYPE` ON `ROOMS_ROOMTYPE_FK`=`ROOMTYPE_PK` ";
+			$sSQL .= "WHERE `ROOMS_PK` = :RoomsId ";
+			$sSQL .= "AND `USERS_PK` = :UserId ";
+			$sSQL .= "LIMIT 1 ";
+			
+			//-- Set the SQL Input Parameters --//
+			$aInputVals = array(
+				array( "Name"=>"RoomsId",       "type"=>"INT",      "value"=>$iRoomId ),
+				array( "Name"=>"UserId",        "type"=>"INT",      "value"=>$iUserId  )
+			);
+			
+			//-- Set the SQL Output Columns --//
+			$aOutputCols = array(
+				array( "Name"=>"UsersId",               "type"=>"INT" ),
+				array( "Name"=>"PermId",                "type"=>"INT" ),
+				array( "Name"=>"PermWrite",             "type"=>"INT" ),
+				array( "Name"=>"PermRead",              "type"=>"INT" ),
+				array( "Name"=>"PermStateToggle",       "type"=>"INT" ),
+				array( "Name"=>"PermDataRead",          "type"=>"INT" ),
+				array( "Name"=>"RoomId",                "type"=>"INT" ),
+				array( "Name"=>"RoomName",              "type"=>"STR" ),
+				array( "Name"=>"RoomFloor",             "type"=>"INT" ),
+				array( "Name"=>"RoomDesc",              "type"=>"STR" ),
+				array( "Name"=>"RoomTypeId",            "type"=>"INT" ),
+				array( "Name"=>"RoomTypeName",          "type"=>"STR" ),
+				array( "Name"=>"RoomTypeOutdoors",      "type"=>"INT" )
+			);
+			
+			//-- Execute the SQL Query --//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1);
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"GetOtherUsersRoomPerms: ".$sErrMesg );
+
+	}
+}
+
+
+function dbInsertUserRoomPermissions( $iUserId, $iRoomId, $iPermRead, $iPermWriter, $iPermStateToggle, $iPermDataRead ) {
+	//------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                       --//
+	//--    This function is used to add the default data to the database.  --//
+	//------------------------------------------------------------------------//
+	
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught. --//
+	$aInputValsInsert   = array();      //-- ARRAY:     SQL bind input parameters. --//
+	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function. --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			//-- Retrieve the Schema name --//
+			$sSchema = dbGetCurrentSchema();
+			
+			//----------------------------------------//
+			//-- SQL Query - Add Premise Perm       --//
+			//----------------------------------------//
+			$sSQL .= "INSERT INTO `".$sSchema."`.`PERMROOMS` ";
+			$sSQL .= "( ";
+			$sSQL .= "    `PERMROOMS_USERS_FK`,    `PERMROOMS_ROOMS_FK`, ";
+			$sSQL .= "    `PERMROOMS_READ`,        `PERMROOMS_WRITE`, ";
+			$sSQL .= "    `PERMROOMS_STATETOGGLE`, `PERMROOMS_DATAREAD` ";
+			$sSQL .= ") VALUES ( ";
+			$sSQL .= "    :UserId,          :RoomId, ";
+			$sSQL .= "    :PermRead,        :PermWriter, ";
+			$sSQL .= "    :PermStateToggle, :PermDataRead ";
+			$sSQL .= ") ";
+			
+			
+			//-- Input binding --//
+			$aInputValsInsert = array(
+				array( "Name"=>"UserId",                  "type"=>"INT",          "value"=>$iUserId             ),
+				array( "Name"=>"RoomId",                  "type"=>"INT",          "value"=>$iRoomId             ),
+				array( "Name"=>"PermWriter",              "type"=>"INT",          "value"=>$iPermWriter         ),
+				array( "Name"=>"PermStateToggle",         "type"=>"INT",          "value"=>$iPermStateToggle    ),
+				array( "Name"=>"PermRead",                "type"=>"INT",          "value"=>$iPermRead           ),
+				array( "Name"=>"PermDataRead",            "type"=>"INT",          "value"=>$iPermDataRead       )
+			);
+			
+			//-- Run the SQL Query and save the results --//
+			$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindInsertQuery( $sSQL, $aInputValsInsert );
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResultInsert["Error"]===true ) {
+				$bError    = true;
+				$sErrMesg .= $aResultInsert["ErrMesg"];
+			}
+		} catch( Exception $e3) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return $aResultInsert;
+		
+	} else {
+//		var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
+		return array( "Error"=>true, "ErrMesg"=>"InsertUserRoomPermission: ".$sErrMesg );
+	}
+}
+
+function dbUpdateUserRoomPermissions( $iRoomPermId, $iPermRead, $iPermWriter, $iPermStateToggle, $iPermDataRead ) {
+	//------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                       --//
+	//--    This function is used to add the default data to the database.  --//
+	//------------------------------------------------------------------------//
+	
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught. --//
+	$aInputValsInsert   = array();      //-- ARRAY:     SQL bind input parameters. --//
+	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function. --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			//-- Retrieve the Schema name --//
+			$sSchema = dbGetCurrentSchema();
+			
+			//----------------------------------------//
+			//-- SQL Query - Update Room Perm      --//
+			//----------------------------------------//
+			
+			$sSQL .= "UPDATE `".$sSchema."`.`PERMROOMS` ";
+			$sSQL .= "SET ";
+			$sSQL .= "    `PERMROOMS_WRITE`          = :PermWriter, ";
+			$sSQL .= "    `PERMROOMS_STATETOGGLE`    = :PermStateToggle, ";
+			$sSQL .= "    `PERMROOMS_READ`           = :PermRead, ";
+			$sSQL .= "    `PERMROOMS_DATAREAD`       = :PermDataRead ";
+			$sSQL .= "WHERE `PERMROOMS_PK`           = :PermRoomId ";
+			
+			//-- Input binding --//
+			$aInputValsInsert = array(
+				array( "Name"=>"PermWriter",              "type"=>"INT",          "value"=>$iPermWriter         ),
+				array( "Name"=>"PermStateToggle",         "type"=>"INT",          "value"=>$iPermStateToggle    ),
+				array( "Name"=>"PermRead",                "type"=>"INT",          "value"=>$iPermRead           ),
+				array( "Name"=>"PermDataRead",            "type"=>"INT",          "value"=>$iPermDataRead       ),
+				array( "Name"=>"PermRoomId",              "type"=>"INT",          "value"=>$iRoomPermId         )
+			);
+			
+			//-- Run the SQL Query and save the results --//
+			$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputValsInsert );
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResultInsert["Error"]===true ) {
+				$bError    = true;
+				$sErrMesg .= $aResultInsert["ErrMesg"];
+			}
+		} catch( Exception $e3) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return $aResultInsert;
+		
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"InsertUserRoomPermission: ".$sErrMesg );
 	}
 }
 
@@ -1361,21 +2072,20 @@ function dbGetPremisesInfoFromPremiseId( $iId ) {
 	//----------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
-	$aResult			= array();		//-- ARRAY:		--//
-	$sSQL				= "";			//-- STRING:	Used to store the SQL string so it can be passed to the database functions. --//
-	$bError				= false;		//-- BOOLEAN:		--//
-	$sErrMesg			= "";			//-- STRING:		--//
-	$sView				= "";			//-- STRING:		--//
-	
-	$aTemporaryView		= array();		//-- ARRAY:		A array to store information about which view to use like the viewname and columns. --//
-	$aInputVals			= array();		//-- ARRAY:		SQL bind input parameters --//
-	$aOutputCols		= array();		//-- ARRAY:		An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;        //-- BOOLEAN:   --//
+	$sErrMesg           = "";           //-- STRING:    --//
+	$sView              = "";           //-- STRING:    --//
+	$aTemporaryView     = array();      //-- ARRAY:     A array to store information about which view to use like the viewname and columns. --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
 	
 	//----------------------------------------//
-	//-- 2.0 - SQL Preperation				--//
+	//-- 2.0 - SQL Preperation              --//
 	//----------------------------------------//
 	if( $bError===false) {
 		try {
@@ -1385,16 +2095,17 @@ function dbGetPremisesInfoFromPremiseId( $iId ) {
 				//-- if an error has occurred --//
 				$bError = true;
 				$sErrMesg = $aTemporaryView["ErrMesg"];
-
+				
 			} else {
 				//-- store the view --//
 				$sView = $aTemporaryView["View"];
-
+				
 				$sSQL .= "SELECT ";
-				$sSQL .= "    `PERMISSIONS_OWNER`, ";
-				$sSQL .= "    `PERMISSIONS_WRITE`, ";
-				$sSQL .= "    `PERMISSIONS_STATETOGGLE`, ";
-				$sSQL .= "    `PERMISSIONS_READ`, ";
+				$sSQL .= "    `PERMPREMISE_OWNER`, ";
+				$sSQL .= "    `PERMPREMISE_WRITE`, ";
+				$sSQL .= "    `PERMPREMISE_STATETOGGLE`, ";
+				$sSQL .= "    `PERMPREMISE_READ`, ";
+				$sSQL .= "    `PERMPREMISE_ROOMADMIN`, ";
 				$sSQL .= "    `PREMISE_PK`, ";
 				$sSQL .= "    `PREMISE_NAME`, ";
 				$sSQL .= "    `PREMISE_DESCRIPTION`, ";
@@ -1410,34 +2121,35 @@ function dbGetPremisesInfoFromPremiseId( $iId ) {
 				$sSQL .= "FROM `".$sView."` ";
 				$sSQL .= "WHERE `PREMISE_PK` = :PremiseId ";
 				$sSQL .= "LIMIT 1 ";
-
+				
 				//-- Set the SQL Input Parameters --//
 				$aInputVals = array(
-					array( "Name"=>"PremiseId",		"type"=>"INT",		"value"=>$iId		)
+					array( "Name"=>"PremiseId",     "type"=>"INT",      "value"=>$iId )
 				);
-					
+				
 				//-- Set the SQL Output Columns --//
 				$aOutputCols = array(
-					array( "Name"=>"PermOwner",						"type"=>"INT" ),
-					array( "Name"=>"PermWrite",						"type"=>"INT" ),
-					array( "Name"=>"PermStateToggle",				"type"=>"INT" ),
-					array( "Name"=>"PermRead",						"type"=>"INT" ),
-					array( "Name"=>"PremiseId",						"type"=>"INT" ),
-					array( "Name"=>"PremiseName",					"type"=>"STR" ),
-					array( "Name"=>"PremiseDesc",					"type"=>"STR" ),
-					array( "Name"=>"PremiseInfoId",					"type"=>"INT" ),
-					array( "Name"=>"BedroomsId",					"type"=>"INT" ),
-					array( "Name"=>"BedroomsName",					"type"=>"STR" ),
-					array( "Name"=>"OccupantsId",					"type"=>"INT" ),
-					array( "Name"=>"OccupantsName",					"type"=>"STR" ),
-					array( "Name"=>"RoomsId",						"type"=>"INT" ),
-					array( "Name"=>"RoomsName",						"type"=>"STR" ),
-					array( "Name"=>"FloorsId",						"type"=>"INT" ),
-					array( "Name"=>"FloorsName",					"type"=>"STR" )
+					array( "Name"=>"PermOwner",             "type"=>"INT" ),
+					array( "Name"=>"PermWrite",             "type"=>"INT" ),
+					array( "Name"=>"PermStateToggle",       "type"=>"INT" ),
+					array( "Name"=>"PermRead",              "type"=>"INT" ),
+					array( "Name"=>"PermRoomAdmin",         "type"=>"INT" ),
+					array( "Name"=>"PremiseId",             "type"=>"INT" ),
+					array( "Name"=>"PremiseName",           "type"=>"STR" ),
+					array( "Name"=>"PremiseDesc",           "type"=>"STR" ),
+					array( "Name"=>"PremiseInfoId",         "type"=>"INT" ),
+					array( "Name"=>"BedroomsId",            "type"=>"INT" ),
+					array( "Name"=>"BedroomsName",          "type"=>"STR" ),
+					array( "Name"=>"OccupantsId",           "type"=>"INT" ),
+					array( "Name"=>"OccupantsName",         "type"=>"STR" ),
+					array( "Name"=>"RoomsId",               "type"=>"INT" ),
+					array( "Name"=>"RoomsName",             "type"=>"STR" ),
+					array( "Name"=>"FloorsId",              "type"=>"INT" ),
+					array( "Name"=>"FloorsName",            "type"=>"STR" )
 				);
 				
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1);
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1);
 			}
 		} catch( Exception $e2 ) {
 			$bError   = true;
@@ -1476,7 +2188,7 @@ function dbGetPremisesAddressFromPremiseId( $iPremiseId ) {
 	//----------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult            = array();      //-- ARRAY:         --//
@@ -1506,10 +2218,10 @@ function dbGetPremisesAddressFromPremiseId( $iPremiseId ) {
 				$sView = $aTemporaryView["View"];
 
 				$sSQL .= "SELECT ";
-				$sSQL .= "    `PERMISSIONS_OWNER`, ";
-				$sSQL .= "    `PERMISSIONS_WRITE`, ";
-				$sSQL .= "    `PERMISSIONS_STATETOGGLE`, ";
-				$sSQL .= "    `PERMISSIONS_READ`, ";
+				$sSQL .= "    `PERMPREMISE_OWNER`, ";
+				$sSQL .= "    `PERMPREMISE_WRITE`, ";
+				$sSQL .= "    `PERMPREMISE_STATETOGGLE`, ";
+				$sSQL .= "    `PERMPREMISE_READ`, ";
 				$sSQL .= "    `PREMISE_PK`, ";
 				$sSQL .= "    `PREMISE_NAME`, ";
 				$sSQL .= "    `PREMISE_DESCRIPTION`, ";
@@ -1541,7 +2253,7 @@ function dbGetPremisesAddressFromPremiseId( $iPremiseId ) {
 
 				//-- Set the SQL Input Parameters --//
 				$aInputVals = array(
-					array( "Name"=>"PremiseId",		"type"=>"INT",		"value"=>$iPremiseId		)
+					array( "Name"=>"PremiseId",		"type"=>"INT",		"value"=>$iPremiseId )
 				);
 					
 					
@@ -1579,7 +2291,7 @@ function dbGetPremisesAddressFromPremiseId( $iPremiseId ) {
 				);
 				
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1);
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1);
 			}
 		} catch( Exception $e2 ) {
 			$bError   = true;
@@ -1588,7 +2300,7 @@ function dbGetPremisesAddressFromPremiseId( $iPremiseId ) {
 	}
 
 	//--------------------------------------------//
-	//-- 4.0 - Error Check						--//
+	//-- 4.0 - Error Check                      --//
 	//--------------------------------------------//
 	if( $bError===false ) {
 		try {
@@ -1602,7 +2314,7 @@ function dbGetPremisesAddressFromPremiseId( $iPremiseId ) {
 	}
 
 	//--------------------------------------------//
-	//-- 5.0 - Return Results or Error Message	--//
+	//-- 5.0 - Return Results or Error Message  --//
 	//--------------------------------------------//
 	if( $bError===false ) {
 		return array( "Error"=>false,	"Data"=>$aResult["Data"] );
@@ -1619,7 +2331,7 @@ function dbChangePremiseName( $iPremiseId, $sName ) {
 	//--------------------------------------------//
 		
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult			= array();	//-- ARRAY:		--//
@@ -1644,7 +2356,7 @@ function dbChangePremiseName( $iPremiseId, $sName ) {
 				array( "Name"=>"PremiseId",				"type"=>"BINT",		"value"=>$iPremiseId	)
 			);
 			
-			$aResult = $oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
 			
 		} catch( Exception $e2 ) {
 			$bError    = true;
@@ -1683,7 +2395,7 @@ function dbChangePremiseDesc( $iPremiseId, $sDescription ) {
 	//--------------------------------------------//
 		
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult			= array();	//-- ARRAY:		--//
@@ -1707,7 +2419,7 @@ function dbChangePremiseDesc( $iPremiseId, $sDescription ) {
 				array( "Name"=>"PremiseId",			"type"=>"BINT",		"value"=>$iPremiseId		)
 			);
 			
-			$aResult = $oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
 			
 		} catch( Exception $e2 ) {
 			$bError    = true;
@@ -1749,7 +2461,7 @@ function dbChangePremiseAddress( $iPremiseAddressId, $sAddressLine1, $sAddressLi
 	//--------------------------------------------//
 		
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult			= array();	//-- ARRAY:		--//
@@ -1788,7 +2500,7 @@ function dbChangePremiseAddress( $iPremiseAddressId, $sAddressLine1, $sAddressLi
 				array( "Name"=>"PremiseAddressId",		"type"=>"BINT",		"value"=>$iPremiseAddressId		)
 			);
 			
-			$aResult = $oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
 			
 		} catch( Exception $e2 ) {
 			$bError    = true;
@@ -1831,7 +2543,7 @@ function dbChangePremiseInfo( $iPremiseInfoId, $sPostInfoOccupants, $sPostInfoBe
 	//--------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult			= array();	//-- ARRAY:		--//
@@ -1862,7 +2574,7 @@ function dbChangePremiseInfo( $iPremiseInfoId, $sPostInfoOccupants, $sPostInfoBe
 				array( "Name"=>"PremiseInfoId",				"type"=>"BINT",		"value"=>$iPremiseInfoId		)
 			);
 			
-			$aResult = $oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
 			
 		} catch( Exception $e2 ) {
 			$bError    = true;
@@ -1905,27 +2617,27 @@ function dbChangePremiseInfo( $iPremiseInfoId, $sPostInfoOccupants, $sPostInfoBe
 
 function dbGetRoomInfoFromRoomId( $iRoomId ) {
 	//----------------------------------------//
-	//-- 1.0 - Declare Variables			--//
+	//-- 1.0 - Declare Variables            --//
 	//----------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
-	$aResult			= array();			//-- ARRAY:		--//
-	$aReturn			= array();
-	$sSQL				= "";				//-- STRING:	Used to store the SQL string so it can be passed to the database functions. --//
-	$bError				= false;			//-- BOOL:		--//
-	$sErrMesg			= "";				//-- STRING:		--//
-	$sView				= "";				//-- STRING:		--//
+	$aResult            = array();          //-- ARRAY:     --//
+	$aReturn            = array();          //-- ARRAY:      --//
+	$sSQL               = "";               //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;            //-- BOOL:      --//
+	$sErrMesg           = "";               //-- STRING:    --//
+	$sView              = "";               //-- STRING:    --//
 	
-	$aTemporaryView		= array();			//-- ARRAY: A array to store information about which view to use like the viewname and columns. --//
-	$aInputVals			= array();			//-- ARRAY: SQL bind input parameters --//
-	$aOutputColsId		= array();			//-- ARRAY: An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	$aTemporaryView     = array();          //-- ARRAY:     A array to store information about which view to use like the viewname and columns. --//
+	$aInputVals         = array();          //-- ARRAY:     SQL bind input parameters --//
+	$aOutputColsId      = array();          //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
 
 
 	//----------------------------------------//
-	//-- 2.0 - SQL Preperation				--//
+	//-- 2.0 - SQL Preperation              --//
 	//----------------------------------------//
 	if($bError===false) {
 		try {
@@ -1941,12 +2653,17 @@ function dbGetRoomInfoFromRoomId( $iRoomId ) {
 				$sView = $aTemporaryView["View"];
 
 				$sSQL .= "SELECT ";
-				$sSQL .= "	`PERMISSIONS_OWNER`, ";
-				$sSQL .= "	`PERMISSIONS_WRITE`, ";
-				$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
-				$sSQL .= "	`PERMISSIONS_READ`, ";
-				$sSQL .= "	`PREMISE_PK`, ";
-				$sSQL .= "	`PREMISE_NAME`, ";
+				//$sSQL .= "	`PERMISSIONS_OWNER`, ";
+				//$sSQL .= "	`PERMISSIONS_WRITE`, ";
+				//$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
+				//$sSQL .= "	`PERMISSIONS_READ`, ";
+				//$sSQL .= "	`PREMISE_PK`, ";
+				//$sSQL .= "	`PREMISE_NAME`, ";
+				$sSQL .= "	`PERMROOMS_READ`, ";
+				$sSQL .= "	`PERMROOMS_WRITE`, ";
+				$sSQL .= "	`PERMROOMS_STATETOGGLE`, ";
+				$sSQL .= "	`PERMROOMS_DATAREAD`, ";
+				$sSQL .= "	`ROOMS_PREMISE_FK`, ";
 				$sSQL .= "	`ROOMS_PK`, ";
 				$sSQL .= "	`ROOMS_NAME`, ";
 				$sSQL .= "	`ROOMS_FLOOR`, ";
@@ -1965,13 +2682,17 @@ function dbGetRoomInfoFromRoomId( $iRoomId ) {
 				
 				//-- Set the SQL Output Columns --//
 				$aOutputColsId = array(
-					array( "Name"=>"PermOwner",					"type"=>"INT" ),
+					//array( "Name"=>"PermOwner",					"type"=>"INT" ),
+					//array( "Name"=>"PermWrite",					"type"=>"INT" ),
+					//array( "Name"=>"PermStateToggle",			"type"=>"INT" ),
+					//array( "Name"=>"PermRead",					"type"=>"INT" ),
+					//array( "Name"=>"PremiseId",					"type"=>"INT" ),
+					//array( "Name"=>"PremiseName",				"type"=>"STR" ),
+					array( "Name"=>"PermRead",					"type"=>"INT" ),
 					array( "Name"=>"PermWrite",					"type"=>"INT" ),
 					array( "Name"=>"PermStateToggle",			"type"=>"INT" ),
-					array( "Name"=>"PermRead",					"type"=>"INT" ),
+					array( "Name"=>"PermDataRead",				"type"=>"INT" ),
 					array( "Name"=>"PremiseId",					"type"=>"INT" ),
-					array( "Name"=>"PremiseName",				"type"=>"STR" ),
-					
 					array( "Name"=>"RoomId",					"type"=>"INT" ),
 					array( "Name"=>"RoomName",					"type"=>"STR" ),
 					array( "Name"=>"RoomFloor",					"type"=>"INT" ),
@@ -1982,7 +2703,7 @@ function dbGetRoomInfoFromRoomId( $iRoomId ) {
 				);
 
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery($sSQL, $aInputVals, $aOutputColsId, 1);
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery($sSQL, $aInputVals, $aOutputColsId, 1);
 			}
 		} catch(Exception $e2) {
 			$bError   = true;
@@ -1991,7 +2712,7 @@ function dbGetRoomInfoFromRoomId( $iRoomId ) {
 	}
 
 	//--------------------------------------------//
-	//-- 4.0 - Error Check						--//
+	//-- 4.0 - Error Check                      --//
 	//--------------------------------------------//
 	if($bError===false) {
 		try {
@@ -2005,7 +2726,7 @@ function dbGetRoomInfoFromRoomId( $iRoomId ) {
 	}
 
 	//--------------------------------------------//
-	//-- 5.0 - Return Results or Error Message	--//
+	//-- 5.0 - Return Results or Error Message  --//
 	//--------------------------------------------// 
 	if($bError===false) {
 		return array( "Error"=>false, "Data"=>$aResult["Data"] );
@@ -2014,15 +2735,119 @@ function dbGetRoomInfoFromRoomId( $iRoomId ) {
 	}
 }
 
+function dbGetFirstRoomIdFromRoomList() {
+	//----------------------------------------//
+	//-- 1.0 - Declare Variables            --//
+	//----------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$aResult            = array();          //-- ARRAY:     --//
+	$aReturn            = array();          //-- ARRAY:     --//
+	$sSQL               = "";               //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;            //-- BOOL:      --//
+	$sErrMesg           = "";               //-- STRING:    --//
+	$sView              = "";               //-- STRING:    --//
+	
+	$aTemporaryView     = array();          //-- ARRAY:     A array to store information about which view to use like the viewname and columns. --//
+	$aInputVals         = array();          //-- ARRAY:     SQL bind input parameters --//
+	$aOutputColsId      = array();          //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if($bError===false) {
+		try {
+			//-- Retrieve the View in an array --//
+			$aTemporaryView = NonDataViewName("Rooms");
+			if ( $aTemporaryView["Error"]===true ) {
+				//-- if an error has occurred --//
+				$bError = true;
+				$sErrMesg = $aTemporaryView["ErrMesg"];
+			} else {
+				//-- store the view --//
+				$sView = $aTemporaryView["View"];
+				
+				$sSQL .= "SELECT ";
+				$sSQL .= "	`PERMROOMS_READ`, ";
+				$sSQL .= "	`PERMROOMS_WRITE`, ";
+				$sSQL .= "	`PERMROOMS_STATETOGGLE`, ";
+				$sSQL .= "	`PERMROOMS_DATAREAD`, ";
+				$sSQL .= "	`ROOMS_PREMISE_FK`, ";
+				$sSQL .= "	`ROOMS_PK`, ";
+				$sSQL .= "	`ROOMS_NAME`, ";
+				$sSQL .= "	`ROOMS_FLOOR`, ";
+				$sSQL .= "	`ROOMS_DESC`, ";
+				$sSQL .= "	`ROOMTYPE_PK`, ";
+				$sSQL .= "	`ROOMTYPE_NAME`, ";
+				$sSQL .= "	`ROOMTYPE_OUTDOORS` ";
+				$sSQL .= "FROM `".$sView."` ";
+				$sSQL .= "WHERE `PERMROOMS_WRITE` = 1 ";
+				$sSQL .= "LIMIT 1 ";
+				
+				//-- Set the SQL Input Parameters --//
+				$aInputVals = array();
+				
+				//-- Set the SQL Output Columns --//
+				$aOutputColsId = array(
+					array( "Name"=>"PermRead",                  "type"=>"INT" ),
+					array( "Name"=>"PermWrite",                 "type"=>"INT" ),
+					array( "Name"=>"PermStateToggle",           "type"=>"INT" ),
+					array( "Name"=>"PermDataRead",              "type"=>"INT" ),
+					array( "Name"=>"PremiseId",                 "type"=>"INT" ),
+					array( "Name"=>"RoomId",                    "type"=>"INT" ),
+					array( "Name"=>"RoomName",                  "type"=>"STR" ),
+					array( "Name"=>"RoomFloor",                 "type"=>"INT" ),
+					array( "Name"=>"RoomDesc",                  "type"=>"STR" ),
+					array( "Name"=>"RoomTypeId",                "type"=>"INT" ),
+					array( "Name"=>"RoomTypeName",              "type"=>"STR" ),
+					array( "Name"=>"RoomTypeOutdoors",          "type"=>"INT" )
+				);
+				//-- Execute the SQL Query --//
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery($sSQL, $aInputVals, $aOutputColsId, 1);
+			}
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if($bError===false) {
+		try {
+			if($aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch(Exception $e) {
+			//-- TODO: Add an error message here --//
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if($bError===false) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"GetRoomsFromRoomList: ".$sErrMesg );
+	}
+}
+
 
 
 function dbChangeRoomInfo( $iRoomId, $sName, $iFloor, $sDesc, $iRoomsTypeId ) {
 	//--------------------------------------------//
-	//-- 1.0 - Declare Variables				--//
+	//-- 1.0 - Declare Variables                --//
 	//--------------------------------------------//
 		
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult			= array();		//-- ARRAY:		--//
@@ -2054,7 +2879,7 @@ function dbChangeRoomInfo( $iRoomId, $sName, $iFloor, $sDesc, $iRoomsTypeId ) {
 				array( "Name"=>"RoomId",			"type"=>"BINT",		"value"=>$iRoomId		)
 			);
 			
-			$aResult = $oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
 			
 		} catch( Exception $e2 ) {
 			$bError   = true;
@@ -2063,7 +2888,7 @@ function dbChangeRoomInfo( $iRoomId, $sName, $iFloor, $sDesc, $iRoomsTypeId ) {
 	}
 
 	//--------------------------------------------//
-	//-- 4.0 - Error Check						--//
+	//-- 4.0 - Error Check                      --//
 	//--------------------------------------------//
 	if( $bError===false ) {
 		try {
@@ -2075,10 +2900,10 @@ function dbChangeRoomInfo( $iRoomId, $sName, $iFloor, $sDesc, $iRoomsTypeId ) {
 			//-- TODO: Write error message for when Database Library returns an unexpected result --//
 		}
 	}
-
+	
 	//--------------------------------------------//
 	//-- 5.0 Return Results or Error Message    --//
-	//--------------------------------------------// 
+	//--------------------------------------------//
 	if( $bError===false ) {
 		//-- Return that it was successful --//
 		return array( 
@@ -2094,24 +2919,24 @@ function dbChangeRoomInfo( $iRoomId, $sName, $iFloor, $sDesc, $iRoomsTypeId ) {
 
 function dbAddNewRoom( $iPremiseId, $iRoomsTypeId, $sName, $iFloor, $sDescription ) {
 	//----------------------------------------//
-	//-- 1.0 - Declare Variables			--//
+	//-- 1.0 - Declare Variables            --//
 	//----------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
-	$bError					= false;			//-- BOOL:		--//
-	$sErrMesg				= "";				//-- STRING:	--//
-	$aReturn				= array();			//-- ARRAY:		--//
+	$bError                 = false;            //-- BOOL:      --//
+	$sErrMesg               = "";               //-- STRING:    --//
+	$aReturn                = array();          //-- ARRAY:     --//
 
-	$sQueryInsert			= "";				//-- STRING:	Used to store the SQL string so it can be passed to the database functions	--//
-	$aResultInsert			= array();			//-- ARRAY:		--//
-	$aInputValsInsert		= array();			//-- ARRAY:		SQL bind input parameters	--//
-	$aOutputColsId			= array();			//-- ARRAY:		An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	$sQueryInsert           = "";               //-- STRING:    Used to store the SQL string so it can be passed to the database functions	--//
+	$aResultInsert          = array();          //-- ARRAY:     --//
+	$aInputValsInsert       = array();          //-- ARRAY:     SQL bind input parameters	--//
+	$aOutputColsId          = array();          //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
 	
 	//----------------------------------------//
-	//-- 3.0 - Insert the new UserInfo		--//
+	//-- 3.0 - Insert the new UserInfo      --//
 	//----------------------------------------//
 	if( $bError===false ) {
 		try {
@@ -2125,22 +2950,22 @@ function dbAddNewRoom( $iPremiseId, $iRoomsTypeId, $sName, $iFloor, $sDescriptio
 			$sQueryInsert .= "    `ROOMS_NAME`,             `ROOMS_FLOOR`, ";
 			$sQueryInsert .= "    `ROOMS_DESC` ";
 			$sQueryInsert .= ") VALUES ( ";
-			$sQueryInsert .= "    :PremiseId,       :RoomTypeId, ";				//-- PremiseFK, RoomTypeFK,				--//
-			$sQueryInsert .= "    :RoomName,        :RoomFloor, ";				//-- RoomName, RoomFloor				--//
-			$sQueryInsert .= "    :RoomDesc ";									//-- RoomDesc 							--//
+			$sQueryInsert .= "    :PremiseId,       :RoomTypeId, ";             //-- PremiseFK, RoomTypeFK,             --//
+			$sQueryInsert .= "    :RoomName,        :RoomFloor, ";              //-- RoomName, RoomFloor                --//
+			$sQueryInsert .= "    :RoomDesc ";                                  //-- RoomDesc                           --//
 			$sQueryInsert .= ") ";
 			
 			//-- Input binding --//
 			$aInputValsInsert = array(
-				array( "Name"=>"PremiseId",					"type"=>"BINT",				"value"=>$iPremiseId	),
-				array( "Name"=>"RoomTypeId",				"type"=>"INT",				"value"=>$iRoomsTypeId	),
-				array( "Name"=>"RoomName",					"type"=>"STR",				"value"=>$sName			),
-				array( "Name"=>"RoomFloor",					"type"=>"INT",				"value"=>$iFloor		),
-				array( "Name"=>"RoomDesc",					"type"=>"STR",				"value"=>$sDescription	)
+				array( "Name"=>"PremiseId",         "type"=>"BINT",         "value"=>$iPremiseId    ),
+				array( "Name"=>"RoomTypeId",        "type"=>"INT",          "value"=>$iRoomsTypeId  ),
+				array( "Name"=>"RoomName",          "type"=>"STR",          "value"=>$sName         ),
+				array( "Name"=>"RoomFloor",         "type"=>"INT",          "value"=>$iFloor        ),
+				array( "Name"=>"RoomDesc",          "type"=>"STR",          "value"=>$sDescription  )
 			);
 			
 			//-- Run the SQL Query and save the results --//
-			$aResultInsert = $oRestrictedDB->InputBindInsertQuery( $sQueryInsert, $aInputValsInsert );
+			$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindInsertQuery( $sQueryInsert, $aInputValsInsert );
 			
 			//----------------------------//
 			//-- Error Checking         --//
@@ -2176,11 +3001,11 @@ function dbAddNewRoom( $iPremiseId, $iRoomsTypeId, $sName, $iFloor, $sDescriptio
 
 function dbDeleteExistingRoom( $iRoomId ) {
 	//----------------------------------------//
-	//-- 1.0 - Declare Variables			--//
+	//-- 1.0 - Declare Variables            --//
 	//----------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$bError					= false;			//-- BOOL:		--//
@@ -2193,13 +3018,13 @@ function dbDeleteExistingRoom( $iRoomId ) {
 	$aOutputColsId			= array();			//-- ARRAY:		An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
 	
 	//----------------------------------------//
-	//-- 3.0 - Perform the SQLQuery			--//
+	//-- 3.0 - Perform the SQLQuery         --//
 	//----------------------------------------//
 	if( $bError===false ) {
 		try {
 			
 			//----------------------------------------//
-			//-- SQL Query - Delete Room			--//
+			//-- SQL Query - Delete Room            --//
 			//----------------------------------------//
 			$sQuery .= "DELETE FROM `ROOMS` ";
 			$sQuery .= "WHERE `ROOMS_PK` = :RoomId ";
@@ -2207,14 +3032,14 @@ function dbDeleteExistingRoom( $iRoomId ) {
 			
 			//-- Input binding --//
 			$aInputVals = array(
-				array( "Name"=>"RoomId",					"type"=>"BINT",				"value"=>$iRoomId	)
+				array( "Name"=>"RoomId",    "type"=>"BINT",    "value"=>$iRoomId	)
 			);
 			
 			//-- Run the SQL Query and save the results --//
-			$aResult = $oRestrictedDB->InputBindUpdateQuery( $sQuery, $aInputVals );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sQuery, $aInputVals );
 			
 			//----------------------------//
-			//-- Error Checking			--//
+			//-- Error Checking         --//
 			//----------------------------//
 			if( $aResult["Error"]===true ) {
 				//-- Error Occurred when Inserting		--//
@@ -2243,6 +3068,280 @@ function dbDeleteExistingRoom( $iRoomId ) {
 }
 
 
+
+function dbSpecialRoomPremiseIdLookup( $iRoomId ) {
+	//----------------------------------------//
+	//-- 1.0 - Declare Variables            --//
+	//----------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$aResult            = array();          //-- ARRAY:		--//
+	$aReturn            = array();
+	$sSQL               = "";               //-- STRING:	Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;            //-- BOOL:		--//
+	$sErrMesg           = "";               //-- STRING:		--//
+	$sView              = "";               //-- STRING:		--//
+	
+	$aTemporaryView     = array();          //-- ARRAY: A array to store information about which view to use like the viewname and columns. --//
+	$aInputVals         = array();          //-- ARRAY: SQL bind input parameters --//
+	$aOutputColsId      = array();          //-- ARRAY: An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+
+
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if($bError===false) {
+		try {
+
+			$sSQL .= "SELECT ";
+			$sSQL .= "	`ROOMS_PREMISE_FK` ";
+			$sSQL .= "FROM `ROOMS` ";
+			$sSQL .= "WHERE `ROOMS_PK` = :RoomId ";
+			$sSQL .= "LIMIT 1 ";
+
+			//-- Set the SQL Input Parameters --//
+			$aInputVals = array(
+				array( "Name"=>"RoomId",        "type"=>"INT",      "value"=>$iRoomId )
+			);
+			
+			//-- Set the SQL Output Columns --//
+			$aOutputColsId = array(
+				array( "Name"=>"PremiseId",     "type"=>"INT" )
+			);
+
+			//-- Execute the SQL Query --//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery($sSQL, $aInputVals, $aOutputColsId, 1);
+
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if($bError===false) {
+		try {
+			if($aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch(Exception $e) {
+			//-- TODO: Add an error message here --//
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if($bError===false) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"GetRoomPremiseId: ".$sErrMesg );
+	}
+}
+
+
+function dbGetFirstRoomIdFromPremiseId( $iPremiseId ) {
+	//-- This is a special function for WatchInputs Users --//
+	
+	//----------------------------------------//
+	//-- 1.0 - Declare Variables            --//
+	//----------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$aResult            = array();          //-- ARRAY:     --//
+	$aReturn            = array();          //-- ARRAY:     --//
+	$sSQL               = "";               //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;            //-- BOOL:      --//
+	$sErrMesg           = "";               //-- STRING:    --//
+	$sView              = "";               //-- STRING:    --//
+	
+	$aTemporaryView     = array();          //-- ARRAY:     A array to store information about which view to use like the viewname and columns. --//
+	$aInputVals         = array();          //-- ARRAY:     SQL bind input parameters --//
+	$aOutputColsId      = array();          //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+
+
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if($bError===false) {
+		try {
+			//-- Retrieve the View in an array --//
+			//$aTemporaryView = NonDataViewName("Rooms");
+			//if ( $aTemporaryView["Error"]===true ) {
+				//-- if an error has occurred --//
+			//	$bError = true;
+			//	$sErrMesg = $aTemporaryView["ErrMesg"];
+			//} else {
+				//-- store the view --//
+				//$sView = $aTemporaryView["View"];
+				
+				$sSQL .= "SELECT ";
+				$sSQL .= "	`PREMISE_PK`, ";
+				$sSQL .= "	`PREMISE_NAME`, ";
+				$sSQL .= "	`ROOMS_PK`, ";
+				$sSQL .= "	`ROOMS_NAME`, ";
+				$sSQL .= "	`ROOMS_FLOOR`, ";
+				$sSQL .= "	`ROOMS_DESC` ";
+				$sSQL .= "FROM `PREMISE` ";
+				$sSQL .= "INNER JOIN `ROOMS` ON `PREMISE_PK`=`ROOMS_PREMISE_FK` ";
+				$sSQL .= "WHERE `PREMISE_PK` = :PremiseId ";
+				$sSQL .= "ORDER BY `ROOMS_PK` ASC ";
+				$sSQL .= "LIMIT 1 ";
+				
+				//-- Set the SQL Input Parameters --//
+				$aInputVals = array(
+					array( "Name"=>"PremiseId",    "type"=>"INT",    "value"=>$iPremiseId )
+				);
+				
+				//-- Set the SQL Output Columns --//
+				$aOutputColsId = array(
+					array( "Name"=>"PremiseId",         "type"=>"INT" ),
+					array( "Name"=>"PremiseName",       "type"=>"STR" ),
+					array( "Name"=>"RoomId",            "type"=>"INT" ),
+					array( "Name"=>"RoomName",          "type"=>"STR" ),
+					array( "Name"=>"RoomFloor",         "type"=>"INT" ),
+					array( "Name"=>"RoomDesc",          "type"=>"STR" )
+				);
+				
+				//-- Execute the SQL Query --//
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery($sSQL, $aInputVals, $aOutputColsId, 1);
+			//}
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if($bError===false) {
+		try {
+			if($aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch(Exception $e) {
+			//-- TODO: Add an error message here --//
+		}
+	}
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if($bError===false) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"GetFirstRoomIdFromPremiseId: ".$sErrMesg );
+	}
+}
+
+function dbWatchInputsGetFirstRoomIdFromPremiseId( $iPremiseId ) {
+	//-- This is a special function for WatchInputs Users --//
+	
+	//----------------------------------------//
+	//-- 1.0 - Declare Variables            --//
+	//----------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$aResult            = array();          //-- ARRAY:     --//
+	$aReturn            = array();          //-- ARRAY:     --//
+	$sSQL               = "";               //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;            //-- BOOL:      --//
+	$sErrMesg           = "";               //-- STRING:    --//
+	$sView              = "";               //-- STRING:    --//
+	
+	$aTemporaryView     = array();          //-- ARRAY:     A array to store information about which view to use like the viewname and columns. --//
+	$aInputVals         = array();          //-- ARRAY:     SQL bind input parameters --//
+	$aOutputColsId      = array();          //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+
+
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if($bError===false) {
+		try {
+			//-- Retrieve the View in an array --//
+			//$aTemporaryView = NonDataViewName("Rooms");
+			//if ( $aTemporaryView["Error"]===true ) {
+				//-- if an error has occurred --//
+			//	$bError = true;
+			//	$sErrMesg = $aTemporaryView["ErrMesg"];
+			//} else {
+				//-- store the view --//
+				//$sView = $aTemporaryView["View"];
+				
+				$sSQL .= "SELECT ";
+				$sSQL .= "	`PREMISE_PK`, ";
+				$sSQL .= "	`PREMISE_NAME`, ";
+				$sSQL .= "	`ROOMS_PK`, ";
+				$sSQL .= "	`ROOMS_NAME`, ";
+				$sSQL .= "	`ROOMS_FLOOR`, ";
+				$sSQL .= "	`ROOMS_DESC` ";
+				$sSQL .= "FROM `PREMISE` ";
+				$sSQL .= "INNER JOIN `ROOMS` ON `PREMISE_PK`=`ROOMS_PREMISE_FK` ";
+				$sSQL .= "WHERE `PREMISE_PK` = :PremiseId ";
+				$sSQL .= "ORDER BY `ROOMS_PK` ASC ";
+				$sSQL .= "LIMIT 1 ";
+				
+				//-- Set the SQL Input Parameters --//
+				$aInputVals = array(
+					array( "Name"=>"PremiseId",    "type"=>"INT",    "value"=>$iPremiseId )
+				);
+				
+				//-- Set the SQL Output Columns --//
+				$aOutputColsId = array(
+					array( "Name"=>"PremiseId",         "type"=>"INT" ),
+					array( "Name"=>"PremiseName",       "type"=>"STR" ),
+					array( "Name"=>"RoomId",            "type"=>"INT" ),
+					array( "Name"=>"RoomName",          "type"=>"STR" ),
+					array( "Name"=>"RoomFloor",         "type"=>"INT" ),
+					array( "Name"=>"RoomDesc",          "type"=>"STR" )
+				);
+				
+				//-- Execute the SQL Query --//
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery($sSQL, $aInputVals, $aOutputColsId, 1);
+			//}
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if($bError===false) {
+		try {
+			if($aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch(Exception $e) {
+			//-- TODO: Add an error message here --//
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if($bError===false) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"WatchInputsGetFirstRoomIdFromPremiseId: ".$sErrMesg );
+	}
+}
+
 //========================================================================================================================//
 //== #7.0# - Hub Functions                                                                                              ==//
 //========================================================================================================================//
@@ -2252,7 +3351,7 @@ function dbHubRetrieveInfoAndPermission( $iHubId ) {
 	//----------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult			= array();		//-- ARRAY:		--//
@@ -2282,10 +3381,14 @@ function dbHubRetrieveInfoAndPermission( $iHubId ) {
 				$sView = $aTemporaryView["View"];
 
 				$sSQL .= "SELECT ";
-				$sSQL .= "    `PERMISSIONS_OWNER`, ";
-				$sSQL .= "    `PERMISSIONS_WRITE`, ";
-				$sSQL .= "    `PERMISSIONS_STATETOGGLE`, ";
-				$sSQL .= "    `PERMISSIONS_READ`, ";
+				//$sSQL .= "    `PERMISSIONS_OWNER`, ";
+				//$sSQL .= "    `PERMISSIONS_WRITE`, ";
+				//$sSQL .= "    `PERMISSIONS_STATETOGGLE`, ";
+				//$sSQL .= "    `PERMISSIONS_READ`, ";
+				$sSQL .= "    `PERMPREMISE_OWNER`, ";
+				$sSQL .= "    `PERMPREMISE_WRITE`, ";
+				$sSQL .= "    `PERMPREMISE_STATETOGGLE`, ";
+				$sSQL .= "    `PERMPREMISE_READ`, ";
 				$sSQL .= "    `PREMISE_PK`, ";
 				$sSQL .= "    `PREMISE_NAME`, ";
 				//$sSQL .= "    `PREMISE_DESCRIPTION`, ";
@@ -2324,7 +3427,7 @@ function dbHubRetrieveInfoAndPermission( $iHubId ) {
 				);
 				
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1);
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1);
 			}
 		} catch( Exception $e2 ) {
 			$bError   = true;
@@ -2363,7 +3466,7 @@ function dbChangeHubName( $iHubId, $sName ) {
 	//--------------------------------------------//
 		
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult			= array();	//-- ARRAY:		--//
@@ -2387,7 +3490,7 @@ function dbChangeHubName( $iHubId, $sName ) {
 				array( "Name"=>"HubId",				"type"=>"BINT",		"value"=>$iHubId	)
 			);
 			
-			$aResult = $oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
 			
 		} catch( Exception $e2 ) {
 			$bError    = true;
@@ -2419,13 +3522,108 @@ function dbChangeHubName( $iHubId, $sName ) {
 	}
 }
 
+
+function dbWatchInputsHubRetrieveInfoAndPermission( $iHubId ) {
+	//----------------------------------------//
+	//-- 1.0 - Declare Variables            --//
+	//----------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;        //-- BOOLEAN:   --//
+	$sErrMesg           = "";           //-- STRING:    --//
+	$sView              = "";           //-- STRING:    --//
+	$aTemporaryView     = array();      //-- ARRAY:     A array to store information about which view to use like the viewname and columns. --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters. --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			//-- Retrieve the View in an array --//
+			$aTemporaryView = NonDataViewName("VW_Hub");
+			if ( $aTemporaryView["Error"]===true ) {
+				//-- if an error has occurred --//
+				$bError = true;
+				$sErrMesg = $aTemporaryView["ErrMesg"];
+			} else {
+				//-- store the view --//
+				$sView = $aTemporaryView["View"];
+
+				$sSQL .= "SELECT ";
+				$sSQL .= "    `HUB_PK`, ";
+				$sSQL .= "    `HUB_PREMISE_FK`, ";
+				$sSQL .= "    `HUB_NAME`, ";
+				$sSQL .= "    `HUB_SERIALNUMBER`, ";
+				$sSQL .= "    `HUB_IPADDRESS`, ";
+				$sSQL .= "    `HUBTYPE_PK`, ";
+				$sSQL .= "    `HUBTYPE_NAME` ";
+				$sSQL .= "FROM `".$sView."` ";
+				$sSQL .= "WHERE `HUB_PK` = :HubId ";
+				$sSQL .= "LIMIT 1 ";
+				
+				//-- Set the SQL Input Parameters --//
+				$aInputVals = array(
+					array( "Name"=>"HubId",     "type"=>"INT",      "value"=>$iHubId    )
+				);
+				
+				//-- Set the SQL Output Columns --//
+				$aOutputCols = array(
+					array( "Name"=>"HubId",                         "type"=>"INT" ),
+					array( "Name"=>"PremiseId",                     "type"=>"INT" ),
+					array( "Name"=>"HubName",                       "type"=>"STR" ),
+					array( "Name"=>"HubSerialCode",                 "type"=>"STR" ),
+					array( "Name"=>"HubIpaddress",                  "type"=>"STR" ),
+					array( "Name"=>"HubTypeId",                     "type"=>"INT" ),
+					array( "Name"=>"HubTypeName",                   "type"=>"STR" )
+				);
+				
+				//-- Execute the SQL Query --//
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1);
+			}
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"WatchInputsGetPremiseInfoFromId: ".$sErrMesg );
+	}
+}
+
+
 //========================================================================================================================//
 //== #8.0# - HUB COMM Functions                                                                                         ==//
 //========================================================================================================================//
 function dbGetCommInfo( $iCommId ) {
 	//--------------------------------------------------------------------------------------------//
 	//-- DESCRIPTION:                                                                           --//
-	//--    This function is used to lookup the Info for a particular Comm                      --// 
+	//--    This function is used to lookup the Info for a particular Comm                      --//
 	//--------------------------------------------------------------------------------------------//
 	
 	//--------------------------------------------------------------------//
@@ -2433,17 +3631,17 @@ function dbGetCommInfo( $iCommId ) {
 	//--------------------------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$bError             = false;                //-- BOOLEAN:   --//
 	$sErrMesg           = "";                   //-- STRING:    --//
-	$aResult            = array();
-	$aReturn            = array();
-	$sSQL               = "";
-	$aInputVals         = array();
-	$aTemporaryView     = array();
-	$sView              = "";
+	$aResult            = array();              
+	$aReturn            = array();              
+	$sSQL               = "";                   //-- STRING:    --//
+	$aInputVals         = array();              //-- ARRAY:     --//
+	$aTemporaryView     = array();              //-- ARRAY:     Used to hold the function results of looking up the view name --//
+	$sView              = "";                   //-- STRING:    Used --//
 	
 	//--------------------------------------------------------------------//
 	//-- 2.0 - SQL Preperation                                          --//
@@ -2463,17 +3661,26 @@ function dbGetCommInfo( $iCommId ) {
 				
 				
 				$sSQL .= "SELECT ";
-				$sSQL .= "	`PERMISSIONS_OWNER`, ";
-				$sSQL .= "	`PERMISSIONS_WRITE`, ";
-				$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
-				$sSQL .= "	`PERMISSIONS_READ`, ";
-				$sSQL .= "	`HUB_PK`, ";
+				//$sSQL .= "	`PERMISSIONS_OWNER`, ";
+				//$sSQL .= "	`PERMISSIONS_WRITE`, ";
+				//$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
+				//$sSQL .= "	`PERMISSIONS_READ`, ";
+				$sSQL .= "	`PERMPREMISE_OWNER`, ";
+				$sSQL .= "	`PERMPREMISE_WRITE`, ";
+				$sSQL .= "	`PERMPREMISE_STATETOGGLE`, ";
+				$sSQL .= "	`PERMPREMISE_READ`, ";
+				$sSQL .= "	`PERMPREMISE_ROOMADMIN`, ";
+				$sSQL .= "	`PREMISE_PK`, ";
+				$sSQL .= "	`PREMISE_NAME`, ";
+				$sSQL .= "	`PREMISE_DESCRIPTION`, ";
+				$sSQL .= "	`HUB_PK`, "; 
 				$sSQL .= "	`HUB_NAME`, ";
 				$sSQL .= "	`HUBTYPE_PK`, ";
 				$sSQL .= "	`HUBTYPE_NAME`, ";
 				$sSQL .= "	`COMM_PK`, ";
 				$sSQL .= "	`COMM_NAME`, ";
 				$sSQL .= "	`COMM_JOINMODE`, ";
+				$sSQL .= "	`COMM_ADDRESS`, ";
 				$sSQL .= "	`COMMTYPE_PK`, ";
 				$sSQL .= "	`COMMTYPE_NAME` ";
 				$sSQL .= "FROM `".$sView."` ";
@@ -2490,6 +3697,10 @@ function dbGetCommInfo( $iCommId ) {
 					array( "Name"=>"PermWrite",                 "type"=>"INT" ),
 					array( "Name"=>"PermStateToggle",           "type"=>"INT" ),
 					array( "Name"=>"PermRead",                  "type"=>"INT" ),
+					array( "Name"=>"PermRoomAdmin",             "type"=>"INT" ),
+					array( "Name"=>"PremiseId",                 "type"=>"INT" ),
+					array( "Name"=>"PremiseName",               "type"=>"STR" ),
+					array( "Name"=>"PremiseDesc",               "type"=>"STR" ),
 					array( "Name"=>"HubId",                     "type"=>"INT" ),
 					array( "Name"=>"HubName",                   "type"=>"STR" ),
 					array( "Name"=>"HubTypeId",                 "type"=>"INT" ),
@@ -2497,11 +3708,12 @@ function dbGetCommInfo( $iCommId ) {
 					array( "Name"=>"CommId",                    "type"=>"INT" ),
 					array( "Name"=>"CommName",                  "type"=>"STR" ),
 					array( "Name"=>"CommJoinMode",              "type"=>"INT" ),
+					array( "Name"=>"CommAddress",               "type"=>"STR" ),
 					array( "Name"=>"CommTypeId",                "type"=>"INT" ),
 					array( "Name"=>"CommTypeName",              "type"=>"STR" )
 				);
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
 				
 				try {
 					if( $aResult["Error"]===true ) {
@@ -2536,7 +3748,7 @@ function dbGetCommsFromHubId( $iHubId ) {
 	//--------------------------------------------------------------------------------------------//
 	//-- DESCRIPTION:                                                                           --//
 	//--    This function is used to find all the Comms on a particular Hub for other functions --//
-	//--    that need that list of Comms                                                        --// 
+	//--    that need that list of Comms                                                        --//
 	//--------------------------------------------------------------------------------------------//
 	
 	//--------------------------------------------------------------------//
@@ -2544,7 +3756,7 @@ function dbGetCommsFromHubId( $iHubId ) {
 	//--------------------------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$bError             = false;                //-- BOOLEAN:   --//
@@ -2574,10 +3786,14 @@ function dbGetCommsFromHubId( $iHubId ) {
 			
 				
 				$sSQL .= "SELECT ";
-				$sSQL .= "	`PERMISSIONS_OWNER`, ";
-				$sSQL .= "	`PERMISSIONS_WRITE`, ";
-				$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
-				$sSQL .= "	`PERMISSIONS_READ`, ";
+				//$sSQL .= "	`PERMISSIONS_OWNER`, ";
+				//$sSQL .= "	`PERMISSIONS_WRITE`, ";
+				//$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
+				//$sSQL .= "	`PERMISSIONS_READ`, ";
+				$sSQL .= "	`PERMPREMISE_OWNER`, ";
+				$sSQL .= "	`PERMPREMISE_WRITE`, ";
+				$sSQL .= "	`PERMPREMISE_STATETOGGLE`, ";
+				$sSQL .= "	`PERMPREMISE_READ`, ";
 				$sSQL .= "	`HUB_PK`, ";
 				$sSQL .= "	`HUB_NAME`, ";
 				$sSQL .= "	`HUBTYPE_PK`, ";
@@ -2611,7 +3827,7 @@ function dbGetCommsFromHubId( $iHubId ) {
 					array( "Name"=>"CommTypeName",              "type"=>"STR" )
 				);
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
 				
 				try {
 					if( $aResult["Error"]===true ) {
@@ -2655,7 +3871,7 @@ function dbAddNewHubComm( $iCommHubId, $iCommTypeId, $sCommName, $sCommAddress, 
 	//-- 1.0 - Declare Variables                        --//
 	//----------------------------------------------------//
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function --//
@@ -2698,9 +3914,9 @@ function dbAddNewHubComm( $iCommHubId, $iCommTypeId, $sCommName, $sCommAddress, 
 			
 			//-- Run the SQL Query and save the results --//
 			if( $bSQLTransaction===true ) {
-				$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+				$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
 			} else {
-				$aResultInsert = $oRestrictedDB->InputBindInsertQuery( $sSQL, $aInputValsInsert );
+				$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindInsertQuery( $sSQL, $aInputValsInsert );
 			}
 			
 			
@@ -2732,11 +3948,115 @@ function dbAddNewHubComm( $iCommHubId, $iCommTypeId, $sCommName, $sCommAddress, 
 		return $aResultInsert;
 		
 	} else {
-		//var_dump( $oRestrictedDB->QueryLogs );
+		//var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
 		return array( "Error"=>true, "ErrMesg"=>"CommAdd: ".$sErrMesg );
 	}
 }
 
+
+
+function dbWatchInputsGetCommInfo( $iCommId ) {
+	//--------------------------------------------------------------------------------------------//
+	//-- DESCRIPTION: This function is used to lookup the Info for a particular Comm for        --//
+	//--     the WatchInputs User.                                                              --//
+	//--------------------------------------------------------------------------------------------//
+	
+	//--------------------------------------------------------------------//
+	//-- 1.0 - Declare Variables                                        --//
+	//--------------------------------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;                //-- BOOLEAN:   --//
+	$sErrMesg           = "";                   //-- STRING:    --//
+	$aResult            = array();
+	$aReturn            = array();
+	$sSQL               = "";
+	$aInputVals         = array();
+	$aTemporaryView     = array();
+	$sView              = "";
+	
+	//--------------------------------------------------------------------//
+	//-- 2.0 - SQL Preperation                                          --//
+	//--------------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			//-- Retrieve the View in an array --//
+			$aTemporaryView = NonDataViewName("VW_Comm");
+			
+			if( $aTemporaryView["Error"]===true) {
+				//-- VIEW ERROR --//
+				$bError     = true;
+				$sErrMesg   = "Unsupported View";
+			} else {
+				//-- store the view --//
+				$sView = $aTemporaryView["View"];
+				
+				
+				$sSQL .= "SELECT ";
+				$sSQL .= "	`HUB_PK`, "; 
+				$sSQL .= "	`HUB_PREMISE_FK`, "; 
+				$sSQL .= "	`HUB_NAME`, ";
+				$sSQL .= "	`HUBTYPE_PK`, ";
+				$sSQL .= "	`HUBTYPE_NAME`, ";
+				$sSQL .= "	`COMM_PK`, ";
+				$sSQL .= "	`COMM_NAME`, ";
+				$sSQL .= "	`COMM_JOINMODE`, ";
+				$sSQL .= "	`COMM_ADDRESS`, ";
+				$sSQL .= "	`COMMTYPE_PK`, ";
+				$sSQL .= "	`COMMTYPE_NAME` ";
+				$sSQL .= "FROM `".$sView."` ";
+				$sSQL .= "WHERE `COMM_PK` = :CommId ";
+				$sSQL .= "LIMIT 1 ";
+				
+				//-- SQL Input Values --//
+				$aInputVals = array(
+					array( "Name"=>"CommId",        "type"=>"INT",    "value"=>$iCommId )
+				);
+				
+				$aOutputCols = array(
+					array( "Name"=>"HubId",                     "type"=>"INT" ),
+					array( "Name"=>"PremiseId",                 "type"=>"INT" ),
+					array( "Name"=>"HubName",                   "type"=>"STR" ),
+					array( "Name"=>"HubTypeId",                 "type"=>"INT" ),
+					array( "Name"=>"HubTypeName",               "type"=>"STR" ),
+					array( "Name"=>"CommId",                    "type"=>"INT" ),
+					array( "Name"=>"CommName",                  "type"=>"STR" ),
+					array( "Name"=>"CommJoinMode",              "type"=>"INT" ),
+					array( "Name"=>"CommAddress",               "type"=>"STR" ),
+					array( "Name"=>"CommTypeId",                "type"=>"INT" ),
+					array( "Name"=>"CommTypeName",              "type"=>"STR" )
+				);
+				//-- Execute the SQL Query --//
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				
+				try {
+					if( $aResult["Error"]===true ) {
+						$bError = true;
+						$sErrMesg = $aResult["ErrMesg"];
+					}
+				} catch( Exception $e) {
+					//-- TODO: Write error message for when Database Library returns an unexpected result --//
+				}
+			}
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	//--------------------------------------------------------------------//
+	//-- 9.0 - Return the Result of the function                        --//
+	//--------------------------------------------------------------------//
+	if( $bError===false) {
+		//-- Return the Results --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- Return an Error Message --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
 
 //----------------------------------------------------------------------------//
 //-- UPDATE COMM                                                            --//
@@ -2753,7 +4073,7 @@ function dbUpdateCommDetails( $iCommId, $iCommTypeId, $sCommName, $sCommAddress 
 	//----------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$aResult            = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function --//
@@ -2785,7 +4105,7 @@ function dbUpdateCommDetails( $iCommId, $iCommTypeId, $sCommName, $sCommAddress 
 				array( "Name"=>"CommId",         "type"=>"INT",      "value"=>$iCommId       )
 			);
 			
-			$aResult = $oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
 			
 		} catch(Exception $e2) {
 			$bError   = true;
@@ -2835,7 +4155,7 @@ function dbGetLinkInfo($iLinkId) {
 	//--------------------------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$bError             = false;                //-- BOOLEAN:   --//
@@ -2864,22 +4184,27 @@ function dbGetLinkInfo($iLinkId) {
 				$sView = $aTemporaryView["View"];
 				
 				$sSQL .= "SELECT ";
-				$sSQL .= "	`PERMISSIONS_OWNER`, ";
-				$sSQL .= "	`PERMISSIONS_WRITE`, ";
-				$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
-				$sSQL .= "	`PERMISSIONS_READ`, ";
-				$sSQL .= "	`HUB_PK`, ";
-				$sSQL .= "	`HUB_NAME`, ";
-				$sSQL .= "	`HUBTYPE_PK`, ";
-				$sSQL .= "	`HUBTYPE_NAME`, ";
-				$sSQL .= "	`COMM_PK`, ";
-				$sSQL .= "	`COMMTYPE_PK`, ";
-				$sSQL .= "	`COMMTYPE_NAME`, ";
+				//$sSQL .= "	`PERMISSIONS_OWNER`, ";
+				//$sSQL .= "	`PERMISSIONS_WRITE`, ";
+				//$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
+				//$sSQL .= "	`PERMISSIONS_READ`, ";
+				$sSQL .= "	`PERMROOMS_READ`, ";
+				$sSQL .= "	`PERMROOMS_WRITE`, ";
+				$sSQL .= "	`PERMROOMS_STATETOGGLE`, ";
+				$sSQL .= "	`PERMROOMS_DATAREAD`, ";
+				//$sSQL .= "	`HUB_PK`, ";
+				//$sSQL .= "	`HUB_NAME`, ";
+				//$sSQL .= "	`HUBTYPE_PK`, ";
+				//$sSQL .= "	`HUBTYPE_NAME`, ";
+				//$sSQL .= "	`COMM_PK`, ";
+				//$sSQL .= "	`COMMTYPE_PK`, ";
+				//$sSQL .= "	`COMMTYPE_NAME`, ";
+				$sSQL .= "	`ROOMS_PK`, ";
 				$sSQL .= "	`LINK_PK`, ";
 				$sSQL .= "	`LINK_NAME`, ";
 				$sSQL .= "	`LINK_SERIALCODE`, ";
 				$sSQL .= "	`LINK_CONNECTED`, ";
-				$sSQL .= "	`LINK_ROOMS_FK`, ";
+				$sSQL .= "	`LINK_COMM_FK`, ";
 				$sSQL .= "	`LINK_STATE`, ";
 				$sSQL .= "	`LINK_STATECHANGECODE`, ";
 				$sSQL .= "	`LINKTYPE_PK`, ";
@@ -2910,22 +4235,27 @@ function dbGetLinkInfo($iLinkId) {
 				);
 				
 				$aOutputCols = array(
-					array( "Name"=>"PermOwner",                 "type"=>"INT"),
+					//array( "Name"=>"PermOwner",                 "type"=>"INT"),
+					//array( "Name"=>"PermWrite",                 "type"=>"INT"),
+					//array( "Name"=>"PermStateToggle",           "type"=>"INT"),
+					//array( "Name"=>"PermRead",                  "type"=>"INT"),
+					array( "Name"=>"PermRead",                  "type"=>"INT"),
 					array( "Name"=>"PermWrite",                 "type"=>"INT"),
 					array( "Name"=>"PermStateToggle",           "type"=>"INT"),
-					array( "Name"=>"PermRead",                  "type"=>"INT"),
-					array( "Name"=>"HubId",                     "type"=>"INT"),
-					array( "Name"=>"HubName",                   "type"=>"STR"),
-					array( "Name"=>"HubTypeId",                 "type"=>"INT"),
-					array( "Name"=>"HubTypeName",               "type"=>"STR"),
-					array( "Name"=>"CommId",                    "type"=>"INT"),
-					array( "Name"=>"CommTypeId",                "type"=>"INT"),
-					array( "Name"=>"CommTypeName",              "type"=>"STR"),
+					array( "Name"=>"PermDataRead",              "type"=>"INT"),
+					//array( "Name"=>"HubId",                     "type"=>"INT"),
+					//array( "Name"=>"HubName",                   "type"=>"STR"),
+					//array( "Name"=>"HubTypeId",                 "type"=>"INT"),
+					//array( "Name"=>"HubTypeName",               "type"=>"STR"),
+					//array( "Name"=>"CommId",                    "type"=>"INT"),
+					//array( "Name"=>"CommTypeId",                "type"=>"INT"),
+					//array( "Name"=>"CommTypeName",              "type"=>"STR"),
+					array( "Name"=>"LinkRoomId",                "type"=>"INT"),
 					array( "Name"=>"LinkId",                    "type"=>"INT"),
 					array( "Name"=>"LinkName",                  "type"=>"STR"),
 					array( "Name"=>"LinkSerialCode",            "type"=>"STR"),
 					array( "Name"=>"LinkConnected",             "type"=>"INT"),
-					array( "Name"=>"LinkRoomId",                "type"=>"INT"),
+					array( "Name"=>"LinkCommId",                "type"=>"INT"),
 					array( "Name"=>"LinkStatus",                "type"=>"INT"),
 					array( "Name"=>"LinkStatusCode",            "type"=>"STR"),
 					array( "Name"=>"LinkTypeId",                "type"=>"INT"),
@@ -2949,7 +4279,7 @@ function dbGetLinkInfo($iLinkId) {
 					
 				);
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
 				
 				try {
 					if( $aResult["Error"] === true) {
@@ -2986,17 +4316,17 @@ function dbGetLinksFromRoomId($iRoomId) {
 	//----------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
-	$bError				= false;
-	$sErrMesg			= "";
-	$aResult			= array();
-	$aReturn			= array();
-	$sSQL				= "";
-	$aInputVals			= array();
-	$aTemporaryView		= array();
-	$sView				= "";
+	$bError             = false;
+	$sErrMesg           = "";
+	$aResult            = array();
+	$aReturn            = array();
+	$sSQL               = "";
+	$aInputVals         = array();
+	$aTemporaryView     = array();
+	$sView              = "";
 	
 	//----------------------------------------//
 	//-- 2.0 - SQL Preperation              --//
@@ -3015,19 +4345,25 @@ function dbGetLinksFromRoomId($iRoomId) {
 				$sView = $aTemporaryView["View"];
 				
 				$sSQL .= "SELECT ";
-				$sSQL .= "	`PERMISSIONS_OWNER`, ";
-				$sSQL .= "	`PERMISSIONS_WRITE`, ";
-				$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
-				$sSQL .= "	`PERMISSIONS_READ`, ";
-				$sSQL .= "	`PREMISE_PK`, ";
-				$sSQL .= "	`PREMISE_NAME`, ";
-				$sSQL .= "	`HUB_PK`, ";
-				$sSQL .= "	`HUB_NAME`, ";
-				$sSQL .= "	`HUBTYPE_PK`, ";
-				$sSQL .= "	`HUBTYPE_NAME`, ";
+				//$sSQL .= "	`PERMISSIONS_OWNER`, ";
+				//$sSQL .= "	`PERMISSIONS_WRITE`, ";
+				//$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
+				//$sSQL .= "	`PERMISSIONS_READ`, ";
+				$sSQL .= "	`PERMROOMS_READ`, ";
+				$sSQL .= "	`PERMROOMS_WRITE`, ";
+				$sSQL .= "	`PERMROOMS_STATETOGGLE`, ";
+				$sSQL .= "	`PERMROOMS_DATAREAD`, ";
+				//$sSQL .= "	`PREMISE_PK`, ";
+				$sSQL .= "	`ROOMS_PREMISE_FK`, ";
+				//$sSQL .= "	`PREMISE_NAME`, ";
+				//$sSQL .= "	`HUB_PK`, ";
+				//$sSQL .= "	`HUB_NAME`, ";
+				//$sSQL .= "	`HUBTYPE_PK`, ";
+				//$sSQL .= "	`HUBTYPE_NAME`, ";
+				$sSQL .= "	`ROOMS_PK`, ";
 				$sSQL .= "	`LINK_PK`, ";
 				$sSQL .= "	`LINK_NAME`, ";
-				$sSQL .= "	`LINK_ROOMS_FK`, ";
+				$sSQL .= "	`LINK_COMM_FK`, ";
 				$sSQL .= "	`LINK_STATE`, ";
 				$sSQL .= "	`LINK_STATECHANGECODE`, ";
 				$sSQL .= "	`LINKTYPE_PK`, ";
@@ -3042,7 +4378,7 @@ function dbGetLinksFromRoomId($iRoomId) {
 				$sSQL .= "	`LINKCRYPTTYPE_NAME`, ";
 				$sSQL .= "	`LINKFREQ_NAME` ";
 				$sSQL .= "FROM `".$sView."` ";
-				$sSQL .= "WHERE `LINK_ROOMS_FK` = :RoomId ";
+				$sSQL .= "WHERE `ROOMS_PK` = :RoomId ";
 				$sSQL .= "LIMIT 1 ";
 				
 				//-- SQL Input Values --//
@@ -3051,19 +4387,24 @@ function dbGetLinksFromRoomId($iRoomId) {
 				);
 				
 				$aOutputCols = array(
-					array( "Name"=>"PermOwner",                 "type"=>"INT" ),
+					//array( "Name"=>"PermOwner",                 "type"=>"INT"),
+					//array( "Name"=>"PermWrite",                 "type"=>"INT"),
+					//array( "Name"=>"PermStateToggle",           "type"=>"INT"),
+					//array( "Name"=>"PermRead",                  "type"=>"INT"),
+					array( "Name"=>"PermRead",                  "type"=>"INT" ),
 					array( "Name"=>"PermWrite",                 "type"=>"INT" ),
 					array( "Name"=>"PermStateToggle",           "type"=>"INT" ),
-					array( "Name"=>"PermRead",                  "type"=>"INT" ),
+					array( "Name"=>"PermDataRead",              "type"=>"INT" ),
 					array( "Name"=>"PremiseId",                 "type"=>"INT" ),
-					array( "Name"=>"PremiseName",               "type"=>"STR" ),
-					array( "Name"=>"HubId",                     "type"=>"INT" ),
-					array( "Name"=>"HubName",                   "type"=>"STR" ),
-					array( "Name"=>"HubTypeId",                 "type"=>"INT" ),
-					array( "Name"=>"HubTypeName",               "type"=>"STR" ),
+					//array( "Name"=>"PremiseName",               "type"=>"STR" ),
+					//array( "Name"=>"HubId",                     "type"=>"INT" ),
+					//array( "Name"=>"HubName",                   "type"=>"STR" ),
+					//array( "Name"=>"HubTypeId",                 "type"=>"INT" ),
+					//array( "Name"=>"HubTypeName",               "type"=>"STR" ),
+					array( "Name"=>"LinkRoomId",                "type"=>"INT" ),
 					array( "Name"=>"LinkId",                    "type"=>"INT" ),
 					array( "Name"=>"LinkName",                  "type"=>"STR" ),
-					array( "Name"=>"LinkRoomId",                "type"=>"INT" ),
+					array( "Name"=>"LinkCommId",                "type"=>"INT" ),
 					array( "Name"=>"LinkStatus",                "type"=>"INT" ),
 					array( "Name"=>"LinkStatusCode",            "type"=>"STR" ),
 					array( "Name"=>"LinkTypeId",                "type"=>"INT" ),
@@ -3080,7 +4421,7 @@ function dbGetLinksFromRoomId($iRoomId) {
 				);
 				
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
 				
 				try {
 					if( $aResult["Error"] === true) {
@@ -3117,7 +4458,7 @@ function dbChangeLinkName( $iLinkId, $sName ) {
 	//--------------------------------------------//
 		
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult			= array();	//-- ARRAY:		--//
@@ -3141,7 +4482,7 @@ function dbChangeLinkName( $iLinkId, $sName ) {
 				array( "Name"=>"LinkId",                "type"=>"BINT",     "value"=>$iLinkId		)
 			);
 			
-			$aResult = $oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
 			
 		} catch( Exception $e2 ) {
 			$bError   = true;
@@ -3186,7 +4527,7 @@ function dbChangeLinkRoom( $iLinkId, $iRoomId ) {
 	//--------------------------------------------//
 		
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult			= array();		//-- ARRAY:		--//
@@ -3214,7 +4555,7 @@ function dbChangeLinkRoom( $iLinkId, $iRoomId ) {
 				array( "Name"=>"LinkId",			"type"=>"BINT",		"value"=>$iLinkId		)
 			);
 			
-			$aResult = $oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
 
 		} catch( Exception $e2 ) {
 			$bError   = true;
@@ -3260,15 +4601,15 @@ function dbLinkRetrieveState( $iLinkId, $bRetrievePermissions ) {
 	//----------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
-	$aResult			= array();			//-- ARRAY:		--//
-	$aReturn			= array();
-	$sSQL				= "";				//-- STRING:	Used to store the SQL string so it can be passed to the database functions. --//
-	$bError				= false;			//-- BOOL:		--//
-	$sErrMesg			= "";				//-- STRING:		--//
-	$sView				= "";				//-- STRING:		--//
+	$aResult            = array();			//-- ARRAY:		--//
+	$aReturn            = array();
+	$sSQL               = "";				//-- STRING:	Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;			//-- BOOL:		--//
+	$sErrMesg           = "";				//-- STRING:		--//
+	$sView              = "";				//-- STRING:		--//
 	
 	$aTemporaryView		= array();			//-- ARRAY:		A array to store information about which view to use like the viewname and columns. --//
 	$aInputVals			= array();			//-- ARRAY:		SQL bind input parameters --//
@@ -3301,6 +4642,8 @@ function dbLinkRetrieveState( $iLinkId, $bRetrievePermissions ) {
 					//-- Set the SQL Output Columns --//
 					$aOutputCols = array(
 						array( "Name"=>"PremiseId",               "type"=>"INT" ),
+						array( "Name"=>"RoomId",                  "type"=>"INT" ),
+						array( "Name"=>"CommId",                  "type"=>"INT" ),
 						array( "Name"=>"LinkId",                  "type"=>"INT" ),
 						array( "Name"=>"LinkName",                "type"=>"STR" ),
 						array( "Name"=>"LinkStatus",              "type"=>"INT" ),
@@ -3325,13 +4668,19 @@ function dbLinkRetrieveState( $iLinkId, $bRetrievePermissions ) {
 				//--------------------------------------------------------//
 				} else {
 					
-					$sExtraCols .=	",    `PERMISSIONS_WRITE`, ";
-					$sExtraCols .=	"    `PERMISSIONS_STATETOGGLE`, ";
-					$sExtraCols .=	"    `PERMISSIONS_READ` ";
+					//$sExtraCols .=	",    `PERMISSIONS_WRITE`, ";
+					//$sExtraCols .=	"    `PERMISSIONS_STATETOGGLE`, ";
+					//$sExtraCols .=	"    `PERMISSIONS_READ` ";
+					$sExtraCols .=	",    `PERMROOMS_WRITE`, ";
+					$sExtraCols .=	"    `PERMROOMS_STATETOGGLE`, ";
+					$sExtraCols .=	"    `PERMROOMS_READ`, ";
+					$sExtraCols .=	"    `PERMROOMS_DATAREAD` ";
 					
 					//-- Set the SQL Output Columns --//
 					$aOutputCols = array(
 						array( "Name"=>"PremiseId",                 "type"=>"INT" ),
+						array( "Name"=>"RoomId",                    "type"=>"INT" ),
+						array( "Name"=>"CommId",                    "type"=>"INT" ),
 						array( "Name"=>"LinkId",                    "type"=>"INT" ),
 						array( "Name"=>"LinkName",                  "type"=>"STR" ),
 						array( "Name"=>"LinkStatus",                "type"=>"INT" ),
@@ -3352,13 +4701,17 @@ function dbLinkRetrieveState( $iLinkId, $bRetrievePermissions ) {
 						//-- Permissions --//
 						array( "Name"=>"PermWrite",                 "type"=>"INT" ),
 						array( "Name"=>"PermStateToggle",           "type"=>"INT" ),
-						array( "Name"=>"PermRead",                  "type"=>"INT" )
+						array( "Name"=>"PermRead",                  "type"=>"INT" ),
+						array( "Name"=>"PermDataRead",              "type"=>"INT" )
 					);
 				}
 				
 				
 				$sSQL .= "SELECT ";
-				$sSQL .= "    `PREMISE_PK`, ";
+				//$sSQL .= "    `PREMISE_PK`, ";
+				$sSQL .= "    `ROOMS_PREMISE_FK`, ";
+				$sSQL .= "    `ROOMS_PK`, ";
+				$sSQL .= "    `LINK_COMM_FK`, ";
 				$sSQL .= "    `LINK_PK`, ";
 				$sSQL .= "    `LINK_NAME`, ";
 				$sSQL .= "    `LINK_STATE`, ";
@@ -3388,7 +4741,7 @@ function dbLinkRetrieveState( $iLinkId, $bRetrievePermissions ) {
 				);
 				
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1);
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1);
 				
 			}
 		} catch(Exception $e2) {
@@ -3430,15 +4783,15 @@ function dbChangeLinkState( $iLinkId, $iNewState ) {
 	//----------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
-	$aResult			= array();		//-- ARRAY:		--//
-	$sSQL				= "";			//-- STRING:	Used to store the SQL string so it can be passed to the database functions. --//
-	$bError				= false;		//-- BOOL:		--//
-	$sErrMesg			= "";			//-- STRING:	--//
-	$sSchema			= "";			//-- STRING:	Used to store the name of the schema that needs updating.    --//
-	$aInputVals			= array();		//-- ARRAY:		--//
+	$aResult            = array();      //-- ARRAY:     --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;        //-- BOOL:      --//
+	$sErrMesg           = "";           //-- STRING:    --//
+	$sSchema            = "";           //-- STRING:    Used to store the name of the schema that needs updating.    --//
+	$aInputVals         = array();      //-- ARRAY:     --//
 	
 	//----------------------------------------------------//
 	//-- 2.0 - SQL Preperation                          --//
@@ -3447,17 +4800,17 @@ function dbChangeLinkState( $iLinkId, $iNewState ) {
 		try {
 			//-- Retrieve the Schema name --//
 			$sSchema = dbGetCurrentSchema();
-
+			
 			$sSQL .= "UPDATE `".$sSchema."`.`LINK` ";
 			$sSQL .= "SET `LINK_STATE` = :LinkState ";
 			$sSQL .= "WHERE `LINK_PK` = :LinkId ";
-
+			
 			$aInputVals = array(
-				array( "Name"=>"LinkState",			"type"=>"INT",		"value"=>$iNewState		),
-				array( "Name"=>"LinkId",			"type"=>"BINT",		"value"=>$iLinkId		)
+				array( "Name"=>"LinkState",         "type"=>"INT",      "value"=>$iNewState     ),
+				array( "Name"=>"LinkId",            "type"=>"BINT",     "value"=>$iLinkId       )
 			);
 			
-			$aResult = $oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
 			
 		} catch(Exception $e2) {
 			$bError   = true;
@@ -3501,7 +4854,7 @@ function dbCheckIfLinkAlreadyExists( $iCommId, $sSerialCode, $sAddress, $sInfoNa
 	//----------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$aResult            = array();          //-- ARRAY:     Used to store the Database function's result. --//
@@ -3523,21 +4876,21 @@ function dbCheckIfLinkAlreadyExists( $iCommId, $sSerialCode, $sAddress, $sInfoNa
 			
 			if( $aTemporaryView["Error"]===true) {
 				//-- VIEW ERROR --//
-				$bError		= true;
-				$sErrMesg	= "Unsupported View";
+				$bError     = true;
+				$sErrMesg   = "Unsupported View";
 				
 			} else {
 				//-- Store the view --//
 				$sView = $aTemporaryView["View"];
 				
 				$sSQL .= "SELECT ";
-				$sSQL .= "	`COMM_PK`, ";
+				$sSQL .= "	`LINK_COMM_FK`, ";
 				$sSQL .= "	`LINK_PK`, ";
 				$sSQL .= "	`LINK_SERIALCODE`, ";
 				$sSQL .= "	`LINKINFO_NAME`, ";
 				$sSQL .= "	`LINKCONN_ADDRESS` ";
 				$sSQL .= "FROM `".$sView."` ";
-				$sSQL .= "WHERE `COMM_PK`           = :CommId ";
+				$sSQL .= "WHERE `LINK_COMM_FK`      = :CommId ";
 				$sSQL .= "AND `LINK_SERIALCODE`     = :LinkSerial ";
 				$sSQL .= "AND `LINKINFO_NAME`       = :LinkInfoName ";
 				$sSQL .= "AND `LINKCONN_ADDRESS`    = :LinkConnAddress ";
@@ -3560,7 +4913,7 @@ function dbCheckIfLinkAlreadyExists( $iCommId, $sSerialCode, $sAddress, $sInfoNa
 				);
 				
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
 				
 				try {
 					if( $aResult["Error"]===true) {
@@ -3617,7 +4970,7 @@ function dbAddNewLink( $iCommId, $iLinkTypeId, $iInfoId, $iConnectionId, $sSeria
 	//-- 1.0 - Declare Variables                        --//
 	//----------------------------------------------------//
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function. --//
@@ -3669,9 +5022,9 @@ function dbAddNewLink( $iCommId, $iLinkTypeId, $iInfoId, $iConnectionId, $sSeria
 			
 			//-- Run the SQL Query and save the results --//
 			if( $bSQLTransaction===true ) {
-				$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+				$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
 			} else {
-				$aResultInsert = $oRestrictedDB->InputBindInsertQuery( $sSQL, $aInputValsInsert );
+				$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindInsertQuery( $sSQL, $aInputValsInsert );
 			}
 			
 		} catch(Exception $e2) {
@@ -3702,7 +5055,7 @@ function dbAddNewLink( $iCommId, $iLinkTypeId, $iInfoId, $iConnectionId, $sSeria
 		return $aResultInsert;
 		
 	} else {
-		//var_dump( $oRestrictedDB->QueryLogs );
+		//var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
 		return array( "Error"=>true, "ErrMesg"=>"AddLink: ".$sErrMesg );
 	}
 }
@@ -3724,7 +5077,7 @@ function dbAddNewLinkConnectionInfo( $iConnProtocolId, $iConnFrequencyId, $iConn
 	//----------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function  --//
@@ -3772,9 +5125,9 @@ function dbAddNewLinkConnectionInfo( $iConnProtocolId, $iConnFrequencyId, $iConn
 			
 			//-- Run the SQL Query and save the results --//
 			if( $bSQLTransaction===true ) {
-				$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+				$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
 			} else {
-				$aResultInsert = $oRestrictedDB->InputBindInsertQuery( $sSQL, $aInputValsInsert );
+				$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindInsertQuery( $sSQL, $aInputValsInsert );
 			}
 			
 			
@@ -3806,7 +5159,7 @@ function dbAddNewLinkConnectionInfo( $iConnProtocolId, $iConnFrequencyId, $iConn
 		return $aResultInsert;
 		
 	} else {
-		//var_dump( $oRestrictedDB->QueryLogs );
+		//var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
 		return array( "Error"=>true, "ErrMesg"=>"LinkConnAdd: ".$sErrMesg );
 	}
 }
@@ -3827,7 +5180,7 @@ function dbAddNewLinkInfo( $sLinkInfoName, $sLinkInfoManufacturer, $sLinkInfoMan
 	//----------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function --//
@@ -3866,9 +5219,9 @@ function dbAddNewLinkInfo( $sLinkInfoName, $sLinkInfoManufacturer, $sLinkInfoMan
 			
 			//-- Run the SQL Query and save the results --//
 			if( $bSQLTransaction===true ) {
-				$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+				$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
 			} else {
-				$aResultInsert = $oRestrictedDB->InputBindInsertQuery( $sSQL, $aInputValsInsert );
+				$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindInsertQuery( $sSQL, $aInputValsInsert );
 			}
 			
 			
@@ -3900,7 +5253,7 @@ function dbAddNewLinkInfo( $sLinkInfoName, $sLinkInfoManufacturer, $sLinkInfoMan
 		return $aResultInsert;
 		
 	} else {
-		//var_dump( $oRestrictedDB->QueryLogs );
+		//var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
 		return array( "Error"=>true, "ErrMesg"=>"LinkInfoAdd: ".$sErrMesg );
 	}
 }
@@ -3921,7 +5274,7 @@ function dbUpdateLinkConnectionInfo( $iConnId, $iConnProtocolId, $iConnFrequency
 	//----------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$aResult            = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function --//
@@ -3963,7 +5316,7 @@ function dbUpdateLinkConnectionInfo( $iConnId, $iConnProtocolId, $iConnFrequency
 			);
 			
 			
-			$aResult = $oRestrictedDB->InputBindUpdateQuery($sSQL, $aInputVals);
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery($sSQL, $aInputVals);
 			
 		} catch(Exception $e2) {
 			$bError   = true;
@@ -3993,7 +5346,7 @@ function dbUpdateLinkConnectionInfo( $iConnId, $iConnProtocolId, $iConnFrequency
 		return array( "Error"=>$aResult["Error"], "Data"=> array( "Result"=>"Updated succesfully") );
 		
 	} else {
-		//var_dump( $oRestrictedDB->QueryLogs );
+		//var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
 		return array( "Error"=>true, "ErrMesg"=>"LinkConnUpdate: ".$sErrMesg );
 	}
 }
@@ -4005,7 +5358,7 @@ function dbCheckIfLinkInfoAlreadyExists( $sLinkInfoName, $sLinkInfoManufacturer,
 	//----------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$aResult            = array();          //-- ARRAY:     Used to store the Database function's result. --//
@@ -4017,6 +5370,229 @@ function dbCheckIfLinkInfoAlreadyExists( $sLinkInfoName, $sLinkInfoManufacturer,
 	$aInputVals         = array();          //-- ARRAY:     SQL bind input parameters --//
 	$aOutputCols        = array();          //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
 	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			//------------------------------------//
+			//-- SQL                            --//
+			//------------------------------------//
+			
+			//-- TODO:  This will be better if it swapped to a  --//
+			$sSQL .= "SELECT ";
+			$sSQL .= "    `LINKINFO_PK`, ";
+			$sSQL .= "    `LINKINFO_NAME`, ";
+			$sSQL .= "    `LINKINFO_MANUFACTURER`, ";
+			$sSQL .= "    `LINKINFO_MANUFACTURERURL` ";
+			$sSQL .= "FROM `LINKINFO` ";
+			$sSQL .= "WHERE `LINKINFO_NAME` = :LinkInfoName ";
+			$sSQL .= "AND `LINKINFO_MANUFACTURER` = :LinkInfoManufacturer ";
+			$sSQL .= "AND `LINKINFO_MANUFACTURERURL` = :LinkInfoManufacturerUrl ";
+			$sSQL .= "LIMIT 1 ";
+			
+			//-- Set the SQL Input Parameters --//
+			$aInputVals = array(
+				array( "Name"=>"LinkInfoName",                "type"=>"STR",      "value"=>$sLinkInfoName ),
+				array( "Name"=>"LinkInfoManufacturer",        "type"=>"STR",      "value"=>$sLinkInfoManufacturer ),
+				array( "Name"=>"LinkInfoManufacturerUrl",     "type"=>"STR",      "value"=>$sLinkInfoManufacturerUrl )
+			);
+			
+			//-- Set the SQL Output Columns --//
+			$aOutputCols = array(
+				array( "Name"=>"LinkInfoId",                  "type"=>"INT" ),
+				array( "Name"=>"LinkInfoName",                "type"=>"STR" ),
+				array( "Name"=>"LinkInfoManufacturer",        "type"=>"STR" ),
+				array( "Name"=>"LinkInfoManufacturerUrl",     "type"=>"STR" )
+			);
+			
+			//-- Execute the SQL Query --//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2["message"];
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			if($aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a error message --//
+			
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	
+	} else {
+		return array( "Error"=>true,  "ErrMesg"=>"LookupLinkInfoId: ".$sErrMesg );
+	}
+}
+
+
+function dbWatchInputsGetLinkInfo( $iLinkId ) {
+	//----------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                           --//
+	//--    This is used to get more information about a "Link" than what the   --//
+	//--    "StateAndPermission" function provides.                             --//
+	//----------------------------------------------------------------------------//
+	
+	//--------------------------------------------------------------------//
+	//-- 1.0 - Declare Variables                                        --//
+	//--------------------------------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;                //-- BOOLEAN:   --//
+	$sErrMesg           = "";                   //-- STRING:    --//
+	$aResult            = array();              //-- --//
+	$aReturn            = array();              //-- --//
+	$sSQL               = "";
+	$aInputVals         = array();
+	$aTemporaryView     = array();
+	$sView              = "";
+	
+	//--------------------------------------------------------------------//
+	//-- 2.0 - SQL Preperation                                          --//
+	//--------------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			//-- Retrieve the View in an array --//
+			$aTemporaryView = NonDataViewName("VW_Link");
+			
+			if( $aTemporaryView["Error"]===true ) {
+				//-- VIEW ERROR --//
+				$bError     = true;
+				$sErrMesg   = "Unsupported View";
+			} else {
+				//-- store the view --//
+				$sView = $aTemporaryView["View"];
+				
+				$sSQL .= "SELECT ";
+				$sSQL .= "	`LINK_PK`, ";
+				$sSQL .= "	`LINK_ROOMS_FK`, ";
+				$sSQL .= "	`LINK_NAME`, ";
+				$sSQL .= "	`LINK_SERIALCODE`, ";
+				$sSQL .= "	`LINK_CONNECTED`, ";
+				$sSQL .= "	`LINK_COMM_FK`, ";
+				$sSQL .= "	`LINK_STATE`, ";
+				$sSQL .= "	`LINK_STATECHANGECODE`, ";
+				$sSQL .= "	`LINKTYPE_PK`, ";
+				$sSQL .= "	`LINKTYPE_NAME`, ";
+				$sSQL .= "	`LINKINFO_PK`, ";
+				$sSQL .= "	`LINKINFO_NAME`, ";
+				$sSQL .= "	`LINKINFO_MANUFACTURER`, ";
+				$sSQL .= "	`LINKINFO_MANUFACTURERURL`, ";
+				$sSQL .= "	`LINKCONN_PK`, ";
+				$sSQL .= "	`LINKCONN_NAME`, ";
+				$sSQL .= "	`LINKCONN_ADDRESS`, ";
+				$sSQL .= "	`LINKCONN_USERNAME`, ";
+				$sSQL .= "	`LINKCONN_PASSWORD`, ";
+				$sSQL .= "	`LINKCONN_PORT`, ";
+				$sSQL .= "	`LINKPROTOCOL_PK`, ";
+				$sSQL .= "	`LINKPROTOCOL_NAME`, ";
+				$sSQL .= "	`LINKCRYPTTYPE_PK`, ";
+				$sSQL .= "	`LINKCRYPTTYPE_NAME`, ";
+				$sSQL .= "	`LINKFREQ_PK`, ";
+				$sSQL .= "	`LINKFREQ_NAME` ";
+				$sSQL .= "FROM `".$sView."` ";
+				$sSQL .= "WHERE `LINK_PK` = :LinkId ";
+				$sSQL .= "LIMIT 1 ";
+				
+				//-- SQL Input Values --//
+				$aInputVals = array(
+					array( "Name"=>"LinkId",        "type"=>"INT",    "value"=>$iLinkId )
+				);
+				
+				$aOutputCols = array(
+					array( "Name"=>"LinkId",                    "type"=>"INT"),
+					array( "Name"=>"LinkRoomId",                "type"=>"INT"),
+					array( "Name"=>"LinkName",                  "type"=>"STR"),
+					array( "Name"=>"LinkSerialCode",            "type"=>"STR"),
+					array( "Name"=>"LinkConnected",             "type"=>"INT"),
+					array( "Name"=>"LinkCommId",                "type"=>"INT"),
+					array( "Name"=>"LinkStatus",                "type"=>"INT"),
+					array( "Name"=>"LinkStatusCode",            "type"=>"STR"),
+					array( "Name"=>"LinkTypeId",                "type"=>"INT"),
+					array( "Name"=>"LinkTypeName",              "type"=>"STR"),
+					array( "Name"=>"LinkInfoId",                "type"=>"INT"),
+					array( "Name"=>"LinkInfoName",              "type"=>"STR"),
+					array( "Name"=>"LinkInfoManufacturer",      "type"=>"STR"),
+					array( "Name"=>"LinkInfoManufacturerURL",   "type"=>"STR"),
+					array( "Name"=>"LinkConnId",                "type"=>"INT"),
+					array( "Name"=>"LinkConnName",              "type"=>"STR"),
+					array( "Name"=>"LinkConnAddress",           "type"=>"STR"),
+					array( "Name"=>"LinkConnUsername",          "type"=>"STR"),
+					array( "Name"=>"LinkConnPassword",          "type"=>"STR"),
+					array( "Name"=>"LinkConnPort",              "type"=>"INT"),
+					array( "Name"=>"LinkConnProtocolId",        "type"=>"INT"),
+					array( "Name"=>"LinkConnProtocolName",      "type"=>"STR"),
+					array( "Name"=>"LinkConnCryptId",           "type"=>"INT"),
+					array( "Name"=>"LinkConnCryptName",         "type"=>"STR"),
+					array( "Name"=>"LinkConnFreqId",            "type"=>"INT"),
+					array( "Name"=>"LinkConnFreqName",          "type"=>"STR")
+				);
+				
+				//-- Execute the SQL Query --//
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				
+				try {
+					if( $aResult["Error"] === true) {
+						$bError = true;
+						$sErrMesg = $aResult["ErrMesg"];
+					}
+				} catch( Exception $e) {
+					//-- TODO: Write error message for when Database Library returns an unexpected result --//
+				}
+			}
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	//--------------------------------------------------------------------//
+	//-- 9.0 - Return the Result of the function                        --//
+	//--------------------------------------------------------------------//
+	if( $bError===false) {
+		//-- Return the Results --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- Return an Error Message --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+function dbWatchInputsCheckIfLinkInfoAlreadyExists( $sLinkInfoName, $sLinkInfoManufacturer, $sLinkInfoManufacturerUrl ) {
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	//-- 1.2 - Normal Variables --//
+	$aResult            = array();          //-- ARRAY:     Used to store the Database function's result. --//
+	$sSQL               = "";               //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;            //-- BOOLEAN:   Used to flag when an error has been caught. --//
+	$sErrMesg           = "";               //-- STRING:    Used to store the error message when an error has been caught so that it can be passed along --//
+	$aTemporaryView     = array();          //-- ARRAY:     A array to store information about which view to use like the viewname and columns. --//
+	$sView              = "";               //-- STRING:    Used to store the name of the View to perform the SQL Query on --//
+	$aInputVals         = array();          //-- ARRAY:     SQL bind input parameters --//
+	$aOutputCols        = array();          //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
 	//----------------------------------------------------//
 	//-- 2.0 - SQL Preperation                          --//
 	//----------------------------------------------------//
@@ -4052,14 +5628,13 @@ function dbCheckIfLinkInfoAlreadyExists( $sLinkInfoName, $sLinkInfoManufacturer,
 			);
 			
 			//-- Execute the SQL Query --//
-			$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
 			
 		} catch( Exception $e2 ) {
 			$bError   = true;
 			$sErrMesg = $e2["message"];
 		}
 	}
-	
 	//----------------------------------------------------//
 	//-- 4.0 - Error Check                              --//
 	//----------------------------------------------------//
@@ -4071,20 +5646,18 @@ function dbCheckIfLinkInfoAlreadyExists( $sLinkInfoName, $sLinkInfoManufacturer,
 			}
 		} catch( Exception $e) {
 			//-- TODO: Add a error message --//
-			
 		}
 	}
-	
 	//----------------------------------------------------//
 	//-- 5.0 - Return Results or Error Message          --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
 		return array( "Error"=>false, "Data"=>$aResult["Data"] );
-	
 	} else {
 		return array( "Error"=>true,  "ErrMesg"=>"LookupLinkInfoId: ".$sErrMesg );
 	}
 }
+
 
 //========================================================================================================================//
 //== #9.0# - Thing Functions                                                                                            ==//
@@ -4092,8 +5665,8 @@ function dbCheckIfLinkInfoAlreadyExists( $sLinkInfoName, $sLinkInfoManufacturer,
 function dbGetThingInfo( $iThingId ) {
 	//----------------------------------------------------------------------------//
 	//-- DESCRIPTION:                                                           --//
-	//--	This is used to get more information about a "Thing" than what the  --//
-	//--	"StateAndPermission" function provides.                             --//
+	//--    This is used to get more information about a "Thing" than what the  --//
+	//--    "StateAndPermission" function provides.                             --//
 	//----------------------------------------------------------------------------//
 	
 	//--------------------------------------------------------------------//
@@ -4101,13 +5674,13 @@ function dbGetThingInfo( $iThingId ) {
 	//--------------------------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$bError             = false;                //-- BOOLEAN:   --//
 	$sErrMesg           = "";                   //-- STRING:    --//
-	$aResult            = array();
-	$aReturn            = array();
+	$aResult            = array();              
+	$aReturn            = array();              
 	$sSQL               = "";
 	$aInputVals         = array();
 	$aTemporaryView     = array();
@@ -4130,19 +5703,25 @@ function dbGetThingInfo( $iThingId ) {
 				$sView = $aTemporaryView["View"];
 				
 				$sSQL .= "SELECT ";
-				$sSQL .= "	`PERMISSIONS_OWNER`, ";
-				$sSQL .= "	`PERMISSIONS_WRITE`, ";
-				$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
-				$sSQL .= "	`PERMISSIONS_READ`, ";
-				$sSQL .= "	`HUB_PK`, ";
-				$sSQL .= "	`HUB_NAME`, ";
-				$sSQL .= "	`HUBTYPE_PK`, ";
-				$sSQL .= "	`HUBTYPE_NAME`, ";
+				//$sSQL .= "	`PERMISSIONS_OWNER`, ";
+				//$sSQL .= "	`PERMISSIONS_WRITE`, ";
+				//$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
+				//$sSQL .= "	`PERMISSIONS_READ`, ";
+				//$sSQL .= "	`HUB_PK`, ";
+				//$sSQL .= "	`HUB_NAME`, ";
+				//$sSQL .= "	`HUBTYPE_PK`, ";
+				//$sSQL .= "	`HUBTYPE_NAME`, ";
+				$sSQL .= "	`PERMROOMS_READ`, ";
+				$sSQL .= "	`PERMROOMS_WRITE`, ";
+				$sSQL .= "	`PERMROOMS_STATETOGGLE`, ";
+				$sSQL .= "	`PERMROOMS_DATAREAD`, ";
+				$sSQL .= "	`ROOMS_PREMISE_FK`, ";
+				$sSQL .= "	`ROOMS_PK`, ";
 				$sSQL .= "	`LINK_PK`, ";
 				$sSQL .= "	`LINK_NAME`, ";
 				$sSQL .= "	`LINK_SERIALCODE`, ";
 				$sSQL .= "	`LINK_CONNECTED`, ";
-				$sSQL .= "	`LINK_ROOMS_FK`, ";
+				$sSQL .= "	`LINK_COMM_FK`, ";
 				$sSQL .= "	`LINK_STATE`, ";
 				$sSQL .= "	`LINK_STATECHANGECODE`, ";
 				$sSQL .= "	`LINKTYPE_PK`, ";
@@ -4166,19 +5745,25 @@ function dbGetThingInfo( $iThingId ) {
 				);
 				
 				$aOutputCols = array(
-					array( "Name"=>"PermOwner",                 "type"=>"INT"),
+					//array( "Name"=>"PermOwner",                 "type"=>"INT"),
+					//array( "Name"=>"PermWrite",                 "type"=>"INT"),
+					//array( "Name"=>"PermStateToggle",           "type"=>"INT"),
+					//array( "Name"=>"PermRead",                  "type"=>"INT"),
+					//array( "Name"=>"HubId",                     "type"=>"INT"),
+					//array( "Name"=>"HubName",                   "type"=>"STR"),
+					//array( "Name"=>"HubTypeId",                 "type"=>"INT"),
+					//array( "Name"=>"HubTypeName",               "type"=>"STR"),
+					array( "Name"=>"PermRead",                  "type"=>"INT"),
 					array( "Name"=>"PermWrite",                 "type"=>"INT"),
 					array( "Name"=>"PermStateToggle",           "type"=>"INT"),
-					array( "Name"=>"PermRead",                  "type"=>"INT"),
-					array( "Name"=>"HubId",                     "type"=>"INT"),
-					array( "Name"=>"HubName",                   "type"=>"STR"),
-					array( "Name"=>"HubTypeId",                 "type"=>"INT"),
-					array( "Name"=>"HubTypeName",               "type"=>"STR"),
+					array( "Name"=>"PermDataRead",              "type"=>"INT"),
+					array( "Name"=>"PremiseId",                 "type"=>"INT"),
+					array( "Name"=>"LinkRoomId",                "type"=>"INT"),
 					array( "Name"=>"LinkId",                    "type"=>"INT"),
 					array( "Name"=>"LinkName",                  "type"=>"STR"),
 					array( "Name"=>"LinkSerialCode",            "type"=>"STR"),
 					array( "Name"=>"LinkConnected",             "type"=>"INT"),
-					array( "Name"=>"LinkRoomId",                "type"=>"INT"),
+					array( "Name"=>"LinkCommId",                "type"=>"INT"),
 					array( "Name"=>"LinkStatus",                "type"=>"INT"),
 					array( "Name"=>"LinkStatusCode",            "type"=>"STR"),
 					array( "Name"=>"LinkTypeId",                "type"=>"INT"),
@@ -4195,7 +5780,7 @@ function dbGetThingInfo( $iThingId ) {
 				);
 				
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
 				
 				try {
 					if( $aResult["Error"] === true) {
@@ -4232,7 +5817,7 @@ function dbChangeThingName( $iThingId, $sName ) {
 	//--------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$aResult			= array();	//-- ARRAY:		--//
@@ -4257,7 +5842,7 @@ function dbChangeThingName( $iThingId, $sName ) {
 				array( "Name"=>"ThingId",				"type"=>"BINT",		"value"=>$iThingId		)
 			);
 			
-			$aResult = $oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
 			
 		} catch( Exception $e2 ) {
 			$bError   = true;
@@ -4300,7 +5885,7 @@ function dbRetrieveThingState( $iThingId, $bRetrievePermissions ) {
 	//----------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$aResult            = array();          //-- ARRAY:     --//
@@ -4343,11 +5928,16 @@ function dbRetrieveThingState( $iThingId, $bRetrievePermissions ) {
 				//-- ElseIf retrieve StateToggle Permission is false    --//
 				//--------------------------------------------------------//
 				} else {
-					
-					$sExtraCols .=	",    `PREMISE_PK`, ";
-					$sExtraCols .=	"    `PERMISSIONS_WRITE`, ";
-					$sExtraCols .=	"    `PERMISSIONS_STATETOGGLE`, ";
-					$sExtraCols .=	"    `PERMISSIONS_READ` ";
+					//$sExtraCols .=	",    `PREMISE_PK`, ";
+					//$sExtraCols .=	"    `PERMISSIONS_WRITE`, ";
+					//$sExtraCols .=	"    `PERMISSIONS_STATETOGGLE`, ";
+					//$sExtraCols .=	"    `PERMISSIONS_READ`, ";
+					$sExtraCols .=	",    `ROOMS_PREMISE_FK`, ";
+					$sExtraCols .=	"    `LINK_COMM_FK`, ";
+					$sExtraCols .=	"    `PERMROOMS_WRITE`, ";
+					$sExtraCols .=	"    `PERMROOMS_STATETOGGLE`, ";
+					$sExtraCols .=	"    `PERMROOMS_READ`, ";
+					$sExtraCols .=	"    `PERMROOMS_DATAREAD` ";
 					
 					//-- Set the SQL Output Columns --//
 					$aOutputCols = array(
@@ -4355,9 +5945,11 @@ function dbRetrieveThingState( $iThingId, $bRetrievePermissions ) {
 						array( "Name"=>"ThingName",             "type"=>"STR" ),
 						array( "Name"=>"ThingStatus",           "type"=>"INT" ),
 						array( "Name"=>"PremiseId",             "type"=>"INT" ),
+						array( "Name"=>"CommId",                "type"=>"INT" ),
 						array( "Name"=>"PermWrite",             "type"=>"INT" ),
 						array( "Name"=>"PermStateToggle",       "type"=>"INT" ),
-						array( "Name"=>"PermRead",              "type"=>"INT" )
+						array( "Name"=>"PermRead",              "type"=>"INT" ),
+						array( "Name"=>"PermDataRead",          "type"=>"INT" )
 					);
 				}
 				
@@ -4380,7 +5972,7 @@ function dbRetrieveThingState( $iThingId, $bRetrievePermissions ) {
 				);
 				
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery($sSQL, $aInputVals, $aOutputCols, 1);
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery($sSQL, $aInputVals, $aOutputCols, 1);
 			}
 		} catch( Exception $e2 ) {
 			$bError   = true;
@@ -4427,7 +6019,7 @@ function dbGetThingsFromLinkId( $iLinkId ) {
 	//--------------------------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$bError             = false;                //-- BOOLEAN:   --//
@@ -4456,19 +6048,25 @@ function dbGetThingsFromLinkId( $iLinkId ) {
 				$sView = $aTemporaryView["View"];
 				
 				$sSQL .= "SELECT ";
-				$sSQL .= "	`PERMISSIONS_OWNER`, ";
-				$sSQL .= "	`PERMISSIONS_WRITE`, ";
-				$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
-				$sSQL .= "	`PERMISSIONS_READ`, ";
-				$sSQL .= "	`HUB_PK`, ";
-				$sSQL .= "	`HUB_NAME`, ";
-				$sSQL .= "	`HUBTYPE_PK`, ";
-				$sSQL .= "	`HUBTYPE_NAME`, ";
+				//$sSQL .= "	`PERMISSIONS_OWNER`, ";
+				//$sSQL .= "	`PERMISSIONS_WRITE`, ";
+				//$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
+				//$sSQL .= "	`PERMISSIONS_READ`, ";
+				//$sSQL .= "	`HUB_PK`, ";
+				//$sSQL .= "	`HUB_NAME`, ";
+				//$sSQL .= "	`HUBTYPE_PK`, ";
+				//$sSQL .= "	`HUBTYPE_NAME`, ";
+				$sSQL .= "	`PERMROOMS_READ`, ";
+				$sSQL .= "	`PERMROOMS_WRITE`, ";
+				$sSQL .= "	`PERMROOMS_STATETOGGLE`, ";
+				$sSQL .= "	`PERMROOMS_DATAREAD`, ";
+				$sSQL .= "	`ROOMS_PREMISE_FK`, ";
+				$sSQL .= "	`ROOMS_PK`, ";
 				$sSQL .= "	`LINK_PK`, ";
 				$sSQL .= "	`LINK_NAME`, ";
 				$sSQL .= "	`LINK_SERIALCODE`, ";
 				$sSQL .= "	`LINK_CONNECTED`, ";
-				$sSQL .= "	`LINK_ROOMS_FK`, ";
+				$sSQL .= "	`LINK_COMM_FK`, ";
 				$sSQL .= "	`LINK_STATE`, ";
 				$sSQL .= "	`LINK_STATECHANGECODE`, ";
 				$sSQL .= "	`LINKTYPE_PK`, ";
@@ -4491,19 +6089,25 @@ function dbGetThingsFromLinkId( $iLinkId ) {
 				);
 				
 				$aOutputCols = array(
-					array( "Name"=>"PermOwner",                 "type"=>"INT" ),
+					//array( "Name"=>"PermOwner",                 "type"=>"INT" ),
+					//array( "Name"=>"PermWrite",                 "type"=>"INT" ),
+					//array( "Name"=>"PermStateToggle",           "type"=>"INT" ),
+					//array( "Name"=>"PermRead",                  "type"=>"INT" ),
+					//array( "Name"=>"HubId",                     "type"=>"INT" ),
+					//array( "Name"=>"HubName",                   "type"=>"STR" ),
+					//array( "Name"=>"HubTypeId",                 "type"=>"INT" ),
+					//array( "Name"=>"HubTypeName",               "type"=>"STR" ),
+					array( "Name"=>"PermRead",                  "type"=>"INT" ),
 					array( "Name"=>"PermWrite",                 "type"=>"INT" ),
 					array( "Name"=>"PermStateToggle",           "type"=>"INT" ),
-					array( "Name"=>"PermRead",                  "type"=>"INT" ),
-					array( "Name"=>"HubId",                     "type"=>"INT" ),
-					array( "Name"=>"HubName",                   "type"=>"STR" ),
-					array( "Name"=>"HubTypeId",                 "type"=>"INT" ),
-					array( "Name"=>"HubTypeName",               "type"=>"STR" ),
+					array( "Name"=>"PermDataRead",              "type"=>"INT" ),
+					array( "Name"=>"PremiseId",                 "type"=>"INT" ),
+					array( "Name"=>"LinkRoomId",                "type"=>"INT" ),
 					array( "Name"=>"LinkId",                    "type"=>"INT" ),
 					array( "Name"=>"LinkName",                  "type"=>"STR" ),
 					array( "Name"=>"LinkSerialCode",            "type"=>"STR" ),
 					array( "Name"=>"LinkConnected",             "type"=>"INT" ),
-					array( "Name"=>"LinkRoomId",                "type"=>"INT" ),
+					array( "Name"=>"LinkCommId",                "type"=>"INT" ),
 					array( "Name"=>"LinkStatus",                "type"=>"INT" ),
 					array( "Name"=>"LinkStatusCode",            "type"=>"STR" ),
 					array( "Name"=>"LinkTypeId",                "type"=>"INT" ),
@@ -4520,7 +6124,7 @@ function dbGetThingsFromLinkId( $iLinkId ) {
 				);
 				
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
 				
 				try {
 					if( $aResult["Error"] === true) {
@@ -4558,7 +6162,7 @@ function dbChangeThingState( $iThingId, $iNewState ) {
 	//----------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//	
 	$aResult            = array();      //-- ARRAY:     Used to hold the results of the database function. --//
@@ -4587,7 +6191,7 @@ function dbChangeThingState( $iThingId, $iNewState ) {
 			);
 			
 			
-			$aResult = $oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
 			
 		} catch(Exception $e2) {
 			$bError   = true;
@@ -4634,7 +6238,7 @@ function dbAddNewThing( $iLinkId, $iThingTypeId, $iThingHWID, $iThingOutputID, $
 	//-- 1.0 - Declare Variables                        --//
 	//----------------------------------------------------//
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function --//
@@ -4682,9 +6286,9 @@ function dbAddNewThing( $iLinkId, $iThingTypeId, $iThingHWID, $iThingOutputID, $
 			
 			//-- Run the SQL Query and save the results --//
 			if( $bSQLTransaction===true ) {
-				$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+				$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
 			} else {
-				$aResultInsert = $oRestrictedDB->InputBindInsertQuery( $sSQL, $aInputValsInsert );
+				$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindInsertQuery( $sSQL, $aInputValsInsert );
 			}
 			
 			
@@ -4716,12 +6320,136 @@ function dbAddNewThing( $iLinkId, $iThingTypeId, $iThingHWID, $iThingOutputID, $
 		return $aResultInsert;
 		
 	} else {
-		//var_dump( $oRestrictedDB->QueryLogs );
+		//var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
 		return array( "Error"=>true, "ErrMesg"=>"AddThing: ".$sErrMesg );
 	}
 }
 
 
+
+function dbWatchInputsGetThingInfo( $iThingId ) {
+	//----------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                           --//
+	//--    This is used to get more information about a "Thing" than what the  --//
+	//--    "StateAndPermission" function provides.                             --//
+	//----------------------------------------------------------------------------//
+	
+	//--------------------------------------------------------------------//
+	//-- 1.0 - Declare Variables                                        --//
+	//--------------------------------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;                //-- BOOLEAN:   --//
+	$sErrMesg           = "";                   //-- STRING:    --//
+	$aResult            = array();              
+	$aReturn            = array();              
+	$sSQL               = "";
+	$aInputVals         = array();
+	$aTemporaryView     = array();
+	$sView              = "";
+	
+	//--------------------------------------------------------------------//
+	//-- 2.0 - SQL Preperation                                          --//
+	//--------------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			//-- Retrieve the View in an array --//
+			$aTemporaryView = NonDataViewName("VW_Thing");
+			
+			if( $aTemporaryView["Error"]===true) {
+				//-- VIEW ERROR --//
+				$bError     = true;
+				$sErrMesg   = "Unsupported View";
+			} else {
+				//-- store the view --//
+				$sView = $aTemporaryView["View"];
+				
+				$sSQL .= "SELECT ";
+				$sSQL .= "	`HUB_PREMISE_FK`, ";
+				$sSQL .= "	`HUB_PK`, ";
+				$sSQL .= "	`COMM_PK`, ";
+				$sSQL .= "	`LINK_PK`, ";
+				$sSQL .= "	`LINK_NAME`, ";
+				$sSQL .= "	`LINK_SERIALCODE`, ";
+				$sSQL .= "	`LINK_CONNECTED`, ";
+				$sSQL .= "	`LINK_COMM_FK`, ";
+				$sSQL .= "	`LINK_STATE`, ";
+				$sSQL .= "	`LINK_STATECHANGECODE`, ";
+				$sSQL .= "	`LINKTYPE_PK`, ";
+				$sSQL .= "	`LINKTYPE_NAME`, ";
+				$sSQL .= "	`THING_PK`, ";
+				$sSQL .= "	`THING_NAME`, ";
+				$sSQL .= "	`THING_HWID`, ";
+				$sSQL .= "	`THING_OUTPUTHWID`, ";
+				$sSQL .= "	`THING_STATE`, ";
+				$sSQL .= "	`THING_STATECHANGEID`, ";
+				$sSQL .= "	`THING_SERIALCODE`, ";
+				$sSQL .= "	`THINGTYPE_PK`, ";
+				$sSQL .= "	`THINGTYPE_NAME` ";
+				$sSQL .= "FROM `".$sView."` ";
+				$sSQL .= "WHERE `THING_PK` = :ThingId ";
+				$sSQL .= "LIMIT 1 ";
+				
+				//-- SQL Input Values --//
+				$aInputVals = array(
+					array( "Name"=>"ThingId",        "type"=>"INT",    "value"=>$iThingId )
+				);
+				
+				$aOutputCols = array(
+					array( "Name"=>"PremiseId",                 "type"=>"INT"),
+					array( "Name"=>"LinkRoomId",                "type"=>"INT"),
+					array( "Name"=>"LinkId",                    "type"=>"INT"),
+					array( "Name"=>"LinkName",                  "type"=>"STR"),
+					array( "Name"=>"LinkSerialCode",            "type"=>"STR"),
+					array( "Name"=>"LinkConnected",             "type"=>"INT"),
+					array( "Name"=>"LinkCommId",                "type"=>"INT"),
+					array( "Name"=>"LinkStatus",                "type"=>"INT"),
+					array( "Name"=>"LinkStatusCode",            "type"=>"STR"),
+					array( "Name"=>"LinkTypeId",                "type"=>"INT"),
+					array( "Name"=>"LinkTypeName",              "type"=>"STR"),
+					array( "Name"=>"ThingId",                   "type"=>"INT"),
+					array( "Name"=>"ThingName",                 "type"=>"STR"),
+					array( "Name"=>"ThingHWId",                 "type"=>"INT"),
+					array( "Name"=>"ThingOHWId",                "type"=>"INT"),
+					array( "Name"=>"ThingStatus",               "type"=>"INT"),
+					array( "Name"=>"ThingStatusCode",           "type"=>"STR"),
+					array( "Name"=>"ThingSerialCode",           "type"=>"STR"),
+					array( "Name"=>"ThingTypeId",               "type"=>"INT"),
+					array( "Name"=>"ThingTypeName",             "type"=>"STR")
+				);
+				
+				//-- Execute the SQL Query --//
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				
+				try {
+					if( $aResult["Error"] === true) {
+						$bError = true;
+						$sErrMesg = $aResult["ErrMesg"];
+					}
+				} catch( Exception $e) {
+					//-- TODO: Write error message for when Database Library returns an unexpected result --//
+				}
+			}
+		
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	//--------------------------------------------------------------------//
+	//-- 9.0 - Return the Result of the function                        --//
+	//--------------------------------------------------------------------//
+	if( $bError===false) {
+		//-- Return the Results --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- Return an Error Message --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
 
 //========================================================================================================================//
 //== #11.0# - IO Functions                                                                                              ==//
@@ -4732,7 +6460,7 @@ function dbIODetection() {
 	//----------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$sSQL           = "";               //-- STRING:        This is used to hold the SQL Query for it to be passed to the database function.     --//
@@ -4761,12 +6489,18 @@ function dbIODetection() {
 				$sView = $aTemporaryView["View"];
 				
 				$sSQL .= "SELECT ";
-				$sSQL .= "	`USERS_USERNAME`, ";
-				$sSQL .= "	`PERMISSIONS_WRITE`, ";
-				$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
-				$sSQL .= "	`PERMISSIONS_READ`, ";
-				$sSQL .= "	`PREMISE_PK`, ";
-				$sSQL .= "	`PREMISE_NAME`, ";
+				//$sSQL .= "	`USERS_USERNAME`, ";
+				//$sSQL .= "	`PERMISSIONS_WRITE`, ";
+				//$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
+				//$sSQL .= "	`PERMISSIONS_READ`, ";
+				$sSQL .= "	`PERMROOMS_WRITE`, ";
+				$sSQL .= "	`PERMROOMS_STATETOGGLE`, ";
+				$sSQL .= "	`PERMROOMS_READ`, ";
+				$sSQL .= "	`PERMROOMS_DATAREAD`, ";
+				//$sSQL .= "	`PREMISE_PK`, ";
+				$sSQL .= "	`ROOMS_PREMISE_FK`, ";
+				//$sSQL .= "	`PREMISE_NAME`, ";
+				$sSQL .= "	`ROOMS_PK`, ";
 				$sSQL .= "	`RSCAT_PK`, ";
 				$sSQL .= "	`RSCAT_NAME`, ";
 				$sSQL .= "	`RSSUBCAT_PK`, ";
@@ -4776,11 +6510,11 @@ function dbIODetection() {
 				$sSQL .= "	`RSTYPE_PK`, ";
 				$sSQL .= "	`RSTYPE_NAME`, ";
 				$sSQL .= "	`RSTYPE_MAIN`, ";
-				$sSQL .= "	`HUB_PK`, ";
+				//$sSQL .= "	`HUB_PK`, ";
 				$sSQL .= "	`LINK_PK`, ";
 				$sSQL .= "	`LINK_NAME`, ";
 				$sSQL .= "	`LINK_STATE`, ";
-				$sSQL .= "	`LINK_ROOMS_FK`, ";
+				$sSQL .= "	`LINK_COMM_FK`, ";
 				$sSQL .= "	`THING_PK`,  ";
 				$sSQL .= "	`THING_NAME`, ";
 				$sSQL .= "	`THING_STATE`, ";
@@ -4809,15 +6543,17 @@ function dbIODetection() {
 				$sSQL .= "AND `UOM_PK` >= 1 ";                  //-- Filters out IOs with broken 'Unit of Measurement' --//
 				$sSQL .= "AND `IOTYPE_DATATYPE_FK` >= 1 ";      //-- Filters out IOs that do not have a 'Data Type' therefore cannot access any data for them --//
 				$sSQL .= "AND `IO_BASECONVERT` <> 0 ";          //-- Filters out IOs that will attempt to divide by zero --//
-				$sSQL .= "ORDER BY `USERS_PK` ASC, `PREMISE_PK` ASC, `LINK_PK` ASC, `THING_PK` ASC, `IO_PK` ASC ";
+				$sSQL .= "ORDER BY `USERS_PK` ASC, `ROOMS_PREMISE_FK` ASC, `LINK_PK` ASC, `THING_PK` ASC, `IO_PK` ASC ";
 		
 				$aOutputCols = array(
-					array( "Name"=>"Username",                  "type"=>"STR" ),
+					//array( "Name"=>"Username",                  "type"=>"STR" ),
 					array( "Name"=>"PermissionWrite",           "type"=>"INT" ),
 					array( "Name"=>"PermissionStateToggle",     "type"=>"INT" ),
 					array( "Name"=>"PermissionRead",            "type"=>"INT" ),
+					array( "Name"=>"PermissionDataRead",        "type"=>"INT" ),
 					array( "Name"=>"PremiseId",                 "type"=>"INT" ),
-					array( "Name"=>"PremiseName",               "type"=>"STR" ),
+					//array( "Name"=>"PremiseName",               "type"=>"STR" ),
+					array( "Name"=>"RoomId",                    "type"=>"INT" ),
 					array( "Name"=>"RSCatId",                   "type"=>"INT" ),
 					array( "Name"=>"RSCatName",                 "type"=>"STR" ),
 					array( "Name"=>"RSSubCatId",                "type"=>"INT" ),
@@ -4827,11 +6563,11 @@ function dbIODetection() {
 					array( "Name"=>"RSTypeId",                  "type"=>"INT" ),
 					array( "Name"=>"RSTypeName",                "type"=>"STR" ),
 					array( "Name"=>"RSTypeMain",                "type"=>"INT" ),
-					array( "Name"=>"UnitId",                    "type"=>"INT" ),
+					//array( "Name"=>"UnitId",                    "type"=>"INT" ),
 					array( "Name"=>"LinkId",                    "type"=>"INT" ),
 					array( "Name"=>"LinkDisplayName",           "type"=>"STR" ),
 					array( "Name"=>"LinkStatus",                "type"=>"INT" ),
-					array( "Name"=>"RoomId",                    "type"=>"INT" ),
+					array( "Name"=>"LinkCommId",                "type"=>"INT" ),
 					array( "Name"=>"ThingId",                   "type"=>"INT" ),
 					array( "Name"=>"ThingName",                 "type"=>"STR" ),
 					array( "Name"=>"ThingStatus",               "type"=>"INT" ),
@@ -4858,7 +6594,7 @@ function dbIODetection() {
 				);
 				
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
 				
 				try {
 					if( $aResult["Error"] === true) {
@@ -4894,7 +6630,7 @@ function dbGetIOInfo( $iIOId ) {
 	//--------------------------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$bError             = false;                //-- BOOLEAN:   --//
@@ -4923,17 +6659,23 @@ function dbGetIOInfo( $iIOId ) {
 				$sView = $aTemporaryView["View"];
 				
 				$sSQL .= "SELECT ";
-				$sSQL .= "	`PERMISSIONS_OWNER`, ";
-				$sSQL .= "	`PERMISSIONS_WRITE`, ";
-				$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
-				$sSQL .= "	`PERMISSIONS_READ`, ";
-				$sSQL .= "	`HUB_PK`, ";
-				$sSQL .= "	`HUB_NAME`, ";
-				$sSQL .= "	`HUBTYPE_PK`, ";
-				$sSQL .= "	`HUBTYPE_NAME`, ";
+				//$sSQL .= "	`PERMISSIONS_OWNER`, ";
+				//$sSQL .= "	`PERMISSIONS_WRITE`, ";
+				//$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
+				//$sSQL .= "	`PERMISSIONS_READ`, ";
+				//$sSQL .= "	`HUB_PK`, ";
+				//$sSQL .= "	`HUB_NAME`, ";
+				//$sSQL .= "	`HUBTYPE_PK`, ";
+				//$sSQL .= "	`HUBTYPE_NAME`, ";
+				$sSQL .= "	`PERMROOMS_READ`, ";
+				$sSQL .= "	`PERMROOMS_WRITE`, ";
+				$sSQL .= "	`PERMROOMS_STATETOGGLE`, ";
+				$sSQL .= "	`PERMROOMS_DATAREAD`, ";
+				$sSQL .= "	`ROOMS_PREMISE_FK`, ";
+				$sSQL .= "	`ROOMS_PK`, ";
 				$sSQL .= "	`LINK_PK`, ";
 				$sSQL .= "	`LINK_NAME`, ";
-				$sSQL .= "	`LINK_ROOMS_FK`, ";
+				$sSQL .= "	`LINK_COMM_FK`, ";
 				$sSQL .= "	`LINK_STATE`, ";
 				$sSQL .= "	`LINK_STATECHANGECODE`, ";
 				$sSQL .= "	`LINKTYPE_PK`, ";
@@ -4984,17 +6726,19 @@ function dbGetIOInfo( $iIOId ) {
 				);
 				
 				$aOutputCols = array(
-					array( "Name"=>"PermOwner",                 "type"=>"INT"),
+					array( "Name"=>"PermRead",                  "type"=>"INT"),
 					array( "Name"=>"PermWrite",                 "type"=>"INT"),
 					array( "Name"=>"PermStateToggle",           "type"=>"INT"),
-					array( "Name"=>"PermRead",                  "type"=>"INT"),
-					array( "Name"=>"HubId",                     "type"=>"INT"),
-					array( "Name"=>"HubName",                   "type"=>"STR"),
-					array( "Name"=>"HubTypeId",                 "type"=>"INT"),
-					array( "Name"=>"HubTypeName",               "type"=>"STR"),
+					array( "Name"=>"PermDataRead",              "type"=>"INT"),
+					//array( "Name"=>"HubId",                     "type"=>"INT"),
+					//array( "Name"=>"HubName",                   "type"=>"STR"),
+					//array( "Name"=>"HubTypeId",                 "type"=>"INT"),
+					//array( "Name"=>"HubTypeName",               "type"=>"STR"),
+					array( "Name"=>"PremiseId",                 "type"=>"INT"),
+					array( "Name"=>"LinkRoomId",                "type"=>"INT"),
 					array( "Name"=>"LinkId",                    "type"=>"INT"),
 					array( "Name"=>"LinkName",                  "type"=>"STR"),
-					array( "Name"=>"LinkRoomId",                "type"=>"INT"),
+					array( "Name"=>"LinkCommId",                "type"=>"INT"),
 					array( "Name"=>"LinkStatus",                "type"=>"INT"),
 					array( "Name"=>"LinkStatusCode",            "type"=>"STR"),
 					array( "Name"=>"LinkTypeId",                "type"=>"INT"),
@@ -5037,7 +6781,7 @@ function dbGetIOInfo( $iIOId ) {
 					array( "Name"=>"DataTypeName",              "type"=>"STR")
 				);
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
 				
 				try {
 					if( $aResult["Error"] === true) {
@@ -5048,7 +6792,7 @@ function dbGetIOInfo( $iIOId ) {
 					//-- TODO: Write error message for when Database Library returns an unexpected result --//
 				}
 			}
-	
+			
 		} catch(Exception $e2) {
 			$bError   = true;
 			$sErrMesg = $e2->getMessage();
@@ -5080,7 +6824,7 @@ function dbGetIOsFromThingId( $iThingId ) {
 	//--------------------------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$bError             = false;                //-- BOOLEAN:   --//
@@ -5109,17 +6853,23 @@ function dbGetIOsFromThingId( $iThingId ) {
 				$sView = $aTemporaryView["View"];
 				
 				$sSQL .= "SELECT ";
-				$sSQL .= "	`PERMISSIONS_OWNER`, ";
-				$sSQL .= "	`PERMISSIONS_WRITE`, ";
-				$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
-				$sSQL .= "	`PERMISSIONS_READ`, ";
-				$sSQL .= "	`HUB_PK`, ";
-				$sSQL .= "	`HUB_NAME`, ";
-				$sSQL .= "	`HUBTYPE_PK`, ";
-				$sSQL .= "	`HUBTYPE_NAME`, ";
+				//$sSQL .= "	`PERMISSIONS_OWNER`, ";
+				//$sSQL .= "	`PERMISSIONS_WRITE`, ";
+				//$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
+				//$sSQL .= "	`PERMISSIONS_READ`, ";
+				//$sSQL .= "	`HUB_PK`, ";
+				//$sSQL .= "	`HUB_NAME`, ";
+				//$sSQL .= "	`HUBTYPE_PK`, ";
+				//$sSQL .= "	`HUBTYPE_NAME`, ";
+				$sSQL .= "	`PERMROOMS_READ`, ";
+				$sSQL .= "	`PERMROOMS_WRITE`, ";
+				$sSQL .= "	`PERMROOMS_STATETOGGLE`, ";
+				$sSQL .= "	`PERMROOMS_DATAREAD`, ";
+				$sSQL .= "	`ROOMS_PREMISE_FK`, ";
+				$sSQL .= "	`ROOMS_PK`, ";
 				$sSQL .= "	`LINK_PK`, ";
 				$sSQL .= "	`LINK_NAME`, ";
-				$sSQL .= "	`LINK_ROOMS_FK`, ";
+				$sSQL .= "	`LINK_COMM_FK`, ";
 				$sSQL .= "	`LINK_STATE`, ";
 				$sSQL .= "	`LINK_STATECHANGECODE`, ";
 				$sSQL .= "	`LINKTYPE_PK`, ";
@@ -5169,17 +6919,23 @@ function dbGetIOsFromThingId( $iThingId ) {
 				);
 				
 				$aOutputCols = array(
-					array( "Name"=>"PermOwner",                 "type"=>"INT"),
+					//array( "Name"=>"PermOwner",                 "type"=>"INT"),
+					//array( "Name"=>"PermWrite",                 "type"=>"INT"),
+					//array( "Name"=>"PermStateToggle",           "type"=>"INT"),
+					//array( "Name"=>"PermRead",                  "type"=>"INT"),
+					//array( "Name"=>"HubId",                     "type"=>"INT"),
+					//array( "Name"=>"HubName",                   "type"=>"STR"),
+					//array( "Name"=>"HubTypeId",                 "type"=>"INT"),
+					//array( "Name"=>"HubTypeName",               "type"=>"STR"),
+					array( "Name"=>"PermRead",                  "type"=>"INT"),
 					array( "Name"=>"PermWrite",                 "type"=>"INT"),
 					array( "Name"=>"PermStateToggle",           "type"=>"INT"),
-					array( "Name"=>"PermRead",                  "type"=>"INT"),
-					array( "Name"=>"HubId",                     "type"=>"INT"),
-					array( "Name"=>"HubName",                   "type"=>"STR"),
-					array( "Name"=>"HubTypeId",                 "type"=>"INT"),
-					array( "Name"=>"HubTypeName",               "type"=>"STR"),
+					array( "Name"=>"PermDataRead",              "type"=>"INT"),
+					array( "Name"=>"PremiseId",                 "type"=>"INT"),
+					array( "Name"=>"LinkRoomId",                "type"=>"INT"),
 					array( "Name"=>"LinkId",                    "type"=>"INT"),
 					array( "Name"=>"LinkName",                  "type"=>"STR"),
-					array( "Name"=>"LinkRoomId",                "type"=>"INT"),
+					array( "Name"=>"LinkCommId",                "type"=>"INT"),
 					array( "Name"=>"LinkStatus",                "type"=>"INT"),
 					array( "Name"=>"LinkStatusCode",            "type"=>"STR"),
 					array( "Name"=>"LinkTypeId",                "type"=>"INT"),
@@ -5222,7 +6978,9 @@ function dbGetIOsFromThingId( $iThingId ) {
 					array( "Name"=>"DataTypeName",              "type"=>"STR")
 				);
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+				
+				
 				
 				try {
 					if( $aResult["Error"] === true) {
@@ -5258,7 +7016,7 @@ function dbDebugIODetection() {
 	//--------------------------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$sSQL           = "";               //-- STRING:        This is used to hold the SQL Query for it to be passed to the  --//
@@ -5286,11 +7044,15 @@ function dbDebugIODetection() {
 				$sView = $aTemporaryView["View"];
 				
 				$sSQL .= "SELECT ";
-				$sSQL .= "	`USERS_USERNAME`, ";
-				$sSQL .= "	`PERMISSIONS_WRITE`, ";
-				$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
-				$sSQL .= "	`PERMISSIONS_READ`, ";
-				$sSQL .= "	`PREMISE_PK`, ";
+				//$sSQL .= "	`USERS_USERNAME`, ";
+				//$sSQL .= "	`PERMISSIONS_WRITE`, ";
+				//$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
+				//$sSQL .= "	`PERMISSIONS_READ`, ";
+				$sSQL .= "	`PERMROOMS_WRITE`, ";
+				$sSQL .= "	`PERMROOMS_STATETOGGLE`, ";
+				$sSQL .= "	`PERMROOMS_READ`, ";
+				$sSQL .= "	`PERMROOMS_DATAREAD`, ";
+				$sSQL .= "	`ROOMS_PREMISE_FK`, ";
 				$sSQL .= "	`RSCAT_PK`, ";
 				$sSQL .= "	`RSCAT_NAME`, ";
 				$sSQL .= "	`RSSUBCAT_PK`, ";
@@ -5300,7 +7062,7 @@ function dbDebugIODetection() {
 				$sSQL .= "	`RSTYPE_PK`, ";
 				$sSQL .= "	`RSTYPE_NAME`, ";
 				$sSQL .= "	`RSTYPE_MAIN`, ";
-				$sSQL .= "	`HUB_PK`, ";
+				//$sSQL .= "	`HUB_PK`, ";
 				$sSQL .= "	`LINK_PK`, ";
 				$sSQL .= "	`LINK_NAME`, ";
 				$sSQL .= "	`LINK_STATE`, ";
@@ -5324,10 +7086,10 @@ function dbDebugIODetection() {
 				$sSQL .= "	`IOTYPE_ENUM`, ";
 				$sSQL .= "	`DATATYPE_NAME` ";
 				$sSQL .= "FROM `".$sView."` ";
-		//		sSQL += "WHERE `RSTYPE_PK` >= 1 ";                          //-- Filters out IOs with broken 'Resource Types' --//
-		//		sSQL += "AND `UOM_PK` >= 1 ";                               //-- Filters out IOs with broken 'Unit of Measurement' --//
-		//		sSQL += "AND `IOTYPE_DATATYPE_FK` >= 1 ";                   //-- Filters out IOs that do not have a 'Data Type' therefore cannot access any data for them --//
-		//		sSQL += "AND `IO_BASECONVERT` <> 0 ";                       //-- Filters out IOs that will attempt to divide by zero --//
+				//sSQL += "WHERE `RSTYPE_PK` >= 1 ";                          //-- Filters out IOs with broken 'Resource Types' --//
+				//sSQL += "AND `UOM_PK` >= 1 ";                               //-- Filters out IOs with broken 'Unit of Measurement' --//
+				//sSQL += "AND `IOTYPE_DATATYPE_FK` >= 1 ";                   //-- Filters out IOs that do not have a 'Data Type' therefore cannot access any data for them --//
+				//sSQL += "AND `IO_BASECONVERT` <> 0 ";                       //-- Filters out IOs that will attempt to divide by zero --//
 				$sSQL .= "ORDER BY `USERS_PK` ASC, `PREMISE_PK` ASC, `LINK_PK` ASC, `THING_PK` ASC, `IO_PK` ASC ";
 				
 				$aOutputCols = array(
@@ -5335,6 +7097,7 @@ function dbDebugIODetection() {
 					array( "Name"=>"PermissionWrite",           "type"=>"INT" ),
 					array( "Name"=>"PermissionStateToggle",     "type"=>"INT" ),
 					array( "Name"=>"PermissionRead",            "type"=>"INT" ),
+					array( "Name"=>"PermissionDataRead",        "type"=>"INT" ),
 					array( "Name"=>"PremiseId",                 "type"=>"INT" ),
 					array( "Name"=>"RSCatId",                   "type"=>"INT" ),
 					array( "Name"=>"RSCatName",                 "type"=>"STR" ),
@@ -5345,7 +7108,7 @@ function dbDebugIODetection() {
 					array( "Name"=>"RSTypeId",                  "type"=>"INT" ),
 					array( "Name"=>"RSTypeName",                "type"=>"STR" ),
 					array( "Name"=>"RSTypeMain",                "type"=>"INT" ),
-					array( "Name"=>"UnitId",                    "type"=>"INT" ),
+					//array( "Name"=>"UnitId",                    "type"=>"INT" ),
 					array( "Name"=>"LinkId",                    "type"=>"INT" ),
 					array( "Name"=>"LinkDisplayName",           "type"=>"STR" ),
 					array( "Name"=>"LinkStatus",                "type"=>"INT" ),
@@ -5371,12 +7134,14 @@ function dbDebugIODetection() {
 				);
 				
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+				
 				
 				try {
 					if( $aResult["Error"] === true) {
 						$bError = true;
 						$sErrMesg = $aResult["ErrMesg"];
+						
 					}
 				} catch( Exception $e) {
 					//-- TODO: Write error message for when Database Library returns an unexpected result --//
@@ -5408,7 +7173,7 @@ function dbGetIODebuggingInfo( $sDataType, $iIO ) {
 	//--------------------------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$bError             = false;        //-- BOOLEAN:   
@@ -5439,7 +7204,6 @@ function dbGetIODebuggingInfo( $sDataType, $iIO ) {
 				//-- store the view --//
 				$sView		= $aTemporaryView["View"];
 				$sUTSCol	= $aTemporaryView["UTS"];
-				//sValCol  = aTemporaryView.Value; 
 				
 				$sSQL .= "SELECT ";
 				$sSQL .= "	`IO_PK`, ";
@@ -5463,9 +7227,9 @@ function dbGetIODebuggingInfo( $sDataType, $iIO ) {
 				);
 				
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
 				
-				//echo json_encode($oRestrictedDB->QueryLogs)."\n\n<br /><br />\n";
+				//echo json_encode($oRestrictedApiCore->oRestrictedDB->QueryLogs)."\n\n<br /><br />\n";
 			}
 		} catch( Exception $e2 ) {
 			$bError   = true;
@@ -5513,7 +7277,7 @@ function dbAddNewIO( $iThingId, $iRSTypesId, $iUoMId, $iIOTypeId, $iIOState, $fS
 	//-- 1.0 - Declare Variables                        --//
 	//----------------------------------------------------//
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function. --//
@@ -5534,22 +7298,22 @@ function dbAddNewIO( $iThingId, $iRSTypesId, $iUoMId, $iIOTypeId, $iIOState, $fS
 			//----------------------------------------//
 			//-- SQL Query - Insert IO              --//
 			//----------------------------------------//
-			$sSQL .= "INSERT INTO `IO` ";
-			$sSQL .= "( ";
-			$sSQL .= "    `IO_THING_FK`,           `IO_RSTYPES_FK`, ";
-			$sSQL .= "    `IO_UOM_FK`,             `IO_IOTYPE_FK`, ";
-			$sSQL .= "    `IO_STATE`,              `IO_STATECHANGEID`, ";
-			$sSQL .= "    `IO_SAMPLERATECURRENT`,  `IO_SAMPLERATEMAX`, ";
-			$sSQL .= "    `IO_SAMPLERATELIMIT`,    `IO_BASECONVERT`, ";
-			$sSQL .= "    `IO_NAME` ";
-			$sSQL .= ") VALUES ( ";
-			$sSQL .= "    :ThingId,             :RSTypesId, ";
-			$sSQL .= "    :UoMId,               :IOTypeId, ";
-			$sSQL .= "    :IOState,             :IOStateChangeID, ";
-			$sSQL .= "    :IOSampleCur,         :IOSampleMax, ";
-			$sSQL .= "    :IOSampleLim,         :IOBaseConvert, ";
-			$sSQL .= "    :IOName ";
-			$sSQL .= ") ";
+			$sSQL .= "INSERT INTO `IO` \n";
+			$sSQL .= "( \n";
+			$sSQL .= "    `IO_THING_FK`,           `IO_RSTYPES_FK`, \n";
+			$sSQL .= "    `IO_UOM_FK`,             `IO_IOTYPE_FK`, \n";
+			$sSQL .= "    `IO_STATE`,              `IO_STATECHANGEID`, \n";
+			$sSQL .= "    `IO_SAMPLERATECURRENT`,  `IO_SAMPLERATEMAX`, \n";
+			$sSQL .= "    `IO_SAMPLERATELIMIT`,    `IO_BASECONVERT`, \n";
+			$sSQL .= "    `IO_NAME` \n";
+			$sSQL .= ") VALUES ( \n";
+			$sSQL .= "    :ThingId,             :RSTypesId, \n";
+			$sSQL .= "    :UoMId,               :IOTypeId, \n";
+			$sSQL .= "    :IOState,             :IOStateChangeID, \n";
+			$sSQL .= "    :IOSampleCur,         :IOSampleMax, \n";
+			$sSQL .= "    :IOSampleLim,         :IOBaseConvert, \n";
+			$sSQL .= "    :IOName \n";
+			$sSQL .= ") \n";
 			
 			//-- Input binding --//
 			$aInputValsInsert = array(
@@ -5568,9 +7332,9 @@ function dbAddNewIO( $iThingId, $iRSTypesId, $iUoMId, $iIOTypeId, $iIOState, $fS
 			
 			//-- Run the SQL Query and save the results --//
 			if( $bSQLTransaction===true ) {
-				$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+				$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
 			} else {
-				$aResultInsert = $oRestrictedDB->InputBindInsertQuery( $sSQL, $aInputValsInsert );
+				$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindInsertQuery( $sSQL, $aInputValsInsert );
 			}
 			
 		} catch(Exception $e2) {
@@ -5601,7 +7365,7 @@ function dbAddNewIO( $iThingId, $iRSTypesId, $iUoMId, $iIOTypeId, $iIOState, $fS
 		return $aResultInsert;
 		
 	} else {
-		//var_dump( $oRestrictedDB->QueryLogs );
+		//var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
 		return array( "Error"=>true, "ErrMesg"=>"IOSensorAdd: ".$sErrMesg );
 	}
 }
@@ -5616,7 +7380,7 @@ function dbGetIODataAggregation( $sAggregationType, $sDataType, $iIOId, $iStartU
 	//-- 1.0 - Declare Variables            --//
 	//----------------------------------------//
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
@@ -5644,30 +7408,29 @@ function dbGetIODataAggregation( $sAggregationType, $sDataType, $iIOId, $iStartU
 				//-- store the view --//
 				$sView              = $aTemporaryView["View"];
 				$sCalcedValueType   = $aTemporaryView["CalcedValueType"];
-				//sValCol  = aTemporaryView.Value; 
 				
-				$sSQL .= "SELECT ";
+				$sSQL .= "SELECT \n";
 				switch( $sAggregationType ) {
 					case "Min":
-						$sSQL .= "	MIN(`CALCEDVALUE`), ";
+						$sSQL .= "	MIN(`CALCEDVALUE`), \n";
 						break;
 					case "Max":
-						$sSQL .= "	MAX(`CALCEDVALUE`), ";
+						$sSQL .= "	MAX(`CALCEDVALUE`), \n";
 						break;
 					case "Sum":
-						$sSQL .= "	SUM(`CALCEDVALUE`), ";
+						$sSQL .= "	SUM(`CALCEDVALUE`), \n";
 						break;
 					default:
-						$sSQL .= "	COUNT(`CALCEDVALUE`), ";
+						$sSQL .= "	COUNT(`CALCEDVALUE`), \n";
 						break;
 				}
-				$sSQL .= "	`IO_PK`, ";
-				$sSQL .= "	`UOM_NAME` ";
-				$sSQL .= "FROM `".$sView."` ";
-				$sSQL .= "WHERE `IO_PK` = :IOId ";
-				$sSQL .= "AND `UTS` > :StartUTS ";
-				$sSQL .= "AND `UTS` <= :EndUTS ";
-				$sSQL .= "GROUP BY `IO_PK`, `UOM_NAME` ";
+				$sSQL .= "	`IO_PK`, \n";
+				$sSQL .= "	`UOM_NAME` \n";
+				$sSQL .= "FROM `".$sView."` \n";
+				$sSQL .= "WHERE `IO_PK` = :IOId \n";
+				$sSQL .= "AND `UTS` > :StartUTS \n";
+				$sSQL .= "AND `UTS` <= :EndUTS \n";
+				$sSQL .= "GROUP BY `IO_PK`, `UOM_NAME` \n";
 				
 				//-- Input Binding --//
 				$aInputVals = array(
@@ -5684,9 +7447,9 @@ function dbGetIODataAggregation( $sAggregationType, $sDataType, $iIOId, $iStartU
 				);
 				
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
 				
-				//echo json_encode($oRestrictedDB->QueryLogs)."\n\n<br /><br />\n";
+				//echo json_encode($oRestrictedApiCore->oRestrictedDB->QueryLogs)."\n\n<br /><br />\n";
 			}
 		} catch( Exception $e2 ) {
 			$bError   = true;
@@ -5735,7 +7498,7 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 	//-- 1.0 - Declare Variables            --//
 	//----------------------------------------//
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Normal Variables --//
 	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
@@ -5763,18 +7526,17 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 				//-- store the view --//
 				$sView              = $aTemporaryView["View"];
 				$sCalcedValueType   = $aTemporaryView['CalcedValueType'];
-				//sValCol  = aTemporaryView.Value; 
 				
-				$sSQL .= "SELECT ";
-				$sSQL .= "	`CALCEDVALUE`, ";
-				$sSQL .= "	`IO_PK`, ";
-				$sSQL .= "	`UTS`, ";
-				$sSQL .= "	`UOM_NAME`, ";
-				$sSQL .= "	`UOM_PK` ";
-				$sSQL .= "FROM `".$sView."` ";
-				$sSQL .= "WHERE `IO_PK` = :IOId ";
-				$sSQL .= "AND `UTS` <= :EndUTS ";
-				$sSQL .= "ORDER BY `UTS` DESC ";
+				$sSQL .= "SELECT \n";
+				$sSQL .= "	`CALCEDVALUE`, \n";
+				$sSQL .= "	`IO_PK`, \n";
+				$sSQL .= "	`UTS`, \n";
+				$sSQL .= "	`UOM_NAME`, \n";
+				$sSQL .= "	`UOM_PK` \n";
+				$sSQL .= "FROM `".$sView."` \n";
+				$sSQL .= "WHERE `IO_PK` = :IOId \n";
+				$sSQL .= "AND `UTS` <= :EndUTS \n";
+				$sSQL .= "ORDER BY `UTS` DESC \n";
 				$sSQL .= "LIMIT 1 ";
 				
 				//-- Input Binding --//
@@ -5793,7 +7555,7 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 				);
 				
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
 				
 			}
 		} catch( Exception $e2 ) {
@@ -5850,6 +7612,204 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 }
 
 
+function dbGetIODataMostRecentEnum( $iDataType, $iIOId, $iEndUTS ) {
+	//----------------------------------------//
+	//-- 1.0 - Declare Variables            --//
+	//----------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught --//
+	$aResult            = array();      //-- ARRAY:     This variable is for the SQL result --//
+	$aReturn            = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function.  --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions.  --//
+
+	$aTemporaryView     = array();      //-- ARRAY:     This variable is used to hold the response from the function that looks up the SQL View name --//
+	$sView              = "";           //-- STRING:    Used to hold the extracted string that contains the SQL View name  --//
+	$sCalcedValueType   = "";           //-- STRING:    --//
+	$aInputVals         = array();      //-- ARRAY:     Used to hold an array of values to do the SQL Input Binding --//
+	$aOutputCols        = array();      //-- ARRAY:     Used to hold an array of values to do the formatting of the SQL Output data --//
+	
+	if( $bError===false ) {
+		try {
+			//------------------------------------//
+			//-- SETUP VARIABLES                --//
+			//------------------------------------//
+			if( $iDataType===1 ) {
+				$sView         = "VR_DATATINYINTENUM";
+				$sValueColumn  = "DATATINYINT_VALUE";
+			} else if( $iDataType===2 ) {
+				$sView         = "VR_DATAINTENUM";
+				$sValueColumn  = "DATAINT_VALUE";
+			} else {
+				$sView         = "VR_DATABIGINTENUM";
+				$sValueColumn  = "DATABIGINT_VALUE";
+			}
+			
+			$sSQL .= "SELECT \n";
+			$sSQL .= "	`".$sValueColumn."`, \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`UTS`, \n";
+			$sSQL .= "	`UOM_NAME`, \n";
+			$sSQL .= "	`UOM_PK` \n";
+			$sSQL .= "FROM `".$sView."` \n";
+			$sSQL .= "WHERE `IO_PK` = :IOId \n";
+			$sSQL .= "AND `UTS` <= :EndUTS \n";
+			$sSQL .= "ORDER BY `UTS` DESC \n";
+			$sSQL .= "LIMIT 1 ";
+			
+			//-- Input Binding --//
+			$aInputVals = array(
+				array( "Name"=>"IOId",              "type"=>"INT",     "value"=>$iIOId        ),
+				array( "Name"=>"EndUTS",            "type"=>"INT",     "value"=>$iEndUTS      )
+			);
+			
+			//-- Output Binding --//
+			$aOutputCols = array(
+				array( "Name"=>"Value",             "type"=>"INT"   ),
+				array( "Name"=>"IOId",              "type"=>"INT"   ),
+				array( "Name"=>"UTS",               "type"=>"BINT"  ),
+				array( "Name"=>"UomName",           "type"=>"STR"   ),
+				array( "Name"=>"UomId",             "type"=>"INT"   )
+			);
+			
+			//-- Execute the SQL Query --//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true ) {
+				//-- So far All APIs that use this expect the "No rows" error when there are no results found with this call --//
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"IODataMostRecentEnum: ".$sErrMesg );
+	}
+}
+
+function dbGetIODataMostRecentEnumBit( $iDataType, $iIOId, $iEndUTS, $iBitsToCheck ) {
+	//----------------------------------------//
+	//-- 1.0 - Declare Variables            --//
+	//----------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught --//
+	$aResult            = array();      //-- ARRAY:     This variable is for the SQL result --//
+	$aReturn            = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function.  --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions.  --//
+
+	$aTemporaryView     = array();      //-- ARRAY:     This variable is used to hold the response from the function that looks up the SQL View name --//
+	$sView              = "";           //-- STRING:    Used to hold the extracted string that contains the SQL View name  --//
+	$sCalcedValueType   = "";           //-- STRING:    --//
+	$aInputVals         = array();      //-- ARRAY:     Used to hold an array of values to do the SQL Input Binding --//
+	$aOutputCols        = array();      //-- ARRAY:     Used to hold an array of values to do the formatting of the SQL Output data --//
+	
+	if( $bError===false ) {
+		try {
+			//------------------------------------//
+			//-- SETUP VARIABLES                --//
+			//------------------------------------//
+			if( $iDataType===1 ) {
+				$sView         = "VR_DATATINYINTENUM";
+				$sValueColumn  = "DATATINYINT_VALUE";
+			} else if( $iDataType===2 ) {
+				$sView         = "VR_DATAINTENUM";
+				$sValueColumn  = "DATAINT_VALUE";
+			} else {
+				$sView         = "VR_DATABIGINTENUM";
+				$sValueColumn  = "DATABIGINT_VALUE";
+			}
+			
+			$sSQL .= "SELECT \n";
+			$sSQL .= "	`".$sValueColumn."`, \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`UTS`, \n";
+			$sSQL .= "	`UOM_NAME`, \n";
+			$sSQL .= "	`UOM_PK` \n";
+			$sSQL .= "FROM `".$sView."` \n";
+			$sSQL .= "WHERE `IO_PK` = :IOId \n";
+			$sSQL .= "AND `UTS` <= :EndUTS \n";
+			$sSQL .= "AND `".$sValueColumn."` & :iBits \n";
+			$sSQL .= "ORDER BY `UTS` DESC \n";
+			$sSQL .= "LIMIT 1 ";
+			
+			
+			//-- Input Binding --//
+			$aInputVals = array(
+				array( "Name"=>"IOId",              "type"=>"INT",     "value"=>$iIOId        ),
+				array( "Name"=>"EndUTS",            "type"=>"INT",     "value"=>$iEndUTS      ),
+				array( "Name"=>"iBits",             "type"=>"INT",     "value"=>$iBitsToCheck )
+			);
+			
+			//-- Output Binding --//
+			$aOutputCols = array(
+				array( "Name"=>"Value",             "type"=>"INT"   ),
+				array( "Name"=>"IOId",              "type"=>"INT"   ),
+				array( "Name"=>"UTS",               "type"=>"BINT"  ),
+				array( "Name"=>"UomName",           "type"=>"STR"   ),
+				array( "Name"=>"UomId",             "type"=>"INT"   )
+			);
+			
+			//-- Execute the SQL Query --//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true ) {
+				//-- So far All APIs that use this expect the "No rows" error when there are no results found with this call --//
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"IODataMostRecentBit: ".$sErrMesg );
+	}
+}
+
+
 function dbInsertNewIODataValue( $sTableName, $iIOId, $iUTS, $Value, $sBindType, $bNonCommited=false ) {
 	//----------------------------------------------------//
 	//-- DESCRIPTION: This function is used to insert   --//
@@ -5863,7 +7823,7 @@ function dbInsertNewIODataValue( $sTableName, $iIOId, $iUTS, $Value, $sBindType,
 	//----------------------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-	global $oRestrictedDB;
+	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
 	$bValidNumeric          = false;            //-- BOOLEAN:	Used for checking if a number is valid or not --//
@@ -5904,9 +7864,9 @@ function dbInsertNewIODataValue( $sTableName, $iIOId, $iUTS, $Value, $sBindType,
 			
 			//-- Run the SQL Query and save the results --//
 			if( $bNonCommited===true ) {
-				$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sQueryInsert, $aInputValsInsert );
+				$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindNonCommittedInsertQuery( $sQueryInsert, $aInputValsInsert );
 			} else {
-				$aResultInsert = $oRestrictedDB->InputBindUpdateQuery( $sQueryInsert, $aInputValsInsert );
+				$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sQueryInsert, $aInputValsInsert );
 			}
 			
 			//----------------------------//
@@ -5935,7 +7895,7 @@ function dbInsertNewIODataValue( $sTableName, $iIOId, $iUTS, $Value, $sBindType,
 		return $aResultInsert;
 	} else {
 		//echo "-----------<br />\n";
-		//var_dump( $oRestrictedDB->QueryLogs );
+		//var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
 		//echo "-----------<br />\n";
 		
 		return array( "Error"=>true, "ErrMesg"=>"Insert DataValue: ".$sErrMesg );

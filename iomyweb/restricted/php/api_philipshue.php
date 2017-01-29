@@ -90,12 +90,12 @@ $iBrightnessRSTypeId        = 0;            //-- INTEGER:       This is used to 
 //----------------------------------------------------//
 require_once SITE_BASE.'/restricted/libraries/philipshue.php';
 require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';		//-- This should call all the additional libraries needed --//
-require_once SITE_BASE.'/restricted/php/special/versions/0.1.0.php';
+require_once SITE_BASE.'/restricted/libraries/special/dbinsertfunctions.php';
 
 //------------------------------------------------------------//
 //-- 1.4 - Flag an Error is there is no Database access     --//
 //------------------------------------------------------------//
-if( $aRestrictedApiCore['RestrictedDB']===false ) {
+if( $oRestrictedApiCore->bRestrictedDB===false ) {
 	$bError    = true;
 	$iErrCode  = 11;
 	$sErrMesg .= "Can't access the database! User may not be logged in";
@@ -485,18 +485,32 @@ if( $bError===false ) {
 				
 				//-- Extract the desired variables out of the results --//
 				if( $aTempFunctionResult2['Error']===false ) {
-					//-- Extract the Desired Variables --//
-					$iLinkCommType        = $aTempFunctionResult2['Data']['CommTypeId'];
 					
-					//-- If the API Controls the Philips Hue Light bulb rather than WatchInputs then extract the variables required --//
-					if( $iAPICommTypeId===$iLinkCommType ) {
-						//-- Extract the required variables from the function results --//
-						$sNetworkAddress  = $aTempFunctionResult2['Data']['LinkConnAddress'];
-						$sNetworkPort     = $aTempFunctionResult2['Data']['LinkConnPort'];
-						$sUserToken       = $aTempFunctionResult2['Data']['LinkConnUsername'];
-						$sHWId            = strval( $aTempFunctionResult1['Data']['ThingHWId'] );
-						//-- Flag that this request needs to use the "PhilipsHue" PHP Object to update the device --//
-						$bUsePHPObject = true;
+					//-- Lookup the Comm Information --//
+					$aCommInfo = GetCommInfo( $aTempFunctionResult2['Data']['LinkCommId'] );
+					
+					if( $aCommInfo['Error']===false ) {
+						
+						//-- Extract the Desired Variables --//
+						$iLinkCommType        = $aCommInfo['Data']['CommTypeId'];
+						
+						//-- If the API Controls the Philips Hue Light bulb rather than WatchInputs then extract the variables required --//
+						if( $iAPICommTypeId===$iLinkCommType ) {
+							//-- Extract the required variables from the function results --//
+							$sNetworkAddress  = $aTempFunctionResult2['Data']['LinkConnAddress'];
+							$sNetworkPort     = $aTempFunctionResult2['Data']['LinkConnPort'];
+							$sUserToken       = $aTempFunctionResult2['Data']['LinkConnUsername'];
+							$sHWId            = strval( $aTempFunctionResult1['Data']['ThingHWId'] );
+							//-- Flag that this request needs to use the "PhilipsHue" PHP Object to update the device --//
+							$bUsePHPObject = true;
+						}
+						
+					} else {
+						$bError = true;
+						$iErrCode  = 3205;
+						$sErrMesg .= "Error Code:'3205' \n";
+						$sErrMesg .= "Problem when fetching the Link's Comm info\n";
+						$sErrMesg .= $aTempFunctionResult1['ErrMesg'];
 					}
 					
 				} else {
@@ -507,25 +521,6 @@ if( $bError===false ) {
 					$sErrMesg .= $aTempFunctionResult1['ErrMesg'];
 				}
 			}
-			
-			
-			if( $bError===false ) {
-				//-- Fetch the Info about the Link --//
-				$aTempFunctionResult2 = GetLinkInfo( $iLinkId );
-				
-				//-- Extract the desired variables out of the results --//
-				if( $aTempFunctionResult2['Error']===false ) {
-					//-- Extract the Desired Variables --//
-					$iLinkCommType = $aTempFunctionResult2['Data']['CommTypeId'];
-				} else {
-					$bError = true;
-					$iErrCode  = 3205;
-					$sErrMesg .= "Error Code:'3205' \n";
-					$sErrMesg .= "Problem when fetching the Link info\n";
-					$sErrMesg .= $aTempFunctionResult1['ErrMesg'];
-				}
-			}
-			
 			
 			//----------------------------------------------------------------------------//
 			//-- STEP 5: Lookup the IOs that need their values updated                  --//
@@ -975,6 +970,9 @@ if( $bError===false ) {
 //====================================================================//
 //== 8.0 - Log the Results											==//
 //====================================================================//
+
+
+
 
 
 

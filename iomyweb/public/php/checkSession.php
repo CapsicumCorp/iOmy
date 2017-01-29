@@ -1,8 +1,7 @@
 <?php
-
 //========================================================================================================//
 //== @Author: Andrew Somerville <support@capsicumcorp.com>
-//== @Description: Basic public API for checking if the User is currently logged in.
+//== @Description: This is used to indicate if a user is logged in or not.
 //== @Copyright: Capsicum Corporation 2015-2016
 //== 
 //== This file is part of Backend of the iOmy project.
@@ -21,12 +20,13 @@
 
 
 
+
 //========================================================================================================//
-//== #1.0# - INITIALSE																					==//
+//== #1.0# - INITIALSE                                                                                  ==//
 //========================================================================================================//
 
 //------------------------------------------------//
-//-- #1.1# - Configure SITE_BASE				--//
+//-- #1.1# - Configure SITE_BASE                --//
 //------------------------------------------------//
 if (!defined('SITE_BASE')) {
 	@define('SITE_BASE', dirname(__FILE__).'/../..');
@@ -34,43 +34,53 @@ if (!defined('SITE_BASE')) {
 
 
 //------------------------------------------------//
-//-- #1.2# - Load Required Libraries			--//
+//-- #1.2# - Load Required Libraries            --//
 //------------------------------------------------//
 require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';
 
 
 //------------------------------------------------//
-//-- #1.3# - Configure normal variables			--//
+//-- #1.3# - Configure normal variables         --//
 //------------------------------------------------//
-$aResult		= array();		//-- ARRAY:		Used to store the results of a function --//
-$aReturn		= array();		//-- ARRAY:		Used to return the results to the User --//
-$bFailedLogin	= false;		//-- BOOLEAN:	Used to indicate if a login attempt failed --//
+$aResult        = array();      //-- ARRAY:     Used to store the results of a function --//
+$aReturn        = array();      //-- ARRAY:     Used to return the results to the User --//
+
+$bFailedLogin   = false;        //-- BOOLEAN:   Used to indicate if a login attempt failed --//
 
 
 //========================================================================================================//
-//== #2.0# - Check if the User is logged in																==//
+//== #2.0# - Check if the User is logged in                                                             ==//
 //========================================================================================================//
 
 //-- Check if the User attempted to login to the database --// 
 if( isset($_POST['AttemptLogin']) && $_POST['AttemptLogin']==true ) {
-	if( $aRestrictedApiCore['LoginResult']===false ) {
+	if( $oRestrictedApiCore->bLoginResult===false ) {
 		//-- Flag that the Login failed --//
 		$bFailedLogin = true;
 		
-		//-- Prepare the array with the data to be returned --//
-		$aReturn = array( 
-			"login"=>false,
-			"ErrCode"=>"0001",
-			"ErrMesg"=>"Login attempt was unsuccessful!"
-		);
+		if( $oRestrictedApiCore->bDebugging===true ) {
+			//-- Prepare the array with the data to be returned --//
+			$aReturn = array( 
+				"login"=>false,
+				"ErrCode"=>"0001",
+				"ErrMesg"=>$oRestrictedApiCore->sDebugMessage
+			);
+		} else {
+			//-- Prepare the array with the data to be returned --//
+			$aReturn = array( 
+				"login"=>false,
+				"ErrCode"=>"0001",
+				"ErrMesg"=>"Login attempt was unsuccessful!"
+			);
+		}
 	}
 }
 
 //-- IF	a failed login attempt hasn't occurred --//
 if( $bFailedLogin===false ) {
 	//-- IF	the user has access to the restricted database --//
-	if( $aRestrictedApiCore['RestrictedDB']===true ) {
-		
+	if( $oRestrictedApiCore->bRestrictedDB===true ) {
+	
 		$aResult = GetCurrentUserDetails();
 		
 		if( $aResult['Error']===false ) {
@@ -98,11 +108,22 @@ if( $bFailedLogin===false ) {
 	//-- ELSE	The user doesn't have access to the restricted database --//
 	} else {
 		//-- No connection to the Restricted Database --//
-		$aReturn = array( 
-			"login"=>false, 
-			"ErrCode"=>"0000",
-			"ErrMesg"=>"User is not logged in!"
-		);
+		if( $oRestrictedApiCore->bDebugging===true ) {
+			//-- Prepare the array with the data to be returned --//
+			$aReturn = array( 
+				"login"=>false,
+				"ErrCode"=>"0000",
+				"ErrMesg"=>$oRestrictedApiCore->sDebugMessage
+			);
+		} else {
+			//-- Prepare the array with the data to be returned --//
+			$aReturn = array( 
+				"login"=>false, 
+				"ErrCode"=>"0000",
+				"ErrMesg"=>"User is not logged in!"
+			);
+		}
+		
 	}
 }
 

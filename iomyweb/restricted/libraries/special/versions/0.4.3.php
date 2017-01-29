@@ -73,6 +73,7 @@ function PrepareAddNewComm( $aComm, $iParamHubId=0 ) {
 		}
 	}
 	
+	
 	//----------------------------------------------------//
 	//-- (Required) Check 'Type' variable               --//
 	//----------------------------------------------------//
@@ -146,16 +147,9 @@ function PrepareAddNewComm( $aComm, $iParamHubId=0 ) {
 	//-- 4.0 - Check to make sure the User has permission   --//
 	//--------------------------------------------------------//
 	if( $bError===false ) {
-		$aVerifyResults = HubRetrieveInfoAndPermission( $iCommHubId );
+		$aVerifyResults = WatchInputsHubRetrieveInfoAndPermission( $iCommHubId );
 		
-		if( $aVerifyResults['Error']===false ) {
-			if( $aVerifyResults['Data']['PermWrite']!==1 ) {
-				$bError = true;
-				$iErrCode  = 9;
-				$sErrMesg .= "Critical Error adding the new Comm! \n";
-				$sErrMesg .= "The User doesn't appear to have the \"Write\" permission for the Hub.\n";
-			}
-		} else {
+		if( $aVerifyResults['Error']===true ) {
 			$bError = true;
 			$iErrCode  = 9;
 			$sErrMesg .= "Problem when looking up Hub Info! \n";
@@ -174,7 +168,7 @@ function PrepareAddNewComm( $aComm, $iParamHubId=0 ) {
 			//----------------------------------------------------//
 			//-- ERROR:                                         --//
 			//----------------------------------------------------//
-			$bError = true;
+			$bError    = true;
 			$iErrCode  = 15;
 			$sErrMesg .= "Problem when adding the 'Comm' into the database! \n";
 			$sErrMesg .= $aResult['ErrMesg'];
@@ -275,6 +269,7 @@ function PrepareAddNewLink( $aLink ) {
 				$iErrCode  = 1;
 				$sErrMesg .= "Problem with the CommId! \n";
 			}
+			
 		} else {
 			//-- Error --//
 			$bError = true;
@@ -537,8 +532,7 @@ function PrepareAddNewLink( $aLink ) {
 		//----------------------------------------------------//
 		//-- (Optional) Check Link 'RoomId'                 --//
 		//----------------------------------------------------//
-		
-		//-- TODO: Implement checks to make sure that the Room exists in the Premise --//
+		//-- NOTE: Requires the Comm Validation to be completed --//
 		if( $bError===false ) {
 			if( isset( $aLink['RoomId'] ) ) {
 				if( is_string( $aLink['RoomId'] ) ) {
@@ -570,16 +564,26 @@ function PrepareAddNewLink( $aLink ) {
 		//----------------------------------------------------------------//
 		if( $bError===false ) {
 			
-			$aVerifyResults = GetCommInfo( $iLinkCommId );
-			
+			$aVerifyResults = WatchInputsGetCommInfo( $iLinkCommId );
 			
 			if( $aVerifyResults['Error']===false ) {
-				if( $aVerifyResults['Data']['PermWrite']!==1 ) {
-					$bError = true;
-					$iErrCode  = 9;
-					$sErrMesg .= "Critical Error adding the new Link! \n";
-					$sErrMesg .= "The User doesn't appear to have the \"Write\" permission for the Hub's Comm.\n";
+				
+				
+				if( $iRoomId===null ) {
+					//-- IF The Comm is available the lookup all the rooms on that Premise --//
+					$aFirstRoomIdsList = WatchInputsGetFirstRoomIdFromPremiseId( $aVerifyResults['Data']['PremiseId'] );
+					
+					if( $aFirstRoomIdsList['Error']===false ) {
+						$iRoomId = $aFirstRoomIdsList['Data']['RoomId'];
+						
+					} else {
+						$bError = true;
+						$iErrCode  = 9;
+						$sErrMesg .= "Problem choosing a default room for a Link! \n";
+						$sErrMesg .= $aVerifyResults['ErrMesg'];
+					}
 				}
+				
 			} else {
 				$bError = true;
 				$iErrCode  = 9;
@@ -594,7 +598,7 @@ function PrepareAddNewLink( $aLink ) {
 		if( $bError===false ) {
 			
 			//-- Check if the LinkInfo already exists --//
-			$iLinkInfoId = CheckIfLinkInfoAlreadyExists( $sLinkInfoName, $sLinkInfoManufacturer, $sLinkInfoManufacturerUrl );
+			$iLinkInfoId = WatchInputsCheckIfLinkInfoAlreadyExists( $sLinkInfoName, $sLinkInfoManufacturer, $sLinkInfoManufacturerUrl );
 			
 			//-- Check if a result was found --//
 			if( $iLinkInfoId===null || $iLinkInfoId===false || $iLinkInfoId<=0 ) {
@@ -636,6 +640,7 @@ function PrepareAddNewLink( $aLink ) {
 				//----------------------------------------------------//
 				if( $aTempResult2['Data']['LinkConnId'] ) {
 					$iLinkConnectionId = $aTempResult2['Data']['LinkConnId'];
+					
 				} else {
 					$bError = true;
 					$iErrCode  = 11;
@@ -954,17 +959,9 @@ function PrepareAddNewThing( $iLinkId, $aThing, $iThingDefaultHWID, $sLinkDispla
 	//----------------------------------------------------------------//
 	if( $bError===false ) {
 		
-		$aVerifyResults = GetLinkInfo( $iLinkId );
+		$aVerifyResults = WatchInputsGetLinkInfo( $iLinkId );
 		
-		if( $aVerifyResults['Error']===false ) {
-			if( $aVerifyResults['Data']['PermWrite']!==1 ) {
-				$bError = true;
-				$iErrCode  = 14;
-				$sErrMesg .= "Critical Error adding the new Thing! \n";
-				$sErrMesg .= "The User doesn't appear to have the \"Write\" permission for the Link.\n";
-			}
-			
-		} else {
+		if( $aVerifyResults['Error']===true ) {
 			$bError = true;
 			$iErrCode  = 14;
 			$sErrMesg .= "Critical Error adding the new Thing! \n";
@@ -1138,7 +1135,6 @@ function PrepareAddNewIO( $iThingId, $aIO, $iThingState ) {
 					$sErrMesg .= "Problem with the 'UoM' variable in one of the 'IO' arrays! \n";
 				}
 			}
-			
 		} else {
 			$bError = true;
 			$iErrCode  = 4;
@@ -1172,7 +1168,6 @@ function PrepareAddNewIO( $iThingId, $aIO, $iThingState ) {
 			$sErrMesg .= "Can not detect the 'Type' variable in one of the 'IO' arrays! \n";
 		}
 	}
-	
 	
 	//----------------------------------------------------//
 	//-- (Required) Check IO 'Name' variable            --//
@@ -1350,17 +1345,9 @@ function PrepareAddNewIO( $iThingId, $aIO, $iThingState ) {
 	//----------------------------------------------------------------//
 	if( $bError===false ) {
 		
-		$aVerifyResults = GetThingInfo( $iThingId );
+		$aVerifyResults = WatchInputsGetThingInfo( $iThingId );
 		
-		if( $aVerifyResults['Error']===false ) {
-			if( $aVerifyResults['Data']['PermWrite']!==1 ) {
-				$bError = true;
-				$iErrCode  = 14;
-				$sErrMesg .= "Critical Error adding the new IO! \n";
-				$sErrMesg .= "The User doesn't appear to have the \"Write\" permission for the Thing.\n";
-			}
-			
-		} else {
+		if( $aVerifyResults['Error']===true ) {
 			$bError = true;
 			$iErrCode  = 14;
 			$sErrMesg .= "Critical Error adding the new IO! \n";

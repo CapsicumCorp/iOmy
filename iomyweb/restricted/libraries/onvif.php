@@ -78,14 +78,14 @@ class PHPOnvif {
 			//-- ELSE error extracting Date and Time    --//
 			//--------------------------------------------//
 			} else {
-				$this->aErrorMessges[] = "InitialConnection: Couldn't extract date and time!\n";
+				$this->aErrorMessges[] = "InitialConnection: Couldn't extract date and time!";
 			}
 			
 		//--------------------------------------------//
 		//-- ELSE Error fetching Date and Time      --//
 		//--------------------------------------------//
 		} else {
-			$this->aErrorMessges[] = "InitialConnection: Connection Failed!\n";
+			$this->aErrorMessges[] = "InitialConnection: Connection Failed!";
 		}
 	}
 	
@@ -1821,7 +1821,7 @@ class PHPOnvif {
 		$iUTS                   = 0;                //-- INTEGER:   --//
 		
 		
-		global $oRestrictedDB;
+		global $oRestrictedApiCore;
 		
 		//--------------------------------------------------------------------//
 		//-- 3.0 - Lookup the List of Stream Profiles                       --//
@@ -2036,7 +2036,7 @@ class PHPOnvif {
 			//--------------------------------------------//
 			//-- 5.2 - Start the Transaction            --//
 			//--------------------------------------------//
-			$bTransactionStarted = $oRestrictedDB->dbBeginTransaction();
+			$bTransactionStarted = $oRestrictedApiCore->oRestrictedDB->dbBeginTransaction();
 			
 			if( $bTransactionStarted===false ) {
 				$bError    = true;
@@ -2156,11 +2156,11 @@ class PHPOnvif {
 			//--------------------------------------------//
 			if( $bError===false ) {
 				//-- Commit the changes --//
-				$oRestrictedDB->dbEndTransaction();
+				$oRestrictedApiCore->oRestrictedDB->dbEndTransaction();
 				
 			} else {
 				//-- Rollback changes --//
-				$oRestrictedDB->dbRollback();
+				$oRestrictedApiCore->oRestrictedDB->dbRollback();
 			}
 		}
 		
@@ -2207,8 +2207,6 @@ class PHPOnvif {
 		
 		//-- 3.5 - Thumbnail name --//
 		$sScript .= $sThumbnailFilename;
-		
-		//ffmpeg -i rtsp://admin:'Key!way#5'@10.4.5.211/videoMain -r 1 -an -updatefirst 1 -y thumbnail.jpg
 		
 		//------------------------------------------------//
 		//-- 4.0 - Execute the script                   --//

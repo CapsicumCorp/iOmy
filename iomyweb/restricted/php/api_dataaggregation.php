@@ -53,7 +53,7 @@ require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';		//-- This
 //------------------------------------------------------------//
 //-- 1.4 - Flag an Error is there is no Database access     --//
 //------------------------------------------------------------//
-if( $aRestrictedApiCore['RestrictedDB']===false ) {
+if( $oRestrictedApiCore->bRestrictedDB===false ) {
 	$bError    = true;
 	$sErrMesg .= "Can't access the database! User may not be logged in";
 }
@@ -342,6 +342,9 @@ if( $bError===false ) {
 //====================================================================//
 //== 8.0 - Log the Results                                          ==//
 //====================================================================//
+
+
+
 
 //====================================================================//
 //== 9.0 - Finalise                                                 ==//

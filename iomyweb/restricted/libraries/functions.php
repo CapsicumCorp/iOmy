@@ -43,8 +43,19 @@
 //========================================================================================================================//
 //== #1.0# - Required PHP Libraries                                                                                     ==//
 //========================================================================================================================//
-require_once("http_post.php");
-require_once("dbfunctions.php");
+//------------------------------------------------//
+//-- #1.1# - Configure Variables                --//
+//------------------------------------------------//
+if (!defined('SITE_BASE')) {
+	@define('SITE_BASE', dirname(__FILE__).'/../..');
+}
+
+//------------------------------------------------//
+//-- #1.2# - Load Required Libraries            --//
+//------------------------------------------------//
+require_once SITE_BASE.'/restricted/libraries/http_post.php';
+require_once SITE_BASE.'/restricted/libraries/dbfunctions.php';
+
 
 
 //========================================================================================================================//
@@ -52,15 +63,26 @@ require_once("dbfunctions.php");
 //========================================================================================================================//
 
 function LookupFunctionConstant( $sValue ) {
-	//-- TODO: Decide if this is going to be the best spot and place to do this --//
+	//-- TODO: Replace this with a better solution --//
 	switch( $sValue ) {
-		//-------------//
-		//-- COMMS   --//
+		//----------------//
+		//-- HUBS       --//
+		//----------------//
+		case "AndroidWatchInputsHubTypeId":
+			return 2;
+			
+		//----------------//
+		//-- COMMS      --//
+		//----------------//
 		case "APICommTypeId":
 			return 2;
 			
-		//-------------//
-		//-- LINKS   --//
+		case "ZigbeeCommTypeId":
+			return 3;
+		
+		//----------------//
+		//-- LINKS      --//
+		//----------------//
 		case "HueBridgeLinkTypeId":
 			return 7;
 			
@@ -70,8 +92,12 @@ function LookupFunctionConstant( $sValue ) {
 		case "OWMLinkTypeId":
 			return 8;
 			
-		//-------------//
-		//-- THINGS  --//
+		case "NetvoxMotionSensorLinkTypeId":
+			return 9;
+			
+		//----------------//
+		//-- THINGS     --//
+		//----------------//
 		case "HueThingTypeId":
 			return 13;
 			
@@ -81,8 +107,12 @@ function LookupFunctionConstant( $sValue ) {
 		case "WeatherThingTypeId":
 			return 14;
 			
-		//-------------//
-		//-- RSTYPES --//
+		case "NetvoxMotionSensorThingTypeId":
+			return 3;
+			
+		//----------------//
+		//-- RSTYPES    --//
+		//----------------//
 		case "WeatherStationRSTypeId":
 			return 1600;
 		
@@ -103,7 +133,13 @@ function LookupFunctionConstant( $sValue ) {
 			
 		case "WindSpeedRSTypeId":
 			return 1606;
-		
+			
+		case "SunriseRSTypeId":
+			return 1607;
+			
+		case "SunsetRSTypeId":
+			return 1608;
+			
 		case "LightHueRSTypeId":
 			return 3901;
 			
@@ -339,7 +375,7 @@ function AddPresetLogToPremiseLog( $iPresetLogId, $iUTS, $iPremiseId, $sCustom1 
 		$bError = true;
 		$sErrMesg .= "Error Code:0x9805! \n";
 		$sErrMesg .= "Error submitting log to the PremiseLog! \n";
-		$sErrMesg .= "Critical Error. \n";
+		$sErrMesg .= "Critical Error \n";
 		$sErrMesg .= $e2->getMessage();
 	}
 	
@@ -349,7 +385,7 @@ function AddPresetLogToPremiseLog( $iPresetLogId, $iUTS, $iPremiseId, $sCustom1 
 	//------------------------------------------------------------//
 	if( $bError===false ) {
 		//-- No Errors --//
-		return array( "Error"=>false );
+		return array( "Error"=>false);
 
 	} else {
 		//-- Error Occurred --//
@@ -364,9 +400,10 @@ function GetPremiseLogsBetweenUTS( $iPremiseId, $iStartstamp, $iEndstamp ) {
 	//-- 1.0 - Initialise                                       --//
 	//------------------------------------------------------------//
 	$bError			= false;			//-- BOOLEAN:	Used to flag when an error has occurred. --//
-	$sErrMesg		= "";				//-- STRING:	Once an error has occurred this is the variable that stores the error message. --//	
+	$sErrMesg		= "";				//-- STRING:	Once an error has occurred this is the variable that stores the error message. --//
 	$aResult		= array();			//-- ARRAY:		--//
 	$aReturn		= array();			//-- ARRAY:		--//
+	
 	
 	//------------------------------------------------------------//
 	//-- 2.0 - Begin                                            --//
@@ -402,7 +439,6 @@ function GetPremiseLogsBetweenUTS( $iPremiseId, $iStartstamp, $iEndstamp ) {
 	}
 	return $aReturn;
 }
-
 
 
 //========================================================================================================================//
@@ -531,41 +567,6 @@ function ChangeUserAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddre
 	}
 }
 
-
-function GetUserServerPermissions() {
-	//------------------------------------------------------------//
-	//-- 1.0 - Initialise                                       --//
-	//------------------------------------------------------------//
-	$bError     = false;
-	$sErrMesg   = "";
-	$aResult    = array();
-	//------------------------------------------------------------//
-	//-- 2.0 - Begin                                            --//
-	//------------------------------------------------------------//
-	$aResult = dbGetUserServerPermissions();
-	
-	
-	//------------------------------------------------------------//
-	//-- 8.0 - Check for errors                                 --//
-	//------------------------------------------------------------//
-	if( $aResult['Error']===true ) {
-		$bError = true;
-		$sErrMesg = "Problem lookinging up the User's Server Permissions!";
-	}
-	
-	//------------------------------------------------------------//
-	//-- 9.0 - Return the Results or Error Message              --//
-	//------------------------------------------------------------//
-	if($bError===false) {
-		//-- 9.A - SUCCESS --//
-		return array( "Error"=>false, "Data"=>$aResult["Data"] );
-	} else {
-		//-- 9.B - FAILURE --//
-		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
-	}
-}
-
-
 function InsertUserInfo( $iGenderId, $sTitle, $sGivennames, $sSurnames, $sDisplayname, $sEmail, $sPhoneNumber, $sDoB ) {
 	//------------------------------------------------------------//
 	//-- 1.0 - Initialise                                       --//
@@ -578,6 +579,7 @@ function InsertUserInfo( $iGenderId, $sTitle, $sGivennames, $sSurnames, $sDispla
 	//-- 2.0 - Begin                                            --//
 	//------------------------------------------------------------//
 	$aResult = dbInsertUserInfo( $iGenderId, $sTitle, $sGivennames, $sSurnames, $sDisplayname, $sEmail, $sPhoneNumber, $sDoB );
+	
 	
 	//------------------------------------------------------------//
 	//-- 8.0 - Check for errors                                 --//
@@ -594,7 +596,7 @@ function InsertUserInfo( $iGenderId, $sTitle, $sGivennames, $sSurnames, $sDispla
 	//------------------------------------------------------------//
 	if($bError===false) {
 		//-- 9.A - SUCCESS --//
-		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+		return array( "Error"=>false, "Data"=>array( "LastId"=>$aResult['LastId'] ) );
 	} else {
 		//-- 9.B - FAILURE --//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
@@ -630,7 +632,7 @@ function InsertUser( $iUserInfoId, $sUsername, $iUserState ) {
 	//------------------------------------------------------------//
 	if($bError===false) {
 		//-- 9.A - SUCCESS --//
-		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+		return array( "Error"=>false, "Data"=>array( "LastId"=>$aResult['LastId'] ) );
 	} else {
 		//-- 9.B - FAILURE --//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
@@ -646,10 +648,13 @@ function InsertUserAddress( $iUserId, $iLanguageId, $iCountriesId, $iStateProvin
 	$sErrMesg   = "";
 	$aResult    = array();
 	
+	
 	//------------------------------------------------------------//
 	//-- 2.0 - Begin                                            --//
 	//------------------------------------------------------------//
 	$aResult = dbInsertUserAddress( $iUserId, $iLanguageId, $iCountriesId, $iStateProvinceId, $iPostcodeId, $iTimezoneId, $sLine1, $sLine2, $sLine3 );
+	
+	
 	
 	//------------------------------------------------------------//
 	//-- 8.0 - Check for errors                                 --//
@@ -665,7 +670,7 @@ function InsertUserAddress( $iUserId, $iLanguageId, $iCountriesId, $iStateProvin
 	//------------------------------------------------------------//
 	if($bError===false) {
 		//-- 9.A - SUCCESS --//
-		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+		return array( "Error"=>false, "Data"=>array( "LastId"=>$aResult['LastId'] ) );
 	} else {
 		//-- 9.B - FAILURE --//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
@@ -694,8 +699,46 @@ function CreateDatabaseUser( $sUsername, $sPassword, $sLocation ) {
 	//------------------------------------------------------------//
 	if( $aResult['Error']===true ) {
 		$bError    = true;
-		$sErrMesg .= "Problem looking up the User's Server Permissions!\n";
-		$sErrMesg .= $aResult['ErrMesg'];
+		$sErrMesg .= "Problem creating the new user!\n";
+		$sErrMesg .= "It could be caused by one of the following reasons.\n";
+		$sErrMesg .= "a.) The database user may not have permission to make new users. \n";
+		$sErrMesg .= "b.) The user may already exist as a database user.\n";
+		//$sErrMesg .= $aResult['ErrMesg'];
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return $aResult;
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+function GetUserServerPermissions() {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError     = false;
+	$sErrMesg   = "";
+	$aResult    = array();
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	$aResult = dbGetUserServerPermissions();
+	
+	
+	//------------------------------------------------------------//
+	//-- 8.0 - Check for errors                                 --//
+	//------------------------------------------------------------//
+	if( $aResult['Error']===true ) {
+		$bError = true;
+		$sErrMesg = "Problem lookinging up the User's Server Permissions!";
 	}
 	
 	//------------------------------------------------------------//
@@ -711,6 +754,863 @@ function CreateDatabaseUser( $sUsername, $sPassword, $sLocation ) {
 }
 
 
+function LookupUserPremisePermissions( $iUserId, $iPremiseId ) {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError                 = false;        //-- BOOLEAN:   --//
+	$iErrCode               = 0;            //-- INTEGER:   --//
+	$sErrMesg               = "";           //-- STRING:    --//
+	$aResult                = array();      //-- ARRAY:     --//
+	$iOwnerPerm             = 0;            //-- INTEGER:   --//
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	try {
+		
+		//--------------------------------------------------------//
+		//-- 5.2 - Check if the Current User is the Owner       --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aPremiseResults = GetPremisesInfoFromPremiseId( $iPremiseId );
+			
+			if( $aPremiseResults['Error']===false ) {
+				//-- Extract the Owner Permission --//
+				$iOwnerPerm = $aPremiseResults['Data']['PermOwner'];
+				
+				//-- If the Current User isn't the Owner of the Premise --//
+				if( $iOwnerPerm!==1 ) {
+					$bError    = true;
+					$iErrCode  = 1;
+					$sErrMesg .= "Insufficient permissions!\n";
+					$sErrMesg .= "Your user doesn't appear to have the \"Owner\" permission needed to perform this operation.";
+					//var_dump($aPremiseResults);
+				}
+				
+			} else {
+				$bError    = true;
+				$iErrCode  = 2;
+				$sErrMesg .= "Internal API Error! \n";
+				$sErrMesg .= $aPremiseResults['ErrMesg'];
+			}
+		}
+		
+		//--------------------------------------------------------//
+		//-- 5.3 - Check if the User has a permissions entry    --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aPermissionsResult = dbSpecialOtherUsersPremisePermissions( $iUserId, $iPremiseId );
+			
+			//-- IF An error occurred in the results --//
+			if( $aPermissionsResult['Error']===true ) {
+				//-- IF No results found --//
+				if( $aPermissionsResult['ErrMesg']==="GetOtherUsersPremisePerms: No Rows Found! Code:1" ) {
+					//-- Create the Results --//
+					$aResult = array(
+						"Owner"       => 0,
+						"RoomAdmin"   => 0,
+						"Write"       => 0,
+						"StateToggle" => 0,
+						"Read"        => 0
+					);
+					
+				//-- ELSE Normal Error --//
+				} else {
+					$bError    = true;
+					$iErrCode  = 3;
+					$sErrMesg .= "Unexpected error fetching Premise Permissions!\n";
+					$sErrMesg .= "Check with your iOmy Administrator on if there is a version mismatch!\n";
+				}
+			} else {
+				//-- Extract the Permissions Id --//
+				if( $aPermissionsResult['Data']['PermId']>=1 ) {
+					//-- Create the Results --//
+					$aResult = array(
+						"Owner"       => $aPermissionsResult['Data']['PermOwner'],
+						"RoomAdmin"   => $aPermissionsResult['Data']['PermRoomAdmin'],
+						"Write"       => $aPermissionsResult['Data']['PermWrite'],
+						"StateToggle" => $aPermissionsResult['Data']['PermStateToggle'],
+						"Read"        => $aPermissionsResult['Data']['PermRead']
+					);
+				}
+			}
+		}
+		
+	} catch( Exception $e0001 ) {
+		$bError    = true;
+		$iErrCode  = 0;
+		$sErrMesg .= "Internal API Error! \n";
+		$sErrMesg .= $e0001->getMessage();
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>$aResult );
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+function SpecialLookupUsersForPremisePerms( $iPremiseId ) {
+	//-- TODO: The functions that gets used by this may need to be put in object to secure against misuse --//
+	
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError                 = false;        //-- BOOLEAN:   --//
+	$iErrCode               = 0;            //-- INTEGER:   --//
+	$sErrMesg               = "";           //-- STRING:    --//
+	$aResult                = array();      //-- ARRAY:     --//
+	
+	//------------------------------------------------------------//
+	//-- 5.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	try {
+		
+		//--------------------------------------------------------//
+		//-- 5.2 - Check if the Current User is the Owner       --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aPremiseResults = GetPremisesInfoFromPremiseId( $iPremiseId );
+			
+			if( $aPremiseResults['Error']===false ) {
+				//-- Extract the Owner Permission --//
+				$iOwnerPerm = $aPremiseResults['Data']['PermOwner'];
+				
+				//-- If the Current User isn't the Owner of the Premise --//
+				if( $iOwnerPerm!==1 ) {
+					$bError    = true;
+					$iErrCode  = 1;
+					$sErrMesg .= "Insufficient permissions!\n";
+					$sErrMesg .= "Your user doesn't appear to have the \"Owner\" permission needed to perform this operation.";
+					//var_dump($aPremiseResults);
+				}
+				
+			} else {
+				$bError    = true;
+				$iErrCode  = 2;
+				$sErrMesg .= "Internal API Error! \n";
+				$sErrMesg .= $aPremiseResults['ErrMesg'];
+			}
+		}
+		
+		//--------------------------------------------------------//
+		//-- 5.3 - Fetch the UserIds and Display Names          --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aResult = dbSpecialLookupUsersForPremisePerms();
+			
+			if( $aResult['Error']===true ) {
+				$bError = true;
+				$sErrMesg .= "Error when looking up the UserList!\n";
+				$sErrMesg .= $aResult['ErrMesg'];
+			}
+			
+		}
+		
+		
+	} catch( Exception $e0001 ) {
+		$bError    = true;
+		$iErrCode  = 0;
+		$sErrMesg .= "Internal API Error! \n";
+		$sErrMesg .= $e0001->getMessage();
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>$aResult['Data'] );
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+function UpdateUserPremisePermissions( $iUserId, $iPremiseId, $aDesiredPermissions ) {
+	//-- TODO: The functions that gets used by this may need to be put in object to secure against misuse --//
+	
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError                 = false;        //-- BOOLEAN:   --//
+	$iErrCode               = 0;            //-- INTEGER:   --//
+	$sErrMesg               = "";           //-- STRING:    --//
+	$aResult                = array();      //-- ARRAY:     --//
+	
+	$bDebugging             = false;        //-- BOOLEAN:   --//
+	$bNeedsInserting        = false;        //-- BOOLEAN:   --//
+	$iOwnerPerm             = 0;            //-- INTEGER:   --//
+	$iPremisePermId         = 0;            //-- INTEGER:   --//
+	$iFetchedOwnerPerm      = 0;            //-- INTEGER:   --//
+	$iNewPermRoomAdmin      = 0;            //-- INTEGER:   --//
+	$iNewPermWrite          = 0;            //-- INTEGER:   --//
+	$iNewPermStateToggle    = 0;            //-- INTEGER:   --//
+	$iNewPermRead           = 0;            //-- INTEGER:   --//
+	
+	$bDesiredChangePresent  = false;        //-- BOOLEAN:   --//
+	
+	//------------------------------------------------------------//
+	//-- 5.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	try {
+		
+		//--------------------------------------------------------//
+		//-- 5.2 - Check if the Current User is the Owner       --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aPremiseResults = GetPremisesInfoFromPremiseId( $iPremiseId );
+			
+			if( $aPremiseResults['Error']===false ) {
+				//-- Extract the Owner Permission --//
+				$iOwnerPerm = $aPremiseResults['Data']['PermOwner'];
+				
+				//-- If the Current User isn't the Owner of the Premise --//
+				if( $iOwnerPerm!==1 ) {
+					$bError    = true;
+					$iErrCode  = 1;
+					$sErrMesg .= "Insufficient permissions!\n";
+					$sErrMesg .= "Your user doesn't appear to have the \"Owner\" permission needed to perform this operation.";
+					//var_dump($aPremiseResults);
+				}
+				
+			} else {
+				$bError    = true;
+				$iErrCode  = 2;
+				$sErrMesg .= "Internal API Error! \n";
+				$sErrMesg .= $aPremiseResults['ErrMesg'];
+			}
+		}
+		
+		
+		//--------------------------------------------------------//
+		//-- 5.3 - Check if the User has a permissions entry    --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aPermissionsResult = dbSpecialOtherUsersPremisePermissions( $iUserId, $iPremiseId );
+			
+			//-- IF An error occurred in the results --//
+			if( $aPermissionsResult['Error']===true ) {
+				//-- IF No results found --//
+				if( $aPermissionsResult['ErrMesg']==="GetOtherUsersPremisePerms: No Rows Found! Code:1" ) {
+					$bNeedsInserting = true;
+					
+				//-- ELSE Normal Error --//
+				} else {
+					$bError    = true;
+					$iErrCode  = 3;
+					$sErrMesg .= "Unexpected error fetching Premise Permissions!\n";
+					$sErrMesg .= "Check with your iOmy Administrator on if there is a version mismatch!\n";
+				}
+			} else {
+				//-- Extract the Permissions Id --//
+				if( $aPermissionsResult['Data']['PermId']>=1 ) {
+					$iPremisePermId      = $aPermissionsResult['Data']['PermId'];
+					$iFetchedOwnerPerm   = $aPermissionsResult['Data']['PermOwner'];
+					$iNewPermRoomAdmin   = $aPermissionsResult['Data']['PermRoomAdmin'];
+					$iNewPermWrite       = $aPermissionsResult['Data']['PermWrite'];
+					$iNewPermStateToggle = $aPermissionsResult['Data']['PermStateToggle'];
+					$iNewPermRead        = $aPermissionsResult['Data']['PermRead'];
+					
+					if( $iFetchedOwnerPerm===1 ) {
+						$bError    = true;
+						$iErrCode  = 4;
+						$sErrMesg .= "Permissions Error!\n";
+						$sErrMesg .= "Permission change was denied due to the target user is a \"Owner\".\n";
+					}
+				}
+			}
+		}
+		
+		
+		//--------------------------------------------------------//
+		//-- 5.4 - Parse the desired Permissions changes        --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			//--------------------//
+			//-- ROOMADMIN      --//
+			//--------------------//
+			if( isset( $aDesiredPermissions['RoomAdmin']) ) {
+				if( $aDesiredPermissions['RoomAdmin']===0 || $aDesiredPermissions['RoomAdmin']===1 ) {
+					$iNewPermRoomAdmin     = $aDesiredPermissions['RoomAdmin'];
+					$bDesiredChangePresent = true;
+				}
+			}
+			
+			//--------------------//
+			//-- WRITE          --//
+			//--------------------//
+			if( isset( $aDesiredPermissions['Write']) ) {
+				if( $aDesiredPermissions['Write']===0 || $aDesiredPermissions['Write']===1 ) {
+					$iNewPermWrite         = $aDesiredPermissions['Write'];
+					$bDesiredChangePresent = true;
+				}
+			}
+			
+			//--------------------//
+			//-- STATETOGGLE    --//
+			//--------------------//
+			if( isset( $aDesiredPermissions['StateToggle']) ) {
+				if( $aDesiredPermissions['StateToggle']===0 || $aDesiredPermissions['StateToggle']===1 ) {
+					$iNewPermStateToggle   = $aDesiredPermissions['StateToggle'];
+					$bDesiredChangePresent = true;
+				}
+			}
+			
+			//--------------------//
+			//-- READ           --//
+			//--------------------//
+			if( isset( $aDesiredPermissions['Read']) ) {
+				if( $aDesiredPermissions['Read']===0 || $aDesiredPermissions['Read']===1 ) {
+					$iNewPermRead          = $aDesiredPermissions['Read'];
+					$bDesiredChangePresent = true;
+				}
+			}
+			
+			//--------------------//
+			//-- DEBUGGING      --//
+			//--------------------//
+			if( isset( $aDesiredPermissions['Debugging']) ) {
+				if( $aDesiredPermissions['Debugging']===1 ) {
+					$bDebugging = true;
+				}
+			}
+			
+			//--------------------//
+			//-- ERROR CHECKING --//
+			//--------------------//
+			if( $bDesiredChangePresent===false ) {
+				//-- Error - No desired changes present --//
+				$bError    = true;
+				$iErrCode  = 5;
+				$sErrMesg .= "No compatible desired changes present! \n";
+				var_dump( $aDesiredPermissions );
+			}
+			
+			
+		}
+		
+		//--------------------------------------------------------//
+		//-- 5.5 - Update the User Premise Permissions          --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			//----------------------------------------//
+			//-- 5.5.2 - Update the Database        --//
+			//----------------------------------------//
+			if( $bDebugging===true ) {
+				echo "Insert          = ".$bNeedsInserting."\n";
+				echo "Premise Perm    = ".$iPremisePermId."\n";
+				echo "New RoomAdmin   = ".$iNewPermRoomAdmin."\n";
+				echo "New Write       = ".$iNewPermWrite."\n";
+				echo "New StateToggle = ".$iNewPermStateToggle."\n";
+				echo "New Read        = ".$iNewPermRead."\n";
+				
+				$bError = true;
+				$sErrMesg = "Debugging";
+				
+			//-- IF Needs inserting into the database --//
+			} else if( $bNeedsInserting===true ) {
+				$aResult = dbInsertUserPremisePermissions( $iUserId, $iPremiseId, $iNewPermRoomAdmin, $iNewPermWrite, $iNewPermStateToggle, $iNewPermRead );
+				
+			//-- ELSE Update the existing Permissions entry --//
+			} else {
+				$aResult = dbUpdateUserPremisePermissions( $iPremisePermId, $iNewPermRoomAdmin, $iNewPermWrite, $iNewPermStateToggle, $iNewPermRead );
+			}
+		}
+		
+	} catch( Exception $e0001 ) {
+		$bError    = true;
+		$iErrCode  = 0;
+		$sErrMesg .= "Internal API Error! \n";
+		$sErrMesg .= $e0001->getMessage();
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>array("Success"=>true) );
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+
+function SpecialLookupUsersForRoomPerms( $iPremiseId ) {
+	//-- TODO: The functions that gets used by this may need to be put in object to secure against misuse --//
+	
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError                 = false;        //-- BOOLEAN:   --//
+	$iErrCode               = 0;            //-- INTEGER:   --//
+	$sErrMesg               = "";           //-- STRING:    --//
+	$aResult                = array();      //-- ARRAY:     --//
+	
+	//------------------------------------------------------------//
+	//-- 5.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	try {
+		
+		//--------------------------------------------------------//
+		//-- 5.2 - Check if the Current User is a RoomAdmin     --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aPremiseResults = GetPremisesInfoFromPremiseId( $iPremiseId );
+			
+			if( $aPremiseResults['Error']===false ) {
+				//-- Extract the Owner Permission --//
+				$iOwnerPerm = $aPremiseResults['Data']['PermRoomAdmin'];
+				
+				//-- If the Current User isn't a RoomAdmin of the Premise --//
+				if( $iOwnerPerm!==1 ) {
+					$bError    = true;
+					$iErrCode  = 1;
+					$sErrMesg .= "Insufficient permissions!\n";
+					$sErrMesg .= "Your user doesn't appear to have the \"RoomAdmin\" permission needed to perform this operation.";
+					//var_dump($aPremiseResults);
+				}
+				
+			} else {
+				$bError    = true;
+				$iErrCode  = 2;
+				$sErrMesg .= "Internal API Error! \n";
+				$sErrMesg .= $aPremiseResults['ErrMesg'];
+			}
+		}
+		
+		//--------------------------------------------------------//
+		//-- 5.3 - Fetch the UserIds and Display Names          --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aResult = dbSpecialLookupUsersForRoomPerms( $iPremiseId );
+			
+			if( $aResult['Error']===true ) {
+				$bError = true;
+				$sErrMesg .= "Error when looking up the UserList!\n";
+				$sErrMesg .= $aResult['ErrMesg'];
+			}
+		}
+		
+		
+	} catch( Exception $e0001 ) {
+		$bError    = true;
+		$iErrCode  = 0;
+		$sErrMesg .= "Internal API Error! \n";
+		$sErrMesg .= $e0001->getMessage();
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>$aResult['Data'] );
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+function LookupUserRoomPermissions( $iUserId, $iRoomId ) {
+	//-- TODO: The functions that gets used by this may need to be put in object to secure against misuse --//
+	
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError                 = false;        //-- BOOLEAN:   --//
+	$iErrCode               = 0;            //-- INTEGER:   --//
+	$sErrMesg               = "";           //-- STRING:    --//
+	$aResult                = array();      //-- ARRAY:     --//
+	
+	$iPremiseId             = 0;            //-- INTEGER:   --//
+	$iRoomAdminPerm         = 0;            //-- INTEGER:   --//
+	
+	//------------------------------------------------------------//
+	//-- 3.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	try {
+		//--------------------------------------------------------//
+		//--- 3.1 Lookup which Premise the Room is located in   --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aRoomPremiseId = dbSpecialRoomPremiseIdLookup( $iRoomId );
+			
+			if( $aRoomPremiseId['Error']===false ) {
+				if( $aRoomPremiseId['Data']['PremiseId']>=1 ) {
+					$iPremiseId = $aRoomPremiseId['Data']['PremiseId'];
+					
+				} else {
+					$bError    = true;
+					$iErrCode  = 2;
+					$sErrMesg .= "Problem looking up the Room! \n";
+					$sErrMesg .= "There might be something wrong with the Room.";
+				}
+				
+			} else {
+				$bError    = true;
+				$iErrCode  = 2;
+				$sErrMesg .= "Internal API Error! \n";
+				$sErrMesg .= $aRoomPremiseId['ErrMesg'];
+			}
+			
+		}
+		
+		
+		//--------------------------------------------------------//
+		//-- 3.2 Check if the User has the "RoomAdmin" Perm     --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aPremiseResults = GetPremisesInfoFromPremiseId( $iPremiseId );
+			
+			if( $aPremiseResults['Error']===false ) {
+				//-- Extract the Owner Permission --//
+				$iRoomAdminPerm = $aPremiseResults['Data']['PermRoomAdmin'];
+				
+				//-- If the Current User isn't a room admin of the premise --//
+				if( $iRoomAdminPerm!==1 ) {
+					$bError    = true;
+					$iErrCode  = 3;
+					$sErrMesg .= "Insufficient permissions!\n";
+					$sErrMesg .= "Your user doesn't appear to have the \"RoomAdmin\" permission needed to perform this operation.";
+				}
+				
+			} else {
+				$bError    = true;
+				$iErrCode  = 4;
+				$sErrMesg .= "Internal API Error! \n";
+				$sErrMesg .= $aPremiseResults['ErrMesg'];
+			}
+		}
+		
+		
+		//--------------------------------------------------------//
+		//-- 3.3 - Check if the User has a permissions entry    --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aPermissionsResult = dbSpecialOtherUsersRoomPermissions( $iUserId, $iRoomId );
+			
+			//-- IF An error occurred in the results --//
+			if( $aPermissionsResult['Error']===true ) {
+				//-- IF No results found --//
+				if( $aPermissionsResult['ErrMesg']==="GetOtherUsersRoomPerms: No Rows Found! Code:1" ) {
+					//-- Create the Results --//
+					$aResult = array(
+						"Read"        => 0,
+						"Write"       => 0,
+						"StateToggle" => 0,
+						"DataRead"    => 0
+					);
+					
+				//-- ELSE Normal Error --//
+				} else {
+					$bError    = true;
+					$iErrCode  = 3;
+					$sErrMesg .= "Unexpected error fetching Room Permissions!\n";
+					$sErrMesg .= "Check with your iOmy Administrator on if there is a version mismatch!\n";
+				}
+			} else {
+				//-- Extract the Permissions Id --//
+				if( $aPermissionsResult['Data']['PermId']>=1 ) {
+					
+					
+					//-- Create the Results --//
+					$aResult = array(
+						"Read"        => $aPermissionsResult['Data']['PermRead'],
+						"Write"       => $aPermissionsResult['Data']['PermWrite'],
+						"StateToggle" => $aPermissionsResult['Data']['PermStateToggle'],
+						"DataRead"    => $aPermissionsResult['Data']['PermDataRead']
+					);
+				}
+			}
+		}
+		
+	} catch( Exception $e0001 ) {
+		$bError    = true;
+		$iErrCode  = 0;
+		$sErrMesg .= "Internal API Error! \n";
+		$sErrMesg .= $e0001->getMessage();
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>$aResult );
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+function UpdateUserRoomPermissions( $iUserId, $iRoomId, $aDesiredPermissions ) {
+	//-- TODO: The functions that gets used by this may need to be put in object to secure against misuse --//
+	
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError                 = false;        //-- BOOLEAN:   --//
+	$iErrCode               = 0;            //-- INTEGER:   --//
+	$sErrMesg               = "";           //-- STRING:    --//
+	$aResult                = array();      //-- ARRAY:     --//
+	
+	$bDebugging             = false;        //-- BOOLEAN:   --//
+	$bNeedsInserting        = false;        //-- BOOLEAN:   --//
+	$iPremiseId             = 0;            //-- INTEGER:   --//
+	
+	
+	$iRoomPermId            = 0;            //-- INTEGER:   --//
+	$iNewPermDataRead       = 0;            //-- INTEGER:   --//
+	$iNewPermWrite          = 0;            //-- INTEGER:   --//
+	$iNewPermStateToggle    = 0;            //-- INTEGER:   --//
+	$iNewPermRead           = 0;            //-- INTEGER:   --//
+	
+	$bDesiredChangePresent  = false;        //-- BOOLEAN:   --//
+	
+	//------------------------------------------------------------//
+	//-- 3.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	try {
+		//--------------------------------------------------------//
+		//--- 3.1 - Lookup which Premise the Room is located in --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aRoomPremiseId = dbSpecialRoomPremiseIdLookup( $iRoomId );
+			
+			if( $aRoomPremiseId['Error']===false ) {
+				if( $aRoomPremiseId['Data']['PremiseId']>=1 ) {
+					$iPremiseId = $aRoomPremiseId['Data']['PremiseId'];
+					
+
+				} else {
+					$bError    = true;
+					$iErrCode  = 2;
+					$sErrMesg .= "Problem looking up the Room! \n";
+					$sErrMesg .= "There might be something wrong with the Room.";
+				}
+				
+			} else {
+				$bError    = true;
+				$iErrCode  = 2;
+				$sErrMesg .= "Internal API Error! \n";
+				$sErrMesg .= $aRoomPremiseId['ErrMesg'];
+			}
+			
+		}
+		
+		
+		//--------------------------------------------------------//
+		//-- 3.2 - Check if the User has the "RoomAdmin" Perm   --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aPremiseResults = GetPremisesInfoFromPremiseId( $iPremiseId );
+			
+			if( $aPremiseResults['Error']===false ) {
+				//-- Extract the Owner Permission --//
+				$iRoomAdminPerm = $aPremiseResults['Data']['PermRoomAdmin'];
+				
+				//-- If the Current User isn't a room admin of the premise --//
+				if( $iRoomAdminPerm!==1 ) {
+					$bError    = true;
+					$iErrCode  = 3;
+					$sErrMesg .= "Insufficient permissions!\n";
+					$sErrMesg .= "Your user doesn't appear to have the \"RoomAdmin\" permission needed to perform this operation.";
+				}
+				
+			} else {
+				$bError    = true;
+				$iErrCode  = 4;
+				$sErrMesg .= "Internal API Error! \n";
+				$sErrMesg .= $aPremiseResults['ErrMesg'];
+			}
+		}
+		
+		
+		//--------------------------------------------------------//
+		//-- 3.3 - Check if the User has a permissions entry    --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aPermissionsResult = dbSpecialOtherUsersRoomPermissions( $iUserId, $iRoomId );
+			
+			//-- IF An error occurred in the results --//
+			if( $aPermissionsResult['Error']===true ) {
+				//-- IF No results found --//
+				if( $aPermissionsResult['ErrMesg']==="GetOtherUsersRoomPerms: No Rows Found! Code:1" ) {
+					$bNeedsInserting = true;
+					
+				//-- ELSE Normal Error --//
+				} else {
+					$bError    = true;
+					$iErrCode  = 3;
+					$sErrMesg .= "Unexpected error fetching Room Permissions!\n";
+					$sErrMesg .= "Check with your iOmy Administrator on if there is a version mismatch!\n";
+				}
+			} else {
+				//-- Extract the Permissions Id --//
+				if( $aPermissionsResult['Data']['PermId']>=1 ) {
+					$iRoomPermId         = $aPermissionsResult['Data']['PermId'];
+					
+					$iNewPermRead        = $aPermissionsResult['Data']['PermRead'];
+					$iNewPermWrite       = $aPermissionsResult['Data']['PermWrite'];
+					$iNewPermStateToggle = $aPermissionsResult['Data']['PermStateToggle'];
+					$iNewPermDataRead    = $aPermissionsResult['Data']['PermDataRead'];
+					
+					if( !($iRoomPermId>=1) ) {
+						$bError    = true;
+						$iErrCode  = 4;
+						$sErrMesg .= "Permissions Error!\n";
+						$sErrMesg .= "Error when fetching the Room Permissions Id.";
+					}
+				}
+			}
+		}
+		
+		
+		//--------------------------------------------------------//
+		//-- 3.4 - Parse the desired Permissions changes        --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			//--------------------//
+			//-- WRITE          --//
+			//--------------------//
+			if( isset( $aDesiredPermissions['Write']) ) {
+				if( $aDesiredPermissions['Write']===0 || $aDesiredPermissions['Write']===1 ) {
+					$iNewPermWrite         = $aDesiredPermissions['Write'];
+					$bDesiredChangePresent = true;
+				}
+			}
+			
+			//--------------------//
+			//-- READ           --//
+			//--------------------//
+			if( isset( $aDesiredPermissions['Read']) ) {
+				if( $aDesiredPermissions['Read']===0 || $aDesiredPermissions['Read']===1 ) {
+					$iNewPermRead          = $aDesiredPermissions['Read'];
+					$bDesiredChangePresent = true;
+				}
+			}
+			
+			//--------------------//
+			//-- STATETOGGLE    --//
+			//--------------------//
+			if( isset( $aDesiredPermissions['StateToggle']) ) {
+				if( $aDesiredPermissions['StateToggle']===0 || $aDesiredPermissions['StateToggle']===1 ) {
+					$iNewPermStateToggle   = $aDesiredPermissions['StateToggle'];
+					$bDesiredChangePresent = true;
+				}
+			}
+			
+			
+			//--------------------//
+			//-- DATA READ      --//
+			//--------------------//
+			if( isset( $aDesiredPermissions['DataRead']) ) {
+				if( $aDesiredPermissions['DataRead']===0 || $aDesiredPermissions['DataRead']===1 ) {
+					$iNewPermDataRead      = $aDesiredPermissions['DataRead'];
+					$bDesiredChangePresent = true;
+				}
+			}
+			
+			
+			//--------------------//
+			//-- DEBUGGING      --//
+			//--------------------//
+			if( isset( $aDesiredPermissions['Debugging']) ) {
+				if( $aDesiredPermissions['Debugging']===1 ) {
+					$bDebugging = true;
+				}
+			}
+			
+			//--------------------//
+			//-- ERROR CHECKING --//
+			//--------------------//
+			if( $bDesiredChangePresent===false ) {
+				//-- Error - No desired changes present --//
+				$bError    = true;
+				$iErrCode  = 5;
+				$sErrMesg .= "No compatible desired changes present! \n";
+				//var_dump( $aDesiredPermissions );
+			}
+		}
+		
+		//--------------------------------------------------------//
+		//-- 5.5 - Update the User Room Permissions             --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			//----------------------------------------//
+			//-- 5.5.2 - Update the Database        --//
+			//----------------------------------------//
+			 if( $bDebugging===true ) {
+				echo "Insert          = ".$bNeedsInserting."\n";
+				echo "Room Perm       = ".$iRoomPermId."\n";
+				echo "New Write       = ".$iNewPermWrite."\n";
+				echo "New StateToggle = ".$iNewPermStateToggle."\n";
+				echo "New Read        = ".$iNewPermRead."\n";
+				echo "New DataRead    = ".$iNewPermDataRead."\n";
+				
+				$bError = true;
+				$sErrMesg = "Debugging";
+				
+			//-- IF Needs inserting into the database --//
+			} else if( $bNeedsInserting===true ) {
+				$aResult = dbInsertUserRoomPermissions( $iUserId, $iRoomId, $iNewPermRead, $iNewPermWrite, $iNewPermStateToggle, $iNewPermDataRead );
+				
+				if( $aResult['Error']===true ) {
+					$bError    = true;
+					$iErrCode  = 5;
+					$sErrMesg .= "Problem inserting the User Room Permissions! \n";
+					$sErrMesg .= $aResult['ErrMesg'];
+				}
+				
+				
+			//-- ELSE Update the existing Permissions entry --//
+			} else {
+				$aResult = dbUpdateUserRoomPermissions( $iRoomPermId, $iNewPermRead, $iNewPermWrite, $iNewPermStateToggle, $iNewPermDataRead );
+				
+				if( $aResult['Error']===true ) {
+					$bError    = true;
+					$iErrCode  = 5;
+					$sErrMesg .= "Problem updating the User Room Permissions! \n";
+					$sErrMesg .= $aResult['ErrMesg'];
+				}
+			}
+		}
+		
+	} catch( Exception $e0001 ) {
+		$bError    = true;
+		$iErrCode  = 0;
+		$sErrMesg .= "Internal API Error! \n";
+		$sErrMesg .= $e0001->getMessage();
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>array("Success"=>true) );
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+
+	
 //========================================================================================================================//
 //== #5.0# - Premise Functions																							==//
 //========================================================================================================================//
@@ -942,6 +1842,19 @@ function GetRoomInfoFromRoomId( $iRoomId ) {
 }
 
 
+function GetFirstRoomIdFromRoomList() {
+	//-- Retrieve the Premise Info --//
+	$aResult = dbGetFirstRoomIdFromRoomList();
+	
+	if( $aResult["Error"]===true ) {
+		//-- Display an Error --//
+		$aResult = array( "Error"=>true, "ErrMesg"=>"An error has occurred looking up the first RoomId that is present in the User's Room List!\n" );
+	}
+	
+	//-- Return the results --//
+	return $aResult;
+}
+
 
 function ChangeRoomInfo( $iRoomId, $sName, $iFloor, $sDesc, $iRoomsTypeId ) {
 	//------------------------------------------------------------//
@@ -1024,13 +1937,14 @@ function AddNewRoom( $iPremiseId, $sName, $iFloor, $sDesc, $iRoomsTypeId ) {
 
 function DeleteExistingRoom( $iPremiseId ) {
 	//------------------------------------------------------------//
-	//-- 1.0 - Initialise										--//
+	//-- 1.0 - Initialise                                       --//
 	//------------------------------------------------------------//
-	$bError			= false;
-	$sErrMesg		= "";
-	$aResult		= array();
+	$bError         = false;
+	$sErrMesg       = "";
+	$aResult        = array();
+	
 	//------------------------------------------------------------//
-	//-- 2.0 - Begin											--//
+	//-- 2.0 - Begin                                            --//
 	//------------------------------------------------------------//
 	try {
 		$aResult = dbDeleteExistingRoom( $iPremiseId );
@@ -1047,19 +1961,35 @@ function DeleteExistingRoom( $iPremiseId ) {
 	}
 	
 	//------------------------------------------------------------//
-	//-- 9.0 - Return the Results or Error Message				--//
+	//-- 9.0 - Return the Results or Error Message              --//
 	//------------------------------------------------------------//
 	if($bError===false) {
-		//-- 9.A - SUCCESS		--//
+		//-- 9.A - SUCCESS  --//
 		return $aResult;
 	} else {
-		//-- 9.B - FAILURE		--//
+		//-- 9.B - FAILURE  --//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
 }
 
+
+
+function WatchInputsGetFirstRoomIdFromPremiseId( $iPremiseId ) {
+	//-- Retrieve the Premise Info --//
+	$aResult = dbWatchInputsGetFirstRoomIdFromPremiseId( $iPremiseId );
+	
+	if( $aResult["Error"]===true ) {
+		//-- Display an Error --//
+		$aResult = array( "Error"=>true, "ErrMesg"=>"An error has occurred looking up the first RoomId that is present in a Premise!\n" );
+	}
+	
+	//-- Return the results --//
+	return $aResult;
+}
+
+
 //========================================================================================================================//
-//== #7.0# - Hub Functions																								==//
+//== #7.0# - Hub Functions                                                                                              ==//
 //========================================================================================================================//
 
 function HubRetrieveInfoAndPermission($iHubId) {
@@ -1078,13 +2008,13 @@ function HubRetrieveInfoAndPermission($iHubId) {
 
 function ChangeHubName( $iHubId, $sHubName ) {
 	//------------------------------------------------------------//
-	//-- 1.0 - Initialise										--//
+	//-- 1.0 - Initialise                                       --//
 	//------------------------------------------------------------//
-	$bError			= false;
-	$sErrMesg		= "";
-	$aResult		= array();
+	$bError         = false;
+	$sErrMesg       = "";
+	$aResult        = array();
 	//------------------------------------------------------------//
-	//-- 2.0 - Begin											--//
+	//-- 2.0 - Begin                                            --//
 	//------------------------------------------------------------//
 	try {
 		$aResult = dbChangeHubName( $iHubId, $sHubName );
@@ -1101,18 +2031,33 @@ function ChangeHubName( $iHubId, $sHubName ) {
 		$sErrMesg .= $e1->getMessage();
 	}
 	
-	//------------------------------------------------//
-	//-- 9.0 - Return the Results or Error Message	--//
-	//------------------------------------------------//
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
 	if($bError===false) {
-		//-- 9.A - SUCCESS		--//
+		//-- 9.A - SUCCESS --//
 		return array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
-		//-- 9.B - FAILURE		--//
+		//-- 9.B - FAILURE --//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
 }
 
+
+function WatchInputsHubRetrieveInfoAndPermission($iHubId) {
+	//-- Description: This is a special function for Watch Inputs Users Only --//
+	
+	//-- Retrieve the Hub Info --//
+	$aResult = dbWatchInputsHubRetrieveInfoAndPermission($iHubId);
+	
+	if( $aResult["Error"]===true ) {
+		//-- Display an Error --//
+		$aResult = array( "Error"=>true, "ErrMesg"=>"Hub wasn't found! \nHub either doesn't exist or you do not have permission to access it!\n" );
+		//$aResult = array( "Error"=>true, "ErrMesg"=>$aResult["ErrMesg"] );
+	}
+	//-- Return the results --//
+	return $aResult;
+}
 
 //========================================================================================================================//
 //== #8.0# - Comm Functions                                                                                             ==//
@@ -1134,20 +2079,21 @@ function GetCommInfo( $iCommId ) {
 	if( $aResult["Error"]===true ) {
 		//-- Display an Error --//
 		return array( "Error"=>true, "ErrMesg"=>"No Comm Found! \nComm either doesn't exist or you do not have permission to access it.\n");
+		//-- Debugging Only Message --//
+		//return array( "Error"=>true, "ErrMesg"=>"No Comm Found! \n".$aResult["ErrMesg"] );
 	}
-	
 	
 	//------------------------------------------------//
 	//-- 9.0 - Return the Results or Error Message  --//
 	//------------------------------------------------//
 	if($bError===false) {
 		//------------------------//
-		//-- 9.A - SUCCESS		--//
+		//-- 9.A - SUCCESS      --//
 		//------------------------//
 		return array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
 		//------------------------//
-		//-- 9.B - FAILURE		--//
+		//-- 9.B - FAILURE      --//
 		//------------------------//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
@@ -1181,12 +2127,12 @@ function GetCommsFromHubId( $iHubId ) {
 	//------------------------------------------------//
 	if($bError===false) {
 		//------------------------//
-		//-- 9.A - SUCCESS		--//
+		//-- 9.A - SUCCESS      --//
 		//------------------------//
 		return array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
 		//------------------------//
-		//-- 9.B - FAILURE		--//
+		//-- 9.B - FAILURE      --//
 		//------------------------//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
@@ -1225,23 +2171,47 @@ function AddNewHubComm( $iCommHubId, $iCommTypeId, $sCommName, $sCommAddress, $b
 	//-- 9.0 - Return the Results or Error Message  --//
 	//------------------------------------------------//
 	if($bError===false) {
-		//-- 9.A - SUCCESS		--//
+		//-- 9.A - SUCCESS --//
 		return array(
-			"Error"		=>false, 
-			"Data"		=>array( 
-				"CommId"	=>$aResult["LastId"]
+			"Error"     =>false, 
+			"Data"      =>array( 
+				"CommId"    =>$aResult["LastId"]
 			)
 		);
 	} else {
-		//-- 9.B - FAILURE		--//
+		//-- 9.B - FAILURE --//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+function WatchInputsGetCommInfo( $iCommId ) {
+	//------------------------------------------------//
+	//-- 1.0 - INITIALISE                           --//
+	//------------------------------------------------//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an error has been caught.       --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message of the caught message.     --//
+	$aResult            = array();      //-- ARRAY:     Used to store the Database function results.        --//
+	
+	//------------------------------------------------//
+	//-- 2.0 - MAIN                                 --//
+	//------------------------------------------------//
+	$aResult = dbWatchInputsGetCommInfo( $iCommId );
+	
+	if( $aResult["Error"]===true ) {
+		//-- Display an Error --//
+		return array( "Error"=>true, "ErrMesg"=>"No Comm Found! \nComm either doesn't exist or you do not have permission to access it.\n");
+		//-- Debugging Only Message --//
+		//return array( "Error"=>true, "ErrMesg"=>"No Comm Found! \n".$aResult["ErrMesg"] );
+	} else {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
 	}
 }
 
 
 
 //========================================================================================================================//
-//== #9.0# - Link Functions																								==//
+//== #9.0# - Link Functions                                                                                             ==//
 //========================================================================================================================//
 function GetLinkInfo( $iLinkId ) {
 	//------------------------------------------------------------//
@@ -1270,24 +2240,21 @@ function GetLinkInfo( $iLinkId ) {
 		$sErrMesg .= $e1->getMessage();
 	}
 	
-	
 	//------------------------------------------------//
 	//-- 9.0 - Return the Results or Error Message  --//
 	//------------------------------------------------//
 	if($bError===false) {
 		//------------------------//
-		//-- 9.A - SUCCESS		--//
+		//-- 9.A - SUCCESS      --//
 		//------------------------//
 		return array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
 		//------------------------//
-		//-- 9.B - FAILURE		--//
+		//-- 9.B - FAILURE      --//
 		//------------------------//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
 }
-
-
 
 
 function LinkRetrieveStateAndPermission( $iId ) {
@@ -1697,7 +2664,7 @@ function AddNewLinkInfo( $sLinkInfoName, $sLinkInfoManufacturer, $sLinkInfoManuf
 	//------------------------------------------------------------//
 	if($bError===false) {
 		//------------------------//
-		//-- 9.A - SUCCESS		--//
+		//-- 9.A - SUCCESS      --//
 		return array(
 			"Error"		=>false, 
 			"Data"		=>array( 
@@ -1706,14 +2673,92 @@ function AddNewLinkInfo( $sLinkInfoName, $sLinkInfoManufacturer, $sLinkInfoManuf
 		);
 	} else {
 		//------------------------//
-		//-- 9.B - FAILURE		--//
+		//-- 9.B - FAILURE      --//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
 }
 
 
+
+function WatchInputsGetLinkInfo( $iLinkId ) {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError         = false;
+	$sErrMesg       = "";
+	$aResult        = array();
+	
+	//------------------------------------------------------------//
+	//-- 5.0 - Lookup Link Info                                 --//
+	//------------------------------------------------------------//
+	try {
+		$aResult = dbWatchInputsGetLinkInfo( $iLinkId );
+		
+		if( $aResult["Error"]===true ) {
+			//-- Display an Error --//
+			$bError = true;
+			$sErrMesg .= "No Link Found! \nLink either doesn't exist or you do not have permission to access it!\n";
+		}
+		
+	} catch( Exception $e1 ) {
+		$bError = true;
+		$sErrMesg .= "Critical Error occurred when attempting to lookup the Link Information! \n";
+		$sErrMesg .= $e1->getMessage();
+	}
+	
+	//------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message  --//
+	//------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS      --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- 9.B - FAILURE      --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+function WatchInputsCheckIfLinkInfoAlreadyExists( $sLinkInfoName, $sLinkInfoManufacturer, $sLinkInfoManufacturerUrl ) {
+	//------------------------------------------------//
+	//-- 1.0 - Initialise                           --//
+	//------------------------------------------------//
+	$bError         = false;            //-- BOOLEAN:       Used to indicate if at least one error has been caught.     --//
+	$sErrMesg       = "";               //-- STRING:        Stores the error message when an error is caught.           --//
+	$aResult        = array();          //-- ARRAY:         Stores the result of this function if no errors occur.      --//
+	
+	//------------------------------------------------//
+	//-- 2.0 - Main                                 --//
+	//------------------------------------------------//
+	try {
+		$aResult = dbWatchInputsCheckIfLinkInfoAlreadyExists( $sLinkInfoName, $sLinkInfoManufacturer, $sLinkInfoManufacturerUrl );
+		
+		if( $aResult["Error"]===true ) {
+			$bError = true;
+			$sErrMesg .= "Error occurred when attempting to check the Link Connection info! \n";
+			$sErrMesg .= $aResult["ErrMesg"];
+		}
+		
+	} catch( Exception $e1 ) {
+		$bError = true;
+		$sErrMesg .= "Critical Error occurred when attempting to check the Link Connection info! \n";
+		$sErrMesg .= $e1->getMessage();
+	}
+	
+	//------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message  --//
+	//------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return $aResult["Data"]["LinkInfoId"];
+	} else {
+		//-- Error Occurred --//
+		return false;
+	}
+}
+
+
 //========================================================================================================================//
-//== #10.0# - Thing Functions																							==//
+//== #10.0# - Thing Functions                                                                                           ==//
 //========================================================================================================================//
 function GetThingInfo($iThingId) {
 	//------------------------------------------------------------//
@@ -1921,6 +2966,41 @@ function AddNewThing( $iLinkId, $iThingTypeId, $iThingHWID, $iThingOutputID, $iT
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
 }
+
+function WatchInputsGetThingInfo($iThingId) {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError         = false;
+	$sErrMesg       = "";
+	$aResult        = array();
+	//------------------------------------------------------------//
+	//-- 5.0 - Lookup Thing Info                                --//
+	//------------------------------------------------------------//
+	try {
+		$aResult = dbWatchInputsGetThingInfo($iThingId);
+		if( $aResult["Error"]===true ) {
+			//-- Display an Error --//
+			$bError = true;
+			$sErrMesg = "No Thing Found! \nThing either doesn't exist or you do not have permission to access it!\n";
+		}
+	} catch( Exception $e1 ) {
+		$bError = true;
+		$sErrMesg .= "Critical Error occurred when attempting to lookup the Thing Information! \n";
+		$sErrMesg .= $e1->getMessage();
+	}
+	//------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message  --//
+	//------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS      --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- 9.B - FAILURE      --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
 
 //========================================================================================================================//
 //== #11.0# - IO Functions                                                                                              ==//
@@ -2194,9 +3274,9 @@ function AddNewIO( $iThingId, $iRSTypesId, $iUoMId, $iIOTypeId, $iIOState, $fSam
 function GetIODataAggregation( $sAggregationType, $iDataType, $sIOId, $sStartUTS, $sEndUTS ) {
 	
 	//--  --//
-	$iIOId			= intval( $sIOId, 10 );
-	$iStartUTS		= intval( $sStartUTS, 10 );
-	$iEndUTS		= intval( $sEndUTS, 10 );
+	$iIOId          = intval( $sIOId, 10 );
+	$iStartUTS      = intval( $sStartUTS, 10 );
+	$iEndUTS        = intval( $sEndUTS, 10 );
 	
 	//-- Convert Datatype to name --//
 	$aConvertedDataType = ConvertDataTypeToName( $iDataType );
@@ -2211,9 +3291,9 @@ function GetIODataAggregation( $sAggregationType, $iDataType, $sIOId, $sStartUTS
 
 function GetIODataMostRecent( $iDataType, $sIOId, $sEndUTS ) {
 	
-	//--  --//
-	$iIOId			= intval( $sIOId, 10 );
-	$iEndUTS		= intval( $sEndUTS, 10 );
+	//-- Ensure that certain parameters are integers --//
+	$iIOId          = intval( $sIOId, 10 );
+	$iEndUTS        = intval( $sEndUTS, 10 );
 	
 	//-- Convert Datatype to name --//
 	$aConvertedDataType = ConvertDataTypeToName( $iDataType );
@@ -2225,6 +3305,45 @@ function GetIODataMostRecent( $iDataType, $sIOId, $sEndUTS ) {
 	
 }
 
+function GetIODataMostRecentEnum( $iDataType, $sIOId, $sEndUTS ) {
+	
+	//-- Ensure that certain parameters are integers --//
+	$iIOId          = intval( $sIOId, 10 );
+	$iEndUTS        = intval( $sEndUTS, 10 );
+	
+	//-- Convert Datatype to name --//
+	if( $iDataType===1 || $iDataType===2 || $iDataType===3 ) {
+
+		
+		//-- Retrieve the IO Aggregation Data --//
+		$aResult = dbGetIODataMostRecentEnum( $iDataType, $iIOId, $iEndUTS );
+		//-- Return the results --//
+		return $aResult;
+		
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"The DataType of the provided IO doesn't support enumeration." );
+	}
+}
+
+function GetIODataMostRecentEnumBit( $iDataType, $sIOId, $sEndUTS, $iBitsToCheckFor ) {
+	
+	//-- Ensure that certain parameters are integers --//
+	$iIOId          = intval( $sIOId, 10 );
+	$iEndUTS        = intval( $sEndUTS, 10 );
+	
+	
+	//-- Convert Datatype to name --//
+	if( $iDataType===1 || $iDataType===2 || $iDataType===3 ) {
+		
+		//-- Retrieve the IO Aggregation Data --//
+		$aResult = dbGetIODataMostRecentEnumBit( $iDataType, $iIOId, $iEndUTS, $iBitsToCheckFor );
+		//-- Return the results --//
+		return $aResult;
+		
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"The DataType of the provided IO doesn't support enumeration." );
+	}
+}
 
 function InsertNewIODataValue( $iIOId, $iUTS, $Value, $bNonCommited=false ) {
 	//------------------------------------------------------------//
@@ -2310,7 +3429,7 @@ function InsertNewIODataValue( $iIOId, $iUTS, $Value, $bNonCommited=false ) {
 
 
 //========================================================================================================================//
-//== #13.0# - RSCat & UoM Functions																						==//
+//== #13.0# - RSCat & UoM Functions                                                                                     ==//
 //========================================================================================================================//
 
 
@@ -2350,15 +3469,15 @@ function CheckIfDeviceSupportsOnvif( $sNetworkAddress, $iPort = 8000 ) {
 	//----------------------------------------------------------------//
 	//-- 1.0 - Initialise                                           --//
 	//----------------------------------------------------------------//
-	$aResult		= array();		//-- ARRAY:			Used to hold the result of if this function succeeded or failed in getting the desired result.	--//
-	$sURL			= "";			//-- STRING:		--//
+	$aResult        = array();      //-- ARRAY:         Used to hold the result of if this function succeeded or failed in getting the desired result.	--//
+	$sURL           = "";           //-- STRING:        --//
 	
 	
 	//----------------------------------------------------------------//
 	//-- 2.0 - Begin                                                --//
 	//----------------------------------------------------------------//
-	$sURL		= 'http://'.$sNetworkAddress.":".$iPort.'/onvif/device_service';
-	$sPOSTData	= '<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"><s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><GetSystemDateAndTime xmlns="http://www.onvif.org/ver10/device/wsdl"/></s:Body></s:Envelope>';
+	$sURL       = 'http://'.$sNetworkAddress.":".$iPort.'/onvif/device_service';
+	$sPOSTData  = '<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"><s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><GetSystemDateAndTime xmlns="http://www.onvif.org/ver10/device/wsdl"/></s:Body></s:Envelope>';
 	
 	$oRequest = curl_init();
 	curl_setopt( $oRequest, CURLOPT_URL, $sURL );

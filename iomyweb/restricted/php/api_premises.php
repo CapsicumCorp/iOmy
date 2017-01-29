@@ -65,7 +65,7 @@ require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';		//-- This
 //------------------------------------------------------------//
 //-- 1.4 - Flag an Error is there is no Database access     --//
 //------------------------------------------------------------//
-if( $aRestrictedApiCore['RestrictedDB']===false ) {
+if( $oRestrictedApiCore->bRestrictedDB===false ) {
 	$bError    = true;
 	$sErrMesg .= "Can't access the database! User may not be logged in";
 }
@@ -498,7 +498,7 @@ if( $bError===false ) {
 				}
 				
 				//--------------------------------------------------------------------//
-				//-- 5.1.2 - Verify that the user has permission to change the name	--//
+				//-- 5.1.2 - Verify that the user has permission to change the name --//
 				//--------------------------------------------------------------------//
 				if( $bError===false ) {
 					//-- Verify that the user has permission to change the name --//
@@ -581,6 +581,7 @@ if( $bError===false ) {
 							//$iPresetLogId		= 13;
 							//$iPremiseId		= $aPremiseInfo["Data"]["PremiseId"];
 							//$sLogCustom1		= $aPremiseInfo["Data"]["DevicePortName"];
+							
 						}
 					} else {
 						//-- Display an Error Message --//

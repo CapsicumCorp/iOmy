@@ -53,7 +53,7 @@ require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';		//-- This
 //------------------------------------------------------------//
 //-- 1.4 - Flag an Error is there is no Database access		--//
 //------------------------------------------------------------//
-if( $aRestrictedApiCore['RestrictedDB']===false ) {
+if( $oRestrictedApiCore->bRestrictedDB===false ) {
 	$bError    = true;
 	$sErrMesg .= "Can't access the database! User may not be logged in";
 }
@@ -65,7 +65,7 @@ if( $aRestrictedApiCore['RestrictedDB']===false ) {
 
 
 //====================================================================//
-//== 4.0 - Prepare														==//
+//== 4.0 - Prepare													==//
 //====================================================================//
 $sHTML .= "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\"> \n";
 $sHTML .= "<html> \n";
@@ -450,7 +450,7 @@ if( $bError===false ) {
 	$sHTML .= '			}'."\n";
 	$sHTML .= '		}'."\n";
 	$sHTML .= '	</script>'."\n";
-	//$sHTML .= " <div>".json_encode( $oRestrictedDB->QueryLogs[1] )."</div>\n";
+	//$sHTML .= " <div>".json_encode( $oRestrictedApiCore->oRestrictedDB->QueryLogs[1] )."</div>\n";
 	$sHTML .= "</body>\n";
 	$sHTML .= "</html>\n";
 	
