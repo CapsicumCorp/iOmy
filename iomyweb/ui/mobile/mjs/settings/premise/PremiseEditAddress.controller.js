@@ -3,7 +3,7 @@ Title: Edit Premise Address Page (UI5 Controller)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws a form that allows you to edit the address about a given
     premise.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -97,100 +97,58 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 	            ]);
                 
                 //===== COUNTRY =====\\
-                var oCountryTitle = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "*"
-                        }).addStyleClass("Text_red_13 PadRight5px"),
-                        new sap.m.Text({
-                            text : "Country"
-                        })
-                    ]
+                var oCountryTitle = new sap.m.Text({
+                    text : "Country"
                 }).addStyleClass("MarTop16px");
     		    
-				var oCountryField = new sap.m.ComboBox(me.createId("addressCountry"), {
-					value : "",
-                    selectionChange : function () {
+				var oCountryField = new sap.m.Select(me.createId("addressCountry"), {
+                    width : "100%",
+					change : function () {
                         me.loadLocaleCBoxItems(me, this.getSelectedKey());
                     }
 				}).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 //===== LANGUAGE =====\\
-				var oLanguageTitle = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "*"
-                        }).addStyleClass("Text_red_13 PadRight5px"),
-                        new sap.m.Text({
-                            text : "Language"
-                        })
-                    ]
+				var oLanguageTitle = new sap.m.Text({
+                    text : "Language"
                 });
     		    
-				var oLanguageField = new sap.m.ComboBox(me.createId("addressLanguage"), {
-					value : ""
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+				var oLanguageField = new sap.m.Select(me.createId("addressLanguage"), {
+                    width : "100%"
+                }).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 //===== STATE =====\\
-                var oStateTitle = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "*"
-                        }).addStyleClass("Text_red_13 PadRight5px"),
-                        new sap.m.Text({
-                            text : "State/Province"
-                        })
-                    ]
+                var oStateTitle = new sap.m.Text({
+                    text : "State/Province"
                 });
     		    
-				var oStateField = new sap.m.ComboBox(me.createId("addressState"), {
-					value : ""
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+				var oStateField = new sap.m.Select(me.createId("addressState"), {
+                    width : "100%"
+                }).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 //===== POST CODE =====\\
-                var oPostCodeTitle = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "*"
-                        }).addStyleClass("Text_red_13 PadRight5px"),
-                        new sap.m.Text({
-                            text : "Post Code"
-                        })
-                    ]
+                var oPostCodeTitle = new sap.m.Text({
+                    text : "Post Code"
                 });
     		    
-				var oPostCodeField = new sap.m.ComboBox(me.createId("addressPostCode"), {
-					value : ""
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+				var oPostCodeField = new sap.m.Select(me.createId("addressPostCode"), {
+                    width : "100%"
+                }).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 //===== TIMEZONE =====\\
-                var oTimezoneTitle = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "*"
-                        }).addStyleClass("Text_red_13 PadRight5px"),
-                        new sap.m.Text({
-                            text : "Timezone"
-                        })
-                    ]
+                var oTimezoneTitle = new sap.m.Text({
+                    text : "Timezone"
                 });
     		    
-				var oTimezoneField = new sap.m.ComboBox(me.createId("addressTimezone"), {
-					value : ""
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+				var oTimezoneField = new sap.m.Select(me.createId("addressTimezone"), {
+                    width : "100%"
+                }).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 //===== PREMISE ADDRESS =====\\
                 
                 //===== STREET ADDRESS (LINE 1) =====\\
-                var oLine1Title = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "*"
-                        }).addStyleClass("Text_red_13 PadRight5px"),
-                        new sap.m.Text({
-                            text : "Street Address"
-                        })
-                    ]
+                var oLine1Title = new sap.m.Text({
+                    text : "Street Address"
                 });
     		    
 				var oLine1Field = new sap.m.Input(me.createId("addressLine1"), {
@@ -243,43 +201,6 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                                     aErrorLog.push("Residential Address (line 1) is required.");
                                     bError = true;
                                 }
-                                if (me.byId("addressCountry").getValue() === "") {
-                                    aErrorLog.push("Country field must not be blank.");
-                                    bError = true;
-                                }
-                                if (me.byId("addressState").getValue() === "") {
-                                    aErrorLog.push("State/Province field must not be blank.");
-                                    bError = true;
-                                }
-                                if (me.byId("addressPostCode").getValue() === "") {
-                                    aErrorLog.push("Post Code field must not be blank.");
-                                    bError = true;
-                                }
-                                if (me.byId("addressTimezone").getValue() === "") {
-                                    aErrorLog.push("Timezone field must not be blank.");
-                                    bError = true;
-                                }
-                                if (me.byId("addressLanguage").getValue() === "") {
-                                    aErrorLog.push("Language field must not be blank.");
-                                    bError = true;
-                                }
-                                
-                                if (me.byId("addressCountry").getSelectedKey() === "") {
-                                    aErrorLog.push("Country not valid.");
-                                    bError = true;
-                                }
-                                if (me.byId("addressPostCode").getSelectedKey() === "") {
-                                    aErrorLog.push("Post Code not valid.");
-                                    bError = true;
-                                }
-                                if (me.byId("addressTimezone").getSelectedKey() === "") {
-                                    aErrorLog.push("Timezone not valid.");
-                                    bError = true;
-                                }
-                                if (me.byId("addressLanguage").getSelectedKey() === "") {
-                                    aErrorLog.push("Language not valid.");
-                                    bError = true;
-                                }
                                 
                                 if (bError === true) {
                                     jQuery.sap.log.error(aErrorLog.join("\n"));
@@ -307,11 +228,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                                             },
                                             onFail : function (response) {
                                                 IOMy.common.showError("Update failed.", "Error");
-//                                                if (response.Error === false) {
-//                                                    this.onSuccess();
-//                                                } else {
-                                                    jQuery.sap.log.error(JSON.stringify(response));
-//                                                }
+                                                jQuery.sap.log.error(JSON.stringify(response));
                                             }
                                         });
                                     } catch (e00033) {
@@ -346,8 +263,9 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 				thisView.byId("page").addContent(oPanel);
                 
                 // Create the extras menu for the Premise Edit Address page.
+                thisView.byId("extrasMenuHolder").destroyItems();
                 thisView.byId("extrasMenuHolder").addItem(
-                    IOMy.widgets.getExtrasButton({
+                    IOMy.widgets.getActionMenu({
                         id : me.createId("extrasMenu"),        // Uses the page ID
                         icon : "sap-icon://GoogleMaterial/more_vert",
                         items : [

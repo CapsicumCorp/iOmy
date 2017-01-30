@@ -3,7 +3,7 @@ Title: Edit Room Page (UI5 Controller)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws a form that allows you to edit information about a given
     room.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -48,7 +48,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 				me.iRoomID = aRoom.RoomId;
 				var sRoomName = aRoom.RoomName;
 				var sRoomDesc = aRoom.RoomDesc;
-                console.log(me.iRoomID);
+                //console.log(me.iRoomID);
 				
                 // Start rendering the page
 				
@@ -94,9 +94,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 //                    ]
 //                });
 //    		    
-//				var oFloorsField = new sap.m.ComboBox(me.createId("roomFloor"), {
-//					value : ""
-//				}).addStyleClass("width100Percent SettingsDropdownInput");
+//				var oFloorsField = new sap.m.Select(me.createId("roomFloor"), {}).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 var oRoomTypeTitle = new sap.m.HBox({
                     items : [
@@ -109,9 +107,9 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                     ]
                 });
     		    
-				var oRoomTypeField = new sap.m.ComboBox(me.createId("roomType"), {
-					value : ""
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+				var oRoomTypeField = new sap.m.Select(me.createId("roomType"), {
+                    width : "100%"
+                }).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 //================================================//
                 // LOAD FLOOR OPTIONS AND SET CURRENT FLOOR COUNT //
@@ -177,32 +175,19 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 						new sap.m.Link({
 							text : "Update",
 							press : function () {
-								this.setEnabled(false);
+								var thisButton = this; // Captures the scope of the calling button.
+                                thisButton.setEnabled(false);
 								
 								var sRoomText = me.byId("roomName").getValue();
                                 var sRoomDesc = me.byId("roomDesc").getValue();
 								var iRoomID = me.iRoomID;
-                                var iRoomTypeId = me.byId("roomType").getSelectedKey() !== null ? me.byId("roomType").getSelectedKey() : 7;
+                                var iRoomTypeId = me.byId("roomType").getSelectedKey();
                                 
                                 var aErrorLog = [];
                                 var bError = false;
 								
                                 if (sRoomText === "") {
                                     aErrorLog.push("Room must have a name");
-                                    bError = true;
-                                }
-//                                if (me.byId("roomFloor").getValue() === "") {
-//                                    aErrorLog.push("Floor must be specified.");
-//                                    bError = true;
-//                                }
-                                if (me.byId("roomType").getValue() === "" ||
-                                    me.byId("roomType").getSelectedKey() === "") {
-                                    
-                                    if (me.byId("roomType").getValue() === "")
-                                        aErrorLog.push("Room type must be specified.");
-                                    else if (me.byId("roomType").getSelectedKey() === "")
-                                        aErrorLog.push("Invalid room type");
-                                    
                                     bError = true;
                                 }
                                 
@@ -248,18 +233,26 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                                                         }, me)
                                                     }); //-- END ROOMS LIST --//
                                                 }, "UpdateMessageBox");
-
                                             },
                                             onFail : function (response) {
                                                 IOMy.common.showError("Update failed.", "Error");
                                                 jQuery.sap.log.error(JSON.stringify(response));
+                                                
+                                                // Finish the request by enabling the edit button
+                                                this.onComplete();
+                                            },
+                                            
+                                            onComplete : function () {
+                                                //------------------------------------------------------------------------------------------//
+                                                // Re-enable the button once the request and the callback functions have finished executing.
+                                                //------------------------------------------------------------------------------------------//
+                                                thisButton.setEnabled(true);
                                             }
                                         });
                                     } catch (e00033) {
                                         IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
                                     }
                                 }
-								this.setEnabled(true);
 							}
 						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
 					]
@@ -288,8 +281,9 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 		    	thisView.byId("page").addContent(oPanel);
                 
                 // Create the extras menu for the Premise Edit Address page.
+                thisView.byId("extrasMenuHolder").destroyItems();
                 thisView.byId("extrasMenuHolder").addItem(
-                    IOMy.widgets.getExtrasButton({
+                    IOMy.widgets.getActionMenu({
                         id : me.createId("extrasMenu"),        // Uses the page ID
                         icon : "sap-icon://GoogleMaterial/more_vert",
                         items : [
@@ -300,15 +294,16 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 
                                     var iNumOfDevices = IOMy.functions.getNumberOfDevicesInRoom(me.iRoomID);
                                     var sDevicesAttachedMessage = "";
-                                    console.log(JSON.stringify(IOMy.common.ThingList));
+                                    //console.log(JSON.stringify(IOMy.common.ThingList));
 
                                     //-- A ROOM SHOULD BE DELETED ONLY WHEN THERE ARE NO DEVICES ATTACHED TO IT --//
                                     if (iNumOfDevices > 0) {
                                         sDevicesAttachedMessage += "There ";
-                                        if (iNumOfDevices === 1)
+                                        if (iNumOfDevices === 1) {
                                             sDevicesAttachedMessage += "is "+iNumOfDevices+" device";
-                                        else
+                                        } else {
                                             sDevicesAttachedMessage += "are "+iNumOfDevices+" devices";
+                                        }
                                         sDevicesAttachedMessage += " still assigned to this room.\n\n";
                                         sDevicesAttachedMessage += "Remove the devices from this room before deleting it.";
 
@@ -353,7 +348,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                                                     }
                                                 });
                                             } else {
-                                                //IOMy.common.NavigationTriggerBackForward(false);
+                                                
                                             }
                                         });
                                     }
