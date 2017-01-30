@@ -335,14 +335,68 @@ if( $bError===false ) {
 		//================================================================//
 		if( $sPostMode==="GetMotionData" ) {
 			try {
-				var_dump( $oMotionSensor );
-				echo "\n";
-				var_dump( $oMotionSensor->GetMostRecentDBMotion() );
-				echo "\n";
-				var_dump( $oMotionSensor->GetCurrentStatusData() );
-				echo "\n";
+				//-- Debugging --//
+				//var_dump( $oMotionSensor );
+				//echo "\n";
+				//var_dump( $oMotionSensor->GetMostRecentDBMotion() );
+				//echo "\n";
+				//var_dump( $oMotionSensor->GetCurrentStatusData() );
+				//echo "\n";
 				
 				
+				$aMostRecent    = $oMotionSensor->GetMostRecentDBMotion();
+				$aCurrentStatus = $oMotionSensor->GetCurrentStatusData();
+				
+				
+				//-- IF There is both the "Current Status" as well as the "Most Recent Motion" --//
+				if( $aMostRecent['Error']===false && $aCurrentStatus['Error']===false ) {
+					//----------------------------------------//
+					//-- OPTION 1: Ideal                    --//
+					//----------------------------------------//
+					$aResult = array(
+						"Error"     => false,
+						"Data"      => array(
+							"MostRecentMotion"  => $aMostRecent['Data']['UTS'],
+							"CurrentStatus"     => array(
+								"Motion"            => $aCurrentStatus['Data']['CurrentMotion'],
+								"Tamper"            => $aCurrentStatus['Data']['Tamper'],
+								"LowBatter"         => $aCurrentStatus['Data']['LowBattery'],
+								"UTS"               => $aCurrentStatus['Data']['UTS'],
+							)
+						)
+					);
+					
+				//-- ELSE  --//
+				} else {
+					//----------------------------------------//
+					//-- OPTION 2: Never seen a Motion      --//
+					//----------------------------------------//
+					if( $aCurrentStatus['Error']===false ) {
+						$aResult = array(
+							"Error"     => false,
+							"Data"      => array(
+								"MostRecentMotion"  => null,
+								"CurrentStatus"     => array(
+									"Motion"            => $aCurrentStatus['Data']['CurrentMotion'],
+									"Tamper"            => $aCurrentStatus['Data']['Tamper'],
+									"LowBatter"         => $aCurrentStatus['Data']['LowBattery'],
+									"UTS"               => $aCurrentStatus['Data']['UTS'],
+								)
+							)
+							
+						);
+						
+						
+					//----------------------------------------//
+					//-- OPTION 3: No Data                  --//
+					//----------------------------------------//
+					} else {
+						$bError = true;
+						$iErrCode  = 1401;
+						$sErrMesg .= "Error Code:'1401' \n";
+						$sErrMesg .= "Couldn't find any data for the Motion Sensor to determine its current status!\n";
+					}
+				}
 			} catch( Exception $e1400 ) {
 				//-- Display an Error Message --//
 				$bError     = true;
@@ -385,7 +439,7 @@ if( $bError===false && $aResult!=false ) {
 		
 		//-- Output results --//
 		echo $sOutput;
-	
+		
 	} catch( Exception $e0001 ) {
 		header('Content-Type: text/plain');
 		//-- The aResult array cannot be turned into a string due to corruption of the array --//

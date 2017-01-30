@@ -156,19 +156,6 @@ class MotionSensor_Netvox {
 								//-- Lookup the most recent Status code from the database --//
 								$aIORecentData = GetIODataMostRecentEnum( $aIOInfo['Data']['DataTypeId'], $aIO['IOId'], $iUTS );
 								
-								echo "\n\n-----------------------------------------------------------\n";
-								var_dump($aIOInfo);
-								echo "\n";
-								var_dump($aIO);
-								echo "\n\n";
-								echo "\n\n-----------------------------------------------------------\n";
-								var_dump($aIORecentData);
-								
-								echo "\n\n-----------------------------------------------------------\n";
-								global $oRestrictedApiCore;
-								var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
-								echo "\n\n";
-								
 								
 								if( $aIORecentData['Error']===false ) {
 									$this->aIOs[$sRSTypeId]['MostRecentData'] = $aIORecentData['Data']['Value'];
@@ -176,8 +163,9 @@ class MotionSensor_Netvox {
 									return true;
 									
 								} else {
-									var_dump($aIORecentData);
-									echo "\n";
+									//var_dump($aIORecentData);
+									$this->aErrorMessges[] = "Problem looking up the most recent Status IO Data.\n".$aIORecentData['ErrMesg'];
+									return false;
 								}
 							}
 							
@@ -228,11 +216,22 @@ class MotionSensor_Netvox {
 			//-- Create the RSTypeId key to search for --//
 			$sRSTypeId = (string)$this->iStatusRSTypeId;
 			
-			//-- Check to make sure the Thing has been located located --//
+			//-- Check to make sure the IO has been located --//
 			if( isset( $this->aIOs[$sRSTypeId] ) ) {
 				//-- Fetch the Most Recent Motion --//
 				$aResult = GetIODataMostRecentEnumBit( $this->aIOs[$sRSTypeId]['DataTypeId'], $this->aIOs[$sRSTypeId]['IOId'], $iUTS, $this->iMotionEnum );
 				
+				//-- Check for Errors --//
+				if( $aResult['Error']===true ) {
+					$bError    = true;
+					$sErrMesg  = "Problem looking up the IO that has the status!\n";
+					$sErrMesg .= $aResult['ErrMesg'];
+				}
+				
+			} else {
+				//-- Couldn't locate the IO with the correct Id --//
+				$bError    = true;
+				$sErrMesg  = "Problem locating the Motion Sensor IO with the correct RSTypeId!";
 			}
 		}	//-- ENDIF No Errors --//
 		
@@ -241,7 +240,7 @@ class MotionSensor_Netvox {
 		//------------------------------------------------------------------------------//
 		if( $bError===false ) {
 			//-- 9.A - SUCCESS --//
-			return array( "Error"=>false, "Data"=>$aResult );
+			return array( "Error"=>false, "Data"=>$aResult['Data'] );
 	
 		} else {
 			//-- 9.B - FAILURE --//

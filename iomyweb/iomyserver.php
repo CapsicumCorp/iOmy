@@ -93,6 +93,9 @@ $aTempResult4C              = array();      //-- ARRAY:         --//
 $aTempResult4D              = array();      //-- ARRAY:         --//
 
 
+$iRoomId                    = 0;
+$sHubAddress                = "";
+
 //------------------------------------------------------------//
 //-- #1.3# - IMPORT REQUIRED LIBRARIES                      --//
 //------------------------------------------------------------//
@@ -679,8 +682,8 @@ if($bError===false) {
 									if( !( strlen( trim( $sWatchInputsUsername ) ) > 1 ) ) {
 										//-- Flag an error --//
 										$bError = true;
-										$iErrCode  = 0;
-										$sErrMesg .= "Error Code:'0000' \n";
+										$iErrCode  = 7310;
+										$sErrMesg .= "Error Code:'7310' \n";
 										$sErrMesg .= "Problem with the 'WatchInputsUsername' from the 'Data' parameter! \n";
 										$sErrMesg .= "The WatchInputs Username might be insufficient length or have other issues.\n";
 										
@@ -688,16 +691,16 @@ if($bError===false) {
 									} else if( !( strlen( $sWatchInputsPassword ) > 6 ) ) {
 										//-- Flag an error --//
 										$bError = true;
-										$iErrCode  = 0;
-										$sErrMesg .= "Error Code:'0000' \n";
+										$iErrCode  = 7311;
+										$sErrMesg .= "Error Code:'7311' \n";
 										$sErrMesg .= "Problem with the 'WatchInputsPassword' from the 'Data' parameter! \n";
 										$sErrMesg .= "The WatchInputs Password might be insufficient length or have other issues.\n";
 									}
 								} else {
 									//-- Flag an error --//
 									$bError = true;
-									$iErrCode  = 0;
-									$sErrMesg .= "Error Code:'0000' \n";
+									$iErrCode  = 7312;
+									$sErrMesg .= "Error Code:'7312' \n";
 									$sErrMesg .= "Problem with either the 'WatchInputsUsername' or the 'WatchInputsPassword' from the 'Data' parameter! \n";
 								}
 							}
@@ -721,7 +724,7 @@ if($bError===false) {
 									//-- Flag an error --//
 									$bError = true;
 									$iErrCode  = 0;
-									$sErrMesg .= "Error Code:'0000' \n";
+									$sErrMesg .= "Error Code:'7317' \n";
 									$sErrMesg .= "Problem with the 'HubName' from the 'Data' parameter! \n";
 								}
 								
@@ -732,15 +735,22 @@ if($bError===false) {
 									//-- Flag an error --//
 									$bError = true;
 									$iErrCode  = 0;
-									$sErrMesg .= "Error Code:'0000' \n";
+									$sErrMesg .= "Error Code:'7318' \n";
 									$sErrMesg .= "Problem with the 'HubName' from the 'Data' parameter! \n";
+								}
+								
+								//-- Check if Hub IP Address is valid if not then assume local host --//
+								if( isset( $aPostData['HubAddress'] ) ) {
+									$sHubAddress = $aPostData['HubAddress'];
+								} else {
+									$sHubAddress = "127.0.0.1";
 								}
 								
 							} else {
 								//-- Flag an error --//
 								$bError = true;
 								$iErrCode  = 0;
-								$sErrMesg .= "Error Code:'0000' \n";
+								$sErrMesg .= "Error Code:'7321' \n";
 								$sErrMesg .= "Problem with either the 'HubName', 'HubType' or the 'HubSerialCode' from the 'Data' parameter! \n";
 							}
 						}
@@ -885,6 +895,7 @@ if($bError===false) {
 				$sErrMesg .= "Error Code:'3400' \n";
 				$sErrMesg .= $e3400->getMessage();
 			}
+			
 		//================================================================//
 		//== 5.4 - MODE: New Schema                                     ==//
 		//================================================================//
@@ -906,7 +917,6 @@ if($bError===false) {
 				//-- 5.4.2 - Begin the transaction                              --//
 				//----------------------------------------------------------------//
 				if( $bError===false ) {
-					
 					$bTransactionStarted = $oRestrictedDB->dbBeginTransaction();
 					
 					if( $bTransactionStarted===false ) {
@@ -950,8 +960,6 @@ if($bError===false) {
 				$sErrMesg .= "Error Code:'4400' \n";
 				$sErrMesg .= $e4400->getMessage();
 			}
-			
-			
 			
 		//================================================================//
 		//== 5.5 - MODE: Create Tables, Foreign Keys or Views           ==//
@@ -1104,23 +1112,23 @@ if($bError===false) {
 							
 						case "02_CreateViewsRestricted2":
 							//$aResult = DB_CreateViewsRestricted2( $sPostDatabaseName );
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateUsersHub", "PrivateUsersRooms", "PrivateUsersComm", "PrivateUsersLink" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateUsersHub", "PrivateUsersRooms", "PrivateUsersComm", "PrivateUsersLink", "PrivateUsersThing", "PrivateUsersIO" ) );
 							break;
 							
 						case "02_CreateViewsRestricted3":
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateUsersThing", "PrivateUsersIO" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateUsersServerPerms", "PrivateDataTinyInt", "PrivateDataInt", "PrivateDataBigInt", "PrivateDataFloat" ) );
 							break;
 							
 						case "02_CreateViewsRestricted4":
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateDataTinyInt", "PrivateDataInt", "PrivateDataBigInt" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateDataTinyString", "PrivateDataShortString", "PrivateDataMedString", "PrivateDataLongString", "PrivateDataString255" ) );
 							break;
 							
 						case "02_CreateViewsRestricted5":
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateDataFloat", "PrivateDataTinyString", "PrivateDataShortString" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateDataTinyIntEnum", "PrivateDataIntEnum", "PrivateDataBigIntEnum", "WatchInputsHub", "WatchInputsComm" ) );
 							break;
 							
 						case "02_CreateViewsRestricted6":
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateDataMedString" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "WatchInputsLink", "WatchInputsThing", "WatchInputsIO" ) );
 							break;
 							
 						//--------------------//
@@ -1294,7 +1302,7 @@ if($bError===false) {
 							$iPremiseInfoId = $aTempResult3A['LastId'];
 							
 							$aTempResult3B = DB_InsertPremise( $sPostDatabaseName, $iPremiseInfoId, $sPremiseName, $sPremiseDesc );
-						
+							
 							if( $aTempResult3B['Error']===true ) {
 								$bError    = true;
 								$iErrCode  = 7407;
@@ -1305,7 +1313,7 @@ if($bError===false) {
 								//-- Extract the PremiseId --//
 								$iPremiseId = $aTempResult3B['LastId'];
 								
-								$aTempResult3C = DB_InsertHub( $sPostDatabaseName, $iPremiseId, $iHubTypeId, $sHubName, $sHubSerialCode, "" );
+								$aTempResult3C = DB_InsertHub( $sPostDatabaseName, $iPremiseId, $iHubTypeId, $sHubName, $sHubSerialCode, $sHubAddress );
 								
 								if( $aTempResult3C['Error']===true ) {
 									$bError    = true;
@@ -1317,6 +1325,21 @@ if($bError===false) {
 								} else {
 									//-- Extract the HubId --//
 									$iHubId = $aTempResult3C['LastId'];
+									
+									$aTempResult3D = DB_InsertRoom( $sPostDatabaseName, $iPremiseId );
+									
+									if( $aTempResult3D['Error']===true ) {
+										$bError    = true;
+										$iErrCode  = 7409;
+										$sErrMesg .= "Error Code:'7409' \n";
+										$sErrMesg .= "Problem inserting the Rooms! \n";
+										$sErrMesg .= $aTempResult3D['ErrMesg'];
+										
+									} else {
+										//-- Extract the RoomId --//
+										$iRoomId = $aTempResult3D['LastId'];
+										
+									}
 								}
 							}
 						}
@@ -1381,6 +1404,24 @@ if($bError===false) {
 									} else {
 										//-- Extract the PermissionId --//
 										$iPermServerId = $aTempResult4D['LastId'];
+										
+										//-- Grant the Owner all room permissions --//
+										$aTempResult4E = DB_InsertPermRoom( $sPostDatabaseName, $iUserId, $iRoomId, 1, 1, 1, 1 );
+										
+										if( $aTempResult4E['Error']===true ) {
+											$bError    = true;
+											$iErrCode  = 7414;
+											$sErrMesg .= "Error Code:'7414' \n";
+											$sErrMesg .= "Problem inserting the Permissions3! \n";
+											//$sErrMesg .= "UId = ".$iUserId." RId = ".$iRoomId."! \n";
+											
+											$sErrMesg .= $aTempResult4E['ErrMesg'];
+											
+											
+										} else {
+											//-- Extract the PermissionId --//
+											$iPermRoomId = $aTempResult4E['LastId'];
+										}
 									}
 								}
 							}
@@ -1389,7 +1430,7 @@ if($bError===false) {
 					
 					
 					//-----------------------------------------------------------------------------//
-					//-- 5.7.3.6.A.6 - Add the Hub                                               --//
+					//-- 5.7.3.6.A.6 - Add the WatchInputs User                                  --//
 					//-----------------------------------------------------------------------------//
 					if( $bError===false ) {
 						
@@ -1412,7 +1453,7 @@ if($bError===false) {
 								$sErrMesg .= $aTempResult5B['ErrMesg'];
 								
 							} else {
-								$aTempResult5C = DB_InsertUser( $sPostDatabaseName, $aTempResult5B['LastId'], $sWatchInputsUsername, 1 );
+								$aTempResult5C = DB_InsertUser( $sPostDatabaseName, $aTempResult5B['LastId'], $sWatchInputsUsername, -1 );
 								
 								if( $aTempResult5C['Error']===true ) {
 									$bError    = true;
@@ -1425,30 +1466,22 @@ if($bError===false) {
 									//-- Extract the User Id --//
 									$iWatchInputsUserId = $aTempResult5C['LastId'];
 									
-									//-- Give the WatchInputs User everything but the owner permission --//
-									$aTempResult5D = DB_InsertPermPremise( $sPostDatabaseName, $iWatchInputsUserId, $iPremiseId, 0, 1, 1, 1, 1 );
+									//-- Give the WatchInputs User special permission to the Hub --//
+									$aTempResult5D = DB_InsertPermHub( $sPostDatabaseName, $iWatchInputsUserId, $iHubId );
+									//$aTempResult5D1 = DB_InsertPermPremise( $sPostDatabaseName, $iWatchInputsUserId, $iPremiseId, 1, 1, 1, 1, 1 );
+									
 									
 									if( $aTempResult5D['Error']===true ) {
 										$bError    = true;
 										$iErrCode  = 7419;
 										$sErrMesg .= "Error Code:'7419' \n";
-										$sErrMesg .= "Problem granting the \"WatchInputs\" user permission to the premise! \n";
+										$sErrMesg .= "Problem granting the \"WatchInputs\" user permission to the hub! \n";
 										$sErrMesg .= $aTempResult5D['ErrMesg'];
 										
 									} else {
 										//-- Extract the User Id --//
-										$iWatchInputsPermPremiseId = $aTempResult5D['LastId'];
+										$iWatchInputsPermHubId = $aTempResult5D['LastId'];
 										
-										//-- Grant the WatchInputs User full server permissions --//
-										$aTempResult5E = DB_InsertPermServer( $sPostDatabaseName, $iWatchInputsUserId, 1, 1, 1 );
-										
-										if( $aTempResult5E['Error']===true ) {
-											$bError    = true;
-											$iErrCode  = 7420;
-											$sErrMesg .= "Error Code:'7420' \n";
-											$sErrMesg .= "Problem granting the \"WatchInputs\" user permission to the server! \n";
-											$sErrMesg .= $aTempResult5E['ErrMesg'];
-										}
 									}
 								}
 							}
