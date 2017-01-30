@@ -2,7 +2,7 @@
 Title: Edit User Information Page (UI5 Controller)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws a form to allow the user to edit his/her details.
-Copyright: Capsicum Corporation 2015, 2016
+Copyright: Capsicum Corporation 2015, 2016, 2017
 
 This file is part of iOmy.
 
@@ -54,28 +54,9 @@ sap.ui.controller("mjs.settings.user.EditUserInformation", {
                     "editButton", "requiredNotice"
 				]);
                 
-                // Populate the Gender ComboBox field.
-//                me.odata.AjaxRequest({
-//                    Url: me.odata.ODataLocation("gender"),
-//                    Columns : ["USERSGENDER_PK", "USERSGENDER_NAME"],
-//                    WhereClause : [],
-//                    OrderByClause : [],
-//                    
-//                    onSuccess : function (responseType, data) {
-//                        for (var i = 0; i < data.length; i++) {
-//                            oGenderField.addItem(
-//                                new sap.ui.core.Item({
-//                                    text : data[i].USERSGENDER_NAME,
-//                                    key : data[i].USERSGENDER_PK
-//                                })
-//                            );
-//                        }
-//                    }
-//                });
-                
 				var oGivenNamesLabel = new sap.m.Label({
 					text : "Given Names"
-				})
+				});
 				
 				var oGivenNamesField = new sap.m.Input(me.createId("givenNamesField"), {
 					value : "",
