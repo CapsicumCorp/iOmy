@@ -2,7 +2,7 @@
 Title: Edit User Information Page (UI5 View)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Creates a page to allow the user to edit his/her details.
-Copyright: Capsicum Corporation 2015, 2016
+Copyright: Capsicum Corporation 2015, 2016, 2017
 
 This file is part of iOmy.
 

@@ -2,7 +2,7 @@
 Title: Thermostat Device Page
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: This is a UI5 View that is used to display information about a chosen thermostat device
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of the iOmy project.
 

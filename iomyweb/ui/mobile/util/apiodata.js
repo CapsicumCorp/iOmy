@@ -3,8 +3,8 @@ Title: OData API Module
 Authors: 
     Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
     Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
-Description: Module for handling communication with our OData service and the data retrived from it
-Copyright: Capsicum Corporation 2015, 2016
+Description: Module for handling communication with the OData service and the data retrived from it
+Copyright: Capsicum Corporation 2015, 2016, 2017
 
 This file is part of iOmy.
 

@@ -2,7 +2,7 @@
 Title: Add Room Page (UI5 View)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Creates a page that allows you to create a room in a premise.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 

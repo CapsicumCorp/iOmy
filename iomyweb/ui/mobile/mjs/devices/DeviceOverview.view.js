@@ -2,7 +2,7 @@
 Title: Add Link page
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: UI5 View. Creates the page to list all the devices the current user has access to.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 

@@ -4,7 +4,7 @@ Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
 Modified: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws a list of all the premises accessible and their
     hubs.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of the iOmy project.
 
@@ -24,8 +24,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("mjs.settings.PremiseList", {
-	common:		IOMy.common,
-	oData:		IOMy.apiodata,
 	
 	bInitialised:					false,			//-- BOOLEAN:	Used to indicate if the page ahs been displayed or not			--//
 	aObjectsToPurge:				[],				//-- ARRAY:		List of Id names of UI5 objects to purge						--//
@@ -395,7 +393,7 @@ sap.ui.controller("mjs.settings.PremiseList", {
                         // Procedure complete, re-enable the button.
                         this.setEnabled(true);
                     }
-                }).addStyleClass("ButtonNoBorder IOMYButton ButtonIconGreen TextSize16px");
+                }).addStyleClass("ButtonNoBorder IOMYButton ButtonIconGreen TextSize20px");
                 
                 // Create the flag for showing the list of IO Ports for a selected IO
                 // if it doesn't already exist.

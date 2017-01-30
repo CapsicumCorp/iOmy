@@ -2,7 +2,7 @@
 Title: Add Link page UI5 View
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Creates the page to add a link.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of the iOmy project.
 
@@ -49,7 +49,7 @@ sap.ui.jsview("mjs.settings.links.LinkAdd", {
             view : me,
             controller : oController,
             icon : "sap-icon://IOMy1/appliances",
-            title : "Add Link"
+            title : "New Link"
         });
 		
 		

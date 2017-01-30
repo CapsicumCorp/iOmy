@@ -3,7 +3,7 @@ Title: Edit Room Page (UI5 View)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Creates a page that allows you to edit information about a given
     room.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 

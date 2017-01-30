@@ -2,7 +2,7 @@
 Title: iOmy Time Module
 Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
 Description: Functions that assist with handling timestamps, and dates.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 

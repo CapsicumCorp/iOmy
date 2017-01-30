@@ -3,7 +3,7 @@ Title: Premise List (Settings) UI5 View
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Creates the page that lists all the premises accessible and their
     hubs.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of the iOmy project.
 
@@ -55,7 +55,7 @@ sap.ui.jsview("mjs.settings.PremiseList", {
 				new sap.m.Panel(me.createId("Panel"), {
 					backgroundDesign: "Transparent",
 					content: []
-				}).addStyleClass("height100Percent PanelNoPadding")
+				}).addStyleClass("height100Percent PanelNoPadding UserInputForm TableSideBorders")
 			],
 			footer : IOMy.widgets.getAppFooter()
 		}).addStyleClass("height100Percent width100Percent MainBackground");
