@@ -6,7 +6,7 @@ Authors:
 Description: Module for creating and holding global variables for our lists in iOmy,
     dialog boxes, flags, navigation, settings, etc. Things that are commonly used in
     iOmy.
-Copyright: Capsicum Corporation 2015, 2016
+Copyright: Capsicum Corporation 2015, 2016, 2017
 
 This file is part of iOmy.
 
@@ -40,6 +40,7 @@ $.extend(IOMy.common,{
 	//-- a login has been successful or not		--//
 	//--------------------------------------------//
 	CoreVariablesInitialised: false,
+    CoreVariableRefreshIntervalInstance : null,
 	
 	
 	//============================================//
@@ -60,6 +61,21 @@ $.extend(IOMy.common,{
 		
 	},
 	
+    //============================================//
+	//== LOCALE OPTIONS         				==//
+	//============================================//
+    bCountriesLoaded        : false,
+    bLanguagesLoaded        : false,
+    bStatesProvincesLoaded  : false,
+    bPostCodesLoaded        : false,
+    bTimezonesLoaded        : false,
+    
+    Countries               : [],
+    Languages               : [],
+    StatesProvinces         : [],
+    PostCodes               : [],
+    Timezones               : [],
+    
 	//============================================//
 	//== PREMISE AND GATEWAY LIST				==//
 	//============================================//
@@ -207,9 +223,8 @@ $.extend(IOMy.common,{
 			dDesiredDate = 2000;
 		}
 		
-		iReturn = parseInt( dDesiredDate/1000, 10 );
+		var iReturn = parseInt( dDesiredDate/1000, 10 );
 		
-		return 0;
 		return iReturn;
 	},
 	
@@ -326,7 +341,7 @@ $.extend(IOMy.common,{
 	},
 	
 	showConfirmQuestion : function( sMessage, sTitle, fnCallback, sCssClass ){
-		//-- --//
+		//-- Defaults --//
 		var callbackFn = fnCallback || function(){};
 		var cssClass = sCssClass || "";
 		
@@ -337,6 +352,23 @@ $.extend(IOMy.common,{
 				title: sTitle,
 				onClose: callbackFn,
 				styleClass : cssClass
+			}
+		);
+	},
+    
+    showYesNoQuestion : function( sMessage, sTitle, fnCallback, sCssClass ){
+		//-- Defaults --//
+		var callbackFn = fnCallback || function(){};
+		var cssClass = sCssClass || "";
+		
+		// open a fully configured message box
+		sap.m.MessageBox.confirm(
+			sMessage,
+			{
+				title: sTitle,
+				onClose: callbackFn,
+				styleClass : cssClass,
+                actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO]
 			}
 		);
 	},
@@ -383,11 +415,183 @@ $.extend(IOMy.common,{
 
 			if(errorMessage){
 				jQuery.sap.log.error("Error:Request error:"+errorMessage);
-				//IOMy.util.Util.showError(errorMessage);
 			}
 		}
 	},
     
+    LoadCountries : function () {
+        var me = this;
+        
+        IOMy.apiodata.AjaxRequest({
+            Url : IOMy.apiodata.ODataLocation("countries"),
+            Columns : ["COUNTRIES_NAME", "COUNTRIES_PK"],
+            WhereClause : [],
+            OrderByClause : ["COUNTRIES_NAME asc"],
+
+            onSuccess : function (responseType, data) {
+                try {
+                    for (var i = 0; i < data.length; i++) {
+                        me.Countries.push({
+                            CountryId : data[i].COUNTRIES_PK,
+                            CountryName : data[i].COUNTRIES_NAME
+                        });
+                    }
+                    
+                    me.bCountriesLoaded = true;
+                } catch (e) {
+
+                    jQuery.sap.log.error("Error gathering Countries: "+JSON.stringify(e.message));
+                    me.bCountriesLoaded = false;
+                    
+                }
+            },
+
+            onFail : function (response) {
+                jQuery.sap.log.error("Error loading countries OData: "+JSON.stringify(response));
+                me.bCountriesLoaded = false;
+            }
+            
+        });
+    },
+    
+    LoadLanguages : function () {
+        var me = this;
+        
+        IOMy.apiodata.AjaxRequest({
+            Url : IOMy.apiodata.ODataLocation("language"),
+            Columns : ["LANGUAGE_PK","LANGUAGE_NAME"],
+            WhereClause : [],
+            OrderByClause : ["LANGUAGE_NAME asc"],
+
+            onSuccess : function (responseType, data) {
+                try {
+                    for (var i = 0; i < data.length; i++) {
+                        me.Languages.push({
+                            LanguageId : data[i].LANGUAGE_PK,
+                            LanguageName : data[i].LANGUAGE_NAME
+                        });
+                    }
+                    
+                    me.bLanguagesLoaded = true;
+                    
+                } catch (e) {
+
+                    jQuery.sap.log.error("Error gathering Languages: "+JSON.stringify(e.message));
+                    me.bLanguagesLoaded = false;
+
+                }
+            },
+
+            onFail : function (response) {
+                jQuery.sap.log.error("Error loading languages OData: "+JSON.stringify(response));
+                me.bLanguagesLoaded = false;
+            }
+        });
+    },
+    
+    LoadStatesProvinces : function () {
+        var me = this;
+        
+        IOMy.apiodata.AjaxRequest({
+            Url : IOMy.apiodata.ODataLocation("stateprovince"),
+            Columns : ["STATEPROVINCE_PK","STATEPROVINCE_NAME"],
+            WhereClause : [],
+            OrderByClause : ["STATEPROVINCE_NAME asc"],
+
+            onSuccess : function (responseType, data) {
+                try {
+                    for (var i = 0; i < data.length; i++) {
+                        me.StatesProvinces.push({
+                            StateProvinceId : data[i].STATEPROVINCE_PK,
+                            StateProvinceName : data[i].STATEPROVINCE_NAME
+                        });
+                    }
+                    
+                    me.bStatesProvincesLoaded = true;
+                    
+                } catch (e) {
+
+                    jQuery.sap.log.error("Error gathering States and Provinces: "+JSON.stringify(e.message));
+                    me.bStatesProvincesLoaded = false;
+                    
+                }
+            },
+
+            onFail : function (response) {
+                jQuery.sap.log.error("Error loading stateprovince OData: "+JSON.stringify(response));
+                me.bStatesProvincesLoaded = false;
+            }
+        });
+    },
+    
+    LoadPostCodes : function () {
+        var me = this;
+        
+        IOMy.apiodata.AjaxRequest({
+            Url : IOMy.apiodata.ODataLocation("postcode"),
+            Columns : ["POSTCODE_PK","POSTCODE_NAME"],
+            WhereClause : [],
+            OrderByClause : ["POSTCODE_NAME asc"],
+
+            onSuccess : function (responseType, data) {
+                try {
+                    for (var i = 0; i < data.length; i++) {
+                        me.PostCodes.push({
+                            PostCodeId : data[i].POSTCODE_PK,
+                            PostCodeName : data[i].POSTCODE_NAME
+                        });
+                    }
+                    
+                    me.bPostCodesLoaded = true;
+                    
+                } catch (e) {
+
+                    jQuery.sap.log.error("Error gathering Post codes: "+JSON.stringify(e.message));
+                    me.bPostCodesLoaded = false;
+                    
+                }
+            },
+
+            onFail : function (response) {
+                jQuery.sap.log.error("Error loading stateprovince OData: "+JSON.stringify(response));
+                me.bPostCodesLoaded = false;
+            }
+        });
+    },
+    
+    LoadTimezones : function () {
+        var me = this;
+        
+        IOMy.apiodata.AjaxRequest({
+            Url : IOMy.apiodata.ODataLocation("timezones"),
+            Columns : ["TIMEZONE_PK","TIMEZONE_TZ"],
+            WhereClause : [],
+            OrderByClause : ["TIMEZONE_TZ asc"],
+
+            onSuccess : function (responseType, data) {
+                try {
+                    for (var i = 0; i < data.length; i++) {
+                        me.Timezones.push({
+                            TimezoneId : data[i].TIMEZONE_PK,
+                            TimezoneName : data[i].TIMEZONE_TZ
+                        });
+                    }
+                    
+                    me.bTimezonesLoaded = true;
+                } catch (e) {
+
+                    jQuery.sap.log.error("Error gathering Timezones: "+JSON.stringify(e.message));
+                    me.bTimezonesLoaded = false;
+                    
+                }
+            },
+
+            onFail : function (response) {
+                jQuery.sap.log.error("Error loading timezone OData: "+JSON.stringify(response));
+                me.bTimezonesLoaded = false;
+            }
+        });
+    },
     
     //================================================================//
 	//== Retrieve Link Information									==//
@@ -398,8 +602,8 @@ $.extend(IOMy.common,{
         IOMy.apiodata.AjaxRequest({
 			Url : IOMy.apiodata.ODataLocation("link"),
 			Columns : [
-                "PREMISE_PK","LINK_PK","LINK_SERIALCODE","LINK_NAME","LINK_CONNECTED",
-                "LINK_STATE","LINKTYPE_PK","LINKTYPE_NAME","LINK_ROOMS_FK"
+                "ROOMS_PREMISE_FK","LINK_PK","LINK_SERIALCODE","LINK_NAME","LINK_CONNECTED",
+                "LINK_STATE","LINKTYPE_PK","LINKTYPE_NAME","ROOMS_PK"
             ],
 			WhereClause : [],
 			OrderByClause : ["LINK_PK asc"],
@@ -414,7 +618,7 @@ $.extend(IOMy.common,{
 						"LinkSerialCode" : data[i].LINK_SERIALCODE,
 						"LinkConnected" : data[i].LINK_CONNECTED,
 						"LinkState" : data[i].LINK_STATE,
-                        "LinkRoomId" : data[i].LINK_ROOMS_FK,
+                        "LinkRoomId" : data[i].ROOMS_PK,
                         "LinkTypeId" : data[i].LINKTYPE_PK,
                         "LinkTypeName" : data[i].LINKTYPE_NAME,
                         "LinkConnId" : data[i].LINKCONN_PK,
@@ -423,7 +627,7 @@ $.extend(IOMy.common,{
                         "LinkConnUsername" : data[i].LINKCONN_USERNAME,
                         "LinkConnPassword" : data[i].LINKCONN_PASSWORD,
                         "LinkConnPort" : data[i].LINKCONN_PORT,
-                        "PremiseId" : data[i].PREMISE_PK
+                        "PremiseId" : data[i].ROOM_PREMISE_FK
 					});
 				}
 				
@@ -490,21 +694,30 @@ $.extend(IOMy.common,{
      * Starts the procession of procedures that will refresh core variables. These
      * are the variables being refreshed.
      * 
-     * 1. Premise List
-     * 2. Hub List
-     * 3. Room List
-     * 4. Link List
-     * 5. Link Type List
-     * 6. Thing List
+     * 1. Locale Information Lists
+     * 2. Premise List
+     * 3. Hub List
+     * 4. Room List
+     * 5. Link List
+     * 6. Link Type List
+     * 7. Thing List
      * 
-     * There are six steps.
+     * There are seven steps.
      */
     ReloadCoreVariables : function (fnCallback) {
+        // STEP 1 of 7: Procedures for refreshing locale lists.
+        this.LoadCountries();
+        this.LoadLanguages();
+        this.LoadStatesProvinces();
+        this.LoadPostCodes();
+        this.LoadTimezones();
+        
+        // Do the next steps
         this.ReloadVariablePremiseList(fnCallback);
     },
     
     /**
-     * STEP 1 of 6: Procedure for refreshing the Premise List using an AJAX function.
+     * STEP 2 of 7: Procedure for refreshing the Premise List using an AJAX function.
      * 
      * Next step is refreshing the hub list if successful.
      */
@@ -523,7 +736,7 @@ $.extend(IOMy.common,{
     },
     
     /**
-     * STEP 2 of 6: Procedure for refreshing the Hub List using an AJAX function.
+     * STEP 3 of 7: Procedure for refreshing the Hub List using an AJAX function.
      * 
      * Next step is refreshing the room list if successful.
      */
@@ -542,7 +755,7 @@ $.extend(IOMy.common,{
     },
     
     /**
-     * STEP 3 of 6: Procedure for refreshing the Room List using an AJAX function.
+     * STEP 4 of 7: Procedure for refreshing the Room List using an AJAX function.
      * 
      * Next step is refreshing the link list if successful.
      */
@@ -561,7 +774,7 @@ $.extend(IOMy.common,{
     },
     
     /**
-     * STEP 4 of 6: Procedure for refreshing the Link List using an AJAX function.
+     * STEP 5 of 7: Procedure for refreshing the Link List using an AJAX function.
      * 
      * Next step is refreshing the link type list if successful.
      */
@@ -580,7 +793,7 @@ $.extend(IOMy.common,{
     },
     
     /**
-     * STEP 5 of 6: Procedure for refreshing the Link Type List using an AJAX function.
+     * STEP 6 of 7: Procedure for refreshing the Link Type List using an AJAX function.
      * 
      * Next step is refreshing the thing list if successful.
      */
@@ -599,7 +812,7 @@ $.extend(IOMy.common,{
     },
     
     /**
-     * STEP 6 of 6: Procedure for refreshing the Thing List using an AJAX function.
+     * STEP 7 of 7: Procedure for refreshing the Thing List using an AJAX function.
      * 
      * Either load the home page or whatever function is parsed.
      */
@@ -699,7 +912,7 @@ $.extend(IOMy.common,{
 		IOMy.apiodata.AjaxRequest({
 			Url : IOMy.apiodata.ODataLocation("premises"),
 			Columns : [
-                "PREMISE_PK", "PREMISE_NAME", "PREMISE_DESCRIPTION", "PERMISSIONS_WRITE", "PERMISSIONS_OWNER",
+                "PREMISE_PK", "PREMISE_NAME", "PREMISE_DESCRIPTION", "PERMPREMISE_WRITE", "PERMPREMISE_OWNER",
                 "PREMISEFLOORS_PK", "PREMISEROOMS_PK", "PREMISEBEDROOMS_PK", "PREMISEOCCUPANTS_PK",
                 "PREMISEFLOORS_NAME", "PREMISEROOMS_NAME", "PREMISEBEDROOMS_COUNT", "PREMISEOCCUPANTS_NAME"
             ],
@@ -714,8 +927,8 @@ $.extend(IOMy.common,{
 						"Id" : data[i].PREMISE_PK,
 						"Name" : data[i].PREMISE_NAME,
 						"Desc" : data[i].PREMISE_DESCRIPTION,
-						"PermWrite" : data[i].PERMISSIONS_WRITE,
-						"PermOwner" : data[i].PERMISSIONS_OWNER,
+						"PermWrite" : data[i].PERMPREMISE_WRITE,
+						"PermOwner" : data[i].PERMPREMISE_OWNER,
                         "FloorCountId" : data[i].PREMISEFLOORS_PK,
                         "RoomCountId" : data[i].PREMISEROOMS_PK,
                         "BedroomCountId" : data[i].PREMISEBEDROOMS_PK,
@@ -751,10 +964,10 @@ $.extend(IOMy.common,{
 		IOMy.apiodata.AjaxRequest({
 			Url : IOMy.apiodata.ODataLocation("hubs"),
 			Columns : [
-				"PERMISSIONS_READ",
-				"PERMISSIONS_WRITE",
-				"PERMISSIONS_STATETOGGLE",
-				"PERMISSIONS_OWNER",
+				"PERMPREMISE_READ",
+				"PERMPREMISE_WRITE",
+				"PERMPREMISE_STATETOGGLE",
+				"PERMPREMISE_OWNER",
 				"PREMISE_PK",
 				"PREMISE_NAME",
 				"HUB_PK",
@@ -773,9 +986,9 @@ $.extend(IOMy.common,{
 				
 				for (var i = 0; i < aData.length; i++) {
 					me.HubList.push({
-						"PermRead":					aData[i].PERMISSIONS_READ,
-						"PermWrite":				aData[i].PERMISSIONS_WRITE,
-						"PermOwner":				aData[i].PERMISSIONS_OWNER,
+						"PermRead":					aData[i].PERMPREMISE_READ,
+						"PermWrite":				aData[i].PERMPREMISE_WRITE,
+						"PermOwner":				aData[i].PERMPREMISE_OWNER,
 						"PremiseId":				aData[i].PREMISE_PK,
 						"PremiseName":				aData[i].PREMISE_NAME,
 						"HubId":                    aData[i].HUB_PK,
@@ -789,7 +1002,7 @@ $.extend(IOMy.common,{
 				
 				//-- Update the Timestamp on when the HubList was last updated --//
 				me.HubListLastUpdate = new Date();
-				console.log(JSON.stringify(me.HubList));
+				//console.log(JSON.stringify(me.HubList));
 				//-- Perform the "onSuccess" function if applicable --//
 				if(oConfig.onSuccess) {
 					oConfig.onSuccess();
@@ -812,9 +1025,9 @@ $.extend(IOMy.common,{
 		//-- ODATA REQUEST PREP				--//
 		//------------------------------------//
 		var sUrl			= IOMy.apiodata.ODataLocation("rooms");
-		var aColumns		= [ "PREMISE_PK", "PREMISE_NAME", "ROOMS_PK", "ROOMS_NAME", "ROOMS_DESC", "ROOMS_FLOOR", "ROOMTYPE_PK", "ROOMTYPE_NAME", "ROOMTYPE_OUTDOORS" ];
+		var aColumns		= [ "ROOMS_PREMISE_FK", "ROOMS_PK", "ROOMS_NAME", "ROOMS_DESC", "ROOMS_FLOOR", "ROOMTYPE_PK", "ROOMTYPE_NAME", "ROOMTYPE_OUTDOORS" ];
 		var aWhere			= [];
-		var aOrderBy		= [ "PREMISE_PK", "ROOMTYPE_OUTDOORS", "ROOMS_PK" ];
+		var aOrderBy		= [ "ROOMS_PREMISE_FK", "ROOMTYPE_OUTDOORS", "ROOMS_PK" ];
 		
 		me.RoomsList = {};
 		//------------------------//
@@ -854,7 +1067,7 @@ $.extend(IOMy.common,{
 						//--------------------------------------------------------//
 						for (var i = 0; i < AjaxData.length; i++) {
 							
-							iPremiseId		= parseInt( AjaxData[i].PREMISE_PK );
+							iPremiseId		= parseInt( AjaxData[i].ROOMS_PREMISE_FK );
 							iRoomId			= parseInt( AjaxData[i].ROOMS_PK );
 							
 							if( iPremiseId>=1 && iRoomId>=1 ) {
@@ -879,7 +1092,7 @@ $.extend(IOMy.common,{
 								
 								//-- Store the values --//
 								aTemp.PremiseId				= iPremiseId;
-								aTemp.PremiseName			= AjaxData[i].PREMISE_NAME;
+								aTemp.PremiseName			= "";
 								
 								aTemp.RoomId				= iRoomId;
 								aTemp.RoomName				= AjaxData[i].ROOMS_NAME;
@@ -889,9 +1102,18 @@ $.extend(IOMy.common,{
 								aTemp.RoomTypeName			= AjaxData[i].ROOMTYPE_NAME;
 								aTemp.RoomTypeOutdoors		= parseInt( AjaxData[i].ROOMTYPE_OUTDOORS );
 								
+								//-- Lookup the Premise Name and position in the PremiseList --//
+								$.each( IOMy.common.PremiseList, function( Key, aPremise ) {
+									if( aPremise.Id===iPremiseId.toString() ) {
+										//-- Add the Premise Name --//
+										aTemp.PremiseName	 = aPremise.Name;
+										//-- NOTE: This will need to be removed if we convert the RoomList from an iterative array to a associative array --//
+										aTemp.PremiseListKey = Key;
+									}
+								});
 								
 								//-- Array to store the IOs and IOPorts in --//
-								aTemp.Things				= {};
+								aTemp.Things	= {};
 								
 								if( !IOMy.common.RoomsList["_"+iPremiseId] ) {
 									IOMy.common.RoomsList["_"+iPremiseId] = {};
@@ -903,7 +1125,6 @@ $.extend(IOMy.common,{
 							} else {
 								console.log("Invalid PremiseId or RoomId");
 							}
-
 							
 						}
 					} 
@@ -930,9 +1151,9 @@ $.extend(IOMy.common,{
 		
 		
 		var me				= this;				//-- SCOPE:			--//
-		var bFoundThing	= false;			//-- BOOLEAN:		--//
-		var sThingIndex	= "";				//-- STRING:	Most likely an integer under ideal conditions --//
-		var aReturn			= {};				//-- ARRAY:		An array used to return the results	--//
+		var bFoundThing		= false;			//-- BOOLEAN:		--//
+		var sThingIndex		= "";				//-- STRING:	Most likely an integer under ideal conditions --//
+		var aReturn			= {};				//-- ARRAY:		An array used to return the results --//
 		
 		//------------------------//
 		//-- Error Catching		--//
@@ -973,7 +1194,7 @@ $.extend(IOMy.common,{
 	},
 	
 	//====================================================================//
-	//== Search the Thing List for a IO							==//
+	//== Search the Thing List for a IO									==//
 	//====================================================================//
 	SearchThingListForIO: function(iIOId) {
 		//------------------------------------------------------------------------------------------------//
