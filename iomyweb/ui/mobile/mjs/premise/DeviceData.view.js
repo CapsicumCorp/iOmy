@@ -3,7 +3,7 @@ Title: Zigbee Data Page UI5 View
 Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
 Modified: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Creates the page for showing data about a given Zigbee device
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -50,7 +50,12 @@ sap.ui.jsview("mjs.premise.DeviceData", {
 			footer:			IOMy.widgets.getAppFooter(),
 			content: [
 				//-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("DEVICE DATA", "sap-icon://IOMy1/appliances", me )
+				IOMy.widgets.getNavigationalSubHeader("DEVICE DATA", "sap-icon://IOMy1/appliances", me ),
+                //-- Main Panel --//
+                new sap.m.Panel(me.createId("panel"), {
+                    backgroundDesign: "Transparent",
+					content: []
+				}).addStyleClass("height100Percent PanelNoPadding UserInputForm ZigbeeDataPage TextCenter")
 			]
 		}).addStyleClass("height100Percent width100Percent MainBackground");
 		

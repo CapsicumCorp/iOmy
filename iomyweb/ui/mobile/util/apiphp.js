@@ -4,7 +4,7 @@ Authors:
     Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
     Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Module for handling communication with the main APIs (written in PHP),
-Copyright: Capsicum Corporation 2015, 2016
+Copyright: Capsicum Corporation 2015, 2016, 2017
 
 This file is part of iOmy.
 
@@ -77,6 +77,10 @@ $.extend(IOMy.apiphp,{
 			case "hubs":
 				sReturn = sUrlRestricted+'/php/api_hubs.php';
 				break;
+                
+            case "hubtelnet":
+				sReturn = sUrlRestricted+'/php/api_hubtelnet.php';
+				break;
 				
 			case "thing":
 				sReturn = sUrlRestricted+'/php/api_thing.php';
@@ -105,10 +109,13 @@ $.extend(IOMy.apiphp,{
             case "philipshue":
 				sReturn = sUrlRestricted+'/php/api_philipshue.php';
 				break;
-				break;
                 
             case "weather":
 				sReturn = sUrlRestricted+'/php/api_weather.php';
+				break;
+                
+            case "permissions":
+				sReturn = sUrlRestricted+'/php/api_permissions.php';
 				break;
 		}
 		
@@ -514,6 +521,9 @@ $.extend(IOMy.apiphp,{
 									
 									//-- Store when this thing was last updated --//
 									oTempThing.UILastUpdate        = new Date();
+                                    
+                                    //-- Store references to the widgets containing display names. --//
+                                    oTempThing.LabelWidgets        = [];
 									
 									//-- Add an associative array for the IOs --//
 									oTempThing.IO                  = {};
