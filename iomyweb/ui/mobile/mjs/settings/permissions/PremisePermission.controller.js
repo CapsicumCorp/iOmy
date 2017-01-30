@@ -1,0 +1,549 @@
+/*
+Title: Premise Permissions Page (UI5 Controller)
+Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+Description: Draws a table of premises that holds their permissions settings
+Copyright: Capsicum Corporation 2016, 2017
+
+This file is part of iOmy.
+
+iOmy is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+iOmy is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+sap.ui.controller("mjs.settings.permissions.PremisePermission", {
+    
+    //========================================================================//
+    // Properties
+    //========================================================================//
+    
+    aElementsToDestroy      : [],
+    
+    // Flags
+    bRefreshUI              : false,
+    premisesExpanded        : {},
+    premisesChanged         : {},
+    
+    // Widgets
+    wUserLabel                  : null,
+    wUserSelectBox              : null,
+    wPremiseLabel               : null,
+    wPremiseSelectBox           : null,
+    wPremisePermissionHeading   : null,
+    wPremisePermissions         : null,
+    wReadPermissionBox          : null,
+    wDataReadPermissionBox      : null,
+    wWritePermissionBox         : null,
+    wStateTogglePermissionBox   : null,
+    wApplyButton                : null,
+    wVertBox                    : null,
+    aPremiseEntries             : [],
+    
+/**
+* Called when a controller is instantiated and its View controls (if available) are already created.
+* Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
+* @memberOf mjs.settings.permissions.PremisePermission
+*/
+	onInit: function() {
+		var me = this;
+		var thisView = me.getView();
+		
+		thisView.addEventDelegate({
+			// Everything is rendered in this function run before rendering.
+			onBeforeShow : function (evt) {
+				
+                // Start the form creation
+                me.DestroyUI();         // STEP 1: Clear any old forms to avoid duplicate IDs
+                me.DrawUI();            // STEP 2: Draw the actual user interface               
+			}
+		});
+	},
+
+/**
+* Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered
+* (NOT before the first rendering! onInit() is used for that one!).
+* @memberOf mjs.settings.permissions.PremisePermission
+*/
+//	onBeforeRendering: function() {
+//
+//	},
+
+/**
+* Called when the View has been rendered (so its HTML is part of the document). Post-rendering manipulations of the HTML could be done here.
+* This hook is the same one that SAPUI5 controls get after being rendered.
+* @memberOf mjs.settings.permissions.PremisePermission
+*/
+//	onAfterRendering: function() {
+//		
+//	},
+	
+	
+	
+/**
+* Called when the Controller is destroyed. Use this one to free resources and finalize activities.
+* @memberOf mjs.settings.permissions.PremisePermission
+*/
+//	onExit: function() {
+//
+//	},
+
+    /**
+     * Procedure that destroys the previous incarnation of the UI. Must be called by onInit before
+     * (re)creating the page.
+     */
+    DestroyUI : function() {
+        var me          = this;
+        
+        if (me.wVertBox !== null) {
+            me.wVertBox.destroy();
+        }
+        me.aPremiseEntries = [];
+    },
+    
+    DrawUI : function () {
+        //====================================================================//
+        // Variables, scope, and imports
+        //====================================================================//
+        var me                      = this;
+        var thisView                = me.getView();
+        var getPremiseSelector      = IOMy.widgets.getPremiseSelector;
+        
+        //====================================================================//
+        // User field
+        //====================================================================//
+        me.wUserLabel = new sap.m.Label({
+            text : "User"
+        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText");
+        
+        me.wUserSelectBox = new sap.m.Select({
+            width : "100%"
+        });
+        
+        //====================================================================//
+        // Premise Field
+        //====================================================================//
+        me.wPremiseLabel = new sap.m.Label({
+            text : "Premise"
+        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText");
+        
+        me.wPremiseSelectBox = getPremiseSelector(me.createId("premiseBox")).addStyleClass("SettingsDropdownInput width100Percent");
+        
+        //====================================================================//
+        // Main containing element
+        //====================================================================//
+        me.wVertBox = new sap.m.VBox({
+            items : [
+                new sap.m.VBox({
+                    items : [
+                        // Label for the user select box
+                        new sap.m.VBox({
+                            items : [
+                                new sap.m.VBox({
+                                    items : [ me.wUserLabel ]
+                                })
+                            ]
+                        }).addStyleClass("ConsistentMenuHeader ListItem width100Percent"),
+                        new sap.m.VBox({
+                            items : [me.wUserSelectBox]
+                        }).addStyleClass("PadLeft8px PadRight8px"),
+                        
+                        new sap.m.VBox({
+                            items : [
+                                new sap.m.VBox({
+                                    items : [ me.wPremiseLabel ]
+                                })
+                            ]
+                        }).addStyleClass("ConsistentMenuHeader ListItem width100Percent"),
+                        new sap.m.VBox({
+                            items : [me.wPremiseSelectBox]
+                        }).addStyleClass("PadLeft8px PadRight8px")
+                    ]
+                }).addStyleClass("MarTop10px MarBottom10px")
+            ]
+        }).addStyleClass("width100Percent UserInputForm MarBottom10px");
+        
+        try {
+            // Populate the users select box with the viewable users
+            IOMy.widgets.getListOfUsersForPremisePermissions(me.wUserSelectBox, me.wPremiseSelectBox.getSelectedKey(),
+                //--------------------------------//
+                // Run this function if successful
+                //--------------------------------//
+                function () {
+                    var mPremise;
+                    //------------------------------------------------------------//
+                    // Draw the premise list complete with the permissions settings.
+                    //------------------------------------------------------------//
+                    for (var i = 0; i < IOMy.common.PremiseList.length; i++) {
+                        mPremise = IOMy.common.PremiseList[i];
+                        //console.log("mPremise.Id                            === "+mPremise.Id);
+                        //console.log("me.wPremiseSelectBox.getSelectedKey()  === "+me.wPremiseSelectBox.getSelectedKey());
+                        if (mPremise.Id == me.wPremiseSelectBox.getSelectedKey()) {
+
+                            mPremise["Index"] = "_"+mPremise.Id;
+                            //console.log(JSON.stringify(mPremise));
+                            me.DrawPremiseEntry(mPremise);
+
+                        }
+                    };
+                    
+                    thisView.byId("page").addContent(me.wVertBox);
+                },
+                
+                //--------------------------------//
+                // Run this function if there's a problem
+                //--------------------------------//
+                function (sError) {
+                    // Show an error message and go back to the previous page
+                    // once closed.
+                    IOMy.common.showError(sError, "", function () {
+                        IOMy.common.NavigationTriggerBackForward(false);
+                    });
+                }
+            );
+
+        } catch (e) {
+            IOMy.common.showError(e.message, "Error");
+        }
+    },
+    
+    /**
+     * Takes a premise object/map and gathers data from and uses it to create an
+     * entry in the premise list table on the permissions page.
+     * 
+     * @param {type} mPremiseInfo              Map containing the current premise information
+     */
+    DrawPremiseEntry : function (mPremiseInfo) {
+        var me = this;
+        var getPermissionSelectBox = IOMy.widgets.getPermissionSelectBox;
+        
+        //====================================================================//
+        // Define vital functions as variables to use for press events.
+        //====================================================================//
+        
+        //--------------------------------------------------------------------//
+        // Apply Button
+        //--------------------------------------------------------------------//
+        if (me.wApplyButton !== null) {
+            me.wApplyButton.destroy();
+        }
+        
+        me.wApplyButton = new sap.m.Link({
+            enabled : false,
+            text : "Apply",
+            press : function () {
+                if (me.premisesChanged[mPremiseInfo.Index] === true) {
+                    me.UpdatePermissionsForPremise(me.wUserSelectBox.getSelectedKey(), mPremiseInfo.Id);
+                }
+            }
+        }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter");
+        
+        var fnShowPermissionChanged = function () {
+            //----------------------------------------------------------------//
+            // Indicate that the permissions have changed and are ready to be
+            // saved.
+            //----------------------------------------------------------------//
+            //me.byId("premiseExpandIcon"+mPremiseInfo.Index).setIcon("sap-icon://GoogleMaterial/check_circle");
+            if (me.premisesChanged[mPremiseInfo.Index] === false) {
+                me.premisesChanged[mPremiseInfo.Index] = true;
+                me.wApplyButton.setEnabled(true);
+            }
+        };
+        
+        //====================================================================//
+        // Create the permission options select boxes and attach functions to
+        // them once created.
+        //====================================================================//
+        me.wReadPermissionBox          = getPermissionSelectBox();
+        me.wDataReadPermissionBox      = getPermissionSelectBox();
+        me.wWritePermissionBox         = getPermissionSelectBox();
+        me.wStateTogglePermissionBox   = getPermissionSelectBox();
+        
+        //--------------------------------------------------------------------//
+        // Functions
+        //--------------------------------------------------------------------//
+        me.wReadPermissionBox.attachSelect(
+            function () {
+                // If "No" is selected
+                if (this.getSelectedIndex() === 1) {
+                    me.wDataReadPermissionBox.setEnabled(false);
+                    me.wWritePermissionBox.setEnabled(false);
+                    me.wStateTogglePermissionBox.setEnabled(false);
+                // If "Yes" is selected
+                } else {
+                    me.wDataReadPermissionBox.setEnabled(true);
+                    me.wWritePermissionBox.setEnabled(true);
+                    me.wStateTogglePermissionBox.setEnabled(true);
+                }
+                
+                fnShowPermissionChanged();
+            }
+        );
+
+        me.wDataReadPermissionBox.attachSelect(
+            function () {
+                // If "No" is selected
+                if (this.getSelectedIndex() === 1) {
+                    me.wStateTogglePermissionBox.setEnabled(false);
+                // If "Yes" is selected
+                } else {
+                    me.wStateTogglePermissionBox.setEnabled(true);
+                }
+                
+                fnShowPermissionChanged();
+            }
+        );
+
+        me.wWritePermissionBox.attachSelect(
+            fnShowPermissionChanged
+        );
+        me.wStateTogglePermissionBox.attachSelect(
+            fnShowPermissionChanged
+        );
+        
+        //=============================================//
+        // Create the permission form for the premise
+        //=============================================//
+        if (me.wPremisePermissionHeading !== null) {
+            me.wPremisePermissionHeading.destroy();
+        }
+        
+        if (me.wPremisePermissions !== null) {
+            me.wPremisePermissions.destroy();
+        }
+        
+        me.wPremisePermissionHeading = new sap.m.VBox({
+            items : [
+                new sap.m.VBox({
+                    items : [
+                        new sap.m.Label({
+                            text: "Permissions"
+                        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText")
+                    ]
+                })
+            ]
+        }).addStyleClass("ConsistentMenuHeader TableSideBorders BorderTop ListItem width100Percent");
+        
+        me.wPremisePermissions = new sap.m.VBox(me.createId("premise"+mPremiseInfo.Index), {
+            items : [
+                new sap.m.VBox({
+                    items : [
+                        //-------------------------------------//
+                        // Basic read access (see that it exists)
+                        // permission
+                        //-------------------------------------//
+                        new sap.m.Label({
+                            text: "Allow this user access?"
+                        }),
+                        me.wReadPermissionBox,
+                        //-------------------------------------//
+                        // Permission to read information about a
+                        // devices in a premise.
+                        //-------------------------------------//
+                        new sap.m.Label({
+                            text: "Allow this user to view device information?"
+                        }),
+                        me.wDataReadPermissionBox,
+                        //-------------------------------------//
+                        // Permission to modify the premise
+                        //-------------------------------------//
+                        new sap.m.Label({
+                            text: "Allow this user to modify the premise?"
+                        }),
+                        me.wWritePermissionBox,
+                        //-------------------------------------//
+                        // Permission to manage devices in a
+                        // premise
+                        //-------------------------------------//
+                        new sap.m.Label({
+                            text: "Allow this user to manage rooms and devices?"
+                        }),
+                        me.wStateTogglePermissionBox
+                    ]
+                }).addStyleClass("MarAll8px")
+            ]
+        }).addStyleClass("ListItem TableSideBorders width100Percent");
+        
+        me.wVertBox.addItem(me.wPremisePermissionHeading);
+        me.wVertBox.addItem(me.wPremisePermissions);
+        me.wVertBox.addItem(
+            new sap.m.VBox({
+                items : [me.wApplyButton]
+            }).addStyleClass("RoomPermissionsApplyButton")
+        );
+        
+        me.premisesChanged[mPremiseInfo.Index] = false;
+        
+        me.FetchPermissionsForPremise(me.wUserSelectBox.getSelectedKey(), mPremiseInfo.Id);
+    },
+    
+    FetchPermissionsForPremise : function (iUserId, iPremiseId) {
+        var me = this;
+        var sUrl = IOMy.apiphp.APILocation("permissions");
+        
+        IOMy.apiphp.AjaxRequest({
+            url : sUrl,
+            data : {
+                "Mode" : "LookupPremisePerms",
+                "UserId" : iUserId,
+                "PremiseId" : iPremiseId
+            },
+            
+            onSuccess : function (responseType, data) {
+                if (data.Error === false) {
+                    try {
+                        var data = data.Data;
+                        var iIndex;
+                        //----------------------------------------------------//
+                        // Basic read access (see that it exists) permission
+                        //----------------------------------------------------//
+                        if (data.Read == 0) {
+                            iIndex = 1;
+                            
+                            me.wReadPermissionBox.setSelectedIndex(iIndex);
+                            
+                            me.wStateTogglePermissionBox.setEnabled(false);
+                            me.wWritePermissionBox.setEnabled(false);
+                            me.wDataReadPermissionBox.setEnabled(false);
+                            
+                            me.wStateTogglePermissionBox.setSelectedIndex(1);
+                            me.wWritePermissionBox.setSelectedIndex(1);
+                            me.wDataReadPermissionBox.setSelectedIndex(1);
+                            
+                        } else if (data.Read == 1) {
+                            iIndex = 0;
+                            
+                            me.wReadPermissionBox.setSelectedIndex(iIndex);
+
+                            //----------------------------------------------------//
+                            // Permission to modify the premise
+                            //----------------------------------------------------//
+                            if (data.Write == 0) {
+                                iIndex = 1;
+                            } else if (data.Write == 1) {
+                                iIndex = 0;
+                            }
+                            me.wWritePermissionBox.setSelectedIndex(iIndex);
+
+                            //----------------------------------------------------//
+                            // Permission to read information about a premise.
+                            //----------------------------------------------------//
+                            if (data.DataRead == 0) {
+                                iIndex = 1;
+                                
+                                me.wDataReadPermissionBox.setSelectedIndex(iIndex);
+                                
+                                me.wStateTogglePermissionBox.setEnabled(false);
+                                
+                                me.wStateTogglePermissionBox.setSelectedIndex(1);
+                                
+                            } else if (data.DataRead == 1) {
+                                iIndex = 0;
+                                
+                                me.wDataReadPermissionBox.setSelectedIndex(iIndex);
+
+                                //----------------------------------------------------//
+                                // Permission to manage devices in a premise
+                                //----------------------------------------------------//
+                                if (data.StateToggle == 0) {
+                                    iIndex = 1;
+                                } else if (data.StateToggle == 1) {
+                                    iIndex = 0;
+                                }
+                                me.wStateTogglePermissionBox.setSelectedIndex(iIndex);
+                            }
+                        }
+                        
+                    } catch (e) {
+                        jQuery.sap.log.error("There was an error setting the permissions on the screen: "+e.message);
+                    }
+                }
+            },
+            
+            onFail : function (response) {
+                jQuery.sap.log.error("There was an error accessing the premise permissions: "+JSON.stringify(response));
+                IOMy.common.showError("There was an error accessing the premise permissions", "Error");
+            }
+            
+        });
+    },
+    
+    UpdatePermissionsForPremise : function (iUserId, iPremiseId) {
+        var me = this;
+        var sUrl = IOMy.apiphp.APILocation("permissions");
+       //console.log(iPremiseId);
+        
+        //==============================================================//
+        // Fetch the permission status
+        //==============================================================//
+        var sRead;
+        var sDataRead;
+        var sWrite;
+        var sStateToggle;
+        
+        if (me.wReadPermissionBox.getEnabled()) {
+            sRead = me.wReadPermissionBox.getSelectedButton().getText();
+        }
+        
+        if (me.wDataReadPermissionBox.getEnabled()) {
+            sDataRead = me.wDataReadPermissionBox.getSelectedButton().getText();
+        } else {
+            sDataRead = "No";
+        }
+        
+        if (me.wWritePermissionBox.getEnabled()) {
+            sWrite = me.wWritePermissionBox.getSelectedButton().getText();
+        } else {
+            sWrite = "No";
+        }
+        
+        if (me.wStateTogglePermissionBox.getEnabled()) {
+            sStateToggle = me.wStateTogglePermissionBox.getSelectedButton().getText();
+        } else {
+            sStateToggle = "No";
+        }
+        
+        var tiRead = sRead === "Yes" ? 1 : 0;
+        var tiDataRead = sDataRead === "Yes" ? 1 : 0;
+        var tiWrite = sWrite === "Yes" ? 1 : 0;
+        var tiStateToggle = sStateToggle === "Yes" ? 1 : 0;
+        
+        IOMy.apiphp.AjaxRequest({
+            url : sUrl,
+            data : {
+                "Mode" : "UpdatePremisePerms",
+                "UserId" : iUserId,
+                "PremiseId" : iPremiseId,
+                "Data" : "{\"Read\":"+tiRead+",\"DataRead\":"+tiDataRead+",\"Write\":"+tiWrite+",\"StateToggle\":"+tiStateToggle+"}"
+            },
+            
+            onSuccess : function (responseType, data) {
+                if (data.Error === false) {
+                    IOMy.common.showSuccess("Premise Permissions updated successfully!", "Success");
+                    // Reset the changed flag for this premise
+                    me.premisesChanged["_"+iPremiseId] = false;
+                    me.wApplyButton.setEnabled(false);
+                } else {
+                    jQuery.sap.log.error("There was an error updating the premise permissions: "+data.ErrMesg);
+                    IOMy.common.showError("There was an error updating the premise permissions", "Error");
+                }
+            },
+            
+            onFail : function (response) {
+                jQuery.sap.log.error("There was an error updating the premise permissions: "+JSON.stringify(response));
+                IOMy.common.showError("There was an error updating the premise permissions", "Error");
+            }
+            
+        });
+    }
+    
+});

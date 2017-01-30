@@ -4,7 +4,7 @@ Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
 Modified: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws either a username and password prompt, or a loading app
     notice for the user to log into iOmy.
-Copyright: Capsicum Corporation 2015, 2016
+Copyright: Capsicum Corporation 2015, 2016, 2017,
 
 This file is part of iOmy.
 
@@ -31,6 +31,7 @@ sap.ui.controller("mjs.login.Login", {
 //		}
 //	},
 	
+    refreshInterval : 600000, // How often the Core variables are refreshed in milliseconds. Default 600 000 (10 minutes)
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -55,7 +56,7 @@ sap.ui.controller("mjs.login.Login", {
 								//--------------------------------------------//
 								//-- TODO: Add the console command to the SAP LOGS (See Andrew for more details) --//
 								//jQuery.sap.log.debug("User has accidentally ended up on the login page! They are now being kicked to the Navigation Page!");
-								console.log( "User has accidentally ended up on the login page! They are now being kicked to the Navigation Page!" );
+								//console.log( "User has accidentally ended up on the login page! They are now being kicked to the Navigation Page!" );
 								IOMy.common.NavigationTriggerBackForward( false );
 								
 								//oApp.to("pNavMain");
@@ -63,7 +64,7 @@ sap.ui.controller("mjs.login.Login", {
 								//----------------------------//
 								//-- Refresh Sensor List	--//
 								//----------------------------//
-								console.log( "Session active, So refresh core variables" );
+								//console.log( "Session active, So refresh core variables" );
 								me.DrawLoginLoading();
 								IOMy.common.ReloadCoreVariables(
                                     function () {
@@ -76,6 +77,12 @@ sap.ui.controller("mjs.login.Login", {
                                             //-- LOAD THE 1ST Page --//
                                             IOMy.common.NavigationChangePage( IOMy.common.sNavigationDefaultPage, {}, true);
 
+                                            // Reload them every 10 minutes
+                                            IOMy.common.CoreVariableRefreshIntervalInstance = setInterval(function () {
+                                               //console.log("Another 10 minutes is up!");
+                                                IOMy.common.ReloadCoreVariables();
+                                            }, me.refreshInterval);
+                                            
                                         } catch(e654321) {
                                             //-- ERROR:  TODO: Write a better error message--//
                                             jQuery.sap.log.error(">>>>Critical Error Loading \"Navigation Main\" page<<<<\n"+e654321.message);
@@ -94,7 +101,7 @@ sap.ui.controller("mjs.login.Login", {
 							//----------------------------//
 							//-- DRAW LOGIN PROMPT		--//
 							//----------------------------//
-							console.log( "Session inactive, Draw Login Prompt" );
+							//console.log( "Session inactive, Draw Login Prompt" );
 							me.DrawLoginPrompt();
 							//-- Draw the Login form fields to allow the user to log in --//
 							
@@ -215,7 +222,10 @@ sap.ui.controller("mjs.login.Login", {
 			type: "Password",
 			placeholder: "Password",
 			maxLength: 40,
-			width: "200px"
+			width: "200px",
+            submit : function (oControlEvent) {
+				me.doLogin();
+			}
 		}).addStyleClass("LoginTextInput");
 		
 		//--------------------------------------------//
@@ -244,17 +254,7 @@ sap.ui.controller("mjs.login.Login", {
 						oLoginInputPassword,
 						oLoginInputSubmit,
 					]
-				}).addStyleClass("LoginForm PadTop25px PadBottom25px"),
-//				new sap.m.VBox({
-//					items : [
-//						new sap.m.Link({
-//							text : "Need help?",
-//							press : function () {
-//								IOMy.functions.showHelpDialog();
-//							}
-//						}).addStyleClass("width100Percent LoginHelpLink SettingsLinks")
-//					]
-//				}).addStyleClass("")
+				}).addStyleClass("LoginForm PadTop25px PadBottom25px")
 			],
 			direction: "Column"
 		}).addStyleClass("width100Percent");
@@ -299,7 +299,29 @@ sap.ui.controller("mjs.login.Login", {
 					if( oResponseData.login===true ) {
 						
 						me.DrawLoginLoading();
-						IOMy.common.RefreshCoreVariables(true);
+                        // Load the core variables now.
+                        IOMy.common.ReloadCoreVariables( function() {
+                            //-- Copy and paste from the "IOMy.common.RefreshCoreVariables" function --//
+                            try {
+                                //-- Flag that the Core Variables have been configured --//
+                                IOMy.common.CoreVariablesInitialised = true;
+                                //-- Reset the Navigation array and index after switching users --//
+                                IOMy.common.NavPagesNavigationArray = [];
+                                IOMy.common.NavPagesCurrentIndex = -1;
+                                //-- LOAD THE 1ST Page --//
+                                IOMy.common.NavigationChangePage( IOMy.common.sNavigationDefaultPage, {}, true);
+                                
+                                // Reload them every 10 minutes
+                                IOMy.common.CoreVariableRefreshIntervalInstance = setInterval(function () {
+                                   // console.log("Another 10 minutes is up!");
+                                    IOMy.common.ReloadCoreVariables();
+                                }, me.refreshInterval);
+
+                            } catch(eLoginCore) {
+                                jQuery.sap.log.error("Login ReloadCoreVars\n"+eLoginCore.message);
+                            }
+                        });
+                        
 					} else {
 						//-- TODO: Add the Appropiate Error Messages from the Session Check when Andrew has completed the Better Error Messages --//
 						IOMy.common.showError("Invalid Username or Password!", "User Error");
