@@ -2,7 +2,7 @@
 Title: Philips Hue Device Page UI5 Controller
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws the controls for displaying the information about a given Philips Hue device.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -82,8 +82,8 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
         //-----------------------------------------//
         // Acquire the thing's IOs
         //-----------------------------------------//
-        var mIOs = me.oThing.IOs;
-        console.log(JSON.stringify(mIOs));
+        var mIOs = me.oThing.IO;
+        //console.log(JSON.stringify(mIOs));
         
         try {
             $.each(mIOs, function (sI, aIO) {
@@ -91,7 +91,7 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                     IOMy.apiodata.AjaxRequest({
                         Url : IOMy.apiodata.ODataLocation("dataint"),
                         Columns : ["CALCEDVALUE","UTS","RSTYPE_PK"],
-                        WhereClause : ["THING_PK eq "+me.oThing.DeviceId, "IO_PK eq "+aIO.Id],
+                        WhereClause : ["THING_PK eq "+me.oThing.Id, "IO_PK eq "+aIO.Id],
                         OrderByClause : ["UTS desc"],
                         limit : 1,
                         format : 'json',
@@ -99,7 +99,7 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                         onSuccess : function (response, data) {
                             if (data.length > 0) {
                                 data = data[0];
-                                console.log(JSON.stringify(data));
+                                //console.log(JSON.stringify(data));
                                 //----------------------------------------------------//
                                 // If we're grabbing the HUE value
                                 //----------------------------------------------------//
@@ -127,7 +127,7 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                         },
 
                         onFail : function (response) {
-                            jQuery.sap.log.error("Error Code 9300: There was a fatal error loading current Hue information: "+JSON.stringify(response));
+                            jQuery.sap.log.error("Error Code 9300: There was a fatal error loading current device information: "+JSON.stringify(response));
                             this.onComplete();
                         },
 
@@ -151,6 +151,9 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
         var me = this;
         var thisView = me.getView();
         
+        // Import the device label functions
+        var LabelFunctions = IOMy.functions.DeviceLabels;
+        
         thisView.addEventDelegate({
 			// Everything is rendered in this function before rendering.
 			onBeforeShow : function (evt) {
@@ -164,13 +167,21 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                 ]);
                 
                 //-- Retrieve any hue data parsed to this controller --//
-                me.oThing = evt.data.Thing;
+                me.oThing = IOMy.common.ThingList['_'+evt.data.ThingId];
+                //console.log(JSON.stringify(me.oThing));
                 
                 // Create the title on the page.
-                me.byId("NavSubHead_Title").setText(me.oThing.DeviceName.toUpperCase());
+                me.byId("NavSubHead_Title").setText(me.oThing.DisplayName.toUpperCase());
+                // Add the subheading title widget to the list of labels that display the Thing name.
+                LabelFunctions.addThingLabelWidget(me.oThing.Id,
+                    {
+                        widgetID : me.createId("NavSubHead_Title"),
+                        uppercase : true
+                    }
+                );
                 
                 //-- Store the device state --//
-                me.iDeviceState = IOMy.common.ThingList["_"+me.oThing.DeviceId].Status;
+                me.iDeviceState = IOMy.common.ThingList["_"+me.oThing.Id].Status;
                 var bEnabled = me.iDeviceState === 0 ? false : true;
                 
                 //-- Create the Colour Box --//
@@ -188,7 +199,7 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                             type: "POST",
                             data: { 
                                 "Mode":"ThingToggleStatus", 
-                                "Id": me.oThing.DeviceId
+                                "Id": me.oThing.Id
                             },
                             onFail : function(response) {
                                 IOMy.common.showError(response.message, "Error Changing Device Status");
@@ -209,7 +220,7 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                                     me.byId("satSlider").setEnabled(bEnabled);
                                     me.byId("briSlider").setEnabled(bEnabled);
 
-                                    IOMy.common.ThingList["_"+me.oThing.DeviceId].Status = aAjaxData.ThingStatus;
+                                    IOMy.common.ThingList["_"+me.oThing.Id].Status = aAjaxData.ThingStatus;
                                 }
                             }
                         });
@@ -249,7 +260,7 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                         }
                         me.ChangeColourBox();
                         
-                        console.log(me.CalculateHueFigureForAPI(me.iHue));
+                        //console.log(me.CalculateHueFigureForAPI(me.iHue));
                     }
                 }).addStyleClass("width100Percent PhilipsHueSlider PhilipsHueSliderHue");
                 
@@ -270,7 +281,7 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                     liveChange : function () {
                         me.iSat = this.getValue();
                         me.ChangeColourBox();
-                        console.log(me.iSat);
+                        //console.log(me.iSat);
                     }
                 }).addStyleClass("width100Percent PhilipsHueSlider");
                 
@@ -290,7 +301,7 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                     },
                     liveChange : function () {
                         me.iLight = this.getValue();
-                        console.log(me.iLight);
+                        //console.log(me.iLight);
                     }
                 }).addStyleClass("width100Percent PhilipsHueSlider");
                 
@@ -317,7 +328,7 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                 });
                 
                 // Load current Device Data
-                me.InitialDeviceInfoLoad(evt.data.Thing.DeviceId);
+                me.InitialDeviceInfoLoad(evt.data.ThingId);
                 
                 // Destroys the actual panel of the page. This is done to ensure that there
 				// are no elements left over which would increase the page size each time
@@ -328,7 +339,7 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                 var oPanel = new sap.m.Panel(me.createId("Panel"), {
                     backgroundDesign: "Transparent",
                     content : [oVertBox]
-                });
+                }).addStyleClass("UserInputForm");
                 
                 thisView.byId("page").addContent(oPanel);
                 
@@ -338,14 +349,14 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                 try {
                     thisView.byId("extrasMenuHolder").destroyItems();
                     thisView.byId("extrasMenuHolder").addItem(
-                        IOMy.widgets.getExtrasButton({
-                            id : me.createId("extrasMenu"+me.oThing.DeviceId+me.oThing.DeviceName.replace(/[ '"?><=\\\-!@#$%\^&*()]/g, "")),        // Uses the page ID and device ID
+                        IOMy.widgets.getActionMenu({
+                            id : me.createId("extrasMenu"+me.oThing.Id),        // Uses the page ID and device ID
                             icon : "sap-icon://GoogleMaterial/more_vert",
                             items : [
                                 {
-                                    text: "Edit "+me.oThing.DeviceName,
+                                    text: "Edit "+me.oThing.DisplayName,
                                     select:	function (oControlEvent) {
-                                        console.log(JSON.stringify(me.oThing));
+                                        //console.log(JSON.stringify(me.oThing));
                                         IOMy.common.NavigationChangePage( "pSettingsEditThing", {device : me.oThing}, false );
                                     }
                                 }
@@ -371,7 +382,7 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
             url : IOMy.apiphp.APILocation("philipshue"),
             data : {
                 Mode : "ChangeHueSatLig",
-                ThingId : me.oThing.DeviceId,
+                ThingId : me.oThing.Id,
                 Hue : me.CalculateHueFigureForAPI(me.iHue),
                 Saturation : me.iSat,
                 Brightness : me.iLight
@@ -382,7 +393,7 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
             onFail : function (response) {
                 jQuery.sap.log.error("There was a fatal error changing information about the current Hue device: "+JSON.stringify(response));
             }
-        })
+        });
     }
     
 });

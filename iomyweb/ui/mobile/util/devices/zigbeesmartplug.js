@@ -2,7 +2,7 @@
 Title: Zigbee Smart Plug Device Module
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Provides the UI for a Zigbee smart plug entry.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -26,6 +26,645 @@ IOMy.devices.zigbeesmartplug = new sap.ui.base.Object();
 
 $.extend(IOMy.devices.zigbeesmartplug,{
 	Devices: [],
+    
+    CommTypeID : 3,                         // This SHOULD NOT change!
+    LinkTypeID : 2,
+    
+    iSelectedCommID : null,
+    
+    ConnectedZigbeeModems : {},             // Associative Array of all the Connected dongles
+    bJoinModeToggleCoolingDown : false,
+    bJoinModeToggleCoolDownPeriod : 180000, // 3 minute cooldown (in milliseconds)
+    intervalCooldown : null,
+    oZigbeeInput : null,
+    sEnableTempJoinButtonText : "Join Device",
+    sEnableTempJoinButtonTimerText : "Join Device",
+    bRunningCommand : false,
+    
+    uiIDs : {
+        sZigbeeModemsLabelID : "ZigbeeModemsLabel",
+        sZigbeeModemsSBoxID : "ZigbeeModemsSBox",
+        sTelnetOutputLabelID : "TelnetOutputLabel",
+        sTelnetOutputTextAreaID : "TelnetOutputTextArea",
+        sCustomTelnetCommandLabelID : "CustomTelnetCommandLabel",
+        sCustomTelnetCommandFieldID : "CustomTelnetCommandField",
+        sAPIModesHBoxID : "APIModesHBox",
+        sGetRapidHAInfoButtonID : "GetRapidHAInfoButton",
+        sEnableJoinModeButtonID : "EnableJoinModeButton"
+    },
+    
+    //========================================================================//
+    // TELNET FUNCTIONALITY
+    //========================================================================//
+    
+    ZigbeeTelnetLog : [
+        // Example: {
+        //      "level":"I",
+        //      "content":"all zigbee output for that command"
+        // }
+    ],
+    
+    ToggleZigbeeCommands : function (oScope, bEnabled) {
+        var me = this;
+        
+        try {
+            me.oZigbeeInput.input.setEnabled(bEnabled);
+            me.oZigbeeInput.menuButton.setEnabled(bEnabled);
+            oScope.byId(me.uiIDs.sEnableJoinModeButtonID).setEnabled(bEnabled);
+        } catch (e) {
+            // Report it silently.
+            jQuery.sap.log.warning(e.message);
+        }
+    },
+    
+    TurnOnZigbeeJoinMode : function (oScope) {
+        //---------------------------------------------------------//
+        // Import modules, widgets and scope
+        //---------------------------------------------------------//
+        var me              = this;
+        var php             = IOMy.apiphp;
+        var oOutputWidget   = oScope.byId(me.uiIDs.sTelnetOutputTextAreaID);
+        var oButton         = oScope.byId(me.uiIDs.sEnableJoinModeButtonID);
+        var sText           = oButton.getText();
+        
+        //---------------------------------------------------------//
+        // API Parameters
+        //---------------------------------------------------------//
+        var sUrl = php.APILocation("hubtelnet");
+        var iCommId = me.iSelectedCommID;
+        
+        // Indicating that a telnet command is running
+        me.bRunningCommand = true;
+        
+        //---------------------------------------------------------//
+        // Indicate in the output widget that data is being loaded and
+        // execute the AJAX Request
+        //---------------------------------------------------------//
+        oOutputWidget.setValue(oOutputWidget.getValue()+"Turning on Join Mode...\n\n");
+        // Force it to scroll down to the bottom.
+        document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
+        // Insert the output into the Telnet log
+        me.ZigbeeTelnetLog.push({
+            "level" : "I",
+            "content" : "Turning on Join Mode...\n\n"
+        });
+        
+        php.AjaxRequest({
+            url : sUrl,
+            data : {"Mode" : "TurnOnZigbeeJoinMode", "CommId" : iCommId},
+            
+            onSuccess : function (dataType, data) {
+                if (data.Error === false || data.Error === undefined) {
+                    
+                    var sOutput = "";
+                    
+                    // Gather the RapidHA Information
+                    sOutput += "-----------------------------------------\n";
+                    sOutput += "Turn On Join Mode\n";
+                    sOutput += "-----------------------------------------\n\n";
+                    sOutput += data.Data.JoinMode.join("\n");
+                    sOutput += "\n\n";
+                    
+                    // Insert the output into the Telnet log
+                    me.ZigbeeTelnetLog.push({
+                        "level" : "I",
+                        "content" : sOutput
+                    });
+                    
+                    if (oOutputWidget !== undefined) {
+                        oOutputWidget.setValue(oOutputWidget.getValue() + sOutput);
+                        // Force it to scroll down to the bottom.
+                        document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
+                    }
+                    
+                    this.onComplete();
+                }
+            },
+            
+            onFail : function (response) {
+                var sOutput = "";
+                sOutput += "-----------------------------------------\n";
+                sOutput += "Turn On Join Mode\n";
+                sOutput += "-----------------------------------------\n\n";
+                sOutput += JSON.stringify(response);
+                sOutput += "\n\n";
+                
+                // Insert the output into the Telnet log
+                me.ZigbeeTelnetLog.push({
+                    "level" : "E",
+                    "content" : sOutput
+                });
+                
+                if (oOutputWidget !== undefined) {
+                    oOutputWidget.setValue(oOutputWidget.getValue() + sOutput);
+                    // Force it to scroll down to the bottom.
+                    document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
+                }
+                
+                this.onComplete();
+            },
+            
+            onComplete : function () {
+                // The calling button and its text
+                var iTime       = me.bJoinModeToggleCoolDownPeriod / 1000;
+                var iElapsed    = 0;
+                
+                me.intervalCooldown = setInterval(
+                    function () {
+                        me.ToggleZigbeeCommands(oScope, false); // Make sure the telnet controls are disabled.
+                        if (iTime === iElapsed) {
+                            // Re-enable the button that called this function after the
+                            // cooldown period expires.
+                            try {
+                                oButton.setText(sText);
+                            } catch (e) {
+                                // Ignore
+                            } finally {
+                                me.sEnableTempJoinButtonText = sText;
+                            }
+                            me.bJoinModeToggleCoolingDown = false;
+                            //oButton.setEnabled(true);
+                            clearInterval(me.intervalCooldown);
+                            me.GetRapidHAInfo(oScope);
+                        } else {
+                            oButton.setText(sText + " - " + (iTime - iElapsed));
+                            me.sEnableTempJoinButtonTimerText = sText + " - " + (iTime - iElapsed);
+                            iElapsed++; 
+                        }
+                        
+                    }, 1000
+                );
+            }
+        });
+    },
+    
+    GetRapidHAInfo : function (oScope) {
+        //---------------------------------------------------------//
+        // Import modules, widgets and scope
+        //---------------------------------------------------------//
+        var me = this;
+        var php = IOMy.apiphp;
+        var oOutputWidget = oScope.byId(me.uiIDs.sTelnetOutputTextAreaID);
+        var sRapidHAOutput = "";
+        var sZigbeeOutput = "";
+        
+        //---------------------------------------------------------//
+        // API Parameters
+        //---------------------------------------------------------//
+        var sUrl = php.APILocation("hubtelnet");
+        var iCommId = me.iSelectedCommID;
+        
+        //---------------------------------------------------------//
+        // Indicate in the output widget that data is being loaded and
+        // execute the AJAX Request
+        //---------------------------------------------------------//
+        if (oOutputWidget !== undefined) {
+            oOutputWidget.setValue(oOutputWidget.getValue()+"Loading RapidHA Information...\n\n");
+            // Force it to scroll down to the bottom.
+            document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
+        }
+        // Insert the output into the Telnet log
+        me.ZigbeeTelnetLog.push({
+            "level" : "I",
+            "content" : "Loading RapidHA Information...\n\n"
+        });
+        
+        php.AjaxRequest({
+            url : sUrl,
+            data : {"Mode" : "GetRapidHAInfo", "CommId" : iCommId},
+            
+            onSuccess : function (dataType, data) {
+                if (data.Error === false || data.Error === undefined) {
+                    
+                    var oOutputWidget = oScope.byId(me.uiIDs.sTelnetOutputTextAreaID);
+                    
+                    // Gather the RapidHA Information
+                    sRapidHAOutput += "-----------------------------------------\n";
+                    sRapidHAOutput += "RapidHA Information:\n";
+                    sRapidHAOutput += "-----------------------------------------\n\n";
+                    sRapidHAOutput += data.Data.RapidHAInfo.join("\n");
+                    sRapidHAOutput += "\n\n";
+                    
+                    // Insert the output into the Telnet log
+                    me.ZigbeeTelnetLog.push({
+                        "level" : "I",
+                        "content" : sRapidHAOutput
+                    });
+                    
+                    // Gather the Zigbee Information
+                    sZigbeeOutput += "-----------------------------------------\n";
+                    sZigbeeOutput += "Zigbee Information:\n";
+                    sZigbeeOutput += "-----------------------------------------\n\n";
+                    sZigbeeOutput += data.Data.RapidHAInfo.join("\n");
+                    sZigbeeOutput += "\n\n";
+                    
+                    // Insert the output into the Telnet log
+                    me.ZigbeeTelnetLog.push({
+                        "level" : "I",
+                        "content" : sZigbeeOutput
+                    });
+                    
+                    if (oOutputWidget !== undefined) {
+                        oOutputWidget.setValue(oOutputWidget.getValue() + sRapidHAOutput+sZigbeeOutput);
+                        // Force it to scroll down to the bottom.
+                        document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
+                    }
+                    
+                    this.onComplete();
+                }
+            },
+            
+            onFail : function (response) {
+                var oOutputWidget = oScope.byId(me.uiIDs.sTelnetOutputTextAreaID);
+                var sOutput = "";
+                sOutput = JSON.stringify(response);
+                
+                // Insert the output into the Telnet log
+                me.ZigbeeTelnetLog.push({
+                    "level" : "E",
+                    "content" : sOutput
+                });
+                
+                if (oOutputWidget !== undefined) {
+                    oOutputWidget.setValue(oOutputWidget.getValue() + sOutput);
+                    
+                    // Force it to scroll down to the bottom.
+                    document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
+                }
+                
+                this.onComplete();
+            },
+            
+            onComplete : function () {
+                // Indicating that a telnet command has finished executing
+                me.bRunningCommand = false;
+                // Re-enable the button that called this function as well as the custom telnet input box
+                me.ToggleZigbeeCommands(oScope, true);
+            }
+        });
+    },
+    
+    ExecuteCustomCommand : function (oScope, oInputWidget) {
+        //---------------------------------------------------------//
+        // Import modules, widgets and scope
+        //---------------------------------------------------------//
+        var me              = this;
+        var php             = IOMy.apiphp;
+        var oOutputWidget   = oScope.byId(me.uiIDs.sTelnetOutputTextAreaID);
+        
+        //---------------------------------------------------------//
+        // API Parameters
+        //---------------------------------------------------------//
+        var sUrl            = php.APILocation("hubtelnet");
+        var iHubId          = oScope.byId("hubCBox").getSelectedKey();
+        var sCommand        = oInputWidget.getValue();
+        
+        // Indicating that a telnet command is running
+        me.bRunningCommand = true;
+        
+        //---------------------------------------------------------//
+        // Indicate in the output widget that data is being loaded and
+        // execute the AJAX Request
+        //---------------------------------------------------------//
+        oOutputWidget.setValue(oOutputWidget.getValue()+"Running "+sCommand+"...\n\n");
+        // Force it to scroll down to the bottom.
+        document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
+        // Insert the output into the Telnet log
+        me.ZigbeeTelnetLog.push({
+            "level" : "I",
+            "content" : "Running "+sCommand+"...\n\n"
+        });
+        
+        php.AjaxRequest({
+            url : sUrl,
+            data : {"Mode" : "CustomTelnetCommand", "HubId" : iHubId, "CustomCommand" : sCommand},
+            
+            onSuccess : function (dataType, data) {
+                if (data.Error === false || data.Error === undefined) {
+                    var sOutput = data.Data.Custom.join("\n");
+                    
+                    this.onComplete(sOutput, false);
+                }
+            },
+            
+            onFail : function (response) {
+                var sOutput = JSON.stringify(response);
+                
+                this.onComplete(sOutput, true);
+            },
+            
+            onComplete : function (output, bError) {
+                var sOutput = "";
+                sOutput += "-----------------------------------------\n";
+                sOutput += "Custom Command: "+sCommand+"\n";
+                sOutput += "-----------------------------------------\n\n";
+                sOutput += output;
+                sOutput += "\n\n";
+                
+                // Insert the output into the Telnet log
+                me.ZigbeeTelnetLog.push({
+                    "level" : !bError ? "I" : "E",
+                    "content" : sOutput
+                });
+                
+                if (oOutputWidget !== undefined) {
+                    oOutputWidget.setValue(oOutputWidget.getValue() + sOutput);
+                    
+                    // Force it to scroll down to the bottom.
+                    document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
+                }
+                
+                me.ToggleZigbeeCommands(oScope, true);
+                me.bRunningCommand = false;
+            }
+        });
+    },
+    
+    FetchConnectedZigbeeModems : function (oScope, fnCallback) {
+        //---------------------------------------------------------//
+        // Defaults
+        //---------------------------------------------------------//
+        if (fnCallback === undefined) {
+            fnCallback = function (mErrorInfo) {};
+        }
+        
+        //---------------------------------------------------------//
+        // Modules and scope
+        //---------------------------------------------------------//
+        var me                  = this;             // Capture the scope of the zigbee device module
+        var odata               = IOMy.apiodata;    // Import the OData API module
+        
+        //---------------------------------------------------------//
+        // Error Handling
+        //---------------------------------------------------------//
+        var bError              = false;
+        var iRecordErrorCount   = 0;
+        var aErrorMessages      = [];
+        var mErrorInfo          = {};
+        
+        //---------------------------------------------------------//
+        // OData Parameters
+        //---------------------------------------------------------//
+        var sUrl                = odata.ODataLocation("comms");
+        var aColumns            = [
+            // Comm Information
+            "COMM_PK","COMM_NAME","COMM_JOINMODE","COMM_ADDRESS",
+            // Hub Information
+            "HUB_PK","HUB_NAME","HUB_SERIALNUMBER","HUB_IPADDRESS"
+        ];
+        var aFilter             = ["COMMTYPE_PK eq "+me.CommTypeID];
+        var aOrderBy            = [];
+        
+        //---------------------------------------------------------//
+        // Start the Request
+        //---------------------------------------------------------//
+        odata.AjaxRequest({
+            Url             : sUrl,
+            Columns         : aColumns,
+            WhereClause     : aFilter,
+            OrderByClause   : aOrderBy,
+            
+            onSuccess : function (dataType, data) {
+                var mCurrentRecord = {};
+                var bHasModems = false;
+                
+                try {
+                    //---------------------------------------------------------//
+                    // If there are no Zigbee modems, there is no reason to continue.
+                    // Throw an exception.
+                    //---------------------------------------------------------//
+                    if (data.length === 0) {
+                        throw "There are no Zigbee modems attached.";
+                    }
+                    //---------------------------------------------------------//
+                    // Start going through each one
+                    //---------------------------------------------------------//
+                    for (var i = 0; i < data.length; i++) {
+                        bHasModems = true;
+                        
+                        try {
+                            //---------------------------------------------------------//
+                            // Make a whole-hearted attempt to collect information from
+                            // each Zigbee modem.
+                            //---------------------------------------------------------//
+                            mCurrentRecord = data[i];
+                            me.ConnectedZigbeeModems["_"+mCurrentRecord.COMM_PK] = {
+                                // Comm Information
+                                "CommId"        : mCurrentRecord.COMM_PK,
+                                "CommName"      : mCurrentRecord.COMM_NAME,
+                                "CommJoinMode"  : mCurrentRecord.COMM_JOINMODE,
+                                "CommAddress"   : mCurrentRecord.COMM_ADDRESS,
+
+                                // Hub Information
+                                "HubId"             : mCurrentRecord.HUB_PK,
+                                "HubName"           : mCurrentRecord.HUB_NAME,
+                                "HubSerialNumber"   : mCurrentRecord.HUB_SERIALNUMBER,
+                                "HubIPAddress"      : mCurrentRecord.HUB_IPADDRESS,
+                                "HubTypeId"         : mCurrentRecord.HUBTYPE_PK,
+                                "HubTypeName"       : mCurrentRecord.HUBTYPE_NAME
+                            };
+                        } catch (e) {
+                            //---------------------------------------------------------//
+                            // Something went wrong with this particular record.
+                            //---------------------------------------------------------//
+                            iRecordErrorCount++;
+                            aErrorMessages.push(mCurrentRecord.HUB_NAME+" ("+mCurrentRecord.HUB_PK+"): Failed to load information: "+e.message);
+                        }
+                    }
+                    
+                    if (bHasModems === false) {
+                        // Disable the command widgets because no modems were detected.
+                        me.ToggleZigbeeCommands(oScope, false);
+                    } else {
+                        // Otherwise, enable them if they're not already
+                        me.ToggleZigbeeCommands(oScope, true);
+                    }
+                    
+                } catch (e) {
+                    //---------------------------------------------------------//
+                    // There was something wrong with the data structure. This
+                    // is hopefully because of an empty list of modems. In any
+                    // case, the error is reported.
+                    //---------------------------------------------------------//
+                    bError = true;
+                    aErrorMessages.push(e.message);
+                    // Disable the command widgets because no modems were detected.
+                    me.ToggleZigbeeCommands(oScope, false);
+                }
+                
+                //-------------------------------------------------------------//
+                // Compile the error info map and run the callback function with it
+                //-------------------------------------------------------------//
+                mErrorInfo.bError = bError;
+                mErrorInfo.aErrorMessages = aErrorMessages;
+                mErrorInfo.iRecordErrorCount = iRecordErrorCount;
+                
+                fnCallback(mErrorInfo);
+            },
+            
+            onFail : function (response) {
+                bError = true;
+                fnCallback(mErrorInfo);
+            }
+        });
+    },
+    
+    CreateLinkForm : function(oScope, oFormBox, aElementsToEnableOnSuccess, aElementsToEnableOnFailure) {
+        var me = this;
+        var oFormItem;
+        var oAPIModesHBox = new sap.m.HBox(oScope.createId(me.uiIDs.sAPIModesHBoxID), {}).addStyleClass("width100Percent");
+        var showErrorDialog = IOMy.common.showError;
+        
+        oScope.byId("addButton").setEnabled(false);
+        
+        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sAPIModesHBoxID);
+        //--------------------------------------------------------------------//
+        // Zigbee Modems
+        //--------------------------------------------------------------------//
+        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sZigbeeModemsLabelID);
+        oFormItem = new sap.m.Label(oScope.createId(me.uiIDs.sZigbeeModemsLabelID), {
+            text : "Attached Zigbee Modems"
+        });
+        oFormBox.addItem(oFormItem);
+        
+        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sZigbeeModemsSBoxID);
+        oFormItem = new sap.m.Select(oScope.createId(me.uiIDs.sZigbeeModemsSBoxID), {
+            width : "100%",
+            change : function () {
+                me.iSelectedCommID = this.getSelectedKey();
+            }
+        }).addStyleClass("width100Percent");
+        oFormBox.addItem(oFormItem);
+        
+        // Attempt to fetch the Zigbee modems
+        me.FetchConnectedZigbeeModems(oScope,
+            function (mErrorInfo) {
+                var firstSelection = null;
+                
+                // Check if a fatal error occurred
+                if (mErrorInfo.bError === true) {
+                    // If so report it and take no further action.
+                    jQuery.sap.log.error(mErrorInfo.join("\n"));
+                    showErrorDialog(mErrorInfo.join("\n\n"));
+                } else {
+                    // Otherwise, first check how many records failed to load.
+                    // If any records failed to load, report them then continue.
+                    if (mErrorInfo.iRecordErrorCount > 0) {
+                        jQuery.sap.log.error(mErrorInfo.join("\n"));
+                        showErrorDialog(mErrorInfo.join("\n\n"));
+                    }
+                    
+                    // Now populate the Zigbee modem select box
+                    $.each(me.ConnectedZigbeeModems, function(sIndex, aModem) {
+                        if (sIndex !== undefined && sIndex !== null
+                                && aModem !== undefined && aModem !== null)
+                        {
+                            oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).addItem(
+                                new sap.ui.core.Item({
+                                    text : aModem.CommName,
+                                    key : aModem.CommId
+                                })
+                            );
+                    
+                            if (firstSelection === null) {
+                                firstSelection = aModem;
+                            }
+                        }
+                    });
+                    
+                    oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).setSelectedKey(firstSelection.CommId);
+                    me.iSelectedCommID = firstSelection.CommId;
+                    me.ToggleZigbeeCommands(oScope, !me.bRunningCommand);
+                }
+                
+            }
+        );
+        
+        //--------------------------------------------------------------------//
+        // Zigbee Custom Telnet Commands
+        //--------------------------------------------------------------------//
+        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sCustomTelnetCommandLabelID);
+        oFormItem = new sap.m.Label(oScope.createId(me.uiIDs.sCustomTelnetCommandLabelID), {
+            text : "Custom Telnet Command"
+        });
+        oFormBox.addItem(oFormItem);
+        
+        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sCustomTelnetCommandFieldID);
+        
+//        oFormItem = new sap.m.Input(oScope.createId(me.uiIDs.sCustomTelnetCommandFieldID), {
+//            enabled : !me.bRunningCommand,
+//            submit : function () {
+//                me.ToggleZigbeeCommands(oScope, false);
+//                
+//                me.ExecuteCustomCommand(oScope);
+//            }
+//        }).addStyleClass("TextCenter width100Percent");
+        oFormItem = new ZigbeeCustomTelnetInput(oScope.createId(me.uiIDs.sCustomTelnetCommandFieldID), {
+            scope : oScope,
+            enabled : !me.bRunningCommand
+        });
+        oFormItem.widget.addStyleClass("width100Percent");
+        oFormBox.addItem(oFormItem.widget);
+        me.oZigbeeInput = oFormItem;
+        
+        //--------------------------------------------------------------------//
+        // Enable Join Mode
+        //--------------------------------------------------------------------//
+        oScope.aElementsForAFormToDestroy.push("EnableJoinModeButtonHolder");
+        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sEnableJoinModeButtonID);
+        
+        oFormItem = new sap.m.VBox(oScope.createId("EnableJoinModeButtonHolder"), {
+            items : [
+                new sap.m.Link(oScope.createId(me.uiIDs.sEnableJoinModeButtonID), {
+                    text : "Join Devices",
+                    // If it's not cooling down, then it will be enabled
+                    enabled : !me.bRunningCommand,
+                    press : function () {
+                        me.bJoinModeToggleCoolingDown = true;
+                        me.ToggleZigbeeCommands(oScope, false);
+                        
+                        // The command to re-enable this button is called by this function
+                        me.TurnOnZigbeeJoinMode(oScope);
+                    }
+                }).addStyleClass("SettingsLinks TelnetCommandButton width100Percent TextCenter")
+            ]
+        }).addStyleClass("TextCenter width100Percent");
+        oAPIModesHBox.addItem(oFormItem);
+        
+        //--------------------------------------------------------------------//
+        // Placeholder for the Zigbee telnet command buttons
+        //--------------------------------------------------------------------//
+        oFormBox.addItem(oAPIModesHBox);
+        
+        //--------------------------------------------------------------------//
+        // Telnet output label and text area
+        //--------------------------------------------------------------------//
+        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sTelnetOutputLabelID);
+        oFormItem = new sap.m.Label(oScope.createId(me.uiIDs.sTelnetOutputLabelID), {
+            text : "Telnet Output"
+        });
+        oFormBox.addItem(oFormItem);
+        
+        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sTelnetOutputTextAreaID);
+        oFormItem = new sap.m.TextArea(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID), {
+            editable : false,
+            growing : true
+        }).addStyleClass("width100Percent TelnetOutput");
+        
+        // Populate it with any prior output.
+        if (me.ZigbeeTelnetLog.length > 0) {
+            var output = "";
+            for (var i = 0; i < me.ZigbeeTelnetLog.length; i++) {
+                output += me.ZigbeeTelnetLog[i].content;
+            }
+            oFormItem.setValue(output);
+            oFormItem.selectText(output.length, output.length);
+            // Force it to scroll down to the bottom.
+            document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
+        }
+        
+        oFormBox.addItem(oFormItem);
+    },
 	
 	GetCommonUI: function( sPrefix, oViewScope, aDeviceData, bIsUnassigned ) {
 		//------------------------------------//
@@ -44,7 +683,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
 		
-		console.log(aDeviceData.DeviceId);
+		//console.log(aDeviceData.DeviceId);
         
         // If the UI is for the Unassigned Devices List, include 
         if (bIsUnassigned === true) {
@@ -64,7 +703,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                     new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
                         text : aDeviceData.DeviceName,
                         press : function () {
-                            IOMy.common.NavigationChangePage("pDeviceData", {Thing : aDeviceData});
+                            IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                         }
                     }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                 ]
@@ -90,7 +729,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                         ]
                     }).addStyleClass("PadLeft5px MarBottom3px MarRight10px TextLeft")
                 ]
-            }).addStyleClass("minwidth70px width10Percent")
+            }).addStyleClass("minwidth90px width10Percent")
         );
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
@@ -119,9 +758,6 @@ $.extend(IOMy.devices.zigbeesmartplug,{
             sStatusButtonText	= "On";
             bButtonStatus		= true;
         }
-
-        //-- DEBUGGING --//
-        //jQuery.sap.log.debug("PERM = "+sPrefix+" "+iTogglePermission);
 
         //------------------------------------//
         //-- Make the Container				--//
@@ -153,10 +789,6 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                 new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
                     state: bButtonStatus,
                     change: function () {
-                //new sap.m.ToggleButton( oViewScope.createId( sPrefix+"_StatusToggle"), {
-                    //text: sStatusButtonText,
-                    //pressed: bButtonStatus,
-                    //press : function () {
                         //-- Bind a link to this button for subfunctions --//
                         var oCurrentButton = this;
                         //-- AJAX --//
@@ -171,7 +803,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                                 IOMy.common.showError(response.message, "Error Changing Device Status");
                             },
                             onSuccess : function( sExpectedDataType, aAjaxData ) {
-                                console.log(aAjaxData.ThingPortStatus);
+                                //console.log(aAjaxData.ThingPortStatus);
                                 //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
                                 if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
                                     IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
@@ -197,7 +829,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
-		
+		//console.log(JSON.stringify(aDeviceData));
 		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
 		
 		//------------------------------------//
@@ -266,7 +898,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
 		
-		console.log(aDeviceData.DeviceId);
+		//console.log(aDeviceData.DeviceId);
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: [
@@ -278,11 +910,11 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                         new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
                             text : aDeviceData.DeviceName,
                             press : function () {
-                                IOMy.common.NavigationChangePage("pDeviceData", {Thing : aDeviceData});
+                                IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                             }
                         }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                     ]
-                }).addStyleClass("BorderRight width80Percent minwidth170px"),
+                }).addStyleClass("BorderRight testlabelcont"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
@@ -298,7 +930,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             ]
                         }).addStyleClass("PadLeft5px MarBottom3px MarRight10px TextLeft")
                     ]
-                }).addStyleClass("width10Percent minwidth70px")
+                }).addStyleClass("width10Percent minwidth90px")
             ]
         }).addStyleClass("ListItem");
 
@@ -393,7 +1025,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
-		console.log(JSON.stringify(aDeviceData));
+		
 		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
 		
 		//------------------------------------//

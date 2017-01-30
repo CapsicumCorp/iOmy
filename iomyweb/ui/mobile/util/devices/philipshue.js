@@ -2,7 +2,7 @@
 Title: Philips Hue Device Module
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Provides the UI for a Philips Hue device entry.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -56,7 +56,7 @@ $.extend(IOMy.devices.philipshue,{
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
 		
-		console.log(aDeviceData.DeviceId);
+		//console.log(aDeviceData.DeviceId);
         
         // If the UI is for the Unassigned Devices List, include 
         if (bIsUnassigned === true) {
@@ -76,7 +76,7 @@ $.extend(IOMy.devices.philipshue,{
                     new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
                         text : aDeviceData.DeviceName,
                         press : function () {
-                            IOMy.common.NavigationChangePage("pPhilipsHue", {Thing : aDeviceData});
+                            IOMy.common.NavigationChangePage("pPhilipsHue", {ThingId : aDeviceData.DeviceId});
                         }
                     }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                 ]
@@ -99,7 +99,7 @@ $.extend(IOMy.devices.philipshue,{
                         ]
                     }).addStyleClass("width110px PadLeft5px MarBottom3px MarRight10px TextLeft")
                 ]
-            }).addStyleClass("minwidth70px width10Percent")
+            }).addStyleClass("minwidth90px width10Percent")
         );
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
@@ -127,9 +127,6 @@ $.extend(IOMy.devices.philipshue,{
             sStatusButtonText	= "On";
             bButtonStatus		= true;
         }
-
-        //-- DEBUGGING --//
-        //jQuery.sap.log.debug("PERM = "+sPrefix+" "+iTogglePermission);
 
         //------------------------------------//
         //-- Make the Container				--//
@@ -175,7 +172,7 @@ $.extend(IOMy.devices.philipshue,{
                                 IOMy.common.showError(response.message, "Error Changing Device Status");
                             },
                             onSuccess : function( sExpectedDataType, aAjaxData ) {
-                                console.log(aAjaxData.ThingPortStatus);
+                                //console.log(aAjaxData.ThingPortStatus);
                                 //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
                                 if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
                                     IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
@@ -227,7 +224,7 @@ $.extend(IOMy.devices.philipshue,{
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
 		
-		console.log(aDeviceData.DeviceId);
+		//console.log(aDeviceData.DeviceId);
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: [
@@ -239,11 +236,11 @@ $.extend(IOMy.devices.philipshue,{
                         new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
                             text : aDeviceData.DeviceName,
                             press : function () {
-                                IOMy.common.NavigationChangePage("pPhilipsHue", {Thing : aDeviceData});
+                                IOMy.common.NavigationChangePage("pPhilipsHue", {ThingId : aDeviceData.DeviceId});
                             }
                         }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                     ]
-                }).addStyleClass("BorderRight width80Percent minwidth170px"),
+                }).addStyleClass("BorderRight testlabelcont"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
@@ -258,7 +255,7 @@ $.extend(IOMy.devices.philipshue,{
                             items: []
                         }).addStyleClass("PadLeft5px MarBottom3px MarRight10px TextLeft")
                     ]
-                }).addStyleClass("width10Percent minwidth70px")
+                }).addStyleClass("width10Percent minwidth90px")
             ]
         }).addStyleClass("ListItem");
 
@@ -370,7 +367,7 @@ $.extend(IOMy.devices.philipshue,{
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
-		console.log(JSON.stringify(aDeviceData));
+		//console.log(JSON.stringify(aDeviceData));
 		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
 		
 		//------------------------------------//

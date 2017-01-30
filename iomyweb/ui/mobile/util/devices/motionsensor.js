@@ -2,7 +2,7 @@
 Title: Motion Sensor Module
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Provides the UI for a Motion Sensor entry.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -26,6 +26,119 @@ IOMy.devices.motionsensor = new sap.ui.base.Object();
 
 $.extend(IOMy.devices.motionsensor,{
 	Devices: [],
+    
+    //---------------------------------------------------//
+    // Module properties
+    //---------------------------------------------------//
+    
+    uiIDs : {
+        TemperatureField : "TemperatureField",
+        BatteryLevelField : "BatteryLevelField"
+    },
+    
+    // -- INTEGERS
+    iODataFieldsToFetch         : 4,
+    iODataFieldsFailedToFetch   : 0,
+    bWaitingToLoadAPI           : false,
+    bLoadingFieldsFromAPI       : false,
+    bLoadingMotionSensorFields  : false,
+    
+    // -- Resource Types for the Motion Sensor IOs
+    RSBattery       : 2111,
+    RSMisc          : 4000,
+    RSBitwiseStatus : 3909,
+    RSTemperature   : 1701,
+    
+    CallAPI : function (iThingId) {
+        //--------------------------------------------------------------------//
+        // Declare variables and import modules
+        //--------------------------------------------------------------------//
+        var me = this;
+        var php = IOMy.apiphp;
+        
+        //--------------------------------------------------------------------//
+        // Send the AJAX request
+        //--------------------------------------------------------------------//
+    },
+    
+    FetchField : function (iIOId, oTextWidget, iRSType) {
+        //--------------------------------------------------------------------//
+        // Declare variables and import modules
+        //--------------------------------------------------------------------//
+        var me = this;
+        var odata = IOMy.apiodata;
+        
+        //--------------------------------------------------------------------//
+        // Send the AJAX request
+        //--------------------------------------------------------------------//
+        odata.AjaxRequest({
+            Url             : odata.ODataLocation("dataint"),
+            Columns         : ["CALCEDVALUE", "UTS", "UOM_PK", "UOM_NAME"],
+            WhereClause     : ["IO_PK eq "+iIOId],
+            OrderByClause   : [],
+            
+            onSuccess : function (responseType, data) {
+                //------------------------------------------------------------//
+                // Output data to console.
+                //------------------------------------------------------------//
+                var data = data[0];
+                //------------------------------------------------------------//
+                // Set the text in the relevant field on the motion sensor page.
+                //------------------------------------------------------------//
+                if (iRSType == me.RSMisc) { // TODO: Once the API is written, remove this condition.
+                    oTextWidget.setText("12h 45m 22s");
+                } else if (iRSType == me.RSBitwiseStatus) { // TODO: Once the API is written, remove this condition.
+                    oTextWidget.setText("Secure");
+                } else {// TODO: Keep this!
+                    oTextWidget.setText(data.CALCEDVALUE + data.UOM_NAME);
+                }
+                
+                // Conclude the request callback
+                this.onComplete();
+            },
+            
+            onFail : function (response) {
+                me.iODataFieldsFailedToFetch++;
+                
+                // Log errors
+                jQuery.sap.log.error("There was an error fetching data for IO "+iIOId+":\n\n" + JSON.stringify(response));
+                
+                // Conclude the request callback
+                this.onComplete();
+            },
+            
+            onComplete : function () {
+                //------------------------------------------------------------//
+                // Decrement the OData Field count
+                //------------------------------------------------------------//
+                console.log("====================================================================");
+                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                //jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                //jQuery.sap.log.debug("====================================================================");
+                
+                if (me.iODataFieldsToFetch > 0) {
+                    me.iODataFieldsToFetch--;
+                } else {
+                    // Log this as an error
+                    jQuery.sap.log.error("Something is wrong! The remaining OData field count for the current motion sensor is already 0!");
+                }
+                
+                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                //jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                
+                //------------------------------------------------------------//
+                // If this is final OData request and the API has finished its
+                // call, reset the loading motion sensor OData fields flag, and
+                // reset the fields to fetch back to the default number.
+                //------------------------------------------------------------//
+                if (me.iODataFieldsToFetch === 0 && me.bWaitingToLoadAPI === false && me.bLoadingFieldsFromAPI === false) {
+                    me.bLoadingMotionSensorFields = false;
+                    me.iODataFieldsToFetch = 4;
+                }
+            }
+            
+        });
+    },
 	
 	GetCommonUI: function( sPrefix, oViewScope, aDeviceData, bIsUnassigned ) {
 		//------------------------------------//
@@ -44,7 +157,7 @@ $.extend(IOMy.devices.motionsensor,{
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
 		
-		console.log(aDeviceData.DeviceId);
+		//console.log(aDeviceData.DeviceId);
         
         // If the UI is for the Unassigned Devices List, include 
         if (bIsUnassigned === true) {
@@ -64,7 +177,7 @@ $.extend(IOMy.devices.motionsensor,{
                     new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
                         text : aDeviceData.DeviceName,
                         press : function () {
-                            //IOMy.common.NavigationChangePage("pDeviceData", {Thing : aDeviceData});
+                            //IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                         }
                     }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                 ]
@@ -204,7 +317,7 @@ $.extend(IOMy.devices.motionsensor,{
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
 		
-		console.log(aDeviceData.DeviceId);
+		//console.log(aDeviceData.DeviceId);
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: [
@@ -216,7 +329,7 @@ $.extend(IOMy.devices.motionsensor,{
                         new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
                             text : aDeviceData.DeviceName,
                             press : function () {
-                                IOMy.common.NavigationChangePage("pDeviceData", {Thing : aDeviceData});
+                                IOMy.common.NavigationChangePage("pMotionSensor", {ThingId : aDeviceData.DeviceId});
                             }
                         }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                     ]
@@ -368,7 +481,7 @@ $.extend(IOMy.devices.motionsensor,{
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
-		console.log(JSON.stringify(aDeviceData));
+		//console.log(JSON.stringify(aDeviceData));
 		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
 		
 		//------------------------------------//

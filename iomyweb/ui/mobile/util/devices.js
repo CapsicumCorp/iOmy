@@ -5,7 +5,7 @@ Modified: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Helps to draw the list entry of a device and its information. Used
     as a wrapper for a variety of modules for each device type, which follow a
     similar structure to this module such as same function names to this one.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -32,9 +32,103 @@ IOMy.devices = new sap.ui.base.Object();
  * Device Overview, and Room Overview. Each entry will display information about
  * the device, or otherwise item, whether it's on or off, it varies between each
  * device type.
+ * 
+ * There are also functions for validation and status that pertain to all types
+ * of devices.
  */
 $.extend(IOMy.devices,{
 	Devices: [],
+    
+    GetDeviceStatus : function (iThingId) {
+        var sStatus;
+        var iStatus = IOMy.common.ThingList["_"+iThingId].Status;
+        
+        if (iStatus === 1) {
+            sStatus = "On";
+        } else if (iStatus === 0) {
+            sStatus = "Off";
+        }
+        
+        return sStatus;
+    },
+    
+    /**
+     * Function that performs an AJAX request to assign a given link to a given room
+     * 
+     * @param {type} iLinkId                ID of the link to assign to a room
+     * @param {type} iRoomId                ID of the room for the link to be assigned to
+     * @param {type} sLinkType              String to display specifying the type of link being assigned.
+     */
+    AssignLinkToRoom : function (iLinkId, iRoomId, sLinkType) {
+        //------------------------------------------------------------//
+        // Declare variables
+        //------------------------------------------------------------//
+        var me = this; // Capture the scope of the current controller
+        var sUrl = IOMy.apiphp.APILocation("link");
+        
+        //------------------------------------------------------------//
+        // Begin request
+        //------------------------------------------------------------//
+        IOMy.apiphp.AjaxRequest({
+            url : sUrl,
+            data : {"Mode" : "ChooseRoom", "Id" : parseInt(iLinkId), "RoomId" : parseInt(iRoomId)},
+            
+            onSuccess : function (response) {
+                if (response.Error === false || response.Error === undefined) {
+                    IOMy.common.showSuccess(sLinkType+" successfully assigned", "Success",
+                        function () {
+                            
+                            // Head back to the previous page.
+                            IOMy.common.NavigationTriggerBackForward(false);
+                            
+                        },
+                    "UpdateMessageBox");
+                } else {
+                    jQuery.sap.log.error("Error assigning "+sLinkType+":"+response.ErrMesg, "Error");
+                    IOMy.common.showError("Error assigning "+sLinkType+":\n\n"+response.ErrMesg, "Error");
+                }
+            },
+            
+            onFail : function (error) {
+                jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
+                IOMy.common.showError("Error assigning "+sLinkType+":\n\n"+error.responseText);
+            }
+        });
+    },
+    
+    /**
+     * Validates the room selection mainly just to ensure that everything (like
+     * the room ID) is correct and hasn't been tampered with in some way.
+     * 
+     * @param {UI5 widget} oScope
+     * @returns {map}
+     */
+    ValidateRoom : function (oScope) {
+        var me                      = this;
+        var bError                  = false;
+        var aErrorMessages          = [];
+        var mInfo                   = {}; // MAP: Contains the error status and any error messages.
+        var oField                  = oScope.byId(me.uiIDs.sRoomCBoxID+"Field");
+        
+        //-------------------------------------------------\\
+        // Is the hub a proper hub (does it have an ID)
+        //-------------------------------------------------\\
+        try {
+            if (oField.getSelectedKey() === "") {
+                bError = true;
+                aErrorMessages.push("Room is not valid");
+            }
+        } catch (e) {
+            bError = true;
+            aErrorMessages.push("Error 0x8101: There was an error checking the room: "+e.message);
+        }
+        
+        // Prepare the return value
+        mInfo.bError = bError;
+        mInfo.aErrorMessages = aErrorMessages;
+        
+        return mInfo;
+    },
 	
 	GetCommonUI: function( sPrefix, oViewScope, aDeviceData, bIsUnassigned ) {
 		//------------------------------------//
@@ -214,7 +308,7 @@ $.extend(IOMy.devices,{
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
-		console.log(JSON.stringify(aDeviceData));
+		//console.log(JSON.stringify(aDeviceData));
 		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
 		
 		//------------------------------------//

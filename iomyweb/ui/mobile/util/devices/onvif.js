@@ -3,7 +3,7 @@ Title: Onvif Camera Module
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Provides the UI for a Onvif stream entry, and other functionality
     pertaining to Onvif devices.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -26,9 +26,10 @@ $.sap.declare("IOMy.devices.onvif",true);
 IOMy.devices.onvif = new sap.ui.base.Object();
 
 $.extend(IOMy.devices.onvif,{
-	Devices     : [],
+	Devices                 : [],
     
-    aProfiles   : [],
+    aProfiles               : [],
+    sProfileLookupErrors    : [],
     
     /**
      * These IDs are used in the elements that are defined in this module. These
@@ -92,7 +93,8 @@ $.extend(IOMy.devices.onvif,{
                 },
 
                 onFail : function (response) {
-                    IOMy.common.showError("There was an error retrieving the Onvif profiles: "+response.ErrMesg);
+                    jQuery.sap.log.error(response.responseText);
+                    me.sProfileLookupErrors = response.responseText;
                     
                     // Call the fail callback function if one is defined.
                     fnFailCallback();
@@ -341,7 +343,7 @@ $.extend(IOMy.devices.onvif,{
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
 		
-		console.log(aDeviceData.DeviceId);
+		//console.log(aDeviceData.DeviceId);
         
         // If the UI is for the Unassigned Devices List, include 
         if (bIsUnassigned === true) {
@@ -361,7 +363,7 @@ $.extend(IOMy.devices.onvif,{
                     new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
                         text : aDeviceData.DeviceName,
                         press : function () {
-                            IOMy.common.NavigationChangePage("pOnvif", {Thing : aDeviceData});
+                            IOMy.common.NavigationChangePage("pOnvif", {ThingId : aDeviceData.DeviceId});
                         }
                     }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                 ]
@@ -409,7 +411,7 @@ $.extend(IOMy.devices.onvif,{
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
 		
-		console.log(aDeviceData.DeviceId);
+		//console.log(aDeviceData.DeviceId);
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: [
@@ -421,7 +423,7 @@ $.extend(IOMy.devices.onvif,{
                         new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
                             text : aDeviceData.DeviceName,
                             press : function () {
-                                IOMy.common.NavigationChangePage("pOnvif", {Thing : aDeviceData});
+                                IOMy.common.NavigationChangePage("pOnvif", {ThingId : aDeviceData.DeviceId});
                             }
                         }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                     ]
@@ -440,7 +442,7 @@ $.extend(IOMy.devices.onvif,{
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
-		console.log(JSON.stringify(aDeviceData));
+		//console.log(JSON.stringify(aDeviceData));
 		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
 		
 		//------------------------------------//
