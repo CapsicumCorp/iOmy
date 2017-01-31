@@ -111,18 +111,12 @@ $aInsertResult              = array();      //-- ARRAY:         --//
 //------------------------------------------------------------//
 //-- 1.3 - IMPORT REQUIRED LIBRARIES                        --//
 //------------------------------------------------------------//
-require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';       //-- This should call all the additional libraries needed --//
-require_once SITE_BASE.'/restricted/libraries/special/dbinsertfunctions.php';        //-- This library is used to perform the inserting of a new Onvif Server and Streams into the database --//
+require_once SITE_BASE.'/restricted/php/core.php';                                   //-- This should call all the additional libraries needed --//
 
+
+require_once SITE_BASE.'/restricted/libraries/special/dbinsertfunctions.php';        //-- This library is used to perform the inserting of a new Onvif Server and Streams into the database --//
 require_once SITE_BASE.'/restricted/libraries/weather/owm.php';
 
-//------------------------------------------------------------//
-//-- 1.4 - ERROR: There is no database access               --//
-//------------------------------------------------------------//
-if( $oRestrictedApiCore->bRestrictedDB===false ) {
-	$bError    = true;
-	$sErrMesg .= "Can't access the database! User may not be logged in";
-}
 
 
 
@@ -823,7 +817,6 @@ if( $bError===false ) {
 				if( $bError===false ) {
 					$aResult = $oWeather->GetMostRecentDBWeather();
 					
-					
 					if( $aResult['Error']===false ) {
 						$iUTS = time();
 						
@@ -838,6 +831,20 @@ if( $bError===false ) {
 								$sErrMesg .= "Error: failed to get new values! \n";
 								$sErrMesg .= $aResultTemp['ErrMesg'];
 							}
+						}
+						
+					//------------------------------------------------------//
+					//-- ELSEIF No data has ever been fetched for the IOs --//
+					} else if( $aResult['ErrMesg']==="No Data could be found for these IOs") {
+						$aResultTemp = $oWeather->PollWeather();
+							
+						if( $aResultTemp['Error']===false ) {
+							
+							$aResult = $oWeather->GetMostRecentDBWeather();
+						} else {
+							$bError = true;
+							$sErrMesg .= "Error: failed to get new values! \n";
+							$sErrMesg .= $aResultTemp['ErrMesg'];
 						}
 					}
 				}

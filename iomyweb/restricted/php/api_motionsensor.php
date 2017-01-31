@@ -69,20 +69,12 @@ $iNetvoxMotionThingTypeId   = 0;            //-- INTEGER:       --//
 //----------------------------------------------------//
 
 //-- Core Libraries --//
-require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';		//-- This should call all the additional libraries needed --//
+require_once SITE_BASE.'/restricted/php/core.php';      //-- This should call all the additional libraries needed --//
 
 //-- Add-on Libraries --//
 require_once SITE_BASE.'/restricted/libraries/motion/netvox.php';
 
 
-//------------------------------------------------------------//
-//-- 1.4 - Flag an Error is there is no Database access     --//
-//------------------------------------------------------------//
-if( $oRestrictedApiCore->bRestrictedDB===false ) {
-	$bError    = true;
-	$iErrCode  = 11;
-	$sErrMesg .= "Can't access the database! User may not be logged in";
-}
 
 //------------------------------------------------------------//
 //-- 1.5 - Fetch Constants (Will be replaced)               --//

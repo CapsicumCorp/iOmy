@@ -377,7 +377,9 @@ class Weather_OpenWeatherMap {
 		$aResult            = array();
 		$iUTS               = time();
 		
-		$iMostRecentValue   = 0;
+		
+		$iMostRecentValue   = 0;                    //-- INTEGER:   Used to hold the most recent value's timestamp --//
+		$bDataFound         = false;                //-- BOOLEAN:   Used to indicate --//
 		
 		//------------------------------------------------------------------------------//
 		//-- 2.0 - CHECK TO MAKE SURE THIS OBJECT CAN POLL DATA                       --//
@@ -408,13 +410,15 @@ class Weather_OpenWeatherMap {
 						
 						//-- IF No errors have occurred in the function results --//
 						if( $aTempResult['Error']===false ) {
-							//-- 
+							//--  --//
 							if( isset($aTempResult['Data']['UomId']) ) {
 								switch( $aIO['RSTypeId'] ) {
 									//----------------------------//
 									//-- TEMPERATURE            --//
 									//----------------------------//
 									case 1601:
+										$bDataFound = true;
+										
 										$aResult['Temperature'] = array(
 											"Value"     => $aTempResult['Data']['Value'],
 											"UomId"     => $aTempResult['Data']['UomId'],
@@ -429,6 +433,8 @@ class Weather_OpenWeatherMap {
 									//-- HUMIDITY               --//
 									//----------------------------//
 									case 1602:
+										$bDataFound = true;
+										
 										$aResult['Humidity']= array(
 											"Value"     => $aTempResult['Data']['Value'],
 											"UomId"     => $aTempResult['Data']['UomId'],
@@ -443,6 +449,8 @@ class Weather_OpenWeatherMap {
 									//-- PRESSURE               --//
 									//----------------------------//
 									case 1603:
+										$bDataFound = true;
+										
 										$aResult['Pressure'] = array(
 											"Value"     => $aTempResult['Data']['Value'],
 											"UomId"     => $aTempResult['Data']['UomId'],
@@ -457,6 +465,8 @@ class Weather_OpenWeatherMap {
 									//-- CONDITION              --//
 									//----------------------------//
 									case 1604:
+										$bDataFound = true;
+										
 										$aResult['Condition'] = array(
 											"Value"     => $aTempResult['Data']['Value'],
 											"UomId"     => $aTempResult['Data']['UomId'],
@@ -471,6 +481,8 @@ class Weather_OpenWeatherMap {
 									//-- WIND DIRECTION         --//
 									//----------------------------//
 									case 1605:
+										$bDataFound = true;
+										
 										$aResult['WindDirection'] = array(
 											"Value"     => $aTempResult['Data']['Value'],
 											"UomId"     => $aTempResult['Data']['UomId'],
@@ -485,6 +497,8 @@ class Weather_OpenWeatherMap {
 									//-- WIND SPEED             --//
 									//----------------------------//
 									case 1606:
+										$bDataFound = true;
+										
 										$aResult['WindSpeed'] = array(
 											"Value"     => $aTempResult['Data']['Value'],
 											"UomId"     => $aTempResult['Data']['UomId'],
@@ -500,6 +514,8 @@ class Weather_OpenWeatherMap {
 									//-- SUNRISE                --//
 									//----------------------------//
 									case 1607:
+										$bDataFound = true;
+										
 										$aResult['Sunrise'] = array(
 											"Value"     => $aTempResult['Data']['Value'],
 											"UomId"     => $aTempResult['Data']['UomId'],
@@ -514,6 +530,8 @@ class Weather_OpenWeatherMap {
 									//-- SUNSET                 --//
 									//----------------------------//
 									case 1608:
+										$bDataFound = true;
+										
 										$aResult['Sunset'] = array(
 											"Value"     => $aTempResult['Data']['Value'],
 											"UomId"     => $aTempResult['Data']['UomId'],
@@ -533,6 +551,12 @@ class Weather_OpenWeatherMap {
 					$aResult['UTS'] = $iMostRecentValue;
 				}
 			}	//-- ENDFOREACH IO --//
+			
+			
+			if( $bDataFound===false ) {
+				$bError    = true;
+				$sErrMesg .= "No Data could be found for these IOs";
+			}
 		}	//-- ENDIF No Errors --//
 		
 		//------------------------------------------------------------------------------//
@@ -543,7 +567,7 @@ class Weather_OpenWeatherMap {
 			//-- 9.A - SUCCESS      --//
 			//------------------------//
 			return array( "Error"=>false, "Data"=>$aResult );
-	
+			
 		} else {
 			//------------------------//
 			//-- 9.B - FAILURE      --//
@@ -667,7 +691,9 @@ class Weather_OpenWeatherMap {
 		$aHTTPResponse              = array();      //-- ARRAY:         Used to hold the response from performing a HTTP Request --//
 		$aWeatherIOsToBeParsed      = array();      //-- ARRAY:         Holds the list of IOs (and what other stuff they need) that this API knows what to do with ( Ignores ones it doesn't ) --//
 		$iUTS                       = time();       //-- INTEGER:       Holds the Current Unix Timestamp --//
-
+		
+		$bDataInsertSuccess         = false;        //-- BOOLEAN:       Used to indicate if a successful insert has been done --//
+		$aInsertErrMesgs            = array();      //-- ARRAY:         --//
 		$iWeatherStationIOId        = 0;            //-- INTEGER:       Holds the IOId of the WeatherStation IO as soon as it is found in the array of IOs --//
 		$iTemperatureIOId           = 0;            //-- INTEGER:       --//
 		$iHumidityIOId              = 0;            //-- INTEGER:       --//
@@ -824,35 +850,55 @@ class Weather_OpenWeatherMap {
 					//-- Lookup the Station Code --//
 					$aStationIOInfo = GetIOInfo( $iWeatherStationIOId );
 					
-					if( $aStationIOInfo['Error']===true ) {
+					if( $aStationIOInfo['Error']===false ) {
+						
+						if( $aStationIOInfo['Data']['PermDataRead']===true ) {
+							
+							//-- Lookup the most recent StationCode from the database --//
+							$aStationCodeResult = GetIODataMostRecent( $aStationIOInfo['Data']['DataTypeId'], $iWeatherStationIOId, $iUTS );
+							
+							if( $aStationCodeResult['Error']===false ) {
+								if( isset( $aStationCodeResult['Data']['Value'] ) ) {
+									
+									//-- Check to make sure it isn't just an empty string --//
+									if( $aStationCodeResult['Data']['Value']!=="" ) {
+										$this->sWeatherCode = $aStationCodeResult['Data']['Value'];
+										
+									} else {
+										//-- Empty String --//
+										$bError    = true;
+										$sErrMesg .= "The 'StationCode' IO may be incorrectly setup.\n";
+										$sErrMesg .= "It appears to be an empty string.\n";
+									}
+									
+								} else {
+									//-- ERROR: Possibly no 'StationCode' value has been added to the database --//
+									$bError    = true;
+									$sErrMesg .= "The 'StationCode' IO may be incorrectly setup.\n";
+									$sErrMesg .= $aStationCodeResult['ErrMesg'];
+								}
+								
+							} else {
+								//-- ERROR: Problem getting the most recent 'StationCode' IO value --//
+								$bError    = true;
+								$sErrMesg .= "Can not retrieve the 'StationCode' IO value.\n";
+								$sErrMesg .= $aStationCodeResult['ErrMesg'];
+							}
+							
+						} else {
+							//-- The user doesn't have the 'DataRead' permission --//
+							$bError    = true;
+							$sErrMesg .= "Can not retrieve the 'StationCode' IO value.\n";
+							$sErrMesg .= "The user doesn't have the 'DataRead' permission.";
+						}
+						
+						
+					} else {
 						$bError    = true;
 						$sErrMesg .= "Can not retrieve the 'StationCode' IO Info.\n";
 						$sErrMesg .= $aStationIOInfo['ErrMesg'];
 						//$sErrMesg .= "\n".$iWeatherStationIOId;
 					}
-					
-					//-- Lookup the most recent StationCode from the database --//
-					if( $bError===false ) {
-						$aStationCodeResult = GetIODataMostRecent( $aStationIOInfo['Data']['DataTypeId'], $iWeatherStationIOId, $iUTS );
-						
-						if( $aStationCodeResult['Error']===false ) {
-							if( isset( $aStationCodeResult['Data']['Value'] ) ) {
-								$this->sWeatherCode = $aStationCodeResult['Data']['Value'];
-								
-							} else {
-								//-- ERROR: Possibly no 'StationCode' value has been added to the database --//
-								$bError    = true;
-								$sErrMesg .= "The 'StationCode' IO may be incorrectly setup.\n";
-								$sErrMesg .= $aStationCodeResult['ErrMesg'];
-							}
-							
-						} else {
-							//-- ERROR: Problem getting the most recent 'StationCode' IO value --//
-							$bError    = true;
-							$sErrMesg .= "Can not retrieve the 'StationCode' IO value.\n";
-							$sErrMesg .= $aStationCodeResult['ErrMesg'];
-						}
-					} //-- ENDIF No errors detected --//
 				}	//-- ENDELSE Assume no errors --//
 			} else {
 				//-- Display the error --//
@@ -900,7 +946,13 @@ class Weather_OpenWeatherMap {
 								$aTempFunctionResult = InsertNewIODataValue( $aWeatherInfo['IOId'], $iUTS, $sValue );
 								
 								
-								//-- TODO: Check for errors --//
+								if( $aTempFunctionResult['Error']===true ) {
+									$aInsertErrMesgs[] = $aTempFunctionResult['ErrMesg'];
+									
+								} else {
+									//-- Flag that atleast one has been inserted --//
+									$bDataInsertSuccess = true;
+								}
 								
 								
 								//-- Debugging --//
@@ -924,6 +976,15 @@ class Weather_OpenWeatherMap {
 			}
 		}
 		
+		//---------------------------------------------------//
+		//-- Check to see if atleast one insert has worked --//
+		//---------------------------------------------------//
+		if( $bError===false) {
+			if( $bDataInsertSuccess===false ) {
+				$bError    = true;
+				$sErrMesg .= "No values were inserted into the database!\n";
+			}
+		}
 		//------------------------------------------------------------------------------//
 		//-- 9.0 - PARSE THE JSON REPONSE                                             --//
 		//------------------------------------------------------------------------------//

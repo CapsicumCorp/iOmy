@@ -93,6 +93,11 @@ class RestrictedAPICore {
 		//-- Declare Variables                                              --//
 		//--------------------------------------------------------------------//
 		
+		//-- Local variables --//
+		$iDBId                  = 0;            //-- INTEGER:   --//
+		$iCurrentIP             = 0;            //-- INTEGER:   --//
+		$bValidParameter        = false;        //-- BOOLEAN:   --//
+		
 		
 		//--------------------------------------------------------------------//
 		//-- If the Config is setup                                         --//
@@ -237,7 +242,7 @@ class RestrictedAPICore {
 												
 												//-- Store the config inside a protected variable --//
 												$this->aPrimaryDBConfig = $aConfig['DB'][$iDBId];
-						
+												
 												//-- Open the Database connection --//
 												$this->oRestrictedDB = new DBMySQL(
 													$this->aPrimaryDBConfig, 
@@ -265,9 +270,19 @@ class RestrictedAPICore {
 											$this->sDebugMessage .= "Session over 15 minutes!\n";
 										}
 									}
+								} else {
+									//-- DEBUGGING --//
+									if( $this->bDebugging===true ) { 
+										$this->sDebugMessage .= "IP Address does not match!\n";
+									}
+								}
+							} else {
+								//-- DEBUGGING --//
+								if( $this->bDebugging===true ) { 
+									$this->sDebugMessage .= "IP Address does not appear to be setup in the session!\n";
 								}
 							}
-							//--  --//
+							//-- Purge the IP Address --//
 							unset($iCurrentIP);
 						}
 					} else {
@@ -295,13 +310,15 @@ class RestrictedAPICore {
 				}
 				
 				
-				//-- Mark that all changes to the Session are completed --//
+				//-- Mark that all changes to the Session are completed and release it --//
 				session_write_close();
 				
 			} else {
+				//-- ERROR: No Crypt Key was found in the session --//
 				$this->UserAuth_ServerNotDeployed();
 			}
 		} else {
+			//-- ERROR: No Config was found --//
 			$this->UserAuth_ServerNotDeployed();
 		}
 	}
@@ -528,11 +545,11 @@ class RestrictedAPICore {
 		//-- STEP 2 - Setup the other variables --//
 		$salt = mcrypt_create_iv(128, MCRYPT_DEV_URANDOM);
 		list ($cipherKey, $macKey, $iv) = $this->Crypt_getKeys($salt, $sCryptKey);
-
+		
 		$sData = $this->Crypt_pad($sData);
-
+		
 		$enc = mcrypt_encrypt($this->aEncrytionVars["cipher"], $cipherKey, $sData, $this->aEncrytionVars["mode"], $iv);
-
+		
 		$mac = hash_hmac('sha512', $enc, $macKey, true);
 		return $salt . $enc . $mac;
 	}
@@ -556,7 +573,7 @@ class RestrictedAPICore {
 		$iv         = substr($key, 2 * $keySize);
 		return array($cipherKey, $macKey, $iv);
 	}
-
+	
 	/**
 	 **********************************************************************************************************
 	 * Stretch the key using the PBKDF2 algorithm
@@ -734,15 +751,8 @@ class RestrictedAPICore {
 		echo '<html><head><title>501 iOMy Server Not Deployed</title></head><body><h1>Please try setting up the server before accessing this API</h1></body></html>';
 		die();
 	}
-	
 }
 
-
-
-//========================================================================================================//
-//== #2.0# - CREATE THE RESTRICTED API CORE                                                             ==//
-//========================================================================================================//
-$oRestrictedApiCore = new RestrictedAPICore( $Config );
 
 
 
