@@ -4,7 +4,7 @@ Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Modified: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
 Description: Functions that create commonly used purpose-built UI5 widgets that
     are used across multiple pages.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -31,6 +31,7 @@ $.extend(IOMy.widgets,{
     
     extrasMenuOpen : false,
     
+    ThingNameLabels : {},
 	
     /**
      * Constructs the IOMy footer that appears on every page. It has the help
@@ -120,7 +121,7 @@ $.extend(IOMy.widgets,{
 			press: function(oControlEvent) {
 				IOMy.common.NavigationReturnToHome();
 			}
-		}).addStyleClass("BG_white PadAll2px MarTop3px MainHeadingMiniLogo");
+		}).addStyleClass("BG_white PadAll2px MarTop6px MainHeadingMiniLogo");
 		
 		//----------------------------------------------------//
 		//-- 4.0 - Create the Page Header Section itself    --//
@@ -200,7 +201,7 @@ $.extend(IOMy.widgets,{
 			
 			
 			//-- 2.1.3 - Center Content Title --//
-			oTitleText = new sap.m.Text({
+			oTitleText = new sap.m.Text( oScope.createId( "NavSubHead_BackBtn" ), {
 				text : sTitle
 			}).addStyleClass("Font-Larger Text_black");
 			
@@ -286,6 +287,35 @@ $.extend(IOMy.widgets,{
 	},
     
     /**
+     * Should return a list of all the rooms within a given premise. If there are
+     * no rooms created in a given premise, then an empty array will be returned.
+     * The array contains items for a select box (sap.ui.core.Item)
+     * 
+     * @param {type} sPremiseId         ID of the premise that the rooms are located in
+     * @returns {Array}                 An array containing either rooms for a select box, or nothing.
+     */
+    getRoomOptions : function (sPremiseId) {
+        var aOptions = [];
+        
+        if (IOMy.common.RoomsList[sPremiseId] !== undefined) {
+            $.each(IOMy.common.RoomsList[sPremiseId],function(sIndex,aRoom) {
+                //-- Verify that the Premise has rooms, other than the pseudo-room Unassigned --//
+                if( sIndex !== "Unassigned" && sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null ) {
+                    aOptions.push(
+                        new sap.ui.core.Item({
+                            text : aRoom.RoomName,
+                            key : aRoom.RoomId
+                        })
+                    );
+                }
+            });
+        }
+        
+        return aOptions;
+    },
+    
+    /**
+     * DEPRECATED! Use getRoomOptions in conjunction to a select box instead.
      * Returns a combo box containing a list of rooms within a given premise. Can also
      * receive the ID of the room that is currently selected if changing from one room
      * to another.
@@ -298,35 +328,57 @@ $.extend(IOMy.widgets,{
     getRoomSelector : function (sId, sPremiseId, iRoomId) {
         try {
             //====================================================================\\
-            // Clean up                                                           \\
+            // Declare Variables                                                  \\
             //====================================================================\\
-            if (sap.ui.getCore().byId(sId) !== undefined)
-                sap.ui.getCore().byId(sId).destroy();
+            var iRoomsCounted = 0;
 
             //====================================================================\\
             // Create the Combo Box                                               \\
             //====================================================================\\
-            var oCBox = new sap.m.ComboBox(sId,{}).addStyleClass("width100Percent");
-            
-            $.each(IOMy.common.RoomsList[sPremiseId],function(sIndex,aRoom) {
-                //-- Verify that the Premise has rooms, other than the pseudo-room Unassigned --//
-                if( sIndex !== "Unassigned" && sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null ) {
-                    oCBox.addItem(
-                        new sap.ui.core.Item({
-                            text : aRoom.RoomName,
-                            key : aRoom.RoomId
-                        })
-                    );
+            if (IOMy.common.RoomsList[sPremiseId] !== undefined) {
+                var oCBox = new sap.m.Select(sId,{
+                    width : "100%"
+                }).addStyleClass("width100Percent");
+                
+                $.each(IOMy.common.RoomsList[sPremiseId],function(sIndex,aRoom) {
+                    //-- Verify that the Premise has rooms, other than the pseudo-room Unassigned --//
+                    if( sIndex !== "Unassigned" && sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null ) {
+                        oCBox.addItem(
+                            new sap.ui.core.Item({
+                                text : aRoom.RoomName,
+                                key : aRoom.RoomId
+                            })
+                        );
+                
+                        iRoomsCounted++;
+                    }
+                });
+                
+                if (iRoomsCounted > 0) {
+                    if (iRoomId !== undefined) {
+                        oCBox.setSelectedKey(iRoomId);
+                    }
+                    
+                    return oCBox;
+                } else {
+                    sap.ui.getCore().byId(sId).destroy();
+                    
+                    return new sap.m.Input(sId, {
+                        enabled : false,
+                        value : "You have no rooms created."
+                    });
                 }
-            });
+                
+            } else {
+                return new sap.m.Input(sId, {
+                    enabled : false,
+                    value : "You have no rooms created."
+                });
+            }
 
-            if (iRoomId !== undefined)
-                oCBox.setSelectedKey(iRoomId);//.addStyleClass("width100Percent SettingsDropdownInput");
-
-            return oCBox;
         } catch (e) {
             jQuery.sap.log.error("Error in IOMy.widgets.getRoomSelector(): "+e.message);
-            return new sap.m.Text({text : "Failed to load the room combo box."});
+            return new sap.m.Text(sId, {text : "Failed to load the room combo box."});
         }
     },
 	
@@ -341,19 +393,21 @@ $.extend(IOMy.widgets,{
      */
     getPremiseSelector : function (sId, iPremiseId) {
         try {
-            //====================================================================\\
-            // Clean up                                                           \\
-            //====================================================================\\
-            if (sap.ui.getCore().byId(sId) !== undefined)
-                sap.ui.getCore().byId(sId).destroy();
-
+            var mFirstPremise = null;
+            
             //====================================================================\\
             // Create the Combo Box                                               \\
             //====================================================================\\
-            var oCBox = new sap.m.ComboBox(sId,{});
-
             if (IOMy.common.PremiseList.length !== 0) {
+                var oCBox = new sap.m.Select(sId,{
+                    width : "100%"
+                });
+                
                 for (var i = 0; i < IOMy.common.PremiseList.length; i++) {
+                    if (mFirstPremise === null) {
+                        mFirstPremise = IOMy.common.PremiseList[i];
+                    }
+                    
                     oCBox.addItem(
                         new sap.ui.core.Item({
                             text : IOMy.common.PremiseList[i].Name,
@@ -362,17 +416,21 @@ $.extend(IOMy.widgets,{
                     );
                 }
 
-                if (iPremiseId !== undefined)
+                if (iPremiseId !== undefined) {
                     oCBox.setSelectedKey(iPremiseId);
+                } else {
+                    oCBox.setSelectedKey(mFirstPremise.Id);
+                }
 
                 return oCBox;
             } else {
-                return new sap.m.Text({text : "You have no premises."});
+                // Something has gone awfully wrong for this to execute!
+                return new sap.m.Text(sId, {text : "You have no premises."});
             }
         } catch (e) {
             jQuery.sap.log.error("Error in IOMy.widgets.getPremiseSelector(): "+e.message);
             IOMy.common.showError("Failed to load the premise combo box\n\n"+e.message, "Error");
-            return new sap.m.Text({text : "Failed to load the premise combo box."});
+            return new sap.m.Text(sId, {text : "Failed to load the premise combo box."});
         }
     },
     
@@ -398,7 +456,9 @@ $.extend(IOMy.widgets,{
             //====================================================================\\
             // Create the Combo Box                                               \\
             //====================================================================\\
-            var oCBox = new sap.m.ComboBox(sId,{});
+            var oCBox = new sap.m.Select(sId,{
+                width : "100%"
+            });
 
             for (var i = 0; i < IOMy.common.HubList.length; i++) {
                 oCBox.addItem(
@@ -417,7 +477,7 @@ $.extend(IOMy.widgets,{
         } catch (e) {
             jQuery.sap.log.error("Error in IOMy.widgets.getHubSelector(): "+e.message);
             IOMy.common.showError("Failed to load the hub combo box\n\n"+e.message, "Error");
-            oElement = new sap.m.Text({text : "Failed to load the hub combo box."});
+            oElement = new sap.m.Text(sId, {text : "Failed to load the hub combo box."});
             
         } finally {
             
@@ -446,7 +506,9 @@ $.extend(IOMy.widgets,{
             //====================================================================\\
             // Create the Combo Box                                               \\
             //====================================================================\\
-            var oCBox = new sap.m.ComboBox(sId,{});
+            var oCBox = new sap.m.Select(sId,{
+                width : "100%"
+            });
 
             for (var i = 0; i < IOMy.common.LinkList.length; i++) {
                 oCBox.addItem(
@@ -465,7 +527,7 @@ $.extend(IOMy.widgets,{
         } catch (e) {
             jQuery.sap.log.error("Error in IOMy.widgets.getLinkSelector(): "+e.message);
             IOMy.common.showError("Failed to load the link combo box\n\n"+e.message, "Error");
-            oElement = new sap.m.Text({text : "Failed to load the link combo box."});
+            oElement = new sap.m.Text(sId, {text : "Failed to load the link combo box."});
             
         } finally {
             
@@ -495,7 +557,9 @@ $.extend(IOMy.widgets,{
             //====================================================================\\
             // Create the Combo Box                                               \\
             //====================================================================\\
-            var oCBox = new sap.m.ComboBox(sId,{});
+            var oCBox = new sap.m.Select(sId,{
+                width : "100%"
+            });
 
             for (var i = 0; i < IOMy.common.LinkTypeList.length; i++) {
                 if (IOMy.common.LinkTypeList[i].LinkTypeId == 2 ||
@@ -512,15 +576,18 @@ $.extend(IOMy.widgets,{
                 }
             }
 
-            if (iLinkTypeId !== undefined)
+            if (iLinkTypeId !== undefined) {
                 oCBox.setSelectedKey(iLinkTypeId);
+            } else {
+                oCBox.setSelectedKey(2);
+            }
 
             oElement = oCBox;
             
         } catch (e) {
             jQuery.sap.log.error("Error in IOMy.widgets.getLinkTypeSelector(): "+e.message);
             IOMy.common.showError("Failed to load the link type combo box\n\n"+e.message, "Error");
-            oElement = new sap.m.Text({text : "Failed to load the link type combo box."});
+            oElement = new sap.m.Text(sId, {text : "Failed to load the link type combo box."});
             
         } finally {
             
@@ -616,7 +683,9 @@ $.extend(IOMy.widgets,{
             
             jQuery.sap.log.error("Error in IOMy.widgets.getIPAddressAndPortField(): "+e.message);
             IOMy.common.showError("Failed to load the IP Address and Port field\n\n"+e.message, "Error");
-            oWidget = new sap.m.Text({text : "Failed to load the IP Address and Port field."});
+            
+            me.aElementsForAFormToDestroy.push(mSettings.ipAddressFieldID);
+            oWidget = new sap.m.Text(mSettings.ipAddressFieldID, {text : "Failed to load the IP Address and Port field."});
             
         } finally {
             
@@ -624,8 +693,344 @@ $.extend(IOMy.widgets,{
         }
     },
     
+    /**
+     * Creates a select box that allows the user to choose or omit a gender.
+     * 
+     * @param {type} sID            Widget ID (Optional)
+     * @returns {sap.m.Select}
+     */
+    getGenderSelectBox : function (sID) {
+        //---------------------------------------------------//
+        // Prepare the data for Select box
+        //---------------------------------------------------//
+        
+        // Declare items array
+        var aItems = [];
+        
+        // An array of gender maps
+        var aGender = [
+            { ID : 1, Name : "Female"},
+            { ID : 2, Name : "Male"},
+            { ID : 3, Name : "Other/Unassigned"}
+        ];
+        
+        // Populate the items array.
+        for (var i = 0; i < aGender.length; i++) {
+            aItems.push(
+                new sap.ui.core.Item({
+                    key : aGender[i].ID,
+                    text : aGender[i].Name
+                })
+            );
+        }
+        
+        //---------------------------------------------------//
+        // Construct the Select box
+        //---------------------------------------------------//
+        var oSBox;
+        var mSettings = {
+            width : "100%",
+            items : aItems
+        };
+        
+        // Widget ID is optional
+        if (sID !== undefined) {
+            oSBox = new sap.m.Select(sID, mSettings);
+        } else {
+            oSBox = new sap.m.Select(mSettings);
+        }
+        
+        // Ensure that the first item is selected.
+        oSBox.setSelectedItem(0);
+        
+        return oSBox;
+    },
+    
+    /**
+     * 
+     * @param {type} sID
+     * @param {type} iState
+     * @returns {unresolved}
+     */
+    getPermissionSelectBox : function (sID, iState) {
+        
+        var oAllowedOption = new sap.m.RadioButton({
+            text : "Yes"
+        });
+        
+        var oForbiddenOption = new sap.m.RadioButton({
+            text : "No"
+        });
+        
+        var mSettings = {
+            buttons : [oAllowedOption, oForbiddenOption]
+        };
+        var sCSSRules = "PermissionsRadioButtonGroup";
+        
+        if (sID !== undefined) {
+            var oSBox = new sap.m.RadioButtonGroup(sID, mSettings).addStyleClass(sCSSRules);
+        } else {
+            var oSBox = new sap.m.RadioButtonGroup(mSettings).addStyleClass(sCSSRules);
+        }
+        
+        if (iState !== undefined) {
+            if (iState == 0) {
+                oSBox.setSelectedIndex(1);
+            } else if (iState == 1) {
+                oSBox.setSelectedIndex(0);
+            }
+        } else {
+            oSBox.setSelectedIndex(0);
+        }
+        
+        return oSBox;
+    },
+    
+    /**
+     * 
+     * @param {type} oSBox
+     * @param {type} iPremise
+     * @param {type} fnSuccessCallback
+     * @param {type} fnFailCallback
+     * @returns {undefined}
+     */
+    getListOfUsersForRoomPermissions : function (oSBox, iPremise, fnSuccessCallback, fnFailCallback) {
+        var sUrl = IOMy.apiphp.APILocation("permissions");
+        
+        IOMy.apiphp.AjaxRequest({
+            url : sUrl,
+            data : {
+                "Mode" : "LookupUsersForRoomPerms",
+                "PremiseId" : iPremise
+            },
+            
+            onSuccess : function (responseType, data) {
+                //------------------------------------------------------------//
+                // If there are no errors, add the users to the select box.
+                //------------------------------------------------------------//
+                if (data.Error === false) {
+                    var mUserInfo;
+                    var mFirstUserInfo = null;
+                    var iNumOfUsers = data.Data.length;
+                    var iErrors = 0;
+                    
+                    for (var i = 0; i < data.Data.length; i++) {
+                        try {
+                            mUserInfo = data.Data[i];
+                             
+                            // Catch the first user in the list and get it's ID later
+                            if (mFirstUserInfo === null) {
+                                mFirstUserInfo = mUserInfo;
+                            }
+                            
+                            oSBox.addItem(
+                                new sap.ui.core.Item({
+                                    text : mUserInfo.UserDisplayName,
+                                    key : mUserInfo.UsersId
+                                })
+                            );
+                        } catch (e) {
+                            iErrors++;
+                            jQuery.sap.log.error("Failed to add the User Details to the select box: "+e.message);
+                        }
+                    }
+                    
+                    // Set the selected key to be that of the first item in the select box
+                    oSBox.setSelectedKey(mFirstUserInfo.UsersId);
+                    
+                    if (iNumOfUsers !== iErrors) {
+                        oSBox.attachChange(fnSuccessCallback);
+                        fnSuccessCallback();
+                    } else {
+                        fnFailCallback("Failed to add any users to the select box");
+                    }
+                }
+                //------------------------------------------------------------//
+                // Otherwise report the error
+                //------------------------------------------------------------//
+                else {
+                    var sErrorMessage = "There was an error accessing the list of users: "+data.ErrMesg;
+                    jQuery.sap.log.error(sErrorMessage);
+                    fnFailCallback(sErrorMessage);
+                }
+            },
+            
+            onFail : function (response) {
+                jQuery.sap.log.error("There was an error accessing the list of users: "+JSON.stringify(response));
+                IOMy.common.showError("There was an error accessing the list of users", "Error");
+            }
+        });
+    },
+    
+    /**
+     * 
+     * @param {type} oSBox
+     * @param {type} iPremise
+     * @param {type} fnSuccessCallback
+     * @param {type} fnFailCallback
+     * @returns {undefined}
+     */
+    getListOfUsersForPremisePermissions : function (oSBox, iPremise, fnSuccessCallback, fnFailCallback) {
+        var sUrl = IOMy.apiphp.APILocation("permissions");
+        
+        IOMy.apiphp.AjaxRequest({
+            url : sUrl,
+            data : {
+                "Mode" : "LookupUsersForPremisePerms",
+                "PremiseId" : iPremise
+            },
+            
+            onSuccess : function (responseType, data) {
+                //------------------------------------------------------------//
+                // If there are no errors, add the users to the select box.
+                //------------------------------------------------------------//
+                if (data.Error === false) {
+                    var mUserInfo;
+                    var mFirstUserInfo = null;
+                    var iNumOfUsers = data.Data.length;
+                    var iErrors = 0;
+                    
+                    for (var i = 0; i < data.Data.length; i++) {
+                        try {
+                            mUserInfo = data.Data[i];
+                             
+                            // Catch the first user in the list and get it's ID later
+                            if (mFirstUserInfo === null) {
+                                mFirstUserInfo = mUserInfo;
+                            }
+                            
+                            oSBox.addItem(
+                                new sap.ui.core.Item({
+                                    text : mUserInfo.UserDisplayName,
+                                    key : mUserInfo.UsersId
+                                })
+                            );
+                        } catch (e) {
+                            iErrors++;
+                            jQuery.sap.log.error("Failed to add the User Details to the select box: "+e.message);
+                        }
+                    }
+                    // Set the selected key to be that of the first item in the select box
+                    oSBox.setSelectedKey(mFirstUserInfo.UsersId);
+                    
+                    if (iNumOfUsers !== iErrors) {
+                        oSBox.attachChange(fnSuccessCallback);
+                        fnSuccessCallback();
+                    } else {
+                        fnFailCallback("Failed to add any users to the select box");
+                    }
+                }
+                //------------------------------------------------------------//
+                // Otherwise report the error
+                //------------------------------------------------------------//
+                else {
+                    var sErrorMessage = "There was an error accessing the list of users: "+data.ErrMesg;
+                    jQuery.sap.log.error(sErrorMessage);
+                    fnFailCallback(sErrorMessage);
+                }
+            },
+            
+            onFail : function (response) {
+                var sErrorMessage = "There was an error accessing the list of users: "+JSON.stringify(response);
+                jQuery.sap.log.error(sErrorMessage);
+                fnFailCallback(sErrorMessage);
+            }
+        });
+    },
+    
+    getCountryItems : function () {
+        // Declare and fetch variables
+        var aCountries = IOMy.common.Countries;
+        var aItems = [];
+        
+        // Make the list of select box items
+        for (var i = 0; i < aCountries.length; i++) {
+            aItems.push(
+                new sap.ui.core.Item({
+                    text : aCountries[i].CountryName,
+                    key : aCountries[i].CountryId
+                })
+            );
+        }
+        
+        return aItems;
+    },
+    
+    getLanguageItems : function () {
+        // Declare and fetch variables
+        var aLanguage = IOMy.common.Languages;
+        var aItems = [];
+        
+        // Make the list of select box items
+        for (var i = 0; i < aLanguage.length; i++) {
+            aItems.push(
+                new sap.ui.core.Item({
+                    text : aLanguage[i].LanguageName,
+                    key : aLanguage[i].LangaugeId
+                })
+            );
+        }
+        
+        return aItems;
+    },
+    
+    getStateProvinceItems : function () {
+        // Declare and fetch variables
+        var aStatesProvinces = IOMy.common.StatesProvinces;
+        var aItems = [];
+        
+        // Make the list of select box items
+        for (var i = 0; i < aStatesProvinces.length; i++) {
+            aItems.push(
+                new sap.ui.core.Item({
+                    text : aStatesProvinces[i].StateProvinceName,
+                    key : aStatesProvinces[i].StateProvinceId
+                })
+            );
+        }
+        
+        return aItems;
+    },
+    
+    getPostCodeItems : function () {
+        // Declare and fetch variables
+        var aPostCodes = IOMy.common.PostCodes;
+        var aItems = [];
+        
+        // Make the list of select box items
+        for (var i = 0; i < aPostCodes.length; i++) {
+            aItems.push(
+                new sap.ui.core.Item({
+                    text : aPostCodes[i].PostCodeName,
+                    key : aPostCodes[i].PostCodeId
+                })
+            );
+        }
+        
+        return aItems;
+    },
+    
+    getTimezoneItems : function () {
+        // Declare and fetch variables
+        var aTimezones = IOMy.common.Timezones;
+        var aItems = [];
+        
+        // Make the list of select box items
+        for (var i = 0; i < aTimezones.length; i++) {
+            aItems.push(
+                new sap.ui.core.Item({
+                    text : aTimezones[i].TimezoneName,
+                    key : aTimezones[i].TimezoneId
+                })
+            );
+        }
+        
+        return aItems;
+    },
+    
     /**************************************************************************\
-    |* A widget that will return an extras button (sap-icon://overflow).      *|
+    |* A widget that will return a button to summon the action menu           *|
+    |* (sap-icon://GoogleMaterial/add_circle).                                *|
     \**************************************************************************/
     /**
      * Constructs a button that will bring up a menu whose items are defined in the
@@ -634,7 +1039,7 @@ $.extend(IOMy.widgets,{
      * @param {JS Object} mSettings     Map of parameters.
      * @return {sap.m.HBox}             Extras menu button
      */
-    getExtrasButton : function (mSettings) {
+    getActionMenu: function (mSettings) {
         var me = this;
         // STEP 1: Create the menu items for the widget.
         var oNavList = new sap.tnt.NavigationList({});
@@ -651,8 +1056,9 @@ $.extend(IOMy.widgets,{
                     //----------------------------------------------------------------------------//
                     //-- Flags to indicate whether optional parameters are discovered           --//
                     //----------------------------------------------------------------------------//
-                    var bCheckIcon   = false;
-                    var bCheckSelect = false;
+                    var bCheckIcon          = false;
+                    var bCheckSelect        = false;
+                    var bCheckMenuItemID    = false;
 
                     //----------------------------------------------------------------------------//
                     //-- PART 1 - Check to see what Parameters are passed                       --//
@@ -677,6 +1083,13 @@ $.extend(IOMy.widgets,{
                         } else {
                             bCheckSelect = false;
                         }
+                        
+                        //-- Check Widget ID --//
+                        if( mSettings.items[i].id ) {
+                            bCheckMenuItemID = true;
+                        } else {
+                            bCheckMenuItemID = false;
+                        }
                     }
                     
                     // Assign a default ID if one isn't defined.
@@ -688,44 +1101,86 @@ $.extend(IOMy.widgets,{
                     //----------------------------------------------------------------------------//
                     //-- PART 2 - Choose the correct button based upon what values are passed   --//
                     //----------------------------------------------------------------------------//
-                    if( bCheckIcon===true && bCheckSelect===true ) {
-                        //-- NORMAL BUTTON --//
-                        oNavList.addItem(
-                            new sap.tnt.NavigationListItem({
-                                text: mSettings.items[i].text,
-                                icon: mSettings.items[i].icon,
-                                select:	mSettings.items[i].select
-                            })
-                        );
-                    } else if( bCheckSelect===true ) {
-                        oNavList.addItem(
-                            new sap.tnt.NavigationListItem({
-                                // [No Child Icon]",
-                                text: mSettings.items[i].text,
-                                select:	mSettings.items[i].select
-                            })
-                        );
-                    } else if( bCheckIcon===true ) {
-                        oNavList.addItem(
-                            new sap.tnt.NavigationListItem({
-                                // [No Child Select]",
-                                text: mSettings.items[i].text,
-                                icon: mSettings.items[i].icon,
-                                select: function() {
-                                    console.log("No select function has been configured by the UI Developer yet!");
-                                }
-                            })
-                        );
+                    if (bCheckMenuItemID===true) {
+                        if( bCheckIcon===true && bCheckSelect===true ) {
+                            //-- NORMAL BUTTON --//
+                            oNavList.addItem(
+                                new sap.tnt.NavigationListItem(mSettings.items[i].id, {
+                                    text: mSettings.items[i].text,
+                                    icon: mSettings.items[i].icon,
+                                    select:	mSettings.items[i].select
+                                })
+                            );
+                        } else if( bCheckSelect===true ) {
+                            oNavList.addItem(
+                                new sap.tnt.NavigationListItem(mSettings.items[i].id, {
+                                    // [No Child Icon],
+                                    text: mSettings.items[i].text,
+                                    select:	mSettings.items[i].select
+                                })
+                            );
+                        } else if( bCheckIcon===true ) {
+                            oNavList.addItem(
+                                new sap.tnt.NavigationListItem(mSettings.items[i].id, {
+                                    // [No Child Select],
+                                    text: mSettings.items[i].text,
+                                    icon: mSettings.items[i].icon,
+                                    select: function() {
+                                        console.log("No select function has been configured by the UI Developer yet!");
+                                    }
+                                })
+                            );
+                        } else {
+                            oNavList.addItem(
+                                new sap.tnt.NavigationListItem({
+                                    // [No Child Icon and no Child Select],
+                                    text: mSettings.items[i].text,
+                                    select: function() {
+                                        console.log("No select function has been configured by the UI Developer yet!");
+                                    }
+                                })
+                            );
+                        }
                     } else {
-                        oNavList.addItem(
-                            new sap.tnt.NavigationListItem({
-                                // [No Child Icon and no Child Select]",
-                                text: mSettings.items[i].text,
-                                select: function() {
-                                    console.log("No select function has been configured by the UI Developer yet!");
-                                }
-                            })
-                        );
+                        if( bCheckIcon===true && bCheckSelect===true ) {
+                            //-- NORMAL BUTTON --//
+                            oNavList.addItem(
+                                new sap.tnt.NavigationListItem({
+                                    text: mSettings.items[i].text,
+                                    icon: mSettings.items[i].icon,
+                                    select:	mSettings.items[i].select
+                                })
+                            );
+                        } else if( bCheckSelect===true ) {
+                            oNavList.addItem(
+                                new sap.tnt.NavigationListItem({
+                                    // [No Child Icon],
+                                    text: mSettings.items[i].text,
+                                    select:	mSettings.items[i].select
+                                })
+                            );
+                        } else if( bCheckIcon===true ) {
+                            oNavList.addItem(
+                                new sap.tnt.NavigationListItem({
+                                    // [No Child Select],
+                                    text: mSettings.items[i].text,
+                                    icon: mSettings.items[i].icon,
+                                    select: function() {
+                                        console.log("No select function has been configured by the UI Developer yet!");
+                                    }
+                                })
+                            );
+                        } else {
+                            oNavList.addItem(
+                                new sap.tnt.NavigationListItem({
+                                    // [No Child Icon and no Child Select],
+                                    text: mSettings.items[i].text,
+                                    select: function() {
+                                        console.log("No select function has been configured by the UI Developer yet!");
+                                    }
+                                })
+                            );
+                        }
                     }
                 }
             }
@@ -740,11 +1195,13 @@ $.extend(IOMy.widgets,{
                     new sap.m.VBox({
                         items : [
                             new sap.m.Button({
-                                icon : mSettings.icon,
+                                icon : "sap-icon://GoogleMaterial/add_circle",
                                 press : function (oControlEvent) {
+                                    
+                                    var oButton = oControlEvent.getSource();
+                                    
                                     if (me.extrasMenuOpen === false) {
                                         // Get or create a new extra menu
-                                        var oButton = oControlEvent.getSource();
                                         var oMenu;
                                         if (sap.ui.getCore().byId(mSettings.id) === undefined) {
                                             oMenu = new sap.m.Popover(mSettings.id, {
@@ -758,8 +1215,10 @@ $.extend(IOMy.widgets,{
 
                                         oMenu.attachAfterClose(function () {
                                             me.extrasMenuOpen = false;
+                                            oButton.setIcon("sap-icon://GoogleMaterial/add_circle");
                                         });
                                     
+                                        oButton.setIcon("sap-icon://GoogleMaterial/remove_circle");
                                         oMenu.openBy(oButton);
                                         me.extrasMenuOpen = true;
                                     } else {
@@ -770,7 +1229,7 @@ $.extend(IOMy.widgets,{
                         ]
                     }).addStyleClass("")
                 ]
-            }).addStyleClass("width100Percent");
+            }).addStyleClass("width100Percent MarTop4px");
 
             return oWidget;
         } catch (e) {

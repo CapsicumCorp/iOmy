@@ -2,7 +2,7 @@
 Title: Add Link page UI5 Controller
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws the form to add a link.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of the iOmy project.
 
@@ -25,6 +25,15 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 	api : IOMy.apiphp,
 	functions : IOMy.functions,
     
+    // WIDGETS
+    // TODO: Have all major widgets defined in the scope of the controller itself
+    // rather than in DrawUI().
+    wPremiseCBox        : null,
+    wRoomCBox           : null,
+    wRoomCBoxHolder     : null,
+    wVertBox            : null,
+    
+    bUIReadyToBeWiped : true,
     aElementsToDestroy : [],
     aElementsForAFormToDestroy : [],
     
@@ -41,10 +50,13 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 			// Everything is rendered in this function run before rendering.
 			onBeforeShow : function (evt) {
 				
-                // Start the form creation
-                me.DestroyUI();         // STEP 1: Clear any old forms to avoid duplicate IDs
-                me.DrawUI();            // STEP 2: Draw the actual user interface
-                
+                if (me.bUIReadyToBeWiped) {
+                    // Start the form creation
+                    me.DestroyUI();         // STEP 1: Clear any old forms to avoid duplicate IDs
+                    me.DrawUI();            // STEP 2: Draw the actual user interface
+                    // Reset any old logs
+                    IOMy.devices.zigbeesmartplug.ZigbeeTelnetLog = [];
+                }                
 			}
 		});
 	},
@@ -64,8 +76,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 * @memberOf mjs.settings.links.LinkAdd
 */
 //	onAfterRendering: function() {
-//		var me = this;
-//		sap.ui.getCore().byId("pDeviceInfo");
+//		
 //	},
 	
 	
@@ -191,6 +202,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         // Is the hub a proper hub (does it have an ID)
         //-------------------------------------------------\\
         try {
+            // TODO: Is this really needed anymore?
             if (me.byId("hubCBox").getSelectedKey() === "") {
                 bError = true;
                 aErrorMessages.push("Hub is not valid");
@@ -217,6 +229,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         // Is the link type a proper link type (does it have an ID)
         //-------------------------------------------------\\
         try {
+            // TODO: Is this really needed anymore?
             if (me.byId("linkTypeCBox").getSelectedKey() === "") {
                 bError = true;
                 aErrorMessages.push("Link type is not valid");
@@ -427,7 +440,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             //--------------------------------------------------------------------//
             // ONVIF SERVER
             //--------------------------------------------------------------------//
-            if (me.byId("linkTypeCBox").getSelectedKey() == 6) {
+            if (me.byId("linkTypeCBox").getSelectedItem().getKey() == 6) {
                 sLinkType = "Onvif Server";
 
                 mData.url = IOMy.apiphp.APILocation("onvif");
@@ -442,7 +455,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             //--------------------------------------------------------------------//
             // PHILIPS HUE BRIDGE
             //--------------------------------------------------------------------//
-            } else if (me.byId("linkTypeCBox").getSelectedKey() == 7) {
+            } else if (me.byId("linkTypeCBox").getSelectedItem().getKey() == 7) {
                 sLinkType = "Philips Hue Bridge";
 
                 mData.url = IOMy.apiphp.APILocation("philipshue");
@@ -456,7 +469,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             //--------------------------------------------------------------------//
             // WEATHER STATION
             //--------------------------------------------------------------------//
-            } else if (me.byId("linkTypeCBox").getSelectedKey() == 8) {
+            } else if (me.byId("linkTypeCBox").getSelectedItem().getKey() == 8) {
                 sLinkType = "Open Weather Map Feed";
                 
                 mData = IOMy.devices.weatherfeed.FetchAddLinkAPIAndParameters(me);
@@ -466,22 +479,44 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         }
         
         // These functions are not necessarily to do with a specific link type.
-        mData.onSuccess = function (response) {
+        mData.onSuccess = function (response, data) {
             jQuery.sap.log.debug("Success: "+JSON.stringify(response));
+            jQuery.sap.log.debug("Success: "+JSON.stringify(data));
+            console.log("Success: "+JSON.stringify(data));
+            
+            //--------------------------------------------------------------//
+            // Find the new Link ID
+            //--------------------------------------------------------------//
+            var iLinkId = 0;
+            
+            // Should be in this variable
+            if (data.Data !== undefined) {
+                if (data.Data.LinkId !== undefined) {
+                    iLinkId = data.Data.LinkId;
+                }
+            // I found the Open Weather Map feed link ID in this variable!
+            } else if (data.WeatherStation !== undefined) {
+                if (data.WeatherStation.LinkId !== undefined) {
+                    iLinkId = data.WeatherStation.LinkId;
+                }
+            }
 
             try {
                 //-- REFRESH LINK LIST --//
                 IOMy.common.ReloadVariableLinkList();
 
-                if (response.Error === false || response.Error === undefined) {
+                if (data.Error === false || data.Error === undefined) {
                     IOMy.common.showSuccess(sLinkType+" successfully created", "Success",
                         function () {
-                            IOMy.common.NavigationTriggerBackForward(false);
+                            // Set the flag to clear the way for a new UI instance
+                            me.bUIReadyToBeWiped = true;
+                            IOMy.devices.AssignLinkToRoom(iLinkId, me.wRoomCBox.getSelectedKey(), sLinkType);
+                            
                         },
                     "UpdateMessageBox");
                 } else {
-                    jQuery.sap.log.error("Error creating "+sLinkType+":"+response.ErrMesg, "Error");
-                    IOMy.common.showError("Error creating "+sLinkType+":\n\n"+response.ErrMesg, "Error");
+                    jQuery.sap.log.error("Error creating "+sLinkType+":"+data.ErrMesg, "Error");
+                    IOMy.common.showError("Error creating "+sLinkType+":\n\n"+data.ErrMesg, "Error");
                 }
             } catch (e) {
                 jQuery.sap.log.error("Error refreshing core variables: "+e.message);
@@ -492,9 +527,51 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         mData.onFail = function (error) {
             jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
             IOMy.common.showError("Error creating "+sLinkType+":\n\n"+error.responseText);
+            
+            // Re-enable the add link button
+            me.byId("addButton").setEnabled(true);
         };
         
         return mData;
+    },
+    
+    ChangeLinkForm : function (oSBox) {
+        var me = this;
+        // Grab the link type ID
+        var iLinkTypeId = oSBox.getSelectedKey();
+        
+        console.log(me.byId("addButton"));
+        // Reset defaults
+        me.byId("addButton").setEnabled(true);
+
+        // Erase the old set of fields
+        me.DestroySpecificFormUI();
+        
+        // Disable the add link button, and if the form is for the Zigbee link type, hide it.
+        if (iLinkTypeId == 2) {
+            console.log(me.byId("addButton"));
+            me.byId("addButton").setVisible(false);
+        } else {
+            me.byId("addButton").setVisible(true);
+        }
+
+        //==---------------------------------==//
+        // Choose a form to load
+        //==---------------------------------==//
+
+        //---- Zigbee ----//
+        if (iLinkTypeId == 2) {
+            IOMy.devices.zigbeesmartplug.CreateLinkForm(me, me.byId("formBox"));
+        //---- Onvif Server ----//
+        } else if (iLinkTypeId == 6) {
+            me.CreateOnvifServerForm();
+        //---- Philips Hue Bridge ----//
+        } else if (iLinkTypeId == 7) {
+            me.CreatePhilipsHueBridgeForm();
+        //---- Open Weather Map ----//
+        } else if (iLinkTypeId == 8) {
+            IOMy.devices.weatherfeed.CreateLinkForm(me, me.byId("formBox"));
+        }
     },
 
     /**
@@ -510,6 +587,11 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             if (me.byId(sCurrentID) !== undefined)
                 me.byId(sCurrentID).destroy();
         }
+        
+        if (me.wVertBox !== null) {
+            me.wVertBox.destroy();
+        }
+        
         // Destroy whatever other elements are left.
         me.DestroySpecificFormUI();
         
@@ -526,8 +608,9 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         
         for (var i = 0; i < me.aElementsForAFormToDestroy.length; i++) {
             sCurrentID = me.aElementsForAFormToDestroy[i];
-            if (me.byId(sCurrentID) !== undefined)
+            if (me.byId(sCurrentID) !== undefined) {
                 me.byId(sCurrentID).destroy();
+            }
         }
         
         // Clear the array
@@ -546,8 +629,10 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         // UI5 Objects used in all link forms
         var oLinkTypeLabel, oHubLabel;
         var oLinkTypeCBox, oHubCBox;
+        var oPremiseLabel;
+        var oRoomLabel;
         var oAddButton; // Button to add link
-        var oFormBox, oVertBox, oPanel; // Container elements
+        var oFormBox, oPanel; // Container elements
         
         //=======================================================\\
         // CONSTRUCT ELEMENTS
@@ -566,35 +651,51 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         oHubCBox = IOMy.widgets.getHubSelector(me.createId("hubCBox")).addStyleClass("width100Percent SettingsDropDownInput");
         
         //-------------------------------------------------------\\
+        // PREMISE COMBO BOX
+        //-------------------------------------------------------\\
+        oPremiseLabel = new sap.m.Label({
+            text : "Premise you wish to place this link in"
+        });
+        
+        me.wPremiseCBox = IOMy.widgets.getPremiseSelector(me.createId("premiseCBox")).addStyleClass("width100Percent SettingsDropDownInput");
+        me.wPremiseCBox.setSelectedItem(null);
+        me.wPremiseCBox.attachChange(
+            function () {
+                // Refresh the room select box.
+                me.wRoomCBoxHolder.destroyItems();
+                me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), this.getSelectedKey()).addStyleClass("width100Percent SettingsDropDownInput");
+                me.wRoomCBox.setSelectedItem(null);
+                me.wRoomCBoxHolder.addItem(me.wRoomCBox);
+            }
+        );
+        
+        //-------------------------------------------------------\\
+        // ROOM COMBO BOX
+        //-------------------------------------------------------\\
+        oRoomLabel = new sap.m.Label({
+            text : "Room you wish to place this link in"
+        });
+        
+        me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_"+me.wPremiseCBox.getSelectedKey()).addStyleClass("width100Percent SettingsDropDownInput");
+        me.wRoomCBox.setSelectedItem(null);
+        
+        me.wRoomCBoxHolder = new sap.m.VBox({
+            items : [me.wRoomCBox]
+        }).addStyleClass("width100Percent");
+        
+        //-------------------------------------------------------\\
         // LINK TYPE COMBO BOX
         //-------------------------------------------------------\\
         oLinkTypeLabel = new sap.m.Label({
             text : "Link Type"
         });
         
-        oLinkTypeCBox = IOMy.widgets.getLinkTypeSelector(me.createId("linkTypeCBox")).addStyleClass("width100Percent SettingsDropDownInput");
-        oLinkTypeCBox.attachSelectionChange(function () {
-            // Grab the link type ID
-            var iLinkTypeId = this.getSelectedKey();
-            
-            // Erase the old set of fields
-            me.DestroySpecificFormUI();
-            
-            //==---------------------------------==//
-            // Choose a form to load
-            //==---------------------------------==//
-            
-            //---- Onvif Server ----//
-            if (iLinkTypeId == 6) {
-                me.CreateOnvifServerForm();
-            //---- Philips Hue Bridge ----//
-            } else if (iLinkTypeId == 7) {
-                me.CreatePhilipsHueBridgeForm();
-            //---- Open Weather Map ----//
-            } else if (iLinkTypeId == 8) {
-                IOMy.devices.weatherfeed.CreateLinkForm(me, me.byId("formBox"));
+        oLinkTypeCBox = IOMy.widgets.getLinkTypeSelector(me.createId("linkTypeCBox")).addStyleClass("SettingsDropDownInput");
+        oLinkTypeCBox.attachChange(
+            function () {
+                me.ChangeLinkForm(this);
             }
-        });
+        );
         
         //-------------------------------------------------------\\
         // FORM BOX
@@ -606,11 +707,12 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         // PLACE ALL THE PIECES TOGETHER
         //=======================================================\\
         
-        me.aElementsToDestroy.push("mainBox");
-        oVertBox = new sap.m.VBox(me.createId("mainBox"),{
+        me.wVertBox = new sap.m.VBox({
             items : [
                 oHubLabel,oHubCBox,
                 oLinkTypeLabel,oLinkTypeCBox,
+                oPremiseLabel,me.wPremiseCBox,
+                oRoomLabel,me.wRoomCBoxHolder,
                 oFormBox
             ]
         }).addStyleClass("UserInputForm");
@@ -622,12 +724,14 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         oAddButton = new sap.m.VBox({
             items : [
                 new sap.m.Link(me.createId("addButton"), {
+                    //enabled : false,
                     text : "Add Link",
                     //-------------------------------------------------------\\
                     // FUNCTION TO ADD THE LINK BY CLICKING ON THE ADD LINK BUTTON
                     //-------------------------------------------------------\\
                     press : function() {
-                        this.setEnabled(false); // Lock the button
+                        var thisButton = this; // Captures the scope of the calling button.
+                        thisButton.setEnabled(false); // Lock the button
                         
                         try {
                             // Error checking variables
@@ -658,10 +762,11 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 
                                 //=== OTHERWISE BRING UP AN ERROR MESSAGE ON THE SCREEN ===\\
                                 } else {
-                                    if (aErrorMessages.length === 1)
+                                    if (aErrorMessages.length === 1) {
                                         sErrorMessage = "There was an error: \n\n"+aErrorMessages.join('\n');
-                                    else
+                                    } else {
                                         sErrorMessage = "There were "+aErrorMessages.length+" errors:\n\n"+aErrorMessages.join('\n\n');
+                                    }
 
                                     jQuery.sap.log.error(sErrorMessage);
                                     IOMy.common.showError(sErrorMessage);
@@ -670,29 +775,34 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                                 bError = true; // No.
                                 aErrorMessages.push("Error 0x1010: There was an error retrieving the API parameters: "+e.message);
                                 
-                                if (aErrorMessages.length === 1)
+                                if (aErrorMessages.length === 1) {
                                     sErrorMessage = "There was an error: \n\n"+aErrorMessages.join('\n');
-                                else
+                                } else {
                                     sErrorMessage = "There were "+aErrorMessages.length+" errors:\n\n"+aErrorMessages.join('\n\n');
-
+                                }
+                                
                                 jQuery.sap.log.error(sErrorMessage);
                                 IOMy.common.showError(sErrorMessage);
                             }
                         }
-
-                        this.setEnabled(true); // Unlock the button
                     }
                 }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
             ]
         }).addStyleClass("TextCenter MarTop12px");
-        oVertBox.addItem(oAddButton);
+        me.wVertBox.addItem(oAddButton);
         
         me.aElementsToDestroy.push("panel");
         oPanel = new sap.m.Panel(me.createId("panel"), {
-            content : [oVertBox]
+            content : [me.wVertBox]
         });
         
         thisView.byId("page").addContent(oPanel);
+        
+        // Disable the refresh functionality until a new link is added.
+        me.bUIReadyToBeWiped = false;
+        
+        // Create the rest of the link form.
+        me.ChangeLinkForm(me.byId("linkTypeCBox"));
     },
     
     CreateOnvifServerForm : function () {
@@ -741,7 +851,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         me.aElementsForAFormToDestroy.push("IPPortField");
         oIPPort = new sap.m.Input(me.createId("IPPortField"), {
             value : "888"
-        }).addStyleClass("width100px SettingsTextInput FlexNoShrink");
+        }).addStyleClass("minwidth80px SettingsTextInput FlexNoShrink");
         
         me.aElementsForAFormToDestroy.push("IPBox");
         oIPAddressAndPortBox = new sap.m.HBox(me.createId("IPBox"), {

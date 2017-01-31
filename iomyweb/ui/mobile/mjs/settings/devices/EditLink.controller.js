@@ -2,7 +2,7 @@
 Title: Edit Link Page (UI5 Controller)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws a form that allows you to edit information about a given link.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -68,7 +68,8 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
 						new sap.m.Link({
 							text : "Update",
 							press : function () {
-								this.setEnabled(false);
+								var thisButton = this; // Captures the scope of the calling button.
+                                thisButton.setEnabled(false);
 								
 								var sText = me.byId("linkField").getValue();
 								var iID = me.linkID;
@@ -109,13 +110,22 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
                                             },
                                             onFail : function () {
                                                 IOMy.common.showError("Update failed.", "Error");
+                                                
+                                                // Finish the request by enabling the edit button
+                                                this.onComplete();
+                                            },
+                                            
+                                            onComplete : function () {
+                                                //------------------------------------------------------------------------------------------//
+                                                // Re-enable the button once the request and the callback functions have finished executing.
+                                                //------------------------------------------------------------------------------------------//
+                                                thisButton.setEnabled(true);
                                             }
                                         });
                                     } catch (e00033) {
                                         IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
                                     }
                                 }
-								this.setEnabled(true);
 							}
 						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
 					]
