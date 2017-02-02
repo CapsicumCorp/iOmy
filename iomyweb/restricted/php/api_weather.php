@@ -116,6 +116,7 @@ require_once SITE_BASE.'/restricted/php/core.php';                              
 
 require_once SITE_BASE.'/restricted/libraries/special/dbinsertfunctions.php';        //-- This library is used to perform the inserting of a new Onvif Server and Streams into the database --//
 require_once SITE_BASE.'/restricted/libraries/weather/owm.php';
+require_once SITE_BASE.'/restricted/libraries/weather/demoweather.php';
 
 
 
@@ -583,20 +584,30 @@ if( $bError===false ) {
 							"ThingId"     => $iPostThingId
 						);
 						
+						//-- If the iOmy System is currently running in Demo Mode --//
+						if( $oRestrictedApiCore->CheckIfDemoMode() ) {
+							//--------------------------------------------//
+							//-- Load the demonstration weather object  --//
+							//--------------------------------------------//
+							$oWeather = new Weather_DemoWeather( $aWeatherObjectData );
+						} else {
+							//--------------------------------------------//
+							//-- Load the normal weather object         --//
+							//--------------------------------------------//
+							$oWeather = new Weather_OpenWeatherMap( $aWeatherObjectData );
+						}
 						
-						$oWeather = new Weather_OpenWeatherMap( $aWeatherObjectData );
+						if( $oWeather->bInitialised===false ) {
+							$bError = true;
+							$iErrCode  = 338;
+							$sErrMesg .= "Error Code:'0338' \n";
+							$sErrMesg .= "Critical error! \n";
+							$sErrMesg .= "Failed to initialise weather object. \n";
 							
-							if( $oWeather->bInitialised===false ) {
-								$bError = true;
-								$iErrCode  = 338;
-								$sErrMesg .= "Error Code:'0338' \n";
-								$sErrMesg .= "Critical error! \n";
-								$sErrMesg .= "Failed to initialise weather object. \n";
-								
-							}
-							
+						}
+						
 					//----------------------------------------------------------------------------//
-					//-- ELSE TYPE: Unsupported                                                 --//
+					//-- ELSE TYPE: Unsupported Weather Object                                  --//
 					//----------------------------------------------------------------------------//
 					} else {
 						$bError    = true;
@@ -604,14 +615,9 @@ if( $bError===false ) {
 						$sErrMesg .= "Error Code:'0339' \n";
 						$sErrMesg .= "Unsupported Weather Type!";
 					}
-					
-					
 				}
-			
 			}
 		}	//-- ENDIF No errors --//
-		
-		
 	} catch( Exception $e0300 ) {
 		$bError = true;
 		$iErrCode  = 0300;

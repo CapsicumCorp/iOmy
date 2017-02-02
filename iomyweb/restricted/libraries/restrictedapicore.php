@@ -79,6 +79,7 @@ class RestrictedAPICore {
 	protected   $aDBServerAddons        = array();      //-- ARRAY:     --//
 	protected   $bVanillaIOMy           = false;        //-- BOOLEAN:   Used to indicate if the Database is still in a vanilla state--//
 	protected   $bDemoMode              = false;        //-- BOOLEAN:   A special state used to let the UI know that the server is not functioning --//
+	protected   $bMaintenanceMode       = false;        //-- BOOLEAN:   A special state used to let the UI know if the server is in maintenance mode --//
 	
 	
 	//-- 1.2 - Public Variables --//
