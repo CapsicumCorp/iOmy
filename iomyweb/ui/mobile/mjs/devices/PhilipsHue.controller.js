@@ -160,15 +160,15 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                 //-- Refresh the Navigational buttons --//
 				IOMy.common.NavigationRefreshButtons( me );
                 
-                //-- Clean up the old elements from the previous render. --//
-                IOMy.functions.destroyItemsByIdFromView(me,
-                [
-                    "StatusToggle", "hueSlider", "satSlider", "briSlider"
-                ]);
-                
                 //-- Retrieve any hue data parsed to this controller --//
                 me.oThing = IOMy.common.ThingList['_'+evt.data.ThingId];
                 //console.log(JSON.stringify(me.oThing));
+                
+                //-- Clean up the old elements from the previous render. --//
+                IOMy.functions.destroyItemsByIdFromView(me,
+                [
+                    "StatusToggle", "hueSlider", "satSlider", "briSlider", "extrasMenu"+me.oThing.Id
+                ]);
                 
                 // Create the title on the page.
                 me.byId("NavSubHead_Title").setText(me.oThing.DisplayName.toUpperCase());

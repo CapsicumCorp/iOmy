@@ -22,28 +22,26 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("mjs.devices.MotionSensor", {
-	oThing : null,
     
-    iID : null,
-    UTSLastUpdate : null,
+    //-------------------------------------------------//
+    // Data
+    //-------------------------------------------------//
+    iThingId                : null,
+    mThing                  : null,
+    UTSLastUpdated          : null,
+    bUIDrawn                : null,
+	
+    //-------------------------------------------------//
+    // Widgets
+    //-------------------------------------------------//
+    aElementsToDestroy : [],        // ARRAY: A list of IDs used by any element on this page
     
-    aElementsToDestroy : [],
-    bUIDrawn           : false,
-    
-    wStatusLabel            : null,
+    wMainList               : null,
     wStatusField            : null,
-    wTemperatureLabel       : null,
     wTemperatureField       : null,
-    wLastMotionLabel        : null,
     wLastMotionField        : null,
-    wBatteryLabel           : null,
     wBatteryField           : null,
-    wTamperLabel            : null,
     wTamperField            : null,
-    wColumn1                : null,
-    wColumn2                : null,
-    wInfoBox                : null,
-    wVertBox                : null,
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -53,15 +51,19 @@ sap.ui.controller("mjs.devices.MotionSensor", {
 	onInit: function() {
 		var me = this;
 		var thisView = me.getView();
+        //-- IMPORT THE DEVICE LABEL FUNCTIONS MODULE --//
+        var LabelFunctions = IOMy.functions.DeviceLabels;
         
         thisView.addEventDelegate({
 			// Everything is rendered in this function before rendering.
 			onBeforeShow : function (evt) {
+                //-- Refresh the Navigational buttons --//
+                IOMy.common.NavigationRefreshButtons( me );
                 
                 var DevModule = IOMy.devices.motionsensor;
                 
                 me.oThing = IOMy.common.ThingList["_"+evt.data.ThingId];
-                me.iID = evt.data.ThingId;
+                me.iThingId = evt.data.ThingId;
                 me.UTSLastUpdate = IOMy.common.ThingList["_"+evt.data.ThingId].UILastUpdate;
                 
                 // Create the title on the page.
@@ -114,10 +116,14 @@ sap.ui.controller("mjs.devices.MotionSensor", {
         var me          = this;
         var sCurrentID  = "";
         
+        if (me.wMainList !== null) {
+            me.wMainList.destroy();
+        }
+        
         for (var i = 0; i < me.aElementsToDestroy.length; i++) {
-            sCurrentID = me.aElementsToDestroy[i];
-            if (me.byId(sCurrentID) !== undefined)
-                me.byId(sCurrentID).destroy();
+            if (me.byId(me.aElementsToDestroy[i]) !== undefined) {
+                me.byId(me.aElementsToDestroy[i]).destroy();
+            }
         }
         
         // Clear the array
@@ -128,87 +134,107 @@ sap.ui.controller("mjs.devices.MotionSensor", {
      * Draws the entire user interface for this page.
      */
     DrawUI : function() {
-        //console.log("DrawUI() called.");
-        var me = this;
-		var thisView = me.getView();
+        //-------------------------------------------------------------------//
+        // Declare variables and import modules.
+        //-------------------------------------------------------------------//
+        var me = this; // Captures the scope of this controller.
+        var thisView = me.getView(); // Captures this controller's view.
+        var sDefaultText = "N/A";
         
-        // STATUS
-        me.wStatusLabel = new sap.m.Text({
-            text : "Status:"
-        }).addStyleClass("TextBold PadTop6px PadBottom6px");
+        //-------------------------------------------------------------------//
+        // Create the data field widgets.
+        //-------------------------------------------------------------------//
         
-        me.wStatusField = new sap.m.Text({
-            text : IOMy.devices.GetDeviceStatus(me.iID)
-        }).addStyleClass("PadTop6px PadBottom6px");
+        //-- Status --//
+        me.wStatusField = new sap.m.Text ({
+            text : sDefaultText,
+            textAlign : "Center",
+            width : "100%"
+        });
         
-        // TEMPERATURE
-        me.wTemperatureLabel = new sap.m.Text({
-            text : "Temperature:"
-        }).addStyleClass("TextBold PadTop6px PadBottom6px");
+        //-- Temperature --//
+        me.wTemperatureField = new sap.m.Text ({
+            text : sDefaultText,
+            textAlign : "Center",
+            width : "100%"
+        });
         
-        me.wTemperatureField = new sap.m.Text({
-            text : ""
-        }).addStyleClass("PadTop6px PadBottom6px");
+        //-- Last Motion --//
+        me.wLastMotionField = new sap.m.Text ({
+            text : sDefaultText,
+            textAlign : "Center",
+            width : "100%"
+        });
         
-        // LAST MOTION
-        me.wLastMotionLabel = new sap.m.Text({
-            text : "Last Motion:"
-        }).addStyleClass("TextBold PadTop6px PadBottom6px");
+        //-- Battery --//
+        me.wBatteryField = new sap.m.Text ({
+            text : sDefaultText,
+            textAlign : "Center",
+            width : "100%"
+        });
         
-        me.wLastMotionField = new sap.m.Text({
-            text : ""
-        }).addStyleClass("PadTop6px PadBottom6px");
+        //-- Tamper --//
+        me.wTamperField = new sap.m.Text ({
+            text : sDefaultText,
+            textAlign : "Center",
+            width : "100%"
+        });
         
-        // BATTERY LEVEL
-        me.wBatteryLabel = new sap.m.Text({
-            text : "Battery:"
-        }).addStyleClass("TextBold PadTop6px PadBottom6px");
-        
-        me.wBatteryField = new sap.m.Text({
-            text : ""
-        }).addStyleClass("PadTop6px PadBottom6px");
-        
-        // TAMPER
-        me.wTamperLabel = new sap.m.Text({
-            text : "Tamper:"
-        }).addStyleClass("TextBold PadTop6px PadBottom6px");
-        
-        me.wTamperField = new sap.m.Text({
-            text : ""
-        }).addStyleClass("PadTop6px PadBottom6px");
-        
-        me.wColumn1 = new sap.m.VBox({
+        //-------------------------------------------------------------------//
+        // Arrange the fields into a UI5 List
+        //-------------------------------------------------------------------//
+        me.wMainList = new sap.m.List({
             items : [
-                me.wStatusLabel,
-                me.wTemperatureLabel,
-                me.wLastMotionLabel,
-                me.wBatteryLabel,
-                me.wTamperLabel
+                //-- Status --//
+                new sap.m.InputListItem ({
+                    label : "Status:",
+                    content : [
+                        //-- Column 2 for Status Row --//
+                        me.wStatusField
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Temperature --//
+                new sap.m.InputListItem ({
+                    label : "Temperature:",
+                    content : [
+                        //-- Column 2 for Temperature Row --//
+                        me.wTemperatureField
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Last Motion --//
+                new sap.m.InputListItem ({
+                    label : "Last Motion:",
+                    content : [
+                        //-- Column 2 for Last Motion Row --//
+                        me.wLastMotionField
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Battery --//
+                new sap.m.InputListItem ({
+                    label : "Battery:",
+                    content : [
+                        //-- Column 2 for Battery Row --//
+                        me.wBatteryField
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Tamper --//
+                new sap.m.InputListItem ({
+                    label : "Tamper:",
+                    content : [
+                        //-- Column 2 for Tamper Row --//
+                        me.wTamperField
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent")
             ]
-        }).addStyleClass("MarLeft6px width160px");
+        }).addStyleClass("PadBottom10px UserInputForm");
         
-        me.wColumn2 = new sap.m.VBox({
-            items : [
-                me.wStatusField,
-                me.wTemperatureField,
-                me.wLastMotionField,
-                me.wBatteryField,
-                me.wTamperField
-            ]
-        });
-        
-        me.wInfoBox = new sap.m.HBox({
-            items : [me.wColumn1, me.wColumn2]
-        });
-        
-        me.aElementsToDestroy.push("mainBox");
-        me.wVertBox = new sap.m.VBox(me.createId("mainBox"),{
-            items : [me.wInfoBox]
-        });
+        thisView.byId("Panel").addContent(me.wMainList);
         
         //----------------------------------------------------------------------------//
-        //-- REDO THE EXTRAS MENU                                                   --//
+        //-- REDO THE ACTION MENU                                                   --//
         //----------------------------------------------------------------------------//
+        me.aElementsToDestroy.push("extrasMenu"+me.oThing.Id);
+        
         try {
             thisView.byId("extrasMenuHolder").destroyItems();
             thisView.byId("extrasMenuHolder").addItem(
@@ -232,8 +258,6 @@ sap.ui.controller("mjs.devices.MotionSensor", {
         // Set the drawn flag so that it will always be loaded.
         me.bUIDrawn = true;
         me.FetchCurrentInformation();
-
-        thisView.byId("Panel").addContent(me.wVertBox);
     },
     
     FetchCurrentInformation : function () {
@@ -241,7 +265,7 @@ sap.ui.controller("mjs.devices.MotionSensor", {
         // Declare variables and import modules and global variables
         //--------------------------------------------------------------------//
         var me = this; // Capture the scope of the current device module.
-        var aaIOs = IOMy.common.ThingList["_"+me.iID].IO;
+        var aaIOs = IOMy.common.ThingList["_"+me.iThingId].IO;
         var aIOIDs = [];
         var DevModule = IOMy.devices.motionsensor;
         

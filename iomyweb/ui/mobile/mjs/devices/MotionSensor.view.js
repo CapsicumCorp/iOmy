@@ -52,8 +52,9 @@ sap.ui.jsview("mjs.devices.MotionSensor", {
 				IOMy.widgets.getNavigationalSubHeader("", "sap-icon://GoogleMaterial/lock", me),
 				//-- Main Page Body --//
 				new sap.m.Panel( me.createId("Panel"), {
-					content: []
-				}).addStyleClass("PanelNoPadding height100Percent UserInputForm")
+					backgroundDesign: "Transparent",
+                    content: []
+				}).addStyleClass("PadBottom10px UserInputForm")
 			]
 		}).addStyleClass("height100Percent width100Percent MainBackground");
 		
