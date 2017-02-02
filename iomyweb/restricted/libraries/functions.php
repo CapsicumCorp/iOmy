@@ -3095,13 +3095,13 @@ function DebugIODetection() {
 
 
 function getIODebuggingInfo( $sIOId, $sDataType) {
-	//--------------------------------------------------------//
-	//-- 1.0 - Initialise                                   --//
-	//--------------------------------------------------------//
+	//-----------------------------------------------------------//
+	//-- 1.0 - Initialise                                      --//
+	//-----------------------------------------------------------//
 	$bError             = false;
 	$sErrMesg           = "";
 	$aResult            = array();
-	$aReturn            = array();			//-- ARRAY:		This is the array that this function returns --//
+	$aReturn            = array();          //-- ARRAY:     This is the array that this function returns --//
 	$iIOId              = 0;
 	$bNumericCheck1     = false;
 	$sPlugDataType      = "";
@@ -3142,9 +3142,9 @@ function getIODebuggingInfo( $sIOId, $sDataType) {
 	//sConvertedDataType = aConvertedDataType.Value
 
 
-	//--------------------------------------------//
-	//-- 3.0 - Run the query                    --//
-	//--------------------------------------------//
+	//-----------------------------------------------------------//
+	//-- 3.0 - Run the query                                   --//
+	//-----------------------------------------------------------//
 	if( $bError===false ) {
 		try {
 			$aResult = dbGetIODebuggingInfo( $aConvertedDataType["Value"], $iIOId );
@@ -3157,9 +3157,9 @@ function getIODebuggingInfo( $sIOId, $sDataType) {
 		}
 	}
 
-	//--------------------------------------------//
-	//-- 4.0 - Check for Errors                 --//
-	//--------------------------------------------//
+	//-----------------------------------------------------------//
+	//-- 4.0 - Check for Errors                                --//
+	//-----------------------------------------------------------//
 	if( $bError===false ) {
 		try {
 			if( $aResult["Error"]===true ) { 
@@ -3176,9 +3176,9 @@ function getIODebuggingInfo( $sIOId, $sDataType) {
 		}
 	}
 	
-	//--------------------------------------------//
-	//-- 9.0 - Return the Results               --//
-	//--------------------------------------------//
+	//-----------------------------------------------------------//
+	//-- 9.0 - Return the Results                              --//
+	//-----------------------------------------------------------//
 	if( $bError===false) {
 		return array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
@@ -3392,7 +3392,6 @@ function InsertNewIODataValue( $iIOId, $iUTS, $Value, $bNonCommited=false ) {
 			$bError     = true;
 			$sErrMesg   = "DataType of the IO is unsupported!\n";
 		}
-		
 		//var_dump($aConvertedDataType);
 	}
 	
@@ -3410,8 +3409,6 @@ function InsertNewIODataValue( $iIOId, $iUTS, $Value, $bNonCommited=false ) {
 			$bError     = true;
 			$sErrMesg  .= "Error setting new IO Data Value!\n";
 			$sErrMesg  .= $aResult['ErrMesg'];
-			
-
 		}
 	}
 	
@@ -3436,35 +3433,106 @@ function InsertNewIODataValue( $iIOId, $iUTS, $Value, $bNonCommited=false ) {
 
 
 
-function ExtractValueFromMultiArray( $aArray, $aArrayLocation ) {
-	//-- A recursive function used for extracting a value from a known location in a multi-dimensional array --// 
 
-	$sLocation      = array_shift($aArrayLocation);
-	$iLocationsToGo = count($aArrayLocation);
+
+
+//========================================================================================================================//
+//== #19.0# - Server Functions                                                                                           ==//
+//========================================================================================================================//
+
+
+function GetServerVersion() {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError         = false;        //-- BOOLEAN:   --//
+	$sErrMesg       = "";           //-- STRING:    --//
+	$aResult        = array();      //-- ARRAY:     --//
 	
-	if( isset( $aArray[$sLocation] ) ) {
-		//-- If more locations to go to the target then perform recursion --//
-		if( $iLocationsToGo>=1 ) {
-			//-- Recurse --//
-			return ExtractValueFromMultiArray( $aArray[$sLocation], $aArrayLocation);
-		} else {
-			//-- Success: Found it --//
-			return $aArray[$sLocation];
+	//------------------------------------------------------------//
+	//-- 5.0 - Lookup Thing Info                                --//
+	//------------------------------------------------------------//
+	try {
+		$aResult = dbGetServerVersion();
+		
+		if( $aResult["Error"]===true ) {
+			//-- Display an Error --//
+			$bError = true;
+			$sErrMesg = "Error: Couldn't lookup the server version!\n";
 		}
+		
+	} catch( Exception $e1 ) {
+		$bError = true;
+		$sErrMesg .= "Critical Error occurred when attempting to lookup the Server Version! \n";
+		$sErrMesg .= $e1->getMessage();
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
-		//-- Failure: Can't find it --//
-		return null;
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+
+
+function GetServerAddonVersions() {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError         = false;        //-- BOOLEAN:   --//
+	$sErrMesg       = "";           //-- STRING:    --//
+	$aResult        = array();      //-- ARRAY:     --//
+	
+	
+	//------------------------------------------------------------//
+	//-- 5.0 - Lookup Thing Info                                --//
+	//------------------------------------------------------------//
+	try {
+		$aResult = dbGetServerAddonVersions();
+		
+		if( $aResult["Error"]===true ) {
+			//-- Display an Error --//
+			$bError = true;
+			$sErrMesg = "Error: Couldn't lookup the server version!\n";
+		}
+		
+	} catch( Exception $e1 ) {
+		$bError = true;
+		$sErrMesg .= "Critical Error occurred when attempting to lookup the Server Version! \n";
+		$sErrMesg .= $e1->getMessage();
 	}
 	
 	
-	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
 }
+
+
+
+
 
 
 
 //========================================================================================================================//
 //== #20.0# - Onvif Functions                                                                                           ==//
 //========================================================================================================================//
+//-- TODO: Move some of these functions into a onvif library --//
+
 function CheckIfDeviceSupportsOnvif( $sNetworkAddress, $iPort = 8000 ) {
 	//----------------------------------------------------------------//
 	//-- 1.0 - Initialise                                           --//
@@ -3499,7 +3567,7 @@ function CheckIfDeviceSupportsOnvif( $sNetworkAddress, $iPort = 8000 ) {
 	
 	if( $oResult===false ) {
 		//------------------------------------//
-		//-- ONVIF NOT SUPPORTED			--//
+		//-- ONVIF NOT SUPPORTED            --//
 		//------------------------------------//
 		$sErrMesg = curl_error( $oRequest );
 		
@@ -3507,11 +3575,13 @@ function CheckIfDeviceSupportsOnvif( $sNetworkAddress, $iPort = 8000 ) {
 		
 	} else {
 		//------------------------------------//
-		//-- ONVIF SUPPORTED				--//
+		//-- ONVIF SUPPORTED                --//
 		//------------------------------------//
 		return true;
 	}
 }
+
+
 
 
 function recursive_array_search( $sSearchString, $aArrayToSearch, $bCaseSensitive=true, $bXmlSoapSearch=false ) {
@@ -3528,13 +3598,10 @@ function recursive_array_search( $sSearchString, $aArrayToSearch, $bCaseSensitiv
 	$sArrayStringLowerCase  = "";           //-- STRING:        Used to hold the a lower case version of the string to allow for case insensitive searches. --//
 	$aSoapTag               = "";           //-- ARRAY:         --//
 	
-	
-	
 	//----------------------------------------------------------------//
 	//-- 2.0 - Begin                                                --//
 	//----------------------------------------------------------------//
 	foreach( $aArrayToSearch as $sKey => $ArrayElement ) {
-		
 		if( is_array($ArrayElement) ) {
 			
 			$aRecursiveSearchResults = recursive_array_search( $sSearchString, $ArrayElement );
@@ -3568,7 +3635,6 @@ function recursive_array_search( $sSearchString, $aArrayToSearch, $bCaseSensitiv
 							//echo "Success!\n";
 							return array($sKey);
 						}
-						
 						
 					} else {
 						//----------------------------//
@@ -3607,11 +3673,8 @@ function recursive_array_search( $sSearchString, $aArrayToSearch, $bCaseSensitiv
 						//-- Check if the array's lower case string matches the search's lower case string --//
 						if( $sSearchStringLowerCase===$sSubnameStringLowerCase ) {
 							return array($sKey);
-						} 
+						}
 						
-						
-						
-					
 					//-- ELSEIF there is only a name and no namespace --//
 					} else if( isset($aSoapElement[1]) ) {
 						
@@ -3625,10 +3688,7 @@ function recursive_array_search( $sSearchString, $aArrayToSearch, $bCaseSensitiv
 						if( $sSearchStringLowerCase===$sArrayStringLowerCase ) {
 							return array($sKey);
 						}
-						
-						
 					}
-					
 				}		//-- END of Normal/Soap Mode --//
 			}
 		}
@@ -3636,6 +3696,27 @@ function recursive_array_search( $sSearchString, $aArrayToSearch, $bCaseSensitiv
 	return false;
 }
 
+
+function ExtractValueFromMultiArray( $aArray, $aArrayLocation ) {
+	//-- A recursive function used for extracting a value from a known location in a multi-dimensional array --// 
+
+	$sLocation      = array_shift($aArrayLocation);
+	$iLocationsToGo = count($aArrayLocation);
+	
+	if( isset( $aArray[$sLocation] ) ) {
+		//-- If more locations to go to the target then perform recursion --//
+		if( $iLocationsToGo>=1 ) {
+			//-- Recurse --//
+			return ExtractValueFromMultiArray( $aArray[$sLocation], $aArrayLocation);
+		} else {
+			//-- Success: Found it --//
+			return $aArray[$sLocation];
+		}
+	} else {
+		//-- Failure: Can't find it --//
+		return null;
+	}
+}
 
 
 function ExtractArrayContentsFromArraySearchResults( $aArray, $aSearchResults, $iStartingElement ) {

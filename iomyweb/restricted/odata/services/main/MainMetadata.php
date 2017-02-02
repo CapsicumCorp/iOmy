@@ -1009,8 +1009,8 @@ class VR_USERSPREMISELOG{
 	public $PREMISELOG_UTS;
 	public $PREMISELOG_CUSTOM1;
 	public $USERSINFO_DISPLAYNAME;
-}
 
+}
 
 /**
  * 3.17 - VR_USERSCOMM entity type.

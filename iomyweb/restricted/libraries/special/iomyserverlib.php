@@ -23,7 +23,7 @@
 function DB_CreateDatabase( $sDatabaseName ) {
 	//------------------------------------------------------------------------//
 	//-- DESCRIPTION:                                                       --//
-	//--    This function is used to add a new database.          --//
+	//--    This function is used to add a new database.                    --//
 	//------------------------------------------------------------------------//
 	
 	//----------------------------------------------------//
@@ -94,7 +94,6 @@ function DB_CreateTables1( $sDBName ) {
 	//-- DESCRIPTION:                                                       --//
 	//--    This function is used to add the tables to the database.        --//
 	//------------------------------------------------------------------------//
-
 }
 
 
@@ -179,7 +178,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "   primary key (COUNTRIES_PK)\n";
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
 			$sSQL .= "alter table `".$sDBName."`.`COUNTRIES` comment 'Stores a list of supported countries.';\n";
-
+			
 			$sSQL .= "create table `".$sDBName."`.`CURRENCIES` \n";
 			$sSQL .= "(\n";
 			$sSQL .= "   CURRENCIES_PK        int not null auto_increment comment 'Primary Key', \n";

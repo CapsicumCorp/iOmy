@@ -22,6 +22,7 @@
 //========================================================================================================//
 
 
+
 //========================================//
 //== NOTES                              ==//
 //========================================//
@@ -29,6 +30,7 @@
 //-- The encryption method came from stackoverflow and was created by ircmaxell and Getz
 //-- URL:   http://stackoverflow.com/questions/5089841/two-way-encryption-i-need-to-store-passwords-that-can-be-retrieved/5093422#5093422
 //-- We will need to replace this another method in the future as mcrypt is being deprecated --//
+
 
 
 
@@ -40,9 +42,11 @@
 //--        setup the object to help protect the "RestrictedAPIs" section against php attacks.                  --//
 
 
+
 //========================================================================================================//
 //== #1.0# - INITIALSE                                                                                  ==//
 //========================================================================================================//
+
 
 //------------------------------------------------//
 //-- #1.1# - Configure Variables                --//
@@ -50,6 +54,7 @@
 if (!defined('SITE_BASE')) {
 	@define('SITE_BASE', dirname(__FILE__).'/../..');
 }
+
 
 //------------------------------------------------//
 //-- #1.2# - Load Required Libraries            --//
@@ -62,8 +67,6 @@ require_once SITE_BASE.'/restricted/libraries/functions.php';
 
 
 
-
-
 class RestrictedAPICore {
 	//====================================================//
 	//== 1.0 - CLASS VARIABLE DECLARATION               ==//
@@ -72,15 +75,20 @@ class RestrictedAPICore {
 	//-- 1.1 - Protected Variables --//
 	protected   $aEncrytionVars         = array();      //-- ARRAY:     --//
 	protected   $aPrimaryDBConfig       = array();      //-- ARRAY:     --//
+	protected   $aIOMyDBVersion         = array();      //-- ARRAY:     Used to indicate what version the database is so that it can be compared against the API Version to see if it is compatible --//
+	protected   $aDBServerAddons        = array();      //-- ARRAY:     --//
+	protected   $bVanillaIOMy           = false;        //-- BOOLEAN:   Used to indicate if the Database is still in a vanilla state--//
+	protected   $bDemoMode              = false;        //-- BOOLEAN:   A special state used to let the UI know that the server is not functioning --//
+	
 	
 	//-- 1.2 - Public Variables --//
 	public      $bRestrictedDB          = false;        //-- BOOLEAN:   Used to indicate when the primary database connection has been setup. --//
 	public      $bSecondaryDB           = false;        //-- BOOLEAN:   Used to indicate when the special database connection has been setup. --//
 	public      $bValidSession          = false;        //-- BOOLEAN:   This is used to flag if the User has a valid session. Default is set to false --//
 	public      $bLoginResult           = false;        //-- BOOLEAN:   This is used to flag if the User succeeded in logging in. --//
-	public      $bDebugging             = false;        //-- BOOLEAN:   --//
-	public      $sDebugMessage          = "";           //-- STRING:    Used to hold the debugging message --//
-	public      $oRestrictedDB;                         //-- OBJECT:    Declare the main database connection. Default is set to false --//
+	public      $bDebugging             = false;        //-- BOOLEAN:   Used to indicate that the iOmy Server is in debugging mode.  --//
+	public      $sDebugMessage          = "";           //-- STRING:    Used to hold the debugging message. --//
+	public      $oRestrictedDB;                         //-- OBJECT:    Declare the main database connection. Default is set to false. --//
 	public      $oSecondaryDB;                          //-- OBJECT:    --//
 	
 	
@@ -92,6 +100,11 @@ class RestrictedAPICore {
 		//--------------------------------------------------------------------//
 		//-- Declare Variables                                              --//
 		//--------------------------------------------------------------------//
+		
+		//-- Local variables --//
+		$iDBId                  = 0;            //-- INTEGER:   --//
+		$iCurrentIP             = 0;            //-- INTEGER:   --//
+		$bValidParameter        = false;        //-- BOOLEAN:   --//
 		
 		
 		//--------------------------------------------------------------------//
@@ -172,7 +185,9 @@ class RestrictedAPICore {
 							}
 							
 						} else {
-							//-- LOGIN ATTEMPT HAD AN ERROR --//
+							//----------------------------------//
+							//-- LOGIN ATTEMPT HAD AN ERROR   --//
+							//----------------------------------//
 							$this->bLoginResult = false;
 							
 							sleep(1);
@@ -237,7 +252,7 @@ class RestrictedAPICore {
 												
 												//-- Store the config inside a protected variable --//
 												$this->aPrimaryDBConfig = $aConfig['DB'][$iDBId];
-						
+												
 												//-- Open the Database connection --//
 												$this->oRestrictedDB = new DBMySQL(
 													$this->aPrimaryDBConfig, 
@@ -256,6 +271,86 @@ class RestrictedAPICore {
 													if( $this->bDebugging===true ) { 
 														$this->sDebugMessage .= "API Access Granted!\n";
 													}
+													
+													
+													//--------------------------------------------------------------------//
+													//-- VERIFICATION STEP 9: Lookup the Server version                 --//
+													//--------------------------------------------------------------------//
+													$oRestrictedApiCore = $this;
+													
+													
+													$aServerVersionTemp = dbSpecialGetServerVersion( $this->oRestrictedDB );
+													
+													
+													//echo "\n\n";
+													//var_dump( $aServerVersionTemp );
+													//echo "\n\n";
+														
+													//--  --//
+													if( $aServerVersionTemp['Error']===false ) {
+														//-- Extract the VersionIds --//
+														$this->aIOMyDBVersion = $aServerVersionTemp['Data'];
+														
+														$aServerAddonsTemp = dbSpecialGetServerAddonVersions( $this->oRestrictedDB, $aServerVersionTemp['Data']['CoreId'] );
+														
+														
+														if( $aServerAddonsTemp['Error']===false ) {
+															//--------------------------------------------//
+															//-- OPTION A: ADDONS DETECTED              --//
+															//--------------------------------------------//
+														
+															//-- Store the Server version --//
+															$this->aDBServerAddons = $aServerAddonsTemp['Data'];
+																
+															//-- Check if the server is in demonstration mode --//
+															foreach( $this->aDBServerAddons as $aDBServerAddon ) {
+																//--------------------------------------------//
+																//-- OPTION A2: DEMO MODE                   --//
+																//--------------------------------------------//
+																
+																if( $aDBServerAddon['AddonName']==="Demo Mode" ) {
+																	$this->bDemoMode = true;
+																}
+															}
+															
+															
+														} else if( $aServerAddonsTemp['ErrMesg']!=="ServerAddonVersion: No Rows Found! Code:0" ) {
+															
+															if( $this->aIOMyDBVersion==="iOmy (Vanilla)" ) {
+																//--------------------------------------------//
+																//-- OPTION B: NORMAL VANILLA               --//
+																//--------------------------------------------//
+																
+																
+																//-- Flag that everything looks normal--//
+																$this->bVanillaIOMy = true;
+															} else {
+																//--------------------------------------------//
+																//-- OPTION C: CUSTOM WITH NO ADDONS        --//
+																//--------------------------------------------//
+																
+																
+															}
+														} else {
+															//--------------------------------------------//
+															//-- OPTION D: FAILED TO LOAD ADDONS        --//
+															//--------------------------------------------//
+															
+															
+														}
+													} else {
+														//--------------------------------------------//
+														//-- OPTION E: FAILED TO LOAD VERSION       --//
+														//--------------------------------------------//
+														
+														
+													}
+												} else {
+													//--------------------------------------------------//
+													//-- Failed to initialise the Database Connection --//
+													//--------------------------------------------------//
+													
+													
 												}
 											}
 										}
@@ -265,9 +360,19 @@ class RestrictedAPICore {
 											$this->sDebugMessage .= "Session over 15 minutes!\n";
 										}
 									}
+								} else {
+									//-- DEBUGGING --//
+									if( $this->bDebugging===true ) { 
+										$this->sDebugMessage .= "IP Address does not match!\n";
+									}
+								}
+							} else {
+								//-- DEBUGGING --//
+								if( $this->bDebugging===true ) { 
+									$this->sDebugMessage .= "IP Address does not appear to be setup in the session!\n";
 								}
 							}
-							//--  --//
+							//-- Purge the IP Address --//
 							unset($iCurrentIP);
 						}
 					} else {
@@ -295,13 +400,15 @@ class RestrictedAPICore {
 				}
 				
 				
-				//-- Mark that all changes to the Session are completed --//
+				//-- Mark that all changes to the Session are completed and release it --//
 				session_write_close();
 				
 			} else {
+				//-- ERROR: No Crypt Key was found in the session --//
 				$this->UserAuth_ServerNotDeployed();
 			}
 		} else {
+			//-- ERROR: No Config was found --//
 			$this->UserAuth_ServerNotDeployed();
 		}
 	}
@@ -315,8 +422,6 @@ class RestrictedAPICore {
 	//====================================================//
 	//== 3.0 - Mini Misc Functions                      ==//
 	//====================================================//
-	
-	
 	private function VerifyPassword( $sCurrentPassword ) {
 		
 		if( gettype($sCurrentPassword)==="string" ) {
@@ -341,7 +446,7 @@ class RestrictedAPICore {
 		//------------------------------------------------//
 		
 		//-- 1.2 - --//
-		$bAbortLogin = false;			//-- BOOLEAN: Flag used to indicate to not continue down the path of attempting to login --//
+		$bAbortLogin = false;   //-- BOOLEAN: Flag used to indicate if the login attempt has failed and not to continue --//
 		
 		//----------------------------------------------------------------------------------//
 		//-- 2.0 - Check to see if the username has a space at the start or the end of it --//
@@ -462,8 +567,8 @@ class RestrictedAPICore {
 		//-- Unset all of the session variables --//
 		$_SESSION = array();
 		
-		//-- If it's desired to kill the session, also delete the session cookie	--//
-		//-- Note: This will destroy the session, and not just the session data!	--//
+		//-- If it's desired to kill the session, also delete the session cookie --//
+		//-- Note: This will destroy the session, and not just the session data! --//
 		if( isset( $_COOKIE[session_name()] ) ) {
 			setcookie(session_name(), '', time()-42000, '/');
 		}
@@ -472,6 +577,49 @@ class RestrictedAPICore {
 		session_destroy();
 		
 		return true;
+	}
+	
+	
+	
+	//----------------------------------------------------------------------------//
+	//-- #?.?# - CHECK VERSION FUNCTION                                         --//
+	//----------------------------------------------------------------------------//
+	public function CheckDBVersion() {
+		
+		
+		//-- Check to makes sure all the variables exist --//
+		if( 
+			isset( $this->aIOMyDBVersion['Version1'] ) && 
+			isset( $this->aIOMyDBVersion['Version2'] ) && 
+			isset( $this->aIOMyDBVersion['Version3'] ) && 
+			isset( $this->aIOMyDBVersion['Name'] )
+		) {
+			//-- Success --//
+			return array(
+				"Version1" => $this->aIOMyDBVersion['Version1'],
+				"Version2" => $this->aIOMyDBVersion['Version2'],
+				"Version3" => $this->aIOMyDBVersion['Version3'],
+				"Name"     => $this->aIOMyDBVersion['Name']
+			);
+			
+		} else {
+			//-- Failure --//
+			return null;
+		}
+	}
+	
+	//----------------------------------------------------------------------------//
+	//-- #?.?# - CHECK VERSION FUNCTION                                         --//
+	//----------------------------------------------------------------------------//
+	public function CheckIfDemoMode() {
+		//-- Check if Demo Mode has been detected --//
+		if( $this->bDemoMode===true ) {
+			return true;
+			
+		} else {
+			return false;
+			
+		}
 	}
 	
 	
@@ -528,11 +676,11 @@ class RestrictedAPICore {
 		//-- STEP 2 - Setup the other variables --//
 		$salt = mcrypt_create_iv(128, MCRYPT_DEV_URANDOM);
 		list ($cipherKey, $macKey, $iv) = $this->Crypt_getKeys($salt, $sCryptKey);
-
+		
 		$sData = $this->Crypt_pad($sData);
-
+		
 		$enc = mcrypt_encrypt($this->aEncrytionVars["cipher"], $cipherKey, $sData, $this->aEncrytionVars["mode"], $iv);
-
+		
 		$mac = hash_hmac('sha512', $enc, $macKey, true);
 		return $salt . $enc . $mac;
 	}
@@ -556,7 +704,7 @@ class RestrictedAPICore {
 		$iv         = substr($key, 2 * $keySize);
 		return array($cipherKey, $macKey, $iv);
 	}
-
+	
 	/**
 	 **********************************************************************************************************
 	 * Stretch the key using the PBKDF2 algorithm
@@ -734,15 +882,8 @@ class RestrictedAPICore {
 		echo '<html><head><title>501 iOMy Server Not Deployed</title></head><body><h1>Please try setting up the server before accessing this API</h1></body></html>';
 		die();
 	}
-	
 }
 
-
-
-//========================================================================================================//
-//== #2.0# - CREATE THE RESTRICTED API CORE                                                             ==//
-//========================================================================================================//
-$oRestrictedApiCore = new RestrictedAPICore( $Config );
 
 
 

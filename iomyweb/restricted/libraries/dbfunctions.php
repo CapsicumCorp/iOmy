@@ -59,7 +59,7 @@ function DataViewName($sViewCategory, $sViewType) {
 	//----------------------------------------//
 	//-- 1.0 - Declare Variables            --//
 	//----------------------------------------//
-	$aResult = array();    //-- ARRAY:		This variable is what is returned from calling this function --//
+	$aResult = array();    //-- ARRAY:      This variable is what is returned from calling this function --//
 	
 	//----------------------------------------//
 	//-- 3.0 - Insert the new UserInfo      --//
@@ -237,9 +237,6 @@ function NonDataViewName($sViewType) {
 	} else if( $sViewType==="VW_IO" ) {
 		$aResult = array( "Error"=>false, "View"=>"VW_IO" );
 		
-		
-		
-		
 	} else {
 		//-- Unsupported type --//
 		$aResult = array( "Error"=>true, "ErrMesg"=>"Unsupported View" );
@@ -248,11 +245,10 @@ function NonDataViewName($sViewType) {
 }
 
 
+
 function dbGetCurrentSchema() {
 	global $oRestrictedApiCore;
-	
 	$sResult = $oRestrictedApiCore->oRestrictedDB->DataSchema;
-	
 	return $sResult;
 }
 
@@ -306,8 +302,8 @@ function dbAddPresetLogToPremiseLog( $iUserId, $iPresetLogActionId, $iUTS, $iPre
 			$sQueryInsert .= "    `PREMISELOG_CUSTOMLOG_FK`, `PREMISELOG_UTS`, `PREMISELOG_CUSTOM1` ";
 			$sQueryInsert .= ") ";
 			$sQueryInsert .= "VALUES( ";
-			$sQueryInsert .= "    :PremiseId, :UserId, :LogPresetId, ";				//-- premiseFK, usersFK, PremiseLogActionFK,			--//
-			$sQueryInsert .= "    :LogCustomId, :UTS, :String ";					//-- CustomLogFK, UTS, Custom1							--//
+			$sQueryInsert .= "    :PremiseId, :UserId, :LogPresetId, ";             //-- premiseFK, usersFK, PremiseLogActionFK,    --//
+			$sQueryInsert .= "    :LogCustomId, :UTS, :String ";                    //-- CustomLogFK, UTS, Custom1                  --//
 			$sQueryInsert .= ") ";
 			
 			//-- Input binding --//
@@ -450,7 +446,7 @@ function dbGetPremiseLogsBetweenUTS( $iPremiseId, $iStartstamp, $iEndstamp) {
 			return array( "Error"=>false, "Data"=>$aResult["Data"] );
 
 		} else {
-			return array( "Error"=>true, "ErrMesg"=>"Get PremiseLog: ".$sErrMesg );
+			return array( "Error"=>true, "ErrMesg"=>"GetPremiseLog: ".$sErrMesg );
 		}
 	}
 }
@@ -6164,7 +6160,7 @@ function dbChangeThingState( $iThingId, $iNewState ) {
 	//-- 1.1 - Global Variables --//
 	global $oRestrictedApiCore;
 	
-	//-- 1.2 - Normal Variables --//	
+	//-- 1.2 - Normal Variables --//
 	$aResult            = array();      //-- ARRAY:     Used to hold the results of the database function. --//
 	$aReturn            = array();      //-- ARRAY:     This variable is used to return the result of this function. --//
 	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
@@ -6178,7 +6174,7 @@ function dbChangeThingState( $iThingId, $iNewState ) {
 	//----------------------------------------//
 	if( $bError===false ) {
 		try {
-			//-- Retrieve the Schema name	--//
+			//-- Retrieve the Schema name --//
 			$sSchema = dbGetCurrentSchema();
 			
 			$sSQL .= "UPDATE `".$sSchema."`.`THING` ";
@@ -6189,7 +6185,6 @@ function dbChangeThingState( $iThingId, $iNewState ) {
 				array( "Name"=>"ThingState",        "type"=>"INT",      "value"=>$iNewState     ),
 				array( "Name"=>"ThingId",           "type"=>"BINT",     "value"=>$iThingId      )
 			);
-			
 			
 			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
 			
@@ -7233,7 +7228,7 @@ function dbGetIODebuggingInfo( $sDataType, $iIO ) {
 			}
 		} catch( Exception $e2 ) {
 			$bError   = true;
-			$sErrMesg = $e2getMessage();
+			$sErrMesg = $e2->getMessage();
 		}
 	}
 	
@@ -7453,7 +7448,7 @@ function dbGetIODataAggregation( $sAggregationType, $sDataType, $iIOId, $iStartU
 			}
 		} catch( Exception $e2 ) {
 			$bError   = true;
-			$sErrMesg = $e2getMessage();
+			$sErrMesg = $e2->getMessage();
 		}
 	}
 	
@@ -7560,7 +7555,7 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 			}
 		} catch( Exception $e2 ) {
 			$bError   = true;
-			$sErrMesg = $e2getMessage();
+			$sErrMesg = $e2->getMessage();
 		}
 	}
 	
@@ -7680,7 +7675,7 @@ function dbGetIODataMostRecentEnum( $iDataType, $iIOId, $iEndUTS ) {
 				
 		} catch( Exception $e2 ) {
 			$bError   = true;
-			$sErrMesg = $e2getMessage();
+			$sErrMesg = $e2->getMessage();
 		}
 	}
 	
@@ -7780,7 +7775,7 @@ function dbGetIODataMostRecentEnumBit( $iDataType, $iIOId, $iEndUTS, $iBitsToChe
 				
 		} catch( Exception $e2 ) {
 			$bError   = true;
-			$sErrMesg = $e2getMessage();
+			$sErrMesg = $e2->getMessage();
 		}
 	}
 	
@@ -7910,6 +7905,203 @@ function dbInsertNewIODataValue( $sTableName, $iIOId, $iUTS, $Value, $sBindType,
 
 
 
+//========================================================================================================================//
+//== #19.0# - Server Version Functions                                                                                  ==//
+//========================================================================================================================//
+
+function dbSpecialGetServerVersion( $oDBConn ) {
+	//----------------------------------------//
+	//-- 1.0 - Declare Variables            --//
+	//----------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught --//
+	$aResult            = array();      //-- ARRAY:     This variable is for the SQL result --//
+	$aReturn            = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function.  --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions.  --//
+
+	$sSchema            = "";           //-- STRING:    Used to hold the extracted string that contains the SQL View name  --//
+	$aInputVals         = array();      //-- ARRAY:     Used to hold an array of values to do the SQL Input Binding --//
+	$aOutputCols        = array();      //-- ARRAY:     Used to hold an array of values to do the formatting of the SQL Output data --//
+	
+	if( $bError===false ) {
+		try {
+			//------------------------------------//
+			//-- SETUP VARIABLES                --//
+			//------------------------------------//
+			//var_dump($oDBConn);
+			
+			$sSchema = $oDBConn->DataSchema;
+			
+			//------------------------------------//
+			//-- SQL                            --//
+			//------------------------------------//
+			$sSQL .= "SELECT \n";
+			$sSQL .= "	`CORE_PK`, \n";
+			$sSQL .= "	`CORE_NAME`, \n";
+			$sSQL .= "	`CORE_VERSION1`, \n";
+			$sSQL .= "	`CORE_VERSION2`, \n";
+			$sSQL .= "	`CORE_VERSION3`, \n";
+			$sSQL .= "	`CORE_SETUPUTS` \n";
+			$sSQL .= "FROM `".$sSchema."`.`CORE` \n";
+			$sSQL .= "ORDER BY `CORE_SETUPUTS` DESC \n";
+			$sSQL .= "LIMIT 1 ";
+			
+			
+			//-- Input Binding --//
+			$aInputVals = array();
+			
+			//-- Output Binding --//
+			$aOutputCols = array(
+				array( "Name"=>"CoreId",            "type"=>"INT"   ),
+				array( "Name"=>"Name",              "type"=>"STR"   ),
+				array( "Name"=>"Version1",          "type"=>"INT"   ),
+				array( "Name"=>"Version2",          "type"=>"INT"   ),
+				array( "Name"=>"Version3",          "type"=>"INT"   ),
+				array( "Name"=>"UTS",               "type"=>"BINT"  )
+			);
+			
+			//-- Execute the SQL Query --//
+			$aResult = $oDBConn->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true ) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"ServerVersion: ".$sErrMesg );
+	}
+}
+
+
+
+function dbSpecialGetServerAddonVersions( $oDBConn, $iCoreId ) {
+	//----------------------------------------//
+	//-- 1.0 - Declare Variables            --//
+	//----------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught --//
+	$aResult            = array();      //-- ARRAY:     This variable is for the SQL result --//
+	$aReturn            = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function.  --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions.  --//
+
+	$sSchema            = "";           //-- STRING:    Used to hold the extracted string that contains the SQL View name  --//
+	$aInputVals         = array();      //-- ARRAY:     Used to hold an array of values to do the SQL Input Binding --//
+	$aOutputCols        = array();      //-- ARRAY:     Used to hold an array of values to do the formatting of the SQL Output data --//
+	
+	if( $bError===false ) {
+		try {
+			//------------------------------------//
+			//-- SETUP VARIABLES                --//
+			//------------------------------------//
+
+			
+			$sSchema = $oDBConn->DataSchema;
+			
+			//------------------------------------//
+			//-- SQL                            --//
+			//------------------------------------//
+			$sSQL .= "SELECT \n";
+			//$sSQL .= "	`COREADDON_PK`, \n";
+			$sSQL .= "	`COREADDON_NAME`, \n";
+			$sSQL .= "	`COREADDON_VERSION1`, \n";
+			$sSQL .= "	`COREADDON_VERSION2`, \n";
+			$sSQL .= "	`COREADDON_VERSION3`, \n";
+			$sSQL .= "	`COREADDON_SETUPUTS`, \n";
+			//$sSQL .= "	`CORE_PK`, \n";
+			$sSQL .= "	`CORE_NAME`, \n";
+			$sSQL .= "	`CORE_VERSION1`, \n";
+			$sSQL .= "	`CORE_VERSION2`, \n";
+			$sSQL .= "	`CORE_VERSION3`, \n";
+			$sSQL .= "	`CORE_SETUPUTS` \n";
+			$sSQL .= "FROM `".$sSchema."`.`CORE` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`COREADDON` ON `CORE_PK`=`COREADDON_CORE_FK` \n";
+			$sSQL .= "WHERE `CORE_PK` = :CoreId \n";
+			$sSQL .= "ORDER BY `COREADDON_PK` ASC \n";
+			
+			
+			//-- Input Binding --//
+			$aInputVals = array( 
+				array( "Name"=>"CoreId",            "type"=>"INT",     "value"=>$iCoreId        )
+			);
+			
+			//-- Output Binding --//
+			$aOutputCols = array(
+				//array( "Name"=>"AddonId",               "type"=>"INT"   ),
+				array( "Name"=>"AddonName",             "type"=>"STR"   ),
+				array( "Name"=>"AddonVersion1",         "type"=>"INT"   ),
+				array( "Name"=>"AddonVersion2",         "type"=>"INT"   ),
+				array( "Name"=>"AddonVersion3",         "type"=>"INT"   ),
+				array( "Name"=>"AddonUTS",              "type"=>"BINT"  ),
+				//array( "Name"=>"CoreId",                "type"=>"INT"   ),
+				array( "Name"=>"CoreName",              "type"=>"STR"   ),
+				array( "Name"=>"CoreVersion1",          "type"=>"INT"   ),
+				array( "Name"=>"CoreVersion2",          "type"=>"INT"   ),
+				array( "Name"=>"CoreVersion3",          "type"=>"INT"   ),
+				array( "Name"=>"CoreUTS",               "type"=>"BINT"  )
+			);
+			
+			//-- Execute the SQL Query --//
+			$aResult = $oDBConn->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true ) {
+				//-- So far All APIs that use this expect the "No rows" error when there are no results found with this call --//
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"ServerAddonVersion: ".$sErrMesg );
+	}
+}
 
 
 ?>

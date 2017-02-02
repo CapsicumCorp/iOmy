@@ -66,16 +66,9 @@ $aCommInfo                  = array();      //-- ARRAY:         --//
 //-- 1.3 - Import Required Libraries                        --//
 //------------------------------------------------------------//
 require_once SITE_BASE.'/restricted/libraries/onvif.php';
-require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';       //-- This should call all the additional libraries needed --//
 require_once SITE_BASE.'/restricted/libraries/special/dbinsertfunctions.php';        //-- This library is used to perform the inserting of a new Onvif Server and Streams into the database --//
 
-//------------------------------------------------------------//
-//-- 1.4 - Flag an Error as there is no Database access     --//
-//------------------------------------------------------------//
-if( $oRestrictedApiCore->bRestrictedDB===false ) {
-	$bError    = true;
-	$sErrMesg .= "Can't access the database! User may not be logged in";
-}
+require_once SITE_BASE.'/restricted/php/core.php';                                   //-- This should call all the additional libraries needed --//
 
 
 //====================================================================//
