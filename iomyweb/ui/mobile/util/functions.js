@@ -112,7 +112,14 @@ $.extend(IOMy.functions,{
      * @param {type} sFormat    Date format in dd/mm/yy or mm/dd/yy
      * @returns {String}        Human-readable date and time
      */
-    getTimestampString : function (date, sFormat) {
+    getTimestampString : function (date, sFormat, bShowTime) {
+        //----------------------------------------------------------//
+        // Declare variables and define default arguments
+        //----------------------------------------------------------//
+        if (bShowTime === undefined) {
+            bShowTime = true;
+        }
+        
         var iHour       = date.getHours();
         var vMinutes    = date.getMinutes();
         var vSeconds    = date.getSeconds();
@@ -123,6 +130,7 @@ $.extend(IOMy.functions,{
         var vDay        = date.getDate();
         
         var sDate       = ""; // Set according to the given format
+        var sTime       = "";
         
         if (iHour >= 12) {
             sSuffix = "PM";
@@ -159,11 +167,19 @@ $.extend(IOMy.functions,{
             sDate = vDay+"/"+vMonth+"/"+iYear+" ";
         } else if (sFormat === "mm/dd/yyyy" || sFormat === "mm/dd/yy") {
             sDate = vMonth+"/"+vDay+"/"+iYear+" ";
+        } else if (sFormat === "yyyy/mm/dd" || sFormat === "yy/mm/dd") {
+            sDate = iYear+"/"+vMonth+"/"+vDay+" ";
+        } else if (sFormat === "yyyy-mm-dd" || sFormat === "yy-mm-dd") {
+            sDate = iYear+"-"+vMonth+"-"+vDay+" ";
         } else {
             sDate = "";
         }
         
-        return sDate+iHour+":"+vMinutes+":"+vSeconds+sSuffix;
+        if (bShowTime === true) {
+            sTime = iHour + ":" + vMinutes + ":" + vSeconds + sSuffix;
+        }
+        
+        return sDate + sTime;
     },
 	
     /**

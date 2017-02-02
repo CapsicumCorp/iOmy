@@ -64,6 +64,12 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         // }
     ],
     
+    /**
+     * Enables or disables the telnet command widgets.
+     * 
+     * @param {type} oScope             Controller that contains the enable join mode button.
+     * @param {type} bEnabled           Boolean switch to enable or disable the telnet controls.
+     */
     ToggleZigbeeCommands : function (oScope, bEnabled) {
         var me = this;
         
@@ -304,6 +310,13 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         });
     },
     
+    /**
+     * Runs a custom command via telnet to the hub.
+     * 
+     * @param {type} oScope
+     * @param {type} oInputWidget
+     * @returns {undefined}
+     */
     ExecuteCustomCommand : function (oScope, oInputWidget) {
         //---------------------------------------------------------//
         // Import modules, widgets and scope
@@ -555,26 +568,34 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                     }
                     
                     // Now populate the Zigbee modem select box
-                    $.each(me.ConnectedZigbeeModems, function(sIndex, aModem) {
-                        if (sIndex !== undefined && sIndex !== null
-                                && aModem !== undefined && aModem !== null)
-                        {
-                            oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).addItem(
-                                new sap.ui.core.Item({
-                                    text : aModem.CommName,
-                                    key : aModem.CommId
-                                })
-                            );
-                    
-                            if (firstSelection === null) {
-                                firstSelection = aModem;
+                    if (JSON.stringify(me.ConnectedZigbeeModems) === "{}") {
+                        oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).addItem(
+                            new sap.ui.core.Item({
+                                text : "No Zigbee Modems Detected"
+                            })
+                        );
+                    } else {
+                        $.each(me.ConnectedZigbeeModems, function(sIndex, aModem) {
+                            if (sIndex !== undefined && sIndex !== null
+                                    && aModem !== undefined && aModem !== null)
+                            {
+                                oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).addItem(
+                                    new sap.ui.core.Item({
+                                        text : aModem.CommName,
+                                        key : aModem.CommId
+                                    })
+                                );
+
+                                if (firstSelection === null) {
+                                    firstSelection = aModem;
+                                }
                             }
-                        }
-                    });
-                    
-                    oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).setSelectedKey(firstSelection.CommId);
-                    me.iSelectedCommID = firstSelection.CommId;
-                    me.ToggleZigbeeCommands(oScope, !me.bRunningCommand);
+                        });
+
+                        oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).setSelectedKey(firstSelection.CommId);
+                        me.iSelectedCommID = firstSelection.CommId;
+                        me.ToggleZigbeeCommands(oScope, !me.bRunningCommand);
+                    }
                 }
                 
             }

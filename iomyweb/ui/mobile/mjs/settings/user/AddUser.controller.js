@@ -27,9 +27,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
     wTitleField             : null,
     wSurnameField           : null,
     wDisplayNameField       : null,
-    wDateOfBirthYearField   : null,
-    wDateOfBirthMonthField  : null,
-    wDateOfBirthDayField    : null,
+    wDateOfBirthField       : null,
     wEmailField             : null,
     wContactPhoneField      : null,
     
@@ -44,11 +42,16 @@ sap.ui.controller("mjs.settings.user.AddUser", {
     
     wPasswordField          : null,
     wConfirmPasswordField   : null,
+    
+    wDBRootUsernameField    : null,
+    wDBRootPasswordField    : null,
+    
     wEditButton             : null,
     
     wUserInformationVertBox : null,
     wUserAddressVertBox     : null,
     wPasswordVertBox        : null,
+    wDBAuthVertBox          : null,
     
     /**
 	 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -106,8 +109,9 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         // Destroys the actual panel of the page. This is done to ensure that there
         // are no elements left over which would increase the page size each time
         // the page is visited.
-        if (me.byId("AddUserPanel") !== undefined)
+        if (me.byId("AddUserPanel") !== undefined) {
             me.byId("AddUserPanel").destroy();
+        }
         
 //        if (me.wVertBox !== null) {
 //            me.wVertBox.destroy();
@@ -178,14 +182,24 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             maxLength : 60
         }).addStyleClass("SettingsTextInput width100Percent");
         
-//        var oDateOfBirthLabel = new sap.m.Label({
-//            text : "Date of Birth"
-//        });
-//
-//        me.wDateOfBirthField = new sap.m.Input({
-//            value : "",
-//            maxLength : 60
-//        }).addStyleClass("SettingsTextInput width100Percent");
+        var oDateOfBirthLabel = new sap.m.Label({
+            text : "Date of Birth"
+        });
+
+        me.wDateOfBirthField = new sap.m.DatePicker({});
+        me.wDateOfBirthField.attachChange(
+            function () {
+                console.log(this.getDisplayFormat());
+                
+                var dDob = this.getDateValue();
+                
+                console.log(IOMy.functions.getTimestampString(dDob, "yyyy-mm-dd", false));
+                
+                console.log(this.getValue());
+            }
+        );
+
+        me.wDateOfBirthField.setDisplayFormat("YYYY-MM-dd");
 
         var oEmailLabel = new sap.m.Label({
             text : "Alert Email"
@@ -339,6 +353,40 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             value : "",
             type : sap.m.InputType.Password
         }).addStyleClass("width100Percent SettingsTextInput");
+        
+        //----------------------------------------------//
+        // Database Authentication Section
+        //----------------------------------------------//
+        var oDBAuthenticationSection = new sap.m.VBox({
+            items : [
+                new sap.m.VBox({
+                    items : [
+                        new sap.m.Label({
+                            text: "Database Authentication"
+                        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText")
+                    ]
+                })
+            ]
+        }).addStyleClass("ConsistentMenuHeader BoxSizingBorderBox MarTop8px BorderTop ListItem width100Percent");
+        
+        // -- USERNAME --\\
+        var oDBRootUsernameLabel = new sap.m.Label({
+            text : "Username"
+        });
+        
+        me.wDBRootUsernameField = new sap.m.Input({
+            value : ""
+        }).addStyleClass("width100Percent SettingsTextInput");
+        
+        // -- PASSWORD --\\
+        var oDBRootPasswordLabel = new sap.m.Label({
+            text : "Password"
+        });
+        
+        me.wDBRootPasswordField = new sap.m.Input({
+            value : "",
+            type : sap.m.InputType.Password
+        }).addStyleClass("width100Percent SettingsTextInput");
 
         //--------------------------//
         // User Information
@@ -346,9 +394,10 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         me.wEditButton = new sap.m.VBox({
             items : [
                 new sap.m.Link(me.createId("editButton"), {
-                    text : "Update",
+                    text : "Create User",
                     press : function () {
-                        this.setEnabled(false);
+                        var thisButton = this;
+                        thisButton.setEnabled(false);
 
                         var sTitle = me.wTitleField.getValue();
                         var sGivennames = me.wGivenNamesField.getValue();
@@ -357,13 +406,26 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                         var sEmail = me.wEmailField.getValue();
                         var sPhone = me.wContactPhoneField.getValue();
                         var iGender = me.wGenderField.getSelectedKey();
+                        var vDob = me.wDateOfBirthField.getDateValue();
+                        var sAddressLine1 = me.wAddressLine1Field.getValue();
+                        var sAddressLine2 = me.wAddressLine2Field.getValue();
+                        var sAddressLine3 = me.wAddressLine3Field.getValue();
 
                         var bError = false;
                         var aLogErrors = [];
                         var sDialogTitle;
                         
+                        //-----------------------------------//
+                        // Prepare the date of birth string
+                        //-----------------------------------//
+                        vDob = IOMy.functions.getTimestampString(vDob, "yyyy-mm-dd", false)
+                        
                         if (sDisplayname === "") {
                             aLogErrors.push("Display name is required.");
+                        }
+                        
+                        if (sDisplayname !== me.wPasswordField.getValue()) {
+                            aLogErrors.push("The new passwords don't match.");
                         }
 
                         if (aLogErrors.length > 0) {
@@ -392,23 +454,39 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                                         "Displayname" : sDisplayname,
                                         "Email" : sEmail,
                                         "Phone" : sPhone,
-                                        "Gender" : iGender
+                                        "Gender" : iGender,
+                                        "AddressLine1" : sAddressLine1,
+                                        "AddressLine2" : sAddressLine2,
+                                        "AddressLine3" : sAddressLine3,
+                                        "AddressCountry" : me.wCountryField.getSelectedKey(),
+                                        "AddressStateProvince" : me.wStateField.getSelectedKey(),
+                                        "AddressPostcode" : me.wPostCodeField.getSelectedKey(),
+                                        "AddressTimezone" : me.wTimezoneField.getSelectedKey(),
+                                        "AddressLanguage" : me.wLanguageField.getSelectedKey(),
+                                        "Username" : sDisplayname,
+                                        "NewPassword" : me.wPasswordField.getValue(),
+                                        "Data" : "{\"Username\":\""+me.wDBRootUsernameField.getValue()+"\",\"Password\":\""+me.wDBRootPasswordField.getValue()+"\",\"URI\":\"localhost\"}",
                                     },
+                                    
                                     onSuccess : function () {
                                         IOMy.common.showSuccess("Update successful.", "Success", 
                                         function () {
                                             IOMy.common.NavigationTriggerBackForward(false);
                                         }, "UpdateMessageBox");
                                     },
-                                    error : function () {
-                                        IOMy.common.showError("Update failed.", "Error");
+                                    onFail : function (response) {
+                                        // Report the error in a popup message.
+                                        IOMy.common.showError(response.responseText, "Error",
+                                            function () {
+                                                thisButton.setEnabled(true);
+                                            }
+                                        );
                                     }
                                 });
                             } catch (e00033) {
                                 IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
                             }
                         }
-                        this.setEnabled(true);
                     }
                 }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
             ]
@@ -424,7 +502,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                 oGenderLabel, me.wGenderField,
                 oSurnameLabel, me.wSurnameField,
                 oDisplayNameLabel, me.wDisplayNameField,
-                //oDateOfBirthLabel, me.wDateOfBirthField,
+                oDateOfBirthLabel, me.wDateOfBirthField,
                 oEmailLabel, me.wEmailField,
                 oContactPhoneNumberLabel, me.wContactPhoneField
             ]
@@ -452,7 +530,17 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                 // Password
                 //--------------------------//
                 oPasswordLabel, me.wPasswordField,
-                oConfirmPasswordLabel, me.wConfirmPasswordField,
+                oConfirmPasswordLabel, me.wConfirmPasswordField
+            ]
+        }).addStyleClass("UserFormSection");
+        
+        me.wDBAuthVertBox = new sap.m.VBox({
+            items : [
+                //------------------------------------------------------//
+                // Username and password for the database admin user.
+                //------------------------------------------------------//
+                oDBRootUsernameLabel, me.wDBRootUsernameField,
+                oDBRootPasswordLabel, me.wDBRootPasswordField,
                 
                 //--------------------------//
                 // Add Button
@@ -471,7 +559,10 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                 me.wUserAddressVertBox,
                 
                 oPasswordSection,
-                me.wPasswordVertBox
+                me.wPasswordVertBox,
+                
+                oDBAuthenticationSection,
+                me.wDBAuthVertBox
             ] //-- End of Panel Content --//
         }).addStyleClass("UserInputForm TableSideBorders");
 

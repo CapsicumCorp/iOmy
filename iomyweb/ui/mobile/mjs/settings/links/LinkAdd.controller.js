@@ -499,6 +499,9 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                 if (data.WeatherStation.LinkId !== undefined) {
                     iLinkId = data.WeatherStation.LinkId;
                 }
+            } else {
+                jQuery.sap.log.error("An error has occurred with the link ID: consult the \"Success\" output above this console");
+                IOMy.common.showError("Error creating "+sLinkType+":\n\n"+error.responseText);
             }
 
             try {

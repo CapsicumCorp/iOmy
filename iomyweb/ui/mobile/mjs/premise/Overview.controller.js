@@ -278,15 +278,17 @@ sap.ui.controller("mjs.premise.Overview", {
 
                             // Create the flag for showing the list of rooms for a selected room
                             // if it doesn't already exist.
-                            if (me.roomsExpanded[sIndex] === undefined)
+                            if (me.roomsExpanded[sIndex] === undefined) {
                                 me.roomsExpanded[sIndex] = false;
-
-                            me.aElementsToDestroy.push("device"+aDevice.DeviceId);
+                            }
 
                             // Retrieve number of devices/things in the room
                             iDevicesInRoom = IOMy.functions.getNumberOfDevicesInRoom(aDevice.DeviceId);
 
-                            //=============== Create the device link ===============\\
+                            //=============== Create/Refresh the device link ===============\\
+                            me.aElementsToDestroy.push("device"+aDevice.DeviceId);
+                            me.aElementsToDestroy.push("deviceLink"+aDevice.DeviceId);
+                            
                             me.byId("room"+sIndex).addItem(
                                 new sap.m.HBox({
                                     items : [

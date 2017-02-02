@@ -966,7 +966,7 @@ $.extend(IOMy.widgets,{
             aItems.push(
                 new sap.ui.core.Item({
                     text : aLanguage[i].LanguageName,
-                    key : aLanguage[i].LangaugeId
+                    key : aLanguage[i].LanguageId
                 })
             );
         }

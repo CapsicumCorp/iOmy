@@ -53,6 +53,27 @@ $.extend(IOMy.devices,{
     },
     
     /**
+     * Returns a map of the link a thing (specified by its ID) is connected to.
+     * 
+     * @param {type} iThingId           // ID of the thing
+     * @returns {JS Object}             // Link referenced by its thing/item
+     */
+    GetLinkOfThing : function(iThingId) {
+        var iLinkId = IOMy.common.ThingList["_"+iThingId].LinkId;
+        
+        var oLink = null;
+        // Using the Link List found in common because the scope is global.
+        for (var j = 0; j < IOMy.common.LinkList.length; j++) {
+            if (IOMy.common.LinkList[j].LinkId === iLinkId) {
+                oLink = IOMy.common.LinkList[j];
+                break;
+            }
+        }
+        
+        return oLink;
+    },
+    
+    /**
      * Function that performs an AJAX request to assign a given link to a given room
      * 
      * @param {type} iLinkId                ID of the link to assign to a room
@@ -78,8 +99,12 @@ $.extend(IOMy.devices,{
                     IOMy.common.showSuccess(sLinkType+" successfully assigned", "Success",
                         function () {
                             
-                            // Head back to the previous page.
-                            IOMy.common.NavigationTriggerBackForward(false);
+                            // Head back to the previous page after the core variables have been updated.
+                            IOMy.common.ReloadCoreVariables(
+                                function () {
+                                    IOMy.common.NavigationTriggerBackForward(false);
+                                }
+                            );
                             
                         },
                     "UpdateMessageBox");
