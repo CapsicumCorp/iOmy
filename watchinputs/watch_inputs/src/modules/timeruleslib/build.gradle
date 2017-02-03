@@ -1,0 +1,3 @@
+apply from: '../../../../WatchInputsAndroid/common_cpp_ndkbuild.gradle'
+
+ext.thismodulename='timeruleslib'

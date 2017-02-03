@@ -222,4 +222,5 @@ AC_CONFIG_FILES([src/modules/commonlib/Makefile])
 AC_CONFIG_FILES([src/modules/webapiclientlib/Makefile])
 AC_CONFIG_FILES([src/modules/dblib/Makefile])
 AC_CONFIG_FILES([src/modules/locklib/Makefile])
+AC_CONFIG_FILES([src/modules/timeruleslib/Makefile])
 AC_OUTPUT

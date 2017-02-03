@@ -1,1 +1,1 @@
-SUBDIRS = simclist debuglib commonserverlib cmdserverlib dbcounterlib configlib httpserverlib nativeseriallib commonlib dblib rapidhalib serialportlib zigbeelib xbeelib webapiclientlib locklib
+SUBDIRS = simclist debuglib commonserverlib cmdserverlib dbcounterlib configlib httpserverlib nativeseriallib commonlib dblib rapidhalib serialportlib zigbeelib xbeelib webapiclientlib locklib timeruleslib
