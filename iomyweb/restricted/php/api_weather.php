@@ -823,6 +823,8 @@ if( $bError===false ) {
 				if( $bError===false ) {
 					$aResult = $oWeather->GetMostRecentDBWeather();
 					
+					//------------------------------------------------------//
+					//-- IF Data has been fetched for the IOs from Source --//
 					if( $aResult['Error']===false ) {
 						$iUTS = time();
 						
@@ -831,10 +833,13 @@ if( $bError===false ) {
 							$aResultTemp = $oWeather->PollWeather();
 							
 							if( $aResultTemp['Error']===false ) {
+								//-- Get the Most Recent Values --//
 								$aResult = $oWeather->GetMostRecentDBWeather();
 							} else {
 								$bError = true;
-								$sErrMesg .= "Error: failed to get new values! \n";
+								$iErrCode  = 2401;
+								$sErrMesg .= "Error Code:'2401' \n";
+								$sErrMesg .= "Error: failed to get new values from the weather source! \n";
 								$sErrMesg .= $aResultTemp['ErrMesg'];
 							}
 						}
@@ -847,9 +852,26 @@ if( $bError===false ) {
 						if( $aResultTemp['Error']===false ) {
 							
 							$aResult = $oWeather->GetMostRecentDBWeather();
+							
+							if( $aResult['Error']===true ) {
+								var_dump( $aResultTemp );
+								echo "\n\n";
+								var_dump( $aResult );
+								
+								$bError = true;
+								$iErrCode  = 2412;
+								$sErrMesg .= "Error Code:'2412' \n";
+								$sErrMesg .= "Error: failed to get new values! \n";
+								$sErrMesg .= $aResult['ErrMesg'];
+							
+							}
+							
+							
 						} else {
 							$bError = true;
-							$sErrMesg .= "Error: failed to get new values! \n";
+							$iErrCode  = 2411;
+							$sErrMesg .= "Error Code:'2411' \n";
+							$sErrMesg .= "Error: failed to get new values from the weather source! \n";
 							$sErrMesg .= $aResultTemp['ErrMesg'];
 						}
 					}
@@ -858,6 +880,7 @@ if( $bError===false ) {
 			} catch( Exception $e2400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
+				$iErrCode  = 2400;
 				$sErrMesg .= "Error Code:'2400' \n";
 				$sErrMesg .= $e2400->getMessage();
 			}
@@ -874,6 +897,7 @@ if( $bError===false ) {
 		
 	} catch( Exception $e0400 ) {
 		$bError = true;
+		$iErrCode  = 400;
 		$sErrMesg .= "Error Code:'0400' \n";
 		$sErrMesg .= $e0400->getMessage();
 	}

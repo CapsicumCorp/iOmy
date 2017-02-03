@@ -852,7 +852,7 @@ class Weather_OpenWeatherMap {
 					
 					if( $aStationIOInfo['Error']===false ) {
 						
-						if( $aStationIOInfo['Data']['PermDataRead']===true ) {
+						if( $aStationIOInfo['Data']['PermDataRead']===1 ) {
 							
 							//-- Lookup the most recent StationCode from the database --//
 							$aStationCodeResult = GetIODataMostRecent( $aStationIOInfo['Data']['DataTypeId'], $iWeatherStationIOId, $iUTS );
