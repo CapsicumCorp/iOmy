@@ -249,7 +249,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
         
         me.wUserLabel = new sap.m.Label({
             text : "User"
-        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText");
+        }).addStyleClass("TextLeft MarTop5px MarBottom5px  PaddingToMatchButtonText");
         
         me.wUserSelectBox = new sap.m.Select({
             width : "100%"
@@ -257,7 +257,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
         
         me.wPremiseLabel = new sap.m.Label({
             text : "Premise"
-        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText");
+        }).addStyleClass("TextLeft MarTop5px MarBottom5px PaddingToMatchButtonText");
         
         me.wPremiseSelectBox = getPremiseSelector(me.createId("premiseBox")).addStyleClass("SettingsDropdownInput width100Percent");
         
@@ -360,6 +360,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
             }
         }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter");
         
+		//-- Where the page gets created --//
         me.wVertBox = new sap.m.VBox({
             items : [
                 //--------------------------//
@@ -387,7 +388,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                                     items : [ me.wPremiseLabel ]
                                 })
                             ]
-                        }).addStyleClass("ConsistentMenuHeader ListItem width100Percent"),
+                        }).addStyleClass("ConsistentMenuHeader BorderTop ListItem width100Percent"),
                         // Premise select box
                         new sap.m.VBox({
                             items : [me.wPremiseSelectBox]

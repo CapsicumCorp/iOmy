@@ -123,7 +123,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
         //====================================================================//
         me.wUserLabel = new sap.m.Label({
             text : "User"
-        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText");
+        }).addStyleClass("TextLeft MarTop5px MarBottom5px PaddingToMatchButtonText");
         
         me.wUserSelectBox = new sap.m.Select({
             width : "100%"
@@ -134,7 +134,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
         //====================================================================//
         me.wPremiseLabel = new sap.m.Label({
             text : "Premise"
-        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText");
+        }).addStyleClass("TextLeft MarTop5px MarBottom5px PaddingToMatchButtonText");
         
         me.wPremiseSelectBox = getPremiseSelector(me.createId("premiseBox")).addStyleClass("SettingsDropdownInput width100Percent");
         
@@ -163,14 +163,14 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                                     items : [ me.wPremiseLabel ]
                                 })
                             ]
-                        }).addStyleClass("ConsistentMenuHeader ListItem width100Percent"),
+                        }).addStyleClass("ConsistentMenuHeader BorderTop ListItem width100Percent"),
                         new sap.m.VBox({
                             items : [me.wPremiseSelectBox]
                         }).addStyleClass("PadLeft8px PadRight8px")
                     ]
-                }).addStyleClass("MarTop10px MarBottom10px")
+                }).addStyleClass("")
             ]
-        }).addStyleClass("width100Percent UserInputForm MarBottom10px");
+        }).addStyleClass("width100Percent TableSideBorders UserInputForm");
         
         try {
             // Populate the users select box with the viewable users
@@ -331,7 +331,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                     ]
                 })
             ]
-        }).addStyleClass("ConsistentMenuHeader TableSideBorders BorderTop ListItem width100Percent");
+        }).addStyleClass("ConsistentMenuHeader BorderTop ListItem width100Percent");
         
         me.wPremisePermissions = new sap.m.VBox(me.createId("premise"+mPremiseInfo.Index), {
             items : [
@@ -371,14 +371,14 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                     ]
                 }).addStyleClass("MarAll8px")
             ]
-        }).addStyleClass("ListItem TableSideBorders width100Percent");
+        }).addStyleClass("ListItem width100Percent");
         
         me.wVertBox.addItem(me.wPremisePermissionHeading);
         me.wVertBox.addItem(me.wPremisePermissions);
         me.wVertBox.addItem(
             new sap.m.VBox({
                 items : [me.wApplyButton]
-            }).addStyleClass("RoomPermissionsApplyButton")
+            }).addStyleClass("RoomPermissionsApplyButton BorderBottom")
         );
         
         me.premisesChanged[mPremiseInfo.Index] = false;

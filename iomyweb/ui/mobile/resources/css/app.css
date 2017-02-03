@@ -724,26 +724,17 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	}
         
     .NavHeader-Icon {
-		height:			25px;
-        line-height:            2.5rem;
-		/*width:			20px;*/
+        line-height: 	2.5rem;
 		margin-top:		5px;
-		/*padding:		0px 10px 16px 10px;*/
-		/*font-size:		40px;*/
-/*		border:			1px solid #404040;
-		border-radius:          50%;*/
 		color:			#404040;
 	}
         
     .NavHeader-Text {
-		height:			25px;
-		min-width: 50px;
+		min-width: 		50px;
 		margin-top:		15px;
 		padding:		0px 10px 16px 10px;
-		/*font-size:		40px;*/
-/*		border:			1px solid #404040;
-		border-radius:          50%;*/
 		color:			#404040;
+		white-space:	nowrap;
 	}
         
     /* DARKEN THE CHILD BUTTONS ON THE NAVIGATION POPOVER */
