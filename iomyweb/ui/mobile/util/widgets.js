@@ -194,7 +194,7 @@ $.extend(IOMy.widgets,{
 				oPageIcon = new sap.ui.core.Icon({
 					src : sPageIcon,
 					//densityAware : false
-				}).addStyleClass("NavHeader-Icon");
+				}).addStyleClass("TextSize2Rem NavHeader-Icon");
 			} else {
 				oPageIcon = new sap.m.Text({ text:"" });
 			}
@@ -202,8 +202,9 @@ $.extend(IOMy.widgets,{
 			
 			//-- 2.1.3 - Center Content Title --//
 			oTitleText = new sap.m.Text( oScope.createId( "NavSubHead_BackBtn" ), {
-				text : sTitle
-			}).addStyleClass("Font-Larger Text_black");
+				text : sTitle,
+				wrapping : false
+			}).addStyleClass("TextSize1d25Rem Text_black");
 			
 			
 			//-- 2.1.4 - Right Content Forward button (if Applicable) --//
@@ -234,7 +235,7 @@ $.extend(IOMy.widgets,{
 			if( sPageIcon!==undefined && sPageIcon!=="" ) {
                 oPageIcon = new sap.ui.core.Icon({
                     src : sPageIcon
-                }).addStyleClass("TextSize40px NavHeader-Icon");
+                }).addStyleClass("TextSize2Rem NavHeader-Icon");
 			} else {
 				oPageIcon = new sap.m.Text({ text:"" });
 			}
@@ -242,8 +243,9 @@ $.extend(IOMy.widgets,{
 			
 			//-- 2.2.3 - Center Content Title --//
 			oTitleText = new sap.m.Text( oScope.createId( "NavSubHead_Title" ), {
-				text : sTitle
-			}).addStyleClass("Font-Larger Text_black NavHeader-Text");
+				text : sTitle,
+				wrapping : false
+			}).addStyleClass("TextSize1d25Rem Text_black NavHeader-Text");
 			
 			
 			//-- 2.2.4 - Right Content Forward button (if Applicable) --//

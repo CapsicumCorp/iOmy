@@ -210,7 +210,7 @@ sap.ui.controller("mjs.premise.Overview", {
                     oVertBox.addItem(
                         new sap.m.HBox({
                             items : [
-                                // === NUMBER OF DEVICES ASSIGNED TO A ROOM === \\
+                                // === NUMBER OF DEVICES ASSIGNED TO A ROOM ===//
                                 new sap.m.VBox({
                                     items : [
                                         new sap.m.Text({
@@ -230,7 +230,7 @@ sap.ui.controller("mjs.premise.Overview", {
                                             }
                                         }).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px width100Percent")
                                     ]
-                                }).addStyleClass("width100Percent TextOverflowEllipsis"),
+                                }).addStyleClass("TextOverflowEllipsis"),
                                 
                                 // === COLLAPSE/EXPAND ICON === \\
                                 new sap.m.VBox({
