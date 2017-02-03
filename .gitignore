@@ -17,8 +17,8 @@ aclocal.m4
 configure
 libtool
 
-config/*
-m4/*
+config/
+m4/
 !m4/boost.m4
 .deps
 
