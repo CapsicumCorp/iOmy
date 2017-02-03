@@ -114,7 +114,6 @@ sap.ui.controller("mjs.devices.MotionSensor", {
     DestroyUI : function() {
         //console.log("DestroyUI() called.");
         var me          = this;
-        var sCurrentID  = "";
         
         if (me.wMainList !== null) {
             me.wMainList.destroy();
@@ -290,8 +289,10 @@ sap.ui.controller("mjs.devices.MotionSensor", {
         console.log(aIOIDs);
         
         //--------------------------------------------------------------------//
-        // Fetch IO data and place them in the correct widgets.
+        // Fetch device status IO data and place them in the correct widgets.
         //--------------------------------------------------------------------//
+        me.wStatusField.setText( IOMy.devices.GetDeviceStatus(me.iThingId) );
+        
         for (var i = 0; i < aIOIDs.length; i++) {
             //------------------------------------//
             // Fetch the Battery Information

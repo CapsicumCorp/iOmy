@@ -553,6 +553,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         me.FetchConnectedZigbeeModems(oScope,
             function (mErrorInfo) {
                 var firstSelection = null;
+                var bNoModems = false;
                 
                 // Check if a fatal error occurred
                 if (mErrorInfo.bError === true) {
@@ -574,6 +575,9 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                                 text : "No Zigbee Modems Detected"
                             })
                         );
+                
+                        oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).setEnabled(false);
+                        me.ToggleZigbeeCommands(oScope, false);
                     } else {
                         $.each(me.ConnectedZigbeeModems, function(sIndex, aModem) {
                             if (sIndex !== undefined && sIndex !== null
@@ -612,14 +616,6 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         
         oScope.aElementsForAFormToDestroy.push(me.uiIDs.sCustomTelnetCommandFieldID);
         
-//        oFormItem = new sap.m.Input(oScope.createId(me.uiIDs.sCustomTelnetCommandFieldID), {
-//            enabled : !me.bRunningCommand,
-//            submit : function () {
-//                me.ToggleZigbeeCommands(oScope, false);
-//                
-//                me.ExecuteCustomCommand(oScope);
-//            }
-//        }).addStyleClass("TextCenter width100Percent");
         oFormItem = new ZigbeeCustomTelnetInput(oScope.createId(me.uiIDs.sCustomTelnetCommandFieldID), {
             scope : oScope,
             enabled : !me.bRunningCommand

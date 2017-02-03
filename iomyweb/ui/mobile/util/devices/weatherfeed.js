@@ -273,7 +273,7 @@ $.extend(IOMy.devices.weatherfeed,{
         return mInfo;
     },
     
-    ValidateRoom : function (oScope) {
+    /*ValidateRoom : function (oScope) {
         var me                      = this;
         var bError                  = false;
         var aErrorMessages          = [];
@@ -302,7 +302,7 @@ $.extend(IOMy.devices.weatherfeed,{
         mInfo.aErrorMessages = aErrorMessages;
         
         return mInfo;
-    },
+    },*/
     
     ValidateKeyCode : function (oScope) {
         var me                      = this;
@@ -504,7 +504,7 @@ $.extend(IOMy.devices.weatherfeed,{
             },
             
             setFailureNotices : function (errMessage) {
-                IOMy.common.showError("Failed to load the weather information", "Error");
+                IOMy.common.showError("Failed to load the weather information:\n\n"+errMessage, "Error");
                 jQuery.sap.log.error(errMessage);
                 
                 if (oScope.byId(sPrefix + me.uiIDs.sTemperatureDisplayID) !== undefined) {
