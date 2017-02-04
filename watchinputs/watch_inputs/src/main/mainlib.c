@@ -57,6 +57,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "mainlib.h"
 #include "modules/debuglib/debuglib.h"
 #include "modules/configlib/configlib.h"
+#include "modules/timeruleslib/timeruleslib.h"
 #include "modules/cmdserverlib/cmdserverlib.h"
 #include "modules/commonserverlib/commonserverlib.h"
 #include "modules/commonlib/commonlib.h"
@@ -122,6 +123,7 @@ static void *mainlib_MainThreadLoop(void *thread_val);
 #define COMMONSERVERLIB_DEPIDX 1
 #define CMDSERVERLIB_DEPIDX 2
 #define CONFIGLIB_DEPIDX 3
+#define TIMERULESLIB_DEPIDX 4
 
 static const mainlib_ifaceptrs_ver_1_t mainlib_ifaceptrs_ver_1={
   mainlib_loadsymbol,
@@ -162,6 +164,12 @@ static moduledep_ver_1_t mainlib_deps[]={
     "configlib",
     NULL,
     CONFIGLIBINTERFACE_VER_1,
+    0
+  },
+  {
+    "timeruleslib",
+    NULL,
+    TIMERULESLIBINTERFACE_VER_1,
     0
   },
   {
@@ -1197,6 +1205,7 @@ void Java_com_capsicumcorp_iomy_libraries_watchinputs_MainLib_jnimain( JNIEnv* e
 static void *mainlib_MainThreadLoop(void *thread_val) {
   const debuglib_ifaceptrs_ver_1_t * const debuglibifaceptr=mainlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   const configlib_ifaceptrs_ver_1_t * const configlibifaceptr=mainlib_deps[CONFIGLIB_DEPIDX].ifaceptr;
+  const timeruleslib_ifaceptrs_ver_1_t * const timeruleslibifaceptr=mainlib_deps[TIMERULESLIB_DEPIDX].ifaceptr;
   int shortsleep=0; //1=Only sleep for a short interval between checks, 0=Sleep for a longer interval between checks
   int result;
   time_t curtime;
@@ -1205,6 +1214,7 @@ static void *mainlib_MainThreadLoop(void *thread_val) {
   debuglibifaceptr->debuglib_printf(1, "%s: Using config file: %s\n", __func__, cfg_filename);
 
 	configlibifaceptr->configlib_setcfgfilename(cfg_filename);
+  timeruleslibifaceptr->setrulesfilename(timerules_filename);
 
   //Wait for quit
   while (!mainlib_getneedtoquit()) {
@@ -1218,6 +1228,15 @@ static void *mainlib_MainThreadLoop(void *thread_val) {
 				}
 			}
 		}
+    if (timeruleslibifaceptr) {
+      if (!timeruleslibifaceptr->isloaded()) {
+        //Load configuration here
+        result=timeruleslibifaceptr->readrulesfile();
+        if (result!=0) {
+          shortsleep=1;
+        }
+      }
+    }
     curtime=time(NULL);
     waittime.tv_nsec=0;
     if (shortsleep) {
