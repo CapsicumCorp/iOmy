@@ -174,7 +174,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         }).addStyleClass("SettingsTextInput width100Percent");
 
         var oDisplayNameLabel = new sap.m.Label({
-            text : "Display Name"
+            text : "Display Name (Login Username)"
         });
 
         me.wDisplayNameField = new sap.m.Input({
@@ -424,7 +424,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                             aLogErrors.push("Display name is required.");
                         }
                         
-                        if (sDisplayname !== me.wPasswordField.getValue()) {
+                        if (me.wConfirmPasswordField.getValue() !== me.wPasswordField.getValue()) {
                             aLogErrors.push("The new passwords don't match.");
                         }
 
