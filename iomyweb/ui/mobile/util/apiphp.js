@@ -110,6 +110,10 @@ $.extend(IOMy.apiphp,{
 				sReturn = sUrlRestricted+'/php/api_philipshue.php';
 				break;
                 
+            case "motionsensor":
+				sReturn = sUrlRestricted+'/php/api_motionsensor.php';
+				break;
+                
             case "weather":
 				sReturn = sUrlRestricted+'/php/api_weather.php';
 				break;

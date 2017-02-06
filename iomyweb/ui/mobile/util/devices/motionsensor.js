@@ -37,7 +37,7 @@ $.extend(IOMy.devices.motionsensor,{
     },
     
     // -- INTEGERS
-    iODataFieldsToFetch         : 4,
+    iODataFieldsToFetch         : 2,
     iODataFieldsFailedToFetch   : 0,
     bWaitingToLoadAPI           : false,
     bLoadingFieldsFromAPI       : false,
@@ -49,19 +49,97 @@ $.extend(IOMy.devices.motionsensor,{
     RSBitwiseStatus : 3909,
     RSTemperature   : 1701,
     
-    CallAPI : function (iThingId) {
+    CallAPI : function (iThingId, oTamperField, oLastMotionField) {
         //--------------------------------------------------------------------//
         // Declare variables and import modules
         //--------------------------------------------------------------------//
         var me = this;
         var php = IOMy.apiphp;
+        var sUrl = php.APILocation("motionsensor");
+        var mData = {
+            "Mode" : "GetMotionData",
+            "ThingId" : iThingId
+        };
         
         //--------------------------------------------------------------------//
-        // Send the AJAX request
+        // Indicate that the API is being loaded and send the AJAX request
         //--------------------------------------------------------------------//
+        me.bWaitingToLoadAPI        = false;
+        me.bLoadingFieldsFromAPI    = true;
+        
+        php.AjaxRequest({
+            "url" : sUrl,
+            "data" : mData,
+            
+            "onSuccess" : function (response, data) {
+                // Check the error condition.
+                if (data.Error === false) {
+                    //--------------------------------------------------------//
+                    // If no error has been reported, get the data and display
+                    // it.
+                    //--------------------------------------------------------//
+                    var mResponseData = data.Data;
+                    
+                    var iUTS    = mResponseData.MostRecentMotion;
+                    var bTamper = mResponseData.CurrentStatus.Tamper;
+                    
+                    oLastMotionField.setText(
+                        IOMy.functions.getLengthOfTimePassed({
+                            "UTS" : iUTS
+                        })
+                    );
+            
+                    oTamperField.setText(bTamper === false ? "Secure" : "Not Secure");
+                    
+                    //--------------------------------------------------------//
+                    // If the device has detected possible tampering, then set
+                    // the text colour to red.
+                    //--------------------------------------------------------//
+                    if (bTamper === true) {
+                        oTamperField.addStyleClass("Text_red_13");
+                    }
+                }
+                
+                // Conclude the request callback
+                this.onComplete();
+            },
+            
+            "onFail" : function (response) {
+                // Log errors
+                jQuery.sap.log.error("There was an error fetching information about the tamper status and how long since the last motion was detected:\n\n" + JSON.stringify(response));
+                
+                // Conclude the request callback
+                this.onComplete();
+            },
+            
+            "onComplete" : function () {
+                //------------------------------------------------------------//
+                // Decrement the OData Field count
+                //------------------------------------------------------------//
+                console.log("====================================================================");
+                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                //jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                //jQuery.sap.log.debug("====================================================================");
+                
+                me.bLoadingFieldsFromAPI = false;
+                
+                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                //jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                
+                //------------------------------------------------------------//
+                // If this is final OData request and the API has finished its
+                // call, reset the loading motion sensor OData fields flag, and
+                // reset the fields to fetch back to the default number.
+                //------------------------------------------------------------//
+                if (me.iODataFieldsToFetch === 0 && me.bWaitingToLoadAPI === false && me.bLoadingFieldsFromAPI === false) {
+                    me.bLoadingMotionSensorFields = false;
+                    me.iODataFieldsToFetch = 2;
+                }
+            }
+        });
     },
     
-    FetchField : function (iIOId, oTextWidget, iRSType) {
+    FetchField : function (iIOId, oTextWidget) {
         //--------------------------------------------------------------------//
         // Declare variables and import modules
         //--------------------------------------------------------------------//
@@ -72,12 +150,12 @@ $.extend(IOMy.devices.motionsensor,{
         // Send the AJAX request
         //--------------------------------------------------------------------//
         odata.AjaxRequest({
-            Url             : odata.ODataLocation("dataint"),
-            Columns         : ["CALCEDVALUE", "UTS", "UOM_PK", "UOM_NAME"],
-            WhereClause     : ["IO_PK eq "+iIOId],
-            OrderByClause   : [],
+            "Url"             : odata.ODataLocation("dataint"),
+            "Columns"         : ["CALCEDVALUE", "UTS", "UOM_PK", "UOM_NAME"],
+            "WhereClause"     : ["IO_PK eq "+iIOId],
+            "OrderByClause"   : [],
             
-            onSuccess : function (responseType, data) {
+            "onSuccess" : function (responseType, data) {
                 //------------------------------------------------------------//
                 // Output data to console.
                 //------------------------------------------------------------//
@@ -85,19 +163,13 @@ $.extend(IOMy.devices.motionsensor,{
                 //------------------------------------------------------------//
                 // Set the text in the relevant field on the motion sensor page.
                 //------------------------------------------------------------//
-                if (iRSType == me.RSMisc) { // TODO: Once the API is written, remove this condition.
-                    oTextWidget.setText("12h 45m 22s");
-                } else if (iRSType == me.RSBitwiseStatus) { // TODO: Once the API is written, remove this condition.
-                    oTextWidget.setText("Secure");
-                } else {// TODO: Keep this!
-                    oTextWidget.setText(data.CALCEDVALUE + data.UOM_NAME);
-                }
+                oTextWidget.setText(data.CALCEDVALUE + data.UOM_NAME);
                 
                 // Conclude the request callback
                 this.onComplete();
             },
             
-            onFail : function (response) {
+            "onFail" : function (response) {
                 me.iODataFieldsFailedToFetch++;
                 
                 // Log errors
@@ -107,7 +179,7 @@ $.extend(IOMy.devices.motionsensor,{
                 this.onComplete();
             },
             
-            onComplete : function () {
+            "onComplete" : function () {
                 //------------------------------------------------------------//
                 // Decrement the OData Field count
                 //------------------------------------------------------------//
@@ -133,7 +205,7 @@ $.extend(IOMy.devices.motionsensor,{
                 //------------------------------------------------------------//
                 if (me.iODataFieldsToFetch === 0 && me.bWaitingToLoadAPI === false && me.bLoadingFieldsFromAPI === false) {
                     me.bLoadingMotionSensorFields = false;
-                    me.iODataFieldsToFetch = 4;
+                    me.iODataFieldsToFetch = 2;
                 }
             }
             

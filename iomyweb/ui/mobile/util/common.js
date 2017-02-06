@@ -191,7 +191,12 @@ $.extend(IOMy.common,{
 				sErrMesg += "These are common causes for this error message. \n";
 				sErrMesg += "1.) Database Problem: \tThe IOMy Database may have stopped running! Please check with whoever manages your system. \n";
 				sErrMesg += "2.) IOMY Version Upgrade: \tThe Person that manages your IOMy system may be rolling out a new update. \n";
-				IOMy.common.showError(sErrMesg, "Authentication Error");
+				IOMy.common.showError(sErrMesg, "Authentication Error",
+                    function () {
+                        // Refresh the page to redirect to the login page.
+                        window.location.reload(true);
+                    }
+                );
 				
 				return false;
 				
@@ -430,6 +435,8 @@ $.extend(IOMy.common,{
 
             onSuccess : function (responseType, data) {
                 try {
+                    me.Countries = [];
+                    
                     for (var i = 0; i < data.length; i++) {
                         me.Countries.push({
                             CountryId : data[i].COUNTRIES_PK,
@@ -465,6 +472,8 @@ $.extend(IOMy.common,{
 
             onSuccess : function (responseType, data) {
                 try {
+                    me.Languages = [];
+                    
                     for (var i = 0; i < data.length; i++) {
                         me.Languages.push({
                             LanguageId : data[i].LANGUAGE_PK,
@@ -500,6 +509,8 @@ $.extend(IOMy.common,{
 
             onSuccess : function (responseType, data) {
                 try {
+                    me.StatesProvinces = [];
+                    
                     for (var i = 0; i < data.length; i++) {
                         me.StatesProvinces.push({
                             StateProvinceId : data[i].STATEPROVINCE_PK,
@@ -535,6 +546,8 @@ $.extend(IOMy.common,{
 
             onSuccess : function (responseType, data) {
                 try {
+                    me.PostCodes = [];
+                    
                     for (var i = 0; i < data.length; i++) {
                         me.PostCodes.push({
                             PostCodeId : data[i].POSTCODE_PK,
@@ -570,6 +583,8 @@ $.extend(IOMy.common,{
 
             onSuccess : function (responseType, data) {
                 try {
+                    me.Timezones = [];
+                    
                     for (var i = 0; i < data.length; i++) {
                         me.Timezones.push({
                             TimezoneId : data[i].TIMEZONE_PK,
@@ -691,8 +706,10 @@ $.extend(IOMy.common,{
     //========================================================================//
     
     /**
-     * Starts the procession of procedures that will refresh core variables. These
-     * are the variables being refreshed.
+     * Starts the procession of procedures that will reloads all the core
+     * variables into memory to so that iOmy code can fetch the necessary
+     * information without constantly polling the database. These are the
+     * variables being refreshed.
      * 
      * 1. Locale Information Lists
      * 2. Premise List
@@ -841,7 +858,13 @@ $.extend(IOMy.common,{
 	//================================================================//
 	//== Refresh Variables											==//
 	//================================================================//
-	RefreshCoreVariables: function(bFirstLogin) {
+    /**
+     * DEPRECATED: Use ReloadCoreVariables() instead!
+     * 
+     * Reloads all the core variables into memory to so that iOmy code can fetch
+     * the necessary information without constantly polling the database.
+     */
+	RefreshCoreVariables: function() {
 		//-- NOTE1: bFirstLogin should always be set to false with the exception of the first time it is loaded when the user logs in! --//
 		var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
 		

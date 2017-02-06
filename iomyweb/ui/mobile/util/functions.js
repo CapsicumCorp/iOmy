@@ -380,6 +380,9 @@ $.extend(IOMy.functions,{
 	\***************************/
     
     /**
+     * (WILL BE DEPRECATED SHORTLY! A new help module (/ui/mobile/util/functions/Help.js)
+     * will be created to make things easier for development.)
+     * 
      * Displays a dialog containing information about the purpose of the current page.
      * It grabs the ID of the current page and uses it to determine what information
      * it should display.
@@ -962,3 +965,9 @@ $.extend(IOMy.functions,{
     }
 	
 });
+
+//----------------------------------------//
+//-- LOAD OTHER MODULES                 --//
+//----------------------------------------//
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.getLengthOfTimePassed");

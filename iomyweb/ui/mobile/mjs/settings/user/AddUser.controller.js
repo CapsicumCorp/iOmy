@@ -440,7 +440,11 @@ sap.ui.controller("mjs.settings.user.AddUser", {
 
                         if (bError === true) {
                             jQuery.sap.log.error(aLogErrors.join("\n"));
-                            IOMy.common.showError(aLogErrors.join("\n\n"), sDialogTitle);
+                            IOMy.common.showError(aLogErrors.join("\n\n"), sDialogTitle,
+                                function () {
+                                    thisButton.setEnabled(true);
+                                }
+                            );
                         } else {
                             // Run the API to update the user information
                             try {

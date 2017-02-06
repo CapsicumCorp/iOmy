@@ -300,21 +300,6 @@ sap.ui.controller("mjs.devices.MotionSensor", {
             if (aIOIDs[i].rstypeId == DevModule.RSBattery) {
                 DevModule.FetchField(aIOIDs[i].id, me.wBatteryField);
             }
-            
-            //------------------------------------//
-            // Fetch the Last Motion Information
-            //------------------------------------//
-            if (aIOIDs[i].rstypeId == DevModule.RSMisc) {
-                DevModule.FetchField(aIOIDs[i].id, me.wLastMotionField, aIOIDs[i].rstypeId);
-            }
-            
-            //------------------------------------//
-            // Fetch the Tamper Information
-            //------------------------------------//
-            if (aIOIDs[i].rstypeId == DevModule.RSBitwiseStatus) {
-                DevModule.FetchField(aIOIDs[i].id, me.wTamperField, aIOIDs[i].rstypeId);
-            }
-            
             //------------------------------------//
             // Fetch the Temperature Information
             //------------------------------------//
@@ -322,6 +307,8 @@ sap.ui.controller("mjs.devices.MotionSensor", {
                 DevModule.FetchField(aIOIDs[i].id, me.wTemperatureField);
             }
         }
+        
+        DevModule.CallAPI(me.iThingId, me.wTamperField, me.wLastMotionField);
     },
 
 });
