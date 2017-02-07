@@ -2,7 +2,7 @@
 
 //========================================================================================================//
 //== @Author: Andrew Somerville <support@capsicumcorp.com>
-//== @Description: This Class is used for connecting to "Onvif" supported devices.
+//== @Description: This Library contains function and a PHP Class that is used for connecting to "Onvif" supported devices.
 //== @Copyright: Capsicum Corporation 2016
 //== 
 //== This file is part of Backend of the iOmy project.
@@ -18,6 +18,63 @@
 //== You should have received a copy of the GNU General Public License along with iOmy.
 //== If not, see <http://www.gnu.org/licenses/>.
 //========================================================================================================//
+
+
+function CheckIfDeviceSupportsOnvif( $sNetworkAddress, $iPort = 8000 ) {
+	//----------------------------------------------------------------//
+	//-- 1.0 - Initialise                                           --//
+	//----------------------------------------------------------------//
+	$aResult        = array();      //-- ARRAY:         Used to hold the result of if this function succeeded or failed in getting the desired result.	--//
+	$sURL           = "";           //-- STRING:        --//
+	
+	//----------------------------------------------------------------//
+	//-- 2.0 - Begin                                                --//
+	//----------------------------------------------------------------//
+	$sURL       = 'http://'.$sNetworkAddress.":".$iPort.'/onvif/device_service';
+	$sPOSTData  = '<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"><s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><GetSystemDateAndTime xmlns="http://www.onvif.org/ver10/device/wsdl"/></s:Body></s:Envelope>';
+	
+	$oRequest = curl_init();
+	
+	//-- IF 'curl_init' succeeded in initialising --//
+	if( $oRequest ) {
+		curl_setopt( $oRequest, CURLOPT_URL, $sURL );
+	
+		//-- TODO: Re-implement Proxy Code if needed --//
+		curl_setopt( $oRequest, CURLOPT_CONNECTTIMEOUT,    1            );
+		curl_setopt( $oRequest, CURLOPT_TIMEOUT,           2            );
+		curl_setopt( $oRequest, CURLOPT_RETURNTRANSFER,    true         );
+		curl_setopt( $oRequest, CURLOPT_SSL_VERIFYPEER,    false        );
+		curl_setopt( $oRequest, CURLOPT_SSL_VERIFYHOST,    false        );
+		curl_setopt( $oRequest, CURLOPT_POST,              true         );
+		curl_setopt( $oRequest, CURLOPT_POSTFIELDS,        $sPOSTData   );
+		curl_setopt( $oRequest, CURLOPT_HTTPHEADER,        array( 
+			'Content-Type: text/xml; charset=utf-8', 
+			'Content-Length: '.strlen( $sPOSTData ) 
+		));
+		
+		$oResult = curl_exec( $oRequest );
+		
+	} else {
+		//-- ELSE failure to prepare to do a basic onvif request --//
+		$oResult = false;
+	}
+	
+	
+	if( $oResult===false ) {
+		//------------------------------------//
+		//-- ONVIF NOT SUPPORTED            --//
+		//------------------------------------//
+		$sErrMesg = curl_error( $oRequest );
+		
+		return false;
+		
+	} else {
+		//------------------------------------//
+		//-- ONVIF SUPPORTED                --//
+		//------------------------------------//
+		return true;
+	}
+}
 
 
 class PHPOnvif {
@@ -305,13 +362,13 @@ class PHPOnvif {
 		//----------------------------------------------------------------//
 		//-- 1.0 - INITIALISE                                           --//
 		//----------------------------------------------------------------//
-		$aResult    = true;     //-- BOOLEAN:		--//
-		$iYear      = 0;        //-- INTEGER:		--//
-		$iMonth     = 0;        //-- INTEGER:		--//
-		$iDay       = 0;        //-- INTEGER:		--//
-		$iHour      = 0;        //-- INTEGER:		--//
-		$iMinute    = 0;        //-- INTEGER:		--//
-		$iSeconds   = 0;        //-- INTEGER:		--//
+		$aResult    = true;     //-- BOOLEAN:       --//
+		$iYear      = 0;        //-- INTEGER:       --//
+		$iMonth     = 0;        //-- INTEGER:       --//
+		$iDay       = 0;        //-- INTEGER:       --//
+		$iHour      = 0;        //-- INTEGER:       --//
+		$iMinute    = 0;        //-- INTEGER:       --//
+		$iSeconds   = 0;        //-- INTEGER:       --//
 		
 		//----------------------------------------------------------------//
 		//-- 2.0 - Extract the Values                                   --//
@@ -458,7 +515,7 @@ class PHPOnvif {
 						
 						//-- Increment the "i" variable --//
 						$i++;
-					}		//-- ENDFOREACH Video Source --//
+					}    //-- ENDFOREACH Video Source --//
 				}
 			} else {
 				$aResult = array(
@@ -550,14 +607,12 @@ class PHPOnvif {
 								}
 							}
 							
-							
 							//----------------------------------------------------------------//
 							//-- PART 3 - Video Source                                      --//
 							//----------------------------------------------------------------//
 							$aProfileVideoSource = GetChildTag( $aProfile, "VideoSourceConfiguration", 1 );
 							
 							if( $aProfileVideoSource ) {
-								
 								//--------------------------------------------//
 								//-- PART 3.1 - VidSource Token             --//
 								$sTemp = ContainsPhpXmlSoapAttribute( $aProfileVideoSource, "token", true );

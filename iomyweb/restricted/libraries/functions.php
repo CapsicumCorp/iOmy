@@ -3533,56 +3533,6 @@ function GetServerAddonVersions() {
 //========================================================================================================================//
 //-- TODO: Move some of these functions into a onvif library --//
 
-function CheckIfDeviceSupportsOnvif( $sNetworkAddress, $iPort = 8000 ) {
-	//----------------------------------------------------------------//
-	//-- 1.0 - Initialise                                           --//
-	//----------------------------------------------------------------//
-	$aResult        = array();      //-- ARRAY:         Used to hold the result of if this function succeeded or failed in getting the desired result.	--//
-	$sURL           = "";           //-- STRING:        --//
-	
-	
-	//----------------------------------------------------------------//
-	//-- 2.0 - Begin                                                --//
-	//----------------------------------------------------------------//
-	$sURL       = 'http://'.$sNetworkAddress.":".$iPort.'/onvif/device_service';
-	$sPOSTData  = '<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"><s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><GetSystemDateAndTime xmlns="http://www.onvif.org/ver10/device/wsdl"/></s:Body></s:Envelope>';
-	
-	$oRequest = curl_init();
-	curl_setopt( $oRequest, CURLOPT_URL, $sURL );
-	
-	//-- TODO: Re-implement Proxy Code if needed --//
-	curl_setopt( $oRequest, CURLOPT_CONNECTTIMEOUT,    1            );
-	curl_setopt( $oRequest, CURLOPT_TIMEOUT,           2            );
-	curl_setopt( $oRequest, CURLOPT_RETURNTRANSFER,    true         );
-	curl_setopt( $oRequest, CURLOPT_SSL_VERIFYPEER,    false        );
-	curl_setopt( $oRequest, CURLOPT_SSL_VERIFYHOST,    false        );
-	curl_setopt( $oRequest, CURLOPT_POST,              true         );
-	curl_setopt( $oRequest, CURLOPT_POSTFIELDS,        $sPOSTData   );
-	curl_setopt( $oRequest, CURLOPT_HTTPHEADER,        array( 
-		'Content-Type: text/xml; charset=utf-8', 
-		'Content-Length: '.strlen( $sPOSTData ) 
-	));
-	
-	$oResult = curl_exec( $oRequest );
-	
-	if( $oResult===false ) {
-		//------------------------------------//
-		//-- ONVIF NOT SUPPORTED            --//
-		//------------------------------------//
-		$sErrMesg = curl_error( $oRequest );
-		
-		return false;
-		
-	} else {
-		//------------------------------------//
-		//-- ONVIF SUPPORTED                --//
-		//------------------------------------//
-		return true;
-	}
-}
-
-
-
 
 function recursive_array_search( $sSearchString, $aArrayToSearch, $bCaseSensitive=true, $bXmlSoapSearch=false ) {
 	//----------------------------------------------------------------//

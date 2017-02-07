@@ -20,6 +20,8 @@
 //========================================================================================================//
 
 
+
+
 //====================================================================//
 //== 1.0 - INITIALISE                                               ==//
 //====================================================================//
@@ -37,7 +39,7 @@ if( !defined('SITE_BASE') ) {
 //------------------------------------------------------------//
 $bError                     = false;        //-- BOOLEAN:       Used to indicate if an error has been caught --//
 $sErrMesg                   = "";           //-- STRING:        Used to store the error message after an error has been caught --//
-$sOutput                    = "";           //-- STRING:        This is the --//
+$sOutput                    = "";           //-- STRING:        Used to hold this API Request's body when everything is successful. --//
 $aResult                    = array();      //-- ARRAY:         Used to store the results.			--//
 
 $sPostMode                  = "";           //-- STRING:        Used to store which Mode the API should function in.			--//
@@ -72,7 +74,7 @@ $iUTS                       = 0;
 //------------------------------------------------------------//
 require_once SITE_BASE.'/restricted/php/core.php';                                   //-- This should call all the additional libraries needed --//
 
-require_once SITE_BASE.'/restricted/libraries/onvif.php';
+require_once SITE_BASE.'/restricted/libraries/onvif/main.php';
 require_once SITE_BASE.'/restricted/libraries/special/dbinsertfunctions.php';        //-- This library is used to perform the inserting of a new Onvif Server and Streams into the database --//
 
 
@@ -108,7 +110,7 @@ if($bError===false) {
 		//-- Verify that the mode is supported --//
 		//if( $sPostMode!=="OpenThingThumbnail" && $sPostMode!=="OpenLinkProfileThumbnail" ) {
 		if( $sPostMode!=="OpenThingThumbnail" && $sPostMode!=="UpdateThingThumbnail" ) {
-			$bError = true;
+			$bError    = true;
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
 			$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
@@ -116,7 +118,7 @@ if($bError===false) {
 		}
 		
 	} catch( Exception $e0011 ) {
-		$bError = true;
+		$bError    = true;
 		$sErrMesg .= "Error Code:'0102' \n";
 		$sErrMesg .= "No \"Mode\" parameter! \n";
 		$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
@@ -189,103 +191,120 @@ if($bError===false) {
 //====================================================================//
 if( $bError===false ) {
 	try {
-		
 		//================================================================//
-		//== 4.2 - Lookup Thing Info                                    ==//
+		//== 4.1 - If iOmy Server is in debug                           ==//
 		//================================================================//
-		if( $sPostMode==="OpenThingThumbnail" || $sPostMode==="UpdateThingThumbnail" ) {
-			
-			$iOnvifThingTypeId = LookupFunctionConstant("OnvifThingTypeId");
-			
-			//----------------------------------------------------------------------------//
-			//-- STEP 1: Lookup Thing Information                                       --//
-			//----------------------------------------------------------------------------//
-			$aTempFunctionResult1 = GetThingInfo( $iPostThingId );
-			
-			if( $aTempFunctionResult1['Error']===false ) {
-				$iThingTypeId       = $aTempFunctionResult1['Data']['ThingTypeId'];
-				$iPostLinkId        = $aTempFunctionResult1['Data']['LinkId'];
-				$bWritePerm         = $aTempFunctionResult1['Data']['PermWrite'];
-				$sOnvifProfileName  = $aTempFunctionResult1['Data']['ThingSerialCode'];
-				
-				if( $iThingTypeId!==$iOnvifThingTypeId ) {
-					//-- The ThingId that the user passed is not a Philips Hue --//
-					$bError     = true;
-					$iErrCode   = 1303;
-					$sErrMesg  .= "Error Code:'1303' \n";
-					$sErrMesg  .= "The specified Thing is not a Onvif Stream!\n";
-					$sErrMesg  .= "Please use the ThingId of a valid Onvif Stream.\n";
+		if( $bError===false ) {
+			if( $oRestrictedApiCore->CheckIfDemoMode() ) {
+				//------------------------------------------------------------//
+				//-- IF Tring to do an Update Thumbnail                     --//
+				//------------------------------------------------------------//
+				if( $sPostMode==="UpdateThingThumbnail" ) {
+					//-- SWAP TO JUST FETCHING THE CURRENT IMAGE --//
+					$sPostMode = "OpenThingThumbnail";
 				}
-				
-			} else {
-				//-- TODO: Add Error Message --//
-				$bError = true;
-				$iErrCode   = 1302;
-				$sErrMesg  .= "Error Code:'1302' \n";
-				$sErrMesg  .= "Problem when looking up the ThingInfo!\n";
-				$sErrMesg  .= $aTempFunctionResult1['ErrMesg'];
 			}
 		}
 		
 		
 		//================================================================//
-		//== 4.3 - Lookup Link Info                                     ==//
+		//== 4.2 - Lookup Thing Info                                    ==//
 		//================================================================//
-		if( $sPostMode==="OpenThingThumbnail"   || $sPostMode==="OpenLinkProfileThumbnail"   || $sPostMode==="UpdateThingThumbnail" ) {
-			//----------------------------------------------------------------------------//
-			//-- STEP 2: Look up the details to the "Link" that belongs to that "Thing" --//
-			//----------------------------------------------------------------------------//
-			if( $bError===false ) {
-				//-- Fetch the Info about the Link --//
-				$aTempFunctionResult2 = GetLinkInfo( $iPostLinkId );
+		if( $bError===false ) {
+			
+			if( $sPostMode==="OpenThingThumbnail" || $sPostMode==="UpdateThingThumbnail" ) {
 				
-				//-- Extract the desired variables out of the results --//
-				if( $aTempFunctionResult2['Error']===false ) {
+				$iOnvifThingTypeId = LookupFunctionConstant("OnvifThingTypeId");
+				
+				//----------------------------------------------------------------------------//
+				//-- STEP 1: Lookup Thing Information                                       --//
+				//----------------------------------------------------------------------------//
+				$aTempFunctionResult1 = GetThingInfo( $iPostThingId );
+				
+				if( $aTempFunctionResult1['Error']===false ) {
+					$iThingTypeId       = $aTempFunctionResult1['Data']['ThingTypeId'];
+					$iPostLinkId        = $aTempFunctionResult1['Data']['LinkId'];
+					$bWritePerm         = $aTempFunctionResult1['Data']['PermWrite'];
+					$sOnvifProfileName  = $aTempFunctionResult1['Data']['ThingSerialCode'];
 					
-					
-					//-- Extract the required variables from the function results --//
-					$sPostNetworkAddress    = $aTempFunctionResult2['Data']['LinkConnAddress'];
-					$iPostNetworkPort       = $aTempFunctionResult2['Data']['LinkConnPort'];
-					$sPostUsername          = $aTempFunctionResult2['Data']['LinkConnUsername'];
-					$sPostPassword          = $aTempFunctionResult2['Data']['LinkConnPassword'];
-					$iLinkPermWrite         = $aTempFunctionResult2['Data']['PermWrite'];
-					
-					
-					
-					//-- Lookup the Comm Info --//
-					
-					//-- Lookup the Link's Comm --//
-					$aCommInfo = GetCommInfo( $aTempFunctionResult2['Data']['LinkCommId'] );
-									
-					if( $aCommInfo['Error']===false ) {
-						//-- Extract the Desired Variables --//
-						$iLinkCommType          = $aCommInfo['Data']['CommTypeId'];
-						
-						//-- Flag that this request needs to use the "PhilipsHue" PHP Object to update the device --//
-						$bUsePHPObject = true;
-					} else {
-						$bError = true;
-						$iErrCode  = 0306;
-						$sErrMesg .= "Error Code:'0306' \n";
-						$sErrMesg .= "Problem when fetching the Link info\n";
-						$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
+					if( $iThingTypeId!==$iOnvifThingTypeId ) {
+						//-- The ThingId that the user passed is not a Philips Hue --//
+						$bError     = true;
+						$iErrCode   = 1303;
+						$sErrMesg  .= "Error Code:'1303' \n";
+						$sErrMesg  .= "The specified Thing is not a Onvif Stream!\n";
+						$sErrMesg  .= "Please use the ThingId of a valid Onvif Stream.\n";
 					}
 					
 				} else {
-					$bError = true;
-					$iErrCode  = 0307;
-					$sErrMesg .= "Error Code:'0307' \n";
-					$sErrMesg .= "Problem when fetching the Link info\n";
-					$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
+					//-- TODO: Add Error Message --//
+					$bError     = true;
+					$iErrCode   = 1302;
+					$sErrMesg  .= "Error Code:'1302' \n";
+					$sErrMesg  .= "Problem when looking up the ThingInfo!\n";
+					$sErrMesg  .= $aTempFunctionResult1['ErrMesg'];
 				}
-			}	//-- ENDIF No errors detected --//
-		}	//-- ENDIF --//
+			}
+		}
+		
+		//================================================================//
+		//== 4.3 - Lookup Link Info                                     ==//
+		//================================================================//
+		if( $bError===false ) {
+			
+			if( $sPostMode==="OpenThingThumbnail"   || $sPostMode==="OpenLinkProfileThumbnail"   || $sPostMode==="UpdateThingThumbnail" ) {
+				//----------------------------------------------------------------------------//
+				//-- STEP 2: Look up the details to the "Link" that belongs to that "Thing" --//
+				//----------------------------------------------------------------------------//
+				if( $bError===false ) {
+					//-- Fetch the Info about the Link --//
+					$aTempFunctionResult2 = GetLinkInfo( $iPostLinkId );
+					
+					//-- Extract the desired variables out of the results --//
+					if( $aTempFunctionResult2['Error']===false ) {
+						
+						//-- Extract the required variables from the function results --//
+						$sPostNetworkAddress    = $aTempFunctionResult2['Data']['LinkConnAddress'];
+						$iPostNetworkPort       = $aTempFunctionResult2['Data']['LinkConnPort'];
+						$sPostUsername          = $aTempFunctionResult2['Data']['LinkConnUsername'];
+						$sPostPassword          = $aTempFunctionResult2['Data']['LinkConnPassword'];
+						$iLinkPermWrite         = $aTempFunctionResult2['Data']['PermWrite'];
+						
+						//-- Lookup the Link's Comm --//
+						$aCommInfo = GetCommInfo( $aTempFunctionResult2['Data']['LinkCommId'] );
+						
+						if( $aCommInfo['Error']===false ) {
+							//-- Extract the Desired Variables --//
+							$iLinkCommType          = $aCommInfo['Data']['CommTypeId'];
+							
+							//-- Flag that this request needs to use the "PhilipsHue" PHP Object to update the device --//
+							$bUsePHPObject = true;
+							
+						} else {
+							$bError = true;
+							$iErrCode  = 0306;
+							$sErrMesg .= "Error Code:'0306' \n";
+							$sErrMesg .= "Problem when fetching the Link info\n";
+							$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
+						}
+						
+					} else {
+						$bError = true;
+						$iErrCode  = 0307;
+						$sErrMesg .= "Error Code:'0307' \n";
+						$sErrMesg .= "Problem when fetching the Link info\n";
+						$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
+					}
+				}	//-- ENDIF No errors detected --//
+			}	//-- ENDIF --//
+		}
+		
 		
 		//----------------------------------------------------------------------------//
 		//-- 4.4 - ESTABLISH THE PHP ONVIF OBJECT                                   --//
 		//----------------------------------------------------------------------------//
 		if( $bError===false ) {
-			if( $sPostMode==="OpenThingThumbnail"       || $sPostMode==="UpdateThingThumbnail"         || $sPostMode==="AddStreamsAsThing"        ) {
+			if( $sPostMode==="OpenThingThumbnail"       || $sPostMode==="UpdateThingThumbnail" ) {
 				//--------------------------------------------------------------------//
 				//-- 4.3.1 - Check if a PHPOnvif class can be created for that IP   --//
 				//--------------------------------------------------------------------//
@@ -300,8 +319,6 @@ if( $bError===false ) {
 				}
 			}
 		}	//-- ENDIF No errors detected --//
-		
-		
 		
 		//----------------------------------------------------------------------------//
 		//-- 4.5 - LOOKUP THE DESIRED IOs FROM THE THINGID                          --//
@@ -325,7 +342,6 @@ if( $bError===false ) {
 						//--------------------//
 						if( $aIO['RSTypeId']===$iThumbUrlRSTypeId ) {
 							$iThumbUrlId = $aIO['IOId'];
-								
 						} 
 					} //-- END Foreach --//
 						
@@ -407,7 +423,6 @@ if( $bError===false ) {
 		//== 5.1 - MODE: Open Thumbnail                                 ==//
 		//================================================================//
 		if( $sPostMode==="OpenThingThumbnail" || $sPostMode==="UpdateThingThumbnail" ) {
-			
 			try {
 				$sThumbnailFilename = SITE_BASE."/../tmp/".$iPostThingId.".jpg";
 				
@@ -433,6 +448,19 @@ if( $bError===false ) {
 						}
 					}
 				}
+				
+				//----------------------------------------//
+				//-- CHECK IF THE THUMBNAIL EXISTS      --//
+				//----------------------------------------//
+				if( $bError===false ) {
+					if( file_exists( $sThumbnailFilename )===false ) {
+						//-- ERROR:  --//
+						$bError = true;
+						$sErrMesg .= "Error Code:'1403'\n";
+						$sErrMesg .= "File doesn't exist!\n";
+					}
+				}
+				
 				
 				
 				//----------------------------------------//

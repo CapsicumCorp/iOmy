@@ -8036,12 +8036,10 @@ function dbSpecialGetServerAddonVersions( $oDBConn, $iCoreId ) {
 			$sSQL .= "	`COREADDON_VERSION2`, \n";
 			$sSQL .= "	`COREADDON_VERSION3`, \n";
 			$sSQL .= "	`COREADDON_SETUPUTS`, \n";
-			//$sSQL .= "	`CORE_PK`, \n";
 			$sSQL .= "	`CORE_NAME`, \n";
 			$sSQL .= "	`CORE_VERSION1`, \n";
 			$sSQL .= "	`CORE_VERSION2`, \n";
-			$sSQL .= "	`CORE_VERSION3`, \n";
-			$sSQL .= "	`CORE_SETUPUTS` \n";
+			$sSQL .= "	`CORE_VERSION3` \n";
 			$sSQL .= "FROM `".$sSchema."`.`CORE` \n";
 			$sSQL .= "INNER JOIN `".$sSchema."`.`COREADDON` ON `CORE_PK`=`COREADDON_CORE_FK` \n";
 			$sSQL .= "WHERE `CORE_PK` = :CoreId \n";
@@ -8061,12 +8059,10 @@ function dbSpecialGetServerAddonVersions( $oDBConn, $iCoreId ) {
 				array( "Name"=>"AddonVersion2",         "type"=>"INT"   ),
 				array( "Name"=>"AddonVersion3",         "type"=>"INT"   ),
 				array( "Name"=>"AddonUTS",              "type"=>"BINT"  ),
-				//array( "Name"=>"CoreId",                "type"=>"INT"   ),
 				array( "Name"=>"CoreName",              "type"=>"STR"   ),
 				array( "Name"=>"CoreVersion1",          "type"=>"INT"   ),
 				array( "Name"=>"CoreVersion2",          "type"=>"INT"   ),
-				array( "Name"=>"CoreVersion3",          "type"=>"INT"   ),
-				array( "Name"=>"CoreUTS",               "type"=>"BINT"  )
+				array( "Name"=>"CoreVersion3",          "type"=>"INT"   )
 			);
 			
 			//-- Execute the SQL Query --//
