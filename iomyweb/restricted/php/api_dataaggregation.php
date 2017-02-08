@@ -213,7 +213,7 @@ if( $bError===false ) {
 		if( $sPostMode==="Sum" ) {
 			try {
 				//--------------------------------------------------------------------//
-				//-- 5.1.1 - Lookup information about the IO                        --//
+				//-- 5.1.1 - Sum up all the IO data values for the selected period  --//
 				//--------------------------------------------------------------------//
 				$aTempResult = GetIODataAggregation( "Sum", $aIOInfo["DataTypeId"], $iPostId, $iPostStartUTS, $iPostEndUTS );
 				
@@ -240,7 +240,7 @@ if( $bError===false ) {
 		} else if( $sPostMode==="Count" ) {
 			try {
 				//--------------------------------------------------------------------//
-				//-- 5.2.1 - Lookup information about the IO                        --//
+				//-- 5.2.1 - Count all the IO data values for the selected period   --//
 				//--------------------------------------------------------------------//
 				$aTempResult = GetIODataAggregation( "Count", $aIOInfo["DataTypeId"], $iPostId, $iPostStartUTS, $iPostEndUTS );
 				
@@ -267,7 +267,7 @@ if( $bError===false ) {
 		} else if( $sPostMode==="Min" ) {
 			try {
 				//--------------------------------------------------------------------//
-				//-- 5.3.1 - Lookup information about the IO                        --//
+				//-- 5.3.1 - Lookup the Minimum value seen during the period        --//
 				//--------------------------------------------------------------------//
 				$aTempResult = GetIODataAggregation( "Min", $aIOInfo["DataTypeId"], $iPostId, $iPostStartUTS, $iPostEndUTS );
 				
@@ -294,7 +294,7 @@ if( $bError===false ) {
 		} else if( $sPostMode==="Max" ) {
 			try {
 				//--------------------------------------------------------------------//
-				//-- 5.4.1 - Lookup information about the IO                        --//
+				//-- 5.4.1 - Lookup the Maximum value seen during the period        --//
 				//--------------------------------------------------------------------//
 				$aTempResult = GetIODataAggregation( "Max", $aIOInfo["DataTypeId"], $iPostId, $iPostStartUTS, $iPostEndUTS );
 				
