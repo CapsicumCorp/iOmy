@@ -40,6 +40,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
     wAddressLine2Field      : null,
     wAddressLine3Field      : null,
     
+    wUsernameField          : null,
     wPasswordField          : null,
     wConfirmPasswordField   : null,
     
@@ -140,6 +141,9 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             ]
         }).addStyleClass("ConsistentMenuHeader BoxSizingBorderBox BorderTop ListItem width100Percent");
         
+        //------------------------------------------------------//
+        // Given names (First and Middle names)
+        //------------------------------------------------------//
         var oGivenNamesLabel = new sap.m.Label({
             text : "Given Names"
         });
@@ -149,6 +153,9 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             maxLength : 60
         }).addStyleClass("SettingsTextInput width100Percent");
 
+        //------------------------------------------------------//
+        // Title
+        //------------------------------------------------------//
         var oTitleLabel = new sap.m.Label({
             text : "Title"
         });
@@ -158,12 +165,18 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             maxLength : 60
         }).addStyleClass("SettingsTextInput width100Percent");
 
+        //------------------------------------------------------//
+        // Gender
+        //------------------------------------------------------//
         var oGenderLabel = new sap.m.Label({
             text : "Gender"
         });
 
         me.wGenderField = IOMy.widgets.getGenderSelectBox().addStyleClass("SettingsTextInput width100Percent");
 
+        //------------------------------------------------------//
+        // Surname
+        //------------------------------------------------------//
         var oSurnameLabel = new sap.m.Label({
             text : "Surname"
         });
@@ -173,8 +186,11 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             maxLength : 60
         }).addStyleClass("SettingsTextInput width100Percent");
 
+        //------------------------------------------------------//
+        // Display name/Username
+        //------------------------------------------------------//
         var oDisplayNameLabel = new sap.m.Label({
-            text : "Display Name (Login Username)"
+            text : "Display Name"
         });
 
         me.wDisplayNameField = new sap.m.Input({
@@ -182,25 +198,19 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             maxLength : 60
         }).addStyleClass("SettingsTextInput width100Percent");
         
+        //------------------------------------------------------//
+        // Date of Birth
+        //------------------------------------------------------//
         var oDateOfBirthLabel = new sap.m.Label({
             text : "Date of Birth"
         });
 
         me.wDateOfBirthField = new sap.m.DatePicker({});
-        me.wDateOfBirthField.attachChange(
-            function () {
-                console.log(this.getDisplayFormat());
-                
-                var dDob = this.getDateValue();
-                
-                console.log(IOMy.functions.getTimestampString(dDob, "yyyy-mm-dd", false));
-                
-                console.log(this.getValue());
-            }
-        );
-
         me.wDateOfBirthField.setDisplayFormat("YYYY-MM-dd");
 
+        //------------------------------------------------------//
+        // Email
+        //------------------------------------------------------//
         var oEmailLabel = new sap.m.Label({
             text : "Alert Email"
         });
@@ -210,6 +220,9 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             maxLength : 80
         }).addStyleClass("SettingsTextInput width100Percent");
 
+        //------------------------------------------------------//
+        // Phone number
+        //------------------------------------------------------//
         var oContactPhoneNumberLabel = new sap.m.Label({
             text : "Alert Mobile"
         });
@@ -320,24 +333,33 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         //loadLocaleCBoxItems(me, me.wCountryField.getSelectedIndex().getKey());
         
         //----------------------------------------------//
-        // Password Section
+        // Username and Password Section
         //----------------------------------------------//
         var oPasswordSection = new sap.m.VBox({
             items : [
                 new sap.m.VBox({
                     items : [
                         new sap.m.Label({
-                            text: "Password"
+                            text: "Username and Password"
                         }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText")
                     ]
                 })
             ]
         }).addStyleClass("ConsistentMenuHeader BoxSizingBorderBox MarTop8px BorderTop ListItem width100Percent");
         
+        // -- USERNAME --\\
+        var oUsernameLabel = new sap.m.Label({
+            text : "Username"
+        });
+        
+        me.wUsernameField = new sap.m.Input({
+            value : ""
+        }).addStyleClass("width100Percent SettingsTextInput");
+        
         // -- PASSWORD -- \\
         var oPasswordLabel = new sap.m.Label({
             text : "Password"
-        }).addStyleClass("");
+        });
 
         me.wPasswordField = new sap.m.Input({
             value : "",
@@ -374,9 +396,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             text : "Username"
         });
         
-        me.wDBRootUsernameField = new sap.m.Input({
-            value : ""
-        }).addStyleClass("width100Percent SettingsTextInput");
+        me.wDBRootUsernameField = new sap.m.Input({}).addStyleClass("width100Percent SettingsTextInput");
         
         // -- PASSWORD --\\
         var oDBRootPasswordLabel = new sap.m.Label({
@@ -389,118 +409,24 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         }).addStyleClass("width100Percent SettingsTextInput");
 
         //--------------------------//
-        // User Information
+        // Edit Button
         //--------------------------//
         me.wEditButton = new sap.m.VBox({
             items : [
                 new sap.m.Link(me.createId("editButton"), {
                     text : "Create User",
                     press : function () {
-                        var thisButton = this;
-                        thisButton.setEnabled(false);
-
-                        var sTitle = me.wTitleField.getValue();
-                        var sGivennames = me.wGivenNamesField.getValue();
-                        var sSurnames = me.wSurnameField.getValue();
-                        var sDisplayname = me.wDisplayNameField.getValue();
-                        var sEmail = me.wEmailField.getValue();
-                        var sPhone = me.wContactPhoneField.getValue();
-                        var iGender = me.wGenderField.getSelectedKey();
-                        var vDob = me.wDateOfBirthField.getDateValue();
-                        var sAddressLine1 = me.wAddressLine1Field.getValue();
-                        var sAddressLine2 = me.wAddressLine2Field.getValue();
-                        var sAddressLine3 = me.wAddressLine3Field.getValue();
-
-                        var bError = false;
-                        var aLogErrors = [];
-                        var sDialogTitle;
-                        
-                        //-----------------------------------//
-                        // Prepare the date of birth string
-                        //-----------------------------------//
-                        vDob = IOMy.functions.getTimestampString(vDob, "yyyy-mm-dd", false)
-                        
-                        if (sDisplayname === "") {
-                            aLogErrors.push("Display name is required.");
-                        }
-                        
-                        if (me.wConfirmPasswordField.getValue() !== me.wPasswordField.getValue()) {
-                            aLogErrors.push("The new passwords don't match.");
-                        }
-
-                        if (aLogErrors.length > 0) {
-                            if (aLogErrors.length > 1) {
-                                sDialogTitle = "Errors";
-                            } else if (aLogErrors.length === 1) {
-                                sDialogTitle = "Error";
-                            }
-
-                            bError = true;
-                        }
-
-                        if (bError === true) {
-                            jQuery.sap.log.error(aLogErrors.join("\n"));
-                            IOMy.common.showError(aLogErrors.join("\n\n"), sDialogTitle,
-                                function () {
-                                    thisButton.setEnabled(true);
-                                }
-                            );
-                        } else {
-                            // Run the API to update the user information
-                            try {
-                                IOMy.apiphp.AjaxRequest({
-                                    url : IOMy.apiphp.APILocation("users"),
-                                    data : {
-                                        "Mode" : "AddUser",
-                                        "Title" : sTitle,
-                                        "Givennames" : sGivennames,
-                                        "Surnames" : sSurnames,
-                                        "Displayname" : sDisplayname,
-                                        "Email" : sEmail,
-                                        "Phone" : sPhone,
-                                        "Gender" : iGender,
-                                        "AddressLine1" : sAddressLine1,
-                                        "AddressLine2" : sAddressLine2,
-                                        "AddressLine3" : sAddressLine3,
-                                        "AddressCountry" : me.wCountryField.getSelectedKey(),
-                                        "AddressStateProvince" : me.wStateField.getSelectedKey(),
-                                        "AddressPostcode" : me.wPostCodeField.getSelectedKey(),
-                                        "AddressTimezone" : me.wTimezoneField.getSelectedKey(),
-                                        "AddressLanguage" : me.wLanguageField.getSelectedKey(),
-                                        "Username" : sDisplayname,
-                                        "NewPassword" : me.wPasswordField.getValue(),
-                                        "Data" : "{\"Username\":\""+me.wDBRootUsernameField.getValue()+"\",\"Password\":\""+me.wDBRootPasswordField.getValue()+"\",\"URI\":\"localhost\"}",
-                                    },
-                                    
-                                    onSuccess : function () {
-                                        IOMy.common.showSuccess("Update successful.", "Success", 
-                                        function () {
-                                            IOMy.common.NavigationTriggerBackForward(false);
-                                        }, "UpdateMessageBox");
-                                    },
-                                    onFail : function (response) {
-                                        // Report the error in a popup message.
-                                        IOMy.common.showError(response.responseText, "Error",
-                                            function () {
-                                                thisButton.setEnabled(true);
-                                            }
-                                        );
-                                    }
-                                });
-                            } catch (e00033) {
-                                IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
-                            }
-                        }
+                        me.AddUser(this);
                     }
                 }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
             ]
         }).addStyleClass("TextCenter MarTop12px");
 
+        //--------------------------//
+        // User Information
+        //--------------------------//
         me.wUserInformationVertBox = new sap.m.VBox({
             items : [
-                //--------------------------//
-                // User Information
-                //--------------------------//
                 oGivenNamesLabel, me.wGivenNamesField,
                 oTitleLabel, me.wTitleField,
                 oGenderLabel, me.wGenderField,
@@ -512,11 +438,11 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             ]
         }).addStyleClass("UserFormSection");
         
+        //--------------------------//
+        // User Address
+        //--------------------------//
         me.wUserAddressVertBox = new sap.m.VBox({
             items : [
-                //--------------------------//
-                // User Address
-                //--------------------------//
                 oCountryTitle, me.wCountryField,
                 oLanguageTitle, me.wLanguageField,
                 oStateTitle, me.wStateField,
@@ -528,21 +454,22 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             ]
         }).addStyleClass("UserFormSection");
         
+        //--------------------------//
+        // Password
+        //--------------------------//
         me.wPasswordVertBox = new sap.m.VBox({
             items : [
-                //--------------------------//
-                // Password
-                //--------------------------//
+                oUsernameLabel, me.wUsernameField,
                 oPasswordLabel, me.wPasswordField,
                 oConfirmPasswordLabel, me.wConfirmPasswordField
             ]
         }).addStyleClass("UserFormSection");
         
+        //------------------------------------------------------//
+        // Username and password for the database admin user.
+        //------------------------------------------------------//
         me.wDBAuthVertBox = new sap.m.VBox({
             items : [
-                //------------------------------------------------------//
-                // Username and password for the database admin user.
-                //------------------------------------------------------//
                 oDBRootUsernameLabel, me.wDBRootUsernameField,
                 oDBRootPasswordLabel, me.wDBRootPasswordField,
                 
@@ -571,6 +498,153 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         }).addStyleClass("UserInputForm TableSideBorders");
 
         thisView.byId("page").addContent(oPanel);
+    },
+    
+    AddUser : function (oCallingWidget) {
+        //--------------------------------------------------------------------//
+        // Declare variables, and disable the calling button.
+        //--------------------------------------------------------------------//
+        var thisButton      = oCallingWidget;
+        thisButton.setEnabled(false);
+
+        var me = this;
+        
+        var sTitle                  = me.wTitleField.getValue();
+        var sGivennames             = me.wGivenNamesField.getValue();
+        var sSurnames               = me.wSurnameField.getValue();
+        var sDisplayname            = me.wDisplayNameField.getValue();
+        var sEmail                  = me.wEmailField.getValue();
+        var sPhone                  = me.wContactPhoneField.getValue();
+        var iGender                 = me.wGenderField.getSelectedKey();
+        var vDob                    = me.wDateOfBirthField.getDateValue();
+        var sAddressLine1           = me.wAddressLine1Field.getValue();
+        var sAddressLine2           = me.wAddressLine2Field.getValue();
+        var sAddressLine3           = me.wAddressLine3Field.getValue();
+        var iAddressCountry         = me.wCountryField.getSelectedKey();
+        var iAddressStateProvince   = me.wStateField.getSelectedKey();
+        var iAddressPostcode        = me.wPostCodeField.getSelectedKey();
+        var iAddressTimezone        = me.wTimezoneField.getSelectedKey();
+        var iAddressLanguage        = me.wLanguageField.getSelectedKey();
+        var sUsername               = me.wUsernameField.getValue();
+        var mPasswordValidationInfo;
+
+        var bError = false;
+        var aLogErrors = [];
+        var sDialogTitle;
+
+        //-----------------------------------//
+        // Prepare the date of birth string
+        //-----------------------------------//
+        if (vDob === null) {
+            vDob = "";
+        } else {
+        //try {
+            vDob = IOMy.functions.getTimestampString(vDob, "yyyy-mm-dd", false)
+//        } catch (e) {
+//            aLogErrors.push("")
+//        }
+            console.log(vDob);
+        }
+
+        //-----------------------------------//
+        // Validate Input
+        //-----------------------------------//
+        if (sAddressLine1 === "") {
+            aLogErrors.push("* Street Address (Line 1) must be filled out");
+        }
+        
+        if (sUsername === "") {
+            aLogErrors.push("* Username is required");
+        }
+        
+        if (me.wPasswordField.getValue() === "") {
+            aLogErrors.push("* Password is required");
+        } else {
+            // Validate password security
+            mPasswordValidationInfo = IOMy.functions.validateSecurePassword(me.wPasswordField.getValue());
+            // If the password is not secure enough
+            if (mPasswordValidationInfo.bValid === false) {
+                // Report the feedback.
+                aLogErrors = aLogErrors.concat(mPasswordValidationInfo.aValidationErrorMessages);
+            }
+        }
+
+        if (me.wConfirmPasswordField.getValue() !== me.wPasswordField.getValue()) {
+            aLogErrors.push("* The new passwords don't match.");
+        }
+        
+        if (me.wDBRootUsernameField.getValue() === "") {
+            aLogErrors.push("* The database admin username is required");
+        }
+        
+        if (me.wDBRootPasswordField.getValue() === "") {
+            aLogErrors.push("* The database admin password is required");
+        }
+
+        if (aLogErrors.length > 0) {
+            if (aLogErrors.length > 1) {
+                sDialogTitle = "Errors";
+            } else if (aLogErrors.length === 1) {
+                sDialogTitle = "Error";
+            }
+
+            bError = true;
+        }
+
+        if (bError === true) {
+            jQuery.sap.log.error(aLogErrors.join("\n"));
+            IOMy.common.showError(aLogErrors.join("\n\n"), sDialogTitle,
+                function () {
+                    thisButton.setEnabled(true);
+                }
+            );
+        } else {
+            // Run the API to update the user information
+            try {
+                IOMy.apiphp.AjaxRequest({
+                    url : IOMy.apiphp.APILocation("users"),
+                    data : {
+                        "Mode" : "AddUser",
+                        "Title" : sTitle,
+                        "Givennames" : sGivennames,
+                        "Surnames" : sSurnames,
+                        "Displayname" : sDisplayname,
+                        "Email" : sEmail,
+                        "Phone" : sPhone,
+                        "Gender" : iGender,
+                        "AddressLine1" : sAddressLine1,
+                        "AddressLine2" : sAddressLine2,
+                        "AddressLine3" : sAddressLine3,
+                        "AddressCountry" : iAddressCountry,
+                        "AddressStateProvince" : iAddressStateProvince,
+                        "AddressPostcode" : iAddressPostcode,
+                        "AddressTimezone" : iAddressTimezone,
+                        "AddressLanguage" : iAddressLanguage,
+                        "Username" : sUsername,
+                        "NewPassword" : me.wPasswordField.getValue(),
+                        "Data" : "{\"Username\":\""+me.wDBRootUsernameField.getValue()+"\",\"Password\":\""+me.wDBRootPasswordField.getValue()+"\",\"URI\":\"localhost\"}",
+                    },
+
+                    onSuccess : function () {
+                        IOMy.common.showSuccess("User "+sDisplayname+" created successfully!", "Success", 
+                            function () {
+                                IOMy.common.NavigationTriggerBackForward(false);
+                            }
+                        , "UpdateMessageBox");
+                    },
+                    onFail : function (response) {
+                        // Report the error in a popup message.
+                        IOMy.common.showError(response.responseText, "Error",
+                            function () {
+                                thisButton.setEnabled(true);
+                            }
+                        );
+                    }
+                });
+            } catch (e00033) {
+                IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
+            }
+        }
     }
 
 });

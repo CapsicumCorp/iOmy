@@ -391,11 +391,12 @@ $.extend(IOMy.functions,{
      * it's not explicitly stated in the function (A BUG IF THIS HAPPENS).
      */
 	showHelpDialog : function () {
-		var sHelpMessage;
+		var sHelpMessage = IOMy.help.PageInformation[oApp.getCurrentPage().getId()];
+        
 		//==============================
         // PREMISE OVERVIEW
         //==============================
-		if ( oApp.getCurrentPage().getId() === "pPremiseOverview" ) {
+/*		if ( oApp.getCurrentPage().getId() === "pPremiseOverview" ) {
 			sHelpMessage = "The Premise Overview features a combo box complete with "
                         + "a list of premises that are available to the user. Below the premise combo box "
                         + "is a list of rooms that are registered with the currently selected premise.\n\n"
@@ -549,7 +550,7 @@ $.extend(IOMy.functions,{
             //
             // If this is executed, there is a bug.
 			sHelpMessage = oApp.getCurrentPage().getId();
-		}
+		}*/
 		
 		sap.m.MessageBox.show(
 			sHelpMessage,
@@ -971,3 +972,6 @@ $.extend(IOMy.functions,{
 //----------------------------------------//
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
 $.sap.require("IOMy.functions.getLengthOfTimePassed");
+
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.validateSecurePassword");

@@ -103,10 +103,10 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         IOMy.devices.onvif.LookupProfiles(me.oThing.LinkId, 
             // Function if Lookup is successful (Onvif server is attached)
             function () {
-                var sThumbnailUrl = IOMy.apiphp.APILocation("onvifthumbnail")+"?Mode=OpenThingThumbnail&ThingId="+me.iID;
-
-                // Set the CSS rule using the API URL with parameters
-                document.getElementById(me.createId("CameraThumbnail")).style = "background-image: url("+sThumbnailUrl+")";
+//                var sThumbnailUrl = IOMy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+me.iID;
+//
+//                // Set the CSS rule using the API URL with parameters
+//                document.getElementById(me.createId("CameraThumbnail")).style = "background-image: url("+sThumbnailUrl+")";
 
                 // Update the JS time stamp
                 me.updateThumnailTimestamp();
@@ -240,10 +240,10 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
                 // Boolean for determining if a different camera to the previous
                 // one is accessed.
                 var bNowForDifferentCamera = me.iID !== evt.data.ThingId;
-                //var bUpdated = me.UTSLastUpdate !== IOMy.common.ThingList["_"+evt.data.Thing.Id].UILastUpdate;
+                var bUpdated = me.UTSLastUpdate !== IOMy.common.ThingList["_"+evt.data.ThingId].UILastUpdate;
                 
                 // Decide whether the page needs to be reloaded.
-                if (bNowForDifferentCamera /*|| bUpdated */) {
+                if (bNowForDifferentCamera || bUpdated ) {
                     me.bUIDrawn = false;
                 }
                 
@@ -439,6 +439,8 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
                         ]
                     }).addStyleClass("width100Percent height300px BG_grey_10 CameraThumbnail");
 
+//                    var sThumbnailUrl = IOMy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+me.iID;
+
                     //==============================================\\
                     // DRAW DATE, TIME, AND ROOM                    \\
                     //==============================================\\
@@ -493,7 +495,7 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
                         thisView.byId("extrasMenuHolder").destroyItems();
                         thisView.byId("extrasMenuHolder").addItem(
                             IOMy.widgets.getActionMenu({
-                                id : me.createId("extrasMenu"+me.oThing.Id+me.oThing.DisplayName.replace(/[ '"?><=\\\-!@#$%\^&*()]/g, "")),        // Uses the page ID
+                                id : me.createId("extrasMenu"+me.oThing.Id),        // Uses the page ID
                                 icon : "sap-icon://GoogleMaterial/more_vert",
                                 items : [
                                     {

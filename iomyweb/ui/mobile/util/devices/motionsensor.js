@@ -83,20 +83,24 @@ $.extend(IOMy.devices.motionsensor,{
                     var iUTS    = mResponseData.MostRecentMotion;
                     var bTamper = mResponseData.CurrentStatus.Tamper;
                     
-                    oLastMotionField.setText(
-                        IOMy.functions.getLengthOfTimePassed({
-                            "UTS" : iUTS
-                        })
-                    );
+                    if (oLastMotionField !== undefined && oLastMotionField !== null) {
+                        oLastMotionField.setText(
+                            IOMy.functions.getLengthOfTimePassed({
+                                "UTS" : iUTS
+                            })
+                        );
+                    }
             
-                    oTamperField.setText(bTamper === false ? "Secure" : "Not Secure");
-                    
-                    //--------------------------------------------------------//
-                    // If the device has detected possible tampering, then set
-                    // the text colour to red.
-                    //--------------------------------------------------------//
-                    if (bTamper === true) {
-                        oTamperField.addStyleClass("Text_red_13");
+                    if (oTamperField !== undefined && oTamperField !== null) {
+                        oTamperField.setText(bTamper === false ? "Secure" : "Not Secure");
+
+                        //--------------------------------------------------------//
+                        // If the device has detected possible tampering, then set
+                        // the text colour to red.
+                        //--------------------------------------------------------//
+                        if (bTamper === true) {
+                            oTamperField.addStyleClass("Text_red_13");
+                        }
                     }
                 }
                 
@@ -253,30 +257,38 @@ $.extend(IOMy.devices.motionsensor,{
                         }
                     }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                 ]
-            }).addStyleClass("minwidth70px width70Percent")
+            }).addStyleClass("minwidth70px width70Percent BorderRight")
         );
 
-//        aUIObjectItems.push(
-//            //------------------------------------//
-//            //-- 2nd is the Device Data			--//
-//            //------------------------------------//
-//            new sap.m.VBox({
-//                items : [
-//                    new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
-//                        //--------------------------------//
-//                        //-- Draw the Data Boxes		--//
-//                        //--------------------------------//
-//
-//                        items: [
-//                            new sap.m.Text( oViewScope.createId( sPrefix+"_Volt" ),	{} ).addStyleClass("Font-RobotoCondensed"),
-//                            new sap.m.Text( oViewScope.createId( sPrefix+"_Amp" ),	{} ).addStyleClass("Font-RobotoCondensed"),
-//                            new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("Font-RobotoCondensed"),
-//                            new sap.m.Text( oViewScope.createId( sPrefix+"_kWh" ),	{} ).addStyleClass("Font-RobotoCondensed")
-//                        ]
-//                    }).addStyleClass("width110px PadLeft5px MarBottom3px MarRight10px TextLeft")
-//                ]
-//            }).addStyleClass("minwidth100px width10Percent")
-//        );
+        aUIObjectItems.push(
+            //------------------------------------//
+            //-- 2nd is the Device Data			--//
+            //------------------------------------//
+            new sap.m.VBox({
+                items : [
+                    new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
+                        //--------------------------------//
+                        //-- Draw the Data Boxes		--//
+                        //--------------------------------//
+
+                        items: [
+                            new sap.m.HBox({
+                                items : [
+                                    //----------------------------------//
+                                    // Last Motion
+                                    //----------------------------------//
+                                    new sap.m.Label({
+                                        text : "Last Motion:"
+                                    }).addStyleClass("Font-RobotoCondensed"),
+
+                                    new sap.m.Text( oViewScope.createId( sPrefix+"_LastMotion" ),	{} ).addStyleClass("PadLeft5px Font-RobotoCondensed width110px")
+                                ]
+                            })
+                        ]
+                    }).addStyleClass("DeviceOverview-ItemLabel PadLeft5px MarBottom3px MarRight10px TextLeft")
+                ]
+            }).addStyleClass("minwidth100px width10Percent")
+        );
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: aUIObjectItems
@@ -405,24 +417,35 @@ $.extend(IOMy.devices.motionsensor,{
                             }
                         }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                     ]
-                }).addStyleClass("PadRight3px width100Percent minwidth170px"),
+                }).addStyleClass("BorderRight testlabelcont"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
                 //------------------------------------//
-//                new sap.m.VBox({
-//                    items : [
-//                        new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
-//                            //--------------------------------//
-//                            //-- Draw the Data Boxes		--//
-//                            //--------------------------------//
-//
-//                            items: [
-//                                //new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("DeviceOverview-ItemLabel Font-RobotoCondensed")
-//                            ]
-//                        }).addStyleClass("PadLeft5px MarBottom3px MarRight10px TextLeft")
-//                    ]
-//                }).addStyleClass("width10Percent minwidth70px")
+                new sap.m.VBox({
+                    items : [
+                        new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
+                            //--------------------------------//
+                            //-- Draw the Data Boxes		--//
+                            //--------------------------------//
+
+                            items: [
+                                new sap.m.HBox({
+                                    items : [
+                                        //----------------------------------//
+                                        // Last Motion
+                                        //----------------------------------//
+                                        new sap.m.Label({
+                                            text : "Last Motion:"
+                                        }).addStyleClass("Font-RobotoCondensed"),
+                                        
+                                        new sap.m.Text( oViewScope.createId( sPrefix+"_LastMotion" ),	{} ).addStyleClass("PadLeft5px Font-RobotoCondensed width110px")
+                                    ]
+                                })
+                            ]
+                        }).addStyleClass("DeviceOverview-ItemLabel PadLeft5px MarBottom3px MarRight10px TextLeft")
+                    ]
+                }).addStyleClass("width10Percent minwidth70px")
             ]
         }).addStyleClass("ListItem");
 
@@ -560,10 +583,10 @@ $.extend(IOMy.devices.motionsensor,{
 		//-- 2.0 - Fetch TASKS				--//
 		//------------------------------------//
 		if( aDeviceData.IOs!==undefined ) {
-            
+            this.CallAPI(aDeviceData.DeviceId, null, oViewScope.byId( Prefix+"_LastMotion" ));
         } else {
             //-- TODO: Write a error message --//
-            jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
+            jQuery.sap.log.error("Device "+aDeviceData.DeviceName+" has no IOs");
         }
 		return aTasks;
 	},
