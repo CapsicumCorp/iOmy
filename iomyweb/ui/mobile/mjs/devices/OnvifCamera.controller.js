@@ -103,10 +103,10 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         IOMy.devices.onvif.LookupProfiles(me.oThing.LinkId, 
             // Function if Lookup is successful (Onvif server is attached)
             function () {
-//                var sThumbnailUrl = IOMy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+me.iID;
-//
-//                // Set the CSS rule using the API URL with parameters
-//                document.getElementById(me.createId("CameraThumbnail")).style = "background-image: url("+sThumbnailUrl+")";
+                var sThumbnailUrl = IOMy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+me.iID;
+
+                // Set the CSS rule using the API URL with parameters
+                document.getElementById(me.createId("CameraThumbnail")).style = "background-image: url("+sThumbnailUrl+")";
 
                 // Update the JS time stamp
                 me.updateThumnailTimestamp();
@@ -200,6 +200,12 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
                             me.sStreamProfileUrl        = data[0].DATAMEDSTRING_VALUE;
                             me.sThumbnailProfileUrl     = data[1].DATAMEDSTRING_VALUE;
                         }
+                        
+                        var sThumbnailUrl = IOMy.apiphp.APILocation("onvifthumbnail")+"?Mode=OpenThingThumbnail&ThingId="+me.iID;
+                    
+                        // Set the CSS rule using the API URL with parameters
+                        document.getElementById(me.createId("CameraThumbnail")).style = "background-image: url("+sThumbnailUrl+")";
+
                         me.loadThumbnail();
                     },
                     
@@ -438,8 +444,6 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
                             }).addStyleClass("width100Percent height30px IOMYButton ButtonIconWhite CameraPTZButton"),
                         ]
                     }).addStyleClass("width100Percent height300px BG_grey_10 CameraThumbnail");
-
-//                    var sThumbnailUrl = IOMy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+me.iID;
 
                     //==============================================\\
                     // DRAW DATE, TIME, AND ROOM                    \\
