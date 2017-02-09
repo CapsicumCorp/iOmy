@@ -3,7 +3,7 @@ Title: Navigation Menu UI fragment
 Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
 Modified: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Builds the navigation menu.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -40,10 +40,10 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 						new sap.tnt.NavigationListItem( oController.createId("UsernameButton"), {
 							icon:		"sap-icon://GoogleMaterial/person",
 							text:		"User Accounts",
-							expanded:	false,
+							expanded:	true,
 							items:	[
 								//--------------------------------//
-								//-- SWITCH USER				--//
+								//-- EDIT USER PAGES			--//
 								//--------------------------------//
 								new sap.tnt.NavigationListItem({
 									text: "Edit Information",
@@ -62,22 +62,28 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 									select:	function (oControlEvent) {
 										IOMy.common.NavigationChangePage( "pSettingsUserPassword", {}, true );
 									}
+								}),
+								new sap.tnt.NavigationListItem({
+									text: "New User",
+									select:	function (oControlEvent) {
+										IOMy.common.NavigationChangePage( "pSettingsAddUser", {}, true );
+									}
 								})
 							],
-							select:		function (oControlEvent) {
-								//---------------------------------------------------//
-								//-- TOGGLE SELECTED STATUS IF MEDIA IS MOBILE     --//
-								//---------------------------------------------------//
-                                var mSystem = sap.ui.Device.system;
-                                
-                                if (mSystem.desktop === false) {
-                                    if( this.getExpanded() ) {
-                                        this.setExpanded(false);
-                                    } else {
-                                        this.setExpanded(true);
-                                    }
-                                }
-							}
+//							select:		function (oControlEvent) {
+//								//---------------------------------------------------//
+//								//-- TOGGLE SELECTED STATUS IF MEDIA IS MOBILE     --//
+//								//---------------------------------------------------//
+//                                var mSystem = sap.ui.Device.system;
+//                                
+//                                if (mSystem.desktop === false) {
+//                                    if( this.getExpanded() ) {
+//                                        this.setExpanded(false);
+//                                    } else {
+//                                        this.setExpanded(true);
+//                                    }
+//                                }
+//							}
 						}),
 						//--------------------------------//
 						//-- DEVICE OVERVIEW			--//
@@ -107,7 +113,7 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 						new sap.tnt.NavigationListItem({
 							icon:		"sap-icon://GoogleMaterial/settings",
 							text:		"Settings",
-							expanded:	false,
+							expanded:	true,
 							items:	[
 								new sap.tnt.NavigationListItem({
 									text: "Premise & Hub",
@@ -122,31 +128,114 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 									}
 								})
 							],
-							select:		function (oControlEvent) {
-								//---------------------------------------------------//
-								//-- TOGGLE SELECTED STATUS IF MEDIA IS MOBILE     --//
-								//---------------------------------------------------//
-                                var mSystem = sap.ui.Device.system;
-                                
-                                if (mSystem.desktop === false) {
-                                    if( this.getExpanded() ) {
-                                        this.setExpanded(false);
-                                    } else {
-                                        this.setExpanded(true);
+//							select:		function (oControlEvent) {
+//								//---------------------------------------------------//
+//								//-- TOGGLE SELECTED STATUS IF MEDIA IS MOBILE     --//
+//								//---------------------------------------------------//
+//                                var mSystem = sap.ui.Device.system;
+//                                
+//                                if (mSystem.desktop === false) {
+//                                    if( this.getExpanded() ) {
+//                                        this.setExpanded(false);
+//                                    } else {
+//                                        this.setExpanded(true);
+//                                    }
+//                                }
+//							}
+						}),
+                        //--------------------------------//
+						//-- PERMISSIONS    			--//
+						//--------------------------------//
+						new sap.tnt.NavigationListItem({
+							icon:		"sap-icon://GoogleMaterial/settings",
+							text:		"Permissions",
+							expanded:	true,
+							items:	[
+								new sap.tnt.NavigationListItem({
+									text: "Rooms",
+									select:	function (oControlEvent) {
+										IOMy.common.NavigationChangePage( "pSettingsRoomPermissions", {}, true );
+									}
+								}),
+								new sap.tnt.NavigationListItem({
+									text: "Premises",
+									select:	function (oControlEvent) {
+										IOMy.common.NavigationChangePage( "pSettingsPremisePermissions", {}, true );
+									}
+								})
+							]
+						}),
+                        //--------------------------------//
+						//-- SIGN OUT   				--//
+						//--------------------------------//
+                        new sap.tnt.NavigationListItem({
+							icon: "sap-icon://GoogleMaterial/person",
+							text: "Sign Out",
+							select:	function (oControlEvent) {
+								//-------------------------------------------//
+                                // Ask if the user actually meant to hit sign
+                                // out in the menu.
+								//-------------------------------------------//
+                                IOMy.common.showConfirmQuestion("Are you sure you want to sign out of iOmy?", "Sign Out",
+                                    // Callback function to run when a selection is made
+                                    function (oAction) {
+                                        //------------------------------------------------------//
+                                        // Determine which button was pressed. If YES, proceed
+                                        //------------------------------------------------------//
+                                        if (oAction === sap.m.MessageBox.Action.OK) {
+                                            //------------------------------------------------------//
+                                            // Declare the necessary variables
+                                            //------------------------------------------------------//
+                                            var sUrl = IOMy.apiphp.APILocation("sessioncheck");
+
+                                            //------------------------------------------------------//
+                                            // Sign the user out
+                                            //------------------------------------------------------//
+                                            IOMy.apiphp.AjaxRequest({
+                                                "url" : sUrl,
+                                                "data" : {
+                                                    "username" : "",
+                                                    "password" : "",
+                                                    "AttemptLogin" : 1
+                                                },
+
+                                                "onSuccess" : function (response, data) {
+                                                    this.onComplete();
+                                                },
+
+                                                "onFail" : function (response) {
+                                                    jQuery.sap.log.error(response.ErrCode + ": " + response.ErrMesg);
+                                                    this.onComplete();
+                                                },
+
+                                                "onComplete" : function() {
+                                                    window.location.reload(true); // TRUE forces a full refresh from the server, NOT the cache!
+                                                }
+                                            });
+                                        }
                                     }
-                                }
+                                );
 							}
 						}),
 						//--------------------------------//
 						//-- SWITCH USER				--//
 						//--------------------------------//
+//						new sap.tnt.NavigationListItem({
+//							icon: "sap-icon://GoogleMaterial/person",
+//							text: "Switch User",
+//							select:	function (oControlEvent) {
+//								IOMy.common.NavigationChangePage( "pForceSwitchUser", {}, true );
+//							}
+//						}),
+						//--------------------------------//
+						//-- UI Staging      			--//
+						//--------------------------------//
 						new sap.tnt.NavigationListItem({
-							icon: "sap-icon://GoogleMaterial/person",
-							text: "Switch User",
+							text: "UI Staging",
 							select:	function (oControlEvent) {
-								IOMy.common.NavigationChangePage( "pForceSwitchUser", {}, true );
+								IOMy.common.NavigationChangePage( "pStagingHome", {}, true );
 							}
-						}),
+						})
 					]
 				}).addStyleClass("IOMYNavMenu")
 			]

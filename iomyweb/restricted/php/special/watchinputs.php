@@ -77,6 +77,26 @@ require_once SITE_BASE.'/restricted/libraries/userauth.php';
 
 
 
+//------------------------------------------------------------//
+//-- 1.4 -              --//
+//------------------------------------------------------------//
+
+class PseudoRestrictedAPICore {
+	//-- Declare Public Variables --//
+	public      $bRestrictedDB          = false;
+	public      $oRestrictedDB;
+	
+	//--  --//
+	
+	
+	
+	
+	
+	
+}
+
+
+
 //====================================================================//
 //== 2.0 - RETRIEVE POST                                            ==//
 //====================================================================//
@@ -270,7 +290,6 @@ if($bError===false) {
 						$sVerTertiary = "0";
 					}
 					
-					
 				} catch( Exception $e0204 ) {
 					$bError = true;
 					$iErrCode  = 204;
@@ -284,7 +303,7 @@ if($bError===false) {
 				//------------------------------------------------//
 				//if( $iVerPrimary===0 ) {
 					//if( $iVerPrimary ) {
-						require_once SITE_BASE.'/restricted/php/special/versions/0.1.0.php';
+						require_once SITE_BASE.'/restricted/libraries/special/versions/0.4.3.php';
 					//}
 				//}
 				
@@ -339,6 +358,9 @@ if($bError===false) {
 				if( isset($aPostAccess[0]) && isset($aPostAccess[1]) ) {
 					//-- Check to make sure they aren't empty --//
 					if( trim($aPostAccess[0])!=="" && trim($aPostAccess[1])!=="" ) {
+						
+						//$Config['DB'][0]['mode'] = "normal";
+						
 						//------------------------------------------//
 						//-- Open Database Connection             --//
 						//------------------------------------------//
@@ -348,25 +370,42 @@ if($bError===false) {
 							$aPostAccess[1]
 						);
 						
+						//var_dump($oRestrictedDB);
+						
 						
 						//------------------------------------------//
 						//-- Check if the DB connection succeeded --//
 						//------------------------------------------//
 						if( $oRestrictedDB->Initialised===true ) {
-							//-- FLAG THAT THE LOGIN ATTEMPT IS SUCCESSFUL --//
-							$aRestrictedApiCore['LoginResult'] = true;
-							//-- FLAG THAT THERE IS ACCESS TO THE RESTRICTED DATABASE --//
-							$aRestrictedApiCore['RestrictedDB'] = true;
 							
+							$oRestrictedApiCore = new PseudoRestrictedAPICore();
+							
+							$oRestrictedApiCore->oRestrictedDB = $oRestrictedDB;
+							$oRestrictedApiCore->bRestrictedDB = true;
+							
+							
+							if( $oRestrictedApiCore->bRestrictedDB===false ) {
+								//-- No Database username detected --//
+								$bError    = true;
+								$iErrCode  = 11;
+								$sErrMesg .= "Error Code:'0211' \n";
+								$sErrMesg .= "Can't access the database! \n";
+								$sErrMesg .= "Possibly invalid Username and/or Password combination.\n";
+							}
+					
 						} else {
 							//-- LOGIN ATTEMPT HAD AN ERROR --//
-							$aRestrictedApiCore['LoginResult'] = false;
+							$bError    = true;
+							$iErrCode  = 12;
+							$sErrMesg .= "Error Code:'0212' \n";
+							$sErrMesg .= "Can't access the database! \n";
+							$sErrMesg .= "Failed to initialise the database connection.\n";
 						}
 					} else {
 						//-- Parameters are missing --//
 						$bError    = true;
 						$iErrCode  = 12;
-						$sErrMesg .= "Error Code:'0012' \n";
+						$sErrMesg .= "Error Code:'0212' \n";
 						$sErrMesg .= "Can't access the database! \n";
 						$sErrMesg .= "Invalid Username and/or Password parameters.\n";
 						
@@ -378,15 +417,6 @@ if($bError===false) {
 					$sErrMesg .= "Error Code:'0012' \n";
 					$sErrMesg .= "Can't access the database! \n";
 					$sErrMesg .= "Invalid Username and/or Password parameters.\n";
-				}
-				
-				if( $aRestrictedApiCore['LoginResult']===false ) {
-					//-- No Database username detected --//
-					$bError    = true;
-					$iErrCode  = 11;
-					$sErrMesg .= "Error Code:'0011' \n";
-					$sErrMesg .= "Can't access the database! \n";
-					$sErrMesg .= "Possibly invalid Username and/or Password combination.\n";
 				}
 				
 			} catch( Exception $e1 ) {
@@ -456,7 +486,7 @@ if($bError===false) {
 				//----------------------------------------------------------------//
 				//-- 5.1.4 - Begin the transaction                              --//
 				//----------------------------------------------------------------//
-				$bTransactionStarted = $oRestrictedDB->dbBeginTransaction();
+				$bTransactionStarted = $oRestrictedApiCore->oRestrictedDB->dbBeginTransaction();
 				
 				if( $bTransactionStarted===false ) {
 					$bError    = true;
@@ -499,7 +529,7 @@ if($bError===false) {
 				//----------------------------------------------------------------//
 				//-- 5.2.1 - Begin the transaction                              --//
 				//----------------------------------------------------------------//
-				$bTransactionStarted = $oRestrictedDB->dbBeginTransaction();
+				$bTransactionStarted = $oRestrictedApiCore->oRestrictedDB->dbBeginTransaction();
 				
 				if( $bTransactionStarted===false ) {
 					$bError    = true;
@@ -575,7 +605,7 @@ if($bError===false) {
 				//----------------------------------------------------------------//
 				//-- 5.3.1 - Begin the transaction                              --//
 				//----------------------------------------------------------------//
-				$bTransactionStarted = $oRestrictedDB->dbBeginTransaction();
+				$bTransactionStarted = $oRestrictedApiCore->oRestrictedDB->dbBeginTransaction();
 				
 				if( $bTransactionStarted===false ) {
 					$bError    = true;
@@ -653,7 +683,7 @@ if($bError===false) {
 				//----------------------------------------------------------------//
 				if( $bError===false ) {
 					
-					$bTransactionStarted = $oRestrictedDB->dbBeginTransaction();
+					$bTransactionStarted = $oRestrictedApiCore->oRestrictedDB->dbBeginTransaction();
 					
 					if( $bTransactionStarted===false ) {
 						$bError    = true;
@@ -719,11 +749,11 @@ if( $bTransactionStarted===true ) {
 	//----------------------------------------//
 	if( $bError===false ) {
 		//-- Commit the changes --//
-		$oRestrictedDB->dbEndTransaction();
+		$oRestrictedApiCore->oRestrictedDB->dbEndTransaction();
 		
 	} else {
 		//-- Rollback changes --//
-		$oRestrictedDB->dbRollback();
+		$oRestrictedApiCore->oRestrictedDB->dbRollback();
 		
 	}
 }

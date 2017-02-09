@@ -133,6 +133,18 @@ else
 	fi
 fi
 
+source "${basedir}/package_info.sh"
+
+echo "Changing to temp assets directory"
+cd "${basedir}/assetstmp"
+if [ -f "${basedir}/download/${DEMODATABASEPKG}" ] ; then
+  echo "Extracting MySQL demo database from ${DEMODATABASETITLE}-${DEMODATABASEVER}"
+	xz -dc "${basedir}/download/${DEMODATABASEPKG}" | tar x
+	if [ $? != 0 ] ; then
+	  exit 1
+	fi
+fi
+
 # Copy the iomyweb files from the iomyweb folder
 echo "Copying iomyweb files from the iomyweb folder"
 bash ${basedir}/scriptlib/copyiomyweb.sh "${basedir}/../../iomyweb" "${basedir}/assetstmp"

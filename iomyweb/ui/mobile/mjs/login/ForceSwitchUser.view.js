@@ -4,7 +4,7 @@ Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
 Modified: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Creates the page for logging in after logging out. Often used for
     switching users.
-Copyright: Capsicum Corporation 2015, 2016
+Copyright: Capsicum Corporation 2015, 2016, 2017
 
 This file is part of iOmy.
 

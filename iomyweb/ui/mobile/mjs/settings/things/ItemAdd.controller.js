@@ -2,7 +2,7 @@
 Title: Add Link page UI5 Controller
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws the form to add a link.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of the iOmy project.
 
@@ -84,6 +84,7 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
         var me                      = this;
         var mValidationInfo         = {};
         var mLinkInfo               = {};
+        var mDisplayNameInfo        = {};
         var mFormDataInfo           = {};
         var bError                  = false;
         var aErrorMessages          = [];
@@ -94,7 +95,14 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
         //----------------------------------------------------------//
         mLinkInfo = me.ValidateLink();
         bError = mLinkInfo.bError;
-        aErrorMessages.concat(mLinkInfo.aErrorMessages);
+        aErrorMessages = aErrorMessages.concat(mLinkInfo.aErrorMessages);
+        
+        //----------------------------------------------------------//
+        // Check that the display name is valid
+        //----------------------------------------------------------//
+        mDisplayNameInfo = me.ValidateDisplayName();
+        bError = mDisplayNameInfo.bError;
+        aErrorMessages = aErrorMessages.concat(mDisplayNameInfo.aErrorMessages);
         
         if (bError === false) {
             try {
@@ -141,6 +149,32 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
         } catch (e) {
             bError = true;
             aErrorMessages.push("Error 0x1001: There was an error checking the link: "+e.message);
+        }
+        
+        // Prepare the return value
+        mInfo.bError = bError;
+        mInfo.aErrorMessages = aErrorMessages;
+        
+        return mInfo;
+    },
+    
+    ValidateDisplayName : function () {
+        var me                      = this;
+        var bError                  = false;
+        var aErrorMessages          = [];
+        var mInfo                   = {}; // MAP: Contains the error status and any error messages.
+        
+        //-------------------------------------------------\\
+        // Is the hub a proper hub (does it have an ID)
+        //-------------------------------------------------\\
+        try {
+            if (me.byId(me.sThingNameField).getValue().length === 0) {
+                bError = true;
+                aErrorMessages.push("You must have the display name filled out.");
+            }
+        } catch (e) {
+            bError = true;
+            aErrorMessages.push("Error 0x1002: There was an error checking the display name: "+e.message);
         }
         
         // Prepare the return value
@@ -207,6 +241,9 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
         mData.onFail = function (error) {
             jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
             IOMy.common.showError("Error creating "+sLinkType+":\n\n"+error.responseText);
+            
+            // Re-enable the add link button
+            me.byId("addButton").setEnabled(true);
         };
         
         return mData;
@@ -279,7 +316,7 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
         });
         
         oLinkCBox = IOMy.widgets.getLinkSelector(me.createId("linkCBox")).addStyleClass("width100Percent SettingsDropDownInput");
-        
+        oLinkCBox.setSelectedItem(null);
         //-----------------------------------------------\\
         // THING NAME
         //-----------------------------------------------\\
@@ -322,7 +359,8 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
                     // FUNCTION TO UPDATE THE LINK BY CLICKING ON THE UPDATE LINK BUTTON
                     //-------------------------------------------------------\\
                     press : function() {
-                        this.setEnabled(false); // Lock the button
+                        var thisButton = this; // Captures the scope of the button.
+                        thisButton.setEnabled(false); // Lock the button
                         
                         try {
                             // Error checking variables
@@ -348,27 +386,29 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
                                 IOMy.apiphp.AjaxRequest(mData);
                             } catch (e) {
                                 bError = true; // No.
-                                aErrorMessages.push("Error 0x1005: There was an error checking the IP Port: "+e.message);
+                                aErrorMessages.push("Error 0x1005: There was an error adding a device: "+e.message);
                                 
-                                if (aErrorMessages.length === 1)
+                                if (aErrorMessages.length === 1) {
                                     sErrorMessage = "There was an error: \n\n"+aErrorMessages.join('\n');
-                                else
+                                } else {
                                     sErrorMessage = "There were "+aErrorMessages.length+" errors:\n\n"+aErrorMessages.join('\n\n');
+                                }
 
                                 jQuery.sap.log.error(sErrorMessage);
                                 IOMy.common.showError(sErrorMessage);
                             }
                         } else {
-                            if (mInfo.aErrorMessages.length === 1)
+                            if (mInfo.aErrorMessages.length === 1) {
                                 sErrorMessage = "There was an error: \n\n"+mInfo.aErrorMessages.join('\n');
-                            else
+                            } else {
                                 sErrorMessage = "There were "+mInfo.aErrorMessages.length+" errors:\n\n"+mInfo.aErrorMessages.join('\n\n');
+                            }
 
                             jQuery.sap.log.error(sErrorMessage);
-                            IOMy.common.showError(sErrorMessage);
+                            IOMy.common.showError(sErrorMessage, "Invalid data", function () {
+                                thisButton.setEnabled(true); // Unlock the button
+                            });
                         }
-
-                        this.setEnabled(true); // Unlock the button
                     }
                 }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
             ]
@@ -379,7 +419,7 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
         // HAVE THE COMBO BOX DRAW A FORM ACCORDING TO THE LINK TYPE OF THE 
         // SELECTED LINK.
         //=======================================================\\
-        oLinkCBox.attachSelectionChange(function () {
+        oLinkCBox.attachChange(function () {
             me.byId("addButton").setEnabled(false); // Lock the add button.
             this.setEnabled(false);                 // Lock this Combo Box
             var iLinkId = this.getSelectedKey();
@@ -400,7 +440,7 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
             } else if (iLinkTypeId == 7) {
                 this.setEnabled(true); // Unlock this combo box.
                 me.byId("addButton").setEnabled(false);
-                IOMy.common.showMessage(me.byId("linkCBox").getValue()+" should have already added all the light bulbs it could detect.");
+                IOMy.common.showMessage(me.byId("linkCBox").getSelectedItem().getText()+" should have already added all the light bulbs it could detect.");
             } else {
                 this.setEnabled(true); // Unlock this combo box.
                 me.byId("addButton").setEnabled(true); // Unlock the add button
@@ -409,6 +449,29 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
 //            else if (iLinkTypeId == 7)
 //                me.CreatePhilipsHueBridgeForm();
         });
+        
+        //====================================================================//
+        // Bring up the right form using the link type of the currently selected
+        // form.
+        //====================================================================//
+        
+        //==---------------------------------==//
+        // Choose a form to load
+        //==---------------------------------==//
+        var iLinkTypeId = IOMy.functions.getLinkTypeIDOfLink(oLinkCBox.getSelectedKey());
+        
+        //---- Onvif Stream ----//
+        if (iLinkTypeId == 6) {
+            IOMy.devices.onvif.CreateThingForm(me, oLinkCBox.getSelectedKey(), oFormBox, [me.byId("addButton"), me.byId("linkCBox")], [me.byId("linkCBox")]);
+        //---- Philips Hue ----//
+        } else if (iLinkTypeId == 7) {
+            me.byId("linkCBox").setEnabled(true); // Unlock this combo box.
+            me.byId("addButton").setEnabled(false);
+            IOMy.common.showMessage(me.byId("linkCBox").getSelectedItem().getText()+" should have already added all the light bulbs it could detect.");
+        } else {
+            me.byId("linkCBox").setEnabled(true); // Unlock this combo box.
+            me.byId("addButton").setEnabled(true); // Unlock the add button
+        }
         
         me.aElementsToDestroy.push("panel");
         oPanel = new sap.m.Panel(me.createId("panel"), {

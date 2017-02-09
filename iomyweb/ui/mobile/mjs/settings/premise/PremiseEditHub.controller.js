@@ -2,7 +2,7 @@
 Title: Edit Hub Information Page (UI5 Controller)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws a form that allows you to edit information about a given hub.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -66,7 +66,8 @@ sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
 						new sap.m.Link({
 							text : "Update",
                             press : function () {
-								this.setEnabled(false);
+                                var thisButton = this;
+								thisButton.setEnabled(false);
 								
 								var sHubText = me.byId("hubField").getValue();
 								var iHubID = me.hubID;
@@ -117,15 +118,19 @@ sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
                                                     }
                                                 });
                                             },
-                                            error : function () {
+                                            onFail : function () {
                                                 IOMy.common.showError("Update failed.", "Error");
+                                                this.onComplete();
+                                            },
+                                            
+                                            onComplete : function () {
+                                                thisButton.setEnabled(true);
                                             }
                                         });
                                     } catch (e00033) {
                                         IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
                                     }
                                 }
-								this.setEnabled(true);
 							}
 						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
 					]
@@ -149,7 +154,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
 				thisView.byId("page").addContent(oPanel);
                 
                 thisView.byId("extrasMenuHolder").addItem(
-                    IOMy.widgets.getExtrasButton({
+                    IOMy.widgets.getActionMenu({
                         id : me.createId("extrasMenu"),        // Uses the page ID
                         icon : "sap-icon://GoogleMaterial/more_vert",
                         items : [

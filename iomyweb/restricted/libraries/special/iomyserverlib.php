@@ -23,7 +23,7 @@
 function DB_CreateDatabase( $sDatabaseName ) {
 	//------------------------------------------------------------------------//
 	//-- DESCRIPTION:                                                       --//
-	//--    This function is used to add a new database.          --//
+	//--    This function is used to add a new database.                    --//
 	//------------------------------------------------------------------------//
 	
 	//----------------------------------------------------//
@@ -94,8 +94,9 @@ function DB_CreateTables1( $sDBName ) {
 	//-- DESCRIPTION:                                                       --//
 	//--    This function is used to add the tables to the database.        --//
 	//------------------------------------------------------------------------//
-
 }
+
+
 
 
 function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
@@ -179,7 +180,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "   primary key (COUNTRIES_PK)\n";
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
 			$sSQL .= "alter table `".$sDBName."`.`COUNTRIES` comment 'Stores a list of supported countries.';\n";
-
+			
 			$sSQL .= "create table `".$sDBName."`.`CURRENCIES` \n";
 			$sSQL .= "(\n";
 			$sSQL .= "   CURRENCIES_PK        int not null auto_increment comment 'Primary Key', \n";
@@ -198,7 +199,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "(\n";
 			$sSQL .= "   LANGUAGE_PK          int not null auto_increment comment 'Primary Key', \n";
 			$sSQL .= "   LANGUAGE_COUNTRIES_FK int comment 'Foreign Key', \n";
-			$sSQL .= "   LANGUAGE_NAME        national varchar(64), \n";
+			$sSQL .= "   LANGUAGE_NAME        varchar(64), \n";
 			$sSQL .= "   LANGUAGE_LANGUAGE    int not null, \n";
 			$sSQL .= "   LANGUAGE_VARIANT     varchar(64), \n";
 			$sSQL .= "   LANGUAGE_ENCODING    varchar(32), \n";
@@ -262,9 +263,9 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "   USERSINFO_PK         bigint not null auto_increment comment 'Primary Key', \n";
 			$sSQL .= "   USERSINFO_USERSGENDER_FK tinyint not null comment 'Foreign Key', \n";
 			$sSQL .= "   USERSINFO_TITLE      varchar(6), \n";
-			$sSQL .= "   USERSINFO_GIVENNAMES national varchar(64) not null, \n";
-			$sSQL .= "   USERSINFO_SURNAMES   national varchar(64) not null, \n";
-			$sSQL .= "   USERSINFO_DISPLAYNAME national varchar(64) not null, \n";
+			$sSQL .= "   USERSINFO_GIVENNAMES varchar(64) not null, \n";
+			$sSQL .= "   USERSINFO_SURNAMES   varchar(64) not null, \n";
+			$sSQL .= "   USERSINFO_DISPLAYNAME varchar(64) not null, \n";
 			$sSQL .= "   USERSINFO_EMAIL      varchar(80), \n";
 			$sSQL .= "   USERSINFO_PHONENUMBER varchar(20), \n";
 			$sSQL .= "   USERSINFO_DOB        date, \n";
@@ -344,6 +345,16 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "   primary key (PERMSERVER_PK) \n";
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset."; \n";
 			$sSQL .= "alter table ".$sDBName.".PERMSERVER comment 'Used to store what permissions a User has on the server'; \n";
+			
+			
+			$sSQL .= "create table ".$sDBName.".PERMHUB\n";
+			$sSQL .= "(\n";
+			$sSQL .= "   PERMHUB_PK           bigint not null auto_increment comment 'Primary Key',\n";
+			$sSQL .= "   PERMHUB_USERS_FK      bigint not null comment 'Foreign Key',\n";
+			$sSQL .= "   PERMHUB_HUB_FK       bigint not null comment 'Foreign Key',\n";
+			$sSQL .= "   primary key (PERMHUB_PK)\n";
+			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset."; \n";
+			$sSQL .= "alter table ".$sDBName.".PERMHUB comment 'Used to store what permissions a WatchInputs User has to a Hub';\n";
 			break;
 
 		/*==============================================================*/
@@ -389,7 +400,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "   PREMISELOG_PREMISELOGACTION_FK int comment 'Foreign Key', \n";
 			$sSQL .= "   PREMISELOG_CUSTOMLOG_FK bigint comment 'Foreign Key', \n";
 			$sSQL .= "   PREMISELOG_UTS       bigint not null, \n";
-			$sSQL .= "   PREMISELOG_CUSTOM1   national varchar(64), \n";
+			$sSQL .= "   PREMISELOG_CUSTOM1   varchar(64), \n";
 			$sSQL .= "   primary key (PREMISELOG_PK)\n";
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
 			$sSQL .= "alter table ".$sDBName.".PREMISELOG comment 'Stores changes done to a premise.';\n";
@@ -475,7 +486,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "   ROOMS_PK             bigint not null auto_increment comment 'Primary Key', \n";
 			$sSQL .= "   ROOMS_PREMISE_FK     bigint not null comment 'Foreign Key', \n";
 			$sSQL .= "   ROOMS_ROOMTYPE_FK    int not null comment 'Foreign Key', \n";
-			$sSQL .= "   ROOMS_NAME           national varchar(64) not null, \n";
+			$sSQL .= "   ROOMS_NAME           varchar(64) not null, \n";
 			$sSQL .= "   ROOMS_FLOOR          int, \n";
 			$sSQL .= "   ROOMS_DESC           varchar(64), \n";
 			$sSQL .= "   primary key (ROOMS_PK)\n";
@@ -941,7 +952,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "   TARGET_PK            bigint not null auto_increment comment 'Primary Key', \n";
 			$sSQL .= "   TARGET_PREMISE_FK    bigint not null comment 'Foreign Key', \n";
 			$sSQL .= "   TARGET_TARGETSTATE_FK int not null comment 'Foreign Key', \n";
-			$sSQL .= "   TARGET_NAME          national varchar(32) not null, \n";
+			$sSQL .= "   TARGET_NAME          varchar(32) not null, \n";
 			$sSQL .= "   TARGET_START         bigint not null, \n";
 			$sSQL .= "   TARGET_END           bigint not null, \n";
 			$sSQL .= "   TARGET_RECUR         tinyint not null, \n";
@@ -1076,8 +1087,12 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/* Table: POSTCODE & TIMEZONE                                   */
 		/*==============================================================*/
 		case 'Postcode':
-			$sSQL .= "alter table `".$sDBName."`.POSTCODE add constraint FK_POSTCODE_STATEPROVINCE foreign key (POSTCODE_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.POSTCODE add constraint FK_POSTCODE_TIMEZONE foreign key (POSTCODE_TIMEZONES_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.POSTCODE add constraint FK_POSTCODE_STATEPROVINCE foreign key (POSTCODE_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.POSTCODE add constraint FK_POSTCODE_TIMEZONE foreign key (POSTCODE_TIMEZONES_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.POSTCODE \n";
+			$sSQL .= "    add constraint FK_POSTCODE_STATEPROVINCE foreign key (POSTCODE_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_POSTCODE_TIMEZONE foreign key (POSTCODE_TIMEZONES_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
 			break;
 			
 		/*==============================================================*/
@@ -1092,23 +1107,46 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/* Table: USERADDRESS & USERSGENDER                             */
 		/*==============================================================*/
 		case 'UserAddress':
-			$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_COUNTRIES foreign key (USERADDRESS_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_LANGUAGE foreign key (USERADDRESS_LANGUAGE_FK) references `".$sDBName."`.LANGUAGE (LANGUAGE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_POSTCODE foreign key (USERADDRESS_POSTCODE_FK) references `".$sDBName."`.POSTCODE (POSTCODE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_STATEPROVINCE foreign key (USERADDRESS_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_TIMEZONE foreign key (USERADDRESS_TIMEZONE_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_USERS foreign key (USERADDRESS_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
-
+			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_COUNTRIES foreign key (USERADDRESS_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_LANGUAGE foreign key (USERADDRESS_LANGUAGE_FK) references `".$sDBName."`.LANGUAGE (LANGUAGE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_POSTCODE foreign key (USERADDRESS_POSTCODE_FK) references `".$sDBName."`.POSTCODE (POSTCODE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_STATEPROVINCE foreign key (USERADDRESS_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_TIMEZONE foreign key (USERADDRESS_TIMEZONE_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_USERS foreign key (USERADDRESS_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.USERADDRESS \n";
+			$sSQL .= "    add constraint FK_USERADDRESS_COUNTRIES foreign key (USERADDRESS_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_USERADDRESS_LANGUAGE foreign key (USERADDRESS_LANGUAGE_FK) references `".$sDBName."`.LANGUAGE (LANGUAGE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_USERADDRESS_POSTCODE foreign key (USERADDRESS_POSTCODE_FK) references `".$sDBName."`.POSTCODE (POSTCODE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_USERADDRESS_STATEPROVINCE foreign key (USERADDRESS_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_USERADDRESS_TIMEZONE foreign key (USERADDRESS_TIMEZONE_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_USERADDRESS_USERS foreign key (USERADDRESS_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+			
+			
+			
 			break;
 			
 		/*==============================================================*/
 		/* Table: PERMISSIONS                                           */
 		/*==============================================================*/
-		case 'Permissions':
-			$sSQL .= "alter table `".$sDBName."`.PERMPREMISE add constraint FK_PERMPREMISE_PREMISE foreign key (PERMPREMISE_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PERMPREMISE add constraint FK_PERMPREMISE_USERS foreign key (PERMPREMISE_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PERMROOMS add constraint FK_PERMROOMS_ROOMS foreign key (PERMROOMS_ROOMS_FK) references `".$sDBName."`.ROOMS (ROOMS_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PERMROOMS add constraint FK_PERMROOMS_USERS foreign key (PERMROOMS_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+		case 'Permissions1':
+			//$sSQL .= "alter table `".$sDBName."`.PERMPREMISE add constraint FK_PERMPREMISE_PREMISE foreign key (PERMPREMISE_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PERMPREMISE add constraint FK_PERMPREMISE_USERS foreign key (PERMPREMISE_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.PERMPREMISE \n";
+			$sSQL .= "    add constraint FK_PERMPREMISE_PREMISE foreign key (PERMPREMISE_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PERMPREMISE_USERS foreign key (PERMPREMISE_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+			
+			break;
+			
+		case 'Permissions2':
+			//$sSQL .= "alter table `".$sDBName."`.PERMROOMS add constraint FK_PERMROOMS_ROOMS foreign key (PERMROOMS_ROOMS_FK) references `".$sDBName."`.ROOMS (ROOMS_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PERMROOMS add constraint FK_PERMROOMS_USERS foreign key (PERMROOMS_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.PERMROOMS \n";
+			$sSQL .= "    add constraint FK_PERMROOMS_ROOMS foreign key (PERMROOMS_ROOMS_FK) references `".$sDBName."`.ROOMS (ROOMS_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PERMROOMS_USERS foreign key (PERMROOMS_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+			
 			$sSQL .= "alter table `".$sDBName."`.PERMSERVER add constraint FK_PERMSERVER_USERS foreign key (PERMSERVER_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
 			break;
 
@@ -1117,32 +1155,55 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/*==============================================================*/
 		case 'Premise':
 			$sSQL .= "alter table `".$sDBName."`.PREMISE add constraint FK_PREMISE_PREMISEINFO foreign key (PREMISE_PREMISEINFO_FK) references `".$sDBName."`.PREMISEINFO (PREMISEINFO_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_COUNTRIES foreign key (PREMISEADDRESS_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_LANGUAGE foreign key (PREMISEADDRESS_LANGUAGE_FK) references `".$sDBName."`.LANGUAGE (LANGUAGE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_POSTCODE foreign key (PREMISEADDRESS_POSTCODE_FK) references `".$sDBName."`.POSTCODE (POSTCODE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_PREMISE foreign key (PREMISEADDRESS_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_STATEPROVINCE foreign key (PREMISEADDRESS_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_TIMEZONE foreign key (PREMISEADDRESS_TIMEZONE_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_COUNTRIES foreign key (PREMISEADDRESS_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_LANGUAGE foreign key (PREMISEADDRESS_LANGUAGE_FK) references `".$sDBName."`.LANGUAGE (LANGUAGE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_POSTCODE foreign key (PREMISEADDRESS_POSTCODE_FK) references `".$sDBName."`.POSTCODE (POSTCODE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_PREMISE foreign key (PREMISEADDRESS_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_STATEPROVINCE foreign key (PREMISEADDRESS_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_TIMEZONE foreign key (PREMISEADDRESS_TIMEZONE_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS \n";
+			$sSQL .= "    add constraint FK_PREMISEADDRESS_COUNTRIES foreign key (PREMISEADDRESS_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEADDRESS_LANGUAGE foreign key (PREMISEADDRESS_LANGUAGE_FK) references `".$sDBName."`.LANGUAGE (LANGUAGE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEADDRESS_POSTCODE foreign key (PREMISEADDRESS_POSTCODE_FK) references `".$sDBName."`.POSTCODE (POSTCODE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEADDRESS_PREMISE foreign key (PREMISEADDRESS_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEADDRESS_STATEPROVINCE foreign key (PREMISEADDRESS_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEADDRESS_TIMEZONE foreign key (PREMISEADDRESS_TIMEZONE_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
+
+			
 			break;
 			
 		/*==============================================================*/
 		/* Table: PREMISELOG & PREMISELOGACTION                         */
 		/*==============================================================*/
 		case 'PremiseLog':
-			$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_CUSTOMLOG foreign key (PREMISELOG_CUSTOMLOG_FK) references `".$sDBName."`.CUSTOMLOG (CUSTOMLOG_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_PREMISE foreign key (PREMISELOG_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_PREMISELOGACTION foreign key (PREMISELOG_PREMISELOGACTION_FK) references `".$sDBName."`.PREMISELOGACTION (PREMISELOGACTION_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_USERS foreign key (PREMISELOG_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_CUSTOMLOG foreign key (PREMISELOG_CUSTOMLOG_FK) references `".$sDBName."`.CUSTOMLOG (CUSTOMLOG_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_PREMISE foreign key (PREMISELOG_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_PREMISELOGACTION foreign key (PREMISELOG_PREMISELOGACTION_FK) references `".$sDBName."`.PREMISELOGACTION (PREMISELOGACTION_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_USERS foreign key (PREMISELOG_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+			$sSQL .= "alter table `".$sDBName."`.PREMISELOG \n";
+			$sSQL .= "    add constraint FK_PREMISELOG_CUSTOMLOG foreign key (PREMISELOG_CUSTOMLOG_FK) references `".$sDBName."`.CUSTOMLOG (CUSTOMLOG_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISELOG_PREMISE foreign key (PREMISELOG_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISELOG_PREMISELOGACTION foreign key (PREMISELOG_PREMISELOGACTION_FK) references `".$sDBName."`.PREMISELOGACTION (PREMISELOGACTION_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISELOG_USERS foreign key (PREMISELOG_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
 			break;
 		
 		/*==============================================================*/
 		/* Table: PREMISEINFO & PREMISEBEDROOMS                         */
 		/*==============================================================*/	
 		case 'PremiseInfo1':
-			$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEBEDROOMS foreign key (PREMISEINFO_PREMISEBEDROOMS_FK) references `".$sDBName."`.PREMISEBEDROOMS (PREMISEBEDROOMS_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEFLOORS foreign key (PREMISEINFO_PREMISEFLOORS_FK) references `".$sDBName."`.PREMISEFLOORS (PREMISEFLOORS_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEOCCUPANTS foreign key (PREMISEINFO_PREMISEOCCUPANTS_FK) references `".$sDBName."`.PREMISEOCCUPANTS (PREMISEOCCUPANTS_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEROOMS foreign key (PREMISEINFO_PREMISEROOMS_FK) references `".$sDBName."`.PREMISEROOMS (PREMISEROOMS_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEBEDROOMS foreign key (PREMISEINFO_PREMISEBEDROOMS_FK) references `".$sDBName."`.PREMISEBEDROOMS (PREMISEBEDROOMS_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEFLOORS foreign key (PREMISEINFO_PREMISEFLOORS_FK) references `".$sDBName."`.PREMISEFLOORS (PREMISEFLOORS_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEOCCUPANTS foreign key (PREMISEINFO_PREMISEOCCUPANTS_FK) references `".$sDBName."`.PREMISEOCCUPANTS (PREMISEOCCUPANTS_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEROOMS foreign key (PREMISEINFO_PREMISEROOMS_FK) references `".$sDBName."`.PREMISEROOMS (PREMISEROOMS_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.PREMISEINFO \n";
+			$sSQL .= "    add constraint FK_PREMISEINFO_PREMISEBEDROOMS foreign key (PREMISEINFO_PREMISEBEDROOMS_FK) references `".$sDBName."`.PREMISEBEDROOMS (PREMISEBEDROOMS_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEINFO_PREMISEFLOORS foreign key (PREMISEINFO_PREMISEFLOORS_FK) references `".$sDBName."`.PREMISEFLOORS (PREMISEFLOORS_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEINFO_PREMISEOCCUPANTS foreign key (PREMISEINFO_PREMISEOCCUPANTS_FK) references `".$sDBName."`.PREMISEOCCUPANTS (PREMISEOCCUPANTS_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEINFO_PREMISEROOMS foreign key (PREMISEINFO_PREMISEROOMS_FK) references `".$sDBName."`.PREMISEROOMS (PREMISEROOMS_PK) on delete restrict on update restrict; \n";
+			
+			
 			break;
 			
 		/*==============================================================*/
@@ -1156,35 +1217,53 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/* Table: ROOMS & ROOMTYPE                                      */
 		/*==============================================================*/
 		case 'Rooms':
-			$sSQL .= "alter table `".$sDBName."`.ROOMS add constraint FK_ROOMS_PREMISE foreign key (ROOMS_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.ROOMS add constraint FK_ROOMS_ROOMTYPE foreign key (ROOMS_ROOMTYPE_FK) references `".$sDBName."`.ROOMTYPE (ROOMTYPE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.ROOMS add constraint FK_ROOMS_PREMISE foreign key (ROOMS_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.ROOMS add constraint FK_ROOMS_ROOMTYPE foreign key (ROOMS_ROOMTYPE_FK) references `".$sDBName."`.ROOMTYPE (ROOMTYPE_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.ROOMS \n";
+			$sSQL .= "    add constraint FK_ROOMS_PREMISE foreign key (ROOMS_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_ROOMS_ROOMTYPE foreign key (ROOMS_ROOMTYPE_FK) references `".$sDBName."`.ROOMTYPE (ROOMTYPE_PK) on delete restrict on update restrict; \n";
 			break;
 			
 		/*==============================================================*/
 		/* Table: HUB & HUBTYPE                                         */
 		/*==============================================================*/
 		case 'Hub':
-			$sSQL .= "alter table `".$sDBName."`.HUB add constraint FK_HUB_HUBTYPE foreign key (HUB_HUBTYPE_FK) references `".$sDBName."`.HUBTYPE (HUBTYPE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.HUB add constraint FK_HUB_PREMISE foreign key (HUB_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.HUB add constraint FK_HUB_HUBTYPE foreign key (HUB_HUBTYPE_FK) references `".$sDBName."`.HUBTYPE (HUBTYPE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.HUB add constraint FK_HUB_PREMISE foreign key (HUB_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.HUB \n";
+			$sSQL .= "    add constraint FK_HUB_HUBTYPE foreign key (HUB_HUBTYPE_FK) references `".$sDBName."`.HUBTYPE (HUBTYPE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_HUB_PREMISE foreign key (HUB_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
 			break;
-
+			
 		/*==============================================================*/
 		/* Table: COMM & COMMTYPE                                       */
 		/*==============================================================*/
 		case 'Comm':
-			$sSQL .= "alter table `".$sDBName."`.COMM add constraint FK_COMM_COMMTYPE foreign key (COMM_COMMTYPE_FK) references `".$sDBName."`.COMMTYPE (COMMTYPE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.COMM add constraint FK_COMM_HUB foreign key (COMM_HUB_FK) references `".$sDBName."`.HUB (HUB_PK) on delete restrict on update restrict; \n";
+			$sSQL .= "alter table `".$sDBName."`.COMM \n";
+			$sSQL .= "    add constraint FK_COMM_COMMTYPE foreign key (COMM_COMMTYPE_FK) references `".$sDBName."`.COMMTYPE (COMMTYPE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_COMM_HUB foreign key (COMM_HUB_FK) references `".$sDBName."`.HUB (HUB_PK) on delete restrict on update restrict; \n";
 			break;
 			
 		/*==============================================================*/
 		/* Table: LINK & LINKTYPE                                       */
 		/*==============================================================*/
 		case 'Link':
-			$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_COMM foreign key (LINK_COMM_FK) references `".$sDBName."`.COMM (COMM_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_LINKCONN foreign key (LINK_LINKCONN_FK) references `".$sDBName."`.LINKCONN (LINKCONN_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_LINKINFO foreign key (LINK_LINKINFO_FK) references `".$sDBName."`.LINKINFO (LINKINFO_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_LINKTYPE foreign key (LINK_LINKTYPE_FK) references `".$sDBName."`.LINKTYPE (LINKTYPE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_ROOMS foreign key (LINK_ROOMS_FK) references `".$sDBName."`.ROOMS (ROOMS_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_COMM foreign key (LINK_COMM_FK) references `".$sDBName."`.COMM (COMM_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_LINKCONN foreign key (LINK_LINKCONN_FK) references `".$sDBName."`.LINKCONN (LINKCONN_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_LINKINFO foreign key (LINK_LINKINFO_FK) references `".$sDBName."`.LINKINFO (LINKINFO_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_LINKTYPE foreign key (LINK_LINKTYPE_FK) references `".$sDBName."`.LINKTYPE (LINKTYPE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_ROOMS foreign key (LINK_ROOMS_FK) references `".$sDBName."`.ROOMS (ROOMS_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.LINK \n";
+			$sSQL .= "    add constraint FK_LINK_COMM foreign key (LINK_COMM_FK) references `".$sDBName."`.COMM (COMM_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_LINK_LINKCONN foreign key (LINK_LINKCONN_FK) references `".$sDBName."`.LINKCONN (LINKCONN_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_LINK_LINKINFO foreign key (LINK_LINKINFO_FK) references `".$sDBName."`.LINKINFO (LINKINFO_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_LINK_LINKTYPE foreign key (LINK_LINKTYPE_FK) references `".$sDBName."`.LINKTYPE (LINKTYPE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_LINK_ROOMS foreign key (LINK_ROOMS_FK) references `".$sDBName."`.ROOMS (ROOMS_PK) on delete restrict on update restrict; \n";
+			
+			
 			break;
 			
 		/*==============================================================*/
@@ -1195,12 +1274,20 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 			break;
 			
 		/*==============================================================*/
-		/* Table: LINKCONN                                   */
+		/* Table: LINKCONN                                              */
 		/*==============================================================*/
 		case 'LinkConn1':
-			$sSQL .= "alter table `".$sDBName."`.LINKCONN add constraint FK_LINKCONN_LINKCRYPTTYPE foreign key (LINKCONN_LINKCRYPTTYPE_FK) references `".$sDBName."`.LINKCRYPTTYPE (LINKCRYPTTYPE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.LINKCONN add constraint FK_LINKCONN_LINKFREQ foreign key (LINKCONN_LINKFREQ_FK) references `".$sDBName."`.LINKFREQ (LINKFREQ_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.LINKCONN add constraint FK_LINKCONN_LINKPROTOCOL foreign key (LINKCONN_LINKPROTOCOL_FK) references `".$sDBName."`.LINKPROTOCOL (LINKPROTOCOL_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LINKCONN add constraint FK_LINKCONN_LINKCRYPTTYPE foreign key (LINKCONN_LINKCRYPTTYPE_FK) references `".$sDBName."`.LINKCRYPTTYPE (LINKCRYPTTYPE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LINKCONN add constraint FK_LINKCONN_LINKFREQ foreign key (LINKCONN_LINKFREQ_FK) references `".$sDBName."`.LINKFREQ (LINKFREQ_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LINKCONN add constraint FK_LINKCONN_LINKPROTOCOL foreign key (LINKCONN_LINKPROTOCOL_FK) references `".$sDBName."`.LINKPROTOCOL (LINKPROTOCOL_PK) on delete restrict on update restrict; \n";
+			
+			
+			$sSQL .= "alter table `".$sDBName."`.LINKCONN \n";
+			$sSQL .= "    add constraint FK_LINKCONN_LINKCRYPTTYPE foreign key (LINKCONN_LINKCRYPTTYPE_FK) references `".$sDBName."`.LINKCRYPTTYPE (LINKCRYPTTYPE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_LINKCONN_LINKFREQ foreign key (LINKCONN_LINKFREQ_FK) references `".$sDBName."`.LINKFREQ (LINKFREQ_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_LINKCONN_LINKPROTOCOL foreign key (LINKCONN_LINKPROTOCOL_FK) references `".$sDBName."`.LINKPROTOCOL (LINKPROTOCOL_PK) on delete restrict on update restrict; \n";
+			
+			
 			break;
 			
 		/*==============================================================*/
@@ -1214,18 +1301,28 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/* Table: THING & THINGTYPE                                     */
 		/*==============================================================*/
 		case 'Thing':
-			$sSQL .= "alter table `".$sDBName."`.THING add constraint FK_THING_LINK foreign key (THING_LINK_FK) references `".$sDBName."`.LINK (LINK_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.THING add constraint FK_THING_THINGTYPE foreign key (THING_THINGTYPE_FK) references `".$sDBName."`.THINGTYPE (THINGTYPE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.THING add constraint FK_THING_LINK foreign key (THING_LINK_FK) references `".$sDBName."`.LINK (LINK_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.THING add constraint FK_THING_THINGTYPE foreign key (THING_THINGTYPE_FK) references `".$sDBName."`.THINGTYPE (THINGTYPE_PK) on delete restrict on update restrict; \n";
+			$sSQL .= "alter table `".$sDBName."`.THING \n";
+			$sSQL .= "    add constraint FK_THING_LINK foreign key (THING_LINK_FK) references `".$sDBName."`.LINK (LINK_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_THING_THINGTYPE foreign key (THING_THINGTYPE_FK) references `".$sDBName."`.THINGTYPE (THINGTYPE_PK) on delete restrict on update restrict; \n";
+			
 			break;
 			
 		/*==============================================================*/
 		/* Table: IO & IOTYPE                                           */
 		/*==============================================================*/
 		case 'IO':
-			$sSQL .= "alter table `".$sDBName."`.IO add constraint FK_IO_THING foreign key (IO_THING_FK) references `".$sDBName."`.THING (THING_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.IO add constraint FK_SENSOR_RSTYPE foreign key (IO_RSTYPES_FK) references `".$sDBName."`.RSTYPE (RSTYPE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.IO add constraint FK_SENSOR_SENSORTYPE foreign key (IO_IOTYPE_FK) references `".$sDBName."`.IOTYPE (IOTYPE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.IO add constraint FK_SENSOR_UOM foreign key (IO_UOM_FK) references `".$sDBName."`.UOM (UOM_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.IO add constraint FK_IO_THING foreign key (IO_THING_FK) references `".$sDBName."`.THING (THING_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.IO add constraint FK_SENSOR_RSTYPE foreign key (IO_RSTYPES_FK) references `".$sDBName."`.RSTYPE (RSTYPE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.IO add constraint FK_SENSOR_SENSORTYPE foreign key (IO_IOTYPE_FK) references `".$sDBName."`.IOTYPE (IOTYPE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.IO add constraint FK_SENSOR_UOM foreign key (IO_UOM_FK) references `".$sDBName."`.UOM (UOM_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.IO \n";
+			$sSQL .= "    add constraint FK_IO_THING foreign key (IO_THING_FK) references `".$sDBName."`.THING (THING_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_SENSOR_RSTYPE foreign key (IO_RSTYPES_FK) references `".$sDBName."`.RSTYPE (RSTYPE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_SENSOR_SENSORTYPE foreign key (IO_IOTYPE_FK) references `".$sDBName."`.IOTYPE (IOTYPE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_SENSOR_UOM foreign key (IO_UOM_FK) references `".$sDBName."`.UOM (UOM_PK) on delete restrict on update restrict; \n";
 			$sSQL .= "alter table `".$sDBName."`.IOTYPE add constraint FK_SENSORTYPE_DATATYPE foreign key (IOTYPE_DATATYPE_FK) references `".$sDBName."`.DATATYPE (DATATYPE_PK) on delete restrict on update restrict; \n";
 			break;
 		
@@ -1339,11 +1436,14 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 	4.03 - PrivateUsersPremiseLocations
 	4.04 - PrivateUsersPremiseLog
 	4.05 - PrivateUsersHub
-	4.06 - PrivateUsersRooms
-	4.07 - PrivateUsersComm
-	4.08 - PrivateUsersLink
-	4.09 - PrivateUsersThing
-	4.10 - PrivateUsersIO
+	4.06 - PrivateUsersComm
+	4.07 - PrivateUsersPremiseRooms
+	4.08 - PrivateUsersRooms
+	4.09 - PrivateUsersLink
+	4.10 - PrivateUsersThing
+	4.11 - PrivateUsersIO
+	4.12 - PrivateUserServerPerms
+	
 	5.01 - PrivateDataTinyInt
 	5.02 - PrivateDataInt
 	5.03 - PrivateDataBigInt
@@ -1351,8 +1451,19 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 	5.05 - PrivateDataTinyString
 	5.06 - PrivateDataShortString
 	5.07 - PrivateDataMedString
+	5.08 - PrivateDataLongString
+	5.09 - PrivateData255String
+	5.21 - PrivateDataTinyIntEnum
+	5.22 - PrivateDataIntEnum
+	5.23 - PrivateDataBigIntEnum
+	
+	6.01 - WatchInputsUsersHub
+	6.02 - WatchInputsUsersComm
+	6.03 - WatchInputsUsersLink
+	6.04 - WatchInputsUsersThing
+	6.05 - WatchInputsUsersIO
 */
-
+	
 	$sSQL = "";
 	
 	
@@ -1448,10 +1559,9 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "CREATE VIEW `".$sDBName."`.`VP_COUNTRIES` AS\n";
 			$sSQL .= "SELECT\n";
 			$sSQL .= "    `COUNTRIES_PK`, \n";
-			$sSQL .= "    `COUNTRIES_NAME` \n";
+			$sSQL .= "    `COUNTRIES_NAME`, \n";
 			$sSQL .= "    `COUNTRIES_ABREVIATION` \n";
 			$sSQL .= "FROM `".$sDBName."`.`COUNTRIES` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`CURRENCIES` ON `COUNTRIES_CURRENCIES_FK`=`CURRENCIES_PK`;\n";
 			break;
 			
 		/*============================================================
@@ -1622,7 +1732,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			break;
 			
 		/*============================================================
-		  == #4.1# - USERSINFO                                      ==
+		  == #4.01# - USERSINFO                                     ==
 		  ============================================================*/
 		case "PrivateUsersInfo":
 			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSINFO` AS \n";
@@ -1678,17 +1788,18 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			break;
 			
 		/*============================================================
-		  == #4.2# - USERSPREMISES                                  ==
+		  == #4.02# - USERSPREMISES                                 ==
 		  ============================================================*/
 		case "PrivateUsersPremises":
 			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSPREMISES` AS \n";
 			$sSQL .= "SELECT \n";
 			$sSQL .= "	`USERS_PK`, \n";
 			$sSQL .= "	`USERS_USERNAME`, \n";
-			$sSQL .= "	`PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "	`PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "	`PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
+			$sSQL .= "	`PERMPREMISE_OWNER`, \n";
+			$sSQL .= "	`PERMPREMISE_WRITE`, \n";
+			$sSQL .= "	`PERMPREMISE_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMPREMISE_READ`, \n";
+			$sSQL .= "	`PERMPREMISE_ROOMADMIN`, \n";
 			$sSQL .= "	`PREMISE_PK`, \n";
 			$sSQL .= "	`PREMISE_NAME`, \n";
 			$sSQL .= "	`PREMISE_DESCRIPTION`, \n";
@@ -1713,17 +1824,18 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			break;
 			
 		/*============================================================
-		  == #4.3# - USERSPREMISELOCATIONS                          ==
+		  == #4.03# - USERSPREMISELOCATIONS                         ==
 		  ============================================================*/
 		case "PrivateUsersPremiseLocations":
 			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSPREMISELOCATIONS` AS \n";
 			$sSQL .= "SELECT \n";
 			$sSQL .= "    `USERS_PK`, \n";
 			$sSQL .= "    `USERS_USERNAME`, \n";
-			$sSQL .= "    `PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "    `PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "    `PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "    `PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
+			$sSQL .= "    `PERMPREMISE_OWNER`,\n";
+			$sSQL .= "    `PERMPREMISE_WRITE`, \n";
+			$sSQL .= "    `PERMPREMISE_STATETOGGLE`, \n";
+			$sSQL .= "    `PERMPREMISE_READ`, \n";
+			$sSQL .= "    `PERMPREMISE_ROOMADMIN`, \n";
 			$sSQL .= "    `PREMISE_PK`, \n";
 			$sSQL .= "    `PREMISE_NAME`, \n";
 			$sSQL .= "    `PREMISE_DESCRIPTION`, \n";
@@ -1762,7 +1874,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			break;
 			
 		/*============================================================
-		  == #4.4# - USERSPREMISELOG                                ==
+		  == #4.04# - USERSPREMISELOG                               ==
 		  ============================================================*/
 		case "PrivateUsersPremiseLog":
 			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSPREMISELOG` AS\n";
@@ -1795,17 +1907,18 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			break;
 			
 		/*============================================================
-		  == #4.5# - USERSHUB                                       ==
+		  == #4.05# - USERSHUB                                      ==
 		  ============================================================*/
 		case "PrivateUsersHub":
 			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSHUB` AS \n";
 			$sSQL .= "SELECT \n";
 			$sSQL .= "	`USERS_PK`, \n";
 			$sSQL .= "	`USERS_USERNAME`, \n";
-			$sSQL .= "	`PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "	`PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "	`PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
+			$sSQL .= "	`PERMPREMISE_OWNER`, \n";
+			$sSQL .= "	`PERMPREMISE_WRITE`, \n";
+			$sSQL .= "	`PERMPREMISE_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMPREMISE_READ`, \n";
+			$sSQL .= "	`PERMPREMISE_ROOMADMIN`, \n";
 			$sSQL .= "	`PREMISE_PK`, \n";
 			$sSQL .= "	`PREMISE_NAME`, \n";
 			$sSQL .= "	`PREMISE_DESCRIPTION`, \n";
@@ -1825,47 +1938,18 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			
 			
 		/*============================================================
-		  == #4.6# - USERSROOMS                                     ==
-		  ============================================================*/
-		case "PrivateUsersRooms":
-			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSROOMS` AS\n";
-			$sSQL .= "SELECT\n";
-			$sSQL .= "	`USERS_PK`, \n";
-			$sSQL .= "	`USERS_USERNAME`, \n";
-			$sSQL .= "	`PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "	`PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "	`PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
-			$sSQL .= "	`PREMISE_PK`, \n";
-			$sSQL .= "	`PREMISE_NAME`, \n";
-			$sSQL .= "	`PREMISE_DESCRIPTION`, \n";
-			$sSQL .= "	`ROOMS_PK`, \n";
-			$sSQL .= "	`ROOMS_NAME`, \n";
-			$sSQL .= "	`ROOMS_FLOOR`, \n";
-			$sSQL .= "	`ROOMS_DESC`, \n";
-			$sSQL .= "	`ROOMTYPE_PK`, \n";
-			$sSQL .= "	`ROOMTYPE_NAME`, \n";
-			$sSQL .= "	`ROOMTYPE_OUTDOORS` \n";
-			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PREMISE` ON `PREMISE_PK`=`PERMPREMISE_PREMISE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `PREMISE_PK`=`ROOMS_PREMISE_FK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`ROOMTYPE` ON `ROOMS_ROOMTYPE_FK`=`ROOMTYPE_PK` \n";
-			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') AND `PERMPREMISE_READ` = 1;\n";
-			break;
-			
-		/*============================================================
-		  == #4.7# - USERSCOMM                                      ==
+		  == #4.06# - USERSCOMM                                     ==
 		  ============================================================*/
 		case "PrivateUsersComm":
 			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSCOMM` AS\n";
 			$sSQL .= "SELECT\n";
 			$sSQL .= "	`USERS_PK`, \n";
 			$sSQL .= "	`USERS_USERNAME`, \n";
-			$sSQL .= "	`PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "	`PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "	`PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
+			$sSQL .= "	`PERMPREMISE_OWNER`, \n";
+			$sSQL .= "	`PERMPREMISE_WRITE`, \n";
+			$sSQL .= "	`PERMPREMISE_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMPREMISE_READ`, \n";
+			$sSQL .= "	`PERMPREMISE_ROOMADMIN`, \n";
 			$sSQL .= "	`PREMISE_PK`, \n";
 			$sSQL .= "	`PREMISE_NAME`, \n";
 			$sSQL .= "	`PREMISE_DESCRIPTION`, \n";
@@ -1892,33 +1976,90 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			break;
 			
 		/*============================================================
-		  == #4.8# - USERSLINK                                      ==
+		  == #4.07# - USERSPREMISEROOMS                             ==
+		  ============================================================*/
+		case "PrivateUsersHub":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSPREMISEROOMS` AS \n";
+			$sSQL .= "SELECT \n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`USERS_USERNAME`, \n";
+			$sSQL .= "	`PERMPREMISE_OWNER`, \n";
+			$sSQL .= "	`PERMPREMISE_WRITE`, \n";
+			$sSQL .= "	`PERMPREMISE_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMPREMISE_READ`, \n";
+			$sSQL .= "	`PERMPREMISE_ROOMADMIN`, \n";
+			$sSQL .= "	`PREMISE_PK`, \n";
+			$sSQL .= "	`PREMISE_NAME`, \n";
+			$sSQL .= "	`PREMISE_DESCRIPTION`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
+			$sSQL .= "	`ROOMS_DESC`, \n";
+			$sSQL .= "	`ROOMTYPE_PK`, \n";
+			$sSQL .= "	`ROOMTYPE_NAME`, \n";
+			$sSQL .= "	`ROOMTYPE_OUTDOORS` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PREMISE` ON `PREMISE_PK`=`PERMPREMISE_PREMISE_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `PREMISE_PK`=`ROOMS_PREMISE_FK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`ROOMTYPE` ON `ROOMS_ROOMTYPE_FK`=`ROOMTYPE_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `PERMPREMISE_READ` = 1;\n";
+			break;
+			
+		/*============================================================
+		  == #4.08# - USERSROOMS                                    ==
+		  ============================================================*/
+		case "PrivateUsersRooms":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSROOMS` AS\n";
+			$sSQL .= "SELECT\n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`USERS_USERNAME`, \n";
+			$sSQL .= "	`PERMROOMS_READ`, \n";
+			$sSQL .= "	`PERMROOMS_WRITE`, \n";
+			$sSQL .= "	`PERMROOMS_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMROOMS_DATAREAD`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
+			$sSQL .= "	`ROOMS_DESC`, \n";
+			$sSQL .= "	`ROOMTYPE_PK`, \n";
+			$sSQL .= "	`ROOMTYPE_NAME`, \n";
+			$sSQL .= "	`ROOMTYPE_OUTDOORS` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`ROOMTYPE` ON `ROOMS_ROOMTYPE_FK`=`ROOMTYPE_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') AND `PERMROOMS_READ` = 1;\n";
+			break;
+			
+			
+			
+		/*============================================================
+		  == #4.09# - USERSLINK                                     ==
 		  ============================================================*/
 		case "PrivateUsersLink":
 			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSLINK` AS \n";
 			$sSQL .= "SELECT \n";
 			$sSQL .= "	`USERS_PK`, \n";
-			$sSQL .= "	`USERS_USERNAME`, \n";
-			$sSQL .= "	`PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "	`PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "	`PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
-			$sSQL .= "	`PREMISE_PK`, \n";
-			$sSQL .= "	`PREMISE_NAME`, \n";
-			$sSQL .= "	`HUB_PK`, \n";
-			$sSQL .= "	`HUB_NAME`, \n";
-			$sSQL .= "	`HUBTYPE_PK`, \n";
-			$sSQL .= "	`HUBTYPE_NAME`, \n";
-			$sSQL .= "	`COMM_PK`, \n";
-			$sSQL .= "	`COMMTYPE_PK`, \n";
-			$sSQL .= "	`COMMTYPE_NAME`, \n";
+			$sSQL .= "	`PERMROOMS_READ`, \n";
+			$sSQL .= "	`PERMROOMS_WRITE`, \n";
+			$sSQL .= "	`PERMROOMS_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMROOMS_DATAREAD`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_DESC`, \n";
 			$sSQL .= "	`LINK_PK`, \n";
 			$sSQL .= "	`LINK_SERIALCODE`, \n";
 			$sSQL .= "	`LINK_NAME`, \n";
 			$sSQL .= "	`LINK_CONNECTED`, \n";
 			$sSQL .= "	`LINK_STATE`, \n";
 			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
-			$sSQL .= "	`LINK_ROOMS_FK`, \n";
+			$sSQL .= "	`LINK_COMM_FK`, \n";
 			$sSQL .= "	`LINKTYPE_PK`, \n";
 			$sSQL .= "	`LINKTYPE_NAME`, \n";
 			$sSQL .= "	`LINKINFO_PK`, \n";
@@ -1938,48 +2079,40 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "	`LINKFREQ_PK`, \n";
 			$sSQL .= "	`LINKFREQ_NAME` \n";
 			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PREMISE` ON `PERMPREMISE_PREMISE_FK`=`PREMISE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `PREMISE_PK`=`HUB_PREMISE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUBTYPE` ON `HUB_HUBTYPE_FK`=`HUBTYPE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `ROOMS_PK`=`LINK_ROOMS_FK` \n";
 			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINK_LINKTYPE_FK`=`LINKTYPE_PK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`LINKINFO` ON `LINK_LINKINFO_FK`=`LINKINFO_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`COMMTYPE` ON `COMM_COMMTYPE_FK`=`COMMTYPE_PK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`LINKCONN` ON `LINK_LINKCONN_FK`=`LINKCONN_PK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`LINKPROTOCOL` ON `LINKCONN_LINKPROTOCOL_FK`=`LINKPROTOCOL_PK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`LINKFREQ` ON `LINKCONN_LINKFREQ_FK`=`LINKFREQ_PK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`LINKCRYPTTYPE` ON `LINKCONN_LINKCRYPTTYPE_FK`=`LINKCRYPTTYPE_PK` \n";
-			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') AND `PERMPREMISE_READ` = 1;\n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') AND `PERMROOMS_READ` = 1;\n";
 			break;
 			
 		/*============================================================
-		  == #4.9# - USERSTHING                                     ==
+		  == #4.10# - USERSTHING                                    ==
 		  ============================================================*/
 		case "PrivateUsersThing":
 			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSTHING` AS\n";
 			$sSQL .= "SELECT\n";
 			$sSQL .= "	`USERS_PK`, \n";
-			$sSQL .= "	`USERS_USERNAME`, \n";
-			$sSQL .= "	`PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "	`PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "	`PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
-			$sSQL .= "	`PERMPREMISE_PK`, \n";
-			$sSQL .= "	`PREMISE_PK`, \n";
-			$sSQL .= "	`PREMISE_NAME`, \n";
-			$sSQL .= "	`HUB_PK`, \n";
-			$sSQL .= "	`HUB_NAME`, \n";
-			$sSQL .= "	`HUBTYPE_PK`, \n";
-			$sSQL .= "	`HUBTYPE_NAME`, \n";
+			$sSQL .= "	`PERMROOMS_READ`, \n";
+			$sSQL .= "	`PERMROOMS_WRITE`, \n";
+			$sSQL .= "	`PERMROOMS_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMROOMS_DATAREAD`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
 			$sSQL .= "	`LINK_PK`, \n";
 			$sSQL .= "	`LINK_SERIALCODE`, \n";
 			$sSQL .= "	`LINK_NAME`, \n";
 			$sSQL .= "	`LINK_CONNECTED`, \n";
 			$sSQL .= "	`LINK_STATE`, \n";
 			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
-			$sSQL .= "	`LINK_ROOMS_FK`, \n";
+			$sSQL .= "	`LINK_COMM_FK`, \n";
 			$sSQL .= "	`LINKTYPE_PK`, \n";
 			$sSQL .= "	`LINKTYPE_NAME`, \n";
 			$sSQL .= "	`THING_PK`, \n";
@@ -1992,37 +2125,1362 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "	`THINGTYPE_PK`, \n";
 			$sSQL .= "	`THINGTYPE_NAME` \n";
 			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PREMISE` ON `PREMISE_PK`=`PERMPREMISE_PREMISE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `PREMISE_PK`=`HUB_PREMISE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `ROOMS_PK`=`LINK_ROOMS_FK` \n";
 			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
 			$sSQL .= "INNER JOIN `".$sDBName."`.`THINGTYPE` ON `THINGTYPE_PK`=`THING_THINGTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUBTYPE` ON `HUBTYPE_PK`=`HUB_HUBTYPE_FK` \n";
 			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
-			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') AND `PERMPREMISE_READ` = 1;\n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') AND `PERMROOMS_READ` = 1;\n";
 			break;
 			
 		/*============================================================
-		  == #4.10# - USERSIO                                       ==
+		  == #4.11# - USERSIO                                       ==
 		  ============================================================*/
 		case "PrivateUsersIO":
 			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSIO` AS\n";
 			$sSQL .= "SELECT\n";
 			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`PERMROOMS_READ`, \n";
+			$sSQL .= "	`PERMROOMS_WRITE`, \n";
+			$sSQL .= "	`PERMROOMS_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMROOMS_DATAREAD`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`LINK_COMM_FK`, \n";
+			$sSQL .= "	`LINK_SERIALCODE`, \n";
+			$sSQL .= "	`LINK_NAME`, \n";
+			$sSQL .= "	`LINK_CONNECTED`, \n";
+			$sSQL .= "	`LINK_STATE`, \n";
+			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
+			$sSQL .= "	`LINKTYPE_NAME`, \n";
+			$sSQL .= "	`LINKTYPE_PK`, \n";
+			$sSQL .= "	`THING_PK`, \n";
+			$sSQL .= "	`THING_HWID`, \n";
+			$sSQL .= "	`THING_OUTPUTHWID`, \n";
+			$sSQL .= "	`THING_STATE`, \n";
+			$sSQL .= "	`THING_STATECHANGEID`, \n";
+			$sSQL .= "	`THING_NAME`, \n";
+			$sSQL .= "	`THING_SERIALCODE`, \n";
+			$sSQL .= "	`THINGTYPE_PK`, \n";
+			$sSQL .= "	`THINGTYPE_NAME`, \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`IO_BASECONVERT`, \n";
+			$sSQL .= "	`IO_NAME`, \n";
+			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
+			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
+			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
+			$sSQL .= "	`IO_STATE`, \n";
+			$sSQL .= "	`IO_STATECHANGEID`, \n";
+			$sSQL .= "	`IOTYPE_PK`, \n";
+			$sSQL .= "	`IOTYPE_NAME`, \n";
+			$sSQL .= "	`IOTYPE_ENUM`, \n";
+			$sSQL .= "	`IOTYPE_DATATYPE_FK`, \n";
+			$sSQL .= "	`DATATYPE_PK`, \n";
+			$sSQL .= "	`DATATYPE_NAME`, \n";
+			$sSQL .= "	`RSCAT_PK`, \n";
+			$sSQL .= "	`RSCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_PK`, \n";
+			$sSQL .= "	`RSSUBCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
+			$sSQL .= "	`RSTARIFF_PK`, \n";
+			$sSQL .= "	`RSTARIFF_NAME`, \n";
+			$sSQL .= "	`RSTYPE_PK`, \n";
+			$sSQL .= "	`RSTYPE_NAME`, \n";
+			$sSQL .= "	`RSTYPE_MAIN`, \n";
+			$sSQL .= "	`UOMCAT_PK`, \n";
+			$sSQL .= "	`UOMCAT_NAME`, \n";
+			$sSQL .= "	`UOMSUBCAT_PK`, \n";
+			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
+			$sSQL .= "	`UOM_PK`, \n";
+			$sSQL .= "	`UOM_NAME`, \n";
+			$sSQL .= "	`UOM_RATE` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `ROOMS_PK`=`LINK_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINK_LINKTYPE_FK`=`LINKTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `PERMROOMS_READ` = 1 \n";
+			$sSQL .= "AND `IO_BASECONVERT` <> 0; \n";
+			break;
+			
+			
+		/*============================================================
+		  == #4.12# - USERSSERVERPERMS                              ==
+		  ============================================================*/
+		case "PrivateUsersServerPerms":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSSERVERPERMS` AS \n";
+			$sSQL .= "SELECT \n";
+			$sSQL .= "	`USERS_PK`, \n";
 			$sSQL .= "	`USERS_USERNAME`, \n";
-			$sSQL .= "	`PERMPREMISE_PK`, \n";
-			$sSQL .= "	`PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "	`PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "	`PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
-			$sSQL .= "	`PREMISE_PK`, \n";
-			$sSQL .= "	`PREMISE_NAME`, \n";
+			$sSQL .= "	`PERMSERVER_PK`, \n";
+			$sSQL .= "	`PERMSERVER_ADDUSER`, \n";
+			$sSQL .= "	`PERMSERVER_ADDPREMISEHUB`, \n";
+			$sSQL .= "	`PERMSERVER_UPGRADE` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`PERMSERVER` ON `USERS_PK` = `PERMSERVER_USERS_FK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			break;
+			
+			
+		/*============================================================
+		  == #5.1# - VR_DATATINYINT                                 ==
+		  ============================================================*/
+		case "PrivateDataTinyInt":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATATINYINT` AS\n";
+			$sSQL .= "SELECT\n";
+			$sSQL .= "	(`DATATINYINT_VALUE` / `IO_BASECONVERT`) AS \"CALCEDVALUE\", \n";
+			$sSQL .= "	`DATATINYINT_DATE` AS \"UTS\", \n";
+			$sSQL .= "	`DATATINYINT_PK`, \n";
+			$sSQL .= "	`DATATINYINT_DATE`, \n";
+			$sSQL .= "	`DATATINYINT_VALUE`, \n";
+			$sSQL .= "	`DATATYPE_PK`, \n";
+			$sSQL .= "	`DATATYPE_NAME`, \n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`PERMROOMS_READ`, \n";
+			$sSQL .= "	`PERMROOMS_WRITE`, \n";
+			$sSQL .= "	`PERMROOMS_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMROOMS_DATAREAD`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`LINK_SERIALCODE`, \n";
+			$sSQL .= "	`LINK_NAME`, \n";
+			$sSQL .= "	`LINK_CONNECTED`, \n";
+			$sSQL .= "	`LINK_STATE`, \n";
+			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
+			$sSQL .= "	`LINKTYPE_PK`, \n";
+			$sSQL .= "	`LINKTYPE_NAME`, \n";
+			$sSQL .= "	`THING_PK`, \n";
+			$sSQL .= "	`THING_HWID`, \n";
+			$sSQL .= "	`THING_OUTPUTHWID`, \n";
+			$sSQL .= "	`THING_STATE`, \n";
+			$sSQL .= "	`THING_STATECHANGEID`, \n";
+			$sSQL .= "	`THING_NAME`, \n";
+			$sSQL .= "	`THINGTYPE_PK`, \n";
+			$sSQL .= "	`THINGTYPE_NAME`, \n";
+			$sSQL .= "	`IO_BASECONVERT`, \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`IO_NAME`, \n";
+			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
+			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
+			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
+			$sSQL .= "	`IO_STATECHANGEID`, \n";
+			$sSQL .= "	`IO_STATE`, \n";
+			$sSQL .= "	`IOTYPE_PK`, \n";
+			$sSQL .= "	`IOTYPE_NAME`, \n";
+			$sSQL .= "	`IOTYPE_ENUM`, \n";
+			$sSQL .= "	`RSCAT_PK`, \n";
+			$sSQL .= "	`RSCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_PK`, \n";
+			$sSQL .= "	`RSSUBCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
+			$sSQL .= "	`RSTARIFF_PK`, \n";
+			$sSQL .= "	`RSTARIFF_NAME`, \n";
+			$sSQL .= "	`RSTYPE_PK`, \n";
+			$sSQL .= "	`RSTYPE_NAME`, \n";
+			$sSQL .= "	`RSTYPE_MAIN`, \n";
+			$sSQL .= "	`UOMCAT_PK`, \n";
+			$sSQL .= "	`UOMCAT_NAME`, \n";
+			$sSQL .= "	`UOMSUBCAT_PK`, \n";
+			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
+			$sSQL .= "	`UOM_PK`, \n";
+			$sSQL .= "	`UOM_NAME`, \n";
+			$sSQL .= "	`UOM_RATE` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `ROOMS_PK`=`LINK_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATINYINT` ON `IO_PK`=`DATATINYINT_IO_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `PERMROOMS_DATAREAD` = 1 \n";
+			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
+			$sSQL .= "AND `IOTYPE_ENUM` <> 1\n";
+			$sSQL .= "AND `DATATYPE_PK` = 1;\n";
+			break;
+			
+		/*============================================================
+		  == #5.2# - VR_DATAINT                                     ==
+		  ============================================================*/
+		case "PrivateDataInt":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATAINT` AS\n";
+			$sSQL .= "SELECT\n";
+			$sSQL .= "	(`DATAINT_VALUE` / `IO_BASECONVERT`) AS \"CALCEDVALUE\", \n";
+			$sSQL .= "	`DATAINT_DATE` AS \"UTS\", \n";
+			$sSQL .= "	`DATAINT_PK`, \n";
+			$sSQL .= "	`DATAINT_DATE`, \n";
+			$sSQL .= "	`DATAINT_VALUE`, \n";
+			$sSQL .= "	`DATATYPE_PK`, \n";
+			$sSQL .= "	`DATATYPE_NAME`, \n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`PERMROOMS_READ`, \n";
+			$sSQL .= "	`PERMROOMS_WRITE`, \n";
+			$sSQL .= "	`PERMROOMS_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMROOMS_DATAREAD`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`LINK_SERIALCODE`, \n";
+			$sSQL .= "	`LINK_NAME`, \n";
+			$sSQL .= "	`LINK_CONNECTED`, \n";
+			$sSQL .= "	`LINK_STATE`, \n";
+			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
+			$sSQL .= "	`LINKTYPE_PK`, \n";
+			$sSQL .= "	`LINKTYPE_NAME`, \n";
+			$sSQL .= "	`THING_PK`, \n";
+			$sSQL .= "	`THING_HWID`, \n";
+			$sSQL .= "	`THING_OUTPUTHWID`, \n";
+			$sSQL .= "	`THING_STATE`, \n";
+			$sSQL .= "	`THING_STATECHANGEID`, \n";
+			$sSQL .= "	`THING_NAME`, \n";
+			$sSQL .= "	`THINGTYPE_PK`, \n";
+			$sSQL .= "	`THINGTYPE_NAME`, \n";
+			$sSQL .= "	`IO_BASECONVERT`, \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`IO_NAME`, \n";
+			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
+			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
+			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
+			$sSQL .= "	`IO_STATECHANGEID`, \n";
+			$sSQL .= "	`IO_STATE`, \n";
+			$sSQL .= "	`IOTYPE_PK`, \n";
+			$sSQL .= "	`IOTYPE_NAME`, \n";
+			$sSQL .= "	`IOTYPE_ENUM`, \n";
+			$sSQL .= "	`RSCAT_PK`, \n";
+			$sSQL .= "	`RSCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_PK`, \n";
+			$sSQL .= "	`RSSUBCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
+			$sSQL .= "	`RSTARIFF_PK`, \n";
+			$sSQL .= "	`RSTARIFF_NAME`, \n";
+			$sSQL .= "	`RSTYPE_PK`, \n";
+			$sSQL .= "	`RSTYPE_NAME`, \n";
+			$sSQL .= "	`RSTYPE_MAIN`, \n";
+			$sSQL .= "	`UOMCAT_PK`, \n";
+			$sSQL .= "	`UOMCAT_NAME`, \n";
+			$sSQL .= "	`UOMSUBCAT_PK`, \n";
+			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
+			$sSQL .= "	`UOM_PK`, \n";
+			$sSQL .= "	`UOM_NAME`, \n";
+			$sSQL .= "	`UOM_RATE` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `ROOMS_PK`=`LINK_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATAINT` ON `IO_PK`=`DATAINT_IO_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `PERMROOMS_DATAREAD` = 1 \n";
+			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
+			$sSQL .= "AND `IOTYPE_ENUM` <> 1\n";
+			$sSQL .= "AND `DATATYPE_PK` = 2;\n";
+			break;
+		
+		/*============================================================
+		  == #5.3# - VR_DATABIGINT                                  ==
+		  ============================================================*/
+		case "PrivateDataBigInt":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATABIGINT` AS\n";
+			$sSQL .= "SELECT\n";
+			$sSQL .= "	(`DATABIGINT_VALUE` / `IO_BASECONVERT`) AS \"CALCEDVALUE\", \n";
+			$sSQL .= "	`DATABIGINT_DATE` AS \"UTS\", \n";
+			$sSQL .= "	`DATABIGINT_PK`, \n";
+			$sSQL .= "	`DATABIGINT_DATE`, \n";
+			$sSQL .= "	`DATABIGINT_VALUE`, \n";
+			$sSQL .= "	`DATATYPE_PK`, \n";
+			$sSQL .= "	`DATATYPE_NAME`, \n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`PERMROOMS_READ`, \n";
+			$sSQL .= "	`PERMROOMS_WRITE`, \n";
+			$sSQL .= "	`PERMROOMS_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMROOMS_DATAREAD`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`LINK_SERIALCODE`, \n";
+			$sSQL .= "	`LINK_NAME`, \n";
+			$sSQL .= "	`LINK_CONNECTED`, \n";
+			$sSQL .= "	`LINK_STATE`, \n";
+			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
+			$sSQL .= "	`LINKTYPE_PK`, \n";
+			$sSQL .= "	`LINKTYPE_NAME`, \n";
+			$sSQL .= "	`THING_PK`, \n";
+			$sSQL .= "	`THING_HWID`, \n";
+			$sSQL .= "	`THING_OUTPUTHWID`, \n";
+			$sSQL .= "	`THING_STATE`, \n";
+			$sSQL .= "	`THING_STATECHANGEID`, \n";
+			$sSQL .= "	`THING_NAME`, \n";
+			$sSQL .= "	`THINGTYPE_PK`, \n";
+			$sSQL .= "	`THINGTYPE_NAME`, \n";
+			$sSQL .= "	`IO_BASECONVERT`, \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`IO_NAME`, \n";
+			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
+			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
+			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
+			$sSQL .= "	`IO_STATECHANGEID`, \n";
+			$sSQL .= "	`IO_STATE`, \n";
+			$sSQL .= "	`IOTYPE_PK`, \n";
+			$sSQL .= "	`IOTYPE_NAME`, \n";
+			$sSQL .= "	`IOTYPE_ENUM`, \n";
+			$sSQL .= "	`RSCAT_PK`, \n";
+			$sSQL .= "	`RSCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_PK`, \n";
+			$sSQL .= "	`RSSUBCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
+			$sSQL .= "	`RSTARIFF_PK`, \n";
+			$sSQL .= "	`RSTARIFF_NAME`, \n";
+			$sSQL .= "	`RSTYPE_PK`, \n";
+			$sSQL .= "	`RSTYPE_NAME`, \n";
+			$sSQL .= "	`RSTYPE_MAIN`, \n";
+			$sSQL .= "	`UOMCAT_PK`, \n";
+			$sSQL .= "	`UOMCAT_NAME`, \n";
+			$sSQL .= "	`UOMSUBCAT_PK`, \n";
+			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
+			$sSQL .= "	`UOM_PK`, \n";
+			$sSQL .= "	`UOM_NAME`, \n";
+			$sSQL .= "	`UOM_RATE` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `ROOMS_PK`=`LINK_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATABIGINT` ON `IO_PK`=`DATABIGINT_IO_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `PERMROOMS_DATAREAD` = 1 \n";
+			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
+			$sSQL .= "AND `IOTYPE_ENUM` <> 1\n";
+			$sSQL .= "AND `DATATYPE_PK` = 3;\n";
+			break;
+			
+		/*============================================================
+		  == #5.4# - VR_DATAFLOAT                                   ==
+		  ============================================================*/
+		case "PrivateDataFloat":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATAFLOAT` AS\n";
+			$sSQL .= "SELECT\n";
+			$sSQL .= "	(`DATAFLOAT_VALUE` / `IO_BASECONVERT`) AS \"CALCEDVALUE\", \n";
+			$sSQL .= "	`DATAFLOAT_DATE` AS \"UTS\", \n";
+			$sSQL .= "	`DATAFLOAT_PK`, \n";
+			$sSQL .= "	`DATAFLOAT_DATE`, \n";
+			$sSQL .= "	`DATAFLOAT_VALUE`, \n";
+			$sSQL .= "	`DATATYPE_PK`, \n";
+			$sSQL .= "	`DATATYPE_NAME`, \n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`PERMROOMS_READ`, \n";
+			$sSQL .= "	`PERMROOMS_WRITE`, \n";
+			$sSQL .= "	`PERMROOMS_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMROOMS_DATAREAD`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`LINK_SERIALCODE`, \n";
+			$sSQL .= "	`LINK_NAME`, \n";
+			$sSQL .= "	`LINK_CONNECTED`, \n";
+			$sSQL .= "	`LINK_STATE`, \n";
+			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
+			$sSQL .= "	`LINKTYPE_PK`, \n";
+			$sSQL .= "	`LINKTYPE_NAME`, \n";
+			$sSQL .= "	`THING_PK`, \n";
+			$sSQL .= "	`THING_HWID`, \n";
+			$sSQL .= "	`THING_OUTPUTHWID`, \n";
+			$sSQL .= "	`THING_STATE`, \n";
+			$sSQL .= "	`THING_STATECHANGEID`, \n";
+			$sSQL .= "	`THING_NAME`, \n";
+			$sSQL .= "	`THINGTYPE_PK`, \n";
+			$sSQL .= "	`THINGTYPE_NAME`, \n";
+			$sSQL .= "	`IO_BASECONVERT`, \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`IO_NAME`, \n";
+			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
+			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
+			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
+			$sSQL .= "	`IO_STATECHANGEID`, \n";
+			$sSQL .= "	`IO_STATE`, \n";
+			$sSQL .= "	`IOTYPE_PK`, \n";
+			$sSQL .= "	`IOTYPE_NAME`, \n";
+			$sSQL .= "	`IOTYPE_ENUM`, \n";
+			$sSQL .= "	`RSCAT_PK`, \n";
+			$sSQL .= "	`RSCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_PK`, \n";
+			$sSQL .= "	`RSSUBCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
+			$sSQL .= "	`RSTARIFF_PK`, \n";
+			$sSQL .= "	`RSTARIFF_NAME`, \n";
+			$sSQL .= "	`RSTYPE_PK`, \n";
+			$sSQL .= "	`RSTYPE_NAME`, \n";
+			$sSQL .= "	`RSTYPE_MAIN`, \n";
+			$sSQL .= "	`UOMCAT_PK`, \n";
+			$sSQL .= "	`UOMCAT_NAME`, \n";
+			$sSQL .= "	`UOMSUBCAT_PK`, \n";
+			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
+			$sSQL .= "	`UOM_PK`, \n";
+			$sSQL .= "	`UOM_NAME`, \n";
+			$sSQL .= "	`UOM_RATE` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `ROOMS_PK`=`LINK_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATAFLOAT` ON `IO_PK`=`DATAFLOAT_IO_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `PERMROOMS_DATAREAD` = 1 \n";
+			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
+			$sSQL .= "AND `IOTYPE_ENUM` <> 1\n";
+			$sSQL .= "AND `DATATYPE_PK` = 4;\n";
+			break;
+			
+		/*============================================================
+		  == #5.5# - VR_DATATINYSTRING                              ==
+		  ============================================================*/
+		case "PrivateDataTinyString":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATATINYSTRING` AS\n";
+			$sSQL .= "SELECT\n";
+			$sSQL .= "	`DATATINYSTRING_VALUE` AS \"CALCEDVALUE\", \n";
+			$sSQL .= "	`DATATINYSTRING_DATE` AS \"UTS\", \n";
+			$sSQL .= "	`DATATINYSTRING_PK`, \n";
+			$sSQL .= "	`DATATINYSTRING_DATE`, \n";
+			$sSQL .= "	`DATATINYSTRING_VALUE`, \n";
+			$sSQL .= "	`DATATYPE_PK`, \n";
+			$sSQL .= "	`DATATYPE_NAME`, \n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`PERMROOMS_READ`, \n";
+			$sSQL .= "	`PERMROOMS_WRITE`, \n";
+			$sSQL .= "	`PERMROOMS_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMROOMS_DATAREAD`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`LINK_SERIALCODE`, \n";
+			$sSQL .= "	`LINK_NAME`, \n";
+			$sSQL .= "	`LINK_CONNECTED`, \n";
+			$sSQL .= "	`LINK_STATE`, \n";
+			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
+			$sSQL .= "	`LINKTYPE_PK`, \n";
+			$sSQL .= "	`LINKTYPE_NAME`, \n";
+			$sSQL .= "	`THING_PK`, \n";
+			$sSQL .= "	`THING_HWID`, \n";
+			$sSQL .= "	`THING_OUTPUTHWID`, \n";
+			$sSQL .= "	`THING_STATE`, \n";
+			$sSQL .= "	`THING_STATECHANGEID`, \n";
+			$sSQL .= "	`THING_NAME`, \n";
+			$sSQL .= "	`THINGTYPE_PK`, \n";
+			$sSQL .= "	`THINGTYPE_NAME`, \n";
+			$sSQL .= "	`IO_BASECONVERT`, \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`IO_NAME`, \n";
+			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
+			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
+			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
+			$sSQL .= "	`IO_STATECHANGEID`, \n";
+			$sSQL .= "	`IO_STATE`, \n";
+			$sSQL .= "	`IOTYPE_PK`, \n";
+			$sSQL .= "	`IOTYPE_NAME`, \n";
+			$sSQL .= "	`IOTYPE_ENUM`, \n";
+			$sSQL .= "	`RSCAT_PK`, \n";
+			$sSQL .= "	`RSCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_PK`, \n";
+			$sSQL .= "	`RSSUBCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
+			$sSQL .= "	`RSTARIFF_PK`, \n";
+			$sSQL .= "	`RSTARIFF_NAME`, \n";
+			$sSQL .= "	`RSTYPE_PK`, \n";
+			$sSQL .= "	`RSTYPE_NAME`, \n";
+			$sSQL .= "	`RSTYPE_MAIN`, \n";
+			$sSQL .= "	`UOMCAT_PK`, \n";
+			$sSQL .= "	`UOMCAT_NAME`, \n";
+			$sSQL .= "	`UOMSUBCAT_PK`, \n";
+			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
+			$sSQL .= "	`UOM_PK`, \n";
+			$sSQL .= "	`UOM_NAME`, \n";
+			$sSQL .= "	`UOM_RATE` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `ROOMS_PK`=`LINK_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATINYSTRING` ON `IO_PK`=`DATATINYSTRING_IO_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `PERMROOMS_DATAREAD` = 1 \n";
+			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
+			$sSQL .= "AND `DATATYPE_PK` = 5; \n";
+			break;
+			
+		/*============================================================
+		  == #5.6# - VR_DATASHORTSTRING                             ==
+		  ============================================================*/
+		case "PrivateDataShortString":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATASHORTSTRING` AS\n";
+			$sSQL .= "SELECT\n";
+			$sSQL .= "	`DATASHORTSTRING_VALUE` AS \"CALCEDVALUE\", \n";
+			$sSQL .= "	`DATASHORTSTRING_DATE` AS \"UTS\", \n";
+			$sSQL .= "	`DATASHORTSTRING_PK`, \n";
+			$sSQL .= "	`DATASHORTSTRING_DATE`, \n";
+			$sSQL .= "	`DATASHORTSTRING_VALUE`, \n";
+			$sSQL .= "	`DATATYPE_PK`, \n";
+			$sSQL .= "	`DATATYPE_NAME`, \n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`PERMROOMS_READ`, \n";
+			$sSQL .= "	`PERMROOMS_WRITE`, \n";
+			$sSQL .= "	`PERMROOMS_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMROOMS_DATAREAD`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`LINK_SERIALCODE`, \n";
+			$sSQL .= "	`LINK_NAME`, \n";
+			$sSQL .= "	`LINK_CONNECTED`, \n";
+			$sSQL .= "	`LINK_STATE`, \n";
+			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
+			$sSQL .= "	`LINKTYPE_PK`, \n";
+			$sSQL .= "	`LINKTYPE_NAME`, \n";
+			$sSQL .= "	`THING_PK`, \n";
+			$sSQL .= "	`THING_HWID`, \n";
+			$sSQL .= "	`THING_OUTPUTHWID`, \n";
+			$sSQL .= "	`THING_STATE`, \n";
+			$sSQL .= "	`THING_STATECHANGEID`, \n";
+			$sSQL .= "	`THING_NAME`, \n";
+			$sSQL .= "	`THINGTYPE_PK`, \n";
+			$sSQL .= "	`THINGTYPE_NAME`, \n";
+			$sSQL .= "	`IO_BASECONVERT`, \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`IO_NAME`, \n";
+			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
+			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
+			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
+			$sSQL .= "	`IO_STATECHANGEID`, \n";
+			$sSQL .= "	`IO_STATE`, \n";
+			$sSQL .= "	`IOTYPE_PK`, \n";
+			$sSQL .= "	`IOTYPE_NAME`, \n";
+			$sSQL .= "	`IOTYPE_ENUM`, \n";
+			$sSQL .= "	`RSCAT_PK`, \n";
+			$sSQL .= "	`RSCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_PK`, \n";
+			$sSQL .= "	`RSSUBCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
+			$sSQL .= "	`RSTARIFF_PK`, \n";
+			$sSQL .= "	`RSTARIFF_NAME`, \n";
+			$sSQL .= "	`RSTYPE_PK`, \n";
+			$sSQL .= "	`RSTYPE_NAME`, \n";
+			$sSQL .= "	`RSTYPE_MAIN`, \n";
+			$sSQL .= "	`UOMCAT_PK`, \n";
+			$sSQL .= "	`UOMCAT_NAME`, \n";
+			$sSQL .= "	`UOMSUBCAT_PK`, \n";
+			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
+			$sSQL .= "	`UOM_PK`, \n";
+			$sSQL .= "	`UOM_NAME`, \n";
+			$sSQL .= "	`UOM_RATE` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `ROOMS_PK`=`LINK_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATASHORTSTRING` ON `IO_PK`=`DATASHORTSTRING_IO_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `PERMROOMS_DATAREAD` = 1 \n";
+			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
+			$sSQL .= "AND `DATATYPE_PK` = 6;\n";
+			break;
+
+		/*============================================================
+		  == #5.7# - VR_DATAMEDSTRING                               ==
+		  ============================================================*/
+		case "PrivateDataMedString":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATAMEDSTRING` AS \n";
+			$sSQL .= "SELECT \n";
+			$sSQL .= "	`DATAMEDSTRING_VALUE` AS \"CALCEDVALUE\", \n";
+			$sSQL .= "	`DATAMEDSTRING_DATE` AS \"UTS\", \n";
+			$sSQL .= "	`DATAMEDSTRING_PK`, \n";
+			$sSQL .= "	`DATAMEDSTRING_DATE`, \n";
+			$sSQL .= "	`DATAMEDSTRING_VALUE`, \n";
+			$sSQL .= "	`DATATYPE_PK`, \n";
+			$sSQL .= "	`DATATYPE_NAME`, \n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`PERMROOMS_READ`, \n";
+			$sSQL .= "	`PERMROOMS_WRITE`, \n";
+			$sSQL .= "	`PERMROOMS_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMROOMS_DATAREAD`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`LINK_SERIALCODE`, \n";
+			$sSQL .= "	`LINK_NAME`, \n";
+			$sSQL .= "	`LINK_CONNECTED`, \n";
+			$sSQL .= "	`LINK_STATE`, \n";
+			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
+			$sSQL .= "	`LINKTYPE_PK`, \n";
+			$sSQL .= "	`LINKTYPE_NAME`, \n";
+			$sSQL .= "	`THING_PK`, \n";
+			$sSQL .= "	`THING_HWID`, \n";
+			$sSQL .= "	`THING_OUTPUTHWID`, \n";
+			$sSQL .= "	`THING_STATE`, \n";
+			$sSQL .= "	`THING_STATECHANGEID`, \n";
+			$sSQL .= "	`THING_NAME`, \n";
+			$sSQL .= "	`THINGTYPE_PK`, \n";
+			$sSQL .= "	`THINGTYPE_NAME`, \n";
+			$sSQL .= "	`IO_BASECONVERT`, \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`IO_NAME`, \n";
+			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
+			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
+			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
+			$sSQL .= "	`IO_STATECHANGEID`, \n";
+			$sSQL .= "	`IO_STATE`, \n";
+			$sSQL .= "	`IOTYPE_PK`, \n";
+			$sSQL .= "	`IOTYPE_NAME`, \n";
+			$sSQL .= "	`IOTYPE_ENUM`, \n";
+			$sSQL .= "	`RSCAT_PK`, \n";
+			$sSQL .= "	`RSCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_PK`, \n";
+			$sSQL .= "	`RSSUBCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
+			$sSQL .= "	`RSTARIFF_PK`, \n";
+			$sSQL .= "	`RSTARIFF_NAME`, \n";
+			$sSQL .= "	`RSTYPE_PK`, \n";
+			$sSQL .= "	`RSTYPE_NAME`, \n";
+			$sSQL .= "	`RSTYPE_MAIN`, \n";
+			$sSQL .= "	`UOMCAT_PK`, \n";
+			$sSQL .= "	`UOMCAT_NAME`, \n";
+			$sSQL .= "	`UOMSUBCAT_PK`, \n";
+			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
+			$sSQL .= "	`UOM_PK`, \n";
+			$sSQL .= "	`UOM_NAME`, \n";
+			$sSQL .= "	`UOM_RATE` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `ROOMS_PK`=`LINK_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATAMEDSTRING` ON `IO_PK`=`DATAMEDSTRING_IO_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `PERMROOMS_DATAREAD` = 1 \n";
+			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
+			$sSQL .= "AND `DATATYPE_PK` = 7;\n";
+			break;
+			
+
+		/*============================================================
+		  == #5.8# - VR_DATALONGSTRING                              ==
+		  ============================================================*/
+		case "PrivateDataLongString":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATALONGSTRING` AS \n";
+			$sSQL .= "SELECT \n";
+			$sSQL .= "	`DATALONGSTRING_VALUE` AS \"CALCEDVALUE\", \n";
+			$sSQL .= "	`DATALONGSTRING_DATE` AS \"UTS\", \n";
+			$sSQL .= "	`DATALONGSTRING_PK`, \n";
+			$sSQL .= "	`DATALONGSTRING_DATE`, \n";
+			$sSQL .= "	`DATALONGSTRING_VALUE`, \n";
+			$sSQL .= "	`DATATYPE_PK`, \n";
+			$sSQL .= "	`DATATYPE_NAME`, \n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`PERMROOMS_READ`, \n";
+			$sSQL .= "	`PERMROOMS_WRITE`, \n";
+			$sSQL .= "	`PERMROOMS_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMROOMS_DATAREAD`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`LINK_SERIALCODE`, \n";
+			$sSQL .= "	`LINK_NAME`, \n";
+			$sSQL .= "	`LINK_CONNECTED`, \n";
+			$sSQL .= "	`LINK_STATE`, \n";
+			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
+			$sSQL .= "	`LINKTYPE_PK`, \n";
+			$sSQL .= "	`LINKTYPE_NAME`, \n";
+			$sSQL .= "	`THING_PK`, \n";
+			$sSQL .= "	`THING_HWID`, \n";
+			$sSQL .= "	`THING_OUTPUTHWID`, \n";
+			$sSQL .= "	`THING_STATE`, \n";
+			$sSQL .= "	`THING_STATECHANGEID`, \n";
+			$sSQL .= "	`THING_NAME`, \n";
+			$sSQL .= "	`THINGTYPE_PK`, \n";
+			$sSQL .= "	`THINGTYPE_NAME`, \n";
+			$sSQL .= "	`IO_BASECONVERT`, \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`IO_NAME`, \n";
+			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
+			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
+			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
+			$sSQL .= "	`IO_STATECHANGEID`, \n";
+			$sSQL .= "	`IO_STATE`, \n";
+			$sSQL .= "	`IOTYPE_PK`, \n";
+			$sSQL .= "	`IOTYPE_NAME`, \n";
+			$sSQL .= "	`IOTYPE_ENUM`, \n";
+			$sSQL .= "	`RSCAT_PK`, \n";
+			$sSQL .= "	`RSCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_PK`, \n";
+			$sSQL .= "	`RSSUBCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
+			$sSQL .= "	`RSTARIFF_PK`, \n";
+			$sSQL .= "	`RSTARIFF_NAME`, \n";
+			$sSQL .= "	`RSTYPE_PK`, \n";
+			$sSQL .= "	`RSTYPE_NAME`, \n";
+			$sSQL .= "	`RSTYPE_MAIN`, \n";
+			$sSQL .= "	`UOMCAT_PK`, \n";
+			$sSQL .= "	`UOMCAT_NAME`, \n";
+			$sSQL .= "	`UOMSUBCAT_PK`, \n";
+			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
+			$sSQL .= "	`UOM_PK`, \n";
+			$sSQL .= "	`UOM_NAME`, \n";
+			$sSQL .= "	`UOM_RATE` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `ROOMS_PK`=`LINK_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATALONGSTRING` ON `IO_PK`=`DATALONGSTRING_IO_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `PERMROOMS_DATAREAD` = 1 \n";
+			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
+			$sSQL .= "AND `DATATYPE_PK` = 8;\n";
+			break;
+			
+		/*============================================================
+		  == #5.9# - VR_DATASTRING255                               ==
+		  ============================================================*/
+		case "PrivateDataString255":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATASTRING255` AS \n";
+			$sSQL .= "SELECT \n";
+			$sSQL .= "	`DATASTRING255_VALUE` AS \"CALCEDVALUE\", \n";
+			$sSQL .= "	`DATASTRING255_DATE` AS \"UTS\", \n";
+			$sSQL .= "	`DATASTRING255_PK`, \n";
+			$sSQL .= "	`DATASTRING255_DATE`, \n";
+			$sSQL .= "	`DATASTRING255_VALUE`, \n";
+			$sSQL .= "	`DATATYPE_PK`, \n";
+			$sSQL .= "	`DATATYPE_NAME`, \n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`PERMROOMS_READ`, \n";
+			$sSQL .= "	`PERMROOMS_WRITE`, \n";
+			$sSQL .= "	`PERMROOMS_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMROOMS_DATAREAD`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`LINK_SERIALCODE`, \n";
+			$sSQL .= "	`LINK_NAME`, \n";
+			$sSQL .= "	`LINK_CONNECTED`, \n";
+			$sSQL .= "	`LINK_STATE`, \n";
+			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
+			$sSQL .= "	`LINKTYPE_PK`, \n";
+			$sSQL .= "	`LINKTYPE_NAME`, \n";
+			$sSQL .= "	`THING_PK`, \n";
+			$sSQL .= "	`THING_HWID`, \n";
+			$sSQL .= "	`THING_OUTPUTHWID`, \n";
+			$sSQL .= "	`THING_STATE`, \n";
+			$sSQL .= "	`THING_STATECHANGEID`, \n";
+			$sSQL .= "	`THING_NAME`, \n";
+			$sSQL .= "	`THINGTYPE_PK`, \n";
+			$sSQL .= "	`THINGTYPE_NAME`, \n";
+			$sSQL .= "	`IO_BASECONVERT`, \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`IO_NAME`, \n";
+			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
+			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
+			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
+			$sSQL .= "	`IO_STATECHANGEID`, \n";
+			$sSQL .= "	`IO_STATE`, \n";
+			$sSQL .= "	`IOTYPE_PK`, \n";
+			$sSQL .= "	`IOTYPE_NAME`, \n";
+			$sSQL .= "	`IOTYPE_ENUM`, \n";
+			$sSQL .= "	`RSCAT_PK`, \n";
+			$sSQL .= "	`RSCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_PK`, \n";
+			$sSQL .= "	`RSSUBCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
+			$sSQL .= "	`RSTARIFF_PK`, \n";
+			$sSQL .= "	`RSTARIFF_NAME`, \n";
+			$sSQL .= "	`RSTYPE_PK`, \n";
+			$sSQL .= "	`RSTYPE_NAME`, \n";
+			$sSQL .= "	`RSTYPE_MAIN`, \n";
+			$sSQL .= "	`UOMCAT_PK`, \n";
+			$sSQL .= "	`UOMCAT_NAME`, \n";
+			$sSQL .= "	`UOMSUBCAT_PK`, \n";
+			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
+			$sSQL .= "	`UOM_PK`, \n";
+			$sSQL .= "	`UOM_NAME`, \n";
+			$sSQL .= "	`UOM_RATE` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `ROOMS_PK`=`LINK_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATASTRING255` ON `IO_PK`=`DATASTRING255_IO_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `PERMROOMS_DATAREAD` = 1 \n";
+			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
+			$sSQL .= "AND `DATATYPE_PK` = 9;\n";
+			break;
+
+		/*============================================================
+		  == #5.21# - VR_DATATINYINT                                ==
+		  ============================================================*/
+		case "PrivateDataTinyIntEnum":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATATINYINTENUM` AS\n";
+			$sSQL .= "SELECT\n";
+			$sSQL .= "	(`DATATINYINT_VALUE` / `IO_BASECONVERT`) AS \"CALCEDVALUE\", \n";
+			$sSQL .= "	`DATATINYINT_DATE` AS \"UTS\", \n";
+			$sSQL .= "	`DATATINYINT_PK`, \n";
+			$sSQL .= "	`DATATINYINT_DATE`, \n";
+			$sSQL .= "	`DATATINYINT_VALUE`, \n";
+			$sSQL .= "	`DATATYPE_PK`, \n";
+			$sSQL .= "	`DATATYPE_NAME`, \n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`PERMROOMS_READ`, \n";
+			$sSQL .= "	`PERMROOMS_WRITE`, \n";
+			$sSQL .= "	`PERMROOMS_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMROOMS_DATAREAD`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`LINK_SERIALCODE`, \n";
+			$sSQL .= "	`LINK_NAME`, \n";
+			$sSQL .= "	`LINK_CONNECTED`, \n";
+			$sSQL .= "	`LINK_STATE`, \n";
+			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
+			$sSQL .= "	`LINKTYPE_PK`, \n";
+			$sSQL .= "	`LINKTYPE_NAME`, \n";
+			$sSQL .= "	`THING_PK`, \n";
+			$sSQL .= "	`THING_HWID`, \n";
+			$sSQL .= "	`THING_OUTPUTHWID`, \n";
+			$sSQL .= "	`THING_STATE`, \n";
+			$sSQL .= "	`THING_STATECHANGEID`, \n";
+			$sSQL .= "	`THING_NAME`, \n";
+			$sSQL .= "	`THINGTYPE_PK`, \n";
+			$sSQL .= "	`THINGTYPE_NAME`, \n";
+			$sSQL .= "	`IO_BASECONVERT`, \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`IO_NAME`, \n";
+			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
+			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
+			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
+			$sSQL .= "	`IO_STATECHANGEID`, \n";
+			$sSQL .= "	`IO_STATE`, \n";
+			$sSQL .= "	`IOTYPE_PK`, \n";
+			$sSQL .= "	`IOTYPE_NAME`, \n";
+			$sSQL .= "	`IOTYPE_ENUM`, \n";
+			$sSQL .= "	`RSCAT_PK`, \n";
+			$sSQL .= "	`RSCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_PK`, \n";
+			$sSQL .= "	`RSSUBCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
+			$sSQL .= "	`RSTARIFF_PK`, \n";
+			$sSQL .= "	`RSTARIFF_NAME`, \n";
+			$sSQL .= "	`RSTYPE_PK`, \n";
+			$sSQL .= "	`RSTYPE_NAME`, \n";
+			$sSQL .= "	`RSTYPE_MAIN`, \n";
+			$sSQL .= "	`UOMCAT_PK`, \n";
+			$sSQL .= "	`UOMCAT_NAME`, \n";
+			$sSQL .= "	`UOMSUBCAT_PK`, \n";
+			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
+			$sSQL .= "	`UOM_PK`, \n";
+			$sSQL .= "	`UOM_NAME`, \n";
+			$sSQL .= "	`UOM_RATE` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `ROOMS_PK`=`LINK_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATINYINT` ON `IO_PK`=`DATATINYINT_IO_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `PERMROOMS_DATAREAD` = 1 \n";
+			$sSQL .= "AND `DATATYPE_PK` = 1;\n";
+			break;
+			
+		/*============================================================
+		  == #5.22# - VR_DATAINTENUM                                ==
+		  ============================================================*/
+		case "PrivateDataIntEnum":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATAINTENUM` AS\n";
+			$sSQL .= "SELECT\n";
+			$sSQL .= "	`DATAINT_DATE` AS \"UTS\", \n";
+			$sSQL .= "	`DATAINT_PK`, \n";
+			$sSQL .= "	`DATAINT_DATE`, \n";
+			$sSQL .= "	`DATAINT_VALUE`, \n";
+			$sSQL .= "	`DATATYPE_PK`, \n";
+			$sSQL .= "	`DATATYPE_NAME`, \n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`PERMROOMS_READ`, \n";
+			$sSQL .= "	`PERMROOMS_WRITE`, \n";
+			$sSQL .= "	`PERMROOMS_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMROOMS_DATAREAD`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`LINK_SERIALCODE`, \n";
+			$sSQL .= "	`LINK_NAME`, \n";
+			$sSQL .= "	`LINK_CONNECTED`, \n";
+			$sSQL .= "	`LINK_STATE`, \n";
+			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
+			$sSQL .= "	`LINKTYPE_PK`, \n";
+			$sSQL .= "	`LINKTYPE_NAME`, \n";
+			$sSQL .= "	`THING_PK`, \n";
+			$sSQL .= "	`THING_HWID`, \n";
+			$sSQL .= "	`THING_OUTPUTHWID`, \n";
+			$sSQL .= "	`THING_STATE`, \n";
+			$sSQL .= "	`THING_STATECHANGEID`, \n";
+			$sSQL .= "	`THING_NAME`, \n";
+			$sSQL .= "	`THINGTYPE_PK`, \n";
+			$sSQL .= "	`THINGTYPE_NAME`, \n";
+			$sSQL .= "	`IO_BASECONVERT`, \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`IO_NAME`, \n";
+			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
+			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
+			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
+			$sSQL .= "	`IO_STATECHANGEID`, \n";
+			$sSQL .= "	`IO_STATE`, \n";
+			$sSQL .= "	`IOTYPE_PK`, \n";
+			$sSQL .= "	`IOTYPE_NAME`, \n";
+			$sSQL .= "	`IOTYPE_ENUM`, \n";
+			$sSQL .= "	`RSCAT_PK`, \n";
+			$sSQL .= "	`RSCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_PK`, \n";
+			$sSQL .= "	`RSSUBCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
+			$sSQL .= "	`RSTARIFF_PK`, \n";
+			$sSQL .= "	`RSTARIFF_NAME`, \n";
+			$sSQL .= "	`RSTYPE_PK`, \n";
+			$sSQL .= "	`RSTYPE_NAME`, \n";
+			$sSQL .= "	`RSTYPE_MAIN`, \n";
+			$sSQL .= "	`UOMCAT_PK`, \n";
+			$sSQL .= "	`UOMCAT_NAME`, \n";
+			$sSQL .= "	`UOMSUBCAT_PK`, \n";
+			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
+			$sSQL .= "	`UOM_PK`, \n";
+			$sSQL .= "	`UOM_NAME`, \n";
+			$sSQL .= "	`UOM_RATE` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `ROOMS_PK`=`LINK_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATAINT` ON `IO_PK`=`DATAINT_IO_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `PERMROOMS_DATAREAD` = 1 \n";
+			$sSQL .= "AND `DATATYPE_PK` = 2;\n";
+			break;
+		
+		/*============================================================
+		  == #5.23# - VR_DATABIGINTENUM                             ==
+		  ============================================================*/
+		case "PrivateDataBigIntEnum":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATABIGINTENUM` AS\n";
+			$sSQL .= "SELECT\n";
+			$sSQL .= "	`DATABIGINT_DATE` AS \"UTS\", \n";
+			$sSQL .= "	`DATABIGINT_PK`, \n";
+			$sSQL .= "	`DATABIGINT_DATE`, \n";
+			$sSQL .= "	`DATABIGINT_VALUE`, \n";
+			$sSQL .= "	`DATATYPE_PK`, \n";
+			$sSQL .= "	`DATATYPE_NAME`, \n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`PERMROOMS_READ`, \n";
+			$sSQL .= "	`PERMROOMS_WRITE`, \n";
+			$sSQL .= "	`PERMROOMS_STATETOGGLE`, \n";
+			$sSQL .= "	`PERMROOMS_DATAREAD`, \n";
+			$sSQL .= "	`ROOMS_PK`, \n";
+			$sSQL .= "	`ROOMS_NAME`, \n";
+			$sSQL .= "	`ROOMS_FLOOR`, \n";
+			$sSQL .= "	`ROOMS_PREMISE_FK`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`LINK_SERIALCODE`, \n";
+			$sSQL .= "	`LINK_NAME`, \n";
+			$sSQL .= "	`LINK_CONNECTED`, \n";
+			$sSQL .= "	`LINK_STATE`, \n";
+			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
+			$sSQL .= "	`LINKTYPE_PK`, \n";
+			$sSQL .= "	`LINKTYPE_NAME`, \n";
+			$sSQL .= "	`THING_PK`, \n";
+			$sSQL .= "	`THING_HWID`, \n";
+			$sSQL .= "	`THING_OUTPUTHWID`, \n";
+			$sSQL .= "	`THING_STATE`, \n";
+			$sSQL .= "	`THING_STATECHANGEID`, \n";
+			$sSQL .= "	`THING_NAME`, \n";
+			$sSQL .= "	`THINGTYPE_PK`, \n";
+			$sSQL .= "	`THINGTYPE_NAME`, \n";
+			$sSQL .= "	`IO_BASECONVERT`, \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`IO_NAME`, \n";
+			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
+			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
+			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
+			$sSQL .= "	`IO_STATECHANGEID`, \n";
+			$sSQL .= "	`IO_STATE`, \n";
+			$sSQL .= "	`IOTYPE_PK`, \n";
+			$sSQL .= "	`IOTYPE_NAME`, \n";
+			$sSQL .= "	`IOTYPE_ENUM`, \n";
+			$sSQL .= "	`RSCAT_PK`, \n";
+			$sSQL .= "	`RSCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_PK`, \n";
+			$sSQL .= "	`RSSUBCAT_NAME`, \n";
+			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
+			$sSQL .= "	`RSTARIFF_PK`, \n";
+			$sSQL .= "	`RSTARIFF_NAME`, \n";
+			$sSQL .= "	`RSTYPE_PK`, \n";
+			$sSQL .= "	`RSTYPE_NAME`, \n";
+			$sSQL .= "	`RSTYPE_MAIN`, \n";
+			$sSQL .= "	`UOMCAT_PK`, \n";
+			$sSQL .= "	`UOMCAT_NAME`, \n";
+			$sSQL .= "	`UOMSUBCAT_PK`, \n";
+			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
+			$sSQL .= "	`UOM_PK`, \n";
+			$sSQL .= "	`UOM_NAME`, \n";
+			$sSQL .= "	`UOM_RATE` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `ROOMS_PK`=`LINK_ROOMS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATABIGINT` ON `IO_PK`=`DATABIGINT_IO_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `PERMROOMS_DATAREAD` = 1 \n";
+			$sSQL .= "AND `DATATYPE_PK` = 3;\n";
+			break;
+
+
+		/*============================================================
+		  == #6.01# - USERSHUB                                      ==
+		  ============================================================*/
+		case "WatchInputsHub":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VW_HUB` AS \n";
+			$sSQL .= "SELECT \n";
+			$sSQL .= "	`USERS_PK`, \n";
 			$sSQL .= "	`HUB_PK`, \n";
+			$sSQL .= "	`HUB_PREMISE_FK`, \n";
 			$sSQL .= "	`HUB_NAME`, \n";
+			$sSQL .= "	`HUB_SERIALNUMBER`, \n";
+			$sSQL .= "	`HUB_IPADDRESS`, \n";
+			$sSQL .= "	`HUBTYPE_PK`, \n";
+			$sSQL .= "	`HUBTYPE_NAME` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMHUB` ON `USERS_PK`=`PERMHUB_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `HUB_PK`=`PERMHUB_HUB_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`HUBTYPE` ON `HUB_HUBTYPE_FK`=`HUBTYPE_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') AND `USERS_STATE` = -1;\n";
+			break;
+			
+			
+		/*============================================================
+		  == #6.02# - USERSCOMM                                     ==
+		  ============================================================*/
+		case "WatchInputsComm":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VW_COMM` AS\n";
+			$sSQL .= "SELECT\n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`HUB_PK`, \n";
+			$sSQL .= "	`HUB_PREMISE_FK`, \n";
+			$sSQL .= "	`HUB_NAME`, \n";
+			$sSQL .= "	`HUB_SERIALNUMBER`, \n";
+			$sSQL .= "	`HUB_IPADDRESS`, \n";
 			$sSQL .= "	`HUBTYPE_PK`, \n";
 			$sSQL .= "	`HUBTYPE_NAME`, \n";
+			$sSQL .= "	`COMM_PK`, \n";
+			$sSQL .= "	`COMM_NAME`, \n";
+			$sSQL .= "	`COMM_JOINMODE`, \n";
+			$sSQL .= "	`COMM_ADDRESS`, \n";
+			$sSQL .= "	`COMMTYPE_PK`, \n";
+			$sSQL .= "	`COMMTYPE_NAME` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMHUB` ON `USERS_PK`=`PERMHUB_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `HUB_PK`=`PERMHUB_HUB_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`HUBTYPE` ON `HUB_HUBTYPE_FK`=`HUBTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`COMM` ON `COMM_HUB_FK`=`HUB_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`COMMTYPE` ON `COMM_COMMTYPE_FK`=`COMMTYPE_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') AND `USERS_STATE` = -1;\n";
+			break;
+			
+			
+		/*============================================================
+		  == #6.03# - USERSLINK                                     ==
+		  ============================================================*/
+		case "WatchInputsLink":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VW_LINK` AS \n";
+			$sSQL .= "SELECT \n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`HUB_PK`, \n";
+			$sSQL .= "	`HUB_PREMISE_FK`, \n";
+			$sSQL .= "	`HUB_HUBTYPE_FK`, \n";
+			$sSQL .= "	`HUB_NAME`, \n";
+			$sSQL .= "	`COMM_PK`, \n";
+			$sSQL .= "	`COMMTYPE_PK`, \n";
+			$sSQL .= "	`COMMTYPE_NAME`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`LINK_ROOMS_FK`, \n";
+			$sSQL .= "	`LINK_SERIALCODE`, \n";
+			$sSQL .= "	`LINK_NAME`, \n";
+			$sSQL .= "	`LINK_CONNECTED`, \n";
+			$sSQL .= "	`LINK_STATE`, \n";
+			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
+			$sSQL .= "	`LINK_COMM_FK`, \n";
+			$sSQL .= "	`LINKTYPE_PK`, \n";
+			$sSQL .= "	`LINKTYPE_NAME`, \n";
+			$sSQL .= "	`LINKINFO_PK`, \n";
+			$sSQL .= "	`LINKINFO_NAME`, \n";
+			$sSQL .= "	`LINKINFO_MANUFACTURER`, \n";
+			$sSQL .= "	`LINKINFO_MANUFACTURERURL`, \n";
+			$sSQL .= "	`LINKCONN_PK`, \n";
+			$sSQL .= "	`LINKCONN_NAME`, \n";
+			$sSQL .= "	`LINKCONN_ADDRESS`, \n";
+			$sSQL .= "	`LINKCONN_USERNAME`, \n";
+			$sSQL .= "	`LINKCONN_PASSWORD`, \n";
+			$sSQL .= "	`LINKCONN_PORT`, \n";
+			$sSQL .= "	`LINKPROTOCOL_PK`, \n";
+			$sSQL .= "	`LINKPROTOCOL_NAME`, \n";
+			$sSQL .= "	`LINKCRYPTTYPE_PK`, \n";
+			$sSQL .= "	`LINKCRYPTTYPE_NAME`, \n";
+			$sSQL .= "	`LINKFREQ_PK`, \n";
+			$sSQL .= "	`LINKFREQ_NAME` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMHUB` ON `USERS_PK`=`PERMHUB_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `HUB_PK`=`PERMHUB_HUB_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`COMMTYPE` ON `COMM_COMMTYPE_FK`=`COMMTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINK_LINKTYPE_FK`=`LINKTYPE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`LINKINFO` ON `LINK_LINKINFO_FK`=`LINKINFO_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`LINKCONN` ON `LINK_LINKCONN_FK`=`LINKCONN_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`LINKPROTOCOL` ON `LINKCONN_LINKPROTOCOL_FK`=`LINKPROTOCOL_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`LINKFREQ` ON `LINKCONN_LINKFREQ_FK`=`LINKFREQ_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`LINKCRYPTTYPE` ON `LINKCONN_LINKCRYPTTYPE_FK`=`LINKCRYPTTYPE_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') AND `USERS_STATE` = -1;\n";
+			break;
+			
+		/*============================================================
+		  == #6.04# - USERSTHING                                    ==
+		  ============================================================*/
+		case "WatchInputsThing":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VW_THING` AS\n";
+			$sSQL .= "SELECT\n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`HUB_PK`, \n";
+			$sSQL .= "	`HUB_PREMISE_FK`, \n";
+			$sSQL .= "	`HUB_HUBTYPE_FK`, \n";
+			$sSQL .= "	`HUB_NAME`, \n";
+			$sSQL .= "	`COMM_PK`, \n";
+			$sSQL .= "	`COMM_COMMTYPE_FK`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`LINK_ROOMS_FK`, \n";
+			$sSQL .= "	`LINK_SERIALCODE`, \n";
+			$sSQL .= "	`LINK_NAME`, \n";
+			$sSQL .= "	`LINK_CONNECTED`, \n";
+			$sSQL .= "	`LINK_STATE`, \n";
+			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
+			$sSQL .= "	`LINK_COMM_FK`, \n";
+			$sSQL .= "	`LINKTYPE_PK`, \n";
+			$sSQL .= "	`LINKTYPE_NAME`, \n";
+			$sSQL .= "	`THING_PK`, \n";
+			$sSQL .= "	`THING_HWID`, \n";
+			$sSQL .= "	`THING_OUTPUTHWID`, \n";
+			$sSQL .= "	`THING_STATE`, \n";
+			$sSQL .= "	`THING_STATECHANGEID`, \n";
+			$sSQL .= "	`THING_NAME`, \n";
+			$sSQL .= "	`THING_SERIALCODE`, \n";
+			$sSQL .= "	`THINGTYPE_PK`, \n";
+			$sSQL .= "	`THINGTYPE_NAME` \n";
+			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMHUB` ON `USERS_PK`=`PERMHUB_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `HUB_PK`=`PERMHUB_HUB_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`THINGTYPE` ON `THINGTYPE_PK`=`THING_THINGTYPE_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') AND `USERS_STATE` = -1;\n";
+			break;
+			
+		/*============================================================
+		  == #6.05# - USERSIO                                       ==
+		  ============================================================*/
+		case "WatchInputsIO":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VW_IO` AS\n";
+			$sSQL .= "SELECT\n";
+			$sSQL .= "	`USERS_PK`, \n";
+			$sSQL .= "	`HUB_PK`, \n";
+			$sSQL .= "	`HUB_PREMISE_FK`, \n";
+			$sSQL .= "	`HUB_HUBTYPE_FK`, \n";
+			$sSQL .= "	`HUB_NAME`, \n";
 			$sSQL .= "	`COMM_PK`, \n";
 			$sSQL .= "	`LINK_PK`, \n";
 			$sSQL .= "	`LINK_ROOMS_FK`, \n";
@@ -2074,10 +3532,8 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "	`UOM_NAME`, \n";
 			$sSQL .= "	`UOM_RATE` \n";
 			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PREMISE` ON `PERMPREMISE_PREMISE_FK`=`PREMISE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `PREMISE_PK`=`HUB_PREMISE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUBTYPE` ON `HUB_HUBTYPE_FK`=`HUBTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMHUB` ON `USERS_PK`=`PERMHUB_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `HUB_PK`=`PERMHUB_HUB_FK` \n";
 			$sSQL .= "INNER JOIN `".$sDBName."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
 			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
 			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINK_LINKTYPE_FK`=`LINKTYPE_PK` \n";
@@ -2093,907 +3549,11 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
-			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
-			$sSQL .= "AND `PERMPREMISE_READ` = 1 \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') AND `USERS_STATE` = -1 \n";
 			$sSQL .= "AND `IO_BASECONVERT` <> 0; \n";
 			break;
 			
 			
-		/*============================================================
-		  == #4.11# - USERSSERVERPERMS                              ==
-		  ============================================================*/
-		case "PrivateUsersServerPerms":
-			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSSERVERPERMS` AS \n";
-			$sSQL .= "SELECT ";
-			$sSQL .= "	`USERS_PK`, ";
-			$sSQL .= "	`USERS_USERNAME`, ";
-			$sSQL .= "	`PERMSERVER_PK`, ";
-			$sSQL .= "	`PERMSERVER_ADDUSER`, ";
-			$sSQL .= "	`PERMSERVER_ADDPREMISEHUB`, ";
-			$sSQL .= "	`PERMSERVER_UPGRADE` ";
-			$sSQL .= "FROM `".$sDBName."`.`USERS` ";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`PERMSERVER` ON `USERS_PK` = `PERMSERVER_USERS_FK` ";
-			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') ";
-			break;
-			
-			
-		/*============================================================
-		  == #5.1# - VR_DATATINYINT                                 ==
-		  ============================================================*/
-		case "PrivateDataTinyInt":
-			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATATINYINT` AS\n";
-			$sSQL .= "SELECT\n";
-			$sSQL .= "	(`DATATINYINT_VALUE` / `IO_BASECONVERT`) AS \"CALCEDVALUE\", \n";
-			$sSQL .= "	`DATATINYINT_DATE` AS \"UTS\", \n";
-			$sSQL .= "	`DATATINYINT_PK`, \n";
-			$sSQL .= "	`DATATINYINT_DATE`, \n";
-			$sSQL .= "	`DATATINYINT_VALUE`, \n";
-			$sSQL .= "	`DATATYPE_PK`, \n";
-			$sSQL .= "	`DATATYPE_NAME`, \n";
-			$sSQL .= "	`USERS_PK`, \n";
-			$sSQL .= "	`USERS_USERNAME`, \n";
-			$sSQL .= "	`PREMISE_PK`, \n";
-			$sSQL .= "	`PREMISE_NAME`, \n";
-			$sSQL .= "	`PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "	`PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
-			$sSQL .= "	`PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "	`HUB_PK`, \n";
-			$sSQL .= "	`HUB_NAME`, \n";
-			$sSQL .= "	`HUBTYPE_PK`, \n";
-			$sSQL .= "	`HUBTYPE_NAME`, \n";
-			$sSQL .= "	`COMM_PK`, \n";
-			$sSQL .= "	`LINK_PK`, \n";
-			$sSQL .= "	`LINK_SERIALCODE`, \n";
-			$sSQL .= "	`LINK_NAME`, \n";
-			$sSQL .= "	`LINK_CONNECTED`, \n";
-			$sSQL .= "	`LINK_STATE`, \n";
-			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
-			$sSQL .= "	`LINKTYPE_PK`, \n";
-			$sSQL .= "	`LINKTYPE_NAME`, \n";
-			$sSQL .= "	`THING_PK`, \n";
-			$sSQL .= "	`THING_HWID`, \n";
-			$sSQL .= "	`THING_OUTPUTHWID`, \n";
-			$sSQL .= "	`THING_STATE`, \n";
-			$sSQL .= "	`THING_STATECHANGEID`, \n";
-			$sSQL .= "	`THING_NAME`, \n";
-			$sSQL .= "	`THINGTYPE_PK`, \n";
-			$sSQL .= "	`THINGTYPE_NAME`, \n";
-			$sSQL .= "	`IO_BASECONVERT`, \n";
-			$sSQL .= "	`IO_PK`, \n";
-			$sSQL .= "	`IO_NAME`, \n";
-			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
-			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
-			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
-			$sSQL .= "	`IO_STATECHANGEID`, \n";
-			$sSQL .= "	`IO_STATE`, \n";
-			$sSQL .= "	`IOTYPE_PK`, \n";
-			$sSQL .= "	`IOTYPE_NAME`, \n";
-			$sSQL .= "	`IOTYPE_ENUM`, \n";
-			$sSQL .= "	`RSCAT_PK`, \n";
-			$sSQL .= "	`RSCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_PK`, \n";
-			$sSQL .= "	`RSSUBCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
-			$sSQL .= "	`RSTARIFF_PK`, \n";
-			$sSQL .= "	`RSTARIFF_NAME`, \n";
-			$sSQL .= "	`RSTYPE_PK`, \n";
-			$sSQL .= "	`RSTYPE_NAME`, \n";
-			$sSQL .= "	`RSTYPE_MAIN`, \n";
-			$sSQL .= "	`UOMCAT_PK`, \n";
-			$sSQL .= "	`UOMCAT_NAME`, \n";
-			$sSQL .= "	`UOMSUBCAT_PK`, \n";
-			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
-			$sSQL .= "	`UOM_PK`, \n";
-			$sSQL .= "	`UOM_NAME`, \n";
-			$sSQL .= "	`UOM_RATE` \n";
-			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PREMISE` ON `PERMPREMISE_PREMISE_FK`=`PREMISE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `PREMISE_PK`=`HUB_PREMISE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUBTYPE` ON `HUBTYPE_PK`=`HUB_HUBTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATINYINT` ON `IO_PK`=`DATATINYINT_IO_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
-			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
-			$sSQL .= "AND `PERMPREMISE_READ` = 1 \n";
-			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
-			$sSQL .= "AND `IOTYPE_ENUM` <> 1\n";
-			$sSQL .= "AND `DATATYPE_PK` = 1;\n";
-			break;
-			
-		/*============================================================
-		  == #5.2# - VR_DATAINT                                     ==
-		  ============================================================*/
-		case "PrivateDataInt":
-			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATAINT` AS\n";
-			$sSQL .= "SELECT\n";
-			$sSQL .= "	(`DATAINT_VALUE` / `IO_BASECONVERT`) AS \"CALCEDVALUE\", \n";
-			$sSQL .= "	`DATAINT_DATE` AS \"UTS\", \n";
-			$sSQL .= "	`DATAINT_PK`, \n";
-			$sSQL .= "	`DATAINT_DATE`, \n";
-			$sSQL .= "	`DATAINT_VALUE`, \n";
-			$sSQL .= "	`DATATYPE_PK`, \n";
-			$sSQL .= "	`DATATYPE_NAME`, \n";
-			$sSQL .= "	`USERS_PK`, \n";
-			$sSQL .= "	`USERS_USERNAME`, \n";
-			$sSQL .= "	`PREMISE_PK`, \n";
-			$sSQL .= "	`PREMISE_NAME`, \n";
-			$sSQL .= "	`PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "	`PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
-			$sSQL .= "	`PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "	`HUB_PK`, \n";
-			$sSQL .= "	`HUB_NAME`, \n";
-			$sSQL .= "	`HUBTYPE_PK`, \n";
-			$sSQL .= "	`HUBTYPE_NAME`, \n";
-			$sSQL .= "	`COMM_PK`, \n";
-			$sSQL .= "	`LINK_PK`, \n";
-			$sSQL .= "	`LINK_SERIALCODE`, \n";
-			$sSQL .= "	`LINK_NAME`, \n";
-			$sSQL .= "	`LINK_CONNECTED`, \n";
-			$sSQL .= "	`LINK_STATE`, \n";
-			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
-			$sSQL .= "	`LINKTYPE_PK`, \n";
-			$sSQL .= "	`LINKTYPE_NAME`, \n";
-			$sSQL .= "	`THING_PK`, \n";
-			$sSQL .= "	`THING_HWID`, \n";
-			$sSQL .= "	`THING_OUTPUTHWID`, \n";
-			$sSQL .= "	`THING_STATE`, \n";
-			$sSQL .= "	`THING_STATECHANGEID`, \n";
-			$sSQL .= "	`THING_NAME`, \n";
-			$sSQL .= "	`THINGTYPE_PK`, \n";
-			$sSQL .= "	`THINGTYPE_NAME`, \n";
-			$sSQL .= "	`IO_BASECONVERT`, \n";
-			$sSQL .= "	`IO_PK`, \n";
-			$sSQL .= "	`IO_NAME`, \n";
-			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
-			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
-			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
-			$sSQL .= "	`IO_STATECHANGEID`, \n";
-			$sSQL .= "	`IO_STATE`, \n";
-			$sSQL .= "	`IOTYPE_PK`, \n";
-			$sSQL .= "	`IOTYPE_NAME`, \n";
-			$sSQL .= "	`IOTYPE_ENUM`, \n";
-			$sSQL .= "	`RSCAT_PK`, \n";
-			$sSQL .= "	`RSCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_PK`, \n";
-			$sSQL .= "	`RSSUBCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
-			$sSQL .= "	`RSTARIFF_PK`, \n";
-			$sSQL .= "	`RSTARIFF_NAME`, \n";
-			$sSQL .= "	`RSTYPE_PK`, \n";
-			$sSQL .= "	`RSTYPE_NAME`, \n";
-			$sSQL .= "	`RSTYPE_MAIN`, \n";
-			$sSQL .= "	`UOMCAT_PK`, \n";
-			$sSQL .= "	`UOMCAT_NAME`, \n";
-			$sSQL .= "	`UOMSUBCAT_PK`, \n";
-			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
-			$sSQL .= "	`UOM_PK`, \n";
-			$sSQL .= "	`UOM_NAME`, \n";
-			$sSQL .= "	`UOM_RATE` \n";
-			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PREMISE` ON `PERMPREMISE_PREMISE_FK`=`PREMISE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `PREMISE_PK`=`HUB_PREMISE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUBTYPE` ON `HUBTYPE_PK`=`HUB_HUBTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATAINT` ON `IO_PK`=`DATAINT_IO_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
-			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
-			$sSQL .= "AND `PERMPREMISE_READ` = 1 \n";
-			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
-			$sSQL .= "AND `IOTYPE_ENUM` <> 1\n";
-			$sSQL .= "AND `DATATYPE_PK` = 2;\n";
-			break;
-		
-		/*============================================================
-		  == #5.3# - VR_DATABIGINT                                  ==
-		  ============================================================*/
-		case "PrivateDataBigInt":
-			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATABIGINT` AS\n";
-			$sSQL .= "SELECT\n";
-			$sSQL .= "	(`DATABIGINT_VALUE` / `IO_BASECONVERT`) AS \"CALCEDVALUE\", \n";
-			$sSQL .= "	`DATABIGINT_DATE` AS \"UTS\", \n";
-			$sSQL .= "	`DATABIGINT_PK`, \n";
-			$sSQL .= "	`DATABIGINT_DATE`, \n";
-			$sSQL .= "	`DATABIGINT_VALUE`, \n";
-			$sSQL .= "	`DATATYPE_PK`, \n";
-			$sSQL .= "	`DATATYPE_NAME`, \n";
-			$sSQL .= "	`USERS_PK`, \n";
-			$sSQL .= "	`USERS_USERNAME`, \n";
-			$sSQL .= "	`PREMISE_PK`, \n";
-			$sSQL .= "	`PREMISE_NAME`, \n";
-			$sSQL .= "	`PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "	`PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
-			$sSQL .= "	`PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "	`HUB_PK`, \n";
-			$sSQL .= "	`HUB_NAME`, \n";
-			$sSQL .= "	`HUBTYPE_PK`, \n";
-			$sSQL .= "	`HUBTYPE_NAME`, \n";
-			$sSQL .= "	`COMM_PK`, \n";
-			$sSQL .= "	`LINK_PK`, \n";
-			$sSQL .= "	`LINK_SERIALCODE`, \n";
-			$sSQL .= "	`LINK_NAME`, \n";
-			$sSQL .= "	`LINK_CONNECTED`, \n";
-			$sSQL .= "	`LINK_STATE`, \n";
-			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
-			$sSQL .= "	`LINKTYPE_PK`, \n";
-			$sSQL .= "	`LINKTYPE_NAME`, \n";
-			$sSQL .= "	`THING_PK`, \n";
-			$sSQL .= "	`THING_HWID`, \n";
-			$sSQL .= "	`THING_OUTPUTHWID`, \n";
-			$sSQL .= "	`THING_STATE`, \n";
-			$sSQL .= "	`THING_STATECHANGEID`, \n";
-			$sSQL .= "	`THING_NAME`, \n";
-			$sSQL .= "	`THINGTYPE_PK`, \n";
-			$sSQL .= "	`THINGTYPE_NAME`, \n";
-			$sSQL .= "	`IO_BASECONVERT`, \n";
-			$sSQL .= "	`IO_PK`, \n";
-			$sSQL .= "	`IO_NAME`, \n";
-			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
-			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
-			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
-			$sSQL .= "	`IO_STATECHANGEID`, \n";
-			$sSQL .= "	`IO_STATE`, \n";
-			$sSQL .= "	`IOTYPE_PK`, \n";
-			$sSQL .= "	`IOTYPE_NAME`, \n";
-			$sSQL .= "	`IOTYPE_ENUM`, \n";
-			$sSQL .= "	`RSCAT_PK`, \n";
-			$sSQL .= "	`RSCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_PK`, \n";
-			$sSQL .= "	`RSSUBCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
-			$sSQL .= "	`RSTARIFF_PK`, \n";
-			$sSQL .= "	`RSTARIFF_NAME`, \n";
-			$sSQL .= "	`RSTYPE_PK`, \n";
-			$sSQL .= "	`RSTYPE_NAME`, \n";
-			$sSQL .= "	`RSTYPE_MAIN`, \n";
-			$sSQL .= "	`UOMCAT_PK`, \n";
-			$sSQL .= "	`UOMCAT_NAME`, \n";
-			$sSQL .= "	`UOMSUBCAT_PK`, \n";
-			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
-			$sSQL .= "	`UOM_PK`, \n";
-			$sSQL .= "	`UOM_NAME`, \n";
-			$sSQL .= "	`UOM_RATE` \n";
-			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PREMISE` ON `PERMPREMISE_PREMISE_FK`=`PREMISE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `PREMISE_PK`=`HUB_PREMISE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUBTYPE` ON `HUBTYPE_PK`=`HUB_HUBTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATABIGINT` ON `IO_PK`=`DATABIGINT_IO_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
-			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
-			$sSQL .= "AND `PERMPREMISE_READ` = 1 \n";
-			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
-			$sSQL .= "AND `IOTYPE_ENUM` <> 1\n";
-			$sSQL .= "AND `DATATYPE_PK` = 3;\n";
-			break;
-			
-		/*============================================================
-		  == #5.4# - VR_DATAFLOAT                                   ==
-		  ============================================================*/
-		case "PrivateDataFloat":
-			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATAFLOAT` AS\n";
-			$sSQL .= "SELECT\n";
-			$sSQL .= "	(`DATAFLOAT_VALUE` / `IO_BASECONVERT`) AS \"CALCEDVALUE\", \n";
-			$sSQL .= "	`DATAFLOAT_DATE` AS \"UTS\", \n";
-			$sSQL .= "	`DATAFLOAT_PK`, \n";
-			$sSQL .= "	`DATAFLOAT_DATE`, \n";
-			$sSQL .= "	`DATAFLOAT_VALUE`, \n";
-			$sSQL .= "	`DATATYPE_PK`, \n";
-			$sSQL .= "	`DATATYPE_NAME`, \n";
-			$sSQL .= "	`USERS_PK`, \n";
-			$sSQL .= "	`USERS_USERNAME`, \n";
-			$sSQL .= "	`PREMISE_PK`, \n";
-			$sSQL .= "	`PREMISE_NAME`, \n";
-			$sSQL .= "	`PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "	`PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
-			$sSQL .= "	`PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "	`HUB_PK`, \n";
-			$sSQL .= "	`HUB_NAME`, \n";
-			$sSQL .= "	`HUBTYPE_PK`, \n";
-			$sSQL .= "	`HUBTYPE_NAME`, \n";
-			$sSQL .= "	`COMM_PK`, \n";
-			$sSQL .= "	`LINK_PK`, \n";
-			$sSQL .= "	`LINK_SERIALCODE`, \n";
-			$sSQL .= "	`LINK_NAME`, \n";
-			$sSQL .= "	`LINK_CONNECTED`, \n";
-			$sSQL .= "	`LINK_STATE`, \n";
-			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
-			$sSQL .= "	`LINKTYPE_PK`, \n";
-			$sSQL .= "	`LINKTYPE_NAME`, \n";
-			$sSQL .= "	`THING_PK`, \n";
-			$sSQL .= "	`THING_HWID`, \n";
-			$sSQL .= "	`THING_OUTPUTHWID`, \n";
-			$sSQL .= "	`THING_STATE`, \n";
-			$sSQL .= "	`THING_STATECHANGEID`, \n";
-			$sSQL .= "	`THING_NAME`, \n";
-			$sSQL .= "	`THINGTYPE_PK`, \n";
-			$sSQL .= "	`THINGTYPE_NAME`, \n";
-			$sSQL .= "	`IO_BASECONVERT`, \n";
-			$sSQL .= "	`IO_PK`, \n";
-			$sSQL .= "	`IO_NAME`, \n";
-			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
-			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
-			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
-			$sSQL .= "	`IO_STATECHANGEID`, \n";
-			$sSQL .= "	`IO_STATE`, \n";
-			$sSQL .= "	`IOTYPE_PK`, \n";
-			$sSQL .= "	`IOTYPE_NAME`, \n";
-			$sSQL .= "	`IOTYPE_ENUM`, \n";
-			$sSQL .= "	`RSCAT_PK`, \n";
-			$sSQL .= "	`RSCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_PK`, \n";
-			$sSQL .= "	`RSSUBCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
-			$sSQL .= "	`RSTARIFF_PK`, \n";
-			$sSQL .= "	`RSTARIFF_NAME`, \n";
-			$sSQL .= "	`RSTYPE_PK`, \n";
-			$sSQL .= "	`RSTYPE_NAME`, \n";
-			$sSQL .= "	`RSTYPE_MAIN`, \n";
-			$sSQL .= "	`UOMCAT_PK`, \n";
-			$sSQL .= "	`UOMCAT_NAME`, \n";
-			$sSQL .= "	`UOMSUBCAT_PK`, \n";
-			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
-			$sSQL .= "	`UOM_PK`, \n";
-			$sSQL .= "	`UOM_NAME`, \n";
-			$sSQL .= "	`UOM_RATE` \n";
-			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PREMISE` ON `PERMPREMISE_PREMISE_FK`=`PREMISE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `PREMISE_PK`=`HUB_PREMISE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUBTYPE` ON `HUBTYPE_PK`=`HUB_HUBTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATAFLOAT` ON `IO_PK`=`DATAFLOAT_IO_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
-			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
-			$sSQL .= "AND `PERMPREMISE_READ` = 1 \n";
-			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
-			$sSQL .= "AND `IOTYPE_ENUM` <> 1\n";
-			$sSQL .= "AND `DATATYPE_PK` = 4;\n";
-			break;
-			
-		/*============================================================
-		  == #5.5# - VR_DATATINYSTRING                              ==
-		  ============================================================*/
-		case "PrivateDataTinyString":
-			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATATINYSTRING` AS\n";
-			$sSQL .= "SELECT\n";
-			$sSQL .= "	`DATATINYSTRING_VALUE` AS \"CALCEDVALUE\", \n";
-			$sSQL .= "	`DATATINYSTRING_DATE` AS \"UTS\", \n";
-			$sSQL .= "	`DATATINYSTRING_PK`, \n";
-			$sSQL .= "	`DATATINYSTRING_DATE`, \n";
-			$sSQL .= "	`DATATINYSTRING_VALUE`, \n";
-			$sSQL .= "	`DATATYPE_PK`, \n";
-			$sSQL .= "	`DATATYPE_NAME`, \n";
-			$sSQL .= "	`USERS_PK`, \n";
-			$sSQL .= "	`USERS_USERNAME`, \n";
-			$sSQL .= "	`PREMISE_PK`, \n";
-			$sSQL .= "	`PREMISE_NAME`, \n";
-			$sSQL .= "	`PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "	`PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
-			$sSQL .= "	`PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "	`HUB_PK`, \n";
-			$sSQL .= "	`HUB_NAME`, \n";
-			$sSQL .= "	`HUBTYPE_PK`, \n";
-			$sSQL .= "	`HUBTYPE_NAME`, \n";
-			$sSQL .= "	`COMM_PK`, \n";
-			$sSQL .= "	`LINK_PK`, \n";
-			$sSQL .= "	`LINK_SERIALCODE`, \n";
-			$sSQL .= "	`LINK_NAME`, \n";
-			$sSQL .= "	`LINK_CONNECTED`, \n";
-			$sSQL .= "	`LINK_STATE`, \n";
-			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
-			$sSQL .= "	`LINKTYPE_PK`, \n";
-			$sSQL .= "	`LINKTYPE_NAME`, \n";
-			$sSQL .= "	`THING_PK`, \n";
-			$sSQL .= "	`THING_HWID`, \n";
-			$sSQL .= "	`THING_OUTPUTHWID`, \n";
-			$sSQL .= "	`THING_STATE`, \n";
-			$sSQL .= "	`THING_STATECHANGEID`, \n";
-			$sSQL .= "	`THING_NAME`, \n";
-			$sSQL .= "	`THINGTYPE_PK`, \n";
-			$sSQL .= "	`THINGTYPE_NAME`, \n";
-			$sSQL .= "	`IO_BASECONVERT`, \n";
-			$sSQL .= "	`IO_PK`, \n";
-			$sSQL .= "	`IO_NAME`, \n";
-			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
-			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
-			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
-			$sSQL .= "	`IO_STATECHANGEID`, \n";
-			$sSQL .= "	`IO_STATE`, \n";
-			$sSQL .= "	`IOTYPE_PK`, \n";
-			$sSQL .= "	`IOTYPE_NAME`, \n";
-			$sSQL .= "	`IOTYPE_ENUM`, \n";
-			$sSQL .= "	`RSCAT_PK`, \n";
-			$sSQL .= "	`RSCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_PK`, \n";
-			$sSQL .= "	`RSSUBCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
-			$sSQL .= "	`RSTARIFF_PK`, \n";
-			$sSQL .= "	`RSTARIFF_NAME`, \n";
-			$sSQL .= "	`RSTYPE_PK`, \n";
-			$sSQL .= "	`RSTYPE_NAME`, \n";
-			$sSQL .= "	`RSTYPE_MAIN`, \n";
-			$sSQL .= "	`UOMCAT_PK`, \n";
-			$sSQL .= "	`UOMCAT_NAME`, \n";
-			$sSQL .= "	`UOMSUBCAT_PK`, \n";
-			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
-			$sSQL .= "	`UOM_PK`, \n";
-			$sSQL .= "	`UOM_NAME`, \n";
-			$sSQL .= "	`UOM_RATE` \n";
-			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PREMISE` ON `PERMPREMISE_PREMISE_FK`=`PREMISE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `PREMISE_PK`=`HUB_PREMISE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUBTYPE` ON `HUBTYPE_PK`=`HUB_HUBTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATINYSTRING` ON `IO_PK`=`DATATINYSTRING_IO_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
-			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
-			$sSQL .= "AND `PERMPREMISE_READ` = 1 \n";
-			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
-			$sSQL .= "AND `DATATYPE_PK` = 5; \n";
-			break;
-			
-		/*============================================================
-		  == #5.6# - VR_DATASHORTSTRING                             ==
-		  ============================================================*/
-		case "PrivateDataShortString":
-			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATASHORTSTRING` AS\n";
-			$sSQL .= "SELECT\n";
-			$sSQL .= "	`DATASHORTSTRING_VALUE` AS \"CALCEDVALUE\", \n";
-			$sSQL .= "	`DATASHORTSTRING_DATE` AS \"UTS\", \n";
-			$sSQL .= "	`DATASHORTSTRING_PK`, \n";
-			$sSQL .= "	`DATASHORTSTRING_DATE`, \n";
-			$sSQL .= "	`DATASHORTSTRING_VALUE`, \n";
-			$sSQL .= "	`DATATYPE_PK`, \n";
-			$sSQL .= "	`DATATYPE_NAME`, \n";
-			$sSQL .= "	`USERS_PK`, \n";
-			$sSQL .= "	`USERS_USERNAME`, \n";
-			$sSQL .= "	`PREMISE_PK`, \n";
-			$sSQL .= "	`PREMISE_NAME`, \n";
-			$sSQL .= "	`PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "	`PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
-			$sSQL .= "	`PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "	`HUB_PK`, \n";
-			$sSQL .= "	`HUB_NAME`, \n";
-			$sSQL .= "	`HUBTYPE_PK`, \n";
-			$sSQL .= "	`HUBTYPE_NAME`, \n";
-			$sSQL .= "	`COMM_PK`, \n";
-			$sSQL .= "	`LINK_PK`, \n";
-			$sSQL .= "	`LINK_SERIALCODE`, \n";
-			$sSQL .= "	`LINK_NAME`, \n";
-			$sSQL .= "	`LINK_CONNECTED`, \n";
-			$sSQL .= "	`LINK_STATE`, \n";
-			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
-			$sSQL .= "	`LINKTYPE_PK`, \n";
-			$sSQL .= "	`LINKTYPE_NAME`, \n";
-			$sSQL .= "	`THING_PK`, \n";
-			$sSQL .= "	`THING_HWID`, \n";
-			$sSQL .= "	`THING_OUTPUTHWID`, \n";
-			$sSQL .= "	`THING_STATE`, \n";
-			$sSQL .= "	`THING_STATECHANGEID`, \n";
-			$sSQL .= "	`THING_NAME`, \n";
-			$sSQL .= "	`THINGTYPE_PK`, \n";
-			$sSQL .= "	`THINGTYPE_NAME`, \n";
-			$sSQL .= "	`IO_BASECONVERT`, \n";
-			$sSQL .= "	`IO_PK`, \n";
-			$sSQL .= "	`IO_NAME`, \n";
-			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
-			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
-			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
-			$sSQL .= "	`IO_STATECHANGEID`, \n";
-			$sSQL .= "	`IO_STATE`, \n";
-			$sSQL .= "	`IOTYPE_PK`, \n";
-			$sSQL .= "	`IOTYPE_NAME`, \n";
-			$sSQL .= "	`IOTYPE_ENUM`, \n";
-			$sSQL .= "	`RSCAT_PK`, \n";
-			$sSQL .= "	`RSCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_PK`, \n";
-			$sSQL .= "	`RSSUBCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
-			$sSQL .= "	`RSTARIFF_PK`, \n";
-			$sSQL .= "	`RSTARIFF_NAME`, \n";
-			$sSQL .= "	`RSTYPE_PK`, \n";
-			$sSQL .= "	`RSTYPE_NAME`, \n";
-			$sSQL .= "	`RSTYPE_MAIN`, \n";
-			$sSQL .= "	`UOMCAT_PK`, \n";
-			$sSQL .= "	`UOMCAT_NAME`, \n";
-			$sSQL .= "	`UOMSUBCAT_PK`, \n";
-			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
-			$sSQL .= "	`UOM_PK`, \n";
-			$sSQL .= "	`UOM_NAME`, \n";
-			$sSQL .= "	`UOM_RATE` \n";
-			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PREMISE` ON `PERMPREMISE_PREMISE_FK`=`PREMISE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `PREMISE_PK`=`HUB_PREMISE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUBTYPE` ON `HUBTYPE_PK`=`HUB_HUBTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATASHORTSTRING` ON `IO_PK`=`DATASHORTSTRING_IO_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
-			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
-			$sSQL .= "AND `PERMPREMISE_READ` = 1 \n";
-			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
-			$sSQL .= "AND `DATATYPE_PK` = 6;\n";
-			break;
-
-		/*============================================================
-		  == #5.7# - VR_DATAMEDSTRING                               ==
-		  ============================================================*/
-		case "PrivateDataMedString":
-			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATAMEDSTRING` AS \n";
-			$sSQL .= "SELECT \n";
-			$sSQL .= "	`DATAMEDSTRING_VALUE` AS \"CALCEDVALUE\", \n";
-			$sSQL .= "	`DATAMEDSTRING_DATE` AS \"UTS\", \n";
-			$sSQL .= "	`DATAMEDSTRING_PK`, \n";
-			$sSQL .= "	`DATAMEDSTRING_DATE`, \n";
-			$sSQL .= "	`DATAMEDSTRING_VALUE`, \n";
-			$sSQL .= "	`DATATYPE_PK`, \n";
-			$sSQL .= "	`DATATYPE_NAME`, \n";
-			$sSQL .= "	`USERS_PK`, \n";
-			$sSQL .= "	`USERS_USERNAME`, \n";
-			$sSQL .= "	`PREMISE_PK`, \n";
-			$sSQL .= "	`PREMISE_NAME`, \n";
-			$sSQL .= "	`PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "	`PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
-			$sSQL .= "	`PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "	`HUB_PK`, \n";
-			$sSQL .= "	`HUB_NAME`, \n";
-			$sSQL .= "	`HUBTYPE_PK`, \n";
-			$sSQL .= "	`HUBTYPE_NAME`, \n";
-			$sSQL .= "	`COMM_PK`, \n";
-			$sSQL .= "	`LINK_PK`, \n";
-			$sSQL .= "	`LINK_SERIALCODE`, \n";
-			$sSQL .= "	`LINK_NAME`, \n";
-			$sSQL .= "	`LINK_CONNECTED`, \n";
-			$sSQL .= "	`LINK_STATE`, \n";
-			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
-			$sSQL .= "	`LINKTYPE_PK`, \n";
-			$sSQL .= "	`LINKTYPE_NAME`, \n";
-			$sSQL .= "	`THING_PK`, \n";
-			$sSQL .= "	`THING_HWID`, \n";
-			$sSQL .= "	`THING_OUTPUTHWID`, \n";
-			$sSQL .= "	`THING_STATE`, \n";
-			$sSQL .= "	`THING_STATECHANGEID`, \n";
-			$sSQL .= "	`THING_NAME`, \n";
-			$sSQL .= "	`THINGTYPE_PK`, \n";
-			$sSQL .= "	`THINGTYPE_NAME`, \n";
-			$sSQL .= "	`IO_BASECONVERT`, \n";
-			$sSQL .= "	`IO_PK`, \n";
-			$sSQL .= "	`IO_NAME`, \n";
-			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
-			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
-			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
-			$sSQL .= "	`IO_STATECHANGEID`, \n";
-			$sSQL .= "	`IO_STATE`, \n";
-			$sSQL .= "	`IOTYPE_PK`, \n";
-			$sSQL .= "	`IOTYPE_NAME`, \n";
-			$sSQL .= "	`IOTYPE_ENUM`, \n";
-			$sSQL .= "	`RSCAT_PK`, \n";
-			$sSQL .= "	`RSCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_PK`, \n";
-			$sSQL .= "	`RSSUBCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
-			$sSQL .= "	`RSTARIFF_PK`, \n";
-			$sSQL .= "	`RSTARIFF_NAME`, \n";
-			$sSQL .= "	`RSTYPE_PK`, \n";
-			$sSQL .= "	`RSTYPE_NAME`, \n";
-			$sSQL .= "	`RSTYPE_MAIN`, \n";
-			$sSQL .= "	`UOMCAT_PK`, \n";
-			$sSQL .= "	`UOMCAT_NAME`, \n";
-			$sSQL .= "	`UOMSUBCAT_PK`, \n";
-			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
-			$sSQL .= "	`UOM_PK`, \n";
-			$sSQL .= "	`UOM_NAME`, \n";
-			$sSQL .= "	`UOM_RATE` \n";
-			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PREMISE` ON `PERMPREMISE_PREMISE_FK`=`PREMISE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `PREMISE_PK`=`HUB_PREMISE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUBTYPE` ON `HUBTYPE_PK`=`HUB_HUBTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATAMEDSTRING` ON `IO_PK`=`DATAMEDSTRING_IO_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
-			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
-			$sSQL .= "AND `PERMPREMISE_READ` = 1 \n";
-			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
-			$sSQL .= "AND `DATATYPE_PK` = 7;\n";
-			break;
-			
-
-		/*============================================================
-		  == #5.8# - VR_DATALONGSTRING                              ==
-		  ============================================================*/
-		case "PrivateDataLongString":
-			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATALONGSTRING` AS \n";
-			$sSQL .= "SELECT \n";
-			$sSQL .= "	`DATALONGSTRING_VALUE` AS \"CALCEDVALUE\", \n";
-			$sSQL .= "	`DATALONGSTRING_DATE` AS \"UTS\", \n";
-			$sSQL .= "	`DATALONGSTRING_PK`, \n";
-			$sSQL .= "	`DATALONGSTRING_DATE`, \n";
-			$sSQL .= "	`DATALONGSTRING_VALUE`, \n";
-			$sSQL .= "	`DATATYPE_PK`, \n";
-			$sSQL .= "	`DATATYPE_NAME`, \n";
-			$sSQL .= "	`USERS_PK`, \n";
-			$sSQL .= "	`USERS_USERNAME`, \n";
-			$sSQL .= "	`PREMISE_PK`, \n";
-			$sSQL .= "	`PREMISE_NAME`, \n";
-			$sSQL .= "	`PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "	`PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
-			$sSQL .= "	`PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "	`HUB_PK`, \n";
-			$sSQL .= "	`HUB_NAME`, \n";
-			$sSQL .= "	`HUBTYPE_PK`, \n";
-			$sSQL .= "	`HUBTYPE_NAME`, \n";
-			$sSQL .= "	`COMM_PK`, \n";
-			$sSQL .= "	`LINK_PK`, \n";
-			$sSQL .= "	`LINK_SERIALCODE`, \n";
-			$sSQL .= "	`LINK_NAME`, \n";
-			$sSQL .= "	`LINK_CONNECTED`, \n";
-			$sSQL .= "	`LINK_STATE`, \n";
-			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
-			$sSQL .= "	`LINKTYPE_PK`, \n";
-			$sSQL .= "	`LINKTYPE_NAME`, \n";
-			$sSQL .= "	`THING_PK`, \n";
-			$sSQL .= "	`THING_HWID`, \n";
-			$sSQL .= "	`THING_OUTPUTHWID`, \n";
-			$sSQL .= "	`THING_STATE`, \n";
-			$sSQL .= "	`THING_STATECHANGEID`, \n";
-			$sSQL .= "	`THING_NAME`, \n";
-			$sSQL .= "	`THINGTYPE_PK`, \n";
-			$sSQL .= "	`THINGTYPE_NAME`, \n";
-			$sSQL .= "	`IO_BASECONVERT`, \n";
-			$sSQL .= "	`IO_PK`, \n";
-			$sSQL .= "	`IO_NAME`, \n";
-			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
-			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
-			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
-			$sSQL .= "	`IO_STATECHANGEID`, \n";
-			$sSQL .= "	`IO_STATE`, \n";
-			$sSQL .= "	`IOTYPE_PK`, \n";
-			$sSQL .= "	`IOTYPE_NAME`, \n";
-			$sSQL .= "	`IOTYPE_ENUM`, \n";
-			$sSQL .= "	`RSCAT_PK`, \n";
-			$sSQL .= "	`RSCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_PK`, \n";
-			$sSQL .= "	`RSSUBCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
-			$sSQL .= "	`RSTARIFF_PK`, \n";
-			$sSQL .= "	`RSTARIFF_NAME`, \n";
-			$sSQL .= "	`RSTYPE_PK`, \n";
-			$sSQL .= "	`RSTYPE_NAME`, \n";
-			$sSQL .= "	`RSTYPE_MAIN`, \n";
-			$sSQL .= "	`UOMCAT_PK`, \n";
-			$sSQL .= "	`UOMCAT_NAME`, \n";
-			$sSQL .= "	`UOMSUBCAT_PK`, \n";
-			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
-			$sSQL .= "	`UOM_PK`, \n";
-			$sSQL .= "	`UOM_NAME`, \n";
-			$sSQL .= "	`UOM_RATE` \n";
-			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PREMISE` ON `PERMPREMISE_PREMISE_FK`=`PREMISE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `PREMISE_PK`=`HUB_PREMISE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUBTYPE` ON `HUBTYPE_PK`=`HUB_HUBTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATALONGSTRING` ON `IO_PK`=`DATALONGSTRING_IO_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
-			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
-			$sSQL .= "AND `PERMPREMISE_READ` = 1 \n";
-			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
-			$sSQL .= "AND `DATATYPE_PK` = 8;\n";
-			break;
-			
-		/*============================================================
-		  == #5.9# - VR_DATASTRING255                               ==
-		  ============================================================*/
-		case "PrivateDataString255":
-			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_DATASTRING255` AS \n";
-			$sSQL .= "SELECT \n";
-			$sSQL .= "	`DATASTRING255_VALUE` AS \"CALCEDVALUE\", \n";
-			$sSQL .= "	`DATASTRING255_DATE` AS \"UTS\", \n";
-			$sSQL .= "	`DATASTRING255_PK`, \n";
-			$sSQL .= "	`DATASTRING255_DATE`, \n";
-			$sSQL .= "	`DATASTRING255_VALUE`, \n";
-			$sSQL .= "	`DATATYPE_PK`, \n";
-			$sSQL .= "	`DATATYPE_NAME`, \n";
-			$sSQL .= "	`USERS_PK`, \n";
-			$sSQL .= "	`USERS_USERNAME`, \n";
-			$sSQL .= "	`PREMISE_PK`, \n";
-			$sSQL .= "	`PREMISE_NAME`, \n";
-			$sSQL .= "	`PERMPREMISE_OWNER` AS \"PERMISSIONS_OWNER\", \n";
-			$sSQL .= "	`PERMPREMISE_WRITE` AS \"PERMISSIONS_WRITE\", \n";
-			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
-			$sSQL .= "	`PERMPREMISE_STATETOGGLE` AS \"PERMISSIONS_STATETOGGLE\", \n";
-			$sSQL .= "	`HUB_PK`, \n";
-			$sSQL .= "	`HUB_NAME`, \n";
-			$sSQL .= "	`HUBTYPE_PK`, \n";
-			$sSQL .= "	`HUBTYPE_NAME`, \n";
-			$sSQL .= "	`COMM_PK`, \n";
-			$sSQL .= "	`LINK_PK`, \n";
-			$sSQL .= "	`LINK_SERIALCODE`, \n";
-			$sSQL .= "	`LINK_NAME`, \n";
-			$sSQL .= "	`LINK_CONNECTED`, \n";
-			$sSQL .= "	`LINK_STATE`, \n";
-			$sSQL .= "	`LINK_STATECHANGECODE`, \n";
-			$sSQL .= "	`LINKTYPE_PK`, \n";
-			$sSQL .= "	`LINKTYPE_NAME`, \n";
-			$sSQL .= "	`THING_PK`, \n";
-			$sSQL .= "	`THING_HWID`, \n";
-			$sSQL .= "	`THING_OUTPUTHWID`, \n";
-			$sSQL .= "	`THING_STATE`, \n";
-			$sSQL .= "	`THING_STATECHANGEID`, \n";
-			$sSQL .= "	`THING_NAME`, \n";
-			$sSQL .= "	`THINGTYPE_PK`, \n";
-			$sSQL .= "	`THINGTYPE_NAME`, \n";
-			$sSQL .= "	`IO_BASECONVERT`, \n";
-			$sSQL .= "	`IO_PK`, \n";
-			$sSQL .= "	`IO_NAME`, \n";
-			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
-			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
-			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
-			$sSQL .= "	`IO_STATECHANGEID`, \n";
-			$sSQL .= "	`IO_STATE`, \n";
-			$sSQL .= "	`IOTYPE_PK`, \n";
-			$sSQL .= "	`IOTYPE_NAME`, \n";
-			$sSQL .= "	`IOTYPE_ENUM`, \n";
-			$sSQL .= "	`RSCAT_PK`, \n";
-			$sSQL .= "	`RSCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_PK`, \n";
-			$sSQL .= "	`RSSUBCAT_NAME`, \n";
-			$sSQL .= "	`RSSUBCAT_TYPE`, \n";
-			$sSQL .= "	`RSTARIFF_PK`, \n";
-			$sSQL .= "	`RSTARIFF_NAME`, \n";
-			$sSQL .= "	`RSTYPE_PK`, \n";
-			$sSQL .= "	`RSTYPE_NAME`, \n";
-			$sSQL .= "	`RSTYPE_MAIN`, \n";
-			$sSQL .= "	`UOMCAT_PK`, \n";
-			$sSQL .= "	`UOMCAT_NAME`, \n";
-			$sSQL .= "	`UOMSUBCAT_PK`, \n";
-			$sSQL .= "	`UOMSUBCAT_NAME`, \n";
-			$sSQL .= "	`UOM_PK`, \n";
-			$sSQL .= "	`UOM_NAME`, \n";
-			$sSQL .= "	`UOM_RATE` \n";
-			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`PREMISE` ON `PERMPREMISE_PREMISE_FK`=`PREMISE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUB` ON `PREMISE_PK`=`HUB_PREMISE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`HUBTYPE` ON `HUBTYPE_PK`=`HUB_HUBTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`LINKTYPE` ON `LINKTYPE_PK`=`LINK_LINKTYPE_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATASTRING255` ON `IO_PK`=`DATASTRING255_IO_FK` \n";
-			$sSQL .= "INNER JOIN `".$sDBName."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`THINGTYPE` ON `THING_THINGTYPE_FK`=`THINGTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTYPE` ON `IO_RSTYPES_FK`=`RSTYPE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSTARIFF` ON `RSTYPE_RSTARIFF_FK`=`RSTARIFF_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSSUBCAT` ON `RSTARIFF_RSSUBCAT_FK`=`RSSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`RSCAT` ON `RSSUBCAT_RSCAT_FK`=`RSCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOM` ON `IO_UOM_FK`=`UOM_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMSUBCAT` ON `UOM_UOMSUBCAT_FK`=`UOMSUBCAT_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`UOMCAT` ON `UOMSUBCAT_UOMCAT_FK`=`UOMCAT_PK` \n";
-			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
-			$sSQL .= "AND `PERMPREMISE_READ` = 1 \n";
-			$sSQL .= "AND `IO_BASECONVERT` <> 0 \n";
-			$sSQL .= "AND `DATATYPE_PK` = 9;\n";
-			break;
 			
 		//case "":
 		//	break;
@@ -3623,6 +4183,7 @@ function DB_CreateDefaultData1( $sDBName ) {
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3902,390,'Saturation',0); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3903,390,'Brightness',0); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3905,390,'Battery Alarm',0); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3909,390,'Special Bitwise Status','0'); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3970,399,'Stream Profile Name',0); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3971,399,'Stream Url',0); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3972,399,'Thumbnail Profile Name',0); \n";
@@ -4327,6 +4888,7 @@ function DB_CreateDefaultData4( $sDBName ) {
 			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Onvif IP Camera' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Philips Hue Bridge' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Open Weather Map Feed' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Netvox Motion Sensor' ); \n";
 			
 			
 			/*============================================================
@@ -4390,24 +4952,24 @@ function DB_CreateDefaultData4( $sDBName ) {
 			/*============================================================
 			  == #6.9# - TARGETCOMP                                     ==
 			  ============================================================*/
-			$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETCOMP` ( `TARGETCOMP_NAME` ) VALUES ( 'Usage/Generation Value' ); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETCOMP` ( `TARGETCOMP_NAME` ) VALUES ( 'Cost' ); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETCOMP` ( `TARGETCOMP_NAME` ) VALUES ( 'Carbon' ); \n";
+			//$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETCOMP` ( `TARGETCOMP_NAME` ) VALUES ( 'Usage/Generation Value' ); \n";
+			//$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETCOMP` ( `TARGETCOMP_NAME` ) VALUES ( 'Cost' ); \n";
+			//$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETCOMP` ( `TARGETCOMP_NAME` ) VALUES ( 'Carbon' ); \n";
 			
 			/*============================================================
 			  == #6.9# - TARGETCOMPMODE                                 ==
 			  ============================================================*/
-			$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETCOMPMODE` ( `TARGETCOMPMODE_NAME` ) VALUES ( 'Self Precise' ); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETCOMPMODE` ( `TARGETCOMPMODE_NAME` ) VALUES ( 'Self Relative' ); \n";
+			//$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETCOMPMODE` ( `TARGETCOMPMODE_NAME` ) VALUES ( 'Self Precise' ); \n";
+			//$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETCOMPMODE` ( `TARGETCOMPMODE_NAME` ) VALUES ( 'Self Relative' ); \n";
 			//$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETCOMPMODE` ( `TARGETCOMPMODE_NAME` ) VALUES ( 'Sensor Precise' ); \n";
 			//$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETCOMPMODE` ( `TARGETCOMPMODE_NAME` ) VALUES ( 'Sensor Relative' ); \n";
 			
 			/*============================================================
 			  == #6.9# - TARGETTYPE                                     ==
 			  ============================================================*/
-			$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETTYPE` ( `TARGETTYPE_NAME` ) VALUES ( 'Premise' ); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETTYPE` ( `TARGETTYPE_NAME` ) VALUES ( 'Device' ); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETTYPE` ( `TARGETTYPE_NAME` ) VALUES ( 'Room' ); \n";
+			//$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETTYPE` ( `TARGETTYPE_NAME` ) VALUES ( 'Premise' ); \n";
+			//$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETTYPE` ( `TARGETTYPE_NAME` ) VALUES ( 'Device' ); \n";
+			//$sSQL .= "INSERT INTO `".$sDBName."`.`TARGETTYPE` ( `TARGETTYPE_NAME` ) VALUES ( 'Room' ); \n";
 			
 			
 			
@@ -5057,7 +5619,7 @@ function DB_InsertPermPremise( $sDBName, $iUserId, $iPremiseId, $iPermOwner, $iP
 			$sSQL .= "    :PermStateToggle, :PermRead, ";
 			$sSQL .= "    :PermRoomAdmin ";
 			$sSQL .= ") ";
-
+			
 			
 			//-- Input binding --//
 			$aInputValsInsert = array(
@@ -5190,6 +5752,171 @@ function DB_InsertPermServer( $sDBName, $iUserId, $iPermAddUser, $iPermAddPremis
 	}
 }
 
+function DB_InsertPermRoom( $sDBName, $iUserId, $iRoomId, $iPermRead, $iPermWriter, $iPermStateToggle, $iPermDataRead ) {
+	//------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                       --//
+	//--    This function is used to add the default data to the database.  --//
+	//------------------------------------------------------------------------//
+	
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedDB;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught. --//
+	$aInputValsInsert   = array();      //-- ARRAY:     SQL bind input parameters. --//
+	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function. --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			//----------------------------------------//
+			//-- SQL Query - Create Default Data    --//
+			//----------------------------------------//
+			$sSQL .= "INSERT INTO `".$sDBName."`.`PERMROOMS` ";
+			$sSQL .= "( ";
+			$sSQL .= "    `PERMROOMS_USERS_FK`,      `PERMROOMS_ROOMS_FK`, ";
+			$sSQL .= "    `PERMROOMS_READ`,          `PERMROOMS_WRITE`, ";
+			$sSQL .= "    `PERMROOMS_STATETOGGLE`,   `PERMROOMS_DATAREAD` ";
+			$sSQL .= ") VALUES ( ";
+			$sSQL .= "    :UserId,              :RoomId, ";
+			$sSQL .= "    :PermRead,            :PermWriter, ";
+			$sSQL .= "    :PermStateToggle,     :PermDataRead ";
+			$sSQL .= ") ";
+			
+			
+			//-- Input binding --//
+			$aInputValsInsert = array(
+				array( "Name"=>"UserId",                  "type"=>"INT",          "value"=>$iUserId             ),
+				array( "Name"=>"RoomId",                  "type"=>"INT",          "value"=>$iRoomId             ),
+				array( "Name"=>"PermRead",                "type"=>"INT",          "value"=>$iPermRead           ),
+				array( "Name"=>"PermWriter",              "type"=>"INT",          "value"=>$iPermWriter         ),
+				array( "Name"=>"PermStateToggle",         "type"=>"INT",          "value"=>$iPermStateToggle    ),
+				array( "Name"=>"PermDataRead",            "type"=>"INT",          "value"=>$iPermDataRead       )
+			);
+			
+			//-- Run the SQL Query and save the results --//
+			$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResultInsert["Error"]===true ) {
+				$bError    = true;
+				$sErrMesg .= $aResultInsert["ErrMesg"];
+			}
+		} catch( Exception $e3) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return $aResultInsert;
+		
+	} else {
+//		var_dump( $oRestrictedDB->QueryLogs );
+		return array( "Error"=>true, "ErrMesg"=>"InsertPermRoom: ".$sErrMesg );
+	}
+}
+
+function DB_InsertPermHub( $sDBName, $iUserId, $iHubId ) {
+	//------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                       --//
+	//--    This function is used to add the WatchInputs User Permissions   --//
+	//------------------------------------------------------------------------//
+	
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedDB;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught. --//
+	$aInputValsInsert   = array();      //-- ARRAY:     SQL bind input parameters. --//
+	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function. --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			//----------------------------------------//
+			//-- SQL Query - Create Default Data    --//
+			//----------------------------------------//
+			$sSQL .= "INSERT INTO `".$sDBName."`.`PERMHUB` ";
+			$sSQL .= "( ";
+			$sSQL .= "    `PERMHUB_USERS_FK`,             `PERMHUB_HUB_FK` ";
+			$sSQL .= ") VALUES ( ";
+			$sSQL .= "    :UserId,                  :HubId ";
+			$sSQL .= ") ";
+			
+			//-- Input binding --//
+			$aInputValsInsert = array(
+				array( "Name"=>"UserId",            "type"=>"INT",          "value"=>$iUserId               ),
+				array( "Name"=>"HubId",             "type"=>"INT",          "value"=>$iHubId                )
+			);
+			
+			//-- Run the SQL Query and save the results --//
+			$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResultInsert["Error"]===true ) {
+				$bError    = true;
+				$sErrMesg .= $aResultInsert["ErrMesg"];
+			}
+		} catch( Exception $e3) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return $aResultInsert;
+		
+	} else {
+//		var_dump( $oRestrictedDB->QueryLogs );
+		return array( "Error"=>true, "ErrMesg"=>"InsertPermHub: ".$sErrMesg );
+	}
+}
+
+
+
 
 function DB_InsertHub( $sDBName, $iPremiseId, $iHubTypeId, $sHubName, $sHubSerialCode, $sHubIPAddress ) {
 	//------------------------------------------------------------------------//
@@ -5280,6 +6007,89 @@ function DB_InsertHub( $sDBName, $iPremiseId, $iHubTypeId, $sHubName, $sHubSeria
 
 
 
+function DB_InsertRoom( $sDBName, $iPremiseId ) {
+	//------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                       --//
+	//--    This function is used to add the default data to the database.  --//
+	//------------------------------------------------------------------------//
+	
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedDB;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught. --//
+	$aInputValsInsert   = array();      //-- ARRAY:     SQL bind input parameters. --//
+	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function. --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			//----------------------------------------//
+			//-- SQL Query - Create Rooms           --//
+			//----------------------------------------//
+			$sSQL .= "INSERT INTO `".$sDBName."`.`ROOMS` ";
+			$sSQL .= "( ";
+			$sSQL .= "    `ROOMS_PREMISE_FK`, `ROOMS_ROOMTYPE_FK`, ";
+			$sSQL .= "    `ROOMS_NAME`,       `ROOMS_FLOOR`, ";
+			$sSQL .= "    `ROOMS_DESC` ";
+			$sSQL .= ") VALUES ( ";
+			$sSQL .= "    :PremiseId,   1, ";
+			$sSQL .= "    'Unassigned', 0, ";
+			$sSQL .= "    '' ";
+			$sSQL .= ") ";
+			
+			//----------------------------------------//
+			//-- Input binding                      --//
+			//----------------------------------------//
+			$aInputValsInsert = array(
+				array( "Name"=>"PremiseId",         "type"=>"INT",          "value"=>$iPremiseId          )
+			);
+			
+			//-- Run the SQL Query and save the results --//
+			$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResultInsert["Error"]===true ) {
+				$bError    = true;
+				$sErrMesg .= $aResultInsert["ErrMesg"];
+			}
+		} catch( Exception $e3) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return $aResultInsert;
+		
+	} else {
+		//var_dump( $oRestrictedDB->QueryLogs );
+		return array( "Error"=>true, "ErrMesg"=>"InsertRoom: ".$sErrMesg );
+	}
+}
+
+
+
 function InsertTheDatabaseCoreValues( $sDBName ) {
 	
 	//------------------------------------------------------------//
@@ -5296,6 +6106,7 @@ function InsertTheDatabaseCoreValues( $sDBName ) {
 	$iCurrentUTS        = time();       //-- INTEGER:   Holds the current unix timestamp so that it can be submitted into the database --//
 	
 	
+	
 	//------------------------------------------------------------//
 	//-- 2.0 - Preperation                                      --//
 	//------------------------------------------------------------//
@@ -5309,7 +6120,7 @@ function InsertTheDatabaseCoreValues( $sDBName ) {
 		//----------------------------------------------------//
 		//-- 3.1 - Perform the insert                       --//
 		//----------------------------------------------------//
-		$aCoreResult = DB_InsertCore( $sDBName, "iOmy (Vanilla)", 0, 4, 2, $iCurrentUTS );
+		$aCoreResult = DB_InsertCore( $sDBName, "iOmy (Vanilla)", 0, 4, 3, $iCurrentUTS );
 		
 		//----------------------------------------------------//
 		//-- 3.2 - Check for errors                         --//
@@ -5334,7 +6145,7 @@ function InsertTheDatabaseCoreValues( $sDBName ) {
 		//----------------------------------------------------//
 		//-- 4.1 - Insert the Schema Name into the database --//
 		//----------------------------------------------------//
-		$aCoreAddonResult = DB_InsertCoreAddon( $sDBName, $iCoreId, "iOmy Schema", 0, 4, 2, $iCurrentUTS );
+		$aCoreAddonResult = DB_InsertCoreAddon( $sDBName, $iCoreId, "iOmy Schema", 0, 4, 3, $iCurrentUTS );
 		
 		//----------------------------------------------------//
 		//-- 4.2 - Check for errors                         --//

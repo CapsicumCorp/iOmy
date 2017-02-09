@@ -4,7 +4,7 @@ Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
 Modified: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws a list of all devices and their information in a given
     room.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -339,14 +339,15 @@ sap.ui.controller("mjs.rooms.Room", {
            //-- Add Grouping box to Panel --//
            backgroundDesign: "Transparent",
            content: [oVertBox]
-        }).addStyleClass("PanelNoPadding");
+        }).addStyleClass("PanelNoPadding UserInputForm TableSideBorders");
 
         thisView.byId("page").addContent( oPanel );
 		//-- Update the LastRoomId --//
 		oController.iLastRoomId = IOMy.common.RoomSelected.RoomId;
         
+        thisView.byId("extrasMenuHolder").destroyItems();
         thisView.byId("extrasMenuHolder").addItem(
-            IOMy.widgets.getExtrasButton({
+            IOMy.widgets.getActionMenu({
                 id : oController.createId("extrasMenu"),        // Uses the page ID
                 icon : "sap-icon://GoogleMaterial/more_vert",
                 items : [
@@ -376,44 +377,6 @@ sap.ui.controller("mjs.rooms.Room", {
                 ]
             })
         );
-		
-/*
-		$.each( me.aUIGroupingDataPerRoom["_"+me.roomID], function( sIndex, aGrouping ) {
-			//-- Reset the Row number --//
-			iRowNumber = 0;
-			//-- 3.1.1 - Draw Container and Header --//
-			//-- TODO: Draw Header --//
-            if (me.byId("forRoom"+me.roomID) === undefined) {
-                var oVBox = new sap.m.VBox(me.createId("forRoom"+me.roomID), {
-                    items: []
-                }).addStyleClass("");
-                //-- 3.1.3 - Draw the UI for each Device --//
-                $.each( aGrouping.Devices, function( sIndex, aDevice ) {
-                    //-- Create the Prefix --//
-                    if (aDevice.RoomId === me.roomID) {
-                        var sPrefix = aGrouping.Prefix+"_"+aDevice.DeviceId+"_room"+me.roomID;
-                        //-- --//
-                        var oRowObject = IOMy.devices.GetCommonUI( sPrefix, me, aDevice );
-                        if( oRowObject!==null ) {
-                            if( iRowNumber%2===0) {
-                                oRowObject.addStyleClass("DeviceOverview-ItemContainerLight");
-                            } else {
-                                oRowObject.addStyleClass("DeviceOverview-ItemContainerDark");
-                            }
-                            //-- Increment the Row Number --//
-                            iRowNumber++;
-                            //-- Push the UI to the VBox Container --//
-                            oVBox.addItem( oRowObject );
-                        }
-                    }
-                });
-                oVBox.addStyleClass("MarTop3px");
-            }
-			//-- Add Grouping box to Panel --//
-            thisView.byId("Panel").removeAllContent();
-			thisView.byId("Panel").addContent( me.byId("forRoom"+me.roomID) );
-		});
-*/
 	},
 
 	//============================================================================================//
@@ -641,7 +604,7 @@ sap.ui.controller("mjs.rooms.Room", {
 		//-- 3.0 - Prepare for Ajax Request                     --//
 		//--------------------------------------------------------//
 		iUTS_End                = IOMy.time.GetCurrentUTS();
-		iUTS_Start              = IOMy.time.GetStartStampForTimePeriod( "day", iUTS_End);
+		iUTS_Start              = 0;//IOMy.time.GetStartStampForTimePeriod( "day", iUTS_End);
 		
 		//-- Store the Odata URL --//
 		sAjaxUrl                = IOMy.apiodata.ODataLocation("data"+sIODataType);
@@ -766,7 +729,7 @@ sap.ui.controller("mjs.rooms.Room", {
 		//-- 3.0 - Prepare for Ajax Request                     --//
 		//--------------------------------------------------------//
 		iUTS_End                = IOMy.time.GetCurrentUTS();
-		iUTS_Start              = IOMy.time.GetStartStampForTimePeriod( "day", iUTS_End);
+		iUTS_Start              = 0;//IOMy.time.GetStartStampForTimePeriod( "day", iUTS_End);
 		
 		//--------------------------------------------------------//
 		//-- 4.0 - Check if Ajax Request should be run          --//

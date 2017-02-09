@@ -34,29 +34,21 @@ if (!defined('SITE_BASE')) {
 //----------------------------------------------------//
 //-- 1.2 - INITIALISE VARIABLES                     --//
 //----------------------------------------------------//
-$bError                     = false;        //-- BOOLEAN:       Used to indicate if an error has been caught											--//
-$sErrMesg                   = "";           //-- STRING:        Used to store the error message after an error has been caught							--//
-$sOutput                    = "";           //-- STRING:        Used to store the String that this API passes back to the user has the response body	--//
-$aResult                    = array();      //-- ARRAY:         Used to store the results.																--//
-$sPostMode                  = "";           //-- STRING:        Used to store which Mode the API should function in.									--//
-$iPostId                    = "";           //-- INTEGER:       Used to store the "IO Id"																--//
-$iPostStartUTS              = "";           //-- INTEGER:       Used to store the starting Unix Timestamp												--//
-$iPostEndUTS                = "";           //-- INTEGER:       Used to store the ending Unix Timestamp													--//
-$aResult                    = array();      //-- ARRAY:         Used to store the Results of room Information lookup									--//
+$bError                     = false;        //-- BOOLEAN:       Used to indicate if an error has been caught.                                           --//
+$sErrMesg                   = "";           //-- STRING:        Used to store the error message after an error has been caught.                         --//
+$sOutput                    = "";           //-- STRING:        Used to store the String that this API passes back to the user has the response body    --//
+$aResult                    = array();      //-- ARRAY:         Used to store the results.                                                              --//
+$sPostMode                  = "";           //-- STRING:        Used to store which Mode the API should function in.                                    --//
+$iPostId                    = "";           //-- INTEGER:       Used to store the "IO Id".                                                              --//
+$iPostStartUTS              = "";           //-- INTEGER:       Used to store the starting Unix Timestamp.                                              --//
+$iPostEndUTS                = "";           //-- INTEGER:       Used to store the ending Unix Timestamp.                                                --//
+$aResult                    = array();      //-- ARRAY:         Used to store the Results of room Information lookup.                                   --//
 
 //----------------------------------------------------//
 //-- 1.3 - Import Required Libraries                --//
 //----------------------------------------------------//
-require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';		//-- This should call all the additional libraries needed --//
+require_once SITE_BASE.'/restricted/php/core.php';      //-- This should call all the additional libraries needed --//
 
-
-//------------------------------------------------------------//
-//-- 1.4 - Flag an Error is there is no Database access     --//
-//------------------------------------------------------------//
-if( $aRestrictedApiCore['RestrictedDB']===false ) {
-	$bError    = true;
-	$sErrMesg .= "Can't access the database! User may not be logged in";
-}
 
 //====================================================================//
 //== 2.0 - Retrieve POST                                            ==//
@@ -221,7 +213,7 @@ if( $bError===false ) {
 		if( $sPostMode==="Sum" ) {
 			try {
 				//--------------------------------------------------------------------//
-				//-- 5.1.1 - Lookup information about the IO                        --//
+				//-- 5.1.1 - Sum up all the IO data values for the selected period  --//
 				//--------------------------------------------------------------------//
 				$aTempResult = GetIODataAggregation( "Sum", $aIOInfo["DataTypeId"], $iPostId, $iPostStartUTS, $iPostEndUTS );
 				
@@ -248,7 +240,7 @@ if( $bError===false ) {
 		} else if( $sPostMode==="Count" ) {
 			try {
 				//--------------------------------------------------------------------//
-				//-- 5.2.1 - Lookup information about the IO                        --//
+				//-- 5.2.1 - Count all the IO data values for the selected period   --//
 				//--------------------------------------------------------------------//
 				$aTempResult = GetIODataAggregation( "Count", $aIOInfo["DataTypeId"], $iPostId, $iPostStartUTS, $iPostEndUTS );
 				
@@ -273,10 +265,9 @@ if( $bError===false ) {
 		//== 5.3 - MODE: "Min"                                          ==//
 		//================================================================//
 		} else if( $sPostMode==="Min" ) {
-
 			try {
 				//--------------------------------------------------------------------//
-				//-- 5.3.1 - Lookup information about the IO                        --//
+				//-- 5.3.1 - Lookup the Minimum value seen during the period        --//
 				//--------------------------------------------------------------------//
 				$aTempResult = GetIODataAggregation( "Min", $aIOInfo["DataTypeId"], $iPostId, $iPostStartUTS, $iPostEndUTS );
 				
@@ -303,7 +294,7 @@ if( $bError===false ) {
 		} else if( $sPostMode==="Max" ) {
 			try {
 				//--------------------------------------------------------------------//
-				//-- 5.4.1 - Lookup information about the IO                        --//
+				//-- 5.4.1 - Lookup the Maximum value seen during the period        --//
 				//--------------------------------------------------------------------//
 				$aTempResult = GetIODataAggregation( "Max", $aIOInfo["DataTypeId"], $iPostId, $iPostStartUTS, $iPostEndUTS );
 				
@@ -339,9 +330,14 @@ if( $bError===false ) {
 		$sErrMesg .= $e0400->getMessage();
 	}
 }
+
+
 //====================================================================//
 //== 8.0 - Log the Results                                          ==//
 //====================================================================//
+
+
+
 
 //====================================================================//
 //== 9.0 - Finalise                                                 ==//
@@ -358,7 +354,7 @@ if( $bError===false && $aResult!=false ) {
 		
 		//-- Output results --//
 		echo $sOutput;
-
+		
 	} catch( Exception $e0001 ) {
 		header('Content-Type: text/plain');
 		//-- The aResult array cannot be turned into a string due to corruption of the array --//
@@ -385,7 +381,7 @@ if( $bError===false && $aResult!=false ) {
 		//-- Error Message is blank --//
 		$sOutput  = "Error Code:'0004' \n Critical Error has occured!";
 	}
-
+	
 	try {
 		//-- Text Error Message --//
 		echo $sOutput;

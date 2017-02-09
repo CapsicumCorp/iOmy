@@ -21,7 +21,7 @@
 
 
 //====================================================================//
-//== 1.0 - INITIALISE												==//
+//== 1.0 - INITIALISE                                               ==//
 //====================================================================//
 
 if (!defined('SITE_BASE')) {
@@ -32,40 +32,32 @@ if (!defined('SITE_BASE')) {
 
 
 //----------------------------------------------------//
-//-- 1.2 - INITIALISE VARIABLES						--//
+//-- 1.2 - INITIALISE VARIABLES                     --//
 //----------------------------------------------------//
-$bError						= false;		//-- BOOLEAN:		Used to indicate if an error has been caught --//
-$sErrMesg					= "";			//-- STRING:		Used to store the error message after an error has been caught --//
-$sOutput					= "";			//-- STRING:		--//
+$bError                     = false;        //-- BOOLEAN:       Used to indicate if an error has been caught --//
+$sErrMesg                   = "";           //-- STRING:        Used to store the error message after an error has been caught --//
+$sOutput                    = "";           //-- STRING:        --//
+$aResult                    = array();      //-- ARRAY:         Used to store the results. --//
+$aSensorList                = array();      //-- ARRAY:         Used to store the 
+$sHTML                      = "";           //-- STRING:        Used to store the HTML Code to display to the user --//
+$iRowNumber                 = 0;            //-- INTEGER:       --//
 
 
-$aResult					= array();		//-- ARRAY:			Used to store the results. --//
-$aSensorList				= array();		//-- ARRAY:			Used to store the 
-
-$sHTML						= "";			//-- STRING:		Used to store the HTML Code to display to the user --//
-$iRowNumber					= 0;			//-- INTEGER: 		--//
 //----------------------------------------------------//
-//-- 1.3 - Import Required Libraries				--//
+//-- 1.3 - Import Required Libraries                --//
 //----------------------------------------------------//
-require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';		//-- This should call all the additional libraries needed --//
+require_once SITE_BASE.'/restricted/php/core.php';      //-- This should call all the additional libraries needed --//
 
 
-//------------------------------------------------------------//
-//-- 1.4 - Flag an Error is there is no Database access		--//
-//------------------------------------------------------------//
-if( $aRestrictedApiCore['RestrictedDB']===false ) {
-	$bError    = true;
-	$sErrMesg .= "Can't access the database! User may not be logged in";
-}
 
 //====================================================================//
-//== 2.0 - Retrieve POST											==//
+//== 2.0 - Retrieve POST                                            ==//
 //====================================================================//
 
 
 
 //====================================================================//
-//== 4.0 - Prepare														==//
+//== 4.0 - Prepare                                                  ==//
 //====================================================================//
 $sHTML .= "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\"> \n";
 $sHTML .= "<html> \n";
@@ -215,9 +207,11 @@ $sHTML .= "				<th class=\"MinWidth100 BG_grey_7\">Unix Last Update</th> \n";
 $sHTML .= "				<th class=\"MinWidth180 BG_grey_9\">UTC Last Update</th> \n";
 $sHTML .= "				<th class=\"MinWidth200 BG_grey_7\">Local</th> \n";
 $sHTML .= "			</tr> \n";
-			
+
+
+
 //====================================================================//
-//== 5.0 - Main														==//
+//== 5.0 - Main                                                     ==//
 //====================================================================//
 
 if($bError===false) {
@@ -243,33 +237,33 @@ if($bError===false) {
 					$aTempArray = array();
 					
 					//-- STEP 1: Extact the Main Data and convert it to the format the UI prefers --//
-					$aTempArray["Id"]				= $aSensor["SensorId"];
-					$aTempArray["Name"]				= $aSensor["SensorName"];
-					$aTempArray["IOPortId"]			= $aSensor["IOPortId"];
-					$aTempArray["IOId"]				= $aSensor["IOId"];
-					$aTempArray["IODisplayName"]	= $aSensor["IODisplayName"];
-					$aTempArray["UnitId"]			= $aSensor["UnitId"];
-					$aTempArray["PremiseId"]		= $aSensor["PremiseId"];
-					$aTempArray["Username"]			= $aSensor["Username"];
-					$aTempArray["DataType"]			= $aSensor["DataType"];
-					$aTempArray["DataTypeName"]		= $aSensor["DataTypeName"];
+					$aTempArray["Id"]               = $aSensor["SensorId"];
+					$aTempArray["Name"]             = $aSensor["SensorName"];
+					$aTempArray["IOPortId"]         = $aSensor["IOPortId"];
+					$aTempArray["IOId"]             = $aSensor["IOId"];
+					$aTempArray["IODisplayName"]    = $aSensor["IODisplayName"];
+					$aTempArray["UnitId"]           = $aSensor["UnitId"];
+					$aTempArray["PremiseId"]        = $aSensor["PremiseId"];
+					$aTempArray["Username"]         = $aSensor["Username"];
+					$aTempArray["DataType"]         = $aSensor["DataType"];
+					$aTempArray["DataTypeName"]     = $aSensor["DataTypeName"];
 					
 					//-- STEP 2: Retrieve and Store the last timestamp --//
 					$aSensorDataTemp = getSensorDebuggingInfo( $aSensor["SensorId"], $aSensor["DataType"] );
 					
 					if( $aSensorDataTemp["Error"]===false ) {
 						//-- SUCCESS --//
-						$aTempArray["Error"]		= false;
-						$aTempArray["UnixTS"]		= $aSensorDataTemp["Data"]["UnixTS"];
-						$aTempArray["TS"]			= $aSensorDataTemp["Data"]["TS"];
+						$aTempArray["Error"]        = false;
+						$aTempArray["UnixTS"]       = $aSensorDataTemp["Data"]["UnixTS"];
+						$aTempArray["TS"]           = $aSensorDataTemp["Data"]["TS"];
 						
 					} else {
 						//-- ERROR --//
-						$aTempArray["Error"]		= true;
-						$aTempArray["ErrMesg"]		= $aSensorDataTemp["ErrMesg"];
+						$aTempArray["Error"]        = true;
+						$aTempArray["ErrMesg"]      = $aSensorDataTemp["ErrMesg"];
 					}
 					//-- STEP 3: Store the Sensor Information in the DataArray --//
-					$aDataArray[]					= $aTempArray;
+					$aDataArray[]                   = $aTempArray;
 					
 				}
 			}
@@ -380,21 +374,17 @@ if($bError===false) {
 				$sHTML .= "<tr>\n";
 				$sHTML .= "	<td class=\"BG_red_4\" colspan=\"11\">The logged in user doesn't have any sensors available</td>";
 				$sHTML .= "</tr>\n";
-				$iRowNumber++;				
+				$iRowNumber++;
 				
 			//-- ELSE The error is not expected so display the error message --//
 			} else {
 				//----------------------------//
-				//-- ERROR HAS OCCURRED		--//
+				//-- ERROR HAS OCCURRED     --//
 				//----------------------------//
 				$bError = true;
 				$sErrMesg .= "E21Debug: ".$aSensorList["ErrMesg"];
 			}
-			
-
 		}
-
-		
 	} catch( Exception $e20) {
 		$bError = true;
 		$sErrMesg .= "E20Debug: ".$e20->getMessage();
@@ -404,7 +394,6 @@ if($bError===false) {
 
 
 if( $bError===false ) {
-	
 	$sHTML .= "		</table> \n";
 	$sHTML .= "		<h3> Legend - Indicates time offline</h3> \n";
 	$sHTML .= "		<table> \n";
@@ -450,7 +439,7 @@ if( $bError===false ) {
 	$sHTML .= '			}'."\n";
 	$sHTML .= '		}'."\n";
 	$sHTML .= '	</script>'."\n";
-	//$sHTML .= " <div>".json_encode( $oRestrictedDB->QueryLogs[1] )."</div>\n";
+	//$sHTML .= " <div>".json_encode( $oRestrictedApiCore->oRestrictedDB->QueryLogs[1] )."</div>\n";
 	$sHTML .= "</body>\n";
 	$sHTML .= "</html>\n";
 	

@@ -2,7 +2,7 @@
 Title: Device Overview Page (UI5 Controller)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws the list of links and their items.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -22,13 +22,12 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("mjs.settings.DeviceList", {
-	api : IOMy.apiphp,	
-	common : IOMy.common,
-	oData : IOMy.apiodata,
 	
 	devices : [],
 	aThingIds : [],
     aLinkIds : [],
+    
+    wVertBox : null,
     
     aElementsToDestroy : [], // Stores the IDs of elements that need to be destroyed once this page loads.
     
@@ -47,25 +46,38 @@ sap.ui.controller("mjs.settings.DeviceList", {
 				//-- Refresh the Navigational buttons --//
 				IOMy.common.NavigationRefreshButtons( me );
 				
-				
-				me.composeDeviceList();
+				me.DestroyUI();
+				me.DrawUI();
 			}
 		});
 	},
+    
+    /**
+     * Procedure that destroys the previous incarnation of the UI. Must be called by onInit before
+     * (re)creating the page.
+     */
+    DestroyUI : function () {
+        var me = this;
+        
+        // Destroy the old panel if it exists.
+		if (me.byId("panel") !== undefined) {
+			me.byId("panel").destroy();
+        }
+        
+//        if (me.wVertBox !== null) {
+//            me.wVertBox.destroy();
+//        }
+    },
 	
     /**
      * Construct the list of links and their things.
      */
-	composeDeviceList : function () {
+	DrawUI : function () {
         // Variables for scope
 		var me = this;                  // Controller
 		var thisView = me.getView();    // View
 		
-        // Remove the old instance of the main VBox.
-		if (me.byId("verticalBox") !== undefined)
-			me.byId("verticalBox").destroy();
-		
-		var me = this;
+        var me = this;
 		if (me.timerInterval !== null)
 			clearInterval(me.timerInterval);
         
@@ -101,7 +113,7 @@ sap.ui.controller("mjs.settings.DeviceList", {
 		}
 		jQuery.sap.log.debug(JSON.stringify(aTempDevices));
 		devices = aTempDevices;
-		console.log(JSON.stringify(devices));
+		//console.log(JSON.stringify(devices));
         
         for (var i = 0; i < aLinks.length; i++) {
             //--------------------------------------------------//
@@ -129,12 +141,12 @@ sap.ui.controller("mjs.settings.DeviceList", {
             aLinksAndItems.push(aLinks[i]);
         }
         
-        console.log(JSON.stringify(aLinksAndItems));
+        //console.log(JSON.stringify(aLinksAndItems));
 		
         //=================================================================\\
 		// Sort the items to their links and list each one alphabetically. \\
         //=================================================================\\
-		var oVertBox = new sap.m.VBox(me.createId("verticalBox"), {
+		me.wVertBox = new sap.m.VBox({
 			items: []
 		}).addStyleClass("");
 
@@ -201,7 +213,7 @@ sap.ui.controller("mjs.settings.DeviceList", {
                                     new sap.m.Text({
                                         textAlign : "Center",
                                         text : iNumberOfThings
-                                    }).addStyleClass("NumberLabel TextBold TextSize20px MarTop10px MarLeft5px MarRight5px")
+                                    }).addStyleClass("NumberLabel TextBold MarTop10px MarLeft5px MarRight5px")
                                 ]
                             }).addStyleClass("width60px FlexNoShrink BorderRight TextCenter"),
                             
@@ -248,17 +260,7 @@ sap.ui.controller("mjs.settings.DeviceList", {
                 //-- Verify that the Sensor has values --//
                 if( sIndex!==undefined && sIndex!==null && aDevice!==undefined && aDevice!==null) {
                     
-                    var mDeviceData = {
-                        "DeviceId":			aDevice.Id,
-                        "DeviceName":		aDevice.DisplayName,
-                        "DeviceTypeId":		aDevice.TypeId,
-                        "DeviceTypeName":	aDevice.TypeName,
-                        "DeviceStatus":		aDevice.Status,
-                        "LinkId":           aDevice.LinkId,
-                        "PermToggle":		aDevice.PermToggle,
-                        "IOs":              aDevice.IO,
-                        "RoomId":			aDevice.RoomId
-                    };
+                    var mDeviceData = aDevice;
                     
                     // Add the expand/collapse icon to the right of the link entry if it doesn't already exist.
                     // Only created when there are items attached to the current link.
@@ -286,12 +288,10 @@ sap.ui.controller("mjs.settings.DeviceList", {
 
                                     // Show or hide the list of items
                                     if (me.ioExpanded["_"+me.aLinkIds[iSelected]] === false) {
-                                        console.log(me.ioExpanded["_"+me.aLinkIds[iSelected]]);
                                         me.byId("ThingListBox"+me.aLinkIds[iSelected]).setVisible(true);
                                         me.ioExpanded["_"+me.aLinkIds[iSelected]] = true;
                                         this.setIcon("sap-icon://navigation-down-arrow");
                                     } else {
-                                        console.log(me.ioExpanded["_"+me.aLinkIds[iSelected]]);
                                         me.byId("ThingListBox"+me.aLinkIds[iSelected]).setVisible(false);
                                         me.ioExpanded["_"+me.aLinkIds[iSelected]] = false;
                                         this.setIcon("sap-icon://navigation-right-arrow");
@@ -300,8 +300,8 @@ sap.ui.controller("mjs.settings.DeviceList", {
                                     // Unlock the button
                                     this.setEnabled(true);
                                 }
-                            }).addStyleClass("ButtonNoBorder IOMYButton ButtonIconGreen TextSize16px")
-                        ).addStyleClass("FlexNoShrink maxwidth70px");
+                            }).addStyleClass("ButtonNoBorder IOMYButton width100Percent ButtonIconGreen TextSize20px")
+                        ).addStyleClass("FlexNoShrink minwidth70px");
                     }
                     
                     // Create the flag for showing the list of things for a selected Link
@@ -309,20 +309,20 @@ sap.ui.controller("mjs.settings.DeviceList", {
                     if (me.ioExpanded["_"+aLinksAndItems[i].LinkId] === undefined)
                         me.ioExpanded["_"+aLinksAndItems[i].LinkId] = false;
                     
-                    me.aThingIds.push(mDeviceData.DeviceId);
+                    me.aThingIds.push(mDeviceData.Id);
                     
                     //=== INSERT ELEMENTS TO DESTROY ===//
-                    me.aElementsToDestroy.push("deviceRow"+mDeviceData.DeviceId);
-                    me.aElementsToDestroy.push("device"+mDeviceData.DeviceId);
+                    me.aElementsToDestroy.push("deviceRow"+mDeviceData.Id);
+                    me.aElementsToDestroy.push("device"+mDeviceData.Id);
 
                     oThingListBox.addItem(
                         // Device Link
-                        new sap.m.HBox(me.createId("deviceRow"+mDeviceData.DeviceId),{
+                        new sap.m.HBox(me.createId("deviceRow"+mDeviceData.Id),{
                             items : [
                                 new sap.m.VBox({
                                     items : [
-                                        new sap.m.Link(me.createId("device"+mDeviceData.DeviceId),{
-                                            text : mDeviceData.DeviceName,
+                                        new sap.m.Link(me.createId("device"+mDeviceData.Id),{
+                                            text : mDeviceData.DisplayName,
                                             press : function () {
                                                 IOMy.common.NavigationChangePage("pSettingsEditThing", {device : mDeviceData});
                                             }
@@ -344,23 +344,21 @@ sap.ui.controller("mjs.settings.DeviceList", {
             iLinkRow++;
         }
         
-        oVertBox.addItem(oLayout);
+        me.wVertBox.addItem(oLayout);
         
-		// Destroy the old panel if it exists.
-		if (me.byId("panel") !== undefined) 
-			me.byId("panel").destroy();
 		var oPanel = new sap.m.Panel(me.createId("panel"), {
 			backgroundDesign: "Transparent",
-			content: [oVertBox] //-- End of Panel Content --//
-		}).addStyleClass("height100Percent PanelNoPadding");
+			content: [me.wVertBox] //-- End of Panel Content --//
+		}).addStyleClass("height100Percent PanelNoPadding UserInputForm TableSideBorders");
 
 		thisView.byId("page").addContent(oPanel);
         
         //-- Insert the extras menu used to list options to either a link or an item to a link. --//
+        thisView.byId("extrasMenuHolder").destroyItems();
         thisView.byId("extrasMenuHolder").addItem(
-            IOMy.widgets.getExtrasButton({
+            IOMy.widgets.getActionMenu({
                 id : me.createId("extrasMenu"),        // Uses the page ID
-                icon : "sap-icon://GoogleMaterial/more_vert",
+                icon : "sap-icon://GoogleMaterial/add_circle",
                 items : [
                     {
                         text: "Add Link",
@@ -371,7 +369,11 @@ sap.ui.controller("mjs.settings.DeviceList", {
                     {
                         text: "Add Item",
                         select : function () {
-                            IOMy.common.NavigationChangePage( "pSettingsThingAdd", {}, false );
+                            if (me.aLinkIds.length > 0) {
+                                IOMy.common.NavigationChangePage( "pSettingsThingAdd", {}, false );
+                            } else {
+                                IOMy.common.showError("You must add a link first before creating an item!", "No Links");
+                            }
                         }
                     }
                 ]
@@ -379,16 +381,16 @@ sap.ui.controller("mjs.settings.DeviceList", {
         );
 	},
     
-    DestroyUI : function () {
-        var me = this;
-        
-        for (var i = 0; i < me.aElementsToDestroy.length; i++) {
-            if (me.byId(me.aElementsToDestroy[i]) !== undefined)
-                me.byId(me.aElementsToDestroy[i]).destroy();
-        }
-        
-        me.aElementsToDestroy = []; // Clear the array.
-    }
+//    DestroyUI : function () {
+//        var me = this;
+//        
+//        for (var i = 0; i < me.aElementsToDestroy.length; i++) {
+//            if (me.byId(me.aElementsToDestroy[i]) !== undefined)
+//                me.byId(me.aElementsToDestroy[i]).destroy();
+//        }
+//        
+//        me.aElementsToDestroy = []; // Clear the array.
+//    }
 	
 /**
 * Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered

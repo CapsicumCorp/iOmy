@@ -3,7 +3,7 @@ Title: Edit Premise Information Page (UI5 Controller)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws a form that allows you to edit information about a given
     premise.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -75,52 +75,38 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                     text : "Occupants"
                 });
     		    
-				var oOccupantsField = new sap.m.ComboBox(me.createId("premiseOccupants"), {
-					value : ""
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+				var oOccupantsField = new sap.m.Select(me.createId("premiseOccupants"), {
+                    width : "100%"
+                }).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 var oBedroomsTitle = new sap.m.Text({
                     text : "Bedrooms"
                 });
     		    
-				var oBedroomsField = new sap.m.ComboBox(me.createId("premiseBedrooms"), {
-					value : ""
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+				var oBedroomsField = new sap.m.Select(me.createId("premiseBedrooms"), {
+                    width : "100%"
+                }).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 var oCol1 = new sap.m.VBox({
                     items : [oOccupantsTitle,oOccupantsField,
                             oBedroomsTitle,oBedroomsField]
                 }).addStyleClass("PadRight5px width50Percent");
                 
-                var oFloorsTitle = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "*"
-                        }).addStyleClass("Text_red_13 PadRight5px"),
-                        new sap.m.Text({
-                            text : "Floors"
-                        })
-                    ]
+                var oFloorsTitle = new sap.m.Text({
+                    text : "Floors"
                 });
     		    
-				var oFloorsField = new sap.m.ComboBox(me.createId("premiseFloors"), {
-					value : ""
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+				var oFloorsField = new sap.m.Select(me.createId("premiseFloors"), {
+                    width : "100%"
+                }).addStyleClass("width100Percent SettingsDropdownInput");
                 
-                var oRoomsTitle = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "*"
-                        }).addStyleClass("Text_red_13 PadRight5px"),
-                        new sap.m.Text({
-                            text : "Rooms"
-                        })
-                    ]
+                var oRoomsTitle = new sap.m.Text({
+                    text : "Rooms"
                 });
     		    
-				var oRoomsField = new sap.m.ComboBox(me.createId("premiseRooms"), {
-					value : ""
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+				var oRoomsField = new sap.m.Select(me.createId("premiseRooms"), {
+                    width : "100%"
+                }).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 var oCol2 = new sap.m.VBox({
                     items : [oFloorsTitle,oFloorsField,
@@ -243,33 +229,12 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 						new sap.m.Link({
 							text : "Update",
 							press : function () {
-								this.setEnabled(false); // Lock button
+                                var thisButton = this; // Captures the scope of the button calling this function.
+								thisButton.setEnabled(false); // Lock button
 								
 								var sPremiseText = me.byId("premiseField").getValue();
                                 var bError = false;
                                 var aErrorLog = [];
-                                
-                                // Check that the required fields are valid.
-                                if (me.byId("premiseRooms").getSelectedKey() === "") {
-                                    aErrorLog.push("Number of rooms must be specified in the combo box.");
-                                    bError = true;
-                                }
-                                if (me.byId("premiseFloors").getSelectedKey() === "") {
-                                    aErrorLog.push("Number of floors must be specified in the combo box.");
-                                    bError = true;
-                                }
-                                if (me.byId("premiseBedrooms").getSelectedKey() === "") {
-                                    aErrorLog.push("Number of bedrooms must be specified in the combo box.");
-                                    bError = true;
-                                }
-                                if (me.byId("premiseOccupants").getSelectedKey() === "") {
-                                    aErrorLog.push("Number of occupants must be specified in the combo box.");
-                                    bError = true;
-                                }
-                                if (sPremiseText === "") {
-                                    aErrorLog.push("Premise must have a name");
-                                    bError = true;
-                                }
                                 
                                 if (bError === true) {
                                     // One or more errors were found in the form. DO NOT PROCEED.
@@ -285,6 +250,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                             url : IOMy.apiphp.APILocation("premises"),
                                             data : {"Mode" : "EditName", "Id" : me.PremiseID, "Name" : sPremiseText},
                                             onSuccess : function () {
+                                                var requestParameters = this;
 
                                                 IOMy.common.PremiseSelected.Name = sPremiseText;
 
@@ -310,10 +276,10 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                                                 IOMy.common.PremiseSelected.BedroomCountId = me.byId("premiseBedrooms").getSelectedKey();
                                                                 IOMy.common.PremiseSelected.OccupantCountId = me.byId("premiseOccupants").getSelectedKey();
 
-                                                                IOMy.common.PremiseSelected.FloorCount = me.byId("premiseFloors").getValue();
-                                                                IOMy.common.PremiseSelected.RoomCount = me.byId("premiseRooms").getValue();
-                                                                IOMy.common.PremiseSelected.BedroomCount = me.byId("premiseBedrooms").getValue();
-                                                                IOMy.common.PremiseSelected.OccupantCount = me.byId("premiseOccupants").getValue();
+                                                                IOMy.common.PremiseSelected.FloorCount = me.byId("premiseFloors").getSelectedItem().getText();
+                                                                IOMy.common.PremiseSelected.RoomCount = me.byId("premiseRooms").getSelectedItem().getText();
+                                                                IOMy.common.PremiseSelected.BedroomCount = me.byId("premiseBedrooms").getSelectedItem().getText();
+                                                                IOMy.common.PremiseSelected.OccupantCount = me.byId("premiseOccupants").getSelectedItem().getText();
 
                                                                 IOMy.common.showSuccess("Update successful.", "Success", 
                                                                 function () {
@@ -338,8 +304,26 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                                                         }, me)
                                                                     }); //-- END PREMISE LIST --//
                                                                 }, "UpdateMessageBox");
+                                                            },
+                                                            
+                                                            onFail : function (response) {
+                                                                // There's something wrong in either the code or the
+                                                                // parameters parsed.
+                                                                IOMy.common.showError("Update failed.", "Error");
+                                                                jQuery.sap.log.error(JSON.stringify(response));
+                                                                
+                                                                requestParameters.onComplete(); // Unlock the button
                                                             }
                                                         });
+                                                    },
+                                                    
+                                                    onFail : function (response) {
+                                                        // There's something wrong in either the code or the
+                                                        // parameters parsed.
+                                                        IOMy.common.showError("Update failed.", "Error");
+                                                        jQuery.sap.log.error(JSON.stringify(response));
+
+                                                        requestParameters.onComplete(); // Unlock the button
                                                     }
                                                 });
                                             },
@@ -348,14 +332,18 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                                 // parameters parsed.
                                                 IOMy.common.showError("Update failed.", "Error");
                                                 jQuery.sap.log.error(JSON.stringify(response));
+                                                
+                                                this.onComplete();
+                                            },
+                                            
+                                            onComplete : function () {
+                                                thisButton.setEnabled(true); // Unlock button
                                             }
                                         });
                                     } catch (e00033) {
                                         IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
                                     }
                                 }
-                                
-								this.setEnabled(true); // Unlock button
 							}
 						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
 					]
@@ -380,8 +368,9 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 				thisView.byId("page").addContent(oPanel);
                 
                 // Create the extras menu for the Premise Edit Info page.
+                thisView.byId("extrasMenuHolder").destroyItems();
                 thisView.byId("extrasMenuHolder").addItem(
-                    IOMy.widgets.getExtrasButton({
+                    IOMy.widgets.getActionMenu({
                         id : me.createId("extrasMenu"),        // Uses the page ID
                         icon : "sap-icon://GoogleMaterial/more_vert",
                         items : [

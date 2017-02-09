@@ -3,7 +3,7 @@ Title: Zigbee Data Page UI5 View
 Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
 Description: Creates the tiles for showing usage data about a given Zigbee
     device.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -47,7 +47,9 @@ sap.ui.controller("mjs.premise.DeviceData", {
 		var oController		= this;
 		var thisView		= oController.getView();
 		
-		
+		// Import the device label functions
+        var LabelFunctions  = IOMy.functions.DeviceLabels;
+        
 		thisView.addEventDelegate({
 			onBeforeShow: function(oEvent) {
 				//------------------------------------------------------------//
@@ -69,13 +71,12 @@ sap.ui.controller("mjs.premise.DeviceData", {
 				//-- Refresh the Navigational buttons --//
 				IOMy.common.NavigationRefreshButtons( oController );
 				
-				
 				//------------------------------------------------------------//
 				//-- 2.3 - CHECK IF PAGE NEEDS TO BE REDRAWN                --//
 				//------------------------------------------------------------//
 				try {
-					if( !!oEvent.data.Thing.DeviceId ) {
-						if( oController.iCurrentThing!==oEvent.data.Thing.DeviceId ) {
+					if( !!oEvent.data.ThingId ) {
+						if( oController.iCurrentThing!==oEvent.data.ThingId ) {
 							//-- Set redraw to true --//
 							bRedrawPageNeeded = true;
 							
@@ -91,7 +92,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 							//-- Set redraw to true --//
 							bRedrawPageNeeded = true;
 						
-						} else if( oController.dUIThingLastUpdate!==IOMy.common.ThingList['_'+oEvent.data.Thing.DeviceId].UILastUpdate ) {
+						} else if( oController.dUIThingLastUpdate!==IOMy.common.ThingList['_'+oEvent.data.ThingId].UILastUpdate ) {
 							//-- Set redraw to true --//
 							bRedrawPageNeeded = true;
 							
@@ -116,35 +117,49 @@ sap.ui.controller("mjs.premise.DeviceData", {
 				//------------------------------------------------------------//
 				if( bRedrawPageNeeded===true ) {
 					try {
-						
+						//console.log(JSON.stringify(IOMy.common.ThingList['_'+oEvent.data.ThingId]));
 						//----------------------------------------------------------------------------//
 						//-- 2.4.1 - IF THE DEVICE IS ACCESSIBLE                                    --//
 						//----------------------------------------------------------------------------//
-						if( !!IOMy.common.ThingList['_'+oEvent.data.Thing.DeviceId] ) {
+						if( !!IOMy.common.ThingList['_'+oEvent.data.ThingId] ) {
+                            //----------------------------------------------------------------------------//
+                            //-- 2.4.1.1 - Set the title if it hasn't already been created              --//
+                            //----------------------------------------------------------------------------//
+                            if (oController.byId("NavSubHead_Title") !== undefined) {
+                                oController.byId("NavSubHead_Title").setText(IOMy.common.ThingList['_'+oEvent.data.ThingId].DisplayName.toUpperCase());
+                                // Add the subheading title widget to the list of labels that display the Thing name.
+                                LabelFunctions.addThingLabelWidget(oEvent.data.ThingId,
+                                    {
+                                        widgetID : oController.createId("NavSubHead_Title"),
+                                        uppercase : true
+                                    }
+                                );
+                            }
+
 							//----------------------------------------------------------------------------//
-							//-- 2.4.1.1 - Store the Current Event Variables                            --//
+							//-- 2.4.1.2 - Store the Current Event Variables                            --//
 							//----------------------------------------------------------------------------//
-                            oController.oCurrentThing = oEvent.data.Thing;
-							oController.iCurrentThing = oEvent.data.Thing.DeviceId;
-							oController.sCurrentThingName = oEvent.data.Thing.DeviceName;
+                            oController.oCurrentThing = IOMy.common.ThingList['_'+oEvent.data.ThingId];
+							oController.iCurrentThing = IOMy.common.ThingList['_'+oEvent.data.ThingId].Id;
+							oController.sCurrentThingName = IOMy.common.ThingList['_'+oEvent.data.ThingId].DisplayName;
                             
 							//----------------------------------------------------------------------------//
-							//-- 2.4.1.2 - Destroy the specific Tile related objects of this page       --//
+							//-- 2.4.1.3 - Destroy the specific Tile related objects of this page       --//
 							//----------------------------------------------------------------------------//
 							oController.DestroyCurrentTiles();
 							
 							//----------------------------------------------------------------------------//
-							//-- 2.4.1.3 - Reset the 'TileData' controller variable                     --//
+							//-- 2.4.1.4 - Reset the 'TileData' controller variable                     --//
 							//----------------------------------------------------------------------------//
 							oController.aTiles = [];
 							
 							//----------------------------------------------------------------------------//
-							//-- 2.4.1.4 - Populate 'Tile Data' controller variable with the new values --//
+							//-- 2.4.1.5 - Populate 'Tile Data' controller variable with the new values --//
 							//----------------------------------------------------------------------------//
 							oController.InitialiseTileData();
 							
 							//----------------------------------------------------------------------------//
-							//-- 2.4.1.5 - Draw the new Tiles on the page                               --//
+							//-- 2.4.1.6 - Draw the new Tiles on the page                               --//
 							//----------------------------------------------------------------------------//
 							oController.DrawConfiguredTilesOnThePage();
 							
@@ -156,10 +171,10 @@ sap.ui.controller("mjs.premise.DeviceData", {
 						//-- 2.4.2 - UPDATE WHEN THE DEVICE LIST WAS LAST UPDATE                    --//
 						//----------------------------------------------------------------------------//
 						oController.dLastThingListUpdate = IOMy.common.ThingListLastUpdate;
-						oController.dUIThingLastUpdate   = IOMy.common.ThingList['_'+oEvent.data.Thing.DeviceId].UILastUpdate;
+						oController.dUIThingLastUpdate   = IOMy.common.ThingList['_'+oEvent.data.ThingId].UILastUpdate;
 						
 					} catch( e1000 ) {
-						jQuery.sap.log.error("Device Data Page - Critical Error Occurred!");
+						jQuery.sap.log.error("Device Data Page - Critical Error Occurred! "+e1000.message);
 					}
 				}
                 
@@ -169,14 +184,15 @@ sap.ui.controller("mjs.premise.DeviceData", {
                 try {
                     thisView.byId("extrasMenuHolder").destroyItems();
                     thisView.byId("extrasMenuHolder").addItem(
-                        IOMy.widgets.getExtrasButton({
+                        IOMy.widgets.getActionMenu({
                             id : oController.createId("extrasMenuDevice"+oController.iCurrentThing+oController.sCurrentThingName.replace(/[ '"?><=\\\-!@#$%\^&*()]/g, "")),        // Uses the page ID and device/thing ID and name
                             icon : "sap-icon://GoogleMaterial/more_vert",
                             items : [
                                 {
                                     text: "Edit "+oController.sCurrentThingName,
                                     select:	function (oControlEvent) {
-                                        console.log(JSON.stringify(oController.oCurrentThing));
+										//-- Debugging --//
+                                        //console.log(JSON.stringify(oController.oCurrentThing));
                                         IOMy.common.NavigationChangePage( "pSettingsEditThing", {device : oController.oCurrentThing}, false );
                                     }
                                 }
@@ -404,7 +420,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 								"FragmentName":			"",
 								"EnabledButtons": {
 									"TimeRB":[
-										"MostRecent",
+										//"MostRecent",
 										"NormalTimePeriods"
 									],
 									"FilterRB":[
@@ -412,12 +428,12 @@ sap.ui.controller("mjs.premise.DeviceData", {
 									]
 								},
 								"TempVals": {
-									"TimeRB":			"CurV",
-									"FilterRB":			"CurV"
+									"TimeRB":			"Day",
+									"FilterRB":			"TotSpecV"
 								},
 								"CurrentVals": {
-									"TimeRB":			"CurV",
-									"FilterRB":			"CurV",
+									"TimeRB":			"Day",
+									"FilterRB":			"TotSpecV",
 									"TimeCustomStart":	null,
 									"TimeCustomEnd":	null
 								}
@@ -504,7 +520,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 					//----------------------------------------//
 					//-- ADD THE TILE TO THE PAGE           --//
 					//----------------------------------------//
-					oView.byId("page").addContent( oTile );
+					oView.byId("panel").addContent( oTile );
 					
 					//------------------------------------------------//
 					//-- ADD THE TILE ID TO THE LIST OF IDS TO      --//
@@ -543,7 +559,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 					//----------------------------------------//
 					//-- ADD THE TILE TO THE PAGE           --//
 					//----------------------------------------//
-					oView.byId("page").addContent( oTile );
+					oView.byId("panel").addContent( oTile );
 					
 					//------------------------------------------------//
 					//-- ADD THE TILE ID TO THE LIST OF IDS TO      --//
@@ -731,9 +747,6 @@ sap.ui.controller("mjs.premise.DeviceData", {
 		//----------------------------------------------------------------//
 		//-- 9.0 - RETURN RESULTS                                       --//
 		//----------------------------------------------------------------//
-		
-		
-		
 	},
 	
 	
@@ -856,7 +869,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 					//--------------------//
 					//-- DAY			--//
 					oTempRadioButton = new sap.m.RadioButton( oController.createId( sIdPrefix+"TimeRBDay"), {
-						"text":			"Day",
+						"text":			"Last 24 hours",
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Day" );
@@ -867,7 +880,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 					//--------------------//
 					//-- WEEK			--//
 					oTempRadioButton = new sap.m.RadioButton( oController.createId( sIdPrefix+"TimeRBWeek"), {
-						"text":			"Week",
+						"text":			"Last 7 days",
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Week" );
@@ -878,7 +891,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 					//--------------------//
 					//-- FORTNIGHT		--//
 					oTempRadioButton = new sap.m.RadioButton( oController.createId( sIdPrefix+"TimeRBFort"), {
-						"text":			"Fortnight",
+						"text":			"Last 14 days",
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Fortnight" );
@@ -889,7 +902,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 					//--------------------//
 					//-- MONTH			--//
 					oTempRadioButton = new sap.m.RadioButton( oController.createId( sIdPrefix+"TimeRBMonth"), {
-						"text":			"Month",
+						"text":			"Last 31 days",
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Month" );
@@ -900,7 +913,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 					//--------------------//
 					//-- QUARTER		--//
 					oTempRadioButton = new sap.m.RadioButton( oController.createId( sIdPrefix+"TimeRBQuarter"), {
-						"text":			"Quarter",
+						"text":			"Last 91 days",
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Quarter" );
@@ -911,7 +924,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 					//--------------------//
 					//-- YEAR			--//
 					oTempRadioButton = new sap.m.RadioButton( oController.createId( sIdPrefix+"TimeRBYear"), {
-						"text":			"Year",
+						"text":			"Last 365 days",
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Year" );
@@ -986,16 +999,16 @@ sap.ui.controller("mjs.premise.DeviceData", {
 				//-- ADD THE "TotalableSpecial" RADIO BUTTONS   --//
 				//------------------------------------------------//
 				case "TotalableSpecial":
-					
+
 					//------------------------//
 					//-- CURRENT VALUE      --//
-					oTempRadioButton = new sap.m.RadioButton( oController.createId( sIdPrefix+"FilterRBCurV"), {
-						"text":		"Current Value",
-						"select":	function( oControlEvent ) {
-							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "FilterRB", "CurV" );
-						}
-					});
-					oTempElement.addButton(oTempRadioButton);
+					//oTempRadioButton = new sap.m.RadioButton( oController.createId( sIdPrefix+"FilterRBCurV"), {
+					//	"text":		"Current Value",
+					//	"select":	function( oControlEvent ) {
+					//		oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "FilterRB", "CurV" );
+					//	}
+					//});
+					//oTempElement.addButton(oTempRadioButton);
 					
 					//------------------------//
 					//-- TOTALABLE VALUE    --//

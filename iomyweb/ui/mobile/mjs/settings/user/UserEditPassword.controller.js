@@ -2,7 +2,7 @@
 Title: Edit User Password Page (UI5 Controller)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws a form to allow the user to edit his/her password.
-Copyright: Capsicum Corporation 2015, 2016
+Copyright: Capsicum Corporation 2015, 2016, 2017
 
 This file is part of iOmy.
 

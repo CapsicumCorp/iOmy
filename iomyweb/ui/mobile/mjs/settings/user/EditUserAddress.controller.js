@@ -2,7 +2,7 @@
 Title: Edit User Address Page (UI5 Controller)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws a form to allow the user to edit his/her address.
-Copyright: Capsicum Corporation 2015, 2016
+Copyright: Capsicum Corporation 2015, 2016, 2017
 
 This file is part of iOmy.
 
@@ -117,8 +117,8 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                     ]
                 }).addStyleClass("MarTop16px");
     		    
-				var oCountryField = new sap.m.ComboBox(me.createId("addressCountry"), {
-					value : "",
+				var oCountryField = new sap.m.Select(me.createId("addressCountry"), {
+                    width : "100%",
                     selectionChange : function () {
                         me.loadLocaleCBoxItems(me, this.getSelectedKey());
                     }
@@ -136,9 +136,9 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                     ]
                 });
     		    
-				var oLanguageField = new sap.m.ComboBox(me.createId("addressLanguage"), {
-					value : ""
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+				var oLanguageField = new sap.m.Select(me.createId("addressLanguage"), {
+                    width : "100%"
+                }).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 //===== STATE =====\\
                 var oStateTitle = new sap.m.HBox({
@@ -152,9 +152,9 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                     ]
                 });
     		    
-				var oStateField = new sap.m.ComboBox(me.createId("addressState"), {
-					value : ""
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+				var oStateField = new sap.m.Select(me.createId("addressState"), {
+                    width : "100%"
+                }).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 //===== POST CODE =====\\
                 var oPostCodeTitle = new sap.m.HBox({
@@ -168,9 +168,9 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                     ]
                 });
     		    
-				var oPostCodeField = new sap.m.ComboBox(me.createId("addressPostCode"), {
-					value : ""
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+				var oPostCodeField = new sap.m.Select(me.createId("addressPostCode"), {
+                    width : "100%"
+                }).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 //===== TIMEZONE =====\\
                 var oTimezoneTitle = new sap.m.HBox({
@@ -184,9 +184,9 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                     ]
                 });
     		    
-				var oTimezoneField = new sap.m.ComboBox(me.createId("addressTimezone"), {
-					value : ""
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+				var oTimezoneField = new sap.m.Select(me.createId("addressTimezone"), {
+                    width : "100%"
+                }).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 //===== RESIDENTIAL ADDRESS =====\\
                 
@@ -224,8 +224,6 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 					value : ""
 				}).addStyleClass("width100Percent SettingsTextInput");
                 
-                //===== POSTAL ADDRESS =====\\
-                
                 me.loadUserInfo();
 				
 				var oEditButton = new sap.m.VBox({
@@ -233,7 +231,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 						new sap.m.Link(me.createId("UpdateLink"), {
 							text : "Update",
 							press : function () {
-                                //this.setEnabled(false);
+                                this.setEnabled(false);
                                 var aErrorLog = [];
                                 var bError = false;
                                 
@@ -241,51 +239,11 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                                     aErrorLog.push("Residential Address (line 1) is required.");
                                     bError = true;
                                 }
-                                if (me.byId("addressCountry").getValue() === "") {
-                                    aErrorLog.push("Country field must not be blank.");
-                                    bError = true;
-                                }
-                                if (me.byId("addressState").getValue() === "") {
-                                    aErrorLog.push("State/Province field must not be blank.");
-                                    bError = true;
-                                }
-                                if (me.byId("addressPostCode").getValue() === "") {
-                                    aErrorLog.push("Post Code field must not be blank.");
-                                    bError = true;
-                                }
-                                if (me.byId("addressTimezone").getValue() === "") {
-                                    aErrorLog.push("Timezone field must not be blank.");
-                                    bError = true;
-                                }
-                                if (me.byId("addressLanguage").getValue() === "") {
-                                    aErrorLog.push("Language field must not be blank.");
-                                    bError = true;
-                                }
-                                
-                                if (me.byId("addressCountry").getSelectedKey() === "") {
-                                    aErrorLog.push("Country not valid.");
-                                    bError = true;
-                                }
-                                if (me.byId("addressState").getSelectedKey() === "") {
-                                    aErrorLog.push("State/Province not valid.");
-                                    bError = true;
-                                }
-                                if (me.byId("addressPostCode").getSelectedKey() === "") {
-                                    aErrorLog.push("Post Code not valid.");
-                                    bError = true;
-                                }
-                                if (me.byId("addressTimezone").getSelectedKey() === "") {
-                                    aErrorLog.push("Timezone not valid.");
-                                    bError = true;
-                                }
-                                if (me.byId("addressLanguage").getSelectedKey() === "") {
-                                    aErrorLog.push("Language not valid.");
-                                    bError = true;
-                                }
                                 
                                 if (bError === true) {
                                     jQuery.sap.log.error(aErrorLog.join("\n"));
                                     IOMy.common.showError(aErrorLog.join("\n\n"), "Errors");
+                                    this.setEnabled(true);
                                 } else {
                                     // Run the API to update the user's address
                                     try {
@@ -306,17 +264,18 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                                                 IOMy.common.showSuccess("Update successful.", "Success", function () {
                                                     IOMy.common.NavigationTriggerBackForward(false);
                                                 }, "UpdateMessageBox");
+                                                this.setEnabled(true);
                                             },
                                             onFail : function (response) {
                                                 IOMy.common.showError("Update failed.", "Error");
                                                 jQuery.sap.log.error(JSON.stringify(response));
+                                                this.setEnabled(true);
                                             }
                                         });
                                     } catch (e00033) {
                                         IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
                                     }
                                 }
-								//this.setEnabled(true);
 							}
 						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
 					]
@@ -327,8 +286,6 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                             oStateTitle, oStateField, oPostCodeTitle, oPostCodeField,
                             oTimezoneTitle, oTimezoneField, oLine1Title, oLine1Field,
                             oLine2Title, oLine2Field, oLine3Title, oLine3Field,
-//                            oPostalLine1Title, oPostalLine1Field, oPostalLine2Title, 
-//                            oPostalLine2Field, oPostalLine3Title, oPostalLine3Field,
                             oEditButton, 
 					]
 				}).addStyleClass("PadLeft16px PadRight16px UserInputForm");

@@ -392,7 +392,7 @@ class PHPPhilipsHue {
 		//----------------------------------------------------------------//
 		
 		//-- 1.1 - Declare Global variables --//
-		global $oRestrictedDB;
+		global $oRestrictedApiCore;
 		
 		
 		//-- 1.2 - Declare normal variables --//
@@ -544,7 +544,7 @@ class PHPPhilipsHue {
 						//--------------------------------------------//
 						//-- Start the Transaction                  --//
 						//--------------------------------------------//
-						$bTransactionStarted = $oRestrictedDB->dbBeginTransaction();
+						$bTransactionStarted = $oRestrictedApiCore->oRestrictedDB->dbBeginTransaction();
 						
 						if( $bTransactionStarted===false ) {
 							$bError    = true;
@@ -579,11 +579,11 @@ class PHPPhilipsHue {
 						//--------------------------------------------//
 						if( $bError===false ) {
 							//-- Commit the changes --//
-							$oRestrictedDB->dbEndTransaction();
+							$oRestrictedApiCore->oRestrictedDB->dbEndTransaction();
 							
 						} else {
 							//-- Rollback changes --//
-							$oRestrictedDB->dbRollback();
+							$oRestrictedApiCore->oRestrictedDB->dbRollback();
 							
 						}
 					}		//-- ENDIF New Light has been found. --/

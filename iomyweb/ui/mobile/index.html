@@ -2,7 +2,8 @@
 <!--
 
 Title: HTML Document for IOMy
-Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
+Modified: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: The HTML file that IOMy will run in.
 Copyright: Capsicum Corporation 2015, 2016
 
@@ -73,21 +74,21 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 		<link rel="stylesheet" type="text/css" href="resources/css/capsicum_textsizes.css"/>
 		<link rel="stylesheet" type="text/css" href="resources/css/capsicum_widths.css"/>
 		
-		
 		<!-- Experimental CSS -   NOTE: The changes from this will be Merged into the main section when they are finished with -->
 		<link rel="stylesheet" type="text/css" href="resources/css/experimental_brent.css"/>
 		<link rel="stylesheet" type="text/css" href="resources/css/experimental_andrew.css"/>
 		<link rel="stylesheet" type="text/css" href="resources/css/experimental_ian.css"/>
 		
-		<!-- ====================================== -->
-		<!-- == 5.0 - START THE APP             === -->
-		<!-- ====================================== -->
+		<!-- ======================================================== -->
+		<!-- == 5.0 - LOAD THE WIDGET OBJECTS AND START THE APP   === -->
+		<!-- ======================================================== -->
 		<script>
 			//--------------------------------------------------------//
 			//-- DECLARE THE MODULE PATH FOR THE OPENUI5 TO RUN IN	--//
 			//--------------------------------------------------------//
 			var sModuleInitialBuildLocation = "/ui/mobile/";
 		</script>
+		<script src="/ui/mobile/resources/js/ZigbeeCustomTelnetInput.js"></script>
 		<script src="/ui/mobile/app.js"></script>
 
 

@@ -60,16 +60,10 @@ $sLogCustom1                = "";           //-- STRING:        Special variable
 //------------------------------------------------------------//
 //-- 1.3 - Import Required Libraries                        --//
 //------------------------------------------------------------//
-require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';		//-- This should call all the additional libraries needed --//
+require_once SITE_BASE.'/restricted/php/core.php';      //-- This should call all the additional libraries needed --//
 
 
-//------------------------------------------------------------//
-//-- 1.4 - Flag an Error is there is no Database access     --//
-//------------------------------------------------------------//
-if( $aRestrictedApiCore['RestrictedDB']===false ) {
-	$bError    = true;
-	$sErrMesg .= "Can't access the database! User may not be logged in";
-}
+
 
 //====================================================================//
 //== 2.0 - RETRIEVE POST                                            ==//
@@ -376,6 +370,9 @@ if($bError===false) {
 	//----------------------------------------------------//
 	
 	
+	
+	
+	
 }
 
 
@@ -420,12 +417,13 @@ if( $bError===false ) {
 							$sErrMesg .= $aResult["ErrMesg"];
 							
 						} else {
+							
 							//-------------------------------------------//
 							//-- Prepare variables for the Premise Log --//
 							//-------------------------------------------//
-							$iPresetLogId   = 9;
-							$iPremiseId     = $aLinkInfo["Data"]["PremiseId"];
-							$sLogCustom1    = $aLinkInfo["Data"]["LinkName"];
+							//$iPresetLogId   = 9;
+							//$iPremiseId     = $aLinkInfo["Data"]["PremiseId"];
+							//$sLogCustom1    = $aLinkInfo["Data"]["LinkName"];
 							
 						}
 					} else {
@@ -461,69 +459,110 @@ if( $bError===false ) {
 					$sErrMesg .= $aLinkInfo["ErrMesg"];
 				}
 				
+				
+				//--------------------------------------------------------------------//
+				//-- 5.1.1 - Lookup information about the Comm                      --//
+				//--------------------------------------------------------------------//
+				if( $bError===false ) {
+					$aCommInfo = GetCommInfo( $aLinkInfo['Data']['CommId'] );
+					
+					if( $aCommInfo["Error"]===true ) {
+						//-- Display an Error Message --//
+						$bError = true;
+						$sErrMesg .= "Error Code:'2402' \n";
+						$sErrMesg .= "Internal API Error! \n";
+						$sErrMesg .= $aCommInfo["ErrMesg"];
+						
+					} else if( $aCommInfo['Data']['PermRoomAdmin']!==1 ) {
+						//-- Flag an error that the User doesn't have sufficient privileges to change the device's room --//
+						$bError = true;
+						$sErrMesg .= "Error Code:'2403' \n";
+						$sErrMesg .= "Internal API Error! \n";
+						$sErrMesg .= "Your user doesn't have sufficient privilege to change the Link name! \n";
+						
+					} else {
+						//-- Store the PremiseId --//
+						$iCommPremiseId = $aCommInfo['Data']['PremiseId'];
+					}
+				}
+				
+				
 				//--------------------------------------------------------------------//
 				//-- 5.2.2 - Verify that the user has permission to change the Link --//
 				//--------------------------------------------------------------------//
 				if( $bError===false ) {
-					//-- Verify that the user has permission to change the name --//
-					if( $aLinkInfo["Data"]["PermWrite"]===1 ) {
-						//--------------------------------------------------------------------//
-						//-- IF the user wants to unassign a Link from a room               --//
-						//--------------------------------------------------------------------//
-						if($iPostRoomId===0) {
-							
-							//--------------------------------------------------------------------//
-							//-- 5.2.3.A.1 - Change the Link's Room                             --//
-							//--------------------------------------------------------------------//
-							$aResult = ChangeLinkRoom( $iPostId, null );
-									
-							//-- Check for caught Errors --//
-							if( $aResult["Error"]===true ) {
-								$bError = true;
-								$sErrMesg .= "Error Code:'2402' \n";
-								$sErrMesg .= "Internal API Error! \n";
-								$sErrMesg .= $aResult["ErrMesg"];
-										
-							} else {
-								//-------------------------------------------//
-								//-- Prepare variables for the Premise Log --//
-								//-------------------------------------------//
-								$iPresetLogId   = 0;
-								$iPremiseId     = $aLinkInfo["Data"]["PremiseId"];
-								$sLogCustom1    = "Unassigned Room";
-							}
+					
+					//--------------------------------------------------------------------//
+					//-- IF the user wants to unassign a Link from a room               --//
+					//--------------------------------------------------------------------//
+					if($iPostRoomId===0) {
 						
 						//--------------------------------------------------------------------//
-						//-- ELSE the user must want a Link assigned to a real room        --//
+						//-- 5.2.3.A.1 - Change the Link's Room                             --//
 						//--------------------------------------------------------------------//
+						$aResult = ChangeLinkRoom( $iPostId, null );
+						
+						//-- Check for caught Errors --//
+						if( $aResult["Error"]===true ) {
+							$bError = true;
+							$sErrMesg .= "Error Code:'2404' \n";
+							$sErrMesg .= "Internal API Error! \n";
+							$sErrMesg .= $aResult["ErrMesg"];
+						
 						} else {
-							//--------------------------------------------------------------------//
-							//-- 5.2.3.B.1 - Lookup Information about the Room                  --//
-							//--------------------------------------------------------------------//
-							$aRoomInfo = GetRoomInfoFromRoomId( $iPostRoomId );
+							//-------------------------------------------//
+							//-- Prepare variables for the Premise Log --//
+							//-------------------------------------------//
+							$iPresetLogId   = 0;
+							$iPremiseId     = $aLinkInfo["Data"]["PremiseId"];
+							$sLogCustom1    = "Unassigned Room";
+						}
+						
+					//--------------------------------------------------------------------//
+					//-- ELSE the user must want a Link assigned to a real room         --//
+					//--------------------------------------------------------------------//
+					} else {
+						//--------------------------------------------------------------------//
+						//-- 5.2.3.B.1 - Lookup Information about the Room                  --//
+						//--------------------------------------------------------------------//
+						$aRoomInfo = GetRoomInfoFromRoomId( $iPostRoomId );
+						
+						if( $aRoomInfo["Error"]===true ) {
+							//-- Display an Error Message --//
+							$bError = true;
+							$sErrMesg .= "Error Code:'2405' \n";
+							$sErrMesg .= "Internal API Error! \n";
+							$sErrMesg .= $aRoomInfo["ErrMesg"];
 							
-							if( $aRoomInfo["Error"]===true ) {
-								//-- Display an Error Message --//
-								$bError = true;
-								$sErrMesg .= "Error Code:'2403' \n";
-								$sErrMesg .= "Internal API Error! \n";
-								$sErrMesg .= $aRoomInfo["ErrMesg"];
-							}
+						//-- ELSEIF The PremiseId does not match between the Comm's Premise and the Room's Premise --// 
+						} else if( $iCommPremiseId!==$aRoomInfo["Data"]["PremiseId"] ) {
+							//-- Display an Error Message --//
+							$bError = true;
+							$sErrMesg .= "Error Code:'2406' \n";
+							$sErrMesg .= "Internal API Error! \n";
+							$sErrMesg .= $aRoomInfo["ErrMesg"];
 							
-							//--------------------------------------------------------------------//
-							//-- 5.2.3.B.2 - Verify that the User has permission to the Room    --//
-							//--------------------------------------------------------------------//
-							if( $bError===false ) {
-								//-- Verify that the user has permission to change the name --//
-								if( $aRoomInfo["Data"]["PermWrite"]===1 ) {
+						}
+						
+						//--------------------------------------------------------------------//
+						//-- 5.2.3.B.2 - Verify that the User has permission to the Room    --//
+						//--------------------------------------------------------------------//
+						if( $bError===false ) {
+							//-- Lookup the Link's Comm --//
+							$aCommInfo = GetCommInfo( $aLinkInfo['Data']['CommId'] );
 							
+							if( $aCommInfo['Error']===false ) {
+								//-- Check to make sure the Comm and the Room are in the same premise --//
+								if( $aRoomInfo["Data"]["PremiseId"]===$aCommInfo["Data"]["PremiseId"] ) {
+									
 									//-- Change which room the Link is in --//
 									$aResult = ChangeLinkRoom( $iPostId, $iPostRoomId );
+									
 									
 									//-- Check for caught Errors --//
 									if( $aResult["Error"]===true ) {
 										$bError = true;
-										$sErrMesg .= "Error Code:'2404' \n";
+										$sErrMesg .= "Error Code:'2407' \n";
 										$sErrMesg .= "Internal API Error! \n";
 										$sErrMesg .= $aResult["ErrMesg"];
 										
@@ -531,28 +570,28 @@ if( $bError===false ) {
 										//-------------------------------------------//
 										//-- Prepare variables for the Premise Log --//
 										//-------------------------------------------//
-										$iPresetLogId   = 0;
-										$iPremiseId     = $aLinkInfo["Data"]["PremiseId"];
-										$sLogCustom1    = $aRoomInfo["Data"]["RoomName"];
+										//$iPresetLogId   = 0;
+										//$iPremiseId     = $aRoomInfo["Data"]["PremiseId"];
+										//$sLogCustom1    = $aRoomInfo["Data"]["RoomName"];
 									}
-							
+									
 								} else {
 									//-- Display an Error Message --//
 									$bError = true;
-									$sErrMesg .= "Error Code:'2405' \n";
+									$sErrMesg .= "Error Code:'2408' \n";
 									$sErrMesg .= "Internal API Error! \n";
-									$sErrMesg .= "Your user doesn't have sufficient privilege to change the Link's Room! \n";
+									$sErrMesg .= "The desired Room's PremiseId doesn't match the Link's PremiseId! \n";
 								}
+								
+							} else {
+								//-- Display an Error Message --//
+								$bError = true;
+								$sErrMesg .= "Error Code:'2409' \n";
+								$sErrMesg .= "Internal API Error! \n";
+								$sErrMesg .= "Problem looking up the Link's Comm Information! \n";
 							}
-						}
-						
-					} else {
-						//-- Display an Error Message --//
-						$bError = true;
-						$sErrMesg .= "Error Code:'2406' \n";
-						$sErrMesg .= "Internal API Error! \n";
-						$sErrMesg .= "Your user doesn't have sufficient privilege to change the Link name! \n";
-					}
+						} //-- ENDIF No errors --//
+					} //-- ENDELSE --//
 				}
 			} catch( Exception $e2400 ) {
 				//-- Display an Error Message --//

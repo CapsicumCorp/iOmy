@@ -2,7 +2,7 @@
 Title: Add Room Page (UI5 Controller)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws the form that allows you to create a room in a premise.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -24,6 +24,9 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 	functions : IOMy.functions,
     odata : IOMy.apiodata,
+    
+    aElementsToDestroy : [],
+    
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
@@ -42,7 +45,7 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 				// Start rendering the page
 				
 				me.functions.destroyItemsByIdFromView(me, [
-	                "roomName", "roomDesc", "roomFloor", "roomType"
+	                "premiseBox", "roomName", "roomDesc", "roomFloor", "roomType"
 	            ]);
 				
 				var oPremiseTitle = new sap.m.HBox({
@@ -56,8 +59,9 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                     ]
                 }).addStyleClass("");
                 
+                me.aElementsToDestroy.push("premiseBox");
                 var oPremiseCBox = IOMy.widgets.getPremiseSelector(me.createId("premiseBox")).addStyleClass("width100Percent SettingsDropdownInput")
-//                oPremiseCBox.attachSelectionChange(function () {
+//                oPremiseCBox.attachChange(function () {
 //                    //================================================//
 //                    // LOAD FLOOR OPTIONS AND SET CURRENT FLOOR COUNT //
 //                    //================================================//
@@ -104,6 +108,7 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                     ]
                 }).addStyleClass("");
     		    
+                me.aElementsToDestroy.push("roomName");
 				var oRoomNameField = new sap.m.Input(me.createId("roomName"), {
 					value : ""
 				}).addStyleClass("width100Percent SettingsTextInput");
@@ -112,24 +117,23 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
     	        	text : "Description"
     	        }).addStyleClass("");
     		    
+                me.aElementsToDestroy.push("roomDesc");
 				var oRoomDescField = new sap.m.Input(me.createId("roomDesc"), {
 					value : ""
 				}).addStyleClass("width100Percent SettingsTextInput");
                 
-                var oFloorsTitle = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "* "
-                        }).addStyleClass("Text_red_13"),
-                        new sap.m.Text({
-                            text : " Floor"
-                        })
-                    ]
-                });
-    		    
-				var oFloorsField = new sap.m.ComboBox(me.createId("roomFloor"), {
-					value : ""
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+//                var oFloorsTitle = new sap.m.HBox({
+//                    items : [
+//                        new sap.m.Text({
+//                            text : "* "
+//                        }).addStyleClass("Text_red_13"),
+//                        new sap.m.Text({
+//                            text : " Floor"
+//                        })
+//                    ]
+//                });
+//    		    
+//				var oFloorsField = new sap.m.Select(me.createId("roomFloor"), {}).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 var oRoomTypeTitle = new sap.m.HBox({
                     items : [
@@ -142,9 +146,10 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                     ]
                 });
     		    
-				var oRoomTypeField = new sap.m.ComboBox(me.createId("roomType"), {
-					value : ""
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+                me.aElementsToDestroy.push("roomType");
+				var oRoomTypeField = new sap.m.Select(me.createId("roomType"), {
+                    width : "100%"
+                }).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 //==================================================//
                 // LOAD ROOM TYPE OPTIONS AND SET CURRENT ROOM TYPE //
@@ -168,7 +173,7 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                     },
                     
                     onFail : function (response) {
-                        jQuery.sap.log.error("Error loading premise floor count OData: "+JSON.stringify(response));
+                        jQuery.sap.log.error("Error loading room types OData: "+JSON.stringify(response));
                     }
                 });
                 
@@ -176,42 +181,20 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 					items : [
 						new sap.m.Link({
 							text : "Add Room",
+                            enabled : true,
 							press : function () {
-								this.setEnabled(false);
+                                var oThisButton = this; // Captures the scope of the link
+								oThisButton.setEnabled(false);
 								
 								var sRoomText = me.byId("roomName").getValue();
                                 var sRoomDesc = me.byId("roomDesc").getValue();
-                                var iRoomTypeId = me.byId("roomType").getSelectedKey() !== null ? me.byId("roomType").getSelectedKey() : 7;
+                                var iRoomTypeId = me.byId("roomType").getSelectedKey();
 								
 								var aErrorLog = [];
                                 var bError = false;
 								
                                 if (sRoomText === "") {
                                     aErrorLog.push("Room must have a name");
-                                    bError = true;
-                                }
-                                if (me.byId("premiseBox").getValue() === "" ||
-                                    me.byId("premiseBox").getSelectedKey() === "") {
-                                    
-                                    if (me.byId("premiseBox").getValue() === "")
-                                        aErrorLog.push("Premise must be specified.");
-                                    else if (me.byId("premiseBox").getSelectedKey() === "")
-                                        aErrorLog.push("Premise doesn't exist");
-                                    
-                                    bError = true;
-                                }
-//                                if (me.byId("roomFloor").getValue() === "") {
-//                                    aErrorLog.push("Floor must be specified.");
-//                                    bError = true;
-//                                }
-                                if (me.byId("roomType").getValue() === "" ||
-                                    me.byId("roomType").getSelectedKey() === "") {
-                                    
-                                    if (me.byId("roomType").getValue() === "")
-                                        aErrorLog.push("Room type must be specified.");
-                                    else if (me.byId("roomType").getSelectedKey() === "")
-                                        aErrorLog.push("Invalid room type");
-                                    
                                     bError = true;
                                 }
                                 
@@ -237,9 +220,11 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                                                     IOMy.common.RetreiveRoomList( {
                                                         onSuccess: $.proxy(function() {
                                                             //-- REFRESH THINGS --//
-                                                            IOMy.apiphp.RefreshSensorList({
+                                                            IOMy.apiphp.RefreshThingList({
                                                                 onSuccess: $.proxy(function() {
-
+                                                                    //-- Enable this switch --//
+                                                                    oThisButton.setEnabled(true);
+                                                                    
                                                                     try {
                                                                         //-- Flag that the Core Variables have been configured --//
                                                                         IOMy.common.CoreVariablesInitialised = true;
@@ -260,13 +245,15 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                                             onFail : function (response) {
                                                 IOMy.common.showError("Update failed.", "Error");
                                                 jQuery.sap.log.error(JSON.stringify(response));
+                                                //-- Enable this switch --//
+                                                oThisButton.setEnabled(true);
                                             }
                                         });
                                     } catch (e00033) {
                                         IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
                                     }
                                 }
-								this.setEnabled(true);
+								
 							}
 						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
 					]
@@ -325,6 +312,10 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 */
 //	onExit: function() {
 //
-//	}
+//	},
+
+    DestroyUI : function () {
+        
+    }
 
 });

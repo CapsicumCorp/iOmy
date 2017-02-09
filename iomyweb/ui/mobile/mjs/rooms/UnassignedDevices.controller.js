@@ -5,7 +5,7 @@ Modified: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws a list of all devices and their information not yet
     assigned a particular room in the premise, and controls to assign them to a
     chosen room.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -204,8 +204,8 @@ sap.ui.controller("mjs.rooms.UnassignedDevices", {
 		//-- Setup the Variables --//
 		sPKey = "_"+me.aCurrentRoomData.PremiseId;
 		sRKey = "Unassigned";
-        console.log(IOMy.common.RoomsList[sPKey][sRKey]);
-        console.log(sPKey)
+        //console.log(IOMy.common.RoomsList[sPKey][sRKey]);
+        //console.log(sPKey)
 		
 		
 		//-- Reset the UI Groupings --//
@@ -241,7 +241,7 @@ sap.ui.controller("mjs.rooms.UnassignedDevices", {
 								"Devices":[]				//-- Array to store the devices in the Grouping --//
 							};
 						}
-						console.log(me.aUIGroupingData[sDeviceGrouping]);
+						//console.log(me.aUIGroupingData[sDeviceGrouping]);
 						//--------------------------------------------//
 						//-- Add the Devices into the Grouping		--//
 						//--------------------------------------------//
@@ -347,49 +347,37 @@ sap.ui.controller("mjs.rooms.UnassignedDevices", {
                         items : [
                             new sap.m.Link({
                                 text : "Update",
+                                enabled : me.byId("Unassigned").getEnabled(),
                                 press : function () {
                                     // Lock the button while the function runs.
                                     this.setEnabled(false);
 
                                     // Retrive the ID and name of the selected room.
                                     var iRoomId = me.byId("Unassigned").getSelectedKey();
-                                    var sRoomName = me.byId("Unassigned").getValue();
+                                    var sRoomName = me.byId("Unassigned").getSelectedItem().getText();
+                                    // Declare arrays of selected prefixes and errors.
+                                    var aSelected = [];
+                                    var aErrors = [];
 
-                                    // If a valid room is specified, assign the selected devices
-                                    if (iRoomId === "" || sRoomName === "") {
-                                        if (iRoomId === "" && sRoomName === "") {
-                                            jQuery.sap.log.error("Room must be specified.");
-                                            IOMy.common.showError("Room must be specified.", "Error");
-                                        } else {
-                                            jQuery.sap.log.error("Room doesn't exist.");
-                                            IOMy.common.showError("Room doesn't exist.", "Error");
-                                        }
+                                    //===============================================================\\
+                                    // Isolate which devices were selected and place them in a list. \\
+                                    //===============================================================\\
+                                    for (var i = 0; i < me.aCheckBoxIDs.length; i++) {
+                                        if (me.byId(me.aCheckBoxIDs[i]).getSelected() === true)
+                                            aSelected.push(me.aDeviceIDs[i]);
+                                    }
+
+                                    if (aSelected.length === 0) {
+                                        jQuery.sap.log.error("Please select at least one device.");
+                                        IOMy.common.showError("Please select at least one device.", "Error");
                                     } else {
 
-                                        // Declare arrays of selected prefixes and errors.
-                                        var aSelected = [];
-                                        var aErrors = [];
-
                                         //===============================================================\\
-                                        // Isolate which devices were selected and place them in a list. \\
+                                        // Create a recursive anonymous function to assign each selected \\
+                                        // device to the selected room.                                  \\
                                         //===============================================================\\
-                                        for (var i = 0; i < me.aCheckBoxIDs.length; i++) {
-                                            if (me.byId(me.aCheckBoxIDs[i]).getSelected() === true)
-                                                aSelected.push(me.aDeviceIDs[i]);
-                                        }
-
-                                        if (aSelected.length === 0) {
-                                            jQuery.sap.log.error("Please select at least one device.");
-                                            IOMy.common.showError("Please select at least one device.", "Error");
-                                        } else {
-
-                                            //===============================================================\\
-                                            // Create a recursive anonymous function to assign each selected \\
-                                            // device to the selected room.                                  \\
-                                            //===============================================================\\
-                                            var iPos = 0;
-                                            me.AssignDeviceToRoom(iPos, aSelected, iRoomId, sRoomName, aErrors);
-                                        }
+                                        var iPos = 0;
+                                        me.AssignDeviceToRoom(iPos, aSelected, iRoomId, sRoomName, aErrors);
                                     }
 
                                     this.setEnabled(true);
@@ -401,7 +389,7 @@ sap.ui.controller("mjs.rooms.UnassignedDevices", {
             })
         );
         
-        console.log(me.aUIGroupingData);
+       //console.log(me.aUIGroupingData);
         
         //----------------------------------------------------//
 		//-- 4.0 - DRAW THE UI FOR EACH DEVICE				--//
@@ -494,7 +482,7 @@ sap.ui.controller("mjs.rooms.UnassignedDevices", {
         var oPanel = new sap.m.Panel( me.createId("Panel"), {
            //-- Add Grouping box to Panel --//
            content: [oVertBox]
-        }).addStyleClass("PanelNoPadding");
+        }).addStyleClass("PanelNoPadding UserInputForm TableSideBorders");
 
         thisView.byId("page").addContent( oPanel );
 		//-- Update the LastRoomId --//
@@ -860,7 +848,7 @@ sap.ui.controller("mjs.rooms.UnassignedDevices", {
                         // If successful, run the onComplete function.                   \\
                         //===============================================================\\
                         onSuccess : function (type, data) {
-                            console.log(JSON.stringify(data));
+                           //console.log(JSON.stringify(data));
                             this.onComplete();
                         },
     
@@ -998,150 +986,6 @@ sap.ui.controller("mjs.rooms.UnassignedDevices", {
 
             //-- TODO: These devices need to be in their own definition file --//
             if( aDeviceData.DeviceTypeId===2 ) {
-//                if (me.byId( sPrefix+"_ID") !== undefined)
-//                    me.byId( sPrefix+"_ID").destroy();
-//                
-//                if (me.byId( sPrefix+"_Selected") !== undefined)
-//                    me.byId( sPrefix+"_Selected").destroy();
-//                
-//                new sap.m.Text( me.createId( sPrefix+"_ID"), {
-//                    text : aDeviceData.DeviceId
-//                });
-//                
-//                me.aDeviceIDs[sPrefix] = aDeviceData.DeviceId;
-//
-//                oUIObject = new sap.m.HBox( me.createId( sPrefix+"_Container"), {
-//                    items: [
-//                        new sap.m.CheckBox(me.createId(sPrefix+"_Selected"), {
-//                            selected : false
-//                        }).addStyleClass("MarTop10px"),
-//                        //------------------------------------//
-//                        //-- 1st is the Device Label		--//
-//                        //------------------------------------//
-//                        new sap.m.VBox({
-//                            items : [
-//                                new sap.m.Text( me.createId( sPrefix+"_Label"), {
-//                                    text : aDeviceData.DeviceName
-//                                }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
-//                            ]
-//                        }).addStyleClass("width100Percent"),
-//
-//                        //------------------------------------//
-//                        //-- 2nd is the Device Data			--//
-//                        //------------------------------------//
-//                        new sap.m.VBox( me.createId( sPrefix+"_DataContainer"), {
-//                            //--------------------------------//
-//                            //-- Draw the Data Boxes		--//
-//                            //--------------------------------//
-//
-//                            items: [
-//                                new sap.m.Text( me.createId( sPrefix+"_Volt" ),	{} ).addStyleClass("Font-RobotoCondensed"),
-//                                new sap.m.Text( me.createId( sPrefix+"_Amp" ),	{} ).addStyleClass("Font-RobotoCondensed"),
-//                                new sap.m.Text( me.createId( sPrefix+"_kW" ),	{} ).addStyleClass("Font-RobotoCondensed"),
-//                                new sap.m.Text( me.createId( sPrefix+"_kWh" ),	{} ).addStyleClass("Font-RobotoCondensed")
-//                            ]
-//                        }).addStyleClass("width75Percent minwidth80px PadLeft5px MarTop3px MarBottom3px MarRight2px TextLeft DeviceOverview-DividingBorder"),
-//                    ]
-//                }).addStyleClass("");
-//
-//                //--------------------------------------------------------------------//
-//                //-- ADD THE STATUS BUTTON TO THE UI								--//
-//                //--------------------------------------------------------------------//
-//
-//                //-- Initialise Variables --//
-//                var sStatusButtonText			= "";
-//                var bButtonStatus				= false;
-//
-//                //-- Store the Device Status --//
-//                var iDeviceStatus		= aDeviceData.DeviceStatus;
-//                var iTogglePermission	= aDeviceData.PermToggle;
-//                //var iTogglePermission	= 0;
-//
-//
-//                //-- Set Text --//
-//                if( iDeviceStatus===0 ) {
-//                    sStatusButtonText	= "Off";
-//                    bButtonStatus		= false;
-//                } else {
-//                    sStatusButtonText	= "On";
-//                    bButtonStatus		= true;
-//                }
-//
-//                //-- DEBUGGING --//
-//                //jQuery.sap.log.debug("PERM = "+sPrefix+" "+iTogglePermission);
-//
-//                //------------------------------------//
-//                //-- Make the Container				--//
-//                //------------------------------------//
-//                var oUIStatusContainer = new sap.m.VBox( me.createId( sPrefix+"_StatusContainer"), {
-//                    items:[] 
-//                }).addStyleClass("minwidth70px PadTop10px PadLeft5px");	//-- END of VBox that holds the Toggle Button
-//
-//
-//                //-- Add the Button's background colour class --//
-//                if( iTogglePermission===0 ) {
-//
-//                    //----------------------------//
-//                    //-- NON TOGGLEABLE BUTTON	--//
-//                    //----------------------------//
-//                    oUIStatusContainer.addItem(
-//                        new sap.m.Switch( me.createId( sPrefix+"_StatusToggle"), {
-//                            state: bButtonStatus,
-//                            enabled: false
-//                        }).addStyleClass("DeviceOverviewStatusToggleSwitch")
-//                    );
-//
-//                } else {
-//
-//                    //----------------------------//
-//                    //-- TOGGLEABLE BUTTON		--//
-//                    //----------------------------//
-//                    oUIStatusContainer.addItem(
-//                        new sap.m.Switch( me.createId( sPrefix+"_StatusToggle"), {
-//                            state: bButtonStatus,
-//                            change: function () {
-//                        //new sap.m.ToggleButton( me.createId( sPrefix+"_StatusToggle"), {
-//                            //text: sStatusButtonText,
-//                            //pressed: bButtonStatus,
-//                            //press : function () {
-//                                //-- Bind a link to this button for subfunctions --//
-//                                var oCurrentButton = this;
-//                                //-- AJAX --//
-//                                IOMy.apiphp.AjaxRequest({
-//                                    url: IOMy.apiphp.APILocation("statechange"),
-//                                    type: "POST",
-//                                    data: { 
-//                                        "Mode":"ThingToggleStatus", 
-//                                        "Id": aDeviceData.DeviceId
-//                                    },
-//                                    onFail : function(response) {
-//                                        IOMy.common.showError(response.message, "Error Changing Device Status");
-//                                    },
-//                                    onSuccess : function( sExpectedDataType, aAjaxData ) {
-//
-//                                        //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
-//                                        if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
-//                                            //-- If turned Off --//
-//                                            //if( aAjaxData.DevicePortStatus===0 ) {
-//                                                //oCurrentButton.setText("Off");
-//                                            //-- Else Turned On --//
-//                                            //} else {
-//                                                //oCurrentButton.setText("On");
-//                                            //}
-//
-//                                            IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.DevicePortStatus;
-//                                        }
-//                                    }
-//                                });
-//                            }
-//                        }).addStyleClass("DeviceOverviewStatusToggleSwitch") //-- END of ToggleButton --//
-//                        //}).addStyleClass("DeviceOverviewStatusToggleButton TextWhite Font-RobotoCondensed Font-Large"); //-- END of ToggleButton --//
-//                    );
-//                }
-//
-//                oUIObject.addItem(oUIStatusContainer);
-//
-//
                 var bUnassignedDevice = true;
                 oUIObject = IOMy.devices.zigbeesmartplug.GetCommonUI( sPrefix, me, aDeviceData, bUnassignedDevice );
                 

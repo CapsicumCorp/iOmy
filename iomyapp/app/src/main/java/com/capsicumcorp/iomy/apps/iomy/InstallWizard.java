@@ -51,6 +51,7 @@ public class InstallWizard {
     //==============================================//
 
     private String welcomeMessage            = "Thank you for choosing iOmy home automation. Press begin to start the quick installation.";
+    private boolean installDemoData          = true;
 
     // Enumerations of answers to the questions.
     public int YES = 0;
@@ -60,7 +61,7 @@ public class InstallWizard {
     public int PROCEED = 4;
 
     // Form Data
-    public String setupAPI = "http://localhost:8080/iomyserver.php"; // TODO: Transfer this into the install wizard module.
+    public String setupAPI = "http://localhost:8080/iomyserver.php";
     public String hostname = null;
     public int webserverport = 8080;
     public String dbURI                 = "localhost";
@@ -121,6 +122,7 @@ public class InstallWizard {
         this.dbURI=sharedPref.getString("pref_mysql_hostname", "localhost");
         this.dbServerPort=Integer.parseInt(sharedPref.getString("pref_mysql_port", "3306"));
         this.dbPassword=sharedPref.getString("pref_mysql_root_password", "");
+        this.installDemoData=sharedPref.getBoolean("pref_demo_data_mode", true);
     }
     /**
      * Generates a random password between 8 - 20 characters long.
@@ -138,10 +140,15 @@ public class InstallWizard {
         // Until a valid password is generated...
         do {
             // ...generate the password.
+
+            // Ensure that the string is empty before the password is generated.
+            password = "";
+
             for (int i = 0; i < length; i++) {
                 r = new Random();
                 password += validChars.charAt(r.nextInt(validChars.length()));
             }
+
         } while (!this.isValidPassword(password));
 
         return password;
@@ -276,8 +283,11 @@ public class InstallWizard {
     // Declare all the class methods
     //==============================================//
     public void summonNextPage(Activity activity, int answer) {
-        if (answer < 0 || answer > 4)
+        if (answer < 0 || answer > 4) {
+            // THIS SHOULD NOT EXECUTE UNDER NORMAL CIRCUMSTANCES!
+            // There must be a bug present in your code for this to run.
             throw new IllegalArgumentException("An unrecognised answer was found.");
+        }
 
         String title = activity.getTitle().toString();
 
@@ -285,11 +295,15 @@ public class InstallWizard {
         if (title == Titles.welcomePageTitle) {
             this.summonLicenseAgreement(activity);
 
-        //--- Proceed from the license agreement to the question about using the device as the server. ---//
+        //--- Proceed from the license agreement to the setup question ---//
         } else if (title == Titles.licenseAgreementTitle) {
+            this.summonSetupQuestions(activity);
+
+        //--- Proceed from the setup questions to the question about using the device as the server. ---//
+        } else if (title == Titles.setupQuestions) {
             this.loadServerDeviceProgress(activity);
 
-        //--- After the server is setup, bring up the database setup. ---//
+            //--- After the server is setup, bring up the database setup. ---//
         } else if (title == Titles.webserverServerSetupTitle) {
             this.summonWebserverDBInfoSetup(activity);
 
@@ -322,6 +336,7 @@ public class InstallWizard {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(activity);
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putBoolean("pref_run_first_run_wizard", false);
+            editor.putBoolean("pref_demo_data_mode", this.getInstallDemoData());
 
             //Update other settings
             editor.putString("pref_webserver_hostname", this.hostname);
@@ -341,6 +356,11 @@ public class InstallWizard {
             //Load main screen
             this.loadIOMy(activity);
         }
+    }
+
+    public void summonSetupQuestions(Activity activity) {
+        Intent intent = new Intent(activity, SetupQuestions.class);
+        activity.startActivity(intent);
     }
 
     public void summonLicenseAgreement(Activity activity) {
@@ -445,4 +465,7 @@ public class InstallWizard {
 //    public String getPremiseAndHubTitle()               {return this.premiseAndHubTitle;}
 
     public String getWelcomeMessage()               {return this.welcomeMessage;}
+    public boolean getInstallDemoData()             {return this.installDemoData;}
+
+    public void setInstallDemoData(boolean b)       {this.installDemoData = b;}
 }

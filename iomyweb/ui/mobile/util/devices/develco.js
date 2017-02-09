@@ -2,7 +2,7 @@
 Title: DevelCo Device Module
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Provides the UI for a DevelCo device entry.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -44,7 +44,7 @@ $.extend(IOMy.devices.develco,{
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
 		
-		console.log(aDeviceData.DeviceId);
+		//console.log(aDeviceData.DeviceId);
         
         // If the UI is for the Unassigned Devices List, include 
         if (bIsUnassigned === true) {
@@ -64,7 +64,7 @@ $.extend(IOMy.devices.develco,{
                     new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
                         text : aDeviceData.DeviceName,
                         press : function () {
-                            //IOMy.common.NavigationChangePage("pDeviceData", {Thing : aDeviceData});
+                            //IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                         }
                     }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                 ]
@@ -204,7 +204,7 @@ $.extend(IOMy.devices.develco,{
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
 		
-		console.log(aDeviceData.DeviceId);
+		//console.log(aDeviceData.DeviceId);
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: [
@@ -216,7 +216,7 @@ $.extend(IOMy.devices.develco,{
                         new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
                             text : aDeviceData.DeviceName,
                             press : function () {
-                                IOMy.common.NavigationChangePage("pDeviceData", {Thing : aDeviceData});
+                                IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                             }
                         }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                     ]
@@ -368,7 +368,7 @@ $.extend(IOMy.devices.develco,{
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
-		console.log(JSON.stringify(aDeviceData));
+		//console.log(JSON.stringify(aDeviceData));
 		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
 		
 		//------------------------------------//

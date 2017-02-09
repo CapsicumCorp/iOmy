@@ -3,7 +3,7 @@ Title: Edit Thing/Item Page (UI5 Controller)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws a form that allows you to edit information about a given
     item or thing.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -45,6 +45,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 		thisView.addEventDelegate({
 			// Everything is rendered in this function run before rendering.
 			onBeforeShow : function (evt) {
+                jQuery.sap.log.debug(JSON.stringify(evt.data.device));
                 // Collect values parsed from the device list.
                 me.oThing = evt.data.device;
         
@@ -173,7 +174,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         
         me.aElementsToDestroy.push(me.sThingNameField);
         var oThingNameField = new sap.m.Input(me.createId(me.sThingNameField), {
-            value : me.oThing.DeviceName
+            value : me.oThing.DisplayName
         }).addStyleClass("width100Percent");
         
         //-----------------------------------------------\\
@@ -191,16 +192,17 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                 new sap.m.Link(me.createId("updateButton"), {
                     text : "Update",
                     press : function () {
-                        this.setEnabled(false);
+                        var thisButton = this; // Captures the scope of the calling button.
+                        thisButton.setEnabled(false);
 
                         var sThingText = me.byId("thingNameField").getValue();
-                        var iThingID = me.oThing.DeviceId;
+                        var iThingID = me.oThing.Id;
                         var mInfo = {};
 
                         //==========================================================\\
                         // Check that the name field is filled out.
                         //==========================================================\\
-                        mInfo = me.ValidateThingName()
+                        mInfo = me.ValidateThingName();
                         
                         if (mInfo.bError === false) {
                             // Run the API to update the device (thing) name
@@ -209,13 +211,6 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                                     url : IOMy.apiphp.APILocation("thing"),
                                     data : {"Mode" : "EditName", "Id" : iThingID, "Name" : sThingText},
                                     onSuccess : function () {
-                                        //===== BRING UP THE SUCCESS DIALOG BECAUSE THE API RAN SUCCESSFULLY. =====\\
-                                        IOMy.common.showSuccess("Update successful.", "Success", 
-                                        function () {
-                                            IOMy.common.NavigationTriggerBackForward(false);
-                                        }, "UpdateMessageBox");
-
-
                                         //-- RENAME THE NAME IN THE DEVICE DATA PAGE --//
                                         try {
                                             var oDevDataPage = oApp.getPage("pDeviceData");
@@ -226,20 +221,33 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 
                                         //-- REFRESH THINGS --//
                                         try {
-                                            IOMy.apiphp.RefreshThingList( {
-                                                onSuccess: $.proxy(function() {
+                                            IOMy.common.ReloadCoreVariables();
+                                            //===== BRING UP THE SUCCESS DIALOG BECAUSE THE API RAN SUCCESSFULLY. =====\\
+                                            IOMy.common.showSuccess("Update successful.", "Success", 
+                                            function () {
+                                                IOMy.common.NavigationTriggerBackForward(false);
+                                            }, "UpdateMessageBox");
 
-                                                    //-- Flag that the Core Variables have been configured --//
-                                                    IOMy.common.CoreVariablesInitialised = true;
-
-                                                }, me)
-                                            }); //-- END THINGS LIST --//
+                                            IOMy.common.bItemNameChangedMustRefresh = true;
                                         } catch (e) {
                                             jQuery.sap.log.error("Error refreshing the Item List: "+e.message);
+                                            this.onComplete();
                                         }
+                                        
+
                                     },
-                                    error : function () {
+                                    onFail : function () {
                                         IOMy.common.showError("Update failed.", "Error");
+                                        
+                                        // Finish the request by enabling the edit button
+                                        this.onComplete();
+                                    },
+                                    
+                                    onComplete : function () {
+                                        //------------------------------------------------------------------------------------------//
+                                        // Re-enable the button once the request and the callback functions have finished executing.
+                                        //------------------------------------------------------------------------------------------//
+                                        thisButton.setEnabled(true);
                                     }
                                 });
                             } catch (e00033) {
@@ -248,9 +256,8 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                             }
                         } else {
                             IOMy.common.showError(mInfo.aErrorMessages.join("\n\n"));
-                            jQuery.sap.log.error(mInfo.aErrorMessages.join("\n"))
+                            jQuery.sap.log.error(mInfo.aErrorMessages.join("\n"));
                         }
-                        this.setEnabled(true);
                     }
                 }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
             ]

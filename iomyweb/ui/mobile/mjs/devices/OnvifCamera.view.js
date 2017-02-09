@@ -3,7 +3,7 @@ Title: IP Camera Page UI5 View
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Creates the page to view a camera feed, capture a screenshot or
     record some pictures, and any motion activity.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -54,7 +54,7 @@ sap.ui.jsview("mjs.devices.OnvifCamera", {
 				//-- Main Page Body --//
 				new sap.m.Panel( me.createId("Panel"), {
 					content: []
-				}).addStyleClass("PanelNoPadding height100Percent")
+				}).addStyleClass("PanelNoPadding height100Percent UserInputForm")
 			]
 		}).addStyleClass("height100Percent width100Percent MainBackground");
 		

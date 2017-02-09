@@ -2,7 +2,7 @@
 Title: Edit Link Page (UI5 Controller)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws a form that allows you to edit information about a given link.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -27,6 +27,9 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
     
     linkID : null,
     
+    wRoomCBox : null,
+    wPremiseCBox : null,
+    
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
@@ -49,7 +52,7 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
 				
 				// Start rendering the page
 				
-				me.functions.destroyItemsByIdFromView(me, ["linkField"]);
+				me.functions.destroyItemsByIdFromView(me, ["linkField", "premiseCBox", "roomCBox"]);
                 
                 var oLinkTitle = new sap.m.Text({
                     text : "Name",
@@ -59,6 +62,39 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
 				var oLinkNameField = new sap.m.Input(me.createId("linkField"), {
 					value : sLinkName
 				}).addStyleClass("SettingsTextInput width100Percent");
+                
+                //-------------------------------------------------------\\
+                // PREMISE COMBO BOX
+                //-------------------------------------------------------\\
+                var oPremiseLabel = new sap.m.Label({
+                    text : "Premise you wish to place this link in"
+                });
+
+                me.wPremiseCBox = IOMy.widgets.getPremiseSelector(me.createId("premiseCBox")).addStyleClass("width100Percent SettingsDropDownInput");
+                me.wPremiseCBox.setSelectedKey(oLink.PremiseId);
+                me.wPremiseCBox.attachChange(
+                    function () {
+                        // Refresh the room select box.
+                        me.wRoomCBoxHolder.destroyItems();
+                        me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), this.getSelectedKey()).addStyleClass("width100Percent SettingsDropDownInput");
+                        me.wRoomCBox.setSelectedItem(null);
+                        me.wRoomCBoxHolder.addItem(me.wRoomCBox);
+                    }
+                );
+                
+                //-------------------------------------------------------\\
+                // ROOM COMBO BOX
+                //-------------------------------------------------------\\
+                var oRoomLabel = new sap.m.Label({
+                    text : "Room you wish to place this link in"
+                });
+
+                me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_"+me.wPremiseCBox.getSelectedKey()).addStyleClass("width100Percent SettingsDropDownInput");
+                me.wRoomCBox.setSelectedKey(oLink.LinkRoomId);
+
+                me.wRoomCBoxHolder = new sap.m.VBox({
+                    items : [me.wRoomCBox]
+                }).addStyleClass("width100Percent");
 				
 				//============================================================\\
                 // Create the Update/Edit Button.                             \\
@@ -68,7 +104,8 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
 						new sap.m.Link({
 							text : "Update",
 							press : function () {
-								this.setEnabled(false);
+								var thisButton = this; // Captures the scope of the calling button.
+                                thisButton.setEnabled(false);
 								
 								var sText = me.byId("linkField").getValue();
 								var iID = me.linkID;
@@ -104,25 +141,39 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
                                                 }); //-- END LINK LIST --//
                                                 IOMy.common.showSuccess("Update successful.", "Success", 
                                                 function () {
-                                                    IOMy.common.NavigationTriggerBackForward(false);
+                                                    IOMy.devices.AssignLinkToRoom(iID, me.wRoomCBox.getSelectedKey(), oLink.LinkTypeName);
                                                 }, "UpdateMessageBox");
                                             },
                                             onFail : function () {
                                                 IOMy.common.showError("Update failed.", "Error");
+                                                
+                                                // Finish the request by enabling the edit button
+                                                this.onComplete();
+                                            },
+                                            
+                                            onComplete : function () {
+                                                //------------------------------------------------------------------------------------------//
+                                                // Re-enable the button once the request and the callback functions have finished executing.
+                                                //------------------------------------------------------------------------------------------//
+                                                thisButton.setEnabled(true);
                                             }
                                         });
                                     } catch (e00033) {
                                         IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
                                     }
                                 }
-								this.setEnabled(true);
 							}
 						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
 					]
 				}).addStyleClass("TextCenter MarTop12px");
         		
 				var oVertBox = new sap.m.VBox(me.makeId("vbox"), {
-					items : [oLinkTitle, oLinkNameField, oEditButton]
+					items : [
+                        oLinkTitle, oLinkNameField,
+                        oPremiseLabel, me.wPremiseCBox,
+                        oRoomLabel, me.wRoomCBox,
+                        oEditButton
+                    ]
 				}).addStyleClass("UserInputForm");
     		    
 		    	var oPanel = new sap.m.Panel(me.makeId("panel"), {

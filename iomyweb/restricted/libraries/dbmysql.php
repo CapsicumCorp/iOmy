@@ -65,6 +65,7 @@ class DBMySQL {
 			} else {
 				//-- Create the Database Url --//
 				$sDBUrl        = $aConfig['uri'];
+				
 			}
 			
 			if( isset($aConfig['viewschema']) ) {
@@ -195,6 +196,7 @@ class DBMySQL {
 			return false;
 		}
 	}
+	
 	
 	
 	public function dbEndTransaction() {

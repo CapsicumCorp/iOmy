@@ -4,7 +4,7 @@ Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
 Modified: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws either a username and password prompt, or a loading app
     notice for the user to enter his/her credentials after logging out.
-Copyright: Capsicum Corporation 2015, 2016
+Copyright: Capsicum Corporation 2015, 2016, 2017
 
 This file is part of iOmy.
 
@@ -135,31 +135,20 @@ sap.ui.controller("mjs.login.ForceSwitchUser", {
 		//============================================//
 		
 		//--------------------------------------------//
-		//-- Input - Username						--//
+		//-- Splash Logo                            --//
 		//--------------------------------------------//
 		if (this.byId("SplashImage") !== undefined)
 			this.byId("SplashImage").destroy();
 		
-		//--------------------------------------------//
-		//-- Splash Logo						--//
-		//--------------------------------------------//
 		var oLoginSplashImage = new sap.m.Image( this.createId("SplashImage"), {
 			src: "resources/images/iomy_splash.png",
             densityAware : false,
 			width: "200px"
 		}).addStyleClass("MarTop10px");
         
-		
-/*
-		oLoginInputSubmit.attachPress(
-			function (oControlEvent) {
-				me.doLogin();
-			}
-		);
-*/
 		var oLoginLoadingContainer = new sap.m.FlexBox({
 			items: [
-				oLoginSplashImage,
+				oLoginSplashImage
 			],
 			direction: "Column"
 		});
@@ -219,7 +208,10 @@ sap.ui.controller("mjs.login.ForceSwitchUser", {
 			type: "Password",
 			placeholder: "password",
 			maxLength: 40,
-			width: "200px"
+			width: "200px",
+            submit : function (oControlEvent) {
+				me.doLogin();
+			}
 		}).addStyleClass("LoginTextInput");
 		
 		//--------------------------------------------//
@@ -304,18 +296,24 @@ sap.ui.controller("mjs.login.ForceSwitchUser", {
 					//-- Check if the User is logged in --//
 					if( oResponseData.login===true ) {
 						
-						me.DrawLoginLoading();
-						IOMy.common.RefreshCoreVariables(true);
+//						me.DrawLoginLoading();
+//						IOMy.common.RefreshCoreVariables(true);
+                        
+                        window.location.reload(true); // TRUE forces a proper refresh from the server, not the cache.
 					} else {
 						//-- TODO: Add the Appropiate Error Messages from the Session Check when Andrew has completed the Better Error Messages --//
 						IOMy.common.showError("Invalid Username or Password!", "User Error",
                             function () {
-                                window.location.reload(true); // TRUE forces a proper refresh from the server, not the cache.
+                                //---------------------------------------------------------------//
+                                // Clears the interval instance for refreshing core variables as
+                                // an incorrect login attempt terminates the current session.
+                                //---------------------------------------------------------------//
+                                clearInterval(IOMy.common.CoreVariableRefreshIntervalInstance);
+//                                window.location.reload(true); // TRUE forces a proper refresh from the server, not the cache.
                             }
                         );
                         
 					}
-					
 					
 				},
 				error : function(err) {

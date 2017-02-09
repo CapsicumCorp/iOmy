@@ -37,14 +37,14 @@ if( !defined('SITE_BASE') ) {
 //------------------------------------------------------------//
 $bError                     = false;        //-- BOOLEAN:       Used to indicate if an error has been caught --//
 $sErrMesg                   = "";           //-- STRING:        Used to store the error message after an error has been caught --//
-$sOutput                    = "";           //-- STRING:        This is the --//
+$sOutput                    = "";           //-- STRING:        Used to hold this API Request's body when everything is successful. --//
 $aResult                    = array();      //-- ARRAY:         Used to store the results.			--//
 
 $sPostMode                  = "";           //-- STRING:        Used to store which Mode the API should function in.			--//
 $sPostNetworkAddress        = "";           //-- STRING:        Used to store the "DeviceNetworkAddress" that is passed as a HTTP POST variable.		--//
-$iPostNetworkPort           = "";           //-- INTEGER:       Used to store the "".				--//
-$sPostUsername              = "";           //-- STRING:        Used to store the "".				--//
-$sPostPassword              = "";           //-- STRING:        Used to store the "".				--//
+$iPostNetworkPort           = "";           //-- INTEGER:       Used to store the "".	--//
+$sPostUsername              = "";           //-- STRING:        Used to store the "".	--//
+$sPostPassword              = "";           //-- STRING:        Used to store the "".	--//
 $sPostStreamProfileName     = "";           //-- STRING:        --//
 $sPostThumbProfileName      = "";           //-- STRING:        --//
 $sPostCapabilitiesType      = "";           //-- STRING:        --//
@@ -60,22 +60,14 @@ $aTempFunctionResult3       = array();      //-- ARRAY:         --//
 $bFound                     = false;        //-- BOOLEAN:       Used to indicate if a match is found or not --//
 $iAPICommTypeId             = 0;            //-- INTEGER:       Will hold the the CommTypeId for comparisons --//
 $iLinkPermWrite             = 0;            //-- INTEGER:       --//
-
+$aCommInfo                  = array();      //-- ARRAY:         --//
 
 //------------------------------------------------------------//
 //-- 1.3 - Import Required Libraries                        --//
 //------------------------------------------------------------//
-require_once SITE_BASE.'/restricted/libraries/onvif.php';
-require_once SITE_BASE.'/restricted/libraries/restrictedapicore.php';       //-- This should call all the additional libraries needed --//
-require_once SITE_BASE.'/restricted/php/special/versions/0.1.0.php';        //-- This library is used to perform the inserting of a new Onvif Server and Streams into the database --//
-
-//------------------------------------------------------------//
-//-- 1.4 - Flag an Error as there is no Database access     --//
-//------------------------------------------------------------//
-if( $aRestrictedApiCore['RestrictedDB']===false ) {
-	$bError    = true;
-	$sErrMesg .= "Can't access the database! User may not be logged in";
-}
+require_once SITE_BASE.'/restricted/libraries/onvif/main.php';
+require_once SITE_BASE.'/restricted/libraries/special/dbinsertfunctions.php';        //-- This library is used to perform the inserting of a new Onvif Server and Streams into the database --//
+require_once SITE_BASE.'/restricted/php/core.php';                                   //-- This should call all the additional libraries needed --//
 
 
 //====================================================================//
@@ -128,9 +120,9 @@ if($bError===false) {
 			$sPostMode!=="PTZAbsoluteMove"              && $sPostMode!=="PTZTimedMove"                  && 
 			$sPostMode!=="NetAddressCheckForOnvif"      && $sPostMode!=="NetAddressListCapabilities"    && 
 			$sPostMode!=="NetAddressLookupDeviceTime"   && $sPostMode!=="LookupVideoSources"            && 
-			$sPostMode!=="LookupProfiles"               && $sPostMode!=="FetchThumbnail"
+			$sPostMode!=="LookupProfiles"               
 		) {
-			$bError = true;
+			$bError    = true;
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
 			$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
@@ -145,7 +137,6 @@ if($bError===false) {
 		$sErrMesg .= "eg. \n \"NetAddressCheckForOnvif\", \"NetAddressLookupDeviceTime\", \"LookupVideoSources\" or \"LookupProfiles\" \n\n";
 		//sErrMesg .= e0011.message;
 	}
-	
 	
 	//----------------------------------------------------//
 	//-- 2.2.2.A - Retrieve "DeviceNetworkAddress"      --//
@@ -558,29 +549,33 @@ if($bError===false) {
 //====================================================================//
 if( $bError===false ) {
 	try {
+		//================================================================//
+		//== 4.1 - Check if the Modes is supported in demo mode         ==//
+		//================================================================//
+		if( $oRestrictedApiCore->CheckIfDemoMode() ) {
+			//-- IF Mode is unsupported --//
+			if( 
+				$sPostMode==="AddNewOnvifServer"             && $sPostMode==="ListServerInfo"                && 
+				$sPostMode==="NewThing"                      && $sPostMode==="PTZAbsoluteMove"               && 
+				$sPostMode==="PTZTimedMove"                  && $sPostMode==="LookupVideoSources"            && 
+				$sPostMode==="LookupProfiles"                
+			) {
+				$bError    = true;
+				$iErrCode  = 0310;
+				$sErrMesg .= "Error Code:'0310' \n";
+				$sErrMesg .= "This feature is not supported while the iOmy server is in demonstration mode!";
+			}
+		}
 		
 		//================================================================//
-		//== 4.1 - Lookup Hub and Comm Info                             ==//
+		//== 4.2 - Lookup Hub and Comm Info                             ==//
 		//================================================================//
 		if( $sPostMode==="AddNewOnvifServer" ) {
 			//-- Lookup the "API Comm" Type to be used to be compared --//
 			$iAPICommTypeId = LookupFunctionConstant("APICommTypeId");
 			
-			$bResult = CheckIfDeviceSupportsOnvif( $sPostNetworkAddress, $iPostNetworkPort );
-				
 			//--------------------------------------------------------------------//
-			//-- 4.1.2 - --//
-			//--------------------------------------------------------------------//
-			if( $bResult===false ) {
-				$bError    = true;
-				$iErrCode  = 1202;
-				$sErrMesg .= "Error Code:'1202' \n";
-				$sErrMesg .= "Device isn't a valid Onvif Server! \n";
-				$sErrMesg .= "Please use the network address and port of a valid Onvif Server! \n";
-			}
-			
-			//--------------------------------------------------------------------//
-			//-- 4.1.3 - --//
+			//-- 4.2.3 - Lookup if the User has Write premise permission        --//
 			//--------------------------------------------------------------------//
 			if( $bError===false ) {
 				$aHubData = HubRetrieveInfoAndPermission( $iPostHubId );
@@ -590,7 +585,7 @@ if( $bError===false ) {
 					$iWritePermission = $aHubData['Data']['PermWrite'];
 						
 					if( $iWritePermission===0 ) {
-						$bError = true;
+						$bError    = true;
 						$iErrCode  = 1203;
 						$sErrMesg .= "Error Code:'1203' \n";
 						$sErrMesg .= "Permission issue detected!\n";
@@ -598,7 +593,7 @@ if( $bError===false ) {
 					}
 					
 				} else {
-					$bError = true;
+					$bError    = true;
 					$iErrCode  = 1204;
 					$sErrMesg .= "Error Code:'1204' \n";
 					$sErrMesg .= "Problem looking up the data for the selected Hub\n";
@@ -607,7 +602,7 @@ if( $bError===false ) {
 			}
 			
 			//--------------------------------------------------------------------//
-			//-- 4.1.4 - Check if a "PHP API" Comm is setup on the Hub          --//
+			//-- 4.2.4 - Check if a "PHP API" Comm is setup on the Hub          --//
 			//--------------------------------------------------------------------//
 			if( $bError===false ) {
 				$aTempFunctionResult1 = GetCommsFromHubId( $iPostHubId );
@@ -632,18 +627,31 @@ if( $bError===false ) {
 				}
 			}
 			
-			
+			//--------------------------------------------------------------------//
+			//-- 4.2.5 - Check if the device Supports Onvif                     --//
+			//--------------------------------------------------------------------//
+			if( $bError===false ) {
+				$bResult = CheckIfDeviceSupportsOnvif( $sPostNetworkAddress, $iPostNetworkPort );
+				
+				if( $bResult===false ) {
+					$bError    = true;
+					$iErrCode  = 1202;
+					$sErrMesg .= "Error Code:'1202' \n";
+					$sErrMesg .= "Device isn't a valid Onvif Server! \n";
+					$sErrMesg .= "Please use the network address and port of a valid Onvif Server! \n";
+				}
+			}
 		}
 		
 		//================================================================//
-		//== 4.2 - Lookup Thing Info                                    ==//
+		//== 4.4 - Lookup Thing Info                                    ==//
 		//================================================================//
 		if( $sPostMode==="PTZAbsoluteMove" || $sPostMode==="PTZTimedMove" ) {
 			
 			$iOnvifThingTypeId = LookupFunctionConstant("OnvifThingTypeId");
 			
 			//----------------------------------------------------------------------------//
-			//-- STEP 1: Lookup Thing Information                                       --//
+			//-- 4.4.1 - Lookup Thing Information                                       --//
 			//----------------------------------------------------------------------------//
 			$aTempFunctionResult1 = GetThingInfo( $iPostThingId );
 			
@@ -654,19 +662,19 @@ if( $bError===false ) {
 				$sOnvifProfileName  = $aTempFunctionResult1['Data']['ThingSerialCode'];
 				
 				if( $iThingTypeId!==$iOnvifThingTypeId ) {
-					//-- The ThingId that the user passed is not a Philips Hue --//
+					//-- The ThingId that the user passed is not a Onvif Stream --//
 					$bError     = true;
-					$iErrCode   = 0303;
-					$sErrMesg  .= "Error Code:'0303' \n";
+					$iErrCode   = 0340;
+					$sErrMesg  .= "Error Code:'0340' \n";
 					$sErrMesg  .= "The specified Thing is not a Onvif Stream!\n";
 					$sErrMesg  .= "Please use the ThingId of a valid Onvif Stream.\n";
 				}
 				
 			} else {
-				//-- TODO: Add Error Message --//
-				$bError = true;
-				$iErrCode   = 0302;
-				$sErrMesg  .= "Error Code:'0302' \n";
+				//-- ERROR: Could not get Thing Info --//
+				$bError     = true;
+				$iErrCode   = 0341;
+				$sErrMesg  .= "Error Code:'0341' \n";
 				$sErrMesg  .= "Problem when looking up the ThingInfo!\n";
 				$sErrMesg  .= $aTempFunctionResult1['ErrMesg'];
 			}
@@ -674,7 +682,7 @@ if( $bError===false ) {
 		
 		
 		//================================================================//
-		//== 4.3 - Lookup Link Info                                     ==//
+		//== 4.5 - Lookup Link Info                                     ==//
 		//================================================================//
 		if( 
 			$sPostMode==="LookupVideoSources"   || $sPostMode==="NewThing"             || 
@@ -691,7 +699,7 @@ if( $bError===false ) {
 				//-- Extract the desired variables out of the results --//
 				if( $aTempFunctionResult2['Error']===false ) {
 					//-- Extract the Desired Variables --//
-					$iLinkCommType          = $aTempFunctionResult2['Data']['CommTypeId'];
+					
 					//-- Extract the required variables from the function results --//
 					$sPostNetworkAddress    = $aTempFunctionResult2['Data']['LinkConnAddress'];
 					$iPostNetworkPort       = $aTempFunctionResult2['Data']['LinkConnPort'];
@@ -702,10 +710,24 @@ if( $bError===false ) {
 					//-- Flag that this request needs to use the "PhilipsHue" PHP Object to update the device --//
 					$bUsePHPObject = true;
 					
+					//-- Lookup the Comm Info --//
+					$aCommInfo = GetCommInfo( $aTempFunctionResult2['Data']['LinkCommId'] );
+					
+					if( $aCommInfo['Error']===false ) {
+						$iLinkCommType          = $aCommInfo['Data']['CommTypeId'];
+						
+					} else {
+						$bError = true;
+						$iErrCode  = 0350;
+						$sErrMesg .= "Error Code:'0350' \n";
+						$sErrMesg .= "Problem when fetching the Link Comm Info\n";
+						$sErrMesg .= $aCommInfo['ErrMesg'];
+					}
+					
 				} else {
 					$bError = true;
-					$iErrCode  = 0304;
-					$sErrMesg .= "Error Code:'0304' \n";
+					$iErrCode  = 0351;
+					$sErrMesg .= "Error Code:'0351' \n";
 					$sErrMesg .= "Problem when fetching the Link info\n";
 					$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
 				}
@@ -713,7 +735,7 @@ if( $bError===false ) {
 		}	//-- ENDIF --//
 		
 		//----------------------------------------------------------------------------//
-		//-- 4.4 - ESTABLISH THE PHP ONVIF OBJECT                                   --//
+		//-- 4.6 - ESTABLISH THE PHP ONVIF OBJECT                                   --//
 		//----------------------------------------------------------------------------//
 		if( $bError===false ) {
 			if( 
@@ -724,14 +746,14 @@ if( $bError===false ) {
 				$sPostMode==="PTZTimedMove"  
 			) {
 				//--------------------------------------------------------------------//
-				//-- 4.3.1 - Check if a PHPOnvif class can be created for that IP   --//
+				//-- 4.6.1 - Check if a PHPOnvif class can be created for that IP   --//
 				//--------------------------------------------------------------------//
 				$oPHPOnvifClient = new PHPOnvif( $sPostNetworkAddress, $iPostNetworkPort, $sPostUsername, $sPostPassword );
 				
 				if( $oPHPOnvifClient->bInitialised===false ) {
 					$bError = true;
-					$iErrCode  = 0305;
-					$sErrMesg .= "Error Code:'0305'\n";
+					$iErrCode  = 0360;
+					$sErrMesg .= "Error Code:'0360'\n";
 					$sErrMesg .= "Couldn't initialise Onvif Class!\n";
 					$sErrMesg .= json_encode( $oPHPOnvifClient->aErrorMessges );
 				}
@@ -786,7 +808,7 @@ if( $bError===false ) {
 				//--------------------------------------------------------------------//
 				//-- 5.2.1 - INITIALISE THE ONVIF CLIENT                            --//
 				//--------------------------------------------------------------------//
-				$oPHPOnvifClient		= new PHPOnvif( $sPostNetworkAddress, $iPostNetworkPort, $sPostUsername, $sPostPassword );
+				$oPHPOnvifClient        = new PHPOnvif( $sPostNetworkAddress, $iPostNetworkPort, $sPostUsername, $sPostPassword );
 				
 				//--------------------------------------------------------------------//
 				//-- 5.2.2 - FETCH RESULTS                                          --//
@@ -866,21 +888,21 @@ if( $bError===false ) {
 							
 						} else {
 							//--  --//
-							$bError = true;
+							$bError    = true;
 							$sErrMesg .= "Error Code:'3403'\n";
 							$sErrMesg .= "Couldn't initialise Onvif Class!\n";
 						}
 						
 					} else {
 						//-- ERROR: Display a message indicating what went wrong --//
-						$bError = true;
+						$bError    = true;
 						$sErrMesg .= "Error Code:'3402'\n";
 						$sErrMesg .= "Couldn't initialise Onvif Class!\n";
 					}
 					
 				} else {
 					//-- ERROR: Display a message indicating what went wrong --//
-					$bError = true;
+					$bError    = true;
 					$sErrMesg .= "Error Code:'3401'\n";
 					$sErrMesg .= "Couldn't initialise Onvif Class!\n";
 					$sErrMesg .= json_encode( $oPHPOnvifClient->aErrorMessges );
@@ -899,7 +921,7 @@ if( $bError===false ) {
 		} else if( $sPostMode==="LookupVideoSources" ) {
 			try {
 				if( $bError===false ) {
-					$aTempFunctionResult	= $oPHPOnvifClient->GetVideoSources();
+					$aTempFunctionResult    = $oPHPOnvifClient->GetVideoSources();
 					
 					if( $aTempFunctionResult['Error']===false ) {
 						$aResult = $oPHPOnvifClient->ExtractVideoSources( $aTempFunctionResult['Result'] );
@@ -924,7 +946,7 @@ if( $bError===false ) {
 		//================================================================//
 		} else if( $sPostMode==="LookupProfiles" ) {
 			try {
-				$aTempFunctionResult	= $oPHPOnvifClient->GetProfiles();
+				$aTempFunctionResult    = $oPHPOnvifClient->GetProfiles();
 				
 				if( $aTempFunctionResult['Error']===false ) {
 					

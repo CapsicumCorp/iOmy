@@ -2,7 +2,7 @@
 Title: Device Overview page
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: UI5 Controller. Lists all the devices the current user has access to.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -36,6 +36,10 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 	},											//-- ARRAY:			Used to store the list of Ajax tasks to execute to update the page. --//
 	aUIGroupingData:				[],			//-- ARRAY:			Used to store the UI data
 	
+    iIOCount:                       0,          //-- INTEGER:       Counts the number of IOs detected. --//
+    iIOErrorCount:                  0,          //-- INTEGER:       Counts the number of IOs that failed to load. --//
+    aIOErrorMessages:               [],         //-- ARRAY:         An array for the error messages that are generated when an error occurs with one of the IOs. --//
+    
 	iCachingSeconds:				300,		//-- INTEGER:		The Time in seconds of how long to cache the Page before it needs refreshing. (Hugely decreases the Server workload)	--//
 	dLastAjaxUpdate:				null,		//-- DATE:			Stores the last time the page had the Ajax values updated.			--//
 	dLastDeviceUpdate:				null,		//-- DATE:			Stores the last time the page had the Ajax values updated.			--//
@@ -140,7 +144,7 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 			try {
 				oController.byId( sObjectId ).destroy();
 			} catch(e1) {
-				console.log("Error DeletingObject: "+sObjectId);
+				//console.log("Error DeletingObject: "+sObjectId);
 			}
 			
 		});
@@ -165,7 +169,7 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 		var sRKey				= "";				//-- STRING:	Holds the "Rooms Id" based key in the "PremiseList" global array. --//
 		var sGroupName			= "";				//-- STRING:	Holds the "UI Grouping Name" that will be used. --//
 		var aDevice				= {};				//-- ARRAY:		--//
-		var aMenuItems = [                          //-- ARRAY:		Holds the items for building the extras menu. --//
+		var aMenuItems = [                          //-- ARRAY:		Holds the items for building the action menu. --//
             {
                 text: "NO FILTER",
                 select: function(oControlEvent) {
@@ -253,7 +257,9 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
                                         "PermToggle":		aDevice.PermToggle,
                                         "IOs":              aDevice.IO,
                                         "RoomId":			aDevice.RoomId,
-                                        "PremiseId":		aDevice.PremiseId
+                                        "PremiseId":		aDevice.PremiseId,
+                                        "UILastUpdate":		aDevice.UILastUpdate,
+                                        "LabelWidgets":     aDevice.LabelWidgets
                                     });
                                 }
                             }
@@ -393,13 +399,14 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
            //-- Add Grouping box to Panel --//
            backgroundDesign: "Transparent",
            content: [oVertBox]
-        }).addStyleClass("PanelNoPadding PadBottom10px");
+        }).addStyleClass("TableSideBorders UserInputForm PanelNoPadding PadBottom10px");
 
         thisView.byId("page").addContent( oPanel );
 		
         //-- Insert the extras menu used to filter devices according to type. --//
+        thisView.byId("extrasMenuHolder").destroyItems();
         thisView.byId("extrasMenuHolder").addItem(
-            IOMy.widgets.getExtrasButton({
+            IOMy.widgets.getActionMenu({
                 id : oController.createId("extrasMenu"),        // Uses the page ID
                 icon : "sap-icon://GoogleMaterial/more_vert",
                 items : aMenuItems
@@ -425,6 +432,7 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 				var sPrefix = aGrouping.Prefix+"_"+aDevice.DeviceId;
 				
 				//-- Add the Tasks to populate the UI --//
+                //console.log(JSON.stringify(aDevice));
 				var aNewTasks = IOMy.devices.GetCommonUITaskListForDeviceOverview( sPrefix, oController, aDevice );
 				//jQuery.sap.log.debug( JSON.stringify(aNewTasks) );
 				
@@ -488,6 +496,7 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 	},
 	
 	RunAjaxTask: function( aTask ) {
+        
 		//-- Extract the task type --//
 		var sTaskType = aTask.Type;
 		
@@ -537,6 +546,9 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 			iIOId			= aTask.Data.IOId;
 			sIODataType		= aTask.Data.IODataType;
 			sIOLabel		= aTask.Data.LabelId;
+            
+            // Add to the IO count
+            oController.iIOCount++;
 			
 		} catch( e1000 ) {
 			jQuery.sap.log.error("Error: Extracting Task data!"); 
@@ -545,7 +557,7 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 		//--------------------------------------------------------//
 		//-- 3.0 - Prepare for Ajax Request						--//
 		//--------------------------------------------------------//
-		iUTS_Start				= IOMy.common.GetStartOfCurrentPeriod();
+		//iUTS_Start				= IOMy.common.GetStartOfCurrentPeriod();
 		iUTS_End				= IOMy.common.GetEndOfCurrentPeriod();
 		
 		//-- Store the Odata URL --//
@@ -580,7 +592,7 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 								//if(aData[0].UTS >= (iUTS_End-600) ) {
 									//-- Update the Page --//
 									
-									var oUI5Object = oController.byId( sIOLabel )
+									var oUI5Object = oController.byId( sIOLabel );
 									if( oUI5Object!==undefined && oUI5Object!==null && oUI5Object!==false ) {
 										//----------------------------------------//
 										//-- Round to 3 decimal places          --//
@@ -601,12 +613,18 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 								//	oController.byId( sIOLabel ).setText("IO Offline");
 								//}
 							} else {
+                                //console.log("aData[0].UTS is not defined");
+                                //console.log(aData[0]);
 								oController.byId( sIOLabel ).setText("IO Offline");
 							}
 						} else {
+                            //console.log("aData[0] is not defined");
+                            //console.log(aData);
 							oController.byId( sIOLabel ).setText("IO Offline");
 						}
 					} else {
+                        //console.log("aData is not defined");
+                        //console.log(aData);
 						oController.byId( sIOLabel ).setText("IO Offline");
 					}
 				} catch( e5678) {
@@ -621,6 +639,8 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 			},
 			"onFail" : function (response) {
 				IOMy.common.showError("There was an error retriving the value of IO "+iIOId);
+                // Add to the IO Error count
+                oController.iIOErrorCount++;
 				
 				//-- Recursively check for more Tasks --//
 				oController.RecursiveLoadAjaxData();

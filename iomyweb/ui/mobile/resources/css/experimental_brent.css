@@ -2,7 +2,7 @@
 Title: Brent's experimental CSS Rules
 Author: Brent's Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Brent's experimental CSS rules
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -20,6 +20,19 @@ You should have received a copy of the GNU General Public License
 along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
+
+        .BoxSizingBorderBox {
+                box-sizing: border-box;
+        }
+        
+        #pSettingsAddUser--AddUserPanel > .sapMPanelContent {
+                /* Clear padding */
+                padding: 0px;
+        }
+        
+        #pSettingsAddUser--AddUserPanel > .sapMPanelContent > .UserFormSection {
+                padding: 1rem;
+        }
 
         .PaddingToMatchButtonText {
                 padding-left: 0.75rem;
@@ -70,6 +83,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
                color: white;
         }
         
+        /*------------------------------------------------------*/
+        /* PHILIPS HUE SLIDERS
+        /*------------------------------------------------------*/
+        
         .PhilipsHueSlider > .sapMSliderInner {
                 background: #AAAAAA;
         }
@@ -96,6 +113,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
                 top: -0.71rem;
         }
         
+        /*------------------------------------------------------*/
+        /* PHILIPS HUE SWITCH
+        /*------------------------------------------------------*/
         .PhilipsHueSwitch {
                 position: relative;
         }
@@ -119,13 +139,13 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
                 color: black;
         }
         
+        .PhilipsHueSwitch_On:hover:not(.sapMLnkDsbl) {
+                color: black;
+        }
+        
         .PhilipsHueSwitch_Off {
                 background: rgb(197,63,00);
                 color: white;
-        }
-        
-        .PhilipsHueSwitch_On:hover:not(.sapMLnkDsbl) {
-                color: black;
         }
         
         .PhilipsHueSwitch_Off:hover:not(.sapMLnkDsbl) {
@@ -133,7 +153,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
         }
         
         .CameraThumbnail {
-                background-size: cover;
+                background-size: 100% 100%;
+                background-repeat: no-repeat;
         }
         
         .sapMPanel {
@@ -160,6 +181,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
                 border-color: rgb(139,197,63);
         }
         
+        .sapMSltPressed:not(.sapMSltDisabled) {
+                border-color: rgb(139,197,63);
+        }
+        
         .NumberLabel {
                 padding: 0.250rem 0px;
                 font-size: 18px;
@@ -167,4 +192,48 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
         
         .DeviceDataBox {
                 margin: auto 0px;
+        }
+        
+        @media only screen and (min-width: 551px) {
+                .TableSideBorders {
+                        border-left: 1px rgb(188,190,192) solid;
+                        border-right: 1px rgb(188,190,192) solid;
+                }
+        }
+        
+        .RoomPermissionsApplyButton > .sapMFlexItem {
+                margin: 10px;
+        }
+        
+        .sapMBarPH {
+                height: auto;
+        }
+        
+        .sapMSltPressed>.sapMSltArrow {
+                background: rgb(139,197,63);
+        }
+        
+        .sapMSltPicker .sapMIBar.sapMIBar-CTX {
+                border: 0.0625rem solid rgb(139,197,63);
+        }
+        
+        .sapMSltBar::after {
+                width: 3.5rem;
+                color: #ffffff;
+                background: rgb(139,197,63);
+        }
+        
+        .sapMSelectListItemBaseSelected {
+                background: #e6f9e6;
+        }
+        
+        .sap-desktop .sapMSlt:not(.sapMSltDisabled):focus {
+                border-color: rgb(139,197,63);
+        }
+        
+        .sap-desktop .sapMSlt:not(.sapMSltDisabled):focus {
+                border-color: rgb(139,197,63);
+        }
+        .sapMSltHoverable:hover {
+                border-color: rgb(139,197,63);
         }

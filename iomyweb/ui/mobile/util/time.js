@@ -2,7 +2,7 @@
 Title: iOmy Time Module
 Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
 Description: Functions that assist with handling timestamps, and dates.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -26,11 +26,11 @@ $.sap.declare("IOMy.time",true);
 IOMy.time = new sap.ui.base.Object();
 
 $.extend(IOMy.time,{
-	bBackdateUTS:			false,			//-- BOOLEAN:		Used to indicate if an old timestamp should be used instead of the current timestamp --//
-	bRoundTime:				false,			//-- BOOLEAN:		Used to indicate if the time should be rounded down. (eg. rounded to down to a 5 minute value)	--//
-	iSecondsToRound:		300,			//-- INTEGER:		--//
-	iDefaultBackdateUTS:	1293885740,		//-- INTEGER:		--//
-	sCurrentPeriod:			"Day",			//-- STRING:		Stores the Current Period --//
+	bBackdateUTS:           false,          //-- BOOLEAN:       Used to indicate if an old timestamp should be used instead of the current timestamp --//
+	bRoundTime:             false,          //-- BOOLEAN:       Used to indicate if the time should be rounded down. (eg. rounded to down to a 5 minute value). --//
+	iSecondsToRound:        300,            //-- INTEGER:       Nearest amount of time in seconds of when to round to (only if round time is turned on ).  --//
+	iDefaultBackdateUTS:    1293885740,     //-- INTEGER:       Special timestamp to replace the current timestamp with to see what the UI would have looked at that date. --//
+	sCurrentPeriod:         "Day",          //-- STRING:        Stores the Current Period --//
 	
 	
 	
@@ -42,13 +42,13 @@ $.extend(IOMy.time,{
 		//----------------------------------------------------//
 		//-- 1.0 - Declare Variables                        --//
 		//----------------------------------------------------//
-		var iYear			= 0;
-		var iMonth			= 0;
-		var iDay			= 0;
-		var iHour			= 0;
-		var iMinute			= 0;
-		var iSecond			= 0;
-		var aResult			= {};
+		var iYear           = 0;
+		var iMonth          = 0;
+		var iDay            = 0;
+		var iHour           = 0;
+		var iMinute         = 0;
+		var iSecond         = 0;
+		var aResult         = {};
 		//----------------------------------------------------//
 		//-- 2.0 - Extract Time Data                        --//
 		//----------------------------------------------------//

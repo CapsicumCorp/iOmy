@@ -5,7 +5,7 @@ Authors:
     Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
     Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
 Description: UI5 Controller. Draws the list of links and their items.
-Copyright: Capsicum Corporation 2015, 2016
+Copyright: Capsicum Corporation 2015, 2016, 2017
 
 This file is part of iOmy.
 
@@ -463,7 +463,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
         }
         
         button.IOMYButton:not(.FooterHelpButton) > .sapMBtnInner > .sapMBtnContent {
-                font-weight: bold;
+                /*font-weight: bold;*/
         }
         
         button.IOMYButton.PremiseOverviewRoomButton > .sapMBtnInner > .sapMBtnContent {
@@ -724,26 +724,17 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	}
         
     .NavHeader-Icon {
-		height:			25px;
-        line-height:            2.5rem;
-		/*width:			20px;*/
+        line-height: 	2.5rem;
 		margin-top:		5px;
-		/*padding:		0px 10px 16px 10px;*/
-		/*font-size:		40px;*/
-/*		border:			1px solid #404040;
-		border-radius:          50%;*/
 		color:			#404040;
 	}
         
     .NavHeader-Text {
-		height:			25px;
-		min-width: 50px;
+		min-width: 		50px;
 		margin-top:		15px;
 		padding:		0px 10px 16px 10px;
-		/*font-size:		40px;*/
-/*		border:			1px solid #404040;
-		border-radius:          50%;*/
 		color:			#404040;
+		white-space:	nowrap;
 	}
         
     /* DARKEN THE CHILD BUTTONS ON THE NAVIGATION POPOVER */
@@ -876,7 +867,13 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	
 	.AcceptSubmitButton {
 		background-color: rgb(139, 197, 63);
-                width: 100%;
+        width: 100%;
+		color: white;
+		border-radius: 10px;
+	}
+    
+    .TelnetCommandButton {
+		background-color: rgb(130, 139, 130);
 		color: white;
 		border-radius: 10px;
 	}
@@ -1012,6 +1009,14 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
         .sapMLnk:hover:not(.sapMLnkDsbl) {
                 color: rgb(139, 197, 63);
         }
+        
+        .sapMLnk:visited {
+                color: rgb(139, 197, 63);
+        }
+        
+        .sapMCbBg.sapMCbMarkChecked:before {
+                color: rgb(139, 197, 63);
+        }
 	
 	.footerMBarContainer > .sapMBarContainer > img {
 		margin-top: 10px;
@@ -1060,46 +1065,53 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	.SettingsListPremise-DividingBorder {
 		border-left:		2px solid #409000;
 	}
+    
+    /*--------------------------------------------------------------*/
+    /* PERMISSIONS RADIO BOX GROUP
+    /*--------------------------------------------------------------*/
+    .PermissionsRadioButtonGroup.sapMRbG>.sapMRb, .PermissionsRadioButtonGroup.sapMRbGCol>.sapMRb {
+            clear: none;
+    }
 	
-        /*****************************\
-        * BUTTONS FOR DIFFERENT PAGES *
-        \*****************************/
+    /*****************************\
+    * BUTTONS FOR DIFFERENT PAGES *
+    \*****************************/
         
-        .ButtonNoBorder {
-                border:none;
-        }
+    .ButtonNoBorder {
+            border:none;
+    }
         
-        .YellowLinkButton {
+    .YellowLinkButton {
 		background-color: #F4C548;
 		color: black;
 	}
         
-        .GreenLinkButton {
+    .GreenLinkButton {
 		background-color: #85B246;
 		color: black;
 	}
         
-        .DarkGreenLinkButton {
+    .DarkGreenLinkButton {
 		background-color: #10840F;
 		color: black;
 	}
         
-        .NormalLinkButton {
+    .NormalLinkButton {
 		background-color: #109010;
 		color: white;
-                border-radius: 15px;
+        border-radius: 15px;
 	}
         
-        .DisabledLinkButton {
+    .DisabledLinkButton {
 		background-color: #909090;
 		color: white;
-                border-radius: 15px;
+        border-radius: 15px;
 	}
         
-        .VideoCaptureButton {
+    .VideoCaptureButton {
 		background-color: #E78B65;
-                border: 1px solid white;
-                width: 50%;
+        border: 1px solid white;
+        width: 50%;
 		color: white;
 	}
         
@@ -1183,4 +1195,20 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
     .UserInputForm {
         margin: 0 auto;
         max-width: 550px;
+    }
+    
+    .UserInputForm.ZigbeeDataPage {
+        max-width: 565px;
+    }
+    
+    .ZigbeeDataPage > .sapMPanelContent {
+        margin-right: 6px;
+    }
+    
+    .TelnetOutput.sapMInputBase.sapMTextArea {
+        height: 300px;
+    }
+    
+    .sapMSlt > .sapMSltLabel {
+        font-family: 'Roboto Condensed', sans-serif;
     }

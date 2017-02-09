@@ -2,7 +2,7 @@
 Title: Edit Link Page (UI5 View)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Creates a page to edit information about a given link.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 

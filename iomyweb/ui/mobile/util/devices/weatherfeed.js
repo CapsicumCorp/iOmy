@@ -5,7 +5,7 @@ Modified: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Helps to draw the list entry of a device and its information. Used
     as a wrapper for a variety of modules for each device type, which follow a
     similar structure to this module such as same function names to this one.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -52,6 +52,8 @@ $.extend(IOMy.devices.weatherfeed,{
         sConditionDisplayID : "ConditionDisplay",
         sWindDirectionDisplayID : "WindDirectionDisplay",
         sWindSpeedDisplayID : "WindSpeedDisplay",
+        sSunriseDisplayID : "SunriseDisplay",
+        sSunsetDisplayID : "SunsetDisplay",
         
         //---------------------------------------------//
         // Add Link Form
@@ -81,7 +83,7 @@ $.extend(IOMy.devices.weatherfeed,{
                 "WeatherType" : "OpenWeatherMap",
                 "Username" : oScope.byId(me.uiIDs.sKeyCodeID+"Field").getValue(),
                 "StationCode" : oScope.byId(me.uiIDs.sStationCodeID+"Field").getValue(),
-                "RoomId" : oScope.byId(me.uiIDs.sRoomCBoxID+"Field").getSelectedKey(),
+                "RoomId" : oScope.wRoomCBox.getSelectedItem().getKey(),
                 "Data" : "{\"LinkName\" : \""+oScope.byId(me.uiIDs.sLinkNameID+"Field").getValue()+"\"}"
             };
             
@@ -92,12 +94,34 @@ $.extend(IOMy.devices.weatherfeed,{
         return mData;
     },
     
+    GetWeatherIcon : function (sText) {
+        //===============================================\\
+        // DECLARE VARIABLES
+        //===============================================\\
+        var me              = this;              // Captures the scope of this device module
+        var sIcon           = "";
+        
+        if (sText === "Clear") {
+            sIcon = "sap-icon://GoogleMaterial/wb_sunny";
+        } else if (sText === "Clouds") {
+            sIcon = "sap-icon://GoogleMaterial/wb_cloudy";
+//        } else if (sText === "Rain") {
+//            sIcon = "sap-icon://GoogleMaterial/wb_cloudy";
+        } else {
+            sIcon = ""
+        }
+        
+        return sIcon;
+    },
+    
     CreateLinkForm : function (oScope, oFormBox, aElementsToEnableOnSuccess, aElementsToEnableOnFailure) {
         //===============================================\\
         // DECLARE VARIABLES
         //===============================================\\
         
         var me = this;                  // Used for capturing this scope.
+        
+        //var aRooms = IOMy.widgets.getRoomOptions("_"+IOMy.functions.getPremiseIDFromHub(oScope.byId("hubCBox").getSelectedKey()));
         
         var oFormItem;
         
@@ -112,7 +136,7 @@ $.extend(IOMy.devices.weatherfeed,{
         // LABEL
         oScope.aElementsForAFormToDestroy.push(me.uiIDs.sLinkNameID+"Label");
         oFormItem = new sap.m.Label(oScope.createId(me.uiIDs.sLinkNameID+"Label"), {
-            text : "Name"
+            text : "Display Name"
         });
         oFormBox.addItem(oFormItem);
         
@@ -122,41 +146,6 @@ $.extend(IOMy.devices.weatherfeed,{
             value : ""
         }).addStyleClass("width100px SettingsTextInput FlexNoShrink");
         oFormBox.addItem(oFormItem);
-        
-        //-----------------------------------------------\\
-        // ROOM
-        //-----------------------------------------------\\
-        
-        // LABEL
-        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sRoomCBoxID+"Label");
-        oFormItem = new sap.m.Label(oScope.createId(me.uiIDs.sRoomCBoxID+"Label"), {
-            text : "Room"
-        });
-        oFormBox.addItem(oFormItem);
-        
-        // FIELD
-        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sRoomCBoxID+"Field");
-        // TODO: When the user can manage multiple premises, we'll need a premise combo box.
-        oFormItem = IOMy.widgets.getRoomSelector(oScope.createId(me.uiIDs.sRoomCBoxID+"Field"), "_"+1);
-        oFormBox.addItem(oFormItem);
-        
-        //-----------------------------------------------\\
-        // WEATHER TYPE
-        //-----------------------------------------------\\
-        
-//        // LABEL
-//        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sWeatherTypeID+"Label");
-//        oFormItem = new sap.m.Label(oScope.createId(me.uiIDs.sWeatherTypeID+"Label"), {
-//            text : "Weather Type"
-//        });
-//        oFormBox.addItem(oFormItem);
-//        
-//        // FIELD
-//        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sWeatherTypeID+"Field");
-//        oFormItem = new sap.m.Input(oScope.createId(me.uiIDs.sWeatherTypeID+"Field"), {
-//            value : ""
-//        }).addStyleClass("width100px SettingsTextInput FlexNoShrink");
-//        oFormBox.addItem(oFormItem);
         
         //-----------------------------------------------\\
         // KEY CODE
@@ -193,10 +182,6 @@ $.extend(IOMy.devices.weatherfeed,{
         oFormBox.addItem(oFormItem);
     },
     
-    CreateThingForm : function (oScope, iLinkId, oFormBox, aElementsToEnableOnSuccess, aElementsToEnableOnFailure) {
-        
-    },
-    
     ValidateLinkFormData : function (oScope) {
         var me                      = this;
         var mNameInfo               = {};
@@ -210,7 +195,6 @@ $.extend(IOMy.devices.weatherfeed,{
         var aErrorMessages          = [];
         
         mNameInfo           = me.ValidateName(oScope);
-        mRoomInfo           = me.ValidateRoom(oScope);
         mKeyCodeInfo        = me.ValidateKeyCode(oScope);
         mStationCodeInfo    = me.ValidateStationCode(oScope);
         
@@ -228,34 +212,6 @@ $.extend(IOMy.devices.weatherfeed,{
             jQuery.sap.log.error(sCatchError);
         }
         
-        // Validate Room
-        try {
-            if (mRoomInfo.bError === true) {
-                bError = true;
-                aErrorMessages = aErrorMessages.concat(mRoomInfo.aErrorMessages);
-            }
-        } catch (e) {
-            // An exception is usually thrown because a coding error has occurred somewhere.
-            bError = true;
-            sCatchError = "ADDLINK_8202: There was an error validating the room selection."+e.message;
-            aErrorMessages.push(sCatchError);
-            jQuery.sap.log.error(sCatchError);
-        }
-
-//        // Validate Weather Type
-//        try {
-//            if (mWeatherTypeInfo.bError === true) {
-//                bError = true;
-//                aErrorMessages = aErrorMessages.concat(mWeatherTypeInfo.aErrorMessages);
-//            }
-//        } catch (e) {
-//            // An exception is usually thrown because a coding error has occurred somewhere.
-//            bError = true;
-//            sCatchError = "ADDLINK_8202: There was an error validating the weather type selection. "+e.message;
-//            aErrorMessages.push(sCatchError);
-//            jQuery.sap.log.error(sCatchError);
-//        }
-
         // Validate Key Code
         try {
             if (mKeyCodeInfo.bError === true) {
@@ -317,7 +273,7 @@ $.extend(IOMy.devices.weatherfeed,{
         return mInfo;
     },
     
-    ValidateRoom : function (oScope) {
+    /*ValidateRoom : function (oScope) {
         var me                      = this;
         var bError                  = false;
         var aErrorMessages          = [];
@@ -346,7 +302,7 @@ $.extend(IOMy.devices.weatherfeed,{
         mInfo.aErrorMessages = aErrorMessages;
         
         return mInfo;
-    },
+    },*/
     
     ValidateKeyCode : function (oScope) {
         var me                      = this;
@@ -402,12 +358,10 @@ $.extend(IOMy.devices.weatherfeed,{
         return mInfo;
     },
     
-    ValidateThingFormData : function () {
-        
-    },
-    
     FetchCurrentWeather : function (iThingId, oScope, sPrefix) {
         var me = this;
+        
+        //console.log(iThingId);
         
         IOMy.apiphp.AjaxRequest({
             url : IOMy.apiphp.APILocation("weather"),
@@ -417,6 +371,7 @@ $.extend(IOMy.devices.weatherfeed,{
             },
             
             onSuccess : function (type, data) {
+                //console.log(data);
                 
                 if (data.Error === false) {
                     var temperature     = data.Data.Temperature;
@@ -425,18 +380,48 @@ $.extend(IOMy.devices.weatherfeed,{
                     var condition       = data.Data.Condition;
                     var windDirection   = data.Data.WindDirection;
                     var windSpeed       = data.Data.WindSpeed;
+                    var sunrise         = data.Data.Sunrise;
+                    var sunset          = data.Data.Sunset;
+                    
+                    var dateSunrise, dateSunset;
                     
                     //---------------------------------------------------------//
                     // Temperature
                     //---------------------------------------------------------//
                     try {
                         if (oScope.byId(sPrefix + me.uiIDs.sTemperatureDisplayID) !== undefined) {
-                            oScope.byId(sPrefix + me.uiIDs.sTemperatureDisplayID).setText( temperature.Value.toString() + temperature.UomName );
+                            oScope.byId(sPrefix + me.uiIDs.sTemperatureDisplayID).setText( Math.round(temperature.Value).toString() + temperature.UomName );
                         }
                     } catch (e) {
                         jQuery.sap.log.error(e.message);
                         if (oScope.byId(sPrefix + me.uiIDs.sTemperatureDisplayID) !== undefined) {
                             oScope.byId(sPrefix + me.uiIDs.sTemperatureDisplayID).setText( "N/A" );
+                        }
+                    }
+                    
+                    //---------------------------------------------------------//
+                    // Sunrise
+                    //---------------------------------------------------------//
+                    if (oScope.byId(sPrefix + me.uiIDs.sSunriseDisplayID) !== undefined) {
+                        try {
+                            dateSunrise = new Date(sunrise.Value * 1000);
+                            oScope.byId(sPrefix + me.uiIDs.sSunriseDisplayID).setText( IOMy.functions.getTimestampString(dateSunrise, "") );
+                        } catch (e) {
+                            jQuery.sap.log.error(e.message);
+                            oScope.byId(sPrefix + me.uiIDs.sSunriseDisplayID).setText( "N/A" );
+                        }
+                    }
+                    
+                    //---------------------------------------------------------//
+                    // Sunset
+                    //---------------------------------------------------------//
+                    if (oScope.byId(sPrefix + me.uiIDs.sSunsetDisplayID) !== undefined) {
+                        try {
+                            dateSunset = new Date(sunset.Value * 1000);
+                            oScope.byId(sPrefix + me.uiIDs.sSunsetDisplayID).setText( IOMy.functions.getTimestampString(dateSunset, "") );
+                        } catch (e) {
+                            jQuery.sap.log.error(e.message);
+                            oScope.byId(sPrefix + me.uiIDs.sSunsetDisplayID).setText( "N/A" );
                         }
                     }
                     
@@ -519,7 +504,7 @@ $.extend(IOMy.devices.weatherfeed,{
             },
             
             setFailureNotices : function (errMessage) {
-                IOMy.common.showError("Failed to load the weather information", "Error");
+                IOMy.common.showError("Failed to load the weather information:\n\n"+errMessage, "Error");
                 jQuery.sap.log.error(errMessage);
                 
                 if (oScope.byId(sPrefix + me.uiIDs.sTemperatureDisplayID) !== undefined) {
@@ -568,7 +553,7 @@ $.extend(IOMy.devices.weatherfeed,{
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
 		
-		console.log(aDeviceData.DeviceId);
+		//console.log(aDeviceData.DeviceId);
         
         // If the UI is for the Unassigned Devices List, include 
         if (bIsUnassigned === true) {
@@ -588,7 +573,8 @@ $.extend(IOMy.devices.weatherfeed,{
                     new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
                         text : aDeviceData.DeviceName,
                         press : function () {
-                            IOMy.common.NavigationChangePage("pWeatherFeed", {Thing : aDeviceData});
+                            //console.log(aDeviceData);
+                            IOMy.common.NavigationChangePage("pThermostat", {ThingId : aDeviceData.DeviceId});
                         }
                     }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                 ]
@@ -613,7 +599,7 @@ $.extend(IOMy.devices.weatherfeed,{
                                 text : "Loading..."
                             }).addStyleClass("Font-RobotoCondensed Font-Medium TextLeft")
                         ]
-                    }).addStyleClass("MarLeft5px DeviceDataBox"),
+                    }).addStyleClass("MarLeft5px"),
                     
                     new sap.m.VBox({
                         items : [
@@ -627,7 +613,7 @@ $.extend(IOMy.devices.weatherfeed,{
                                 text : "Loading..."
                             }).addStyleClass("Font-RobotoCondensed Font-Medium TextLeft")
                         ]
-                    }).addStyleClass("MarLeft5px DeviceDataBox")
+                    }).addStyleClass("MarLeft5px")
                 
                 ]
             }).addStyleClass("width100Percent")
@@ -658,7 +644,7 @@ $.extend(IOMy.devices.weatherfeed,{
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
 		
-		console.log(aDeviceData.DeviceId);
+		//console.log(aDeviceData.DeviceId);
         
         aUIObjectItems.push(
             //------------------------------------//
@@ -669,11 +655,12 @@ $.extend(IOMy.devices.weatherfeed,{
                     new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
                         text : aDeviceData.DeviceName,
                         press : function () {
-                            IOMy.common.NavigationChangePage("pWeatherFeed", {Thing : aDeviceData});
+                            //console.log(aDeviceData);
+                            IOMy.common.NavigationChangePage("pThermostat", {ThingId : aDeviceData.DeviceId});
                         }
                     }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                 ]
-            }).addStyleClass("width80Percent minwidth170px BorderRight")
+            }).addStyleClass("testlabelcont BorderRight")
         );
 
         aUIObjectItems.push(
@@ -694,7 +681,7 @@ $.extend(IOMy.devices.weatherfeed,{
                         ]
                     }).addStyleClass("PadLeft5px DeviceDataBox")
                 ]
-            }).addStyleClass("minwidth155px")
+            }).addStyleClass("minwidth175px")
         );
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
@@ -715,6 +702,7 @@ $.extend(IOMy.devices.weatherfeed,{
 		
 		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
 		
+        //console.log(aDeviceData);
         this.FetchCurrentWeather(aDeviceData.DeviceId, oViewScope, Prefix);
 		
 		return aTasks;
@@ -726,6 +714,7 @@ $.extend(IOMy.devices.weatherfeed,{
 		//------------------------------------//
 		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
 		
+        //console.log(aDeviceData);
 		this.FetchCurrentWeather(aDeviceData.DeviceId, oViewScope, Prefix);
         
 		return aTasks;

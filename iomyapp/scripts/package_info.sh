@@ -19,7 +19,7 @@
 # Info about all the packages used for binary download
 
 WEBSERVERTITLE="Webserver"
-WEBSERVERVER="0.4.2"
+WEBSERVERVER="0.4.3"
 WEBSERVERPKG="webserverarmbinaries.tar.xz"
 WEBSERVERHOMEPAGE="https://www.iomy.org/"
 WEBSERVERLICENSE="Various"
@@ -27,12 +27,20 @@ WEBSERVERBASEURL="https://download.iomy.org/download.php?file="
 WEBSERVERNEED_WEB_BROWSER=1
 
 DATABASETITLE="SQL Initial Database"
-DATABASEVER="0.4.2"
+DATABASEVER="0.4.3"
 DATABASEPKG="webservermysqlinitialdatabase.tar.xz"
 DATABASEHOMEPAGE="https://www.iomy.org/"
-DATABASELICENSE="Various"
+DATABASELICENSE=">=GPL-3"
 DATABASEBASEURL="https://download.iomy.org/download.php?file="
 DATABASENEED_WEB_BROWSER=1
+
+DEMODATABASETITLE="SQL Demo Database"
+DEMODATABASEVER="0.4.3"
+DEMODATABASEPKG="webservermysqldemodatabase.tar.xz"
+DEMODATABASEHOMEPAGE="https://www.iomy.org/"
+DEMODATABASELICENSE=">=GPL-3"
+DEMODATABASEBASEURL="https://download.iomy.org/download.php?file="
+DEMODATABASENEED_WEB_BROWSER=1
 
 PHPMYADMINTITLE="phpMyAdmin"
 PHPMYADMINVER="4.6.4"

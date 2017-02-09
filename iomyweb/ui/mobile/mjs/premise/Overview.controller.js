@@ -3,7 +3,7 @@ Title: Premise Overview UI5 Controller
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws the controls for showing a selection of premises, each with its
     set of rooms and devices.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -65,7 +65,7 @@ sap.ui.controller("mjs.premise.Overview", {
                 
                 //=== Create the Premise combo box ===//
                 var oPremiseCBox = IOMy.widgets.getPremiseSelector(me.createId("premiseBox")).addStyleClass("SettingsDropdownInput width100Percent");
-                oPremiseCBox.attachSelectionChange( function () {
+                oPremiseCBox.attachChange( function () {
                     me.composeRoomList(this.getSelectedKey());
                 });
                 
@@ -77,15 +77,13 @@ sap.ui.controller("mjs.premise.Overview", {
                 var oVertBox = new sap.m.VBox(me.createId("verticalBox"), {
                     items: [oPremiseCBoxContainer]
                 });
-                
-                //me.byId("premiseBox").setSelectedKey(IOMy.common.PremiseList[0].Id);
 
                 me.composeRoomList();
                 
                 var oPanel = new sap.m.Panel(me.createId("panel"), {
                     backgroundDesign: "Transparent",
                     content: [oVertBox] //-- End of Panel Content --//
-                }).addStyleClass("height100Percent PanelNoPadding MarTop0px");
+                }).addStyleClass("height100Percent PanelNoPadding MarTop0px UserInputForm");
 
                 thisView.byId("page").addContent(oPanel);
 			}
@@ -130,7 +128,7 @@ sap.ui.controller("mjs.premise.Overview", {
         
         var oVertBox = new sap.m.VBox(me.createId("roomListBox"), {
             items: []
-        });
+        }).addStyleClass("TableSideBorders");
         
         if (iPremiseId !== undefined && iPremiseId !== null) {
             me.byId("premiseBox").setSelectedKey(iPremiseId);
@@ -195,8 +193,7 @@ sap.ui.controller("mjs.premise.Overview", {
             
             $.each(rooms,function(sIndex,aRoom) {
                 //-- Verify that the Premise has rooms --//
-                if( sIndex!==undefined && sIndex!==null && aRoom!==undefined &&
-                        aRoom!==null && JSON.stringify(aRoom.Things) !== "{}" )
+                if( sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null )
                 {
                     // Clean up any old elements with IDs.
                     me.aElementsToDestroy.push("roomName"+sIndex);
@@ -209,17 +206,17 @@ sap.ui.controller("mjs.premise.Overview", {
                     // Retrieve number of devices in a given room
                     iDevicesInRoom = IOMy.functions.getNumberOfDevicesInRoom(aRoom.RoomId);
                     
-                    //=========== Create the button to show/hide the list of rooms for this premise. =============\\
+                    //=========== Create the room entry =============\\
                     oVertBox.addItem(
                         new sap.m.HBox({
                             items : [
-                                // === NUMBER OF DEVICES ASSIGNED TO A ROOM === \\
+                                // === NUMBER OF DEVICES ASSIGNED TO A ROOM ===//
                                 new sap.m.VBox({
                                     items : [
                                         new sap.m.Text({
                                             textAlign : "Center",
                                             text : iDevicesInRoom
-                                        }).addStyleClass("TextBold TextSize20px MarTop10px MarLeft5px MarRight5px")
+                                        }).addStyleClass("TextBold NumberLabel MarTop10px MarLeft5px MarRight5px")
                                     ]
                                 }).addStyleClass("FlexNoShrink width60px BorderRight TextCenter"),
                                 
@@ -233,7 +230,7 @@ sap.ui.controller("mjs.premise.Overview", {
                                             }
                                         }).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px width100Percent")
                                     ]
-                                }).addStyleClass("width100Percent TextOverflowEllipsis"),
+                                }).addStyleClass("TextOverflowEllipsis"),
                                 
                                 // === COLLAPSE/EXPAND ICON === \\
                                 new sap.m.VBox({
@@ -251,7 +248,7 @@ sap.ui.controller("mjs.premise.Overview", {
                                                     this.setIcon("sap-icon://navigation-right-arrow");
                                                 }
                                             }
-                                        }).addStyleClass("ButtonNoBorder IOMYButton ButtonIconGreen TextSize16px width100Percent")
+                                        }).addStyleClass("ButtonNoBorder IOMYButton ButtonIconGreen TextSize20px width100Percent")
                                     ]
                                 }).addStyleClass("FlexNoShrink width70px")
                             ]
@@ -281,15 +278,17 @@ sap.ui.controller("mjs.premise.Overview", {
 
                             // Create the flag for showing the list of rooms for a selected room
                             // if it doesn't already exist.
-                            if (me.roomsExpanded[sIndex] === undefined)
+                            if (me.roomsExpanded[sIndex] === undefined) {
                                 me.roomsExpanded[sIndex] = false;
-
-                            me.aElementsToDestroy.push("device"+aDevice.DeviceId);
+                            }
 
                             // Retrieve number of devices/things in the room
                             iDevicesInRoom = IOMy.functions.getNumberOfDevicesInRoom(aDevice.DeviceId);
 
-                            //=============== Create the device link ===============\\
+                            //=============== Create/Refresh the device link ===============\\
+                            me.aElementsToDestroy.push("device"+aDevice.DeviceId);
+                            me.aElementsToDestroy.push("deviceLink"+aDevice.DeviceId);
+                            
                             me.byId("room"+sIndex).addItem(
                                 new sap.m.HBox({
                                     items : [
@@ -318,11 +317,13 @@ sap.ui.controller("mjs.premise.Overview", {
                                                             sPageName = "pDeviceData"; // Zigbee
                                                         } else if (me.aStoredDevices[i].DeviceTypeId === 13) {
                                                             sPageName = "pPhilipsHue"; // Philips Hue
-                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 6) {
-                                                            sPageName = "pOnvif"; // Philips Hue
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 12) {
+                                                            sPageName = "pOnvif"; // Onvif Camera
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 14) {
+                                                            sPageName = "pThermostat"; // Open Weather Map
                                                         }
                                                         
-                                                        IOMy.common.NavigationChangePage(sPageName, {Thing : oItem});
+                                                        IOMy.common.NavigationChangePage(sPageName, {ThingId : oItem.DeviceId});
                                                         
                                                         // Unlock Button
                                                         this.setEnabled(true);
@@ -341,7 +342,6 @@ sap.ui.controller("mjs.premise.Overview", {
                             }
 
                             idCount++;
-//                            iRow++;
                         }
                     });
                 }
@@ -352,10 +352,11 @@ sap.ui.controller("mjs.premise.Overview", {
             me.lastUpdated = IOMy.common.RoomsListLastUpdate;
         }
         
-        // Insert the extras menu to the bottom left of the page.
+        // Insert the action menu to the bottom left of the page.
         oVertBox.addItem(oLayout);
+        thisView.byId("extrasMenuHolder").destroyItems();
         thisView.byId("extrasMenuHolder").addItem(
-            IOMy.widgets.getExtrasButton({
+            IOMy.widgets.getActionMenu({
                 id : me.createId("extrasMenu"),        // Uses the page ID
                 icon : "sap-icon://GoogleMaterial/more_vert",
                 items : [

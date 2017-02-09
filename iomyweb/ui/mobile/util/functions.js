@@ -2,7 +2,7 @@
 Title: iOmy Functions Module
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Declares various functions that are used across multiple pages.
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 
@@ -62,13 +62,64 @@ $.extend(IOMy.functions,{
     },
     
     /**
+     * Adds a label widget containing the name of a thing/item/device into the
+     * widget list in the Thing List.
+     * 
+     * @param {type} iThingId       Thing ID to access the thing in the list
+     * @param {type} oWidget        Label containing the Device/Thing Name
+     */
+    addThingLabelWidget : function (iThingId, oWidget) {
+        //-------------------------------------------//
+        // DECLARE VARIABLES
+        //-------------------------------------------//
+        var aThingLabels = IOMy.common.ThingList["_"+iThingId].LabelWidgets;
+        var bExists = false;
+        
+        //-------------------------------------------//
+        // Check if the widget is in the list already.
+        //-------------------------------------------//
+        for (var i = 0; i < aThingLabels.length; i++) {
+            if (aThingLabels[i] === oWidget) {
+                bExists = true;
+                break; // The widget is already in the list. We do not add duplicates!
+            }
+        }
+        
+        //-------------------------------------------//
+        // Insert widget if it is not in the list.
+        //-------------------------------------------//
+        if (!bExists) {
+            IOMy.common.ThingList["_"+iThingId].LabelWidgets.push(oWidget);
+        }
+    },
+    
+    /**
+     * Updates all the labels that belong to a given item/thing.
+     * 
+     * @param {type} iThingId             Device ID
+     * @param {type} sText                New label
+     */
+    updateThingLabels : function (iThingId, sText) {
+        for (var i = 0; i < IOMy.common.ThingList["_"+iThingId].length; i++) {
+            IOMy.common.ThingList["_"+iThingId][i].setText(sText);
+        }
+    },
+    
+    /**
      * Generates a human-readable timestamp from a JS Date.
      * 
      * @param {type} date       Given date
      * @param {type} sFormat    Date format in dd/mm/yy or mm/dd/yy
      * @returns {String}        Human-readable date and time
      */
-    getTimestampString : function (date, sFormat) {
+    getTimestampString : function (date, sFormat, bShowTime) {
+        //----------------------------------------------------------//
+        // Declare variables and define default arguments
+        //----------------------------------------------------------//
+        if (bShowTime === undefined) {
+            bShowTime = true;
+        }
+        
         var iHour       = date.getHours();
         var vMinutes    = date.getMinutes();
         var vSeconds    = date.getSeconds();
@@ -79,6 +130,7 @@ $.extend(IOMy.functions,{
         var vDay        = date.getDate();
         
         var sDate       = ""; // Set according to the given format
+        var sTime       = "";
         
         if (iHour >= 12) {
             sSuffix = "PM";
@@ -112,12 +164,22 @@ $.extend(IOMy.functions,{
         }
         
         if (sFormat === "dd/mm/yyyy" || sFormat === "dd/mm/yy") {
-            sDate = vDay+"/"+vMonth;
+            sDate = vDay+"/"+vMonth+"/"+iYear+" ";
         } else if (sFormat === "mm/dd/yyyy" || sFormat === "mm/dd/yy") {
-            sDate = vMonth+"/"+vDay;
+            sDate = vMonth+"/"+vDay+"/"+iYear+" ";
+        } else if (sFormat === "yyyy/mm/dd" || sFormat === "yy/mm/dd") {
+            sDate = iYear+"/"+vMonth+"/"+vDay+" ";
+        } else if (sFormat === "yyyy-mm-dd" || sFormat === "yy-mm-dd") {
+            sDate = iYear+"-"+vMonth+"-"+vDay+" ";
+        } else {
+            sDate = "";
         }
         
-        return sDate+"/"+iYear+" "+iHour+":"+vMinutes+":"+vSeconds+sSuffix;
+        if (bShowTime === true) {
+            sTime = iHour + ":" + vMinutes + ":" + vSeconds + sSuffix;
+        }
+        
+        return sDate + sTime;
     },
 	
     /**
@@ -288,12 +350,39 @@ $.extend(IOMy.functions,{
         
         return mLinkConnInfo;
     },
+    
+    /**
+     * Retrieves the premise ID of a given hub.
+     * 
+     * @param {type} iHubId         ID of the hub to inspect
+     * @returns                     The premise ID or -1 if the hub couldn't be found
+     */
+    getPremiseIDFromHub : function (iHubId) {
+        var iPremiseId = -1;
+        var aHubList = IOMy.common.HubList;
+        var mHub;
+        
+        for (var i = 0; i < aHubList.length; i++) {
+            mHub = aHubList[i];
+            
+            // If the target hub is found, then grab its Premise ID, and end the loop.
+            if (mHub.HubId == iHubId) {
+                iPremiseId = mHub.PremiseId;
+                break;
+            }
+        }
+        
+        return iPremiseId;
+    },
 	
 	/***************************\
 	|* Display the help dialog *|
 	\***************************/
     
     /**
+     * (WILL BE DEPRECATED SHORTLY! A new help module (/ui/mobile/util/functions/Help.js)
+     * will be created to make things easier for development.)
+     * 
      * Displays a dialog containing information about the purpose of the current page.
      * It grabs the ID of the current page and uses it to determine what information
      * it should display.
@@ -312,7 +401,7 @@ $.extend(IOMy.functions,{
                         + "is a list of rooms that are registered with the currently selected premise.\n\n"
                         + "There is a button to the right of the name of the room that allows you to show "
                         + "or hide its list of devices.\n\n Each device can be tapped to lead into the device "
-                        + "information page.\n\nThe extras menu will allow you to edit the information and address "
+                        + "information page.\n\nThe action menu will allow you to edit the information and address "
                         + "of the currently selected premise, and add a new room.";
                 
         //==============================
@@ -367,7 +456,7 @@ $.extend(IOMy.functions,{
 			sHelpMessage = "Here is a list of links and their objects. Tap a name to view or edit "
 						+ "the link or object details. Each link has a list of any objects that may "
                         + "be connected to it. These lists are expandable.\n\nThere are two entries in "
-                        + "the extras menu, one to add a link, and the other to add an item to a link.";
+                        + "the action menu, one to add a link, and the other to add an item to a link.";
                 
         //==============================
         // EDIT LINK
@@ -611,7 +700,8 @@ $.extend(IOMy.functions,{
 	/**
 	 * Takes a list of IDs and destroys the objects with one of those IDs if it exists.
 	 * Used for elements with IDs that are registered globally (sap.ui.getCore().byId() to
-	 * access).
+	 * access). DEPRECATED! New views and controllers will do the purging of old instances
+     * of widgets with IDs.
 	 * 
 	 * @param aIds		List of IDs to look for
 	 */
@@ -626,7 +716,8 @@ $.extend(IOMy.functions,{
 	/**
 	 * Takes a list of IDs and destroys the objects with one of those IDs if it exists.
 	 * Used for elements with IDs that are registered for a specific view or controller
-	 * (this.byId() to access).
+	 * (this.byId() to access). DEPRECATED! New views and controllers will do the
+     * purging of old instances of widgets with IDs.
 	 * 
 	 * @param view		View (or controller) to search the elements in
 	 * @param aIds		List of IDs to look for
@@ -854,11 +945,11 @@ $.extend(IOMy.functions,{
                                                 if (displayData !== undefined) {
                                                     // Display the information retrieved from the Premise Location OData
                                                     // and set any foreign keys as item keys in the combo boxes.
-                                                    me.byId("addressCountry").setValue(displayData.COUNTRIES_NAME).setSelectedKey(displayData.COUNTRIES_PK);
-                                                    me.byId("addressLanguage").setValue(displayData.LANGUAGE_NAME).setSelectedKey(displayData.LANGUAGE_PK);
-                                                    me.byId("addressState").setValue(displayData.STATEPROVINCE_NAME).setSelectedKey(displayData.STATEPROVINCE_PK);
-                                                    me.byId("addressPostCode").setValue(displayData.POSTCODE_NAME).setSelectedKey(displayData.POSTCODE_PK);
-                                                    me.byId("addressTimezone").setValue(displayData.TIMEZONE_TZ).setSelectedKey(displayData.TIMEZONE_PK);
+                                                    me.byId("addressCountry").setSelectedKey(displayData.COUNTRIES_PK);
+                                                    me.byId("addressLanguage").setSelectedKey(displayData.LANGUAGE_PK);
+                                                    me.byId("addressState").setSelectedKey(displayData.STATEPROVINCE_PK);
+                                                    me.byId("addressPostCode").setSelectedKey(displayData.POSTCODE_PK);
+                                                    me.byId("addressTimezone").setSelectedKey(displayData.TIMEZONE_PK);
                                                     me.byId("UpdateLink").setEnabled(true);
                                                 }
                                             }
@@ -874,3 +965,9 @@ $.extend(IOMy.functions,{
     }
 	
 });
+
+//----------------------------------------//
+//-- LOAD OTHER MODULES                 --//
+//----------------------------------------//
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.getLengthOfTimePassed");

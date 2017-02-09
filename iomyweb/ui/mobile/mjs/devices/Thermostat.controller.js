@@ -2,7 +2,7 @@
 Title: Thermostat Device Page
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: This is a UI5 Controller that creates a page to display information about a chosen thermostat device
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of the iOmy project.
 
@@ -25,10 +25,12 @@ sap.ui.controller("mjs.devices.Thermostat", {
     
     aElementsToDestroy : [],
     
+    mThingInfo : null,
+    
 /**
 * Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered
 * (NOT before the first rendering! onInit() is used for that one!).
-* @memberOf mjs.settings.devices.EditLink
+* @memberOf mjs.devices.Thermostat
 */
 //	onBeforeRendering: function() {
 //
@@ -37,7 +39,7 @@ sap.ui.controller("mjs.devices.Thermostat", {
 /**
 * Called when the View has been rendered (so its HTML is part of the document). Post-rendering manipulations of the HTML could be done here.
 * This hook is the same one that SAPUI5 controls get after being rendered.
-* @memberOf mjs.settings.devices.EditLink
+* @memberOf mjs.devices.Thermostat
 */
 //	onAfterRendering: function() {
 //		
@@ -45,7 +47,7 @@ sap.ui.controller("mjs.devices.Thermostat", {
 	
 /**
 * Called when the Controller is destroyed. Use this one to free resources and finalize activities.
-* @memberOf mjs.settings.devices.EditLink
+* @memberOf mjs.devices.Thermostat
 */
 //	onExit: function() {
 //
@@ -54,7 +56,7 @@ sap.ui.controller("mjs.devices.Thermostat", {
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
-* @memberOf mjs.devices.PhilipsHue
+* @memberOf mjs.devices.Thermostat
 */
     onInit : function () {
         var me = this;
@@ -64,6 +66,7 @@ sap.ui.controller("mjs.devices.Thermostat", {
 			// Everything is rendered in this function before rendering.
 			onBeforeShow : function (evt) {
                 
+                me.mThingInfo = IOMy.common.ThingList['_'+evt.data.ThingId];
                 // Start the form creation
                 me.DestroyUI();         // STEP 1: Clear any old forms to avoid duplicate IDs
                 me.DrawUI();            // STEP 2: Draw the actual user interface
@@ -99,13 +102,17 @@ sap.ui.controller("mjs.devices.Thermostat", {
         //=======================================================\\
         var me = this;
         var thisView = me.getView();
+        var weatherModule = IOMy.devices.weatherfeed;
+        var widgetIDs = weatherModule.uiIDs;
         
-        // 
         // Boxes
         var oWeatherLabel, oWeatherField;
+        var oSunriseLabel, oSunriseField;
+        var oSunsetLabel, oSunsetField;
         var oTemperatureLabel, oTemperatureField;
         var oHumidityLabel, oHumidityField;
-        var oWindLabel, oWindField;
+        var oWindDirectionLabel, oWindDirectionField;
+        var oWindSpeedLabel, oWindSpeedField;
         var oPressureLabel, oPressureField;
         var oColumn1, oColumn2;
         var oInfoBox;
@@ -123,8 +130,8 @@ sap.ui.controller("mjs.devices.Thermostat", {
             text : "Weather outside:"
         }).addStyleClass("TextBold PadTop6px PadBottom6px");
         
-        oWeatherField = new sap.m.Text({
-            text : "Sunny"
+        oWeatherField = new sap.m.Text(me.createId(widgetIDs.sConditionDisplayID), {
+            text : ""
         }).addStyleClass("PadTop6px PadBottom6px");
         
         // TEMPERATURE
@@ -132,8 +139,26 @@ sap.ui.controller("mjs.devices.Thermostat", {
             text : "Temperature:"
         }).addStyleClass("TextBold PadTop6px PadBottom6px");
         
-        oTemperatureField = new sap.m.Text({
-            text : "23.3&deg;C"
+        oTemperatureField = new sap.m.Text(me.createId(widgetIDs.sTemperatureDisplayID), {
+            text : ""
+        }).addStyleClass("PadTop6px PadBottom6px");
+        
+        // SUNRISE
+        oSunriseLabel = new sap.m.Text({
+            text : "Sunrise:"
+        }).addStyleClass("TextBold PadTop6px PadBottom6px");
+        
+        oSunriseField = new sap.m.Text(me.createId(widgetIDs.sSunriseDisplayID), {
+            text : ""
+        }).addStyleClass("PadTop6px PadBottom6px");
+        
+        // SUNSET
+        oSunsetLabel = new sap.m.Text({
+            text : "Sunset:"
+        }).addStyleClass("TextBold PadTop6px PadBottom6px");
+        
+        oSunsetField = new sap.m.Text(me.createId(widgetIDs.sSunsetDisplayID), {
+            text : ""
         }).addStyleClass("PadTop6px PadBottom6px");
         
         // HUMIDITY
@@ -141,17 +166,25 @@ sap.ui.controller("mjs.devices.Thermostat", {
             text : "Humidity:"
         }).addStyleClass("TextBold PadTop6px PadBottom6px");
         
-        oHumidityField = new sap.m.Text({
-            text : "88%"
+        oHumidityField = new sap.m.Text(me.createId(widgetIDs.sHumidityDisplayID), {
+            text : ""
         }).addStyleClass("PadTop6px PadBottom6px");
         
-        // TEMPERATURE
-        oWindLabel = new sap.m.Text({
-            text : "Wind:"
+        // WIND
+        oWindDirectionLabel = new sap.m.Text({
+            text : "Wind Direction:"
         }).addStyleClass("TextBold PadTop6px PadBottom6px");
         
-        oWindField = new sap.m.Text({
-            text : "SW 11km/h"
+        oWindDirectionField = new sap.m.Text(me.createId(widgetIDs.sWindDirectionDisplayID), {
+            text : ""
+        }).addStyleClass("PadTop6px PadBottom6px");
+        
+        oWindSpeedLabel = new sap.m.Text({
+            text : "Wind Speed:"
+        }).addStyleClass("TextBold PadTop6px PadBottom6px");
+        
+        oWindSpeedField = new sap.m.Text(me.createId(widgetIDs.sWindSpeedDisplayID), {
+            text : ""
         }).addStyleClass("PadTop6px PadBottom6px");
         
         // PRESSURE
@@ -159,17 +192,23 @@ sap.ui.controller("mjs.devices.Thermostat", {
             text : "Air Pressure:"
         }).addStyleClass("TextBold PadTop6px PadBottom6px");
         
-        oPressureField = new sap.m.Text({
-            text : "1011.2 hPa"
+        oPressureField = new sap.m.Text(me.createId(widgetIDs.sPressureDisplayID), {
+            text : ""
         }).addStyleClass("PadTop6px PadBottom6px");
+        
+        // Populate the fields
+        weatherModule.FetchCurrentWeather(me.mThingInfo.Id, me, "");
         
         oColumn1 = new sap.m.VBox({
             items : [
                 oWeatherLabel,
                 oTemperatureLabel,
                 oHumidityLabel,
-                oWindLabel,
-                oPressureLabel
+                oWindDirectionLabel,
+                oWindSpeedLabel,
+                oPressureLabel,
+                oSunriseLabel,
+                oSunsetLabel
             ]
         }).addStyleClass("width160px");
         
@@ -178,8 +217,11 @@ sap.ui.controller("mjs.devices.Thermostat", {
                 oWeatherField,
                 oTemperatureField,
                 oHumidityField,
-                oWindField,
-                oPressureField
+                oWindDirectionField,
+                oWindSpeedField,
+                oPressureField,
+                oSunriseField,
+                oSunsetField
             ]
         });
         
@@ -195,7 +237,7 @@ sap.ui.controller("mjs.devices.Thermostat", {
         me.aElementsToDestroy.push("panel");
         oPanel = new sap.m.Panel(me.createId("panel"), {
             content : [oVertBox]
-        });
+        }).addStyleClass("UserInputForm");
         
         thisView.byId("page").addContent(oPanel);
     }
