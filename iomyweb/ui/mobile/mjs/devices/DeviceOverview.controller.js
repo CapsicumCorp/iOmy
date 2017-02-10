@@ -399,7 +399,7 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
            //-- Add Grouping box to Panel --//
            backgroundDesign: "Transparent",
            content: [oVertBox]
-        }).addStyleClass("TableSideBorders UserInputForm PanelNoPadding PadBottom10px");
+        }).addStyleClass("MasterPanel UserInputForm PanelNoPadding PadTop3px PadBottom15px");
 
         thisView.byId("page").addContent( oPanel );
 		

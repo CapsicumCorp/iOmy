@@ -294,7 +294,7 @@ sap.ui.controller("mjs.settings.PremiseList", {
                                     text : "Hubs"
                                 }).addStyleClass("MarTop5px MarBottom5px MarLeft5px MarRight5px")
                             ]
-                        }).addStyleClass("FlexNoShrink width60px BorderRight"),
+                        }).addStyleClass("FlexNoShrink width60px BorderRight TextCenter"),
                         // === PREMISES === \\
                         new sap.m.VBox({
                             items : [

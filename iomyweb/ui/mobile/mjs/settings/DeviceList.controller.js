@@ -165,7 +165,7 @@ sap.ui.controller("mjs.settings.DeviceList", {
                                 text: "Items"
                             }).addStyleClass("MarTop5px MarBottom5px MarLeft5px MarRight5px")
                         ]
-                    }).addStyleClass("FlexNoShrink width60px BorderRight"),
+                    }).addStyleClass("FlexNoShrink width60px BorderRight TextCenter"),
                     new sap.m.VBox({
                         items : [
                             new sap.m.Label({
@@ -349,7 +349,7 @@ sap.ui.controller("mjs.settings.DeviceList", {
 		var oPanel = new sap.m.Panel(me.createId("panel"), {
 			backgroundDesign: "Transparent",
 			content: [me.wVertBox] //-- End of Panel Content --//
-		}).addStyleClass("height100Percent PanelNoPadding UserInputForm TableSideBorders");
+		}).addStyleClass("height100Percent PanelNoPadding UserInputForm  MasterPanel PadTop3px PadBottom15px");
 
 		thisView.byId("page").addContent(oPanel);
         

@@ -1340,7 +1340,7 @@ $.extend(IOMy.widgets,{
                         customHeader : IOMy.widgets.getIOMYPageHeaderNav( mSettings.controller ),
                         content: [IOMy.widgets.getNavigationalSubHeader(mSettings.title.toUpperCase(), mSettings.icon, mSettings.view)],
                         footer : IOMy.widgets.getAppFooter()
-                    }).addStyleClass("height100Percent width100Percent MainBackground");
+                    }).addStyleClass("height100Percent width100Percent MainBackground MasterPage");
                 } catch (e) {
                     // Something has gone wrong if this executes.
                     bError = true;
