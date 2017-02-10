@@ -493,7 +493,7 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
                     thisView.byId("Panel").addContent(oVertBox);
 
                     //----------------------------------------------------------------------------//
-                    //-- REDO THE EXTRAS MENU                                                   --//
+                    //-- REDO THE ACTION MENU                                                   --//
                     //----------------------------------------------------------------------------//
                     try {
                         thisView.byId("extrasMenuHolder").destroyItems();
@@ -514,7 +514,7 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
                     } catch (e) {
                         jQuery.sap.log.error("Error redrawing the extras menu: "+e.message);
                     }
-
+                    
                     // Set the drawn flag so that it will always be loaded.
                     me.bUIDrawn = true;
 

@@ -29,6 +29,7 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
     aElementsForAFormToDestroy : [],
     
     sThingNameField : "thingNameField",
+    iLinkId : null,
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -43,6 +44,13 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
 			// Everything is rendered in this function run before rendering.
 			onBeforeShow : function (evt) {
 				
+                // Collect the link ID if one exists. Only necessary if this page
+                // is accessed by the new link page after everything is created.
+                if (evt.data.LinkId !== undefined) {
+                    console.log(evt.data.LinkId);
+                    me.iLinkId = evt.data.LinkId;
+                }
+                
                 // Start the form creation
                 me.DestroyUI();         // STEP 1: Clear any old forms to avoid duplicate IDs
                 me.DrawUI();            // STEP 2: Draw the actual user interface
@@ -315,8 +323,8 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
             text : "Link you wish to connect the new item to"
         });
         
-        oLinkCBox = IOMy.widgets.getLinkSelector(me.createId("linkCBox")).addStyleClass("width100Percent SettingsDropDownInput");
-        oLinkCBox.setSelectedItem(null);
+        oLinkCBox = IOMy.widgets.getLinkSelector(me.createId("linkCBox"), me.iLinkId).addStyleClass("width100Percent SettingsDropDownInput");
+        
         //-----------------------------------------------\\
         // THING NAME
         //-----------------------------------------------\\

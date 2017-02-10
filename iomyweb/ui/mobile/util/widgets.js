@@ -289,8 +289,8 @@ $.extend(IOMy.widgets,{
 	},
     
     /**
-     * Should return a list of all the rooms within a given premise. If there are
-     * no rooms created in a given premise, then an empty array will be returned.
+     * Returns a list of all the rooms within a given premise. If there are no
+     * rooms created in a given premise, then an empty array will be returned.
      * The array contains items for a select box (sap.ui.core.Item)
      * 
      * @param {type} sPremiseId         ID of the premise that the rooms are located in
@@ -317,7 +317,7 @@ $.extend(IOMy.widgets,{
     },
     
     /**
-     * DEPRECATED! Use getRoomOptions in conjunction to a select box instead.
+     * Use getRoomOptions in conjunction to a select box instead.
      * Returns a combo box containing a list of rooms within a given premise. Can also
      * receive the ID of the room that is currently selected if changing from one room
      * to another.
@@ -357,8 +357,10 @@ $.extend(IOMy.widgets,{
                 });
                 
                 if (iRoomsCounted > 0) {
-                    if (iRoomId !== undefined) {
+                    if (iRoomId !== undefined && iRoomId !== null) {
                         oCBox.setSelectedKey(iRoomId);
+                    } else {
+                        oCBox.setSelectedKey(null);
                     }
                     
                     return oCBox;
@@ -395,8 +397,6 @@ $.extend(IOMy.widgets,{
      */
     getPremiseSelector : function (sId, iPremiseId) {
         try {
-            var mFirstPremise = null;
-            
             //====================================================================\\
             // Create the Combo Box                                               \\
             //====================================================================\\
@@ -406,10 +406,6 @@ $.extend(IOMy.widgets,{
                 });
                 
                 for (var i = 0; i < IOMy.common.PremiseList.length; i++) {
-                    if (mFirstPremise === null) {
-                        mFirstPremise = IOMy.common.PremiseList[i];
-                    }
-                    
                     oCBox.addItem(
                         new sap.ui.core.Item({
                             text : IOMy.common.PremiseList[i].Name,
@@ -418,10 +414,10 @@ $.extend(IOMy.widgets,{
                     );
                 }
 
-                if (iPremiseId !== undefined) {
+                if (iPremiseId !== undefined && iPremiseId !== null) {
                     oCBox.setSelectedKey(iPremiseId);
                 } else {
-                    oCBox.setSelectedKey(mFirstPremise.Id);
+                    oCBox.setSelectedKey(null);
                 }
 
                 return oCBox;
@@ -471,8 +467,11 @@ $.extend(IOMy.widgets,{
                 );
             }
 
-            if (iHubId !== undefined)
+            if (iHubId !== undefined && iHubId !== null) {
                 oCBox.setSelectedKey(iHubId);
+            } else {
+                oCBox.setSelectedKey(null);
+            }
 
             oElement = oCBox;
             
@@ -521,8 +520,11 @@ $.extend(IOMy.widgets,{
                 );
             }
 
-            if (iLinkId !== undefined)
+            if (iLinkId !== undefined && iLinkId !== null) {
                 oCBox.setSelectedKey(iLinkId);
+            } else {
+                oCBox.setSelectedKey(null);
+            }
 
             oElement = oCBox;
             
@@ -578,7 +580,7 @@ $.extend(IOMy.widgets,{
                 }
             }
 
-            if (iLinkTypeId !== undefined) {
+            if (iLinkTypeId !== undefined && iLinkTypeId !== null) {
                 oCBox.setSelectedKey(iLinkTypeId);
             } else {
                 oCBox.setSelectedKey(2);
@@ -749,6 +751,7 @@ $.extend(IOMy.widgets,{
     },
     
     /**
+     * Create a Select box that contains the options 'Yes' and 'No'.
      * 
      * @param {type} sID
      * @param {type} iState
@@ -789,12 +792,12 @@ $.extend(IOMy.widgets,{
     },
     
     /**
+     * Retrieve a list of users to be shown on the Room Permissions page.
      * 
      * @param {type} oSBox
      * @param {type} iPremise
      * @param {type} fnSuccessCallback
      * @param {type} fnFailCallback
-     * @returns {undefined}
      */
     getListOfUsersForRoomPermissions : function (oSBox, iPremise, fnSuccessCallback, fnFailCallback) {
         var sUrl = IOMy.apiphp.APILocation("permissions");

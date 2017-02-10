@@ -31,6 +31,8 @@ $.extend(IOMy.devices.onvif,{
     aProfiles               : [],
     sProfileLookupErrors    : [],
     
+    proceedToCreateItem     : true,
+    
     /**
      * These IDs are used in the elements that are defined in this module. These
      * elements are used in forms that handle information about onvif devices.

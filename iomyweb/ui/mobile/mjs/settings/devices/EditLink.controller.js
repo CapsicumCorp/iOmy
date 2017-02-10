@@ -49,6 +49,7 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
 				var oLink = evt.data.link;
 				var sLinkName = oLink.LinkName;
                 me.linkID = oLink.LinkId;
+                console.log(me.linkID);
 				
 				// Start rendering the page
 				

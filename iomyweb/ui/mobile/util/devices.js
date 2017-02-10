@@ -102,7 +102,11 @@ $.extend(IOMy.devices,{
                             // Head back to the previous page after the core variables have been updated.
                             IOMy.common.ReloadCoreVariables(
                                 function () {
-                                    IOMy.common.NavigationTriggerBackForward(false);
+                                    if (IOMy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
+                                        oApp.to("pSettingsThingAdd", { LinkId: iLinkId });
+                                    } else {
+                                        IOMy.common.NavigationTriggerBackForward(false);
+                                    }
                                 }
                             );
                             
