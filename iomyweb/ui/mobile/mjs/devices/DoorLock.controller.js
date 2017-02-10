@@ -30,6 +30,8 @@ sap.ui.controller("mjs.devices.DoorLock", {
     aElementsToDestroy : [],        // ARRAY: A list of IDs used by any element on this page
     
     wMainList           : null,
+	wPanel				: null,
+	
     wStatusField        : null,
     wLastAccessField    : null,
     wBatteryField       : null,
@@ -98,8 +100,8 @@ sap.ui.controller("mjs.devices.DoorLock", {
         var me = this;
         
         // Wipe main list container
-        if (me.wMainList !== null) {
-            me.wMainList.destroy();
+        if (me.wPanel !== null) {
+            me.wPanel.destroy();
         }
         
         // Wipe any elements with IDs assigned to them
@@ -133,28 +135,28 @@ sap.ui.controller("mjs.devices.DoorLock", {
             width : "100%"
         });
         
-        //-- Status --//
+        //-- Last Accessed --//
         me.wLastAccessField = new sap.m.Text ({
             text : sDefaultText,
             textAlign : "Right",
             width : "100%"
         });
         
-        //-- Status --//
+        //-- Battery --//
         me.wBatteryField = new sap.m.Text ({
             text : sDefaultText,
             textAlign : "Right",
             width : "100%"
         });
         
-        //-- Status --//
+        //-- Tamper --//
         me.wTamperField = new sap.m.Text ({
             text : sDefaultText,
             textAlign : "Right",
             width : "100%"
         });
         
-        //-- Status --//
+        //-- Control Switch --//
         me.wControlSwitch = new sap.m.Button({
             icon : "sap-icon://GoogleMaterial/lock_open",
             text : "Unlock",
@@ -214,7 +216,13 @@ sap.ui.controller("mjs.devices.DoorLock", {
         //--------------------------------------------------------------//
         // Draw the page on the panel declared on this controller's view.
         //--------------------------------------------------------------//
-        thisView.byId("panel").addContent(me.wMainList);
+		
+		me.wPanel = new sap.m.Panel( me.createId("panel"), {
+			backgroundDesign: "Transparent",
+			content : [me.wMainList]
+		}).addStyleClass("PadBottom10px UserInputForm")
+		
+        thisView.byId("page").addContent(me.wPanel);
     },
     
     ToggleLockSwitch : function () {

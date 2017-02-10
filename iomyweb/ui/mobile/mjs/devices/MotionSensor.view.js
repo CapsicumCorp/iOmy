@@ -44,19 +44,22 @@ sap.ui.jsview("mjs.devices.MotionSensor", {
 	createContent : function(oController) {
 		var me = this;
 		
-		var oPage = new sap.m.Page(me.createId("page"),{
-			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			footer : IOMy.widgets.getAppFooter(),
-			content : [
-				//-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("", "sap-icon://GoogleMaterial/lock", me),
-				//-- Main Page Body --//
-				new sap.m.Panel( me.createId("Panel"), {
-					backgroundDesign: "Transparent",
-                    content: []
-				}).addStyleClass("PadBottom10px UserInputForm")
-			]
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+		var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/camera",
+            title : "Motion Sensor"
+        });
+		
+//		var oPage = new sap.m.Page(me.createId("page"),{
+//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			footer : IOMy.widgets.getAppFooter(),
+//			content : [
+//				//-- Navigational Header --//
+//				IOMy.widgets.getNavigationalSubHeader("", "sap-icon://GoogleMaterial/lock", me),
+//				//-- Main Page Body --//
+//			]
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
 		
 		return oPage;
 	}

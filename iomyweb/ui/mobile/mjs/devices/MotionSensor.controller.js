@@ -37,12 +37,13 @@ sap.ui.controller("mjs.devices.MotionSensor", {
     aElementsToDestroy : [],        // ARRAY: A list of IDs used by any element on this page
     
     wMainList               : null,
+	wPanel					: null,
+	
     wStatusField            : null,
     wTemperatureField       : null,
     wLastMotionField        : null,
     wBatteryField           : null,
     wTamperField            : null,
-    
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
@@ -115,8 +116,8 @@ sap.ui.controller("mjs.devices.MotionSensor", {
         //console.log("DestroyUI() called.");
         var me          = this;
         
-        if (me.wMainList !== null) {
-            me.wMainList.destroy();
+        if (me.wPanel !== null) {
+            me.wPanel.destroy();
         }
         
         for (var i = 0; i < me.aElementsToDestroy.length; i++) {
@@ -226,8 +227,13 @@ sap.ui.controller("mjs.devices.MotionSensor", {
                 }).addStyleClass("maxlabelwidth50Percent")
             ]
         }).addStyleClass("PadBottom10px UserInputForm");
-        
-        thisView.byId("Panel").addContent(me.wMainList);
+		
+		me.wPanel = new sap.m.Panel( me.createId("Panel"), {
+			backgroundDesign: "Transparent",
+			content: [me.wMainList]
+		}).addStyleClass("PadBottom10px UserInputForm")
+		
+        thisView.byId("page").addContent(me.wPanel);
         
         //----------------------------------------------------------------------------//
         //-- REDO THE ACTION MENU                                                   --//

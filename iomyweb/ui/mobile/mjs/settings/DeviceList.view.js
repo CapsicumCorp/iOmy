@@ -43,20 +43,25 @@ sap.ui.jsview("mjs.settings.DeviceList", {
 	****************************************************************************************************/
 	createContent : function(oController) {
 		var me = this;
+	
+		var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/settings",
+            title : "Link List"
+        });	
 		
-		//--------------------------------//
-		//-- THE NAVIGATION SUBHEADER	--//
-		//--------------------------------//
-		var oPageNavigationHeader = new sap.m.VBox({
-			items: [ IOMy.widgets.getNavigationalSubHeader("LINK LIST", "sap-icon://GoogleMaterial/settings", me) ]
-		});
+//		var oPageNavigationHeader = new sap.m.VBox({
+//			items: [ IOMy.widgets.getNavigationalSubHeader("LINK LIST", "sap-icon://GoogleMaterial/settings", me) ]
+//		});
 		
-		return new sap.m.Page(this.createId("page"), {
-			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			footer : IOMy.widgets.getAppFooter(),
-			content: [oPageNavigationHeader]
-		}).addStyleClass("height100Percent width100Percent MainBackground");
-		
+//		return new sap.m.Page(this.createId("page"), {
+//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			footer : IOMy.widgets.getAppFooter(),
+//			content: [oPageNavigationHeader]
+//		}).addStyleClass("height100Percent width100Percent MainBackground");	
+	
+		return oPage;
 	}
 
 });

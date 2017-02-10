@@ -683,6 +683,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         oFormBox.addItem(oFormItem);
     },
 	
+	// For All other pages except the DeviceOverview Page. See "GetCommonUIForDeviceOverview"
 	GetCommonUI: function( sPrefix, oViewScope, aDeviceData, bIsUnassigned ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//

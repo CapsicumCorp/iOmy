@@ -45,82 +45,26 @@ sap.ui.jsview("mjs.devices.DoorLock", {
 	createContent : function(oController) {
 		var me = this;
 		
-		var oPage = new sap.m.Page(me.createId("page"),{
-			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			footer : IOMy.widgets.getAppFooter(),
-			content : [
-                //-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("Door Lock", "sap-icon://GoogleMaterial/lock_outline", me),
-				new sap.m.Panel( me.createId("panel"), {
-                    backgroundDesign: "Transparent",
-                    content : [
-						/*new sap.m.List ({
-							items : [
-								//-- Status --//
-								new sap.m.InputListItem ({
-									label : "Status:",
-									content : [
-										//-- Column 2 for Status Row --//
-										new sap.m.Text ({
-											text : "Locked",
-											textAlign : "Right",
-											width : "100%"
-										})
-									]
-								}).addStyleClass("maxlabelwidth50Percent"),
-								//-- Last Accessed --//
-								new sap.m.InputListItem ({
-									label : "Last Accessed:",
-									content : [
-										//-- Column 2 for Last Accessed Row --//
-										new sap.m.Text ({
-											text : "1d 3h 21m",
-											textAlign : "Right",
-											width : "100%"
-										})
-									]
-								}).addStyleClass("maxlabelwidth50Percent"),
-								//-- Battery --//
-								new sap.m.InputListItem ({
-									label : "Battery:",
-									content : [
-										//-- Column 2 for Battery Row --//
-										new sap.m.Text ({
-											text : "21%",
-											textAlign : "Right",
-											width : "100%"
-										})
-									]
-								}).addStyleClass("maxlabelwidth50Percent"),
-								//-- Tamper --//
-								new sap.m.InputListItem ({
-									label : "Tamper:",
-									content : [
-										//-- Column 2 for Current Temp Row --//
-										new sap.m.Text ({
-											text : "Secure",
-											textAlign : "Right",
-											width : "100%"
-										})
-									]
-								}).addStyleClass("maxlabelwidth50Percent"),
-								//-- Control --//
-								new sap.m.InputListItem ({
-									label : "Control:",
-									content : [
-										//-- Column 2 for Current Temp Row --//
-										new sap.m.Button({
-											icon : "sap-icon://GoogleMaterial/lock_open",
-											text : "Unlock"
-										}).addStyleClass("MarLeft10Percent")
-									]
-								}).addStyleClass("maxlabelwidth50Percent textaligncenter")
-							]
-						})*/
-					]
-                }).addStyleClass("PadBottom10px UserInputForm")
-            ]
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+		var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/lock_outline",
+            title : "Door Lock"
+        });
+		
+//		var oPage = new sap.m.Page(me.createId("page"),{
+//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			footer : IOMy.widgets.getAppFooter(),
+//			content : [
+//               //-- Navigational Header --//
+//				IOMy.widgets.getNavigationalSubHeader("Door Lock", "sap-icon://GoogleMaterial/lock_outline", me),
+//				new sap.m.Panel( me.createId("panel"), {
+//                    backgroundDesign: "Transparent",
+//                    content : [
+//					]
+//               }).addStyleClass("PadBottom10px UserInputForm")
+//          ]
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
 		
 		return oPage;
 	}

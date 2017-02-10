@@ -33,7 +33,7 @@ sap.ui.controller("mjs.settings.PremiseList", {
     hubs:                           [],
 	//aPremises:					[],			//-- ARRAY:		This holds the current Premise Data that is used to remove the existing page contents on refresh --//
 	//aHubs:						[],			//-- ARRAY:		This holds the current Hub Data that is used to remove the existing page contents on refresh --//
-	
+	wPanel:							null,
 	
 	/**
 	 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -227,6 +227,8 @@ sap.ui.controller("mjs.settings.PremiseList", {
      */
 	RemoveExistingSettingsPremiseList: function( me, oThisView ) {
 		
+		var me = this;
+		
 		//====================================================================//
 		//== 1.0 - DESTROY EXISTING OBJECTS									==//
 		//====================================================================//
@@ -238,16 +240,13 @@ sap.ui.controller("mjs.settings.PremiseList", {
 			
 		});
 		
-		oThisView.byId("Panel").destroyContent();
 		//====================================================================//
-		//== 2.0 - PLACE BUSY INDICATOR										==//
+		//== 1.1 - DESTROY EXISTING PANEL									==//
 		//====================================================================//
-		oThisView.byId("Panel").addContent( 
-			new sap.m.BusyIndicator( me.createId("BusyIndicator"), {
-				text: "Loading Page Content"
-			})
-		);
 		
+		if (me.wPanel !== null) {
+            me.wPanel.destroy();
+        };
 	},
 	
 	//====================================================================================================================//
@@ -268,16 +267,8 @@ sap.ui.controller("mjs.settings.PremiseList", {
 		//var thisView		= me.getView();			//-- OBJECT:	Store the Current View for sub-functions to use so they can modify elements in this view. --//
 		var aPremiseList	= [];					//-- ARRAY:		--//
 		
-		
 		//====================================================================//
-		//== 2.0 - REMOVE THE BUSY INDICATOR								==//
-		//====================================================================//
-		me.byId("BusyIndicator").destroy();
-		oThisView.byId("Panel").destroyContent();
-		
-		
-		//====================================================================//
-		//== 3.0 - PREPARE TO REDRAW INTERFACE								==//
+		//== 2.0 - PREPARE TO REDRAW INTERFACE								==//
 		//====================================================================//
 		aPremiseList = IOMy.common.PremiseList;
 		
@@ -514,7 +505,12 @@ sap.ui.controller("mjs.settings.PremiseList", {
 		//====================================================================//
 		//== 4.0 - Add to the Page Panel									==//
 		//====================================================================//
-		oThisView.byId("Panel").addContent( oPremiseListContainer );
+		me.wPanel = new sap.m.Panel(me.createId("Panel"), {
+			backgroundDesign: "Transparent",
+			content: [oPremiseListContainer]
+		}).addStyleClass("height100Percent PanelNoPadding UserInputForm TableSideBorders")
+		
+		oThisView.byId("page").addContent( me.wPanel );
 		
 	}
 	

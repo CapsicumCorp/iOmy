@@ -36,7 +36,8 @@ sap.ui.controller("mjs.devices.WindowSensor", {
     aElementsToDestroy : [],        // ARRAY: A list of IDs used by any element on this page
     
     wMainList           : null,
-    
+    wPanel				: null,
+	
     wStatusField        : null,
     wLastAccessedField  : null,
     wBatteryField       : null,
@@ -104,8 +105,8 @@ sap.ui.controller("mjs.devices.WindowSensor", {
         var me = this;
         
         // Wipe main list container
-        if (me.wMainList !== null) {
-            me.wMainList.destroy();
+        if (me.wPanel !== null) {
+            me.wPanel.destroy();
         }
         
         // Wipe any elements with IDs assigned to them
@@ -206,7 +207,12 @@ sap.ui.controller("mjs.devices.WindowSensor", {
         //--------------------------------------------------------------//
         // Draw the page on the panel declared on this controller's view.
         //--------------------------------------------------------------//
-        thisView.byId("panel").addContent(me.wMainList);
+		me.wPanel = new sap.m.Panel( me.createId("panel"), {
+			backgroundDesign: "Transparent",
+			content : [me.wMainList]
+		}).addStyleClass("PadBottom10px UserInputForm")
+		
+        thisView.byId("page").addContent(me.wPanel);
     }
 	
 });

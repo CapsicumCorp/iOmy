@@ -45,12 +45,19 @@ sap.ui.jsview("mjs.settings.permissions.PremisePermission", {
     createContent : function(oController) {
     	var me = this;
     	this.destroyContent();
-    	
-    	var oPage = new sap.m.Page(this.createId("page"), {
-            customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			content: [IOMy.widgets.getNavigationalSubHeader("PREMISE PERMISSIONS", "sap-icon://GoogleMaterial/lock", me)],
-			footer : IOMy.widgets.getAppFooter()
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+		
+		var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/lock",
+            title : "Premise Permissions"
+        });	
+		
+//    	var oPage = new sap.m.Page(this.createId("page"), {
+//            customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			content: [IOMy.widgets.getNavigationalSubHeader("PREMISE PERMISSIONS", "sap-icon://GoogleMaterial/lock", me)],
+//			footer : IOMy.widgets.getAppFooter()
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
 		
 		
 		return oPage;

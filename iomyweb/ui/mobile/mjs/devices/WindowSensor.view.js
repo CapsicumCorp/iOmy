@@ -45,71 +45,25 @@ sap.ui.jsview("mjs.devices.WindowSensor", {
 	createContent : function(oController) {
 		var me = this;
 		
-		var oPage = new sap.m.Page(me.createId("page"),{
-			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			footer : IOMy.widgets.getAppFooter(),
-			content : [
-                //-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("Windows Sensor", "sap-icon://GoogleMaterial/border_all", me),
-				new sap.m.Panel( me.createId("panel"), {
-                    backgroundDesign: "Transparent",
-                    content : [
-						/*new sap.m.List ({
-							items : [
-								//-- Status --//
-								new sap.m.InputListItem ({
-									label : "Status:",
-									content : [
-										//-- Column 2 for Status Row --//
-										new sap.m.Text ({
-											text : "Closed",
-											textAlign : "Center",
-											width : "100%"
-										})
-									]
-								}).addStyleClass("maxlabelwidth50Percent"),
-								//-- Last Accessed --//
-								new sap.m.InputListItem ({
-									label : "Last Accessed:",
-									content : [
-										//-- Column 2 for Last Accessed Row --//
-										new sap.m.Text ({
-											text : "23d 13h 44m",
-											textAlign : "Center",
-											width : "100%"
-										})
-									]
-								}).addStyleClass("maxlabelwidth50Percent"),
-								//-- Battery --//
-								new sap.m.InputListItem ({
-									label : "Battery:",
-									content : [
-										//-- Column 2 for Battery Row --//
-										new sap.m.Text ({
-											text : "79%",
-											textAlign : "Center",
-											width : "100%"
-										})
-									]
-								}).addStyleClass("maxlabelwidth50Percent"),
-								//-- Tamper --//
-								new sap.m.InputListItem ({
-									label : "Tamper:",
-									content : [
-										//-- Column 2 for Tamper Row --//
-										new sap.m.Text ({
-											text : "Secure",
-											textAlign : "Center",
-											width : "100%"
-										})
-									]
-								}).addStyleClass("maxlabelwidth50Percent")
-							]
-						})*/
-					]
-                }).addStyleClass("PadBottom10px UserInputForm")
-            ]
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+		var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/border_all",
+            title : "Window Sensor"
+        });
+		
+//		var oPage = new sap.m.Page(me.createId("page"),{
+//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			footer : IOMy.widgets.getAppFooter(),
+//			content : [
+//                //-- Navigational Header --//
+//				IOMy.widgets.getNavigationalSubHeader("Windows Sensor", "sap-icon://GoogleMaterial/border_all", me),
+//				new sap.m.Panel( me.createId("panel"), {
+//                    backgroundDesign: "Transparent",
+//                    content : []
+//               }).addStyleClass("PadBottom10px UserInputForm")
+//            ]
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
 		
 		return oPage;
 	}

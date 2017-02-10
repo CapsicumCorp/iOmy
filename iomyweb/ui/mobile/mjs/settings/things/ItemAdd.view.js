@@ -43,20 +43,25 @@ sap.ui.jsview("mjs.settings.things.ItemAdd", {
 	****************************************************************************************************/
 	createContent : function(oController) {
 		var me = this;
+		this.destroyContent();
 		
-		//--------------------------------//
-		//-- THE NAVIGATION SUBHEADER	--//
-		//--------------------------------//
-		var oPageNavigationHeader = new sap.m.VBox({
-			items: [ IOMy.widgets.getNavigationalSubHeader("NEW ITEM", "sap-icon://GoogleMaterial/settings", me) ]
-		});
+		var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/settings",
+            title : "New Item"
+        });	
 		
-		return new sap.m.Page(this.createId("page"), {
-			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			footer : IOMy.widgets.getAppFooter(),
-			content: [oPageNavigationHeader]
-		}).addStyleClass("height100Percent width100Percent MainBackground");
-		
+//		var oPageNavigationHeader = new sap.m.VBox({
+//			items: [ IOMy.widgets.getNavigationalSubHeader("NEW ITEM", "sap-icon://GoogleMaterial/settings", me) ]
+//		});	
+//		return new sap.m.Page(this.createId("page"), {
+//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			footer : IOMy.widgets.getAppFooter(),
+//			content: [oPageNavigationHeader]
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
+	
+		return oPage;
 	}
 
 });

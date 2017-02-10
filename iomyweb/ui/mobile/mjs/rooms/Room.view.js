@@ -46,14 +46,21 @@ sap.ui.jsview("mjs.rooms.Room", {
 	createContent : function(oController) {
 		var me = this;
 		
-		var oPage = new sap.m.Page(me.createId("page"),{
-			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			footer : IOMy.widgets.getAppFooter(),
-			content : [
-                //-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("ROOM", "sap-icon://GoogleMaterial/home", me )
-            ]
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+		var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/home",
+            title : "Room"
+        });
+		
+//		var oPage = new sap.m.Page(me.createId("page"),{
+//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			footer : IOMy.widgets.getAppFooter(),
+//			content : [
+//                //-- Navigational Header --//
+//				IOMy.widgets.getNavigationalSubHeader("ROOM", "sap-icon://GoogleMaterial/home", me )
+//           ]
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
 		
 		return oPage;
 	}

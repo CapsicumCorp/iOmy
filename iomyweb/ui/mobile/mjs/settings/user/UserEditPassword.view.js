@@ -44,12 +44,19 @@ sap.ui.jsview("mjs.settings.user.UserEditPassword", {
     createContent : function(oController) {
     	var me = this;
     	this.destroyContent();
-    	
-    	var oPage = new sap.m.Page(this.createId("page"), {
-            customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			content: [IOMy.widgets.getNavigationalSubHeader("CHANGE PASSWORD", "sap-icon://GoogleMaterial/person", me)],
-			footer : IOMy.widgets.getAppFooter()
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+		
+		var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/person",
+            title : "Change Password"
+        });	
+		
+//    	var oPage = new sap.m.Page(this.createId("page"), {
+//            customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			content: [IOMy.widgets.getNavigationalSubHeader("CHANGE PASSWORD", "sap-icon://GoogleMaterial/person", me)],
+//			footer : IOMy.widgets.getAppFooter()
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
 		
 		
 		return oPage;
