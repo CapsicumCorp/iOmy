@@ -187,10 +187,10 @@ $.extend(IOMy.devices.motionsensor,{
                 //------------------------------------------------------------//
                 // Decrement the OData Field count
                 //------------------------------------------------------------//
-                console.log("====================================================================");
-                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
-                //jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
-                //jQuery.sap.log.debug("====================================================================");
+//                console.log("====================================================================");
+//                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                jQuery.sap.log.debug("====================================================================");
                 
                 if (me.iODataFieldsToFetch > 0) {
                     me.iODataFieldsToFetch--;
@@ -199,8 +199,8 @@ $.extend(IOMy.devices.motionsensor,{
                     jQuery.sap.log.error("Something is wrong! The remaining OData field count for the current motion sensor is already 0!");
                 }
                 
-                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
-                //jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+//                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
                 
                 //------------------------------------------------------------//
                 // If this is final OData request and the API has finished its
