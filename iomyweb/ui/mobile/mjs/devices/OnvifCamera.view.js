@@ -56,7 +56,7 @@ sap.ui.jsview("mjs.devices.OnvifCamera", {
 					content: []
 				}).addStyleClass("PanelNoPadding height100Percent UserInputForm")
 			]
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+		}).addStyleClass("height100Percent width100Percent MainBackground MasterPage");
 		
 		return oPage;
 	}

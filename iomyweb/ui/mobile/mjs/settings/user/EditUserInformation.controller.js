@@ -204,7 +204,7 @@ sap.ui.controller("mjs.settings.user.EditUserInformation", {
 				
 				me.loadCurrentUserInfo();
 				
-				thisView.byId("EditUserInformationPage").addContent(oPanel);
+				thisView.byId("page").addContent(oPanel);
 			}
 		});
 	},

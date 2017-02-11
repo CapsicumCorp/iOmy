@@ -63,7 +63,7 @@ sap.ui.jsview("mjs.login.ForceSwitchUser", {
 		return new sap.m.Page({
 			content: [ IOMy.widgets.getNavigationalSubHeader("SWITCH USER", "", me), oSwitchUserPanel ],
 			footer : IOMy.widgets.getAppFooter()
-		}).setShowHeader(false).addStyleClass("MainBackground");
+		}).setShowHeader(false).addStyleClass("MainBackground MasterPage");
 	}
 	
 
