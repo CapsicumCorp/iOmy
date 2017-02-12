@@ -30,6 +30,15 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
     
     aElementsToDestroy : [],
     
+    wCameraFeed         : null,
+    wBtnMoveUp          : null,
+    wBtnMoveLeft        : null,
+    wBtnMoveRight       : null,
+    wBtnMoveDown        : null,
+    wSnapshotTimeField  : null,
+    wLocationField      : null,
+    wPanel              : null,
+    
     oThing : null,
     mLinkConnInfo : null,
     
@@ -46,6 +55,280 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
     
     oTimeoutThumbnailRefresh : null,
     
+/**
+* Called when a controller is instantiated and its View controls (if available) are already created.
+* Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
+* @memberOf mjs.devices.OnvifCamera
+*/
+	onInit: function() {
+		var me = this;
+		var thisView = me.getView();
+        
+        // Import the device label functions
+        var LabelFunctions = IOMy.functions.DeviceLabels;
+		
+		thisView.addEventDelegate({
+			// Everything is rendered in this function before rendering.
+			onBeforeShow : function (evt) {
+				//-- Refresh the Navigational buttons --//
+				IOMy.common.NavigationRefreshButtons( me );
+                
+                // Import the given Thing
+                me.oThing = IOMy.common.ThingList['_'+evt.data.ThingId];
+
+                me.loadLinkConn(me.oThing.LinkId);
+                //console.log(me.oThing);
+                //console.log(me.oThing.DisplayName.toUpperCase());
+                // Create the title on the page.
+                me.byId("NavSubHead_Title").setText(me.oThing.DisplayName.toUpperCase());
+                // Add the subheading title widget to the list of labels that display the Thing name.
+                LabelFunctions.addThingLabelWidget(me.oThing.Id,
+                    {
+                        widgetID : me.createId("NavSubHead_Title"),
+                        uppercase : true
+                    }
+                );
+                
+                // Boolean for determining if a different camera to the previous
+                // one is accessed.
+                var bNowForDifferentCamera = me.iID !== evt.data.ThingId;
+                var bUpdated = me.UTSLastUpdate !== IOMy.common.ThingList["_"+evt.data.ThingId].UILastUpdate;
+                
+                // Decide whether the page needs to be reloaded.
+                if (bNowForDifferentCamera || bUpdated ) {
+                    me.bUIDrawn = false;
+                }
+                
+                if (!me.bUIDrawn) {
+                    // Store the ID and the last update timestamp.
+                    me.iID = me.oThing.Id;
+                    me.UTSLastUpdate = me.oThing.UILastUpdate;
+
+                    // Wipe out the old instance of the UI and redraw the page.
+                    me.DestroyUI();
+                    me.DrawUI();
+                }
+			}
+		});
+	},
+
+/**
+* Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered
+* (NOT before the first rendering! onInit() is used for that one!).
+* @memberOf mjs.devices.OnvifCamera
+*/
+//	onBeforeRendering: function() {
+//
+//	},
+
+/**
+* Called when the View has been rendered (so its HTML is part of the document). Post-rendering manipulations of the HTML could be done here.
+* This hook is the same one that SAPUI5 controls get after being rendered.
+* @memberOf mjs.devices.OnvifCamera
+*/
+//	onAfterRendering: function() {
+//		
+//	},
+	
+	
+	
+/**
+* Called when the Controller is destroyed. Use this one to free resources and finalize activities.
+* @memberOf mjs.devices.OnvifCamera
+*/
+//	onExit: function() {
+//
+//	}
+
+    /**
+     * Procedure that destroys the previous incarnation of the UI. Must be called by onInit before
+     * (re)creating the page.
+     */
+    DestroyUI : function() {
+        var me          = this;
+        var sCurrentID  = "";
+        
+        for (var i = 0; i < me.aElementsToDestroy.length; i++) {
+            sCurrentID = me.aElementsToDestroy[i];
+            if (me.byId(sCurrentID) !== undefined) {
+                me.byId(sCurrentID).destroy();
+            }
+        }
+        
+        if (me.wCameraFeed !== null) {
+            me.wCameraFeed.destroy();
+        }
+        
+        if (me.wPanel !== null) {
+            me.wPanel.destroy();
+        }
+        
+        // Clear the array
+        me.aElementsToDestroy = [];
+    },
+    
+    DrawUI : function () {
+        var me = this;
+        var thisView = me.getView();
+        var oRoomInfo = IOMy.common.RoomsList["_"+me.oThing.PremiseId]["_"+me.oThing.RoomId];
+
+        //==============================================//
+        // Create PTZ Controls
+        //==============================================//
+
+        //-----------------//
+        // Up
+        //-----------------//
+        me.wBtnMoveUp = new sap.m.Button({
+            icon : "sap-icon://slim-arrow-up",
+            enabled : me.bPTZButtonsEnabled,
+            press : function () {
+                me.PTZMoveUp();
+            }
+        }).addStyleClass("width100Percent height30px IOMYButton ButtonIconWhite CameraPTZButton");
+
+        //-----------------//
+        // Left
+        //-----------------//
+        me.wBtnMoveLeft = new sap.m.Button({
+            icon : "sap-icon://slim-arrow-left",
+            enabled : me.bPTZButtonsEnabled,
+            press : function () {
+                me.PTZMoveLeft();
+            }
+        }).addStyleClass("width30px height240px IOMYButton ButtonIconWhite CameraPTZButton");
+
+        //-----------------//
+        // Right
+        //-----------------//
+        me.wBtnMoveRight = new sap.m.Button({
+            icon : "sap-icon://slim-arrow-right",
+            enabled : me.bPTZButtonsEnabled,
+            press : function () {
+                me.PTZMoveRight();
+            }
+        }).addStyleClass("width30px height240px IOMYButton ButtonIconWhite CameraPTZButton");
+
+        //-----------------//
+        // Down
+        //-----------------//
+        me.wBtnMoveDown = new sap.m.Button({
+            icon : "sap-icon://slim-arrow-down",
+            enabled : me.bPTZButtonsEnabled,
+            press : function () {
+                me.PTZMoveDown();
+            }
+        }).addStyleClass("width100Percent height30px IOMYButton ButtonIconWhite CameraPTZButton")
+        //==============================================\\
+        // DRAW CAMERA FEED                             \\
+        //==============================================\\
+        
+        me.wCameraFeed = new sap.m.VBox(me.createId("CameraThumbnail"), {
+            items : [
+                // UP BUTTON
+                me.wBtnMoveUp,
+
+                // MIDDLE SECTION
+                new sap.m.HBox({
+                    items : [
+                        // LEFT BUTTON
+                        me.wBtnMoveLeft,
+
+                        // CENTER AREA
+                        new sap.m.VBox({}).addStyleClass("width100Percent heightAuto"),
+
+                        // RIGHT BUTTON
+                        me.wBtnMoveRight
+                    ]
+                }).addStyleClass("width100Percent"),
+
+                // DOWN ARROW
+                me.wBtnMoveDown
+            ]
+        }).addStyleClass("width100Percent height300px BG_grey_10 CameraThumbnail");
+
+        //==============================================\\
+        // DRAW DATE, TIME, AND ROOM                    \\
+        //==============================================\\
+        me.wLocationField = new sap.m.Label({
+            text : oRoomInfo.RoomName + " in " + oRoomInfo.PremiseName
+        });
+        
+        me.wSnapshotTimeField = new sap.m.Label({});
+        
+//        me.aElementsToDestroy.push("CameraInfoBox");
+//        me.aElementsToDestroy.push("SnapshotField");
+        var oInfoBox = new sap.m.VBox({
+            items : [
+                //------------------------------------------------------------------//
+                // Camera Location
+                //------------------------------------------------------------------//
+                new sap.m.HBox({
+                    items :[
+                        new sap.m.Label({
+                            text : "Location:"
+                        }).addStyleClass("width120px"),
+
+                        me.wLocationField
+                    ]
+                }),
+                //------------------------------------------------------------------//
+                // Time and Date
+                //------------------------------------------------------------------//
+                new sap.m.HBox({
+                    items :[
+                        new sap.m.Label({
+                            text : "Snapshot Taken:"
+                        }).addStyleClass("width120px"),
+
+                        me.wSnapshotTimeField
+                    ]
+                })
+            ]
+        });
+
+        var oVertBox = new sap.m.VBox({
+            items : [ me.wCameraFeed, oInfoBox ]
+        });
+
+        me.wPanel = new sap.m.Panel({
+            content: [oVertBox]
+        }).addStyleClass("PanelNoPadding height100Percent UserInputForm")
+
+        thisView.byId("page").addContent(me.wPanel);
+
+        //----------------------------------------------------------------------------//
+        //-- REDO THE ACTION MENU                                                   --//
+        //----------------------------------------------------------------------------//
+        try {
+            thisView.byId("extrasMenuHolder").destroyItems();
+            thisView.byId("extrasMenuHolder").addItem(
+                IOMy.widgets.getActionMenu({
+                    id : me.createId("extrasMenu"+me.oThing.Id),        // Uses the page ID
+                    icon : "sap-icon://GoogleMaterial/more_vert",
+                    items : [
+                        {
+                            text: "Edit Stream Information",
+                            select:	function (oControlEvent) {
+                                IOMy.common.NavigationChangePage( "pSettingsEditThing", {device : me.oThing}, false );
+                            }
+                        }
+                    ]
+                })
+            );
+        } catch (e) {
+            jQuery.sap.log.error("Error redrawing the extras menu: "+e.message);
+        }
+
+        // Set the drawn flag so that it will always be loaded.
+        me.bUIDrawn = true;
+
+        //----------------------------------------------------------------------------//
+        //-- LOAD THE PROFILE NAMES AND URLS                                        --//
+        //----------------------------------------------------------------------------//
+        me.loadProfile();
+    },
+    
     loadLinkConn : function (iLinkId) {
         this.mLinkConnInfo = IOMy.functions.getLinkConnInfo(iLinkId);
         this.sDeviceNetworkAddress = this.mLinkConnInfo.LinkConnAddress;
@@ -61,9 +344,11 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
     bPTZButtonsEnabled : false,
     
     setPTZButtonsEnabled : function(bStatus) {
+        var me = this;
+        
         // If the camera has NO PTZ capability, this command is useless, so
         // terminate the function.
-        if (this.bHasPTZ === false) {
+        if (me.bHasPTZ === false) {
             return;
         }
         
@@ -72,24 +357,81 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
             bStatus = true;
         }
         
-        this.bPTZButtonsEnabled = bStatus;
+        me.bPTZButtonsEnabled = bStatus;
         
-        this.byId("ptzUpButton").setEnabled(bStatus);
-        this.byId("ptzDownButton").setEnabled(bStatus);
-        this.byId("ptzLeftButton").setEnabled(bStatus);
-        this.byId("ptzRightButton").setEnabled(bStatus);
+        me.wBtnMoveUp.setEnabled(bStatus);
+        me.wBtnMoveDown.setEnabled(bStatus);
+        me.wBtnMoveLeft.setEnabled(bStatus);
+        me.wBtnMoveRight.setEnabled(bStatus);
     },
     
-    updateThumnailTimestamp : function () {
+    PTZMove : function (iPosX, iPosY) {
         var me = this;
-        me.dateThumbnailUpdate = new Date();
-        me.byId("SnapshotField").setText(IOMy.functions.getTimestampString(me.dateThumbnailUpdate));
+        
+        // Lock all the PTZ buttons
+        me.setPTZButtonsEnabled(false);
+
+        try {
+            IOMy.apiphp.AjaxRequest({
+                url : IOMy.apiphp.APILocation("onvif"),
+                data : { Mode : "PTZTimedMove",
+                         ProfileName : me.sThumbnailProfileName,
+                         PosX : iPosX, PosY : iPosY, ThingId : me.iID},
+
+                onSuccess : function (response) {
+                    jQuery.sap.log.debug(JSON.stringify(response));
+                    me.loadThumbnail();
+                },
+
+                onFail : function (response) {
+                    jQuery.sap.log.error(JSON.stringify(response));
+                    // Unlock all the PTZ buttons
+                    me.setPTZButtonsEnabled(true);
+                }
+            });
+
+        } catch (ePTZError) {
+            jQuery.sap.log.error(JSON.stringify(ePTZError.message));
+            IOMy.common.showError(ePTZError.message);
+            // Unlock all the PTZ buttons
+            me.setPTZButtonsEnabled(true);
+        }
+    },
+    
+    PTZMoveUp : function () {
+        var me = this;
+        
+        me.PTZMove(0, 1);
+    },
+    
+    PTZMoveDown : function () {
+        var me = this;
+        
+        me.PTZMove(0, -1);
+    },
+    
+    PTZMoveLeft : function () {
+        var me = this;
+        
+        me.PTZMove(-1, 0);
+    },
+    
+    PTZMoveRight : function () {
+        var me = this;
+        
+        me.PTZMove(1, 0);
     },
     
     //---------------------------------------------------//
     // Thumbnail Load
     //---------------------------------------------------//
     dateThumbnailUpdate : null,
+    
+    updateThumnailTimestamp : function () {
+        var me = this;
+        me.dateThumbnailUpdate = new Date();
+        me.wSnapshotTimeField.setText(IOMy.functions.getTimestampString(me.dateThumbnailUpdate));
+    },
     
     /**
      * Loads a thumbnail from the current Onvif camera. Repeats every 5 minutes.
@@ -223,354 +565,6 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         });
         
                 
-    },
-    
-/**
-* Called when a controller is instantiated and its View controls (if available) are already created.
-* Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
-* @memberOf mjs.devices.OnvifCamera
-*/
-	onInit: function() {
-		var me = this;
-		var thisView = me.getView();
-        
-        // Import the device label functions
-        var LabelFunctions = IOMy.functions.DeviceLabels;
-		
-		thisView.addEventDelegate({
-			// Everything is rendered in this function before rendering.
-			onBeforeShow : function (evt) {
-				//-- Refresh the Navigational buttons --//
-				IOMy.common.NavigationRefreshButtons( me );
-                
-                // Boolean for determining if a different camera to the previous
-                // one is accessed.
-                var bNowForDifferentCamera = me.iID !== evt.data.ThingId;
-                var bUpdated = me.UTSLastUpdate !== IOMy.common.ThingList["_"+evt.data.ThingId].UILastUpdate;
-                
-                // Decide whether the page needs to be reloaded.
-                if (bNowForDifferentCamera || bUpdated ) {
-                    me.bUIDrawn = false;
-                }
-                
-                if (!me.bUIDrawn) {
-                    // Import the given Thing
-                    me.oThing = IOMy.common.ThingList['_'+evt.data.ThingId];
-                    
-                    me.loadLinkConn(me.oThing.LinkId);
-                    me.iID = me.oThing.Id;
-                    me.UTSLastUpdate = me.oThing.UILastUpdate;
-
-                    //console.log(me.oThing);
-                    //console.log(me.oThing.DisplayName.toUpperCase());
-                    // Create the title on the page.
-                    me.byId("NavSubHead_Title").setText(me.oThing.DisplayName.toUpperCase());
-                    // Add the subheading title widget to the list of labels that display the Thing name.
-                    LabelFunctions.addThingLabelWidget(me.oThing.Id,
-                        {
-                            widgetID : me.createId("NavSubHead_Title"),
-                            uppercase : true
-                        }
-                    );
-                    
-                    // Wipe out the old instance of the UI.
-                    me.DestroyUI();
-
-                    //==============================================\\
-                    // DRAW CAMERA FEED                             \\
-                    //==============================================\\
-                    me.aElementsToDestroy.push("ptzUpButton");
-                    me.aElementsToDestroy.push("ptzDownButton");
-                    me.aElementsToDestroy.push("ptzLeftButton");
-                    me.aElementsToDestroy.push("ptzRightButton");
-
-                    me.aElementsToDestroy.push("CameraThumbnail");
-
-                    var oCameraFeed = new sap.m.VBox(me.createId("CameraThumbnail"), {
-                        items : [
-                            // UP BUTTON
-                            new sap.m.Button(me.createId("ptzUpButton"), {
-                                icon : "sap-icon://slim-arrow-up",
-                                enabled : me.bPTZButtonsEnabled,
-                                press : function () {
-                                    // Lock all the PTZ buttons
-                                    me.setPTZButtonsEnabled(false);
-
-                                    try {
-                                        IOMy.apiphp.AjaxRequest({
-                                            url : IOMy.apiphp.APILocation("onvif"),
-                                            data : { Mode : "PTZTimedMove",
-                                                     ProfileName : me.sThumbnailProfileName,
-                                                     PosX : 0, PosY : 1, ThingId : me.iID},
-
-                                            onSuccess : function (response) {
-                                                jQuery.sap.log.debug(JSON.stringify(response));
-                                                me.loadThumbnail();
-                                            },
-
-                                            onFail : function (response) {
-                                                jQuery.sap.log.error(JSON.stringify(response));
-                                                // Unlock all the PTZ buttons
-                                                me.setPTZButtonsEnabled(true);
-                                            }
-                                        });
-
-                                    } catch (ePTZError) {
-                                        jQuery.sap.log.error(JSON.stringify(ePTZError.message));
-                                        IOMy.common.showError(ePTZError.message);
-                                        // Unlock all the PTZ buttons
-                                        me.setPTZButtonsEnabled(true);
-                                    }
-                                }
-                            }).addStyleClass("width100Percent height30px IOMYButton ButtonIconWhite CameraPTZButton"),
-
-                            // MIDDLE SECTION
-                            new sap.m.HBox({
-                                items : [
-                                    // LEFT BUTTON
-                                    new sap.m.Button(me.createId("ptzLeftButton"), {
-                                        icon : "sap-icon://slim-arrow-left",
-                                        enabled : me.bPTZButtonsEnabled,
-                                        press : function () {
-                                            // Lock all the PTZ buttons
-                                            me.setPTZButtonsEnabled(false);
-
-                                            try {
-
-                                                IOMy.apiphp.AjaxRequest({
-                                                    url : IOMy.apiphp.APILocation("onvif"),
-                                                    data : { Mode : "PTZTimedMove",
-                                                             ProfileName : me.sStreamProfileName,
-                                                             PosX : -1, PosY : 0, ThingId : me.iID},
-
-                                                    onSuccess : function (response) {
-                                                        jQuery.sap.log.debug(JSON.stringify(response));
-                                                        me.loadThumbnail();
-                                                    },
-
-                                                    onFail : function (response) {
-                                                        jQuery.sap.log.error(JSON.stringify(response));
-                                                        // Unlock all the PTZ buttons
-                                                        me.setPTZButtonsEnabled(true);
-                                                    }
-                                                });
-
-                                            } catch (ePTZError) {
-                                                jQuery.sap.log.error(JSON.stringify(ePTZError.message));
-                                                IOMy.common.showError(ePTZError.message);
-                                                // Unlock all the PTZ buttons
-                                                me.setPTZButtonsEnabled(true);
-                                            }
-                                        }
-                                    }).addStyleClass("width30px height240px IOMYButton ButtonIconWhite CameraPTZButton"),
-
-                                    // CENTER AREA
-                                    new sap.m.VBox({}).addStyleClass("width100Percent heightAuto"),
-
-                                    // RIGHT BUTTON
-                                    new sap.m.Button(me.createId("ptzRightButton"), {
-                                        icon : "sap-icon://slim-arrow-right",
-                                        enabled : me.bPTZButtonsEnabled,
-                                        press : function () {
-                                            // Lock all the PTZ buttons
-                                            me.setPTZButtonsEnabled(false);
-
-                                            try {
-
-                                                IOMy.apiphp.AjaxRequest({
-                                                    url : IOMy.apiphp.APILocation("onvif"),
-                                                    data : { Mode : "PTZTimedMove",
-                                                             ProfileName : me.sStreamProfileName,
-                                                             PosX : 1, PosY : 0, ThingId : me.iID},
-
-                                                    onSuccess : function (response) {
-                                                        jQuery.sap.log.debug(JSON.stringify(response));
-                                                        me.loadThumbnail();
-                                                    },
-
-                                                    onFail : function (response) {
-                                                        jQuery.sap.log.error(JSON.stringify(response));
-                                                        // Unlock all the PTZ buttons
-                                                        me.setPTZButtonsEnabled(true);
-                                                    }
-                                                });
-
-                                            } catch (ePTZError) {
-                                                jQuery.sap.log.error(JSON.stringify(ePTZError.message));
-                                                IOMy.common.showError(ePTZError.message);
-                                                // Unlock all the PTZ buttons
-                                                me.setPTZButtonsEnabled(true);
-                                            }
-                                        }
-                                    }).addStyleClass("width30px height240px IOMYButton ButtonIconWhite CameraPTZButton"),
-                                ]
-                            }).addStyleClass("width100Percent"),
-
-                            // DOWN ARROW
-                            new sap.m.Button(me.createId("ptzDownButton"),{
-                                icon : "sap-icon://slim-arrow-down",
-                                enabled : me.bPTZButtonsEnabled,
-                                press : function () {
-                                    // Lock all the PTZ buttons
-                                    me.setPTZButtonsEnabled(false);
-
-                                    try {
-
-                                        IOMy.apiphp.AjaxRequest({
-                                            url : IOMy.apiphp.APILocation("onvif"),
-                                            data : { Mode : "PTZTimedMove",
-                                                     ProfileName : me.sStreamProfileName,
-                                                     PosX : 0, PosY : -1, ThingId : me.iID},
-
-                                            onSuccess : function (response) {
-                                                jQuery.sap.log.debug(JSON.stringify(response));
-                                                me.loadThumbnail();
-                                            },
-
-                                            onFail : function (response) {
-                                                jQuery.sap.log.error(JSON.stringify(response));
-                                                // Unlock all the PTZ buttons
-                                                me.setPTZButtonsEnabled(true);
-                                            }
-                                        });
-
-                                    } catch (ePTZError) {
-                                        jQuery.sap.log.error(JSON.stringify(ePTZError.message));
-                                        IOMy.common.showError(ePTZError.message);
-                                        // Unlock all the PTZ buttons
-                                        me.setPTZButtonsEnabled(true);
-                                    }
-                                }
-                            }).addStyleClass("width100Percent height30px IOMYButton ButtonIconWhite CameraPTZButton"),
-                        ]
-                    }).addStyleClass("width100Percent height300px BG_grey_10 CameraThumbnail");
-
-                    //==============================================\\
-                    // DRAW DATE, TIME, AND ROOM                    \\
-                    //==============================================\\
-                    var oRoomInfo = IOMy.common.RoomsList["_"+me.oThing.PremiseId]["_"+me.oThing.RoomId];
-
-                    me.aElementsToDestroy.push("CameraInfoBox");
-                    me.aElementsToDestroy.push("SnapshotField");
-                    var oInfoBox = new sap.m.VBox(me.createId("CameraInfoBox"), {
-                        items : [
-                            //------------------------------------------------------------------//
-                            // Camera Location
-                            //------------------------------------------------------------------//
-                            new sap.m.HBox({
-                                items :[
-                                    new sap.m.Label({
-                                        text : "Location:"
-                                    }).addStyleClass("width120px"),
-
-                                    new sap.m.Label({
-                                        text : oRoomInfo.RoomName + " in " + oRoomInfo.PremiseName
-                                    })
-                                ]
-                            }),
-                            //------------------------------------------------------------------//
-                            // Time and Date
-                            //------------------------------------------------------------------//
-                            new sap.m.HBox({
-                                items :[
-                                    new sap.m.Label({
-                                        text : "Snapshot Taken:"
-                                    }).addStyleClass("width120px"),
-
-                                    new sap.m.Label(me.createId("SnapshotField"), {
-                                        text : ""
-                                    })
-                                ]
-                            })
-                        ]
-                    });
-
-                    me.aElementsToDestroy.push("vbox_container");
-                    var oVertBox = new sap.m.VBox(me.createId("vbox_container"), {
-                        items : [ oCameraFeed, oInfoBox ]
-                    });
-
-                    thisView.byId("Panel").addContent(oVertBox);
-
-                    //----------------------------------------------------------------------------//
-                    //-- REDO THE ACTION MENU                                                   --//
-                    //----------------------------------------------------------------------------//
-                    try {
-                        thisView.byId("extrasMenuHolder").destroyItems();
-                        thisView.byId("extrasMenuHolder").addItem(
-                            IOMy.widgets.getActionMenu({
-                                id : me.createId("extrasMenu"+me.oThing.Id),        // Uses the page ID
-                                icon : "sap-icon://GoogleMaterial/more_vert",
-                                items : [
-                                    {
-                                        text: "Edit Stream Information",
-                                        select:	function (oControlEvent) {
-                                            IOMy.common.NavigationChangePage( "pSettingsEditThing", {device : me.oThing}, false );
-                                        }
-                                    }
-                                ]
-                            })
-                        );
-                    } catch (e) {
-                        jQuery.sap.log.error("Error redrawing the extras menu: "+e.message);
-                    }
-                    
-                    // Set the drawn flag so that it will always be loaded.
-                    me.bUIDrawn = true;
-
-                    //----------------------------------------------------------------------------//
-                    //-- LOAD THE PROFILE NAMES AND URLS                                        --//
-                    //----------------------------------------------------------------------------//
-                    me.loadProfile();
-                }
-			}
-		});
-	},
-
-/**
-* Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered
-* (NOT before the first rendering! onInit() is used for that one!).
-* @memberOf mjs.devices.OnvifCamera
-*/
-//	onBeforeRendering: function() {
-//
-//	},
-
-/**
-* Called when the View has been rendered (so its HTML is part of the document). Post-rendering manipulations of the HTML could be done here.
-* This hook is the same one that SAPUI5 controls get after being rendered.
-* @memberOf mjs.devices.OnvifCamera
-*/
-//	onAfterRendering: function() {
-//		
-//	},
-	
-	
-	
-/**
-* Called when the Controller is destroyed. Use this one to free resources and finalize activities.
-* @memberOf mjs.devices.OnvifCamera
-*/
-//	onExit: function() {
-//
-//	}
-
-    /**
-     * Procedure that destroys the previous incarnation of the UI. Must be called by onInit before
-     * (re)creating the page.
-     */
-    DestroyUI : function() {
-        var me          = this;
-        var sCurrentID  = "";
-        
-        for (var i = 0; i < me.aElementsToDestroy.length; i++) {
-            sCurrentID = me.aElementsToDestroy[i];
-            if (me.byId(sCurrentID) !== undefined)
-                me.byId(sCurrentID).destroy();
-        }
-        
-        // Clear the array
-        me.aElementsToDestroy = [];
     },
 
 });

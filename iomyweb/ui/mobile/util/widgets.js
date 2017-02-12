@@ -1301,9 +1301,17 @@ $.extend(IOMy.widgets,{
             }
             //== ID ==\\
             //--- Now see if the ID exists and is valid. ---\\
-            if (mSettings.id === undefined || isNaN(mSettings.id) === false) {
+            if (mSettings.id === undefined || isNaN(mSettings.id.charAt(0)) === false) {
                 // Set the default ID which will be unique to its view if a valid ID does not exist.
                 mSettings.id = "page";
+                // Log that the default ID will be used and the reason why.
+                if (mSettings.id === undefined) {
+                    // If the ID is not given, say so.
+                    jQuery.sap.log.warn("ID not specified, so '"+mSettings.id+"' is used as the ID");
+                    
+                } else if (isNaN(mSettings.id.charAt(0)) === false) {
+                    jQuery.sap.log.warn("ID is invalid as it starts with a number, so '"+mSettings.id+"' is used as the ID");
+                }
             }
 
             //== TITLE ==\\
