@@ -693,6 +693,9 @@ $.extend(IOMy.apiphp,{
 					//-- 9.0 - FINALISE BY TRIGGERING THE NEXT TASK                 --//
 					//----------------------------------------------------------------//
 					if(oConfig.onSuccess) {
+						
+						IOMy.common.bCoreRefreshInProgress = false;
+						
 						oConfig.onSuccess();
 					}
 					

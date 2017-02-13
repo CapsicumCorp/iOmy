@@ -42,6 +42,11 @@ $.extend(IOMy.common,{
 	CoreVariablesInitialised: false,
     CoreVariableRefreshIntervalInstance : null,
 	
+	//============================================//
+	//== Core Refresh Variables                 ==//
+	//============================================//
+	bCoreRefreshInProgress: false,
+	
 	
 	//============================================//
 	//== USER VARIABLES							==//
@@ -722,15 +727,24 @@ $.extend(IOMy.common,{
      * There are seven steps.
      */
     ReloadCoreVariables : function (fnCallback) {
-        // STEP 1 of 7: Procedures for refreshing locale lists.
-        this.LoadCountries();
-        this.LoadLanguages();
-        this.LoadStatesProvinces();
-        this.LoadPostCodes();
-        this.LoadTimezones();
         
-        // Do the next steps
-        this.ReloadVariablePremiseList(fnCallback);
+        if( IOMy.common.bCoreRefreshInProgress===false ) {
+            IOMy.common.bCoreRefreshInProgress = true;
+            
+            // STEP 1 of 7: Procedures for refreshing locale lists.
+            this.LoadCountries();
+            this.LoadLanguages();
+            this.LoadStatesProvinces();
+            this.LoadPostCodes();
+            this.LoadTimezones();
+        
+            // Do the next steps
+            this.ReloadVariablePremiseList(fnCallback);
+        } else {
+            //-- Error has occurred --//
+            IOMy.common.showError( "Reloading of Core variables is in already progress! New attempt has aborted.", "Core Variables");
+            
+        }
     },
     
     /**
@@ -869,58 +883,64 @@ $.extend(IOMy.common,{
 		var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
 		
 		try {
-			//-- REFRESH PREMISE LIST --//
-			me.RefreshPremiseList({
-				onSuccess : function () {
-					//-- REFRESH HUB LIST --//
-                    IOMy.common.RefreshHubList({
-                        onSuccess: $.proxy(function () {
-                            
-                            //-- REFRESH ROOM LIST --//
-                            IOMy.common.RetreiveRoomList({
-                                onSuccess: $.proxy(function() {
+			if( IOMy.common.bCoreRefreshInProgress===false ) {
+				//-- REFRESH PREMISE LIST --//
+				me.RefreshPremiseList({
+					onSuccess : function () {
+						//-- REFRESH HUB LIST --//
+                        IOMy.common.RefreshHubList({
+                            onSuccess: $.proxy(function () {
+                                
+                                //-- REFRESH ROOM LIST --//
+                                IOMy.common.RetreiveRoomList({
+                                    onSuccess: $.proxy(function() {
+	
+                                        //-- REFRESH LINK LIST --//
+                                        IOMy.common.RetrieveLinkList( {
+                                            onSuccess: $.proxy(function() {
+	
+                                                //-- REFRESH LINK TYPES LIST --//
+                                                IOMy.common.RetrieveLinkTypeList( {
+                                                    onSuccess : function () {
+                                                        //-- REFRESH IO LIST --//
+                                                        IOMy.apiphp.RefreshThingList( {
+                                                            onSuccess: $.proxy(function() {
 
-                                    //-- REFRESH LINK LIST --//
-                                    IOMy.common.RetrieveLinkList( {
-                                        onSuccess: $.proxy(function() {
+                                                                try {
+                                                                    //-- Flag that the Core Variables have been configured --//
+                                                                    IOMy.common.CoreVariablesInitialised = true;
+                                                                    //-- Reset the Navigation array and index after switching users --//
+                                                                    IOMy.common.NavPagesNavigationArray = [];
+                                                                    IOMy.common.NavPagesCurrentIndex = -1;
+                                                                    //-- LOAD THE 1ST Page --//
+                                                                    IOMy.common.NavigationChangePage( IOMy.common.sNavigationDefaultPage, {}, true);
 
-//                                            //-- REFRESH LINK TYPES LIST --//
-                                            IOMy.common.RetrieveLinkTypeList( {
-                                                onSuccess : function () {
-                                                    //-- REFRESH IO LIST --//
-                                                    IOMy.apiphp.RefreshThingList( {
-                                                        onSuccess: $.proxy(function() {
+                                                                } catch(e654321) {
+                                                                    //-- ERROR:  TODO: Write a better error message--//
+                                                                    jQuery.sap.log.error(">>>>Critical Error Loading \"Navigation Main\" page<<<<\n"+e654321.message);
+                                                                }
+                                                            }, me)
+                                                        }); //-- END IO LIST --//
+                                                        
+                                                    }
+                                                }); //-- END LINK TYPES LIST --//
 
-                                                            try {
-                                                                //-- Flag that the Core Variables have been configured --//
-                                                                IOMy.common.CoreVariablesInitialised = true;
-                                                                //-- Reset the Navigation array and index after switching users --//
-                                                                IOMy.common.NavPagesNavigationArray = [];
-                                                                IOMy.common.NavPagesCurrentIndex = -1;
-                                                                //-- LOAD THE 1ST Page --//
-                                                                IOMy.common.NavigationChangePage( IOMy.common.sNavigationDefaultPage, {}, true);
+                                            }, me)
+                                        }); //-- END LINK LIST --//
 
-                                                            } catch(e654321) {
-                                                                //-- ERROR:  TODO: Write a better error message--//
-                                                                jQuery.sap.log.error(">>>>Critical Error Loading \"Navigation Main\" page<<<<\n"+e654321.message);
-                                                            }
-                                                        }, me)
-                                                    }); //-- END IO LIST --//
-                                                    
-                                                }
-                                            }); //-- END LINK TYPES LIST --//
-
-                                        }, me)
-                                    }); //-- END LINK LIST --//
-
-                                }, me)
-                            }); //-- END ROOMS LIST --//
-                            
-                        }, me)
-                    }); //-- END HUB LIST --//
-                    
-				}
-			}); //-- END PREMISE LIST --//
+                                    }, me)
+                                }); //-- END ROOMS LIST --//
+                                
+                            }, me)
+                        }); //-- END HUB LIST --//
+                        
+					}
+				}); //-- END PREMISE LIST --//
+			} else {
+				//-- Error has occurred --//
+				IOMy.common.showError( "Reloading of Core variables is in already progress! New attempt has aborted.", "Core Variables");
+				
+			}
 		} catch(e1) {
 			jQuery.sap.log.error("RefreshCoreVariables Error! "+e1.message);
 		}
