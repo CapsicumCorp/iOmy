@@ -137,6 +137,13 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 #define BUFFER_SIZE 1024
 
+typedef struct timerule timerule_t;
+struct timerule {
+  std::string deviceid; //Normally the mac address of a device
+  int16_t ontime; //The minute of the day at which to turn on a device
+  int16_t offtime; //The minute of the day at which to turn off a device
+};
+
 static int timeruleslib_inuse=0; //Only shutdown when inuse = 0
 
 #ifdef DEBUG
@@ -153,8 +160,8 @@ static int rulesloaded=0;
 static int rulesloadpending=0;
 static std::string rulesfilename="";
 
-//block , name, value
-//static std::map<std::string, std::map<std::string, std::string> > cfgfileitems;
+//device id , timerule struct
+static std::map<std::string, timerule_t> gtimerules;
 
 //Function Declarations
 int timeruleslib_init(void);
@@ -419,7 +426,8 @@ int timeruleslib_readrulesfile(void) {
   FILE *file;
   char *linebuf;
   int abort=0;
-  std::string curblock="<global>"; //If we see an item outside of a block put it in block: <global>
+  std::string curblock="<global>";
+  std::string curdeviceid="";
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
   timeruleslib_lockconfig();
@@ -457,18 +465,18 @@ int timeruleslib_readrulesfile(void) {
     debuglibifaceptr->debuglib_printf(1, "%s: Configuration load aborted due to error\n", __func__);
     return -3;
   }
-  //rulesfileitems.clear();
+  gtimerules.clear();
   while (fgets(linebuf, BUFFER_SIZE, file) !=NULL) {
-		size_t tmplen;
+    size_t tmplen;
 
-		tmplen=strlen(linebuf)-1;
+    tmplen=strlen(linebuf)-1;
     if (tmplen>0 && linebuf[tmplen] == '\n') {
       //Remove the newline at the end of the line
       linebuf[tmplen]=0;
-			--tmplen;
+      --tmplen;
     }
     if (tmplen>0 && linebuf[tmplen] == '\r') {
-			//Carriage return will be present with DOS format
+      //Carriage return will be present with DOS format
       //Remove the carriage return at the end of the line
       linebuf[tmplen]=0;
       --tmplen;
@@ -495,15 +503,46 @@ int timeruleslib_readrulesfile(void) {
     std::string value=equalsptr+1;
 
     debuglibifaceptr->debuglib_printf(1, "%s: Found a name=value pair: [%s]: %s=%s\n", __func__, curblock.c_str(), linebuf, value.c_str());
-		//rulesfileitems[curblock][linebuf]=value;
-	}
+
+    //Process the name=value pair
+    if (curblock=="timerules") {
+      if (strcmp(linebuf, "device")==0) {
+        curdeviceid=value;
+        gtimerules[curdeviceid].deviceid=curdeviceid;
+      } else if (strcmp(linebuf, "ontime")==0) {
+        int hour, minute;
+        sscanf(value.substr(0, 2).c_str(), "%02d", &hour);
+        sscanf(value.substr(2, 4).c_str(), "%02d", &minute);
+        gtimerules[curdeviceid].ontime=hour*60+minute;
+      } else if (strcmp(linebuf, "offtime")==0) {
+        int hour, minute;
+        sscanf(value.substr(0, 2).c_str(), "%02d", &hour);
+        sscanf(value.substr(2, 4).c_str(), "%02d", &minute);
+        gtimerules[curdeviceid].offtime=hour*60+minute;
+      }
+    }
+  }
   fclose(file);
   free(linebuf);
-	linebuf=NULL;
+  linebuf=NULL;
 
   rulesloadpending=0;
   rulesloaded=1;
 
+  //DEBUG: Display Time Rules
+  for (auto const &timerulesit : gtimerules) {
+    int onhour, onminute;
+    int offhour, offminute;
+
+    onhour=(timerulesit.second.ontime) / 60;
+    onminute=(timerulesit.second.ontime)-(onhour*60);
+    offhour=(timerulesit.second.offtime) / 60;
+    offminute=(timerulesit.second.offtime)-(offhour*60);
+
+    debuglibifaceptr->debuglib_printf(1, "Time Rule for device: %s\n", timerulesit.first.c_str());
+    debuglibifaceptr->debuglib_printf(1, "  On Time: %02d:%02d\n", onhour, onminute);
+    debuglibifaceptr->debuglib_printf(1, "  Off Time: %02d:%02d\n", offhour, offminute);
+  }
   timeruleslib_unlockconfig();
 
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
