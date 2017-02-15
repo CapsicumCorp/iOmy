@@ -152,7 +152,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
      */
     DrawUI : function () {
         //===============================================\\
-        // DECLARE VARIABLES
+        // Declare Variables
         //===============================================\\
         var me = this;
         var thisView = me.getView();
@@ -163,7 +163,9 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         me.thingID = me.oThing.DeviceId;
         //var iLinkId = me.oThing.LinkId;
         
+        //===============================================\\
         // Start rendering the page
+        //===============================================\\
         
         //-----------------------------------------------\\
         // THING NAME
@@ -218,17 +220,19 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                                         } catch (e) {
                                             jQuery.sap.log.error("Error updating the Device Data page upon refresh: "+e.message);
                                         }
-
+                                        
                                         //-- REFRESH THINGS --//
                                         try {
-                                            IOMy.common.ReloadCoreVariables();
-                                            //===== BRING UP THE SUCCESS DIALOG BECAUSE THE API RAN SUCCESSFULLY. =====\\
-                                            IOMy.common.showSuccess("Update successful.", "Success", 
-                                            function () {
-                                                IOMy.common.NavigationTriggerBackForward(false);
-                                            }, "UpdateMessageBox");
-
-                                            IOMy.common.bItemNameChangedMustRefresh = true;
+                                            IOMy.common.ReloadCoreVariables(
+                                                function () {
+                                                    //===== BRING UP THE SUCCESS DIALOG BECAUSE THE API RAN SUCCESSFULLY AND THE VARIABLES HAVE BEEN REFRESHED. =====\\
+                                                    IOMy.common.showSuccess("Update successful.", "Success", 
+                                                    function () {
+                                                        IOMy.common.bItemNameChangedMustRefresh = true;
+                                                        IOMy.common.NavigationTriggerBackForward(false);
+                                                    }, "UpdateMessageBox");
+                                                }
+                                            );
                                         } catch (e) {
                                             jQuery.sap.log.error("Error refreshing the Item List: "+e.message);
                                             this.onComplete();

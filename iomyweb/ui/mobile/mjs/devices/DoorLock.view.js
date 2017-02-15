@@ -52,20 +52,6 @@ sap.ui.jsview("mjs.devices.DoorLock", {
             title : "Door Lock"
         });
 		
-//		var oPage = new sap.m.Page(me.createId("page"),{
-//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-//			footer : IOMy.widgets.getAppFooter(),
-//			content : [
-//               //-- Navigational Header --//
-//				IOMy.widgets.getNavigationalSubHeader("Door Lock", "sap-icon://GoogleMaterial/lock_outline", me),
-//				new sap.m.Panel( me.createId("panel"), {
-//                    backgroundDesign: "Transparent",
-//                    content : [
-//					]
-//               }).addStyleClass("PadBottom10px UserInputForm")
-//          ]
-//		}).addStyleClass("height100Percent width100Percent MainBackground");
-		
 		return oPage;
 	}
 

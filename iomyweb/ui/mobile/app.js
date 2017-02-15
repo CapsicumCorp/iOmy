@@ -1598,6 +1598,24 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.MotionSensor\" Page!\n"
 	},
+    { 
+		"Id":			"pDeviceDoorLock",
+		"Location":		"mjs.devices.DoorLock",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.DoorLock\" Page!\n"
+	},
+	{ 
+		"Id":			"pDeviceWindowSensor",
+		"Location":		"mjs.devices.WindowSensor",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.WindowSensor\" Page!\n"
+	},
+	{ 
+		"Id":			"pDeviceTestThermostat",
+		"Location":		"mjs.devices.TestThermostat",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.TestThermostat\" Page!\n"
+	},
 	{ 
 		"Id":			"pTemplate",
 		"Location":		"mjs.staging.Template",

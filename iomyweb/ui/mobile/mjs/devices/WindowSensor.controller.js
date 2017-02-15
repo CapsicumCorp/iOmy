@@ -135,28 +135,28 @@ sap.ui.controller("mjs.devices.WindowSensor", {
         
         //-- Status --//
         me.wStatusField = new sap.m.Text ({
-            text : sDefaultText, // Default text until data can be loaded into it.
+            text : "Closed",
             textAlign : "Center",
             width : "100%"
         });
         
         //-- Last Accessed --//
         me.wLastAccessedField = new sap.m.Text ({
-            text : sDefaultText, // Default text until data can be loaded into it.
+            text : "23d 14h 55m",
             textAlign : "Center",
             width : "100%"
         });
         
         //-- Battery --//
         me.wBatteryField = new sap.m.Text ({
-            text : sDefaultText, // Default text until data can be loaded into it.
+            text : "79%",
             textAlign : "Center",
             width : "100%"
         });
         
         //-- Tamper --//
         me.wTamperField = new sap.m.Text ({
-            text : sDefaultText, // Default text until data can be loaded into it.
+            text : "Secure",
             textAlign : "Center",
             width : "100%"
         });

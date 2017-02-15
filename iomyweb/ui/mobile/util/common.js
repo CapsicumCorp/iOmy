@@ -726,7 +726,7 @@ $.extend(IOMy.common,{
      * 
      * There are seven steps.
      */
-    ReloadCoreVariables : function (fnCallback) {
+    ReloadCoreVariables : function (fnCallback, fnFailCallback) {
         
         if( IOMy.common.bCoreRefreshInProgress===false ) {
             IOMy.common.bCoreRefreshInProgress = true;
@@ -739,11 +739,11 @@ $.extend(IOMy.common,{
             this.LoadTimezones();
         
             // Do the next steps
-            this.ReloadVariablePremiseList(fnCallback);
+            this.ReloadVariablePremiseList(fnCallback, fnFailCallback);
         } else {
             //-- Error has occurred --//
             IOMy.common.showError( "Reloading of Core variables is in already progress! New attempt has aborted.", "Core Variables");
-            
+            fnFailCallback();
         }
     },
     
@@ -752,13 +752,13 @@ $.extend(IOMy.common,{
      * 
      * Next step is refreshing the hub list if successful.
      */
-    ReloadVariablePremiseList : function (fnCallback) {
+    ReloadVariablePremiseList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
         try {
             me.RefreshPremiseList({
 				onSuccess : function () {
-                    me.ReloadVariableHubList(fnCallback);
+                    me.ReloadVariableHubList(fnCallback, fnFailCallback);
                 }
             });
         } catch (e) {
@@ -771,13 +771,13 @@ $.extend(IOMy.common,{
      * 
      * Next step is refreshing the room list if successful.
      */
-    ReloadVariableHubList : function (fnCallback) {
+    ReloadVariableHubList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
         try {
             me.RefreshHubList({
 				onSuccess : function () {
-                    me.ReloadVariableRoomList(fnCallback);
+                    me.ReloadVariableRoomList(fnCallback, fnFailCallback);
                 }
             });
         } catch (e) {
@@ -790,13 +790,13 @@ $.extend(IOMy.common,{
      * 
      * Next step is refreshing the link list if successful.
      */
-    ReloadVariableRoomList : function (fnCallback) {
+    ReloadVariableRoomList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
         try {
             me.RetreiveRoomList({
 				onSuccess : function () {
-                    me.ReloadVariableLinkList(fnCallback);
+                    me.ReloadVariableLinkList(fnCallback, fnFailCallback);
                 }
             });
         } catch (e) {
@@ -809,13 +809,13 @@ $.extend(IOMy.common,{
      * 
      * Next step is refreshing the link type list if successful.
      */
-    ReloadVariableLinkList : function (fnCallback) {
+    ReloadVariableLinkList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
         try {
             me.RetrieveLinkList({
 				onSuccess : function () {
-                    me.ReloadVariableLinkTypeList(fnCallback);
+                    me.ReloadVariableLinkTypeList(fnCallback, fnFailCallback);
                 }
             });
         } catch (e) {
@@ -828,13 +828,13 @@ $.extend(IOMy.common,{
      * 
      * Next step is refreshing the thing list if successful.
      */
-    ReloadVariableLinkTypeList : function (fnCallback) {
+    ReloadVariableLinkTypeList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
         try {
             me.RetrieveLinkTypeList({
 				onSuccess : function () {
-                    me.ReloadVariableThingList(fnCallback);
+                    me.ReloadVariableThingList(fnCallback, fnFailCallback);
                 }
             });
         } catch (e) {
@@ -847,22 +847,32 @@ $.extend(IOMy.common,{
      * 
      * Either load the home page or whatever function is parsed.
      */
-    ReloadVariableThingList : function (fnCallback) {
+    ReloadVariableThingList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         var fnOnComplete;
+        var fnOnFail;
         
         //------------------------------------------------------//
         // Collect the call back function or create the default function, which
         // is to carry the user to the home page.
         //------------------------------------------------------//
-        if (fnCallback !== undefined)
+        if (fnCallback !== undefined) {
             fnOnComplete = fnCallback;
-        else
+        } else {
             fnOnComplete = function () {};
+        }
+        
+        
+        if (fnCallback !== undefined) {
+            fnOnFail = fnFailCallback;
+        } else {
+            fnOnFail = function () {};
+        }
         
         try {
             IOMy.apiphp.RefreshThingList({
-				onSuccess : fnOnComplete
+				onSuccess   : fnOnComplete,
+                onFail      : fnOnFail
             });
         } catch (e) {
             jQuery.sap.log.error("ReloadVariableThingList Error! "+e.message);

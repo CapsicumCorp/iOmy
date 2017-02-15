@@ -52,19 +52,6 @@ sap.ui.jsview("mjs.devices.TestThermostat", {
             title : "Thermostat"
         });
 		
-//		var oPage = new sap.m.Page(me.createId("page"),{
-//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-//			footer : IOMy.widgets.getAppFooter(),
-//			content : [
-//               //-- Navigational Header --//
-//				IOMy.widgets.getNavigationalSubHeader("Thermostat", "sap-icon://WeatherIcons/wi-thermometer", me),
-//				new sap.m.Panel( me.createId("panel"), {
-//                   backgroundDesign: "Transparent",
-//                    content : []
-//                }).addStyleClass("PadBottom10px UserInputForm")
-//            ]
-//		}).addStyleClass("height100Percent width100Percent MainBackground");
-		
 		return oPage;
 	}
 

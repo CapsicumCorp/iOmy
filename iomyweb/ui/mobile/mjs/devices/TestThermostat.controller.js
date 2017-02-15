@@ -27,7 +27,7 @@ sap.ui.controller("mjs.devices.TestThermostat", {
     //-------------------------------------------------//
     // Widgets
     //-------------------------------------------------//
-    aElementsToDestroy : [],        // ARRAY: A list of IDs used by any element on this page
+    aElementsToDestroy      : [],        // ARRAY: A list of IDs used by any element on this page
     
     wMainList 				: null,
 	wPanel					: null,
@@ -129,14 +129,14 @@ sap.ui.controller("mjs.devices.TestThermostat", {
         
         //-- Status --//
         me.wStatusField = new sap.m.Text ({
-            text : sDefaultText, // Default text until data can be loaded into it.
+            text : "On", // Default text until data can be loaded into it.
             textAlign : "Center",
             width : "100%"
         });
         
         //-- Current Temperature --//
         me.wCurrentTempField = new sap.m.Text ({
-            text : sDefaultText, // Default text until data can be loaded into it.
+            text : "29°C", // Default text until data can be loaded into it.
             textAlign : "Center",
             width : "100%"
         });
@@ -181,20 +181,23 @@ sap.ui.controller("mjs.devices.TestThermostat", {
         
         //-- Mode --//
         me.wModeField = new sap.m.SegmentedButton({
-            selectedKey : "SBYes",
+            selectedKey : "SBHeat",
             items : [
                 new sap.m.SegmentedButtonItem ({
                     text : "Off",
+                    key : "SBOff"
                 }),
                 new sap.m.SegmentedButtonItem ({
                     text : "Heat",
-                    key : "SBYes"
+                    key : "SBHeat"
                 }),
                 new sap.m.SegmentedButtonItem ({
-                    text : "Cool"
+                    text : "Cool",
+                    key : "SBCool"
                 }),
                 new sap.m.SegmentedButtonItem ({
-                    text : "Auto"
+                    text : "Auto",
+                    key : "SBAuto"
                 })
             ]
         });

@@ -130,28 +130,28 @@ sap.ui.controller("mjs.devices.DoorLock", {
         
         //-- Status --//
         me.wStatusField = new sap.m.Text ({
-            text : sDefaultText,
+            text : "Locked",
             textAlign : "Right",
             width : "100%"
         });
         
         //-- Last Accessed --//
         me.wLastAccessField = new sap.m.Text ({
-            text : sDefaultText,
+            text : "1d 3h 21m",
             textAlign : "Right",
             width : "100%"
         });
         
         //-- Battery --//
         me.wBatteryField = new sap.m.Text ({
-            text : sDefaultText,
+            text : "21%",
             textAlign : "Right",
             width : "100%"
         });
         
         //-- Tamper --//
         me.wTamperField = new sap.m.Text ({
-            text : sDefaultText,
+            text : "Secure",
             textAlign : "Right",
             width : "100%"
         });

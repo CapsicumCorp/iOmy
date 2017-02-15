@@ -52,19 +52,6 @@ sap.ui.jsview("mjs.devices.WindowSensor", {
             title : "Window Sensor"
         });
 		
-//		var oPage = new sap.m.Page(me.createId("page"),{
-//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-//			footer : IOMy.widgets.getAppFooter(),
-//			content : [
-//                //-- Navigational Header --//
-//				IOMy.widgets.getNavigationalSubHeader("Windows Sensor", "sap-icon://GoogleMaterial/border_all", me),
-//				new sap.m.Panel( me.createId("panel"), {
-//                    backgroundDesign: "Transparent",
-//                    content : []
-//               }).addStyleClass("PadBottom10px UserInputForm")
-//            ]
-//		}).addStyleClass("height100Percent width100Percent MainBackground");
-		
 		return oPage;
 	}
 

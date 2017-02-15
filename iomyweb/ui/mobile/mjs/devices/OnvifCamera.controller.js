@@ -79,15 +79,13 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
                 me.loadLinkConn(me.oThing.LinkId);
                 //console.log(me.oThing);
                 //console.log(me.oThing.DisplayName.toUpperCase());
-                // Create the title on the page.
-                me.byId("NavSubHead_Title").setText(me.oThing.DisplayName.toUpperCase());
                 // Add the subheading title widget to the list of labels that display the Thing name.
-                LabelFunctions.addThingLabelWidget(me.oThing.Id,
-                    {
-                        widgetID : me.createId("NavSubHead_Title"),
-                        uppercase : true
-                    }
-                );
+//                LabelFunctions.addThingLabelWidget(me.oThing.Id,
+//                    {
+//                        widgetID : me.createId("NavSubHead_Title"),
+//                        uppercase : true
+//                    }
+//                );
                 
                 // Boolean for determining if a different camera to the previous
                 // one is accessed.
@@ -171,6 +169,10 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         var me = this;
         var thisView = me.getView();
         var oRoomInfo = IOMy.common.RoomsList["_"+me.oThing.PremiseId]["_"+me.oThing.RoomId];
+        
+        // Create the title on the page.
+        me.byId("NavSubHead_Title").setText(me.oThing.DisplayName.toUpperCase());
+                
 
         //==============================================//
         // Create PTZ Controls
