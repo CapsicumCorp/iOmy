@@ -1196,23 +1196,23 @@ if($bError===false) {
 							
 						case "02_CreateViewsRestricted2":
 							//$aResult = DB_CreateViewsRestricted2( $sPostDatabaseName );
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateUsersHub", "PrivateUsersRooms", "PrivateUsersComm", "PrivateUsersLink", "PrivateUsersThing", "PrivateUsersIO" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateUsersHub", "PrivateUsersPremiseRooms", "PrivateUsersRooms", "PrivateUsersComm", "PrivateUsersLink", "PrivateUsersThing" ) );
 							break;
 							
 						case "02_CreateViewsRestricted3":
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateUsersServerPerms", "PrivateDataTinyInt", "PrivateDataInt", "PrivateDataBigInt", "PrivateDataFloat" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateUsersIO", "PrivateUsersServerPerms", "PrivateDataTinyInt", "PrivateDataInt", "PrivateDataBigInt" ) );
 							break;
 							
 						case "02_CreateViewsRestricted4":
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateDataTinyString", "PrivateDataShortString", "PrivateDataMedString", "PrivateDataLongString", "PrivateDataString255" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateDataFloat", "PrivateDataTinyString", "PrivateDataShortString", "PrivateDataMedString", "PrivateDataLongString" ) );
 							break;
 							
 						case "02_CreateViewsRestricted5":
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateDataTinyIntEnum", "PrivateDataIntEnum", "PrivateDataBigIntEnum", "WatchInputsHub", "WatchInputsComm" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateDataString255", "PrivateDataTinyIntEnum", "PrivateDataIntEnum", "PrivateDataBigIntEnum" ) );
 							break;
 							
 						case "02_CreateViewsRestricted6":
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "WatchInputsLink", "WatchInputsThing", "WatchInputsIO" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "WatchInputsHub", "WatchInputsComm", "WatchInputsLink", "WatchInputsThing", "WatchInputsIO" ) );
 							break;
 							
 						//--------------------//

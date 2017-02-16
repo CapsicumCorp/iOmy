@@ -89,16 +89,6 @@ function DB_CreateDatabase( $sDatabaseName ) {
 
 
 
-function DB_CreateTables1( $sDBName ) {
-	//------------------------------------------------------------------------//
-	//-- DESCRIPTION:                                                       --//
-	//--    This function is used to add the tables to the database.        --//
-	//------------------------------------------------------------------------//
-}
-
-
-
-
 function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 	/*
 	Core
@@ -1262,8 +1252,6 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 			$sSQL .= "    add constraint FK_LINK_LINKINFO foreign key (LINK_LINKINFO_FK) references `".$sDBName."`.LINKINFO (LINKINFO_PK) on delete restrict on update restrict, \n";
 			$sSQL .= "    add constraint FK_LINK_LINKTYPE foreign key (LINK_LINKTYPE_FK) references `".$sDBName."`.LINKTYPE (LINKTYPE_PK) on delete restrict on update restrict, \n";
 			$sSQL .= "    add constraint FK_LINK_ROOMS foreign key (LINK_ROOMS_FK) references `".$sDBName."`.ROOMS (ROOMS_PK) on delete restrict on update restrict; \n";
-			
-			
 			break;
 			
 		/*==============================================================*/
@@ -1561,7 +1549,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "    `COUNTRIES_PK`, \n";
 			$sSQL .= "    `COUNTRIES_NAME`, \n";
 			$sSQL .= "    `COUNTRIES_ABREVIATION` \n";
-			$sSQL .= "FROM `".$sDBName."`.`COUNTRIES` \n";
+			$sSQL .= "FROM `".$sDBName."`.`COUNTRIES`; \n";
 			break;
 			
 		/*============================================================
@@ -1978,7 +1966,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 		/*============================================================
 		  == #4.07# - USERSPREMISEROOMS                             ==
 		  ============================================================*/
-		case "PrivateUsersHub":
+		case "PrivateUsersPremiseRooms":
 			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSPREMISEROOMS` AS \n";
 			$sSQL .= "SELECT \n";
 			$sSQL .= "	`USERS_PK`, \n";
@@ -2005,7 +1993,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `PREMISE_PK`=`ROOMS_PREMISE_FK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`ROOMTYPE` ON `ROOMS_ROOMTYPE_FK`=`ROOMTYPE_PK` \n";
 			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
-			$sSQL .= "AND `PERMPREMISE_READ` = 1;\n";
+			$sSQL .= "AND `PERMPREMISE_READ` = 1 AND `PERMPREMISE_ROOMADMIN` = 1;\n";
 			break;
 			
 		/*============================================================
@@ -2235,7 +2223,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "	`PERMSERVER_UPGRADE` \n";
 			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`PERMSERVER` ON `USERS_PK` = `PERMSERVER_USERS_FK` \n";
-			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%'); \n";
 			break;
 			
 			
