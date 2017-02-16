@@ -24,6 +24,12 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+//NOTE: POSIX_C_SOURCE is needed for the following
+//  ctime_r
+//  CLOCK_REALTIME
+//  sem_timedwait
+#define _POSIX_C_SOURCE 200112L
+
 //NOTE: _XOPEN_SOURCE is needed for the following
 //  pthread_mutexattr_settype
 //  PTHREAD_MUTEX_ERRORCHECK
@@ -39,6 +45,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <time.h>
+#include <semaphore.h>
 #include <list>
 #include <map>
 #include <string>
@@ -49,6 +57,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "moduleinterface.h"
 #include "timeruleslib.hpp"
 #include "modules/debuglib/debuglib.h"
+#include "modules/dblib/dblib.h"
 #include "modules/commonlib/commonlib.h"
 
 #ifdef DEBUG
@@ -144,7 +153,14 @@ struct timerule {
   int16_t offtime; //The minute of the day at which to turn off a device
 };
 
+static sem_t timeruleslib_mainthreadsleepsem; //Used for main thread sleeping
+
 static int timeruleslib_inuse=0; //Only shutdown when inuse = 0
+static bool timeruleslib_shuttingdown=false;
+
+static bool needtoquit=false; //Set to true when timeruleslib should exit
+
+static pthread_t timeruleslib_mainthread=0;
 
 #ifdef DEBUG
 static pthread_mutexattr_t errorcheckmutexattr;
@@ -164,12 +180,16 @@ static std::string rulesfilename="";
 static std::map<std::string, timerule_t> gtimerules;
 
 //Function Declarations
-int timeruleslib_init(void);
-void timeruleslib_shutdown(void);
-
-int timeruleslib_setrulesfilename(const char *rulefile);
 int timeruleslib_readrulesfile();
 int timeruleslib_isloaded();
+static int timeruleslib_setrulesfilename(const char *rulefile);
+
+static void timeruleslib_setneedtoquit(bool val);
+static bool timeruleslib_getneedtoquit();
+static int timeruleslib_start(void);
+static void timeruleslib_stop(void);
+static int timeruleslib_init(void);
+static void timeruleslib_shutdown(void);
 
 //C Exports
 extern "C" {
@@ -184,6 +204,7 @@ JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_TimeRulesLib_jn
 
 //Module Interface Definitions
 #define DEBUGLIB_DEPIDX 0
+#define DBLIB_DEPIDX 0
 
 static timeruleslib_ifaceptrs_ver_1_t timeruleslib_ifaceptrs_ver_1={
   timeruleslib_setrulesfilename,
@@ -219,6 +240,12 @@ moduledep_ver_1_t timeruleslib_deps[]={
     1
   },
   {
+    "dblib",
+    nullptr,
+    DBLIBINTERFACE_VER_1,
+    1
+  },
+  {
     nullptr, nullptr, 0, 0
   }
 };
@@ -228,10 +255,10 @@ moduleinfo_ver_1_t timeruleslib_moduleinfo_ver_1={
   "timeruleslib",
   timeruleslib_init,
   timeruleslib_shutdown,
-	nullptr,
-	nullptr,
-	nullptr,
-	nullptr,
+  timeruleslib_start,
+  timeruleslib_stop,
+  nullptr,
+  nullptr,
   (moduleiface_ver_1_t (* const)[]) &timeruleslib_ifaces,
   (moduledep_ver_1_t (*)[]) &timeruleslib_deps
 };
@@ -276,7 +303,7 @@ static void timeruleslib_makelockkey() {
 /*
   Apply the timeruleslib mutex lock if not already applied otherwise increment the lock count
 */
-void timeruleslib_lockconfig() {
+void timeruleslib_lock() {
   LOCKDEBUG_ADDDEBUGLIBIFACEPTR();
   long *lockcnt;
 
@@ -307,7 +334,7 @@ void timeruleslib_lockconfig() {
 /*
   Decrement the lock count and if 0, release the timeruleslib mutex lock
 */
-void timeruleslib_unlockconfig() {
+void timeruleslib_unlock() {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   long *lockcnt;
 
@@ -340,81 +367,6 @@ void timeruleslib_unlockconfig() {
 }
 
 /*
-  Initialise the timerules library
-  Returns 0 for success or other value on error
-//NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
-*/
-int timeruleslib_init(void) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
-
-  debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
-
-	++timeruleslib_inuse;
-	if (timeruleslib_inuse>1) {
-    //Already initialised
-		debuglibifaceptr->debuglib_printf(1, "Exiting %s, already initialised, use count=%d\n", __func__, timeruleslib_inuse);
-    pthread_mutex_unlock(&timeruleslibmutex);
-		return 0;
-  }
-  rulesfilename="";
-  rulesloaded=0;
-  rulesloadpending=0;
-  //rulefileitems.clear();
-
-#ifdef DEBUG
-  //Enable error checking on mutexes if debugging is enabled
-  pthread_mutexattr_init(&errorcheckmutexattr);
-  pthread_mutexattr_settype(&errorcheckmutexattr, PTHREAD_MUTEX_ERRORCHECK);
-
-  pthread_mutex_init(&timeruleslibmutex, &errorcheckmutexattr);
-#endif
-  debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
-
-  return 0;
-}
-
-
-//Shutdown the timerules library
-//NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
-void timeruleslib_shutdown(void) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
-
-  debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
-
-  if (timeruleslib_inuse==0) {
-    //Already uninitialised
-    pthread_mutex_unlock(&timeruleslibmutex);
-    debuglibifaceptr->debuglib_printf(1, "WARNING: Exiting %s, Already shutdown\n", __func__);
-    return;
-  }
-	--timeruleslib_inuse;
-	if (timeruleslib_inuse>0) {
-		//Module still in use
-    debuglibifaceptr->debuglib_printf(1, "Exiting %s, Still in use, use count=%d\n", __func__, timeruleslib_inuse);
-		pthread_mutex_unlock(&timeruleslibmutex);
-		return;
-	}
-	rulesloadpending=0;
-	rulesloaded=0;
-
-#ifdef DEBUG
-  //Destroy main mutexes
-  pthread_mutex_destroy(&timeruleslibmutex);
-
-  pthread_mutexattr_destroy(&errorcheckmutexattr);
-#endif
-  debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
-}
-
-//Set the current config filename
-//Returns 0 if success or non-zero on error
-int timeruleslib_setrulesfilename(const char *rulesfile) {
-	rulesfilename=rulesfile;
-
-	return 0;
-}
-
-/*
   Read in the time rules from a file.
   NOTE: This function has a lock around the entire operation so any functions called this function will only be called by
     one thread at a time.
@@ -430,14 +382,14 @@ int timeruleslib_readrulesfile(void) {
   std::string curdeviceid="";
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
-  timeruleslib_lockconfig();
+  timeruleslib_lock();
 	if (timeruleslib_inuse==0) {
-    timeruleslib_unlockconfig();
+    timeruleslib_unlock();
 		debuglibifaceptr->debuglib_printf(1, "Exiting %s, not initialised\n", __func__);
 		return -1;
 	}
 	if (rulesfilename=="") {
-    timeruleslib_unlockconfig();
+    timeruleslib_unlock();
     debuglibifaceptr->debuglib_printf(1, "Exiting %s, config filename not configured\n", __func__);
     return -1;
   }
@@ -445,7 +397,7 @@ int timeruleslib_readrulesfile(void) {
   file=fopen(rulesfilename.c_str(), "rb");
   if (file == NULL) {
     rulesloadpending=1;
-    timeruleslib_unlockconfig();
+    timeruleslib_unlock();
     debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s\n", __func__, rulesfilename.c_str());
     return -1;
   }
@@ -453,7 +405,7 @@ int timeruleslib_readrulesfile(void) {
   if (!linebuf) {
     fclose(file);
     rulesloadpending=1;
-    timeruleslib_unlockconfig();
+    timeruleslib_unlock();
     debuglibifaceptr->debuglib_printf(1, "%s: Not enough memory to load configuration\n", __func__);
     return -2;
   }
@@ -461,7 +413,7 @@ int timeruleslib_readrulesfile(void) {
     fclose(file);
     free(linebuf);
     rulesloadpending=1;
-    timeruleslib_unlockconfig();
+    timeruleslib_unlock();
     debuglibifaceptr->debuglib_printf(1, "%s: Configuration load aborted due to error\n", __func__);
     return -3;
   }
@@ -543,7 +495,7 @@ int timeruleslib_readrulesfile(void) {
     debuglibifaceptr->debuglib_printf(1, "  On Time: %02d:%02d\n", onhour, onminute);
     debuglibifaceptr->debuglib_printf(1, "  Off Time: %02d:%02d\n", offhour, offminute);
   }
-  timeruleslib_unlockconfig();
+  timeruleslib_unlock();
 
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 
@@ -556,9 +508,9 @@ int timeruleslib_readrulesfile(void) {
 int timeruleslib_isloaded() {
   int val;
 
-  timeruleslib_lockconfig();
+  timeruleslib_lock();
   val=rulesloaded;
-  timeruleslib_unlockconfig();
+  timeruleslib_unlock();
 
   return val;
 }
@@ -569,9 +521,9 @@ int timeruleslib_isloaded() {
 static int timeruleslib_loadpending() {
   int val;
 
-  timeruleslib_lockconfig();
+  timeruleslib_lock();
   val=rulesloadpending;
-  timeruleslib_unlockconfig();
+  timeruleslib_unlock();
 
   return val;
 }
@@ -580,9 +532,218 @@ static int timeruleslib_loadpending() {
   Cancel a previous pending load attempt
 */
 static void timeruleslib_cancelpendingload() {
-  timeruleslib_lockconfig();
+  timeruleslib_lock();
   rulesloadpending=0;
-  timeruleslib_unlockconfig();
+  timeruleslib_unlock();
+}
+
+//Set the current config filename
+//Returns 0 if success or non-zero on error
+static int timeruleslib_setrulesfilename(const char *rulesfile) {
+  rulesfilename=rulesfile;
+
+  return 0;
+}
+
+/*
+  Main Time Rules thread loop that manages
+*/
+static void *timeruleslib_mainloop(void* UNUSED(val)) {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  time_t currenttime;
+  struct timespec curtime, semwaittime;
+
+  debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
+
+  //Loop until this thread is canceled
+  while (!timeruleslib_getneedtoquit()) {
+    bool fastsleep=false; //True means we only sleep for 5 secons instead of 60 while waiting for loading
+
+    clock_gettime(CLOCK_REALTIME, &semwaittime);
+    currenttime=semwaittime.tv_sec;
+
+    if (timeruleslib_isloaded()) {
+      timeruleslib_lock();
+      timeruleslib_unlock();
+    } else {
+      fastsleep=true;
+    }
+    if (timeruleslib_getneedtoquit()) {
+      break;
+    }
+    if (fastsleep) {
+      semwaittime.tv_sec+=5;
+      semwaittime.tv_nsec=0;
+    } else {
+      semwaittime.tv_sec+=60; //Step to the next minute but don't round so each device has slightly different on/off intevals for power grid distribution
+      semwaittime.tv_nsec=0;
+    }
+#ifdef DEBUG
+      {
+        char timestr[100];
+        ctime_r(&semwaittime.tv_sec, timestr);
+        //Remove newline at end of timestr
+        timestr[strlen(timestr)-1]='\0';
+        if (fastsleep) {
+          debuglibifaceptr->debuglib_printf(1, "%s: Fast Sleeping to reach time %s\n", __func__, timestr);
+        } else {
+          debuglibifaceptr->debuglib_printf(1, "%s: Sleeping to reach time %s\n", __func__, timestr);
+        }
+      }
+#endif
+    sem_timedwait(&timeruleslib_mainthreadsleepsem, &semwaittime);
+  }
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
+
+  return (void *) 0;
+}
+
+static void timeruleslib_setneedtoquit(bool val) {
+  timeruleslib_lock();
+  needtoquit=val;
+  timeruleslib_unlock();
+}
+
+static bool timeruleslib_getneedtoquit() {
+  bool val;
+
+  timeruleslib_lock();
+  val=needtoquit;
+  timeruleslib_unlock();
+
+  return val;
+}
+
+//NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
+static int timeruleslib_start(void) {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  int result=0;
+
+  debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
+  //Start a thread for looping through time rules
+  if (timeruleslib_mainthread==0) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Starting the main thread\n", __func__);
+    result=pthread_create(&timeruleslib_mainthread, NULL, timeruleslib_mainloop, (void *) ((unsigned short) 0));
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to spawn main thread\n", __func__);
+      result=-1;
+    }
+  }
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
+
+  return result;
+}
+
+//NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
+//NOTE: No need to wait for response and detecting device since the other libraries will also have their stop function called before
+//  this library's shutdown function is called.
+static void timeruleslib_stop(void) {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
+
+  if (timeruleslib_mainthread!=0) {
+    //Cancel the main thread and wait for it to exit
+    debuglibifaceptr->debuglib_printf(1, "%s: Cancelling the main thread\n", __func__);
+    timeruleslib_lock();
+    needtoquit=true;
+    sem_post(&timeruleslib_mainthreadsleepsem);
+    timeruleslib_unlock();
+    debuglibifaceptr->debuglib_printf(1, "%s: Waiting for main thread to exit\n", __func__);
+    pthread_join(timeruleslib_mainthread, NULL);
+    timeruleslib_mainthread=0;
+  }
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
+}
+
+/*
+  Initialise the timerules library
+  Returns 0 for success or other value on error
+//NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
+*/
+static int timeruleslib_init(void) {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  dblib_ifaceptrs_ver_1_t *dblibifaceptr=(dblib_ifaceptrs_ver_1_t *) timeruleslib_deps[DBLIB_DEPIDX].ifaceptr;
+
+  debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
+
+  ++timeruleslib_inuse;
+  if (timeruleslib_inuse>1) {
+    //Already initialised
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s, already initialised, use count=%d\n", __func__, timeruleslib_inuse);
+    pthread_mutex_unlock(&timeruleslibmutex);
+    return 0;
+  }
+  //Let the database library know that we want to use it
+  if (dblibifaceptr) {
+    dblibifaceptr->init();
+  }
+  needtoquit=false;
+  if (sem_init(&timeruleslib_mainthreadsleepsem, 0, 0)==-1) {
+    //Can't initialise semaphore
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s: Can't initialise main thread sleep semaphore\n", __func__);
+    return -2;
+  }
+  rulesfilename="";
+  rulesloaded=0;
+  rulesloadpending=0;
+  gtimerules.clear();
+
+#ifdef DEBUG
+  //Enable error checking on mutexes if debugging is enabled
+  pthread_mutexattr_init(&errorcheckmutexattr);
+  pthread_mutexattr_settype(&errorcheckmutexattr, PTHREAD_MUTEX_ERRORCHECK);
+
+  pthread_mutex_init(&timeruleslibmutex, &errorcheckmutexattr);
+#endif
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
+
+  return 0;
+}
+
+//Shutdown the timerules library
+//NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
+static void timeruleslib_shutdown(void) {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  dblib_ifaceptrs_ver_1_t *dblibifaceptr=(dblib_ifaceptrs_ver_1_t *) timeruleslib_deps[DBLIB_DEPIDX].ifaceptr;
+
+  debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
+
+  if (timeruleslib_inuse==0) {
+    //Already uninitialised
+    pthread_mutex_unlock(&timeruleslibmutex);
+    debuglibifaceptr->debuglib_printf(1, "WARNING: Exiting %s, Already shutdown\n", __func__);
+    return;
+  }
+  --timeruleslib_inuse;
+  if (timeruleslib_inuse>0) {
+    //Module still in use
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s, Still in use, use count=%d\n", __func__, timeruleslib_inuse);
+    pthread_mutex_unlock(&timeruleslibmutex);
+    return;
+  }
+  //Start shutting down library
+  timeruleslib_shuttingdown=true;
+
+  //Finished using the database library
+  dblibifaceptr->shutdown();
+
+  sem_destroy(&timeruleslib_mainthreadsleepsem);
+
+  rulesloadpending=0;
+  rulesloaded=0;
+  gtimerules.clear();
+
+  //Finished shutting down
+  timeruleslib_shuttingdown=false;
+
+#ifdef DEBUG
+  //Destroy main mutexes
+  pthread_mutex_destroy(&timeruleslibmutex);
+
+  pthread_mutexattr_destroy(&errorcheckmutexattr);
+#endif
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 }
 
 moduleinfo_ver_generic_t *timeruleslib_getmoduleinfo() {
