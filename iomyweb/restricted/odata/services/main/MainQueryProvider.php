@@ -1,6 +1,23 @@
 <?php
 
 
+/*
+This file is part of iOmy.
+
+iOmy is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+iOmy is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 	
 	
@@ -96,6 +113,8 @@
 				case 'VR_USERSHUB':
 					break;
 				case 'VR_USERSROOMS':
+					break;
+				case 'VR_USERSPREMISEROOMS':
 					break;
 				case 'VR_USERSLINK':
 					break;
@@ -217,6 +236,9 @@
 							break;
 						case 'VR_USERSROOMS':
 							$aReturnResults[] = $this->_serializeVR_USERSROOMS($aRow);
+							break;
+						case 'VR_USERSPREMISEROOMS':
+							$aReturnResults[] = $this->_serializeVR_USERSPREMISEROOMS($aRow);
 							break;
 						case 'VR_USERSLINK':
 							$aReturnResults[] = $this->_serializeVR_USERSLINK($aRow);
@@ -342,6 +364,8 @@
 					break;
 				case 'VR_USERSROOMS':
 					break;
+				case 'VR_USERSPREMISEROOMS':
+					break;
 				case 'VR_USERSLINK':
 					break;
 				case 'VR_USERSTHING':
@@ -461,6 +485,9 @@
 							$aReturnResults = $this->_serializeVR_USERSHUB($aSQLResult["Data"]);
 							break;
 						case 'VR_USERSROOMS':
+							$aReturnResults = $this->_serializeVR_USERSROOMS($aSQLResult["Data"]);
+							break;
+						case 'VR_USERSPREMISEROOMS':
 							$aReturnResults = $this->_serializeVR_USERSROOMS($aSQLResult["Data"]);
 							break;
 						case 'VR_USERSLINK':
@@ -767,7 +794,7 @@
 		}
 		
 		/**
-		 * Serialize the sql row into RSCAT object
+		 * Serialize the sql row into UsersHub object
 		 * 
 		 * @param array $record each row of RSCAT
 		 * 
@@ -820,6 +847,37 @@
 			
 		}
 		
+        /**
+		 * Serialize the sql row into UsersPremiseRooms object
+		 * 
+		 * @param array $record each row of UsersRooms
+		 * 
+		 * @return Object
+		 */
+		private function _serializeVR_USERSPREMISEROOMS($record)
+		{
+			$VR_USERSPREMISEROOMS = new VR_USERSPREMISEROOMS();
+			$VR_USERSPREMISEROOMS->USERS_PK                        = $record['USERS_PK'];
+			//$VR_USERSPREMISEROOMS->USERS_USERNAME                  = $record['USERS_USERNAME'];
+			$VR_USERSPREMISEROOMS->PERMPREMISE_OWNER                  = $record['PERMPREMISE_OWNER'];
+			$VR_USERSPREMISEROOMS->PERMPREMISE_WRITE                 = $record['PERMPREMISE_WRITE'];
+			$VR_USERSPREMISEROOMS->PERMPREMISE_STATETOGGLE           = $record['PERMPREMISE_STATETOGGLE'];
+			$VR_USERSPREMISEROOMS->PERMPREMISE_READ              = $record['PERMPREMISE_READ'];
+			$VR_USERSPREMISEROOMS->PERMPREMISE_ROOMADMIN             = $record['PERMPREMISE_ROOMADMIN'];
+            $VR_USERSPREMISEROOMS->PREMISE_PK                      = $record['PREMISE_PK'];
+			$VR_USERSPREMISEROOMS->PREMISE_NAME					= $record['PREMISE_NAME'];
+			$VR_USERSPREMISEROOMS->PREMISE_DESCRIPTION             = $record['PREMISE_DESCRIPTION'];
+			$VR_USERSPREMISEROOMS->ROOMS_PK                        = $record['ROOMS_PK'];
+			//$VR_USERSPREMISEROOMS->ROOMS_PREMISE_FK                = $record['ROOMS_PREMISE_FK'];
+			$VR_USERSPREMISEROOMS->ROOMS_NAME                      = $record['ROOMS_NAME'];
+			$VR_USERSPREMISEROOMS->ROOMS_FLOOR                     = $record['ROOMS_FLOOR'];
+			$VR_USERSPREMISEROOMS->ROOMS_DESC                      = $record['ROOMS_DESC'];
+			$VR_USERSPREMISEROOMS->ROOMTYPE_PK                     = $record['ROOMTYPE_PK'];
+			$VR_USERSPREMISEROOMS->ROOMTYPE_NAME                   = $record['ROOMTYPE_NAME'];
+			$VR_USERSPREMISEROOMS->ROOMTYPE_OUTDOORS               = $record['ROOMTYPE_OUTDOORS'];
+			return $VR_USERSPREMISEROOMS;
+			
+		}
 		
 		/**
 		 * Serialize the sql row into UsersIo object

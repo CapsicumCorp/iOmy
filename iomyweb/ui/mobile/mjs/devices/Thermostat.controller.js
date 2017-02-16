@@ -94,6 +94,13 @@ sap.ui.controller("mjs.devices.Thermostat", {
         var me          = this;
         var sCurrentID  = "";
         
+        //--------------------------------------------------------------------//
+        // Destroy the main panel
+        //--------------------------------------------------------------------//
+        if (me.wPanel !== null) {
+            me.wPanel.destroy();
+        }
+        
         for (var i = 0; i < me.aElementsToDestroy.length; i++) {
             sCurrentID = me.aElementsToDestroy[i];
             if (me.byId(sCurrentID) !== undefined)

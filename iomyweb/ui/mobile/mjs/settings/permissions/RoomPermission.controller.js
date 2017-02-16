@@ -195,6 +195,16 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
         if (me.wVertBox !== null) {
             me.wVertBox.destroy();
         }
+        
+        //-- Wipe out any elements with IDs that didn't get destroyed during the full wipe. --//
+        for (var i = 0; i < me.aElementsToDestroy.length; i++) {
+            if (me.byId(me.aElementsToDestroy[i]) !== undefined) {
+                me.byId(me.aElementsToDestroy[i]).destroy();
+            }
+        }
+        
+        //-- Clear Arrays --//
+        me.aElementsToDestroy = [];
         me.aRoomEntries = [];
     },
     
@@ -430,21 +440,62 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                     //------------------------------------------------------------//
                     // Draw the room list complete with the permissions settings.
                     //------------------------------------------------------------//
-                    $.each(IOMy.common.RoomsList["_"+me.wPremiseSelectBox.getSelectedKey()],
-                        function (sIndex, mRoomInfo) {
-
-                            if (sIndex !== undefined && sIndex !== null &&
-                                    mRoomInfo !== undefined && mRoomInfo !== null &&
-                                    sIndex !== "Unassigned")
-                            {
-                                mRoomInfo["Index"] = sIndex;
+                    var sUrl = IOMy.apiodata.ODataLocation("premise_perm_rooms");
+                    var aColumns        = ["ROOMS_PK","ROOMS_NAME"];
+                    var aFilter         = [];
+                    var aOrderBy        = [];
+                    
+                    IOMy.apiodata.AjaxRequest({
+                        Url             : sUrl,
+                        Columns         : aColumns,
+                        WhereClause     : aFilter,
+                        OrderByClause   : aOrderBy,
+                        
+                        onSuccess : function (responseType, data) {
+                            var premisePermRoomsRequest = this;
+                            var mRoomInfo = {};
+                            
+                            //-- Wipe out any elements with IDs that didn't get destroyed during the full wipe. --//
+                            for (var i = 0; i < me.aElementsToDestroy.length; i++) {
+                                if (me.byId(me.aElementsToDestroy[i]) !== undefined) {
+                                    me.byId(me.aElementsToDestroy[i]).destroy();
+                                }
+                            }
+                            
+                            for (var i = 0; i < data.length; i++) {
+                                mRoomInfo = data[i];
+                                mRoomInfo["Index"] = "_"+mRoomInfo.ROOMS_PK;
                                 me.DrawRoomEntry(mRoomInfo);
                             }
-
+                            
+                            premisePermRoomsRequest.onComplete();
+                        },
+                        
+                        onFail : function (response) {
+                            var premisePermRoomsRequest = this;
+                            premisePermRoomsRequest.onComplete();
+                        },
+                        
+                        onComplete : function () {
+                            thisView.byId("page").addContent(me.wVertBox);
                         }
-                    );
-            
-                    thisView.byId("page").addContent(me.wVertBox);
+                    });
+                    
+//                    $.each(IOMy.common.RoomsList["_"+me.wPremiseSelectBox.getSelectedKey()],
+//                        function (sIndex, mRoomInfo) {
+//
+//                            if (sIndex !== undefined && sIndex !== null &&
+//                                    mRoomInfo !== undefined && mRoomInfo !== null &&
+//                                    sIndex !== "Unassigned")
+//                            {
+//                                mRoomInfo["Index"] = sIndex;
+//                                me.DrawRoomEntry(mRoomInfo);
+//                            }
+//
+//                        }
+//                    );
+//            
+//                    thisView.byId("page").addContent(me.wVertBox);
                 },
 
                 //--------------------------------//
@@ -501,7 +552,10 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
         //=============================================//
         // Create the entry in the room list
         //=============================================//
-        var oEntry = new sap.m.HBox({
+        me.aElementsToDestroy.push("checkbox"+mRoomInfo.Index);
+        me.aElementsToDestroy.push("roomName"+mRoomInfo.Index);
+        me.aElementsToDestroy.push("roomEntry"+mRoomInfo.Index);
+        var oEntry = new sap.m.HBox(me.createId("roomEntry"+mRoomInfo.Index), {
             items : [
                 // === CHECK BOX === \\
                 new sap.m.VBox({
@@ -517,9 +571,9 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                 new sap.m.VBox({
                     items : [
                         new sap.m.Button(me.createId("roomName"+mRoomInfo.Index), {
-                            text : mRoomInfo.RoomName,
+                            text : mRoomInfo.ROOMS_NAME,
                             press : function () {
-                                me.ShowCurrentPermissions(mRoomInfo.RoomId, mRoomInfo.RoomName);
+                                me.ShowCurrentPermissions(mRoomInfo.ROOMS_PK, mRoomInfo.ROOMS_NAME);
                             }
                         }).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px width100Percent")
                     ]
@@ -535,7 +589,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
         me.roomsChanged[mRoomInfo.Index] = false;
         me.roomsToUpdate[mRoomInfo.Index] = {
             update : false,
-            Id : mRoomInfo.RoomId
+            Id : mRoomInfo.ROOMS_PK
         };
         
         //==============================================================//
@@ -624,6 +678,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                 if (iPos < aRoomIDs.length) {
                     me.UpdatePermissionsForRoom(iUserId, iPos, aRoomIDs);
                 } else {
+                    
                     //--------------------------------------------------------//
                     // If all rooms failed to have new permissions set, then
                     // report it as an error.
@@ -637,7 +692,11 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                     // successfully.
                     //--------------------------------------------------------//
                     else if (me.aErrors.length > 0 && me.aErrors.length < aRoomIDs.length) {
-                        IOMy.common.showWarning("Some permissions updated successfully, but some could not be updated.\n\n"+me.aErrors.join('\n'), "Error");
+                        IOMy.common.ReloadCoreVariables(
+                            function () {
+                                IOMy.common.showWarning("Some permissions updated successfully, but some could not be updated.\n\n"+me.aErrors.join('\n'), "Error");
+                            }
+                        );
                     }
                     //--------------------------------------------------------//
                     // If some rooms failed to have new permissions set, then
@@ -645,7 +704,11 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                     // successfully.
                     //--------------------------------------------------------//
                     else if (me.aErrors.length === 0) {
-                        IOMy.common.showSuccess("Room Permissions updated successfully!", "Success");
+                        IOMy.common.ReloadCoreVariables(
+                            function () {
+                                IOMy.common.showSuccess("Room Permissions updated successfully!", "Success");
+                            }
+                        );
                     }
                     
                     // Clear error log

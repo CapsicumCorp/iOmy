@@ -119,6 +119,7 @@ $.extend(IOMy.common,{
 	//== Boolean flags      					==//
 	//============================================//
     bItemNameChangedMustRefresh     : false,        //-- BOOLEAN:       Indicates whether to refresh certain pages after changing the name of an item   --//
+    bSessionTerminated              : false,        //-- BOOLEAN:       Indicates whether the session was terminated for whatever reason. Sets to true when an API request (OData or PHP) encounters a HTTP 403 error.   --//
     
 	//============================================//
 	//== CONFIGURATION VARIABLES				==//
@@ -741,6 +742,10 @@ $.extend(IOMy.common,{
             // Do the next steps
             this.ReloadVariablePremiseList(fnCallback, fnFailCallback);
         } else {
+            //-- Define an empty function if fnFailCallback is undefined. --//
+            if (fnFailCallback === undefined) {
+                fnFailCallback = function () {};
+            }
             //-- Error has occurred --//
             IOMy.common.showError( "Reloading of Core variables is in already progress! New attempt has aborted.", "Core Variables");
             fnFailCallback();
@@ -919,6 +924,7 @@ $.extend(IOMy.common,{
                                                                 try {
                                                                     //-- Flag that the Core Variables have been configured --//
                                                                     IOMy.common.CoreVariablesInitialised = true;
+                                                                    IOMy.common.bCoreRefreshInProgress = false;
                                                                     //-- Reset the Navigation array and index after switching users --//
                                                                     IOMy.common.NavPagesNavigationArray = [];
                                                                     IOMy.common.NavPagesCurrentIndex = -1;

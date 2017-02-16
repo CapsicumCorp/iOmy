@@ -388,7 +388,20 @@ $.extend(IOMy.apiphp,{
 							this.bApiComplete = true;
 							
 						//------------------------------------------------------------------------//
-						//-- 2.2.E - UNEXPECTED STATUS CODE:                                    --//
+						//-- 2.2.E - HTTP 403 STATUS CODE:                                      --//
+						//------------------------------------------------------------------------//
+						} else if (err.status=="403") {
+							//-- Log the Error --//
+							this.DebugLogString += "HTTP Status:"+err.status+"\n The above error code is not expected! \nError Mesgage:"+err.message+"\n";
+							
+                            //-- 403 Errors indicate that the session has been terminated and the user will need to log back in. Flag this --//
+                            IOMy.common.bSessionTerminated = true;
+                            
+							//-- Flag that we shouldn't retry the ajax request (because we assume it won't help the error that we are getting) --//
+							this.bApiComplete = true;
+							
+						//------------------------------------------------------------------------//
+						//-- 2.2.F - UNEXPECTED STATUS CODE:                                    --//
 						//------------------------------------------------------------------------//
 						} else {
 							//-- Log the Error --//
@@ -704,7 +717,8 @@ $.extend(IOMy.apiphp,{
 			//
 			
 		} catch(e1) {
-			 jQuery.sap.log.error( "RefreshThingList: "+e1.message, "", "IO Detection");
+            IOMy.common.bCoreRefreshInProgress = false;
+			jQuery.sap.log.error( "RefreshThingList: "+e1.message, "", "IO Detection");
 		}
 	}
 	

@@ -150,6 +150,10 @@ $.extend(IOMy.apiodata,{
 				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_USERSPREMISELOCATIONS';
 				break;
 				
+            case "premise_perm_rooms":
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_USERSPREMISEROOMS';
+				break;
+				
 			case "rooms":
 				sReturn = sUrlRestricted+'/odata/Main.svc.php/VR_USERSROOMS';
 				break;
@@ -496,9 +500,22 @@ $.extend(IOMy.apiodata,{
 					this.bApiComplete = true;
 					
 				//------------------------------------------------------------------------//
-				//-- 2.3.E - UNEXPECTED STATUS CODE: 									--//
-				//------------------------------------------------------------------------//
-				} else {
+                //-- 2.2.E - HTTP 403 STATUS CODE:                                      --//
+                //------------------------------------------------------------------------//
+                } else if (err.status=="403") {
+                    //-- Log the Error --//
+                    this.DebugLogString += "HTTP Status:"+err.status+"\n The above error code is not expected! \nError Mesgage:"+err.message+"\n";
+                    
+                    //-- 403 Errors indicate that the session has been terminated and the user will need to log back in. Flag this --//
+                    IOMy.common.bSessionTerminated = true;
+                    
+                    //-- Flag that we shouldn't retry the ajax request (because we assume it won't help the error that we are getting) --//
+                    this.bApiComplete = true;
+
+                //------------------------------------------------------------------------//
+                //-- 2.2.F - UNEXPECTED STATUS CODE:                                    --//
+                //------------------------------------------------------------------------//
+                } else {
 					//-- Log the Error --//
 					this.DebugLogString += "HTTP Status:"+err.status+"\n The above error code is not expected! \nError Mesgage:"+err.message+"\n";
 					
