@@ -33,7 +33,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
     sCurrentThingName:              "",             //-- STRING:        Stores the current thing's name.    --//
 	dLastThingListUpdate:			null,			//-- DATE:			Stores the last time the page had the Thing List Ajax values updated.			--//
 	dUIThingLastUpdate:				null,			//-- DATE:			Stores the last time the page had the individual Thing updated.			--//
-	
+	iCurrentThingState:				0,				//-- INTEGER:		--//
 	
 	/**
 	* Called when a controller is instantiated and its View controls (if available) are already created.
@@ -96,6 +96,10 @@ sap.ui.controller("mjs.premise.DeviceData", {
 							//-- Set redraw to true --//
 							bRedrawPageNeeded = true;
 							
+						} else if( oController.iCurrentThingState!==IOMy.common.ThingList['_'+oEvent.data.ThingId].Status ) {
+							//-- Set redraw to true --//
+							bRedrawPageNeeded = true;
+							
 						} else {
                             //-- Check to see if the item/device name has been changed. --//
                             if (IOMy.common.bItemNameChangedMustRefresh === true) {
@@ -142,7 +146,9 @@ sap.ui.controller("mjs.premise.DeviceData", {
                             oController.oCurrentThing = IOMy.common.ThingList['_'+oEvent.data.ThingId];
 							oController.iCurrentThing = IOMy.common.ThingList['_'+oEvent.data.ThingId].Id;
 							oController.sCurrentThingName = IOMy.common.ThingList['_'+oEvent.data.ThingId].DisplayName;
-                            
+							
+							oController.iCurrentThingState = IOMy.common.ThingList['_'+oEvent.data.ThingId].Status;
+							
 							//----------------------------------------------------------------------------//
 							//-- 2.4.1.3 - Destroy the specific Tile related objects of this page       --//
 							//----------------------------------------------------------------------------//
