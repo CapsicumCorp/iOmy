@@ -1,7 +1,8 @@
 /*
-Title: Scales View
+Title: Template UI5 View
 Author: Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
-Description:
+Description: Creates the page list all devices and their information in a given
+    room.
 Copyright: Capsicum Corporation 2016
 
 This file is part of iOmy.
@@ -21,17 +22,17 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-sap.ui.jsview("mjs.staging.Scales", {
+sap.ui.jsview("mjs.staging.BPM", {
 	
 	/*************************************************************************************************** 
 	** 1.0 - Controller Declaration
 	**************************************************************************************************** 
 	* Specifies the Controller belonging to this View. 
 	* In the case that it is not implemented, or that "null" is returned, this View does not have a Controller.
-	* @memberOf mjs.staging.WindowSensor
+	* @memberOf mjs.staging.BPM
 	****************************************************************************************************/ 
 	getControllerName : function() {
-		return "mjs.staging.Scales";
+		return "mjs.staging.BPM";
 	},
 
 	/*************************************************************************************************** 
@@ -39,7 +40,7 @@ sap.ui.jsview("mjs.staging.Scales", {
 	**************************************************************************************************** 
 	* Is initially called once after the Controller has been instantiated. It is the place where the UI is constructed. 
 	* Since the Controller is given to this method, its event handlers can be attached right away. 
-	* @memberOf mjs.staging.WindowSensor
+	* @memberOf mjs.staging.BPM
 	****************************************************************************************************/ 
 	createContent : function(oController) {
 		var me = this;
@@ -49,7 +50,7 @@ sap.ui.jsview("mjs.staging.Scales", {
 			footer : IOMy.widgets.getAppFooter(),
 			content : [
                 //-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("Bluetooth Scales", "sap-icon://GoogleMaterial/bluetooth", me),
+				IOMy.widgets.getNavigationalSubHeader("Blood Pressure Monitor", "sap-icon://GoogleMaterial/favorite_border", me),
 				new sap.m.Panel( me.createId("panel"), {
                     backgroundDesign: "Transparent",
                     content : [
@@ -61,7 +62,7 @@ sap.ui.jsview("mjs.staging.Scales", {
 									content : [
 										//-- Column 2 for Status Row --//
 										new sap.m.Text ({
-											text : "Connected",
+											text : "Closed",
 											textAlign : "Right",
 										}).addStyleClass("")
 									]
@@ -88,37 +89,35 @@ sap.ui.jsview("mjs.staging.Scales", {
 										}).addStyleClass("")
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
-								//-- Height --//
+								//-- Systol --//
 								new sap.m.InputListItem ({
-									label : "Height:",
+									label : "Systol:",
 									content : [
-										//-- Column 2 for Height Row --//
+										//-- Column 2 for Systol Row --//
 										new sap.m.Text ({
-											text : "179cm",
+											text : "103 mmHG",
 											textAlign : "Right",
 										}).addStyleClass("")
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
-								//-- Weight --//
+								//-- Diastol --//
 								new sap.m.InputListItem ({
-									label : "Weight:",
+									label : "Diastol:",
 									content : [
-										//-- Column 2 for Weight Row --//
+										//-- Column 2 for Daistol Row --//
 										new sap.m.Text ({
-											text : "80kg",
+											text : "123 mmHG",
 											textAlign : "Right",
 										}).addStyleClass("")
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
-								//-- BMI --//
-								//-- BMI = Weight / (height * height) = BMI --//
-								//-- BMI = 80 / (1.79 * 1.79) = 25.0 --//
+								//-- HeartRate --//
 								new sap.m.InputListItem ({
-									label : "BMI:",
+									label : "Heart Rate:",
 									content : [
-										//-- Column 2 for BMI Row --//
+										//-- Column 2 for HeartRate Row --//
 										new sap.m.Text ({
-											text : "25.0",
+											text : "75 BPM",
 											textAlign : "Right",
 										}).addStyleClass("")
 									]

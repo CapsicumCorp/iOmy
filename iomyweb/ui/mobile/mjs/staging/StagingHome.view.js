@@ -141,6 +141,17 @@ sap.ui.jsview("mjs.staging.StagingHome", {
 											}
 										})
 									]
+								}),		
+								new sap.m.ColumnListItem({
+									cells:[
+										new sap.m.Link({
+											text:"Blood Pressure Monitor",
+											emphasized : true,
+											press : function () {
+												IOMy.common.NavigationChangePage("pBPM", {}, false);
+											}
+										})
+									]
 								})
 							]	
 						})

@@ -1663,6 +1663,12 @@ var aPages = [
 		"Location":		"mjs.staging.Quadcopter",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Quadcopter\" Page!\n"
+	},
+	{
+		"Id":			"pBPM",
+		"Location":		"mjs.staging.BPM",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.BPM\" Page!\n"
 	}
 	
 ];
