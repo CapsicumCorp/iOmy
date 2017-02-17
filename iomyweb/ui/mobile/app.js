@@ -1669,6 +1669,12 @@ var aPages = [
 		"Location":		"mjs.staging.BPM",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.BPM\" Page!\n"
+	},
+	{
+		"Id":			"pGaragedoor",
+		"Location":		"mjs.staging.Garagedoor",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Garagedoor\" Page!\n"
 	}
 	
 ];

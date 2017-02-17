@@ -22,25 +22,19 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-sap.ui.controller("mjs.staging.StagingHome", {
+sap.ui.controller("mjs.staging.Garagedoor", {
 	
-	Staginglinks : [
-		{ "display" : "Blood Pressure Monitor" , "link" : "pBPM" },
-		{ "display" : "Bluetooth Scales" , "link" : "pScales" },
-		{ "display" : "Device Overview", "link" : "pOverviewRe" },
-		{ "display" : "Door Lock" , "link" : "pDoorLock" },		
-		{ "display" : "Garage Door" , "link" : "pGaragedoor" },
-		{ "display" : "Motion Sensor" , "link" : "pMotionTemp" },
-		{ "display" : "Quadcopter" , "link" : "pQuadcopter" },
-		{ "display" : "Thermostat" , "link" : "pTestThermostat" },
-		{ "display" : "Window Sensor" , "link" : "pWindowSensor" },
+	ListItem : [
+		{ "label" : "Status" , "text" : "Closed" },
+		{ "label" : "Last Accessed" , "text" : "3h 21m" },
+		{ "label" : "Battery" , "text" : "33%" },
+		{ "label" : "Tamper" , "text" : "Secure" },
 	],
-	
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
-* @memberOf mjs.staging.StagingHome
+* @memberOf mjs.staging.Garagedoor
 */
 
 	onInit: function() {
@@ -62,16 +56,16 @@ sap.ui.controller("mjs.staging.StagingHome", {
 /**
 * Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered
 * (NOT before the first rendering! onInit() is used for that one!).
-* @memberOf mjs.staging.StagingHome
+* @memberOf mjs.staging.Garagedoor
 */
 	onBeforeRendering: function() {
-	
+
 	},
 
 /**
 * Called when the View has been rendered (so its HTML is part of the document). Post-rendering manipulations of the HTML could be done here.
 * This hook is the same one that SAPUI5 controls get after being rendered.
-* @memberOf mjs.staging.StagingHome
+* @memberOf mjs.staging.Garagedoor
 */
 	onAfterRendering: function() {
 		//--------------------------------------------//
@@ -83,65 +77,67 @@ sap.ui.controller("mjs.staging.StagingHome", {
 
         oController.SetupPage(); 
 	},
-
 /**
 * Called when the Controller is destroyed. Use this one to free resources and finalize activities.
-* @memberOf mjs.staging.StagingHome
+* @memberOf mjs.staging.Garagedoor
 */
 	onExit: function() {
 
 	},
 	
-    SetupPage: function(  ) {
+	SetupPage: function(  ) {
         //--------------------------------------------//
         //-- Declare Variables                      --//
         //--------------------------------------------//
         var oController         = this;                 //-- SCOPE: Allows subfunctions to access the current scope --//
         var oView               = this.getView();
-        var bError              = false;
-        var sErrMesg            = "";
   
-
 		//--------------------------------------------------------//
-				//-- Draw 1st Run Page 2 --//
+		//-- Draw 1st Run Page 2                                --//
 		//--------------------------------------------------------//
-        if( bError===false ) {
+		var oList = oController.byId("list");
 
-            //var oTileContainer = oController.byId("TileContainer");
-            var oTable = oController.byId("table");
+		if( oList ) {
+			$.each( oController.ListItem, function( iIndex, aListItem ) {
+				try {
+					oList.addItem(
+						//-- Coloumn 1 --//
+						new sap.m.InputListItem ({
+							label : aListItem.label+":",
+							content : [
+								//-- Column 2 --//
+								new sap.m.Text ({
+									text : aListItem.text,
+									textAlign : "Right",
+								})
+							]
+						}).addStyleClass("maxlabelwidth50Percent")                 
+					);
+				} catch(e2) {
+					jQuery.sap.log.error("GD_Foreach: "+e2.message, "", "GD");
+				}
+			}); 
+			//-- End of foreach loop ($.each) --//
+			//-- Adding in a unqiue item "Control Button" --//
+			try {
+				oList.addItem(
+					new sap.m.InputListItem ({
+						label : "Control:",
+						content : [
+							//-- Column 2 for Current Temp Row --//
+							new sap.m.Button({
+								icon : "sap-icon://GoogleMaterial/lock_open",
+								text : "Open"
+							}).addStyleClass("")
+						]
+					}).addStyleClass("maxlabelwidth50Percent")                 
+				);
+			} catch(e2) {
+				jQuery.sap.log.error("GD_ControlButton: "+e2.message, "", "GD");
+			}
+		} else {
+			console.log("GD List Error - Unable to Find the List");
+		}
+	}
 
-            //if( oTileContainer ) {
-            if( oTable ) {
-                $.each( oController.Staginglinks, function( iIndex, aStageLink ) {
-                    try {
-                        oTable.addItem(
-							new sap.m.ColumnListItem({
-								cells:[
-									new sap.m.Link({
-										text : aStageLink.display,
-										emphasized : true,
-										press : function () {
-											IOMy.common.NavigationChangePage( aStageLink.link , {} , false);
-										}
-									})
-								]
-							})                    
-                        );
-                    } catch(e2) {
-                        jQuery.sap.log.error("CriticalErrorAAA: "+e2.message, "", "AAA");
-                    }
-                }); //-- End of foreach loop ($.each) --//
-
-            } else {
-                console.log("Page Error");
-            }
-        }
-		//--------------------------------------------------------//
-				//-- Error Messages --//
-		//--------------------------------------------------------//
-        if( bError===true ) {
-            IOMy.common.showError( sErrMesg, "Perform 1st Run ")
-        }
-    }
-	
 });
