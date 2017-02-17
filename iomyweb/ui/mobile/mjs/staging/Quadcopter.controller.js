@@ -74,9 +74,9 @@ sap.ui.controller("mjs.staging.Quadcopter", {
 				IOMy.common.NavigationRefreshButtons( me );
                 
                 // Import the given Thing
-                me.oThing = IOMy.common.ThingList['_'+evt.data.ThingId];
+                //me.oThing = IOMy.common.ThingList['_'+evt.data.ThingId];
 
-                me.loadLinkConn(me.oThing.LinkId);
+                //me.loadLinkConn(me.oThing.LinkId);
                 //console.log(me.oThing);
                 //console.log(me.oThing.DisplayName.toUpperCase());
                 // Add the subheading title widget to the list of labels that display the Thing name.
@@ -89,23 +89,23 @@ sap.ui.controller("mjs.staging.Quadcopter", {
                 
                 // Boolean for determining if a different camera to the previous
                 // one is accessed.
-                var bNowForDifferentCamera = me.iID !== evt.data.ThingId;
-                var bUpdated = me.UTSLastUpdate !== IOMy.common.ThingList["_"+evt.data.ThingId].UILastUpdate;
-                
-                // Decide whether the page needs to be reloaded.
-                if (bNowForDifferentCamera || bUpdated ) {
-                    me.bUIDrawn = false;
-                }
-                
-                if (!me.bUIDrawn) {
-                    // Store the ID and the last update timestamp.
-                    me.iID = me.oThing.Id;
-                    me.UTSLastUpdate = me.oThing.UILastUpdate;
+//                var bNowForDifferentCamera = me.iID !== evt.data.ThingId;
+//                var bUpdated = me.UTSLastUpdate !== IOMy.common.ThingList["_"+evt.data.ThingId].UILastUpdate;
+//                
+//                // Decide whether the page needs to be reloaded.
+//                if (bNowForDifferentCamera || bUpdated ) {
+//                    me.bUIDrawn = false;
+//                }
+//                
+//                if (!me.bUIDrawn) {
+//                    // Store the ID and the last update timestamp.
+//                    me.iID = me.oThing.Id;
+//                    me.UTSLastUpdate = me.oThing.UILastUpdate;
 
                     // Wipe out the old instance of the UI and redraw the page.
                     me.DestroyUI();
                     me.DrawUI();
-                }
+//                }
 			}
 		});
 	},
@@ -153,6 +153,7 @@ sap.ui.controller("mjs.staging.Quadcopter", {
             }
         }
         
+        //-- Because camera feed has an ID this will need to be destroyed separately. --//
         if (me.wCameraFeed !== null) {
             me.wCameraFeed.destroy();
         }
@@ -168,10 +169,10 @@ sap.ui.controller("mjs.staging.Quadcopter", {
     DrawUI : function () {
         var me = this;
         var thisView = me.getView();
-        var oRoomInfo = IOMy.common.RoomsList["_"+me.oThing.PremiseId]["_"+me.oThing.RoomId];
+        //var oRoomInfo = IOMy.common.RoomsList["_"+me.oThing.PremiseId]["_"+me.oThing.RoomId];
         
         // Create the title on the page.
-        me.byId("NavSubHead_Title").setText(me.oThing.DisplayName.toUpperCase());
+        //me.byId("NavSubHead_Title").setText(me.oThing.DisplayName.toUpperCase());
                 
 
         //==============================================//
@@ -225,6 +226,10 @@ sap.ui.controller("mjs.staging.Quadcopter", {
         // DRAW CAMERA FEED                             \\
         //==============================================\\
         
+        //--------------------------------------------------------------------//
+        // The camera feed VBox is assigned an ID simply because we need to have
+        // a way to reference the element to load a thumbnail into it.
+        //--------------------------------------------------------------------//
         me.wCameraFeed = new sap.m.VBox(me.createId("CameraThumbnail"), {
             items : [
                 // UP BUTTON
@@ -253,7 +258,7 @@ sap.ui.controller("mjs.staging.Quadcopter", {
         // DRAW DATE, TIME, AND ROOM                    \\
         //==============================================\\
         me.wLocationField = new sap.m.Label({
-            text : oRoomInfo.RoomName + " in " + oRoomInfo.PremiseName
+            text : ""//oRoomInfo.RoomName + " in " + oRoomInfo.PremiseName
         });
         
         me.wSnapshotTimeField = new sap.m.Label({});
@@ -306,13 +311,13 @@ sap.ui.controller("mjs.staging.Quadcopter", {
             thisView.byId("extrasMenuHolder").destroyItems();
             thisView.byId("extrasMenuHolder").addItem(
                 IOMy.widgets.getActionMenu({
-                    id : me.createId("extrasMenu"+me.oThing.Id),        // Uses the page ID
+                    id : me.createId("extrasMenu"/*+me.oThing.Id*/),        // Uses the page ID
                     icon : "sap-icon://GoogleMaterial/more_vert",
                     items : [
                         {
                             text: "Edit Stream Information",
                             select:	function (oControlEvent) {
-                                IOMy.common.NavigationChangePage( "pSettingsEditThing", {device : me.oThing}, false );
+                                //IOMy.common.NavigationChangePage( "pSettingsEditThing", {device : me.oThing}, false );
                             }
                         }
                     ]
@@ -328,7 +333,7 @@ sap.ui.controller("mjs.staging.Quadcopter", {
         //----------------------------------------------------------------------------//
         //-- LOAD THE PROFILE NAMES AND URLS                                        --//
         //----------------------------------------------------------------------------//
-        me.loadProfile();
+        //me.loadProfile();
     },
     
     loadLinkConn : function (iLinkId) {
