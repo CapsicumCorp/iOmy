@@ -63,8 +63,7 @@ sap.ui.jsview("mjs.staging.TestThermostat", {
 										//-- Column 2 for Status Row --//
 										new sap.m.Text ({
 											text : "On",
-											textAlign : "Center",
-											width : "100%"
+											textAlign : "Right",
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
@@ -75,8 +74,7 @@ sap.ui.jsview("mjs.staging.TestThermostat", {
 										//-- Column 2 for Current Temp Row --//
 										new sap.m.Text ({
 											text : "29°C",
-											textAlign : "Center",
-											width : "100%"
+											textAlign : "Right",
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
@@ -122,7 +120,7 @@ sap.ui.jsview("mjs.staging.TestThermostat", {
 											]
 										}).addStyleClass(""),
 									]
-								}).addStyleClass("maxlabelwidth50Percent textaligncenter"),
+								}).addStyleClass("maxlabelwidth50Percent"),
 								//-- Mode Title --//
 								new sap.m.InputListItem ({
 									label : "Mode:"
@@ -132,6 +130,7 @@ sap.ui.jsview("mjs.staging.TestThermostat", {
 									content : [
 										new sap.m.SegmentedButton ({
 											selectedKey : "SBYes",
+											width: "255px",
 											items : [
 												new sap.m.SegmentedButtonItem ({
 													text : "Off",
@@ -159,6 +158,7 @@ sap.ui.jsview("mjs.staging.TestThermostat", {
 									content : [
 										new sap.m.SegmentedButton ({
 											selectedKey : "SBYes",
+											width: "255px",
 											items : [
 												new sap.m.SegmentedButtonItem ({
 													text : "High"
