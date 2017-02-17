@@ -34,6 +34,7 @@ sap.ui.jsview("mjs.staging.StagingHome", {
 	getControllerName : function() {
 		return "mjs.staging.StagingHome";
 	},
+	
 
 	/*************************************************************************************************** 
 	** 2.0 - Content Creation
@@ -54,7 +55,7 @@ sap.ui.jsview("mjs.staging.StagingHome", {
 				new sap.m.Panel( me.createId("panel"), {
                     backgroundDesign: "Transparent",
                     content : [ 
-						new sap.m.Table({
+						new sap.m.Table(me.createId("table"),{
 							columns : [
 								new sap.m.Column({
 									header: [
@@ -65,95 +66,8 @@ sap.ui.jsview("mjs.staging.StagingHome", {
 								})
 							],
 							items:[
-								new sap.m.ColumnListItem({
-									cells:[
-										new sap.m.Link({
-											text:"Device Overview",
-											emphasized : true,
-											press : function () {
-												IOMy.common.NavigationChangePage("pOverviewRe", {}, false);
-											}
-										})
-									]
-								}),
-								new sap.m.ColumnListItem({
-									cells:[
-										new sap.m.Link({
-											text:"Motion Sensor",
-											emphasized : true,
-											press : function () {
-												IOMy.common.NavigationChangePage("pMotionTemp", {}, false);
-											}
-										})
-									]
-								}),
-								new sap.m.ColumnListItem({
-									cells:[
-										new sap.m.Link({
-											text:"Door Lock",
-											emphasized : true,
-											press : function () {
-												IOMy.common.NavigationChangePage("pDoorLock", {}, false);
-											}
-										})
-									]
-								}),
-								new sap.m.ColumnListItem({
-									cells:[
-										new sap.m.Link({
-											text:"Window Sensor",
-											emphasized : true,
-											press : function () {
-												IOMy.common.NavigationChangePage("pWindowSensor", {}, false);
-											}
-										})
-									]
-								}),
-								new sap.m.ColumnListItem({
-									cells:[
-										new sap.m.Link({
-											text:"Thermostat",
-											emphasized : true,
-											press : function () {
-												IOMy.common.NavigationChangePage("pTestThermostat", {}, false);
-											}
-										})
-									]
-								}),
-								new sap.m.ColumnListItem({
-									cells:[
-										new sap.m.Link({
-											text:"Bluetooth Scales",
-											emphasized : true,
-											press : function () {
-												IOMy.common.NavigationChangePage("pScales", {}, false);
-											}
-										})
-									]
-								}),		
-								new sap.m.ColumnListItem({
-									cells:[
-										new sap.m.Link({
-											text:"Quadcopter",
-											emphasized : true,
-											press : function () {
-												IOMy.common.NavigationChangePage("pQuadcopter", {}, false);
-											}
-										})
-									]
-								}),		
-								new sap.m.ColumnListItem({
-									cells:[
-										new sap.m.Link({
-											text:"Blood Pressure Monitor",
-											emphasized : true,
-											press : function () {
-												IOMy.common.NavigationChangePage("pBPM", {}, false);
-											}
-										})
-									]
-								})
-							]	
+								/* Items are being loaded in via the Controller */
+							]
 						})
 					]
                 }).addStyleClass("PadBottom10px PanelNoPadding UserInputForm")
