@@ -1616,13 +1616,7 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.TestThermostat\" Page!\n"
 	},
-	{ 
-		"Id":			"pTemplate",
-		"Location":		"mjs.staging.Template",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Template\" Page!\n"
-	},
-	{ 
+	{
 		"Id":			"pMotionTemp",
 		"Location":		"mjs.staging.MotionTemp",
 		"Type":			"JS",
@@ -1657,7 +1651,20 @@ var aPages = [
 		"Location":		"mjs.staging.OverviewRedesign",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.OverviewRedesign\" Page!\n"
+	},
+	{
+		"Id":			"pScales",
+		"Location":		"mjs.staging.Scales",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Scales\" Page!\n"
+	},
+	{
+		"Id":			"pQuadcopter",
+		"Location":		"mjs.staging.Quadcopter",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Quadcopter\" Page!\n"
 	}
+	
 ];
 
 /**

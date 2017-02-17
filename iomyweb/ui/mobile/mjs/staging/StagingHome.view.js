@@ -123,10 +123,10 @@ sap.ui.jsview("mjs.staging.StagingHome", {
 								new sap.m.ColumnListItem({
 									cells:[
 										new sap.m.Link({
-											text:"RC Tank",
+											text:"Bluetooth Scales",
 											emphasized : true,
 											press : function () {
-												IOMy.common.NavigationChangePage("pStagingHome", {}, false);
+												IOMy.common.NavigationChangePage("pScales", {}, false);
 											}
 										})
 									]
@@ -137,7 +137,7 @@ sap.ui.jsview("mjs.staging.StagingHome", {
 											text:"Quadcopter",
 											emphasized : true,
 											press : function () {
-												IOMy.common.NavigationChangePage("pStagingHome", {}, false);
+												IOMy.common.NavigationChangePage("pQuadcopter", {}, false);
 											}
 										})
 									]
