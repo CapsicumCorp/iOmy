@@ -44,6 +44,8 @@ sap.ui.controller("mjs.devices.MotionSensor", {
     wLastMotionField        : null,
     wBatteryField           : null,
     wTamperField            : null,
+    
+    destroyItemsWithIDs     : IOMy.functions.destroyItemsByIdFromView,
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
@@ -113,20 +115,19 @@ sap.ui.controller("mjs.devices.MotionSensor", {
      * (re)creating the page.
      */
     DestroyUI : function() {
-        //console.log("DestroyUI() called.");
-        var me          = this;
+        //--------------------------//
+        // Capture scope
+        //--------------------------//
+        var me = this;
         
+        // Wipe main list container
         if (me.wPanel !== null) {
             me.wPanel.destroy();
         }
         
-        for (var i = 0; i < me.aElementsToDestroy.length; i++) {
-            if (me.byId(me.aElementsToDestroy[i]) !== undefined) {
-                me.byId(me.aElementsToDestroy[i]).destroy();
-            }
-        }
+        me.destroyItemsWithIDs(me, me.aElementsToDestroy);
         
-        // Clear the array
+        // Clear the element list
         me.aElementsToDestroy = [];
     },
     

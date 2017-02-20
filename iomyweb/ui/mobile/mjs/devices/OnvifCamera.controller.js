@@ -477,7 +477,7 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
             // Function if Lookup fails (Onvif server not found)
             function (response) {
                 jQuery.sap.log.error("Error checking for the Onvif device (onFail): "+IOMy.devices.onvif.sProfileLookupErrors);
-                me.byId("SnapshotField").setText("Failed to load snapshot");
+                me.wSnapshotTimeField.setText("Failed to load snapshot");
             }
         );
     },

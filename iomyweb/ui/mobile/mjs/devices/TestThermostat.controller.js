@@ -37,6 +37,8 @@ sap.ui.controller("mjs.devices.TestThermostat", {
     wSetTempField           : null,
     wModeField              : null,
     
+    destroyItemsWithIDs     : IOMy.functions.destroyItemsByIdFromView,
+    
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
@@ -104,9 +106,7 @@ sap.ui.controller("mjs.devices.TestThermostat", {
         }
         
         // Wipe any elements with IDs assigned to them
-        for (var i = 0; i < me.aElementsToDestroy.length; i++) {
-            me.aElementsToDestroy[i].destroy();
-        }
+        me.destroyItemsWithIDs(me, me.aElementsToDestroy);
         
         // Clear the element list
         me.aElementsToDestroy = [];
@@ -202,6 +202,26 @@ sap.ui.controller("mjs.devices.TestThermostat", {
             ]
         });
         
+        //-- Fan Field --//
+        me.wFanField = new sap.m.SegmentedButton ({
+            selectedKey : "SBYes",
+            items : [
+                new sap.m.SegmentedButtonItem ({
+                    text : "High"
+                }),
+                new sap.m.SegmentedButtonItem ({
+                    text : "Med"
+                }),
+                new sap.m.SegmentedButtonItem ({
+                    text : "Low"
+                }),
+                new sap.m.SegmentedButtonItem ({
+                    text : "Auto",
+                    key : "SBYes"
+                })
+            ]
+        });
+        
         //-------------------------------------------------------------------//
         // Arrange the fields into a UI5 List
         //-------------------------------------------------------------------//
@@ -239,6 +259,17 @@ sap.ui.controller("mjs.devices.TestThermostat", {
                     content : [
                         //-- Column 2 for Mode Row --//
                         me.wModeField
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Fan Title --//
+                new sap.m.InputListItem ({
+                    label : "Fan:",
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Fan Segmented Button --//
+                new sap.m.InputListItem ({
+                    content : [
+                        //-- Column 2 for Fan Speed Row --//
+                        me.wFanField
                     ]
                 }).addStyleClass("maxlabelwidth50Percent")
             ]

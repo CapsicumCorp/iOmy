@@ -36,6 +36,8 @@ sap.ui.controller("mjs.devices.Thermostat", {
     wMainList           : null,
     wPanel              : null,
     
+    destroyItemsWithIDs     : IOMy.functions.destroyItemsByIdFromView,
+    
     mThingInfo : null,
     
 /**
@@ -91,23 +93,20 @@ sap.ui.controller("mjs.devices.Thermostat", {
      * (re)creating the page.
      */
     DestroyUI : function() {
-        var me          = this;
-        var sCurrentID  = "";
+        //--------------------------//
+        // Capture scope
+        //--------------------------//
+        var me = this;
         
-        //--------------------------------------------------------------------//
-        // Destroy the main panel
-        //--------------------------------------------------------------------//
+        // Wipe main list container
         if (me.wPanel !== null) {
             me.wPanel.destroy();
         }
         
-        for (var i = 0; i < me.aElementsToDestroy.length; i++) {
-            sCurrentID = me.aElementsToDestroy[i];
-            if (me.byId(sCurrentID) !== undefined)
-                me.byId(sCurrentID).destroy();
-        }
+        // Wipe any elements with IDs assigned to them
+        me.destroyItemsWithIDs(me, me.aElementsToDestroy);
         
-        // Clear the array
+        // Clear the element list
         me.aElementsToDestroy = [];
     },
     

@@ -1,9 +1,7 @@
 /*
-Title: Template UI5 Controller
+Title: Scales Contoller
 Author: Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
-    Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
-Description: Draws either a username and password prompt, or a loading app
-    notice for the user to log into iOmy.
+Description:
 Copyright: Capsicum Corporation 2015, 2016
 
 This file is part of iOmy.
@@ -23,27 +21,22 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-sap.ui.controller("mjs.devices.WindowSensor", {
-    
-    //-------------------------------------------------//
-    // Data
-    //-------------------------------------------------//
-    iThingId            : null,
+sap.ui.controller("mjs.devices.Scales", {
 	
-    //-------------------------------------------------//
-    // Widgets
-    //-------------------------------------------------//
-    aElementsToDestroy : [],        // ARRAY: A list of IDs used by any element on this page
+    aElementsToDestroy : [],
     
+    wStatus             : null,
+    wLastUsed           : null,
+    wBattery            : null,
+    wHeight             : null,
+    wWeight             : null,
+    wBMI                : null,
+    wUser               : null,
+    wApplyButton        : null,
     wMainList           : null,
-    wPanel				: null,
-	
-    wStatusField        : null,
-    wLastAccessedField  : null,
-    wBatteryField       : null,
-    wTamperField        : null,
+    wPanel              : null,
     
-    destroyItemsWithIDs     : IOMy.functions.destroyItemsByIdFromView,
+    destroyItemsWithIDs : IOMy.functions.destroyItemsByIdFromView,
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -125,93 +118,155 @@ sap.ui.controller("mjs.devices.WindowSensor", {
         //-------------------------------------------------------------------//
         // Declare variables and import modules.
         //-------------------------------------------------------------------//
-        var me = this; // Captures the scope of this controller.
-        var thisView = me.getView(); // Captures this controller's view.
-        var sDefaultText = "N/A";
+        var me = this;
+        var thisView = me.getView();
         
         //-------------------------------------------------------------------//
         // Create the data field widgets.
         //-------------------------------------------------------------------//
         
         //-- Status --//
-        me.wStatusField = new sap.m.Text ({
-            text : "Closed",
-            textAlign : "Center",
-            width : "100%"
+        me.wStatus = new sap.m.Text ({
+            text : "Connected",
+            textAlign : "Right"
         });
         
         //-- Last Accessed --//
-        me.wLastAccessedField = new sap.m.Text ({
-            text : "23d 14h 55m",
-            textAlign : "Center",
-            width : "100%"
+        me.wLastUsed = new sap.m.Text ({
+            text : "23d 13h 44m",
+            textAlign : "Right"
         });
         
         //-- Battery --//
-        me.wBatteryField = new sap.m.Text ({
+        me.wBattery = new sap.m.Text ({
             text : "79%",
-            textAlign : "Center",
-            width : "100%"
+            textAlign : "Right"
         });
         
-        //-- Tamper --//
-        me.wTamperField = new sap.m.Text ({
-            text : "Secure",
-            textAlign : "Center",
-            width : "100%"
+        //-- Height --//
+        me.wHeight = new sap.m.Text ({
+            text : "179cm",
+            textAlign : "Right"
         });
+        
+        //-- Weight --//
+        me.wWeight = new sap.m.Text ({
+            text : "80kg",
+            textAlign : "Right"
+        });
+        
+        //-- BMI --//
+        //-- BMI = Weight / (height * height) = BMI --//
+        //-- BMI = 80 / (1.79 * 1.79) = 25.0 --//
+        me.wBMI = new sap.m.Text ({
+            text : "25.0",
+            textAlign : "Right",
+        });
+        
+        //-- User --//
+        me.wUser = new sap.m.Select ({
+            items : [
+                new sap.ui.core.Item({
+                    key: "Freshwater1",
+                    text: "Freshwater1",
+                }),
+                new sap.ui.core.Item({
+                    key: "DemoUser",
+                    text: "DemoUser",
+                })
+            ]
+        });
+        
+        //-- Apply Button --//
+        me.wApplyButton = new sap.m.Button({
+            text : "Apply",
+            width: "100px",
+            press : function () {
+                IOMy.common.NavigationChangePage("pStagingHome", {}, false);
+            }
+        }).addStyleClass("")
         
         //-------------------------------------------------------------------//
         // Arrange the fields into a UI5 List
         //-------------------------------------------------------------------//
-        me.wMainList = new sap.m.List({
+        me.wMainList = new sap.m.List ({
             items : [
                 //-- Status --//
                 new sap.m.InputListItem ({
                     label : "Status:",
                     content : [
                         //-- Column 2 for Status Row --//
-                        me.wStatusField
+                        me.wStatus
                     ]
                 }).addStyleClass("maxlabelwidth50Percent"),
-                
                 //-- Last Accessed --//
                 new sap.m.InputListItem ({
                     label : "Last Accessed:",
                     content : [
                         //-- Column 2 for Last Accessed Row --//
-                        me.wLastAccessedField
+                        me.wLastUsed
                     ]
                 }).addStyleClass("maxlabelwidth50Percent"),
-                
                 //-- Battery --//
                 new sap.m.InputListItem ({
                     label : "Battery:",
                     content : [
                         //-- Column 2 for Battery Row --//
-                        me.wBatteryField
+                        me.wBattery
                     ]
                 }).addStyleClass("maxlabelwidth50Percent"),
-                
-                //-- Tamper --//
+                //-- Height --//
                 new sap.m.InputListItem ({
-                    label : "Tamper:",
+                    label : "Height:",
                     content : [
-                        //-- Column 2 for Tamper Row --//
-                        me.wTamperField
+                        //-- Column 2 for Height Row --//
+                        me.wHeight
                     ]
-                }).addStyleClass("maxlabelwidth50Percent")
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Weight --//
+                new sap.m.InputListItem ({
+                    label : "Weight:",
+                    content : [
+                        //-- Column 2 for Weight Row --//
+                        me.wWeight
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- BMI --//
+                //-- BMI = Weight / (height * height) = BMI --//
+                //-- BMI = 80 / (1.79 * 1.79) = 25.0 --//
+                new sap.m.InputListItem ({
+                    label : "BMI:",
+                    content : [
+                        //-- Column 2 for BMI Row --//
+                        me.wBMI
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- User --//
+                new sap.m.InputListItem ({
+                    label : "Assign to:",
+                    content : [
+                        //-- Column 2 for HeartRate Row --//
+                        me.wUser
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Apply Button --//
+                new sap.m.InputListItem ({
+                    content : [
+                        //-- Column 2 for Current Temp Row --//
+                        me.wApplyButton
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent textaligncenter")
             ]
-        }).addStyleClass("PadBottom10px UserInputForm");
+        });
         
         //--------------------------------------------------------------//
         // Draw the page on the panel declared on this controller's view.
         //--------------------------------------------------------------//
-		me.wPanel = new sap.m.Panel( me.createId("panel"), {
-			backgroundDesign: "Transparent",
-			content : [me.wMainList]
-		}).addStyleClass("PadBottom10px UserInputForm")
-		
+        me.wPanel = new sap.m.Panel({
+            backgroundDesign: "Transparent",
+            content : [ me.wMainList ]
+        }).addStyleClass("PadBottom10px UserInputForm");
+        
         thisView.byId("page").addContent(me.wPanel);
     }
 	

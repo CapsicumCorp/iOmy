@@ -1617,6 +1617,27 @@ var aPages = [
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.TestThermostat\" Page!\n"
 	},
 	{
+		"Id":			"pDeviceScales",
+		"Location":		"mjs.devices.Scales",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Scales\" Page!\n"
+	},
+	{
+		"Id":			"pDeviceQuadcopter",
+		"Location":		"mjs.devices.Quadcopter",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Quadcopter\" Page!\n"
+	},
+	{
+		"Id":			"pDeviceBPM",
+		"Location":		"mjs.devices.BPM",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.BPM\" Page!\n"
+	},
+    //--------------------------------------------------------------------//
+    // Staging
+    //--------------------------------------------------------------------//
+	{
 		"Id":			"pMotionTemp",
 		"Location":		"mjs.staging.MotionTemp",
 		"Type":			"JS",

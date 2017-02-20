@@ -1,9 +1,8 @@
 /*
-Title: Template UI5 Controller
+Title: Blood Pressure Monitor Device Page Controller
 Author: Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
     Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
-Description: Draws either a username and password prompt, or a loading app
-    notice for the user to log into iOmy.
+Description: Shows all the data from a Blood Pressure Monitor
 Copyright: Capsicum Corporation 2015, 2016
 
 This file is part of iOmy.
@@ -23,25 +22,20 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-sap.ui.controller("mjs.devices.WindowSensor", {
+sap.ui.controller("mjs.devices.BPM", {
     
-    //-------------------------------------------------//
-    // Data
-    //-------------------------------------------------//
-    iThingId            : null,
-	
-    //-------------------------------------------------//
-    // Widgets
-    //-------------------------------------------------//
-    aElementsToDestroy : [],        // ARRAY: A list of IDs used by any element on this page
+    aElementsToDestroy  : [],
     
+    wStatus             : null,
+    wLastUsed           : null,
+    wBattery            : null,
+    wSystol             : null,
+    wDiastol            : null,
+    wHeartRate          : null,
+    wUserSelectBox      : null,
     wMainList           : null,
-    wPanel				: null,
-	
-    wStatusField        : null,
-    wLastAccessedField  : null,
-    wBatteryField       : null,
-    wTamperField        : null,
+    wApplyButton        : null,
+    wPanel              : null,
     
     destroyItemsWithIDs     : IOMy.functions.destroyItemsByIdFromView,
     
@@ -125,93 +119,151 @@ sap.ui.controller("mjs.devices.WindowSensor", {
         //-------------------------------------------------------------------//
         // Declare variables and import modules.
         //-------------------------------------------------------------------//
-        var me = this; // Captures the scope of this controller.
-        var thisView = me.getView(); // Captures this controller's view.
-        var sDefaultText = "N/A";
+        var me = this;
+        var thisView = me.getView();
         
         //-------------------------------------------------------------------//
         // Create the data field widgets.
         //-------------------------------------------------------------------//
         
         //-- Status --//
-        me.wStatusField = new sap.m.Text ({
+        me.wStatus = new sap.m.Text ({
             text : "Closed",
-            textAlign : "Center",
-            width : "100%"
-        });
+            textAlign : "Right",
+        }).addStyleClass("");
         
-        //-- Last Accessed --//
-        me.wLastAccessedField = new sap.m.Text ({
-            text : "23d 14h 55m",
-            textAlign : "Center",
-            width : "100%"
-        });
+        //-- Last Used --//
+        me.wLastUsed = new sap.m.Text ({
+            text : "23d 13h 44m",
+            textAlign : "Right",
+        }).addStyleClass("");
         
         //-- Battery --//
-        me.wBatteryField = new sap.m.Text ({
+        me.wBattery = new sap.m.Text ({
             text : "79%",
-            textAlign : "Center",
-            width : "100%"
+            textAlign : "Right",
+        }).addStyleClass("");
+        
+        //-- Systol --//
+        me.wSystol = new sap.m.Text ({
+            text : "103 mmHG",
+            textAlign : "Right",
+        }).addStyleClass("");
+        
+        //-- Diastol --//
+        me.wDiastol = new sap.m.Text ({
+            text : "123 mmHG",
+            textAlign : "Right",
+        }).addStyleClass("");
+        
+        //-- Heart Rate --//
+        me.wHeartRate = new sap.m.Text ({
+            text : "75 BPM",
+            textAlign : "Right",
+        }).addStyleClass("");
+        
+        //-- BPM User --//
+        me.wUserSelectBox = new sap.m.Select ({
+            items : [
+                new sap.ui.core.Item({
+                    key: "Freshwater1",
+                    text: "Freshwater1",
+                }),
+                new sap.ui.core.Item({
+                    key: "DemoUser",
+                    text: "DemoUser",
+                })
+            ]
         });
         
-        //-- Tamper --//
-        me.wTamperField = new sap.m.Text ({
-            text : "Secure",
-            textAlign : "Center",
-            width : "100%"
-        });
+        //-- Apply Button --//
+        me.wApplyButton = new sap.m.Button({
+            text : "Apply",
+            width: "100px",
+            press : function () {
+                //IOMy.common.NavigationChangePage("pStagingHome", {}, false);
+            }
+        }).addStyleClass("");
         
         //-------------------------------------------------------------------//
         // Arrange the fields into a UI5 List
         //-------------------------------------------------------------------//
-        me.wMainList = new sap.m.List({
+        me.wMainList = new sap.m.List ({
             items : [
                 //-- Status --//
                 new sap.m.InputListItem ({
                     label : "Status:",
                     content : [
                         //-- Column 2 for Status Row --//
-                        me.wStatusField
+                        me.wStatus
                     ]
                 }).addStyleClass("maxlabelwidth50Percent"),
-                
-                //-- Last Accessed --//
+                //-- Last Used --//
                 new sap.m.InputListItem ({
-                    label : "Last Accessed:",
+                    label : "Last Used:",
                     content : [
-                        //-- Column 2 for Last Accessed Row --//
-                        me.wLastAccessedField
+                        //-- Column 2 for Last Used Row --//
+                        me.wLastUsed
                     ]
                 }).addStyleClass("maxlabelwidth50Percent"),
-                
                 //-- Battery --//
                 new sap.m.InputListItem ({
                     label : "Battery:",
                     content : [
                         //-- Column 2 for Battery Row --//
-                        me.wBatteryField
+                        me.wBattery
                     ]
                 }).addStyleClass("maxlabelwidth50Percent"),
-                
-                //-- Tamper --//
+                //-- Systol --//
                 new sap.m.InputListItem ({
-                    label : "Tamper:",
+                    label : "Systol:",
                     content : [
-                        //-- Column 2 for Tamper Row --//
-                        me.wTamperField
+                        //-- Column 2 for Systol Row --//
+                        me.wSystol
                     ]
-                }).addStyleClass("maxlabelwidth50Percent")
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Diastol --//
+                new sap.m.InputListItem ({
+                    label : "Diastol:",
+                    content : [
+                        //-- Column 2 for Diastol Row --//
+                        me.wDiastol
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Heart Rate --//
+                new sap.m.InputListItem ({
+                    label : "Heart Rate:",
+                    content : [
+                        //-- Column 2 for Heart Rate Row --//
+                        me.wHeartRate
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- BPM User --//
+                new sap.m.InputListItem ({
+                    label : "Assign to:",
+                    content : [
+                        //-- Column 2 for BPM User Row --//
+                        me.wUserSelectBox
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Apply Button --//
+                new sap.m.InputListItem ({
+                    content : [
+                        //-- Column 2 for Apply Button Row --//
+                        me.wApplyButton
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent textaligncenter")
             ]
-        }).addStyleClass("PadBottom10px UserInputForm");
+        });
         
         //--------------------------------------------------------------//
         // Draw the page on the panel declared on this controller's view.
         //--------------------------------------------------------------//
-		me.wPanel = new sap.m.Panel( me.createId("panel"), {
-			backgroundDesign: "Transparent",
-			content : [me.wMainList]
-		}).addStyleClass("PadBottom10px UserInputForm")
-		
+        me.wPanel = new sap.m.Panel({
+            backgroundDesign: "Transparent",
+            content : [me.wMainList]
+        }).addStyleClass("PadBottom10px UserInputForm");
+        
         thisView.byId("page").addContent(me.wPanel);
     }
 	
