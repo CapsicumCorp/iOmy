@@ -35,6 +35,9 @@ $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/fun
 $.sap.require("IOMy.functions.destroyItemsByIdFromView");
 
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.getCurrentUsername");
+
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
 $.sap.require("IOMy.functions.getLengthOfTimePassed");
 
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
@@ -72,6 +75,9 @@ $.sap.require("IOMy.functions.getTimestampString");
 
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
 $.sap.require("IOMy.functions.loadLocaleCBoxItems");
+
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.reportSessionTerminated");
 
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
 $.sap.require("IOMy.functions.setCurrentUserNameForNavigation");

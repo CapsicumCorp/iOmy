@@ -1,7 +1,7 @@
 /*
-Title: Set User Name On Navigation Bar
+Title: Get Current Username
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
-Description: Writes the username on the navigation menu.
+Description: Fetches the current user's username and stores it in memory.
 Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
@@ -21,7 +21,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IOMy.functions.setCurrentUserNameForNavigation",true);
+$.sap.declare("IOMy.functions.getCurrentUsername",true);
 
 //----------------------------------------------------------------------------//
 // Add this function to the functions module.
@@ -29,12 +29,25 @@ $.sap.declare("IOMy.functions.setCurrentUserNameForNavigation",true);
 $.extend(IOMy.functions,{
     
     /**
-     * Procedure that sets the text of the User button in the IOMy button to be
-     * the username of the current user.
+     * Procedure that fetches the current user's username and stores it in the
+     * IOMy.common global object.
      * 
-     * @param {type} oController        UI5 Controller or View that invokes this procedure.
+     * Calls IOMy.functions.reportSessionTerminated() if unsuccessful.
+     * 
+     * @param {function} fnCallback        Function to run if successful (OPTIONAL).
      */
-    setCurrentUserNameForNavigation : function (oController) {
+    getCurrentUsername : function (fnCallback) {
+        //------------------------------------------------//
+        // Assign default values to arguments
+        //------------------------------------------------//
+        if (fnCallback === undefined) {
+            fnCallback = function () {};
+        }
+        
+        
+        //------------------------------------------------//
+        // Capture scope of IOMy.functions
+        //------------------------------------------------//
         var me = this;
         
         IOMy.apiodata.AjaxRequest({
@@ -45,12 +58,11 @@ $.extend(IOMy.functions,{
             Limit : 0,
             
             onSuccess : function (response, data) {
-                oController.byId("UsernameButton").setText(data[0].USERS_USERNAME);
+                IOMy.common.CurrentUsername = data[0].USERS_USERNAME;
+                fnCallback();
             },
             
             onFail : function (response) {
-                oController.byId("UsernameButton").setText("Current User");
-                
                 me.reportSessionTerminated(response.message);
             }
         });
