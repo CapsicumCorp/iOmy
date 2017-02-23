@@ -170,7 +170,7 @@ public class DBSetupProgressPage extends ProgressPage {
         requests++;
 
         final StringRequest createForeignKeys20 = new StringRequest(Request.Method.POST, sUrl,
-                createSuccessRequestListener("Create FKs - Part 20"),
+                createSuccessRequestListenerOnComplete("Create FKs - Part 20"),
                 createErrorRequestListener("Create FKs - Part 20")) {
             protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>(baseparams2);
@@ -270,7 +270,7 @@ public class DBSetupProgressPage extends ProgressPage {
         requests++;
 
         final StringRequest createForeignKeys16 = new StringRequest(Request.Method.POST, sUrl,
-                createSuccessRequestListenerOnComplete("Create FKs - Part 16"),
+                createSuccessRequestListener("Create FKs - Part 16"),
                 createErrorRequestListener("Create FKs - Part 16")) {
             protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>(baseparams2);
@@ -520,7 +520,7 @@ public class DBSetupProgressPage extends ProgressPage {
         requests++;
 
         final StringRequest createForeignKeys6 = new StringRequest(Request.Method.POST, sUrl,
-                createSuccessRequestListenerOnComplete("Create FKs - Part 6"),
+                createSuccessRequestListener("Create FKs - Part 6"),
                 createErrorRequestListener("Create FKs - Part 6")) {
             protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>(baseparams2);

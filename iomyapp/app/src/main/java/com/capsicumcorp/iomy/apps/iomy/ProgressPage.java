@@ -112,11 +112,16 @@ public class ProgressPage extends AppCompatActivity {
     protected void onComplete() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         boolean firstrunval=sharedPref.getBoolean("pref_run_first_run_wizard", true);
+        boolean demoMode=sharedPref.getBoolean("pref_demo_data_mode", true);
 
         if (firstrunval) {
             this.installWizard.summonNextPage(this, this.installWizard.PROCEED);
         } else {
-            installWizard.loadIOMy(this);
+            if (demoMode) {
+                this.installWizard.summonDemoWarning(this);
+            } else {
+                this.installWizard.loadIOMy(this);
+            }
         }
     }
 

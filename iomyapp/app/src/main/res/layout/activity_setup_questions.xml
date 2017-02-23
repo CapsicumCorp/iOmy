@@ -19,7 +19,7 @@
         <CheckBox
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Install the demonstration"
+            android:text="Install iOmy in demonstration mode"
             android:id="@+id/installDemo"
             android:checked="true" />
     </LinearLayout>

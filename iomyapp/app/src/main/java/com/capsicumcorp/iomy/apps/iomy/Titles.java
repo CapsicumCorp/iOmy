@@ -26,12 +26,13 @@ package com.capsicumcorp.iomy.apps.iomy;
  * List of titles that an activity can choose one from.
  *
  * REMEMBER! These strings must be unique!
+ * TODO: Use a method of page identification that is more easily maintainable.
  */
 public interface Titles {
     String welcomePageTitle                 = "Welcome";
     String setupQuestions                   = "iOmy Setup Options";
     String licenseAgreementTitle            = "License Information";
-    String webserverQuestionTitle           = "Web Server Location";
+    String demoNoticeTitle                  = "Demo Mode";
     String webserverPageTitle               = "Web Server Setup";
     String webserverInfoPageTitle           = "Web Server Setup - Cont.";
 

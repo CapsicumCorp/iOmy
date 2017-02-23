@@ -28,12 +28,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -249,7 +247,7 @@ public class InstallWizard {
                 }
 
             //---------------------------------------------------------------------------------//
-            // Someone was cheeky enough to try and circumvent the 8 character limit by placing
+            // Someone was cheeky enough to try to circumvent the 8 character limit by placing
             // spaces on either sides of the characters. No chance!
             //---------------------------------------------------------------------------------//
             } else {
@@ -332,13 +330,13 @@ public class InstallWizard {
         //--- Start IOMy ---//
         } else if (title == Titles.finalSetupTitle) {
             writeWatchInputsFile();
-            //Disable first run wizard
+            // Disable first run wizard
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(activity);
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putBoolean("pref_run_first_run_wizard", false);
             editor.putBoolean("pref_demo_data_mode", this.getInstallDemoData());
 
-            //Update other settings
+            // Update other settings
             editor.putString("pref_webserver_hostname", this.hostname);
             editor.putString("pref_webserver_port", Integer.toString(this.webserverport));
             editor.putString("pref_mysql_hostname", this.dbURI);
@@ -353,8 +351,17 @@ public class InstallWizard {
             editor.putBoolean("pref_mysql_enabled", true);
             editor.commit();
 
-            //Load main screen
+            // Load main screen
+            if (this.installDemoData == true) {
+                this.summonDemoWarning(activity);
+            } else {
+                this.loadIOMy(activity);
+            }
+
+            //--- Start IOMy after showing the Demo Mode Warning ---//
+        } else if (title == Titles.demoNoticeTitle) {
             this.loadIOMy(activity);
+
         }
     }
 
@@ -362,6 +369,7 @@ public class InstallWizard {
         Intent intent = new Intent(activity, SetupQuestions.class);
         activity.startActivity(intent);
     }
+
 
     public void summonLicenseAgreement(Activity activity) {
         Intent intent = new Intent(activity, LicenseAgreement.class);
@@ -405,6 +413,11 @@ public class InstallWizard {
 
     public void loadPremiseHubOwnerProgress(Activity activity) {
         Intent intent = new Intent(activity, UserPremiseHubProgressPage.class);
+        activity.startActivity(intent);
+    }
+
+    public void summonDemoWarning(Activity activity) {
+        Intent intent = new Intent(activity, DemoAppWarning.class);
         activity.startActivity(intent);
     }
 
