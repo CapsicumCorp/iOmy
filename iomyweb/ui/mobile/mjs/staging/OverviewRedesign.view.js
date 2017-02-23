@@ -50,107 +50,44 @@ sap.ui.jsview("mjs.staging.OverviewRedesign", {
 			footer : IOMy.widgets.getAppFooter(),
 			content : [
                 //-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("Staging Home", "sap-icon://GoogleMaterial/home", me),
+				IOMy.widgets.getNavigationalSubHeader("Device Overview", "sap-icon://GoogleMaterial/home", me),
 				new sap.m.Panel( me.createId("panel"), {
                     backgroundDesign: "Transparent",
                     content : [
 						new sap.m.List ({
+							headerText : "Weather",
 							items : [
-								//-- Weather Feed Group Title --//
-								new sap.m.InputListItem ({
-									label : "Weather Feed",
-								}).addStyleClass(""),
-								//-- Weather Feed 1 --//
-								new sap.m.InputListItem ({
-									label : "Outside Weather Feed",
+								//-- Select User --//
+								new sap.m.CustomListItem ({
 									content : [
-										//-- Column 2 for Status Row --//
-										new sap.m.Text ({
-											text : "28°C",
-											textAlign : "Center",
-											width : "50%"
-										}),
-										new sap.m.Text ({
-											text : "Clear",
-											textAlign : "Center",
-											width : "50%"
-										}),
+										new sap.m.StandardListItem ({
+											title: "Outside Weather Feed"
+										}).addStyleClass("BorderRight"),
+										new sap.m.StandardListItem ({
+											icon: "sap-icon://WeatherIcons/wi-day-sunny",
+											title: "Clear 28°C"
+										})
 									]
-								}).addStyleClass("maxlabelwidth50Percent"),
-								//-- Zigbee Netvox SmartPlug Group Title --//
-								new sap.m.InputListItem ({
-									label : "Zigbee Netvox SmartPlug",
-								}).addStyleClass(""),
-								new sap.m.InputListItem ({
-									label : "Fridge",
+								}),
+							] //-- Items End --//
+						}).addStyleClass("ListMenuHeader"),						
+						new sap.m.List ({
+							headerText : "Zigbee Netvox Smart Plug",
+							items : [
+								//-- Select User --//
+								new sap.m.CustomListItem ({
 									content : [
-										//-- Column 2 for Last Accessed Row --//
-										new sap.m.FlexBox ({
-											items : [
-												new sap.m.Text ({
-													text : "0.088 kW",
-													textAlign : "Center",
-													width : "50%"
-												})
-											]
-										}),
-										new sap.m.FlexBox ({
-											items : [
-												new sap.m.Switch ({
-												state : true,
-												})
-											]
-										}),
+										new sap.m.StandardListItem ({
+											title: "Outside Weather Feed"
+										}).addStyleClass("BorderRight"),
+										new sap.m.StandardListItem ({
+											icon: "sap-icon://WeatherIcons/wi-day-sunny",
+											title: "Clear 28°C"
+										})
 									]
-								}).addStyleClass("maxlabelwidth50Percent"),
-								new sap.m.InputListItem ({
-									label : "Lamp",
-									content : [
-										//-- Column 2 for Last Accessed Row --//
-										new sap.m.Text ({
-											text : "0.093 kW",
-											textAlign : "Center",
-											width : "50%"
-										}),
-										new sap.m.Switch ({
-											state : true,
-										}).addStyleClass(""),
-									]
-								}).addStyleClass("maxlabelwidth50Percent"),
-								new sap.m.InputListItem ({
-									label : "Tv",
-									content : [
-										//-- Column 2 for Last Accessed Row --//
-										new sap.m.Text ({
-											text : "IO Offline",
-											textAlign : "Center",
-											width : "50%"
-										}),
-										new sap.m.Switch ({
-											state : false,
-										}).addStyleClass(""),
-									]
-								}).addStyleClass("maxlabelwidth50Percent"),
-								//-- Phillips Hue Light --//
-								new sap.m.InputListItem ({
-									label : "Phillips Hue Light",
-								}).addStyleClass(""),
-								new sap.m.InputListItem ({
-									label : "Phillips Hue Lamp",
-									content : [
-										//-- Column 2 for Phillips Hue Light --//
-										new sap.m.Text ({
-											text : "",
-											textAlign : "Center",
-											width : "50%"
-										}),
-										new sap.m.Switch ({
-											state : true,
-										}).addStyleClass(""),
-									]
-								}).addStyleClass("maxlabelwidth50Percent"),
-							]
-						})
+								}),
+							] //-- Items End --//
+						}).addStyleClass("ListMenuHeader"),
 					]
                 }).addStyleClass("PadBottom10px PanelNoPadding UserInputForm")
             ]

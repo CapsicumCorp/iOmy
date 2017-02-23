@@ -367,7 +367,7 @@ $.extend(IOMy.devices.onvif,{
                         press : function () {
                             IOMy.common.NavigationChangePage("pOnvif", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                 ]
             }).addStyleClass("width100Percent")
         );
@@ -427,7 +427,7 @@ $.extend(IOMy.devices.onvif,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pOnvif", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                     ]
                 }).addStyleClass("PadRight3px width100Percent minwidth170px"),
             ]

@@ -255,7 +255,7 @@ $.extend(IOMy.devices.motionsensor,{
                         press : function () {
                             //IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                 ]
             }).addStyleClass("minwidth70px width70Percent BorderRight")
         );
@@ -285,7 +285,7 @@ $.extend(IOMy.devices.motionsensor,{
                                 ]
                             })
                         ]
-                    }).addStyleClass("DeviceOverview-ItemLabel PadLeft5px MarBottom3px MarRight10px TextLeft")
+                    }).addStyleClass("PadTop20px PadBottom15px PadLeft5px MarBottom3px MarRight10px TextLeft")
                 ]
             }).addStyleClass("minwidth100px width10Percent")
         );
@@ -415,7 +415,7 @@ $.extend(IOMy.devices.motionsensor,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pMotionSensor", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                     ]
                 }).addStyleClass("BorderRight testlabelcont"),
 
@@ -443,7 +443,7 @@ $.extend(IOMy.devices.motionsensor,{
                                     ]
                                 })
                             ]
-                        }).addStyleClass("DeviceOverview-ItemLabel PadLeft5px MarBottom3px MarRight10px TextLeft")
+                        }).addStyleClass("PadTop20px PadBottom15px PadLeft5px MarBottom3px MarRight10px TextLeft")
                     ]
                 }).addStyleClass("width10Percent minwidth70px")
             ]

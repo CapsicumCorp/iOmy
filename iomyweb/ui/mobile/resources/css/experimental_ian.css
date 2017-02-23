@@ -21,15 +21,46 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-.ConsistentMenuHeader > div > div > .sapMLabel {
-	/* background-color: rgb(241,242,242); */
-	color: black;
-	font-family: "Roboto Condensed", sans-serif;
-	font-weight: bold;
-	min-height: 20px;
-	font-size: 16px;
+/******************************************
+** Staging UI > Room Permission          **
+******************************************/
+/* -- Adds in Borders to each "List" -- */ 
+.ListMenuHeader {
+	border-top: 1px solid #cccccc;
+	border-left: 1px solid #cccccc;
+	border-right:  1px solid #cccccc;
 }
 
+/* -- Adds padding to the "Select Box" Parent -- */
+.ListMenuHeader > ul {
+	padding: 4px;
+}
+
+/* -- Removes Default Bottom Border -- */
+.ListMenuHeader > ul > li {
+	border-bottom: 0px;
+}
+
+.ListApply {
+	border-bottom: 0px;
+}
+
+/* -- Styles the Title to be consistent with exisitng -- */
+.ListMenuHeader > div.sapMListHdr {
+	background-color: rgb(241,242,242);
+	height: 1.5rem;
+	line-height: 1.5rem;
+	font-family: "Roboto Condensed", sans-serif;
+}
+
+/* -- Adds padding to the "Permissions" Questions -- */
+.ListMenuHeader.PermissionPadding > ul > li {
+	padding: 10px;
+}
+
+/******************************************
+** To Be Sorted                          **
+******************************************/
 .toggleVertMiddle > div > span {
 	padding-top: 15px;
 }
@@ -38,16 +69,19 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	max-width:	50%;
 }
 
-.textaligncenter {
-	text-align: center;
-}
 
 .MarLeft10Percent {
 	margin-left: 10%;
 }
 
-/* For aligning segemented buttons & Select Boxes
-in the center of a list - See Thermostat Page */
+
+/*************************************************** 
+** For aligning segemented buttons & Select Boxes **
+** in the center of a list - See Thermostat Page  **
+***************************************************/
+.textaligncenter {
+	text-align: center;
+}
 
 .textaligncenter > div {
 	text-align: left;
@@ -58,36 +92,23 @@ in the center of a list - See Thermostat Page */
 }
 
 .testlabelcont {
-	width: 80%;
 	min-width: 170px; 
 }
- 
-
-@media screen and (max-device-width: 480px) {
-    .testlabelcont {
-		width: 80%;
-		max-width: 145px;
-		min-width: 150px;
-    }
-}
-
-@media screen and (min-device-width: 640px) {
-    .testlabelcont {
-		width: 80%;
-		max-width: 185px;
-    }
-}
-
+/********************************************* 
+** Temp Fix for how the borders are applied **
+** To make Page Layouts consistent          **
+*********************************************/
 .MasterPanel > div.sapMPanelContent {
 	border-left: 1px rgb(188,190,192) solid;
 	border-right: 1px rgb(188,190,192) solid;
 	border-top: 1px rgb(188,190,192) solid;
 }
 
-/* Used to fix issues where the footer overlaps the Page.
-sapMPageWithFooter "bottom" value needs to be the same as 
-the Footer's "height" value. */
-
+/**************************************************************
+** Used to fix issues where the footer overlaps the Page.    **
+** sapMPageWithFooter "bottom" value needs to be the same as **
+** the Footer's "height" value.                              **
+**************************************************************/
 .MasterPage.sapMPageWithFooter > section { 
 	bottom: 3.5rem;
 } 

@@ -1717,7 +1717,19 @@ var aPages = [
 		"Location":		"mjs.staging.Garagedoor",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Garagedoor\" Page!\n"
-	}
+	},
+    {
+		"Id":			"pStagingRoomPermissions",
+		"Location":		"mjs.staging.permissions.RoomPermissions",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.permissions.RoomPermissions\" Page!\n"
+	},
+    {
+		"Id":			"pStagingPremisePermissions",
+		"Location":		"mjs.staging.permissions.PremisePermissions",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.permissions.PremisePermissions\" Page!\n"
+	},
 	
 ];
 

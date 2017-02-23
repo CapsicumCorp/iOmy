@@ -81,7 +81,7 @@ sap.ui.controller("mjs.premise.Overview", {
                 var oPanel = new sap.m.Panel(me.createId("panel"), {
                     backgroundDesign: "Transparent",
                     content: [oVertBox] //-- End of Panel Content --//
-                }).addStyleClass("height100Percent PanelNoPadding MarTop0px PadBottom15px UserInputForm");
+                }).addStyleClass("PanelNoPadding MarTop0px PadBottom15px UserInputForm");
 
                 thisView.byId("page").addContent(oPanel);
 			}

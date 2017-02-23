@@ -178,6 +178,15 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		height: 3.5rem;
 	}
 	
+	.ConsistentMenuHeader > div > div > .sapMLabel {
+		/* Provides a Consistent Header for all Pages */
+		color: black;
+		font-family: "Roboto Condensed", sans-serif;
+		font-weight: bold;
+		min-height: 20px;
+		font-size: 16px;
+	}
+	
 	/*--------------------------------*/
 	/*-- SUBHEADER                  --*/
 	/*--------------------------------*/
@@ -705,11 +714,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	/*----------------------------*/
 	/*-- ITEM LABEL             --*/
 	/*----------------------------*/
-	.DeviceOverview-ItemLabel {
-		padding-top: 20px;
-		padding-bottom: 15px;
-	}
-	
 	.DeviceOverview-DividingBorder {
 		border-left: 2px solid #909090;
 	}

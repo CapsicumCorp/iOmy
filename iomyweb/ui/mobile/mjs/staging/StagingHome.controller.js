@@ -31,6 +31,8 @@ sap.ui.controller("mjs.staging.StagingHome", {
 		{ "display" : "Door Lock" , "link" : "pDoorLock" },		
 		{ "display" : "Garage Door" , "link" : "pGaragedoor" },
 		{ "display" : "Motion Sensor" , "link" : "pMotionTemp" },
+		{ "display" : "Premise Permissions" , "link" : "pStagingPremisePermissions" },
+		{ "display" : "Room Permissions" , "link" : "pStagingRoomPermissions" },
 		{ "display" : "Quadcopter" , "link" : "pQuadcopter" },
 		{ "display" : "Thermostat" , "link" : "pTestThermostat" },
 		{ "display" : "Window Sensor" , "link" : "pWindowSensor" },
