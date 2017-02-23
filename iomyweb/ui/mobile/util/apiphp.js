@@ -682,8 +682,8 @@ $.extend(IOMy.apiphp,{
 							jQuery.sap.log.error("CriticalErrorIODetect: "+e2.message, "", "IO Detection");
 						}
 					}); //-- End of foreach loop ($.each) --//
-					
-					//----------------------------------------------------------------//
+                    
+                    //----------------------------------------------------------------//
 					//-- Store the Lists in global variables so the                 --//
 					//-- other UI components can use them.                          --//
 					//----------------------------------------------------------------//
@@ -692,6 +692,14 @@ $.extend(IOMy.apiphp,{
 					} catch(e1234) {
 						jQuery.sap.log.error("Problem Mapping ThingList: "+e1234.message, "", "IO Detection");
 					}
+					
+					//--------------------------------------------------------//
+                    // ONLY add these hard-coded devices if user is FRESHWATER1,
+                    // our debug user.
+                    //--------------------------------------------------------//
+                    if (IOMy.common.CurrentUsername === "FRESHWATER1") {
+                        IOMy.experimental.addDemoDataToThingList();
+                    }
 					
 					//----------------------------------------------------------------//
 					//-- 8.0 - DEBUGGING                                            --//

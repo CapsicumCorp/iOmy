@@ -129,7 +129,7 @@ $.extend(IOMy.devices,{
      * Validates the room selection mainly just to ensure that everything (like
      * the room ID) is correct and hasn't been tampered with in some way.
      * 
-     * @param {UI5 widget} oScope
+     * @param {UI5 view} oScope
      * @returns {map}
      */
     ValidateRoom : function (oScope) {
@@ -198,6 +198,33 @@ $.extend(IOMy.devices,{
         } else if ( aDeviceData.DeviceTypeId===14) {
             oUIObject = IOMy.devices.weatherfeed.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
             
+        //-----------------------------------//
+        // --- Experimental Device Pages --- //
+        //-----------------------------------//
+        //-- Door Lock --//
+        } else if ( aDeviceData.DeviceTypeId==="-1") {
+            oUIObject = IOMy.devices.doorlock.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            
+        //-- Window Sensor --//
+        } else if ( aDeviceData.DeviceTypeId==="-2") {
+            oUIObject = IOMy.devices.windowsensor.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            
+        //-- Bluetooth Scales --//
+        } else if ( aDeviceData.DeviceTypeId==="-3") {
+            oUIObject = IOMy.devices.bluetoothscale.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            
+        //-- Blood Pressure Montior --//
+        } else if ( aDeviceData.DeviceTypeId==="-4") {
+            oUIObject = IOMy.devices.bpm.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            
+        //-- Remote Controlled Garage Door --//
+        } else if ( aDeviceData.DeviceTypeId==="-5") {
+           oUIObject = IOMy.devices.garagedoor.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            
+        //-- Thermostat --//
+        } else if ( aDeviceData.DeviceTypeId==="-6") {
+           oUIObject = IOMy.devices.thermostat.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            
         }
 		
 		
@@ -245,6 +272,33 @@ $.extend(IOMy.devices,{
         //-- Weather Feed --//
         } else if ( aDeviceData.DeviceTypeId===14) {
             oUIObject = IOMy.devices.weatherfeed.GetCommonUIForDeviceOverview( sPrefix, oViewScope, aDeviceData );
+            
+        //-----------------------------------//
+        // --- Experimental Device Pages --- //
+        //-----------------------------------//
+        //-- Door Lock --//
+        } else if ( aDeviceData.DeviceTypeId==="-1") {
+            oUIObject = IOMy.devices.doorlock.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            
+        //-- Window Sensor --//
+        } else if ( aDeviceData.DeviceTypeId==="-2") {
+            oUIObject = IOMy.devices.windowsensor.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            
+        //-- Bluetooth Scales --//
+        } else if ( aDeviceData.DeviceTypeId==="-3") {
+            oUIObject = IOMy.devices.bluetoothscale.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            
+        //-- Blood Pressure Montior --//
+        } else if ( aDeviceData.DeviceTypeId==="-4") {
+            oUIObject = IOMy.devices.bpm.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            
+        //-- Remote Controlled Garage Door --//
+        } else if ( aDeviceData.DeviceTypeId==="-5") {
+            oUIObject = IOMy.devices.garagedoor.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            
+        //-- Remote Controlled Garage Door --//
+        } else if ( aDeviceData.DeviceTypeId==="-6") {
+            oUIObject = IOMy.devices.thermostat.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         }
 		

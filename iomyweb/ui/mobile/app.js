@@ -50,6 +50,9 @@ $.sap.require("IOMy.time");
 $.sap.registerModulePath('IOMy.help', sModuleInitialBuildLocation+'util/help');
 $.sap.require("IOMy.help");
 
+$.sap.registerModulePath('IOMy.experimental', sModuleInitialBuildLocation+'util/experimental');
+$.sap.require("IOMy.experimental");
+
 //----------------------------------------//
 //-- 5.1.1 - LOAD DEVICE FILES  		--//
 //----------------------------------------//
@@ -73,6 +76,24 @@ $.sap.require("IOMy.devices.develco");
 
 $.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
 $.sap.require("IOMy.devices.weatherfeed");
+
+$.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
+$.sap.require("IOMy.devices.doorlock");
+
+$.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
+$.sap.require("IOMy.devices.windowsensor");
+
+$.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
+$.sap.require("IOMy.devices.bluetoothscale");
+
+$.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
+$.sap.require("IOMy.devices.bpm");
+
+$.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
+$.sap.require("IOMy.devices.garagedoor");
+
+$.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
+$.sap.require("IOMy.devices.thermostat");
 
 //----------------------------------------//
 //-- 5.1.2 - LOAD FUNCTION MODULES 		--//
@@ -1602,13 +1623,13 @@ var aPages = [
 		"Id":			"pDeviceDoorLock",
 		"Location":		"mjs.devices.DoorLock",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.DoorLock\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.DoorLock\" Page!\n"
 	},
 	{ 
 		"Id":			"pDeviceWindowSensor",
 		"Location":		"mjs.devices.WindowSensor",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.WindowSensor\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.WindowSensor\" Page!\n"
 	},
 	{ 
 		"Id":			"pDeviceTestThermostat",
@@ -1626,7 +1647,7 @@ var aPages = [
 		"Id":			"pDeviceQuadcopter",
 		"Location":		"mjs.devices.Quadcopter",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Quadcopter\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Quadcopter\" Page!\n"
 	},
 	{
 		"Id":			"pDeviceBPM",

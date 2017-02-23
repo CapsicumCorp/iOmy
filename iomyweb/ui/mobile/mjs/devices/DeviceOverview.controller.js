@@ -1,6 +1,7 @@
 /*
 Title: Device Overview page
-Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+Author: Andrew Sommerville (Capsicum Corporation) <andrew@capsicumcorp.com>
+    Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: UI5 Controller. Lists all the devices the current user has access to.
 Copyright: Capsicum Corporation 2016, 2017
 
@@ -75,21 +76,21 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 				//----------------------------------------------------//
 				
 				//-- IF no Ajax requests have been run from this page yet. --//
-				if( me.dLastAjaxUpdate!==null && me.dLastDeviceUpdate !== null) {
-						
-                    me.DestroyCurrentDevices();
-                    me.InitialThingUISetup();
-                    me.RefreshAjaxDataForUI();
-                        
-				//-- ELSE do nothing as the page should be doing the "1st Run". --//
-				} else {
+//				if( me.dLastAjaxUpdate!==null && me.dLastDeviceUpdate !== null) {
+//						
+//                    me.DestroyCurrentDevices();
+//                    me.InitialThingUISetup();
+//                    me.RefreshAjaxDataForUI();
+//                        
+//				//-- ELSE do nothing as the page should be doing the "1st Run". --//
+//				} else {
 					//console.log("Room: First run hasn't initialised!");
 					me.DestroyCurrentDevices();
 					//-- Run the 1st run tool --//
 					me.InitialThingUISetup();
 					//-- Update the Ajax Data for the UI --//
 					me.RefreshAjaxDataForUI();
-				}
+//				}
 /*
 				if (me.aLastAjaxUpdatePerRoom["_"+me.roomID] === undefined) {
 					me.aLastAjaxUpdatePerRoom["_"+me.roomID] = null;

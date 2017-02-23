@@ -53,6 +53,8 @@ $.extend(IOMy.common,{
 	//============================================//
 	//-- Arrays used to store the User's variables
 	//--------------------------------------------//
+    CurrentUsername         : null,
+    
 	UserVars : {},			//-- TODO: Check if this variable is still used anywhere --//
 	
 	UserInfo : {},
@@ -651,9 +653,15 @@ $.extend(IOMy.common,{
                         "PremiseId" : data[i].ROOM_PREMISE_FK
 					});
 				}
-				
-				//-- Update the Timestamp on when the LinkList was last updated --//
-				me.LinkListLastUpdate = new Date();
+                
+                //--------------------------------------------------------//
+                // ONLY add these hard-coded devices if user is FRESHWATER1,
+                // our debug user.
+                //--------------------------------------------------------//
+                if (IOMy.common.CurrentUsername === "FRESHWATER1") {
+                    console.log("Logged In as debug user: FRESHWATER1");
+                    IOMy.experimental.addDemoDataToLinkList();
+                }
                 
 				//-- Perform the "onSuccess" function if applicable --//
 				if(oConfig.onSuccess !== undefined) {
@@ -690,6 +698,14 @@ $.extend(IOMy.common,{
 						"LinkTypeName" : data[i].LINKTYPE_NAME,
 					});
 				}
+                
+                //--------------------------------------------------------//
+                // ONLY add these hard-coded devices if user is FRESHWATER1,
+                // our debug user.
+                //--------------------------------------------------------//
+                if (IOMy.common.CurrentUsername === "FRESHWATER1") {
+                    IOMy.experimental.addDemoDataToLinkTypeList();
+                }
 				
 				//-- Perform the "onSuccess" function if applicable --//
 				if(oConfig.onSuccess !== undefined) {
@@ -728,9 +744,12 @@ $.extend(IOMy.common,{
      * There are seven steps.
      */
     ReloadCoreVariables : function (fnCallback, fnFailCallback) {
+        var me = this;
         
         if( IOMy.common.bCoreRefreshInProgress===false ) {
             IOMy.common.bCoreRefreshInProgress = true;
+            
+            // Load Current Username into memory.
             
             // STEP 1 of 7: Procedures for refreshing locale lists.
             this.LoadCountries();
@@ -740,7 +759,9 @@ $.extend(IOMy.common,{
             this.LoadTimezones();
         
             // Do the next steps
-            this.ReloadVariablePremiseList(fnCallback, fnFailCallback);
+            IOMy.functions.getCurrentUsername( function () {
+                me.ReloadVariablePremiseList(fnCallback, fnFailCallback);
+            });
         } else {
             //-- Define an empty function if fnFailCallback is undefined. --//
             if (fnFailCallback === undefined) {
