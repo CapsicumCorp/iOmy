@@ -94,13 +94,8 @@ sap.ui.controller("mjs.premise.Overview", {
      */
     DestroyUI : function() {
         var me          = this;
-        var sCurrentID  = "";
         
-        for (var i = 0; i < me.aElementsToDestroy.length; i++) {
-            sCurrentID = me.aElementsToDestroy[i];
-            if (me.byId(sCurrentID) !== undefined)
-                me.byId(sCurrentID).destroy();
-        }
+        IOMy.functions.destroyItemsByIdFromView(me, me.aElementsToDestroy);
         
         // Clear the array
         me.aElementsToDestroy = [];
@@ -316,13 +311,33 @@ sap.ui.controller("mjs.premise.Overview", {
                                                         
                                                         // Determine which device page to enter according to the device type.
                                                         if (me.aStoredDevices[i].DeviceTypeId === 2) {
-                                                            sPageName = "pDeviceData"; // Zigbee
+                                                            sPageName = "pDeviceData"; //-- Zigbee --//
                                                         } else if (me.aStoredDevices[i].DeviceTypeId === 13) {
-                                                            sPageName = "pPhilipsHue"; // Philips Hue
+                                                            sPageName = "pPhilipsHue"; //-- Philips Hue --//
                                                         } else if (me.aStoredDevices[i].DeviceTypeId === 12) {
-                                                            sPageName = "pOnvif"; // Onvif Camera
+                                                            sPageName = "pOnvif"; //-- Onvif Camera --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 3) {
+                                                            sPageName = "pMotionSensor"; //-- Motion Sensor --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 4) {
+                                                            //sPageName = "pDeviceTestThermostat"; //-- Temperature Sensor --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 10) {
+                                                            //sPageName = "pThermostat"; //-- DevelCo Energy Meter --//
                                                         } else if (me.aStoredDevices[i].DeviceTypeId === 14) {
-                                                            sPageName = "pThermostat"; // Open Weather Map
+                                                            sPageName = "pThermostat"; //-- Open Weather Map --//
+                                                            
+                                                        // -- Experimental Pages --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-1") {
+                                                            sPageName = "pDeviceDoorLock"; //-- Door Lock --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-2") {
+                                                            sPageName = "pDeviceWindowSensor"; //-- Window Sensor --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-3") {
+                                                            sPageName = "pDeviceScales"; //-- Bluetooth Scales --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-4") {
+                                                            sPageName = "pDeviceBPM"; //-- Blood Pressure Monitor --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-5") {
+                                                            sPageName = "pGaragedoor"; //-- Door Lock --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-6") {
+                                                            sPageName = "pDeviceTestThermostat"; //-- Thermostat --//
                                                         }
                                                         
                                                         IOMy.common.NavigationChangePage(sPageName, {ThingId : oItem.DeviceId});

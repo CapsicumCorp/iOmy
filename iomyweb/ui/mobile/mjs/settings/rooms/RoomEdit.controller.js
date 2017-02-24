@@ -166,7 +166,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                     },
                     
                     onFail : function (response) {
-                        jQuery.sap.log.error("Error loading premise floor count OData: "+JSON.stringify(response));
+                        jQuery.sap.log.error("Error loading room types OData: "+JSON.stringify(response));
                     }
                 });
                 
