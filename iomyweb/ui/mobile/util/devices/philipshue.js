@@ -252,11 +252,11 @@ $.extend(IOMy.devices.philipshue,{
                             //-- Draw the Data Boxes		--//
                             //--------------------------------//
                             items: []
-                        }).addStyleClass("PadLeft5px MarBottom3px MarRight10px TextLeft")
+                        }).addStyleClass("width110px PadLeft5px MarBottom3px MarRight10px TextLeft")
                     ]
                 }).addStyleClass("width10Percent minwidth90px")
             ]
-        }).addStyleClass("ListItem");
+        }).addStyleClass("ListItem MarRight6px");
 
         //--------------------------------------------------------------------//
         //-- ADD THE STATUS BUTTON TO THE UI								--//

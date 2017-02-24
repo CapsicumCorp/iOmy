@@ -578,7 +578,7 @@ $.extend(IOMy.devices.weatherfeed,{
                         }
                     }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                 ]
-            }).addStyleClass("width100Percent BorderRight")
+            }).addStyleClass("width80Percent BorderRight")
         );
 
         aUIObjectItems.push(
@@ -613,15 +613,15 @@ $.extend(IOMy.devices.weatherfeed,{
                                 text : "Loading..."
                             }).addStyleClass("Font-RobotoCondensed Font-Medium TextLeft")
                         ]
-                    }).addStyleClass("MarLeft5px")
+                    }).addStyleClass("MarLeft15px")
                 
                 ]
-            }).addStyleClass("width100Percent")
+            }).addStyleClass("minwidth180px width10Percent")
         );
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: aUIObjectItems
-        }).addStyleClass("ListItem");
+        }).addStyleClass("ListItem MarRight2px");
 		
 		
 		//------------------------------------//
@@ -660,7 +660,7 @@ $.extend(IOMy.devices.weatherfeed,{
                         }
                     }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                 ]
-            }).addStyleClass("testlabelcont BorderRight")
+            }).addStyleClass("width80Percent BorderRight")
         );
 
         aUIObjectItems.push(
@@ -679,9 +679,9 @@ $.extend(IOMy.devices.weatherfeed,{
                                 text : "Loading..."
                             }).addStyleClass("Font-RobotoCondensed Font-Medium TextLeft")
                         ]
-                    }).addStyleClass("PadLeft5px DeviceDataBox")
+                    }).addStyleClass("PadLeft5px MarBottom3px MarRight10px TextLeft")
                 ]
-            }).addStyleClass("minwidth175px")
+            }).addStyleClass("minwidth180px width10Percent MarAuto0px")
         );
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {

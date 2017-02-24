@@ -74,6 +74,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	margin-left: 10%;
 }
 
+.sapMLnk {
+	white-space: normal;
+}
 
 /*************************************************** 
 ** For aligning segemented buttons & Select Boxes **

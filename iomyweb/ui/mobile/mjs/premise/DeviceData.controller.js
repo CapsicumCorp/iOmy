@@ -554,7 +554,8 @@ sap.ui.controller("mjs.premise.DeviceData", {
 									"value":                "",
 									"valueColor":           "Good",
 									"scale":                ""
-								}).addStyleClass("")
+								}).addStyleClass(""),
+								"footer" : "Period : "+aTileData.Data.CurrentVals.FilterRB
 							})
 						],
 						press: function (oControlEvent) {

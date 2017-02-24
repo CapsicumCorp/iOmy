@@ -725,7 +725,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                         }
                     }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                 ]
-            }).addStyleClass("width80Percent minwidth170px BorderRight")
+            }).addStyleClass("width80Percent BorderRight")
         );
 
         aUIObjectItems.push(
@@ -932,7 +932,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             }
                         }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                     ]
-                }).addStyleClass("BorderRight width80Percent minwidth170px"),
+                }).addStyleClass("BorderRight width80Percent"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//

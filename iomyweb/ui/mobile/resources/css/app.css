@@ -43,48 +43,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		cursor : pointer;
 	}
 	
-	.FloatLeft {
-		float: left;
-	}
-	
-	.FloatRight {
-		float: right;
-	}
-	
-	.FloatClear {
-		/* Clears Floating															*/
-		/* NOTE: Needs to be applied to a dummy element below the floating elements	*/
-		clear: both;
-	}
-	
-	.ElementCenter {
-		/* Div auto centers if the Div is smaller than its parent Div */
-		/* NOTE: The child Div(the one that gets this as its class) should be the only child of the parent Div */
-		margin: auto;
-	}
-	
-	.ElementHidden {
-		/* Element is not visible and doesn't occupy space on the web browser */
-		display: none;
-	}
-	
-	.ElementInvisible {
-		/* Element is not visible but still occupies space on the web browser */
-		visibility: hidden;
-	}
-	
-	.TextCenter {
-		text-align: center;
-	}
-	
-	.TextLeft {
-		text-align: left;
-	}
-	
-	.TextRight {
-		text-align: right;
-	}
-	
 	.TextBold {
 		font-weight: bold;
 	}
@@ -127,6 +85,50 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		padding-top: 0px;
 	}
 	
+	/*====================================================================================*/
+	/*== Andrew Common Classes                                                          ==*/
+	/*====================================================================================*/	
+	.FloatLeft {
+		float: left;
+	}
+	
+	.FloatRight {
+		float: right;
+	}
+	
+	.FloatClear {
+		/* Clears Floating															*/
+		/* NOTE: Needs to be applied to a dummy element below the floating elements	*/
+		clear: both;
+	}
+	
+	.ElementCenter {
+		/* Div auto centers if the Div is smaller than its parent Div */
+		/* NOTE: The child Div(the one that gets this as its class) should be the only child of the parent Div */
+		margin: auto;
+	}
+	
+	.ElementHidden {
+		/* Element is not visible and doesn't occupy space on the web browser */
+		display: none;
+	}
+	
+	.ElementInvisible {
+		/* Element is not visible but still occupies space on the web browser */
+		visibility: hidden;
+	}
+	
+	.TextCenter {
+		text-align: center;
+	}
+	
+	.TextLeft {
+		text-align: left;
+	}
+	
+	.TextRight {
+		text-align: right;
+	}	
 	
 	/*====================================================================================*/
 	/*== FONTS AND SIZES                                                                ==*/
@@ -327,6 +329,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		background-color: #508F00;
 	}
 
+	
 	.BorderTop {
 		border-top: 1px rgb(188,190,192) solid; 
 	}
@@ -488,40 +491,39 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	}
 	
 	/* Perhaps place these CSS Classes and overrides in a dedicated CSS file */
-	button.IOMYButton.TextSize16px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-		font-size: 16px;
-	}
 	button.IOMYButton.TextSize16px > div.sapMBtnInner > span.sapMBtnIcon {
 		font-size: 16px;
-	}
-	
-	button.IOMYButton.TextSize18px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-		font-size: 18px;
 	}
 	button.IOMYButton.TextSize18px > div.sapMBtnInner > span.sapMBtnIcon {
 		font-size: 18px;
 	}
-	
-	button.IOMYButton.TextSize20px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-		font-size: 20px;
-	}
 	button.IOMYButton.TextSize20px > div.sapMBtnInner > span.sapMBtnIcon {
 		font-size: 20px;
-	}
-	
-	button.IOMYButton.TextSize22px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-		font-size: 22px;
 	}
 	button.IOMYButton.TextSize22px > div.sapMBtnInner > span.sapMBtnIcon {
 		font-size: 22px;
 	}
-	
-	button.IOMYButton.TextSize40px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-		font-size: 40px;
-	}
 	button.IOMYButton.TextSize40px > div.sapMBtnInner > span.sapMBtnIcon {
 		font-size: 40px;
 	}
+	
+	/* -- Currently not being used. Possibly Deprecated --
+	button.IOMYButton.TextSize16px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
+		font-size: 16px;
+	}
+	button.IOMYButton.TextSize18px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
+		font-size: 18px;
+	}
+	button.IOMYButton.TextSize20px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
+		font-size: 20px;
+	}
+	button.IOMYButton.TextSize22px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
+		font-size: 22px;
+	}
+	button.IOMYButton.TextSize40px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
+		font-size: 40px;
+	}
+	*/
 	
 	button.IOMYButton.TextLeft > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
 			text-align: left;
@@ -1036,6 +1038,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	.ConsistentMenuHeader {
 		background-color: rgb(241,242,242);
 	}
+	
 	.ConsistentMenuHeader > div > div > .sapMText {
 		color: black;
 		font-family: "Roboto Condensed", sans-serif;
@@ -1043,6 +1046,16 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		min-height: 20px;
 		font-size: 16px;
 		width: 100%;
+	}
+	
+		
+	/*-- Centers Labels when used in a Tile --*/
+	.TileToggleThingStatusLabel {
+		text-align: center;
+		width: 100%;
+		font-size: 2.125rem;
+		color: navy;
+		padding-top: 8px;
 	}
 	
 	.HeaderLower.sapMBar {

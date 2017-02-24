@@ -257,7 +257,7 @@ $.extend(IOMy.devices.motionsensor,{
                         }
                     }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                 ]
-            }).addStyleClass("minwidth70px width70Percent BorderRight")
+            }).addStyleClass("width80Percent BorderRight")
         );
 
         aUIObjectItems.push(
@@ -285,9 +285,9 @@ $.extend(IOMy.devices.motionsensor,{
                                 ]
                             })
                         ]
-                    }).addStyleClass("PadTop20px PadBottom15px PadLeft5px MarBottom3px MarRight10px TextLeft")
+                    }).addStyleClass("width110px PadLeft5px TextLeft")
                 ]
-            }).addStyleClass("minwidth100px width10Percent")
+            }).addStyleClass("minwidth180px width10Percent MarAuto0px")
         );
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
@@ -417,7 +417,7 @@ $.extend(IOMy.devices.motionsensor,{
                             }
                         }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                     ]
-                }).addStyleClass("BorderRight testlabelcont"),
+                }).addStyleClass("BorderRight width80Percent"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
@@ -443,9 +443,9 @@ $.extend(IOMy.devices.motionsensor,{
                                     ]
                                 })
                             ]
-                        }).addStyleClass("PadTop20px PadBottom15px PadLeft5px MarBottom3px MarRight10px TextLeft")
+                        }).addStyleClass("width110px PadLeft5px TextLeft")
                     ]
-                }).addStyleClass("width10Percent minwidth70px")
+                }).addStyleClass("width10Percent minwidth180px MarAuto0px")
             ]
         }).addStyleClass("ListItem");
 

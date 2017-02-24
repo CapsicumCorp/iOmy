@@ -44,6 +44,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 margin-right: 0.3em;
 }
 
+.MarAuto0px {
+	margin: auto 0px;
+}
 
 /*********************************************
  * #2.0# - MAR ALL
