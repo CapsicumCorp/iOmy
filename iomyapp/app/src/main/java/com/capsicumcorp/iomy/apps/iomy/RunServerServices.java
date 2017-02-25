@@ -98,7 +98,7 @@ public class RunServerServices extends Thread {
         this.AppName=Application.getInstance().getAppName();
 
         //Create Watch Inputs objects
-        mMainLib=new com.capsicumcorp.iomy.libraries.watchinputs.MainLib(context, this.AppName, Application.getInstance().getUsbManager(), InternalStorageFolderName, Application.getInstance().getStartedFromUsb());
+        mMainLib=new com.capsicumcorp.iomy.libraries.watchinputs.MainLib(context, this.AppName, Application.getInstance().getUsbManager(), InternalStorageFolderName, ExternalStorageFolderName, Application.getInstance().getStartedFromUsb());
     }
 
     private int execWithWait(String cmd) throws Exception {

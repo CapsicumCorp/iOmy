@@ -1212,6 +1212,7 @@ static void *mainlib_MainThreadLoop(void *thread_val) {
   struct timespec waittime;
 
   debuglibifaceptr->debuglib_printf(1, "%s: Using config file: %s\n", __func__, cfg_filename);
+  debuglibifaceptr->debuglib_printf(1, "%s: Using time rules file: %s\n", __func__, timerules_filename);
 
 	configlibifaceptr->configlib_setcfgfilename(cfg_filename);
   timeruleslibifaceptr->setrulesfilename(timerules_filename);
@@ -1442,5 +1443,23 @@ void Java_com_capsicumcorp_iomy_libraries_watchinputs_MainLib_jnisetConfigFilena
   cfg_filename=strdup(tmpstr);
 
   (*env)->ReleaseStringUTFChars(env, jcfgfile, tmpstr);
+}
+
+void Java_com_capsicumcorp_iomy_libraries_watchinputs_MainLib_jnisetTimeRulesFilename( JNIEnv* env, jobject obj, jstring jrulesfile) {
+  const char* tmpstr;
+
+  tmpstr=(*env)->GetStringUTFChars(env, jrulesfile, 0);
+  if (tmpstr==NULL) {
+    return;
+  }
+  if (tmpstr[0]==0) {
+    return;
+  }
+  if (timerules_filename) {
+    free(timerules_filename);
+  }
+  timerules_filename=strdup(tmpstr);
+
+  (*env)->ReleaseStringUTFChars(env, jrulesfile, tmpstr);
 }
 #endif

@@ -30,7 +30,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #define MODULES_DIR LIBDIR "/watch_inputs/modules"
 #else
 #define CFG_FILENAME "inputdevs.cfg"
-#define CFG_FILENAME "timerules.cfg"
+#define TIMERULES_FILENAME "timerules.cfg"
 #define MODULES_DIR "modules"
 #endif
 

@@ -390,7 +390,7 @@ int timeruleslib_readrulesfile(void) {
 	}
 	if (rulesfilename=="") {
     timeruleslib_unlock();
-    debuglibifaceptr->debuglib_printf(1, "Exiting %s, config filename not configured\n", __func__);
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s, time rules filename not configured\n", __func__);
     return -1;
   }
   rulesloadpending=0;
@@ -414,7 +414,7 @@ int timeruleslib_readrulesfile(void) {
     free(linebuf);
     rulesloadpending=1;
     timeruleslib_unlock();
-    debuglibifaceptr->debuglib_printf(1, "%s: Configuration load aborted due to error\n", __func__);
+    debuglibifaceptr->debuglib_printf(1, "%s: Time rules load aborted due to error\n", __func__);
     return -3;
   }
   gtimerules.clear();
