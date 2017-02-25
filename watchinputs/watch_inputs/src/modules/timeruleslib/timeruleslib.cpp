@@ -26,6 +26,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 //NOTE: POSIX_C_SOURCE is needed for the following
 //  ctime_r
+//  localtime_r
 //  CLOCK_REALTIME
 //  sem_timedwait
 #define _POSIX_C_SOURCE 200112L
@@ -59,6 +60,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "modules/debuglib/debuglib.h"
 #include "modules/dblib/dblib.h"
 #include "modules/commonlib/commonlib.h"
+#include "modules/cmdserverlib/cmdserverlib.h"
+#include "modules/commonserverlib/commonserverlib.h"
 
 #ifdef DEBUG
 #pragma message("TIMERULESLIB_PTHREAD_LOCK and TIMERULESLIB_PTHREAD_UNLOCK debugging has been enabled")
@@ -151,12 +154,16 @@ struct timerule {
   std::string deviceid; //Normally the mac address of a device
   int16_t ontime; //The minute of the day at which to turn on a device
   int16_t offtime; //The minute of the day at which to turn off a device
+  int lastruleset=-1; //1 means on was the last rule applied, 0 means off was the last rule applied
 };
 
 static sem_t timeruleslib_mainthreadsleepsem; //Used for main thread sleeping
 
 static int timeruleslib_inuse=0; //Only shutdown when inuse = 0
 static bool timeruleslib_shuttingdown=false;
+
+static bool timeruleslib_needtoreload=false;
+static bool timeruleslib_processingtimerules=false; // While set to true, reloading shouldn't be done
 
 static bool needtoquit=false; //Set to true when timeruleslib should exit
 
@@ -184,7 +191,6 @@ int timeruleslib_readrulesfile();
 int timeruleslib_isloaded();
 static int timeruleslib_setrulesfilename(const char *rulefile);
 
-static void timeruleslib_setneedtoquit(bool val);
 static bool timeruleslib_getneedtoquit();
 static int timeruleslib_start(void);
 static void timeruleslib_stop(void);
@@ -204,7 +210,9 @@ JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_TimeRulesLib_jn
 
 //Module Interface Definitions
 #define DEBUGLIB_DEPIDX 0
-#define DBLIB_DEPIDX 0
+#define DBLIB_DEPIDX 1
+#define CMDSERVERLIB_DEPIDX 2
+#define COMMONSERVERLIB_DEPIDX 3
 
 static timeruleslib_ifaceptrs_ver_1_t timeruleslib_ifaceptrs_ver_1={
   timeruleslib_setrulesfilename,
@@ -235,7 +243,7 @@ static moduleiface_ver_1_t timeruleslib_ifaces[]={
 moduledep_ver_1_t timeruleslib_deps[]={
   {
     "debuglib",
-		nullptr,
+    nullptr,
     DEBUGLIBINTERFACE_VER_1,
     1
   },
@@ -243,6 +251,18 @@ moduledep_ver_1_t timeruleslib_deps[]={
     "dblib",
     nullptr,
     DBLIBINTERFACE_VER_1,
+    1
+  },
+  {
+    "cmdserverlib",
+    nullptr,
+    CMDSERVERLIBINTERFACE_VER_1,
+    0
+  },
+  {
+    "commonserverlib",
+    NULL,
+    COMMONSERVERLIBINTERFACE_VER_1,
     1
   },
   {
@@ -393,6 +413,12 @@ int timeruleslib_readrulesfile(void) {
     debuglibifaceptr->debuglib_printf(1, "Exiting %s, time rules filename not configured\n", __func__);
     return -1;
   }
+  if (timeruleslib_processingtimerules) {
+    timeruleslib_needtoreload=true;
+    timeruleslib_unlock();
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s, time rules are currently being processed, scheduling load for later\n", __func__);
+    return 0;
+  }
   rulesloadpending=0;
   file=fopen(rulesfilename.c_str(), "rb");
   if (file == NULL) {
@@ -461,6 +487,7 @@ int timeruleslib_readrulesfile(void) {
       if (strcmp(linebuf, "device")==0) {
         curdeviceid=value;
         gtimerules[curdeviceid].deviceid=curdeviceid;
+        gtimerules[curdeviceid].lastruleset=-1;
       } else if (strcmp(linebuf, "ontime")==0) {
         int hour, minute;
         sscanf(value.substr(0, 2).c_str(), "%02d", &hour);
@@ -480,6 +507,8 @@ int timeruleslib_readrulesfile(void) {
 
   rulesloadpending=0;
   rulesloaded=1;
+
+  timeruleslib_needtoreload=false;
 
   //DEBUG: Display Time Rules
   for (auto const &timerulesit : gtimerules) {
@@ -545,13 +574,89 @@ static int timeruleslib_setrulesfilename(const char *rulesfile) {
   return 0;
 }
 
+static int timeruleslib_processreloadcommand(const char *UNUSED(buffer), int clientsock) {
+  auto const debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  auto const commonserverlibifaceptr=(commonserverlib_ifaceptrs_ver_1_t *) timeruleslib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
+
+  if (timeruleslib_getneedtoquit()) {
+    commonserverlibifaceptr->serverlib_netputs("Unable to reload during shutdown\n", clientsock, NULL);
+    return CMDLISTENER_NOERROR;
+  }
+  timeruleslib_lock();
+  timeruleslib_needtoreload=true;
+  sem_post(&timeruleslib_mainthreadsleepsem);
+  timeruleslib_unlock();
+
+  commonserverlibifaceptr->serverlib_netputs("Reloading of time rules file has been scheduled\n", clientsock, NULL);
+
+  return CMDLISTENER_NOERROR;
+}
+
+/*
+ * Process the time rules one by one
+ */
+static void timeruleslib_process_timerules() {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  time_t currenttime;
+  struct timespec curtime;
+  struct tm curtimelocaltm, *curtimelocaltmptr;
+
+  // Get the current time
+  clock_gettime(CLOCK_REALTIME, &curtime);
+  currenttime=curtime.tv_sec;
+
+  // Get the current local time split out into individual fields
+  curtimelocaltmptr=localtime_r(&currenttime, &curtimelocaltm);
+  if (curtimelocaltmptr==nullptr) {
+    debuglibifaceptr->debuglib_printf(1, "%s: WARNING: Unable to get current local time\n", __func__);
+    return;
+  }
+  debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Current time: %02d:%02d\n", __func__, curtimelocaltm.tm_hour, curtimelocaltm.tm_min);
+
+  // Set that we are processing time rules so we don't need to hold the lock the entire time
+  timeruleslib_lock();
+  timeruleslib_processingtimerules=true;
+  timeruleslib_unlock();
+
+  for (auto &timerulesit : gtimerules) {
+    bool changestate=false, newstate=false; // New State: false=off, true=on
+    int onhour, onminute;
+    int offhour, offminute;
+
+    onhour=(timerulesit.second.ontime) / 60;
+    onminute=(timerulesit.second.ontime)-(onhour*60);
+    offhour=(timerulesit.second.offtime) / 60;
+    offminute=(timerulesit.second.offtime)-(offhour*60);
+
+    debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Last rule set for device: %s=%d\n", __func__, timerulesit.first.c_str(), timerulesit.second.lastruleset);
+    if (onhour==curtimelocaltm.tm_hour && onminute==curtimelocaltm.tm_min && timerulesit.second.lastruleset!=1) {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Need to activate On Time Rule for device: %s\n", __func__, timerulesit.first.c_str());
+      changestate=true;
+      newstate=true;
+      timerulesit.second.lastruleset=1;
+    }
+    if (offhour==curtimelocaltm.tm_hour && offminute==curtimelocaltm.tm_min && timerulesit.second.lastruleset!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Need to activate Off Time Rule for device: %s\n", __func__, timerulesit.first.c_str());
+      changestate=true;
+      newstate=false;
+      timerulesit.second.lastruleset=0;
+    }
+    if (timeruleslib_getneedtoquit()) {
+      break;
+    }
+  }
+  timeruleslib_lock();
+  timeruleslib_processingtimerules=false;
+  timeruleslib_unlock();
+}
+
 /*
   Main Time Rules thread loop that manages
 */
 static void *timeruleslib_mainloop(void* UNUSED(val)) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   time_t currenttime;
-  struct timespec curtime, semwaittime;
+  struct timespec semwaittime;
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
 
@@ -562,9 +667,19 @@ static void *timeruleslib_mainloop(void* UNUSED(val)) {
     clock_gettime(CLOCK_REALTIME, &semwaittime);
     currenttime=semwaittime.tv_sec;
 
-    if (timeruleslib_isloaded()) {
-      timeruleslib_lock();
-      timeruleslib_unlock();
+    bool local_needtoreload;
+    timeruleslib_lock();
+    local_needtoreload=timeruleslib_needtoreload;
+    timeruleslib_unlock();
+    if (local_needtoreload) {
+      timeruleslib_readrulesfile();
+    }
+    bool local_processingtimerules;
+    timeruleslib_lock();
+    local_processingtimerules=timeruleslib_processingtimerules;
+    timeruleslib_unlock();
+    if (timeruleslib_isloaded() && !local_processingtimerules) {
+      timeruleslib_process_timerules();
     } else {
       fastsleep=true;
     }
@@ -598,12 +713,6 @@ static void *timeruleslib_mainloop(void* UNUSED(val)) {
   return (void *) 0;
 }
 
-static void timeruleslib_setneedtoquit(bool val) {
-  timeruleslib_lock();
-  needtoquit=val;
-  timeruleslib_unlock();
-}
-
 static bool timeruleslib_getneedtoquit() {
   bool val;
 
@@ -616,7 +725,8 @@ static bool timeruleslib_getneedtoquit() {
 
 //NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
 static int timeruleslib_start(void) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  auto const debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  auto const cmdserverlibifaceptr=(cmdserverlib_ifaceptrs_ver_1_t *) timeruleslib_deps[CMDSERVERLIB_DEPIDX].ifaceptr;
   int result=0;
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
@@ -629,6 +739,8 @@ static int timeruleslib_start(void) {
       result=-1;
     }
   }
+  cmdserverlibifaceptr->cmdserverlib_register_cmd_function("timerules_reload", "Reload the time rules file", timeruleslib_processreloadcommand);
+
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 
   return result;
