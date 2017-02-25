@@ -228,7 +228,8 @@ std::string zigbeelink_to_json(const webapiclient_zigbeelink_t &zigbeelink) {
 	tmphexstr.fill('0');
 	tmphexstr << std::uppercase << std::hex << zigbeelink.addr;
 	pt.put("SerialCode", tmphexstr.str());
-	pt.put("Displayname", zigbeelink.userstr);
+	//pt.put("Displayname", zigbeelink.userstr);
+  pt.put("Displayname", "");
 	ptree thingspt;
 	for (const auto &thingit : zigbeelink.things) {
 		ptree thingpt;
