@@ -723,9 +723,9 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                         press : function () {
                             IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
+                    }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
                 ]
-            }).addStyleClass("width80Percent BorderRight")
+            }).addStyleClass("width80Percent BorderRight DeviceLabelMargin")
         );
 
         aUIObjectItems.push(
@@ -745,14 +745,14 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("Font-RobotoCondensed"),
                             new sap.m.Text( oViewScope.createId( sPrefix+"_kWh" ),	{} ).addStyleClass("Font-RobotoCondensed")
                         ]
-                    }).addStyleClass("PadLeft5px MarBottom3px MarRight10px TextLeft")
+                    }).addStyleClass("MarLeft6px MarAuto0px")
                 ]
-            }).addStyleClass("minwidth90px width10Percent")
+            }).addStyleClass("minwidth90px minheight58px")
         );
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: aUIObjectItems
-        }).addStyleClass("ListItem MarRight6px");
+        }).addStyleClass("ListItem");
 
         //--------------------------------------------------------------------//
         //-- ADD THE STATUS BUTTON TO THE UI								--//
@@ -782,7 +782,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         //------------------------------------//
         var oUIStatusContainer = new sap.m.VBox( oViewScope.createId( sPrefix+"_StatusContainer"), {
             items:[] 
-        }).addStyleClass("minwidth80px PadTop10px PadLeft5px");	//-- END of VBox that holds the Toggle Button
+        }).addStyleClass("minwidth80px DeviceLabelMargin");	//-- END of VBox that holds the Toggle Button
 
 
         //-- Add the Button's background colour class --//
@@ -930,9 +930,9 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
+                        }).addStyleClass("MarLeft6px Font-Medium Text_grey_20")
                     ]
-                }).addStyleClass("BorderRight width80Percent"),
+                }).addStyleClass("BorderRight width80Percent DeviceLabelMargin"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
@@ -944,13 +944,13 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             //-- Draw the Data Boxes		--//
                             //--------------------------------//
                             items: [
-                                new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("PadTop20px PadBottom15px Font-RobotoCondensed")
+                                new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass(" Font-RobotoCondensed")
                             ]
-                        }).addStyleClass("PadLeft5px MarBottom3px MarRight10px TextLeft")
+                        }).addStyleClass("MarLeft6px MarAuto0px")
                     ]
-                }).addStyleClass("width10Percent minwidth90px")
+                }).addStyleClass("minheight58px minwidth90px")
             ]
-        }).addStyleClass("ListItem MarRight6px");
+        }).addStyleClass("ListItem");
 
         //--------------------------------------------------------------------//
         //-- ADD THE STATUS BUTTON TO THE UI								--//
@@ -980,7 +980,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         //------------------------------------//
         var oUIStatusContainer = new sap.m.VBox( oViewScope.createId( sPrefix+"_StatusContainer"), {
             items:[] 
-        }).addStyleClass("PadTop5px PadLeft5px  minwidth80px");	//-- END of VBox that holds the Toggle Button
+        }).addStyleClass("minwidth80px DeviceLabelMargin");	//-- END of VBox that holds the Toggle Button
 
 
         //-- Add the Button's background colour class --//

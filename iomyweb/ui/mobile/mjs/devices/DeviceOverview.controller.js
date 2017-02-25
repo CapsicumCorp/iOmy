@@ -351,7 +351,7 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
                         items : [
                             new sap.m.Label( oController.createId(sTempName), {
                                 text:		aGrouping.Name
-                            }).addStyleClass("width100Percent PadTop5px PadBottom5px")
+                            }).addStyleClass("width100Percent")
                         ]
                     }).addStyleClass("MarLeft6px TextOverflowEllipsis")
                 ]

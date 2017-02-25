@@ -78,9 +78,9 @@ $.extend(IOMy.devices.philipshue,{
                         press : function () {
                             IOMy.common.NavigationChangePage("pPhilipsHue", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
+                    }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
                 ]
-            }).addStyleClass((bIsUnassigned ? "minwidth120px" : "minwidth170px")+" width80Percent BorderRight")
+            }).addStyleClass("width80Percent BorderRight DeviceLabelMargin")
         );
 
         aUIObjectItems.push(
@@ -97,14 +97,14 @@ $.extend(IOMy.devices.philipshue,{
                         items: [
 
                         ]
-                    }).addStyleClass("width110px PadLeft5px MarBottom3px MarRight10px TextLeft")
+                    }).addStyleClass("MarLeft6px MarAuto0px ")
                 ]
-            }).addStyleClass("minwidth90px width10Percent")
+            }).addStyleClass("minwidth90px minheight58px")
         );
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: aUIObjectItems
-        }).addStyleClass("ListItem MarRight6px");
+        }).addStyleClass("ListItem");
 
         //--------------------------------------------------------------------//
         //-- ADD THE STATUS BUTTON TO THE UI								--//
@@ -133,7 +133,7 @@ $.extend(IOMy.devices.philipshue,{
         //------------------------------------//
         var oUIStatusContainer = new sap.m.VBox( oViewScope.createId( sPrefix+"_StatusContainer"), {
             items:[] 
-        }).addStyleClass("minwidth80px PadTop10px PadLeft5px");	//-- END of VBox that holds the Toggle Button
+        }).addStyleClass("minwidth80px DeviceLabelMargin");	//-- END of VBox that holds the Toggle Button
 
 
         //-- Add the Button's background colour class --//
@@ -238,9 +238,9 @@ $.extend(IOMy.devices.philipshue,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pPhilipsHue", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
+                        }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
                     ]
-                }).addStyleClass("width80Percent BorderRight"),
+                }).addStyleClass("width80Percent BorderRight DeviceLabelMargin"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
@@ -251,12 +251,14 @@ $.extend(IOMy.devices.philipshue,{
                             //--------------------------------//
                             //-- Draw the Data Boxes		--//
                             //--------------------------------//
-                            items: []
-                        }).addStyleClass("width110px PadLeft5px MarBottom3px MarRight10px TextLeft")
+                            items: [
+							
+							]
+                        }).addStyleClass("MarLeft6px MarAuto0px")
                     ]
-                }).addStyleClass("width10Percent minwidth90px")
+                }).addStyleClass("minheight58px minwidth90px")
             ]
-        }).addStyleClass("ListItem MarRight6px");
+        }).addStyleClass("ListItem");
 
         //--------------------------------------------------------------------//
         //-- ADD THE STATUS BUTTON TO THE UI								--//
@@ -289,7 +291,7 @@ $.extend(IOMy.devices.philipshue,{
         //------------------------------------//
         var oUIStatusContainer = new sap.m.VBox( oViewScope.createId( sPrefix+"_StatusContainer"), {
             items:[] 
-        }).addStyleClass("PadTop5px PadLeft5px width10Percent minwidth80px");	//-- END of VBox that holds the Toggle Button
+        }).addStyleClass("minwidth80px DeviceLabelMargin");	//-- END of VBox that holds the Toggle Button
 
 
         //-- Add the Button's background colour class --//

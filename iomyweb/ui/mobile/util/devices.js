@@ -251,27 +251,27 @@ $.extend(IOMy.devices,{
             
         //-- Philips Hue --//
         } else if( aDeviceData.DeviceTypeId===13 ) {
-            oUIObject = IOMy.devices.philipshue.GetCommonUIForDeviceOverview( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.philipshue.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Onvif Stream --//
         } else if ( aDeviceData.DeviceTypeId===12) {
-            oUIObject = IOMy.devices.onvif.GetCommonUIForDeviceOverview( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.onvif.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Motion Sensor --//
         } else if ( aDeviceData.DeviceTypeId===3) {
-            oUIObject = IOMy.devices.motionsensor.GetCommonUIForDeviceOverview( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.motionsensor.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Temperature Sensor --//
         } else if ( aDeviceData.DeviceTypeId===4) {
-            oUIObject = IOMy.devices.temperaturesensor.GetCommonUIForDeviceOverview( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.temperaturesensor.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- DevelCo Energy Meter --//
         } else if ( aDeviceData.DeviceTypeId===10) {
-            oUIObject = IOMy.devices.develco.GetCommonUIForDeviceOverview( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.develco.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Weather Feed --//
         } else if ( aDeviceData.DeviceTypeId===14) {
-            oUIObject = IOMy.devices.weatherfeed.GetCommonUIForDeviceOverview( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.weatherfeed.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-----------------------------------//
         // --- Experimental Device Pages --- //

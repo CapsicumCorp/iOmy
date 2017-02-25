@@ -74,9 +74,9 @@ $.extend(IOMy.devices.bpm,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceBPM", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                        }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
                     ]
-                }).addStyleClass("BorderRight testlabelcont"),
+                }).addStyleClass("BorderRight width80Percent DeviceLabelMargin"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
@@ -89,7 +89,7 @@ $.extend(IOMy.devices.bpm,{
                             //--------------------------------//
 
                             items: [
-                                new sap.m.HBox({
+                                new sap.m.VBox({
                                     items : [
                                         //----------------------------------//
                                         // Last Motion
@@ -98,15 +98,15 @@ $.extend(IOMy.devices.bpm,{
                                             text : "Last Used:"
                                         }).addStyleClass("Font-RobotoCondensed"),
                                         
-                                        new sap.m.Text( oViewScope.createId( sPrefix+"_LastMotion" ),	{
+                                        new sap.m.Label( oViewScope.createId( sPrefix+"_LastMotion" ),	{
                                             text : "23d 13h 44m"
-                                        } ).addStyleClass("PadLeft5px Font-RobotoCondensed width110px")
+                                        } ).addStyleClass("Font-RobotoCondensed")
                                     ]
                                 })
                             ]
-                        }).addStyleClass("DeviceOverview-ItemLabel PadLeft5px MarBottom3px MarRight10px TextLeft")
+                        }).addStyleClass("MarLeft6px MarAuto0px")
                     ]
-                }).addStyleClass("width10Percent minwidth70px")
+                }).addStyleClass("minheight58px minwidth170px")
             ]
         }).addStyleClass("ListItem");
 
