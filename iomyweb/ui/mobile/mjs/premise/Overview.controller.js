@@ -221,9 +221,9 @@ sap.ui.controller("mjs.premise.Overview", {
                                             press : function () {
                                                 IOMy.common.NavigationChangePage(aRoom.RoomId !== 0 ? "pRoomsOverview" : "pRoomsUnassignedDevices", {room : aRoom});
                                             }
-                                        }).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px width100Percent")
+                                        }).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px ")
                                     ]
-                                }).addStyleClass("TextOverflowEllipsis"),
+                                }).addStyleClass("TextOverflowEllipsis width100Percent"),
                                 
                                 // === COLLAPSE/EXPAND ICON === \\
                                 // If there are things associated with a room via their links...

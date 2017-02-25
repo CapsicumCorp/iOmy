@@ -576,28 +576,47 @@ $.extend(IOMy.devices.weatherfeed,{
                             //console.log(aDeviceData);
                             IOMy.common.NavigationChangePage("pThermostat", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
+                    }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
                 ]
-            }).addStyleClass("width80Percent BorderRight")
+            }).addStyleClass("width80Percent BorderRight DeviceLabelMargin")
         );
 
         aUIObjectItems.push(
             //------------------------------------//
             //-- 2nd is the weather information --//
             //------------------------------------//
-            new sap.m.HBox({
+			
+			//-- Displays 2 Values on Overview Pages --//
+			new sap.m.VBox({
+                items : [
+                    new sap.m.HBox({
+                        items : [
+                            new sap.m.Label(oViewScope.createId(sPrefix + me.uiIDs.sTemperatureDisplayID),{
+                                text : "Loading..."
+                            }).addStyleClass("Font-RobotoCondensed"),
+
+                            new sap.m.Label(oViewScope.createId(sPrefix + me.uiIDs.sConditionDisplayID),{
+                                text : "Loading..."
+                            }).addStyleClass("Font-RobotoCondensed MarLeft5px")
+                        ]
+                    }).addStyleClass("MarLeft6px MarAuto0px")
+                ]
+            }).addStyleClass("minwidth170px minheight58px")
+			
+			//-- Displays 6 Values on Overview Pages --//
+			/* new sap.m.HBox({
                 items : [
                     new sap.m.VBox({
                         items : [
                             new sap.m.Label(oViewScope.createId(sPrefix + me.uiIDs.sTemperatureDisplayID),{
                                 text : "Loading..."
-                            }).addStyleClass("Font-RobotoCondensed Font-Medium TextLeft"),
+                            }).addStyleClass("Font-RobotoCondensed"),
                             new sap.m.Label(oViewScope.createId(sPrefix + me.uiIDs.sHumidityDisplayID),{
                                 text : "Loading..."
-                            }).addStyleClass("Font-RobotoCondensed Font-Medium TextLeft"),
+                            }).addStyleClass("Font-RobotoCondensed"),
                             new sap.m.Label(oViewScope.createId(sPrefix + me.uiIDs.sWindSpeedDisplayID),{
                                 text : "Loading..."
-                            }).addStyleClass("Font-RobotoCondensed Font-Medium TextLeft")
+                            }).addStyleClass("Font-RobotoCondensed")
                         ]
                     }).addStyleClass("MarLeft5px"),
                     
@@ -605,23 +624,22 @@ $.extend(IOMy.devices.weatherfeed,{
                         items : [
                             new sap.m.Label(oViewScope.createId(sPrefix + me.uiIDs.sPressureDisplayID),{
                                 text : "Loading..."
-                            }).addStyleClass("Font-RobotoCondensed Font-Medium TextLeft"),
+                            }).addStyleClass("Font-RobotoCondensed"),
                             new sap.m.Label(oViewScope.createId(sPrefix + me.uiIDs.sConditionDisplayID),{
                                 text : "Loading..."
-                            }).addStyleClass("Font-RobotoCondensed Font-Medium TextLeft"),
+                            }).addStyleClass("Font-RobotoCondensed"),
                             new sap.m.Label(oViewScope.createId(sPrefix + me.uiIDs.sWindDirectionDisplayID),{
                                 text : "Loading..."
-                            }).addStyleClass("Font-RobotoCondensed Font-Medium TextLeft")
+                            }).addStyleClass("Font-RobotoCondensed")
                         ]
                     }).addStyleClass("MarLeft15px")
-                
                 ]
-            }).addStyleClass("minwidth180px width10Percent")
+            }).addStyleClass("minwidth170px minheight58px") */
         );
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: aUIObjectItems
-        }).addStyleClass("ListItem MarRight2px");
+        }).addStyleClass("ListItem");
 		
 		
 		//------------------------------------//
@@ -658,30 +676,30 @@ $.extend(IOMy.devices.weatherfeed,{
                             //console.log(aDeviceData);
                             IOMy.common.NavigationChangePage("pThermostat", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
+                    }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
                 ]
-            }).addStyleClass("width80Percent BorderRight")
+            }).addStyleClass("width80Percent BorderRight DeviceLabelMargin")
         );
 
         aUIObjectItems.push(
-            //------------------------------------//
-            //-- 2nd is the weather information --//
-            //------------------------------------//
+		//------------------------------------//
+		//-- 2nd is the weather information --//
+		//------------------------------------//
             new sap.m.VBox({
                 items : [
-                    new sap.m.VBox({
+                    new sap.m.HBox({
                         items : [
                             new sap.m.Label(oViewScope.createId(sPrefix + me.uiIDs.sTemperatureDisplayID),{
                                 text : "Loading..."
-                            }).addStyleClass("Font-RobotoCondensed Font-Medium TextLeft"),
+                            }).addStyleClass("Font-RobotoCondensed"),
 
                             new sap.m.Label(oViewScope.createId(sPrefix + me.uiIDs.sConditionDisplayID),{
                                 text : "Loading..."
-                            }).addStyleClass("Font-RobotoCondensed Font-Medium TextLeft")
+                            }).addStyleClass("Font-RobotoCondensed MarLeft5px")
                         ]
-                    }).addStyleClass("PadLeft5px MarBottom3px MarRight10px TextLeft")
+                    }).addStyleClass("MarLeft6px MarAuto0px")
                 ]
-            }).addStyleClass("minwidth180px width10Percent MarAuto0px")
+            }).addStyleClass("minwidth170px minheight58px")
         );
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {

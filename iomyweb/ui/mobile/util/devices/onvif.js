@@ -367,11 +367,51 @@ $.extend(IOMy.devices.onvif,{
                         press : function () {
                             IOMy.common.NavigationChangePage("pOnvif", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
+                    }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
                 ]
-            }).addStyleClass("width100Percent")
+            }).addStyleClass("BorderRight width80Percent DeviceLabelMargin")
         );
-
+		
+		aUIObjectItems.push(
+            //------------------------------------//
+			//-- 2nd is the Device Data			--//
+			//------------------------------------//
+			new sap.m.HBox({
+                    items : [
+						new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
+                            //--------------------------------//
+                            //-- Draw the Data Boxes		--//
+                            //--------------------------------//
+                            items: [
+                                new sap.m.VBox({
+                                    items : [
+										new sap.m.Button ({
+											width: "100%",
+											icon : "sap-icon://GoogleMaterial/visibility",
+										})
+                                    ]
+                                })
+                            ]
+                        }).addStyleClass("MarLeft10px MarAuto0px minwidth70px"),
+                        new sap.m.VBox( oViewScope.createId( sPrefix+"_Screenshot"), {
+                            //--------------------------------//
+                            //-- Draw the Data Boxes		--//
+                            //--------------------------------//
+                            items: [
+                                new sap.m.VBox({
+                                    items : [
+										new sap.m.Button ({
+											width: "100%",
+											icon : "sap-icon://GoogleMaterial/camera",
+										})
+                                    ]
+                                })
+                            ]
+                        }).addStyleClass("MarLeft10px MarAuto0px minwidth70px")
+                    ]
+                }).addStyleClass("minwidth170px minheight58px")
+        );
+		
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: aUIObjectItems
         }).addStyleClass("ListItem");
@@ -427,12 +467,50 @@ $.extend(IOMy.devices.onvif,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pOnvif", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
+                        }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
                     ]
-                }).addStyleClass("PadRight3px width100Percent minwidth170px"),
+                }).addStyleClass("BorderRight width80Percent DeviceLabelMargin"),
+				
+				//------------------------------------//
+                //-- 2nd is the Device Data			--//
+                //------------------------------------//
+                new sap.m.HBox({
+                    items : [
+						new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
+                            //--------------------------------//
+                            //-- Draw the Data Boxes		--//
+                            //--------------------------------//
+                            items: [
+                                new sap.m.VBox({
+                                    items : [
+										new sap.m.Button ({
+											width: "100%",
+											icon : "sap-icon://GoogleMaterial/visibility",
+										})
+                                    ]
+                                })
+                            ]
+                        }).addStyleClass("MarLeft10px MarAuto0px minwidth70px"),
+                        new sap.m.VBox( oViewScope.createId( sPrefix+"_Screenshot"), {
+                            //--------------------------------//
+                            //-- Draw the Data Boxes		--//
+                            //--------------------------------//
+                            items: [
+                                new sap.m.VBox({
+                                    items : [
+										new sap.m.Button ({
+											width: "100%",
+											icon : "sap-icon://GoogleMaterial/camera",
+										})
+                                    ]
+                                })
+                            ]
+                        }).addStyleClass("MarLeft10px MarAuto0px minwidth70px")
+                    ]
+                }).addStyleClass("minwidth170px minheight58px")
             ]
         }).addStyleClass("ListItem");
-
+		
 
 		//------------------------------------//
 		//-- 9.0 - RETURN THE RESULTS		--//

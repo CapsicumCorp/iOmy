@@ -293,7 +293,7 @@ sap.ui.controller("mjs.rooms.Room", {
                         ]
                     }).addStyleClass("MarLeft6px")
                 ]
-            }).addStyleClass("ConsistentMenuHeader");
+            }).addStyleClass("ConsistentMenuHeader BorderBottom");
 			
 			oVBox.addItem(oHeading);
 			
@@ -326,7 +326,7 @@ sap.ui.controller("mjs.rooms.Room", {
 				}
 			});
 			
-			oVBox.addStyleClass("MarTop3px");
+			oVBox.addStyleClass("");
             oVertBox.addItem(oVBox);
             
 		}); //-- END FOREACH LOOP --//
@@ -339,7 +339,7 @@ sap.ui.controller("mjs.rooms.Room", {
            //-- Add Grouping box to Panel --//
            backgroundDesign: "Transparent",
            content: [oVertBox]
-        }).addStyleClass("PanelNoPadding UserInputForm TableSideBorders");
+        }).addStyleClass("PanelNoPadding UserInputForm TableSideBorders MarTop3px BorderTop");
 
         thisView.byId("page").addContent( oPanel );
 		//-- Update the LastRoomId --//

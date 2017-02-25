@@ -76,8 +76,22 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 .sapMLnk {
 	white-space: normal;
+	font-family: "Roboto Condensed", sans-serif;
 }
 
+/* Rename to ElementCenterChild */
+.DeviceLabelMargin > div {
+	margin: auto 0px;
+}
+
+/* Device Overview Sizing */
+.minheight58px {
+	min-height:58px;
+}
+/* Room Overview Sizing */
+.minheight73px {
+	min-height:73px;
+}
 /*************************************************** 
 ** For aligning segemented buttons & Select Boxes **
 ** in the center of a list - See Thermostat Page  **
@@ -93,7 +107,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 .textaligncenter > div > div {
 	text-align: center;
 }
-
+/* To be removed as now deprecated */
 .testlabelcont {
 	min-width: 170px; 
 }

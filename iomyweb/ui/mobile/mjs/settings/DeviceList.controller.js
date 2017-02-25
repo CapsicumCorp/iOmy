@@ -240,7 +240,7 @@ sap.ui.controller("mjs.settings.DeviceList", {
                                             // Unlock the button
                                             this.setEnabled(true);
                                         }
-                                    }).addStyleClass("ButtonNoBorder DeviceButton IOMYButton TextSize16px TextLeft width100Percent")
+                                    }).addStyleClass("ButtonNoBorder DeviceButton IOMYButton TextSize16px TextLeft")
                                 ]
                             }).addStyleClass("width100Percent TextOverflowEllipsis"),
                             
@@ -300,7 +300,7 @@ sap.ui.controller("mjs.settings.DeviceList", {
                                     // Unlock the button
                                     this.setEnabled(true);
                                 }
-                            }).addStyleClass("ButtonNoBorder IOMYButton width100Percent ButtonIconGreen TextSize20px")
+                            }).addStyleClass("ButtonNoBorder IOMYButton ButtonIconGreen TextSize20px")
                         ).addStyleClass("FlexNoShrink minwidth70px");
                     }
                     

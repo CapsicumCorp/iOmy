@@ -255,9 +255,9 @@ $.extend(IOMy.devices.motionsensor,{
                         press : function () {
                             //IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
+                    }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
                 ]
-            }).addStyleClass("width80Percent BorderRight")
+            }).addStyleClass("BorderRight width80Percent DeviceLabelMargin")
         );
 
         aUIObjectItems.push(
@@ -272,22 +272,22 @@ $.extend(IOMy.devices.motionsensor,{
                         //--------------------------------//
 
                         items: [
-                            new sap.m.HBox({
+                            new sap.m.VBox({
                                 items : [
                                     //----------------------------------//
                                     // Last Motion
                                     //----------------------------------//
                                     new sap.m.Label({
                                         text : "Last Motion:"
-                                    }).addStyleClass("Font-RobotoCondensed"),
+                                    }).addStyleClass("FontRobotoCondensed"),
 
-                                    new sap.m.Text( oViewScope.createId( sPrefix+"_LastMotion" ),	{} ).addStyleClass("PadLeft5px Font-RobotoCondensed width110px")
+                                    new sap.m.Label( oViewScope.createId( sPrefix+"_LastMotion" ),	{} ).addStyleClass("FontRobotoCondensed")
                                 ]
                             })
                         ]
-                    }).addStyleClass("width110px PadLeft5px TextLeft")
-                ]
-            }).addStyleClass("minwidth180px width10Percent MarAuto0px")
+                        }).addStyleClass("MarLeft6px MarAuto0px")
+                    ]
+                }).addStyleClass("minwidth170px minheight58px")
         );
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
@@ -415,9 +415,9 @@ $.extend(IOMy.devices.motionsensor,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pMotionSensor", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
+                        }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
                     ]
-                }).addStyleClass("BorderRight width80Percent"),
+                }).addStyleClass("BorderRight width80Percent DeviceLabelMargin"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
@@ -430,7 +430,7 @@ $.extend(IOMy.devices.motionsensor,{
                             //--------------------------------//
 
                             items: [
-                                new sap.m.HBox({
+                                new sap.m.VBox({
                                     items : [
                                         //----------------------------------//
                                         // Last Motion
@@ -439,13 +439,13 @@ $.extend(IOMy.devices.motionsensor,{
                                             text : "Last Motion:"
                                         }).addStyleClass("Font-RobotoCondensed"),
                                         
-                                        new sap.m.Text( oViewScope.createId( sPrefix+"_LastMotion" ),	{} ).addStyleClass("PadLeft5px Font-RobotoCondensed width110px")
+                                        new sap.m.Label( oViewScope.createId( sPrefix+"_LastMotion" ),	{} ).addStyleClass("")
                                     ]
                                 })
                             ]
-                        }).addStyleClass("width110px PadLeft5px TextLeft")
+                        }).addStyleClass("MarLeft6px MarAuto0px")
                     ]
-                }).addStyleClass("width10Percent minwidth180px MarAuto0px")
+                }).addStyleClass("minwidth170px minheight58px")
             ]
         }).addStyleClass("ListItem");
 
