@@ -47,6 +47,12 @@ $.sap.require("IOMy.devices");
 $.sap.registerModulePath('IOMy.time', sModuleInitialBuildLocation+'util/time');
 $.sap.require("IOMy.time");
 
+$.sap.registerModulePath('IOMy.help', sModuleInitialBuildLocation+'util/help');
+$.sap.require("IOMy.help");
+
+$.sap.registerModulePath('IOMy.experimental', sModuleInitialBuildLocation+'util/experimental');
+$.sap.require("IOMy.experimental");
+
 //----------------------------------------//
 //-- 5.1.1 - LOAD DEVICE FILES  		--//
 //----------------------------------------//
@@ -70,6 +76,24 @@ $.sap.require("IOMy.devices.develco");
 
 $.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
 $.sap.require("IOMy.devices.weatherfeed");
+
+$.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
+$.sap.require("IOMy.devices.doorlock");
+
+$.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
+$.sap.require("IOMy.devices.windowsensor");
+
+$.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
+$.sap.require("IOMy.devices.bluetoothscale");
+
+$.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
+$.sap.require("IOMy.devices.bpm");
+
+$.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
+$.sap.require("IOMy.devices.garagedoor");
+
+$.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
+$.sap.require("IOMy.devices.thermostat");
 
 //----------------------------------------//
 //-- 5.1.2 - LOAD FUNCTION MODULES 		--//
@@ -1351,131 +1375,197 @@ var aPages = [
 		"Id":			"pLogin",
 		"Location":		"mjs.login.Login",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.login.Login\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.login.Login\" Page!\n",
+        
+        "HelpInfo":     "Before you can use the app, you need to enter your username and password to "
+						+ "view and manage your devices."
 	},
 	{
 		"Id":			"pForceSwitchUser",
 		"Location":		"mjs.login.ForceSwitchUser",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.login.ForceSwitchUser\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.login.ForceSwitchUser\" Page!\n",
+        
+        "HelpInfo":     "If at anytime you wish to switch from one user to the next, simply enter the "
+						+ "username and password. The current session will terminate once you switch users."
 	},
     // --- Premise Overview --- \\
     {
 		"Id":			"pPremiseOverview",
 		"Location":		"mjs.premise.Overview",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.premise.Overview\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.premise.Overview\" Page!\n",
+        
+        "HelpInfo":     "The Premise Overview features a combo box complete with "
+                        + "a list of premises that are available to the user. Below the premise combo box "
+                        + "is a list of rooms that are registered with the currently selected premise.\n\n"
+                        + "There is a button to the right of the name of the room that allows you to show "
+                        + "or hide its list of devices.\n\n Each device can be tapped to lead into the device "
+                        + "information page.\n\nThe action menu will allow you to edit the information and address "
+                        + "of the currently selected premise, and add a new room."
 	},
     // --- Device Overview --- \\
     {
 		"Id":			"pDeviceOverview",
 		"Location":		"mjs.devices.DeviceOverview",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.device.DeviceOverview\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.device.DeviceOverview\" Page!\n",
+        
+        "HelpInfo":     "This is the home page.\n\nHere is a list of all the devices that the current user "
+                        + "has access to, regardless of their location. Some of these can be switched on or off "
+                        + "depending on whether the current user has permission to do this."
 	},
     // --- Room Overview And Unassigned Devices --- \\
     {
 		"Id":			"pRoomsOverview",
 		"Location":		"mjs.rooms.Room",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.rooms.Room\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.rooms.Room\" Page!\n",
+        
+        "HelpInfo":     "This page lists all devices in the selected room and their current readings of "
+						+ "voltage, amps, kilowatts, and kilowatt/hour.\n\nYou can also switch these devices on "
+                        + "or off."
 	},
-    {
-		"Id":			"pRoomsUnassignedDevices",
-		"Location":		"mjs.rooms.UnassignedDevices",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.rooms.UnassignedDevices\" Page!\n"
-	},
+//    {
+//		"Id":			"pRoomsUnassignedDevices",
+//		"Location":		"mjs.rooms.UnassignedDevices",
+//		"Type":			"JS",
+//		"ErrMesg":		"Critical Error: Couldn't load \"mjs.rooms.UnassignedDevices\" Page!\n"
+//	},
     // --- Settings Views --- \\
     {
 		"Id":			"pSettingsDeviceList",
 		"Location":		"mjs.settings.DeviceList",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.DeviceList\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.DeviceList\" Page!\n",
+        
+        "HelpInfo":     "Here is a list of links and their objects. Tap a name to view or edit "
+						+ "the link or object details. Each link has a list of any objects that may "
+                        + "be connected to it. These lists are expandable.\n\nThere are two entries in "
+                        + "the action menu, one to add a link, and the other to add an item to a link."
 	},
     {
 		"Id":			"pSettingsEditLink",
 		"Location":		"mjs.settings.devices.EditLink",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.devices.EditLink\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.devices.EditLink\" Page!\n",
+        
+        "HelpInfo":     "You can change the name of a link and which room the link is located on this page."
 	},
     {
 		"Id":			"pSettingsEditThing",
 		"Location":		"mjs.settings.devices.EditThing",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.devices.EditThing\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.devices.EditThing\" Page!\n",
+        
+        "HelpInfo":     "You can change the name of an item in this page."
 	},
     {
 		"Id":			"pSettingsLinkAdd",
 		"Location":		"mjs.settings.links.LinkAdd",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.links.LinkAdd\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.links.LinkAdd\" Page!\n",
+        
+        "HelpInfo":     "Allows you to add a link and assign it a room. Different link types are "
+                        + "supported and each one will have its own specific form."
 	},
     {
 		"Id":			"pSettingsThingAdd",
 		"Location":		"mjs.settings.things.ItemAdd",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.things.ItemAdd\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.things.ItemAdd\" Page!\n",
+        
+        "HelpInfo":     "Allows you to add items of certain types to a link. Note that some items like "
+                        + "Philips Hue lamps and devices attached to Zigbee plugs will have already "
+                        + "been added to their links as soon as the link was created."
 	},
     {
 		"Id":			"pSettingsAddUser",
 		"Location":		"mjs.settings.user.AddUser",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.user.AddUser\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.user.AddUser\" Page!\n",
+        
+        "HelpInfo":     "This is where you can create new users if you have permission to do so. "
+                        + "Required fields are the Display Name, username, and Line 1 of the Street Address. "
+                        + "User information, address, and credentials are stored in the database."
 	},
     {
 		"Id":			"pSettingsUserInfo",
 		"Location":		"mjs.settings.user.EditUserInformation",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.user.EditUserInformation\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.user.EditUserInformation\" Page!\n",
+        
+        "HelpInfo":     "This page is where you can change your name(s) and your personal and contact details."
 	},
     {
 		"Id":			"pSettingsUserPassword",
 		"Location":		"mjs.settings.user.UserEditPassword",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.user.UserEditPassword\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.user.UserEditPassword\" Page!\n",
+        
+        "HelpInfo":     "Enter your currrent password to change your password. Enter the new "
+                        + "password twice to confirm."
 	},
     {
 		"Id":			"pSettingsUserAddress",
 		"Location":		"mjs.settings.user.EditUserAddress",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.user.EditUserAddress\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.user.EditUserAddress\" Page!\n",
+        
+        "HelpInfo":     "This page allows you to change your address."
 	},
     {
 		"Id":			"pSettingsPremiseList",
 		"Location":		"mjs.settings.PremiseList",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.PremiseList\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.PremiseList\" Page!\n",
+        
+        "HelpInfo":     "This page is a list of premises that are available to the user. Any hubs that "
+                        + "the current user has access to will be displayed under their own premise once its "
+                        + "list is expanded."
 	},
     {
 		"Id":			"pSettingsPremiseInfo",
 		"Location":		"mjs.settings.premise.PremiseEditInfo",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.premise.PremiseEditInfo\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.premise.PremiseEditInfo\" Page!\n",
+        
+        "HelpInfo":     "The user can change the premise name and its description. If the current user "
+                        + "owns the premise, a button to change the permissions will be available."
 	},
     {
 		"Id":			"pSettingsPremiseHub",
 		"Location":		"mjs.settings.premise.PremiseEditHub",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.premise.PremiseEditHub\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.premise.PremiseEditHub\" Page!\n",
+        
+        "HelpInfo":     "The user can change the name of the selected hub on this page."
 	},
     {
 		"Id":			"pSettingsPremiseAddress",
 		"Location":		"mjs.settings.premise.PremiseEditAddress",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.premise.PremiseEditAddress\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.premise.PremiseEditAddress\" Page!\n",
+        
+        "HelpInfo":     "This page allows you to change the location address of the selected premise."
 	},
     {
 		"Id":			"pSettingsRoomEdit",
 		"Location":		"mjs.settings.rooms.RoomEdit",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.rooms.RoomEdit\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.rooms.RoomEdit\" Page!\n",
+        
+        "HelpInfo":     "Use this page to modify details about the selected room, i.e. name (required), "
+                        + "description (optional), and the type of room it is."
 	},
     {
 		"Id":			"pSettingsRoomAdd",
 		"Location":		"mjs.settings.rooms.RoomAdd",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.rooms.RoomAdd\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.rooms.RoomAdd\" Page!\n",
+        
+        "HelpInfo":     "Use this page to create a room with a name (required), description (optional), "
+                        + "what floor it belongs to, and the type of room it is."
 	},
     {
 		"Id":			"pSettingsRoomPermissions",
@@ -1493,19 +1583,29 @@ var aPages = [
 		"Id":			"pDeviceData",
 		"Location":		"mjs.premise.DeviceData",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.premise.DeviceData\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.premise.DeviceData\" Page!\n",
+        
+        "HelpInfo":     "This page lists the current state (on/off) all the current readings of voltage, amps, "
+						+ "kilowatts, and kilowatt/hour from the current device."
 	},
     {
 		"Id":			"pOnvif",
 		"Location":		"mjs.devices.OnvifCamera",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.OnvifCamera\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.OnvifCamera\" Page!\n",
+        
+        "HelpInfo":     "Displays the camera stream thumbnail if the camera is on. If the camera has PTZ support, "
+                        + "there are controls around the page."
 	},
     {
 		"Id":			"pPhilipsHue",
 		"Location":		"mjs.devices.PhilipsHue",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.PhilipsHue\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.PhilipsHue\" Page!\n",
+        
+        "HelpInfo":     "This page shows the current the colour (hue), saturation, and brightness of the "
+						+ "currently selected device. Each has its own slide to easily change the levels of "
+                        + "each setting. There is also a switch to turn it either on or off."
 	},
     { // TODO: Change the file containing this to './mjs/devices/OpenWeatherMap'.
 		"Id":			"pThermostat",
@@ -1519,13 +1619,46 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.MotionSensor\" Page!\n"
 	},
-	{ 
-		"Id":			"pTemplate",
-		"Location":		"mjs.staging.Template",
+    { 
+		"Id":			"pDeviceDoorLock",
+		"Location":		"mjs.devices.DoorLock",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Template\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.DoorLock\" Page!\n"
 	},
 	{ 
+		"Id":			"pDeviceWindowSensor",
+		"Location":		"mjs.devices.WindowSensor",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.WindowSensor\" Page!\n"
+	},
+	{ 
+		"Id":			"pDeviceTestThermostat",
+		"Location":		"mjs.devices.TestThermostat",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.TestThermostat\" Page!\n"
+	},
+	{
+		"Id":			"pDeviceScales",
+		"Location":		"mjs.devices.Scales",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Scales\" Page!\n"
+	},
+	{
+		"Id":			"pDeviceQuadcopter",
+		"Location":		"mjs.devices.Quadcopter",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Quadcopter\" Page!\n"
+	},
+	{
+		"Id":			"pDeviceBPM",
+		"Location":		"mjs.devices.BPM",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.BPM\" Page!\n"
+	},
+    //--------------------------------------------------------------------//
+    // Staging
+    //--------------------------------------------------------------------//
+	{
 		"Id":			"pMotionTemp",
 		"Location":		"mjs.staging.MotionTemp",
 		"Type":			"JS",
@@ -1560,7 +1693,44 @@ var aPages = [
 		"Location":		"mjs.staging.OverviewRedesign",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.OverviewRedesign\" Page!\n"
-	}
+	},
+	{
+		"Id":			"pScales",
+		"Location":		"mjs.staging.Scales",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Scales\" Page!\n"
+	},
+	{
+		"Id":			"pQuadcopter",
+		"Location":		"mjs.staging.Quadcopter",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Quadcopter\" Page!\n"
+	},
+	{
+		"Id":			"pBPM",
+		"Location":		"mjs.staging.BPM",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.BPM\" Page!\n"
+	},
+	{
+		"Id":			"pGaragedoor",
+		"Location":		"mjs.staging.Garagedoor",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Garagedoor\" Page!\n"
+	},
+    {
+		"Id":			"pStagingRoomPermissions",
+		"Location":		"mjs.staging.permissions.RoomPermissions",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.permissions.RoomPermissions\" Page!\n"
+	},
+    {
+		"Id":			"pStagingPremisePermissions",
+		"Location":		"mjs.staging.permissions.PremisePermissions",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.permissions.PremisePermissions\" Page!\n"
+	},
+	
 ];
 
 /**
@@ -1591,14 +1761,27 @@ $.each( aPages, function (iIndex, aPageData) {
 			
 		}
 		
-		oApp.addPage(
+		//------------------------------------//
+        // Add the help information to memory
+        //------------------------------------//
+        if (aPageData.HelpInfo !== undefined) {
+            IOMy.help.PageInformation[aPageData.Id] = aPageData.HelpInfo;
+        } else {
+            // Pages with no help information will show the ID indicating that
+            // the page needs to show help information.
+            // TODO: Help information must be provided before the activity can
+            // be created.
+            IOMy.help.PageInformation[aPageData.Id] = aPageData.Id;
+        }
+		
+        oApp.addPage(
 			new sap.ui.view({
 				id:			aPageData.Id,
 				viewName:	aPageData.Location,
 				type:		sType
 			})
 		);
-		
+
 	} catch(ePLogin) {
 		console.log( sErMesg+ePLogin.message );
 	}

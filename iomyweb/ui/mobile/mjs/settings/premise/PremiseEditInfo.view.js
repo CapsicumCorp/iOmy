@@ -44,17 +44,26 @@ sap.ui.jsview("mjs.settings.premise.PremiseEditInfo", {
 	****************************************************************************************************/
 	createContent : function(oController) {
         var me = this;
-        
-		var oPageNavigationHeader = new sap.m.VBox({
-			items: [ IOMy.widgets.getNavigationalSubHeader("EDIT PREMISE", "sap-icon://GoogleMaterial/home", me) ]
-		});
+        this.destroyContent();
 		
-		return new sap.m.Page(this.createId("page"), {
-			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			footer : IOMy.widgets.getAppFooter(),
-			content: [oPageNavigationHeader]
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+		var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/home",
+            title : "Edit Premise"
+        });	
 		
+		
+//		var oPageNavigationHeader = new sap.m.VBox({
+//			items: [ IOMy.widgets.getNavigationalSubHeader("EDIT PREMISE", "sap-icon://GoogleMaterial/home", me) ]
+//		});		
+//		return new sap.m.Page(this.createId("page"), {
+//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			footer : IOMy.widgets.getAppFooter(),
+//			content: [oPageNavigationHeader]
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
+		
+		return oPage;
 	}
 
 });

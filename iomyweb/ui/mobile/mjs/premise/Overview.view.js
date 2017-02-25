@@ -45,14 +45,21 @@ sap.ui.jsview("mjs.premise.Overview", {
 	createContent : function(oController) {
 		var me = this;
 		
-		var oPage = new sap.m.Page(me.createId("page"),{
-			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			footer : IOMy.widgets.getAppFooter(),
-			content : [
+		var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/home",
+            title : "Premises"
+        });
+		
+//		var oPage = new sap.m.Page(me.createId("page"),{
+//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			footer : IOMy.widgets.getAppFooter(),
+//			content : [
 				//-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("PREMISES", "sap-icon://GoogleMaterial/home", me),
-			]
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+//				IOMy.widgets.getNavigationalSubHeader("PREMISES", "sap-icon://GoogleMaterial/home", me),
+//			]
+//		}).addStyleClass("height100Percent width100Percent MainBackground MasterPage");
 		
 		return oPage;
 	}

@@ -31,6 +31,8 @@ $.extend(IOMy.devices.onvif,{
     aProfiles               : [],
     sProfileLookupErrors    : [],
     
+    proceedToCreateItem     : true,
+    
     /**
      * These IDs are used in the elements that are defined in this module. These
      * elements are used in forms that handle information about onvif devices.
@@ -365,7 +367,7 @@ $.extend(IOMy.devices.onvif,{
                         press : function () {
                             IOMy.common.NavigationChangePage("pOnvif", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                 ]
             }).addStyleClass("width100Percent")
         );
@@ -425,7 +427,7 @@ $.extend(IOMy.devices.onvif,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pOnvif", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                     ]
                 }).addStyleClass("PadRight3px width100Percent minwidth170px"),
             ]

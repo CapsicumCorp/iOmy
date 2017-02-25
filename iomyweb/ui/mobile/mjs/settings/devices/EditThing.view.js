@@ -44,14 +44,20 @@ sap.ui.jsview("mjs.settings.devices.EditThing", {
     createContent : function(oController) {
     	var me = this;
     	this.destroyContent();
-    	
-    	var oPage = new sap.m.Page(this.createId("page"), {
-    		customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			content: [IOMy.widgets.getNavigationalSubHeader("EDIT ITEM", "sap-icon://GoogleMaterial/settings", me)],
-			footer : IOMy.widgets.getAppFooter()
-		}).addStyleClass("height100Percent width100Percent MainBackground");
 		
+		var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/settings",
+            title : "Edit Item"
+        });	
 		
+//    	var oPage = new sap.m.Page(this.createId("page"), {
+//    		customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			content: [IOMy.widgets.getNavigationalSubHeader("EDIT ITEM", "sap-icon://GoogleMaterial/settings", me)],
+//			footer : IOMy.widgets.getAppFooter()
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
+	
 		return oPage;
     }
     

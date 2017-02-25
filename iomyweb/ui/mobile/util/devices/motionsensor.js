@@ -37,7 +37,7 @@ $.extend(IOMy.devices.motionsensor,{
     },
     
     // -- INTEGERS
-    iODataFieldsToFetch         : 4,
+    iODataFieldsToFetch         : 2,
     iODataFieldsFailedToFetch   : 0,
     bWaitingToLoadAPI           : false,
     bLoadingFieldsFromAPI       : false,
@@ -49,19 +49,101 @@ $.extend(IOMy.devices.motionsensor,{
     RSBitwiseStatus : 3909,
     RSTemperature   : 1701,
     
-    CallAPI : function (iThingId) {
+    CallAPI : function (iThingId, oTamperField, oLastMotionField) {
         //--------------------------------------------------------------------//
         // Declare variables and import modules
         //--------------------------------------------------------------------//
         var me = this;
         var php = IOMy.apiphp;
+        var sUrl = php.APILocation("motionsensor");
+        var mData = {
+            "Mode" : "GetMotionData",
+            "ThingId" : iThingId
+        };
         
         //--------------------------------------------------------------------//
-        // Send the AJAX request
+        // Indicate that the API is being loaded and send the AJAX request
         //--------------------------------------------------------------------//
+        me.bWaitingToLoadAPI        = false;
+        me.bLoadingFieldsFromAPI    = true;
+        
+        php.AjaxRequest({
+            "url" : sUrl,
+            "data" : mData,
+            
+            "onSuccess" : function (response, data) {
+                // Check the error condition.
+                if (data.Error === false) {
+                    //--------------------------------------------------------//
+                    // If no error has been reported, get the data and display
+                    // it.
+                    //--------------------------------------------------------//
+                    var mResponseData = data.Data;
+                    
+                    var iUTS    = mResponseData.MostRecentMotion;
+                    var bTamper = mResponseData.CurrentStatus.Tamper;
+                    
+                    if (oLastMotionField !== undefined && oLastMotionField !== null) {
+                        oLastMotionField.setText(
+                            IOMy.functions.getLengthOfTimePassed({
+                                "UTS" : iUTS
+                            })
+                        );
+                    }
+            
+                    if (oTamperField !== undefined && oTamperField !== null) {
+                        oTamperField.setText(bTamper === false ? "Secure" : "Not Secure");
+
+                        //--------------------------------------------------------//
+                        // If the device has detected possible tampering, then set
+                        // the text colour to red.
+                        //--------------------------------------------------------//
+                        if (bTamper === true) {
+                            oTamperField.addStyleClass("Text_red_13");
+                        }
+                    }
+                }
+                
+                // Conclude the request callback
+                this.onComplete();
+            },
+            
+            "onFail" : function (response) {
+                // Log errors
+                jQuery.sap.log.error("There was an error fetching information about the tamper status and how long since the last motion was detected:\n\n" + JSON.stringify(response));
+                
+                // Conclude the request callback
+                this.onComplete();
+            },
+            
+            "onComplete" : function () {
+                //------------------------------------------------------------//
+                // Decrement the OData Field count
+                //------------------------------------------------------------//
+//                console.log("====================================================================");
+//                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                jQuery.sap.log.debug("====================================================================");
+                jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                
+                me.bLoadingFieldsFromAPI = false;
+                
+//                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                
+                //------------------------------------------------------------//
+                // If this is final OData request and the API has finished its
+                // call, reset the loading motion sensor OData fields flag, and
+                // reset the fields to fetch back to the default number.
+                //------------------------------------------------------------//
+                if (me.iODataFieldsToFetch === 0 && me.bWaitingToLoadAPI === false && me.bLoadingFieldsFromAPI === false) {
+                    me.bLoadingMotionSensorFields = false;
+                    me.iODataFieldsToFetch = 2;
+                }
+            }
+        });
     },
     
-    FetchField : function (iIOId, oTextWidget, iRSType) {
+    FetchField : function (iIOId, oTextWidget) {
         //--------------------------------------------------------------------//
         // Declare variables and import modules
         //--------------------------------------------------------------------//
@@ -72,12 +154,12 @@ $.extend(IOMy.devices.motionsensor,{
         // Send the AJAX request
         //--------------------------------------------------------------------//
         odata.AjaxRequest({
-            Url             : odata.ODataLocation("dataint"),
-            Columns         : ["CALCEDVALUE", "UTS", "UOM_PK", "UOM_NAME"],
-            WhereClause     : ["IO_PK eq "+iIOId],
-            OrderByClause   : [],
+            "Url"             : odata.ODataLocation("dataint"),
+            "Columns"         : ["CALCEDVALUE", "UTS", "UOM_PK", "UOM_NAME"],
+            "WhereClause"     : ["IO_PK eq "+iIOId],
+            "OrderByClause"   : [],
             
-            onSuccess : function (responseType, data) {
+            "onSuccess" : function (responseType, data) {
                 //------------------------------------------------------------//
                 // Output data to console.
                 //------------------------------------------------------------//
@@ -85,19 +167,13 @@ $.extend(IOMy.devices.motionsensor,{
                 //------------------------------------------------------------//
                 // Set the text in the relevant field on the motion sensor page.
                 //------------------------------------------------------------//
-                if (iRSType == me.RSMisc) { // TODO: Once the API is written, remove this condition.
-                    oTextWidget.setText("12h 45m 22s");
-                } else if (iRSType == me.RSBitwiseStatus) { // TODO: Once the API is written, remove this condition.
-                    oTextWidget.setText("Secure");
-                } else {// TODO: Keep this!
-                    oTextWidget.setText(data.CALCEDVALUE + data.UOM_NAME);
-                }
+                oTextWidget.setText(data.CALCEDVALUE + data.UOM_NAME);
                 
                 // Conclude the request callback
                 this.onComplete();
             },
             
-            onFail : function (response) {
+            "onFail" : function (response) {
                 me.iODataFieldsFailedToFetch++;
                 
                 // Log errors
@@ -107,14 +183,14 @@ $.extend(IOMy.devices.motionsensor,{
                 this.onComplete();
             },
             
-            onComplete : function () {
+            "onComplete" : function () {
                 //------------------------------------------------------------//
                 // Decrement the OData Field count
                 //------------------------------------------------------------//
-                console.log("====================================================================");
-                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
-                //jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
-                //jQuery.sap.log.debug("====================================================================");
+//                console.log("====================================================================");
+//                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                jQuery.sap.log.debug("====================================================================");
                 
                 if (me.iODataFieldsToFetch > 0) {
                     me.iODataFieldsToFetch--;
@@ -123,8 +199,8 @@ $.extend(IOMy.devices.motionsensor,{
                     jQuery.sap.log.error("Something is wrong! The remaining OData field count for the current motion sensor is already 0!");
                 }
                 
-                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
-                //jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+//                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
+                jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
                 
                 //------------------------------------------------------------//
                 // If this is final OData request and the API has finished its
@@ -133,7 +209,7 @@ $.extend(IOMy.devices.motionsensor,{
                 //------------------------------------------------------------//
                 if (me.iODataFieldsToFetch === 0 && me.bWaitingToLoadAPI === false && me.bLoadingFieldsFromAPI === false) {
                     me.bLoadingMotionSensorFields = false;
-                    me.iODataFieldsToFetch = 4;
+                    me.iODataFieldsToFetch = 2;
                 }
             }
             
@@ -179,32 +255,40 @@ $.extend(IOMy.devices.motionsensor,{
                         press : function () {
                             //IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                 ]
-            }).addStyleClass("minwidth70px width70Percent")
+            }).addStyleClass("width80Percent BorderRight")
         );
 
-//        aUIObjectItems.push(
-//            //------------------------------------//
-//            //-- 2nd is the Device Data			--//
-//            //------------------------------------//
-//            new sap.m.VBox({
-//                items : [
-//                    new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
-//                        //--------------------------------//
-//                        //-- Draw the Data Boxes		--//
-//                        //--------------------------------//
-//
-//                        items: [
-//                            new sap.m.Text( oViewScope.createId( sPrefix+"_Volt" ),	{} ).addStyleClass("Font-RobotoCondensed"),
-//                            new sap.m.Text( oViewScope.createId( sPrefix+"_Amp" ),	{} ).addStyleClass("Font-RobotoCondensed"),
-//                            new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("Font-RobotoCondensed"),
-//                            new sap.m.Text( oViewScope.createId( sPrefix+"_kWh" ),	{} ).addStyleClass("Font-RobotoCondensed")
-//                        ]
-//                    }).addStyleClass("width110px PadLeft5px MarBottom3px MarRight10px TextLeft")
-//                ]
-//            }).addStyleClass("minwidth100px width10Percent")
-//        );
+        aUIObjectItems.push(
+            //------------------------------------//
+            //-- 2nd is the Device Data			--//
+            //------------------------------------//
+            new sap.m.VBox({
+                items : [
+                    new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
+                        //--------------------------------//
+                        //-- Draw the Data Boxes		--//
+                        //--------------------------------//
+
+                        items: [
+                            new sap.m.HBox({
+                                items : [
+                                    //----------------------------------//
+                                    // Last Motion
+                                    //----------------------------------//
+                                    new sap.m.Label({
+                                        text : "Last Motion:"
+                                    }).addStyleClass("Font-RobotoCondensed"),
+
+                                    new sap.m.Text( oViewScope.createId( sPrefix+"_LastMotion" ),	{} ).addStyleClass("PadLeft5px Font-RobotoCondensed width110px")
+                                ]
+                            })
+                        ]
+                    }).addStyleClass("width110px PadLeft5px TextLeft")
+                ]
+            }).addStyleClass("minwidth180px width10Percent MarAuto0px")
+        );
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: aUIObjectItems
@@ -331,26 +415,37 @@ $.extend(IOMy.devices.motionsensor,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pMotionSensor", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                     ]
-                }).addStyleClass("PadRight3px width100Percent minwidth170px"),
+                }).addStyleClass("BorderRight width80Percent"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
                 //------------------------------------//
-//                new sap.m.VBox({
-//                    items : [
-//                        new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
-//                            //--------------------------------//
-//                            //-- Draw the Data Boxes		--//
-//                            //--------------------------------//
-//
-//                            items: [
-//                                //new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("DeviceOverview-ItemLabel Font-RobotoCondensed")
-//                            ]
-//                        }).addStyleClass("PadLeft5px MarBottom3px MarRight10px TextLeft")
-//                    ]
-//                }).addStyleClass("width10Percent minwidth70px")
+                new sap.m.VBox({
+                    items : [
+                        new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
+                            //--------------------------------//
+                            //-- Draw the Data Boxes		--//
+                            //--------------------------------//
+
+                            items: [
+                                new sap.m.HBox({
+                                    items : [
+                                        //----------------------------------//
+                                        // Last Motion
+                                        //----------------------------------//
+                                        new sap.m.Label({
+                                            text : "Last Motion:"
+                                        }).addStyleClass("Font-RobotoCondensed"),
+                                        
+                                        new sap.m.Text( oViewScope.createId( sPrefix+"_LastMotion" ),	{} ).addStyleClass("PadLeft5px Font-RobotoCondensed width110px")
+                                    ]
+                                })
+                            ]
+                        }).addStyleClass("width110px PadLeft5px TextLeft")
+                    ]
+                }).addStyleClass("width10Percent minwidth180px MarAuto0px")
             ]
         }).addStyleClass("ListItem");
 
@@ -488,10 +583,10 @@ $.extend(IOMy.devices.motionsensor,{
 		//-- 2.0 - Fetch TASKS				--//
 		//------------------------------------//
 		if( aDeviceData.IOs!==undefined ) {
-            
+            this.CallAPI(aDeviceData.DeviceId, null, oViewScope.byId( Prefix+"_LastMotion" ));
         } else {
             //-- TODO: Write a error message --//
-            jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
+            jQuery.sap.log.error("Device "+aDeviceData.DeviceName+" has no IOs");
         }
 		return aTasks;
 	},

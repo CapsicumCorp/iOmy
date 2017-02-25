@@ -25,6 +25,8 @@ m4/
 # other files
 *.kdev4
 *~
+/scripts
+/tmp
 
 # Archive files
 *.gz
@@ -61,4 +63,5 @@ $RECYCLE.BIN/
 
 # Mac OS files
 .DS_Store
+
 

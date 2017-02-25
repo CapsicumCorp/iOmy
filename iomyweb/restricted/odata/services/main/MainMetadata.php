@@ -29,18 +29,19 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 //-- 3.3   - Premise Locations                  --//
 //-- 3.4   - Users Hubs                         --//
 //-- 3.5   - Users Rooms                        --//
-//-- 3.6   - Users IO                           --//
-//-- 3.7   - Users Thing                        --//
-//-- 3.8   - Users Sensors                      --//
-//-- 3.9   - Data TinyInt                       --//
-//-- 3.10  - Data Int                           --//
-//-- 3.11  - Data BigInt                        --//
-//-- 3.12  - Data Float                         --//
-//-- 3.13  - Data TinyString                    --//
-//-- 3.14  - Data ShortString                   --//
-//-- 3.15  - Data Medstring                     --//
-//-- 3.16  - Users Premise Log                  --//
-//-- 3.17  - Users Gateways                     --//
+//-- 3.6   - Users Premise Rooms                --//
+//-- 3.7   - Users IO                           --//
+//-- 3.8   - Users Thing                        --//
+//-- 3.9   - Users Sensors                      --//
+//-- 3.10  - Data TinyInt                       --//
+//-- 3.11  - Data Int                           --//
+//-- 3.12  - Data BigInt                        --//
+//-- 3.13  - Data Float                         --//
+//-- 3.14  - Data TinyString                    --//
+//-- 3.15  - Data ShortString                   --//
+//-- 3.16  - Data Medstring                     --//
+//-- 3.17  - Users Premise Log                  --//
+//-- 3.18  - Users Gateways                     --//
 //-- 3.101 - PREMISETYPES                       --//
 //-- 3.102 - PREMISEBUILDINGTYPES               --//
 //-- 3.103 - PREMISEOCCUPANTS                   --//
@@ -69,18 +70,19 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 //-- 4.3   - Premise Locations                  --//
 //-- 4.4   - Users Units                        --//
 //-- 4.5   - Users Rooms                        --//
-//-- 4.6   - Users IO                           --//
-//-- 4.7   - Users Thing                        --//
-//-- 4.8   - Users Sensors                      --//
-//-- 4.9   - Data TinyInt                       --//
-//-- 4.10  - Data Int                           --//
-//-- 4.11  - Data BigInt                        --//
-//-- 4.12  - Data Float                         --//
-//-- 4.13  - Data TinyString                    --//
-//-- 4.14 -  Data ShortString                   --//
-//-- 4.15  - Data Medstring                     --//
-//-- 4.16  - Users Premise Log                  --//
-//-- 4.17  - Users Gateways                     --//
+//-- 4.6   - Users Premise Rooms                --//
+//-- 4.7   - Users IO                           --//
+//-- 4.8   - Users Thing                        --//
+//-- 4.9   - Users Sensors                      --//
+//-- 4.10  - Data TinyInt                       --//
+//-- 4.11  - Data Int                           --//
+//-- 4.12  - Data BigInt                        --//
+//-- 4.13  - Data Float                         --//
+//-- 4.14  - Data TinyString                    --//
+//-- 4.15 -  Data ShortString                   --//
+//-- 4.16  - Data Medstring                     --//
+//-- 4.17  - Users Premise Log                  --//
+//-- 4.18  - Users Gateways                     --//
 //-- 4.101 - PREMISETYPES                       --//
 //-- 4.102 - PREMISEBUILDINGTYPES               --//
 //-- 4.103 - PREMISEOCCUPANTS                   --//
@@ -274,7 +276,31 @@ class VR_USERSROOMS{
 }
 
 /**
- * 3.6 - VR_USERSLINK entity type.
+ * 3.6 - VR_USERSPREMISEROOMS entity type.
+ */
+class VR_USERSPREMISEROOMS{
+	public $USERS_PK;
+	//public $USERS_USERNAME;
+	public $PERMPREMISE_OWNER;
+	public $PERMPREMISE_WRITE;
+	public $PERMPREMISE_STATETOGGLE;
+	public $PERMPREMISE_READ;
+	public $PERMPREMISE_ROOMADMIN;
+	//public $ROOMS_PREMISE_FK;
+	public $PREMISE_PK;
+	public $PREMISE_NAME;
+	public $PREMISE_DESCRIPTION;
+	public $ROOMS_PK;
+	public $ROOMS_NAME;
+	public $ROOMS_FLOOR;
+	public $ROOMS_DESC;
+	public $ROOMTYPE_PK;
+	public $ROOMTYPE_NAME;
+	public $ROOMTYPE_OUTDOORS;
+}
+
+/**
+ * 3.7 - VR_USERSLINK entity type.
  */
 
 class VR_USERSLINK{
@@ -324,7 +350,7 @@ class VR_USERSLINK{
 }
 
 /**
- * 3.7 - VR_USERSTHING entity type.
+ * 3.8 - VR_USERSTHING entity type.
  */
 class VR_USERSTHING{
 	public $USERS_PK;
@@ -369,7 +395,7 @@ class VR_USERSTHING{
 
 
 /**
- * 3.8 - VR_USERSIO entity type.
+ * 3.9 - VR_USERSIO entity type.
  */
 class VR_USERSIO{
 	public $USERS_PK;
@@ -447,7 +473,7 @@ class VR_USERSIO{
 
 
 /**
- * 3.9 - VR_DATATINYINT entity type.
+ * 3.10 - VR_DATATINYINT entity type.
  */
 class VR_DATATINYINT{
 	public $CALCEDVALUE;
@@ -525,7 +551,7 @@ class VR_DATATINYINT{
 }
 
 /**
- * 3.10 - VR_DATAINT entity type.
+ * 3.11 - VR_DATAINT entity type.
  */
 class VR_DATAINT{
 	public $CALCEDVALUE;
@@ -603,7 +629,7 @@ class VR_DATAINT{
 }
 
 /**
- * 3.11 - VR_DATABIGINT entity type.
+ * 3.12 - VR_DATABIGINT entity type.
  */
 class VR_DATABIGINT{
 	public $CALCEDVALUE;
@@ -681,7 +707,7 @@ class VR_DATABIGINT{
 }
 
 /**
- * 3.12 - VR_DATAFLOAT entity type.
+ * 3.13 - VR_DATAFLOAT entity type.
  */
 class VR_DATAFLOAT{
 	public $CALCEDVALUE;
@@ -760,7 +786,7 @@ class VR_DATAFLOAT{
 }
 
 /**
- * 3.13 - VR_DATATINYSTRING entity type.
+ * 3.14 - VR_DATATINYSTRING entity type.
  */
 class VR_DATATINYSTRING{
 	public $CALCEDVALUE;
@@ -838,7 +864,7 @@ class VR_DATATINYSTRING{
 }
 
 /**
- * 3.14 - VR_DATASHORTSTRING entity type.
+ * 3.15 - VR_DATASHORTSTRING entity type.
  */
 class VR_DATASHORTSTRING{
 	public $CALCEDVALUE;
@@ -916,7 +942,7 @@ class VR_DATASHORTSTRING{
 }
 
 /**
- * 3.15 - VR_DATAMEDSTRING entity type.
+ * 3.16 - VR_DATAMEDSTRING entity type.
  */
 class VR_DATAMEDSTRING{
 	public $CALCEDVALUE;
@@ -994,7 +1020,7 @@ class VR_DATAMEDSTRING{
 }
 
 /**
- * 3.16 - VR_USERSPREMISELOG entity type.
+ * 3.17 - VR_USERSPREMISELOG entity type.
  */
 class VR_USERSPREMISELOG{
 	public $PERMPREMISE_READ;
@@ -1013,7 +1039,7 @@ class VR_USERSPREMISELOG{
 }
 
 /**
- * 3.17 - VR_USERSCOMM entity type.
+ * 3.18 - VR_USERSCOMM entity type.
  */
 class VR_USERSCOMM{
 	public $USERS_PK;
@@ -1453,9 +1479,35 @@ class CreateMainMetadata
 		$metadata->addPrimitiveProperty(        $VR_USERSROOMSEntityType,    'ROOMTYPE_OUTDOORS',           EdmPrimitiveType::INT16         );
 		
 		$VR_USERSROOMSsResourceSet = $metadata->addResourceSet( 'VR_USERSROOMS', $VR_USERSROOMSEntityType );
+        
+        //------------------------------------------------------------//
+		//-- 4.6 - USER PREMISE ROOMS                               --//
+		//------------------------------------------------------------//
+		//Register the entity (resource) type 'VR_USERSPREMISEROOMS'
+		$VR_USERSPREMISEROOMSEntityType = $metadata->addEntityType(new ReflectionClass('VR_USERSPREMISEROOMS'),    'VR_USERSPREMISEROOMS',    'Main');
+		$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'USERS_PK',                    EdmPrimitiveType::INT64         );
+		//$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'USERS_USERNAME',              EdmPrimitiveType::CHARARRAY     );
+		$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'PERMPREMISE_OWNER',           EdmPrimitiveType::INT16         );
+		$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'PERMPREMISE_WRITE',           EdmPrimitiveType::INT16         );
+		$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'PERMPREMISE_STATETOGGLE',     EdmPrimitiveType::INT16         );
+		$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'PERMPREMISE_READ',        EdmPrimitiveType::INT16         );
+		$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'PERMPREMISE_ROOMADMIN',       EdmPrimitiveType::INT16         );
+		$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'PREMISE_PK',                  EdmPrimitiveType::INT64         );
+		$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'PREMISE_NAME',                EdmPrimitiveType::CHARARRAY     );
+		$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'PREMISE_DESCRIPTION',         EdmPrimitiveType::INT64         );
+		$metadata->addKeyProperty(              $VR_USERSPREMISEROOMSEntityType,    'ROOMS_PK',                    EdmPrimitiveType::INT64         );
+		//$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'ROOMS_PREMISE_FK',            EdmPrimitiveType::INT64         );
+		$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'ROOMS_NAME',                  EdmPrimitiveType::CHARARRAY     );
+		$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'ROOMS_FLOOR',                 EdmPrimitiveType::INT32         );
+		$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'ROOMS_DESC',                  EdmPrimitiveType::CHARARRAY     );
+		$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'ROOMTYPE_PK',                 EdmPrimitiveType::INT32         );
+		$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'ROOMTYPE_NAME',               EdmPrimitiveType::CHARARRAY     );
+		$metadata->addPrimitiveProperty(        $VR_USERSPREMISEROOMSEntityType,    'ROOMTYPE_OUTDOORS',           EdmPrimitiveType::INT16         );
+		
+		$VR_USERSPREMISEROOMSsResourceSet = $metadata->addResourceSet( 'VR_USERSPREMISEROOMS', $VR_USERSPREMISEROOMSEntityType );
 		
 		//------------------------------------------------------------//
-		//-- 4.6 - USER LINK                                        --//
+		//-- 4.7 - USER LINK                                        --//
 		//------------------------------------------------------------//
 		//Register the entity (resource) type 'VR_USERSLINK'
 		$VR_USERSLINKEntityType = $metadata->addEntityType( new ReflectionClass('VR_USERSLINK'),    'VR_USERSLINK',    'Main' );
@@ -1505,7 +1557,7 @@ class CreateMainMetadata
 		
 		
 		//------------------------------------------------------------//
-		//-- 4.7 - USER THING	             --//
+		//-- 4.8 - USER THING	             --//
 		//------------------------------------------------------------//
 		
 		//Register the entity (resource) type 'VR_USERSTHING'
@@ -1548,7 +1600,7 @@ class CreateMainMetadata
 		
 		
 		//------------------------------------------------------------//
-		//-- 4.8 - USER IO	             --//
+		//-- 4.9 - USER IO	             --//
 		//------------------------------------------------------------//
 		//Register the entity (resource) type 'VR_USERSIO'
 		$VR_USERSIOEntityType = $metadata->addEntityType( new ReflectionClass('VR_USERSIO'),    'VR_USERSIO',    'Main' );
@@ -1620,7 +1672,7 @@ class CreateMainMetadata
 		
 		
 		//------------------------------------------------------------//
-		//-- 4.9 - DATA TINYINT	             --//
+		//-- 4.10 - DATA TINYINT	             --//
 		//------------------------------------------------------------//
 		//Register the entity (resource) type 'VR_DATATINYINT'
 		$VR_DATATINYINTEntityType = $metadata->addEntityType( new ReflectionClass('VR_DATATINYINT'),    'VR_DATATINYINT',    'Main' );
@@ -1690,7 +1742,7 @@ class CreateMainMetadata
 		$VR_DATATINYINTsResourceSet = $metadata->addResourceSet( 'VR_DATATINYINT', $VR_DATATINYINTEntityType );
 		
 		//------------------------------------------------------------//
-		//-- 4.10 - DATA INT		             --//
+		//-- 4.11 - DATA INT		             --//
 		//------------------------------------------------------------//
 		//Register the entity (resource) type 'VR_DATAINT'
 		$VR_DATAINTEntityType = $metadata->addEntityType( new ReflectionClass('VR_DATAINT'), 'VR_DATAINT', 'Main' );
@@ -1761,7 +1813,7 @@ class CreateMainMetadata
 		$VR_DATAINTsResourceSet = $metadata->addResourceSet( 'VR_DATAINT', $VR_DATAINTEntityType );
 		
 		//------------------------------------------------------------//
-		//-- 4.11 -DATA BIGINT	             --//
+		//-- 4.12 -DATA BIGINT	             --//
 		//------------------------------------------------------------//
 		//Register the entity (resource) type 'VR_DATABIGINT'
 		$VR_DATABIGINTEntityType = $metadata->addEntityType( new ReflectionClass('VR_DATABIGINT'), 'VR_DATABIGINT', 'Main' );
@@ -1833,7 +1885,7 @@ class CreateMainMetadata
 		
 		
 		//------------------------------------------------------------//
-		//-- 4.12 - DATA FLOAT	             --//
+		//-- 4.13 - DATA FLOAT	             --//
 		//------------------------------------------------------------//
 		//Register the entity (resource) type 'VR_DATAFLOAT'
 		$VR_DATAFLOATEntityType = $metadata->addEntityType(	new ReflectionClass('VR_DATAFLOAT'), 'VR_DATAFLOAT', 'Main');
@@ -1905,7 +1957,7 @@ class CreateMainMetadata
 		
 		
 		//------------------------------------------------------------//
-		//-- 4.13 - DATA TINYSTRING                                --//
+		//-- 4.14 - DATA TINYSTRING                                --//
 		//------------------------------------------------------------//
 		//Register the entity (resource) type 'VR_DATATINYSTRING'
 		$VR_DATATINYSTRINGEntityType = $metadata->addEntityType( new ReflectionClass('VR_DATATINYSTRING'), 'VR_DATATINYSTRING', 'Main' );
@@ -1976,7 +2028,7 @@ class CreateMainMetadata
 		$VR_DATATINYSTRINGsResourceSet = $metadata->addResourceSet( 'VR_DATATINYSTRING', $VR_DATATINYSTRINGEntityType );
 		
 		//------------------------------------------------------------//
-		//-- 4.14 - DATA SHORT STRING                               --//
+		//-- 4.15 - DATA SHORT STRING                               --//
 		//------------------------------------------------------------//
 		//Register the entity (resource) type 'VR_DATASHORTSTRING'
 		$VR_DATASHORTSTRINGEntityType = $metadata->addEntityType( new ReflectionClass('VR_DATASHORTSTRING'), 'VR_DATASHORTSTRING', 'DatashortstringView' );
@@ -2048,7 +2100,7 @@ class CreateMainMetadata
 		
 		
 		//------------------------------------------------------------//
-		//-- 4.15 - DATA MEDIUM STRING                              --//
+		//-- 4.16 - DATA MEDIUM STRING                              --//
 		//------------------------------------------------------------//
 		//Register the entity (resource) type 'VR_DATAMEDSTRING'
 		$VR_DATAMEDSTRINGEntityType = $metadata->addEntityType( new ReflectionClass('VR_DATAMEDSTRING'), 'VR_DATAMEDSTRING', 'Main' );
@@ -2120,7 +2172,7 @@ class CreateMainMetadata
 		
 		
 		//------------------------------------------------------------//
-		//-- 4.16 - USERS PREMISELOG                                --//
+		//-- 4.17 - USERS PREMISELOG                                --//
 		//------------------------------------------------------------//
 		//Register the entity (resource) type 'VR_USERSPREMISELOG'
 		$VR_USERSPREMISELOGEntityType = $metadata->addEntityType(
@@ -2143,7 +2195,7 @@ class CreateMainMetadata
 		
 		
 		//------------------------------------------------------------//
-		//-- 4.17 - USERS COMM                                      --//
+		//-- 4.18 - USERS COMM                                      --//
 		//------------------------------------------------------------//
 		//Register the entity (resource) type 'VR_USERSCOMM'
 		$VR_USERSCOMMEntityType = $metadata->addEntityType(

@@ -45,11 +45,18 @@ sap.ui.jsview("mjs.settings.user.EditUserInformation", {
     	var me = this;
     	this.destroyContent();
     	
-    	var oPage = new sap.m.Page(this.createId("EditUserInformationPage"), {
-            customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			content: [IOMy.widgets.getNavigationalSubHeader("EDIT USER INFO", "sap-icon://GoogleMaterial/person", me)],
-			footer : IOMy.widgets.getAppFooter()
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+		var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/person",
+            title : "Edit User Info"
+        });	
+		
+//    	var oPage = new sap.m.Page(this.createId("EditUserInformationPage"), {
+//            customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			content: [IOMy.widgets.getNavigationalSubHeader("EDIT USER INFO", "sap-icon://GoogleMaterial/person", me)],
+//			footer : IOMy.widgets.getAppFooter()
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
 		
 		
 		return oPage;

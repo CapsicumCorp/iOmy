@@ -273,7 +273,7 @@ $.extend(IOMy.devices.weatherfeed,{
         return mInfo;
     },
     
-    ValidateRoom : function (oScope) {
+    /*ValidateRoom : function (oScope) {
         var me                      = this;
         var bError                  = false;
         var aErrorMessages          = [];
@@ -302,7 +302,7 @@ $.extend(IOMy.devices.weatherfeed,{
         mInfo.aErrorMessages = aErrorMessages;
         
         return mInfo;
-    },
+    },*/
     
     ValidateKeyCode : function (oScope) {
         var me                      = this;
@@ -504,7 +504,7 @@ $.extend(IOMy.devices.weatherfeed,{
             },
             
             setFailureNotices : function (errMessage) {
-                IOMy.common.showError("Failed to load the weather information", "Error");
+                IOMy.common.showError("Failed to load the weather information:\n\n"+errMessage, "Error");
                 jQuery.sap.log.error(errMessage);
                 
                 if (oScope.byId(sPrefix + me.uiIDs.sTemperatureDisplayID) !== undefined) {
@@ -576,9 +576,9 @@ $.extend(IOMy.devices.weatherfeed,{
                             //console.log(aDeviceData);
                             IOMy.common.NavigationChangePage("pThermostat", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                 ]
-            }).addStyleClass("width100Percent BorderRight")
+            }).addStyleClass("width80Percent BorderRight")
         );
 
         aUIObjectItems.push(
@@ -613,15 +613,15 @@ $.extend(IOMy.devices.weatherfeed,{
                                 text : "Loading..."
                             }).addStyleClass("Font-RobotoCondensed Font-Medium TextLeft")
                         ]
-                    }).addStyleClass("MarLeft5px")
+                    }).addStyleClass("MarLeft15px")
                 
                 ]
-            }).addStyleClass("width100Percent")
+            }).addStyleClass("minwidth180px width10Percent")
         );
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: aUIObjectItems
-        }).addStyleClass("ListItem");
+        }).addStyleClass("ListItem MarRight2px");
 		
 		
 		//------------------------------------//
@@ -658,9 +658,9 @@ $.extend(IOMy.devices.weatherfeed,{
                             //console.log(aDeviceData);
                             IOMy.common.NavigationChangePage("pThermostat", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                 ]
-            }).addStyleClass("testlabelcont BorderRight")
+            }).addStyleClass("width80Percent BorderRight")
         );
 
         aUIObjectItems.push(
@@ -679,9 +679,9 @@ $.extend(IOMy.devices.weatherfeed,{
                                 text : "Loading..."
                             }).addStyleClass("Font-RobotoCondensed Font-Medium TextLeft")
                         ]
-                    }).addStyleClass("PadLeft5px DeviceDataBox")
+                    }).addStyleClass("PadLeft5px MarBottom3px MarRight10px TextLeft")
                 ]
-            }).addStyleClass("minwidth175px")
+            }).addStyleClass("minwidth180px width10Percent MarAuto0px")
         );
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {

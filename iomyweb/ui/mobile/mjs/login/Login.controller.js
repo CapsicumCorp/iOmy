@@ -77,7 +77,16 @@ sap.ui.controller("mjs.login.Login", {
                                             //-- LOAD THE 1ST Page --//
                                             IOMy.common.NavigationChangePage( IOMy.common.sNavigationDefaultPage, {}, true);
 
+                                            //-------------------------------------------------//
                                             // Reload them every 10 minutes
+                                            //-------------------------------------------------//
+                                            
+                                            //-- Clear the interval as a precaution. --//
+                                            if (IOMy.common.CoreVariableRefreshIntervalInstance !== null) {
+                                                clearInterval(IOMy.common.CoreVariableRefreshIntervalInstance);
+                                                IOMy.common.CoreVariableRefreshIntervalInstance = null;
+                                            }
+                                            
                                             IOMy.common.CoreVariableRefreshIntervalInstance = setInterval(function () {
                                                //console.log("Another 10 minutes is up!");
                                                 IOMy.common.ReloadCoreVariables();

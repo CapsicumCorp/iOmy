@@ -23,9 +23,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("mjs.premise.Overview", {
-	api : IOMy.apiphp,	
-	common : IOMy.common,
-	oData : IOMy.apiodata,
+//	api : IOMy.apiphp,	
+//	common : IOMy.common,
+//	oData : IOMy.apiodata,
 	
 	rooms : [],
 	aStoredDevices : [],
@@ -52,12 +52,6 @@ sap.ui.controller("mjs.premise.Overview", {
 				//-- Refresh the Navigational buttons               --//
                 //----------------------------------------------------//
 				IOMy.common.NavigationRefreshButtons( me );
-				
-//				if( IOMy.common.NavPagesCurrentIndex<=0 ) {
-//					console.log("Disable back button");
-//				} else {
-//					console.log("Don't disable back button");
-//				}
                 
                 me.aElementsToDestroy.push("verticalBox");
                 me.aElementsToDestroy.push("premiseBox");
@@ -65,9 +59,13 @@ sap.ui.controller("mjs.premise.Overview", {
                 
                 //=== Create the Premise combo box ===//
                 var oPremiseCBox = IOMy.widgets.getPremiseSelector(me.createId("premiseBox")).addStyleClass("SettingsDropdownInput width100Percent");
-                oPremiseCBox.attachChange( function () {
-                    me.composeRoomList(this.getSelectedKey());
-                });
+                try {
+                    oPremiseCBox.attachChange( function () {
+                        me.composeRoomList(this.getSelectedKey());
+                    });
+                } catch(e) {
+                    // Do nothing
+                }
                 
                 var oPremiseCBoxContainer = new sap.m.VBox({
                     items : [oPremiseCBox]
@@ -83,7 +81,7 @@ sap.ui.controller("mjs.premise.Overview", {
                 var oPanel = new sap.m.Panel(me.createId("panel"), {
                     backgroundDesign: "Transparent",
                     content: [oVertBox] //-- End of Panel Content --//
-                }).addStyleClass("height100Percent PanelNoPadding MarTop0px UserInputForm");
+                }).addStyleClass("PanelNoPadding MarTop0px PadBottom15px UserInputForm");
 
                 thisView.byId("page").addContent(oPanel);
 			}
@@ -96,13 +94,8 @@ sap.ui.controller("mjs.premise.Overview", {
      */
     DestroyUI : function() {
         var me          = this;
-        var sCurrentID  = "";
         
-        for (var i = 0; i < me.aElementsToDestroy.length; i++) {
-            sCurrentID = me.aElementsToDestroy[i];
-            if (me.byId(sCurrentID) !== undefined)
-                me.byId(sCurrentID).destroy();
-        }
+        IOMy.functions.destroyItemsByIdFromView(me, me.aElementsToDestroy);
         
         // Clear the array
         me.aElementsToDestroy = [];
@@ -210,7 +203,7 @@ sap.ui.controller("mjs.premise.Overview", {
                     oVertBox.addItem(
                         new sap.m.HBox({
                             items : [
-                                // === NUMBER OF DEVICES ASSIGNED TO A ROOM === \\
+                                // === NUMBER OF DEVICES ASSIGNED TO A ROOM ===//
                                 new sap.m.VBox({
                                     items : [
                                         new sap.m.Text({
@@ -230,27 +223,31 @@ sap.ui.controller("mjs.premise.Overview", {
                                             }
                                         }).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px width100Percent")
                                     ]
-                                }).addStyleClass("width100Percent TextOverflowEllipsis"),
+                                }).addStyleClass("TextOverflowEllipsis"),
                                 
                                 // === COLLAPSE/EXPAND ICON === \\
-                                new sap.m.VBox({
-                                    items : [
-                                        new sap.m.Button(me.createId("roomName"+sIndex), {
-                                            icon : "sap-icon://navigation-down-arrow",
-                                            press : function () {
-                                                if (me.roomsExpanded[sIndex] === false) {
-                                                    me.byId("room"+sIndex).setVisible(true);
-                                                    me.roomsExpanded[sIndex] = true;
-                                                    this.setIcon("sap-icon://navigation-down-arrow");
-                                                } else {
-                                                    me.byId("room"+sIndex).setVisible(false);
-                                                    me.roomsExpanded[sIndex] = false;
-                                                    this.setIcon("sap-icon://navigation-right-arrow");
+                                // If there are things associated with a room via their links...
+                                (JSON.stringify(aRoom.Things) !== "{}") ?
+                                    // Create the collapse/expand icon.
+                                    new sap.m.VBox({
+                                        items : [
+                                            new sap.m.Button(me.createId("roomName"+sIndex), {
+                                                icon : "sap-icon://navigation-down-arrow",
+                                                press : function () {
+                                                    if (me.roomsExpanded[sIndex] === false) {
+                                                        me.byId("room"+sIndex).setVisible(true);
+                                                        me.roomsExpanded[sIndex] = true;
+                                                        this.setIcon("sap-icon://navigation-down-arrow");
+                                                    } else {
+                                                        me.byId("room"+sIndex).setVisible(false);
+                                                        me.roomsExpanded[sIndex] = false;
+                                                        this.setIcon("sap-icon://navigation-right-arrow");
+                                                    }
                                                 }
-                                            }
-                                        }).addStyleClass("ButtonNoBorder IOMYButton ButtonIconGreen TextSize20px width100Percent")
-                                    ]
-                                }).addStyleClass("FlexNoShrink width70px")
+                                            }).addStyleClass("ButtonNoBorder IOMYButton ButtonIconGreen TextSize20px width100Percent")
+                                        ]
+                                    }).addStyleClass("FlexNoShrink width70px")
+                                : {/* Otherwise, do nothing */}
                             ]
                         }).addStyleClass("ListItem minheight20px")
                     ).addItem(
@@ -278,15 +275,17 @@ sap.ui.controller("mjs.premise.Overview", {
 
                             // Create the flag for showing the list of rooms for a selected room
                             // if it doesn't already exist.
-                            if (me.roomsExpanded[sIndex] === undefined)
+                            if (me.roomsExpanded[sIndex] === undefined) {
                                 me.roomsExpanded[sIndex] = false;
-
-                            me.aElementsToDestroy.push("device"+aDevice.DeviceId);
+                            }
 
                             // Retrieve number of devices/things in the room
                             iDevicesInRoom = IOMy.functions.getNumberOfDevicesInRoom(aDevice.DeviceId);
 
-                            //=============== Create the device link ===============\\
+                            //=============== Create/Refresh the device link ===============\\
+                            me.aElementsToDestroy.push("device"+aDevice.DeviceId);
+                            me.aElementsToDestroy.push("deviceLink"+aDevice.DeviceId);
+                            
                             me.byId("room"+sIndex).addItem(
                                 new sap.m.HBox({
                                     items : [
@@ -312,13 +311,33 @@ sap.ui.controller("mjs.premise.Overview", {
                                                         
                                                         // Determine which device page to enter according to the device type.
                                                         if (me.aStoredDevices[i].DeviceTypeId === 2) {
-                                                            sPageName = "pDeviceData"; // Zigbee
+                                                            sPageName = "pDeviceData"; //-- Zigbee --//
                                                         } else if (me.aStoredDevices[i].DeviceTypeId === 13) {
-                                                            sPageName = "pPhilipsHue"; // Philips Hue
+                                                            sPageName = "pPhilipsHue"; //-- Philips Hue --//
                                                         } else if (me.aStoredDevices[i].DeviceTypeId === 12) {
-                                                            sPageName = "pOnvif"; // Onvif Camera
+                                                            sPageName = "pOnvif"; //-- Onvif Camera --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 3) {
+                                                            sPageName = "pMotionSensor"; //-- Motion Sensor --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 4) {
+                                                            //sPageName = "pDeviceTestThermostat"; //-- Temperature Sensor --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 10) {
+                                                            //sPageName = "pThermostat"; //-- DevelCo Energy Meter --//
                                                         } else if (me.aStoredDevices[i].DeviceTypeId === 14) {
-                                                            sPageName = "pThermostat"; // Open Weather Map
+                                                            sPageName = "pThermostat"; //-- Open Weather Map --//
+                                                            
+                                                        // -- Experimental Pages --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-1") {
+                                                            sPageName = "pDeviceDoorLock"; //-- Door Lock --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-2") {
+                                                            sPageName = "pDeviceWindowSensor"; //-- Window Sensor --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-3") {
+                                                            sPageName = "pDeviceScales"; //-- Bluetooth Scales --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-4") {
+                                                            sPageName = "pDeviceBPM"; //-- Blood Pressure Monitor --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-5") {
+                                                            sPageName = "pGaragedoor"; //-- Door Lock --//
+                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-6") {
+                                                            sPageName = "pDeviceTestThermostat"; //-- Thermostat --//
                                                         }
                                                         
                                                         IOMy.common.NavigationChangePage(sPageName, {ThingId : oItem.DeviceId});
@@ -336,7 +355,9 @@ sap.ui.controller("mjs.premise.Overview", {
                             // Decide whether to hide or show when the page loads/reloads.
                             if (me.roomsExpanded[sIndex] === false) {
                                 me.byId("room"+sIndex).setVisible(false);
-                                me.byId("roomName"+sIndex).setIcon("sap-icon://navigation-right-arrow");
+                                if (me.byId("roomName"+sIndex) !== undefined) {
+                                    me.byId("roomName"+sIndex).setIcon("sap-icon://navigation-right-arrow");
+                                }
                             }
 
                             idCount++;

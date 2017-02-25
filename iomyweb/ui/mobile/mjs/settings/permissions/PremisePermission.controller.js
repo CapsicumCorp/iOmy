@@ -45,6 +45,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
     wDataReadPermissionBox      : null,
     wWritePermissionBox         : null,
     wStateTogglePermissionBox   : null,
+    wRoomAdminPermissionBox     : null,
     wApplyButton                : null,
     wVertBox                    : null,
     aPremiseEntries             : [],
@@ -104,9 +105,20 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
     DestroyUI : function() {
         var me          = this;
         
+        //-- Destroy the main VBox. --//
         if (me.wVertBox !== null) {
             me.wVertBox.destroy();
         }
+        
+        //-- Wipe out any elements with IDs that didn't get destroyed during the full wipe. --//
+        for (var i = 0; i < me.aElementsToDestroy.length; i++) {
+            if (me.byId(me.aElementsToDestroy[i]) !== undefined) {
+                me.byId(me.aElementsToDestroy[i]).destroy();
+            }
+        }
+        
+        //-- Clear Arrays --//
+        me.aElementsToDestroy = [];
         me.aPremiseEntries = [];
     },
     
@@ -123,7 +135,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
         //====================================================================//
         me.wUserLabel = new sap.m.Label({
             text : "User"
-        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText");
+        }).addStyleClass("TextLeft MarTop5px MarBottom5px PaddingToMatchButtonText");
         
         me.wUserSelectBox = new sap.m.Select({
             width : "100%"
@@ -134,7 +146,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
         //====================================================================//
         me.wPremiseLabel = new sap.m.Label({
             text : "Premise"
-        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText");
+        }).addStyleClass("TextLeft MarTop5px MarBottom5px PaddingToMatchButtonText");
         
         me.wPremiseSelectBox = getPremiseSelector(me.createId("premiseBox")).addStyleClass("SettingsDropdownInput width100Percent");
         
@@ -163,14 +175,14 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                                     items : [ me.wPremiseLabel ]
                                 })
                             ]
-                        }).addStyleClass("ConsistentMenuHeader ListItem width100Percent"),
+                        }).addStyleClass("ConsistentMenuHeader BorderTop ListItem width100Percent"),
                         new sap.m.VBox({
                             items : [me.wPremiseSelectBox]
                         }).addStyleClass("PadLeft8px PadRight8px")
                     ]
-                }).addStyleClass("MarTop10px MarBottom10px")
+                }).addStyleClass("")
             ]
-        }).addStyleClass("width100Percent UserInputForm MarBottom10px");
+        }).addStyleClass("width100Percent TableSideBorders UserInputForm");
         
         try {
             // Populate the users select box with the viewable users
@@ -267,6 +279,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
         me.wDataReadPermissionBox      = getPermissionSelectBox();
         me.wWritePermissionBox         = getPermissionSelectBox();
         me.wStateTogglePermissionBox   = getPermissionSelectBox();
+        me.wRoomAdminPermissionBox     = getPermissionSelectBox();
         
         //--------------------------------------------------------------------//
         // Functions
@@ -278,11 +291,13 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                     me.wDataReadPermissionBox.setEnabled(false);
                     me.wWritePermissionBox.setEnabled(false);
                     me.wStateTogglePermissionBox.setEnabled(false);
+                    me.wRoomAdminPermissionBox.setEnabled(false);
                 // If "Yes" is selected
                 } else {
                     me.wDataReadPermissionBox.setEnabled(true);
                     me.wWritePermissionBox.setEnabled(true);
                     me.wStateTogglePermissionBox.setEnabled(true);
+                    me.wRoomAdminPermissionBox.setEnabled(true);
                 }
                 
                 fnShowPermissionChanged();
@@ -309,6 +324,9 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
         me.wStateTogglePermissionBox.attachSelect(
             fnShowPermissionChanged
         );
+        me.wRoomAdminPermissionBox.attachSelect(
+            fnShowPermissionChanged
+        );
         
         //=============================================//
         // Create the permission form for the premise
@@ -331,7 +349,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                     ]
                 })
             ]
-        }).addStyleClass("ConsistentMenuHeader TableSideBorders BorderTop ListItem width100Percent");
+        }).addStyleClass("ConsistentMenuHeader BorderTop ListItem width100Percent");
         
         me.wPremisePermissions = new sap.m.VBox(me.createId("premise"+mPremiseInfo.Index), {
             items : [
@@ -365,20 +383,28 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                         // premise
                         //-------------------------------------//
                         new sap.m.Label({
-                            text: "Allow this user to manage rooms and devices?"
+                            text: "Allow this user to manage devices?"
                         }),
-                        me.wStateTogglePermissionBox
+                        me.wStateTogglePermissionBox,
+                        //-------------------------------------//
+                        // Permission to manage rooms in a
+                        // premise
+                        //-------------------------------------//
+                        new sap.m.Label({
+                            text: "Allow this user to manage rooms?"
+                        }),
+                        me.wRoomAdminPermissionBox
                     ]
                 }).addStyleClass("MarAll8px")
             ]
-        }).addStyleClass("ListItem TableSideBorders width100Percent");
+        }).addStyleClass("ListItem width100Percent");
         
         me.wVertBox.addItem(me.wPremisePermissionHeading);
         me.wVertBox.addItem(me.wPremisePermissions);
         me.wVertBox.addItem(
             new sap.m.VBox({
                 items : [me.wApplyButton]
-            }).addStyleClass("RoomPermissionsApplyButton")
+            }).addStyleClass("RoomPermissionsApplyButton BorderBottom")
         );
         
         me.premisesChanged[mPremiseInfo.Index] = false;
@@ -414,10 +440,12 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                             me.wStateTogglePermissionBox.setEnabled(false);
                             me.wWritePermissionBox.setEnabled(false);
                             me.wDataReadPermissionBox.setEnabled(false);
+                            me.wRoomAdminPermissionBox.setEnabled(false);
                             
                             me.wStateTogglePermissionBox.setSelectedIndex(1);
                             me.wWritePermissionBox.setSelectedIndex(1);
                             me.wDataReadPermissionBox.setSelectedIndex(1);
+                            me.wRoomAdminPermissionBox.setSelectedIndex(1);
                             
                         } else if (data.Read == 1) {
                             iIndex = 0;
@@ -461,6 +489,17 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                                 }
                                 me.wStateTogglePermissionBox.setSelectedIndex(iIndex);
                             }
+                            
+                            if (data.RoomAdmin == 0) {
+                                iIndex = 1;
+                            } else if (data.RoomAdmin == 1) {
+                                iIndex = 0;
+                            }
+                            
+                            //----------------------------------------------------//
+                            // Permission to read information about a premise.
+                            //----------------------------------------------------//
+                            me.wRoomAdminPermissionBox.setSelectedIndex(iIndex);
                         }
                         
                     } catch (e) {
@@ -489,6 +528,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
         var sDataRead;
         var sWrite;
         var sStateToggle;
+        var sRoomAdmin;
         
         if (me.wReadPermissionBox.getEnabled()) {
             sRead = me.wReadPermissionBox.getSelectedButton().getText();
@@ -512,10 +552,17 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
             sStateToggle = "No";
         }
         
+        if (me.wRoomAdminPermissionBox.getEnabled()) {
+            sRoomAdmin = me.wRoomAdminPermissionBox.getSelectedButton().getText();
+        } else {
+            sRoomAdmin = "No";
+        }
+        
         var tiRead = sRead === "Yes" ? 1 : 0;
         var tiDataRead = sDataRead === "Yes" ? 1 : 0;
         var tiWrite = sWrite === "Yes" ? 1 : 0;
         var tiStateToggle = sStateToggle === "Yes" ? 1 : 0;
+        var tiRoomAdmin = sRoomAdmin === "Yes" ? 1 : 0;
         
         IOMy.apiphp.AjaxRequest({
             url : sUrl,
@@ -523,7 +570,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                 "Mode" : "UpdatePremisePerms",
                 "UserId" : iUserId,
                 "PremiseId" : iPremiseId,
-                "Data" : "{\"Read\":"+tiRead+",\"DataRead\":"+tiDataRead+",\"Write\":"+tiWrite+",\"StateToggle\":"+tiStateToggle+"}"
+                "Data" : "{\"Read\":"+tiRead+",\"DataRead\":"+tiDataRead+",\"Write\":"+tiWrite+",\"StateToggle\":"+tiStateToggle+",\"RoomAdmin\":"+tiRoomAdmin+"}"
             },
             
             onSuccess : function (responseType, data) {

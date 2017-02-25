@@ -781,7 +781,7 @@ if( $bError===false ) {
 								$bError    = true;
 								$sErrMesg .= "Error Code:'4303' \n";
 								$sErrMesg .= "Problem adding a new user!\n";
-								$sErrMesg .= "Failed opening the special database connnection as .\n";
+								$sErrMesg .= "Failed opening the special database connnection as an administrator.\n";
 							}
 						}
 					} else {

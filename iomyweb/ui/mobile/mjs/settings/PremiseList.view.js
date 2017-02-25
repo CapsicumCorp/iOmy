@@ -46,19 +46,26 @@ sap.ui.jsview("mjs.settings.PremiseList", {
 		var me = this;
 		this.destroyContent();
 		
-		var oPage = new sap.m.Page(me.createId("PremiseListPage"), {
-			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			content: [
-				//-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("PREMISE LIST", "sap-icon://GoogleMaterial/settings", me ),
-				//-- Main Panel --//
-				new sap.m.Panel(me.createId("Panel"), {
-					backgroundDesign: "Transparent",
-					content: []
-				}).addStyleClass("height100Percent PanelNoPadding UserInputForm TableSideBorders")
-			],
-			footer : IOMy.widgets.getAppFooter()
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+		var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/settings",
+            title : "Premise List"
+        });	
+		
+//		var oPage = new sap.m.Page(me.createId("PremiseListPage"), {
+//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			content: [
+//				//-- Navigational Header --//
+//				IOMy.widgets.getNavigationalSubHeader("PREMISE LIST", "sap-icon://GoogleMaterial/settings", me ),
+//				//-- Main Panel --//
+//				new sap.m.Panel(me.createId("Panel"), {
+//					backgroundDesign: "Transparent",
+//					content: []
+//				}).addStyleClass("height100Percent PanelNoPadding UserInputForm TableSideBorders")
+//			],
+//			footer : IOMy.widgets.getAppFooter()
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
 		
 		
 		return oPage;

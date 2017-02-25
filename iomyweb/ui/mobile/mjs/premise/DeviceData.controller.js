@@ -33,7 +33,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
     sCurrentThingName:              "",             //-- STRING:        Stores the current thing's name.    --//
 	dLastThingListUpdate:			null,			//-- DATE:			Stores the last time the page had the Thing List Ajax values updated.			--//
 	dUIThingLastUpdate:				null,			//-- DATE:			Stores the last time the page had the individual Thing updated.			--//
-	
+	iCurrentThingState:				0,				//-- INTEGER:		--//
 	
 	/**
 	* Called when a controller is instantiated and its View controls (if available) are already created.
@@ -96,6 +96,10 @@ sap.ui.controller("mjs.premise.DeviceData", {
 							//-- Set redraw to true --//
 							bRedrawPageNeeded = true;
 							
+						} else if( oController.iCurrentThingState!==IOMy.common.ThingList['_'+oEvent.data.ThingId].Status ) {
+							//-- Set redraw to true --//
+							bRedrawPageNeeded = true;
+							
 						} else {
                             //-- Check to see if the item/device name has been changed. --//
                             if (IOMy.common.bItemNameChangedMustRefresh === true) {
@@ -142,7 +146,9 @@ sap.ui.controller("mjs.premise.DeviceData", {
                             oController.oCurrentThing = IOMy.common.ThingList['_'+oEvent.data.ThingId];
 							oController.iCurrentThing = IOMy.common.ThingList['_'+oEvent.data.ThingId].Id;
 							oController.sCurrentThingName = IOMy.common.ThingList['_'+oEvent.data.ThingId].DisplayName;
-                            
+							
+							oController.iCurrentThingState = IOMy.common.ThingList['_'+oEvent.data.ThingId].Status;
+							
 							//----------------------------------------------------------------------------//
 							//-- 2.4.1.3 - Destroy the specific Tile related objects of this page       --//
 							//----------------------------------------------------------------------------//
@@ -420,7 +426,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 								"FragmentName":			"",
 								"EnabledButtons": {
 									"TimeRB":[
-										"MostRecent",
+										//"MostRecent",
 										"NormalTimePeriods"
 									],
 									"FilterRB":[
@@ -428,12 +434,12 @@ sap.ui.controller("mjs.premise.DeviceData", {
 									]
 								},
 								"TempVals": {
-									"TimeRB":			"CurV",
-									"FilterRB":			"CurV"
+									"TimeRB":			"Day",
+									"FilterRB":			"TotSpecV"
 								},
 								"CurrentVals": {
-									"TimeRB":			"CurV",
-									"FilterRB":			"CurV",
+									"TimeRB":			"Day",
+									"FilterRB":			"TotSpecV",
 									"TimeCustomStart":	null,
 									"TimeCustomEnd":	null
 								}
@@ -548,7 +554,8 @@ sap.ui.controller("mjs.premise.DeviceData", {
 									"value":                "",
 									"valueColor":           "Good",
 									"scale":                ""
-								}).addStyleClass("")
+								}).addStyleClass(""),
+								"footer" : "Period : "+aTileData.Data.CurrentVals.FilterRB
 							})
 						],
 						press: function (oControlEvent) {
@@ -747,9 +754,6 @@ sap.ui.controller("mjs.premise.DeviceData", {
 		//----------------------------------------------------------------//
 		//-- 9.0 - RETURN RESULTS                                       --//
 		//----------------------------------------------------------------//
-		
-		
-		
 	},
 	
 	
@@ -872,7 +876,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 					//--------------------//
 					//-- DAY			--//
 					oTempRadioButton = new sap.m.RadioButton( oController.createId( sIdPrefix+"TimeRBDay"), {
-						"text":			"Day",
+						"text":			"Last 24 hours",
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Day" );
@@ -883,7 +887,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 					//--------------------//
 					//-- WEEK			--//
 					oTempRadioButton = new sap.m.RadioButton( oController.createId( sIdPrefix+"TimeRBWeek"), {
-						"text":			"Week",
+						"text":			"Last 7 days",
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Week" );
@@ -894,7 +898,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 					//--------------------//
 					//-- FORTNIGHT		--//
 					oTempRadioButton = new sap.m.RadioButton( oController.createId( sIdPrefix+"TimeRBFort"), {
-						"text":			"Fortnight",
+						"text":			"Last 14 days",
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Fortnight" );
@@ -905,7 +909,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 					//--------------------//
 					//-- MONTH			--//
 					oTempRadioButton = new sap.m.RadioButton( oController.createId( sIdPrefix+"TimeRBMonth"), {
-						"text":			"Month",
+						"text":			"Last 31 days",
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Month" );
@@ -916,7 +920,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 					//--------------------//
 					//-- QUARTER		--//
 					oTempRadioButton = new sap.m.RadioButton( oController.createId( sIdPrefix+"TimeRBQuarter"), {
-						"text":			"Quarter",
+						"text":			"Last 91 days",
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Quarter" );
@@ -927,7 +931,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 					//--------------------//
 					//-- YEAR			--//
 					oTempRadioButton = new sap.m.RadioButton( oController.createId( sIdPrefix+"TimeRBYear"), {
-						"text":			"Year",
+						"text":			"Last 365 days",
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Year" );
@@ -1002,16 +1006,16 @@ sap.ui.controller("mjs.premise.DeviceData", {
 				//-- ADD THE "TotalableSpecial" RADIO BUTTONS   --//
 				//------------------------------------------------//
 				case "TotalableSpecial":
-					
+
 					//------------------------//
 					//-- CURRENT VALUE      --//
-					oTempRadioButton = new sap.m.RadioButton( oController.createId( sIdPrefix+"FilterRBCurV"), {
-						"text":		"Current Value",
-						"select":	function( oControlEvent ) {
-							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "FilterRB", "CurV" );
-						}
-					});
-					oTempElement.addButton(oTempRadioButton);
+					//oTempRadioButton = new sap.m.RadioButton( oController.createId( sIdPrefix+"FilterRBCurV"), {
+					//	"text":		"Current Value",
+					//	"select":	function( oControlEvent ) {
+					//		oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "FilterRB", "CurV" );
+					//	}
+					//});
+					//oTempElement.addButton(oTempRadioButton);
 					
 					//------------------------//
 					//-- TOTALABLE VALUE    --//

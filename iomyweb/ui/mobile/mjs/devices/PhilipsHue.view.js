@@ -49,7 +49,7 @@ sap.ui.jsview("mjs.devices.PhilipsHue", {
     		customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
 			content: [IOMy.widgets.getNavigationalSubHeader("PHILIPS HUE", "sap-icon://IOMy1/appliances", me)],
 			footer : IOMy.widgets.getAppFooter()
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+		}).addStyleClass("height100Percent width100Percent MainBackground MasterPage");
 		
 		
 		return oPage;

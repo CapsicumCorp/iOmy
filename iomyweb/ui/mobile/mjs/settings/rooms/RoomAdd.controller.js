@@ -25,6 +25,7 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 	functions : IOMy.functions,
     odata : IOMy.apiodata,
     
+    userId : 0,
     aElementsToDestroy : [],
     
 /**
@@ -42,11 +43,12 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 				//-- Refresh the Navigational buttons --//
                 IOMy.common.NavigationRefreshButtons( me );
                 
+                me.DestroyUI();
 				// Start rendering the page
 				
-				me.functions.destroyItemsByIdFromView(me, [
-	                "premiseBox", "roomName", "roomDesc", "roomFloor", "roomType"
-	            ]);
+//				me.functions.destroyItemsByIdFromView(me, [
+//	                "premiseBox", "roomName", "roomDesc", "roomFloor", "roomType"
+//	            ]);
 				
 				var oPremiseTitle = new sap.m.HBox({
                     items : [
@@ -177,11 +179,12 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                     }
                 });
                 
+                me.aElementsToDestroy.push("addButton");
 				var oAddButton = new sap.m.VBox({
 					items : [
-						new sap.m.Link({
+						new sap.m.Link(me.createId("addButton"), {
 							text : "Add Room",
-                            enabled : true,
+                            enabled : false,
 							press : function () {
                                 var oThisButton = this; // Captures the scope of the link
 								oThisButton.setEnabled(false);
@@ -202,8 +205,9 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                                     jQuery.sap.log.error(aErrorLog.join("\n"));
                                     IOMy.common.showError(aErrorLog.join("\n\n"), "Errors");
                                 } else {
-                                    
+                                    //----------------------------------------------------------//
                                     // Run the API to add the room
+                                    //----------------------------------------------------------//
                                     try {
                                         IOMy.apiphp.AjaxRequest({
                                             url : IOMy.apiphp.APILocation("rooms"),
@@ -212,34 +216,66 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                                                     "Name" : sRoomText, "Desc" : sRoomDesc, 
                                                     "Floor" : 1,//me.byId("roomFloor").getValue(),
                                                     "RoomTypeId" : iRoomTypeId/*me.byId("roomType").getSelectedKey()*/},
-                                            onSuccess : function () {
+                                            onSuccess : function (responseType, roomData) {
+                                                
+                                                var iRoomId = roomData.Data.RoomId;
+                                                
+                                                //----------------------------------------------------------//
+                                                // Run the API to give permission to the current user to
+                                                // access it.
+                                                //----------------------------------------------------------//
+                                                IOMy.apiphp.AjaxRequest({
+                                                    url : IOMy.apiphp.APILocation("permissions"),
+                                                    data : {
+                                                        "Mode" : "UpdateRoomPerms",
+                                                        "UserId" : me.userId,
+                                                        "RoomId" : iRoomId,
+                                                        "Data" : "{\"Read\":1,\"DataRead\":1,\"Write\":1,\"StateToggle\":1}"
+                                                    },
 
-                                                IOMy.common.showSuccess(sRoomText+" added successfully.", "Success", 
-                                                function () {
-                                                    //-- REFRESH ROOMS --//
-                                                    IOMy.common.RetreiveRoomList( {
-                                                        onSuccess: $.proxy(function() {
-                                                            //-- REFRESH THINGS --//
-                                                            IOMy.apiphp.RefreshThingList({
-                                                                onSuccess: $.proxy(function() {
-                                                                    //-- Enable this switch --//
-                                                                    oThisButton.setEnabled(true);
-                                                                    
-                                                                    try {
-                                                                        //-- Flag that the Core Variables have been configured --//
-                                                                        IOMy.common.CoreVariablesInitialised = true;
-                                                                        //-- Reset the Navigation array and index after switching users --//
-                                                                        IOMy.common.NavigationTriggerBackForward(false);
+                                                    onSuccess : function (responseType, permData) {
+                                                        var sErrMessage;
+                                                        if (permData.Error === false) {
+                                                            //--------------------------------------------//
+                                                            // Show the success message and reload the core
+                                                            // variables.
+                                                            //--------------------------------------------//
+                                                            IOMy.common.showSuccess(sRoomText+" added successfully.", "Success", 
+                                                                function () {
+                                                                    //-- REFRESH ROOMS --//
+                                                                    IOMy.common.ReloadVariableRoomList( 
+                                                                        function () {
+                                                                            //-- Enable this switch --//
+                                                                            oThisButton.setEnabled(true);
 
-                                                                    } catch(e654321) {
-                                                                        //-- ERROR:  TODO: Write a better error message--//
-                                                                        jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
-                                                                    }
-                                                                }, me)
-                                                            }); //-- END THINGS LIST --//
-                                                        }, me)
-                                                    }); //-- END ROOMS LIST --//
-                                                }, "UpdateMessageBox");
+                                                                            try {
+                                                                                //-- Flag that the Core Variables have been configured --//
+                                                                                IOMy.common.CoreVariablesInitialised = true;
+                                                                                //-- Reset the Navigation array and index after switching users --//
+                                                                                IOMy.common.NavigationTriggerBackForward(false);
+
+                                                                            } catch(e654321) {
+                                                                                //-- ERROR:  TODO: Write a better error message--//
+                                                                                jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
+                                                                            }
+                                                                        }
+                                                                    ); //-- END ROOMS LIST --//
+                                                                },
+                                                            "UpdateMessageBox");
+                                                        } else {
+                                                            sErrMessage = "There was an error updating the room permissions: "+permData.ErrMesg;
+                                                            jQuery.sap.log.error(sErrMessage);
+                                                            
+                                                        }
+                                                    },
+
+                                                    onFail : function (response) {
+                                                        var sErrMessage = "There was an error updating the room permissions: "+JSON.stringify(response);
+                                                        jQuery.sap.log.error(sErrMessage);
+                                                        IOMy.common.showError(sErrMessage, "Permissions Error");
+                                                    }
+
+                                                });
 
                                             },
                                             onFail : function (response) {
@@ -259,8 +295,9 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 					]
 				}).addStyleClass("TextCenter MarTop12px");
                 
-                if (me.byId("vbox_container") !== undefined)
+                if (me.byId("vbox_container") !== undefined) {
                     me.byId("vbox_container").destroy();
+                }
                 
                 var oVertBox = new sap.m.VBox(me.createId("vbox_container"), {
 					items : [oPremiseTitle, oPremiseCBox,
@@ -272,8 +309,9 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 		    	// Destroys the actual panel of the page. This is done to ensure that there
 				// are no elements left over which would increase the page size each time
 				// the page is visited.
-				if (me.byId("panel") !== undefined)
+				if (me.byId("panel") !== undefined) {
 					me.byId("panel").destroy();
+                }
 				
 				var oPanel = new sap.m.Panel(me.createId("panel"), {
                     backgroundDesign: "Transparent",
@@ -281,6 +319,9 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 				});
                 
 		    	thisView.byId("page").addContent(oPanel);
+                
+                // Load the user ID
+                me.loadCurrentUserID();
         
 			}
 		});
@@ -315,7 +356,41 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 //	},
 
     DestroyUI : function () {
+        var me = this;
         
-    }
+        //-- Wipe out any elements with IDs that didn't get destroyed during the full wipe. --//
+        for (var i = 0; i < me.aElementsToDestroy.length; i++) {
+            if (me.byId(me.aElementsToDestroy[i]) !== undefined) {
+                me.byId(me.aElementsToDestroy[i]).destroy();
+            }
+        }
+        
+        //-- Clear Arrays --//
+        me.aElementsToDestroy = [];
+    },
+    
+    loadCurrentUserID : function () {
+		var me = this;
+		
+		IOMy.apiodata.AjaxRequest({
+			Url: IOMy.apiodata.ODataLocation("users"),
+			Columns : ["USERS_PK","USERSINFO_SURNAMES","USERSINFO_GIVENNAMES",
+					"USERSINFO_DISPLAYNAME","USERSINFO_EMAIL","USERSINFO_PHONENUMBER",
+                    "USERSGENDER_PK"],
+			WhereClause : [],
+			OrderByClause : [],
+			
+			onSuccess : function (responseType, data) {
+				data = data[0];
+                
+                me.userId = data.USERS_PK;
+                me.byId("addButton").setEnabled(true);
+			},
+			
+			onFail : function (response) {
+				jQuery.sap.log.error("Error loading user information: "+JSON.stringify(response));
+			}
+		});
+	}
 
 });

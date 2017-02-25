@@ -28,12 +28,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -249,7 +247,7 @@ public class InstallWizard {
                 }
 
             //---------------------------------------------------------------------------------//
-            // Someone was cheeky enough to try and circumvent the 8 character limit by placing
+            // Someone was cheeky enough to try to circumvent the 8 character limit by placing
             // spaces on either sides of the characters. No chance!
             //---------------------------------------------------------------------------------//
             } else {
@@ -332,13 +330,13 @@ public class InstallWizard {
         //--- Start IOMy ---//
         } else if (title == Titles.finalSetupTitle) {
             writeWatchInputsFile();
-            //Disable first run wizard
+            // Disable first run wizard
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(activity);
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putBoolean("pref_run_first_run_wizard", false);
             editor.putBoolean("pref_demo_data_mode", this.getInstallDemoData());
 
-            //Update other settings
+            // Update other settings
             editor.putString("pref_webserver_hostname", this.hostname);
             editor.putString("pref_webserver_port", Integer.toString(this.webserverport));
             editor.putString("pref_mysql_hostname", this.dbURI);
@@ -353,8 +351,17 @@ public class InstallWizard {
             editor.putBoolean("pref_mysql_enabled", true);
             editor.commit();
 
-            //Load main screen
+            // Load main screen
+            if (this.installDemoData == true) {
+                this.summonDemoWarning(activity);
+            } else {
+                this.loadIOMy(activity);
+            }
+
+            //--- Start IOMy after showing the Demo Mode Warning ---//
+        } else if (title == Titles.demoNoticeTitle) {
             this.loadIOMy(activity);
+
         }
     }
 
@@ -362,6 +369,7 @@ public class InstallWizard {
         Intent intent = new Intent(activity, SetupQuestions.class);
         activity.startActivity(intent);
     }
+
 
     public void summonLicenseAgreement(Activity activity) {
         Intent intent = new Intent(activity, LicenseAgreement.class);
@@ -408,6 +416,11 @@ public class InstallWizard {
         activity.startActivity(intent);
     }
 
+    public void summonDemoWarning(Activity activity) {
+        Intent intent = new Intent(activity, DemoAppWarning.class);
+        activity.startActivity(intent);
+    }
+
     public void loadIOMy(Activity activity) {
         Intent intent = new Intent(activity, IOMy.class);
 
@@ -421,14 +434,14 @@ public class InstallWizard {
         //First write to a temp file as if Watch Inputs is already running
         //  when we write to the final filename, Watch Inputs may pick up the file
         //  before we have finished writing the entire contents
-        File watchInputsSrcFile=new File(Application.getInstance().getStorageFolderName() + "/WatchInputs.cfg.tmp");
+        File watchInputsSrcFile=new File(Application.getInstance().getInternalStorageFolderName() + "/WatchInputs.cfg.tmp");
         if (watchInputsSrcFile.exists()) {
             watchInputsSrcFile.delete();
         }
         try {
             watchInputsSrcFile.createNewFile();
 
-            PrintWriter watchInputsTempFile = new PrintWriter(Application.getInstance().getStorageFolderName() +"/WatchInputs.cfg.tmp");
+            PrintWriter watchInputsTempFile = new PrintWriter(Application.getInstance().getInternalStorageFolderName() +"/WatchInputs.cfg.tmp");
             watchInputsTempFile.println("# ioMy Watch Inputs Config");
             watchInputsTempFile.println("[general]");
             watchInputsTempFile.println("hubpk=" + hubID);
@@ -446,10 +459,10 @@ public class InstallWizard {
             watchInputsTempFile.println("apiusername=" + watchInputsUsername);
             watchInputsTempFile.println("apipassword=" + watchInputsPassword);
             watchInputsTempFile.println("[zigbeeconfig]");
-            watchInputsTempFile.println("zigbeedefsfilename=" + Application.getInstance().getStorageFolderName() + "/zigbeedefs.ini");
+            watchInputsTempFile.println("zigbeedefsfilename=" + Application.getInstance().getInternalStorageFolderName() + "/zigbeedefs.ini");
             watchInputsTempFile.close();
 
-            File watchInputsDestFile = new File(Application.getInstance().getStorageFolderName() + "/WatchInputs.cfg");
+            File watchInputsDestFile = new File(Application.getInstance().getInternalStorageFolderName() + "/WatchInputs.cfg");
             if (watchInputsDestFile.exists()) {
                 watchInputsDestFile.delete();
             }

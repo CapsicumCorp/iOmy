@@ -24,6 +24,21 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 sap.ui.controller("mjs.staging.StagingHome", {
 	
+	Staginglinks : [
+		{ "display" : "Blood Pressure Monitor" , "link" : "pBPM" },
+		{ "display" : "Bluetooth Scales" , "link" : "pScales" },
+		{ "display" : "Device Overview", "link" : "pOverviewRe" },
+		{ "display" : "Door Lock" , "link" : "pDoorLock" },		
+		{ "display" : "Garage Door" , "link" : "pGaragedoor" },
+		{ "display" : "Motion Sensor" , "link" : "pMotionTemp" },
+		{ "display" : "Premise Permissions" , "link" : "pStagingPremisePermissions" },
+		{ "display" : "Room Permissions" , "link" : "pStagingRoomPermissions" },
+		{ "display" : "Quadcopter" , "link" : "pQuadcopter" },
+		{ "display" : "Thermostat" , "link" : "pTestThermostat" },
+		{ "display" : "Window Sensor" , "link" : "pWindowSensor" },
+	],
+	
+	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
@@ -52,7 +67,7 @@ sap.ui.controller("mjs.staging.StagingHome", {
 * @memberOf mjs.staging.StagingHome
 */
 	onBeforeRendering: function() {
-
+	
 	},
 
 /**
@@ -61,7 +76,14 @@ sap.ui.controller("mjs.staging.StagingHome", {
 * @memberOf mjs.staging.StagingHome
 */
 	onAfterRendering: function() {
+		//--------------------------------------------//
+        //-- Initialise Variables                   --//
+        //--------------------------------------------//
+        var oController = this;            //-- SCOPE: Allows subfunctions to access the current scope --//
+        var oView       = this.getView();
 
+
+        oController.SetupPage(); 
 	},
 
 /**
@@ -70,6 +92,58 @@ sap.ui.controller("mjs.staging.StagingHome", {
 */
 	onExit: function() {
 
-	}
+	},
+	
+    SetupPage: function(  ) {
+        //--------------------------------------------//
+        //-- Declare Variables                      --//
+        //--------------------------------------------//
+        var oController         = this;                 //-- SCOPE: Allows subfunctions to access the current scope --//
+        var oView               = this.getView();
+        var bError              = false;
+        var sErrMesg            = "";
+  
+
+		//--------------------------------------------------------//
+				//-- Draw 1st Run Page 2 --//
+		//--------------------------------------------------------//
+        if( bError===false ) {
+
+            //var oTileContainer = oController.byId("TileContainer");
+            var oTable = oController.byId("table");
+
+            //if( oTileContainer ) {
+            if( oTable ) {
+                $.each( oController.Staginglinks, function( iIndex, aStageLink ) {
+                    try {
+                        oTable.addItem(
+							new sap.m.ColumnListItem({
+								cells:[
+									new sap.m.Link({
+										text : aStageLink.display,
+										emphasized : true,
+										press : function () {
+											IOMy.common.NavigationChangePage( aStageLink.link , {} , false);
+										}
+									})
+								]
+							})                    
+                        );
+                    } catch(e2) {
+                        jQuery.sap.log.error("CriticalErrorAAA: "+e2.message, "", "AAA");
+                    }
+                }); //-- End of foreach loop ($.each) --//
+
+            } else {
+                console.log("Page Error");
+            }
+        }
+		//--------------------------------------------------------//
+				//-- Error Messages --//
+		//--------------------------------------------------------//
+        if( bError===true ) {
+            IOMy.common.showError( sErrMesg, "Perform 1st Run ")
+        }
+    }
 	
 });

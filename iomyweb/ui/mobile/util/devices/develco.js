@@ -66,7 +66,7 @@ $.extend(IOMy.devices.develco,{
                         press : function () {
                             //IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                 ]
             }).addStyleClass("minwidth70px width100Percent")
         );
@@ -218,7 +218,7 @@ $.extend(IOMy.devices.develco,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                     ]
                 }).addStyleClass("PadRight3px width100Percent minwidth170px"),
 
@@ -233,7 +233,7 @@ $.extend(IOMy.devices.develco,{
 //                            //--------------------------------//
 //
 //                            items: [
-//                                //new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("DeviceOverview-ItemLabel Font-RobotoCondensed")
+//                                //new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("PadTop20px PadBottom15px Font-RobotoCondensed")
 //                            ]
 //                        }).addStyleClass("PadLeft5px MarBottom3px MarRight10px TextLeft")
 //                    ]

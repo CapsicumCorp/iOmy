@@ -42,12 +42,19 @@ $.extend(IOMy.common,{
 	CoreVariablesInitialised: false,
     CoreVariableRefreshIntervalInstance : null,
 	
+	//============================================//
+	//== Core Refresh Variables                 ==//
+	//============================================//
+	bCoreRefreshInProgress: false,
+	
 	
 	//============================================//
 	//== USER VARIABLES							==//
 	//============================================//
 	//-- Arrays used to store the User's variables
 	//--------------------------------------------//
+    CurrentUsername         : null,
+    
 	UserVars : {},			//-- TODO: Check if this variable is still used anywhere --//
 	
 	UserInfo : {},
@@ -114,6 +121,7 @@ $.extend(IOMy.common,{
 	//== Boolean flags      					==//
 	//============================================//
     bItemNameChangedMustRefresh     : false,        //-- BOOLEAN:       Indicates whether to refresh certain pages after changing the name of an item   --//
+    bSessionTerminated              : false,        //-- BOOLEAN:       Indicates whether the session was terminated for whatever reason. Sets to true when an API request (OData or PHP) encounters a HTTP 403 error.   --//
     
 	//============================================//
 	//== CONFIGURATION VARIABLES				==//
@@ -191,7 +199,12 @@ $.extend(IOMy.common,{
 				sErrMesg += "These are common causes for this error message. \n";
 				sErrMesg += "1.) Database Problem: \tThe IOMy Database may have stopped running! Please check with whoever manages your system. \n";
 				sErrMesg += "2.) IOMY Version Upgrade: \tThe Person that manages your IOMy system may be rolling out a new update. \n";
-				IOMy.common.showError(sErrMesg, "Authentication Error");
+				IOMy.common.showError(sErrMesg, "Authentication Error",
+                    function () {
+                        // Refresh the page to redirect to the login page.
+                        window.location.reload(true);
+                    }
+                );
 				
 				return false;
 				
@@ -430,6 +443,8 @@ $.extend(IOMy.common,{
 
             onSuccess : function (responseType, data) {
                 try {
+                    me.Countries = [];
+                    
                     for (var i = 0; i < data.length; i++) {
                         me.Countries.push({
                             CountryId : data[i].COUNTRIES_PK,
@@ -465,6 +480,8 @@ $.extend(IOMy.common,{
 
             onSuccess : function (responseType, data) {
                 try {
+                    me.Languages = [];
+                    
                     for (var i = 0; i < data.length; i++) {
                         me.Languages.push({
                             LanguageId : data[i].LANGUAGE_PK,
@@ -500,6 +517,8 @@ $.extend(IOMy.common,{
 
             onSuccess : function (responseType, data) {
                 try {
+                    me.StatesProvinces = [];
+                    
                     for (var i = 0; i < data.length; i++) {
                         me.StatesProvinces.push({
                             StateProvinceId : data[i].STATEPROVINCE_PK,
@@ -535,6 +554,8 @@ $.extend(IOMy.common,{
 
             onSuccess : function (responseType, data) {
                 try {
+                    me.PostCodes = [];
+                    
                     for (var i = 0; i < data.length; i++) {
                         me.PostCodes.push({
                             PostCodeId : data[i].POSTCODE_PK,
@@ -570,6 +591,8 @@ $.extend(IOMy.common,{
 
             onSuccess : function (responseType, data) {
                 try {
+                    me.Timezones = [];
+                    
                     for (var i = 0; i < data.length; i++) {
                         me.Timezones.push({
                             TimezoneId : data[i].TIMEZONE_PK,
@@ -630,9 +653,15 @@ $.extend(IOMy.common,{
                         "PremiseId" : data[i].ROOM_PREMISE_FK
 					});
 				}
-				
-				//-- Update the Timestamp on when the LinkList was last updated --//
-				me.LinkListLastUpdate = new Date();
+                
+                //--------------------------------------------------------//
+                // ONLY add these hard-coded devices if user is FRESHWATER1,
+                // our debug user.
+                //--------------------------------------------------------//
+                if (IOMy.common.CurrentUsername === "FRESHWATER1") {
+                    console.log("Logged In as debug user: FRESHWATER1");
+                    IOMy.experimental.addDemoDataToLinkList();
+                }
                 
 				//-- Perform the "onSuccess" function if applicable --//
 				if(oConfig.onSuccess !== undefined) {
@@ -669,6 +698,14 @@ $.extend(IOMy.common,{
 						"LinkTypeName" : data[i].LINKTYPE_NAME,
 					});
 				}
+                
+                //--------------------------------------------------------//
+                // ONLY add these hard-coded devices if user is FRESHWATER1,
+                // our debug user.
+                //--------------------------------------------------------//
+                if (IOMy.common.CurrentUsername === "FRESHWATER1") {
+                    IOMy.experimental.addDemoDataToLinkTypeList();
+                }
 				
 				//-- Perform the "onSuccess" function if applicable --//
 				if(oConfig.onSuccess !== undefined) {
@@ -691,8 +728,10 @@ $.extend(IOMy.common,{
     //========================================================================//
     
     /**
-     * Starts the procession of procedures that will refresh core variables. These
-     * are the variables being refreshed.
+     * Starts the procession of procedures that will reloads all the core
+     * variables into memory to so that iOmy code can fetch the necessary
+     * information without constantly polling the database. These are the
+     * variables being refreshed.
      * 
      * 1. Locale Information Lists
      * 2. Premise List
@@ -704,16 +743,34 @@ $.extend(IOMy.common,{
      * 
      * There are seven steps.
      */
-    ReloadCoreVariables : function (fnCallback) {
-        // STEP 1 of 7: Procedures for refreshing locale lists.
-        this.LoadCountries();
-        this.LoadLanguages();
-        this.LoadStatesProvinces();
-        this.LoadPostCodes();
-        this.LoadTimezones();
+    ReloadCoreVariables : function (fnCallback, fnFailCallback) {
+        var me = this;
         
-        // Do the next steps
-        this.ReloadVariablePremiseList(fnCallback);
+        if( IOMy.common.bCoreRefreshInProgress===false ) {
+            IOMy.common.bCoreRefreshInProgress = true;
+            
+            // Load Current Username into memory.
+            
+            // STEP 1 of 7: Procedures for refreshing locale lists.
+            this.LoadCountries();
+            this.LoadLanguages();
+            this.LoadStatesProvinces();
+            this.LoadPostCodes();
+            this.LoadTimezones();
+        
+            // Do the next steps
+            IOMy.functions.getCurrentUsername( function () {
+                me.ReloadVariablePremiseList(fnCallback, fnFailCallback);
+            });
+        } else {
+            //-- Define an empty function if fnFailCallback is undefined. --//
+            if (fnFailCallback === undefined) {
+                fnFailCallback = function () {};
+            }
+            //-- Error has occurred --//
+            IOMy.common.showError( "Reloading of Core variables is in already progress! New attempt has aborted.", "Core Variables");
+            fnFailCallback();
+        }
     },
     
     /**
@@ -721,13 +778,13 @@ $.extend(IOMy.common,{
      * 
      * Next step is refreshing the hub list if successful.
      */
-    ReloadVariablePremiseList : function (fnCallback) {
+    ReloadVariablePremiseList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
         try {
             me.RefreshPremiseList({
 				onSuccess : function () {
-                    me.ReloadVariableHubList(fnCallback);
+                    me.ReloadVariableHubList(fnCallback, fnFailCallback);
                 }
             });
         } catch (e) {
@@ -740,13 +797,13 @@ $.extend(IOMy.common,{
      * 
      * Next step is refreshing the room list if successful.
      */
-    ReloadVariableHubList : function (fnCallback) {
+    ReloadVariableHubList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
         try {
             me.RefreshHubList({
 				onSuccess : function () {
-                    me.ReloadVariableRoomList(fnCallback);
+                    me.ReloadVariableRoomList(fnCallback, fnFailCallback);
                 }
             });
         } catch (e) {
@@ -759,13 +816,13 @@ $.extend(IOMy.common,{
      * 
      * Next step is refreshing the link list if successful.
      */
-    ReloadVariableRoomList : function (fnCallback) {
+    ReloadVariableRoomList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
         try {
             me.RetreiveRoomList({
 				onSuccess : function () {
-                    me.ReloadVariableLinkList(fnCallback);
+                    me.ReloadVariableLinkList(fnCallback, fnFailCallback);
                 }
             });
         } catch (e) {
@@ -778,13 +835,13 @@ $.extend(IOMy.common,{
      * 
      * Next step is refreshing the link type list if successful.
      */
-    ReloadVariableLinkList : function (fnCallback) {
+    ReloadVariableLinkList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
         try {
             me.RetrieveLinkList({
 				onSuccess : function () {
-                    me.ReloadVariableLinkTypeList(fnCallback);
+                    me.ReloadVariableLinkTypeList(fnCallback, fnFailCallback);
                 }
             });
         } catch (e) {
@@ -797,13 +854,13 @@ $.extend(IOMy.common,{
      * 
      * Next step is refreshing the thing list if successful.
      */
-    ReloadVariableLinkTypeList : function (fnCallback) {
+    ReloadVariableLinkTypeList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
         try {
             me.RetrieveLinkTypeList({
 				onSuccess : function () {
-                    me.ReloadVariableThingList(fnCallback);
+                    me.ReloadVariableThingList(fnCallback, fnFailCallback);
                 }
             });
         } catch (e) {
@@ -816,22 +873,32 @@ $.extend(IOMy.common,{
      * 
      * Either load the home page or whatever function is parsed.
      */
-    ReloadVariableThingList : function (fnCallback) {
+    ReloadVariableThingList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         var fnOnComplete;
+        var fnOnFail;
         
         //------------------------------------------------------//
         // Collect the call back function or create the default function, which
         // is to carry the user to the home page.
         //------------------------------------------------------//
-        if (fnCallback !== undefined)
+        if (fnCallback !== undefined) {
             fnOnComplete = fnCallback;
-        else
+        } else {
             fnOnComplete = function () {};
+        }
+        
+        
+        if (fnCallback !== undefined) {
+            fnOnFail = fnFailCallback;
+        } else {
+            fnOnFail = function () {};
+        }
         
         try {
             IOMy.apiphp.RefreshThingList({
-				onSuccess : fnOnComplete
+				onSuccess   : fnOnComplete,
+                onFail      : fnOnFail
             });
         } catch (e) {
             jQuery.sap.log.error("ReloadVariableThingList Error! "+e.message);
@@ -841,63 +908,76 @@ $.extend(IOMy.common,{
 	//================================================================//
 	//== Refresh Variables											==//
 	//================================================================//
-	RefreshCoreVariables: function(bFirstLogin) {
+    /**
+     * DEPRECATED: Use ReloadCoreVariables() instead!
+     * 
+     * Reloads all the core variables into memory to so that iOmy code can fetch
+     * the necessary information without constantly polling the database.
+     */
+	RefreshCoreVariables: function() {
 		//-- NOTE1: bFirstLogin should always be set to false with the exception of the first time it is loaded when the user logs in! --//
 		var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
 		
 		try {
-			//-- REFRESH PREMISE LIST --//
-			me.RefreshPremiseList({
-				onSuccess : function () {
-					//-- REFRESH HUB LIST --//
-                    IOMy.common.RefreshHubList({
-                        onSuccess: $.proxy(function () {
-                            
-                            //-- REFRESH ROOM LIST --//
-                            IOMy.common.RetreiveRoomList({
-                                onSuccess: $.proxy(function() {
+			if( IOMy.common.bCoreRefreshInProgress===false ) {
+				//-- REFRESH PREMISE LIST --//
+				me.RefreshPremiseList({
+					onSuccess : function () {
+						//-- REFRESH HUB LIST --//
+                        IOMy.common.RefreshHubList({
+                            onSuccess: $.proxy(function () {
+                                
+                                //-- REFRESH ROOM LIST --//
+                                IOMy.common.RetreiveRoomList({
+                                    onSuccess: $.proxy(function() {
+	
+                                        //-- REFRESH LINK LIST --//
+                                        IOMy.common.RetrieveLinkList( {
+                                            onSuccess: $.proxy(function() {
+	
+                                                //-- REFRESH LINK TYPES LIST --//
+                                                IOMy.common.RetrieveLinkTypeList( {
+                                                    onSuccess : function () {
+                                                        //-- REFRESH IO LIST --//
+                                                        IOMy.apiphp.RefreshThingList( {
+                                                            onSuccess: $.proxy(function() {
 
-                                    //-- REFRESH LINK LIST --//
-                                    IOMy.common.RetrieveLinkList( {
-                                        onSuccess: $.proxy(function() {
+                                                                try {
+                                                                    //-- Flag that the Core Variables have been configured --//
+                                                                    IOMy.common.CoreVariablesInitialised = true;
+                                                                    IOMy.common.bCoreRefreshInProgress = false;
+                                                                    //-- Reset the Navigation array and index after switching users --//
+                                                                    IOMy.common.NavPagesNavigationArray = [];
+                                                                    IOMy.common.NavPagesCurrentIndex = -1;
+                                                                    //-- LOAD THE 1ST Page --//
+                                                                    IOMy.common.NavigationChangePage( IOMy.common.sNavigationDefaultPage, {}, true);
 
-//                                            //-- REFRESH LINK TYPES LIST --//
-                                            IOMy.common.RetrieveLinkTypeList( {
-                                                onSuccess : function () {
-                                                    //-- REFRESH IO LIST --//
-                                                    IOMy.apiphp.RefreshThingList( {
-                                                        onSuccess: $.proxy(function() {
+                                                                } catch(e654321) {
+                                                                    //-- ERROR:  TODO: Write a better error message--//
+                                                                    jQuery.sap.log.error(">>>>Critical Error Loading \"Navigation Main\" page<<<<\n"+e654321.message);
+                                                                }
+                                                            }, me)
+                                                        }); //-- END IO LIST --//
+                                                        
+                                                    }
+                                                }); //-- END LINK TYPES LIST --//
 
-                                                            try {
-                                                                //-- Flag that the Core Variables have been configured --//
-                                                                IOMy.common.CoreVariablesInitialised = true;
-                                                                //-- Reset the Navigation array and index after switching users --//
-                                                                IOMy.common.NavPagesNavigationArray = [];
-                                                                IOMy.common.NavPagesCurrentIndex = -1;
-                                                                //-- LOAD THE 1ST Page --//
-                                                                IOMy.common.NavigationChangePage( IOMy.common.sNavigationDefaultPage, {}, true);
+                                            }, me)
+                                        }); //-- END LINK LIST --//
 
-                                                            } catch(e654321) {
-                                                                //-- ERROR:  TODO: Write a better error message--//
-                                                                jQuery.sap.log.error(">>>>Critical Error Loading \"Navigation Main\" page<<<<\n"+e654321.message);
-                                                            }
-                                                        }, me)
-                                                    }); //-- END IO LIST --//
-                                                    
-                                                }
-                                            }); //-- END LINK TYPES LIST --//
-
-                                        }, me)
-                                    }); //-- END LINK LIST --//
-
-                                }, me)
-                            }); //-- END ROOMS LIST --//
-                            
-                        }, me)
-                    }); //-- END HUB LIST --//
-                    
-				}
-			}); //-- END PREMISE LIST --//
+                                    }, me)
+                                }); //-- END ROOMS LIST --//
+                                
+                            }, me)
+                        }); //-- END HUB LIST --//
+                        
+					}
+				}); //-- END PREMISE LIST --//
+			} else {
+				//-- Error has occurred --//
+				IOMy.common.showError( "Reloading of Core variables is in already progress! New attempt has aborted.", "Core Variables");
+				
+			}
 		} catch(e1) {
 			jQuery.sap.log.error("RefreshCoreVariables Error! "+e1.message);
 		}

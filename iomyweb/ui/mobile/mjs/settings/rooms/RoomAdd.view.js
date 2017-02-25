@@ -45,14 +45,21 @@ sap.ui.jsview("mjs.settings.rooms.RoomAdd", {
 		var me = this;
 		this.destroyContent();
 		
-		var oPage = new sap.m.Page(me.createId("page"), {
-			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			content: [
-				//-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("ADD ROOM", "", me )
-			],
-			footer : IOMy.widgets.getAppFooter()
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+		var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/settings",
+            title : "Add Room"
+        });		
+		
+//		var oPage = new sap.m.Page(me.createId("page"), {
+//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			content: [
+//				//-- Navigational Header --//
+//				IOMy.widgets.getNavigationalSubHeader("ADD ROOM", "", me )
+//			],
+//			footer : IOMy.widgets.getAppFooter()
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
 		
 		
 		return oPage;

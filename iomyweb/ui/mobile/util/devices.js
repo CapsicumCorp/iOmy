@@ -53,6 +53,27 @@ $.extend(IOMy.devices,{
     },
     
     /**
+     * Returns a map of the link a thing (specified by its ID) is connected to.
+     * 
+     * @param {type} iThingId           // ID of the thing
+     * @returns {JS Object}             // Link referenced by its thing/item
+     */
+    GetLinkOfThing : function(iThingId) {
+        var iLinkId = IOMy.common.ThingList["_"+iThingId].LinkId;
+        
+        var oLink = null;
+        // Using the Link List found in common because the scope is global.
+        for (var j = 0; j < IOMy.common.LinkList.length; j++) {
+            if (IOMy.common.LinkList[j].LinkId === iLinkId) {
+                oLink = IOMy.common.LinkList[j];
+                break;
+            }
+        }
+        
+        return oLink;
+    },
+    
+    /**
      * Function that performs an AJAX request to assign a given link to a given room
      * 
      * @param {type} iLinkId                ID of the link to assign to a room
@@ -78,8 +99,16 @@ $.extend(IOMy.devices,{
                     IOMy.common.showSuccess(sLinkType+" successfully assigned", "Success",
                         function () {
                             
-                            // Head back to the previous page.
-                            IOMy.common.NavigationTriggerBackForward(false);
+                            // Head back to the previous page after the core variables have been updated.
+                            IOMy.common.ReloadCoreVariables(
+                                function () {
+                                    if (IOMy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
+                                        oApp.to("pSettingsThingAdd", { LinkId: iLinkId });
+                                    } else {
+                                        IOMy.common.NavigationTriggerBackForward(false);
+                                    }
+                                }
+                            );
                             
                         },
                     "UpdateMessageBox");
@@ -100,7 +129,7 @@ $.extend(IOMy.devices,{
      * Validates the room selection mainly just to ensure that everything (like
      * the room ID) is correct and hasn't been tampered with in some way.
      * 
-     * @param {UI5 widget} oScope
+     * @param {UI5 view} oScope
      * @returns {map}
      */
     ValidateRoom : function (oScope) {
@@ -169,6 +198,33 @@ $.extend(IOMy.devices,{
         } else if ( aDeviceData.DeviceTypeId===14) {
             oUIObject = IOMy.devices.weatherfeed.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
             
+        //-----------------------------------//
+        // --- Experimental Device Pages --- //
+        //-----------------------------------//
+        //-- Door Lock --//
+        } else if ( aDeviceData.DeviceTypeId==="-1") {
+            oUIObject = IOMy.devices.doorlock.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            
+        //-- Window Sensor --//
+        } else if ( aDeviceData.DeviceTypeId==="-2") {
+            oUIObject = IOMy.devices.windowsensor.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            
+        //-- Bluetooth Scales --//
+        } else if ( aDeviceData.DeviceTypeId==="-3") {
+            oUIObject = IOMy.devices.bluetoothscale.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            
+        //-- Blood Pressure Montior --//
+        } else if ( aDeviceData.DeviceTypeId==="-4") {
+            oUIObject = IOMy.devices.bpm.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            
+        //-- Remote Controlled Garage Door --//
+        } else if ( aDeviceData.DeviceTypeId==="-5") {
+           oUIObject = IOMy.devices.garagedoor.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            
+        //-- Thermostat --//
+        } else if ( aDeviceData.DeviceTypeId==="-6") {
+           oUIObject = IOMy.devices.thermostat.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            
         }
 		
 		
@@ -216,6 +272,33 @@ $.extend(IOMy.devices,{
         //-- Weather Feed --//
         } else if ( aDeviceData.DeviceTypeId===14) {
             oUIObject = IOMy.devices.weatherfeed.GetCommonUIForDeviceOverview( sPrefix, oViewScope, aDeviceData );
+            
+        //-----------------------------------//
+        // --- Experimental Device Pages --- //
+        //-----------------------------------//
+        //-- Door Lock --//
+        } else if ( aDeviceData.DeviceTypeId==="-1") {
+            oUIObject = IOMy.devices.doorlock.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            
+        //-- Window Sensor --//
+        } else if ( aDeviceData.DeviceTypeId==="-2") {
+            oUIObject = IOMy.devices.windowsensor.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            
+        //-- Bluetooth Scales --//
+        } else if ( aDeviceData.DeviceTypeId==="-3") {
+            oUIObject = IOMy.devices.bluetoothscale.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            
+        //-- Blood Pressure Montior --//
+        } else if ( aDeviceData.DeviceTypeId==="-4") {
+            oUIObject = IOMy.devices.bpm.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            
+        //-- Remote Controlled Garage Door --//
+        } else if ( aDeviceData.DeviceTypeId==="-5") {
+            oUIObject = IOMy.devices.garagedoor.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            
+        //-- Remote Controlled Garage Door --//
+        } else if ( aDeviceData.DeviceTypeId==="-6") {
+            oUIObject = IOMy.devices.thermostat.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         }
 		

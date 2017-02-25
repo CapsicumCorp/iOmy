@@ -157,7 +157,7 @@ if($bError===false) {
 	//----------------------------------------------------//
 	try {
 		//-- Extract the "Mode" Parameter --//
-		$sPostMode = $aHTTPData["Mode"];		//-- NOTE: What modes are valid change based upon the if the config works or not --//
+		$sPostMode = $aHTTPData["Mode"];        //-- NOTE: What modes are valid change based upon the if the config works or not --//
 		
 		//----------------------------------------------------------------------------//
 		//-- IF the PHP Configuration is written then only have a couple of modes   --//
@@ -198,6 +198,13 @@ if($bError===false) {
 				$sPostMode!=="02_CreateForeignKeys1"     && $sPostMode!=="02_CreateForeignKeys2"     && 
 				$sPostMode!=="02_CreateForeignKeys3"     && $sPostMode!=="02_CreateForeignKeys4"     && 
 				$sPostMode!=="02_CreateForeignKeys5"     && $sPostMode!=="02_CreateForeignKeys6"     && 
+				$sPostMode!=="02_CreateForeignKeys7"     && $sPostMode!=="02_CreateForeignKeys8"     && 
+				$sPostMode!=="02_CreateForeignKeys9"     && $sPostMode!=="02_CreateForeignKeys10"    && 
+				$sPostMode!=="02_CreateForeignKeys11"    && $sPostMode!=="02_CreateForeignKeys12"    && 
+				$sPostMode!=="02_CreateForeignKeys13"    && $sPostMode!=="02_CreateForeignKeys14"    && 
+				$sPostMode!=="02_CreateForeignKeys15"    && $sPostMode!=="02_CreateForeignKeys16"    && 
+				$sPostMode!=="02_CreateForeignKeys17"    && $sPostMode!=="02_CreateForeignKeys18"    && 
+				$sPostMode!=="02_CreateForeignKeys19"    && $sPostMode!=="02_CreateForeignKeys20"    && 
 				$sPostMode!=="02_CreateViewsPublic1"     && $sPostMode!=="02_CreateViewsPublic2"     && 
 				$sPostMode!=="02_CreateViewsPublic3"     && $sPostMode!=="02_CreateViewsPublic4"     && 
 				$sPostMode!=="02_CreateViewsPublic5"     && $sPostMode!=="02_CreateViewsPublic6"     && 
@@ -247,6 +254,13 @@ if($bError===false) {
 					$sPostMode==="02_CreateForeignKeys1"     || $sPostMode==="02_CreateForeignKeys2"     || 
 					$sPostMode==="02_CreateForeignKeys3"     || $sPostMode==="02_CreateForeignKeys4"     || 
 					$sPostMode==="02_CreateForeignKeys5"     || $sPostMode==="02_CreateForeignKeys6"     || 
+					$sPostMode==="02_CreateForeignKeys7"     || $sPostMode==="02_CreateForeignKeys8"     || 
+					$sPostMode==="02_CreateForeignKeys9"     || $sPostMode==="02_CreateForeignKeys10"    || 
+					$sPostMode==="02_CreateForeignKeys11"    || $sPostMode==="02_CreateForeignKeys12"    || 
+					$sPostMode==="02_CreateForeignKeys13"    || $sPostMode==="02_CreateForeignKeys14"    || 
+					$sPostMode==="02_CreateForeignKeys15"    || $sPostMode==="02_CreateForeignKeys16"    || 
+					$sPostMode==="02_CreateForeignKeys17"    || $sPostMode==="02_CreateForeignKeys18"    || 
+					$sPostMode==="02_CreateForeignKeys19"    || $sPostMode==="02_CreateForeignKeys20"    || 
 					$sPostMode==="02_CreateViewsPublic1"     || $sPostMode==="02_CreateViewsPublic2"     || 
 					$sPostMode==="02_CreateViewsPublic3"     || $sPostMode==="02_CreateViewsPublic4"     || 
 					$sPostMode==="02_CreateViewsPublic5"     || $sPostMode==="02_CreateViewsPublic6"     || 
@@ -360,6 +374,13 @@ if($bError===false) {
 				$sPostMode==="02_CreateForeignKeys1"     || $sPostMode==="02_CreateForeignKeys2"     || 
 				$sPostMode==="02_CreateForeignKeys3"     || $sPostMode==="02_CreateForeignKeys4"     || 
 				$sPostMode==="02_CreateForeignKeys5"     || $sPostMode==="02_CreateForeignKeys6"     || 
+				$sPostMode==="02_CreateForeignKeys7"     || $sPostMode==="02_CreateForeignKeys8"     || 
+				$sPostMode==="02_CreateForeignKeys9"     || $sPostMode==="02_CreateForeignKeys10"    || 
+				$sPostMode==="02_CreateForeignKeys11"    || $sPostMode==="02_CreateForeignKeys12"    || 
+				$sPostMode==="02_CreateForeignKeys13"    || $sPostMode==="02_CreateForeignKeys14"    || 
+				$sPostMode==="02_CreateForeignKeys15"    || $sPostMode==="02_CreateForeignKeys16"    || 
+				$sPostMode==="02_CreateForeignKeys17"    || $sPostMode==="02_CreateForeignKeys18"    || 
+				$sPostMode==="02_CreateForeignKeys19"    || $sPostMode==="02_CreateForeignKeys20"    || 
 				$sPostMode==="02_CreateViewsPublic1"     || $sPostMode==="02_CreateViewsPublic2"     || 
 				$sPostMode==="02_CreateViewsPublic3"     || $sPostMode==="02_CreateViewsPublic4"     || 
 				$sPostMode==="02_CreateViewsPublic5"     || $sPostMode==="02_CreateViewsPublic6"     || 
@@ -971,6 +992,13 @@ if($bError===false) {
 			$sPostMode==="02_CreateForeignKeys1"     || $sPostMode==="02_CreateForeignKeys2"     || 
 			$sPostMode==="02_CreateForeignKeys3"     || $sPostMode==="02_CreateForeignKeys4"     || 
 			$sPostMode==="02_CreateForeignKeys5"     || $sPostMode==="02_CreateForeignKeys6"     || 
+			$sPostMode==="02_CreateForeignKeys7"     || $sPostMode==="02_CreateForeignKeys8"     || 
+			$sPostMode==="02_CreateForeignKeys9"     || $sPostMode==="02_CreateForeignKeys10"    || 
+			$sPostMode==="02_CreateForeignKeys11"    || $sPostMode==="02_CreateForeignKeys12"    || 
+			$sPostMode==="02_CreateForeignKeys13"    || $sPostMode==="02_CreateForeignKeys14"    || 
+			$sPostMode==="02_CreateForeignKeys15"    || $sPostMode==="02_CreateForeignKeys16"    || 
+			$sPostMode==="02_CreateForeignKeys17"    || $sPostMode==="02_CreateForeignKeys18"    || 
+			$sPostMode==="02_CreateForeignKeys19"    || $sPostMode==="02_CreateForeignKeys20"    || 
 			$sPostMode==="02_CreateViewsPublic1"     || $sPostMode==="02_CreateViewsPublic2"     || 
 			$sPostMode==="02_CreateViewsPublic3"     || $sPostMode==="02_CreateViewsPublic4"     || 
 			$sPostMode==="02_CreateViewsPublic5"     || $sPostMode==="02_CreateViewsPublic6"     || 
@@ -1054,29 +1082,85 @@ if($bError===false) {
 						//-- Foreign Keys   --//
 						//--------------------//
 						case "02_CreateForeignKeys1":
-							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array("Core", "Countries", "Language", "Postcode") );
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Core", "Countries", "Users" ) );
 							break;
 							
 						case "02_CreateForeignKeys2":
-							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Users", "UserAddress", "Permissions", "Premise", "PremiseLog" ) );
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Language", "Postcode" ) );
 							break;
 							
 						case "02_CreateForeignKeys3":
-							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "PremiseInfo1", "Rooms", "Hub", "Comm") );
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "UserAddress" ) );
 							break;
 							
 						case "02_CreateForeignKeys4":
-							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Link", "LinkConn1", "Thing" ) );
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Permissions1" ) );
 							break;
 							
 						case "02_CreateForeignKeys5":
-							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "IO", "Data1", "Data2", "Data3", "Data4" ) );
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Permissions2" ) );
 							break;
 							
 						case "02_CreateForeignKeys6":
-							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Data5", "RSType", "UoM" ) );
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Premise" ) );
 							break;
 							
+						case "02_CreateForeignKeys7":
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "PremiseLog" ) );
+							break;
+							
+						case "02_CreateForeignKeys8":
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "PremiseInfo1" ) );
+							break;
+							
+						case "02_CreateForeignKeys9":
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Rooms", "Hub" ) );
+							break;
+							
+						case "02_CreateForeignKeys10":
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Comm" ) );
+							break;
+							
+						case "02_CreateForeignKeys11":
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Link" ) );
+							break;
+							
+						case "02_CreateForeignKeys12":
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "LinkConn1" ) );
+							break;
+							
+						case "02_CreateForeignKeys13":
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Thing" ) );
+							break;
+							
+						case "02_CreateForeignKeys14":
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "IO" ) );
+							break;
+							
+						case "02_CreateForeignKeys15":
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Data1" ) );
+							break;
+						
+						case "02_CreateForeignKeys16":
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Data2", "Data3" ) );
+							break;
+							
+						case "02_CreateForeignKeys17":
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Data4" ) );
+							break;
+							
+						case "02_CreateForeignKeys18":
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Data5" ) );
+							break;
+							
+						case "02_CreateForeignKeys19":
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "RSType" ) );
+							break;
+							
+						case "02_CreateForeignKeys20":
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "UoM" ) );
+							break;
+						
 						//--------------------//
 						//-- Views          --//
 						//--------------------//
@@ -1112,23 +1196,23 @@ if($bError===false) {
 							
 						case "02_CreateViewsRestricted2":
 							//$aResult = DB_CreateViewsRestricted2( $sPostDatabaseName );
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateUsersHub", "PrivateUsersRooms", "PrivateUsersComm", "PrivateUsersLink", "PrivateUsersThing", "PrivateUsersIO" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateUsersHub", "PrivateUsersPremiseRooms", "PrivateUsersRooms", "PrivateUsersComm", "PrivateUsersLink", "PrivateUsersThing" ) );
 							break;
 							
 						case "02_CreateViewsRestricted3":
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateUsersServerPerms", "PrivateDataTinyInt", "PrivateDataInt", "PrivateDataBigInt", "PrivateDataFloat" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateUsersIO", "PrivateUsersServerPerms", "PrivateDataTinyInt", "PrivateDataInt", "PrivateDataBigInt" ) );
 							break;
 							
 						case "02_CreateViewsRestricted4":
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateDataTinyString", "PrivateDataShortString", "PrivateDataMedString", "PrivateDataLongString", "PrivateDataString255" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateDataFloat", "PrivateDataTinyString", "PrivateDataShortString", "PrivateDataMedString", "PrivateDataLongString" ) );
 							break;
 							
 						case "02_CreateViewsRestricted5":
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateDataTinyIntEnum", "PrivateDataIntEnum", "PrivateDataBigIntEnum", "WatchInputsHub", "WatchInputsComm" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PrivateDataString255", "PrivateDataTinyIntEnum", "PrivateDataIntEnum", "PrivateDataBigIntEnum" ) );
 							break;
 							
 						case "02_CreateViewsRestricted6":
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "WatchInputsLink", "WatchInputsThing", "WatchInputsIO" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "WatchInputsHub", "WatchInputsComm", "WatchInputsLink", "WatchInputsThing", "WatchInputsIO" ) );
 							break;
 							
 						//--------------------//

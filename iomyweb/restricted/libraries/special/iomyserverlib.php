@@ -23,7 +23,7 @@
 function DB_CreateDatabase( $sDatabaseName ) {
 	//------------------------------------------------------------------------//
 	//-- DESCRIPTION:                                                       --//
-	//--    This function is used to add a new database.          --//
+	//--    This function is used to add a new database.                    --//
 	//------------------------------------------------------------------------//
 	
 	//----------------------------------------------------//
@@ -87,15 +87,6 @@ function DB_CreateDatabase( $sDatabaseName ) {
 }
 
 
-
-
-function DB_CreateTables1( $sDBName ) {
-	//------------------------------------------------------------------------//
-	//-- DESCRIPTION:                                                       --//
-	//--    This function is used to add the tables to the database.        --//
-	//------------------------------------------------------------------------//
-
-}
 
 
 function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
@@ -179,7 +170,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "   primary key (COUNTRIES_PK)\n";
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
 			$sSQL .= "alter table `".$sDBName."`.`COUNTRIES` comment 'Stores a list of supported countries.';\n";
-
+			
 			$sSQL .= "create table `".$sDBName."`.`CURRENCIES` \n";
 			$sSQL .= "(\n";
 			$sSQL .= "   CURRENCIES_PK        int not null auto_increment comment 'Primary Key', \n";
@@ -1086,8 +1077,12 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/* Table: POSTCODE & TIMEZONE                                   */
 		/*==============================================================*/
 		case 'Postcode':
-			$sSQL .= "alter table `".$sDBName."`.POSTCODE add constraint FK_POSTCODE_STATEPROVINCE foreign key (POSTCODE_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.POSTCODE add constraint FK_POSTCODE_TIMEZONE foreign key (POSTCODE_TIMEZONES_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.POSTCODE add constraint FK_POSTCODE_STATEPROVINCE foreign key (POSTCODE_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.POSTCODE add constraint FK_POSTCODE_TIMEZONE foreign key (POSTCODE_TIMEZONES_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.POSTCODE \n";
+			$sSQL .= "    add constraint FK_POSTCODE_STATEPROVINCE foreign key (POSTCODE_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_POSTCODE_TIMEZONE foreign key (POSTCODE_TIMEZONES_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
 			break;
 			
 		/*==============================================================*/
@@ -1102,23 +1097,46 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/* Table: USERADDRESS & USERSGENDER                             */
 		/*==============================================================*/
 		case 'UserAddress':
-			$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_COUNTRIES foreign key (USERADDRESS_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_LANGUAGE foreign key (USERADDRESS_LANGUAGE_FK) references `".$sDBName."`.LANGUAGE (LANGUAGE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_POSTCODE foreign key (USERADDRESS_POSTCODE_FK) references `".$sDBName."`.POSTCODE (POSTCODE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_STATEPROVINCE foreign key (USERADDRESS_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_TIMEZONE foreign key (USERADDRESS_TIMEZONE_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_USERS foreign key (USERADDRESS_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
-
+			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_COUNTRIES foreign key (USERADDRESS_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_LANGUAGE foreign key (USERADDRESS_LANGUAGE_FK) references `".$sDBName."`.LANGUAGE (LANGUAGE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_POSTCODE foreign key (USERADDRESS_POSTCODE_FK) references `".$sDBName."`.POSTCODE (POSTCODE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_STATEPROVINCE foreign key (USERADDRESS_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_TIMEZONE foreign key (USERADDRESS_TIMEZONE_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_USERS foreign key (USERADDRESS_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.USERADDRESS \n";
+			$sSQL .= "    add constraint FK_USERADDRESS_COUNTRIES foreign key (USERADDRESS_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_USERADDRESS_LANGUAGE foreign key (USERADDRESS_LANGUAGE_FK) references `".$sDBName."`.LANGUAGE (LANGUAGE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_USERADDRESS_POSTCODE foreign key (USERADDRESS_POSTCODE_FK) references `".$sDBName."`.POSTCODE (POSTCODE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_USERADDRESS_STATEPROVINCE foreign key (USERADDRESS_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_USERADDRESS_TIMEZONE foreign key (USERADDRESS_TIMEZONE_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_USERADDRESS_USERS foreign key (USERADDRESS_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+			
+			
+			
 			break;
 			
 		/*==============================================================*/
 		/* Table: PERMISSIONS                                           */
 		/*==============================================================*/
-		case 'Permissions':
-			$sSQL .= "alter table `".$sDBName."`.PERMPREMISE add constraint FK_PERMPREMISE_PREMISE foreign key (PERMPREMISE_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PERMPREMISE add constraint FK_PERMPREMISE_USERS foreign key (PERMPREMISE_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PERMROOMS add constraint FK_PERMROOMS_ROOMS foreign key (PERMROOMS_ROOMS_FK) references `".$sDBName."`.ROOMS (ROOMS_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PERMROOMS add constraint FK_PERMROOMS_USERS foreign key (PERMROOMS_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+		case 'Permissions1':
+			//$sSQL .= "alter table `".$sDBName."`.PERMPREMISE add constraint FK_PERMPREMISE_PREMISE foreign key (PERMPREMISE_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PERMPREMISE add constraint FK_PERMPREMISE_USERS foreign key (PERMPREMISE_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.PERMPREMISE \n";
+			$sSQL .= "    add constraint FK_PERMPREMISE_PREMISE foreign key (PERMPREMISE_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PERMPREMISE_USERS foreign key (PERMPREMISE_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+			
+			break;
+			
+		case 'Permissions2':
+			//$sSQL .= "alter table `".$sDBName."`.PERMROOMS add constraint FK_PERMROOMS_ROOMS foreign key (PERMROOMS_ROOMS_FK) references `".$sDBName."`.ROOMS (ROOMS_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PERMROOMS add constraint FK_PERMROOMS_USERS foreign key (PERMROOMS_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.PERMROOMS \n";
+			$sSQL .= "    add constraint FK_PERMROOMS_ROOMS foreign key (PERMROOMS_ROOMS_FK) references `".$sDBName."`.ROOMS (ROOMS_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PERMROOMS_USERS foreign key (PERMROOMS_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+			
 			$sSQL .= "alter table `".$sDBName."`.PERMSERVER add constraint FK_PERMSERVER_USERS foreign key (PERMSERVER_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
 			break;
 
@@ -1127,32 +1145,55 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/*==============================================================*/
 		case 'Premise':
 			$sSQL .= "alter table `".$sDBName."`.PREMISE add constraint FK_PREMISE_PREMISEINFO foreign key (PREMISE_PREMISEINFO_FK) references `".$sDBName."`.PREMISEINFO (PREMISEINFO_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_COUNTRIES foreign key (PREMISEADDRESS_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_LANGUAGE foreign key (PREMISEADDRESS_LANGUAGE_FK) references `".$sDBName."`.LANGUAGE (LANGUAGE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_POSTCODE foreign key (PREMISEADDRESS_POSTCODE_FK) references `".$sDBName."`.POSTCODE (POSTCODE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_PREMISE foreign key (PREMISEADDRESS_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_STATEPROVINCE foreign key (PREMISEADDRESS_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_TIMEZONE foreign key (PREMISEADDRESS_TIMEZONE_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_COUNTRIES foreign key (PREMISEADDRESS_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_LANGUAGE foreign key (PREMISEADDRESS_LANGUAGE_FK) references `".$sDBName."`.LANGUAGE (LANGUAGE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_POSTCODE foreign key (PREMISEADDRESS_POSTCODE_FK) references `".$sDBName."`.POSTCODE (POSTCODE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_PREMISE foreign key (PREMISEADDRESS_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_STATEPROVINCE foreign key (PREMISEADDRESS_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_TIMEZONE foreign key (PREMISEADDRESS_TIMEZONE_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS \n";
+			$sSQL .= "    add constraint FK_PREMISEADDRESS_COUNTRIES foreign key (PREMISEADDRESS_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEADDRESS_LANGUAGE foreign key (PREMISEADDRESS_LANGUAGE_FK) references `".$sDBName."`.LANGUAGE (LANGUAGE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEADDRESS_POSTCODE foreign key (PREMISEADDRESS_POSTCODE_FK) references `".$sDBName."`.POSTCODE (POSTCODE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEADDRESS_PREMISE foreign key (PREMISEADDRESS_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEADDRESS_STATEPROVINCE foreign key (PREMISEADDRESS_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEADDRESS_TIMEZONE foreign key (PREMISEADDRESS_TIMEZONE_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
+
+			
 			break;
 			
 		/*==============================================================*/
 		/* Table: PREMISELOG & PREMISELOGACTION                         */
 		/*==============================================================*/
 		case 'PremiseLog':
-			$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_CUSTOMLOG foreign key (PREMISELOG_CUSTOMLOG_FK) references `".$sDBName."`.CUSTOMLOG (CUSTOMLOG_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_PREMISE foreign key (PREMISELOG_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_PREMISELOGACTION foreign key (PREMISELOG_PREMISELOGACTION_FK) references `".$sDBName."`.PREMISELOGACTION (PREMISELOGACTION_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_USERS foreign key (PREMISELOG_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_CUSTOMLOG foreign key (PREMISELOG_CUSTOMLOG_FK) references `".$sDBName."`.CUSTOMLOG (CUSTOMLOG_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_PREMISE foreign key (PREMISELOG_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_PREMISELOGACTION foreign key (PREMISELOG_PREMISELOGACTION_FK) references `".$sDBName."`.PREMISELOGACTION (PREMISELOGACTION_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_USERS foreign key (PREMISELOG_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
+			$sSQL .= "alter table `".$sDBName."`.PREMISELOG \n";
+			$sSQL .= "    add constraint FK_PREMISELOG_CUSTOMLOG foreign key (PREMISELOG_CUSTOMLOG_FK) references `".$sDBName."`.CUSTOMLOG (CUSTOMLOG_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISELOG_PREMISE foreign key (PREMISELOG_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISELOG_PREMISELOGACTION foreign key (PREMISELOG_PREMISELOGACTION_FK) references `".$sDBName."`.PREMISELOGACTION (PREMISELOGACTION_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISELOG_USERS foreign key (PREMISELOG_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
 			break;
 		
 		/*==============================================================*/
 		/* Table: PREMISEINFO & PREMISEBEDROOMS                         */
 		/*==============================================================*/	
 		case 'PremiseInfo1':
-			$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEBEDROOMS foreign key (PREMISEINFO_PREMISEBEDROOMS_FK) references `".$sDBName."`.PREMISEBEDROOMS (PREMISEBEDROOMS_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEFLOORS foreign key (PREMISEINFO_PREMISEFLOORS_FK) references `".$sDBName."`.PREMISEFLOORS (PREMISEFLOORS_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEOCCUPANTS foreign key (PREMISEINFO_PREMISEOCCUPANTS_FK) references `".$sDBName."`.PREMISEOCCUPANTS (PREMISEOCCUPANTS_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEROOMS foreign key (PREMISEINFO_PREMISEROOMS_FK) references `".$sDBName."`.PREMISEROOMS (PREMISEROOMS_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEBEDROOMS foreign key (PREMISEINFO_PREMISEBEDROOMS_FK) references `".$sDBName."`.PREMISEBEDROOMS (PREMISEBEDROOMS_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEFLOORS foreign key (PREMISEINFO_PREMISEFLOORS_FK) references `".$sDBName."`.PREMISEFLOORS (PREMISEFLOORS_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEOCCUPANTS foreign key (PREMISEINFO_PREMISEOCCUPANTS_FK) references `".$sDBName."`.PREMISEOCCUPANTS (PREMISEOCCUPANTS_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEROOMS foreign key (PREMISEINFO_PREMISEROOMS_FK) references `".$sDBName."`.PREMISEROOMS (PREMISEROOMS_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.PREMISEINFO \n";
+			$sSQL .= "    add constraint FK_PREMISEINFO_PREMISEBEDROOMS foreign key (PREMISEINFO_PREMISEBEDROOMS_FK) references `".$sDBName."`.PREMISEBEDROOMS (PREMISEBEDROOMS_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEINFO_PREMISEFLOORS foreign key (PREMISEINFO_PREMISEFLOORS_FK) references `".$sDBName."`.PREMISEFLOORS (PREMISEFLOORS_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEINFO_PREMISEOCCUPANTS foreign key (PREMISEINFO_PREMISEOCCUPANTS_FK) references `".$sDBName."`.PREMISEOCCUPANTS (PREMISEOCCUPANTS_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEINFO_PREMISEROOMS foreign key (PREMISEINFO_PREMISEROOMS_FK) references `".$sDBName."`.PREMISEROOMS (PREMISEROOMS_PK) on delete restrict on update restrict; \n";
+			
+			
 			break;
 			
 		/*==============================================================*/
@@ -1166,35 +1207,51 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/* Table: ROOMS & ROOMTYPE                                      */
 		/*==============================================================*/
 		case 'Rooms':
-			$sSQL .= "alter table `".$sDBName."`.ROOMS add constraint FK_ROOMS_PREMISE foreign key (ROOMS_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.ROOMS add constraint FK_ROOMS_ROOMTYPE foreign key (ROOMS_ROOMTYPE_FK) references `".$sDBName."`.ROOMTYPE (ROOMTYPE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.ROOMS add constraint FK_ROOMS_PREMISE foreign key (ROOMS_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.ROOMS add constraint FK_ROOMS_ROOMTYPE foreign key (ROOMS_ROOMTYPE_FK) references `".$sDBName."`.ROOMTYPE (ROOMTYPE_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.ROOMS \n";
+			$sSQL .= "    add constraint FK_ROOMS_PREMISE foreign key (ROOMS_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_ROOMS_ROOMTYPE foreign key (ROOMS_ROOMTYPE_FK) references `".$sDBName."`.ROOMTYPE (ROOMTYPE_PK) on delete restrict on update restrict; \n";
 			break;
 			
 		/*==============================================================*/
 		/* Table: HUB & HUBTYPE                                         */
 		/*==============================================================*/
 		case 'Hub':
-			$sSQL .= "alter table `".$sDBName."`.HUB add constraint FK_HUB_HUBTYPE foreign key (HUB_HUBTYPE_FK) references `".$sDBName."`.HUBTYPE (HUBTYPE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.HUB add constraint FK_HUB_PREMISE foreign key (HUB_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.HUB add constraint FK_HUB_HUBTYPE foreign key (HUB_HUBTYPE_FK) references `".$sDBName."`.HUBTYPE (HUBTYPE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.HUB add constraint FK_HUB_PREMISE foreign key (HUB_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.HUB \n";
+			$sSQL .= "    add constraint FK_HUB_HUBTYPE foreign key (HUB_HUBTYPE_FK) references `".$sDBName."`.HUBTYPE (HUBTYPE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_HUB_PREMISE foreign key (HUB_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
 			break;
-
+			
 		/*==============================================================*/
 		/* Table: COMM & COMMTYPE                                       */
 		/*==============================================================*/
 		case 'Comm':
-			$sSQL .= "alter table `".$sDBName."`.COMM add constraint FK_COMM_COMMTYPE foreign key (COMM_COMMTYPE_FK) references `".$sDBName."`.COMMTYPE (COMMTYPE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.COMM add constraint FK_COMM_HUB foreign key (COMM_HUB_FK) references `".$sDBName."`.HUB (HUB_PK) on delete restrict on update restrict; \n";
+			$sSQL .= "alter table `".$sDBName."`.COMM \n";
+			$sSQL .= "    add constraint FK_COMM_COMMTYPE foreign key (COMM_COMMTYPE_FK) references `".$sDBName."`.COMMTYPE (COMMTYPE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_COMM_HUB foreign key (COMM_HUB_FK) references `".$sDBName."`.HUB (HUB_PK) on delete restrict on update restrict; \n";
 			break;
 			
 		/*==============================================================*/
 		/* Table: LINK & LINKTYPE                                       */
 		/*==============================================================*/
 		case 'Link':
-			$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_COMM foreign key (LINK_COMM_FK) references `".$sDBName."`.COMM (COMM_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_LINKCONN foreign key (LINK_LINKCONN_FK) references `".$sDBName."`.LINKCONN (LINKCONN_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_LINKINFO foreign key (LINK_LINKINFO_FK) references `".$sDBName."`.LINKINFO (LINKINFO_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_LINKTYPE foreign key (LINK_LINKTYPE_FK) references `".$sDBName."`.LINKTYPE (LINKTYPE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_ROOMS foreign key (LINK_ROOMS_FK) references `".$sDBName."`.ROOMS (ROOMS_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_COMM foreign key (LINK_COMM_FK) references `".$sDBName."`.COMM (COMM_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_LINKCONN foreign key (LINK_LINKCONN_FK) references `".$sDBName."`.LINKCONN (LINKCONN_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_LINKINFO foreign key (LINK_LINKINFO_FK) references `".$sDBName."`.LINKINFO (LINKINFO_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_LINKTYPE foreign key (LINK_LINKTYPE_FK) references `".$sDBName."`.LINKTYPE (LINKTYPE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_ROOMS foreign key (LINK_ROOMS_FK) references `".$sDBName."`.ROOMS (ROOMS_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.LINK \n";
+			$sSQL .= "    add constraint FK_LINK_COMM foreign key (LINK_COMM_FK) references `".$sDBName."`.COMM (COMM_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_LINK_LINKCONN foreign key (LINK_LINKCONN_FK) references `".$sDBName."`.LINKCONN (LINKCONN_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_LINK_LINKINFO foreign key (LINK_LINKINFO_FK) references `".$sDBName."`.LINKINFO (LINKINFO_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_LINK_LINKTYPE foreign key (LINK_LINKTYPE_FK) references `".$sDBName."`.LINKTYPE (LINKTYPE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_LINK_ROOMS foreign key (LINK_ROOMS_FK) references `".$sDBName."`.ROOMS (ROOMS_PK) on delete restrict on update restrict; \n";
 			break;
 			
 		/*==============================================================*/
@@ -1205,12 +1262,20 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 			break;
 			
 		/*==============================================================*/
-		/* Table: LINKCONN                                   */
+		/* Table: LINKCONN                                              */
 		/*==============================================================*/
 		case 'LinkConn1':
-			$sSQL .= "alter table `".$sDBName."`.LINKCONN add constraint FK_LINKCONN_LINKCRYPTTYPE foreign key (LINKCONN_LINKCRYPTTYPE_FK) references `".$sDBName."`.LINKCRYPTTYPE (LINKCRYPTTYPE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.LINKCONN add constraint FK_LINKCONN_LINKFREQ foreign key (LINKCONN_LINKFREQ_FK) references `".$sDBName."`.LINKFREQ (LINKFREQ_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.LINKCONN add constraint FK_LINKCONN_LINKPROTOCOL foreign key (LINKCONN_LINKPROTOCOL_FK) references `".$sDBName."`.LINKPROTOCOL (LINKPROTOCOL_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LINKCONN add constraint FK_LINKCONN_LINKCRYPTTYPE foreign key (LINKCONN_LINKCRYPTTYPE_FK) references `".$sDBName."`.LINKCRYPTTYPE (LINKCRYPTTYPE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LINKCONN add constraint FK_LINKCONN_LINKFREQ foreign key (LINKCONN_LINKFREQ_FK) references `".$sDBName."`.LINKFREQ (LINKFREQ_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LINKCONN add constraint FK_LINKCONN_LINKPROTOCOL foreign key (LINKCONN_LINKPROTOCOL_FK) references `".$sDBName."`.LINKPROTOCOL (LINKPROTOCOL_PK) on delete restrict on update restrict; \n";
+			
+			
+			$sSQL .= "alter table `".$sDBName."`.LINKCONN \n";
+			$sSQL .= "    add constraint FK_LINKCONN_LINKCRYPTTYPE foreign key (LINKCONN_LINKCRYPTTYPE_FK) references `".$sDBName."`.LINKCRYPTTYPE (LINKCRYPTTYPE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_LINKCONN_LINKFREQ foreign key (LINKCONN_LINKFREQ_FK) references `".$sDBName."`.LINKFREQ (LINKFREQ_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_LINKCONN_LINKPROTOCOL foreign key (LINKCONN_LINKPROTOCOL_FK) references `".$sDBName."`.LINKPROTOCOL (LINKPROTOCOL_PK) on delete restrict on update restrict; \n";
+			
+			
 			break;
 			
 		/*==============================================================*/
@@ -1224,18 +1289,28 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/* Table: THING & THINGTYPE                                     */
 		/*==============================================================*/
 		case 'Thing':
-			$sSQL .= "alter table `".$sDBName."`.THING add constraint FK_THING_LINK foreign key (THING_LINK_FK) references `".$sDBName."`.LINK (LINK_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.THING add constraint FK_THING_THINGTYPE foreign key (THING_THINGTYPE_FK) references `".$sDBName."`.THINGTYPE (THINGTYPE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.THING add constraint FK_THING_LINK foreign key (THING_LINK_FK) references `".$sDBName."`.LINK (LINK_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.THING add constraint FK_THING_THINGTYPE foreign key (THING_THINGTYPE_FK) references `".$sDBName."`.THINGTYPE (THINGTYPE_PK) on delete restrict on update restrict; \n";
+			$sSQL .= "alter table `".$sDBName."`.THING \n";
+			$sSQL .= "    add constraint FK_THING_LINK foreign key (THING_LINK_FK) references `".$sDBName."`.LINK (LINK_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_THING_THINGTYPE foreign key (THING_THINGTYPE_FK) references `".$sDBName."`.THINGTYPE (THINGTYPE_PK) on delete restrict on update restrict; \n";
+			
 			break;
 			
 		/*==============================================================*/
 		/* Table: IO & IOTYPE                                           */
 		/*==============================================================*/
 		case 'IO':
-			$sSQL .= "alter table `".$sDBName."`.IO add constraint FK_IO_THING foreign key (IO_THING_FK) references `".$sDBName."`.THING (THING_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.IO add constraint FK_SENSOR_RSTYPE foreign key (IO_RSTYPES_FK) references `".$sDBName."`.RSTYPE (RSTYPE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.IO add constraint FK_SENSOR_SENSORTYPE foreign key (IO_IOTYPE_FK) references `".$sDBName."`.IOTYPE (IOTYPE_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.IO add constraint FK_SENSOR_UOM foreign key (IO_UOM_FK) references `".$sDBName."`.UOM (UOM_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.IO add constraint FK_IO_THING foreign key (IO_THING_FK) references `".$sDBName."`.THING (THING_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.IO add constraint FK_SENSOR_RSTYPE foreign key (IO_RSTYPES_FK) references `".$sDBName."`.RSTYPE (RSTYPE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.IO add constraint FK_SENSOR_SENSORTYPE foreign key (IO_IOTYPE_FK) references `".$sDBName."`.IOTYPE (IOTYPE_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.IO add constraint FK_SENSOR_UOM foreign key (IO_UOM_FK) references `".$sDBName."`.UOM (UOM_PK) on delete restrict on update restrict; \n";
+			
+			$sSQL .= "alter table `".$sDBName."`.IO \n";
+			$sSQL .= "    add constraint FK_IO_THING foreign key (IO_THING_FK) references `".$sDBName."`.THING (THING_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_SENSOR_RSTYPE foreign key (IO_RSTYPES_FK) references `".$sDBName."`.RSTYPE (RSTYPE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_SENSOR_SENSORTYPE foreign key (IO_IOTYPE_FK) references `".$sDBName."`.IOTYPE (IOTYPE_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_SENSOR_UOM foreign key (IO_UOM_FK) references `".$sDBName."`.UOM (UOM_PK) on delete restrict on update restrict; \n";
 			$sSQL .= "alter table `".$sDBName."`.IOTYPE add constraint FK_SENSORTYPE_DATATYPE foreign key (IOTYPE_DATATYPE_FK) references `".$sDBName."`.DATATYPE (DATATYPE_PK) on delete restrict on update restrict; \n";
 			break;
 		
@@ -1474,7 +1549,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "    `COUNTRIES_PK`, \n";
 			$sSQL .= "    `COUNTRIES_NAME`, \n";
 			$sSQL .= "    `COUNTRIES_ABREVIATION` \n";
-			$sSQL .= "FROM `".$sDBName."`.`COUNTRIES` \n";
+			$sSQL .= "FROM `".$sDBName."`.`COUNTRIES`; \n";
 			break;
 			
 		/*============================================================
@@ -1891,7 +1966,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 		/*============================================================
 		  == #4.07# - USERSPREMISEROOMS                             ==
 		  ============================================================*/
-		case "PrivateUsersHub":
+		case "PrivateUsersPremiseRooms":
 			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSPREMISEROOMS` AS \n";
 			$sSQL .= "SELECT \n";
 			$sSQL .= "	`USERS_PK`, \n";
@@ -1918,7 +1993,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "INNER JOIN `".$sDBName."`.`ROOMS` ON `PREMISE_PK`=`ROOMS_PREMISE_FK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`ROOMTYPE` ON `ROOMS_ROOMTYPE_FK`=`ROOMTYPE_PK` \n";
 			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
-			$sSQL .= "AND `PERMPREMISE_READ` = 1;\n";
+			$sSQL .= "AND `PERMPREMISE_READ` = 1 AND `PERMPREMISE_ROOMADMIN` = 1;\n";
 			break;
 			
 		/*============================================================
@@ -2148,7 +2223,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "	`PERMSERVER_UPGRADE` \n";
 			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`PERMSERVER` ON `USERS_PK` = `PERMSERVER_USERS_FK` \n";
-			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%'); \n";
 			break;
 			
 			

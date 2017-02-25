@@ -24,6 +24,69 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 	/************************/
+	/* REMS					*/
+	/************************/
+	.TextSize0d25 {
+		font-size:	0.25rem;
+	}
+
+	.TextSize0d33Rem {
+		font-size:	0.333rem;
+	}
+	
+	.TextSize0d5Rem {
+		font-size:	0.5rem;
+	}
+	
+	.TextSize0d75Rem {
+		font-size:	0.75rem;
+	}
+	
+	.TextSize1Rem {
+		font-size:	1rem;
+	}
+	
+	.TextSize1d25Rem {
+		font-size:	1.25rem;
+	}
+
+	.TextSize1d33Rem {
+		font-size:	1.333rem;
+	}
+	
+	.TextSize1d5Rem {
+		font-size:	1.5rem;
+	}
+	
+	.TextSize1d75Rem {
+		font-size:	1.75rem;
+	}
+	.TextSize2Rem {
+		font-size:	2rem;
+	}
+	.TextSize2d25Rem {
+		font-size:	1.25rem;
+	}
+
+	.TextSize2d33Rem {
+		font-size:	2.333rem;
+	}
+	
+	.TextSize2d5Rem {
+		font-size:	2.5rem;
+	}
+	
+	.TextSize2d75Rem {
+		font-size:	2.75rem;
+	}
+	
+	.TextSize3Rem {
+		font-size: 3rem;
+	}
+
+
+
+	/************************/
 	/* Special Sizes		*/
 	/************************/
 	

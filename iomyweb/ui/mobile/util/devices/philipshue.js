@@ -78,7 +78,7 @@ $.extend(IOMy.devices.philipshue,{
                         press : function () {
                             IOMy.common.NavigationChangePage("pPhilipsHue", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                 ]
             }).addStyleClass((bIsUnassigned ? "minwidth120px" : "minwidth170px")+" width80Percent BorderRight")
         );
@@ -238,9 +238,9 @@ $.extend(IOMy.devices.philipshue,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pPhilipsHue", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                     ]
-                }).addStyleClass("BorderRight testlabelcont"),
+                }).addStyleClass("width80Percent BorderRight"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
@@ -251,13 +251,12 @@ $.extend(IOMy.devices.philipshue,{
                             //--------------------------------//
                             //-- Draw the Data Boxes		--//
                             //--------------------------------//
-
                             items: []
-                        }).addStyleClass("PadLeft5px MarBottom3px MarRight10px TextLeft")
+                        }).addStyleClass("width110px PadLeft5px MarBottom3px MarRight10px TextLeft")
                     ]
                 }).addStyleClass("width10Percent minwidth90px")
             ]
-        }).addStyleClass("ListItem");
+        }).addStyleClass("ListItem MarRight6px");
 
         //--------------------------------------------------------------------//
         //-- ADD THE STATUS BUTTON TO THE UI								--//

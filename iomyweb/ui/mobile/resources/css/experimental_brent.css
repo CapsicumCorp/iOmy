@@ -157,9 +157,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
                 background-repeat: no-repeat;
         }
         
-        .sapMPanel {
+        /* Commented out by Ian, Not suitable
+		.sapMPanel {
                 margin-bottom: 10px;
         }
+		*/
         
         .IPAddressBox > .sapMFlexItem:first-child {
                 width: 100%;
@@ -188,10 +190,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
         .NumberLabel {
                 padding: 0.250rem 0px;
                 font-size: 18px;
-        }
-        
-        .DeviceDataBox {
-                margin: auto 0px;
         }
         
         @media only screen and (min-width: 551px) {

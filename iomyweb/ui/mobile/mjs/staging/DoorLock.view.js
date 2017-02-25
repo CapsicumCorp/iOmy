@@ -63,8 +63,7 @@ sap.ui.jsview("mjs.staging.DoorLock", {
 										//-- Column 2 for Status Row --//
 										new sap.m.Text ({
 											text : "Locked",
-											textAlign : "Center",
-											width : "100%"
+											textAlign : "Right",
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
@@ -75,8 +74,7 @@ sap.ui.jsview("mjs.staging.DoorLock", {
 										//-- Column 2 for Last Accessed Row --//
 										new sap.m.Text ({
 											text : "1d 3h 21m",
-											textAlign : "Center",
-											width : "100%"
+											textAlign : "Right",
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
@@ -87,8 +85,7 @@ sap.ui.jsview("mjs.staging.DoorLock", {
 										//-- Column 2 for Battery Row --//
 										new sap.m.Text ({
 											text : "21%",
-											textAlign : "Center",
-											width : "100%"
+											textAlign : "Right",
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
@@ -99,8 +96,7 @@ sap.ui.jsview("mjs.staging.DoorLock", {
 										//-- Column 2 for Current Temp Row --//
 										new sap.m.Text ({
 											text : "Secure",
-											textAlign : "Center",
-											width : "100%"
+											textAlign : "Right",
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
@@ -114,7 +110,7 @@ sap.ui.jsview("mjs.staging.DoorLock", {
 											text : "Unlock"
 										}).addStyleClass("MarLeft10Percent")
 									]
-								}).addStyleClass("maxlabelwidth50Percent textaligncenter")
+								}).addStyleClass("maxlabelwidth50Percent")
 							]
 						})
 					]

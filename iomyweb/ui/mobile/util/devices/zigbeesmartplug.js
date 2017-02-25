@@ -64,6 +64,12 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         // }
     ],
     
+    /**
+     * Enables or disables the telnet command widgets.
+     * 
+     * @param {type} oScope             Controller that contains the enable join mode button.
+     * @param {type} bEnabled           Boolean switch to enable or disable the telnet controls.
+     */
     ToggleZigbeeCommands : function (oScope, bEnabled) {
         var me = this;
         
@@ -304,6 +310,13 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         });
     },
     
+    /**
+     * Runs a custom command via telnet to the hub.
+     * 
+     * @param {type} oScope
+     * @param {type} oInputWidget
+     * @returns {undefined}
+     */
     ExecuteCustomCommand : function (oScope, oInputWidget) {
         //---------------------------------------------------------//
         // Import modules, widgets and scope
@@ -540,6 +553,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         me.FetchConnectedZigbeeModems(oScope,
             function (mErrorInfo) {
                 var firstSelection = null;
+                var bNoModems = false;
                 
                 // Check if a fatal error occurred
                 if (mErrorInfo.bError === true) {
@@ -555,26 +569,37 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                     }
                     
                     // Now populate the Zigbee modem select box
-                    $.each(me.ConnectedZigbeeModems, function(sIndex, aModem) {
-                        if (sIndex !== undefined && sIndex !== null
-                                && aModem !== undefined && aModem !== null)
-                        {
-                            oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).addItem(
-                                new sap.ui.core.Item({
-                                    text : aModem.CommName,
-                                    key : aModem.CommId
-                                })
-                            );
-                    
-                            if (firstSelection === null) {
-                                firstSelection = aModem;
+                    if (JSON.stringify(me.ConnectedZigbeeModems) === "{}") {
+                        oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).addItem(
+                            new sap.ui.core.Item({
+                                text : "No Zigbee Modems Detected"
+                            })
+                        );
+                
+                        oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).setEnabled(false);
+                        me.ToggleZigbeeCommands(oScope, false);
+                    } else {
+                        $.each(me.ConnectedZigbeeModems, function(sIndex, aModem) {
+                            if (sIndex !== undefined && sIndex !== null
+                                    && aModem !== undefined && aModem !== null)
+                            {
+                                oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).addItem(
+                                    new sap.ui.core.Item({
+                                        text : aModem.CommName,
+                                        key : aModem.CommId
+                                    })
+                                );
+
+                                if (firstSelection === null) {
+                                    firstSelection = aModem;
+                                }
                             }
-                        }
-                    });
-                    
-                    oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).setSelectedKey(firstSelection.CommId);
-                    me.iSelectedCommID = firstSelection.CommId;
-                    me.ToggleZigbeeCommands(oScope, !me.bRunningCommand);
+                        });
+
+                        oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).setSelectedKey(firstSelection.CommId);
+                        me.iSelectedCommID = firstSelection.CommId;
+                        me.ToggleZigbeeCommands(oScope, !me.bRunningCommand);
+                    }
                 }
                 
             }
@@ -591,14 +616,6 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         
         oScope.aElementsForAFormToDestroy.push(me.uiIDs.sCustomTelnetCommandFieldID);
         
-//        oFormItem = new sap.m.Input(oScope.createId(me.uiIDs.sCustomTelnetCommandFieldID), {
-//            enabled : !me.bRunningCommand,
-//            submit : function () {
-//                me.ToggleZigbeeCommands(oScope, false);
-//                
-//                me.ExecuteCustomCommand(oScope);
-//            }
-//        }).addStyleClass("TextCenter width100Percent");
         oFormItem = new ZigbeeCustomTelnetInput(oScope.createId(me.uiIDs.sCustomTelnetCommandFieldID), {
             scope : oScope,
             enabled : !me.bRunningCommand
@@ -666,6 +683,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         oFormBox.addItem(oFormItem);
     },
 	
+	// For All other pages except the DeviceOverview Page. See "GetCommonUIForDeviceOverview"
 	GetCommonUI: function( sPrefix, oViewScope, aDeviceData, bIsUnassigned ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
@@ -705,9 +723,9 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                         press : function () {
                             IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                 ]
-            }).addStyleClass("width80Percent minwidth170px BorderRight")
+            }).addStyleClass("width80Percent BorderRight")
         );
 
         aUIObjectItems.push(
@@ -912,9 +930,9 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                     ]
-                }).addStyleClass("BorderRight testlabelcont"),
+                }).addStyleClass("BorderRight width80Percent"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
@@ -926,13 +944,13 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             //-- Draw the Data Boxes		--//
                             //--------------------------------//
                             items: [
-                                new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("DeviceOverview-ItemLabel Font-RobotoCondensed")
+                                new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("PadTop20px PadBottom15px Font-RobotoCondensed")
                             ]
                         }).addStyleClass("PadLeft5px MarBottom3px MarRight10px TextLeft")
                     ]
                 }).addStyleClass("width10Percent minwidth90px")
             ]
-        }).addStyleClass("ListItem");
+        }).addStyleClass("ListItem MarRight6px");
 
         //--------------------------------------------------------------------//
         //-- ADD THE STATUS BUTTON TO THE UI								--//
@@ -962,7 +980,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         //------------------------------------//
         var oUIStatusContainer = new sap.m.VBox( oViewScope.createId( sPrefix+"_StatusContainer"), {
             items:[] 
-        }).addStyleClass("PadTop5px PadLeft5px width10Percent minwidth80px");	//-- END of VBox that holds the Toggle Button
+        }).addStyleClass("PadTop5px PadLeft5px  minwidth80px");	//-- END of VBox that holds the Toggle Button
 
 
         //-- Add the Button's background colour class --//

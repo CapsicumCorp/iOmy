@@ -110,6 +110,10 @@ $.extend(IOMy.apiphp,{
 				sReturn = sUrlRestricted+'/php/api_philipshue.php';
 				break;
                 
+            case "motionsensor":
+				sReturn = sUrlRestricted+'/php/api_motionsensor.php';
+				break;
+                
             case "weather":
 				sReturn = sUrlRestricted+'/php/api_weather.php';
 				break;
@@ -384,7 +388,20 @@ $.extend(IOMy.apiphp,{
 							this.bApiComplete = true;
 							
 						//------------------------------------------------------------------------//
-						//-- 2.2.E - UNEXPECTED STATUS CODE:                                    --//
+						//-- 2.2.E - HTTP 403 STATUS CODE:                                      --//
+						//------------------------------------------------------------------------//
+						} else if (err.status=="403") {
+							//-- Log the Error --//
+							this.DebugLogString += "HTTP Status:"+err.status+"\n The above error code is not expected! \nError Mesgage:"+err.message+"\n";
+							
+                            //-- 403 Errors indicate that the session has been terminated and the user will need to log back in. Flag this --//
+                            IOMy.common.bSessionTerminated = true;
+                            
+							//-- Flag that we shouldn't retry the ajax request (because we assume it won't help the error that we are getting) --//
+							this.bApiComplete = true;
+							
+						//------------------------------------------------------------------------//
+						//-- 2.2.F - UNEXPECTED STATUS CODE:                                    --//
 						//------------------------------------------------------------------------//
 						} else {
 							//-- Log the Error --//
@@ -665,8 +682,8 @@ $.extend(IOMy.apiphp,{
 							jQuery.sap.log.error("CriticalErrorIODetect: "+e2.message, "", "IO Detection");
 						}
 					}); //-- End of foreach loop ($.each) --//
-					
-					//----------------------------------------------------------------//
+                    
+                    //----------------------------------------------------------------//
 					//-- Store the Lists in global variables so the                 --//
 					//-- other UI components can use them.                          --//
 					//----------------------------------------------------------------//
@@ -675,6 +692,14 @@ $.extend(IOMy.apiphp,{
 					} catch(e1234) {
 						jQuery.sap.log.error("Problem Mapping ThingList: "+e1234.message, "", "IO Detection");
 					}
+					
+					//--------------------------------------------------------//
+                    // ONLY add these hard-coded devices if user is FRESHWATER1,
+                    // our debug user.
+                    //--------------------------------------------------------//
+                    if (IOMy.common.CurrentUsername === "FRESHWATER1") {
+                        IOMy.experimental.addDemoDataToThingList();
+                    }
 					
 					//----------------------------------------------------------------//
 					//-- 8.0 - DEBUGGING                                            --//
@@ -689,6 +714,9 @@ $.extend(IOMy.apiphp,{
 					//-- 9.0 - FINALISE BY TRIGGERING THE NEXT TASK                 --//
 					//----------------------------------------------------------------//
 					if(oConfig.onSuccess) {
+						
+						IOMy.common.bCoreRefreshInProgress = false;
+						
 						oConfig.onSuccess();
 					}
 					
@@ -697,7 +725,8 @@ $.extend(IOMy.apiphp,{
 			//
 			
 		} catch(e1) {
-			 jQuery.sap.log.error( "RefreshThingList: "+e1.message, "", "IO Detection");
+            IOMy.common.bCoreRefreshInProgress = false;
+			jQuery.sap.log.error( "RefreshThingList: "+e1.message, "", "IO Detection");
 		}
 	}
 	

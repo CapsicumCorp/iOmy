@@ -116,6 +116,7 @@ require_once SITE_BASE.'/restricted/php/core.php';                              
 
 require_once SITE_BASE.'/restricted/libraries/special/dbinsertfunctions.php';        //-- This library is used to perform the inserting of a new Onvif Server and Streams into the database --//
 require_once SITE_BASE.'/restricted/libraries/weather/owm.php';
+require_once SITE_BASE.'/restricted/libraries/weather/demoweather.php';
 
 
 
@@ -583,20 +584,30 @@ if( $bError===false ) {
 							"ThingId"     => $iPostThingId
 						);
 						
+						//-- If the iOmy System is currently running in Demo Mode --//
+						if( $oRestrictedApiCore->CheckIfDemoMode() ) {
+							//--------------------------------------------//
+							//-- Load the demonstration weather object  --//
+							//--------------------------------------------//
+							$oWeather = new Weather_DemoWeather( $aWeatherObjectData );
+						} else {
+							//--------------------------------------------//
+							//-- Load the normal weather object         --//
+							//--------------------------------------------//
+							$oWeather = new Weather_OpenWeatherMap( $aWeatherObjectData );
+						}
 						
-						$oWeather = new Weather_OpenWeatherMap( $aWeatherObjectData );
+						if( $oWeather->bInitialised===false ) {
+							$bError = true;
+							$iErrCode  = 338;
+							$sErrMesg .= "Error Code:'0338' \n";
+							$sErrMesg .= "Critical error! \n";
+							$sErrMesg .= "Failed to initialise weather object. \n";
 							
-							if( $oWeather->bInitialised===false ) {
-								$bError = true;
-								$iErrCode  = 338;
-								$sErrMesg .= "Error Code:'0338' \n";
-								$sErrMesg .= "Critical error! \n";
-								$sErrMesg .= "Failed to initialise weather object. \n";
-								
-							}
-							
+						}
+						
 					//----------------------------------------------------------------------------//
-					//-- ELSE TYPE: Unsupported                                                 --//
+					//-- ELSE TYPE: Unsupported Weather Object                                  --//
 					//----------------------------------------------------------------------------//
 					} else {
 						$bError    = true;
@@ -604,14 +615,9 @@ if( $bError===false ) {
 						$sErrMesg .= "Error Code:'0339' \n";
 						$sErrMesg .= "Unsupported Weather Type!";
 					}
-					
-					
 				}
-			
 			}
 		}	//-- ENDIF No errors --//
-		
-		
 	} catch( Exception $e0300 ) {
 		$bError = true;
 		$iErrCode  = 0300;
@@ -817,6 +823,8 @@ if( $bError===false ) {
 				if( $bError===false ) {
 					$aResult = $oWeather->GetMostRecentDBWeather();
 					
+					//------------------------------------------------------//
+					//-- IF Data has been fetched for the IOs from Source --//
 					if( $aResult['Error']===false ) {
 						$iUTS = time();
 						
@@ -825,10 +833,13 @@ if( $bError===false ) {
 							$aResultTemp = $oWeather->PollWeather();
 							
 							if( $aResultTemp['Error']===false ) {
+								//-- Get the Most Recent Values --//
 								$aResult = $oWeather->GetMostRecentDBWeather();
 							} else {
 								$bError = true;
-								$sErrMesg .= "Error: failed to get new values! \n";
+								$iErrCode  = 2401;
+								$sErrMesg .= "Error Code:'2401' \n";
+								$sErrMesg .= "Error: failed to get new values from the weather source! \n";
 								$sErrMesg .= $aResultTemp['ErrMesg'];
 							}
 						}
@@ -841,9 +852,26 @@ if( $bError===false ) {
 						if( $aResultTemp['Error']===false ) {
 							
 							$aResult = $oWeather->GetMostRecentDBWeather();
+							
+							if( $aResult['Error']===true ) {
+								var_dump( $aResultTemp );
+								echo "\n\n";
+								var_dump( $aResult );
+								
+								$bError = true;
+								$iErrCode  = 2412;
+								$sErrMesg .= "Error Code:'2412' \n";
+								$sErrMesg .= "Error: failed to get new values! \n";
+								$sErrMesg .= $aResult['ErrMesg'];
+							
+							}
+							
+							
 						} else {
 							$bError = true;
-							$sErrMesg .= "Error: failed to get new values! \n";
+							$iErrCode  = 2411;
+							$sErrMesg .= "Error Code:'2411' \n";
+							$sErrMesg .= "Error: failed to get new values from the weather source! \n";
 							$sErrMesg .= $aResultTemp['ErrMesg'];
 						}
 					}
@@ -852,6 +880,7 @@ if( $bError===false ) {
 			} catch( Exception $e2400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
+				$iErrCode  = 2400;
 				$sErrMesg .= "Error Code:'2400' \n";
 				$sErrMesg .= $e2400->getMessage();
 			}
@@ -868,6 +897,7 @@ if( $bError===false ) {
 		
 	} catch( Exception $e0400 ) {
 		$bError = true;
+		$iErrCode  = 400;
 		$sErrMesg .= "Error Code:'0400' \n";
 		$sErrMesg .= $e0400->getMessage();
 	}

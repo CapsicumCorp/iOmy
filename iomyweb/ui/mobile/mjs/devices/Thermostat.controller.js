@@ -25,6 +25,19 @@ sap.ui.controller("mjs.devices.Thermostat", {
     
     aElementsToDestroy : [],
     
+    wWeatherField       : null,
+    wTemperatureField   : null,
+    wSunriseField       : null,
+    wSunsetField        : null,
+    wHumidityField      : null,
+    wWindDirectionField : null,
+    wWindSpeedField     : null,
+    wPressureField      : null,
+    wMainList           : null,
+    wPanel              : null,
+    
+    destroyItemsWithIDs     : IOMy.functions.destroyItemsByIdFromView,
+    
     mThingInfo : null,
     
 /**
@@ -80,16 +93,20 @@ sap.ui.controller("mjs.devices.Thermostat", {
      * (re)creating the page.
      */
     DestroyUI : function() {
-        var me          = this;
-        var sCurrentID  = "";
+        //--------------------------//
+        // Capture scope
+        //--------------------------//
+        var me = this;
         
-        for (var i = 0; i < me.aElementsToDestroy.length; i++) {
-            sCurrentID = me.aElementsToDestroy[i];
-            if (me.byId(sCurrentID) !== undefined)
-                me.byId(sCurrentID).destroy();
+        // Wipe main list container
+        if (me.wPanel !== null) {
+            me.wPanel.destroy();
         }
         
-        // Clear the array
+        // Wipe any elements with IDs assigned to them
+        me.destroyItemsWithIDs(me, me.aElementsToDestroy);
+        
+        // Clear the element list
         me.aElementsToDestroy = [];
     },
     
@@ -105,140 +122,132 @@ sap.ui.controller("mjs.devices.Thermostat", {
         var weatherModule = IOMy.devices.weatherfeed;
         var widgetIDs = weatherModule.uiIDs;
         
-        // Boxes
-        var oWeatherLabel, oWeatherField;
-        var oSunriseLabel, oSunriseField;
-        var oSunsetLabel, oSunsetField;
-        var oTemperatureLabel, oTemperatureField;
-        var oHumidityLabel, oHumidityField;
-        var oWindDirectionLabel, oWindDirectionField;
-        var oWindSpeedLabel, oWindSpeedField;
-        var oPressureLabel, oPressureField;
-        var oColumn1, oColumn2;
-        var oInfoBox;
-        var oVertBox, oPanel;
-        
         //=======================================================\\
-        // CONSTRUCT ELEMENTS
+        // CONSTRUCT FIELDS
         //=======================================================\\
         
         //-- Refresh the Navigational buttons --//
         IOMy.common.NavigationRefreshButtons( me );
         
         // WEATHER
-        oWeatherLabel = new sap.m.Text({
-            text : "Weather outside:"
-        }).addStyleClass("TextBold PadTop6px PadBottom6px");
-        
-        oWeatherField = new sap.m.Text(me.createId(widgetIDs.sConditionDisplayID), {
+        me.wWeatherField = new sap.m.Text(me.createId(widgetIDs.sConditionDisplayID), {
             text : ""
         }).addStyleClass("PadTop6px PadBottom6px");
         
         // TEMPERATURE
-        oTemperatureLabel = new sap.m.Text({
-            text : "Temperature:"
-        }).addStyleClass("TextBold PadTop6px PadBottom6px");
-        
-        oTemperatureField = new sap.m.Text(me.createId(widgetIDs.sTemperatureDisplayID), {
+        me.wTemperatureField = new sap.m.Text(me.createId(widgetIDs.sTemperatureDisplayID), {
             text : ""
         }).addStyleClass("PadTop6px PadBottom6px");
         
         // SUNRISE
-        oSunriseLabel = new sap.m.Text({
-            text : "Sunrise:"
-        }).addStyleClass("TextBold PadTop6px PadBottom6px");
-        
-        oSunriseField = new sap.m.Text(me.createId(widgetIDs.sSunriseDisplayID), {
+        me.wSunriseField = new sap.m.Text(me.createId(widgetIDs.sSunriseDisplayID), {
             text : ""
         }).addStyleClass("PadTop6px PadBottom6px");
         
         // SUNSET
-        oSunsetLabel = new sap.m.Text({
-            text : "Sunset:"
-        }).addStyleClass("TextBold PadTop6px PadBottom6px");
-        
-        oSunsetField = new sap.m.Text(me.createId(widgetIDs.sSunsetDisplayID), {
+        me.wSunsetField = new sap.m.Text(me.createId(widgetIDs.sSunsetDisplayID), {
             text : ""
         }).addStyleClass("PadTop6px PadBottom6px");
         
         // HUMIDITY
-        oHumidityLabel = new sap.m.Text({
-            text : "Humidity:"
-        }).addStyleClass("TextBold PadTop6px PadBottom6px");
-        
-        oHumidityField = new sap.m.Text(me.createId(widgetIDs.sHumidityDisplayID), {
+        me.wHumidityField = new sap.m.Text(me.createId(widgetIDs.sHumidityDisplayID), {
             text : ""
         }).addStyleClass("PadTop6px PadBottom6px");
         
         // WIND
-        oWindDirectionLabel = new sap.m.Text({
-            text : "Wind Direction:"
-        }).addStyleClass("TextBold PadTop6px PadBottom6px");
-        
-        oWindDirectionField = new sap.m.Text(me.createId(widgetIDs.sWindDirectionDisplayID), {
+        me.wWindDirectionField = new sap.m.Text(me.createId(widgetIDs.sWindDirectionDisplayID), {
             text : ""
         }).addStyleClass("PadTop6px PadBottom6px");
         
-        oWindSpeedLabel = new sap.m.Text({
-            text : "Wind Speed:"
-        }).addStyleClass("TextBold PadTop6px PadBottom6px");
-        
-        oWindSpeedField = new sap.m.Text(me.createId(widgetIDs.sWindSpeedDisplayID), {
+        me.wWindSpeedField = new sap.m.Text(me.createId(widgetIDs.sWindSpeedDisplayID), {
             text : ""
         }).addStyleClass("PadTop6px PadBottom6px");
         
         // PRESSURE
-        oPressureLabel = new sap.m.Text({
-            text : "Air Pressure:"
-        }).addStyleClass("TextBold PadTop6px PadBottom6px");
-        
-        oPressureField = new sap.m.Text(me.createId(widgetIDs.sPressureDisplayID), {
+        me.wPressureField = new sap.m.Text(me.createId(widgetIDs.sPressureDisplayID), {
             text : ""
         }).addStyleClass("PadTop6px PadBottom6px");
         
         // Populate the fields
         weatherModule.FetchCurrentWeather(me.mThingInfo.Id, me, "");
         
-        oColumn1 = new sap.m.VBox({
-            items : [
-                oWeatherLabel,
-                oTemperatureLabel,
-                oHumidityLabel,
-                oWindDirectionLabel,
-                oWindSpeedLabel,
-                oPressureLabel,
-                oSunriseLabel,
-                oSunsetLabel
+        //=======================================================\\
+        // CONSTRUCT THE MAIN LIST
+        //=======================================================\\
+        me.wMainList = new sap.m.List({
+            items :[
+                //-- Weather Outside --//
+                new sap.m.InputListItem ({
+                    label : "Weather Outside:",
+                    content : [
+                        //-- Column 2 for Weather Outside Row --//
+                        me.wWeatherField
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Temperature Outside --//
+                new sap.m.InputListItem ({
+                    label : "Temperature:",
+                    content : [
+                        //-- Column 2 for Temperature Row --//
+                        me.wTemperatureField
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Sunrise --//
+                new sap.m.InputListItem ({
+                    label : "Sunrise:",
+                    content : [
+                        //-- Column 2 for Sunrise Row --//
+                        me.wSunriseField
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Sunset --//
+                new sap.m.InputListItem ({
+                    label : "Sunset:",
+                    content : [
+                        //-- Column 2 for Sunset Row --//
+                        me.wSunsetField
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Humidity --//
+                new sap.m.InputListItem ({
+                    label : "Humidity:",
+                    content : [
+                        //-- Column 2 for Humidity Row --//
+                        me.wHumidityField
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Wind Direction --//
+                new sap.m.InputListItem ({
+                    label : "Wind Direction:",
+                    content : [
+                        //-- Column 2 for Wind Direction Row --//
+                        me.wWindDirectionField
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Wind Speed --//
+                new sap.m.InputListItem ({
+                    label : "Wind Speed:",
+                    content : [
+                        //-- Column 2 for Wind Speed Row --//
+                        me.wWindSpeedField
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
+                //-- Air Pressure --//
+                new sap.m.InputListItem ({
+                    label : "Air Pressure:",
+                    content : [
+                        //-- Column 2 for Air Pressure Row --//
+                        me.wPressureField
+                    ]
+                }).addStyleClass("maxlabelwidth50Percent"),
             ]
-        }).addStyleClass("width160px");
+        }).addStyleClass("PadBottom10px UserInputForm");
         
-        oColumn2 = new sap.m.VBox({
-            items : [
-                oWeatherField,
-                oTemperatureField,
-                oHumidityField,
-                oWindDirectionField,
-                oWindSpeedField,
-                oPressureField,
-                oSunriseField,
-                oSunsetField
-            ]
+        me.wPanel = new sap.m.Panel({
+            backgroundDesign: "Transparent",
+            content : [me.wMainList]
         });
         
-        oInfoBox = new sap.m.HBox({
-            items : [oColumn1, oColumn2]
-        });
-        
-        me.aElementsToDestroy.push("mainBox");
-        oVertBox = new sap.m.VBox(me.createId("mainBox"),{
-            items : [oInfoBox]
-        });
-        
-        me.aElementsToDestroy.push("panel");
-        oPanel = new sap.m.Panel(me.createId("panel"), {
-            content : [oVertBox]
-        }).addStyleClass("UserInputForm");
-        
-        thisView.byId("page").addContent(oPanel);
+        thisView.byId("page").addContent(me.wPanel);
     }
 });

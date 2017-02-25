@@ -46,11 +46,18 @@ sap.ui.jsview("mjs.settings.permissions.RoomPermission", {
     	var me = this;
     	this.destroyContent();
     	
-    	var oPage = new sap.m.Page(this.createId("page"), {
-            customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			content: [IOMy.widgets.getNavigationalSubHeader("ROOM PERMISSIONS", "sap-icon://GoogleMaterial/lock", me)],
-			footer : IOMy.widgets.getAppFooter()
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+		var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/lock",
+            title : "Room Permissions"
+        });	
+		
+//    	var oPage = new sap.m.Page(this.createId("page"), {
+//            customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			content: [IOMy.widgets.getNavigationalSubHeader("ROOM PERMISSIONS", "sap-icon://GoogleMaterial/lock", me)],
+//			footer : IOMy.widgets.getAppFooter()
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
 		
 		
 		return oPage;

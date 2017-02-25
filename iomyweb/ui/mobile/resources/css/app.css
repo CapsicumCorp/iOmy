@@ -38,13 +38,56 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		outline: none !important;
 	}
 	
-	
-	
 	ul li{
 		/* Possibly unused unless the User has plugged(or bluetooth) a mouse into the device running the App/"Mobile Site" */
 		cursor : pointer;
 	}
 	
+	.TextBold {
+		font-weight: bold;
+	}
+	
+	.MainBackground {
+		background-color: white;
+	}
+	
+	.ButtonIconWhite > div > .sapMBtnIcon:before {
+		color: white;
+	}
+	.ButtonIconGreen > div > .sapMBtnIcon:before {
+		color: rgb(139,197,63);
+	}
+	
+	/*----------------------------------*/
+	/*-- Top Headers Alignment          */
+	/*----------------------------------*/
+	.sapMPage>.sapMPageHeader + section, .sapMPage>.sapMPageSubHeader + section, .sapMPage>.sapMPageHeader + .sapUiHiddenPlaceholder + section {
+		top: 3.5rem;
+	}
+	
+	/*----------------------------------*/
+	/*-- Panel Padding                  */
+	/*----------------------------------*/
+	.PanelNoPadding > div.sapMPanelContent {
+		/* This is used to remove padding from a panel */
+		padding: 0px;
+	}
+	
+	.PanelNoTopOrSidesPadding > div.sapMPanelContent {
+		/* This is used to remove padding from a panel */
+		padding-top: 0px;
+		padding-left: 0px;
+		padding-right: 0px;
+	}
+	
+	.PanelNoTopPadding > div.sapMPanelContent {
+		/* This is used to remove padding from a panel */
+		padding-top: 0px;
+	}
+	
+	/*====================================================================================*/
+	/*== Andrew Common Classes                                                          ==*/
+	/*====================================================================================*/	
 	.FloatLeft {
 		float: left;
 	}
@@ -76,71 +119,26 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	}
 	
 	.TextCenter {
-		text-align: 					center;
+		text-align: center;
 	}
 	
 	.TextLeft {
-		text-align: 					left;
+		text-align: left;
 	}
 	
 	.TextRight {
-		text-align: 					right;
-	}
-        
-        .TextBold {
-                font-weight:                                    bold;
-        }
+		text-align: right;
+	}	
 	
-	.MainBackground {
-		/*background: linear-gradient(to top right, #B2B7A4 0%, #FFFFFF 22%, #EBD7C9 45%, #EBD7C9 50%, #FFFFFF 78%, #B2B7A4 100%);*/
-		/*background: linear-gradient(to bottom, #F7F7F7 0%,  #DFE5DC 100%);*/
-                background-color: white;
-	}
-	
-	.ButtonIconWhite > div > .sapMBtnIcon:before {
-		color:		white;
-	}
-	.ButtonIconGreen > div > .sapMBtnIcon:before {
-		color:		rgb(139,197,63);
-	}
-	
-	/*----------------------------------*/
-	/*-- Top Headers Alignment          */
-	/*----------------------------------*/
-	.sapMPage>.sapMPageHeader + section, .sapMPage>.sapMPageSubHeader + section, .sapMPage>.sapMPageHeader + .sapUiHiddenPlaceholder + section {
-		top: 3.5rem;
-	}
-
-	/*----------------------------------*/
-	/*-- Panel Padding                  */
-	/*----------------------------------*/
-	.PanelNoPadding > div.sapMPanelContent {
-		/* This is used to remove padding from a panel */
-		padding: 0px;
-	}
-
-	.PanelNoTopOrSidesPadding > div.sapMPanelContent {
-		/* This is used to remove padding from a panel */
-		padding-top:	0px;
-		padding-left:	0px;
-		padding-right:	0px;
-	}
-	
-	.PanelNoTopPadding > div.sapMPanelContent {
-		/* This is used to remove padding from a panel */
-		padding-top: 0px;
-	}
-	
-
 	/*====================================================================================*/
 	/*== FONTS AND SIZES                                                                ==*/
 	/*====================================================================================*/
-
+	
 	.Font-Main {
 		font-family: "Roboto Condensed", sans-serif;
-		color:rgb(03,94,58);
+		color: rgb(03,94,58);
 	}
-
+	
 	.Font-RobotoCondensed {
 		font-family: "Roboto Condensed", sans-serif;
 		/* This is a simple class that can be used to set some of the elements to the correct font */
@@ -159,7 +157,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	.Font-Medium {
 		font-size: medium;
 	}
-
+	
 	.Font-Small {
 		font-size: small;
 	}
@@ -172,213 +170,185 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	/*-- HEADER                     --*/
 	/*--------------------------------*/
 	.sapMPageHeader::before {
-		display:none;			/* This is used to hide a green bar that is added by the Blue Crystal Library */
+		display:none; /* This is used to hide a green bar that is added by the Blue Crystal Library */
 	}
-
+	
 	.sapMPage > .sapMIBar.sapMHeader-CTX {
 		/* This is to overwrite the Default Page Header Background */
 		background: white;
-                box-shadow: 0px 5px 8px #CFCFCF;
+		box-shadow: 0px 5px 8px #CFCFCF;
 		height: 3.5rem;
 	}
 	
-	
-	.MainHeadingMiniLogo {
-		/*border-radius: 9px;*/
+	.ConsistentMenuHeader > div > div > .sapMLabel {
+		/* Provides a Consistent Header for all Pages */
+		color: black;
+		font-family: "Roboto Condensed", sans-serif;
+		font-weight: bold;
+		min-height: 20px;
+		font-size: 16px;
 	}
+	
 	/*--------------------------------*/
 	/*-- SUBHEADER                  --*/
 	/*--------------------------------*/
 	.sapMIBar.sapMSubHeader-CTX {
 		background-color: white;
 	}
-
+	
 	.BackForwardButton {
-		border:			none;
-		background:		none;
-		height:			100%;
+		border: none;
+		background: none;
+		height: 100%;
 	}
 	/*--------------------------------*/
 	/*-- FOOTER                     --*/
 	/*--------------------------------*/
 	
 	.footerMBarContainer > div {
-    /*background-image: linear-gradient(to right, #feede1 0, #f3e4e1 50%, #e1e1e1 100%);*/
-    /*background-color: #55AA00;*/
-    color: black;
-    margin-right:15px;
+		color: black;
+		margin-right: 15px;
 }
-
+	
 	.footerMBarContainer > div > img {
 		width: 120px;
 	}
 		
 	.sapMIBar-CTX.sapMFooter-CTX.FooterBackgroundColour {
-		/* Set the Footer Bacground */
-/*		background-image: linear-gradient(to right, #acacac, #E5E1dd);
-		background: linear-gradient(to right, #acacac, #E5E1dd);*/
-		/*background: linear-gradient(to top right, #808080, #CECECE);*/
-                background-color: rgb(241,242,242);
+	/*	Set the Footer Bacground */
+		background-color: rgb(241,242,242);
 		height: 3.5rem;
-                box-shadow: 0px -5px 8px #9F9F9F;
-                border: none;
+		box-shadow: 0px -5px 8px #9F9F9F;
+		border: none;
 	}
-
+	
 	.FooterHelpButton {
-		/* Style the Footer Button */
+	/* Style the Footer Button */
 		border: none;
 		border-radius: 7px;
 		background: rgb(88, 89, 91);
 		margin-left: 2em;
-                height: 37px;
+		height: 37px;
 	}
-        
-        .FooterHelpButton.sapMBtnBase > div > span.sapMBtnContent {
-                line-height: 1.7rem
-        }
-        
+	
+	.FooterHelpButton.sapMBtnBase > div > span.sapMBtnContent {
+			line-height: 1.7rem
+	}
 	
 	.FooterHelpButton.sapMBtnBase > div > span {
-/*		height:	20px;
-		width: 20px;
-		margin-left: 6px;
-		margin-right: 7px;
-		margin-top: 4px;*/
-                line-height: 1.9rem;
-                font-weight: normal;
+		line-height: 1.9rem;
+		font-weight: normal;
 	}
 	
 	/*--------------------------------*/
 	/*-- FOOTER HELP                --*/
-	/*--------------------------------*/	
+	/*--------------------------------*/
 	.sapMNavItem > .FooterBackground > .footerMBarContainer > div > .FooterHelpButton {
 		margin-left: 5px;
 		margin-top: 10px;
 	}
 	
-/*	.HelpDialog > footer.sapMIBar-CTX.sapMFooter-CTX {
-		 Give the help dialog box a footer with a green gradient background 
-		background-image: linear-gradient(to right, #007737 20%, #087725 40%, #0F7710 60%, #217708 80%, #307700 100%);
-	}
-	
 	.UpdateMessageBox > footer.sapMIBar-CTX.sapMFooter-CTX {
-		 Give the update dialog box a footer with a green gradient background 
-		background-image: linear-gradient(to right, #007737 20%, #087725 40%, #0F7710 60%, #217708 80%, #307700 100%);
-	}*/
-        
-        .UpdateMessageBox > footer.sapMIBar-CTX.sapMFooter-CTX {
-                background-image:linear-gradient(to bottom right, #71C900 20%, #60B800 40%, #4F9B00 60%, #4D7900 80%, #2C6B00 100%);
-        }
-        
-        .HelpDialog > footer.sapMIBar-CTX.sapMFooter-CTX {
-                background-image:linear-gradient(to bottom right, #71C900 20%, #60B800 40%, #4F9B00 60%, #4D7900 80%, #2C6B00 100%);
-        }
-        
+		background-image:linear-gradient(to bottom right, #71C900 20%, #60B800 40%, #4F9B00 60%, #4D7900 80%, #2C6B00 100%);
+	}
+	.HelpDialog > footer.sapMIBar-CTX.sapMFooter-CTX {
+		background-image:linear-gradient(to bottom right, #71C900 20%, #60B800 40%, #4F9B00 60%, #4D7900 80%, #2C6B00 100%);
+	}
 	
 	/*----------------------------------------*/
 	/*-- NAVIGATIONAL MENU                  --*/
 	/*----------------------------------------*/
 	ul.IOMYNavMenu > li > div.sapTntNavLIGroup {
-		background-color:       rgb(241,242,242);
+		background-color: rgb(241,242,242);
 	}
 	
 	.sapTntNavLIGroup:not(.sapTntNavLIItemDisabled):hover {
-		background-color:       #f0f0f0;
+		background-color: #f0f0f0;
 	}
 	
 	ul.IOMYNavMenu > li > div {
-		border-bottom:          1px solid rgb(188,190,192);
+		border-bottom: 1px solid rgb(188,190,192);
 	}
-        
+	
 	ul.IOMYNavMenu > li:first-child.sapTntNavLIItemSelected > div.sapTntNavLIGroup {
-		background-color:       #309010;
+		background-color: #309010;
 	}
 	
 	ul.IOMYNavMenu > li:first-child > div {
-		padding-top:		50px;
-		height:				90px;
-		background:			#309010 url("../images/navmenuheader.png") no-repeat center top;
-		/*border-bottom:		none;*/
+		padding-top: 50px;
+		height:	 90px;
+		background:	 #309010 url("../images/navmenuheader.png") no-repeat center top;
 	}
-	
 	
 	ul.IOMYNavMenu > li:first-child > div.sapTntNavLIGroup:not(.sapTntNavLIItemDisabled):hover {
-		/*background:			#308010; */
-		background:			#309010 url("../images/navmenuheader.png") no-repeat center top;
-		border-bottom:		none;
-	}
-        
-        ul.IOMYNavMenu > li:first-child > div > span.sapUiIcon {
-		color:				#FFFFFF;
-                font-size:                      22px;
+		background: #309010 url("../images/navmenuheader.png") no-repeat center top;
+		border-bottom: none;
 	}
 	
+	ul.IOMYNavMenu > li:first-child > div > span.sapUiIcon {
+		color: #FFFFFF;
+		font-size: 22px;
+	}
 	
 	ul.IOMYNavMenu > li:first-child > div > span.sapMText {
-		color:				#FFFFFF;
-                font-size:                      22px;
+		color: #FFFFFF;
+		font-size: 22px;
 	}
-	
 	
 	ul.IOMYNavMenu > li:first-child > div.sapTntNavLIGroup:not(.sapTntNavLIItemDisabled):hover > span.sapUiIcon {
-		color:				#FFFFFF;
+		color: #FFFFFF;
 	}
-	
 	
 	ul.IOMYNavMenu > li:first-child > div.sapTntNavLIGroup:not(.sapTntNavLIItemDisabled):hover > span.sapMText {
-		color:				#FFFFFF;
+		color: #FFFFFF;
 	}
-	
 	
 	ul.IOMYNavMenu > li > div.sapTntNavLIGroup.sapTntNavLIItem > .sapTntNavLIExpandIcon {
-                color:		rgb(139,197,63);
-        }
-        
-        ul.IOMYNavMenu > li:first-child > div.sapTntNavLIGroup.sapTntNavLIItem > .sapTntNavLIExpandIcon {
-                color:		white;
-        }
-        
-        
-        .IOMYNavMenuContainer {
-		width:				80%;
-		min-width:			250px;
-		max-width:			400px;
-                font-weight:                    bold;
+		color: rgb(139,197,63);
 	}
 	
+	ul.IOMYNavMenu > li:first-child > div.sapTntNavLIGroup.sapTntNavLIItem > .sapTntNavLIExpandIcon {
+		color: white;
+	}
+
+	.IOMYNavMenuContainer {
+		width: 80%;
+		min-width: 250px;
+		max-width: 400px;
+		font-weight: bold;
+	}
 	
 	/*====================================================================================*/
 	/*== STYLES FOR LISTS                                                               ==*/
 	/*====================================================================================*/
-        .ListItem {
-                border-bottom: 1px rgb(188,190,192) solid;
-        }
-        
-        .ListItemImportant {
-                background-color: #508F00;
-        }
-        
-        .BorderTop {
-                border-top: 1px rgb(188,190,192) solid; 
-        }
-        
-        .BorderBottom {
-                border-bottom: 1px rgb(188,190,192) solid; 
-        }
-        
-        .BorderLeft {
-                border-left: 1px rgb(188,190,192) solid; 
-        }
-        
-        .BorderRight {
-                border-right: 1px rgb(188,190,192) solid; 
-        }
-        
+	.ListItem {
+		border-bottom: 1px rgb(188,190,192) solid;
+	}
+
+	.ListItemImportant {
+		background-color: #508F00;
+	}
+
+	
+	.BorderTop {
+		border-top: 1px rgb(188,190,192) solid; 
+	}
+
+	.BorderBottom {
+		border-bottom: 1px rgb(188,190,192) solid; 
+	}
+
+	.BorderLeft {
+		border-left: 1px rgb(188,190,192) solid; 
+	}
+
+	.BorderRight {
+		border-right: 1px rgb(188,190,192) solid; 
+	}
+	
 	/*====================================================================================*/
 	/*== LOGIN PAGE & SWITCH USER PAGE STYLES                                           ==*/
 	/*====================================================================================*/
-
-
 	
 	div.LoginTextInput > input {
 		border: none;
@@ -406,18 +376,20 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		font-size: large;
 		text-align: left;
 	}
-        
-        button.LoginPageSubmit > div > span.sapMBtnIcon.sapUiIcon{
+	
+	button.LoginPageSubmit > div > span.sapMBtnIcon.sapUiIcon{
 		font-size: 22px;
 	}
 	
-        .LoginForm {
-                background-color: rgb(139, 197, 63);
-        }
-        
-        .LoginHelpLink {
-                color: rgb(99, 157, 23);
-        }
+	
+		.LoginForm {
+		background-color: rgb(139, 197, 63);
+	}
+	
+	.LoginHelpLink {
+		color: rgb(99, 157, 23);
+	}
+	
 	/*--------------------------------*/
 	/*-- SWITCH USER BUTTON         --*/
 	/*--------------------------------*/
@@ -436,7 +408,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		border-radius: 4px;
 		height: 70%;
 	}
-
+	
 	.SwitchUserButton > div > .sapMBtnContent {
 		line-height: 2.25em;
 	}
@@ -456,147 +428,133 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		/*margin-left: 10px;*/
 	}
 	
-	
-        button.IOMYButton > .sapMBtnInner {
-                border: none;
-                background: none;
-        }
-        
-        button.IOMYButton:not(.FooterHelpButton) > .sapMBtnInner > .sapMBtnContent {
-                /*font-weight: bold;*/
-        }
-        
-        button.IOMYButton.PremiseOverviewRoomButton > .sapMBtnInner > .sapMBtnContent {
-                font-family: "Roboto Condensed", sans-serif;
-                line-height: 2.5rem;
-        }
-/*        .IOMYButton > .sapMBtnInner.sapMBtnActive {
-                background-color: rgb(139, 197, 63);
-        }*/
-        
-/*        button.IOMYButton.DeviceButton {
-                height: 38px;
-        }
-        
-        button.IOMYButton.DeviceButton > .sapMBtnInner > .sapMBtnIcon {
-                line-height: 1.9rem;
-        }*/
-        
-        button.IOMYButton.DeviceButton > .sapMBtnInner > .sapMBtnContent {
-                font-family: "Roboto Condensed", sans-serif;
-                line-height: 2.5rem;
-        }
-        
-        button.IOMYButton.CameraPTZButton > .sapMBtnInner > .sapMBtnIcon {
-                text-shadow: 2px 2px black;
-                font-size: 1.775rem;
-        }
-        
-        button.IOMYButton.SecurityPageButton {
-                height: 38px;
-        }
-        
-        button.IOMYButton.SecurityPageButton > .sapMBtnInner > .sapMBtnIcon {
-                line-height: 1.9rem;
-        }
-        
-        button.IOMYButton.SecurityPageButton > .sapMBtnInner > .sapMBtnContent {
-                font-family: "Roboto Condensed", sans-serif;
-                line-height: 1.9rem;
-        }
-        
-        button.IOMYButton.IODeviceButton {
-                height: 32px;
-        }
-        
-        button.IOMYButton.IODeviceButton > .sapMBtnInner > .sapMBtnIcon {
-                line-height: 1.6rem;
-        }
-        
-        button.IOMYButton.IODeviceButton > .sapMBtnInner > .sapMBtnContent {
-                font-family: "Roboto Condensed", sans-serif;
-                line-height: 1.6rem;
-        }
-        
-        button.IOMYButton > div.sapMBtnInner {
-                text-shadow : none;
-        }
-        
-        button.IOMYButton.Text_white > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-                color: white;
-        }
-        
-        button.IOMYButton.Text_black > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-                color: black;
-        }
-        
-        /* Perhaps place these CSS Classes and overrides in a dedicated CSS file */
-        button.IOMYButton.TextSize16px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-                font-size: 16px;
-        }
-        button.IOMYButton.TextSize16px > div.sapMBtnInner > span.sapMBtnIcon {
-                font-size: 16px;
-        }
-        
-        button.IOMYButton.TextSize18px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-                font-size: 18px;
-        }
-        button.IOMYButton.TextSize18px > div.sapMBtnInner > span.sapMBtnIcon {
-                font-size: 18px;
-        }
-        
-        button.IOMYButton.TextSize20px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-                font-size: 20px;
-        }
-        button.IOMYButton.TextSize20px > div.sapMBtnInner > span.sapMBtnIcon {
-                font-size: 20px;
-        }
-        
-        button.IOMYButton.TextSize22px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-                font-size: 22px;
-        }
-        button.IOMYButton.TextSize22px > div.sapMBtnInner > span.sapMBtnIcon {
-                font-size: 22px;
-        }
-        
-        button.IOMYButton.TextSize40px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-                font-size: 40px;
-        }
-        button.IOMYButton.TextSize40px > div.sapMBtnInner > span.sapMBtnIcon {
-                font-size: 40px;
-        }
-        
-        button.IOMYButton.TextLeft > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-                text-align: left;
-        }
-        
-        button.IOMYButtonFlex > div {
-		display: flex;
+	button.IOMYButton > .sapMBtnInner {
+		border: none;
+		background: none;
 	}
-        
-        .IOMYButton:not(.sapMBtnDisabled)>.sapMBtnInner.sapMBtnActive {
-                background-color: rgb(241, 242, 242);
-                color: black;
-                border-color: rgb(241, 242, 242);
-        }
+	
+	button.IOMYButton:not(.FooterHelpButton) > .sapMBtnInner > .sapMBtnContent {
+		/*font-weight: bold;*/
+	}
+	
+	button.IOMYButton.PremiseOverviewRoomButton > .sapMBtnInner > .sapMBtnContent {
+		font-family: "Roboto Condensed", sans-serif;
+		line-height: 2.5rem;
+	}
+	
+	button.IOMYButton.DeviceButton > .sapMBtnInner > .sapMBtnContent {
+		font-family: "Roboto Condensed", sans-serif;
+		line-height: 2.5rem;
+	}
+	
+	button.IOMYButton.CameraPTZButton > .sapMBtnInner > .sapMBtnIcon {
+		text-shadow: 2px 2px black;
+		font-size: 1.775rem;
+	}
+	
+	button.IOMYButton.SecurityPageButton {
+		height: 38px;
+	}
+	
+	button.IOMYButton.SecurityPageButton > .sapMBtnInner > .sapMBtnIcon {
+		line-height: 1.9rem;
+	}
+	
+	button.IOMYButton.SecurityPageButton > .sapMBtnInner > .sapMBtnContent {
+		font-family: "Roboto Condensed", sans-serif;
+		line-height: 1.9rem;
+	}
+	
+	button.IOMYButton.IODeviceButton {
+		height: 32px;
+	}
+	
+	button.IOMYButton.IODeviceButton > .sapMBtnInner > .sapMBtnIcon {
+		line-height: 1.6rem;
+	}
+	
+	button.IOMYButton.IODeviceButton > .sapMBtnInner > .sapMBtnContent {
+		font-family: "Roboto Condensed", sans-serif;
+		line-height: 1.6rem;
+	}
+	
+	button.IOMYButton > div.sapMBtnInner {
+		text-shadow : none;
+	}
+	
+	button.IOMYButton.Text_white > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
+		color: white;
+	}
+	
+	button.IOMYButton.Text_black > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
+		color: black;
+	}
+	
+	/* Perhaps place these CSS Classes and overrides in a dedicated CSS file */
+	button.IOMYButton.TextSize16px > div.sapMBtnInner > span.sapMBtnIcon {
+		font-size: 16px;
+	}
+	button.IOMYButton.TextSize18px > div.sapMBtnInner > span.sapMBtnIcon {
+		font-size: 18px;
+	}
+	button.IOMYButton.TextSize20px > div.sapMBtnInner > span.sapMBtnIcon {
+		font-size: 20px;
+	}
+	button.IOMYButton.TextSize22px > div.sapMBtnInner > span.sapMBtnIcon {
+		font-size: 22px;
+	}
+	button.IOMYButton.TextSize40px > div.sapMBtnInner > span.sapMBtnIcon {
+		font-size: 40px;
+	}
+	
+	/* -- Currently not being used. Possibly Deprecated --
+	button.IOMYButton.TextSize16px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
+		font-size: 16px;
+	}
+	button.IOMYButton.TextSize18px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
+		font-size: 18px;
+	}
+	button.IOMYButton.TextSize20px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
+		font-size: 20px;
+	}
+	button.IOMYButton.TextSize22px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
+		font-size: 22px;
+	}
+	button.IOMYButton.TextSize40px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
+		font-size: 40px;
+	}
+	*/
+	
+	button.IOMYButton.TextLeft > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
+			text-align: left;
+	}
+	
+	button.IOMYButtonFlex > div {
+	display: flex;
+	}
+	
+	.IOMYButton:not(.sapMBtnDisabled)>.sapMBtnInner.sapMBtnActive {
+		background-color: rgb(241, 242, 242);
+		color: black;
+		border-color: rgb(241, 242, 242);
+	}
 	
 	button.NavButton.sapMBarChild.sapMBtnBase {
 		border: none;
 		background: none;
-                line-height: 2rem;
+		line-height: 2rem;
 	}
 	button.NavButton > div > span.sapUiIcon {
-                font-size: 40px;
-        }
-        
-        .sapMIBar-CTX.sapMFooter-CTX :not(.sapMBtnDisabled)>.sapMBtnActive {
-                background-color: rgb(119,177,43);
-        }
-        
-        :not(.sapMBtnDisabled)>.sapMBtnInner.sapMBtnActive {
-                border-color: rgb(119,177,43);
-        }
-        
+		font-size: 40px;
+	}
+	.sapMIBar-CTX.sapMFooter-CTX :not(.sapMBtnDisabled)>.sapMBtnActive {
+		background-color: rgb(119,177,43);
+	}
+	
+	:not(.sapMBtnDisabled)>.sapMBtnInner.sapMBtnActive {
+		border-color: rgb(119,177,43);
+	}
+	
 	/*====================================================================================*/
 	/*== NAVIGATION PAGE STYLES                                                         ==*/
 	/*====================================================================================*/
@@ -624,13 +582,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		border-radius: 50%;
 		padding-top: 4px;
 	}
-        
-        .NavMain_Data_Value_2DigitCircle_Important {
+	.NavMain_Data_Value_2DigitCircle_Important {
 		background-color: #500000;
 		color: white;
 		font-size: 18px;
 		width: 1.5em;
-		/*height: 1.5em;*/
 		border-radius: 50%;
 		padding-top: 4px;
 	}
@@ -642,7 +598,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	
 	.NavMain_Data_ValueNormal {
 		/* This class is used for the labels next to the green circle value */
-		/*padding: 5px;*/
 		text-align: center;
 		font-size: medium;
 	}
@@ -656,110 +611,92 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		text-align: center;
 	}
 	
-	
 	.NavMain-DividingBorder {
-		border-left:		2px solid #409000;
+		border-left: 2px solid #409000;
 	}
-
+	
 	.NavMain-ItemIcon {
-		height:			40px;
-		width:			40px;
-		margin:			10px 3px 3px 3px;
-		padding:		8px 6px 4px 6px;
-		font-size:		40px;
-/*		border:			1px solid #404040;
-		border-radius:	50%;*/
-		color:			#404040;
+		height: 40px;
+		width: 40px;
+		margin: 10px 3px 3px 3px;
+		padding: 8px 6px 4px 6px;
+		font-size: 40px;
+		color: #404040;
 	}
-
 	
 	.NavMain-ItemLabel {
 		padding-top: 24px;
 		color: black;
 	}
 	
-
+	
 	.MainPanelBackground {
 		background: linear-gradient(to right, #EBD7C9, #FFFFFF);
 	}
 	
-	.MainPanelElement {
-	/*	background: linear-gradient(to right, #F4EAE3 1%, #F7EDE6 25%, #FFFFFF 70%); */ 
-	}
-	
 	.NavMain-IconBordered_grey {
-		border:			1px solid #404040;
-		border-radius:	50%;
-		color:			#404040;
+		border:	 1px solid #404040;
+		border-radius: 50%;
+		color: #404040;
 	}
 	
 	.NavMain-IconBordered_orange {
-		border:			1px solid #B55117;
-		border-radius:	50%;
-		color:			#B55117;
+		border: 1px solid #B55117;
+		border-radius: 50%;
+		color: #B55117;
 	}
 	
 	.NavMain-IconBordered_darkgreen {
-		border:			1px solid #209020;
-		border-radius:	50%;
-		color:			#209020;
+		border:	 1px solid #209020;
+		border-radius: 50%;
+		color: #209020;
 	}
 	
 	.NavMain-IconBordered_darkred {
-		border:			1px solid #600000;
-		border-radius:	50%;
-		color:			#600000;
+		border: 1px solid #600000;
+		border-radius: 50%;
+		color: #600000;
 	}
 	
 	.NavMain-IconBordered_darkskyblue {
-		border:			1px solid #105080;
-		border-radius:	50%;
-		color:			#105080;
+		border: 1px solid #105080;
+		border-radius: 50%;
+		color: #105080;
 	}
 	
 	.NavMain-IconBordered_darkindego {
-		border:			1px solid #501080;
-		border-radius:	50%;
-		color:			#501080;
+		border: 1px solid #501080;
+		border-radius: 50%;
+		color: #501080;
 	}
-        
-    .NavHeader-Icon {
-		height:			25px;
-        line-height:            2.5rem;
-		/*width:			20px;*/
-		margin-top:		5px;
-		/*padding:		0px 10px 16px 10px;*/
-		/*font-size:		40px;*/
-/*		border:			1px solid #404040;
-		border-radius:          50%;*/
-		color:			#404040;
+	
+	.NavHeader-Icon {
+		line-height: 2.5rem;
+		margin-top: 5px;
+		color: #404040;
 	}
-        
-    .NavHeader-Text {
-		height:			25px;
+	
+	.NavHeader-Text {
 		min-width: 50px;
-		margin-top:		15px;
-		padding:		0px 10px 16px 10px;
-		/*font-size:		40px;*/
-/*		border:			1px solid #404040;
-		border-radius:          50%;*/
-		color:			#404040;
+		margin-top: 15px;
+		padding: 0px 10px 16px 10px;
+		color: #404040;
+		white-space: nowrap;
 	}
-        
-    /* DARKEN THE CHILD BUTTONS ON THE NAVIGATION POPOVER */
-    ul.IOMYNavMenu > li > ul > li.sapTntNavLIGroupItem {
-        background-color:white;
-    }
-
-
-    /*====================================================================================*/
+	
+	/* DARKEN THE CHILD BUTTONS ON THE NAVIGATION POPOVER */
+	ul.IOMYNavMenu > li > ul > li.sapTntNavLIGroupItem {
+		background-color: white;
+	}
+	
+	/*====================================================================================*/
 	/*== ROOM LIST															==*/
 	/*====================================================================================*/
 	.Setting-RoomListItemLabel {
 		padding-top: 22px;
 		padding-bottom: 22px;
 		border-right: 2px solid #529B00;
-        }
+	}
 	
 	/*====================================================================================*/
 	/*== DEVICE OVERVIEW                                                                ==*/
@@ -769,33 +706,26 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	/*-- ITEM CONTAINER STYLES  --*/
 	/*----------------------------*/
 	.DeviceOverview-ItemContainerDark {
-		background:		#EEEEEE;
+		background: #EEEEEE;
 	}
 	
 	.DeviceOverview-ItemContainerLight {
-		background:		#FFFFFF;
+		background: #FFFFFF;
 	}
 	
 	/*----------------------------*/
 	/*-- ITEM LABEL             --*/
 	/*----------------------------*/
-	.DeviceOverview-ItemLabel {
-		padding-top:		20px;
-		padding-bottom:		15px;
-		/* min-width:			130px; */
-	}
-	
 	.DeviceOverview-DividingBorder {
-		border-left:		2px solid #909090;
+		border-left: 2px solid #909090;
 	}
-	
 	
 	/*----------------------------*/
 	/*-- TOOGLE BUTTONS         --*/
 	/*----------------------------*/
 	.DeviceToggleButtons {
-		border:				none;
-		border-radius:		7px;
+		border: none;
+		border-radius: 7px;
 	}
 	
 	.DeviceOverviewStatusToggleSwitch > .sapMSwtOn:not(.sapMSwtAcceptReject) {
@@ -816,9 +746,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		color: #cc2020;
 	}
 	
-	.DeviceOverviewStatusToggleSwitch > .sapMSwt.sapMSwtHoverable:hover {
-		
-	}
 	.DeviceOverviewStatusToggleSwitch > .sapMSwtHoverable.sapMSwtOn:hover:not(.sapMSwtAcceptReject) {
 		background: #209920 none repeat scroll 0 0;
 	}
@@ -827,19 +754,18 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		background: #ffe9e9 none repeat scroll 0 0;
 	}
 	
-	
 	/*====================================================================================*/
 	/*== ACTIVITY LOGS                                                                  ==*/
 	/*====================================================================================*/
-        .ActivityLogEntry {
-                padding-top : 8px;
-                padding-bottom : 8px;
-                margin-left: 4px;
-        }
-        
-        .ActivityLogEntryDivider {
-                border-right : 1px solid #333333;
-        }
+	.ActivityLogEntry {
+		padding-top : 8px;
+		padding-bottom : 8px;
+		margin-left: 4px;
+	}
+	
+	.ActivityLogEntryDivider {
+		border-right : 1px solid #333333;
+	}
 	
 	/*====================================================================================*/
 	/*== SECURITY OVERVIEW                                                              ==*/
@@ -857,9 +783,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		width: 40px;
 	}
 	
-	
-
-	
 	/*====================================================================================*/
 	/*== SETTINGS OVERVIEW                                                              ==*/
 	/*====================================================================================*/
@@ -868,106 +791,75 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		padding-bottom: 20px;
 		border-right: 2px solid #529B00;
 	}
-        
-        .Setting-ItemLabel-NoBorder {
+	
+	.Setting-ItemLabel-NoBorder {
 		padding-top: 20px;
 		padding-bottom: 20px;
 	}
 	
 	.AcceptSubmitButton {
 		background-color: rgb(139, 197, 63);
-        width: 100%;
+		width: 100%;
 		color: white;
 		border-radius: 10px;
 	}
-    
-    .TelnetCommandButton {
+	
+	.TelnetCommandButton {
 		background-color: rgb(130, 139, 130);
 		color: white;
 		border-radius: 10px;
 	}
 	
-        .SettingsLinks {
-                padding-top: 15px;
-                padding-bottom: 15px;
-        }
+	.SettingsLinks {
+			padding-top: 15px;
+			padding-bottom: 15px;
+	}
 	
 	/*====================================================================================*/
 	/*== SETTINGS DEVICE LIST                                                           ==*/
 	/*====================================================================================*/
-	/*.sapMInputBase > input {
-		border-radius: 10px;
-	}*/
 	
-        .sapMInputBase.SettingsTextInput > input {
-		/*border-radius: 10px;*/
-                /* You can set width to whatever you like */
-                width: 100%;
-                font-family: "Roboto Condensed", sans-serif;
-                /*font-size: 16px;*/
-                margin: 0;
-                padding: 8px 8px 6px 8px;
-                position: relative;
-                display: block;
-                outline: none;
-                border: 1px solid rgb(188,190,192);
-/*                background: bottom left linear-gradient(#a9a9a9, #a9a9a9) no-repeat, bottom center linear-gradient(#a9a9a9, #a9a9a9) repeat-x, bottom right linear-gradient(#a9a9a9, #a9a9a9) no-repeat;
-                background-size: 1px 6px, 1px 1px, 1px 6px;*/
+	.sapMInputBase.SettingsTextInput > input {
+		width: 100%;
+		font-family: "Roboto Condensed", sans-serif;
+		margin: 0;
+		padding: 8px 8px 6px 8px;
+		position: relative;
+		display: block;
+		outline: none;
+		border: 1px solid rgb(188,190,192);
 	}
-        
-        .sapMInputBase.SettingsTextInput > input[type='text']:hover, .sapMInputBase.SettingsDropdownInput > input[type='text']:focus {
-/*                background: bottom left linear-gradient(#00cc99, #00cc99) no-repeat, bottom center linear-gradient(#00cc99, #00cc99) repeat-x, bottom right linear-gradient(#00cc99, #00cc99) no-repeat;
-                background-size: 1px 6px, 1px 1px, 1px 6px;*/
-        }
 	
-        .SettingsDropdownInput.sapMComboBoxBasePressed
-        .sapMComboBoxBaseArrow, .sap-desktop .sapMComboBoxBasePressed .sapMComboBoxBaseArrow:hover {
-                background: rgb(241, 242, 242);
-        }
-        
-        .SettingsDropdownInput.sapMComboBoxBasePressed:not(.sapMComboBoxTextFieldReadonly):not(.sapMComboBoxTextFieldState):not(.sapMComboBoxTextFieldDisabled) {
-                border-color: rgb(241, 242, 242);
-        }
-        
-        .SettingsDropdownInput.sapMFocus.sapMComboBoxTextField:not(.sapMComboBoxTextFieldReadonly):not(.sapMComboBoxTextFieldState):not(.sapMComboBoxTextFieldDisabled),
-        .sapMComboBoxTextField:not(.sapMComboBoxTextFieldReadonly):not(.sapMComboBoxTextFieldState):not(.sapMComboBoxTextFieldDisabled):hover {
-                border-color: rgb(188,190,192);
-        }
+	.SettingsDropdownInput.sapMComboBoxBasePressed
+	.sapMComboBoxBaseArrow, .sap-desktop .sapMComboBoxBasePressed .sapMComboBoxBaseArrow:hover {
+		background: rgb(241, 242, 242);
+	}
 	
-	.sapMInputBase.SettingsDropdownInput {
-		/*border: none;*/
+	.SettingsDropdownInput.sapMComboBoxBasePressed:not(.sapMComboBoxTextFieldReadonly):not(.sapMComboBoxTextFieldState):not(.sapMComboBoxTextFieldDisabled) {
+		border-color: rgb(241, 242, 242);
+	}
+	
+	.SettingsDropdownInput.sapMFocus.sapMComboBoxTextField:not(.sapMComboBoxTextFieldReadonly):not(.sapMComboBoxTextFieldState):not(.sapMComboBoxTextFieldDisabled),
+	.sapMComboBoxTextField:not(.sapMComboBoxTextFieldReadonly):not(.sapMComboBoxTextFieldState):not(.sapMComboBoxTextFieldDisabled):hover {
+		border-color: rgb(188,190,192);
 	}
 	
 	.sapMInputBase.SettingsDropdownInput > input {
-/*		border: 1px solid #bfbfbf;
-		border-top-left-radius: 10px;
-		border-bottom-left-radius: 10px;*/
-                width: 100%;
-                /*font-family: "Roboto", "Droid Sans", sans-serif;*/
-                font-family: "Roboto Condensed", sans-serif;
-                font-size: 16px;
-                margin: 0;
-                padding: 8px 8px 6px 8px;
-                position: relative;
-                display: block;
-                outline: none;
-/*                background: bottom left linear-gradient(#a9a9a9, #a9a9a9) no-repeat, bottom center linear-gradient(#a9a9a9, #a9a9a9) repeat-x, bottom right linear-gradient(#a9a9a9, #a9a9a9) no-repeat;
-                background-size: 1px 6px, 1px 1px, 1px 6px;*/
+		width: 100%;
+		font-family: "Roboto Condensed", sans-serif;
+		font-size: 16px;
+		margin: 0;
+		padding: 8px 8px 6px 8px;
+		position: relative;
+		display: block;
+		outline: none;
 	}
-        
-        .sapMInputBase.SettingsDropdownInput > input[type='text']:hover, .sapMInputBase.SettingsDropdownInput > input[type='text']:focus {
-                
-/*                background: bottom left linear-gradient(#00cc99, #00cc99) no-repeat, bottom center linear-gradient(#00cc99, #00cc99) repeat-x, bottom right linear-gradient(#00cc99, #00cc99) no-repeat;
-                background-size: 1px 6px, 1px 1px, 1px 6px;*/
-        }
 	
 	.sapMInputBase.SettingsDropdownInput > button {
-                background-color: rgba(197,197,197,0.1);
-                border-left: 1px solid rgb(197,197,197);
-/*		background: bottom left linear-gradient(#a9a9a9, #a9a9a9) no-repeat, bottom center linear-gradient(#a9a9a9, #a9a9a9) repeat-x, bottom right linear-gradient(#a9a9a9, #a9a9a9) no-repeat;
-                background-size: 1px 6px, 1px 1px, 1px 6px;*/
+		background-color: rgba(197,197,197,0.1);
+		border-left: 1px solid rgb(197,197,197);
 	}
-        
+	
 	/*====================================================================================*/
 	/*== SETTINGS PREMISE LIST AND OVERVIEW                                             ==*/
 	/*====================================================================================*/
@@ -975,57 +867,49 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		padding-top: 32px;
 		padding-bottom: 32px;
 		border-right: 2px solid #529B00;
-        }
-
-
+		}
+		
 	/* Overriding UI5 default rules */
-	
 	.sapMText:not(.Text_red_13) {
-                color: rgb(88, 89, 91);
-        }
-        
-        .sapMBar-CTX :not(.sapMBtnDisabled)>.sapMBtnInner.sapMBtnActive {
-                background-color: rgb(139, 197, 63);
-                border-color: rgb(139, 197, 63);
-        }
-        
-        .sapMSelectListItemBase {
-                font-family: 'Roboto Condensed', sans-serif;
-        }
-        
-        
-        .sapMInputBaseInner {
-                font-family: 'Roboto Condensed', sans-serif;
-        }
-        
-/*        .sapMSelectListItemBaseSelected {
-                font-family: 'Roboto Condensed', sans-serif;
-        }
-        */
-        .sapMComboBoxBasePicker > div > div > ul > li.sapMSelectListItemBaseSelected {
-                background: rgb(241, 242, 242);
-        }
-        
-        .sapMLIBSelected + .sapMListTblSubRow {
-                background: #e6f9db;
-        }
-        
-        html.sap-desktop .sapMBtn:focus>.sapMFocusable {
-                outline: 1px solid rgb(241, 242, 242);
-                outline-offset: -2px;
-        }
-        
-        .sapMLnk:hover:not(.sapMLnkDsbl) {
-                color: rgb(139, 197, 63);
-        }
-        
-        .sapMLnk:visited {
-                color: rgb(139, 197, 63);
-        }
-        
-        .sapMCbBg.sapMCbMarkChecked:before {
-                color: rgb(139, 197, 63);
-        }
+		color: rgb(88, 89, 91);
+	}
+	.sapMBar-CTX :not(.sapMBtnDisabled)>.sapMBtnInner.sapMBtnActive {
+		background-color: rgb(139, 197, 63);
+		border-color: rgb(139, 197, 63);
+	}
+	
+	.sapMSelectListItemBase {
+		font-family: 'Roboto Condensed', sans-serif;
+	}
+	
+	.sapMInputBaseInner {
+			font-family: 'Roboto Condensed', sans-serif;
+	}
+	
+	.sapMComboBoxBasePicker > div > div > ul > li.sapMSelectListItemBaseSelected {
+		background: rgb(241, 242, 242);
+	}
+	
+	.sapMLIBSelected + .sapMListTblSubRow {
+		background: #e6f9db;
+	}
+	
+	html.sap-desktop .sapMBtn:focus>.sapMFocusable {
+		outline: 1px solid rgb(241, 242, 242);
+		outline-offset: -2px;
+	}
+	
+	.sapMLnk:hover:not(.sapMLnkDsbl) {
+			color: rgb(139, 197, 63);
+	}
+	
+	.sapMLnk:visited {
+			color: rgb(139, 197, 63);
+	}
+	
+	.sapMCbBg.sapMCbMarkChecked:before {
+			color: rgb(139, 197, 63);
+	}
 	
 	.footerMBarContainer > .sapMBarContainer > img {
 		margin-top: 10px;
@@ -1072,152 +956,154 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	
 	
 	.SettingsListPremise-DividingBorder {
-		border-left:		2px solid #409000;
+		border-left: 2px solid #409000;
 	}
-    
-    /*--------------------------------------------------------------*/
-    /* PERMISSIONS RADIO BOX GROUP
-    /*--------------------------------------------------------------*/
-    .PermissionsRadioButtonGroup.sapMRbG>.sapMRb, .PermissionsRadioButtonGroup.sapMRbGCol>.sapMRb {
-            clear: none;
-    }
 	
-    /*****************************\
-    * BUTTONS FOR DIFFERENT PAGES *
-    \*****************************/
-        
-    .ButtonNoBorder {
-            border:none;
-    }
-        
-    .YellowLinkButton {
+	/*--------------------------------------------------------------*/
+	/* PERMISSIONS RADIO BOX GROUP                                  */
+	/*--------------------------------------------------------------*/
+	.PermissionsRadioButtonGroup.sapMRbG>.sapMRb, .PermissionsRadioButtonGroup.sapMRbGCol>.sapMRb {
+			clear: none;
+	}
+	
+	/*====================================================================================*/
+	/*== Buttons for Different Pages                                                    ==*/
+	/*====================================================================================*/
+	
+	.ButtonNoBorder {
+		border:none;
+	}
+	
+	.YellowLinkButton {
 		background-color: #F4C548;
 		color: black;
 	}
-        
-    .GreenLinkButton {
+	
+	.GreenLinkButton {
 		background-color: #85B246;
 		color: black;
 	}
-        
-    .DarkGreenLinkButton {
+	
+	.DarkGreenLinkButton {
 		background-color: #10840F;
 		color: black;
 	}
-        
-    .NormalLinkButton {
+	
+	.NormalLinkButton {
 		background-color: #109010;
 		color: white;
-        border-radius: 15px;
+		border-radius: 15px;
 	}
-        
-    .DisabledLinkButton {
+	
+	.DisabledLinkButton {
 		background-color: #909090;
 		color: white;
-        border-radius: 15px;
+		border-radius: 15px;
 	}
-        
-    .VideoCaptureButton {
+	
+	.VideoCaptureButton {
 		background-color: #E78B65;
-        border: 1px solid white;
-        width: 50%;
+		border: 1px solid white;
+		width: 50%;
 		color: white;
 	}
-        
-        .VideoButtonBarIcon.sapUiIcon:before {
-                font-size: 35px;
-        }
-        
-        .VideoCaptureButton > .sapMFlexItem > .IOMYButton > div > span.sapMBtnContent {
-                font-family: "Roboto Condensed", sans-serif;
-                font-size: 16px;
-        }
-        
-        .LinkButton {
-                color: white;
-                border-radius: 15px;
-        }
-        
-        .ButtonCircle {
-                border-radius: 50%;
-        }
-
+	
+	.VideoButtonBarIcon.sapUiIcon:before {
+		font-size: 35px;
+	}
+	
+	.VideoCaptureButton > .sapMFlexItem > .IOMYButton > div > span.sapMBtnContent {
+		font-family: "Roboto Condensed", sans-serif;
+		font-size: 16px;
+	}
+	
+	.LinkButton {
+		color: white;
+		border-radius: 15px;
+	}
+	
+	.ButtonCircle {
+		border-radius: 50%;
+	}
 	
 	/*====================================================================================*/
 	/*== TILE DATA PAGES                                                                ==*/
 	/*====================================================================================*/
-	.TileSensorMenu > section > div > div > div > div > section {
-		/*background: linear-gradient(to bottom, #F7F7F7 0%, #DFE5DC 100%); */
-	}
-
-	
 	div > .sapMIBar-CTX .sapMLabel {
 		color: #000000;
 		font-size: 24px;
 		text-shadow: 2px 2px 4px #404040;
 	}
-        
-        .ConsistentMenuHeader {
-                background-color: rgb(241,242,242);
-        };
-        
-        .ConsistentMenuHeader > div > div > .sapMText {
-/*                background-color: rgb(241,242,242);*/
-                color: black;
-                font-family: "Roboto Condensed", sans-serif;
-                font-weight: bold;
-                min-height: 20px;
-                font-size: 16px;
-                width: 100%;
-        };
-        
-        .HeaderLower.sapMBar {
-                line-height: 2.4rem;
-        }
-        
-        /*====================================================================================*/
+	
+	.ConsistentMenuHeader {
+		background-color: rgb(241,242,242);
+	}
+	
+	.ConsistentMenuHeader > div > div > .sapMText {
+		color: black;
+		font-family: "Roboto Condensed", sans-serif;
+		font-weight: bold;
+		min-height: 20px;
+		font-size: 16px;
+		width: 100%;
+	}
+	
+		
+	/*-- Centers Labels when used in a Tile --*/
+	.TileToggleThingStatusLabel {
+		text-align: center;
+		width: 100%;
+		font-size: 2.125rem;
+		color: navy;
+		padding-top: 8px;
+	}
+	
+	.HeaderLower.sapMBar {
+		line-height: 2.4rem;
+	}
+	
+	/*====================================================================================*/
 	/*== TILE DATA POPOVERS                                                             ==*/
 	/*====================================================================================*/
-        
-        .sapMSegBBtn.sapMSegBBtnFocusable.sapMSegBBtnSel:hover, .sapMSegBBtnFocusable.sapMBtnActive:hover {
-                background: rgb(139, 197, 63);
-        }
-
-        .sapMSegBBtn.sapMSegBBtnFocusable.sapMSegBBtnSel {
-                border-right: 1px solid #006ca7;
-        }
-        
-        .sapMSegBBtn.sapMSegBBtnSel {
-                background: rgb(139, 217, 83);
-                color: #ffffff;
-                border-color: rgb(139, 197, 63);
-        }
-        
-        .sapMRbSel .sapMRbBInn {
-                background-color: rgb(139, 197, 63);
-        }
-        
-    /*================================================================*/
-    /* FORMS
-    /*================================================================*/
-    
-    .UserInputForm {
-        margin: 0 auto;
-        max-width: 550px;
-    }
-    
-    .UserInputForm.ZigbeeDataPage {
-        max-width: 565px;
-    }
-    
-    .ZigbeeDataPage > .sapMPanelContent {
-        margin-right: 6px;
-    }
-    
-    .TelnetOutput.sapMInputBase.sapMTextArea {
-        height: 300px;
-    }
-    
-    .sapMSlt > .sapMSltLabel {
-        font-family: 'Roboto Condensed', sans-serif;
-    }
+	.sapMSegBBtn.sapMSegBBtnFocusable.sapMSegBBtnSel:hover, .sapMSegBBtnFocusable.sapMBtnActive:hover {
+		background: rgb(139, 197, 63);
+	}
+	
+	.sapMSegBBtn.sapMSegBBtnFocusable.sapMSegBBtnSel {
+		border-right: 1px solid #006ca7;
+	}
+	
+	.sapMSegBBtn.sapMSegBBtnSel {
+		background: rgb(139, 217, 83);
+		color: #ffffff;
+		border-color: rgb(139, 197, 63);
+	}
+	
+	.sapMRbSel .sapMRbBInn {
+		background-color: rgb(139, 197, 63);
+	}
+	
+	/*================================================================*/
+	/* FORMS                                                          */
+	/*================================================================*/
+	
+	.UserInputForm {
+		margin: 0 auto;
+		max-width: 550px;
+	}
+	
+	.UserInputForm.ZigbeeDataPage {
+		max-width: 565px;
+	}
+	
+	.ZigbeeDataPage > .sapMPanelContent {
+		margin-right: 6px;
+	}
+	
+	.TelnetOutput.sapMInputBase.sapMTextArea {
+		height: 300px;
+	}
+	
+	.sapMSlt > .sapMSltLabel {
+		font-family: 'Roboto Condensed', sans-serif;
+	}

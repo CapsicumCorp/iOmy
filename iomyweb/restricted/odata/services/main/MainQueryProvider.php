@@ -1,6 +1,23 @@
 <?php
 
 
+/*
+This file is part of iOmy.
+
+iOmy is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+iOmy is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 	
 	
@@ -96,6 +113,8 @@
 				case 'VR_USERSHUB':
 					break;
 				case 'VR_USERSROOMS':
+					break;
+				case 'VR_USERSPREMISEROOMS':
 					break;
 				case 'VR_USERSLINK':
 					break;
@@ -217,6 +236,9 @@
 							break;
 						case 'VR_USERSROOMS':
 							$aReturnResults[] = $this->_serializeVR_USERSROOMS($aRow);
+							break;
+						case 'VR_USERSPREMISEROOMS':
+							$aReturnResults[] = $this->_serializeVR_USERSPREMISEROOMS($aRow);
 							break;
 						case 'VR_USERSLINK':
 							$aReturnResults[] = $this->_serializeVR_USERSLINK($aRow);
@@ -342,6 +364,8 @@
 					break;
 				case 'VR_USERSROOMS':
 					break;
+				case 'VR_USERSPREMISEROOMS':
+					break;
 				case 'VR_USERSLINK':
 					break;
 				case 'VR_USERSTHING':
@@ -461,6 +485,9 @@
 							$aReturnResults = $this->_serializeVR_USERSHUB($aSQLResult["Data"]);
 							break;
 						case 'VR_USERSROOMS':
+							$aReturnResults = $this->_serializeVR_USERSROOMS($aSQLResult["Data"]);
+							break;
+						case 'VR_USERSPREMISEROOMS':
 							$aReturnResults = $this->_serializeVR_USERSROOMS($aSQLResult["Data"]);
 							break;
 						case 'VR_USERSLINK':
@@ -767,7 +794,7 @@
 		}
 		
 		/**
-		 * Serialize the sql row into RSCAT object
+		 * Serialize the sql row into UsersHub object
 		 * 
 		 * @param array $record each row of RSCAT
 		 * 
@@ -820,6 +847,37 @@
 			
 		}
 		
+        /**
+		 * Serialize the sql row into UsersPremiseRooms object
+		 * 
+		 * @param array $record each row of UsersRooms
+		 * 
+		 * @return Object
+		 */
+		private function _serializeVR_USERSPREMISEROOMS($record)
+		{
+			$VR_USERSPREMISEROOMS = new VR_USERSPREMISEROOMS();
+			$VR_USERSPREMISEROOMS->USERS_PK                        = $record['USERS_PK'];
+			//$VR_USERSPREMISEROOMS->USERS_USERNAME                  = $record['USERS_USERNAME'];
+			$VR_USERSPREMISEROOMS->PERMPREMISE_OWNER                  = $record['PERMPREMISE_OWNER'];
+			$VR_USERSPREMISEROOMS->PERMPREMISE_WRITE                 = $record['PERMPREMISE_WRITE'];
+			$VR_USERSPREMISEROOMS->PERMPREMISE_STATETOGGLE           = $record['PERMPREMISE_STATETOGGLE'];
+			$VR_USERSPREMISEROOMS->PERMPREMISE_READ              = $record['PERMPREMISE_READ'];
+			$VR_USERSPREMISEROOMS->PERMPREMISE_ROOMADMIN             = $record['PERMPREMISE_ROOMADMIN'];
+            $VR_USERSPREMISEROOMS->PREMISE_PK                      = $record['PREMISE_PK'];
+			$VR_USERSPREMISEROOMS->PREMISE_NAME					= $record['PREMISE_NAME'];
+			$VR_USERSPREMISEROOMS->PREMISE_DESCRIPTION             = $record['PREMISE_DESCRIPTION'];
+			$VR_USERSPREMISEROOMS->ROOMS_PK                        = $record['ROOMS_PK'];
+			//$VR_USERSPREMISEROOMS->ROOMS_PREMISE_FK                = $record['ROOMS_PREMISE_FK'];
+			$VR_USERSPREMISEROOMS->ROOMS_NAME                      = $record['ROOMS_NAME'];
+			$VR_USERSPREMISEROOMS->ROOMS_FLOOR                     = $record['ROOMS_FLOOR'];
+			$VR_USERSPREMISEROOMS->ROOMS_DESC                      = $record['ROOMS_DESC'];
+			$VR_USERSPREMISEROOMS->ROOMTYPE_PK                     = $record['ROOMTYPE_PK'];
+			$VR_USERSPREMISEROOMS->ROOMTYPE_NAME                   = $record['ROOMTYPE_NAME'];
+			$VR_USERSPREMISEROOMS->ROOMTYPE_OUTDOORS               = $record['ROOMTYPE_OUTDOORS'];
+			return $VR_USERSPREMISEROOMS;
+			
+		}
 		
 		/**
 		 * Serialize the sql row into UsersIo object
@@ -1284,25 +1342,18 @@
 		private function _serializeVR_DATATINYSTRING($record)
 		{
 			$VR_DATATINYSTRING = new VR_DATATINYSTRING();
-			$VR_DATATINYSTRING->CALCEDVALUE					= $record['CALCEDVALUE'];
-			$VR_DATATINYSTRING->UTS							= $record['UTS'];
-			$VR_DATATINYSTRING->DATATINYSTRING_PK			= $record['DATATINYSTRING_PK'];
-			$VR_DATATINYSTRING->DATATINYSTRING_DATE			= $record['DATATINYSTRING_DATE'];
-			$VR_DATATINYSTRING->DATATINYSTRING_VALUE		= $record['DATATINYSTRING_VALUE'];
-			$VR_DATATINYSTRING->DATATYPE_PK					= $record['DATATYPE_PK'];
-			$VR_DATATINYSTRING->DATATYPE_NAME				= $record['DATATYPE_NAME'];
-			$VR_DATATINYSTRING->USERS_PK					= $record['USERS_PK'];
-			//$VR_DATATINYSTRING->USERS_USERNAME				= $record['USERS_USERNAME'];
-			//$VR_DATATINYSTRING->PREMISE_PK					= $record['PREMISE_PK'];
-			//$VR_DATATINYSTRING->PREMISE_NAME				= $record['PREMISE_NAME'];
-			$VR_DATATINYSTRING->PERMROOMS_READ				= $record['PERMROOMS_READ'];
-			$VR_DATATINYSTRING->PERMROOMS_WRITE				= $record['PERMROOMS_WRITE'];
-			$VR_DATATINYSTRING->PERMROOMS_STATETOGGLE		= $record['PERMROOMS_STATETOGGLE'];
-			$VR_DATATINYSTRING->PERMROOMS_DATAREAD			= $record['PERMROOMS_DATAREAD'];
-			//$VR_DATATINYSTRING->HUB_PK						= $record['HUB_PK'];
-			//$VR_DATATINYSTRING->HUB_NAME					= $record['HUB_NAME'];
-			//$VR_DATATINYSTRING->HUBTYPE_PK					= $record['HUBTYPE_PK'];
-			//$VR_DATATINYSTRING->HUBTYPE_NAME				= $record['HUBTYPE_NAME'];
+			$VR_DATATINYSTRING->CALCEDVALUE                 = $record['CALCEDVALUE'];
+			$VR_DATATINYSTRING->UTS                         = $record['UTS'];
+			$VR_DATATINYSTRING->DATATINYSTRING_PK           = $record['DATATINYSTRING_PK'];
+			$VR_DATATINYSTRING->DATATINYSTRING_DATE         = $record['DATATINYSTRING_DATE'];
+			$VR_DATATINYSTRING->DATATINYSTRING_VALUE        = $record['DATATINYSTRING_VALUE'];
+			$VR_DATATINYSTRING->DATATYPE_PK                 = $record['DATATYPE_PK'];
+			$VR_DATATINYSTRING->DATATYPE_NAME               = $record['DATATYPE_NAME'];
+			$VR_DATATINYSTRING->USERS_PK                    = $record['USERS_PK'];
+			$VR_DATATINYSTRING->PERMROOMS_READ              = $record['PERMROOMS_READ'];
+			$VR_DATATINYSTRING->PERMROOMS_WRITE             = $record['PERMROOMS_WRITE'];
+			$VR_DATATINYSTRING->PERMROOMS_STATETOGGLE       = $record['PERMROOMS_STATETOGGLE'];
+			$VR_DATATINYSTRING->PERMROOMS_DATAREAD          = $record['PERMROOMS_DATAREAD'];
 			$VR_DATATINYSTRING->LINK_PK                     = $record['LINK_PK'];
 			$VR_DATATINYSTRING->LINK_SERIALCODE             = $record['LINK_SERIALCODE'];
 			$VR_DATATINYSTRING->LINK_NAME                   = $record['LINK_NAME'];
@@ -1358,26 +1409,19 @@
 		 */
 		private function _serializeVR_DATASHORTSTRING($record) {
 			$VR_DATASHORTSTRING = new VR_DATASHORTSTRING();
-			$VR_DATASHORTSTRING->CALCEDVALUE				= $record['CALCEDVALUE'];
-			$VR_DATASHORTSTRING->UTS						= $record['UTS'];
-			$VR_DATASHORTSTRING->DATASHORTSTRING_PK			= $record['DATASHORTSTRING_PK'];
-			$VR_DATASHORTSTRING->DATASHORTSTRING_DATE		= $record['DATASHORTSTRING_DATE'];
-			$VR_DATASHORTSTRING->DATASHORTSTRING_VALUE		= $record['DATASHORTSTRING_VALUE'];
-			$VR_DATASHORTSTRING->DATATYPE_PK				= $record['DATATYPE_PK'];
-			$VR_DATASHORTSTRING->DATATYPE_NAME				= $record['DATATYPE_NAME'];
-			$VR_DATASHORTSTRING->USERS_PK					= $record['USERS_PK'];
-			//$VR_DATASHORTSTRING->USERS_USERNAME				= $record['USERS_USERNAME'];
-			//$VR_DATASHORTSTRING->PREMISE_PK					= $record['PREMISE_PK'];
-			//$VR_DATASHORTSTRING->PREMISE_NAME				= $record['PREMISE_NAME'];
-			$VR_DATASHORTSTRING->PERMROOMS_READ				= $record['PERMROOMS_READ'];
-			$VR_DATASHORTSTRING->PERMROOMS_WRITE			= $record['PERMROOMS_WRITE'];
-			$VR_DATASHORTSTRING->PERMROOMS_STATETOGGLE		= $record['PERMROOMS_STATETOGGLE'];
-			$VR_DATASHORTSTRING->PERMROOMS_DATAREAD			= $record['PERMROOMS_DATAREAD'];
-			//$VR_DATASHORTSTRING->HUB_PK						= $record['HUB_PK'];
-			//$VR_DATASHORTSTRING->HUB_NAME					= $record['HUB_NAME'];
-			//$VR_DATASHORTSTRING->HUBTYPE_PK					= $record['HUBTYPE_PK'];
-			//$VR_DATASHORTSTRING->HUBTYPE_NAME				= $record['HUBTYPE_NAME'];
-			$VR_DATASHORTSTRING->LINK_PK					= $record['LINK_PK'];
+			$VR_DATASHORTSTRING->CALCEDVALUE                = $record['CALCEDVALUE'];
+			$VR_DATASHORTSTRING->UTS                        = $record['UTS'];
+			$VR_DATASHORTSTRING->DATASHORTSTRING_PK         = $record['DATASHORTSTRING_PK'];
+			$VR_DATASHORTSTRING->DATASHORTSTRING_DATE       = $record['DATASHORTSTRING_DATE'];
+			$VR_DATASHORTSTRING->DATASHORTSTRING_VALUE      = $record['DATASHORTSTRING_VALUE'];
+			$VR_DATASHORTSTRING->DATATYPE_PK                = $record['DATATYPE_PK'];
+			$VR_DATASHORTSTRING->DATATYPE_NAME              = $record['DATATYPE_NAME'];
+			$VR_DATASHORTSTRING->USERS_PK                   = $record['USERS_PK'];
+			$VR_DATASHORTSTRING->PERMROOMS_READ             = $record['PERMROOMS_READ'];
+			$VR_DATASHORTSTRING->PERMROOMS_WRITE            = $record['PERMROOMS_WRITE'];
+			$VR_DATASHORTSTRING->PERMROOMS_STATETOGGLE      = $record['PERMROOMS_STATETOGGLE'];
+			$VR_DATASHORTSTRING->PERMROOMS_DATAREAD         = $record['PERMROOMS_DATAREAD'];
+			$VR_DATASHORTSTRING->LINK_PK                    = $record['LINK_PK'];
 			$VR_DATASHORTSTRING->LINK_SERIALCODE            = $record['LINK_SERIALCODE'];
 			$VR_DATASHORTSTRING->LINK_NAME                  = $record['LINK_NAME'];
 			$VR_DATASHORTSTRING->LINK_CONNECTED             = $record['LINK_CONNECTED'];
@@ -1433,69 +1477,62 @@
 		 */
 		private function _serializeVR_DATAMEDSTRING($record) {
 			$VR_DATAMEDSTRING = new VR_DATAMEDSTRING();
-			$VR_DATAMEDSTRING->CALCEDVALUE				= $record['CALCEDVALUE'];
-			$VR_DATAMEDSTRING->UTS						= $record['UTS'];
-			$VR_DATAMEDSTRING->DATAMEDSTRING_PK			= $record['DATAMEDSTRING_PK'];
-			$VR_DATAMEDSTRING->DATAMEDSTRING_DATE		= $record['DATAMEDSTRING_DATE'];
-			$VR_DATAMEDSTRING->DATAMEDSTRING_VALUE		= $record['DATAMEDSTRING_VALUE'];
-			$VR_DATAMEDSTRING->DATATYPE_PK				= $record['DATATYPE_PK'];
-			$VR_DATAMEDSTRING->DATATYPE_NAME			= $record['DATATYPE_NAME'];
-			$VR_DATAMEDSTRING->USERS_PK					= $record['USERS_PK'];
-			//$VR_DATAMEDSTRING->USERS_USERNAME			= $record['USERS_USERNAME'];
-			//$VR_DATAMEDSTRING->PREMISE_PK				= $record['PREMISE_PK'];
-			//$VR_DATAMEDSTRING->PREMISE_NAME				= $record['PREMISE_NAME'];
-			$VR_DATAMEDSTRING->PERMROOMS_READ			= $record['PERMROOMS_READ'];
-			$VR_DATAMEDSTRING->PERMROOMS_WRITE			= $record['PERMROOMS_WRITE'];
-			$VR_DATAMEDSTRING->PERMROOMS_STATETOGGLE	= $record['PERMROOMS_STATETOGGLE'];
-			$VR_DATAMEDSTRING->PERMROOMS_DATAREAD		= $record['PERMROOMS_DATAREAD'];
-			//$VR_DATAMEDSTRING->HUB_PK					= $record['HUB_PK'];
-			//$VR_DATAMEDSTRING->HUB_NAME					= $record['HUB_NAME'];
-			//$VR_DATAMEDSTRING->HUBTYPE_PK				= $record['HUBTYPE_PK'];
-			//$VR_DATAMEDSTRING->HUBTYPE_NAME				= $record['HUBTYPE_NAME'];
-			$VR_DATAMEDSTRING->LINK_PK = $record['LINK_PK'];
-			$VR_DATAMEDSTRING->LINK_SERIALCODE = $record['LINK_SERIALCODE'];
-			$VR_DATAMEDSTRING->LINK_NAME = $record['LINK_NAME'];
-			$VR_DATAMEDSTRING->LINK_CONNECTED = $record['LINK_CONNECTED'];
-			$VR_DATAMEDSTRING->LINK_STATE = $record['LINK_STATE'];
-			$VR_DATAMEDSTRING->LINK_STATECHANGECODE = $record['LINK_STATECHANGECODE'];
-			$VR_DATAMEDSTRING->LINKTYPE_PK = $record['LINKTYPE_PK'];
-			$VR_DATAMEDSTRING->LINKTYPE_NAME = $record['LINKTYPE_NAME'];
-			$VR_DATAMEDSTRING->THING_PK = $record['THING_PK'];
-			$VR_DATAMEDSTRING->THING_HWID = $record['THING_HWID'];
-			$VR_DATAMEDSTRING->THING_OUTPUTHWID = $record['THING_OUTPUTHWID'];
-			$VR_DATAMEDSTRING->THING_STATE = $record['THING_STATE'];
-			$VR_DATAMEDSTRING->THING_STATECHANGEID = $record['THING_STATECHANGEID'];
-			$VR_DATAMEDSTRING->THING_NAME = $record['THING_NAME'];
-			$VR_DATAMEDSTRING->THINGTYPE_PK = $record['THINGTYPE_PK'];
-			$VR_DATAMEDSTRING->THINGTYPE_NAME = $record['THINGTYPE_NAME'];
-			$VR_DATAMEDSTRING->IO_BASECONVERT = $record['IO_BASECONVERT'];
-			$VR_DATAMEDSTRING->IO_PK = $record['IO_PK'];
-			$VR_DATAMEDSTRING->IO_NAME = $record['IO_NAME'];
-			$VR_DATAMEDSTRING->IO_SAMPLERATELIMIT = $record['IO_SAMPLERATELIMIT'];
-			$VR_DATAMEDSTRING->IO_SAMPLERATEMAX = $record['IO_SAMPLERATEMAX'];
-			$VR_DATAMEDSTRING->IO_SAMPLERATECURRENT = $record['IO_SAMPLERATECURRENT'];
-			$VR_DATAMEDSTRING->IO_STATECHANGEID = $record['IO_STATECHANGEID'];
-			$VR_DATAMEDSTRING->IO_STATE = $record['IO_STATE'];
-			$VR_DATAMEDSTRING->IOTYPE_PK = $record['IOTYPE_PK'];
-			$VR_DATAMEDSTRING->IOTYPE_NAME = $record['IOTYPE_NAME'];
-			$VR_DATAMEDSTRING->IOTYPE_ENUM = $record['IOTYPE_ENUM'];
-			$VR_DATAMEDSTRING->RSCAT_PK = $record['RSCAT_PK'];
-			$VR_DATAMEDSTRING->RSCAT_NAME = $record['RSCAT_NAME'];
-			$VR_DATAMEDSTRING->RSSUBCAT_PK = $record['RSSUBCAT_PK'];
-			$VR_DATAMEDSTRING->RSSUBCAT_NAME = $record['RSSUBCAT_NAME'];
-			$VR_DATAMEDSTRING->RSSUBCAT_TYPE = $record['RSSUBCAT_TYPE'];
-			$VR_DATAMEDSTRING->RSTARIFF_PK = $record['RSTARIFF_PK'];
-			$VR_DATAMEDSTRING->RSTARIFF_NAME = $record['RSTARIFF_NAME'];
-			$VR_DATAMEDSTRING->RSTYPE_PK = $record['RSTYPE_PK'];
-			$VR_DATAMEDSTRING->RSTYPE_NAME = $record['RSTYPE_NAME'];
-			$VR_DATAMEDSTRING->RSTYPE_MAIN = $record['RSTYPE_MAIN'];
-			$VR_DATAMEDSTRING->UOMCAT_PK = $record['UOMCAT_PK'];
-			$VR_DATAMEDSTRING->UOMCAT_NAME = $record['UOMCAT_NAME'];
-			$VR_DATAMEDSTRING->UOMSUBCAT_PK = $record['UOMSUBCAT_PK'];
-			$VR_DATAMEDSTRING->UOMSUBCAT_NAME = $record['UOMSUBCAT_NAME'];
-			$VR_DATAMEDSTRING->UOM_PK = $record['UOM_PK'];
-			$VR_DATAMEDSTRING->UOM_NAME = $record['UOM_NAME'];
-			$VR_DATAMEDSTRING->UOM_RATE = $record['UOM_RATE'];
+			$VR_DATAMEDSTRING->CALCEDVALUE              = $record['CALCEDVALUE'];
+			$VR_DATAMEDSTRING->UTS                      = $record['UTS'];
+			$VR_DATAMEDSTRING->DATAMEDSTRING_PK         = $record['DATAMEDSTRING_PK'];
+			$VR_DATAMEDSTRING->DATAMEDSTRING_DATE       = $record['DATAMEDSTRING_DATE'];
+			$VR_DATAMEDSTRING->DATAMEDSTRING_VALUE      = $record['DATAMEDSTRING_VALUE'];
+			$VR_DATAMEDSTRING->DATATYPE_PK              = $record['DATATYPE_PK'];
+			$VR_DATAMEDSTRING->DATATYPE_NAME            = $record['DATATYPE_NAME'];
+			$VR_DATAMEDSTRING->USERS_PK                 = $record['USERS_PK'];
+			$VR_DATAMEDSTRING->PERMROOMS_READ           = $record['PERMROOMS_READ'];
+			$VR_DATAMEDSTRING->PERMROOMS_WRITE          = $record['PERMROOMS_WRITE'];
+			$VR_DATAMEDSTRING->PERMROOMS_STATETOGGLE    = $record['PERMROOMS_STATETOGGLE'];
+			$VR_DATAMEDSTRING->PERMROOMS_DATAREAD       = $record['PERMROOMS_DATAREAD'];
+			$VR_DATAMEDSTRING->LINK_PK                  = $record['LINK_PK'];
+			$VR_DATAMEDSTRING->LINK_SERIALCODE          = $record['LINK_SERIALCODE'];
+			$VR_DATAMEDSTRING->LINK_NAME                = $record['LINK_NAME'];
+			$VR_DATAMEDSTRING->LINK_CONNECTED           = $record['LINK_CONNECTED'];
+			$VR_DATAMEDSTRING->LINK_STATE               = $record['LINK_STATE'];
+			$VR_DATAMEDSTRING->LINK_STATECHANGECODE     = $record['LINK_STATECHANGECODE'];
+			$VR_DATAMEDSTRING->LINKTYPE_PK              = $record['LINKTYPE_PK'];
+			$VR_DATAMEDSTRING->LINKTYPE_NAME            = $record['LINKTYPE_NAME'];
+			$VR_DATAMEDSTRING->THING_PK                 = $record['THING_PK'];
+			$VR_DATAMEDSTRING->THING_HWID               = $record['THING_HWID'];
+			$VR_DATAMEDSTRING->THING_OUTPUTHWID         = $record['THING_OUTPUTHWID'];
+			$VR_DATAMEDSTRING->THING_STATE              = $record['THING_STATE'];
+			$VR_DATAMEDSTRING->THING_STATECHANGEID      = $record['THING_STATECHANGEID'];
+			$VR_DATAMEDSTRING->THING_NAME               = $record['THING_NAME'];
+			$VR_DATAMEDSTRING->THINGTYPE_PK             = $record['THINGTYPE_PK'];
+			$VR_DATAMEDSTRING->THINGTYPE_NAME           = $record['THINGTYPE_NAME'];
+			$VR_DATAMEDSTRING->IO_BASECONVERT           = $record['IO_BASECONVERT'];
+			$VR_DATAMEDSTRING->IO_PK                    = $record['IO_PK'];
+			$VR_DATAMEDSTRING->IO_NAME                  = $record['IO_NAME'];
+			$VR_DATAMEDSTRING->IO_SAMPLERATELIMIT       = $record['IO_SAMPLERATELIMIT'];
+			$VR_DATAMEDSTRING->IO_SAMPLERATEMAX         = $record['IO_SAMPLERATEMAX'];
+			$VR_DATAMEDSTRING->IO_SAMPLERATECURRENT     = $record['IO_SAMPLERATECURRENT'];
+			$VR_DATAMEDSTRING->IO_STATECHANGEID         = $record['IO_STATECHANGEID'];
+			$VR_DATAMEDSTRING->IO_STATE                 = $record['IO_STATE'];
+			$VR_DATAMEDSTRING->IOTYPE_PK                = $record['IOTYPE_PK'];
+			$VR_DATAMEDSTRING->IOTYPE_NAME              = $record['IOTYPE_NAME'];
+			$VR_DATAMEDSTRING->IOTYPE_ENUM              = $record['IOTYPE_ENUM'];
+			$VR_DATAMEDSTRING->RSCAT_PK                 = $record['RSCAT_PK'];
+			$VR_DATAMEDSTRING->RSCAT_NAME               = $record['RSCAT_NAME'];
+			$VR_DATAMEDSTRING->RSSUBCAT_PK              = $record['RSSUBCAT_PK'];
+			$VR_DATAMEDSTRING->RSSUBCAT_NAME            = $record['RSSUBCAT_NAME'];
+			$VR_DATAMEDSTRING->RSSUBCAT_TYPE            = $record['RSSUBCAT_TYPE'];
+			$VR_DATAMEDSTRING->RSTARIFF_PK              = $record['RSTARIFF_PK'];
+			$VR_DATAMEDSTRING->RSTARIFF_NAME            = $record['RSTARIFF_NAME'];
+			$VR_DATAMEDSTRING->RSTYPE_PK                = $record['RSTYPE_PK'];
+			$VR_DATAMEDSTRING->RSTYPE_NAME              = $record['RSTYPE_NAME'];
+			$VR_DATAMEDSTRING->RSTYPE_MAIN              = $record['RSTYPE_MAIN'];
+			$VR_DATAMEDSTRING->UOMCAT_PK                = $record['UOMCAT_PK'];
+			$VR_DATAMEDSTRING->UOMCAT_NAME              = $record['UOMCAT_NAME'];
+			$VR_DATAMEDSTRING->UOMSUBCAT_PK             = $record['UOMSUBCAT_PK'];
+			$VR_DATAMEDSTRING->UOMSUBCAT_NAME           = $record['UOMSUBCAT_NAME'];
+			$VR_DATAMEDSTRING->UOM_PK                   = $record['UOM_PK'];
+			$VR_DATAMEDSTRING->UOM_NAME                 = $record['UOM_NAME'];
+			$VR_DATAMEDSTRING->UOM_RATE                 = $record['UOM_RATE'];
 			return $VR_DATAMEDSTRING;
 		}
 		
@@ -1533,11 +1570,10 @@
 		private function _serializeVR_USERSCOMM($record) {
 			$VR_USERSCOMM = new VR_USERSCOMM();
 			$VR_USERSCOMM->USERS_PK                 = $record['USERS_PK'];
-			//$VR_USERSCOMM->USERS_USERNAME			= $record['USERS_USERNAME'];
-			$VR_USERSCOMM->PERMROOMS_READ           = $record['PERMROOMS_READ'];
-			$VR_USERSCOMM->PERMROOMS_WRITE          = $record['PERMROOMS_WRITE'];
-			$VR_USERSCOMM->PERMROOMS_STATETOGGLE    = $record['PERMROOMS_STATETOGGLE'];
-			$VR_USERSCOMM->PERMROOMS_DATAREAD       = $record['PERMROOMS_DATAREAD'];
+			$VR_USERSCOMM->PERMPREMISE_OWNER        = $record['PERMPREMISE_OWNER'];
+			$VR_USERSCOMM->PERMPREMISE_WRITE        = $record['PERMPREMISE_WRITE'];
+			$VR_USERSCOMM->PERMPREMISE_STATETOGGLE  = $record['PERMPREMISE_STATETOGGLE'];
+			$VR_USERSCOMM->PERMPREMISE_READ         = $record['PERMPREMISE_READ'];
 			$VR_USERSCOMM->PREMISE_PK               = $record['PREMISE_PK'];
 			$VR_USERSCOMM->PREMISE_NAME             = $record['PREMISE_NAME'];
 			$VR_USERSCOMM->PREMISE_DESCRIPTION      = $record['PREMISE_DESCRIPTION'];
@@ -1703,9 +1739,9 @@
 		 */
 		private function _serializeVP_COUNTRIES($record) {
 			$VP_COUNTRIES = new VP_COUNTRIES();
-			$VP_COUNTRIES->COUNTRIES_PK						= $record['COUNTRIES_PK'];
-			$VP_COUNTRIES->COUNTRIES_NAME					= $record['COUNTRIES_NAME'];
-			$VP_COUNTRIES->COUNTRIES_ABREVIATION			= $record['COUNTRIES_ABREVIATION'];
+			$VP_COUNTRIES->COUNTRIES_PK                     = $record['COUNTRIES_PK'];
+			$VP_COUNTRIES->COUNTRIES_NAME                   = $record['COUNTRIES_NAME'];
+			$VP_COUNTRIES->COUNTRIES_ABREVIATION            = $record['COUNTRIES_ABREVIATION'];
 			return $VP_COUNTRIES;
 		}
 		
@@ -1721,12 +1757,12 @@
 		
 		private function _serializeVP_CURRENCIES($record) {
 			$VP_CURRENCIES = new VP_CURRENCIES();
-			$VP_CURRENCIES->CURRENCIES_PK					= $record['CURRENCIES_PK'];
-			$VP_CURRENCIES->CURRENCIES_NAME					= $record['CURRENCIES_NAME'];
-			$VP_CURRENCIES->CURRENCIES_ABREVIATION			= $record['CURRENCIES_ABREVIATION'];
-			$VP_CURRENCIES->COUNTRIES_PK					= $record['COUNTRIES_PK'];
-			$VP_CURRENCIES->COUNTRIES_NAME				= $record['COUNTRIES_NAME'];
-			$VP_CURRENCIES->COUNTRIES_ABREVIATION			= $record['COUNTRIES_ABREVIATION'];
+			$VP_CURRENCIES->CURRENCIES_PK                   = $record['CURRENCIES_PK'];
+			$VP_CURRENCIES->CURRENCIES_NAME                 = $record['CURRENCIES_NAME'];
+			$VP_CURRENCIES->CURRENCIES_ABREVIATION          = $record['CURRENCIES_ABREVIATION'];
+			$VP_CURRENCIES->COUNTRIES_PK                    = $record['COUNTRIES_PK'];
+			$VP_CURRENCIES->COUNTRIES_NAME                  = $record['COUNTRIES_NAME'];
+			$VP_CURRENCIES->COUNTRIES_ABREVIATION           = $record['COUNTRIES_ABREVIATION'];
 			return $VP_CURRENCIES;
 		}
 		
@@ -1739,14 +1775,14 @@
 		private function _serializeVP_LANGUAGES($record)
 		{
 			$VP_LANGUAGES = new VP_LANGUAGES();
-			$VP_LANGUAGES->LANGUAGE_PK = $record['LANGUAGE_PK'];
-			$VP_LANGUAGES->LANGUAGE_NAME = $record['LANGUAGE_NAME'];
-			$VP_LANGUAGES->LANGUAGE_LANGUAGE = $record['LANGUAGE_LANGUAGE'];
-			$VP_LANGUAGES->LANGUAGE_VARIANT = $record['LANGUAGE_VARIANT'];
-			$VP_LANGUAGES->LANGUAGE_ENCODING = $record['LANGUAGE_ENCODING'];
-			$VP_LANGUAGES->COUNTRIES_PK = $record['COUNTRIES_PK'];
-			$VP_LANGUAGES->COUNTRIES_NAME = $record['COUNTRIES_NAME'];
-			$VP_LANGUAGES->COUNTRIES_ABREVIATION = $record['COUNTRIES_ABREVIATION'];
+			$VP_LANGUAGES->LANGUAGE_PK                      = $record['LANGUAGE_PK'];
+			$VP_LANGUAGES->LANGUAGE_NAME                    = $record['LANGUAGE_NAME'];
+			$VP_LANGUAGES->LANGUAGE_LANGUAGE                = $record['LANGUAGE_LANGUAGE'];
+			$VP_LANGUAGES->LANGUAGE_VARIANT                 = $record['LANGUAGE_VARIANT'];
+			$VP_LANGUAGES->LANGUAGE_ENCODING                = $record['LANGUAGE_ENCODING'];
+			$VP_LANGUAGES->COUNTRIES_PK                     = $record['COUNTRIES_PK'];
+			$VP_LANGUAGES->COUNTRIES_NAME                   = $record['COUNTRIES_NAME'];
+			$VP_LANGUAGES->COUNTRIES_ABREVIATION            = $record['COUNTRIES_ABREVIATION'];
 
 			return $VP_LANGUAGES;
 		}
@@ -1760,9 +1796,9 @@
 		private function _serializeVP_RSCAT($record)
 		{
 			$VP_RSCAT = new VP_RSCAT();
-			$VP_RSCAT->RSCAT_PK					= $record['RSCAT_PK'];
-			$VP_RSCAT->RSCAT_NAME				= $record['RSCAT_NAME'];
-			$VP_RSCAT->RSCAT_FORMUTILITY		= $record['RSCAT_FORMUTILITY'];
+			$VP_RSCAT->RSCAT_PK                         = $record['RSCAT_PK'];
+			$VP_RSCAT->RSCAT_NAME                       = $record['RSCAT_NAME'];
+			$VP_RSCAT->RSCAT_FORMUTILITY                = $record['RSCAT_FORMUTILITY'];
 
 			return $VP_RSCAT;
 		}
@@ -1776,10 +1812,10 @@
 		private function _serializeVP_RSSUBCAT($record)
 		{
 			$VP_RSSUBCAT = new VP_RSSUBCAT();
-			$VP_RSSUBCAT->RSSUBCAT_PK			= $record['RSSUBCAT_PK'];
-			$VP_RSSUBCAT->RSSUBCAT_RSCAT_FK		= $record['RSSUBCAT_RSCAT_FK'];
-			$VP_RSSUBCAT->RSSUBCAT_NAME			= $record['RSSUBCAT_NAME'];
-			$VP_RSSUBCAT->RSSUBCAT_TYPE			= $record['RSSUBCAT_TYPE'];
+			$VP_RSSUBCAT->RSSUBCAT_PK           = $record['RSSUBCAT_PK'];
+			$VP_RSSUBCAT->RSSUBCAT_RSCAT_FK     = $record['RSSUBCAT_RSCAT_FK'];
+			$VP_RSSUBCAT->RSSUBCAT_NAME         = $record['RSSUBCAT_NAME'];
+			$VP_RSSUBCAT->RSSUBCAT_TYPE         = $record['RSSUBCAT_TYPE'];
 
 			return $VP_RSSUBCAT;
 		}
@@ -1794,13 +1830,13 @@
 		private function _serializeVP_RSTARIFF($record)
 		{
 			$VP_RSTARIFF = new VP_RSTARIFF();
-			$VP_RSTARIFF->RSTARIFF_NAME			= $record['RSTARIFF_NAME'];
-			$VP_RSTARIFF->RSTARIFF_PK			= $record['RSTARIFF_PK'];
-			$VP_RSTARIFF->RSCAT_PK				= $record['RSCAT_PK'];
-			$VP_RSTARIFF->RSCAT_NAME			= $record['RSCAT_NAME'];
-			$VP_RSTARIFF->RSSUBCAT_NAME			= $record['RSSUBCAT_NAME'];
-			$VP_RSTARIFF->RSSUBCAT_TYPE			= $record['RSSUBCAT_TYPE'];
-			$VP_RSTARIFF->RSSUBCAT_PK			= $record['RSSUBCAT_PK'];
+			$VP_RSTARIFF->RSTARIFF_NAME         = $record['RSTARIFF_NAME'];
+			$VP_RSTARIFF->RSTARIFF_PK           = $record['RSTARIFF_PK'];
+			$VP_RSTARIFF->RSCAT_PK              = $record['RSCAT_PK'];
+			$VP_RSTARIFF->RSCAT_NAME            = $record['RSCAT_NAME'];
+			$VP_RSTARIFF->RSSUBCAT_NAME         = $record['RSSUBCAT_NAME'];
+			$VP_RSTARIFF->RSSUBCAT_TYPE         = $record['RSSUBCAT_TYPE'];
+			$VP_RSTARIFF->RSSUBCAT_PK           = $record['RSSUBCAT_PK'];
 
 			return $VP_RSTARIFF;
 		}
@@ -1815,16 +1851,16 @@
 		private function _serializeVP_RSTYPES($record)
 		{
 			$VP_RSTYPES = new VP_RSTYPES();
-			$VP_RSTYPES->RSSUBCAT_PK = $record['RSSUBCAT_PK'];
-			$VP_RSTYPES->RSSUBCAT_NAME = $record['RSSUBCAT_NAME'];
-			$VP_RSTYPES->RSSUBCAT_TYPE = $record['RSSUBCAT_TYPE'];
-			$VP_RSTYPES->RSTARIFF_PK = $record['RSTARIFF_PK'];
-			$VP_RSTYPES->RSTARIFF_NAME = $record['RSTARIFF_NAME'];
-			$VP_RSTYPES->RSTYPE_PK = $record['RSTYPE_PK'];
-			$VP_RSTYPES->RSTYPE_NAME = $record['RSTYPE_NAME'];
-			$VP_RSTYPES->RSTYPE_MAIN = $record['RSTYPE_MAIN'];
-			$VP_RSTYPES->RSCAT_PK = $record['RSCAT_PK'];
-			$VP_RSTYPES->RSCAT_NAME = $record['RSCAT_NAME'];
+			$VP_RSTYPES->RSSUBCAT_PK            = $record['RSSUBCAT_PK'];
+			$VP_RSTYPES->RSSUBCAT_NAME          = $record['RSSUBCAT_NAME'];
+			$VP_RSTYPES->RSSUBCAT_TYPE          = $record['RSSUBCAT_TYPE'];
+			$VP_RSTYPES->RSTARIFF_PK            = $record['RSTARIFF_PK'];
+			$VP_RSTYPES->RSTARIFF_NAME          = $record['RSTARIFF_NAME'];
+			$VP_RSTYPES->RSTYPE_PK              = $record['RSTYPE_PK'];
+			$VP_RSTYPES->RSTYPE_NAME            = $record['RSTYPE_NAME'];
+			$VP_RSTYPES->RSTYPE_MAIN            = $record['RSTYPE_MAIN'];
+			$VP_RSTYPES->RSCAT_PK               = $record['RSCAT_PK'];
+			$VP_RSTYPES->RSCAT_NAME             = $record['RSCAT_NAME'];
 
 			return $VP_RSTYPES;
 		}
@@ -1839,12 +1875,12 @@
 		private function _serializeVP_UOMS($record)
 		{
 			$VP_UOMS = new VP_UOMS();
-			$VP_UOMS->UOMCAT_PK = $record['UOMCAT_PK'];
-			$VP_UOMS->UOMCAT_NAME = $record['UOMCAT_NAME'];
-			$VP_UOMS->UOMSUBCAT_PK = $record['UOMSUBCAT_PK'];
-			$VP_UOMS->UOMSUBCAT_NAME = $record['UOMSUBCAT_NAME'];
-			$VP_UOMS->UOM_PK = $record['UOM_PK'];
-			$VP_UOMS->UOM_NAME = $record['UOM_NAME'];
+			$VP_UOMS->UOMCAT_PK                 = $record['UOMCAT_PK'];
+			$VP_UOMS->UOMCAT_NAME               = $record['UOMCAT_NAME'];
+			$VP_UOMS->UOMSUBCAT_PK              = $record['UOMSUBCAT_PK'];
+			$VP_UOMS->UOMSUBCAT_NAME            = $record['UOMSUBCAT_NAME'];
+			$VP_UOMS->UOM_PK                    = $record['UOM_PK'];
+			$VP_UOMS->UOM_NAME                  = $record['UOM_NAME'];
 
 			return $VP_UOMS;
 		}
@@ -1858,11 +1894,11 @@
 		private function _serializeVP_ICONS($record)
 		{
 			$VP_ICONS = new VP_ICONS();
-			$VP_ICONS->ICONS_PK = $record['ICONS_PK'];
-			$VP_ICONS->ICONS_NAME = $record['ICONS_NAME'];
-			$VP_ICONS->ICONS_ICON = $record['ICONS_ICON'];
-			$VP_ICONS->ICONSTYPE_NAME = $record['ICONSTYPE_NAME'];
-			$VP_ICONS->ICONSTYPE_PK = $record['ICONSTYPE_PK'];
+			$VP_ICONS->ICONS_PK                 = $record['ICONS_PK'];
+			$VP_ICONS->ICONS_NAME               = $record['ICONS_NAME'];
+			$VP_ICONS->ICONS_ICON               = $record['ICONS_ICON'];
+			$VP_ICONS->ICONSTYPE_NAME           = $record['ICONSTYPE_NAME'];
+			$VP_ICONS->ICONSTYPE_PK             = $record['ICONSTYPE_PK'];
 
 			return $VP_ICONS;
 		}
@@ -1876,8 +1912,8 @@
 		private function _serializeVP_USERSGENDER($record)
 		{
 			$VP_USERSGENDER = new VP_USERSGENDER();
-			$VP_USERSGENDER->USERSGENDER_PK = $record['USERSGENDER_PK'];
-			$VP_USERSGENDER->USERSGENDER_NAME = $record['USERSGENDER_NAME'];
+			$VP_USERSGENDER->USERSGENDER_PK         = $record['USERSGENDER_PK'];
+			$VP_USERSGENDER->USERSGENDER_NAME       = $record['USERSGENDER_NAME'];
 
 			return $VP_USERSGENDER;
 		}
@@ -1891,9 +1927,9 @@
 		private function _serializeVP_ROOMTYPE($record)
 		{
 			$VP_ROOMTYPE = new VP_ROOMTYPE();
-			$VP_ROOMTYPE->ROOMTYPE_PK = $record['ROOMTYPE_PK'];
-			$VP_ROOMTYPE->ROOMTYPE_NAME = $record['ROOMTYPE_NAME'];
-			$VP_ROOMTYPE->ROOMTYPE_OUTDOORS = $record['ROOMTYPE_OUTDOORS'];
+			$VP_ROOMTYPE->ROOMTYPE_PK           = $record['ROOMTYPE_PK'];
+			$VP_ROOMTYPE->ROOMTYPE_NAME         = $record['ROOMTYPE_NAME'];
+			$VP_ROOMTYPE->ROOMTYPE_OUTDOORS     = $record['ROOMTYPE_OUTDOORS'];
 
 			return $VP_ROOMTYPE;
 		}
@@ -1907,8 +1943,8 @@
 		private function _serializeVP_LINKTYPE($record)
 		{
 			$VP_LINKTYPE = new VP_LINKTYPE();
-			$VP_LINKTYPE->LINKTYPE_PK = $record['LINKTYPE_PK'];
-			$VP_LINKTYPE->LINKTYPE_NAME = $record['LINKTYPE_NAME'];
+			$VP_LINKTYPE->LINKTYPE_PK           = $record['LINKTYPE_PK'];
+			$VP_LINKTYPE->LINKTYPE_NAME         = $record['LINKTYPE_NAME'];
 			
 			return $VP_LINKTYPE;
 		}

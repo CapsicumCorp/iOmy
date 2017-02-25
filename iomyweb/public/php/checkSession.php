@@ -101,9 +101,11 @@ if( isset( $Config ) ) {
 				//echo "\n";
 				
 				$aReturn = array( 
-					"login"         => true, 
-					"Username"      => $aResult['Data']['Username'], 
-					"UserId"        => $aResult['Data']['UserId'] 
+					"login"             => true, 
+					"Username"          => $aResult['Data']['Username'], 
+					"UserId"            => $aResult['Data']['UserId'],
+					"ServerDBVer"       => $oRestrictedApiCore->CheckDBVersion(),
+					"ServerDemoMode"    => $oRestrictedApiCore->CheckIfDemoMode()
 				);
 				
 			} else {

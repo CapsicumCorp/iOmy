@@ -57,7 +57,7 @@ sap.ui.jsview("mjs.premise.DeviceData", {
 					content: []
 				}).addStyleClass("height100Percent PanelNoPadding UserInputForm ZigbeeDataPage TextCenter")
 			]
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+		}).addStyleClass("height100Percent width100Percent MainBackground MasterPage");
 		
 		return oPage;
 	}
