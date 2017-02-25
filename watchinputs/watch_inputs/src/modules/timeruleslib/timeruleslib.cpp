@@ -596,7 +596,8 @@ static int timeruleslib_processreloadcommand(const char *UNUSED(buffer), int cli
  * Process the time rules one by one
  */
 static void timeruleslib_process_timerules() {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  auto const debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  auto const dblibifaceptr=(dblib_ifaceptrs_ver_1_t *) timeruleslib_deps[DBLIB_DEPIDX].ifaceptr;
   time_t currenttime;
   struct timespec curtime;
   struct tm curtimelocaltm, *curtimelocaltmptr;
@@ -619,7 +620,8 @@ static void timeruleslib_process_timerules() {
   timeruleslib_unlock();
 
   for (auto &timerulesit : gtimerules) {
-    bool changestate=false, newstate=false; // New State: false=off, true=on
+    bool changestate=false;
+    int newstate=0;
     int onhour, onminute;
     int offhour, offminute;
 
@@ -632,17 +634,57 @@ static void timeruleslib_process_timerules() {
     if (onhour==curtimelocaltm.tm_hour && onminute==curtimelocaltm.tm_min && timerulesit.second.lastruleset!=1) {
       debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Need to activate On Time Rule for device: %s\n", __func__, timerulesit.first.c_str());
       changestate=true;
-      newstate=true;
+      newstate=1;
       timerulesit.second.lastruleset=1;
     }
     if (offhour==curtimelocaltm.tm_hour && offminute==curtimelocaltm.tm_min && timerulesit.second.lastruleset!=0) {
       debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Need to activate Off Time Rule for device: %s\n", __func__, timerulesit.first.c_str());
       changestate=true;
-      newstate=false;
+      newstate=0;
       timerulesit.second.lastruleset=0;
     }
     if (timeruleslib_getneedtoquit()) {
       break;
+    }
+    // Apply a state change if needed and the database is initialised
+    // TODO: Once zigbeelib implementes the on/off interface again we can use that instead of accessing the database directly
+    if (changestate && dblibifaceptr->is_initialised()) {
+      int result;
+      int32_t curdbstate;
+      void *uniqueid;
+      uint64_t addr=0;
+
+      // Convert string form of the address to a uint64_t type
+      std::string hexaddr="0x";
+      hexaddr+=timerulesit.first.c_str();
+      sscanf(hexaddr.c_str(), "0x%" SCNx64, &addr);
+
+      result=dblibifaceptr->begin();
+      if (result<0) {
+        debuglibifaceptr->debuglib_printf(1, "%s: Failed to start database transaction for device: %s\n", __func__, timerulesit.first.c_str());
+        continue;
+      }
+      uniqueid=dblibifaceptr->getport_uniqueid(addr, 0);
+      if (!uniqueid) {
+        result=dblibifaceptr->getioport_state(uniqueid, &curdbstate);
+        if (result<0) {
+          // If error when retrieving current state just try to apply the new state anyway
+          curdbstate=-1;
+        }
+        if (curdbstate!=newstate) {
+          result=dblibifaceptr->update_ioports_state(uniqueid, newstate);
+          if (result<0) {
+            debuglibifaceptr->debuglib_printf(1, "%s: Failed to apply new on/off state to device: %s\n", __func__, timerulesit.first.c_str());
+          }
+        }
+        dblibifaceptr->freeuniqueid(uniqueid);
+      } else {
+        debuglibifaceptr->debuglib_printf(1, "%s: Failed to access database thing for device: %s\n", __func__, timerulesit.first.c_str());
+      }
+      result=dblibifaceptr->end();
+      if (result<0) {
+        dblibifaceptr->rollback();
+      }
     }
   }
   timeruleslib_lock();
