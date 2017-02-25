@@ -89,15 +89,15 @@ public class RunServerServices extends Thread {
 
     private boolean okayToRunServices=false; //Only run when it is confirmed to be okay
 
-    RunServerServices(Context context, String SystemDirectory, String StorageFolderName) {
+    RunServerServices(Context context, String SystemDirectory, String InternalStorageFolderName) {
         this.context = context;
         this.SystemDirectory = SystemDirectory;
         this.CHANGE_PERMISSION = SystemDirectory + "/bin/chmod 755 ";
-        this.INTERNAL_LOCATION=StorageFolderName;
+        this.INTERNAL_LOCATION=InternalStorageFolderName;
         this.AppName=Application.getInstance().getAppName();
 
         //Create Watch Inputs objects
-        mMainLib=new com.capsicumcorp.iomy.libraries.watchinputs.MainLib(context, this.AppName, Application.getInstance().getUsbManager(), StorageFolderName, Application.getInstance().getStartedFromUsb());
+        mMainLib=new com.capsicumcorp.iomy.libraries.watchinputs.MainLib(context, this.AppName, Application.getInstance().getUsbManager(), InternalStorageFolderName, Application.getInstance().getStartedFromUsb());
     }
 
     private int execWithWait(String cmd) throws Exception {

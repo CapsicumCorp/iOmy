@@ -37,7 +37,7 @@ import static com.capsicumcorp.iomy.apps.iomy.Constants.installWizard;
 public class Application extends android.app.Application {
     private static Application instance;
     private String AppName;
-    private String StorageFolderName;
+    private String InternalStorageFolderName;
     private String SystemDirectory;
     private UsbManager mUsbManager;
 
@@ -63,7 +63,7 @@ public class Application extends android.app.Application {
         instance = this;
 
         AppName=null;
-        StorageFolderName=null;
+        InternalStorageFolderName=null;
         SystemDirectory=null;
         serviceStarted = false;
         extractServerServices=null;
@@ -78,7 +78,7 @@ public class Application extends android.app.Application {
 
         this.AppName=res.getString(R.string.app_name);
         this.SystemDirectory=Environment.getRootDirectory().getPath();
-        this.StorageFolderName=this.getFilesDir().getPath();
+        this.InternalStorageFolderName=this.getFilesDir().getPath();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
         	this.mUsbManager=(UsbManager) getSystemService(Context.USB_SERVICE);
@@ -86,10 +86,10 @@ public class Application extends android.app.Application {
             this.mUsbManager=null;
         }
         //Create Extract Server Services object
-        extractServerServices=new ExtractServerServices(this, SystemDirectory, StorageFolderName);
+        extractServerServices=new ExtractServerServices(this, SystemDirectory, InternalStorageFolderName);
 
         //Create Run Server Services object
-        runServerServices=new RunServerServices(this, SystemDirectory, StorageFolderName);
+        runServerServices=new RunServerServices(this, SystemDirectory, InternalStorageFolderName);
     }
     //Returns true if the first run wizard needs to be run
     public synchronized boolean needFirstRunWizard() {
@@ -225,8 +225,8 @@ public class Application extends android.app.Application {
         return this.AppName;
     }
     public String getSystemDirectory() { return this.SystemDirectory; }
-    public String getStorageFolderName() {
-        return this.StorageFolderName;
+    public String getInternalStorageFolderName() {
+        return this.InternalStorageFolderName;
     }
     public UsbManager getUsbManager() {
     	return this.mUsbManager;

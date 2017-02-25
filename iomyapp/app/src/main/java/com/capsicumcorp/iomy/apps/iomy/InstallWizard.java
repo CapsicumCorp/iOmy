@@ -434,14 +434,14 @@ public class InstallWizard {
         //First write to a temp file as if Watch Inputs is already running
         //  when we write to the final filename, Watch Inputs may pick up the file
         //  before we have finished writing the entire contents
-        File watchInputsSrcFile=new File(Application.getInstance().getStorageFolderName() + "/WatchInputs.cfg.tmp");
+        File watchInputsSrcFile=new File(Application.getInstance().getInternalStorageFolderName() + "/WatchInputs.cfg.tmp");
         if (watchInputsSrcFile.exists()) {
             watchInputsSrcFile.delete();
         }
         try {
             watchInputsSrcFile.createNewFile();
 
-            PrintWriter watchInputsTempFile = new PrintWriter(Application.getInstance().getStorageFolderName() +"/WatchInputs.cfg.tmp");
+            PrintWriter watchInputsTempFile = new PrintWriter(Application.getInstance().getInternalStorageFolderName() +"/WatchInputs.cfg.tmp");
             watchInputsTempFile.println("# ioMy Watch Inputs Config");
             watchInputsTempFile.println("[general]");
             watchInputsTempFile.println("hubpk=" + hubID);
@@ -459,10 +459,10 @@ public class InstallWizard {
             watchInputsTempFile.println("apiusername=" + watchInputsUsername);
             watchInputsTempFile.println("apipassword=" + watchInputsPassword);
             watchInputsTempFile.println("[zigbeeconfig]");
-            watchInputsTempFile.println("zigbeedefsfilename=" + Application.getInstance().getStorageFolderName() + "/zigbeedefs.ini");
+            watchInputsTempFile.println("zigbeedefsfilename=" + Application.getInstance().getInternalStorageFolderName() + "/zigbeedefs.ini");
             watchInputsTempFile.close();
 
-            File watchInputsDestFile = new File(Application.getInstance().getStorageFolderName() + "/WatchInputs.cfg");
+            File watchInputsDestFile = new File(Application.getInstance().getInternalStorageFolderName() + "/WatchInputs.cfg");
             if (watchInputsDestFile.exists()) {
                 watchInputsDestFile.delete();
             }

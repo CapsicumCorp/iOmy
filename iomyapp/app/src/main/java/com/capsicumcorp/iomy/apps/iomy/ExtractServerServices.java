@@ -50,7 +50,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.os.Environment;
-import android.support.annotation.IntegerRes;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -92,12 +91,12 @@ public class ExtractServerServices extends Thread {
     private Hashtable<String, Boolean> skipfoldersifexist = new Hashtable<String, Boolean>();
     private Hashtable<String, Boolean> changedfiles = new Hashtable<String, Boolean>();
 
-    ExtractServerServices(Context context, String SystemDirectory, String StorageFolderName) {
+    ExtractServerServices(Context context, String SystemDirectory, String InternalStorageFolderName) {
         this.context = context;
         this.progressPage=null;
         this.SystemDirectory = SystemDirectory;
         this.CHANGE_PERMISSION = SystemDirectory + "/bin/chmod 755 ";
-        this.INTERNAL_LOCATION=StorageFolderName;
+        this.INTERNAL_LOCATION=InternalStorageFolderName;
     }
     private Application getApplication() {
         return Application.getInstance();
@@ -106,7 +105,7 @@ public class ExtractServerServices extends Thread {
         return getApplication().getSystemDirectory();
     }
     private String getInternalStorageFolder() {
-        return getApplication().getStorageFolderName();
+        return getApplication().getInternalStorageFolderName();
     }
     public synchronized void setProgressPage(ProgressPage progressPage) {
         this.progressPage=progressPage;
