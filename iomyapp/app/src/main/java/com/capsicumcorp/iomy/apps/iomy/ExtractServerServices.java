@@ -71,7 +71,7 @@ public class ExtractServerServices extends Thread {
     private String SystemDirectory;
     private String CHANGE_PERMISSION;
     private String INTERNAL_LOCATION = null;
-    public static final String EXTERNAL_STORAGE = Environment.getExternalStorageDirectory().getPath(); //For debugging
+    private String EXTERNAL_STORAGE = null;
     public static final String ASSETSFILENAME = "webserverassets.zip";
     public static final String ASSETSNUMFILESFILENAME = "webserverassetsnumfiles.txt";
     public static final String ASSETSVERSIONFILENAME = "webserverassetsversion.txt";
@@ -91,12 +91,13 @@ public class ExtractServerServices extends Thread {
     private Hashtable<String, Boolean> skipfoldersifexist = new Hashtable<String, Boolean>();
     private Hashtable<String, Boolean> changedfiles = new Hashtable<String, Boolean>();
 
-    ExtractServerServices(Context context, String SystemDirectory, String InternalStorageFolderName) {
+    ExtractServerServices(Context context, String SystemDirectory, String InternalStorageFolderName, String ExternalStorageFolderName) {
         this.context = context;
         this.progressPage=null;
         this.SystemDirectory = SystemDirectory;
         this.CHANGE_PERMISSION = SystemDirectory + "/bin/chmod 755 ";
         this.INTERNAL_LOCATION=InternalStorageFolderName;
+        this.EXTERNAL_STORAGE=ExternalStorageFolderName;
     }
     private Application getApplication() {
         return Application.getInstance();
@@ -106,6 +107,9 @@ public class ExtractServerServices extends Thread {
     }
     private String getInternalStorageFolder() {
         return getApplication().getInternalStorageFolderName();
+    }
+    private String getExternalStorageFolder() {
+        return getApplication().getExternalStorageFolderName();
     }
     public synchronized void setProgressPage(ProgressPage progressPage) {
         this.progressPage=progressPage;

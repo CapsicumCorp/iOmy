@@ -61,7 +61,7 @@ public class RunServerServices extends Thread {
     private String SystemDirectory;
     private String CHANGE_PERMISSION;
     private String INTERNAL_LOCATION = null;
-    public static final String EXTERNAL_STORAGE = Environment.getExternalStorageDirectory().getPath(); //For debugging
+    private String EXTERNAL_STORAGE = null;
     public static final String ASSETSFILENAME = "webserverassets.zip";
     public static final String ASSETSVERSIONFILENAME = "webserverassetsversion.txt";
     private String AppName;
@@ -89,11 +89,12 @@ public class RunServerServices extends Thread {
 
     private boolean okayToRunServices=false; //Only run when it is confirmed to be okay
 
-    RunServerServices(Context context, String SystemDirectory, String InternalStorageFolderName) {
+    RunServerServices(Context context, String SystemDirectory, String InternalStorageFolderName, String ExternalStorageFolderName) {
         this.context = context;
         this.SystemDirectory = SystemDirectory;
         this.CHANGE_PERMISSION = SystemDirectory + "/bin/chmod 755 ";
         this.INTERNAL_LOCATION=InternalStorageFolderName;
+        this.EXTERNAL_STORAGE=ExternalStorageFolderName;
         this.AppName=Application.getInstance().getAppName();
 
         //Create Watch Inputs objects

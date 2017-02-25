@@ -32,12 +32,15 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import java.io.File;
+
 import static com.capsicumcorp.iomy.apps.iomy.Constants.installWizard;
 
 public class Application extends android.app.Application {
     private static Application instance;
     private String AppName;
     private String InternalStorageFolderName;
+    private String ExternalStorageFolderName;
     private String SystemDirectory;
     private UsbManager mUsbManager;
 
@@ -64,6 +67,7 @@ public class Application extends android.app.Application {
 
         AppName=null;
         InternalStorageFolderName=null;
+        ExternalStorageFolderName=null;
         SystemDirectory=null;
         serviceStarted = false;
         extractServerServices=null;
@@ -79,17 +83,26 @@ public class Application extends android.app.Application {
         this.AppName=res.getString(R.string.app_name);
         this.SystemDirectory=Environment.getRootDirectory().getPath();
         this.InternalStorageFolderName=this.getFilesDir().getPath();
+        this.ExternalStorageFolderName=Environment.getExternalStorageDirectory().getPath()+"/iOmy";
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
         	this.mUsbManager=(UsbManager) getSystemService(Context.USB_SERVICE);
         } else {
             this.mUsbManager=null;
         }
+        //Create external storage folder if it doesn't exist
+        File ExternalStorageFolderFile=new File(this.ExternalStorageFolderName);
+        if (!ExternalStorageFolderFile.exists()) {
+            ExternalStorageFolderFile.mkdir();
+            if (!ExternalStorageFolderFile.exists()) {
+                Log.println(Log.INFO, this.AppName, "Application.onCreate: Failed to create external storage directory: "+this.ExternalStorageFolderName);
+            }
+        }
         //Create Extract Server Services object
-        extractServerServices=new ExtractServerServices(this, SystemDirectory, InternalStorageFolderName);
+        extractServerServices=new ExtractServerServices(this, SystemDirectory, InternalStorageFolderName, ExternalStorageFolderName);
 
         //Create Run Server Services object
-        runServerServices=new RunServerServices(this, SystemDirectory, InternalStorageFolderName);
+        runServerServices=new RunServerServices(this, SystemDirectory, InternalStorageFolderName, ExternalStorageFolderName);
     }
     //Returns true if the first run wizard needs to be run
     public synchronized boolean needFirstRunWizard() {
@@ -227,6 +240,9 @@ public class Application extends android.app.Application {
     public String getSystemDirectory() { return this.SystemDirectory; }
     public String getInternalStorageFolderName() {
         return this.InternalStorageFolderName;
+    }
+    public String getExternalStorageFolderName() {
+        return this.ExternalStorageFolderName;
     }
     public UsbManager getUsbManager() {
     	return this.mUsbManager;
