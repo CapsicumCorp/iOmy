@@ -27,6 +27,12 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
     odata : IOMy.apiodata,
     
     iRoomID : null,
+    mRoom   : null,
+    
+    wRoomName           : null,
+    wRoomDescription    : null,
+    wRoomType           : null,
+    
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
@@ -44,16 +50,14 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 				
                 
 				// Collect values parsed from the device list.
-				var aRoom = evt.data.room;
-				me.iRoomID = aRoom.RoomId;
-				var sRoomName = aRoom.RoomName;
-				var sRoomDesc = aRoom.RoomDesc;
-                //console.log(me.iRoomID);
+				me.iRoomID = evt.data.room.RoomId;
+				me.mRoom = IOMy.common.RoomsList["_"+evt.data.room.PremiseId]["_"+me.iRoomID];
+				//console.log(me.iRoomID);
 				
                 // Start rendering the page
 				
                 //-- Set Room name as the title --//
-                thisView.byId("NavSubHead_Title").setText(sRoomName.toUpperCase());
+                thisView.byId("NavSubHead_Title").setText(me.mRoom.RoomName.toUpperCase());
                 
 				me.functions.destroyItemsByIdFromView(me, [
 	                "roomName", "roomDesc", "roomFloor", "roomType"
@@ -71,16 +75,16 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                     ]
                 }).addStyleClass("");
     		    
-				var oRoomNameField = new sap.m.Input(me.createId("roomName"), {
-					value : sRoomName
+				me.wRoomName = new sap.m.Input(me.createId("roomName"), {
+					value : me.mRoom.RoomName
 				}).addStyleClass("width100Percent SettingsTextInput");
                 
                 var oRoomDescTitle = new sap.m.Text({
     	        	text : "Description"
     	        }).addStyleClass("");
     		    
-				var oRoomDescField = new sap.m.Input(me.createId("roomDesc"), {
-					value : sRoomDesc
+				me.wRoomDescription = new sap.m.Input(me.createId("roomDesc"), {
+					value : me.mRoom.RoomDesc
 				}).addStyleClass("width100Percent SettingsTextInput");
                 
 //                var oFloorsTitle = new sap.m.HBox({
@@ -107,7 +111,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                     ]
                 });
     		    
-				var oRoomTypeField = new sap.m.Select(me.createId("roomType"), {
+				me.wRoomType = new sap.m.Select(me.createId("roomType"), {
                     width : "100%"
                 }).addStyleClass("width100Percent SettingsDropdownInput");
                 
@@ -123,7 +127,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 //                    onSuccess : function (responseType, data) {
 //                        var iMaxFloors;
 //                        for (var i = 0; i < IOMy.common.PremiseList.length; i++) {
-//                            if (IOMy.common.PremiseList[i].Id == aRoom.PremiseId) {
+//                            if (IOMy.common.PremiseList[i].Id == me.mRoom.PremiseId) {
 //                                iMaxFloors = IOMy.common.PremiseList[i].FloorCountId;
 //                                break;
 //                            }
@@ -137,7 +141,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 //                                })
 //                            );
 //                        }
-//                        oFloorsField.setValue(aRoom.RoomFloor);
+//                        oFloorsField.setValue(me.mRoom.RoomFloor);
 //                    },
 //                    
 //                    onFail : function (response) {
@@ -156,12 +160,12 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                     
                     onSuccess : function (responseType, data) {
                         for (var i = 0; i < data.length; i++) {
-                            oRoomTypeField.addItem(
+                            me.wRoomType.addItem(
                                 new sap.ui.core.Item({
                                     text : data[i].ROOMTYPE_NAME,
                                     key : data[i].ROOMTYPE_PK
                                 })
-                            ).setSelectedKey(aRoom.RoomTypeId);
+                            ).setSelectedKey(me.mRoom.RoomTypeId);
                         }
                     },
                     
@@ -175,85 +179,13 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 						new sap.m.Link({
 							text : "Update",
 							press : function () {
-								var thisButton = this; // Captures the scope of the calling button.
-                                thisButton.setEnabled(false);
-								
-								var sRoomText = me.byId("roomName").getValue();
-                                var sRoomDesc = me.byId("roomDesc").getValue();
-								var iRoomID = me.iRoomID;
-                                var iRoomTypeId = me.byId("roomType").getSelectedKey();
-                                
-                                var aErrorLog = [];
-                                var bError = false;
-								
-                                if (sRoomText === "") {
-                                    aErrorLog.push("Room must have a name");
-                                    bError = true;
-                                }
-                                
-                                if (bError === true) {
-                                    jQuery.sap.log.error(aErrorLog.join("\n"));
-                                    IOMy.common.showError(aErrorLog.join("\n\n"), "Errors");
-                                } else {
-                                
-                                    // Run the API to update the room
-                                    try {
-                                        IOMy.apiphp.AjaxRequest({
-                                            url : IOMy.apiphp.APILocation("rooms"),
-                                            data : {"Mode" : "EditInfo", "Id" : iRoomID, "Name" : sRoomText,
-                                                    "Desc" : sRoomDesc, "Floor" : 1,
-                                                    "RoomTypeId" : iRoomTypeId},
-                                            onSuccess : function () {
-                                                IOMy.common.RoomSelected.RoomName = sRoomText;
-                                                IOMy.common.RoomSelected.RoomDesc = sRoomDesc;
-                                                IOMy.common.RoomSelected.RoomFloor = 1;//me.byId("roomFloor").getValue();
-                                                IOMy.common.RoomSelected.RoomTypeId = iRoomTypeId;
-                                                
-                                                IOMy.common.showSuccess("Update successful.", "Success", 
-                                                function () {
-                                                    //-- REFRESH ROOMS --//
-                                                    IOMy.common.RetreiveRoomList( {
-                                                        onSuccess: $.proxy(function() {
-                                                            //-- REFRESH THINGS --//
-                                                            IOMy.apiphp.RefreshThingList({
-                                                                onSuccess: $.proxy(function() {
-
-                                                                    try {
-                                                                        //-- Flag that the Core Variables have been configured --//
-                                                                        IOMy.common.CoreVariablesInitialised = true;
-                                                                        //-- Reset the Navigation array and index after switching users --//
-                                                                        IOMy.common.NavigationTriggerBackForward(false);
-
-                                                                    } catch(e654321) {
-                                                                        //-- ERROR:  TODO: Write a better error message--//
-                                                                        jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
-                                                                    }
-                                                                }, me)
-                                                            }); //-- END THINGS LIST --//
-                                                        }, me)
-                                                    }); //-- END ROOMS LIST --//
-                                                }, "UpdateMessageBox");
-                                            },
-                                            onFail : function (response) {
-                                                IOMy.common.showError("Update failed.", "Error");
-                                                jQuery.sap.log.error(JSON.stringify(response));
-                                                
-                                                // Finish the request by enabling the edit button
-                                                this.onComplete();
-                                            },
-                                            
-                                            onComplete : function () {
-                                                //------------------------------------------------------------------------------------------//
-                                                // Re-enable the button once the request and the callback functions have finished executing.
-                                                //------------------------------------------------------------------------------------------//
-                                                thisButton.setEnabled(true);
-                                            }
-                                        });
-                                    } catch (e00033) {
-                                        IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
-                                    }
-                                }
-							}
+                                //--------------------------------------------//
+                                // Update the room details.
+                                //--------------------------------------------//
+                                IOMy.functions.updateRoom(me.iRoomID, {
+                                    callingWidget : this
+                                });
+                            }
 						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
 					]
 				}).addStyleClass("TextCenter MarTop12px");
@@ -262,8 +194,8 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                     me.byId("vbox_container").destroy();
                 
                 var oVertBox = new sap.m.VBox(me.createId("vbox_container"), {
-					items : [oRoomTitle, oRoomNameField, oRoomDescTitle, oRoomDescField,
-                            /*oFloorsTitle, oFloorsField,*/ oRoomTypeTitle, oRoomTypeField,
+					items : [oRoomTitle, me.wRoomName, oRoomDescTitle, me.wRoomDescription,
+                            /*oFloorsTitle, oFloorsField,*/ oRoomTypeTitle, me.wRoomType,
                             oEditButton]
 				}).addStyleClass("UserInputForm");
                 
@@ -319,7 +251,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                                                     data : {"Mode" : "DeleteRoom", "Id" : me.iRoomID},
 
                                                     onSuccess : function () {
-                                                        IOMy.common.showSuccess(sRoomName+" successfully removed.", "Success", 
+                                                        IOMy.common.showSuccess(me.mRoom.RoomName+" successfully removed.", "Success", 
                                                         function () {
                                                             //-- REFRESH ROOMS --//
                                                             IOMy.common.RetreiveRoomList( {
@@ -347,8 +279,6 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                                                         }, "UpdateMessageBox");
                                                     }
                                                 });
-                                            } else {
-                                                
                                             }
                                         });
                                     }
@@ -390,5 +320,11 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 //	onExit: function() {
 //
 //	}
+
+    
+    
+    removeRoom : function (iRoomId, mInfo) {
+        
+    }
 
 });

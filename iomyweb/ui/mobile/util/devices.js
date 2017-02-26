@@ -52,6 +52,8 @@ $.extend(IOMy.devices,{
         return sStatus;
     },
     
+    
+    
     /**
      * Returns a map of the link a thing (specified by its ID) is connected to.
      * 

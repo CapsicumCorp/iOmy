@@ -71,7 +71,7 @@ $.extend(IOMy.devices.garagedoor,{
                         new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
                             text : aDeviceData.DeviceName,
                             press : function () {
-                                IOMy.common.NavigationChangePage("pGaragedoor", {ThingId : aDeviceData.DeviceId});
+                                IOMy.common.NavigationChangePage("pDeviceGaragedoor", {ThingId : aDeviceData.DeviceId});
                             }
                         }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
                     ]
@@ -228,7 +228,7 @@ $.extend(IOMy.devices.garagedoor,{
                         new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
                             text : aDeviceData.DeviceName,
                             press : function () {
-                                IOMy.common.NavigationChangePage("pDeviceWindowSensor", {ThingId : aDeviceData.DeviceId});
+                                IOMy.common.NavigationChangePage("pDeviceGaragedoor", {ThingId : aDeviceData.DeviceId});
                             }
                         }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                     ]

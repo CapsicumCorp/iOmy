@@ -50,6 +50,9 @@ $.extend(IOMy.functions,{
         //------------------------------------------------//
         var me = this;
         
+        //------------------------------------------------//
+        // Fetch the user's username if possible.
+        //------------------------------------------------//
         IOMy.apiodata.AjaxRequest({
             Url : IOMy.apiodata.ODataLocation("users"),
             Columns : ["USERS_USERNAME"],
@@ -63,6 +66,7 @@ $.extend(IOMy.functions,{
             },
             
             onFail : function (response) {
+                // Calls a function defined in the same module elsewhere.
                 me.reportSessionTerminated(response.message);
             }
         });

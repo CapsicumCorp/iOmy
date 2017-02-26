@@ -35,6 +35,9 @@ $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/fun
 $.sap.require("IOMy.functions.destroyItemsByIdFromView");
 
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.findInputWidget");
+
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
 $.sap.require("IOMy.functions.getCurrentUsername");
 
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
@@ -84,6 +87,9 @@ $.sap.require("IOMy.functions.setCurrentUserNameForNavigation");
 
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
 $.sap.require("IOMy.functions.showHelpDialog");
+
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.updateRoom");
 
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
 $.sap.require("IOMy.functions.ValidateIPAddress");

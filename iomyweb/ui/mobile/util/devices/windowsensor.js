@@ -86,7 +86,6 @@ $.extend(IOMy.devices.windowsensor,{
                             //--------------------------------//
                             //-- Draw the Data Boxes		--//
                             //--------------------------------//
-
                             items: [
                                 new sap.m.VBox({
                                     items : [

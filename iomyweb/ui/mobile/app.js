@@ -1655,6 +1655,12 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.BPM\" Page!\n"
 	},
+    {
+		"Id":			"pDeviceGaragedoor",
+		"Location":		"mjs.devices.Garagedoor",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Garagedoor\" Page!\n"
+	},
     //--------------------------------------------------------------------//
     // Staging
     //--------------------------------------------------------------------//
