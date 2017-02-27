@@ -65,6 +65,14 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <!--
+        Each activity has this attribute: android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize".
+        This is generated as each new activity is created. The options 'keyboardHidden', 'screenLayout', and 'orientation' is to prevent any problems that
+        would occur if a device is rotated. This is especially important on the activity with the webview because without this fix, the webview widget
+        would refresh as the activity was refreshed.
+
+        https://developer.android.com/guide/topics/resources/runtime-changes.html
+        -->
         <activity
             android:name=".SplashActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
@@ -77,7 +85,7 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
         </activity>
         <activity
             android:name=".Start"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"></activity>
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
         <activity
             android:name=".WebserverServerDevice"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
