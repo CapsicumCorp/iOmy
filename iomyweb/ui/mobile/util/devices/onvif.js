@@ -374,42 +374,42 @@ $.extend(IOMy.devices.onvif,{
 		
 		aUIObjectItems.push(
             //------------------------------------//
-			//-- 2nd is the Device Data			--//
+			//-- 2nd is the onvif buttons		--//
 			//------------------------------------//
 			new sap.m.HBox({
-                    items : [
-						new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
-                            //--------------------------------//
-                            //-- Draw the Data Boxes		--//
-                            //--------------------------------//
-                            items: [
-                                new sap.m.VBox({
-                                    items : [
-										new sap.m.Button ({
-											width: "100%",
-											icon : "sap-icon://GoogleMaterial/visibility",
-										})
-                                    ]
-                                })
-                            ]
-                        }).addStyleClass("MarLeft10px MarAuto0px minwidth70px"),
-                        new sap.m.VBox( oViewScope.createId( sPrefix+"_Screenshot"), {
-                            //--------------------------------//
-                            //-- Draw the Data Boxes		--//
-                            //--------------------------------//
-                            items: [
-                                new sap.m.VBox({
-                                    items : [
-										new sap.m.Button ({
-											width: "100%",
-											icon : "sap-icon://GoogleMaterial/camera",
-										})
-                                    ]
-                                })
-                            ]
-                        }).addStyleClass("MarLeft10px MarAuto0px minwidth70px")
-                    ]
-                }).addStyleClass("minwidth170px minheight58px")
+                items : [
+                    new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
+                        //--------------------------------//
+                        //-- Take Snapshot              --//
+                        //--------------------------------//
+                        items: [
+                            new sap.m.VBox({
+                                items : [
+                                    new sap.m.Button ({
+                                        width: "100%",
+                                        icon : "sap-icon://GoogleMaterial/photo_camera",
+                                    })
+                                ]
+                            })
+                        ]
+                    }).addStyleClass("MarLeft10px MarAuto0px minwidth70px"),
+                    new sap.m.VBox( oViewScope.createId( sPrefix+"_Screenshot"), {
+                        //--------------------------------//
+                        //-- Open Live Stream           --//
+                        //--------------------------------//
+                        items: [
+                            new sap.m.VBox({
+                                items : [
+                                    new sap.m.Button ({
+                                        width: "100%",
+                                        icon : "sap-icon://GoogleMaterial/videocam",
+                                    })
+                                ]
+                            })
+                        ]
+                    }).addStyleClass("MarLeft10px MarAuto0px minwidth70px")
+                ]
+            }).addStyleClass("minwidth170px minheight58px")
         );
 		
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
