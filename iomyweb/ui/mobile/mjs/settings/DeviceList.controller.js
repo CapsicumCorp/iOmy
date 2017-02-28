@@ -163,16 +163,16 @@ sap.ui.controller("mjs.settings.DeviceList", {
                         items : [
                             new sap.m.Label({
                                 text: "Items"
-                            }).addStyleClass("MarTop5px MarBottom5px MarLeft5px MarRight5px")
+                            }).addStyleClass("")
                         ]
                     }).addStyleClass("FlexNoShrink width60px BorderRight TextCenter"),
                     new sap.m.VBox({
                         items : [
                             new sap.m.Label({
                                 text: "Links"
-                            }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText")
+                            }).addStyleClass("PaddingToMatchButtonText")
                         ]
-                    }).addStyleClass("width100Percent")
+                    }).addStyleClass("")
                 ]
             }).addStyleClass("ConsistentMenuHeader ListItem")
         );

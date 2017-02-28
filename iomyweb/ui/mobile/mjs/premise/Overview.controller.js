@@ -163,7 +163,7 @@ sap.ui.controller("mjs.premise.Overview", {
                             items : [
                                 new sap.m.Label({
                                     text : "Devices"
-                                }).addStyleClass("MarTop5px MarBottom5px MarLeft5px MarRight5px")
+                                }).addStyleClass(" ")
                             ]
                         }).addStyleClass("HasCenteredObject FlexNoShrink width60px BorderRight"),
                         // === ROOM === \\
@@ -171,9 +171,9 @@ sap.ui.controller("mjs.premise.Overview", {
                             items : [
                                 new sap.m.Label({
                                     text : "Room"
-                                }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText")
+                                }).addStyleClass("PaddingToMatchButtonText")
                             ]
-                        }).addStyleClass("width100Percent")
+                        }).addStyleClass("")
                     ]
                 }).addStyleClass("ConsistentMenuHeader ListItem BorderTop")
             );

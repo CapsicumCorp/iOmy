@@ -135,11 +135,11 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                     items : [
                         new sap.m.Label({
                             text: "User Information"
-                        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText")
+                        }).addStyleClass("MarLeft6px")
                     ]
                 })
             ]
-        }).addStyleClass("ConsistentMenuHeader BoxSizingBorderBox BorderTop ListItem width100Percent");
+        }).addStyleClass("ConsistentMenuHeader BorderTop ListItem");
         
         //------------------------------------------------------//
         // Given names (First and Middle names)
@@ -151,7 +151,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         me.wGivenNamesField = new sap.m.Input({
             value : "",
             maxLength : 60
-        }).addStyleClass("SettingsTextInput width100Percent");
+        }).addStyleClass("SettingsTextInput");
 
         //------------------------------------------------------//
         // Title
@@ -163,7 +163,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         me.wTitleField = new sap.m.Input({
             value : "",
             maxLength : 60
-        }).addStyleClass("SettingsTextInput width100Percent");
+        }).addStyleClass("SettingsTextInput");
 
         //------------------------------------------------------//
         // Gender
@@ -172,7 +172,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             text : "Gender"
         });
 
-        me.wGenderField = IOMy.widgets.getGenderSelectBox().addStyleClass("SettingsTextInput width100Percent");
+        me.wGenderField = IOMy.widgets.getGenderSelectBox().addStyleClass("SettingsTextInput");
 
         //------------------------------------------------------//
         // Surname
@@ -184,7 +184,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         me.wSurnameField = new sap.m.Input({
             value : "",
             maxLength : 60
-        }).addStyleClass("SettingsTextInput width100Percent");
+        }).addStyleClass("SettingsTextInput");
 
         //------------------------------------------------------//
         // Display name/Username
@@ -196,7 +196,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         me.wDisplayNameField = new sap.m.Input({
             value : "",
             maxLength : 60
-        }).addStyleClass("SettingsTextInput width100Percent");
+        }).addStyleClass("SettingsTextInput");
         
         //------------------------------------------------------//
         // Date of Birth
@@ -218,7 +218,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         me.wEmailField = new sap.m.Input({
             value : "",
             maxLength : 80
-        }).addStyleClass("SettingsTextInput width100Percent");
+        }).addStyleClass("SettingsTextInput");
 
         //------------------------------------------------------//
         // Phone number
@@ -229,7 +229,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
 
         me.wContactPhoneField = new sap.m.Input({
             value : ""
-        }).addStyleClass("SettingsTextInput width100Percent");
+        }).addStyleClass("SettingsTextInput");
         
         //----------------------------------------------//
         // User Address Section
@@ -240,11 +240,11 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                     items : [
                         new sap.m.Label({
                             text: "User Address"
-                        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText")
+                        }).addStyleClass("MarLeft6px")
                     ]
                 })
             ]
-        }).addStyleClass("ConsistentMenuHeader MarTop8px BoxSizingBorderBox BorderTop ListItem width100Percent");
+        }).addStyleClass("ConsistentMenuHeader BorderTop ListItem");
         
         //===== COUNTRY =====\\
         var oCountryTitle = new sap.m.Text({
@@ -257,7 +257,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             selectionChange : function () {
                 loadLocaleCBoxItems(me, this.getSelectedKey());
             }
-        }).addStyleClass("width100Percent SettingsDropdownInput");
+        }).addStyleClass("SettingsDropdownInput");
         
         me.wCountryField.setSelectedIndex(0);
 
@@ -269,7 +269,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         me.wLanguageField = new sap.m.Select({
             width : "100%",
             items : IOMy.widgets.getLanguageItems()
-        }).addStyleClass("width100Percent SettingsDropdownInput");
+        }).addStyleClass("SettingsDropdownInput");
 
         //===== STATE =====\\
         var oStateTitle = new sap.m.Text({
@@ -279,7 +279,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         me.wStateField = new sap.m.Select({
             width : "100%",
             items : IOMy.widgets.getStateProvinceItems()
-        }).addStyleClass("width100Percent SettingsDropdownInput");
+        }).addStyleClass("SettingsDropdownInput");
 
         //===== POST CODE =====\\
         var oPostCodeTitle = new sap.m.Text({
@@ -289,7 +289,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         me.wPostCodeField = new sap.m.Select({
             width : "100%",
             items : IOMy.widgets.getPostCodeItems()
-        }).addStyleClass("width100Percent SettingsDropdownInput");
+        }).addStyleClass("SettingsDropdownInput");
 
         //===== TIMEZONE =====\\
         var oTimezoneTitle = new sap.m.Text({
@@ -299,7 +299,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         me.wTimezoneField = new sap.m.Select({
             width : "100%",
             items : IOMy.widgets.getTimezoneItems()
-        }).addStyleClass("width100Percent SettingsDropdownInput");
+        }).addStyleClass("SettingsDropdownInput");
 
         //===== RESIDENTIAL ADDRESS =====\\
 
@@ -310,7 +310,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
 
         me.wAddressLine1Field = new sap.m.Input({
             value : ""
-        }).addStyleClass("width100Percent SettingsTextInput");
+        }).addStyleClass("SettingsTextInput");
 
         //===== UNIT/FLAT ADDRESS (LINE 2) =====\\
         var oLine2Title = new sap.m.Text({
@@ -319,7 +319,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
 
         me.wAddressLine2Field = new sap.m.Input({
             value : ""
-        }).addStyleClass("width100Percent SettingsTextInput");
+        }).addStyleClass("SettingsTextInput");
 
         //===== EXTRA INFO (LINE 3) =====\\
         var oLine3Title = new sap.m.Text({
@@ -328,7 +328,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
 
         me.wAddressLine3Field = new sap.m.Input({
             value : ""
-        }).addStyleClass("width100Percent SettingsTextInput");
+        }).addStyleClass("SettingsTextInput");
         
         //loadLocaleCBoxItems(me, me.wCountryField.getSelectedIndex().getKey());
         
@@ -341,11 +341,11 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                     items : [
                         new sap.m.Label({
                             text: "Username and Password"
-                        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText")
+                        }).addStyleClass("MarLeft6px")
                     ]
                 })
             ]
-        }).addStyleClass("ConsistentMenuHeader BoxSizingBorderBox MarTop8px BorderTop ListItem width100Percent");
+        }).addStyleClass("ConsistentMenuHeader BorderTop ListItem");
         
         // -- USERNAME --\\
         var oUsernameLabel = new sap.m.Label({
@@ -354,7 +354,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         
         me.wUsernameField = new sap.m.Input({
             value : ""
-        }).addStyleClass("width100Percent SettingsTextInput");
+        }).addStyleClass("SettingsTextInput");
         
         // -- PASSWORD -- \\
         var oPasswordLabel = new sap.m.Label({
@@ -364,7 +364,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         me.wPasswordField = new sap.m.Input({
             value : "",
             type : sap.m.InputType.Password
-        }).addStyleClass("width100Percent SettingsTextInput");
+        }).addStyleClass("SettingsTextInput");
 
         // -- CONFIRM PASSWORD -- \\
         var oConfirmPasswordLabel = new sap.m.Label({
@@ -374,7 +374,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         me.wConfirmPasswordField = new sap.m.Input({
             value : "",
             type : sap.m.InputType.Password
-        }).addStyleClass("width100Percent SettingsTextInput");
+        }).addStyleClass("SettingsTextInput");
         
         //----------------------------------------------//
         // Database Authentication Section
@@ -385,18 +385,18 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                     items : [
                         new sap.m.Label({
                             text: "Database Authentication"
-                        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText")
+                        }).addStyleClass("MarLeft6px")
                     ]
                 })
             ]
-        }).addStyleClass("ConsistentMenuHeader BoxSizingBorderBox MarTop8px BorderTop ListItem width100Percent");
+        }).addStyleClass("ConsistentMenuHeader BorderTop ListItem");
         
         // -- USERNAME --\\
         var oDBRootUsernameLabel = new sap.m.Label({
             text : "Username"
         });
         
-        me.wDBRootUsernameField = new sap.m.Input({}).addStyleClass("width100Percent SettingsTextInput");
+        me.wDBRootUsernameField = new sap.m.Input({}).addStyleClass("SettingsTextInput");
         
         // -- PASSWORD --\\
         var oDBRootPasswordLabel = new sap.m.Label({
@@ -406,7 +406,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         me.wDBRootPasswordField = new sap.m.Input({
             value : "",
             type : sap.m.InputType.Password
-        }).addStyleClass("width100Percent SettingsTextInput");
+        }).addStyleClass("SettingsTextInput");
 
         //--------------------------//
         // Edit Button
@@ -495,7 +495,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                 oDBAuthenticationSection,
                 me.wDBAuthVertBox
             ] //-- End of Panel Content --//
-        }).addStyleClass("UserInputForm TableSideBorders");
+        }).addStyleClass("UserInputForm TableSideBorders MarTop3px");
 
         thisView.byId("page").addContent(oPanel);
     },
