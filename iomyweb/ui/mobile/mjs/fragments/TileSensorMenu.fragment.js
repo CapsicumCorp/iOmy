@@ -60,7 +60,7 @@ sap.ui.jsfragment("mjs.fragments.TileSensorMenu", {
 							"content": [
 								new sap.m.RadioButtonGroup( sID_TimeRB, {
 									buttons:	[]
-								}).addStyleClass("")
+								}).addStyleClass("RadioHover")
 							]
 						})
 					]
@@ -78,7 +78,7 @@ sap.ui.jsfragment("mjs.fragments.TileSensorMenu", {
 							"content": [
 								new sap.m.RadioButtonGroup( sID_FilterRB, {
 									buttons:	[]
-								}).addStyleClass("")
+								}).addStyleClass("RadioHover")
 							]
 						}).addStyleClass("")
 					]

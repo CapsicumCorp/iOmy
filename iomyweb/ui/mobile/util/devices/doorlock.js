@@ -77,35 +77,49 @@ $.extend(IOMy.devices.doorlock,{
                     ]
                 }).addStyleClass("BorderRight width80Percent DeviceLabelMargin"),
 
-                //------------------------------------//
-                //-- 2nd is the Device Data			--//
-                //------------------------------------//
-                new sap.m.VBox({
-                    items : [
-                        new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
-                            //--------------------------------//
-                            //-- Draw the Data Boxes		--//
-                            //--------------------------------//
+               //------------------------------------//
+			//-- 2nd is the onvif buttons		--//
+			//------------------------------------//
+			new sap.m.HBox({
+                items : [
+                    new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
+                        //--------------------------------//
+                        //-- Take Snapshot              --//
+                        //--------------------------------//
+                        items: [
+                            new sap.m.VBox({
+                                items : [
 
-                            items: [
-                                new sap.m.VBox({
-                                    items : [
-                                        //----------------------------------//
-                                        // Last Motion
-                                        //----------------------------------//
-                                        new sap.m.Label({
-                                            text : "Last Accessed:"
-                                        }).addStyleClass("Font-RobotoCondensed"),
-                                        
-                                        new sap.m.Label( oViewScope.createId( sPrefix+"_LastMotion" ),	{
-                                            text : "1d 3h 21m"
-                                        } ).addStyleClass("Font-RobotoCondensed")
-                                    ]
-                                })
-                            ]
-                        }).addStyleClass("MarLeft6px MarAuto0px")
-                    ]
-                }).addStyleClass("minheight58px minwidth170px")
+                                ]
+                            })
+                        ]
+                    }).addStyleClass("MarLeft10px MarAuto0px minwidth60px"),
+                    new sap.m.VBox( oViewScope.createId( sPrefix+"_Screenshot"), {
+                        //--------------------------------//
+                        //-- Open Live Stream           --//
+                        //--------------------------------//
+                        items: [
+                            new sap.m.VBox({
+                                items : [
+                                    new sap.m.SegmentedButton({
+										selectedKey : "DUnlock",
+										items : [
+											new sap.m.SegmentedButtonItem ({
+												icon : "sap-icon://GoogleMaterial/lock_open",
+												key : "DUnlock"
+											}),
+											new sap.m.SegmentedButtonItem ({
+												icon : "sap-icon://GoogleMaterial/lock_outline",
+												key : "Dlock"
+											}),
+										]
+									})
+                                ]
+                            })
+                        ]
+                    }).addStyleClass("MarLeft10px MarAuto0px minwidth80px")
+                ]
+            }).addStyleClass("minwidth170px minheight58px")
             ]
         }).addStyleClass("ListItem");
 

@@ -1067,24 +1067,33 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	/*====================================================================================*/
 	/*== TILE DATA POPOVERS                                                             ==*/
 	/*====================================================================================*/
-	.sapMSegBBtn.sapMSegBBtnFocusable.sapMSegBBtnSel:hover, .sapMSegBBtnFocusable.sapMBtnActive:hover {
+	.TileSensorMenu > section > div > div > div > div > header > div > ul > li.sapMSegBBtn.sapMSegBBtnFocusable.sapMSegBBtnSel:hover,
+	.TileSensorMenu > section > div > div > div > div > header > div > ul > li.sapMSegBBtnFocusable.sapMBtnActive:hover  {
 		background: rgb(139, 197, 63);
 	}
 	
-	.sapMSegBBtn.sapMSegBBtnFocusable.sapMSegBBtnSel {
+	
+	.TileSensorMenu > section > div > div > div > div > header > div > ul > li.sapMSegBBtn.sapMSegBBtnFocusable.sapMSegBBtnSel {
 		border-right: 1px solid #006ca7;
 	}
 	
-	.sapMSegBBtn.sapMSegBBtnSel {
+	
+	.TileSensorMenu > section > div > div > div > div > header > div > ul > li.sapMSegBBtn.sapMSegBBtnSel {
 		background: rgb(139, 217, 83);
 		color: #ffffff;
 		border-color: rgb(139, 197, 63);
 	}
 	
-	.sapMRbSel .sapMRbBInn {
+	/* Changes the Radio Button Background to be Green */
+	.TileSensorMenu > section > div > div > div > div > section > section > div > div > div.sapMRbSel > div > div > div.sapMRbBInn{
 		background-color: rgb(139, 197, 63);
 	}
 	
+	/* Changes the Border Color whilst hovering to be Green */
+	.RadioHover > div > div > div.sapMRbHoverable:hover, 
+	.RadioHover > div.sapMRbBTouched > div > div.sapMRb.sapMRbHoverable {
+		border-color: rgb(139, 197, 63);
+	}
 	/*================================================================*/
 	/* FORMS                                                          */
 	/*================================================================*/
