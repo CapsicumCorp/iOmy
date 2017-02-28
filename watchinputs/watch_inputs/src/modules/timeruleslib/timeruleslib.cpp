@@ -154,6 +154,7 @@ struct timerule {
   std::string deviceid; //Normally the mac address of a device
   int16_t ontime; //The minute of the day at which to turn on a device
   int16_t offtime; //The minute of the day at which to turn off a device
+  int prevlastruleset=-1; //Previous last rule set
   int lastruleset=-1; //1 means on was the last rule applied, 0 means off was the last rule applied
 };
 
@@ -487,6 +488,7 @@ int timeruleslib_readrulesfile(void) {
       if (strcmp(linebuf, "device")==0) {
         curdeviceid=value;
         gtimerules[curdeviceid].deviceid=curdeviceid;
+        gtimerules[curdeviceid].prevlastruleset=-1;
         gtimerules[curdeviceid].lastruleset=-1;
       } else if (strcmp(linebuf, "ontime")==0) {
         int hour, minute;
@@ -575,7 +577,6 @@ static int timeruleslib_setrulesfilename(const char *rulesfile) {
 }
 
 static int timeruleslib_processreloadcommand(const char *UNUSED(buffer), int clientsock) {
-  auto const debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   auto const commonserverlibifaceptr=(commonserverlib_ifaceptrs_ver_1_t *) timeruleslib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
 
   if (timeruleslib_getneedtoquit()) {
@@ -635,13 +636,11 @@ static void timeruleslib_process_timerules() {
       debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Need to activate On Time Rule for device: %s\n", __func__, timerulesit.first.c_str());
       changestate=true;
       newstate=1;
-      timerulesit.second.lastruleset=1;
     }
     if (offhour==curtimelocaltm.tm_hour && offminute==curtimelocaltm.tm_min && timerulesit.second.lastruleset!=0) {
       debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Need to activate Off Time Rule for device: %s\n", __func__, timerulesit.first.c_str());
       changestate=true;
       newstate=0;
-      timerulesit.second.lastruleset=0;
     }
     if (timeruleslib_getneedtoquit()) {
       break;
@@ -656,16 +655,16 @@ static void timeruleslib_process_timerules() {
 
       // Convert string form of the address to a uint64_t type
       std::string hexaddr="0x";
-      hexaddr+=timerulesit.first.c_str();
+      hexaddr+=timerulesit.first;
       sscanf(hexaddr.c_str(), "0x%" SCNx64, &addr);
 
       result=dblibifaceptr->begin();
       if (result<0) {
-        debuglibifaceptr->debuglib_printf(1, "%s: Failed to start database transaction for device: %s\n", __func__, timerulesit.first.c_str());
+        debuglibifaceptr->debuglib_printf(1, "%s: Failed to start database transaction for device: %016" PRIX64 ", result=%d\n", __func__, addr, result);
         continue;
       }
       uniqueid=dblibifaceptr->getport_uniqueid(addr, 0);
-      if (!uniqueid) {
+      if (uniqueid) {
         result=dblibifaceptr->getioport_state(uniqueid, &curdbstate);
         if (result<0) {
           // If error when retrieving current state just try to apply the new state anyway
@@ -674,12 +673,20 @@ static void timeruleslib_process_timerules() {
         if (curdbstate!=newstate) {
           result=dblibifaceptr->update_ioports_state(uniqueid, newstate);
           if (result<0) {
-            debuglibifaceptr->debuglib_printf(1, "%s: Failed to apply new on/off state to device: %s\n", __func__, timerulesit.first.c_str());
+            debuglibifaceptr->debuglib_printf(1, "%s: Failed to apply new on/off state to device: %016" PRIX64 ", result=%d\n", __func__, addr, result);
+          } else {
+            //Update that the rule was set
+            timerulesit.second.prevlastruleset=timerulesit.second.lastruleset;
+            timerulesit.second.lastruleset=newstate;
           }
+        } else {
+          //Update that the rule was set so we are in sync with the database
+          timerulesit.second.prevlastruleset=timerulesit.second.lastruleset;
+          timerulesit.second.lastruleset=newstate;
         }
         dblibifaceptr->freeuniqueid(uniqueid);
       } else {
-        debuglibifaceptr->debuglib_printf(1, "%s: Failed to access database thing for device: %s\n", __func__, timerulesit.first.c_str());
+        debuglibifaceptr->debuglib_printf(1, "%s: Failed to access database thing for device: %016" PRIX64 "\n", __func__, addr);
       }
       result=dblibifaceptr->end();
       if (result<0) {
