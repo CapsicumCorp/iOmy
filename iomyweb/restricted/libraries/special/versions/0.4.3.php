@@ -825,8 +825,9 @@ function PrepareAddNewThing( $iLinkId, $aThing, $iThingDefaultHWID, $sLinkDispla
 					$sErrMesg .= "Problem with the Thing 'Name' in an element of the 'Things' array!\n";
 				}
 			}
+		//-- ELSE Use the Link Display name --//
 		} else {
-			if( $sLinkDisplayName!=="" ) {
+			if( is_string( $sLinkDisplayName ) ) {
 				$sThingName = $sLinkDisplayName;
 			} else {
 				$bError = true;
