@@ -32,7 +32,8 @@ public class MainLib {
     private static MainLib instance;
     private String AppName;
     private UsbManager usbManager;
-    private String StorageFolderName;
+    private String InternalStorageFolderName;
+    private String ExternalStorageFolderName;
     private boolean startedFromUsb;
     private CmdServerLib mCmdServerLib;
     private CommonServerLib mCommonServerLib;
@@ -50,6 +51,7 @@ public class MainLib {
     private UserspaceUSBSerialAndroidLib mUserspaceUSBSerialAndroidLib;
     private WebApiClientLib mWebApiClientLib;
     private LockLib mLockLib;
+    private TimeRulesLib mTimeRulesLib;
 
     public native int jniinit();
     public native int jniloadModule(long module);
@@ -58,6 +60,7 @@ public class MainLib {
     public native void jnicleanup();
     public native long jnigetmodulesinfo();
     public native void jnisetConfigFilename(String cfgfile);
+    public native void jnisetTimeRulesFilename(String rulesfile);
 
     public static MainLib getInstance() {
         if (instance == null) {
@@ -66,11 +69,12 @@ public class MainLib {
         return instance;
     }
 
-    public MainLib(Context context, String AppName, UsbManager usbManager, String StorageFolderName, boolean startedFromUsb) {
+    public MainLib(Context context, String AppName, UsbManager usbManager, String InternalStorageFolderName, String ExternalStorageFolderName, boolean startedFromUsb) {
         instance=this;
         this.AppName=AppName;
         this.usbManager=usbManager;
-        this.StorageFolderName=StorageFolderName;
+        this.InternalStorageFolderName=InternalStorageFolderName;
+        this.ExternalStorageFolderName=ExternalStorageFolderName;
         this.startedFromUsb=startedFromUsb;
 
         mCmdServerLib=new CmdServerLib(AppName);
@@ -89,6 +93,7 @@ public class MainLib {
         mUserspaceUSBSerialAndroidLib=new UserspaceUSBSerialAndroidLib(context, AppName);
         mWebApiClientLib=new WebApiClientLib(AppName);
         mLockLib=new LockLib(AppName);
+        mTimeRulesLib=new TimeRulesLib(AppName);
     }
 
     public int init() {
@@ -222,6 +227,13 @@ public class MainLib {
             Log.println(Log.INFO, AppName, "MainLib.loadModules: Failed to load module: locklib");
             return -1;
         }
+        //Add TimeRulesLib library
+        modulesinfo=mTimeRulesLib.jnigetmodulesinfo();
+        result=jniloadModule(modulesinfo);
+        if (result!=0) {
+            Log.println(Log.INFO, AppName, "MainLib.loadModules: Failed to load module: timeruleslib");
+            return -1;
+        }
         return 0;
     }
 
@@ -233,8 +245,11 @@ public class MainLib {
         if (jnifillinModuleDependencyInfo()!=0) {
             return -3;
         }
-        String watchInputsConfigFilename=new File(StorageFolderName+"/WatchInputs.cfg").toString();
+        String watchInputsConfigFilename=new File(InternalStorageFolderName+"/WatchInputs.cfg").toString();
+        String watchInputsTimeRulesFilename=new File(ExternalStorageFolderName+"/timerules.cfg").toString();
         jnisetConfigFilename(watchInputsConfigFilename);
+        jnisetTimeRulesFilename(watchInputsTimeRulesFilename);
+
         jnimain();
 
         return 0;
@@ -243,8 +258,8 @@ public class MainLib {
     public String getAppName() {
         return this.AppName;
     }
-    public String getStorageFolderName() {
-        return this.StorageFolderName;
+    public String getInternalStorageFolderName() {
+        return this.InternalStorageFolderName;
     }
     public UsbManager getUsbManager() {
         return this.usbManager;

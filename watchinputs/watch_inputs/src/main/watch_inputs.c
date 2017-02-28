@@ -43,6 +43,7 @@ static int needtoquit;
 static int lastsignal, lastsignalcount;
 
 char *cfg_filename;
+char *timerules_filename;
 char *modules_dir=MODULES_DIR;
 
 static pthread_t mainthread;
@@ -54,6 +55,7 @@ static int nummodules = 1;
 //Command line options
 static struct option const long_opts[] = {
   {"cfgfile", required_argument, NULL, 'c'},
+  {"rulesfile", required_argument, NULL, 't'},
 	{"modulesdir", required_argument, NULL, 'u'},
   {0, 0, 0, 0}
 };
@@ -106,6 +108,7 @@ void die(int x) {
 static void help() {
   printf("Options:\n"
          "  --cfgfile=[filename] Config filename\n"
+         "  --rulesfile=[filename] Time Rules filename\n"
 				 "  --modulesdir=[dir]     Modules Directory\n"
         );
   exit(0);
@@ -124,6 +127,14 @@ static void getcmdopts(int argc, char **argv) {
 					cfg_filename=strdup(optarg);
 				}
 				break;
+      case 't':
+        if (optarg) {
+          if (timerules_filename) {
+            free(timerules_filename);
+          }
+          timerules_filename=strdup(optarg);
+        }
+        break;
 			case 'u':
 				if (optarg) {
 					modules_dir=optarg;
@@ -148,6 +159,11 @@ int main(int argc, char **argv) {
   }
   cfg_filename=strdup(CFG_FILENAME);
 
+  if (timerules_filename) {
+    free(timerules_filename);
+  }
+  timerules_filename=strdup(TIMERULES_FILENAME);
+
   getcmdopts(argc, argv);
 
 	//This always seems to return 0 for the main thread
@@ -163,6 +179,10 @@ int main(int argc, char **argv) {
   if (cfg_filename) {
     free(cfg_filename);
     cfg_filename=NULL;
+  }
+  if (timerules_filename) {
+    free(timerules_filename);
+    timerules_filename=NULL;
   }
   return 0;
 }

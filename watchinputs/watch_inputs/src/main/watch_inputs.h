@@ -26,9 +26,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef __ANDROID__
 #define CFG_FILENAME SYSCONFDIR "/watch_inputs/watch_inputs.cfg"
+#define TIMERULES_FILENAME SYSCONFDIR "/watch_inputs/timerules.cfg"
 #define MODULES_DIR LIBDIR "/watch_inputs/modules"
 #else
 #define CFG_FILENAME "inputdevs.cfg"
+#define TIMERULES_FILENAME "timerules.cfg"
 #define MODULES_DIR "modules"
 #endif
 
@@ -39,6 +41,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 
 extern char *cfg_filename;
+extern char *timerules_filename;
 extern char *modules_dir;
 
 #endif

@@ -43,6 +43,7 @@ model {
                     project ':ndkuserspaceusbserialandroidlib'
                     project ':ndkwebapiclientlib'
                     project ':ndklocklib'
+                    project ':ndktimeruleslib'
                     project ':ndkwatchinputs'
                 }
             }
