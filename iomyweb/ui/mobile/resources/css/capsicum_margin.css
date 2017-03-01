@@ -33,6 +33,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
  #5.0# - MAR Left
  #6.0# - MAR Right
  #7.0# - MAR Auto
+ #8.0# - MAR All REMS
+ #9.0# - MAR Top REMS
+ #10.0# - MAR Bottom REMS
+ #11.0# - MAR Left REMS
+ #12.0# - MAR Right REMS
   ********************************************/
 
   
@@ -690,4 +695,829 @@ margin-right: 0.3em;
 
 .VerticalCenter {
     margin: auto 0;
+}
+
+/*********************************************
+ * #8.0# - MAR ALL REMS
+ *********************************************/
+ 
+.MarAll0d125Rem {
+	margin: 0.125rem;
+}
+
+.MarAll0d25Rem {
+	margin: 0.25rem;
+}
+
+.MarAll0d375Rem {
+	margin: 0.375rem;
+}
+
+.MarAll0d5Rem {
+	margin: 0.5rem;
+}
+
+.MarAll0d625Rem {
+	margin: 0.625rem;
+}
+
+.MarAll0d75Rem {
+	margin: 0.75rem;
+}
+
+.MarAll0d875Rem {
+	margin: 0.875rem;
+}
+
+.MarAll1d0Rem {
+	margin: 1.0rem;
+}
+
+
+.MarAll1d125Rem {
+	margin: 1.125rem;
+}
+
+.MarAll1d25Rem {
+	margin: 1.25rem;
+}
+
+.MarAll1d375Rem {
+	margin: 1.375rem;
+}
+
+.MarAll1d5Rem {
+	margin: 1.5rem;
+}
+
+.MarAll1d625Rem {
+	margin: 1.625rem;
+}
+
+.MarAll1d75Rem {
+	margin: 1.75rem;
+}
+
+.MarAll1d875Rem {
+	margin: 1.875rem;
+}
+
+.MarAll2d0Rem {
+	margin: 2.0rem;
+}
+
+.MarAll2d125Rem {
+	margin: 2.125rem;
+}
+
+.MarAll2d25Rem {
+	margin: 2.25rem;
+}
+
+.MarAll2d375Rem {
+	margin: 2.375rem;
+}
+
+.MarAll2d5Rem {
+	margin: 2.5rem;
+}
+
+.MarAll2d625Rem {
+	margin: 2.625rem;
+}
+
+.MarAll2d75Rem {
+	margin: 2.75rem;
+}
+
+.MarAll2d875Rem {
+	margin: 2.875rem;
+}
+
+.MarAll3d0Rem {
+	margin: 3.0rem;
+}
+
+.MarAll3d125Rem {
+	margin: 3.125rem;
+}
+
+.MarAll3d25Rem {
+	margin: 3.25rem;
+}
+
+.MarAll3d375Rem {
+	margin: 3.375rem;
+}
+
+.MarAll3d5Rem {
+	margin: 3.5rem;
+}
+
+.MarAll3d625Rem {
+	margin: 3.625rem;
+}
+
+.MarAll3d75Rem {
+	margin: 3.75rem;
+}
+
+.MarAll3d875Rem {
+	margin: 3.875rem;
+}
+
+.MarAll4d0Rem {
+	margin: 4.0rem;
+}
+
+.MarAll4d125Rem {
+	margin: 4.125rem;
+}
+
+.MarAll4d25Rem {
+	margin: 4.25rem;
+}
+
+.MarAll4d375Rem {
+	margin: 4.375rem;
+}
+
+.MarAll4d5Rem {
+	margin: 4.5rem;
+}
+
+.MarAll4d625Rem {
+	margin: 4.625rem;
+}
+
+.MarAll4d75Rem {
+	margin: 4.75rem;
+}
+
+.MarAll4d875Rem {
+	margin: 4.875rem;
+}
+
+.MarAll5d0Rem {
+	margin: 5.0rem;
+}
+
+/*********************************************
+ * #9.0# - MAR Top REMS
+ *********************************************/
+ 
+.MarTop0d125Rem {
+	margin-top: 0.125rem;
+}
+
+.MarTop0d25Rem {
+	margin-top: 0.25rem;
+}
+
+.MarTop0d375Rem {
+	margin-top: 0.375rem;
+}
+
+.MarTop0d5Rem {
+	margin-top: 0.5rem;
+}
+
+.MarTop0d625Rem {
+	margin-top: 0.625rem;
+}
+
+.MarTop0d75Rem {
+	margin-top: 0.75rem;
+}
+
+.MarTop0d875Rem {
+	margin-top: 0.875rem;
+}
+
+.MarTop1d0Rem {
+	margin-top: 1.0rem;
+}
+
+
+.MarTop1d125Rem {
+	margin-top: 1.125rem;
+}
+
+.MarTop1d25Rem {
+	margin-top: 1.25rem;
+}
+
+.MarTop1d375Rem {
+	margin-top: 1.375rem;
+}
+
+.MarTop1d5Rem {
+	margin-top: 1.5rem;
+}
+
+.MarTop1d625Rem {
+	margin-top: 1.625rem;
+}
+
+.MarTop1d75Rem {
+	margin-top: 1.75rem;
+}
+
+.MarTop1d875Rem {
+	margin-top: 1.875rem;
+}
+
+.MarTop2d0Rem {
+	margin-top: 2.0rem;
+}
+
+.MarTop2d125Rem {
+	margin-top: 2.125rem;
+}
+
+.MarTop2d25Rem {
+	margin-top: 2.25rem;
+}
+
+.MarTop2d375Rem {
+	margin-top: 2.375rem;
+}
+
+.MarTop2d5Rem {
+	margin-top: 2.5rem;
+}
+
+.MarTop2d625Rem {
+	margin-top: 2.625rem;
+}
+
+.MarTop2d75Rem {
+	margin-top: 2.75rem;
+}
+
+.MarTop2d875Rem {
+	margin-top: 2.875rem;
+}
+
+.MarTop3d0Rem {
+	margin-top: 3.0rem;
+}
+
+.MarTop3d125Rem {
+	margin-top: 3.125rem;
+}
+
+.MarTop3d25Rem {
+	margin-top: 3.25rem;
+}
+
+.MarTop3d375Rem {
+	margin-top: 3.375rem;
+}
+
+.MarTop3d5Rem {
+	margin-top: 3.5rem;
+}
+
+.MarTop3d625Rem {
+	margin-top: 3.625rem;
+}
+
+.MarTop3d75Rem {
+	margin-top: 3.75rem;
+}
+
+.MarTop3d875Rem {
+	margin-top: 3.875rem;
+}
+
+.MarTop4d0Rem {
+	margin-top: 4.0rem;
+}
+
+.MarTop4d125Rem {
+	margin-top: 4.125rem;
+}
+
+.MarTop4d25Rem {
+	margin-top: 4.25rem;
+}
+
+.MarTop4d375Rem {
+	margin-top: 4.375rem;
+}
+
+.MarTop4d5Rem {
+	margin-top: 4.5rem;
+}
+
+.MarTop4d625Rem {
+	margin-top: 4.625rem;
+}
+
+.MarTop4d75Rem {
+	margin-top: 4.75rem;
+}
+
+.MarTop4d875Rem {
+	margin-top: 4.875rem;
+}
+
+.MarTop5d0Rem {
+	margin-top: 5.0rem;
+}
+
+/*********************************************
+ * #10.0# - MAR Bottom REMS
+ *********************************************/
+ 
+.MarBottom0d125Rem {
+	margin-bottom: 0.125rem;
+}
+
+.MarBottom0d25Rem {
+	margin-bottom: 0.25rem;
+}
+
+.MarBottom0d375Rem {
+	margin-bottom: 0.375rem;
+}
+
+.MarBottom0d5Rem {
+	margin-bottom: 0.5rem;
+}
+
+.MarBottom0d625Rem {
+	margin-bottom: 0.625rem;
+}
+
+.MarBottom0d75Rem {
+	margin-bottom: 0.75rem;
+}
+
+.MarBottom0d875Rem {
+	margin-bottom: 0.875rem;
+}
+
+.MarBottom1d0Rem {
+	margin-bottom: 1.0rem;
+}
+
+
+.MarBottom1d125Rem {
+	margin-bottom: 1.125rem;
+}
+
+.MarBottom1d25Rem {
+	margin-bottom: 1.25rem;
+}
+
+.MarBottom1d375Rem {
+	margin-bottom: 1.375rem;
+}
+
+.MarBottom1d5Rem {
+	margin-bottom: 1.5rem;
+}
+
+.MarBottom1d625Rem {
+	margin-bottom: 1.625rem;
+}
+
+.MarBottom1d75Rem {
+	margin-bottom: 1.75rem;
+}
+
+.MarBottom1d875Rem {
+	margin-bottom: 1.875rem;
+}
+
+.MarBottom2d0Rem {
+	margin-bottom: 2.0rem;
+}
+
+.MarBottom2d125Rem {
+	margin-bottom: 2.125rem;
+}
+
+.MarBottom2d25Rem {
+	margin-bottom: 2.25rem;
+}
+
+.MarBottom2d375Rem {
+	margin-bottom: 2.375rem;
+}
+
+.MarBottom2d5Rem {
+	margin-bottom: 2.5rem;
+}
+
+.MarBottom2d625Rem {
+	margin-bottom: 2.625rem;
+}
+
+.MarBottom2d75Rem {
+	margin-bottom: 2.75rem;
+}
+
+.MarBottom2d875Rem {
+	margin-bottom: 2.875rem;
+}
+
+.MarBottom3d0Rem {
+	margin-bottom: 3.0rem;
+}
+
+.MarBottom3d125Rem {
+	margin-bottom: 3.125rem;
+}
+
+.MarBottom3d25Rem {
+	margin-bottom: 3.25rem;
+}
+
+.MarBottom3d375Rem {
+	margin-bottom: 3.375rem;
+}
+
+.MarBottom3d5Rem {
+	margin-bottom: 3.5rem;
+}
+
+.MarBottom3d625Rem {
+	margin-bottom: 3.625rem;
+}
+
+.MarBottom3d75Rem {
+	margin-bottom: 3.75rem;
+}
+
+.MarBottom3d875Rem {
+	margin-bottom: 3.875rem;
+}
+
+.MarBottom4d0Rem {
+	margin-bottom: 4.0rem;
+}
+
+.MarBottom4d125Rem {
+	margin-bottom: 4.125rem;
+}
+
+.MarBottom4d25Rem {
+	margin-bottom: 4.25rem;
+}
+
+.MarBottom4d375Rem {
+	margin-bottom: 4.375rem;
+}
+
+.MarBottom4d5Rem {
+	margin-bottom: 4.5rem;
+}
+
+.MarBottom4d625Rem {
+	margin-bottom: 4.625rem;
+}
+
+.MarBottom4d75Rem {
+	margin-bottom: 4.75rem;
+}
+
+.MarBottom4d875Rem {
+	margin-bottom: 4.875rem;
+}
+
+.MarBottom5d0Rem {
+	margin-bottom: 5.0rem;
+}
+
+/*********************************************
+ * #11.0# - MAR Left REMS
+ *********************************************/
+ 
+.MarLeft0d125Rem {
+	margin-left: 0.125rem;
+}
+
+.MarLeft0d25Rem {
+	margin-left: 0.25rem;
+}
+
+.MarLeft0d375Rem {
+	margin-left: 0.375rem;
+}
+
+.MarLeft0d5Rem {
+	margin-left: 0.5rem;
+}
+
+.MarLeft0d625Rem {
+	margin-left: 0.625rem;
+}
+
+.MarLeft0d75Rem {
+	margin-left: 0.75rem;
+}
+
+.MarLeft0d875Rem {
+	margin-left: 0.875rem;
+}
+
+.MarLeft1d0Rem {
+	margin-left: 1.0rem;
+}
+
+
+.MarLeft1d125Rem {
+	margin-left: 1.125rem;
+}
+
+.MarLeft1d25Rem {
+	margin-left: 1.25rem;
+}
+
+.MarLeft1d375Rem {
+	margin-left: 1.375rem;
+}
+
+.MarLeft1d5Rem {
+	margin-left: 1.5rem;
+}
+
+.MarLeft1d625Rem {
+	margin-left: 1.625rem;
+}
+
+.MarLeft1d75Rem {
+	margin-left: 1.75rem;
+}
+
+.MarLeft1d875Rem {
+	margin-left: 1.875rem;
+}
+
+.MarLeft2d0Rem {
+	margin-left: 2.0rem;
+}
+
+.MarLeft2d125Rem {
+	margin-left: 2.125rem;
+}
+
+.MarLeft2d25Rem {
+	margin-left: 2.25rem;
+}
+
+.MarLeft2d375Rem {
+	margin-left: 2.375rem;
+}
+
+.MarLeft2d5Rem {
+	margin-left: 2.5rem;
+}
+
+.MarLeft2d625Rem {
+	margin-left: 2.625rem;
+}
+
+.MarLeft2d75Rem {
+	margin-left: 2.75rem;
+}
+
+.MarLeft2d875Rem {
+	margin-left: 2.875rem;
+}
+
+.MarLeft3d0Rem {
+	margin-left: 3.0rem;
+}
+
+.MarLeft3d125Rem {
+	margin-left: 3.125rem;
+}
+
+.MarLeft3d25Rem {
+	margin-left: 3.25rem;
+}
+
+.MarLeft3d375Rem {
+	margin-left: 3.375rem;
+}
+
+.MarLeft3d5Rem {
+	margin-left: 3.5rem;
+}
+
+.MarLeft3d625Rem {
+	margin-left: 3.625rem;
+}
+
+.MarLeft3d75Rem {
+	margin-left: 3.75rem;
+}
+
+.MarLeft3d875Rem {
+	margin-left: 3.875rem;
+}
+
+.MarLeft4d0Rem {
+	margin-left: 4.0rem;
+}
+
+.MarLeft4d125Rem {
+	margin-left: 4.125rem;
+}
+
+.MarLeft4d25Rem {
+	margin-left: 4.25rem;
+}
+
+.MarLeft4d375Rem {
+	margin-left: 4.375rem;
+}
+
+.MarLeft4d5Rem {
+	margin-left: 4.5rem;
+}
+
+.MarLeft4d625Rem {
+	margin-left: 4.625rem;
+}
+
+.MarLeft4d75Rem {
+	margin-left: 4.75rem;
+}
+
+.MarLeft4d875Rem {
+	margin-left: 4.875rem;
+}
+
+.MarLeft5d0Rem {
+	margin-left: 5.0rem;
+}
+
+/*********************************************
+ * #12.0# - MAR Right REMS
+ *********************************************/
+ 
+.MarRight0d125Rem {
+	margin-right: 0.125rem;
+}
+
+.MarRight0d25Rem {
+	margin-right: 0.25rem;
+}
+
+.MarRight0d375Rem {
+	margin-right: 0.375rem;
+}
+
+.MarRight0d5Rem {
+	margin-right: 0.5rem;
+}
+
+.MarRight0d625Rem {
+	margin-right: 0.625rem;
+}
+
+.MarRight0d75Rem {
+	margin-right: 0.75rem;
+}
+
+.MarRight0d875Rem {
+	margin-right: 0.875rem;
+}
+
+.MarRight1d0Rem {
+	margin-right: 1.0rem;
+}
+
+
+.MarRight1d125Rem {
+	margin-right: 1.125rem;
+}
+
+.MarRight1d25Rem {
+	margin-right: 1.25rem;
+}
+
+.MarRight1d375Rem {
+	margin-right: 1.375rem;
+}
+
+.MarRight1d5Rem {
+	margin-right: 1.5rem;
+}
+
+.MarRight1d625Rem {
+	margin-right: 1.625rem;
+}
+
+.MarRight1d75Rem {
+	margin-right: 1.75rem;
+}
+
+.MarRight1d875Rem {
+	margin-right: 1.875rem;
+}
+
+.MarRight2d0Rem {
+	margin-right: 2.0rem;
+}
+
+.MarRight2d125Rem {
+	margin-right: 2.125rem;
+}
+
+.MarRight2d25Rem {
+	margin-right: 2.25rem;
+}
+
+.MarRight2d375Rem {
+	margin-right: 2.375rem;
+}
+
+.MarRight2d5Rem {
+	margin-right: 2.5rem;
+}
+
+.MarRight2d625Rem {
+	margin-right: 2.625rem;
+}
+
+.MarRight2d75Rem {
+	margin-right: 2.75rem;
+}
+
+.MarRight2d875Rem {
+	margin-right: 2.875rem;
+}
+
+.MarRight3d0Rem {
+	margin-right: 3.0rem;
+}
+
+.MarRight3d125Rem {
+	margin-right: 3.125rem;
+}
+
+.MarRight3d25Rem {
+	margin-right: 3.25rem;
+}
+
+.MarRight3d375Rem {
+	margin-right: 3.375rem;
+}
+
+.MarRight3d5Rem {
+	margin-right: 3.5rem;
+}
+
+.MarRight3d625Rem {
+	margin-right: 3.625rem;
+}
+
+.MarRight3d75Rem {
+	margin-right: 3.75rem;
+}
+
+.MarRight3d875Rem {
+	margin-right: 3.875rem;
+}
+
+.MarRight4d0Rem {
+	margin-right: 4.0rem;
+}
+
+.MarRight4d125Rem {
+	margin-right: 4.125rem;
+}
+
+.MarRight4d25Rem {
+	margin-right: 4.25rem;
+}
+
+.MarRight4d375Rem {
+	margin-right: 4.375rem;
+}
+
+.MarRight4d5Rem {
+	margin-right: 4.5rem;
+}
+
+.MarRight4d625Rem {
+	margin-right: 4.625rem;
+}
+
+.MarRight4d75Rem {
+	margin-right: 4.75rem;
+}
+
+.MarRight4d875Rem {
+	margin-right: 4.875rem;
+}
+
+.MarRight5d0Rem {
+	margin-right: 5.0rem;
 }

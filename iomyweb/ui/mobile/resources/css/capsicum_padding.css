@@ -32,6 +32,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
  #4.0# - Pad Bottom
  #5.0# - Pad Left
  #6.0# - Pad Right
+ #7.0# - Pad All REMS
+ #8.0# - Pad Top REMS
+ #9.0# - Pad Bottom REMS
+ #10.0# - Pad Left REMS
+ #11.0# - Pad Right REMS
   ********************************************/
 
   
@@ -611,8 +616,831 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 }
 
 
-
-
 .PadChildNone > div {
 	padding: 0px;
+}
+
+/*********************************************
+ * #7.0# - PAD ALL REMS
+ *********************************************/
+ 
+.PadAll0d125Rem {
+	padding: 0.125rem;
+}
+
+.PadAll0d25Rem {
+	padding: 0.25rem;
+}
+
+.PadAll0d375Rem {
+	padding: 0.375rem;
+}
+
+.PadAll0d5Rem {
+	padding: 0.5rem;
+}
+
+.PadAll0d625Rem {
+	padding: 0.625rem;
+}
+
+.PadAll0d75Rem {
+	padding: 0.75rem;
+}
+
+.PadAll0d875Rem {
+	padding: 0.875rem;
+}
+
+.PadAll1d0Rem {
+	padding: 1.0rem;
+}
+
+
+.PadAll1d125Rem {
+	padding: 1.125rem;
+}
+
+.PadAll1d25Rem {
+	padding: 1.25rem;
+}
+
+.PadAll1d375Rem {
+	padding: 1.375rem;
+}
+
+.PadAll1d5Rem {
+	padding: 1.5rem;
+}
+
+.PadAll1d625Rem {
+	padding: 1.625rem;
+}
+
+.PadAll1d75Rem {
+	padding: 1.75rem;
+}
+
+.PadAll1d875Rem {
+	padding: 1.875rem;
+}
+
+.PadAll2d0Rem {
+	padding: 2.0rem;
+}
+
+.PadAll2d125Rem {
+	padding: 2.125rem;
+}
+
+.PadAll2d25Rem {
+	padding: 2.25rem;
+}
+
+.PadAll2d375Rem {
+	padding: 2.375rem;
+}
+
+.PadAll2d5Rem {
+	padding: 2.5rem;
+}
+
+.PadAll2d625Rem {
+	padding: 2.625rem;
+}
+
+.PadAll2d75Rem {
+	padding: 2.75rem;
+}
+
+.PadAll2d875Rem {
+	padding: 2.875rem;
+}
+
+.PadAll3d0Rem {
+	padding: 3.0rem;
+}
+
+.PadAll3d125Rem {
+	padding: 3.125rem;
+}
+
+.PadAll3d25Rem {
+	padding: 3.25rem;
+}
+
+.PadAll3d375Rem {
+	padding: 3.375rem;
+}
+
+.PadAll3d5Rem {
+	padding: 3.5rem;
+}
+
+.PadAll3d625Rem {
+	padding: 3.625rem;
+}
+
+.PadAll3d75Rem {
+	padding: 3.75rem;
+}
+
+.PadAll3d875Rem {
+	padding: 3.875rem;
+}
+
+.PadAll4d0Rem {
+	padding: 4.0rem;
+}
+
+.PadAll4d125Rem {
+	padding: 4.125rem;
+}
+
+.PadAll4d25Rem {
+	padding: 4.25rem;
+}
+
+.PadAll4d375Rem {
+	padding: 4.375rem;
+}
+
+.PadAll4d5Rem {
+	padding: 4.5rem;
+}
+
+.PadAll4d625Rem {
+	padding: 4.625rem;
+}
+
+.PadAll4d75Rem {
+	padding: 4.75rem;
+}
+
+.PadAll4d875Rem {
+	padding: 4.875rem;
+}
+
+.PadAll5d0Rem {
+	padding: 5.0rem;
+}
+
+/*********************************************
+ * #8.0# - PAD Top REMS
+ *********************************************/
+ 
+.PadTop0d125Rem {
+	padding-top: 0.125rem;
+}
+
+.PadTop0d25Rem {
+	padding-top: 0.25rem;
+}
+
+.PadTop0d375Rem {
+	padding-top: 0.375rem;
+}
+
+.PadTop0d5Rem {
+	padding-top: 0.5rem;
+}
+
+.PadTop0d625Rem {
+	padding-top: 0.625rem;
+}
+
+.PadTop0d75Rem {
+	padding-top: 0.75rem;
+}
+
+.PadTop0d875Rem {
+	padding-top: 0.875rem;
+}
+
+.PadTop1d0Rem {
+	padding-top: 1.0rem;
+}
+
+
+.PadTop1d125Rem {
+	padding-top: 1.125rem;
+}
+
+.PadTop1d25Rem {
+	padding-top: 1.25rem;
+}
+
+.PadTop1d375Rem {
+	padding-top: 1.375rem;
+}
+
+.PadTop1d5Rem {
+	padding-top: 1.5rem;
+}
+
+.PadTop1d625Rem {
+	padding-top: 1.625rem;
+}
+
+.PadTop1d75Rem {
+	padding-top: 1.75rem;
+}
+
+.PadTop1d875Rem {
+	padding-top: 1.875rem;
+}
+
+.PadTop2d0Rem {
+	padding-top: 2.0rem;
+}
+
+.PadTop2d125Rem {
+	padding-top: 2.125rem;
+}
+
+.PadTop2d25Rem {
+	padding-top: 2.25rem;
+}
+
+.PadTop2d375Rem {
+	padding-top: 2.375rem;
+}
+
+.PadTop2d5Rem {
+	padding-top: 2.5rem;
+}
+
+.PadTop2d625Rem {
+	padding-top: 2.625rem;
+}
+
+.PadTop2d75Rem {
+	padding-top: 2.75rem;
+}
+
+.PadTop2d875Rem {
+	padding-top: 2.875rem;
+}
+
+.PadTop3d0Rem {
+	padding-top: 3.0rem;
+}
+
+.PadTop3d125Rem {
+	padding-top: 3.125rem;
+}
+
+.PadTop3d25Rem {
+	padding-top: 3.25rem;
+}
+
+.PadTop3d375Rem {
+	padding-top: 3.375rem;
+}
+
+.PadTop3d5Rem {
+	padding-top: 3.5rem;
+}
+
+.PadTop3d625Rem {
+	padding-top: 3.625rem;
+}
+
+.PadTop3d75Rem {
+	padding-top: 3.75rem;
+}
+
+.PadTop3d875Rem {
+	padding-top: 3.875rem;
+}
+
+.PadTop4d0Rem {
+	padding-top: 4.0rem;
+}
+
+.PadTop4d125Rem {
+	padding-top: 4.125rem;
+}
+
+.PadTop4d25Rem {
+	padding-top: 4.25rem;
+}
+
+.PadTop4d375Rem {
+	padding-top: 4.375rem;
+}
+
+.PadTop4d5Rem {
+	padding-top: 4.5rem;
+}
+
+.PadTop4d625Rem {
+	padding-top: 4.625rem;
+}
+
+.PadTop4d75Rem {
+	padding-top: 4.75rem;
+}
+
+.PadTop4d875Rem {
+	padding-top: 4.875rem;
+}
+
+.PadTop5d0Rem {
+	padding-top: 5.0rem;
+}
+
+/*********************************************
+ * #9.0# - PAD Bottom REMS
+ *********************************************/
+ 
+.PadBottom0d125Rem {
+	padding-bottom: 0.125rem;
+}
+
+.PadBottom0d25Rem {
+	padding-bottom: 0.25rem;
+}
+
+.PadBottom0d375Rem {
+	padding-bottom: 0.375rem;
+}
+
+.PadBottom0d5Rem {
+	padding-bottom: 0.5rem;
+}
+
+.PadBottom0d625Rem {
+	padding-bottom: 0.625rem;
+}
+
+.PadBottom0d75Rem {
+	padding-bottom: 0.75rem;
+}
+
+.PadBottom0d875Rem {
+	padding-bottom: 0.875rem;
+}
+
+.PadBottom1d0Rem {
+	padding-bottom: 1.0rem;
+}
+
+
+.PadBottom1d125Rem {
+	padding-bottom: 1.125rem;
+}
+
+.PadBottom1d25Rem {
+	padding-bottom: 1.25rem;
+}
+
+.PadBottom1d375Rem {
+	padding-bottom: 1.375rem;
+}
+
+.PadBottom1d5Rem {
+	padding-bottom: 1.5rem;
+}
+
+.PadBottom1d625Rem {
+	padding-bottom: 1.625rem;
+}
+
+.PadBottom1d75Rem {
+	padding-bottom: 1.75rem;
+}
+
+.PadBottom1d875Rem {
+	padding-bottom: 1.875rem;
+}
+
+.PadBottom2d0Rem {
+	padding-bottom: 2.0rem;
+}
+
+.PadBottom2d125Rem {
+	padding-bottom: 2.125rem;
+}
+
+.PadBottom2d25Rem {
+	padding-bottom: 2.25rem;
+}
+
+.PadBottom2d375Rem {
+	padding-bottom: 2.375rem;
+}
+
+.PadBottom2d5Rem {
+	padding-bottom: 2.5rem;
+}
+
+.PadBottom2d625Rem {
+	padding-bottom: 2.625rem;
+}
+
+.PadBottom2d75Rem {
+	padding-bottom: 2.75rem;
+}
+
+.PadBottom2d875Rem {
+	padding-bottom: 2.875rem;
+}
+
+.PadBottom3d0Rem {
+	padding-bottom: 3.0rem;
+}
+
+.PadBottom3d125Rem {
+	padding-bottom: 3.125rem;
+}
+
+.PadBottom3d25Rem {
+	padding-bottom: 3.25rem;
+}
+
+.PadBottom3d375Rem {
+	padding-bottom: 3.375rem;
+}
+
+.PadBottom3d5Rem {
+	padding-bottom: 3.5rem;
+}
+
+.PadBottom3d625Rem {
+	padding-bottom: 3.625rem;
+}
+
+.PadBottom3d75Rem {
+	padding-bottom: 3.75rem;
+}
+
+.PadBottom3d875Rem {
+	padding-bottom: 3.875rem;
+}
+
+.PadBottom4d0Rem {
+	padding-bottom: 4.0rem;
+}
+
+.PadBottom4d125Rem {
+	padding-bottom: 4.125rem;
+}
+
+.PadBottom4d25Rem {
+	padding-bottom: 4.25rem;
+}
+
+.PadBottom4d375Rem {
+	padding-bottom: 4.375rem;
+}
+
+.PadBottom4d5Rem {
+	padding-bottom: 4.5rem;
+}
+
+.PadBottom4d625Rem {
+	padding-bottom: 4.625rem;
+}
+
+.PadBottom4d75Rem {
+	padding-bottom: 4.75rem;
+}
+
+.PadBottom4d875Rem {
+	padding-bottom: 4.875rem;
+}
+
+.PadBottom5d0Rem {
+	padding-bottom: 5.0rem;
+}
+
+/*********************************************
+ * #10.0# - PAD Left REMS
+ *********************************************/
+ 
+.PadLeft0d125Rem {
+	padding-left: 0.125rem;
+}
+
+.PadLeft0d25Rem {
+	padding-left: 0.25rem;
+}
+
+.PadLeft0d375Rem {
+	padding-left: 0.375rem;
+}
+
+.PadLeft0d5Rem {
+	padding-left: 0.5rem;
+}
+
+.PadLeft0d625Rem {
+	padding-left: 0.625rem;
+}
+
+.PadLeft0d75Rem {
+	padding-left: 0.75rem;
+}
+
+.PadLeft0d875Rem {
+	padding-left: 0.875rem;
+}
+
+.PadLeft1d0Rem {
+	padding-left: 1.0rem;
+}
+
+
+.PadLeft1d125Rem {
+	padding-left: 1.125rem;
+}
+
+.PadLeft1d25Rem {
+	padding-left: 1.25rem;
+}
+
+.PadLeft1d375Rem {
+	padding-left: 1.375rem;
+}
+
+.PadLeft1d5Rem {
+	padding-left: 1.5rem;
+}
+
+.PadLeft1d625Rem {
+	padding-left: 1.625rem;
+}
+
+.PadLeft1d75Rem {
+	padding-left: 1.75rem;
+}
+
+.PadLeft1d875Rem {
+	padding-left: 1.875rem;
+}
+
+.PadLeft2d0Rem {
+	padding-left: 2.0rem;
+}
+
+.PadLeft2d125Rem {
+	padding-left: 2.125rem;
+}
+
+.PadLeft2d25Rem {
+	padding-left: 2.25rem;
+}
+
+.PadLeft2d375Rem {
+	padding-left: 2.375rem;
+}
+
+.PadLeft2d5Rem {
+	padding-left: 2.5rem;
+}
+
+.PadLeft2d625Rem {
+	padding-left: 2.625rem;
+}
+
+.PadLeft2d75Rem {
+	padding-left: 2.75rem;
+}
+
+.PadLeft2d875Rem {
+	padding-left: 2.875rem;
+}
+
+.PadLeft3d0Rem {
+	padding-left: 3.0rem;
+}
+
+.PadLeft3d125Rem {
+	padding-left: 3.125rem;
+}
+
+.PadLeft3d25Rem {
+	padding-left: 3.25rem;
+}
+
+.PadLeft3d375Rem {
+	padding-left: 3.375rem;
+}
+
+.PadLeft3d5Rem {
+	padding-left: 3.5rem;
+}
+
+.PadLeft3d625Rem {
+	padding-left: 3.625rem;
+}
+
+.PadLeft3d75Rem {
+	padding-left: 3.75rem;
+}
+
+.PadLeft3d875Rem {
+	padding-left: 3.875rem;
+}
+
+.PadLeft4d0Rem {
+	padding-left: 4.0rem;
+}
+
+.PadLeft4d125Rem {
+	padding-left: 4.125rem;
+}
+
+.PadLeft4d25Rem {
+	padding-left: 4.25rem;
+}
+
+.PadLeft4d375Rem {
+	padding-left: 4.375rem;
+}
+
+.PadLeft4d5Rem {
+	padding-left: 4.5rem;
+}
+
+.PadLeft4d625Rem {
+	padding-left: 4.625rem;
+}
+
+.PadLeft4d75Rem {
+	padding-left: 4.75rem;
+}
+
+.PadLeft4d875Rem {
+	padding-left: 4.875rem;
+}
+
+.PadLeft5d0Rem {
+	padding-left: 5.0rem;
+}
+
+/*********************************************
+ * #11.0# - PAD Right REMS
+ *********************************************/
+ 
+.PadRight0d125Rem {
+	padding-right: 0.125rem;
+}
+
+.PadRight0d25Rem {
+	padding-right: 0.25rem;
+}
+
+.PadRight0d375Rem {
+	padding-right: 0.375rem;
+}
+
+.PadRight0d5Rem {
+	padding-right: 0.5rem;
+}
+
+.PadRight0d625Rem {
+	padding-right: 0.625rem;
+}
+
+.PadRight0d75Rem {
+	padding-right: 0.75rem;
+}
+
+.PadRight0d875Rem {
+	padding-right: 0.875rem;
+}
+
+.PadRight1d0Rem {
+	padding-right: 1.0rem;
+}
+
+
+.PadRight1d125Rem {
+	padding-right: 1.125rem;
+}
+
+.PadRight1d25Rem {
+	padding-right: 1.25rem;
+}
+
+.PadRight1d375Rem {
+	padding-right: 1.375rem;
+}
+
+.PadRight1d5Rem {
+	padding-right: 1.5rem;
+}
+
+.PadRight1d625Rem {
+	padding-right: 1.625rem;
+}
+
+.PadRight1d75Rem {
+	padding-right: 1.75rem;
+}
+
+.PadRight1d875Rem {
+	padding-right: 1.875rem;
+}
+
+.PadRight2d0Rem {
+	padding-right: 2.0rem;
+}
+
+.PadRight2d125Rem {
+	padding-right: 2.125rem;
+}
+
+.PadRight2d25Rem {
+	padding-right: 2.25rem;
+}
+
+.PadRight2d375Rem {
+	padding-right: 2.375rem;
+}
+
+.PadRight2d5Rem {
+	padding-right: 2.5rem;
+}
+
+.PadRight2d625Rem {
+	padding-right: 2.625rem;
+}
+
+.PadRight2d75Rem {
+	padding-right: 2.75rem;
+}
+
+.PadRight2d875Rem {
+	padding-right: 2.875rem;
+}
+
+.PadRight3d0Rem {
+	padding-right: 3.0rem;
+}
+
+.PadRight3d125Rem {
+	padding-right: 3.125rem;
+}
+
+.PadRight3d25Rem {
+	padding-right: 3.25rem;
+}
+
+.PadRight3d375Rem {
+	padding-right: 3.375rem;
+}
+
+.PadRight3d5Rem {
+	padding-right: 3.5rem;
+}
+
+.PadRight3d625Rem {
+	padding-right: 3.625rem;
+}
+
+.PadRight3d75Rem {
+	padding-right: 3.75rem;
+}
+
+.PadRight3d875Rem {
+	padding-right: 3.875rem;
+}
+
+.PadRight4d0Rem {
+	padding-right: 4.0rem;
+}
+
+.PadRight4d125Rem {
+	padding-right: 4.125rem;
+}
+
+.PadRight4d25Rem {
+	padding-right: 4.25rem;
+}
+
+.PadRight4d375Rem {
+	padding-right: 4.375rem;
+}
+
+.PadRight4d5Rem {
+	padding-right: 4.5rem;
+}
+
+.PadRight4d625Rem {
+	padding-right: 4.625rem;
+}
+
+.PadRight4d75Rem {
+	padding-right: 4.75rem;
+}
+
+.PadRight4d875Rem {
+	padding-right: 4.875rem;
+}
+
+.PadRight5d0Rem {
+	padding-right: 5.0rem;
 }
