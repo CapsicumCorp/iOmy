@@ -439,7 +439,7 @@ $.extend(IOMy.devices.motionsensor,{
                                             text : "Last Motion:"
                                         }).addStyleClass("Font-RobotoCondensed"),
                                         
-                                        new sap.m.Label( oViewScope.createId( sPrefix+"_LastMotion" ),	{} ).addStyleClass("")
+                                        new sap.m.Label( oViewScope.createId( sPrefix+"_LastMotion" ),	{} ).addStyleClass("Font-RobotoCondensed")
                                     ]
                                 })
                             ]

@@ -335,7 +335,7 @@ sap.ui.controller("mjs.premise.Overview", {
                                                         } else if (me.aStoredDevices[i].DeviceTypeId === "-4") {
                                                             sPageName = "pDeviceBPM"; //-- Blood Pressure Monitor --//
                                                         } else if (me.aStoredDevices[i].DeviceTypeId === "-5") {
-                                                            sPageName = "pGaragedoor"; //-- Door Lock --//
+                                                            sPageName = "pDeviceGaragedoor"; //-- Remote Controlled Garage Door --//
                                                         } else if (me.aStoredDevices[i].DeviceTypeId === "-6") {
                                                             sPageName = "pDeviceTestThermostat"; //-- Thermostat --//
                                                         }
