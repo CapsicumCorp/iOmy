@@ -66,7 +66,7 @@ $.extend(IOMy.devices.temperaturesensor,{
                         press : function () {
                             //IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
+                    }).addStyleClass("width100Percent Font-RobotoCondensed TextSizeMedium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                 ]
             }).addStyleClass("minwidth70px width70Percent")
         );
@@ -218,7 +218,7 @@ $.extend(IOMy.devices.temperaturesensor,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
+                        }).addStyleClass("width100Percent Font-RobotoCondensed TextSizeMedium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
                     ]
                 }).addStyleClass("PadRight3px width100Percent minwidth170px"),
 

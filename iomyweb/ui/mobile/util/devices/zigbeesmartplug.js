@@ -723,7 +723,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                         press : function () {
                             IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
+                    }).addStyleClass("TextSizeMedium MarLeft6px Text_grey_20")
                 ]
             }).addStyleClass("width80Percent BorderRight DeviceLabelMargin")
         );
@@ -930,7 +930,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("MarLeft6px Font-Medium Text_grey_20")
+                        }).addStyleClass("MarLeft6px TextSizeMedium Text_grey_20")
                     ]
                 }).addStyleClass("BorderRight width80Percent DeviceLabelMargin"),
 

@@ -210,7 +210,7 @@ ul li{
 	width: 120px;
 }
 
-/* Set the Footer Bacground */	
+/* Set the Footer Background */	
 .sapMIBar-CTX.sapMFooter-CTX.FooterBackgroundColour {
 	background-color: rgb(241,242,242);
 	height: 3.5rem;
@@ -409,24 +409,6 @@ div > .sapMIBar-CTX .sapMLabel {
 .Font-RobotoCondensed {
 	font-family: "Roboto Condensed", sans-serif;
 }
-
-/* #ToDo# - Replacements are in capsicum_textsizes.css */
-.Font-Larger {
-	font-size: larger;
-}
-
-.Font-Large {
-	font-size: large;
-}
-
-.Font-Medium {
-	font-size: medium;
-}
-
-.Font-Small {
-	font-size: small;
-}
-
 /* ==================================================================================== */
 /* == #10.0# - Panels                                                                == */
 /* ==================================================================================== */

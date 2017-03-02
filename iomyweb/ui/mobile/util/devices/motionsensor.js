@@ -255,7 +255,7 @@ $.extend(IOMy.devices.motionsensor,{
                         press : function () {
                             //IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
+                    }).addStyleClass("TextSizeMedium MarLeft6px Text_grey_20")
                 ]
             }).addStyleClass("BorderRight width80Percent DeviceLabelMargin")
         );
@@ -415,7 +415,7 @@ $.extend(IOMy.devices.motionsensor,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pMotionSensor", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
+                        }).addStyleClass("TextSizeMedium MarLeft6px Text_grey_20")
                     ]
                 }).addStyleClass("BorderRight width80Percent DeviceLabelMargin"),
 

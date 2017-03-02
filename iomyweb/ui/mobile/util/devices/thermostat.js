@@ -73,7 +73,7 @@ $.extend(IOMy.devices.thermostat,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceTestThermostat", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
+                        }).addStyleClass("TextSizeMedium MarLeft6px Text_grey_20")
                     ]
                 }).addStyleClass("BorderRight width80Percent DeviceLabelMargin"),
 
@@ -147,7 +147,7 @@ $.extend(IOMy.devices.thermostat,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceTestThermostat", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("width100Percent Font-RobotoCondensed Font-Medium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
+                        }).addStyleClass("width100Percent Font-RobotoCondensed TextSizeMedium PadLeft6px DeviceOverview-ItemLabel TextLeft Text_grey_20")
                     ]
                 }).addStyleClass("BorderRight testlabelcont"),
 

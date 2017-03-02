@@ -76,7 +76,7 @@ $.extend(IOMy.devices.doorlock,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceDoorLock", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
+                        }).addStyleClass("TextSizeMedium MarLeft6px Text_grey_20")
                     ]
                 }).addStyleClass("BorderRight width80Percent DeviceLabelMargin"),
 			//------------------------------------//

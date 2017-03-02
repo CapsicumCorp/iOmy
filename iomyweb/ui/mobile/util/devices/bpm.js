@@ -74,7 +74,7 @@ $.extend(IOMy.devices.bpm,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceBPM", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
+                        }).addStyleClass("TextSizeMedium MarLeft6px Text_grey_20")
                     ]
                 }).addStyleClass("BorderRight width80Percent DeviceLabelMargin"),
 
