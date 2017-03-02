@@ -626,14 +626,16 @@ $.extend(IOMy.common,{
 			Url : IOMy.apiodata.ODataLocation("link"),
 			Columns : [
                 "ROOMS_PREMISE_FK","LINK_PK","LINK_SERIALCODE","LINK_NAME","LINK_CONNECTED",
-                "LINK_STATE","LINKTYPE_PK","LINKTYPE_NAME","ROOMS_PK"
+                "LINK_STATE","LINKTYPE_PK","LINKTYPE_NAME","ROOMS_PK",
+                "LINKCONN_PK","LINKCONN_NAME","LINKCONN_ADDRESS","LINKCONN_USERNAME",
+                "LINKCONN_PASSWORD","LINKCONN_PORT"
             ],
 			WhereClause : [],
 			OrderByClause : ["LINK_PK asc"],
 			
 			onSuccess : function (responseType, data) {
 				me.LinkList = [];
-				
+                
 				for (var i = 0; i < data.length; i++) {
 					me.LinkList.push({
 						"LinkId" : data[i].LINK_PK,
