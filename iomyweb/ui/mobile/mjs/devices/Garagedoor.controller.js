@@ -23,12 +23,14 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("mjs.devices.Garagedoor", {
+    
+    wControlButton : null,
 	
 	ListItem : [
-		{ "label" : "Status" , "text" : "Closed" },
-		{ "label" : "Last Accessed" , "text" : "3h 21m" },
-		{ "label" : "Battery" , "text" : "33%" },
-		{ "label" : "Tamper" , "text" : "Secure" },
+		{ "variable" : "wStatus", "label" : "Status" , "text" : "Closed" },
+		{ "variable" : "wLastAccessed", "label" : "Last Accessed" , "text" : "3h 21m" },
+		{ "variable" : "wBattery", "label" : "Battery" , "text" : "33%" },
+		{ "variable" : "wTamper", "label" : "Tamper" , "text" : "Secure" }
 	],
 	
 /**
@@ -100,16 +102,18 @@ sap.ui.controller("mjs.devices.Garagedoor", {
 		if( oList ) {
 			$.each( oController.ListItem, function( iIndex, aListItem ) {
 				try {
+                    oController[ aListItem.variable ] = new sap.m.Text ({
+                        text : aListItem.text,
+                        textAlign : "Right",
+                    });
+                    
 					oList.addItem(
 						//-- Coloumn 1 --//
 						new sap.m.InputListItem ({
 							label : aListItem.label+":",
 							content : [
 								//-- Column 2 --//
-								new sap.m.Text ({
-									text : aListItem.text,
-									textAlign : "Right",
-								})
+								oController[ aListItem.variable ]
 							]
 						}).addStyleClass("maxlabelwidth50Percent")                 
 					);
@@ -120,15 +124,20 @@ sap.ui.controller("mjs.devices.Garagedoor", {
 			//-- End of foreach loop ($.each) --//
 			//-- Adding in a unqiue item "Control Button" --//
 			try {
+                oController.wControlButton = new sap.m.Button({
+                    icon : "sap-icon://GoogleMaterial/lock_open",
+                    text : "Open",
+                    press : function () {
+                        oController.ToggleDoor();
+                    }
+                }).addStyleClass("");
+                
 				oList.addItem(
 					new sap.m.InputListItem ({
 						label : "Control:",
 						content : [
 							//-- Column 2 for Current Temp Row --//
-							new sap.m.Button({
-								icon : "sap-icon://GoogleMaterial/lock_open",
-								text : "Open"
-							}).addStyleClass("")
+                            oController.wControlButton
 						]
 					}).addStyleClass("maxlabelwidth50Percent")                 
 				);
@@ -138,6 +147,42 @@ sap.ui.controller("mjs.devices.Garagedoor", {
 		} else {
 			console.log("GD List Error - Unable to Find the List");
 		}
-	}
+	},
+    
+    ToggleDoor : function () {
+        var me          = this;
+        
+        //--------------------------------------------------------------------//
+        // Start opening or closing the garage door and disable the switch.
+        //--------------------------------------------------------------------//
+        if (me.wControlButton.getText() === "Open") {
+            me.wStatus.setText("Closing");
+            me.wControlButton.setText("Closing");
+            me.wControlButton.setEnabled(false);
+        } else if (me.wControlButton.getText() === "Closed") {
+            me.wStatus.setText("Opening");
+            me.wControlButton.setText("Opening");
+            me.wControlButton.setEnabled(false);
+        }
+        
+        //--------------------------------------------------------------------//
+        // After 15 seconds report the new status and enable the switch.
+        //--------------------------------------------------------------------//
+        setTimeout(
+            function () {
+                if (me.wControlButton.getText() === "Opening") {
+                    me.wStatus.setText("Open");
+                    me.wControlButton.setText("Open");
+                    
+                } else if (me.wControlButton.getText() === "Closing") {
+                    me.wStatus.setText("Closed");
+                    me.wControlButton.setText("Closed");
+                    
+                }
+                
+                me.wControlButton.setEnabled(true);
+            },
+        15000);
+    }
 
 });

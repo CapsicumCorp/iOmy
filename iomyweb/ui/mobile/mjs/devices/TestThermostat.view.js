@@ -49,7 +49,7 @@ sap.ui.jsview("mjs.devices.TestThermostat", {
             view : me,
             controller : oController,
             icon : "sap-icon://WeatherIcons/wi-thermometer",
-            title : "Thermostat"
+            title : "THERMOSTAT"
         });
 		
 		return oPage;

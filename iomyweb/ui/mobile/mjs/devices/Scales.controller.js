@@ -182,7 +182,7 @@ sap.ui.controller("mjs.devices.Scales", {
             text : "Apply",
             width: "100px",
             press : function () {
-                IOMy.common.NavigationChangePage("pStagingHome", {}, false);
+                //IOMy.common.NavigationChangePage("pStagingHome", {}, false);
             }
         }).addStyleClass("")
         

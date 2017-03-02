@@ -50,7 +50,7 @@ sap.ui.jsview("mjs.devices.Garagedoor", {
 			footer : IOMy.widgets.getAppFooter(),
 			content : [
                 //-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("Garage Door", "sap-icon://GoogleMaterial/lock_outline", me),
+				IOMy.widgets.getNavigationalSubHeader("GARAGE DOOR", "sap-icon://GoogleMaterial/lock_outline", me),
 				new sap.m.Panel( me.createId("panel"), {
                     backgroundDesign: "Transparent",
                     content : [

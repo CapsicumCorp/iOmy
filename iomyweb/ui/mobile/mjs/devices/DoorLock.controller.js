@@ -130,7 +130,7 @@ sap.ui.controller("mjs.devices.DoorLock", {
         
         //-- Status --//
         me.wStatusField = new sap.m.Text ({
-            text : "Locked",
+            text : "Unlocked",
             textAlign : "Right",
             width : "100%"
         });
@@ -230,9 +230,11 @@ sap.ui.controller("mjs.devices.DoorLock", {
         
         if (me.wControlSwitch.getText() === "Unlock") {
             me.wControlSwitch.setText("Lock");
+            me.wStatusField.setText("Locked");
             me.wControlSwitch.setIcon("sap-icon://GoogleMaterial/lock");
         } else if (me.wControlSwitch.getText() === "Lock") {
             me.wControlSwitch.setText("Unlock");
+            me.wStatusField.setText("Unlocked");
             me.wControlSwitch.setIcon("sap-icon://GoogleMaterial/lock_open");
         }
     }

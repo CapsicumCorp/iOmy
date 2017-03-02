@@ -49,7 +49,7 @@ sap.ui.jsview("mjs.devices.Scales", {
 			footer : IOMy.widgets.getAppFooter(),
 			content : [
                 //-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("Bluetooth Scales", "sap-icon://GoogleMaterial/bluetooth", me)
+				IOMy.widgets.getNavigationalSubHeader("BLUETOOTH SCALES", "sap-icon://GoogleMaterial/bluetooth", me)
             ]
 		}).addStyleClass("height100Percent width100Percent MainBackground");
 		
