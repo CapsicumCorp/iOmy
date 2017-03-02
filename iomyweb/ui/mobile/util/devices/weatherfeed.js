@@ -597,7 +597,7 @@ $.extend(IOMy.devices.weatherfeed,{
 
                             new sap.m.Label(oViewScope.createId(sPrefix + me.uiIDs.sConditionDisplayID),{
                                 text : "Loading..."
-                            }).addStyleClass("Font-RobotoCondensed MarLeft5px")
+                            }).addStyleClass("Font-RobotoCondensed MarLeft10px")
                         ]
                     }).addStyleClass("MarLeft6px MarAuto0px")
                 ]
@@ -697,7 +697,7 @@ $.extend(IOMy.devices.weatherfeed,{
                                 text : "Loading..."
                             }).addStyleClass("Font-RobotoCondensed MarLeft5px")
                         ]
-                    }).addStyleClass("MarLeft6px MarAuto0px")
+                    }).addStyleClass("MarLeft12px MarAuto0px")
                 ]
             }).addStyleClass("minwidth170px minheight58px")
         );

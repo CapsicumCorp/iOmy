@@ -285,7 +285,7 @@ $.extend(IOMy.devices.motionsensor,{
                                 ]
                             })
                         ]
-                        }).addStyleClass("MarLeft6px MarAuto0px")
+                        }).addStyleClass("MarLeft12px MarAuto0px")
                     ]
                 }).addStyleClass("minwidth170px minheight58px")
         );

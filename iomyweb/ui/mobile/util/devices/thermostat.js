@@ -82,7 +82,7 @@ $.extend(IOMy.devices.thermostat,{
                 //------------------------------------//
                 new sap.m.VBox({
                     items : [
-                        new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
+                        new sap.m.HBox( oViewScope.createId( sPrefix+"_DataContainer"), {
                             //--------------------------------//
                             //-- Draw the Data Boxes		--//
                             //--------------------------------//
@@ -93,16 +93,22 @@ $.extend(IOMy.devices.thermostat,{
                                         // Temperature
                                         //----------------------------------//
 										new sap.m.Label({
-                                            text : "Current Temperature:"
-                                        }).addStyleClass("Font-RobotoCondensed"),
-										
-                                        new sap.m.Label( oViewScope.createId( sPrefix+"_LastMotion" ),	{
-                                            text : "29°C"
-                                        } ).addStyleClass("Font-RobotoCondensed")
+                                            text : "Temp: 29°C"
+                                        }).addStyleClass("Font-RobotoCondensed width65px"),
+                                    ]
+                                }),
+								new sap.m.VBox({
+                                    items : [
+                                        //----------------------------------//
+                                        // Temperature
+                                        //----------------------------------//
+										new sap.m.Label({
+                                            text : "Mode: Off"
+                                        }).addStyleClass("Font-RobotoCondensed width65px MarLeft15px"),
                                     ]
                                 })
                             ]
-                        }).addStyleClass("MarLeft6px MarAuto0px")
+                        }).addStyleClass("MarLeft12px MarAuto0px")
                     ]
                 }).addStyleClass("minheight58px minwidth170px")
             ]
@@ -115,7 +121,8 @@ $.extend(IOMy.devices.thermostat,{
 		return oUIObject;
 	},
     
-    GetCommonUIForDeviceOverview: function( sPrefix, oViewScope, aDeviceData ) {
+   /* Not Currently Being used as switched over to CommonUI
+   GetCommonUIForDeviceOverview: function( sPrefix, oViewScope, aDeviceData ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
@@ -180,6 +187,7 @@ $.extend(IOMy.devices.thermostat,{
 		//------------------------------------//
 		return oUIObject;
 	},
+	*/
 	
 	GetCommonUITaskList: function( Prefix, oViewScope, aDeviceData ) {
 		//------------------------------------//

@@ -745,7 +745,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("Font-RobotoCondensed"),
                             new sap.m.Text( oViewScope.createId( sPrefix+"_kWh" ),	{} ).addStyleClass("Font-RobotoCondensed")
                         ]
-                    }).addStyleClass("MarLeft6px MarAuto0px")
+                    }).addStyleClass("MarLeft12px MarAuto0px")
                 ]
             }).addStyleClass("minwidth90px minheight58px")
         );
@@ -946,7 +946,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             items: [
                                 new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass(" Font-RobotoCondensed")
                             ]
-                        }).addStyleClass("MarLeft6px MarAuto0px")
+                        }).addStyleClass("MarLeft12px MarAuto0px")
                     ]
                 }).addStyleClass("minheight58px minwidth90px")
             ]

@@ -159,6 +159,7 @@ sap.ui.controller("mjs.devices.DoorLock", {
         //-- Control Switch --//
         me.wControlSwitch = new sap.m.Button({
             icon : "sap-icon://GoogleMaterial/lock_open",
+			width: "95px",
             text : "Unlock",
             press : function () {
                 me.ToggleLockSwitch();

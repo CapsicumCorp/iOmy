@@ -102,7 +102,7 @@ $.extend(IOMy.devices.windowsensor,{
                                     ]
                                 })
                             ]
-                        }).addStyleClass("MarLeft6px MarAuto0px")
+                        }).addStyleClass("MarLeft12px MarAuto0px")
                     ]
                 }).addStyleClass("minheight58px minwidth170px")
             ]

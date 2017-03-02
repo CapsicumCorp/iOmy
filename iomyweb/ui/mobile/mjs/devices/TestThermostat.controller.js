@@ -130,14 +130,14 @@ sap.ui.controller("mjs.devices.TestThermostat", {
         //-- Status --//
         me.wStatusField = new sap.m.Text ({
             text : "On", // Default text until data can be loaded into it.
-            textAlign : "Center",
+            textAlign : "Right",
             width : "100%"
         });
         
         //-- Current Temperature --//
         me.wCurrentTempField = new sap.m.Text ({
             text : "29°C", // Default text until data can be loaded into it.
-            textAlign : "Center",
+            textAlign : "Right",
             width : "100%"
         });
         
@@ -182,6 +182,7 @@ sap.ui.controller("mjs.devices.TestThermostat", {
         //-- Mode --//
         me.wModeField = new sap.m.SegmentedButton({
             selectedKey : "SBHeat",
+			width: "255px",
             items : [
                 new sap.m.SegmentedButtonItem ({
                     text : "Off",
@@ -205,6 +206,7 @@ sap.ui.controller("mjs.devices.TestThermostat", {
         //-- Fan Field --//
         me.wFanField = new sap.m.SegmentedButton ({
             selectedKey : "SBYes",
+			width: "255px",
             items : [
                 new sap.m.SegmentedButtonItem ({
                     text : "High"
@@ -260,7 +262,7 @@ sap.ui.controller("mjs.devices.TestThermostat", {
                         //-- Column 2 for Mode Row --//
                         me.wModeField
                     ]
-                }).addStyleClass("maxlabelwidth50Percent"),
+                }).addStyleClass("maxlabelwidth50Percent textaligncenter"),
                 //-- Fan Title --//
                 new sap.m.InputListItem ({
                     label : "Fan:",
@@ -271,7 +273,7 @@ sap.ui.controller("mjs.devices.TestThermostat", {
                         //-- Column 2 for Fan Speed Row --//
                         me.wFanField
                     ]
-                }).addStyleClass("maxlabelwidth50Percent")
+                }).addStyleClass("maxlabelwidth50Percent textaligncenter")
             ]
         }).addStyleClass("PadBottom10px UserInputForm");
         
