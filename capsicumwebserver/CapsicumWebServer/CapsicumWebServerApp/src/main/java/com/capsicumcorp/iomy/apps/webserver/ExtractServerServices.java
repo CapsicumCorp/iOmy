@@ -280,6 +280,7 @@ public class ExtractServerServices extends Thread {
                 final String zipEntryName=zipEntry.getName();
                 boolean skipfile=false;
 
+                //skipfiles and skipfolders are populated by the doUpgrade script
                 Boolean reallySkipFile=skipfiles.get(zipEntryName);
                 if (reallySkipFile!=null) {
                     //Log.println(Log.INFO, "WebServer", "Skipping file: " + zipEntryName);
@@ -291,8 +292,8 @@ public class ExtractServerServices extends Thread {
                 for (String key : skipfolders.keySet()) {
                     if (zipEntryName.startsWith(key)) {
                         skipfile=true;
-                        //Log.println(Log.INFO, "WebServer", "Skipping file: " + zipEntryName);
-                        doNotification("Skipping file: " + zipEntryName);
+                        //Log.println(Log.INFO, "WebServer", "Skipping folder: " + zipEntryName);
+                        doNotification("Skipping folder: " + zipEntryName);
                         changeProgressPagePercentageText();
                         break;
                     }
