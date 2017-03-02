@@ -395,7 +395,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                         }),
                         me.wRoomAdminPermissionBox
                     ]
-                }).addStyleClass("MarAll8px")
+                }).addStyleClass("MarAll8px iOmyRadioButtons")
             ]
         }).addStyleClass("ListItem width100Percent");
         

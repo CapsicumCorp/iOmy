@@ -1643,12 +1643,14 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Scales\" Page!\n"
 	},
+	/* No current pages 
 	{
 		"Id":			"pDeviceQuadcopter",
 		"Location":		"mjs.devices.Quadcopter",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Quadcopter\" Page!\n"
 	},
+	*/
 	{
 		"Id":			"pDeviceBPM",
 		"Location":		"mjs.devices.BPM",
@@ -1664,77 +1666,11 @@ var aPages = [
     //--------------------------------------------------------------------//
     // Staging
     //--------------------------------------------------------------------//
-	{
-		"Id":			"pMotionTemp",
-		"Location":		"mjs.staging.MotionTemp",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.MotionTemp\" Page!\n"
-	},
-	{ 
-		"Id":			"pDoorLock",
-		"Location":		"mjs.staging.DoorLock",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.DoorLock\" Page!\n"
-	},
-	{ 
-		"Id":			"pWindowSensor",
-		"Location":		"mjs.staging.WindowSensor",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.WindowSensor\" Page!\n"
-	},
-	{ 
-		"Id":			"pTestThermostat",
-		"Location":		"mjs.staging.TestThermostat",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.TestThermostat\" Page!\n"
-	},
 	{ 
 		"Id":			"pStagingHome",
 		"Location":		"mjs.staging.StagingHome",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.StagingHome\" Page!\n"
-	},
-	{ 
-		"Id":			"pOverviewRe",
-		"Location":		"mjs.staging.OverviewRedesign",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.OverviewRedesign\" Page!\n"
-	},
-	{
-		"Id":			"pScales",
-		"Location":		"mjs.staging.Scales",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Scales\" Page!\n"
-	},
-	{
-		"Id":			"pQuadcopter",
-		"Location":		"mjs.staging.Quadcopter",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Quadcopter\" Page!\n"
-	},
-	{
-		"Id":			"pBPM",
-		"Location":		"mjs.staging.BPM",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.BPM\" Page!\n"
-	},
-	{
-		"Id":			"pGaragedoor",
-		"Location":		"mjs.staging.Garagedoor",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Garagedoor\" Page!\n"
-	},
-    {
-		"Id":			"pStagingRoomPermissions",
-		"Location":		"mjs.staging.permissions.RoomPermissions",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.permissions.RoomPermissions\" Page!\n"
-	},
-    {
-		"Id":			"pStagingPremisePermissions",
-		"Location":		"mjs.staging.permissions.PremisePermissions",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.permissions.PremisePermissions\" Page!\n"
 	},
 	
 ];

@@ -25,17 +25,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 sap.ui.controller("mjs.staging.StagingHome", {
 	
 	Staginglinks : [
-		{ "display" : "Blood Pressure Monitor" , "link" : "pBPM" },
-		{ "display" : "Bluetooth Scales" , "link" : "pScales" },
-		{ "display" : "Device Overview", "link" : "pOverviewRe" },
-		{ "display" : "Door Lock" , "link" : "pDoorLock" },		
-		{ "display" : "Garage Door" , "link" : "pGaragedoor" },
-		{ "display" : "Motion Sensor" , "link" : "pMotionTemp" },
-		{ "display" : "Premise Permissions" , "link" : "pStagingPremisePermissions" },
-		{ "display" : "Room Permissions" , "link" : "pStagingRoomPermissions" },
-		{ "display" : "Quadcopter" , "link" : "pQuadcopter" },
-		{ "display" : "Thermostat" , "link" : "pTestThermostat" },
-		{ "display" : "Window Sensor" , "link" : "pWindowSensor" },
+	//	{ "display" : "Blood Pressure Monitor" , "link" : "pBPM" },
 	],
 	
 	

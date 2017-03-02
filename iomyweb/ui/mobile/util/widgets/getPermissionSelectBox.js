@@ -44,7 +44,7 @@ $.extend(IOMy.widgets,{
         var mSettings = {
             buttons : [oAllowedOption, oForbiddenOption]
         };
-        var sCSSRules = "PermissionsRadioButtonGroup";
+        var sCSSRules = "PermissionsRadioButtonGroup iOmyRadioButtons";
         
         if (sID !== undefined) {
             var oSBox = new sap.m.RadioButtonGroup(sID, mSettings).addStyleClass(sCSSRules);
