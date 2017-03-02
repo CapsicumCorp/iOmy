@@ -327,7 +327,7 @@ public class ExtractServerServices extends Thread {
             FileOutputStream fout;
 
             while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-                final String zipEntryName=zipEntry.getName();
+                String zipEntryName=zipEntry.getName();
                 boolean skipfile=false;
 
                 //skipfiles and skipfolders are populated by the doUpgrade script
@@ -369,10 +369,37 @@ public class ExtractServerServices extends Thread {
                 if (skipfile) {
                     continue;
                 }
-                //Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG: Extracting file: "+zipEntryName);
-                doNotification("Extracting file: " + zipEntryName);
+                //Select demo data if demo mode is enabled otherwise select normal data
+                if (Application.getInstance().getInstallDemoData()) {
+                    //Skip extracting of normal data and extract demo data
+                    if (zipEntryName.startsWith("components/mysql/sbin/data/")) {
+                        //Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG: Skipping file: " + zipEntryName);
+                        doNotification("Skipping file: " + zipEntryName);
+                        changeProgressPagePercentageText();
+                        continue;
+                    }
+                    if (zipEntryName.startsWith("components/mysql/sbin/demodata/")) {
+                        //Change the output folder name to components/mysql/sbin/data/
+                        zipEntryName=zipEntryName.replace("components/mysql/sbin/demodata/", "components/mysql/sbin/data/");
+                    }
+                } else {
+                    //Skip extracting of demo data folder as we are in normal mode
+                    if (zipEntryName.startsWith("components/mysql/sbin/demodata/")) {
+                        //Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG: Skipping file: " + zipEntryName);
+                        doNotification("Skipping file: " + zipEntryName);
+                        changeProgressPagePercentageText();
+                        continue;
+                    }
+                }
+                if (zipEntryName.equals(zipEntry.getName())) {
+                    //Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG: Extracting file: " + zipEntryName);
+                    doNotification("Extracting file: " + zipEntryName);
+                } else {
+                    //Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG: Extracting file: " + zipEntry.getName() + " as " + zipEntryName);
+                    doNotification("Extracting file: " + zipEntry.getName() + " as " + zipEntryName);
+                }
                 if (zipEntry.isDirectory()) {
-                    createDirectory(zipEntry.getName());
+                    createDirectory(zipEntryName);
                 } else {
                     fout = new FileOutputStream(INTERNAL_LOCATION + "/" + zipEntryName);
                     byte[] buffer = new byte[4096 * 10];

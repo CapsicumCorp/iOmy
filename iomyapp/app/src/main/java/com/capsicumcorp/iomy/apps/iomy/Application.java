@@ -249,6 +249,7 @@ public class Application extends android.app.Application {
     }
     public void setStartedFromUsb(boolean val) { startedFromUsb=val; }
     public boolean getStartedFromUsb() { return startedFromUsb; }
+    public boolean getInstallDemoData()             { return installWizard.getInstallDemoData(); }
 
     static {
         System.loadLibrary("crystax");
