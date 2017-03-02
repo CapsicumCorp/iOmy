@@ -192,7 +192,10 @@ public class RunServerServices extends Thread {
                 if (Application.getInstance().getMySQLEnabled() && getMySQLOverrideState()) {
                     startmysql();
                     checkmysql();
-                    bootstrap_mysql();
+                    if (!Application.getInstance().getInstallDemoData()) {
+                        //The demo database doesn't need bootstrapping
+                        bootstrap_mysql();
+                    }
                     changeServiceSettingsMySQLCheckbox(true);
                 }
             } else {
