@@ -170,11 +170,11 @@ sap.ui.controller("mjs.devices.Garagedoor", {
         //--------------------------------------------------------------------//
         setTimeout(
             function () {
-                if (me.wControlButton.getText() === "Opening") {
+                if (me.wControlButton.getText() === "Closing") {
                     me.wStatus.setText("Open");
                     me.wControlButton.setText("Open");
                     
-                } else if (me.wControlButton.getText() === "Closing") {
+                } else if (me.wControlButton.getText() === "Opening") {
                     me.wStatus.setText("Closed");
                     me.wControlButton.setText("Closed");
                     
