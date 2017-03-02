@@ -52,7 +52,23 @@ $.extend(IOMy.devices,{
         return sStatus;
     },
     
-    
+    ToggleDeviceStatus : function (iThingId) {
+        
+        if (iThingId > 0) {
+            var sUrl = IOMy.apiphp.APILocation("statechange");
+            
+            IOMy.apiphp.AjaxRequest({
+                url: sUrl,
+                data : { "Mode" : "ThingToggleStatus", "Id" : iThingId },
+                
+                
+                
+            });
+        } else {
+            IOMy.common.ThingList["_"+iThingId].Status = iState;
+        }
+        
+    },
     
     /**
      * Returns a map of the link a thing (specified by its ID) is connected to.

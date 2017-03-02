@@ -39,11 +39,11 @@ $.extend(IOMy.devices.bpm,{
     bLoadingFieldsFromAPI       : false,
     bLoadingMotionSensorFields  : false,
     
-    // -- Resource Types for the Window Sensor IOs
+    // -- Resource Types for the Blood Pressure IOs
     RSBattery       : 2111,
     RSMisc          : 4000,
     RSBitwiseStatus : 3909,
-    RSTemperature   : 1701,
+    RSBloodPressure : 2510,
     
     //-- Link and Thing Types IDs --//
     LinkTypeID          : -4,

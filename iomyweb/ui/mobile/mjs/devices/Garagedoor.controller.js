@@ -26,12 +26,12 @@ sap.ui.controller("mjs.devices.Garagedoor", {
     
     wControlButton : null,
 	
-	ListItem : [
-		{ "variable" : "wStatus", "label" : "Status" , "text" : "Closed" },
-		{ "variable" : "wLastAccessed", "label" : "Last Accessed" , "text" : "3h 21m" },
-		{ "variable" : "wBattery", "label" : "Battery" , "text" : "33%" },
-		{ "variable" : "wTamper", "label" : "Tamper" , "text" : "Secure" }
-	],
+	ListItem : {
+		"wStatus" : {"label" : "Status" , "text" : "Closed" },
+		"wLastAccessed" : { "label" : "Last Accessed" , "text" : "3h 21m" },
+		"wBattery" : { "label" : "Battery" , "text" : "33%" },
+		"wTamper" : { "label" : "Tamper" , "text" : "Secure" }
+    },
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -100,9 +100,9 @@ sap.ui.controller("mjs.devices.Garagedoor", {
 		var oList = oController.byId("list");
 
 		if( oList ) {
-			$.each( oController.ListItem, function( iIndex, aListItem ) {
+			$.each( oController.ListItem, function( sVariable, aListItem ) {
 				try {
-                    oController[ aListItem.variable ] = new sap.m.Text ({
+                    oController[ sVariable ] = new sap.m.Text ({
                         text : aListItem.text,
                         textAlign : "Right",
                     });
@@ -113,7 +113,7 @@ sap.ui.controller("mjs.devices.Garagedoor", {
 							label : aListItem.label+":",
 							content : [
 								//-- Column 2 --//
-								oController[ aListItem.variable ]
+								oController[ sVariable ]
 							]
 						}).addStyleClass("maxlabelwidth50Percent")                 
 					);
@@ -155,11 +155,11 @@ sap.ui.controller("mjs.devices.Garagedoor", {
         //--------------------------------------------------------------------//
         // Start opening or closing the garage door and disable the switch.
         //--------------------------------------------------------------------//
-        if (me.wControlButton.getText() === "Open") {
+        if (me.wControlButton.getText() === "Close") {
             me.wStatus.setText("Closing");
             me.wControlButton.setText("Closing");
             me.wControlButton.setEnabled(false);
-        } else if (me.wControlButton.getText() === "Closed") {
+        } else if (me.wControlButton.getText() === "Open") {
             me.wStatus.setText("Opening");
             me.wControlButton.setText("Opening");
             me.wControlButton.setEnabled(false);
@@ -171,12 +171,12 @@ sap.ui.controller("mjs.devices.Garagedoor", {
         setTimeout(
             function () {
                 if (me.wControlButton.getText() === "Closing") {
-                    me.wStatus.setText("Open");
+                    me.wStatus.setText("Closed");
                     me.wControlButton.setText("Open");
                     
                 } else if (me.wControlButton.getText() === "Opening") {
-                    me.wStatus.setText("Closed");
-                    me.wControlButton.setText("Closed");
+                    me.wStatus.setText("Open");
+                    me.wControlButton.setText("Close");
                     
                 }
                 

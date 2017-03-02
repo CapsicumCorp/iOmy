@@ -253,7 +253,7 @@ $.extend(IOMy.devices.motionsensor,{
                     new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
                         text : aDeviceData.DeviceName,
                         press : function () {
-                            //IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
+                            IOMy.common.NavigationChangePage("pMotionSensor", {ThingId : aDeviceData.DeviceId});
                         }
                     }).addStyleClass("TextSizeMedium MarLeft6px Text_grey_20")
                 ]

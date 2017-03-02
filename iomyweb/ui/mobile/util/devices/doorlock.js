@@ -38,7 +38,7 @@ $.extend(IOMy.devices.doorlock,{
     bLoadingFieldsFromAPI       : false,
     bLoadingMotionSensorFields  : false,
     
-    // -- Resource Types for the Window Sensor IOs
+    // -- Resource Types for the Door Lock IOs
     RSBattery       : 2111,
     RSMisc          : 4000,
     RSBitwiseStatus : 3909,
@@ -47,6 +47,18 @@ $.extend(IOMy.devices.doorlock,{
     //-- Link and Thing Types IDs --//
     LinkTypeID          : -1,
     ThingTypeID         : -1,
+    
+    ToggleLockSwitch : function (wWidget) {
+        var me = this;
+        
+        if (wWidget.getText() === "Unlock") {
+            wWidget.setText("Lock");
+            wWidget.setIcon("sap-icon://GoogleMaterial/lock");
+        } else if (wWidget.getText() === "Lock") {
+            wWidget.setText("Unlock");
+            wWidget.setIcon("sap-icon://GoogleMaterial/lock_open");
+        }
+    },
 	
 	GetCommonUI: function( sPrefix, oViewScope, aDeviceData ) {
 		//------------------------------------//

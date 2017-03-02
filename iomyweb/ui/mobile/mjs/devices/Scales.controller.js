@@ -57,8 +57,8 @@ sap.ui.controller("mjs.devices.Scales", {
 				//-- Refresh the Navigational buttons --//
 				IOMy.common.NavigationRefreshButtons( me );
                 
-                me.DestroyUI();
-                me.DrawUI();
+//                me.DestroyUI();
+//                me.DrawUI();
 			}
 		});
 	},
@@ -78,7 +78,9 @@ sap.ui.controller("mjs.devices.Scales", {
 * @memberOf mjs.devices.WindowSensor
 */
 	onAfterRendering: function() {
-
+        var me = this;
+        
+        me.DrawUI();
 	},
 
 /**

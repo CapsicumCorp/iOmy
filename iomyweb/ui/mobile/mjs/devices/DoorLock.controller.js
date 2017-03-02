@@ -29,6 +29,8 @@ sap.ui.controller("mjs.devices.DoorLock", {
     //-------------------------------------------------//
     aElementsToDestroy : [],        // ARRAY: A list of IDs used by any element on this page
     
+    timeoutLockDoor     : null,
+    
     wMainList           : null,
 	wPanel				: null,
 	
@@ -57,8 +59,10 @@ sap.ui.controller("mjs.devices.DoorLock", {
 				//-- Refresh the Navigational buttons --//
 				IOMy.common.NavigationRefreshButtons( me );
                 
-                me.DestroyUI();
-                me.DrawUI();
+//                if (me.timeoutLockDoor === null) {
+//                    me.DestroyUI();
+//                    me.DrawUI();
+//                }
 			}
 		});
 	},
@@ -78,7 +82,9 @@ sap.ui.controller("mjs.devices.DoorLock", {
 * @memberOf mjs.devices.DoorLock
 */
 	onAfterRendering: function() {
-
+        var me = this;
+        
+        me.DrawUI();
 	},
 
 /**
@@ -130,7 +136,7 @@ sap.ui.controller("mjs.devices.DoorLock", {
         
         //-- Status --//
         me.wStatusField = new sap.m.Text ({
-            text : "Unlocked",
+            text : "Locked",
             textAlign : "Right",
             width : "100%"
         });
@@ -162,7 +168,47 @@ sap.ui.controller("mjs.devices.DoorLock", {
 			width: "95px",
             text : "Unlock",
             press : function () {
-                me.ToggleLockSwitch();
+                var thisButton = this;
+                
+                /*
+                 * The door lock should unlock and remain unlocked for a set period.
+                 * 
+                 */
+                            
+                IOMy.devices.doorlock.ToggleLockSwitch(thisButton);
+                
+                if (thisButton.getText() === "Unlock") {
+                    me.wStatusField.setText("Locked");
+                    
+                    if (me.timeoutLockDoor !== null) {
+                        clearTimeout(me.timeoutLockDoor);
+                        me.timeoutLockDoor = null;
+                    }
+                    
+                } else if (thisButton.getText() === "Lock") {
+                    me.wStatusField.setText("Unlocked");
+                    
+                    if (me.timeoutLockDoor === null) {
+                        me.timeoutLockDoor = setTimeout(
+                            function () {
+                                IOMy.devices.doorlock.ToggleLockSwitch(thisButton);
+
+                                if (thisButton.getText() === "Unlock") {
+                                    me.wStatusField.setText("Locked");
+                                } else if (thisButton.getText() === "Lock") {
+                                    me.wStatusField.setText("Unlocked");
+                                }
+                                
+                                clearTimeout(me.timeoutLockDoor);
+                                me.timeoutLockDoor = null;
+                            },
+                        5000);
+                    }
+                }
+                
+                //if (me.timeoutLockDoor !== null) {
+                    
+                //}
             }
         }).addStyleClass("MarLeft10Percent");
         
@@ -224,20 +270,6 @@ sap.ui.controller("mjs.devices.DoorLock", {
 		}).addStyleClass("PadBottom10px UserInputForm")
 		
         thisView.byId("page").addContent(me.wPanel);
-    },
-    
-    ToggleLockSwitch : function () {
-        var me = this;
-        
-        if (me.wControlSwitch.getText() === "Unlock") {
-            me.wControlSwitch.setText("Lock");
-            me.wStatusField.setText("Locked");
-            me.wControlSwitch.setIcon("sap-icon://GoogleMaterial/lock");
-        } else if (me.wControlSwitch.getText() === "Lock") {
-            me.wControlSwitch.setText("Unlock");
-            me.wStatusField.setText("Unlocked");
-            me.wControlSwitch.setIcon("sap-icon://GoogleMaterial/lock_open");
-        }
     }
 	
 });

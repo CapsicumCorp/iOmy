@@ -58,8 +58,8 @@ sap.ui.controller("mjs.devices.BPM", {
 				//-- Refresh the Navigational buttons --//
 				IOMy.common.NavigationRefreshButtons( me );
                 
-                me.DestroyUI();
-                me.DrawUI();
+//                me.DestroyUI();
+//                me.DrawUI();
 			}
 		});
 	},
@@ -79,7 +79,9 @@ sap.ui.controller("mjs.devices.BPM", {
 * @memberOf mjs.devices.WindowSensor
 */
 	onAfterRendering: function() {
-
+        var me = this;
+        
+        me.DrawUI();
 	},
 
 /**

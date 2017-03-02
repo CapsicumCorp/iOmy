@@ -27,6 +27,10 @@ IOMy.devices.philipshue = new sap.ui.base.Object();
 $.extend(IOMy.devices.philipshue,{
 	Devices: [],
     
+    RSHue           : 3901,
+    RSSaturation    : 3902,
+    RSBrightness    : 3903,
+    
     CreateColourBox : function (sID) {
         var me = this;
         

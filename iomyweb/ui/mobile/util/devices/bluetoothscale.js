@@ -45,8 +45,21 @@ $.extend(IOMy.devices.bluetoothscale,{
     RSTemperature   : 1701,
     
     //-- Link and Thing Types IDs --//
+    // TODO: Change these to the actual IDs once they're in the database
     LinkTypeID          : -3,
     ThingTypeID         : -3,
+    
+    CreateLinkForm : function (mSettings) {
+        
+        
+        
+    },
+    
+    CreateThingForm : function (mSettings) {
+        
+        
+        
+    },
 	
 	GetCommonUI: function( sPrefix, oViewScope, aDeviceData ) {
 		//------------------------------------//

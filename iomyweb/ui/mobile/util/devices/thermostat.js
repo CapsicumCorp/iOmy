@@ -43,6 +43,9 @@ $.extend(IOMy.devices.thermostat,{
     RSMisc          : 4000,
     RSBitwiseStatus : 3909,
     RSTemperature   : 1701,
+    RSFanSpeed      : 1780,
+    RSMode          : 1770,
+    RSModeAuto      : 1771,
     
     //-- Link and Thing Types IDs --//
     LinkTypeID          : -6,

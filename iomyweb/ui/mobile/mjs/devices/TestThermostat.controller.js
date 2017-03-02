@@ -58,8 +58,8 @@ sap.ui.controller("mjs.devices.TestThermostat", {
 				//-- Refresh the Navigational buttons --//
 				IOMy.common.NavigationRefreshButtons( me );
                 
-                me.DestroyUI();
-                me.DrawUI();
+//                me.DestroyUI();
+//                me.DrawUI();
 			}
 		});
 	},
@@ -79,7 +79,9 @@ sap.ui.controller("mjs.devices.TestThermostat", {
 * @memberOf mjs.devices.TestTheromostat
 */
 	onAfterRendering: function() {
-
+        var me = this;
+        
+        me.DrawUI();
 	},
 
 /**
