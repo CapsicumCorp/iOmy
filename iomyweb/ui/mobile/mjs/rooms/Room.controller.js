@@ -729,7 +729,7 @@ sap.ui.controller("mjs.rooms.Room", {
 		//-- 3.0 - Prepare for Ajax Request                     --//
 		//--------------------------------------------------------//
 		iUTS_End                = IOMy.time.GetCurrentUTS();
-		iUTS_Start              = 0;//IOMy.time.GetStartStampForTimePeriod( "day", iUTS_End);
+		iUTS_Start              = IOMy.time.GetStartStampForTimePeriod( "day", iUTS_End);
 		
 		//--------------------------------------------------------//
 		//-- 4.0 - Check if Ajax Request should be run          --//
