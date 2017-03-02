@@ -57,6 +57,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 /* == #19.0# - Settings: Device List                                               == */
 /* == #20.0# - Settings: Premise List & Overview                                   == */
 /* == #21.0# - Settings: Permissions Pages                                         == */
+/* == #ToDo# - Deprecated Files                                                    == */
 /* ================================================================================== */
 
 /* ================================================================================== */
@@ -88,25 +89,25 @@ ul li{
 	float: right;
 }
 
+/* Clears Floating */
+/* NOTE: Needs to be applied to a dummy element below the floating elements	*/
 .FloatClear {
-	/* Clears Floating															*/
-	/* NOTE: Needs to be applied to a dummy element below the floating elements	*/
 	clear: both;
 }
 
+/* Div auto centers if the Div is smaller than its parent Div */
+/* NOTE: The child Div(the one that gets this as its class) should be the only child of the parent Div */
 .ElementCenter {
-	/* Div auto centers if the Div is smaller than its parent Div */
-	/* NOTE: The child Div(the one that gets this as its class) should be the only child of the parent Div */
 	margin: auto;
 }
 
+/* Element is not visible and doesn't occupy space on the web browser */
 .ElementHidden {
-	/* Element is not visible and doesn't occupy space on the web browser */
 	display: none;
 }
 
+/* Element is not visible but still occupies space on the web browser */
 .ElementInvisible {
-	/* Element is not visible but still occupies space on the web browser */
 	visibility: hidden;
 }
 
@@ -187,7 +188,6 @@ ul li{
 /* ============================== */
 /* == #4.2# - Sub Headers      == */
 /* ============================== */
-
 .sapMIBar.sapMSubHeader-CTX {
 	background-color: white;
 }
@@ -202,8 +202,8 @@ ul li{
 /* == #4.3# - Footers          == */
 /* ============================== */
 .footerMBarContainer > div {
-		color: black;
-		margin-right: 15px;
+	color: black;
+	margin-right: 15px;
 }
 	
 .footerMBarContainer > div > img {
@@ -341,7 +341,7 @@ ul.IOMYNavMenu > li:first-child > div.sapTntNavLIGroup.sapTntNavLIItem > .sapTnt
 /* == #7.0# - Tiles                                                                  == */
 /* ==================================================================================== */
 /* ============================== */
-/* == #7.1# - Tile Data       == */
+/* == #7.1# - Tile Data        == */
 /* ============================== */
 div > .sapMIBar-CTX .sapMLabel {
 	color: #000000;
@@ -349,7 +349,7 @@ div > .sapMIBar-CTX .sapMLabel {
 	text-shadow: 2px 2px 4px #404040;
 }
 	
-/*-- Centers Labels when used in a Tile --*/
+/* Centers Labels when used in a Tile */
 .TileToggleThingStatusLabel {
 	text-align: center;
 	width: 100%;
@@ -410,7 +410,7 @@ div > .sapMIBar-CTX .sapMLabel {
 	font-family: "Roboto Condensed", sans-serif;
 }
 
-/* To Be Removed, Replacements are in capsicum_textsizes.css */
+/* #ToDo# - Replacements are in capsicum_textsizes.css */
 .Font-Larger {
 	font-size: larger;
 }
@@ -571,6 +571,7 @@ button.IOMYButton > .sapMBtnInner {
 	background: none;
 }
 
+/* #ToDo# - Deprecated? */
 button.IOMYButton:not(.FooterHelpButton) > .sapMBtnInner > .sapMBtnContent {
 	/*font-weight: bold;*/
 }
@@ -644,7 +645,7 @@ button.IOMYButton.TextSize40px > div.sapMBtnInner > span.sapMBtnIcon {
 	font-size: 40px;
 }
 
-/* -- Currently not being used. Possibly Deprecated --
+/* -- #ToDo# - Currently not being used. Possibly Deprecated --
 button.IOMYButton.TextSize16px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
 	font-size: 16px;
 }
@@ -737,7 +738,7 @@ button.LoginPageSubmit > div > span.sapMBtnIcon.sapUiIcon{
 /* ==================================================================================== */
 /* == #13.0# - Navigation Page                                                       == */
 /* ==================================================================================== */
-/* #ToDo - Possibly Deprecated Code - Check NavFragment */
+/* #ToDo# - Possibly Deprecated Code - Check NavFragment */
 .NavMain-ItemLabel {
 	padding-top: 17px;
 	color : black;
@@ -776,8 +777,8 @@ button.LoginPageSubmit > div > span.sapMBtnIcon.sapUiIcon{
 	color: white;
 }
 
+/* This class is used for the labels next to the green circle value */
 .NavMain_Data_ValueNormal {
-	/* This class is used for the labels next to the green circle value */
 	text-align: center;
 	font-size: medium;
 }
@@ -808,7 +809,6 @@ button.LoginPageSubmit > div > span.sapMBtnIcon.sapUiIcon{
 	padding-top: 24px;
 	color: black;
 }
-
 
 .MainPanelBackground {
 	background: linear-gradient(to right, #EBD7C9, #FFFFFF);
@@ -864,7 +864,7 @@ button.LoginPageSubmit > div > span.sapMBtnIcon.sapUiIcon{
 	white-space: nowrap;
 }
 
-/* DARKEN THE CHILD BUTTONS ON THE NAVIGATION POPOVER */
+/* Darken the child buttons on the Nav popover */
 ul.IOMYNavMenu > li > ul > li.sapTntNavLIGroupItem {
 	background-color: white;
 }
@@ -935,7 +935,7 @@ ul.IOMYNavMenu > li > ul > li.sapTntNavLIGroupItem {
 /* ==================================================================================== */
 /* == #16.0# - Activity Logs                                                         == */
 /* ==================================================================================== */
-/* #ToDo - Possibly Deprecated Code */
+/* #ToDo# - Possibly Deprecated Code */
 .ActivityLogEntry {
 	padding-top : 8px;
 	padding-bottom : 8px;
@@ -949,7 +949,7 @@ ul.IOMYNavMenu > li > ul > li.sapTntNavLIGroupItem {
 /* ==================================================================================== */
 /* == #17.0# - Security Overview                                                     == */
 /* ==================================================================================== */
-/* #ToDo - Possibly Deprecated Code */
+/* #ToDo# - Possibly Deprecated Code */
 .SecurityOverview-IPCameraItemLabel {
 	padding-top: 16px;
 	padding-bottom: 16px;
@@ -965,7 +965,7 @@ ul.IOMYNavMenu > li > ul > li.sapTntNavLIGroupItem {
 /* ==================================================================================== */
 /* == #18.0# - Settings: Overview                                                    == */
 /* ==================================================================================== */
-/* #ToDo - Possibly Deprecated Code */
+/* #ToDo# - Possibly Deprecated Code */
 .Setting-ItemLabel {
 	padding-top: 20px;
 	padding-bottom: 20px;
@@ -1141,5 +1141,5 @@ html.sap-desktop .sapMBtn:focus>.sapMFocusable {
 /* == #21.0# - Settings: Permissions Pages                                           == */
 /* ==================================================================================== */
 .PermissionsRadioButtonGroup.sapMRbG>.sapMRb, .PermissionsRadioButtonGroup.sapMRbGCol>.sapMRb {
-		clear: none;
+	clear: none;
 }
