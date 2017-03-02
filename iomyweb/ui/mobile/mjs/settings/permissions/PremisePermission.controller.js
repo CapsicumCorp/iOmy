@@ -47,7 +47,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
     wStateTogglePermissionBox   : null,
     wRoomAdminPermissionBox     : null,
     wApplyButton                : null,
-    wVertBox                    : null,
+    wPanel                      : null,
     aPremiseEntries             : [],
     
 /**
@@ -106,8 +106,8 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
         var me          = this;
         
         //-- Destroy the main VBox. --//
-        if (me.wVertBox !== null) {
-            me.wVertBox.destroy();
+        if (me.wPanel !== null) {
+            me.wPanel.destroy();
         }
         
         //-- Wipe out any elements with IDs that didn't get destroyed during the full wipe. --//
@@ -135,7 +135,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
         //====================================================================//
         me.wUserLabel = new sap.m.Label({
             text : "User"
-        }).addStyleClass("TextLeft MarTop5px MarBottom5px PaddingToMatchButtonText");
+        }).addStyleClass("PaddingToMatchButtonText");
         
         me.wUserSelectBox = new sap.m.Select({
             width : "100%"
@@ -146,15 +146,15 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
         //====================================================================//
         me.wPremiseLabel = new sap.m.Label({
             text : "Premise"
-        }).addStyleClass("TextLeft MarTop5px MarBottom5px PaddingToMatchButtonText");
+        }).addStyleClass("PaddingToMatchButtonText");
         
         me.wPremiseSelectBox = getPremiseSelector(me.createId("premiseBox")).addStyleClass("SettingsDropdownInput width100Percent");
         
         //====================================================================//
         // Main containing element
         //====================================================================//
-        me.wVertBox = new sap.m.VBox({
-            items : [
+        me.wPanel = new sap.m.Panel({
+            content : [
                 new sap.m.VBox({
                     items : [
                         // Label for the user select box
@@ -182,7 +182,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                     ]
                 }).addStyleClass("")
             ]
-        }).addStyleClass("width100Percent TableSideBorders UserInputForm");
+        }).addStyleClass("MasterPanel UserInputForm PanelNoPadding PadTop3px PadBottom15px");
         
         try {
             // Populate the users select box with the viewable users
@@ -208,7 +208,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                         }
                     };
                     
-                    thisView.byId("page").addContent(me.wVertBox);
+                    thisView.byId("page").addContent(me.wPanel);
                 },
                 
                 //--------------------------------//
@@ -345,7 +345,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                     items : [
                         new sap.m.Label({
                             text: "Permissions"
-                        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText")
+                        }).addStyleClass("PaddingToMatchButtonText")
                     ]
                 })
             ]
@@ -399,9 +399,9 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
             ]
         }).addStyleClass("ListItem width100Percent");
         
-        me.wVertBox.addItem(me.wPremisePermissionHeading);
-        me.wVertBox.addItem(me.wPremisePermissions);
-        me.wVertBox.addItem(
+        me.wPanel.addContent(me.wPremisePermissionHeading);
+        me.wPanel.addContent(me.wPremisePermissions);
+        me.wPanel.addContent(
             new sap.m.VBox({
                 items : [me.wApplyButton]
             }).addStyleClass("RoomPermissionsApplyButton BorderBottom")

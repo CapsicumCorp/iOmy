@@ -56,7 +56,9 @@ $.extend(IOMy.devices.garagedoor,{
 		var oUIObject			= null;					//-- OBJECT:			--//
 		var aUIObjectItems		= [];					//-- ARRAY:             --//
         
-        
+        // Added in temporarily until functionality is implemented by Brent
+		var me = this;
+		
         //------------------------------------//
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
@@ -80,32 +82,30 @@ $.extend(IOMy.devices.garagedoor,{
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
                 //------------------------------------//
-                new sap.m.VBox({
-                    items : [
-                        new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
-                            //--------------------------------//
-                            //-- Draw the Data Boxes		--//
-                            //--------------------------------//
-
-                            items: [
-                                new sap.m.VBox({
-                                    items : [
-                                        //----------------------------------//
-                                        // Last Motion
-                                        //----------------------------------//
-                                        new sap.m.Label({
-                                            text : "Last Accessed:"
-                                        }).addStyleClass("Font-RobotoCondensed"),
-                                        
-                                        new sap.m.Label( oViewScope.createId( sPrefix+"_LastMotion" ),	{
-                                            text : "3h 21m"
-                                        } ).addStyleClass("Font-RobotoCondensed")
-                                    ]
-                                })
-                            ]
-                        }).addStyleClass("MarLeft6px MarAuto0px")
-                    ]
-                }).addStyleClass("minheight58px minwidth170px")
+				new sap.m.HBox({
+					items : [
+						new sap.m.VBox( oViewScope.createId( sPrefix+"_GarageButton"), {
+							//--------------------------------//
+							//-- Toggle Button              --//
+							//--------------------------------//
+							items: [
+								new sap.m.VBox({
+									items : [
+										// Added in temporarily until functionality is implemented by Brent
+										 me.wControlGarageSwitch = new sap.m.Button({
+											icon : "sap-icon://GoogleMaterial/lock_open",
+											width: "95px",
+											text : "Open",
+											press : function () {
+												me.ToggleGarageSwitch();
+											}
+										}).addStyleClass(""),
+									]
+								}).addStyleClass("ElementCenter"),
+							]
+						}).addStyleClass("width100Percent")
+					]
+				}).addStyleClass("minwidth170px minheight58px")
             ]
         }).addStyleClass("ListItem");
 
@@ -204,7 +204,19 @@ $.extend(IOMy.devices.garagedoor,{
 		//------------------------------------//
 		return oUIObject;
 	},
-    
+	
+	// Added in temporarily until functionality is implemented by Brent
+	ToggleGarageSwitch : function () {
+        var me = this;
+        if (me.wControlGarageSwitch.getText() === "Open") {
+            me.wControlGarageSwitch.setText("Close");
+            me.wControlGarageSwitch.setIcon("sap-icon://GoogleMaterial/lock");
+        } else if (me.wControlGarageSwitch.getText() === "Close") {
+            me.wControlGarageSwitch.setText("Open");
+            me.wControlGarageSwitch.setIcon("sap-icon://GoogleMaterial/lock_open");
+        }
+    },
+	
     GetCommonUIForDeviceOverview: function( sPrefix, oViewScope, aDeviceData ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//

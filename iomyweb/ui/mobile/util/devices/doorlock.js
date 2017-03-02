@@ -55,7 +55,10 @@ $.extend(IOMy.devices.doorlock,{
 		
 		var oUIObject			= null;					//-- OBJECT:			--//
 		var aUIObjectItems		= [];					//-- ARRAY:             --//
-        
+		
+		// Added in temporarily until functionality is implemented by Brent
+		var me = this;
+		
         
         //------------------------------------//
 		//-- 2.0 - Fetch UI					--//
@@ -76,48 +79,32 @@ $.extend(IOMy.devices.doorlock,{
                         }).addStyleClass("Font-Medium MarLeft6px Text_grey_20")
                     ]
                 }).addStyleClass("BorderRight width80Percent DeviceLabelMargin"),
-
-               //------------------------------------//
-			//-- 2nd is the onvif buttons		--//
+			//------------------------------------//
+			//-- 2nd is the Device Data			--//
 			//------------------------------------//
 			new sap.m.HBox({
                 items : [
-                    new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
+                    new sap.m.VBox( oViewScope.createId( sPrefix+"_LockButton"), {
                         //--------------------------------//
-                        //-- Take Snapshot              --//
-                        //--------------------------------//
-                        items: [
-                            new sap.m.VBox({
-                                items : [
-
-                                ]
-                            })
-                        ]
-                    }).addStyleClass("MarLeft10px MarAuto0px minwidth60px"),
-                    new sap.m.VBox( oViewScope.createId( sPrefix+"_Screenshot"), {
-                        //--------------------------------//
-                        //-- Open Live Stream           --//
+                        //-- Toggle Button              --//
                         //--------------------------------//
                         items: [
                             new sap.m.VBox({
                                 items : [
-                                    new sap.m.SegmentedButton({
-										selectedKey : "DUnlock",
-										items : [
-											new sap.m.SegmentedButtonItem ({
-												icon : "sap-icon://GoogleMaterial/lock_open",
-												key : "DUnlock"
-											}),
-											new sap.m.SegmentedButtonItem ({
-												icon : "sap-icon://GoogleMaterial/lock_outline",
-												key : "Dlock"
-											}),
-										]
-									})
+									// Added in temporarily until functionality is implemented by Brent
+									// Doors will auto lock after 5 - 20 seconds
+                                     me.wDoorLock = new sap.m.Button({
+										icon : "sap-icon://GoogleMaterial/lock_open",
+										width: "95px",
+										text : "Unlock",
+										press : function () {
+											me.ToggleDoorLockSwitch();
+										}
+									}).addStyleClass(""),
                                 ]
-                            })
+                            }).addStyleClass("ElementCenter"),
                         ]
-                    }).addStyleClass("MarLeft10px MarAuto0px minwidth80px")
+                    }).addStyleClass("width100Percent")
                 ]
             }).addStyleClass("minwidth170px minheight58px")
             ]
@@ -218,7 +205,18 @@ $.extend(IOMy.devices.doorlock,{
 		//------------------------------------//
 		return oUIObject;
 	},
-    
+	// Added in temporarily until functionality is implemented by Brent
+	ToggleDoorLockSwitch : function () {
+        var me = this;
+        if (me.wDoorLock.getText() === "Unlock") {
+            me.wDoorLock.setText("Lock");
+            me.wDoorLock.setIcon("sap-icon://GoogleMaterial/lock");
+        } else if (me.wDoorLock.getText() === "Lock") {
+            me.wDoorLock.setText("Unlock");
+            me.wDoorLock.setIcon("sap-icon://GoogleMaterial/lock_open");
+        }
+    },
+	
     GetCommonUITaskList: function( Prefix, oViewScope, aDeviceData ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//

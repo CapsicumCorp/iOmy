@@ -45,7 +45,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
     wRoomPermissionHeading      : null,
     wRoomList                   : null,
     wRoomListHeading            : null,
-    wVertBox                    : null,
+    wPanel                      : null,
     wReadPermissionBox          : null,
     wDataReadPermissionBox      : null,
     wWritePermissionBox         : null,
@@ -192,8 +192,8 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
     DestroyUI : function() {
         var me          = this;
         
-        if (me.wVertBox !== null) {
-            me.wVertBox.destroy();
+        if (me.wPanel !== null) {
+            me.wPanel.destroy();
         }
         
         //-- Wipe out any elements with IDs that didn't get destroyed during the full wipe. --//
@@ -259,7 +259,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
         
         me.wUserLabel = new sap.m.Label({
             text : "User"
-        }).addStyleClass("TextLeft MarTop5px MarBottom5px  PaddingToMatchButtonText");
+        }).addStyleClass("PaddingToMatchButtonText");
         
         me.wUserSelectBox = new sap.m.Select({
             width : "100%"
@@ -267,7 +267,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
         
         me.wPremiseLabel = new sap.m.Label({
             text : "Premise"
-        }).addStyleClass("TextLeft MarTop5px MarBottom5px PaddingToMatchButtonText");
+        }).addStyleClass("PaddingToMatchButtonText");
         
         me.wPremiseSelectBox = getPremiseSelector(me.createId("premiseBox")).addStyleClass("SettingsDropdownInput width100Percent");
         
@@ -280,7 +280,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                     items : [
                         new sap.m.Label({
                             text: "Permissions"
-                        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText")
+                        }).addStyleClass("PaddingToMatchButtonText")
                     ]
                 })
             ]
@@ -331,7 +331,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                     items : [
                         new sap.m.Label({
                             text: "Apply Permissions To"
-                        }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText")
+                        }).addStyleClass("PaddingToMatchButtonText")
                     ]
                 })
             ]
@@ -371,8 +371,8 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
         }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter");
         
 		//-- Where the page gets created --//
-        me.wVertBox = new sap.m.VBox({
-            items : [
+        me.wPanel = new sap.m.Panel({
+            content : [
                 //--------------------------//
                 // Top section
                 //--------------------------//
@@ -431,7 +431,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                     items : [me.wApplyButton]
                 }).addStyleClass("RoomPermissionsApplyButton")
             ]
-        }).addStyleClass("width100Percent UserInputForm TableSideBorders MarBottom10px");
+        }).addStyleClass("MasterPanel UserInputForm PanelNoPadding PadTop3px PadBottom15px");
         
         // Populate the users select box with the viewable users
         try {
@@ -477,7 +477,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                         },
                         
                         onComplete : function () {
-                            thisView.byId("page").addContent(me.wVertBox);
+                            thisView.byId("page").addContent(me.wPanel);
                         }
                     });
                     
@@ -495,7 +495,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
 //                        }
 //                    );
 //            
-//                    thisView.byId("page").addContent(me.wVertBox);
+//                    thisView.byId("page").addContent(me.wPanel);
                 },
 
                 //--------------------------------//

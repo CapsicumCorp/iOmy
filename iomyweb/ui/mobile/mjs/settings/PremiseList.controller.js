@@ -283,7 +283,7 @@ sap.ui.controller("mjs.settings.PremiseList", {
                             items : [
                                 new sap.m.Label({
                                     text : "Hubs"
-                                }).addStyleClass("MarTop5px MarBottom5px MarLeft5px MarRight5px")
+                                }).addStyleClass("")
                             ]
                         }).addStyleClass("FlexNoShrink width60px BorderRight TextCenter"),
                         // === PREMISES === \\
@@ -291,9 +291,9 @@ sap.ui.controller("mjs.settings.PremiseList", {
                             items : [
                                 new sap.m.Label({
                                     text : "Premises"
-                                }).addStyleClass("TextLeft MarTop5px MarBottom5px width100Percent PaddingToMatchButtonText")
+                                }).addStyleClass("PaddingToMatchButtonText")
                             ]
-                        }).addStyleClass("width100Percent")
+                        }).addStyleClass("")
                     ]
                 }).addStyleClass("ConsistentMenuHeader ListItem")
             ]
@@ -427,7 +427,7 @@ sap.ui.controller("mjs.settings.PremiseList", {
 				
                 oHubContainer = new sap.m.VBox(me.createId(sHubContainerRow), {
                     items : []
-                }).addStyleClass("MainPanelElement ListItemDark width100Percent PadTop4px");
+                }).addStyleClass("MainPanelElement ListItemDark width100Percent PadTop4px ListItem");
                 
                 //-- Process any hubs that are attached to a premise --//
 				$.each( IOMy.common.HubList, function( sIndex, aHub ) {
@@ -474,7 +474,7 @@ sap.ui.controller("mjs.settings.PremiseList", {
                     oHubContainer.addItem(
                         new sap.m.VBox({
                             items : [oHubLabel]
-                        }).addStyleClass("width100Percent PadLeft8px ListItem")
+                        }).addStyleClass("MarLeft8px")
                     );
 					
 				});
@@ -508,7 +508,7 @@ sap.ui.controller("mjs.settings.PremiseList", {
 		me.wPanel = new sap.m.Panel(me.createId("Panel"), {
 			backgroundDesign: "Transparent",
 			content: [oPremiseListContainer]
-		}).addStyleClass("height100Percent PanelNoPadding UserInputForm TableSideBorders")
+		}).addStyleClass("MasterPanel UserInputForm PanelNoPadding PadTop3px PadBottom15px")
 		
 		oThisView.byId("page").addContent( me.wPanel );
 		
