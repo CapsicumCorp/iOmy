@@ -1935,25 +1935,34 @@ function AddNewRoom( $iPremiseId, $sName, $iFloor, $sDesc, $iRoomsTypeId ) {
 }
 
 
-function DeleteExistingRoom( $iPremiseId ) {
+function DeleteExistingRoom( $iRoomId ) {
 	//------------------------------------------------------------//
 	//-- 1.0 - Initialise                                       --//
 	//------------------------------------------------------------//
 	$bError         = false;
 	$sErrMesg       = "";
 	$aResult        = array();
-	
+	$aTempRestult   = array();
 	//------------------------------------------------------------//
 	//-- 2.0 - Begin                                            --//
 	//------------------------------------------------------------//
 	try {
-		$aResult = dbDeleteExistingRoom( $iPremiseId );
+		$aTempRestult = dbDeleteExistingRoomPerms( $iRoomId );
 		
-		if( $aResult["Error"]===true ) {
-			$bError = true;
-			$sErrMesg .= "Error occurred when attempting to delete an existing room! \n";
-			$sErrMesg .= $aResult["ErrMesg"];
+		if( $aTempRestult['Error']===false ) {
+			$aResult = dbDeleteExistingRoom( $iRoomId );
+			
+			if( $aResult["Error"]===true ) {
+				$bError = true;
+				$sErrMesg .= "Error occurred when attempting to delete an existing room! \n";
+				$sErrMesg .= $aResult["ErrMesg"];
+			}
+			
+			
+			
+			
 		}
+		
 	} catch( Exception $e1 ) {
 		$bError = true;
 		$sErrMesg .= "Critical Error occurred when attempting to delete an existing room! \n";
@@ -3018,9 +3027,9 @@ function GetIOInfo($sIOId) {
 
 function IODetection() {
 	//-- 1.0 - Initialisation --//
-	$bError			= false;
-	$sErrMesg		= "";
-	$aResult		= array();
+	$bError         = false;
+	$sErrMesg       = "";
+	$aResult        = array();
 	
 	//-- Retrieve Values from database --//
 	try{
@@ -3302,8 +3311,8 @@ function GetIODataMostRecent( $iDataType, $sIOId, $sEndUTS ) {
 	$aResult = dbGetIODataMostRecent( $aConvertedDataType["Value"], $iIOId, $iEndUTS );
 	//-- Return the results --//
 	return $aResult;
-	
 }
+
 
 function GetIODataMostRecentEnum( $iDataType, $sIOId, $sEndUTS ) {
 	
@@ -3313,8 +3322,6 @@ function GetIODataMostRecentEnum( $iDataType, $sIOId, $sEndUTS ) {
 	
 	//-- Convert Datatype to name --//
 	if( $iDataType===1 || $iDataType===2 || $iDataType===3 ) {
-
-		
 		//-- Retrieve the IO Aggregation Data --//
 		$aResult = dbGetIODataMostRecentEnum( $iDataType, $iIOId, $iEndUTS );
 		//-- Return the results --//

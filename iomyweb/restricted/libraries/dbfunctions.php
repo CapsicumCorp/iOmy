@@ -1724,7 +1724,6 @@ function dbUpdateUserPremisePermissions( $iPremisePermId, $iPermRoomAdmin , $iPe
 			//----------------------------------------//
 			//-- SQL Query - Update Premise Perm    --//
 			//----------------------------------------//
-			
 			$sSQL .= "UPDATE `".$sSchema."`.`PERMPREMISE` ";
 			$sSQL .= "SET ";
 			$sSQL .= "    `PERMPREMISE_WRITE`        = :PermWriter, ";
@@ -3063,6 +3062,73 @@ function dbDeleteExistingRoom( $iRoomId ) {
 	}
 }
 
+function dbDeleteExistingRoomPerms( $iRoomId ) {
+	//----------------------------------------//
+	//-- 1.0 - Declare Variables            --//
+	//----------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$bError					= false;			//-- BOOL:		--//
+	$sErrMesg				= "";				//-- STRING:	--//
+	$aReturn				= array();			//-- ARRAY:		--//
+
+	$sQuery					= "";				//-- STRING:	Used to store the SQL string so it can be passed to the database functions	--//
+	$aResult				= array();			//-- ARRAY:		--//
+	$aInputVals				= array();			//-- ARRAY:		SQL bind input parameters	--//
+	$aOutputColsId			= array();			//-- ARRAY:		An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	//----------------------------------------//
+	//-- 3.0 - Perform the SQLQuery         --//
+	//----------------------------------------//
+	if( $bError===false ) {
+		try {
+			
+			//----------------------------------------//
+			//-- SQL Query - Delete Room            --//
+			//----------------------------------------//
+			$sQuery .= "DELETE FROM `PERMROOMS` ";
+			$sQuery .= "WHERE `PERMROOMS_ROOMS_FK` = :RoomId ";
+			
+			
+			//-- Input binding --//
+			$aInputVals = array(
+				array( "Name"=>"RoomId",    "type"=>"BINT",    "value"=>$iRoomId	)
+			);
+			
+			//-- Run the SQL Query and save the results --//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sQuery, $aInputVals );
+			
+			//----------------------------//
+			//-- Error Checking         --//
+			//----------------------------//
+			if( $aResult["Error"]===true ) {
+				//-- Error Occurred when Inserting		--//
+				$bError     = true;
+				$sErrMesg  .= "Error deleting the existing \"Room Permission\"! \n";
+				$sErrMesg  .= $aResult["ErrMesg"]." \n";
+			}
+		
+		} catch( Exception $e30 ) {
+			//-- Debugging: Catch any unexpected errors --//
+			$bError = true;
+			$sErrMesg  = "Unexpected Error! \n";
+			$sErrMesg .= "Error occurred when deleting an existing \"Room Permission\". \n";
+			$sErrMesg .= $e30->getMessage()." \n";
+		}
+	}
+	//--------------------------------------------//
+	//-- 9.0 Return Results or Error Message    --//
+	//--------------------------------------------//
+	if($bError===false) {
+		return $aResult;
+
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"Delete Room Perms: ".$sErrMesg );
+	}
+}
 
 
 function dbSpecialRoomPremiseIdLookup( $iRoomId ) {

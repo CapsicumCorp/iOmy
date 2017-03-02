@@ -45,7 +45,7 @@ $sPostDesc                  = "";           //-- STRING:        Used to store th
 $iPostFloor                 = 0;            //-- INTEGER:       Used to store the desired Room "Floor" --//
 $iPostPremiseId             = 0;            //-- INTEGER:       Used to store the desired Room "PremiseId" --//
 $aTempDataResult            = array();      //-- ARRAY:         Used to store the Results of either the "Room Info" or "Premise Info" lookup --//
-
+$aTempDataResult2           = array();      //-- ARRAY:         --//
 $iPremiseId                 = 0;            //-- INTEGER:       This variable is used to identify the Premise for the Premise Log. --//
 $iLogNowUTS                 = 0;            //-- INTEGER:       --//
 $iPresetLogId               = 0;            //-- INTEGER:       --//
@@ -398,22 +398,36 @@ if( $bError===false ) {
 				if( $aTempDataResult["Error"]===true ) {
 					//-- Display an Error Message --//
 					$bError = true;
-					$sErrMesg .= "Error Code:'3406' \n";
+					$sErrMesg .= "Error Code:'3405' \n";
 					$sErrMesg .= "Internal API Error! \n";
 					$sErrMesg .= $aTempDataResult["ErrMesg"];
 				}
 				
 				//--------------------------------------------------------------------//
-				//-- 5.3.2 - Verify that the user has permission to change the Info --//
+				//-- 5.3.2 - Lookup information about the Premise                   --//
+				//--------------------------------------------------------------------//
+				$aTempDataResult2 = GetPremisesInfoFromPremiseId( $aTempDataResult["Data"]["PremiseId"] );
+				
+				if( $aTempDataResult2["Error"]===true ) {
+					//-- Display an Error Message --//
+					$bError = true;
+					$sErrMesg .= "Error Code:'3406' \n";
+					$sErrMesg .= "Internal API Error! \n";
+					$sErrMesg .= "Problem looking up the Premise information that the Room is in! \n";
+					$sErrMesg .= $aTempDataResult2["ErrMesg"];
+				}
+				
+				//--------------------------------------------------------------------//
+				//-- 5.3.3 - Verify that the user has permission to change the Info --//
 				//--------------------------------------------------------------------//
 				if( $bError===false ) {
 					//-- Verify that the user has permission to change the name --//
-					if( $aTempDataResult["Data"]["PermOwner"]===1 ) {
+					if( $aTempDataResult2["Data"]["PermRoomAdmin"]===1 && $aTempDataResult["Data"]["PermRead"]===1 ) {
 						
 						//------------------------------------------------------------------------//
-						//-- 5.3.3 - Check to make sure that no IOs are assigned to the room    --//
+						//-- 5.3.3.1 - Check to make sure that no IOs are assigned to the room  --//
 						//------------------------------------------------------------------------//
-						$aDevicesInfo   = GetDevicesFromRoomId( $iPostId );
+						$aDevicesInfo   = GetLinksFromRoomId( $iPostId );
 						
 						if( $aDevicesInfo['Error']===false ) {
 							//-- Error: Devices are still assigned to the room --//
@@ -444,6 +458,8 @@ if( $bError===false ) {
 								$sErrMesg .= "Internal API Error! \n";
 								$sErrMesg .= $aResult["ErrMesg"];
 								
+								echo "\n".json_encode( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
+								//var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
 							} else {
 								//-------------------------------------------//
 								//-- Prepare variables for the Premise Log --//
@@ -490,14 +506,14 @@ if( $bError===false ) {
 //====================================================================//
 if( $bError===false ) {
 	try {
-		if( $iPresetLogId!==0 ) {
-			$iLogNowUTS = time();
+		//if( $iPresetLogId!==0 ) {
+			//$iLogNowUTS = time();
 			//-- Log the Results --//
 			//$aLogResult = AddPresetLogToPremiseLog( $iPresetLogId, $iLogNowUTS, $iPremiseId, $sLogCustom1 );
 			//echo "<br />\n";
 			//var_dump( $aLogResult );
 			//echo "<br />\n";
-		}
+		//}
 	} catch( Exception $e9800 ) {
 		//-- Error Catching --//
 		$bError = true;
