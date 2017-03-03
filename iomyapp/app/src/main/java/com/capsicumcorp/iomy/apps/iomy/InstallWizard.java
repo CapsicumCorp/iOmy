@@ -49,7 +49,9 @@ public class InstallWizard {
     //==============================================//
 
     private String welcomeMessage            = "Thank you for choosing iOmy home automation. Press begin to start the quick installation.";
-    private boolean installDemoData          = true;
+
+    //Don't enable demo mode until enabled in first run wizard as otherwise an upgraded app will end up in demo mode
+    private boolean installDemoData          = false;
 
     // Enumerations of answers to the questions.
     public int YES = 0;
