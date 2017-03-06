@@ -299,38 +299,46 @@ public class InstallWizard {
         } else if (title == Titles.licenseAgreementTitle) {
             this.summonSetupQuestions(activity);
 
-        //--- Proceed from the setup questions to the question about using the device as the server. ---//
-        } else if (title == Titles.setupQuestions) {
+        }
+        //--- TODO: Proceed from the setup questions to the question about using the device as the server. ---//
+        //--- ONly if demo mode is enabled though
+
+        //The following page shows progress of extracting server files and starting server services
+        else if (title == Titles.setupQuestions) {
             this.loadServerDeviceProgress(activity);
 
+        } else if (!this.installDemoData) {
+            //Only run the following if demo mode isn't enabled
+
             //--- After the server is setup, bring up the database setup. ---//
-        } else if (title == Titles.webserverServerSetupTitle) {
-            this.summonWebserverDBInfoSetup(activity);
+            if (title == Titles.webserverServerSetupTitle) {
+                this.summonWebserverDBInfoSetup(activity);
 
-            //--- Configure the database root password ---//
-        } else if (title == Titles.webserverInfoPageTitle) {
-            this.summonDBConfigureRootPassword(activity);
+                //--- Configure the database root password ---//
+            } else if (title == Titles.webserverInfoPageTitle) {
+                this.summonDBConfigureRootPassword(activity);
 
-            //--- Setup the database ---//
-        } else if (title == Titles.webserverDatabaseRootPasswordSetupTitle) {
-            //Inform the service services thread about the current root password
-            Application.getInstance().runServerServices.supplyDBRootPassword(dbPassword);
-            this.summonDBSetupPage(activity);
+                //--- Setup the database ---//
+            } else if (title == Titles.webserverDatabaseRootPasswordSetupTitle) {
+                //Inform the service services thread about the current root password
+                Application.getInstance().runServerServices.supplyDBRootPassword(dbPassword);
+                this.summonDBSetupPage(activity);
 
-        //--- Once the database is set up, create a premise and a hub
-        } else if (title == Titles.webserverDatabaseSetupTitle) {
-            this.summonPremiseAndHubSetup(activity);
+                //--- Once the database is set up, create a premise and a hub
+            } else if (title == Titles.webserverDatabaseSetupTitle) {
+                this.summonPremiseAndHubSetup(activity);
 
-        //--- Set the new owner of the premise ---//
-        } else if (title == Titles.premiseAndHubTitle) {
-            this.summonPremiseHubOwner(activity);
+                //--- Set the new owner of the premise ---//
+            } else if (title == Titles.premiseAndHubTitle) {
+                this.summonPremiseHubOwner(activity);
 
-        //--- Create the premise, hub, and their owner ---//
-        } else if (title == Titles.premiseHubOwnerTitle) {
-            this.loadPremiseHubOwnerProgress(activity);
-
+                //--- Create the premise, hub, and their owner ---//
+            } else if (title == Titles.premiseHubOwnerTitle) {
+                this.loadPremiseHubOwnerProgress(activity);
+            }
+        }
         //--- Start IOMy ---//
-        } else if (title == Titles.finalSetupTitle) {
+        if (title == Titles.finalSetupTitle || (this.installDemoData && title == Titles.webserverServerSetupTitle)) {
             writeWatchInputsFile();
             // Disable first run wizard
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(activity);
@@ -344,11 +352,17 @@ public class InstallWizard {
             editor.putString("pref_mysql_hostname", this.dbURI);
             editor.putString("pref_mysql_port", Integer.toString(this.dbServerPort));
             editor.putString("pref_mysql_root_password", this.dbPassword);
-            editor.putString("pref_mysql_owner_username", this.ownerUsername);
-            editor.putString("pref_mysql_owner_password", this.ownerPassword);
-            editor.putString("pref_mysql_watchInputs_username", this.watchInputsUsername);
-            editor.putString("pref_mysql_watchInputs_password", this.watchInputsPassword);
-            editor.putBoolean("pref_watch_inputs_enabled", true);
+            if (this.installDemoData) {
+                editor.putString("pref_mysql_owner_username", "demo");
+                editor.putString("pref_mysql_owner_password", "demo");
+                editor.putBoolean("pref_watch_inputs_enabled", false);
+            } else {
+                editor.putString("pref_mysql_owner_username", this.ownerUsername);
+                editor.putString("pref_mysql_owner_password", this.ownerPassword);
+                editor.putString("pref_mysql_watchInputs_username", this.watchInputsUsername);
+                editor.putString("pref_mysql_watchInputs_password", this.watchInputsPassword);
+                editor.putBoolean("pref_watch_inputs_enabled", true);
+            }
             editor.putBoolean("pref_lighttpdphp_enabled", true);
             editor.putBoolean("pref_mysql_enabled", true);
             editor.commit();
