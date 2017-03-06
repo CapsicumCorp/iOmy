@@ -91,19 +91,32 @@ $.extend(IOMy.devices.bpm,{
 
                             items: [
                                 new sap.m.VBox({
-                                    items : [
-                                        //----------------------------------//
-                                        // Last Motion
-                                        //----------------------------------//
-                                        new sap.m.Label({
-                                            text : "Last Used:"
-                                        }).addStyleClass("Font-RobotoCondensed"),
-                                        
-                                        new sap.m.Label( oViewScope.createId( sPrefix+"_LastMotion" ),	{
-                                            text : "23d 13h 44m"
-                                        } ).addStyleClass("Font-RobotoCondensed")
+                                    //--------------------------------//
+                                    //-- Draw the Data Boxes		--//
+                                    //--------------------------------//
+                                    items: [
+                                        new sap.m.VBox({
+                                            items : [
+                                                //----------------------------------//
+                                                // Temperature
+                                                //----------------------------------//
+                                                new sap.m.Label({
+                                                    text : "118/71 mmHG"
+                                                }).addStyleClass("Font-RobotoCondensed"),
+                                            ]
+                                        }),
+                                        new sap.m.VBox({
+                                            items : [
+                                                //----------------------------------//
+                                                // Temperature
+                                                //----------------------------------//
+                                                new sap.m.Label({
+                                                    text : "75 BPM"
+                                                }).addStyleClass("Font-RobotoCondensed"),
+                                            ]
+                                        })
                                     ]
-                                })
+                                }).addStyleClass("MarAuto0px")
                             ]
                         }).addStyleClass("MarLeft12px MarAuto0px")
                     ]

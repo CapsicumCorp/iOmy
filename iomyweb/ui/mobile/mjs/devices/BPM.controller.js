@@ -148,13 +148,13 @@ sap.ui.controller("mjs.devices.BPM", {
         
         //-- Systol --//
         me.wSystol = new sap.m.Text ({
-            text : "103 mmHG",
+            text : "118 mmHG",
             textAlign : "Right",
         }).addStyleClass("");
         
         //-- Diastol --//
         me.wDiastol = new sap.m.Text ({
-            text : "123 mmHG",
+            text : "71 mmHG",
             textAlign : "Right",
         }).addStyleClass("");
         

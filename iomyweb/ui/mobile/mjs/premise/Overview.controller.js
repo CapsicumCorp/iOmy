@@ -23,14 +23,14 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("mjs.premise.Overview", {
-//	api : IOMy.apiphp,	
-//	common : IOMy.common,
-//	oData : IOMy.apiodata,
-	
+    
 	rooms : [],
 	aStoredDevices : [],
     
-    aElementsToDestroy : [],
+    wRoomListBox        : null,
+    wMainBox            : null,
+    wPanel              : null,
+    aElementsToDestroy  : [],
     
     roomsExpanded : {},
     
@@ -72,18 +72,18 @@ sap.ui.controller("mjs.premise.Overview", {
                 }).addStyleClass("UserInputForm width100Percent");
                 
                 // Create the main placeholder
-                var oVertBox = new sap.m.VBox(me.createId("verticalBox"), {
+                me.wMainBox = new sap.m.VBox({
                     items: [oPremiseCBoxContainer]
                 });
 
                 me.composeRoomList();
                 
-                var oPanel = new sap.m.Panel(me.createId("panel"), {
+                me.wPanel = new sap.m.Panel(me.createId("panel"), {
                     backgroundDesign: "Transparent",
-                    content: [oVertBox] //-- End of Panel Content --//
+                    content: [me.wMainBox] //-- End of Panel Content --//
                 }).addStyleClass("PanelNoPadding MarTop0px PadBottom15px UserInputForm");
 
-                thisView.byId("page").addContent(oPanel);
+                thisView.byId("page").addContent(me.wPanel);
 			}
 		});
 	},
@@ -96,6 +96,10 @@ sap.ui.controller("mjs.premise.Overview", {
         var me          = this;
         
         IOMy.functions.destroyItemsByIdFromView(me, me.aElementsToDestroy);
+        
+        if (me.wPanel !== null) {
+            me.wPanel.destroy();
+        }
         
         // Clear the array
         me.aElementsToDestroy = [];
@@ -117,16 +121,14 @@ sap.ui.controller("mjs.premise.Overview", {
 		if (me.timerInterval !== null)
 			clearInterval(me.timerInterval);
         
-        me.aElementsToDestroy.push("roomListBox");
-        
-        var oVertBox = new sap.m.VBox(me.createId("roomListBox"), {
+        me.wRoomListBox = new sap.m.VBox({
             items: []
         }).addStyleClass("TableSideBorders");
         
         if (iPremiseId !== undefined && iPremiseId !== null) {
             me.byId("premiseBox").setSelectedKey(iPremiseId);
         } else {
-            me.byId("premiseBox").setSelectedKey(IOMy.common.PremiseList[0].Id);
+            me.byId("premiseBox").setSelectedKey(null);
         }
 
 		me.rooms = [];
@@ -155,7 +157,7 @@ sap.ui.controller("mjs.premise.Overview", {
             //==============================================\\
             // ADD TABLE HEADINGS
             //==============================================\\
-            oVertBox.addItem(
+            me.wRoomListBox.addItem(
                 new sap.m.HBox({
                     items : [
                         // === DEVICES === \\
@@ -163,7 +165,7 @@ sap.ui.controller("mjs.premise.Overview", {
                             items : [
                                 new sap.m.Label({
                                     text : "Devices"
-                                }).addStyleClass(" ")
+                                })
                             ]
                         }).addStyleClass("HasCenteredObject FlexNoShrink width60px BorderRight"),
                         // === ROOM === \\
@@ -173,7 +175,7 @@ sap.ui.controller("mjs.premise.Overview", {
                                     text : "Room"
                                 }).addStyleClass("PaddingToMatchButtonText")
                             ]
-                        }).addStyleClass("")
+                        })
                     ]
                 }).addStyleClass("ConsistentMenuHeader ListItem BorderTop")
             );
@@ -192,15 +194,11 @@ sap.ui.controller("mjs.premise.Overview", {
                     me.aElementsToDestroy.push("roomName"+sIndex);
                     me.aElementsToDestroy.push("roomLink"+sIndex);
                     
-                    // If we're processing Unassigned devices, the RoomId is 0.
-                    if (aRoom.RoomId === null)
-                        aRoom.RoomId = 0;
-                    
                     // Retrieve number of devices in a given room
                     iDevicesInRoom = IOMy.functions.getNumberOfDevicesInRoom(aRoom.RoomId);
                     
                     //=========== Create the room entry =============\\
-                    oVertBox.addItem(
+                    me.wRoomListBox.addItem(
                         new sap.m.HBox({
                             items : [
                                 // === NUMBER OF DEVICES ASSIGNED TO A ROOM ===//
@@ -217,11 +215,11 @@ sap.ui.controller("mjs.premise.Overview", {
                                 new sap.m.VBox({
                                     items : [
                                         new sap.m.Button(me.createId("roomLink"+sIndex), {
-                                            text : aRoom.RoomId !== 0 ? aRoom.RoomName : "Unassigned Devices",
+                                            text : aRoom.RoomName,
                                             press : function () {
-                                                IOMy.common.NavigationChangePage(aRoom.RoomId !== 0 ? "pRoomsOverview" : "pRoomsUnassignedDevices", {room : aRoom});
+                                                IOMy.common.NavigationChangePage("pRoomsOverview", {room : aRoom});
                                             }
-                                        }).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px ")
+                                        }).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px")
                                     ]
                                 }).addStyleClass("TextOverflowEllipsis width100Percent jbMR1tempfix"),
                                 
@@ -372,7 +370,7 @@ sap.ui.controller("mjs.premise.Overview", {
         }
         
         // Insert the action menu to the bottom left of the page.
-        oVertBox.addItem(oLayout);
+        me.wRoomListBox.addItem(oLayout);
         thisView.byId("extrasMenuHolder").destroyItems();
         thisView.byId("extrasMenuHolder").addItem(
             IOMy.widgets.getActionMenu({
@@ -421,7 +419,7 @@ sap.ui.controller("mjs.premise.Overview", {
             })
         );
         
-        me.byId("verticalBox").addItem(oVertBox);
+        me.wMainBox.addItem(me.wRoomListBox);
 	},
 	
 /**

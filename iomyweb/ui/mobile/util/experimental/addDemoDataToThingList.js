@@ -105,9 +105,9 @@ $.extend(IOMy.experimental,{
                         oTempThing.IO                  = {};
 
                         //--------------------------------------------------------//
-                        //-- Add the missing DevicePort                         --//
+                        //-- Add the Thing                                      --//
                         //--------------------------------------------------------//
-                        IOMy.common.ThingList["_"+iTempThingId]  = oTempThing;
+                        IOMy.common.ThingList["_"+iTempThingId] = IOMy.common.createExtraThingProperties(oTempThing);
 
                         //--------------------------------------------------------//
                         //-- Check that the Premise is setup in the Rooms List  --//

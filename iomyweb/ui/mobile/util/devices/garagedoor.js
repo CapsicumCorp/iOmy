@@ -93,12 +93,47 @@ $.extend(IOMy.devices.garagedoor,{
 								new sap.m.VBox({
 									items : [
 										// Added in temporarily until functionality is implemented by Brent
-										 me.wControlGarageSwitch = new sap.m.Button({
+										new sap.m.Button({
 											icon : "sap-icon://GoogleMaterial/lock_open",
 											width: "95px",
 											text : "Open",
 											press : function () {
-												me.ToggleGarageSwitch();
+                                                var thisButton = this;
+                                                thisButton.setEnabled(false);
+                                                
+                                                if (thisButton.getText() === "Close") {
+                                                    thisButton.setText("Closing");
+                                                    thisButton.setIcon("sap-icon://GoogleMaterial/lock");
+                                                    //IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = -1; // Closing
+                                                    IOMy.common.ThingList["_"+aDeviceData.DeviceId].Closing = true; // Closing
+                                                } else if (thisButton.getText() === "Open") {
+                                                    thisButton.setText("Opening");
+                                                    thisButton.setIcon("sap-icon://GoogleMaterial/lock_open");
+                                                    //IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = -2; // Opening
+                                                    IOMy.common.ThingList["_"+aDeviceData.DeviceId].Opening = true; // Opening
+                                                }
+                                                //----------------------------------------------------------------//
+                                                // Function to update the control button after the switch is completed.
+                                                //----------------------------------------------------------------//
+												me.ToggleGarageSwitch([
+                                                    function () {
+                                                        if (thisButton.getText() === "Closing") {
+                                                            IOMy.common.ThingList["_"+aDeviceData.DeviceId].Closing = false;
+                                                            IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = 0;
+                                                            thisButton.setIcon("sap-icon://GoogleMaterial/lock_open");
+                                                            thisButton.setText("Open");
+
+                                                        } else if (thisButton.getText() === "Opening") {
+                                                            IOMy.common.ThingList["_"+aDeviceData.DeviceId].Opening = false;
+                                                            IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = 1;
+                                                            thisButton.setIcon("sap-icon://GoogleMaterial/lock");
+                                                            thisButton.setText("Close");
+
+                                                        }
+
+                                                        thisButton.setEnabled(true);
+                                                    }
+                                                ]);
 											}
 										}).addStyleClass(""),
 									]
@@ -207,15 +242,44 @@ $.extend(IOMy.devices.garagedoor,{
 	},
 	
 	// Added in temporarily until functionality is implemented by Brent
-	ToggleGarageSwitch : function () {
+	ToggleGarageSwitch : function (aFunctions) {
         var me = this;
-        if (me.wControlGarageSwitch.getText() === "Open") {
-            me.wControlGarageSwitch.setText("Close");
-            me.wControlGarageSwitch.setIcon("sap-icon://GoogleMaterial/lock");
-        } else if (me.wControlGarageSwitch.getText() === "Close") {
-            me.wControlGarageSwitch.setText("Open");
-            me.wControlGarageSwitch.setIcon("sap-icon://GoogleMaterial/lock_open");
-        }
+        var oController;
+        
+        //--------------------------------------------------------------------//
+        // After 15 seconds, run the functions in an array.
+        //--------------------------------------------------------------------//
+        setTimeout(
+            function () {
+                
+                for (var i = 0; i < aFunctions.length; i++) {
+                    aFunctions[i]();
+                }
+                
+                //------------------------------------------------------------//
+                // If the current page is the Garage Door device page, enable
+                // the switch.
+                //------------------------------------------------------------//
+                if (oApp.getCurrentPage().getId() === "pDeviceGaragedoor") {
+                    oController = oApp.getCurrentPage().getController();
+                    
+                    if (oController.wStatus.getText() === "Opening") {
+                        oController.wStatus.setText("Open");
+                        oController.wControlButton.setIcon("sap-icon://GoogleMaterial/lock");
+                        oController.wControlButton.setText("Close");
+                        
+                    } else if (oController.wStatus.getText() === "Closing") {
+                        oController.wStatus.setText("Closed");
+                        oController.wControlButton.setIcon("sap-icon://GoogleMaterial/lock_open");
+                        oController.wControlButton.setText("Open");
+                        
+                    }
+                    
+                    
+                    oController.wControlButton.setEnabled(true);
+                }
+            },
+        15000);
     },
 	
     GetCommonUIForDeviceOverview: function( sPrefix, oViewScope, aDeviceData ) {

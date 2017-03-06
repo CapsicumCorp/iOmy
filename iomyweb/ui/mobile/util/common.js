@@ -1618,3 +1618,9 @@ $.extend(IOMy.common,{
 	}
 	
 });
+
+//----------------------------------------------------------------------------//
+// Load the other methods and properties
+//----------------------------------------------------------------------------//
+$.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
+$.sap.require("IOMy.common.createExtraThingProperties");

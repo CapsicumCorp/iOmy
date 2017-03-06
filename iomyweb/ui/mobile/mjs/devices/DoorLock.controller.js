@@ -24,6 +24,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 sap.ui.controller("mjs.devices.DoorLock", {
 	
+    mThing              : null,
     //-------------------------------------------------//
     // Widgets
     //-------------------------------------------------//
@@ -59,10 +60,13 @@ sap.ui.controller("mjs.devices.DoorLock", {
 				//-- Refresh the Navigational buttons --//
 				IOMy.common.NavigationRefreshButtons( me );
                 
-//                if (me.timeoutLockDoor === null) {
-//                    me.DestroyUI();
-//                    me.DrawUI();
-//                }
+                //-- Retrieve the thing --//
+                me.mThing = IOMy.common.ThingList["_"+evt.data.ThingId];
+                
+                //if (IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout === null) {
+                    me.DestroyUI();
+                    me.DrawUI();
+                //}
 			}
 		});
 	},
@@ -84,7 +88,7 @@ sap.ui.controller("mjs.devices.DoorLock", {
 	onAfterRendering: function() {
         var me = this;
         
-        me.DrawUI();
+        //me.DrawUI();
 	},
 
 /**
@@ -129,6 +133,11 @@ sap.ui.controller("mjs.devices.DoorLock", {
         var me = this; // Captures the scope of this controller.
         var thisView = me.getView(); // Captures this controller's view.
         var sDefaultText = "N/A";
+        
+        //-- If the switches array has not been created yet, create it. --//
+        if (IOMy.common.ThingList["_"+me.mThing.Id].Switches === undefined) {
+            IOMy.common.ThingList["_"+me.mThing.Id].Switches = {};
+        }
         
         //-------------------------------------------------------------------//
         // Create the data field widgets.
@@ -175,42 +184,49 @@ sap.ui.controller("mjs.devices.DoorLock", {
                  * 
                  */
                             
-                IOMy.devices.doorlock.ToggleLockSwitch(thisButton);
+                IOMy.devices.doorlock.ToggleDoorLockSwitch(me.mThing.Id);
                 
                 if (thisButton.getText() === "Unlock") {
-                    me.wStatusField.setText("Locked");
+                    //me.wStatusField.setText("Locked");
                     
-                    if (me.timeoutLockDoor !== null) {
-                        clearTimeout(me.timeoutLockDoor);
-                        me.timeoutLockDoor = null;
+                    if (IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout !== null &&
+                            IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout !== undefined)
+                    {
+                        clearTimeout(IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout);
+                        IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout = null;
                     }
                     
                 } else if (thisButton.getText() === "Lock") {
-                    me.wStatusField.setText("Unlocked");
+                    //me.wStatusField.setText("Unlocked");
                     
-                    if (me.timeoutLockDoor === null) {
-                        me.timeoutLockDoor = setTimeout(
+                    if (IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout === null ||
+                            IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout === undefined)
+                    {
+                        IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout = setTimeout(
                             function () {
-                                IOMy.devices.doorlock.ToggleLockSwitch(thisButton);
+                                IOMy.devices.doorlock.ToggleDoorLockSwitch(me.mThing.Id);
 
-                                if (thisButton.getText() === "Unlock") {
-                                    me.wStatusField.setText("Locked");
-                                } else if (thisButton.getText() === "Lock") {
-                                    me.wStatusField.setText("Unlocked");
-                                }
+//                                if (thisButton.getText() === "Unlock") {
+//                                    me.wStatusField.setText("Locked");
+//                                } else if (thisButton.getText() === "Lock") {
+//                                    me.wStatusField.setText("Unlocked");
+//                                }
                                 
-                                clearTimeout(me.timeoutLockDoor);
-                                me.timeoutLockDoor = null;
+                                //-- Clean up --//
+                                clearTimeout(IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout);
+                                IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout = null;
                             },
                         5000);
                     }
                 }
                 
-                //if (me.timeoutLockDoor !== null) {
+                //if (IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout !== null) {
                     
                 //}
             }
         }).addStyleClass("MarLeft10Percent");
+        
+        IOMy.common.ThingList["_"+me.mThing.Id].Switches[oApp.getCurrentPage().getId()] = me.wControlSwitch;
         
         //-------------------------------------------------------------------//
         // Arrange the fields into a UI5 List

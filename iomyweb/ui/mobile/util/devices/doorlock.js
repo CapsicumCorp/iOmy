@@ -70,12 +70,76 @@ $.extend(IOMy.devices.doorlock,{
 		
 		// Added in temporarily until functionality is implemented by Brent
 		var me = this;
-		
         
         //------------------------------------//
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
-		
+        
+        //-- If the switches array has not been created yet, create it. --//
+        if (IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches === undefined) {
+            IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches = {};
+        }
+        
+        //--------------------------------------------------------------------//
+        // Create the Switch that is unique to the current device, if it does
+        // not exist already.
+        //--------------------------------------------------------------------//
+        if (IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches[oApp.getCurrentPage().getId()] === undefined ||
+                IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches[oApp.getCurrentPage().getId()] === null)
+        {
+            me["wDoorLock_"+aDeviceData.DeviceId] = new sap.m.Button({
+                icon : "sap-icon://GoogleMaterial/lock_open",
+                width: "95px",
+                text : "Unlock",
+                press : function () {
+                    var thisButton = this;
+
+                    me.ToggleDoorLockSwitch(aDeviceData.DeviceId);
+
+                    if (thisButton.getText() === "Unlock") {
+                        //me.wStatusField.setText("Locked");
+
+                        if (IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout !== null &&
+                                IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout !== undefined)
+                        {
+                            clearTimeout(IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout);
+                            IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout = null;
+                        }
+
+                    } else if (thisButton.getText() === "Lock") {
+                        //me.wStatusField.setText("Unlocked");
+
+                        if (IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout === null ||
+                                IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout === undefined)
+                        {
+                            IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout = setTimeout(
+                                function () {
+                                    me.ToggleDoorLockSwitch(aDeviceData.DeviceId);
+
+    //                                if (thisButton.getText() === "Unlock") {
+    //                                    me.wStatusField.setText("Locked");
+    //                                } else if (thisButton.getText() === "Lock") {
+    //                                    me.wStatusField.setText("Unlocked");
+    //                                }
+
+                                    //-- Clean up --//
+                                    clearTimeout(IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout);
+                                    IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout = null;
+                                },
+                            5000);
+                        }
+                    }
+                }
+            }).addStyleClass("");
+            
+            //-- Add the switch to the switches array. --//
+            IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches[oApp.getCurrentPage().getId()] = me["wDoorLock_"+aDeviceData.DeviceId];
+        }
+        
+        
+        //--------------------------------------------------------------------//
+        // Draw the UI entry for the Door Lock
+        //--------------------------------------------------------------------//
 		oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: [
                 //------------------------------------//
@@ -91,127 +155,31 @@ $.extend(IOMy.devices.doorlock,{
                             }
                         }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20")
                     ]
+
                 }).addStyleClass("BorderRight width80Percent jbMR1tempfix"),
-			//------------------------------------//
-			//-- 2nd is the Device Data			--//
-			//------------------------------------//
-			new sap.m.HBox({
-                items : [
-                    new sap.m.VBox( oViewScope.createId( sPrefix+"_LockButton"), {
-                        //--------------------------------//
-                        //-- Toggle Button              --//
-                        //--------------------------------//
-                        items: [
-                            new sap.m.VBox({
-                                items : [
-									// Added in temporarily until functionality is implemented by Brent
-									// Doors will auto lock after 5 - 20 seconds
-                                     me.wDoorLock = new sap.m.Button({
-										icon : "sap-icon://GoogleMaterial/lock_open",
-										width: "95px",
-										text : "Unlock",
-										press : function () {
-											me.ToggleDoorLockSwitch();
-										}
-									}).addStyleClass(""),
-                                ]
-                            }).addStyleClass("MarTop5px MarLeft40px"),
-                        ]
-                    }).addStyleClass("width100Percent")
-                ]
-            }).addStyleClass("minwidth170px minheight58px")
+                //------------------------------------//
+                //-- 2nd is the Device Data			--//
+                //------------------------------------//
+                new sap.m.HBox({
+                    items : [
+                        new sap.m.VBox( oViewScope.createId( sPrefix+"_LockButton"), {
+                            //--------------------------------//
+                            //-- Toggle Button              --//
+                            //--------------------------------//
+                            items: [
+                                new sap.m.VBox({
+                                    items : [
+                                        // Added in temporarily until functionality is implemented by Brent
+                                        // Doors will auto lock after 5 - 20 seconds
+                                        IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches[oApp.getCurrentPage().getId()]
+                                    ]
+                                }).addStyleClass("ElementCenter"),
+                            ]
+                        }).addStyleClass("width100Percent")
+                    ]
+                }).addStyleClass("minwidth170px minheight58px")
             ]
         }).addStyleClass("ListItem");
-
-        //--------------------------------------------------------------------//
-        //-- ADD THE STATUS BUTTON TO THE UI								--//
-        //--------------------------------------------------------------------//
-
-//        //-- Initialise Variables --//
-//        var sStatusButtonText			= "";
-//        var bButtonStatus				= false;
-//
-//        //-- Store the Device Status --//
-//        var iDeviceStatus		= aDeviceData.DeviceStatus;
-//        var iTogglePermission	= aDeviceData.PermToggle;
-//        //var iTogglePermission	= 0;
-//
-//
-//        //-- Set Text --//
-//        if( iDeviceStatus===0 ) {
-//            sStatusButtonText	= "Off";
-//            bButtonStatus		= false;
-//        } else {
-//            sStatusButtonText	= "On";
-//            bButtonStatus		= true;
-//        }
-//
-//        //-- DEBUGGING --//
-//        //jQuery.sap.log.debug("PERM = "+sPrefix+" "+iTogglePermission);
-//
-//        //------------------------------------//
-//        //-- Make the Container				--//
-//        //------------------------------------//
-//        var oUIStatusContainer = new sap.m.VBox( oViewScope.createId( sPrefix+"_StatusContainer"), {
-//            items:[] 
-//        }).addStyleClass("minwidth80px PadTop10px PadLeft5px");	//-- END of VBox that holds the Toggle Button
-//
-//
-//        //-- Add the Button's background colour class --//
-//        if( iTogglePermission===0 ) {
-//
-//            //----------------------------//
-//            //-- NON TOGGLEABLE BUTTON	--//
-//            //----------------------------//
-//            oUIStatusContainer.addItem(
-//                new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
-//                    state: bButtonStatus,
-//                    enabled: false
-//                }).addStyleClass("DeviceOverviewStatusToggleSwitch")
-//            );
-//
-//        } else {
-//
-//            //----------------------------//
-//            //-- TOGGLEABLE BUTTON		--//
-//            //----------------------------//
-//            oUIStatusContainer.addItem(
-//                new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
-//                    state: bButtonStatus,
-//                    change: function () {
-//                //new sap.m.ToggleButton( oViewScope.createId( sPrefix+"_StatusToggle"), {
-//                    //text: sStatusButtonText,
-//                    //pressed: bButtonStatus,
-//                    //press : function () {
-//                        //-- Bind a link to this button for subfunctions --//
-//                        var oCurrentButton = this;
-//                        //-- AJAX --//
-//                        IOMy.apiphp.AjaxRequest({
-//                            url: IOMy.apiphp.APILocation("statechange"),
-//                            type: "POST",
-//                            data: { 
-//                                "Mode":"ThingToggleStatus", 
-//                                "Id": aDeviceData.DeviceId
-//                            },
-//                            onFail : function(response) {
-//                                IOMy.common.showError(response.message, "Error Changing Device Status");
-//                            },
-//                            onSuccess : function( sExpectedDataType, aAjaxData ) {
-//                                console.log(aAjaxData.ThingPortStatus);
-//                                //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
-//                                if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
-//                                    IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
-//                                }
-//                            }
-//                        });
-//                    }
-//                }).addStyleClass("DeviceOverviewStatusToggleSwitch") //-- END of ToggleButton --//
-//                //}).addStyleClass("DeviceOverviewStatusToggleButton TextWhite Font-RobotoCondensed Font-Large"); //-- END of ToggleButton --//
-//            );
-//        }
-//
-//        oUIObject.addItem(oUIStatusContainer);
-		
 		
 		//------------------------------------//
 		//-- 9.0 - RETURN THE RESULTS		--//
@@ -219,15 +187,29 @@ $.extend(IOMy.devices.doorlock,{
 		return oUIObject;
 	},
 	// Added in temporarily until functionality is implemented by Brent
-	ToggleDoorLockSwitch : function () {
+	ToggleDoorLockSwitch : function (iThingId) {
         var me = this;
-        if (me.wDoorLock.getText() === "Unlock") {
-            me.wDoorLock.setText("Lock");
-            me.wDoorLock.setIcon("sap-icon://GoogleMaterial/lock");
-        } else if (me.wDoorLock.getText() === "Lock") {
-            me.wDoorLock.setText("Unlock");
-            me.wDoorLock.setIcon("sap-icon://GoogleMaterial/lock_open");
-        }
+        var aaSwitches = IOMy.common.ThingList["_"+iThingId].Switches;
+        
+        $.each(aaSwitches, function (sIndex, oSwitchWidget) {
+            if (oSwitchWidget.getText() === "Unlock") {
+                oSwitchWidget.setText("Lock");
+                oSwitchWidget.setIcon("sap-icon://GoogleMaterial/lock");
+            } else if (oSwitchWidget.getText() === "Lock") {
+                oSwitchWidget.setText("Unlock");
+                oSwitchWidget.setIcon("sap-icon://GoogleMaterial/lock_open");
+            }
+        });
+        
+//        for (var i = 0; i < aSwitches.length; i++) {
+//            if (aSwitches[i].getText() === "Unlock") {
+//                aSwitches[i].setText("Lock");
+//                aSwitches[i].setIcon("sap-icon://GoogleMaterial/lock");
+//            } else if (aSwitches[i].getText() === "Lock") {
+//                aSwitches[i].setText("Unlock");
+//                aSwitches[i].setIcon("sap-icon://GoogleMaterial/lock_open");
+//            }
+//        }
     },
 	
     GetCommonUITaskList: function( Prefix, oViewScope, aDeviceData ) {

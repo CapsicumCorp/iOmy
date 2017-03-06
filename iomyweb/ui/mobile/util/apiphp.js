@@ -546,7 +546,7 @@ $.extend(IOMy.apiphp,{
 									oTempThing.IO                  = {};
 									
 									//--------------------------------------------------------//
-									//-- Add the missing DevicePort                         --//
+									//-- Add the thing                                      --//
 									//--------------------------------------------------------//
 									aThingList["_"+iTempThingId]  = oTempThing;
 									
