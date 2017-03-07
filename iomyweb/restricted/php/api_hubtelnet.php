@@ -56,7 +56,6 @@ $iPostHubId                 = 0;            //-- INTEGER:       This is used to 
 $iPostCommId                = 0;            //-- INTEGER:       This is used to store which "Zigbee Comm" to connect to --//
 
 
-
 $sNetworkAddress            = "";           //-- STRING:        --//
 $iNetworkPort               = 0;            //-- INTEGER:       --//
 $sUserToken                 = "";           //-- STRING:        --//
@@ -312,7 +311,7 @@ if( $bError===false ) {
 							$sErrMesg .= "Error Code:'0211' \n";
 							$sErrMesg .= "The HubType is not supported by this API.\n";
 							$sErrMesg .= "Please use a valid HubId of a supported Hub (Android WatchInputs).\n";
-						} else if( $sHubIPAddress===false || $sHubIPAddress===null || $sHubIPAddress==="" || strlen($sHubIPAddress)<=2 ) {
+						} else if( $sHubIPAddress===false || $sHubIPAddress===null || $sHubIPAddress==="" || strlen($sHubIPAddress)<2 ) {
 							$bError = true;
 							$iErrCode  = 212;
 							$sErrMesg .= "Error Code:'0212' \n";
@@ -421,13 +420,12 @@ if( $bError===false ) {
 				$sErrMesg  .= "Critical Error in the main section of the \"".$sPostMode."\" Mode!\n";
 				$sErrMesg  .= $e1400->getMessage();
 			}
-
+			
 		//================================================================//
 		//== 5.2 - MODE: Turns on Zigbee Join Mode                      ==//
 		//================================================================//
 		} else if( $sPostMode==="TurnOnZigbeeJoinMode" ) {
 			try {
-				
 				if( $iCommWritePerm===1 ) {
 					if( strlen( $sCommAddress )>=15 ) {
 						
@@ -467,22 +465,22 @@ if( $bError===false ) {
 							
 						} else {
 							$bError     = true;
-							$iErrCode   = 1401;
-							$sErrMesg  .= "Error Code:'1401' \n";
+							$iErrCode   = 2403;
+							$sErrMesg  .= "Error Code:'2403' \n";
 							$sErrMesg  .= "Failed to connect to Hub via Telnet";
 						}
 						
 					} else {
 						$bError     = true;
-						$iErrCode   = 4401;
-						$sErrMesg  .= "Error Code:'4401' \n";
-						$sErrMesg  .= "Failed to connect to Hub via Telnet\n";
-						
+						$iErrCode   = 2402;
+						$sErrMesg  .= "Error Code:'2402' \n";
+						$sErrMesg  .= "Problem with the CommAddress of the provided Comm!\n";
+						$sErrMesg  .= "Please verify that the Comm supports join mode!\n";
 					}
 				} else {
 					$bError     = true;
-					$iErrCode   = 4401;
-					$sErrMesg  .= "Error Code:'4401' \n";
+					$iErrCode   = 2401;
+					$sErrMesg  .= "Error Code:'2401' \n";
 					$sErrMesg  .= "Failed to connect to Hub via Telnet\n";
 				}
 				
@@ -494,7 +492,7 @@ if( $bError===false ) {
 				$sErrMesg  .= "Critical Error in the main section of the \"".$sPostMode."\" Mode!\n";
 				$sErrMesg  .= $e2400->getMessage();
 			}
-
+			
 		//================================================================//
 		//== 5.3 - MODE: Rapid HA Form Network                          ==//
 		//================================================================//
@@ -510,7 +508,7 @@ if( $bError===false ) {
 				$sErrMesg  .= "Critical Error in the main section of the \"".$sPostMode."\" Mode!\n";
 				$sErrMesg  .= $e3400->getMessage();
 			}
-
+			
 		//================================================================//
 		//== 5.4 - MODE: Custom Telnet Command                          ==//
 		//================================================================//
@@ -526,7 +524,7 @@ if( $bError===false ) {
 						//----------------------------//
 						$aResult = array(
 							"Error" => false,
-							"Data" => array(
+							"Data"  => array(
 								"Custom" => array()
 							)
 						);

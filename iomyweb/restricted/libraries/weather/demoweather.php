@@ -2,7 +2,7 @@
 
 //========================================================================================================//
 //== @Author: Andrew Somerville <support@capsicumcorp.com>
-//== @Description: This PHP class is used for connecting to "Open Weather Map" weather stations.
+//== @Description: This PHP class is used for displaying weather data that is presetup in the database.
 //== @Copyright: Capsicum Corporation 2016
 //== 
 //== This file is part of Backend of the iOmy project.
@@ -136,7 +136,6 @@ class Weather_DemoWeather {
 							return false;
 							
 						} else {
-							
 							//-- Lookup the most recent StationCode from the database --//
 							$aStationCodeResult = GetIODataMostRecent( $aStationIOInfo['Data']['DataTypeId'], $aIO['IOId'], $iUTS );
 								
@@ -149,7 +148,6 @@ class Weather_DemoWeather {
 				}
 			}	//-- ENDFOREACH --//
 		}
-		
 		//-- Failure to find the correct IO --//
 		return false;
 	}

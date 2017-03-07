@@ -2,7 +2,7 @@
 
 //========================================================================================================//
 //== @Author: Andrew Somerville <support@capsicumcorp.com>
-//== @Description: This PHP class is used for connecting to "Open Weather Map" weather stations.
+//== @Description: This PHP class is used for Netvox Motion Sensors.
 //== @Copyright: Capsicum Corporation 2016
 //== 
 //== This file is part of Backend of the iOmy project.
@@ -91,7 +91,7 @@ class MotionSensor_Netvox {
 					break;
 					
 				default:
-					$this->aErrorMessges[] = "Unregonized Weather Object State!";
+					$this->aErrorMessges[] = "Unregonized MotionSensor State!";
 					
 			}
 			
@@ -180,8 +180,6 @@ class MotionSensor_Netvox {
 		}
 		return false;
 	}
-	
-	
 	
 	
 	public function GetMostRecentDBMotion() {
@@ -345,16 +343,6 @@ class MotionSensor_Netvox {
 	}
 	
 	
-	//================================================================================================//
-	//== #4.3# - POLL WEATHER FROM SOURCE                                                           ==//
-	//================================================================================================//
-
-	
-	
-	//================================================================================================//
-	//== #9.1# - HTTP REQUEST FUNCTION                                                              ==//
-	//================================================================================================//
-
 }
 
 ?>
