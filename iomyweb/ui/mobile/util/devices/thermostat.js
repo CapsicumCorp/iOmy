@@ -72,13 +72,14 @@ $.extend(IOMy.devices.thermostat,{
                 new sap.m.VBox({
                     items : [
                         new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
+							width: "85%",
                             text : aDeviceData.DeviceName,
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceTestThermostat", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("TextSizeMedium MarLeft6px Text_grey_20")
+                        }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20")
                     ]
-                }).addStyleClass("BorderRight width80Percent DeviceLabelMargin"),
+                }).addStyleClass("BorderRight width80Percent jbMR1tempfix"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
@@ -111,7 +112,7 @@ $.extend(IOMy.devices.thermostat,{
                                     ]
                                 })
                             ]
-                        }).addStyleClass("MarLeft12px MarAuto0px")
+                        }).addStyleClass("MarTop20px MarLeft12px")
                     ]
                 }).addStyleClass("minheight58px minwidth170px")
             ]

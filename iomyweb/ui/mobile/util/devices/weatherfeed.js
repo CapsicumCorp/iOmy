@@ -571,14 +571,15 @@ $.extend(IOMy.devices.weatherfeed,{
             new sap.m.VBox({
                 items : [
                     new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
+						width: "85%",
                         text : aDeviceData.DeviceName,
                         press : function () {
                             //console.log(aDeviceData);
                             IOMy.common.NavigationChangePage("pThermostat", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("TextSizeMedium MarLeft6px Text_grey_20")
+                    }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20")
                 ]
-            }).addStyleClass("width80Percent BorderRight DeviceLabelMargin")
+            }).addStyleClass("width80Percent BorderRight jbMR1tempfix")
         );
 
         aUIObjectItems.push(

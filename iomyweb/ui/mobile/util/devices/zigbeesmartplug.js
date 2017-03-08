@@ -719,13 +719,14 @@ $.extend(IOMy.devices.zigbeesmartplug,{
             new sap.m.VBox({
                 items : [
                     new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
+						width: "85%",
                         text : aDeviceData.DeviceName,
                         press : function () {
                             IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("TextSizeMedium MarLeft6px Text_grey_20")
+                    }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20")
                 ]
-            }).addStyleClass("width80Percent BorderRight DeviceLabelMargin")
+            }).addStyleClass("width80Percent BorderRight jbMR1tempfix")
         );
 
         aUIObjectItems.push(
@@ -745,7 +746,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("Font-RobotoCondensed"),
                             new sap.m.Text( oViewScope.createId( sPrefix+"_kWh" ),	{} ).addStyleClass("Font-RobotoCondensed")
                         ]
-                    }).addStyleClass("MarLeft12px MarAuto0px")
+                    }).addStyleClass("MarLeft12px")
                 ]
             }).addStyleClass("minwidth90px minheight58px")
         );
@@ -830,7 +831,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             }
                         });
                     }
-                }).addStyleClass("DeviceOverviewStatusToggleSwitch") //-- END of ToggleButton --//
+                }).addStyleClass("DeviceOverviewStatusToggleSwitch MarTop4px") //-- END of ToggleButton --//
             );
         }
 
@@ -926,13 +927,14 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                 new sap.m.VBox({
                     items : [
                         new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
+							width: "85%",
                             text : aDeviceData.DeviceName,
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("MarLeft6px TextSizeMedium Text_grey_20")
+                        }).addStyleClass("MarLeft6px TextSizeMedium MarTop20px Text_grey_20")
                     ]
-                }).addStyleClass("BorderRight width80Percent DeviceLabelMargin"),
+                }).addStyleClass("BorderRight width80Percent jbMR1tempfix"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
@@ -946,7 +948,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             items: [
                                 new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass(" Font-RobotoCondensed")
                             ]
-                        }).addStyleClass("MarLeft12px MarAuto0px")
+                        }).addStyleClass("MarLeft12px MarTop20px")
                     ]
                 }).addStyleClass("minheight58px minwidth90px")
             ]
@@ -980,7 +982,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         //------------------------------------//
         var oUIStatusContainer = new sap.m.VBox( oViewScope.createId( sPrefix+"_StatusContainer"), {
             items:[] 
-        }).addStyleClass("minwidth80px DeviceLabelMargin");	//-- END of VBox that holds the Toggle Button
+        }).addStyleClass("minwidth80px");	//-- END of VBox that holds the Toggle Button
 
 
         //-- Add the Button's background colour class --//
@@ -1026,7 +1028,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             }
                         });
                     }
-                }).addStyleClass("DeviceOverviewStatusToggleSwitch") //-- END of ToggleButton --//
+                }).addStyleClass("DeviceOverviewStatusToggleSwitch MarTop4px") //-- END of ToggleButton --//
             );
         }
 

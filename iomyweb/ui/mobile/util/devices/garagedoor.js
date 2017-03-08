@@ -71,13 +71,14 @@ $.extend(IOMy.devices.garagedoor,{
                 new sap.m.VBox({
                     items : [
                         new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
+							width: "85%",
                             text : aDeviceData.DeviceName,
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceGaragedoor", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("TextSizeMedium MarLeft6px Text_grey_20")
+                        }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20")
                     ]
-                }).addStyleClass("BorderRight width80Percent DeviceLabelMargin"),
+                }).addStyleClass("BorderRight width80Percent jbMR1tempfix"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//
@@ -101,7 +102,7 @@ $.extend(IOMy.devices.garagedoor,{
 											}
 										}).addStyleClass(""),
 									]
-								}).addStyleClass("ElementCenter"),
+								}).addStyleClass("MarTop5px MarLeft40px"),
 							]
 						}).addStyleClass("width100Percent")
 					]
