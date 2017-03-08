@@ -26,14 +26,12 @@ $.sap.declare("IOMy.common.createExtraThingProperties",true);
 
 $.extend(IOMy.common,{
     
-    createExtraThingProperties : function (mThing) {
+    createExtraThingProperties : function (iThing) {
         //--------------------------------------------------------------------//
         // Declare variables
         //--------------------------------------------------------------------//
         var me          = this;
-        var iThingType  = mThing.ThingTypeId;
-        
-        console.log(mThing);
+        var iThingType  = IOMy.common.ThingList["_"+iThing].ThingTypeId;
         
         //--------------------------------------------------------------------//
         // Add any methods and properties to these thing objects depending on
@@ -42,12 +40,11 @@ $.extend(IOMy.common,{
         
         //-- If this is a door lock... --//
         if (iThingType == -1) {
-            mThing.UnlockTimeout            = null; // JS Timeout:  To store the timeout function that is supposed to lock the door after a period of time.
-            mThing.Switches                 = {};   // Array:       Stores the widgets that will act as switches.
+            IOMy.common.ThingList["_"+iThing].SwitchTimeout            = null; // JS Timeout:  To store the timeout function that is supposed to lock the door after a period of time.
+            IOMy.common.ThingList["_"+iThing].Switches                 = {};   // Array:       Stores the widgets that will act as switches.
+            IOMy.common.ThingList["_"+iThing].StatusLabels             = {};
             
         }
-        
-        return mThing;
     }
     
 });

@@ -107,7 +107,8 @@ $.extend(IOMy.experimental,{
                         //--------------------------------------------------------//
                         //-- Add the Thing                                      --//
                         //--------------------------------------------------------//
-                        IOMy.common.ThingList["_"+iTempThingId] = IOMy.common.createExtraThingProperties(oTempThing);
+                        IOMy.common.ThingList["_"+iTempThingId] = oTempThing;
+                        IOMy.common.createExtraThingProperties(iTempThingId);
 
                         //--------------------------------------------------------//
                         //-- Check that the Premise is setup in the Rooms List  --//

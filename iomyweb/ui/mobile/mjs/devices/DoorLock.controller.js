@@ -86,9 +86,7 @@ sap.ui.controller("mjs.devices.DoorLock", {
 * @memberOf mjs.devices.DoorLock
 */
 	onAfterRendering: function() {
-        var me = this;
         
-        //me.DrawUI();
 	},
 
 /**
@@ -133,10 +131,36 @@ sap.ui.controller("mjs.devices.DoorLock", {
         var me = this; // Captures the scope of this controller.
         var thisView = me.getView(); // Captures this controller's view.
         var sDefaultText = "N/A";
+        var sSwitchText = "";
+        var sSwitchIcon = "";
+        var sStatusText = "";
         
-        //-- If the switches array has not been created yet, create it. --//
+        //-- Get the current status and use it to say whether it's locked or not. --//
+        if (IOMy.common.ThingList["_"+me.mThing.Id].Status === 1) {
+            sStatusText = "Locked";
+            
+            // Set the switch to unlock it.
+            sSwitchText = "Unlock";
+            sSwitchIcon = "sap-icon://GoogleMaterial/lock_open";
+            
+        } else if (IOMy.common.ThingList["_"+me.mThing.Id].Status === 0) {
+            sStatusText = "Unlocked";
+            
+            // Set the switch to lock it.
+            sSwitchText = "Lock";
+            sSwitchIcon = "sap-icon://GoogleMaterial/lock";
+        }
+        
+        //-------------------------------------------------------------------//
+        // If the switches and status labels arrays have not been created yet,
+        // create them.
+        //-------------------------------------------------------------------//
         if (IOMy.common.ThingList["_"+me.mThing.Id].Switches === undefined) {
             IOMy.common.ThingList["_"+me.mThing.Id].Switches = {};
+        }
+        
+        if (IOMy.common.ThingList["_"+me.mThing.Id].StatusLabels === undefined) {
+            IOMy.common.ThingList["_"+me.mThing.Id].StatusLabels = {};
         }
         
         //-------------------------------------------------------------------//
@@ -144,8 +168,8 @@ sap.ui.controller("mjs.devices.DoorLock", {
         //-------------------------------------------------------------------//
         
         //-- Status --//
-        me.wStatusField = new sap.m.Text ({
-            text : "Locked",
+        me.wStatusField = new sap.m.Text ( me.createId("StatusField"), {
+            text : sStatusText,
             textAlign : "Right",
             width : "100%"
         });
@@ -172,61 +196,21 @@ sap.ui.controller("mjs.devices.DoorLock", {
         });
         
         //-- Control Switch --//
-        me.wControlSwitch = new sap.m.Button({
-            icon : "sap-icon://GoogleMaterial/lock_open",
+        me.wControlSwitch = new sap.m.Button(me.createId("doorSwitch_"+me.mThing.Id), {
+            icon : sSwitchIcon,
 			width: "95px",
-            text : "Unlock",
+            text : sSwitchText,
             press : function () {
-                var thisButton = this;
-                
-                /*
-                 * The door lock should unlock and remain unlocked for a set period.
-                 * 
-                 */
-                            
-                IOMy.devices.doorlock.ToggleDoorLockSwitch(me.mThing.Id);
-                
-                if (thisButton.getText() === "Unlock") {
-                    //me.wStatusField.setText("Locked");
-                    
-                    if (IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout !== null &&
-                            IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout !== undefined)
-                    {
-                        clearTimeout(IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout);
-                        IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout = null;
-                    }
-                    
-                } else if (thisButton.getText() === "Lock") {
-                    //me.wStatusField.setText("Unlocked");
-                    
-                    if (IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout === null ||
-                            IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout === undefined)
-                    {
-                        IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout = setTimeout(
-                            function () {
-                                IOMy.devices.doorlock.ToggleDoorLockSwitch(me.mThing.Id);
-
-//                                if (thisButton.getText() === "Unlock") {
-//                                    me.wStatusField.setText("Locked");
-//                                } else if (thisButton.getText() === "Lock") {
-//                                    me.wStatusField.setText("Unlocked");
-//                                }
-                                
-                                //-- Clean up --//
-                                clearTimeout(IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout);
-                                IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout = null;
-                            },
-                        5000);
-                    }
-                }
-                
-                //if (IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout !== null) {
-                    
-                //}
+                IOMy.devices.doorlock.RunSwitch(me.mThing.Id);
             }
         }).addStyleClass("MarLeft10Percent");
         
-        IOMy.common.ThingList["_"+me.mThing.Id].Switches[oApp.getCurrentPage().getId()] = me.wControlSwitch;
+        //-------------------------------------------------------------------//
+        // Insert the switch and status field IDs into their respective arrays
+        // in its Thing object.
+        //-------------------------------------------------------------------//
+        IOMy.common.ThingList["_"+me.mThing.Id].StatusLabels[ thisView.getId() ] = me.createId("StatusField");
+        IOMy.common.ThingList["_"+me.mThing.Id].Switches[ thisView.getId() ] = me.createId("doorSwitch_"+me.mThing.Id);
         
         //-------------------------------------------------------------------//
         // Arrange the fields into a UI5 List
@@ -270,9 +254,9 @@ sap.ui.controller("mjs.devices.DoorLock", {
                     label : "Switch:",
                     content : [
                         //-- Column 2 for Control Switch Row --//
-                        me.wControlSwitch
+                        sap.ui.getCore().byId(IOMy.common.ThingList["_"+me.mThing.Id].Switches[ thisView.getId() ])
                     ]
-                }),
+                })
             ]
         });
         

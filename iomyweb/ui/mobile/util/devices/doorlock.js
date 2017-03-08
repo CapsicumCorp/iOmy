@@ -38,7 +38,8 @@ $.extend(IOMy.devices.doorlock,{
     bLoadingFieldsFromAPI       : false,
     bLoadingMotionSensorFields  : false,
     
-    // -- Resource Types for the Door Lock IOs
+    //-- TODO: Place the resource types for this particular device when we have an API for the device. --//
+    //-- Resource Types for the Door Lock IOs --//
     RSBattery       : 2111,
     RSMisc          : 4000,
     RSBitwiseStatus : 3909,
@@ -48,32 +49,29 @@ $.extend(IOMy.devices.doorlock,{
     LinkTypeID          : -1,
     ThingTypeID         : -1,
     
-    ToggleLockSwitch : function (wWidget) {
-        var me = this;
-        
-        if (wWidget.getText() === "Unlock") {
-            wWidget.setText("Lock");
-            wWidget.setIcon("sap-icon://GoogleMaterial/lock");
-        } else if (wWidget.getText() === "Lock") {
-            wWidget.setText("Unlock");
-            wWidget.setIcon("sap-icon://GoogleMaterial/lock_open");
-        }
-    },
-	
-	GetCommonUI: function( sPrefix, oViewScope, aDeviceData ) {
+    GetCommonUI: function( sPrefix, oViewScope, aDeviceData ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
 		
-		var oUIObject			= null;					//-- OBJECT:			--//
-		var aUIObjectItems		= [];					//-- ARRAY:             --//
-		
-		// Added in temporarily until functionality is implemented by Brent
 		var me = this;
+		var oUIObject			= null;					//-- OBJECT:	The device entry
+        var sSwitchText         = "";                   //-- STRING:    Text to display on the button.
+        var sSwitchIcon         = "";                   //-- STRING:    Icon to display on the button.
+		var sPageId             = oViewScope.getView().getId(); //-- STRING:    ID of the page that this will display on.
         
-        //------------------------------------//
-		//-- 2.0 - Fetch UI					--//
-		//------------------------------------//
+        //--------------------------------------------------------------------//
+		// Prepare the switch with the right text and icon.
+		//--------------------------------------------------------------------//
+        
+        if (IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status === 1) {
+            sSwitchText = "Unlock";
+            sSwitchIcon = "sap-icon://GoogleMaterial/lock_open";
+            
+        } else if (IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status === 0) {
+            sSwitchText = "Lock";
+            sSwitchIcon = "sap-icon://GoogleMaterial/lock";
+        }
         
         //-- If the switches array has not been created yet, create it. --//
         if (IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches === undefined) {
@@ -81,61 +79,19 @@ $.extend(IOMy.devices.doorlock,{
         }
         
         //--------------------------------------------------------------------//
-        // Create the Switch that is unique to the current device, if it does
-        // not exist already.
+        // Create the switch.
         //--------------------------------------------------------------------//
-        if (IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches[oApp.getCurrentPage().getId()] === undefined ||
-                IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches[oApp.getCurrentPage().getId()] === null)
-        {
-            me["wDoorLock_"+aDeviceData.DeviceId] = new sap.m.Button({
-                icon : "sap-icon://GoogleMaterial/lock_open",
-                width: "95px",
-                text : "Unlock",
-                press : function () {
-                    var thisButton = this;
+        new sap.m.Button(oViewScope.createId(sPageId+"Button_"+aDeviceData.DeviceId), {
+            icon : sSwitchIcon,
+            width: "95px",
+            text : sSwitchText,
+            press : function () {
+                me.RunSwitch(aDeviceData.DeviceId);
+            }
+        }).addStyleClass("");
 
-                    me.ToggleDoorLockSwitch(aDeviceData.DeviceId);
-
-                    if (thisButton.getText() === "Unlock") {
-                        //me.wStatusField.setText("Locked");
-
-                        if (IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout !== null &&
-                                IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout !== undefined)
-                        {
-                            clearTimeout(IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout);
-                            IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout = null;
-                        }
-
-                    } else if (thisButton.getText() === "Lock") {
-                        //me.wStatusField.setText("Unlocked");
-
-                        if (IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout === null ||
-                                IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout === undefined)
-                        {
-                            IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout = setTimeout(
-                                function () {
-                                    me.ToggleDoorLockSwitch(aDeviceData.DeviceId);
-
-    //                                if (thisButton.getText() === "Unlock") {
-    //                                    me.wStatusField.setText("Locked");
-    //                                } else if (thisButton.getText() === "Lock") {
-    //                                    me.wStatusField.setText("Unlocked");
-    //                                }
-
-                                    //-- Clean up --//
-                                    clearTimeout(IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout);
-                                    IOMy.common.ThingList["_"+aDeviceData.DeviceId].UnlockTimeout = null;
-                                },
-                            5000);
-                        }
-                    }
-                }
-            }).addStyleClass("");
-            
-            //-- Add the switch to the switches array. --//
-            IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches[oApp.getCurrentPage().getId()] = me["wDoorLock_"+aDeviceData.DeviceId];
-        }
-        
+        //-- Add the switch to the switches array. --//
+        IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches[ sPageId ] = oViewScope.createId(sPageId+"Button_"+aDeviceData.DeviceId);
         
         //--------------------------------------------------------------------//
         // Draw the UI entry for the Door Lock
@@ -171,7 +127,7 @@ $.extend(IOMy.devices.doorlock,{
                                     items : [
                                         // Added in temporarily until functionality is implemented by Brent
                                         // Doors will auto lock after 5 - 20 seconds
-                                        IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches[oApp.getCurrentPage().getId()]
+                                        sap.ui.getCore().byId(IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches[ sPageId ])
                                     ]
                                 }).addStyleClass("ElementCenter"),
                             ]
@@ -186,30 +142,120 @@ $.extend(IOMy.devices.doorlock,{
 		//------------------------------------//
 		return oUIObject;
 	},
-	// Added in temporarily until functionality is implemented by Brent
-	ToggleDoorLockSwitch : function (iThingId) {
-        var me = this;
-        var aaSwitches = IOMy.common.ThingList["_"+iThingId].Switches;
-        
-        $.each(aaSwitches, function (sIndex, oSwitchWidget) {
-            if (oSwitchWidget.getText() === "Unlock") {
-                oSwitchWidget.setText("Lock");
-                oSwitchWidget.setIcon("sap-icon://GoogleMaterial/lock");
-            } else if (oSwitchWidget.getText() === "Lock") {
-                oSwitchWidget.setText("Unlock");
-                oSwitchWidget.setIcon("sap-icon://GoogleMaterial/lock_open");
+    
+    /**
+     * Either locks or unlocks a given bluetooth door lock. If the user unlocks 
+     * the door, it will lock again after a set amount of seconds.
+     * 
+     * @param {type} iThingId                   The ID of the door lock.
+     */
+    RunSwitch : function (iThingId) {
+        //------------------------------------------------------------//
+        // Change the door lock status
+        //------------------------------------------------------------//
+        IOMy.devices.doorlock.ToggleDoorLockSwitch(iThingId);
+
+        //------------------------------------------------------------//
+        // If the door locks...
+        //------------------------------------------------------------//
+        if (IOMy.common.ThingList["_"+iThingId].Status === 1) {
+
+            //--------------------------------------------------------//
+            // Clear any timeout function for locking the door.
+            //--------------------------------------------------------//
+            if (IOMy.common.ThingList["_"+iThingId].SwitchTimeout !== null &&
+                    IOMy.common.ThingList["_"+iThingId].SwitchTimeout !== undefined)
+            {
+                clearTimeout(IOMy.common.ThingList["_"+iThingId].SwitchTimeout);
+                IOMy.common.ThingList["_"+iThingId].SwitchTimeout = null;
             }
-        });
+
+        //------------------------------------------------------------//
+        // If the door unlocks...
+        //------------------------------------------------------------//
+        } else if (IOMy.common.ThingList["_"+iThingId].Status === 0) {
+
+            //--------------------------------------------------------//
+            // Create the timeout function and store it in its thing.
+            //--------------------------------------------------------//
+            if (IOMy.common.ThingList["_"+iThingId].SwitchTimeout === null ||
+                    IOMy.common.ThingList["_"+iThingId].SwitchTimeout === undefined)
+            {
+                //----------------------------------------------------//
+                // After 5 seconds the door locks itself.
+                //----------------------------------------------------//
+                IOMy.common.ThingList["_"+iThingId].SwitchTimeout = setTimeout(
+                    function () {
+                        IOMy.devices.doorlock.ToggleDoorLockSwitch(iThingId);
+
+                        //-- Clean up --//
+                        clearTimeout(IOMy.common.ThingList["_"+iThingId].SwitchTimeout);
+                        IOMy.common.ThingList["_"+iThingId].SwitchTimeout = null;
+                    },
+                5000);
+            }
+        }
+    },
+    
+	/**
+     * Changes the status of the bluetooth door lock and reports the new state
+     * of the door.
+     * 
+     * All switches as well as any status labels that it recognises will be
+     * affected by this change.
+     * 
+     * A switch will then display either 'Unlock' or 'Lock'.
+     * 
+     * Status labels will display either 'Unlocked' or 'Locked'.
+     * 
+     * @param {type} iThingId           ID of the garage door.
+     */
+	ToggleDoorLockSwitch : function (iThingId) {
+        //--------------------------------------------------------------------//
+        // Declare variable
+        //--------------------------------------------------------------------//
+        var me              = this;                                             // Door Lock Module scope.
+        var aaSwitches      = IOMy.common.ThingList["_"+iThingId].Switches;     // Associative Array for switch IDs for different pages.
+        var aaStatusLabels  = IOMy.common.ThingList["_"+iThingId].StatusLabels; // Associative Array for the status label IDs.
+        var oWidget;                                                            // Temporary placeholder for holding a widget while it's being manipulated.
         
-//        for (var i = 0; i < aSwitches.length; i++) {
-//            if (aSwitches[i].getText() === "Unlock") {
-//                aSwitches[i].setText("Lock");
-//                aSwitches[i].setIcon("sap-icon://GoogleMaterial/lock");
-//            } else if (aSwitches[i].getText() === "Lock") {
-//                aSwitches[i].setText("Unlock");
-//                aSwitches[i].setIcon("sap-icon://GoogleMaterial/lock_open");
-//            }
-//        }
+        //--------------------------------------------------------------------//
+        // Traverse through the associative array to work on the switches.
+        //--------------------------------------------------------------------//
+        if (aaSwitches !== undefined) {
+            $.each(aaSwitches, function (sIndex, sWidgetID) {
+                oWidget = sap.ui.getCore().byId(sWidgetID);
+
+                if (oWidget.getText() === "Unlock") {
+                    oWidget.setText("Lock");
+                    oWidget.setIcon("sap-icon://GoogleMaterial/lock");
+                    IOMy.common.ThingList["_"+iThingId].Status = 0;
+                    IOMy.experimental.updateThingField(iThingId, "ThingStatus", 0);
+                } else if (oWidget.getText() === "Lock") {
+                    oWidget.setText("Unlock");
+                    oWidget.setIcon("sap-icon://GoogleMaterial/lock_open");
+                    IOMy.common.ThingList["_"+iThingId].Status = 1;
+                    IOMy.experimental.updateThingField(iThingId, "ThingStatus", 1);
+                }
+
+            });
+        } 
+        
+        //--------------------------------------------------------------------//
+        // Traverse through the associative array to work on the status labels.
+        //--------------------------------------------------------------------//
+        if (aaStatusLabels !== undefined) {
+            $.each(aaStatusLabels, function (sIndex, sWidgetID) {
+                oWidget = sap.ui.getCore().byId(sWidgetID);
+
+                if (IOMy.common.ThingList["_"+iThingId].Status === 0) {
+                    oWidget.setText("Unlocked");
+                } else if (IOMy.common.ThingList["_"+iThingId].Status === 1) {
+                    oWidget.setText("Locked");
+                }
+            });
+        }
+        
     },
 	
     GetCommonUITaskList: function( Prefix, oViewScope, aDeviceData ) {

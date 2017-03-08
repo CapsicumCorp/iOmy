@@ -59,15 +59,9 @@ sap.ui.controller("mjs.devices.Garagedoor", {
                 me.mThing = IOMy.common.ThingList["_"+evt.data.ThingId];
                 me.iID = evt.data.ThingId;
                 
-                var iStatus = me.GetCurrentStatus();
+                me.byId("list").destroyItems();
+                me.DrawUI();
                 
-                if (me.wControlButton !== null) {
-                    if (iStatus < 0) {
-                        me.wControlButton.setEnabled(false);
-                    } else {
-                        me.wControlButton.setEnabled(true);
-                    }
-                }
 			}
 		});
 	},
@@ -94,7 +88,7 @@ sap.ui.controller("mjs.devices.Garagedoor", {
         var oView       = this.getView();
 
 
-        oController.DrawUI(); 
+        //oController.DrawUI(); 
 	},
 /**
 * Called when the Controller is destroyed. Use this one to free resources and finalize activities.
@@ -103,35 +97,6 @@ sap.ui.controller("mjs.devices.Garagedoor", {
 	onExit: function() {
 
 	},
-    
-    DetermineStatus : function () {
-        //--------------------------------------------------------------------//
-        // Capture scope. Determine what the status field should say.
-        //--------------------------------------------------------------------//
-        var me = this;
-        
-        // Determine whether it's open or closed.
-        if (me.mThing.Status === 1) {
-            // Determine if it's opening at the moment.
-            if (me.mThing.Opening === true && me.mThing.Opening !== undefined) {
-                me.ListItem.wStatus.text = "Opening";
-                me.wControlButton.setEnabled(false);
-            } else {
-                // If not, it's closed.
-                me.ListItem.wStatus.text = "Closed";
-            }
-            
-        } else if (me.mThing.Status === 0) {
-            // Determine if it's closing at the moment.
-            if (me.mThing.Closing === true && me.mThing.Closing !== undefined) {
-                me.ListItem.wStatus.text = "Closing";
-                me.wControlButton.setEnabled(false);
-            } else {
-                // If not, it's open.
-                me.ListItem.wStatus.text = "Open";
-            }
-        }
-    },
 	
 	DrawUI: function(  ) {
         //--------------------------------------------//
@@ -141,28 +106,49 @@ sap.ui.controller("mjs.devices.Garagedoor", {
         var oView               = this.getView();
         var iStatus             = oController.GetCurrentStatus();
         var oList               = oController.byId("list");
+        var mStatusInfo         = IOMy.devices.garagedoor.GetSwitchStatus(oController.mThing.Id, oView);
         
-		//--------------------------------------------------------//
+		//-------------------------------------------------------------------//
+        // If the switches and status labels arrays have not been created yet,
+        // create them.
+        //-------------------------------------------------------------------//
+        if (IOMy.common.ThingList["_"+oController.mThing.Id].Switches === undefined) {
+            IOMy.common.ThingList["_"+oController.mThing.Id].Switches = {};
+        }
+        
+        if (IOMy.common.ThingList["_"+oController.mThing.Id].StatusLabels === undefined) {
+            IOMy.common.ThingList["_"+oController.mThing.Id].StatusLabels = {};
+        }
+        
+        //--------------------------------------------------------//
 		//-- Draw 1st Run Page 2                                --//
 		//--------------------------------------------------------//
 		
-        oController.wControlButton = new sap.m.Button({
-            icon        : "sap-icon://GoogleMaterial/lock_open",
-            text        : "Open",
+        oController.wControlButton = new sap.m.Button(oController.createId("doorSwitch_"+oController.mThing.Id), {
+            icon        : mStatusInfo.switchIcon,
+            text        : mStatusInfo.switchText,
+            enabled     : mStatusInfo.switchEnabled,
             press : function () {
-                oController.ToggleDoor();
+                IOMy.devices.garagedoor.RunSwitch(oController.mThing.Id);
             }
         });
-        
-        oController.DetermineStatus();
 
 		if( oList ) {
 			$.each( oController.ListItem, function( sVariable, aListItem ) {
 				try {
-                    oController[ sVariable ] = new sap.m.Text ({
-                        text : aListItem.text,
-                        textAlign : "Right",
-                    });
+                    if (sVariable === "wStatus") {
+                        oController[ sVariable ] = new sap.m.Text (oController.createId("StatusField"), {
+                            text : mStatusInfo.statusText,
+                            textAlign : "Right",
+                        });
+                        
+                    } else {
+                        oController[ sVariable ] = new sap.m.Text ({
+                            text : aListItem.text,
+                            textAlign : "Right",
+                        });
+                        
+                    }
                     
 					oList.addItem(
 						//-- Column 1 --//
@@ -198,6 +184,14 @@ sap.ui.controller("mjs.devices.Garagedoor", {
 		} else {
 			console.log("GD List Error - Unable to Find the List");
 		}
+        
+        //-------------------------------------------------------------------//
+        // Insert the switch and status field IDs into their respective arrays
+        // in its Thing object.
+        //-------------------------------------------------------------------//
+        IOMy.common.ThingList["_"+oController.mThing.Id].StatusLabels[ oView.getId() ] = oController.createId("StatusField");
+        IOMy.common.ThingList["_"+oController.mThing.Id].Switches[ oView.getId() ] = oController.createId("doorSwitch_"+oController.mThing.Id);
+        
 	},
     
     ToggleDoor : function () {

@@ -37,3 +37,6 @@ $.sap.require("IOMy.experimental.addDemoDataToLinkTypeList");
 
 $.sap.registerModulePath('IOMy.experimental', sModuleInitialBuildLocation+'util/experimental');
 $.sap.require("IOMy.experimental.addDemoDataToThingList");
+
+$.sap.registerModulePath('IOMy.experimental', sModuleInitialBuildLocation+'util/experimental');
+$.sap.require("IOMy.experimental.updateThingField");

@@ -38,7 +38,8 @@ $.extend(IOMy.devices.garagedoor,{
     bLoadingFieldsFromAPI       : false,
     bLoadingMotionSensorFields  : false,
     
-    // -- Resource Types for the Window Sensor IOs
+    //-- TODO: Place the resource types for this particular device when we have an API for the device. --//
+    //-- Resource Types for the Garage Door IOs --//
     RSBattery       : 2111,
     RSMisc          : 4000,
     RSBitwiseStatus : 3909,
@@ -53,16 +54,36 @@ $.extend(IOMy.devices.garagedoor,{
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
 		
+		var me = this;
 		var oUIObject			= null;					//-- OBJECT:			--//
 		var aUIObjectItems		= [];					//-- ARRAY:             --//
+        var mSwitchInfo         = me.GetSwitchStatus(aDeviceData.DeviceId, oViewScope);
+        var sSwitchText         = mSwitchInfo.switchText;                   //-- STRING:    Text to display on the button.
+        var sSwitchIcon         = mSwitchInfo.switchIcon;                   //-- STRING:    Icon to display on the button.
+        var bSwitchEnabled      = mSwitchInfo.switchEnabled;
+		var sPageId             = oViewScope.getView().getId(); //-- STRING:    ID of the page that this will display on.
+                
+        //-- If the switches array has not been created yet, create it. --//
+        if (IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches === undefined) {
+            IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches = {};
+        }
         
-        // Added in temporarily until functionality is implemented by Brent
-		var me = this;
-		
-        //------------------------------------//
-		//-- 2.0 - Fetch UI					--//
-		//------------------------------------//
-		
+        //--------------------------------------------------------------------//
+        // Create the switch.
+        //--------------------------------------------------------------------//
+        new sap.m.Button(oViewScope.createId(sPageId+"Button_"+aDeviceData.DeviceId), {
+            icon : sSwitchIcon,
+            width: "95px",
+            text : sSwitchText,
+            enabled : bSwitchEnabled,
+            press : function () {
+                me.RunSwitch(aDeviceData.DeviceId);
+            }
+        });
+
+        //-- Add the switch to the switches array. --//
+        IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches[ sPageId ] = oViewScope.createId(sPageId+"Button_"+aDeviceData.DeviceId);
+        
 		oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: [
                 //------------------------------------//
@@ -92,50 +113,7 @@ $.extend(IOMy.devices.garagedoor,{
 							items: [
 								new sap.m.VBox({
 									items : [
-										// Added in temporarily until functionality is implemented by Brent
-										new sap.m.Button({
-											icon : "sap-icon://GoogleMaterial/lock_open",
-											width: "95px",
-											text : "Open",
-											press : function () {
-                                                var thisButton = this;
-                                                thisButton.setEnabled(false);
-                                                
-                                                if (thisButton.getText() === "Close") {
-                                                    thisButton.setText("Closing");
-                                                    thisButton.setIcon("sap-icon://GoogleMaterial/lock");
-                                                    //IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = -1; // Closing
-                                                    IOMy.common.ThingList["_"+aDeviceData.DeviceId].Closing = true; // Closing
-                                                } else if (thisButton.getText() === "Open") {
-                                                    thisButton.setText("Opening");
-                                                    thisButton.setIcon("sap-icon://GoogleMaterial/lock_open");
-                                                    //IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = -2; // Opening
-                                                    IOMy.common.ThingList["_"+aDeviceData.DeviceId].Opening = true; // Opening
-                                                }
-                                                //----------------------------------------------------------------//
-                                                // Function to update the control button after the switch is completed.
-                                                //----------------------------------------------------------------//
-												me.ToggleGarageSwitch([
-                                                    function () {
-                                                        if (thisButton.getText() === "Closing") {
-                                                            IOMy.common.ThingList["_"+aDeviceData.DeviceId].Closing = false;
-                                                            IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = 0;
-                                                            thisButton.setIcon("sap-icon://GoogleMaterial/lock_open");
-                                                            thisButton.setText("Open");
-
-                                                        } else if (thisButton.getText() === "Opening") {
-                                                            IOMy.common.ThingList["_"+aDeviceData.DeviceId].Opening = false;
-                                                            IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = 1;
-                                                            thisButton.setIcon("sap-icon://GoogleMaterial/lock");
-                                                            thisButton.setText("Close");
-
-                                                        }
-
-                                                        thisButton.setEnabled(true);
-                                                    }
-                                                ]);
-											}
-										}).addStyleClass(""),
+                                        sap.ui.getCore().byId(IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches[ sPageId ])
 									]
 								}).addStyleClass("MarTop5px MarLeft40px"),
 							]
@@ -144,142 +122,239 @@ $.extend(IOMy.devices.garagedoor,{
 				}).addStyleClass("minwidth170px minheight58px")
             ]
         }).addStyleClass("ListItem");
-
-        //--------------------------------------------------------------------//
-        //-- ADD THE STATUS BUTTON TO THE UI								--//
-        //--------------------------------------------------------------------//
-
-//        //-- Initialise Variables --//
-//        var sStatusButtonText			= "";
-//        var bButtonStatus				= false;
-//
-//        //-- Store the Device Status --//
-//        var iDeviceStatus		= aDeviceData.DeviceStatus;
-//        var iTogglePermission	= aDeviceData.PermToggle;
-//        //var iTogglePermission	= 0;
-//
-//
-//        //-- Set Text --//
-//        if( iDeviceStatus===0 ) {
-//            sStatusButtonText	= "Off";
-//            bButtonStatus		= false;
-//        } else {
-//            sStatusButtonText	= "On";
-//            bButtonStatus		= true;
-//        }
-//
-//        //-- DEBUGGING --//
-//        //jQuery.sap.log.debug("PERM = "+sPrefix+" "+iTogglePermission);
-//
-//        //------------------------------------//
-//        //-- Make the Container				--//
-//        //------------------------------------//
-//        var oUIStatusContainer = new sap.m.VBox( oViewScope.createId( sPrefix+"_StatusContainer"), {
-//            items:[] 
-//        }).addStyleClass("minwidth80px PadTop10px PadLeft5px");	//-- END of VBox that holds the Toggle Button
-//
-//
-//        //-- Add the Button's background colour class --//
-//        if( iTogglePermission===0 ) {
-//
-//            //----------------------------//
-//            //-- NON TOGGLEABLE BUTTON	--//
-//            //----------------------------//
-//            oUIStatusContainer.addItem(
-//                new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
-//                    state: bButtonStatus,
-//                    enabled: false
-//                }).addStyleClass("DeviceOverviewStatusToggleSwitch")
-//            );
-//
-//        } else {
-//
-//            //----------------------------//
-//            //-- TOGGLEABLE BUTTON		--//
-//            //----------------------------//
-//            oUIStatusContainer.addItem(
-//                new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
-//                    state: bButtonStatus,
-//                    change: function () {
-//                //new sap.m.ToggleButton( oViewScope.createId( sPrefix+"_StatusToggle"), {
-//                    //text: sStatusButtonText,
-//                    //pressed: bButtonStatus,
-//                    //press : function () {
-//                        //-- Bind a link to this button for subfunctions --//
-//                        var oCurrentButton = this;
-//                        //-- AJAX --//
-//                        IOMy.apiphp.AjaxRequest({
-//                            url: IOMy.apiphp.APILocation("statechange"),
-//                            type: "POST",
-//                            data: { 
-//                                "Mode":"ThingToggleStatus", 
-//                                "Id": aDeviceData.DeviceId
-//                            },
-//                            onFail : function(response) {
-//                                IOMy.common.showError(response.message, "Error Changing Device Status");
-//                            },
-//                            onSuccess : function( sExpectedDataType, aAjaxData ) {
-//                                console.log(aAjaxData.ThingPortStatus);
-//                                //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
-//                                if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
-//                                    IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
-//                                }
-//                            }
-//                        });
-//                    }
-//                }).addStyleClass("DeviceOverviewStatusToggleSwitch") //-- END of ToggleButton --//
-//                //}).addStyleClass("DeviceOverviewStatusToggleButton TextWhite Font-RobotoCondensed Font-Large"); //-- END of ToggleButton --//
-//            );
-//        }
-//
-//        oUIObject.addItem(oUIStatusContainer);
-		
 		
 		//------------------------------------//
 		//-- 9.0 - RETURN THE RESULTS		--//
 		//------------------------------------//
 		return oUIObject;
 	},
-	
-	// Added in temporarily until functionality is implemented by Brent
-	ToggleGarageSwitch : function (aFunctions) {
-        var me = this;
-        var oController;
+    
+    GetSwitchStatus : function(iThingId, oViewScope) {
+        //--------------------------------------------------------------------//
+		// Check that the arguments are given
+		//--------------------------------------------------------------------//
+        var sErrorMessage = "Error Retrieving Garage Switch Status:";          // Error message
+        
+        //-- Check the Thing ID --//
+        if (iThingId === undefined) {
+            //-- It doesn't exist... --//
+            sErrorMessage += " Thing ID is not given!";
+            jQuery.sap.log.error(sErrorMessage);
+            throw sErrorMessage;
+            
+        } else if (isNaN(iThingId)) {
+            //-- It's not a number --//
+            sErrorMessage += " Thing ID is not a valid number";
+            jQuery.sap.log.error(sErrorMessage);
+            throw sErrorMessage;
+        }
+        
+        //-- Check the given view to fetch the page ID. --//
+        if (oViewScope === undefined) {
+            sErrorMessage += " Scope of a given page/view is not given!";
+            jQuery.sap.log.error(sErrorMessage);
+            throw sErrorMessage;
+        }
         
         //--------------------------------------------------------------------//
-        // After 15 seconds, run the functions in an array.
+		// Declare variables
+		//--------------------------------------------------------------------//
+        var sStatusText         = "";                       //-- STRING:    Text to display on the status field.
+        var sSwitchText         = "";                       //-- STRING:    Text to display on the button.
+        var sSwitchIcon         = "";                       //-- STRING:    Icon to display on the button.
+        var bSwitchEnabled;                                 //-- BOOLEAN
+        var mInfo               = {};                       //-- MAP:       Contains the variables for setting the switch properties.
+        
         //--------------------------------------------------------------------//
-        setTimeout(
-            function () {
+		// Prepare the switch with the right text and icon.
+		//--------------------------------------------------------------------//
+        if (IOMy.common.ThingList["_"+iThingId].Status === 0) {
+            //----------------------------------------------------------------//
+            // If the door is opening, specify so and disable the switch.
+            //----------------------------------------------------------------//
+            if (IOMy.common.ThingList["_"+iThingId].Opening && 
+                    IOMy.common.ThingList["_"+iThingId].Opening !== undefined)
+            {
+                sSwitchText = "Opening";
+                sSwitchIcon = "sap-icon://GoogleMaterial/lock_open";
+                bSwitchEnabled = false;
                 
-                for (var i = 0; i < aFunctions.length; i++) {
-                    aFunctions[i]();
+                sStatusText = "Opening";
+                
+            //----------------------------------------------------------------//
+            // Otherwise, the door is closed. The switch is set to open the
+            // door.
+            //----------------------------------------------------------------//
+            } else {
+                sSwitchText = "Open";
+                sSwitchIcon = "sap-icon://GoogleMaterial/lock_open";
+                bSwitchEnabled = true;
+                
+                sStatusText = "Closed";
+            }
+        } else if (IOMy.common.ThingList["_"+iThingId].Status === 1) {
+            //----------------------------------------------------------------//
+            // If the door is closing, specify so and disable the switch.
+            //----------------------------------------------------------------//
+            if (IOMy.common.ThingList["_"+iThingId].Closing && 
+                    IOMy.common.ThingList["_"+iThingId].Closing !== undefined)
+            {
+                sSwitchText = "Closing";
+                sSwitchIcon = "sap-icon://GoogleMaterial/lock";
+                bSwitchEnabled = false;
+                
+                sStatusText = "Closing";
+            //----------------------------------------------------------------//
+            // Otherwise, the door is open. The switch is set to close the door.
+            //----------------------------------------------------------------//
+            } else {
+                sSwitchText = "Close";
+                sSwitchIcon = "sap-icon://GoogleMaterial/lock";
+                bSwitchEnabled = true;
+                
+                sStatusText = "Open";
+            }
+        }
+        
+        //--------------------------------------------------------------------//
+        // Put the three variables into a map and return it to the calling
+        // function.
+        //--------------------------------------------------------------------//
+        mInfo = {
+            statusText : sStatusText,
+            switchText : sSwitchText,
+            switchIcon : sSwitchIcon,
+            switchEnabled : bSwitchEnabled
+        };
+        
+        return mInfo;
+    },
+    
+    RunSwitch : function (iThingId) {
+        IOMy.devices.garagedoor.ToggleGarageDoorSwitch(iThingId);
+        
+        //--------------------------------------------------------//
+        // Create the timeout function and store it in its thing.
+        //--------------------------------------------------------//
+        if (IOMy.common.ThingList["_"+iThingId].SwitchTimeout === null ||
+                IOMy.common.ThingList["_"+iThingId].SwitchTimeout === undefined)
+        {
+            //----------------------------------------------------//
+            // After 15 seconds the status and switch are updated.
+            //----------------------------------------------------//
+            IOMy.common.ThingList["_"+iThingId].SwitchTimeout = setTimeout(
+                function () {
+                    IOMy.devices.garagedoor.ToggleGarageDoorSwitch(iThingId);
+
+                    //-- Clean up --//
+                    clearTimeout(IOMy.common.ThingList["_"+iThingId].SwitchTimeout);
+                    IOMy.common.ThingList["_"+iThingId].SwitchTimeout = null;
+                },
+            15000);
+        }
+    },
+	
+    /**
+     * Changes the status of the garage door and reports the new state of the
+     * door.
+     * 
+     * All switches as well as any status labels that it recognises will be
+     * affected by this change.
+     * 
+     * A switch will then display either 'Open', 'Opening', 'Close', or
+     * 'Closing'. If the switch says either 'Opening' or 'Closing' then the
+     * switch is disabled. This is re-enabled by a timeout function set by
+     * IOMy.devices.garagedoor.RunSwitch().
+     * 
+     * Status labels will display either 'Open', 'Opening', 'Closed', or
+     * 'Closing'.
+     * 
+     * @param {type} iThingId           ID of the garage door.
+     */
+	ToggleGarageDoorSwitch : function(iThingId) {
+        var me = this;
+        var aaSwitches = IOMy.common.ThingList["_"+iThingId].Switches;
+        var aaStatusLabels = IOMy.common.ThingList["_"+iThingId].StatusLabels;
+        var oWidget;
+        
+        //--------------------------------------------------------------------//
+        // Traverse through the associative array to work on the switches.
+        //--------------------------------------------------------------------//
+        if (aaSwitches !== undefined) {
+            $.each(aaSwitches, function (sIndex, sWidgetID) {
+                oWidget = sap.ui.getCore().byId(sWidgetID);
+
+                //------------------------------------------------------------//
+                // Start opening the door.
+                //------------------------------------------------------------//
+                if (oWidget.getText() === "Open") {
+                    oWidget.setText("Opening");
+                    oWidget.setIcon("sap-icon://GoogleMaterial/lock_open");
+                    oWidget.setEnabled(false);
+                    IOMy.common.ThingList["_"+iThingId].Status = 0;
+                    IOMy.common.ThingList["_"+iThingId].Opening = true;
+                    IOMy.experimental.updateThingField(iThingId, "ThingStatus", 0);
+
+                //------------------------------------------------------------//
+                // Now open. The switch can close the door.
+                //------------------------------------------------------------//
+                } else if (oWidget.getText() === "Opening") {
+                    oWidget.setText("Close");
+                    oWidget.setIcon("sap-icon://GoogleMaterial/lock");
+                    oWidget.setEnabled(true);
+                    IOMy.common.ThingList["_"+iThingId].Status = 1;
+                    IOMy.common.ThingList["_"+iThingId].Opening = false;
+                    IOMy.experimental.updateThingField(iThingId, "ThingStatus", 1);
+
+                //------------------------------------------------------------//
+                // Start closing the door.
+                //------------------------------------------------------------//
+                } else if (oWidget.getText() === "Close") {
+                    oWidget.setText("Closing");
+                    oWidget.setIcon("sap-icon://GoogleMaterial/lock");
+                    oWidget.setEnabled(false);
+                    IOMy.common.ThingList["_"+iThingId].Status = 1;
+                    IOMy.common.ThingList["_"+iThingId].Closing = true;
+                    IOMy.experimental.updateThingField(iThingId, "ThingStatus", 1);
+
+                //------------------------------------------------------------//
+                // Now closed. The switch can open the door.
+                //------------------------------------------------------------//
+                } else if (oWidget.getText() === "Closing") {
+                    oWidget.setText("Open");
+                    oWidget.setIcon("sap-icon://GoogleMaterial/lock_open");
+                    oWidget.setEnabled(true);
+                    IOMy.common.ThingList["_"+iThingId].Status = 0;
+                    IOMy.common.ThingList["_"+iThingId].Closing = false;
+                    IOMy.experimental.updateThingField(iThingId, "ThingStatus", 0);
+
                 }
-                
-                //------------------------------------------------------------//
-                // If the current page is the Garage Door device page, enable
-                // the switch.
-                //------------------------------------------------------------//
-                if (oApp.getCurrentPage().getId() === "pDeviceGaragedoor") {
-                    oController = oApp.getCurrentPage().getController();
-                    
-                    if (oController.wStatus.getText() === "Opening") {
-                        oController.wStatus.setText("Open");
-                        oController.wControlButton.setIcon("sap-icon://GoogleMaterial/lock");
-                        oController.wControlButton.setText("Close");
-                        
-                    } else if (oController.wStatus.getText() === "Closing") {
-                        oController.wStatus.setText("Closed");
-                        oController.wControlButton.setIcon("sap-icon://GoogleMaterial/lock_open");
-                        oController.wControlButton.setText("Open");
-                        
+
+            });
+        } 
+        
+        //--------------------------------------------------------------------//
+        // Traverse through the associative array to work on the status labels.
+        //--------------------------------------------------------------------//
+        if (aaStatusLabels !== undefined) {
+            $.each(aaStatusLabels, function (sIndex, sWidgetID) {
+                oWidget = sap.ui.getCore().byId(sWidgetID);
+
+                if (IOMy.common.ThingList["_"+iThingId].Status === 0) {
+                    if (IOMy.common.ThingList["_"+iThingId].Opening) {
+                        oWidget.setText("Opening")
+                    } else {
+                        oWidget.setText("Closed");
                     }
-                    
-                    
-                    oController.wControlButton.setEnabled(true);
+                } else if (IOMy.common.ThingList["_"+iThingId].Status === 1) {
+                    if (IOMy.common.ThingList["_"+iThingId].Closing) {
+                        oWidget.setText("Closing")
+                    } else {
+                        oWidget.setText("Open");
+                    }
                 }
-            },
-        15000);
+            });
+        }
     },
 	
     GetCommonUIForDeviceOverview: function( sPrefix, oViewScope, aDeviceData ) {

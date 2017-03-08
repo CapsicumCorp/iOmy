@@ -185,6 +185,8 @@ sap.ui.controller("mjs.premise.Overview", {
             //==============================================\\
             var iDevicesInRoom;
             var aDevice;
+            // Create the collapse/expand icon.
+            var aDeviceArrow;
             
             $.each(rooms,function(sIndex,aRoom) {
                 //-- Verify that the Premise has rooms --//
@@ -196,6 +198,36 @@ sap.ui.controller("mjs.premise.Overview", {
                     
                     // Retrieve number of devices in a given room
                     iDevicesInRoom = IOMy.functions.getNumberOfDevicesInRoom(aRoom.RoomId);
+                    
+                    //--------------------------------------------------------//
+                    // If this rooom has devices attached. Create an array
+                    // containing a button to expand or collapse a list of those
+                    // devices
+                    //--------------------------------------------------------//
+                    if (JSON.stringify(aRoom.Things) !== "{}") {
+                        aDeviceArrow = [
+                            new sap.m.Button(me.createId("roomName"+sIndex), {
+                                icon : "sap-icon://navigation-down-arrow",
+                                press : function () {
+                                    if (me.roomsExpanded[sIndex] === false) {
+                                        me.byId("room"+sIndex).setVisible(true);
+                                        me.roomsExpanded[sIndex] = true;
+                                        this.setIcon("sap-icon://navigation-down-arrow");
+                                    } else {
+                                        me.byId("room"+sIndex).setVisible(false);
+                                        me.roomsExpanded[sIndex] = false;
+                                        this.setIcon("sap-icon://navigation-right-arrow");
+                                    }
+                                }
+                            }).addStyleClass("ButtonNoBorder IOMYButton ButtonIconGreen TextSize20px width100Percent")
+                        ];
+                        
+                    //--------------------------------------------------------//
+                    // Otherwise use an empty items array
+                    //--------------------------------------------------------//
+                    } else {
+                        aDeviceArrow = [];
+                    }
                     
                     //=========== Create the room entry =============\\
                     me.wRoomListBox.addItem(
@@ -223,29 +255,11 @@ sap.ui.controller("mjs.premise.Overview", {
                                     ]
                                 }).addStyleClass("TextOverflowEllipsis width100Percent jbMR1tempfix"),
                                 
-                                // === COLLAPSE/EXPAND ICON === \\
+                                // === COLLAPSE/EXPAND BUTTON PLACEHOLDER === \\
                                 // If there are things associated with a room via their links...
-                                (JSON.stringify(aRoom.Things) !== "{}") ?
-                                    // Create the collapse/expand icon.
-                                    new sap.m.VBox({
-                                        items : [
-                                            new sap.m.Button(me.createId("roomName"+sIndex), {
-                                                icon : "sap-icon://navigation-down-arrow",
-                                                press : function () {
-                                                    if (me.roomsExpanded[sIndex] === false) {
-                                                        me.byId("room"+sIndex).setVisible(true);
-                                                        me.roomsExpanded[sIndex] = true;
-                                                        this.setIcon("sap-icon://navigation-down-arrow");
-                                                    } else {
-                                                        me.byId("room"+sIndex).setVisible(false);
-                                                        me.roomsExpanded[sIndex] = false;
-                                                        this.setIcon("sap-icon://navigation-right-arrow");
-                                                    }
-                                                }
-                                            }).addStyleClass("ButtonNoBorder IOMYButton ButtonIconGreen TextSize20px width100Percent")
-                                        ]
-                                    }).addStyleClass("FlexNoShrink width70px")
-                                : {/* Otherwise, do nothing */}
+                                new sap.m.VBox({
+                                    items : aDeviceArrow
+                                }).addStyleClass("FlexNoShrink width70px")
                             ]
                         }).addStyleClass("ListItem minheight20px")
                     ).addItem(
