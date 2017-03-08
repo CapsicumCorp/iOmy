@@ -1672,6 +1672,12 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.StagingHome\" Page!\n"
 	},
+	{ 
+		"Id":			"pRulesOverview",
+		"Location":		"mjs.staging.RulesOverview",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.RulesOverview\" Page!\n"
+	},
 	
 ];
 

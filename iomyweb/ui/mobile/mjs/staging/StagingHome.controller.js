@@ -25,7 +25,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 sap.ui.controller("mjs.staging.StagingHome", {
 	
 	Staginglinks : [
-	//	{ "display" : "Blood Pressure Monitor" , "link" : "pBPM" },
+		{ "display" : "Rules Overview" , "link" : "pRulesOverview" },
 	],
 	
 	

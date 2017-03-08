@@ -80,8 +80,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 }
 
 /* Rename to ElementCenterChild */
-.DeviceLabelMargin > div {
-	margin: auto 0px;
+.DeviceLabelMargin > div:not(.sapMFlexBox) {
+	margin: auto;
+    margin-left: 0px;
+    margin-right: 0px;
 }
 
 /* Device Overview Sizing */
@@ -91,6 +93,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 /* Room Overview Sizing */
 .minheight73px {
 	min-height:73px;
+}
+
+.jbMR1tempfix {
+	-webkit-box-flex: 1;
 }
 /*************************************************** 
 ** For aligning segemented buttons & Select Boxes **
