@@ -131,6 +131,13 @@ else
 	if [ $? != 0 ] ; then
 	  exit 1
 	fi
+  # Copy the phpMyAdmin files from the download folder
+  echo "Copying phpMyAdmin files from the download folder"
+  bash ${basedir}/scriptlib/copyphpmyadmin.sh "${basedir}" "${basedir}/assetstmp" "${baseassetsdir}"
+  if [ $? != 0 ] ; then
+    echo "Error running ${basedir}/copyphpmyadmin.sh"
+    exit 1
+  fi
 fi
 
 source "${basedir}/package_info.sh"
