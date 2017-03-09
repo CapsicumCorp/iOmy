@@ -185,7 +185,7 @@ sap.ui.controller("mjs.premise.Overview", {
             //==============================================\\
             var iDevicesInRoom;
             var aDevice;
-            // Create the collapse/expand icon.
+            // Create the collapse/expand icon in an array of widgets.
             var aDeviceArrow;
             
             $.each(rooms,function(sIndex,aRoom) {

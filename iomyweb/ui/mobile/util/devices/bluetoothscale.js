@@ -108,11 +108,11 @@ $.extend(IOMy.devices.bluetoothscale,{
                                         // Last Motion
                                         //----------------------------------//
                                         new sap.m.Label({
-                                            text : "Last Accessed:"
+                                            text : "Freshwater1:"
                                         }).addStyleClass("Font-RobotoCondensed"),
                                         
                                         new sap.m.Label( oViewScope.createId( sPrefix+"_LastMotion" ),	{
-                                            text : "23d 13h 44m"
+                                            text : "80kg, 179cm, BMI: 25.0"
                                         } ).addStyleClass("Font-RobotoCondensed")
                                     ]
                                 })

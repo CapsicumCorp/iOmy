@@ -252,31 +252,27 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 
                                                     onSuccess : function () {
                                                         IOMy.common.showSuccess(me.mRoom.RoomName+" successfully removed.", "Success", 
-                                                        function () {
-                                                            //-- REFRESH ROOMS --//
-                                                            IOMy.common.RetreiveRoomList( {
-                                                                onSuccess: $.proxy(function() {
-                                                                    //-- REFRESH THINGS --//
-                                                                    IOMy.apiphp.RefreshThingList({
-                                                                        onSuccess: $.proxy(function() {
+                                                            function () {
+                                                                //-- REFRESH ROOMS --//
+                                                                IOMy.common.ReloadVariableRoomList(
+                                                                    function() {
 
-                                                                            try {
-                                                                                //-- Flag that the Core Variables have been configured --//
-                                                                                IOMy.common.CoreVariablesInitialised = true;
-                                                                                // Refresh the room list after a deletion.
-                                                                                oApp.getPage("pPremiseOverview").getController().composeRoomList();
-                                                                                // Go back.
-                                                                                IOMy.common.NavigationTriggerBackForward(false);
+                                                                        try {
+                                                                            //-- Flag that the Core Variables have been configured --//
+                                                                            //IOMy.common.CoreVariablesInitialised = true;
+                                                                            // Refresh the room list after a deletion.
+                                                                            //oApp.getPage("pPremiseOverview").getController().composeRoomList();
+                                                                            // Go back.
+                                                                            IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
 
-                                                                            } catch(e654321) {
-                                                                                //-- ERROR:  TODO: Write a better error message--//
-                                                                                jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
-                                                                            }
-                                                                        }, me)
-                                                                    }); //-- END THINGS LIST --//
-                                                                }, me)
-                                                            }); //-- END ROOMS LIST --//
-                                                        }, "UpdateMessageBox");
+                                                                        } catch(e654321) {
+                                                                            //-- ERROR:  TODO: Write a better error message--//
+                                                                            jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
+                                                                        }
+                                                                    }
+                                                                )
+                                                            },
+                                                        "UpdateMessageBox");
                                                     }
                                                 });
                                             }
