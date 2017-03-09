@@ -418,7 +418,7 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
                             });
                         }
                     }
-                }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
+                }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
             ]
         }).addStyleClass("TextCenter MarTop12px");
         oVertBox.addItem(oAddButton);

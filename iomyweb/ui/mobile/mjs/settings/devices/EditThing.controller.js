@@ -263,7 +263,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                             jQuery.sap.log.error(mInfo.aErrorMessages.join("\n"));
                         }
                     }
-                }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
+                }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
             ]
         }).addStyleClass("TextCenter MarTop12px");
 

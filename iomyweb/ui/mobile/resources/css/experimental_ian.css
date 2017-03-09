@@ -69,14 +69,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	max-width:	50%;
 }
 
-
 .MarLeft10Percent {
 	margin-left: 10%;
-}
-
-.sapMLnk {
-	white-space: normal;
-	font-family: "Roboto Condensed", sans-serif;
 }
 
 /* Rename to ElementCenterChild */

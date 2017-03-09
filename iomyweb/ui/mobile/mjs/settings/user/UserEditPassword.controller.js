@@ -177,7 +177,7 @@ sap.ui.controller("mjs.settings.user.UserEditPassword", {
                                 }
 								this.setEnabled(true);
 							}
-						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
+						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
 					]
 				}).addStyleClass("TextCenter MarTop12px");
         		

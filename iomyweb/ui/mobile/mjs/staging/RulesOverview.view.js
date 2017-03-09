@@ -64,7 +64,7 @@ sap.ui.jsview("mjs.staging.RulesOverview", {
 											items : [
 												new sap.m.Label({
 													text: "Zigbee Smart Plug"
-												}).addStyleClass("")
+												}).addStyleClass("Font-RobotoCondensed")
 											]
 										}).addStyleClass("MarLeft3px")
 									]
@@ -73,6 +73,9 @@ sap.ui.jsview("mjs.staging.RulesOverview", {
 								new sap.m.HBox({
 									items : [
 										new sap.m.VBox({
+											layoutData : new sap.m.FlexItemData({
+												growFactor : 8
+											}),
 											items : [
 												new sap.m.Link({
 													text : "Tv",
@@ -80,7 +83,7 @@ sap.ui.jsview("mjs.staging.RulesOverview", {
 													press : function () {
 														IOMy.common.NavigationChangePage("pAddRule");
 													}
-												}).addStyleClass("TextSizeMedium Text_grey_20 MarTop1d25Rem"),
+												}).addStyleClass("Font-RobotoCondensed TextSizeMedium Text_grey_20 MarTop1d25Rem iOmyLink"),
 												new sap.m.HBox({
 													width: "100%",
 													justifyContent: "End",
@@ -88,11 +91,123 @@ sap.ui.jsview("mjs.staging.RulesOverview", {
 														// -- Example Serial Number -- //
 														new sap.m.Label({
 															text: "SN: 00137A000000AD88"
-														}).addStyleClass("TextSizeXSmall Text_grey_20")
+														}).addStyleClass("Font-RobotoCondensed TextSizeXSmall Text_grey_20")
 													]
 												}).addStyleClass("")
 											]
-										}).addStyleClass("MarLeft3px width70Percent BorderRight"),
+										}).addStyleClass("MarLeft3px BorderRight PadRight3px"),
+										new sap.m.VBox({
+											layoutData : new sap.m.FlexItemData({
+												growFactor : 1
+											}),
+											items: [
+												new sap.m.VBox({
+													items : [
+														new sap.m.Label({
+															text : "Turn On: 6:00pm"
+														}).addStyleClass("Font-RobotoCondensed width100px"),
+														
+														new sap.m.Label({
+															text : "Turn Off: 12:00am"
+														}).addStyleClass("Font-RobotoCondensed width100px")
+													]
+												})
+											]
+										}).addStyleClass("MarTop12px TextCenter")
+									]
+								}).addStyleClass("minheight58px ListItem"),
+								// -- Device Display Name w/ Onpress Event Link --//
+								new sap.m.HBox({
+									items : [
+										new sap.m.VBox({
+											layoutData : new sap.m.FlexItemData({
+												growFactor : 8
+											}),
+											items : [
+												new sap.m.Link({
+													text : "Fridge",
+													width: "100%",
+													press : function () {
+														IOMy.common.NavigationChangePage("pAddRule");
+													}
+												}).addStyleClass("Font-RobotoCondensed TextSizeMedium Text_grey_20 MarTop1d25Rem iOmyLink"),
+												new sap.m.HBox({
+													width: "100%",
+													justifyContent: "End",
+													items : [
+														// -- Example Serial Number -- //
+														new sap.m.Label({
+															text: "SN: 00137A000000AD87"
+														}).addStyleClass("Font-RobotoCondensed TextSizeXSmall Text_grey_20")
+													]
+												}).addStyleClass("")
+											]
+										}).addStyleClass("MarLeft3px BorderRight PadRight3px"),
+										new sap.m.VBox({
+											layoutData : new sap.m.FlexItemData({
+												growFactor : 1
+											}),
+											items: [
+												new sap.m.VBox({
+													items : [
+														new sap.m.Label({
+															text : "Turn On: 8:00am"
+														}).addStyleClass("Font-RobotoCondensed width100px"),
+														
+														new sap.m.Label({
+															text : "Turn Off: 5:00pm"
+														}).addStyleClass("Font-RobotoCondensed width100px")
+													]
+												})
+											]
+										}).addStyleClass("MarTop12px TextCenter")
+									]
+								}).addStyleClass("minheight58px ListItem"),
+								// -- Device Display Name w/ Onpress Event Link --//
+								new sap.m.HBox({
+									items : [
+										new sap.m.VBox({
+											layoutData : new sap.m.FlexItemData({
+												growFactor : 8
+											}),
+											items : [
+												new sap.m.Link({
+													text : "Lamp",
+													width: "100%",
+													press : function () {
+														IOMy.common.NavigationChangePage("pAddRule");
+													}
+												}).addStyleClass("Font-RobotoCondensed TextSizeMedium Text_grey_20 MarTop1d25Rem iOmyLink"),
+												new sap.m.HBox({
+													width: "100%",
+													justifyContent: "End",
+													items : [
+														// -- Example Serial Number -- //
+														new sap.m.Label({
+															text: "SN: 00137A000000AD86"
+														}).addStyleClass("Font-RobotoCondensed TextSizeXSmall Text_grey_20")
+													]
+												}).addStyleClass("")
+											]
+										}).addStyleClass("MarLeft3px BorderRight PadRight3px"),
+										new sap.m.VBox({
+											layoutData : new sap.m.FlexItemData({
+												growFactor : 1
+											}),
+											items: [
+												new sap.m.VBox({
+													items : [
+														new sap.m.Label({
+															text : "Turn On: 11:00pm"
+														}).addStyleClass("Font-RobotoCondensed width100px"),
+														
+														new sap.m.Label({
+															text : "Turn Off: 6:00am"
+														}).addStyleClass("Font-RobotoCondensed width100px")
+													]
+												})
+											]
+										}).addStyleClass("MarTop12px TextCenter")
 									]
 								}).addStyleClass("minheight58px ListItem"),
 							]

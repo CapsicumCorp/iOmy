@@ -368,7 +368,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                     IOMy.common.showError("You must select at least one room to apply the new permissions to.");
                 }
             }
-        }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter");
+        }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink");
         
 		//-- Where the page gets created --//
         me.wPanel = new sap.m.Panel({

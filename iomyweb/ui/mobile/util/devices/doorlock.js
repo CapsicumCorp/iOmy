@@ -109,7 +109,7 @@ $.extend(IOMy.devices.doorlock,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceDoorLock", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20")
+                        }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20 iOmyLink")
                     ]
 
                 }).addStyleClass("BorderRight width80Percent jbMR1tempfix"),
@@ -129,7 +129,7 @@ $.extend(IOMy.devices.doorlock,{
                                         // Doors will auto lock after 5 - 20 seconds
                                         sap.ui.getCore().byId(IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches[ sPageId ])
                                     ]
-                                }).addStyleClass("ElementCenter"),
+                                }).addStyleClass("MarTop5px TextCenter"),
                             ]
                         }).addStyleClass("width100Percent")
                     ]

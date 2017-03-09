@@ -74,7 +74,7 @@ $.extend(IOMy.devices.windowsensor,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceWindowSensor", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20")
+                        }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20 iOmyLink")
                     ]
                 }).addStyleClass("BorderRight width80Percent jbMR1tempfix"),
 
@@ -103,7 +103,7 @@ $.extend(IOMy.devices.windowsensor,{
                                     ]
                                 })
                             ]
-                        }).addStyleClass("MarLeft12px MarAuto0px")
+                        }).addStyleClass("MarLeft12px MarTop8px")
                     ]
                 }).addStyleClass("minheight58px minwidth170px")
             ]

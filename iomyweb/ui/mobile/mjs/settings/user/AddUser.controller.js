@@ -418,7 +418,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                     press : function () {
                         me.AddUser(this);
                     }
-                }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
+                }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
             ]
         }).addStyleClass("TextCenter MarTop12px");
 

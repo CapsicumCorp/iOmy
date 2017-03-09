@@ -164,7 +164,7 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
                                     }
                                 }
 							}
-						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
+						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
 					]
 				}).addStyleClass("TextCenter MarTop12px");
         		

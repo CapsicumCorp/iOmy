@@ -237,7 +237,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                                 }
 								this.setEnabled(true);
 							}
-						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
+						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
 					]
 				}).addStyleClass("TextCenter MarTop12px");
                 

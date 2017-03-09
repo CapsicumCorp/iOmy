@@ -277,7 +277,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                                     }
                                 }
 							}
-						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
+						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
 					]
 				}).addStyleClass("TextCenter MarTop12px");
                 

@@ -83,7 +83,7 @@ $.extend(IOMy.devices.philipshue,{
                         press : function () {
                             IOMy.common.NavigationChangePage("pPhilipsHue", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20")
+                    }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20 iOmyLink")
                 ]
             }).addStyleClass("width80Percent BorderRight jbMR1tempfix")
         );

@@ -257,7 +257,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                     me.UpdatePermissionsForPremise(me.wUserSelectBox.getSelectedKey(), mPremiseInfo.Id);
                 }
             }
-        }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter");
+        }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink");
         
         var fnShowPermissionChanged = function () {
             //----------------------------------------------------------------//

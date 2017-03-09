@@ -97,7 +97,7 @@ $.extend(IOMy.devices.garagedoor,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceGaragedoor", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20")
+                        }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20 iOmyLink")
                     ]
                 }).addStyleClass("BorderRight width80Percent jbMR1tempfix"),
 
@@ -115,7 +115,7 @@ $.extend(IOMy.devices.garagedoor,{
 									items : [
                                         sap.ui.getCore().byId(IOMy.common.ThingList["_"+aDeviceData.DeviceId].Switches[ sPageId ])
 									]
-								}).addStyleClass("MarTop5px MarLeft40px"),
+								}).addStyleClass("MarTop5px TextCenter"),
 							]
 						}).addStyleClass("width100Percent")
 					]

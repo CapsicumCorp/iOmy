@@ -75,7 +75,7 @@ $.extend(IOMy.devices.bpm,{
                             press : function () {
                                 IOMy.common.NavigationChangePage("pDeviceBPM", {ThingId : aDeviceData.DeviceId});
                             }
-                        }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20")
+                        }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20 iOmyLink")
                     ]
                 }).addStyleClass("BorderRight width80Percent jbMR1tempfix"),
 
@@ -118,7 +118,7 @@ $.extend(IOMy.devices.bpm,{
                                     ]
                                 }).addStyleClass("MarAuto0px")
                             ]
-                        }).addStyleClass("MarLeft12px MarAuto0px")
+                        }).addStyleClass("MarLeft12px MarTop8px")
                     ]
                 }).addStyleClass("minheight58px minwidth170px")
             ]

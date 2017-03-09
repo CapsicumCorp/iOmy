@@ -368,7 +368,7 @@ $.extend(IOMy.devices.onvif,{
                         press : function () {
                             IOMy.common.NavigationChangePage("pOnvif", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20")
+                    }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20 iOmyLink")
                 ]
             }).addStyleClass("BorderRight width80Percent jbMR1tempfix")
         );

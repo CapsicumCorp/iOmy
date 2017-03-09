@@ -101,6 +101,10 @@ ul li{
 	margin: auto;
 }
 
+.ElementChildCenter > *{
+	margin: auto;
+}
+
 /* Element is not visible and doesn't occupy space on the web browser */
 .ElementHidden {
 	display: none;
@@ -381,8 +385,33 @@ div > .sapMIBar-CTX .sapMLabel {
 }
 
 /* ==================================================================================== */
-/* == #8.0# - Lists                                                                  == */
+/* == #8.0# - Lists & Links                                                          == */
 /* ==================================================================================== */
+
+/* Used for all links that have a non-green background */
+.iOmyLink {
+	white-space: normal;
+	font-family: "Roboto Condensed", sans-serif;
+}
+
+.iOmyLink:visited {
+	color: rgb(139, 197, 63);
+}
+
+.iOmyLink:hover:not(.sapMLnkDsbl) {
+	color: rgb(139, 197, 63);
+}
+
+/* Used for links that have a green background */
+.iOmyLink.AcceptSubmitButton:visited {
+	color: darkgreen;
+}
+
+.iOmyLink.AcceptSubmitButton:hover {
+	color: darkgreen;
+}
+
+/* List Items */
 .ListItem {
 	border-bottom: 1px rgb(188,190,192) solid;
 }
@@ -519,7 +548,7 @@ div > .sapMIBar-CTX .sapMLabel {
 	height: 30px;
 }
 
-.sapMBar > .sapMBarContainer  > .SwitchUserButton {
+.sapMBar > .sapMBarContainer > .SwitchUserButton {
 	margin-top: 6.5%;
 	margin-right: 8px;
 	border-radius: 4px;
@@ -1058,14 +1087,6 @@ ul.IOMYNavMenu > li > ul > li.sapTntNavLIGroupItem {
 html.sap-desktop .sapMBtn:focus>.sapMFocusable {
 	outline: 1px solid rgb(241, 242, 242);
 	outline-offset: -2px;
-}
-
-.sapMLnk:hover:not(.sapMLnkDsbl) {
-		color: rgb(139, 197, 63);
-}
-
-.sapMLnk:visited {
-		color: rgb(139, 197, 63);
 }
 
 .sapMCbBg.sapMCbMarkChecked:before {

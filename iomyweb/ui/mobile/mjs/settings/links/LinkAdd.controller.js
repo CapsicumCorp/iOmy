@@ -729,15 +729,15 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                 new sap.m.Link(me.createId("addButton"), {
                     //enabled : false,
                     text : "Add Link",
-                    //-------------------------------------------------------\\
+                    //-------------------------------------------------------//
                     // FUNCTION TO ADD THE LINK BY CLICKING ON THE ADD LINK BUTTON
-                    //-------------------------------------------------------\\
+                    //-------------------------------------------------------//
                     press : function() {
-                        var thisButton = this; // Captures the scope of the calling button.
-                        thisButton.setEnabled(false); // Lock the button
+                        var thisButton = this; // Captures the scope of the calling button.//
+                        thisButton.setEnabled(false); // Lock the button//
                         
                         try {
-                            // Error checking variables
+                            // Error checking variables//
                             var bError                  = false;
                             var mInfo                   = false;
                             var aErrorMessages          = [];
@@ -747,23 +747,23 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                             jQuery.sap.log.error("Error 0x1000: There was an error declaring variables: "+e.message);
                         }
                 
-                        //=== VALIDATE FORM DATA ===\\
+                        //=== VALIDATE FORM DATA ===//
                         
                         if (bError === false) {
                             mInfo = me.ValidateFormData();
                             bError = mInfo.bError;
                             aErrorMessages = mInfo.aErrorMessages;
 
-                            //-------------------------------------------------\\
+                            //-------------------------------------------------//
                             // Try to add the link
-                            //-------------------------------------------------\\
+                            //-------------------------------------------------//
                             try {
-                                //=== IF EVERYTHING IS VALID, ADD THE LINK ===\\
+                                //=== IF EVERYTHING IS VALID, ADD THE LINK ===//
                                 if (bError === false) {
                                     var mData = me.FetchAPIAndParameters();
                                     IOMy.apiphp.AjaxRequest(mData);
 
-                                //=== OTHERWISE BRING UP AN ERROR MESSAGE ON THE SCREEN ===\\
+                                //=== OTHERWISE BRING UP AN ERROR MESSAGE ON THE SCREEN ===//
                                 } else {
                                     if (aErrorMessages.length === 1) {
                                         sErrorMessage = "There was an error: \n\n"+aErrorMessages.join('\n');
@@ -775,7 +775,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                                     IOMy.common.showError(sErrorMessage);
                                 }
                             } catch (e) {
-                                bError = true; // No.
+                                bError = true; // No.//
                                 aErrorMessages.push("Error 0x1010: There was an error retrieving the API parameters: "+e.message);
                                 
                                 if (aErrorMessages.length === 1) {
@@ -789,7 +789,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                             }
                         }
                     }
-                }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter")
+                }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
             ]
         }).addStyleClass("TextCenter MarTop12px");
         me.wVertBox.addItem(oAddButton);
@@ -801,10 +801,10 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         
         thisView.byId("page").addContent(oPanel);
         
-        // Disable the refresh functionality until a new link is added.
+        // Disable the refresh functionality until a new link is added.//
         me.bUIReadyToBeWiped = false;
         
-        // Create the rest of the link form.
+        // Create the rest of the link form.//
         me.ChangeLinkForm(me.byId("linkTypeCBox"));
     },
     

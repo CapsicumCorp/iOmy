@@ -577,7 +577,7 @@ $.extend(IOMy.devices.weatherfeed,{
                             //console.log(aDeviceData);
                             IOMy.common.NavigationChangePage("pThermostat", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20")
+                    }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20 iOmyLink")
                 ]
             }).addStyleClass("width80Percent BorderRight jbMR1tempfix")
         );
@@ -600,7 +600,7 @@ $.extend(IOMy.devices.weatherfeed,{
                                 text : "Loading..."
                             }).addStyleClass("Font-RobotoCondensed MarLeft10px")
                         ]
-                    }).addStyleClass("MarLeft6px MarAuto0px")
+                    }).addStyleClass("MarLeft12px MarTop18px")
                 ]
             }).addStyleClass("minwidth170px minheight58px")
 			
@@ -698,7 +698,7 @@ $.extend(IOMy.devices.weatherfeed,{
                                 text : "Loading..."
                             }).addStyleClass("Font-RobotoCondensed MarLeft5px")
                         ]
-                    }).addStyleClass("MarLeft12px MarAuto0px")
+                    }).addStyleClass("MarLeft12px MarTop18px")
                 ]
             }).addStyleClass("minwidth170px minheight58px")
         );
