@@ -179,7 +179,7 @@ cd "${basedir}/assetstmp"
 if [ $? != 0 ] ; then
   exit 1
 fi
-zip -9r "${destassetsdir}/webserverassets.zip" components scripts tmp var htdocs zigbeedefs.ini
+zip -9r "${destassetsdir}/webserverassets.zip" components scripts tmp var htdocs zigbeedefs.ini demodata
 if [ $? != 0 ] ; then
   exit 1
 fi

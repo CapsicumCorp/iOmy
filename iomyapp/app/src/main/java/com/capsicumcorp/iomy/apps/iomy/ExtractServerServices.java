@@ -378,13 +378,16 @@ public class ExtractServerServices extends Thread {
                         changeProgressPagePercentageText();
                         continue;
                     }
-                    if (zipEntryName.startsWith("components/mysql/sbin/demodata/")) {
+                    if (zipEntryName.startsWith("demodata/mysql_database/")) {
                         //Change the output folder name to components/mysql/sbin/data/
-                        zipEntryName=zipEntryName.replace("components/mysql/sbin/demodata/", "components/mysql/sbin/data/");
+                        zipEntryName=zipEntryName.replace("demodata/mysql_database/", "components/mysql/sbin/data/");
+                    } else if (zipEntryName.startsWith("demodata/website_config/")) {
+                        //Change the output folder name to iomyweb/
+                        zipEntryName=zipEntryName.replace("demodata/website_config/", "htdocs/restricted/config/");
                     }
                 } else {
                     //Skip extracting of demo data folder as we are in normal mode
-                    if (zipEntryName.startsWith("components/mysql/sbin/demodata/")) {
+                    if (zipEntryName.startsWith("demodata/")) {
                         //Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG: Skipping file: " + zipEntryName);
                         doNotification("Skipping file: " + zipEntryName);
                         changeProgressPagePercentageText();
