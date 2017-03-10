@@ -637,6 +637,8 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                     // If it's not cooling down, then it will be enabled
                     enabled : !me.bRunningCommand,
                     press : function () {
+                        //-- Show that it is loading a timer --//
+                        this.setText(me.sEnableTempJoinButtonText + " - Loading");
                         me.bJoinModeToggleCoolingDown = true;
                         me.ToggleZigbeeCommands(oScope, false);
                         

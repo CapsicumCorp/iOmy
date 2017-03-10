@@ -204,7 +204,7 @@ sap.ui.controller("mjs.premise.Overview", {
                     // containing a button to expand or collapse a list of those
                     // devices
                     //--------------------------------------------------------//
-                    if (JSON.stringify(aRoom.Things) !== "{}") {
+                    if (iDevicesInRoom > 0) {
                         aDeviceArrow = [
                             new sap.m.Button(me.createId("roomName"+sIndex), {
                                 icon : "sap-icon://navigation-down-arrow",
@@ -249,7 +249,14 @@ sap.ui.controller("mjs.premise.Overview", {
                                         new sap.m.Button(me.createId("roomLink"+sIndex), {
                                             text : aRoom.RoomName,
                                             press : function () {
-                                                IOMy.common.NavigationChangePage("pRoomsOverview", {room : aRoom});
+                                                //-- If there are things associated with this room go to its overview page --//
+                                                if (JSON.stringify(aRoom.Things) !== "{}") {
+                                                    IOMy.common.NavigationChangePage("pRoomsOverview", {room : aRoom});
+                                                
+                                                //-- Otherwise go straight to the edit page for it. --//
+                                                } else {
+                                                    IOMy.common.NavigationChangePage("pSettingsRoomEdit", {room : aRoom});
+                                                }
                                             }
                                         }).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px")
                                     ]

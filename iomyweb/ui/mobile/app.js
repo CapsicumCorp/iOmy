@@ -53,6 +53,12 @@ $.sap.require("IOMy.help");
 $.sap.registerModulePath('IOMy.experimental', sModuleInitialBuildLocation+'util/experimental');
 $.sap.require("IOMy.experimental");
 
+$.sap.registerModulePath('IOMy.validation', sModuleInitialBuildLocation+'util/validation');
+$.sap.require("IOMy.validation");
+
+$.sap.registerModulePath('IOMy.rules', sModuleInitialBuildLocation+'util/rules');
+$.sap.require("IOMy.rules");
+
 //----------------------------------------//
 //-- 5.1.1 - LOAD DEVICE FILES  		--//
 //----------------------------------------//

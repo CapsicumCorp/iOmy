@@ -179,12 +179,25 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 						new sap.m.Link({
 							text : "Update",
 							press : function () {
-                                //--------------------------------------------//
-                                // Update the room details.
-                                //--------------------------------------------//
-                                IOMy.functions.updateRoom(me.iRoomID, {
-                                    callingWidget : this
-                                });
+                                var thisButton = this;
+                                
+                                try {
+                                    //--------------------------------------------//
+                                    // Update the room details.
+                                    //--------------------------------------------//
+                                    IOMy.functions.updateRoom(me.iRoomID, {
+                                        callingWidget : this
+                                    });
+                                } catch (eUpdateRoomError) {
+                                    //--------------------------------------------//
+                                    // Catch any exceptions.
+                                    //--------------------------------------------//
+                                    IOMy.common.showError("There was a problem updating the room.", "Error Updating Room",
+                                        function () {
+                                            thisButton.setEnabled(true);
+                                        }
+                                    );
+                                }
                             }
 						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
 					]

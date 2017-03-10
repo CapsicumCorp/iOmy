@@ -197,16 +197,28 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                         var thisButton = this; // Captures the scope of the calling button.
                         thisButton.setEnabled(false);
 
+                        var bError = false;
+                        var aErrorMessages = [];
                         var sThingText = me.byId("thingNameField").getValue();
                         var iThingID = me.oThing.Id;
-                        var mInfo = {};
+                        var mThingIdInfo = IOMy.validation.isThingIDValid(iThingID);
+                        var mThingNameInfo = me.ValidateThingName();
 
-                        //==========================================================\\
-                        // Check that the name field is filled out.
-                        //==========================================================\\
-                        mInfo = me.ValidateThingName();
+                        //==========================================================//
+                        // Check that the name field is filled out and that the ID
+                        // is valid
+                        //==========================================================//
+                        if (mThingIdInfo.bIsValid === false) {
+                            bError = true;
+                            aErrorMessages = aErrorMessages.concat(mThingIdInfo.aErrorMessages);
+                        }
                         
-                        if (mInfo.bError === false) {
+                        if (mThingNameInfo.bIsValid === false) {
+                            bError = true;
+                            aErrorMessages = aErrorMessages.concat(mThingNameInfo.aErrorMessages);
+                        }
+                        
+                        if (bError === false) {
                             // Run the API to update the device (thing) name
                             try {
                                 IOMy.apiphp.AjaxRequest({
@@ -225,7 +237,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                                         try {
                                             IOMy.common.ReloadCoreVariables(
                                                 function () {
-                                                    //===== BRING UP THE SUCCESS DIALOG BECAUSE THE API RAN SUCCESSFULLY AND THE VARIABLES HAVE BEEN REFRESHED. =====\\
+                                                    //===== BRING UP THE SUCCESS DIALOG BECAUSE THE API RAN SUCCESSFULLY AND THE VARIABLES HAVE BEEN REFRESHED. =====//
                                                     IOMy.common.showSuccess("Update successful.", "Success", 
                                                     function () {
                                                         IOMy.common.bItemNameChangedMustRefresh = true;
@@ -259,8 +271,8 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                                 IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
                             }
                         } else {
-                            IOMy.common.showError(mInfo.aErrorMessages.join("\n\n"));
-                            jQuery.sap.log.error(mInfo.aErrorMessages.join("\n"));
+                            IOMy.common.showError(aErrorMessages.join("\n\n"));
+                            jQuery.sap.log.error(aErrorMessages.join("\n"));
                         }
                     }
                 }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")

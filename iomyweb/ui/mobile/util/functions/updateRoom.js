@@ -36,14 +36,15 @@ $.extend(IOMy.functions, {
      * update the room with.
      * 
      * Throws an exception if either room ID, room information map (mInfo), or
-     * both are not specified.
+     * both are not specified. Also throws an exception if the room does not
+     * exist.
      * 
      * @param {type} iRoomId            ID of the room.
      * @param {type} mInfo              New room information, including the widget that called the function.
      */
     updateRoom : function (iRoomId, mInfo)  {
         //--------------------------------------------------------------------//
-        // Declare important variables
+        // Declare and initialise important variables
         //--------------------------------------------------------------------//
         var bError              = false;
         var aErrorMessages      = [];
@@ -55,14 +56,16 @@ $.extend(IOMy.functions, {
         var wRoomDescription    = null;
         var wRoomType           = null;
         
+        var mRoomValidation     = IOMy.validation.isRoomIDValid(iRoomId);
+        
         //--------------------------------------------------------------------//
         // Check for required parameters
         //--------------------------------------------------------------------//
         
-        //-- Check that room ID exists and it isn't the mInfo parameter --//
-        if (iRoomId === undefined || typeof iRoomId === "object") {
+        //-- Check that room ID exists, is valid and it isn't the mInfo parameter --//
+        if (mRoomValidation.bIsValid === false) {
             bError = true;
-            aErrorMessages.push("Room ID must be specified!");
+            aErrorMessages = aErrorMessages.concat( mRoomValidation.aErrorMessages );
         } else {
             //-- If it does exist, check that the room information map is there. --//
             if (mInfo === undefined) {
@@ -156,12 +159,23 @@ $.extend(IOMy.functions, {
             aErrorMessages.push("Room must have a name");
         }
 
+        //--------------------------------------------------------------------//
+        // Report any errors
+        //--------------------------------------------------------------------//
         if (bError) {
             jQuery.sap.log.error(aErrorMessages.join("\n"));
-            IOMy.common.showError(aErrorMessages.join("\n\n"), "Errors");
+            IOMy.common.showError(aErrorMessages.join("\n\n"), "Errors",
+                function () {
+                    //-- Re enable the calling button if one is specified. --//
+                    if (wCallingWidget !== null) {
+                        wCallingWidget.setEnabled(true);
+                    }
+                }
+            );
         } else {
-
-            // Run the API to update the room
+            //----------------------------------------------------------------//
+            // If there are no errors, run the API to update the room.
+            //----------------------------------------------------------------//
             try {
                 IOMy.apiphp.AjaxRequest({
                     url : IOMy.apiphp.APILocation("rooms"),
@@ -173,26 +187,20 @@ $.extend(IOMy.functions, {
                         IOMy.common.showSuccess("Update successful.", "Success", 
                         function () {
                             //-- REFRESH ROOMS --//
-                            IOMy.common.RetreiveRoomList( {
-                                onSuccess: function() {
-                                    //-- REFRESH THINGS --//
-                                    IOMy.apiphp.RefreshThingList({
-                                        onSuccess: function() {
+                            IOMy.common.ReloadVariableRoomList(
+                                function() {
+                                    try {
+                                        //-- Flag that the Core Variables have been configured --//
+                                        IOMy.common.CoreVariablesInitialised = true;
+                                        //-- Reset the Navigation array and index after switching users --//
+                                        IOMy.common.NavigationTriggerBackForward(false);
 
-                                            try {
-                                                //-- Flag that the Core Variables have been configured --//
-                                                IOMy.common.CoreVariablesInitialised = true;
-                                                //-- Reset the Navigation array and index after switching users --//
-                                                IOMy.common.NavigationTriggerBackForward(false);
-
-                                            } catch(e654321) {
-                                                //-- ERROR:  TODO: Write a better error message--//
-                                                jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
-                                            }
-                                        }
-                                    }); //-- END THINGS LIST --//
+                                    } catch(e654321) {
+                                        //-- ERROR:  TODO: Write a better error message--//
+                                        jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
+                                    }
                                 }
-                            }); //-- END ROOMS LIST --//
+                            );
                         }, "UpdateMessageBox");
                     },
                     onFail : function (response) {
@@ -209,13 +217,15 @@ $.extend(IOMy.functions, {
                         // callback functions have finished executing.
                         //----------------------------------------------------//
                         if (wCallingWidget !== null) {
-                            wCallingWidget.setEnabled(false);
+                            wCallingWidget.setEnabled(true);
                         }
                     }
                 });
             } catch (e00033) {
                 IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
-                wCallingWidget.setEnabled(false);
+                if (wCallingWidget !== null) {
+                    wCallingWidget.setEnabled(true);
+                }
             }
         }
     }
