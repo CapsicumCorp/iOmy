@@ -423,7 +423,7 @@ class RestrictedAPICore {
 	//====================================================//
 	//== 3.0 - Mini Misc Functions                      ==//
 	//====================================================//
-	private function VerifyPassword( $sCurrentPassword ) {
+	public function VerifyPassword( $sCurrentPassword ) {
 		
 		if( gettype($sCurrentPassword)==="string" ) {
 			if( $this->decrypt($_SESSION['User'][SESSION_PASSWORD])===$sCurrentPassword ) {

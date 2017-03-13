@@ -973,7 +973,7 @@ if( $bError===false ) {
 					if( $aUserInfo["Data"]["UserInfoId"]>=1 ) {
 						
 						//-- Check if the OldPassword is the valid password --//
-						if( $oRestrictedApiCore->VerifyUserPassword($sPostOldPassword) ) {
+						if( $oRestrictedApiCore->VerifyPassword($sPostOldPassword) ) {
 							//-- If the Password matches then its fine to swap to the new password --//
 							$aResult = ChangeUserPassword($sPostNewPassword);
 							
