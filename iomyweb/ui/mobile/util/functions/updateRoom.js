@@ -188,6 +188,9 @@ $.extend(IOMy.functions, {
                         function () {
                             //-- REFRESH ROOMS --//
                             IOMy.common.ReloadVariableRoomList(
+                                //-------------------------------//
+                                // Success callback function
+                                //-------------------------------//
                                 function() {
                                     try {
                                         //-- Flag that the Core Variables have been configured --//
@@ -198,6 +201,15 @@ $.extend(IOMy.functions, {
                                     } catch(e654321) {
                                         //-- ERROR:  TODO: Write a better error message--//
                                         jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
+                                    }
+                                },
+                                
+                                //-------------------------------//
+                                // Failure callback function
+                                //-------------------------------//
+                                function() {
+                                    if (wCallingWidget !== null) {
+                                        wCallingWidget.setEnabled(true);
                                     }
                                 }
                             );

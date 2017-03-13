@@ -748,30 +748,23 @@ $.extend(IOMy.common,{
     ReloadCoreVariables : function (fnCallback, fnFailCallback) {
         var me = this;
         
-        if( IOMy.common.bCoreRefreshInProgress===false ) {
-            IOMy.common.bCoreRefreshInProgress = true;
+        if( me.isCoreVariablesRefreshInProgress(1, fnFailCallback)===false ) {
+            IOMy.common.CoreVariableRefreshStepsInProgress[0] = true;
             
             // Load Current Username into memory.
             
-            // STEP 1 of 7: Procedures for refreshing locale lists.
+            // STEP 1 of 7: Procedures for refreshing lists.
             this.LoadCountries();
             this.LoadLanguages();
             this.LoadStatesProvinces();
             this.LoadPostCodes();
             this.LoadTimezones();
+            this.LoadRoomTypes();
         
             // Do the next steps
             IOMy.functions.getCurrentUsername( function () {
                 me.ReloadVariablePremiseList(fnCallback, fnFailCallback);
             });
-        } else {
-            //-- Define an empty function if fnFailCallback is undefined. --//
-            if (fnFailCallback === undefined) {
-                fnFailCallback = function () {};
-            }
-            //-- Error has occurred --//
-            IOMy.common.showError( "Reloading of Core variables is in already progress! New attempt has aborted.", "Core Variables");
-            fnFailCallback();
         }
     },
     
@@ -783,14 +776,17 @@ $.extend(IOMy.common,{
     ReloadVariablePremiseList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
-        try {
-            me.RefreshPremiseList({
-				onSuccess : function () {
-                    me.ReloadVariableHubList(fnCallback, fnFailCallback);
-                }
-            });
-        } catch (e) {
-            jQuery.sap.log.error("ReloadPremiseList Error! "+e.message);
+        if( me.isCoreVariablesRefreshInProgress(2, fnFailCallback)===false ) {
+            me.CoreVariableRefreshStepsInProgress[1] = true;
+            try {
+                me.RefreshPremiseList({
+                    onSuccess : function () {
+                        me.ReloadVariableHubList(fnCallback, fnFailCallback);
+                    }
+                });
+            } catch (e) {
+                jQuery.sap.log.error("ReloadPremiseList Error! "+e.message);
+            }
         }
     },
     
@@ -802,14 +798,17 @@ $.extend(IOMy.common,{
     ReloadVariableHubList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
-        try {
-            me.RefreshHubList({
-				onSuccess : function () {
-                    me.ReloadVariableRoomList(fnCallback, fnFailCallback);
-                }
-            });
-        } catch (e) {
-            jQuery.sap.log.error("ReloadVariableHubList Error! "+e.message);
+        if( me.isCoreVariablesRefreshInProgress(3, fnFailCallback)===false ) {
+            me.CoreVariableRefreshStepsInProgress[2] = true;
+            try {
+                me.RefreshHubList({
+                    onSuccess : function () {
+                        me.ReloadVariableRoomList(fnCallback, fnFailCallback);
+                    }
+                });
+            } catch (e) {
+                jQuery.sap.log.error("ReloadVariableHubList Error! "+e.message);
+            }
         }
     },
     
@@ -821,14 +820,18 @@ $.extend(IOMy.common,{
     ReloadVariableRoomList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
-        try {
-            me.RetreiveRoomList({
-				onSuccess : function () {
-                    me.ReloadVariableLinkList(fnCallback, fnFailCallback);
-                }
-            });
-        } catch (e) {
-            jQuery.sap.log.error("ReloadVariableRoomList Error! "+e.message);
+        if( me.isCoreVariablesRefreshInProgress(4, fnFailCallback)===false ) {
+            me.CoreVariableRefreshStepsInProgress[3] = true;
+            
+            try {
+                me.RetreiveRoomList({
+                    onSuccess : function () {
+                        me.ReloadVariableLinkList(fnCallback, fnFailCallback);
+                    }
+                });
+            } catch (e) {
+                jQuery.sap.log.error("ReloadVariableRoomList Error! "+e.message);
+            }
         }
     },
     
@@ -840,14 +843,18 @@ $.extend(IOMy.common,{
     ReloadVariableLinkList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
-        try {
-            me.RetrieveLinkList({
-				onSuccess : function () {
-                    me.ReloadVariableLinkTypeList(fnCallback, fnFailCallback);
-                }
-            });
-        } catch (e) {
-            jQuery.sap.log.error("ReloadVariableLinkList Error! "+e.message);
+        if( me.isCoreVariablesRefreshInProgress(5, fnFailCallback)===false ) {
+            me.CoreVariableRefreshStepsInProgress[4] = true;
+            
+            try {
+                me.RetrieveLinkList({
+                    onSuccess : function () {
+                        me.ReloadVariableLinkTypeList(fnCallback, fnFailCallback);
+                    }
+                });
+            } catch (e) {
+                jQuery.sap.log.error("ReloadVariableLinkList Error! "+e.message);
+            }
         }
     },
     
@@ -859,14 +866,18 @@ $.extend(IOMy.common,{
     ReloadVariableLinkTypeList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
-        try {
-            me.RetrieveLinkTypeList({
-				onSuccess : function () {
-                    me.ReloadVariableThingList(fnCallback, fnFailCallback);
-                }
-            });
-        } catch (e) {
-            jQuery.sap.log.error("ReloadVariableLinkTypeList Error! "+e.message);
+        if( me.isCoreVariablesRefreshInProgress(6, fnFailCallback)===false ) {
+            me.CoreVariableRefreshStepsInProgress[5] = true;
+            
+            try {
+                me.RetrieveLinkTypeList({
+                    onSuccess : function () {
+                        me.ReloadVariableThingList(fnCallback, fnFailCallback);
+                    }
+                });
+            } catch (e) {
+                jQuery.sap.log.error("ReloadVariableLinkTypeList Error! "+e.message);
+            }
         }
     },
     
@@ -880,10 +891,9 @@ $.extend(IOMy.common,{
         var fnOnComplete;
         var fnOnFail;
         
-        //------------------------------------------------------//
-        // Collect the call back function or create the default function, which
-        // is to carry the user to the home page.
-        //------------------------------------------------------//
+        //--------------------------------------------------------------------//
+        // Collect the call back function or create an empty function.
+        //--------------------------------------------------------------------//
         if (fnCallback !== undefined) {
             fnOnComplete = fnCallback;
         } else {
@@ -897,13 +907,29 @@ $.extend(IOMy.common,{
             fnOnFail = function () {};
         }
         
-        try {
-            IOMy.apiphp.RefreshThingList({
-				onSuccess   : fnOnComplete,
-                onFail      : fnOnFail
-            });
-        } catch (e) {
-            jQuery.sap.log.error("ReloadVariableThingList Error! "+e.message);
+        if( me.isCoreVariablesRefreshInProgress(7, fnFailCallback)===false ) {
+            me.CoreVariableRefreshStepsInProgress[6] = true;
+            
+            try {
+                IOMy.apiphp.RefreshThingList({
+                    onSuccess   : function () {
+                        fnOnComplete();
+                        
+                        me.CoreVariableRefreshStepsInProgress = [       // BOOLEAN ARRAY: 
+                            false,  // Step 1
+                            false,  // Step 2
+                            false,  // Step 3
+                            false,  // Step 4
+                            false,  // Step 5
+                            false,  // Step 6
+                            false,  // Step 7
+                        ];
+                    },
+                    onFail      : fnOnFail
+                });
+            } catch (e) {
+                jQuery.sap.log.error("ReloadVariableThingList Error! "+e.message);
+            }
         }
     },
 	
@@ -977,7 +1003,7 @@ $.extend(IOMy.common,{
 				}); //-- END PREMISE LIST --//
 			} else {
 				//-- Error has occurred --//
-				IOMy.common.showError( "Reloading of Core variables is in already progress! New attempt has aborted.", "Core Variables");
+				IOMy.common.showError( "Reloading of Core variables is already in progress! New attempt has been aborted.", "Core Variables");
 				
 			}
 		} catch(e1) {
@@ -1624,3 +1650,9 @@ $.extend(IOMy.common,{
 //----------------------------------------------------------------------------//
 $.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
 $.sap.require("IOMy.common.createExtraThingProperties");
+
+$.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
+$.sap.require("IOMy.common.LoadRoomTypes");
+
+$.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
+$.sap.require("IOMy.common.isCoreVariablesRefreshInProgress");

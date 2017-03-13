@@ -96,3 +96,9 @@ $.sap.require("IOMy.functions.ValidateIPAddress");
 
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
 $.sap.require("IOMy.functions.validateSecurePassword");
+
+//----------------------------------------------------------------------------//
+// Room Functions
+//----------------------------------------------------------------------------//
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.rooms.deleteRoom");

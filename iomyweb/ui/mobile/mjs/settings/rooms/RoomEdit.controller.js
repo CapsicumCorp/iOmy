@@ -152,27 +152,14 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                 //==================================================//
                 // LOAD ROOM TYPE OPTIONS AND SET CURRENT ROOM TYPE //
                 //==================================================//
-                me.odata.AjaxRequest({
-                    Url : me.odata.ODataLocation("room_types"),
-                    Columns : ["ROOMTYPE_PK", "ROOMTYPE_NAME"],
-                    WhereClause : [],
-                    OrderByClause : [],
-                    
-                    onSuccess : function (responseType, data) {
-                        for (var i = 0; i < data.length; i++) {
-                            me.wRoomType.addItem(
-                                new sap.ui.core.Item({
-                                    text : data[i].ROOMTYPE_NAME,
-                                    key : data[i].ROOMTYPE_PK
-                                })
-                            ).setSelectedKey(me.mRoom.RoomTypeId);
-                        }
-                    },
-                    
-                    onFail : function (response) {
-                        jQuery.sap.log.error("Error loading room types OData: "+JSON.stringify(response));
-                    }
-                });
+                for (var i = 0; i < IOMy.common.RoomTypes.length; i++) {
+                    me.wRoomType.addItem(
+                        new sap.ui.core.Item({
+                            text : IOMy.common.RoomTypes[i].RoomTypeName,
+                            key : IOMy.common.RoomTypes[i].RoomTypeId
+                        })
+                    ).setSelectedKey(me.mRoom.RoomTypeId);
+                }
                 
 				var oEditButton = new sap.m.VBox({
 					items : [
@@ -186,7 +173,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                                     // Update the room details.
                                     //--------------------------------------------//
                                     IOMy.functions.updateRoom(me.iRoomID, {
-                                        callingWidget : this
+                                        callingWidget : thisButton
                                     });
                                 } catch (eUpdateRoomError) {
                                     //--------------------------------------------//
@@ -254,7 +241,14 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 
                                         jQuery.sap.log.error(sDevicesAttachedMessage);
                                         IOMy.common.showError(sDevicesAttachedMessage, "Devices still assigned");
+                                        
+                                        this.setEnabled(true);
                                     } else {
+//                                        IOMy.functions.deleteRoom(me.iRoomID,
+//                                            function () {
+//                                                IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+//                                            }
+//                                        );
                                         //-- CONFIRM THAT YOU WISH TO DELETE THIS ROOM --//
                                         IOMy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
                                         function (oAction) {
@@ -292,7 +286,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                                         });
                                     }
 
-                                    this.setEnabled(true);
+                                    
                                 }
                             }
                         ]

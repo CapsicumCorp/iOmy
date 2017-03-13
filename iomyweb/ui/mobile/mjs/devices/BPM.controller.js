@@ -130,7 +130,7 @@ sap.ui.controller("mjs.devices.BPM", {
         
         //-- Status --//
         me.wStatus = new sap.m.Text ({
-            text : "Closed",
+            text : "Off",
             textAlign : "Right",
         }).addStyleClass("");
         
