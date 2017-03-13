@@ -139,7 +139,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                     ]
                 })
             ]
-        }).addStyleClass("ConsistentMenuHeader BorderTop ListItem");
+        }).addStyleClass("ConsistentMenuHeader ListItem");
         
         //------------------------------------------------------//
         // Given names (First and Middle names)
@@ -205,7 +205,9 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             text : "Date of Birth"
         });
 
-        me.wDateOfBirthField = new sap.m.DatePicker({});
+        me.wDateOfBirthField = new sap.m.DatePicker({
+			
+		}).addStyleClass("SettingsTextInput iOmyLink");
         me.wDateOfBirthField.setDisplayFormat("YYYY-MM-dd");
 
         //------------------------------------------------------//
@@ -436,7 +438,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                 oEmailLabel, me.wEmailField,
                 oContactPhoneNumberLabel, me.wContactPhoneField
             ]
-        }).addStyleClass("UserFormSection");
+        }).addStyleClass("UserFormSection PadAll10px");
         
         //--------------------------//
         // User Address
@@ -452,7 +454,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                 oLine2Title, me.wAddressLine2Field,
                 oLine3Title, me.wAddressLine3Field,
             ]
-        }).addStyleClass("UserFormSection");
+        }).addStyleClass("UserFormSection PadAll10px");
         
         //--------------------------//
         // Password
@@ -463,7 +465,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                 oPasswordLabel, me.wPasswordField,
                 oConfirmPasswordLabel, me.wConfirmPasswordField
             ]
-        }).addStyleClass("UserFormSection");
+        }).addStyleClass("UserFormSection PadAll10px");
         
         //------------------------------------------------------//
         // Username and password for the database admin user.
@@ -478,7 +480,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                 //--------------------------//
                 me.wEditButton
             ]
-        }).addStyleClass("UserFormSection");
+        }).addStyleClass("UserFormSection PadAll10px BorderBottom");
 
         var oPanel = new sap.m.Panel(me.createId("AddUserPanel"), {
             backgroundDesign: "Transparent",
@@ -495,7 +497,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                 oDBAuthenticationSection,
                 me.wDBAuthVertBox
             ] //-- End of Panel Content --//
-        }).addStyleClass("UserInputForm TableSideBorders MarTop3px");
+        }).addStyleClass("UserInputForm MasterPanel PanelNoPadding PadTop3px PadBottom15px");
 
         thisView.byId("page").addContent(oPanel);
     },

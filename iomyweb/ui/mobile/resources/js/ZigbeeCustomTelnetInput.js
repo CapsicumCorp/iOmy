@@ -72,7 +72,7 @@ function ZigbeeCustomTelnetInput(sID, mSettings) {
 
                 IOMy.devices.zigbeesmartplug.ExecuteCustomCommand(me.oScope, this);
             }
-        }).addStyleClass("width100Percent");
+        }).addStyleClass("width100Percent SettingsTextInput");
         
         me.input = oInput;
         

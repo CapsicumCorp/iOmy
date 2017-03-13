@@ -167,7 +167,7 @@ sap.ui.controller("mjs.premise.Overview", {
                                     text : "Devices"
                                 })
                             ]
-                        }).addStyleClass("HasCenteredObject FlexNoShrink width60px BorderRight"),
+                        }).addStyleClass("ElementChildCenter FlexNoShrink width60px BorderRight"),
                         // === ROOM === \\
                         new sap.m.VBox({
                             items : [

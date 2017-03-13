@@ -54,10 +54,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 /* == #16.0# - Activity Logs                                                       == */
 /* == #17.0# - Security Overview                                                   == */
 /* == #18.0# - Settings: Overview                                                  == */
-/* == #19.0# - Settings: Device List                                               == */
+/* == #19.0# -                                                                     == */
 /* == #20.0# - Settings: Premise List & Overview                                   == */
 /* == #21.0# - Settings: Permissions Pages                                         == */
-/* == #ToDo# - Deprecated Files                                                    == */
+/* == #TODO:# - Deprecated Files                                                   == */
 /* ================================================================================== */
 
 /* ================================================================================== */
@@ -172,16 +172,20 @@ ul li{
 /* ============================== */
 /* == #4.1# - Headers          == */
 /* ============================== */
+
+/* #TODO:# - Create a new Unique class to fix overwriting library classes */
 /* Aligns the Top Header */
-.sapMPage>.sapMPageHeader + section, .sapMPage>.sapMPageSubHeader + section, .sapMPage>.sapMPageHeader + .sapUiHiddenPlaceholder + section {
+.sapMPage >.sapMPageHeader + section, .sapMPage>.sapMPageSubHeader + section, .sapMPage>.sapMPageHeader + .sapUiHiddenPlaceholder + section {
 	top: 3.5rem;
 }
 
+/* #TODO:# - Create a new Unique class to fix overwriting library classes */
 /* This is used to hide a green bar that is added by the Blue Crystal Library */
 .sapMPageHeader::before {
 	display:none; 
 }
 
+/* #TODO:# - Create a new Unique class to fix overwriting library classes */
 /* This is to overwrite the Default Page Header Background */
 .sapMPage > .sapMIBar.sapMHeader-CTX {
 	background: white;
@@ -192,6 +196,7 @@ ul li{
 /* ============================== */
 /* == #4.2# - Sub Headers      == */
 /* ============================== */
+/* #TODO:# - Create a new Unique class to fix overwriting library classes */
 .sapMIBar.sapMSubHeader-CTX {
 	background-color: white;
 }
@@ -262,6 +267,7 @@ ul.IOMYNavMenu > li > div.sapTntNavLIGroup {
 	background-color: rgb(241,242,242);
 }
 
+/* #TODO:# - Create a new Unique class to fix overwriting library classes */
 .sapTntNavLIGroup:not(.sapTntNavLIItemDisabled):hover {
 	background-color: #f0f0f0;
 }
@@ -337,33 +343,43 @@ ul.IOMYNavMenu > li:first-child > div.sapTntNavLIGroup.sapTntNavLIItem > .sapTnt
 	height: 300px;
 }
 
+/* #TODO:# - Create a new Unique class to fix overwriting library classes */
 .sapMSlt > .sapMSltLabel {
 	font-family: 'Roboto Condensed', sans-serif;
 }
 
+/* Changes the "Hover" color of input boxes to green */
+.SettingsTextInput > .sapMInputBaseInner:not(.sapMInputBaseReadonlyInner):not(.sapMInputBaseStateInner):not(.sapMInputBaseDisabledInner):hover {
+		border-color: rgb(139,197,63);
+} 
+
+/* Changes the "Focus" color of input boxes to green */
+.SettingsTextInput > .sapMInputBaseInner:not(.sapMInputBaseReadonlyInner):not(.sapMInputBaseStateInner):not(.sapMInputBaseDisabledInner):focus {
+		border-color: rgb(139,197,63);
+}
+
+/* Date Pickers - Changes the right "calendar" icon to have a green background */
+.UserFormSection > .sapMFlexItem > .SettingsTextInput > div > span.sapMInputValHelpInner:active {
+	    background-color: rgb(139,197,63);
+}
+
+/* Check Boxes - Changes the "Hover" of a check box to green */
+.IOMYButton > .sapMCbHoverable:hover {
+	border-color: rgb(139, 197, 63);
+}
 /* ==================================================================================== */
 /* == #7.0# - Tiles                                                                  == */
 /* ==================================================================================== */
 /* ============================== */
 /* == #7.1# - Tile Data        == */
 /* ============================== */
-div > .sapMIBar-CTX .sapMLabel {
-	color: #000000;
-	font-size: 24px;
-	text-shadow: 2px 2px 4px #404040;
-}
-	
-/* Centers Labels when used in a Tile */
+
+/* Toggle Status Styling */
 .TileToggleThingStatusLabel {
 	text-align: center;
 	width: 100%;
-	font-size: 2.125rem;
+	font-size: 1.25rem;
 	color: navy;
-	padding-top: 8px;
-}
-
-.HeaderLower.sapMBar {
-	line-height: 2.4rem;
 }
 
 /* ============================== */
@@ -582,11 +598,6 @@ button.IOMYButton > .sapMBtnInner {
 	background: none;
 }
 
-/* #ToDo# - Deprecated? */
-button.IOMYButton:not(.FooterHelpButton) > .sapMBtnInner > .sapMBtnContent {
-	/*font-weight: bold;*/
-}
-
 button.IOMYButton.PremiseOverviewRoomButton > .sapMBtnInner > .sapMBtnContent {
 	font-family: "Roboto Condensed", sans-serif;
 	line-height: 2.5rem;
@@ -655,24 +666,6 @@ button.IOMYButton.TextSize22px > div.sapMBtnInner > span.sapMBtnIcon {
 button.IOMYButton.TextSize40px > div.sapMBtnInner > span.sapMBtnIcon {
 	font-size: 40px;
 }
-
-/* -- #ToDo# - Currently not being used. Possibly Deprecated --
-button.IOMYButton.TextSize16px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-	font-size: 16px;
-}
-button.IOMYButton.TextSize18px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-	font-size: 18px;
-}
-button.IOMYButton.TextSize20px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-	font-size: 20px;
-}
-button.IOMYButton.TextSize22px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-	font-size: 22px;
-}
-button.IOMYButton.TextSize40px > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
-	font-size: 40px;
-}
-*/
 
 button.IOMYButton.TextLeft > div.sapMBtnInner.sapMBtnText > span.sapMBtnContent {
 	text-align: left;
@@ -749,7 +742,7 @@ button.LoginPageSubmit > div > span.sapMBtnIcon.sapUiIcon{
 /* ==================================================================================== */
 /* == #13.0# - Navigation Page                                                       == */
 /* ==================================================================================== */
-/* #ToDo# - Possibly Deprecated Code - Check NavFragment */
+/* #TODO:# - Possibly Deprecated Code - Check NavFragment */
 .NavMain-ItemLabel {
 	padding-top: 17px;
 	color : black;
@@ -946,7 +939,7 @@ ul.IOMYNavMenu > li > ul > li.sapTntNavLIGroupItem {
 /* ==================================================================================== */
 /* == #16.0# - Activity Logs                                                         == */
 /* ==================================================================================== */
-/* #ToDo# - Possibly Deprecated Code */
+/* #TODO:# - Possibly Deprecated Code */
 .ActivityLogEntry {
 	padding-top : 8px;
 	padding-bottom : 8px;
@@ -960,7 +953,7 @@ ul.IOMYNavMenu > li > ul > li.sapTntNavLIGroupItem {
 /* ==================================================================================== */
 /* == #17.0# - Security Overview                                                     == */
 /* ==================================================================================== */
-/* #ToDo# - Possibly Deprecated Code */
+/* #TODO:# - Possibly Deprecated Code */
 .SecurityOverview-IPCameraItemLabel {
 	padding-top: 16px;
 	padding-bottom: 16px;
@@ -976,7 +969,7 @@ ul.IOMYNavMenu > li > ul > li.sapTntNavLIGroupItem {
 /* ==================================================================================== */
 /* == #18.0# - Settings: Overview                                                    == */
 /* ==================================================================================== */
-/* #ToDo# - Possibly Deprecated Code */
+/* #TODO:# - Possibly Deprecated Code */
 .Setting-ItemLabel {
 	padding-top: 20px;
 	padding-bottom: 20px;
@@ -1007,47 +1000,9 @@ ul.IOMYNavMenu > li > ul > li.sapTntNavLIGroupItem {
 }
 
 /* ==================================================================================== */
-/* == #19.0# - Settings: Device List                                                 == */
+/* == #19.0# -                                                                       == */
 /* ==================================================================================== */
-.sapMInputBase.SettingsTextInput > input {
-	width: 100%;
-	font-family: "Roboto Condensed", sans-serif;
-	margin: 0;
-	padding: 8px 8px 6px 8px;
-	position: relative;
-	display: block;
-	outline: none;
-	border: 1px solid rgb(188,190,192);
-}
 
-.SettingsDropdownInput.sapMComboBoxBasePressed.sapMComboBoxBaseArrow, .sap-desktop .sapMComboBoxBasePressed .sapMComboBoxBaseArrow:hover {
-	background: rgb(241, 242, 242);
-}
-
-.SettingsDropdownInput.sapMComboBoxBasePressed:not(.sapMComboBoxTextFieldReadonly):not(.sapMComboBoxTextFieldState):not(.sapMComboBoxTextFieldDisabled) {
-	border-color: rgb(241, 242, 242);
-}
-
-.SettingsDropdownInput.sapMFocus.sapMComboBoxTextField:not(.sapMComboBoxTextFieldReadonly):not(.sapMComboBoxTextFieldState):not(.sapMComboBoxTextFieldDisabled),
-.sapMComboBoxTextField:not(.sapMComboBoxTextFieldReadonly):not(.sapMComboBoxTextFieldState):not(.sapMComboBoxTextFieldDisabled):hover {
-	border-color: rgb(188,190,192);
-}
-
-.sapMInputBase.SettingsDropdownInput > input {
-	width: 100%;
-	font-family: "Roboto Condensed", sans-serif;
-	font-size: 16px;
-	margin: 0;
-	padding: 8px 8px 6px 8px;
-	position: relative;
-	display: block;
-	outline: none;
-}
-
-.sapMInputBase.SettingsDropdownInput > button {
-	background-color: rgba(197,197,197,0.1);
-	border-left: 1px solid rgb(197,197,197);
-}
 
 /* ==================================================================================== */
 /* == #20.0# - Settings: Premise List & Overview                                     == */
