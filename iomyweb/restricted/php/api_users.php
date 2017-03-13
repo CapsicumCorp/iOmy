@@ -654,7 +654,7 @@ if($bError===false) {
 				//-- Retrieve the "Username" --//
 				$sPostUsername = $aHTTPData["Username"];
 				
-				if( $sPostUsername===false ) {
+				if( $sPostUsername===false || trim($sPostUsername)==="" ) {
 					$bError = true;
 					$sErrMesg .= "Error Code:'0143' \n";
 					$sErrMesg .= "Invalid \"Username\" parameter! \n";
@@ -973,7 +973,7 @@ if( $bError===false ) {
 					if( $aUserInfo["Data"]["UserInfoId"]>=1 ) {
 						
 						//-- Check if the OldPassword is the valid password --//
-						if( VerifyUserPassword($sPostOldPassword) ) {
+						if( $oRestrictedApiCore->VerifyUserPassword($sPostOldPassword) ) {
 							//-- If the Password matches then its fine to swap to the new password --//
 							$aResult = ChangeUserPassword($sPostNewPassword);
 							
