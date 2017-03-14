@@ -364,6 +364,7 @@ sap.ui.controller("mjs.settings.PremiseList", {
                 // Create the show/hide hub list button. May or may not be used, depending on whether
                 // there are hubs attached to a premise.
                 oPremiseShowHideButton = new sap.m.Button( me.createId( sPremiseIconId ), {
+                    tooltip: "Collapse",
                     icon : "sap-icon://navigation-down-arrow",
                     press: function () {
                         // Lock the button while this procedure is running.
@@ -374,11 +375,13 @@ sap.ui.controller("mjs.settings.PremiseList", {
                             me.byId(sHubContainerRow).setVisible(true);
                             me.premiseExpanded["_"+aPremise.Id] = true;
                             this.setIcon("sap-icon://navigation-down-arrow");
+                            this.setTooltip("Collapse");
                         // Otherwise if it's shown, hide it.
                         } else {
                             me.byId(sHubContainerRow).setVisible(false);
                             me.premiseExpanded["_"+aPremise.Id] = false;
                             this.setIcon("sap-icon://navigation-right-arrow");
+                            this.setTooltip("Expand");
                         }
 
                         // Procedure complete, re-enable the button.
@@ -482,7 +485,7 @@ sap.ui.controller("mjs.settings.PremiseList", {
                 // Decide whether to hide or show when the page loads/reloads.
                 if (me.premiseExpanded["_"+aPremise.Id] === false) {
                     me.byId(sHubContainerRow).setVisible(false);
-                    oPremiseShowHideButton.setIcon("sap-icon://navigation-right-arrow");
+                    oPremiseShowHideButton.setIcon("sap-icon://navigation-right-arrow").setTooltip("Expand");
                 }
 				
 					

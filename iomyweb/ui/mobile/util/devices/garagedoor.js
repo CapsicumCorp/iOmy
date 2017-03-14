@@ -72,6 +72,7 @@ $.extend(IOMy.devices.garagedoor,{
         // Create the switch.
         //--------------------------------------------------------------------//
         new sap.m.Button(oViewScope.createId(sPageId+"Button_"+aDeviceData.DeviceId), {
+            tooltip: "Open/Close Toggle",
             icon : sSwitchIcon,
             width: "95px",
             text : sSwitchText,

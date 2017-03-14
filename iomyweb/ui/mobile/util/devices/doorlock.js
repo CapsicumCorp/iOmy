@@ -82,6 +82,7 @@ $.extend(IOMy.devices.doorlock,{
         // Create the switch.
         //--------------------------------------------------------------------//
         new sap.m.Button(oViewScope.createId(sPageId+"Button_"+aDeviceData.DeviceId), {
+            tooltip: "Lock/Unlock Toogle",
             icon : sSwitchIcon,
             width: "95px",
             text : sSwitchText,

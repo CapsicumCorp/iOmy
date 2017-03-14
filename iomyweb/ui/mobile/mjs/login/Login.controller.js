@@ -241,6 +241,7 @@ sap.ui.controller("mjs.login.Login", {
 		//-- Input - Submit Button					--//
 		//--------------------------------------------//
 		var oLoginInputSubmit = new sap.m.Button("oLoginButtonSubmit", {
+			tooltip: "Login",
 			text: "Login",
 			type: "Accept",
             icon: "sap-icon://GoogleMaterial/check_circle",

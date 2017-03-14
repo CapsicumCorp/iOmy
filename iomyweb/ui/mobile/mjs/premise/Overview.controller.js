@@ -207,16 +207,19 @@ sap.ui.controller("mjs.premise.Overview", {
                     if (iDevicesInRoom > 0) {
                         aDeviceArrow = [
                             new sap.m.Button(me.createId("roomName"+sIndex), {
+                                tooltip: "Collapse",
                                 icon : "sap-icon://navigation-down-arrow",
                                 press : function () {
                                     if (me.roomsExpanded[sIndex] === false) {
                                         me.byId("room"+sIndex).setVisible(true);
                                         me.roomsExpanded[sIndex] = true;
                                         this.setIcon("sap-icon://navigation-down-arrow");
+                                        this.setTooltip("Collapse");
                                     } else {
                                         me.byId("room"+sIndex).setVisible(false);
                                         me.roomsExpanded[sIndex] = false;
                                         this.setIcon("sap-icon://navigation-right-arrow");
+                                        this.setTooltip("Expand");
                                     }
                                 }
                             }).addStyleClass("ButtonNoBorder IOMYButton ButtonIconGreen TextSize20px width100Percent")
@@ -375,7 +378,7 @@ sap.ui.controller("mjs.premise.Overview", {
                             if (me.roomsExpanded[sIndex] === false) {
                                 me.byId("room"+sIndex).setVisible(false);
                                 if (me.byId("roomName"+sIndex) !== undefined) {
-                                    me.byId("roomName"+sIndex).setIcon("sap-icon://navigation-right-arrow");
+                                    me.byId("roomName"+sIndex).setIcon("sap-icon://navigation-right-arrow").setTooltip("Expand");
                                 }
                             }
 

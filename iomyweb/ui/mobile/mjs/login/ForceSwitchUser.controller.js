@@ -221,7 +221,8 @@ sap.ui.controller("mjs.login.ForceSwitchUser", {
 			this.byId("oLoginButtonSubmit").destroy();
 		
 		var oLoginInputSubmit = new sap.m.Button(this.createId("oLoginButtonSubmit"), {
-			text: "Switch",
+			tooltip: "Switch",
+			text: "Switch User",
 			type: "Accept",
             icon: "sap-icon://GoogleMaterial/check_circle",
             iconFirst: false,

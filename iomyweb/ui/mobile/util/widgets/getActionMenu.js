@@ -198,6 +198,7 @@ $.extend(IOMy.widgets,{
                     new sap.m.VBox({
                         items : [
                             new sap.m.Button({
+                                tooltip: "Action menu",
                                 icon : "sap-icon://GoogleMaterial/add_circle",
                                 press : function (oControlEvent) {
                                     

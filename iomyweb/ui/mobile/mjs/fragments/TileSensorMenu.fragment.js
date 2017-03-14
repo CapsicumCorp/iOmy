@@ -100,6 +100,7 @@ sap.ui.jsfragment("mjs.fragments.TileSensorMenu", {
 											"text":		'NOTE: The analytical buttons below will use the "Time Period" and the "Filter" values setup in the previous tabs in this Menu.'
 										}).addStyleClass("MarBottom20px BG_white PadAll8px BorderRad7px"),
 										new sap.m.Button({
+											tooltip:    "Create Table",
 											"enabled":	false,
 											"text":		"Create Table",
 											//"type":		"Accept",
@@ -108,6 +109,7 @@ sap.ui.jsfragment("mjs.fragments.TileSensorMenu", {
 											//"icon":		"sap-icon://GoogleMaterial/adb"
 										}),
 										new sap.m.Button({
+											tooltip:    "Create Line Graph",
 											"enabled":	false,
 											"text":		"Create Line Graph",
 											//"type":		"Accept",
@@ -115,6 +117,7 @@ sap.ui.jsfragment("mjs.fragments.TileSensorMenu", {
 											"icon":		"sap-icon://line-chart"
 										}),
 										new sap.m.Button({
+											tooltip:    "Create Bar Graph",
 											"enabled":	false,
 											"text":		"Create Bar Graph",
 											//"type":		"Accept", 
@@ -122,6 +125,7 @@ sap.ui.jsfragment("mjs.fragments.TileSensorMenu", {
 											"icon":		"sap-icon://vertical-bar-chart-2"
 										}),
 										new sap.m.Button({
+											tooltip:    "Create Pie Graph",
 											"enabled":	false,
 											"text":		"Create Pie Graph",
 											//"type":		"Accept",

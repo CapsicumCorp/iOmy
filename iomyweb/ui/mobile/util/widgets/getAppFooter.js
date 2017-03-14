@@ -36,6 +36,7 @@ $.extend(IOMy.widgets,{
 		var oFooter = new sap.m.Bar({
 			contentLeft : [
 				new sap.m.Button({
+					tootip: "Open Help",
 					text:	"Help",
                     icon:   "sap-icon://GoogleMaterial/help",
 					iconFirst: false,

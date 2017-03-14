@@ -387,6 +387,7 @@ $.extend(IOMy.devices.onvif,{
                             new sap.m.VBox({
                                 items : [
                                     new sap.m.Button ({
+                                        tooltip: "Screenshot",
                                         width: "100%",
                                         icon : "sap-icon://GoogleMaterial/photo_camera",
                                     })
@@ -402,6 +403,7 @@ $.extend(IOMy.devices.onvif,{
                             new sap.m.VBox({
                                 items : [
                                     new sap.m.Button ({
+                                        tooltip: "Open the stream",
                                         width: "100%",
                                         icon : "sap-icon://GoogleMaterial/videocam",
                                     })
