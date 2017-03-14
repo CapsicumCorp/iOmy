@@ -114,7 +114,9 @@ public class Settings {
      * @param yes true for Yes or false for No
      */
     public static void setRunFirstRunWizard(Context context, boolean yes) {
-        getEditor(context).putBoolean(PREF_RUN_FIRST_RUN_WIZARD, yes);
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putBoolean(PREF_RUN_FIRST_RUN_WIZARD, yes);
+        editor.apply();
     }
 
     /**
@@ -132,7 +134,9 @@ public class Settings {
      * @param enabled true to enable or false to disable
      */
     public static void setDemoModeEnabled(Context context, boolean enabled) {
-        getEditor(context).putBoolean(PREF_DEMO_DATA_MODE, enabled);
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putBoolean(PREF_DEMO_DATA_MODE, enabled);
+        editor.apply();
     }
 
     /**
@@ -150,7 +154,9 @@ public class Settings {
     * @param enabled true to enable or false to disable
     */
     public static void setWatchInputsEnabled(Context context, boolean enabled) {
-        getEditor(context).putBoolean(PREF_WATCH_INPUTS_ENABLED, enabled);
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putBoolean(PREF_WATCH_INPUTS_ENABLED, enabled);
+        editor.apply();
     }
 
     /**
@@ -168,7 +174,9 @@ public class Settings {
      * @param enabled true to enable or false to disable
      */
     public static void setLighttpdPHPEnabled(Context context, boolean enabled) {
-        getEditor(context).putBoolean(PREF_LIGHTTPDPHP_ENABLED, enabled);
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putBoolean(PREF_LIGHTTPDPHP_ENABLED, enabled);
+        editor.apply();
     }
 
     /**
@@ -186,7 +194,9 @@ public class Settings {
      * @param enabled true to enable or false to disable
      */
     public static void setMySQLEnabled(Context context, boolean enabled) {
-        getEditor(context).putBoolean(PREF_MYSQL_ENABLED, enabled);
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putBoolean(PREF_MYSQL_ENABLED, enabled);
+        editor.apply();
     }
 
     /**
@@ -205,7 +215,9 @@ public class Settings {
      * @param hostname The hostname of the web server to save
      */
     public static void setWebServerHostname(Context context, String hostname) {
-        getEditor(context).putString(PREF_WEBSERVER_HOSTNAME, hostname);
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putString(PREF_WEBSERVER_HOSTNAME, hostname);
+        editor.apply();
     }
 
     /**
@@ -234,7 +246,9 @@ public class Settings {
      * @param port The port of the web server to save
      */
     public static void setWebServerPort(Context context, String port) {
-        getEditor(context).putString(PREF_WEBSERVER_PORT, port);
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putString(PREF_WEBSERVER_PORT, port);
+        editor.apply();
     }
 
     /**
@@ -263,7 +277,9 @@ public class Settings {
      * @param hostname The hostname of the MySQL server to save
      */
     public static void setMySQLServerHostname(Context context, String hostname) {
-        getEditor(context).putString(PREF_MYSQL_HOSTNAME, hostname);
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putString(PREF_MYSQL_HOSTNAME, hostname);
+        editor.apply();
     }
 
     /**
@@ -292,7 +308,9 @@ public class Settings {
      * @param port The port of the MySQL server to save
      */
     public static void setMySQLServerPort(Context context, String port) {
-        getEditor(context).putString(PREF_MYSQL_PORT, port);
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putString(PREF_MYSQL_PORT, port);
+        editor.apply();
     }
 
     /**
@@ -320,7 +338,9 @@ public class Settings {
      * @param password The root password to use for the MySQL server to save
      */
     public static void setMySQLRootPassword(Context context, String password) {
-        getEditor(context).putString(PREF_MYSQL_ROOT_PASSWORD, password);
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putString(PREF_MYSQL_ROOT_PASSWORD, password);
+        editor.apply();
     }
 
     /**
@@ -338,7 +358,9 @@ public class Settings {
      * @param username The owner username to use for the MySQL server to save
      */
     public static void setMySQLOwnerUsername(Context context, String username) {
-        getEditor(context).putString(PREF_MYSQL_OWNER_USERNAME, username);
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putString(PREF_MYSQL_OWNER_USERNAME, username);
+        editor.apply();
     }
 
     /**
@@ -356,7 +378,9 @@ public class Settings {
      * @param password The owner password to use for the MySQL server to save
      */
     public static void setMySQLOwnerPassword(Context context, String password) {
-        getEditor(context).putString(PREF_MYSQL_OWNER_PASSWORD, password);
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putString(PREF_MYSQL_OWNER_PASSWORD, password);
+        editor.apply();
     }
 
     /**
@@ -374,7 +398,9 @@ public class Settings {
      * @param username The Watch Inputs username to use for the MySQL server to save
      */
     public static void setMySQLWatchInputsUsername(Context context, String username) {
-        getEditor(context).putString(PREF_MYSQL_WATCHINPUTS_USERNAME, username);
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putString(PREF_MYSQL_WATCHINPUTS_USERNAME, username);
+        editor.apply();
     }
 
     /**
@@ -392,6 +418,8 @@ public class Settings {
      * @param password The Watch Inputs password to use for the MySQL server to save
      */
     public static void setMySQLWatchInputsPassword(Context context, String password) {
-        getEditor(context).putString(PREF_MYSQL_WATCHINPUTS_PASSWORD, password);
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putString(PREF_MYSQL_WATCHINPUTS_PASSWORD, password);
+        editor.apply();
     }
 }
