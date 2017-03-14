@@ -25,9 +25,7 @@ package com.capsicumcorp.iomy.apps.iomy;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Build;
-import android.preference.PreferenceManager;
 
 import org.json.JSONObject;
 
@@ -113,16 +111,14 @@ public class InstallWizard {
 
     //Set initial variable settings based on the current stored preferences
     public void setInitialSettings(Context context) {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-
         //Using localhost is okay for the local web server
-        this.hostname=sharedPref.getString("pref_webserver_hostname", "localhost");
-        this.webserverport=Integer.parseInt(sharedPref.getString("pref_webserver_port", "8080"));
+        this.hostname=Settings.getWebServerHostname(context);
+        this.webserverport=Settings.getWebServerPortAsInt(context);
         this.setupAPI="http://"+this.hostname+":"+this.webserverport+"/iomyserver.php";
-        this.dbURI=sharedPref.getString("pref_mysql_hostname", "localhost");
-        this.dbServerPort=Integer.parseInt(sharedPref.getString("pref_mysql_port", "3306"));
-        this.dbPassword=sharedPref.getString("pref_mysql_root_password", "");
-        this.installDemoData=sharedPref.getBoolean("pref_demo_data_mode", true);
+        this.dbURI=Settings.getMySQLServerHostname(context);
+        this.dbServerPort=Settings.getMySQLServerPortAsInt(context);
+        this.dbPassword=Settings.getMySQLRootPassword(context);
+        this.installDemoData=Settings.getDemoModeEnabled(context);
     }
     /**
      * Generates a random password between 8 - 20 characters long.
@@ -341,31 +337,28 @@ public class InstallWizard {
         if (title == Titles.finalSetupTitle || (this.installDemoData && title == Titles.webserverServerSetupTitle)) {
             writeWatchInputsFile();
             // Disable first run wizard
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(activity);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean("pref_run_first_run_wizard", false);
-            editor.putBoolean("pref_demo_data_mode", this.getInstallDemoData());
+            Settings.setRunFirstRunWizard(activity, false);
+            Settings.setDemoModeEnabled(activity, this.getInstallDemoData());
 
             // Update other settings
-            editor.putString("pref_webserver_hostname", this.hostname);
-            editor.putString("pref_webserver_port", Integer.toString(this.webserverport));
-            editor.putString("pref_mysql_hostname", this.dbURI);
-            editor.putString("pref_mysql_port", Integer.toString(this.dbServerPort));
-            editor.putString("pref_mysql_root_password", this.dbPassword);
+            Settings.setWebServerHostname(activity, this.hostname);
+            Settings.setWebServerPortAsInt(activity, this.webserverport);
+            Settings.setMySQLServerHostname(activity, this.dbURI);
+            Settings.setWebServerPortAsInt(activity, this.dbServerPort);
+            Settings.setMySQLRootPassword(activity, this.dbPassword);
             if (this.installDemoData) {
-                editor.putString("pref_mysql_owner_username", "demo");
-                editor.putString("pref_mysql_owner_password", "demo");
-                editor.putBoolean("pref_watch_inputs_enabled", false);
+                Settings.setMySQLOwnerUsername(activity, "demo");
+                Settings.setMySQLOwnerPassword(activity, "demo");
+                Settings.setWatchInputsEnabled(activity, false);
             } else {
-                editor.putString("pref_mysql_owner_username", this.ownerUsername);
-                editor.putString("pref_mysql_owner_password", this.ownerPassword);
-                editor.putString("pref_mysql_watchInputs_username", this.watchInputsUsername);
-                editor.putString("pref_mysql_watchInputs_password", this.watchInputsPassword);
-                editor.putBoolean("pref_watch_inputs_enabled", true);
+                Settings.setMySQLOwnerUsername(activity, this.ownerUsername);
+                Settings.setMySQLOwnerPassword(activity, this.ownerPassword);
+                Settings.setMySQLOwnerUsername(activity, this.watchInputsUsername);
+                Settings.setMySQLOwnerPassword(activity, this.watchInputsPassword);
+                Settings.setWatchInputsEnabled(activity, true);
             }
-            editor.putBoolean("pref_lighttpdphp_enabled", true);
-            editor.putBoolean("pref_mysql_enabled", true);
-            editor.commit();
+            Settings.setLighttpdPHPEnabled(activity, true);
+            Settings.setMySQLEnabled(activity, true);
 
             // Load main screen
             if (this.installDemoData == true) {

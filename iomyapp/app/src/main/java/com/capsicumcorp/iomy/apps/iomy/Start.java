@@ -23,9 +23,7 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 package com.capsicumcorp.iomy.apps.iomy;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
@@ -43,7 +41,7 @@ public class Start extends AppCompatActivity {
         //========================================================================//
         super.onCreate(savedInstanceState);
 
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        Settings.initPreferences(this);
 
         this.setContentView(R.layout.activity_start);
         this.setTitle(Titles.welcomePageTitle);
@@ -53,12 +51,10 @@ public class Start extends AppCompatActivity {
 
         final Context context=this;
 
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-
         //Import default or current settings from Android preferences to the local variables
         installWizard.setInitialSettings(this);
 
-        boolean firstrunval=sharedPref.getBoolean("pref_run_first_run_wizard", true);
+        boolean firstrunval=Settings.getRunFirstRunWizard(this);
         if (firstrunval==false) {
             Application.getInstance().runServerServices.supplyDBRootPassword(installWizard.dbPassword);
 
@@ -66,20 +62,6 @@ public class Start extends AppCompatActivity {
             //TODO: Fix this so it can run an alternative multiple set of screens
             installWizard.loadServerDeviceProgress(this);
             //installWizard.loadIOMy(this);
-        } else {
-            //Setup initial preference values
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putString("pref_webserver_hostname", "localhost");
-            editor.putString("pref_webserver_port", "8080");
-            editor.putString("pref_mysql_hostname", "localhost");
-            editor.putString("pref_mysql_port", "3306");
-            editor.putString("pref_mysql_root_password", "");
-            editor.putString("pref_mysql_owner_username", "");
-            editor.putString("pref_mysql_owner_password", "");
-            editor.putBoolean("pref_watch_inputs_enabled", true);
-            editor.putBoolean("pref_lighttpdphp_enabled", true);
-            editor.putBoolean("pref_mysql_enabled", true);
-            editor.commit();
         }
     }
 

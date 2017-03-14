@@ -26,7 +26,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -42,9 +41,6 @@ public class SettingsPage extends PreferenceActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
-
-        //This is needed for text preferences that use an integer
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
         EditTextPreference textPref;
 
@@ -87,14 +83,13 @@ public class SettingsPage extends PreferenceActivity {
                         }
                     }
                 };
-        sharedPref.registerOnSharedPreferenceChangeListener(changeListener);
+        Settings.getSharedPref(this).registerOnSharedPreferenceChangeListener(changeListener);
     }
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        sharedPref.unregisterOnSharedPreferenceChangeListener(changeListener);
+        Settings.getSharedPref(this).unregisterOnSharedPreferenceChangeListener(changeListener);
     }
 
     @Override

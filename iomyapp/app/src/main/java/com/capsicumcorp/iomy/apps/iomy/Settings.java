@@ -51,7 +51,7 @@ public class Settings {
     //Constants for Preference defaults
     //These should be synched with the defaults specified in xml/preferences.xml
     public static final boolean PREF_RUN_FIRST_RUN_WIZARD_DEFAULT=true;
-    public static final boolean PREF_DEMO_DATA_MODE_DEFAULT=false;
+    public static final boolean PREF_DEMO_DATA_MODE_DEFAULT=false; //Default to false so old installations don't start in demo mode
 
     public static final boolean PREF_WATCH_INPUTS_ENABLED_DEFAULT=true;
     public static final boolean PREF_LIGHTTPDPHP_ENABLED_DEFAULT=true;

@@ -26,9 +26,7 @@ package com.capsicumcorp.iomy.apps.iomy;
 
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -113,9 +111,8 @@ public class ProgressPage extends AppCompatActivity {
      * Commands the the install wizard module to bring up the next activity.
      */
     protected void onComplete() {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean firstrunval=sharedPref.getBoolean("pref_run_first_run_wizard", true);
-        boolean demoMode=sharedPref.getBoolean("pref_demo_data_mode", true);
+        boolean firstrunval=Settings.getRunFirstRunWizard(this);
+        boolean demoMode=Settings.getDemoModeEnabled(this);
 
         if (firstrunval) {
             this.installWizard.summonNextPage(this, this.installWizard.PROCEED);

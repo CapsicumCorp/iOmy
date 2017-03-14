@@ -24,12 +24,10 @@ package com.capsicumcorp.iomy.apps.iomy;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.io.File;
@@ -106,8 +104,7 @@ public class Application extends android.app.Application {
     }
     //Returns true if the first run wizard needs to be run
     public synchronized boolean needFirstRunWizard() {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean firstrunval=sharedPref.getBoolean("pref_run_first_run_wizard", true);
+        boolean firstrunval=Settings.getRunFirstRunWizard(this);
 
         if (firstrunval==true) {
             //The first run wizard needs to be run first
@@ -135,12 +132,10 @@ public class Application extends android.app.Application {
             Log.println(Log.INFO, this.AppName, "Application.startBackgroundTasksfromReceiver: Background tasks failed to start result=");
             return false;
         }
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(Application.getInstance());
-
         //Import default or current settings from Android preferences to the local variables
         installWizard.setInitialSettings(this);
 
-        boolean firstrunval=sharedPref.getBoolean("pref_run_first_run_wizard", true);
+        boolean firstrunval=Settings.getRunFirstRunWizard(this);
         if (firstrunval==false) {
             Log.println(Log.INFO, this.AppName, "Application.startBackgroundTasksfromReceiver: Activating Extract Service");
             Application.getInstance().runServerServices.supplyDBRootPassword(installWizard.dbPassword);
@@ -220,19 +215,13 @@ public class Application extends android.app.Application {
     public boolean getBackgroundTasksStarted() { return this.backgroundTasksStarted; }
 
     public synchronized boolean getWatchInputsEnabled() {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        return sharedPref.getBoolean("pref_watch_inputs_enabled", true);
+        return Settings.getWatchInputsEnabled(this);
     }
     public synchronized boolean getLighttpdServerEnabled() {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        return sharedPref.getBoolean("pref_lighttpdphp_enabled", true);
+        return Settings.getLighttpdPHPEnabled(this);
     }
     public synchronized boolean getMySQLEnabled() {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        return sharedPref.getBoolean("pref_mysql_enabled", true);
+        return Settings.getMySQLEnabled(this);
     }
     public String getAppName() {
         return this.AppName;
