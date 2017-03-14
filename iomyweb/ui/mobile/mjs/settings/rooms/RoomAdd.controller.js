@@ -154,30 +154,16 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                 }).addStyleClass("width100Percent SettingsDropdownInput");
                 
                 //==================================================//
-                // LOAD ROOM TYPE OPTIONS AND SET CURRENT ROOM TYPE //
+                // LOAD ROOM TYPE OPTIONS
                 //==================================================//
-                me.odata.AjaxRequest({
-                    Url : me.odata.ODataLocation("room_types"),
-                    Columns : ["ROOMTYPE_PK", "ROOMTYPE_NAME"],
-                    WhereClause : [],
-                    OrderByClause : [],
-                    
-                    onSuccess : function (responseType, data) {
-                        for (var i = 0; i < data.length; i++) {
-                            oRoomTypeField.addItem(
-                                new sap.ui.core.Item({
-                                    text : data[i].ROOMTYPE_NAME,
-                                    key : data[i].ROOMTYPE_PK
-                                })
-                            );
-                        }
-                        oRoomTypeField.setSelectedKey(data[0].ROOMTYPE_PK);
-                    },
-                    
-                    onFail : function (response) {
-                        jQuery.sap.log.error("Error loading room types OData: "+JSON.stringify(response));
-                    }
-                });
+                for (var i = 0; i < IOMy.common.RoomTypes.length; i++) {
+                    oRoomTypeField.addItem(
+                        new sap.ui.core.Item({
+                            text : IOMy.common.RoomTypes[i].RoomTypeName,
+                            key : IOMy.common.RoomTypes[i].RoomTypeId
+                        })
+                    ).setSelectedKey(null);
+                }
                 
                 me.aElementsToDestroy.push("addButton");
 				var oAddButton = new sap.m.VBox({
@@ -245,9 +231,6 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                                                                     //-- REFRESH ROOMS --//
                                                                     IOMy.common.ReloadVariableRoomList( 
                                                                         function () {
-                                                                            //-- Enable this switch --//
-                                                                            oThisButton.setEnabled(true);
-
                                                                             try {
                                                                                 //-- Flag that the Core Variables have been configured --//
                                                                                 IOMy.common.CoreVariablesInitialised = true;

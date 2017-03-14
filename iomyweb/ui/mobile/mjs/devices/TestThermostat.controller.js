@@ -203,7 +203,7 @@ sap.ui.controller("mjs.devices.TestThermostat", {
                     key : "SBAuto"
                 })
             ]
-        });
+        }).addStyleClass("IOMySegmentedButtons");
         
         //-- Fan Field --//
         me.wFanField = new sap.m.SegmentedButton ({
@@ -224,7 +224,7 @@ sap.ui.controller("mjs.devices.TestThermostat", {
                     key : "SBYes"
                 })
             ]
-        });
+        }).addStyleClass("IOMySegmentedButtons");
         
         //-------------------------------------------------------------------//
         // Arrange the fields into a UI5 List

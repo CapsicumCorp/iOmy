@@ -49,7 +49,7 @@ sap.ui.jsview("mjs.settings.rooms.RoomAdd", {
             view : me,
             controller : oController,
             icon : "sap-icon://GoogleMaterial/settings",
-            title : "Add Room"
+            title : "New Room"
         });		
 		
 //		var oPage = new sap.m.Page(me.createId("page"), {

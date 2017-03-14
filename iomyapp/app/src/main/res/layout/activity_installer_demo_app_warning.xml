@@ -18,7 +18,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="You are currently running iOmy in demonstration mode.\n\nUsername: demo\nPassword: demo"
+            android:text="You are currently running iOmy in demonstration mode.\n\nUsername: demo\nPassword: demo\n\nTo revert iOmy to normal mode, you will need to go to the app entry in the application manager to force stop it and clear the data.\n\nAfter that you will need to run the installation again. "
             android:id="@+id/tvDemoNotice"
             android:layout_weight="1" />
 

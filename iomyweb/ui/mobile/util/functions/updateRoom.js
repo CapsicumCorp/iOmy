@@ -216,7 +216,7 @@ $.extend(IOMy.functions, {
                         }, "UpdateMessageBox");
                     },
                     onFail : function (response) {
-                        IOMy.common.showError("Update failed.", "Error");
+                        IOMy.common.showError(response.responseText, "Error");
                         jQuery.sap.log.error(JSON.stringify(response));
 
                         // Finish the request by enabling the edit button

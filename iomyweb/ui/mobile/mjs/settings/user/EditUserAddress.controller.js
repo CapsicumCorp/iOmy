@@ -51,6 +51,21 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                 iCountryId = displayData.COUNTRIES_PK;
                 
                 // Display the information retrieved from the User Information OData.
+                me.byId("addressCountry").setSelectedKey(displayData.COUNTRIES_PK);
+                me.byId("addressCountry").setEnabled(true);
+                
+                me.byId("addressLanguage").setSelectedKey(displayData.LANGUAGE_PK);
+                me.byId("addressLanguage").setEnabled(true);
+                
+                me.byId("addressPostCode").setSelectedKey(displayData.POSTCODE_PK);
+                me.byId("addressPostCode").setEnabled(true);
+                
+                me.byId("addressState").setSelectedKey(displayData.STATEPROVINCE_PK);
+                me.byId("addressState").setEnabled(true);
+                
+                me.byId("addressTimezone").setSelectedKey(displayData.TIMEZONE_PK);
+                me.byId("addressTimezone").setEnabled(true);
+                
                 me.byId("addressLine1").setValue(displayData.USERADDRESS_LINE1);
                 me.byId("addressLine2").setValue(displayData.USERADDRESS_LINE2);
                 me.byId("addressLine3").setValue(displayData.USERADDRESS_LINE3);
@@ -76,7 +91,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
              * @param {type} iCountryId
              */
             onProceed : function (iCountryId, displayData) {
-                me.loadLocaleCBoxItems(me, iCountryId, displayData);
+                //me.loadLocaleCBoxItems(me, iCountryId, displayData);
             }
         });
     },
@@ -117,12 +132,8 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                     ]
                 }).addStyleClass("MarTop16px");
     		    
-				var oCountryField = new sap.m.Select(me.createId("addressCountry"), {
-                    width : "100%",
-                    selectionChange : function () {
-                        me.loadLocaleCBoxItems(me, this.getSelectedKey());
-                    }
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+				var oCountryField = IOMy.widgets.selectBoxCountries(me.createId("addressCountry")).addStyleClass("SettingsDropdownInput");
+                oCountryField.setEnabled(false);
                 
                 //===== LANGUAGE =====\\
 				var oLanguageTitle = new sap.m.HBox({
@@ -136,9 +147,8 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                     ]
                 });
     		    
-				var oLanguageField = new sap.m.Select(me.createId("addressLanguage"), {
-                    width : "100%"
-                }).addStyleClass("width100Percent SettingsDropdownInput");
+				var oLanguageField = IOMy.widgets.selectBoxLanguages(me.createId("addressLanguage")).addStyleClass("SettingsDropdownInput");
+                oLanguageField.setEnabled(false);
                 
                 //===== STATE =====\\
                 var oStateTitle = new sap.m.HBox({
@@ -152,9 +162,8 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                     ]
                 });
     		    
-				var oStateField = new sap.m.Select(me.createId("addressState"), {
-                    width : "100%"
-                }).addStyleClass("width100Percent SettingsDropdownInput");
+				var oStateField = IOMy.widgets.selectBoxStatesProvinces(me.createId("addressState")).addStyleClass("SettingsDropdownInput");
+                oStateField.setEnabled(false);
                 
                 //===== POST CODE =====\\
                 var oPostCodeTitle = new sap.m.HBox({
@@ -168,9 +177,8 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                     ]
                 });
     		    
-				var oPostCodeField = new sap.m.Select(me.createId("addressPostCode"), {
-                    width : "100%"
-                }).addStyleClass("width100Percent SettingsDropdownInput");
+				var oPostCodeField = IOMy.widgets.selectBoxPostCodes(me.createId("addressPostCode")).addStyleClass("SettingsDropdownInput");
+                oPostCodeField.setEnabled(false);
                 
                 //===== TIMEZONE =====\\
                 var oTimezoneTitle = new sap.m.HBox({
@@ -184,9 +192,8 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                     ]
                 });
     		    
-				var oTimezoneField = new sap.m.Select(me.createId("addressTimezone"), {
-                    width : "100%"
-                }).addStyleClass("width100Percent SettingsDropdownInput");
+				var oTimezoneField = IOMy.widgets.selectBoxTimezones(me.createId("addressTimezone")).addStyleClass("SettingsDropdownInput");
+                oTimezoneField.setEnabled(false);
                 
                 //===== RESIDENTIAL ADDRESS =====\\
                 

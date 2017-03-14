@@ -45,15 +45,25 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                 var displayData = data[0];
                 iCountryId = displayData.COUNTRIES_PK;
                 
-                me.loadLocaleCBoxItems(me, iCountryId, displayData);
+                //me.loadLocaleCBoxItems(me, iCountryId, displayData);
                 
                 // Display the information retrieved from the Premise Location OData
-                // and set any foreign keys as item keys in the combo boxes.
-//                me.byId("addressCountry").setValue(displayData.COUNTRIES_NAME).setSelectedKey(displayData.COUNTRIES_PK);
-//                me.byId("addressLanguage").setValue(displayData.LANGUAGE_NAME).setSelectedKey(displayData.LANGUAGE_PK);
-//                me.byId("addressState").setValue(displayData.STATEPROVINCE_NAME).setSelectedKey(displayData.STATEPROVINCE_PK);
-                me.byId("addressPostCode").setValue(displayData.POSTCODE_NAME);
-//                me.byId("addressTimezone").setValue(displayData.TIMEZONE_TZ).setSelectedKey(displayData.TIMEZONE_PK);
+                // Display the information retrieved from the User Information OData.
+                me.byId("addressCountry").setSelectedKey(displayData.COUNTRIES_PK);
+                me.byId("addressCountry").setEnabled(true);
+                
+                me.byId("addressLanguage").setSelectedKey(displayData.LANGUAGE_PK);
+                me.byId("addressLanguage").setEnabled(true);
+                
+                me.byId("addressPostCode").setSelectedKey(displayData.POSTCODE_PK);
+                me.byId("addressPostCode").setEnabled(true);
+                
+                me.byId("addressState").setSelectedKey(displayData.STATEPROVINCE_PK);
+                me.byId("addressState").setEnabled(true);
+                
+                me.byId("addressTimezone").setSelectedKey(displayData.TIMEZONE_PK);
+                me.byId("addressTimezone").setEnabled(true);
+                
                 me.byId("addressLine1").setValue(displayData.PREMISEADDRESS_LINE1);
                 me.byId("addressLine2").setValue(displayData.PREMISEADDRESS_LINE2);
                 me.byId("addressLine3").setValue(displayData.PREMISEADDRESS_LINE3);
@@ -101,48 +111,40 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                     text : "Country"
                 }).addStyleClass("MarTop16px");
     		    
-				var oCountryField = new sap.m.Select(me.createId("addressCountry"), {
-                    width : "100%",
-					change : function () {
-                        me.loadLocaleCBoxItems(me, this.getSelectedKey());
-                    }
-				}).addStyleClass("width100Percent SettingsDropdownInput");
+				var oCountryField = IOMy.widgets.selectBoxCountries(me.createId("addressCountry")).addStyleClass("SettingsDropdownInput");
+                oCountryField.setEnabled(false);
                 
                 //===== LANGUAGE =====\\
 				var oLanguageTitle = new sap.m.Text({
                     text : "Language"
                 });
     		    
-				var oLanguageField = new sap.m.Select(me.createId("addressLanguage"), {
-                    width : "100%"
-                }).addStyleClass("width100Percent SettingsDropdownInput");
+				var oLanguageField = IOMy.widgets.selectBoxLanguages(me.createId("addressLanguage")).addStyleClass("SettingsDropdownInput");
+                oLanguageField.setEnabled(false);
                 
                 //===== STATE =====\\
                 var oStateTitle = new sap.m.Text({
                     text : "State/Province"
                 });
     		    
-				var oStateField = new sap.m.Select(me.createId("addressState"), {
-                    width : "100%"
-                }).addStyleClass("width100Percent SettingsDropdownInput");
+				var oStateField = IOMy.widgets.selectBoxStatesProvinces(me.createId("addressState")).addStyleClass("SettingsDropdownInput");
+                oStateField.setEnabled(false);
                 
                 //===== POST CODE =====\\
                 var oPostCodeTitle = new sap.m.Text({
                     text : "Post Code"
                 });
     		    
-				var oPostCodeField = new sap.m.Select(me.createId("addressPostCode"), {
-                    width : "100%"
-                }).addStyleClass("width100Percent SettingsDropdownInput");
+				var oPostCodeField = IOMy.widgets.selectBoxPostCodes(me.createId("addressPostCode")).addStyleClass("SettingsDropdownInput");
+                oPostCodeField.setEnabled(false);
                 
                 //===== TIMEZONE =====\\
                 var oTimezoneTitle = new sap.m.Text({
                     text : "Timezone"
                 });
     		    
-				var oTimezoneField = new sap.m.Select(me.createId("addressTimezone"), {
-                    width : "100%"
-                }).addStyleClass("width100Percent SettingsDropdownInput");
+				var oTimezoneField = IOMy.widgets.selectBoxTimezones(me.createId("addressTimezone")).addStyleClass("SettingsDropdownInput");
+                oTimezoneField.setEnabled(false);
                 
                 //===== PREMISE ADDRESS =====\\
                 

@@ -98,3 +98,6 @@ $.sap.require("IOMy.widgets.getStateProvinceItems");
 
 $.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getTimezoneItems");
+
+$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
+$.sap.require("IOMy.widgets.selectBoxLocale");

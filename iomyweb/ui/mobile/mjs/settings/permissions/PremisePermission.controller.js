@@ -558,11 +558,11 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
             sRoomAdmin = "No";
         }
         
-        var tiRead = sRead === "Yes" ? 1 : 0;
-        var tiDataRead = sDataRead === "Yes" ? 1 : 0;
-        var tiWrite = sWrite === "Yes" ? 1 : 0;
-        var tiStateToggle = sStateToggle === "Yes" ? 1 : 0;
-        var tiRoomAdmin = sRoomAdmin === "Yes" ? 1 : 0;
+        var tiRead          = sRead === "Yes" ? 1 : 0;
+        var tiDataRead      = sDataRead === "Yes" ? 1 : 0;
+        var tiWrite         = sWrite === "Yes" ? 1 : 0;
+        var tiStateToggle   = sStateToggle === "Yes" ? 1 : 0;
+        var tiRoomAdmin     = sRoomAdmin === "Yes" ? 1 : 0;
         
         IOMy.apiphp.AjaxRequest({
             url : sUrl,

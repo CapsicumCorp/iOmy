@@ -293,7 +293,6 @@ sap.ui.controller("mjs.devices.MotionSensor", {
         // Indicate that the current information will now be fetched
         //--------------------------------------------------------------------//
         DevModule.bLoadingMotionSensorFields = true;
-        console.log(aIOIDs);
         
         //--------------------------------------------------------------------//
         // Fetch device status IO data and place them in the correct widgets.

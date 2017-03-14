@@ -265,7 +265,7 @@ $.extend(IOMy.devices,{
 		
 		//-- Zigbee Netvox Smart Plug --//
 		if( aDeviceData.DeviceTypeId===2 ) {
-            oUIObject = IOMy.devices.zigbeesmartplug.GetCommonUIForDeviceOverview( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.zigbeesmartplug.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Philips Hue --//
         } else if( aDeviceData.DeviceTypeId===13 ) {

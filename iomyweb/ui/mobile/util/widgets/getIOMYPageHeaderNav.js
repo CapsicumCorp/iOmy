@@ -1,6 +1,7 @@
 /*
 Title: iOmy Page Header
-Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
+    Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Header with the app navigation button, iOmy logo, and space for
     the action menu if one is created for a page.
 Copyright: Capsicum Corporation 2016, 2017
@@ -54,19 +55,21 @@ $.extend(IOMy.widgets,{
 			tooltip:    "Navigation Menu",
 			press:      function(oControlEvent) {
 				//oCurrentController.onOpenNavMenu( oControlEvent );
-				if(!oCurrentController.oNavMenu) {
-					oCurrentController.oNavMenu = sap.ui.jsfragment("mjs.fragments.NavMenu", oCurrentController );
-					oCurrentController.getView().addDependent( oCurrentController.oNavMenu );
-					
-				}
+                if (oCurrentController.oNavMenu !== undefined) {
+                    oCurrentController.oNavMenu.destroy();
+                }
+                
+                oCurrentController.oNavMenu = sap.ui.jsfragment("mjs.fragments.NavMenu", oCurrentController );
+                oCurrentController.getView().addDependent( oCurrentController.oNavMenu );
 				
 				var oButton = oControlEvent.getSource();
 				//-- Wait for UI5 to do the redraw after adding the Fragment so that the fragment is loaded before it is opened --//
 				$.sap.delayedCall(0, oCurrentController, function() {
-					if (oCurrentController.oNavMenu.isOpen())
+					if (oCurrentController.oNavMenu.isOpen()) {
                         oCurrentController.oNavMenu.close();
-                    else
+                    } else {
                         oCurrentController.oNavMenu.openBy( oButton );
+                    }
 				});
 			}
 		}).addStyleClass("NavButton");

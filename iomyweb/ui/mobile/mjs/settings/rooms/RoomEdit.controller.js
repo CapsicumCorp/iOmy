@@ -184,14 +184,17 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                                             thisButton.setEnabled(true);
                                         }
                                     );
+                                    
+                                    jQuery.sap.log.error(eUpdateRoomError.message);
                                 }
                             }
 						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
 					]
 				}).addStyleClass("TextCenter MarTop12px");
                 
-                if (me.byId("vbox_container") !== undefined)
+                if (me.byId("vbox_container") !== undefined) {
                     me.byId("vbox_container").destroy();
+                }
                 
                 var oVertBox = new sap.m.VBox(me.createId("vbox_container"), {
 					items : [oRoomTitle, me.wRoomName, oRoomDescTitle, me.wRoomDescription,
@@ -216,7 +219,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                 thisView.byId("extrasMenuHolder").destroyItems();
                 thisView.byId("extrasMenuHolder").addItem(
                     IOMy.widgets.getActionMenu({
-                        id : me.createId("extrasMenu"),        // Uses the page ID
+                        id : me.createId("extrasMenu"+me.iRoomID),        // Uses the page ID
                         icon : "sap-icon://GoogleMaterial/more_vert",
                         items : [
                             {
@@ -226,7 +229,6 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 
                                     var iNumOfDevices = IOMy.functions.getNumberOfDevicesInRoom(me.iRoomID);
                                     var sDevicesAttachedMessage = "";
-                                    //console.log(JSON.stringify(IOMy.common.ThingList));
 
                                     //-- A ROOM SHOULD BE DELETED ONLY WHEN THERE ARE NO DEVICES ATTACHED TO IT --//
                                     if (iNumOfDevices > 0) {
@@ -244,49 +246,52 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                                         
                                         this.setEnabled(true);
                                     } else {
-//                                        IOMy.functions.deleteRoom(me.iRoomID,
-//                                            function () {
-//                                                IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
-//                                            }
-//                                        );
-                                        //-- CONFIRM THAT YOU WISH TO DELETE THIS ROOM --//
                                         IOMy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
-                                        function (oAction) {
-                                            if (oAction === sap.m.MessageBox.Action.OK) {
-                                                IOMy.apiphp.AjaxRequest({
-                                                    url: IOMy.apiphp.APILocation("rooms"),
-                                                    data : {"Mode" : "DeleteRoom", "Id" : me.iRoomID},
-
-                                                    onSuccess : function () {
-                                                        IOMy.common.showSuccess(me.mRoom.RoomName+" successfully removed.", "Success", 
-                                                            function () {
-                                                                //-- REFRESH ROOMS --//
-                                                                IOMy.common.ReloadVariableRoomList(
-                                                                    function() {
-
-                                                                        try {
-                                                                            //-- Flag that the Core Variables have been configured --//
-                                                                            //IOMy.common.CoreVariablesInitialised = true;
-                                                                            // Refresh the room list after a deletion.
-                                                                            //oApp.getPage("pPremiseOverview").getController().composeRoomList();
-                                                                            // Go back.
-                                                                            IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
-
-                                                                        } catch(e654321) {
-                                                                            //-- ERROR:  TODO: Write a better error message--//
-                                                                            jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
-                                                                        }
-                                                                    }
-                                                                )
-                                                            },
-                                                        "UpdateMessageBox");
+                                            function () {
+                                                IOMy.functions.deleteRoom(me.iRoomID,
+                                                    function () {
+                                                        IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
                                                     }
-                                                });
+                                                );
                                             }
-                                        });
+                                        );
+                                        //-- CONFIRM THAT YOU WISH TO DELETE THIS ROOM --//
+//                                        IOMy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
+//                                        function (oAction) {
+//                                            if (oAction === sap.m.MessageBox.Action.OK) {
+//                                                IOMy.apiphp.AjaxRequest({
+//                                                    url: IOMy.apiphp.APILocation("rooms"),
+//                                                    data : {"Mode" : "DeleteRoom", "Id" : me.iRoomID},
+//
+//                                                    onSuccess : function () {
+//                                                        IOMy.common.showSuccess(me.mRoom.RoomName+" successfully removed.", "Success", 
+//                                                            function () {
+//                                                                //-- REFRESH ROOMS --//
+//                                                                IOMy.common.ReloadVariableRoomList(
+//                                                                    function() {
+//
+//                                                                        try {
+//                                                                            //-- Flag that the Core Variables have been configured --//
+//                                                                            //IOMy.common.CoreVariablesInitialised = true;
+//                                                                            // Refresh the room list after a deletion.
+//                                                                            //oApp.getPage("pPremiseOverview").getController().composeRoomList();
+//                                                                            // Go back.
+//                                                                            IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+//
+//                                                                        } catch(e654321) {
+//                                                                            //-- ERROR:  TODO: Write a better error message--//
+//                                                                            jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
+//                                                                        }
+//                                                                    }
+//                                                                )
+//                                                            },
+//                                                        "UpdateMessageBox");
+//                                                    }
+//                                                });
+//                                            }
+//                                        });
                                     }
 
-                                    
                                 }
                             }
                         ]

@@ -38,14 +38,14 @@ $.extend(IOMy.functions,{
         var me = this;
         
         IOMy.apiodata.AjaxRequest({
-            Url : IOMy.apiodata.ODataLocation("users"),
-            Columns : ["USERS_USERNAME"],
-            WhereClause : [],
-            OrderByClause : [],
-            Limit : 0,
+            Url             : IOMy.apiodata.ODataLocation("users"),
+            Columns         : ["USERSINFO_DISPLAYNAME"],
+            WhereClause     : [],
+            OrderByClause   : [],
+            Limit           : 0,
             
             onSuccess : function (response, data) {
-                oController.byId("UsernameButton").setText(data[0].USERS_USERNAME);
+                oController.byId("UsernameButton").setText(data[0].USERSINFO_DISPLAYNAME);
             },
             
             onFail : function (response) {

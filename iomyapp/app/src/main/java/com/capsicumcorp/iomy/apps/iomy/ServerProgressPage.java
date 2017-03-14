@@ -23,7 +23,12 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 package com.capsicumcorp.iomy.apps.iomy;
 
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 /**
  * Created by Capsicum on 9/13/2016.
@@ -35,6 +40,7 @@ public class ServerProgressPage extends ProgressPageWithCustomPercentage {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_progress_page);
         this.setTitle(Titles.webserverServerSetupTitle);
+        this.showSnackbarPopup("Please wait while installation is in progress. This may take several minutes.", 10000, Gravity.BOTTOM);
         this.startSettingUpWebserver();
     }
 
@@ -50,5 +56,22 @@ public class ServerProgressPage extends ProgressPageWithCustomPercentage {
 
         //Then run the thread that will call onComplete when extract is finished
         application.extractServerServices.setOkayToExtract(true);
+    }
+
+    public void showSnackbarPopup(String message, int seconds, int gravity) {
+        //-----------------------------------------------------------------------------------//
+        // Bring up the notice.
+        //-----------------------------------------------------------------------------------//
+        LinearLayout linearLayout=(LinearLayout)findViewById(R.id.progress_page);
+        Snackbar notice = Snackbar.make(linearLayout, message, Snackbar.LENGTH_INDEFINITE);
+
+        //-----------------------------------------------------------------------------------//
+        // Retrieve the text view that holds the message(s) to set the maximum number of lines.
+        //-----------------------------------------------------------------------------------//
+        View errorNoticeView = notice.getView();
+        TextView textView = (TextView) errorNoticeView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setMaxLines(6);  // We wish to have a maximum 6 lines
+        notice.show();
+
     }
 }

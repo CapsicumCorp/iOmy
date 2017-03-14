@@ -22,12 +22,14 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
 package com.capsicumcorp.iomy.apps.iomy;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -57,7 +59,40 @@ public class IOMy extends AppCompatActivity
      */
     @Override
     public void onBackPressed() {
-        // DO NOTHING
+        //----------------------------------------------------------------------------//
+        // Create an alert dialog box
+        //----------------------------------------------------------------------------//
+        AlertDialog.Builder confirmationDialogBuilder = new AlertDialog.Builder(this);
+
+        //----------------------------------------------------------------------------//
+        // Set the properties
+        //----------------------------------------------------------------------------//
+        //confirmationDialogBuilder.setTitle("Are you sure you want to exit iOmy?");
+        confirmationDialogBuilder.setMessage("Are you sure you want to exit iOmy?");
+        confirmationDialogBuilder.setPositiveButton("Yes",
+            new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog,
+                                    int id) {
+                    // Close iOmy
+                    finishAffinity();
+                    System.exit(0);
+                }
+            }
+        );
+        confirmationDialogBuilder.setNegativeButton("No",
+            new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog,
+                                    int id) {
+                    dialog.cancel();
+                }
+            }
+        );
+
+        //----------------------------------------------------------------------------//
+        // Make the dialog appear
+        //----------------------------------------------------------------------------//
+        AlertDialog confirmationDialog = confirmationDialogBuilder.create();
+        confirmationDialog.show();
     }
 
     @Override
