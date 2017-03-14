@@ -62,6 +62,7 @@ $.extend(IOMy.widgets,{
 			
 			//-- 2.1.1 - Left Content Back Button --//
 			oBackBtn = new sap.m.Button({
+				tooltip: "Go backwards a page",
 				icon:	"sap-icon://navigation-left-arrow",
 				type: sap.m.ButtonType.Unstyled,
 				//-- Bind the Back Navigation Event --//
@@ -73,6 +74,7 @@ $.extend(IOMy.widgets,{
 			//-- 2.1.2 - Page Icon (if applicable) --//
 			if( sPageIcon!==undefined && sPageIcon!=="" ) {
 				oPageIcon = new sap.ui.core.Icon({
+					tooltip: sTitle,
 					src : sPageIcon,
 					//densityAware : false
 				}).addStyleClass("TextSize2Rem NavHeader-Icon");
@@ -90,6 +92,7 @@ $.extend(IOMy.widgets,{
 			
 			//-- 2.1.4 - Right Content Forward button (if Applicable) --//
 			oForwardBtn = new sap.m.Button({
+				tooltip: "Go forwards a page",
 				icon:	"sap-icon://navigation-right-arrow",
 				type: sap.m.ButtonType.Unstyled,
 				//-- Bind the Back Navigation Event --//
@@ -103,6 +106,7 @@ $.extend(IOMy.widgets,{
 			
 			//-- 2.2.1 - Left Content Back Button --//
 			oBackBtn = new sap.m.Button( oScope.createId( "NavSubHead_BackBtn" ), {
+				tooltip: "Go backwards a page",
 				visible: false,
 				icon:	"sap-icon://navigation-left-arrow",
 				type: sap.m.ButtonType.Unstyled,
@@ -115,6 +119,7 @@ $.extend(IOMy.widgets,{
 			//-- 2.2.2 - Page Icon (if applicable) --//
 			if( sPageIcon!==undefined && sPageIcon!=="" ) {
                 oPageIcon = new sap.ui.core.Icon({
+                    tooltip: sTitle,
                     src : sPageIcon
                 }).addStyleClass("TextSize2Rem NavHeader-Icon");
 			} else {
@@ -131,6 +136,7 @@ $.extend(IOMy.widgets,{
 			
 			//-- 2.2.4 - Right Content Forward button (if Applicable) --//
 			oForwardBtn = new sap.m.Button( oScope.createId( "NavSubHead_ForwardBtn" ), {
+				tooltip: "Go forwards a page",
 				visible: false,
 				icon:	"sap-icon://navigation-right-arrow",
 				type: sap.m.ButtonType.Unstyled,
