@@ -262,7 +262,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
         }).addStyleClass("PaddingToMatchButtonText");
         
         me.wUserSelectBox = new sap.m.Select({
-            width : "100%"
+            width: "100%"
         });
         
         me.wPremiseLabel = new sap.m.Label({
@@ -275,6 +275,9 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
         // Create the permission form for the room
         //=============================================//
         me.wRoomPermissionHeading = new sap.m.VBox({
+			layoutData : new sap.m.FlexItemData({
+				growFactor : 1
+			}),
             items : [
                 new sap.m.VBox({
                     items : [
@@ -284,11 +287,14 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                     ]
                 })
             ]
-        }).addStyleClass("ConsistentMenuHeader ListItem BorderTop width100Percent");
+        }).addStyleClass("ConsistentMenuHeader ListItem BorderTop");
         
         me.wRoomPermissions = new sap.m.VBox(me.createId("roomPermissions"), {
             items : [
                 new sap.m.VBox({
+					layoutData : new sap.m.FlexItemData({
+						growFactor : 1
+					}),
                     items : [
                         //-------------------------------------//
                         // Basic read access (see that it exists)
@@ -323,9 +329,12 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                     ]
                 }).addStyleClass("MarAll8px")
             ]
-        }).addStyleClass("ListItem width100Percent");
+        }).addStyleClass("ListItem");
         
         me.wRoomListHeading = new sap.m.VBox({
+			layoutData : new sap.m.FlexItemData({
+				growFactor : 1
+			}),
             items : [
                 new sap.m.VBox({
                     items : [
@@ -335,11 +344,14 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                     ]
                 })
             ]
-        }).addStyleClass("ConsistentMenuHeader ListItem width100Percent");
+        }).addStyleClass("ConsistentMenuHeader ListItem");
         
         me.wRoomList = new sap.m.VBox({
+			layoutData : new sap.m.FlexItemData({
+						growFactor : 1
+					}),
             items : [me.wRoomListHeading]
-        }).addStyleClass("width100Percent");
+        }).addStyleClass("");
         
         //--------------------------------------------------------------------//
         // Apply Button
@@ -377,51 +389,78 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                 // Top section
                 //--------------------------//
                 new sap.m.VBox({
+					layoutData : new sap.m.FlexItemData({
+						growFactor : 1
+					}),
                     items : [
                         // Label for the user select box
                         new sap.m.VBox({
+							layoutData : new sap.m.FlexItemData({
+								growFactor : 1
+							}),
                             items : [
                                 new sap.m.VBox({
                                     items : [ me.wUserLabel ]
                                 })
                             ]
-                        }).addStyleClass("ConsistentMenuHeader ListItem width100Percent"),
+                        }).addStyleClass("ConsistentMenuHeader ListItem "),
                         // User select box
                         new sap.m.VBox({
+							layoutData : new sap.m.FlexItemData({
+								growFactor : 1
+							}),
                             items : [me.wUserSelectBox]
                         }).addStyleClass("PadLeft8px PadRight8px"),
                         
                         // Label for the premise select box
                         new sap.m.VBox({
+							layoutData : new sap.m.FlexItemData({
+								growFactor : 1
+							}),
                             items : [
                                 new sap.m.VBox({
                                     items : [ me.wPremiseLabel ]
                                 })
                             ]
-                        }).addStyleClass("ConsistentMenuHeader BorderTop ListItem width100Percent"),
+                        }).addStyleClass("ConsistentMenuHeader BorderTop ListItem"),
                         // Premise select box
                         new sap.m.VBox({
                             items : [me.wPremiseSelectBox]
                         }).addStyleClass("PadLeft8px PadRight8px")
                     ]
                 }),
+			
                 //--------------------------//
                 // Middle section
                 //--------------------------//
                 new sap.m.VBox({
+					layoutData : new sap.m.FlexItemData({
+						growFactor : 1
+					}),
                     items : [
                         // Room Permission form heading
                         new sap.m.VBox({
+							layoutData : new sap.m.FlexItemData({
+								growFactor : 1
+							}),
                             items : [me.wRoomPermissionHeading]
                         }),
                         // Room Permission form
                         new sap.m.VBox({
+							layoutData : new sap.m.FlexItemData({
+								growFactor : 1
+							}),
                             items : [me.wRoomPermissions]
                         }),
+						
                         // List of rooms
                         new sap.m.VBox({
+							layoutData : new sap.m.FlexItemData({
+								growFactor : 1
+							}),
                             items : [me.wRoomList]
                         })
+						
                     ]
                 }),
                 //--------------------------//
@@ -430,6 +469,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                 new sap.m.VBox({
                     items : [me.wApplyButton]
                 }).addStyleClass("RoomPermissionsApplyButton")
+				
             ]
         }).addStyleClass("MasterPanel UserInputForm PanelNoPadding PadTop3px PadBottom15px");
         
@@ -557,27 +597,33 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
         me.aElementsToDestroy.push("roomEntry"+mRoomInfo.Index);
         var oEntry = new sap.m.HBox(me.createId("roomEntry"+mRoomInfo.Index), {
             items : [
-                // === CHECK BOX === \\
+                // === CHECK BOX === //
                 new sap.m.VBox({
+					layoutData : new sap.m.FlexItemData({
+						growFactor : 0
+					}),
                     items : [
                         new sap.m.CheckBox(me.createId("checkbox"+mRoomInfo.Index), {
                             icon : "sap-icon://navigation-down-arrow",
                             select : fnSetRoomToUpdate
-                        }).addStyleClass("ButtonNoBorder IOMYButton ButtonIconGreen TextSize20px width100Percent")
+                        }).addStyleClass("ButtonNoBorder IOMYButton ButtonIconGreen TextSize20px")
                     ]
-                }).addStyleClass("FlexNoShrink minwidth70px"),
+                }).addStyleClass("minwidth70px"),
                 
-                // === ROOM === \\
+                // === ROOM === //
                 new sap.m.VBox({
+					layoutData : new sap.m.FlexItemData({
+						growFactor : 1
+					}),
                     items : [
                         new sap.m.Button(me.createId("roomName"+mRoomInfo.Index), {
                             text : mRoomInfo.ROOMS_NAME,
                             press : function () {
                                 me.ShowCurrentPermissions(mRoomInfo.ROOMS_PK, mRoomInfo.ROOMS_NAME);
                             }
-                        }).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px width100Percent")
+                        }).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px")
                     ]
-                }).addStyleClass("width100Percent TextOverflowEllipsis"),
+                }).addStyleClass("TextOverflowEllipsis"),
             ]
         }).addStyleClass("ListItem minheight20px ");
         

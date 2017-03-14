@@ -160,13 +160,19 @@ sap.ui.controller("mjs.settings.DeviceList", {
             new sap.m.HBox({
                 items : [
                     new sap.m.VBox({
+						layoutData : new sap.m.FlexItemData({
+							growFactor : 0
+						}),
                         items : [
                             new sap.m.Label({
                                 text: "Items"
                             }).addStyleClass("")
                         ]
-                    }).addStyleClass("FlexNoShrink width60px BorderRight TextCenter"),
+                    }).addStyleClass("width60px BorderRight TextCenter"),
                     new sap.m.VBox({
+						layoutData : new sap.m.FlexItemData({
+							growFactor : 1
+						}),
                         items : [
                             new sap.m.Label({
                                 text: "Links"
@@ -209,6 +215,9 @@ sap.ui.controller("mjs.settings.DeviceList", {
                         items : [
                             // Number of Items/Things
                             new sap.m.VBox({
+								layoutData : new sap.m.FlexItemData({
+									growFactor : 0
+								}),
                                 items : [
                                     new sap.m.Text({
                                         textAlign : "Center",
@@ -219,6 +228,9 @@ sap.ui.controller("mjs.settings.DeviceList", {
                             
                             // Button to show the link name and take the user to the edit link page when pressed.
                             new sap.m.VBox({
+								layoutData : new sap.m.FlexItemData({
+									growFactor : 1
+								}),
                                 items : [
                                     new sap.m.Button(me.createId("ioButton"+aLinksAndItems[i].LinkId),{
                                         text : aLinksAndItems[i].LinkName,
@@ -242,10 +254,14 @@ sap.ui.controller("mjs.settings.DeviceList", {
                                         }
                                     }).addStyleClass("ButtonNoBorder DeviceButton IOMYButton TextSize16px TextLeft")
                                 ]
-                            }).addStyleClass("width100Percent TextOverflowEllipsis"),
+                            }).addStyleClass("TextOverflowEllipsis"),
                             
                             // Widget to house a button to expand or collapse a list of things associated with this link.
-                            new sap.m.VBox(me.createId("ioExpandCollapse"+aLinksAndItems[i].LinkId), {})
+                            new sap.m.VBox(me.createId("ioExpandCollapse"+aLinksAndItems[i].LinkId), {
+								layoutData : new sap.m.FlexItemData({
+									growFactor : 0
+								}),
+							})
                         ]
                     }).addStyleClass("ListItem minheight20px"),
                     
@@ -320,15 +336,21 @@ sap.ui.controller("mjs.settings.DeviceList", {
                         new sap.m.HBox(me.createId("deviceRow"+mDeviceData.Id),{
                             items : [
                                 new sap.m.VBox({
+									layoutData : new sap.m.FlexItemData({
+										growFactor : 1
+									}),
                                     items : [
                                         new sap.m.Link(me.createId("device"+mDeviceData.Id),{
+											layoutData : new sap.m.FlexItemData({
+												growFactor : 1
+											}),
                                             text : mDeviceData.DisplayName,
                                             press : function () {
                                                 IOMy.common.NavigationChangePage("pSettingsEditThing", {device : mDeviceData});
                                             }
-                                        }).addStyleClass("SettingsLinks Font-RobotoCondensed PadLeft8px TextBold TextLeft Text_grey_20 width100Percent minwidth140px")
+                                        }).addStyleClass("SettingsLinks Font-RobotoCondensed PadLeft8px TextBold TextLeft Text_grey_20 minwidth140px")
                                     ]
-                                }).addStyleClass("width100Percent"),
+                                }).addStyleClass(""),
                             ]
                         }).addStyleClass("MainPanelElement ListItem MarTop3px PadTop8px PadBottom8px ListItemDark")
                     );

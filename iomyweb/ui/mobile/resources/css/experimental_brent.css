@@ -30,16 +30,15 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	padding-right: 0.75rem;
 }
 
+/*
 .sapMPanelContent {
 	overflow: initial;
 }
+*/
 
+/* No shrinking under any circumstances.*/
 .FlexNoShrink {
-	flex-shrink: 0; /* No shrinking under any circumstances.*/
-}
-
-.HasCenteredObject > div.sapMFlexItem {
-	margin: auto;
+	flex-shrink: 0; 
 }
 
 .TextOverflowEllipsis {
