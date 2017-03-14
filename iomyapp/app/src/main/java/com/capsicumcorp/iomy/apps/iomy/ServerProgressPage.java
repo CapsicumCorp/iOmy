@@ -28,7 +28,7 @@ import android.util.Log;
 /**
  * Created by Capsicum on 9/13/2016.
  */
-public class ServerProgressPage extends ProgressPage {
+public class ServerProgressPage extends ProgressPageWithCustomPercentage {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

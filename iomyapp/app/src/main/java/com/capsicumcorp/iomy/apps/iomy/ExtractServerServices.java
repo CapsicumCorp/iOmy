@@ -84,7 +84,7 @@ public class ExtractServerServices extends Thread {
 
     private InputStream assetsversionfile;
 
-    private ProgressPage progressPage;
+    private ProgressPageWithCustomPercentage progressPage;
 
     private Hashtable<String, Boolean> skipfiles = new Hashtable<String, Boolean>();
     private Hashtable<String, Boolean> skipfolders = new Hashtable<String, Boolean>();
@@ -111,7 +111,7 @@ public class ExtractServerServices extends Thread {
     private String getExternalStorageFolder() {
         return getApplication().getExternalStorageFolderName();
     }
-    public synchronized void setProgressPage(ProgressPage progressPage) {
+    public synchronized void setProgressPage(ProgressPageWithCustomPercentage progressPage) {
         this.progressPage=progressPage;
     }
     private int execWithWait(String cmd) throws Exception {

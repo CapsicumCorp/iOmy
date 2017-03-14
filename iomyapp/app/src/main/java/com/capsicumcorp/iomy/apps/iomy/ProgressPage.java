@@ -65,8 +65,8 @@ public class ProgressPage extends AppCompatActivity {
     protected synchronized void setTotalRequests(long totalRequests) {
         this.totalRequests=totalRequests;
     }
-    protected synchronized int getTotalRequests() {
-        return (int) this.totalRequests;
+    protected synchronized long getTotalRequests() {
+        return this.totalRequests;
     }
     protected synchronized void setCount(float count) {
         this.count=count;
@@ -99,24 +99,6 @@ public class ProgressPage extends AppCompatActivity {
         tv.setText(Math.round(result)+"%");
         // Increase the complete request count
         this.count++;
-    }
-
-    /**
-     * Sets the percentage counter without updating the percentage text
-     * @param count The value to set the count to
-     */
-    protected synchronized void updatePercentageCounter(long count) {
-        this.count=count;
-    }
-
-    /**
-     * Updates the percentage text without updating the percentage counter
-     */
-    protected synchronized void updatePercentageText() {
-        TextView tv = (TextView) findViewById(R.id.progressPercentage);
-        float result = (this.count / (float) this.totalRequests) * 100;
-        tv.setText(Math.round(result)+"%");
-        // Increase the complete request count
     }
 
     /**
