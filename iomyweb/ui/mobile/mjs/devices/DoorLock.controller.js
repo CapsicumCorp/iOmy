@@ -197,6 +197,7 @@ sap.ui.controller("mjs.devices.DoorLock", {
         
         //-- Control Switch --//
         me.wControlSwitch = new sap.m.Button(me.createId("doorSwitch_"+me.mThing.Id), {
+            tooltip: "Lock/Unlock Toggle",
             icon : sSwitchIcon,
 			width: "95px",
             text : sSwitchText,

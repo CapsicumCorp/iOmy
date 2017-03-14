@@ -180,6 +180,7 @@ sap.ui.controller("mjs.devices.BPM", {
         
         //-- Apply Button --//
         me.wApplyButton = new sap.m.Button({
+            tooltip: "Apply",
             text : "Apply",
             width: "100px",
             press : function () {
