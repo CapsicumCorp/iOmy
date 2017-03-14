@@ -183,12 +183,21 @@ zip -9r "${destassetsdir}/webserverassets.zip" components scripts tmp var htdocs
 if [ $? != 0 ] ; then
   exit 1
 fi
-echo "Creating webserverassetsnumfiles.txt"
+echo "Creating webserverassetsfileinfo.txt"
 numfiles=$(unzip -l "${destassetsdir}/webserverassets.zip" | tail -n 1 | awk '{print $2}')
 if [ $? != 0 ] ; then
   exit 1
 fi
-echo "NUMFILES=${numfiles}" > "${destassetsdir}/webserverassetsnumfiles.txt"
+totalsize=$(unzip -l "${destassetsdir}/webserverassets.zip" | tail -n 1 | awk '{print $1}')
+if [ $? != 0 ] ; then
+  exit 1
+fi
+
+echo "NUMFILES=${numfiles}" > "${destassetsdir}/webserverassetsfileinfo.txt"
+if [ $? != 0 ] ; then
+  exit 1
+fi
+echo "TOTALSIZE=${totalsize}" >> "${destassetsdir}/webserverassetsfileinfo.txt"
 if [ $? != 0 ] ; then
   exit 1
 fi

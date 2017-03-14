@@ -73,7 +73,7 @@ public class ExtractServerServices extends Thread {
     private String INTERNAL_LOCATION = null;
     private String EXTERNAL_STORAGE = null;
     public static final String ASSETSFILENAME = "webserverassets.zip";
-    public static final String ASSETSNUMFILESFILENAME = "webserverassetsnumfiles.txt";
+    public static final String ASSETSFILEINFOFILENAME = "webserverassetsfileinfo.txt";
     public static final String ASSETSVERSIONFILENAME = "webserverassetsversion.txt";
     private final Context context;
 
@@ -295,16 +295,16 @@ public class ExtractServerServices extends Thread {
 
         //Get number of files
         try {
-            InputStream assetsnumfilesstream;
+            InputStream assetsfileinfostream;
 
-            assetsnumfilesstream = assetManager.open(ASSETSNUMFILESFILENAME);
-            assetsnumfilesstream.mark(2048);
-            String numFilesStr = getNumFiles(assetsnumfilesstream);
-            if (!numFilesStr.equals("")) {
+            assetsfileinfostream = assetManager.open(ASSETSFILEINFOFILENAME);
+            assetsfileinfostream.mark(2048);
+            String totalFileSizeStr = getZipTotalFileSize(assetsfileinfostream);
+            if (!totalFileSizeStr.equals("")) {
                 try {
-                    int numfiles = Integer.parseInt(numFilesStr);
+                    long totalFileSize = Integer.parseInt(totalFileSizeStr);
                     if (progressPage!=null) {
-                        progressPage.setTotalRequests(numfiles);
+                        progressPage.setTotalRequests(totalFileSize);
                     }
                 } catch (Exception e) {
                     //Do nothing
@@ -325,9 +325,11 @@ public class ExtractServerServices extends Thread {
         try {
             ZipEntry zipEntry;
             FileOutputStream fout;
+            long curFileSize=0;
 
             while ((zipEntry = zipInputStream.getNextEntry()) != null) {
                 String zipEntryName=zipEntry.getName();
+                long zipFileSize=zipEntry.getSize();
                 boolean skipfile=false;
 
                 //skipfiles and skipfolders are populated by the doUpgrade script
@@ -336,7 +338,9 @@ public class ExtractServerServices extends Thread {
                     //Log.println(Log.INFO, "WebServer", "Skipping file: " + zipEntryName);
                     doNotification("Skipping file: " + zipEntryName);
                     //Log.println(Log.INFO, "WebServer", "SUPER DEBUG: Skipping file: " + zipEntry.getName() + " in assets.zip as it already exists");
-                    changeProgressPagePercentageText();
+                    zipInputStream.closeEntry();
+                    curFileSize+=zipFileSize;
+                    changeProgressPagePercentageTextCustomCount(curFileSize);
                     continue;
                 }
                 for (String key : skipfolders.keySet()) {
@@ -344,7 +348,9 @@ public class ExtractServerServices extends Thread {
                         skipfile=true;
                         //Log.println(Log.INFO, "WebServer", "Skipping folder: " + zipEntryName);
                         doNotification("Skipping folder: " + zipEntryName);
-                        changeProgressPagePercentageText();
+                        zipInputStream.closeEntry();
+                        curFileSize+=zipFileSize;
+                        changeProgressPagePercentageTextCustomCount(curFileSize);
                         break;
                     }
                 }
@@ -360,7 +366,9 @@ public class ExtractServerServices extends Thread {
                                 skipfile=true;
                                 //Log.println(Log.INFO, "WebServer", "Skipping file: " + zipEntryName);
                                 doNotification("Skipping file: " + zipEntryName);
-                                changeProgressPagePercentageText();
+                                zipInputStream.closeEntry();
+                                curFileSize+=zipFileSize;
+                                changeProgressPagePercentageTextCustomCount(curFileSize);
                                 break;
                             }
                         }
@@ -375,7 +383,9 @@ public class ExtractServerServices extends Thread {
                     if (zipEntryName.startsWith("components/mysql/sbin/data/")) {
                         //Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG: Skipping file: " + zipEntryName);
                         doNotification("Skipping file: " + zipEntryName);
-                        changeProgressPagePercentageText();
+                        zipInputStream.closeEntry();
+                        curFileSize+=zipFileSize;
+                        changeProgressPagePercentageTextCustomCount(curFileSize);
                         continue;
                     }
                     if (zipEntryName.startsWith("demodata/mysql_database/")) {
@@ -390,7 +400,9 @@ public class ExtractServerServices extends Thread {
                     if (zipEntryName.startsWith("demodata/")) {
                         //Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG: Skipping file: " + zipEntryName);
                         doNotification("Skipping file: " + zipEntryName);
-                        changeProgressPagePercentageText();
+                        zipInputStream.closeEntry();
+                        curFileSize+=zipFileSize;
+                        changeProgressPagePercentageTextCustomCount(curFileSize);
                         continue;
                     }
                 }
@@ -409,11 +421,12 @@ public class ExtractServerServices extends Thread {
                     int length;
                     while ((length = zipInputStream.read(buffer)) != -1) {
                         fout.write(buffer, 0, length);
+                        curFileSize+=length;
+                        changeProgressPagePercentageTextCustomCount(curFileSize);
                     }
-                    zipInputStream.closeEntry();
                     fout.close();
                 }
-                changeProgressPagePercentageText();
+                zipInputStream.closeEntry();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -635,6 +648,19 @@ public class ExtractServerServices extends Thread {
             }
         });
     }
+    private void changeProgressPagePercentageTextCustomCount(long count) {
+        final long localCount=count;
+        if (progressPage == null) {
+            return;
+        }
+        progressPage.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressPage.updatePercentageCounter(localCount);
+                progressPage.updatePercentageText();
+            }
+        });
+    }
     //Return prefixed with the root folder for a given path
     private String getFolderWithRootForPath(String path) {
         String rootpath;
@@ -691,9 +717,9 @@ public class ExtractServerServices extends Thread {
     }
     //Get the NUMFILES String from a file
     //Returns the number of files or empty string otherwise
-    String getNumFiles(InputStream numfilesfile) {
+    String getNumFiles(InputStream fileinfofile) {
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(numfilesfile, "UTF-8"));
+            BufferedReader in = new BufferedReader(new InputStreamReader(fileinfofile, "UTF-8"));
             String line;
             while ((line = in.readLine()) != null) {
                 if (line.charAt(0) == '#') {
@@ -701,6 +727,31 @@ public class ExtractServerServices extends Thread {
                 }
                 String parts[] = line.split("=");
                 if (parts[0].equals("NUMFILES")) {
+                    return parts[1];
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    /**
+     * Get the TOTALSIZE String from a file
+     * @param fileinfofile The file to read from
+     * @return Returns the total size value
+     */
+    //Returns the number of files or empty string otherwise
+    String getZipTotalFileSize(InputStream fileinfofile) {
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(fileinfofile, "UTF-8"));
+            String line;
+            while ((line = in.readLine()) != null) {
+                if (line.charAt(0) == '#') {
+                    continue;
+                }
+                String parts[] = line.split("=");
+                if (parts[0].equals("TOTALSIZE")) {
                     return parts[1];
                 }
             }

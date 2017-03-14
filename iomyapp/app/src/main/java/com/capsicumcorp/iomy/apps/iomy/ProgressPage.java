@@ -49,7 +49,7 @@ import org.json.JSONObject;
 public class ProgressPage extends AppCompatActivity {
     protected InstallWizard installWizard = Constants.installWizard;    // Capture the install wizard module
     protected ProgressPage me;                                          // Captures this activity to be referenced in subroutines
-    protected int totalRequests;                                        // Number of requests to be processed
+    protected long totalRequests;                                        // Number of requests to be processed
     protected float count = 0;                                          // Number requests completed
     RequestQueue fullQueue;                                             // The request queue in the scope of the entire class
 
@@ -62,8 +62,11 @@ public class ProgressPage extends AppCompatActivity {
     protected synchronized void setTotalRequests(int totalRequests) {
         this.totalRequests=totalRequests;
     }
+    protected synchronized void setTotalRequests(long totalRequests) {
+        this.totalRequests=totalRequests;
+    }
     protected synchronized int getTotalRequests() {
-        return this.totalRequests;
+        return (int) this.totalRequests;
     }
     protected synchronized void setCount(float count) {
         this.count=count;
@@ -96,6 +99,24 @@ public class ProgressPage extends AppCompatActivity {
         tv.setText(Math.round(result)+"%");
         // Increase the complete request count
         this.count++;
+    }
+
+    /**
+     * Sets the percentage counter without updating the percentage text
+     * @param count The value to set the count to
+     */
+    protected synchronized void updatePercentageCounter(long count) {
+        this.count=count;
+    }
+
+    /**
+     * Updates the percentage text without updating the percentage counter
+     */
+    protected synchronized void updatePercentageText() {
+        TextView tv = (TextView) findViewById(R.id.progressPercentage);
+        float result = (this.count / (float) this.totalRequests) * 100;
+        tv.setText(Math.round(result)+"%");
+        // Increase the complete request count
     }
 
     /**
