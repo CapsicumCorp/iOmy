@@ -49,9 +49,10 @@ $.extend(IOMy.widgets,{
 		//-- 2.0 - Left Content                             --//
 		//----------------------------------------------------//
 		oNavOpenBtn = new sap.m.Button({
-			icon:	"sap-icon://GoogleMaterial/menu",
-			type:	sap.m.ButtonType.Unstyled,
-			press:	function(oControlEvent) {
+			icon:       "sap-icon://GoogleMaterial/menu",
+			type:       sap.m.ButtonType.Unstyled,
+			tooltip:    "Navigation Menu",
+			press:      function(oControlEvent) {
 				//oCurrentController.onOpenNavMenu( oControlEvent );
 				if(!oCurrentController.oNavMenu) {
 					oCurrentController.oNavMenu = sap.ui.jsfragment("mjs.fragments.NavMenu", oCurrentController );
@@ -74,6 +75,7 @@ $.extend(IOMy.widgets,{
 		//-- 3.0 - Right Content Create Logo                --//
 		//----------------------------------------------------//
 		oLogoImg = new sap.m.Image({
+			tooltip: "Home",
 			densityAware: false,
 			src : "resources/images/minilogo.png",
 			press: function(oControlEvent) {
