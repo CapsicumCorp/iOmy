@@ -181,6 +181,7 @@ sap.ui.controller("mjs.devices.Scales", {
         
         //-- Apply Button --//
         me.wApplyButton = new sap.m.Button({
+            tooltip: "Apply",
             text : "Apply",
             width: "100px",
             press : function () {

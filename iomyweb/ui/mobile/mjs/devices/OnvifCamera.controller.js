@@ -182,6 +182,7 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         // Up
         //-----------------//
         me.wBtnMoveUp = new sap.m.Button({
+            tooltip: "PTZ Up",
             icon : "sap-icon://slim-arrow-up",
             enabled : me.bPTZButtonsEnabled,
             press : function () {
@@ -193,6 +194,7 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         // Left
         //-----------------//
         me.wBtnMoveLeft = new sap.m.Button({
+            tooltip: "PTZ Left",
             icon : "sap-icon://slim-arrow-left",
             enabled : me.bPTZButtonsEnabled,
             press : function () {
@@ -204,6 +206,7 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         // Right
         //-----------------//
         me.wBtnMoveRight = new sap.m.Button({
+            tooltip: "PTZ Right",
             icon : "sap-icon://slim-arrow-right",
             enabled : me.bPTZButtonsEnabled,
             press : function () {
@@ -215,6 +218,7 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         // Down
         //-----------------//
         me.wBtnMoveDown = new sap.m.Button({
+            tooltip: "PTZ Down",
             icon : "sap-icon://slim-arrow-down",
             enabled : me.bPTZButtonsEnabled,
             press : function () {

@@ -125,6 +125,7 @@ sap.ui.controller("mjs.devices.Garagedoor", {
 		//--------------------------------------------------------//
 		
         oController.wControlButton = new sap.m.Button(oController.createId("doorSwitch_"+oController.mThing.Id), {
+            tooltip     : "Open/Close Toggle",
             icon        : mStatusInfo.switchIcon,
             text        : mStatusInfo.switchText,
             enabled     : mStatusInfo.switchEnabled,
