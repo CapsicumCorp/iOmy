@@ -4,12 +4,14 @@
 # Info about all the packages used for cross compile
 
 ZLIBTITLE="Zlib"
-ZLIBVER="1.2.8"
-ZLIBPKG="zlib-1.2.8.tar.gz"
-ZLIBCOMPILEDIR="zlib-1.2.8"
+ZLIBVER="1.2.11"
+ZLIBPKG="zlib-1.2.11.tar.gz"
+ZLIBCOMPILEDIR="zlib-1.2.11"
 ZLIBHOMEPAGE="http://zlib.net/"
 ZLIBLICENSE="ZLIB"
 ZLIBBASEURL="http://zlib.net/"
+ZLIBGENTOOPKG="sys-libs/zlib"
+ZLIBGENTOOVER="1.2.11"
 ZLIBNEED_WEB_BROWSER=0
 
 BZIP2TITLE="Bzip2"
