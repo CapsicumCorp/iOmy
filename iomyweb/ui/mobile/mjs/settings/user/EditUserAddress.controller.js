@@ -70,6 +70,8 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                 me.byId("addressLine2").setValue(displayData.USERADDRESS_LINE2);
                 me.byId("addressLine3").setValue(displayData.USERADDRESS_LINE3);
                 
+                me.byId("UpdateLink").setEnabled(true);
+                
                 me.userId = displayData.USERS_PK;
                 
                 this.onProceed(iCountryId, displayData);
@@ -215,7 +217,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                 
                 //===== UNIT/FLAT ADDRESS (LINE 2) =====\\
                 var oLine2Title = new sap.m.Text({
-    	        	text : "Street Address Line 2"
+    	        	text : "Unit Number (if applicable)"
     	        }).addStyleClass("");
     		    
 				var oLine2Field = new sap.m.Input(me.createId("addressLine2"), {
@@ -224,7 +226,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                 
                 //===== EXTRA INFO (LINE 3) =====\\
                 var oLine3Title = new sap.m.Text({
-    	        	text : "Street Address Line 3"
+    	        	text : "Line 3 (Other info)"
     	        }).addStyleClass("");
                 
 				var oLine3Field = new sap.m.Input(me.createId("addressLine3"), {
@@ -236,47 +238,50 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 				var oEditButton = new sap.m.VBox({
 					items : [
 						new sap.m.Link(me.createId("UpdateLink"), {
+                            enabled : true,
 							text : "Update",
 							press : function () {
-                                this.setEnabled(false);
+                                var thisButton = this;
+                                thisButton.setEnabled(false);
                                 var aErrorLog = [];
                                 var bError = false;
                                 
                                 if (me.byId("addressLine1").getValue() === "") {
-                                    aErrorLog.push("Residential Address (line 1) is required.");
+                                    aErrorLog.push("Street Address is required.");
                                     bError = true;
                                 }
                                 
                                 if (bError === true) {
                                     jQuery.sap.log.error(aErrorLog.join("\n"));
                                     IOMy.common.showError(aErrorLog.join("\n\n"), "Errors");
-                                    this.setEnabled(true);
+                                    thisButton.setEnabled(true);
                                 } else {
                                     // Run the API to update the user's address
                                     try {
                                         IOMy.apiphp.AjaxRequest({
                                             url : IOMy.apiphp.APILocation("users"),
-                                            data : {"Mode" : "EditUserAddress", 
-                                                    "Id" : me.userId,
-                                                    "AddressLine1" : me.byId("addressLine1").getValue(),
-                                                    "AddressLine2" : me.byId("addressLine2").getValue(),
-                                                    "AddressLine3" : me.byId("addressLine3").getValue(),
-                                                    "AddressCountry" : me.byId("addressCountry").getSelectedKey(),
-                                                    "AddressStateProvince" : me.byId("addressState").getSelectedKey(),
-                                                    "AddressPostcode" : me.byId("addressPostCode").getSelectedKey(),
-                                                    "AddressTimezone" : me.byId("addressTimezone").getSelectedKey(),
-                                                    "AddressLanguage" : me.byId("addressLanguage").getSelectedKey()
-                                                },
+                                            data : {
+                                                "Mode" : "EditUserAddress", 
+                                                "Id" : me.userId,
+                                                "AddressLine1" : me.byId("addressLine1").getValue(),
+                                                "AddressLine2" : me.byId("addressLine2").getValue(),
+                                                "AddressLine3" : me.byId("addressLine3").getValue(),
+                                                "AddressCountry" : me.byId("addressCountry").getSelectedKey(),
+                                                "AddressStateProvince" : me.byId("addressState").getSelectedKey(),
+                                                "AddressPostcode" : me.byId("addressPostCode").getSelectedKey(),
+                                                "AddressTimezone" : me.byId("addressTimezone").getSelectedKey(),
+                                                "AddressLanguage" : me.byId("addressLanguage").getSelectedKey()
+                                            },
                                             onSuccess : function () {
                                                 IOMy.common.showSuccess("Update successful.", "Success", function () {
-                                                    IOMy.common.NavigationTriggerBackForward(false);
+                                                    IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
                                                 }, "UpdateMessageBox");
-                                                this.setEnabled(true);
+                                                thisButton.setEnabled(true);
                                             },
                                             onFail : function (response) {
                                                 IOMy.common.showError("Update failed.", "Error");
                                                 jQuery.sap.log.error(JSON.stringify(response));
-                                                this.setEnabled(true);
+                                                thisButton.setEnabled(true);
                                             }
                                         });
                                     } catch (e00033) {

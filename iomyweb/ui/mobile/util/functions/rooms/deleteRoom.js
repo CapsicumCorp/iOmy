@@ -52,29 +52,6 @@ $.extend(IOMy.functions, {
             fnCallback = function () {}; // Declare that it's an empty function.
         }
         
-//        try {
-//            //--------------------------------------------------------//
-//            // Grab the room object in the Rooms List
-//            //--------------------------------------------------------//
-//            $.each(IOMy.common.RoomsList, function (sPremiseID, oRoomList) {
-//
-//                if (sPremiseID !== undefined && sPremiseID !== null &&
-//                        oRoomList !== undefined && oRoomList !== null)
-//                {
-//                    $.each(oRoomList, function (sRoomID, oRoom) {
-//                        if (sRoomID !== undefined && sRoomID !== null &&
-//                                oRoom !== undefined && oRoom !== null)
-//                        {
-//                            oRoomToDelete = oRoom; 
-//                        }
-//                    }); 
-//                }
-//
-//            });
-//        } catch (eRoomSearchError) {
-//            throw eRoomSearchError.message;
-//        }
-        
         try {
             //----------------------------------------------------------------//
             // Run the API Ajax request to delete the room.
@@ -89,22 +66,6 @@ $.extend(IOMy.functions, {
                         function () {
                             //-- REFRESH ROOMS --//
                             IOMy.common.ReloadVariableRoomList(fnCallback);
-//                                function() {
-//
-//                                    try {
-//                                        //-- Flag that the Core Variables have been configured --//
-//                                        //IOMy.common.CoreVariablesInitialised = true;
-//                                        // Refresh the room list after a deletion.
-//                                        //oApp.getPage("pPremiseOverview").getController().composeRoomList();
-//                                        // Go back.
-//                                        IOMy.common.NavigationChangePage("pPremiseOverview", true);
-//
-//                                    } catch(e654321) {
-//                                        //-- ERROR:  TODO: Write a better error message--//
-//                                        jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
-//                                    }
-//                                }
-//                            )
                         },
                     "UpdateMessageBox");
                 },

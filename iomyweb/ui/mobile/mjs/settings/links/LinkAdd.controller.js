@@ -513,7 +513,15 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                         function () {
                             // Set the flag to clear the way for a new UI instance
                             me.bUIReadyToBeWiped = true;
-                            IOMy.devices.AssignLinkToRoom(iLinkId, me.wRoomCBox.getSelectedKey(), sLinkType);
+                            IOMy.devices.AssignLinkToRoom(iLinkId, me.wRoomCBox.getSelectedKey(), sLinkType,
+                                function () {
+                                    if (IOMy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
+                                        oApp.to("pSettingsThingAdd", { LinkId: iLinkId });
+                                    } else {
+                                        IOMy.common.NavigationChangePage("pSettingsDeviceList", {}, true);
+                                    }
+                                }
+                            );
                             
                         },
                     "UpdateMessageBox");

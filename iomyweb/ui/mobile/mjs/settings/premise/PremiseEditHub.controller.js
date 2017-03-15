@@ -82,41 +82,30 @@ sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
                                             url : IOMy.apiphp.APILocation("hubs"),
                                             data : {"Mode" : "EditName", "Id" : iHubID, "Name" : sHubText},
                                             onSuccess : function () {
-                                                IOMy.common.showSuccess("Update successful.", "Success", 
-                                                function () {
-                                                    IOMy.common.NavigationTriggerBackForward(false);
-                                                }, "UpdateMessageBox");
                                                 
-                                                IOMy.common.RefreshHubList({
-                                                    onSuccess : function () {
-                                                        //-- REFRESH THINGS --//
-                                                        IOMy.apiphp.RefreshThingList({
-                                                            onSuccess: $.proxy(function() {
-                                                                var viewPremiseList = oApp.getPage("pSettingsPremiseList");
-                                                                var controllerPremiseList = viewPremiseList.getController();
+                                                IOMy.common.ReloadVariableHubList(
+                                                    function () {
+                                                        var viewPremiseList = oApp.getPage("pSettingsPremiseList");
+                                                        var controllerPremiseList = viewPremiseList.getController();
+
+                                                        //-- STEP 1 of 3 - EMPTY THE PREMISE LIST PAGE --//
+                                                        controllerPremiseList.RemoveExistingSettingsPremiseList( controllerPremiseList, viewPremiseList );
+
+                                                        //-- STEP 2 of 3 - REFRESH CORE VARIABLES --//
+                                                        IOMy.common.ReloadVariablePremiseList(
+                                                            function () {
+                                                                //-- STEP 3 of 3 - REDRAW THE PAGE --//
+                                                                controllerPremiseList.RedrawSettingsPremiseList( controllerPremiseList, viewPremiseList );
                                                                 
-                                                                //-- STEP 1 of 4 - EMPTY THE PREMISE LIST PAGE --//
-                                                                controllerPremiseList.RemoveExistingSettingsPremiseList( controllerPremiseList, viewPremiseList );
-
-                                                                //-- STEP 2 of 4 - REFRESH PREMISE LIST --//
-                                                                IOMy.common.RefreshPremiseList({
-                                                                    onSuccess : function () {
-
-                                                                        //-- STEP 3 of 4 - REFRESH GATEWAY LIST --//
-                                                                        IOMy.common.RefreshHubList({
-                                                                            onSuccess: function () {
-
-                                                                                //-- STEP 4 of 4 - REDRAW THE PAGE --//
-                                                                                controllerPremiseList.RedrawSettingsPremiseList( controllerPremiseList, viewPremiseList );
-                                                                            }
-                                                                        });
-                                                                    }
-                                                                });
-
-                                                            }, me)
-                                                        }); //-- END SENSORS LIST --//
+                                                                IOMy.common.showSuccess("Update successful.", "Success", 
+                                                                    function () {
+                                                                        IOMy.common.NavigationChangePage("pSettingsPremiseList", {}, true);
+                                                                    },
+                                                                "UpdateMessageBox");
+                                                            }
+                                                        );
                                                     }
-                                                });
+                                                );
                                             },
                                             onFail : function () {
                                                 IOMy.common.showError("Update failed.", "Error");
@@ -153,18 +142,18 @@ sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
 				
 				thisView.byId("page").addContent(oPanel);
                 
-                thisView.byId("extrasMenuHolder").addItem(
-                    IOMy.widgets.getActionMenu({
-                        id : me.createId("extrasMenu"),        // Uses the page ID
-                        icon : "sap-icon://GoogleMaterial/more_vert",
-                        items : [
-                            {
-                                // TODO: Make the delete hub function
-                                text: "Delete "+sName,
-                            }
-                        ]
-                    })
-                );
+//                thisView.byId("extrasMenuHolder").addItem(
+//                    IOMy.widgets.getActionMenu({
+//                        id : me.createId("extrasMenu"),        // Uses the page ID
+//                        icon : "sap-icon://GoogleMaterial/more_vert",
+//                        items : [
+//                            {
+//                                // TODO: Make the delete hub function
+//                                text: "Delete "+sName,
+//                            }
+//                        ]
+//                    })
+//                );
 			}
 		});
 	},

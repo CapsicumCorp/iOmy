@@ -237,7 +237,7 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
 
                 IOMy.common.showSuccess(me.byId("thingNameField").getValue()+" successfully created", "Success",
                     function () {
-                        IOMy.common.NavigationTriggerBackForward(false);
+                        IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
                     },
                 "UpdateMessageBox");
             } catch (e) {

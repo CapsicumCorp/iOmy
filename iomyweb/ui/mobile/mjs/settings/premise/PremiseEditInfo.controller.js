@@ -270,6 +270,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                                                 "PremiseInfoFloors" : me.byId("premiseFloors").getSelectedKey(),
                                                                 "PremiseInfoRooms" : me.byId("premiseRooms").getSelectedKey()
                                                             },
+                                                            
                                                             onSuccess : function () {
                                                                 IOMy.common.PremiseSelected.FloorCountId = me.byId("premiseFloors").getSelectedKey();
                                                                 IOMy.common.PremiseSelected.RoomCountId = me.byId("premiseRooms").getSelectedKey();
@@ -284,8 +285,8 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                                                 IOMy.common.showSuccess("Update successful.", "Success", 
                                                                 function () {
                                                                     //-- REFRESH PREMISES --//
-                                                                    IOMy.common.RefreshPremiseList({
-                                                                        onSuccess: $.proxy(function() {
+                                                                    IOMy.common.ReloadVariablePremiseList(
+                                                                        function() {
 
                                                                             IOMy.common.CoreVariablesInitialised = true;
                                                                             
@@ -299,10 +300,10 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                                                                 jQuery.sap.log.error("Error reloading Premise List: "+e.message);
                                                                             }
                                                                             
-                                                                            IOMy.common.NavigationTriggerBackForward(false);
+                                                                            IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
                                                                             
-                                                                        }, me)
-                                                                    }); //-- END PREMISE LIST --//
+                                                                        }
+                                                                    ); //-- END PREMISE LIST --//
                                                                 }, "UpdateMessageBox");
                                                             },
                                                             

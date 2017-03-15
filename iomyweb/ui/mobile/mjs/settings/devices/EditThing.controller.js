@@ -225,13 +225,6 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                                     url : IOMy.apiphp.APILocation("thing"),
                                     data : {"Mode" : "EditName", "Id" : iThingID, "Name" : sThingText},
                                     onSuccess : function () {
-                                        //-- RENAME THE NAME IN THE DEVICE DATA PAGE --//
-                                        try {
-                                            var oDevDataPage = oApp.getPage("pDeviceData");
-                                            oDevDataPage.byId("NavSubHead_Title").setText(sThingText.toUpperCase());
-                                        } catch (e) {
-                                            jQuery.sap.log.error("Error updating the Device Data page upon refresh: "+e.message);
-                                        }
                                         
                                         //-- REFRESH THINGS --//
                                         try {
@@ -241,7 +234,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                                                     IOMy.common.showSuccess("Update successful.", "Success", 
                                                     function () {
                                                         IOMy.common.bItemNameChangedMustRefresh = true;
-                                                        IOMy.common.NavigationTriggerBackForward(false);
+                                                        IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
                                                     }, "UpdateMessageBox");
                                                 }
                                             );

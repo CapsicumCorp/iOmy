@@ -126,23 +126,18 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
                                             data : {"Mode" : "EditName", "Id" : iID, "Name" : sText},
                                             onSuccess : function () {
                                                 //-- REFRESH LINK LIST --//
-                                                IOMy.common.RetrieveLinkList( {
-                                                    onSuccess: $.proxy(function() {
-                                                        
-                                                        //-- REFRESH THINGS --//
-                                                        IOMy.apiphp.RefreshThingList( {
-                                                            onSuccess: $.proxy(function() {
-
-                                                                //-- Flag that the Core Variables have been configured --//
-                                                                IOMy.common.CoreVariablesInitialised = true;
-                                                                
-                                                            }, me)
-                                                        }); //-- END THINGS LIST --//
-                                                    }, me)
-                                                }); //-- END LINK LIST --//
+                                                IOMy.common.ReloadVariableLinkList();
+                                                
                                                 IOMy.common.showSuccess("Update successful.", "Success", 
                                                 function () {
-                                                    IOMy.devices.AssignLinkToRoom(iID, me.wRoomCBox.getSelectedKey(), oLink.LinkTypeName);
+                                                    IOMy.devices.AssignLinkToRoom(iID, me.wRoomCBox.getSelectedKey(), oLink.LinkTypeName,
+                                                        function () {
+                                                            
+                                                            // Take the user to the link list settings page.
+                                                            IOMy.common.NavigationChangePage("pSettingsDeviceList", {}, true);
+                                                            
+                                                        }
+                                                    );
                                                 }, "UpdateMessageBox");
                                             },
                                             onFail : function () {

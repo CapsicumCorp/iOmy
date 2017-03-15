@@ -67,6 +67,8 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                 me.byId("addressLine1").setValue(displayData.PREMISEADDRESS_LINE1);
                 me.byId("addressLine2").setValue(displayData.PREMISEADDRESS_LINE2);
                 me.byId("addressLine3").setValue(displayData.PREMISEADDRESS_LINE3);
+                
+                me.byId("UpdateLink").setEnabled(true);
             },
             
             onFail : function (response) {
@@ -183,7 +185,8 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                             enabled : false,
 							text : "Update",
 							press : function () {
-								this.setEnabled(false);
+                                var thisButton = this;
+								thisButton.setEnabled(false);
 								
 								var iPremiseID = me.premiseID;
                                 var sAddressLine1 = me.byId("addressLine1").getValue();
@@ -200,7 +203,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                                 
                                 // Error checking and validation
                                 if (sAddressLine1 === "") {
-                                    aErrorLog.push("Residential Address (line 1) is required.");
+                                    aErrorLog.push("Street Address is required.");
                                     bError = true;
                                 }
                                 
@@ -212,32 +215,33 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                                     try {
                                         IOMy.apiphp.AjaxRequest({
                                             url : IOMy.apiphp.APILocation("premises"),
-                                            data : {"Mode" : "EditPremiseAddress", 
-                                                    "Id" : iPremiseID,
-                                                    "AddressLine1" : sAddressLine1,
-                                                    "AddressLine2" : sAddressLine2,
-                                                    "AddressLine3" : sAddressLine3,
-                                                    "AddressCountry" : sAddressCountry,
-                                                    "AddressStateProvince" : sAddressStateProvince,
-                                                    "AddressPostcode" : sAddressPostcode,
-                                                    "AddressTimezone" : sAddressTimezone,
-                                                    "AddressLanguage" : sAddressLanguage
-                                                },
+                                            data : {
+                                                "Mode" : "EditPremiseAddress", 
+                                                "Id" : iPremiseID,
+                                                "AddressLine1" : sAddressLine1,
+                                                "AddressLine2" : sAddressLine2,
+                                                "AddressLine3" : sAddressLine3,
+                                                "AddressCountry" : sAddressCountry,
+                                                "AddressStateProvince" : sAddressStateProvince,
+                                                "AddressPostcode" : sAddressPostcode,
+                                                "AddressTimezone" : sAddressTimezone,
+                                                "AddressLanguage" : sAddressLanguage
+                                            },
                                             onSuccess : function () {
                                                 IOMy.common.showSuccess("Update successful.", "Success", function () {
-                                                    IOMy.common.NavigationTriggerBackForward(false);
+                                                    IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
                                                 }, "UpdateMessageBox");
                                             },
                                             onFail : function (response) {
                                                 IOMy.common.showError("Update failed.", "Error");
                                                 jQuery.sap.log.error(JSON.stringify(response));
+                                                thisButton.setEnabled(true);
                                             }
                                         });
                                     } catch (e00033) {
                                         IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
                                     }
                                 }
-								this.setEnabled(true);
 							}
 						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
 					]
@@ -254,8 +258,9 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                 // Destroys the actual panel of the page. This is done to ensure that there
 				// are no elements left over which would increase the page size each time
 				// the page is visited.
-				if (me.byId("premisePanel") !== undefined)
+				if (me.byId("premisePanel") !== undefined) {
 					me.byId("premisePanel").destroy();
+                }
     		    
     		    var oPanel = new sap.m.Panel(me.createId("premisePanel"), {
     		    	backgroundDesign: "Transparent",

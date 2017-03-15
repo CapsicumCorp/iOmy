@@ -164,7 +164,7 @@ sap.ui.controller("mjs.settings.user.EditUserInformation", {
                                             onSuccess : function () {
                                                 IOMy.common.showSuccess("Update successful.", "Success", 
                                                 function () {
-                                                    IOMy.common.NavigationTriggerBackForward(false);
+                                                    IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
                                                 }, "UpdateMessageBox");
                                             },
                                             error : function () {

@@ -234,8 +234,7 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                                                                             try {
                                                                                 //-- Flag that the Core Variables have been configured --//
                                                                                 IOMy.common.CoreVariablesInitialised = true;
-                                                                                //-- Reset the Navigation array and index after switching users --//
-                                                                                IOMy.common.NavigationTriggerBackForward(false);
+                                                                                IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
 
                                                                             } catch(e654321) {
                                                                                 //-- ERROR:  TODO: Write a better error message--//

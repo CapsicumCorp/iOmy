@@ -98,7 +98,7 @@ $.extend(IOMy.devices,{
      * @param {type} iRoomId                ID of the room for the link to be assigned to
      * @param {type} sLinkType              String to display specifying the type of link being assigned.
      */
-    AssignLinkToRoom : function (iLinkId, iRoomId, sLinkType) {
+    AssignLinkToRoom : function (iLinkId, iRoomId, sLinkType, fnCallback) {
         //------------------------------------------------------------//
         // Declare variables
         //------------------------------------------------------------//
@@ -118,15 +118,7 @@ $.extend(IOMy.devices,{
                         function () {
                             
                             // Head back to the previous page after the core variables have been updated.
-                            IOMy.common.ReloadCoreVariables(
-                                function () {
-                                    if (IOMy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
-                                        oApp.to("pSettingsThingAdd", { LinkId: iLinkId });
-                                    } else {
-                                        IOMy.common.NavigationTriggerBackForward(false);
-                                    }
-                                }
-                            );
+                            IOMy.common.ReloadCoreVariables(fnCallback);
                             
                         },
                     "UpdateMessageBox");
