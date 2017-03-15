@@ -383,6 +383,7 @@ sap.ui.controller("mjs.settings.DeviceList", {
         thisView.byId("extrasMenuHolder").addItem(
             IOMy.widgets.getActionMenu({
                 id : me.createId("extrasMenu"),        // Uses the page ID
+                tooltip: "Action Menu",
                 icon : "sap-icon://GoogleMaterial/add_circle",
                 items : [
                     {
