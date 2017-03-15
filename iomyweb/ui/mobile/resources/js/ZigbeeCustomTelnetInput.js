@@ -36,7 +36,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
  */
 function ZigbeeCustomTelnetInput(sID, mSettings) {
     //========================================================================//
-    // Properties
+    // Properties                                                             //
     //========================================================================//
     this.sID                = sID;
     this.sInputID           = sID+"--Input";
@@ -49,7 +49,7 @@ function ZigbeeCustomTelnetInput(sID, mSettings) {
     this.oScope             = mSettings.scope;
     
     //========================================================================//
-    // Methods
+    // Methods                                                                //
     //========================================================================//
     this.toggleZigbeeCommands = function(bEnabled) {
         var me = this;
@@ -63,24 +63,30 @@ function ZigbeeCustomTelnetInput(sID, mSettings) {
         }
     };
     
-    this.createInputBox     = function () {
+    this.createInputBox = function () {
         var me = this;
         
         var oInput = new sap.m.Input(me.sInputID, {
+			layoutData : new sap.m.FlexItemData({
+				growFactor : 0
+			}),
             submit : function () {
                 IOMy.devices.zigbeesmartplug.ToggleZigbeeCommands(me.oScope, false);
 
                 IOMy.devices.zigbeesmartplug.ExecuteCustomCommand(me.oScope, this);
             }
-        }).addStyleClass("width100Percent SettingsTextInput");
+        }).addStyleClass("SettingsTextInput");
         
         me.input = oInput;
         
         return new sap.m.VBox({
+			layoutData : new sap.m.FlexItemData({
+				growFactor : 1
+			}),
             items : [
                 oInput
             ]
-        }).addStyleClass("width100Percent");
+        }).addStyleClass("");
     };
     
     /**
@@ -93,8 +99,9 @@ function ZigbeeCustomTelnetInput(sID, mSettings) {
         var me = this;
         var oNavList = new sap.tnt.NavigationList({});
         
+		// #TODO:# - Move over to a $.each Loop
         //------------------------------------------------------------//
-        // Insert each of the telnet commands to the menu.
+        // Insert each of the telnet commands to the menu.            //
         //------------------------------------------------------------//
         oNavList.addItem(
             new sap.tnt.NavigationListItem({
@@ -231,7 +238,7 @@ function ZigbeeCustomTelnetInput(sID, mSettings) {
 //        );
 
         //------------------------------------------------------------//
-        // Create the button to invoke the menu.
+        // Create the button to invoke the menu.                      //
         //------------------------------------------------------------//
         var oButton = new sap.m.Button(me.sMenuButtonID,{
             icon : "sap-icon://GoogleMaterial/add_circle",
@@ -268,7 +275,7 @@ function ZigbeeCustomTelnetInput(sID, mSettings) {
         }).addStyleClass("height100Percent minwidth40px");
         
         //--------------------------------------//
-        // Store it in the object
+        // Store it in the object               //
         //--------------------------------------//
         me.menuButton = oButton;
         
@@ -276,7 +283,7 @@ function ZigbeeCustomTelnetInput(sID, mSettings) {
     };
     
     //========================================================================//
-    // Widgets
+    // Widgets                                                                //
     //========================================================================//
     
     this.widget = new sap.m.HBox(sID,{});

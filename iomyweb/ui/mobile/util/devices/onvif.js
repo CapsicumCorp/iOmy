@@ -38,8 +38,8 @@ $.extend(IOMy.devices.onvif,{
      * elements are used in forms that handle information about onvif devices.
      */
     uiIDs       : {
-        sStreamProfileLabelID : "StreamProfileLabel",
-        sStreamProfileFieldID : "StreamProfileField",
+        sStreamProfileLabelID    : "StreamProfileLabel",
+        sStreamProfileFieldID    : "StreamProfileField",
         sThumbnailProfileLabelID : "ThumbnailProfileLabel",
         sThumbnailProfileFieldID : "ThumbnailProfileField"
     },
@@ -55,9 +55,9 @@ $.extend(IOMy.devices.onvif,{
         var me = this;
         var bError = false;
         
-        //------------------------------------------------------------//
-        // Check that both the link ID and callback functions are given.
-        //------------------------------------------------------------//
+        //---------------------------------------------------------------//
+        // Check that both the link ID and callback functions are given. //
+        //---------------------------------------------------------------//
         if (fnFailCallback === undefined) {
             fnFailCallback = function () {};
         }
@@ -74,7 +74,7 @@ $.extend(IOMy.devices.onvif,{
         // If all went well...
         if (bError === false) {
             //------------------------------------------------------------//
-            // Call the API to collect the profiles from an Onvif server.
+            // Call the API to collect the profiles from an Onvif server. //
             //------------------------------------------------------------//
             var sUrl = IOMy.apiphp.APILocation("onvif");
             var sMode = "LookupProfiles";
@@ -110,20 +110,19 @@ $.extend(IOMy.devices.onvif,{
         var me = this; // Scope of the Onvif module.
         
         // Disable the update button on its form
-        //oUpdateButton.setEnabled(false);
+        // oUpdateButton.setEnabled(false);
         
-        //===============================================\\
-        // DECLARE VARIABLES
-        //===============================================\\
+        //===============================================//
+        // DECLARE VARIABLES                             //
+        //===============================================//
         var oStreamProfileLabel;
         var oStreamProfileField;
         var oThumbnailProfileLabel;
         var oThumbnailProfileField;
         
-        
-        //===============================================\\
-        // ASSIGN DEFAULT VALUES TO THE ELEMENT ARRAY
-        //===============================================\\
+        //===============================================//
+        // ASSIGN DEFAULT VALUES TO THE ELEMENT ARRAY    //
+        //===============================================//
         if (aElementsToEnableOnSuccess === undefined) {
             aElementsToEnableOnSuccess = [];
         }
@@ -132,13 +131,13 @@ $.extend(IOMy.devices.onvif,{
             aElementsToEnableOnFailure = aElementsToEnableOnSuccess;
         }
         
-        //===============================================\\
-        // CONSTRUCT ELEMENTS
-        //===============================================\\
+        //===============================================//
+        // CONSTRUCT ELEMENTS                            //
+        //===============================================//
         
-        //-----------------------------------------------\\
-        // STREAM PROFILE
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
+        // STREAM PROFILE                                //
+        //-----------------------------------------------//
         
         // LABEL
         oScope.aElementsForAFormToDestroy.push(me.uiIDs.sStreamProfileLabelID);
@@ -154,9 +153,9 @@ $.extend(IOMy.devices.onvif,{
         }).addStyleClass("width100Percent");
         oFormBox.addItem(oStreamProfileField);
         
-        //-----------------------------------------------\\
-        // THUMBNAIL PROFILE
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
+        // THUMBNAIL PROFILE                             //
+        //-----------------------------------------------//
         
         // LABEL
         oScope.aElementsForAFormToDestroy.push(me.uiIDs.sThumbnailProfileLabelID);
@@ -172,13 +171,13 @@ $.extend(IOMy.devices.onvif,{
         }).addStyleClass("width100Percent");
         oFormBox.addItem(oThumbnailProfileField);
         
-        //===============================================\\
-        // POPULATE THE COMBO BOXES
-        //===============================================\\
+        //===============================================//
+        // POPULATE THE SELECT BOXES                     //
+        //===============================================//
         me.LookupProfiles(iLinkId,
             // On Success
             function () {
-                // Populate the combo boxes
+                // Populate the select boxes
                 for (var i = 0; i < me.aProfiles.length; i++) {
                     // CBox for Stream profile
                     oStreamProfileField.addItem(
@@ -229,14 +228,14 @@ $.extend(IOMy.devices.onvif,{
     },
     
     ValidateStreamProfile: function (oScope) {
-        var me                      = this;  // Scope of the onvif module
-        var bError                  = false;
-        var aErrorMessages          = [];
-        var mInfo                   = {}; // MAP: Contains the error status and any error messages.
+        var me                      = this;   // Scope of the onvif module
+        var bError                  = false;  //
+        var aErrorMessages          = [];     //
+        var mInfo                   = {};     // MAP: Contains the error status and any error messages.
         
-        //-------------------------------------------------\\
-        // Is the stream profile valid? (does it have an ID)
-        //-------------------------------------------------\\
+        //---------------------------------------------------//
+        // Is the stream profile valid? (does it have an ID) //
+        //---------------------------------------------------//
         try {
             if (oScope.byId(me.uiIDs.sStreamProfileFieldID).getSelectedKey() === "") {
                 bError = true;
@@ -281,16 +280,16 @@ $.extend(IOMy.devices.onvif,{
     },
     
     ValidateThingFormData : function (oScope) {
-        var me                      = this; // Scope of the onvif module
-        var bError                  = false;
-        var aErrorMessages          = [];
-        var mInfo                   = {}; // MAP: Contains the error status and any error messages.
-        var mStreamProfileInfo      = {};
-        var mThumbnailProfileInfo   = {};
+        var me                      = this;   // Scope of the onvif module
+        var bError                  = false;  //
+        var aErrorMessages          = [];     //
+        var mInfo                   = {};     // MAP: Contains the error status and any error messages.
+        var mStreamProfileInfo      = {};     //
+        var mThumbnailProfileInfo   = {};     //
         
-        //-------------------------------------------------\\
-        // Check the Onvif stream form data
-        //-------------------------------------------------\\
+        //-------------------------------------------------//
+        // Check the Onvif stream form data                //
+        //-------------------------------------------------//
         try {
             // Check the stream profile
             mStreamProfileInfo      = me.ValidateStreamProfile(oScope);
@@ -333,10 +332,9 @@ $.extend(IOMy.devices.onvif,{
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
 		
-		var oUIObject			= null;					//-- OBJECT:			--//
-		var aUIObjectItems		= [];					//-- ARRAY:             --//
-        
-        
+		var oUIObject			= null;   //-- OBJECT:            --//
+		var aUIObjectItems		= [];     //-- ARRAY:             --//
+         
         //-- 1.1 - Set default values		--//
         if (bIsUnassigned === undefined)
             bIsUnassigned = false;
@@ -344,7 +342,6 @@ $.extend(IOMy.devices.onvif,{
 		//------------------------------------//
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
-		
 		//console.log(aDeviceData.DeviceId);
         
         // If the UI is for the Unassigned Devices List, include 
@@ -387,7 +384,6 @@ $.extend(IOMy.devices.onvif,{
                             new sap.m.VBox({
                                 items : [
                                     new sap.m.Button ({
-                                        tooltip: "Screenshot",
                                         width: "100%",
                                         icon : "sap-icon://GoogleMaterial/photo_camera",
                                     })
@@ -403,7 +399,6 @@ $.extend(IOMy.devices.onvif,{
                             new sap.m.VBox({
                                 items : [
                                     new sap.m.Button ({
-                                        tooltip: "Open the stream",
                                         width: "100%",
                                         icon : "sap-icon://GoogleMaterial/videocam",
                                     })
@@ -455,7 +450,6 @@ $.extend(IOMy.devices.onvif,{
 		//------------------------------------//
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
-		
 		//console.log(aDeviceData.DeviceId);
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
@@ -513,7 +507,6 @@ $.extend(IOMy.devices.onvif,{
                 }).addStyleClass("minwidth170px minheight58px")
             ]
         }).addStyleClass("ListItem");
-		
 
 		//------------------------------------//
 		//-- 9.0 - RETURN THE RESULTS		--//
@@ -536,19 +529,17 @@ $.extend(IOMy.devices.onvif,{
                 
             });
         } else {
-            //-- TODO: Write a error message --//
+            //  #TODO:# - Write a error message
             jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
         }
 		return aTasks;
 	},
-	
 	
 	GetObjectIdList: function( sPrefix, oViewScope, aDeviceData ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
 		var aObjectIdList = [];
-		
 		
 		//------------------------------------//
 		//-- 2.0 - Fetch Definition names	--//
@@ -566,8 +557,7 @@ $.extend(IOMy.devices.onvif,{
 			];
 			
 		}
-		
-		
+	
 		//------------------------------------//
 		//-- 9.0 - RETURN THE RESULTS		--//
 		//------------------------------------//

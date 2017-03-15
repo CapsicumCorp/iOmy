@@ -118,30 +118,30 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         if (bError === false) {
             try {
                 //====================================================================//
-                // ONVIF SERVER
+                // ONVIF SERVER                                                       //
                 //====================================================================//
                 if (me.byId("linkTypeCBox").getSelectedKey() == 6) {
-                    //-------------------------------------------------\\
-                    // Is the IP address and port present and correct?
-                    //-------------------------------------------------\\
+                    //-------------------------------------------------//
+                    // Is the IP address and port present and correct? //
+                    //-------------------------------------------------//
                     mIPAddressInfo = me.ValidateIPAddress();
                     if (mIPAddressInfo.bError === true) {
                         bError = true;
                         aErrorMessages = aErrorMessages.concat(mIPAddressInfo.aErrorMessages);
                     }
                     
-                    //-------------------------------------------------\\
-                    // Is the username given?
-                    //-------------------------------------------------\\
+                    //-------------------------------------------------//
+                    // Is the username given?                          //
+                    //-------------------------------------------------//
                     mUsernameInfo = me.ValidateUsername();
                     if (mUsernameInfo.bError === true) {
                         bError = true;
                         aErrorMessages = aErrorMessages.concat(mUsernameInfo.aErrorMessages);
                     }
                     
-                    //-------------------------------------------------\\
-                    // Is the password given?
-                    //-------------------------------------------------\\
+                    //-------------------------------------------------//
+                    // Is the password given?                          //
+                    //-------------------------------------------------//
                     mPasswordInfo = me.ValidatePassword();
                     if (mPasswordInfo.bError === true) {
                         bError = true;
@@ -149,21 +149,21 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                     }
                     
                 //====================================================================//
-                // PHILIPS HUE BRIDGE
+                // PHILIPS HUE BRIDGE                                                 //
                 //====================================================================//
                 } else if (me.byId("linkTypeCBox").getSelectedKey() == 7) {
-                    //-------------------------------------------------\\
-                    // Is the IP address and port present and correct?
-                    //-------------------------------------------------\\
+                    //-------------------------------------------------//
+                    // Is the IP address and port present and correct? //
+                    //-------------------------------------------------//
                     mIPAddressInfo = me.ValidateIPAddress();
                     if (mIPAddressInfo.bError === true) {
                         bError = true;
                         aErrorMessages = aErrorMessages.concat(mIPAddressInfo.aErrorMessages);
                     }
                     
-                    //-------------------------------------------------\\
-                    // Is the device user token given?
-                    //-------------------------------------------------\\
+                    //-------------------------------------------------//
+                    // Is the device user token given?                 //
+                    //-------------------------------------------------//
                     mDeviceUserTokenInfo = me.ValidateDeviceUserToken();
                     if (mDeviceUserTokenInfo.bError === true) {
                         bError = true;
@@ -171,7 +171,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                     }
                     
                 //====================================================================//
-                // OPEN WEATHER MAP
+                // OPEN WEATHER MAP                                                   //
                 //====================================================================//
                 } else if (me.byId("linkTypeCBox").getSelectedKey() == 8) {
                     mOpenWeatherMapInfo = IOMy.devices.weatherfeed.ValidateLinkFormData(me);
@@ -198,9 +198,9 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         var aErrorMessages          = [];
         var mInfo                   = {}; // MAP: Contains the error status and any error messages.
         
-        //-------------------------------------------------\\
-        // Is the hub a proper hub (does it have an ID)
-        //-------------------------------------------------\\
+        //-------------------------------------------------//
+        // Is the hub a proper hub (does it have an ID)    //
+        //-------------------------------------------------//
         try {
             // TODO: Is this really needed anymore?
             if (me.byId("hubCBox").getSelectedKey() === "") {
@@ -225,11 +225,11 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         var aErrorMessages          = [];
         var mInfo                   = {}; // MAP: Contains the error status and any error messages.
         
-        //-------------------------------------------------\\
-        // Is the link type a proper link type (does it have an ID)
-        //-------------------------------------------------\\
+        //----------------------------------------------------------//
+        // Is the link type a proper link type (does it have an ID) //
+        //----------------------------------------------------------//
         try {
-            // TODO: Is this really needed anymore?
+            // -- #TODO:# Is this really needed anymore? -- //
             if (me.byId("linkTypeCBox").getSelectedKey() === "") {
                 bError = true;
                 aErrorMessages.push("Link type is not valid");
@@ -259,30 +259,30 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         var sIPAddress              = me.byId("IPAddressField").getValue();
         var sIPPort                 = me.byId("IPPortField").getValue();
         
-        //-------------------------------------------------\\
-        // Is the IP address given?
-        //-------------------------------------------------\\
+        //-------------------------------------------------//
+        // Is the IP address given?                        //
+        //-------------------------------------------------//
         try {
             if (sIPAddress === "") {
-                bError = true;// No
+                bError = true; // No
                 aErrorMessages.push("IP address must be filled out");
 
-            //-------------------------------------------------\\
-            // If so, is it a valid IP address?
-            //-------------------------------------------------\\
+            //-------------------------------------------------//
+            // If so, is it a valid IP address?                //
+            //-------------------------------------------------//
             } else {
-                //-------------------------------------------------\\
-                // Are there three dots in the IP Address?
-                //-------------------------------------------------\\
+                //-------------------------------------------------//
+                // Are there three dots in the IP Address?         //
+                //-------------------------------------------------//
                 aThreeDots = sIPAddress.match(/\./g);
 
                 if (aThreeDots === null || aThreeDots.length !== 3) {
                     bError = true; // No. FAIL!
                     aErrorMessages.push("IP address is not valid - there must be only 4 parts separated by dots ('.') in an IPv4 address");
                 } else {
-                    //-------------------------------------------------\\
-                    // There are three dots. Are the four parts valid numbers?
-                    //-------------------------------------------------\\
+                    //---------------------------------------------------------//
+                    // There are three dots. Are the four parts valid numbers? //
+                    //---------------------------------------------------------//
                     aIPAddressParts = sIPAddress.split('.');
 
                     // Check each number
@@ -312,9 +312,9 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             aErrorMessages.push("Error 0x1003: There was an error checking the IP Address: "+e.message);
         }
         
-        //-------------------------------------------------\\
-        // Is the port given?
-        //-------------------------------------------------\\
+        //-------------------------------------------------//
+        // Is the port given?                              //
+        //-------------------------------------------------//
         try {
             if (sIPPort === "") {
                 bError = true;
@@ -354,9 +354,9 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         var aErrorMessages          = [];
         var mInfo                   = {}; // MAP: Contains the error status and any error messages.
         
-        //-------------------------------------------------\\
-        // Is the device user token given?
-        //-------------------------------------------------\\
+        //-------------------------------------------------//
+        // Is the device user token given?                 //
+        //-------------------------------------------------//
         try {
             if (me.byId("DeviceUserTokenField").getValue() === "") {
                 bError = true; // No.
@@ -379,9 +379,9 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         var aErrorMessages          = [];
         var mInfo                   = {}; // MAP: Contains the error status and any error messages.
         
-        //-------------------------------------------------\\
-        // Is the username given?
-        //-------------------------------------------------\\
+        //-------------------------------------------------//
+        // Is the username given?                          //
+        //-------------------------------------------------//
         try {
             if (me.byId("Username").getValue() === "") {
                 bError = true; // No.
@@ -404,9 +404,9 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         var aErrorMessages          = [];
         var mInfo                   = {}; // MAP: Contains the error status and any error messages.
         
-        //-------------------------------------------------\\
-        // Is the password given?
-        //-------------------------------------------------\\
+        //-------------------------------------------------//
+        // Is the password given?                          //
+        //-------------------------------------------------//
         try {
             if (me.byId("Password").getValue() === "") {
                 bError = true; // No.
@@ -438,7 +438,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         
         try {
             //--------------------------------------------------------------------//
-            // ONVIF SERVER
+            // ONVIF SERVER                                                       //
             //--------------------------------------------------------------------//
             if (me.byId("linkTypeCBox").getSelectedItem().getKey() == 6) {
                 sLinkType = "Onvif Server";
@@ -453,7 +453,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                     "OnvifPassword" : me.byId("Password").getValue()
                 };
             //--------------------------------------------------------------------//
-            // PHILIPS HUE BRIDGE
+            // PHILIPS HUE BRIDGE                                                 //
             //--------------------------------------------------------------------//
             } else if (me.byId("linkTypeCBox").getSelectedItem().getKey() == 7) {
                 sLinkType = "Philips Hue Bridge";
@@ -467,7 +467,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                     "DeviceUserToken" : me.byId("DeviceUserTokenField").getValue()
                 };
             //--------------------------------------------------------------------//
-            // WEATHER STATION
+            // WEATHER STATION                                                    //
             //--------------------------------------------------------------------//
             } else if (me.byId("linkTypeCBox").getSelectedItem().getKey() == 8) {
                 sLinkType = "Open Weather Map Feed";
@@ -485,7 +485,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             console.log("Success: "+JSON.stringify(data));
             
             //--------------------------------------------------------------//
-            // Find the new Link ID
+            // Find the new Link ID                                         //
             //--------------------------------------------------------------//
             var iLinkId = 0;
             
@@ -505,7 +505,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             }
 
             try {
-                //-- REFRESH LINK LIST --//
+                // REFRESH LINK LIST
                 IOMy.common.ReloadVariableLinkList();
 
                 if (data.Error === false || data.Error === undefined) {
@@ -558,20 +558,20 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             me.byId("addButton").setVisible(true);
         }
 
-        //==---------------------------------==//
-        // Choose a form to load
-        //==---------------------------------==//
+        //-------------------------------------//
+        // Choose a form to load               //
+        //-------------------------------------//
 
-        //---- Zigbee ----//
+        // Zigbee 
         if (iLinkTypeId == 2) {
             IOMy.devices.zigbeesmartplug.CreateLinkForm(me, me.byId("formBox"));
-        //---- Onvif Server ----//
+        // Onvif Server
         } else if (iLinkTypeId == 6) {
             me.CreateOnvifServerForm();
-        //---- Philips Hue Bridge ----//
+        // Philips Hue Bridge
         } else if (iLinkTypeId == 7) {
             me.CreatePhilipsHueBridgeForm();
-        //---- Open Weather Map ----//
+        // Open Weather Map
         } else if (iLinkTypeId == 8) {
             IOMy.devices.weatherfeed.CreateLinkForm(me, me.byId("formBox"));
         }
@@ -624,9 +624,9 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
      * Constructs the user interface for the form to add a link.
      */
     DrawUI : function() {
-        //===============================================\\
-        // DECLARE VARIABLES
-        //===============================================\\
+        //===============================================//
+        // DECLARE VARIABLES                             //
+        //===============================================//
         var me = this;
         var thisView = me.getView();
         // UI5 Objects used in all link forms
@@ -637,25 +637,25 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         var oAddButton; // Button to add link
         var oFormBox, oPanel; // Container elements
         
-        //=======================================================\\
-        // CONSTRUCT ELEMENTS
-        //=======================================================\\
+        //=======================================================//
+        // CONSTRUCT ELEMENTS                                    //
+        //=======================================================//
         
-        //-- Refresh the Navigational buttons --//
+        // Refresh the Navigational buttons
         IOMy.common.NavigationRefreshButtons( me );
         
-        //-------------------------------------------------------\\
-        // HUB COMBO BOX
-        //-------------------------------------------------------\\
+        //-------------------------------------------------------//
+        // HUB SELECT BOX                                        //
+        //-------------------------------------------------------//
         oHubLabel = new sap.m.Label({
             text : "Hub you wish to connect this link to"
         });
         
         oHubCBox = IOMy.widgets.getHubSelector(me.createId("hubCBox")).addStyleClass("width100Percent SettingsDropDownInput");
         
-        //-------------------------------------------------------\\
-        // PREMISE COMBO BOX
-        //-------------------------------------------------------\\
+        //-------------------------------------------------------//
+        // PREMISE SELECT BOX                                    //
+        //-------------------------------------------------------//
         oPremiseLabel = new sap.m.Label({
             text : "Premise you wish to place this link in"
         });
@@ -672,9 +672,9 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             }
         );
         
-        //-------------------------------------------------------\\
-        // ROOM COMBO BOX
-        //-------------------------------------------------------\\
+        //-------------------------------------------------------//
+        // ROOM SELECT BOX                                       //
+        //-------------------------------------------------------//
         oRoomLabel = new sap.m.Label({
             text : "Room you wish to place this link in"
         });
@@ -686,9 +686,9 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             items : [me.wRoomCBox]
         }).addStyleClass("width100Percent");
         
-        //-------------------------------------------------------\\
-        // LINK TYPE COMBO BOX
-        //-------------------------------------------------------\\
+        //-------------------------------------------------------//
+        // LINK TYPE SELECT BOX                                  //
+        //-------------------------------------------------------//
         oLinkTypeLabel = new sap.m.Label({
             text : "Link Type"
         });
@@ -700,15 +700,15 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             }
         );
         
-        //-------------------------------------------------------\\
-        // FORM BOX
-        //-------------------------------------------------------\\
+        //-------------------------------------------------------//
+        // FORM BOX                                              //
+        //-------------------------------------------------------//
         me.aElementsToDestroy.push("formBox");
         oFormBox = new sap.m.VBox(me.createId("formBox"),{});
         
-        //=======================================================\\
-        // PLACE ALL THE PIECES TOGETHER
-        //=======================================================\\
+        //=======================================================//
+        // PLACE ALL THE PIECES TOGETHER                         //
+        //=======================================================//
         
         me.wVertBox = new sap.m.VBox({
             items : [
@@ -720,24 +720,25 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             ]
         }).addStyleClass("UserInputForm");
         
-        //-------------------------------------------------------\\
-        // ADD LINK BUTTON
-        //-------------------------------------------------------\\
+        //-------------------------------------------------------//
+        // ADD LINK BUTTON                                       //
+        //-------------------------------------------------------//
         me.aElementsToDestroy.push("addButton");
         oAddButton = new sap.m.VBox({
             items : [
                 new sap.m.Link(me.createId("addButton"), {
                     //enabled : false,
                     text : "Add Link",
-                    //-------------------------------------------------------//
-                    // FUNCTION TO ADD THE LINK BY CLICKING ON THE ADD LINK BUTTON
-                    //-------------------------------------------------------//
+					
+                    //--------------------------------------------------------------//
+                    // FUNCTION TO ADD THE LINK BY CLICKING ON THE ADD LINK BUTTON  //
+                    //--------------------------------------------------------------//
                     press : function() {
-                        var thisButton = this; // Captures the scope of the calling button.//
-                        thisButton.setEnabled(false); // Lock the button//
+                        var thisButton = this; // Captures the scope of the calling button.
+                        thisButton.setEnabled(false); // Lock the button
                         
                         try {
-                            // Error checking variables//
+                            // Error checking variables
                             var bError                  = false;
                             var mInfo                   = false;
                             var aErrorMessages          = [];
@@ -747,23 +748,22 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                             jQuery.sap.log.error("Error 0x1000: There was an error declaring variables: "+e.message);
                         }
                 
-                        //=== VALIDATE FORM DATA ===//
-                        
+                        // VALIDATE FORM DATA
                         if (bError === false) {
                             mInfo = me.ValidateFormData();
                             bError = mInfo.bError;
                             aErrorMessages = mInfo.aErrorMessages;
 
                             //-------------------------------------------------//
-                            // Try to add the link
+                            // Try to add the link                             //
                             //-------------------------------------------------//
                             try {
-                                //=== IF EVERYTHING IS VALID, ADD THE LINK ===//
+                                // IF EVERYTHING IS VALID, ADD THE LINK
                                 if (bError === false) {
                                     var mData = me.FetchAPIAndParameters();
                                     IOMy.apiphp.AjaxRequest(mData);
 
-                                //=== OTHERWISE BRING UP AN ERROR MESSAGE ON THE SCREEN ===//
+                                // OTHERWISE BRING UP AN ERROR MESSAGE ON THE SCREEN 
                                 } else {
                                     if (aErrorMessages.length === 1) {
                                         sErrorMessage = "There was an error: \n\n"+aErrorMessages.join('\n');
@@ -775,7 +775,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                                     IOMy.common.showError(sErrorMessage);
                                 }
                             } catch (e) {
-                                bError = true; // No.//
+                                bError = true; // No.
                                 aErrorMessages.push("Error 0x1010: There was an error retrieving the API parameters: "+e.message);
                                 
                                 if (aErrorMessages.length === 1) {
@@ -801,17 +801,19 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         
         thisView.byId("page").addContent(oPanel);
         
-        // Disable the refresh functionality until a new link is added.//
+        // Disable the refresh functionality until a new link is added.
         me.bUIReadyToBeWiped = false;
         
-        // Create the rest of the link form.//
+        // Create the rest of the link form.
         me.ChangeLinkForm(me.byId("linkTypeCBox"));
     },
     
+	
+	// #TODO:# Move Function to "util\devices\onvif.js"
     CreateOnvifServerForm : function () {
-        //===============================================\\
-        // DECLARE VARIABLES
-        //===============================================\\
+        //===============================================//
+        // DECLARE VARIABLES                             //
+        //===============================================//
         
         var me = this;                  // Used for capturing this scope.
         
@@ -827,44 +829,50 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         // --Device User Token
         var oDeviceUserTokenField;      // sap.m.Input
         
-        //===============================================\\
-        // CONSTRUCT ELEMENTS
-        //===============================================\\
+        //===============================================//
+        // CONSTRUCT ELEMENTS                            //
+        //===============================================//
         
-        //-----------------------------------------------\\
-        // IP ADDRESS AND PORT
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
+        // IP ADDRESS AND PORT                           //
+        //-----------------------------------------------//
         
-        // LABEL
+        // IP ADDRESS LABEL
         me.aElementsForAFormToDestroy.push("IPAddressLabel");
         oIPAddressAndPortLabel = new sap.m.Label(me.createId("IPAddressLabel"), {
             text : "IP Address and port (eg. 10.9.9.9:80)"
         });
         me.byId("formBox").addItem(oIPAddressAndPortLabel);
         
-        // FIELD
+        // IP ADDRESS INPUT
         me.aElementsForAFormToDestroy.push("IPAddressField");
-        oIPAddressField = new sap.m.Input(me.createId("IPAddressField"), {}).addStyleClass("width100Percent SettingsTextInput");
+        oIPAddressField = new sap.m.Input(me.createId("IPAddressField"), {
+			layoutData : new sap.m.FlexItemData({ growFactor : 1 }),
+		}).addStyleClass("SettingsTextInput");
         
+		// : TEXT BOX
         me.aElementsForAFormToDestroy.push("Colon");
         oColon = new sap.m.Text(me.createId("Colon"), {
             text : ":"
-        }).addStyleClass("PadLeft5px PadRight5px FlexNoShrink LineHeight45px");
+        }).addStyleClass("PadLeft5px PadRight5px FlexNoShrink MarTop15px");
         
+		// PORT INPUT
         me.aElementsForAFormToDestroy.push("IPPortField");
         oIPPort = new sap.m.Input(me.createId("IPPortField"), {
             value : "888"
-        }).addStyleClass("minwidth80px SettingsTextInput FlexNoShrink");
+        }).addStyleClass("maxwidth80px SettingsTextInput");
         
+		// HBOX CONTAINER
         me.aElementsForAFormToDestroy.push("IPBox");
         oIPAddressAndPortBox = new sap.m.HBox(me.createId("IPBox"), {
+			layoutData : new sap.m.FlexItemData({ growFactor : 1 }),
             items : [ oIPAddressField,oColon,oIPPort ]
-        }).addStyleClass("width100Percent IPAddressBox");
+        }).addStyleClass("IPAddressBox");
         me.byId("formBox").addItem(oIPAddressAndPortBox);
         
-        //-----------------------------------------------\\
-        // USERNAME
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
+        // USERNAME                                      //
+        //-----------------------------------------------//
         
         // LABEL
         me.aElementsForAFormToDestroy.push("UsernameLabel");
@@ -878,9 +886,9 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         oDeviceUserTokenField = new sap.m.Input(me.createId("Username"), {}).addStyleClass("width100Percent SettingsTextInput");
         me.byId("formBox").addItem(oDeviceUserTokenField);
         
-        //-----------------------------------------------\\
-        // PASSWORD
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
+        // PASSWORD                                      //
+        //-----------------------------------------------//
         
         // LABEL
         me.aElementsForAFormToDestroy.push("PasswordLabel");
@@ -897,10 +905,12 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         me.byId("formBox").addItem(oDeviceUserTokenField);
     },
     
+	
+	// #TODO:# Move Function to "util\devices\philipshue.js" 
     CreatePhilipsHueBridgeForm : function () {
-        //===============================================\\
-        // DECLARE VARIABLES
-        //===============================================\\
+        //===============================================//
+        // DECLARE VARIABLES                             //
+        //===============================================//
         
         var me = this;                  // Used for capturing this scope.
         
@@ -908,61 +918,69 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         var oIPAddressAndPortLabel;
         var oDeviceUserTokenLabel;
         // Fields
-        // --IP Address and Port
+        // IP Address and Port
         var oIPAddressField;            // sap.m.Input
         var oColon;                     // sap.m.Text
         var oIPPort;                    // sap.m.Input
         var oIPAddressAndPortBox;       // sap.m.HBox
-        // --Device User Token
+        // Device User Token
         var oDeviceUserTokenField;      // sap.m.Input
         
-        //===============================================\\
-        // CONSTRUCT ELEMENTS
-        //===============================================\\
+        //===============================================//
+        // CONSTRUCT ELEMENTS                            //
+        //===============================================//
         
-        //-----------------------------------------------\\
-        // IP ADDRESS AND PORT
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
+        // IP ADDRESS AND PORT                           //
+        //-----------------------------------------------//
         
         // LABEL
         me.aElementsForAFormToDestroy.push("IPAddressLabel");
         oIPAddressAndPortLabel = new sap.m.Label(me.createId("IPAddressLabel"), {
-            text : "IP Address and port (eg. 10.9.9.9:80)"
+            text : "IP Address and port (eg. 10.9.9.9 : 80)"
         });
         me.byId("formBox").addItem(oIPAddressAndPortLabel);
         
         // FIELD
         me.aElementsForAFormToDestroy.push("IPAddressField");
-        oIPAddressField = new sap.m.Input(me.createId("IPAddressField"), {}).addStyleClass("width100Percent SettingsTextInput");
+        oIPAddressField = new sap.m.Input(me.createId("IPAddressField"), {
+			layoutData : new sap.m.FlexItemData({ growFactor : 1 }),
+			placeholder : "Enter IP Address..."
+		}).addStyleClass("width100Percent SettingsTextInput");
         
         me.aElementsForAFormToDestroy.push("Colon");
         oColon = new sap.m.Text(me.createId("Colon"), {
             text : ":"
-        }).addStyleClass("PadLeft5px PadRight5px FlexNoShrink LineHeight45px");
+        }).addStyleClass("PadLeft5px PadRight5px FlexNoShrink MarTop15px");
         
         me.aElementsForAFormToDestroy.push("IPPortField");
-        oIPPort = new sap.m.Input(me.createId("IPPortField"), {}).addStyleClass("width100px SettingsTextInput FlexNoShrink");
+        oIPPort = new sap.m.Input(me.createId("IPPortField"), {
+			value : "80"
+		}).addStyleClass("maxwidth80px SettingsTextInput");
         
         me.aElementsForAFormToDestroy.push("IPBox");
         oIPAddressAndPortBox = new sap.m.HBox(me.createId("IPBox"), {
+			layoutData : new sap.m.FlexItemData({ growFactor : 1 }),
             items : [ oIPAddressField,oColon,oIPPort ]
         }).addStyleClass("width100Percent IPAddressBox");
         me.byId("formBox").addItem(oIPAddressAndPortBox);
         
-        //-----------------------------------------------\\
-        // DEVICE USER TOKEN FIELD
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
+        // DEVICE USER TOKEN FIELD                       //
+        //-----------------------------------------------//
         
         // LABEL
         me.aElementsForAFormToDestroy.push("DeviceUserTokenLabel");
         oDeviceUserTokenLabel = new sap.m.Label(me.createId("DeviceUserTokenLabel"), {
-            text : "Device User Token Label (located in your Philips Hue bridge manual)"
+            text : "Device User Token Label"
         });
         me.byId("formBox").addItem(oDeviceUserTokenLabel);
         
         // FIELD
         me.aElementsForAFormToDestroy.push("DeviceUserTokenField");
-        oDeviceUserTokenField = new sap.m.Input(me.createId("DeviceUserTokenField"), {}).addStyleClass("width100Percent SettingsTextInput");
+        oDeviceUserTokenField = new sap.m.Input(me.createId("DeviceUserTokenField"), {
+			placeholder : "Located in your Philips Hue bridge manual"
+		}).addStyleClass("width100Percent SettingsTextInput");
         me.byId("formBox").addItem(oDeviceUserTokenField);
     }
 
