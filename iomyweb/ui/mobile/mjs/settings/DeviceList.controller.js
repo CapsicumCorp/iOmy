@@ -285,6 +285,7 @@ sap.ui.controller("mjs.settings.DeviceList", {
                         me.byId("ioExpandCollapse"+aLinksAndItems[i].LinkId).addItem(
                             new sap.m.Button(me.createId("ioExpandCollapseButton"+aLinksAndItems[i].LinkId), {
                                 icon : "sap-icon://navigation-down-arrow",
+                                tooltip: "Collapse",
                                 press : function () {
                                     // Lock the button
                                     this.setEnabled(false);
@@ -307,10 +308,12 @@ sap.ui.controller("mjs.settings.DeviceList", {
                                         me.byId("ThingListBox"+me.aLinkIds[iSelected]).setVisible(true);
                                         me.ioExpanded["_"+me.aLinkIds[iSelected]] = true;
                                         this.setIcon("sap-icon://navigation-down-arrow");
+                                        this.setTooltip("Collapse");
                                     } else {
                                         me.byId("ThingListBox"+me.aLinkIds[iSelected]).setVisible(false);
                                         me.ioExpanded["_"+me.aLinkIds[iSelected]] = false;
                                         this.setIcon("sap-icon://navigation-right-arrow");
+                                        this.setTooltip("Expand");
                                     }
 
                                     // Unlock the button
@@ -360,7 +363,7 @@ sap.ui.controller("mjs.settings.DeviceList", {
             // Decide whether to hide or show when the page loads/reloads.
             if (me.ioExpanded["_"+aLinksAndItems[i].LinkId] === false) {
                 me.byId("ThingListBox"+aLinksAndItems[i].LinkId).setVisible(false);
-                me.byId("ioExpandCollapseButton"+aLinksAndItems[i].LinkId).setIcon("sap-icon://navigation-right-arrow");
+                me.byId("ioExpandCollapseButton"+aLinksAndItems[i].LinkId).setIcon("sap-icon://navigation-right-arrow").setTooltip("Expand");
             }
             
             iLinkRow++;
