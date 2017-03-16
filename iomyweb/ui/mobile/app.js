@@ -1473,7 +1473,8 @@ var aPages = [
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.links.LinkAdd\" Page!\n",
         
         "HelpInfo":     "Allows you to add a link and assign it a room. Different link types are "
-                        + "supported and each one will have its own specific form."
+                        + "supported and each one will have its own specific form. \n\n"
+						+ "How to create and add OWM Account: www.iomy.org/openweathermap.php"
 	},
     {
 		"Id":			"pSettingsThingAdd",

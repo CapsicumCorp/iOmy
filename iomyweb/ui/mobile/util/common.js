@@ -353,10 +353,11 @@ $.extend(IOMy.common,{
 		);
 	},
 	
+	// Confirm Question for Sign Out
 	showConfirmQuestion : function( sMessage, sTitle, fnCallback, sCssClass ){
 		//-- Defaults --//
 		var callbackFn = fnCallback || function(){};
-		var cssClass = sCssClass || "";
+		var cssClass = sCssClass || "iOmySignout";
 		
 		// open a fully configured message box
 		sap.m.MessageBox.confirm(

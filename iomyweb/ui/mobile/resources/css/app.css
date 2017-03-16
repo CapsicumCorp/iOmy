@@ -34,6 +34,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 /* ==== #4.3# - Footers                                                            == */
 /* ==== #4.4# - Footer Help                                                        == */
 /* == #5.0# - Navigation Menu                                                      == */
+/* ==== #5.1# - Signout                                                            == */
 /* == #6.0# - Forms                                                                == */
 /* == #7.0# - Tiles                                                                == */
 /* ==== #7.1# - Tile Data                                                          == */
@@ -267,7 +268,6 @@ ul.IOMYNavMenu > li > div.sapTntNavLIGroup {
 	background-color: rgb(241,242,242);
 }
 
-/* #TODO:# - Create a new Unique class to fix overwriting library classes */
 .sapTntNavLIGroup:not(.sapTntNavLIItemDisabled):hover {
 	background-color: #f0f0f0;
 }
@@ -323,6 +323,39 @@ ul.IOMYNavMenu > li:first-child > div.sapTntNavLIGroup.sapTntNavLIItem > .sapTnt
 	max-width: 400px;
 	font-weight: bold;
 }
+
+
+/* == Changes the default hover background color for 
+selected nav items from bluecrystal blue to iOmy green  == */
+.sapTntNavLIItemSelected.sapTntNavLIGroupItem:hover {
+    background-color: #d6f7c6;
+}
+
+/* == Changes the default background color for selected 
+nav items from bluecrystal blue to iOmy green  == */
+.sapTntNavLIItemSelected.sapTntNavLIGroupItem {
+	background-color: #d6f7c6;
+}
+
+/* ============================== */
+/* == #5.1# - Signout          == */
+/* ============================== */
+
+/* == Changes the default icon color for 
+messageboxes from bluecrystal blue to iOmy green == */
+.sapMDialog.sapMMessageBoxQuestion .sapMDialogIcon.sapUiIcon {
+	color: #8bc53f;
+}
+
+/* == Changes the default box-shadow color for 
+messageboxes from bluecrystal blue to iOmy green == */
+.sapMMessageBoxQuestion>.sapMBar {
+    box-shadow: inset 0 -0.0625rem #8bc53f;
+}
+
+.iOmySignout > .sapMIBar.sapMFooter-CTX {
+    background-image: linear-gradient(to bottom right, #71C900 20%, #60B800 40%, #4F9B00 60%, #4D7900 80%, #2C6B00 100%);
+}
 /* ==================================================================================== */
 /* == #6.0# - Forms                                                                  == */
 /* ==================================================================================== */
@@ -341,11 +374,6 @@ ul.IOMYNavMenu > li:first-child > div.sapTntNavLIGroup.sapTntNavLIItem > .sapTnt
 
 .TelnetOutput.sapMInputBase.sapMTextArea {
 	height: 300px;
-}
-
-/* #TODO:# - Create a new Unique class to fix overwriting library classes */
-.sapMSlt > .sapMSltLabel {
-	font-family: 'Roboto Condensed', sans-serif;
 }
 
 /* Changes the "Hover" color of input boxes to green */
@@ -689,12 +717,9 @@ button.NavButton.sapMBarChild.sapMBtnBase {
 button.NavButton > div > span.sapUiIcon {
 	font-size: 40px;
 }
+
 .sapMIBar-CTX.sapMFooter-CTX :not(.sapMBtnDisabled) > .sapMBtnActive {
 	background-color: rgb(119,177,43);
-}
-
-:not(.sapMBtnDisabled) > .sapMBtnInner.sapMBtnActive {
-	border-color: rgb(119,177,43);
 }
 
 /* ==================================================================================== */
@@ -1000,9 +1025,40 @@ ul.IOMYNavMenu > li > ul > li.sapTntNavLIGroupItem {
 }
 
 /* ==================================================================================== */
-/* == #19.0# -                                                                       == */
+/* == #19.0# - Libary.css overirdes                                                  == */
 /* ==================================================================================== */
 
+/* Changes the default focus color for mobile links from
+bluecrystal blue to iOmy green while in desktop mode */
+.sap-desktop .sapMLnk:focus:not(.sapMLnkDsbl) {
+    outline: 0.0625rem dotted #8bc53f;
+}
+
+/* Changes the default text color & focus outline color for links
+from bluecrystal blue to iOmy green */
+.sapMLnk:active:not(.sapMLnkDsbl), .sapMLnk:focus:not(.sapMLnkDsbl) {
+	color: #8bc53f;
+	outline: 0.0625rem dotted #8bc53f;
+}
+
+/* Changes the default background color & border color for mobile buttons
+from bluecrystal blue to iOmy green */
+:not(.sapMBtnDisabled) > .sapMBtnInner.sapMBtnActive {
+	border-color: #8bc53f;
+	background-color: #8bc53f; 
+}
+
+/* Changes the default background color of the checkbox tick
+from bluecrystal blue to iOmy green */
+.sapMActive .sapMCbBg.sapMCbActiveStateOff.sapMCbMarkChecked:before, .sapMCbBg:active.sapMCbActiveStateOff.sapMCbMarkChecked:before, .sapMActive .sapMCbBg.sapMCbMarkChecked:before, .sapMCbBg:active.sapMCbMarkChecked:before {
+	color: #8bc53f;
+}
+
+
+/* Changes the default font for mobile select box labels */
+.sapMSlt > .sapMSltLabel {
+	font-family: 'Roboto Condensed', sans-serif;
+}
 
 /* ==================================================================================== */
 /* == #20.0# - Settings: Premise List & Overview                                     == */
@@ -1018,6 +1074,7 @@ ul.IOMYNavMenu > li > ul > li.sapTntNavLIGroupItem {
 	color: rgb(88, 89, 91);
 }
 
+/* Sets the "Help" bitton background and border color */
 .sapMBar-CTX :not(.sapMBtnDisabled)>.sapMBtnInner.sapMBtnActive {
 	background-color: rgb(139, 197, 63);
 	border-color: rgb(139, 197, 63);
