@@ -94,6 +94,10 @@ $.extend(IOMy.apiphp,{
 				sReturn = sUrlRestricted+'/php/api_dataaggregation.php';
 				break;
 				
+			case "mostrecent" :
+				sReturn = sUrlRestricted+'/php/api_datamostrecent.php';
+				break;
+				
 			case "statechange":
 				sReturn = sUrlRestricted+'/php/api_statechange.php';
 				break;

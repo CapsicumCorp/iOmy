@@ -22,6 +22,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+
 sap.ui.controller("mjs.devices.DeviceOverview", {
 	api: IOMy.apiphp,
 	oData: IOMy.apiodata,
@@ -561,6 +562,8 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 		//iUTS_Start				= IOMy.common.GetStartOfCurrentPeriod();
 		iUTS_End				= IOMy.common.GetEndOfCurrentPeriod();
 		
+		
+		/*
 		//-- Store the Odata URL --//
 		sAjaxUrl				= IOMy.apiodata.ODataLocation("data"+sIODataType);
 		//-- Set the Columns --//
@@ -573,10 +576,78 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 		];
 		//-- Set the Order by --//
 		aAjaxOrderByClause = ["UTS desc"];
-		
+		*/
 		//--------------------------------------------------------//
 		//-- 4.0 - Check if Ajax Request should be run			--//
 		//--------------------------------------------------------//
+		IOMy.apiphp.AjaxRequest({
+			"url": IOMy.apiphp.APILocation("mostrecent"),
+			"data": {
+				"Mode":     "MostRecentValue",
+				"Id":       iIOId
+			},
+			"onSuccess": function ( sResponseType, aData ) {
+				try {
+					if( aData!==undefined && aData!==null) {
+						if(aData.UTS!==undefined && aData.UTS!==null) {
+							//-- If the UTS is less than 10 minutes from the endstamp --//
+							//if(aData[0].UTS >= (iUTS_End-600) ) {
+								//-- Update the Page --//
+								
+								var oUI5Object = oController.byId( sIOLabel );
+								if( oUI5Object!==undefined && oUI5Object!==null && oUI5Object!==false ) {
+									//----------------------------------------//
+									//-- Round to 3 decimal places          --//
+									//----------------------------------------//
+									var fCalcedValue = ( Math.round( aData.Value * 1000 ) ) / 1000;
+									
+									//----------------------------------------//
+									//-- Show the Results                   --//
+									//----------------------------------------//
+									oUI5Object.setText( fCalcedValue+" "+aData.UomName);
+									
+									
+								} else {
+									console.log("Critical Error: Odata OnSuccess can't find "+sIOLabel)
+								}
+							//} else {
+								//-- Update the Page --//
+							//	oController.byId( sIOLabel ).setText("IO Offline");
+							//}
+						} else {
+                            //console.log("aData[0].UTS is not defined");
+                            //console.log(aData[0]);
+							oController.byId( sIOLabel ).setText("IO Offline");
+						}
+					} else {
+                        //console.log("aData is not defined");
+                        //console.log(aData);
+						oController.byId( sIOLabel ).setText("IO Offline");
+					}
+					
+				} catch( e5678) {
+					console.log( e5678.message );
+				}
+				
+				//-- Update the Last Ajax Request Date --//
+				oController.dLastAjaxUpdate	= Date();
+				
+				//-- Recursively check for more Tasks --//
+				oController.RecursiveLoadAjaxData();
+			},
+			"onFail" : function (response) {
+				IOMy.common.showError("There was an error retriving the value of IO "+iIOId);
+                // Add to the IO Error count
+                oController.iIOErrorCount++;
+				
+				//-- Recursively check for more Tasks --//
+				oController.RecursiveLoadAjaxData();
+			}
+		});
+		
+		
+		/*
+		
 		IOMy.apiodata.AjaxRequest({
 			"Url":				sAjaxUrl,
 			"Limit":			1,
@@ -647,6 +718,10 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 				oController.RecursiveLoadAjaxData();
 			}
 		});
+	*/
+	
+	
+	
 	},
 	
 	
