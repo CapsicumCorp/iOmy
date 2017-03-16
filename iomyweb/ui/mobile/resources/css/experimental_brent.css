@@ -68,10 +68,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	line-height: 30px;
 }
 
-.sapTntNavLIGroupItem:not(.sapTntNavLIItemDisabled):active {
-   background-color: #309010;
-   color: white;
-}
+
 
 /*------------------------------------------------------*/
 /* PHILIPS HUE SLIDERS

@@ -714,6 +714,7 @@ button.NavButton.sapMBarChild.sapMBtnBase {
 	background: none;
 	line-height: 2rem;
 }
+
 button.NavButton > div > span.sapUiIcon {
 	font-size: 40px;
 }
@@ -1028,38 +1029,92 @@ ul.IOMYNavMenu > li > ul > li.sapTntNavLIGroupItem {
 /* == #19.0# - Libary.css overirdes                                                  == */
 /* ==================================================================================== */
 
-/* Changes the default focus color for mobile links from
-bluecrystal blue to iOmy green while in desktop mode */
+/* Changes the default focus color for mobile links from bluecrystal blue to iOmy green while in desktop mode */
 .sap-desktop .sapMLnk:focus:not(.sapMLnkDsbl) {
     outline: 0.0625rem dotted #8bc53f;
 }
 
-/* Changes the default text color & focus outline color for links
-from bluecrystal blue to iOmy green */
+/* Changes the default text color & focus outline color for links from bluecrystal blue to iOmy green */
 .sapMLnk:active:not(.sapMLnkDsbl), .sapMLnk:focus:not(.sapMLnkDsbl) {
 	color: #8bc53f;
 	outline: 0.0625rem dotted #8bc53f;
 }
 
-/* Changes the default background color & border color for mobile buttons
-from bluecrystal blue to iOmy green */
+/* Changes the default background color & border color for mobile buttons from bluecrystal blue to iOmy green */
 :not(.sapMBtnDisabled) > .sapMBtnInner.sapMBtnActive {
 	border-color: #8bc53f;
 	background-color: #8bc53f; 
 }
 
-/* Changes the default background color of the checkbox tick
-from bluecrystal blue to iOmy green */
+/* Changes the default background color of the checkbox tick from bluecrystal blue to iOmy green */
 .sapMActive .sapMCbBg.sapMCbActiveStateOff.sapMCbMarkChecked:before, .sapMCbBg:active.sapMCbActiveStateOff.sapMCbMarkChecked:before, .sapMActive .sapMCbBg.sapMCbMarkChecked:before, .sapMCbBg:active.sapMCbMarkChecked:before {
 	color: #8bc53f;
 }
-
 
 /* Changes the default font for mobile select box labels */
 .sapMSlt > .sapMSltLabel {
 	font-family: 'Roboto Condensed', sans-serif;
 }
 
+/* Changes the default focus border color for NavMenu list items */
+.sapTntNavLI li:focus::before, .sapTntNavLIItem:focus::before {
+    border: 1px dotted #8bc53f;
+}
+
+/* Changes the default active background color for NavMenu list items */
+.sapTntNavLIGroupItem:not(.sapTntNavLIItemDisabled):active {
+	/* background-color: #309010; Old Darker Color */ 
+	/* Changed the color a few shades brighter to make text easier to read */
+	background-color: #38a713;
+}
+
+/* Temporary fix for the blue focus outline issue with the NavMenu Button & Back / Forward Buttons */
+button.NavButton.sapMBarChild.sapMBtnBase:focus, .BackForwardButton {
+	outline: none;
+}
+
+/* Changes the default hover & focus color for mobile list items from bluecrystal blue to iOmy green  */
+.sapMInputBaseInner:not(.sapMInputBaseReadonlyInner):not(.sapMInputBaseStateInner):not(.sapMInputBaseDisabledInner):hover, 
+.sapMInputBaseInner:not(.sapMInputBaseReadonlyInner):not(.sapMInputBaseStateInner):not(.sapMInputBaseDisabledInner):focus {
+	border-color: rgb(139, 197, 63);
+}
+
+/* Changes the default focus color for mobile list items from bluecrystal blue to iOmy green */
+.sapMLIBFocusable:focus {
+    outline: 0.0625rem dotted #8bc53f;
+}
+
+/* Sets the "Help" button background and border color */
+.sapMBar-CTX :not(.sapMBtnDisabled)>.sapMBtnInner.sapMBtnActive {
+	background-color: rgb(139, 197, 63);
+	border-color: rgb(139, 197, 63);
+}
+
+/* Changes the default color of sap.m.text objects to a "Very dark grayish blue" */
+.sapMText:not(.Text_red_13) {
+	color: rgb(88, 89, 91);
+}
+
+/* Changes the default selected border color of sap.m.SegmentedButton to "iOmy Green" */
+.sapMSegBBtn.sapMSegBBtnFocusable.sapMSegBBtnSel {
+    border-right: 1px solid #8bc53f;
+}
+/* Changes the default hover background of sap.m.SegmentedButton to "iOmy Green" */
+.sapMSegBBtn.sapMSegBBtnFocusable.sapMSegBBtnSel:hover, .sapMSegBBtnFocusable.sapMBtnActive:hover {
+    background: #8bc53f;
+}
+
+/* Changes the default background & border color of sap.m.SegmentedButton to "iOmy Green" */
+.sapMSegBBtn.sapMSegBBtnSel {
+    background: #8bc53f;
+    color: #ffffff;
+    border-color: #8bc53f;
+}
+
+/* Changes the default text color of sap.m.SegmentedButton to "Very dark gray" */
+.sapMSegBBtn {
+	color: #333333;
+}
 /* ==================================================================================== */
 /* == #20.0# - Settings: Premise List & Overview                                     == */
 /* ==================================================================================== */
@@ -1069,17 +1124,6 @@ from bluecrystal blue to iOmy green */
 	border-right: 2px solid #529B00;
 }
 	
-/* Overriding UI5 default rules */
-.sapMText:not(.Text_red_13) {
-	color: rgb(88, 89, 91);
-}
-
-/* Sets the "Help" bitton background and border color */
-.sapMBar-CTX :not(.sapMBtnDisabled)>.sapMBtnInner.sapMBtnActive {
-	background-color: rgb(139, 197, 63);
-	border-color: rgb(139, 197, 63);
-}
-
 .sapMSelectListItemBase {
 	font-family: 'Roboto Condensed', sans-serif;
 }
