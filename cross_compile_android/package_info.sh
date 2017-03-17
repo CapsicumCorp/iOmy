@@ -25,8 +25,8 @@ BZIP2GENTOOPKG="app-arch/bzip2"
 BZIP2GENTOOVER="1.0.6-r7"
 BZIP2NEED_WEB_BROWSER=0
 BZIP2PATCHES="fromgentoo/bzip2-1.0.3-no-test.patch fromgentoo/bzip2-1.0.4-POSIX-shell.patch fromgentoo/bzip2-1.0.4-makefile-CFLAGS.patch fromgentoo/bzip2-1.0.6-saneso.patch"
-BZIP2PATCHES2="fromgentoo/bzip2-1.0.4-man-links.patch fromgentoo/bzip2-1.0.6-mingw.patch fromgentoo/bzip2-1.0.6-out-of-tree-build.patch fromgentoo/bzip2-1.0.6-progress.patch"
-
+#BZIP2PATCHES="fromgentoo/bzip2-1.0.4-man-links.patch"
+BZIP2PATCHES2="fromgentoo/bzip2-1.0.6-mingw.patch fromgentoo/bzip2-1.0.6-out-of-tree-build.patch fromgentoo/bzip2-1.0.6-progress.patch"
 OPENSSLTITLE="Openssl"
 OPENSSLVER="1.0.2k"
 OPENSSLPKG="openssl-1.0.2k.tar.gz"
