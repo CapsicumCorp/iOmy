@@ -59,7 +59,7 @@ if [ $? != 0 ] ; then
 fi
 # Copy general binary files
 echo "Copying general binary files"
-binfiles="curl ffmpeg ffplay"
+binfiles="curl ffmpeg"
 for binfile in ${binfiles}; do
   cp -ai "${compilepath}/compiled/bin/${binfile}" bin/armeabi/pie/
 	if [ $? != 0 ] ; then
