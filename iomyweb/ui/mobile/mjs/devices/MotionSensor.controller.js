@@ -149,35 +149,35 @@ sap.ui.controller("mjs.devices.MotionSensor", {
         //-- Status --//
         me.wStatusField = new sap.m.Text ({
             text : sDefaultText,
-            textAlign : "Center",
+            textAlign : "Right",
             width : "100%"
         });
         
         //-- Temperature --//
         me.wTemperatureField = new sap.m.Text ({
             text : sDefaultText,
-            textAlign : "Center",
+            textAlign : "Right",
             width : "100%"
         });
         
         //-- Last Motion --//
         me.wLastMotionField = new sap.m.Text ({
             text : sDefaultText,
-            textAlign : "Center",
+            textAlign : "Right",
             width : "100%"
         });
         
         //-- Battery --//
         me.wBatteryField = new sap.m.Text ({
             text : sDefaultText,
-            textAlign : "Center",
+            textAlign : "Right",
             width : "100%"
         });
         
         //-- Tamper --//
         me.wTamperField = new sap.m.Text ({
             text : sDefaultText,
-            textAlign : "Center",
+            textAlign : "Right",
             width : "100%"
         });
         

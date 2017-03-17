@@ -30,12 +30,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	padding-right: 0.75rem;
 }
 
-/*
-.sapMPanelContent {
-	overflow: initial;
-}
-*/
-
 /* No shrinking under any circumstances.*/
 .FlexNoShrink {
 	flex-shrink: 0; 
@@ -176,32 +170,3 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	margin: 10px;
 }
 
-.sapMBarPH {
-	height: auto;
-}
-
-.sapMSltPressed > .sapMSltArrow {
-	background: rgb(139,197,63);
-}
-
-.sapMSltPicker .sapMIBar.sapMIBar-CTX {
-	border: 0.0625rem solid rgb(139,197,63);
-}
-
-.sapMSltBar::after {
-	width: 3.5rem;
-	color: #ffffff;
-	background: rgb(139,197,63);
-}
-
-.sapMSelectListItemBaseSelected {
-	background: #e6f9e6;
-}
-
-.sap-desktop .sapMSlt:not(.sapMSltDisabled):focus {
-	border-color: rgb(139,197,63);
-}
-
-.sapMSltHoverable:hover {
-	border-color: rgb(139,197,63);
-}
