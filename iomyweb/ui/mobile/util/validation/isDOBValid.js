@@ -27,16 +27,18 @@ $.sap.declare("IOMy.validation.isDOBValid",true);
 $.extend(IOMy.validation, {
     
     /**
-     * Checks a given date to see if it's valid. It accepts date strings and
-     * unix timestamps.
+     * Checks a given date to see if it's valid date of birth.
      * 
-     * This function imposes stricter restrictions in the default Javascript
-     * date validation which behaves differently across different browsers. For
-     * example, it requires that the date strings conform to either one of these
-     * two short formats, YYYY-MM-DD, or YYYY/MM/DD.
+     * In addition to checking to see if the date itself is valid, it checks
+     * that date is not in the future. It is an error if the DOB is set in the
+     * future.
      * 
-     * @param {type} vDate          ID of a Room to check.
-     * @returns {map}               Map containg error status and any error messages
+     * The information returned is a Javascript map that contains the validity
+     * status of the date, any error messages, and the date itself as a
+     * Javascript Date object.
+     * 
+     * @param {type} vDate          Date of birth to check
+     * @returns {map}               Map containg validity status, any error messages, and the date itself as a JS Date
      */
     isDOBValid : function (vDate) {
         //--------------------------------------------------------------------//

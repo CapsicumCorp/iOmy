@@ -27,7 +27,18 @@ $.sap.declare("IOMy.functions.time.getMaximumDateInMonth",true);
 $.extend(IOMy.functions,{
     
     /**
+     * Returns the number of days in a given month.
      * 
+     * It takes into account the year so that if the given month is February, it
+     * can determine if it's a leap year and return 29 if it is or 28 if it is
+     * not.
+     * 
+     * Returns 28, 29, 30 (Apr, Jun, Sep, Nov), or 31 (Jan, Mar, May, Jul, Aug,
+     * Oct, Dec).
+     * 
+     * @param {mixed} vYear             Year as either an integer or a string
+     * @param {mixed} vMonth            Month as either an integer or a string
+     * @returns {integer}               Number of days in a month.
      */
     getMaximumDateInMonth : function(vYear, vMonth) {
         //--------------------------------------------------------------------//

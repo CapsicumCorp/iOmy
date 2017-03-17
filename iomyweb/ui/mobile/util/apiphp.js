@@ -698,10 +698,9 @@ $.extend(IOMy.apiphp,{
 					}
 					
 					//--------------------------------------------------------//
-                    // ONLY add these hard-coded devices if user is FRESHWATER1,
-                    // our debug user.
+                    // ONLY add these hard-coded devices if user is 'demo'.
                     //--------------------------------------------------------//
-                    if (IOMy.common.CurrentUsername === "FRESHWATER1") {
+                    if (IOMy.common.CurrentUsername === "demo") {
                         IOMy.experimental.addDemoDataToThingList();
                     }
 					

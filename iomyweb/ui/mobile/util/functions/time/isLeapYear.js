@@ -26,7 +26,10 @@ $.sap.declare("IOMy.functions.time.isLeapYear",true);
 $.extend(IOMy.functions,{
     
     /**
+     * Determines whether a year is a leap year.
      * 
+     * @param {mixed} vYear             Year as either an integer or a string
+     * @returns {boolean}               Whether it's a leap year or not.
      */
     isLeapYear : function(vYear) {
         //--------------------------------------------------------------------//
@@ -58,7 +61,7 @@ $.extend(IOMy.functions,{
             if (iYear % 100) {
                 //-- Alright, is it divisible by 400? --//
                 if (iYear % 400) {
-                    //-- It is a leap year. The year is a multiple of 400 (1600, 2000). --//
+                    //-- It is a leap year. The year is a multiple of 100 and 400 (1600, 2000). --//
                     return true;
                 } else {
                     //-- It is not a leap year as it's a multiple of 100 but not a multiple of 400. --//

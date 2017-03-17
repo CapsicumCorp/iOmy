@@ -658,11 +658,10 @@ $.extend(IOMy.common,{
 				}
                 
                 //--------------------------------------------------------//
-                // ONLY add these hard-coded devices if user is FRESHWATER1,
+                // ONLY add these hard-coded devices if user is 'demo',
                 // our debug user.
                 //--------------------------------------------------------//
-                if (IOMy.common.CurrentUsername === "FRESHWATER1") {
-                    console.log("Logged In as debug user: FRESHWATER1");
+                if (IOMy.common.CurrentUsername === "demo") {
                     IOMy.experimental.addDemoDataToLinkList();
                 }
                 
@@ -703,10 +702,9 @@ $.extend(IOMy.common,{
 				}
                 
                 //--------------------------------------------------------//
-                // ONLY add these hard-coded devices if user is FRESHWATER1,
-                // our debug user.
+                // ONLY add these hard-coded devices if user is 'demo'.
                 //--------------------------------------------------------//
-                if (IOMy.common.CurrentUsername === "FRESHWATER1") {
+                if (IOMy.common.CurrentUsername === "demo") {
                     IOMy.experimental.addDemoDataToLinkTypeList();
                 }
 				
