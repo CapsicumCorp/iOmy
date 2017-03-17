@@ -353,8 +353,8 @@ public class InstallWizard {
             } else {
                 Settings.setMySQLOwnerUsername(activity, this.ownerUsername);
                 Settings.setMySQLOwnerPassword(activity, this.ownerPassword);
-                Settings.setMySQLOwnerUsername(activity, this.watchInputsUsername);
-                Settings.setMySQLOwnerPassword(activity, this.watchInputsPassword);
+                Settings.setMySQLWatchInputsUsername(activity, this.watchInputsUsername);
+                Settings.setMySQLWatchInputsPassword(activity, this.watchInputsPassword);
                 Settings.setWatchInputsEnabled(activity, true);
             }
             Settings.setLighttpdPHPEnabled(activity, true);
