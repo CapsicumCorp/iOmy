@@ -30,6 +30,7 @@ $.sap.declare("IOMy.functions.loadLocaleCBoxItems",true);
 $.extend(IOMy.functions,{
     
     /**
+     * @deprecated
      * Procedure loads countries, languages, states and provinces, postcodes,
      * and timezones into their respective combo boxes through a series of AJAX
      * requests. What will be populated in these combo boxes depends on which

@@ -205,10 +205,9 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             text : "Date of Birth"
         });
 
-        me.wDateOfBirthField = new sap.m.DatePicker({
-			
-		}).addStyleClass("SettingsTextInput iOmyLink");
+        me.wDateOfBirthField = new sap.m.DatePicker({}).addStyleClass("SettingsTextInput iOmyLink");
         me.wDateOfBirthField.setDisplayFormat("YYYY-MM-dd");
+        me.wDateOfBirthField.setValueFormat("YYYY-MM-dd");
 
         //------------------------------------------------------//
         // Email
@@ -502,6 +501,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         thisView.byId("page").addContent(oPanel);
     },
     
+    // TODO: This could be put in the functions library for iOmy.
     AddUser : function (oCallingWidget) {
         //--------------------------------------------------------------------//
         // Declare variables, and disable the calling button.
@@ -518,7 +518,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         var sEmail                  = me.wEmailField.getValue();
         var sPhone                  = me.wContactPhoneField.getValue();
         var iGender                 = me.wGenderField.getSelectedKey();
-        var vDob                    = me.wDateOfBirthField.getDateValue();
+        var vDob                    = me.wDateOfBirthField.getValue();
         var sAddressLine1           = me.wAddressLine1Field.getValue();
         var sAddressLine2           = me.wAddressLine2Field.getValue();
         var sAddressLine3           = me.wAddressLine3Field.getValue();
@@ -529,23 +529,28 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         var iAddressLanguage        = me.wLanguageField.getSelectedKey();
         var sUsername               = me.wUsernameField.getValue();
         var mPasswordValidationInfo;
+        var mDOBValidationInfo;
 
         var bError = false;
         var aLogErrors = [];
         var sDialogTitle;
 
         //-----------------------------------//
-        // Prepare the date of birth string
+        // Validate the date of birth
         //-----------------------------------//
-        if (vDob === null) {
-            vDob = "";
+        if (vDob === "") {
+            aLogErrors.push("* Date of birth must be filled out");
+            
         } else {
-        //try {
-            vDob = IOMy.functions.getTimestampString(vDob, "yyyy-mm-dd", false)
-//        } catch (e) {
-//            aLogErrors.push("")
-//        }
-            console.log(vDob);
+            mDOBValidationInfo = IOMy.validation.isDOBValid(vDob);
+            
+            if (mDOBValidationInfo.bIsValid === false) {
+                aLogErrors.push("* Date of birth: "+mDOBValidationInfo.aErrorMessages.join("\n* Date of birth: "));
+            }
+            
+            if (mDOBValidationInfo.date !== null) {
+                vDob = IOMy.functions.getTimestampString(mDOBValidationInfo.date, "yyyy-mm-dd", false);
+            }
         }
 
         //-----------------------------------//
@@ -564,7 +569,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         } else {
             // Validate password security
             mPasswordValidationInfo = IOMy.functions.validateSecurePassword(me.wPasswordField.getValue());
-            // If the password is not secure enough
+            // If the password is not secure enough...
             if (mPasswordValidationInfo.bValid === false) {
                 // Report the feedback.
                 aLogErrors = aLogErrors.concat(mPasswordValidationInfo.aValidationErrorMessages);
@@ -614,6 +619,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                         "Email" : sEmail,
                         "Phone" : sPhone,
                         "Gender" : iGender,
+                        "DoB" : vDob,
                         "AddressLine1" : sAddressLine1,
                         "AddressLine2" : sAddressLine2,
                         "AddressLine3" : sAddressLine3,

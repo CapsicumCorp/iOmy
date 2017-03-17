@@ -837,6 +837,15 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         // --Device User Token
         var oDeviceUserTokenField;      // sap.m.Input
         
+        //--------------------------------------------------------------------//
+        // Change the help message for the New Link page.
+        //--------------------------------------------------------------------//
+        IOMy.help.PageInformation["pSettingsLinkAdd"] = "" +
+            "To create an Onvif Server, enter the IP address and port of the " +
+            "onvif supported camera. The default port is normally 888.\n\nAfter " +
+            "the server is created, iOmy will take you to add a camera item to " +
+            "the newly created server.";
+        
         //===============================================//
         // CONSTRUCT ELEMENTS                            //
         //===============================================//
@@ -858,7 +867,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 			layoutData : new sap.m.FlexItemData({ growFactor : 1 }),
 		}).addStyleClass("SettingsTextInput");
         
-		// : TEXT BOX
+		// TEXT BOX
         me.aElementsForAFormToDestroy.push("Colon");
         oColon = new sap.m.Text(me.createId("Colon"), {
             text : ":"
@@ -933,6 +942,15 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         var oIPAddressAndPortBox;       // sap.m.HBox
         // Device User Token
         var oDeviceUserTokenField;      // sap.m.Input
+        
+        //--------------------------------------------------------------------//
+        // Change the help message for the New Link page.
+        //--------------------------------------------------------------------//
+        IOMy.help.PageInformation["pSettingsLinkAdd"] = "" +
+            "Enter the IP address and port of the Philips Hue bridge, and also " +
+            "the device user token for your device. This is located in your " +
+            "Philips Hue bridge manual.\n\nAdding the bridge to iOmy will also " +
+            "attempt to add all devices attached to the bridge as items in iOmy.";
         
         //===============================================//
         // CONSTRUCT ELEMENTS                            //

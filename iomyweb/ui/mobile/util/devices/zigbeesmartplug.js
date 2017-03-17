@@ -528,6 +528,16 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         var oAPIModesHBox = new sap.m.HBox(oScope.createId(me.uiIDs.sAPIModesHBoxID), {}).addStyleClass("width100Percent");
         var showErrorDialog = IOMy.common.showError;
         
+        //--------------------------------------------------------------------//
+        // Change the help message for the New Link page.
+        //--------------------------------------------------------------------//
+        IOMy.help.PageInformation["pSettingsLinkAdd"] = "" +
+            "If there are Zigbee modems detected, they will show in its select box, " +
+            "and you will be able to add all zigbee devices by pressing the 'Join Devices' " +
+            "button.\n\nThere is an area where telnet output is displayed. This contains " +
+            "feedback from each telnet command called.\n\nThis will add all zigbee devices " +
+            "attached to a zigbee dongle as links and items.";
+        
         oScope.byId("addButton").setEnabled(false);
         
         oScope.aElementsForAFormToDestroy.push(me.uiIDs.sAPIModesHBoxID);
@@ -697,64 +707,97 @@ $.extend(IOMy.devices.zigbeesmartplug,{
 		
 		var oUIObject			= null;					//-- OBJECT:			--//
 		var aUIObjectItems		= [];					//-- ARRAY:             --//
-        
-        
-        //-- 1.1 - Set default values		--//
-        if (bIsUnassigned === undefined)
-            bIsUnassigned = false;
+        var sSerialCode         = "";
         
 		//------------------------------------//
-		//-- 2.0 - Fetch UI					--//
+        // Capture Link Serial Code
 		//------------------------------------//
-		//console.log(aDeviceData.DeviceId);
-        
-        // If the UI is for the Unassigned Devices List, include 
-        if (bIsUnassigned === true) {
-            aUIObjectItems.push(
-                new sap.m.CheckBox(oViewScope.createId(sPrefix+"_Selected"), {
-                    selected : false
-                }).addStyleClass("MarTop10px")
-            );
+        for (var i = 0; i < IOMy.common.LinkList.length; i++) {
+            if (IOMy.common.LinkList[i].LinkId == aDeviceData.LinkId) {
+                sSerialCode = IOMy.common.LinkList[i].LinkSerialCode;
+                break;
+            }
         }
         
+		//------------------------------------//
+		// Fetch UI
+		//------------------------------------//
         aUIObjectItems.push(
-            //------------------------------------//
-            //-- 1st is the Device Label		--//
-            //------------------------------------//
             new sap.m.VBox({
                 items : [
+                    //------------------------------------//
+                    //-- Label                          --//
+                    //------------------------------------//
                     new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
-						width: "85%",
+                        width: "85%",
                         text : aDeviceData.DeviceName,
                         press : function () {
                             IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20 iOmyLink")
+                    }).addStyleClass("TextSizeMedium MarLeft6px MarTop1d25Rem Text_grey_20 iOmyLink"),
+
+                    //------------------------------------//
+                    //-- Link Serial Code       		--//
+                    //------------------------------------//
+                    new sap.m.HBox({
+                        width: "100%",
+                        justifyContent: "End",
+                        items : [
+                            new sap.m.Label({
+                                text: sSerialCode
+                            }).addStyleClass("Font-RobotoCondensed TextSizeXSmall Text_grey_20")
+                        ]
+                    }).addStyleClass("")
                 ]
             }).addStyleClass("width80Percent BorderRight jbMR1tempfix")
         );
 
-        aUIObjectItems.push(
-            //------------------------------------//
-            //-- 2nd is the Device Data			--//
-            //------------------------------------//
-            new sap.m.VBox({
-                items : [
-                    new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
-                        //--------------------------------//
-                        //-- Draw the Data Boxes		--//
-                        //--------------------------------//
+        //--------------------------------------------------------------------//
+        // If the current page is the device overview page, then only 1 field is
+        // shown.
+        //--------------------------------------------------------------------//
+        if (oViewScope.getView().getId() === "pDeviceOverview") {
+            aUIObjectItems.push(
+                new sap.m.VBox({
+                    items : [
+                        new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
+                            //--------------------------------//
+                            //-- Draw the Data Boxes		--//
+                            //--------------------------------//
+                            items: [
+                                new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass(" Font-RobotoCondensed")
+                            ]
+                        }).addStyleClass("MarLeft12px MarTop20px")
+                    ]
+                }).addStyleClass("minheight58px minwidth90px")
+            );
+    
+        //--------------------------------------------------------------------//
+        // Otherwise all 4 fields are shown.
+        //--------------------------------------------------------------------//
+        } else {
+            aUIObjectItems.push(
+                //------------------------------------//
+                //-- 2nd is the Device Data			--//
+                //------------------------------------//
+                new sap.m.VBox({
+                    items : [
+                        new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
+                            //--------------------------------//
+                            //-- Draw the Data Boxes		--//
+                            //--------------------------------//
 
-                        items: [
-                            new sap.m.Text( oViewScope.createId( sPrefix+"_Volt" ),	{} ).addStyleClass("Font-RobotoCondensed"),
-                            new sap.m.Text( oViewScope.createId( sPrefix+"_Amp" ),	{} ).addStyleClass("Font-RobotoCondensed"),
-                            new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("Font-RobotoCondensed"),
-                            new sap.m.Text( oViewScope.createId( sPrefix+"_kWh" ),	{} ).addStyleClass("Font-RobotoCondensed")
-                        ]
-                    }).addStyleClass("MarLeft12px")
-                ]
-            }).addStyleClass("minwidth90px minheight58px")
-        );
+                            items: [
+                                new sap.m.Text( oViewScope.createId( sPrefix+"_Volt" ),	{} ).addStyleClass("Font-RobotoCondensed"),
+                                new sap.m.Text( oViewScope.createId( sPrefix+"_Amp" ),	{} ).addStyleClass("Font-RobotoCondensed"),
+                                new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("Font-RobotoCondensed"),
+                                new sap.m.Text( oViewScope.createId( sPrefix+"_kWh" ),	{} ).addStyleClass("Font-RobotoCondensed")
+                            ]
+                        }).addStyleClass("MarLeft12px")
+                    ]
+                }).addStyleClass("minwidth90px minheight58px")
+            );
+        }
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: aUIObjectItems

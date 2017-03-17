@@ -30,6 +30,12 @@ IOMy.validation = new sap.ui.base.Object();
 //-- LOAD VALIDATION FUNCTIONS          --//
 //----------------------------------------//
 $.sap.registerModulePath('IOMy.validation', sModuleInitialBuildLocation+'util/validation');
+$.sap.require("IOMy.validation.isDateValid");
+
+$.sap.registerModulePath('IOMy.validation', sModuleInitialBuildLocation+'util/validation');
+$.sap.require("IOMy.validation.isDOBValid");
+
+$.sap.registerModulePath('IOMy.validation', sModuleInitialBuildLocation+'util/validation');
 $.sap.require("IOMy.validation.isThingIDValid");
 
 $.sap.registerModulePath('IOMy.validation', sModuleInitialBuildLocation+'util/validation');

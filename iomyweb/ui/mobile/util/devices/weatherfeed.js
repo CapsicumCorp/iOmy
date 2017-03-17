@@ -84,7 +84,7 @@ $.extend(IOMy.devices.weatherfeed,{
                 "Username" : oScope.byId(me.uiIDs.sKeyCodeID+"Field").getValue(),
                 "StationCode" : oScope.byId(me.uiIDs.sStationCodeID+"Field").getValue(),
                 "RoomId" : oScope.wRoomCBox.getSelectedItem().getKey(),
-                "Data" : "{\"LinkName\" : \""+oScope.byId(me.uiIDs.sLinkNameID+"Field").getValue()+"\"}"
+                "Data" : "{\"Name\" : \""+oScope.byId(me.uiIDs.sLinkNameID+"Field").getValue()+"\"}"
             };
             
         } catch (eAddLink8200) {
@@ -115,9 +115,9 @@ $.extend(IOMy.devices.weatherfeed,{
     },
     
     CreateLinkForm : function (oScope, oFormBox, aElementsToEnableOnSuccess, aElementsToEnableOnFailure) {
-        //===============================================\\
+        //===============================================//
         // DECLARE VARIABLES
-        //===============================================\\
+        //===============================================//
         
         var me = this;                  // Used for capturing this scope.
         
@@ -125,13 +125,21 @@ $.extend(IOMy.devices.weatherfeed,{
         
         var oFormItem;
         
-        //===============================================\\
-        // CONSTRUCT ELEMENTS
-        //===============================================\\
+        //--------------------------------------------------------------------//
+        // Change the help message for the New Link page.
+        //--------------------------------------------------------------------//
+        IOMy.help.PageInformation["pSettingsLinkAdd"] = "" +
+            "An Open Weather Map Feed requires the key code and the station code before " +
+            "it can be created. Once created, an item will automatically be created " +
+            "to access the feed.";
         
-        //-----------------------------------------------\\
+        //===============================================//
+        // CONSTRUCT ELEMENTS
+        //===============================================//
+        
+        //-----------------------------------------------//
         // NAME
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
         
         // LABEL
         oScope.aElementsForAFormToDestroy.push(me.uiIDs.sLinkNameID+"Label");
@@ -147,9 +155,9 @@ $.extend(IOMy.devices.weatherfeed,{
         }).addStyleClass("width100px SettingsTextInput FlexNoShrink");
         oFormBox.addItem(oFormItem);
         
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
         // KEY CODE
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
         
         // LABEL
         oScope.aElementsForAFormToDestroy.push(me.uiIDs.sKeyCodeID+"Label");

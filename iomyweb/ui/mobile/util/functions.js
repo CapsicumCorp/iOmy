@@ -102,3 +102,12 @@ $.sap.require("IOMy.functions.validateSecurePassword");
 //----------------------------------------------------------------------------//
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
 $.sap.require("IOMy.functions.rooms.deleteRoom");
+
+//----------------------------------------------------------------------------//
+// Time Functions
+//----------------------------------------------------------------------------//
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.time.getMaximumDateInMonth");
+
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.time.isLeapYear");

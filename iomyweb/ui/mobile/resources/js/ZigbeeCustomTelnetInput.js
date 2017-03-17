@@ -43,6 +43,14 @@ function ZigbeeCustomTelnetInput(sID, mSettings) {
     this.sMenuButtonID      = sID+"--CommandMenuButton";
     this.sMenuID            = sID+"--CommandMenu";
     this.commandMenuOpen    = false;
+    this.aCommands          = [
+        "versioninfo",
+        "modulesinfo",
+        "debug output show",
+        "debug output hide",
+        "get_rapidha_info",
+        "get_zigbee_info"
+    ];
     
     this.iPremiseID         = mSettings.premiseID;
     this.iCommID            = mSettings.commID;
@@ -103,140 +111,20 @@ function ZigbeeCustomTelnetInput(sID, mSettings) {
         //------------------------------------------------------------//
         // Insert each of the telnet commands to the menu.            //
         //------------------------------------------------------------//
-        oNavList.addItem(
-            new sap.tnt.NavigationListItem({
-                text : "versioninfo",
-                select : function() {
-                    sap.ui.getCore().byId(me.sInputID).setValue(this.getText());
-                    sap.ui.getCore().byId(me.sInputID).fireSubmit();
-                    sap.ui.getCore().byId(me.sMenuID).close();
-                }
-            })
-        ).addItem(
-            new sap.tnt.NavigationListItem({
-                text : "modulesinfo",
-                select : function() {
-                    sap.ui.getCore().byId(me.sInputID).setValue(this.getText());
-                    sap.ui.getCore().byId(me.sInputID).fireSubmit();
-                    sap.ui.getCore().byId(me.sMenuID).close();
-                }
-            })
-        )
-//        .addItem(
-//            new sap.tnt.NavigationListItem({
-//                text : "debug enable <amount>",
-//                select : function() {
-//                    // TODO: ENTER AN INPUT DIALOG
-//                    sap.ui.getCore().byId(me.sInputID).setValue(this.getText());
-//                    //sap.ui.getCore().byId(me.sInputID).fireSubmit();
-//                    sap.ui.getCore().byId(me.sMenuID).close();
-//                }
-//            })
-//        )
-        .addItem(
-            new sap.tnt.NavigationListItem({
-                text : "debug output show",
-                select : function() {
-                    sap.ui.getCore().byId(me.sInputID).setValue(this.getText());
-                    sap.ui.getCore().byId(me.sInputID).fireSubmit();
-                    sap.ui.getCore().byId(me.sMenuID).close();
-                }
-            })
-        ).addItem(
-            new sap.tnt.NavigationListItem({
-                text : "debug output hide",
-                select : function() {
-                    sap.ui.getCore().byId(me.sInputID).setValue(this.getText());
-                    sap.ui.getCore().byId(me.sInputID).fireSubmit();
-                    sap.ui.getCore().byId(me.sMenuID).close();
-                }
-            })
-        )
-//        .addItem(
-//            new sap.tnt.NavigationListItem({
-//                text : "rapidha_join_network <rapidha UUID>",
-//                select : function() {
-//                    sap.ui.getCore().byId(me.sInputID).setValue(this.getText());
-//                    //sap.ui.getCore().byId(me.sInputID).fireSubmit();
-//                    sap.ui.getCore().byId(me.sMenuID).close();
-//                }
-//            })
-//        ).addItem(
-//            new sap.tnt.NavigationListItem({
-//                text : "rapidha_form_network <rapidha UUID>",
-//                select : function() {
-//                    sap.ui.getCore().byId(me.sInputID).setValue(this.getText());
-//                    //sap.ui.getCore().byId(me.sInputID).fireSubmit();
-//                    sap.ui.getCore().byId(me.sMenuID).close();
-//                }
-//            })
-//        ).addItem(
-//            new sap.tnt.NavigationListItem({
-//                text : "rapidha_form_network_netvoxchan <rapidha UUID>",
-//                select : function() {
-//                    sap.ui.getCore().byId(me.sInputID).setValue(this.getText());
-//                    //sap.ui.getCore().byId(me.sInputID).fireSubmit();
-//                    sap.ui.getCore().byId(me.sMenuID).close();
-//                }
-//            })
-//        ).addItem(
-//            new sap.tnt.NavigationListItem({
-//                text : "rapidha_leave_network <rapidha UUID>",
-//                select : function() {
-//                    sap.ui.getCore().byId(me.sInputID).setValue(this.getText());
-//                    //sap.ui.getCore().byId(me.sInputID).fireSubmit();
-//                    sap.ui.getCore().byId(me.sMenuID).close();
-//                }
-//            })
-//        ).addItem(
-//            new sap.tnt.NavigationListItem({
-//                text : "rapidha_reinit <rapidha UUID>",
-//                select : function() {
-//                    sap.ui.getCore().byId(me.sInputID).setValue(this.getText());
-//                    //sap.ui.getCore().byId(me.sInputID).fireSubmit();
-//                    sap.ui.getCore().byId(me.sMenuID).close();
-//                }
-//            })
-//        ).addItem(
-//            new sap.tnt.NavigationListItem({
-//                text : "rapidha_enable_tempjoin [<rapidha UUID>]",
-//                select : function() {
-//                    sap.ui.getCore().byId(me.sInputID).setValue(this.getText());
-//                    //sap.ui.getCore().byId(me.sInputID).fireSubmit();
-//                    sap.ui.getCore().byId(me.sMenuID).close();
-//                }
-//            })
-//        )
-        .addItem(
-            new sap.tnt.NavigationListItem({
-                text : "get_rapidha_info",
-                select : function() {
-                    sap.ui.getCore().byId(me.sInputID).setValue(this.getText());
-                    sap.ui.getCore().byId(me.sInputID).fireSubmit();
-                    sap.ui.getCore().byId(me.sMenuID).close();
-                }
-            })
-        ).addItem(
-            new sap.tnt.NavigationListItem({
-                text : "get_zigbee_info",
-                select : function() {
-                    sap.ui.getCore().byId(me.sInputID).setValue(this.getText());
-                    sap.ui.getCore().byId(me.sInputID).fireSubmit();
-                    sap.ui.getCore().byId(me.sMenuID).close();
-                }
-            })
-        );
-//        .addItem(
-//            new sap.tnt.NavigationListItem({
-//                text : "refresh_zigbee_info <local zigbee UUID>",
-//                select : function() {
-//                    sap.ui.getCore().byId(me.sInputID).setValue(this.getText());
-//                    //sap.ui.getCore().byId(me.sInputID).fireSubmit();
-//                    sap.ui.getCore().byId(me.sMenuID).close();
-//                }
-//            })
-//        );
-
+        
+        for (var i = 0; i < me.aCommands.length; i++) {
+            oNavList.addItem(
+                new sap.tnt.NavigationListItem({
+                    text : me.aCommands[i],
+                    select : function() {
+                        sap.ui.getCore().byId(me.sInputID).setValue(me.aCommands[i]);
+                        sap.ui.getCore().byId(me.sInputID).fireSubmit();
+                        sap.ui.getCore().byId(me.sMenuID).close();
+                    }
+                })
+            );
+        }
+        
         //------------------------------------------------------------//
         // Create the button to invoke the menu.                      //
         //------------------------------------------------------------//
