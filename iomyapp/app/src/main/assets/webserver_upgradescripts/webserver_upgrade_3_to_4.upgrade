@@ -1,0 +1,38 @@
+; An upgrade script to migrate the web server files from version 3 to version 4
+; skipfolderifexist skips files in that folder unless they don't exist
+; skipfile will always re-extract if the file doesn't exist
+; deletefolder will recursively delete everything in the folder
+; changedfile entries will override skipfolder entries
+
+;Most of the binaries have changed so don't skip any
+;skipfolderifexist components
+
+;Most of the libraries have changed so don't skip any
+
+;Files to skip in new extract
+skipfolderifexist scripts
+
+changedfile scripts/manage_services.sh
+
+skipfolderifexist tmp
+skipfolderifexist var
+
+skipfile zigbeedefs.ini
+
+;Always skip this folder as it contains the MySQL database
+skipfolder components/mysql/sbin/data
+
+;Web Files - There are many changes, so just delete everything except the web config
+deletefolder htdocs/phpmyadmin
+deletefolder htdocs/public
+deletefolder htdocs/restricted/libraries
+deletefolder htdocs/restricted/odata
+deletefolder htdocs/restricted/php
+deletefolder htdocs/ui
+
+changedfile htdocs/LICENSE
+changedfile htdocs/README
+changedfile htdocs/index.html
+changedfile htdocs/index.php
+changedfile htdocs/iomyserver.php
+
