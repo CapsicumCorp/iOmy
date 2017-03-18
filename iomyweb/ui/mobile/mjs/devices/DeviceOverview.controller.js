@@ -563,20 +563,7 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 		iUTS_End				= IOMy.common.GetEndOfCurrentPeriod();
 		
 		
-		/*
-		//-- Store the Odata URL --//
-		sAjaxUrl				= IOMy.apiodata.ODataLocation("data"+sIODataType);
-		//-- Set the Columns --//
-		aAjaxColumns			= ["CALCEDVALUE", "UTS", "UOM_NAME"];
-		//-- Set the Where Clause --//
-		aAjaxWhereClause = [
-			"IO_PK eq "+iIOId, 
-			"UTS gt "+iUTS_Start,
-			"UTS le "+iUTS_End
-		];
-		//-- Set the Order by --//
-		aAjaxOrderByClause = ["UTS desc"];
-		*/
+
 		//--------------------------------------------------------//
 		//-- 4.0 - Check if Ajax Request should be run			--//
 		//--------------------------------------------------------//
@@ -608,20 +595,16 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 									
 									
 								} else {
-									console.log("Critical Error: Odata OnSuccess can't find "+sIOLabel)
+									console.log("Critical Error: PHP API (Most Recent) OnSuccess can't find "+sIOLabel);
 								}
 							//} else {
 								//-- Update the Page --//
 							//	oController.byId( sIOLabel ).setText("IO Offline");
 							//}
 						} else {
-                            //console.log("aData[0].UTS is not defined");
-                            //console.log(aData[0]);
 							oController.byId( sIOLabel ).setText("IO Offline");
 						}
 					} else {
-                        //console.log("aData is not defined");
-                        //console.log(aData);
 						oController.byId( sIOLabel ).setText("IO Offline");
 					}
 					
@@ -637,90 +620,13 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 			},
 			"onFail" : function (response) {
 				IOMy.common.showError("There was an error retriving the value of IO "+iIOId);
-                // Add to the IO Error count
-                oController.iIOErrorCount++;
+				// Add to the IO Error count
+				oController.iIOErrorCount++;
 				
 				//-- Recursively check for more Tasks --//
 				oController.RecursiveLoadAjaxData();
 			}
 		});
-		
-		
-		/*
-		
-		IOMy.apiodata.AjaxRequest({
-			"Url":				sAjaxUrl,
-			"Limit":			1,
-			"Columns":			["CALCEDVALUE", "UTS", "UOM_NAME"],
-			"WhereClause":		aAjaxWhereClause,
-			"OrderByClause":	aAjaxOrderByClause,
-			"onSuccess":		function (sResponseType, aData) {
-				
-				try {
-					if( aData!==undefined && aData!==null) {
-						if( aData[0]!==undefined && aData[0]!==null) {
-							if(aData[0].UTS!==undefined && aData[0].UTS!==null) {
-								//-- If the UTS is less than 10 minutes from the endstamp --//
-								//if(aData[0].UTS >= (iUTS_End-600) ) {
-									//-- Update the Page --//
-									
-									var oUI5Object = oController.byId( sIOLabel );
-									if( oUI5Object!==undefined && oUI5Object!==null && oUI5Object!==false ) {
-										//----------------------------------------//
-										//-- Round to 3 decimal places          --//
-										//----------------------------------------//
-										var fCalcedValue = ( Math.round( aData[0].CALCEDVALUE * 1000 ) ) / 1000;
-										
-										//----------------------------------------//
-										//-- Show the Results                   --//
-										//----------------------------------------//
-										oUI5Object.setText( fCalcedValue+" "+aData[0].UOM_NAME);
-										
-										
-									} else {
-										console.log("Critical Error: Odata OnSuccess can't find "+sIOLabel)
-									}
-								//} else {
-									//-- Update the Page --//
-								//	oController.byId( sIOLabel ).setText("IO Offline");
-								//}
-							} else {
-                                //console.log("aData[0].UTS is not defined");
-                                //console.log(aData[0]);
-								oController.byId( sIOLabel ).setText("IO Offline");
-							}
-						} else {
-                            //console.log("aData[0] is not defined");
-                            //console.log(aData);
-							oController.byId( sIOLabel ).setText("IO Offline");
-						}
-					} else {
-                        //console.log("aData is not defined");
-                        //console.log(aData);
-						oController.byId( sIOLabel ).setText("IO Offline");
-					}
-				} catch( e5678) {
-					console.log( e5678.message );
-				}
-				
-				//-- Update the Last Ajax Request Date --//
-				oController.dLastAjaxUpdate	= Date();
-				
-				//-- Recursively check for more Tasks --//
-				oController.RecursiveLoadAjaxData();
-			},
-			"onFail" : function (response) {
-				IOMy.common.showError("There was an error retriving the value of IO "+iIOId);
-                // Add to the IO Error count
-                oController.iIOErrorCount++;
-				
-				//-- Recursively check for more Tasks --//
-				oController.RecursiveLoadAjaxData();
-			}
-		});
-	*/
-	
-	
 	
 	},
 	

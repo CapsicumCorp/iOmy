@@ -395,7 +395,7 @@ sap.ui.controller("mjs.rooms.Room", {
 		//----------------------------------------------------//
 		//-- 2.0 - Clear the List of tasks                  --//
 		//----------------------------------------------------//
-		oController.aAjaxTasks = { 
+		oController.aAjaxTasks = {
 			"Low":    [],
 			"Mid":    [],
 			"High":   []
@@ -410,7 +410,6 @@ sap.ui.controller("mjs.rooms.Room", {
 			} catch(e1) {
 				console.log("Error DeletingObject: "+sObjectId);
 			}
-			
 		});
 		
 		//----------------------------------------------------//
@@ -603,66 +602,39 @@ sap.ui.controller("mjs.rooms.Room", {
 		//--------------------------------------------------------//
 		//-- 3.0 - Prepare for Ajax Request                     --//
 		//--------------------------------------------------------//
-		iUTS_End                = IOMy.time.GetCurrentUTS();
-		iUTS_Start              = 0;//IOMy.time.GetStartStampForTimePeriod( "day", iUTS_End);
 		
-		//-- Store the Odata URL --//
-		sAjaxUrl                = IOMy.apiodata.ODataLocation("data"+sIODataType);
-		//-- Set the Columns --//
-		aAjaxColumns            = ["CALCEDVALUE", "UTS", "UOM_NAME"];
-		//-- Set the Where Clause --//
-		aAjaxWhereClause = [
-			"IO_PK eq "+iIOId, 
-			"UTS gt "+iUTS_Start,
-			"UTS le "+iUTS_End
-		];
-		//-- Set the Order by --//
-		aAjaxOrderByClause = ["UTS desc"];
 		
 		//--------------------------------------------------------//
 		//-- 4.0 - Check if Ajax Request should be run          --//
 		//--------------------------------------------------------//
-		IOMy.apiodata.AjaxRequest({
-			"Url":              sAjaxUrl,
-			"Limit":            1,
-			"Columns":          ["CALCEDVALUE", "UTS", "UOM_NAME"],
-			"WhereClause":      aAjaxWhereClause,
-			"OrderByClause":    aAjaxOrderByClause,
-			"onSuccess":        function (sResponseType, aData) {
-				
+		IOMy.apiphp.AjaxRequest({
+			"url": IOMy.apiphp.APILocation("mostrecent"),
+			"data": {
+				"Mode":     "MostRecentValue",
+				"Id":       iIOId
+			},
+			"onSuccess": function ( sResponseType, aData ) {
 				try {
 					if( aData!==undefined && aData!==null) {
-						if( aData[0]!==undefined && aData[0]!==null) {
-							if(aData[0].UTS!==undefined && aData[0].UTS!==null) {
-								//-- If the UTS is less than 10 minutes from the endstamp --//
+						if(aData.UTS!==undefined && aData.UTS!==null) {
+							//-- If the UTS is less than 10 minutes from the endstamp --//
+							
+							//-- Update the Page --//
+							var oUI5Object = oController.byId( sIOLabel );
+							
+							if( oUI5Object!==undefined && oUI5Object!==null && oUI5Object!==false ) {
+								//----------------------------------------//
+								//-- Round to 3 decimal places          --//
+								//----------------------------------------//
+								var fCalcedValue = ( Math.round( aData.Value * 1000 ) ) / 1000;
 								
-								//-- Check if the dates are valid --//
-								if( aData[0].UTS>=iUTS_Start && aData[0].UTS<=iUTS_End ) {
-									
-									//-- Update the Page --//
-									var oUI5Object = oController.byId( sIOLabel );
-									
-									if( oUI5Object!==undefined && oUI5Object!==null && oUI5Object!==false ) {
-										//----------------------------------------//
-										//-- Round to 3 decimal places          --//
-										//----------------------------------------//
-										var fCalcedValue = ( Math.round( aData[0].CALCEDVALUE * 1000 ) ) / 1000;
-										
-										//----------------------------------------//
-										//-- Show the Results                   --//
-										//----------------------------------------//
-										oUI5Object.setText( fCalcedValue+" "+aData[0].UOM_NAME);
-										
-										
-									} else {
-										console.log("Critical Error: Odata OnSuccess can't find "+sIOLabel)
-									}
-								} else {
-									//-- Update the Page --//
-									oController.byId( sIOLabel ).setText("IO Offline");
-								}
+								//----------------------------------------//
+								//-- Show the Results                   --//
+								//----------------------------------------//
+								oUI5Object.setText( fCalcedValue+" "+aData.UomName);
+								
 							} else {
-								oController.byId( sIOLabel ).setText("IO Offline");
+								console.log("Critical Error: PHP API (Most Recent) OnSuccess can't find "+sIOLabel);
 							}
 						} else {
 							oController.byId( sIOLabel ).setText("IO Offline");
