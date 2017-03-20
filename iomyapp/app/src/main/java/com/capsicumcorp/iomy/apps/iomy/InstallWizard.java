@@ -344,7 +344,7 @@ public class InstallWizard {
             Settings.setWebServerHostname(activity, this.hostname);
             Settings.setWebServerPortAsInt(activity, this.webserverport);
             Settings.setMySQLServerHostname(activity, this.dbURI);
-            Settings.setWebServerPortAsInt(activity, this.dbServerPort);
+            Settings.setMySQLServerPortAsInt(activity, this.dbServerPort);
             Settings.setMySQLRootPassword(activity, this.dbPassword);
             if (this.installDemoData) {
                 Settings.setMySQLOwnerUsername(activity, "demo");
