@@ -40,8 +40,8 @@ $sPostDesc                  = "";           //-- STRING:        Used to store th
 $sPostAddressLine1          = "";           //-- STRING:        Used to store the desired "Premise Address Line 1".		--//
 $sPostAddressLine2          = "";           //-- STRING:        Used to store the desired "Premise Address Line 2".		--//
 $sPostAddressLine3          = "";           //-- STRING:        Used to store the desired "Premise Address Line 3".		--//
-$sPostAddressCountry        = "";           //-- STRING:        Used to store the desired "Premise Address Country".	--//
-$sPostAddressStateProvince  = "";           //-- STRING:        Used to store the desired "Premise Address State".		--//
+$sPostAddressRegion         = "";           //-- STRING:        Used to store the desired "Premise Address Region".		--//
+$sPostAddressSubRegion      = "";           //-- STRING:        Used to store the desired "Premise Address SubRegion".	--//
 $sPostAddressPostcode       = "";           //-- STRING:        Used to store the desired "Premise Address Postcode".	--//
 $sPostAddressTimezone       = "";           //-- STRING:        Used to store the desired "Premise Address Timezone".	--//
 $sPostAddressLanguage       = "";           //-- STRING:        Used to store the desired "Premise Address Language".	--//
@@ -80,9 +80,9 @@ if($bError===false) {
 		array( "Name"=>'AddressLine1',          "DataType"=>'STR' ),
 		array( "Name"=>'AddressLine2',          "DataType"=>'STR' ),
 		array( "Name"=>'AddressLine3',          "DataType"=>'STR' ),
-		array( "Name"=>'AddressCountry',        "DataType"=>'INT' ),
-		array( "Name"=>'AddressStateProvince',  "DataType"=>'INT' ),
-		array( "Name"=>'AddressPostcode',       "DataType"=>'INT' ),
+		array( "Name"=>'AddressRegion',         "DataType"=>'INT' ),
+		array( "Name"=>'AddressSubRegion',      "DataType"=>'STR' ),
+		array( "Name"=>'AddressPostcode',       "DataType"=>'STR' ),
 		array( "Name"=>'AddressTimezone',       "DataType"=>'INT' ),
 		array( "Name"=>'AddressLanguage',       "DataType"=>'INT' ),
 		array( "Name"=>'PremiseInfoOccupants',  "DataType"=>'INT' ),
@@ -264,46 +264,46 @@ if($bError===false) {
 			}
 			
 			//----------------------------------------------------//
-			//-- 2.2.6.C - Retrieve Premise Address Country     --//
+			//-- 2.2.6.C - Retrieve Premise Address Region      --//
 			//----------------------------------------------------//
 			if( $bError===false ) {
 				try {
-					//-- Retrieve the "Address Country" --//
-					$sPostAddressCountry = $aHTTPData["AddressCountry"];
+					//-- Retrieve the "Address Region" --//
+					$sPostAddressRegion = $aHTTPData["AddressRegion"];
 					
-					if( $sPostAddressCountry===false ) {
+					if( $sPostAddressRegion===false ) {
 						$bError = true;
 						$sErrMesg .= "Error Code:'0115' \n";
-						$sErrMesg .= "Non numeric \"AddressCountry\" parameter! \n";
-						$sErrMesg .= "Please use a valid \"AddressCountry\" parameter\n";
+						$sErrMesg .= "Non numeric \"AddressRegion\" parameter! \n";
+						$sErrMesg .= "Please use a valid \"AddressRegion\" parameter\n";
 					}
 				} catch( Exception $e0116 ) {
 					$bError = true;
 					$sErrMesg .= "Error Code:'0116' \n";
-					$sErrMesg .= "Incorrect \"AddressCountry\" parameter!\n";
-					$sErrMesg .= "Please use a valid \"AddressCountry\" parameter\n";
+					$sErrMesg .= "Incorrect \"AddressRegion\" parameter!\n";
+					$sErrMesg .= "Please use a valid \"AddressRegion\" parameter\n";
 				}
 			}
 			
 			//----------------------------------------------------//
-			//-- 2.2.7.C - Retrieve Premise Address Province    --//
+			//-- 2.2.7.C - Retrieve Premise Address Sub-Region  --//
 			//----------------------------------------------------//
 			if( $bError===false ) {
 				try {
-					//-- Retrieve the "Address Province" --//
-					$sPostAddressStateProvince = $aHTTPData["AddressStateProvince"];
+					//-- Retrieve the "Address SubRegion" --//
+					$sPostAddressSubRegion = $aHTTPData["AddressSubRegion"];
 					
-					if( $sPostAddressStateProvince===false ) {
+					if( $sPostAddressSubRegion===false ) {
 						$bError = true;
 						$sErrMesg .= "Error Code:'0117' \n";
-						$sErrMesg .= "Non numeric \"AddressStateProvince\" parameter! \n";
-						$sErrMesg .= "Please use a valid \"AddressStateProvince\" parameter\n";
+						$sErrMesg .= "Invalid \"AddressSubRegion\" parameter! \n";
+						$sErrMesg .= "Please use a valid \"AddressSubRegion\" parameter\n";
 					}
 				} catch( Exception $e0118 ) {
 					$bError = true;
 					$sErrMesg .= "Error Code:'0118' \n";
-					$sErrMesg .= "Incorrect \"AddressStateProvince\" parameter!\n";
-					$sErrMesg .= "Please use a valid \"AddressStateProvince\" parameter\n";
+					$sErrMesg .= "Incorrect \"AddressSubRegion\" parameter!\n";
+					$sErrMesg .= "Please use a valid \"AddressSubRegion\" parameter\n";
 				}
 			}
 			
@@ -318,7 +318,7 @@ if($bError===false) {
 					if( $sPostAddressPostcode===false ) {
 						$bError = true;
 						$sErrMesg .= "Error Code:'0119' \n";
-						$sErrMesg .= "Non numeric \"AddressPostcode\" parameter! \n";
+						$sErrMesg .= "Invalid \"AddressPostcode\" parameter! \n";
 						$sErrMesg .= "Please use a valid \"AddressPostcode\" parameter\n";
 					}
 				} catch( Exception $e0120 ) {
@@ -618,7 +618,7 @@ if( $bError===false ) {
 					if( $aPremiseInfo["Data"]["PermWrite"]===1 ) {
 						
 						//-- Change the Name of the Premise --//
-						$aResult = ChangePremiseAddress( $aPremiseInfo["Data"]["AddressId"], $sPostAddressLine1, $sPostAddressLine2, $sPostAddressLine3, $sPostAddressCountry, $sPostAddressStateProvince, $sPostAddressPostcode, $sPostAddressTimezone, $sPostAddressLanguage );
+						$aResult = ChangePremiseAddress( $aPremiseInfo["Data"]["AddressId"], $sPostAddressLine1, $sPostAddressLine2, $sPostAddressLine3, $sPostAddressRegion, $sPostAddressSubRegion, $sPostAddressPostcode, $sPostAddressTimezone, $sPostAddressLanguage );
 						
 						//-- Check for caught Errors --//
 						if( $aResult["Error"]===true ) {

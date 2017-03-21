@@ -140,17 +140,13 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 					break;
 				case 'VR_USERSCOMM':
 					break;
-				case 'VP_COUNTRIES':
+				case 'VP_REGION':
 					break;
 				case 'VP_CURRENCIES':
 					break;
 				case 'VP_LANGUAGES':
 					break;
-				case 'VP_POSTCODES':
-					break;
 				case 'VP_TIMEZONES':
-					break;
-				case 'VP_STATEPROVINCE':
 					break;
 				case 'VP_PREMISEBEDROOMS':
 					break;
@@ -276,23 +272,14 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 						case 'VR_USERSCOMM':
 							$aReturnResults[] = $this->_serializeVR_USERSCOMM($aRow);
 							break;
-						case 'VP_COUNTRIES':
-							$aReturnResults[] = $this->_serializeVP_COUNTRIES($aRow);
+						case 'VP_REGION':
+							$aReturnResults[] = $this->_serializeVP_REGION($aRow);
 							break;
 						case 'VP_CURRENCIES':
 							$aReturnResults[] = $this->_serializeVP_CURRENCIES($aRow);
 							break;
 						case 'VP_LANGUAGES':
 							$aReturnResults[] = $this->_serializeVP_LANGUAGES($aRow);
-							break;
-						case 'VP_POSTCODES':
-							$aReturnResults[] = $this->_serializeVP_POSTCODES($aRow);
-							break;
-						case 'VP_TIMEZONES':
-							$aReturnResults[] = $this->_serializeVP_TIMEZONES($aRow);
-							break;
-						case 'VP_STATEPROVINCE':
-							$aReturnResults[] = $this->_serializeVP_STATEPROVINCE($aRow);
 							break;
 						case 'VP_PREMISEBEDROOMS':
 							$aReturnResults[] = $this->_serializeVP_PREMISEBEDROOMS($aRow);
@@ -390,17 +377,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 					break;
 				case 'VR_USERSCOMM':
 					break;
-				case 'VP_COUNTRIES':
+				case 'VP_REGION':
 					break;
 				case 'VP_CURRENCIES':
 					break;
 				case 'VP_LANGUAGES':
-					break;
-				case 'VP_POSTCODES':
-					break;
-				case 'VP_TIMEZONES':
-					break;
-				case 'VP_STATEPROVINCE':
 					break;
 				case 'VP_PREMISEBEDROOMS':
 					break;
@@ -526,8 +507,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 						case 'VR_USERSCOMM':
 							$aReturnResults = $this->_serializeVR_USERSCOMM($aSQLResult["Data"]);
 							break;
-						case 'VP_COUNTRIES':
-							$aReturnResults = $this->_serializeVP_COUNTRIES($aSQLResult["Data"]);
+						case 'VP_REGION':
+							$aReturnResults = $this->_serializeVP_REGION($aSQLResult["Data"]);
 							break;
 						case 'VP_CURRENCIES':
 							$aReturnResults = $this->_serializeVP_CURRENCIES($aSQLResult["Data"]);
@@ -535,14 +516,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 						case 'VP_LANGUAGES':
 							$aReturnResults = $this->_serializeVP_LANGUAGES($aSQLResult["Data"]);
 							break;
-						case 'VP_POSTCODES':
-							$aReturnResults = $this->_serializeVP_POSTCODES($aSQLResult["Data"]);
-							break;
 						case 'VP_TIMEZONES':
 							$aReturnResults = $this->_serializeVP_TIMEZONES($aSQLResult["Data"]);
-							break;
-						case 'VP_STATEPROVINCE':
-							$aReturnResults = $this->_serializeVP_STATEPROVINCE($aSQLResult["Data"]);
 							break;
 						case 'VP_PREMISEBEDROOMS':
 							$aReturnResults = $this->_serializeVP_PREMISEBEDROOMS($aSQLResult["Data"]);
@@ -682,22 +657,16 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 			$VR_USERSINFO->USERADDRESS_LINE3                = $record['USERADDRESS_LINE3'];
 			$VR_USERSINFO->USERADDRESS_LINE2                = $record['USERADDRESS_LINE2'];
 			$VR_USERSINFO->USERADDRESS_LINE1                = $record['USERADDRESS_LINE1'];
-//			$VR_USERSINFO->USERADDRESS_POSTALLINE3          = $record['USERADDRESS_POSTALLINE3'];
-//			$VR_USERSINFO->USERADDRESS_POSTALLINE2          = $record['USERADDRESS_POSTALLINE2'];
-//			$VR_USERSINFO->USERADDRESS_POSTALLINE1          = $record['USERADDRESS_POSTALLINE1'];
-			$VR_USERSINFO->COUNTRIES_PK                     = $record['COUNTRIES_PK'];
-			$VR_USERSINFO->COUNTRIES_NAME                   = $record['COUNTRIES_NAME'];
-			$VR_USERSINFO->COUNTRIES_ABREVIATION            = $record['COUNTRIES_ABREVIATION'];
+			$VR_USERSINFO->USERADDRESS_SUBREGION            = $record['USERADDRESS_SUBREGION'];
+			$VR_USERSINFO->USERADDRESS_POSTCODE             = $record['USERADDRESS_POSTCODE'];
+			$VR_USERSINFO->REGION_PK                        = $record['REGION_PK'];
+			$VR_USERSINFO->REGION_NAME                      = $record['REGION_NAME'];
+			$VR_USERSINFO->REGION_ABREVIATION               = $record['REGION_ABREVIATION'];
 			$VR_USERSINFO->LANGUAGE_PK                      = $record['LANGUAGE_PK'];
 			$VR_USERSINFO->LANGUAGE_NAME                    = $record['LANGUAGE_NAME'];
 			$VR_USERSINFO->LANGUAGE_LANGUAGE                = $record['LANGUAGE_LANGUAGE'];
 			$VR_USERSINFO->LANGUAGE_VARIANT                 = $record['LANGUAGE_VARIANT'];
 			$VR_USERSINFO->LANGUAGE_ENCODING                = $record['LANGUAGE_ENCODING'];
-			$VR_USERSINFO->POSTCODE_PK                      = $record['POSTCODE_PK'];
-			$VR_USERSINFO->POSTCODE_NAME                    = $record['POSTCODE_NAME'];
-			$VR_USERSINFO->STATEPROVINCE_PK                 = $record['STATEPROVINCE_PK'];
-			$VR_USERSINFO->STATEPROVINCE_SHORTNAME          = $record['STATEPROVINCE_SHORTNAME'];
-			$VR_USERSINFO->STATEPROVINCE_NAME               = $record['STATEPROVINCE_NAME'];
 			$VR_USERSINFO->TIMEZONE_PK                      = $record['TIMEZONE_PK'];
 			$VR_USERSINFO->TIMEZONE_CC                      = $record['TIMEZONE_CC'];
 			$VR_USERSINFO->TIMEZONE_LATITUDE                = $record['TIMEZONE_LATITUDE'];
@@ -758,38 +727,34 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		 */
 		private function _serializeVR_USERSPREMISELOCATIONS($record) {
 			$VR_USERSPREMISELOCATIONS = new VR_USERSPREMISELOCATIONS();
-			$VR_USERSPREMISELOCATIONS->USERS_PK						= $record['USERS_PK'];
-			//$VR_USERSPREMISELOCATIONS->USERS_USERNAME				= $record['USERS_USERNAME'];
-			$VR_USERSPREMISELOCATIONS->PERMPREMISE_OWNER			= $record['PERMPREMISE_OWNER'];
-			$VR_USERSPREMISELOCATIONS->PERMPREMISE_WRITE			= $record['PERMPREMISE_WRITE'];
-			$VR_USERSPREMISELOCATIONS->PERMPREMISE_STATETOGGLE		= $record['PERMPREMISE_STATETOGGLE'];
-			$VR_USERSPREMISELOCATIONS->PERMPREMISE_READ				= $record['PERMPREMISE_READ'];
-			$VR_USERSPREMISELOCATIONS->PERMPREMISE_ROOMADMIN		= $record['PERMPREMISE_ROOMADMIN'];
-			$VR_USERSPREMISELOCATIONS->PREMISE_PK					= $record['PREMISE_PK'];
-			$VR_USERSPREMISELOCATIONS->PREMISE_NAME					= $record['PREMISE_NAME'];
-			$VR_USERSPREMISELOCATIONS->PREMISE_DESCRIPTION			= $record['PREMISE_DESCRIPTION'];
-			$VR_USERSPREMISELOCATIONS->PREMISEADDRESS_PK			= $record['PREMISEADDRESS_PK'];
-			$VR_USERSPREMISELOCATIONS->PREMISEADDRESS_LINE1			= $record['PREMISEADDRESS_LINE1'];
-			$VR_USERSPREMISELOCATIONS->PREMISEADDRESS_LINE2			= $record['PREMISEADDRESS_LINE2'];
-			$VR_USERSPREMISELOCATIONS->PREMISEADDRESS_LINE3			= $record['PREMISEADDRESS_LINE3'];
-			$VR_USERSPREMISELOCATIONS->LANGUAGE_PK					= $record['LANGUAGE_PK'];
-			$VR_USERSPREMISELOCATIONS->LANGUAGE_NAME				= $record['LANGUAGE_NAME'];
-			$VR_USERSPREMISELOCATIONS->LANGUAGE_LANGUAGE			= $record['LANGUAGE_LANGUAGE'];
-			$VR_USERSPREMISELOCATIONS->LANGUAGE_VARIANT				= $record['LANGUAGE_VARIANT'];
-			$VR_USERSPREMISELOCATIONS->LANGUAGE_ENCODING			= $record['LANGUAGE_ENCODING'];
-			$VR_USERSPREMISELOCATIONS->COUNTRIES_PK					= $record['COUNTRIES_PK'];
-			$VR_USERSPREMISELOCATIONS->COUNTRIES_NAME				= $record['COUNTRIES_NAME'];
-			$VR_USERSPREMISELOCATIONS->COUNTRIES_ABREVIATION		= $record['COUNTRIES_ABREVIATION'];
-			$VR_USERSPREMISELOCATIONS->STATEPROVINCE_PK				= $record['STATEPROVINCE_PK'];
-			$VR_USERSPREMISELOCATIONS->STATEPROVINCE_SHORTNAME		= $record['STATEPROVINCE_SHORTNAME'];
-			$VR_USERSPREMISELOCATIONS->STATEPROVINCE_NAME			= $record['STATEPROVINCE_NAME'];
-			$VR_USERSPREMISELOCATIONS->POSTCODE_PK					= $record['POSTCODE_PK'];
-			$VR_USERSPREMISELOCATIONS->POSTCODE_NAME				= $record['POSTCODE_NAME'];
-			$VR_USERSPREMISELOCATIONS->TIMEZONE_PK					= $record['TIMEZONE_PK'];
-			$VR_USERSPREMISELOCATIONS->TIMEZONE_CC					= $record['TIMEZONE_CC'];
-			$VR_USERSPREMISELOCATIONS->TIMEZONE_LATITUDE			= $record['TIMEZONE_LATITUDE'];
-			$VR_USERSPREMISELOCATIONS->TIMEZONE_LONGITUDE			= $record['TIMEZONE_LONGITUDE'];
-			$VR_USERSPREMISELOCATIONS->TIMEZONE_TZ					= $record['TIMEZONE_TZ'];
+			$VR_USERSPREMISELOCATIONS->USERS_PK                     = $record['USERS_PK'];
+			$VR_USERSPREMISELOCATIONS->PERMPREMISE_OWNER            = $record['PERMPREMISE_OWNER'];
+			$VR_USERSPREMISELOCATIONS->PERMPREMISE_WRITE            = $record['PERMPREMISE_WRITE'];
+			$VR_USERSPREMISELOCATIONS->PERMPREMISE_STATETOGGLE      = $record['PERMPREMISE_STATETOGGLE'];
+			$VR_USERSPREMISELOCATIONS->PERMPREMISE_READ             = $record['PERMPREMISE_READ'];
+			$VR_USERSPREMISELOCATIONS->PERMPREMISE_ROOMADMIN        = $record['PERMPREMISE_ROOMADMIN'];
+			$VR_USERSPREMISELOCATIONS->PREMISE_PK                   = $record['PREMISE_PK'];
+			$VR_USERSPREMISELOCATIONS->PREMISE_NAME                 = $record['PREMISE_NAME'];
+			$VR_USERSPREMISELOCATIONS->PREMISE_DESCRIPTION          = $record['PREMISE_DESCRIPTION'];
+			$VR_USERSPREMISELOCATIONS->PREMISEADDRESS_PK            = $record['PREMISEADDRESS_PK'];
+			$VR_USERSPREMISELOCATIONS->PREMISEADDRESS_LINE1         = $record['PREMISEADDRESS_LINE1'];
+			$VR_USERSPREMISELOCATIONS->PREMISEADDRESS_LINE2         = $record['PREMISEADDRESS_LINE2'];
+			$VR_USERSPREMISELOCATIONS->PREMISEADDRESS_LINE3         = $record['PREMISEADDRESS_LINE3'];
+			$VR_USERSPREMISELOCATIONS->PREMISEADDRESS_POSTCODE      = $record['PREMISEADDRESS_POSTCODE'];
+			$VR_USERSPREMISELOCATIONS->PREMISEADDRESS_SUBREGION     = $record['PREMISEADDRESS_SUBREGION'];
+			$VR_USERSPREMISELOCATIONS->LANGUAGE_PK                  = $record['LANGUAGE_PK'];
+			$VR_USERSPREMISELOCATIONS->LANGUAGE_NAME                = $record['LANGUAGE_NAME'];
+			$VR_USERSPREMISELOCATIONS->LANGUAGE_LANGUAGE            = $record['LANGUAGE_LANGUAGE'];
+			$VR_USERSPREMISELOCATIONS->LANGUAGE_VARIANT             = $record['LANGUAGE_VARIANT'];
+			$VR_USERSPREMISELOCATIONS->LANGUAGE_ENCODING            = $record['LANGUAGE_ENCODING'];
+			$VR_USERSPREMISELOCATIONS->REGION_PK                    = $record['REGION_PK'];
+			$VR_USERSPREMISELOCATIONS->REGION_NAME                  = $record['REGION_NAME'];
+			$VR_USERSPREMISELOCATIONS->REGION_ABREVIATION           = $record['REGION_ABREVIATION'];
+			$VR_USERSPREMISELOCATIONS->TIMEZONE_PK                  = $record['TIMEZONE_PK'];
+			$VR_USERSPREMISELOCATIONS->TIMEZONE_CC                  = $record['TIMEZONE_CC'];
+			$VR_USERSPREMISELOCATIONS->TIMEZONE_LATITUDE            = $record['TIMEZONE_LATITUDE'];
+			$VR_USERSPREMISELOCATIONS->TIMEZONE_LONGITUDE           = $record['TIMEZONE_LONGITUDE'];
+			$VR_USERSPREMISELOCATIONS->TIMEZONE_TZ                  = $record['TIMEZONE_TZ'];
 			return $VR_USERSPREMISELOCATIONS;
 		}
 		
@@ -1669,30 +1634,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 			return $VP_PREMISEROOMS;
 		}
 		
-		/**
-		 * Serialize the sql row into RSCAT object
-		 * @param array $record each row of RSCAT
-		 * @return Object
-		 */
-		private function _serializeVP_POSTCODES($record)
-		{
-			$VP_POSTCODES = new VP_POSTCODES();
-			$VP_POSTCODES->POSTCODE_PK                      = $record['POSTCODE_PK'];
-			$VP_POSTCODES->POSTCODE_NAME                    = $record['POSTCODE_NAME'];
-			$VP_POSTCODES->STATEPROVINCE_PK                 = $record['STATEPROVINCE_PK'];
-			$VP_POSTCODES->STATEPROVINCE_SHORTNAME          = $record['STATEPROVINCE_SHORTNAME'];
-			$VP_POSTCODES->STATEPROVINCE_NAME               = $record['STATEPROVINCE_NAME'];
-			$VP_POSTCODES->COUNTRIES_PK                     = $record['COUNTRIES_PK'];
-			$VP_POSTCODES->COUNTRIES_NAME                   = $record['COUNTRIES_NAME'];
-			$VP_POSTCODES->COUNTRIES_ABREVIATION            = $record['COUNTRIES_ABREVIATION'];
-			$VP_POSTCODES->TIMEZONE_PK                      = $record['TIMEZONE_PK'];
-			$VP_POSTCODES->TIMEZONE_CC                      = $record['TIMEZONE_CC'];
-			$VP_POSTCODES->TIMEZONE_LATITUDE                = $record['TIMEZONE_LATITUDE'];
-			$VP_POSTCODES->TIMEZONE_LONGITUDE               = $record['TIMEZONE_LONGITUDE'];
-			$VP_POSTCODES->TIMEZONE_TZ                      = $record['TIMEZONE_TZ'];
-
-			return $VP_POSTCODES;
-		}
 		
 		/**
 		 * Serialize the sql row into RSCAT object
@@ -1711,38 +1652,20 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 			return $VP_TIMEZONES;
 		}
 		
+		
+		
 		/**
+		 * 3.110 - REGION
 		 * Serialize the sql row into RSCAT object
 		 * @param array $record each row of RSCAT
 		 * @return Object
 		 */
-		private function _serializeVP_STATEPROVINCE($record)
-		{
-			$VP_STATEPROVINCE = new VP_STATEPROVINCE();
-			$VP_STATEPROVINCE->STATEPROVINCE_PK             = $record['STATEPROVINCE_PK'];
-			$VP_STATEPROVINCE->STATEPROVINCE_SHORTNAME      = $record['STATEPROVINCE_SHORTNAME'];
-			$VP_STATEPROVINCE->STATEPROVINCE_NAME           = $record['STATEPROVINCE_NAME'];
-			$VP_STATEPROVINCE->COUNTRIES_PK                 = $record['COUNTRIES_PK'];
-			$VP_STATEPROVINCE->COUNTRIES_NAME               = $record['COUNTRIES_NAME'];
-			$VP_STATEPROVINCE->COUNTRIES_ABREVIATION        = $record['COUNTRIES_ABREVIATION'];
-
-			return $VP_STATEPROVINCE;
-		}
-		
-		
-		
-		/**
-		 * 3.110 - COUNTRIES
-		 * Serialize the sql row into RSCAT object
-		 * @param array $record each row of RSCAT
-		 * @return Object
-		 */
-		private function _serializeVP_COUNTRIES($record) {
-			$VP_COUNTRIES = new VP_COUNTRIES();
-			$VP_COUNTRIES->COUNTRIES_PK                     = $record['COUNTRIES_PK'];
-			$VP_COUNTRIES->COUNTRIES_NAME                   = $record['COUNTRIES_NAME'];
-			$VP_COUNTRIES->COUNTRIES_ABREVIATION            = $record['COUNTRIES_ABREVIATION'];
-			return $VP_COUNTRIES;
+		private function _serializeVP_REGION($record) {
+			$VP_REGION = new VP_REGION();
+			$VP_REGION->REGION_PK                           = $record['REGION_PK'];
+			$VP_REGION->REGION_NAME                         = $record['REGION_NAME'];
+			$VP_REGION->REGION_ABREVIATION                  = $record['REGION_ABREVIATION'];
+			return $VP_REGION;
 		}
 		
 		
@@ -1760,9 +1683,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 			$VP_CURRENCIES->CURRENCIES_PK                   = $record['CURRENCIES_PK'];
 			$VP_CURRENCIES->CURRENCIES_NAME                 = $record['CURRENCIES_NAME'];
 			$VP_CURRENCIES->CURRENCIES_ABREVIATION          = $record['CURRENCIES_ABREVIATION'];
-			$VP_CURRENCIES->COUNTRIES_PK                    = $record['COUNTRIES_PK'];
-			$VP_CURRENCIES->COUNTRIES_NAME                  = $record['COUNTRIES_NAME'];
-			$VP_CURRENCIES->COUNTRIES_ABREVIATION           = $record['COUNTRIES_ABREVIATION'];
+			$VP_CURRENCIES->REGION_PK                       = $record['REGION_PK'];
+			$VP_CURRENCIES->REGION_NAME                     = $record['REGION_NAME'];
+			$VP_CURRENCIES->REGION_ABREVIATION              = $record['REGION_ABREVIATION'];
 			return $VP_CURRENCIES;
 		}
 		
@@ -1780,9 +1703,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 			$VP_LANGUAGES->LANGUAGE_LANGUAGE                = $record['LANGUAGE_LANGUAGE'];
 			$VP_LANGUAGES->LANGUAGE_VARIANT                 = $record['LANGUAGE_VARIANT'];
 			$VP_LANGUAGES->LANGUAGE_ENCODING                = $record['LANGUAGE_ENCODING'];
-			$VP_LANGUAGES->COUNTRIES_PK                     = $record['COUNTRIES_PK'];
-			$VP_LANGUAGES->COUNTRIES_NAME                   = $record['COUNTRIES_NAME'];
-			$VP_LANGUAGES->COUNTRIES_ABREVIATION            = $record['COUNTRIES_ABREVIATION'];
+			$VP_LANGUAGES->REGION_PK                        = $record['REGION_PK'];
+			$VP_LANGUAGES->REGION_NAME                      = $record['REGION_NAME'];
+			$VP_LANGUAGES->REGION_ABREVIATION               = $record['REGION_ABREVIATION'];
 
 			return $VP_LANGUAGES;
 		}

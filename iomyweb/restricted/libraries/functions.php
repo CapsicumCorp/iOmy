@@ -531,7 +531,7 @@ function ChangeUserPassword( $sPassword ) {
 }
 
 
-function ChangeUserAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressCountry, $sAddressStateProvince, $sAddressPostcode, $sAddressTimezone, $sAddressLanguage ) {
+function ChangeUserAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressRegion, $sAddressSubRegion, $sAddressPostcode, $sAddressTimezone, $sAddressLanguage ) {
 	//------------------------------------------------------------//
 	//-- 1.0 - Initialise										--//
 	//------------------------------------------------------------//
@@ -542,7 +542,7 @@ function ChangeUserAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddre
 	//-- 2.0 - Begin											--//
 	//------------------------------------------------------------//
 	try {
-		$aResult = dbChangeUserAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressCountry, $sAddressStateProvince, $sAddressPostcode, $sAddressTimezone, $sAddressLanguage );
+		$aResult = dbChangeUserAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressRegion, $sAddressSubRegion, $sAddressPostcode, $sAddressTimezone, $sAddressLanguage );
 		
 		if( $aResult["Error"]===true ) {
 			$bError = true;
@@ -566,6 +566,7 @@ function ChangeUserAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddre
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
 }
+
 
 function InsertUserInfo( $iGenderId, $sTitle, $sGivennames, $sSurnames, $sDisplayname, $sEmail, $sPhoneNumber, $sDoB ) {
 	//------------------------------------------------------------//
@@ -640,7 +641,7 @@ function InsertUser( $iUserInfoId, $sUsername, $iUserState ) {
 }
 
 
-function InsertUserAddress( $iUserId, $iLanguageId, $iCountriesId, $iStateProvinceId, $iPostcodeId, $iTimezoneId, $sLine1, $sLine2, $sLine3 ) {
+function InsertUserAddress( $iUserId, $iLanguageId, $iRegionId, $sSubRegion, $sPostcode, $iTimezoneId, $sLine1, $sLine2, $sLine3 ) {
 	//------------------------------------------------------------//
 	//-- 1.0 - Initialise                                       --//
 	//------------------------------------------------------------//
@@ -652,7 +653,7 @@ function InsertUserAddress( $iUserId, $iLanguageId, $iCountriesId, $iStateProvin
 	//------------------------------------------------------------//
 	//-- 2.0 - Begin                                            --//
 	//------------------------------------------------------------//
-	$aResult = dbInsertUserAddress( $iUserId, $iLanguageId, $iCountriesId, $iStateProvinceId, $iPostcodeId, $iTimezoneId, $sLine1, $sLine2, $sLine3 );
+	$aResult = dbInsertUserAddress( $iUserId, $iLanguageId, $iRegionId, $sSubRegion, $sPostcode, $iTimezoneId, $sLine1, $sLine2, $sLine3 );
 	
 	
 	
@@ -1722,7 +1723,7 @@ function ChangePremiseDesc( $iPremiseId, $sPremiseDescription ) {
 }
 
 
-function ChangePremiseAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressCountry, $sAddressStateProvince, $sAddressPostcode, $sAddressTimezone, $sAddressLanguage ) {
+function ChangePremiseAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressRegion, $sAddressSubRegion, $sAddressPostcode, $sAddressTimezone, $sAddressLanguage ) {
 	//------------------------------------------------------------//
 	//-- 1.0 - Initialise										--//
 	//------------------------------------------------------------//
@@ -1733,7 +1734,7 @@ function ChangePremiseAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAd
 	//-- 2.0 - Begin											--//
 	//------------------------------------------------------------//
 	try {
-		$aResult = dbChangePremiseAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressCountry, $sAddressStateProvince, $sAddressPostcode, $sAddressTimezone, $sAddressLanguage );
+		$aResult = dbChangePremiseAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressRegion, $sAddressSubRegion, $sAddressPostcode, $sAddressTimezone, $sAddressLanguage );
 		
 		if( $aResult["Error"]===true ) {
 			$bError = true;
@@ -1747,7 +1748,7 @@ function ChangePremiseAddress( $iAddressId, $sAddressLine1, $sAddressLine2, $sAd
 	}
 	
 	//------------------------------------------------------------//
-	//-- 9.0 - Return the Results or Error Message				--//
+	//-- 9.0 - Return the Results or Error Message              --//
 	//------------------------------------------------------------//
 	if($bError===false) {
 		//-- 9.A - SUCCESS		--//
@@ -1863,6 +1864,8 @@ function ChangeRoomInfo( $iRoomId, $sName, $iFloor, $sDesc, $iRoomsTypeId ) {
 	$bError			= false;
 	$sErrMesg		= "";
 	$aResult		= array();
+	
+			
 	//------------------------------------------------------------//
 	//-- 2.0 - Begin											--//
 	//------------------------------------------------------------//
@@ -1880,6 +1883,7 @@ function ChangeRoomInfo( $iRoomId, $sName, $iFloor, $sDesc, $iRoomsTypeId ) {
 		$sErrMesg .= $e1->getMessage();
 	}
 	
+		
 	//------------------------------------------------------------//
 	//-- 9.0 - Return the Results or Error Message				--//
 	//------------------------------------------------------------//
@@ -1921,7 +1925,7 @@ function AddNewRoom( $iPremiseId, $sName, $iFloor, $sDesc, $iRoomsTypeId ) {
 	//-- 9.0 - Return the Results or Error Message				--//
 	//------------------------------------------------------------//
 	if($bError===false) {
-		//-- 9.A - SUCCESS		--//
+		//-- 9.A - SUCCESS --//
 		return array(
 			"Error"		=>false, 
 			"Data"		=>array( 
@@ -1929,7 +1933,7 @@ function AddNewRoom( $iPremiseId, $sName, $iFloor, $sDesc, $iRoomsTypeId ) {
 			)
 		);
 	} else {
-		//-- 9.B - FAILURE		--//
+		//-- 9.B - FAILURE --//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
 }
@@ -1943,6 +1947,8 @@ function DeleteExistingRoom( $iRoomId ) {
 	$sErrMesg       = "";
 	$aResult        = array();
 	$aTempRestult   = array();
+	
+			
 	//------------------------------------------------------------//
 	//-- 2.0 - Begin                                            --//
 	//------------------------------------------------------------//
@@ -1953,14 +1959,14 @@ function DeleteExistingRoom( $iRoomId ) {
 			$aResult = dbDeleteExistingRoom( $iRoomId );
 			
 			if( $aResult["Error"]===true ) {
-				$bError = true;
+				$bError    = true;
 				$sErrMesg .= "Error occurred when attempting to delete an existing room! \n";
 				$sErrMesg .= $aResult["ErrMesg"];
 			}
-			
-			
-			
-			
+		} else {
+			$bError    = true;
+			$sErrMesg .= "Error occurred when attempting to delete the remaining room permissions! \n";
+			$sErrMesg .= $aResult["ErrMesg"];
 		}
 		
 	} catch( Exception $e1 ) {

@@ -1,7 +1,7 @@
 <?php
 //========================================================================================================//
 //== @Author: Andrew Somerville <support@capsicumcorp.com>
-//== @Description: This is used to indicate if a user is logged in or not.
+//== @Description: This is included in the APIs to setup the RestrictedAPICore and add any required libraries.
 //== @Copyright: Capsicum Corporation 2015-2016
 //== 
 //== This file is part of Backend of the iOmy project.

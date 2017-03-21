@@ -1046,7 +1046,7 @@ if($bError===false) {
 						//-- Tables         --//
 						//--------------------//
 						case "02_CreateTables1":
-							$aTemp   = DB_CreateTables( $sPostDatabaseName, array("Core", "Countries", "Language", "Postcode") );
+							$aTemp   = DB_CreateTables( $sPostDatabaseName, array("Core", "Region", "Currency", "Language", "Timezone") );
 							
 							//-- Insert the Core Values --//
 							if( $aTemp['Error']===false ) {
@@ -1082,39 +1082,39 @@ if($bError===false) {
 						//-- Foreign Keys   --//
 						//--------------------//
 						case "02_CreateForeignKeys1":
-							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Core", "Countries", "Users" ) );
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Core", "Users" ) );
 							break;
 							
 						case "02_CreateForeignKeys2":
-							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Language", "Postcode" ) );
-							break;
-							
-						case "02_CreateForeignKeys3":
 							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "UserAddress" ) );
 							break;
 							
-						case "02_CreateForeignKeys4":
+						case "02_CreateForeignKeys3":
 							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Permissions1" ) );
 							break;
 							
-						case "02_CreateForeignKeys5":
+						case "02_CreateForeignKeys4":
 							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Permissions2" ) );
 							break;
 							
-						case "02_CreateForeignKeys6":
+						case "02_CreateForeignKeys5":
 							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Premise" ) );
 							break;
 							
-						case "02_CreateForeignKeys7":
+						case "02_CreateForeignKeys6":
 							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "PremiseLog" ) );
 							break;
 							
-						case "02_CreateForeignKeys8":
+						case "02_CreateForeignKeys7":
 							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "PremiseInfo1" ) );
 							break;
 							
+						case "02_CreateForeignKeys8":
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Rooms" ) );
+							break;
+							
 						case "02_CreateForeignKeys9":
-							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Rooms", "Hub" ) );
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "Hub" ) );
 							break;
 							
 						case "02_CreateForeignKeys10":
@@ -1170,11 +1170,11 @@ if($bError===false) {
 							break;
 							
 						case "02_CreateViewsPublic2":
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PublicUoM", "PublicCountries", "PublicCurrencies" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PublicUoM", "PublicRegion", "PublicCurrencies" ) );
 							break;
 							
 						case "02_CreateViewsPublic3":
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PublicLanguages", "PublicPostcodes", "PublicStateProvince" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "PublicLanguages" ) );
 							break;
 							
 						case "02_CreateViewsPublic4":

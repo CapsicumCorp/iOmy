@@ -556,22 +556,19 @@ function dbGetCurrentUserInfo() {
 				$sSQL .= "	`USERADDRESS_LINE1`, ";
 				$sSQL .= "	`USERADDRESS_LINE2`, ";
 				$sSQL .= "	`USERADDRESS_LINE3`, ";
+				$sSQL .= "	`USERADDRESS_SUBREGION`, ";
+				$sSQL .= "	`USERADDRESS_POSTCODE`, ";
 //				$sSQL .= "	`USERADDRESS_POSTALLINE1`, ";
 //				$sSQL .= "	`USERADDRESS_POSTALLINE2`, ";
 //				$sSQL .= "	`USERADDRESS_POSTALLINE3`, ";
-				$sSQL .= "	`COUNTRIES_PK`, ";
-				$sSQL .= "	`COUNTRIES_NAME`, ";
-				$sSQL .= "	`COUNTRIES_ABREVIATION`, ";
+				$sSQL .= "	`REGION_PK`, ";
+				$sSQL .= "	`REGION_NAME`, ";
+				$sSQL .= "	`REGION_ABREVIATION`, ";
 				$sSQL .= "	`LANGUAGE_PK`, ";
 				$sSQL .= "	`LANGUAGE_NAME`, ";
 				$sSQL .= "	`LANGUAGE_LANGUAGE`, ";
 				$sSQL .= "	`LANGUAGE_VARIANT`, ";
 				$sSQL .= "	`LANGUAGE_ENCODING`, ";
-				$sSQL .= "	`POSTCODE_PK`, ";
-				$sSQL .= "	`POSTCODE_NAME`, ";
-				$sSQL .= "	`STATEPROVINCE_PK`, ";
-				$sSQL .= "	`STATEPROVINCE_SHORTNAME`, ";
-				$sSQL .= "	`STATEPROVINCE_NAME`, ";
 				$sSQL .= "	`TIMEZONE_PK`, ";
 				$sSQL .= "	`TIMEZONE_CC`, ";
 				$sSQL .= "	`TIMEZONE_LATITUDE`, ";
@@ -599,22 +596,19 @@ function dbGetCurrentUserInfo() {
 					array( "Name"=>"UserAddressLine1",					"type"=>"STR" ),
 					array( "Name"=>"UserAddressLine2",					"type"=>"STR" ),
 					array( "Name"=>"UserAddressLine3",					"type"=>"STR" ),
+					array( "Name"=>"UserAddressSubRegion",				"type"=>"STR" ),
+					array( "Name"=>"UserAddressPostcode",				"type"=>"STR" ),
 //					array( "Name"=>"UserAddressPostalLine1",			"type"=>"STR" ),
 //					array( "Name"=>"UserAddressPostalLine2",			"type"=>"STR" ),
 //					array( "Name"=>"UserAddressPostalLine3",			"type"=>"STR" ),
-					array( "Name"=>"UserAddressCountryId",				"type"=>"INT" ),
-					array( "Name"=>"UserAddressCountryName",			"type"=>"STR" ),
-					array( "Name"=>"UserAddressCountryAbrv",			"type"=>"STR" ),
+					array( "Name"=>"UserAddressRegionId",				"type"=>"INT" ),
+					array( "Name"=>"UserAddressRegionName",				"type"=>"STR" ),
+					array( "Name"=>"UserAddressRegionAbrv",				"type"=>"STR" ),
 					array( "Name"=>"UserAddressLanguageId",				"type"=>"INT" ),
 					array( "Name"=>"UserAddressLanguageName",			"type"=>"STR" ),
 					array( "Name"=>"UserAddressLanguage",				"type"=>"STR" ),
 					array( "Name"=>"UserAddressLanguageVariant",		"type"=>"STR" ),
 					array( "Name"=>"UserAddressLanguageEncoding",		"type"=>"STR" ),
-					array( "Name"=>"UserAddressPostcodeId",				"type"=>"INT" ),
-					array( "Name"=>"UserAddressPostcodeName",			"type"=>"STR" ),
-					array( "Name"=>"UserAddressStateProvinceId",		"type"=>"INT" ),
-					array( "Name"=>"UserAddressStateProvinceShort",		"type"=>"STR" ),
-					array( "Name"=>"UserAddressStateProvinceName",		"type"=>"STR" ),
 					array( "Name"=>"UserAddressTimezoneId",				"type"=>"INT" ),
 					array( "Name"=>"UserAddressTimezoneCC",				"type"=>"STR" ),
 					array( "Name"=>"UserAddressTimezoneLatitude",		"type"=>"STR" ),
@@ -748,9 +742,9 @@ function dbChangeUserInformation( $iUserInfoId, $iGender, $sTitle, $sGivenames, 
 }
 
 
-function dbChangeUserAddress( $iUserAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressCountry, $sAddressStateProvince, $sAddressPostcode, $sAddressTimezone, $sAddressLanguage ) {
+function dbChangeUserAddress( $iUserAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $iAddressRegion, $sAddressSubRegion, $sAddressPostcode, $iAddressTimezone, $iAddressLanguage ) {
 	//--------------------------------------------//
-	//-- 1.0 - Declare Variables				--//
+	//-- 1.0 - Declare Variables                --//
 	//--------------------------------------------//
 		
 	//-- 1.1 - Global Variables --//
@@ -765,7 +759,7 @@ function dbChangeUserAddress( $iUserAddressId, $sAddressLine1, $sAddressLine2, $
 	$aInputVals			= array();	//-- ARRAY:		--//
 	
 	//--------------------------------------------//
-	//-- 2.0 - SQL Query						--//
+	//-- 2.0 - SQL Query                        --//
 	//--------------------------------------------//
 	if( $bError===false ) {
 		try {
@@ -777,9 +771,9 @@ function dbChangeUserAddress( $iUserAddressId, $sAddressLine1, $sAddressLine2, $
 			//$sSQL .= "	`USERADDRESS_POSTALLINE1`		= :AddressPostalLine1, ";
 			//$sSQL .= "	`USERADDRESS_POSTALLINE2`		= :AddressPostalLine2, ";
 			//$sSQL .= "	`USERADDRESS_POSTALLINE3`		= :AddressPostalLine3, ";
-			$sSQL .= "	`USERADDRESS_COUNTRIES_FK`		= :AddressCountryId, ";
-			$sSQL .= "	`USERADDRESS_STATEPROVINCE_FK`	= :AddressProvinceId, ";
-			$sSQL .= "	`USERADDRESS_POSTCODE_FK`		= :AddressPostcodeId, ";
+			$sSQL .= "	`USERADDRESS_REGION_FK`			= :AddressRegionId, ";
+			$sSQL .= "	`USERADDRESS_SUBREGION`			= :AddressSubRegion, ";
+			$sSQL .= "	`USERADDRESS_POSTCODE`			= :AddressPostcode, ";
 			$sSQL .= "	`USERADDRESS_TIMEZONE_FK`		= :AddressTimezoneId, ";
 			$sSQL .= "	`USERADDRESS_LANGUAGE_FK`		= :AddressLanguageId ";
 			$sSQL .= "WHERE `USERADDRESS_PK`			= :UserAddressId ";
@@ -791,11 +785,11 @@ function dbChangeUserAddress( $iUserAddressId, $sAddressLine1, $sAddressLine2, $
 				//array( "Name"=>"AddressPostalLine1",	"type"=>"STR",		"value"=>$sAddressPostalLine1	),
 				//array( "Name"=>"AddressPostalLine2",	"type"=>"STR",		"value"=>$sAddressPostalLine2	),
 				//array( "Name"=>"AddressPostalLine3",	"type"=>"STR",		"value"=>$sAddressPostalLine3	),
-				array( "Name"=>"AddressCountryId",		"type"=>"INT",		"value"=>$sAddressCountry		),
-				array( "Name"=>"AddressProvinceId",		"type"=>"INT",		"value"=>$sAddressStateProvince	),
-				array( "Name"=>"AddressPostcodeId",		"type"=>"INT",		"value"=>$sAddressPostcode		),
-				array( "Name"=>"AddressTimezoneId",		"type"=>"INT",		"value"=>$sAddressTimezone		),
-				array( "Name"=>"AddressLanguageId",		"type"=>"INT",		"value"=>$sAddressLanguage		),
+				array( "Name"=>"AddressRegionId",		"type"=>"INT",		"value"=>$iAddressRegion		),
+				array( "Name"=>"AddressSubRegion",		"type"=>"STR",		"value"=>$sAddressSubRegion		),
+				array( "Name"=>"AddressPostcode",		"type"=>"STR",		"value"=>$sAddressPostcode		),
+				array( "Name"=>"AddressTimezoneId",		"type"=>"INT",		"value"=>$iAddressTimezone		),
+				array( "Name"=>"AddressLanguageId",		"type"=>"INT",		"value"=>$iAddressLanguage		),
 				array( "Name"=>"UserAddressId",			"type"=>"BINT",		"value"=>$iUserAddressId		)
 			);
 			
@@ -1167,7 +1161,7 @@ function dbInsertUser( $iUserInfoId, $sUsername, $iUserState ) {
 	}
 }
 
-function dbInsertUserAddress( $iUserId, $iLanguageId, $iCountriesId, $iStateProvinceId, $iPostcodeId, $iTimezoneId, $sLine1, $sLine2, $sLine3 ) {
+function dbInsertUserAddress( $iUserId, $iLanguageId, $iRegionId, $sSubRegion, $sPostcode, $iTimezoneId, $sLine1, $sLine2, $sLine3 ) {
 	//------------------------------------------------------------------------//
 	//-- DESCRIPTION:                                                       --//
 	//--    This function is used to add the new User to the database.      --//
@@ -1198,14 +1192,14 @@ function dbInsertUserAddress( $iUserId, $iLanguageId, $iCountriesId, $iStateProv
 			//----------------------------------------//
 			$sSQL .= "INSERT INTO `".$sDBName."`.`USERADDRESS` ( ";
 			$sSQL .= "    `USERADDRESS_USERS_FK`,           `USERADDRESS_LANGUAGE_FK`, ";
-			$sSQL .= "    `USERADDRESS_COUNTRIES_FK`,       `USERADDRESS_STATEPROVINCE_FK`, ";
-			$sSQL .= "    `USERADDRESS_POSTCODE_FK`,        `USERADDRESS_TIMEZONE_FK`, ";
+			$sSQL .= "    `USERADDRESS_REGION_FK`,         `USERADDRESS_SUBREGION`, ";
+			$sSQL .= "    `USERADDRESS_POSTCODE`,           `USERADDRESS_TIMEZONE_FK`, ";
 			$sSQL .= "    `USERADDRESS_LINE1`,              `USERADDRESS_LINE2`, ";
 			$sSQL .= "    `USERADDRESS_LINE3` ";
 			$sSQL .= ") VALUES ( ";
 			$sSQL .= "    :UserId,          :LanguageId, ";
-			$sSQL .= "    :CountriesId,     :StateProvinceId, ";
-			$sSQL .= "    :PostcodeId,      :TimezoneId, ";
+			$sSQL .= "    :RegionsId,       :SubRegion, ";
+			$sSQL .= "    :Postcode,        :TimezoneId, ";
 			$sSQL .= "    :Line1,           :Line2, ";
 			$sSQL .= "    :Line3 ";
 			$sSQL .= ") ";
@@ -1214,9 +1208,9 @@ function dbInsertUserAddress( $iUserId, $iLanguageId, $iCountriesId, $iStateProv
 			$aInputValsInsert = array(
 				array( "Name"=>"UserId",            "type"=>"INT",          "value"=>$iUserId                 ),
 				array( "Name"=>"LanguageId",        "type"=>"INT",          "value"=>$iLanguageId             ),
-				array( "Name"=>"CountriesId",       "type"=>"INT",          "value"=>$iCountriesId            ),
-				array( "Name"=>"StateProvinceId",   "type"=>"INT",          "value"=>$iStateProvinceId        ),
-				array( "Name"=>"PostcodeId",        "type"=>"INT",          "value"=>$iPostcodeId             ),
+				array( "Name"=>"RegionId",          "type"=>"INT",          "value"=>$iRegionId               ),
+				array( "Name"=>"SubRegion",         "type"=>"STR",          "value"=>$sSubRegion              ),
+				array( "Name"=>"Postcode",          "type"=>"STR",          "value"=>$sPostcode               ),
 				array( "Name"=>"TimezoneId",        "type"=>"INT",          "value"=>$iTimezoneId             ),
 				array( "Name"=>"Line1",             "type"=>"STR",          "value"=>$sLine1                  ),
 				array( "Name"=>"Line2",             "type"=>"STR",          "value"=>$sLine2                  ),
@@ -2224,19 +2218,17 @@ function dbGetPremisesAddressFromPremiseId( $iPremiseId ) {
 				$sSQL .= "    `PREMISEADDRESS_LINE1`, ";
 				$sSQL .= "    `PREMISEADDRESS_LINE2`, ";
 				$sSQL .= "    `PREMISEADDRESS_LINE3`, ";
-				$sSQL .= "    `COUNTRIES_PK`, ";
-				$sSQL .= "    `COUNTRIES_NAME`, ";
-				$sSQL .= "    `COUNTRIES_ABREVIATION`, ";
+				$sSQL .= "    `PREMISEADDRESS_POSTCODE`, ";
+				$sSQL .= "    `PREMISEADDRESS_SUBREGION`, ";
+				$sSQL .= "    `REGION_PK`, ";
+				$sSQL .= "    `REGION_NAME`, ";
+				$sSQL .= "    `REGION_ABREVIATION`, ";
 				$sSQL .= "    `LANGUAGE_PK`, ";
 				$sSQL .= "    `LANGUAGE_NAME`, ";
 				$sSQL .= "    `LANGUAGE_LANGUAGE`, ";
 				$sSQL .= "    `LANGUAGE_VARIANT`, ";
 				$sSQL .= "    `LANGUAGE_ENCODING`, ";
-				$sSQL .= "    `POSTCODE_PK`, ";
-				$sSQL .= "    `POSTCODE_NAME`, ";
-				$sSQL .= "    `STATEPROVINCE_PK`, ";
-				$sSQL .= "    `STATEPROVINCE_SHORTNAME`, ";
-				$sSQL .= "    `STATEPROVINCE_NAME`, ";
+
 				$sSQL .= "    `TIMEZONE_PK`, ";
 				$sSQL .= "    `TIMEZONE_CC`, ";
 				$sSQL .= "    `TIMEZONE_LATITUDE`, ";
@@ -2265,19 +2257,16 @@ function dbGetPremisesAddressFromPremiseId( $iPremiseId ) {
 					array( "Name"=>"AddressLine1",					"type"=>"STR" ),
 					array( "Name"=>"AddressLine2",					"type"=>"STR" ),
 					array( "Name"=>"AddressLine3",					"type"=>"STR" ),
-					array( "Name"=>"AddressCountryId",				"type"=>"INT" ),
-					array( "Name"=>"AddressCountryName",			"type"=>"STR" ),
-					array( "Name"=>"AddressCountryAbrv",			"type"=>"STR" ),
+					array( "Name"=>"Postcode",						"type"=>"STR" ),
+					array( "Name"=>"SubRegion",						"type"=>"STR" ),
+					array( "Name"=>"AddressRegionId",				"type"=>"INT" ),
+					array( "Name"=>"AddressRegionName",				"type"=>"STR" ),
+					array( "Name"=>"AddressRegionAbrv",				"type"=>"STR" ),
 					array( "Name"=>"AddressLanguageId",				"type"=>"INT" ),
 					array( "Name"=>"AddressLanguageName",			"type"=>"STR" ),
 					array( "Name"=>"AddressLanguage",				"type"=>"STR" ),
 					array( "Name"=>"AddressLanguageVariant",		"type"=>"STR" ),
 					array( "Name"=>"AddressLanguageEncoding",		"type"=>"STR" ),
-					array( "Name"=>"AddressPostcodeId",				"type"=>"INT" ),
-					array( "Name"=>"AddressPostcodeName",			"type"=>"STR" ),
-					array( "Name"=>"AddressStateProvinceId",		"type"=>"INT" ),
-					array( "Name"=>"AddressStateProvinceShortName",	"type"=>"STR" ),
-					array( "Name"=>"AddressStateProvinceName",		"type"=>"STR" ),
 					array( "Name"=>"AddressTimezoneId",				"type"=>"INT" ),
 					array( "Name"=>"AddressTimezoneCC",				"type"=>"STR" ),
 					array( "Name"=>"AddressTimezoneLatitude",		"type"=>"STR" ),
@@ -2450,7 +2439,7 @@ function dbChangePremiseDesc( $iPremiseId, $sDescription ) {
 }
 
 
-function dbChangePremiseAddress( $iPremiseAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressCountry, $sAddressStateProvince, $sAddressPostcode, $sAddressTimezone, $sAddressLanguage ) {
+function dbChangePremiseAddress( $iPremiseAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressRegion, $sAddressSubRegion, $sAddressPostcode, $sAddressTimezone, $iAddressLanguageId ) {
 	//--------------------------------------------//
 	//-- 1.0 - Declare Variables                --//
 	//--------------------------------------------//
@@ -2476,9 +2465,9 @@ function dbChangePremiseAddress( $iPremiseAddressId, $sAddressLine1, $sAddressLi
 			$sSQL .= "	`PREMISEADDRESS_LINE1`				= :AddressLine1, ";
 			$sSQL .= "	`PREMISEADDRESS_LINE2`				= :AddressLine2, ";
 			$sSQL .= "	`PREMISEADDRESS_LINE3`				= :AddressLine3, ";
-			$sSQL .= "	`PREMISEADDRESS_COUNTRIES_FK`		= :AddressCountryId, ";
-			$sSQL .= "	`PREMISEADDRESS_STATEPROVINCE_FK`	= :AddressProvinceId, ";
-			$sSQL .= "	`PREMISEADDRESS_POSTCODE_FK`		= :AddressPostcodeId, ";
+			$sSQL .= "	`PREMISEADDRESS_REGION_FK`			= :AddressRegionId, ";
+			$sSQL .= "	`PREMISEADDRESS_SUBREGION`			= :AddressSubRegion, ";
+			$sSQL .= "	`PREMISEADDRESS_POSTCODE`			= :AddressPostcode, ";
 			$sSQL .= "	`PREMISEADDRESS_TIMEZONE_FK`		= :AddressTimezoneId, ";
 			$sSQL .= "	`PREMISEADDRESS_LANGUAGE_FK`		= :AddressLanguageId ";
 			$sSQL .= "WHERE `PREMISEADDRESS_PK`				= :PremiseAddressId ";
@@ -2487,11 +2476,11 @@ function dbChangePremiseAddress( $iPremiseAddressId, $sAddressLine1, $sAddressLi
 				array( "Name"=>"AddressLine1",			"type"=>"STR",		"value"=>$sAddressLine1			),
 				array( "Name"=>"AddressLine2",			"type"=>"STR",		"value"=>$sAddressLine2			),
 				array( "Name"=>"AddressLine3",			"type"=>"STR",		"value"=>$sAddressLine3			),
-				array( "Name"=>"AddressCountryId",		"type"=>"INT",		"value"=>$sAddressCountry		),
-				array( "Name"=>"AddressProvinceId",		"type"=>"INT",		"value"=>$sAddressStateProvince	),
-				array( "Name"=>"AddressPostcodeId",		"type"=>"INT",		"value"=>$sAddressPostcode		),
+				array( "Name"=>"AddressRegionId",		"type"=>"INT",		"value"=>$sAddressRegion		),
+				array( "Name"=>"AddressSubRegion",		"type"=>"STR",		"value"=>$sAddressSubRegion		),
+				array( "Name"=>"AddressPostcode",		"type"=>"STR",		"value"=>$sAddressPostcode		),
 				array( "Name"=>"AddressTimezoneId",		"type"=>"INT",		"value"=>$sAddressTimezone		),
-				array( "Name"=>"AddressLanguageId",		"type"=>"INT",		"value"=>$sAddressLanguage		),
+				array( "Name"=>"AddressLanguageId",		"type"=>"INT",		"value"=>$sAddressLanguageId	),
 				array( "Name"=>"PremiseAddressId",		"type"=>"BINT",		"value"=>$iPremiseAddressId		)
 			);
 			

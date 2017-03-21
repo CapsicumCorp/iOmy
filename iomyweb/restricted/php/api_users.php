@@ -50,11 +50,8 @@ $iPostGender                = 0;            //-- INTEGER:       --//
 $sPostAddressLine1          = "";           //-- STRING:        Used to store the desired "User Address Line 1". --//
 $sPostAddressLine2          = "";           //-- STRING:        Used to store the desired "User Address Line 2". --//
 $sPostAddressLine3          = "";           //-- STRING:        Used to store the desired "User Address Line 3". --//
-$sPostAddressPostalLine1    = "";           //-- STRING:        Used to store the desired "User Address Line 1". --//
-$sPostAddressPostalLine2    = "";           //-- STRING:        Used to store the desired "User Address Line 2".   --//
-$sPostAddressPostalLine3    = "";           //-- STRING:        Used to store the desired "User Address Line 3".   --//
-$iPostAddressCountry        = 0;            //-- INTEGER:       Used to store the desired "User Address Country".  --//
-$iPostAddressStateProvince  = 0;            //-- INTEGER:       Used to store the desired "User Address State".    --//
+$sPostAddressRegion         = "";           //-- STRING:        Used to store the desired "User Address Region".      --//
+$iPostAddressSubRegion      = "";           //-- STRING:        Used to store the desired "User Address SubRegion".    --//
 $iPostAddressPostcode       = 0;            //-- INTEGER:       Used to store the desired "User Address Postcode". --//
 $iPostAddressTimezone       = 0;            //-- INTEGER:       Used to store the desired "User Address Timezone". --//
 $iPostAddressLanguage       = 0;            //-- INTEGER:       Used to store the desired "User Address Language". --//
@@ -110,9 +107,9 @@ if($bError===false) {
 //		array( "Name"=>'AddressPostalLine1',    "DataType"=>'STR' ),
 //		array( "Name"=>'AddressPostalLine2',    "DataType"=>'STR' ),
 //		array( "Name"=>'AddressPostalLine3',    "DataType"=>'STR' ),
-		array( "Name"=>'AddressCountry',        "DataType"=>'INT' ),
-		array( "Name"=>'AddressStateProvince',  "DataType"=>'INT' ),
-		array( "Name"=>'AddressPostcode',       "DataType"=>'INT' ),
+		array( "Name"=>'AddressRegion',         "DataType"=>'INT' ),
+		array( "Name"=>'AddressSubRegion',      "DataType"=>'STR' ),
+		array( "Name"=>'AddressPostcode',       "DataType"=>'STR' ),
 		array( "Name"=>'AddressTimezone',       "DataType"=>'INT' ),
 		array( "Name"=>'AddressLanguage',       "DataType"=>'INT' ),
 		array( "Name"=>'OldPassword',           "DataType"=>'STR' ),
@@ -126,7 +123,7 @@ if($bError===false) {
 
 
 //----------------------------------------------------//
-//-- 2.2 - Retrieve the API "Mode"                  --//
+//-- 2.2 - Extract the API Parameters               --//
 //----------------------------------------------------//
 if($bError===false) {
 	//----------------------------------------------------//
@@ -415,116 +412,48 @@ if($bError===false) {
 					$sErrMesg .= "Please use a valid \"AddressLine3\" parameter\n";
 				}
 			}
-			
-			
-			
-/*
-			//----------------------------------------------------//
-			//-- 2.2.5.B - Retrieve User Address Line 1         --//
-			//----------------------------------------------------//
-			try {
-				//-- Retrieve the "Address Line 1" --//
-				$sPostAddressPostalLine1 = $aHTTPData["AddressPostalLine1"];
-				
-				if( $sPostAddressPostalLine1===false ) {
-					$bError = true;
-					$sErrMesg .= "Error Code:'0123' \n";
-					$sErrMesg .= "Non numeric \"AddressPostalLine1\" parameter! \n";
-					$sErrMesg .= "Please use a valid \"AddressPostalLine1\" parameter\n";
-				}
-			} catch( Exception $e0124 ) {
-				$bError = true;
-				$sErrMesg .= "Error Code:'0124' \n";
-				$sErrMesg .= "Incorrect \"AddressPostalLine1\" parameter!\n";
-				$sErrMesg .= "Please use a valid \"AddressPostalLine1\" parameter\n";
-			}
-			
-			//----------------------------------------------------//
-			//-- 2.2.6.B - Retrieve User Address Line 2         --//
-			//----------------------------------------------------//
-			if( $bError===false ) {
-				try {
-					//-- Retrieve the "Address Line 2" --//
-					$sPostAddressPostalLine2 = $aHTTPData["AddressPostalLine2"];
-					
-					if( $sPostAddressPostalLine2===false ) {
-						$bError = true;
-						$sErrMesg .= "Error Code:'0125' \n";
-						$sErrMesg .= "Non numeric \"AddressPostalLine2\" parameter! \n";
-						$sErrMesg .= "Please use a valid \"AddressPostalLine2\" parameter\n";
-					}
-				} catch( Exception $e0126 ) {
-					$bError = true;
-					$sErrMesg .= "Error Code:'0126' \n";
-					$sErrMesg .= "Incorrect \"AddressPostalLine2\" parameter!\n";
-					$sErrMesg .= "Please use a valid \"AddressPostalLine2\" parameter\n";
-				}
-			}
-			
-			//----------------------------------------------------//
-			//-- 2.2.7.B - Retrieve User Address Line 3         --//
-			//----------------------------------------------------//
-			if( $bError===false ) {
-				try {
-					//-- Retrieve the "Address Line 3" --//
-					$sPostAddressPostalLine3 = $aHTTPData["AddressPostalLine3"];
-					
-					if( $sPostAddressPostalLine3===false ) {
-						$bError = true;
-						$sErrMesg .= "Error Code:'0127' \n";
-						$sErrMesg .= "Non numeric \"AddressPostalLine3\" parameter! \n";
-						$sErrMesg .= "Please use a valid \"AddressPostalLine3\" parameter\n";
-					}
-				} catch( Exception $e0128 ) {
-					$bError = true;
-					$sErrMesg .= "Error Code:'0128' \n";
-					$sErrMesg .= "Incorrect \"AddressPostalLine3\" parameter!\n";
-					$sErrMesg .= "Please use a valid \"AddressPostalLine3\" parameter\n";
-				}
-			}
-*/
 
 			//----------------------------------------------------//
-			//-- 2.2.8.B - Retrieve User Address Country        --//
+			//-- 2.2.8.B - Retrieve User Address Region        --//
 			//----------------------------------------------------//
 			if( $bError===false ) {
 				try {
-					//-- Retrieve the "Address Country" --//
-					$iPostAddressCountry = $aHTTPData["AddressCountry"];
+					//-- Retrieve the "Address Region" --//
+					$iPostAddressRegion = $aHTTPData["AddressRegion"];
 					
-					if( $iPostAddressCountry===false ) {
+					if( $iPostAddressRegion===false ) {
 						$bError = true;
 						$sErrMesg .= "Error Code:'0129' \n";
-						$sErrMesg .= "Non numeric \"AddressCountry\" parameter! \n";
-						$sErrMesg .= "Please use a valid \"AddressCountry\" parameter\n";
+						$sErrMesg .= "Non numeric \"AddressRegion\" parameter! \n";
+						$sErrMesg .= "Please use a valid \"AddressRegion\" parameter\n";
 					}
 				} catch( Exception $e0130 ) {
 					$bError = true;
 					$sErrMesg .= "Error Code:'0130' \n";
-					$sErrMesg .= "Incorrect \"AddressCountry\" parameter!\n";
-					$sErrMesg .= "Please use a valid \"AddressCountry\" parameter\n";
+					$sErrMesg .= "Incorrect \"AddressRegion\" parameter!\n";
+					$sErrMesg .= "Please use a valid \"AddressRegion\" parameter\n";
 				}
 			}
 			
 			//----------------------------------------------------//
-			//-- 2.2.9.B - Retrieve User Address Province       --//
+			//-- 2.2.9.B - Retrieve User Address Sub-region     --//
 			//----------------------------------------------------//
 			if( $bError===false ) {
 				try {
-					//-- Retrieve the "Address Province" --//
-					$iPostAddressStateProvince = $aHTTPData["AddressStateProvince"];
+					//-- Retrieve the "Address Sub-region" --//
+					$sPostAddressSubRegion = $aHTTPData["AddressStateSubRegion"];
 					
-					if( $iPostAddressStateProvince===false ) {
+					if( $sPostAddressStateSubRegion===false ) {
 						$bError = true;
 						$sErrMesg .= "Error Code:'0131' \n";
-						$sErrMesg .= "Non numeric \"AddressStateProvince\" parameter! \n";
-						$sErrMesg .= "Please use a valid \"AddressStateProvince\" parameter\n";
+						$sErrMesg .= "Invalid \"AddressStateSubRegion\" parameter! \n";
+						$sErrMesg .= "Please use a valid \"AddressStateSubRegion\" parameter\n";
 					}
 				} catch( Exception $e0132 ) {
 					$bError = true;
 					$sErrMesg .= "Error Code:'0132' \n";
-					$sErrMesg .= "Incorrect \"AddressStateProvince\" parameter!\n";
-					$sErrMesg .= "Please use a valid \"AddressStateProvince\" parameter\n";
+					$sErrMesg .= "Incorrect \"AddressStateSubRegion\" parameter!\n";
+					$sErrMesg .= "Please use a valid \"AddressStateSubRegion\" parameter\n";
 				}
 			}
 			
@@ -535,12 +464,12 @@ if($bError===false) {
 			if( $bError===false ) {
 				try {
 					//-- Retrieve the "Address Postcode" --//
-					$iPostAddressPostcode = $aHTTPData["AddressPostcode"];
+					$sPostAddressPostcode = $aHTTPData["AddressPostcode"];
 					
-					if( $iPostAddressPostcode===false ) {
+					if( $sPostAddressPostcode===false ) {
 						$bError = true;
 						$sErrMesg .= "Error Code:'0133' \n";
-						$sErrMesg .= "Non numeric \"AddressPostcode\" parameter! \n";
+						$sErrMesg .= "Invalid \"AddressPostcode\" parameter! \n";
 						$sErrMesg .= "Please use a valid \"AddressPostcode\" parameter\n";
 					}
 				} catch( Exception $e0134 ) {
@@ -912,7 +841,7 @@ if( $bError===false ) {
 					if( $aUserInfo["Data"]["UserAddressId"]>=1 ) {
 						
 						//-- If the Password matches then its fine to swap to the new password --//
-						$aResult = ChangeUserAddress( $aUserInfo["Data"]["UserAddressId"], $sPostAddressLine1, $sPostAddressLine2, $sPostAddressLine3, $iPostAddressCountry, $iPostAddressStateProvince, $iPostAddressPostcode, $iPostAddressTimezone, $iPostAddressLanguage);
+						$aResult = ChangeUserAddress( $aUserInfo["Data"]["UserAddressId"], $sPostAddressLine1, $sPostAddressLine2, $sPostAddressLine3, $iPostAddressRegion, $iPostAddressSubRegion, $iPostAddressPostcode, $iPostAddressTimezone, $iPostAddressLanguage);
 						
 						//-- Check for caught Errors --//
 						if( $aResult["Error"]===true ) {
@@ -1087,7 +1016,7 @@ if( $bError===false ) {
 				//----------------------------------------//
 				if( $bError===false ) {
 					
-					$aUserAddressResult = InsertUserAddress( $iUserId, $iPostAddressLanguage, $iPostAddressCountry, $iPostAddressStateProvince, $iPostAddressPostcode, $iPostAddressTimezone, $sPostAddressLine1, $sPostAddressLine2, $sPostAddressLine3 );
+					$aUserAddressResult = InsertUserAddress( $iUserId, $iPostAddressLanguage, $iPostAddressRegion, $sPostAddressSubRegion, $sPostAddressPostcode, $iPostAddressTimezone, $sPostAddressLine1, $sPostAddressLine2, $sPostAddressLine3 );
 					
 					//-- IF No errors have occurred then extract the UserId --//
 					if( $aUserAddressResult['Error']===false ) {
