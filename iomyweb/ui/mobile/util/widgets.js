@@ -100,4 +100,7 @@ $.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widge
 $.sap.require("IOMy.widgets.getTimezoneItems");
 
 $.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
+$.sap.require("IOMy.widgets.roomTypesSelectBox");
+
+$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.selectBoxLocale");

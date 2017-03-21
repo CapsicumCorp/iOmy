@@ -64,9 +64,9 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
 					value : sLinkName
 				}).addStyleClass("SettingsTextInput width100Percent");
                 
-                //-------------------------------------------------------\\
+                //-------------------------------------------------------//
                 // PREMISE COMBO BOX
-                //-------------------------------------------------------\\
+                //-------------------------------------------------------//
                 var oPremiseLabel = new sap.m.Label({
                     text : "Premise you wish to place this link in"
                 });
@@ -83,9 +83,9 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
                     }
                 );
                 
-                //-------------------------------------------------------\\
+                //-------------------------------------------------------//
                 // ROOM COMBO BOX
-                //-------------------------------------------------------\\
+                //-------------------------------------------------------//
                 var oRoomLabel = new sap.m.Label({
                     text : "Room you wish to place this link in"
                 });
@@ -97,9 +97,9 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
                     items : [me.wRoomCBox]
                 }).addStyleClass("width100Percent");
 				
-				//============================================================\\
-                // Create the Update/Edit Button.                             \\
-                //============================================================\\
+				//============================================================//
+                // Create the Update/Edit Button.                             //
+                //============================================================//
 				var oEditButton = new sap.m.VBox({
 					items : [
 						new sap.m.Link({
@@ -111,9 +111,9 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
 								var sText = me.byId("linkField").getValue();
 								var iID = me.linkID;
 								
-                                //==========================================================\\
+                                //==========================================================//
                                 // Check that the name field is filled out.
-                                //==========================================================\\
+                                //==========================================================//
                                 if (sText === "") {
                                     // NO NAME SPECIFIED. SHOW AN ERROR DIALOG
                                     jQuery.sap.log.error("Link must have a name");

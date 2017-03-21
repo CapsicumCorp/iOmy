@@ -1,8 +1,8 @@
 /*
-Title: Extension of IOMy.common Library with Room Types
+Title: Extension of IOMy.common Library with Premise Floor Count Options
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
-Description: Function to load a list of room types from the database via OData
-    and store it memory.
+Description: Function to insert properties and methods specific to a particular
+    Thing. Part of the IOMy.common core module.
 Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
@@ -22,17 +22,17 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IOMy.common.LoadRoomTypes",true);
+$.sap.declare("IOMy.common.LoadPremiseFloorsOptions",true);
 
 $.extend(IOMy.common,{
     
-    bRoomTypesLoaded    : false,
-    RoomTypes           : [],
+    bPremiseFloorsOptionsLoaded  : false,
+    PremiseFloorsOptions         : [],
     
     /**
-     * Loads all the room type options into memory.
+     * Loads all the premise floor count options into memory.
      */
-    LoadRoomTypes : function (mSettings) {
+    LoadPremiseFloorsOptions : function (mSettings) {
         var me = this;
         var fnSuccess;
         var fnFail;
@@ -60,37 +60,33 @@ $.extend(IOMy.common,{
         }
         
         //--------------------------------------------------------------------//
-        // Call the OData that returns a list of room types.
+        // Call the OData that returns a list of options for the number of
+        // floors in a premise.
         //--------------------------------------------------------------------//
         IOMy.apiodata.AjaxRequest({
-            Url : IOMy.apiodata.ODataLocation("room_types"),
-            Columns : ["ROOMTYPE_PK", "ROOMTYPE_NAME", "ROOMTYPE_OUTDOORS"],
+            Url : IOMy.apiodata.ODataLocation("premise_floors"),
+            Columns : ["PREMISEFLOORS_PK", "PREMISEFLOORS_NAME"],
             WhereClause : [],
             OrderByClause : [],
 
             onSuccess : function (responseType, data) {
                 try {
-                    //--------------------------------------------------------//
-                    // Refresh the variable and reload the room type array.
-                    //--------------------------------------------------------//
-                    me.RoomTypes = [];
+                    me.PremiseFloorsOptions = [];
                     
                     for (var i = 0; i < data.length; i++) {
-                        me.RoomTypes.push({
-                            RoomTypeId : parseInt(data[i].ROOMTYPE_PK),
-                            RoomTypeName : data[i].ROOMTYPE_NAME,
-                            RoomTypeOutdoors : parseInt(data[i].ROOMTYPE_OUTDOORS)
+                        me.PremiseFloorsOptions.push({
+                            FloorsCount   : data[i].PREMISEFLOORS_NAME,
+                            FloorsCountId : data[i].PREMISEFLOORS_PK
                         });
                     }
-                    
-                    me.bRoomTypesLoaded = true;
+
+                    me.bPremiseFloorsOptionsLoaded = true;
                     
                     // Call the success callback function
                     fnSuccess();
                 } catch (eLoadVariableError) {
-
-                    jQuery.sap.log.error("Error gathering room types: "+JSON.stringify(eLoadVariableError.message));
-                    me.bRoomTypesLoaded = false;
+                    jQuery.sap.log.error("Error gathering premise floor count: "+JSON.stringify(eLoadVariableError.message));
+                    me.bPremiseFloorsOptionsLoaded = false;
                     
                     // Call the failure callback function
                     fnFail();
@@ -98,13 +94,14 @@ $.extend(IOMy.common,{
             },
 
             onFail : function (response) {
-                jQuery.sap.log.error("Error loading room types OData: "+JSON.stringify(response));
-                me.bRoomTypesLoaded = false;
+                jQuery.sap.log.error("Error loading premise floor count OData: "+JSON.stringify(response));
+                me.bPremiseFloorsOptionsLoaded = false;
                 
                 // Call the failure callback function
                 fnFail();
             }
         });
+        
     }
     
 });

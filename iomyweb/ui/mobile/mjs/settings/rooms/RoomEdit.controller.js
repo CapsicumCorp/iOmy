@@ -32,6 +32,11 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
     wRoomName           : null,
     wRoomDescription    : null,
     wRoomType           : null,
+    wUpdateButton       : null,
+    wMainBox            : null,
+    wPanel              : null,
+    
+    aElementsToDestroy  : [],
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -59,244 +64,9 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                 //-- Set Room name as the title --//
                 thisView.byId("NavSubHead_Title").setText(me.mRoom.RoomName.toUpperCase());
                 
-				me.functions.destroyItemsByIdFromView(me, [
-	                "roomName", "roomDesc", "roomFloor", "roomType"
-	            ]);
-				
+                me.DestroyUI();
+                me.DrawUI();
                 
-				var oRoomTitle = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "* "
-                        }).addStyleClass("Text_red_13"),
-                        new sap.m.Text({
-                            text : "Name"
-                        })
-                    ]
-                }).addStyleClass("");
-    		    
-				me.wRoomName = new sap.m.Input(me.createId("roomName"), {
-					value : me.mRoom.RoomName
-				}).addStyleClass("width100Percent SettingsTextInput");
-                
-                var oRoomDescTitle = new sap.m.Text({
-    	        	text : "Description"
-    	        }).addStyleClass("");
-    		    
-				me.wRoomDescription = new sap.m.Input(me.createId("roomDesc"), {
-					value : me.mRoom.RoomDesc
-				}).addStyleClass("width100Percent SettingsTextInput");
-                
-//                var oFloorsTitle = new sap.m.HBox({
-//                    items : [
-//                        new sap.m.Text({
-//                            text : "* "
-//                        }).addStyleClass("Text_red_13"),
-//                        new sap.m.Text({
-//                            text : " Floor"
-//                        })
-//                    ]
-//                });
-//    		    
-//				var oFloorsField = new sap.m.Select(me.createId("roomFloor"), {}).addStyleClass("width100Percent SettingsDropdownInput");
-                
-                var oRoomTypeTitle = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "* "
-                        }).addStyleClass("Text_red_13"),
-                        new sap.m.Text({
-                            text : " Room Type"
-                        })
-                    ]
-                });
-    		    
-				me.wRoomType = new sap.m.Select(me.createId("roomType"), {
-                    width : "100%"
-                }).addStyleClass("width100Percent SettingsDropdownInput");
-                
-                //================================================//
-                // LOAD FLOOR OPTIONS AND SET CURRENT FLOOR COUNT //
-                //================================================//
-//                me.odata.AjaxRequest({
-//                    Url : me.odata.ODataLocation("premise_floors"),
-//                    Columns : ["PREMISEFLOORS_PK", "PREMISEFLOORS_NAME"],
-//                    WhereClause : [],
-//                    OrderByClause : [],
-//                    
-//                    onSuccess : function (responseType, data) {
-//                        var iMaxFloors;
-//                        for (var i = 0; i < IOMy.common.PremiseList.length; i++) {
-//                            if (IOMy.common.PremiseList[i].Id == me.mRoom.PremiseId) {
-//                                iMaxFloors = IOMy.common.PremiseList[i].FloorCountId;
-//                                break;
-//                            }
-//                        }
-//                        
-//                        for (var i = 0; i < iMaxFloors; i++) {
-//                            oFloorsField.addItem(
-//                                new sap.ui.core.Item({
-//                                    text : data[i].PREMISEFLOORS_NAME,
-//                                    key : data[i].PREMISEFLOORS_PK
-//                                })
-//                            );
-//                        }
-//                        oFloorsField.setValue(me.mRoom.RoomFloor);
-//                    },
-//                    
-//                    onFail : function (response) {
-//                        jQuery.sap.log.error("Error loading premise floor count OData: "+JSON.stringify(response));
-//                    }
-//                });
-                
-                //==================================================//
-                // LOAD ROOM TYPE OPTIONS AND SET CURRENT ROOM TYPE //
-                //==================================================//
-                for (var i = 0; i < IOMy.common.RoomTypes.length; i++) {
-                    me.wRoomType.addItem(
-                        new sap.ui.core.Item({
-                            text : IOMy.common.RoomTypes[i].RoomTypeName,
-                            key : IOMy.common.RoomTypes[i].RoomTypeId
-                        })
-                    ).setSelectedKey(me.mRoom.RoomTypeId);
-                }
-                
-				var oEditButton = new sap.m.VBox({
-					items : [
-						new sap.m.Link({
-							text : "Update",
-							press : function () {
-                                var thisButton = this;
-                                
-                                try {
-                                    //--------------------------------------------//
-                                    // Update the room details.
-                                    //--------------------------------------------//
-                                    IOMy.functions.updateRoom(me.iRoomID, {
-                                        callingWidget : thisButton
-                                    });
-                                } catch (eUpdateRoomError) {
-                                    //--------------------------------------------//
-                                    // Catch any exceptions.
-                                    //--------------------------------------------//
-                                    IOMy.common.showError("There was a problem updating the room.", "Error Updating Room",
-                                        function () {
-                                            thisButton.setEnabled(true);
-                                        }
-                                    );
-                                    
-                                    jQuery.sap.log.error(eUpdateRoomError.message);
-                                }
-                            }
-						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
-					]
-				}).addStyleClass("TextCenter MarTop12px");
-                
-                if (me.byId("vbox_container") !== undefined) {
-                    me.byId("vbox_container").destroy();
-                }
-                
-                var oVertBox = new sap.m.VBox(me.createId("vbox_container"), {
-					items : [oRoomTitle, me.wRoomName, oRoomDescTitle, me.wRoomDescription,
-                            /*oFloorsTitle, oFloorsField,*/ oRoomTypeTitle, me.wRoomType,
-                            oEditButton]
-				}).addStyleClass("UserInputForm");
-                
-                // Destroys the actual panel of the page. This is done to ensure that there
-				// are no elements left over which would increase the page size each time
-				// the page is visited.
-				if (me.byId("panel") !== undefined)
-					me.byId("panel").destroy();
-				
-				var oPanel = new sap.m.Panel(me.createId("panel"), {
-                    backgroundDesign: "Transparent",
-					content: [oVertBox] //-- End of Panel Content --//
-				});
-                
-		    	thisView.byId("page").addContent(oPanel);
-                
-                // Create the extras menu for the Premise Edit Address page.
-                thisView.byId("extrasMenuHolder").destroyItems();
-                thisView.byId("extrasMenuHolder").addItem(
-                    IOMy.widgets.getActionMenu({
-                        id : me.createId("extrasMenu"+me.iRoomID),        // Uses the page ID
-                        icon : "sap-icon://GoogleMaterial/more_vert",
-                        items : [
-                            {
-                                text : "Delete This Room",
-                                select : function () {
-                                    this.setEnabled(false);
-
-                                    var iNumOfDevices = IOMy.functions.getNumberOfDevicesInRoom(me.iRoomID);
-                                    var sDevicesAttachedMessage = "";
-
-                                    //-- A ROOM SHOULD BE DELETED ONLY WHEN THERE ARE NO DEVICES ATTACHED TO IT --//
-                                    if (iNumOfDevices > 0) {
-                                        sDevicesAttachedMessage += "There ";
-                                        if (iNumOfDevices === 1) {
-                                            sDevicesAttachedMessage += "is "+iNumOfDevices+" device";
-                                        } else {
-                                            sDevicesAttachedMessage += "are "+iNumOfDevices+" devices";
-                                        }
-                                        sDevicesAttachedMessage += " still assigned to this room.\n\n";
-                                        sDevicesAttachedMessage += "Remove the devices from this room before deleting it.";
-
-                                        jQuery.sap.log.error(sDevicesAttachedMessage);
-                                        IOMy.common.showError(sDevicesAttachedMessage, "Devices still assigned");
-                                        
-                                        this.setEnabled(true);
-                                    } else {
-                                        IOMy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
-                                            function () {
-                                                IOMy.functions.deleteRoom(me.iRoomID,
-                                                    function () {
-                                                        IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
-                                                    }
-                                                );
-                                            }
-                                        );
-                                        //-- CONFIRM THAT YOU WISH TO DELETE THIS ROOM --//
-//                                        IOMy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
-//                                        function (oAction) {
-//                                            if (oAction === sap.m.MessageBox.Action.OK) {
-//                                                IOMy.apiphp.AjaxRequest({
-//                                                    url: IOMy.apiphp.APILocation("rooms"),
-//                                                    data : {"Mode" : "DeleteRoom", "Id" : me.iRoomID},
-//
-//                                                    onSuccess : function () {
-//                                                        IOMy.common.showSuccess(me.mRoom.RoomName+" successfully removed.", "Success", 
-//                                                            function () {
-//                                                                //-- REFRESH ROOMS --//
-//                                                                IOMy.common.ReloadVariableRoomList(
-//                                                                    function() {
-//
-//                                                                        try {
-//                                                                            //-- Flag that the Core Variables have been configured --//
-//                                                                            //IOMy.common.CoreVariablesInitialised = true;
-//                                                                            // Refresh the room list after a deletion.
-//                                                                            //oApp.getPage("pPremiseOverview").getController().composeRoomList();
-//                                                                            // Go back.
-//                                                                            IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
-//
-//                                                                        } catch(e654321) {
-//                                                                            //-- ERROR:  TODO: Write a better error message--//
-//                                                                            jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
-//                                                                        }
-//                                                                    }
-//                                                                )
-//                                                            },
-//                                                        "UpdateMessageBox");
-//                                                    }
-//                                                });
-//                                            }
-//                                        });
-                                    }
-
-                                }
-                            }
-                        ]
-                    })
-                );
 			}
 		});
 	},
@@ -329,10 +99,162 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 //
 //	}
 
-    
-    
-    removeRoom : function (iRoomId, mInfo) {
+    DestroyUI : function () {
+        //--------------------------//
+        // Capture scope
+        //--------------------------//
+        var me = this;
         
+        // Wipe main list container
+        if (me.wPanel !== null) {
+            me.wPanel.destroy();
+        }
+        
+        // Wipe any elements with IDs assigned to them
+        //me.destroyItemsWithIDs(me, me.aElementsToDestroy);
+        
+        // Clear the element list
+        me.aElementsToDestroy = [];
+    },
+    
+    DrawUI : function () {
+        //-------------------------------------------------------------------//
+        // Declare and initialise variables.
+        //-------------------------------------------------------------------//
+        var me = this;
+		var thisView = me.getView();
+        var oRoomTitle;
+        var oRoomDescTitle;
+        var oRoomTypeTitle;
+        var oEditButton;
+        var fnRoomTypesSelectBox = IOMy.widgets.roomTypesSelectBox;
+        
+        //-------------------------------------------------------------------//
+        // Create Labels.
+        //-------------------------------------------------------------------//
+        oRoomTitle = new sap.m.Text({
+            text : "Name"
+        });
+
+        oRoomDescTitle = new sap.m.Text({
+            text : "Description"
+        });
+
+        oRoomTypeTitle = new sap.m.Text({
+            text : " Room Type"
+        });
+        
+        //-------------------------------------------------------------------//
+        // Create fields.
+        //-------------------------------------------------------------------//
+        me.wRoomName = new sap.m.Input(me.createId("roomName"), {
+            value : me.mRoom.RoomName
+        }).addStyleClass("width100Percent SettingsTextInput");
+
+        me.wRoomDescription = new sap.m.Input(me.createId("roomDesc"), {
+            value : me.mRoom.RoomDesc
+        }).addStyleClass("width100Percent SettingsTextInput");
+
+        me.wRoomType = fnRoomTypesSelectBox(me.createId("roomType"), me.mRoom.RoomTypeId).addStyleClass("width100Percent SettingsDropdownInput");
+        
+        me.wUpdateButton = new sap.m.Link({
+            text : "Update",
+            press : function () {
+                var thisButton = this;
+
+                try {
+                    //--------------------------------------------//
+                    // Update the room details.
+                    //--------------------------------------------//
+                    IOMy.functions.updateRoom(me.iRoomID, {
+                        callingWidget : thisButton
+                    });
+                } catch (eUpdateRoomError) {
+                    //--------------------------------------------//
+                    // Catch any exceptions.
+                    //--------------------------------------------//
+                    IOMy.common.showError("There was a problem updating the room.", "Error Updating Room",
+                        function () {
+                            thisButton.setEnabled(true);
+                        }
+                    );
+
+                    jQuery.sap.log.error(eUpdateRoomError.message);
+                }
+            }
+        }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink");
+
+        oEditButton = new sap.m.VBox({
+            items : [
+                me.wUpdateButton
+            ]
+        }).addStyleClass("TextCenter MarTop12px");
+
+        me.wMainBox = new sap.m.VBox({
+            items : [
+                oRoomTitle, me.wRoomName,
+                oRoomDescTitle, me.wRoomDescription,
+                /*oFloorsTitle, oFloorsField,*/
+                oRoomTypeTitle, me.wRoomType,
+                oEditButton
+            ]
+        }).addStyleClass("UserInputForm");
+
+        me.wPanel = new sap.m.Panel({
+            backgroundDesign: "Transparent",
+            content: [me.wMainBox] //-- End of Panel Content --//
+        });
+
+        thisView.byId("page").addContent(me.wPanel);
+
+        // Create the extras menu for the Premise Edit Address page.
+        thisView.byId("extrasMenuHolder").destroyItems();
+        thisView.byId("extrasMenuHolder").addItem(
+            IOMy.widgets.getActionMenu({
+                id : me.createId("extrasMenu"+me.iRoomID),        // Uses the page ID
+                icon : "sap-icon://GoogleMaterial/more_vert",
+                items : [
+                    {
+                        text : "Delete This Room",
+                        select : function () {
+                            this.setEnabled(false);
+
+                            var iNumOfDevices = IOMy.functions.getNumberOfDevicesInRoom(me.iRoomID);
+                            var sDevicesAttachedMessage = "";
+
+                            //-- A ROOM SHOULD BE DELETED ONLY WHEN THERE ARE NO DEVICES ATTACHED TO IT --//
+                            if (iNumOfDevices > 0) {
+                                sDevicesAttachedMessage += "There ";
+                                if (iNumOfDevices === 1) {
+                                    sDevicesAttachedMessage += "is "+iNumOfDevices+" device";
+                                } else {
+                                    sDevicesAttachedMessage += "are "+iNumOfDevices+" devices";
+                                }
+                                sDevicesAttachedMessage += " still assigned to this room.\n\n";
+                                sDevicesAttachedMessage += "Remove the devices from this room before deleting it.";
+
+                                jQuery.sap.log.error(sDevicesAttachedMessage);
+                                IOMy.common.showError(sDevicesAttachedMessage, "Devices still assigned");
+
+                                this.setEnabled(true);
+                            } else {
+                                //-- CONFIRM THAT YOU WISH TO DELETE THIS ROOM --//
+                                IOMy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
+                                    function () {
+                                        IOMy.functions.deleteRoom(me.iRoomID,
+                                            function () {
+                                                IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+                                            }
+                                        );
+                                    }
+                                );
+                            }
+
+                        }
+                    }
+                ]
+            })
+        );
     }
 
 });

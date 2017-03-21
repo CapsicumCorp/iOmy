@@ -122,7 +122,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                     "addressLine3", "UpdateLink"
 	            ]);
                 
-                //===== COUNTRY =====\\
+                //===== COUNTRY =====//
                 var oCountryTitle = new sap.m.HBox({
                     items : [
                         new sap.m.Text({
@@ -137,7 +137,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 				var oCountryField = IOMy.widgets.selectBoxCountries(me.createId("addressCountry")).addStyleClass("SettingsDropdownInput");
                 oCountryField.setEnabled(false);
                 
-                //===== LANGUAGE =====\\
+                //===== LANGUAGE =====//
 				var oLanguageTitle = new sap.m.HBox({
                     items : [
                         new sap.m.Text({
@@ -152,7 +152,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 				var oLanguageField = IOMy.widgets.selectBoxLanguages(me.createId("addressLanguage")).addStyleClass("SettingsDropdownInput");
                 oLanguageField.setEnabled(false);
                 
-                //===== STATE =====\\
+                //===== STATE =====//
                 var oStateTitle = new sap.m.HBox({
                     items : [
                         new sap.m.Text({
@@ -167,7 +167,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 				var oStateField = IOMy.widgets.selectBoxStatesProvinces(me.createId("addressState")).addStyleClass("SettingsDropdownInput");
                 oStateField.setEnabled(false);
                 
-                //===== POST CODE =====\\
+                //===== POST CODE =====//
                 var oPostCodeTitle = new sap.m.HBox({
                     items : [
                         new sap.m.Text({
@@ -182,7 +182,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 				var oPostCodeField = IOMy.widgets.selectBoxPostCodes(me.createId("addressPostCode")).addStyleClass("SettingsDropdownInput");
                 oPostCodeField.setEnabled(false);
                 
-                //===== TIMEZONE =====\\
+                //===== TIMEZONE =====//
                 var oTimezoneTitle = new sap.m.HBox({
                     items : [
                         new sap.m.Text({
@@ -197,9 +197,9 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 				var oTimezoneField = IOMy.widgets.selectBoxTimezones(me.createId("addressTimezone")).addStyleClass("SettingsDropdownInput");
                 oTimezoneField.setEnabled(false);
                 
-                //===== RESIDENTIAL ADDRESS =====\\
+                //===== RESIDENTIAL ADDRESS =====//
                 
-                //===== STREET ADDRESS (LINE 1) =====\\
+                //===== STREET ADDRESS (LINE 1) =====//
                 var oLine1Title = new sap.m.HBox({
                     items : [
                         new sap.m.Text({
@@ -215,7 +215,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 					value : ""
 				}).addStyleClass("width100Percent SettingsTextInput");
                 
-                //===== UNIT/FLAT ADDRESS (LINE 2) =====\\
+                //===== UNIT/FLAT ADDRESS (LINE 2) =====//
                 var oLine2Title = new sap.m.Text({
     	        	text : "Unit Number (if applicable)"
     	        }).addStyleClass("");
@@ -224,7 +224,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 					value : ""
 				}).addStyleClass("width100Percent SettingsTextInput");
                 
-                //===== EXTRA INFO (LINE 3) =====\\
+                //===== EXTRA INFO (LINE 3) =====//
                 var oLine3Title = new sap.m.Text({
     	        	text : "Line 3 (Other info)"
     	        }).addStyleClass("");

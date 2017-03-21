@@ -90,9 +90,9 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         var aErrorMessages          = [];
         var mInfo                   = {}; // MAP: Contains the error status and any error messages.
         
-        //-------------------------------------------------\\
+        //-------------------------------------------------//
         // Is the name filled out?
-        //-------------------------------------------------\\
+        //-------------------------------------------------//
         try {
             if (me.byId(me.sThingNameField).getValue() === "") {
                 bError = true;
@@ -151,9 +151,9 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
      * Constructs the user interface for the form to add a thing.
      */
     DrawUI : function () {
-        //===============================================\\
+        //===============================================//
         // Declare Variables
-        //===============================================\\
+        //===============================================//
         var me = this;
         var thisView = me.getView();
         
@@ -163,13 +163,13 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         me.thingID = me.oThing.DeviceId;
         //var iLinkId = me.oThing.LinkId;
         
-        //===============================================\\
+        //===============================================//
         // Start rendering the page
-        //===============================================\\
+        //===============================================//
         
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
         // THING NAME
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
         var oThingNameLabel = new sap.m.Label({
             text : "Display Name"
         });
@@ -179,15 +179,15 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
             value : me.oThing.DisplayName
         }).addStyleClass("width100Percent");
         
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
         // FORM BOX FOR SPECIFIC DEVICE TYPES
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
         me.aElementsToDestroy.push("formBox");
         var oFormBox = new sap.m.VBox(me.createId("formBox"), {});
 
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
         // UPDATE BUTTON
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
         me.aElementsToDestroy.push("updateButton");
         var oEditButton = new sap.m.VBox({
             items : [
@@ -260,7 +260,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                                     }
                                 });
                             } catch (e00033) {
-                                //===== BRING UP THE ERROR DIALOG BECAUSE SOMETHING'S NOT RIGHT. =====\\
+                                //===== BRING UP THE ERROR DIALOG BECAUSE SOMETHING'S NOT RIGHT. =====//
                                 IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
                             }
                         } else {

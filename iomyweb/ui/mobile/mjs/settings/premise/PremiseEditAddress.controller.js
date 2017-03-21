@@ -108,7 +108,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                     "addressLine2", "addressLine3", "UpdateLink"
 	            ]);
                 
-                //===== COUNTRY =====\\
+                //===== COUNTRY =====//
                 var oCountryTitle = new sap.m.Text({
                     text : "Country"
                 }).addStyleClass("MarTop16px");
@@ -116,7 +116,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 				var oCountryField = IOMy.widgets.selectBoxCountries(me.createId("addressCountry")).addStyleClass("SettingsDropdownInput");
                 oCountryField.setEnabled(false);
                 
-                //===== LANGUAGE =====\\
+                //===== LANGUAGE =====//
 				var oLanguageTitle = new sap.m.Text({
                     text : "Language"
                 });
@@ -124,7 +124,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 				var oLanguageField = IOMy.widgets.selectBoxLanguages(me.createId("addressLanguage")).addStyleClass("SettingsDropdownInput");
                 oLanguageField.setEnabled(false);
                 
-                //===== STATE =====\\
+                //===== STATE =====//
                 var oStateTitle = new sap.m.Text({
                     text : "State/Province"
                 });
@@ -132,7 +132,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 				var oStateField = IOMy.widgets.selectBoxStatesProvinces(me.createId("addressState")).addStyleClass("SettingsDropdownInput");
                 oStateField.setEnabled(false);
                 
-                //===== POST CODE =====\\
+                //===== POST CODE =====//
                 var oPostCodeTitle = new sap.m.Text({
                     text : "Post Code"
                 });
@@ -140,7 +140,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 				var oPostCodeField = IOMy.widgets.selectBoxPostCodes(me.createId("addressPostCode")).addStyleClass("SettingsDropdownInput");
                 oPostCodeField.setEnabled(false);
                 
-                //===== TIMEZONE =====\\
+                //===== TIMEZONE =====//
                 var oTimezoneTitle = new sap.m.Text({
                     text : "Timezone"
                 });
@@ -148,9 +148,9 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 				var oTimezoneField = IOMy.widgets.selectBoxTimezones(me.createId("addressTimezone")).addStyleClass("SettingsDropdownInput");
                 oTimezoneField.setEnabled(false);
                 
-                //===== PREMISE ADDRESS =====\\
+                //===== PREMISE ADDRESS =====//
                 
-                //===== STREET ADDRESS (LINE 1) =====\\
+                //===== STREET ADDRESS (LINE 1) =====//
                 var oLine1Title = new sap.m.Text({
                     text : "Street Address"
                 });
@@ -159,7 +159,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 					value : ""
 				}).addStyleClass("width100Percent SettingsTextInput");
                 
-                //===== UNIT/FLAT ADDRESS (LINE 2) =====\\
+                //===== UNIT/FLAT ADDRESS (LINE 2) =====//
                 var oLine2Title = new sap.m.Text({
     	        	text : "Unit Number (if applicable)"
     	        });
@@ -168,7 +168,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 					value : ""
 				}).addStyleClass("width100Percent SettingsTextInput");
                 
-                //===== EXTRA INFO (LINE 3) =====\\
+                //===== EXTRA INFO (LINE 3) =====//
                 var oLine3Title = new sap.m.Text({
     	        	text : "Line 3 (Other info)"
     	        });

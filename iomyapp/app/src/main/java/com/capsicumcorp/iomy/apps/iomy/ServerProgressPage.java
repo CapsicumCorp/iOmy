@@ -41,9 +41,9 @@ public class ServerProgressPage extends ProgressPageWithCustomPercentage {
         setContentView(R.layout.activity_progress_page);
         this.setTitle(Titles.webserverServerSetupTitle);
         if (Settings.getRunFirstRunWizard(this)==true) {
-            this.showSnackbarPopup("Please wait while installation is in progress. This may take several minutes.", 10000, Gravity.BOTTOM);
+            this.showSnackbarPopup("Please wait while installation is in progress. This may take several minutes.");
         } else {
-            this.showSnackbarPopup("Please wait while server services are starting up. This may take several minutes.", 10000, Gravity.BOTTOM);
+            this.showSnackbarPopup("Please wait while server services are starting up. This may take several minutes.");
         }
         this.startSettingUpWebserver();
     }
@@ -62,7 +62,7 @@ public class ServerProgressPage extends ProgressPageWithCustomPercentage {
         application.extractServerServices.setOkayToExtract(true);
     }
 
-    public void showSnackbarPopup(String message, int seconds, int gravity) {
+    public void showSnackbarPopup(String message) {
         //-----------------------------------------------------------------------------------//
         // Bring up the notice.
         //-----------------------------------------------------------------------------------//

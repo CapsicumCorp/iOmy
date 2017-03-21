@@ -1,5 +1,5 @@
 /*
-Title: Link Select Box
+Title: Room Types Select Box
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Creates a select box containing a list of links.
 Copyright: Capsicum Corporation 2016, 2017
@@ -21,20 +21,20 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IOMy.widgets.getLinkSelector",true);
+$.sap.declare("IOMy.widgets.roomTypesSelectBox",true);
 
 $.extend(IOMy.widgets,{
     
     /**
-     * Returns a combo box containing a list of links accessible to the current user.
-     * Can also accept a link ID to immediately set that particular link as the
-     * current link.
+     * Returns a combo box containing a list of room types. Can also accept a 
+     * room type ID to immediately set that particular room type as the current
+     * room type.
      * 
      * @param {string} sId          ID for the combo box.
-     * @param {string} iLinkId      ID of a link.
+     * @param {string} iRoomTypeId  ID of a room type.
      * @returns {mixed}             Either the combo box filled with links or a text widget with an error message.
      */
-    getLinkSelector : function (sId, iLinkId) {
+    roomTypesSelectBox : function (sId, iRoomTypeId) {
         var oElement;
         
         try {
@@ -45,24 +45,24 @@ $.extend(IOMy.widgets,{
                 sap.ui.getCore().byId(sId).destroy();
             }
 
-            //====================================================================//
-            // Create the Combo Box                                               //
-            //====================================================================//
+            //====================================================================\\
+            // Create the Combo Box                                               \\
+            //====================================================================\\
             var oSBox = new sap.m.Select(sId,{
                 width : "100%"
             });
 
-            for (var i = 0; i < IOMy.common.LinkList.length; i++) {
+            for (var i = 0; i < IOMy.common.RoomTypes.length; i++) {
                 oSBox.addItem(
                     new sap.ui.core.Item({
-                        text : IOMy.common.LinkList[i].LinkName,
-                        key : IOMy.common.LinkList[i].LinkId
+                        text : IOMy.common.RoomTypes[i].RoomTypeName,
+                        key : IOMy.common.RoomTypes[i].RoomTypeId
                     })
                 );
             }
 
-            if (iLinkId !== undefined && iLinkId !== null) {
-                oSBox.setSelectedKey(iLinkId);
+            if (iRoomTypeId !== undefined && iRoomTypeId !== null) {
+                oSBox.setSelectedKey(iRoomTypeId);
             } else {
                 oSBox.setSelectedKey(null);
             }

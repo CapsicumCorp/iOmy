@@ -51,15 +51,6 @@ sap.ui.jsview("mjs.devices.BPM", {
             icon : "sap-icon://GoogleMaterial/favorite_border",
             title : "Blood Pressure Monitor"
         });
-        
-//		var oPage = new sap.m.Page(me.createId("page"),{
-//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-//			footer : IOMy.widgets.getAppFooter(),
-//			content : [
-//                //-- Navigational Header --//
-//				IOMy.widgets.getNavigationalSubHeader("Blood Pressure Monitor", "sap-icon://GoogleMaterial/favorite_border", me)
-//            ]
-//		}).addStyleClass("height100Percent width100Percent MainBackground");
 		
 		return oPage;
 	}

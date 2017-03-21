@@ -470,6 +470,43 @@ $.extend(IOMy.common,{
         });
     },
     
+    LoadRegions : function () {
+        var me = this;
+        
+        IOMy.apiodata.AjaxRequest({
+            Url : IOMy.apiodata.ODataLocation("countries"),
+            Columns : ["REGIONS_NAME", "REGIONS_PK"],
+            WhereClause : [],
+            OrderByClause : ["REGIONS_NAME asc"],
+
+            onSuccess : function (responseType, data) {
+                try {
+                    me.Regions = [];
+                    
+                    for (var i = 0; i < data.length; i++) {
+                        me.Regions.push({
+                            RegionId    : data[i].REGIONS_PK,
+                            RegionName  : data[i].REGIONS_NAME
+                        });
+                    }
+                    
+                    me.bRegionsLoaded = true;
+                } catch (e) {
+
+                    jQuery.sap.log.error("Error gathering Regions: "+JSON.stringify(e.message));
+                    me.bRegionsLoaded = false;
+                    
+                }
+            },
+
+            onFail : function (response) {
+                jQuery.sap.log.error("Error loading regions OData: "+JSON.stringify(response));
+                me.bRegionsLoaded = false;
+            }
+            
+        });
+    },
+    
     LoadLanguages : function () {
         var me = this;
         

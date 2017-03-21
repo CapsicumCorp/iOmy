@@ -146,9 +146,9 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
         var aErrorMessages          = [];
         var mInfo                   = {}; // MAP: Contains the error status and any error messages.
         
-        //-------------------------------------------------\\
+        //-------------------------------------------------//
         // Is the hub a proper hub (does it have an ID)
-        //-------------------------------------------------\\
+        //-------------------------------------------------//
         try {
             if (me.byId("linkCBox").getSelectedKey() === "") {
                 bError = true;
@@ -172,9 +172,9 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
         var aErrorMessages          = [];
         var mInfo                   = {}; // MAP: Contains the error status and any error messages.
         
-        //-------------------------------------------------\\
+        //-------------------------------------------------//
         // Is the hub a proper hub (does it have an ID)
-        //-------------------------------------------------\\
+        //-------------------------------------------------//
         try {
             if (me.byId(me.sThingNameField).getValue().length === 0) {
                 bError = true;
@@ -298,9 +298,9 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
      * Constructs the user interface for the form to add a thing.
      */
     DrawUI : function() {
-        //===============================================\\
+        //===============================================//
         // DECLARE VARIABLES
-        //===============================================\\
+        //===============================================//
         var me = this;
         var thisView = me.getView();
         // UI5 Objects used in all link forms
@@ -309,25 +309,25 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
         var oAddButton; // Button to add link
         var oFormBox, oVertBox, oPanel; // Container elements
         
-        //=======================================================\\
+        //=======================================================//
         // CONSTRUCT ELEMENTS
-        //=======================================================\\
+        //=======================================================//
         
         //-- Refresh the Navigational buttons --//
         IOMy.common.NavigationRefreshButtons( me );
         
-        //-------------------------------------------------------\\
+        //-------------------------------------------------------//
         // LINK COMBO BOX
-        //-------------------------------------------------------\\
+        //-------------------------------------------------------//
         oLinkLabel = new sap.m.Label({
             text : "Link you wish to connect the new item to"
         });
         
         oLinkCBox = IOMy.widgets.getLinkSelector(me.createId("linkCBox"), me.iLinkId).addStyleClass("width100Percent SettingsDropDownInput");
         
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
         // THING NAME
-        //-----------------------------------------------\\
+        //-----------------------------------------------//
         var oThingNameLabel = new sap.m.Label({
             text : "Display Name"
         });
@@ -337,15 +337,15 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
             value : ""
         }).addStyleClass("width100Percent");
         
-        //-------------------------------------------------------\\
+        //-------------------------------------------------------//
         // FORM BOX
-        //-------------------------------------------------------\\
+        //-------------------------------------------------------//
         me.aElementsToDestroy.push("formBox");
         oFormBox = new sap.m.VBox(me.createId("formBox"),{});
         
-        //=======================================================\\
+        //=======================================================//
         // PLACE ALL THE PIECES TOGETHER
-        //=======================================================\\
+        //=======================================================//
         
         me.aElementsToDestroy.push("mainBox");
         oVertBox = new sap.m.VBox(me.createId("mainBox"),{
@@ -354,18 +354,18 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
             ]
         }).addStyleClass("UserInputForm");
         
-        //-------------------------------------------------------\\
+        //-------------------------------------------------------//
         // NEW ITEM BUTTON
-        //-------------------------------------------------------\\
+        //-------------------------------------------------------//
         me.aElementsToDestroy.push("addButton");
         oAddButton = new sap.m.VBox({
             items : [
                 new sap.m.Link(me.createId("addButton"), {
                     text : "Create",
                     enabled : false,
-                    //-------------------------------------------------------\\
+                    //-------------------------------------------------------//
                     // FUNCTION TO UPDATE THE LINK BY CLICKING ON THE UPDATE LINK BUTTON
-                    //-------------------------------------------------------\\
+                    //-------------------------------------------------------//
                     press : function() {
                         var thisButton = this; // Captures the scope of the button.
                         thisButton.setEnabled(false); // Lock the button
@@ -382,13 +382,13 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
                             jQuery.sap.log.error("Error 0x1000: There was an error declaring variables: "+e.message);
                         }
                 
-                        //=== VALIDATE FORM DATA ===\\
+                        //=== VALIDATE FORM DATA ===//
                         mInfo = me.ValidateFormData();
                         
                         if (mInfo.bError === false) {
-                            //-------------------------------------------------\\
+                            //-------------------------------------------------//
                             // Try to add the link
-                            //-------------------------------------------------\\
+                            //-------------------------------------------------//
                             try {
                                 var mData = me.FetchAPIAndParameters();
                                 IOMy.apiphp.AjaxRequest(mData);
@@ -423,10 +423,10 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
         }).addStyleClass("TextCenter MarTop12px");
         oVertBox.addItem(oAddButton);
         
-        //=======================================================\\
+        //=======================================================//
         // HAVE THE COMBO BOX DRAW A FORM ACCORDING TO THE LINK TYPE OF THE 
         // SELECTED LINK.
-        //=======================================================\\
+        //=======================================================//
         oLinkCBox.attachChange(function () {
             me.byId("addButton").setEnabled(false); // Lock the add button.
             this.setEnabled(false);                 // Lock this Combo Box

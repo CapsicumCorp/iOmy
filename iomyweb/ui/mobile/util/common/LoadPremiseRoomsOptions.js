@@ -1,8 +1,8 @@
 /*
-Title: Extension of IOMy.common Library with Room Types
+Title: Extension of IOMy.common Library with Premise Room Count Options
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
-Description: Function to load a list of room types from the database via OData
-    and store it memory.
+Description: Function to load a list of premise room count options from the
+    database via OData and store it memory.
 Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
@@ -22,17 +22,17 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IOMy.common.LoadRoomTypes",true);
+$.sap.declare("IOMy.common.LoadPremiseRoomsOptions",true);
 
 $.extend(IOMy.common,{
     
-    bRoomTypesLoaded    : false,
-    RoomTypes           : [],
+    bPremiseRoomsOptionsLoaded  : false,
+    PremiseRoomsOptions         : [],
     
     /**
-     * Loads all the room type options into memory.
+     * Loads all the premise room count options into memory.
      */
-    LoadRoomTypes : function (mSettings) {
+    LoadPremiseRoomsOptions : function (mSettings) {
         var me = this;
         var fnSuccess;
         var fnFail;
@@ -60,37 +60,32 @@ $.extend(IOMy.common,{
         }
         
         //--------------------------------------------------------------------//
-        // Call the OData that returns a list of room types.
+        // Call the OData that returns a list of options for the number of rooms
+        // in a premise.
         //--------------------------------------------------------------------//
         IOMy.apiodata.AjaxRequest({
-            Url : IOMy.apiodata.ODataLocation("room_types"),
-            Columns : ["ROOMTYPE_PK", "ROOMTYPE_NAME", "ROOMTYPE_OUTDOORS"],
+            Url : IOMy.apiodata.ODataLocation("premise_rooms"),
+            Columns : ["PREMISEROOMS_PK", "PREMISEROOMS_NAME"],
             WhereClause : [],
             OrderByClause : [],
 
             onSuccess : function (responseType, data) {
                 try {
-                    //--------------------------------------------------------//
-                    // Refresh the variable and reload the room type array.
-                    //--------------------------------------------------------//
-                    me.RoomTypes = [];
+                    me.PremiseRoomsOptions = [];
                     
                     for (var i = 0; i < data.length; i++) {
-                        me.RoomTypes.push({
-                            RoomTypeId : parseInt(data[i].ROOMTYPE_PK),
-                            RoomTypeName : data[i].ROOMTYPE_NAME,
-                            RoomTypeOutdoors : parseInt(data[i].ROOMTYPE_OUTDOORS)
+                        me.PremiseRoomsOptions.push({
+                            RoomCount   : data[i].PREMISEROOMS_NAME,
+                            RoomCountId : data[i].PREMISEROOMS_PK
                         });
                     }
-                    
-                    me.bRoomTypesLoaded = true;
+
+                    me.bPremiseRoomsOptionsLoaded = true;
                     
                     // Call the success callback function
                     fnSuccess();
                 } catch (eLoadVariableError) {
-
-                    jQuery.sap.log.error("Error gathering room types: "+JSON.stringify(eLoadVariableError.message));
-                    me.bRoomTypesLoaded = false;
+                    jQuery.sap.log.error("Error gathering premise room counts: "+JSON.stringify(eLoadVariableError.message));
                     
                     // Call the failure callback function
                     fnFail();
@@ -98,13 +93,14 @@ $.extend(IOMy.common,{
             },
 
             onFail : function (response) {
-                jQuery.sap.log.error("Error loading room types OData: "+JSON.stringify(response));
-                me.bRoomTypesLoaded = false;
+                jQuery.sap.log.error("Error loading premise room count OData: "+JSON.stringify(response));
+                me.bPremiseRoomsOptionsLoaded = false;
                 
                 // Call the failure callback function
                 fnFail();
             }
         });
+        
     }
     
 });

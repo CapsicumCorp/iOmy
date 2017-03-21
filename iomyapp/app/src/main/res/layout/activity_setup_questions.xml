@@ -19,7 +19,7 @@
         <CheckBox
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Install iOmy in demonstration mode"
+            android:text="Install iOmy in demonstration mode (Will take up around 1.7GB!)"
             android:id="@+id/installDemo"
             android:checked="true" />
     </LinearLayout>
