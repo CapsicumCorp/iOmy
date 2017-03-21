@@ -75,8 +75,8 @@ $.extend(IOMy.common,{
                     
                     for (var i = 0; i < data.length; i++) {
                         me.PremiseFloorsOptions.push({
-                            FloorsCount   : data[i].PREMISEFLOORS_NAME,
-                            FloorsCountId : data[i].PREMISEFLOORS_PK
+                            FloorCount   : data[i].PREMISEFLOORS_NAME,
+                            FloorCountId : data[i].PREMISEFLOORS_PK
                         });
                     }
 

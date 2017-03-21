@@ -75,17 +75,15 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                     text : "Occupants"
                 });
     		    
-				var oOccupantsField = new sap.m.Select(me.createId("premiseOccupants"), {
-                    width : "100%"
-                }).addStyleClass("width100Percent SettingsDropdownInput");
+				var oOccupantsField = IOMy.widgets.selectBoxPremiseOccupantCount(me.createId("premiseOccupants")).addStyleClass("width100Percent SettingsDropdownInput");
+                oOccupantsField.setSelectedKey(aPremise.OccupantCountId);
                 
                 var oBedroomsTitle = new sap.m.Text({
                     text : "Bedrooms"
                 });
     		    
-				var oBedroomsField = new sap.m.Select(me.createId("premiseBedrooms"), {
-                    width : "100%"
-                }).addStyleClass("width100Percent SettingsDropdownInput");
+				var oBedroomsField = IOMy.widgets.selectBoxPremiseBedroomCount(me.createId("premiseBedrooms")).addStyleClass("width100Percent SettingsDropdownInput");
+                oBedroomsField.setSelectedKey(aPremise.BedroomCountId);
                 
                 var oCol1 = new sap.m.VBox({
                     items : [oOccupantsTitle,oOccupantsField,
@@ -96,17 +94,15 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                     text : "Floors"
                 });
     		    
-				var oFloorsField = new sap.m.Select(me.createId("premiseFloors"), {
-                    width : "100%"
-                }).addStyleClass("width100Percent SettingsDropdownInput");
+				var oFloorsField = IOMy.widgets.selectBoxPremiseFloorCount(me.createId("premiseFloors")).addStyleClass("width100Percent SettingsDropdownInput");
+                oFloorsField.setSelectedKey(aPremise.FloorCountId);
                 
                 var oRoomsTitle = new sap.m.Text({
                     text : "Rooms"
                 });
     		    
-				var oRoomsField = new sap.m.Select(me.createId("premiseRooms"), {
-                    width : "100%"
-                }).addStyleClass("width100Percent SettingsDropdownInput");
+				var oRoomsField = IOMy.widgets.selectBoxPremiseRoomCount(me.createId("premiseRooms")).addStyleClass("width100Percent SettingsDropdownInput");
+                oRoomsField.setSelectedKey(aPremise.RoomCountId);
                 
                 var oCol2 = new sap.m.VBox({
                     items : [oFloorsTitle,oFloorsField,
@@ -115,110 +111,6 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                 
                 var oCBoxGrid = new sap.m.HBox({
                     items : [oCol1, oCol2]
-                });
-                
-                //======================================================//
-                // LOAD OCCUPANT OPTIONS AND SET CURRENT OCCUPANT COUNT //
-                //======================================================//
-                me.odata.AjaxRequest({
-                    Url : me.odata.ODataLocation("premise_occupants"),
-                    Columns : ["PREMISEOCCUPANTS_PK", "PREMISEOCCUPANTS_NAME"],
-                    WhereClause : [],
-                    OrderByClause : [],
-                    
-                    onSuccess : function (responseType, data) {
-                        for (var i = 0; i < data.length; i++) {
-                            oOccupantsField.addItem(
-                                new sap.ui.core.Item({
-                                    text : data[i].PREMISEOCCUPANTS_NAME,
-                                    key : data[i].PREMISEOCCUPANTS_PK
-                                })
-                            );
-                        }
-                        oOccupantsField.setSelectedKey(aPremise.OccupantCountId);
-                    },
-                    
-                    onFail : function (response) {
-                        jQuery.sap.log.error("Error loading premise occupant count OData: "+JSON.stringify(response));
-                    }
-                });
-                
-                //====================================================//
-                // LOAD BEDROOM OPTIONS AND SET CURRENT BEDROOM COUNT //
-                //====================================================//
-                me.odata.AjaxRequest({
-                    Url : me.odata.ODataLocation("premise_bedrooms"),
-                    Columns : ["PREMISEBEDROOMS_PK", "PREMISEBEDROOMS_COUNT"],
-                    WhereClause : [],
-                    OrderByClause : [],
-                    
-                    onSuccess : function (responseType, data) {
-                        for (var i = 0; i < data.length; i++) {
-                            oBedroomsField.addItem(
-                                new sap.ui.core.Item({
-                                    text : data[i].PREMISEBEDROOMS_COUNT,
-                                    key : data[i].PREMISEBEDROOMS_PK
-                                })
-                            );
-                        }
-                        oBedroomsField.setSelectedKey(aPremise.BedroomCountId);
-                    },
-                    
-                    onFail : function (response) {
-                        jQuery.sap.log.error("Error loading premise bedroom count OData: "+JSON.stringify(response));
-                    }
-                });
-                
-                //================================================//
-                // LOAD FLOOR OPTIONS AND SET CURRENT FLOOR COUNT //
-                //================================================//
-                me.odata.AjaxRequest({
-                    Url : me.odata.ODataLocation("premise_floors"),
-                    Columns : ["PREMISEFLOORS_PK", "PREMISEFLOORS_NAME"],
-                    WhereClause : [],
-                    OrderByClause : [],
-                    
-                    onSuccess : function (responseType, data) {
-                        for (var i = 0; i < data.length; i++) {
-                            oFloorsField.addItem(
-                                new sap.ui.core.Item({
-                                    text : data[i].PREMISEFLOORS_NAME,
-                                    key : data[i].PREMISEFLOORS_PK
-                                })
-                            );
-                        }
-                        oFloorsField.setSelectedKey(aPremise.FloorCountId);
-                    },
-                    
-                    onFail : function (response) {
-                        jQuery.sap.log.error("Error loading premise floor count OData: "+JSON.stringify(response));
-                    }
-                });
-                
-                //==============================================//
-                // LOAD ROOM OPTIONS AND SET CURRENT ROOM COUNT //
-                //==============================================//
-                me.odata.AjaxRequest({
-                    Url : me.odata.ODataLocation("premise_rooms"),
-                    Columns : ["PREMISEROOMS_PK", "PREMISEROOMS_NAME"],
-                    WhereClause : [],
-                    OrderByClause : [],
-                    
-                    onSuccess : function (responseType, data) {
-                        for (var i = 0; i < data.length; i++) {
-                            oRoomsField.addItem(
-                                new sap.ui.core.Item({
-                                    text : data[i].PREMISEROOMS_NAME,
-                                    key : data[i].PREMISEROOMS_PK
-                                })
-                            );
-                        }
-                        oRoomsField.setSelectedKey(aPremise.RoomCountId);
-                    },
-                    
-                    onFail : function (response) {
-                        jQuery.sap.log.error("Error loading premise room count OData: "+JSON.stringify(response));
-                    }
                 });
 				
                 //===========================//
@@ -272,15 +164,15 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                                             },
                                                             
                                                             onSuccess : function () {
-                                                                IOMy.common.PremiseSelected.FloorCountId = me.byId("premiseFloors").getSelectedKey();
-                                                                IOMy.common.PremiseSelected.RoomCountId = me.byId("premiseRooms").getSelectedKey();
-                                                                IOMy.common.PremiseSelected.BedroomCountId = me.byId("premiseBedrooms").getSelectedKey();
-                                                                IOMy.common.PremiseSelected.OccupantCountId = me.byId("premiseOccupants").getSelectedKey();
-
-                                                                IOMy.common.PremiseSelected.FloorCount = me.byId("premiseFloors").getSelectedItem().getText();
-                                                                IOMy.common.PremiseSelected.RoomCount = me.byId("premiseRooms").getSelectedItem().getText();
-                                                                IOMy.common.PremiseSelected.BedroomCount = me.byId("premiseBedrooms").getSelectedItem().getText();
-                                                                IOMy.common.PremiseSelected.OccupantCount = me.byId("premiseOccupants").getSelectedItem().getText();
+//                                                                IOMy.common.PremiseSelected.FloorCountId = me.byId("premiseFloors").getSelectedKey();
+//                                                                IOMy.common.PremiseSelected.RoomCountId = me.byId("premiseRooms").getSelectedKey();
+//                                                                IOMy.common.PremiseSelected.BedroomCountId = me.byId("premiseBedrooms").getSelectedKey();
+//                                                                IOMy.common.PremiseSelected.OccupantCountId = me.byId("premiseOccupants").getSelectedKey();
+//
+//                                                                IOMy.common.PremiseSelected.FloorCount = me.byId("premiseFloors").getSelectedItem().getText();
+//                                                                IOMy.common.PremiseSelected.RoomCount = me.byId("premiseRooms").getSelectedItem().getText();
+//                                                                IOMy.common.PremiseSelected.BedroomCount = me.byId("premiseBedrooms").getSelectedItem().getText();
+//                                                                IOMy.common.PremiseSelected.OccupantCount = me.byId("premiseOccupants").getSelectedItem().getText();
 
                                                                 IOMy.common.showSuccess("Update successful.", "Success", 
                                                                 function () {

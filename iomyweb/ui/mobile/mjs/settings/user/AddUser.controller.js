@@ -31,7 +31,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
     wEmailField             : null,
     wContactPhoneField      : null,
     
-    wCountryField           : null,
+    wRegionField            : null,
     wLanguageField          : null,
     wStateField             : null,
     wPostCodeField          : null,
@@ -247,30 +247,20 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             ]
         }).addStyleClass("ConsistentMenuHeader BorderTop ListItem");
         
-        //===== COUNTRY =====\\
-        var oCountryTitle = new sap.m.Text({
-            text : "Country"
+        //===== REGION =====\\
+        var oRegionTitle = new sap.m.Text({
+            text : "Region"
         });
 
-        me.wCountryField = new sap.m.Select({
-            width : "100%",
-            items : IOMy.widgets.getCountryItems(),
-            selectionChange : function () {
-                loadLocaleCBoxItems(me, this.getSelectedKey());
-            }
-        }).addStyleClass("SettingsDropdownInput");
-        
-        me.wCountryField.setSelectedIndex(0);
+        me.wRegionField = IOMy.widgets.selectBoxRegions().addStyleClass("SettingsDropdownInput");
+        me.wRegionField.setSelectedIndex(null);
 
         //===== LANGUAGE =====\\
         var oLanguageTitle = new sap.m.Text({
             text : " Language"
         });
 
-        me.wLanguageField = new sap.m.Select({
-            width : "100%",
-            items : IOMy.widgets.getLanguageItems()
-        }).addStyleClass("SettingsDropdownInput");
+        me.wLanguageField = IOMy.widgets.selectBoxLanguages().addStyleClass("SettingsDropdownInput");
 
         //===== STATE =====\\
         var oStateTitle = new sap.m.Text({
@@ -331,7 +321,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             value : ""
         }).addStyleClass("SettingsTextInput");
         
-        //loadLocaleCBoxItems(me, me.wCountryField.getSelectedIndex().getKey());
+        //loadLocaleCBoxItems(me, me.wRegionField.getSelectedIndex().getKey());
         
         //----------------------------------------------//
         // Username and Password Section
@@ -444,7 +434,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         //--------------------------//
         me.wUserAddressVertBox = new sap.m.VBox({
             items : [
-                oCountryTitle, me.wCountryField,
+                oRegionTitle, me.wRegionField,
                 oLanguageTitle, me.wLanguageField,
                 oStateTitle, me.wStateField,
                 oPostCodeTitle, me.wPostCodeField,
@@ -522,7 +512,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         var sAddressLine1           = me.wAddressLine1Field.getValue();
         var sAddressLine2           = me.wAddressLine2Field.getValue();
         var sAddressLine3           = me.wAddressLine3Field.getValue();
-        var iAddressCountry         = me.wCountryField.getSelectedKey();
+        var iAddressRegion          = me.wRegionField.getSelectedKey();
         var iAddressStateProvince   = me.wStateField.getSelectedKey();
         var iAddressPostcode        = me.wPostCodeField.getSelectedKey();
         var iAddressTimezone        = me.wTimezoneField.getSelectedKey();
@@ -623,7 +613,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                         "AddressLine1" : sAddressLine1,
                         "AddressLine2" : sAddressLine2,
                         "AddressLine3" : sAddressLine3,
-                        "AddressCountry" : iAddressCountry,
+                        "AddressRegion" : iAddressRegion,
                         "AddressStateProvince" : iAddressStateProvince,
                         "AddressPostcode" : iAddressPostcode,
                         "AddressTimezone" : iAddressTimezone,

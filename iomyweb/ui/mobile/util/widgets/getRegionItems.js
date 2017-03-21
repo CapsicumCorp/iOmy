@@ -1,7 +1,7 @@
 /*
-Title: UI Options for Countries Function
+Title: UI Options for Regions Function
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
-Description: Returns a list of countries to populate select and combo boxes.
+Description: Returns a list of regions to populate select and combo boxes.
 Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
@@ -21,28 +21,28 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IOMy.widgets.getCountryItems",true);
+$.sap.declare("IOMy.widgets.getRegionItems",true);
 
 $.extend(IOMy.widgets,{
     
     /**
-     * Creates an array of items containing the countries of the world. These
+     * Creates an array of items containing a list of regions in the world. These
      * items can be used to populate select boxes (sap.m.Select) or combo boxes
      * (sap.m.ComboBox).
      * 
      * @returns {Array}
      */
-    getCountryItems : function () {
+    getRegionItems : function () {
         // Declare and fetch variables
-        var aCountries = IOMy.common.Countries;
+        var aRegions = IOMy.common.Regions;
         var aItems = [];
         
         // Make the list of select box items
-        for (var i = 0; i < aCountries.length; i++) {
+        for (var i = 0; i < aRegions.length; i++) {
             aItems.push(
                 new sap.ui.core.Item({
-                    text : aCountries[i].CountryName,
-                    key : aCountries[i].CountryId
+                    text : aRegions[i].RegionName,
+                    key : aRegions[i].RegionId
                 })
             );
         }

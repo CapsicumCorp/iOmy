@@ -51,7 +51,7 @@ $.extend(IOMy.apiodata,{
 			//--------------------------------//
 			//-- Public ODatas				--//
 			//--------------------------------//
-			case "countries":
+			case "regions":
 				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_COUNTRIES';
 				break;
 				
