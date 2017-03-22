@@ -44,7 +44,7 @@ $sPostAddressRegion         = "";           //-- STRING:        Used to store th
 $sPostAddressSubRegion      = "";           //-- STRING:        Used to store the desired "Premise Address SubRegion".	--//
 $sPostAddressPostcode       = "";           //-- STRING:        Used to store the desired "Premise Address Postcode".	--//
 $sPostAddressTimezone       = "";           //-- STRING:        Used to store the desired "Premise Address Timezone".	--//
-$sPostAddressLanguage       = "";           //-- STRING:        Used to store the desired "Premise Address Language".	--//
+$iPostAddressLanguageId     = 0;            //-- INTEGER:        Used to store the desired "Premise Address Language".	--//
 
 $sPostInfoOccupants         = "";           //-- STRING:        Used to store the desired "Premise Info Occupants".		--//
 $sPostInfoBedrooms          = "";           //-- STRING:        Used to store the desired "Premise Info Bedrooms".		--//
@@ -357,9 +357,9 @@ if($bError===false) {
 			if( $bError===false ) {
 				try {
 					//-- Retrieve the "Address Language" --//
-					$sPostAddressLanguage = $aHTTPData["AddressLanguage"];
+					$iPostAddressLanguageId = $aHTTPData["AddressLanguage"];
 					
-					if( $sPostAddressLanguage===false ) {
+					if( $iPostAddressLanguageId===false ) {
 						$bError = true;
 						$sErrMesg .= "Error Code:'0123' \n";
 						$sErrMesg .= "Non numeric \"AddressLanguage\" parameter! \n";
@@ -618,7 +618,7 @@ if( $bError===false ) {
 					if( $aPremiseInfo["Data"]["PermWrite"]===1 ) {
 						
 						//-- Change the Name of the Premise --//
-						$aResult = ChangePremiseAddress( $aPremiseInfo["Data"]["AddressId"], $sPostAddressLine1, $sPostAddressLine2, $sPostAddressLine3, $sPostAddressRegion, $sPostAddressSubRegion, $sPostAddressPostcode, $sPostAddressTimezone, $sPostAddressLanguage );
+						$aResult = ChangePremiseAddress( $aPremiseInfo["Data"]["AddressId"], $sPostAddressLine1, $sPostAddressLine2, $sPostAddressLine3, $sPostAddressRegion, $sPostAddressSubRegion, $sPostAddressPostcode, $sPostAddressTimezone, $iPostAddressLanguageId );
 						
 						//-- Check for caught Errors --//
 						if( $aResult["Error"]===true ) {
