@@ -768,9 +768,6 @@ function dbChangeUserAddress( $iUserAddressId, $sAddressLine1, $sAddressLine2, $
 			$sSQL .= "	`USERADDRESS_LINE1`				= :AddressLine1, ";
 			$sSQL .= "	`USERADDRESS_LINE2`				= :AddressLine2, ";
 			$sSQL .= "	`USERADDRESS_LINE3`				= :AddressLine3, ";
-			//$sSQL .= "	`USERADDRESS_POSTALLINE1`		= :AddressPostalLine1, ";
-			//$sSQL .= "	`USERADDRESS_POSTALLINE2`		= :AddressPostalLine2, ";
-			//$sSQL .= "	`USERADDRESS_POSTALLINE3`		= :AddressPostalLine3, ";
 			$sSQL .= "	`USERADDRESS_REGION_FK`			= :AddressRegionId, ";
 			$sSQL .= "	`USERADDRESS_SUBREGION`			= :AddressSubRegion, ";
 			$sSQL .= "	`USERADDRESS_POSTCODE`			= :AddressPostcode, ";
@@ -782,9 +779,6 @@ function dbChangeUserAddress( $iUserAddressId, $sAddressLine1, $sAddressLine2, $
 				array( "Name"=>"AddressLine1",			"type"=>"STR",		"value"=>$sAddressLine1			),
 				array( "Name"=>"AddressLine2",			"type"=>"STR",		"value"=>$sAddressLine2			),
 				array( "Name"=>"AddressLine3",			"type"=>"STR",		"value"=>$sAddressLine3			),
-				//array( "Name"=>"AddressPostalLine1",	"type"=>"STR",		"value"=>$sAddressPostalLine1	),
-				//array( "Name"=>"AddressPostalLine2",	"type"=>"STR",		"value"=>$sAddressPostalLine2	),
-				//array( "Name"=>"AddressPostalLine3",	"type"=>"STR",		"value"=>$sAddressPostalLine3	),
 				array( "Name"=>"AddressRegionId",		"type"=>"INT",		"value"=>$iAddressRegion		),
 				array( "Name"=>"AddressSubRegion",		"type"=>"STR",		"value"=>$sAddressSubRegion		),
 				array( "Name"=>"AddressPostcode",		"type"=>"STR",		"value"=>$sAddressPostcode		),

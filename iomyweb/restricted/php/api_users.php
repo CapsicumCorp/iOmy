@@ -441,19 +441,19 @@ if($bError===false) {
 			if( $bError===false ) {
 				try {
 					//-- Retrieve the "Address Sub-region" --//
-					$sPostAddressSubRegion = $aHTTPData["AddressStateSubRegion"];
+					$sPostAddressSubRegion = $aHTTPData["AddressSubRegion"];
 					
-					if( $sPostAddressStateSubRegion===false ) {
+					if( $sPostAddressSubRegion===false ) {
 						$bError = true;
 						$sErrMesg .= "Error Code:'0131' \n";
-						$sErrMesg .= "Invalid \"AddressStateSubRegion\" parameter! \n";
-						$sErrMesg .= "Please use a valid \"AddressStateSubRegion\" parameter\n";
+						$sErrMesg .= "Invalid \"AddressSubRegion\" parameter! \n";
+						$sErrMesg .= "Please use a valid \"AddressSubRegion\" parameter\n";
 					}
 				} catch( Exception $e0132 ) {
 					$bError = true;
 					$sErrMesg .= "Error Code:'0132' \n";
-					$sErrMesg .= "Incorrect \"AddressStateSubRegion\" parameter!\n";
-					$sErrMesg .= "Please use a valid \"AddressStateSubRegion\" parameter\n";
+					$sErrMesg .= "Incorrect \"AddressSubRegion\" parameter!\n";
+					$sErrMesg .= "Please use a valid \"AddressSubRegion\" parameter\n";
 				}
 			}
 			
@@ -841,7 +841,7 @@ if( $bError===false ) {
 					if( $aUserInfo["Data"]["UserAddressId"]>=1 ) {
 						
 						//-- If the Password matches then its fine to swap to the new password --//
-						$aResult = ChangeUserAddress( $aUserInfo["Data"]["UserAddressId"], $sPostAddressLine1, $sPostAddressLine2, $sPostAddressLine3, $iPostAddressRegion, $iPostAddressSubRegion, $iPostAddressPostcode, $iPostAddressTimezone, $iPostAddressLanguage);
+						$aResult = ChangeUserAddress( $aUserInfo["Data"]["UserAddressId"], $sPostAddressLine1, $sPostAddressLine2, $sPostAddressLine3, $iPostAddressRegion, $sPostAddressSubRegion, $sPostAddressPostcode, $iPostAddressTimezone, $iPostAddressLanguage);
 						
 						//-- Check for caught Errors --//
 						if( $aResult["Error"]===true ) {
