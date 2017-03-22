@@ -92,9 +92,9 @@ function DB_CreateDatabase( $sDatabaseName ) {
 function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 	/*
 	Core
-	Countries
+	Region
 	Language
-	Postcode
+	Timezone
 	
 	Users
 	UserAddress
@@ -158,19 +158,24 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			break;
 			
 		/*==============================================================*/
-		/* Table: COUNTRIES & CURRENCIES                                */
+		/* Table: REGION                                                */
 		/*==============================================================*/
-		case 'Countries':
-			$sSQL .= "create table `".$sDBName."`.`COUNTRIES` \n";
+		case 'Region':
+			$sSQL .= "create table `".$sDBName."`.`REGION` \n";
 			$sSQL .= "(\n";
-			$sSQL .= "   COUNTRIES_PK         int not null auto_increment comment 'Primary Key', \n";
-			$sSQL .= "   COUNTRIES_CURRENCIES_FK int comment 'Foreign Key', \n";
-			$sSQL .= "   COUNTRIES_NAME      varchar(64) not null, \n";
-			$sSQL .= "   COUNTRIES_ABREVIATION varchar(16) not null, \n";
-			$sSQL .= "   primary key (COUNTRIES_PK)\n";
+			$sSQL .= "   REGION_PK         int not null auto_increment comment 'Primary Key', \n";
+			$sSQL .= "   REGION_CURRENCIES_FK int comment 'Foreign Key', \n";
+			$sSQL .= "   REGION_NAME      varchar(64) not null, \n";
+			$sSQL .= "   REGION_ABREVIATION varchar(16) not null, \n";
+			$sSQL .= "   primary key (REGION_PK)\n";
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
-			$sSQL .= "alter table `".$sDBName."`.`COUNTRIES` comment 'Stores a list of supported countries.';\n";
-			
+			$sSQL .= "alter table `".$sDBName."`.`REGION` comment 'Stores a list of supported regions.';\n";
+			break;
+		
+		/*==============================================================*/
+		/* Table: CURRENCIES                                            */
+		/*==============================================================*/
+		case 'Currency':
 			$sSQL .= "create table `".$sDBName."`.`CURRENCIES` \n";
 			$sSQL .= "(\n";
 			$sSQL .= "   CURRENCIES_PK        int not null auto_increment comment 'Primary Key', \n";
@@ -182,13 +187,13 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			break;
 		
 		/*==============================================================*/
-		/* Table: LANGUAGE & STATEPROVINCE                              */
+		/* Table: LANGUAGE                                              */
 		/*==============================================================*/
 		case 'Language':
 			$sSQL .= "create table `".$sDBName."`.`LANGUAGE` \n";
 			$sSQL .= "(\n";
 			$sSQL .= "   LANGUAGE_PK          int not null auto_increment comment 'Primary Key', \n";
-			$sSQL .= "   LANGUAGE_COUNTRIES_FK int comment 'Foreign Key', \n";
+			$sSQL .= "   LANGUAGE_REGION_FK   int comment 'Foreign Key', \n";
 			$sSQL .= "   LANGUAGE_NAME        varchar(64), \n";
 			$sSQL .= "   LANGUAGE_LANGUAGE    int not null, \n";
 			$sSQL .= "   LANGUAGE_VARIANT     varchar(64), \n";
@@ -196,32 +201,12 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "   primary key (LANGUAGE_PK)\n";
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
 			$sSQL .= "alter table `".$sDBName."`.`LANGUAGE` comment 'Stores a list of supported languages.';\n";
-			
-			$sSQL .= "create table `".$sDBName."`.`STATEPROVINCE` \n";
-			$sSQL .= "(\n";
-			$sSQL .= "   STATEPROVINCE_PK     int not null auto_increment comment 'Primary Key', \n";
-			$sSQL .= "   STATEPROVINCE_COUNTRIES_FK int not null comment 'Foreign Key', \n";
-			$sSQL .= "   STATEPROVINCE_SHORTNAME varchar(8), \n";
-			$sSQL .= "   STATEPROVINCE_NAME varchar(64) not null, \n";
-			$sSQL .= "   primary key (STATEPROVINCE_PK)\n";
-			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
-			$sSQL .= "alter table ".$sDBName.".STATEPROVINCE comment 'Stores a list of supported states.';\n";
 			break;
 			
 		/*==============================================================*/
-		/* Table: POSTCODE & TIMEZONE                                   */
+		/* Table: TIMEZONE                                              */
 		/*==============================================================*/
-		case 'Postcode':
-			$sSQL .= "create table `".$sDBName."`.`POSTCODE` \n";
-			$sSQL .= "(\n";
-			$sSQL .= "   POSTCODE_PK          int not null auto_increment comment 'Primary Key', \n";
-			$sSQL .= "   POSTCODE_STATEPROVINCE_FK int comment 'Foreign Key', \n";
-			$sSQL .= "   POSTCODE_TIMEZONES_FK int comment 'Foreign Key', \n";
-			$sSQL .= "   POSTCODE_NAME        varchar(48) not null, \n";
-			$sSQL .= "   primary key (POSTCODE_PK)\n";
-			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
-			$sSQL .= "alter table ".$sDBName.".POSTCODE comment 'Stores a list of supported postcodes.';\n";
-			
+		case 'Timezone':
 			$sSQL .= "create table `".$sDBName."`.`TIMEZONE` \n";
 			$sSQL .= "(\n";
 			$sSQL .= "   TIMEZONE_PK          int not null auto_increment comment 'Primary Key', \n";
@@ -269,19 +254,19 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 		case 'UserAddress':
 			$sSQL .= "create table `".$sDBName."`.`USERADDRESS` \n";
 			$sSQL .= "( \n";
-			$sSQL .= "   USERADDRESS_PK       bigint not null auto_increment comment 'Primary Key', \n";
-			$sSQL .= "   USERADDRESS_USERS_FK bigint not null comment 'Foreign Key', \n";
-			$sSQL .= "   USERADDRESS_LANGUAGE_FK int not null comment 'Foreign Key', \n";
-			$sSQL .= "   USERADDRESS_COUNTRIES_FK int not null comment 'Foreign Key', \n";
-			$sSQL .= "   USERADDRESS_STATEPROVINCE_FK int not null comment 'Foreign Key', \n";
-			$sSQL .= "   USERADDRESS_POSTCODE_FK int not null comment 'Foreign Key', \n";
-			$sSQL .= "   USERADDRESS_TIMEZONE_FK int not null comment 'Foreign Key', \n";
+			$sSQL .= "   USERADDRESS_PK            bigint not null auto_increment comment 'Primary Key', \n";
+			$sSQL .= "   USERADDRESS_USERS_FK      bigint not null comment 'Foreign Key', \n";
+			$sSQL .= "   USERADDRESS_LANGUAGE_FK   int not null comment 'Foreign Key', \n";
+			$sSQL .= "   USERADDRESS_REGION_FK     int not null comment 'Foreign Key', \n";
+			$sSQL .= "   USERADDRESS_SUBREGION     varchar(128) not null, \n";
+			$sSQL .= "   USERADDRESS_POSTCODE      varchar(12) not null, \n";
+			$sSQL .= "   USERADDRESS_TIMEZONE_FK   int not null comment 'Foreign Key', \n";
 //			$sSQL .= "   USERADDRESS_POSTALLINE1 varchar(128) not null, \n";
 //			$sSQL .= "   USERADDRESS_POSTALLINE2 varchar(128) not null, \n";
 //			$sSQL .= "   USERADDRESS_POSTALLINE3 varchar(128) not null, \n";
-			$sSQL .= "   USERADDRESS_LINE1    varchar(128) not null, \n";
-			$sSQL .= "   USERADDRESS_LINE2    varchar(128) not null, \n";
-			$sSQL .= "   USERADDRESS_LINE3    varchar(128) not null, \n";
+			$sSQL .= "   USERADDRESS_LINE1         varchar(128) not null, \n";
+			$sSQL .= "   USERADDRESS_LINE2         varchar(128) not null, \n";
+			$sSQL .= "   USERADDRESS_LINE3         varchar(128) not null, \n";
 			$sSQL .= "   primary key (USERADDRESS_PK)\n";
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
 
@@ -336,7 +321,6 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset."; \n";
 			$sSQL .= "alter table ".$sDBName.".PERMSERVER comment 'Used to store what permissions a User has on the server'; \n";
 			
-			
 			$sSQL .= "create table ".$sDBName.".PERMHUB\n";
 			$sSQL .= "(\n";
 			$sSQL .= "   PERMHUB_PK           bigint not null auto_increment comment 'Primary Key',\n";
@@ -363,16 +347,16 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			
 			$sSQL .= "create table `".$sDBName."`.`PREMISEADDRESS` \n";
 			$sSQL .= "( \n";
-			$sSQL .= "   PREMISEADDRESS_PK    bigint not null auto_increment comment 'Primary Key', \n";
-			$sSQL .= "   PREMISEADDRESS_PREMISE_FK bigint comment 'Foreign Key', \n";
-			$sSQL .= "   PREMISEADDRESS_LANGUAGE_FK int comment 'Foreign Key', \n";
-			$sSQL .= "   PREMISEADDRESS_COUNTRIES_FK int comment 'Foreign Key', \n";
-			$sSQL .= "   PREMISEADDRESS_STATEPROVINCE_FK int comment 'Foreign Key', \n";
-			$sSQL .= "   PREMISEADDRESS_POSTCODE_FK int comment 'Foreign Key', \n";
-			$sSQL .= "   PREMISEADDRESS_TIMEZONE_FK int comment 'Foreign Key', \n";
-			$sSQL .= "   PREMISEADDRESS_LINE1 varchar(128), \n";
-			$sSQL .= "   PREMISEADDRESS_LINE2 varchar(128), \n";
-			$sSQL .= "   PREMISEADDRESS_LINE3 varchar(128), \n";
+			$sSQL .= "   PREMISEADDRESS_PK            bigint not null auto_increment comment 'Primary Key', \n";
+			$sSQL .= "   PREMISEADDRESS_PREMISE_FK    bigint comment 'Foreign Key', \n";
+			$sSQL .= "   PREMISEADDRESS_LANGUAGE_FK   int comment 'Foreign Key', \n";
+			$sSQL .= "   PREMISEADDRESS_REGION_FK     int comment 'Foreign Key', \n";
+			$sSQL .= "   PREMISEADDRESS_SUBREGION     varchar(128) not null, \n";
+			$sSQL .= "   PREMISEADDRESS_POSTCODE      varchar(12) not null, \n";
+			$sSQL .= "   PREMISEADDRESS_TIMEZONE_FK   int comment 'Foreign Key', \n";
+			$sSQL .= "   PREMISEADDRESS_LINE1         varchar(128), \n";
+			$sSQL .= "   PREMISEADDRESS_LINE2         varchar(128), \n";
+			$sSQL .= "   PREMISEADDRESS_LINE3         varchar(128), \n";
 			$sSQL .= "   primary key (PREMISEADDRESS_PK)\n";
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
 			$sSQL .= "alter table ".$sDBName.".PREMISEADDRESS comment 'Used to store the location of the Premise.';\n";
@@ -1017,7 +1001,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 /*
 	Core
-	Countries
+	Region
 	Language
 	Postcode
 	Users
@@ -1059,30 +1043,23 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 			break;
 			
 		/*==============================================================*/
-		/* Table: COUNTRIES & CURRENCIES                                */
+		/* Table: REGION & CURRENCIES                                */
 		/*==============================================================*/
-		case 'Countries':
-			$sSQL .= "alter table `".$sDBName."`.COUNTRIES add constraint FK_COUNTRIES_CURRENCIES foreign key (COUNTRIES_CURRENCIES_FK) references `".$sDBName."`.CURRENCIES (CURRENCIES_PK) on delete restrict on update restrict; \n";
+		case 'Region':
+			//$sSQL .= "alter table `".$sDBName."`.REGION add constraint FK_REGION_CURRENCIES foreign key (REGION_CURRENCIES_FK) references `".$sDBName."`.CURRENCIES (CURRENCIES_PK) on delete restrict on update restrict; \n";
 			break;
 		
 		/*==============================================================*/
-		/* Table: LANGUAGE & STATEPROVINCE                              */
+		/* Table: LANGUAGE                                              */
 		/*==============================================================*/
 		case 'Language':
-			$sSQL .= "alter table `".$sDBName."`.STATEPROVINCE add constraint FK_STATEPROVINCE_COUNTRIES foreign key (STATEPROVINCE_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.LANGUAGE add constraint FK_LANGUAGE_COUNTRIES foreign key (LANGUAGE_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict; \n";
+			//$sSQL .= "alter table `".$sDBName."`.LANGUAGE add constraint FK_LANGUAGE_REGION foreign key (LANGUAGE_REGION_FK) references `".$sDBName."`.REGION (REGION_PK) on delete restrict on update restrict; \n";
 			break;
 			
 		/*==============================================================*/
-		/* Table: POSTCODE & TIMEZONE                                   */
+		/* Table: TIMEZONE                                              */
 		/*==============================================================*/
-		case 'Postcode':
-			//$sSQL .= "alter table `".$sDBName."`.POSTCODE add constraint FK_POSTCODE_STATEPROVINCE foreign key (POSTCODE_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.POSTCODE add constraint FK_POSTCODE_TIMEZONE foreign key (POSTCODE_TIMEZONES_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
-			
-			$sSQL .= "alter table `".$sDBName."`.POSTCODE \n";
-			$sSQL .= "    add constraint FK_POSTCODE_STATEPROVINCE foreign key (POSTCODE_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict, \n";
-			$sSQL .= "    add constraint FK_POSTCODE_TIMEZONE foreign key (POSTCODE_TIMEZONES_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
+		case 'Timezone':
 			break;
 			
 		/*==============================================================*/
@@ -1097,69 +1074,41 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/* Table: USERADDRESS & USERSGENDER                             */
 		/*==============================================================*/
 		case 'UserAddress':
-			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_COUNTRIES foreign key (USERADDRESS_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_LANGUAGE foreign key (USERADDRESS_LANGUAGE_FK) references `".$sDBName."`.LANGUAGE (LANGUAGE_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_POSTCODE foreign key (USERADDRESS_POSTCODE_FK) references `".$sDBName."`.POSTCODE (POSTCODE_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_STATEPROVINCE foreign key (USERADDRESS_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_TIMEZONE foreign key (USERADDRESS_TIMEZONE_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.USERADDRESS add constraint FK_USERADDRESS_USERS foreign key (USERADDRESS_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
-			
 			$sSQL .= "alter table `".$sDBName."`.USERADDRESS \n";
-			$sSQL .= "    add constraint FK_USERADDRESS_COUNTRIES foreign key (USERADDRESS_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_USERADDRESS_REGION foreign key (USERADDRESS_REGION_FK) references `".$sDBName."`.REGION (REGION_PK) on delete restrict on update restrict, \n";
 			$sSQL .= "    add constraint FK_USERADDRESS_LANGUAGE foreign key (USERADDRESS_LANGUAGE_FK) references `".$sDBName."`.LANGUAGE (LANGUAGE_PK) on delete restrict on update restrict, \n";
-			$sSQL .= "    add constraint FK_USERADDRESS_POSTCODE foreign key (USERADDRESS_POSTCODE_FK) references `".$sDBName."`.POSTCODE (POSTCODE_PK) on delete restrict on update restrict, \n";
-			$sSQL .= "    add constraint FK_USERADDRESS_STATEPROVINCE foreign key (USERADDRESS_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict, \n";
 			$sSQL .= "    add constraint FK_USERADDRESS_TIMEZONE foreign key (USERADDRESS_TIMEZONE_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict, \n";
 			$sSQL .= "    add constraint FK_USERADDRESS_USERS foreign key (USERADDRESS_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
-			
-			
-			
 			break;
 			
 		/*==============================================================*/
 		/* Table: PERMISSIONS                                           */
 		/*==============================================================*/
 		case 'Permissions1':
-			//$sSQL .= "alter table `".$sDBName."`.PERMPREMISE add constraint FK_PERMPREMISE_PREMISE foreign key (PERMPREMISE_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.PERMPREMISE add constraint FK_PERMPREMISE_USERS foreign key (PERMPREMISE_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
-			
 			$sSQL .= "alter table `".$sDBName."`.PERMPREMISE \n";
 			$sSQL .= "    add constraint FK_PERMPREMISE_PREMISE foreign key (PERMPREMISE_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict, \n";
 			$sSQL .= "    add constraint FK_PERMPREMISE_USERS foreign key (PERMPREMISE_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
-			
 			break;
 			
 		case 'Permissions2':
-			//$sSQL .= "alter table `".$sDBName."`.PERMROOMS add constraint FK_PERMROOMS_ROOMS foreign key (PERMROOMS_ROOMS_FK) references `".$sDBName."`.ROOMS (ROOMS_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.PERMROOMS add constraint FK_PERMROOMS_USERS foreign key (PERMROOMS_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
-			
 			$sSQL .= "alter table `".$sDBName."`.PERMROOMS \n";
 			$sSQL .= "    add constraint FK_PERMROOMS_ROOMS foreign key (PERMROOMS_ROOMS_FK) references `".$sDBName."`.ROOMS (ROOMS_PK) on delete restrict on update restrict, \n";
 			$sSQL .= "    add constraint FK_PERMROOMS_USERS foreign key (PERMROOMS_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
 			
 			$sSQL .= "alter table `".$sDBName."`.PERMSERVER add constraint FK_PERMSERVER_USERS foreign key (PERMSERVER_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
 			break;
-
+			
 		/*==============================================================*/
 		/* Table: PREMISE & PREMISEADDRESS                              */
 		/*==============================================================*/
 		case 'Premise':
 			$sSQL .= "alter table `".$sDBName."`.PREMISE add constraint FK_PREMISE_PREMISEINFO foreign key (PREMISE_PREMISEINFO_FK) references `".$sDBName."`.PREMISEINFO (PREMISEINFO_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_COUNTRIES foreign key (PREMISEADDRESS_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_LANGUAGE foreign key (PREMISEADDRESS_LANGUAGE_FK) references `".$sDBName."`.LANGUAGE (LANGUAGE_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_POSTCODE foreign key (PREMISEADDRESS_POSTCODE_FK) references `".$sDBName."`.POSTCODE (POSTCODE_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_PREMISE foreign key (PREMISEADDRESS_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_STATEPROVINCE foreign key (PREMISEADDRESS_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS add constraint FK_PREMISEADDRESS_TIMEZONE foreign key (PREMISEADDRESS_TIMEZONE_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
 			
 			$sSQL .= "alter table `".$sDBName."`.PREMISEADDRESS \n";
-			$sSQL .= "    add constraint FK_PREMISEADDRESS_COUNTRIES foreign key (PREMISEADDRESS_COUNTRIES_FK) references `".$sDBName."`.COUNTRIES (COUNTRIES_PK) on delete restrict on update restrict, \n";
+			$sSQL .= "    add constraint FK_PREMISEADDRESS_REGION foreign key (PREMISEADDRESS_REGION_FK) references `".$sDBName."`.REGION (REGION_PK) on delete restrict on update restrict, \n";
 			$sSQL .= "    add constraint FK_PREMISEADDRESS_LANGUAGE foreign key (PREMISEADDRESS_LANGUAGE_FK) references `".$sDBName."`.LANGUAGE (LANGUAGE_PK) on delete restrict on update restrict, \n";
-			$sSQL .= "    add constraint FK_PREMISEADDRESS_POSTCODE foreign key (PREMISEADDRESS_POSTCODE_FK) references `".$sDBName."`.POSTCODE (POSTCODE_PK) on delete restrict on update restrict, \n";
 			$sSQL .= "    add constraint FK_PREMISEADDRESS_PREMISE foreign key (PREMISEADDRESS_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict, \n";
-			$sSQL .= "    add constraint FK_PREMISEADDRESS_STATEPROVINCE foreign key (PREMISEADDRESS_STATEPROVINCE_FK) references `".$sDBName."`.STATEPROVINCE (STATEPROVINCE_PK) on delete restrict on update restrict, \n";
 			$sSQL .= "    add constraint FK_PREMISEADDRESS_TIMEZONE foreign key (PREMISEADDRESS_TIMEZONE_FK) references `".$sDBName."`.TIMEZONE (TIMEZONE_PK) on delete restrict on update restrict; \n";
-
 			
 			break;
 			
@@ -1167,10 +1116,6 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/* Table: PREMISELOG & PREMISELOGACTION                         */
 		/*==============================================================*/
 		case 'PremiseLog':
-			//$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_CUSTOMLOG foreign key (PREMISELOG_CUSTOMLOG_FK) references `".$sDBName."`.CUSTOMLOG (CUSTOMLOG_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_PREMISE foreign key (PREMISELOG_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_PREMISELOGACTION foreign key (PREMISELOG_PREMISELOGACTION_FK) references `".$sDBName."`.PREMISELOGACTION (PREMISELOGACTION_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.PREMISELOG add constraint FK_PREMISELOG_USERS foreign key (PREMISELOG_USERS_FK) references `".$sDBName."`.USERS (USERS_PK) on delete restrict on update restrict; \n";
 			$sSQL .= "alter table `".$sDBName."`.PREMISELOG \n";
 			$sSQL .= "    add constraint FK_PREMISELOG_CUSTOMLOG foreign key (PREMISELOG_CUSTOMLOG_FK) references `".$sDBName."`.CUSTOMLOG (CUSTOMLOG_PK) on delete restrict on update restrict, \n";
 			$sSQL .= "    add constraint FK_PREMISELOG_PREMISE foreign key (PREMISELOG_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict, \n";
@@ -1182,11 +1127,6 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/* Table: PREMISEINFO & PREMISEBEDROOMS                         */
 		/*==============================================================*/	
 		case 'PremiseInfo1':
-			//$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEBEDROOMS foreign key (PREMISEINFO_PREMISEBEDROOMS_FK) references `".$sDBName."`.PREMISEBEDROOMS (PREMISEBEDROOMS_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEFLOORS foreign key (PREMISEINFO_PREMISEFLOORS_FK) references `".$sDBName."`.PREMISEFLOORS (PREMISEFLOORS_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEOCCUPANTS foreign key (PREMISEINFO_PREMISEOCCUPANTS_FK) references `".$sDBName."`.PREMISEOCCUPANTS (PREMISEOCCUPANTS_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.PREMISEINFO add constraint FK_PREMISEINFO_PREMISEROOMS foreign key (PREMISEINFO_PREMISEROOMS_FK) references `".$sDBName."`.PREMISEROOMS (PREMISEROOMS_PK) on delete restrict on update restrict; \n";
-			
 			$sSQL .= "alter table `".$sDBName."`.PREMISEINFO \n";
 			$sSQL .= "    add constraint FK_PREMISEINFO_PREMISEBEDROOMS foreign key (PREMISEINFO_PREMISEBEDROOMS_FK) references `".$sDBName."`.PREMISEBEDROOMS (PREMISEBEDROOMS_PK) on delete restrict on update restrict, \n";
 			$sSQL .= "    add constraint FK_PREMISEINFO_PREMISEFLOORS foreign key (PREMISEINFO_PREMISEFLOORS_FK) references `".$sDBName."`.PREMISEFLOORS (PREMISEFLOORS_PK) on delete restrict on update restrict, \n";
@@ -1207,9 +1147,6 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/* Table: ROOMS & ROOMTYPE                                      */
 		/*==============================================================*/
 		case 'Rooms':
-			//$sSQL .= "alter table `".$sDBName."`.ROOMS add constraint FK_ROOMS_PREMISE foreign key (ROOMS_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.ROOMS add constraint FK_ROOMS_ROOMTYPE foreign key (ROOMS_ROOMTYPE_FK) references `".$sDBName."`.ROOMTYPE (ROOMTYPE_PK) on delete restrict on update restrict; \n";
-			
 			$sSQL .= "alter table `".$sDBName."`.ROOMS \n";
 			$sSQL .= "    add constraint FK_ROOMS_PREMISE foreign key (ROOMS_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict, \n";
 			$sSQL .= "    add constraint FK_ROOMS_ROOMTYPE foreign key (ROOMS_ROOMTYPE_FK) references `".$sDBName."`.ROOMTYPE (ROOMTYPE_PK) on delete restrict on update restrict; \n";
@@ -1219,9 +1156,6 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/* Table: HUB & HUBTYPE                                         */
 		/*==============================================================*/
 		case 'Hub':
-			//$sSQL .= "alter table `".$sDBName."`.HUB add constraint FK_HUB_HUBTYPE foreign key (HUB_HUBTYPE_FK) references `".$sDBName."`.HUBTYPE (HUBTYPE_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.HUB add constraint FK_HUB_PREMISE foreign key (HUB_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
-			
 			$sSQL .= "alter table `".$sDBName."`.HUB \n";
 			$sSQL .= "    add constraint FK_HUB_HUBTYPE foreign key (HUB_HUBTYPE_FK) references `".$sDBName."`.HUBTYPE (HUBTYPE_PK) on delete restrict on update restrict, \n";
 			$sSQL .= "    add constraint FK_HUB_PREMISE foreign key (HUB_PREMISE_FK) references `".$sDBName."`.PREMISE (PREMISE_PK) on delete restrict on update restrict; \n";
@@ -1240,12 +1174,6 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/* Table: LINK & LINKTYPE                                       */
 		/*==============================================================*/
 		case 'Link':
-			//$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_COMM foreign key (LINK_COMM_FK) references `".$sDBName."`.COMM (COMM_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_LINKCONN foreign key (LINK_LINKCONN_FK) references `".$sDBName."`.LINKCONN (LINKCONN_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_LINKINFO foreign key (LINK_LINKINFO_FK) references `".$sDBName."`.LINKINFO (LINKINFO_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_LINKTYPE foreign key (LINK_LINKTYPE_FK) references `".$sDBName."`.LINKTYPE (LINKTYPE_PK) on delete restrict on update restrict; \n";
-			//$sSQL .= "alter table `".$sDBName."`.LINK add constraint FK_LINK_ROOMS foreign key (LINK_ROOMS_FK) references `".$sDBName."`.ROOMS (ROOMS_PK) on delete restrict on update restrict; \n";
-			
 			$sSQL .= "alter table `".$sDBName."`.LINK \n";
 			$sSQL .= "    add constraint FK_LINK_COMM foreign key (LINK_COMM_FK) references `".$sDBName."`.COMM (COMM_PK) on delete restrict on update restrict, \n";
 			$sSQL .= "    add constraint FK_LINK_LINKCONN foreign key (LINK_LINKCONN_FK) references `".$sDBName."`.LINKCONN (LINKCONN_PK) on delete restrict on update restrict, \n";
@@ -1405,11 +1333,11 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 	3.03 - PublicRSTariff
 	3.04 - PublicRSTypes
 	3.05 - PublicUoM
-	3.06 - PublicCountries
+	3.06 - PublicRegions
 	3.07 - PublicCurrencies
 	3.08 - PublicLanguages
 	3.09 - PublicPostcodes
-	3.10 - PublicStateProvince
+	3.10 - PublicSubRegion
 	3.11 - PublicTimezones
 	3.12 - PublicGenders
 	3.13 - PublicRoomTypes
@@ -1541,15 +1469,15 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			break;
 			
 		/*============================================================
-		  == #3.6# - COUNTRIES                                      ==
+		  == #3.6# - Public Regions                                 ==
 		  ============================================================*/
-		case "PublicCountries":
-			$sSQL .= "CREATE VIEW `".$sDBName."`.`VP_COUNTRIES` AS\n";
+		case "PublicRegion":
+			$sSQL .= "CREATE VIEW `".$sDBName."`.`VP_REGIONS` AS\n";
 			$sSQL .= "SELECT\n";
-			$sSQL .= "    `COUNTRIES_PK`, \n";
-			$sSQL .= "    `COUNTRIES_NAME`, \n";
-			$sSQL .= "    `COUNTRIES_ABREVIATION` \n";
-			$sSQL .= "FROM `".$sDBName."`.`COUNTRIES`; \n";
+			$sSQL .= "    `REGION_PK`, \n";
+			$sSQL .= "    `REGION_NAME`, \n";
+			$sSQL .= "    `REGION_ABREVIATION` \n";
+			$sSQL .= "FROM `".$sDBName."`.`REGION`; \n";
 			break;
 			
 		/*============================================================
@@ -1561,11 +1489,11 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "    `CURRENCIES_PK`, \n";
 			$sSQL .= "    `CURRENCIES_NAME`, \n";
 			$sSQL .= "    `CURRENCIES_ABREVIATION`, \n";
-			$sSQL .= "    `COUNTRIES_PK`, \n";
-			$sSQL .= "    `COUNTRIES_NAME`, \n";
-			$sSQL .= "    `COUNTRIES_ABREVIATION` \n";
+			$sSQL .= "    `REGION_PK`, \n";
+			$sSQL .= "    `REGION_NAME`, \n";
+			$sSQL .= "    `REGION_ABREVIATION` \n";
 			$sSQL .= "FROM `".$sDBName."`.`CURRENCIES` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`COUNTRIES` ON `CURRENCIES_PK`=`COUNTRIES_CURRENCIES_FK`;\n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`REGION` ON `CURRENCIES_PK`=`REGION_CURRENCIES_FK`;\n";
 			break;
 			
 		/*============================================================
@@ -1579,53 +1507,13 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "    `LANGUAGE_LANGUAGE`, \n";
 			$sSQL .= "    `LANGUAGE_VARIANT`, \n";
 			$sSQL .= "    `LANGUAGE_ENCODING`, \n";
-			$sSQL .= "    `COUNTRIES_PK`, \n";
-			$sSQL .= "    `COUNTRIES_NAME`, \n";
-			$sSQL .= "    `COUNTRIES_ABREVIATION` \n";
+			$sSQL .= "    `REGION_PK`, \n";
+			$sSQL .= "    `REGION_NAME`, \n";
+			$sSQL .= "    `REGION_ABREVIATION` \n";
 			$sSQL .= "FROM `".$sDBName."`.`LANGUAGE` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`COUNTRIES` ON `LANGUAGE_COUNTRIES_FK`=`COUNTRIES_PK`;\n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`REGION` ON `LANGUAGE_REGION_FK`=`REGION_PK`;\n";
 			break;
 			
-		/*============================================================
-		  == #3.9# - POSTCODES                                      ==
-		  ============================================================*/
-		case "PublicPostcodes":
-			$sSQL .= "CREATE VIEW `".$sDBName."`.`VP_POSTCODES` AS\n";
-			$sSQL .= "SELECT\n";
-			$sSQL .= "    `POSTCODE_PK`, \n";
-			$sSQL .= "    `POSTCODE_NAME`, \n";
-			$sSQL .= "    `STATEPROVINCE_PK`, \n";
-			$sSQL .= "    `STATEPROVINCE_SHORTNAME`, \n";
-			$sSQL .= "    `STATEPROVINCE_NAME`, \n";
-			$sSQL .= "    `COUNTRIES_PK`, \n";
-			$sSQL .= "    `COUNTRIES_NAME`, \n";
-			$sSQL .= "    `COUNTRIES_ABREVIATION`, \n";
-			$sSQL .= "    `TIMEZONE_PK`, \n";
-			$sSQL .= "    `TIMEZONE_CC`, \n";
-			$sSQL .= "    `TIMEZONE_LATITUDE`, \n";
-			$sSQL .= "    `TIMEZONE_LONGITUDE`, \n";
-			$sSQL .= "    `TIMEZONE_TZ` \n";
-			$sSQL .= "FROM `".$sDBName."`.`POSTCODE` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`TIMEZONE` ON `POSTCODE_TIMEZONES_FK`=`TIMEZONE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`STATEPROVINCE` ON `POSTCODE_STATEPROVINCE_FK`=`STATEPROVINCE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`COUNTRIES` ON `STATEPROVINCE_COUNTRIES_FK`=`COUNTRIES_PK`;\n";
-			break;
-			
-		/*============================================================
-		  == #3.10# - STATEPROVINCE                                 ==
-		  ============================================================*/
-		case "PublicStateProvince":
-			$sSQL .= "CREATE VIEW `".$sDBName."`.`VP_STATEPROVINCE` AS\n";
-			$sSQL .= "SELECT\n";
-			$sSQL .= "    `STATEPROVINCE_PK`, \n";
-			$sSQL .= "    `STATEPROVINCE_SHORTNAME`, \n";
-			$sSQL .= "    `STATEPROVINCE_NAME`, \n";
-			$sSQL .= "    `COUNTRIES_PK`, \n";
-			$sSQL .= "    `COUNTRIES_NAME`, \n";
-			$sSQL .= "    `COUNTRIES_ABREVIATION` \n";
-			$sSQL .= "FROM `".$sDBName."`.`STATEPROVINCE` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`COUNTRIES` ON `STATEPROVINCE_COUNTRIES_FK`=`COUNTRIES_PK`;\n";
-			break;
 			
 		/*============================================================
 		  == #3.11# - TIMEZONES                                     ==
@@ -1732,22 +1620,16 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "	`USERADDRESS_LINE3`, \n";
 			$sSQL .= "	`USERADDRESS_LINE2`, \n";
 			$sSQL .= "	`USERADDRESS_LINE1`, \n";
-//			$sSQL .= "	`USERADDRESS_POSTALLINE3`, \n";
-//			$sSQL .= "	`USERADDRESS_POSTALLINE2`, \n";
-//			$sSQL .= "	`USERADDRESS_POSTALLINE1`, \n";
-			$sSQL .= "	`COUNTRIES_PK`, \n";
-			$sSQL .= "	`COUNTRIES_NAME`, \n";
-			$sSQL .= "	`COUNTRIES_ABREVIATION`, \n";
+			$sSQL .= "	`USERADDRESS_POSTCODE`, \n";
+			$sSQL .= "	`USERADDRESS_SUBREGION`, \n";
+			$sSQL .= "	`REGION_PK`, \n";
+			$sSQL .= "	`REGION_NAME`, \n";
+			$sSQL .= "	`REGION_ABREVIATION`, \n";
 			$sSQL .= "	`LANGUAGE_PK`, \n";
 			$sSQL .= "	`LANGUAGE_NAME`, \n";
 			$sSQL .= "	`LANGUAGE_LANGUAGE`, \n";
 			$sSQL .= "	`LANGUAGE_VARIANT`, \n";
 			$sSQL .= "	`LANGUAGE_ENCODING`, \n";
-			$sSQL .= "	`POSTCODE_PK`, \n";
-			$sSQL .= "	`POSTCODE_NAME`, \n";
-			$sSQL .= "	`STATEPROVINCE_PK`, \n";
-			$sSQL .= "	`STATEPROVINCE_SHORTNAME`, \n";
-			$sSQL .= "	`STATEPROVINCE_NAME`, \n";
 			$sSQL .= "	`TIMEZONE_PK`, \n";
 			$sSQL .= "	`TIMEZONE_CC`, \n";
 			$sSQL .= "	`TIMEZONE_LATITUDE`, \n";
@@ -1766,9 +1648,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`USERADDRESS` ON `USERS_PK`=`USERADDRESS_USERS_FK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`LANGUAGE` ON `USERADDRESS_LANGUAGE_FK`=`LANGUAGE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`COUNTRIES` ON `USERADDRESS_COUNTRIES_FK`=`COUNTRIES_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`STATEPROVINCE` ON `USERADDRESS_STATEPROVINCE_FK`=`STATEPROVINCE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`POSTCODE` ON `USERADDRESS_POSTCODE_FK`=`POSTCODE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`REGION` ON `USERADDRESS_REGION_FK`=`REGION_PK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`TIMEZONE` ON `USERADDRESS_TIMEZONE_FK`=`TIMEZONE_PK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`USERSINFO` ON `USERS_USERSINFO_FK`=`USERSINFO_PK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`USERSGENDER` ON `USERSINFO_USERSGENDER_FK`=`USERSGENDER_PK` \n";
@@ -1831,19 +1711,16 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "    `PREMISEADDRESS_LINE1`, \n";
 			$sSQL .= "    `PREMISEADDRESS_LINE2`, \n";
 			$sSQL .= "    `PREMISEADDRESS_LINE3`, \n";
+			$sSQL .= "    `PREMISEADDRESS_POSTCODE`, \n";
+			$sSQL .= "    `PREMISEADDRESS_SUBREGION`, \n";
 			$sSQL .= "    `LANGUAGE_PK`, \n";
 			$sSQL .= "    `LANGUAGE_NAME`, \n";
 			$sSQL .= "    `LANGUAGE_LANGUAGE`, \n";
 			$sSQL .= "    `LANGUAGE_VARIANT`, \n";
 			$sSQL .= "    `LANGUAGE_ENCODING`, \n";
-			$sSQL .= "    `COUNTRIES_PK`, \n";
-			$sSQL .= "    `COUNTRIES_NAME`, \n";
-			$sSQL .= "    `COUNTRIES_ABREVIATION`, \n";
-			$sSQL .= "    `STATEPROVINCE_PK`, \n";
-			$sSQL .= "    `STATEPROVINCE_SHORTNAME`, \n";
-			$sSQL .= "    `STATEPROVINCE_NAME`, \n";
-			$sSQL .= "    `POSTCODE_PK`, \n";
-			$sSQL .= "    `POSTCODE_NAME`, \n";
+			$sSQL .= "    `REGION_PK`, \n";
+			$sSQL .= "    `REGION_NAME`, \n";
+			$sSQL .= "    `REGION_ABREVIATION`, \n";
 			$sSQL .= "    `TIMEZONE_PK`, \n";
 			$sSQL .= "    `TIMEZONE_CC`, \n";
 			$sSQL .= "    `TIMEZONE_LATITUDE`, \n";
@@ -1854,9 +1731,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "INNER JOIN `".$sDBName."`.`PREMISE` ON `PREMISE_PK`=`PERMPREMISE_PREMISE_FK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`PREMISEADDRESS` ON `PREMISE_PK`=`PREMISEADDRESS_PREMISE_FK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`LANGUAGE` ON `PREMISEADDRESS_LANGUAGE_FK`=`LANGUAGE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`COUNTRIES` ON `PREMISEADDRESS_COUNTRIES_FK`=`COUNTRIES_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`STATEPROVINCE` ON `PREMISEADDRESS_STATEPROVINCE_FK`=`STATEPROVINCE_PK` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`POSTCODE` ON `PREMISEADDRESS_POSTCODE_FK`=`POSTCODE_PK` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`REGION` ON `PREMISEADDRESS_REGION_FK`=`REGION_PK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`TIMEZONE` ON `PREMISEADDRESS_TIMEZONE_FK`=`TIMEZONE_PK` \n";
 			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') AND `PERMPREMISE_READ` = 1; \n";
 			break;
@@ -4407,267 +4282,256 @@ function DB_CreateDefaultData3( $sDBName ) {
 			
 			
 			/*============================================================
-			  == #6.9# - COUNTRIES                                      ==
+			  == #6.9# - REGION                                         ==
 			  ============================================================*/
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (1, null,'Afghanistan',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (2, null,'Albania',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (3, null,'Algeria',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (4, null,'American Samoa',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (5, null,'Andorra',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (6, null,'Angola',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (7, null,'Anguilla',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (8, null,'Antarctica',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (9, null,'Antigua and Barbuda',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (10, null,'Argentina',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (11, null,'Armenia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (13, null,'Aruba',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (14, 1, 'Australia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (15, null,'Austria',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (16, null,'Azerbaijan',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (18, null,'Bahamas',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (19, null,'Bahrain',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (20, null,'Bangladesh',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (21, null,'Barbados',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (22, null,'Belarus',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (23, null,'Belgium',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (24, null,'Belize',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (25, null,'Benin',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (26, null,'Bermuda',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (27, null,'Bhutan',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (28, null,'Bolivia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (29, null,'Bosnia and Herzegovina',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (30, null,'Botswana',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (31, null,'Bouvet Island',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (32, null,'Brazil',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (33, null,'British Indian Ocean Territory',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (34, null,'Brunei Darussalam',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (35, null,'Bulgaria',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (36, null,'Burkina Faso',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (37, null,'Burundi',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (38, null,'Cambodia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (39, null,'Cameroon',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (40, null,'Canada',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (41, null,'Cape Verde',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (42, null,'Cayman Islands',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (43, null,'Central African Republic',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (44, null,'Chad',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (45, null,'Chile',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (46, null,'China',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (47, null,'Christmas Island',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (49, null,'Colombia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (50, null,'Comoros',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (51, null,'Congo',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (52, null,'Congo, The Democratic Republic of The',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (53, null,'Cook Islands',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (54, null,'Costa Rica',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (55, null,'Cote D''ivoire',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (56, null,'Croatia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (57, null,'Cuba',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (58, null,'Cyprus',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (60, null,'Czech Republic',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (61, null,'Denmark',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (62, null,'Djibouti',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (63, null,'Dominica',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (64, null,'Dominican Republic',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (65, null,'Easter Island',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (66, null,'Ecuador',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (67, null,'Egypt',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (68, null,'El Salvador',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (69, null,'Equatorial Guinea',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (70, null,'Eritrea',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (71, null,'Estonia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (72, null,'Ethiopia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (74, null,'Faroe Islands',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (75, null,'Fiji',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (76, null,'Finland',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (77, null,'France',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (78, null,'French Guiana',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (79, null,'French Polynesia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (80, null,'French Southern Territories',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (81, null,'Gabon',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (82, null,'Gambia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (83, null,'Georgia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (85, null,'Germany',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (86, null,'Ghana',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (87, null,'Gibraltar',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (88, null,'Greece',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (89, null,'Greenland',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (91, null,'Grenada',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (92, null,'Guadeloupe',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (93, null,'Guam',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (94, null,'Guatemala',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (95, null,'Guinea',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (96, null,'Guinea-bissau',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (97, null,'Guyana',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (98, null,'Haiti',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (99, null,'Heard Island and Mcdonald Islands',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (100, null,'Honduras',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (101, null,'Hong Kong',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (102, null,'Hungary',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (103, null,'Iceland',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (104, null,'India',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (105, null,'Indonesia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (107, null,'Iran',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (108, null,'Iraq',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (109, null,'Ireland',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (110, null,'Israel',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (111, null,'Italy',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (112, null,'Jamaica',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (113, null,'Japan',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (114, null,'Jordan',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (115, null,'Kazakhstan',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (117, null,'Kenya',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (118, null,'Kiribati',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (119, null,'Korea, North',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (120, null,'Korea, South',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (121, null,'Kosovo',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (122, null,'Kuwait',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (123, null,'Kyrgyzstan',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (124, null,'Laos',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (125, null,'Latvia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (126, null,'Lebanon',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (127, null,'Lesotho',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (128, null,'Liberia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (129, null,'Libyan Arab Jamahiriya',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (130, null,'Liechtenstein',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (131, null,'Lithuania',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (132, null,'Luxembourg',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (133, null,'Macau',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (134, null,'Macedonia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (135, null,'Madagascar',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (136, null,'Malawi',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (137, null,'Malaysia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (138, null,'Maldives',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (139, null,'Mali',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (140, null,'Malta',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (141, null,'Marshall Islands',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (142, null,'Martinique',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (143, null,'Mauritania',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (144, null,'Mauritius',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (145, null,'Mayotte',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (146, null,'Mexico',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (147, null,'Micronesia, Federated States of',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (148, null,'Moldova, Republic of',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (149, null,'Monaco',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (150, null,'Mongolia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (151, null,'Montenegro',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (152, null,'Montserrat',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (153, null,'Morocco',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (154, null,'Mozambique',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (155, null,'Myanmar',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (156, null,'Namibia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (157, null,'Nauru',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (158, null,'Nepal',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (159, null,'Netherlands',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (160, null,'Netherlands Antilles',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (161, null,'New Caledonia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (162, null,'New Zealand',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (163, null,'Nicaragua',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (164, null,'Niger',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (165, null,'Nigeria',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (166, null,'Niue',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (167, null,'Norfolk Island',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (168, null,'Northern Mariana Islands',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (169, null,'Norway',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (170, null,'Oman',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (171, null,'Pakistan',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (172, null,'Palau',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (173, null,'Palestinian Territory',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (174, null,'Panama',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (175, null,'Papua New Guinea',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (176, null,'Paraguay',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (177, null,'Peru',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (178, null,'Philippines',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (179, null,'Pitcairn',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (180, null,'Poland',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (181, null,'Portugal',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (182, null,'Puerto Rico',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (183, null,'Qatar',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (184, null,'Reunion',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (185, null,'Romania',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (186, null,'Russia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (188, null,'Rwanda',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (189, null,'Saint Helena',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (190, null,'Saint Kitts and Nevis',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (191, null,'Saint Lucia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (192, null,'Saint Pierre and Miquelon',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (193, null,'Saint Vincent and The Grenadines',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (194, null,'Samoa',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (195, null,'San Marino',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (196, null,'Sao Tome and Principe',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (197, null,'Saudi Arabia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (198, null,'Senegal',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (199, null,'Serbia and Montenegro',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (200, null,'Seychelles',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (201, null,'Sierra Leone',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (202, null,'Singapore',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (203, null,'Slovakia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (204, null,'Slovenia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (205, null,'Solomon Islands',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (206, null,'Somalia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (207, null,'South Africa',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (208, null,'South Georgia and The South Sandwich Islands',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (209, null,'Spain',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (210, null,'Sri Lanka',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (211, null,'Sudan',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (212, null,'Suriname',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (213, null,'Svalbard and Jan Mayen',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (214, null,'Swaziland',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (215, null,'Sweden',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (216, null,'Switzerland',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (217, null,'Syria',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (218, null,'Taiwan',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (219, null,'Tajikistan',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (220, null,'Tanzania, United Republic of',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (221, null,'Thailand',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (222, null,'Timor-leste',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (223, null,'Togo',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (224, null,'Tokelau',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (225, null,'Tonga',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (226, null,'Trinidad and Tobago',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (227, null,'Tunisia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (228, null,'Turkey',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (230, null,'Turkmenistan',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (231, null,'Turks and Caicos Islands',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (232, null,'Tuvalu',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (233, null,'Uganda',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (234, null,'Ukraine',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (235, null,'United Arab Emirates',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (236, null,'United Kingdom',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (237, null,'United States',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (238, null,'United States Minor Outlying Islands',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (239, null,'Uruguay',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (240, null,'Uzbekistan',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (241, null,'Vanuatu',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (242, null,'Vatican City',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (243, null,'Venezuela',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (244, null,'Vietnam',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (245, null,'Virgin Islands, British',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (246, null,'Virgin Islands, U.S.',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (247, null,'Wallis and Futuna',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (248, null,'Western Sahara',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (250, null,'Yemen',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (251, null,'Zambia',''); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COUNTRIES` (COUNTRIES_PK,COUNTRIES_CURRENCIES_FK,COUNTRIES_NAME,COUNTRIES_ABREVIATION) VALUES (252, null,'Zimbabwe',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (1, null,'Afghanistan',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (2, null,'Albania',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (3, null,'Algeria',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (4, null,'American Samoa',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (5, null,'Andorra',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (6, null,'Angola',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (7, null,'Anguilla',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (8, null,'Antarctica',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (9, null,'Antigua and Barbuda',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (10, null,'Argentina',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (11, null,'Armenia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (13, null,'Aruba',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (14, 1, 'Australia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (15, null,'Austria',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (16, null,'Azerbaijan',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (18, null,'Bahamas',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (19, null,'Bahrain',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (20, null,'Bangladesh',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (21, null,'Barbados',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (22, null,'Belarus',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (23, null,'Belgium',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (24, null,'Belize',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (25, null,'Benin',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (26, null,'Bermuda',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (27, null,'Bhutan',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (28, null,'Bolivia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (29, null,'Bosnia and Herzegovina',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (30, null,'Botswana',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (31, null,'Bouvet Island',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (32, null,'Brazil',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (33, null,'British Indian Ocean Territory',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (34, null,'Brunei Darussalam',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (35, null,'Bulgaria',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (36, null,'Burkina Faso',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (37, null,'Burundi',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (38, null,'Cambodia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (39, null,'Cameroon',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (40, null,'Canada',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (41, null,'Cape Verde',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (42, null,'Cayman Islands',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (43, null,'Central African Republic',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (44, null,'Chad',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (45, null,'Chile',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (46, null,'China',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (47, null,'Christmas Island',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (49, null,'Colombia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (50, null,'Comoros',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (51, null,'Congo',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (52, null,'Congo, The Democratic Republic of The',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (53, null,'Cook Islands',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (54, null,'Costa Rica',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (55, null,'Cote D''ivoire',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (56, null,'Croatia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (57, null,'Cuba',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (58, null,'Cyprus',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (60, null,'Czech Republic',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (61, null,'Denmark',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (62, null,'Djibouti',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (63, null,'Dominica',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (64, null,'Dominican Republic',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (65, null,'Easter Island',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (66, null,'Ecuador',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (67, null,'Egypt',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (68, null,'El Salvador',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (69, null,'Equatorial Guinea',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (70, null,'Eritrea',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (71, null,'Estonia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (72, null,'Ethiopia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (74, null,'Faroe Islands',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (75, null,'Fiji',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (76, null,'Finland',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (77, null,'France',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (78, null,'French Guiana',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (79, null,'French Polynesia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (80, null,'French Southern Territories',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (81, null,'Gabon',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (82, null,'Gambia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (83, null,'Georgia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (85, null,'Germany',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (86, null,'Ghana',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (87, null,'Gibraltar',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (88, null,'Greece',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (89, null,'Greenland',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (91, null,'Grenada',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (92, null,'Guadeloupe',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (93, null,'Guam',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (94, null,'Guatemala',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (95, null,'Guinea',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (96, null,'Guinea-bissau',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (97, null,'Guyana',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (98, null,'Haiti',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (99, null,'Heard Island and Mcdonald Islands',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (100, null,'Honduras',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (101, null,'Hong Kong',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (102, null,'Hungary',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (103, null,'Iceland',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (104, null,'India',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (105, null,'Indonesia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (107, null,'Iran',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (108, null,'Iraq',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (109, null,'Ireland',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (110, null,'Israel',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (111, null,'Italy',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (112, null,'Jamaica',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (113, null,'Japan',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (114, null,'Jordan',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (115, null,'Kazakhstan',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (117, null,'Kenya',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (118, null,'Kiribati',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (119, null,'Korea, North',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (120, null,'Korea, South',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (121, null,'Kosovo',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (122, null,'Kuwait',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (123, null,'Kyrgyzstan',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (124, null,'Laos',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (125, null,'Latvia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (126, null,'Lebanon',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (127, null,'Lesotho',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (128, null,'Liberia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (129, null,'Libyan Arab Jamahiriya',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (130, null,'Liechtenstein',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (131, null,'Lithuania',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (132, null,'Luxembourg',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (133, null,'Macau',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (134, null,'Macedonia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (135, null,'Madagascar',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (136, null,'Malawi',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (137, null,'Malaysia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (138, null,'Maldives',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (139, null,'Mali',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (140, null,'Malta',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (141, null,'Marshall Islands',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (142, null,'Martinique',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (143, null,'Mauritania',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (144, null,'Mauritius',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (145, null,'Mayotte',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (146, null,'Mexico',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (147, null,'Micronesia, Federated States of',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (148, null,'Moldova, Republic of',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (149, null,'Monaco',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (150, null,'Mongolia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (151, null,'Montenegro',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (152, null,'Montserrat',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (153, null,'Morocco',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (154, null,'Mozambique',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (155, null,'Myanmar',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (156, null,'Namibia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (157, null,'Nauru',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (158, null,'Nepal',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (159, null,'Netherlands',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (160, null,'Netherlands Antilles',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (161, null,'New Caledonia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (162, null,'New Zealand',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (163, null,'Nicaragua',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (164, null,'Niger',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (165, null,'Nigeria',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (166, null,'Niue',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (167, null,'Norfolk Island',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (168, null,'Northern Mariana Islands',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (169, null,'Norway',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (170, null,'Oman',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (171, null,'Pakistan',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (172, null,'Palau',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (173, null,'Palestinian Territory',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (174, null,'Panama',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (175, null,'Papua New Guinea',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (176, null,'Paraguay',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (177, null,'Peru',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (178, null,'Philippines',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (179, null,'Pitcairn',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (180, null,'Poland',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (181, null,'Portugal',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (182, null,'Puerto Rico',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (183, null,'Qatar',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (184, null,'Reunion',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (185, null,'Romania',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (186, null,'Russia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (188, null,'Rwanda',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (189, null,'Saint Helena',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (190, null,'Saint Kitts and Nevis',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (191, null,'Saint Lucia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (192, null,'Saint Pierre and Miquelon',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (193, null,'Saint Vincent and The Grenadines',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (194, null,'Samoa',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (195, null,'San Marino',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (196, null,'Sao Tome and Principe',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (197, null,'Saudi Arabia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (198, null,'Senegal',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (199, null,'Serbia and Montenegro',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (200, null,'Seychelles',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (201, null,'Sierra Leone',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (202, null,'Singapore',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (203, null,'Slovakia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (204, null,'Slovenia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (205, null,'Solomon Islands',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (206, null,'Somalia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (207, null,'South Africa',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (208, null,'South Georgia and The South Sandwich Islands',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (209, null,'Spain',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (210, null,'Sri Lanka',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (211, null,'Sudan',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (212, null,'Suriname',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (213, null,'Svalbard and Jan Mayen',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (214, null,'Swaziland',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (215, null,'Sweden',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (216, null,'Switzerland',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (217, null,'Syria',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (218, null,'Taiwan',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (219, null,'Tajikistan',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (220, null,'Tanzania, United Republic of',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (221, null,'Thailand',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (222, null,'Timor-leste',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (223, null,'Togo',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (224, null,'Tokelau',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (225, null,'Tonga',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (226, null,'Trinidad and Tobago',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (227, null,'Tunisia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (228, null,'Turkey',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (230, null,'Turkmenistan',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (231, null,'Turks and Caicos Islands',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (232, null,'Tuvalu',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (233, null,'Uganda',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (234, null,'Ukraine',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (235, null,'United Arab Emirates',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (236, null,'United Kingdom',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (237, null,'United States',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (238, null,'United States Minor Outlying Islands',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (239, null,'Uruguay',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (240, null,'Uzbekistan',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (241, null,'Vanuatu',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (242, null,'Vatican City',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (243, null,'Venezuela',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (244, null,'Vietnam',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (245, null,'Virgin Islands, British',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (246, null,'Virgin Islands, U.S.',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (247, null,'Wallis and Futuna',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (248, null,'Western Sahara',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (250, null,'Yemen',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (251, null,'Zambia',''); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGION` (REGION_PK,REGION_CURRENCIES_FK,REGION_NAME,REGION_ABREVIATION) VALUES (252, null,'Zimbabwe',''); \n";
 			
 			/*============================================================
 			  == #6.10# - LANGUAGE                                      ==
 			  ============================================================*/
-			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (LANGUAGE_PK,LANGUAGE_COUNTRIES_FK,LANGUAGE_NAME,LANGUAGE_LANGUAGE,LANGUAGE_VARIANT,LANGUAGE_ENCODING) VALUES (1,1,'Australian English',1,'AU','EN-AU'); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (LANGUAGE_PK,LANGUAGE_COUNTRIES_FK,LANGUAGE_NAME,LANGUAGE_LANGUAGE,LANGUAGE_VARIANT,LANGUAGE_ENCODING) VALUES (2,236,'United Kingdom English',2,'','EN-GB'); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (LANGUAGE_PK,LANGUAGE_REGION_FK,LANGUAGE_NAME,LANGUAGE_LANGUAGE,LANGUAGE_VARIANT,LANGUAGE_ENCODING) VALUES (1,1,'Australian English',1,'AU','EN-AU'); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (LANGUAGE_PK,LANGUAGE_REGION_FK,LANGUAGE_NAME,LANGUAGE_LANGUAGE,LANGUAGE_VARIANT,LANGUAGE_ENCODING) VALUES (2,236,'United Kingdom English',2,'','EN-GB'); \n";
 			
-			/*============================================================
-			  == #6.11# - STATEPROVINCE                                 ==
-			  ============================================================*/
-			$sSQL .= "INSERT INTO `".$sDBName."`.`STATEPROVINCE` (STATEPROVINCE_PK,STATEPROVINCE_COUNTRIES_FK,STATEPROVINCE_SHORTNAME,STATEPROVINCE_NAME) VALUES (1,14,'QLD','Queensland'); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`STATEPROVINCE` (STATEPROVINCE_PK,STATEPROVINCE_COUNTRIES_FK,STATEPROVINCE_SHORTNAME,STATEPROVINCE_NAME) VALUES (2,14,'NSW','New South Wales'); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`STATEPROVINCE` (STATEPROVINCE_PK,STATEPROVINCE_COUNTRIES_FK,STATEPROVINCE_SHORTNAME,STATEPROVINCE_NAME) VALUES (3,14,'VIC','Victoria'); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`STATEPROVINCE` (STATEPROVINCE_PK,STATEPROVINCE_COUNTRIES_FK,STATEPROVINCE_SHORTNAME,STATEPROVINCE_NAME) VALUES (4,14,'SA','South Australia'); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`STATEPROVINCE` (STATEPROVINCE_PK,STATEPROVINCE_COUNTRIES_FK,STATEPROVINCE_SHORTNAME,STATEPROVINCE_NAME) VALUES (5,14,'WA','Western Australia'); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`STATEPROVINCE` (STATEPROVINCE_PK,STATEPROVINCE_COUNTRIES_FK,STATEPROVINCE_SHORTNAME,STATEPROVINCE_NAME) VALUES (6,14,'TAS','Tasmania'); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`STATEPROVINCE` (STATEPROVINCE_PK,STATEPROVINCE_COUNTRIES_FK,STATEPROVINCE_SHORTNAME,STATEPROVINCE_NAME) VALUES (7,14,'NT','Northern Territory'); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`STATEPROVINCE` (STATEPROVINCE_PK,STATEPROVINCE_COUNTRIES_FK,STATEPROVINCE_SHORTNAME,STATEPROVINCE_NAME) VALUES (8,14,'ACT','Australian Capital Territory'); \n";
-			
+	
 			/*============================================================
 			  == #6.12# - TIMEZONE                                      ==
 			  ============================================================*/ 
@@ -4687,8 +4551,8 @@ function DB_CreateDefaultData3( $sDBName ) {
 			/*============================================================
 			  == #6.13# - POSTCODE                                      ==
 			  ============================================================*/
-			$sSQL .= "INSERT INTO `".$sDBName."`.`POSTCODE` (POSTCODE_STATEPROVINCE_FK,POSTCODE_TIMEZONES_FK,POSTCODE_NAME) VALUES (1,1,'4655'); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`POSTCODE` (POSTCODE_STATEPROVINCE_FK,POSTCODE_TIMEZONES_FK,POSTCODE_NAME) VALUES (1,1,'4006'); \n";
+			//$sSQL .= "INSERT INTO `".$sDBName."`.`POSTCODE` (POSTCODE_STATEPROVINCE_FK,POSTCODE_TIMEZONES_FK,POSTCODE_NAME) VALUES (1,1,'4655'); \n";
+			//$sSQL .= "INSERT INTO `".$sDBName."`.`POSTCODE` (POSTCODE_STATEPROVINCE_FK,POSTCODE_TIMEZONES_FK,POSTCODE_NAME) VALUES (1,1,'4006'); \n";
 			
 			/*============================================================
 			  == #6.14# - PREMISEBEDROOMS                               ==
@@ -5316,7 +5180,7 @@ function DB_InsertUser( $sDBName, $iUserInfoId, $sUsername, $iUserState ) {
 }
 
 
-function DB_InsertUserAddress( $sDBName, $iUserId, $iLanguageId, $iCountriesId, $iStateProvinceId, $iPostcodeId, $iTimezoneId, $sLine1, $sLine2, $sLine3 ) {
+function DB_InsertUserAddress( $sDBName, $iUserId, $iLanguageId, $iRegionId, $sSubRegion, $sPostcode, $iTimezoneId, $sLine1, $sLine2, $sLine3 ) {
 	//------------------------------------------------------------------------//
 	//-- DESCRIPTION:                                                       --//
 	//--    This function is used to add the new User to the database.      --//
@@ -5346,14 +5210,14 @@ function DB_InsertUserAddress( $sDBName, $iUserId, $iLanguageId, $iCountriesId, 
 			//----------------------------------------//
 			$sSQL .= "INSERT INTO `".$sDBName."`.`USERADDRESS` ( ";
 			$sSQL .= "    `USERADDRESS_USERS_FK`,           `USERADDRESS_LANGUAGE_FK`, ";
-			$sSQL .= "    `USERADDRESS_COUNTRIES_FK`,       `USERADDRESS_STATEPROVINCE_FK`, ";
-			$sSQL .= "    `USERADDRESS_POSTCODE_FK`,        `USERADDRESS_TIMEZONE_FK`, ";
+			$sSQL .= "    `USERADDRESS_REGION_FK`,          `USERADDRESS_SUBREGION`, ";
+			$sSQL .= "    `USERADDRESS_POSTCODE`,           `USERADDRESS_TIMEZONE_FK`, ";
 			$sSQL .= "    `USERADDRESS_LINE1`,              `USERADDRESS_LINE2`, ";
 			$sSQL .= "    `USERADDRESS_LINE3` ";
 			$sSQL .= ") VALUES ( ";
 			$sSQL .= "    :UserId,          :LanguageId, ";
-			$sSQL .= "    :CountriesId,     :StateProvinceId, ";
-			$sSQL .= "    :PostcodeId,      :TimezoneId, ";
+			$sSQL .= "    :RegionId,        :SubRegion, ";
+			$sSQL .= "    :Postcode,        :TimezoneId, ";
 			$sSQL .= "    :Line1,           :Line2, ";
 			$sSQL .= "    :Line3 ";
 			$sSQL .= ") ";
@@ -5365,9 +5229,9 @@ function DB_InsertUserAddress( $sDBName, $iUserId, $iLanguageId, $iCountriesId, 
 			$aInputValsInsert = array(
 				array( "Name"=>"UserId",            "type"=>"INT",          "value"=>$iUserId                 ),
 				array( "Name"=>"LanguageId",        "type"=>"INT",          "value"=>$iLanguageId             ),
-				array( "Name"=>"CountriesId",       "type"=>"INT",          "value"=>$iCountriesId            ),
-				array( "Name"=>"StateProvinceId",   "type"=>"INT",          "value"=>$iStateProvinceId        ),
-				array( "Name"=>"PostcodeId",        "type"=>"INT",          "value"=>$iPostcodeId             ),
+				array( "Name"=>"RegionId",          "type"=>"INT",          "value"=>$iRegionId               ),
+				array( "Name"=>"SubRegion",         "type"=>"STR",          "value"=>$sSubRegion              ),
+				array( "Name"=>"Postcode",          "type"=>"STR",          "value"=>$sPostcode               ),
 				array( "Name"=>"TimezoneId",        "type"=>"INT",          "value"=>$iTimezoneId             ),
 				array( "Name"=>"Line1",             "type"=>"STR",          "value"=>$sLine1                  ),
 				array( "Name"=>"Line2",             "type"=>"STR",          "value"=>$sLine2                  ),
@@ -5409,6 +5273,8 @@ function DB_InsertUserAddress( $sDBName, $iUserId, $iLanguageId, $iCountriesId, 
 		return array( "Error"=>true, "ErrMesg"=>"InsertUserAddress: ".$sErrMesg );
 	}
 }
+
+
 //============================================================================================================================//
 //== PREMEISE
 //============================================================================================================================//

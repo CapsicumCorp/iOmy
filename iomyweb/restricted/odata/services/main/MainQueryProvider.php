@@ -281,6 +281,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 						case 'VP_LANGUAGES':
 							$aReturnResults[] = $this->_serializeVP_LANGUAGES($aRow);
 							break;
+						case 'VP_TIMEZONES':
+							$aReturnResults[] = $this->_serializeVP_TIMEZONES($aRow);
+							break;
 						case 'VP_PREMISEBEDROOMS':
 							$aReturnResults[] = $this->_serializeVP_PREMISEBEDROOMS($aRow);
 							break;
@@ -382,6 +385,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 				case 'VP_CURRENCIES':
 					break;
 				case 'VP_LANGUAGES':
+					break;
+				case 'VP_TIMEZONES':
 					break;
 				case 'VP_PREMISEBEDROOMS':
 					break;
