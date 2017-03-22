@@ -35,12 +35,11 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
      */
     loadUserInfo : function () {
         var me = this;
-        var iRegionId;
         
         me.odata.AjaxRequest({
             Url : me.odata.ODataLocation("users"),
-            Columns : ["USERS_PK", "COUNTRIES_NAME", "COUNTRIES_PK", "LANGUAGE_PK", "LANGUAGE_NAME", 
-                        "POSTCODE_NAME", "STATEPROVINCE_NAME",
+            Columns : ["USERS_PK", "REGION_NAME", "REGION_PK", "LANGUAGE_PK", "LANGUAGE_NAME", 
+                        "USERADDRESS_POSTCODE", "USERADDRESS_SUBREGION",
                         "TIMEZONE_PK", "TIMEZONE_TZ", "USERADDRESS_LINE1", "USERADDRESS_LINE2",
                         "USERADDRESS_LINE3", "USERADDRESS_PK"],
             WhereClause : [],
@@ -48,19 +47,17 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 
             onSuccess : function (responseType, data) {
                 var displayData = data[0];
-                iRegionId = displayData.REGIONS_PK;
-                
                 // Display the information retrieved from the User Information OData.
-                me.byId("addressRegion").setSelectedKey(displayData.COUNTRIES_PK);
+                me.byId("addressRegion").setSelectedKey(displayData.REGION_PK);
                 me.byId("addressRegion").setEnabled(true);
                 
                 me.byId("addressLanguage").setSelectedKey(displayData.LANGUAGE_PK);
                 me.byId("addressLanguage").setEnabled(true);
                 
-                me.byId("addressPostCode").setValue(displayData.POSTCODE_NAME);
+                me.byId("addressPostCode").setValue(displayData.USERADDRESS_POSTCODE);
                 me.byId("addressPostCode").setEnabled(true);
                 
-                me.byId("addressState").setValue(displayData.STATEPROVINCE_NAME);
+                me.byId("addressState").setValue(displayData.USERADDRESS_SUBREGION);
                 me.byId("addressState").setEnabled(true);
                 
                 me.byId("addressTimezone").setSelectedKey(displayData.TIMEZONE_PK);
@@ -73,27 +70,11 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                 me.byId("UpdateLink").setEnabled(true);
                 
                 me.userId = displayData.USERS_PK;
-                
-                this.onProceed(iRegionId, displayData);
             },
             
             onFail : function (response) {
                 IOMy.common.showError("There was an unexpected error loading the user address.");
                 jQuery.sap.log.error(JSON.stringify(response));
-            },
-            
-            /**
-             * Normally we parse two functions, onSuccess and onFail. This third
-             * function is executed after the success function is run.
-             * 
-             * This function begins to execute a series of public ODatas to do
-             * with locale information, country, language, timezone, states or
-             * provinces and postcodes.
-             * 
-             * @param {type} iRegionId
-             */
-            onProceed : function (iRegionId, displayData) {
-                //me.loadLocaleCBoxItems(me, iRegionId, displayData);
             }
         });
     },
@@ -118,8 +99,8 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 				
 				me.functions.destroyItemsByIdFromView(me, [
 	                "addressLanguage", "addressRegion", "addressState",
-                    "addressPostCode", "addressTimezone", "addressLine1", "addressLine2",
-                    "addressLine3", "UpdateLink"
+                    "addressPostCode", "addressTimezone", "addressLine1",
+                    "addressLine2", "addressLine3", "UpdateLink"
 	            ]);
                 
                 //===== REGION =====//

@@ -52,7 +52,7 @@ $.extend(IOMy.apiodata,{
 			//-- Public ODatas				--//
 			//--------------------------------//
 			case "regions":
-				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_COUNTRIES';
+				sReturn = sUrlRestricted+'/odata/Main.svc.php/VP_REGION';
 				break;
 				
 			case "currencies":

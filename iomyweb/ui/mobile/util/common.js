@@ -462,9 +462,9 @@ $.extend(IOMy.common,{
         
         IOMy.apiodata.AjaxRequest({
             Url : IOMy.apiodata.ODataLocation("regions"),
-            Columns : ["COUNTRIES_NAME", "COUNTRIES_PK"],
+            Columns : ["REGION_NAME", "REGION_PK", "REGION_ABREVIATION"],
             WhereClause : [],
-            OrderByClause : ["COUNTRIES_NAME asc"],
+            OrderByClause : ["REGION_NAME asc"],
 
             onSuccess : function (responseType, data) {
                 try {
@@ -472,8 +472,9 @@ $.extend(IOMy.common,{
                     
                     for (var i = 0; i < data.length; i++) {
                         me.Regions.push({
-                            RegionId    : data[i].COUNTRIES_PK,
-                            RegionName  : data[i].COUNTRIES_NAME
+                            RegionId            : data[i].REGION_PK,
+                            RegionName          : data[i].REGION_NAME,
+                            RegionAbbreviation  : data[i].REGION_ABREVIATION
                         });
                     }
                     

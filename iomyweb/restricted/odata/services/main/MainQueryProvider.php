@@ -1708,9 +1708,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 			$VP_LANGUAGES->LANGUAGE_LANGUAGE                = $record['LANGUAGE_LANGUAGE'];
 			$VP_LANGUAGES->LANGUAGE_VARIANT                 = $record['LANGUAGE_VARIANT'];
 			$VP_LANGUAGES->LANGUAGE_ENCODING                = $record['LANGUAGE_ENCODING'];
-			$VP_LANGUAGES->REGION_PK                        = $record['REGION_PK'];
-			$VP_LANGUAGES->REGION_NAME                      = $record['REGION_NAME'];
-			$VP_LANGUAGES->REGION_ABREVIATION               = $record['REGION_ABREVIATION'];
+//			$VP_LANGUAGES->REGION_PK                        = $record['REGION_PK'];
+//			$VP_LANGUAGES->REGION_NAME                      = $record['REGION_NAME'];
+//			$VP_LANGUAGES->REGION_ABREVIATION               = $record['REGION_ABREVIATION'];
 
 			return $VP_LANGUAGES;
 		}

@@ -30,12 +30,11 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
     
     loadLocaleInfo : function (iPremiseId) {
         var me = this;
-        var iRegionId;
         
         me.odata.AjaxRequest({
             Url : me.odata.ODataLocation("premiselocation"),
-            Columns : ["COUNTRIES_NAME", "COUNTRIES_PK", "LANGUAGE_PK", "LANGUAGE_NAME", 
-                        "POSTCODE_NAME", "STATEPROVINCE_NAME",
+            Columns : ["REGION_NAME", "REGION_PK", "LANGUAGE_PK", "LANGUAGE_NAME", 
+                        "USERADDRESS_POSTCODE", "USERADDRESS_SUBREGION",
                         "TIMEZONE_PK", "TIMEZONE_TZ", "PREMISEADDRESS_LINE1", "PREMISEADDRESS_LINE2",
                         "PREMISEADDRESS_LINE3", "PREMISEADDRESS_PK"],
             WhereClause : ["PREMISE_PK eq "+iPremiseId],
@@ -43,21 +42,18 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 
             onSuccess : function (responseType, data) {
                 var displayData = data[0];
-                iRegionId = displayData.REGIONS_PK;
-                
-                //me.loadLocaleCBoxItems(me, iRegionId, displayData);
                 
                 // Display the information retrieved from the Premise Location OData
-                me.byId("addressRegion").setSelectedKey(displayData.COUNTRIES_PK);
+                me.byId("addressRegion").setSelectedKey(displayData.REGION_PK);
                 me.byId("addressRegion").setEnabled(true);
                 
                 me.byId("addressLanguage").setSelectedKey(displayData.LANGUAGE_PK);
                 me.byId("addressLanguage").setEnabled(true);
                 
-                me.byId("addressPostCode").setValue(displayData.POSTCODE_NAME);
+                me.byId("addressPostCode").setValue(displayData.USERADDRESS_POSTCODE);
                 me.byId("addressPostCode").setEnabled(true);
                 
-                me.byId("addressState").setValue(displayData.STATEPROVINCE_NAME);
+                me.byId("addressState").setValue(displayData.USERADDRESS_SUBREGION);
                 me.byId("addressState").setEnabled(true);
                 
                 me.byId("addressTimezone").setSelectedKey(displayData.TIMEZONE_PK);

@@ -153,115 +153,10 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
             text : "Add Room",
             enabled : false,
             press : function () {
-                var oThisButton = this; // Captures the scope of the link
-                oThisButton.setEnabled(false);
-
-                var sRoomText = me.wRoomName.getValue();
-                var sRoomDesc = me.wRoomDescription.getValue();
-                var iRoomTypeId = me.wRoomType.getSelectedKey();
-
-                var aErrorLog = [];
-                var bError = false;
-
-                if (sRoomText === "") {
-                    aErrorLog.push("Room must have a name");
-                    bError = true;
-                }
-
-                if (bError === true) {
-                    jQuery.sap.log.error(aErrorLog.join("\n"));
-                    IOMy.common.showError(aErrorLog.join("\n\n"), "Errors",
-                        function () {
-                            oThisButton.setEnabled(true);
-                        }
-                    );
-                    
-                } else {
-                    //----------------------------------------------------------//
-                    // Run the API to add the room
-                    //----------------------------------------------------------//
-                    try {
-                        IOMy.apiphp.AjaxRequest({
-                            url : IOMy.apiphp.APILocation("rooms"),
-                            data : {
-                                "Mode" : "AddRoom",
-                                "PremiseId" : me.wPremise.getSelectedKey(),
-                                "Name" : sRoomText,
-                                "Desc" : sRoomDesc, 
-                                "Floor" : 1,
-                                "RoomTypeId" : iRoomTypeId
-                            },
-                            
-                            onSuccess : function (responseType, roomData) {
-
-                                var iRoomId = roomData.Data.RoomId;
-
-                                //----------------------------------------------------------//
-                                // Run the API to give permission to the current user to
-                                // access it.
-                                //----------------------------------------------------------//
-                                IOMy.apiphp.AjaxRequest({
-                                    url : IOMy.apiphp.APILocation("permissions"),
-                                    data : {
-                                        "Mode" : "UpdateRoomPerms",
-                                        "UserId" : me.userId,
-                                        "RoomId" : iRoomId,
-                                        "Data" : "{\"Read\":1,\"DataRead\":1,\"Write\":1,\"StateToggle\":1}"
-                                    },
-
-                                    onSuccess : function (responseType, permData) {
-                                        var sErrMessage;
-                                        if (permData.Error === false) {
-                                            //--------------------------------------------//
-                                            // Show the success message and reload the core
-                                            // variables.
-                                            //--------------------------------------------//
-                                            IOMy.common.showSuccess(sRoomText+" added successfully.", "Success", 
-                                                function () {
-                                                    //-- REFRESH ROOMS --//
-                                                    IOMy.common.ReloadVariableRoomList( 
-                                                        function () {
-                                                            try {
-                                                                //-- Flag that the Core Variables have been configured --//
-                                                                IOMy.common.CoreVariablesInitialised = true;
-                                                                IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
-
-                                                            } catch(e654321) {
-                                                                //-- ERROR:  TODO: Write a better error message--//
-                                                                jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
-                                                            }
-                                                        }
-                                                    ); //-- END ROOMS LIST --//
-                                                },
-                                            "UpdateMessageBox");
-                                        } else {
-                                            sErrMessage = "There was an error updating the room permissions: "+permData.ErrMesg;
-                                            jQuery.sap.log.error(sErrMessage);
-
-                                        }
-                                    },
-
-                                    onFail : function (response) {
-                                        var sErrMessage = "There was an error updating the room permissions: "+JSON.stringify(response);
-                                        jQuery.sap.log.error(sErrMessage);
-                                        IOMy.common.showError(sErrMessage, "Permissions Error");
-                                    }
-
-                                });
-
-                            },
-                            onFail : function (response) {
-                                IOMy.common.showError("Update failed.", "Error");
-                                jQuery.sap.log.error(JSON.stringify(response));
-                                //-- Enable this switch --//
-                                oThisButton.setEnabled(true);
-                            }
-                        });
-                    } catch (e00033) {
-                        IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
-                    }
-                }
-
+                
+                me.AddRoom({
+                    callingWidget : me.wUpdateButton
+                });
             }
         }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink");
         
@@ -313,6 +208,227 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 				jQuery.sap.log.error("Error loading user information: "+JSON.stringify(response));
 			}
 		});
-	}
+	},
+    
+    AddRoom : function (mInfo) {
+        //--------------------------------------------------------------------//
+        // Declare and initialise important variables
+        //--------------------------------------------------------------------//
+        var me = this;
+        var bError              = false;
+        var aErrorMessages      = [];
+        var sRoomText           = "";
+        var sRoomDesc           = "";
+        var iRoomTypeId         = 0;
+        var iPremiseId          = 0;
+        var wCallingWidget      = null;
+        var wPremise            = null;
+        var wRoomName           = null;
+        var wRoomDescription    = null;
+        var wRoomType           = null;
+        
+        //--------------------------------------------------------------------//
+        // Check room info map and assign default values if necessary.
+        //--------------------------------------------------------------------//
+        //-- If it does exist, check that the room information map is there. --//
+        if (mInfo === undefined) {
+            bError = true;
+            aErrorMessages.push("A map (associative array) of room information is required!");
+        }
+        
+        // Throw an exception if one or more parameters are not specified.
+        if (bError) {
+            throw aErrorMessages.join('\n');
+        }
+        
+        //--------------------------------------------------------------------//
+        // Check that the calling widget is specified.
+        //--------------------------------------------------------------------//
+        if (mInfo.callingWidget === undefined || mInfo.callingWidget === null) {
+            wCallingWidget = null; // No UI5 widget has called this function.
+        } else {
+            // If so, capture it and disable it.
+            wCallingWidget = mInfo.callingWidget;
+            wCallingWidget.setEnabled(false);
+        }
+        
+        //----------------------------------------------//
+        //-- Check that premise field is specified.   --//
+        //----------------------------------------------//
+        if (mInfo.roomName === undefined || mInfo.roomName === null) {
+            //---------------------------------------------------------//
+            //-- If not, see if the field variable wPremise exists.  --//
+            //---------------------------------------------------------//
+            try {
+                wPremise = IOMy.functions.findInputWidget("wPremise");
+            } catch (eInputWidgetError) {
+                //-- An exception is thrown if something is wrong. --//
+                bError = true;
+                aErrorMessages.push(eInputWidgetError.message);
+            }
+        } else {
+            wPremise = mInfo.roomPremise;
+        }
+        
+        //----------------------------------------------//
+        //-- Check that room name field is specified. --//
+        //----------------------------------------------//
+        if (mInfo.roomName === undefined || mInfo.roomName === null) {
+            //---------------------------------------------------------//
+            //-- If not, see if the field variable wRoomName exists. --//
+            //---------------------------------------------------------//
+            try {
+                wRoomName = IOMy.functions.findInputWidget("wRoomName");
+            } catch (eInputWidgetError) {
+                //-- An exception is thrown if something is wrong. --//
+                bError = true;
+                aErrorMessages.push(eInputWidgetError.message);
+            }
+        } else {
+            wRoomName = mInfo.roomName;
+        }
+        
+        //-----------------------------------------------------//
+        //-- Check that room description field is specified. --//
+        //-----------------------------------------------------//
+        if (mInfo.roomDescription === undefined) {
+            //----------------------------------------------------------------//
+            // If not, see if the field variable wRoomDescription exists.
+            //----------------------------------------------------------------//
+            try {
+                wRoomDescription = IOMy.functions.findInputWidget("wRoomDescription");
+            } catch (eInputWidgetError) {
+                //-- An exception is thrown if something is wrong. --//
+                bError = true;
+                aErrorMessages.push(eInputWidgetError.message);
+            }
+        } else {
+            wRoomDescription = mInfo.roomDescription;
+        }
+        
+        //----------------------------------------------//
+        //-- Check that room type field is specified. --//
+        //----------------------------------------------//
+        if (mInfo.roomType === undefined) {
+            //----------------------------------------------------------------//
+            // If not, see if the field variable wRoomType exists.
+            //----------------------------------------------------------------//
+            try {
+                wRoomType = IOMy.functions.findInputWidget("wRoomType");
+            } catch (eInputWidgetError) {
+                //-- An exception is thrown if something is wrong. --//
+                bError = true;
+                aErrorMessages.push(eInputWidgetError.message);
+            }
+        } else {
+            wRoomType = mInfo.roomType;
+        }
+
+        iPremiseId  = wPremise.getSelectedKey();
+        sRoomText   = wRoomName.getValue();
+        sRoomDesc   = wRoomDescription.getValue();
+        iRoomTypeId = wRoomType.getSelectedKey();
+
+        if (sRoomText === "") {
+            aErrorMessages.push("Room must have a name");
+            bError = true;
+        }
+
+        if (bError === true) {
+            jQuery.sap.log.error(aErrorMessages.join("\n"));
+            IOMy.common.showError(aErrorMessages.join("\n\n"), "Errors",
+                function () {
+                    if (wCallingWidget !== null) {
+                        wCallingWidget.setEnabled(true);
+                    }
+                }
+            );
+
+        } else {
+            //----------------------------------------------------------//
+            // Run the API to add the room
+            //----------------------------------------------------------//
+            try {
+                IOMy.apiphp.AjaxRequest({
+                    url : IOMy.apiphp.APILocation("rooms"),
+                    data : {
+                        "Mode" : "AddRoom",
+                        "PremiseId" : iPremiseId,
+                        "Name" : sRoomText,
+                        "Desc" : sRoomDesc, 
+                        "Floor" : 1,
+                        "RoomTypeId" : iRoomTypeId
+                    },
+
+                    onSuccess : function (responseType, roomData) {
+
+                        var iRoomId = roomData.Data.RoomId;
+
+                        //----------------------------------------------------------//
+                        // Run the API to give permission to the current user to
+                        // access it.
+                        //----------------------------------------------------------//
+                        IOMy.apiphp.AjaxRequest({
+                            url : IOMy.apiphp.APILocation("permissions"),
+                            data : {
+                                "Mode" : "UpdateRoomPerms",
+                                "UserId" : me.userId,
+                                "RoomId" : iRoomId,
+                                "Data" : "{\"Read\":1,\"DataRead\":1,\"Write\":1,\"StateToggle\":1}"
+                            },
+
+                            onSuccess : function (responseType, permData) {
+                                var sErrMessage;
+                                if (permData.Error === false) {
+                                    //--------------------------------------------//
+                                    // Show the success message and reload the core
+                                    // variables.
+                                    //--------------------------------------------//
+                                    IOMy.common.showSuccess(sRoomText+" added successfully.", "Success", 
+                                        function () {
+                                            //-- REFRESH ROOMS --//
+                                            IOMy.common.ReloadVariableRoomList( 
+                                                function () {
+                                                    try {
+                                                        //-- Flag that the Core Variables have been configured --//
+                                                        IOMy.common.CoreVariablesInitialised = true;
+                                                        IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+
+                                                    } catch(e654321) {
+                                                        //-- ERROR:  TODO: Write a better error message--//
+                                                        jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
+                                                    }
+                                                }
+                                            ); //-- END ROOMS LIST --//
+                                        },
+                                    "UpdateMessageBox");
+                                } else {
+                                    sErrMessage = "There was an error updating the room permissions: "+permData.ErrMesg;
+                                    jQuery.sap.log.error(sErrMessage);
+
+                                }
+                            },
+
+                            onFail : function (response) {
+                                var sErrMessage = "There was an error updating the room permissions: "+JSON.stringify(response);
+                                jQuery.sap.log.error(sErrMessage);
+                                IOMy.common.showError(sErrMessage, "Permissions Error");
+                            }
+
+                        });
+
+                    },
+                    onFail : function (response) {
+                        IOMy.common.showError("Update failed.", "Error");
+                        jQuery.sap.log.error(JSON.stringify(response));
+                        //-- Enable this switch --//
+                        oThisButton.setEnabled(true);
+                    }
+                });
+            } catch (e00033) {
+                IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
+            }
+        }
+    }
 
 });
