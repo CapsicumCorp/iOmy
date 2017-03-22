@@ -71,13 +71,13 @@ $.extend(IOMy.common,{
     //============================================//
 	//== LOCALE OPTIONS         				==//
 	//============================================//
-    bCountriesLoaded        : false,
+    bRegionsLoaded        : false,
     bLanguagesLoaded        : false,
     bStatesProvincesLoaded  : false,
     bPostCodesLoaded        : false,
     bTimezonesLoaded        : false,
     
-    Countries               : [],
+    Regions               : [],
     Languages               : [],
     StatesProvinces         : [],
     PostCodes               : [],
@@ -433,51 +433,38 @@ $.extend(IOMy.common,{
 		}
 	},
     
-    LoadCountries : function () {
+    LoadRegions : function (mSettings) {
         var me = this;
+        var fnSuccess;
+        var fnFail;
         
-        IOMy.apiodata.AjaxRequest({
-            Url : IOMy.apiodata.ODataLocation("countries"),
-            Columns : ["COUNTRIES_NAME", "COUNTRIES_PK"],
-            WhereClause : [],
-            OrderByClause : ["COUNTRIES_NAME asc"],
-
-            onSuccess : function (responseType, data) {
-                try {
-                    me.Countries = [];
-                    
-                    for (var i = 0; i < data.length; i++) {
-                        me.Countries.push({
-                            CountryId : data[i].COUNTRIES_PK,
-                            CountryName : data[i].COUNTRIES_NAME
-                        });
-                    }
-                    
-                    me.bCountriesLoaded = true;
-                } catch (e) {
-
-                    jQuery.sap.log.error("Error gathering Countries: "+JSON.stringify(e.message));
-                    me.bCountriesLoaded = false;
-                    
-                }
-            },
-
-            onFail : function (response) {
-                jQuery.sap.log.error("Error loading countries OData: "+JSON.stringify(response));
-                me.bCountriesLoaded = false;
+        //--------------------------------------------------------------------//
+        // Check the settings map for the two callback functions.
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined) {
+            //-- Success callback --//
+            if (mSettings.onSuccess === undefined) {
+                fnSuccess = function () {};
+            } else {
+                fnSuccess = mSettings.onSuccess;
             }
             
-        });
-    },
-    
-    LoadRegions : function () {
-        var me = this;
+            //-- Failure callback --//
+            if (mSettings.onFail === undefined) {
+                fnFail = function () {};
+            } else {
+                fnFail = mSettings.onFail;
+            }
+        } else {
+            fnSuccess   = function () {};
+            fnFail      = function () {};
+        }
         
         IOMy.apiodata.AjaxRequest({
-            Url : IOMy.apiodata.ODataLocation("countries"),
-            Columns : ["REGIONS_NAME", "REGIONS_PK"],
+            Url : IOMy.apiodata.ODataLocation("regions"),
+            Columns : ["REGION_NAME", "REGION_PK", "REGION_ABREVIATION"],
             WhereClause : [],
-            OrderByClause : ["REGIONS_NAME asc"],
+            OrderByClause : ["REGION_NAME asc"],
 
             onSuccess : function (responseType, data) {
                 try {
@@ -485,30 +472,57 @@ $.extend(IOMy.common,{
                     
                     for (var i = 0; i < data.length; i++) {
                         me.Regions.push({
-                            RegionId    : data[i].REGIONS_PK,
-                            RegionName  : data[i].REGIONS_NAME
+                            RegionId            : data[i].REGION_PK,
+                            RegionName          : data[i].REGION_NAME,
+                            RegionAbbreviation  : data[i].REGION_ABREVIATION
                         });
                     }
                     
                     me.bRegionsLoaded = true;
+                    fnSuccess();
                 } catch (e) {
 
                     jQuery.sap.log.error("Error gathering Regions: "+JSON.stringify(e.message));
                     me.bRegionsLoaded = false;
-                    
+                    fnFail();
                 }
             },
 
             onFail : function (response) {
                 jQuery.sap.log.error("Error loading regions OData: "+JSON.stringify(response));
                 me.bRegionsLoaded = false;
+                fnFail();
             }
             
         });
     },
     
-    LoadLanguages : function () {
+    LoadLanguages : function (mSettings) {
         var me = this;
+        var fnSuccess;
+        var fnFail;
+        
+        //--------------------------------------------------------------------//
+        // Check the settings map for the two callback functions.
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined) {
+            //-- Success callback --//
+            if (mSettings.onSuccess === undefined) {
+                fnSuccess = function () {};
+            } else {
+                fnSuccess = mSettings.onSuccess;
+            }
+            
+            //-- Failure callback --//
+            if (mSettings.onFail === undefined) {
+                fnFail = function () {};
+            } else {
+                fnFail = mSettings.onFail;
+            }
+        } else {
+            fnSuccess   = function () {};
+            fnFail      = function () {};
+        }
         
         IOMy.apiodata.AjaxRequest({
             Url : IOMy.apiodata.ODataLocation("language"),
@@ -528,98 +542,123 @@ $.extend(IOMy.common,{
                     }
                     
                     me.bLanguagesLoaded = true;
-                    
+                    fnSuccess();
                 } catch (e) {
 
                     jQuery.sap.log.error("Error gathering Languages: "+JSON.stringify(e.message));
                     me.bLanguagesLoaded = false;
-
+                    fnFail();
                 }
             },
 
             onFail : function (response) {
                 jQuery.sap.log.error("Error loading languages OData: "+JSON.stringify(response));
                 me.bLanguagesLoaded = false;
+                fnFail();
             }
         });
     },
     
-    LoadStatesProvinces : function () {
+//    LoadStatesProvinces : function () {
+//        var me = this;
+//        
+//        IOMy.apiodata.AjaxRequest({
+//            Url : IOMy.apiodata.ODataLocation("stateprovince"),
+//            Columns : ["STATEPROVINCE_PK","STATEPROVINCE_NAME"],
+//            WhereClause : [],
+//            OrderByClause : ["STATEPROVINCE_NAME asc"],
+//
+//            onSuccess : function (responseType, data) {
+//                try {
+//                    me.StatesProvinces = [];
+//                    
+//                    for (var i = 0; i < data.length; i++) {
+//                        me.StatesProvinces.push({
+//                            StateProvinceId : data[i].STATEPROVINCE_PK,
+//                            StateProvinceName : data[i].STATEPROVINCE_NAME
+//                        });
+//                    }
+//                    
+//                    me.bStatesProvincesLoaded = true;
+//                    
+//                } catch (e) {
+//
+//                    jQuery.sap.log.error("Error gathering States and Provinces: "+JSON.stringify(e.message));
+//                    me.bStatesProvincesLoaded = false;
+//                    
+//                }
+//            },
+//
+//            onFail : function (response) {
+//                jQuery.sap.log.error("Error loading stateprovince OData: "+JSON.stringify(response));
+//                me.bStatesProvincesLoaded = false;
+//            }
+//        });
+//    },
+//    
+//    LoadPostCodes : function () {
+//        var me = this;
+//        
+//        IOMy.apiodata.AjaxRequest({
+//            Url : IOMy.apiodata.ODataLocation("postcode"),
+//            Columns : ["POSTCODE_PK","POSTCODE_NAME"],
+//            WhereClause : [],
+//            OrderByClause : ["POSTCODE_NAME asc"],
+//
+//            onSuccess : function (responseType, data) {
+//                try {
+//                    me.PostCodes = [];
+//                    
+//                    for (var i = 0; i < data.length; i++) {
+//                        me.PostCodes.push({
+//                            PostCodeId : data[i].POSTCODE_PK,
+//                            PostCodeName : data[i].POSTCODE_NAME
+//                        });
+//                    }
+//                    
+//                    me.bPostCodesLoaded = true;
+//                    
+//                } catch (e) {
+//
+//                    jQuery.sap.log.error("Error gathering Post codes: "+JSON.stringify(e.message));
+//                    me.bPostCodesLoaded = false;
+//                    
+//                }
+//            },
+//
+//            onFail : function (response) {
+//                jQuery.sap.log.error("Error loading stateprovince OData: "+JSON.stringify(response));
+//                me.bPostCodesLoaded = false;
+//            }
+//        });
+//    },
+    
+    LoadTimezones : function (mSettings) {
         var me = this;
+        var fnSuccess;
+        var fnFail;
         
-        IOMy.apiodata.AjaxRequest({
-            Url : IOMy.apiodata.ODataLocation("stateprovince"),
-            Columns : ["STATEPROVINCE_PK","STATEPROVINCE_NAME"],
-            WhereClause : [],
-            OrderByClause : ["STATEPROVINCE_NAME asc"],
-
-            onSuccess : function (responseType, data) {
-                try {
-                    me.StatesProvinces = [];
-                    
-                    for (var i = 0; i < data.length; i++) {
-                        me.StatesProvinces.push({
-                            StateProvinceId : data[i].STATEPROVINCE_PK,
-                            StateProvinceName : data[i].STATEPROVINCE_NAME
-                        });
-                    }
-                    
-                    me.bStatesProvincesLoaded = true;
-                    
-                } catch (e) {
-
-                    jQuery.sap.log.error("Error gathering States and Provinces: "+JSON.stringify(e.message));
-                    me.bStatesProvincesLoaded = false;
-                    
-                }
-            },
-
-            onFail : function (response) {
-                jQuery.sap.log.error("Error loading stateprovince OData: "+JSON.stringify(response));
-                me.bStatesProvincesLoaded = false;
+        //--------------------------------------------------------------------//
+        // Check the settings map for the two callback functions.
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined) {
+            //-- Success callback --//
+            if (mSettings.onSuccess === undefined) {
+                fnSuccess = function () {};
+            } else {
+                fnSuccess = mSettings.onSuccess;
             }
-        });
-    },
-    
-    LoadPostCodes : function () {
-        var me = this;
-        
-        IOMy.apiodata.AjaxRequest({
-            Url : IOMy.apiodata.ODataLocation("postcode"),
-            Columns : ["POSTCODE_PK","POSTCODE_NAME"],
-            WhereClause : [],
-            OrderByClause : ["POSTCODE_NAME asc"],
-
-            onSuccess : function (responseType, data) {
-                try {
-                    me.PostCodes = [];
-                    
-                    for (var i = 0; i < data.length; i++) {
-                        me.PostCodes.push({
-                            PostCodeId : data[i].POSTCODE_PK,
-                            PostCodeName : data[i].POSTCODE_NAME
-                        });
-                    }
-                    
-                    me.bPostCodesLoaded = true;
-                    
-                } catch (e) {
-
-                    jQuery.sap.log.error("Error gathering Post codes: "+JSON.stringify(e.message));
-                    me.bPostCodesLoaded = false;
-                    
-                }
-            },
-
-            onFail : function (response) {
-                jQuery.sap.log.error("Error loading stateprovince OData: "+JSON.stringify(response));
-                me.bPostCodesLoaded = false;
+            
+            //-- Failure callback --//
+            if (mSettings.onFail === undefined) {
+                fnFail = function () {};
+            } else {
+                fnFail = mSettings.onFail;
             }
-        });
-    },
-    
-    LoadTimezones : function () {
-        var me = this;
+        } else {
+            fnSuccess   = function () {};
+            fnFail      = function () {};
+        }
         
         IOMy.apiodata.AjaxRequest({
             Url : IOMy.apiodata.ODataLocation("timezones"),
@@ -639,10 +678,12 @@ $.extend(IOMy.common,{
                     }
                     
                     me.bTimezonesLoaded = true;
+                    fnSuccess();
                 } catch (e) {
 
                     jQuery.sap.log.error("Error gathering Timezones: "+JSON.stringify(e.message));
                     me.bTimezonesLoaded = false;
+                    fnFail();
                     
                 }
             },
@@ -650,6 +691,7 @@ $.extend(IOMy.common,{
             onFail : function (response) {
                 jQuery.sap.log.error("Error loading timezone OData: "+JSON.stringify(response));
                 me.bTimezonesLoaded = false;
+                fnFail();
             }
         });
     },
@@ -790,17 +832,76 @@ $.extend(IOMy.common,{
             // Load Current Username into memory.
             
             // STEP 1 of 7: Procedures for refreshing lists.
-            this.LoadCountries();
-            this.LoadLanguages();
-            this.LoadStatesProvinces();
-            this.LoadPostCodes();
-            this.LoadTimezones();
-            this.LoadRoomTypes();
-        
-            // Do the next steps
-            IOMy.functions.getCurrentUsername( function () {
-                me.ReloadVariablePremiseList(fnCallback, fnFailCallback);
+            
+            //-- Load the Regions --//
+            me.LoadRegions({
+                onSuccess : function () {
+                    
+                    //-- Load the Languages --//
+                    me.LoadLanguages({
+                        onSuccess : function () {
+                            
+                            //-- Load the Timezones --//
+                            me.LoadTimezones({
+                                onSuccess : function () {
+                                    
+                                    //-- Load the Room Types --//
+                                    me.LoadRoomTypes({
+                                        onSuccess : function () {
+                                            
+                                            //-- Load the Premise Bedroom Options --//
+                                            me.LoadPremiseBedroomsOptions({
+                                                onSuccess : function () {
+                                                    
+                                                    //-- Load the Premise Occupant Options --//
+                                                    me.LoadPremiseOccupantsOptions({
+                                                        onSuccess : function () {
+                                                            
+                                                            //-- Load the Premise Floor Options --//
+                                                            me.LoadPremiseFloorsOptions({
+                                                                onSuccess : function () {
+                                                                    
+                                                                    //-- Load the Premise Room Options --//
+                                                                    me.LoadPremiseRoomsOptions({
+                                                                        onSuccess : function () {
+                                                                            
+                                                                            //-- Do the next steps --//
+                                                                            IOMy.functions.getCurrentUsername( function () {
+                                                                                me.ReloadVariablePremiseList(fnCallback, fnFailCallback);
+                                                                            });
+                                                                            
+                                                                        }
+                                                                    });
+                                                                    
+                                                                }
+                                                            });
+                                                            
+                                                        }
+                                                    });
+                                                    
+                                                }
+                                            });
+                                            
+                                        }
+                                    });
+                                    
+                                }
+                            });
+                            
+                        }
+                    });
+                    
+                }
             });
+//            this.LoadStatesProvinces();
+//            this.LoadPostCodes();
+//            this.LoadTimezones();
+//            this.LoadRoomTypes();
+        
+//            // Do the next steps
+//            IOMy.functions.getCurrentUsername( function () {
+//                me.ReloadVariablePremiseList(fnCallback, fnFailCallback);
+//            });
         }
     },
     
@@ -1689,6 +1790,18 @@ $.sap.require("IOMy.common.createExtraThingProperties");
 
 $.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
 $.sap.require("IOMy.common.LoadRoomTypes");
+
+$.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
+$.sap.require("IOMy.common.LoadPremiseBedroomsOptions");
+
+$.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
+$.sap.require("IOMy.common.LoadPremiseFloorsOptions");
+
+$.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
+$.sap.require("IOMy.common.LoadPremiseOccupantsOptions");
+
+$.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
+$.sap.require("IOMy.common.LoadPremiseRoomsOptions");
 
 $.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
 $.sap.require("IOMy.common.isCoreVariablesRefreshInProgress");

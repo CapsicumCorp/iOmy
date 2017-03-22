@@ -65,7 +65,7 @@ $.extend(IOMy.common,{
         //--------------------------------------------------------------------//
         IOMy.apiodata.AjaxRequest({
             Url : IOMy.apiodata.ODataLocation("premise_bedrooms"),
-            Columns : ["PREMISEBEDROOMS_PK", "PREMISEBEDROOMS_NAME"],
+            Columns : ["PREMISEBEDROOMS_PK", "PREMISEBEDROOMS_COUNT"],
             WhereClause : [],
             OrderByClause : [],
 
@@ -75,8 +75,8 @@ $.extend(IOMy.common,{
                     
                     for (var i = 0; i < data.length; i++) {
                         me.PremiseBedroomsOptions.push({
-                            BedroomsCount   : data[i].PREMISEBEDROOMS_NAME,
-                            BedroomsCountId : data[i].PREMISEBEDROOMS_PK
+                            BedroomCount   : data[i].PREMISEBEDROOMS_COUNT,
+                            BedroomCountId : data[i].PREMISEBEDROOMS_PK
                         });
                     }
 
@@ -85,7 +85,7 @@ $.extend(IOMy.common,{
                     // Call the success callback function
                     fnSuccess();
                 } catch (eLoadVariableError) {
-                    jQuery.sap.log.error("Error gathering premise floor count: "+JSON.stringify(eLoadVariableError.message));
+                    jQuery.sap.log.error("Error gathering premise bedroom count: "+JSON.stringify(eLoadVariableError.message));
                     me.bPremiseBedroomsOptionsLoaded = false;
                     
                     // Call the failure callback function

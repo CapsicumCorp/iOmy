@@ -46,9 +46,6 @@ $.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widge
 $.sap.require("IOMy.widgets.getAppFooter");
 
 $.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
-$.sap.require("IOMy.widgets.getCountryItems");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getGenderSelectBox");
 
 $.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
@@ -88,6 +85,9 @@ $.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widge
 $.sap.require("IOMy.widgets.getPremiseSelector");
 
 $.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
+$.sap.require("IOMy.widgets.getRegionItems");
+
+$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getRoomOptions");
 
 $.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
@@ -98,6 +98,9 @@ $.sap.require("IOMy.widgets.getStateProvinceItems");
 
 $.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getTimezoneItems");
+
+$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
+$.sap.require("IOMy.widgets.premiseOptionsSelectBox");
 
 $.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.roomTypesSelectBox");

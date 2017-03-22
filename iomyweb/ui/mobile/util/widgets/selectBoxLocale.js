@@ -27,18 +27,24 @@ $.sap.declare("IOMy.widgets.selectBoxLocale",true);
 $.extend(IOMy.widgets,{
     
     /**
-     * Creates a select box filled with countries as options.
+     * Creates a select box filled with regions as options.
      * 
-     * @returns {sap.m.Select}          Country select box.
+     * @returns {sap.m.Select}          Region select box.
      */
-    selectBoxCountries : function (sID) {
+    selectBoxRegions : function (sID) {
         // Capture scope
         var me = this;
-        
-        var wSBox = new sap.m.Select(sID, {
+        var wSBox;
+        var mSettings = {
             width : "100%",
-            items : me.getCountryItems()
-        });
+            items : me.getRegionItems()
+        };
+        
+        if (sID !== undefined) {
+            wSBox = new sap.m.Select(sID, mSettings);
+        } else {
+            wSBox = new sap.m.Select(mSettings);
+        }
         
         return wSBox;
     },
@@ -46,16 +52,22 @@ $.extend(IOMy.widgets,{
     /**
      * Creates a select box filled with languages as options.
      * 
-     * @returns {sap.m.Select}          Country select box.
+     * @returns {sap.m.Select}          Language select box.
      */
     selectBoxLanguages : function (sID) {
         // Capture scope
         var me = this;
-        
-        var wSBox = new sap.m.Select(sID, {
+        var wSBox;
+        var mSettings = {
             width : "100%",
             items : me.getLanguageItems()
-        });
+        };
+        
+        if (sID !== undefined) {
+            wSBox = new sap.m.Select(sID, mSettings);
+        } else {
+            wSBox = new sap.m.Select(mSettings);
+        }
         
         return wSBox;
     },
@@ -63,50 +75,56 @@ $.extend(IOMy.widgets,{
     /**
      * Creates a select box filled with post code/zip codes as options.
      * 
-     * @returns {sap.m.Select}          Country select box.
+     * @returns {sap.m.Select}          Post code select box.
      */
-    selectBoxPostCodes : function (sID) {
-        // Capture scope
-        var me = this;
-        
-        var wSBox = new sap.m.Select(sID, {
-            width : "100%",
-            items : me.getPostCodeItems()
-        });
-        
-        return wSBox;
-    },
+//    selectBoxPostCodes : function (sID) {
+//        // Capture scope
+//        var me = this;
+//        
+//        var wSBox = new sap.m.Select(sID, {
+//            width : "100%",
+//            items : me.getPostCodeItems()
+//        });
+//        
+//        return wSBox;
+//    },
     
     /**
      * Creates a select box filled with states/provinces as options.
      * 
-     * @returns {sap.m.Select}          Country select box.
+     * @returns {sap.m.Select}          State select box.
      */
-    selectBoxStatesProvinces : function (sID) {
-        // Capture scope
-        var me = this;
-        
-        var wSBox = new sap.m.Select(sID, {
-            width : "100%",
-            items : me.getStateProvinceItems()
-        });
-        
-        return wSBox;
-    },
+//    selectBoxStatesProvinces : function (sID) {
+//        // Capture scope
+//        var me = this;
+//        
+//        var wSBox = new sap.m.Select(sID, {
+//            width : "100%",
+//            items : me.getStateProvinceItems()
+//        });
+//        
+//        return wSBox;
+//    },
     
     /**
      * Creates a select box filled with timezones as options.
      * 
-     * @returns {sap.m.Select}          Country select box.
+     * @returns {sap.m.Select}          Timezone select box.
      */
     selectBoxTimezones : function (sID) {
         // Capture scope
         var me = this;
-        
-        var wSBox = new sap.m.Select(sID, {
+        var wSBox;
+        var mSettings = {
             width : "100%",
             items : me.getTimezoneItems()
-        });
+        };
+        
+        if (sID !== undefined) {
+            wSBox = new sap.m.Select(sID, mSettings);
+        } else {
+            wSBox = new sap.m.Select(mSettings);
+        }
         
         return wSBox;
     },

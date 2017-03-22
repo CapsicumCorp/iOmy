@@ -75,8 +75,8 @@ $.extend(IOMy.common,{
                     
                     for (var i = 0; i < data.length; i++) {
                         me.PremiseOccupantsOptions.push({
-                            OccupantCount   : data[i].PREMISEROOMS_NAME,
-                            OccupantCountId : data[i].PREMISEROOMS_PK
+                            OccupantCount   : data[i].PREMISEOCCUPANTS_NAME,
+                            OccupantCountId : data[i].PREMISEOCCUPANTS_PK
                         });
                     }
 
