@@ -104,8 +104,8 @@ $.sap.require("IOMy.devices.thermostat");
 //----------------------------------------//
 //-- 5.1.2 - LOAD FUNCTION MODULES 		--//
 //----------------------------------------//
-$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
-$.sap.require("IOMy.functions.DeviceLabels");
+//$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+//$.sap.require("IOMy.functions.DeviceLabels");
 
 //================================================//
 //== 5.2 - INITIALISE APPLICATION				==//
@@ -1384,9 +1384,10 @@ var aPages = [
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.login.Login\" Page!\n",
         
         "HelpInfo":     "Before you can use the app, you need to enter your username and password to "
-						+ "view and manage your devices."
+						+ "view and manage your devices.\n\nIn the demo version of iOmy. The username "
+                        + "is 'demo' and the password is 'demo'."
 	},
-	{
+	{// This is for a later version.
 		"Id":			"pForceSwitchUser",
 		"Location":		"mjs.login.ForceSwitchUser",
 		"Type":			"JS",
@@ -1421,23 +1422,16 @@ var aPages = [
                         + "has access to, regardless of their location. Some of these can be switched on or off "
                         + "depending on whether the current user has permission to do this."
 	},
-    // --- Room Overview And Unassigned Devices --- \\
+    // --- Room Overview --- \\
     {
 		"Id":			"pRoomsOverview",
 		"Location":		"mjs.rooms.Room",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.rooms.Room\" Page!\n",
         
-        "HelpInfo":     "This page lists all devices in the selected room and their current readings of "
-						+ "voltage, amps, kilowatts, and kilowatt/hour.\n\nYou can also switch these devices on "
-                        + "or off."
+        "HelpInfo":     "This page lists all devices in the selected room. Similar to the device overview page, only "
+                        + "it shows devices for a particular room."
 	},
-//    {
-//		"Id":			"pRoomsUnassignedDevices",
-//		"Location":		"mjs.rooms.UnassignedDevices",
-//		"Type":			"JS",
-//		"ErrMesg":		"Critical Error: Couldn't load \"mjs.rooms.UnassignedDevices\" Page!\n"
-//	},
     // --- Settings Views --- \\
     {
 		"Id":			"pSettingsDeviceList",

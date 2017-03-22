@@ -106,7 +106,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                 //===== REGION =====//
                 var oRegionTitle = new sap.m.Text({
                     text : "Region"
-                });
+                }).addStyleClass("MarTop16px");
     		    
 				var oRegionField = IOMy.widgets.selectBoxRegions(me.createId("addressRegion")).addStyleClass("SettingsDropdownInput");
                 oRegionField.setEnabled(false);
@@ -220,7 +220,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                                                 "AddressLine2" : me.byId("addressLine2").getValue(),
                                                 "AddressLine3" : me.byId("addressLine3").getValue(),
                                                 "AddressRegion" : me.byId("addressRegion").getSelectedKey(),
-                                                "AddressStateProvince" : sAddressStateProvince,
+                                                "AddressSubRegion" : sAddressStateProvince,
                                                 "AddressPostcode" : sAddressPostcode,
                                                 "AddressTimezone" : me.byId("addressTimezone").getSelectedKey(),
                                                 "AddressLanguage" : me.byId("addressLanguage").getSelectedKey()

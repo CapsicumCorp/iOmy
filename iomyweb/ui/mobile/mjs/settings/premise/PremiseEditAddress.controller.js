@@ -229,7 +229,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                                                 "AddressLine2" : sAddressLine2,
                                                 "AddressLine3" : sAddressLine3,
                                                 "AddressRegion" : sAddressRegion,
-                                                "AddressStateProvince" : sAddressStateProvince,
+                                                "AddressSubRegion" : sAddressStateProvince,
                                                 "AddressPostcode" : sAddressPostcode,
                                                 "AddressTimezone" : sAddressTimezone,
                                                 "AddressLanguage" : sAddressLanguage

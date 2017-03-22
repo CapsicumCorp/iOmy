@@ -131,7 +131,7 @@ $.extend(IOMy.devices.weatherfeed,{
         IOMy.help.PageInformation["pSettingsLinkAdd"] = "" +
             "An Open Weather Map Feed requires the key code and the station code before " +
             "it can be created. Once created, an item will automatically be created " +
-            "to access the feed.";
+            "to access the feed.\n\nHow to create and add OWM Account: www.iomy.org/openweathermap.php";
         
         //===============================================//
         // CONSTRUCT ELEMENTS
@@ -262,7 +262,7 @@ $.extend(IOMy.devices.weatherfeed,{
         var oField                  = oScope.byId(me.uiIDs.sLinkNameID+"Field");
         
         //-------------------------------------------------\\
-        // Is the hub a proper hub (does it have an ID)
+        // Is the name specified
         //-------------------------------------------------\\
         try {
             if (oField.getValue().trim().length === 0) {
