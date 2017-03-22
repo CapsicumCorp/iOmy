@@ -1472,7 +1472,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 		  == #3.6# - Public Regions                                 ==
 		  ============================================================*/
 		case "PublicRegion":
-			$sSQL .= "CREATE VIEW `".$sDBName."`.`VP_REGIONS` AS\n";
+			$sSQL .= "CREATE VIEW `".$sDBName."`.`VP_REGION` AS\n";
 			$sSQL .= "SELECT\n";
 			$sSQL .= "    `REGION_PK`, \n";
 			$sSQL .= "    `REGION_NAME`, \n";
