@@ -2433,7 +2433,7 @@ function dbChangePremiseDesc( $iPremiseId, $sDescription ) {
 }
 
 
-function dbChangePremiseAddress( $iPremiseAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $sAddressRegion, $sAddressSubRegion, $sAddressPostcode, $sAddressTimezone, $iAddressLanguageId ) {
+function dbChangePremiseAddress( $iPremiseAddressId, $sAddressLine1, $sAddressLine2, $sAddressLine3, $iAddressRegionId, $sAddressSubRegion, $sAddressPostcode, $iAddressTimezoneId, $iAddressLanguageId ) {
 	//--------------------------------------------//
 	//-- 1.0 - Declare Variables                --//
 	//--------------------------------------------//
@@ -2442,12 +2442,12 @@ function dbChangePremiseAddress( $iPremiseAddressId, $sAddressLine1, $sAddressLi
 	global $oRestrictedApiCore;
 	
 	//-- 1.2 - Other Varirables --//
-	$aResult			= array();	//-- ARRAY:		--//
-	$sSQL				= "";		//-- STRING:	Used to store the SQL string so it can be passed to the database functions. --//
-	$bError				= false;	//-- BOOL:		--//
-	$sErrMesg			= "";		//-- STRING:	--//
-	$sSchema			= "";		//-- STRING:	Used to store the name of the schema that needs updating. --//
-	$aInputVals			= array();	//-- ARRAY:		--//
+	$aResult		= array();	//-- ARRAY:		--//
+	$sSQL			= "";		//-- STRING:	Used to store the SQL string so it can be passed to the database functions. --//
+	$bError			= false;	//-- BOOL:		--//
+	$sErrMesg		= "";		//-- STRING:	--//
+	$sSchema		= "";		//-- STRING:	Used to store the name of the schema that needs updating. --//
+	$aInputVals		= array();	//-- ARRAY:		--//
 	
 	//--------------------------------------------//
 	//-- 2.0 - SQL Query						--//
@@ -2470,11 +2470,11 @@ function dbChangePremiseAddress( $iPremiseAddressId, $sAddressLine1, $sAddressLi
 				array( "Name"=>"AddressLine1",			"type"=>"STR",		"value"=>$sAddressLine1			),
 				array( "Name"=>"AddressLine2",			"type"=>"STR",		"value"=>$sAddressLine2			),
 				array( "Name"=>"AddressLine3",			"type"=>"STR",		"value"=>$sAddressLine3			),
-				array( "Name"=>"AddressRegionId",		"type"=>"INT",		"value"=>$sAddressRegion		),
+				array( "Name"=>"AddressRegionId",		"type"=>"INT",		"value"=>$iAddressRegionId		),
 				array( "Name"=>"AddressSubRegion",		"type"=>"STR",		"value"=>$sAddressSubRegion		),
 				array( "Name"=>"AddressPostcode",		"type"=>"STR",		"value"=>$sAddressPostcode		),
-				array( "Name"=>"AddressTimezoneId",		"type"=>"INT",		"value"=>$sAddressTimezone		),
-				array( "Name"=>"AddressLanguageId",		"type"=>"INT",		"value"=>$sAddressLanguageId	),
+				array( "Name"=>"AddressTimezoneId",		"type"=>"INT",		"value"=>$iAddressTimezoneId	),
+				array( "Name"=>"AddressLanguageId",		"type"=>"INT",		"value"=>$iAddressLanguageId	),
 				array( "Name"=>"PremiseAddressId",		"type"=>"BINT",		"value"=>$iPremiseAddressId		)
 			);
 			
