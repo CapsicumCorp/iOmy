@@ -34,7 +34,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
         me.odata.AjaxRequest({
             Url : me.odata.ODataLocation("premiselocation"),
             Columns : ["REGION_NAME", "REGION_PK", "LANGUAGE_PK", "LANGUAGE_NAME", 
-                        "USERADDRESS_POSTCODE", "USERADDRESS_SUBREGION",
+                        "PREMISEADDRESS_POSTCODE", "PREMISEADDRESS_SUBREGION",
                         "TIMEZONE_PK", "TIMEZONE_TZ", "PREMISEADDRESS_LINE1", "PREMISEADDRESS_LINE2",
                         "PREMISEADDRESS_LINE3", "PREMISEADDRESS_PK"],
             WhereClause : ["PREMISE_PK eq "+iPremiseId],
@@ -50,10 +50,10 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                 me.byId("addressLanguage").setSelectedKey(displayData.LANGUAGE_PK);
                 me.byId("addressLanguage").setEnabled(true);
                 
-                me.byId("addressPostCode").setValue(displayData.USERADDRESS_POSTCODE);
+                me.byId("addressPostCode").setValue(displayData.PREMISEADDRESS_POSTCODE);
                 me.byId("addressPostCode").setEnabled(true);
                 
-                me.byId("addressState").setValue(displayData.USERADDRESS_SUBREGION);
+                me.byId("addressState").setValue(displayData.PREMISEADDRESS_SUBREGION);
                 me.byId("addressState").setEnabled(true);
                 
                 me.byId("addressTimezone").setSelectedKey(displayData.TIMEZONE_PK);
@@ -121,7 +121,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                 
                 //===== STATE =====//
                 var oStateTitle = new sap.m.Text({
-                    text : "State/Province"
+                    text : "Subregion"
                 });
     		    
 				var oStateField = new sap.m.Input(me.createId("addressState"), {
@@ -203,6 +203,14 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                                 // Error checking and validation
                                 if (sAddressLine1 === "") {
                                     aErrorLog.push("Street Address is required.");
+                                    bError = true;
+                                }
+                                if (sAddressStateProvince === "") {
+                                    aErrorLog.push("Subregion is required.");
+                                    bError = true;
+                                }
+                                if (sAddressPostcode === "") {
+                                    aErrorLog.push("Post code is required.");
                                     bError = true;
                                 }
                                 

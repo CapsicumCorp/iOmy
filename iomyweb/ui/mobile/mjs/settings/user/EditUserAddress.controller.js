@@ -104,45 +104,24 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 	            ]);
                 
                 //===== REGION =====//
-                var oRegionTitle = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "*"
-                        }).addStyleClass("Text_red_13 PadRight5px"),
-                        new sap.m.Text({
-                            text : "Region"
-                        })
-                    ]
-                }).addStyleClass("MarTop16px");
+                var oRegionTitle = new sap.m.Text({
+                    text : "Region"
+                });
     		    
 				var oRegionField = IOMy.widgets.selectBoxRegions(me.createId("addressRegion")).addStyleClass("SettingsDropdownInput");
                 oRegionField.setEnabled(false);
                 
                 //===== LANGUAGE =====//
-				var oLanguageTitle = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "*"
-                        }).addStyleClass("Text_red_13 PadRight5px"),
-                        new sap.m.Text({
-                            text : " Language"
-                        })
-                    ]
+				var oLanguageTitle = new sap.m.Text({
+                    text : " Language"
                 });
     		    
 				var oLanguageField = IOMy.widgets.selectBoxLanguages(me.createId("addressLanguage")).addStyleClass("SettingsDropdownInput");
                 oLanguageField.setEnabled(false);
                 
                 //===== STATE =====//
-                var oStateTitle = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "*"
-                        }).addStyleClass("Text_red_13 PadRight5px"),
-                        new sap.m.Text({
-                            text : "State/Province"
-                        })
-                    ]
+                var oStateTitle = new sap.m.Text({
+                    text : "State/Province"
                 });
     		    
 				var oStateField = new sap.m.Input(me.createId("addressState"), {
@@ -151,15 +130,8 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                 oStateField.setEnabled(false);
                 
                 //===== POST CODE =====//
-                var oPostCodeTitle = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "*"
-                        }).addStyleClass("Text_red_13 PadRight5px"),
-                        new sap.m.Text({
-                            text : "Post Code"
-                        })
-                    ]
+                var oPostCodeTitle = new sap.m.Text({
+                    text : "Post Code"
                 });
     		    
 				var oPostCodeField = new sap.m.Input(me.createId("addressPostCode"), {
@@ -168,15 +140,8 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                 oPostCodeField.setEnabled(false);
                 
                 //===== TIMEZONE =====//
-                var oTimezoneTitle = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "*"
-                        }).addStyleClass("Text_red_13 PadRight5px"),
-                        new sap.m.Text({
-                            text : "Timezone"
-                        })
-                    ]
+                var oTimezoneTitle = new sap.m.Text({
+                    text : "Timezone"
                 });
     		    
 				var oTimezoneField = IOMy.widgets.selectBoxTimezones(me.createId("addressTimezone")).addStyleClass("SettingsDropdownInput");
@@ -185,15 +150,8 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                 //===== RESIDENTIAL ADDRESS =====//
                 
                 //===== STREET ADDRESS (LINE 1) =====//
-                var oLine1Title = new sap.m.HBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "*"
-                        }).addStyleClass("Text_red_13 PadRight5px"),
-                        new sap.m.Text({
-                            text : "Street Address Line 1"
-                        })
-                    ]
+                var oLine1Title = new sap.m.Text({
+                    text : "Street Address Line 1"
                 });
     		    
 				var oLine1Field = new sap.m.Input(me.createId("addressLine1"), {
@@ -230,9 +188,19 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                                 thisButton.setEnabled(false);
                                 var aErrorLog = [];
                                 var bError = false;
+                                var sAddressStateProvince = me.byId("addressState").getValue();
+                                var sAddressPostcode = me.byId("addressPostCode").getValue()
                                 
                                 if (me.byId("addressLine1").getValue() === "") {
                                     aErrorLog.push("Street Address is required.");
+                                    bError = true;
+                                }
+                                if (sAddressStateProvince === "") {
+                                    aErrorLog.push("Subregion is required.");
+                                    bError = true;
+                                }
+                                if (sAddressPostcode === "") {
+                                    aErrorLog.push("Post code is required.");
                                     bError = true;
                                 }
                                 
@@ -252,8 +220,8 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                                                 "AddressLine2" : me.byId("addressLine2").getValue(),
                                                 "AddressLine3" : me.byId("addressLine3").getValue(),
                                                 "AddressRegion" : me.byId("addressRegion").getSelectedKey(),
-                                                "AddressStateProvince" : me.byId("addressState").getValue(),
-                                                "AddressPostcode" : me.byId("addressPostCode").getValue(),
+                                                "AddressStateProvince" : sAddressStateProvince,
+                                                "AddressPostcode" : sAddressPostcode,
                                                 "AddressTimezone" : me.byId("addressTimezone").getSelectedKey(),
                                                 "AddressLanguage" : me.byId("addressLanguage").getSelectedKey()
                                             },
@@ -290,8 +258,9 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                 // Destroys the actual panel of the page. This is done to ensure that there
 				// are no elements left over which would increase the page size each time
 				// the page is visited.
-				if (me.byId("premisePanel") !== undefined)
+				if (me.byId("premisePanel") !== undefined) {
 					me.byId("premisePanel").destroy();
+                }
     		    
     		    var oPanel = new sap.m.Panel(me.createId("premisePanel"), {
     		    	backgroundDesign: "Transparent",
