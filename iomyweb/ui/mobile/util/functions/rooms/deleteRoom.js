@@ -1,7 +1,7 @@
 /*
-Title: iOmy Functions Module
+Title: Extension of Function Library (Delete Room)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
-Description: Declares various functions that are used across multiple pages.
+Description: Includes a function to delete a room 
 Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
@@ -48,6 +48,8 @@ $.extend(IOMy.functions, {
             throw mRoomIDResult.aErrorMessages.join('\n');
         }
         
+        //-- Check the callback function. --//
+        //-- TODO: This parameter will be used in this function later. --//
         if (fnCallback === undefined) {
             fnCallback = function () {}; // Declare that it's an empty function.
         }
