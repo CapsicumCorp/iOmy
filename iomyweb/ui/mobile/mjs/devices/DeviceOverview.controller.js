@@ -394,8 +394,9 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 		}); //-- END FOREACH LOOP --//
 		
         //-- Main Page Body --//
-        if (oController.byId("Panel") !== undefined)
+        if (oController.byId("Panel") !== undefined) {
             oController.byId("Panel").destroy();
+        }
 
         var oPanel = new sap.m.Panel( oController.createId("Panel"), {
            //-- Add Grouping box to Panel --//
@@ -476,25 +477,27 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 		var oController		= this;			//-- SCOPE:		Binds the current controller scope for subfunctions					--//
 		var aTask			= {};			//-- ARRAY:		This will hold a task that has being pulled from the task list --//
 
-		//-- Check the Length of the array to see if there is any jobs to do --//
-		if( oController.aAjaxTasks.High.length > 0 ) {
-			//-- Pull a task from the array --//
-			aTask = oController.aAjaxTasks.High.pop();
-			oController.RunAjaxTask(aTask);
-			
-		} else if( oController.aAjaxTasks.Mid.length > 0 ) {
-			//-- Pull a task from the array --//
-			aTask = oController.aAjaxTasks.Mid.pop();
-			oController.RunAjaxTask(aTask);
-				
-		} else {
-			if( oController.aAjaxTasks.Low.length > 0 ) {
-				//-- Pull a task from the array --//
-				aTask = oController.aAjaxTasks.Low.pop();
-				oController.RunAjaxTask(aTask);
-				
-			}
-		}
+        if (IOMy.common.bSessionTerminated === false) {
+            //-- Check the Length of the array to see if there is any jobs to do --//
+            if( oController.aAjaxTasks.High.length > 0 ) {
+                //-- Pull a task from the array --//
+                aTask = oController.aAjaxTasks.High.pop();
+                oController.RunAjaxTask(aTask);
+
+            } else if( oController.aAjaxTasks.Mid.length > 0 ) {
+                //-- Pull a task from the array --//
+                aTask = oController.aAjaxTasks.Mid.pop();
+                oController.RunAjaxTask(aTask);
+
+            } else {
+                if( oController.aAjaxTasks.Low.length > 0 ) {
+                    //-- Pull a task from the array --//
+                    aTask = oController.aAjaxTasks.Low.pop();
+                    oController.RunAjaxTask(aTask);
+
+                }
+            }
+        }
 	},
 	
 	RunAjaxTask: function( aTask ) {

@@ -48,7 +48,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 		var thisView		= oController.getView();
 		
 		// Import the device label functions
-        var LabelFunctions  = IOMy.functions.DeviceLabels;
+        //var LabelFunctions  = IOMy.functions.DeviceLabels;
         
 		thisView.addEventDelegate({
 			onBeforeShow: function(oEvent) {
@@ -132,12 +132,12 @@ sap.ui.controller("mjs.premise.DeviceData", {
                             if (oController.byId("NavSubHead_Title") !== undefined) {
                                 oController.byId("NavSubHead_Title").setText(IOMy.common.ThingList['_'+oEvent.data.ThingId].DisplayName.toUpperCase());
                                 // Add the subheading title widget to the list of labels that display the Thing name.
-                                LabelFunctions.addThingLabelWidget(oEvent.data.ThingId,
-                                    {
-                                        widgetID : oController.createId("NavSubHead_Title"),
-                                        uppercase : true
-                                    }
-                                );
+//                                LabelFunctions.addThingLabelWidget(oEvent.data.ThingId,
+//                                    {
+//                                        widgetID : oController.createId("NavSubHead_Title"),
+//                                        uppercase : true
+//                                    }
+//                                );
                             }
 
 							//----------------------------------------------------------------------------//

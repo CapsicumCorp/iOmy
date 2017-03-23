@@ -151,9 +151,6 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
         var me = this;
         var thisView = me.getView();
         
-        // Import the device label functions
-        var LabelFunctions = IOMy.functions.DeviceLabels;
-        
         thisView.addEventDelegate({
 			// Everything is rendered in this function before rendering.
 			onBeforeShow : function (evt) {
@@ -172,13 +169,6 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                 
                 // Create the title on the page.
                 me.byId("NavSubHead_Title").setText(me.oThing.DisplayName.toUpperCase());
-                // Add the subheading title widget to the list of labels that display the Thing name.
-                LabelFunctions.addThingLabelWidget(me.oThing.Id,
-                    {
-                        widgetID : me.createId("NavSubHead_Title"),
-                        uppercase : true
-                    }
-                );
                 
                 //-- Store the device state --//
                 me.iDeviceState = IOMy.common.ThingList["_"+me.oThing.Id].Status;

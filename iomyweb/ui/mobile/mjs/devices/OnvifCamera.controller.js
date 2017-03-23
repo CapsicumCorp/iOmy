@@ -65,7 +65,7 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
 		var thisView = me.getView();
         
         // Import the device label functions
-        var LabelFunctions = IOMy.functions.DeviceLabels;
+        //var LabelFunctions = IOMy.functions.DeviceLabels;
 		
 		thisView.addEventDelegate({
 			// Everything is rendered in this function before rendering.
