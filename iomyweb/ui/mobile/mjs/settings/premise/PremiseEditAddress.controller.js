@@ -175,8 +175,6 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 				var oLine3Field = new sap.m.Input(me.createId("addressLine3"), {
 					value : ""
 				}).addStyleClass("width100Percent SettingsTextInput");
-                
-                me.loadLocaleInfo(aPremise.Id);
 				
 				var oEditButton = new sap.m.VBox({
 					items : [
@@ -292,6 +290,8 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                         ]
                     })
                 );
+                
+                me.loadLocaleInfo(aPremise.Id);
 			}
 		});
 	},

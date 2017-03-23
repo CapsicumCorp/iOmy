@@ -175,13 +175,11 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 				var oLine3Field = new sap.m.Input(me.createId("addressLine3"), {
 					value : ""
 				}).addStyleClass("width100Percent SettingsTextInput");
-                
-                me.loadUserInfo();
 				
 				var oEditButton = new sap.m.VBox({
 					items : [
 						new sap.m.Link(me.createId("UpdateLink"), {
-                            enabled : true,
+                            enabled : false,
 							text : "Update",
 							press : function () {
                                 var thisButton = this;
@@ -269,6 +267,8 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 				
 				
 				thisView.byId("page").addContent(oPanel);
+                
+                me.loadUserInfo();
 			}
 		});
 	},
