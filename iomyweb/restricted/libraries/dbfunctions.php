@@ -1192,7 +1192,7 @@ function dbInsertUserAddress( $iUserId, $iLanguageId, $iRegionId, $sSubRegion, $
 			$sSQL .= "    `USERADDRESS_LINE3` ";
 			$sSQL .= ") VALUES ( ";
 			$sSQL .= "    :UserId,          :LanguageId, ";
-			$sSQL .= "    :RegionsId,       :SubRegion, ";
+			$sSQL .= "    :RegionId,        :SubRegion, ";
 			$sSQL .= "    :Postcode,        :TimezoneId, ";
 			$sSQL .= "    :Line1,           :Line2, ";
 			$sSQL .= "    :Line3 ";
@@ -1213,7 +1213,6 @@ function dbInsertUserAddress( $iUserId, $iLanguageId, $iRegionId, $sSubRegion, $
 			
 			//-- Run the SQL Query and save the results --//
 			$aResultInsert = $oRestrictedApiCore->oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
-			
 			
 		} catch(Exception $e2) {
 			$bError   = true;
