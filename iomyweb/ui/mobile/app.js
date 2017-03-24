@@ -1486,8 +1486,8 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.user.AddUser\" Page!\n",
         
-        "HelpInfo":     "This is where you can create new users if you have permission to do so. "
-                        + "Required fields are the Display Name, username, and Line 1 of the Street Address. "
+        "HelpInfo":     "This is where you can create new users if you have permission to do so.\n\n "
+                        + "Required fields are the Display Name, username, date of birth, and Line 1 of the Street Address.\n\n"
                         + "User information, address, and credentials are stored in the database."
 	},
     {

@@ -211,45 +211,47 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
         thisView.byId("extrasMenuHolder").destroyItems();
         thisView.byId("extrasMenuHolder").addItem(
             IOMy.widgets.getActionMenu({
-                id : me.createId("extrasMenu"+me.iRoomID),        // Uses the page ID
+                id : me.createId("extrasMenu"+me.iRoomID),        // Uses the page and room IDs
                 icon : "sap-icon://GoogleMaterial/more_vert",
                 items : [
                     {
                         text : "Delete This Room",
                         select : function () {
-                            this.setEnabled(false);
+                            var oButton = this;
+                            var sDialogTitle = "";
+                            oButton.setEnabled(false);
 
-                            var iNumOfDevices = IOMy.functions.getNumberOfDevicesInRoom(me.iRoomID);
-                            var sDevicesAttachedMessage = "";
-
-                            //-- A ROOM SHOULD BE DELETED ONLY WHEN THERE ARE NO DEVICES ATTACHED TO IT --//
-                            if (iNumOfDevices > 0) {
-                                sDevicesAttachedMessage += "There ";
-                                if (iNumOfDevices === 1) {
-                                    sDevicesAttachedMessage += "is "+iNumOfDevices+" device";
-                                } else {
-                                    sDevicesAttachedMessage += "are "+iNumOfDevices+" devices";
-                                }
-                                sDevicesAttachedMessage += " still assigned to this room.\n\n";
-                                sDevicesAttachedMessage += "Remove the devices from this room before deleting it.";
-
-                                jQuery.sap.log.error(sDevicesAttachedMessage);
-                                IOMy.common.showError(sDevicesAttachedMessage, "Devices still assigned");
-
-                                this.setEnabled(true);
-                            } else {
-                                //-- CONFIRM THAT YOU WISH TO DELETE THIS ROOM --//
-                                IOMy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
-                                    function () {
+                            //-- CONFIRM THAT YOU WISH TO DELETE THIS ROOM --//
+                            IOMy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
+                                function () {
+                                    try {
                                         IOMy.functions.deleteRoom(me.iRoomID,
                                             function () {
                                                 IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
                                             }
                                         );
-                                    }
-                                );
-                            }
 
+                                    } catch (err) {
+                                        console.log(JSON.stringify(err));
+                                        
+                                        if (err.name === "DevicesStillInRoomException") {
+                                            sDialogTitle = "Devices still assigned";
+                                            
+                                        } else if (err.name === "AttemptToDeleteOnlyRoomException") {
+                                            sDialogTitle = "Only room registered"
+                                            
+                                        }
+                                        
+                                        IOMy.common.showError(err.message, sDialogTitle,
+                                            function () {
+
+                                                oButton.setEnabled(true);
+                                            }
+                                        );
+                                        
+                                    }
+                                }
+                            );
                         }
                     }
                 ]

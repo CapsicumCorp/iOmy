@@ -40,9 +40,12 @@ $.extend(IOMy.functions, {
         // Declare and initialise variables and verify that the room ID is given
         // and that it is valid.
         //--------------------------------------------------------------------//
-        var validator       = IOMy.validation;
-        var mRoomIDResult   = validator.isRoomIDValid(iRoomId);
-        var oRoomToDelete   = null;
+        var validator               = IOMy.validation;
+        var mRoomIDResult           = validator.isRoomIDValid(iRoomId);
+        var oRoomToDelete           = null;
+        var iNumOfDevices           = 0;
+        var sErrMessage             = "";
+        var iNumOfRooms             = 0;
         
         if (mRoomIDResult.bResult === false) {
             throw mRoomIDResult.aErrorMessages.join('\n');
@@ -53,11 +56,49 @@ $.extend(IOMy.functions, {
         if (fnCallback === undefined) {
             fnCallback = function () {}; // Declare that it's an empty function.
         }
+
+        //--------------------------------------------------------------------//
+        // If there are any devices still attached, these will need to be
+        // removed first. Throw an exception.
+        //--------------------------------------------------------------------//
+        iNumOfDevices = IOMy.functions.getNumberOfDevicesInRoom(iRoomId);
+        if (iNumOfDevices > 0) {
+            sErrMessage += "There ";
+            
+            if (iNumOfDevices === 1) {
+                sErrMessage += "is "+iNumOfDevices+" device";
+            } else {
+                sErrMessage += "are "+iNumOfDevices+" devices";
+            }
+            
+            sErrMessage += " still assigned to this room.\n\n";
+            sErrMessage += "Remove the devices from this room before deleting it.";
+
+            jQuery.sap.log.error(sErrMessage);
+            
+            throw new DevicesStillInRoomException(sErrMessage);
+            
+        }
         
+        //--------------------------------------------------------------------//
+        // If this room is the only one registered in iOmy, it should not be
+        // deleted.
+        //--------------------------------------------------------------------//
+        iNumOfRooms             = IOMy.functions.getNumberOfRooms();
+        if (iNumOfRooms === 1) {
+            sErrMessage = "This is the only room left in iOmy! You need at least "+
+                    "one room to assign new devices to. This room will not be deleted " +
+                    "until you create another one.";
+            
+            jQuery.sap.log.error(sErrMessage);
+            
+            throw new AttemptToDeleteOnlyRoomException(sErrMessage);
+        }
+        
+        //--------------------------------------------------------------------//
+        // Run the API Ajax request to delete the room.
+        //--------------------------------------------------------------------//
         try {
-            //----------------------------------------------------------------//
-            // Run the API Ajax request to delete the room.
-            //----------------------------------------------------------------//
             IOMy.apiphp.AjaxRequest({
                 url: IOMy.apiphp.APILocation("rooms"),
                 data : {"Mode" : "DeleteRoom", "Id" : iRoomId},
@@ -71,18 +112,17 @@ $.extend(IOMy.functions, {
                         },
                     "UpdateMessageBox");
                 },
-                
+
                 onFail : function (response) {
-                    
+
                     IOMy.common.showError(oRoomToDelete.RoomName+" could not be removed.", "Error");
-                    Query.sap.log.error(oRoomToDelete.RoomName+" could not be removed.\n" + response.ErrMesg);
-                    
+                    jQuery.sap.log.error(oRoomToDelete.RoomName+" could not be removed.\n" + response.ErrMesg);
+
                 }
             });
         } catch (eAPIAccessError) {
             throw eAPIAccessError.message;
         }
-        
     }
     
 });

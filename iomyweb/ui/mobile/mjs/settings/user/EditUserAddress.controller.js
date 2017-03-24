@@ -25,8 +25,6 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 	functions : IOMy.functions,
     odata : IOMy.apiodata,
     
-    loadLocaleCBoxItems : IOMy.functions.loadLocaleCBoxItems,
-    
     userId : 0,
     
     /**
@@ -121,7 +119,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                 
                 //===== STATE =====//
                 var oStateTitle = new sap.m.Text({
-                    text : "State/Province"
+                    text : "Subregion"
                 });
     		    
 				var oStateField = new sap.m.Input(me.createId("addressState"), {
