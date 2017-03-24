@@ -143,7 +143,9 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "   primary key (CORE_PK) \n";
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset."; \n";
 			$sSQL .= "alter table `".$sDBName."`.`CORE` comment 'This table is used to store what the current and previous versions have been setup'; \n";
+			break;
 			
+		case 'CoreAddon':
 			$sSQL .= "create table `".$sDBName."`.COREADDON \n";
 			$sSQL .= "( \n";
 			$sSQL .= "   COREADDON_PK         integer not null auto_increment comment 'Primary Key', \n";
@@ -3482,7 +3484,9 @@ function DB_CreateTables( $sDBName, $aTables ) {
 					$aResult['Data'][$sTable]= $aTemp1['Result'];
 				} else {
 					$bError = true;
-					$sErrMesg .= "Problem Creating Table ".$aTemp1['ErrMesg'];
+					$sErrMesg .= "Problem Creating Table (".$sTable.") ".$aTemp1['ErrMesg'];
+					
+					echo $sSQL."\n";
 				}
 			}
 		}
@@ -5433,6 +5437,98 @@ function DB_InsertPremise( $sDBName, $iPremiseInfoId, $sPremiseName, $sPremiseDe
 	}
 }
 
+
+function DB_InsertPremiseAddress( $sDBName, $iPremiseId, $iLanguageId, $iTimezoneId, $iRegionId, $sSubRegion, $sPostcode, $sAddressLine1, $sAddressLine2, $sAddressLine3 ) {
+	//------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                       --//
+	//--    This function is used to add the default data to the database.  --//
+	//------------------------------------------------------------------------//
+	
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedDB;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught. --//
+	$aInputValsInsert   = array();      //-- ARRAY:     SQL bind input parameters. --//
+	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function. --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			//----------------------------------------//
+			//-- SQL Query - Create Default Data    --//
+			//----------------------------------------//
+			$sSQL .= "INSERT INTO `".$sDBName."`.`PREMISEADDRESS` ( ";
+			$sSQL .= "    `PREMISEADDRESS_PREMISE_FK`,      `PREMISEADDRESS_LANGUAGE_FK`, ";
+			$sSQL .= "    `PREMISEADDRESS_TIMEZONE_FK`,     `PREMISEADDRESS_REGION_FK`, ";
+			$sSQL .= "    `PREMISEADDRESS_SUBREGION`,       `PREMISEADDRESS_POSTCODE`, ";
+			$sSQL .= "    `PREMISEADDRESS_LINE1`,           `PREMISEADDRESS_LINE2`, ";
+			$sSQL .= "    `PREMISEADDRESS_LINE3`            ";
+			$sSQL .= ") VALUES ( ";
+			$sSQL .= "    :PremiseId,       :LanguageId,   ";
+			$sSQL .= "    :TimezoneId,      :RegionId,     ";
+			$sSQL .= "    :SubRegion,       :Postcode,     ";
+			$sSQL .= "    :AddressLine1,    :AddressLine2, ";
+			$sSQL .= "    :AddressLine3     ";
+			$sSQL .= "); \n";
+			
+			
+			//-- Input binding --//
+			$aInputValsInsert = array(
+				array( "Name"=>"PremiseId",                 "type"=>"BINT",         "value"=>$iPremiseId        ),
+				array( "Name"=>"LanguageId",                "type"=>"INT",          "value"=>$iLanguageId       ),
+				array( "Name"=>"TimezoneId",                "type"=>"INT",          "value"=>$iTimezoneId       ),
+				array( "Name"=>"RegionId",                  "type"=>"INT",          "value"=>$iRegionId         ),
+				array( "Name"=>"SubRegion",                 "type"=>"STR",          "value"=>$sSubRegion        ),
+				array( "Name"=>"Postcode",                  "type"=>"STR",          "value"=>$sPostcode         ),
+				array( "Name"=>"AddressLine1",              "type"=>"STR",          "value"=>$sAddressLine1     ),
+				array( "Name"=>"AddressLine2",              "type"=>"STR",          "value"=>$sAddressLine2     ),
+				array( "Name"=>"AddressLine3",              "type"=>"STR",          "value"=>$sAddressLine3     )
+			);
+			
+			//-- Run the SQL Query and save the results --//
+			$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+			
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResultInsert["Error"]===true ) {
+				$bError    = true;
+				$sErrMesg .= $aResultInsert["ErrMesg"];
+			}
+		} catch( Exception $e3) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return $aResultInsert;
+		
+	} else {
+		//var_dump( $oRestrictedDB->QueryLogs );
+		return array( "Error"=>true, "ErrMesg"=>"InsertPremiseAddress: ".$sErrMesg );
+	}
+}
 
 function DB_InsertPermPremise( $sDBName, $iUserId, $iPremiseId, $iPermOwner, $iPermWriter, $iPermStateToggle, $iPermRead, $iPermRoomAdmin ) {
 	//------------------------------------------------------------------------//

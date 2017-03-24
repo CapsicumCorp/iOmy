@@ -1046,7 +1046,7 @@ if($bError===false) {
 						//-- Tables         --//
 						//--------------------//
 						case "02_CreateTables1":
-							$aTemp   = DB_CreateTables( $sPostDatabaseName, array("Core", "Region", "Currency", "Language", "Timezone") );
+							$aTemp   = DB_CreateTables( $sPostDatabaseName, array("Core", "CoreAddon", "Region", "Currency", "Language", "Timezone") );
 							
 							//-- Insert the Core Values --//
 							if( $aTemp['Error']===false ) {
@@ -1397,32 +1397,46 @@ if($bError===false) {
 								//-- Extract the PremiseId --//
 								$iPremiseId = $aTempResult3B['LastId'];
 								
-								$aTempResult3C = DB_InsertHub( $sPostDatabaseName, $iPremiseId, $iHubTypeId, $sHubName, $sHubSerialCode, $sHubAddress );
+								
+								$aTempResult3C = DB_InsertPremiseAddress( $sPostDatabaseName, $iPremiseId, 1, 1, 14, "", "0000", "123 Your Street Name", "", "" );
 								
 								if( $aTempResult3C['Error']===true ) {
 									$bError    = true;
 									$iErrCode  = 7408;
 									$sErrMesg .= "Error Code:'7408' \n";
-									$sErrMesg .= "Problem inserting the Hubs! \n";
+									$sErrMesg .= "Problem inserting the Premise Address! \n";
 									$sErrMesg .= $aTempResult3C['ErrMesg'];
-									
 								} else {
-									//-- Extract the HubId --//
-									$iHubId = $aTempResult3C['LastId'];
+									//-- Extract the PremiseAddressId --//
+									$iPremiseAddressId = $aTempResult3C['LastId'];
 									
-									$aTempResult3D = DB_InsertRoom( $sPostDatabaseName, $iPremiseId );
+									$aTempResult3D = DB_InsertHub( $sPostDatabaseName, $iPremiseId, $iHubTypeId, $sHubName, $sHubSerialCode, $sHubAddress );
 									
 									if( $aTempResult3D['Error']===true ) {
 										$bError    = true;
-										$iErrCode  = 7409;
-										$sErrMesg .= "Error Code:'7409' \n";
-										$sErrMesg .= "Problem inserting the Rooms! \n";
+										$iErrCode  = 7410;
+										$sErrMesg .= "Error Code:'7410' \n";
+										$sErrMesg .= "Problem inserting the Hubs! \n";
 										$sErrMesg .= $aTempResult3D['ErrMesg'];
 										
 									} else {
-										//-- Extract the RoomId --//
-										$iRoomId = $aTempResult3D['LastId'];
+										//-- Extract the HubId --//
+										$iHubId = $aTempResult3C['LastId'];
 										
+										$aTempResult3D = DB_InsertRoom( $sPostDatabaseName, $iPremiseId );
+										
+										if( $aTempResult3D['Error']===true ) {
+											$bError    = true;
+											$iErrCode  = 7411;
+											$sErrMesg .= "Error Code:'7411' \n";
+											$sErrMesg .= "Problem inserting the Rooms! \n";
+											$sErrMesg .= $aTempResult3D['ErrMesg'];
+											
+										} else {
+											//-- Extract the RoomId --//
+											$iRoomId = $aTempResult3D['LastId'];
+											
+										}
 									}
 								}
 							}
@@ -1438,8 +1452,8 @@ if($bError===false) {
 						
 						if( $aTempResult4A['Error']===true ) {
 							$bError    = true;
-							$iErrCode  = 7410;
-							$sErrMesg .= "Error Code:'7410' \n";
+							$iErrCode  = 7420;
+							$sErrMesg .= "Error Code:'7420' \n";
 							$sErrMesg .= "Problem inserting the UserInfo! \n";
 							$sErrMesg .= $aTempResult4A['ErrMesg'];
 							
@@ -1451,8 +1465,8 @@ if($bError===false) {
 							
 							if( $aTempResult4B['Error']===true ) {
 								$bError    = true;
-								$iErrCode  = 7411;
-								$sErrMesg .= "Error Code:'7411' \n";
+								$iErrCode  = 7421;
+								$sErrMesg .= "Error Code:'7421' \n";
 								$sErrMesg .= "Problem inserting the User into the 'User' table! \n";
 								$sErrMesg .= $aTempResult4B['ErrMesg'];
 								
@@ -1460,51 +1474,67 @@ if($bError===false) {
 								//-- Extract the User Id --//
 								$iUserId = $aTempResult4B['LastId'];
 								
-								//-- Give the user permission to do admin modes --//
-								$aTempResult4C = DB_InsertPermPremise( $sPostDatabaseName, $iUserId, $iPremiseId, 1, 1, 1, 1, 1 );
+								
+								//-- Give the user address --//
+								$aTempResult4C = DB_InsertUserAddress( $sPostDatabaseName, $iUserId, 1, 14, "", "0000", 1, "", "", "" );
 								
 								if( $aTempResult4C['Error']===true ) {
 									$bError    = true;
-									$iErrCode  = 7412;
-									$sErrMesg .= "Error Code:'7412' \n";
-									$sErrMesg .= "Problem inserting the Permissions1! \n";
-									$sErrMesg .= "User=".$iUserId."  Premise=".$iPremiseId."\n";
+									$iErrCode  = 7422;
+									$sErrMesg .= "Error Code:'7422' \n";
+									$sErrMesg .= "Problem inserting the UserAddress! \n";
 									$sErrMesg .= $aTempResult4C['ErrMesg'];
 									
 								} else {
-									//-- Extract the PermissionId --//
-									$iPermissionId = $aTempResult4C['LastId'];
+									//-- Extract the User Address Id --//
+									$iUserAddressId = $aTempResult4C['LastId'];
 									
-									//-- Grant the Owner all server permissions --//
-									$aTempResult4D = DB_InsertPermServer( $sPostDatabaseName, $iUserId, 1, 1, 1 );
+									//-- Give the user permission to do admin modes --//
+									$aTempResult4D = DB_InsertPermPremise( $sPostDatabaseName, $iUserId, $iPremiseId, 1, 1, 1, 1, 1 );
 									
 									if( $aTempResult4D['Error']===true ) {
 										$bError    = true;
-										$iErrCode  = 7413;
-										$sErrMesg .= "Error Code:'7413' \n";
-										$sErrMesg .= "Problem inserting the Permissions2! \n";
+										$iErrCode  = 7424;
+										$sErrMesg .= "Error Code:'7424' \n";
+										$sErrMesg .= "Problem inserting the Permissions1! \n";
+										$sErrMesg .= "User=".$iUserId."  Premise=".$iPremiseId."\n";
 										$sErrMesg .= $aTempResult4D['ErrMesg'];
 										
 									} else {
 										//-- Extract the PermissionId --//
-										$iPermServerId = $aTempResult4D['LastId'];
+										$iPermissionId = $aTempResult4D['LastId'];
 										
-										//-- Grant the Owner all room permissions --//
-										$aTempResult4E = DB_InsertPermRoom( $sPostDatabaseName, $iUserId, $iRoomId, 1, 1, 1, 1 );
+										//-- Grant the Owner all server permissions --//
+										$aTempResult4E = DB_InsertPermServer( $sPostDatabaseName, $iUserId, 1, 1, 1 );
 										
 										if( $aTempResult4E['Error']===true ) {
 											$bError    = true;
-											$iErrCode  = 7414;
-											$sErrMesg .= "Error Code:'7414' \n";
-											$sErrMesg .= "Problem inserting the Permissions3! \n";
-											//$sErrMesg .= "UId = ".$iUserId." RId = ".$iRoomId."! \n";
-											
+											$iErrCode  = 7425;
+											$sErrMesg .= "Error Code:'7425' \n";
+											$sErrMesg .= "Problem inserting the Permissions2! \n";
 											$sErrMesg .= $aTempResult4E['ErrMesg'];
-											
 											
 										} else {
 											//-- Extract the PermissionId --//
-											$iPermRoomId = $aTempResult4E['LastId'];
+											$iPermServerId = $aTempResult4E['LastId'];
+											
+											//-- Grant the Owner all room permissions --//
+											$aTempResult4F = DB_InsertPermRoom( $sPostDatabaseName, $iUserId, $iRoomId, 1, 1, 1, 1 );
+											
+											if( $aTempResult4F['Error']===true ) {
+												$bError    = true;
+												$iErrCode  = 7428;
+												$sErrMesg .= "Error Code:'7428' \n";
+												$sErrMesg .= "Problem inserting the Permissions3! \n";
+												//$sErrMesg .= "UId = ".$iUserId." RId = ".$iRoomId."! \n";
+												
+												$sErrMesg .= $aTempResult4F['ErrMesg'];
+												
+												
+											} else {
+												//-- Extract the PermissionId --//
+												$iPermRoomId = $aTempResult4F['LastId'];
+											}
 										}
 									}
 								}
@@ -1522,8 +1552,8 @@ if($bError===false) {
 						
 						if( $aTempResult5A['Error']===true ) {
 							$bError    = true;
-							$iErrCode  = 7416;
-							$sErrMesg .= "Error Code:'7416' \n";
+							$iErrCode  = 7430;
+							$sErrMesg .= "Error Code:'7430' \n";
 							$sErrMesg .= "Problem creating the \"WatchInputs\" database user! \n";
 							
 						} else {
@@ -1531,8 +1561,8 @@ if($bError===false) {
 							
 							if( $aTempResult5B['Error']===true ) {
 								$bError    = true;
-								$iErrCode  = 7417;
-								$sErrMesg .= "Error Code:'7417' \n";
+								$iErrCode  = 7431;
+								$sErrMesg .= "Error Code:'7431' \n";
 								$sErrMesg .= "Problem inserting the \"WatchInputs\" UserInfo! \n";
 								$sErrMesg .= $aTempResult5B['ErrMesg'];
 								
@@ -1541,8 +1571,8 @@ if($bError===false) {
 								
 								if( $aTempResult5C['Error']===true ) {
 									$bError    = true;
-									$iErrCode  = 7418;
-									$sErrMesg .= "Error Code:'7418' \n";
+									$iErrCode  = 7432;
+									$sErrMesg .= "Error Code:'7432' \n";
 									$sErrMesg .= "Problem inserting the \"WatchInputs\" user into the 'User' table! \n";
 									$sErrMesg .= $aTempResult5C['ErrMesg'];
 									
@@ -1557,8 +1587,8 @@ if($bError===false) {
 									
 									if( $aTempResult5D['Error']===true ) {
 										$bError    = true;
-										$iErrCode  = 7419;
-										$sErrMesg .= "Error Code:'7419' \n";
+										$iErrCode  = 7433;
+										$sErrMesg .= "Error Code:'7433' \n";
 										$sErrMesg .= "Problem granting the \"WatchInputs\" user permission to the hub! \n";
 										$sErrMesg .= $aTempResult5D['ErrMesg'];
 										
