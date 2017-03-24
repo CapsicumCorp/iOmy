@@ -713,7 +713,7 @@ function PrepareAddNewLink( $aLink ) {
 						//-- ERROR --//
 						$bError = true;
 						$iErrCode  = 15+$aTempResult4["ErrCode"];
-						$sErrMesg .= "Error Code:0x".$iErrCode." \n";
+						$sErrMesg .= "Link Error Code:0x".$iErrCode." \n";
 						$sErrMesg .= $aTempResult4["ErrMesg"];
 					}
 					
