@@ -39,19 +39,19 @@ default-character-set=utf8
 
     default-storage-engine=MYISAM
 
-    max_connections=100
+    max_connections=30
 
 query_cache_type = 1
 query_cache_size=1M
-query_cache_limit=256K
+query_cache_limit=64K
 
     table_open_cache=256
 
-    tmp_table_size=18M
+    tmp_table_size=1M
 
     thread_cache_size=8
 
-    myisam_max_sort_file_size=100G
+    myisam_max_sort_file_size=8G
 
     myisam_sort_buffer_size=35M
 
@@ -65,8 +65,10 @@ query_cache_limit=256K
 
 lc_messages_dir=%datafolder%/components/mysql/sbin/share/mysql/english
 
+innodb_buffer_pool_size = 16M
+
 innodb_log_file_size = 5M
-innodb_log_buffer_size = 8M
+innodb_log_buffer_size = 1M
 innodb_flush_log_at_trx_commit = 2
 innodb_lock_wait_timeout = 500
 innodb_file_per_table
