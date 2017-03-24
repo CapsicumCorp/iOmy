@@ -101,6 +101,9 @@ $.sap.require("IOMy.functions.validateSecurePassword");
 // Room Functions
 //----------------------------------------------------------------------------//
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.rooms.addRoom");
+
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
 $.sap.require("IOMy.functions.rooms.deleteRoom");
 
 //----------------------------------------------------------------------------//
@@ -111,3 +114,9 @@ $.sap.require("IOMy.functions.time.getMaximumDateInMonth");
 
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
 $.sap.require("IOMy.functions.time.isLeapYear");
+
+//----------------------------------------------------------------------------//
+// Permissions Functions
+//----------------------------------------------------------------------------//
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.updateRoomPermissions");

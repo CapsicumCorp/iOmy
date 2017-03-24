@@ -264,12 +264,11 @@ sap.ui.controller("mjs.settings.user.AddUser", {
 
         //===== STATE =====\\
         var oStateTitle = new sap.m.Text({
-            text : "State/Province"
+            text : "Subregion"
         });
 
-        me.wStateField = new sap.m.Select({
-            width : "100%",
-            items : IOMy.widgets.getStateProvinceItems()
+        me.wStateField = new sap.m.Input({
+            
         }).addStyleClass("SettingsDropdownInput");
 
         //===== POST CODE =====\\
@@ -277,9 +276,8 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             text : "Post Code"
         });
 
-        me.wPostCodeField = new sap.m.Select({
-            width : "100%",
-            items : IOMy.widgets.getPostCodeItems()
+        me.wPostCodeField = new sap.m.Input({
+            
         }).addStyleClass("SettingsDropdownInput");
 
         //===== TIMEZONE =====\\
@@ -513,8 +511,8 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         var sAddressLine2           = me.wAddressLine2Field.getValue();
         var sAddressLine3           = me.wAddressLine3Field.getValue();
         var iAddressRegion          = me.wRegionField.getSelectedKey();
-        var iAddressStateProvince   = me.wStateField.getSelectedKey();
-        var iAddressPostcode        = me.wPostCodeField.getSelectedKey();
+        var sAddressSubregion       = me.wStateField.getValue();
+        var sAddressPostcode        = me.wPostCodeField.getValue();
         var iAddressTimezone        = me.wTimezoneField.getSelectedKey();
         var iAddressLanguage        = me.wLanguageField.getSelectedKey();
         var sUsername               = me.wUsernameField.getValue();
@@ -614,8 +612,8 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                         "AddressLine2" : sAddressLine2,
                         "AddressLine3" : sAddressLine3,
                         "AddressRegion" : iAddressRegion,
-                        "AddressStateProvince" : iAddressStateProvince,
-                        "AddressPostcode" : iAddressPostcode,
+                        "AddressSubRegion" : sAddressSubregion,
+                        "AddressPostcode" : sAddressPostcode,
                         "AddressTimezone" : iAddressTimezone,
                         "AddressLanguage" : iAddressLanguage,
                         "Username" : sUsername,
