@@ -1648,25 +1648,29 @@ var aPages = [
 		"Id":			"pDeviceDoorLock",
 		"Location":		"mjs.devices.DoorLock",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.DoorLock\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.DoorLock\" Page!\n",
+		"HelpInfo":		"This feature is still in development."
 	},
 	{ 
 		"Id":			"pDeviceWindowSensor",
 		"Location":		"mjs.devices.WindowSensor",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.WindowSensor\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.WindowSensor\" Page!\n",
+		"HelpInfo":		"This feature is still in development."
 	},
 	{ 
 		"Id":			"pDeviceTestThermostat",
 		"Location":		"mjs.devices.TestThermostat",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.TestThermostat\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.TestThermostat\" Page!\n",
+		"HelpInfo":		"This feature is still in development."
 	},
 	{
 		"Id":			"pDeviceScales",
 		"Location":		"mjs.devices.Scales",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Scales\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Scales\" Page!\n",
+		"HelpInfo":		"This feature is still in development."
 	},
 	/* No current pages 
 	{
@@ -1692,7 +1696,8 @@ var aPages = [
 		"Id":			"pDeviceGaragedoor",
 		"Location":		"mjs.devices.Garagedoor",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Garagedoor\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Garagedoor\" Page!\n",
+		"HelpInfo":		"This feature is still in development."
 	},
     //--------------------------------------------------------------------//
     // Staging
