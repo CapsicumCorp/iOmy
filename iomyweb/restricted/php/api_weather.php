@@ -476,9 +476,8 @@ if( $bError===false ) {
 							}
 						}
 					} else {
-						$bError = true;
-						$sErrMesg .= "Error Code:'0304' \n";
-						$sErrMesg .= $aCommsLookup['ErrMesg'];
+						//-- Flag that no comms were found --//
+						$bFound = false;
 					}
 					
 				} catch( Exception $e0305 ) {
