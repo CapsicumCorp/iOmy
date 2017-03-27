@@ -365,6 +365,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
             text : "Apply",
             press : function () {
                 var aRoomIDs = [];
+                this.setEnabled(false);
                 
                 $.each(me.roomsToUpdate, function (sIndex, mInfo) {
                     if (sIndex !== undefined && sIndex !== null && mInfo !== undefined && mInfo !== null) {
@@ -378,6 +379,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                     me.UpdatePermissionsForRoom(me.wUserSelectBox.getSelectedKey(), 0, aRoomIDs);
                 } else {
                     IOMy.common.showError("You must select at least one room to apply the new permissions to.");
+                    this.setEnabled(true);
                 }
             }
         }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink");
@@ -730,7 +732,11 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                     // report it as an error.
                     //--------------------------------------------------------//
                     if (me.aErrors.length === aRoomIDs.length) {
-                        IOMy.common.showError("There was an error updating the room permissions", "Error");
+                        IOMy.common.showError("There was an error updating the room permissions", "Error",
+                            function () {
+                                me.wApplyButton.setEnabled(true);
+                            }
+                        );
                     }
                     //--------------------------------------------------------//
                     // If some rooms failed to have new permissions set, then
@@ -738,9 +744,13 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                     // successfully.
                     //--------------------------------------------------------//
                     else if (me.aErrors.length > 0 && me.aErrors.length < aRoomIDs.length) {
-                        IOMy.common.ReloadCoreVariables(
+                        IOMy.common.ReloadVariablePremiseList(
                             function () {
-                                IOMy.common.showWarning("Some permissions updated successfully, but some could not be updated.\n\n"+me.aErrors.join('\n'), "Error");
+                                IOMy.common.showWarning("Some permissions updated successfully, but some could not be updated.\n\n"+me.aErrors.join('\n'), "Error",
+                                    function () {
+                                        me.wApplyButton.setEnabled(true);
+                                    }
+                                );
                             }
                         );
                     }
@@ -750,9 +760,13 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                     // successfully.
                     //--------------------------------------------------------//
                     else if (me.aErrors.length === 0) {
-                        IOMy.common.ReloadCoreVariables(
+                        IOMy.common.ReloadVariablePremiseList(
                             function () {
-                                IOMy.common.showSuccess("Room Permissions updated successfully!", "Success");
+                                IOMy.common.showSuccess("Room Permissions updated successfully!", "Success",
+                                    function () {
+                                        me.wApplyButton.setEnabled(true);
+                                    }
+                                );
                             }
                         );
                     }

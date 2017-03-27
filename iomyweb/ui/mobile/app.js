@@ -1572,13 +1572,25 @@ var aPages = [
 		"Id":			"pSettingsRoomPermissions",
 		"Location":		"mjs.settings.permissions.RoomPermission",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.permissions.RoomPermission\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.permissions.RoomPermission\" Page!\n",
+        
+        "HelpInfo":     "You can set different permissions for different rooms in a given premise for a user.\n\n"
+                        + "Granting and revoking permissions is easy. Simply use the form to specify read access, "
+                        + "access to room information, write access for the room(s), and device management permission.\n\n"
+                        + "Every room in a selected premise is listed below the form. You can select which rooms the "
+                        + "new permissions should apply to."
 	},
     {
 		"Id":			"pSettingsPremisePermissions",
 		"Location":		"mjs.settings.permissions.PremisePermission",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.permissions.PremisePermission\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.permissions.PremisePermission\" Page!\n",
+        
+        "HelpInfo":     "This page is used to make adjustments to premise permissions for different users. Example: "
+                        + "a user can be given access to a premise they couldn't access before or have their premise "
+                        + "permissions revoked if required.\n\nThe form allows you to select the user and the premise "
+                        + "to apply the permissions to. You can set read/write permission, device management and "
+                        + "information access, and room management permission."
 	},
     {
 		"Id":			"pDeviceData",
@@ -1612,13 +1624,25 @@ var aPages = [
 		"Id":			"pThermostat",
 		"Location":		"mjs.devices.Thermostat",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Thermostat\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Thermostat\" Page!\n",
+        
+        "HelpInfo":     "Shows an overview of the weather from a selected station. The information "
+                        + "given are as follows:\n\n"
+                        + "* Weather outside\n"
+                        + "* Sunrise/sunset times\n"
+                        + "* Air pressure\n"
+                        + "* Wind speed and direction\n"
+                        + "* Temperature and humidity\n"
 	},
     {
 		"Id":			"pMotionSensor",
 		"Location":		"mjs.devices.MotionSensor",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.MotionSensor\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.MotionSensor\" Page!\n",
+        
+        "HelpInfo":     "Shows whether it's currently on or off, when any motion was last detected, "
+                        + "the temperature, battery level, and the tamper reading (whether it's secure "
+                        + "or not)."
 	},
     { 
 		"Id":			"pDeviceDoorLock",
@@ -1656,7 +1680,13 @@ var aPages = [
 		"Id":			"pDeviceBPM",
 		"Location":		"mjs.devices.BPM",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.BPM\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.BPM\" Page!\n",
+        
+        "HelpInfo":     "This feature is still in development.\n\nBlood pressure monitors will "
+                        + "display not only the blood pressure reading (systol/diastol, 120/80) "
+                        + "and heart rate, but also whether it's on or off, battery level, and "
+                        + "when it was last used.\n\nYou will be able to view the results for "
+                        + "for each registered user."
 	},
     {
 		"Id":			"pDeviceGaragedoor",
@@ -1671,19 +1701,22 @@ var aPages = [
 		"Id":			"pStagingHome",
 		"Location":		"mjs.staging.StagingHome",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.StagingHome\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.StagingHome\" Page!\n",
+        "Staging":      true
 	},
 	{ 
 		"Id":			"pRulesOverview",
 		"Location":		"mjs.staging.RulesOverview",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.RulesOverview\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.RulesOverview\" Page!\n",
+        "Staging":      true
 	},
 	{ 
 		"Id":			"pAddRule",
 		"Location":		"mjs.staging.AddRule",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.AddRule\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.AddRule\" Page!\n",
+        "Staging":      true
 	},
 	
 ];
@@ -1719,14 +1752,11 @@ $.each( aPages, function (iIndex, aPageData) {
 		//------------------------------------//
         // Add the help information to memory
         //------------------------------------//
-        if (aPageData.HelpInfo !== undefined) {
+        if (aPageData.HelpInfo !== undefined || aPageData.Staging) {
             IOMy.help.PageInformation[aPageData.Id] = aPageData.HelpInfo;
-        } else {
-            // Pages with no help information will show the ID indicating that
-            // the page needs to show help information.
-            // TODO: Help information must be provided before the activity can
-            // be created.
-            IOMy.help.PageInformation[aPageData.Id] = aPageData.Id;
+        } else if (aPageData.HelpInfo === undefined && aPageData.Staging !== true) {
+            //IOMy.help.PageInformation[aPageData.Id] = aPageData.Id;
+            throw new NoHelpMessageForPageException(aPageData.Id+" does not have a help message! This must be specified before the page can be created.");
         }
 		
         oApp.addPage(
@@ -1738,7 +1768,11 @@ $.each( aPages, function (iIndex, aPageData) {
 		);
 
 	} catch(ePLogin) {
-		console.log( sErMesg+ePLogin.message );
+        if (ePLogin.name === "NoHelpMessageForPageException") {
+            console.log( ePLogin.message );
+        } else {
+            console.log( sErMesg+ePLogin.message );
+        }
 	}
 });
 

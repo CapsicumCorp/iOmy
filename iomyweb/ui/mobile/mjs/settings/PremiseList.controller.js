@@ -358,7 +358,7 @@ sap.ui.controller("mjs.settings.PremiseList", {
 							IOMy.common.NavigationChangePage( "pSettingsPremiseInfo", {} );
                             this.setEnabled(true);
 						}
-					}).addStyleClass("ButtonNoBorder IOMYButton PremiseOverviewRoomButton TextSize16px TextLeft width100Percent minheight15px");
+					}).addStyleClass("ButtonNoBorder IOMYButton PremiseOverviewRoomButton TextSize16px TextLeft minheight15px");
 				}
                 
                 // Create the show/hide hub list button. May or may not be used, depending on whether

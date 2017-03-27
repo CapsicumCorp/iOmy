@@ -33,6 +33,14 @@ function IOmyException(message) {
 }
 
 //----------------------------------------------------------------------------//
+// Pages
+//----------------------------------------------------------------------------//
+function NoHelpMessageForPageException(message) {
+    IOmyException.call(this, message);
+    this.name       = "NoHelpMessageForPageException";
+}
+
+//----------------------------------------------------------------------------//
 // Sessions and Users
 //----------------------------------------------------------------------------//
 function UserNotSignedInException(message) {

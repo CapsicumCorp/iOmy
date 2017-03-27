@@ -253,6 +253,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
             enabled : false,
             text : "Apply",
             press : function () {
+                this.setEnabled(false);
                 if (me.premisesChanged[mPremiseInfo.Index] === true) {
                     me.UpdatePermissionsForPremise(me.wUserSelectBox.getSelectedKey(), mPremiseInfo.Id);
                 }
@@ -575,19 +576,34 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
             
             onSuccess : function (responseType, data) {
                 if (data.Error === false) {
-                    IOMy.common.showSuccess("Premise Permissions updated successfully!", "Success");
+                    IOMy.common.ReloadVariablePremiseList(
+                        function () {
+                            IOMy.common.showSuccess("Premise Permissions updated successfully!", "Success",
+                                function () {
+                                    me.wApplyButton.setEnabled(true);
+                                }
+                            );
+                        }
+                    );
                     // Reset the changed flag for this premise
                     me.premisesChanged["_"+iPremiseId] = false;
-                    me.wApplyButton.setEnabled(false);
                 } else {
                     jQuery.sap.log.error("There was an error updating the premise permissions: "+data.ErrMesg);
-                    IOMy.common.showError("There was an error updating the premise permissions", "Error");
+                    IOMy.common.showError("There was an error updating the premise permissions", "Error",
+                        function () {
+                            me.wApplyButton.setEnabled(true);
+                        }
+                    );
                 }
             },
             
             onFail : function (response) {
                 jQuery.sap.log.error("There was an error updating the premise permissions: "+JSON.stringify(response));
-                IOMy.common.showError("There was an error updating the premise permissions", "Error");
+                IOMy.common.showError("There was an error updating the premise permissions", "Error",
+                    function () {
+                        me.wApplyButton.setEnabled(true);
+                    }
+                );
             }
             
         });
