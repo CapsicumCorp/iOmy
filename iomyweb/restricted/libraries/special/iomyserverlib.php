@@ -6073,7 +6073,7 @@ function InsertTheDatabaseCoreValues( $sDBName ) {
 		//----------------------------------------------------//
 		//-- 3.1 - Perform the insert                       --//
 		//----------------------------------------------------//
-		$aCoreResult = DB_InsertCore( $sDBName, "iOmy (Vanilla)", 0, 4, 3, $iCurrentUTS );
+		$aCoreResult = DB_InsertCore( $sDBName, "iOmy (Vanilla)", 0, 4, 4, $iCurrentUTS );
 		
 		//----------------------------------------------------//
 		//-- 3.2 - Check for errors                         --//
@@ -6098,7 +6098,7 @@ function InsertTheDatabaseCoreValues( $sDBName ) {
 		//----------------------------------------------------//
 		//-- 4.1 - Insert the Schema Name into the database --//
 		//----------------------------------------------------//
-		$aCoreAddonResult = DB_InsertCoreAddon( $sDBName, $iCoreId, "iOmy Schema", 0, 4, 3, $iCurrentUTS );
+		$aCoreAddonResult = DB_InsertCoreAddon( $sDBName, $iCoreId, "iOmy Schema", 0, 4, 4, $iCurrentUTS );
 		
 		//----------------------------------------------------//
 		//-- 4.2 - Check for errors                         --//
