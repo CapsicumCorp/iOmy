@@ -86,12 +86,12 @@ if($bError===false) {
 		//-- NOTE: Valid modes are going to be "MostRecentValue" --//
 		
 		//-- Verify that the mode is supported --//
-		if( $sPostMode!=="MostRecentValue"  ) {
+		if( $sPostMode!=="MostRecentValue" && $sPostMode!=="MostRecentTwoValues" ) {
 			$bError = true;
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
 			$sErrMesg .= "Please use a valid \"Mode\" parameter. \n";
-			$sErrMesg .= "eg. \n \"MostRecentValue\" \n\n";
+			$sErrMesg .= "eg. \n \"MostRecentValue\" or \"MostRecentTwoValues\" \n\n";
 		}
 		
 	} catch( Exception $e0102 ) {
@@ -99,7 +99,7 @@ if($bError===false) {
 		$sErrMesg .= "Error Code:'0102' \n";
 		$sErrMesg .= "No \"Mode\" parameter! \n";
 		$sErrMesg .= "Please use a valid \"Mode\" parameter. \n";
-		$sErrMesg .= "eg. \n \"MostRecentValue\" \n\n";
+		$sErrMesg .= "eg. \n \"MostRecentValue\" or \"MostRecentTwoValues\" \n\n";
 		//sErrMesg .= e0011.message;
 	}
 	
@@ -179,10 +179,10 @@ if( $bError===false ) {
 				//-- 5.1.1 - Lookup the most recent value                           --//
 				//--------------------------------------------------------------------//
 				if( $aIOInfo["DataEnumeration"]===0 || $aIOInfo["DataEnumeration"]===2 ) {
-					$aTempResult = GetIODataMostRecent( $aIOInfo["DataTypeId"], $iPostId, $iEndUTS );
+					$aTempResult = GetIODataMostRecent( $aIOInfo["DataTypeId"], $iPostId, $iEndUTS, 1 );
 					
 				} else if( $aIOInfo["DataEnumeration"]===1 ) {
-					$aTempResult = GetIODataMostRecentEnum( $aIOInfo["DataTypeId"], $iPostId, $iEndUTS );
+					$aTempResult = GetIODataMostRecentEnum( $aIOInfo["DataTypeId"], $iPostId, $iEndUTS, 1 );
 					
 				} else {
 					//-- Display an Error Message --//
@@ -213,7 +213,50 @@ if( $bError===false ) {
 				$sErrMesg .= "Error Code:'1400' \n";
 				$sErrMesg .= $e1400->getMessage();
 			}
-			
+		
+		//================================================================//
+		//== 5.2 - MODE: MostRecentTwoValues                            ==//
+		//================================================================//
+		} else if( $sPostMode==="MostRecentTwoValues" ) {
+			try {
+				//--------------------------------------------------------------------//
+				//-- 5.2.1 - Lookup the most recent value                           --//
+				//--------------------------------------------------------------------//
+				if( $aIOInfo["DataEnumeration"]===0 || $aIOInfo["DataEnumeration"]===2 ) {
+					$aTempResult = GetIODataMostRecent( $aIOInfo["DataTypeId"], $iPostId, $iEndUTS, 2 );
+					
+				} else if( $aIOInfo["DataEnumeration"]===1 ) {
+					$aTempResult = GetIODataMostRecentEnum( $aIOInfo["DataTypeId"], $iPostId, $iEndUTS, 2 );
+					
+				} else {
+					//-- Display an Error Message --//
+					$bError = true;
+					$sErrMesg .= "Error Code:'2401' \n";
+					$sErrMesg .= "IO has a unrecognised Enumeration type! \n";
+					$sErrMesg .= "Please use a valid IO that this API supports! \n";
+				}
+				
+				//--------------------------------------------------------------------//
+				//-- 5.2.2 - Check for errors                                       --//
+				//--------------------------------------------------------------------//
+				if( $bError===false ) {
+					if( $aTempResult["Error"]===true ) {
+						//-- Display an Error Message --//
+						$bError = true;
+						$sErrMesg .= "Error Code:'2402' \n";
+						$sErrMesg .= "Internal API Error! \n";
+						$sErrMesg .= $aTempResult["ErrMesg"];
+					} else {
+						$aResult = $aTempResult['Data'];
+					}
+				}
+				
+			} catch( Exception $e2400 ) {
+				//-- Display an Error Message --//
+				$bError    = true;
+				$sErrMesg .= "Error Code:'2400' \n";
+				$sErrMesg .= $e2400->getMessage();
+			}	
 			
 			
 		//================================================================//

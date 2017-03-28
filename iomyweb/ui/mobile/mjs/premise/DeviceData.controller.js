@@ -1456,6 +1456,8 @@ sap.ui.controller("mjs.premise.DeviceData", {
 				//-- CURRENT VALUE			--//
 				//----------------------------//
 				if( sFilterRBValue==="CurV" ) {
+					
+					/*
 					//-- LOOKUP THE URL --//
 					sAPIUrl = oController.ConvertIODataTypeToOdataString( aDataIO.DataType );
 					
@@ -1539,6 +1541,74 @@ sap.ui.controller("mjs.premise.DeviceData", {
 							oTile.setState("Loaded");
 						}
 					});
+					*/
+					
+					oTile.setState("Loading");
+					
+					
+					IOMy.apiphp.AjaxRequest({
+						"url": IOMy.apiphp.APILocation("mostrecent"),
+						"data": {
+							"Mode":     "MostRecentTwoValues",
+							"Id":       iIOId
+						},
+						"onSuccess": function ( sResponseType, aData ) {
+							try {
+								if( aData!==undefined && aData!==null  ) {
+									if( typeof aData['Error']==="undefined" ) {
+										if( aData[0]!==undefined && aData[0]!==null ) {
+											if( aData[0].UTS!==undefined && aData[0].UTS!==null ) {
+												//--------------------------------------------//
+												//-- IF THERE IS MORE THAN 1 VALUE          --//
+												//--------------------------------------------//
+												if( aData.length >=2 ) {
+													
+													//------------------------------------------------------------//
+													//-- Work out if it is decreasing, neutral, increasing      --//
+													//------------------------------------------------------------//
+													if( aData[0].Value===aData[1].Value ) {
+														//-- Value Unchanged --//
+														bSuccessful = oController.UpdateGenericTileWithNewValue( oController, iArrayId, aData[0].Value, aData[0].UOM_NAME, "None", "Neutral" );
+														
+													} else if( aData[0].Value>=aData[1].Value ) {
+														//-- Increasing Value --//
+														bSuccessful = oController.UpdateGenericTileWithNewValue( oController, iArrayId, aData[0].Value, aData[0].UOM_NAME, "Up", "Good" );
+														
+													} else {
+														//-- Decreasing Value --//
+														bSuccessful = oController.UpdateGenericTileWithNewValue( oController, iArrayId, aData[0].Value, aData[0].UOM_NAME, "Down", "Critical" );
+														
+													}
+													
+												//--------------------------------------------//
+												//-- ELSE IF THERE IS JUST 1 VALUE          --//
+												//--------------------------------------------//
+												} else if( aData.length===1 ) {
+													//-- Set the colour to Neutral since not enough data provided to determine if up, down, neutral --//
+													bSuccessful = oController.UpdateGenericTileWithNewValue( oController, iArrayId, aData[0].Value, aData[0].UOM_NAME, "None", "Neutral" );
+												}
+											}
+										}
+									}
+								}
+							} catch( e5678) {
+								console.log( e5678.message );
+							}
+							
+							//-- Flag that the Tile has been loaded --//
+							oTile.setState("Loaded");
+						},
+						"onFail" : function (response) {
+							IOMy.common.showError("There was an error retriving the value of IO "+iIOId);
+							
+							//-- Recursively check for more Tasks --//
+							oController.RecursiveLoadAjaxData();
+						}
+					});
+							
+							
+					
+					
 				//----------------------------//
 				//-- MINIMUM VALUE			--//
 				//----------------------------//

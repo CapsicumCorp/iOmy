@@ -7537,7 +7537,7 @@ function dbGetIODataAggregation( $sAggregationType, $sDataType, $iIOId, $iStartU
 }
 
 
-function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
+function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS, $iRowLimit=1 ) {
 	//----------------------------------------//
 	//-- 1.0 - Declare Variables            --//
 	//----------------------------------------//
@@ -7581,7 +7581,7 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 				$sSQL .= "WHERE `IO_PK` = :IOId \n";
 				$sSQL .= "AND `UTS` <= :EndUTS \n";
 				$sSQL .= "ORDER BY `UTS` DESC \n";
-				$sSQL .= "LIMIT 1 ";
+				$sSQL .= "LIMIT ".$iRowLimit." ";
 				
 				//-- Input Binding --//
 				$aInputVals = array(
@@ -7599,7 +7599,12 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 				);
 				
 				//-- Execute the SQL Query --//
-				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				if( $iRowLimit!==1 ) {
+					$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+				} else {
+					$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				}
+				
 				
 			}
 		} catch( Exception $e2 ) {
@@ -7618,8 +7623,8 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 					//-- Return no results --//
 					if( $sCalcedValueType==="STR" ) {
 						$aResult = array(
-							"Error"	=> false,
-							"Data"	=> array(
+							"Error"     => false,
+							"Data"      => array(
 								"Value"     => "",
 								"IOId"      => $iIOId,
 								"UTS"       => 0
@@ -7627,14 +7632,41 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 						);
 					} else {
 						$aResult = array(
-							"Error"    => false,
-							"Data"     => array(
+							"Error"     => false,
+							"Data"      => array(
 								"Value"     => 0,
 								"IOId"      => $iIOId,
 								"UTS"       => 0
 							)
 						);
 					}
+				} else if( $aResult["ErrMesg"]==="No Rows Found! Code:0" ) {
+					
+					//-- Return no results --//
+					if( $sCalcedValueType==="STR" ) {
+						$aResult = array(
+							"Error"     => false,
+							"Data"      => array(
+								array(
+									"Value"     => "",
+									"IOId"      => $iIOId,
+									"UTS"       => 0
+								)
+							)
+						);
+					} else {
+						$aResult = array(
+							"Error"    => false,
+							"Data"     => array(
+								array(
+									"Value"     => 0,
+									"IOId"      => $iIOId,
+									"UTS"       => 0
+								)
+							)
+						);
+					}
+					
 				} else {
 					$bError = true;
 					$sErrMesg = $aResult["ErrMesg"];
@@ -7656,7 +7688,7 @@ function dbGetIODataMostRecent( $sDataType, $iIOId, $iEndUTS ) {
 }
 
 
-function dbGetIODataMostRecentEnum( $iDataType, $iIOId, $iEndUTS ) {
+function dbGetIODataMostRecentEnum( $iDataType, $iIOId, $iEndUTS, $iRowLimit=1 ) {
 	//----------------------------------------//
 	//-- 1.0 - Declare Variables            --//
 	//----------------------------------------//
@@ -7702,7 +7734,7 @@ function dbGetIODataMostRecentEnum( $iDataType, $iIOId, $iEndUTS ) {
 			$sSQL .= "WHERE `IO_PK` = :IOId \n";
 			$sSQL .= "AND `UTS` <= :EndUTS \n";
 			$sSQL .= "ORDER BY `UTS` DESC \n";
-			$sSQL .= "LIMIT 1 ";
+			$sSQL .= "LIMIT ".$iRowLimit." ";
 			
 			//-- Input Binding --//
 			$aInputVals = array(
@@ -7720,7 +7752,11 @@ function dbGetIODataMostRecentEnum( $iDataType, $iIOId, $iEndUTS ) {
 			);
 			
 			//-- Execute the SQL Query --//
-			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+			if( $iRowLimit!==1 ) {
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+			} else {
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+			}
 				
 		} catch( Exception $e2 ) {
 			$bError   = true;
@@ -7753,7 +7789,7 @@ function dbGetIODataMostRecentEnum( $iDataType, $iIOId, $iEndUTS ) {
 	}
 }
 
-function dbGetIODataMostRecentEnumBit( $iDataType, $iIOId, $iEndUTS, $iBitsToCheck ) {
+function dbGetIODataMostRecentEnumBit( $iDataType, $iIOId, $iEndUTS, $iBitsToCheck, $iRowLimit ) {
 	//----------------------------------------//
 	//-- 1.0 - Declare Variables            --//
 	//----------------------------------------//
@@ -7800,7 +7836,7 @@ function dbGetIODataMostRecentEnumBit( $iDataType, $iIOId, $iEndUTS, $iBitsToChe
 			$sSQL .= "AND `UTS` <= :EndUTS \n";
 			$sSQL .= "AND `".$sValueColumn."` & :iBits \n";
 			$sSQL .= "ORDER BY `UTS` DESC \n";
-			$sSQL .= "LIMIT 1 ";
+			$sSQL .= "LIMIT ".$iRowLimit." ";
 			
 			
 			//-- Input Binding --//
@@ -7820,7 +7856,11 @@ function dbGetIODataMostRecentEnumBit( $iDataType, $iIOId, $iEndUTS, $iBitsToChe
 			);
 			
 			//-- Execute the SQL Query --//
-			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+			if( $iRowLimit!==1 ) {
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+			} else {
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+			}
 				
 		} catch( Exception $e2 ) {
 			$bError   = true;

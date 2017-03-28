@@ -3304,7 +3304,7 @@ function GetIODataAggregation( $sAggregationType, $iDataType, $sIOId, $sStartUTS
 }
 
 
-function GetIODataMostRecent( $iDataType, $sIOId, $sEndUTS ) {
+function GetIODataMostRecent( $iDataType, $sIOId, $sEndUTS, $iRowLimit=1 ) {
 	
 	//-- Ensure that certain parameters are integers --//
 	$iIOId          = intval( $sIOId, 10 );
@@ -3314,13 +3314,13 @@ function GetIODataMostRecent( $iDataType, $sIOId, $sEndUTS ) {
 	$aConvertedDataType = ConvertDataTypeToName( $iDataType );
 	
 	//-- Retrieve the IO Aggregation Data --//
-	$aResult = dbGetIODataMostRecent( $aConvertedDataType["Value"], $iIOId, $iEndUTS );
+	$aResult = dbGetIODataMostRecent( $aConvertedDataType["Value"], $iIOId, $iEndUTS, $iRowLimit );
 	//-- Return the results --//
 	return $aResult;
 }
 
 
-function GetIODataMostRecentEnum( $iDataType, $sIOId, $sEndUTS ) {
+function GetIODataMostRecentEnum( $iDataType, $sIOId, $sEndUTS, $iRowLimit=1 ) {
 	
 	//-- Ensure that certain parameters are integers --//
 	$iIOId          = intval( $sIOId, 10 );
@@ -3329,7 +3329,7 @@ function GetIODataMostRecentEnum( $iDataType, $sIOId, $sEndUTS ) {
 	//-- Convert Datatype to name --//
 	if( $iDataType===1 || $iDataType===2 || $iDataType===3 ) {
 		//-- Retrieve the IO Aggregation Data --//
-		$aResult = dbGetIODataMostRecentEnum( $iDataType, $iIOId, $iEndUTS );
+		$aResult = dbGetIODataMostRecentEnum( $iDataType, $iIOId, $iEndUTS, $iRowLimit );
 		//-- Return the results --//
 		return $aResult;
 		
@@ -3338,7 +3338,7 @@ function GetIODataMostRecentEnum( $iDataType, $sIOId, $sEndUTS ) {
 	}
 }
 
-function GetIODataMostRecentEnumBit( $iDataType, $sIOId, $sEndUTS, $iBitsToCheckFor ) {
+function GetIODataMostRecentEnumBit( $iDataType, $sIOId, $sEndUTS, $iBitsToCheckFor, $iRowLimit=1 ) {
 	
 	//-- Ensure that certain parameters are integers --//
 	$iIOId          = intval( $sIOId, 10 );
@@ -3349,7 +3349,7 @@ function GetIODataMostRecentEnumBit( $iDataType, $sIOId, $sEndUTS, $iBitsToCheck
 	if( $iDataType===1 || $iDataType===2 || $iDataType===3 ) {
 		
 		//-- Retrieve the IO Aggregation Data --//
-		$aResult = dbGetIODataMostRecentEnumBit( $iDataType, $iIOId, $iEndUTS, $iBitsToCheckFor );
+		$aResult = dbGetIODataMostRecentEnumBit( $iDataType, $iIOId, $iEndUTS, $iBitsToCheckFor, $iRowLimit );
 		//-- Return the results --//
 		return $aResult;
 		
