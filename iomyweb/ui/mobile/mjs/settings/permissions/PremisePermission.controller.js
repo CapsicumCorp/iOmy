@@ -129,62 +129,64 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
         var me                      = this;
         var thisView                = me.getView();
         var getPremiseSelector      = IOMy.widgets.getPremiseSelector;
-        
-        //====================================================================//
-        // User field
-        //====================================================================//
-        me.wUserLabel = new sap.m.Label({
-            text : "User"
-        }).addStyleClass("PaddingToMatchButtonText");
-        
-        me.wUserSelectBox = new sap.m.Select({
-            width : "100%"
-        });
-        
-        //====================================================================//
-        // Premise Field
-        //====================================================================//
-        me.wPremiseLabel = new sap.m.Label({
-            text : "Premise"
-        }).addStyleClass("PaddingToMatchButtonText");
-        
-        me.wPremiseSelectBox = getPremiseSelector(me.createId("premiseBox")).addStyleClass("SettingsDropdownInput width100Percent");
-        
-        //====================================================================//
-        // Main containing element
-        //====================================================================//
-        me.wPanel = new sap.m.Panel({
-            content : [
-                new sap.m.VBox({
-                    items : [
-                        // Label for the user select box
-                        new sap.m.VBox({
-                            items : [
-                                new sap.m.VBox({
-                                    items : [ me.wUserLabel ]
-                                })
-                            ]
-                        }).addStyleClass("ConsistentMenuHeader ListItem width100Percent"),
-                        new sap.m.VBox({
-                            items : [me.wUserSelectBox]
-                        }).addStyleClass("PadLeft8px PadRight8px"),
-                        
-                        new sap.m.VBox({
-                            items : [
-                                new sap.m.VBox({
-                                    items : [ me.wPremiseLabel ]
-                                })
-                            ]
-                        }).addStyleClass("ConsistentMenuHeader BorderTop ListItem width100Percent"),
-                        new sap.m.VBox({
-                            items : [me.wPremiseSelectBox]
-                        }).addStyleClass("PadLeft8px PadRight8px")
-                    ]
-                }).addStyleClass("")
-            ]
-        }).addStyleClass("MasterPanel UserInputForm PanelNoPadding PadTop3px PadBottom15px");
+        var sDialogTitle            = "";
         
         try {
+            //====================================================================//
+            // User field
+            //====================================================================//
+            me.wUserLabel = new sap.m.Label({
+                text : "User"
+            }).addStyleClass("PaddingToMatchButtonText");
+
+            me.wUserSelectBox = new sap.m.Select({
+                width : "100%"
+            });
+
+            //====================================================================//
+            // Premise Field
+            //====================================================================//
+            me.wPremiseLabel = new sap.m.Label({
+                text : "Premise"
+            }).addStyleClass("PaddingToMatchButtonText");
+
+            me.wPremiseSelectBox = getPremiseSelector(me.createId("premiseBox")).addStyleClass("SettingsDropdownInput width100Percent");
+
+            //====================================================================//
+            // Main containing element
+            //====================================================================//
+            me.wPanel = new sap.m.Panel({
+                content : [
+                    new sap.m.VBox({
+                        items : [
+                            // Label for the user select box
+                            new sap.m.VBox({
+                                items : [
+                                    new sap.m.VBox({
+                                        items : [ me.wUserLabel ]
+                                    })
+                                ]
+                            }).addStyleClass("ConsistentMenuHeader ListItem width100Percent"),
+                            new sap.m.VBox({
+                                items : [me.wUserSelectBox]
+                            }).addStyleClass("PadLeft8px PadRight8px"),
+
+                            // Label for the premise select box
+                            new sap.m.VBox({
+                                items : [
+                                    new sap.m.VBox({
+                                        items : [ me.wPremiseLabel ]
+                                    })
+                                ]
+                            }).addStyleClass("ConsistentMenuHeader BorderTop ListItem width100Percent"),
+                            new sap.m.VBox({
+                                items : [me.wPremiseSelectBox]
+                            }).addStyleClass("PadLeft8px PadRight8px")
+                        ]
+                    }).addStyleClass("")
+                ]
+            }).addStyleClass("MasterPanel UserInputForm PanelNoPadding PadTop3px PadBottom15px");
+            
             // Populate the users select box with the viewable users
             IOMy.widgets.getListOfUsersForPremisePermissions(me.wUserSelectBox, me.wPremiseSelectBox.getSelectedKey(),
                 //--------------------------------//
@@ -222,9 +224,21 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                     });
                 }
             );
-
-        } catch (e) {
-            IOMy.common.showError(e.message, "Error");
+        } catch (err) {
+            
+            //----------------------------------------------------------------//
+            // We expect a NoPremisesVisibleException to be thrown at some point.
+            //----------------------------------------------------------------//
+            if (err.name === "NoPremisesVisibleException") {
+                sDialogTitle = "No premises available";
+                // Show an error message and go back to the previous page
+                // once closed.
+                IOMy.common.showError(err.message + " You will not be able to edit the permissions until you are granted permission to do so.", sDialogTitle, function () {
+                    IOMy.common.NavigationTriggerBackForward(false);
+                });
+            } else {
+                sDialogTitle = "";
+            }
         }
     },
     

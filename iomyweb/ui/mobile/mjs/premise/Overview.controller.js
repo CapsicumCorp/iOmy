@@ -47,7 +47,7 @@ sap.ui.controller("mjs.premise.Overview", {
 		thisView.addEventDelegate({
 			onBeforeShow : function (evt) {
                 me.DestroyUI();
-                
+                var oPremiseCBox;
 				//----------------------------------------------------//
 				//-- Refresh the Navigational buttons               --//
                 //----------------------------------------------------//
@@ -58,13 +58,22 @@ sap.ui.controller("mjs.premise.Overview", {
                 me.aElementsToDestroy.push("panel");
                 
                 //=== Create the Premise combo box ===//
-                var oPremiseCBox = IOMy.widgets.getPremiseSelector(me.createId("premiseBox")).addStyleClass("SettingsDropdownInput width100Percent");
                 try {
+                    oPremiseCBox = IOMy.widgets.getPremiseSelector(me.createId("premiseBox")).addStyleClass("SettingsDropdownInput width100Percent");
                     oPremiseCBox.attachChange( function () {
                         me.composeRoomList(this.getSelectedKey());
                     });
                 } catch(e) {
-                    // Do nothing
+                    
+                    if (e.name === "NoPremisesVisibleException") {
+                        oPremiseCBox = new sap.m.Text({
+                            text : e.message + ""
+                        });
+                    } else {
+                        oPremiseCBox = new sap.m.Text({
+                            text : e.message
+                        });
+                    }
                 }
                 
                 var oPremiseCBoxContainer = new sap.m.VBox({
@@ -76,7 +85,10 @@ sap.ui.controller("mjs.premise.Overview", {
                     items: [oPremiseCBoxContainer]
                 });
 
-                me.composeRoomList();
+                //-- Build the room list if there are any premises visible. --//
+                if (IOMy.common.PremiseList.length !== 0) {
+                    me.composeRoomList();
+                }
                 
                 me.wPanel = new sap.m.Panel(me.createId("panel"), {
                     backgroundDesign: "Transparent",

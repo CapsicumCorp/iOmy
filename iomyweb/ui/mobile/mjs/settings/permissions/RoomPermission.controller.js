@@ -216,267 +216,266 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
         var thisView                = me.getView();
         var getPremiseSelector      = IOMy.widgets.getPremiseSelector;
         var getPermissionSelectBox  = IOMy.widgets.getPermissionSelectBox;
+        var sDialogTitle            = "";
         
-        //====================================================================//
-        // Create the permission options select boxes and attach functions to
-        // them once created.
-        //====================================================================//
-        me.wReadPermissionBox          = getPermissionSelectBox(me.createId("ReadAccessPermission"));
-        me.wDataReadPermissionBox      = getPermissionSelectBox(me.createId("ViewInfoPermission"));
-        me.wWritePermissionBox         = getPermissionSelectBox(me.createId("EditRoomPermission"));
-        me.wStateTogglePermissionBox   = getPermissionSelectBox(me.createId("ToggleStatePermission"));
-        
-        //--------------------------------------------------------------------//
-        // Functions
-        //--------------------------------------------------------------------//
-        me.wReadPermissionBox.attachSelect(
-            function () {
-                // If "No" is selected
-                if (this.getSelectedIndex() === 1) {
-                    me.wDataReadPermissionBox.setEnabled(false);
-                    me.wWritePermissionBox.setEnabled(false);
-                    me.wStateTogglePermissionBox.setEnabled(false);
-                // If "Yes" is selected
-                } else {
-                    me.wDataReadPermissionBox.setEnabled(true);
-                    me.wWritePermissionBox.setEnabled(true);
-                    me.wStateTogglePermissionBox.setEnabled(true);
-                }
-            }
-        );
-
-        me.wDataReadPermissionBox.attachSelect(
-            function () {
-                // If "No" is selected
-                if (this.getSelectedIndex() === 1) {
-                    me.wStateTogglePermissionBox.setEnabled(false);
-                // If "Yes" is selected
-                } else {
-                    me.wStateTogglePermissionBox.setEnabled(true);
-                }
-            }
-        );
-        
-        me.wUserLabel = new sap.m.Label({
-            text : "User"
-        }).addStyleClass("PaddingToMatchButtonText");
-        
-        me.wUserSelectBox = new sap.m.Select({
-            width: "100%"
-        });
-        
-        me.wPremiseLabel = new sap.m.Label({
-            text : "Premise"
-        }).addStyleClass("PaddingToMatchButtonText");
-        
-        me.wPremiseSelectBox = getPremiseSelector(me.createId("premiseBox")).addStyleClass("SettingsDropdownInput width100Percent");
-        
-        //=============================================//
-        // Create the permission form for the room
-        //=============================================//
-        me.wRoomPermissionHeading = new sap.m.VBox({
-			layoutData : new sap.m.FlexItemData({
-				growFactor : 1
-			}),
-            items : [
-                new sap.m.VBox({
-                    items : [
-                        new sap.m.Label({
-                            text: "Permissions"
-                        }).addStyleClass("PaddingToMatchButtonText")
-                    ]
-                })
-            ]
-        }).addStyleClass("ConsistentMenuHeader ListItem BorderTop");
-        
-        me.wRoomPermissions = new sap.m.VBox(me.createId("roomPermissions"), {
-            items : [
-                new sap.m.VBox({
-					layoutData : new sap.m.FlexItemData({
-						growFactor : 1
-					}),
-                    items : [
-                        //-------------------------------------//
-                        // Basic read access (see that it exists)
-                        // permission
-                        //-------------------------------------//
-                        new sap.m.Label({
-                            text: "Allow this user access?"
-                        }),
-                        me.wReadPermissionBox,
-                        //-------------------------------------//
-                        // Permission to read information about a
-                        // room.
-                        //-------------------------------------//
-                        new sap.m.Label({
-                            text: "Allow this user to view room details?"
-                        }),
-                        me.wDataReadPermissionBox,
-                        //-------------------------------------//
-                        // Permission to modify the room
-                        //-------------------------------------//
-                        new sap.m.Label({
-                            text: "Allow this user to modify room?"
-                        }),
-                        me.wWritePermissionBox,
-                        //-------------------------------------//
-                        // Permission to manage devices in a room
-                        //-------------------------------------//
-                        new sap.m.Label({
-                            text: "Allow this user to manage devices?"
-                        }),
-                        me.wStateTogglePermissionBox
-                    ]
-                }).addStyleClass("MarAll8px")
-            ]
-        }).addStyleClass("ListItem");
-        
-        me.wRoomListHeading = new sap.m.VBox({
-			layoutData : new sap.m.FlexItemData({
-				growFactor : 1
-			}),
-            items : [
-                new sap.m.VBox({
-                    items : [
-                        new sap.m.Label({
-                            text: "Apply Permissions To"
-                        }).addStyleClass("PaddingToMatchButtonText")
-                    ]
-                })
-            ]
-        }).addStyleClass("ConsistentMenuHeader ListItem");
-        
-        me.wRoomList = new sap.m.VBox({
-			layoutData : new sap.m.FlexItemData({
-						growFactor : 1
-					}),
-            items : [me.wRoomListHeading]
-        }).addStyleClass("");
-        
-        //--------------------------------------------------------------------//
-        // Apply Button
-        //--------------------------------------------------------------------//
-        if (me.wApplyButton !== null) {
-            me.wApplyButton.destroy();
-        }
-        
-        me.wApplyButton = new sap.m.Link({
-            enabled : true,
-            text : "Apply",
-            press : function () {
-                var aRoomIDs = [];
-                this.setEnabled(false);
-                
-                $.each(me.roomsToUpdate, function (sIndex, mInfo) {
-                    if (sIndex !== undefined && sIndex !== null && mInfo !== undefined && mInfo !== null) {
-                        if (mInfo.update === true) {
-                            aRoomIDs.push(mInfo.Id);
-                        }
-                    }
-                });
-                
-                if (aRoomIDs.length > 0) {
-                    me.UpdatePermissionsForRoom(me.wUserSelectBox.getSelectedKey(), 0, aRoomIDs);
-                } else {
-                    IOMy.common.showError("You must select at least one room to apply the new permissions to.");
-                    this.setEnabled(true);
-                }
-            }
-        }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink");
-        
-		//-- Where the page gets created --//
-        me.wPanel = new sap.m.Panel({
-            content : [
-                //--------------------------//
-                // Top section
-                //--------------------------//
-                new sap.m.VBox({
-					layoutData : new sap.m.FlexItemData({
-						growFactor : 1
-					}),
-                    items : [
-                        // Label for the user select box
-                        new sap.m.VBox({
-							layoutData : new sap.m.FlexItemData({
-								growFactor : 1
-							}),
-                            items : [
-                                new sap.m.VBox({
-                                    items : [ me.wUserLabel ]
-                                })
-                            ]
-                        }).addStyleClass("ConsistentMenuHeader ListItem "),
-                        // User select box
-                        new sap.m.VBox({
-							layoutData : new sap.m.FlexItemData({
-								growFactor : 1
-							}),
-                            items : [me.wUserSelectBox]
-                        }).addStyleClass("PadLeft8px PadRight8px"),
-                        
-                        // Label for the premise select box
-                        new sap.m.VBox({
-							layoutData : new sap.m.FlexItemData({
-								growFactor : 1
-							}),
-                            items : [
-                                new sap.m.VBox({
-                                    items : [ me.wPremiseLabel ]
-                                })
-                            ]
-                        }).addStyleClass("ConsistentMenuHeader BorderTop ListItem"),
-                        // Premise select box
-                        new sap.m.VBox({
-                            items : [me.wPremiseSelectBox]
-                        }).addStyleClass("PadLeft8px PadRight8px")
-                    ]
-                }),
-			
-                //--------------------------//
-                // Middle section
-                //--------------------------//
-                new sap.m.VBox({
-					layoutData : new sap.m.FlexItemData({
-						growFactor : 1
-					}),
-                    items : [
-                        // Room Permission form heading
-                        new sap.m.VBox({
-							layoutData : new sap.m.FlexItemData({
-								growFactor : 1
-							}),
-                            items : [me.wRoomPermissionHeading]
-                        }),
-                        // Room Permission form
-                        new sap.m.VBox({
-							layoutData : new sap.m.FlexItemData({
-								growFactor : 1
-							}),
-                            items : [me.wRoomPermissions]
-                        }),
-						
-                        // List of rooms
-                        new sap.m.VBox({
-							layoutData : new sap.m.FlexItemData({
-								growFactor : 1
-							}),
-                            items : [me.wRoomList]
-                        })
-						
-                    ]
-                }),
-                //--------------------------//
-                // Apply button
-                //--------------------------//
-                new sap.m.VBox({
-                    items : [me.wApplyButton]
-                }).addStyleClass("RoomPermissionsApplyButton")
-				
-            ]
-        }).addStyleClass("MasterPanel UserInputForm PanelNoPadding PadTop3px PadBottom15px");
-        
-        // Populate the users select box with the viewable users
         try {
+            //====================================================================//
+            // Create the permission options select boxes and attach functions to
+            // them once created.
+            //====================================================================//
+            me.wReadPermissionBox          = getPermissionSelectBox(me.createId("ReadAccessPermission"));
+            me.wDataReadPermissionBox      = getPermissionSelectBox(me.createId("ViewInfoPermission"));
+            me.wWritePermissionBox         = getPermissionSelectBox(me.createId("EditRoomPermission"));
+            me.wStateTogglePermissionBox   = getPermissionSelectBox(me.createId("ToggleStatePermission"));
+
+            //--------------------------------------------------------------------//
+            // Functions
+            //--------------------------------------------------------------------//
+            me.wReadPermissionBox.attachSelect(
+                function () {
+                    // If "No" is selected
+                    if (this.getSelectedIndex() === 1) {
+                        me.wDataReadPermissionBox.setEnabled(false);
+                        me.wWritePermissionBox.setEnabled(false);
+                        me.wStateTogglePermissionBox.setEnabled(false);
+                    // If "Yes" is selected
+                    } else {
+                        me.wDataReadPermissionBox.setEnabled(true);
+                        me.wWritePermissionBox.setEnabled(true);
+                        me.wStateTogglePermissionBox.setEnabled(true);
+                    }
+                }
+            );
+
+            me.wDataReadPermissionBox.attachSelect(
+                function () {
+                    // If "No" is selected
+                    if (this.getSelectedIndex() === 1) {
+                        me.wStateTogglePermissionBox.setEnabled(false);
+                    // If "Yes" is selected
+                    } else {
+                        me.wStateTogglePermissionBox.setEnabled(true);
+                    }
+                }
+            );
+
+            me.wUserLabel = new sap.m.Label({
+                text : "User"
+            }).addStyleClass("PaddingToMatchButtonText");
+
+            me.wUserSelectBox = new sap.m.Select({
+                width: "100%"
+            });
+
+            me.wPremiseLabel = new sap.m.Label({
+                text : "Premise"
+            }).addStyleClass("PaddingToMatchButtonText");
+
+            me.wPremiseSelectBox = getPremiseSelector(me.createId("premiseBox")).addStyleClass("SettingsDropdownInput width100Percent");
+
+            //=============================================//
+            // Create the permission form for the room
+            //=============================================//
+            me.wRoomPermissionHeading = new sap.m.VBox({
+                layoutData : new sap.m.FlexItemData({
+                    growFactor : 1
+                }),
+                items : [
+                    new sap.m.VBox({
+                        items : [
+                            new sap.m.Label({
+                                text: "Permissions"
+                            }).addStyleClass("PaddingToMatchButtonText")
+                        ]
+                    })
+                ]
+            }).addStyleClass("ConsistentMenuHeader ListItem BorderTop");
+
+            me.wRoomPermissions = new sap.m.VBox(me.createId("roomPermissions"), {
+                items : [
+                    new sap.m.VBox({
+                        layoutData : new sap.m.FlexItemData({
+                            growFactor : 1
+                        }),
+                        items : [
+                            //-------------------------------------//
+                            // Basic read access (see that it exists)
+                            // permission
+                            //-------------------------------------//
+                            new sap.m.Label({
+                                text: "Allow this user access?"
+                            }),
+                            me.wReadPermissionBox,
+                            //-------------------------------------//
+                            // Permission to read information about a
+                            // room.
+                            //-------------------------------------//
+                            new sap.m.Label({
+                                text: "Allow this user to view room details?"
+                            }),
+                            me.wDataReadPermissionBox,
+                            //-------------------------------------//
+                            // Permission to modify the room
+                            //-------------------------------------//
+                            new sap.m.Label({
+                                text: "Allow this user to modify room?"
+                            }),
+                            me.wWritePermissionBox,
+                            //-------------------------------------//
+                            // Permission to manage devices in a room
+                            //-------------------------------------//
+                            new sap.m.Label({
+                                text: "Allow this user to manage devices?"
+                            }),
+                            me.wStateTogglePermissionBox
+                        ]
+                    }).addStyleClass("MarAll8px")
+                ]
+            }).addStyleClass("ListItem");
+
+            me.wRoomListHeading = new sap.m.VBox({
+                layoutData : new sap.m.FlexItemData({
+                    growFactor : 1
+                }),
+                items : [
+                    new sap.m.VBox({
+                        items : [
+                            new sap.m.Label({
+                                text: "Apply Permissions To"
+                            }).addStyleClass("PaddingToMatchButtonText")
+                        ]
+                    })
+                ]
+            }).addStyleClass("ConsistentMenuHeader ListItem");
+
+            me.wRoomList = new sap.m.VBox({
+                layoutData : new sap.m.FlexItemData({
+                            growFactor : 1
+                        }),
+                items : [me.wRoomListHeading]
+            }).addStyleClass("");
+
+            //--------------------------------------------------------------------//
+            // Apply Button
+            //--------------------------------------------------------------------//
+            me.wApplyButton = new sap.m.Link({
+                enabled : true,
+                text : "Apply",
+                press : function () {
+                    var aRoomIDs = [];
+                    this.setEnabled(false);
+
+                    $.each(me.roomsToUpdate, function (sIndex, mInfo) {
+                        if (sIndex !== undefined && sIndex !== null && mInfo !== undefined && mInfo !== null) {
+                            if (mInfo.update === true) {
+                                aRoomIDs.push(mInfo.Id);
+                            }
+                        }
+                    });
+
+                    if (aRoomIDs.length > 0) {
+                        me.UpdatePermissionsForRoom(me.wUserSelectBox.getSelectedKey(), 0, aRoomIDs);
+                    } else {
+                        IOMy.common.showError("You must select at least one room to apply the new permissions to.");
+                        this.setEnabled(true);
+                    }
+                }
+            }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink");
+
+            //-- Where the page gets created --//
+            me.wPanel = new sap.m.Panel({
+                content : [
+                    //--------------------------//
+                    // Top section
+                    //--------------------------//
+                    new sap.m.VBox({
+                        layoutData : new sap.m.FlexItemData({
+                            growFactor : 1
+                        }),
+                        items : [
+                            // Label for the user select box
+                            new sap.m.VBox({
+                                layoutData : new sap.m.FlexItemData({
+                                    growFactor : 1
+                                }),
+                                items : [
+                                    new sap.m.VBox({
+                                        items : [ me.wUserLabel ]
+                                    })
+                                ]
+                            }).addStyleClass("ConsistentMenuHeader ListItem "),
+                            // User select box
+                            new sap.m.VBox({
+                                layoutData : new sap.m.FlexItemData({
+                                    growFactor : 1
+                                }),
+                                items : [me.wUserSelectBox]
+                            }).addStyleClass("PadLeft8px PadRight8px"),
+
+                            // Label for the premise select box
+                            new sap.m.VBox({
+                                layoutData : new sap.m.FlexItemData({
+                                    growFactor : 1
+                                }),
+                                items : [
+                                    new sap.m.VBox({
+                                        items : [ me.wPremiseLabel ]
+                                    })
+                                ]
+                            }).addStyleClass("ConsistentMenuHeader BorderTop ListItem"),
+                            // Premise select box
+                            new sap.m.VBox({
+                                items : [me.wPremiseSelectBox]
+                            }).addStyleClass("PadLeft8px PadRight8px")
+                        ]
+                    }),
+
+                    //--------------------------//
+                    // Middle section
+                    //--------------------------//
+                    new sap.m.VBox({
+                        layoutData : new sap.m.FlexItemData({
+                            growFactor : 1
+                        }),
+                        items : [
+                            // Room Permission form heading
+                            new sap.m.VBox({
+                                layoutData : new sap.m.FlexItemData({
+                                    growFactor : 1
+                                }),
+                                items : [me.wRoomPermissionHeading]
+                            }),
+                            // Room Permission form
+                            new sap.m.VBox({
+                                layoutData : new sap.m.FlexItemData({
+                                    growFactor : 1
+                                }),
+                                items : [me.wRoomPermissions]
+                            }),
+
+                            // List of rooms
+                            new sap.m.VBox({
+                                layoutData : new sap.m.FlexItemData({
+                                    growFactor : 1
+                                }),
+                                items : [me.wRoomList]
+                            })
+
+                        ]
+                    }),
+                    //--------------------------//
+                    // Apply button
+                    //--------------------------//
+                    new sap.m.VBox({
+                        items : [me.wApplyButton]
+                    }).addStyleClass("RoomPermissionsApplyButton")
+
+                ]
+            }).addStyleClass("MasterPanel UserInputForm PanelNoPadding PadTop3px PadBottom15px");
+
+            //----------------------------------------------------------------//
+            // Populate the users select box with the viewable users
+            //----------------------------------------------------------------//
             IOMy.widgets.getListOfUsersForRoomPermissions(me.wUserSelectBox, me.wPremiseSelectBox.getSelectedKey(),
                 function () {
                     //------------------------------------------------------------//
@@ -552,8 +551,22 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                 }
             );
             
-        } catch (e) {
-            IOMy.common.showError(e.message, "Error");
+        }
+        catch (err) {
+            //----------------------------------------------------------------//
+            // We expect a NoPremisesVisibleException to be thrown at some point.
+            //----------------------------------------------------------------//
+            if (err.name === "NoPremisesVisibleException") {
+                sDialogTitle = "No premises available";
+            } else {
+                sDialogTitle = "";
+            }
+            
+            // Show an error message and go back to the previous page
+            // once closed.
+            IOMy.common.showError(err.message, sDialogTitle, function () {
+                IOMy.common.NavigationTriggerBackForward(false);
+            });
         }
     },
     

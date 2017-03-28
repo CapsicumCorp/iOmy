@@ -922,6 +922,7 @@ $.extend(IOMy.common,{
                     }
                 });
             } catch (e) {
+                me.CoreVariableRefreshStepsInProgress[1] = false;
                 jQuery.sap.log.error("ReloadPremiseList Error! "+e.message);
             }
         }
@@ -944,6 +945,7 @@ $.extend(IOMy.common,{
                     }
                 });
             } catch (e) {
+                me.CoreVariableRefreshStepsInProgress[2] = false;
                 jQuery.sap.log.error("ReloadVariableHubList Error! "+e.message);
             }
         }
@@ -967,6 +969,7 @@ $.extend(IOMy.common,{
                     }
                 });
             } catch (e) {
+                me.CoreVariableRefreshStepsInProgress[3] = false;
                 jQuery.sap.log.error("ReloadVariableRoomList Error! "+e.message);
             }
         }
@@ -990,6 +993,7 @@ $.extend(IOMy.common,{
                     }
                 });
             } catch (e) {
+                me.CoreVariableRefreshStepsInProgress[4] = false;
                 jQuery.sap.log.error("ReloadVariableLinkList Error! "+e.message);
             }
         }
@@ -1013,6 +1017,7 @@ $.extend(IOMy.common,{
                     }
                 });
             } catch (e) {
+                me.CoreVariableRefreshStepsInProgress[5] = false;
                 jQuery.sap.log.error("ReloadVariableLinkTypeList Error! "+e.message);
             }
         }
@@ -1065,6 +1070,7 @@ $.extend(IOMy.common,{
                     onFail      : fnOnFail
                 });
             } catch (e) {
+                me.CoreVariableRefreshStepsInProgress[6] = false;
                 jQuery.sap.log.error("ReloadVariableThingList Error! "+e.message);
             }
         }

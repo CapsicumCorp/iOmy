@@ -32,7 +32,9 @@ $.extend(IOMy.widgets,{
      * 
      * @param {string} sId          ID for the select box.
      * @param {Number} iPremiseId   ID of the given premise.
-     * @returns {sap.m.ComboBox}
+     * @returns {sap.m.Select}
+     * 
+     * @throws NoPremisesVisibleException
      */
     getPremiseSelector : function (sId, iPremiseId) {
         try {
@@ -62,12 +64,12 @@ $.extend(IOMy.widgets,{
                 return oSBox;
             } else {
                 // Something has gone awfully wrong for this to execute!
-                return new sap.m.Text(sId, {text : "You have no premises."});
+                throw new NoPremisesVisibleException("You have no premises.");
             }
         } catch (e) {
             jQuery.sap.log.error("Error in IOMy.widgets.getPremiseSelector(): "+e.message);
-            IOMy.common.showError("Failed to load the premise select box\n\n"+e.message, "Error");
-            return new sap.m.Text(sId, {text : "Failed to load the premise select box."});
+            //IOMy.common.showError("Failed to load the premise select box\n\n"+e.message, "Error");
+            throw e;
         }
     }
     

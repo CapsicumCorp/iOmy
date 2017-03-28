@@ -41,11 +41,26 @@ function NoHelpMessageForPageException(message) {
 }
 
 //----------------------------------------------------------------------------//
-// Sessions and Users
+// Sessions, Users, and Permissions
 //----------------------------------------------------------------------------//
 function UserNotSignedInException(message) {
     IOmyException.call(this, message);
     this.name       = "UserNotSignedInException";
+}
+
+function PermissionException(message) {
+    IOmyException.call(this, message);
+    this.name       = "PermissionException";
+}
+
+function InvalidRoomPermissionException(message) {
+    PermissionException.call(this, message);
+    this.name       = "InvalidRoomPermissionException";
+}
+
+function InvalidPremisePermissionException(message) {
+    PermissionException.call(this, message);
+    this.name       = "InvalidPremisePermissionException";
 }
 
 //----------------------------------------------------------------------------//
@@ -64,12 +79,26 @@ function MissingSettingsMapException(message) {
 //----------------------------------------------------------------------------//
 // Room Management
 //----------------------------------------------------------------------------//
-function DevicesStillInRoomException(message) {
+function RoomException(message, roomName) {
     IOmyException.call(this, message);
+    this.name       = "RoomException";
+    this.room       = roomName;
+}
+
+function DevicesStillInRoomException(message, roomName) {
+    RoomException.call(this, message, roomName);
     this.name       = "DevicesStillInRoomException";
 }
 
-function AttemptToDeleteOnlyRoomException(message) {
-    IOmyException.call(this, message);
+function AttemptToDeleteOnlyRoomException(message, roomName) {
+    RoomException.call(this, message, roomName);
     this.name       = "AttemptToDeleteOnlyRoomException";
+}
+
+//----------------------------------------------------------------------------//
+// Premises
+//----------------------------------------------------------------------------//
+function NoPremisesVisibleException(message) {
+    IOmyException.call(this, message);
+    this.name       = "NoPremisesVisibleException";
 }
