@@ -46,7 +46,7 @@ public class iOmyServices extends Service {
             Notification notification = new NotificationCompat.Builder(this)
                 .setContentTitle(Application.getInstance().getAppName())
                 .setContentText("iOmy Service")
-                .setSmallIcon(R.drawable.iomy_notification)
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .build();
 
             //Using this makes Android less likely to kill the service during low ram situation
