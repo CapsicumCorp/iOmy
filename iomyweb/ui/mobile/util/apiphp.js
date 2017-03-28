@@ -730,13 +730,26 @@ $.extend(IOMy.apiphp,{
 						oConfig.onSuccess();
 					}
 					
-				},oScope) 	//-- End of "OnSuccess" Ajax Request --//
+				},oScope), 	//-- End of "OnSuccess" Ajax Request --//
+                
+                onFail : function (response) {
+                    jQuery.sap.log.error("Error refreshing thing list: "+JSON.stringify(response));
+                    //-- Perform the "onFail" function if applicable --//
+                    if(oConfig.onFail) {
+                        oConfig.onFail();
+                    }
+                }
 			}); //-- End of Ajax Request --//
 			//
 			
 		} catch(e1) {
             IOMy.common.bCoreRefreshInProgress = false;
 			jQuery.sap.log.error( "RefreshThingList: "+e1.message, "", "IO Detection");
+            
+            //-- Perform the "onFail" function if applicable --//
+            if(oConfig.onFail) {
+                oConfig.onFail();
+            }
 		}
 	}
 	

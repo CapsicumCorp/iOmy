@@ -752,6 +752,11 @@ $.extend(IOMy.common,{
 			
 			onFail : function (response) {
 				jQuery.sap.log.error("Error refreshing link list: "+JSON.stringify(response));
+                
+                //-- Perform the "onFail" function if applicable --//
+                if(oConfig.onFail) {
+					oConfig.onFail();
+				}
 			}
 		});
     },
@@ -794,10 +799,11 @@ $.extend(IOMy.common,{
 			},
 			
 			onFail : function (response) {
-				jQuery.sap.log.error("Error refreshing link list: "+JSON.stringify(response));
-                //-- Perform the "onSuccess" function if applicable --//
-				if(oConfig.onSuccess !== undefined) {
-					oConfig.onSuccess();
+				jQuery.sap.log.error("Error refreshing link type list: "+JSON.stringify(response));
+                
+                //-- Perform the "onFail" function if applicable --//
+                if(oConfig.onFail) {
+					oConfig.onFail();
 				}
 			}
 		});
@@ -919,10 +925,14 @@ $.extend(IOMy.common,{
                 me.RefreshPremiseList({
                     onSuccess : function () {
                         me.ReloadVariableHubList(fnCallback, fnFailCallback);
+                    },
+                    
+                    onFail : function () {
+                        me.ResetCoreVariableRefreshFlags();
                     }
                 });
             } catch (e) {
-                me.CoreVariableRefreshStepsInProgress[1] = false;
+                me.ResetCoreVariableRefreshFlags();
                 jQuery.sap.log.error("ReloadPremiseList Error! "+e.message);
             }
         }
@@ -942,10 +952,14 @@ $.extend(IOMy.common,{
                 me.RefreshHubList({
                     onSuccess : function () {
                         me.ReloadVariableRoomList(fnCallback, fnFailCallback);
+                    },
+                    
+                    onFail : function () {
+                        me.ResetCoreVariableRefreshFlags();
                     }
                 });
             } catch (e) {
-                me.CoreVariableRefreshStepsInProgress[2] = false;
+                me.ResetCoreVariableRefreshFlags();
                 jQuery.sap.log.error("ReloadVariableHubList Error! "+e.message);
             }
         }
@@ -966,10 +980,14 @@ $.extend(IOMy.common,{
                 me.RetreiveRoomList({
                     onSuccess : function () {
                         me.ReloadVariableLinkList(fnCallback, fnFailCallback);
+                    },
+                    
+                    onFail : function () {
+                        me.ResetCoreVariableRefreshFlags();
                     }
                 });
             } catch (e) {
-                me.CoreVariableRefreshStepsInProgress[3] = false;
+                me.ResetCoreVariableRefreshFlags();
                 jQuery.sap.log.error("ReloadVariableRoomList Error! "+e.message);
             }
         }
@@ -990,10 +1008,14 @@ $.extend(IOMy.common,{
                 me.RetrieveLinkList({
                     onSuccess : function () {
                         me.ReloadVariableLinkTypeList(fnCallback, fnFailCallback);
+                    },
+                    
+                    onFail : function () {
+                        me.ResetCoreVariableRefreshFlags();
                     }
                 });
             } catch (e) {
-                me.CoreVariableRefreshStepsInProgress[4] = false;
+                me.ResetCoreVariableRefreshFlags();
                 jQuery.sap.log.error("ReloadVariableLinkList Error! "+e.message);
             }
         }
@@ -1014,10 +1036,14 @@ $.extend(IOMy.common,{
                 me.RetrieveLinkTypeList({
                     onSuccess : function () {
                         me.ReloadVariableThingList(fnCallback, fnFailCallback);
+                    },
+                    
+                    onFail : function () {
+                        me.ResetCoreVariableRefreshFlags();
                     }
                 });
             } catch (e) {
-                me.CoreVariableRefreshStepsInProgress[5] = false;
+                me.ResetCoreVariableRefreshFlags();
                 jQuery.sap.log.error("ReloadVariableLinkTypeList Error! "+e.message);
             }
         }
@@ -1057,15 +1083,7 @@ $.extend(IOMy.common,{
                     onSuccess   : function () {
                         fnOnComplete();
                         
-                        me.CoreVariableRefreshStepsInProgress = [       // BOOLEAN ARRAY: 
-                            false,  // Step 1
-                            false,  // Step 2
-                            false,  // Step 3
-                            false,  // Step 4
-                            false,  // Step 5
-                            false,  // Step 6
-                            false,  // Step 7
-                        ];
+                        me.ResetCoreVariableRefreshFlags();
                     },
                     onFail      : fnOnFail
                 });
@@ -1075,15 +1093,27 @@ $.extend(IOMy.common,{
             }
         }
     },
+    
+    ResetCoreVariableRefreshFlags : function () {
+        this.CoreVariableRefreshStepsInProgress = [       // BOOLEAN ARRAY: 
+            false,  // Step 1
+            false,  // Step 2
+            false,  // Step 3
+            false,  // Step 4
+            false,  // Step 5
+            false,  // Step 6
+            false,  // Step 7
+        ];
+    },
 	
 	//================================================================//
 	//== Refresh Variables											==//
 	//================================================================//
     /**
-     * DEPRECATED: Use ReloadCoreVariables() instead!
-     * 
      * Reloads all the core variables into memory to so that iOmy code can fetch
      * the necessary information without constantly polling the database.
+     * 
+     * @deprecated Use ReloadCoreVariables() instead!
      */
 	RefreshCoreVariables: function() {
 		//-- NOTE1: bFirstLogin should always be set to false with the exception of the first time it is loaded when the user logs in! --//
@@ -1202,6 +1232,11 @@ $.extend(IOMy.common,{
 			
 			onFail : function (response) {
 				jQuery.sap.log.error("Error refreshing premise list: "+JSON.stringify(response));
+                
+                //-- Perform the "onFail" function if applicable --//
+                if(oConfig.onFail) {
+					oConfig.onFail();
+				}
 			}
 		});
 	},
@@ -1262,6 +1297,10 @@ $.extend(IOMy.common,{
 			
 			onFail : function (response) {
 				jQuery.sap.log.error("Error refreshing gateway list: "+JSON.stringify(response));
+                //-- Perform the "onFail" function if applicable --//
+                if(oConfig.onFail) {
+					oConfig.onFail();
+				}
 			}
 		});
 	},
@@ -1296,7 +1335,12 @@ $.extend(IOMy.common,{
 			//-- 3.A - ON AJAX FAILURE	--//
 			//----------------------------//
 			onFail : function(response) {
-				console.log("Login_RoomLookup Error!");
+				jQuery.sap.log.error("RoomLookup Error!");
+                
+                //-- Perform the "onFail" function if applicable --//
+                if(oConfig.onFail) {
+					oConfig.onFail();
+				}
 			},
 		
 			//--------------------------------//
@@ -1390,7 +1434,10 @@ $.extend(IOMy.common,{
 					
 				} catch(e11) {
 					console.log("LoginRoomsList Error 11: "+e11.message);
-					
+					//-- Perform the "onFail" function if applicable --//
+                    if(oConfig.onFail) {
+                        oConfig.onFail();
+                    }
 				}
 			})
 		});
