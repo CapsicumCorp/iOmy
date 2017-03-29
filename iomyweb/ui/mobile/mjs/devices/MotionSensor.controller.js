@@ -63,8 +63,6 @@ sap.ui.controller("mjs.devices.MotionSensor", {
                 //-- Refresh the Navigational buttons --//
                 IOMy.common.NavigationRefreshButtons( me );
                 
-                var DevModule = IOMy.devices.motionsensor;
-                
                 me.oThing = IOMy.common.ThingList["_"+evt.data.ThingId];
                 me.iThingId = evt.data.ThingId;
                 me.UTSLastUpdate = IOMy.common.ThingList["_"+evt.data.ThingId].UILastUpdate;

@@ -163,11 +163,20 @@ $.extend(IOMy.devices.motionsensor,{
                 //------------------------------------------------------------//
                 // Output data to console.
                 //------------------------------------------------------------//
-                var data = data[0];
+                var data        = data[0];
+                var sUOMName    = data.UOM_NAME;
+                
+                //------------------------------------------------------------//
+                // This is a temporary workaround to eliminate a character from
+                // the UOM_NAME (Â) which comes from the OData service. This
+                // affected the temperature field.
+                //------------------------------------------------------------//
+                sUOMName = sUOMName.replace("Â", "");
+                
                 //------------------------------------------------------------//
                 // Set the text in the relevant field on the motion sensor page.
                 //------------------------------------------------------------//
-                oTextWidget.setText(data.CALCEDVALUE + data.UOM_NAME);
+                oTextWidget.setText(data.CALCEDVALUE + sUOMName);
                 
                 // Conclude the request callback
                 this.onComplete();

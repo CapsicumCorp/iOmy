@@ -198,10 +198,10 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                                 var bEnabled;
 
                                 if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
-                                    //-- If Turned On --//
+                                    //-- If Turned Off --//
                                     if( aAjaxData.ThingStatus===0 ) {
                                         bEnabled = false;
-                                    //-- Else Turned Off --//
+                                    //-- Else Turned On--//
                                     } else {
                                         bEnabled = true;
                                     }
