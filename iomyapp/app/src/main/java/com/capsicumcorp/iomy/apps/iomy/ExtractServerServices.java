@@ -63,6 +63,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Hashtable;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -85,6 +86,11 @@ public class ExtractServerServices extends Thread {
     private InputStream assetsversionfile;
 
     private ProgressPageWithCustomPercentage progressPage;
+
+    //It is okay if we don't always update the custom percentage count and actually trying to do
+    //  all the updates in the ui thread will overload some devices so this allows skipping an
+    //  update if one is already running
+    private AtomicBoolean updatingCustomPercentage=new AtomicBoolean();
 
     private Hashtable<String, Boolean> skipfiles = new Hashtable<String, Boolean>();
     private Hashtable<String, Boolean> skipfolders = new Hashtable<String, Boolean>();
@@ -292,6 +298,7 @@ public class ExtractServerServices extends Thread {
     //Returns true if okay to run services or false if there was an error
     public boolean extractAssets() {
         AssetManager assetManager = context.getAssets();
+        long totalFileSize=0;
 
         //Get number of files
         try {
@@ -302,7 +309,7 @@ public class ExtractServerServices extends Thread {
             String totalFileSizeStr = getZipTotalFileSize(assetsfileinfostream);
             if (!totalFileSizeStr.equals("")) {
                 try {
-                    long totalFileSize = Integer.parseInt(totalFileSizeStr);
+                    totalFileSize = Integer.parseInt(totalFileSizeStr);
                     if (progressPage!=null) {
                         progressPage.setTotalRequests(totalFileSize);
                     }
@@ -428,6 +435,8 @@ public class ExtractServerServices extends Thread {
                 }
                 zipInputStream.closeEntry();
             }
+            //One last update to get to 100%
+            changeProgressPagePercentageTextCustomCount(totalFileSize, true);
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -648,18 +657,34 @@ public class ExtractServerServices extends Thread {
             }
         });
     }
+    private void setNotUpdatingCustomPercentage() {
+       updatingCustomPercentage.set(false);
+    }
+    private boolean setUpdatingCustomPercentageIfNotAlready() {
+       if (updatingCustomPercentage.compareAndSet(false, true)) {
+           return false;
+       }
+       return true;
+    }
     private void changeProgressPagePercentageTextCustomCount(long count) {
+        changeProgressPagePercentageTextCustomCount(count, false);
+    }
+    private void changeProgressPagePercentageTextCustomCount(long count, boolean noSkipUpdate) {
         final long localCount=count;
         if (progressPage == null) {
             return;
         }
-        progressPage.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                progressPage.updatePercentageCounter(localCount);
-                progressPage.updatePercentageText();
-            }
-        });
+        if (!setUpdatingCustomPercentageIfNotAlready() || noSkipUpdate) {
+            //Only update the percentage text if not already updating or if no skip update has been requested
+            progressPage.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    progressPage.updatePercentageCounter(localCount);
+                    progressPage.updatePercentageText();
+                    setNotUpdatingCustomPercentage();
+                }
+            });
+        }
     }
     //Return prefixed with the root folder for a given path
     private String getFolderWithRootForPath(String path) {
