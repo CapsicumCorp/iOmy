@@ -200,7 +200,11 @@ public class Application extends android.app.Application {
     }
     //Call to stop the background service
     public void stopBackgroundService() {
-        Log.println(Log.INFO, this.AppName, "Application.stopBackgroTasks: Stopping Background Service");
+        //Stop the background tasks before stopping the service as Android won't wait for Service.onDestroy to complete
+        //  before shutting down
+        Log.println(Log.INFO, this.AppName, "Application.stopBackgroundTasks: Stopping Background Tasks");
+        stopBackgroundTasks();
+        Log.println(Log.INFO, this.AppName, "Application.stopBackgroundTasks: Stopping Background Service");
         stopService(iOmyServices.createIntent(this));
     }
     //Called by the service when it is destroyed
