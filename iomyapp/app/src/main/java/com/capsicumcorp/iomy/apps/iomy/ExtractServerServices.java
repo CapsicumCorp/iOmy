@@ -53,6 +53,7 @@ import android.os.Environment;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -331,7 +332,6 @@ public class ExtractServerServices extends Thread {
         Log.println(Log.INFO, "WebServer", "Extracting asset: " + ASSETSFILENAME);
         try {
             ZipEntry zipEntry;
-            FileOutputStream fout;
             long curFileSize=0;
 
             while ((zipEntry = zipInputStream.getNextEntry()) != null) {
@@ -423,7 +423,9 @@ public class ExtractServerServices extends Thread {
                 if (zipEntry.isDirectory()) {
                     createDirectory(zipEntryName);
                 } else {
-                    fout = new FileOutputStream(INTERNAL_LOCATION + "/" + zipEntryName);
+                    //Using BufferedOutputStream reduces total extract time on slower devices by quite a lot compared
+                    //  to writing direct to a FileOutputStream
+                    BufferedOutputStream fout = new BufferedOutputStream(new FileOutputStream(INTERNAL_LOCATION + "/" + zipEntryName));
                     byte[] buffer = new byte[4096 * 10];
                     int length;
                     while ((length = zipInputStream.read(buffer)) != -1) {
