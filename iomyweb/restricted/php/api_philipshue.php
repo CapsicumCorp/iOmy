@@ -77,11 +77,12 @@ $bFound                     = false;        //-- BOOLEAN:       Used to indicate
 
 
 //- Constants that need to be added to a function in the fuctions library --//
-$iHueThingTypeId            = 0;            //-- INTEGER:       This is used to hold the "ThingTypeId" of a Philips Hue Light. --//
-$iAPICommTypeId             = 0;            //-- INTEGER:       This is used to indicate the 
-$iHueRSTypeId               = 0;            //-- INTEGER:       This is used to indicate the 
-$iSaturationRSTypeId        = 0;            //-- INTEGER:       This is used to indicate the 
-$iBrightnessRSTypeId        = 0;            //-- INTEGER:       This is used to indicate the 
+$iHueThingTypeId            = 0;            //-- INTEGER:       This is used to hold the "ThingTypeId" of a Philips Hue Light.     --//
+$iDemoCommTypeId            = 0;            //-- INTEGER:       Used to store the "Comm Type Id" of the "Demo Comm Type".          --//
+$iAPICommTypeId             = 0;            //-- INTEGER:       Used to store the "Comm Type Id" of the "PHP API Comm Type".       --//
+$iHueRSTypeId               = 0;            //-- INTEGER:       Used to store the "Resource Type Id" of the "Hue Controls".        --//
+$iSaturationRSTypeId        = 0;            //-- INTEGER:       Used to store the "Resource Type Id" of the "Saturation Controls". --//
+$iBrightnessRSTypeId        = 0;            //-- INTEGER:       Used to store the "Resource Type Id" of the "Brightness Controls". --//
 
 
 
@@ -89,7 +90,6 @@ $iBrightnessRSTypeId        = 0;            //-- INTEGER:       This is used to 
 //-- 1.3 - IMPORT REQUIRED LIBRARIES                --//
 //----------------------------------------------------//
 require_once SITE_BASE.'/restricted/php/core.php';                                   //-- This should call all the additional libraries needed --//
-
 require_once SITE_BASE.'/restricted/libraries/philipshue.php';
 require_once SITE_BASE.'/restricted/libraries/special/dbinsertfunctions.php';
 
@@ -98,14 +98,12 @@ require_once SITE_BASE.'/restricted/libraries/special/dbinsertfunctions.php';
 //------------------------------------------------------------//
 //-- 1.5 - Fetch Constants (Will be replaced)               --//
 //------------------------------------------------------------//
+$iDemoCommTypeId         = LookupFunctionConstant("DemoCommTypeId");
 $iAPICommTypeId          = LookupFunctionConstant("APICommTypeId");
 $iHueThingTypeId         = LookupFunctionConstant("HueThingTypeId");
 $iHueRSTypeId            = LookupFunctionConstant("LightHueRSTypeId");
 $iSaturationRSTypeId     = LookupFunctionConstant("LightSaturationRSTypeId");
 $iBrightnessRSTypeId     = LookupFunctionConstant("LightBrightnessRSTypeId");
-
-
-
 
 //====================================================================//
 //== 2.0 - Retrieve POST                                            ==//
@@ -489,12 +487,14 @@ if( $bError===false ) {
 						$iLinkCommType        = $aCommInfo['Data']['CommTypeId'];
 						
 						//-- If the API Controls the Philips Hue Light bulb rather than WatchInputs then extract the variables required --//
-						if( $iAPICommTypeId===$iLinkCommType ) {
+						if( $iLinkCommType===$iAPICommTypeId ) {
 							//-- Extract the required variables from the function results --//
 							$sNetworkAddress  = $aTempFunctionResult2['Data']['LinkConnAddress'];
 							$sNetworkPort     = $aTempFunctionResult2['Data']['LinkConnPort'];
 							$sUserToken       = $aTempFunctionResult2['Data']['LinkConnUsername'];
 							$sHWId            = strval( $aTempFunctionResult1['Data']['ThingHWId'] );
+							
+							
 							//-- Flag that this request needs to use the "PhilipsHue" PHP Object to update the device --//
 							$bUsePHPObject = true;
 						}
@@ -872,8 +872,16 @@ if( $bError===false ) {
 						$sErrMesg  .= "Error Code:'3403' \n";
 						$sErrMesg  .= "Problem when connecting to the Philips Hue Bridge! \n";
 						$sErrMesg  .= $oPHPPhilipsHue->aErrorMessges[0];
-						
 					}
+				} else if( $iLinkCommType===$iDemoCommTypeId ) {
+					
+					//-- Return a fake success message --//
+					$aResult = array(
+						"Error"     => false,
+						"Data"      => array(
+							array( "Success" => true )
+						)
+					);
 				}
 				
 				//----------------------------------------------------------------//
