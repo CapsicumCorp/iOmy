@@ -29,6 +29,8 @@ import android.content.Intent;
 public class ShutdownReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Application.getInstance().stopBackgroundService();
+        if (intent.getAction().equals(Intent.ACTION_SHUTDOWN)) {
+            Application.getInstance().stopBackgroundService();
+        }
     }
 }

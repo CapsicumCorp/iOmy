@@ -23,7 +23,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 package com.capsicumcorp.iomy.apps.iomy;
 
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
@@ -41,6 +44,9 @@ public class Application extends android.app.Application {
     private String ExternalStorageFolderName;
     private String SystemDirectory;
     private UsbManager mUsbManager;
+
+    //Dynamically Registered Receiver Intents
+    private BroadcastReceiver mShutdownReceiver;
 
     //Whether the service has started.
     private boolean serviceStarted;
@@ -82,6 +88,11 @@ public class Application extends android.app.Application {
         this.SystemDirectory=Environment.getRootDirectory().getPath();
         this.InternalStorageFolderName=this.getFilesDir().getPath();
         this.ExternalStorageFolderName=Environment.getExternalStorageDirectory().getPath()+"/iOmy";
+
+        //Register Dynamic Receiver Intents
+        IntentFilter filterShutdown = new IntentFilter(Intent.ACTION_SHUTDOWN);
+        BroadcastReceiver mShutdownReceiver = new ShutdownReceiver();
+        registerReceiver(mShutdownReceiver, filterShutdown);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
         	this.mUsbManager=(UsbManager) getSystemService(Context.USB_SERVICE);
