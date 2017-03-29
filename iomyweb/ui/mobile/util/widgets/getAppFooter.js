@@ -32,7 +32,17 @@ $.extend(IOMy.widgets,{
      * 
      * @returns {sap.m.Bar}     App Footer
      */
-	getAppFooter : function () {
+	getAppFooter : function (bHelpButtonEnabled) {
+        //--------------------------------------------------------------------//
+        // If the help button enabled flag is not given, default is TRUE.
+        //--------------------------------------------------------------------//
+        if (bHelpButtonEnabled === undefined) {
+            bHelpButtonEnabled = true;
+        }
+        
+        //--------------------------------------------------------------------//
+        // Draw the footer
+        //--------------------------------------------------------------------//
 		var oFooter = new sap.m.Bar({
 			contentLeft : [
 				new sap.m.Button({
@@ -40,6 +50,7 @@ $.extend(IOMy.widgets,{
 					text:	"Help",
                     icon:   "sap-icon://GoogleMaterial/help",
 					iconFirst: false,
+                    enabled : bHelpButtonEnabled,
 					press : function () {
 						IOMy.functions.showHelpDialog();
 					}

@@ -45,19 +45,34 @@ sap.ui.jsview("mjs.premise.DeviceData", {
 	createContent : function(oController) {
 		var me = this;
 		
-		var oPage = new sap.m.Page( me.createId("page"), {
-			customHeader:	IOMy.widgets.getIOMYPageHeaderNav(oController),
-			footer:			IOMy.widgets.getAppFooter(),
-			content: [
-				//-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("DEVICE DATA", "sap-icon://IOMy1/appliances", me ),
-                //-- Main Panel --//
-                new sap.m.Panel(me.createId("panel"), {
-                    backgroundDesign: "Transparent",
-					content: []
-				}).addStyleClass("height100Percent PanelNoPadding UserInputForm ZigbeeDataPage TextCenter")
-			]
-		}).addStyleClass("height100Percent width100Percent MainBackground MasterPage");
+        var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://IOMy1/appliances",
+            title : "Device Data"
+        });
+        
+        oPage.addContent(
+            //-- Main Panel --//
+            new sap.m.Panel(me.createId("panel"), {
+                backgroundDesign: "Transparent",
+                content: []
+            }).addStyleClass("height100Percent PanelNoPadding UserInputForm ZigbeeDataPage TextCenter")
+        );
+        
+//		var oPage = new sap.m.Page( me.createId("page"), {
+//			customHeader:	IOMy.widgets.getIOMYPageHeaderNav(oController),
+//			footer:			IOMy.widgets.getAppFooter(),
+//			content: [
+//				//-- Navigational Header --//
+//				IOMy.widgets.getNavigationalSubHeader("DEVICE DATA", "sap-icon://IOMy1/appliances", me ),
+//                //-- Main Panel --//
+//                new sap.m.Panel(me.createId("panel"), {
+//                    backgroundDesign: "Transparent",
+//                    content: []
+//                }).addStyleClass("height100Percent PanelNoPadding UserInputForm ZigbeeDataPage TextCenter")
+//			]
+//		}).addStyleClass("height100Percent width100Percent MainBackground MasterPage");
 		
 		return oPage;
 	}

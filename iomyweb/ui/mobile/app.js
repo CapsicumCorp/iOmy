@@ -1466,9 +1466,7 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.links.LinkAdd\" Page!\n",
         
-        "HelpInfo":     "Allows you to add a link and assign it a room. Different link types are "
-                        + "supported and each one will have its own specific form. \n\n"
-						+ "How to create and add OWM Account: www.iomy.org/openweathermap.php"
+        "HelpInfo":     ""
 	},
     {
 		"Id":			"pSettingsThingAdd",
@@ -1496,7 +1494,7 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.user.EditUserInformation\" Page!\n",
         
-        "HelpInfo":     "This page is where you can change your name(s) and your personal and contact details."
+//        "HelpInfo":     "This page is where you can change your name(s) and your personal and contact details."
 	},
     {
 		"Id":			"pSettingsUserPassword",
@@ -1504,8 +1502,8 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.user.UserEditPassword\" Page!\n",
         
-        "HelpInfo":     "Enter your currrent password to change your password. Enter the new "
-                        + "password twice to confirm."
+//        "HelpInfo":     "Enter your currrent password to change your password. Enter the new "
+//                        + "password twice to confirm."
 	},
     {
 		"Id":			"pSettingsUserAddress",
@@ -1513,7 +1511,7 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.user.EditUserAddress\" Page!\n",
         
-        "HelpInfo":     "This page allows you to change your address."
+//        "HelpInfo":     "This page allows you to change your address."
 	},
     {
 		"Id":			"pSettingsPremiseList",
@@ -1531,8 +1529,8 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.premise.PremiseEditInfo\" Page!\n",
         
-        "HelpInfo":     "The user can change the premise name and its description. If the current user "
-                        + "owns the premise, a button to change the permissions will be available."
+//        "HelpInfo":     "The user can change the premise name and its description. If the current user "
+//                        + "owns the premise, a button to change the permissions will be available."
 	},
     {
 		"Id":			"pSettingsPremiseHub",
@@ -1540,7 +1538,7 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.premise.PremiseEditHub\" Page!\n",
         
-        "HelpInfo":     "The user can change the name of the selected hub on this page."
+//        "HelpInfo":     "The user can change the name of the selected hub on this page."
 	},
     {
 		"Id":			"pSettingsPremiseAddress",
@@ -1548,7 +1546,7 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.premise.PremiseEditAddress\" Page!\n",
         
-        "HelpInfo":     "This page allows you to change the location address of the selected premise."
+//        "HelpInfo":     "This page allows you to change the location address of the selected premise."
 	},
     {
 		"Id":			"pSettingsRoomEdit",
@@ -1556,8 +1554,7 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.rooms.RoomEdit\" Page!\n",
         
-        "HelpInfo":     "Use this page to modify details about the selected room, i.e. name (required), "
-                        + "description (optional), and the type of room it is."
+        "HelpInfo":     "The name field is required"
 	},
     {
 		"Id":			"pSettingsRoomAdd",
@@ -1598,8 +1595,8 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.premise.DeviceData\" Page!\n",
         
-        "HelpInfo":     "This page lists the current state (on/off) all the current readings of voltage, amps, "
-						+ "kilowatts, and kilowatt/hour from the current device."
+//        "HelpInfo":     "This page lists the current state (on/off) all the current readings of voltage, amps, "
+//						+ "kilowatts, and kilowatt/hour from the current device."
 	},
     {
 		"Id":			"pOnvif",
@@ -1614,63 +1611,43 @@ var aPages = [
 		"Id":			"pPhilipsHue",
 		"Location":		"mjs.devices.PhilipsHue",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.PhilipsHue\" Page!\n",
-        
-        "HelpInfo":     "This page shows the current the colour (hue), saturation, and brightness of the "
-						+ "currently selected device. Each has its own slide to easily change the levels of "
-                        + "each setting. There is also a switch to turn it either on or off."
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.PhilipsHue\" Page!\n"
 	},
     { // TODO: Change the file containing this to './mjs/devices/OpenWeatherMap'.
 		"Id":			"pThermostat",
 		"Location":		"mjs.devices.Thermostat",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Thermostat\" Page!\n",
-        
-        "HelpInfo":     "Shows an overview of the weather from a selected station. The information "
-                        + "given are as follows:\n\n"
-                        + "* Weather outside\n"
-                        + "* Sunrise/sunset times\n"
-                        + "* Air pressure\n"
-                        + "* Wind speed and direction\n"
-                        + "* Temperature and humidity\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Thermostat\" Page!\n"
 	},
     {
 		"Id":			"pMotionSensor",
 		"Location":		"mjs.devices.MotionSensor",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.MotionSensor\" Page!\n",
-        
-        "HelpInfo":     "Shows whether it's currently on or off, when any motion was last detected, "
-                        + "the temperature, battery level, and the tamper reading (whether it's secure "
-                        + "or not)."
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.MotionSensor\" Page!\n"
 	},
     { 
 		"Id":			"pDeviceDoorLock",
 		"Location":		"mjs.devices.DoorLock",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.DoorLock\" Page!\n",
-		"HelpInfo":		"This feature is still in development."
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.DoorLock\" Page!\n"
 	},
 	{ 
 		"Id":			"pDeviceWindowSensor",
 		"Location":		"mjs.devices.WindowSensor",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.WindowSensor\" Page!\n",
-		"HelpInfo":		"This feature is still in development."
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.WindowSensor\" Page!\n"
 	},
 	{ 
 		"Id":			"pDeviceTestThermostat",
 		"Location":		"mjs.devices.TestThermostat",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.TestThermostat\" Page!\n",
-		"HelpInfo":		"This feature is still in development."
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.TestThermostat\" Page!\n"
 	},
 	{
 		"Id":			"pDeviceScales",
 		"Location":		"mjs.devices.Scales",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Scales\" Page!\n",
-		"HelpInfo":		"This feature is still in development."
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Scales\" Page!\n"
 	},
 	/* No current pages 
 	{
@@ -1684,20 +1661,13 @@ var aPages = [
 		"Id":			"pDeviceBPM",
 		"Location":		"mjs.devices.BPM",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.BPM\" Page!\n",
-        
-        "HelpInfo":     "This feature is still in development.\n\nBlood pressure monitors will "
-                        + "display not only the blood pressure reading (systol/diastol, 120/80) "
-                        + "and heart rate, but also whether it's on or off, battery level, and "
-                        + "when it was last used.\n\nYou will be able to view the results for "
-                        + "for each registered user."
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.BPM\" Page!\n"
 	},
     {
 		"Id":			"pDeviceGaragedoor",
 		"Location":		"mjs.devices.Garagedoor",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Garagedoor\" Page!\n",
-		"HelpInfo":		"This feature is still in development."
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Garagedoor\" Page!\n"
 	},
     //--------------------------------------------------------------------//
     // Staging
@@ -1706,23 +1676,20 @@ var aPages = [
 		"Id":			"pStagingHome",
 		"Location":		"mjs.staging.StagingHome",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.StagingHome\" Page!\n",
-        "Staging":      true
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.StagingHome\" Page!\n"
 	},
 	{ 
 		"Id":			"pRulesOverview",
 		"Location":		"mjs.staging.RulesOverview",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.RulesOverview\" Page!\n",
-        "Staging":      true
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.RulesOverview\" Page!\n"
 	},
 	{ 
 		"Id":			"pAddRule",
 		"Location":		"mjs.staging.AddRule",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.AddRule\" Page!\n",
-        "Staging":      true
-	},
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.AddRule\" Page!\n"
+	}
 	
 ];
 
@@ -1757,11 +1724,8 @@ $.each( aPages, function (iIndex, aPageData) {
 		//------------------------------------//
         // Add the help information to memory
         //------------------------------------//
-        if (aPageData.HelpInfo !== undefined || aPageData.Staging) {
+        if (aPageData.HelpInfo !== undefined) {
             IOMy.help.PageInformation[aPageData.Id] = aPageData.HelpInfo;
-        } else if (aPageData.HelpInfo === undefined && aPageData.Staging !== true) {
-            //IOMy.help.PageInformation[aPageData.Id] = aPageData.Id;
-            throw new NoHelpMessageForPageException(aPageData.Id+" does not have a help message! This must be specified before the page can be created.");
         }
 		
         oApp.addPage(
@@ -1773,11 +1737,7 @@ $.each( aPages, function (iIndex, aPageData) {
 		);
 
 	} catch(ePLogin) {
-        if (ePLogin.name === "NoHelpMessageForPageException") {
-            console.log( ePLogin.message );
-        } else {
-            console.log( sErMesg+ePLogin.message );
-        }
+        jQuery.sap.log.error( sErMesg+ePLogin.message );
 	}
 });
 

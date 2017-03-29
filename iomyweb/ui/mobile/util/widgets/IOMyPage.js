@@ -41,39 +41,42 @@ $.extend(IOMy.widgets,{
      * @returns {object}            // sap.m.Page OR an empty object, {}
      */
     IOMyPage : function (mSettings) {
-        //===============================================\\
+        //===============================================//
         // DECLARE VARIABLES
-        //===============================================\\
+        //===============================================//
         
         // Error checking
         var bError              = false;    // Unless indicated otherwise.
         var aErrorMessages      = [];       // Array of error messages.
         var sErrorMessage       = "";       // Final error message.
+        // Help button management
+        var bHelpButtonEnabled  = true;
+        var sCurrentPageID;
         // The Page itself
         var oPage               = {};
         
-        //===============================================\\
+        //===============================================//
         // VALIDATE REQUIRED ARGUMENTS
-        //===============================================\\
+        //===============================================//
         
         try {
-            //== VIEW ==\\
-            //--- If the view is undefined, then the page can't be created. ---\\
+            //== VIEW ==//
+            //--- If the view is undefined, then the page can't be created. ---//
             if (mSettings.view === undefined) {
                 bError = true; // Bugger.
                 aErrorMessages.push("A UI5 view must be parsed.");
 
-            //--- If it is parsed, check to see if it's actually a JS Object. ---\\
+            //--- If it is parsed, check to see if it's actually a JS Object. ---//
             } else if (typeof mSettings.view !== "object") {
                 // If it's not, then that's an error.
                 bError = true;
                 aErrorMessages.push("view must be a JS Object (sap.ui.jsview).");
             }
 
-            //== CONTROLLER ==\\
-            //--- If there is a valid view, check the controller to see if it exists and is valid. ---\\
+            //== CONTROLLER ==//
+            //--- If there is a valid view, check the controller to see if it exists and is valid. ---//
             if (mSettings.controller === undefined || typeof mSettings.controller !== "object") {
-                //--- If not, see if a controller can be gathered from the view instead. ---\\
+                //--- If not, see if a controller can be gathered from the view instead. ---//
                 try {
 
                     mSettings.controller = mSettings.view.getController();
@@ -83,8 +86,8 @@ $.extend(IOMy.widgets,{
                     aErrorMessages.push("Could not retrieve the controller: "+e.message);
                 }
             }
-            //== ID ==\\
-            //--- Now see if the ID exists and is valid. ---\\
+            //== ID ==//
+            //--- Now see if the ID exists and is valid. ---//
             if (mSettings.id === undefined || isNaN(mSettings.id.charAt(0)) === false) {
                 // Set the default ID which will be unique to its view if a valid ID does not exist.
                 mSettings.id = "page";
@@ -98,40 +101,49 @@ $.extend(IOMy.widgets,{
                 }
             }
 
-            //== TITLE ==\\
-            //--- Every page needs a title... ---\\
+            //== TITLE ==//
+            //--- Every page needs a title... ---//
             if (mSettings.title === undefined) {
                 bError = true; // No title!
                 aErrorMessages.push("Every page needs a title");
 
-            //--- ...which must be a string ---\\
+            //--- ...which must be a string ---//
             } else if (typeof mSettings.title !== "string") {
                 bError = true; // It's not a string.
                 aErrorMessages.push("Title must be a string");
             }
 
-            //== ICON ==\\
-            //--- Every page needs an icon... ---\\
+            //== ICON ==//
+            //--- Every page needs an icon... ---//
             if (mSettings.icon === undefined) {
                 bError = true; // Where's the icon?
                 aErrorMessages.push("Every page needs an icon");
 
-            //--- ...which must be a string ---\\
+            //--- ...which must be a string ---//
             } else if (typeof mSettings.icon !== "string") {
                 bError = true; // It's not a string.
                 aErrorMessages.push("Title must be a string");
             }
-
-            //===============================================\\
-            // NOW CREATE THE PAGE IF IT ALL CHECKS OUT
-            //===============================================\\
-
+            //----------------------------------------------------------------//
+            // Proceed if there are no errors.
+            //----------------------------------------------------------------//
             if (bError === false) {
+                //============================================================//
+                // CHECK WHETHER THE HELP BUTTON NEEDS TO BE DISABLED OR NOT.
+                //============================================================//
+                sCurrentPageID = mSettings.view.getId();
+                if (IOMy.help.PageInformation[ sCurrentPageID ] === undefined) {
+                    bHelpButtonEnabled = false;
+                }
+
+                //===============================================//
+                // NOW CREATE THE PAGE IF IT ALL CHECKS OUT
+                //===============================================//
                 try {
                     oPage = new sap.m.Page(mSettings.view.createId(mSettings.id), {
                         customHeader : IOMy.widgets.getIOMYPageHeaderNav( mSettings.controller ),
                         content: [IOMy.widgets.getNavigationalSubHeader(mSettings.title.toUpperCase(), mSettings.icon, mSettings.view)],
-                        footer : IOMy.widgets.getAppFooter()
+                        footer : IOMy.widgets.getAppFooter(bHelpButtonEnabled)
                     }).addStyleClass("height100Percent width100Percent MainBackground MasterPage");
                 } catch (e) {
                     // Something has gone wrong if this executes.
@@ -144,7 +156,7 @@ $.extend(IOMy.widgets,{
         } catch (e) {
             // Something has gone wrong if this executes.
             bError = true;
-            aErrorMessages.push("There : "+e.message);
+            aErrorMessages.push(e.name+": "+e.message);
         }
         
         if (bError === true) {

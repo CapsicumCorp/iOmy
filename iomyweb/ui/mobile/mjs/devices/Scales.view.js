@@ -44,14 +44,21 @@ sap.ui.jsview("mjs.devices.Scales", {
 	createContent : function(oController) {
 		var me = this;
 		
-		var oPage = new sap.m.Page(me.createId("page"),{
-			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			footer : IOMy.widgets.getAppFooter(),
-			content : [
-                //-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("BLUETOOTH SCALES", "sap-icon://GoogleMaterial/bluetooth", me)
-            ]
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+        var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/bluetooth",
+            title : "Bluetooth Scales"
+        });
+        
+//		var oPage = new sap.m.Page(me.createId("page"),{
+//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			footer : IOMy.widgets.getAppFooter(),
+//			content : [
+//                //-- Navigational Header --//
+//				IOMy.widgets.getNavigationalSubHeader("BLUETOOTH SCALES", "sap-icon://GoogleMaterial/bluetooth", me)
+//            ]
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
 		
 		return oPage;
 	}

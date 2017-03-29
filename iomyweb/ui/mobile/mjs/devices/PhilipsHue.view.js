@@ -44,12 +44,19 @@ sap.ui.jsview("mjs.devices.PhilipsHue", {
     createContent : function(oController) {
     	var me = this;
     	this.destroyContent();
+        
+        var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://IOMy1/appliances",
+            title : "Philips Hue"
+        });
     	
-    	var oPage = new sap.m.Page(this.createId("page"), {
-    		customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			content: [IOMy.widgets.getNavigationalSubHeader("PHILIPS HUE", "sap-icon://IOMy1/appliances", me)],
-			footer : IOMy.widgets.getAppFooter()
-		}).addStyleClass("height100Percent width100Percent MainBackground MasterPage");
+//    	var oPage = new sap.m.Page(this.createId("page"), {
+//    		customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			content: [IOMy.widgets.getNavigationalSubHeader("PHILIPS HUE", "sap-icon://IOMy1/appliances", me)],
+//			footer : IOMy.widgets.getAppFooter()
+//		}).addStyleClass("height100Percent width100Percent MainBackground MasterPage");
 		
 		
 		return oPage;

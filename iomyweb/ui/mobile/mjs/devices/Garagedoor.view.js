@@ -44,23 +44,41 @@ sap.ui.jsview("mjs.devices.Garagedoor", {
 	****************************************************************************************************/ 
 	createContent : function(oController) {
 		var me = this;
+        
+        var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/lock",
+            title : "Garage Door"
+        });
+        
+        oPage.addContent(
+            new sap.m.Panel( me.createId("panel"), {
+                backgroundDesign: "Transparent",
+                content : [
+                    new sap.m.List (me.createId("list"),{
+                        items : [ /* Items are being loaded in via the Controller */ ]
+                    })
+                ]
+            }).addStyleClass("PadBottom10px UserInputForm")
+        );
 		
-		var oPage = new sap.m.Page(me.createId("page"),{
-			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			footer : IOMy.widgets.getAppFooter(),
-			content : [
-                //-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("GARAGE DOOR", "sap-icon://GoogleMaterial/lock_outline", me),
-				new sap.m.Panel( me.createId("panel"), {
-                    backgroundDesign: "Transparent",
-                    content : [
-						new sap.m.List (me.createId("list"),{
-							items : [ /* Items are being loaded in via the Controller */ ]
-						})
-					]
-                }).addStyleClass("PadBottom10px UserInputForm")
-            ]
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+//		var oPage = new sap.m.Page(me.createId("page"),{
+//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			footer : IOMy.widgets.getAppFooter(),
+//			content : [
+//                //-- Navigational Header --//
+//				IOMy.widgets.getNavigationalSubHeader("GARAGE DOOR", "sap-icon://GoogleMaterial/lock_outline", me),
+//				new sap.m.Panel( me.createId("panel"), {
+//                    backgroundDesign: "Transparent",
+//                    content : [
+//						new sap.m.List (me.createId("list"),{
+//							items : [ /* Items are being loaded in via the Controller */ ]
+//						})
+//					]
+//                }).addStyleClass("PadBottom10px UserInputForm")
+//            ]
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
 		
 		return oPage;
 	}
