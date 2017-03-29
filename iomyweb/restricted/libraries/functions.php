@@ -74,6 +74,9 @@ function LookupFunctionConstant( $sValue ) {
 		//----------------//
 		//-- COMMS      --//
 		//----------------//
+		case "DemoCommTypeId":
+			return 1;
+			
 		case "APICommTypeId":
 			return 2;
 			
