@@ -64,7 +64,8 @@ $iWindDirectionIOId         = 0;            //-- INTEGER:       --//
 $iWindSpeedIOId             = 0;            //-- INTEGER:       --//
 $bFound                     = false;        //-- BOOLEAN:       --//
 $iCommId                    = 0;            //-- INTEGER:       --//
-$iAPICommTypeId             = 0;            //-- INTEGER:       --//
+$iDemoCommTypeId            = 0;            //-- INTEGER:       Used to store the "Comm Type Id" of the "Demo Comm Type".          --//
+$iAPICommTypeId             = 0;            //-- INTEGER:       Used to store the "Comm Type Id" of the "PHP API Comm Type".       --//
 $iWeatherStationRSTypeId    = 0;            //-- INTEGER:       --//
 
 $iTemperatureRSTypeId       = 0;            //-- INTEGER:       --//
@@ -124,6 +125,7 @@ require_once SITE_BASE.'/restricted/libraries/weather/demoweather.php';
 //------------------------------------------------------------//
 //-- 1.5 - Fetch Constants (Will be replaced)               --//
 //------------------------------------------------------------//
+$iDemoCommTypeId            = LookupFunctionConstant("DemoCommTypeId");
 $iAPICommTypeId             = LookupFunctionConstant("APICommTypeId");
 $iOWMLinkTypeId             = LookupFunctionConstant("OWMLinkTypeId");
 $iWeatherThingTypeId        = LookupFunctionConstant("WeatherThingTypeId");
@@ -584,7 +586,7 @@ if( $bError===false ) {
 						);
 						
 						//-- If the iOmy System is currently running in Demo Mode --//
-						if( $oRestrictedApiCore->CheckIfDemoMode() ) {
+						if( $oRestrictedApiCore->CheckIfDemoMode() || $iLinkCommType===$iDemoCommTypeId ) {
 							//--------------------------------------------//
 							//-- Load the demonstration weather object  --//
 							//--------------------------------------------//
@@ -853,9 +855,9 @@ if( $bError===false ) {
 							$aResult = $oWeather->GetMostRecentDBWeather();
 							
 							if( $aResult['Error']===true ) {
-								var_dump( $aResultTemp );
-								echo "\n\n";
-								var_dump( $aResult );
+								//var_dump( $aResultTemp );
+								//echo "\n\n";
+								//var_dump( $aResult );
 								
 								$bError = true;
 								$iErrCode  = 2412;
