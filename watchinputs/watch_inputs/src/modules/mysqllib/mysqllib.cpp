@@ -2,7 +2,7 @@
 Title: MySQL Library for Watch Inputs
 Author: Matthew Stapleton (Capsicum Corporation) <matthew@capsicumcorp.com>
 Description: This module provides support for mysql database.
-Copyright: Capsicum Corporation 2010-2016
+Copyright: Capsicum Corporation 2010-2017
 
 This file is part of Watch Inputs which is part of the iOmy project.
 
@@ -977,6 +977,124 @@ void *mysqllib_getsensor_uniqueid(uint64_t addr, int portid, const char *sensor_
   jtmpstr=env->NewStringUTF(thisaddr);
   jtmpstr2=env->NewStringUTF(sensor_name);
   thisvalue=env->CallStaticLongMethod(mysqllib_mysql_class, getSensorUniqueId_methodid, jtmpstr, portid, jtmpstr2);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GETSENSOR_UNIQUEID];
+  if (stmt) {
+    int result;
+    size_t addrlen, sensor_name_len;
+    char *thissensor_name=NULL;
+    my_bool is_null=0;
+    MYSQL_BIND bind[3];
+
+    thissensor_name=strdup(sensor_name);
+    if (thissensor_name==NULL) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to allocate ram for copy of sensor name for Get Sensor UniqueID SQL Statement\n", __func__);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return NULL;
+    }
+    memset(bind, 0, sizeof(bind));
+    addrlen=strlen(thisaddr);
+    sensor_name_len=strlen(thissensor_name);
+
+    bind[0].buffer=thisaddr;
+    bind[0].buffer_type=MYSQL_TYPE_STRING;
+    bind[0].buffer_length=addrlen+1;
+    bind[0].is_null=&is_null;
+    bind[0].length=&addrlen;
+
+    bind[1].buffer=&portid;
+    bind[1].buffer_type=MYSQL_TYPE_LONG;
+    bind[1].buffer_length=4;
+    bind[1].is_null=0;
+    bind[1].length=0;
+
+    bind[2].buffer=thissensor_name;
+    bind[2].buffer_type=MYSQL_TYPE_STRING;
+    bind[2].buffer_length=sensor_name_len+1;
+    bind[2].is_null=&is_null;
+    bind[2].length=&sensor_name_len;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for Get Sensor UniqueID SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      if (thissensor_name) {
+        free(thissensor_name);
+      }
+      return NULL;
+    }
+    //Configure binding for result
+    long long longint_data;
+    unsigned long result_length[1];
+    my_bool result_is_null[1];
+    my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
+
+    memset(result_bind, 0, sizeof(result_bind));
+
+    result_bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    result_bind[0].buffer= (char *)&longint_data;
+    result_bind[0].buffer_length=8;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
+
+    //Bind the result buffers
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for Get Sensor UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      if (thissensor_name) {
+        free(thissensor_name);
+      }
+      return NULL;
+    }
+    //NOTE: If result buffers are already bound, execute will use them so execute needs to be called
+    //  after binding the result buffers
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Get Sensor UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      if (thissensor_name) {
+        free(thissensor_name);
+      }
+      return NULL;
+    }
+    //Fetch the first row
+    result=mysql_stmt_fetch(stmt);
+    if (result==MYSQL_NO_DATA) {
+      //PK doesn't exist
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      if (thissensor_name) {
+        free(thissensor_name);
+      }
+      return NULL;
+    }
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to fetch result for Get Sensor UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      if (thissensor_name) {
+        free(thissensor_name);
+      }
+      return NULL;
+    }
+    thisvalue=longint_data;
+
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for Get Sensor UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      if (thissensor_name) {
+        free(thissensor_name);
+      }
+      return NULL;
+    }
+    free(thissensor_name);
+  }
 #endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
 #ifdef __ANDROID__
@@ -1038,6 +1156,86 @@ int mysqllib_getioport_state(const void *uniqueid, int32_t *state) {
   }
 #ifdef __ANDROID__
   thisvalue=env->CallStaticIntMethod(mysqllib_mysql_class, getIOPorts_State_methodid, thisuniqueid->pk64);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GETIOPORT_STATE];
+  if (stmt) {
+    int result;
+    int64_t thispk64=thisuniqueid->pk64;
+    my_bool is_null=0;
+    MYSQL_BIND bind[1];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thispk64;
+    bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[0].buffer_length=8;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for Get IO Port State SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    //Configure binding for result
+    int32_t int_data;
+    unsigned long result_length[1];
+    my_bool result_is_null[1];
+    my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
+
+    memset(result_bind, 0, sizeof(result_bind));
+
+    result_bind[0].buffer_type=MYSQL_TYPE_LONG;
+    result_bind[0].buffer= (char *)&int_data;
+    result_bind[0].buffer_length=4;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
+
+    //Bind the result buffers
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for Get IO Port State SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -6;
+    }
+    //NOTE: If result buffers are already bound, execute will use them so execute needs to be called
+    //  after binding the result buffers
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Get IO Port State SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    //Fetch the first row
+    result=mysql_stmt_fetch(stmt);
+    if (result==MYSQL_NO_DATA) {
+      //IO Port doesn't exist
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      debuglibifaceptr->debuglib_printf(1, "%s: No state for ioportspk: %" PRId32 "\n", __func__, thispk64);
+      return -8;
+    }
+    if (result!=0) {
+      //State doesn't exist
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to fetch result for Get IO Port State SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -9;
+    }
+    thisvalue=int_data;
+
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for Get IO Port State SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
 #endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
 #ifdef __ANDROID__
@@ -1092,6 +1290,85 @@ int mysqllib_getsensor_sampleratecurrent(const void *uniqueid, double *samplerat
   }
 #ifdef __ANDROID__
   thisvalue=env->CallStaticDoubleMethod(mysqllib_mysql_class, getSensor_SampleRateCurrent_methodid, thisuniqueid->pk64);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GETSENSOR_SAMPLERATECURRENT];
+  if (stmt) {
+    int result;
+    int64_t thispk64=thisuniqueid->pk64;
+    my_bool is_null=0;
+    MYSQL_BIND bind[1];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thispk64;
+    bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[0].buffer_length=8;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for Get Current Sensor Sample Rate SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    //Configure binding for result
+    double double_data;
+    unsigned long result_length[1];
+    my_bool result_is_null[1];
+    my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
+
+    memset(result_bind, 0, sizeof(result_bind));
+
+    result_bind[0].buffer_type=MYSQL_TYPE_DOUBLE;
+    result_bind[0].buffer=(char *)&double_data;
+    result_bind[0].buffer_length=8;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
+
+    //Bind the result buffers
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for Get Current Sensor Sample Rate SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -6;
+    }
+    //NOTE: If result buffers are already bound, execute will use them so execute needs to be called
+    //  after binding the result buffers
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Get Current Sensor Sample Rate SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    //Fetch the first row
+    result=mysql_stmt_fetch(stmt);
+    if (result==MYSQL_NO_DATA) {
+      //Sample Rate doesn't exist
+      debuglibifaceptr->debuglib_printf(1, "%s: No sample rate current for sensorpk: %s\n", __func__, thispk64);
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -8;
+    }
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to fetch result for Get Current Sensor Sample Rate SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -9;
+    }
+    thisvalue=double_data;
+
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for Get Current Sensor Sample Rate SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return NULL;
+    }
+  }
 #endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
 #ifdef __ANDROID__
@@ -1147,6 +1424,49 @@ int mysqllib_update_ioports_state(const void *uniqueid, int32_t value) {
   }
 #ifdef __ANDROID__
   result=env->CallStaticIntMethod(mysqllib_mysql_class, update_IOPorts_State_methodid, thisuniqueid->pk64, value);
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_UPDATE_IOPORT_STATE];
+  if (stmt) {
+    int result;
+    int64_t thispk64=thisuniqueid->pk64;
+    int32_t thisvalue=value;
+    my_bool is_null=0;
+    MYSQL_BIND bind[2];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thisvalue;
+    bind[0].buffer_type=MYSQL_TYPE_LONG;
+    bind[0].buffer_length=4;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    bind[1].buffer=&thispk64;
+    bind[1].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[1].buffer_length=8;
+    bind[1].is_null=0;
+    bind[1].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for Update IO Ports State SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Update IO Ports State SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for Update IO Ports State SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
 #endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
 #ifdef __ANDROID__
