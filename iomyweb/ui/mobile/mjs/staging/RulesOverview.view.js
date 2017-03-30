@@ -44,178 +44,189 @@ sap.ui.jsview("mjs.staging.RulesOverview", {
 	createContent : function(oController) {
 		var me = this;
 		
-		var oPage = new sap.m.Page(me.createId("page"),{
-			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			footer : IOMy.widgets.getAppFooter(),
-			content : [
-                // -- Navigational Header -- // 
-				IOMy.widgets.getNavigationalSubHeader("Rules Overview", "sap-icon://GoogleMaterial/home", me),
-				new sap.m.Panel ({
-					backgroundDesign: "Transparent",
-					content: [
-						// -- Parent VBox. Aligns children vertically -- //
-						new sap.m.VBox({
-							items : [
-								// -- Device Header -- //
-								new sap.m.VBox({
-									items : [
-										// -- HBox Label Container. Aligns children horizontally -- //
-										new sap.m.HBox({
-											items : [
-												new sap.m.Label({
-													text: "Zigbee Smart Plug"
-												}).addStyleClass("Font-RobotoCondensed")
-											]
-										}).addStyleClass("MarLeft3px")
-									]
-								}).addStyleClass("ConsistentMenuHeader ListItem width100Percent"),
-								// -- Device Display Name w/ Onpress Event Link --//
-								new sap.m.HBox({
-									items : [
-										new sap.m.VBox({
-											layoutData : new sap.m.FlexItemData({
-												growFactor : 8
-											}),
-											items : [
-												new sap.m.Link({
-													text : "Tv",
-													width: "100%",
-													press : function () {
-														IOMy.common.NavigationChangePage("pAddRule");
-													}
-												}).addStyleClass("Font-RobotoCondensed TextSizeMedium Text_grey_20 MarTop1d25Rem iOmyLink"),
-												new sap.m.HBox({
-													width: "100%",
-													justifyContent: "End",
-													items : [
-														// -- Example Serial Number -- //
-														new sap.m.Label({
-															text: "SN: 00137A000000AD88"
-														}).addStyleClass("Font-RobotoCondensed TextSizeXSmall Text_grey_20")
-													]
-												}).addStyleClass("")
-											]
-										}).addStyleClass("MarLeft3px BorderRight PadRight3px"),
-										new sap.m.VBox({
-											layoutData : new sap.m.FlexItemData({
-												growFactor : 1
-											}),
-											items: [
-												new sap.m.VBox({
-													items : [
-														new sap.m.Label({
-															text : "Turn On: 6:00pm"
-														}).addStyleClass("Font-RobotoCondensed width100px"),
-														
-														new sap.m.Label({
-															text : "Turn Off: 12:00am"
-														}).addStyleClass("Font-RobotoCondensed width100px")
-													]
-												})
-											]
-										}).addStyleClass("MarTop12px TextCenter")
-									]
-								}).addStyleClass("minheight58px ListItem"),
-								// -- Device Display Name w/ Onpress Event Link --//
-								new sap.m.HBox({
-									items : [
-										new sap.m.VBox({
-											layoutData : new sap.m.FlexItemData({
-												growFactor : 8
-											}),
-											items : [
-												new sap.m.Link({
-													text : "Fridge",
-													width: "100%",
-													press : function () {
-														IOMy.common.NavigationChangePage("pAddRule");
-													}
-												}).addStyleClass("Font-RobotoCondensed TextSizeMedium Text_grey_20 MarTop1d25Rem iOmyLink"),
-												new sap.m.HBox({
-													width: "100%",
-													justifyContent: "End",
-													items : [
-														// -- Example Serial Number -- //
-														new sap.m.Label({
-															text: "SN: 00137A000000AD87"
-														}).addStyleClass("Font-RobotoCondensed TextSizeXSmall Text_grey_20")
-													]
-												}).addStyleClass("")
-											]
-										}).addStyleClass("MarLeft3px BorderRight PadRight3px"),
-										new sap.m.VBox({
-											layoutData : new sap.m.FlexItemData({
-												growFactor : 1
-											}),
-											items: [
-												new sap.m.VBox({
-													items : [
-														new sap.m.Label({
-															text : "Turn On: 8:00am"
-														}).addStyleClass("Font-RobotoCondensed width100px"),
-														
-														new sap.m.Label({
-															text : "Turn Off: 5:00pm"
-														}).addStyleClass("Font-RobotoCondensed width100px")
-													]
-												})
-											]
-										}).addStyleClass("MarTop12px TextCenter")
-									]
-								}).addStyleClass("minheight58px ListItem"),
-								// -- Device Display Name w/ Onpress Event Link --//
-								new sap.m.HBox({
-									items : [
-										new sap.m.VBox({
-											layoutData : new sap.m.FlexItemData({
-												growFactor : 8
-											}),
-											items : [
-												new sap.m.Link({
-													text : "Lamp",
-													width: "100%",
-													press : function () {
-														IOMy.common.NavigationChangePage("pAddRule");
-													}
-												}).addStyleClass("Font-RobotoCondensed TextSizeMedium Text_grey_20 MarTop1d25Rem iOmyLink"),
-												new sap.m.HBox({
-													width: "100%",
-													justifyContent: "End",
-													items : [
-														// -- Example Serial Number -- //
-														new sap.m.Label({
-															text: "SN: 00137A000000AD86"
-														}).addStyleClass("Font-RobotoCondensed TextSizeXSmall Text_grey_20")
-													]
-												}).addStyleClass("")
-											]
-										}).addStyleClass("MarLeft3px BorderRight PadRight3px"),
-										new sap.m.VBox({
-											layoutData : new sap.m.FlexItemData({
-												growFactor : 1
-											}),
-											items: [
-												new sap.m.VBox({
-													items : [
-														new sap.m.Label({
-															text : "Turn On: 11:00pm"
-														}).addStyleClass("Font-RobotoCondensed width100px"),
-														
-														new sap.m.Label({
-															text : "Turn Off: 6:00am"
-														}).addStyleClass("Font-RobotoCondensed width100px")
-													]
-												})
-											]
-										}).addStyleClass("MarTop12px TextCenter")
-									]
-								}).addStyleClass("minheight58px ListItem"),
-							]
-						})
-					]
-				}).addStyleClass("MasterPanel PanelNoPadding PadBottom10px UserInputForm MarTop3px")
-            ]
-		}).addStyleClass("height100Percent width100Percent MainBackground")
+//		var oPage = new sap.m.Page(me.createId("page"),{
+//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			footer : IOMy.widgets.getAppFooter(),
+//			content : [
+//                // -- Navigational Header -- // 
+//				IOMy.widgets.getNavigationalSubHeader("Rules Overview", "sap-icon://GoogleMaterial/home", me),
+//            
+//            ]
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
+        
+        var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/home",
+            title : "Rules Overview"
+        });
+        
+        oPage.addContent(
+            new sap.m.Panel ({
+                backgroundDesign: "Transparent",
+                content: [
+                    // -- Parent VBox. Aligns children vertically -- //
+                    new sap.m.VBox({
+                        items : [
+                            // -- Device Header -- //
+                            new sap.m.VBox({
+                                items : [
+                                    // -- HBox Label Container. Aligns children horizontally -- //
+                                    new sap.m.HBox({
+                                        items : [
+                                            new sap.m.Label({
+                                                text: "Zigbee Smart Plug"
+                                            }).addStyleClass("Font-RobotoCondensed")
+                                        ]
+                                    }).addStyleClass("MarLeft3px")
+                                ]
+                            }).addStyleClass("ConsistentMenuHeader ListItem width100Percent"),
+                            // -- Device Display Name w/ Onpress Event Link --//
+                            new sap.m.HBox({
+                                items : [
+                                    new sap.m.VBox({
+                                        layoutData : new sap.m.FlexItemData({
+                                            growFactor : 8
+                                        }),
+                                        items : [
+                                            new sap.m.Link({
+                                                text : "Tv",
+                                                width: "100%",
+                                                press : function () {
+                                                    IOMy.common.NavigationChangePage("pAddRule");
+                                                }
+                                            }).addStyleClass("Font-RobotoCondensed TextSizeMedium Text_grey_20 MarTop1d25Rem iOmyLink"),
+                                            new sap.m.HBox({
+                                                width: "100%",
+                                                justifyContent: "End",
+                                                items : [
+                                                    // -- Example Serial Number -- //
+                                                    new sap.m.Label({
+                                                        text: "SN: 00137A000000AD88"
+                                                    }).addStyleClass("Font-RobotoCondensed TextSizeXSmall Text_grey_20")
+                                                ]
+                                            }).addStyleClass("")
+                                        ]
+                                    }).addStyleClass("MarLeft3px BorderRight PadRight3px"),
+                                    new sap.m.VBox({
+                                        layoutData : new sap.m.FlexItemData({
+                                            growFactor : 1
+                                        }),
+                                        items: [
+                                            new sap.m.VBox({
+                                                items : [
+                                                    new sap.m.Label({
+                                                        text : "Turn On: 6:00pm"
+                                                    }).addStyleClass("Font-RobotoCondensed width100px"),
+
+                                                    new sap.m.Label({
+                                                        text : "Turn Off: 12:00am"
+                                                    }).addStyleClass("Font-RobotoCondensed width100px")
+                                                ]
+                                            })
+                                        ]
+                                    }).addStyleClass("MarTop12px TextCenter")
+                                ]
+                            }).addStyleClass("minheight58px ListItem"),
+                            // -- Device Display Name w/ Onpress Event Link --//
+                            new sap.m.HBox({
+                                items : [
+                                    new sap.m.VBox({
+                                        layoutData : new sap.m.FlexItemData({
+                                            growFactor : 8
+                                        }),
+                                        items : [
+                                            new sap.m.Link({
+                                                text : "Fridge",
+                                                width: "100%",
+                                                press : function () {
+                                                    IOMy.common.NavigationChangePage("pAddRule");
+                                                }
+                                            }).addStyleClass("Font-RobotoCondensed TextSizeMedium Text_grey_20 MarTop1d25Rem iOmyLink"),
+                                            new sap.m.HBox({
+                                                width: "100%",
+                                                justifyContent: "End",
+                                                items : [
+                                                    // -- Example Serial Number -- //
+                                                    new sap.m.Label({
+                                                        text: "SN: 00137A000000AD87"
+                                                    }).addStyleClass("Font-RobotoCondensed TextSizeXSmall Text_grey_20")
+                                                ]
+                                            }).addStyleClass("")
+                                        ]
+                                    }).addStyleClass("MarLeft3px BorderRight PadRight3px"),
+                                    new sap.m.VBox({
+                                        layoutData : new sap.m.FlexItemData({
+                                            growFactor : 1
+                                        }),
+                                        items: [
+                                            new sap.m.VBox({
+                                                items : [
+                                                    new sap.m.Label({
+                                                        text : "Turn On: 8:00am"
+                                                    }).addStyleClass("Font-RobotoCondensed width100px"),
+
+                                                    new sap.m.Label({
+                                                        text : "Turn Off: 5:00pm"
+                                                    }).addStyleClass("Font-RobotoCondensed width100px")
+                                                ]
+                                            })
+                                        ]
+                                    }).addStyleClass("MarTop12px TextCenter")
+                                ]
+                            }).addStyleClass("minheight58px ListItem"),
+                            // -- Device Display Name w/ Onpress Event Link --//
+                            new sap.m.HBox({
+                                items : [
+                                    new sap.m.VBox({
+                                        layoutData : new sap.m.FlexItemData({
+                                            growFactor : 8
+                                        }),
+                                        items : [
+                                            new sap.m.Link({
+                                                text : "Lamp",
+                                                width: "100%",
+                                                press : function () {
+                                                    IOMy.common.NavigationChangePage("pAddRule");
+                                                }
+                                            }).addStyleClass("Font-RobotoCondensed TextSizeMedium Text_grey_20 MarTop1d25Rem iOmyLink"),
+                                            new sap.m.HBox({
+                                                width: "100%",
+                                                justifyContent: "End",
+                                                items : [
+                                                    // -- Example Serial Number -- //
+                                                    new sap.m.Label({
+                                                        text: "SN: 00137A000000AD86"
+                                                    }).addStyleClass("Font-RobotoCondensed TextSizeXSmall Text_grey_20")
+                                                ]
+                                            }).addStyleClass("")
+                                        ]
+                                    }).addStyleClass("MarLeft3px BorderRight PadRight3px"),
+                                    new sap.m.VBox({
+                                        layoutData : new sap.m.FlexItemData({
+                                            growFactor : 1
+                                        }),
+                                        items: [
+                                            new sap.m.VBox({
+                                                items : [
+                                                    new sap.m.Label({
+                                                        text : "Turn On: 11:00pm"
+                                                    }).addStyleClass("Font-RobotoCondensed width100px"),
+
+                                                    new sap.m.Label({
+                                                        text : "Turn Off: 6:00am"
+                                                    }).addStyleClass("Font-RobotoCondensed width100px")
+                                                ]
+                                            })
+                                        ]
+                                    }).addStyleClass("MarTop12px TextCenter")
+                                ]
+                            }).addStyleClass("minheight58px ListItem"),
+                        ]
+                    })
+                ]
+            }).addStyleClass("MasterPanel PanelNoPadding PadBottom10px UserInputForm MarTop3px")
+        );
 		
 		return oPage;
 	}

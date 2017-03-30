@@ -46,33 +46,44 @@ sap.ui.jsview("mjs.staging.StagingHome", {
 	createContent : function(oController) {
 		var me = this;
 		
-		var oPage = new sap.m.Page(me.createId("page"),{
-			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			footer : IOMy.widgets.getAppFooter(),
-			content : [
-                //-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("Staging Home", "sap-icon://GoogleMaterial/home", me),
-				new sap.m.Panel( me.createId("panel"), {
-                    backgroundDesign: "Transparent",
-                    content : [ 
-						new sap.m.Table(me.createId("table"),{
-							columns : [
-								new sap.m.Column({
-									header: [
-										new sap.m.Label ({
-											text : "Device Type"
-										})
-									]
-								})
-							],
-							items:[
-								/* Items are being loaded in via the Controller */
-							]
-						})
-					]
-                }).addStyleClass("PadBottom10px PanelNoPadding UserInputForm")
-            ]
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+//		var oPage = new sap.m.Page(me.createId("page"),{
+//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			footer : IOMy.widgets.getAppFooter(),
+//			content : [
+//                //-- Navigational Header --//
+//				IOMy.widgets.getNavigationalSubHeader("Staging Home", "sap-icon://GoogleMaterial/home", me),
+//            
+//            ]
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
+        
+        var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/home",
+            title : "Staging Home"
+        });
+        
+        oPage.addContent(
+            new sap.m.Panel( me.createId("panel"), {
+                backgroundDesign: "Transparent",
+                content : [ 
+                    new sap.m.Table(me.createId("table"),{
+                        columns : [
+                            new sap.m.Column({
+                                header: [
+                                    new sap.m.Label ({
+                                        text : "Device Type"
+                                    })
+                                ]
+                            })
+                        ],
+                        items:[
+                            /* Items are being loaded in via the Controller */
+                        ]
+                    })
+                ]
+            }).addStyleClass("PadBottom10px PanelNoPadding UserInputForm")
+        );
 		
 		return oPage;
 	}

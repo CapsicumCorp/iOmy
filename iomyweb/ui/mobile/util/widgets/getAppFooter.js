@@ -32,12 +32,41 @@ $.extend(IOMy.widgets,{
      * 
      * @returns {sap.m.Bar}     App Footer
      */
-	getAppFooter : function (bHelpButtonEnabled) {
+	getAppFooter : function (mSettings) {
         //--------------------------------------------------------------------//
-        // If the help button enabled flag is not given, default is TRUE.
+        // Initialise variables
         //--------------------------------------------------------------------//
-        if (bHelpButtonEnabled === undefined) {
-            bHelpButtonEnabled = true;
+        var bError              = false;
+        var aErrorMessages      = [];
+        var bHelpButtonEnabled  = false;
+        
+        //--------------------------------------------------------------------//
+        // Process any arguments parsed
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined) {
+            //----------------------------------------------------------------//
+            // Check that the view is provided
+            //----------------------------------------------------------------//
+            if (mSettings.view === undefined) {
+                bError = true;
+                aErrorMessages.push("A UI5 view must be given to create a unique ID for its help button!");
+            }
+            //----------------------------------------------------------------//
+            // If the help button enabled flag is not given, default is FALSE.
+            //----------------------------------------------------------------//
+            if (mSettings.helpButtonEnabled !== undefined) {
+                bHelpButtonEnabled = mSettings.helpButtonEnabled;
+            }
+        } else {
+            //----------------------------------------------------------------//
+            // There are required parameters that need parsing and the settings
+            // map is not even there.
+            //----------------------------------------------------------------//
+            throw new MissingSettingsMapException();
+        }
+        
+        if (bError) {
+            throw new MissingArgumentException("Error calling IOMy.widgets.getAppFooter():\n* "+aErrorMessages.join("\n* "));
         }
         
         //--------------------------------------------------------------------//
@@ -45,7 +74,7 @@ $.extend(IOMy.widgets,{
         //--------------------------------------------------------------------//
 		var oFooter = new sap.m.Bar({
 			contentLeft : [
-				new sap.m.Button({
+				new sap.m.Button(mSettings.view.createId("helpButton"), {
 					tootip: "Open Help",
 					text:	"Help",
                     icon:   "sap-icon://GoogleMaterial/help",

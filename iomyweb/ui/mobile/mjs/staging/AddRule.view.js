@@ -44,100 +44,111 @@ sap.ui.jsview("mjs.staging.AddRule", {
 	createContent : function(oController) {
 		var me = this;
 		
-		var oPage = new sap.m.Page(me.createId("page"),{
-			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-			footer : IOMy.widgets.getAppFooter(),
-			content : [
-                //-- Navigational Header --//
-				IOMy.widgets.getNavigationalSubHeader("Add Rule", "sap-icon://GoogleMaterial/home", me),
-				//-- Main Panel --//
-				new sap.m.Panel ({
-					backgroundDesign: "Transparent",
-					content: [
-						new sap.m.VBox ({
-							items : [
-								new sap.m.Label ({
-									text: "Display Name"
-								}),
-								new sap.m.Input ({
-									layoutData : new sap.m.FlexItemData({
-										growFactor : 1
-									}),
-									value: "TV",
-									enabled: false,
-								}).addStyleClass(""),
-							]
-						}),
-						new sap.m.HBox ({	
-							items : [
-								new sap.m.VBox ({
-									layoutData : new sap.m.FlexItemData({
-										growFactor : 1
-									}),
-									items : [
-										new sap.m.Label ({
-											text: "On Time"
-										}),
-										new sap.m.TimePicker ({
-											id: "TP1",
-											valueFormat: "hh:mm a",
-											displayFormat: "hh:mm a",
-											change: "handleChange",
-											placeholder: "Select a On Time",
-										}).addStyleClass("width100Percent"),
-									]
-								}).addStyleClass("MarRight10px"),
-								new sap.m.VBox ({
-									layoutData : new sap.m.FlexItemData({
-										growFactor : 1
-									}),
-									items : [
-										new sap.m.Label ({
-											text: "Off Time"
-										}),
-										new sap.m.TimePicker ({
-											id: "TP2",
-											valueFormat: "hh:mm a",
-											displayFormat: "hh:mm a",
-											change: "handleChange",
-											placeholder: "Select a Off Time",
-										}).addStyleClass("width100Percent"),
-									]
-								}).addStyleClass("MarLeft10px"),
-							]
-						}).addStyleClass("MarTop10px"),
-						new sap.m.HBox ({	
-							layoutData : new sap.m.FlexItemData({
-								growFactor : 1
-							}),
-							items : [
-								new sap.m.Button({
-									layoutData : new sap.m.FlexItemData({
-										growFactor : 1
-									}),
-									type:"Default",
-									text: "Cancel",
-								}).addStyleClass("width80px"),
-								new sap.m.Button({
-									layoutData : new sap.m.FlexItemData({
-										growFactor : 1
-									}),									
-									type:"Accept",
-									text: "Apply",
-								}).addStyleClass("width80px"),
-								new sap.m.Button({
-									layoutData : new sap.m.FlexItemData({
-										growFactor : 1
-									}),									
-									type:"Reject",
-									text: "Discard",
-								}).addStyleClass("width80px "),
-							]
-						}).addStyleClass("MarTop15px TextCenter")
-					]
-				}).addStyleClass("PadBottom10px UserInputForm MarTop3px")
-            ]
-		}).addStyleClass("height100Percent width100Percent MainBackground");
+//		var oPage = new sap.m.Page(me.createId("page"),{
+//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
+//			footer : IOMy.widgets.getAppFooter(),
+//			content : [
+//                //-- Navigational Header --//
+//				IOMy.widgets.getNavigationalSubHeader("Add Rule", "sap-icon://GoogleMaterial/home", me),
+//            
+//            ]
+//		}).addStyleClass("height100Percent width100Percent MainBackground");
+
+        var oPage = new IOMy.widgets.IOMyPage({
+            view : me,
+            controller : oController,
+            icon : "sap-icon://GoogleMaterial/home",
+            title : "New Rule"
+        });
+        
+        oPage.addContent(
+            //-- Main Panel --//
+            new sap.m.Panel ({
+                backgroundDesign: "Transparent",
+                content: [
+                    new sap.m.VBox ({
+                        items : [
+                            new sap.m.Label ({
+                                text: "Display Name"
+                            }),
+                            new sap.m.Input ({
+                                layoutData : new sap.m.FlexItemData({
+                                    growFactor : 1
+                                }),
+                                value: "TV",
+                                enabled: false,
+                            }).addStyleClass(""),
+                        ]
+                    }),
+                    new sap.m.HBox ({	
+                        items : [
+                            new sap.m.VBox ({
+                                layoutData : new sap.m.FlexItemData({
+                                    growFactor : 1
+                                }),
+                                items : [
+                                    new sap.m.Label ({
+                                        text: "On Time"
+                                    }),
+                                    new sap.m.TimePicker ({
+                                        id: "TP1",
+                                        valueFormat: "hh:mm a",
+                                        displayFormat: "hh:mm a",
+                                        change: "handleChange",
+                                        placeholder: "Select a On Time",
+                                    }).addStyleClass("width100Percent"),
+                                ]
+                            }).addStyleClass("MarRight10px"),
+                            new sap.m.VBox ({
+                                layoutData : new sap.m.FlexItemData({
+                                    growFactor : 1
+                                }),
+                                items : [
+                                    new sap.m.Label ({
+                                        text: "Off Time"
+                                    }),
+                                    new sap.m.TimePicker ({
+                                        id: "TP2",
+                                        valueFormat: "hh:mm a",
+                                        displayFormat: "hh:mm a",
+                                        change: "handleChange",
+                                        placeholder: "Select a Off Time",
+                                    }).addStyleClass("width100Percent"),
+                                ]
+                            }).addStyleClass("MarLeft10px"),
+                        ]
+                    }).addStyleClass("MarTop10px"),
+                    new sap.m.HBox ({	
+                        layoutData : new sap.m.FlexItemData({
+                            growFactor : 1
+                        }),
+                        items : [
+                            new sap.m.Button({
+                                layoutData : new sap.m.FlexItemData({
+                                    growFactor : 1
+                                }),
+                                type:"Default",
+                                text: "Cancel",
+                            }).addStyleClass("width80px"),
+                            new sap.m.Button({
+                                layoutData : new sap.m.FlexItemData({
+                                    growFactor : 1
+                                }),									
+                                type:"Accept",
+                                text: "Apply",
+                            }).addStyleClass("width80px"),
+                            new sap.m.Button({
+                                layoutData : new sap.m.FlexItemData({
+                                    growFactor : 1
+                                }),									
+                                type:"Reject",
+                                text: "Discard",
+                            }).addStyleClass("width80px "),
+                        ]
+                    }).addStyleClass("MarTop15px TextCenter")
+                ]
+            }).addStyleClass("PadBottom10px UserInputForm MarTop3px")
+        );
 		
 		return oPage;
 	}

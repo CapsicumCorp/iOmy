@@ -131,10 +131,10 @@ $.extend(IOMy.widgets,{
                 //============================================================//
                 // CHECK WHETHER THE HELP BUTTON NEEDS TO BE DISABLED OR NOT.
                 //============================================================//
-                sCurrentPageID = mSettings.view.getId();
-                if (IOMy.help.PageInformation[ sCurrentPageID ] === undefined) {
-                    bHelpButtonEnabled = false;
-                }
+//                sCurrentPageID = mSettings.view.getId();
+//                if (IOMy.help.PageInformation[ sCurrentPageID ] === undefined) {
+//                    bHelpButtonEnabled = false;
+//                }
 
                 //===============================================//
                 // NOW CREATE THE PAGE IF IT ALL CHECKS OUT
@@ -142,9 +142,19 @@ $.extend(IOMy.widgets,{
                 try {
                     oPage = new sap.m.Page(mSettings.view.createId(mSettings.id), {
                         customHeader : IOMy.widgets.getIOMYPageHeaderNav( mSettings.controller ),
-                        content: [IOMy.widgets.getNavigationalSubHeader(mSettings.title.toUpperCase(), mSettings.icon, mSettings.view)],
-                        footer : IOMy.widgets.getAppFooter(bHelpButtonEnabled)
+                        content: [],
+                        footer : IOMy.widgets.getAppFooter({
+                            helpButtonEnabled   : false,
+                            view                : mSettings.view
+                        })
                     }).addStyleClass("height100Percent width100Percent MainBackground MasterPage");
+                    
+                    //--------------------------------------------------------//
+                    // The login page does not have a header.
+                    //--------------------------------------------------------//
+                    if (mSettings.view.getId() !== "pLogin") {
+                        oPage.addContent(IOMy.widgets.getNavigationalSubHeader(mSettings.title.toUpperCase(), mSettings.icon, mSettings.view));
+                    }
                 } catch (e) {
                     // Something has gone wrong if this executes.
                     bError = true;

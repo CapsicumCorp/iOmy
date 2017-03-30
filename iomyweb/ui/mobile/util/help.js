@@ -36,6 +36,19 @@ $.extend(IOMy.help,{
      * Initially declared as an empty object and populated in app.js as each UI5
      * activity is created.
      */
-    PageInformation : {}
+    PageInformation : {},
+    
+    /**
+     * Inserts a help message for a given page, and enables the help button
+     * for that page.
+     * 
+     * @param {type} sPageID        ID of the UI5 view/page
+     * @param {type} sMessage       Help message
+     */
+    addHelpMessage : function (sPageID, sMessage) {
+        this.PageInformation[sPageID] = sMessage;
+        
+        oApp.getPage(sPageID).byId("helpButton").setEnabled(true);
+    }
     
 });

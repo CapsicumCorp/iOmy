@@ -35,10 +35,6 @@ function IOmyException(message) {
 //----------------------------------------------------------------------------//
 // Pages
 //----------------------------------------------------------------------------//
-function NoHelpMessageForPageException(message) {
-    IOmyException.call(this, message);
-    this.name       = "NoHelpMessageForPageException";
-}
 
 //----------------------------------------------------------------------------//
 // Sessions, Users, and Permissions
@@ -72,6 +68,10 @@ function MissingArgumentException(message) {
 }
 
 function MissingSettingsMapException(message) {
+    if (message === undefined || message === null || message === "") {
+        message = "A Javascript object containing parameters is required!";
+    }
+    
     MissingArgumentException.call(this, message);
     this.name       = "MissingSettingsMapException";
 }
