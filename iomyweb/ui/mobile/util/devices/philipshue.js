@@ -43,7 +43,7 @@ $.extend(IOMy.devices.philipshue,{
         return oColourBox;
     },
     
-    GetCommonUI: function( sPrefix, oViewScope, aDeviceData, bIsUnassigned ) {
+    GetCommonUI: function( sPrefix, oViewScope, aDeviceData ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
@@ -52,26 +52,10 @@ $.extend(IOMy.devices.philipshue,{
 		var aUIObjectItems		= [];					//-- ARRAY:             --//
         
         
-        //-- 1.1 - Set default values		--//
-        if (bIsUnassigned === undefined)
-            bIsUnassigned = false;
-		
-		//------------------------------------//
+        //------------------------------------//
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
-		
-		//console.log(aDeviceData.DeviceId);
-        
-        // If the UI is for the Unassigned Devices List, include 
-        if (bIsUnassigned === true) {
-            aUIObjectItems.push(
-                new sap.m.CheckBox(oViewScope.createId(sPrefix+"_Selected"), {
-                    selected : false
-                }).addStyleClass("MarTop10px")
-            );
-        }
-        
-        aUIObjectItems.push(
+		aUIObjectItems.push(
             //------------------------------------//
             //-- 1st is the Device Label		--//
             //------------------------------------//

@@ -285,10 +285,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             text : "Timezone"
         });
 
-        me.wTimezoneField = new sap.m.Select({
-            width : "100%",
-            items : IOMy.widgets.getTimezoneItems()
-        }).addStyleClass("SettingsDropdownInput");
+        me.wTimezoneField = IOMy.widgets.selectBoxTimezones().addStyleClass("SettingsDropdownInput");
 
         //===== RESIDENTIAL ADDRESS =====\\
 

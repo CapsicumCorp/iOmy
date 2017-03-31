@@ -57,7 +57,6 @@ $.extend(IOMy.devices.thermostat,{
 		//------------------------------------//
 		
 		var oUIObject			= null;					//-- OBJECT:			--//
-		var aUIObjectItems		= [];					//-- ARRAY:             --//
         
         
         //------------------------------------//

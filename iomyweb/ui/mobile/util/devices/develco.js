@@ -27,7 +27,7 @@ IOMy.devices.develco = new sap.ui.base.Object();
 $.extend(IOMy.devices.develco,{
 	Devices: [],
 	
-	GetCommonUI: function( sPrefix, oViewScope, aDeviceData, bIsUnassigned ) {
+	GetCommonUI: function( sPrefix, oViewScope, aDeviceData ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
@@ -36,26 +36,10 @@ $.extend(IOMy.devices.develco,{
 		var aUIObjectItems		= [];					//-- ARRAY:             --//
         
         
-        //-- 1.1 - Set default values		--//
-        if (bIsUnassigned === undefined)
-            bIsUnassigned = false;
-        
-		//------------------------------------//
+        //------------------------------------//
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
-		
-		//console.log(aDeviceData.DeviceId);
-        
-        // If the UI is for the Unassigned Devices List, include 
-        if (bIsUnassigned === true) {
-            aUIObjectItems.push(
-                new sap.m.CheckBox(oViewScope.createId(sPrefix+"_Selected"), {
-                    selected : false
-                }).addStyleClass("MarTop10px")
-            );
-        }
-        
-        aUIObjectItems.push(
+		aUIObjectItems.push(
             //------------------------------------//
             //-- 1st is the Device Label		--//
             //------------------------------------//
@@ -66,9 +50,9 @@ $.extend(IOMy.devices.develco,{
                         press : function () {
                             //IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("width100Percent Font-RobotoCondensed TextSizeMedium PadLeft6px PadTop20px PadBottom15px TextLeft Text_grey_20")
+                    }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20 iOmyLink")
                 ]
-            }).addStyleClass("minwidth70px width100Percent")
+            }).addStyleClass("BorderRight width80Percent jbMR1tempfix")
         );
 
 //        aUIObjectItems.push(

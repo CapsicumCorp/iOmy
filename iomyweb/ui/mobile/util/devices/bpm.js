@@ -55,13 +55,10 @@ $.extend(IOMy.devices.bpm,{
 		//------------------------------------//
 		
 		var oUIObject			= null;					//-- OBJECT:			--//
-		var aUIObjectItems		= [];					//-- ARRAY:             --//
-        
         
         //------------------------------------//
 		//-- 2.0 - Fetch UI					--//
 		//------------------------------------//
-		
 		oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: [
                 //------------------------------------//
