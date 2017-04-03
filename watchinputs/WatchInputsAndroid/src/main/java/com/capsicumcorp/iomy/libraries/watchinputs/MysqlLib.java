@@ -290,7 +290,7 @@ public class MysqlLib {
                 rs=preparedStmts[psidx].executeQuery();
                 if (rs!=null) {
                     if (rs.first()) {
-                        portstate=rs.getInt(1);
+                        portstate=rs.getDouble(1);
                     } else {
                         Log.println(Log.INFO, MainLib.getInstance().getAppName(), "MysqlLib.getSensorSampleRateCurrent: No sample rate current for sensorpk: "+sensorpk);
                     }
@@ -362,7 +362,7 @@ public class MysqlLib {
             try {
                 preparedStmts[psidx].setLong(1, sensorpk);
                 preparedStmts[psidx].setLong(2, date);
-                preparedStmts[psidx].setLong(3, value);
+                preparedStmts[psidx].setInt(3, value);
                 preparedStmts[psidx].executeUpdate();
                 return 0;
             } catch ( SQLException e) {
@@ -399,7 +399,7 @@ public class MysqlLib {
                 rs=preparedStmts[psidx].executeQuery();
                 if (rs!=null) {
                     if (rs.first()) {
-                        portstate=rs.getInt(1);
+                        portstate=rs.getDouble(1);
                     } else {
                         Log.println(Log.INFO, MainLib.getInstance().getAppName(), "MysqlLib.getSensorDataFloatValue: No DATAFLOAT value for sensorpk: "+sensorpk);
                     }
@@ -429,7 +429,7 @@ public class MysqlLib {
                 rs=preparedStmts[psidx].executeQuery();
                 if (rs!=null) {
                     if (rs.first()) {
-                        portstate=rs.getInt(1);
+                        portstate=rs.getLong(1);
                     } else {
                         Log.println(Log.INFO, MainLib.getInstance().getAppName(), "MysqlLib.getSensorDataBigIntValue: No DATABIGINT value for sensorpk: "+sensorpk);
                     }
