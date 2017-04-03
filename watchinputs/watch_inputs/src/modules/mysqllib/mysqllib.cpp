@@ -2339,21 +2339,21 @@ int mysqllib_update_sensor_datafloat_value(const void *uniqueid, int64_t date, d
 
     memset(bind, 0, sizeof(bind));
 
-    bind[0].buffer=&thispk64;
+    bind[0].buffer=&thisdate;
     bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
     bind[0].buffer_length=8;
     bind[0].is_null=0;
     bind[0].length=0;
 
-    bind[1].buffer=&thisdate;
-    bind[1].buffer_type=MYSQL_TYPE_LONGLONG;
-    bind[1].buffer_length=8;
+    bind[1].buffer=&thisvalue;
+    bind[1].buffer_type=MYSQL_TYPE_DOUBLE;
+    bind[1].buffer_length=1;
     bind[1].is_null=0;
     bind[1].length=0;
 
-    bind[2].buffer=&thisvalue;
-    bind[2].buffer_type=MYSQL_TYPE_DOUBLE;
-    bind[2].buffer_length=1;
+    bind[2].buffer=&thispk64;
+    bind[2].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[2].buffer_length=8;
     bind[2].is_null=0;
     bind[2].length=0;
 
@@ -2421,21 +2421,21 @@ int mysqllib_update_sensor_databigint_value(const void *uniqueid, int64_t date, 
 
     memset(bind, 0, sizeof(bind));
 
-    bind[0].buffer=&thispk64;
+    bind[0].buffer=&thisdate;
     bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
     bind[0].buffer_length=8;
     bind[0].is_null=0;
     bind[0].length=0;
 
-    bind[1].buffer=&thisdate;
+    bind[1].buffer=&thisvalue;
     bind[1].buffer_type=MYSQL_TYPE_LONGLONG;
-    bind[1].buffer_length=8;
+    bind[1].buffer_length=1;
     bind[1].is_null=0;
     bind[1].length=0;
 
-    bind[2].buffer=&thisvalue;
+    bind[2].buffer=&thispk64;
     bind[2].buffer_type=MYSQL_TYPE_LONGLONG;
-    bind[2].buffer_length=1;
+    bind[2].buffer_length=8;
     bind[2].is_null=0;
     bind[2].length=0;
 
@@ -2503,21 +2503,21 @@ int mysqllib_update_sensor_dataint_value(const void *uniqueid, int64_t date, int
 
     memset(bind, 0, sizeof(bind));
 
-    bind[0].buffer=&thispk64;
+    bind[0].buffer=&thisdate;
     bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
     bind[0].buffer_length=8;
     bind[0].is_null=0;
     bind[0].length=0;
 
-    bind[1].buffer=&thisdate;
-    bind[1].buffer_type=MYSQL_TYPE_LONGLONG;
-    bind[1].buffer_length=8;
+    bind[1].buffer=&thisvalue;
+    bind[1].buffer_type=MYSQL_TYPE_LONG;
+    bind[1].buffer_length=1;
     bind[1].is_null=0;
     bind[1].length=0;
 
-    bind[2].buffer=&thisvalue;
-    bind[2].buffer_type=MYSQL_TYPE_LONG;
-    bind[2].buffer_length=1;
+    bind[2].buffer=&thispk64;
+    bind[2].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[2].buffer_length=8;
     bind[2].is_null=0;
     bind[2].length=0;
 
@@ -2585,21 +2585,21 @@ int mysqllib_update_sensor_datatinyint_value(const void *uniqueid, int64_t date,
 
     memset(bind, 0, sizeof(bind));
 
-    bind[0].buffer=&thispk64;
+    bind[0].buffer=&thisdate;
     bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
     bind[0].buffer_length=8;
     bind[0].is_null=0;
     bind[0].length=0;
 
-    bind[1].buffer=&thisdate;
-    bind[1].buffer_type=MYSQL_TYPE_LONGLONG;
-    bind[1].buffer_length=8;
+    bind[1].buffer=&thisvalue;
+    bind[1].buffer_type=MYSQL_TYPE_TINY;
+    bind[1].buffer_length=1;
     bind[1].is_null=0;
     bind[1].length=0;
 
-    bind[2].buffer=&thisvalue;
-    bind[2].buffer_type=MYSQL_TYPE_TINY;
-    bind[2].buffer_length=1;
+    bind[2].buffer=&thispk64;
+    bind[2].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[2].buffer_length=8;
     bind[2].is_null=0;
     bind[2].length=0;
 
