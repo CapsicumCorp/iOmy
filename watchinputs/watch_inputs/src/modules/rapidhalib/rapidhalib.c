@@ -204,6 +204,7 @@ typedef struct {
                       //4=Init as Sleepy End Device
 
   uint8_t reportingsupported; //>= 1.5.3 supports attribute reports
+  uint8_t manureportingsupported; //>= 1.5.7 supports manufacturer attribute reports
 
   //These variables need to carry across calls to the rapidha receive function
   uint8_t receive_processing_packet, receive_escapechar;
@@ -2392,6 +2393,10 @@ static int rapidhalib_detect_rapidha(rapidhadevice_t *rapidhadevice, int longdet
       //Firmware version>=1.5.3 supports reporting but not reporting of manufacturer specific attributes
       rapidhadevice->reportingsupported=1;
     }
+    if (firmmaj>1 || (firmmaj==1 && firmmin>5) || (firmmaj==1 && firmmin==5 && firmbuild>=7)) {
+      //Firmware version>=1.5.7 supports reporting of manufacturer specific attributes
+      rapidhadevice->manureportingsupported=1;
+    }
   }
   //NOTE: Always do full reinit at startup so things like the time get updated
   rapidhadevice->needreinit=1;
@@ -2897,7 +2902,10 @@ STATIC void rapidhalib_refresh_rapidha_data(void) {
       unsigned long long features=0;
 
       if (rapidhadeviceptr->reportingsupported) {
-        features|=ZIGBEE_FEATURE_RECEIVEREPORTPACKETS|ZIGBEE_FEATURE_NORECEIVEMANUREPORTPACKETS;
+        features|=ZIGBEE_FEATURE_RECEIVEREPORTPACKETS;
+      }
+      if (!rapidhadeviceptr->manureportingsupported) {
+        features|=ZIGBEE_FEATURE_NORECEIVEMANUREPORTPACKETS;
       }
 			rapidhadeviceptr->zigbeelibindex=zigbeelibifaceptr->add_localzigbeedevice(&localzigbeedevice, &rapidhalib_localzigbeedevice_iface_ver_1, features, &rapidhalocked, &zigbeelocked);
     }
