@@ -67,6 +67,9 @@ public class PremiseAndHubSetup extends AppCompatActivity {
         // Proceed to Page 2 of the premise setup. Set up the owner.
         //------------------------------------------------------------//
         if (this.isDataValid() == true) {
+            Settings.setMySQLPremiseName(this, installWizard.premiseName);
+            Settings.setMySQLHubName(this, installWizard.hubName);
+            Settings.setFirstRunWizardStepCompleted(this, this.getTitle().toString());
             installWizard.summonNextPage(this, installWizard.PROCEED);
         } else {
             // Compile the error message

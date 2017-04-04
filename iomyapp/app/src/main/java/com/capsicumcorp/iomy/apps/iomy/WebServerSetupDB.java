@@ -68,6 +68,8 @@ public class WebServerSetupDB extends AppCompatActivity {
         List<String> sets = new ArrayList<String>();
 
         if (this.isDataValid()) {
+            Settings.setMySQLDatabaseSchema(this, installWizard.databaseSchema);
+            Settings.setFirstRunWizardStepCompleted(this, this.getTitle().toString());
             installWizard.summonNextPage(this, installWizard.PROCEED);
         } else {
             // Reset the variable to null

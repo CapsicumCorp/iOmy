@@ -67,7 +67,14 @@ public class DBConfigureRootPassword extends ProgressPage {
         String newRootPassword=this.installWizard.generateRandomPassword();
         Log.println(Log.INFO, "iOmy", "DEBUG: startSettingUpDatabaseRootPassword: new password will be "+newRootPassword);
 
+        String curRootPassword=installWizard.dbPassword;
         installWizard.dbPassword=newRootPassword;
+
+        //TODO: This should be set only if the onComplete is called but that may require a dedicated onComplete handler to be written
+        Settings.setMySQLRootPassword(this, newRootPassword);
+
+        //Inform the services thread about the new root password
+        Application.getInstance().runServerServices.supplyDBRootPassword(newRootPassword);
 
         //From Volley.newRequestQueue but modified to create a thread pool size of 1 so only do one query at a time
         File cacheDir = new File(this.getCacheDir(), "volley");
@@ -88,7 +95,7 @@ public class DBConfigureRootPassword extends ProgressPage {
         String sUrl = installWizard.setupAPI;
         // Parameters
         final Map<String, String> baseparams = new HashMap<String, String>();
-        baseparams.put("Access", "{\"URI\":\"" + installWizard.dbURI + "\",\"Port\":\"" + installWizard.dbServerPort + "\",\"Username\":\"" + installWizard.dbUsername + "\",\"Password\":\"\"}");
+        baseparams.put("Access", "{\"URI\":\"" + installWizard.dbURI + "\",\"Port\":\"" + installWizard.dbServerPort + "\",\"Username\":\"" + installWizard.dbUsername + "\",\"Password\":\"" + curRootPassword + "\"}");
         baseparams.put("DBName", installWizard.databaseSchema);
         baseparams.put("Data", "{\"Password\":\""+installWizard.dbPassword+"\"}");
 

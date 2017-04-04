@@ -73,6 +73,15 @@
         android:maxLength="5"/>
 
     <EditTextPreference
+        android:key="pref_mysql_database_schema"
+        android:title="MySQL Schema"
+        android:summary="The MySQL Database Schema"
+        android:enabled="false"
+        android:selectable="false"
+        android:shouldDisableView="false"
+        android:defaultValue="IOMY" />
+
+    <EditTextPreference
         android:key="pref_mysql_root_password"
         android:title="MySQL Root Password"
         android:summary="The MySQL Root Password"

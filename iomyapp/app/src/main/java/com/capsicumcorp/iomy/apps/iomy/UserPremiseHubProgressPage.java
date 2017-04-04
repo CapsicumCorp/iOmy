@@ -193,6 +193,9 @@ public class UserPremiseHubProgressPage extends ProgressPage {
                         installWizard.hubID = array.getInt("HubId");
                         installWizard.userID = array.getInt("UserId");
                     }
+                    Settings.setMySQLWatchInputsUsername(me, installWizard.watchInputsUsername);
+                    Settings.setMySQLWatchInputsPassword(me, installWizard.watchInputsPassword);
+
                     me.onComplete();
                 } catch (JSONException jsone) {
                     Log.e(requestName, jsone.getMessage());

@@ -58,6 +58,9 @@ public class InstallWizard {
     public int USE_EXISTING = 3;
     public int PROCEED = 4;
 
+    private boolean servicesLoaded=false; //Set to true when we have called the summon the Server Progress Page to startup the services
+    private String prevStepCompleted=""; //Temporary backup of the current step while executing the Server Progress Page
+
     // Form Data
     public String setupAPI = "http://localhost:8080/iomyserver.php";
     public String hostname = null;
@@ -117,7 +120,10 @@ public class InstallWizard {
         this.setupAPI="http://"+this.hostname+":"+this.webserverport+"/iomyserver.php";
         this.dbURI=Settings.getMySQLServerHostname(context);
         this.dbServerPort=Settings.getMySQLServerPortAsInt(context);
+        this.databaseSchema=Settings.getMySQLDatabaseSchema(context);
         this.dbPassword=Settings.getMySQLRootPassword(context);
+        this.premiseName=Settings.getMySQLPremiseName(context);
+        this.hubName=Settings.getMySQLHubName(context);
         this.installDemoData=Settings.getDemoModeEnabled(context);
     }
     /**
@@ -285,14 +291,20 @@ public class InstallWizard {
             throw new IllegalArgumentException("An unrecognised answer was found.");
         }
 
+        if (!prevStepCompleted.equals("")) {
+            //Restore backed up step completed value
+            Settings.setFirstRunWizardStepCompleted(activity, prevStepCompleted);
+            prevStepCompleted="";
+        }
         String title = activity.getTitle().toString();
+        String stepCompleted=Settings.getFirstRunWizardStepCompleted(activity);
 
         //--- Proceed from the welcome page to the license agreement. ---//
-        if (title == Titles.welcomePageTitle) {
+        if (stepCompleted.equals("")) {
             this.summonLicenseAgreement(activity);
 
         //--- Proceed from the license agreement to the setup question ---//
-        } else if (title == Titles.licenseAgreementTitle) {
+        } else if (stepCompleted.equals(Titles.licenseAgreementTitle)) {
             this.summonSetupQuestions(activity);
 
         }
@@ -300,36 +312,42 @@ public class InstallWizard {
         //--- ONly if demo mode is enabled though
 
         //The following page shows progress of extracting server files and starting server services
-        else if (title == Titles.setupQuestions) {
+        else if (stepCompleted.equals(Titles.setupQuestions)) {
+            this.loadServerDeviceProgress(activity);
+
+        } else if (!this.servicesLoaded) {
+            //Always make sure the services are loaded before proceeding further
+            //Backup the current step Completed value
+            prevStepCompleted=Settings.getFirstRunWizardStepCompleted(activity);
             this.loadServerDeviceProgress(activity);
 
         } else if (!this.installDemoData) {
             //Only run the following if demo mode isn't enabled
 
             //--- After the server is setup, bring up the database setup. ---//
-            if (title == Titles.webserverServerSetupTitle) {
+            if (stepCompleted.equals(Titles.webserverServerSetupTitle)) {
                 this.summonWebserverDBInfoSetup(activity);
 
                 //--- Configure the database root password ---//
-            } else if (title == Titles.webserverInfoPageTitle) {
+            } else if (stepCompleted.equals(Titles.webserverInfoPageTitle)) {
                 this.summonDBConfigureRootPassword(activity);
 
                 //--- Setup the database ---//
-            } else if (title == Titles.webserverDatabaseRootPasswordSetupTitle) {
-                //Inform the service services thread about the current root password
-                Application.getInstance().runServerServices.supplyDBRootPassword(dbPassword);
+            } else if (stepCompleted.equals(Titles.webserverDatabaseRootPasswordSetupTitle)) {
+                //NOTE: The user may need to do an app wipe if this fails or aborts part way through
+                //  as we currently aren't storing progress during the database setup
                 this.summonDBSetupPage(activity);
 
                 //--- Once the database is set up, create a premise and a hub
-            } else if (title == Titles.webserverDatabaseSetupTitle) {
+            } else if (stepCompleted.equals(Titles.webserverDatabaseSetupTitle)) {
                 this.summonPremiseAndHubSetup(activity);
 
                 //--- Set the new owner of the premise ---//
-            } else if (title == Titles.premiseAndHubTitle) {
+            } else if (stepCompleted.equals(Titles.premiseAndHubTitle)) {
                 this.summonPremiseHubOwner(activity);
 
                 //--- Create the premise, hub, and their owner ---//
-            } else if (title == Titles.premiseHubOwnerTitle) {
+            } else if (stepCompleted.equals(Titles.premiseHubOwnerTitle)) {
                 this.loadPremiseHubOwnerProgress(activity);
             }
         }
@@ -338,27 +356,7 @@ public class InstallWizard {
             writeWatchInputsFile();
             // Disable first run wizard
             Settings.setRunFirstRunWizard(activity, false);
-            Settings.setDemoModeEnabled(activity, this.getInstallDemoData());
-
-            // Update other settings
-            Settings.setWebServerHostname(activity, this.hostname);
-            Settings.setWebServerPortAsInt(activity, this.webserverport);
-            Settings.setMySQLServerHostname(activity, this.dbURI);
-            Settings.setMySQLServerPortAsInt(activity, this.dbServerPort);
-            Settings.setMySQLRootPassword(activity, this.dbPassword);
-            if (this.installDemoData) {
-                Settings.setMySQLOwnerUsername(activity, "demo");
-                Settings.setMySQLOwnerPassword(activity, "demo");
-                Settings.setWatchInputsEnabled(activity, false);
-            } else {
-                Settings.setMySQLOwnerUsername(activity, this.ownerUsername);
-                Settings.setMySQLOwnerPassword(activity, this.ownerPassword);
-                Settings.setMySQLWatchInputsUsername(activity, this.watchInputsUsername);
-                Settings.setMySQLWatchInputsPassword(activity, this.watchInputsPassword);
-                Settings.setWatchInputsEnabled(activity, true);
-            }
-            Settings.setLighttpdPHPEnabled(activity, true);
-            Settings.setMySQLEnabled(activity, true);
+            //Settings.setDemoModeEnabled(activity, this.getInstallDemoData());
 
             // Load main screen
             if (this.installDemoData == true) {
@@ -391,6 +389,7 @@ public class InstallWizard {
     }
 
     public void loadServerDeviceProgress(Activity activity) {
+        servicesLoaded=true;
         Intent intent = new Intent(activity, ServerProgressPage.class);
         activity.startActivity(intent);
     }

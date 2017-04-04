@@ -52,11 +52,27 @@ public class SetupQuestions extends AppCompatActivity {
         //--------------------------------------------------------------------//
         // Apply the installation parameters
         //--------------------------------------------------------------------//
-        if (chkboxInstallDemo.isChecked()) {
-            installWizard.setInstallDemoData(true);
+        boolean installDemoData=chkboxInstallDemo.isChecked();
+
+        installWizard.setInstallDemoData(installDemoData);
+
+        Settings.setDemoModeEnabled(this, installDemoData);
+        Settings.setFirstRunWizardStepCompleted(this, this.getTitle().toString());
+
+        if (installDemoData) {
+            Settings.setMySQLOwnerUsername(this, "demo");
+            Settings.setMySQLOwnerPassword(this, "demo");
+            Settings.setWatchInputsEnabled(this, false);
         } else {
-            installWizard.setInstallDemoData(false);
+            Settings.setWatchInputsEnabled(this, true);
         }
+        //Save these settings here until WebserverServerDevice is setup
+        Settings.setWebServerHostname(this, installWizard.hostname);
+        Settings.setWebServerPortAsInt(this, installWizard.webserverport);
+        Settings.setMySQLServerHostname(this, installWizard.dbURI);
+        Settings.setMySQLServerPortAsInt(this, installWizard.dbServerPort);
+        Settings.setLighttpdPHPEnabled(this, true);
+        Settings.setMySQLEnabled(this, true);
 
         installWizard.summonNextPage(this, installWizard.PROCEED);
 

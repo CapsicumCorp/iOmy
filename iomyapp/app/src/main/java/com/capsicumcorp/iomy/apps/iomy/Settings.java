@@ -31,6 +31,7 @@ public class Settings {
     //Constants for Preference names
     //These should be synched with the names specified in xml/preferences.xml
     public static final String PREF_RUN_FIRST_RUN_WIZARD="pref_run_first_run_wizard";
+    public static final String PREF_FIRST_RUN_WIZARD_STEP_COMPLETED="pref_first_run_wizard_step_completed"; //Records the step that the user last completed in the first run wizard
     public static final String PREF_DEMO_DATA_MODE="pref_demo_data_mode";
 
     public static final String PREF_WATCH_INPUTS_ENABLED="pref_watch_inputs_enabled";
@@ -42,15 +43,20 @@ public class Settings {
 
     public static final String PREF_MYSQL_HOSTNAME="pref_mysql_hostname";
     public static final String PREF_MYSQL_PORT="pref_mysql_port";
+    public static final String PREF_MYSQL_DATABASE_SCHEMA="pref_mysql_database_schema";
     public static final String PREF_MYSQL_ROOT_PASSWORD="pref_mysql_root_password";
     public static final String PREF_MYSQL_OWNER_USERNAME="pref_mysql_owner_username";
     public static final String PREF_MYSQL_OWNER_PASSWORD="pref_mysql_owner_password";
     public static final String PREF_MYSQL_WATCHINPUTS_USERNAME="pref_mysql_watchInputs_username";
     public static final String PREF_MYSQL_WATCHINPUTS_PASSWORD="pref_mysql_watchInputs_password";
 
+    public static final String PREF_MYSQL_PREMISE_NAME="pref_mysql_premise_name";
+    public static final String PREF_MYSQL_HUB_NAME="pref_mysql_hub_name";
+
     //Constants for Preference defaults
     //These should be synched with the defaults specified in xml/preferences.xml
     public static final boolean PREF_RUN_FIRST_RUN_WIZARD_DEFAULT=true;
+    public static final String PREF_FIRST_RUN_WIZARD_STEP_COMPLETED_DEFAULT="";
     public static final boolean PREF_DEMO_DATA_MODE_DEFAULT=false; //Default to false so old installations don't start in demo mode
 
     public static final boolean PREF_WATCH_INPUTS_ENABLED_DEFAULT=true;
@@ -62,11 +68,15 @@ public class Settings {
 
     public static final String PREF_MYSQL_HOSTNAME_DEFAULT="localhost";
     public static final String PREF_MYSQL_PORT_DEFAULT="3306";
+    public static final String PREF_MYSQL_DATABASE_SCHEMA_DEFAULT="IOMY";
     public static final String PREF_MYSQL_ROOT_PASSWORD_DEFAULT="";
     public static final String PREF_MYSQL_OWNER_USERNAME_DEFAULT="";
     public static final String PREF_MYSQL_OWNER_PASSWORD_DEFAULT="";
     public static final String PREF_MYSQL_WATCHINPUTS_USERNAME_DEFAULT="";
     public static final String PREF_MYSQL_WATCHINPUTS_PASSWORD_DEFAULT="";
+
+    public static final String PREF_MYSQL_PREMISE_NAME_DEFAULT="Home";
+    public static final String PREF_MYSQL_HUB_NAME_DEFAULT="iOmyHub";
 
     public Settings() {
         //Do nothing
@@ -116,6 +126,26 @@ public class Settings {
     public static void setRunFirstRunWizard(Context context, boolean yes) {
         SharedPreferences.Editor editor=getEditor(context);
         editor.putBoolean(PREF_RUN_FIRST_RUN_WIZARD, yes);
+        editor.apply();
+    }
+
+    /**
+     * Return from saved settings what step the user last completed in the first run wizard
+     * @param context Android requires a context to access the Preferences
+     * @return Returns from saved settings what step the user last completed in the first run wizard
+     */
+    public static String getFirstRunWizardStepCompleted(Context context) {
+        return getSharedPref(context).getString(PREF_FIRST_RUN_WIZARD_STEP_COMPLETED, PREF_FIRST_RUN_WIZARD_STEP_COMPLETED_DEFAULT);
+    }
+
+    /**
+     * Update to saved settings what step the user last completed in the first run wizard
+     * @param context Android requires a context to access the Preferences
+     * @param step A string describing the current step
+     */
+    public static void setFirstRunWizardStepCompleted(Context context, String step) {
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putString(PREF_FIRST_RUN_WIZARD_STEP_COMPLETED, step);
         editor.apply();
     }
 
@@ -324,6 +354,26 @@ public class Settings {
     }
 
     /**
+     * Return from saved settings the current database schema to use for the MySQL server
+     * @param context Android requires a context to access the Preferences
+     * @return Returns from saved settings the current database schema to use for the MySQL server
+     */
+    public static String getMySQLDatabaseSchema(Context context) {
+        return getSharedPref(context).getString(PREF_MYSQL_DATABASE_SCHEMA, PREF_MYSQL_DATABASE_SCHEMA_DEFAULT);
+    }
+
+    /**
+     * Update the current database schema to use for the MySQL server to saved settings
+     * @param context Android requires a context to access the Preferences
+     * @param databaseSchema The database schema to use for the MySQL server to save
+     */
+    public static void setMySQLDatabaseSchema(Context context, String databaseSchema) {
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putString(PREF_MYSQL_DATABASE_SCHEMA, databaseSchema);
+        editor.apply();
+    }
+
+    /**
      * Return from saved settings the current root password to use for the MySQL server
      * @param context Android requires a context to access the Preferences
      * @return Returns from saved settings the current root password to use for the MySQL server
@@ -420,6 +470,46 @@ public class Settings {
     public static void setMySQLWatchInputsPassword(Context context, String password) {
         SharedPreferences.Editor editor=getEditor(context);
         editor.putString(PREF_MYSQL_WATCHINPUTS_PASSWORD, password);
+        editor.apply();
+    }
+
+    /**
+     * Return from saved settings the current iOmy Premise Name to use for the MySQL server
+     * @param context Android requires a context to access the Preferences
+     * @return Returns from saved settings the current iOmy Premise Name to use for the MySQL server
+     */
+    public static String getMySQLPremiseName(Context context) {
+        return getSharedPref(context).getString(PREF_MYSQL_PREMISE_NAME, PREF_MYSQL_PREMISE_NAME_DEFAULT);
+    }
+
+    /**
+     * Update the current iOmy Premise Name to use for the MySQL server to saved settings
+     * @param context Android requires a context to access the Preferences
+     * @param premiseName The iOmy Premise Name to use for the MySQL server to save
+     */
+    public static void setMySQLPremiseName(Context context, String premiseName) {
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putString(PREF_MYSQL_PREMISE_NAME, premiseName);
+        editor.apply();
+    }
+
+    /**
+     * Return from saved settings the current Hub Name to use for the MySQL server
+     * @param context Android requires a context to access the Preferences
+     * @return Returns from saved settings the current Hub Name to use for the MySQL server
+     */
+    public static String getMySQLHubName(Context context) {
+        return getSharedPref(context).getString(PREF_MYSQL_HUB_NAME, PREF_MYSQL_HUB_NAME_DEFAULT);
+    }
+
+    /**
+     * Update the current Hub Name to use for the MySQL server to saved settings
+     * @param context Android requires a context to access the Preferences
+     * @param hubName The Hub Name to use for the MySQL server to save
+     */
+    public static void setMySQLHubName(Context context, String hubName) {
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putString(PREF_MYSQL_HUB_NAME, hubName);
         editor.apply();
     }
 }

@@ -56,6 +56,9 @@ public class SettingsPage extends PreferenceActivity {
         textPref=(EditTextPreference)findPreference("pref_mysql_port");
         textPref.setSummary(textPref.getText());
 
+        textPref=(EditTextPreference)findPreference("pref_mysql_database_schema");
+        textPref.setSummary(textPref.getText());
+
         textPref=(EditTextPreference)findPreference("pref_mysql_root_password");
         textPref.setSummary(textPref.getText());
 

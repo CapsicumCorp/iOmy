@@ -69,6 +69,9 @@ public class NewUser extends AppCompatActivity {
             //------------------------------------------------------------//
             // Proceed to create the premise, hub, and a new user, the owner.
             //------------------------------------------------------------//
+            Settings.setMySQLOwnerUsername(this, installWizard.ownerUsername);
+            Settings.setMySQLOwnerPassword(this, installWizard.ownerPassword);
+            Settings.setFirstRunWizardStepCompleted(this, this.getTitle().toString());
             installWizard.summonNextPage(this, installWizard.PROCEED);
         } else {
             // Compile the error message

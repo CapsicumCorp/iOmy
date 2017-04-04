@@ -57,6 +57,7 @@ public class LicenseAgreement extends AppCompatActivity {
         // Lock the button
         view.setEnabled(false);
 
+        Settings.setFirstRunWizardStepCompleted(this, this.getTitle().toString());
         installWizard.summonNextPage(this, installWizard.PROCEED);
 
         // Unlock the button

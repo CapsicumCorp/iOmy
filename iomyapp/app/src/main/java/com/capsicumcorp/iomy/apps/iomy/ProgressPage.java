@@ -115,6 +115,8 @@ public class ProgressPage extends AppCompatActivity {
         boolean demoMode=Settings.getDemoModeEnabled(this);
 
         if (firstrunval) {
+            //Use the title of whatever the caller of ProgressPage used as the first run step that has completed
+            Settings.setFirstRunWizardStepCompleted(this, this.getTitle().toString());
             this.installWizard.summonNextPage(this, this.installWizard.PROCEED);
         } else {
             if (demoMode) {
