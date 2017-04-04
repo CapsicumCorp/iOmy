@@ -149,9 +149,9 @@ sap.ui.controller("mjs.premise.Overview", {
             var rooms = IOMy.common.RoomsList["_"+me.byId("premiseBox").getSelectedKey()];
             jQuery.sap.log.debug(JSON.stringify(rooms));
 
-            //==============================================\\
-            // CREATE THE LIST OF ROOMS                     \\
-            //==============================================\\
+            //==============================================//
+            // CREATE THE LIST OF ROOMS                     //
+            //==============================================//
 
             // Layout Object
             var oLayout = new sap.m.VBox({
@@ -166,13 +166,13 @@ sap.ui.controller("mjs.premise.Overview", {
             });
             oLayout.addItem(oLine);
             
-            //==============================================\\
+            //==============================================//
             // ADD TABLE HEADINGS
-            //==============================================\\
+            //==============================================//
             me.wRoomListBox.addItem(
                 new sap.m.HBox({
                     items : [
-                        // === DEVICES === \\
+                        // === DEVICES === //
                         new sap.m.VBox({
                             items : [
                                 new sap.m.Label({
@@ -180,7 +180,7 @@ sap.ui.controller("mjs.premise.Overview", {
                                 })
                             ]
                         }).addStyleClass("ElementChildCenter FlexNoShrink width60px BorderRight"),
-                        // === ROOM === \\
+                        // === ROOM === //
                         new sap.m.VBox({
                             items : [
                                 new sap.m.Label({
@@ -192,9 +192,9 @@ sap.ui.controller("mjs.premise.Overview", {
                 }).addStyleClass("ConsistentMenuHeader ListItem BorderTop")
             );
             
-            //==============================================\\
+            //==============================================//
             // CONSTRUCT THE ROOM LIST
-            //==============================================\\
+            //==============================================//
             var iDevicesInRoom;
             var aDevice;
             // Create the collapse/expand icon in an array of widgets.
@@ -244,7 +244,7 @@ sap.ui.controller("mjs.premise.Overview", {
                         aDeviceArrow = [];
                     }
                     
-                    //=========== Create the room entry =============\\
+                    //=========== Create the room entry =============//
                     me.wRoomListBox.addItem(
                         new sap.m.HBox({
                             items : [
@@ -258,7 +258,7 @@ sap.ui.controller("mjs.premise.Overview", {
                                     ]
                                 }).addStyleClass("FlexNoShrink width60px BorderRight TextCenter"),
                                 
-                                // === ROOM LINK === \\
+                                // === ROOM LINK === //
                                 new sap.m.VBox({
                                     items : [
                                         new sap.m.Button(me.createId("roomLink"+sIndex), {
@@ -277,7 +277,7 @@ sap.ui.controller("mjs.premise.Overview", {
                                     ]
                                 }).addStyleClass("TextOverflowEllipsis width100Percent jbMR1tempfix"),
                                 
-                                // === COLLAPSE/EXPAND BUTTON PLACEHOLDER === \\
+                                // === COLLAPSE/EXPAND BUTTON PLACEHOLDER === //
                                 // If there are things associated with a room via their links...
                                 new sap.m.VBox({
                                     items : aDeviceArrow
@@ -285,7 +285,7 @@ sap.ui.controller("mjs.premise.Overview", {
                             ]
                         }).addStyleClass("ListItem minheight20px")
                     ).addItem(
-                        //=============== Create the placeholder for the room list. ===============\\
+                        //=============== Create the placeholder for the room list. ===============//
                         new sap.m.VBox(me.createId("room"+sIndex), {
                             items : []
                         })
@@ -316,7 +316,7 @@ sap.ui.controller("mjs.premise.Overview", {
                             // Retrieve number of devices/things in the room
                             iDevicesInRoom = IOMy.functions.getNumberOfDevicesInRoom(aDevice.DeviceId);
 
-                            //=============== Create/Refresh the device link ===============\\
+                            //=============== Create/Refresh the device link ===============//
                             me.aElementsToDestroy.push("device"+aDevice.DeviceId);
                             me.aElementsToDestroy.push("deviceLink"+aDevice.DeviceId);
                             

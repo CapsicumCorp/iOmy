@@ -53,7 +53,7 @@ $.extend(IOMy.devices,{
     },
     
     ToggleDeviceStatus : function (iThingId) {
-        
+        // TODO: Work out what to do with this!
         if (iThingId > 0) {
             var sUrl = IOMy.apiphp.APILocation("statechange");
             
@@ -169,7 +169,7 @@ $.extend(IOMy.devices,{
         return mInfo;
     },
 	
-	GetCommonUI: function( sPrefix, oViewScope, aDeviceData, bIsUnassigned ) {
+	GetCommonUI: function( sPrefix, oViewScope, aDeviceData ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
@@ -182,58 +182,58 @@ $.extend(IOMy.devices,{
 		
 		//-- Zigbee Netvox Smart Plug --//
 		if( aDeviceData.DeviceTypeId===2 ) {
-            oUIObject = IOMy.devices.zigbeesmartplug.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            oUIObject = IOMy.devices.zigbeesmartplug.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Philips Hue --//
         } else if( aDeviceData.DeviceTypeId===13 ) {
-            oUIObject = IOMy.devices.philipshue.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            oUIObject = IOMy.devices.philipshue.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Onvif Stream --//
         } else if ( aDeviceData.DeviceTypeId===12) {
-            oUIObject = IOMy.devices.onvif.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            oUIObject = IOMy.devices.onvif.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Motion Sensor --//
         } else if ( aDeviceData.DeviceTypeId===3) {
-            oUIObject = IOMy.devices.motionsensor.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            oUIObject = IOMy.devices.motionsensor.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Temperature Sensor --//
         } else if ( aDeviceData.DeviceTypeId===4) {
-            oUIObject = IOMy.devices.temperaturesensor.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            oUIObject = IOMy.devices.temperaturesensor.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- DevelCo Energy Meter --//
         } else if ( aDeviceData.DeviceTypeId===10) {
-            oUIObject = IOMy.devices.develco.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            oUIObject = IOMy.devices.develco.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Weather Feed --//
         } else if ( aDeviceData.DeviceTypeId===14) {
-            oUIObject = IOMy.devices.weatherfeed.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            oUIObject = IOMy.devices.weatherfeed.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-----------------------------------//
         // --- Experimental Device Pages --- //
         //-----------------------------------//
         //-- Door Lock --//
         } else if ( aDeviceData.DeviceTypeId==="-1") {
-            oUIObject = IOMy.devices.doorlock.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            oUIObject = IOMy.devices.doorlock.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Window Sensor --//
         } else if ( aDeviceData.DeviceTypeId==="-2") {
-            oUIObject = IOMy.devices.windowsensor.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            oUIObject = IOMy.devices.windowsensor.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Bluetooth Scales --//
         } else if ( aDeviceData.DeviceTypeId==="-3") {
-            oUIObject = IOMy.devices.bluetoothscale.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            oUIObject = IOMy.devices.bluetoothscale.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Blood Pressure Montior --//
         } else if ( aDeviceData.DeviceTypeId==="-4") {
-            oUIObject = IOMy.devices.bpm.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+            oUIObject = IOMy.devices.bpm.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Remote Controlled Garage Door --//
         } else if ( aDeviceData.DeviceTypeId==="-5") {
-           oUIObject = IOMy.devices.garagedoor.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+           oUIObject = IOMy.devices.garagedoor.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Thermostat --//
         } else if ( aDeviceData.DeviceTypeId==="-6") {
-           oUIObject = IOMy.devices.thermostat.GetCommonUI( sPrefix, oViewScope, aDeviceData, bIsUnassigned );
+           oUIObject = IOMy.devices.thermostat.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         }
 		

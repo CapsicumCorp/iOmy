@@ -288,7 +288,7 @@ sap.ui.controller("mjs.settings.PremiseList", {
             oPremiseListContainer.addItem(
                 new sap.m.HBox({
                     items : [
-                        // === HUBS === \\
+                        // === HUBS === //
                         new sap.m.VBox({
                             items : [
                                 new sap.m.Label({
@@ -296,7 +296,7 @@ sap.ui.controller("mjs.settings.PremiseList", {
                                 }).addStyleClass("")
                             ]
                         }).addStyleClass("FlexNoShrink width60px BorderRight TextCenter"),
-                        // === PREMISES === \\
+                        // === PREMISES === //
                         new sap.m.VBox({
                             items : [
                                 new sap.m.Label({

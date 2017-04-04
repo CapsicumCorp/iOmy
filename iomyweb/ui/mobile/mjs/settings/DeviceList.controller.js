@@ -325,8 +325,9 @@ sap.ui.controller("mjs.settings.DeviceList", {
                     
                     // Create the flag for showing the list of things for a selected Link
                     // if it doesn't already exist.
-                    if (me.ioExpanded["_"+aLinksAndItems[i].LinkId] === undefined)
+                    if (me.ioExpanded["_"+aLinksAndItems[i].LinkId] === undefined) {
                         me.ioExpanded["_"+aLinksAndItems[i].LinkId] = false;
+                    }
                     
                     me.aThingIds.push(mDeviceData.Id);
                     
@@ -405,18 +406,7 @@ sap.ui.controller("mjs.settings.DeviceList", {
                 ]
             })
         );
-	},
-    
-//    DestroyUI : function () {
-//        var me = this;
-//        
-//        for (var i = 0; i < me.aElementsToDestroy.length; i++) {
-//            if (me.byId(me.aElementsToDestroy[i]) !== undefined)
-//                me.byId(me.aElementsToDestroy[i]).destroy();
-//        }
-//        
-//        me.aElementsToDestroy = []; // Clear the array.
-//    }
+	}
 	
 /**
 * Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered
