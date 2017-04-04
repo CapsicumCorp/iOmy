@@ -851,6 +851,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
 			$sSQL .= "alter table ".$sDBName.".RSCAT comment 'Resource Category. Helps the UI with the sensors.';\n";
 
+
 			$sSQL .= "create table `".$sDBName."`.`RSSUBCAT` \n";
 			$sSQL .= "(\n";
 			$sSQL .= "   RSSUBCAT_PK          int not null comment 'Primary Key', \n";
@@ -4680,6 +4681,7 @@ function DB_CreateDefaultData4( $sDBName ) {
 			$sSQL .= "INSERT INTO `".$sDBName."`.`COMMTYPE` ( COMMTYPE_PK ,COMMTYPE_NAME ) VALUES ( 2, 'PHP API' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`COMMTYPE` ( COMMTYPE_PK ,COMMTYPE_NAME ) VALUES ( 3, 'Zigbee' ); \n";
 			
+			
 			/*============================================================
 			  == #6.9# - DATATYPES                                      ==
 			  ============================================================*/
@@ -4692,7 +4694,8 @@ function DB_CreateDefaultData4( $sDBName ) {
 			$sSQL .= "INSERT INTO `".$sDBName."`.`DATATYPE` ( DATATYPE_PK, DATATYPE_NAME ) VALUES ( 7, 'mediumstring' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`DATATYPE` ( DATATYPE_PK, DATATYPE_NAME ) VALUES ( 8, 'longstring' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`DATATYPE` ( DATATYPE_PK, DATATYPE_NAME ) VALUES ( 9, 'string255' ); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`DATATYPE` ( DATATYPE_PK, DATATYPE_NAME ) VALUES ( 11, 'mediumstring' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`DATATYPE` ( DATATYPE_PK, DATATYPE_NAME ) VALUES ( 11, 'blob' ); \n";
+			
 			
 			/*============================================================
 			  == #6.9# - IOTYPES                                        ==
@@ -4748,6 +4751,10 @@ function DB_CreateDefaultData4( $sDBName ) {
 			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Philips Hue Bridge' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Open Weather Map Feed' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Netvox Motion Sensor' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Thermostat' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Door Lock' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Window Sensor' ); \n";
+			
 			
 			
 			/*============================================================
@@ -4767,6 +4774,8 @@ function DB_CreateDefaultData4( $sDBName ) {
 			$sSQL .= "INSERT INTO `".$sDBName."`.`THINGTYPE` ( `THINGTYPE_NAME` ) VALUES ( 'Onvif Camera Stream' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`THINGTYPE` ( `THINGTYPE_NAME` ) VALUES ( 'Philips Hue Light' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`THINGTYPE` ( `THINGTYPE_NAME` ) VALUES ( 'Weather Feed' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`THINGTYPE` ( `THINGTYPE_NAME` ) VALUES ( 'Door Lock' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`THINGTYPE` ( `THINGTYPE_NAME` ) VALUES ( 'Window Sensor' ); \n";
 			
 			
 			/*============================================================
