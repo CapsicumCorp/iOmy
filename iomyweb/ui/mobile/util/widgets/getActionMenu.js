@@ -129,7 +129,7 @@ $.extend(IOMy.widgets,{
                                     text: mSettings.items[i].text,
                                     icon: mSettings.items[i].icon,
                                     select: function() {
-                                        console.log("No select function has been configured by the UI Developer yet!");
+                                        jQuery.sap.log.warning("No select function has been configured by the UI Developer yet!");
                                     }
                                 })
                             );
@@ -139,7 +139,7 @@ $.extend(IOMy.widgets,{
                                     // [No Child Icon and no Child Select],
                                     text: mSettings.items[i].text,
                                     select: function() {
-                                        console.log("No select function has been configured by the UI Developer yet!");
+                                        jQuery.sap.log.warning("No select function has been configured by the UI Developer yet!");
                                     }
                                 })
                             );
@@ -169,7 +169,7 @@ $.extend(IOMy.widgets,{
                                     text: mSettings.items[i].text,
                                     icon: mSettings.items[i].icon,
                                     select: function() {
-                                        console.log("No select function has been configured by the UI Developer yet!");
+                                        jQuery.sap.log.warning("No select function has been configured by the UI Developer yet!");
                                     }
                                 })
                             );
@@ -179,7 +179,7 @@ $.extend(IOMy.widgets,{
                                     // [No Child Icon and no Child Select],
                                     text: mSettings.items[i].text,
                                     select: function() {
-                                        console.log("No select function has been configured by the UI Developer yet!");
+                                        jQuery.sap.log.warning("No select function has been configured by the UI Developer yet!");
                                     }
                                 })
                             );
