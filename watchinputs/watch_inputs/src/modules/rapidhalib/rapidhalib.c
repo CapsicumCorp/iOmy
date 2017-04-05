@@ -29,6 +29,7 @@ NOTE: We have seen the following RapidHA firmware versions:
   1.5.3 : New firmware update that adds proper support for the report attribute
     NOTE: It is only passing through non-manufacturer specific reports.  Manufacturer specific reports are rejected by
       the RapidHA with ZCL error code: 0x84
+  1.5.6 : New firmware update that adds support for manufacturer specific attribute reports
 */
 
 //NOTE: With 9600, 115200 serial order, the RapidHA module fails to intialise on 9600 baud, but then initialises at 115200
@@ -204,7 +205,7 @@ typedef struct {
                       //4=Init as Sleepy End Device
 
   uint8_t reportingsupported; //>= 1.5.3 supports attribute reports
-  uint8_t manureportingsupported; //>= 1.5.7 supports manufacturer attribute reports
+  uint8_t manureportingsupported; //>= 1.5.6 supports manufacturer attribute reports
 
   //These variables need to carry across calls to the rapidha receive function
   uint8_t receive_processing_packet, receive_escapechar;
@@ -2393,8 +2394,8 @@ static int rapidhalib_detect_rapidha(rapidhadevice_t *rapidhadevice, int longdet
       //Firmware version>=1.5.3 supports reporting but not reporting of manufacturer specific attributes
       rapidhadevice->reportingsupported=1;
     }
-    if (firmmaj>1 || (firmmaj==1 && firmmin>5) || (firmmaj==1 && firmmin==5 && firmbuild>=7)) {
-      //Firmware version>=1.5.7 supports reporting of manufacturer specific attributes
+    if (firmmaj>1 || (firmmaj==1 && firmmin>5) || (firmmaj==1 && firmmin==5 && firmbuild>=6)) {
+      //Firmware version>=1.5.6 supports reporting of manufacturer specific attributes
       rapidhadevice->manureportingsupported=1;
     }
   }
