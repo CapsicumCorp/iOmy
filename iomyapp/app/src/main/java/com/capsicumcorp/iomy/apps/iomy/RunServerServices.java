@@ -204,7 +204,9 @@ public class RunServerServices extends Thread {
                     changeServiceSettingsMySQLCheckbox(false);
                 }
             }
-            if (!getIsWatchInputsRunning()) {
+            if (!getIsWatchInputsRunning() && !Settings.getRunFirstRunWizard(Application.getInstance())) {
+                // Only start if the first run wizard isn't running as the config file might not be written yet and
+                //   Watch Inputs may bring up permission prompts for new usb devices that are connected
                 if (Application.getInstance().getWatchInputsEnabled() && getWatchInputsOverrideState()) {
                     startWatchInputs();
                     changeServiceSettingsWatchInputsCheckbox(true);
