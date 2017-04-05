@@ -61,6 +61,7 @@ sap.ui.controller("mjs.premise.Overview", {
                 try {
                     oPremiseCBox = IOMy.widgets.getPremiseSelector(me.createId("premiseBox")).addStyleClass("SettingsDropdownInput width100Percent");
                     oPremiseCBox.attachChange( function () {
+                        me.wRoomListBox.destroyItems();
                         me.composeRoomList(this.getSelectedKey());
                     });
                 } catch(e) {
