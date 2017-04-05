@@ -34,6 +34,7 @@ NOTE: We have seen the following RapidHA firmware versions:
 
 //NOTE: With 9600, 115200 serial order, the RapidHA module fails to intialise on 9600 baud, but then initialises at 115200
 //NOTE: Might need to use convert to LSB functions for rapidha packets for Android although wikipedia says it uses LSB which is similar to x86: htole16 and htole64
+//NOTE: The firmware update runs in the main thread but it might not be worth moving to a dedicated thread as it isn't run very often
 
 //NOTE: POSIX_C_SOURCE is needed for the following
 //  CLOCK_REALTIME
@@ -175,6 +176,15 @@ NOTE: We have seen the following RapidHA firmware versions:
 
 #define RAPIDHA_DETECT_TIMEOUT 1 //Use 1 second timeout when detecting the RapidHA device
 
+//NOTE: Firmware images can take a while to upload
+#define RAPIDHA_FIRMWARE_UPDATE_MAX_WAIT_TIME 300 //Max time in seconds to wait for a firmware upgrade to complete
+#define RAPIDHA_FIRMWARE_UPDATE_MAX_RETRIES 10000 //Sometimes a block fails to apply so the module will ask for it again
+#define RAPIDHA_FIRMWARE_UPDATE_OFFSET_PROGRESS 10 //Number of seconds to allow the offset to not progress
+
+#define RAPIDHA_FIRMWARE_UPDATE_PROGRESS_DONE 0
+#define RAPIDHA_FIRMWARE_UPDATE_PROGRESS_UPDATING 1
+#define RAPIDHA_FIRMWARE_UPDATE_PROGRESS_ENDING 2
+
 typedef struct {
   char removed; //This rapidha device has been removed so is free to be reused by a new rapidha device
   char needtoremove; //This rapidha device has been scheduled for removal so functions should stop using it
@@ -206,6 +216,14 @@ typedef struct {
 
   uint8_t reportingsupported; //>= 1.5.3 supports attribute reports
   uint8_t manureportingsupported; //>= 1.5.6 supports manufacturer attribute reports
+
+  //These variables are used for upgrading the firmware on a rapidha
+  char *firmware_file; //Specifies the file to upgrade to and if not NULL means an upgrade has been requested
+  int firmwarefile_fd; //Descriptor for the open firmware file
+  uint32_t firmware_file_offset; //The current offset that we are expecting the RapidHA module to ask for
+  int firmware_retries; //Block retry count
+
+  int firmware_progress; //Negative value means the firmware update has aborted, positive value means the update is progressing, 0 means the update is finished
 
   //These variables need to carry across calls to the rapidha receive function
   uint8_t receive_processing_packet, receive_escapechar;
@@ -1288,6 +1306,156 @@ void rapidhalib_send_rapidha_support_config_send_current_time(rapidhadevice_t *r
 }
 
 /*
+  Upload info about a firmware file to a rapidha device to prepare for firmware upgrade
+  Args: rapidhadevice A pointer to rapidhadevice structure used to send the serial data
+        firmwarefile_fd A descriptor to the open file
+  NOTE: Really basic at the moment
+*/
+void rapidhalib_send_rapidha_bootload_query_next_image_response(rapidhadevice_t *rapidhadevice, int firmwarefile_fd, long *rapidhalocked) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  rapidha_bootload_query_next_image_response_t *apicmd;
+  off_t filesize;
+
+  MOREDEBUG_ENTERINGFUNC();
+
+  //First get the size of the file
+  if (firmwarefile_fd!=-1) {
+    filesize=lseek(firmwarefile_fd, 0, SEEK_END);
+  } else {
+    filesize=-1;
+  }
+  if (filesize==-1) {
+    //Failed to get the size of the file
+    MOREDEBUG_EXITINGFUNC();
+    return;
+  }
+  //Fill in the packet details and send the packet
+  apicmd=(rapidha_bootload_query_next_image_response_t *) calloc(1, sizeof(rapidha_bootload_query_next_image_response_t)+2);
+  if (!apicmd) {
+    MOREDEBUG_EXITINGFUNC();
+    return;
+  }
+  apicmd->header_primary=RAPIDHA_BOOTLOAD;
+  apicmd->header_secondary=RAPIDHA_BOOTLOAD_QUERY_NEXT_IMAGE_RESPONSE;
+  apicmd->length=sizeof(rapidha_bootload_query_next_image_response_t)-5;
+  apicmd->netaddr=0xFFFF;
+  apicmd->addr=rapidhadevice->addr;
+  apicmd->endpoint=0xFF;
+  apicmd->status=0;
+  apicmd->manu=htole16(0x109A); //Must be 109A for RapidHA
+  apicmd->imagetype=0;
+  apicmd->fileversion=0;
+  apicmd->imagesize=filesize;
+
+  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) apicmd, rapidhalocked);
+
+  free(apicmd);
+
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
+  Upload part of a firmware file to a rapidha device for firmware upgrade or abort a module's current firmware upgrade
+  Args: rapidhadevice A pointer to rapidhadevice structure used to send the serial data
+        Most of the parameters should be copied from a bootload_image_block_request packet
+        Specify status of RAPIDHA_STATUS_RESPONSE_ABORT to tell the RapidHA to abort a firmware upgrade
+  NOTE: Really basic at the moment
+*/
+void rapidhalib_send_rapidha_bootload_image_block_response(rapidhadevice_t *rapidhadevice, uint16_t netaddr, uint64_t addr, uint8_t endpoint, uint8_t status, uint16_t manu, uint16_t image_type, uint32_t fileversion, uint32_t fileoffset, uint8_t maxsize, long *rapidhalocked) {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
+  rapidha_bootload_image_block_response_t *apicmd;
+  ssize_t filesize=0;
+
+  MOREDEBUG_ENTERINGFUNC();
+
+  if (maxsize>80) {
+    //Some RapidHA modules/firmwares seem to have problems with their advertised maxsize of 128 but 80 seems to work okay
+    maxsize=80;
+  }
+  //Always allocate space for maximum possible data send
+  apicmd=(rapidha_bootload_image_block_response_t *) calloc(1, sizeof(rapidha_bootload_image_block_response_t)+maxsize-1+3);
+  if (!apicmd) {
+    MOREDEBUG_EXITINGFUNC();
+    return;
+  }
+  if (status!=RAPIDHA_STATUS_RESPONSE_ABORT) {
+    //Read the data
+    rapidhalib_lockrapidha(rapidhalocked);
+    if (rapidhadevice->firmwarefile_fd!=-1) {
+      lseek(rapidhadevice->firmwarefile_fd, fileoffset, SEEK_SET);
+      filesize=read(rapidhadevice->firmwarefile_fd, &apicmd->data, maxsize);
+    } else {
+      filesize=-1;
+    }
+    rapidhalib_unlockrapidha(rapidhalocked);
+    if (filesize==-1) {
+      //Failed to read from the file so abort firmware update
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to read from file offset: %lu for RapidHA: %016llX so aborting update\n", __func__, fileoffset, addr);
+      status=RAPIDHA_STATUS_RESPONSE_ABORT;
+      filesize=0;
+    } else {
+      rapidhalib_lockrapidha(rapidhalocked);
+      //NOTE: Sometimes we will be retrying an offset so use the current offset aa the base
+      rapidhadevice->firmware_file_offset=fileoffset+filesize;
+      rapidhalib_unlockrapidha(rapidhalocked);
+    }
+  }
+  //Fill in the packet details and send the packet
+  apicmd->header_primary=RAPIDHA_BOOTLOAD;
+  apicmd->header_secondary=RAPIDHA_BOOTLOAD_IMAGE_BLOCK_RESPONSE;
+  apicmd->length=sizeof(rapidha_bootload_image_block_response_t)+filesize-5;
+  apicmd->netaddr=netaddr;
+  apicmd->addr=addr;
+  apicmd->endpoint=endpoint;
+  apicmd->status=status;
+  apicmd->manu=manu;
+  apicmd->image_type=image_type;
+  apicmd->fileversion=fileversion;
+  apicmd->fileoffset=fileoffset;
+  apicmd->datalen=filesize;
+  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) apicmd, rapidhalocked);
+
+  free(apicmd);
+
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
+  Send an upgrade end response to a rapidha device
+  Args: rapidhadevice A pointer to rapidhadevice structure used to send the serial data
+        Most of the parameters should be copied from a bootload_upgrade_end_request packet
+  NOTE: Really basic at the moment
+*/
+void rapidhalib_send_rapidha_bootload_upgrade_end_response(rapidhadevice_t *rapidhadevice, uint16_t netaddr, uint64_t addr, uint8_t endpoint, uint16_t manu, uint16_t image_type, uint32_t fileversion, long *rapidhalocked) {
+  rapidha_bootload_upgrade_end_response_t *apicmd;
+
+  MOREDEBUG_ENTERINGFUNC();
+
+  //Fill in the packet details and send the packet
+  apicmd=(rapidha_bootload_upgrade_end_response_t *) calloc(1, sizeof(rapidha_bootload_upgrade_end_response_t)+3);
+  if (!apicmd) {
+    MOREDEBUG_EXITINGFUNC();
+    return;
+  }
+  apicmd->header_primary=RAPIDHA_BOOTLOAD;
+  apicmd->header_secondary=RAPIDHA_BOOTLOAD_UPGRADE_EBD_RESPONSE;
+  apicmd->length=sizeof(rapidha_bootload_upgrade_end_response_t)-5;
+  apicmd->netaddr=netaddr;
+  apicmd->addr=addr;
+  apicmd->endpoint=endpoint;
+  apicmd->manu=manu;
+  apicmd->image_type=image_type;
+  apicmd->fileversion=fileversion;
+  apicmd->curtime=0;
+  apicmd->upgrade_time=0;
+  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) apicmd, rapidhalocked);
+
+  free(apicmd);
+
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
   Send a RapidHA Zigbee ZDO
   Arguments:
     rapidhadevice A pointer to rapidhadevice structure used to send the serial data
@@ -1585,7 +1753,7 @@ void rapidhalib_process_network_comissioning_network_status_response(rapidhadevi
 }
 
 /*
-  Process a RapidhA ZDO Response Received
+  Process a RapidHA ZDO Response Received
   Converts a RapidHA Zigbee ZDO Response Received packet into a generic Zigbee ZDO Response Packet
     and then passes onto the zigbee library
   Args: rapidhadevice A pointer to rapidhadevice structure used to store info about the rapidha device including the receive buffer containing the packet
@@ -1630,7 +1798,7 @@ STATIC void rapidhalib_process_zdo_response_received(rapidhadevice_t *rapidhadev
 }
 
 /*
-  Display a RapidhA ZDO/ZCL Send Status
+  Display a RapidHA ZDO/ZCL Send Status
   Args: header_primary The primary header id associated with the status message
         frameid The frameid associated with the status message
         status The RapidHA status
@@ -1691,7 +1859,7 @@ STATIC void rapidhalib_display_send_status(uint8_t header_primary, uint8_t frame
 }
 
 /*
-  Process a RapidhA ZDO/ZCL Send Status
+  Process a RapidHA ZDO/ZCL Send Status
   Args: rapidhadevice A pointer to rapidhadevice structure used to store info about the rapidha device including the receive buffer containing the packet
 */
 STATIC void rapidhalib_process_send_status(rapidhadevice_t *rapidhadevice, long *rapidhalocked, long *zigbeelocked) {
@@ -1717,7 +1885,65 @@ STATIC void rapidhalib_process_send_status(rapidhadevice_t *rapidhadevice, long 
 }
 
 /*
-  Process a RapidhA ZDO/ZCL APS ACK Status
+  Process a RapidHA Error
+  Args: rapidhadevice A pointer to rapidhadevice structure used to store info about the rapidha device including the receive buffer containing the packet
+*/
+STATIC void rapidhalib_process_utility_error(rapidhadevice_t *rapidhadevice, long *rapidhalocked) {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
+  rapidha_utility_error_header_t *apicmd=(rapidha_utility_error_header_t *) (rapidhadevice->receivebuf);
+  uint64_t addr;
+  const char *errorstr;
+
+  MOREDEBUG_ENTERINGFUNC();
+  rapidhalib_lockrapidha(rapidhalocked);
+  addr=rapidhadevice->addr;
+  rapidhalib_unlockrapidha(rapidhalocked);
+  switch (apicmd->error) {
+    case 0x00:
+      errorstr="Reserved";
+      break;
+    case 0x01:
+      errorstr="Scanning Error";
+      break;
+    case 0x02:
+      errorstr="Key Establishment Error";
+      break;
+    case 0x03:
+      errorstr="Service Discovery and Binding Error";
+      break;
+    case 0x10:
+      errorstr="Reset Error";
+      break;
+    case 0x20:
+      errorstr="Synchronization Error";
+      break;
+    case 0x30:
+      errorstr="Invalid Call Error";
+      break;
+    case 0xB0:
+      errorstr="Local Bootload Error";
+      break;
+    case 0xB1:
+      errorstr="OTA Client Bootloader Error";
+      break;
+    default:
+      errorstr="Reserved";
+      break;
+  }
+  debuglibifaceptr->debuglib_printf(1, "%s: RapidHA: %016llX received error: %s, suberror: %02hhX for frameid: %02hhX\n", __func__, addr, errorstr, apicmd->suberror, apicmd->frameid);
+  if (apicmd->error==0xB0) {
+    //Special handling for firmware update error
+    rapidhalib_lockrapidha(rapidhalocked);
+    if (rapidhadevice->firmware_progress>0) {
+      rapidhadevice->firmware_progress=-1;
+    }
+    rapidhalib_unlockrapidha(rapidhalocked);
+  }
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
+  Process a RapidHA ZDO/ZCL APS ACK Status
   Args: rapidhadevice A pointer to rapidhadevice structure used to store info about the rapidha device including the receive buffer containing the packet
 */
 STATIC void rapidhalib_process_aps_ack(rapidhadevice_t *rapidhadevice, long *rapidhalocked) {
@@ -1742,7 +1968,7 @@ STATIC void rapidhalib_process_aps_ack(rapidhadevice_t *rapidhadevice, long *rap
 }
 
 /*
-  Process a RapidhA ZDO Response Timeout
+  Process a RapidHA ZDO Response Timeout
   Args: rapidhadevice A pointer to rapidhadevice structure used to store info about the rapidha device including the receive buffer containing the packet
 */
 STATIC void rapidhalib_process_zdo_response_timeout(rapidhadevice_t *rapidhadevice, long *rapidhalocked, long *zigbeelocked) {
@@ -1769,7 +1995,7 @@ STATIC void rapidhalib_process_zdo_response_timeout(rapidhadevice_t *rapidhadevi
 }
 
 /*
-  Process a RapidhA ZDO Device Announce Received
+  Process a RapidHA ZDO Device Announce Received
   Args: rapidhadevice A pointer to rapidhadevice structure used to store info about the rapidha device including the receive buffer containing the packet
 */
 STATIC void rapidhalib_process_zdo_device_announce_received(rapidhadevice_t *rapidhadevice, long *rapidhalocked, long *zigbeelocked) {
@@ -1811,7 +2037,7 @@ STATIC void rapidhalib_process_zdo_device_announce_received(rapidhadevice_t *rap
 }
 
 /*
-  Process a RapidhA ZCL Response Received
+  Process a RapidHA ZCL Response Received
   Converts a RapidHA Zigbee ZCL Response Received packet into a generic Zigbee ZCL Response Packet
     and then passes onto the zigbee library
   Args: rapidhadevice A pointer to rapidhadevice structure used to store info about the rapidha device including the receive buffer containing the packet
@@ -1857,7 +2083,7 @@ STATIC void rapidhalib_process_zcl_response_received(rapidhadevice_t *rapidhadev
 }
 
 /*
-Process a RapidhA ZCL Response Timeout
+Process a RapidHA ZCL Response Timeout
   Args: rapidhadevice A pointer to rapidhadevice structure used to store info about the rapidha device including the receive buffer containing the packet
 */
 STATIC void rapidhalib_process_zcl_response_timeout(rapidhadevice_t *rapidhadevice, long *rapidhalocked, long *zigbeelocked) {
@@ -1884,7 +2110,7 @@ STATIC void rapidhalib_process_zcl_response_timeout(rapidhadevice_t *rapidhadevi
 }
 
 /*
-  Process a RapidhA ZCL Read Attribute Response
+  Process a RapidHA ZCL Read Attribute Response
   Args: rapidhadevice A pointer to rapidhadevice structure used to store info about the rapidha device including the receive buffer containing the packet
 */
 STATIC void rapidhalib_process_zcl_read_attribute_response(rapidhadevice_t *rapidhadevice, long *rapidhalocked, long *zigbeelocked) {
@@ -1922,7 +2148,7 @@ STATIC void rapidhalib_process_zcl_read_attribute_response(rapidhadevice_t *rapi
 }
 
 /*
-  Process a RapidhA ZCL Write Attribute Response
+  Process a RapidHA ZCL Write Attribute Response
   Args: rapidhadevice A pointer to rapidhadevice structure used to store info about the rapidha device including the receive buffer containing the packet
 */
 STATIC void rapidhalib_process_zcl_write_attribute_response(rapidhadevice_t *rapidhadevice, long *rapidhalocked) {
@@ -1956,6 +2182,96 @@ STATIC void rapidhalib_process_zcl_write_attribute_response(rapidhadevice_t *rap
 }
 
 /*
+  Process a RapidHA Bootload Image Block Request from the module
+  Args: rapidhadevice A pointer to rapidhadevice structure used to store info about the rapidha device including the receive buffer containing the packet
+*/
+void rapidhalib_process_bootload_image_block_request(rapidhadevice_t *rapidhadevice, long *rapidhalocked) {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
+  rapidha_bootload_image_block_request_t *apicmd=(rapidha_bootload_image_block_request_t *) (rapidhadevice->receivebuf);
+  int cancel_firmware_update=0;
+  char *firmware_file;
+  int firmwarefile_fd;
+  uint64_t addr;
+  uint8_t status;
+
+  MOREDEBUG_ENTERINGFUNC();
+  rapidhalib_lockrapidha(rapidhalocked);
+  addr=rapidhadevice->addr;
+
+  debuglibifaceptr->debuglib_printf(1, "%s: Received Bootload Image Block Request on RapidHA device: %016llX for offset: %lu\n", __func__, addr, apicmd->fileoffset);
+  if (!rapidhadevice->firmware_file) {
+    //Not currently doing a firmware update so cancel the RapidHA module's firmware upgrade
+    debuglibifaceptr->debuglib_printf(1, "%s: Cancelling firmware upgrade as a firmware upgrade isn't active at the moment\n", __func__);
+    cancel_firmware_update=1;
+  }
+  if (!cancel_firmware_update && apicmd->fileoffset!=rapidhadevice->firmware_file_offset) {
+    if (rapidhadevice->firmware_retries>=RAPIDHA_FIRMWARE_UPDATE_MAX_RETRIES) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Cancelling firmware upgrade as a request for file offset: %ld was expected but the requested offset was %ld and the maximum number of retries: %d has been exceeded\n", __func__, rapidhadevice->firmware_file_offset, apicmd->fileoffset, RAPIDHA_FIRMWARE_UPDATE_MAX_RETRIES);
+      cancel_firmware_update=1;
+    } else {
+      //Ensure that the requested file offset is lower than the expected offset
+      if (apicmd->fileoffset<rapidhadevice->firmware_file_offset) {
+        debuglibifaceptr->debuglib_printf(1, "%s:   Retrying the file offset\n", __func__);
+        ++rapidhadevice->firmware_retries;
+      } else {
+        debuglibifaceptr->debuglib_printf(1, "%s:   Cancelling firmware upgrade as the requested file offset: %ld is higher than the expected offset: %ld\n", __func__, rapidhadevice->firmware_file_offset, apicmd->fileoffset);
+        cancel_firmware_update=1;
+      }
+    }
+  }
+  rapidhalib_unlockrapidha(rapidhalocked);
+
+  if (cancel_firmware_update) {
+    status=RAPIDHA_STATUS_RESPONSE_ABORT;
+  } else {
+    rapidhalib_lockrapidha(rapidhalocked);
+    debuglibifaceptr->debuglib_printf(1, "%s: Sending data from offset: %lu from file: %s\n", __func__, apicmd->fileoffset, rapidhadevice->firmware_file);
+    rapidhalib_unlockrapidha(rapidhalocked);
+    status=RAPIDHA_STATUS_RESPONSE_SUCCESS;
+  }
+  rapidhalib_send_rapidha_bootload_image_block_response(rapidhadevice, apicmd->netaddr, apicmd->addr, apicmd->endpoint, status, apicmd->manu, apicmd->image_type, apicmd->fileversion, apicmd->fileoffset, apicmd->maxsize, rapidhalocked);
+
+  rapidhalib_lockrapidha(rapidhalocked);
+  if (cancel_firmware_update && rapidhadevice->firmware_progress>0) {
+    rapidhadevice->firmware_progress=-2;
+  }
+  rapidhalib_unlockrapidha(rapidhalocked);
+
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
+  Process a RapidHA Bootload Upgrade End Request from the module
+  Args: rapidhadevice A pointer to rapidhadevice structure used to store info about the rapidha device including the receive buffer containing the packet
+*/
+//At the moment just sends an upgrade end response without checking anything
+void rapidhalib_process_bootload_upgrade_end_request(rapidhadevice_t *rapidhadevice, long *rapidhalocked) {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
+  rapidha_bootload_upgrade_end_request_t *apicmd=(rapidha_bootload_upgrade_end_request_t *) (rapidhadevice->receivebuf);
+  int cancel_firmware_update=0;
+  char *firmware_file;
+  int firmwarefile_fd;
+  uint64_t addr;
+  uint8_t status;
+
+  MOREDEBUG_ENTERINGFUNC();
+
+  rapidhalib_lockrapidha(rapidhalocked);
+  addr=rapidhadevice->addr;
+  rapidhadevice->firmware_progress=RAPIDHA_FIRMWARE_UPDATE_PROGRESS_ENDING;
+  rapidhalib_unlockrapidha(rapidhalocked);
+  debuglibifaceptr->debuglib_printf(1, "%s: RapidHA: %016llX firmware upload complete, sending command to apply update\n", __func__, addr);
+
+  rapidhalib_send_rapidha_bootload_upgrade_end_response(rapidhadevice, apicmd->netaddr, apicmd->addr, apicmd->endpoint, apicmd->manu, apicmd->image_type, apicmd->fileversion, rapidhalocked);
+
+  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhadevice->firmware_progress=RAPIDHA_FIRMWARE_UPDATE_PROGRESS_DONE;
+  rapidhalib_unlockrapidha(rapidhalocked);
+
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
   Process a RapidHA API packet
   Args: rapidhadevice A pointer to rapidhadevice structure used to store info about the rapidha device including the receive buffer containing the packet
   NOTE: No need to mark rapidha inuse here as all callers of this function do that already
@@ -1979,6 +2295,9 @@ void rapidhalib_process_api_packet(rapidhadevice_t *rapidhadevice, long *rapidha
         break;
       case RAPIDHA_UTILITY_STATUS_RESPONSE:
         rapidhalib_process_send_status(rapidhadevice, rapidhalocked, &zigbeelocked);
+        break;
+      case RAPIDHA_UTILITY_ERROR:
+        rapidhalib_process_utility_error(rapidhadevice, rapidhalocked);
         break;
       default:
         debuglibifaceptr->debuglib_printf(1, "%s: Received RapidHA Utility packet of unknown type: %02hhX\n", __func__, apicmd->header_secondary);
@@ -2035,6 +2354,17 @@ void rapidhalib_process_api_packet(rapidhadevice_t *rapidhadevice, long *rapidha
         break;
       default:
         debuglibifaceptr->debuglib_printf(1, "%s: Received RapidHA ZCL packet of unknown type: %02hhX\n", __func__, apicmd->header_secondary);
+    }
+  } else if (apicmd->header_primary==RAPIDHA_BOOTLOAD) {
+    switch (apicmd->header_secondary) {
+      case RAPIDHA_BOOTLOAD_IMAGE_BLOCK_REQUEST:
+        rapidhalib_process_bootload_image_block_request(rapidhadevice, rapidhalocked);
+        break;
+      case RAPIDHA_BOOTLOAD_UPGRADE_END_REQUEST:
+        rapidhalib_process_bootload_upgrade_end_request(rapidhadevice, rapidhalocked);
+        break;
+      default:
+        debuglibifaceptr->debuglib_printf(1, "%s: Received RapidHA Bootload packet of unknown type: %02hhX\n", __func__, apicmd->header_secondary);
     }
   } else {
     debuglibifaceptr->debuglib_printf(1, "%s: Received RapidHA packet of unknown type: %02hhX %02hhX\n", __func__, apicmd->header_primary, apicmd->header_secondary);
@@ -2238,6 +2568,8 @@ STATIC void _init_rapidhalib_newrapidha(void) {
   rapidhalib_newrapidha.serdevidx=-1;
   rapidhalib_newrapidha.zigbeelibindex=-1;
   rapidhalib_newrapidha.waiting_for_remotestatus=-1;
+
+  rapidhalib_newrapidha.firmwarefile_fd=-1;
 
   PTHREAD_UNLOCK(&rapidhalibmutex_initnewrapidha);
 
@@ -2662,6 +2994,95 @@ STATIC int rapidhalib_processcommand(const char *buffer, int clientsock) {
   return CMDLISTENER_NOERROR;
 }
 
+//Format: rapidha_firmware_upgrade <64-bit addr> <path_to_filename>
+static int rapidhalib_process_firmware_upgrade_command(const char *buffer, int clientsock) {
+  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=rapidhalib_getmoduledepifaceptr("commonserverlib", COMMONSERVERLIBINTERFACE_VER_1);
+
+  if (strncmp(buffer, "rapidha_firmware_upgrade ", 25)==0 && strlen(buffer)>=43) {
+    char tmpstrbuf[300];
+    uint64_t addr;
+    int found;
+    long rapidhalocked=0;
+
+    sscanf(buffer+25, "%016llX", (unsigned long long *) &addr);
+    rapidhalib_lockrapidha(&rapidhalocked);
+    found=rapidhalib_find_rapidha_device(addr, &rapidhalocked);
+    if (found>=0) {
+      if (rapidhalib_rapidhadevices[found].firmware_file) {
+        sprintf(tmpstrbuf, "RapidHA device: %016" PRIX64 " is already updating with file: %s\n", addr, rapidhalib_rapidhadevices[found].firmware_file);
+        rapidhalib_unlockrapidha(&rapidhalocked);
+        commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      } else {
+        struct stat stat_buf;
+        int statresult, localerrno;
+
+        statresult=stat(buffer+42, &stat_buf);
+        localerrno=errno;
+        if (statresult!=0) {
+          rapidhalib_unlockrapidha(&rapidhalocked);
+          sprintf(tmpstrbuf, "RAPIDHA: Unable to access file: \"%s\", errno=%d\n", buffer+42, localerrno);
+        } else {
+          rapidhalib_rapidhadevices[found].firmware_file=strdup(buffer+42);
+          if (!rapidhalib_rapidhadevices[found].firmware_file) {
+            rapidhalib_unlockrapidha(&rapidhalocked);
+            sprintf(tmpstrbuf, "RAPIDHA: Failed to allocate ram for filename: %s\n", buffer+42);
+          } else {
+            rapidhalib_unlockrapidha(&rapidhalocked);
+            sprintf(tmpstrbuf, "Upgrade scheduled for RapidHA device: %016" PRIX64 " using file: \"%s\"\n", addr, buffer+42);
+          }
+        }
+        commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      }
+    } else {
+      rapidhalib_unlockrapidha(&rapidhalocked);
+      sprintf(tmpstrbuf, "RAPIDHA: NOT FOUND %016" PRIX64 " not found\n", addr);
+      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+    }
+    return CMDLISTENER_NOERROR;
+  }
+  return CMDLISTENER_CMDINVALID;
+}
+
+//Format: rapidha_cancel_firmware_upgrade <64-bit addr> <path_to_filename>
+static int rapidhalib_process_cancel_firmware_upgrade_command(const char *buffer, int clientsock) {
+  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=rapidhalib_getmoduledepifaceptr("commonserverlib", COMMONSERVERLIBINTERFACE_VER_1);
+
+  if (strncmp(buffer, "rapidha_cancel_firmware_upgrade ", 32)==0 && strlen(buffer)>=48) {
+    char tmpstrbuf[100];
+    uint64_t addr;
+    int found;
+    long rapidhalocked=0;
+
+    sscanf(buffer+32, "%016llX", (unsigned long long *) &addr);
+    rapidhalib_lockrapidha(&rapidhalocked);
+    found=rapidhalib_find_rapidha_device(addr, &rapidhalocked);
+    if (found>=0) {
+      if (!rapidhalib_rapidhadevices[found].firmware_file) {
+        rapidhalib_unlockrapidha(&rapidhalocked);
+        sprintf(tmpstrbuf, "RAPIDHA: Firmware upgrade not currently active\n");
+      } else {
+        if (rapidhalib_rapidhadevices[found].firmwarefile_fd!=-1) {
+          close(rapidhalib_rapidhadevices[found].firmwarefile_fd);
+          rapidhalib_rapidhadevices[found].firmwarefile_fd=-1;
+        }
+        if (rapidhalib_rapidhadevices[found].firmware_file) {
+          free(rapidhalib_rapidhadevices[found].firmware_file);
+          rapidhalib_rapidhadevices[found].firmware_file=NULL;
+        }
+        rapidhalib_unlockrapidha(&rapidhalocked);
+        sprintf(tmpstrbuf, "RAPIDHA: Firmware upgrade for RapidHA device: %016" PRIX64 " has been cancelled\n", addr);
+      }
+      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+    } else {
+      rapidhalib_unlockrapidha(&rapidhalocked);
+      sprintf(tmpstrbuf, "RAPIDHA: NOT FOUND %016" PRIX64 "\n", addr);
+      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+    }
+    return CMDLISTENER_NOERROR;
+  }
+  return CMDLISTENER_CMDINVALID;
+}
+
 /*
   A function called by the parent library when the rapidha device has been removed
   If the rapidhadevice is still in use we return negative value but mark the rapidha for removal so
@@ -2843,6 +3264,123 @@ STATIC void rapidhalib_doreinit(rapidhadevice_t *rapidhadevice, long *rapidhaloc
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 }
 
+//Upgrade the firmware on a RapidHA device
+//The commands sent here were modeled from the RapidHA Coordinator Desktop program console output
+STATIC void rapidhalib_dofirmwareupgrade(rapidhadevice_t *rapidhadevice, long *rapidhalocked, long *zigbeelocked) {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
+  zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=rapidhalib_getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1);
+  int zigbeelibindex;
+  uint64_t addr;
+  int result;
+  int firmwarefile_fd;
+  int firmware_progress, prevfirmware_progress, secscnt, offsetnotprogressing;
+  uint32_t prevfirmware_offset, offsetsecscnt;
+
+  debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
+
+  debuglibifaceptr->debuglib_printf(1, "%s: A firmware upgrade has been scheduled\n", __func__);
+
+  //First remove the RapidHA from the zigbee library so other operations don't interfer
+  rapidhalib_lockrapidha(rapidhalocked);
+  zigbeelibindex=rapidhadevice->zigbeelibindex;
+  addr=rapidhadevice->addr;
+  rapidhalib_unlockrapidha(rapidhalocked);
+  //Do this outside a lock as it may call back into the rapidha library and multi-library locking has some problems at the moment
+  result=zigbeelibifaceptr->remove_localzigbeedevice(zigbeelibindex, rapidhalocked, zigbeelocked);
+  if (result==0) {
+    debuglibifaceptr->debuglib_printf(1, "%s: RapidHA %016llX is still in use by the Zigbee library so the firmware upgrade cannot proceed yet\n", __func__, addr);
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
+    return;
+  } else {
+    rapidhalib_lockrapidha(rapidhalocked);
+    rapidhadevice->zigbeelibindex=-1;
+    rapidhalib_unlockrapidha(rapidhalocked);
+  }
+
+  //Open the firmware file for reading
+  rapidhalib_lockrapidha(rapidhalocked);
+  if (rapidhadevice->firmware_file) {
+    rapidhadevice->firmwarefile_fd=open(rapidhadevice->firmware_file, O_RDONLY);
+  } else {
+    rapidhadevice->firmwarefile_fd=-1;
+  }
+  if (rapidhadevice->firmwarefile_fd==-1) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s for reading\n", __func__, rapidhadevice->firmware_file);
+    rapidhalib_unlockrapidha(rapidhalocked);
+    goto firmwareupgrade_cleanup;
+  }
+  rapidhadevice->firmware_file_offset=0;
+  rapidhadevice->firmware_progress=RAPIDHA_FIRMWARE_UPDATE_PROGRESS_UPDATING;
+  rapidhadevice->firmware_retries=0;
+  rapidhalib_send_rapidha_bootload_query_next_image_response(rapidhadevice, rapidhadevice->firmwarefile_fd, rapidhalocked);
+  rapidhalib_unlockrapidha(rapidhalocked);
+
+  prevfirmware_progress=firmware_progress=1;
+  secscnt=0;
+  offsetsecscnt=0;
+  prevfirmware_offset=0;
+  offsetnotprogressing=0;
+  while (firmware_progress>0 && secscnt<RAPIDHA_FIRMWARE_UPDATE_MAX_WAIT_TIME && !rapidhalib_getneedtoquit(rapidhalocked)) {
+    //Wait until firmware progress is no longer above 0 or until we've waited too long
+    sleep(1);
+    rapidhalib_lockrapidha(rapidhalocked);
+    firmware_progress=rapidhadevice->firmware_progress;
+    if (offsetsecscnt>=RAPIDHA_FIRMWARE_UPDATE_OFFSET_PROGRESS) {
+      //Check every 5 seconds if the upgrade has progressed and if not abort
+      offsetsecscnt=0;
+      if (rapidhadevice->firmware_file_offset==prevfirmware_offset) {
+        rapidhalib_unlockrapidha(rapidhalocked);
+        offsetnotprogressing=1;
+        break;
+      } else {
+        prevfirmware_offset=rapidhadevice->firmware_file_offset;
+      }
+    }
+    rapidhalib_unlockrapidha(rapidhalocked);
+    if (firmware_progress>prevfirmware_progress) {
+      //Firmware update has progressed to the next level
+      secscnt=0;
+      offsetsecscnt=0;
+      prevfirmware_progress=firmware_progress;
+    }
+    ++secscnt;
+    ++offsetsecscnt;
+  }
+  if (offsetnotprogressing) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Firmware upgrade aborted due to no progress in %d seconds\n", __func__, RAPIDHA_FIRMWARE_UPDATE_OFFSET_PROGRESS);
+  }
+  if (secscnt>=RAPIDHA_FIRMWARE_UPDATE_MAX_WAIT_TIME) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Firmware upgrade aborted due to taking longer than %d seconds\n", __func__, RAPIDHA_FIRMWARE_UPDATE_MAX_WAIT_TIME);
+  }
+  if (firmware_progress==0) {
+    //The firmware upgrade completed but we should wait a few seconds for the RapidHA to switch to the new firmware
+    debuglibifaceptr->debuglib_printf(1, "%s: Waiting a few seconds for the RapidHA to apply the firmware update\n", __func__);
+    sleep(5);
+  }
+  //Cleanup and refresh after the firmware upgrade
+firmwareupgrade_cleanup:
+  rapidhalib_lockrapidha(rapidhalocked);
+  if (rapidhadevice->firmwarefile_fd!=-1) {
+    close(rapidhadevice->firmwarefile_fd);
+    rapidhadevice->firmwarefile_fd=-1;
+  }
+  if (rapidhadevice->firmware_file) {
+    free(rapidhadevice->firmware_file);
+    rapidhadevice->firmware_file=NULL;
+  }
+  rapidhalib_unlockrapidha(rapidhalocked);
+
+  //Redetect info about this RapidHA
+  rapidhalib_detect_rapidha(rapidhadevice, 1, rapidhalocked);
+
+  //Schedule to reinitialise this RapidHA
+  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhadevice->needreinit=1;
+  rapidhalib_unlockrapidha(rapidhalocked);
+
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
+}
+
 //Refresh data from rapidha devices
 //NOTE: Only need to do minimal thread locking since a lot of the variables used won't change while this function is running
 STATIC void rapidhalib_refresh_rapidha_data(void) {
@@ -2860,11 +3398,28 @@ STATIC void rapidhalib_refresh_rapidha_data(void) {
   for (i=0; i<numrapidhadevices; i++) {
     int zigbeelibindex;
     rapidhadevice_t *rapidhadeviceptr;
+    const char *firmware_file;
     uint8_t needreinit, cfgstate;
 
     rapidhadeviceptr=&rapidhalib_rapidhadevices[i];
     if (rapidhalib_markrapidha_inuse(rapidhadeviceptr, &rapidhalocked)<0) {
       //Unable to mark this rapidha for use
+      continue;
+    }
+    //Check if a firmware upgrade has been requested
+    //Check at the top so easier to run through reinitialisation after the upgrade is complete
+    rapidhalib_lockrapidha(&rapidhalocked);
+    firmware_file=rapidhadeviceptr->firmware_file;
+    rapidhalib_unlockrapidha(&rapidhalocked);
+    if (firmware_file) {
+      rapidhalib_dofirmwareupgrade(rapidhadeviceptr, &rapidhalocked, &zigbeelocked);
+    }
+    rapidhalib_lockrapidha(&rapidhalocked);
+    firmware_file=rapidhadeviceptr->firmware_file;
+    rapidhalib_unlockrapidha(&rapidhalocked);
+    if (firmware_file) {
+      //If the firmware file is still set, then the firmware upgrade is still pending and we shouldn't
+      //  do anything else with this device
       continue;
     }
     //Check if need to reinitialise this RapidHA
@@ -3006,6 +3561,7 @@ static inline int rapidhalib_getneedtoquit(long *rapidhalocked) {
 int rapidhalib_start(void) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
   int result=0;
+  cmdserverlib_ifaceptrs_ver_1_t *cmdserverlibifaceptr=rapidhalib_getmoduledepifaceptr("cmdserverlib", CMDSERVERLIBINTERFACE_VER_1);
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
   //Start a thread for auto detecting RapidHA modules
@@ -3017,6 +3573,9 @@ int rapidhalib_start(void) {
       result=-1;
     }
   }
+  cmdserverlibifaceptr->cmdserverlib_register_cmd_function("rapidha_firmware_upgrade", "(Experimental) Upgrade the firmware on a RapidHA device", rapidhalib_process_firmware_upgrade_command);
+  cmdserverlibifaceptr->cmdserverlib_register_cmd_function("rapidha_cancel_firmware_upgrade", "(Experimental) Cancel an in progress firmware upgrade on a RapidHA device", rapidhalib_process_cancel_firmware_upgrade_command);
+
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 
   return result;
@@ -3138,6 +3697,14 @@ void rapidhalib_shutdown(void) {
   //Free allocated memory
   if (rapidhalib_rapidhadevices) {
     for (i=0; i<rapidhalib_numrapidhadevices; i++) {
+      if (rapidhalib_rapidhadevices[i].firmwarefile_fd!=-1) {
+        close(rapidhalib_rapidhadevices[i].firmwarefile_fd);
+        rapidhalib_rapidhadevices[i].firmwarefile_fd=-1;
+      }
+      if (rapidhalib_rapidhadevices[i].firmware_file) {
+        free(rapidhalib_rapidhadevices[i].firmware_file);
+        rapidhalib_rapidhadevices[i].firmware_file=NULL;
+      }
       if (rapidhalib_rapidhadevices[i].receivebuf) {
         free(rapidhalib_rapidhadevices[i].receivebuf);
         rapidhalib_rapidhadevices[i].receivebuf=NULL;
