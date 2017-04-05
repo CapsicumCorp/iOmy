@@ -30,6 +30,12 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 function IOmyException(message) {
     this.name       = "iOmyException";
     this.message    = message;
+    
+    this.getMessage = function () {
+        return this.name + ": " + this.message;
+    };
+    
+    //jQuery.sap.log.error(message);
 }
 
 //----------------------------------------------------------------------------//
@@ -68,6 +74,10 @@ function MissingArgumentException(message) {
 }
 
 function MissingSettingsMapException(message) {
+    //------------------------------------------------------------------------//
+    // This exception can have a simple default not found message if one is
+    // not provided.
+    //------------------------------------------------------------------------//
     if (message === undefined || message === null || message === "") {
         message = "A Javascript object containing parameters is required!";
     }
@@ -101,4 +111,25 @@ function AttemptToDeleteOnlyRoomException(message, roomName) {
 function NoPremisesVisibleException(message) {
     IOmyException.call(this, message);
     this.name       = "NoPremisesVisibleException";
+}
+
+//----------------------------------------------------------------------------//
+// Objects not found
+//----------------------------------------------------------------------------//
+function ObjectNotFoundException(message) {
+    IOmyException.call(this, message);
+    this.name       = "ObjectNotFoundException";
+}
+
+function PremiseNotFoundException(message) {
+    //------------------------------------------------------------------------//
+    // This exception can have a simple "Premise not found" message if one is
+    // not provided.
+    //------------------------------------------------------------------------//
+    if (message === undefined || message === null || message === "") {
+        message = "Premise Not Found!";
+    }
+    
+    ObjectNotFoundException.call(this, message);
+    this.name       = "PremiseNotFoundException";
 }

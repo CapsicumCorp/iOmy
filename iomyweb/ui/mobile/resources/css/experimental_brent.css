@@ -170,3 +170,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	margin: 10px;
 }
 
+
+.FullPageMessage {
+    font-size: 1.5rem;
+}

@@ -503,21 +503,10 @@ $.extend(IOMy.apiodata,{
                 //-- 2.2.E - HTTP 403 STATUS CODE:                                      --//
                 //------------------------------------------------------------------------//
                 } else if (err.status=="403") { 
-                    //-- 403 Errors indicate that the session has been terminated and the user will need to log back in. Flag this --//
-                    IOMy.common.bSessionTerminated = true;
                     //-- Flag that we shouldn't retry the ajax request --// 
                     this.bApiComplete = true;
-                    
-                    //-- Overwrite the onFail function to handle a terminated session. --//
-                    aConfig.onFail = function (err) {
-                        //-- 403 was returned! Display the message and take the user back to the --//
-                        //-- login screen once they close the dialog.                            --//
-                        IOMy.common.showError("You are not signed in! You will be taken to the start screen to sign in again.", "Access Denied!",
-                            function () {
-                                window.location.reload(true);   // TRUE forces a reload from the server, NOT the cache!
-                            }
-                        );
-                    };
+
+                    IOMy.apiphp.handle403APIError(aConfig);
 
                 //------------------------------------------------------------------------//
 				//-- 2.3.F - UNEXPECTED STATUS CODE: 									--//

@@ -341,8 +341,8 @@ sap.ui.controller("mjs.login.Login", {
 				},
 				error : function(err) {
 					//-- TODO: Replace this with a more apporpiate error --//
-					jQuery.sap.log.error(err.error());
-					IOMy.common.showError("Invalid Username or Password! (Error)", "User Error");
+					jQuery.sap.log.error(JSON.stringify(err));
+					IOMy.common.showError("A connection error has occurred. Please try again. If the problem persists, restart iOmy.", "User Error");
 				}
 			});
 		} else {

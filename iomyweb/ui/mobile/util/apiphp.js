@@ -369,6 +369,7 @@ $.extend(IOMy.apiphp,{
 						//------------------------------------------------------------------------//
 						} else if (err.status=="0") {
 							//-- NOTE: This is a weird non-standard error code (more info on what causes of this needs to be found) --//
+                            //-- Seems to be a timeout issue --//
 							//-- Log that it happened and try again --//
 							this.DebugLogString += "The HTTP 0 Status Code has been returned! UI Developers need to be notified. \n";
 							//-- Flag that we can try again for a different result as the API Request isn't complete --//
@@ -395,21 +396,10 @@ $.extend(IOMy.apiphp,{
 						//-- 2.2.E - HTTP 403 STATUS CODE:                                      --//
 						//------------------------------------------------------------------------//
 						} else if (err.status=="403") { 
-							//-- 403 Errors indicate that the session has been terminated and the user will need to log back in. Flag this --//
-                            IOMy.common.bSessionTerminated = true;
                             //-- Flag that we shouldn't retry the ajax request --// 
 							this.bApiComplete = true;
                             
-                            //-- Overwrite the onFail function to handle a terminated session. --//
-                            aConfig.onFail = function (err) {
-                                //-- 403 was returned! Display the message and take the user back to the --//
-                                //-- login screen once they close the dialog.                            --//
-                                IOMy.common.showError("You are not signed in! You will be taken to the start screen to sign in again.", "Access Denied!",
-                                    function () {
-                                        window.location.reload(true);   // TRUE forces a reload from the server, NOT the cache!
-                                    }
-                                );
-                            };
+                            IOMy.apiphp.handle403APIError(aConfig);
 							
 						//------------------------------------------------------------------------//
 						//-- 2.2.F - UNEXPECTED STATUS CODE:                                    --//
@@ -751,8 +741,48 @@ $.extend(IOMy.apiphp,{
                 oConfig.onFail();
             }
 		}
-	}
-	
+	},
+    
+    /**
+     * Replace the onFail function with one that brings up an error popup that
+     * the user will be taken back to the sign in page again. If a previous API
+     * call encountered a 403 error, then a popup will have already appeared or
+     * will appear, so an empty function will be given.
+     * 
+     * @param {Map} mConfig             The config map that came with the API call.
+     */
+	handle403APIError : function (mConfig) {
+        //--------------------------------------------------------------------//
+        // Check that the request config was given
+        //--------------------------------------------------------------------//
+        if (mConfig === undefined) {
+            throw new MissingSettingsMapException("API request config must be given!");
+        }
+        
+        //--------------------------------------------------------------------//
+        // Handle the error by replacing the onFail function.
+        //--------------------------------------------------------------------//
+        if (IOMy.common.bSessionTerminated === false) {
+            //-- 403 Errors indicate that the session has been terminated and the user will need to log back in. Flag this --//
+            IOMy.common.bSessionTerminated = true;
+            //-- Overwrite the onFail function to handle a terminated session. --//
+            mConfig.onFail = function () {
+                //-- 403 was returned! Display the message and take the user back to the --//
+                //-- login screen once they close the dialog.                            --//
+                IOMy.common.showError("Your sign-in session is currently inactive. You will be taken to the start screen to sign in again.", "Inactive Sign-in",
+                    function () {
+                        window.location.reload(true);   // TRUE forces a reload from the server, NOT the cache!
+                    }
+                );
+            };
+        } else {
+            //------------------------------------------------------------------------//
+            // If there is a slew of requests being run at once, then only one needs to
+            // show the error popup.
+            //------------------------------------------------------------------------//
+            mConfig.onFail = function () {};
+        }
+    }
 	
 
 });

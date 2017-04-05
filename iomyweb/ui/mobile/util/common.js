@@ -1195,7 +1195,8 @@ $.extend(IOMy.common,{
 			Columns : [
                 "PREMISE_PK", "PREMISE_NAME", "PREMISE_DESCRIPTION", "PERMPREMISE_WRITE", "PERMPREMISE_OWNER",
                 "PREMISEFLOORS_PK", "PREMISEROOMS_PK", "PREMISEBEDROOMS_PK", "PREMISEOCCUPANTS_PK",
-                "PREMISEFLOORS_NAME", "PREMISEROOMS_NAME", "PREMISEBEDROOMS_COUNT", "PREMISEOCCUPANTS_NAME"
+                "PREMISEFLOORS_NAME", "PREMISEROOMS_NAME", "PREMISEBEDROOMS_COUNT", "PREMISEOCCUPANTS_NAME",
+                "PERMPREMISE_ROOMADMIN"
             ],
 			WhereClause : [],
 			OrderByClause : ["PREMISE_NAME asc"],
@@ -1208,8 +1209,6 @@ $.extend(IOMy.common,{
 						"Id" : data[i].PREMISE_PK,
 						"Name" : data[i].PREMISE_NAME,
 						"Desc" : data[i].PREMISE_DESCRIPTION,
-						"PermWrite" : data[i].PERMPREMISE_WRITE,
-						"PermOwner" : data[i].PERMPREMISE_OWNER,
                         "FloorCountId" : data[i].PREMISEFLOORS_PK,
                         "RoomCountId" : data[i].PREMISEROOMS_PK,
                         "BedroomCountId" : data[i].PREMISEBEDROOMS_PK,
@@ -1217,7 +1216,11 @@ $.extend(IOMy.common,{
                         "FloorCount" : data[i].PREMISEFLOORS_NAME,
                         "RoomCount" : data[i].PREMISEROOMS_NAME,
                         "BedroomCount" : data[i].PREMISEBEDROOMS_COUNT,
-                        "OccupantCount" : data[i].PREMISEOCCUPANTS_NAME
+                        "OccupantCount" : data[i].PREMISEOCCUPANTS_NAME,
+                        //-- Premise Permissions --//
+						"PermWrite" : data[i].PERMPREMISE_WRITE,
+						"PermOwner" : data[i].PERMPREMISE_OWNER,
+                        "PermRoomAdmin" : data[i].PERMPREMISE_ROOMADMIN
 					});
 				}
 				
@@ -1842,6 +1845,9 @@ $.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common
 $.sap.require("IOMy.common.createExtraThingProperties");
 
 $.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
+$.sap.require("IOMy.common.hasRoomAdminAccess");
+
+$.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
 $.sap.require("IOMy.common.LoadRoomTypes");
 
 $.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
@@ -1858,3 +1864,10 @@ $.sap.require("IOMy.common.LoadPremiseRoomsOptions");
 
 $.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
 $.sap.require("IOMy.common.isCoreVariablesRefreshInProgress");
+
+
+//----------------------------------------------------------------------------//
+// Getters
+//----------------------------------------------------------------------------//
+$.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
+$.sap.require("IOMy.common.getters");

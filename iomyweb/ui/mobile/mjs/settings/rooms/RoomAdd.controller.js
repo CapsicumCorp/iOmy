@@ -26,6 +26,7 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
     odata : IOMy.apiodata,
     
     userId : 0,
+    premiseID : 0,
     
     wPremise            : null,
     wRoomName           : null,
@@ -51,6 +52,8 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 			onBeforeShow : function (evt) {
 				//-- Refresh the Navigational buttons --//
                 IOMy.common.NavigationRefreshButtons( me );
+                
+                me.premiseID = evt.data.premiseID;
                 
                 me.DestroyUI();
                 me.DrawUI();
@@ -131,13 +134,23 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
         });
         
         oRoomTypeTitle = new sap.m.Text({
-            text : " Room Type"
+            text : "Room Type"
         });
         
         //-------------------------------------------------------------------//
         // Create fields.
         //-------------------------------------------------------------------//
         me.wPremise = IOMy.widgets.getPremiseSelector(me.createId("premiseBox")).addStyleClass("width100Percent SettingsDropdownInput");
+        me.wPremise.attachChange(
+            function () {
+                if (IOMy.common.hasRoomAdminAccess(me.wPremise.getSelectedKey())) {
+                    me.byId("addButton").setEnabled(true);
+                } else {
+                    me.byId("addButton").setEnabled(false);
+                    
+                }
+            }
+        );
 
         me.wRoomName = new sap.m.Input(me.createId("roomName"), {
             value : ""
@@ -215,9 +228,7 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 		
 		IOMy.apiodata.AjaxRequest({
 			Url: IOMy.apiodata.ODataLocation("users"),
-			Columns : ["USERS_PK","USERSINFO_SURNAMES","USERSINFO_GIVENNAMES",
-					"USERSINFO_DISPLAYNAME","USERSINFO_EMAIL","USERSINFO_PHONENUMBER",
-                    "USERSGENDER_PK"],
+			Columns : ["USERS_PK"],
 			WhereClause : [],
 			OrderByClause : [],
 			
@@ -225,7 +236,9 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 				data = data[0];
                 
                 me.userId = data.USERS_PK;
-                me.byId("addButton").setEnabled(true);
+                if (IOMy.common.hasRoomAdminAccess(me.wPremise.getSelectedKey())) {
+                    me.byId("addButton").setEnabled(true);
+                }
 			},
 			
 			onFail : function (response) {

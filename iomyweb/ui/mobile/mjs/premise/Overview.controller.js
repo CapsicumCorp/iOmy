@@ -135,7 +135,7 @@ sap.ui.controller("mjs.premise.Overview", {
         
         me.wRoomListBox = new sap.m.VBox({
             items: []
-        }).addStyleClass("TableSideBorders");
+        });
         
         if (iPremiseId !== undefined && iPremiseId !== null) {
             me.byId("premiseBox").setSelectedKey(iPremiseId);
@@ -165,240 +165,263 @@ sap.ui.controller("mjs.premise.Overview", {
                 content : ["<div class='Line'></div>"]
             });
             oLayout.addItem(oLine);
-            
+
             //==============================================//
-            // ADD TABLE HEADINGS
+            // If there are rooms available, show them
             //==============================================//
-            me.wRoomListBox.addItem(
-                new sap.m.HBox({
-                    items : [
-                        // === DEVICES === //
-                        new sap.m.VBox({
-                            items : [
-                                new sap.m.Label({
-                                    text : "Devices"
-                                })
-                            ]
-                        }).addStyleClass("ElementChildCenter FlexNoShrink width60px BorderRight"),
-                        // === ROOM === //
-                        new sap.m.VBox({
-                            items : [
-                                new sap.m.Label({
-                                    text : "Room"
-                                }).addStyleClass("PaddingToMatchButtonText")
-                            ]
-                        })
-                    ]
-                }).addStyleClass("ConsistentMenuHeader ListItem BorderTop")
-            );
-            
-            //==============================================//
-            // CONSTRUCT THE ROOM LIST
-            //==============================================//
-            var iDevicesInRoom;
-            var aDevice;
-            // Create the collapse/expand icon in an array of widgets.
-            var aDeviceArrow;
-            
-            $.each(rooms,function(sIndex,aRoom) {
-                //-- Verify that the Premise has rooms --//
-                if( sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null )
-                {
-                    // Clean up any old elements with IDs.
-                    me.aElementsToDestroy.push("roomName"+sIndex);
-                    me.aElementsToDestroy.push("roomLink"+sIndex);
+            //if (IOMy.functions.getNumberOfRoomsInPremise(me.byId("premiseBox").getSelectedKey()) !== 0) {
+                //-- Add side borders if the page is wide enough --//
+                me.wRoomListBox.addStyleClass("TableSideBorders");
+                
+                //==============================================//
+                // ADD TABLE HEADINGS
+                //==============================================//
+                me.wRoomListBox.addItem(
+                    new sap.m.HBox({
+                        items : [
+                            // === DEVICES === //
+                            new sap.m.VBox({
+                                items : [
+                                    new sap.m.Label({
+                                        text : "Devices"
+                                    })
+                                ]
+                            }).addStyleClass("ElementChildCenter FlexNoShrink width60px BorderRight"),
+                            // === ROOM === //
+                            new sap.m.VBox({
+                                items : [
+                                    new sap.m.Label({
+                                        text : "Room"
+                                    }).addStyleClass("PaddingToMatchButtonText")
+                                ]
+                            })
+                        ]
+                    }).addStyleClass("ConsistentMenuHeader ListItem BorderTop")
+                );
+
+                //==============================================//
+                // CONSTRUCT THE ROOM LIST
+                //==============================================//
+                var iDevicesInRoom;
+                var aDevice;
+                // Create the collapse/expand icon in an array of widgets.
+                var aDeviceArrow;
+                
+                $.each(rooms,function(sIndex,aRoom) {
                     
-                    // Retrieve number of devices in a given room
-                    iDevicesInRoom = IOMy.functions.getNumberOfDevicesInRoom(aRoom.RoomId);
-                    
-                    //--------------------------------------------------------//
-                    // If this rooom has devices attached. Create an array
-                    // containing a button to expand or collapse a list of those
-                    // devices
-                    //--------------------------------------------------------//
-                    if (iDevicesInRoom > 0) {
-                        aDeviceArrow = [
-                            new sap.m.Button(me.createId("roomName"+sIndex), {
-                                tooltip: "Collapse",
-                                icon : "sap-icon://navigation-down-arrow",
-                                press : function () {
-                                    if (me.roomsExpanded[sIndex] === false) {
-                                        me.byId("room"+sIndex).setVisible(true);
-                                        me.roomsExpanded[sIndex] = true;
-                                        this.setIcon("sap-icon://navigation-down-arrow");
-                                        this.setTooltip("Collapse");
-                                    } else {
-                                        me.byId("room"+sIndex).setVisible(false);
-                                        me.roomsExpanded[sIndex] = false;
-                                        this.setIcon("sap-icon://navigation-right-arrow");
-                                        this.setTooltip("Expand");
+                    //-- Verify that the Premise has rooms --//
+                    if( sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null )
+                    {
+                        // Clean up any old elements with IDs.
+                        me.aElementsToDestroy.push("roomName"+sIndex);
+                        me.aElementsToDestroy.push("roomLink"+sIndex);
+
+                        // Retrieve number of devices in a given room
+                        iDevicesInRoom = IOMy.functions.getNumberOfDevicesInRoom(aRoom.RoomId);
+
+                        //--------------------------------------------------------//
+                        // If this rooom has devices attached. Create an array
+                        // containing a button to expand or collapse a list of those
+                        // devices
+                        //--------------------------------------------------------//
+                        if (iDevicesInRoom > 0) {
+                            aDeviceArrow = [
+                                new sap.m.Button(me.createId("roomName"+sIndex), {
+                                    tooltip: "Collapse",
+                                    icon : "sap-icon://navigation-down-arrow",
+                                    press : function () {
+                                        if (me.roomsExpanded[sIndex] === false) {
+                                            me.byId("room"+sIndex).setVisible(true);
+                                            me.roomsExpanded[sIndex] = true;
+                                            this.setIcon("sap-icon://navigation-down-arrow");
+                                            this.setTooltip("Collapse");
+                                        } else {
+                                            me.byId("room"+sIndex).setVisible(false);
+                                            me.roomsExpanded[sIndex] = false;
+                                            this.setIcon("sap-icon://navigation-right-arrow");
+                                            this.setTooltip("Expand");
+                                        }
+                                    }
+                                }).addStyleClass("ButtonNoBorder IOMYButton ButtonIconGreen TextSize20px width100Percent")
+                            ];
+
+                        //--------------------------------------------------------//
+                        // Otherwise use an empty items array
+                        //--------------------------------------------------------//
+                        } else {
+                            aDeviceArrow = [];
+                        }
+
+                        //=========== Create the room entry =============//
+                        me.wRoomListBox.addItem(
+                            new sap.m.HBox({
+                                items : [
+                                    // === NUMBER OF DEVICES ASSIGNED TO A ROOM ===//
+                                    new sap.m.VBox({
+                                        items : [
+                                            new sap.m.Text({
+                                                textAlign : "Center",
+                                                text : iDevicesInRoom
+                                            }).addStyleClass("TextBold NumberLabel MarTop10px MarLeft5px MarRight5px")
+                                        ]
+                                    }).addStyleClass("FlexNoShrink width60px BorderRight TextCenter"),
+
+                                    // === ROOM LINK === //
+                                    new sap.m.VBox({
+                                        items : [
+                                            new sap.m.Button(me.createId("roomLink"+sIndex), {
+                                                text : aRoom.RoomName,
+                                                press : function () {
+                                                    //-- If there are things associated with this room go to its overview page --//
+                                                    if (JSON.stringify(aRoom.Things) !== "{}") {
+                                                        IOMy.common.NavigationChangePage("pRoomsOverview", {room : aRoom});
+
+                                                    //-- Otherwise go straight to the edit page for it. --//
+                                                    } else {
+                                                        IOMy.common.NavigationChangePage("pSettingsRoomEdit", {room : aRoom});
+                                                    }
+                                                }
+                                            }).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px")
+                                        ]
+                                    }).addStyleClass("TextOverflowEllipsis width100Percent jbMR1tempfix"),
+
+                                    // === COLLAPSE/EXPAND BUTTON PLACEHOLDER === //
+                                    // If there are things associated with a room via their links...
+                                    new sap.m.VBox({
+                                        items : aDeviceArrow
+                                    }).addStyleClass("FlexNoShrink width70px")
+                                ]
+                            }).addStyleClass("ListItem minheight20px")
+                        ).addItem(
+                            //=============== Create the placeholder for the room list. ===============//
+                            new sap.m.VBox(me.createId("room"+sIndex), {
+                                items : []
+                            })
+                        );
+
+                        $.each(aRoom.Things,function(sJndex,aDeviceKeys) {
+                            if( sJndex!==undefined && sJndex!==null && aDeviceKeys!==undefined && aDeviceKeys!==null ) {
+                                // Grab the correct Thing in the list and save its ID.
+                                aDevice = IOMy.common.ThingList["_"+aDeviceKeys.Thing];
+                                aDevice = {
+                                    "DeviceId":			aDevice.Id,
+                                    "DeviceName":		aDevice.DisplayName,
+                                    "DeviceTypeId":		aDevice.TypeId,
+                                    "DeviceTypeName":	aDevice.TypeName,
+                                    "DeviceStatus":		aDevice.Status,
+                                    "PermToggle":		aDevice.PermToggle,
+                                    "IOs":              aDevice.IO,
+                                    "RoomId":			aDevice.RoomId
+                                };
+                                me.aStoredDevices.push(aDevice);
+
+                                // Create the flag for showing the list of rooms for a selected room
+                                // if it doesn't already exist.
+                                if (me.roomsExpanded[sIndex] === undefined) {
+                                    me.roomsExpanded[sIndex] = false;
+                                }
+
+                                // Retrieve number of devices/things in the room
+                                iDevicesInRoom = IOMy.functions.getNumberOfDevicesInRoom(aDevice.DeviceId);
+
+                                //=============== Create/Refresh the device link ===============//
+                                me.aElementsToDestroy.push("device"+aDevice.DeviceId);
+                                me.aElementsToDestroy.push("deviceLink"+aDevice.DeviceId);
+
+                                me.byId("room"+sIndex).addItem(
+                                    new sap.m.HBox({
+                                        items : [
+                                            // Device Link
+                                            new sap.m.VBox(me.createId("device"+aDevice.DeviceId),{
+                                                items : [
+                                                    new sap.m.Link(me.createId("deviceLink"+aDevice.DeviceId),{
+                                                        text : aDevice.DeviceName,
+                                                        press : function () {
+                                                            // Lock Button
+                                                            this.setEnabled(false);
+
+                                                            var sPageName = "";     // Name of the page to enter as defined in app.js
+
+                                                            var oItem;
+                                                            for (var i = 0; i < me.aStoredDevices.length; i++) {
+                                                                if (me.byId("deviceLink"+me.aStoredDevices[i].DeviceId).getEnabled() === false) {
+                                                                    oItem = me.aStoredDevices[i];
+                                                                    jQuery.sap.log.debug("ID of Thing selected: "+oItem.DeviceId);
+                                                                    break;
+                                                                }
+                                                            }
+
+                                                            // Determine which device page to enter according to the device type.
+                                                            if (me.aStoredDevices[i].DeviceTypeId === 2) {
+                                                                sPageName = "pDeviceData"; //-- Zigbee --//
+                                                            } else if (me.aStoredDevices[i].DeviceTypeId === 13) {
+                                                                sPageName = "pPhilipsHue"; //-- Philips Hue --//
+                                                            } else if (me.aStoredDevices[i].DeviceTypeId === 12) {
+                                                                sPageName = "pOnvif"; //-- Onvif Camera --//
+                                                            } else if (me.aStoredDevices[i].DeviceTypeId === 3) {
+                                                                sPageName = "pMotionSensor"; //-- Motion Sensor --//
+                                                            } else if (me.aStoredDevices[i].DeviceTypeId === 4) {
+                                                                //sPageName = "pDeviceTestThermostat"; //-- Temperature Sensor --//
+                                                            } else if (me.aStoredDevices[i].DeviceTypeId === 10) {
+                                                                //sPageName = "pThermostat"; //-- DevelCo Energy Meter --//
+                                                            } else if (me.aStoredDevices[i].DeviceTypeId === 14) {
+                                                                sPageName = "pThermostat"; //-- Open Weather Map --//
+
+                                                            // -- Experimental Pages --//
+                                                            } else if (me.aStoredDevices[i].DeviceTypeId === "-1") {
+                                                                sPageName = "pDeviceDoorLock"; //-- Door Lock --//
+                                                            } else if (me.aStoredDevices[i].DeviceTypeId === "-2") {
+                                                                sPageName = "pDeviceWindowSensor"; //-- Window Sensor --//
+                                                            } else if (me.aStoredDevices[i].DeviceTypeId === "-3") {
+                                                                sPageName = "pDeviceScales"; //-- Bluetooth Scales --//
+                                                            } else if (me.aStoredDevices[i].DeviceTypeId === "-4") {
+                                                                sPageName = "pDeviceBPM"; //-- Blood Pressure Monitor --//
+                                                            } else if (me.aStoredDevices[i].DeviceTypeId === "-5") {
+                                                                sPageName = "pDeviceGaragedoor"; //-- Remote Controlled Garage Door --//
+                                                            } else if (me.aStoredDevices[i].DeviceTypeId === "-6") {
+                                                                sPageName = "pDeviceTestThermostat"; //-- Thermostat --//
+                                                            }
+
+                                                            IOMy.common.NavigationChangePage(sPageName, {ThingId : oItem.DeviceId});
+
+                                                            // Unlock Button
+                                                            this.setEnabled(true);
+                                                        }
+                                                    }).addStyleClass("SettingsLinks Font-RobotoCondensed TextLeft TextBold PadLeft8px Text_grey_20 width100Percent")
+                                                ]
+                                            }).addStyleClass("width100Percent TextOverflowEllipsis")
+                                        ]
+                                    }).addStyleClass("ListItem width100Percent PadTop4px MainPanelElement ListItemDark")
+                                );
+
+                                // Decide whether to hide or show when the page loads/reloads.
+                                if (me.roomsExpanded[sIndex] === false) {
+                                    me.byId("room"+sIndex).setVisible(false);
+                                    if (me.byId("roomName"+sIndex) !== undefined) {
+                                        me.byId("roomName"+sIndex).setIcon("sap-icon://navigation-right-arrow").setTooltip("Expand");
                                     }
                                 }
-                            }).addStyleClass("ButtonNoBorder IOMYButton ButtonIconGreen TextSize20px width100Percent")
-                        ];
-                        
-                    //--------------------------------------------------------//
-                    // Otherwise use an empty items array
-                    //--------------------------------------------------------//
-                    } else {
-                        aDeviceArrow = [];
+
+                                idCount++;
+                            }
+                        });
                     }
-                    
-                    //=========== Create the room entry =============//
-                    me.wRoomListBox.addItem(
-                        new sap.m.HBox({
-                            items : [
-                                // === NUMBER OF DEVICES ASSIGNED TO A ROOM ===//
-                                new sap.m.VBox({
-                                    items : [
-                                        new sap.m.Text({
-                                            textAlign : "Center",
-                                            text : iDevicesInRoom
-                                        }).addStyleClass("TextBold NumberLabel MarTop10px MarLeft5px MarRight5px")
-                                    ]
-                                }).addStyleClass("FlexNoShrink width60px BorderRight TextCenter"),
-                                
-                                // === ROOM LINK === //
-                                new sap.m.VBox({
-                                    items : [
-                                        new sap.m.Button(me.createId("roomLink"+sIndex), {
-                                            text : aRoom.RoomName,
-                                            press : function () {
-                                                //-- If there are things associated with this room go to its overview page --//
-                                                if (JSON.stringify(aRoom.Things) !== "{}") {
-                                                    IOMy.common.NavigationChangePage("pRoomsOverview", {room : aRoom});
-                                                
-                                                //-- Otherwise go straight to the edit page for it. --//
-                                                } else {
-                                                    IOMy.common.NavigationChangePage("pSettingsRoomEdit", {room : aRoom});
-                                                }
-                                            }
-                                        }).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px")
-                                    ]
-                                }).addStyleClass("TextOverflowEllipsis width100Percent jbMR1tempfix"),
-                                
-                                // === COLLAPSE/EXPAND BUTTON PLACEHOLDER === //
-                                // If there are things associated with a room via their links...
-                                new sap.m.VBox({
-                                    items : aDeviceArrow
-                                }).addStyleClass("FlexNoShrink width70px")
-                            ]
-                        }).addStyleClass("ListItem minheight20px")
-                    ).addItem(
-                        //=============== Create the placeholder for the room list. ===============//
-                        new sap.m.VBox(me.createId("room"+sIndex), {
-                            items : []
-                        })
-                    );
-                    
-                    $.each(aRoom.Things,function(sJndex,aDeviceKeys) {
-                        if( sJndex!==undefined && sJndex!==null && aDeviceKeys!==undefined && aDeviceKeys!==null ) {
-                            // Grab the correct Thing in the list and save its ID.
-                            aDevice = IOMy.common.ThingList["_"+aDeviceKeys.Thing];
-                            aDevice = {
-                                "DeviceId":			aDevice.Id,
-                                "DeviceName":		aDevice.DisplayName,
-                                "DeviceTypeId":		aDevice.TypeId,
-                                "DeviceTypeName":	aDevice.TypeName,
-                                "DeviceStatus":		aDevice.Status,
-                                "PermToggle":		aDevice.PermToggle,
-                                "IOs":              aDevice.IO,
-                                "RoomId":			aDevice.RoomId
-                            };
-                            me.aStoredDevices.push(aDevice);
-
-                            // Create the flag for showing the list of rooms for a selected room
-                            // if it doesn't already exist.
-                            if (me.roomsExpanded[sIndex] === undefined) {
-                                me.roomsExpanded[sIndex] = false;
-                            }
-
-                            // Retrieve number of devices/things in the room
-                            iDevicesInRoom = IOMy.functions.getNumberOfDevicesInRoom(aDevice.DeviceId);
-
-                            //=============== Create/Refresh the device link ===============//
-                            me.aElementsToDestroy.push("device"+aDevice.DeviceId);
-                            me.aElementsToDestroy.push("deviceLink"+aDevice.DeviceId);
-                            
-                            me.byId("room"+sIndex).addItem(
-                                new sap.m.HBox({
-                                    items : [
-                                        // Device Link
-                                        new sap.m.VBox(me.createId("device"+aDevice.DeviceId),{
-                                            items : [
-                                                new sap.m.Link(me.createId("deviceLink"+aDevice.DeviceId),{
-                                                    text : aDevice.DeviceName,
-                                                    press : function () {
-                                                        // Lock Button
-                                                        this.setEnabled(false);
-                                                        
-                                                        var sPageName = "";     // Name of the page to enter as defined in app.js
-                                                        
-                                                        var oItem;
-                                                        for (var i = 0; i < me.aStoredDevices.length; i++) {
-                                                            if (me.byId("deviceLink"+me.aStoredDevices[i].DeviceId).getEnabled() === false) {
-                                                                oItem = me.aStoredDevices[i];
-                                                                jQuery.sap.log.debug("ID of Thing selected: "+oItem.DeviceId);
-                                                                break;
-                                                            }
-                                                        }
-                                                        
-                                                        // Determine which device page to enter according to the device type.
-                                                        if (me.aStoredDevices[i].DeviceTypeId === 2) {
-                                                            sPageName = "pDeviceData"; //-- Zigbee --//
-                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 13) {
-                                                            sPageName = "pPhilipsHue"; //-- Philips Hue --//
-                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 12) {
-                                                            sPageName = "pOnvif"; //-- Onvif Camera --//
-                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 3) {
-                                                            sPageName = "pMotionSensor"; //-- Motion Sensor --//
-                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 4) {
-                                                            //sPageName = "pDeviceTestThermostat"; //-- Temperature Sensor --//
-                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 10) {
-                                                            //sPageName = "pThermostat"; //-- DevelCo Energy Meter --//
-                                                        } else if (me.aStoredDevices[i].DeviceTypeId === 14) {
-                                                            sPageName = "pThermostat"; //-- Open Weather Map --//
-                                                            
-                                                        // -- Experimental Pages --//
-                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-1") {
-                                                            sPageName = "pDeviceDoorLock"; //-- Door Lock --//
-                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-2") {
-                                                            sPageName = "pDeviceWindowSensor"; //-- Window Sensor --//
-                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-3") {
-                                                            sPageName = "pDeviceScales"; //-- Bluetooth Scales --//
-                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-4") {
-                                                            sPageName = "pDeviceBPM"; //-- Blood Pressure Monitor --//
-                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-5") {
-                                                            sPageName = "pDeviceGaragedoor"; //-- Remote Controlled Garage Door --//
-                                                        } else if (me.aStoredDevices[i].DeviceTypeId === "-6") {
-                                                            sPageName = "pDeviceTestThermostat"; //-- Thermostat --//
-                                                        }
-                                                        
-                                                        IOMy.common.NavigationChangePage(sPageName, {ThingId : oItem.DeviceId});
-                                                        
-                                                        // Unlock Button
-                                                        this.setEnabled(true);
-                                                    }
-                                                }).addStyleClass("SettingsLinks Font-RobotoCondensed TextLeft TextBold PadLeft8px Text_grey_20 width100Percent")
-                                            ]
-                                        }).addStyleClass("width100Percent TextOverflowEllipsis")
-                                    ]
-                                }).addStyleClass("ListItem width100Percent PadTop4px MainPanelElement ListItemDark")
-                            );
-
-                            // Decide whether to hide or show when the page loads/reloads.
-                            if (me.roomsExpanded[sIndex] === false) {
-                                me.byId("room"+sIndex).setVisible(false);
-                                if (me.byId("roomName"+sIndex) !== undefined) {
-                                    me.byId("roomName"+sIndex).setIcon("sap-icon://navigation-right-arrow").setTooltip("Expand");
-                                }
-                            }
-
-                            idCount++;
-                        }
-                    });
-                }
-            });
+                });
+//            } else {
+//                me.wRoomListBox.addItem(
+//                    new sap.m.VBox({
+//                        layoutData : new sap.m.FlexItemData({
+//                            growFactor : 1
+//                        }),
+//                        items : [
+//                            new sap.m.Text({
+//                                textAlign : "Center",
+//                                text : "You have no rooms visible in "+me.byId("premiseBox").getSelectedItem().getText()
+//                            }).addStyleClass("FullPageMessage")
+//                        ]
+//                    })
+//                );
+//            }
             
             idCount = 0;
 
@@ -416,7 +439,7 @@ sap.ui.controller("mjs.premise.Overview", {
                     {
                         text: "New Room",
                         select:	function (oControlEvent) {
-                            IOMy.common.NavigationChangePage( "pSettingsRoomAdd", {} );
+                            IOMy.common.NavigationChangePage( "pSettingsRoomAdd", {premiseID : me.byId("premiseBox").getSelectedKey()} );
                         }
                     },
                     {

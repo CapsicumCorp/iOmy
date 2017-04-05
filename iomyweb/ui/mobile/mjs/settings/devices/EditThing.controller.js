@@ -283,6 +283,41 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         });
 
         thisView.byId("page").addContent(oPanel);
+        
+        //--------------------------------------------------------------------//
+        // Create the action menu
+        //--------------------------------------------------------------------//
+        thisView.byId("extrasMenuHolder").destroyItems();
+        thisView.byId("extrasMenuHolder").addItem(
+            IOMy.widgets.getActionMenu({
+                id : me.createId("extrasMenu"),        // Uses the page ID
+                icon : "sap-icon://GoogleMaterial/more_vert",
+                items : [
+                    {
+                        text: "Edit Link",
+                        select:	function (oControlEvent) {
+                            // Lock the button
+                            this.setEnabled(false);
+
+                            var oLink;
+                            // Using the Link List found in common because the scope is global.
+                            for (var j = 0; j < IOMy.common.LinkList.length; j++) {
+                                if (IOMy.common.LinkList[j].LinkId == me.oThing.LinkId) {
+                                    oLink = IOMy.common.LinkList[j];
+                                    break;
+                                }
+                            }
+                            
+                            // Change to the edit link page parsing the correct link to the page.
+                            IOMy.common.NavigationChangePage("pSettingsEditLink", {link : oLink});
+
+                            // Unlock the button
+                            this.setEnabled(true);
+                        }
+                    }
+                ]
+            })
+        );
     }
 
 });
