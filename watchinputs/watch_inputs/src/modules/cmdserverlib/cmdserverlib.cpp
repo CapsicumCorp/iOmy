@@ -27,6 +27,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <arpa/telnet.h>
 #include <map>
 #include <string>
 #ifdef __ANDROID__
@@ -42,7 +43,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #define BUFFER_SIZE 4096
 #define DEFAULT_CMD_TCPPORT 64932
 #define MAX_CMDSERV_THREADS 10
-#define INTERFACE_VERSION "000600" /* The Version of the command interface implemented by this library */
+#define INTERFACE_VERSION "000700" /* The Version of the command interface implemented by this library */
 
 typedef struct cmdserver_cmdfunc cmdserver_cmdfunc_t;
 
@@ -55,7 +56,9 @@ typedef struct {
 
 struct cmdserver_cmdfunc {
   std::string cmdname;
+  std::string usage;
   std::string description;
+  std::string longdesc;
   cmd_func_ptr_t func;
 };
 
@@ -83,7 +86,9 @@ static int cmdserverlib_start(void);
 static void cmdserverlib_stop(void);
 static int cmdserverlib_init(void);
 static void cmdserverlib_shutdown(void);
+static int cmdserverlib_netputs(const char *s, int sock, int (* const getAbortEarlyfuncptr)(void));
 static int cmdserverlib_register_cmd_function(const char *name, const char *description, cmd_func_ptr_t funcptr);
+static int cmdserverlib_register_cmd_longdesc(const char *name, const char *usage, const char *description, const char *longdesc, cmd_func_ptr_t funcptr);
 static int cmdserverlib_register_cmd_listener(cmd_func_ptr_t funcptr);
 static int cmdserverlib_unregister_cmd_listener(cmd_func_ptr_t funcptr);
 
@@ -107,7 +112,9 @@ JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_CmdServerLib_jn
 #define COMMONSERVERLIB_DEPIDX 1
 
 static cmdserverlib_ifaceptrs_ver_1_t cmdserverlib_ifaceptrs_ver_1={
+  cmdserverlib_netputs,
   cmdserverlib_register_cmd_function,
+  cmdserverlib_register_cmd_longdesc,
   cmdserverlib_register_cmd_listener,
   cmdserverlib_unregister_cmd_listener,
   cmdserverlib_register_networkclientclose_listener,
@@ -185,29 +192,42 @@ static int cmdserverlib_processhelpcommand(const char *buffer, int clientsock) {
   if (tmplen==4) {
     //Display a list of registered commands and their description
     std::string helpline="Here is a list of commands:\n";
-    commonserverlibifaceptr->serverlib_netputs(helpline.c_str(), clientsock, NULL);
+    cmdserverlib_netputs(helpline.c_str(), clientsock, NULL);
     for (auto const &cmdfunc : cmdfuncs) {
-      helpline="  ";
-      helpline+=cmdfunc.second.cmdname;
-      helpline+=' ';
+      helpline=cmdfunc.second.cmdname;
+      helpline+="\n  ";
       helpline+=cmdfunc.second.description;
-      helpline+='\n';
-      commonserverlibifaceptr->serverlib_netputs(helpline.c_str(), clientsock, NULL);
+      helpline+="\n";
+      cmdserverlib_netputs(helpline.c_str(), clientsock, NULL);
     }
   } else {
     try {
       //Use the parameter (assume a single space for now) as a command to display help for
       std::string name=thestring.substr(5);
       std::string nametmp=name;
-      nametmp+='\n';
-      commonserverlibifaceptr->serverlib_netputs(nametmp.c_str(), clientsock, NULL);
-      std::string description=cmdfuncs.at(thestring.substr(5)).description;
+      nametmp+="\n";
+
+      cmdserver_cmdfunc_t cmdfunc=cmdfuncs.at(thestring.substr(5));
+      std::string usage=cmdfunc.usage;
+      std::string description=cmdfunc.description;
+      std::string longdesc=cmdfunc.longdesc;
+
       thestring="Command: ";
       thestring+=name;
-      thestring+="\nDescription: ";
-      thestring+=description;
-      thestring+='\n';
-      commonserverlibifaceptr->serverlib_netputs(thestring.c_str(), clientsock, NULL);
+      thestring+="\n";
+      if (usage!="") {
+        thestring="Usage: ";
+        thestring+=usage;
+        thestring+="\n       ";
+      }
+      if (longdesc!="") {
+        thestring+=longdesc;
+      } else {
+        thestring+="Description: ";
+        thestring+=description;
+      }
+      thestring+="\n";
+      cmdserverlib_netputs(thestring.c_str(), clientsock, NULL);
     } catch (std::out_of_range& e) {
       //Do nothing as the command doesn't exist
     }
@@ -310,6 +330,111 @@ static void cmdserverlib_cleanupClientThread(void *val) {
   pthread_mutex_unlock(&cmdserverlibmutex);
 }
 
+/*
+  Description: Read a string over a network socket and process telnet commands
+  NOTE: Only some telnet commands are handled at the moment and they are all currently ignored
+  Reads at most one less than size characters and adds '\0' after the last character
+*/
+static char *cmdserverlib_netgets_with_telnet(char *s, int size, int sock, char *netgetc_buffer, size_t netgetc_bufsize, int *netgetc_pos, int *netgetc_received, int (* const getAbortEarlyfuncptr)(void), int quitpipefd) {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=(commonserverlib_ifaceptrs_ver_1_t *) cmdserverlib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
+  int c=EOF;
+  int pos;
+  int in_telnet_command=0;
+  int telnet_command_byte=-1;
+  int telnet_data_byte=-1, num_telnet_data_bytes=0;
+  int cur_telnet_data_byte=0;
+
+  pos=0;
+
+  while (pos < (size-1)) {
+    c=commonserverlibifaceptr->serverlib_netgetc_with_quitpipe(sock, netgetc_buffer, netgetc_bufsize, netgetc_pos, netgetc_received, getAbortEarlyfuncptr, quitpipefd);
+    if (c == EOF || c=='\n') {
+      break;
+    }
+    if (!in_telnet_command && c==IAC) {
+      //Start of a telnet command
+      in_telnet_command=1;
+      telnet_command_byte=-1;
+      cur_telnet_data_byte=num_telnet_data_bytes=0;
+      continue;
+    }
+    if (in_telnet_command) {
+      if (telnet_command_byte==-1) {
+        telnet_command_byte=c;
+
+        //Always interpret as 1 for now which is usually okay for Putty client
+        num_telnet_data_bytes=1;
+      } else {
+        ++cur_telnet_data_byte;
+        if (cur_telnet_data_byte>=num_telnet_data_bytes) {
+          in_telnet_command=0;
+        }
+      }
+      continue;
+    }
+    s[pos]=c;
+    pos++;
+  }
+  //Either EOF or size exceeded
+  if (c=='\n') {
+    s[pos]=c;
+    pos++;
+  }
+  s[pos]='\0';
+
+  if (pos == 0) {
+    //EOF occurred
+    return NULL;
+  } else {
+    return s;
+  }
+}
+
+//Special netputs function for cmd server
+//Converts any form of end-of-line into \r\n and turns off 8th bit to be more complient with Telnet protocol
+static int cmdserverlib_netputs(const char *s, int sock, int (* const getAbortEarlyfuncptr)(void)) {
+  size_t len=strlen(s);
+  int sent, pos;
+
+  //Convert the string into telnet form
+  std::string sendstr="";
+  pos=0;
+  while (len > 0) {
+    if ( *(s+pos)=='\r') {
+      //Ignore \r
+      ++pos;
+      --len;
+      continue;
+    } else if ( *(s+pos)=='\n') {
+      //Convert \n into \r\n
+      sendstr+="\r\n";
+    } else {
+      sendstr+=*(s+pos) & 0x7f;
+    }
+    ++pos;
+    --len;
+  }
+  //Send the converted string
+  len=strlen(sendstr.c_str());
+  pos=0;
+  while (len > 0) {
+    if (getAbortEarlyfuncptr) {
+      if (getAbortEarlyfuncptr()) {
+        return -2;
+      }
+    }
+    sent = send(sock, (sendstr.c_str()) + pos, len, MSG_NOSIGNAL);
+    if (sent < 0) {
+      //An error occurred while sending
+      return -1;
+    }
+    pos+=sent;
+    len-=sent;
+  }
+  return 0;
+}
+
 //NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
 static void *cmdserverlib_networkClientLoop(void *thread_val) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
@@ -330,7 +455,7 @@ static void *cmdserverlib_networkClientLoop(void *thread_val) {
     cmdserverlib_cleanupClientThread((void *) threadslot);
     return (void *) 1;
   }
-  commonserverlibifaceptr->serverlib_netputs("\n"
+  cmdserverlib_netputs("\n"
           "# -------------------------\n"
           "# Watch Inputs Command Tool\n"
           "# Type quit to exit\n"
@@ -345,21 +470,37 @@ static void *cmdserverlib_networkClientLoop(void *thread_val) {
   }
   //Command Loop
   while (!cmdserverlib_getneedtoquit()) {
-    if (commonserverlibifaceptr->serverlib_netgets(dataptr->buffer, BUFFER_SIZE, dataptr->clientsock, dataptr->netgetc_buffer, SMALLBUF_SIZE*sizeof(char), &netgetc_pos, &netgetc_received, cmdserverlib_getneedtoquit) != NULL) {
+    if (cmdserverlib_netgets_with_telnet(dataptr->buffer, BUFFER_SIZE, dataptr->clientsock, dataptr->netgetc_buffer, SMALLBUF_SIZE*sizeof(char), &netgetc_pos, &netgetc_received, cmdserverlib_getneedtoquit, -1) != NULL) {
       len=strlen(dataptr->buffer);
 
+      //Remove trailing whitespace at the end of the command
+      while (len>0) {
+        if (dataptr->buffer[len-1]==' ' || dataptr->buffer[len-1]=='\t' || dataptr->buffer[len-1]=='\n' || dataptr->buffer[len-1]=='\r') {
+          dataptr->buffer[len-1]=0;
+          --len;
+        } else {
+          //No more whitespace
+          break;
+        }
+      }
+      if (len==0) {
+        //This line only had whitespace
+        continue;
+      }
+      //Recalculate the length
+      len=strlen(dataptr->buffer);
       if (strncmp(dataptr->buffer, "quit", 4)==0) {
         break;
       } else if (strncmp(dataptr->buffer, "interface version", 17)==0) {
         sprintf(dataptr->buffer, "INTERFACEVERSION=%s\n", INTERFACE_VERSION);
-        commonserverlibifaceptr->serverlib_netputs(dataptr->buffer, dataptr->clientsock, cmdserverlib_getneedtoquit);
+        cmdserverlib_netputs(dataptr->buffer, dataptr->clientsock, cmdserverlib_getneedtoquit);
       } else {
 				listener_result=cmdserverlib_call_cmd_listeners(dataptr->buffer, dataptr->clientsock);
 				if (listener_result==CMDLISTENER_NOTHANDLED) {
-					commonserverlibifaceptr->serverlib_netputs("Unknown Command\n", dataptr->clientsock, cmdserverlib_getneedtoquit);
+					cmdserverlib_netputs("Unknown Command\n", dataptr->clientsock, cmdserverlib_getneedtoquit);
 				}
 				if (listener_result==CMDLISTENER_CMDINVALID) {
-          commonserverlibifaceptr->serverlib_netputs("Command Incorrectly Formatted\n", dataptr->clientsock, cmdserverlib_getneedtoquit);
+          cmdserverlib_netputs("Command Incorrectly Formatted\n", dataptr->clientsock, cmdserverlib_getneedtoquit);
         }
 			}
     } else {
@@ -437,7 +578,7 @@ static void *cmdserverlib_MainServerLoop(void *thread_val) {
       }
     } else {
       debuglibifaceptr->debuglib_printf(1, "%s: The maximum number of connections has been reached\n", __func__);
-      commonserverlibifaceptr->serverlib_netputs("The maximum number of connections has been reached\n", clientsock, cmdserverlib_getneedtoquit);
+      cmdserverlib_netputs("The maximum number of connections has been reached\n", clientsock, cmdserverlib_getneedtoquit);
       commonserverlibifaceptr->serverlib_closeSocket(&clientsock);
     }
   }
@@ -474,7 +615,7 @@ static int cmdserverlib_start(void) {
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
 
   //Register commands
-  cmdserverlib_register_cmd_function("help", "Get help for a command", cmdserverlib_processhelpcommand);
+  cmdserverlib_register_cmd_longdesc("help", "help or help <command>", "Get help for a command", "Get a summary for all commands or\n       Get help for a specific command", cmdserverlib_processhelpcommand);
 
   if (cmdserverlib_thread==0) {
     debuglibifaceptr->debuglib_printf(1, "%s: Starting the Command Server thread\n", __func__);
@@ -565,8 +706,24 @@ static void cmdserverlib_shutdown(void) {
   NOTE: Cleanup will automatically be handled by the cmdserverlib shutdown function
 */
 static int cmdserverlib_register_cmd_function(const char *name, const char *description, cmd_func_ptr_t funcptr) {
+  return cmdserverlib_register_cmd_longdesc(name, nullptr, description, nullptr, funcptr);
+}
+
+/*
+  Register a cmd command with usage info and a long description function
+  Input: name The name of the command
+         usage Info on how to use the command
+           Use NULL or "" for no usage
+         description A short description of the command
+         longdesc A long description of the command (newlines should have 7 spaces after them and be in \r\n format)
+           Use NULL or "" for no long description
+         funcptr A pointer to the function that handles the command
+  Returns: 0 if success or non-zero on error
+  NOTE: Don't need to search for a free slot since this function should only ever be called once at program startup
+  NOTE: Cleanup will automatically be handled by the cmdserverlib shutdown function
+*/
+static int cmdserverlib_register_cmd_longdesc(const char *name, const char *usage, const char *description, const char *longdesc, cmd_func_ptr_t funcptr) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
-  void * *tmpptr;
 
   pthread_mutex_lock(&cmdserverlibmutex);
   if (cmdserverlib_inuse==0) {
@@ -575,7 +732,17 @@ static int cmdserverlib_register_cmd_function(const char *name, const char *desc
   }
   cmdserver_cmdfunc_t cmdfunc;
   cmdfunc.cmdname=name;
+  if (usage) {
+    cmdfunc.usage=usage;
+  } else {
+    cmdfunc.usage="";
+  }
   cmdfunc.description=description;
+  if (longdesc) {
+    cmdfunc.longdesc=longdesc;
+  } else {
+    cmdfunc.longdesc="";
+  }
   cmdfunc.func=funcptr;
 
   cmdfuncs[cmdfunc.cmdname]=cmdfunc;

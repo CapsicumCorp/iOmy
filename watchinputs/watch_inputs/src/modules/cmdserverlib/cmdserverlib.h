@@ -41,7 +41,9 @@ extern "C" {
 //Array of pointers to functions and variables we want to make available to other modules
 //Public interface for cmdserverlib module
 typedef struct {
+  int (*cmdserverlib_netputs)(const char *s, int sock, int (* const getAbortEarlyfuncptr)(void));
   int (*cmdserverlib_register_cmd_function)(const char *name, const char *description, cmd_func_ptr_t funcptr);
+  int (*register_cmd_longdesc)(const char *name, const char *usage, const char *description, const char *longdesc, cmd_func_ptr_t funcptr);
   int (*cmdserverlib_register_cmd_listener)(cmd_func_ptr_t funcptr);
   int (*cmdserverlib_unregister_cmd_listener)(cmd_func_ptr_t funcptr);
 
