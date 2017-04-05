@@ -351,24 +351,23 @@ public class InstallWizard {
                 this.loadPremiseHubOwnerProgress(activity);
             }
         }
-        //--- Start IOMy ---//
-        if (title == Titles.finalSetupTitle || (this.installDemoData && title == Titles.webserverServerSetupTitle)) {
-            writeWatchInputsFile();
+        if (title.equals(Titles.finalSetupTitle) && Settings.getRunFirstRunWizard(activity)) {
+            // Finished install wizard
+            if (!this.installDemoData) {
+                writeWatchInputsFile();
+            }
             // Disable first run wizard
             Settings.setRunFirstRunWizard(activity, false);
-            //Settings.setDemoModeEnabled(activity, this.getInstallDemoData());
-
-            // Load main screen
-            if (this.installDemoData == true) {
+        }
+        if (!Settings.getRunFirstRunWizard(activity)) {
+            // Start IOMy after first run wizard is complete
+            if (this.installDemoData && title.equals(Titles.webserverServerSetupTitle)) {
+                // Show Demo Mode Warning before main screen if in demo mode
                 this.summonDemoWarning(activity);
             } else {
+                // Load main screen
                 this.loadIOMy(activity);
             }
-
-            //--- Start IOMy after showing the Demo Mode Warning ---//
-        } else if (title == Titles.demoNoticeTitle) {
-            this.loadIOMy(activity);
-
         }
     }
 
