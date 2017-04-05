@@ -35,6 +35,7 @@ typedef struct {
   int (* const serverlib_netgetc)(int sock, char *buffer, size_t bufsize, int *pos, int *received, int (* const getAbortEarlyfuncptr)(void));
   char *(* const serverlib_netgets)(char *s, int size, int sock, char *netgetc_buffer, size_t netgetc_bufsize, int *netgetc_pos, int *netgetc_received, int (* const getAbortEarlyfuncptr)(void));
   int (* const serverlib_netputs)(const char *s, int sock, int (* const getAbortEarlyfuncptr)(void));
+  int (* const serverlib_netnput)(const char *s, size_t len, int sock, int (* const getAbortEarlyfuncptr)(void));
   void (* const serverlib_closeSocket)(int *socket);
   int (* const serverlib_setupTCPListenSocket)(in_addr_t hostip, uint16_t port, int (* const getAbortEarlyfuncptr)(void));
   int (* const serverlib_waitForConnection)(int sock, int (* const getAbortEarlyfuncptr)(void));
