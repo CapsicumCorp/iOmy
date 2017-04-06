@@ -75,9 +75,9 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
                 me.wPremiseCBox.attachChange(
                     function () {
                         // Refresh the room select box.
-                        me.wRoomCBoxHolder.destroyItems();
-                        me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), this.getSelectedKey()).addStyleClass("width100Percent SettingsDropDownInput");
-                        me.wRoomCBox.setSelectedItem(null);
+                        me.wRoomCBox.destroy();
+                        me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_"+me.wPremiseCBox.getSelectedKey()).addStyleClass("width100Percent SettingsDropDownInput");
+                        me.wRoomCBox.setSelectedKey(null);
                         me.wRoomCBoxHolder.addItem(me.wRoomCBox);
                     }
                 );
@@ -125,23 +125,25 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
                                             data : {"Mode" : "EditName", "Id" : iID, "Name" : sText},
                                             onSuccess : function () {
                                                 //-- REFRESH LINK LIST --//
-                                                IOMy.common.ReloadVariableLinkList();
-                                                
-                                                IOMy.common.showSuccess("Update successful.", "Success", 
-                                                function () {
-                                                    IOMy.devices.AssignLinkToRoom(iID, me.wRoomCBox.getSelectedKey(), oLink.LinkTypeName,
+                                                IOMy.common.ReloadVariableLinkList(
+                                                    function () {
+                                                        IOMy.common.showSuccess("Update successful.", "Success", 
                                                         function () {
-                                                            
-                                                            // Take the user to the link list settings page.
-                                                            IOMy.common.NavigationChangePage("pSettingsDeviceList", {}, true);
-                                                            
-                                                        }
-                                                    );
-                                                }, "UpdateMessageBox");
+                                                            IOMy.devices.AssignLinkToRoom(iID, me.wRoomCBox.getSelectedKey(), oLink.LinkTypeName,
+                                                                function () {
+
+                                                                    // Take the user to the link list settings page.
+                                                                    IOMy.common.NavigationChangePage("pSettingsDeviceList", {}, true);
+
+                                                                }
+                                                            );
+                                                        }, "UpdateMessageBox");
+                                                    }
+                                                );
                                             },
-                                            onFail : function () {
-                                                IOMy.common.showError("Update failed.", "Error");
-                                                
+                                            onFail : function (err) {
+                                                //IOMy.common.showError("Update failed.", "Error");
+                                                IOMy.common.showError(JSON.stringify(err.responseText), "Error");
                                                 // Finish the request by enabling the edit button
                                                 this.onComplete();
                                             },

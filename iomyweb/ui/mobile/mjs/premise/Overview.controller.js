@@ -170,7 +170,7 @@ sap.ui.controller("mjs.premise.Overview", {
             //==============================================//
             // If there are rooms available, show them
             //==============================================//
-            //if (IOMy.functions.getNumberOfRoomsInPremise(me.byId("premiseBox").getSelectedKey()) !== 0) {
+            if (IOMy.functions.getNumberOfRoomsInPremise(me.byId("premiseBox").getSelectedKey()) !== 0) {
                 //-- Add side borders if the page is wide enough --//
                 me.wRoomListBox.addStyleClass("TableSideBorders");
                 
@@ -408,21 +408,13 @@ sap.ui.controller("mjs.premise.Overview", {
                         });
                     }
                 });
-//            } else {
-//                me.wRoomListBox.addItem(
-//                    new sap.m.VBox({
-//                        layoutData : new sap.m.FlexItemData({
-//                            growFactor : 1
-//                        }),
-//                        items : [
-//                            new sap.m.Text({
-//                                textAlign : "Center",
-//                                text : "You have no rooms visible in "+me.byId("premiseBox").getSelectedItem().getText()
-//                            }).addStyleClass("FullPageMessage")
-//                        ]
-//                    })
-//                );
-//            }
+            } else {
+                me.wRoomListBox.addItem(
+                    new sap.m.MessageStrip({
+                        text : "You have no rooms visible in "+me.byId("premiseBox").getSelectedItem().getText()+" If you have permission, you can create a new room using the action menu at the top-right corner of the screen."
+                    }).addStyleClass("iOmyMessageInfoStrip")
+                );
+            }
             
             idCount = 0;
 

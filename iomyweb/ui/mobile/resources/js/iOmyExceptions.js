@@ -66,7 +66,7 @@ function InvalidPremisePermissionException(message) {
 }
 
 //----------------------------------------------------------------------------//
-// Missing arguments
+// Missing and invalid arguments
 //----------------------------------------------------------------------------//
 function MissingArgumentException(message) {
     IOmyException.call(this, message);
@@ -84,6 +84,11 @@ function MissingSettingsMapException(message) {
     
     MissingArgumentException.call(this, message);
     this.name       = "MissingSettingsMapException";
+}
+
+function IllegalArgumentException(message) {
+    IOmyException.call(this, message);
+    this.name       = "IllegalArgumentException";
 }
 
 //----------------------------------------------------------------------------//

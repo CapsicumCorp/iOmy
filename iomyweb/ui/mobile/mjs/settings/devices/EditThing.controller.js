@@ -242,11 +242,11 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                                             jQuery.sap.log.error("Error refreshing the Item List: "+e.message);
                                             this.onComplete();
                                         }
-                                        
 
                                     },
-                                    onFail : function () {
-                                        IOMy.common.showError("Update failed.", "Error");
+                                    onFail : function (err) {
+                                        //IOMy.common.showError("Update failed.", "Error");
+                                        IOMy.common.showError(JSON.stringify(err.responseText), "Error");
                                         
                                         // Finish the request by enabling the edit button
                                         this.onComplete();

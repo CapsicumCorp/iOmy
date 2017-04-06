@@ -301,7 +301,7 @@ $.extend(IOMy.apiphp,{
 									
 									//-- Trigger the "onFail" event --//
 									if(aConfig.onFail) {
-										aConfig.onFail();
+										aConfig.onFail(Response);
 									}
 									
 								} else {

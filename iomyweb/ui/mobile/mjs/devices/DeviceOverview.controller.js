@@ -319,79 +319,87 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
             items: []
         }).addStyleClass("");
 		
-		$.each( oController.aUIGroupingData, function( sIndex, aGrouping ) {
-			//-- Reset the Row number --//
-			iRowNumber = 0;
-			iUniqueId++;
-			//----------------------------------------//
-			//-- CREATE THE GROUPING CONTAINER		--//
-			//----------------------------------------//
-			
-			//-- Create Unique Id --//
-			var sTempName = "GC_"+iUniqueId+"_"+iRowNumber;
-			oController.aElementsToDestroy.push( sTempName );
-			
-			
-            //-- Create Container --//
-            var oVBox = new sap.m.VBox( oController.createId(sTempName), {
-                items: []
-            }).addStyleClass("");
-			
-			//----------------------------------------//
-			//-- GROUPING HEADING					--//
-			//----------------------------------------//
-			
-			//-- Create Unique Id --//
-			sTempName = "GH_"+iUniqueId+"_"+iRowNumber;
-			oController.aElementsToDestroy.push( sTempName );
-			
-            var oHeading = new sap.m.HBox({
-                items : [
-                    // Group Heading (Item type)
-                    new sap.m.VBox({
-                        items : [
-                            new sap.m.Label( oController.createId(sTempName), {
-                                text:		aGrouping.Name
-                            }).addStyleClass("width100Percent")
-                        ]
-                    }).addStyleClass("MarLeft6px TextOverflowEllipsis")
-                ]
-            }).addStyleClass("ConsistentMenuHeader BorderBottom");
-			
-			oVBox.addItem(oHeading);
-			
-			//----------------------------------------//
-			//-- FOREACH DEVICE IN GROUPING			--//
-			//----------------------------------------//
-			
-			//-- 3.1.3 - Draw the UI for each Device --//
-			$.each( aGrouping.Devices, function( sIndex2, aDevice ) {
-				
-				//-- Create the Prefix --//
-				var sPrefix = aGrouping.Prefix+"_"+aDevice.DeviceId;
-				
-				//--  --//
-				var oRowObject = IOMy.devices.GetCommonUIForDeviceOverview( sPrefix, oController, aDevice );
-				
-				if( oRowObject!==null ) {
-                    oRowObject.addStyleClass("DeviceOverview-ItemContainerLight");
-					
-					//-- Increment the Row Number --//
-					iRowNumber++;
-					
-					//-- Push the UI to the VBox Container --//
-					oVBox.addItem( oRowObject );
-					
-					//-- Add the Object Names to the list of items to cleanup --//
-					var aTemp1 = oController.aElementsToDestroy;
-					var aTemp2 = IOMy.devices.GetObjectIdList( sPrefix, oController, aDevice );
-					oController.aElementsToDestroy = aTemp1.concat(aTemp2);
-				}
-			});
-			
-			oVertBox.addItem(oVBox);
-            
-		}); //-- END FOREACH LOOP --//
+        if (JSON.stringify(oController.aUIGroupingData) !== "{}") {
+            $.each( oController.aUIGroupingData, function( sIndex, aGrouping ) {
+                //-- Reset the Row number --//
+                iRowNumber = 0;
+                iUniqueId++;
+                //----------------------------------------//
+                //-- CREATE THE GROUPING CONTAINER		--//
+                //----------------------------------------//
+
+                //-- Create Unique Id --//
+                var sTempName = "GC_"+iUniqueId+"_"+iRowNumber;
+                oController.aElementsToDestroy.push( sTempName );
+
+
+                //-- Create Container --//
+                var oVBox = new sap.m.VBox( oController.createId(sTempName), {
+                    items: []
+                }).addStyleClass("");
+
+                //----------------------------------------//
+                //-- GROUPING HEADING					--//
+                //----------------------------------------//
+
+                //-- Create Unique Id --//
+                sTempName = "GH_"+iUniqueId+"_"+iRowNumber;
+                oController.aElementsToDestroy.push( sTempName );
+
+                var oHeading = new sap.m.HBox({
+                    items : [
+                        // Group Heading (Item type)
+                        new sap.m.VBox({
+                            items : [
+                                new sap.m.Label( oController.createId(sTempName), {
+                                    text:		aGrouping.Name
+                                }).addStyleClass("width100Percent")
+                            ]
+                        }).addStyleClass("MarLeft6px TextOverflowEllipsis")
+                    ]
+                }).addStyleClass("ConsistentMenuHeader BorderBottom");
+
+                oVBox.addItem(oHeading);
+
+                //----------------------------------------//
+                //-- FOREACH DEVICE IN GROUPING			--//
+                //----------------------------------------//
+
+                //-- 3.1.3 - Draw the UI for each Device --//
+                $.each( aGrouping.Devices, function( sIndex2, aDevice ) {
+
+                    //-- Create the Prefix --//
+                    var sPrefix = aGrouping.Prefix+"_"+aDevice.DeviceId;
+
+                    //--  --//
+                    var oRowObject = IOMy.devices.GetCommonUIForDeviceOverview( sPrefix, oController, aDevice );
+
+                    if( oRowObject!==null ) {
+                        oRowObject.addStyleClass("DeviceOverview-ItemContainerLight");
+
+                        //-- Increment the Row Number --//
+                        iRowNumber++;
+
+                        //-- Push the UI to the VBox Container --//
+                        oVBox.addItem( oRowObject );
+
+                        //-- Add the Object Names to the list of items to cleanup --//
+                        var aTemp1 = oController.aElementsToDestroy;
+                        var aTemp2 = IOMy.devices.GetObjectIdList( sPrefix, oController, aDevice );
+                        oController.aElementsToDestroy = aTemp1.concat(aTemp2);
+                    }
+                });
+
+                oVertBox.addItem(oVBox);
+
+            }); //-- END FOREACH LOOP --//
+        } else {
+            oVertBox.addItem(
+                new sap.m.MessageStrip({
+                    text : "You have no devices in iOmy. To add devices, you will need to add a link first.\n\nGo to the app menu at the top-left corner and press Links and Items and use the action menu and find \"Add Link\"."
+                }).addStyleClass("iOmyMessageInfoStrip")
+            );
+        }
 		
         //-- Main Page Body --//
         if (oController.byId("Panel") !== undefined) {

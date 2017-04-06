@@ -42,7 +42,7 @@ $.extend(IOMy.functions,{
             if (sIndex !== null && sIndex !== undefined && aPremise !== null && aPremise !== undefined) {
                 $.each(aPremise, function (sJndex, aRoom) {
                     if (sJndex !== "Unassigned" && sJndex !== null && sJndex !== undefined && aRoom !== null && aRoom !== undefined) {
-                        if (aRoom.PremiseId === iPremiseId) {
+                        if (aRoom.PremiseId == iPremiseId) {
                             iNum++;
                         }
                     }

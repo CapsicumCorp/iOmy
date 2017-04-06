@@ -170,7 +170,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	margin: 10px;
 }
 
-
-.FullPageMessage {
-    font-size: 1.5rem;
+.iOmyMessageInfoStrip {
+    background-color: #f9f9f9;
+    border-color: #7c7c7c;
 }

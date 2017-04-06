@@ -192,7 +192,8 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                                 "Id": me.oThing.Id
                             },
                             onFail : function(response) {
-                                IOMy.common.showError("Check to make sure that the bridge and lamp are connected and that you have permission to turn it on or off in this room.", "Error Changing Device Status");
+                                //IOMy.common.showError("Check to make sure that the bridge and lamp are connected and that you have permission to turn it on or off in this room.", "Error Changing Device Status");
+                                IOMy.common.showError(response.responseText, "Error Changing Device Status");
                             },
                             onSuccess : function( sExpectedDataType, aAjaxData ) {
                                 var bEnabled;

@@ -130,7 +130,7 @@ $.extend(IOMy.devices,{
             
             onFail : function (error) {
                 jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
-                IOMy.common.showError("Error assigning "+sLinkType+":\n\n"+error.responseText);
+                IOMy.common.showError("Error assigning "+sLinkType+":\n\n"+error.responseText, "Cannot move to new room");
             }
         });
     },
@@ -149,9 +149,9 @@ $.extend(IOMy.devices,{
         var mInfo                   = {}; // MAP: Contains the error status and any error messages.
         var oField                  = oScope.byId(me.uiIDs.sRoomCBoxID+"Field");
         
-        //-------------------------------------------------\\
+        //-------------------------------------------------//
         // Is the hub a proper hub (does it have an ID)
-        //-------------------------------------------------\\
+        //-------------------------------------------------//
         try {
             if (oField.getSelectedKey() === "") {
                 bError = true;

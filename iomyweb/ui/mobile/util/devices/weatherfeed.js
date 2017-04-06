@@ -114,6 +114,68 @@ $.extend(IOMy.devices.weatherfeed,{
         return sIcon;
     },
     
+    getWindDirection : function (fCardinality) {
+        var mInfo = {};
+        
+        if (fCardinality === undefined) {
+            throw new MissingArgumentException("Wind direction cardinal must be given and be between 0 and 360.");
+            
+        } else if (fCardinality < 0 || fCardinality > 360) {
+            throw new IllegalArgumentException("Wind direction cardinal must be between 0 and 360.")
+        }
+        
+        if( (fCardinality > 348.75 && fCardinality <= 360.0) || (fCardinality >= 0 && fCardinality <= 11.25) ) {
+            mInfo.direction = "N";
+            
+        } else if (fCardinality > 11.25 && fCardinality <= 33.75 ) {
+            mInfo.direction = "NNE";
+            
+        } else if (fCardinality > 33.75 && fCardinality <= 56.25) {
+            mInfo.direction = "NE";
+            
+        } else if (fCardinality > 56.25 && fCardinality <= 78.75) {
+            mInfo.direction = "ENE";
+            
+        } else if (fCardinality > 78.75 && fCardinality <= 101.25) {
+            mInfo.direction = "E";
+            
+        } else if (fCardinality > 101.25 && fCardinality <= 123.75) {
+            mInfo.direction = "ESE";
+            
+        } else if (fCardinality > 123.75 && fCardinality <= 146.25) {
+            mInfo.direction = "SE";
+            
+        } else if (fCardinality > 146.25 && fCardinality <= 168.75) {
+            mInfo.direction = "SSE";
+            
+        } else if (fCardinality > 168.75 && fCardinality <= 191.25) {
+            mInfo.direction = "S";
+            
+        } else if (fCardinality > 191.25 && fCardinality <= 213.75) {
+            mInfo.direction = "SSW";
+            
+        } else if (fCardinality > 213.75 && fCardinality <= 236.25) {
+            mInfo.direction = "SW";
+            
+        } else if (fCardinality > 236.25 && fCardinality <= 258.75) {
+            mInfo.direction = "WSW";
+            
+        } else if (fCardinality > 258.75 && fCardinality <= 281.25) {
+            mInfo.direction = "W";
+            
+        } else if (fCardinality > 281.25 && fCardinality <= 303.75) {
+            mInfo.direction = "WNW";
+            
+        } else if (fCardinality > 303.75 && fCardinality <= 326.25) {
+            mInfo.direction = "NW";
+            
+        } else if (fCardinality > 326.25 && fCardinality <= 348.75) {
+            mInfo.direction = "NNW";
+        }
+        
+        return mInfo;
+    },
+    
     CreateLinkForm : function (oScope, oFormBox, aElementsToEnableOnSuccess, aElementsToEnableOnFailure) {
         //===============================================//
         // DECLARE VARIABLES
@@ -392,6 +454,7 @@ $.extend(IOMy.devices.weatherfeed,{
                     var sunset          = data.Data.Sunset;
                     
                     var dateSunrise, dateSunset;
+                    var mWindDirectionInfo = me.getWindDirection( parseFloat(windDirection.Value.toString()) );
                     
                     //---------------------------------------------------------//
                     // Temperature
@@ -480,7 +543,7 @@ $.extend(IOMy.devices.weatherfeed,{
                     //---------------------------------------------------------//
                     try {
                         if (oScope.byId(sPrefix + me.uiIDs.sWindDirectionDisplayID) !== undefined) {
-                            oScope.byId(sPrefix + me.uiIDs.sWindDirectionDisplayID).setText( windDirection.Value.toString() + windDirection.UomName);
+                            oScope.byId(sPrefix + me.uiIDs.sWindDirectionDisplayID).setText( mWindDirectionInfo.direction );
                         }
                     } catch (e) {
                         jQuery.sap.log.error(e.message);
