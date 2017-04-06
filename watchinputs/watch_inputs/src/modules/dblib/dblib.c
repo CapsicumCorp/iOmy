@@ -529,13 +529,25 @@ static int dblib_getschemaversion(void) {
 */
 int dblib_begin(void) {
   mysqllib_ifaceptrs_ver_1_t *mysqllibifaceptr=dblib_deps[MYSQLLIB_DEPIDX].ifaceptr;
-  int ldbtype;
+  int ldbtype, result;
 
   PTHREAD_LOCK(&dblibmutex);
   ldbtype=dblib_dbtype;
   PTHREAD_UNLOCK(&dblibmutex);
   if (ldbtype==DBLIB_DBTYPE_MYSQL) {
-    return mysqllibifaceptr->begin();
+    result=mysqllibifaceptr->begin();
+
+    if (result<0) {
+      if (mysqllibifaceptr->is_initialised()) {
+        //If begin fails, MySQL might have a connection issue
+        //Disconnect the connection so we retry connecting
+        _dblib_unloaddatabase();
+
+        //Wakeup the main thread to load the database
+        sem_post(&dblib_mainthreadsleepsem);
+      }
+    }
+    return result;
   }
   return -1;
 }

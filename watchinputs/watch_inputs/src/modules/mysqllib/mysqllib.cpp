@@ -2,7 +2,7 @@
 Title: MySQL Library for Watch Inputs
 Author: Matthew Stapleton (Capsicum Corporation) <matthew@capsicumcorp.com>
 Description: This module provides support for mysql database.
-Copyright: Capsicum Corporation 2010-2016
+Copyright: Capsicum Corporation 2010-2017
 
 This file is part of Watch Inputs which is part of the iOmy project.
 
@@ -21,7 +21,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-//NOTE: Currently only supports Android
 //NOTE: Some versions of Android may be limited to 512 local references so we need to delete them fairly rapidly
 
 #include <inttypes.h>
@@ -33,6 +32,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <unistd.h>
 #include <pthread.h>
 #include <semaphore.h>
+#ifndef __ANDROID__
+#include <mysql.h>
+#endif
 #ifdef __ANDROID__
 #include <jni.h>
 #endif
@@ -130,6 +132,11 @@ static int dbloaded = 0;
 
 static int dbschemaver=0; //We detect the version based on which prepared statements succeed
 
+#ifndef __ANDROID__
+static MYSQL *conn=nullptr;
+static MYSQL_STMT *preparedstmt[20];
+#endif
+
 #ifdef DEBUG
 static pthread_mutexattr_t errorcheckmutexattr;
 static pthread_mutex_t thislibmutex;
@@ -182,14 +189,16 @@ int mysqllib_getlinkpk(uint64_t addr, int64_t *linkpk);
 int mysqllib_getlinkcommpk(uint64_t addr, int64_t *commpk);
 void mysqllib_freeuniqueid(void *uniqueid);
 
+//C Exports
+extern "C" {
+
 extern moduleinfo_ver_generic_t *mysqllib_getmoduleinfo();
 
 //JNI Exports
 #ifdef __ANDROID__
-extern "C" {
 JNIEXPORT jlong JNICALL Java_com_capsicumcorp_iomy_libraries_watchinputs_MysqlLib_jnigetmodulesinfo( JNIEnv* UNUSED(env), jobject UNUSED(obj));
-}
 #endif
+}
 
 //Module Interface Definitions
 #define DEBUGLIB_DEPIDX 0
@@ -309,8 +318,8 @@ int mysqllib_init(void) {
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID init_methodid;
+  int wasdetached=0;
 #endif
-  int result, wasdetached=0;
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__, mysqllib_init);
   ++libinuse;
@@ -326,7 +335,7 @@ int mysqllib_init(void) {
     return -1;
   }
   init_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "init", "()I");
-  result=env->CallStaticIntMethod(mysqllib_mysql_class, init_methodid);
+  env->CallStaticIntMethod(mysqllib_mysql_class, init_methodid);
   JNIDetachThread(wasdetached);
 #endif
 #ifdef DEBUG
@@ -351,8 +360,8 @@ void mysqllib_shutdown(void) {
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID shutdown_methodid;
-#endif
   int wasdetached=0;
+#endif
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
   if (libinuse==0) {
@@ -401,12 +410,13 @@ int mysqllib_loaddatabase(const char *hostname, const char *dbname, const char *
   JNIEnv *env;
   jmethodID loaddatabase_methodid, prepareStmt_methodid;
   jstring jtmpstr=NULL, jhostnamestr=NULL, jdbnamestr=NULL, jusernamestr=NULL, jpasswordstr=NULL;
+  int wasdetached=0;
 #endif
-  int result, wasdetached=0, i;
+  int result, i;
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
-#ifdef __ANDROID__
   PTHREAD_LOCK(&thislibmutex);
+#ifdef __ANDROID__
   if (dbloaded) {
     //Database already loaded
     PTHREAD_UNLOCK(&thislibmutex);
@@ -431,7 +441,7 @@ int mysqllib_loaddatabase(const char *hostname, const char *dbname, const char *
   if (!result) {
     PTHREAD_UNLOCK(&thislibmutex);
     JNIDetachThread(wasdetached);
-    debuglibifaceptr->debuglib_printf(1, "Exiting %s, database hostname: %s failed to load\n", __func__, hostname);
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s, database hostname: %s failed to connect\n", __func__, hostname);
     return -2;
   }
   //Prepare the SQL statements
@@ -460,7 +470,6 @@ int mysqllib_loaddatabase(const char *hostname, const char *dbname, const char *
 
   PTHREAD_UNLOCK(&thislibmutex);
 #else
-  PTHREAD_LOCK(&thislibmutex);
   if (dbloaded) {
     //Database already loaded
     PTHREAD_UNLOCK(&thislibmutex);
@@ -468,7 +477,51 @@ int mysqllib_loaddatabase(const char *hostname, const char *dbname, const char *
     debuglibifaceptr->debuglib_printf(1, "Exiting %s, database file already loaded\n", __func__);
     return 0;
   }
+  if (!conn) {
+    conn = mysql_init(nullptr);
+  }
+  //Connect to database
+  if (!mysql_real_connect(conn, hostname,
+         username, password, dbname, 0, nullptr, 0)) {
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s, database hostname: %s failed to connect\n", __func__, hostname, mysql_error(conn));
+
+    mysql_close(conn);
+    conn=nullptr;
+    PTHREAD_UNLOCK(&thislibmutex);
+    return -2;
+  }
+  debuglibifaceptr->debuglib_printf(1, "%s, Successfully connected to MySQL database: %s at host: %s\n", __func__, dbname, hostname);
+
+  //Prepare the SQL statements
+  dbschemaver=0;
+
+  for (i=0; i<num_stmts; ++i) {
+    preparedstmt[i]=mysql_stmt_init(conn);
+    if (!preparedstmt[i]) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to prepare SQL statement: \"%s\", result=Out of Memory\n", __func__, mysqllib_stmts[i]);
+      continue;
+    }
+    result=mysql_stmt_prepare(preparedstmt[i], mysqllib_stmts[i], strlen(mysqllib_stmts[i]));
+    if (result) {
+      //Can't prepare the statement but continue to load since it might just be a query for an older or newer database
+      debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to prepare SQL statement: \"%s\", result=%s\n", __func__, mysqllib_stmts[i], mysql_error(conn));
+      mysql_stmt_close(preparedstmt[i]);
+      preparedstmt[i]=nullptr;
+    } else {
+      //Detect schema version using the index to the prepare statement that worked
+      switch (i) {
+        case 0:
+          dbschemaver=1;
+          break;
+      }
+    }
+  }
+  debuglibifaceptr->debuglib_printf(1, "%s: Detected db schema version: %d\n", __func__, dbschemaver);
+  dbloaded=1;
+
 #endif
+  PTHREAD_UNLOCK(&thislibmutex);
+
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 
   return 0;
@@ -482,8 +535,9 @@ int mysqllib_unloaddatabase(void) {
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID unloaddatabase_methodid, unprepareStmt_methodid;
+  int wasdetached=0;
 #endif
-  int i, result, wasdetached=0;
+  int i, result;
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
 
@@ -505,13 +559,28 @@ int mysqllib_unloaddatabase(void) {
       result=env->CallStaticIntMethod(mysqllib_mysql_class, unprepareStmt_methodid, i);
       if (!result) {
         //Can't unprepare the statements but continue to load since it might just be a query for an older or newer database
-        debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to unload prepared statement: %s\n", __func__, mysqllib_stmts[i]);
+        debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to unload prepared statement: \"%s\", result=%s\n", __func__, mysqllib_stmts[i], result);
       }
     }
     result=env->CallStaticIntMethod(mysqllib_mysql_class, unloaddatabase_methodid);
     if (!result) {
       debuglibifaceptr->debuglib_printf(1, "%s, Failed to unload database\n", __func__);
     }
+#else
+    //Unload prepared SQL statements
+    for (i=0; i<num_stmts; ++i) {
+      if (preparedstmt[i]) {
+        result=mysql_stmt_close(preparedstmt[i]);
+        if (result) {
+          //Can't unprepare the statements but continue to unload since it might just be a query for an older or newer database
+          debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to unload prepared statement: \"%s\", result=\n", __func__, mysqllib_stmts[i], mysql_error(conn));
+        }
+        preparedstmt[i]=nullptr;
+      }
+    }
+    //Close the connection
+    mysql_close(conn);
+    conn=nullptr;
 #endif
     PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
     dbloaded=0;
@@ -557,20 +626,17 @@ int mysqllib_getschemaversion(void) {
   return result;
 }
 
-
 /*
   Begin a transaction
-  Returns 0 on success or other value on error
+  Returns 0 on success or negative value on error
 */
 int mysqllib_begin(void) {
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID begin_methodid;
+  int wasdetached=0;
 #endif
-  int locdbloaded, result=0, wasdetached=0;
-
-  //Wait for any previous transactions to finish then start the transaction lock
-  PTHREAD_LOCK(&thislib_transaction_mutex);
+  int locdbloaded, result=0;
 
   //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
   PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
@@ -581,6 +647,8 @@ int mysqllib_begin(void) {
     PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
     return -1;
   }
+  //Wait for any previous transactions to finish then start the transaction lock
+  PTHREAD_LOCK(&thislib_transaction_mutex);
 #ifdef __ANDROID__
   if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
     PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
@@ -591,6 +659,21 @@ int mysqllib_begin(void) {
   result=env->CallStaticIntMethod(mysqllib_mysql_class, begin_methodid);
   JNIDetachThread(wasdetached);
 
+  if (result!=0) {
+    PTHREAD_UNLOCK(&thislib_transaction_mutex);
+  }
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  //Disable auto commit
+  result=mysql_autocommit(conn, 0);
+  if (result!=0) {
+    PTHREAD_UNLOCK(&thislib_transaction_mutex);
+    debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to disable auto commit to begin a transaction, result=%s\n", __func__, mysql_error(conn));
+    result=-2;
+  } else {
+    debuglibifaceptr->debuglib_printf(1, "%s: Beginning transaction success\n", __func__);
+  }
 #endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
 
@@ -605,8 +688,9 @@ int mysqllib_end(void) {
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID end_methodid;
+  int wasdetached=0;
 #endif
-  int locdbloaded, result=0, wasdetached=0;
+  int locdbloaded, result=0;
 
   //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
   PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
@@ -632,8 +716,22 @@ int mysqllib_end(void) {
   }
   JNIDetachThread(wasdetached);
 #else
-  //Transaction is complete
-  PTHREAD_UNLOCK(&thislib_transaction_mutex);
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  result=mysql_commit(conn);
+  if (result==0) {
+    //Transaction is complete
+    PTHREAD_UNLOCK(&thislib_transaction_mutex);
+    debuglibifaceptr->debuglib_printf(1, "%s: Ending transaction success\n", __func__);
+    //Re-enable auto commit
+    int result2=mysql_autocommit(conn, 1);
+    if (result2!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to re-eanble auto commit after ending a transaction, result=%s\n", __func__, mysql_error(conn));
+    }
+  } else {
+    debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to end, result=%s\n", __func__, mysql_error(conn));
+    result=-2;
+  }
 #endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
 
@@ -648,8 +746,9 @@ int mysqllib_rollback(void) {
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID rollback_methodid;
+  int wasdetached=0;
 #endif
-  int locdbloaded, result=0, wasdetached=0;
+  int locdbloaded, result=0;
 
   //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
   PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
@@ -673,8 +772,23 @@ int mysqllib_rollback(void) {
   PTHREAD_UNLOCK(&thislib_transaction_mutex);
   JNIDetachThread(wasdetached);
 #else
-  //Transaction is complete
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  result=mysql_rollback(conn);
+  if (result!=0) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to rollback, result=%s\n", __func__, mysql_error(conn));
+    result=-2;
+  } else {
+    debuglibifaceptr->debuglib_printf(1, "%s: Rolling back transaction success\n", __func__);
+  }
+  //Always release the transaction mutex here as this is currently the last resort for the transaction operation
   PTHREAD_UNLOCK(&thislib_transaction_mutex);
+
+  //Re-enable auto commit
+  int result2=mysql_autocommit(conn, 1);
+  if (result2!=0) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to re-eanble auto commit after rolling back a transaction, result=%s\n", __func__, mysql_error(conn));
+  }
 #endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
 
@@ -691,10 +805,11 @@ void *mysqllib_getport_uniqueid(uint64_t addr, int portid) {
   JNIEnv *env;
   jmethodID getPortUniqueId_methodid;
   jstring jtmpstr;
+  int wasdetached=0;
 #endif
 
   mysqllib_uniqueid_t *uniqueid;
-  int locdbloaded, wasdetached=0;
+  int locdbloaded;
   char thisaddr[17];
   int64_t thisvalue;
 
@@ -721,7 +836,94 @@ void *mysqllib_getport_uniqueid(uint64_t addr, int portid) {
 #ifdef __ANDROID__
   jtmpstr=env->NewStringUTF(thisaddr);
   thisvalue=env->CallStaticLongMethod(mysqllib_mysql_class, getPortUniqueId_methodid, jtmpstr, portid);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GETPORT_UNIQUEID];
+  if (stmt) {
+    int result;
+    size_t addrlen;
+    my_bool is_null=0;
+    MYSQL_BIND bind[2];
+
+    memset(bind, 0, sizeof(bind));
+    addrlen=strlen(thisaddr);
+
+    bind[0].buffer=thisaddr;
+    bind[0].buffer_type=MYSQL_TYPE_STRING;
+    bind[0].buffer_length=addrlen+1;
+    bind[0].is_null=&is_null;
+    bind[0].length=&addrlen;
+
+    bind[1].buffer=&portid;
+    bind[1].buffer_type=MYSQL_TYPE_LONG;
+    bind[1].buffer_length=4;
+    bind[1].is_null=0;
+    bind[1].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for Get Port UniqueID SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return NULL;
+    }
+    //Configure binding for result
+    long long longint_data;
+    unsigned long result_length[1];
+    my_bool result_is_null[1];
+    my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
+
+    memset(result_bind, 0, sizeof(result_bind));
+
+    result_bind[0].buffer_type= MYSQL_TYPE_LONGLONG;
+    result_bind[0].buffer= (char *)&longint_data;
+    result_bind[0].buffer_length=8;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
+
+    //Bind the result buffers
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for Get Port UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return NULL;
+    }
+    //NOTE: If result buffers are already bound, execute will use them so execute needs to be called
+    //  after binding the result buffers
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Get Port UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return NULL;
+    }
+    //Fetch the first row
+    result=mysql_stmt_fetch(stmt);
+    if (result==MYSQL_NO_DATA) {
+      //PK doesn't exist
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return NULL;
+    }
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to fetch result for Get Port UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return NULL;
+    }
+    thisvalue=longint_data;
+
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for Get Port UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return NULL;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   env->DeleteLocalRef(jtmpstr);
   JNIDetachThread(wasdetached);
 #endif
@@ -750,10 +952,11 @@ void *mysqllib_getsensor_uniqueid(uint64_t addr, int portid, const char *sensor_
   JNIEnv *env;
   jmethodID getSensorUniqueId_methodid;
   jstring jtmpstr, jtmpstr2;
+  int wasdetached=0;
 #endif
 
   mysqllib_uniqueid_t *uniqueid;
-  int locdbloaded, wasdetached=0;
+  int locdbloaded;
   char thisaddr[17];
   int64_t thisvalue;
 
@@ -781,7 +984,127 @@ void *mysqllib_getsensor_uniqueid(uint64_t addr, int portid, const char *sensor_
   jtmpstr=env->NewStringUTF(thisaddr);
   jtmpstr2=env->NewStringUTF(sensor_name);
   thisvalue=env->CallStaticLongMethod(mysqllib_mysql_class, getSensorUniqueId_methodid, jtmpstr, portid, jtmpstr2);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GETSENSOR_UNIQUEID];
+  if (stmt) {
+    int result;
+    size_t addrlen, sensor_name_len;
+    char *thissensor_name=NULL;
+    my_bool is_null=0;
+    MYSQL_BIND bind[3];
+
+    thissensor_name=strdup(sensor_name);
+    if (thissensor_name==NULL) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to allocate ram for copy of sensor name for Get Sensor UniqueID SQL Statement\n", __func__);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return NULL;
+    }
+    memset(bind, 0, sizeof(bind));
+    addrlen=strlen(thisaddr);
+    sensor_name_len=strlen(thissensor_name);
+
+    bind[0].buffer=thisaddr;
+    bind[0].buffer_type=MYSQL_TYPE_STRING;
+    bind[0].buffer_length=addrlen+1;
+    bind[0].is_null=&is_null;
+    bind[0].length=&addrlen;
+
+    bind[1].buffer=&portid;
+    bind[1].buffer_type=MYSQL_TYPE_LONG;
+    bind[1].buffer_length=4;
+    bind[1].is_null=0;
+    bind[1].length=0;
+
+    bind[2].buffer=thissensor_name;
+    bind[2].buffer_type=MYSQL_TYPE_STRING;
+    bind[2].buffer_length=sensor_name_len+1;
+    bind[2].is_null=&is_null;
+    bind[2].length=&sensor_name_len;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for Get Sensor UniqueID SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      if (thissensor_name) {
+        free(thissensor_name);
+      }
+      return NULL;
+    }
+    //Configure binding for result
+    long long longint_data;
+    unsigned long result_length[1];
+    my_bool result_is_null[1];
+    my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
+
+    memset(result_bind, 0, sizeof(result_bind));
+
+    result_bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    result_bind[0].buffer= (char *)&longint_data;
+    result_bind[0].buffer_length=8;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
+
+    //Bind the result buffers
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for Get Sensor UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      if (thissensor_name) {
+        free(thissensor_name);
+      }
+      return NULL;
+    }
+    //NOTE: If result buffers are already bound, execute will use them so execute needs to be called
+    //  after binding the result buffers
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Get Sensor UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      if (thissensor_name) {
+        free(thissensor_name);
+      }
+      return NULL;
+    }
+    //Fetch the first row
+    result=mysql_stmt_fetch(stmt);
+    if (result==MYSQL_NO_DATA) {
+      //PK doesn't exist
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      if (thissensor_name) {
+        free(thissensor_name);
+      }
+      return NULL;
+    }
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to fetch result for Get Sensor UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      if (thissensor_name) {
+        free(thissensor_name);
+      }
+      return NULL;
+    }
+    thisvalue=longint_data;
+
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for Get Sensor UniqueID SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      if (thissensor_name) {
+        free(thissensor_name);
+      }
+      return NULL;
+    }
+    free(thissensor_name);
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   env->DeleteLocalRef(jtmpstr);
   env->DeleteLocalRef(jtmpstr2);
   JNIDetachThread(wasdetached);
@@ -811,8 +1134,9 @@ int mysqllib_getioport_state(const void *uniqueid, int32_t *state) {
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID getIOPorts_State_methodid;
+  int wasdetached=0;
 #endif
-  int locdbloaded, wasdetached=0;
+  int locdbloaded;
   const mysqllib_uniqueid_t *thisuniqueid=(mysqllib_uniqueid_t *) uniqueid;
   int32_t thisvalue=0;
 
@@ -840,7 +1164,88 @@ int mysqllib_getioport_state(const void *uniqueid, int32_t *state) {
   }
 #ifdef __ANDROID__
   thisvalue=env->CallStaticIntMethod(mysqllib_mysql_class, getIOPorts_State_methodid, thisuniqueid->pk64);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GETIOPORT_STATE];
+  if (stmt) {
+    int result;
+    int64_t thispk64=thisuniqueid->pk64;
+    MYSQL_BIND bind[1];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thispk64;
+    bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[0].buffer_length=8;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for Get IO Port State SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    //Configure binding for result
+    int32_t int_data;
+    unsigned long result_length[1];
+    my_bool result_is_null[1];
+    my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
+
+    memset(result_bind, 0, sizeof(result_bind));
+
+    result_bind[0].buffer_type=MYSQL_TYPE_LONG;
+    result_bind[0].buffer= (char *)&int_data;
+    result_bind[0].buffer_length=4;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
+
+    //Bind the result buffers
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for Get IO Port State SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -6;
+    }
+    //NOTE: If result buffers are already bound, execute will use them so execute needs to be called
+    //  after binding the result buffers
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Get IO Port State SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    //Fetch the first row
+    result=mysql_stmt_fetch(stmt);
+    if (result==MYSQL_NO_DATA) {
+      //IO Port doesn't exist
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      debuglibifaceptr->debuglib_printf(1, "%s: No state for ioportspk: %" PRId32 "\n", __func__, thispk64);
+      return -8;
+    }
+    if (result!=0) {
+      //State doesn't exist
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to fetch result for Get IO Port State SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -9;
+    }
+    thisvalue=int_data;
+
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for Get IO Port State SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   JNIDetachThread(wasdetached);
 #endif
 
@@ -863,8 +1268,9 @@ int mysqllib_getsensor_sampleratecurrent(const void *uniqueid, double *samplerat
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID getSensor_SampleRateCurrent_methodid;
+  int wasdetached=0;
 #endif
-  int locdbloaded, wasdetached=0;
+  int locdbloaded;
   const mysqllib_uniqueid_t *thisuniqueid=(mysqllib_uniqueid_t *) uniqueid;
   double thisvalue=0;
 
@@ -892,7 +1298,87 @@ int mysqllib_getsensor_sampleratecurrent(const void *uniqueid, double *samplerat
   }
 #ifdef __ANDROID__
   thisvalue=env->CallStaticDoubleMethod(mysqllib_mysql_class, getSensor_SampleRateCurrent_methodid, thisuniqueid->pk64);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GETSENSOR_SAMPLERATECURRENT];
+  if (stmt) {
+    int result;
+    int64_t thispk64=thisuniqueid->pk64;
+    MYSQL_BIND bind[1];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thispk64;
+    bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[0].buffer_length=8;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for Get Current Sensor Sample Rate SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    //Configure binding for result
+    double double_data;
+    unsigned long result_length[1];
+    my_bool result_is_null[1];
+    my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
+
+    memset(result_bind, 0, sizeof(result_bind));
+
+    result_bind[0].buffer_type=MYSQL_TYPE_DOUBLE;
+    result_bind[0].buffer=(char *)&double_data;
+    result_bind[0].buffer_length=8;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
+
+    //Bind the result buffers
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for Get Current Sensor Sample Rate SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -6;
+    }
+    //NOTE: If result buffers are already bound, execute will use them so execute needs to be called
+    //  after binding the result buffers
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Get Current Sensor Sample Rate SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    //Fetch the first row
+    result=mysql_stmt_fetch(stmt);
+    if (result==MYSQL_NO_DATA) {
+      //Sample Rate doesn't exist
+      debuglibifaceptr->debuglib_printf(1, "%s: No sample rate current for sensorpk: %s\n", __func__, thispk64);
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -8;
+    }
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to fetch result for Get Current Sensor Sample Rate SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -9;
+    }
+    thisvalue=double_data;
+
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for Get Current Sensor Sample Rate SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   JNIDetachThread(wasdetached);
 #endif
 
@@ -914,8 +1400,9 @@ int mysqllib_update_ioports_state(const void *uniqueid, int32_t value) {
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID update_IOPorts_State_methodid;
+  int wasdetached=0;
 #endif
-  int locdbloaded, result, wasdetached=0;
+  int locdbloaded, result=-1;
   const mysqllib_uniqueid_t *thisuniqueid=(mysqllib_uniqueid_t *) uniqueid;
 
   if (!thisuniqueid) {
@@ -945,7 +1432,52 @@ int mysqllib_update_ioports_state(const void *uniqueid, int32_t value) {
   }
 #ifdef __ANDROID__
   result=env->CallStaticIntMethod(mysqllib_mysql_class, update_IOPorts_State_methodid, thisuniqueid->pk64, value);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_UPDATE_IOPORT_STATE];
+  if (stmt) {
+    int result;
+    int64_t thispk64=thisuniqueid->pk64;
+    int32_t thisvalue=value;
+    MYSQL_BIND bind[2];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thisvalue;
+    bind[0].buffer_type=MYSQL_TYPE_LONG;
+    bind[0].buffer_length=4;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    bind[1].buffer=&thispk64;
+    bind[1].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[1].buffer_length=8;
+    bind[1].is_null=0;
+    bind[1].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for Update IO Ports State SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Update IO Ports State SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for Update IO Ports State SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   JNIDetachThread(wasdetached);
 #endif
   if (result==0) {
@@ -993,8 +1525,9 @@ int mysqllib_insert_sensor_datafloat_value(const void *uniqueid, int64_t date, d
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID methodid;
+  int wasdetached=0;
 #endif
-  int result, wasdetached=0;
+  int result=-1;
   const mysqllib_uniqueid_t *thisuniqueid=(mysqllib_uniqueid_t *) uniqueid;
 
 #ifdef __ANDROID__
@@ -1003,7 +1536,61 @@ int mysqllib_insert_sensor_datafloat_value(const void *uniqueid, int64_t date, d
     return result;
   }
   result=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64, date, value);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_INSERT_DATAFLOAT_VALUE];
+  if (stmt) {
+    int result;
+
+    //Make copies of the values in case mysql library needs to modify them
+    int64_t thispk64=thisuniqueid->pk64;
+    int64_t thisdate=date;
+    double thisvalue=value;
+    MYSQL_BIND bind[3];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thispk64;
+    bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[0].buffer_length=8;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    bind[1].buffer=&thisdate;
+    bind[1].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[1].buffer_length=8;
+    bind[1].is_null=0;
+    bind[1].length=0;
+
+    bind[2].buffer=&thisvalue;
+    bind[2].buffer_type=MYSQL_TYPE_DOUBLE;
+    bind[2].buffer_length=8;
+    bind[2].is_null=0;
+    bind[2].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   JNIDetachThread(wasdetached);
 #endif
   if (result==0) {
@@ -1020,8 +1607,9 @@ int mysqllib_insert_sensor_databigint_value(const void *uniqueid, int64_t date, 
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID methodid;
+  int wasdetached=0;
 #endif
-  int result, wasdetached=0;
+  int result=-1;
   const mysqllib_uniqueid_t *thisuniqueid=(mysqllib_uniqueid_t *) uniqueid;
 
 #ifdef __ANDROID__
@@ -1030,7 +1618,61 @@ int mysqllib_insert_sensor_databigint_value(const void *uniqueid, int64_t date, 
     return result;
   }
   result=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64, date, value);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_INSERT_DATABIGINT_VALUE];
+  if (stmt) {
+    int result;
+
+    //Make copies of the values in case mysql library needs to modify them
+    int64_t thispk64=thisuniqueid->pk64;
+    int64_t thisdate=date;
+    int64_t thisvalue=value;
+    MYSQL_BIND bind[3];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thispk64;
+    bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[0].buffer_length=8;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    bind[1].buffer=&thisdate;
+    bind[1].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[1].buffer_length=8;
+    bind[1].is_null=0;
+    bind[1].length=0;
+
+    bind[2].buffer=&thisvalue;
+    bind[2].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[2].buffer_length=8;
+    bind[2].is_null=0;
+    bind[2].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   JNIDetachThread(wasdetached);
 #endif
   if (result==0) {
@@ -1047,8 +1689,9 @@ int mysqllib_insert_sensor_dataint_value(const void *uniqueid, int64_t date, int
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID methodid;
+  int wasdetached=0;
 #endif
-  int result, wasdetached=0;
+  int result=-1;
   const mysqllib_uniqueid_t *thisuniqueid=(mysqllib_uniqueid_t *) uniqueid;
 
 #ifdef __ANDROID__
@@ -1057,7 +1700,61 @@ int mysqllib_insert_sensor_dataint_value(const void *uniqueid, int64_t date, int
     return result;
   }
   result=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64, date, value);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_INSERT_DATAINT_VALUE];
+  if (stmt) {
+    int result;
+
+    //Make copies of the values in case mysql library needs to modify them
+    int64_t thispk64=thisuniqueid->pk64;
+    int64_t thisdate=date;
+    int32_t thisvalue=value;
+    MYSQL_BIND bind[3];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thispk64;
+    bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[0].buffer_length=8;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    bind[1].buffer=&thisdate;
+    bind[1].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[1].buffer_length=8;
+    bind[1].is_null=0;
+    bind[1].length=0;
+
+    bind[2].buffer=&thisvalue;
+    bind[2].buffer_type=MYSQL_TYPE_LONG;
+    bind[2].buffer_length=4;
+    bind[2].is_null=0;
+    bind[2].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   JNIDetachThread(wasdetached);
 #endif
   if (result==0) {
@@ -1074,8 +1771,9 @@ int mysqllib_insert_sensor_datatinyint_value(const void *uniqueid, int64_t date,
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID methodid;
+  int wasdetached=0;
 #endif
-  int result, wasdetached=0;
+  int result=-1;
   const mysqllib_uniqueid_t *thisuniqueid=(mysqllib_uniqueid_t *) uniqueid;
 
 #ifdef __ANDROID__
@@ -1084,7 +1782,61 @@ int mysqllib_insert_sensor_datatinyint_value(const void *uniqueid, int64_t date,
     return result;
   }
   result=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64, date, value);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_INSERT_DATATINYINT_VALUE];
+  if (stmt) {
+    int result;
+
+    //Make copies of the values in case mysql library needs to modify them
+    int64_t thispk64=thisuniqueid->pk64;
+    int64_t thisdate=date;
+    int8_t thisvalue=(int8_t) value; //MySQL defaults to signed for tinyint, some databases default to unsigned which is why the api used unsigned
+    MYSQL_BIND bind[3];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thispk64;
+    bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[0].buffer_length=8;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    bind[1].buffer=&thisdate;
+    bind[1].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[1].buffer_length=8;
+    bind[1].is_null=0;
+    bind[1].length=0;
+
+    bind[2].buffer=&thisvalue;
+    bind[2].buffer_type=MYSQL_TYPE_TINY;
+    bind[2].buffer_length=1;
+    bind[2].is_null=0;
+    bind[2].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   JNIDetachThread(wasdetached);
 #endif
   if (result==0) {
@@ -1094,7 +1846,7 @@ int mysqllib_insert_sensor_datatinyint_value(const void *uniqueid, int64_t date,
 }
 
 /*
-  Retrieve a the most recent value for a sensor from the DATAFLOAT table
+  Retrieve the most recent value for a sensor from the DATAFLOAT table
   Returns 0 for success or negative value on error
   The value is returned via the pointer
 */
@@ -1102,18 +1854,100 @@ int mysqllib_getsensor_datafloat_value(const void *uniqueid, double *value) {
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID methodid;
+  int wasdetached=0;
 #endif
-  int result, wasdetached=0;
   const mysqllib_uniqueid_t *thisuniqueid=(mysqllib_uniqueid_t *) uniqueid;
   double thisvalue=0;
 
 #ifdef __ANDROID__
+  int result=-1;
+
   result=mysqllib_sensor_value_pre(env, wasdetached, thisuniqueid, methodid, "getSensorDataFloatValue", "(J)D");
   if (result!=0) {
     return result;
   }
   thisvalue=env->CallStaticDoubleMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GET_DATAFLOAT_VALUE];
+  if (stmt) {
+    int result;
+    int64_t thispk64=thisuniqueid->pk64;
+    MYSQL_BIND bind[1];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thispk64;
+    bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[0].buffer_length=8;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    //Configure binding for result
+    double double_data;
+    unsigned long result_length[1];
+    my_bool result_is_null[1];
+    my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
+
+    memset(result_bind, 0, sizeof(result_bind));
+
+    result_bind[0].buffer_type=MYSQL_TYPE_DOUBLE;
+    result_bind[0].buffer=(char *)&double_data;
+    result_bind[0].buffer_length=8;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
+
+    //Bind the result buffers
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -6;
+    }
+    //NOTE: If result buffers are already bound, execute will use them so execute needs to be called
+    //  after binding the result buffers
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Get SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    //Fetch the first row
+    result=mysql_stmt_fetch(stmt);
+    if (result==MYSQL_NO_DATA) {
+      //Sample Rate doesn't exist
+      debuglibifaceptr->debuglib_printf(1, "%s: No data for pk: %s\n", __func__, thispk64);
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -8;
+    }
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to fetch result for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -9;
+    }
+    thisvalue=double_data;
+
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for Get Current Sensor Sample Rate SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   JNIDetachThread(wasdetached);
 #endif
   //TODO: Implement dedicated getter function so we can separate the result from the value
@@ -1127,7 +1961,7 @@ int mysqllib_getsensor_datafloat_value(const void *uniqueid, double *value) {
 }
 
 /*
-  Retrieve a the most recent value for a sensor from the DATABIGINT table
+  Retrieve the most recent value for a sensor from the DATABIGINT table
   Returns 0 for success or negative value on error
   The value is returned via the pointer
 */
@@ -1135,18 +1969,100 @@ int mysqllib_getsensor_databigint_value(const void *uniqueid, int64_t *value) {
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID methodid;
+  int wasdetached=0;
 #endif
-  int result, wasdetached=0;
   const mysqllib_uniqueid_t *thisuniqueid=(mysqllib_uniqueid_t *) uniqueid;
   int64_t thisvalue=0;
 
 #ifdef __ANDROID__
+  int result=-1;
+
   result=mysqllib_sensor_value_pre(env, wasdetached, thisuniqueid, methodid, "getSensorDataBigIntValue", "(J)J");
   if (result!=0) {
     return result;
   }
   thisvalue=env->CallStaticLongMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GET_DATABIGINT_VALUE];
+  if (stmt) {
+    int result;
+    int64_t thispk64=thisuniqueid->pk64;
+    MYSQL_BIND bind[1];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thispk64;
+    bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[0].buffer_length=8;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    //Configure binding for result
+    int64_t bigint_data;
+    unsigned long result_length[1];
+    my_bool result_is_null[1];
+    my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
+
+    memset(result_bind, 0, sizeof(result_bind));
+
+    result_bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    result_bind[0].buffer=(char *)&bigint_data;
+    result_bind[0].buffer_length=8;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
+
+    //Bind the result buffers
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -6;
+    }
+    //NOTE: If result buffers are already bound, execute will use them so execute needs to be called
+    //  after binding the result buffers
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Get SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    //Fetch the first row
+    result=mysql_stmt_fetch(stmt);
+    if (result==MYSQL_NO_DATA) {
+      //Sample Rate doesn't exist
+      debuglibifaceptr->debuglib_printf(1, "%s: No data for pk: %s\n", __func__, thispk64);
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -8;
+    }
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to fetch result for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -9;
+    }
+    thisvalue=bigint_data;
+
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for Get Current Sensor Sample Rate SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   JNIDetachThread(wasdetached);
 #endif
   //TODO: Implement dedicated getter function so we can separate the result from the value
@@ -1160,7 +2076,7 @@ int mysqllib_getsensor_databigint_value(const void *uniqueid, int64_t *value) {
 }
 
 /*
-  Retrieve a the most recent value for a sensor from the DATAINT table
+  Retrieve the most recent value for a sensor from the DATAINT table
   Returns 0 for success or negative value on error
   The value is returned via the pointer
 */
@@ -1168,18 +2084,100 @@ int mysqllib_getsensor_dataint_value(const void *uniqueid, int32_t *value) {
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID methodid;
+  int wasdetached=0;
 #endif
-  int result, wasdetached=0;
   const mysqllib_uniqueid_t *thisuniqueid=(mysqllib_uniqueid_t *) uniqueid;
   int32_t thisvalue=0;
 
 #ifdef __ANDROID__
+  int result=-1;
+
   result=mysqllib_sensor_value_pre(env, wasdetached, thisuniqueid, methodid, "getSensorDataIntValue", "(J)I");
   if (result!=0) {
     return result;
   }
   thisvalue=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GET_DATAINT_VALUE];
+  if (stmt) {
+    int result;
+    int64_t thispk64=thisuniqueid->pk64;
+    MYSQL_BIND bind[1];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thispk64;
+    bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[0].buffer_length=8;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    //Configure binding for result
+    int32_t int_data;
+    unsigned long result_length[1];
+    my_bool result_is_null[1];
+    my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
+
+    memset(result_bind, 0, sizeof(result_bind));
+
+    result_bind[0].buffer_type=MYSQL_TYPE_LONG;
+    result_bind[0].buffer=(char *)&int_data;
+    result_bind[0].buffer_length=4;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
+
+    //Bind the result buffers
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -6;
+    }
+    //NOTE: If result buffers are already bound, execute will use them so execute needs to be called
+    //  after binding the result buffers
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Get SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    //Fetch the first row
+    result=mysql_stmt_fetch(stmt);
+    if (result==MYSQL_NO_DATA) {
+      //Sample Rate doesn't exist
+      debuglibifaceptr->debuglib_printf(1, "%s: No data for pk: %s\n", __func__, thispk64);
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -8;
+    }
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to fetch result for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -9;
+    }
+    thisvalue=int_data;
+
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for Get Current Sensor Sample Rate SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   JNIDetachThread(wasdetached);
 #endif
   //TODO: Implement dedicated getter function so we can separate the result from the value
@@ -1193,7 +2191,7 @@ int mysqllib_getsensor_dataint_value(const void *uniqueid, int32_t *value) {
 }
 
 /*
-  Retrieve a the most recent value for a sensor from the DATATINYINT table
+  Retrieve the most recent value for a sensor from the DATATINYINT table
   Returns 0 for success or negative value on error
   The value is returned via the pointer
 */
@@ -1201,18 +2199,100 @@ int mysqllib_getsensor_datatinyint_value(const void *uniqueid, uint8_t *value) {
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID methodid;
+  int wasdetached=0;
 #endif
-  int result, wasdetached=0;
   const mysqllib_uniqueid_t *thisuniqueid=(mysqllib_uniqueid_t *) uniqueid;
   int32_t thisvalue=0;
 
 #ifdef __ANDROID__
+  int result=-1;
+
   result=mysqllib_sensor_value_pre(env, wasdetached, thisuniqueid, methodid, "getSensorDataTinyIntValue", "(J)I");
   if (result!=0) {
     return result;
   }
   thisvalue=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GET_DATATINYINT_VALUE];
+  if (stmt) {
+    int result;
+    int64_t thispk64=thisuniqueid->pk64;
+    MYSQL_BIND bind[1];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thispk64;
+    bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[0].buffer_length=8;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    //Configure binding for result
+    int8_t tinyint_data; //MySQL defaults to signed for tinyint, some databases default to unsigned which is why the api used unsigned
+    unsigned long result_length[1];
+    my_bool result_is_null[1];
+    my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
+
+    memset(result_bind, 0, sizeof(result_bind));
+
+    result_bind[0].buffer_type=MYSQL_TYPE_TINY;
+    result_bind[0].buffer=(char *)&tinyint_data;
+    result_bind[0].buffer_length=4;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
+
+    //Bind the result buffers
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -6;
+    }
+    //NOTE: If result buffers are already bound, execute will use them so execute needs to be called
+    //  after binding the result buffers
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Get SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    //Fetch the first row
+    result=mysql_stmt_fetch(stmt);
+    if (result==MYSQL_NO_DATA) {
+      //Sample Rate doesn't exist
+      debuglibifaceptr->debuglib_printf(1, "%s: No data for pk: %s\n", __func__, thispk64);
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -8;
+    }
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to fetch result for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -9;
+    }
+    thisvalue=(uint8_t) tinyint_data;
+
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for Get Current Sensor Sample Rate SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   JNIDetachThread(wasdetached);
 #endif
   //TODO: Implement dedicated getter function so we can separate the result from the value
@@ -1233,8 +2313,9 @@ int mysqllib_update_sensor_datafloat_value(const void *uniqueid, int64_t date, d
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID methodid;
+  int wasdetached=0;
 #endif
-  int result, wasdetached=0;
+  int result=-1;
   const mysqllib_uniqueid_t *thisuniqueid=(mysqllib_uniqueid_t *) uniqueid;
 
 #ifdef __ANDROID__
@@ -1243,7 +2324,61 @@ int mysqllib_update_sensor_datafloat_value(const void *uniqueid, int64_t date, d
     return result;
   }
   result=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64, date, value);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_UPDATE_DATAFLOAT_VALUE];
+  if (stmt) {
+    int result;
+
+    //Make copies of the values in case mysql library needs to modify them
+    int64_t thispk64=thisuniqueid->pk64;
+    int64_t thisdate=date;
+    double thisvalue=value;
+    MYSQL_BIND bind[3];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thisdate;
+    bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[0].buffer_length=8;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    bind[1].buffer=&thisvalue;
+    bind[1].buffer_type=MYSQL_TYPE_DOUBLE;
+    bind[1].buffer_length=1;
+    bind[1].is_null=0;
+    bind[1].length=0;
+
+    bind[2].buffer=&thispk64;
+    bind[2].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[2].buffer_length=8;
+    bind[2].is_null=0;
+    bind[2].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   JNIDetachThread(wasdetached);
 #endif
   if (result==0) {
@@ -1260,8 +2395,9 @@ int mysqllib_update_sensor_databigint_value(const void *uniqueid, int64_t date, 
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID methodid;
+  int wasdetached=0;
 #endif
-  int result, wasdetached=0;
+  int result=-1;
   const mysqllib_uniqueid_t *thisuniqueid=(mysqllib_uniqueid_t *) uniqueid;
 
 #ifdef __ANDROID__
@@ -1270,7 +2406,61 @@ int mysqllib_update_sensor_databigint_value(const void *uniqueid, int64_t date, 
     return result;
   }
   result=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64, date, value);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_UPDATE_DATABIGINT_VALUE];
+  if (stmt) {
+    int result;
+
+    //Make copies of the values in case mysql library needs to modify them
+    int64_t thispk64=thisuniqueid->pk64;
+    int64_t thisdate=date;
+    int64_t thisvalue=value;
+    MYSQL_BIND bind[3];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thisdate;
+    bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[0].buffer_length=8;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    bind[1].buffer=&thisvalue;
+    bind[1].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[1].buffer_length=1;
+    bind[1].is_null=0;
+    bind[1].length=0;
+
+    bind[2].buffer=&thispk64;
+    bind[2].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[2].buffer_length=8;
+    bind[2].is_null=0;
+    bind[2].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   JNIDetachThread(wasdetached);
 #endif
   if (result==0) {
@@ -1287,8 +2477,9 @@ int mysqllib_update_sensor_dataint_value(const void *uniqueid, int64_t date, int
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID methodid;
+  int wasdetached=0;
 #endif
-  int result, wasdetached=0;
+  int result=-1;
   const mysqllib_uniqueid_t *thisuniqueid=(mysqllib_uniqueid_t *) uniqueid;
 
 #ifdef __ANDROID__
@@ -1297,7 +2488,61 @@ int mysqllib_update_sensor_dataint_value(const void *uniqueid, int64_t date, int
     return result;
   }
   result=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64, date, value);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_UPDATE_DATAINT_VALUE];
+  if (stmt) {
+    int result;
+
+    //Make copies of the values in case mysql library needs to modify them
+    int64_t thispk64=thisuniqueid->pk64;
+    int64_t thisdate=date;
+    int32_t thisvalue=value;
+    MYSQL_BIND bind[3];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thisdate;
+    bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[0].buffer_length=8;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    bind[1].buffer=&thisvalue;
+    bind[1].buffer_type=MYSQL_TYPE_LONG;
+    bind[1].buffer_length=1;
+    bind[1].is_null=0;
+    bind[1].length=0;
+
+    bind[2].buffer=&thispk64;
+    bind[2].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[2].buffer_length=8;
+    bind[2].is_null=0;
+    bind[2].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   JNIDetachThread(wasdetached);
 #endif
   if (result==0) {
@@ -1314,8 +2559,9 @@ int mysqllib_update_sensor_datatinyint_value(const void *uniqueid, int64_t date,
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID methodid;
+  int wasdetached=0;
 #endif
-  int result, wasdetached=0;
+  int result=-1;
   const mysqllib_uniqueid_t *thisuniqueid=(mysqllib_uniqueid_t *) uniqueid;
 
 #ifdef __ANDROID__
@@ -1324,7 +2570,61 @@ int mysqllib_update_sensor_datatinyint_value(const void *uniqueid, int64_t date,
     return result;
   }
   result=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64, date, value);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_UPDATE_DATATINYINT_VALUE];
+  if (stmt) {
+    int result;
+
+    //Make copies of the values in case mysql library needs to modify them
+    int64_t thispk64=thisuniqueid->pk64;
+    int64_t thisdate=date;
+    int8_t thisvalue=value; //MySQL defaults to signed for tinyint, some databases default to unsigned which is why the api used unsigned
+    MYSQL_BIND bind[3];
+
+    memset(bind, 0, sizeof(bind));
+
+    bind[0].buffer=&thisdate;
+    bind[0].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[0].buffer_length=8;
+    bind[0].is_null=0;
+    bind[0].length=0;
+
+    bind[1].buffer=&thisvalue;
+    bind[1].buffer_type=MYSQL_TYPE_TINY;
+    bind[1].buffer_length=1;
+    bind[1].is_null=0;
+    bind[1].length=0;
+
+    bind[2].buffer=&thispk64;
+    bind[2].buffer_type=MYSQL_TYPE_LONGLONG;
+    bind[2].buffer_length=8;
+    bind[2].is_null=0;
+    bind[2].length=0;
+
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -5;
+    }
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -7;
+    }
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -10;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   JNIDetachThread(wasdetached);
 #endif
   if (result==0) {
@@ -1344,11 +2644,11 @@ int mysqllib_getcommpk(uint64_t addr, int64_t *commpk) {
   JNIEnv *env;
   jmethodID getCommPK_methodid;
   jstring jtmpstr;
+  int wasdetached=0;
 #endif
-
-  int locdbloaded, wasdetached=0;
+  int locdbloaded;
   char thisaddr[17];
-  int64_t thisvalue;
+  int64_t thisvalue=-2;
 
 #ifdef __ANDROID__
   if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
@@ -1376,6 +2676,87 @@ int mysqllib_getcommpk(uint64_t addr, int64_t *commpk) {
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
   env->DeleteLocalRef(jtmpstr);
   JNIDetachThread(wasdetached);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GETCOMMPK];
+  if (stmt) {
+    int result;
+    size_t commpklen;
+    my_bool is_null=0;
+    my_bool error=0;
+    MYSQL_BIND bind[1];
+
+    memset(bind, 0, sizeof(bind));
+    commpklen=strlen(thisaddr);
+
+    bind[0].buffer=thisaddr;
+    bind[0].buffer_type=MYSQL_TYPE_STRING;
+    bind[0].buffer_length=commpklen+1;
+    bind[0].is_null=&is_null;
+    bind[0].length=&commpklen;
+    bind[0].error=&error;
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for Get Comm PK SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -4;
+    }
+    //Configure binding for result
+    long long longint_data;
+    unsigned long result_length[1];
+    my_bool result_is_null[1];
+    my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
+
+    memset(result_bind, 0, sizeof(result_bind));
+
+    result_bind[0].buffer_type= MYSQL_TYPE_LONGLONG;
+    result_bind[0].buffer= (char *)&longint_data;
+    result_bind[0].buffer_length=8;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
+
+    //Bind the result buffers
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for Get Comm PK SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -4;
+    }
+    //NOTE: If result buffers are already bound, execute will use them so execute needs to be called
+    //  after binding the result buffers
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Get Comm PK SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -4;
+    }
+    //Fetch the first row
+    result=mysql_stmt_fetch(stmt);
+    if (result==MYSQL_NO_DATA) {
+      //PK doesn't exist
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -1;
+    }
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to fetch result for Get Comm PK SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -4;
+    }
+    thisvalue=longint_data;
+
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for Get Comm PK SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -4;
+    }
+  }
+  PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
 #endif
   if (thisvalue>=0) {
 		*commpk=thisvalue;
@@ -1396,9 +2777,9 @@ int mysqllib_getlinkpk(uint64_t addr, int64_t *linkpk) {
   JNIEnv *env;
   jmethodID getLinkPK_methodid;
   jstring jtmpstr;
+  int wasdetached=0;
 #endif
-
-  int locdbloaded, wasdetached=0;
+  int locdbloaded;
   char thisaddr[17];
   int64_t thisvalue;
 
@@ -1428,6 +2809,87 @@ int mysqllib_getlinkpk(uint64_t addr, int64_t *linkpk) {
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
   env->DeleteLocalRef(jtmpstr);
   JNIDetachThread(wasdetached);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GETLINKPK];
+  if (stmt) {
+    int result;
+    size_t linkpklen;
+    my_bool is_null=0;
+    my_bool error=0;
+    MYSQL_BIND bind[1];
+
+    memset(bind, 0, sizeof(bind));
+    linkpklen=strlen(thisaddr);
+
+    bind[0].buffer=thisaddr;
+    bind[0].buffer_type=MYSQL_TYPE_STRING;
+    bind[0].buffer_length=linkpklen+1;
+    bind[0].is_null=&is_null;
+    bind[0].length=&linkpklen;
+    bind[0].error=&error;
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for Get Link PK SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -4;
+    }
+    //Configure binding for result
+    long long longint_data;
+    unsigned long result_length[1];
+    my_bool result_is_null[1];
+    my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
+
+    memset(result_bind, 0, sizeof(result_bind));
+
+    result_bind[0].buffer_type= MYSQL_TYPE_LONGLONG;
+    result_bind[0].buffer= (char *)&longint_data;
+    result_bind[0].buffer_length=8;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
+
+    //Bind the result buffers
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for Get Link PK SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -4;
+    }
+    //NOTE: If result buffers are already bound, execute will use them so execute needs to be called
+    //  after binding the result buffers
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute Get Link PK SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -4;
+    }
+    //Fetch the first row
+    result=mysql_stmt_fetch(stmt);
+    if (result==MYSQL_NO_DATA) {
+      //PK doesn't exist
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -1;
+    }
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to fetch result for Get Link PK SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -4;
+    }
+    thisvalue=longint_data;
+
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for Get Link PK SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -4;
+    }
+  }
+  PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
 #endif
   if (thisvalue>=0) {
 		*linkpk=thisvalue;
@@ -1448,9 +2910,9 @@ int mysqllib_getlinkcommpk(uint64_t addr, int64_t *commpk) {
   JNIEnv *env;
   jmethodID getLinkCommPK_methodid;
   jstring jtmpstr;
+  int wasdetached=0;
 #endif
-
-  int locdbloaded, wasdetached=0;
+  int locdbloaded;
   char thisaddr[17];
   int64_t thisvalue;
 
@@ -1477,7 +2939,89 @@ int mysqllib_getlinkcommpk(uint64_t addr, int64_t *commpk) {
 #ifdef __ANDROID__
   jtmpstr=env->NewStringUTF(thisaddr);
   thisvalue=env->CallStaticLongMethod(mysqllib_mysql_class, getLinkCommPK_methodid, jtmpstr);
+#else
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GETLINKCOMMPK];
+  if (stmt) {
+    int result;
+    size_t commpklen;
+    my_bool is_null=0;
+    my_bool error=0;
+    MYSQL_BIND bind[1];
+
+    memset(bind, 0, sizeof(bind));
+    commpklen=strlen(thisaddr);
+
+    bind[0].buffer=thisaddr;
+    bind[0].buffer_type=MYSQL_TYPE_STRING;
+    bind[0].buffer_length=commpklen+1;
+    bind[0].is_null=&is_null;
+    bind[0].length=&commpklen;
+    bind[0].error=&error;
+    result=mysql_stmt_bind_param(stmt, bind);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind parameters for Get Comm PK SQL Statement: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -4;
+    }
+    //Configure binding for result
+    long long longint_data;
+    unsigned long result_length[1];
+    my_bool result_is_null[1];
+    my_bool result_error[1];
+    MYSQL_BIND result_bind[1];
+
+    memset(result_bind, 0, sizeof(result_bind));
+
+    result_bind[0].buffer_type= MYSQL_TYPE_LONGLONG;
+    result_bind[0].buffer= (char *)&longint_data;
+    result_bind[0].buffer_length=8;
+    result_bind[0].is_null= &result_is_null[0];
+    result_bind[0].length= &result_length[0];
+    result_bind[0].error= &result_error[0];
+
+    //Bind the result buffers
+    if (mysql_stmt_bind_result(stmt, result_bind)) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to bind result for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -4;
+    }
+    //NOTE: If result buffers are already bound, execute will use them so execute needs to be called
+    //  after binding the result buffers
+    result=mysql_stmt_execute(stmt);
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to execute SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -4;
+    }
+    //Fetch the first row
+    result=mysql_stmt_fetch(stmt);
+    if (result==MYSQL_NO_DATA) {
+      //PK doesn't exist
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -1;
+    }
+    if (result!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to fetch result for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      mysql_stmt_free_result(stmt);
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -4;
+    }
+    thisvalue=longint_data;
+
+    if (mysql_stmt_free_result(stmt)!=0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to free resources for SQL Query: %s\n", __func__, mysql_stmt_error(stmt));
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      return -4;
+    }
+  }
+#endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
   env->DeleteLocalRef(jtmpstr);
   JNIDetachThread(wasdetached);
 #endif

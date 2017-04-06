@@ -69,6 +69,12 @@ BOOST_FIND_HEADER([boost/property_tree/json_parser.hpp])
 # optional libraries
 
 # Plugin options
+AC_ARG_ENABLE([mysql-plugin], AS_HELP_STRING([--disable-mysql-plugin], [Build without MySQL plugin]), [], [enable_mysql_plugin=yes])
+AS_IF([test "x$enable_mysql_plugin" != xno], [
+  # MySQL client
+  MYSQL_CLIENT([], client)
+  MYSQLPLUGIN=true
+])
 
 # Checks for required headers
 
@@ -96,6 +102,11 @@ AC_ARG_ENABLE([zigbeelib_debugwithoutdatabase], AS_HELP_STRING([--enable-zigbeel
 AC_ARG_ENABLE([locklib_lockdebug], AS_HELP_STRING([--enable-locklib_lockdebug], [Build with locklib lock debugging]), [locklib_lockdebug=true])
 
 # Custom Messages
+AS_IF([test "x$MYSQLPLUGIN" = xtrue], [
+  AC_MSG_RESULT([MySQL plugin: enabled])
+], [
+  AC_MSG_RESULT([MySQL plugin: disabled])
+])
 AS_IF([test "x$debug" = xtrue], [
   AC_MSG_RESULT([Debugging: enabled])
 ], [
@@ -176,7 +187,7 @@ AM_CONDITIONAL([ZIGBEELIB_DEBUGWITHOUTDATABASE], [test x$zigbeelib_debugwithoutd
 AM_CONDITIONAL([LOCKLIB_LOCKDEBUG], [test x$locklib_lockdebug = xtrue])
 
 # Optional plugins to enable
-# None available yet
+AM_CONDITIONAL([LINK_MYSQLPLUGIN], [test x$MYSQLPLUGIN = xtrue])
 
 # NOTE: Some functions like dlsym have problems with -pedantic-errors and our older
 #   library interface versions use void * for function parameters as well.
@@ -187,7 +198,7 @@ COMMONCPPFLAGS="-std=c++11"
 AS_IF([test "x$debug" = xtrue], [
   COMMONFLAGS="${COMMONFLAGS} -DDEBUG"
 ], [
-  COMMONFLAGS="${COMMONFLAGS} -s -O2 -fomit-frame-pointer -ftree-vectorize -fpredictive-commoning"
+  COMMONFLAGS="${COMMONFLAGS} -s -O2 -fomit-frame-pointer"
 ])
 AS_IF([test "x$pedantic" = xtrue], [
   COMMONFLAGS="${COMMONFLAGS} -pedantic"
@@ -222,5 +233,8 @@ AC_CONFIG_FILES([src/modules/commonlib/Makefile])
 AC_CONFIG_FILES([src/modules/webapiclientlib/Makefile])
 AC_CONFIG_FILES([src/modules/dblib/Makefile])
 AC_CONFIG_FILES([src/modules/locklib/Makefile])
+AS_IF([test "x$MYSQLPLUGIN" = xtrue], [
+  AC_CONFIG_FILES([src/modules/mysqllib/Makefile])
+])
 AC_CONFIG_FILES([src/modules/timeruleslib/Makefile])
 AC_OUTPUT
