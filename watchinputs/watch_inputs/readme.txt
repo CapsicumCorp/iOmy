@@ -31,5 +31,5 @@ Version Info
 ------------
 
 The Watch Inputs version info is in watch_inputs/src/watch_inputs.h
-The Android version of Watch Inputs is in WatchInputsAndroidStudio/WatchInputs/src/main/AndroidManifest.xml
+The Android version of Watch Inputs is in WatchInputsAndroidStudio/WatchInputsApp/build.gradle
 
