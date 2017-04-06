@@ -137,6 +137,20 @@ RapidHA info sourced from MMB Research RapidHA docs
 #define RAPIDHA_ZIGBEE_ZCL_WRITE_ATTR_REQUEST 0x32
 #define RAPIDHA_ZIGBEE_ZCL_WRITE_ATTR_RESPONSE 0x33
 
+//RapidHA Bootload Secondary Frame Types
+#define RAPIDHA_BOOTLOAD_QUERY_NEXT_IMAGE_RESPONSE 0x02
+#define RAPIDHA_BOOTLOAD_IMAGE_BLOCK_REQUEST 0x03
+#define RAPIDHA_BOOTLOAD_IMAGE_BLOCK_RESPONSE 0x05
+#define RAPIDHA_BOOTLOAD_UPGRADE_END_REQUEST 0x06
+#define RAPIDHA_BOOTLOAD_UPGRADE_EBD_RESPONSE 0x07
+#define RAPIDHA_BOOTLOAD_OTA_QUERY_CONFIG_REQUEST 0x020
+#define RAPIDHA_BOOTLOAD_OTA_QUERY_CONFIG_RESPONSE 0x21
+#define RAPIDHA_BOOTLOAD_OTA_QUERY_CONFIG_WRITE 0x22
+#define RAPIDHA_BOOTLOAD_IMAGE_PROGRESS_NOTIFICATION 0x23
+#define RAPIDHA_BOOTLOAD_OTA_VERSION_CONFIG_REQUEST 0x24
+#define RAPIDHA_BOOTLOAD_OTA_VERSION_CONFIG_RESPONSE 0x25
+#define RAPIDHA_BOOTLOAD_OTA_VERSION_CONFIG_WRITE 0x26
+
 //RapidHA Status Responses
 #define RAPIDHA_STATUS_RESPONSE_SUCCESS 0x00
 #define RAPIDHA_STATUS_RESPONSE_INVALID_CALL 0x01
@@ -154,6 +168,14 @@ RapidHA info sourced from MMB Research RapidHA docs
 #define RAPIDHA_STATUS_RESPONSE_SEND_FAILURE 0x0D
 #define RAPIDHA_STATUS_RESPONSE_APS_ACK_TIMEOUT 0x0E
 #define RAPIDHA_STATUS_RESPONSE_ENDPOINT_CONFIG_LOCKED 0x0F
+#define RAPIDHA_STATUS_RESPONSE_NOT_AUTHORIZED 0x7E
+#define RAPIDHA_STATUS_RESPONSE_MALFORMED_COMMAND 0x80
+#define RAPIDHA_STATUS_RESPONSE_UNSUPPORTED_CLUSTER_COMMAND 0x81
+#define RAPIDHA_STATUS_RESPONSE_ABORT 0x95
+#define RAPIDHA_STATUS_RESPONSE_INVALID_IMAGE 0x96
+#define RAPIDHA_STATUS_RESPONSE_WAIT_FOR_DATA 0x97
+#define RAPIDHA_STATUS_RESPONSE_NO_IMAGE_AVAILABE 0x98
+#define RAPIDHA_STATUS_RESPONSE_REQUIRE_MODE_IMAGE 0x99
 #define RAPIDHA_STATUS_RESPONSE_UNKNOWN_FAILURE 0xFF
 
 //RapidHA/Zigbee Waiting Definitions
@@ -484,6 +506,16 @@ typedef struct {
   uint8_t header_secondary; //Command Subset of the given primary frame type
   uint8_t frameid; //Set this with get_next_frameid : 0-127 from Host 128-255 from module
   uint8_t length; //Number of bytes between the length and the checksum
+  uint8_t error;
+  uint8_t suberror;
+} __attribute__((packed)) rapidha_utility_error_header_t;
+
+typedef struct {
+  uint8_t frame_start; //Always set to 0xF1
+  uint8_t header_primary; //Primary frame type
+  uint8_t header_secondary; //Command Subset of the given primary frame type
+  uint8_t frameid; //Set this with get_next_frameid : 0-127 from Host 128-255 from module
+  uint8_t length; //Number of bytes between the length and the checksum
   uint8_t network_state; //0=Network Down
                          //1=Network Up
                          //2=Joining
@@ -525,6 +557,108 @@ typedef struct {
   uint8_t zigbeelength;
   uint8_t status; //The 1st byte of the RapidHA zigbee payload is always the status byte
 } __attribute__((packed)) rapidha_zigbee_zdo_response_received_t;
+
+typedef struct {
+  uint8_t frame_start; //Always set to 0xF1
+  uint8_t header_primary; //Primary frame type
+  uint8_t header_secondary; //Command Subset of the given primary frame type
+  uint8_t frameid; //Set this with get_next_frameid : 0-127 from Host 128-255 from module
+  uint8_t length; //Number of bytes between the length and the checksum
+  uint16_t netaddr; //0xFFFF indicates that 64-bit address is used
+  uint64_t addr; //64-bit address
+  uint8_t endpoint; //Use 0xFF to request on all endpoints
+  uint8_t status; //Set to 0 when sending from host
+  uint16_t manu; //Must be 0x109A for local bootloading on RapidHA
+  uint16_t imagetype; //Set to 0 when sending from host
+  uint32_t fileversion; //Set to 0 when sending from host
+  uint32_t imagesize; //Set to the size of the firmware file
+} __attribute__((packed)) rapidha_bootload_query_next_image_response_t;
+
+typedef struct {
+  uint8_t frame_start; //Always set to 0xF1
+  uint8_t header_primary; //Primary frame type
+  uint8_t header_secondary; //Command Subset of the given primary frame type
+  uint8_t frameid; //Set this with get_next_frameid : 0-127 from Host 128-255 from module
+  uint8_t length; //Number of bytes between the length and the checksum
+  uint16_t netaddr; //0xFFFF indicates that 64-bit address is used
+  uint64_t addr; //64-bit address
+  uint8_t endpoint; //Use 0xFF to request on all endpoints
+  uint8_t field_control; //Bit 0: Request node's 64-bit address present
+  uint16_t manu; //Manufacturer code
+  uint16_t image_type; //0x0000 - 0xFFBF - Manuafacturer Specific
+                       //0xFFC0 - Security Credential
+                       //0xFFC1 - Configuration
+                       //0xFFC2 - Log
+                       //0xFFC3 - 0xFFFE - Reserved
+                       //0xFFFF - Wildcard
+  uint32_t fileversion; //Set to 0 when sending from host
+  uint32_t fileoffset; //Offset of the file being requested
+  uint8_t maxsize; //Maximum data size that can be received
+} __attribute__((packed)) rapidha_bootload_image_block_request_t;
+
+typedef struct {
+  uint8_t frame_start; //Always set to 0xF1
+  uint8_t header_primary; //Primary frame type
+  uint8_t header_secondary; //Command Subset of the given primary frame type
+  uint8_t frameid; //Set this with get_next_frameid : 0-127 from Host 128-255 from module
+  uint8_t length; //Number of bytes between the length and the checksum
+  uint16_t netaddr; //0xFFFF indicates that 64-bit address is used
+  uint64_t addr; //64-bit address
+  uint8_t endpoint; //Use 0xFF to request on all endpoints
+  uint8_t status; //Use RAPIDHA_STATUS_RESPONSE_ABORT to abort a firmware upgrade
+  uint16_t manu; //Manufacturer code
+  uint16_t image_type; //0x0000 - 0xFFBF - Manuafacturer Specific
+                       //0xFFC0 - Security Credential
+                       //0xFFC1 - Configuration
+                       //0xFFC2 - Log
+                       //0xFFC3 - 0xFFFE - Reserved
+                       //0xFFFF - Wildcard
+  uint32_t fileversion; //Set to 0 when sending from host
+  uint32_t fileoffset; //Offset of the file being requested
+  uint8_t datalen; //Length of the data
+  uint8_t data; //The data starts here
+} __attribute__((packed)) rapidha_bootload_image_block_response_t;
+
+typedef struct {
+  uint8_t frame_start; //Always set to 0xF1
+  uint8_t header_primary; //Primary frame type
+  uint8_t header_secondary; //Command Subset of the given primary frame type
+  uint8_t frameid; //Set this with get_next_frameid : 0-127 from Host 128-255 from module
+  uint8_t length; //Number of bytes between the length and the checksum
+  uint16_t netaddr; //0xFFFF indicates that 64-bit address is used
+  uint64_t addr; //64-bit address
+  uint8_t endpoint; //Use 0xFF to request on all endpoints
+  uint8_t status; //0x00=Success
+  uint16_t manu; //Manufacturer code
+  uint16_t image_type; //0x0000 - 0xFFBF - Manuafacturer Specific
+                       //0xFFC0 - Security Credential
+                       //0xFFC1 - Configuration
+                       //0xFFC2 - Log
+                       //0xFFC3 - 0xFFFE - Reserved
+                       //0xFFFF - Wildcard
+  uint32_t fileversion; //Set to 0 when sending from host
+} __attribute__((packed)) rapidha_bootload_upgrade_end_request_t;
+
+typedef struct {
+  uint8_t frame_start; //Always set to 0xF1
+  uint8_t header_primary; //Primary frame type
+  uint8_t header_secondary; //Command Subset of the given primary frame type
+  uint8_t frameid; //Set this with get_next_frameid : 0-127 from Host 128-255 from module
+  uint8_t length; //Number of bytes between the length and the checksum
+  uint16_t netaddr; //0xFFFF indicates that 64-bit address is used
+  uint64_t addr; //64-bit address
+  uint8_t endpoint; //Use 0xFF to request on all endpoints
+  uint16_t manu; //Manufacturer code
+  uint16_t image_type; //0x0000 - 0xFFBF - Manuafacturer Specific
+                       //0xFFC0 - Security Credential
+                       //0xFFC1 - Configuration
+                       //0xFFC2 - Log
+                       //0xFFC3 - 0xFFFE - Reserved
+                       //0xFFFF - Wildcard
+  uint32_t fileversion; //Set to 0 when sending from host
+  uint32_t curtime; //0=Now
+  uint32_t upgrade_time; //0=Now
+} __attribute__((packed)) rapidha_bootload_upgrade_end_response_t;
 
 typedef struct {
   uint8_t frame_start; //Always set to 0xF1
