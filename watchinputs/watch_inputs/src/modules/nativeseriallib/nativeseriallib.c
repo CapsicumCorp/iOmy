@@ -418,14 +418,16 @@ static int nativeseriallib_serial_port_reset(void *serialport) {
 
   fd=serialportptr->fd;
 
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
-
   //Drop both RTS and DTR for 100 milliseconds and raise again
   controlbits=TIOCM_DTR|TIOCM_RTS;
   ioctl(fd, TIOCMBIC, &controlbits);
   usleep(100000);
   ioctl(fd, TIOCMBIS, &controlbits);
   usleep(100000);
+
+  nativeseriallib_configureserialport(serialportptr->fd);
+
+  PTHREAD_UNLOCK(&nativeseriallibmutex);
 
   return 1;
 }
