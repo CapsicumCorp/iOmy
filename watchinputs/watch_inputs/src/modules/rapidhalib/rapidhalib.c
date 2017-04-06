@@ -2668,7 +2668,7 @@ static int rapidhalib_initialRapidHAsetup(rapidhadevice_t *rapidhadevice, int lo
     if ((longdetect && retrycnt % 4==0) || !longdetect) {
       //Reset the RapidHA module to get it in a known state
       //Only reset on every 4th retry if longdetect is set
-      debuglibifaceptr->debuglib_printf(1, "Sending the reset command to the RapidHA\n", __func__);
+      debuglibifaceptr->debuglib_printf(1, "%s: Sending the reset command to the RapidHA\n", __func__);
       rapidhalib_send_rapidha_utility_reset(rapidhadevice, rapidhalocked);
 
       //Wait 100 milliseconds after reset
@@ -3446,7 +3446,7 @@ STATIC void rapidhalib_refresh_rapidha_data(void) {
       rapidhalib_unlockrapidha(&rapidhalocked);
       if (needreinit) {
         //Having problems configuring this RapidHA so go on to other devices
-        debuglibifaceptr->debuglib_printf(1, "%s: ERROR: RapidHA: %016" PRIX64 " hasn't reinitialising properly\n", __func__, rapidhadeviceptr->addr);
+        debuglibifaceptr->debuglib_printf(1, "%s: ERROR: RapidHA: %016" PRIX64 " hasn't reinitialised properly\n", __func__, rapidhadeviceptr->addr);
         rapidhalib_markrapidha_notinuse(rapidhadeviceptr, &rapidhalocked);
         continue;
       }
