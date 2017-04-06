@@ -387,7 +387,7 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
                         
                         if (mInfo.bError === false) {
                             //-------------------------------------------------//
-                            // Try to add the link
+                            // Try to add the item
                             //-------------------------------------------------//
                             try {
                                 var mData = me.FetchAPIAndParameters();
@@ -403,7 +403,9 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
                                 }
 
                                 jQuery.sap.log.error(sErrorMessage);
-                                IOMy.common.showError(sErrorMessage);
+                                IOMy.common.showError(sErrorMessage, "Error", function () {
+                                    thisButton.setEnabled(true); // Unlock the button
+                                });
                             }
                         } else {
                             if (mInfo.aErrorMessages.length === 1) {

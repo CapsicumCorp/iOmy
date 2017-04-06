@@ -337,9 +337,9 @@ sap.ui.controller("mjs.settings.PremiseList", {
                         //----------------------------------------//
                         //-- A.) No Access to this Premise		--//
                         //----------------------------------------//
-                        oPremiseLabel = new sap.m.Text( me.createId(sPremiseLabelId), {
+                        oPremiseLabel = new sap.m.Button( me.createId(sPremiseLabelId), {
                             text : aPremise.Name
-                        }).addStyleClass("MarLeft6px Font_RobotoCondensed Setting-ItemLabel TextLeft width140px");
+                        }).addStyleClass("ButtonNoBorder IOMYButton PremiseOverviewRoomButton TextSize16px TextLeft minheight15px");
 
                     } else {
                         //----------------------------------------//

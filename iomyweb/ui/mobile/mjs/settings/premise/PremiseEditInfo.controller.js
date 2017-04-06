@@ -202,7 +202,8 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                                             onFail : function (response) {
                                                                 // There's something wrong in either the code or the
                                                                 // parameters parsed.
-                                                                IOMy.common.showError("Update failed.", "Error");
+                                                                //IOMy.common.showError("Update failed.", "Error");
+                                                                IOMy.common.showError(response.responseText, "Error");
                                                                 jQuery.sap.log.error(JSON.stringify(response));
                                                                 
                                                                 requestParameters.onComplete(); // Unlock the button
@@ -213,7 +214,8 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                                     onFail : function (response) {
                                                         // There's something wrong in either the code or the
                                                         // parameters parsed.
-                                                        IOMy.common.showError("Update failed.", "Error");
+                                                        //IOMy.common.showError("Update failed.", "Error");
+                                                        IOMy.common.showError(response.responseText, "Error");
                                                         jQuery.sap.log.error(JSON.stringify(response));
 
                                                         requestParameters.onComplete(); // Unlock the button
@@ -223,7 +225,8 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                             onFail : function (response) {
                                                 // There's something wrong in either the code or the
                                                 // parameters parsed.
-                                                IOMy.common.showError("Update failed.", "Error");
+                                                //IOMy.common.showError("Update failed.", "Error");
+                                                IOMy.common.showError(response.responseText, "Error");
                                                 jQuery.sap.log.error(JSON.stringify(response));
                                                 
                                                 this.onComplete();

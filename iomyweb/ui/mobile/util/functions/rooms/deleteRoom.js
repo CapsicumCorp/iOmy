@@ -115,7 +115,7 @@ $.extend(IOMy.functions, {
 
                 onFail : function (response) {
 
-                    IOMy.common.showError(oRoomToDelete.RoomName+" could not be removed.", "Error");
+                    IOMy.common.showError(oRoomToDelete.RoomName+" could not be removed:\n\n" + response.ErrMesg, "Error");
                     jQuery.sap.log.error(oRoomToDelete.RoomName+" could not be removed.\n" + response.ErrMesg);
 
                 }

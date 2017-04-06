@@ -396,9 +396,25 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
         } else {
             oVertBox.addItem(
                 new sap.m.MessageStrip({
-                    text : "You have no devices in iOmy. To add devices, you will need to add a link first.\n\nGo to the app menu at the top-left corner and press Links and Items and use the action menu and find \"Add Link\"."
+                    text : "You have no devices in iOmy. To add devices, you will need to add a link first."
                 }).addStyleClass("iOmyMessageInfoStrip")
             );
+    
+            oVertBox.addItem(
+                new sap.m.VBox({
+                    items : [
+                        new sap.m.Link({
+                            //enabled : false,
+                            text : "Add Link",
+                            press : function () {
+                                IOMy.common.NavigationChangePage("pSettingsLinkAdd", {});
+                            }
+                        }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
+                    ]
+                }).addStyleClass("TextCenter MarTop12px")
+            );
+    
+            oVertBox.addStyleClass("BorderBottom PadAll6px");
         }
 		
         //-- Main Page Body --//

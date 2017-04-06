@@ -238,7 +238,8 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                                                 }, "UpdateMessageBox");
                                             },
                                             onFail : function (response) {
-                                                IOMy.common.showError("Update failed.", "Error");
+                                                //IOMy.common.showError("Update failed.", "Error");
+                                                IOMy.common.showError(response.responseText, "Error");
                                                 jQuery.sap.log.error(JSON.stringify(response));
                                                 thisButton.setEnabled(true);
                                             }
