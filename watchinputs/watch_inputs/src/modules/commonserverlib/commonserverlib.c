@@ -49,6 +49,7 @@ static int serverlib_netgetc(int sock, char *buffer, size_t bufsize, int *pos, i
 static char *serverlib_netgets_with_quitpipe(char *s, int size, int sock, char *netgetc_buffer, size_t netgetc_bufsize, int *netgetc_pos, int *netgetc_received, int (* const getAbortEarlyfuncptr)(void), int quitpipefd);
 static char *serverlib_netgets(char *s, int size, int sock, char *netgetc_buffer, size_t netgetc_bufsize, int *netgetc_pos, int *netgetc_received, int (* const getAbortEarlyfuncptr)(void));
 static int serverlib_netputs(const char *s, int sock, int (* const getAbortEarlyfuncptr)(void));
+static int serverlib_netnput(const char *s, size_t len, int sock, int (* const getAbortEarlyfuncptr)(void));
 static void serverlib_closeSocket(int *socket);
 static int serverlib_setupTCPListenSocket(in_addr_t hostip, uint16_t port, int (* const getAbortEarlyfuncptr)(void));
 static int serverlib_waitForConnection_with_quitpipe(int sock, int (* const getAbortEarlyfuncptr)(void), int quitpipefd);
@@ -61,6 +62,7 @@ static commonserverlib_ifaceptrs_ver_1_t commonserverlib_ifaceptrs_ver_1={
   serverlib_netgetc,
   serverlib_netgets,
   serverlib_netputs,
+  serverlib_netnput,
   serverlib_closeSocket,
   serverlib_setupTCPListenSocket,
   serverlib_waitForConnection,
@@ -228,9 +230,16 @@ static char *serverlib_netgets(char *s, int size, int sock, char *netgetc_buffer
   Arguments: getAbortEarlyfuncptr A pointer to a function that returns non-zero if we should abort early or NULL if not available
 */
 static int serverlib_netputs(const char *s, int sock, int (* const getAbortEarlyfuncptr)(void)) {
-  int len, sent, pos;
+  return serverlib_netnput(s, strlen(s), sock, getAbortEarlyfuncptr);
+}
 
-  len = strlen(s);
+/*
+  Description: Send a string of length len over a network socket
+  Arguments: getAbortEarlyfuncptr A pointer to a function that returns non-zero if we should abort early or NULL if not available
+*/
+static int serverlib_netnput(const char *s, size_t len, int sock, int (* const getAbortEarlyfuncptr)(void)) {
+  int sent, pos;
+
   pos=0;
   while (len > 0) {
     if (getAbortEarlyfuncptr) {
@@ -243,6 +252,7 @@ static int serverlib_netputs(const char *s, int sock, int (* const getAbortEarly
       //An error occurred while sending
       return -1;
     }
+    pos+=sent;
     len-=sent;
   }
   return 0;
