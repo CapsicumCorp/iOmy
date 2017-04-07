@@ -26,7 +26,32 @@ $.sap.declare("IOMy.rules",true);
 IOMy.rules = new sap.ui.base.Object();
 
 //----------------------------------------//
-//-- LOAD VALIDATION FUNCTIONS          --//
+//-- LOAD RULE FUNCTIONS                --//
 //----------------------------------------//
+
+//----------------------------------------------------------------------------//
+// Rule management
+//----------------------------------------------------------------------------//
 //$.sap.registerModulePath('IOMy.rules', sModuleInitialBuildLocation+'util/validation');
 //$.sap.require("IOMy.rules.addRule");
+//
+//$.sap.registerModulePath('IOMy.rules', sModuleInitialBuildLocation+'util/validation');
+//$.sap.require("IOMy.rules.editRule");
+//
+//$.sap.registerModulePath('IOMy.rules', sModuleInitialBuildLocation+'util/validation');
+//$.sap.require("IOMy.rules.deleteRule");
+//
+////----------------------------------------------------------------------------//
+//// Rule conditions and their controls
+////----------------------------------------------------------------------------//
+//$.sap.registerModulePath('IOMy.rules', sModuleInitialBuildLocation+'util/validation');
+//$.sap.require("IOMy.rules.Action");
+//
+//$.sap.registerModulePath('IOMy.rules', sModuleInitialBuildLocation+'util/validation');
+//$.sap.require("IOMy.rules.Condition");
+//
+//$.sap.registerModulePath('IOMy.rules', sModuleInitialBuildLocation+'util/validation');
+//$.sap.require("IOMy.rules.Rule");
+//
+//$.sap.registerModulePath('IOMy.rules', sModuleInitialBuildLocation+'util/validation');
+//$.sap.require("IOMy.rules.widgets");
