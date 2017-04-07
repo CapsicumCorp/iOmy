@@ -27,6 +27,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <sys/socket.h>
 #include <arpa/telnet.h>
 #include <map>
 #include <string>
