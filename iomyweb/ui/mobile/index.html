@@ -33,7 +33,7 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 		<title>IOMY Mobile UI Git2</title>
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'/>
-
+		
 		<!-- ===================================== -->
 		<!-- == FAVICON                        === -->
 		<!-- ===================================== -->
@@ -45,55 +45,55 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 		<!-- Google Fonts -->
 		<link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Roboto+Condensed' /> 
 		<!-- Other Fonts -->
-		
-		<!-- ====================================== -->
-		<!-- == SAP UI5 CORE                    === -->
-		<!-- ====================================== -->
-		<script src="OpenUI5/sap-ui-core.js"
-			id="sap-ui-bootstrap"
-			data-sap-ui-libs="sap.m, sap.tnt"
-			data-sap-ui-theme="sap_bluecrystal" >
-		</script>
-		
-		
-		<!-- ===================================== -->
-		<!-- == CSS                            === -->
-		<!-- ===================================== -->
-		<!-- Andrew's Common Support CSS -->
-		<link rel="stylesheet" type="text/css" href="resources/css/additional_colour_pallete.css"/>		<!-- Contains a heap of Andrew's commonly used colours -->
-		<!-- Other Additional Support CSS -->
-		
-		<!-- Main App CSS -->
-		<link rel="stylesheet" type="text/css" href="resources/css/app.css"/>						<!-- The main CSS for the site while -->
-		<link rel="stylesheet" type="text/css" href="resources/css/icons.css"/>
-		<link rel="stylesheet" type="text/css" href="resources/css/responsive.css"/>
-		<link rel="stylesheet" type="text/css" href="resources/css/capsicum_height.css"/>
-		<link rel="stylesheet" type="text/css" href="resources/css/capsicum_margin.css"/>
-		<link rel="stylesheet" type="text/css" href="resources/css/capsicum_padding.css"/>
-		<link rel="stylesheet" type="text/css" href="resources/css/capsicum_textsizes.css"/>
-		<link rel="stylesheet" type="text/css" href="resources/css/capsicum_widths.css"/>
-		
-		<!-- Experimental CSS -   NOTE: The changes from this will be Merged into the main section when they are finished with -->
-		<link rel="stylesheet" type="text/css" href="resources/css/experimental_brent.css"/>
-		<link rel="stylesheet" type="text/css" href="resources/css/experimental_andrew.css"/>
-		<link rel="stylesheet" type="text/css" href="resources/css/experimental_ian.css"/>
-		
-		<!-- ======================================================== -->
-		<!-- == 5.0 - LOAD THE WIDGET OBJECTS AND START THE APP   === -->
-		<!-- ======================================================== -->
-		<script>
-			//--------------------------------------------------------//
-			//-- DECLARE THE MODULE PATH FOR THE OPENUI5 TO RUN IN	--//
-			//--------------------------------------------------------//
-			var sModuleInitialBuildLocation = "/ui/mobile/";
-		</script>
-		<script src="/ui/mobile/resources/js/ZigbeeCustomTelnetInput.js"></script>
-		<script src="/ui/mobile/resources/js/iOmyExceptions.js"></script>
-		<script src="/ui/mobile/app.js"></script>
-
-
 	</head>
 	<body class="sapUiBody" role="application">
+		<div id="se-pre-con" class="se-pre-con"></div>
 		<div id="content"></div>
 	</body>
+	<!-- ====================================== -->
+	<!-- == SAP UI5 CORE                    === -->
+	<!-- ====================================== -->
+	<script src="OpenUI5/sap-ui-core.js"
+		id="sap-ui-bootstrap"
+		data-sap-ui-libs="sap.m, sap.tnt"
+		data-sap-ui-theme="sap_bluecrystal" >
+	</script>
+
+	<!-- ===================================== -->
+	<!-- == CSS                            === -->
+	<!-- ===================================== -->
+	<!-- Andrew's Common Support CSS -->
+	<link rel="stylesheet" type="text/css" href="resources/css/additional_colour_pallete.css"/>		<!-- Contains a heap of Andrew's commonly used colours -->
+	<!-- Other Additional Support CSS -->
+	
+	<!-- Main App CSS -->
+	<link rel="stylesheet" type="text/css" href="resources/css/app.css"/>						<!-- The main CSS for the site while -->
+	<link rel="stylesheet" type="text/css" href="resources/css/icons.css"/>
+	<link rel="stylesheet" type="text/css" href="resources/css/responsive.css"/>
+	<link rel="stylesheet" type="text/css" href="resources/css/capsicum_height.css"/>
+	<link rel="stylesheet" type="text/css" href="resources/css/capsicum_margin.css"/>
+	<link rel="stylesheet" type="text/css" href="resources/css/capsicum_padding.css"/>
+	<link rel="stylesheet" type="text/css" href="resources/css/capsicum_textsizes.css"/>
+	<link rel="stylesheet" type="text/css" href="resources/css/capsicum_widths.css"/>
+	
+	<!-- Experimental CSS -   NOTE: The changes from this will be Merged into the main section when they are finished with -->
+	<link rel="stylesheet" type="text/css" href="resources/css/experimental_brent.css"/>
+	<link rel="stylesheet" type="text/css" href="resources/css/experimental_andrew.css"/>
+	<link rel="stylesheet" type="text/css" href="resources/css/experimental_ian.css"/>
+	
+	<!-- ======================================================== -->
+	<!-- == 5.0 - LOAD THE WIDGET OBJECTS AND START THE APP   === -->
+	<!-- ======================================================== -->
+	<script>
+		//--------------------------------------------------------//
+		//-- DECLARE THE MODULE PATH FOR THE OPENUI5 TO RUN IN	--//
+		//--------------------------------------------------------//
+		var sModuleInitialBuildLocation = "/ui/mobile/";
+	</script>
+	<script src="/ui/mobile/resources/js/ZigbeeCustomTelnetInput.js"></script>
+	<script src="/ui/mobile/resources/js/iOmyExceptions.js"></script>
+	<script src="/ui/mobile/app.js"></script>
+	
+	<!-- Removes the Loader from the screen -->
+	<script src="/ui/mobile/resources/js/removeloader.js"></script>
 </html>

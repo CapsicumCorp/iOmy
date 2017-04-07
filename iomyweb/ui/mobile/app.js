@@ -1682,6 +1682,8 @@ $.getJSON(
 //== 5.4 - DEPLOY OPENUI5 APP					==//
 //================================================//
 
+//-- Fade out the Pre-load gif --//
+//$("#se-pre-con").fadeOut("slow");
 //-- Deploy that App in the Content Div --//
 oApp.placeAt("content");
 

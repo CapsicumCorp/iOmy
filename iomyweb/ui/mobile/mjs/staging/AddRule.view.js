@@ -143,7 +143,16 @@ sap.ui.jsview("mjs.staging.AddRule", {
                                 }),									
                                 type:"Reject",
                                 text: "Discard",
-                            }).addStyleClass("width80px "),
+								press: function () {
+									sap.m.MessageBox.show(
+											"Are you sure that you wish to discard the current rule?", 
+											{ 	//text displayed in content area of the message box
+												icon: sap.m.MessageBox.Icon.INFORMATION,                            //icon : Icon displayed on the header
+												title: "Warning",   	                                            //title : Header text
+												actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO], //Supported action in message box
+											});
+										}
+								}).addStyleClass("width80px "),
                         ]
                     }).addStyleClass("MarTop15px TextCenter")
                 ]

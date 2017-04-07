@@ -53,6 +53,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
     wUserAddressVertBox     : null,
     wPasswordVertBox        : null,
     wDBAuthVertBox          : null,
+	wSubmitVertBox			: null,
     
     /**
 	 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -139,7 +140,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                     ]
                 })
             ]
-        }).addStyleClass("ConsistentMenuHeader ListItem");
+        }).addStyleClass("ConsistentMenuHeader BorderTop ListItem");
         
         //------------------------------------------------------//
         // Given names (First and Middle names)
@@ -249,7 +250,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         
         //===== REGION =====//
         var oRegionTitle = new sap.m.Text({
-            text : "Region"
+            text : "Country / Region"
         });
 
         me.wRegionField = IOMy.widgets.selectBoxRegions().addStyleClass("SettingsDropdownInput");
@@ -263,7 +264,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
 
         //===== STATE =====//
         var oStateTitle = new sap.m.Text({
-            text : "Subregion"
+            text : "State / County"
         });
 
         me.wStateField = new sap.m.Input({
@@ -272,7 +273,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
 
         //===== POST CODE =====//
         var oPostCodeTitle = new sap.m.Text({
-            text : "Post Code"
+            text : "Post Code / Zip Code"
         });
 
         me.wPostCodeField = new sap.m.Input({
@@ -290,7 +291,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
 
         //===== STREET ADDRESS (LINE 1) =====//
         var oLine1Title = new sap.m.Text({
-            text : "Street Address Line 1"
+            text : "Street Address"
         });
 
         me.wAddressLine1Field = new sap.m.Input({
@@ -299,7 +300,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
 
         //===== UNIT/FLAT ADDRESS (LINE 2) =====//
         var oLine2Title = new sap.m.Text({
-            text : "Street Address Line 2"
+            text : "Unit Number (if applicable)"
         });
 
         me.wAddressLine2Field = new sap.m.Input({
@@ -308,7 +309,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
 
         //===== EXTRA INFO (LINE 3) =====//
         var oLine3Title = new sap.m.Text({
-            text : "Street Address Line 3"
+            text : "City / Suburb"
         });
 
         me.wAddressLine3Field = new sap.m.Input({
@@ -325,12 +326,12 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                 new sap.m.VBox({
                     items : [
                         new sap.m.Label({
-                            text: "Username and Password"
+                            text: "User Login Details"
                         }).addStyleClass("MarLeft6px")
                     ]
                 })
             ]
-        }).addStyleClass("ConsistentMenuHeader BorderTop ListItem");
+        }).addStyleClass("ConsistentMenuHeader ListItem");
         
         // -- USERNAME --//
         var oUsernameLabel = new sap.m.Label({
@@ -412,9 +413,9 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         //--------------------------//
         me.wUserInformationVertBox = new sap.m.VBox({
             items : [
+				oGenderLabel, me.wGenderField,
+				oTitleLabel, me.wTitleField,
                 oGivenNamesLabel, me.wGivenNamesField,
-                oTitleLabel, me.wTitleField,
-                oGenderLabel, me.wGenderField,
                 oSurnameLabel, me.wSurnameField,
                 oDisplayNameLabel, me.wDisplayNameField,
                 oDateOfBirthLabel, me.wDateOfBirthField,
@@ -428,14 +429,14 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         //--------------------------//
         me.wUserAddressVertBox = new sap.m.VBox({
             items : [
-                oRegionTitle, me.wRegionField,
                 oLanguageTitle, me.wLanguageField,
-                oStateTitle, me.wStateField,
-                oPostCodeTitle, me.wPostCodeField,
-                oTimezoneTitle, me.wTimezoneField,
                 oLine1Title, me.wAddressLine1Field,
                 oLine2Title, me.wAddressLine2Field,
                 oLine3Title, me.wAddressLine3Field,
+				oStateTitle, me.wStateField,
+                oPostCodeTitle, me.wPostCodeField,
+				oRegionTitle, me.wRegionField,
+                oTimezoneTitle, me.wTimezoneField,
             ]
         }).addStyleClass("UserFormSection PadAll10px");
         
@@ -457,28 +458,34 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             items : [
                 oDBRootUsernameLabel, me.wDBRootUsernameField,
                 oDBRootPasswordLabel, me.wDBRootPasswordField,
-                
-                //--------------------------//
-                // Add Button
-                //--------------------------//
+            ]
+        }).addStyleClass("UserFormSection PadAll10px");
+		
+		//--------------------------//
+		// Add / Edit Button
+		//--------------------------//
+		me.wSubmitVertBox = new sap.m.VBox({
+            items : [
                 me.wEditButton
             ]
         }).addStyleClass("UserFormSection PadAll10px BorderBottom");
-
+		
         var oPanel = new sap.m.Panel(me.createId("AddUserPanel"), {
             backgroundDesign: "Transparent",
             content: [
+				oPasswordSection,
+                me.wPasswordVertBox,
+                
+                oDBAuthenticationSection,
+                me.wDBAuthVertBox,
+				
                 oUserInformationSection,
                 me.wUserInformationVertBox,
                 
                 oUserAddressHeading,
                 me.wUserAddressVertBox,
-                
-                oPasswordSection,
-                me.wPasswordVertBox,
-                
-                oDBAuthenticationSection,
-                me.wDBAuthVertBox
+				
+				me.wSubmitVertBox
             ] //-- End of Panel Content --//
         }).addStyleClass("UserInputForm MasterPanel PanelNoPadding PadTop3px PadBottom15px");
 

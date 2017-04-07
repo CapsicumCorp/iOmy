@@ -216,7 +216,7 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
                                     }
                                 );
 							}
-						})//,
+						}),
 						//--------------------------------//
 						//-- SWITCH USER				--//
 						//--------------------------------//
@@ -230,12 +230,12 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 						//--------------------------------//
 						//-- UI Staging      			--//
 						//--------------------------------//
-						//new sap.tnt.NavigationListItem({
-						//	text: "UI Staging",
-						//	select:	function (oControlEvent) {
-						//		IOMy.common.NavigationChangePage( "pStagingHome", {}, true );
-						//	}
-						//})
+						new sap.tnt.NavigationListItem({
+							text: "UI Staging",
+							select:	function (oControlEvent) {
+								IOMy.common.NavigationChangePage( "pStagingHome", {}, true );
+							}
+						})
 					]
 				}).addStyleClass("IOMYNavMenu")
 			]
