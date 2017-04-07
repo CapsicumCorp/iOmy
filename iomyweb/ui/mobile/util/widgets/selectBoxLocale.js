@@ -46,6 +46,9 @@ $.extend(IOMy.widgets,{
             wSBox = new sap.m.Select(mSettings);
         }
         
+        // Default to Australia
+        wSBox.setSelectedKey(14);
+        
         return wSBox;
     },
     
@@ -68,6 +71,9 @@ $.extend(IOMy.widgets,{
         } else {
             wSBox = new sap.m.Select(mSettings);
         }
+        
+        // Default to Australian English
+        wSBox.setSelectedKey(1);
         
         return wSBox;
     },

@@ -247,22 +247,21 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             ]
         }).addStyleClass("ConsistentMenuHeader BorderTop ListItem");
         
-        //===== REGION =====\\
+        //===== REGION =====//
         var oRegionTitle = new sap.m.Text({
             text : "Region"
         });
 
         me.wRegionField = IOMy.widgets.selectBoxRegions().addStyleClass("SettingsDropdownInput");
-        me.wRegionField.setSelectedIndex(null);
 
-        //===== LANGUAGE =====\\
+        //===== LANGUAGE =====//
         var oLanguageTitle = new sap.m.Text({
             text : " Language"
         });
 
         me.wLanguageField = IOMy.widgets.selectBoxLanguages().addStyleClass("SettingsDropdownInput");
 
-        //===== STATE =====\\
+        //===== STATE =====//
         var oStateTitle = new sap.m.Text({
             text : "Subregion"
         });
@@ -271,7 +270,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             
         }).addStyleClass("SettingsDropdownInput");
 
-        //===== POST CODE =====\\
+        //===== POST CODE =====//
         var oPostCodeTitle = new sap.m.Text({
             text : "Post Code"
         });
@@ -280,16 +279,16 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             
         }).addStyleClass("SettingsDropdownInput");
 
-        //===== TIMEZONE =====\\
+        //===== TIMEZONE =====//
         var oTimezoneTitle = new sap.m.Text({
             text : "Timezone"
         });
 
         me.wTimezoneField = IOMy.widgets.selectBoxTimezones().addStyleClass("SettingsDropdownInput");
 
-        //===== RESIDENTIAL ADDRESS =====\\
+        //===== RESIDENTIAL ADDRESS =====//
 
-        //===== STREET ADDRESS (LINE 1) =====\\
+        //===== STREET ADDRESS (LINE 1) =====//
         var oLine1Title = new sap.m.Text({
             text : "Street Address Line 1"
         });
@@ -298,7 +297,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             value : ""
         }).addStyleClass("SettingsTextInput");
 
-        //===== UNIT/FLAT ADDRESS (LINE 2) =====\\
+        //===== UNIT/FLAT ADDRESS (LINE 2) =====//
         var oLine2Title = new sap.m.Text({
             text : "Street Address Line 2"
         });
@@ -307,7 +306,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             value : ""
         }).addStyleClass("SettingsTextInput");
 
-        //===== EXTRA INFO (LINE 3) =====\\
+        //===== EXTRA INFO (LINE 3) =====//
         var oLine3Title = new sap.m.Text({
             text : "Street Address Line 3"
         });
@@ -333,7 +332,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             ]
         }).addStyleClass("ConsistentMenuHeader BorderTop ListItem");
         
-        // -- USERNAME --\\
+        // -- USERNAME --//
         var oUsernameLabel = new sap.m.Label({
             text : "Username"
         });
@@ -342,7 +341,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             value : ""
         }).addStyleClass("SettingsTextInput");
         
-        // -- PASSWORD -- \\
+        // -- PASSWORD -- //
         var oPasswordLabel = new sap.m.Label({
             text : "Password"
         });
@@ -352,7 +351,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             type : sap.m.InputType.Password
         }).addStyleClass("SettingsTextInput");
 
-        // -- CONFIRM PASSWORD -- \\
+        // -- CONFIRM PASSWORD -- //
         var oConfirmPasswordLabel = new sap.m.Label({
             text : "Confirm Password"
         }).addStyleClass("");
@@ -377,14 +376,14 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             ]
         }).addStyleClass("ConsistentMenuHeader BorderTop ListItem");
         
-        // -- USERNAME --\\
+        // -- USERNAME --//
         var oDBRootUsernameLabel = new sap.m.Label({
             text : "Username"
         });
         
         me.wDBRootUsernameField = new sap.m.Input({}).addStyleClass("SettingsTextInput");
         
-        // -- PASSWORD --\\
+        // -- PASSWORD --//
         var oDBRootPasswordLabel = new sap.m.Label({
             text : "Password"
         });
@@ -523,10 +522,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         //-----------------------------------//
         // Validate the date of birth
         //-----------------------------------//
-        if (vDob === "") {
-            aLogErrors.push("* Date of birth must be filled out");
-            
-        } else {
+        if (vDob !== "") {
             mDOBValidationInfo = IOMy.validation.isDOBValid(vDob);
             
             if (mDOBValidationInfo.bIsValid === false) {
