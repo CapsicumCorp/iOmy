@@ -114,6 +114,7 @@ $.sap.require("IOMy.devices.thermostat");
 var sLocalResources = sModuleInitialBuildLocation+"mjs";
 jQuery.sap.registerResourcePath("mjs", sLocalResources);
 
+// TODO: Perhaps use the user's language settings instead of that of the webview.
 var language = navigator.language;
 var oApp = new sap.m.App("oApp");
 	
@@ -1590,6 +1591,13 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Garagedoor\" Page!\n"
 	},
+//    //-- Rules --//
+//    {
+//		"Id":			"pRuleNew",
+//		"Location":		"mjs.rules.AddRule",
+//		"Type":			"JS",
+//		"ErrMesg":		"Critical Error: Couldn't load \"mjs.rules.AddRule\" Page!\n"
+//	},
     //--------------------------------------------------------------------//
     // Staging
     //--------------------------------------------------------------------//

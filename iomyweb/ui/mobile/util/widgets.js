@@ -103,6 +103,9 @@ $.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widge
 $.sap.require("IOMy.widgets.premiseOptionsSelectBox");
 
 $.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
+$.sap.require("IOMy.widgets.thingsSelectBox");
+
+$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.roomTypesSelectBox");
 
 $.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
