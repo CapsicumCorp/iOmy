@@ -168,7 +168,7 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
 					items : [
                         oLinkTitle, oLinkNameField,
                         oPremiseLabel, me.wPremiseCBox,
-                        oRoomLabel, me.wRoomCBox,
+                        oRoomLabel, me.wRoomCBoxHolder,
                         oEditButton
                     ]
 				}).addStyleClass("UserInputForm");

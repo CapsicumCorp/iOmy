@@ -54,7 +54,7 @@ $.extend(IOMy.widgets,{
                 
                 $.each(IOMy.common.RoomsList[sPremiseId],function(sIndex,aRoom) {
                     //-- Verify that the Premise has rooms, other than the pseudo-room Unassigned --//
-                    if( sIndex !== "Unassigned" && sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null ) {
+                    if( sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null ) {
                         oSBox.addItem(
                             new sap.ui.core.Item({
                                 text : aRoom.RoomName,

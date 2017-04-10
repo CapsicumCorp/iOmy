@@ -673,9 +673,9 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         me.wPremiseCBox.attachChange(
             function () {
                 // Refresh the room select box.
-                me.wRoomCBoxHolder.destroyItems();
-                me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), this.getSelectedKey()).addStyleClass("width100Percent SettingsDropDownInput");
-                me.wRoomCBox.setSelectedItem(null);
+                me.wRoomCBox.destroy();
+                me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_"+me.wPremiseCBox.getSelectedKey()).addStyleClass("width100Percent SettingsDropDownInput");
+                me.wRoomCBox.setSelectedKey(null);
                 me.wRoomCBoxHolder.addItem(me.wRoomCBox);
             }
         );

@@ -169,7 +169,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                 
                 //===== EXTRA INFO (LINE 3) =====//
                 var oLine3Title = new sap.m.Text({
-    	        	text : "Line 3 (Other info)"
+    	        	text : "City / Suburb"
     	        });
                 
 				var oLine3Field = new sap.m.Input(me.createId("addressLine3"), {
