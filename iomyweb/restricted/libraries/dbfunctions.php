@@ -38,7 +38,8 @@
 //-- #10.0# - Thing Functions                                       --//
 //-- #11.0# - IO Functions                                          --//
 //-- #12.0# - IO Data Functions                                     --//
-//-- #13.0# - RSCat & UoM Functions                                 --//
+//-- #13.0# - Graph Functions                                       --//
+//-- #15.0# - RSCat & UoM Functions                                 --//
 //--                                                                --//
 //====================================================================//
 
@@ -252,11 +253,12 @@ function dbGetCurrentSchema() {
 	return $sResult;
 }
 
-
-
 //========================================================================================================================//
 //== #2.0# - Time Functions                                                                                             ==//
 //========================================================================================================================//
+
+
+
 
 
 //========================================================================================================================//
@@ -1371,6 +1373,7 @@ function dbSpecialLookupUsersForPremisePerms() {
 			$sSQL .= "	`USERSINFO_DISPLAYNAME` \n";
 			$sSQL .= "FROM `".$sSchema."`.`USERS` \n";
 			$sSQL .= "INNER JOIN `".$sSchema."`.`USERSINFO` ON `USERS_USERSINFO_FK`=`USERSINFO_PK` \n";
+			$sSQL .= "WHERE `USERS_STATE` >= 1 \n";
 			$sSQL .= "ORDER BY `USERS_PK` ASC \n";
 			
 			//-- Set the SQL Output Columns --//
@@ -2044,6 +2047,7 @@ function dbUpdateUserRoomPermissions( $iRoomPermId, $iPermRead, $iPermWriter, $i
 		return array( "Error"=>true, "ErrMesg"=>"InsertUserRoomPermission: ".$sErrMesg );
 	}
 }
+
 
 //========================================================================================================================//
 //== #5.0# - Premise Functions                                                                                          ==//
@@ -7986,10 +7990,148 @@ function dbInsertNewIODataValue( $sTableName, $iIOId, $iUTS, $Value, $sBindType,
 	}
 }
 
+//========================================================================================================================//
+//== #13.0# - Graph Functions                                                                                           ==//
+//========================================================================================================================//
+
+function dbGetGraphLineIOAvg( $sDataType, $iIOId, $iStartUTS, $iEndUTS, $iDiff ) {
+	//----------------------------------------//
+	//-- 1.0 - Declare Variables            --//
+	//----------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught --//
+	$aResult            = array();      //-- ARRAY:     This variable is for the SQL result --//
+	$aReturn            = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function.  --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions.  --//
+
+	$aTemporaryView     = array();      //-- ARRAY:     This variable is used to hold the response from the function that looks up the SQL View name --//
+	$sView              = "";           //-- STRING:    Used to hold the extracted string that contains the SQL View name  --//
+	$sCalcedValueType   = "";           //-- STRING:    --//
+	$aInputVals         = array();      //-- ARRAY:     Used to hold an array of values to do the SQL Input Binding --//
+	$aOutputCols        = array();      //-- ARRAY:     Used to hold an array of values to do the formatting of the SQL Output data --//
+	
+	
+	if( $bError===false ) {
+		try {
+			//-- Retrieve the View in an array --//
+			$aTemporaryView = DataViewName( "Attribute", $sDataType );
+			
+			if ( $aTemporaryView["Error"]===true ) {
+				//-- If an error has occurred --//
+				$bError = true; 
+				$sErrMesg = "Debug: Unsupported datatype! \n datatype=".$sDataType;
+				
+			} else {
+				//-- store the view --//
+				$sView              = $aTemporaryView["View"];
+				$sCalcedValueType   = $aTemporaryView['CalcedValueType'];
+				
+				$sSQL .= "SELECT ";
+				$sSQL .= "    AVG( `RawValue`) AS \"Value\", ";
+				$sSQL .= "    `LastTimestamp`, ";
+				$sSQL .= "    `LastTimestamp` AS \"UnixTS\" ";
+				$sSQL .= "FROM ( ";
+				$sSQL .= "    SELECT ";
+				$sSQL .= "        `CALCEDVALUE` AS \"RawValue\", ";
+				$sSQL .= "        ( ( ROUND( ( `UTS` / :DiffStamp1 ) + 0.5, 0 ) * :DiffStamp2 ) ) AS \"LastTimestamp\" ";
+				$sSQL .= "    FROM `".$sView."` ";
+				$sSQL .= "    WHERE `IO_PK` = :IOId ";
+				$sSQL .= "    AND `UTS` > :StartUnixTS ";
+				$sSQL .= "    AND `UTS` <= :EndUnixTS ";
+				$sSQL .= "    ORDER BY `UTS` ASC ";
+				$sSQL .= ") AS InnerQuery ";
+				$sSQL .= "GROUP BY `LastTimestamp` ";
+				$sSQL .= "ORDER BY `LastTimestamp` ASC ";
+				
+				//-- Input Binding --//
+				$aInputVals = array(
+					array( "Name"=>"DiffStamp1",        "type"=>"INT",     "value"=>$iDiff        ),
+					array( "Name"=>"DiffStamp2",        "type"=>"INT",     "value"=>$iDiff        ),
+					array( "Name"=>"IOId",              "type"=>"INT",     "value"=>$iIOId        ),
+					array( "Name"=>"StartUnixTS",       "type"=>"INT",     "value"=>$iStartUTS    ),
+					array( "Name"=>"EndUnixTS",         "type"=>"INT",     "value"=>$iEndUTS      )
+				);
+				
+				//-- Output Binding --//
+				$aOutputCols = array(
+					array( "Name"=>"Value",             "type"=>"DEC3"  ),
+					array( "Name"=>"LastTimestamp",     "type"=>"TSC"   ),
+					array( "Name"=>"UnixTS",            "type"=>"BINT"  )
+				);
+				
+				//-- Execute the SQL Query --//
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+				
+				
+				//var_dump( $sSQL );
+				//echo "\n\n";
+				
+				//var_dump( $aInputVals );
+				//echo "\n\n";
+				
+				
+			}
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true ) {
+				if( $aResult["ErrMesg"]==="No Rows Found! Code:0" ) {
+					//-- Return no results --//
+					$aResult = array(
+						"Error"    => false,
+						"Data"     => array(
+							array(
+								"Value"     => 0,
+								//"IOId"      => $iIOId,
+								"UTS"       => 0
+							),
+							array (
+								"Value"     => 0,
+								//"IOId"      => $iIOId,
+								"UTS"       => 0
+							)
+						)
+					);
+					
+				} else {
+					$bError = true;
+					$sErrMesg = $aResult["ErrMesg"];
+				}
+			}
+		} catch( Exception $e) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"IOGraphLineAvg: ".$sErrMesg );
+	}
+}
+
+
+
+
 
 
 //========================================================================================================================//
-//== #13.0# - RSCat & UoM Functions                                                                                     ==//
+//== #15.0# - RSCat & UoM Functions                                                                                     ==//
 //========================================================================================================================//
 
 

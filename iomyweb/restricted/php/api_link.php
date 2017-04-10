@@ -478,7 +478,7 @@ if( $bError===false ) {
 						$bError = true;
 						$sErrMesg .= "Error Code:'2403' \n";
 						$sErrMesg .= "Internal API Error! \n";
-						$sErrMesg .= "Your user doesn't have sufficient privilege to change the Link name! \n";
+						$sErrMesg .= "Your user doesn't have the 'RoomAdmin' permission which is required to assign the link to a different room! \n";
 						
 					} else {
 						//-- Store the PremiseId --//

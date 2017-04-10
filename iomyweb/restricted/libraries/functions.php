@@ -35,7 +35,8 @@
 //-- #10.0# - Thing Functions                                       --//
 //-- #11.0# - IO Functions                                          --//
 //-- #12.0# - IO Data Functions                                     --//
-//-- #13.0# - RSCat & UoM Functions                                 --//
+//-- #12.0# - Graph Functions                                       --//
+//-- #15.0# - RSCat & UoM Functions                                 --//
 //====================================================================//
 
 
@@ -1028,7 +1029,8 @@ function UpdateUserPremisePermissions( $iUserId, $iPremiseId, $aDesiredPermissio
 						$bError    = true;
 						$iErrCode  = 4;
 						$sErrMesg .= "Permissions Error!\n";
-						$sErrMesg .= "Permission change was denied due to the target user is a \"Owner\".\n";
+						$sErrMesg .= "The target user is flagged as an \"Owner\"!.\n";
+						$sErrMesg .= "The API can not revoke an Owner's permission to their own Premise.\n";
 					}
 				}
 			}
@@ -3286,6 +3288,8 @@ function AddNewIO( $iThingId, $iRSTypesId, $iUoMId, $iIOTypeId, $iIOState, $fSam
 }
 
 
+
+
 //========================================================================================================================//
 //== #12.0# - IO Data Functions                                                                                         ==//
 //========================================================================================================================//
@@ -3437,12 +3441,98 @@ function InsertNewIODataValue( $iIOId, $iUTS, $Value, $bNonCommited=false ) {
 	} else {
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
+}
+
+
+function GetIOSpecialTotaledEnumValue( $iIODataType, $iIOId, $iStartStamp, $iEndStamp ) {
+	//------------------------------------------------------------//
+	//-- 1.0 - INITIALISE VARIABLES                             --//
+	//------------------------------------------------------------//
+	$bError         = false;        //-- BOOLEAN:       Used to indicate if at least one error has been caught.     --//
+	$iErrCode       = 0;            //-- INTEGER:       Used to store the error code of the error that occurred     --//
+	$sErrMesg       = "";           //-- STRING:        Stores the error message when an error is caught.           --//
+	$aResult        = array();      //-- ARRAY:         Stores the result of this function if no errors occur.      --//
+	
+	
+	//------------------------------------------------------------//
+	//-- 3.0 - FETCH THE MAXIMUM                                --//
+	//------------------------------------------------------------//
+	try {
+		$aTempResult1 = GetIODataAggregation( "Max", $iIODataType, $iIOId, $iStartStamp, $iEndStamp );
+		
+		if( $aTempResult1['Error']===false ) {
+			//------------------------------------------------------------//
+			//-- 4.0 - FETCH THE MINIMUM                                --//
+			//------------------------------------------------------------//
+			$aTempResult2 = GetIODataAggregation( "Min", $iIODataType, $iIOId, $iStartStamp, $iEndStamp );
+			
+			if( $aTempResult2['Error']===false ) {
+				//------------------------------------------------------------//
+				//-- 5.0 - STORE THE RESULT                                 --//
+				//------------------------------------------------------------//
+				$aResult = array(
+					"Error"     => false,
+					"Data"      => array(
+						"Value"     => $aTempResult1['Data']['Value'] - $aTempResult2['Data']['Value']
+					)
+				);
+			} else {
+				//-- Error --//
+				$bError    = true;
+				$iErrCode  = 1;
+				$sErrMesg .= "Problem looking up the Minimum value!\n";
+			}
+		} else {
+			//-- Error --//
+			$bError    = true;
+			$iErrCode  = 2;
+			$sErrMesg .= "Problem looking up the Maximum value!\n";
+		}
+	} catch( Exception $e1 ) {
+		//-- Error --//
+		$bError    = true;
+		$iErrCode  = 0;
+		$sErrMesg .= $e1->getMessage();
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - RETURN THE RESULTS                               --//
+	//------------------------------------------------------------//
+	if( $bError===false) {
+		return $aResult;
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
 	
 }
 
 
 //========================================================================================================================//
-//== #13.0# - RSCat & UoM Functions                                                                                     ==//
+//== #13.0# - Graph Functions                                                                                           ==//
+//========================================================================================================================//
+
+function GetGraphLineIOAvg( $sIOId, $iIODataType, $sPostStartUTS, $sPostEndUTS, $iLineGraphDiff ) {
+	
+	//-- Ensure that certain parameters are integers --//
+	$iIOId          = intval( $sIOId, 10 );
+	$iStartUTS      = intval( $sPostStartUTS, 10 );
+	$iEndUTS        = intval( $sPostEndUTS, 10 );
+	
+	//-- Convert Datatype to name --//
+	$aConvertedDataType = ConvertDataTypeToName( $iIODataType );
+	
+	//-- Retrieve the IO Aggregation Data --//
+	$aResult = dbGetGraphLineIOAvg( $aConvertedDataType["Value"], $iIOId, $iStartUTS, $iEndUTS, $iLineGraphDiff );
+	//-- Return the results --//
+	return $aResult;
+}
+
+
+
+
+
+//========================================================================================================================//
+//== #15.0# - RSCat & UoM Functions                                                                                     ==//
 //========================================================================================================================//
 
 
@@ -3452,8 +3542,16 @@ function InsertNewIODataValue( $iIOId, $iUTS, $Value, $bNonCommited=false ) {
 
 
 
+
+
+
+
+
+
+
+
 //========================================================================================================================//
-//== #19.0# - Server Functions                                                                                           ==//
+//== #19.0# - Server Functions                                                                                          ==//
 //========================================================================================================================//
 
 
