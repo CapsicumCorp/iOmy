@@ -50,7 +50,12 @@ model {
         }
     }
     android.buildTypes {
+        // NOTE: Keep debug and release settings similar so testing is done on the same features
         debug {
+            applicationIdSuffix ".dev"
+            minifyEnabled=false
+            useProguard=false
+            proguardFiles.add(file('proguard-rules.txt'))
         }
         release {
             minifyEnabled=false
