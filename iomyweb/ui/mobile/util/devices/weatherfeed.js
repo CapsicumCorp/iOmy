@@ -557,7 +557,7 @@ $.extend(IOMy.devices.weatherfeed,{
                     //---------------------------------------------------------//
                     try {
                         if (oScope.byId(sPrefix + me.uiIDs.sWindSpeedDisplayID) !== undefined) {
-                            oScope.byId(sPrefix + me.uiIDs.sWindSpeedDisplayID).setText( windSpeed.Value.toString() + windSpeed.UomName);
+                            oScope.byId(sPrefix + me.uiIDs.sWindSpeedDisplayID).setText( parseFloat(windSpeed.Value.toString()).toFixed(2) + " " + windSpeed.UomName);
                         }
                     } catch (e) {
                         jQuery.sap.log.error(e.message);
