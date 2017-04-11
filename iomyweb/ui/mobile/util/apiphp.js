@@ -101,7 +101,11 @@ $.extend(IOMy.apiphp,{
 			case "statechange":
 				sReturn = sUrlRestricted+'/php/api_statechange.php';
 				break;
-                
+				
+			case "graph" :
+				sReturn = sUrlRestricted+'/php/api_datagraph.php';
+				break;
+				
             case "onvif":
 				sReturn = sUrlRestricted+'/php/api_onvif.php';
 				break;
