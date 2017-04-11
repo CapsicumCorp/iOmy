@@ -1,0 +1,3 @@
+[submodule "iomyweb/ui/mobile/resources/jqplot"]
+	path = iomyweb/ui/mobile/resources/jqplot
+	url = https://github.com/CapsicumCorp/jqPlot.git
