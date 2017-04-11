@@ -928,6 +928,8 @@ $.extend(IOMy.common,{
                     },
                     
                     onFail : function () {
+                        fnFailCallback();
+                        
                         me.ResetCoreVariableRefreshFlags();
                     }
                 });
@@ -955,6 +957,8 @@ $.extend(IOMy.common,{
                     },
                     
                     onFail : function () {
+                        fnFailCallback();
+                        
                         me.ResetCoreVariableRefreshFlags();
                     }
                 });
@@ -983,6 +987,8 @@ $.extend(IOMy.common,{
                     },
                     
                     onFail : function () {
+                        fnFailCallback();
+                        
                         me.ResetCoreVariableRefreshFlags();
                     }
                 });
@@ -1011,6 +1017,8 @@ $.extend(IOMy.common,{
                     },
                     
                     onFail : function () {
+                        fnFailCallback();
+                        
                         me.ResetCoreVariableRefreshFlags();
                     }
                 });
@@ -1039,6 +1047,8 @@ $.extend(IOMy.common,{
                     },
                     
                     onFail : function () {
+                        fnFailCallback();
+                        
                         me.ResetCoreVariableRefreshFlags();
                     }
                 });
@@ -1085,10 +1095,14 @@ $.extend(IOMy.common,{
                         
                         me.ResetCoreVariableRefreshFlags();
                     },
-                    onFail      : fnOnFail
+                    onFail      : function () {
+                        fnOnFail();
+                        
+                        me.ResetCoreVariableRefreshFlags();
+                    }
                 });
             } catch (e) {
-                me.CoreVariableRefreshStepsInProgress[6] = false;
+                me.ResetCoreVariableRefreshFlags();
                 jQuery.sap.log.error("ReloadVariableThingList Error! "+e.message);
             }
         }
