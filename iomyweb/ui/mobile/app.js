@@ -59,6 +59,9 @@ $.sap.require("IOMy.validation");
 $.sap.registerModulePath('IOMy.rules', sModuleInitialBuildLocation+'util/rules');
 $.sap.require("IOMy.rules");
 
+$.sap.registerModulePath('IOMy.graph_jqplot', sModuleInitialBuildLocation+'util/graph_jqplot');
+$.sap.require("IOMy.graph_jqplot");
+
 //----------------------------------------//
 //-- 5.1.1 - LOAD DEVICE FILES  		--//
 //----------------------------------------//
@@ -1618,6 +1621,12 @@ var aPages = [
 		"Location":		"mjs.staging.AddRule",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.AddRule\" Page!\n"
+	},
+	{ 
+		"Id":			"pJqplot_test",
+		"Location":		"mjs.staging.Graph",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Graph\" Page!\n"
 	}
 	
 ];

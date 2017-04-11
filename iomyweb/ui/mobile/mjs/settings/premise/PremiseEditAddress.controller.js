@@ -105,8 +105,8 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                 
                 //===== REGION =====//
                 var oRegionTitle = new sap.m.Text({
-                    text : "Region"
-                }).addStyleClass("MarTop16px");
+                    text : "Country / Region"
+                });
     		    
 				var oRegionField = IOMy.widgets.selectBoxRegions(me.createId("addressRegion")).addStyleClass("SettingsDropdownInput");
                 oRegionField.setEnabled(false);
@@ -114,14 +114,14 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                 //===== LANGUAGE =====//
 				var oLanguageTitle = new sap.m.Text({
                     text : "Language"
-                });
+                }).addStyleClass("MarTop16px");
     		    
 				var oLanguageField = IOMy.widgets.selectBoxLanguages(me.createId("addressLanguage")).addStyleClass("SettingsDropdownInput");
                 oLanguageField.setEnabled(false);
                 
                 //===== STATE =====//
                 var oStateTitle = new sap.m.Text({
-                    text : "Subregion"
+                    text : "State / County"
                 });
     		    
 				var oStateField = new sap.m.Input(me.createId("addressState"), {
@@ -131,7 +131,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                 
                 //===== POST CODE =====//
                 var oPostCodeTitle = new sap.m.Text({
-                    text : "Post Code"
+                    text : "Post Code / Zip Code"
                 });
     		    
 				var oPostCodeField = new sap.m.Input(me.createId("addressPostCode"), {
@@ -254,11 +254,18 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 				}).addStyleClass("TextCenter MarTop12px");
                 
                 var oVertBox = new sap.m.VBox({
-					items : [oRegionTitle, oRegionField, oLanguageTitle, oLanguageField,
-                            oStateTitle, oStateField, oPostCodeTitle, oPostCodeField,
-                            oTimezoneTitle, oTimezoneField, oLine1Title, oLine1Field,
-                            oLine2Title, oLine2Field, oLine3Title, oLine3Field,
-                            oEditButton]
+					items : [
+								
+								oLanguageTitle, oLanguageField,
+								oLine1Title, oLine1Field,
+								oLine2Title, oLine2Field, 
+								oLine3Title, oLine3Field,
+								oStateTitle, oStateField, 
+								oPostCodeTitle, oPostCodeField,
+								oRegionTitle, oRegionField, 
+								oTimezoneTitle, oTimezoneField, 
+								oEditButton
+							]
 				}).addStyleClass("UserInputForm");
                 
                 // Destroys the actual panel of the page. This is done to ensure that there

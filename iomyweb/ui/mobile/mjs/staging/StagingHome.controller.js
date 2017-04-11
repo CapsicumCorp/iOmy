@@ -24,8 +24,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 sap.ui.controller("mjs.staging.StagingHome", {
 	
+	bDeployed : false, //-- Sets the deployed status to false --//
 	Staginglinks : [
 		{ "display" : "Rules Overview" , "link" : "pRulesOverview" },
+		{ "display" : "JQ Plot Test" , "link" : "pJqplot_test" },
 	],
 	
 	
@@ -72,7 +74,6 @@ sap.ui.controller("mjs.staging.StagingHome", {
         var oController = this;            //-- SCOPE: Allows subfunctions to access the current scope --//
         var oView       = this.getView();
 
-
         oController.SetupPage(); 
 	},
 
@@ -90,14 +91,13 @@ sap.ui.controller("mjs.staging.StagingHome", {
         //--------------------------------------------//
         var oController         = this;                 //-- SCOPE: Allows subfunctions to access the current scope --//
         var oView               = this.getView();
-        var bError              = false;
         var sErrMesg            = "";
   
 
 		//--------------------------------------------------------//
 				//-- Draw 1st Run Page 2 --//
 		//--------------------------------------------------------//
-        if( bError===false ) {
+        if( oController.bDeployed===false ) {
 
             //var oTileContainer = oController.byId("TileContainer");
             var oTable = oController.byId("table");
@@ -123,16 +123,10 @@ sap.ui.controller("mjs.staging.StagingHome", {
                         jQuery.sap.log.error("CriticalErrorAAA: "+e2.message, "", "AAA");
                     }
                 }); //-- End of foreach loop ($.each) --//
-
+				oController.bDeployed=true;
             } else {
                 console.log("Page Error");
             }
-        }
-		//--------------------------------------------------------//
-				//-- Error Messages --//
-		//--------------------------------------------------------//
-        if( bError===true ) {
-            IOMy.common.showError( sErrMesg, "Perform 1st Run ")
         }
     }
 	
