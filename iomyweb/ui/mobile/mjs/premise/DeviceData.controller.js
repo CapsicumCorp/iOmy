@@ -1404,7 +1404,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 		
 		var iStartStamp			= 0;				//-- INTEGER:		--//
 		var iEndStamp			= 0;				//-- INTEGER:		--//
-		
+		var iSampleRateLimit    = 0;                //-- INTEGER:       --//
 		
 		//----------------------------------------------------------------//
 		//-- 2.0 - SETUP VARIABLES										--//
@@ -1553,40 +1553,46 @@ sap.ui.controller("mjs.premise.DeviceData", {
 							"Id":       iIOId
 						},
 						"onSuccess": function ( sResponseType, aData ) {
+                            iSampleRateLimit = IOMy.common.ThingList["_"+oController.iCurrentThing].IO["_"+iIOId].SamplerateLimit;
+                            
 							try {
 								if( aData!==undefined && aData!==null  ) {
 									if( typeof aData['Error']==="undefined" ) {
 										if( aData[0]!==undefined && aData[0]!==null ) {
 											if( aData[0].UTS!==undefined && aData[0].UTS!==null ) {
-												//--------------------------------------------//
-												//-- IF THERE IS MORE THAN 1 VALUE          --//
-												//--------------------------------------------//
-												if( aData.length >=2 ) {
-													
-													//------------------------------------------------------------//
-													//-- Work out if it is decreasing, neutral, increasing      --//
-													//------------------------------------------------------------//
-													if( aData[0].Value===aData[1].Value ) {
-														//-- Value Unchanged --//
-														bSuccessful = oController.UpdateGenericTileWithNewValue( oController, iArrayId, aData[0].Value, aData[0].UOM_NAME, "None", "Neutral" );
-														
-													} else if( aData[0].Value>=aData[1].Value ) {
-														//-- Increasing Value --//
-														bSuccessful = oController.UpdateGenericTileWithNewValue( oController, iArrayId, aData[0].Value, aData[0].UOM_NAME, "Up", "Good" );
-														
-													} else {
-														//-- Decreasing Value --//
-														bSuccessful = oController.UpdateGenericTileWithNewValue( oController, iArrayId, aData[0].Value, aData[0].UOM_NAME, "Down", "Critical" );
-														
-													}
-													
-												//--------------------------------------------//
-												//-- ELSE IF THERE IS JUST 1 VALUE          --//
-												//--------------------------------------------//
-												} else if( aData.length===1 ) {
-													//-- Set the colour to Neutral since not enough data provided to determine if up, down, neutral --//
-													bSuccessful = oController.UpdateGenericTileWithNewValue( oController, iArrayId, aData[0].Value, aData[0].UOM_NAME, "None", "Neutral" );
-												}
+                                                if (iSampleRateLimit !== null && iSampleRateLimit>=1 && ( aData[0].UTS <= ( iEndStamp - iSampleRateLimit ) )) {
+                                                    bSuccessful = false;
+                                                } else {
+                                                    //--------------------------------------------//
+                                                    //-- IF THERE IS MORE THAN 1 VALUE          --//
+                                                    //--------------------------------------------//
+                                                    if( aData.length >=2 ) {
+
+                                                        //------------------------------------------------------------//
+                                                        //-- Work out if it is decreasing, neutral, increasing      --//
+                                                        //------------------------------------------------------------//
+                                                        if( aData[0].Value===aData[1].Value ) {
+                                                            //-- Value Unchanged --//
+                                                            bSuccessful = oController.UpdateGenericTileWithNewValue( oController, iArrayId, aData[0].Value, aData[0].UOM_NAME, "None", "Neutral" );
+
+                                                        } else if( aData[0].Value>=aData[1].Value ) {
+                                                            //-- Increasing Value --//
+                                                            bSuccessful = oController.UpdateGenericTileWithNewValue( oController, iArrayId, aData[0].Value, aData[0].UOM_NAME, "Up", "Good" );
+
+                                                        } else {
+                                                            //-- Decreasing Value --//
+                                                            bSuccessful = oController.UpdateGenericTileWithNewValue( oController, iArrayId, aData[0].Value, aData[0].UOM_NAME, "Down", "Critical" );
+
+                                                        }
+
+                                                    //--------------------------------------------//
+                                                    //-- ELSE IF THERE IS JUST 1 VALUE          --//
+                                                    //--------------------------------------------//
+                                                    } else if( aData.length===1 ) {
+                                                        //-- Set the colour to Neutral since not enough data provided to determine if up, down, neutral --//
+                                                        bSuccessful = oController.UpdateGenericTileWithNewValue( oController, iArrayId, aData[0].Value, aData[0].UOM_NAME, "None", "Neutral" );
+                                                    }
+                                                }
 											}
 										}
 									}

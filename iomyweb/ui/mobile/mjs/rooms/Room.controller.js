@@ -580,6 +580,7 @@ sap.ui.controller("mjs.rooms.Room", {
 		var iIOId           = 0;        //-- INTEGER:       The IO Id to poll the Data for                                                --//
 		var sIODataType     = "";       //-- STRING:        The IO's Datatype is stored so that we know what Odata URL to poll            --//
 		var sIOLabel        = "";       //-- STRING:        This will hold the nickname of which odata url to poll for data                   --//
+		var iSampleRateLimit    = null;         //-- INTEGER:		Sample rate limit in seconds                                                --//
 		var iUTS_Start          = 0;        //-- INTEGER:       Used to hold the current period's starting Unix Timestamp                         --//
 		var iUTS_End            = 0;        //-- INTEGER:       Used to hold the current period's ending Unix Timestamp                           --//
 		var sAjaxUrl            = "";       //-- STRING:        Used to hold the the URL to the API called.                                       --//
@@ -591,10 +592,11 @@ sap.ui.controller("mjs.rooms.Room", {
 		//-- 2.0 - Extract the variables from the Task Data     --//
 		//--------------------------------------------------------//
 		try {
-			iIOId           = aTask.Data.IOId;
-			sIODataType     = aTask.Data.IODataType;
-			sIOLabel        = aTask.Data.LabelId;
-			
+			iIOId               = aTask.Data.IOId;
+			sIODataType         = aTask.Data.IODataType;
+			sIOLabel            = aTask.Data.LabelId;
+			iSampleRateLimit    = aTask.Data.SamplerateLimit;
+            
 		} catch( e1000 ) {
 			jQuery.sap.log.error("Error: Extracting Task data!"); 
 		}
@@ -602,7 +604,7 @@ sap.ui.controller("mjs.rooms.Room", {
 		//--------------------------------------------------------//
 		//-- 3.0 - Prepare for Ajax Request                     --//
 		//--------------------------------------------------------//
-		
+		iUTS_End				= IOMy.time.GetCurrentUTS();
 		
 		//--------------------------------------------------------//
 		//-- 4.0 - Check if Ajax Request should be run          --//
@@ -618,24 +620,29 @@ sap.ui.controller("mjs.rooms.Room", {
 					if( aData!==undefined && aData!==null) {
 						if(aData.UTS!==undefined && aData.UTS!==null) {
 							//-- If the UTS is less than 10 minutes from the endstamp --//
-							
-							//-- Update the Page --//
-							var oUI5Object = oController.byId( sIOLabel );
-							
-							if( oUI5Object!==undefined && oUI5Object!==null && oUI5Object!==false ) {
-								//----------------------------------------//
-								//-- Round to 3 decimal places          --//
-								//----------------------------------------//
-								var fCalcedValue = ( Math.round( aData.Value * 1000 ) ) / 1000;
-								
-								//----------------------------------------//
-								//-- Show the Results                   --//
-								//----------------------------------------//
-								oUI5Object.setText( fCalcedValue+" "+aData.UomName);
-								
-							} else {
-								console.log("Critical Error: PHP API (Most Recent) OnSuccess can't find "+sIOLabel);
-							}
+                            if( iSampleRateLimit !== null && iSampleRateLimit>=1 && ( aData.UTS <= ( iUTS_End - iSampleRateLimit ) ) ) {
+                                //-- Flag that the IO is offline --//
+                                oController.byId( sIOLabel ).setText("IO Offline");
+                                
+                            } else {
+                                //-- Display the most recent value --//
+                                var oUI5Object = oController.byId( sIOLabel );
+                                if( oUI5Object!==undefined && oUI5Object!==null && oUI5Object!==false ) {
+                                    //----------------------------------------//
+                                    //-- Round to 3 decimal places          --//
+                                    //----------------------------------------//
+                                    var fCalcedValue = ( Math.round( aData.Value * 1000 ) ) / 1000;
+
+                                    //----------------------------------------//
+                                    //-- Show the Results                   --//
+                                    //----------------------------------------//
+                                    oUI5Object.setText( fCalcedValue+" "+aData.UomName);
+
+
+                                } else {
+                                    console.log("Critical Error: PHP API (Most Recent) OnSuccess can't find "+sIOLabel);
+                                }
+                            }
 						} else {
 							oController.byId( sIOLabel ).setText("IO Offline");
 						}

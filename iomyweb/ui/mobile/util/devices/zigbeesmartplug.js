@@ -908,9 +908,10 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                     aTasks.Low.push({
                         "Type":"DeviceValueKWHTotal", 
                         "Data":{ 
-                            "IOId":			aIO.Id, 
-                            "IODataType":	aIO.DataTypeName,
-                            "IOUoMName":	aIO.UoMName,
+                            "IOId":             aIO.Id, 
+                            "IODataType":       aIO.DataTypeName,
+                            "IOUoMName":        aIO.UoMName,
+                            "SamplerateLimit":  aIO.SamplerateLimit,
                             "LabelId":			Prefix+"_kWh"
                         }
                     });
@@ -919,8 +920,9 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                     aTasks.High.push({
                         "Type":"DeviceValueKW", 
                         "Data":{ 
-                            "IOId":			aIO.Id, 
-                            "IODataType":	aIO.DataTypeName,
+                            "IOId":             aIO.Id, 
+                            "IODataType":       aIO.DataTypeName,
+                            "SamplerateLimit":  aIO.SamplerateLimit,
                             "LabelId":			Prefix+"_kW"
                         }
                     });
@@ -930,8 +932,9 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                     aTasks.High.push({
                         "Type":"DeviceValueVolt", 
                         "Data":{ 
-                            "IOId":			aIO.Id, 
-                            "IODataType":	aIO.DataTypeName,
+                            "IOId":             aIO.Id, 
+                            "IODataType":       aIO.DataTypeName,
+                            "SamplerateLimit":  aIO.SamplerateLimit,
                             "LabelId":			Prefix+"_Volt"
                         }
                     });
@@ -940,8 +943,9 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                     aTasks.High.push({
                         "Type":"DeviceValueAmp", 
                         "Data":{ 
-                            "IOId":			aIO.Id, 
-                            "IODataType":	aIO.DataTypeName,
+                            "IOId":             aIO.Id, 
+                            "IODataType":       aIO.DataTypeName,
+                            "SamplerateLimit":  aIO.SamplerateLimit,
                             "LabelId":			Prefix+"_Amp"
                         }
                     });
@@ -1105,8 +1109,9 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                     aTasks.High.push({
                         "Type":"DeviceValueKW", 
                         "Data":{ 
-                            "IOId":			aIO.Id, 
-                            "IODataType":	aIO.DataTypeName,
+                            "IOId":             aIO.Id, 
+                            "IODataType":       aIO.DataTypeName,
+                            "SamplerateLimit":  aIO.SamplerateLimit,
                             "LabelId":			Prefix+"_kW"
                         }
                     });

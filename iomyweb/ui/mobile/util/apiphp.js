@@ -621,23 +621,25 @@ $.extend(IOMy.apiphp,{
 							//-- Part A - IO Info                                       --//
 							//------------------------------------------------------------//
 							//-- Add the IO Id --//
-							oTempIO.Id             = aIO.IOId;
+							oTempIO.Id              = aIO.IOId;
 							//-- Add the IO DisplayName --//
-							oTempIO.Name           = aIO.IOName;
+							oTempIO.Name            = aIO.IOName;
 							//-- Add the IO Status --//
-							oTempIO.Status         = aIO.IOStatus;
+							oTempIO.Status          = aIO.IOStatus;
 							//-- Add the IO Type Id --//
-							oTempIO.TypeId         = aIO.IOTypeId;
+							oTempIO.TypeId          = aIO.IOTypeId;
 							//-- Add the IO DataType --//
-							oTempIO.DataType       = aIO.DataType;
+							oTempIO.DataType        = aIO.DataType;
 							//-- Add the IO DataTypeName --//
-							oTempIO.DataTypeName   = aIO.DataTypeName;
+							oTempIO.DataTypeName    = aIO.DataTypeName;
 							//-- Add the IO DataType Enumeration Flags --//
-							oTempIO.DataTypeEnum   = aIO.DataTypeEnum;
+							oTempIO.DataTypeEnum    = aIO.DataTypeEnum;
 							//-- Add the IO SampleRate --//
-							oTempIO.Samplerate     = aIO.IOSamplerate;
+							oTempIO.Samplerate      = aIO.IOSamplerate;
+							//-- Add the IO SampleRateLimit --//
+							oTempIO.SamplerateLimit = aIO.IOSamplerateLimit;
 							//-- Add the IO ConvertRate --//
-							oTempIO.Convertrate    = aIO.IOConvertRate;
+							oTempIO.Convertrate     = aIO.IOConvertRate;
 							
 							//------------------------------------------------------------//
 							//-- Part B - IO UoM                                        --//
