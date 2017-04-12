@@ -27,7 +27,8 @@ sap.ui.controller("mjs.staging.StagingHome", {
 	bDeployed : false, //-- Sets the deployed status to false --//
 	Staginglinks : [
 		{ "display" : "Rules Overview" , "link" : "pRulesOverview" },
-		{ "display" : "JQ Plot Test" , "link" : "pJqplot_test" },
+		{ "display" : "JQPlot line" , "link" : "pJqplot_line" },
+		{ "display" : "JQPlot Bar" , "link" : "pJqplot_bar" },
 	],
 	
 	

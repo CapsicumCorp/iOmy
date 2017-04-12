@@ -1,5 +1,5 @@
 /*
-Title: Template UI5 View
+Title: Line Graph Example
 Author: Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
 Description: 
 Copyright: Capsicum Corporation 2016
@@ -21,17 +21,17 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-sap.ui.jsview("mjs.staging.Graph", {
+sap.ui.jsview("mjs.staging.LineGraph", {
 	
 	/*************************************************************************************************** 
 	** 1.0 - Controller Declaration
 	**************************************************************************************************** 
 	* Specifies the Controller belonging to this View. 
 	* In the case that it is not implemented, or that "null" is returned, this View does not have a Controller.
-	* @memberOf mjs.staging.Graph
+	* @memberOf mjs.staging.LineGraph
 	****************************************************************************************************/ 
 	getControllerName : function() {
-		return "mjs.staging.Graph";
+		return "mjs.staging.LineGraph";
 	},
 
 	/*************************************************************************************************** 
@@ -39,7 +39,7 @@ sap.ui.jsview("mjs.staging.Graph", {
 	**************************************************************************************************** 
 	* Is initially called once after the Controller has been instantiated. It is the place where the UI is constructed. 
 	* Since the Controller is given to this method, its event handlers can be attached right away. 
-	* @memberOf mjs.staging.Graph
+	* @memberOf mjs.staging.LineGraph
 	****************************************************************************************************/ 
 	createContent : function(oController) {
 		var me = this;
@@ -58,7 +58,7 @@ sap.ui.jsview("mjs.staging.Graph", {
             view : me,
             controller : oController,
             icon : "sap-icon://GoogleMaterial/home",
-            title : "JQ Plot Test"
+            title : "LineGraph Example"
         });
         
         oPage.addContent(
@@ -70,7 +70,7 @@ sap.ui.jsview("mjs.staging.Graph", {
 						content: "<div id=\"GraphPage_Main\" class=\"\" style=\"padding-right: 5.5rem\" ></div><div id=\"GraphPage_Main_Info\" class=\"PadAll10px\" ></div>"
 					}).addStyleClass("")
                 ]
-            }).addStyleClass("PadBottom10px UserInputForm MarTop3px")
+            }).addStyleClass("PadBottom10px UserInputForm MarTop3px minheight350px")
         );
 		
 		return oPage;

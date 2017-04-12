@@ -28,6 +28,8 @@ $.extend( IOMy.graph_jqplot, {
 	
 	
 	DefaultLineSeriesColors: [
+		"silver",
+		"lightslategrey",
 		"red",
 		"royalblue",
 		"forestgreen",
@@ -36,6 +38,7 @@ $.extend( IOMy.graph_jqplot, {
 		"violet",
 		"lawngreen",
 		"grey"
+
 	],
 	Default6HourPieSeriesColors: [
 		"orangered",
@@ -341,6 +344,10 @@ $.extend( IOMy.graph_jqplot, {
 		
 		//-- 4.01 - Setup the Basic variables for all line Graphs --//
 		aGraphSettings = {
+			"grid": {
+				"background":	'#D3DDC9',
+				"borderColor":	'#AAAAAA'
+			},
 			"cursor": {
 				"show":        true,
 				"zoom":        true
@@ -900,6 +907,10 @@ $.extend( IOMy.graph_jqplot, {
 		//-- 4.01 - Setup the Basic variables for all line Graphs --//
 		aGraphSettings = {
 			"animate":         !$.jqplot.use_excanvas,
+			"grid": {
+				"background":	'#D3DDC9',
+				"borderColor":	'#AAAAAA'
+			},
 			"cursor":          {
 				"show":            false,
 				"zoom":            false

@@ -1623,10 +1623,16 @@ var aPages = [
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.AddRule\" Page!\n"
 	},
 	{ 
-		"Id":			"pJqplot_test",
-		"Location":		"mjs.staging.Graph",
+		"Id":			"pJqplot_line",
+		"Location":		"mjs.staging.LineGraph",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Graph\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.LineGraph\" Page!\n"
+	},
+	{ 
+		"Id":			"pJqplot_bar",
+		"Location":		"mjs.staging.BarGraph",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.BarGraph\" Page!\n"
 	}
 	
 ];
