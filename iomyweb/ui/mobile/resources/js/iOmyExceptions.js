@@ -138,3 +138,16 @@ function PremiseNotFoundException(message) {
     ObjectNotFoundException.call(this, message);
     this.name       = "PremiseNotFoundException";
 }
+
+function LinkNotFoundException(message) {
+    //------------------------------------------------------------------------//
+    // This exception can have a simple "Link not found" message if one is not
+    // provided.
+    //------------------------------------------------------------------------//
+    if (message === undefined || message === null || message === "") {
+        message = "Link Not Found!";
+    }
+    
+    ObjectNotFoundException.call(this, message);
+    this.name       = "LinkNotFoundException";
+}

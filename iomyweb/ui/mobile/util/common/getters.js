@@ -29,7 +29,7 @@ $.extend(IOMy.common, {
      * Fetches a premise from IOMy.common.PremiseList
      * 
      * @param {type} iPremiseId         ID of the premise to retrieve from memory
-     * @returns {Object}                Premise
+     * @returns {Object}                The premise object
      * 
      * @throws PremiseNotFoundException
      */
@@ -57,6 +57,40 @@ $.extend(IOMy.common, {
         }
         
         return oPremise;
+    },
+    
+    /**
+     * Fetches a link from IOMy.common.LinkList
+     * 
+     * @param {type} iLinkId            ID of the link to retrieve from memory
+     * @returns {Object}                The link object
+     * 
+     * @throws LinkNotFoundException
+     */
+    getLink : function (iLinkId) {
+        //--------------------------------------------------------------------//
+        // Variables
+        //--------------------------------------------------------------------//
+        var oLink = null;
+        
+        //--------------------------------------------------------------------//
+        // Get premise and return it
+        //--------------------------------------------------------------------//
+        for (var i = 0; i < this.LinkList.length; i++) {
+            // There is still an inconsistency with the data types of these two
+            // IDs. They are the same value but not the same type. This is why
+            // two equal signs are used to compare instead of the preferred three.
+            if (this.LinkList[i].Id == iLinkId) {
+                oLink = this.LinkList[i];
+                break;
+            }
+        }
+        
+        if (oLink === null) {
+            throw new LinkNotFoundException();
+        }
+        
+        return oLink;
     }
     
 });
