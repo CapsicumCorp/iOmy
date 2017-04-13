@@ -1633,6 +1633,12 @@ var aPages = [
 		"Location":		"mjs.staging.BarGraph",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.BarGraph\" Page!\n"
+	},
+	{ 
+		"Id":			"pControlTools",
+		"Location":		"mjs.staging.ControlTools",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.ControlTools\" Page!\n"
 	}
 	
 ];

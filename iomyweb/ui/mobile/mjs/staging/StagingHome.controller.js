@@ -29,6 +29,7 @@ sap.ui.controller("mjs.staging.StagingHome", {
 		{ "display" : "Rules Overview" , "link" : "pRulesOverview" },
 		{ "display" : "JQPlot line" , "link" : "pJqplot_line" },
 		{ "display" : "JQPlot Bar" , "link" : "pJqplot_bar" },
+		{ "display" : "Controller" , "link" : "pControlTools" },
 	],
 	
 	
