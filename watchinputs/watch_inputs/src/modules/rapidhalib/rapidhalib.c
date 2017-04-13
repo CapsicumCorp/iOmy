@@ -420,45 +420,93 @@ static inline void rapidhalib_backtrace(void) {
 }
 #endif
 
+static pthread_key_t lockkey=NULL;
+static pthread_once_t lockkey_onceinit = PTHREAD_ONCE_INIT;
+static int havelockkey=0;
+
+//Initialise a thread local store for the lock counter
+void rapidhalib_makelockkey() {
+  int result;
+
+  result=pthread_key_create(&lockkey, NULL);
+  if (result!=0) {
+    debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
+    debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu Failed to create lockkey: %d\n", __func__, pthread_self(), result);
+  } else {
+    havelockkey=1;
+  }
+}
+
 /*
   Apply the rapidha mutex lock if not already applied otherwise increment the lock count
 */
-void rapidhalib_lockrapidha(long *rapidhalocked) {
+void rapidhalib_lockrapidha(void) {
   LOCKDEBUG_ADDDEBUGLIBIFACEPTR();
+  long *lockcnt;
 
   LOCKDEBUG_ENTERINGFUNC();
-  if ((*rapidhalocked)==0) {
+
+  (void) pthread_once(&lockkey_onceinit, rapidhalib_makelockkey);
+  if (!havelockkey) {
+    debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lockkey not created\n", __func__, pthread_self(), __LINE__);
+    return;
+  }
+  //Get the lock counter from thread local store
+  lockcnt = (long *) pthread_getspecific(lockkey);
+  if (lockcnt==NULL) {
+    //Allocate storage for the lock counter and set to 0
+    lockcnt=(long *) calloc(1, sizeof(long));
+    (void) pthread_setspecific(lockkey, lockcnt);
+  }
+  if ((*lockcnt)==0) {
     //Lock the thread if not already locked
     RAPIDHALIB_PTHREAD_LOCK(&rapidhalibmutex);
   }
   //Increment the lock count
-  ++(*rapidhalocked);
+  ++(*lockcnt);
 #ifdef RAPIDHALIB_LOCKDEBUG
-  debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lock count=%ld\n", __func__, pthread_self(), __LINE__, *rapidhalocked);
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lock count=%ld\n", __func__, pthread_self(), __LINE__, *lockcnt);
 #endif
 }
 
 /*
   Decrement the lock count and if 0, release the rapidha mutex lock
 */
-void rapidhalib_unlockrapidha(long *rapidhalocked) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
+void rapidhalib_unlockrapidha(void) {
+  long *lockcnt;
 
   LOCKDEBUG_ENTERINGFUNC();
 
-  if ((*rapidhalocked)==0) {
+  (void) pthread_once(&lockkey_onceinit, rapidhalib_makelockkey);
+  if (!havelockkey) {
+    debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lockkey not created\n", __func__, pthread_self(), __LINE__);
+    return;
+  }
+  //Get the lock counter from thread local store
+  lockcnt = (long *) pthread_getspecific(lockkey);
+  if (lockcnt==NULL) {
+    debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
     debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu LOCKING MISMATCH TRIED TO UNLOCK WHEN LOCK COUNT IS 0 AND ALREADY UNLOCKED\n", __func__, pthread_self());
     rapidhalib_backtrace();
     return;
   }
-  --(*rapidhalocked);
-  if ((*rapidhalocked)==0) {
+  --(*lockcnt);
+  if ((*lockcnt)==0) {
     //Lock the thread if not already locked
     RAPIDHALIB_PTHREAD_UNLOCK(&rapidhalibmutex);
   }
 #ifdef RAPIDHALIB_LOCKDEBUG
-  debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lock count=%ld\n", __func__, pthread_self(), __LINE__, *rapidhalocked);
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lock count=%ld\n", __func__, pthread_self(), __LINE__, *lockcnt);
 #endif
+
+  if ((*lockcnt)==0) {
+    //Deallocate storage for the lock counter so don't have to free it at thread exit
+    free(lockcnt);
+    lockcnt=NULL;
+    (void) pthread_setspecific(lockkey, lockcnt);
+  }
 }
 
 /*
@@ -474,9 +522,9 @@ static inline int _rapidhalib_getnumrapidhadevices(void) {
 static inline int rapidhalib_getnumrapidhadevices(long *rapidhalocked) {
   int val;
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   val=_rapidhalib_getnumrapidhadevices();
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   return val;
 }
@@ -492,9 +540,9 @@ STATIC INLINE void _rapidhalib_setnumrapidhadevices(int numrapidhadevices) {
   Thread safe set the number of rapidha devices
 */
 STATIC INLINE void rapidhalib_setnumrapidhadevices(int numrapidhadevices, long *rapidhalocked) {
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   _rapidhalib_setnumrapidhadevices(numrapidhadevices);
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 }
 
 /*
@@ -510,9 +558,9 @@ static inline int _rapidhalib_getdetectingdevice(void) {
 static inline int rapidhalib_getdetectingdevice(long *rapidhalocked) {
   int val;
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   val=_rapidhalib_getdetectingdevice();
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   return val;
 }
@@ -528,9 +576,9 @@ static inline void _rapidhalib_setdetectingdevice(int detectingdevice) {
   Thread safe set detecting device
 */
 static inline void rapidhalib_setdetectingdevice(int detectingdevice, long *rapidhalocked) {
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   _rapidhalib_setdetectingdevice(detectingdevice);
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 }
 
 /*
@@ -546,9 +594,9 @@ STATIC INLINE int _rapidhalib_getneedmoreinfo(void) {
 STATIC INLINE int rapidhalib_getneedmoreinfo(long *rapidhalocked) {
   int val;
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   val=_rapidhalib_getneedmoreinfo();
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   return val;
 }
@@ -564,9 +612,9 @@ STATIC INLINE void _rapidhalib_setneedmoreinfo(int needmoreinfo) {
   Thread safe set need more info value
 */
 STATIC INLINE void rapidhalib_setneedmoreinfo(int needmoreinfo, long *rapidhalocked) {
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   _rapidhalib_setneedmoreinfo(needmoreinfo);
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 }
 
 /*
@@ -580,9 +628,9 @@ STATIC INLINE void _rapidhalib_addtoneedmoreinfo(int addvalue) {
   Thread safe add to need more info value
 */
 STATIC INLINE void rapidhalib_addtoneedmoreinfo(int addvalue, long *rapidhalocked) {
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   _rapidhalib_addtoneedmoreinfo(addvalue);
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 }
 
 /*
@@ -608,10 +656,10 @@ STATIC INLINE void rapidhalib_subtractneedmoreinfo(int subtractvalue, long *rapi
 int rapidhalib_markrapidha_inuse(rapidhadevice_t *rapidhadevice, long *rapidhalocked) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   if (rapidhadevice->removed || rapidhadevice->needtoremove) {
     //This device shouldn't be used as it is either removed or is scheduled for removab
-    rapidhalib_unlockrapidha(rapidhalocked);
+    rapidhalib_unlockrapidha();
 
     return -1;
   }
@@ -621,7 +669,7 @@ int rapidhalib_markrapidha_inuse(rapidhadevice_t *rapidhadevice, long *rapidhalo
   debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu RapidHA: %016llX now inuse: %d\n", __func__, pthread_self(), rapidhadevice->addr, rapidhadevice->inuse);
 #endif
 
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   return 0;
 }
@@ -633,17 +681,17 @@ int rapidhalib_markrapidha_inuse(rapidhadevice_t *rapidhadevice, long *rapidhalo
 int rapidhalib_markrapidha_notinuse(rapidhadevice_t *rapidhadevice, long *rapidhalocked) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   if (rapidhadevice->removed) {
     //This device shouldn't be used as it is removed
-    rapidhalib_unlockrapidha(rapidhalocked);
+    rapidhalib_unlockrapidha();
 
     return -1;
   }
   if (!rapidhadevice->inuse) {
     debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu INUSE MISMATCH TRIED TO MARK AS NOT IN USE WHEN INUSE COUNT IS 0\n", __func__, pthread_self());
     rapidhalib_backtrace();
-    rapidhalib_unlockrapidha(rapidhalocked);
+    rapidhalib_unlockrapidha();
     return -2;
   }
   //Decrement rapidha inuse value
@@ -652,7 +700,7 @@ int rapidhalib_markrapidha_notinuse(rapidhadevice_t *rapidhadevice, long *rapidh
 #ifdef RAPIDHALIB_MOREDEBUG
   debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu RapidHA: %016llX now inuse: %d\n", __func__, pthread_self(), rapidhadevice->addr, rapidhadevice->inuse);
 #endif
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   return 0;
 }
@@ -663,14 +711,14 @@ int rapidhalib_rapidha_connected_to_network(void *localzigbeedevice, long *rapid
   rapidhadevice_t *rapidhadeviceptr=localzigbeedevice;
   int val;
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
 
   if (rapidhadeviceptr->network_state!=0x01) {
     val=0;
   } else {
     val=1;
   }
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   return val;
 }
@@ -744,13 +792,13 @@ STATIC unsigned char zigbee_seqnumber=0xFF;
 static inline unsigned char rapidhalib_rapidha_get_next_frameid(long *rapidhalocked) {
   unsigned char val;
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   ++rapidha_frameid;
   if (rapidha_frameid==128) {
     rapidha_frameid=0;
   }
   val=rapidha_frameid;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   return val;
 }
@@ -758,9 +806,9 @@ static inline unsigned char rapidhalib_rapidha_get_next_frameid(long *rapidhaloc
 STATIC INLINE unsigned char rapidhalib_rapidha_get_frameid(long *rapidhalocked) {
   unsigned char val;
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   val=rapidha_frameid;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   return val;
 }
@@ -768,13 +816,13 @@ STATIC INLINE unsigned char rapidhalib_rapidha_get_frameid(long *rapidhalocked) 
 STATIC INLINE unsigned char rapidhalib_zigbee_get_next_seqnumber(long *rapidhalocked) {
   unsigned char val;
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   ++zigbee_seqnumber;
   if (zigbee_seqnumber==128) {
     zigbee_seqnumber=0;
   }
   val=zigbee_seqnumber;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   return val;
 }
@@ -782,9 +830,9 @@ STATIC INLINE unsigned char rapidhalib_zigbee_get_next_seqnumber(long *rapidhalo
 STATIC INLINE unsigned char rapidhalib_zigbee_get_seqnumber(long *rapidhalocked) {
   unsigned char val;
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   val=zigbee_seqnumber;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   return val;
 }
@@ -1380,24 +1428,24 @@ void rapidhalib_send_rapidha_bootload_image_block_response(rapidhadevice_t *rapi
   }
   if (status!=RAPIDHA_STATUS_RESPONSE_ABORT) {
     //Read the data
-    rapidhalib_lockrapidha(rapidhalocked);
+    rapidhalib_lockrapidha();
     if (rapidhadevice->firmwarefile_fd!=-1) {
       lseek(rapidhadevice->firmwarefile_fd, fileoffset, SEEK_SET);
       filesize=read(rapidhadevice->firmwarefile_fd, &apicmd->data, maxsize);
     } else {
       filesize=-1;
     }
-    rapidhalib_unlockrapidha(rapidhalocked);
+    rapidhalib_unlockrapidha();
     if (filesize==-1) {
       //Failed to read from the file so abort firmware update
       debuglibifaceptr->debuglib_printf(1, "%s: Failed to read from file offset: %lu for RapidHA: %016llX so aborting update\n", __func__, fileoffset, addr);
       status=RAPIDHA_STATUS_RESPONSE_ABORT;
       filesize=0;
     } else {
-      rapidhalib_lockrapidha(rapidhalocked);
+      rapidhalib_lockrapidha();
       //NOTE: Sometimes we will be retrying an offset so use the current offset aa the base
       rapidhadevice->firmware_file_offset=fileoffset+filesize;
-      rapidhalib_unlockrapidha(rapidhalocked);
+      rapidhalib_unlockrapidha();
     }
   }
   //Fill in the packet details and send the packet
@@ -1648,7 +1696,7 @@ void rapidhalib_process_utility_module_info_response(rapidhadevice_t *rapidhadev
   rapidha_utility_module_info_response_t *apicmd=(rapidha_utility_module_info_response_t *) (rapidhadevice->receivebuf);
 
   MOREDEBUG_ENTERINGFUNC();
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   if (rapidhalib_waitingforresponse==RAPIDHA_WAITING_FOR_UTILITY_MODULE_INFO_RESPONSE) {
     rapidhalib_waitresult=1;
   }
@@ -1657,7 +1705,7 @@ void rapidhalib_process_utility_module_info_response(rapidhadevice_t *rapidhadev
   rapidhadevice->firmbuild=apicmd->build_firmware_version;
   rapidhadevice->addr=apicmd->addr;
 
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
   MOREDEBUG_EXITINGFUNC();
 }
 
@@ -1694,12 +1742,12 @@ void rapidhalib_process_utility_startup_sync_request(rapidhadevice_t *rapidhadev
     }
     debuglibifaceptr->debuglib_printf(1, "%s: Configuration State: %s\n", __func__, cfgstatestr);
   }
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   if (rapidhalib_waitingforresponse==RAPIDHA_WAITING_FOR_UTILITY_STARTUP_SYNC_REQUEST) {
     rapidhalib_waitresult=1;
   }
   rapidhadevice->cfgstate=apicmd->configuration_state;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
   MOREDEBUG_EXITINGFUNC();
 }
 
@@ -1716,7 +1764,7 @@ void rapidhalib_process_network_comissioning_network_status_response(rapidhadevi
   uint64_t addr;
 
   MOREDEBUG_ENTERINGFUNC();
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   if (rapidhalib_waitingforresponse==RAPIDHA_WAITING_FOR_NETWORK_COMISSIONING_NETWORK_STATUS_RESPONSE) {
     rapidhalib_waitresult=1;
   }
@@ -1732,7 +1780,7 @@ void rapidhalib_process_network_comissioning_network_status_response(rapidhadevi
   rapidhadevice->panid=apicmd->panid;
   rapidhadevice->extpanid=apicmd->extpanid;
 
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   debuglibifaceptr->debuglib_printf(1, "%s: Received Network Status Response on RapidHA device: %016llX\n", __func__, addr);
   debuglibifaceptr->debuglib_printf(1, "%s: Network State=%s\n",__func__, rapidhalib_get_network_state_string(apicmd->network_state));
@@ -1788,9 +1836,9 @@ STATIC void rapidhalib_process_zdo_response_received(rapidhadevice_t *rapidhadev
   zdocmd->zigbeelength=zigbeelength;
   zdocmd->seqnumber=seqnumber;
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   zigbeelibindex=rapidhadevice->zigbeelibindex;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
   if (zigbeelibindex>=0 && zigbeelibifaceptr) {
     zigbeelibifaceptr->process_zdo_response_received(zigbeelibindex, zdocmd, rapidhalocked, zigbeelocked);
   }
@@ -1847,7 +1895,7 @@ STATIC void rapidhalib_display_send_status(uint8_t header_primary, uint8_t frame
   }
   debuglibifaceptr->debuglib_printf(1, "%s: Received %s send status: %s (0x%02hhX) for frameid: %02hhX, Sequence Number: %02hhX\n", __func__, zdoorzclstr, statusstrptr, status, frameid, seqnumber);
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   if (
     (header_primary==RAPIDHA_UTILITY && rapidhalib_waitingforresponse==RAPIDHA_WAITING_FOR_RAPIDHA_UTILITY_STATUS_RESPONSE) ||
     (header_primary==RAPIDHA_ZIGBEE_ZDO && rapidhalib_waitingforresponse==RAPIDHA_WAITING_FOR_RAPIDHA_ZIGBEE_ZDO_SEND_STATUS) ||
@@ -1855,7 +1903,7 @@ STATIC void rapidhalib_display_send_status(uint8_t header_primary, uint8_t frame
   ) {
     rapidhalib_waitresult=1;
   }
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 }
 
 /*
@@ -1871,9 +1919,9 @@ STATIC void rapidhalib_process_send_status(rapidhadevice_t *rapidhadevice, long 
   MOREDEBUG_ENTERINGFUNC();
   rapidhalib_display_send_status(apicmd->header_primary, apicmd->frameid, apicmd->status, apicmd->seqnumber, rapidhalocked);
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   zigbeelibindex=rapidhadevice->zigbeelibindex;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
   if (zigbeelibindex>=0 && zigbeelibifaceptr) {
     if (apicmd->header_primary==RAPIDHA_ZIGBEE_ZDO) {
       zigbeelibifaceptr->process_zdo_send_status(zigbeelibindex, apicmd->status, &apicmd->seqnumber, rapidhalocked, zigbeelocked);
@@ -1895,9 +1943,9 @@ STATIC void rapidhalib_process_utility_error(rapidhadevice_t *rapidhadevice, lon
   const char *errorstr;
 
   MOREDEBUG_ENTERINGFUNC();
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   addr=rapidhadevice->addr;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
   switch (apicmd->error) {
     case 0x00:
       errorstr="Reserved";
@@ -1933,11 +1981,11 @@ STATIC void rapidhalib_process_utility_error(rapidhadevice_t *rapidhadevice, lon
   debuglibifaceptr->debuglib_printf(1, "%s: RapidHA: %016llX received error: %s, suberror: %02hhX for frameid: %02hhX\n", __func__, addr, errorstr, apicmd->suberror, apicmd->frameid);
   if (apicmd->error==0xB0) {
     //Special handling for firmware update error
-    rapidhalib_lockrapidha(rapidhalocked);
+    rapidhalib_lockrapidha();
     if (rapidhadevice->firmware_progress>0) {
       rapidhadevice->firmware_progress=-1;
     }
-    rapidhalib_unlockrapidha(rapidhalocked);
+    rapidhalib_unlockrapidha();
   }
   MOREDEBUG_EXITINGFUNC();
 }
@@ -1985,9 +2033,9 @@ STATIC void rapidhalib_process_zdo_response_timeout(rapidhadevice_t *rapidhadevi
   cluster=apicmd->cluster;
   debuglibifaceptr->debuglib_printf(1, "%s: Received ZDO Timeout for destination: %04hX, Cluster: %04hX, Sequence Number: %02hhX, frameid: %02hhX\n", __func__, destnetaddr, cluster, apicmd->seqnumber, apicmd->frameid);
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   zigbeelibindex=rapidhadevice->zigbeelibindex;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
   if (zigbeelibindex>=0 && zigbeelibifaceptr) {
     zigbeelibifaceptr->process_zdo_response_timeout(zigbeelibindex, destnetaddr, cluster, &apicmd->seqnumber, rapidhalocked, zigbeelocked);
   }
@@ -2027,9 +2075,9 @@ STATIC void rapidhalib_process_zdo_device_announce_received(rapidhadevice_t *rap
   zdocmd->zigbeelength=zigbeelength;
   zdocmd->seqnumber=seqnumber;
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   zigbeelibindex=rapidhadevice->zigbeelibindex;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
   if (zigbeelibindex>=0 && zigbeelibifaceptr) {
     zigbeelibifaceptr->process_zdo_response_received(zigbeelibindex, zdocmd, rapidhalocked, zigbeelocked);
   }
@@ -2071,9 +2119,9 @@ STATIC void rapidhalib_process_zcl_response_received(rapidhadevice_t *rapidhadev
 
   memmove(&(zclcmd->zigbeepayload), &(apicmd->zigbeepayload), apicmd->zigbeelength);
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   zigbeelibindex=rapidhadevice->zigbeelibindex;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
   if (zigbeelibindex>=0 && zigbeelibifaceptr) {
     zigbeelibifaceptr->process_zcl_response_received(zigbeelibindex, zclcmd, rapidhalocked, zigbeelocked);
   }
@@ -2100,9 +2148,9 @@ STATIC void rapidhalib_process_zcl_response_timeout(rapidhadevice_t *rapidhadevi
   cluster=apicmd->cluster;
   debuglibifaceptr->debuglib_printf(1, "%s: Received ZCL Timeout for source: %02hhX, Endpoint: %04hX, Cluster: %04hX, Sequence Number: %02hhX, frameid: %02hhX\n", __func__, srcnetaddr, apicmd->srcendpnt, cluster, apicmd->seqnumber, apicmd->frameid);
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   zigbeelibindex=rapidhadevice->zigbeelibindex;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
   if (zigbeelibindex>=0 && zigbeelibifaceptr) {
     zigbeelibifaceptr->process_zcl_response_timeout(zigbeelibindex, srcnetaddr, cluster, &apicmd->seqnumber, rapidhalocked, zigbeelocked);
   }
@@ -2132,17 +2180,17 @@ STATIC void rapidhalib_process_zcl_read_attribute_response(rapidhadevice_t *rapi
     MOREDEBUG_EXITINGFUNC();
     return;
   }
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   zigbeelibindex=rapidhadevice->zigbeelibindex;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
   if (zigbeelibindex>=0 && zigbeelibifaceptr) {
     zigbeelibifaceptr->decode_zigbee_home_automation_attribute(zigbeelibindex, netaddr, endpoint, clusterid, 0x0000, apicmd->attrid, apicmd->status, apicmd->attrtype, (zigbee_attrval_t *) &(apicmd->attrdata), &attrsize, rapidhalocked, zigbeelocked);
   }
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   if (rapidhalib_waitingforresponse==RAPIDHA_WAITING_FOR_ZCL_READ_ATTRIBUTE_RESPONSE) {
     rapidhalib_waitresult=1;
   }
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   MOREDEBUG_EXITINGFUNC();
 }
@@ -2172,11 +2220,11 @@ STATIC void rapidhalib_process_zcl_write_attribute_response(rapidhadevice_t *rap
       debuglibifaceptr->debuglib_printf(1, "%s:   Attr: %04hX Status=%02hhX\n", __func__, apicmd->attrstatus[i].attrid, apicmd->attrstatus[i].status);
     }
   }
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   if (rapidhalib_waitingforresponse==RAPIDHA_WAITING_FOR_ZCL_WRITE_ATTRIBUTE_RESPONSE) {
     rapidhalib_waitresult=1;
   }
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   MOREDEBUG_EXITINGFUNC();
 }
@@ -2195,7 +2243,7 @@ void rapidhalib_process_bootload_image_block_request(rapidhadevice_t *rapidhadev
   uint8_t status;
 
   MOREDEBUG_ENTERINGFUNC();
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   addr=rapidhadevice->addr;
 
   debuglibifaceptr->debuglib_printf(1, "%s: Received Bootload Image Block Request on RapidHA device: %016llX for offset: %lu\n", __func__, addr, apicmd->fileoffset);
@@ -2219,23 +2267,23 @@ void rapidhalib_process_bootload_image_block_request(rapidhadevice_t *rapidhadev
       }
     }
   }
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   if (cancel_firmware_update) {
     status=RAPIDHA_STATUS_RESPONSE_ABORT;
   } else {
-    rapidhalib_lockrapidha(rapidhalocked);
+    rapidhalib_lockrapidha();
     debuglibifaceptr->debuglib_printf(1, "%s: Sending data from offset: %lu from file: %s\n", __func__, apicmd->fileoffset, rapidhadevice->firmware_file);
-    rapidhalib_unlockrapidha(rapidhalocked);
+    rapidhalib_unlockrapidha();
     status=RAPIDHA_STATUS_RESPONSE_SUCCESS;
   }
   rapidhalib_send_rapidha_bootload_image_block_response(rapidhadevice, apicmd->netaddr, apicmd->addr, apicmd->endpoint, status, apicmd->manu, apicmd->image_type, apicmd->fileversion, apicmd->fileoffset, apicmd->maxsize, rapidhalocked);
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   if (cancel_firmware_update && rapidhadevice->firmware_progress>0) {
     rapidhadevice->firmware_progress=-2;
   }
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   MOREDEBUG_EXITINGFUNC();
 }
@@ -2256,17 +2304,17 @@ void rapidhalib_process_bootload_upgrade_end_request(rapidhadevice_t *rapidhadev
 
   MOREDEBUG_ENTERINGFUNC();
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   addr=rapidhadevice->addr;
   rapidhadevice->firmware_progress=RAPIDHA_FIRMWARE_UPDATE_PROGRESS_ENDING;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
   debuglibifaceptr->debuglib_printf(1, "%s: RapidHA: %016llX firmware upload complete, sending command to apply update\n", __func__, addr);
 
   rapidhalib_send_rapidha_bootload_upgrade_end_response(rapidhadevice, apicmd->netaddr, apicmd->addr, apicmd->endpoint, apicmd->manu, apicmd->image_type, apicmd->fileversion, rapidhalocked);
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   rapidhadevice->firmware_progress=RAPIDHA_FIRMWARE_UPDATE_PROGRESS_DONE;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   MOREDEBUG_EXITINGFUNC();
 }
@@ -2369,11 +2417,11 @@ void rapidhalib_process_api_packet(rapidhadevice_t *rapidhadevice, long *rapidha
   } else {
     debuglibifaceptr->debuglib_printf(1, "%s: Received RapidHA packet of unknown type: %02hhX %02hhX\n", __func__, apicmd->header_primary, apicmd->header_secondary);
   }
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   if (rapidhalib_waitingforresponse==RAPIDHA_WAITING_FOR_ANYTHING) {
     rapidhalib_waitresult=1;
   }
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
   MOREDEBUG_EXITINGFUNC();
 }
 
@@ -2488,21 +2536,21 @@ void rapidhalib_receiveraw(int UNUSED(serdevidx), int handlerdevidx, char *buffe
 
           //Process the API packet here
           rapidhalib_process_api_packet(rapidhadevice, &rapidhalocked);
-          rapidhalib_lockrapidha(&rapidhalocked);
+          rapidhalib_lockrapidha();
           if (rapidhalib_waitresult) {
             sem_post(&rapidhalib_waitforresponsesem);
             rapidhalib_waitresult=0;
           }
-          rapidhalib_unlockrapidha(&rapidhalocked);
+          rapidhalib_unlockrapidha();
         }
         //Ready to process a new packet
-        rapidhalib_lockrapidha(&rapidhalocked);
+        rapidhalib_lockrapidha();
         rapidhadevice->receivebufcnt=0;
         rapidhadevice->receive_checksum=0;
         rapidhadevice->receive_processing_packet=0;
         rapidhadevice->receive_escapechar=0;
         rapidhadevice->receive_packetlength=0;
-        rapidhalib_unlockrapidha(&rapidhalocked);
+        rapidhalib_unlockrapidha();
       }
     } else {
       //Ignore invalid bytes here
@@ -2528,7 +2576,7 @@ STATIC int rapidhalib_find_rapidha_device(uint64_t addr, long *rapidhalocked) {
   int numrapidhadevices;
 
   MOREDEBUG_ENTERINGFUNC();
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   numrapidhadevices=_rapidhalib_getnumrapidhadevices();
   for (i=0; i<numrapidhadevices; i++) {
     if (rapidhalib_rapidhadevices[i].addr==addr && !rapidhalib_rapidhadevices[i].removed && !rapidhalib_rapidhadevices[i].needtoremove) {
@@ -2536,7 +2584,7 @@ STATIC int rapidhalib_find_rapidha_device(uint64_t addr, long *rapidhalocked) {
       break;
     }
   }
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
   MOREDEBUG_EXITINGFUNC();
 
   return match_found;
@@ -2594,10 +2642,10 @@ STATIC int rapidhalib_initwaitforresponse(int waitingforresponseid, long *rapidh
     MOREDEBUG_EXITINGFUNC();
     return -1;
   }
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   rapidhalib_waitingforresponse=waitingforresponseid;
   rapidhalib_waitresult=0;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   MOREDEBUG_EXITINGFUNC();
 
@@ -2623,9 +2671,9 @@ STATIC int rapidhalib_waitforresponse(long *rapidhalocked) {
   while ((result=sem_timedwait(&rapidhalib_waitforresponsesem, &waittime)) == -1 && errno == EINTR)
     continue; /* Restart if interrupted by handler */
   lerrno=errno;
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   rapidhalib_waitingforresponse=0;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
   sem_destroy(&rapidhalib_waitforresponsesem);
   PTHREAD_UNLOCK(&rapidhalibmutex_waitforresponse);
   if (result==-1 && lerrno==ETIMEDOUT) {
@@ -2711,7 +2759,7 @@ static int rapidhalib_detect_rapidha(rapidhadevice_t *rapidhadevice, int longdet
     debuglibifaceptr->debuglib_printf(1, "Exiting %s: Failed to receive RapidHA Network Commissioning Status Response\n", __func__);
     return -1;
   }
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   {
     uint8_t firmmaj, firmmin, firmbuild; //RapidHA Firmware version
 
@@ -2734,7 +2782,7 @@ static int rapidhalib_detect_rapidha(rapidhadevice_t *rapidhadevice, int longdet
   //NOTE: Always do full reinit at startup so things like the time get updated
   rapidhadevice->needreinit=1;
 
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   return 0;
 }
@@ -2768,7 +2816,7 @@ int rapidhalib_isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx
     debuglibifaceptr->debuglib_printf(1, "Exiting %s line: %d\n", __func__, __LINE__);
     return -1;
   }
-  rapidhalib_lockrapidha(&rapidhalocked);
+  rapidhalib_lockrapidha();
   //Setup a list entry for the rapidha device
 
   //First search for an empty slot
@@ -2779,7 +2827,7 @@ int rapidhalib_isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx
   }
   if (i==MAX_RAPIDHA_DEVICES) {
     rapidhalib_setdetectingdevice(0, &rapidhalocked);
-    rapidhalib_unlockrapidha(&rapidhalocked);
+    rapidhalib_unlockrapidha();
     PTHREAD_UNLOCK(&rapidhalibmutex_detectingdevice);
     debuglibifaceptr->debuglib_printf(1, "Exiting %s: Max limit of %d RapidHA devices has been reached\n", __func__, MAX_RAPIDHA_DEVICES);
     debuglibifaceptr->debuglib_printf(1, "Exiting %s line: %d\n", __func__, __LINE__);
@@ -2794,11 +2842,11 @@ int rapidhalib_isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx
   //  then it will be safe to make an atomic copy of the structure
   //Also need to unlock rapidha so receiveraw can lock.  This is okay as this is the only place where new rapidha devices
   //  are added
-  rapidhalib_unlockrapidha(&rapidhalocked);
+  rapidhalib_unlockrapidha();
   PTHREAD_LOCK(&rapidhalibmutex_initnewrapidha);
   memcpy(&rapidhalib_rapidhadevices[list_numitems], &rapidhalib_newrapidha, sizeof(rapidhadevice_t));
   PTHREAD_UNLOCK(&rapidhalibmutex_initnewrapidha);
-  rapidhalib_lockrapidha(&rapidhalocked);
+  rapidhalib_lockrapidha();
 
   //Allocate new memory for the send and receive buffers
   rapidhalib_rapidhadevices[list_numitems].receivebuf=(unsigned char *) malloc(BUFFER_SIZE*sizeof(unsigned char));
@@ -2806,7 +2854,7 @@ int rapidhalib_isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx
   if (i==rapidhalib_numrapidhadevices) {
     ++rapidhalib_numrapidhadevices;
   }
-  rapidhalib_unlockrapidha(&rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   PTHREAD_UNLOCK(&rapidhalibmutex_detectingdevice);
 
@@ -2837,57 +2885,57 @@ STATIC int rapidhalib_processcommand(const char *buffer, int clientsock) {
   if (strncmp(buffer, "rapidha_join_network ", 21)==0 && len>=37) {
     //Format: rapidha_join_network <64-bit addr>
     sscanf(buffer+21, "%016llX", (unsigned long long *) &addr);
-    rapidhalib_lockrapidha(&rapidhalocked);
+    rapidhalib_lockrapidha();
     found=rapidhalib_find_rapidha_device(addr, &rapidhalocked);
     if (found>=0) {
       rapidhalib_send_rapidha_network_comissioning_join_network(&rapidhalib_rapidhadevices[found], &rapidhalocked);
-      rapidhalib_unlockrapidha(&rapidhalocked);
+      rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "OKAY\n");
       commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
-      rapidhalib_unlockrapidha(&rapidhalocked);
+      rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "RAPIDHA: NOT FOUND %016llX\n", (unsigned long long) addr);
     }
   } else if (strncmp(buffer, "rapidha_form_network ", 21)==0 && len>=37) {
     //Format: rapidha_form_network <64-bit addr>
     sscanf(buffer+21, "%016llX", (unsigned long long *) &addr);
-    rapidhalib_lockrapidha(&rapidhalocked);
+    rapidhalib_lockrapidha();
     found=rapidhalib_find_rapidha_device(addr, &rapidhalocked);
     if (found>=0) {
       rapidhalib_send_rapidha_network_comissioning_form_network(&rapidhalib_rapidhadevices[found], ZIGBEE_CHANMASK_STANDARD, &rapidhalocked);
-      rapidhalib_unlockrapidha(&rapidhalocked);
+      rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "OKAY\n");
       commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
-      rapidhalib_unlockrapidha(&rapidhalocked);
+      rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "RAPIDHA: NOT FOUND %016llX\n", (unsigned long long) addr);
     }
   } else if (strncmp(buffer, "rapidha_form_network_netvoxchan ", 32)==0 && len>=48) {
     //Format: rapidha_form_network <64-bit addr>
     sscanf(buffer+32, "%016llX", (unsigned long long *) &addr);
-    rapidhalib_lockrapidha(&rapidhalocked);
+    rapidhalib_lockrapidha();
     found=rapidhalib_find_rapidha_device(addr, &rapidhalocked);
     if (found>=0) {
       rapidhalib_send_rapidha_network_comissioning_form_network(&rapidhalib_rapidhadevices[found], ZIGBEE_CHANMASK_NETVOX, &rapidhalocked);
-      rapidhalib_unlockrapidha(&rapidhalocked);
+      rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "OKAY\n");
       commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
-      rapidhalib_unlockrapidha(&rapidhalocked);
+      rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "RAPIDHA: NOT FOUND %016llX\n", (unsigned long long) addr);
     }
   } else if (strncmp(buffer, "rapidha_leave_network ", 22)==0 && len>=38) {
     //Format: rapidha_leave_network <64-bit addr>
     sscanf(buffer+22, "%016llX", (unsigned long long *) &addr);
-    rapidhalib_lockrapidha(&rapidhalocked);
+    rapidhalib_lockrapidha();
     found=rapidhalib_find_rapidha_device(addr, &rapidhalocked);
     if (found>=0) {
       rapidhalib_send_rapidha_network_comissioning_leave_network(&rapidhalib_rapidhadevices[found], &rapidhalocked);
-      rapidhalib_unlockrapidha(&rapidhalocked);
+      rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "OKAY\n");
       commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
-      rapidhalib_unlockrapidha(&rapidhalocked);
+      rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "RAPIDHA: NOT FOUND %016llX\n", (unsigned long long) addr);
     }
   } else if (strncmp(buffer, "rapidha_reinit ", 15)==0 && len>=31) {
@@ -2899,11 +2947,11 @@ STATIC int rapidhalib_processcommand(const char *buffer, int clientsock) {
 
     //WARNING: Setting the device as reduced function may cause problems with some RapidHA modules
     device_type=0;
-    rapidhalib_lockrapidha(&rapidhalocked);
+    rapidhalib_lockrapidha();
     found=rapidhalib_find_rapidha_device(addr, &rapidhalocked);
     if (found>=0) {
       rapidhalib_rapidhadevices[found].needreinit=device_type+1;
-      rapidhalib_unlockrapidha(&rapidhalocked);
+      rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "RapidHA has been scheduled for reinitialisation as type: ");
       switch (device_type) {
         case 0: sprintf(tmpstrbuf+57, "Full Function\n");
@@ -2915,14 +2963,14 @@ STATIC int rapidhalib_processcommand(const char *buffer, int clientsock) {
       }
       commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
-      rapidhalib_unlockrapidha(&rapidhalocked);
+      rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "RAPIDHA: NOT FOUND %016llX\n", (unsigned long long) addr);
     }
   } else if (strncmp(buffer, "get_rapidha_info", 16)==0) {
     int found=0;
 
     //Format: get_rapidha_info
-    rapidhalib_lockrapidha(&rapidhalocked);
+    rapidhalib_lockrapidha();
     numrapidhadevices=_rapidhalib_getnumrapidhadevices();
     for (i=0; i<numrapidhadevices; i++) {
       uint8_t firmmaj, firmmin, firmbuild;
@@ -2985,7 +3033,7 @@ STATIC int rapidhalib_processcommand(const char *buffer, int clientsock) {
     if (!found) {
       commonserverlibifaceptr->serverlib_netputs("NO RAPIDHA DEVICES FOUND\n", clientsock, NULL);
     }
-    rapidhalib_unlockrapidha(&rapidhalocked);
+    rapidhalib_unlockrapidha();
   } else {
     return CMDLISTENER_NOTHANDLED;
   }
@@ -3005,12 +3053,12 @@ static int rapidhalib_process_firmware_upgrade_command(const char *buffer, int c
     long rapidhalocked=0;
 
     sscanf(buffer+25, "%016llX", (unsigned long long *) &addr);
-    rapidhalib_lockrapidha(&rapidhalocked);
+    rapidhalib_lockrapidha();
     found=rapidhalib_find_rapidha_device(addr, &rapidhalocked);
     if (found>=0) {
       if (rapidhalib_rapidhadevices[found].firmware_file) {
         sprintf(tmpstrbuf, "RapidHA device: %016" PRIX64 " is already updating with file: %s\n", addr, rapidhalib_rapidhadevices[found].firmware_file);
-        rapidhalib_unlockrapidha(&rapidhalocked);
+        rapidhalib_unlockrapidha();
         commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
       } else {
         struct stat stat_buf;
@@ -3019,22 +3067,22 @@ static int rapidhalib_process_firmware_upgrade_command(const char *buffer, int c
         statresult=stat(buffer+42, &stat_buf);
         localerrno=errno;
         if (statresult!=0) {
-          rapidhalib_unlockrapidha(&rapidhalocked);
+          rapidhalib_unlockrapidha();
           sprintf(tmpstrbuf, "RAPIDHA: Unable to access file: \"%s\", errno=%d\n", buffer+42, localerrno);
         } else {
           rapidhalib_rapidhadevices[found].firmware_file=strdup(buffer+42);
           if (!rapidhalib_rapidhadevices[found].firmware_file) {
-            rapidhalib_unlockrapidha(&rapidhalocked);
+            rapidhalib_unlockrapidha();
             sprintf(tmpstrbuf, "RAPIDHA: Failed to allocate ram for filename: %s\n", buffer+42);
           } else {
-            rapidhalib_unlockrapidha(&rapidhalocked);
+            rapidhalib_unlockrapidha();
             sprintf(tmpstrbuf, "Upgrade scheduled for RapidHA device: %016" PRIX64 " using file: \"%s\"\n", addr, buffer+42);
           }
         }
         commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
       }
     } else {
-      rapidhalib_unlockrapidha(&rapidhalocked);
+      rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "RAPIDHA: NOT FOUND %016" PRIX64 " not found\n", addr);
       commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
     }
@@ -3054,11 +3102,11 @@ static int rapidhalib_process_cancel_firmware_upgrade_command(const char *buffer
     long rapidhalocked=0;
 
     sscanf(buffer+32, "%016llX", (unsigned long long *) &addr);
-    rapidhalib_lockrapidha(&rapidhalocked);
+    rapidhalib_lockrapidha();
     found=rapidhalib_find_rapidha_device(addr, &rapidhalocked);
     if (found>=0) {
       if (!rapidhalib_rapidhadevices[found].firmware_file) {
-        rapidhalib_unlockrapidha(&rapidhalocked);
+        rapidhalib_unlockrapidha();
         sprintf(tmpstrbuf, "RAPIDHA: Firmware upgrade not currently active\n");
       } else {
         if (rapidhalib_rapidhadevices[found].firmwarefile_fd!=-1) {
@@ -3069,12 +3117,12 @@ static int rapidhalib_process_cancel_firmware_upgrade_command(const char *buffer
           free(rapidhalib_rapidhadevices[found].firmware_file);
           rapidhalib_rapidhadevices[found].firmware_file=NULL;
         }
-        rapidhalib_unlockrapidha(&rapidhalocked);
+        rapidhalib_unlockrapidha();
         sprintf(tmpstrbuf, "RAPIDHA: Firmware upgrade for RapidHA device: %016" PRIX64 " has been cancelled\n", addr);
       }
       commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
-      rapidhalib_unlockrapidha(&rapidhalocked);
+      rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "RAPIDHA: NOT FOUND %016" PRIX64 "\n", addr);
       commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
     }
@@ -3099,7 +3147,7 @@ int rapidhalib_serial_device_removed(int serdevidx) {
 
   MOREDEBUG_ENTERINGFUNC();
 
-  rapidhalib_lockrapidha(&rapidhalocked);
+  rapidhalib_lockrapidha();
 
   numrapidhadevices=_rapidhalib_getnumrapidhadevices();
   for (i=0; i<numrapidhadevices; i++) {
@@ -3114,7 +3162,7 @@ int rapidhalib_serial_device_removed(int serdevidx) {
     }
   }
   if (i==numrapidhadevices) {
-    rapidhalib_unlockrapidha(&rapidhalocked);
+    rapidhalib_unlockrapidha();
 
     MOREDEBUG_EXITINGFUNC();
 
@@ -3132,7 +3180,7 @@ int rapidhalib_serial_device_removed(int serdevidx) {
 			//Still in use so we can't cleanup yet
 			debuglibifaceptr->debuglib_printf(1, "%s: RapidHA %016llX at index: %d is still in use: %d by Zigbee so it cannot be fully removed yet\n", __func__, rapidhadeviceptr->addr, i, rapidhadeviceptr->inuse);
 
-			rapidhalib_unlockrapidha(&rapidhalocked);
+			rapidhalib_unlockrapidha();
 
 			MOREDEBUG_EXITINGFUNC();
 			return 0;
@@ -3142,7 +3190,7 @@ int rapidhalib_serial_device_removed(int serdevidx) {
     //Still in use so we can't cleanup yet
     debuglibifaceptr->debuglib_printf(1, "%s: RapidHA %016llX at index: %d is still in use: %d so it cannot be fully removed yet\n", __func__, rapidhadeviceptr->addr, i, rapidhadeviceptr->inuse);
 
-    rapidhalib_unlockrapidha(&rapidhalocked);
+    rapidhalib_unlockrapidha();
 
     MOREDEBUG_EXITINGFUNC();
     return 0;
@@ -3163,7 +3211,7 @@ int rapidhalib_serial_device_removed(int serdevidx) {
 
   rapidhadeviceptr->removed=1;
 
-  rapidhalib_unlockrapidha(&rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   MOREDEBUG_EXITINGFUNC();
 
@@ -3180,9 +3228,9 @@ STATIC void rapidhalib_doreinit(rapidhadevice_t *rapidhadevice, long *rapidhaloc
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   addr=rapidhadevice->addr;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
   debuglibifaceptr->debuglib_printf(1, "%s: Reinitialising RapidHA: %016" PRIX64 "\n", __func__, addr);
 
   detectresult=rapidhalib_initialRapidHAsetup(rapidhadevice, 0, rapidhalocked);
@@ -3255,11 +3303,11 @@ STATIC void rapidhalib_doreinit(rapidhadevice_t *rapidhadevice, long *rapidhaloc
   result=rapidhalib_waitforresponse(rapidhalocked);
 
   //No longer need reinit if now fully configured
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   if (rapidhadevice->cfgstate==RAPIDHA_CFGSTATE_FULLY_CONFIGURED) {
     rapidhadevice->needreinit=0;
   }
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 }
@@ -3281,10 +3329,10 @@ STATIC void rapidhalib_dofirmwareupgrade(rapidhadevice_t *rapidhadevice, long *r
   debuglibifaceptr->debuglib_printf(1, "%s: A firmware upgrade has been scheduled\n", __func__);
 
   //First remove the RapidHA from the zigbee library so other operations don't interfer
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   zigbeelibindex=rapidhadevice->zigbeelibindex;
   addr=rapidhadevice->addr;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
   //Do this outside a lock as it may call back into the rapidha library and multi-library locking has some problems at the moment
   result=zigbeelibifaceptr->remove_localzigbeedevice(zigbeelibindex, rapidhalocked, zigbeelocked);
   if (result==0) {
@@ -3292,13 +3340,13 @@ STATIC void rapidhalib_dofirmwareupgrade(rapidhadevice_t *rapidhadevice, long *r
     debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
     return;
   } else {
-    rapidhalib_lockrapidha(rapidhalocked);
+    rapidhalib_lockrapidha();
     rapidhadevice->zigbeelibindex=-1;
-    rapidhalib_unlockrapidha(rapidhalocked);
+    rapidhalib_unlockrapidha();
   }
 
   //Open the firmware file for reading
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   if (rapidhadevice->firmware_file) {
     rapidhadevice->firmwarefile_fd=open(rapidhadevice->firmware_file, O_RDONLY);
   } else {
@@ -3306,14 +3354,14 @@ STATIC void rapidhalib_dofirmwareupgrade(rapidhadevice_t *rapidhadevice, long *r
   }
   if (rapidhadevice->firmwarefile_fd==-1) {
     debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s for reading\n", __func__, rapidhadevice->firmware_file);
-    rapidhalib_unlockrapidha(rapidhalocked);
+    rapidhalib_unlockrapidha();
     goto firmwareupgrade_cleanup;
   }
   rapidhadevice->firmware_file_offset=0;
   rapidhadevice->firmware_progress=RAPIDHA_FIRMWARE_UPDATE_PROGRESS_UPDATING;
   rapidhadevice->firmware_retries=0;
   rapidhalib_send_rapidha_bootload_query_next_image_response(rapidhadevice, rapidhadevice->firmwarefile_fd, rapidhalocked);
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   prevfirmware_progress=firmware_progress=1;
   secscnt=0;
@@ -3323,20 +3371,20 @@ STATIC void rapidhalib_dofirmwareupgrade(rapidhadevice_t *rapidhadevice, long *r
   while (firmware_progress>0 && secscnt<RAPIDHA_FIRMWARE_UPDATE_MAX_WAIT_TIME && !rapidhalib_getneedtoquit(rapidhalocked)) {
     //Wait until firmware progress is no longer above 0 or until we've waited too long
     sleep(1);
-    rapidhalib_lockrapidha(rapidhalocked);
+    rapidhalib_lockrapidha();
     firmware_progress=rapidhadevice->firmware_progress;
     if (offsetsecscnt>=RAPIDHA_FIRMWARE_UPDATE_OFFSET_PROGRESS) {
       //Check every 5 seconds if the upgrade has progressed and if not abort
       offsetsecscnt=0;
       if (rapidhadevice->firmware_file_offset==prevfirmware_offset) {
-        rapidhalib_unlockrapidha(rapidhalocked);
+        rapidhalib_unlockrapidha();
         offsetnotprogressing=1;
         break;
       } else {
         prevfirmware_offset=rapidhadevice->firmware_file_offset;
       }
     }
-    rapidhalib_unlockrapidha(rapidhalocked);
+    rapidhalib_unlockrapidha();
     if (firmware_progress>prevfirmware_progress) {
       //Firmware update has progressed to the next level
       secscnt=0;
@@ -3359,7 +3407,7 @@ STATIC void rapidhalib_dofirmwareupgrade(rapidhadevice_t *rapidhadevice, long *r
   }
   //Cleanup and refresh after the firmware upgrade
 firmwareupgrade_cleanup:
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   if (rapidhadevice->firmwarefile_fd!=-1) {
     close(rapidhadevice->firmwarefile_fd);
     rapidhadevice->firmwarefile_fd=-1;
@@ -3368,15 +3416,15 @@ firmwareupgrade_cleanup:
     free(rapidhadevice->firmware_file);
     rapidhadevice->firmware_file=NULL;
   }
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   //Redetect info about this RapidHA
   rapidhalib_detect_rapidha(rapidhadevice, 1, rapidhalocked);
 
   //Schedule to reinitialise this RapidHA
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   rapidhadevice->needreinit=1;
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 }
@@ -3408,15 +3456,15 @@ STATIC void rapidhalib_refresh_rapidha_data(void) {
     }
     //Check if a firmware upgrade has been requested
     //Check at the top so easier to run through reinitialisation after the upgrade is complete
-    rapidhalib_lockrapidha(&rapidhalocked);
+    rapidhalib_lockrapidha();
     firmware_file=rapidhadeviceptr->firmware_file;
-    rapidhalib_unlockrapidha(&rapidhalocked);
+    rapidhalib_unlockrapidha();
     if (firmware_file) {
       rapidhalib_dofirmwareupgrade(rapidhadeviceptr, &rapidhalocked, &zigbeelocked);
     }
-    rapidhalib_lockrapidha(&rapidhalocked);
+    rapidhalib_lockrapidha();
     firmware_file=rapidhadeviceptr->firmware_file;
-    rapidhalib_unlockrapidha(&rapidhalocked);
+    rapidhalib_unlockrapidha();
     if (firmware_file) {
       //If the firmware file is still set, then the firmware upgrade is still pending and we shouldn't
       //  do anything else with this device
@@ -3427,23 +3475,23 @@ STATIC void rapidhalib_refresh_rapidha_data(void) {
     //  seeing a serial dropout so here we also reinit if rapidha isn't fully configured
     //Always refresh all ZigBee devices after reinit as the RapidHA may lose important state information
     //  during reinit
-    rapidhalib_lockrapidha(&rapidhalocked);
+    rapidhalib_lockrapidha();
     zigbeelibindex=rapidhadeviceptr->zigbeelibindex;
     cfgstate=rapidhadeviceptr->cfgstate;
     if (cfgstate!=RAPIDHA_CFGSTATE_FULLY_CONFIGURED) {
       rapidhadeviceptr->needreinit=1;
     }
     needreinit=rapidhadeviceptr->needreinit;
-    rapidhalib_unlockrapidha(&rapidhalocked);
+    rapidhalib_unlockrapidha();
     if (needreinit) {
       if (zigbeelibindex>=0 && zigbeelibifaceptr) {
         debuglibifaceptr->debuglib_printf(1, "%s: Removing cached list of ZigBee devices as RapidHA: %016" PRIX64 " needs to be reconfigured\n", __func__, rapidhadeviceptr->addr);
         zigbeelibifaceptr->remove_all_zigbee_devices(zigbeelibindex, &rapidhalocked, &zigbeelocked);
       }
       rapidhalib_doreinit(rapidhadeviceptr, &rapidhalocked, &zigbeelocked);
-      rapidhalib_lockrapidha(&rapidhalocked);
+      rapidhalib_lockrapidha();
       needreinit=rapidhadeviceptr->needreinit;
-      rapidhalib_unlockrapidha(&rapidhalocked);
+      rapidhalib_unlockrapidha();
       if (needreinit) {
         //Having problems configuring this RapidHA so go on to other devices
         debuglibifaceptr->debuglib_printf(1, "%s: ERROR: RapidHA: %016" PRIX64 " hasn't reinitialised properly\n", __func__, rapidhadeviceptr->addr);
@@ -3451,7 +3499,7 @@ STATIC void rapidhalib_refresh_rapidha_data(void) {
         continue;
       }
     }
-    rapidhalib_lockrapidha(&rapidhalocked);
+    rapidhalib_lockrapidha();
     localzigbeedevice.addr=rapidhadeviceptr->addr;
     localzigbeedevice.deviceptr=rapidhadeviceptr;
     if (rapidhadeviceptr->zigbeelibindex<0 && zigbeelibifaceptr) {
@@ -3466,7 +3514,7 @@ STATIC void rapidhalib_refresh_rapidha_data(void) {
 			rapidhadeviceptr->zigbeelibindex=zigbeelibifaceptr->add_localzigbeedevice(&localzigbeedevice, &rapidhalib_localzigbeedevice_iface_ver_1, features, &rapidhalocked, &zigbeelocked);
     }
     if (rapidhadeviceptr->zigbeelibindex<0) {
-      rapidhalib_unlockrapidha(&rapidhalocked);
+      rapidhalib_unlockrapidha();
       rapidhalib_markrapidha_notinuse(rapidhadeviceptr, &rapidhalocked);
       continue;
     }
@@ -3479,7 +3527,7 @@ STATIC void rapidhalib_refresh_rapidha_data(void) {
         rapidhadeviceptr->haendpointregistered=1;
       }
     }
-    rapidhalib_unlockrapidha(&rapidhalocked);
+    rapidhalib_unlockrapidha();
     if (rapidhalib_rapidha_connected_to_network(rapidhadeviceptr, &rapidhalocked) && zigbeelibifaceptr) {
       //Check if the connected RapidHA module has been added as a Zigbee device
       pos=zigbeelibifaceptr->find_zigbee_device(rapidhadeviceptr->zigbeelibindex, rapidhadeviceptr->addr, rapidhadeviceptr->netaddr, &rapidhalocked, &zigbeelocked);
@@ -3538,9 +3586,9 @@ static inline void _rapidhalib_setneedtoquit(int val) {
 }
 
 static inline void rapidhalib_setneedtoquit(int val, long *rapidhalocked) {
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   _rapidhalib_setneedtoquit(val);
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 }
 
 static inline int _rapidhalib_getneedtoquit(void) {
@@ -3550,9 +3598,9 @@ static inline int _rapidhalib_getneedtoquit(void) {
 static inline int rapidhalib_getneedtoquit(long *rapidhalocked) {
   int val;
 
-  rapidhalib_lockrapidha(rapidhalocked);
+  rapidhalib_lockrapidha();
   val=_rapidhalib_getneedtoquit();
-  rapidhalib_unlockrapidha(rapidhalocked);
+  rapidhalib_unlockrapidha();
 
   return val;
 }
