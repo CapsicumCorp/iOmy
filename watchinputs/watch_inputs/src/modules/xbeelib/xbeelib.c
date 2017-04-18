@@ -404,45 +404,92 @@ static inline void xbeelib_backtrace(void) {
 }
 #endif
 
+static pthread_key_t lockkey=NULL;
+static pthread_once_t lockkey_onceinit = PTHREAD_ONCE_INIT;
+static int havelockkey=0;
+
+//Initialise a thread local store for the lock counter
+void xbeelib_makelockkey() {
+  int result;
+
+  result=pthread_key_create(&lockkey, NULL);
+  if (result!=0) {
+    debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=xbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+    debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu Failed to create lockkey: %d\n", __func__, pthread_self(), result);
+  } else {
+    havelockkey=1;
+  }
+}
+
 /*
   Apply the xbee mutex lock if not already applied otherwise increment the lock count
 */
-STATIC void xbeelib_lockxbee(long *xbeelocked) {
+void xbeelib_lockxbee(void) {
   LOCKDEBUG_ADDDEBUGLIBIFACEPTR();
+  long *lockcnt;
 
   LOCKDEBUG_ENTERINGFUNC();
-  if ((*xbeelocked)==0) {
+  (void) pthread_once(&lockkey_onceinit, xbeelib_makelockkey);
+  if (!havelockkey) {
+    debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=xbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lockkey not created\n", __func__, pthread_self(), __LINE__);
+    return;
+  }
+  //Get the lock counter from thread local store
+  lockcnt = (long *) pthread_getspecific(lockkey);
+  if (lockcnt==NULL) {
+    //Allocate storage for the lock counter and set to 0
+    lockcnt=(long *) calloc(1, sizeof(long));
+    (void) pthread_setspecific(lockkey, lockcnt);
+  }
+  if ((*lockcnt)==0) {
     //Lock the thread if not already locked
     XBEELIB_PTHREAD_LOCK(&xbeelibmutex);
   }
   //Increment the lock count
-  ++(*xbeelocked);
+  ++(*lockcnt);
 #ifdef XBEELIB_LOCKDEBUG
-  debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lock count=%ld\n", __func__, pthread_self(), __LINE__, *xbeelocked);
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lock count=%ld\n", __func__, pthread_self(), __LINE__, *lockcnt);
 #endif
 }
 
 /*
   Decrement the lock count and if 0, release the xbee mutex lock
 */
-STATIC void xbeelib_unlockxbee(long *xbeelocked) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=xbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+void xbeelib_unlockxbee(void) {
+  long *lockcnt;
 
   LOCKDEBUG_ENTERINGFUNC();
 
-  if ((*xbeelocked)==0) {
+  (void) pthread_once(&lockkey_onceinit, xbeelib_makelockkey);
+  if (!havelockkey) {
+    debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=xbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lockkey not created\n", __func__, pthread_self(), __LINE__);
+    return;
+  }
+  //Get the lock counter from thread local store
+  lockcnt = (long *) pthread_getspecific(lockkey);
+  if (lockcnt==NULL) {
+    debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=xbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
     debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu LOCKING MISMATCH TRIED TO UNLOCK WHEN LOCK COUNT IS 0 AND ALREADY UNLOCKED\n", __func__, pthread_self());
     xbeelib_backtrace();
     return;
   }
-  --(*xbeelocked);
-  if ((*xbeelocked)==0) {
+  --(*lockcnt);
+  if ((*lockcnt)==0) {
     //Lock the thread if not already locked
     XBEELIB_PTHREAD_UNLOCK(&xbeelibmutex);
   }
 #ifdef XBEELIB_LOCKDEBUG
-  debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lock count=%ld\n", __func__, pthread_self(), __LINE__, *xbeelocked);
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lock count=%ld\n", __func__, pthread_self(), __LINE__, *lockcnt);
 #endif
+
+  if ((*lockcnt)==0) {
+    //Deallocate storage for the lock counter so don't have to free it at thread exit
+    free(lockcnt);
+    lockcnt=NULL;
+    (void) pthread_setspecific(lockkey, lockcnt);
+  }
 }
 
 /*
@@ -458,9 +505,9 @@ static inline int _xbeelib_getnumxbeedevices(void) {
 static int xbeelib_getnumxbeedevices(long *xbeelocked) {
   int val;
 
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   val=_xbeelib_getnumxbeedevices();
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   return val;
 }
@@ -478,9 +525,9 @@ static inline void _xbeelib_setnumxbeedevices(int numxbeedevices) {
 static void xbeelib_setnumxbeedevices(int numxbeedevices) {
   long xbeelocked=0;
 
-  xbeelib_lockxbee(&xbeelocked);
+  xbeelib_lockxbee();
   _xbeelib_setnumxbeedevices(numxbeedevices);
-  xbeelib_unlockxbee(&xbeelocked);
+  xbeelib_unlockxbee();
 }
 
 /*
@@ -496,9 +543,9 @@ static inline int _xbeelib_getdetectingdevice() {
 static int xbeelib_getdetectingdevice(long *xbeelocked) {
   int val;
 
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   val=_xbeelib_getdetectingdevice();
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   return val;
 }
@@ -514,9 +561,9 @@ static inline void _xbeelib_setdetectingdevice(int detectingdevice) {
   Thread safe set detecting device
 */
 static void xbeelib_setdetectingdevice(int detectingdevice, long *xbeelocked) {
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   _xbeelib_setdetectingdevice(detectingdevice);
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 }
 
 /*
@@ -526,10 +573,10 @@ static void xbeelib_setdetectingdevice(int detectingdevice, long *xbeelocked) {
 STATIC int xbeelib_markxbee_inuse(xbeedevice_t *xbeedevice, long *xbeelocked) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
 
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   if (xbeedevice->removed || xbeedevice->needtoremove) {
     //This device shouldn't be used as it is either removed or is scheduled for removal
-    xbeelib_unlockxbee(xbeelocked);
+    xbeelib_unlockxbee();
 
     return -1;
   }
@@ -539,7 +586,7 @@ STATIC int xbeelib_markxbee_inuse(xbeedevice_t *xbeedevice, long *xbeelocked) {
   debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu Xbee: %016llX now inuse: %d\n", __func__, pthread_self(), xbeedevice->addr, xbeedevice->inuse);
 #endif
 
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   return 0;
 }
@@ -551,17 +598,17 @@ STATIC int xbeelib_markxbee_inuse(xbeedevice_t *xbeedevice, long *xbeelocked) {
 STATIC int xbeelib_markxbee_notinuse(xbeedevice_t *xbeedevice, long *xbeelocked) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=xbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
 
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   if (xbeedevice->removed) {
     //This device shouldn't be used as it is removed
-    xbeelib_unlockxbee(xbeelocked);
+    xbeelib_unlockxbee();
 
     return -1;
   }
   if (!xbeedevice->inuse) {
     debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu INUSE MISMATCH TRIED TO MARK AS NOT IN USE WHEN INUSE COUNT IS 0\n", __func__, pthread_self());
     xbeelib_backtrace();
-    xbeelib_unlockxbee(xbeelocked);
+    xbeelib_unlockxbee();
     return -2;
   }
   //Decrement xbee inuse value
@@ -570,7 +617,7 @@ STATIC int xbeelib_markxbee_notinuse(xbeedevice_t *xbeedevice, long *xbeelocked)
 #ifdef XBEELIB_MOREDEBUG
   debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu Xbee: %016llX now inuse: %d\n", __func__, pthread_self(), xbeedevice->addr, xbeedevice->inuse);
 #endif
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   return 0;
 }
@@ -581,11 +628,11 @@ int xbeelib_xbee_connected_to_network(void *localzigbeedevice, long *xbeelocked)
   xbeedevice_t *xbeedeviceptr=localzigbeedevice;
   int val;
 
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
 
   val=xbeedeviceptr->network_connected;
 
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   return val;
 }
@@ -725,15 +772,15 @@ static inline unsigned char _xbeelib_xbee_get_next_frameid(xbeedevice_t *xbeedev
 STATIC unsigned char xbeelib_xbee_get_next_frameid(xbeedevice_t *xbeedevice, long *xbeelocked) {
   unsigned char val;
 
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   if (xbeelib_markxbee_inuse(xbeedevice, xbeelocked)<0) {
     //Failed to mark xbee as inuse
-    xbeelib_unlockxbee(xbeelocked);
+    xbeelib_unlockxbee();
     return -1;
   }
   val=_xbeelib_xbee_get_next_frameid(xbeedevice);
   xbeelib_markxbee_notinuse(xbeedevice, xbeelocked);
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   return val;
 }
@@ -745,15 +792,15 @@ static inline unsigned char _xbeelib_xbee_get_frameid(xbeedevice_t *xbeedevice) 
 static unsigned char xbeelib_xbee_get_frameid(xbeedevice_t *xbeedevice, long *xbeelocked) {
   unsigned char val;
 
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   if (xbeelib_markxbee_inuse(xbeedevice, xbeelocked)<0) {
     //Failed to mark xbee as inuse
-    xbeelib_unlockxbee(xbeelocked);
+    xbeelib_unlockxbee();
     return -1;
   }
   val=_xbeelib_xbee_get_frameid(xbeedevice);
   xbeelib_markxbee_notinuse(xbeedevice, xbeelocked);
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   return val;
 }
@@ -784,15 +831,15 @@ static inline unsigned char _xbeelib_zigbee_get_next_seqnumber(xbeedevice_t *xbe
 static unsigned char xbeelib_zigbee_get_next_seqnumber(xbeedevice_t *xbeedevice, long *xbeelocked) {
   unsigned char val;
 
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   if (xbeelib_markxbee_inuse(xbeedevice, xbeelocked)<0) {
     //Failed to mark xbee as inuse
-    xbeelib_unlockxbee(xbeelocked);
+    xbeelib_unlockxbee();
     return -1;
   }
   val=_xbeelib_zigbee_get_next_seqnumber(xbeedevice);
   xbeelib_markxbee_notinuse(xbeedevice, xbeelocked);
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   return val;
 }
@@ -804,15 +851,15 @@ static unsigned char _xbeelib_zigbee_get_seqnumber(xbeedevice_t *xbeedevice) {
 static unsigned char xbeelib_zigbee_get_seqnumber(xbeedevice_t *xbeedevice, long *xbeelocked) {
   unsigned char val;
 
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   if (xbeelib_markxbee_inuse(xbeedevice, xbeelocked)<0) {
     //Failed to mark xbee as inuse
-    xbeelib_unlockxbee(xbeelocked);
+    xbeelib_unlockxbee();
     return -1;
   }
   val=_xbeelib_zigbee_get_seqnumber(xbeedevice);
   xbeelib_markxbee_notinuse(xbeedevice, xbeelocked);
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   return val;
 }
@@ -901,7 +948,7 @@ int xbeelib_request_send_packet(xbeedevice_t *xbeedevice, long *xbeelocked) {
   xbee_packets_intransit_t *xbee_packets_intransit;
 
   MOREDEBUG_ENTERINGFUNC();
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   if (xbeelib_markxbee_inuse(xbeedevice, xbeelocked)<0) {
     //Failed to mark xbee as inuse
     return -1;
@@ -912,7 +959,7 @@ int xbeelib_request_send_packet(xbeedevice_t *xbeedevice, long *xbeelocked) {
     if (xbee_packets_intransit[i].inuse && xbee_packets_intransit[i].threadid==threadid && xbee_packets_intransit[i].sent==0) {
       //Each thread has to send the packet it has reserved or cancel the reservation before it can send another packet
       xbeelib_markxbee_notinuse(xbeedevice, xbeelocked);
-      xbeelib_unlockxbee(xbeelocked);
+      xbeelib_unlockxbee();
       MOREDEBUG_EXITINGFUNC();
 
       return -2;
@@ -929,7 +976,7 @@ int xbeelib_request_send_packet(xbeedevice_t *xbeedevice, long *xbeelocked) {
     }
   }
   xbeelib_markxbee_notinuse(xbeedevice, xbeelocked);
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
   MOREDEBUG_EXITINGFUNC();
 
   if (i!=MAX_PACKETS_IN_TRANSIT) {
@@ -949,7 +996,7 @@ int xbeelib_cancel_request_send_packet(xbeedevice_t *xbeedevice, long *xbeelocke
   xbee_packets_intransit_t *xbee_packets_intransit;
 
   MOREDEBUG_ENTERINGFUNC();
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   if (xbeelib_markxbee_inuse(xbeedevice, xbeelocked)<0) {
     //Failed to mark xbee as inuse
     return -1;
@@ -961,7 +1008,7 @@ int xbeelib_cancel_request_send_packet(xbeedevice_t *xbeedevice, long *xbeelocke
       //Reserved packet has been found so unreserve it
       xbee_packets_intransit[i].inuse=0;
       xbeelib_markxbee_notinuse(xbeedevice, xbeelocked);
-      xbeelib_unlockxbee(xbeelocked);
+      xbeelib_unlockxbee();
 
 //      debuglibifaceptr->debuglib_printf(1, "SUPER DEBUG: %s: Thread: %llu has cancelled reserved packet buffer\n", __func__, threadid);
 
@@ -969,7 +1016,7 @@ int xbeelib_cancel_request_send_packet(xbeedevice_t *xbeedevice, long *xbeelocke
     }
   }
   xbeelib_markxbee_notinuse(xbeedevice, xbeelocked);
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
   MOREDEBUG_EXITINGFUNC();
 
   return -2;
@@ -984,7 +1031,7 @@ int xbeelib_find_reserved_send_packet(xbeedevice_t *xbeedevice, long *xbeelocked
   xbee_packets_intransit_t *xbee_packets_intransit;
 
   MOREDEBUG_ENTERINGFUNC();
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   if (xbeelib_markxbee_inuse(xbeedevice, xbeelocked)<0) {
     //Failed to mark xbee as inuse
     return -1;
@@ -995,13 +1042,13 @@ int xbeelib_find_reserved_send_packet(xbeedevice_t *xbeedevice, long *xbeelocked
     if (xbee_packets_intransit[i].inuse && xbee_packets_intransit[i].threadid==threadid && xbee_packets_intransit[i].sent==0) {
       //Reserved packet has been found
       xbeelib_markxbee_notinuse(xbeedevice, xbeelocked);
-      xbeelib_unlockxbee(xbeelocked);
+      xbeelib_unlockxbee();
 
       return i;
     }
   }
   xbeelib_markxbee_notinuse(xbeedevice, xbeelocked);
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
   MOREDEBUG_EXITINGFUNC();
 
   return -2;
@@ -1015,7 +1062,7 @@ int xbeelib_find_intransit_packet_by_frameid(xbeedevice_t *xbeedevice, uint8_t f
   xbee_packets_intransit_t *xbee_packets_intransit;
 
   MOREDEBUG_ENTERINGFUNC();
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   if (xbeelib_markxbee_inuse(xbeedevice, xbeelocked)<0) {
     //Failed to mark xbee as inuse
     return -1;
@@ -1025,13 +1072,13 @@ int xbeelib_find_intransit_packet_by_frameid(xbeedevice_t *xbeedevice, uint8_t f
     if (xbee_packets_intransit[i].inuse && xbee_packets_intransit[i].sent==1 && xbee_packets_intransit[i].frameid==frameid) {
       //Packet has been found
       xbeelib_markxbee_notinuse(xbeedevice, xbeelocked);
-      xbeelib_unlockxbee(xbeelocked);
+      xbeelib_unlockxbee();
 
       return i;
     }
   }
   xbeelib_markxbee_notinuse(xbeedevice, xbeelocked);
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
   MOREDEBUG_EXITINGFUNC();
 
   return -2;
@@ -1045,7 +1092,7 @@ int xbeelib_find_intransit_packet_by_seqnumber(xbeedevice_t *xbeedevice, uint8_t
   xbee_packets_intransit_t *xbee_packets_intransit;
 
   MOREDEBUG_ENTERINGFUNC();
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   if (xbeelib_markxbee_inuse(xbeedevice, xbeelocked)<0) {
     //Failed to mark xbee as inuse
     return -1;
@@ -1055,13 +1102,13 @@ int xbeelib_find_intransit_packet_by_seqnumber(xbeedevice_t *xbeedevice, uint8_t
     if (xbee_packets_intransit[i].inuse && xbee_packets_intransit[i].sent==1 && xbee_packets_intransit[i].seqnumber==seqnumber) {
       //Packet has been found
       xbeelib_markxbee_notinuse(xbeedevice, xbeelocked);
-      xbeelib_unlockxbee(xbeelocked);
+      xbeelib_unlockxbee();
 
       return i;
     }
   }
   xbeelib_markxbee_notinuse(xbeedevice, xbeelocked);
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
   MOREDEBUG_EXITINGFUNC();
 
   return -2;
@@ -1178,7 +1225,7 @@ void __xbeelib_send_zigbee_zdo(xbeedevice_t *xbeedevice, zdo_general_request_t *
   apicmd->frametype=API_EXPLICIT_ADDRESSING_ZIGBEE_COMMAND;
 
   //Fill in the details for in transit packet
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   xbee_packets_intransit->sent=1;
   xbee_packets_intransit->frameid=apicmd->frameid;
   xbee_packets_intransit->waitingfortransmitstatus=1;
@@ -1192,13 +1239,13 @@ void __xbeelib_send_zigbee_zdo(xbeedevice_t *xbeedevice, zdo_general_request_t *
   xbee_packets_intransit->destendpoint=0;
   xbee_packets_intransit->destcluster=zdocmd->clusterid;
   xbee_packets_intransit->seqnumber=xbeezdocmd->seqnumber;
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   //debuglibifaceptr->debuglib_printf(1, "SUPER DEBUG %s: Sending a ZDO packet to Zigbee Device %04hX with frameid: %02hhX, seqnumber: %02hhX\n", __func__, zdocmd->netaddr, apicmd->frameid, xbeezdocmd->seqnumber);
 
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   zigbeelibindex=xbeedevice->zigbeelibindex;
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   if (zigbeelibindex>=0 && zigbeelibifaceptr) {
     zigbeelibifaceptr->process_zdo_seqnumber(zigbeelibindex, zdocmd->netaddr, xbeezdocmd->seqnumber, xbeelocked, zigbeelocked);
@@ -1299,7 +1346,7 @@ void __xbeelib_send_zigbee_zcl(xbeedevice_t *xbeedevice, zcl_general_request_t *
   apicmd->frametype=API_EXPLICIT_ADDRESSING_ZIGBEE_COMMAND;
 
   //Fill in the details for in transit packet
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   xbee_packets_intransit->sent=1;
   xbee_packets_intransit->frameid=apicmd->frameid;
   xbee_packets_intransit->waitingfortransmitstatus=1;
@@ -1317,13 +1364,13 @@ void __xbeelib_send_zigbee_zcl(xbeedevice_t *xbeedevice, zcl_general_request_t *
   } else {
     xbee_packets_intransit->seqnumber=xbeezclcmdwithmanu->seqnumber;
   }
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   //debuglibifaceptr->debuglib_printf(1, "SUPER DEBUG %s: Sending a ZCL packet to Zigbee Device %04hX with frameid: %02hhX, seqnumber: %02hhX\n", __func__, zclcmd->netaddr, apicmd->frameid, seqnumber);
 
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   zigbeelibindex=xbeedevice->zigbeelibindex;
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   if (zigbeelibindex>=0 && zigbeelibifaceptr) {
     zigbeelibifaceptr->process_zcl_seqnumber(zigbeelibindex, zclcmd->netaddr, seqnumber, xbeelocked, zigbeelocked);
@@ -1365,10 +1412,10 @@ void xbeelib_send_xbee_form_network(xbeedevice_t *xbeedevice, uint16_t chanmask,
 
   MOREDEBUG_ENTERINGFUNC();
 
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   addr=xbeedevice->addr;
   device_type=xbeedevice->device_type;
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
   if (device_type!=ZIGBEE_DEVICE_TYPE_COORDINATOR) {
     debuglibifaceptr->debuglib_printf(1, "%s: Xbee device: %016llX is not a coordinator\n", __func__, addr);
     MOREDEBUG_EXITINGFUNC();
@@ -1518,7 +1565,7 @@ void xbeelib_process_api_at_response(xbeedevice_t *xbeedevice, long *xbeelocked,
   debuglibifaceptr->debuglib_printf(1, "SUPER DEBUG: %s: Received AT response for command: %c%c\n", __func__, apicmd->atcmd[0], apicmd->atcmd[1]);
 
   //NOTE: This section triggers some dereferencing type-punned pointer warnings but the casting from ->end works okay
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   if (apicmd->atcmd[0]==XBEE_AT_CMD_FIRMVER[0] && apicmd->atcmd[1]==XBEE_AT_CMD_FIRMVER[1]) {
     if (xbeelib_waitingforresponse==XBEE_WAITING_FOR_AT_FIRMVER) {
       xbeelib_waitresult=1;
@@ -1601,7 +1648,7 @@ void xbeelib_process_api_at_response(xbeedevice_t *xbeedevice, long *xbeelocked,
       }
     }
   }
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
   MOREDEBUG_EXITINGFUNC();
 }
 
@@ -1618,13 +1665,13 @@ void xbeelib_process_api_modem_status(xbeedevice_t *xbeedevice, long *xbeelocked
 
   MOREDEBUG_ENTERINGFUNC();
 
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   addr=xbeedevice->addr;
 
   //Force a refresh of the network status as it may have changed
   xbeedevice->last_connect_status_refresh=0;
 
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   switch (apicmd->status) {
     case 0x00:
@@ -1682,7 +1729,7 @@ void xbeelib_process_api_transmit_status(xbeedevice_t *xbeedevice, long *xbeeloc
   if (apicmd->delivery_status==0x00) {
     netaddr=ntohs(apicmd->destnetaddr);
   }
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   idx=xbeelib_find_intransit_packet_by_frameid(xbeedevice, apicmd->frameid, xbeelocked);
   if (idx>=0) {
     seqnumber=xbeedevice->xbee_packets_intransit[idx].seqnumber;
@@ -1701,12 +1748,12 @@ void xbeelib_process_api_transmit_status(xbeedevice_t *xbeedevice, long *xbeeloc
       }
     }
   }
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   //debuglibifaceptr->debuglib_printf(1, "SUPER DEBUG: %s: Received Transmit Status: %02hhX for frame id: %02hhX, netaddr=%04hX\n", __func__, apicmd->delivery_status, apicmd->frameid, netaddr);
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   zigbeelibindex=xbeedevice->zigbeelibindex;
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
   if (zigbeelibindex>=0 && zigbeelibifaceptr) {
     if (apicmd->delivery_status==API_RECEIVE_DELIV_STATUS_ANF || apicmd->delivery_status==API_RECEIVE_DELIV_STATUS_RNF) {
       //Assume not being able to find the address or route is a timeout
@@ -1759,7 +1806,7 @@ static void xbeelib_process_api_zigbee_zdo_packet_response(xbeedevice_t *xbeedev
   zdocmd->profileid=profileid;
   zdocmd->zigbeelength=zigbeelength;
 
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   zigbeelibindex=xbeedevice->zigbeelibindex;
 
   idx=xbeelib_find_intransit_packet_by_seqnumber(xbeedevice, zdocmd->seqnumber, xbeelocked);
@@ -1771,7 +1818,7 @@ static void xbeelib_process_api_zigbee_zdo_packet_response(xbeedevice_t *xbeedev
       xbeedevice->xbee_packets_intransit[idx].waitingforresponse=0;
     }
   }
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
   debuglibifaceptr->debuglib_printf(1, "SUPER DEBUG %s: Received a ZDO packet from Zigbee Device %04hX with seqnumber: %02hhX, Profile ID: %04" PRIX16 ", Cluster ID: %04" PRIX16 "\n", __func__, netaddr, zdocmd->seqnumber, profileid, clusterid);
 
   if (zigbeelibindex>=0 && zigbeelibifaceptr) {
@@ -1834,7 +1881,7 @@ static void xbeelib_process_api_zigbee_zcl_packet_response(xbeedevice_t *xbeedev
     //Copy the zigbee payload into the generic Zigbee ZCL Response structure
     memmove(&(zclcmd->zigbeepayload), &(xbeezclcmdwithmanu->data), zclcmd->zigbeelength);
   }
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   zigbeelibindex=xbeedevice->zigbeelibindex;
 
   if (zclcmd->cmdid!=ZIGBEE_ZCL_CMD_REPORT_ATTRIB) {
@@ -1849,7 +1896,7 @@ static void xbeelib_process_api_zigbee_zcl_packet_response(xbeedevice_t *xbeedev
       }
     }
   }
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
   //debuglibifaceptr->debuglib_printf(1, "SUPER DEBUG %s: Received a ZCL packet from Zigbee Device %04hX with seqnumber: %02hhX, Command ID=%02hhX, Length=%d, Length2=%04hX\n", __func__, zclcmd->srcnetaddr, zclcmd->seqnumber, zclcmd->cmdid, zclcmd->zigbeelength, apicmd->length);
 
   if (zigbeelibindex>=0 && zigbeelibifaceptr) {
@@ -1920,11 +1967,11 @@ void xbeelib_process_api_packet(xbeedevice_t *xbeedevice, long *xbeelocked) {
     default:
       debuglibifaceptr->debuglib_printf(1, "%s: Received Xbee packet of unknown type: %02hhX\n", __func__, apicmd->frametype);
   }
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   if (xbeelib_waitingforresponse==XBEE_WAITING_FOR_ANYTHING) {
     xbeelib_waitresult=1;
   }
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
   MOREDEBUG_EXITINGFUNC();
 }
 
@@ -2045,21 +2092,21 @@ void xbeelib_receiveraw(int serdevidx, int handlerdevidx, char *buffer, int bufc
 
           //Process the API packet here
           xbeelib_process_api_packet(xbeedevice, &xbeelocked);
-          xbeelib_lockxbee(&xbeelocked);
+          xbeelib_lockxbee();
           if (xbeelib_waitresult) {
             sem_post(&xbeelib_waitforresponsesem);
             xbeelib_waitresult=0;
           }
-          xbeelib_unlockxbee(&xbeelocked);
+          xbeelib_unlockxbee();
         }
         //Ready to process a new packet
-        xbeelib_lockxbee(&xbeelocked);
+        xbeelib_lockxbee();
         xbeedevice->receivebufcnt=0;
         xbeedevice->receive_checksum=0;
         xbeedevice->receive_processing_packet=0;
         xbeedevice->receive_escapechar=0;
         xbeedevice->receive_packetlength=0;
-        xbeelib_unlockxbee(&xbeelocked);
+        xbeelib_unlockxbee();
       } else {
         xbeedevice->receive_checksum+=serchar;
       }
@@ -2087,7 +2134,7 @@ STATIC int xbeelib_find_xbee_device(uint64_t addr, long *xbeelocked) {
   int numxbeedevices;
 
   MOREDEBUG_ENTERINGFUNC();
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   numxbeedevices=_xbeelib_getnumxbeedevices();
   for (i=0; i<numxbeedevices; i++) {
     if (xbeelib_xbeedevices[i].addr==addr && !xbeelib_xbeedevices[i].removed && !xbeelib_xbeedevices[i].needtoremove) {
@@ -2095,7 +2142,7 @@ STATIC int xbeelib_find_xbee_device(uint64_t addr, long *xbeelocked) {
       break;
     }
   }
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
   MOREDEBUG_EXITINGFUNC();
 
   return match_found;
@@ -2149,10 +2196,10 @@ STATIC int xbeelib_initwaitforresponse(int waitingforresponseid, long *xbeelocke
     MOREDEBUG_EXITINGFUNC();
     return -1;
   }
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   xbeelib_waitingforresponse=waitingforresponseid;
   xbeelib_waitresult=0;
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   MOREDEBUG_EXITINGFUNC();
 
@@ -2178,9 +2225,9 @@ STATIC int xbeelib_waitforresponse(long *xbeelocked) {
   while ((result=sem_timedwait(&xbeelib_waitforresponsesem, &waittime)) == -1 && errno == EINTR)
     continue; /* Restart if interrupted by handler */
   lerrno=errno;
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   xbeelib_waitingforresponse=0;
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
   sem_destroy(&xbeelib_waitforresponsesem);
   PTHREAD_UNLOCK(&xbeelibmutex_waitforresponse);
   if (result==-1 && lerrno==ETIMEDOUT) {
@@ -2314,7 +2361,7 @@ int xbeelib_isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx, c
     return -1;
   }
   //Don't need to lock very much here since the values were set during detect
-  xbeelib_lockxbee(&xbeelocked);
+  xbeelib_lockxbee();
   debuglibifaceptr->debuglib_printf(1, "%s: Firmware version=%04hX\n", __func__, xbeelib_newxbee.firmver);
   debuglibifaceptr->debuglib_printf(1, "%s: Hardware version=%04hX\n", __func__, xbeelib_newxbee.hwver);
   debuglibifaceptr->debuglib_printf(1, "%s: 64-bit Network Address=%016llX\n", __func__, xbeelib_newxbee.addr);
@@ -2356,11 +2403,11 @@ int xbeelib_isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx, c
   //  then it will be safe to make an atomic copy of the structure
   //Also need to unlock xbee so receiveraw can lock.  This is okay as this is the only place where new xbee devices
   //  are added
-  xbeelib_unlockxbee(&xbeelocked);
+  xbeelib_unlockxbee();
   PTHREAD_LOCK(&xbeelibmutex_initnewxbee);
   memcpy(&xbeelib_xbeedevices[list_numitems], &xbeelib_newxbee, sizeof(xbeedevice_t));
   PTHREAD_UNLOCK(&xbeelibmutex_initnewxbee);
-  xbeelib_lockxbee(&xbeelocked);
+  xbeelib_lockxbee();
 
   //Allocate new memory for the receive buffers
   xbeelib_xbeedevices[list_numitems].receivebuf=(unsigned char *) malloc(BUFFER_SIZE*sizeof(unsigned char *));
@@ -2368,7 +2415,7 @@ int xbeelib_isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx, c
   if (i==xbeelib_numxbeedevices) {
     ++xbeelib_numxbeedevices;
   }
-  xbeelib_unlockxbee(&xbeelocked);
+  xbeelib_unlockxbee();
 
   PTHREAD_UNLOCK(&xbeelibmutex_detectingdevice);
 
@@ -2401,50 +2448,50 @@ STATIC int xbeelib_processcommand(const char *buffer, int clientsock) {
   if (strncmp(buffer, "xbee_form_network ", 18)==0 && len>=34) {
     //Format: xbee_form_network <64-bit addr>
     sscanf(buffer+18, "%016llX", (unsigned long long *) &addr);
-    xbeelib_lockxbee(&xbeelocked);
+    xbeelib_lockxbee();
     found=xbeelib_find_xbee_device(addr, &xbeelocked);
     if (found>=0) {
       xbeelib_send_xbee_form_network(&xbeelib_xbeedevices[found], XBEE_CHANMASK_STANDARD, &xbeelocked);
-      xbeelib_unlockxbee(&xbeelocked);
+      xbeelib_unlockxbee();
       sprintf(tmpstrbuf, "OKAY\n");
       commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
-      xbeelib_unlockxbee(&xbeelocked);
+      xbeelib_unlockxbee();
       sprintf(tmpstrbuf, "XBEE: NOT FOUND %016llX\n", (unsigned long long) addr);
     }
   } else if (strncmp(buffer, "xbee_form_network_netvoxchan ", 29)==0 && len>=45) {
     //Format: xbee_form_network <64-bit addr>
     sscanf(buffer+29, "%016llX", (unsigned long long *) &addr);
-    xbeelib_lockxbee(&xbeelocked);
+    xbeelib_lockxbee();
     found=xbeelib_find_xbee_device(addr, &xbeelocked);
     if (found>=0) {
       xbeelib_send_xbee_form_network(&xbeelib_xbeedevices[found], XBEE_CHANMASK_NETVOX, &xbeelocked);
-      xbeelib_unlockxbee(&xbeelocked);
+      xbeelib_unlockxbee();
       sprintf(tmpstrbuf, "OKAY\n");
       commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
-      xbeelib_unlockxbee(&xbeelocked);
+      xbeelib_unlockxbee();
       sprintf(tmpstrbuf, "XBEE: NOT FOUND %016llX\n", (unsigned long long) addr);
     }
   } else if (strncmp(buffer, "xbee_leave_network ", 19)==0 && len>=35) {
     //Format: xbee_leave_network <64-bit addr>
     sscanf(buffer+19, "%016llX", (unsigned long long *) &addr);
-    xbeelib_lockxbee(&xbeelocked);
+    xbeelib_lockxbee();
     found=xbeelib_find_xbee_device(addr, &xbeelocked);
     if (found>=0) {
       xbeelib_send_xbee_leave_network(&xbeelib_xbeedevices[found], &xbeelocked);
-      xbeelib_unlockxbee(&xbeelocked);
+      xbeelib_unlockxbee();
       sprintf(tmpstrbuf, "OKAY\n");
       commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
-      xbeelib_unlockxbee(&xbeelocked);
+      xbeelib_unlockxbee();
       sprintf(tmpstrbuf, "XBEE: NOT FOUND %016llX\n", (unsigned long long) addr);
     }
   } else if (strncmp(buffer, "get_xbee_info", 13)==0) {
     int found=0;
 
     //Format: get_xbee_info
-    xbeelib_lockxbee(&xbeelocked);
+    xbeelib_lockxbee();
     numxbeedevices=_xbeelib_getnumxbeedevices();
     for (i=0; i<numxbeedevices; i++) {
       uint16_t firmver, hwver;
@@ -2504,7 +2551,7 @@ STATIC int xbeelib_processcommand(const char *buffer, int clientsock) {
     if (!found) {
       commonserverlibifaceptr->serverlib_netputs("NO XBEE DEVICES FOUND\n", clientsock, NULL);
     }
-    xbeelib_unlockxbee(&xbeelocked);
+    xbeelib_unlockxbee();
   } else {
     return CMDLISTENER_NOTHANDLED;
   }
@@ -2529,7 +2576,7 @@ int xbeelib_serial_device_removed(int serdevidx) {
 
   MOREDEBUG_ENTERINGFUNC();
 
-  xbeelib_lockxbee(&xbeelocked);
+  xbeelib_lockxbee();
 
   numxbeedevices=_xbeelib_getnumxbeedevices();
   for (i=0; i<numxbeedevices; i++) {
@@ -2544,7 +2591,7 @@ int xbeelib_serial_device_removed(int serdevidx) {
     }
   }
   if (i==numxbeedevices) {
-    xbeelib_unlockxbee(&xbeelocked);
+    xbeelib_unlockxbee();
 
     MOREDEBUG_EXITINGFUNC();
 
@@ -2562,7 +2609,7 @@ int xbeelib_serial_device_removed(int serdevidx) {
 			//Still in use so we can't cleanup yet
 			debuglibifaceptr->debuglib_printf(1, "%s: Xbee %016llX at index: %d is still in use: %d by Zigbee so it cannot be fully removed yet\n", __func__, xbeedeviceptr->addr, i, xbeedeviceptr->inuse);
 
-			xbeelib_unlockxbee(&xbeelocked);
+			xbeelib_unlockxbee();
 
 			MOREDEBUG_EXITINGFUNC();
 			return 0;
@@ -2572,7 +2619,7 @@ int xbeelib_serial_device_removed(int serdevidx) {
     //Still in use so we can't cleanup yet
     debuglibifaceptr->debuglib_printf(1, "%s: Xbee %016llX at index: %d is still in use: %d so it cannot be fully removed yet\n", __func__, xbeedeviceptr->addr, i, xbeedeviceptr->inuse);
 
-    xbeelib_unlockxbee(&xbeelocked);
+    xbeelib_unlockxbee();
 
     MOREDEBUG_EXITINGFUNC();
     return 0;
@@ -2592,7 +2639,7 @@ int xbeelib_serial_device_removed(int serdevidx) {
 
   xbeedeviceptr->removed=1;
 
-  xbeelib_unlockxbee(&xbeelocked);
+  xbeelib_unlockxbee();
 
   MOREDEBUG_EXITINGFUNC();
 
@@ -2606,10 +2653,10 @@ STATIC void xbeelib_get_xbee_network_status(xbeedevice_t *xbeedevice, long *xbee
 
   MOREDEBUG_ENTERINGFUNC();
 
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   xbeedevice->have_network_status_values=0;
   xbeedevice->received_network_status_values=0;
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   //Just request all values needed for full network status and then the receive function will handle storing
   //  and resetting the zigbee cache if necessary
@@ -2654,14 +2701,14 @@ STATIC void xbeelib_refresh_xbee_data(void) {
     if (xbeedeviceptr->last_connect_status_refresh+XBEE_CONNECT_STATUS_POLL_INTERVAL<curtime.tv_sec) {
       xbeelib_get_xbee_network_status(xbeedeviceptr, &xbeelocked, &zigbeelocked);
     }
-    xbeelib_lockxbee(&xbeelocked);
+    xbeelib_lockxbee();
     localzigbeedevice.addr=xbeedeviceptr->addr;
     localzigbeedevice.deviceptr=xbeedeviceptr;
     if (xbeedeviceptr->zigbeelibindex<0 && zigbeelibifaceptr) {
       xbeedeviceptr->zigbeelibindex=zigbeelibifaceptr->add_localzigbeedevice(&localzigbeedevice, &xbeelib_localzigbeedevice_iface_ver_1, ZIGBEE_FEATURE_RECEIVEREPORTPACKETS|ZIGBEE_FEATURE_NOHACLUSTERS, &xbeelocked, &zigbeelocked);
     }
     if (xbeedeviceptr->zigbeelibindex<0) {
-      xbeelib_unlockxbee(&xbeelocked);
+      xbeelib_unlockxbee();
       xbeelib_markxbee_notinuse(xbeedeviceptr, &xbeelocked);
       continue;
     }
@@ -2673,7 +2720,7 @@ STATIC void xbeelib_refresh_xbee_data(void) {
       }
     }
     have_network_status_values=xbeedeviceptr->have_network_status_values;
-    xbeelib_unlockxbee(&xbeelocked);
+    xbeelib_unlockxbee();
     if (xbeelib_xbee_connected_to_network(xbeedeviceptr, &xbeelocked) && have_network_status_values==1 && zigbeelibifaceptr) {
       //Check if the connected Xbee module has been added as a Zigbee device
       pos=zigbeelibifaceptr->find_zigbee_device(xbeedeviceptr->zigbeelibindex, xbeedeviceptr->addr, xbeedeviceptr->netaddr, &xbeelocked, &zigbeelocked);
@@ -2722,17 +2769,17 @@ static void *xbeelib_mainloop(void *val) {
 }
 
 static inline void xbeelib_setneedtoquit(int val, long *xbeelocked) {
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   needtoquit=val;
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 }
 
 static inline int xbeelib_getneedtoquit(long *xbeelocked) {
   int val;
 
-  xbeelib_lockxbee(xbeelocked);
+  xbeelib_lockxbee();
   val=needtoquit;
-  xbeelib_unlockxbee(xbeelocked);
+  xbeelib_unlockxbee();
 
   return val;
 }
