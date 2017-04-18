@@ -913,12 +913,11 @@ function SpecialLookupUsersForPremisePerms( $iPremiseId ) {
 			
 			if( $aResult['Error']===true ) {
 				$bError = true;
+				$iErrCode  = 3;
 				$sErrMesg .= "Error when looking up the UserList!\n";
 				$sErrMesg .= $aResult['ErrMesg'];
 			}
-			
 		}
-		
 		
 	} catch( Exception $e0001 ) {
 		$bError    = true;
@@ -3553,8 +3552,6 @@ function GetGraphLineIOAvg( $sIOId, $iIODataType, $sPostStartUTS, $sPostEndUTS, 
 //========================================================================================================================//
 //== #19.0# - Server Functions                                                                                          ==//
 //========================================================================================================================//
-
-
 function GetServerVersion() {
 	//------------------------------------------------------------//
 	//-- 1.0 - Initialise                                       --//
@@ -3636,14 +3633,119 @@ function GetServerAddonVersions() {
 	}
 }
 
+//========================================================================================================================//
+//== #20.0# - Server Modification Functions                                                                             ==//
+//========================================================================================================================//
+
+function SpecialLookupTableIndicies( $sTableName ) {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError         = false;        //-- BOOLEAN:   --//
+	$sErrMesg       = "";           //-- STRING:    --//
+	$aResult        = array();      //-- ARRAY:     --//
+	
+	//------------------------------------------------------------//
+	//-- 5.0 - Lookup all the Indicies                          --//
+	//------------------------------------------------------------//
+	try {
+		$aResult = dbLookupTableIndicies( $sTableName );
+		
+		
+		if( $aResult["Error"]===true ) {
+			//-- Display an Error --//
+			$bError = true;
+			$sErrMesg = "Error: Couldn't lookup the table indicies!\n";
+		}
+		
+	} catch( exception $e001 ) {
+		$bError   = true;
+		$sErrMesg = "";
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>$aResult['Data'] );
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
 
 
+function CreateIndexOnTable( $oDBConn, $sTableName, $sNewIndexName, $sTableColumn ) {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError         = false;        //-- BOOLEAN:   --//
+	$sErrMesg       = "";           //-- STRING:    --//
+	$aResult        = array();      //-- ARRAY:     --//
+	
+	//------------------------------------------------------------//
+	//-- 5.0 - Lookup all the Indicies                          --//
+	//------------------------------------------------------------//
+	try {
+		$aResult = dbCreateIndexOnTable( $oDBConn, $sTableName, $sNewIndexName, $sTableColumn );
+		
+		
+	} catch( exception $e001 ) {
+		$bError   = true;
+		$sErrMesg = "Critical Error: Problem creating a table index!";
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return $aResult;
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+	
+}
 
 
+function DeleteIndexOnTable( $oDBConn, $sTableName, $sIndexName ) {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError         = false;        //-- BOOLEAN:   --//
+	$sErrMesg       = "";           //-- STRING:    --//
+	$aResult        = array();      //-- ARRAY:     --//
+	
+	//------------------------------------------------------------//
+	//-- 5.0 - Lookup all the Indicies                          --//
+	//------------------------------------------------------------//
+	try {
+		$aResult = dbDeleteIndexOnTable( $oDBConn, $sTableName, $sIndexName );
+		
+		
+	} catch( exception $e001 ) {
+		$bError   = true;
+		$sErrMesg = "Critical Error: Problem deleting a table index!";
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return $aResult['Data'];
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+	
+}
 
 
 //========================================================================================================================//
-//== #20.0# - Onvif Functions                                                                                           ==//
+//== #25.0# - Onvif Functions                                                                                           ==//
 //========================================================================================================================//
 //-- TODO: Move some of these functions into a onvif library --//
 

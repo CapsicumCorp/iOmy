@@ -8253,8 +8253,6 @@ function dbSpecialGetServerAddonVersions( $oDBConn, $iCoreId ) {
 			//------------------------------------//
 			//-- SETUP VARIABLES                --//
 			//------------------------------------//
-
-			
 			$sSchema = $oDBConn->DataSchema;
 			
 			//------------------------------------//
@@ -8321,12 +8319,255 @@ function dbSpecialGetServerAddonVersions( $oDBConn, $iCoreId ) {
 	}
 	
 	//--------------------------------------------//
-	//-- 5.0 - Return Results or Error Message  --//
+	//-- 9.0 - Return Results or Error Message  --//
 	//--------------------------------------------//
 	if( $bError===false ) {
 		return array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
 		return array( "Error"=>true, "ErrMesg"=>"ServerAddonVersion: ".$sErrMesg );
+	}
+}
+
+
+//========================================================================================================================//
+//== #20.0# - Server Version Functions                                                                                  ==//
+//========================================================================================================================//
+
+function dbLookupTableIndicies( $sTableName ) {
+	//------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                       --//
+	//--                                                                    --//
+	//------------------------------------------------------------------------//
+	
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught --//
+	$sSchema            = "";           //-- STRING:    Used to store the name of the schema that needs updating.    --//
+	$aInputVals         = array();      //-- ARRAY:     Used to store the SQL Input values so they can be bound to the query to help prevent injection --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	
+	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			//------------------------------------//
+			//-- SETUP VARIABLES                --//
+			//------------------------------------//
+			$sSchema = $oRestrictedApiCore->oRestrictedDB->DataSchema;
+			
+			//------------------------------------//
+			//-- SQL                            --//
+			//------------------------------------//
+			$sSQL .= "SHOW INDEX FROM `".$sSchema."`.`".$sTableName."`; ";
+			
+			$aInputVals = array();
+			
+			$aOutputCols = array(
+				array( "Name"=>"Table",             "type"=>"STR" ),
+				array( "Name"=>"Non_unique",        "type"=>"INT" ),
+				array( "Name"=>"Key_name",          "type"=>"STR" ),
+				array( "Name"=>"Seq_in_index",      "type"=>"INT" ),
+				array( "Name"=>"Column_name",       "type"=>"STR" ),
+				array( "Name"=>"Collation",         "type"=>"STR" ),
+				array( "Name"=>"Cadinality",        "type"=>"INT" ),
+				array( "Name"=>"Sub_part",          "type"=>"STR" ),
+				array( "Name"=>"Packed",            "type"=>"STR" ),
+				array( "Name"=>"Null",              "type"=>"STR" ),
+				array( "Name"=>"Index_type",        "type"=>"STR" ),
+				array( "Name"=>"Comment",           "type"=>"STR" ),
+				array( "Name"=>"Index_comment",     "type"=>"STR" )
+			);
+			
+			
+			//----------------------------------------------//
+			//-- EXECUTE THE SQL QUERY                    --//
+			//----------------------------------------------//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+			
+			
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true ) {
+				$bError    = true;
+				$sErrMesg .= $aResult["ErrMesg"];
+			}
+		} catch( Exception $e3) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 9.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"ServerIndicies: ".$sErrMesg );
+	}
+}
+
+
+
+
+function dbCreateIndexOnTable( $oDBConn, $sTableName, $sNewIndexName, $sTableColumn ) {
+	//--------------------------------------------//
+	//-- 1.0 - Declare Variables                --//
+	//--------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$aResult            = array();  //-- ARRAY:     --//
+	$sSQL               = "";       //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;    //-- BOOL:      --//
+	$sErrMesg           = "";       //-- STRING:    --//
+	$sSchema            = "";       //-- STRING:    Used to store the name of the schema that needs updating. --//
+	$aInputVals         = array();  //-- ARRAY:     --//
+	
+	
+	//--------------------------------------------//
+	//-- 2.0 - SQL Query                        --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			
+			//------------------------------------//
+			//-- SETUP VARIABLES                --//
+			//------------------------------------//
+			$sSchema = $oDBConn->DataSchema;
+			
+			//------------------------------------//
+			//-- SQL                            --//
+			//------------------------------------//
+			$sSQL .= "ALTER TABLE `".$sSchema."`.`".$sTableName."` ";
+			$sSQL .= "ADD INDEX `".$sNewIndexName."` ";
+			$sSQL .= "( `".$sTableColumn."` ); ";
+			
+			$aInputVals = array();
+			
+			$aResult = $oDBConn->InputBindUpdateQuery( $sSQL, $aInputVals );
+			
+		} catch( Exception $e2 ) {
+			$bError    = true;
+			$sErrMesg .= $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true ) {
+				$bError = true;
+				$sErrMesg .= $aResult["ErrMesg"];
+			}
+		} catch( Exception $e ) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 5.0 Return Results or Error Message    --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return array( "Error"=>false,   "Data"=>array("Result"=>"Updated succesfully"));
+	} else {
+		return array( "Error"=>true,    "ErrMesg"=>"Add Index: ".$sErrMesg );
+	}
+}
+
+
+
+function dbDeleteIndexOnTable( $oDBConn, $sTableName, $sIndexName ) {
+	//--------------------------------------------//
+	//-- 1.0 - Declare Variables                --//
+	//--------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$aResult            = array();  //-- ARRAY:     --//
+	$sSQL               = "";       //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;    //-- BOOL:      --//
+	$sErrMesg           = "";       //-- STRING:    --//
+	$sSchema            = "";       //-- STRING:    Used to store the name of the schema that needs updating. --//
+	$aInputVals         = array();  //-- ARRAY:     --//
+	
+	
+	//--------------------------------------------//
+	//-- 2.0 - SQL Query                        --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			
+			//------------------------------------//
+			//-- SETUP VARIABLES                --//
+			//------------------------------------//
+			$sSchema = $oDBConn->DataSchema;
+			
+			//------------------------------------//
+			//-- SQL                            --//
+			//------------------------------------//
+			$sSQL .= "ALTER TABLE `".$sSchema."`.`".$sTableName."` ";
+			$sSQL .= "DROP INDEX `".$sIndexName."` ";
+			
+			$aInputVals = array();
+			
+			$aResult = $oDBConn->InputBindUpdateQuery( $sSQL, $aInputVals );
+			
+		} catch( Exception $e2 ) {
+			$bError    = true;
+			$sErrMesg .= $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true ) {
+				$bError = true;
+				$sErrMesg .= $aResult["ErrMesg"];
+			}
+		} catch( Exception $e ) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 5.0 Return Results or Error Message    --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return array( "Error"=>false,   "Data"=>array("Result"=>"Updated succesfully"));
+	} else {
+		return array( "Error"=>true,    "ErrMesg"=>"Drop Index: ".$sErrMesg );
 	}
 }
 
