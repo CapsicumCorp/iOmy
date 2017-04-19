@@ -740,9 +740,9 @@ $.extend(IOMy.common,{
                 // ONLY add these hard-coded devices if user is 'demo',
                 // our debug user.
                 //--------------------------------------------------------//
-                if (IOMy.common.CurrentUsername === "demo") {
-                    IOMy.experimental.addDemoDataToLinkList();
-                }
+//                if (IOMy.common.CurrentUsername === "demo") {
+//                    IOMy.experimental.addDemoDataToLinkList();
+//                }
                 
 				//-- Perform the "onSuccess" function if applicable --//
 				if(oConfig.onSuccess !== undefined) {
@@ -788,9 +788,9 @@ $.extend(IOMy.common,{
                 //--------------------------------------------------------//
                 // ONLY add these hard-coded devices if user is 'demo'.
                 //--------------------------------------------------------//
-                if (IOMy.common.CurrentUsername === "demo") {
-                    IOMy.experimental.addDemoDataToLinkTypeList();
-                }
+//                if (IOMy.common.CurrentUsername === "demo") {
+//                    IOMy.experimental.addDemoDataToLinkTypeList();
+//                }
 				
 				//-- Perform the "onSuccess" function if applicable --//
 				if(oConfig.onSuccess !== undefined) {
