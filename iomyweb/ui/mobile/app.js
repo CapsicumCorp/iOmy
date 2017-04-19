@@ -62,6 +62,9 @@ $.sap.require("IOMy.rules");
 $.sap.registerModulePath('IOMy.graph_jqplot', sModuleInitialBuildLocation+'util/graph_jqplot');
 $.sap.require("IOMy.graph_jqplot");
 
+$.sap.registerModulePath('IOMy.telnet', sModuleInitialBuildLocation+'util/telnet');
+$.sap.require("IOMy.telnet");
+
 //----------------------------------------//
 //-- 5.1.1 - LOAD DEVICE FILES  		--//
 //----------------------------------------//
@@ -1594,13 +1597,19 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Garagedoor\" Page!\n"
 	},
-//    //-- Rules --//
-//    {
-//		"Id":			"pRuleNew",
-//		"Location":		"mjs.rules.AddRule",
-//		"Type":			"JS",
-//		"ErrMesg":		"Critical Error: Couldn't load \"mjs.rules.AddRule\" Page!\n"
-//	},
+    //-- Rules --//
+    {
+		"Id":			"pRuleNew",
+		"Location":		"mjs.rules.AddRule",
+    	"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.rules.AddRule\" Page!\n"
+	},
+    {
+		"Id":			"pRuleDeviceList",
+		"Location":		"mjs.rules.RulesOverview",
+    	"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.rules.RulesOverview\" Page!\n"
+	},
     //--------------------------------------------------------------------//
     // Staging
     //--------------------------------------------------------------------//

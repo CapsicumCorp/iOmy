@@ -35,12 +35,16 @@ $.extend(IOMy.functions,{
      * @param {type} sFormat    Date format in dd/mm/yy or mm/dd/yy
      * @returns {String}        Human-readable date and time
      */
-    getTimestampString : function (date, sFormat, bShowTime) {
+    getTimestampString : function (date, sFormat, bShowTime, bShowSeconds) {
         //----------------------------------------------------------//
         // Declare variables and define default arguments
         //----------------------------------------------------------//
         if (bShowTime === undefined) {
             bShowTime = true;
+        }
+        
+        if (bShowSeconds === undefined) {
+            bShowSeconds = true;
         }
         
         var iHour       = date.getHours();
@@ -98,8 +102,12 @@ $.extend(IOMy.functions,{
             sDate = "";
         }
         
-        if (bShowTime === true) {
-            sTime = iHour + ":" + vMinutes + ":" + vSeconds + sSuffix;
+        if (bShowTime) {
+            if (bShowSeconds) {
+                sTime = iHour + ":" + vMinutes + ":" + vSeconds + sSuffix;
+            } else {
+                sTime = iHour + ":" + vMinutes + sSuffix;
+            }
         }
         
         return sDate + sTime;

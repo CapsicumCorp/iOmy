@@ -94,6 +94,13 @@ sap.ui.controller("mjs.login.Login", {
                                                 IOMy.common.ReloadVariablePremiseList();
                                             }, me.refreshInterval);
                                             
+                                            //----------------------------------------------------------------------------//
+                                            // Load all the device rules into memory.
+                                            //----------------------------------------------------------------------------//
+                                            IOMy.rules.loadRules({
+                                                hubID : 1
+                                            });
+                                            
                                         } catch(e654321) {
                                             //-- ERROR:  TODO: Write a better error message--//
                                             jQuery.sap.log.error(">>>>Critical Error Loading \"Navigation Main\" page<<<<\n"+e654321.message);
@@ -328,6 +335,13 @@ sap.ui.controller("mjs.login.Login", {
                                    // console.log("Another 10 minutes is up!");
                                     IOMy.common.ReloadVariablePremiseList();
                                 }, me.refreshInterval);
+                                
+                                //----------------------------------------------------------------------------//
+                                // Load all the device rules into memory.
+                                //----------------------------------------------------------------------------//
+                                IOMy.rules.loadRules({
+                                    hubID : 1
+                                });
 
                             } catch(eLoginCore) {
                                 jQuery.sap.log.error("Login ReloadCoreVars\n"+eLoginCore.message);

@@ -197,12 +197,108 @@ $.extend(IOMy.time,{
 		
 		return iStartStamp;
 		
-	}
+	},
 	
 	
+	GetMilitaryTimeFromDate : function (date) {
+        //--------------------------------------------------------------------//
+        // Variables
+        //--------------------------------------------------------------------//
+        var me              = this;
+        var sMilitaryTime   = "";
+        var iHours;
+        var iMinutes;
+        
+        //--------------------------------------------------------------------//
+        // Check the date argument
+        //--------------------------------------------------------------------//
+        if (date === undefined) {
+            throw new MissingArgumentException("Date must be given!");
+        }
+        
+        //--------------------------------------------------------------------//
+        // Take the hours and minutes and create a string with the military time
+        //--------------------------------------------------------------------//
+        iHours = date.getHours();
+        iMinutes = date.getMinutes();
+        
+        if (iHours < 10) {
+            sMilitaryTime += "0" + iHours;
+        } else {
+            sMilitaryTime += iHours;
+        }
+        
+        if (iMinutes < 10) {
+            sMilitaryTime += "0" + iMinutes;
+        } else {
+            sMilitaryTime += iMinutes;
+        }
+        
+        return sMilitaryTime;
+    },
 	
-	
-	
+	GetDateFromMilitaryTime : function (sMilTime) {
+        //--------------------------------------------------------------------//
+        // Variables
+        //--------------------------------------------------------------------//
+        var me              = this;
+        var bError          = false;
+        var aErrorMessages  = [];
+        var date;
+        var iHours;
+        var iMinutes;
+        
+        var fnAppendError = function (sErrMesg) {
+            bError = true;
+            aErrorMessages.push(sErrMesg);
+        };
+        
+        //--------------------------------------------------------------------//
+        // Check the time argument
+        //--------------------------------------------------------------------//
+        if (sMilTime !== undefined) {
+            if (sMilTime.length !== 4) {
+                fnAppendError("Military time is not 4 digits long!");
+            }
+            
+            if (isNaN(sMilTime)) {
+                fnAppendError("Military time is not a valid number!");
+            }
+        } else {
+            throw new MissingArgumentException("Hours and minutes in military time must be given!");
+        }
+        
+        if (bError) {
+            throw new IllegalArgumentException("* "+aErrorMessages.join("\n* "));
+        }
+        
+        //--------------------------------------------------------------------//
+        // Check that the hour and minute figures are valid.
+        //--------------------------------------------------------------------//
+        iHours      = sMilTime.substr(0,2);
+        iMinutes    = sMilTime.substr(2,4);
+        
+        if (iHours > 23) {
+            fnAppendError("Hour must be between 0 and 23");
+        }
+        
+        if (iMinutes > 59) {
+            fnAppendError("Minutes must be between 0 and 59");
+        }
+        
+        if (bError) {
+            throw new IllegalArgumentException("* "+aErrorMessages.join("\n* "));
+        }
+        
+        //--------------------------------------------------------------------//
+        // Take the military time and create a date object with the input.
+        //--------------------------------------------------------------------//
+        date = new Date();
+        date.setHours(parseInt(iHours));
+        date.setMinutes(parseInt(iMinutes));
+        
+        return date;
+    }
 	
 	
 	

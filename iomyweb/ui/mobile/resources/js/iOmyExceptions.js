@@ -35,12 +35,7 @@ function IOmyException(message) {
         return this.name + ": " + this.message;
     };
     
-    //jQuery.sap.log.error(message);
 }
-
-//----------------------------------------------------------------------------//
-// Pages
-//----------------------------------------------------------------------------//
 
 //----------------------------------------------------------------------------//
 // Sessions, Users, and Permissions
@@ -150,4 +145,21 @@ function LinkNotFoundException(message) {
     
     ObjectNotFoundException.call(this, message);
     this.name       = "LinkNotFoundException";
+}
+
+//----------------------------------------------------------------------------//
+// Device Exceptions
+//----------------------------------------------------------------------------//
+
+function SerialCodeNullException(message) {
+    //------------------------------------------------------------------------//
+    // This exception can have a simple "Serial Code is null" message if one is
+    // not provided.
+    //------------------------------------------------------------------------//
+    if (message === undefined || message === null || message === "") {
+        message = "Serial Code is null.";
+    }
+    
+    IOmyException.call(this, message);
+    this.name = "SerialCodeNullException";
 }

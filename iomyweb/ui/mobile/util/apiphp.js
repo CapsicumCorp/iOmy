@@ -129,6 +129,10 @@ $.extend(IOMy.apiphp,{
             case "permissions":
 				sReturn = sUrlRestricted+'/php/api_permissions.php';
 				break;
+                
+            case "devicerules":
+				sReturn = sUrlRestricted+'/php/api_devicerulesconfig.php';
+				break;
 		}
 		
 		//--------------------------------------------------------//

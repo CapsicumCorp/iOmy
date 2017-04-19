@@ -80,7 +80,7 @@ $.extend(IOMy.common, {
             // There is still an inconsistency with the data types of these two
             // IDs. They are the same value but not the same type. This is why
             // two equal signs are used to compare instead of the preferred three.
-            if (this.LinkList[i].Id == iLinkId) {
+            if (this.LinkList[i].LinkId == iLinkId) {
                 oLink = this.LinkList[i];
                 break;
             }

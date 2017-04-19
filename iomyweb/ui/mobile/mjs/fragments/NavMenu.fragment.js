@@ -165,6 +165,18 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 								})
 							]
 						}),
+						
+						//--------------------------------//
+						//-- RULE DEVICE LIST           --//
+						//--------------------------------//
+						new sap.tnt.NavigationListItem({
+							icon:	"sap-icon://GoogleMaterial/home",
+							text:	"Rules",
+							select:	function (oControlEvent) {
+								IOMy.common.NavigationChangePage( "pRuleDeviceList", {}, true );
+							}
+						}),
+                        
                         //--------------------------------//
 						//-- SIGN OUT   				--//
 						//--------------------------------//
