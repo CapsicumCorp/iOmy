@@ -777,18 +777,14 @@ $.extend(IOMy.apiphp,{
             IOMy.common.bSessionTerminated = true;
             //-- Overwrite the onFail function to handle a terminated session. --//
             mConfig.onFail = function () {
-                //-- 403 was returned! Display the message and take the user back to the --//
-                //-- login screen once they close the dialog.                            --//
-                IOMy.common.showError("Your sign-in session is currently inactive. You will be taken to the start screen to sign in again.", "Inactive Sign-in",
-                    function () {
-                        window.location.reload(true);   // TRUE forces a reload from the server, NOT the cache!
-                    }
-                );
+                //-- 403 was returned! Take the user back to the login screen   --//
+                //-- once they close the dialog.                                --//
+                window.location.reload(true);   // TRUE forces a reload from the server, NOT the cache!
             };
         } else {
             //------------------------------------------------------------------------//
-            // If there is a slew of requests being run at once, then only one needs to
-            // show the error popup.
+            // If there is a slew of requests being run at once, one log out command
+            // should be executed. The other requests should do nothing.
             //------------------------------------------------------------------------//
             mConfig.onFail = function () {};
         }
