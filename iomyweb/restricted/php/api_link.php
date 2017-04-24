@@ -33,6 +33,7 @@ if (!defined('SITE_BASE')) {
 //-- 1.2 - INITIALISE VARIABLES                             --//
 //------------------------------------------------------------//
 $bError                     = false;        //-- BOOLEAN:       Used to indicate if an error has been caught --//
+$iErrCode                   = 0;            //-- INTEGER:       --//
 $sErrMesg                   = "";           //-- STRING:        Used to store the error message after an error has been caught --//
 $sOutput                    = "";           //-- STRING:        Holds the HTTP Response that will be returned to the HTTP Client that requested this API.--//
 $aResult                    = array();      //-- ARRAY:         Used to store the results.                        --//
@@ -106,6 +107,7 @@ if($bError===false) {
 		//-- Verify that the mode is supported --//
 		if( $sPostMode!=="EditName" && $sPostMode!=="ChooseRoom" && $sPostMode!=="EditConnectData" ) {
 			$bError = true;
+			$iErrCode  = 101;
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
 			$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
@@ -114,6 +116,7 @@ if($bError===false) {
 		
 	} catch( Exception $e0102 ) {
 		$bError = true;
+		$iErrCode  = 102;
 		$sErrMesg .= "Error Code:'0102' \n";
 		$sErrMesg .= "No \"Mode\" parameter! \n";
 		$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
@@ -132,6 +135,7 @@ if($bError===false) {
 			
 			if( $iPostId===false ) {
 				$bError = true;
+				$iErrCode  = 103;
 				$sErrMesg .= "Error Code:'0103' \n";
 				$sErrMesg .= "Non numeric \"Id\" parameter! \n";
 				$sErrMesg .= "Please use a valid \"Id\" parameter\n";
@@ -139,6 +143,7 @@ if($bError===false) {
 			}
 		} catch( Exception $e0104 ) {
 			$bError = true;
+			$iErrCode  = 104;
 			$sErrMesg .= "Error Code:'0104' \n";
 			$sErrMesg .= "Incorrect \"Id\" parameter!";
 			$sErrMesg .= "Please use a valid \"Id\" parameter";
@@ -157,12 +162,14 @@ if($bError===false) {
 				
 				if( $sPostName===false ) {
 					$bError = true;
+					$iErrCode  = 105;
 					$sErrMesg .= "Error Code:'0105' \n";
 					$sErrMesg .= "Invalid \"Name\" parameter! \n";
 					$sErrMesg .= "Please use a valid \"Name\" parameter\n";
 				}
 			} catch( Exception $e0106 ) {
 				$bError = true;
+				$iErrCode  = 106;
 				$sErrMesg .= "Error Code:'0106' \n";
 				$sErrMesg .= "Incorrect \"Name\" parameter!\n";
 				$sErrMesg .= "Please use a valid \"Name\" parameter.\n";
@@ -182,12 +189,14 @@ if($bError===false) {
 				
 				if( $iPostRoomId===false ) {
 					$bError = true;
+					$iErrCode  = 107;
 					$sErrMesg .= "Error Code:'0107' \n";
 					$sErrMesg .= "Non numeric \"RoomId\" parameter! \n";
 					$sErrMesg .= "Please use a valid \"RoomId\" parameter.\n";
 				}
 			} catch( Exception $e0108 ) {
 				$bError = true;
+				$iErrCode  = 108;
 				$sErrMesg .= "Error Code:'0108' \n";
 				$sErrMesg .= "Incorrect \"RoomId\" parameter!\n";
 				$sErrMesg .= "Please use a valid \"RoomId\" parameter.\n";
@@ -207,12 +216,14 @@ if($bError===false) {
 				
 				if( $iPostConFrequencyId===false ) {
 					$bError = true;
+					$iErrCode  = 109;
 					$sErrMesg .= "Error Code:'0109' \n";
 					$sErrMesg .= "Non numeric \"ConnFrequencyId\" parameter! \n";
 					$sErrMesg .= "Please use a valid \"ConnFrequencyId\" parameter.\n";
 				}
 			} catch( Exception $e0110 ) {
 				$bError = true;
+				$iErrCode  = 110;
 				$sErrMesg .= "Error Code:'0110' \n";
 				$sErrMesg .= "Incorrect \"ConnFrequencyId\" parameter!\n";
 				$sErrMesg .= "Please use a valid \"ConnFrequencyId\" parameter.\n";
@@ -231,12 +242,14 @@ if($bError===false) {
 				
 				if( $iPostConCryptTypeId===false ) {
 					$bError = true;
+					$iErrCode  = 111;
 					$sErrMesg .= "Error Code'0111' \n";
 					$sErrMesg .= "Non numeric \"ConnCryptTypeId\" parameter! \n";
 					$sErrMesg .= "Please use a valid \"ConnCryptTypeId\" parameter.\n";
 				}
 			} catch( Exception $e0112 ) {
 				$bError = true;
+				$iErrCode  = 112;
 				$sErrMesg .= "Error Code:'0112' \n";
 				$sErrMesg .= "Incorrect \"ConnCryptTypeId\" parameter!\n";
 				$sErrMesg .= "Please use a valid \"ConnCryptTypeId\" parameter.\n";
@@ -255,12 +268,14 @@ if($bError===false) {
 				
 				if( $iPostConProtocolId===false ) {
 					$bError = true;
+					$iErrCode  = 113;
 					$sErrMesg .= "Error Code:'0113' \n";
 					$sErrMesg .= "Non numeric \"ConnProtocolId\" parameter! \n";
 					$sErrMesg .= "Please use a valid \"ConnProtocolId\" parameter.\n";
 				}
 			} catch( Exception $e0114 ) {
 				$bError = true;
+				$iErrCode  = 114;
 				$sErrMesg .= "Error Code:'0114' \n";
 				$sErrMesg .= "Incorrect \"ConnProtocolId\" parameter!\n";
 				$sErrMesg .= "Please use a valid \"ConnProtocolId\" parameter.\n";
@@ -279,12 +294,14 @@ if($bError===false) {
 				
 				if( $sPostConAddress===false ) {
 					$bError = true;
+					$iErrCode  = 115;
 					$sErrMesg .= "Error Code:'0115' \n";
 					$sErrMesg .= "Invalid \"ConnAddress\" parameter! \n";
 					$sErrMesg .= "Please use a valid \"ConnAddress\" parameter\n";
 				}
 			} catch( Exception $e0116 ) {
 				$bError = true;
+				$iErrCode  = 116;
 				$sErrMesg .= "Error Code:'0116' \n";
 				$sErrMesg .= "Incorrect \"ConnAddress\" parameter!\n";
 				$sErrMesg .= "Please use a valid \"ConnAddress\" parameter.\n";
@@ -303,12 +320,14 @@ if($bError===false) {
 				
 				if( $sPostConName===false ) {
 					$bError = true;
+					$iErrCode  = 117;
 					$sErrMesg .= "Error Code:'0117' \n";
 					$sErrMesg .= "Invalid \"ConnName\" parameter! \n";
 					$sErrMesg .= "Please use a valid \"ConnName\" parameter\n";
 				}
 			} catch( Exception $e0118 ) {
 				$bError = true;
+				$iErrCode  = 118;
 				$sErrMesg .= "Error Code:'0118' \n";
 				$sErrMesg .= "Incorrect \"ConnName\" parameter!\n";
 				$sErrMesg .= "Please use a valid \"ConnName\" parameter.\n";
@@ -327,12 +346,14 @@ if($bError===false) {
 				
 				if( $sPostConUsername===false ) {
 					$bError = true;
+					$iErrCode  = 119;
 					$sErrMesg .= "Error Code:'0119' \n";
 					$sErrMesg .= "Invalid \"ConnUsername\" parameter! \n";
 					$sErrMesg .= "Please use a valid \"ConnUsername\" parameter\n";
 				}
 			} catch( Exception $e0120 ) {
 				$bError = true;
+				$iErrCode  = 120;
 				$sErrMesg .= "Error Code:'0120' \n";
 				$sErrMesg .= "Incorrect \"ConnUsername\" parameter!\n";
 				$sErrMesg .= "Please use a valid \"ConnUsername\" parameter.\n";
@@ -352,12 +373,14 @@ if($bError===false) {
 				
 				if( $sPostConPassword===false ) {
 					$bError = true;
+					$iErrCode  = 121;
 					$sErrMesg .= "Error Code:'0121' \n";
 					$sErrMesg .= "Invalid \"ConnPassword\" parameter! \n";
 					$sErrMesg .= "Please use a valid \"ConnPassword\" parameter\n";
 				}
 			} catch( Exception $e0122 ) {
 				$bError = true;
+				$iErrCode  = 122;
 				$sErrMesg .= "Error Code:'0122' \n";
 				$sErrMesg .= "Incorrect \"ConnPassword\" parameter!\n";
 				$sErrMesg .= "Please use a valid \"ConnPassword\" parameter.\n";
@@ -394,8 +417,8 @@ if( $bError===false ) {
 				if( $aLinkInfo["Error"]===true ) {
 					//-- Display an Error Message --//
 					$bError = true;
+					$iErrCode  = 1401;
 					$sErrMesg .= "Error Code:'1401' \n";
-					$sErrMesg .= "Internal API Error! \n";
 					$sErrMesg .= $aLinkInfo["ErrMesg"];
 				}
 				
@@ -412,8 +435,8 @@ if( $bError===false ) {
 						//-- Check for caught Errors --//
 						if( $aResult["Error"]===true ) {
 							$bError = true;
+							$iErrCode  = 1402;
 							$sErrMesg .= "Error Code:'1402' \n";
-							$sErrMesg .= "Internal API Error! \n";
 							$sErrMesg .= $aResult["ErrMesg"];
 							
 						} else {
@@ -429,15 +452,17 @@ if( $bError===false ) {
 					} else {
 						//-- Display an Error Message --//
 						$bError = true;
+						$iErrCode  = 1403;
 						$sErrMesg .= "Error Code:'1403' \n";
-						$sErrMesg .= "Internal API Error! \n";
 						$sErrMesg .= "Your user doesn't have sufficient privilege to change the Link name! \n";
 					}
 				}
 			} catch( Exception $e1400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
+				$iErrCode  = 1400;
 				$sErrMesg .= "Error Code:'1400' \n";
+				$sErrMesg .= "Internal API Error! \n";
 				$sErrMesg .= $e1400->getMessage();
 			}
 			
@@ -454,8 +479,8 @@ if( $bError===false ) {
 				if( $aLinkInfo["Error"]===true ) {
 					//-- Display an Error Message --//
 					$bError = true;
+					$iErrCode  = 2401;
 					$sErrMesg .= "Error Code:'2401' \n";
-					$sErrMesg .= "Internal API Error! \n";
 					$sErrMesg .= $aLinkInfo["ErrMesg"];
 				}
 				
@@ -469,15 +494,15 @@ if( $bError===false ) {
 					if( $aCommInfo["Error"]===true ) {
 						//-- Display an Error Message --//
 						$bError = true;
+						$iErrCode  = 2402;
 						$sErrMesg .= "Error Code:'2402' \n";
-						$sErrMesg .= "Internal API Error! \n";
 						$sErrMesg .= $aCommInfo["ErrMesg"];
 						
 					} else if( $aCommInfo['Data']['PermRoomAdmin']!==1 ) {
 						//-- Flag an error that the User doesn't have sufficient privileges to change the device's room --//
 						$bError = true;
+						$iErrCode  = 2403;
 						$sErrMesg .= "Error Code:'2403' \n";
-						$sErrMesg .= "Internal API Error! \n";
 						$sErrMesg .= "Your user doesn't have the 'RoomAdmin' permission which is required to assign the link to a different room! \n";
 						
 					} else {
@@ -505,8 +530,8 @@ if( $bError===false ) {
 						//-- Check for caught Errors --//
 						if( $aResult["Error"]===true ) {
 							$bError = true;
+							$iErrCode  = 2404;
 							$sErrMesg .= "Error Code:'2404' \n";
-							$sErrMesg .= "Internal API Error! \n";
 							$sErrMesg .= $aResult["ErrMesg"];
 						
 						} else {
@@ -530,16 +555,16 @@ if( $bError===false ) {
 						if( $aRoomInfo["Error"]===true ) {
 							//-- Display an Error Message --//
 							$bError = true;
+							$iErrCode  = 2405;
 							$sErrMesg .= "Error Code:'2405' \n";
-							$sErrMesg .= "Internal API Error! \n";
 							$sErrMesg .= $aRoomInfo["ErrMesg"];
 							
 						//-- ELSEIF The PremiseId does not match between the Comm's Premise and the Room's Premise --// 
 						} else if( $iCommPremiseId!==$aRoomInfo["Data"]["PremiseId"] ) {
 							//-- Display an Error Message --//
 							$bError = true;
+							$iErrCode  = 2406;
 							$sErrMesg .= "Error Code:'2406' \n";
-							$sErrMesg .= "Internal API Error! \n";
 							$sErrMesg .= $aRoomInfo["ErrMesg"];
 							
 						}
@@ -562,8 +587,8 @@ if( $bError===false ) {
 									//-- Check for caught Errors --//
 									if( $aResult["Error"]===true ) {
 										$bError = true;
+										$iErrCode  = 2407;
 										$sErrMesg .= "Error Code:'2407' \n";
-										$sErrMesg .= "Internal API Error! \n";
 										$sErrMesg .= $aResult["ErrMesg"];
 										
 									} else {
@@ -578,16 +603,16 @@ if( $bError===false ) {
 								} else {
 									//-- Display an Error Message --//
 									$bError = true;
+									$iErrCode  = 2408;
 									$sErrMesg .= "Error Code:'2408' \n";
-									$sErrMesg .= "Internal API Error! \n";
 									$sErrMesg .= "The desired Room's PremiseId doesn't match the Link's PremiseId! \n";
 								}
 								
 							} else {
 								//-- Display an Error Message --//
 								$bError = true;
+								$iErrCode  = 2409;
 								$sErrMesg .= "Error Code:'2409' \n";
-								$sErrMesg .= "Internal API Error! \n";
 								$sErrMesg .= "Problem looking up the Link's Comm Information! \n";
 							}
 						} //-- ENDIF No errors --//
@@ -596,7 +621,9 @@ if( $bError===false ) {
 			} catch( Exception $e2400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
+				$iErrCode  = 2400;
 				$sErrMesg .= "Error Code:'2400' \n";
+				$sErrMesg .= "Internal API Error! \n";
 				$sErrMesg .= $e2400->getMessage();
 			}
 			
@@ -613,8 +640,8 @@ if( $bError===false ) {
 				if( $aLinkInfo["Error"]===true ) {
 					//-- Display an Error Message --//
 					$bError = true;
+					$iErrCode  = 3407;
 					$sErrMesg .= "Error Code:'3407' \n";
-					$sErrMesg .= "Internal API Error! \n";
 					$sErrMesg .= $aLinkInfo["ErrMesg"];
 				}
 				
@@ -632,8 +659,8 @@ if( $bError===false ) {
 						if( $aResult["Error"]===true ) {
 							//-- Display an Error Message --//
 							$bError = true;
+							$iErrCode  = 3406;
 							$sErrMesg .= "Error Code:'3406' \n";
-							$sErrMesg .= "Internal API Error! \n";
 							$sErrMesg .= $aResult["ErrMesg"];
 						}
 						
@@ -642,15 +669,18 @@ if( $bError===false ) {
 						
 						//-- Display an Error Message --//
 						$bError = true;
+						$iErrCode  = 3409;
 						$sErrMesg .= "Error Code:'3409' \n";
-						$sErrMesg .= "Internal API Error! \n";
 						$sErrMesg .= "Your user doesn't have sufficient privilege to change the Link Connection info! \n";
+						$sErrMesg .= "Please try again when you have been granted the \"Write\" permission! \n";
 					}
 				}
 			} catch( Exception $e3400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
+				$iErrCode  = 3400;
 				$sErrMesg .= "Error Code:'3400' \n";
+				$sErrMesg .= "Internal API Error! \n";
 				$sErrMesg .= $e3400->getMessage();
 			}
 			
@@ -659,13 +689,18 @@ if( $bError===false ) {
 		//================================================================//
 		} else {
 			$bError = true;
-			$sErrMesg .= "Error Code:'1001' \n";
+			$iErrCode  = 401;
+			$sErrMesg .= "Error Code:'0401' \n";
+			$sErrMesg .= "Internal API Error! \n";
+			$sErrMesg .= "Unsupported Mode! \n";
 		}
 		
-	} catch( Exception $e1000 ) {
+	} catch( Exception $e0400 ) {
 		$bError = true;
-		$sErrMesg .= "Error Code:'1000' \n";
-		$sErrMesg .= $e1000->getMessage();
+		$iErrCode  = 400;
+		$sErrMesg .= "Error Code:'0400' \n";
+		$sErrMesg .= "Internal API Error! \n";
+		$sErrMesg .= $e0400->getMessage();
 	}
 }
 
@@ -685,6 +720,7 @@ if( $bError===false ) {
 	} catch( Exception $e0800 ) {
 		//-- Error Catching --//
 		$bError = true;
+		$iErrCode  = 800;
 		$sErrMesg .= "Error Code:'0800' \n";
 		$sErrMesg .= "Internal API Error! \n";
 		$sErrMesg .= "Premise Log Error! \n";
