@@ -280,7 +280,7 @@ STATIC INLINE void configlib_backtrace(void) {
 #endif
 
 //Initialise a thread local store for the lock counter
-static void configlib_makelockkey() {
+static void configlib_makelockkey(void) {
   (void) pthread_key_create(&lockkey, NULL);
 }
 
