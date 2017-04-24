@@ -317,7 +317,7 @@ STATIC INLINE void timeruleslib_backtrace(void) {
 #endif
 
 //Initialise a thread local store for the lock counter
-static void timeruleslib_makelockkey() {
+static void timeruleslib_makelockkey(void) {
   (void) pthread_key_create(&lockkey, NULL);
 }
 

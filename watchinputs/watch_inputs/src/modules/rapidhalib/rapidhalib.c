@@ -425,7 +425,7 @@ static pthread_once_t lockkey_onceinit = PTHREAD_ONCE_INIT;
 static int havelockkey=0;
 
 //Initialise a thread local store for the lock counter
-void rapidhalib_makelockkey() {
+static void rapidhalib_makelockkey(void) {
   int result;
 
   result=pthread_key_create(&lockkey, NULL);
