@@ -118,6 +118,7 @@ class DBMySQL {
 				
 				//-- Matthew's suggestion to turn off PDO's prepared statement emulation --//
 				//$this->DBConn->setAttribute( PDO::ATTR_EMULATE_PREPARES, false );
+				//-- NOTE:   If the above is uncommented the the "NonCommittedCreateQuery" has issues as well as the "change password" --//
 				
 				//----------------------------------------------------//
 				//-- LEGACY CHARSET                                 --//
@@ -149,10 +150,11 @@ class DBMySQL {
 	//====================================================//
 	protected function ConvertUTSToString( $iUTS ) {
 		
-		$sDate = date("Y-m-d h:i:s", $iUTS );
+		$sDate = date("Y-m-d h:i:sa", $iUTS );
 		
 		return $sDate;
 	}
+	
 	
 	
 	protected function xssafe( $sData , $sEncoding='UTF-8' ) {
@@ -630,7 +632,7 @@ class DBMySQL {
 								//-- Time stamp convert --//
 								} else if( $sColumnType==="TSC" ) {
 									$iTempValue						= (int)$aRow[$j];
-									$aResults[$i][$sColumnAlias]	= $iTempValue;
+									$aResults[$i][$sColumnAlias]	= $this->ConvertUTSToString( $iTempValue );
 									
 								} else if( $sColumnType==="STR" ) {
 									$iTempValue						= $aRow[$j];
@@ -700,7 +702,7 @@ class DBMySQL {
 							//-- Time stamp convert --//
 							} else if( $sColumnType==="TSC" ) {
 								$iTempValue					= (int)$aRow[$j];
-								$aResults[$sColumnAlias]	= $iTempValue;
+								$aResults[$sColumnAlias]	= $this->ConvertUTSToString( $iTempValue );
 								
 							//-- String --//
 							} else {
