@@ -424,6 +424,7 @@ int mysqllib_loaddatabase(const char *hostname, const char *dbname, const char *
     return 0;
   }
   if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
+    PTHREAD_UNLOCK(&thislibmutex);
     return -1;
   }
   loaddatabase_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "loaddatabase", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I");
@@ -467,8 +468,6 @@ int mysqllib_loaddatabase(const char *hostname, const char *dbname, const char *
 
   debuglibifaceptr->debuglib_printf(1, "%s: Detected db schema version: %d\n", __func__, dbschemaver);
   dbloaded=1;
-
-  PTHREAD_UNLOCK(&thislibmutex);
 #else
   if (dbloaded) {
     //Database already loaded
@@ -518,7 +517,6 @@ int mysqllib_loaddatabase(const char *hostname, const char *dbname, const char *
   }
   debuglibifaceptr->debuglib_printf(1, "%s: Detected db schema version: %d\n", __func__, dbschemaver);
   dbloaded=1;
-
 #endif
   PTHREAD_UNLOCK(&thislibmutex);
 
@@ -638,6 +636,12 @@ int mysqllib_begin(void) {
 #endif
   int locdbloaded, result=0;
 
+  //Wait for any previous transactions to finish then start the transaction lock
+  //Lock the transaction mutex first as otherwise it will be possible for a second begin operation to get past
+  //  single access mutex, then get stop at locking transaction mutex, and then the existing transaction won't be able to
+  //  end the transaction as end will get stuck waiting for single access mutex
+  PTHREAD_LOCK(&thislib_transaction_mutex);
+
   //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
   PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
   PTHREAD_LOCK(&thislibmutex);
@@ -645,13 +649,13 @@ int mysqllib_begin(void) {
   PTHREAD_UNLOCK(&thislibmutex);
   if (!locdbloaded) {
     PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+    PTHREAD_UNLOCK(&thislib_transaction_mutex);
     return -1;
   }
-  //Wait for any previous transactions to finish then start the transaction lock
-  PTHREAD_LOCK(&thislib_transaction_mutex);
 #ifdef __ANDROID__
   if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
     PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+    PTHREAD_UNLOCK(&thislib_transaction_mutex);
     return -1;
   }
   begin_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "begin", "()I");
@@ -659,16 +663,12 @@ int mysqllib_begin(void) {
   result=env->CallStaticIntMethod(mysqllib_mysql_class, begin_methodid);
   JNIDetachThread(wasdetached);
 
-  if (result!=0) {
-    PTHREAD_UNLOCK(&thislib_transaction_mutex);
-  }
 #else
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
 
   //Disable auto commit
   result=mysql_autocommit(conn, 0);
   if (result!=0) {
-    PTHREAD_UNLOCK(&thislib_transaction_mutex);
     debuglibifaceptr->debuglib_printf(1, "%s: Warning: Failed to disable auto commit to begin a transaction, result=%s\n", __func__, mysql_error(conn));
     result=-2;
   } else {
@@ -677,6 +677,9 @@ int mysqllib_begin(void) {
 #endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
 
+  if (result!=0) {
+    PTHREAD_UNLOCK(&thislib_transaction_mutex);
+  }
   return result;
 }
 
@@ -710,10 +713,6 @@ int mysqllib_end(void) {
 
   result=env->CallStaticIntMethod(mysqllib_mysql_class, end_methodid);
 
-  if (result==0) {
-    //Transaction is complete
-    PTHREAD_UNLOCK(&thislib_transaction_mutex);
-  }
   JNIDetachThread(wasdetached);
 #else
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
@@ -721,7 +720,6 @@ int mysqllib_end(void) {
   result=mysql_commit(conn);
   if (result==0) {
     //Transaction is complete
-    PTHREAD_UNLOCK(&thislib_transaction_mutex);
     debuglibifaceptr->debuglib_printf(1, "%s: Ending transaction success\n", __func__);
     //Re-enable auto commit
     int result2=mysql_autocommit(conn, 1);
@@ -735,6 +733,10 @@ int mysqllib_end(void) {
 #endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
 
+  if (result==0) {
+    //Transaction is complete
+    PTHREAD_UNLOCK(&thislib_transaction_mutex);
+  }
   return result;
 }
 
@@ -768,8 +770,6 @@ int mysqllib_rollback(void) {
 
   result=env->CallStaticIntMethod(mysqllib_mysql_class, rollback_methodid);
 
-  //Always release the transaction mutex here as this is currently the last resort for the transaction operation
-  PTHREAD_UNLOCK(&thislib_transaction_mutex);
   JNIDetachThread(wasdetached);
 #else
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
@@ -781,9 +781,6 @@ int mysqllib_rollback(void) {
   } else {
     debuglibifaceptr->debuglib_printf(1, "%s: Rolling back transaction success\n", __func__);
   }
-  //Always release the transaction mutex here as this is currently the last resort for the transaction operation
-  PTHREAD_UNLOCK(&thislib_transaction_mutex);
-
   //Re-enable auto commit
   int result2=mysql_autocommit(conn, 1);
   if (result2!=0) {
@@ -791,6 +788,9 @@ int mysqllib_rollback(void) {
   }
 #endif
   PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+
+  //Always release the transaction mutex in rollback as it is currently the last resort for the transaction operation
+  PTHREAD_UNLOCK(&thislib_transaction_mutex);
 
   return result;
 }
@@ -1437,7 +1437,6 @@ int mysqllib_update_ioports_state(const void *uniqueid, int32_t value) {
 
   MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_UPDATE_IOPORT_STATE];
   if (stmt) {
-    int result;
     int64_t thispk64=thisuniqueid->pk64;
     int32_t thisvalue=value;
     MYSQL_BIND bind[2];
@@ -1538,11 +1537,22 @@ int mysqllib_insert_sensor_datafloat_value(const void *uniqueid, int64_t date, d
   result=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64, date, value);
 #else
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  int locdbloaded;
 
+  if (!uniqueid) {
+    return -4;
+  }
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+    return -1;
+  }
   MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_INSERT_DATAFLOAT_VALUE];
   if (stmt) {
-    int result;
-
     //Make copies of the values in case mysql library needs to modify them
     int64_t thispk64=thisuniqueid->pk64;
     int64_t thisdate=date;
@@ -1620,11 +1630,22 @@ int mysqllib_insert_sensor_databigint_value(const void *uniqueid, int64_t date, 
   result=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64, date, value);
 #else
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  int locdbloaded;
 
+  if (!uniqueid) {
+    return -4;
+  }
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+    return -1;
+  }
   MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_INSERT_DATABIGINT_VALUE];
   if (stmt) {
-    int result;
-
     //Make copies of the values in case mysql library needs to modify them
     int64_t thispk64=thisuniqueid->pk64;
     int64_t thisdate=date;
@@ -1702,11 +1723,22 @@ int mysqllib_insert_sensor_dataint_value(const void *uniqueid, int64_t date, int
   result=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64, date, value);
 #else
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  int locdbloaded;
 
+  if (!uniqueid) {
+    return -4;
+  }
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+    return -1;
+  }
   MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_INSERT_DATAINT_VALUE];
   if (stmt) {
-    int result;
-
     //Make copies of the values in case mysql library needs to modify them
     int64_t thispk64=thisuniqueid->pk64;
     int64_t thisdate=date;
@@ -1784,11 +1816,22 @@ int mysqllib_insert_sensor_datatinyint_value(const void *uniqueid, int64_t date,
   result=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64, date, value);
 #else
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  int locdbloaded;
 
+  if (!uniqueid) {
+    return -4;
+  }
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+    return -1;
+  }
   MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_INSERT_DATATINYINT_VALUE];
   if (stmt) {
-    int result;
-
     //Make copies of the values in case mysql library needs to modify them
     int64_t thispk64=thisuniqueid->pk64;
     int64_t thisdate=date;
@@ -1869,7 +1912,20 @@ int mysqllib_getsensor_datafloat_value(const void *uniqueid, double *value) {
   thisvalue=env->CallStaticDoubleMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64);
 #else
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  int locdbloaded;
 
+  if (!uniqueid) {
+    return -4;
+  }
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+    return -1;
+  }
   MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GET_DATAFLOAT_VALUE];
   if (stmt) {
     int result;
@@ -1984,7 +2040,20 @@ int mysqllib_getsensor_databigint_value(const void *uniqueid, int64_t *value) {
   thisvalue=env->CallStaticLongMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64);
 #else
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  int locdbloaded;
 
+  if (!uniqueid) {
+    return -4;
+  }
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+    return -1;
+  }
   MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GET_DATABIGINT_VALUE];
   if (stmt) {
     int result;
@@ -2099,7 +2168,20 @@ int mysqllib_getsensor_dataint_value(const void *uniqueid, int32_t *value) {
   thisvalue=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64);
 #else
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  int locdbloaded;
 
+  if (!uniqueid) {
+    return -4;
+  }
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+    return -1;
+  }
   MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GET_DATAINT_VALUE];
   if (stmt) {
     int result;
@@ -2214,7 +2296,20 @@ int mysqllib_getsensor_datatinyint_value(const void *uniqueid, uint8_t *value) {
   thisvalue=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64);
 #else
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  int locdbloaded;
 
+  if (!uniqueid) {
+    return -4;
+  }
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+    return -1;
+  }
   MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_GET_DATATINYINT_VALUE];
   if (stmt) {
     int result;
@@ -2326,11 +2421,22 @@ int mysqllib_update_sensor_datafloat_value(const void *uniqueid, int64_t date, d
   result=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64, date, value);
 #else
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  int locdbloaded;
 
+  if (!uniqueid) {
+    return -4;
+  }
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+    return -1;
+  }
   MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_UPDATE_DATAFLOAT_VALUE];
   if (stmt) {
-    int result;
-
     //Make copies of the values in case mysql library needs to modify them
     int64_t thispk64=thisuniqueid->pk64;
     int64_t thisdate=date;
@@ -2408,11 +2514,22 @@ int mysqllib_update_sensor_databigint_value(const void *uniqueid, int64_t date, 
   result=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64, date, value);
 #else
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  int locdbloaded;
 
+  if (!uniqueid) {
+    return -4;
+  }
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+    return -1;
+  }
   MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_UPDATE_DATABIGINT_VALUE];
   if (stmt) {
-    int result;
-
     //Make copies of the values in case mysql library needs to modify them
     int64_t thispk64=thisuniqueid->pk64;
     int64_t thisdate=date;
@@ -2490,11 +2607,22 @@ int mysqllib_update_sensor_dataint_value(const void *uniqueid, int64_t date, int
   result=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64, date, value);
 #else
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  int locdbloaded;
 
+  if (!uniqueid) {
+    return -4;
+  }
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+    return -1;
+  }
   MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_UPDATE_DATAINT_VALUE];
   if (stmt) {
-    int result;
-
     //Make copies of the values in case mysql library needs to modify them
     int64_t thispk64=thisuniqueid->pk64;
     int64_t thisdate=date;
@@ -2572,11 +2700,22 @@ int mysqllib_update_sensor_datatinyint_value(const void *uniqueid, int64_t date,
   result=env->CallStaticIntMethod(mysqllib_mysql_class, methodid, thisuniqueid->pk64, date, value);
 #else
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  int locdbloaded;
 
+  if (!uniqueid) {
+    return -4;
+  }
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+    return -1;
+  }
   MYSQL_STMT *stmt=preparedstmt[MYSQLLIB_UPDATE_DATATINYINT_VALUE];
   if (stmt) {
-    int result;
-
     //Make copies of the values in case mysql library needs to modify them
     int64_t thispk64=thisuniqueid->pk64;
     int64_t thisdate=date;
