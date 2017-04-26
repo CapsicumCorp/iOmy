@@ -43,16 +43,6 @@ sap.ui.jsview("mjs.devices.graphs.BarGraph", {
 	****************************************************************************************************/ 
 	createContent : function(oController) {
 		var me = this;
-		
-//		var oPage = new sap.m.Page(me.createId("page"),{
-//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-//			footer : IOMy.widgets.getAppFooter(),
-//			content : [
-//                //-- Navigational Header --//
-//				IOMy.widgets.getNavigationalSubHeader("Add Rule", "sap-icon://GoogleMaterial/home", me),
-//            
-//            ]
-//		}).addStyleClass("height100Percent width100Percent MainBackground");
 
         var oPage = new IOMy.widgets.IOMyPage({
             view : me,
@@ -71,7 +61,7 @@ sap.ui.jsview("mjs.devices.graphs.BarGraph", {
 						content: "<div id=\"GraphPage_Main\" class=\"\" style=\"min-width: 400px; padding-right: 5.5rem\" ></div><div id=\"GraphPage_Main_Info\" class=\"PadAll10px\" ></div>"
 					}).addStyleClass("")
                 ]
-            }).addStyleClass(" PadBottom10px minheight350px UserInputForm MarTop3px")
+            }).addStyleClass("PadBottom10px minheight350px UserInputForm MarTop3px")
         );
 
 		//--------------------------------------------------------------------//
@@ -79,9 +69,10 @@ sap.ui.jsview("mjs.devices.graphs.BarGraph", {
 		//--------------------------------------------------------------------//
 		sap.ui.Device.orientation.attachHandler(
 			function () {
+				var dateCurrentTime = new Date();
 				$("#GraphPage_Main").html("");
 				$("#GraphPage_Main_Info").html("");
-				me.oController.GetBarDataAndDrawGraph( oController.iIOId, 1491055200, "Week" );
+				me.oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), "Week" );
 			}
 		);
 

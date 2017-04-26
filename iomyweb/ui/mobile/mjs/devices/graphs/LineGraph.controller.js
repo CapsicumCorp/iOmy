@@ -23,8 +23,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 sap.ui.controller("mjs.devices.graphs.LineGraph", {
 	
-	Graph_Data1:          [],
-	Graph_Data2:          [],
+	Graph_Data:          [],
+	
+	iIOId				: 0,
+	iThingId			: 0,
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -41,11 +43,17 @@ sap.ui.controller("mjs.devices.graphs.LineGraph", {
 				//----------------------------------------------------//
 				//-- Enable/Disable Navigational Forward Button		--//
 				//----------------------------------------------------//
+				var dateCurrentTime = new Date();
 				
 				//-- Refresh the Navigational buttons --//
 				IOMy.common.NavigationRefreshButtons( me );
 				
-				me.GetLineDataAndDrawGraph();
+				me.iIOId = evt.data.IO_ID;
+				me.iThingId	= evt.data.ThingId;
+				
+				$("#LineGraphPage_Main").html("");
+                $("#LineGraphPage_Main_Info").html("");
+				me.GetLineDataAndDrawGraph( Math.floor(dateCurrentTime.getTime() / 1000) );
 			}
 		});
 	},
@@ -502,15 +510,171 @@ sap.ui.controller("mjs.devices.graphs.LineGraph", {
 
 	},
 	
-	GetLineDataAndDrawGraph : function () {
+	GetLineDataAndDrawGraph : function (iEndUTS) {
 		var oController    = this;
 		var oView          = this.getView();
-		
 		
 		//============================================================================================//
 		//--  2.1 - LINE GRAPH API DATA                                                             ==//
 		//============================================================================================//
 		IOMy.apiphp.AjaxRequest({
+			url:       IOMy.apiphp.APILocation("graph"),
+			data:      {
+				"Mode": "GraphLine",
+				"Data": "{\"Type\":\"NormalAvg\",\"IOId\":"+oController.iIOId+"}",
+				"StartUTS": iEndUTS - 86400,
+				"EndUTS":   iEndUTS,
+				"Points":   100
+			},
+			onSuccess: function ( sType, aData ) {
+				
+				if( sType==="JSON" && aData.Error===false ) {
+					oController.Graph_Data = [];
+					
+					$.each( aData.Data,function(index, aLineData) {
+						oController.Graph_Data.push( [aLineData.LastTimestamp, aLineData.Value]);
+					})
+					//oController.Graph_Data1 = aData.Data;
+					
+					
+					//----------------------------//
+					//-- GRAPH LINE DATA 2      --//
+					//----------------------------//
+//					IOMy.apiphp.AjaxRequest({
+//						url:       IOMy.apiphp.APILocation("graph"),
+//						data:      {
+//							"Mode": "GraphLine",
+//							"Data": "{\"Type\":\"NormalAvg\",\"IOId\":8}",
+//							"StartUTS": 1488250800,
+//							"EndUTS":   1490929200,
+//							"Points":   100
+//						},
+//						onSuccess: function ( sType, aData ) {
+							
+//							if( sType==="JSON" && aData.Error===false ) {
+								//oController.Graph_Data2 = aData.Data;
+//								oController.Graph_Data2 = [];
+//								$.each( aData.Data,function(index, aLineData) {
+//									oController.Graph_Data2.push( [aLineData.LastTimestamp, aLineData.Value]);
+//								})
+					
+								//----------------------------//
+								//-- GRAPH                  --//
+								//----------------------------//
+								var sDeviceName		= IOMy.common.ThingList["_"+oController.iThingId].DisplayName;
+								var sIOName			= IOMy.common.ThingList["_"+oController.iThingId].IO["_"+oController.iIOId].Name;
+								var sUOM			= IOMy.common.ThingList["_"+oController.iThingId].IO["_"+oController.iIOId].UoMName;
+								
+								var oLineTest = IOMy.graph_jqplot.CreateLineGraph(
+									oController,
+									'LineGraphPage_Main',
+									[
+										{
+											"Label":    sDeviceName,
+											"Data":     oController.Graph_Data
+										}//,
+										//{
+										//	"Label":    "Fridge",
+										//	"Data":     oController.Graph_Data2
+										//}
+									],
+									{
+										"sTitle":               sDeviceName + " (" + sIOName + ")",
+										"sType":                "1YAxis",
+										"UseLegend":            true,
+										"LegendPreset":         2,
+										"AxisX_Label":          "Time",
+										"AxisX_UseDate":        true,
+										"AxisY_Label":          sUOM,
+										"TimePeriod":           "year"
+									}
+								);
+								
+								
+								
+								
+//							} else {
+								//-- Run the fail event
+								
+//							}
+//						},
+//						onFail: function () {
+							
+//						}
+//					});
+					
+					
+					
+				} else {
+					//-- Run the fail event
+					
+				}
+			},
+			onFail: function () {
+				
+			}
+		});
+		//----------------------------//
+		//-- GRAPH LINE DATA 2      --//
+		//----------------------------//
+		/*IOMy.apiphp.AjaxRequest({
+			url:       IOMy.apiphp.APILocation("graph"),
+			data:      {
+				"Mode": "GraphLine",
+				"Data": "{\"Type\":\"NormalAvg\",\"IOId\":"+oController.iIOId+"}",
+				"StartUTS": iEndUTS - 86400,
+				"EndUTS":   iEndUTS,
+				"Points":   100
+			},
+			onSuccess: function ( sType, aData ) {
+
+				if( sType==="JSON" && aData.Error===false ) {
+					//oController.Graph_Data = aData.Data;
+					var sDeviceName		= IOMy.common.ThingList["_"+oController.iThingId].DisplayName;
+					
+					oController.Graph_Data = [];
+
+					$.each( aData.Data,function(index, aLineData) {
+						oController.Graph_Data.push( [aLineData.LastTimestamp, aLineData.Value]);
+					});
+
+					//----------------------------//
+					//-- GRAPH                  --//
+					//----------------------------//
+					var oLineTest = IOMy.graph_jqplot.CreateLineGraph(
+						oController,
+						'LineGraphPage_Main',
+						[
+							{
+								"Label":    sDeviceName,
+								"Data":     oController.Graph_Data
+							}
+						],
+						{
+							"sTitle":               "API Line Y1 Test",
+							"sType":                "1YAxis",
+							"UseLegend":            true,
+							"LegendPreset":         2,
+							"AxisX_Label":          "Axis X",
+							"AxisX_UseDate":        true,
+							"AxisY_Label":          "Axis Y",
+							"TimePeriod":           "year"
+						}
+					);
+
+				} else {
+					//-- Run the fail event
+
+				}
+			},
+			onFail: function () {
+
+			}
+		});*/
+		//============================================================================================//
+		//--  2.1 - LINE GRAPH API DATA                                                             ==//
+		//============================================================================================//
+		/*IOMy.apiphp.AjaxRequest({
 			url:       IOMy.apiphp.APILocation("graph"),
 			data:      {
 				"Mode": "GraphLine",
@@ -601,7 +765,7 @@ sap.ui.controller("mjs.devices.graphs.LineGraph", {
 			onFail: function () {
 				
 			}
-		});
+		});*/
 	}
 	
 });

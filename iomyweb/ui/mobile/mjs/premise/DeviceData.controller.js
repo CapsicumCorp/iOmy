@@ -34,6 +34,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 	dLastThingListUpdate:			null,			//-- DATE:			Stores the last time the page had the Thing List Ajax values updated.			--//
 	dUIThingLastUpdate:				null,			//-- DATE:			Stores the last time the page had the individual Thing updated.			--//
 	iCurrentThingState:				0,				//-- INTEGER:		--//
+	iSelectedIOId:					0,
 	
 	/**
 	* Called when a controller is instantiated and its View controls (if available) are already created.
@@ -185,7 +186,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 				}
                 
                 //----------------------------------------------------------------------------//
-                //-- 2.5 - REDO THE EXTRAS MENU                                             --//
+                //-- 2.5 - REDO THE ACTION MENU                                             --//
                 //----------------------------------------------------------------------------//
                 try {
                     thisView.byId("extrasMenuHolder").destroyItems();
@@ -241,6 +242,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 		
 		var aTempTileData       = {};           //-- ARRAY:         --//
 		var iIOId               = 0;            //-- INTEGER:       --//
+		var sIOName				= ""			//-- STRING:        --//
 		var iCurrentThing       = 0;            //-- INTEGER:       --//
 		var sTemp               = "";           //-- STRING:        --//
 		
@@ -559,6 +561,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 							})
 						],
 						press: function (oControlEvent) {
+							oController.iSelectedIOId = aTileData.Data.IOId;
 							oController.OpenIOTileMenu( oControlEvent, sIndex );
 						}
 					}).addStyleClass("MarTop6px MarLeft6px");

@@ -161,7 +161,7 @@ $.extend(IOMy.devices.motionsensor,{
             
             "onSuccess" : function (responseType, data) {
                 //------------------------------------------------------------//
-                // Output data to console.
+                // Variables
                 //------------------------------------------------------------//
                 var data        = data[0];
                 var sUOMName    = data.UOM_NAME;

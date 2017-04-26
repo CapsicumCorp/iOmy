@@ -38,6 +38,11 @@ IOMy.devices = new sap.ui.base.Object();
  */
 $.extend(IOMy.devices,{
 	Devices: [],
+	
+	iODataFieldsToFetch				: 0,
+	bWaitingToLoadAPI				: false,
+	bLoadingFieldsFromAPI			: false,
+	bLoadingFieldsFromOData			: false,
     
     GetDeviceStatus : function (iThingId) {
         var sStatus;
@@ -134,8 +139,8 @@ $.extend(IOMy.devices,{
             }
         });
     },
-    
-    /**
+	
+	/**
      * Validates the room selection mainly just to ensure that everything (like
      * the room ID) is correct and hasn't been tampered with in some way.
      * 

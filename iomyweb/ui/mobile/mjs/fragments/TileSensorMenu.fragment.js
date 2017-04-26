@@ -1,6 +1,7 @@
 /*
 Title: Edit Thing/Item Page (UI5 Controller)
 Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
+Modified: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: A fragment for the IO Menu
 Copyright: Capsicum Corporation 2016, 2017
 
@@ -41,8 +42,15 @@ sap.ui.jsfragment("mjs.fragments.TileSensorMenu", {
 		oController.aElementsToDestroy.push( sID_FilterRB );
 		
 		
+		//-------------------------------------------------------------//
+		//-- 3.0 - GET IO TYPE ENUMERATION AND ENABLE CERTAIN GRAPHS --//
+		//-------------------------------------------------------------//
+		var iIOTypeEnum = IOMy.common.ThingList["_"+oController.iCurrentThing].IO["_"+oController.iSelectedIOId].DataTypeEnum;
+		var bLineGraphEnabled	= iIOTypeEnum === 0;
+		var bBarGraphEnabled	= iIOTypeEnum === 2;
+		
 		//--------------------------------------------//
-		//-- 3.0 - CREATE THE TILE SENSOR MENU      --//
+		//-- 4.0 - CREATE THE TILE SENSOR MENU      --//
 		//--------------------------------------------//
 		var oTileSensorMenu = new sap.m.ViewSettingsDialog( sID_Menu, {
 			"title":		"Sensor",
@@ -100,7 +108,7 @@ sap.ui.jsfragment("mjs.fragments.TileSensorMenu", {
 											"text":		'NOTE: The analytical buttons below will use the "Time Period" and the "Filter" values setup in the previous tabs in this Menu.'
 										}).addStyleClass("MarBottom20px BG_white PadAll8px BorderRad7px"),
 										new sap.m.Button({
-											tooltip:    "Create Table",
+											"tooltip":    "Create Table",
 											"enabled":	false,
 											"text":		"Create Table",
 											//"type":		"Accept",
@@ -109,28 +117,39 @@ sap.ui.jsfragment("mjs.fragments.TileSensorMenu", {
 											//"icon":		"sap-icon://GoogleMaterial/adb"
 										}),
 										new sap.m.Button({
-											tooltip:    "Create Line Graph",
-											"enabled":	false,
+											"tooltip":    "Create Line Graph",
+											"enabled":	bLineGraphEnabled,
 											"text":		"Create Line Graph",
 											//"type":		"Accept",
 											"width":	"210px",
-											"icon":		"sap-icon://line-chart"
+											"icon":		"sap-icon://line-chart",
+											"press":	function () {
+												IOMy.common.NavigationChangePage("pGraphLine", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing });
+												sap.ui.getCore().byId(sID_Menu).fireConfirm();
+											}
 										}),
 										new sap.m.Button({
-											tooltip:    "Create Bar Graph",
-											"enabled":	false,
+											"tooltip":    "Create Bar Graph",
+											"enabled":	bBarGraphEnabled,
 											"text":		"Create Bar Graph",
 											//"type":		"Accept", 
 											"width":	"210px",
-											"icon":		"sap-icon://vertical-bar-chart-2"
+											"icon":		"sap-icon://vertical-bar-chart-2",
+											"press":	function () {
+												IOMy.common.NavigationChangePage("pGraphBar", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing });
+												sap.ui.getCore().byId(sID_Menu).fireConfirm();
+											}
 										}),
 										new sap.m.Button({
-											tooltip:    "Create Pie Graph",
-											"enabled":	false,
+											"tooltip":    "Create Pie Graph",
+											"enabled":	bBarGraphEnabled,
 											"text":		"Create Pie Graph",
 											//"type":		"Accept",
 											"width":	"210px",
-											"icon":		"sap-icon://pie-chart"
+											"icon":		"sap-icon://pie-chart",
+											"press":	function () {
+												IOMy.common.NavigationChangePage("pGraphPie", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing });
+											}
 										})
 									]
 								}).addStyleClass("TextCenter")

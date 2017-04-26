@@ -63,6 +63,8 @@ sap.ui.controller("mjs.devices.WindowSensor", {
 				
 				//-- Refresh the Navigational buttons --//
 				IOMy.common.NavigationRefreshButtons( me );
+				
+				me.iThingId = evt.data.ThingId;
                 
 //                me.DestroyUI();
 //                me.DrawUI();
@@ -211,6 +213,64 @@ sap.ui.controller("mjs.devices.WindowSensor", {
 		}).addStyleClass("PadBottom10px UserInputForm")
 		
         thisView.byId("page").addContent(me.wPanel);
+		
+		me.FetchCurrentInformation();
+    },
+	
+	FetchCurrentInformation : function () {
+        //--------------------------------------------------------------------//
+        // Declare variables and import modules and global variables
+        //--------------------------------------------------------------------//
+        var me = this; // Capture the scope of the current device module.
+        var aaIOs = IOMy.common.ThingList["_"+me.iThingId].IO;
+        var aIOIDs = [];
+		var mInfo = {};
+        var DevModule = IOMy.devices.windowsensor;
+        
+        //--------------------------------------------------------------------//
+        // Prepare the IO ID array
+        //--------------------------------------------------------------------//
+        $.each(aaIOs, function (sI, mIO) {
+            if (sI !== undefined && sI !== null && mIO !== undefined && mIO !== null) {
+                aIOIDs.push(
+                    {
+                        "id" : mIO.Id,
+                        "rstypeId" : mIO.RSTypeId
+                    }
+                );
+            }
+        });
+        
+        //--------------------------------------------------------------------//
+        // Indicate that the current information will now be fetched
+        //--------------------------------------------------------------------//
+        DevModule.bLoadingFields = true;
+        
+        //--------------------------------------------------------------------//
+        // Fetch device status IO data and place them in the correct widgets.
+        //--------------------------------------------------------------------//
+        //me.wStatusField.setText( IOMy.devices.GetDeviceStatus(me.iThingId) );
+        me.wStatusField.setText( "Closed" );
+        
+        for (var i = 0; i < aIOIDs.length; i++) {
+			mInfo = aIOIDs[i];
+            //------------------------------------//
+            // Fetch the Battery Information
+            //------------------------------------//
+			DevModule.FetchField({
+				"IOID" : mInfo.id,
+
+				onSuccess : function (sValue, sUOM) {
+					
+					if (mInfo.rstypeId == DevModule.RSBattery) {
+						me.wBatteryField.setText("79%");
+					}
+					
+				}
+			});
+        }
+        
+        DevModule.CallAPI(me.iThingId, me.wTamperField, me.wLastAccessedField);
     }
 	
 });

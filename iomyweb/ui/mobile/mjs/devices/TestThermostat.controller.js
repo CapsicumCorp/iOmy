@@ -24,6 +24,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 sap.ui.controller("mjs.devices.TestThermostat", {
 	
+	iThingId				: 0,
+	
     //-------------------------------------------------//
     // Widgets
     //-------------------------------------------------//
@@ -36,6 +38,7 @@ sap.ui.controller("mjs.devices.TestThermostat", {
     wCurrentTempField       : null,
     wSetTempField           : null,
     wModeField              : null,
+	wFanField				: null,
     
     destroyItemsWithIDs     : IOMy.functions.destroyItemsByIdFromView,
     
@@ -58,6 +61,7 @@ sap.ui.controller("mjs.devices.TestThermostat", {
 				//-- Refresh the Navigational buttons --//
 				IOMy.common.NavigationRefreshButtons( me );
                 
+				me.iThingId = evt.data.ThingId;
 //                me.DestroyUI();
 //                me.DrawUI();
 			}
@@ -138,7 +142,7 @@ sap.ui.controller("mjs.devices.TestThermostat", {
         
         //-- Current Temperature --//
         me.wCurrentTempField = new sap.m.Text ({
-            text : "29°C", // Default text until data can be loaded into it.
+            text : "", // Default text until data can be loaded into it.
             textAlign : "Right",
             width : "100%"
         });
@@ -147,36 +151,36 @@ sap.ui.controller("mjs.devices.TestThermostat", {
         me.wSetTempField = new sap.m.Select ({
             items : [
                 new sap.ui.core.Item({
-                    key: "20",
-                    text: "21",
+                    key: "21",
+                    text: "21"
                 }),
                 new sap.ui.core.Item({
                     key: "22",
-                    text: "22",
+                    text: "22"
                 }),
                 new sap.ui.core.Item({
                     key: "23",
-                    text: "23",
+                    text: "23"
                 }),
                 new sap.ui.core.Item({
                     key: "24",
-                    text: "24",
+                    text: "24"
                 }),
                 new sap.ui.core.Item({
                     key: "25",
-                    text: "25",
+                    text: "25"
                 }),
                 new sap.ui.core.Item({
                     key: "26",
-                    text: "26",
+                    text: "26"
                 }),
                 new sap.ui.core.Item({
                     key: "27",
-                    text: "27",
+                    text: "27"
                 }),
                 new sap.ui.core.Item({
                     key: "28",
-                    text: "28",
+                    text: "28"
                 })
             ]
         });
@@ -289,6 +293,71 @@ sap.ui.controller("mjs.devices.TestThermostat", {
 		}).addStyleClass("PadBottom10px UserInputForm")
 		
         thisView.byId("page").addContent(me.wPanel);
-    }
+		
+		me.FetchCurrentInformation();
+    },
+	
+	FetchCurrentInformation : function () {
+        //--------------------------------------------------------------------//
+        // Declare variables and import modules and global variables
+        //--------------------------------------------------------------------//
+        var me = this; // Capture the scope of the current device module.
+        var aaIOs = IOMy.common.ThingList["_"+me.iThingId].IO;
+        var aIOIDs = [];
+		var mInfo = {};
+        var DevModule = IOMy.devices.thermostat;
+        
+        //--------------------------------------------------------------------//
+        // Prepare the IO ID array
+        //--------------------------------------------------------------------//
+        $.each(aaIOs, function (sI, mIO) {
+            if (sI !== undefined && sI !== null && mIO !== undefined && mIO !== null) {
+                aIOIDs.push(
+                    {
+                        "id" : mIO.Id,
+                        "rstypeId" : mIO.RSTypeId
+                    }
+                );
+            }
+        });
+        
+        //--------------------------------------------------------------------//
+        // Indicate that the current information will now be fetched
+        //--------------------------------------------------------------------//
+        DevModule.bLoadingFields = true;
+        
+        //--------------------------------------------------------------------//
+        // Fetch device status IO data and place them in the correct widgets.
+        //--------------------------------------------------------------------//
+        me.wStatusField.setText( IOMy.devices.GetDeviceStatus(me.iThingId) );
+        
+        for (var i = 0; i < aIOIDs.length; i++) {
+			mInfo = aIOIDs[i];
+            //------------------------------------//
+            // Fetch the Battery Information
+            //------------------------------------//
+			DevModule.FetchField({
+				"IOID" : aIOIDs[i].id,
+
+				onSuccess : function (sValue, sUOM) {
+					
+					if (mInfo.rstypeId == DevModule.RSTemperature) {
+						me.wCurrentTempField.setText("29°C");
+					} else if (mInfo.rstypeId == DevModule.RSMode) {
+						me.wModeField;
+					} else if (mInfo.rstypeId == DevModule.RSFanSpeed) {
+						me.wFanField;
+					} else if (mInfo.rstypeId == DevModule.RSDesiredCoolth ||
+						mInfo.rstypeId == DevModule.RSDesiredHeat )
+					{
+						me.wSetTempField.setSelectedKey("24");
+					}
+					
+				}
+			});
+        }
+        
+        //DevModule.CallAPI(me.iThingId, me.wTamperField, me.wLastMotionField);
+    },
 	
 });

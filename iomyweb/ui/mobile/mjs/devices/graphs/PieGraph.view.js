@@ -43,16 +43,6 @@ sap.ui.jsview("mjs.devices.graphs.PieGraph", {
 	****************************************************************************************************/ 
 	createContent : function(oController) {
 		var me = this;
-		
-//		var oPage = new sap.m.Page(me.createId("page"),{
-//			customHeader : IOMy.widgets.getIOMYPageHeaderNav( oController ),
-//			footer : IOMy.widgets.getAppFooter(),
-//			content : [
-//                //-- Navigational Header --//
-//				IOMy.widgets.getNavigationalSubHeader("Add Rule", "sap-icon://GoogleMaterial/home", me),
-//            
-//            ]
-//		}).addStyleClass("height100Percent width100Percent MainBackground");
 
         var oPage = new IOMy.widgets.IOMyPage({
             view : me,

@@ -67,10 +67,21 @@ sap.ui.jsview("mjs.staging.LineGraph", {
                 backgroundDesign: "Transparent",
                 content: [
                    new sap.ui.core.HTML ({
-						content: "<div id=\"GraphPage_Main\" class=\"\" style=\"padding-right: 5.5rem\" ></div><div id=\"GraphPage_Main_Info\" class=\"PadAll10px\" ></div>"
+						content: "<div id=\"_GraphPage_Main\" class=\"\" style=\"padding-right: 5.5rem\" ></div><div id=\"_GraphPage_Main_Info\" class=\"PadAll10px\" ></div>"
 					}).addStyleClass("")
                 ]
             }).addStyleClass("PadBottom10px UserInputForm MarTop3px minheight350px")
+        );
+
+        //--------------------------------------------------------------------//
+        // Respond to screen orientation change.
+        //--------------------------------------------------------------------//
+        sap.ui.Device.orientation.attachHandler(
+            function () {
+                $("#_GraphPage_Main").html("");
+                $("#_GraphPage_Main_Info").html("");
+                me.oController.GetLineDataAndDrawGraph( 10, 1491055200, "Week" );
+            }
         );
 		
 		return oPage;

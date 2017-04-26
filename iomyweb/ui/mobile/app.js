@@ -1597,6 +1597,25 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.Garagedoor\" Page!\n"
 	},
+	//-- Graphs --//
+	{ 
+		"Id":			"pGraphLine",
+		"Location":		"mjs.devices.graphs.LineGraph",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.graphs.LineGraph\" Page!\n"
+	},
+	{ 
+		"Id":			"pGraphBar",
+		"Location":		"mjs.devices.graphs.BarGraph",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.graphs.BarGraph\" Page!\n"
+	},
+	{ 
+		"Id":			"pGraphPie",
+		"Location":		"mjs.devices.graphs.PieGraph",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.graphs.PieGraph\" Page!\n"
+	},
     //-- Rules --//
     {
 		"Id":			"pRuleNew",

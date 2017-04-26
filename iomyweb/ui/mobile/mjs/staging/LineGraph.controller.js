@@ -44,6 +44,8 @@ sap.ui.controller("mjs.staging.LineGraph", {
 				
 				//-- Refresh the Navigational buttons --//
 				IOMy.common.NavigationRefreshButtons( me );
+				
+				me.GetLineDataAndDrawGraph();
 			}
 		});
 	},
@@ -70,98 +72,6 @@ sap.ui.controller("mjs.staging.LineGraph", {
 		//============================================================================================//
 		//--  2.1 - LINE GRAPH API DATA                                                             ==//
 		//============================================================================================//
-		IOMy.apiphp.AjaxRequest({
-			url:       IOMy.apiphp.APILocation("graph"),
-			data:      {
-				"Mode": "GraphLine",
-				"Data": "{\"Type\":\"NormalAvg\",\"IOId\":3}",
-				"StartUTS": 1488250800,
-				"EndUTS":   1490929200,
-				"Points":   100
-			},
-			onSuccess: function ( sType, aData ) {
-				
-				if( sType==="JSON" && aData.Error===false ) {
-					oController.Graph_Data1 = [];
-					
-					$.each( aData.Data,function(index, aLineData) {
-						oController.Graph_Data1.push( [aLineData.LastTimestamp, aLineData.Value]);
-					})
-					//oController.Graph_Data1 = aData.Data;
-					
-					
-					//----------------------------//
-					//-- GRAPH LINE DATA 2      --//
-					//----------------------------//
-					IOMy.apiphp.AjaxRequest({
-						url:       IOMy.apiphp.APILocation("graph"),
-						data:      {
-							"Mode": "GraphLine",
-							"Data": "{\"Type\":\"NormalAvg\",\"IOId\":8}",
-							"StartUTS": 1488250800,
-							"EndUTS":   1490929200,
-							"Points":   100
-						},
-						onSuccess: function ( sType, aData ) {
-							
-							if( sType==="JSON" && aData.Error===false ) {
-								//oController.Graph_Data2 = aData.Data;
-								
-								oController.Graph_Data2 = [];
-					
-								$.each( aData.Data,function(index, aLineData) {
-									oController.Graph_Data2.push( [aLineData.LastTimestamp, aLineData.Value]);
-								})
-					
-								//----------------------------//
-								//-- GRAPH                  --//
-								//----------------------------//
-								var oLineTest = IOMy.graph_jqplot.CreateLineGraph(
-									oController,
-									'GraphPage_Main',
-									[
-										{
-											"Label":    "Kettle",
-											"Data":     oController.Graph_Data1
-										},
-										{
-											"Label":    "Fridge",
-											"Data":     oController.Graph_Data2
-										}
-									],
-									{
-										"sTitle":               "API Line Y1 Test",
-										"sType":                "1YAxis",
-										"UseLegend":            true,
-										"LegendPreset":         2,
-										"AxisX_Label":          "Axis X",
-										"AxisX_UseDate":        true,
-										"AxisY_Label":          "Axis Y",
-										"TimePeriod":           "year"
-									}
-								);
-								
-							} else {
-								//-- Run the fail event
-								
-							}
-						},
-						onFail: function () {
-							
-						}
-					});
-					
-					
-					
-				} else {
-					//-- Run the fail event
-					
-				}
-			},
-			onFail: function () {
-				
-			}
-		});
 		
 		//============================================================================================//
 		//-- 3.1 - PIE GRAPH API DATA                                                               ==//
@@ -590,6 +500,108 @@ sap.ui.controller("mjs.staging.LineGraph", {
 */
 	onExit: function() {
 
+	},
+	
+	GetLineDataAndDrawGraph : function () {
+		var oController    = this;
+		var oView          = this.getView();
+		
+		
+		//============================================================================================//
+		//--  2.1 - LINE GRAPH API DATA                                                             ==//
+		//============================================================================================//
+		IOMy.apiphp.AjaxRequest({
+			url:       IOMy.apiphp.APILocation("graph"),
+			data:      {
+				"Mode": "GraphLine",
+				"Data": "{\"Type\":\"NormalAvg\",\"IOId\":10}",
+				"StartUTS": 1488250800,
+				"EndUTS":   1490929200,
+				"Points":   100
+			},
+			onSuccess: function ( sType, aData ) {
+				
+				if( sType==="JSON" && aData.Error===false ) {
+					oController.Graph_Data1 = [];
+					
+					$.each( aData.Data,function(index, aLineData) {
+						oController.Graph_Data1.push( [aLineData.LastTimestamp, aLineData.Value]);
+					});
+					//oController.Graph_Data1 = aData.Data;
+					
+					
+					//----------------------------//
+					//-- GRAPH LINE DATA 2      --//
+					//----------------------------//
+					IOMy.apiphp.AjaxRequest({
+						url:       IOMy.apiphp.APILocation("graph"),
+						data:      {
+							"Mode": "GraphLine",
+							"Data": "{\"Type\":\"NormalAvg\",\"IOId\":8}",
+							"StartUTS": 1488250800,
+							"EndUTS":   1490929200,
+							"Points":   100
+						},
+						onSuccess: function ( sType, aData ) {
+							
+							if( sType==="JSON" && aData.Error===false ) {
+								//oController.Graph_Data2 = aData.Data;
+								
+								oController.Graph_Data2 = [];
+					
+								$.each( aData.Data,function(index, aLineData) {
+									oController.Graph_Data2.push( [aLineData.LastTimestamp, aLineData.Value]);
+								});
+					
+								//----------------------------//
+								//-- GRAPH                  --//
+								//----------------------------//
+								var oLineTest = IOMy.graph_jqplot.CreateLineGraph(
+									oController,
+									'_GraphPage_Main',
+									[
+										{
+											"Label":    "Kettle",
+											"Data":     oController.Graph_Data1
+										},
+										{
+											"Label":    "Fridge",
+											"Data":     oController.Graph_Data2
+										}
+									],
+									{
+										"sTitle":               "API Line Y1 Test",
+										"sType":                "1YAxis",
+										"UseLegend":            true,
+										"LegendPreset":         2,
+										"AxisX_Label":          "Axis X",
+										"AxisX_UseDate":        true,
+										"AxisY_Label":          "Axis Y",
+										"TimePeriod":           "year"
+									}
+								);
+								
+							} else {
+								//-- Run the fail event
+								
+							}
+						},
+						onFail: function () {
+							
+						}
+					});
+					
+					
+					
+				} else {
+					//-- Run the fail event
+					
+				}
+			},
+			onFail: function () {
+				
+			}
+		});
 	}
 	
 });

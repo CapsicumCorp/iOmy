@@ -25,6 +25,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 sap.ui.controller("mjs.devices.DoorLock", {
 	
     mThing              : null,
+	iThingId			: 0,
     //-------------------------------------------------//
     // Widgets
     //-------------------------------------------------//
@@ -62,6 +63,7 @@ sap.ui.controller("mjs.devices.DoorLock", {
                 
                 //-- Retrieve the thing --//
                 me.mThing = IOMy.common.ThingList["_"+evt.data.ThingId];
+				me.iThingId = evt.data.ThingId;
                 
                 //if (IOMy.common.ThingList["_"+me.mThing.Id].UnlockTimeout === null) {
                     me.DestroyUI();
@@ -271,6 +273,63 @@ sap.ui.controller("mjs.devices.DoorLock", {
 		}).addStyleClass("PadBottom10px UserInputForm")
 		
         thisView.byId("page").addContent(me.wPanel);
+		
+		//me.FetchCurrentInformation();
+    },
+	
+	FetchCurrentInformation : function () {
+        //--------------------------------------------------------------------//
+        // Declare variables and import modules and global variables
+        //--------------------------------------------------------------------//
+        var me = this; // Capture the scope of the current device module.
+        var aaIOs = IOMy.common.ThingList["_"+me.iThingId].IO;
+        var aIOIDs = [];
+		var mInfo = {};
+        var DevModule = IOMy.devices.doorlock;
+        
+        //--------------------------------------------------------------------//
+        // Prepare the IO ID array
+        //--------------------------------------------------------------------//
+        $.each(aaIOs, function (sI, mIO) {
+            if (sI !== undefined && sI !== null && mIO !== undefined && mIO !== null) {
+                aIOIDs.push(
+                    {
+                        "id" : mIO.Id,
+                        "rstypeId" : mIO.RSTypeId
+                    }
+                );
+            }
+        });
+        
+        //--------------------------------------------------------------------//
+        // Indicate that the current information will now be fetched
+        //--------------------------------------------------------------------//
+        DevModule.bLoadingFields = true;
+        
+        //--------------------------------------------------------------------//
+        // Fetch device status IO data and place them in the correct widgets.
+        //--------------------------------------------------------------------//
+        //me.wStatusField.setText( IOMy.devices.GetDeviceStatus(me.iThingId) );
+        
+        for (var i = 0; i < aIOIDs.length; i++) {
+			mInfo = aIOIDs[i];
+            //------------------------------------//
+            // Fetch the Battery Information
+            //------------------------------------//
+			DevModule.FetchField({
+				"IOID" : mInfo.id,
+
+				onSuccess : function (sValue, sUOM) {
+					
+					if (mInfo.rstypeId == DevModule.RSBattery) {
+						me.wBatteryField.setText("21%");
+					}
+					
+				}
+			});
+        }
+        
+        DevModule.CallAPI(me.iThingId, me.wTamperField, me.wLastAccessField);
     }
 	
 });
