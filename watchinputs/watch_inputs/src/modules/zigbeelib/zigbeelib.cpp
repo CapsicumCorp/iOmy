@@ -716,7 +716,7 @@ static pthread_once_t lockkey_onceinit = PTHREAD_ONCE_INIT;
 static bool havelockkey=false;
 
 //Initialise a thread local store for the lock counter
-static void zigbeelib_makelockkey(void) {
+static void zigbeelib_makelockkey() {
 	int result;
 
   result=pthread_key_create(&lockkey, NULL);

@@ -409,7 +409,7 @@ static pthread_once_t lockkey_onceinit = PTHREAD_ONCE_INIT;
 static int havelockkey=0;
 
 //Initialise a thread local store for the lock counter
-static void xbeelib_makelockkey(void) {
+void xbeelib_makelockkey() {
   int result;
 
   result=pthread_key_create(&lockkey, NULL);
