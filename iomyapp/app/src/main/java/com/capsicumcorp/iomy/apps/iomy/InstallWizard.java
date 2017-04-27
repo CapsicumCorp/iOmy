@@ -58,7 +58,7 @@ public class InstallWizard {
     public int USE_EXISTING = 3;
     public int PROCEED = 4;
 
-    private boolean servicesLoaded=false; //Set to true when we have called the summon the Server Progress Page to startup the services
+    private boolean servicesLoaded=false; //Set to true when the services have finished loading
     private String prevStepCompleted=""; //Temporary backup of the current step while executing the Server Progress Page
 
     // Form Data
@@ -390,7 +390,6 @@ public class InstallWizard {
     }
 
     public void loadServerDeviceProgress(Activity activity) {
-        servicesLoaded=true;
         Intent intent = new Intent(activity, ServerProgressPage.class);
         activity.startActivity(intent);
     }
@@ -438,7 +437,10 @@ public class InstallWizard {
         activity.startActivity(intent);
     }
 
-    //TODO: Get the real hubpk instead of assuming 1
+    public void setServicesLoaded(boolean servicesLoaded) {
+        this.servicesLoaded=servicesLoaded;
+    }
+
     public void writeWatchInputsFile() {
         //First write to a temp file as if Watch Inputs is already running
         //  when we write to the final filename, Watch Inputs may pick up the file
