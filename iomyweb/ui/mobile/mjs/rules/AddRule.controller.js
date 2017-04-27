@@ -160,7 +160,10 @@ sap.ui.controller("mjs.rules.AddRule", {
                 growFactor : 1
             }),
             type:"Default",
-            text: "Cancel"
+            text: "Cancel",
+			press: function () {
+				me.cancelChanges();
+			}
         }).addStyleClass("width80px");
         
         me.wApplyButton = new sap.m.Button({
@@ -251,6 +254,10 @@ sap.ui.controller("mjs.rules.AddRule", {
             me.loadRule();
         }
     },
+	
+	cancelChanges : function () {
+		IOMy.common.NavigationTriggerBackForward();
+	},
     
     loadRule : function () {
         var me          = this;
@@ -304,6 +311,7 @@ sap.ui.controller("mjs.rules.AddRule", {
 
                     onSuccess : function () {
                         IOMy.common.showSuccess("Rule for "+mThing.DisplayName+" was successfully removed.", "Success");
+						IOMy.common.NavigationChangePage( "pRuleDeviceList", {}, true);
                     },
 
                     onFail : function (sError) {
