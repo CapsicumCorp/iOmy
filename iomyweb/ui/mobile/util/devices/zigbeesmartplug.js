@@ -447,7 +447,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                     // Throw an exception.                                            //
                     //----------------------------------------------------------------//
                     if (data.length === 0) {
-                        throw "There are no Zigbee modems attached.";
+                        throw new NoZigbeeModemsException();
                     }
                     //---------------------------------------------------------//
                     // Start going through each one                            //
@@ -494,15 +494,17 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                     }
                     
                 } catch (e) {
-                    //---------------------------------------------------------//
-                    // There was something wrong with the data structure. This //
-                    // is hopefully because of an empty list of modems. In any //
-                    // case, the error is reported.                            //
-                    //---------------------------------------------------------//
-                    bError = true;
-                    aErrorMessages.push(e.message);
-                    // Disable the command widgets because no modems were detected.
-                    me.ToggleZigbeeCommands(oScope, false);
+					//--------------------------------------------------------//
+					// We're looking for an exception thrown because there were
+					// no zigbee modems detected. If a different exception is
+					// thrown, that's a problem!
+					//--------------------------------------------------------//
+					if (e.name !== "NoZigbeeModemsException") {
+						bError = true;
+						aErrorMessages.push(e.message);
+						// Disable the command widgets because no modems were detected.
+						me.ToggleZigbeeCommands(oScope, false);
+					}
                 }
                 
                 //------------------------------------------------------------------//
@@ -568,14 +570,14 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                 // Check if a fatal error occurred
                 if (mErrorInfo.bError === true) {
                     // If so report it and take no further action.
-                    jQuery.sap.log.error(mErrorInfo.join("\n"));
-                    showErrorDialog(mErrorInfo.join("\n\n"));
+                    jQuery.sap.log.error(mErrorInfo.aErrorMessages.join("\n"));
+                    showErrorDialog(mErrorInfo.aErrorMessages.join("\n\n"));
                 } else {
                     // Otherwise, first check how many records failed to load.
                     // If any records failed to load, report them then continue.
                     if (mErrorInfo.iRecordErrorCount > 0) {
-                        jQuery.sap.log.error(mErrorInfo.join("\n"));
-                        showErrorDialog(mErrorInfo.join("\n\n"));
+                        jQuery.sap.log.error(mErrorInfo.aErrorMessages.join("\n"));
+                        showErrorDialog(mErrorInfo.aErrorMessages.join("\n\n"));
                     }
                     
                     // Now populate the Zigbee modem select box

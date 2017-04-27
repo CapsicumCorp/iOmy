@@ -163,3 +163,16 @@ function SerialCodeNullException(message) {
     IOmyException.call(this, message);
     this.name = "SerialCodeNullException";
 }
+
+function NoZigbeeModemsException(message) {
+    //------------------------------------------------------------------------//
+    // This exception can have a simple "Serial Code is null" message if one is
+    // not provided.
+    //------------------------------------------------------------------------//
+    if (message === undefined || message === null || message === "") {
+        message = "There are no Zigbee modems attached.";
+    }
+    
+    IOmyException.call(this, message);
+    this.name = "NoZigbeeModemsException";
+}
