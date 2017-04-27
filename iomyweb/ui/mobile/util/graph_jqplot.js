@@ -57,6 +57,15 @@ $.extend( IOMy.graph_jqplot, {
 		"grey"
 	],
 	
+	//========================================================================//
+	// Time Period Strings
+	//========================================================================//
+	PeriodDay		: "Day",
+	PeriodWeek		: "Week",
+	PeriodFortnight	: "Fortnight",
+	PeriodMonth		: "Month",
+	PeriodQuarter	: "Quarter",
+	PeriodYear		: "year",
 	
 	//========================================================================//
 	//== LEGEND PRESET                                                      ==//

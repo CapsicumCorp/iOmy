@@ -50,10 +50,11 @@ sap.ui.controller("mjs.devices.graphs.PieGraph", {
                 me.iIOId	= evt.data.IO_ID;
 				me.iThingId	= evt.data.ThingId;
                 
+				var dateCurrentTime = new Date();
 				$("#PieGraphPage_Main").html("");
 				$("#PieGraphPage_Main_Info").html("");
 				
-                me.GetPieDataAndDrawGraph( me.iIOId, 1491055200, "Week" );
+                me.GetPieDataAndDrawGraph( me.iIOId, (dateCurrentTime.getTime() / 1000) );
 			}
 		});
 	},
@@ -158,7 +159,7 @@ sap.ui.controller("mjs.devices.graphs.PieGraph", {
         
 	},
     
-    GetPieDataAndDrawGraph : function ( iIOId, iEndUTS, sPeriodType ) {
+    GetPieDataAndDrawGraph : function ( iIOId, iEndUTS ) {
         //----------------------------------------------------//
         //-- 1.0 - Declare Variables                        --//
         //----------------------------------------------------//
@@ -169,253 +170,59 @@ sap.ui.controller("mjs.devices.graphs.PieGraph", {
         //----------------------------------------------------//
         //-- 4.0 - Get the data for the appropriate Period  --//
         //----------------------------------------------------//
-        switch( sPeriodType ) {
-            case "Week":
-                //--------------------------------//
-                //-- WORKOUT THE TIMESTAMPS     --//
-                var iDay1StartUTS = iEndUTS - ( 86400 * 7 );
-                var iDay1EndUTS   = iEndUTS - ( 86400 * 6 );
+        IOMy.apiphp.AjaxRequest({
+			url:       IOMy.apiphp.APILocation("graph"),
+			data:      {
+				"Mode": "6HourPiePreviousDay",
+				"Data": "{\"Type\":\"Normal\",\"IOId\":"+iIOId+"}",
+				"EndUTS":   iEndUTS
+			},
+			onSuccess: function ( sType, aData ) {
+				try {
+					
+					if( sType==="JSON" && aData.Error===false ) {
+					
+						//-- Store the Ajax data --//
+						oController.Graph_Data1 = [
+							[ 'Night',     aData.Data.Night ],
+							[ 'Morning',   aData.Data.Morning ],
+							[ 'Afternoon', aData.Data.Afternoon ],
+							[ 'Evening',   aData.Data.Evening ]
+						];
+						
+						//-- Create the Pie Graph --//
+						var oPieTest = IOMy.graph_jqplot.CreatePieGraph( 
+							oController,
+							'PieGraphPage_Main',
+							[
+								{
+									"Data": oController.Graph_Data1
+								}
+							],
+							{
+								"sTitle":       "6 Hour Usage",
+								"sType":        "6HourPie",
+								"UseLegend":    true,
+								"LegendPreset": 2
+							}
+						);
+						
+						
+					} else {
+						//-- Run the fail event --//
+						
+					}
+					
+				} catch( e01 ) {
+					console.log("Critical Graph Error: NOTE: replace this with a real "+e01.message);
+				}
 				
-                var iDay2StartUTS = iEndUTS - ( 86400 * 6 );
-                var iDay2EndUTS   = iEndUTS - ( 86400 * 5 );
 				
-                var iDay3StartUTS = iEndUTS - ( 86400 * 5 );
-                var iDay3EndUTS   = iEndUTS - ( 86400 * 4 );
+			},
+			onFail: function () {
 				
-                var iDay4StartUTS = iEndUTS - ( 86400 * 4 );
-                var iDay4EndUTS   = iEndUTS - ( 86400 * 3 );
-				
-                var iDay5StartUTS = iEndUTS - ( 86400 * 3 );
-                var iDay5EndUTS   = iEndUTS - ( 86400 * 2 );
-				
-                var iDay6StartUTS = iEndUTS - ( 86400 * 2 );
-                var iDay6EndUTS   = iEndUTS - ( 86400 * 1 );
-				
-                var iDay7StartUTS = iEndUTS - ( 86400 * 1 );
-                var iDay7EndUTS   = iEndUTS;
-
-                //--------------------------------//
-                //-- PERFORM THE AJAX REQUESTS  --//
-                IOMy.apiphp.AjaxRequest({
-                    url:  IOMy.apiphp.APILocation( "aggregation" ),
-                    data: {
-                        Id:        iIOId,
-                        Mode:      "Min",
-                        StartUTS:  iDay1StartUTS,
-                        EndUTS:    iDay1EndUTS
-                    },
-                    onSuccess: function ( sResponseType, aData1Min ) {
-                        //--------------------------------//
-                        //-- DATA1 MAX                  --//
-                        IOMy.apiphp.AjaxRequest({
-                            url:  IOMy.apiphp.APILocation( "aggregation" ),
-                            data: {
-                                Id:       iIOId,
-                                Mode:     "Max",
-                                StartUTS: iDay1StartUTS,
-                                EndUTS:   iDay1EndUTS
-                            },
-                            onSuccess: function ( sResponseType, aData1Max ) {
-
-                                //--------------------------------//
-                                //-- DATA2 MAX                  --//
-                                IOMy.apiphp.AjaxRequest({
-                                    url:  IOMy.apiphp.APILocation( "aggregation" ),
-                                    data: {
-                                        Id:        iIOId,
-                                        Mode:      "Max",
-                                        StartUTS:  iDay2StartUTS,
-                                        EndUTS:    iDay2EndUTS
-                                    },
-                                    onSuccess: function ( sResponseType, aData2Max ) {
-
-                                        //--------------------------------//
-                                        //-- DATA3 MAX                  --//
-                                        IOMy.apiphp.AjaxRequest({
-                                            url:  IOMy.apiphp.APILocation( "aggregation" ),
-                                            data: {
-                                                Id:       iIOId,
-                                                Mode:     "Max",
-                                                StartUTS: iDay3StartUTS,
-                                                EndUTS:   iDay3EndUTS
-                                            },
-                                            onSuccess: function ( sResponseType, aData3Max ) {
-
-                                                //--------------------------------//
-                                                //-- DATA4 MAX                  --//
-                                                IOMy.apiphp.AjaxRequest({
-                                                    url:  IOMy.apiphp.APILocation( "aggregation" ),
-                                                    data: {
-                                                        Id:       iIOId,
-                                                        Mode:     "Max",
-                                                        StartUTS: iDay4StartUTS,
-                                                        EndUTS:   iDay4EndUTS
-                                                    },
-                                                    onSuccess: function ( sResponseType, aData4Max ) {
-
-                                                        //--------------------------------//
-                                                        //-- DATA5 MAX                  --//
-                                                        IOMy.apiphp.AjaxRequest({
-                                                            url:  IOMy.apiphp.APILocation( "aggregation" ),
-                                                            data: {
-                                                                Id:       iIOId,
-                                                                Mode:     "Max",
-                                                                StartUTS: iDay5StartUTS,
-                                                                EndUTS:   iDay5EndUTS
-                                                            },
-                                                            onSuccess: function ( sResponseType, aData5Max ) {
-
-                                                                //--------------------------------//
-                                                                //-- DATA6 MAX                  --//
-                                                                IOMy.apiphp.AjaxRequest({
-                                                                    url:  IOMy.apiphp.APILocation( "aggregation" ),
-                                                                    data: {
-                                                                        Id:       iIOId,
-                                                                        Mode:     "Max",
-                                                                        StartUTS: iDay6StartUTS,
-                                                                        EndUTS:   iDay6EndUTS
-                                                                    },
-                                                                    onSuccess: function ( sResponseType, aData6Max ) {
-
-                                                                        //--------------------------------//
-                                                                        //-- DATA7 MAX                  --//
-                                                                        IOMy.apiphp.AjaxRequest({
-                                                                            url:  IOMy.apiphp.APILocation( "aggregation" ),
-                                                                            data: {
-                                                                                Id:       iIOId,
-                                                                                Mode:     "Max",
-                                                                                StartUTS: iDay7StartUTS,
-                                                                                EndUTS:   iDay7EndUTS
-                                                                            },
-                                                                            onSuccess: function ( sResponseType, aData7Max ) {
-
-                                                                                try {
-                                                                                    var iSundayValue    = aData1Max['Value'] - aData1Min['Value'];
-                                                                                    var iMondayValue    = aData2Max['Value'] - aData1Max['Value'];
-                                                                                    var iTuesdayValue   = aData3Max['Value'] - aData2Max['Value'];
-                                                                                    var iWednesdayValue = aData4Max['Value'] - aData3Max['Value'];
-                                                                                    var iThursdayValue  = aData5Max['Value'] - aData4Max['Value'];
-                                                                                    var iFridayValue    = aData6Max['Value'] - aData5Max['Value'];
-                                                                                    var iSaturdayValue  = aData7Max['Value'] - aData6Max['Value'];
-																					var sDeviceName		= IOMy.common.ThingList["_"+oController.iThingId].DisplayName;
-																					
-                                                                                    var aSeriesData = {
-                                                                                        "Label": sDeviceName,
-                                                                                        "Color": "lightslategrey",
-                                                                                        "Data":  [ iSundayValue, iMondayValue, iTuesdayValue, iWednesdayValue, iThursdayValue, iFridayValue, iSaturdayValue ]
-                                                                                    };
-
-
-                                                                                    var aTicks = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
-
-                                                                                    var oVarTest = IOMy.graph_jqplot.CreatePieGraph( 
-                                                                                        oController,
-                                                                                        'PieGraphPage_Main',
-                                                                                        [
-                                                                                            aSeriesData
-                                                                                        ],
-                                                                                        {
-                                                                                            "sTitle":       "Weekly Usage for "+sDeviceName,
-                                                                                            "sType":        "Basic",
-                                                                                            "UseLegend":    true,
-                                                                                            "LegendPreset": 2,
-                                                                                            "AxisX_Label":  "Week",
-                                                                                            "AxisY_Label":  aData1Max.UOM_NAME,
-                                                                                            "AxisX_TickCategories": aTicks
-                                                                                        }
-                                                                                    );
-
-
-                                                                                    $('#PieGraphPage_Main').bind('jqplotDataHighlight', 
-                                                                                        function( ev, seriesIndex, iPointIndex, aData ) {
-                                                                                            //$('#PieGraphPage_Main_Info').html('series: '+seriesIndex+', point: '+pointIndex+', data: '+data);
-                                                                                            try {
-                                                                                                $('#PieGraphPage_Main_Info').html(' '+aTicks[iPointIndex]+': '+aData[1]+' ');
-
-                                                                                            } catch( e1 ) {
-                                                                                                $('#PieGraphPage_Main_Info').html( e1.message );
-                                                                                            }
-                                                                                        }
-                                                                                    );
-
-
-                                                                                    $('#PieGraphPage_Main').bind('jqplotDataUnhighlight', 
-                                                                                        function (ev) {
-                                                                                            $('#PieGraphPage_Main_Info').html('');
-                                                                                        }
-                                                                                    );
-                                                                                } catch( e20 ) {
-                                                                                    console.log( "Data1Min = "+JSON.stringify( aData1Max ) );
-                                                                                    console.log( "Data1Max = "+JSON.stringify( aData1Max ) );
-                                                                                    console.log( "Data2Max = "+JSON.stringify( aData2Max ) );
-                                                                                    console.log( "Data3Max = "+JSON.stringify( aData3Max ) );
-                                                                                    console.log( "Data4Max = "+JSON.stringify( aData4Max ) );
-                                                                                    console.log( "Data5Max = "+JSON.stringify( aData5Max ) );
-                                                                                    console.log( "Data6Max = "+JSON.stringify( aData6Max ) );
-                                                                                    console.log( "Data7Max = "+JSON.stringify( aData7Max ) );
-
-                                                                                    console.log("Critical Error! Bar Graph: "+e20.message );
-                                                                                }
-
-
-                                                                            },
-                                                                            onFail: function () {
-
-
-                                                                            }
-                                                                        });		//-- END of this Data7 Max Ajax request --//
-
-                                                                    },
-                                                                    onFail: function () {
-
-
-                                                                    }
-                                                                });		//-- END of this Data6 Max Ajax request --//
-
-
-                                                            },
-                                                            onFail: function () {
-
-
-                                                            }
-                                                        });		//-- END of this Data5 Max Ajax request --//
-
-                                                    },
-                                                    onFail: function () {
-
-
-                                                    }
-                                                });		//-- END of this Data4 Max Ajax request --//
-                                            },
-                                            onFail: function () {
-
-
-                                            }
-                                        });		//-- END of this Data3 Max Ajax request --//
-
-                                    },
-                                    onFail: function () {
-
-
-                                    }
-                                });		//-- END of this Data2 Max Ajax request --//
-
-
-                            },
-                            onFail: function () {
-
-
-                            }
-                        });		//-- END of this Data1 Max Ajax request --//
-
-
-                    },
-                    onFail: function () {
-
-                    }
-                });		//-- END of this Data1Min Ajax request --//
-                break;
-        }
+			}
+		});
     }
 	
 });

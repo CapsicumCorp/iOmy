@@ -27,6 +27,7 @@ sap.ui.controller("mjs.devices.graphs.LineGraph", {
 	
 	iIOId				: 0,
 	iThingId			: 0,
+	sTimePeriod			: 0,
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -50,10 +51,11 @@ sap.ui.controller("mjs.devices.graphs.LineGraph", {
 				
 				me.iIOId = evt.data.IO_ID;
 				me.iThingId	= evt.data.ThingId;
+				me.sTimePeriod = evt.data.TimePeriod;
 				
 				$("#LineGraphPage_Main").html("");
                 $("#LineGraphPage_Main_Info").html("");
-				me.GetLineDataAndDrawGraph( Math.floor(dateCurrentTime.getTime() / 1000) );
+				me.GetLineDataAndDrawGraph( Math.floor(dateCurrentTime.getTime() / 1000), me.sTimePeriod );
 			}
 		});
 	},
@@ -510,9 +512,24 @@ sap.ui.controller("mjs.devices.graphs.LineGraph", {
 
 	},
 	
-	GetLineDataAndDrawGraph : function (iEndUTS) {
-		var oController    = this;
-		var oView          = this.getView();
+	GetLineDataAndDrawGraph : function (iEndUTS, sPeriodType) {
+		var oController		= this;
+		var oView			= this.getView();
+		var iStartUTS		= iEndUTS;
+		
+		if (sPeriodType === IOMy.graph_jqplot.PeriodDay) {
+			iStartUTS = iEndUTS - 86400;
+		} else if (sPeriodType === IOMy.graph_jqplot.PeriodWeek) {
+			iStartUTS = iEndUTS - (86400 * 7);
+		} else if (sPeriodType === IOMy.graph_jqplot.PeriodFortnight) {
+			iStartUTS = iEndUTS - (86400 * 14);
+		} else if (sPeriodType === IOMy.graph_jqplot.PeriodMonth) {
+			iStartUTS = iEndUTS - (86400 * 31);
+		} else if (sPeriodType === IOMy.graph_jqplot.PeriodQuarter) {
+			iStartUTS = iEndUTS - (86400 * 91);
+		} else if (sPeriodType === IOMy.graph_jqplot.PeriodYear) {
+			iStartUTS = iEndUTS - (86400 * 365);
+		}
 		
 		//============================================================================================//
 		//--  2.1 - LINE GRAPH API DATA                                                             ==//
@@ -522,7 +539,7 @@ sap.ui.controller("mjs.devices.graphs.LineGraph", {
 			data:      {
 				"Mode": "GraphLine",
 				"Data": "{\"Type\":\"NormalAvg\",\"IOId\":"+oController.iIOId+"}",
-				"StartUTS": iEndUTS - 86400,
+				"StartUTS": iStartUTS,
 				"EndUTS":   iEndUTS,
 				"Points":   100
 			},
@@ -533,77 +550,39 @@ sap.ui.controller("mjs.devices.graphs.LineGraph", {
 					
 					$.each( aData.Data,function(index, aLineData) {
 						oController.Graph_Data.push( [aLineData.LastTimestamp, aLineData.Value]);
-					})
-					//oController.Graph_Data1 = aData.Data;
-					
+					});
 					
 					//----------------------------//
-					//-- GRAPH LINE DATA 2      --//
+					//-- GRAPH                  --//
 					//----------------------------//
-//					IOMy.apiphp.AjaxRequest({
-//						url:       IOMy.apiphp.APILocation("graph"),
-//						data:      {
-//							"Mode": "GraphLine",
-//							"Data": "{\"Type\":\"NormalAvg\",\"IOId\":8}",
-//							"StartUTS": 1488250800,
-//							"EndUTS":   1490929200,
-//							"Points":   100
-//						},
-//						onSuccess: function ( sType, aData ) {
-							
-//							if( sType==="JSON" && aData.Error===false ) {
-								//oController.Graph_Data2 = aData.Data;
-//								oController.Graph_Data2 = [];
-//								$.each( aData.Data,function(index, aLineData) {
-//									oController.Graph_Data2.push( [aLineData.LastTimestamp, aLineData.Value]);
-//								})
-					
-								//----------------------------//
-								//-- GRAPH                  --//
-								//----------------------------//
-								var sDeviceName		= IOMy.common.ThingList["_"+oController.iThingId].DisplayName;
-								var sIOName			= IOMy.common.ThingList["_"+oController.iThingId].IO["_"+oController.iIOId].Name;
-								var sUOM			= IOMy.common.ThingList["_"+oController.iThingId].IO["_"+oController.iIOId].UoMName;
-								
-								var oLineTest = IOMy.graph_jqplot.CreateLineGraph(
-									oController,
-									'LineGraphPage_Main',
-									[
-										{
-											"Label":    sDeviceName,
-											"Data":     oController.Graph_Data
-										}//,
-										//{
-										//	"Label":    "Fridge",
-										//	"Data":     oController.Graph_Data2
-										//}
-									],
-									{
-										"sTitle":               sDeviceName + " (" + sIOName + ")",
-										"sType":                "1YAxis",
-										"UseLegend":            true,
-										"LegendPreset":         2,
-										"AxisX_Label":          "Time",
-										"AxisX_UseDate":        true,
-										"AxisY_Label":          sUOM,
-										"TimePeriod":           "year"
-									}
-								);
-								
-								
-								
-								
-//							} else {
-								//-- Run the fail event
-								
-//							}
-//						},
-//						onFail: function () {
-							
-//						}
-//					});
-					
-					
+					var sDeviceName		= IOMy.common.ThingList["_"+oController.iThingId].DisplayName;
+					var sIOName			= IOMy.common.ThingList["_"+oController.iThingId].IO["_"+oController.iIOId].Name;
+					var sUOM			= IOMy.common.ThingList["_"+oController.iThingId].IO["_"+oController.iIOId].UoMName;
+
+					var oLineTest = IOMy.graph_jqplot.CreateLineGraph(
+						oController,
+						'LineGraphPage_Main',
+						[
+							{
+								"Label":    sDeviceName,
+								"Data":     oController.Graph_Data
+							}//,
+							//{
+							//	"Label":    "Fridge",
+							//	"Data":     oController.Graph_Data2
+							//}
+						],
+						{
+							"sTitle":               sDeviceName + " (" + sIOName + ")",
+							"sType":                "1YAxis",
+							"UseLegend":            true,
+							"LegendPreset":         2,
+							"AxisX_Label":          "Time",
+							"AxisX_UseDate":        true,
+							"AxisY_Label":          sUOM,
+							"TimePeriod":           "year"
+						}
+					);
 					
 				} else {
 					//-- Run the fail event

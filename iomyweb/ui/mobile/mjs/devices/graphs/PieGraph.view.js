@@ -72,7 +72,7 @@ sap.ui.jsview("mjs.devices.graphs.PieGraph", {
 				var dateCurrentTime = new Date();
 				$("#PieGraphPage_Main").html("");
 				$("#PieGraphPage_Main_Info").html("");
-				me.oController.GetPieDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), "Week" );
+				me.oController.GetPieDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000) );
 			}
 		);
 

@@ -124,7 +124,7 @@ sap.ui.jsfragment("mjs.fragments.TileSensorMenu", {
 											"width":	"210px",
 											"icon":		"sap-icon://line-chart",
 											"press":	function () {
-												IOMy.common.NavigationChangePage("pGraphLine", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing });
+												IOMy.common.NavigationChangePage("pGraphLine", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing, "TimePeriod" : oController.sSelectedTimePeriod });
 												sap.ui.getCore().byId(sID_Menu).fireConfirm();
 											}
 										}),

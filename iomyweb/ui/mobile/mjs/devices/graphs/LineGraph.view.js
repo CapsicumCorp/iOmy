@@ -71,7 +71,7 @@ sap.ui.jsview("mjs.devices.graphs.LineGraph", {
                 var dateCurrentTime = new Date();
 				$("#LineGraphPage_Main").html("");
                 $("#LineGraphPage_Main_Info").html("");
-                oController.GetLineDataAndDrawGraph( Math.floor(dateCurrentTime.getTime() / 1000) );
+                oController.GetLineDataAndDrawGraph( Math.floor(dateCurrentTime.getTime() / 1000), oController.sTimePeriod );
             }
         );
 

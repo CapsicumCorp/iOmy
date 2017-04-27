@@ -50,10 +50,11 @@ sap.ui.controller("mjs.devices.graphs.BarGraph", {
                 me.iIOId	= evt.data.IO_ID;
 				me.iThingId	= evt.data.ThingId;
                 
+				var dateCurrentTime = new Date();
 				$("#GraphPage_Main").html("");
 				$("#GraphPage_Main_Info").html("");
 				
-                me.GetBarDataAndDrawGraph( me.iIOId, 1491055200, "Week" );
+                me.GetBarDataAndDrawGraph( me.iIOId, (dateCurrentTime.getTime() / 1000), "Week" );
 			}
 		});
 	},

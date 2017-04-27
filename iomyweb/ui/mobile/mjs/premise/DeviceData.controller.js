@@ -35,6 +35,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 	dUIThingLastUpdate:				null,			//-- DATE:			Stores the last time the page had the individual Thing updated.			--//
 	iCurrentThingState:				0,				//-- INTEGER:		--//
 	iSelectedIOId:					0,
+	sSelectedTimePeriod:			IOMy.graph_jqplot.PeriodDay,
 	
 	/**
 	* Called when a controller is instantiated and its View controls (if available) are already created.
@@ -867,6 +868,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 						"editable":		true,
 						"select": function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "CurV" );
+							oController.sSelectedTimePeriod = IOMy.graph_jqplot.PeriodDay;
 						}
 					});
 					oTempElement.addButton(oTempRadioButton);
@@ -883,6 +885,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Day" );
+							oController.sSelectedTimePeriod = IOMy.graph_jqplot.PeriodDay;
 						}
 					});
 					oTempElement.addButton(oTempRadioButton);
@@ -894,6 +897,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Week" );
+							oController.sSelectedTimePeriod = IOMy.graph_jqplot.PeriodWeek;
 						}
 					});
 					oTempElement.addButton(oTempRadioButton);
@@ -905,6 +909,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Fortnight" );
+							oController.sSelectedTimePeriod = IOMy.graph_jqplot.PeriodFortnight;
 						}
 					});
 					oTempElement.addButton(oTempRadioButton);
@@ -916,6 +921,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Month" );
+							oController.sSelectedTimePeriod = IOMy.graph_jqplot.PeriodMonth;
 						}
 					});
 					oTempElement.addButton(oTempRadioButton);
@@ -927,6 +933,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Quarter" );
+							oController.sSelectedTimePeriod = IOMy.graph_jqplot.PeriodQuarter;
 						}
 					});
 					oTempElement.addButton(oTempRadioButton);
@@ -938,6 +945,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 						"editable":		true,
 						"select":		function( oControlEvent ) {
 							oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Year" );
+							oController.sSelectedTimePeriod = IOMy.graph_jqplot.PeriodYear;
 						}
 					});
 					oTempElement.addButton(oTempRadioButton);
