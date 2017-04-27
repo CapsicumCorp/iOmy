@@ -42,33 +42,6 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 							text:		"User Accounts",
 							expanded:	true,
 							items:	[
-								//--------------------------------//
-								//-- EDIT USER PAGES			--//
-								//--------------------------------//
-								new sap.tnt.NavigationListItem({
-									text: "Edit Information",
-									select:	function (oControlEvent) {
-										IOMy.common.NavigationChangePage( "pSettingsUserInfo", {}, true );
-									}
-								}),
-								new sap.tnt.NavigationListItem({
-									text: "Edit Address",
-									select:	function (oControlEvent) {
-										IOMy.common.NavigationChangePage( "pSettingsUserAddress", {}, true );
-									}
-								}),
-								new sap.tnt.NavigationListItem({
-									text: "Change Password",
-									select:	function (oControlEvent) {
-										IOMy.common.NavigationChangePage( "pSettingsUserPassword", {}, true );
-									}
-								}),
-								new sap.tnt.NavigationListItem({
-									text: "New User",
-									select:	function (oControlEvent) {
-										IOMy.common.NavigationChangePage( "pSettingsAddUser", {}, true );
-									}
-								})
 							],
 //							select:		function (oControlEvent) {
 //								//---------------------------------------------------//
@@ -113,7 +86,7 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 						new sap.tnt.NavigationListItem({
 							icon:		"sap-icon://GoogleMaterial/settings",
 							text:		"Settings",
-							expanded:	true,
+							expanded:	false,
 							items:	[
 								new sap.tnt.NavigationListItem({
 									text: "Premise & Hub",
@@ -125,6 +98,57 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 									text: "Links and Items",
 									select:	function (oControlEvent) {
 										IOMy.common.NavigationChangePage( "pSettingsDeviceList", {}, true );
+									}
+								}),
+								//--------------------------------//
+								//-- EDIT USER PAGES			--//
+								//--------------------------------//
+								new sap.tnt.NavigationListItem({
+									text: "Edit User Information",
+									select:	function (oControlEvent) {
+										IOMy.common.NavigationChangePage( "pSettingsUserInfo", {}, true );
+									}
+								}),
+								new sap.tnt.NavigationListItem({
+									text: "Edit User Address",
+									select:	function (oControlEvent) {
+										IOMy.common.NavigationChangePage( "pSettingsUserAddress", {}, true );
+									}
+								}),
+								new sap.tnt.NavigationListItem({
+									text: "Change Password",
+									select:	function (oControlEvent) {
+										IOMy.common.NavigationChangePage( "pSettingsUserPassword", {}, true );
+									}
+								}),
+								new sap.tnt.NavigationListItem({
+									text: "New User",
+									select:	function (oControlEvent) {
+										IOMy.common.NavigationChangePage( "pSettingsAddUser", {}, true );
+									}
+								}),
+								//--------------------------------//
+								//-- PERMISSIONS    			--//
+								//--------------------------------//
+								new sap.tnt.NavigationListItem({
+									text: "Room Permissions",
+									select:	function (oControlEvent) {
+										IOMy.common.NavigationChangePage( "pSettingsRoomPermissions", {}, true );
+									}
+								}),
+								new sap.tnt.NavigationListItem({
+									text: "Premise Permissions",
+									select:	function (oControlEvent) {
+										IOMy.common.NavigationChangePage( "pSettingsPremisePermissions", {}, true );
+									}
+								}),
+								//--------------------------------//
+								//-- RULE DEVICE LIST           --//
+								//--------------------------------//
+								new sap.tnt.NavigationListItem({
+									text: "Rules",
+									select:	function (oControlEvent) {
+										IOMy.common.NavigationChangePage( "pRuleDeviceList", {}, true );
 									}
 								})
 							],
@@ -143,39 +167,25 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 //                                }
 //							}
 						}),
-                        //--------------------------------//
-						//-- PERMISSIONS    			--//
-						//--------------------------------//
-						new sap.tnt.NavigationListItem({
-							icon:		"sap-icon://GoogleMaterial/settings",
-							text:		"Permissions",
-							expanded:	true,
-							items:	[
-								new sap.tnt.NavigationListItem({
-									text: "Rooms",
-									select:	function (oControlEvent) {
-										IOMy.common.NavigationChangePage( "pSettingsRoomPermissions", {}, true );
-									}
-								}),
-								new sap.tnt.NavigationListItem({
-									text: "Premises",
-									select:	function (oControlEvent) {
-										IOMy.common.NavigationChangePage( "pSettingsPremisePermissions", {}, true );
-									}
-								})
-							]
-						}),
-						
-						//--------------------------------//
-						//-- RULE DEVICE LIST           --//
-						//--------------------------------//
-						new sap.tnt.NavigationListItem({
-							icon:	"sap-icon://GoogleMaterial/home",
-							text:	"Rules",
-							select:	function (oControlEvent) {
-								IOMy.common.NavigationChangePage( "pRuleDeviceList", {}, true );
-							}
-						}),
+//						new sap.tnt.NavigationListItem({
+//							icon:		"sap-icon://GoogleMaterial/settings",
+//							text:		"Permissions",
+//							expanded:	true,
+//							items:	[
+//								
+//							]
+//						}),
+//						
+//						//--------------------------------//
+//						//-- RULE DEVICE LIST           --//
+//						//--------------------------------//
+//						new sap.tnt.NavigationListItem({
+//							icon:	"sap-icon://GoogleMaterial/home",
+//							text:	"Rules",
+//							select:	function (oControlEvent) {
+//								IOMy.common.NavigationChangePage( "pRuleDeviceList", {}, true );
+//							}
+//						}),
                         
                         //--------------------------------//
 						//-- SIGN OUT   				--//
