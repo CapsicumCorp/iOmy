@@ -351,13 +351,15 @@ public class InstallWizard {
                 this.loadPremiseHubOwnerProgress(activity);
             }
         }
-        if (title.equals(Titles.finalSetupTitle) && Settings.getRunFirstRunWizard(activity)) {
-            // Finished install wizard
-            if (!this.installDemoData) {
-                writeWatchInputsFile();
-            }
-            // Disable first run wizard
-            Settings.setRunFirstRunWizard(activity, false);
+        if (Settings.getRunFirstRunWizard(activity)) {
+          if (title.equals(Titles.finalSetupTitle) || (this.installDemoData && title.equals(Titles.webserverServerSetupTitle))) {
+              // Finished install wizard
+              if (!this.installDemoData) {
+                  writeWatchInputsFile();
+              }
+              // Disable first run wizard
+              Settings.setRunFirstRunWizard(activity, false);
+          }
         }
         if (!Settings.getRunFirstRunWizard(activity)) {
             // Start IOMy after first run wizard is complete

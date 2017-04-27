@@ -43,9 +43,13 @@ THE SOFTWARE.
 
 package com.capsicumcorp.iomy.apps.iomy;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.graphics.BitmapFactory;
 import android.os.Environment;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -145,6 +149,45 @@ public class RunServerServices extends Thread {
 
         return exitval;
     }
+    private int execWithWaitAndLog(String[] cmd) throws Exception {
+        Process p;
+        ProcessBuilder builder = new ProcessBuilder();;
+        Runtime runtime = Runtime.getRuntime();
+        int exitval;
+
+        builder.redirectErrorStream(true);
+        builder.command(cmd);
+        builder.directory(new File(this.INTERNAL_LOCATION));
+        //p=runtime.exec(cmd);
+        p=builder.start();
+        InputStream is = p.getInputStream();
+        BufferedReader reader=new BufferedReader(new InputStreamReader(is));
+        boolean waiting=true;
+        while (waiting) {
+            try {
+                String line = reader.readLine();
+                while (line != null) {
+                    Log.println(Log.INFO, "WebServer", "DEBUG: execWithWaitAndLog(): "+line);
+                    line = reader.readLine();
+                }
+                reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                p.waitFor();
+                waiting = false;
+            } catch (InterruptedException e) {
+                //Ignore interrupts while waiting for program to finish executing
+            }
+        }
+        exitval=p.exitValue();
+
+        //When finished with runtime.exec some Android devices don't close the connection to stdin, stdout, and stderr if not explicitly destroyed
+        p.destroy();
+
+        return exitval;
+    }
 
     //Threads can only be started once for a single instance so stay in a loop mostly sleeping
     //  so can be activated with an interrupt
@@ -188,13 +231,49 @@ public class RunServerServices extends Thread {
                     changeServiceSettingsLighttpdCheckbox(false);
                 }
             }
-            if (!getBoolIsMySQLRunning()) {
+            if (!getBoolIsMySQLRunningWithSock()) {
                 if (Application.getInstance().getMySQLEnabled() && getMySQLOverrideState()) {
                     startmysql();
-                    checkmysql();
-                    if (!Application.getInstance().getInstallDemoData()) {
-                        //The demo database doesn't need bootstrapping
-                        bootstrap_mysql();
+                    // MySQL often takes while to start so provide extra startup info to the user here
+                    int mysqlstartwait=20;
+                    while (!getBoolIsMySQLRunningWithSock() && mysqlstartwait>0) {
+                        Log.println(Log.INFO, "WebServer", "Waiting "+mysqlstartwait+" more seconds for MySQL to finish starting");
+                        setProgressNotificationText("Waiting "+mysqlstartwait+" more seconds for MySQL to finish starting");
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            Log.println(Log.INFO, "WebServer", "run(): Server thread has been interrupted");
+                        }
+                        --mysqlstartwait;
+                    }
+                    if (!getBoolIsMySQLRunningWithSock()) {
+                        Log.println(Log.INFO, "WebServer", "run(): Failed to start MySQL Server");
+                        setProgressNotificationText("Failed to start MySQL Server");
+                        mysqlStartFailureNotice();
+                        // Wait a while to give the user time to see the error
+                        try {
+                            Thread.sleep(5000);
+                        } catch (InterruptedException e) {
+                            Log.println(Log.INFO, "WebServer", "run(): Server thread has been interrupted");
+                        }
+                        final ProgressPage progressPage=getProgressPage();
+                        setProgressPage(null);
+                        if (progressPage!=null) {
+                            Log.println(Log.INFO, "WebServer", "run(): Removing progress page");
+                            progressPage.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    progressPage.finish();
+                                }
+                            });
+                        }
+                    } else {
+                        if (!Application.getInstance().getInstallDemoData()) {
+                            //mysqlcheck can't run with demodata without the root password
+                            checkmysql();
+                            //The demo database doesn't need bootstrapping
+                            bootstrap_mysql();
+                        }
                     }
                     changeServiceSettingsMySQLCheckbox(true);
                 }
@@ -204,27 +283,31 @@ public class RunServerServices extends Thread {
                     changeServiceSettingsMySQLCheckbox(false);
                 }
             }
-            if (!getIsWatchInputsRunning() && !Settings.getRunFirstRunWizard(Application.getInstance())) {
-                // Only start if the first run wizard isn't running as the config file might not be written yet and
-                //   Watch Inputs may bring up permission prompts for new usb devices that are connected
-                if (Application.getInstance().getWatchInputsEnabled() && getWatchInputsOverrideState()) {
-                    startWatchInputs();
-                    changeServiceSettingsWatchInputsCheckbox(true);
-                }
-            } else {
-                if (!Application.getInstance().getWatchInputsEnabled() || !getWatchInputsOverrideState()) {
-                    stopWatchInputs();
-                    changeServiceSettingsWatchInputsCheckbox(false);
+            if (!Application.getInstance().getInstallDemoData()) {
+                //Only load Watch Inouts if demodata isn't active
+                if (!getIsWatchInputsRunning() && !Settings.getRunFirstRunWizard(Application.getInstance())) {
+                    // Only start if the first run wizard isn't running as the config file might not be written yet and
+                    //   Watch Inputs may bring up permission prompts for new usb devices that are connected
+                    if (Application.getInstance().getWatchInputsEnabled() && getWatchInputsOverrideState()) {
+                        startWatchInputs();
+                        changeServiceSettingsWatchInputsCheckbox(true);
+                    }
+                } else {
+                    if (!Application.getInstance().getWatchInputsEnabled() || !getWatchInputsOverrideState()) {
+                        stopWatchInputs();
+                        changeServiceSettingsWatchInputsCheckbox(false);
+                    }
                 }
             }
             final ProgressPage progressPage=getProgressPage();
+            setProgressPage(null);
             if (progressPage!=null) {
+                Constants.installWizard.setServicesLoaded(true);
                 Log.println(Log.INFO, "WebServer", "run(): Completing progress page");
                 progressPage.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         progressPage.onComplete();
-                        setProgressPage(null);
                     }
                 });
             }
@@ -242,6 +325,14 @@ public class RunServerServices extends Thread {
         Log.println(Log.INFO, "WebServer", "run(): Stopping services");
         stopWatchInputs();
         stopServices();
+    }
+    private synchronized void mysqlStartFailureNotice() {
+        NotificationCompat.Builder b = new NotificationCompat.Builder(Application.getInstance().getApplicationContext())
+                .setSmallIcon(android.R.drawable.stat_notify_error)
+                .setContentTitle("iOmy")
+                .setContentText("Failed to start MySQL Server");
+        NotificationManager notificationManager = (NotificationManager) Application.getInstance().getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(2, b.build());
     }
     public synchronized ProgressPage getProgressPage() {
         return this.progressPage;
@@ -451,7 +542,8 @@ public class RunServerServices extends Thread {
         Log.println(Log.INFO, "WebServer", "Checking MySQL database");
         setProgressNotificationText("Checking MySQL database");
         try {
-            execWithWait(SystemDirectory + "/bin/sh " + INTERNAL_LOCATION + "/scripts/manage_services.sh " + SystemDirectory + " " + INTERNAL_LOCATION + " mysql_check "+dbPassword);
+            String cmd[]={ SystemDirectory + "/bin/sh", INTERNAL_LOCATION + "/scripts/manage_services.sh", SystemDirectory, INTERNAL_LOCATION, "mysql_check", dbPassword };
+            execWithWaitAndLog(cmd);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -550,6 +642,18 @@ public class RunServerServices extends Thread {
         }
         return 0;
     }
+    public synchronized int getIsMySQLRunningWithSock() {
+        try {
+            int exitval=execWithWait(SystemDirectory + "/bin/sh " + INTERNAL_LOCATION + "/scripts/manage_services.sh " + SystemDirectory + " " + INTERNAL_LOCATION + " is_running_mysql_with_sock");
+            if (exitval==0) {
+                return 1;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+        return 0;
+    }
     public synchronized boolean getIsWatchInputsRunning() {
         return this.watchInputsStarted;
     }
@@ -568,6 +672,12 @@ public class RunServerServices extends Thread {
     }
     public synchronized boolean getBoolIsMySQLRunning() {
         if (getIsMySQLRunning()==1) {
+            return true;
+        }
+        return false;
+    }
+    public synchronized boolean getBoolIsMySQLRunningWithSock() {
+        if (getIsMySQLRunningWithSock()==1) {
             return true;
         }
         return false;

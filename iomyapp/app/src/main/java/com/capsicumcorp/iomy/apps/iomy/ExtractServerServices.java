@@ -93,10 +93,9 @@ public class ExtractServerServices extends Thread {
     //  update if one is already running
     private AtomicBoolean updatingCustomPercentage=new AtomicBoolean();
 
-    private Hashtable<String, Boolean> skipfiles = new Hashtable<String, Boolean>();
-    private Hashtable<String, Boolean> skipfolders = new Hashtable<String, Boolean>();
-    private Hashtable<String, Boolean> skipfoldersifexist = new Hashtable<String, Boolean>();
-    private Hashtable<String, Boolean> changedfiles = new Hashtable<String, Boolean>();
+    private boolean isUpgrade=false; //If true, the extract is during an upgrade
+    private Hashtable<String, Boolean> newfolders = new Hashtable<String, Boolean>();
+    private Hashtable<String, Boolean> newfiles = new Hashtable<String, Boolean>();
 
     ExtractServerServices(Context context, String SystemDirectory, String InternalStorageFolderName, String ExternalStorageFolderName) {
         this.context = context;
@@ -207,6 +206,7 @@ public class ExtractServerServices extends Thread {
                 return;
             }
             //Log.println(Log.INFO, "WebServer", "system directory=" + SystemDirectory + " , internal storage=" + context.getFilesDir().getPath());
+            isUpgrade=false;
             if (!areWebServerAssetsExtracted()) {
                 int upgraderesult = doUpgrade();
                 if (upgraderesult < 0) {
@@ -270,7 +270,7 @@ public class ExtractServerServices extends Thread {
     //Returns true if Web Server assets are extracted or false otherwise
     public synchronized boolean  areWebServerAssetsExtracted() {
         AssetManager assetManager = context.getAssets();
-        String appassetsversion, dataversion;
+        long appassetsversion, dataversion;
 
         try {
             assetsversionfile = assetManager.open(ASSETSVERSIONFILENAME);
@@ -280,7 +280,7 @@ public class ExtractServerServices extends Thread {
             try {
                 InputStream dataversionfile = new FileInputStream(new File(INTERNAL_LOCATION + "/" + ASSETSVERSIONFILENAME));
                 dataversion = getFileVersion(dataversionfile);
-                if (appassetsversion.equals(dataversion)) {
+                if (appassetsversion==dataversion) {
                     Log.println(Log.INFO, "WebServer", "Latest assets have already been extracted");
                     return true;
                 }
@@ -337,52 +337,28 @@ public class ExtractServerServices extends Thread {
             while ((zipEntry = zipInputStream.getNextEntry()) != null) {
                 String zipEntryName=zipEntry.getName();
                 long zipFileSize=zipEntry.getSize();
-                boolean skipfile=false;
 
-                //skipfiles and skipfolders are populated by the doUpgrade script
-                Boolean reallySkipFile=skipfiles.get(zipEntryName);
-                if (reallySkipFile!=null) {
-                    //Log.println(Log.INFO, "WebServer", "Skipping file: " + zipEntryName);
-                    doNotification("Skipping file: " + zipEntryName);
-                    //Log.println(Log.INFO, "WebServer", "SUPER DEBUG: Skipping file: " + zipEntry.getName() + " in assets.zip as it already exists");
-                    zipInputStream.closeEntry();
-                    curFileSize+=zipFileSize;
-                    changeProgressPagePercentageTextCustomCount(curFileSize);
-                    continue;
-                }
-                for (String key : skipfolders.keySet()) {
-                    if (zipEntryName.startsWith(key)) {
-                        skipfile=true;
-                        //Log.println(Log.INFO, "WebServer", "Skipping folder: " + zipEntryName);
-                        doNotification("Skipping folder: " + zipEntryName);
-                        zipInputStream.closeEntry();
-                        curFileSize+=zipFileSize;
-                        changeProgressPagePercentageTextCustomCount(curFileSize);
-                        break;
-                    }
-                }
-                if (skipfile) {
-                    continue;
-                }
-                Boolean isChanged=changedfiles.get(zipEntryName);
-                if (isChanged==null) {
-                    for (String key : skipfoldersifexist.keySet()) {
-                        if (zipEntryName.startsWith(key)) {
-                            File skipFile = new File(getFolderWithRootForPath(zipEntryName));
-                            if (skipFile.exists()) {
-                                skipfile=true;
-                                //Log.println(Log.INFO, "WebServer", "Skipping file: " + zipEntryName);
-                                doNotification("Skipping file: " + zipEntryName);
-                                zipInputStream.closeEntry();
-                                curFileSize+=zipFileSize;
-                                changeProgressPagePercentageTextCustomCount(curFileSize);
-                                break;
-                            }
+                //newfiles and newfolders are populated by the doUpgrade script
+                if (isUpgrade) {
+                    if (zipEntry.isDirectory()) {
+                        if (!newfolders.containsKey(zipEntryName)) {
+                            //Log.println(Log.INFO, "WebServer", "Skipping folder: " + zipEntryName);
+                            doNotification("Skipping folder: " + zipEntryName);
+                            zipInputStream.closeEntry();
+                            curFileSize+=zipFileSize;
+                            changeProgressPagePercentageTextCustomCount(curFileSize);
+                            continue;
+                        }
+                    } else {
+                        if (!newfiles.containsKey(zipEntryName)) {
+                            //Log.println(Log.INFO, "WebServer", "Skipping file: " + zipEntryName);
+                            doNotification("Skipping file: " + zipEntryName);
+                            zipInputStream.closeEntry();
+                            curFileSize += zipFileSize;
+                            changeProgressPagePercentageTextCustomCount(curFileSize);
+                            continue;
                         }
                     }
-                }
-                if (skipfile) {
-                    continue;
                 }
                 //Select demo data if demo mode is enabled otherwise select normal data
                 if (Application.getInstance().getInstallDemoData()) {
@@ -461,17 +437,26 @@ public class ExtractServerServices extends Thread {
     //Run an upgrade script if it is available and needed
     //Returns 0 if okay to do extract or negative value if extract should abort
 
-    // An upgrade script to migrate the web server files from version 1 to version 2
-    // skipfolderifexist skips files in that folder unless they don't exist
-    // skipfile will always re-extract if the file doesn't exist
+    // An upgrade script to migrate the web server files from to the current version
+    // deletefile will delete a file
     // deletefolder will recursively delete everything in the folder
-    // changedfile entries will override skipfolder entries
-    // If a skipfile or changedfile is a folder, then add a / at the end so extract can match it
-    // You should include a changedfile entry for new folders so they will be created
+    // newfile The file is new and should be extracted
+    // newfolder The folder is new and should be extracted
+    // mkdir Create a new folder straight away (useful for movefile)
+    // movefile The file will be moved from one filename path to a new filename path
+
+    // folder names should have / at the end so extract can match it
+    // You should include a newfolder entry for new folders so they will be created
     // Only put one space between parameters otherwise split won't work properly
+
+    // An upgrade script will run for each incremental version upgrade until the current version
+    //   is reached.
+    // All delete and move operations will run as processed in order
+    // newfolder and newfile instructions will be checked when the extract runs
+    // When in upgrade mode, any folder/file that doesn't match newfolder/newfile won't be extracted
     private int doUpgrade() {
         AssetManager assetManager = context.getAssets();
-        String appassetsversion, dataversion;
+        long appassetsversion, dataversion, upgradingversion;
 
         try {
             assetsversionfile = assetManager.open(ASSETSVERSIONFILENAME);
@@ -483,157 +468,143 @@ public class ExtractServerServices extends Thread {
                 dataversion = getFileVersion(dataversionfile);
             } catch (FileNotFoundException e) {
                 //Ignore this error for now
-                Log.println(Log.INFO, getApplication().getAppName(), "WebServer.doUpgradeFailed to access file: " + getInternalStorageFolder() + "/" + ASSETSVERSIONFILENAME);
+                Log.println(Log.INFO, getApplication().getAppName(), "ExtractServerServices.doUpgradeFailed to access file: " + getInternalStorageFolder() + "/" + ASSETSVERSIONFILENAME);
 
-                //Upgrade not needed as the files have never been fully access
+                //Upgrade not needed as the files haven't been fully extracted
                 return 0;
             }
         } catch (IOException e) {
             //Abort as we can't open the version filename asset from the app package
-            Log.println(Log.INFO, getApplication().getAppName(), "WebServer.doUpgrade(): Failed to access version filename from asset: " + ASSETSVERSIONFILENAME);
+            Log.println(Log.INFO, getApplication().getAppName(), "ExtractServerServices.doUpgrade(): Failed to access version filename from asset: " + ASSETSVERSIONFILENAME);
             return -1;
         }
-        String upgradescriptname = "webserver_upgradescripts/webserver_upgrade_" + dataversion + "_to_" + appassetsversion + ".upgrade";
+        isUpgrade=true;
+        newfolders.clear();
+        newfiles.clear();
+        for (upgradingversion=dataversion; upgradingversion<appassetsversion; upgradingversion++) {
+            String upgradescriptname = "webserver_upgradescripts/webserver_upgrade_" + upgradingversion + "_to_" + (upgradingversion+1) + ".upgrade";
 
-        //Log.println(Log.INFO, getApplication().getAppName(), "DEBUG: WebServer.doUpgrade(): Check upgrade script: " + upgradescriptname);
+            Log.println(Log.INFO, getApplication().getAppName(), "ExtractServerServices.doUpgrade(): Processing upgrade script: " + upgradescriptname);
 
-        InputStream upgradeScriptStream;
-        try {
-            upgradeScriptStream = assetManager.open(upgradescriptname);
-        } catch (IOException e) {
-            Log.println(Log.INFO, getApplication().getAppName(), "WebServer.doUpgrade(): Failed to access version upgrade script: " + upgradescriptname);
-            return -3;
-        }
-        //Open the upgrade script and process its instructions
-        //First count the number of operations for progress report
-        int numoperations=0;
-        try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(upgradeScriptStream, "UTF-8"));
-            String line;
-            upgradeScriptStream.mark(32768);
-            while ((line = in.readLine()) != null) {
-                if (line.length() == 0) {
-                    //Empty line
-                    continue;
-                }
-                if (line.charAt(0) == '#' || line.charAt(0) == ';') {
-                    //Comment
-                    continue;
-                }
-                String parts[] = line.split(" ");
-                if (parts.length == 0) {
-                    //No parts found
-                    continue;
-                }
-                ++numoperations;
+            InputStream upgradeScriptStream;
+            try {
+                upgradeScriptStream = assetManager.open(upgradescriptname);
+            } catch (IOException e) {
+                Log.println(Log.INFO, getApplication().getAppName(), "ExtractServerServices.doUpgrade(): Failed to access version upgrade script: " + upgradescriptname);
+                return -3;
             }
-            Log.println(Log.INFO, getApplication().getAppName(), "WebServer.doUpgrade(): Num Operations="+numoperations);
-            upgradeScriptStream.reset();
-        } catch (Exception e) {
-            Log.println(Log.INFO, getApplication().getAppName(), "WebServer.doUpgrade(): Error while processing upgrade script: " + upgradescriptname);
-            e.printStackTrace();
-            return -4;
-        }
-        if (progressPage!=null) {
-            progressPage.setTotalRequests(numoperations);
-        }
-        try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(upgradeScriptStream, "UTF-8"));
-            String line;
-            skipfiles.clear();
-            skipfolders.clear();
-            skipfoldersifexist.clear();
-            changedfiles.clear();
-            while ((line = in.readLine()) != null) {
-                if (line.length() == 0) {
-                    //Empty line
-                    continue;
+            //Open the upgrade script and process its instructions
+            //First count the number of operations for progress report
+            int numoperations = 0;
+            try {
+                BufferedReader in = new BufferedReader(new InputStreamReader(upgradeScriptStream, "UTF-8"));
+                String line;
+                upgradeScriptStream.mark(32768);
+                while ((line = in.readLine()) != null) {
+                    if (line.length() == 0) {
+                        //Empty line
+                        continue;
+                    }
+                    if (line.charAt(0) == '#' || line.charAt(0) == ';') {
+                        //Comment
+                        continue;
+                    }
+                    String parts[] = line.split(" ");
+                    if (parts.length == 0) {
+                        //No parts found
+                        continue;
+                    }
+                    if (!parts[0].equals("newfile") && !parts[0].equals("newfolder")) {
+                        //Only add operations to progress bar that aren't queued for extracting
+                        ++numoperations;
+                    }
                 }
-                if (line.charAt(0) == '#' || line.charAt(0) == ';') {
-                    //Comment
-                    continue;
-                }
-                String parts[] = line.split(" ");
-                if (parts.length == 0) {
-                    //No parts found
-                    continue;
-                }
-                String cmd = parts[0];
-                if (cmd.equals("mkdir")) {
-                    String folder = parts[1];
-                    String rootfolder=getFolderWithRootForPath(folder);
-                    File rootFolderFile=new File(rootfolder);
-                    if (!rootFolderFile.exists()) {
-                        //Log.println(Log.INFO, getApplication().getAppName(), "WebServer.doUpgrade(): Making folder: " + folder);
+                Log.println(Log.INFO, getApplication().getAppName(), "ExtractServerServices.doUpgrade(): Num Operations=" + numoperations);
+                upgradeScriptStream.reset();
+            } catch (Exception e) {
+                Log.println(Log.INFO, getApplication().getAppName(), "ExtractServerServices.doUpgrade(): Error while processing upgrade script: " + upgradescriptname);
+                e.printStackTrace();
+                return -4;
+            }
+            if (progressPage != null) {
+                progressPage.setTotalRequests(numoperations);
+            }
+            try {
+                BufferedReader in = new BufferedReader(new InputStreamReader(upgradeScriptStream, "UTF-8"));
+                String line;
+                while ((line = in.readLine()) != null) {
+                    if (line.length() == 0) {
+                        //Empty line
+                        continue;
+                    }
+                    if (line.charAt(0) == '#' || line.charAt(0) == ';') {
+                        //Comment
+                        continue;
+                    }
+                    String parts[] = line.split(" ");
+                    if (parts.length == 0) {
+                        //No parts found
+                        continue;
+                    }
+                    String cmd = parts[0];
+                    // For now we update the log and notify even if the operation doesn't need to be done
+                    // so the percentage count updates correctly
+                    if (cmd.equals("mkdir")) {
+                        String folder = parts[1];
+                        String rootfolder = getFolderWithRootForPath(folder);
+                        File rootFolderFile = new File(rootfolder);
+                        Log.println(Log.INFO, getApplication().getAppName(), "ExtractServerServices.doUpgrade(): Making folder: " + folder);
                         doNotification("Upgrading web server files: Making folder: " + folder);
-                        createDirectoryNew(rootfolder);
-                    }
-                } else if (cmd.equals("movefile")) {
-                    String srcfilename = parts[1];
-                    String destfilename = parts[2];
-                    File srcFile=new File(getFolderWithRootForPath(srcfilename));
-                    File destFile=new File(getFolderWithRootForPath(destfilename));
-                    if (srcFile.exists()) {
-                        //Only move if the source file exists
-                        //Log.println(Log.INFO, getApplication().getAppName(), "WebServer.doUpgrade(): Moving file from " + srcfilename + " to " + destfilename);
-                        doNotification("Upgrading web server files: Moving file from " + srcfilename + " to " + destfilename);
-                        if (destFile.exists()) {
-                            throw new java.io.IOException(destFile + " exists");
+                        if (!rootFolderFile.exists()) {
+                            createDirectoryNew(rootfolder);
                         }
-                        srcFile.renameTo(destFile);
-                    }
-                } else if (cmd.equals("deletefile")) {
-                    String thefile = parts[1];
-                    File deleteFile=new File(getFolderWithRootForPath(thefile));
-                    if (deleteFile.exists()) {
-                        //Log.println(Log.INFO, getApplication().getAppName(), "WebServer.doUpgrade(): Deleting file: " + thefile);
+                    } else if (cmd.equals("movefile")) {
+                        String srcfilename = parts[1];
+                        String destfilename = parts[2];
+                        File srcFile = new File(getFolderWithRootForPath(srcfilename));
+                        File destFile = new File(getFolderWithRootForPath(destfilename));
+                        Log.println(Log.INFO, getApplication().getAppName(), "ExtractServerServices.doUpgrade(): Moving file from " + srcfilename + " to " + destfilename);
+                        doNotification("Upgrading web server files: Moving file from " + srcfilename + " to " + destfilename);
+                        if (srcFile.exists()) {
+                            //Only move if the source file exists
+                            if (destFile.exists()) {
+                                //Fail if the destination already exists
+                                throw new java.io.IOException(destFile + " exists");
+                            }
+                            srcFile.renameTo(destFile);
+                        }
+                    } else if (cmd.equals("deletefile")) {
+                        String thefile = parts[1];
+                        File deleteFile = new File(getFolderWithRootForPath(thefile));
+                        Log.println(Log.INFO, getApplication().getAppName(), "ExtractServerServices.doUpgrade(): Deleting file: " + thefile);
                         doNotification("Upgrading web server files: Deleting file: " + thefile);
-                        deleteFile.delete();
-                    }
-                } else if (cmd.equals("deletefolder")) {
-                    String thefolder = parts[1];
-                    File deleteFolderFile=new File(getFolderWithRootForPath(thefolder));
-                    if (deleteFolderFile.exists()) {
-                        //Log.println(Log.INFO, getApplication().getAppName(), "WebServer.doUpgrade(): Deleting folder: " + thefolder);
+                        if (deleteFile.exists()) {
+                            deleteFile.delete();
+                        }
+                    } else if (cmd.equals("deletefolder")) {
+                        String thefolder = parts[1];
+                        File deleteFolderFile = new File(getFolderWithRootForPath(thefolder));
+                        Log.println(Log.INFO, getApplication().getAppName(), "ExtractServerServices.doUpgrade(): Deleting folder: " + thefolder);
                         doNotification("Upgrading web server files: Deleting folder: " + thefolder);
-                        recursiveDeleteDir(deleteFolderFile);
+                        if (deleteFolderFile.exists()) {
+                            recursiveDeleteDir(deleteFolderFile);
+                        }
+                    } else if (cmd.equals("newfile")) {
+                        String newfilename = parts[1];
+                        Log.println(Log.INFO, getApplication().getAppName(), "ExtractServerServices.doUpgrade(): Adding new file to queue: " + newfilename);
+                        newfiles.put(newfilename, true);
+                    } else if (cmd.equals("newfolder")) {
+                        String newfoldername = parts[1];
+                        Log.println(Log.INFO, getApplication().getAppName(), "ExtractServerServices.doUpgrade(): Adding new folder to queue: " + newfoldername);
+                        newfolders.put(newfoldername, true);
                     }
-                } else if (cmd.equals("skipfile" )) {
-                    String skipfilename = parts[1];
-                    File skipFile=new File(getFolderWithRootForPath(skipfilename));
-                    if (skipFile.exists()) {
-                        //Log.println(Log.INFO, getApplication().getAppName(), "WebServer.doUpgrade(): Skipping file: " + skipfilename);
-                        doNotification("Upgrading web server files: Skipping file: " + skipfilename);
-                        skipfiles.put(skipfilename, true);
-                    }
-                } else if (cmd.equals("skipfolder" )) {
-                    String skipfoldername = parts[1];
-                    File skipFolderFile=new File(getFolderWithRootForPath(skipfoldername));
-                    if (skipFolderFile.exists()) {
-                        //Log.println(Log.INFO, getApplication().getAppName(), "WebServer.doUpgrade(): Skipping folder: " + skipfoldername);
-                        doNotification("Upgrading web server files: Skipping folder: " + skipfoldername);
-                        skipfolders.put(skipfoldername, true);
-                    }
-                } else if (cmd.equals("skipfolderifexist" )) {
-                    String skipfoldername = parts[1];
-                    File skipFolderFile=new File(getFolderWithRootForPath(skipfoldername));
-                    if (skipFolderFile.exists()) {
-                        //Log.println(Log.INFO, getApplication().getAppName(), "WebServer.doUpgrade(): Skipping files if they exist in folder: " + skipfoldername);
-                        doNotification("Upgrading web server files: Skipping files if they exist in folder: " + skipfoldername);
-                        skipfoldersifexist.put(skipfoldername, true);
-                    }
-                } else if (cmd.equals("changedfile" )) {
-                    String changedfile = parts[1];
-                    //Log.println(Log.INFO, getApplication().getAppName(), "WebServer.doUpgrade(): Not skipping file: " + changedfile);
-                    doNotification("Upgrading web server files: Not skipping file: " + changedfile);
-                    changedfiles.put(changedfile, true);
+                    changeProgressPagePercentageText();
                 }
-                changeProgressPagePercentageText();
+            } catch (Exception e) {
+                Log.println(Log.INFO, getApplication().getAppName(), "WebServer.doUpgrade(): Error while processing upgrade script: " + upgradescriptname + " " + e.getMessage());
+                e.printStackTrace();
+                return -4;
             }
-        } catch (Exception e) {
-            Log.println(Log.INFO, getApplication().getAppName(), "WebServer.doUpgrade(): Error while processing upgrade script: " + upgradescriptname + " "+e.getMessage());
-            e.printStackTrace();
-            return -4;
         }
         return 0;
     }
@@ -723,8 +694,8 @@ public class ExtractServerServices extends Thread {
         file.delete();
     }
     //Get the version String from a file
-    //Returns the version or empty string otherwise
-    String getFileVersion(InputStream versionfile) {
+    //Returns the version or -1 otherwise
+    long getFileVersion(InputStream versionfile) {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(versionfile, "UTF-8"));
             String line;
@@ -734,13 +705,13 @@ public class ExtractServerServices extends Thread {
                 }
                 String parts[] = line.split("=");
                 if (parts[0].equals("ZIPVERSION")) {
-                    return parts[1];
+                    return Long.parseLong(parts[1]);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "";
+        return -1;
     }
     //Get the NUMFILES String from a file
     //Returns the number of files or empty string otherwise

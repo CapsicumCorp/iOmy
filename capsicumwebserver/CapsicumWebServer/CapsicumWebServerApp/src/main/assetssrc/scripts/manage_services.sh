@@ -207,7 +207,19 @@ is_running_php() {
 
 is_running_mysql() {
   is_running mysqld ${mysqldpidfile}
-  return $?
+	return $?
+}
+
+is_running_mysql_with_sock() {
+  is_running mysqld ${mysqldpidfile}
+	result=$?
+  if [ $result = 0 ] ; then
+    if [ ! -S "${app}/var/run/mysql.sock" ] ; then
+      # MySQL isn't fully running until the socket is up
+      result=1
+    fi
+	fi
+  return $result
 }
 
 start_all() {
@@ -256,7 +268,7 @@ start_mysql() {
   $sbin/bin/${abi}/${pie}/mysqld --defaults-file=$sbin/etc/mysql/mysql.ini --user=${USER} --language=$sbin/mysql/sbin/share/mysql/english > /dev/null 2> /dev/null & PID_MYSQL=$!
   echo ${PID_MYSQL} > "${mysqldpidfile}"
 
-  wait_mysql_started
+#  wait_mysql_started
 }
 
 prestop_lighttpd() {
@@ -491,7 +503,7 @@ wait_mysql_started() {
   # Wait for mysql to finish starting
   #echo "$(date)Waiting for mysql to finish starting"
   cnt=0
-  while [ ! -f "${app}/var/run/mysql.sock" -a ${cnt} -lt 20 ] ; do
+  while [ ! -S "${app}/var/run/mysql.sock" -a ${cnt} -lt 20 ] ; do
     ${SLEEP} 1
     let cnt++
   done
@@ -524,9 +536,9 @@ mysql_check() {
   wait_mysql_started
 	dbpassword=$1
 	if [ "${dbpassword}" == "" ] ; then
-    $sbin/bin/${abi}/${pie}/mysqlcheck --defaults-file=$sbin/etc/mysql/mysql.ini -hlocalhost -uroot -A --auto-repair > /dev/null 2> /dev/null
+    $sbin/bin/${abi}/${pie}/mysqlcheck --defaults-file=$sbin/etc/mysql/mysql.ini -hlocalhost -uroot --all-databases --auto-repair #> /dev/null 2> /dev/null
 	else
-	  $sbin/bin/${abi}/${pie}/mysqlcheck --defaults-file=$sbin/etc/mysql/mysql.ini -hlocalhost -uroot -p"${dbpassword}" -A --auto-repair > /dev/null 2> /dev/null
+	  $sbin/bin/${abi}/${pie}/mysqlcheck --defaults-file=$sbin/etc/mysql/mysql.ini -hlocalhost -uroot -p"${dbpassword}" --all-databases --auto-repair # > /dev/null 2> /dev/null
 	fi
 }
 

@@ -1,113 +1,103 @@
 ; An upgrade script to migrate the web server files from version 2 to version 3
-; skipfolderifexist skips files in that folder unless they don't exist
-; skipfile will always re-extract if the file doesn't exist
+; deletefile will delete a file
 ; deletefolder will recursively delete everything in the folder
-; changedfile entries will override skipfolder entries
-
-;Only some binaries have changed
-skipfolderifexist components
-
-changedfile components/bin/armeabi/pie/ffmpeg
-changedfile components/bin/armeabi/pie/ffplay
-changedfile components/bin/armeabi/pie/lighttpd
-changedfile components/bin/armeabi/pie/mysql
-changedfile components/bin/armeabi/pie/mysqlcheck
-changedfile components/bin/armeabi/pie/mysqld
-changedfile components/bin/armeabi/pie/php
-changedfile components/bin/armeabi/pie/php-cgi
-
-;Only some libraries have changed
-changedfile components/lib/armeabi/libcrypto.so.1.0.0
-changedfile components/lib/armeabi/libssl.so.1.0.0
-changedfile components/lib/armeabi/libpcre.so.1
-
-changedfile components/etc/mysql/mysql.ini.template
-
-;Files to skip in new extract
-skipfolderifexist scripts
-
-changedfile scripts/manage_services.sh
-changedfile scripts/run_ffmpeg.sh
-
-skipfolderifexist tmp
-skipfolderifexist var
-
-skipfile zigbeedefs.ini
+; newfile The file is new and should be extracted
+; newfolder The folder is new and should be extracted
+; mkdir Create a new folder straight away (useful for movefile)
+; movefile The file will be moved from one filename path to a new filename path
 
 ;Always skip this folder as it contains the MySQL database
-skipfolder components/mysql/sbin/data
+;Old command, not having newfile entries for this will now skip the file/folder
+;skipfolder components/mysql/sbin/data
 
-;Web Files
-skipfolderifexist htdocs
-
-;0.4.1 to 0.4.2
-changedfile htdocs/iomyserver.php
-changedfile htdocs/restricted/libraries/dbfunctions.php
-changedfile htdocs/restricted/libraries/dbmysql.php
-changedfile htdocs/restricted/libraries/functions.php
-changedfile htdocs/restricted/libraries/http_post.php
-changedfile htdocs/restricted/libraries/onvif.php
-changedfile htdocs/restricted/libraries/philipshue.php
-changedfile htdocs/restricted/libraries/restrictedapicore.php
-changedfile htdocs/restricted/libraries/special/iomyserverlib.php
-changedfile htdocs/restricted/libraries/userauth.php
-changedfile htdocs/restricted/odata/services/main/MainMetadata.php
-changedfile htdocs/restricted/odata/services/main/MainQueryProvider.php
-changedfile htdocs/restricted/php/api_onvif.php
-changedfile htdocs/restricted/php/api_philipshue.php
-changedfile htdocs/restricted/php/api_statechange.php
-changedfile htdocs/restricted/php/api_users.php
-changedfile htdocs/restricted/php/special/versions/0.1.0.php
-changedfile htdocs/ui/mobile/app.js
-changedfile htdocs/ui/mobile/index.html
-changedfile htdocs/ui/mobile/mjs/devices/DeviceOverview.controller.js
-changedfile htdocs/ui/mobile/mjs/devices/OnvifCamera.controller.js
-changedfile htdocs/ui/mobile/mjs/devices/PhilipsHue.controller.js
-changedfile htdocs/ui/mobile/mjs/fragments/NavMenu.fragment.js
-changedfile htdocs/ui/mobile/mjs/premise/Overview.controller.js
-changedfile htdocs/ui/mobile/mjs/rooms/Room.controller.js
-changedfile htdocs/ui/mobile/mjs/rooms/UnassignedDevices.controller.js
-changedfile htdocs/ui/mobile/mjs/settings/devices/EditLink.controller.js
-changedfile htdocs/ui/mobile/mjs/settings/devices/EditThing.controller.js
-changedfile htdocs/ui/mobile/mjs/settings/links/LinkAdd.controller.js
-changedfile htdocs/ui/mobile/mjs/settings/premise/PremiseEditAddress.controller.js
-changedfile htdocs/ui/mobile/mjs/settings/premise/PremiseEditHub.controller.js
-changedfile htdocs/ui/mobile/mjs/settings/premise/PremiseEditInfo.controller.js
-changedfile htdocs/ui/mobile/mjs/settings/rooms/RoomAdd.controller.js
-changedfile htdocs/ui/mobile/mjs/settings/rooms/RoomEdit.controller.js
-changedfile htdocs/ui/mobile/mjs/settings/things/ItemAdd.controller.js
-changedfile htdocs/ui/mobile/mjs/settings/user/EditUserAddress.controller.js
-changedfile htdocs/ui/mobile/mjs/settings/user/EditUserInformation.controller.js
-changedfile htdocs/ui/mobile/mjs/settings/user/UserEditPassword.controller.js
-changedfile htdocs/ui/mobile/resources/css/app.css
-changedfile htdocs/ui/mobile/resources/css/capsicum_margin.css
-changedfile htdocs/ui/mobile/resources/css/capsicum_widths.css
-changedfile htdocs/ui/mobile/util/apiodata.js
-changedfile htdocs/ui/mobile/util/apiphp.js
-changedfile htdocs/ui/mobile/util/devices/philipshue.js
-changedfile htdocs/ui/mobile/util/devices/weatherfeed.js
-changedfile htdocs/ui/mobile/util/devices/zigbeesmartplug.js
-changedfile htdocs/ui/mobile/util/functions.js
-changedfile htdocs/ui/mobile/util/widgets.js
-
+; From compare_iomy_apks.sh
+deletefolder components/php/sbin/
+newfile components/bin/armeabi/pie/curl
+newfile components/bin/armeabi/pie/ffmpeg
+newfile components/bin/armeabi/pie/ffplay
+newfile components/bin/armeabi/pie/lighttpd
+newfile components/bin/armeabi/pie/mysql
+newfile components/bin/armeabi/pie/mysqlcheck
+newfile components/bin/armeabi/pie/mysqld
+newfile components/bin/armeabi/pie/php
+newfile components/bin/armeabi/pie/php-cgi
+newfile components/etc/mysql/mysql.ini.template
+newfile components/lib/armeabi/libSDL-1.2.so.0
+newfile components/lib/armeabi/libcrypto.so.1.0.0
+newfile components/lib/armeabi/libcurl.so.5
+newfile components/lib/armeabi/libffmpeg.so
+newfile components/lib/armeabi/libfreetype.so.6
+newfile components/lib/armeabi/libiconv.so.2
+newfile components/lib/armeabi/libjpeg.so.62
+newfile components/lib/armeabi/libmcrypt.so.4
+newfile components/lib/armeabi/libpcre.so.1
+newfile components/lib/armeabi/libssl.so.1.0.0
+newfile components/lib/armeabi/libxml2.so.2
+newfile htdocs/iomyserver.php
+newfile htdocs/restricted/libraries/dbfunctions.php
+newfile htdocs/restricted/libraries/dbmysql.php
+newfile htdocs/restricted/libraries/functions.php
+newfile htdocs/restricted/libraries/http_post.php
+newfile htdocs/restricted/libraries/onvif.php
+newfile htdocs/restricted/libraries/philipshue.php
+newfile htdocs/restricted/libraries/restrictedapicore.php
+newfile htdocs/restricted/libraries/userauth.php
+newfile htdocs/restricted/libraries/weather_owm.php
+newfile htdocs/restricted/libraries/special/iomyserverlib.php
+newfile htdocs/restricted/odata/services/main/MainMetadata.php
+newfile htdocs/restricted/odata/services/main/MainQueryProvider.php
+newfile htdocs/restricted/php/api_onvif.php
+newfile htdocs/restricted/php/api_philipshue.php
+newfile htdocs/restricted/php/api_statechange.php
+newfile htdocs/restricted/php/api_users.php
+newfile htdocs/restricted/php/api_weather.php
+newfile htdocs/restricted/php/special/versions/0.1.0.php
+newfile htdocs/ui/mobile/app.js
+newfile htdocs/ui/mobile/index.html
 deletefile htdocs/ui/mobile/mjs/rooms/DeviceIPCamera.controller.js
-deletefile htdocs/ui/mobile/mjs/settings/EditUser.controller.js
-deletefile htdocs/ui/mobile/mjs/settings/EditUser.view.js
-deletefile htdocs/ui/mobile/mjs/settings/SettingsOverview.controller.js
 deletefile htdocs/ui/mobile/mjs/settings/SettingsOverview.view.js
-deletefile htdocs/ui/mobile/mjs/settings/devices/DeviceAddManually.controller.js
-deletefile htdocs/ui/mobile/mjs/settings/devices/DeviceAddManually.view.js
-deletefile htdocs/ui/mobile/mjs/settings/devices/DeviceInfo.controller.js
+deletefile htdocs/ui/mobile/mjs/settings/SettingsOverview.controller.js
+deletefile htdocs/ui/mobile/mjs/settings/EditUser.view.js
+deletefile htdocs/ui/mobile/mjs/settings/EditUser.controller.js
 deletefile htdocs/ui/mobile/mjs/settings/devices/DeviceInfo.view.js
-deletefile htdocs/ui/mobile/mjs/settings/premise/Premise.controller.js
-deletefile htdocs/ui/mobile/mjs/settings/premise/Premise.view.js
-deletefile htdocs/ui/mobile/mjs/settings/premise/PremiseViewInfo.controller.js
+deletefile htdocs/ui/mobile/mjs/settings/devices/DeviceInfo.controller.js
+deletefile htdocs/ui/mobile/mjs/settings/devices/DeviceAddManually.view.js
+deletefile htdocs/ui/mobile/mjs/settings/devices/DeviceAddManually.controller.js
 deletefile htdocs/ui/mobile/mjs/settings/premise/PremiseViewInfo.view.js
-deletefile htdocs/ui/mobile/mjs/settings/rooms/RoomDevice.controller.js
+deletefile htdocs/ui/mobile/mjs/settings/premise/PremiseViewInfo.controller.js
+deletefile htdocs/ui/mobile/mjs/settings/premise/Premise.view.js
+deletefile htdocs/ui/mobile/mjs/settings/premise/Premise.controller.js
 deletefile htdocs/ui/mobile/mjs/settings/rooms/RoomDevice.view.js
-
-;New Web Files
-;changedfile htdocs/restricted/libraries/weather_owm.php
-;changedfile htdocs/restricted/php/api_weather.php
-;changedfile htdocs/ui/mobile/resources/icons/favicon.png
-
+deletefile htdocs/ui/mobile/mjs/settings/rooms/RoomDevice.controller.js
+newfile htdocs/ui/mobile/mjs/devices/DeviceOverview.controller.js
+newfile htdocs/ui/mobile/mjs/devices/OnvifCamera.controller.js
+newfile htdocs/ui/mobile/mjs/devices/PhilipsHue.controller.js
+newfile htdocs/ui/mobile/mjs/fragments/NavMenu.fragment.js
+newfile htdocs/ui/mobile/mjs/premise/Overview.controller.js
+newfile htdocs/ui/mobile/mjs/rooms/Room.controller.js
+newfile htdocs/ui/mobile/mjs/rooms/UnassignedDevices.controller.js
+newfile htdocs/ui/mobile/mjs/settings/devices/EditLink.controller.js
+newfile htdocs/ui/mobile/mjs/settings/devices/EditThing.controller.js
+newfile htdocs/ui/mobile/mjs/settings/links/LinkAdd.controller.js
+newfile htdocs/ui/mobile/mjs/settings/premise/PremiseEditAddress.controller.js
+newfile htdocs/ui/mobile/mjs/settings/premise/PremiseEditHub.controller.js
+newfile htdocs/ui/mobile/mjs/settings/premise/PremiseEditInfo.controller.js
+newfile htdocs/ui/mobile/mjs/settings/rooms/RoomAdd.controller.js
+newfile htdocs/ui/mobile/mjs/settings/rooms/RoomEdit.controller.js
+newfile htdocs/ui/mobile/mjs/settings/things/ItemAdd.controller.js
+newfile htdocs/ui/mobile/mjs/settings/user/EditUserAddress.controller.js
+newfile htdocs/ui/mobile/mjs/settings/user/EditUserInformation.controller.js
+newfile htdocs/ui/mobile/mjs/settings/user/UserEditPassword.controller.js
+newfile htdocs/ui/mobile/resources/css/app.css
+newfile htdocs/ui/mobile/resources/css/capsicum_margin.css
+newfile htdocs/ui/mobile/resources/css/capsicum_widths.css
+newfile htdocs/ui/mobile/resources/icons/favicon.png
+newfile htdocs/ui/mobile/util/apiodata.js
+newfile htdocs/ui/mobile/util/apiphp.js
+newfile htdocs/ui/mobile/util/functions.js
+newfile htdocs/ui/mobile/util/widgets.js
+newfile htdocs/ui/mobile/util/devices/philipshue.js
+newfile htdocs/ui/mobile/util/devices/weatherfeed.js
+newfile htdocs/ui/mobile/util/devices/zigbeesmartplug.js
+newfile scripts/manage_services.sh
+newfile scripts/run_ffmpeg.sh

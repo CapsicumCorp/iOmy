@@ -1,10 +1,12 @@
 ; An upgrade script to migrate the web server files from version 1 to version 2
-; skipfolderifexist skips files in that folder unless they don't exist
-; skipfile will always re-extract if the file doesn't exist
+; deletefile will delete a file
 ; deletefolder will recursively delete everything in the folder
-; changedfile entries will override skipfolder entries
+; newfile The file is new and should be extracted
+; newfolder The folder is new and should be extracted
+; mkdir Create a new folder straight away (useful for movefile)
+; movefile The file will be moved from one filename path to a new filename path
 
-;Move config files
+;Move config files to new location
 mkdir components/etc
 mkdir components/etc/lighttpd
 mkdir components/etc/mysql
@@ -44,46 +46,61 @@ deletefile components/mysql/sbin/mysql
 deletefile components/mysql/sbin/mysqlcheck
 deletefile components/mysql/sbin/mysqld
 
-;Files to skip in new extract
-skipfile components/etc/lighttpd/lighttpd.conf.template
-skipfile components/etc/mysql/mysql.ini.template
-skipfile components/etc/php/php.ini.template
-
-skipfile components/mysql/extra_bootstrap.sql
-skipfile components/mysql/extra2_bootstrap.sql
-
-skipfile zigbeedefs.ini
-
 ;Always skip this folder as it contains the MySQL database
-skipfolder components/mysql/sbin/data
+;Old command, not having newfile entries for this will now skip the file/folder
+;skipfolder components/mysql/sbin/data
 
-skipfolderifexist components/mysql/sbin/share
-
-skipfile scripts/find_systemapps.sh
-
-;Web Files
+; From compare_iomy_apks.sh
+deletefile components/php/sbin/php-cgi
+deletefile components/php/sbin/php
+newfolder components/bin/armeabi/
+newfile components/bin/armeabi/busybox
+newfolder components/bin/armeabi/pie/
+newfile components/bin/armeabi/pie/curl
+newfile components/bin/armeabi/pie/ffmpeg
+newfile components/bin/armeabi/pie/ffplay
+newfile components/bin/armeabi/pie/lighttpd
+newfile components/bin/armeabi/pie/mysql
+newfile components/bin/armeabi/pie/mysqlcheck
+newfile components/bin/armeabi/pie/mysqld
+newfile components/bin/armeabi/pie/php
+newfile components/bin/armeabi/pie/php-cgi
+newfolder components/lib/armeabi/
+newfile components/lib/armeabi/libSDL-1.2.so.0
+newfile components/lib/armeabi/libaio.so.1
+newfile components/lib/armeabi/libcrypto.so.1.0.0
+newfile components/lib/armeabi/libcurl.so.5
+newfile components/lib/armeabi/libffmpeg.so
+newfile components/lib/armeabi/libfreetype.so.6
+newfile components/lib/armeabi/libiconv.so.2
+newfile components/lib/armeabi/libjpeg.so.62
+newfile components/lib/armeabi/libmcrypt.so.4
+newfile components/lib/armeabi/libpng16.so.16
+newfile components/lib/armeabi/libssl.so.1.0.0
+newfile components/lib/armeabi/libxml2.so.2
+newfile components/lib/armeabi/libz.so.1
 deletefile htdocs/restricted/config/iomy_vanilla.php_template
-
-skipfolderifexist htdocs
-
-changedfile htdocs/restricted/libraries/dbfunctions.php
-changedfile htdocs/restricted/libraries/dbmysql.php
-changedfile htdocs/restricted/libraries/functions.php
-changedfile htdocs/restricted/libraries/special/iomyserverlib.php
-changedfile htdocs/restricted/php/api_onvif.php
-changedfile htdocs/restricted/php/api_onvifthumbnail.php
-changedfile htdocs/restricted/php/api_philipshue.php
-changedfile htdocs/ui/mobile/app.js
-changedfile htdocs/ui/mobile/mjs/premise/Overview.controller.js
-changedfile htdocs/ui/mobile/mjs/rooms/UnassignedDevices.controller.js
-changedfile htdocs/ui/mobile/resources/css/app.css
-changedfile htdocs/ui/mobile/resources/css/capsicum_widths.css
-changedfile htdocs/ui/mobile/resources/css/experimental_brent.css
-changedfile htdocs/ui/mobile/resources/images/mainlogo.png
-changedfile htdocs/ui/mobile/resources/images/minilogo.png
-changedfile htdocs/ui/mobile/util/apiphp.js
-changedfile htdocs/ui/mobile/util/devices/weatherfeed.js
-changedfile htdocs/ui/mobile/util/devices.js
-changedfile htdocs/ui/mobile/util/functions.js
-changedfile htdocs/ui/mobile/util/widgets.js
+newfile htdocs/restricted/libraries/dbfunctions.php
+newfile htdocs/restricted/libraries/dbmysql.php
+newfile htdocs/restricted/libraries/functions.php
+newfile htdocs/restricted/libraries/special/iomyserverlib.php
+newfile htdocs/restricted/php/api_onvif.php
+newfile htdocs/restricted/php/api_onvifthumbnail.php
+newfile htdocs/restricted/php/api_philipshue.php
+newfile htdocs/ui/mobile/app.js
+newfile htdocs/ui/mobile/mjs/premise/Overview.controller.js
+newfile htdocs/ui/mobile/mjs/rooms/UnassignedDevices.controller.js
+newfile htdocs/ui/mobile/resources/css/app.css
+newfile htdocs/ui/mobile/resources/css/capsicum_widths.css
+newfile htdocs/ui/mobile/resources/css/experimental_brent.css
+newfile htdocs/ui/mobile/resources/images/mainlogo.png
+newfile htdocs/ui/mobile/resources/images/minilogo.png
+newfile htdocs/ui/mobile/util/apiphp.js
+newfile htdocs/ui/mobile/util/devices.js
+newfile htdocs/ui/mobile/util/functions.js
+newfile htdocs/ui/mobile/util/widgets.js
+newfile htdocs/ui/mobile/util/devices/weatherfeed.js
+newfile scripts/manage_services.sh
+newfile scripts/run_ffmpeg.sh
+newfile scripts/set_permissions.sh
 
