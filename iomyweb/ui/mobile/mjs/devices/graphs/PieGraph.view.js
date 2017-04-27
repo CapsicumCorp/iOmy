@@ -48,7 +48,7 @@ sap.ui.jsview("mjs.devices.graphs.PieGraph", {
             view : me,
             controller : oController,
             icon : "sap-icon://GoogleMaterial/home",
-            title : "Pie Graph Example"
+            title : "6-Hour Pie Graph"
         });
         
         oPage.addContent(

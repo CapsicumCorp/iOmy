@@ -25,7 +25,7 @@ sap.ui.controller("mjs.rules.AddRule", {
     
     aElementsToDestroy      : [],
     
-    wRuleName               : null,
+    wDisplayName               : null,
     wOnTime                 : null,
     wOffTime                : null,
     wCancelButton           : null,
@@ -118,17 +118,20 @@ sap.ui.controller("mjs.rules.AddRule", {
      * Constructs the user interface for this page.
      */
     DrawUI : function () {
-        var me = this;
-        var thisView = me.getView();
+        var me					= this;
+        var thisView			= me.getView();
+		var aButtonHBoxItems	= [];
 		
         //--------------------------------------------------------------------//
         // Fields
         //--------------------------------------------------------------------//
         //-- Rule Display Name --//
-        me.wRuleName = new sap.m.Input ({
+        me.wDisplayName = new sap.m.Input ({
             layoutData : new sap.m.FlexItemData({
                 growFactor : 1
-            })
+            }),
+			value : IOMy.common.ThingList["_"+me.iThingId].DisplayName,
+			enabled : false
         });
         
         //-- When the device should turn on --//
@@ -171,18 +174,27 @@ sap.ui.controller("mjs.rules.AddRule", {
                 me.saveRule();
             }
         }).addStyleClass("width80px");
-        
-        me.wDiscardButton = new sap.m.Button({
-            layoutData : new sap.m.FlexItemData({
-                growFactor : 1
-            }),									
-            type:"Reject",
-            text: "Discard",
-            
-            press : function () {
-                me.deleteRule();
-            }
-        }).addStyleClass("width80px");
+		
+		aButtonHBoxItems = [
+			me.wCancelButton,
+			me.wApplyButton
+		];
+		
+		if (me.bEditing) {
+			me.wDiscardButton = new sap.m.Button({
+				layoutData : new sap.m.FlexItemData({
+					growFactor : 1
+				}),									
+				type:"Reject",
+				text: "Discard",
+
+				press : function () {
+					me.deleteRule();
+				}
+			}).addStyleClass("width80px");
+			
+			aButtonHBoxItems.push(me.wDiscardButton);
+		}
         
         //--------------------------------------------------------------------//
         // Draw the main panel
@@ -195,7 +207,7 @@ sap.ui.controller("mjs.rules.AddRule", {
                         new sap.m.Label ({
                             text: "Display Name"
                         }),
-                        me.wRuleName
+                        me.wDisplayName
                     ]
                 }),
                 new sap.m.HBox ({	
@@ -228,11 +240,7 @@ sap.ui.controller("mjs.rules.AddRule", {
                     layoutData : new sap.m.FlexItemData({
                         growFactor : 1
                     }),
-                    items : [
-                        me.wCancelButton,
-                        me.wApplyButton,
-                        me.wDiscardButton
-                    ]
+                    items : aButtonHBoxItems
                 }).addStyleClass("MarTop15px TextCenter")
             ]
         }).addStyleClass("PadBottom10px UserInputForm MarTop3px");
@@ -277,7 +285,7 @@ sap.ui.controller("mjs.rules.AddRule", {
             },
             
             onFail : function (sError) {
-                IOMy.common.showSuccess("Rule for "+mThing.DisplayName+" could not be applied applied.\n\n"+sError, "Success");
+                IOMy.common.showSuccess("Rule for "+mThing.DisplayName+" could not be applied.\n\n"+sError, "Success");
             }
         });
         
@@ -295,11 +303,11 @@ sap.ui.controller("mjs.rules.AddRule", {
                     Serial : sSerialCode,
 
                     onSuccess : function () {
-                        IOMy.common.showSuccess("Rule for "+mThing.DisplayName+" was successfully applied.", "Success");
+                        IOMy.common.showSuccess("Rule for "+mThing.DisplayName+" was successfully removed.", "Success");
                     },
 
                     onFail : function (sError) {
-                        IOMy.common.showSuccess("Rule for "+mThing.DisplayName+" could not be applied applied.\n\n"+sError, "Success");
+                        IOMy.common.showSuccess("Rule for "+mThing.DisplayName+" could not be removed.\n\n"+sError, "Success");
                     }
                 });
             }

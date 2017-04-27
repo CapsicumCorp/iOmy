@@ -48,7 +48,7 @@ sap.ui.jsview("mjs.devices.graphs.LineGraph", {
             view : me,
             controller : oController,
             icon : "sap-icon://GoogleMaterial/home",
-            title : "LineGraph Example"
+            title : "IO Line Graph"
         });
 
         oPage.addContent(

@@ -48,7 +48,7 @@ sap.ui.jsview("mjs.devices.graphs.BarGraph", {
             view : me,
             controller : oController,
             icon : "sap-icon://GoogleMaterial/home",
-            title : "BarGraph Example"
+            title : "Weekly Bar Graph"
         });
         
         oPage.addContent(
