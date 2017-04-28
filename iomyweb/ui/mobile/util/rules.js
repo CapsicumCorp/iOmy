@@ -269,7 +269,7 @@ $.extend(IOMy.rules, {
             onFail : function (error) {
                 var sErrMessage = "Error accessing the rules API: " + error.responseText;
                 jQuery.sap.log.error(sErrMessage);
-                fnFail(error);
+                fnFail(sErrMessage);
             }
             
         });

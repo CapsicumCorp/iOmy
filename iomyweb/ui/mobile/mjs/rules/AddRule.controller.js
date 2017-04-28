@@ -292,7 +292,7 @@ sap.ui.controller("mjs.rules.AddRule", {
             },
             
             onFail : function (sError) {
-                IOMy.common.showSuccess("Rule for "+mThing.DisplayName+" could not be applied.\n\n"+sError, "Success");
+                IOMy.common.showError("Rule for "+mThing.DisplayName+" could not be applied.\n\n"+sError, "Success");
             }
         });
         
@@ -305,19 +305,23 @@ sap.ui.controller("mjs.rules.AddRule", {
         
         IOMy.common.showConfirmQuestion("Are you sure you wish to discard this rule?", "",
             function () {
-                IOMy.rules.discardRule({
-                    hubID : 1,
-                    Serial : sSerialCode,
+				try {
+					IOMy.rules.discardRule({
+						hubID : 1,
+						Serial : sSerialCode,
 
-                    onSuccess : function () {
-                        IOMy.common.showSuccess("Rule for "+mThing.DisplayName+" was successfully removed.", "Success");
-						IOMy.common.NavigationChangePage( "pRuleDeviceList", {}, true);
-                    },
+						onSuccess : function () {
+							IOMy.common.showSuccess("Rule for "+mThing.DisplayName+" was successfully removed.", "Success");
+							IOMy.common.NavigationChangePage( "pRuleDeviceList", {}, true);
+						},
 
-                    onFail : function (sError) {
-                        IOMy.common.showSuccess("Rule for "+mThing.DisplayName+" could not be removed.\n\n"+sError, "Success");
-                    }
-                });
+						onFail : function (sError) {
+							IOMy.common.showError("Rule for "+mThing.DisplayName+" could not be removed.\n\n"+sError, "Success");
+						}
+					});
+				} catch (error) {
+					IOMy.common.showError("Rule for "+mThing.DisplayName+" could not be removed.\n\n"+error.message, "Success");
+				}
             }
         );
     }
