@@ -70,13 +70,12 @@ $aHubData                   = array();      //-- ARRAY:         --//
 $aNewCommData               = array();      //-- ARRAY:         --//
 $bTransactionStarted        = false;        //-- BOOLEAN:       --//
 $bFound                     = false;        //-- BOOLEAN:       Used to indicate if a match is found or not. --//
-
+$bCommNetworkStateFound     = false;        //-- BOOLEAN:       Used to indicate if a Network State for a RapidHA modem was found or not. --//
+$bCommNetworkState          = false;        //-- BOOLEAN:       Used to store the current network state that the RapidHa Modem is in. --//
 
 //- Constants that need to be added to a function in the fuctions library --//
-$iZigbeeCommTypeId          = 0;            //-- INTEGER:       This is used to indicate the 
-$iTelnetHubTypeId1          = 0;            //-- INTEGER:       --//
-
-
+$iZigbeeCommTypeId          = 0;            //-- INTEGER:       This is used to hold the Zigbee Comm Type Id to verify if the provided Comm is supported by that mode or not. --//
+$iTelnetHubTypeId1          = 0;            //-- INTEGER:       Holds the Hub Type of the only supported Hub Type that can be accessed by telnet. --//
 
 //------------------------------------------------------------//
 //-- 1.3 - IMPORT REQUIRED LIBRARIES                        --//
@@ -84,14 +83,11 @@ $iTelnetHubTypeId1          = 0;            //-- INTEGER:       --//
 require_once SITE_BASE.'/restricted/libraries/telnet.php';
 require_once SITE_BASE.'/restricted/php/core.php';      //-- This should call all the additional libraries needed --//
 
-
-
 //------------------------------------------------------------//
 //-- 1.5 - Fetch Constants (Will be replaced)               --//
 //------------------------------------------------------------//
 $iZigbeeCommTypeId       = LookupFunctionConstant("ZigbeeCommTypeId");
 $iTelnetHubTypeId1       = LookupFunctionConstant("AndroidWatchInputsHubTypeId");
-
 
 
 
@@ -153,7 +149,7 @@ if($bError===false) {
 	//-- 2.2.2 - Retrieve "CommId"                      --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="GetRapidHAInfo" || $sPostMode==="TurnOnZigbeeJoinMode" ) {
+		if( $sPostMode==="GetRapidHAInfo" || $sPostMode==="TurnOnZigbeeJoinMode" || $sPostMode==="RapidHAFormNetwork" ) {
 			try {
 				//-- Retrieve the "DeviceIPAddress" --//
 				$iPostCommId = $aHTTPData["CommId"];
@@ -177,7 +173,6 @@ if($bError===false) {
 			}
 		}
 	}
-	
 	
 	//----------------------------------------------------//
 	//-- 2.2.3 - Retrieve "HubId"                       --//
@@ -240,13 +235,12 @@ if($bError===false) {
 //====================================================================//
 if( $bError===false ) {
 	try {
-		if( $sPostMode==="TurnOnZigbeeJoinMode" || $sPostMode==="GetRapidHAInfo" ) {
+		if( $sPostMode==="TurnOnZigbeeJoinMode" || $sPostMode==="GetRapidHAInfo" || $sPostMode==="RapidHAFormNetwork" ) {
 			try {
 				//----------------------------------------------------------------//
 				//-- Check the CommInfo                                         --//
 				//----------------------------------------------------------------//
 				$aCommInfo = GetCommInfo( $iPostCommId );
-				
 				
 				if( $aCommInfo['Error']===false ) {
 					$iCommOwnerPerm     = $aCommInfo['Data']['PermOwner'];
@@ -284,7 +278,7 @@ if( $bError===false ) {
 				$iErrCode  = 201;
 				$sErrMesg .= "Error Code:'1201' \n";
 				$sErrMesg .= "Critical Error Occurred!\n";
-				$sErrMesg .= "Problem occurred when preparing for the main function\n";
+				$sErrMesg .= "Problem occurred when preparing for the main function.\n";
 			}
 		}
 		
@@ -293,7 +287,7 @@ if( $bError===false ) {
 		//-- Check the HubInfo                                          --//
 		//----------------------------------------------------------------//
 		if( $bError===false ) {
-			if( $sPostMode==="TurnOnZigbeeJoinMode" || $sPostMode==="GetRapidHAInfo" || $sPostMode==="CustomTelnetCommand" ) {
+			if( $sPostMode==="TurnOnZigbeeJoinMode" || $sPostMode==="GetRapidHAInfo" || $sPostMode==="CustomTelnetCommand" || $sPostMode==="RapidHAFormNetwork" ) {
 				try {
 					$aHubData = HubRetrieveInfoAndPermission( $iPostHubId );
 					
@@ -325,31 +319,26 @@ if( $bError===false ) {
 						$bError = true;
 						$iErrCode  = 213;
 						$sErrMesg .= "Error Code:'0213' \n";
-						$sErrMesg .= "Problem looking up the Info for the selected Hub\n";
+						$sErrMesg .= "Problem looking up the Info for the selected Hub.\n";
 						$sErrMesg .= $aHubData['ErrMesg'];
 					}
-	
 				} catch( Exception $e0214 ) {
 					$bError = true;
 					$iErrCode  = 214;
 					$sErrMesg .= "Error Code:'1214' \n";
 					$sErrMesg .= "Critical Error Occurred!\n";
-					$sErrMesg .= "Problem occurred when preparing for the main function\n";
+					$sErrMesg .= "Problem occurred when preparing for the main function.\n";
 				}
 			}
 		}
-		
 	} catch( Exception $e0200 ) {
 		$bError = true;
 		$iErrCode  = 200;
 		$sErrMesg .= "Error Code:'0200' \n";
 		$sErrMesg .= "Critical Error Occurred!\n";
-		$sErrMesg .= "Problem occurred when preparing for the main function\n";
+		$sErrMesg .= "Problem occurred when preparing for the main function.\n";
 	}
 }
-
-
-
 
 //====================================================================//
 //== 5.0 - MAIN                                                     ==//
@@ -362,56 +351,49 @@ if( $bError===false ) {
 		//================================================================//
 		if( $sPostMode==="GetRapidHAInfo" ) {
 			try {
+				//----------------------------//
+				//-- Setup the Results      --//
+				//----------------------------//
+				$aResult = array(
+					"Error"   => false,
+					"Data"    => array(
+						"RapidHAInfo" => array(),
+						"ZigbeeInfo"  => array()
+					)
+				);
 				
+				//----------------------------//
+				//-- RapidHA Info           --//
+				//----------------------------//
 				$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
-				
-				
 				if( $oTelnet->bInitialised===true ) {
-					
-					//----------------------------//
-					//-- Setup the Results      --//
-					//----------------------------//
-					$aResult = array(
-						"Error" => false,
-						"Data" => array(
-							"RapidHAInfo" => array(),
-							"ZigbeeInfo"  => array()
-						)
-					);
-					
-					//----------------------------//
-					//-- Write Test             --//
-					//----------------------------//
-					$oTelnet->WriteArray( array( "versioninfo\n" ) );
-					$oTelnet->FetchRows( 128, 5, true );
-					
-					//----------------------------//
-					//-- RapidHA Info           --//
-					//----------------------------//
-					$oTelnet->WriteArray( array( "get_rapidha_info\n" ) );
+					$oTelnet->WriteArray( array( "get_rapidha_info\n", "quit\n" ) );
 					$aResult['Data']['RapidHAInfo'] = $oTelnet->FetchRows( 128, 5, true );
-					
-					//----------------------------//
-					//-- Zigbee Info            --//
-					//----------------------------//
-					$oTelnet->WriteArray( array( "get_zigbee_info\n" ) );
-					$aResult['Data']['ZigbeeInfo'] = $oTelnet->FetchRows( 128, 5, false );
-					
-					//----------------------------//
-					//-- Quit Telnet            --//
-					//----------------------------//
-					$oTelnet->WriteArray( array("quit\n") );
-					
 					
 				} else {
 					$bError     = true;
 					$iErrCode   = 1401;
 					$sErrMesg  .= "Error Code:'1401' \n";
-					$sErrMesg  .= "Failed to connect to Hub via Telnet";
+					$sErrMesg  .= "Failed to connect to Hub via Telnet.";
+				}
+				
+				//----------------------------//
+				//-- Zigbee Info            --//
+				//----------------------------//
+				$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
+				if( $oTelnet->bInitialised===true ) {
+					$oTelnet->WriteArray( array( "get_zigbee_info\n", "quit\n" ) );
+					$aResult['Data']['ZigbeeInfo'] = $oTelnet->FetchRows( 128, 5, true );
+					
+				} else {
+					$bError     = true;
+					$iErrCode   = 1402;
+					$sErrMesg  .= "Error Code:'1402' \n";
+					$sErrMesg  .= "Failed to connect to Hub via Telnet.";
 				}
 				//$oTelnet->WriteArray( array( "versioninfo\n", "get_rapidha_info\n", "get_zigbee_info\n" ) );
 				
-			
+				
 			} catch( Exception $e1400 ) {
 				//-- Display an Error Message --//
 				$bError     = true;
@@ -429,47 +411,30 @@ if( $bError===false ) {
 				if( $iCommWritePerm===1 ) {
 					if( strlen( $sCommAddress )>=15 ) {
 						
-						$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
+						//----------------------------//
+						//-- Setup the Results      --//
+						//----------------------------//
+						$aResult = array(
+							"Error" => false,
+							"Data"  => array(
+								"JoinMode" => array()
+							)
+						);
 						
+						//----------------------------//
+						//-- RapidHA Info           --//
+						//----------------------------//
+						$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
 						if( $oTelnet->bInitialised===true ) {
-							
-							//----------------------------//
-							//-- Setup the Results      --//
-							//----------------------------//
-							$aResult = array(
-								"Error" => false,
-								"Data" => array(
-									"JoinMode" => array()
-								)
-							);
-							
-							//----------------------------//
-							//-- Write Test             --//
-							//----------------------------//
-							$oTelnet->WriteArray( array( "versioninfo\n" ) );
-							$oTelnet->FetchRows( 128, 5, true );
-							
-							
-							//----------------------------//
-							//-- RapidHA Info           --//
-							//----------------------------//
-							$oTelnet->WriteArray( array( "zigbee_enable_tempjoin ".$sCommAddress."\n" ) );
+							$oTelnet->WriteArray( array( "zigbee_enable_tempjoin ".$sCommAddress."\n", "quit\n" ) );
 							$aResult['Data']['JoinMode'] = $oTelnet->FetchRows( 128, 5, true );
-							
-							
-							//----------------------------//
-							//-- Quit Telnet            --//
-							//----------------------------//
-							$oTelnet->WriteArray( array("quit\n") );
-							
 							
 						} else {
 							$bError     = true;
 							$iErrCode   = 2403;
 							$sErrMesg  .= "Error Code:'2403' \n";
-							$sErrMesg  .= "Failed to connect to Hub via Telnet";
+							$sErrMesg  .= "Failed to connect to Hub via Telnet.";
 						}
-						
 					} else {
 						$bError     = true;
 						$iErrCode   = 2402;
@@ -481,9 +446,9 @@ if( $bError===false ) {
 					$bError     = true;
 					$iErrCode   = 2401;
 					$sErrMesg  .= "Error Code:'2401' \n";
-					$sErrMesg  .= "Failed to connect to Hub via Telnet\n";
+					$sErrMesg  .= "Insufficient user permissions.\n";
+					$sErrMesg  .= "Check if your user has the write permission to the premise.\n";
 				}
-				
 			} catch( Exception $e2400 ) {
 				//-- Display an Error Message --//
 				$bError     = true;
@@ -498,9 +463,120 @@ if( $bError===false ) {
 		//================================================================//
 		} else if( $sPostMode==="RapidHAFormNetwork" ) {
 			try {
-				
-				
-				
+				if( true ) {
+					if( true ) {
+				//if( $iCommWritePerm===1 ) {
+					//if( strlen( $sCommAddress )>=15 ) {
+						//----------------------------//
+						//-- Setup the Results      --//
+						//----------------------------//
+						$aResult = array(
+							"Error" => false,
+							"Data"  => array(
+								"FormNetwork" => array()
+							)
+						);
+						
+						//----------------------------//
+						//-- RapidHA Info           --//
+						//----------------------------//
+						$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
+						if( $oTelnet->bInitialised===true ) {
+							$oTelnet->WriteArray( array( "get_rapidha_info\n", "quit\n" ) );
+							$aTempFunctionResult1 = $oTelnet->FetchRows( 128, 5, true );
+							
+							if( $aTempFunctionResult1===false || count( $aTempFunctionResult1 )<=4 ) {
+								$bError     = true;
+								$iErrCode   = 3404;
+								$sErrMesg  .= "Error Code:'3404' \n";
+								$sErrMesg  .= "Problem extracting the rapidha info.";
+							}
+						} else {
+							$bError     = true;
+							$iErrCode   = 3403;
+							$sErrMesg  .= "Error Code:'3403' \n";
+							$sErrMesg  .= "Failed to connect to Hub via Telnet.";
+						}
+						
+						//----------------------------//
+						//-- Regex the values       --//
+						//----------------------------//
+						if( $bError===false ) {
+							//-- Setup the initial variables --//
+							$sCurrentCommUUID = "Unknown";
+							
+							foreach( $aTempFunctionResult1 as $sRow ) {
+								//-- Clear the variables --//
+								$aTempFunctionResult2 = array();
+								
+								//-- Check if it is the desired Comm --//
+								preg_match('/^RAPIDHA ADDRESS.*([0-9a-fA-F]{16})/', $sRow, $aTempFunctionResult2);
+								if( count($aTempFunctionResult2)===2 ) {
+									$sCurrentCommUUID = $aTempFunctionResult2[1];
+								}
+								
+								//-- Check if the Comm UUID match --//
+								if( $sCommAddress===$sCurrentCommUUID ) {
+									//-- Check Network State --//
+									preg_match('/^Network\s+State.*Network\s([\w]+)$/', $sRow, $aTempFunctionResult2);
+									if( count($aTempFunctionResult2)===2 ) {
+										$bCommNetworkStateFound = true;
+										
+										if( $aTempFunctionResult2[1]==="Up" || $aTempFunctionResult2[1]==="up" ) {
+											//-- Error --//
+											$bError     = true;
+											$iErrCode   = 3404;
+											$sErrMesg  .= "Error Code:'3404' \n";
+											$sErrMesg  .= "Zigbee modem already has a network!\n";
+											$sErrMesg  .= "Please remove it from a network before trying to add it to a new one!\n";
+										}
+									}
+									
+									//-- Store the row --//
+									$aTempFunctionResult3[] = $sRow;
+								}
+							} //-- ENDFOREACH --//
+						}	//-- ENDIF No Errors --//
+						
+						if( $bError===false ) {
+							if( $bCommNetworkStateFound===false ) {
+								$bError     = true;
+								$iErrCode   = 3405;
+								$sErrMesg  .= "Error Code:'3405 \n";
+								$sErrMesg  .= "Zigbee Modem's network state cannot be determined!\n";
+							}
+						}	//-- ENDIF No Errors --//
+						
+						if( $bError===false ) {
+							//----------------------------//
+							//-- Form a Network         --//
+							//----------------------------//
+							$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
+							if( $oTelnet->bInitialised===true ) {
+								$oTelnet->WriteArray( array( "rapidha_form_network ".$sCommAddress."\n", "quit\n" ) );
+								$aResult['Data']['FormNetwork'] = $oTelnet->FetchRows( 128, 5, true );
+								
+							} else {
+								$bError     = true;
+								$iErrCode   = 3409;
+								$sErrMesg  .= "Error Code:'3409' \n";
+								$sErrMesg  .= "Failed to connect to Hub via Telnet";
+							}
+						}	//-- ENDIF No Errors --//
+					} else {
+						$bError     = true;
+						$iErrCode   = 3402;
+						$sErrMesg  .= "Error Code:'3402' \n";
+						$sErrMesg  .= "Problem with the CommAddress of the provided Comm!\n";
+						$sErrMesg  .= "Please verify that the Comm supports join mode!\n";
+					}
+				} else {
+					$bError     = true;
+					$iErrCode   = 3401;
+					$sErrMesg  .= "Error Code:'3401' \n";
+					$sErrMesg  .= "Insufficient user permissions.\n";
+					$sErrMesg  .= "Check if your user has the write permission to the premise.\n";
+				}
 			} catch( Exception $e3400 ) {
 				//-- Display an Error Message --//
 				$bError     = true;
@@ -514,55 +590,44 @@ if( $bError===false ) {
 		//================================================================//
 		} else if( $sPostMode==="CustomTelnetCommand" ) {
 			try {
-				
 				if( $iHubOwnerPerm===1 ) {
-					$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
+					//----------------------------//
+					//-- Setup the Results      --//
+					//----------------------------//
+					$aResult = array(
+						"Error" => false,
+						"Data"  => array(
+							"Custom" => array()
+						)
+					);
 					
+					//----------------------------//
+					//-- Custom Command         --//
+					//----------------------------//
+					$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
 					if( $oTelnet->bInitialised===true ) {
-						//----------------------------//
-						//-- Setup the Results      --//
-						//----------------------------//
-						$aResult = array(
-							"Error" => false,
-							"Data"  => array(
-								"Custom" => array()
-							)
-						);
-						
 						//----------------------------//
 						//-- Write Test             --//
 						//----------------------------//
-						$oTelnet->WriteArray( array( "versioninfo\n" ) );
-						$oTelnet->FetchRows( 128, 5, true );
-						
-						
-						//----------------------------//
-						//-- Custom Command         --//
-						//----------------------------//
-						$oTelnet->WriteArray( array( $sPostTelnetCommand."\n" ) );
+						//$oTelnet->WriteArray( array( "versioninfo\n" ) );
+						//$oTelnet->FetchRows( 128, 5, true );
+						$oTelnet->WriteArray( array( $sPostTelnetCommand."\n", "quit\n" ) );
 						$aResult['Data']['Custom'] = $oTelnet->FetchRows( 128, 5, true );
-						
-						
-						//----------------------------//
-						//-- Quit Telnet            --//
-						//----------------------------//
-						$oTelnet->WriteArray( array("quit\n") );
-						
 						
 					} else {
 						$bError     = true;
 						$iErrCode   = 4401;
 						$sErrMesg  .= "Error Code:'4401' \n";
-						$sErrMesg  .= "Failed to connect to Hub via Telnet\n";
+						$sErrMesg  .= "Failed to connect to Hub via Telnet.\n";
 					}
 				} else {
 					$bError     = true;
 					$iErrCode   = 4402;
 					$sErrMesg  .= "Error Code:'4402' \n";
-					$sErrMesg  .= "In\n";
-					$sErrMesg  .= $sHubIPAddress;
+					$sErrMesg  .= "Insufficient user permissions!\n";
+					$sErrMesg  .= "The Owner permission is required to perform this action on the Hub.\n";
+					$sErrMesg  .= "\n";
 				}
-				
 			} catch( Exception $e4400 ) {
 				//-- Display an Error Message --//
 				$bError     = true;
@@ -623,11 +688,11 @@ if( $bError===false && $aResult!=false ) {
 	if( $bError===false ) {
 		//-- The aResult array has become undefined due to corruption of the array --//
 		$sOutput = "Error Code:'0002'!\n No Result";
-	
+		
 	} else if( $sErrMesg===null || $sErrMesg===false || $sErrMesg==="" ) {
 		//-- The Error Message has been corrupted --//
 		$sOutput  = "Error Code:'0003'!\n Critical Error has occured!\n Undefinable Error Message\n";
-	
+		
 	} else if( $sErrMesg!=false ) {
 		//-- Output the Error Message --//
 		$sOutput  = $sErrMesg;
