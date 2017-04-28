@@ -30,6 +30,7 @@ sap.ui.controller("mjs.staging.StagingHome", {
 		{ "display" : "JQPlot line" , "link" : "pJqplot_line" },
 		{ "display" : "JQPlot Bar" , "link" : "pJqplot_bar" },
 		{ "display" : "Controller" , "link" : "pControlTools" },
+		{ "display" : "DeviceList" , "link" : "pDeviceList" },
 	],
 	
 	

@@ -1667,6 +1667,12 @@ var aPages = [
 		"Location":		"mjs.staging.ControlTools",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.ControlTools\" Page!\n"
+	},
+	{ 
+		"Id":			"pDeviceList",
+		"Location":		"mjs.staging.DeviceList",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.DeviceList\" Page!\n"
 	}
 	
 ];

@@ -172,7 +172,13 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 		var sGroupName			= "";				//-- STRING:	Holds the "UI Grouping Name" that will be used. --//
 		var aDevice				= {};				//-- ARRAY:		--//
 		var aMenuItems = [                          //-- ARRAY:		Holds the items for building the action menu. --//
-            {
+			{
+				text: "Add Device",
+				select:	function (oControlEvent) {
+					IOMy.common.NavigationChangePage("pSettingsLinkAdd", {room : IOMy.common.RoomSelected});
+				}
+			},	   
+			{
                 text: "NO FILTER",
                 select: function(oControlEvent) {
                     if (oController.sFilter !== "") {

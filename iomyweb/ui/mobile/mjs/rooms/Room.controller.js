@@ -351,7 +351,13 @@ sap.ui.controller("mjs.rooms.Room", {
                 id : oController.createId("extrasMenu"),        // Uses the page ID
                 icon : "sap-icon://GoogleMaterial/more_vert",
                 items : [
-                    {
+					{
+                        text: "Add Device",
+                        select:	function (oControlEvent) {
+                            IOMy.common.NavigationChangePage("pSettingsLinkAdd", {room : IOMy.common.RoomSelected});
+                        }
+                    },
+					                    {
                         text: "Edit Room Information",
                         select:	function (oControlEvent) {
                             IOMy.common.NavigationChangePage("pSettingsRoomEdit", {room : IOMy.common.RoomSelected});
