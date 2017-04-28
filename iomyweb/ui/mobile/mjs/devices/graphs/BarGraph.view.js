@@ -69,10 +69,12 @@ sap.ui.jsview("mjs.devices.graphs.BarGraph", {
 		//--------------------------------------------------------------------//
 		sap.ui.Device.orientation.attachHandler(
 			function () {
-				var dateCurrentTime = new Date();
-				$("#GraphPage_Main").html("");
-				$("#GraphPage_Main_Info").html("");
-				me.oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), "Week" );
+				if (oApp.getCurrentPage().getId() === me.getId()) {
+					var dateCurrentTime = new Date();
+					$("#GraphPage_Main").html("");
+					$("#GraphPage_Main_Info").html("");
+					me.oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), "Week" );
+				}
 			}
 		);
 

@@ -69,10 +69,12 @@ sap.ui.jsview("mjs.devices.graphs.PieGraph", {
 		//--------------------------------------------------------------------//
 		sap.ui.Device.orientation.attachHandler(
 			function () {
-				var dateCurrentTime = new Date();
-				$("#PieGraphPage_Main").html("");
-				$("#PieGraphPage_Main_Info").html("");
-				me.oController.GetPieDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000) );
+				if (oApp.getCurrentPage().getId() === me.getId()) {
+					var dateCurrentTime = new Date();
+					$("#PieGraphPage_Main").html("");
+					$("#PieGraphPage_Main_Info").html("");
+					me.oController.GetPieDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000) );
+				}
 			}
 		);
 

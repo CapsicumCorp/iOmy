@@ -68,10 +68,12 @@ sap.ui.jsview("mjs.devices.graphs.LineGraph", {
         //--------------------------------------------------------------------//
         sap.ui.Device.orientation.attachHandler(
             function () {
-                var dateCurrentTime = new Date();
-				$("#LineGraphPage_Main").html("");
-                $("#LineGraphPage_Main_Info").html("");
-                oController.GetLineDataAndDrawGraph( Math.floor(dateCurrentTime.getTime() / 1000), oController.sTimePeriod );
+				if (oApp.getCurrentPage().getId() === me.getId()) {
+					var dateCurrentTime = new Date();
+					$("#LineGraphPage_Main").html("");
+					$("#LineGraphPage_Main_Info").html("");
+					oController.GetLineDataAndDrawGraph( Math.floor(dateCurrentTime.getTime() / 1000), oController.sTimePeriod );
+				}
             }
         );
 
