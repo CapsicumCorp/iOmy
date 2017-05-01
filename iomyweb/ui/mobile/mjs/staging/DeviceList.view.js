@@ -120,7 +120,7 @@ sap.ui.jsview("mjs.staging.DeviceList", {
 														press : function () {
 															IOMy.common.NavigationChangePage("pDeviceData", { "ThingId":3 }, false);
 														}
-													}).addStyleClass("Font-RobotoCondensed TextSizeMedium Text_grey_20 MarTop1d25Rem iOmyLink"),
+													}).addStyleClass("Font-RobotoCondensed TextSizeMedium Text_grey_20 MarTop1d0Rem iOmyLink"),
 													new  sap.ui.core.Icon ({
 														layoutData : new sap.m.FlexItemData({
 															growFactor : 0.25
@@ -152,7 +152,7 @@ sap.ui.jsview("mjs.staging.DeviceList", {
 												]
                                             }).addStyleClass("")
                                         ]
-                                    }).addStyleClass("MarLeft3px PadRight3px"),
+                                    }).addStyleClass("MarLeft4px PadRight4px"),
                                 ]
                             }).addStyleClass("minheight58px ListItem"),
                             // -- Fridge --//
@@ -177,7 +177,7 @@ sap.ui.jsview("mjs.staging.DeviceList", {
 														press : function () {
 															IOMy.common.NavigationChangePage("pDeviceData", { "ThingId":2 }, false);
 														}
-													}).addStyleClass("Font-RobotoCondensed TextSizeMedium Text_grey_20 MarTop1d25Rem iOmyLink"),
+													}).addStyleClass("Font-RobotoCondensed TextSizeMedium Text_grey_20 MarTop1d0Rem iOmyLink"),
 													new  sap.ui.core.Icon ({
 														layoutData : new sap.m.FlexItemData({
 															growFactor : 0.25
@@ -209,7 +209,7 @@ sap.ui.jsview("mjs.staging.DeviceList", {
 												]
                                             }).addStyleClass("")
                                         ]
-                                    }).addStyleClass("MarLeft3px PadRight3px"),
+                                    }).addStyleClass("MarLeft4px PadRight4px"),
                                 ]
                             }).addStyleClass("minheight58px ListItem"),
 							 // -- Lamp --//
@@ -266,7 +266,7 @@ sap.ui.jsview("mjs.staging.DeviceList", {
 												]
                                             }).addStyleClass("")
                                         ]
-                                    }).addStyleClass("MarLeft3px PadRight3px"),
+                                    }).addStyleClass("MarLeft4px PadRight4px"),
                                 ]
                             }).addStyleClass("minheight58px ListItem"),
                         ]
