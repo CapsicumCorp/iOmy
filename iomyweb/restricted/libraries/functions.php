@@ -414,7 +414,7 @@ function GetPremiseLogsBetweenUTS( $iPremiseId, $iStartstamp, $iEndstamp ) {
 	//------------------------------------------------------------//
 	try {
 		$aResult = dbGetPremiseLogsBetweenUTS( $iPremiseId, $iStartstamp, $iEndstamp );
-
+		
 		if( $aResult["Error"]===true ) {
 			//-- Display the Error Message that the function returned --//
 			$bError = true;
@@ -428,7 +428,7 @@ function GetPremiseLogsBetweenUTS( $iPremiseId, $iStartstamp, $iEndstamp ) {
 		$sErrMesg .= "Critical Error fetching PremiseLog! \n";
 		$sErrMesg .= $e1->getMessage();
 	}
-
+	
 	
 	//------------------------------------------------------------//
 	//-- 9.0 - Return the Results or Error Message              --//

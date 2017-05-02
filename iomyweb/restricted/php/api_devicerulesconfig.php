@@ -35,28 +35,30 @@ if( !defined('SITE_BASE') ) {
 //------------------------------------------------------------//
 //-- 1.2 - INITIALISE VARIABLES                             --//
 //------------------------------------------------------------//
-$bError                     = false;        //-- BOOLEAN:       Used to indicate if an error has been caught --//
-$iErrCode                   = 0;            //-- INTEGER:       Used to hold the error code  --//
-$sErrMesg                   = "";           //-- STRING:        Used to store the error message after an error has been caught --//
-$sOutput                    = "";           //-- STRING:        This is the --//
+$bError                     = false;        //-- BOOLEAN:       Used to indicate if an error has been caught. --//
+$iErrCode                   = 0;            //-- INTEGER:       Used to hold the error code. --//
+$sErrMesg                   = "";           //-- STRING:        Used to store the error message after an error has been caught. --//
+$sOutput                    = "";           //-- STRING:        This is what this API returns. --//
 $sPostMode                  = "";           //-- STRING:        Used to store which Mode the API should function in.  --//
-$iPostHubId                 = 0;            //-- INTEGER:       This is used to store which HubId that should be telnetted to. --//
-$sPostConfig                = "";           //-- STRING:        --//
-$aPostConfig                = array();      //-- ARRAY:         --//
+$iPostHubId                 = 0;            //-- INTEGER:       This is the HTTP POST "HubId" parameter used to store which HubId that this API will edit the config file for. (has to be the local one) --//
+$sPostConfig                = "";           //-- STRING:        This is the HTTP POST "Config" parameter when it is still in a json string format. --//
+$aPostConfig                = array();      //-- ARRAY:         This is the HTTP POST "Config" parameter after it has been converted to a PHP array. --//
 $aResult                    = array();      //-- ARRAY:         Used to store the results.  --//
 $sNetworkAddress            = "";           //-- STRING:        --//
 $iNetworkPort               = 0;            //-- INTEGER:       --//
 $aHubData                   = array();      //-- ARRAY:         --//
 $bFound                     = false;        //-- BOOLEAN:       Used to indicate if a match is found or not. --//
+$bRenameResult              = false;        //-- BOOLEAN:       Used to hold the result of if the renaming of the temp config file was successful or not. --//
+
 $sFileContents              = "";           //-- STRING:        --//
 $aDeviceRulesVariable       = array();      //-- ARRAY:         --//
 $sTestFileContents          = "";           //-- STRING:        --//
-$sNewConfigFileContents     = 
+$sNewConfigFileContents     = "";           //-- STRING:        --//
 
 //- Constants that need to be added to a function in the fuctions library --//
-$iWatchInputsHubTypeId      = 0;            //-- INTEGER:       --//
-$sDeviceRulesFilename       = "";
-
+$iWatchInputsHubTypeId      = 0;            //-- INTEGER:       It will hold the only HubTypeId that is supported by this API. --//
+$sDeviceRulesFilename       = "";           //-- STRING:        Holds the filename of the rules config file. --//
+$sDeviceRulesFilenameTemp   = "";           //-- STRING:        Holds the filename of the temporary file that will be used to make the real one. --//
 
 //------------------------------------------------------------//
 //-- 1.3 - IMPORT REQUIRED LIBRARIES                        --//
@@ -70,7 +72,7 @@ require_once SITE_BASE.'/restricted/libraries/editconfig/device_rules.php';
 //------------------------------------------------------------//
 $iWatchInputsHubTypeId      = LookupFunctionConstant("AndroidWatchInputsHubTypeId");
 $sDeviceRulesFilename       = '/sdcard/iOmy/timerules.cfg';
-
+$sDeviceRulesFilenameTemp   = '/sdcard/iOmy/timerules.tmp';
 
 
 //====================================================================//
@@ -107,7 +109,7 @@ if($bError===false) {
 			$iErrCode  = 101;
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
-			$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
+			$sErrMesg .= "Please use a valid \"Mode\" parameter. \n";
 			$sErrMesg .= "eg. \n \"FetchConfigArray\" or \"SaveConfigArray\" \n\n";
 		}
 		
@@ -175,6 +177,7 @@ if($bError===false) {
 		}
 	}
 }
+
 
 //====================================================================//
 //== 4.0 - PREPARE                                                  ==//
@@ -260,7 +263,6 @@ if( $bError===false ) {
 						$sErrMesg .= "Problem looking up the Info for the selected Hub\n";
 						$sErrMesg .= $aHubData['ErrMesg'];
 					}
-					
 				} catch( Exception $e0218 ) {
 					$bError = true;
 					$iErrCode  = 218;
@@ -271,7 +273,7 @@ if( $bError===false ) {
 			}
 		}
 	} catch( Exception $e0200 ) {
-		$bError = true;
+		$bError    = true;
 		$iErrCode  = 200;
 		$sErrMesg .= "Error Code:'0200' \n";
 		$sErrMesg .= "Critical Error Occurred!\n";
@@ -291,37 +293,89 @@ if( $bError===false ) {
 		//================================================================//
 		if( $sPostMode==="FetchConfigArray" ) {
 			try {
+				//---------------------------------------------------------------------//
+				//-- Attempt to make a default file if the current one doesn't exist --//
+				//---------------------------------------------------------------------//
+				if( !file_exists( $sDeviceRulesFilename ) ) {
+					//-- NOTE 1: The reason this is done this way as opposed to just making the file in the correct location to start with instead of making a file and renaming it is due to Matthew believe there may be an issue with doing it that way and watchinputs --//
+					
+					//--------------------------------------------------------//
+					//-- Create a blank rules file in the correct directory --//
+					//--------------------------------------------------------//
+					$oFile = fopen( $sDeviceRulesFilenameTemp, 'w' );
+					
+					if( $oFile===null || $oFile===false ) {
+						//-- Display an Error Message --//
+						$bError     = true;
+						$iErrCode   = 1403;
+						$sErrMesg  .= "Error Code:'1403' \n";
+						$sErrMesg  .= "Problem creating the temp Device Rules Config file!\n";
+					}
+					
+					//--------------------------------------------------------//
+					//-- Write the empty rules file                         --//
+					//--------------------------------------------------------//
+					if( $bError===false ) {
+						//-- Write the default category --//
+						$iTemp = fwrite( $oFile, "[timerules]\n" );
+						
+						//-- Close the file connection --//
+						fclose( $oFile );
+						
+						//-- Check if the writing was successful --//
+						if( $iTemp!==null && $iTemp!==false ) {
+							//--------------------------------------------------------//
+							//-- Rename the new file to the correct filename        --//
+							//--------------------------------------------------------//
+							$bRenameResult = rename( $sDeviceRulesFilenameTemp, $sDeviceRulesFilename );
+							
+							
+						} else {
+							$bError     = true;
+							$iErrCode   = 1404;
+							$sErrMesg  .= "Error Code:'1404' \n";
+							$sErrMesg  .= "Problem writing data to the temp Device Rules Config file!\n";
+						}
+					}
+				}
 				
-				if( file_exists( $sDeviceRulesFilename ) ) {
-					//--------------------------------------------//
-					//-- Get the contents of the Config file    --//
-					//--------------------------------------------//
-					$sFileContents        = file_get_contents( $sDeviceRulesFilename );
-					
-					//--------------------------------------------//
-					//-- Parse the Config                       --//
-					//--------------------------------------------//
-					$aDeviceRulesVariable = SpecialConfigParser( $sFileContents );
-					
-					//--------------------------------------------//
-					//-- Prepare the Results                    --//
-					//--------------------------------------------//
-					if( count($aDeviceRulesVariable) >=1 ) {
-						$aResult = array(
-							"Error" => false,
-							"Data"  => $aDeviceRulesVariable
-						);
+				
+				//---------------------------------------------------------------------//
+				//-- Open the Config File                                            --//
+				//---------------------------------------------------------------------//
+				if( $bError===false ) {
+					if( file_exists( $sDeviceRulesFilename ) ) {
+						//--------------------------------------------//
+						//-- Get the contents of the Config file    --//
+						//--------------------------------------------//
+						$sFileContents        = file_get_contents( $sDeviceRulesFilename );
+						
+						//--------------------------------------------//
+						//-- Parse the Config                       --//
+						//--------------------------------------------//
+						$aDeviceRulesVariable = SpecialConfigParser( $sFileContents );
+						
+						//--------------------------------------------//
+						//-- Prepare the Results                    --//
+						//--------------------------------------------//
+						if( count($aDeviceRulesVariable) >=1 ) {
+							$aResult = array(
+								"Error" => false,
+								"Data"  => $aDeviceRulesVariable
+							);
+						} else {
+							$bError     = true;
+							$iErrCode   = 1402;
+							$sErrMesg  .= "Error Code:'1402' \n";
+							$sErrMesg  .= "The Device Rules file doesn't appear to be setup!\n";
+							$sErrMesg  .= json_encode( $aDeviceRulesVariable );
+						}
 					} else {
 						$bError     = true;
-						$iErrCode   = 1402;
-						$sErrMesg  .= "Error Code:'1402' \n";
-						$sErrMesg  .= "The Device Rules file doesn't appear to be setup!\n";
+						$iErrCode   = 1401;
+						$sErrMesg  .= "Error Code:'1401' \n";
+						$sErrMesg  .= "Problem finding the Device Rules Config file!\n";
 					}
-				} else {
-					$bError     = true;
-					$iErrCode   = 1401;
-					$sErrMesg  .= "Error Code:'1401' \n";
-					$sErrMesg  .= "Problem finding the Device Rules Config file!\n";
 				}
 			} catch( Exception $e1400 ) {
 				//-- Display an Error Message --//
@@ -333,7 +387,7 @@ if( $bError===false ) {
 			}
 		
 		//================================================================//
-		//== 5.2 - MODE:                  ==//
+		//== 5.2 - MODE:                                                ==//
 		//================================================================//
 		} else if( $sPostMode==="SaveConfigArray" ) {
 			try {
@@ -347,20 +401,21 @@ if( $bError===false ) {
 					if( $iTemp!==null && $iTemp!==false ) {
 						
 						$aResult = array(
-							"Error"      => false,
-							"Data"       => array(
+							"Error" => false,
+							"Data"  => array(
 								"Success" => true
 							)
 						);
 						
-						
 					} else {
+						//-- Display an Error Message --//
 						$bError     = true;
-						$iErrCode   = 2401;
-						$sErrMesg  .= "Error Code:'2401' \n";
-						$sErrMesg  .= "Problem finding the Device Rules Config file!\n";
+						$iErrCode   = 2402;
+						$sErrMesg  .= "Error Code:'2402' \n";
+						$sErrMesg  .= "Problem writing the Device Rules Config file!\n";
 					}
 				} else {
+					//-- Display an Error Message --//
 					$bError     = true;
 					$iErrCode   = 2401;
 					$sErrMesg  .= "Error Code:'2401' \n";
@@ -375,24 +430,24 @@ if( $bError===false ) {
 				$sErrMesg  .= $e2400->getMessage();
 			}
 			
-			
 		//================================================================//
 		//== UNSUPPORTED MODE                                           ==//
 		//================================================================//
 		} else {
-			$bError = true;
+			$bError    = true;
 			$iErrCode  = 401;
 			$sErrMesg .= "Error Code:'0401' \n";
 			$sErrMesg .= "Unsupported Mode! \n";
 		}
-		
 	} catch( Exception $e0400 ) {
-		$bError = true;
+		$bError    = true;
 		$iErrCode  = 400;
 		$sErrMesg .= "Error Code:'0400' \n";
+		$sErrMesg .= "Internal API Error! \n";
 		$sErrMesg .= $e0400->getMessage();
 	}
 }
+
 //====================================================================//
 //== 8.0 - Log the Results                                          ==//
 //====================================================================//
@@ -433,7 +488,7 @@ if( $bError===false && $aResult!=false ) {
 	
 	} else if( $sErrMesg===null || $sErrMesg===false || $sErrMesg==="" ) {
 		//-- The Error Message has been corrupted --//
-		$sOutput  = "Error Code:'0003'!\n Critical Error has occured!\n Undefinable Error Message\n";
+		$sOutput  = "Error Code:'0003'!\n Critical Error has occured!\n Undefinable Error Message.\n";
 	
 	} else if( $sErrMesg!=false ) {
 		//-- Output the Error Message --//

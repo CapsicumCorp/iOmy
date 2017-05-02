@@ -188,7 +188,6 @@ function SpecialConfigParser( $sFileContent ) {
 				//--------------------------------------------------------//
 				$bPerformNormalAdd = true;
 				
-				
 				//--------------------------------------------------------//
 				//-- Special Devices                                    --//
 				//--------------------------------------------------------//
@@ -197,7 +196,6 @@ function SpecialConfigParser( $sFileContent ) {
 					if( $bSpecialFlag1===true && $bSpecialFlag2===true && $bSpecialFlag3 ) {
 						$bPerformSpecialAdd = true;
 					}
-					
 					
 					//--------------------------------------------------------//
 					//-- IF the Category changes                            --//
@@ -290,9 +288,8 @@ function SpecialConfigParser( $sFileContent ) {
 							$bSpecialPending   = true;
 						}
 					}
+					
 					//--------------------------------------------------------//
-					
-					
 					if( $bPerformNormalAdd===true ) { 
 						//-- Add to the current Category --//
 						$aExtractedFileData[$sCurrentCategory][] = $aTemp;
@@ -305,6 +302,9 @@ function SpecialConfigParser( $sFileContent ) {
 				} else if( $aTemp['Type']==="Category" ) {
 					//-- Set the Category as the Current Category --//
 					$sCurrentCategory = $aTemp['Value'];
+					
+					//-- Setup an array for the category --//
+					$aExtractedFileData[$sCurrentCategory] = array();
 					
 				}
 			}
