@@ -24,6 +24,8 @@ package com.capsicumcorp.iomy.apps.iomy;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -32,12 +34,17 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.HttpAuthHandler;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
 
 /**
  * IOMy Web View Activity displays the app itself. The main app interface was created using OpenUI5,
@@ -47,6 +54,7 @@ public class IOMy extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener {
 
     private int menuItemId=-1;
+    private IOMy me;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -97,6 +105,8 @@ public class IOMy extends AppCompatActivity
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+        me = this;
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_iomy);
 
@@ -127,7 +137,70 @@ public class IOMy extends AppCompatActivity
         WebView iomy = (WebView) findViewById(R.id.iomy_view);
         WebSettings iomySettings = iomy.getSettings();
         iomySettings.setJavaScriptEnabled(true);
-        iomy.setWebViewClient(new WebViewClient() {});
+        iomy.setWebViewClient(new WebViewClient() {
+
+            //------------------------------------------------------------------------------------//
+            // Give custom functionality to handle URLs with rtsp:// protocol
+            //------------------------------------------------------------------------------------//
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                Boolean takeOver = false;       //-- Flag that indicates whether the WebView handles the URL, or if iOmy has to seize control.
+
+                // If the URL uses the rtsp protocol, launch the default program to stream your onvif cameras.
+                if (url.startsWith("rtsp://")) {
+                    takeOver = true;
+
+                    Uri videoStreamUrl = Uri.parse(url);
+
+                    //----------------------------------------------------------------------------//
+                    // Create the intents
+                    //----------------------------------------------------------------------------//
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setType("video/H264");
+                    intent.setData(videoStreamUrl);
+
+                    // Obtain the title for the Onvif stream app chooser.
+                    String title = getResources().getString(R.string.app_chooser_rtsp_title);
+                    // Show the chooser
+                    Intent chooser = Intent.createChooser(intent, title);
+
+                    //----------------------------------------------------------------------------//
+                    // Verify the intent will resolve to at least one activity
+                    //----------------------------------------------------------------------------//
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(chooser);
+
+                    } else {
+                        //----------------------------------------------------------------------------//
+                        // Create an alert dialog box
+                        //----------------------------------------------------------------------------//
+                        AlertDialog.Builder confirmationDialogBuilder = new AlertDialog.Builder(me);
+
+                        //----------------------------------------------------------------------------//
+                        // Set the properties
+                        //----------------------------------------------------------------------------//
+                        confirmationDialogBuilder.setTitle("No suitable app found");
+                        confirmationDialogBuilder.setMessage("To view a live stream of this device, you will need an app installed on your phone that can access live feeds. VLC is able to view live streams.");
+                        confirmationDialogBuilder.setNegativeButton("OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,
+                                                        int id) {
+                                        dialog.cancel();
+                                    }
+                                }
+                        );
+
+                        //----------------------------------------------------------------------------//
+                        // Make the dialog appear
+                        //----------------------------------------------------------------------------//
+                        AlertDialog confirmationDialog = confirmationDialogBuilder.create();
+                        confirmationDialog.show();
+                    }
+                }
+
+                return takeOver;
+            }
+        });
+
         if (savedInstanceState != null) {
             iomy.restoreState(savedInstanceState);
         } else {

@@ -28,6 +28,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
  * @returns {iOmyException}
  */
 function IOmyException(message) {
+	if (message === undefined || message === null || message === false) {
+		message = "An exception has occurred in iOmy. No error message specified.";
+	}
+	
     this.name       = "iOmyException";
     this.message    = message;
     
@@ -84,6 +88,11 @@ function MissingSettingsMapException(message) {
 function IllegalArgumentException(message) {
     IOmyException.call(this, message);
     this.name       = "IllegalArgumentException";
+}
+
+function ThingIDNotValidException(message) {
+	IllegalArgumentException.call(this, message);
+	this.name       = "ThingIDNotValidException";
 }
 
 //----------------------------------------------------------------------------//
@@ -166,8 +175,8 @@ function SerialCodeNullException(message) {
 
 function NoZigbeeModemsException(message) {
     //------------------------------------------------------------------------//
-    // This exception can have a simple "Serial Code is null" message if one is
-    // not provided.
+    // This exception can have a simple "There are no Zigbee modems attached."
+    // message if one is not provided.
     //------------------------------------------------------------------------//
     if (message === undefined || message === null || message === "") {
         message = "There are no Zigbee modems attached.";
@@ -175,4 +184,17 @@ function NoZigbeeModemsException(message) {
     
     IOmyException.call(this, message);
     this.name = "NoZigbeeModemsException";
+}
+
+function StreamURLNotFoundException(message) {
+	//------------------------------------------------------------------------//
+    // This exception can have a simple not found message if one is not
+	// provided.
+    //------------------------------------------------------------------------//
+    if (message === undefined || message === null || message === "") {
+        message = "Could not find the stream IO in the given thing. The thing given may not be an Onvif stream.";
+    }
+    
+    IOmyException.call(this, message);
+    this.name = "StreamURLNotFoundException";
 }

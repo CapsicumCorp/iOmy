@@ -43,6 +43,123 @@ $.extend(IOMy.devices.onvif,{
         sThumbnailProfileLabelID : "ThumbnailProfileLabel",
         sThumbnailProfileFieldID : "ThumbnailProfileField"
     },
+	
+	RSStreamProfile		: 3970,
+	RSStreamURL			: 3971,
+	RSThumbnailProfile	: 3972,
+	RSThumbnailURL		: 3973,
+	RSPTZAxisX			: 3974,
+	RSPTZAxisY			: 3975,
+	
+	getStreamURL : function(mSettings) {
+		var me				= this;
+		var bError			= false;
+		var aErrorMessages	= [];
+		var iIOId			= null;
+		var iThingId;
+		var sUrl;
+		var mThingIdInfo;
+		var mThing;
+		var fnSuccess;
+		var fnFail;
+		
+		//--------------------------------------------------------------------//
+        // Check that all the parameters are there
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined) {
+            //----------------------------------------------------------------//
+            // REQUIRED: Find the hub ID
+            //----------------------------------------------------------------//
+			mThingIdInfo	= IOMy.validation.isThingIDValid(mSettings.ThingId);
+			bError			= !mThingIdInfo.bIsValid;
+			aErrorMessages	= mThingIdInfo.aErrorMessages;
+            
+            //----------------------------------------------------------------//
+            // Check for errors and throw an exception if there are errors.
+            //----------------------------------------------------------------//
+            if (bError) {
+                throw new ThingIDNotValidException("* "+aErrorMessages.join("\n* "));
+            } else {
+				iThingId = mSettings.ThingId;
+			}
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onSuccess callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onSuccess === undefined) {
+                fnSuccess = function () {};
+            } else {
+                fnSuccess = mSettings.onSuccess;
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onFail callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onFail === undefined) {
+                fnFail = function () {};
+            } else {
+                fnFail = mSettings.onFail;
+            }
+            
+        } else {
+            throw new MissingSettingsMapException();
+        }
+		
+		//--------------------------------------------------------------------//
+		// Check that the Thing ID passed the test. Throw an exception if not.
+		//--------------------------------------------------------------------//
+		if (bError) {
+			throw ThingIDNotValidException(aErrorMessages.join("\n"));
+		}
+		
+		//--------------------------------------------------------------------//
+		// Fetch the IO for the stream URL
+		//--------------------------------------------------------------------//
+		mThing = IOMy.common.ThingList["_"+iThingId];
+		
+		$.each(mThing.IO, function (sIndex, mIO) {
+			
+			if (sIndex !== undefined && sIndex !== null && mIO !== undefined && mIO !== null) {
+				if (mIO.RSTypeId === me.RSStreamURL) {
+					iIOId = mIO.Id;
+				}
+			}
+			
+		});
+		
+		if (iIOId === null) {
+			throw StreamURLNotFoundException();
+		}
+		
+		//--------------------------------------------------------------------//
+		// Run a request to fetch the URL
+		//--------------------------------------------------------------------//
+		sUrl = IOMy.apiodata.ODataLocation("datamedstring");
+		
+		IOMy.apiodata.AjaxRequest({
+			Url				: sUrl,
+			Columns			: ["CALCEDVALUE"],
+			WhereClause		: ["IO_PK eq " + iIOId],
+			OrderByClause	: [],
+			
+			onSuccess : function (response, data) {
+				var mErrorInfo = {};
+				
+				if (data.length > 0 && data[0] !== undefined && data[0].CALCEDVALUE) {
+					// Parse the URL through the success callback function.
+					fnSuccess(data[0].CALCEDVALUE);
+				} else {
+					mErrorInfo.status = -1;
+					mErrorInfo.responseText = "No Stream URL Found";
+					fnFail(mErrorInfo);
+				}
+			},
+			
+			onFail : function (response) {
+				fnFail(response);
+			}
+		});
+	},
     
     /**
      * Retrives a list of profiles within an Onvif server identified by its link
@@ -58,17 +175,17 @@ $.extend(IOMy.devices.onvif,{
         //---------------------------------------------------------------//
         // Check that both the link ID and callback functions are given. //
         //---------------------------------------------------------------//
+        if (iLinkId === undefined || isNaN(iLinkId)) {
+            bError = true;
+            jQuery.sap.log.error("A valid link ID must be given and must be a number.");
+        }
+        
         if (fnFailCallback === undefined) {
             fnFailCallback = function () {};
         }
         
         if (fnSuccessCallback === undefined) {
             fnSuccessCallback = function () {};
-        }
-        
-        if (iLinkId === undefined || isNaN(iLinkId)) {
-            bError = true;
-            jQuery.sap.log.error("A valid link ID must be given and must be a number.");
         }
         
         // If all went well...
@@ -332,6 +449,7 @@ $.extend(IOMy.devices.onvif,{
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
 		
+		var me					= this;
 		var oUIObject			= null;   //-- OBJECT:            --//
 		var aUIObjectItems		= [];     //-- ARRAY:             --//
          
@@ -386,6 +504,26 @@ $.extend(IOMy.devices.onvif,{
                                     new sap.m.Button ({
                                         width: "100%",
                                         icon : "sap-icon://GoogleMaterial/videocam",
+                                        press : function () {
+											try {
+												me.getStreamURL({
+													ThingId : aDeviceData.DeviceId,
+
+													onSuccess : function(sUrl) {
+														jQuery.sap.log.debug(sUrl);
+														window.open(sUrl);
+													},
+
+													onFail : function (response) {
+														IOMy.common.showError(response.responseText, "Couldn't load the stream");
+													}
+												});
+											} catch (ex) {
+												IOMy.common.showError(ex.message, "Couldn't load the stream");
+											}
+                                            //window.open("rtsp://");
+                                            //window.open("rtsp://admin:'admin'@10.4.5.72:8554/1.3gp");
+                                        }
                                     })
                                 ]
                             })
