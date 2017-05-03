@@ -58,7 +58,7 @@ sap.ui.jsview("mjs.devices.graphs.BarGraph", {
 				height: "90%",
                 content: [
                     new sap.ui.core.HTML ({
-						content: "<div id=\"GraphPage_Main\" class=\"\" style=\"min-width: 400px; padding-right: 5.5rem\" ></div><div id=\"GraphPage_Main_Info\" class=\"PadAll10px\" ></div>"
+						content: "<div id=\"GraphPage_Main\" class=\"\" style=\"min-width: 350px;\" ></div><div id=\"GraphPage_Main_Info\" class=\"PadAll5px PadLeft0px\" ></div>"
 					}).addStyleClass("")
                 ]
             }).addStyleClass("PadBottom10px minheight350px UserInputForm MarTop3px")

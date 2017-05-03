@@ -57,10 +57,10 @@ sap.ui.jsview("mjs.devices.graphs.LineGraph", {
                 backgroundDesign: "Transparent",
                 content: [
                     new sap.ui.core.HTML ({
-                        content: "<div id=\"LineGraphPage_Main\" class=\"\" style=\"padding-right: 5.5rem\" ></div><div id=\"LineGraphPage_Main_Info\" class=\"PadAll10px\" ></div>"
+                        content: "<div id=\"LineGraphPage_Main\" class=\"\" ></div><div id=\"LineGraphPage_Main_Info\" class=\"PadAll5px PadLeft0px\" ></div>"
                     }).addStyleClass("")
                 ]
-            }).addStyleClass("PadBottom10px UserInputForm MarTop3px minheight350px")
+            }).addStyleClass("PadBottom10px MarTop3px minheight350px")
         );
 
         //--------------------------------------------------------------------//

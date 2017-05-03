@@ -318,7 +318,7 @@ sap.ui.controller("mjs.devices.graphs.BarGraph", {
                                                                                         {
                                                                                             "sTitle":       "Weekly Usage for "+sDeviceName,
                                                                                             "sType":        "Basic",
-                                                                                            "UseLegend":    true,
+                                                                                            "UseLegend":    false,
                                                                                             "LegendPreset": 2,
                                                                                             "AxisX_Label":  "Week",
                                                                                             "AxisY_Label":  aData1Max.UOM_NAME,

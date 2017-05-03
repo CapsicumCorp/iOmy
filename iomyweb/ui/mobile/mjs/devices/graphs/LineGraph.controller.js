@@ -575,7 +575,7 @@ sap.ui.controller("mjs.devices.graphs.LineGraph", {
 						{
 							"sTitle":               sDeviceName + " (" + sIOName + ")",
 							"sType":                "1YAxis",
-							"UseLegend":            true,
+							"UseLegend":            false,
 							"LegendPreset":         2,
 							"AxisX_Label":          "Time",
 							"AxisX_UseDate":        true,
