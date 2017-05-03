@@ -137,6 +137,9 @@ public class IOMy extends AppCompatActivity
         WebView iomy = (WebView) findViewById(R.id.iomy_view);
         WebSettings iomySettings = iomy.getSettings();
         iomySettings.setJavaScriptEnabled(true);
+        iomySettings.setAppCacheEnabled(false);
+        // Enable launching external apps after an AJAX request.
+        iomySettings.setJavaScriptCanOpenWindowsAutomatically(true);
         iomy.setWebViewClient(new WebViewClient() {
 
             //------------------------------------------------------------------------------------//

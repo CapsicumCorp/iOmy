@@ -510,7 +510,6 @@ $.extend(IOMy.devices.onvif,{
 													ThingId : aDeviceData.DeviceId,
 
 													onSuccess : function(sUrl) {
-														jQuery.sap.log.debug(sUrl);
 														window.open(sUrl);
 													},
 
@@ -521,8 +520,6 @@ $.extend(IOMy.devices.onvif,{
 											} catch (ex) {
 												IOMy.common.showError(ex.message, "Couldn't load the stream");
 											}
-                                            //window.open("rtsp://");
-                                            //window.open("rtsp://admin:'admin'@10.4.5.72:8554/1.3gp");
                                         }
                                     })
                                 ]
