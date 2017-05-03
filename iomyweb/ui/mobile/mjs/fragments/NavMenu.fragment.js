@@ -39,7 +39,7 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 						//--------------------------------//
 						new sap.tnt.NavigationListItem( oController.createId("UsernameButton"), {
 							icon:		"sap-icon://GoogleMaterial/person",
-							text:		"User Accounts",
+							text:		IOMy.common.UserDisplayName,
 							expanded:	true,
 							items:	[
 							],
@@ -263,10 +263,6 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 			]
 		}).addStyleClass("IOMYNavMenuContainer");
 		
-		//--------------------------------//
-		//-- RETURN THE NAV POPUP		--//
-		//--------------------------------//
-        IOMy.functions.setCurrentUserNameForNavigation(oController);
 		//--------------------------------//
 		//-- RETURN THE NAV POPUP		--//
 		//--------------------------------//

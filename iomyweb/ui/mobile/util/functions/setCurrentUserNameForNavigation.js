@@ -29,12 +29,9 @@ $.sap.declare("IOMy.functions.setCurrentUserNameForNavigation",true);
 $.extend(IOMy.functions,{
     
     /**
-     * Procedure that sets the text of the User button in the IOMy button to be
-     * the username of the current user.
-     * 
-     * @param {type} oController        UI5 Controller or View that invokes this procedure.
+     * Procedure that retrieves and stores the user's display name.
      */
-    setCurrentUserNameForNavigation : function (oController) {
+    setCurrentUserNameForNavigation : function () {
         var me = this;
         
         IOMy.apiodata.AjaxRequest({
@@ -45,12 +42,10 @@ $.extend(IOMy.functions,{
             Limit           : 0,
             
             onSuccess : function (response, data) {
-                oController.byId("UsernameButton").setText(data[0].USERSINFO_DISPLAYNAME);
+                IOMy.common.UserDisplayName = data[0].USERSINFO_DISPLAYNAME;
             },
             
             onFail : function (response) {
-                oController.byId("UsernameButton").setText("Current User");
-                
                 me.reportSessionTerminated(response.message);
             }
         });

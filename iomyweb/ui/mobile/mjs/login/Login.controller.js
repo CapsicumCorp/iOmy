@@ -54,9 +54,7 @@ sap.ui.controller("mjs.login.Login", {
 								//--------------------------------------------//
 								//-- Kick the user to the Navigation Page	--//
 								//--------------------------------------------//
-								//-- TODO: Add the console command to the SAP LOGS (See Andrew for more details) --//
 								//jQuery.sap.log.debug("User has accidentally ended up on the login page! They are now being kicked to the Navigation Page!");
-								//console.log( "User has accidentally ended up on the login page! They are now being kicked to the Navigation Page!" );
 								IOMy.common.NavigationTriggerBackForward( false );
 								
 								//oApp.to("pNavMain");
@@ -100,6 +98,11 @@ sap.ui.controller("mjs.login.Login", {
                                             IOMy.rules.loadRules({
                                                 hubID : 1
                                             });
+											
+											//----------------------------------------------------------------------------//
+											// Load the user's display name
+											//----------------------------------------------------------------------------//
+											IOMy.functions.setCurrentUserNameForNavigation();
                                             
                                         } catch(e654321) {
                                             //-- ERROR:  TODO: Write a better error message--//
@@ -342,6 +345,11 @@ sap.ui.controller("mjs.login.Login", {
                                 IOMy.rules.loadRules({
                                     hubID : 1
                                 });
+								
+								//----------------------------------------------------------------------------//
+								// Load the user's display name
+								//----------------------------------------------------------------------------//
+								IOMy.functions.setCurrentUserNameForNavigation();
 
                             } catch(eLoginCore) {
                                 jQuery.sap.log.error("Login ReloadCoreVars\n"+eLoginCore.message);
