@@ -746,7 +746,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                         justifyContent: "End",
                         items : [
                             new sap.m.Label({
-                                text: sSerialCode
+                                text: "SN: " + (sSerialCode !== null ? sSerialCode : "N/A")
                             }).addStyleClass("Font-RobotoCondensed TextSizeXSmall Text_grey_20")
                         ]
                     }).addStyleClass("")
@@ -869,7 +869,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                                 "Id": aDeviceData.DeviceId
                             },
                             onFail : function(response) {
-                                IOMy.common.showError(response.message, "Error Changing Device Status");
+                                IOMy.common.showError(response.responseText, "Error Changing Device Status");
                             },
                             onSuccess : function( sExpectedDataType, aAjaxData ) {
                                 //console.log(aAjaxData.ThingPortStatus);

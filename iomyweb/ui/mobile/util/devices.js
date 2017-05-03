@@ -218,11 +218,11 @@ $.extend(IOMy.devices,{
         //-----------------------------------//
         //-- Door Lock --//
         } else if ( aDeviceData.DeviceTypeId==="-1") {
-            oUIObject = IOMy.devices.doorlock.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.zigbeesmartplug.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Window Sensor --//
         } else if ( aDeviceData.DeviceTypeId==="-2") {
-            oUIObject = IOMy.devices.windowsensor.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.zigbeesmartplug.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Bluetooth Scales --//
         } else if ( aDeviceData.DeviceTypeId==="-3") {
@@ -293,11 +293,11 @@ $.extend(IOMy.devices,{
         //-----------------------------------//
         //-- Door Lock --//
         } else if ( aDeviceData.DeviceTypeId==="-1") {
-            oUIObject = IOMy.devices.doorlock.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.zigbeesmartplug.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Window Sensor --//
         } else if ( aDeviceData.DeviceTypeId==="-2") {
-            oUIObject = IOMy.devices.windowsensor.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            oUIObject = IOMy.devices.zigbeesmartplug.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-- Bluetooth Scales --//
         } else if ( aDeviceData.DeviceTypeId==="-3") {

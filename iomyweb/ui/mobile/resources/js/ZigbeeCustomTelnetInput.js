@@ -131,7 +131,7 @@ function ZigbeeCustomTelnetInput(sID, mSettings) {
         var oButton = new sap.m.Button(me.sMenuButtonID,{
             icon : "sap-icon://GoogleMaterial/add_circle",
             press : function (oControlEvent) {
-                if (me.commandMenuOpen === false) {
+                if (me.commandMenuOpen !== true) {
                     // Get or create a new extra menu
                     var oButton = oControlEvent.getSource();
                     var oMenu;
@@ -152,12 +152,12 @@ function ZigbeeCustomTelnetInput(sID, mSettings) {
                     oMenu.openBy(oButton);
                     me.commandMenuOpen = true;
                     
-                } else if (me.commandMenuOpen === true) {
+                } else {
                     sap.ui.getCore().byId(me.sMenuID).close();
                     
-                } else {
-                    // Some programmer made a silly little error for this to execute.
-                    jQuery.sap.log.error("me.commandMenuOpen is neither true nor false.");
+//                } else {
+//                    // Some programmer made a silly little error for this to execute.
+//                    jQuery.sap.log.error("me.commandMenuOpen is neither true nor false.");
                 }
             }
         }).addStyleClass("height100Percent minwidth40px");
@@ -181,3 +181,11 @@ function ZigbeeCustomTelnetInput(sID, mSettings) {
     
     this.toggleZigbeeCommands(mSettings.enabled);
 }
+
+ZigbeeCustomTelnetInput.prototype.getValue = function () {
+	return sap.ui.getCore().byId(this.sInputID).getValue();
+};
+
+ZigbeeCustomTelnetInput.prototype.setValue = function (sValue) {
+	sap.ui.getCore().byId(this.sInputID).setValue(sValue);
+};

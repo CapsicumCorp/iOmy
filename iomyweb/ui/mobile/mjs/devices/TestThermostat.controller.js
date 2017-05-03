@@ -62,8 +62,8 @@ sap.ui.controller("mjs.devices.TestThermostat", {
 				IOMy.common.NavigationRefreshButtons( me );
                 
 				me.iThingId = evt.data.ThingId;
-//                me.DestroyUI();
-//                me.DrawUI();
+                me.DestroyUI();
+                me.DrawUI();
 			}
 		});
 	},
@@ -85,7 +85,7 @@ sap.ui.controller("mjs.devices.TestThermostat", {
 	onAfterRendering: function() {
         var me = this;
         
-        me.DrawUI();
+        //me.DrawUI();
 	},
 
 /**
@@ -190,19 +190,19 @@ sap.ui.controller("mjs.devices.TestThermostat", {
             selectedKey : "SBHeat",
 			width: "255px",
             items : [
-                new sap.m.SegmentedButtonItem ({
+                new sap.m.SegmentedButtonItem (me.createId("ModeOff"), {
                     text : "Off",
                     key : "SBOff"
                 }),
-                new sap.m.SegmentedButtonItem ({
+                new sap.m.SegmentedButtonItem (me.createId("ModeHeat"), {
                     text : "Heat",
                     key : "SBHeat"
                 }),
-                new sap.m.SegmentedButtonItem ({
+                new sap.m.SegmentedButtonItem (me.createId("ModeCool"), {
                     text : "Cool",
                     key : "SBCool"
                 }),
-                new sap.m.SegmentedButtonItem ({
+                new sap.m.SegmentedButtonItem (me.createId("ModeAuto"), {
                     text : "Auto",
                     key : "SBAuto"
                 })
@@ -211,21 +211,24 @@ sap.ui.controller("mjs.devices.TestThermostat", {
         
         //-- Fan Field --//
         me.wFanField = new sap.m.SegmentedButton ({
-            selectedKey : "SBYes",
+            selectedKey : "SBHigh",
 			width: "255px",
             items : [
-                new sap.m.SegmentedButtonItem ({
-                    text : "High"
+                new sap.m.SegmentedButtonItem (me.createId("FanSpeedHigh"), {
+                    text : "High",
+                    key : "SBHigh"
                 }),
-                new sap.m.SegmentedButtonItem ({
-                    text : "Med"
+                new sap.m.SegmentedButtonItem (me.createId("FanSpeedMed"), {
+                    text : "Med",
+                    key : "SBMed"
                 }),
-                new sap.m.SegmentedButtonItem ({
-                    text : "Low"
+                new sap.m.SegmentedButtonItem (me.createId("FanSpeedLow"), {
+                    text : "Low",
+                    key : "SBLow"
                 }),
-                new sap.m.SegmentedButtonItem ({
+                new sap.m.SegmentedButtonItem (me.createId("FanSpeedAuto"), {
                     text : "Auto",
-                    key : "SBYes"
+                    key : "SBAuto"
                 })
             ]
         }).addStyleClass("IOMySegmentedButtons");
@@ -343,10 +346,13 @@ sap.ui.controller("mjs.devices.TestThermostat", {
 					
 					if (mInfo.rstypeId == DevModule.RSTemperature) {
 						me.wCurrentTempField.setText("29°C");
+						
 					} else if (mInfo.rstypeId == DevModule.RSMode) {
-						me.wModeField;
+						me.wModeField.setSelectedKey("SBCool");
+						
 					} else if (mInfo.rstypeId == DevModule.RSFanSpeed) {
-						me.wFanField;
+						me.wModeField.setSelectedKey("SBAuto");
+						
 					} else if (mInfo.rstypeId == DevModule.RSDesiredCoolth ||
 						mInfo.rstypeId == DevModule.RSDesiredHeat )
 					{
