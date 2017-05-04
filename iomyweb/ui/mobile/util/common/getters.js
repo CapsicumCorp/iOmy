@@ -58,6 +58,40 @@ $.extend(IOMy.common, {
         
         return oPremise;
     },
+	
+	/**
+     * Fetches a hub from IOMy.common.HubList
+     * 
+     * @param {type} iHubId				ID of the premise to retrieve from memory
+     * @returns {Object}                The premise object
+     * 
+     * @throws PremiseNotFoundException
+     */
+    getHub : function (iHubId) {
+        //--------------------------------------------------------------------//
+        // Variables
+        //--------------------------------------------------------------------//
+        var oHub = null;
+        
+        //--------------------------------------------------------------------//
+        // Get hub and return it
+        //--------------------------------------------------------------------//
+        for (var i = 0; i < this.HubList.length; i++) {
+            // There is still an inconsistency with the data types of these two
+            // IDs. They are the same value but not the same type. This is why
+            // two equal signs are used to compare instead of the preferred three.
+            if (this.HubList[i].HubId == iHubId) {
+                oHub = this.HubList[i];
+                break;
+            }
+        }
+        
+        if (oHub === null) {
+            throw new HubNotFoundException();
+        }
+        
+        return oHub;
+    },
     
     /**
      * Fetches a link from IOMy.common.LinkList

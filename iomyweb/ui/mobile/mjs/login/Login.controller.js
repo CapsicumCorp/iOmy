@@ -95,9 +95,13 @@ sap.ui.controller("mjs.login.Login", {
                                             //----------------------------------------------------------------------------//
                                             // Load all the device rules into memory.
                                             //----------------------------------------------------------------------------//
-                                            IOMy.rules.loadRules({
-                                                hubID : 1
-                                            });
+											try {
+												IOMy.rules.loadRules({
+													hubID : 1
+												});
+											} catch (ex) {
+												jQuery.sap.log.warning(ex.message);
+											}
 											
 											//----------------------------------------------------------------------------//
 											// Load the user's display name
@@ -342,9 +346,13 @@ sap.ui.controller("mjs.login.Login", {
                                 //----------------------------------------------------------------------------//
                                 // Load all the device rules into memory.
                                 //----------------------------------------------------------------------------//
-                                IOMy.rules.loadRules({
-                                    hubID : 1
-                                });
+                                try {
+									IOMy.rules.loadRules({
+										hubID : 1
+									});
+								} catch (ex) {
+									jQuery.sap.log.warning(ex.message);
+								}
 								
 								//----------------------------------------------------------------------------//
 								// Load the user's display name

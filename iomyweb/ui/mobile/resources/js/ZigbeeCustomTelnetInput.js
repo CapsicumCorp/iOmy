@@ -112,18 +112,18 @@ function ZigbeeCustomTelnetInput(sID, mSettings) {
         // Insert each of the telnet commands to the menu.            //
         //------------------------------------------------------------//
         
-        for (var i = 0; i < me.aCommands.length; i++) {
-            oNavList.addItem(
+		$.each(me.aCommands, function (iIndex, sCommand) {
+			oNavList.addItem(
                 new sap.tnt.NavigationListItem({
-                    text : me.aCommands[i],
+                    text : sCommand,
                     select : function() {
-                        sap.ui.getCore().byId(me.sInputID).setValue(me.aCommands[i]);
+                        sap.ui.getCore().byId(me.sInputID).setValue(sCommand);
                         sap.ui.getCore().byId(me.sInputID).fireSubmit();
                         sap.ui.getCore().byId(me.sMenuID).close();
                     }
                 })
             );
-        }
+		});
         
         //------------------------------------------------------------//
         // Create the button to invoke the menu.                      //

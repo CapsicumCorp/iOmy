@@ -72,7 +72,8 @@ sap.ui.controller("mjs.rules.RulesOverview", {
 				IOMy.common.NavigationRefreshButtons( me );
                 
                 me.DestroyUI();
-                me.DrawUI();
+				me.DrawUI();
+                
 			}
 		});
 	},
@@ -131,55 +132,62 @@ sap.ui.controller("mjs.rules.RulesOverview", {
     DrawUI : function () {
         var me = this;
         var thisView = me.getView();
+		var mHub = IOMy.common.getHub(1);
         
-        //--------------------------------------------------------------------//
-        // Draw the table that shows a list of devices and their on/off times
-        //--------------------------------------------------------------------//
-        var wEntryTable = new sap.m.VBox({
-            items : [
-                // -- Device Header -- //
-                new sap.m.VBox({
-                    items : [
-                        // -- HBox Label Container. Aligns children horizontally -- //
-                        new sap.m.HBox({
-                            items : [
-                                new sap.m.Label({
-                                    text: "Zigbee Smart Plug"
-                                }).addStyleClass("Font-RobotoCondensed")
-                            ]
-                        }).addStyleClass("MarLeft3px")
-                    ]
-                }).addStyleClass("ConsistentMenuHeader ListItem width100Percent")
-            ]
-        });
-        
-        //--------------------------------------------------------------------//
-        // Draw each device into the table
-        //--------------------------------------------------------------------//
-//        for (var i = 0; i < me.Entries.length; i++) {
-//            wEntryTable.addItem( me.DrawEntry(me.Entries[i]) );
-//        }
-        
-        $.each(IOMy.common.ThingList, function (sThingIndex, mThing) {
-            
-            if (sThingIndex !== undefined && sThingIndex !== null && mThing !== undefined && mThing !== null) {
-                // Looking for Zigbee Smart Plugs
-                if (mThing.TypeId === 2) {
-                    try {
-                        wEntryTable.addItem( me.DrawEntry(mThing) );
-                    } catch (error) {
-                        // Failed to draw the item, expecting a SerialCodeNullException
-                        if (error.name !== "SerialCodeNullException") {
-                            // Some other exception was thrown. Log it.
-                            // .getMessage() is not called because it might not be an iOmy exception.
-                            jQuery.sap.log.error(error.name + ": " + error.message);
-                        }
-                        // Do nothing else.
-                    }
-                }
-            }
-            
-        });
+		if (mHub.HubTypeId === 2) {
+			//--------------------------------------------------------------------//
+			// Draw the table that shows a list of devices and their on/off times
+			//--------------------------------------------------------------------//
+			var wContainer = new sap.m.VBox({
+				items : [
+					// -- Device Header -- //
+					new sap.m.VBox({
+						items : [
+							// -- HBox Label Container. Aligns children horizontally -- //
+							new sap.m.HBox({
+								items : [
+									new sap.m.Label({
+										text: "Zigbee Smart Plug"
+									}).addStyleClass("Font-RobotoCondensed")
+								]
+							}).addStyleClass("MarLeft3px")
+						]
+					}).addStyleClass("ConsistentMenuHeader ListItem width100Percent")
+				]
+			});
+
+			//--------------------------------------------------------------------//
+			// Draw each device into the table
+			//--------------------------------------------------------------------//
+	//        for (var i = 0; i < me.Entries.length; i++) {
+	//            wEntryTable.addItem( me.DrawEntry(me.Entries[i]) );
+	//        }
+
+			$.each(IOMy.common.ThingList, function (sThingIndex, mThing) {
+
+				if (sThingIndex !== undefined && sThingIndex !== null && mThing !== undefined && mThing !== null) {
+					// Looking for Zigbee Smart Plugs
+					if (mThing.TypeId === 2) {
+						try {
+							wContainer.addItem( me.DrawEntry(mThing) );
+						} catch (error) {
+							// Failed to draw the item, expecting a SerialCodeNullException
+							if (error.name !== "SerialCodeNullException") {
+								// Some other exception was thrown. Log it.
+								// .getMessage() is not called because it might not be an iOmy exception.
+								jQuery.sap.log.error(error.name + ": " + error.message);
+							}
+							// Do nothing else.
+						}
+					}
+				}
+
+			});
+		} else {
+			var wContainer = new sap.m.MessageStrip({
+				text : "Your hub is not a valid WatchInputs Hub. Rules are only supported on WatchInputs Hubs."
+			}).addStyleClass("iOmyMessageInfoStrip");
+		}
         
         //--------------------------------------------------------------------//
         // Draw the containing panel and add it to the page.
@@ -187,7 +195,7 @@ sap.ui.controller("mjs.rules.RulesOverview", {
         me.wPanel = new sap.m.Panel ({
             backgroundDesign: "Transparent",
             content: [
-                wEntryTable
+                wContainer
             ]
         }).addStyleClass("MasterPanel PanelNoPadding PadBottom10px UserInputForm MarTop3px");
         

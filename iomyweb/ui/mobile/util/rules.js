@@ -28,15 +28,45 @@ IOMy.rules = new sap.ui.base.Object();
 $.extend(IOMy.rules, {
     
     RulesList : {},
+	
+	doesHubSupportDeviceRules : function (iHub) {
+		//--------------------------------------------------------------------//
+        // Check the hub ID.
+        //--------------------------------------------------------------------//
+		if (iHub === undefined || iHub === null) {
+			throw new MissingArgumentException("Hub ID must be specified.");
+		} else if (isNaN(iHub)) {
+			throw new IllegalArgumentException("Hub ID must be a number.");
+		}
+		
+		var mHub;
+		var bSupported;
+		
+		try {
+			mHub = IOMy.common.getHub(iHub);
+		} catch (ex) {
+			throw ex;
+		}
+		
+		if (mHub.HubTypeId == 2) {
+			bSupported = true;
+		} else {
+			bSupported = false;
+		}
+		
+		return bSupported;
+	},
     
     loadRules : function (mSettings) {
         //--------------------------------------------------------------------//
         // Declare and initialise variables
         //--------------------------------------------------------------------//
+		var me				= this;
         var bError          = false;
         var aErrorMessages  = [];
         var sURL            = IOMy.apiphp.APILocation("devicerules");
         var iHub;
+		var mHub;
         var fnSuccess;
         var fnFail;
         
@@ -50,13 +80,29 @@ $.extend(IOMy.rules, {
         //--------------------------------------------------------------------//
         if (mSettings !== undefined) {
             //----------------------------------------------------------------//
-            // REQUIRED: Find the hub ID
+            // REQUIRED: Find the hub ID and verify that it is a valid type.
             //----------------------------------------------------------------//
             if (mSettings.hubID === undefined || mSettings.hubID === null) {
                 fnAppendError("A Hub must be specified.");
             } else {
                 iHub = mSettings.hubID;
             }
+			
+			try {
+				mHub = IOMy.common.getHub(iHub);
+				
+				if (mHub.HubTypeId !== 2) {
+					fnAppendError("The given hub does not support device rules.");
+				}
+			} catch (ex) {
+				// Most likely it couldn't find the hub
+				if (ex.name === "HubNotFoundException") {
+					fnAppendError("Hub doesn't exist!");
+				} else {
+					// Another exception was thrown that wasn't expected. Rethrow.
+					throw ex;
+				}
+			}
             
             //----------------------------------------------------------------//
             // Check for errors and throw an exception if there are errors.

@@ -482,7 +482,6 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         mData.onSuccess = function (response, data) {
             jQuery.sap.log.debug("Success: "+JSON.stringify(response));
             jQuery.sap.log.debug("Success: "+JSON.stringify(data));
-            console.log("Success: "+JSON.stringify(data));
             
             //--------------------------------------------------------------//
             // Find the new Link ID                                         //
@@ -551,7 +550,6 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         // Grab the link type ID
         var iLinkTypeId = oSBox.getSelectedKey();
         
-        console.log(me.byId("addButton"));
         // Reset defaults
         me.byId("addButton").setEnabled(true);
 
@@ -560,7 +558,6 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         
         // Disable the add link button, and if the form is for the Zigbee link type, hide it.
         if (iLinkTypeId == 2) {
-            console.log(me.byId("addButton"));
             me.byId("addButton").setVisible(false);
         } else {
             me.byId("addButton").setVisible(true);

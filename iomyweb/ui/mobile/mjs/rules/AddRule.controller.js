@@ -271,10 +271,16 @@ sap.ui.controller("mjs.rules.AddRule", {
     },
     
     saveRule : function () {
-        var me          = this;
-        var mThing      = IOMy.common.ThingList["_"+me.iThingId];
-        var sSerialCode = IOMy.common.getLink(mThing.LinkId).LinkSerialCode;
+        var me				= this;
+		var bError			= false;
+		var aErrorMessages	= [];
+        var mThing			= IOMy.common.ThingList["_"+me.iThingId];
+        var sSerialCode		= IOMy.common.getLink(mThing.LinkId).LinkSerialCode;
         
+		if (me.wOnTime.getDateValue() === null) {
+			
+		}
+		
         var mRule = {
             "Type" : "DeviceTimeRule",
             "Serial" : sSerialCode,

@@ -143,6 +143,19 @@ function PremiseNotFoundException(message) {
     this.name       = "PremiseNotFoundException";
 }
 
+function HubNotFoundException(message) {
+	//------------------------------------------------------------------------//
+    // This exception can have a simple "Hub not found" message if one is
+    // not provided.
+    //------------------------------------------------------------------------//
+    if (message === undefined || message === null || message === "") {
+        message = "Hub Not Found!";
+    }
+    
+    ObjectNotFoundException.call(this, message);
+    this.name       = "HubNotFoundException";
+}
+
 function LinkNotFoundException(message) {
     //------------------------------------------------------------------------//
     // This exception can have a simple "Link not found" message if one is not

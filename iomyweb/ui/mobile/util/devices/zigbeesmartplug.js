@@ -34,7 +34,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
     
     ConnectedZigbeeModems : {},             // Associative Array of all the Connected dongles
     bJoinModeToggleCoolingDown : false,
-    bJoinModeToggleCoolDownPeriod : 180000, // 3 minute cooldown (in milliseconds)
+    bJoinModeToggleCoolDownPeriod : 5000, // 3 minute cooldown (in milliseconds)
     intervalCooldown : null,
     oZigbeeInput : null,
     sEnableTempJoinButtonText : "Join Device",
