@@ -307,12 +307,15 @@ public class InstallWizard {
         } else if (stepCompleted.equals(Titles.licenseAgreementTitle)) {
             this.summonSetupQuestions(activity);
 
-        }
+        } else if (this.installDemoData && stepCompleted.equals(Titles.setupQuestions)) {
+            //--- Download demo data from a url ---//
+            this.summonDownloadDemoData(activity);
+
         //--- TODO: Proceed from the setup questions to the question about using the device as the server. ---//
         //--- ONly if demo mode is enabled though
 
         //The following page shows progress of extracting server files and starting server services
-        else if (stepCompleted.equals(Titles.setupQuestions)) {
+        } else if (stepCompleted.equals(Titles.setupQuestions) || (this.installDemoData && stepCompleted.equals(Titles.downloadDemoDataTitle))) {
             this.loadServerDeviceProgress(activity);
 
         } else if (!this.servicesLoaded) {
@@ -384,6 +387,10 @@ public class InstallWizard {
         activity.startActivity(intent);
     }
 
+    public void summonDownloadDemoData(Activity activity) {
+        Intent intent = new Intent(activity, DownloadDemoDataPage.class);
+        activity.startActivity(intent);
+    }
     public void summonWebserverDevicePage(Activity activity) {
         Intent intent = new Intent(activity, WebserverServerDevice.class);
         activity.startActivity(intent);

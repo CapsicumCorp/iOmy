@@ -31,6 +31,7 @@ package com.capsicumcorp.iomy.apps.iomy;
 public interface Titles {
     String welcomePageTitle                 = "Welcome";
     String setupQuestions                   = "iOmy Setup Options";
+    String downloadDemoDataTitle            = "Download Demo Data";
     String licenseAgreementTitle            = "License Information";
     String demoNoticeTitle                  = "Demo Mode";
     String webserverPageTitle               = "Web Server Setup";

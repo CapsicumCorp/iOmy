@@ -298,126 +298,154 @@ public class ExtractServerServices extends Thread {
     }
     //Returns true if okay to run services or false if there was an error
     public boolean extractAssets() {
+        String[] zipFilename; //Array of zip filenames
+        ZipInputStream[] zipFileStream; //Array of zip files to extract
+        InputStream[] fileInfoStream; //Array of file info files that contain info about the zip files
+
         AssetManager assetManager = context.getAssets();
         long totalFileSize=0;
 
+        if (!Application.getInstance().getInstallDemoData()) {
+            // Zip files for non-demodata mode
+            zipFilename=new String[1];
+            zipFileStream=new ZipInputStream[1];
+            fileInfoStream=new InputStream[1];
+            try {
+                zipFilename[0]=ASSETSFILENAME;
+                zipFileStream[0]=new ZipInputStream(assetManager.open(ASSETSFILENAME));
+                fileInfoStream[0]=assetManager.open(ASSETSFILEINFOFILENAME);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        } else {
+            // Zip files for demodata mode
+            zipFilename=new String[2];
+            zipFileStream=new ZipInputStream[2];
+            fileInfoStream=new InputStream[2];
+            try {
+                zipFilename[0]=ASSETSFILENAME;
+                zipFileStream[0]=new ZipInputStream(assetManager.open(ASSETSFILENAME));
+                fileInfoStream[0]=assetManager.open(ASSETSFILEINFOFILENAME);
+                String demodataFilename=INTERNAL_LOCATION + "/" + "webservermysqldemodatabase.zip";
+                String demodataFileInfoFilename=INTERNAL_LOCATION + "/" + "webservermysqldemodatabasefileinfo.txt";
+                zipFilename[1]="webservermysqldemodatabase.zip";
+                zipFileStream[1]=new ZipInputStream(new FileInputStream(new File(demodataFilename)));
+                fileInfoStream[1]=new FileInputStream(new File(demodataFileInfoFilename));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
         //Get number of files
-        try {
-            InputStream assetsfileinfostream;
-
-            assetsfileinfostream = assetManager.open(ASSETSFILEINFOFILENAME);
-            assetsfileinfostream.mark(2048);
-            String totalFileSizeStr = getZipTotalFileSize(assetsfileinfostream);
+        totalFileSize=0;
+        for (InputStream stream : fileInfoStream) {
+            stream.mark(2048);
+            String totalFileSizeStr = getZipTotalFileSize(stream);
             if (!totalFileSizeStr.equals("")) {
                 try {
-                    totalFileSize = Integer.parseInt(totalFileSizeStr);
-                    if (progressPage!=null) {
-                        progressPage.setTotalRequests(totalFileSize);
-                    }
+                    totalFileSize += Integer.parseInt(totalFileSizeStr);
                 } catch (Exception e) {
                     //Do nothing
                 }
             }
-        } catch (IOException e) {
-            //Do nothing
+        }
+        if (progressPage!=null) {
+            progressPage.setTotalRequests(totalFileSize);
         }
         //Extract the web server assets
-        ZipInputStream zipInputStream = null;
-        try {
-            zipInputStream = new ZipInputStream(assetManager.open(ASSETSFILENAME));
-        } catch (IOException e) {
-            Log.println(Log.INFO, "WebServer", "Failed to access asset: " + ASSETSFILENAME);
-            return false;
-        }
-        Log.println(Log.INFO, "WebServer", "Extracting asset: " + ASSETSFILENAME);
-        try {
-            ZipEntry zipEntry;
-            long curFileSize=0;
+        int i;
+        long curFileSize = 0;
+        for (i=0; i<zipFileStream.length; ++i){
+            Log.println(Log.INFO, "WebServer", "Extracting asset: " + zipFilename[i]);
+            try {
+                ZipEntry zipEntry;
 
-            while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-                String zipEntryName=zipEntry.getName();
-                long zipFileSize=zipEntry.getSize();
+                while ((zipEntry = zipFileStream[i].getNextEntry()) != null) {
+                    String zipEntryName = zipEntry.getName();
+                    long zipFileSize = zipEntry.getSize();
 
-                //newfiles and newfolders are populated by the doUpgrade script
-                if (isUpgrade) {
-                    if (zipEntry.isDirectory()) {
-                        if (!newfolders.containsKey(zipEntryName)) {
-                            //Log.println(Log.INFO, "WebServer", "Skipping folder: " + zipEntryName);
-                            doNotification("Skipping folder: " + zipEntryName);
-                            zipInputStream.closeEntry();
-                            curFileSize+=zipFileSize;
+                    //newfiles and newfolders are populated by the doUpgrade script
+                    if (isUpgrade) {
+                        if (zipEntry.isDirectory()) {
+                            if (!newfolders.containsKey(zipEntryName)) {
+                                //Log.println(Log.INFO, "WebServer", "Skipping folder: " + zipEntryName);
+                                doNotification("Skipping folder: " + zipEntryName);
+                                zipFileStream[i].closeEntry();
+                                curFileSize += zipFileSize;
+                                changeProgressPagePercentageTextCustomCount(curFileSize);
+                                continue;
+                            }
+                        } else {
+                            if (!newfiles.containsKey(zipEntryName)) {
+                                //Log.println(Log.INFO, "WebServer", "Skipping file: " + zipEntryName);
+                                doNotification("Skipping file: " + zipEntryName);
+                                zipFileStream[i].closeEntry();
+                                curFileSize += zipFileSize;
+                                changeProgressPagePercentageTextCustomCount(curFileSize);
+                                continue;
+                            }
+                        }
+                    }
+                    //Select demo data if demo mode is enabled otherwise select normal data
+                    if (Application.getInstance().getInstallDemoData()) {
+                        //Skip extracting of normal data and extract demo data
+                        if (zipEntryName.startsWith("components/mysql/sbin/data/")) {
+                            //Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG: Skipping file: " + zipEntryName);
+                            doNotification("Skipping file: " + zipEntryName);
+                            zipFileStream[i].closeEntry();
+                            curFileSize += zipFileSize;
                             changeProgressPagePercentageTextCustomCount(curFileSize);
                             continue;
                         }
+                        if (zipEntryName.startsWith("demodata/mysql_database/")) {
+                            //Change the output folder name to components/mysql/sbin/data/
+                            zipEntryName = zipEntryName.replace("demodata/mysql_database/", "components/mysql/sbin/data/");
+                        } else if (zipEntryName.startsWith("demodata/website_config/")) {
+                            //Change the output folder name to iomyweb/
+                            zipEntryName = zipEntryName.replace("demodata/website_config/", "htdocs/restricted/config/");
+                        }
                     } else {
-                        if (!newfiles.containsKey(zipEntryName)) {
-                            //Log.println(Log.INFO, "WebServer", "Skipping file: " + zipEntryName);
+                        //Skip extracting of demo data folder as we are in normal mode
+                        if (zipEntryName.startsWith("demodata/")) {
+                            //Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG: Skipping file: " + zipEntryName);
                             doNotification("Skipping file: " + zipEntryName);
-                            zipInputStream.closeEntry();
+                            zipFileStream[i].closeEntry();
                             curFileSize += zipFileSize;
                             changeProgressPagePercentageTextCustomCount(curFileSize);
                             continue;
                         }
                     }
-                }
-                //Select demo data if demo mode is enabled otherwise select normal data
-                if (Application.getInstance().getInstallDemoData()) {
-                    //Skip extracting of normal data and extract demo data
-                    if (zipEntryName.startsWith("components/mysql/sbin/data/")) {
-                        //Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG: Skipping file: " + zipEntryName);
-                        doNotification("Skipping file: " + zipEntryName);
-                        zipInputStream.closeEntry();
-                        curFileSize+=zipFileSize;
-                        changeProgressPagePercentageTextCustomCount(curFileSize);
-                        continue;
+                    if (zipEntryName.equals(zipEntry.getName())) {
+                        //Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG: Extracting file: " + zipEntryName);
+                        doNotification("Extracting file: " + zipEntryName);
+                    } else {
+                        //Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG: Extracting file: " + zipEntry.getName() + " as " + zipEntryName);
+                        doNotification("Extracting file: " + zipEntry.getName() + " as " + zipEntryName);
                     }
-                    if (zipEntryName.startsWith("demodata/mysql_database/")) {
-                        //Change the output folder name to components/mysql/sbin/data/
-                        zipEntryName=zipEntryName.replace("demodata/mysql_database/", "components/mysql/sbin/data/");
-                    } else if (zipEntryName.startsWith("demodata/website_config/")) {
-                        //Change the output folder name to iomyweb/
-                        zipEntryName=zipEntryName.replace("demodata/website_config/", "htdocs/restricted/config/");
+                    if (zipEntry.isDirectory()) {
+                        createDirectory(zipEntryName);
+                    } else {
+                        //Using BufferedOutputStream reduces total extract time on slower devices by quite a lot compared
+                        //  to writing direct to a FileOutputStream
+                        BufferedOutputStream fout = new BufferedOutputStream(new FileOutputStream(INTERNAL_LOCATION + "/" + zipEntryName));
+                        byte[] buffer = new byte[4096 * 10];
+                        int length;
+                        while ((length = zipFileStream[i].read(buffer)) != -1) {
+                            fout.write(buffer, 0, length);
+                            curFileSize += length;
+                            changeProgressPagePercentageTextCustomCount(curFileSize);
+                        }
+                        fout.close();
                     }
-                } else {
-                    //Skip extracting of demo data folder as we are in normal mode
-                    if (zipEntryName.startsWith("demodata/")) {
-                        //Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG: Skipping file: " + zipEntryName);
-                        doNotification("Skipping file: " + zipEntryName);
-                        zipInputStream.closeEntry();
-                        curFileSize+=zipFileSize;
-                        changeProgressPagePercentageTextCustomCount(curFileSize);
-                        continue;
-                    }
+                    zipFileStream[i].closeEntry();
                 }
-                if (zipEntryName.equals(zipEntry.getName())) {
-                    //Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG: Extracting file: " + zipEntryName);
-                    doNotification("Extracting file: " + zipEntryName);
-                } else {
-                    //Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG: Extracting file: " + zipEntry.getName() + " as " + zipEntryName);
-                    doNotification("Extracting file: " + zipEntry.getName() + " as " + zipEntryName);
-                }
-                if (zipEntry.isDirectory()) {
-                    createDirectory(zipEntryName);
-                } else {
-                    //Using BufferedOutputStream reduces total extract time on slower devices by quite a lot compared
-                    //  to writing direct to a FileOutputStream
-                    BufferedOutputStream fout = new BufferedOutputStream(new FileOutputStream(INTERNAL_LOCATION + "/" + zipEntryName));
-                    byte[] buffer = new byte[4096 * 10];
-                    int length;
-                    while ((length = zipInputStream.read(buffer)) != -1) {
-                        fout.write(buffer, 0, length);
-                        curFileSize+=length;
-                        changeProgressPagePercentageTextCustomCount(curFileSize);
-                    }
-                    fout.close();
-                }
-                zipInputStream.closeEntry();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
             }
             //One last update to get to 100%
             changeProgressPagePercentageTextCustomCount(totalFileSize, true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
         }
         try {
             File dataversionoutfile = new File(INTERNAL_LOCATION + "/" + ASSETSVERSIONFILENAME);

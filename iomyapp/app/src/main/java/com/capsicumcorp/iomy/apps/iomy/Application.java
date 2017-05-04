@@ -27,6 +27,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
@@ -255,6 +257,26 @@ public class Application extends android.app.Application {
     public boolean getStartedFromUsb() { return startedFromUsb; }
     public boolean getInstallDemoData()             { return installWizard.getInstallDemoData(); }
 
+    public String getCurrentAppVersionName() {
+        String versionName = "";
+        try {
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            versionName = packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return versionName;
+    }
+    public int getCurrentAppVersionCode() {
+        int versionCode = -1;
+        try {
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            versionCode = packageInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return versionCode;
+    }
     static {
         System.loadLibrary("crystax");
         System.loadLibrary("gnustl_shared");

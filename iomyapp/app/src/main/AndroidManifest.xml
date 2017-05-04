@@ -108,6 +108,9 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
             android:name=".ServerProgressPage"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
         <activity
+            android:name=".DownloadDemoDataPage"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
+        <activity
             android:name=".NewUser"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
         <activity
