@@ -128,16 +128,18 @@ $.extend(IOMy.telnet,{
                         var sOutput = data.Data.Custom.join("\n");
                         this.logOutput(sOutput, false);
                         
-                        IOMy.rules.loadRules();
+                        IOMy.rules.loadRules({
+							hubID : iHubId
+						});
                         
                         fnSuccess();
                     } else {
                         this.logOutput(sOutput, true);
-                        fnFail();
+                        fnFail(data.ErrMesg);
                     }
                 } catch (error) {
                     this.logOutput(error.name + ": " + error.message);
-                    fnFail();
+                    fnFail(error.message);
                 }
             },
             
@@ -145,7 +147,7 @@ $.extend(IOMy.telnet,{
                 var sOutput = JSON.stringify(response);
                 this.logOutput(sOutput, true);
                 
-                fnFail();
+                fnFail(response.responseText);
             },
             
             logOutput : function (output, bError) {

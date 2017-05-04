@@ -58,7 +58,7 @@ sap.ui.jsview("mjs.rules.AddRule", {
             view : me,
             controller : oController,
             icon : "sap-icon://GoogleMaterial/home",
-            title : "New Rule"
+            title : "Rule"
         });
         
 		return oPage;

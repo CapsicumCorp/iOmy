@@ -1133,6 +1133,7 @@ html.sap-desktop .sapMBtn:focus>.sapMFocusable {
 
 .sapMIBar-CTX.sapMFooter-CTX :not(.sapMBtnDisabled) > .sapMBtnActive {
 	background-color: rgb(119,177,43);
+    border: 1px solid #6F9A39;
 }
 
 .sapTntNavLIGroup:not(.sapTntNavLIItemDisabled):hover {

@@ -141,7 +141,7 @@ sap.ui.controller("mjs.rules.AddRule", {
             displayFormat: "hh:mm a",
             placeholder: "Select an On Time",
             change: function () {}
-        }).addStyleClass("width100Percent");
+        }).addStyleClass("width100Percent IOMyTimePicker");
         
         //-- When the device should turn off --//
         me.wOffTime = new sap.m.TimePicker ({
@@ -150,7 +150,7 @@ sap.ui.controller("mjs.rules.AddRule", {
             displayFormat: "hh:mm a",
             placeholder: "Select an Off Time",
             change: function () {}
-        }).addStyleClass("width100Percent");
+        }).addStyleClass("width100Percent IOMyTimePicker");
         
         //--------------------------------------------------------------------//
         // Buttons
@@ -265,8 +265,8 @@ sap.ui.controller("mjs.rules.AddRule", {
         var sSerialCode = IOMy.common.getLink(mThing.LinkId).LinkSerialCode;
         var mRule       = IOMy.rules.RulesList[sSerialCode];
         
-        me.OnTime.setDateValue( IOMy.time.GetDateFromMilitaryTime(mRule.Ontime) );
-        me.OffTime.setDateValue( IOMy.time.GetDateFromMilitaryTime(mRule.Offtime) );
+        me.wOnTime.setDateValue( IOMy.time.GetDateFromMilitaryTime(mRule.Ontime) );
+        me.wOffTime.setDateValue( IOMy.time.GetDateFromMilitaryTime(mRule.Offtime) );
         
     },
     
@@ -289,6 +289,7 @@ sap.ui.controller("mjs.rules.AddRule", {
             
             onSuccess : function () {
                 IOMy.common.showSuccess("Rule for "+mThing.DisplayName+" was successfully applied.", "Success");
+				IOMy.common.NavigationChangePage( "pRuleDeviceList", {}, true);
             },
             
             onFail : function (sError) {

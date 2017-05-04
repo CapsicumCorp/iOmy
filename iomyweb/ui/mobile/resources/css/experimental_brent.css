@@ -174,3 +174,55 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
     background-color: #f9f9f9;
     border-color: #7c7c7c;
 }
+
+/*------------------------------------------------------------------------*/
+/* Timepicker styling
+/*------------------------------------------------------------------------*/
+/*-- Input Widget --*/
+.IOMyTimePicker.sapMTimePicker.sapMTPInputActive .sapMInputBaseInner {
+    border: 1px solid #8FC74A;
+}
+.IOMyTimePicker.sapMTPInputActive > .sapMTimePicker.sapMTPInputActive .sapMInputBaseInner {
+    border: 1px solid #8FC74A;
+}
+.IOMyTimePicker.sapMTPInputActive > div.sapMInputValHelp > .sapMInputValHelpInner.sapUiIcon.sapUiIconMirrorInRTL {
+    background: #8FC74A;
+}
+.IOMyTimePicker.sapMInputVH:not(.sapMInputBaseReadonly) .sapMInputValHelp>.sapMInputValHelpInner:active {
+    background: #8FC74A;
+}
+
+/*-- Popover Widget (Desktop) --*/
+.sapMTimePickerDropDown .sapMTimePickerContainer .sapMTPColumn .sapMTimePickerSlider .sapMTimePickerItem {
+    background: #8FC74A;
+}
+.sapMTimePickerDropDown .sapMTimePickerContainer .sapMTPColumn .sapMTimePickerSlider .sapMTimePickerItem:active {
+    background: #8FC74A;
+}
+.sapMTimePickerDropDown .sapMTimePickerContainer .sapMTPColumn .sapMTimePickerSlider .sapMTimePickerItem:hover {
+    background: #6F9A39;
+}
+.sapMTimePickerDropDown .sapMTimePickerContainer .sapMTPColumn.sapMTPSliderExpanded .sapMTimePickerSlider .sapMTimePickerItem:active {
+    background: #8FC74A;
+}
+
+.sapMTimePickerDropDown .sapMTimePickerContainer .sapMTPColumn.sapMTPSliderExpanded .sapMTimePickerSlider .sapMTPPickerSelectionFrame {
+    border: 2px solid #8FC74A;
+}
+.sapMTimePickerDropDown .sapMTimePickerContainer .sapMTPColumn.sapMTPSliderExpanded .sapMTimePickerSlider .sapMTPPickerSelectionFrame:hover{
+    border: 2px solid #6F9A39;
+}
+.sapMTimePickerDropDown .sapMTimePickerContainer .sapMTPColumn.sapMTPSliderExpanded .sapMTimePickerSlider .sapMTPPickerSelectionFrame:active + ul > li.sapMTimePickerItem.sapMTimePickerItemSelected {
+    background: #8FC74A;
+}
+
+/*-- Popover Widget (Phone) --*/
+.sap-phone .sapMTimePickerDropDown .sapMTimePickerContainer .sapMTPColumn .sapMTimePickerSlider .sapMTimePickerItem {
+    background: #8FC74A;
+}
+.sap-phone .sapMTimePickerDropDown .sapMTimePickerContainer .sapMTPColumn .sapMTimePickerSlider .sapMTimePickerItem:active {
+    background: #6F9A39;
+}
+.sap-phone .sapMTimePickerDropDown .sapMTimePickerContainer .sapMTPColumn.sapMTPSliderExpanded .sapMTimePickerSlider .sapMTPPickerSelectionFrame {
+    border: 2px solid #8FC74A;
+}
