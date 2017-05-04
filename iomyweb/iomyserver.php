@@ -1702,6 +1702,7 @@ if( $bTransactionStarted===true ) {
 if( $bError===false && $aResult!=false ) {
 	try {
 		//-- Force the page to JSON --//
+		header("Access-Control-Allow-Origin: *");
 		header('Content-Type: application/json');
 		
 		//-- Convert results to a string --//
@@ -1728,6 +1729,7 @@ if( $bError===false && $aResult!=false ) {
 //----------------------------------------//
 } else {
 	//-- Set the page to JSON when an error. Note this can be changed to "text/html" or "test/plain". --//
+	header("Access-Control-Allow-Origin: *");
 	header('Content-Type: application/json');
 	
 	if( $bError===false ) {
