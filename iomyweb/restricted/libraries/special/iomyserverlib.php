@@ -43,7 +43,6 @@ function DB_CreateDatabase( $sDatabaseName ) {
 	//----------------------------------------------------//
 	if($bError===false) {
 		try {
-			
 			//----------------------------------------//
 			//-- SQL Query - Insert Database        --//
 			//----------------------------------------//
@@ -1743,7 +1742,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 		  == #4.04# - USERSPREMISELOG                               ==
 		  ============================================================*/
 		case "PrivateUsersPremiseLog":
-			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSPREMISELOG` AS\n";
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSPREMISELOG` AS \n";
 			$sSQL .= "SELECT\n";
 			$sSQL .= "	`PERMPREMISE_READ` AS \"PERMISSIONS_READ\", \n";
 			$sSQL .= "	`PREMISELOGACTION_NAME`, \n";
@@ -1807,7 +1806,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 		  == #4.06# - USERSCOMM                                     ==
 		  ============================================================*/
 		case "PrivateUsersComm":
-			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSCOMM` AS\n";
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSCOMM` AS \n";
 			$sSQL .= "SELECT\n";
 			$sSQL .= "	`USERS_PK`, \n";
 			$sSQL .= "	`USERS_USERNAME`, \n";
@@ -1878,7 +1877,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 		  == #4.08# - USERSROOMS                                    ==
 		  ============================================================*/
 		case "PrivateUsersRooms":
-			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSROOMS` AS\n";
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSROOMS` AS \n";
 			$sSQL .= "SELECT\n";
 			$sSQL .= "	`USERS_PK`, \n";
 			$sSQL .= "	`USERS_USERNAME`, \n";
@@ -1961,7 +1960,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 		  == #4.10# - USERSTHING                                    ==
 		  ============================================================*/
 		case "PrivateUsersThing":
-			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSTHING` AS\n";
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VR_USERSTHING` AS \n";
 			$sSQL .= "SELECT\n";
 			$sSQL .= "	`USERS_PK`, \n";
 			$sSQL .= "	`PERMROOMS_READ`, \n";
@@ -5165,7 +5164,7 @@ function DB_CreateDefaultData4( $sDBName ) {
 			  == #6.9# - LINKTYPE                                       ==
 			  ============================================================*/
 			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Legacy: Cron Task' ); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Zigbee Home Automation Meter' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Zigbee HA' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Android Smartphone' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'iPhone' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Bluetooth Device' ); \n";
