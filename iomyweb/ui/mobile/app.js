@@ -1639,18 +1639,6 @@ var aPages = [
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.StagingHome\" Page!\n"
 	},
 	{ 
-		"Id":			"pRulesOverview",
-		"Location":		"mjs.staging.RulesOverview",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.RulesOverview\" Page!\n"
-	},
-	{ 
-		"Id":			"pAddRule",
-		"Location":		"mjs.staging.AddRule",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.AddRule\" Page!\n"
-	},
-	{ 
 		"Id":			"pJqplot_line",
 		"Location":		"mjs.staging.LineGraph",
 		"Type":			"JS",
@@ -1673,6 +1661,12 @@ var aPages = [
 		"Location":		"mjs.staging.DeviceList",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.DeviceList\" Page!\n"
+	},
+	{ 
+		"Id":			"pMotionJPEG",
+		"Location":		"mjs.staging.MotionJPEG",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.MotionJPEG\" Page!\n"
 	}
 	
 ];
