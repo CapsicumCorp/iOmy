@@ -34,6 +34,7 @@ $.extend(IOMy.common,{
         false,  // Step 5
         false,  // Step 6
         false,  // Step 7
+		false	// Step 8
     ],
     
     isCoreVariablesRefreshInProgress : function (iStep, fnFailCallback) {
@@ -51,7 +52,7 @@ $.extend(IOMy.common,{
             sErrorMessage = "Refresh Step (1 - " + iNumberOfSteps + ") not specified!";
         } else if (iStep < 1 || iStep > iNumberOfSteps) {
             bError = true;
-            sErrorMessage = "Step must be between 1 - " + iNumberOfSteps + ") not specified!";
+            sErrorMessage = "Step must be between 1 - " + iNumberOfSteps + "!";
         }
         
         //-- There is an error, report it an throw the exception. --//
@@ -71,7 +72,6 @@ $.extend(IOMy.common,{
         //--------------------------------------------------------------------//
         if (IOMy.common.CoreVariableRefreshStepsInProgress[ (iStep - 1) ]===true) {
             //-- Error has occurred --//
-            IOMy.common.showError( "Reloading of Core variables is already in progress! New attempt has been aborted.", "Core Variables");
             fnFailCallback();
             return true;
         } else {

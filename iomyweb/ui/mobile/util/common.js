@@ -206,8 +206,6 @@ $.extend(IOMy.common,{
                     }
                 );
 				
-				return false;
-				
 			}
 		});
 	},
@@ -708,7 +706,7 @@ $.extend(IOMy.common,{
                 "ROOMS_PREMISE_FK","LINK_PK","LINK_SERIALCODE","LINK_NAME","LINK_CONNECTED",
                 "LINK_STATE","LINKTYPE_PK","LINKTYPE_NAME","ROOMS_PK",
                 "LINKCONN_PK","LINKCONN_NAME","LINKCONN_ADDRESS","LINKCONN_USERNAME",
-                "LINKCONN_PASSWORD","LINKCONN_PORT"
+                "LINKCONN_PASSWORD","LINKCONN_PORT","LINK_COMM_FK"
             ],
 			WhereClause : [],
 			OrderByClause : ["LINK_PK asc"],
@@ -732,7 +730,8 @@ $.extend(IOMy.common,{
                         "LinkConnUsername" : data[i].LINKCONN_USERNAME,
                         "LinkConnPassword" : data[i].LINKCONN_PASSWORD,
                         "LinkConnPort" : data[i].LINKCONN_PORT,
-                        "PremiseId" : data[i].ROOM_PREMISE_FK
+                        "PremiseId" : data[i].ROOM_PREMISE_FK,
+						"CommId" : data[i].LINK_COMM_FK
 					});
 				}
                 
@@ -822,12 +821,13 @@ $.extend(IOMy.common,{
      * 1. Locale Information Lists
      * 2. Premise List
      * 3. Hub List
-     * 4. Room List
-     * 5. Link List
-     * 6. Link Type List
-     * 7. Thing List
+	 * 4. Comm List
+     * 5. Room List
+     * 6. Link List
+     * 7. Link Type List
+     * 8. Thing List
      * 
-     * There are seven steps.
+     * There are eight steps.
      */
     ReloadCoreVariables : function (fnCallback, fnFailCallback) {
         var me = this;
@@ -908,7 +908,10 @@ $.extend(IOMy.common,{
 //            IOMy.functions.getCurrentUsername( function () {
 //                me.ReloadVariablePremiseList(fnCallback, fnFailCallback);
 //            });
-        }
+        } else {
+			//-- Keep running this function until the refresh is complete --//
+			me.ReloadCoreVariables(fnCallback, fnFailCallback);
+		}
     },
     
     /**
@@ -937,7 +940,10 @@ $.extend(IOMy.common,{
                 me.ResetCoreVariableRefreshFlags();
                 jQuery.sap.log.error("ReloadPremiseList Error! "+e.message);
             }
-        }
+        } else {
+			//-- Keep running this function until the refresh is complete --//
+			me.ReloadVariablePremiseList(fnCallback, fnFailCallback);
+		}
     },
     
     /**
@@ -953,7 +959,7 @@ $.extend(IOMy.common,{
             try {
                 me.RefreshHubList({
                     onSuccess : function () {
-                        me.ReloadVariableRoomList(fnCallback, fnFailCallback);
+                        me.ReloadVariableCommList(fnCallback, fnFailCallback);
                     },
                     
                     onFail : function () {
@@ -966,7 +972,43 @@ $.extend(IOMy.common,{
                 me.ResetCoreVariableRefreshFlags();
                 jQuery.sap.log.error("ReloadVariableHubList Error! "+e.message);
             }
-        }
+        } else {
+			//-- Keep running this function until the refresh is complete --//
+			me.ReloadVariableHubList(fnCallback, fnFailCallback);
+		}
+    },
+    
+    /**
+     * STEP 5 of 7: Procedure for refreshing the Comm List using an AJAX function.
+     * 
+     * Next step is refreshing the link type list if successful.
+     */
+    ReloadVariableCommList : function (fnCallback, fnFailCallback) {
+        var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
+        
+        if( me.isCoreVariablesRefreshInProgress(4, fnFailCallback)===false ) {
+            me.CoreVariableRefreshStepsInProgress[3] = true;
+            
+            try {
+                me.RefreshCommList({
+                    onSuccess : function () {
+                        me.ReloadVariableRoomList(fnCallback, fnFailCallback);
+                    },
+                    
+                    onFail : function () {
+                        fnFailCallback();
+                        
+                        me.ResetCoreVariableRefreshFlags();
+                    }
+                });
+            } catch (e) {
+                me.ResetCoreVariableRefreshFlags();
+                jQuery.sap.log.error("ReloadVariableCommList Error! "+e.message);
+            }
+        } else {
+			//-- Keep running this function until the refresh is complete --//
+			me.ReloadVariableCommList(fnCallback, fnFailCallback);
+		}
     },
     
     /**
@@ -977,8 +1019,8 @@ $.extend(IOMy.common,{
     ReloadVariableRoomList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
-        if( me.isCoreVariablesRefreshInProgress(4, fnFailCallback)===false ) {
-            me.CoreVariableRefreshStepsInProgress[3] = true;
+        if( me.isCoreVariablesRefreshInProgress(5, fnFailCallback)===false ) {
+            me.CoreVariableRefreshStepsInProgress[4] = true;
             
             try {
                 me.RetreiveRoomList({
@@ -996,10 +1038,13 @@ $.extend(IOMy.common,{
                 me.ResetCoreVariableRefreshFlags();
                 jQuery.sap.log.error("ReloadVariableRoomList Error! "+e.message);
             }
-        }
+        } else {
+			//-- Keep running this function until the refresh is complete --//
+			me.ReloadVariableRoomList(fnCallback, fnFailCallback);
+		}
     },
-    
-    /**
+	
+	/**
      * STEP 5 of 7: Procedure for refreshing the Link List using an AJAX function.
      * 
      * Next step is refreshing the link type list if successful.
@@ -1007,8 +1052,8 @@ $.extend(IOMy.common,{
     ReloadVariableLinkList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
-        if( me.isCoreVariablesRefreshInProgress(5, fnFailCallback)===false ) {
-            me.CoreVariableRefreshStepsInProgress[4] = true;
+        if( me.isCoreVariablesRefreshInProgress(6, fnFailCallback)===false ) {
+            me.CoreVariableRefreshStepsInProgress[5] = true;
             
             try {
                 me.RetrieveLinkList({
@@ -1026,7 +1071,10 @@ $.extend(IOMy.common,{
                 me.ResetCoreVariableRefreshFlags();
                 jQuery.sap.log.error("ReloadVariableLinkList Error! "+e.message);
             }
-        }
+        } else {
+			//-- Keep running this function until the refresh is complete --//
+			me.ReloadVariableLinkList(fnCallback, fnFailCallback);
+		}
     },
     
     /**
@@ -1037,8 +1085,8 @@ $.extend(IOMy.common,{
     ReloadVariableLinkTypeList : function (fnCallback, fnFailCallback) {
         var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
         
-        if( me.isCoreVariablesRefreshInProgress(6, fnFailCallback)===false ) {
-            me.CoreVariableRefreshStepsInProgress[5] = true;
+        if( me.isCoreVariablesRefreshInProgress(7, fnFailCallback)===false ) {
+            me.CoreVariableRefreshStepsInProgress[6] = true;
             
             try {
                 me.RetrieveLinkTypeList({
@@ -1056,7 +1104,10 @@ $.extend(IOMy.common,{
                 me.ResetCoreVariableRefreshFlags();
                 jQuery.sap.log.error("ReloadVariableLinkTypeList Error! "+e.message);
             }
-        }
+        } else {
+			//-- Keep running this function until the refresh is complete --//
+			me.ReloadVariableLinkTypeList(fnCallback, fnFailCallback);
+		}
     },
     
     /**
@@ -1085,8 +1136,8 @@ $.extend(IOMy.common,{
             fnOnFail = function () {};
         }
         
-        if( me.isCoreVariablesRefreshInProgress(7, fnFailCallback)===false ) {
-            me.CoreVariableRefreshStepsInProgress[6] = true;
+        if( me.isCoreVariablesRefreshInProgress(8, fnFailCallback)===false ) {
+            me.CoreVariableRefreshStepsInProgress[7] = true;
             
             try {
                 IOMy.apiphp.RefreshThingList({
@@ -1105,7 +1156,10 @@ $.extend(IOMy.common,{
                 me.ResetCoreVariableRefreshFlags();
                 jQuery.sap.log.error("ReloadVariableThingList Error! "+e.message);
             }
-        }
+        } else {
+			//-- Keep running this function until the refresh is complete --//
+			me.ReloadVariableThingList(fnCallback, fnFailCallback);
+		}
     },
     
     ResetCoreVariableRefreshFlags : function () {
@@ -1117,6 +1171,7 @@ $.extend(IOMy.common,{
             false,  // Step 5
             false,  // Step 6
             false,  // Step 7
+			false   // Step 8
         ];
     },
 	
@@ -1368,10 +1423,10 @@ $.extend(IOMy.common,{
 					
 					var iPremiseId		= 0;			//-- INTEGER:	--//
 					var iRoomId			= 0;			//-- INTEGER:	--//
-					var aTemp			= {};			//-- ARRAY:		Temporary Associative array used to temporarily store a utility price --//
+					var aTemp			= {};			//-- ARRAY:		Temporary Associative array used to temporarily store room data --//
 					
 					//--------------------------------------------------------//
-					//-- 3.B.A - Check to see how many Tariffs are found	--//
+					//-- 3.B.A - Check to see how many rooms are found	--//
 					//--------------------------------------------------------//
 					if( AjaxData.length >= 1 ) {
 						//--------------------------------------------------------//
@@ -1424,7 +1479,7 @@ $.extend(IOMy.common,{
 									}
 								});
 								
-								//-- Array to store the IOs and IOPorts in --//
+								//-- Array to store the Things in --//
 								aTemp.Things	= {};
 								
 								if( !IOMy.common.RoomsList["_"+iPremiseId] ) {
@@ -1875,6 +1930,9 @@ $.sap.require("IOMy.common.LoadPremiseOccupantsOptions");
 
 $.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
 $.sap.require("IOMy.common.LoadPremiseRoomsOptions");
+
+$.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
+$.sap.require("IOMy.common.CommList");
 
 $.sap.registerModulePath('IOMy.common', sModuleInitialBuildLocation+'util/common');
 $.sap.require("IOMy.common.isCoreVariablesRefreshInProgress");
