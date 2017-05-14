@@ -38,7 +38,13 @@ $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/fun
 $.sap.require("IOMy.functions.findInputWidget");
 
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.generateDeviceListData");
+
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
 $.sap.require("IOMy.functions.getCurrentUsername");
+
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.getHubConnectedToThing");
 
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
 $.sap.require("IOMy.functions.getLengthOfTimePassed");

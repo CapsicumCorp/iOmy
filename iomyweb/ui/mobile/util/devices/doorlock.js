@@ -50,6 +50,8 @@ $.extend(IOMy.devices.doorlock,{
     LinkTypeID          : -1,
     ThingTypeID         : -1,
 	
+	DevicePageID : "pDeviceDoorLock",
+	
 	CallAPI : function (iThingId, oTamperField, oLastAccessedField) {
         //--------------------------------------------------------------------//
         // Declare variables and import modules

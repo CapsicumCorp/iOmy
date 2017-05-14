@@ -51,6 +51,8 @@ $.extend(IOMy.devices.onvif,{
 	RSPTZAxisX			: 3974,
 	RSPTZAxisY			: 3975,
 	
+	DevicePageID : "pOnvif",
+	
 	getStreamURL : function(mSettings) {
 		var me				= this;
 		var bError			= false;

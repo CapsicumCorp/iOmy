@@ -174,6 +174,65 @@ $.extend(IOMy.devices,{
         return mInfo;
     },
 	
+	getDevicePageID : function (iThingTypeId) {
+		//-- Zigbee Netvox Smart Plug --//
+		if( iThingTypeId===2 ) {
+            return IOMy.devices.zigbeesmartplug.DevicePageID;
+            
+        //-- Philips Hue --//
+        } else if( iThingTypeId===13 ) {
+            return IOMy.devices.philipshue.DevicePageID;
+            
+        //-- Onvif Stream --//
+        } else if ( iThingTypeId===12) {
+            return IOMy.devices.onvif.DevicePageID;
+            
+        //-- Motion Sensor --//
+        } else if ( iThingTypeId===3) {
+            return IOMy.devices.motionsensor.DevicePageID;
+            
+        //-- Temperature Sensor --//
+        } else if ( iThingTypeId===4) {
+            return IOMy.devices.temperaturesensor.DevicePageID;
+            
+        //-- DevelCo Energy Meter --//
+        } else if ( iThingTypeId===10) {
+            return IOMy.devices.develco.DevicePageID;
+            
+        //-- Weather Feed --//
+        } else if ( iThingTypeId===14) {
+            return IOMy.devices.weatherfeed.DevicePageID;
+		
+		//-----------------------------------//
+        // --- Experimental Device Pages --- //
+        //-----------------------------------//
+        //-- Door Lock --//
+        } else if ( iThingTypeId==="-1") {
+            return IOMy.devices.zigbeesmartplug.DevicePageID;
+            
+        //-- Window Sensor --//
+        } else if ( iThingTypeId==="-2") {
+            return IOMy.devices.zigbeesmartplug.DevicePageID;
+            
+        //-- Bluetooth Scales --//
+        } else if ( iThingTypeId==="-3") {
+            return IOMy.devices.bluetoothscale.DevicePageID;
+            
+        //-- Blood Pressure Montior --//
+        } else if ( iThingTypeId==="-4") {
+            return IOMy.devices.bpm.DevicePageID;
+            
+        //-- Remote Controlled Garage Door --//
+        } else if ( iThingTypeId==="-5") {
+           return IOMy.devices.garagedoor.DevicePageID;
+            
+        //-- Thermostat --//
+        } else if ( iThingTypeId==="-6") {
+           return IOMy.devices.thermostat.DevicePageID;
+            
+        }
+	},
+	
 	GetCommonUI: function( sPrefix, oViewScope, aDeviceData ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//

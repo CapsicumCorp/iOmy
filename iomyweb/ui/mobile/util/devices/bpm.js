@@ -49,6 +49,8 @@ $.extend(IOMy.devices.bpm,{
     LinkTypeID          : -4,
     ThingTypeID         : -4,
 	
+	DevicePageID : "pDeviceBPM",
+	
 	GetCommonUI: function( sPrefix, oViewScope, aDeviceData ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//

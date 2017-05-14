@@ -52,6 +52,8 @@ $.extend(IOMy.devices.thermostat,{
     LinkTypeID          : -6,
     ThingTypeID         : -6,
 	
+	DevicePageID : "pDeviceTestThermostat",
+	
 	CallAPI : function (iThingId, oTamperField, oLastAccessedField) {
         //--------------------------------------------------------------------//
         // Declare variables and import modules

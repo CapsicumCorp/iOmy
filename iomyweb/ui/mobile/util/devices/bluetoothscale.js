@@ -48,6 +48,8 @@ $.extend(IOMy.devices.bluetoothscale,{
     // TODO: Change these to the actual IDs once they're in the database
     LinkTypeID          : -3,
     ThingTypeID         : -3,
+	
+	DevicePageID : "pDeviceScales",
     
     CreateLinkForm : function (mSettings) {
         

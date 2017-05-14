@@ -30,6 +30,8 @@ $.extend(IOMy.devices.philipshue,{
     RSHue           : 3901,
     RSSaturation    : 3902,
     RSBrightness    : 3903,
+	
+	DevicePageID : "pPhilipsHue",
     
     CreateColourBox : function (sID) {
         var me = this;

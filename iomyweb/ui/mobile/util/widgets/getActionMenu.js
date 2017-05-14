@@ -199,7 +199,7 @@ $.extend(IOMy.widgets,{
                         items : [
                             new sap.m.Button({
                                 tooltip: "Action Menu",
-                                icon : "sap-icon://GoogleMaterial/add_circle",
+                                icon : "sap-icon://GoogleMaterial/more_vert",
                                 press : function (oControlEvent) {
                                     
                                     var oButton = oControlEvent.getSource();
@@ -219,10 +219,8 @@ $.extend(IOMy.widgets,{
 
                                         oMenu.attachAfterClose(function () {
                                             me.extrasMenuOpen = false;
-                                            oButton.setIcon("sap-icon://GoogleMaterial/add_circle");
                                         });
-                                    
-                                        oButton.setIcon("sap-icon://GoogleMaterial/remove_circle");
+										
                                         oMenu.openBy(oButton);
                                         me.extrasMenuOpen = true;
                                     } else {
