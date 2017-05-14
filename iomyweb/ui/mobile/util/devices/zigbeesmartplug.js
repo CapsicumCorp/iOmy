@@ -52,6 +52,8 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         sGetRapidHAInfoButtonID : "GetRapidHAInfoButton",
         sEnableJoinModeButtonID : "EnableJoinModeButton"
     },
+	
+	DevicePageID : "pDeviceData",
     
     //========================================================================//
     // TELNET FUNCTIONALITY                                                   //
@@ -106,7 +108,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         // Indicate in the output widget that data is being loaded //
         // and execute the AJAX Request                            //
         //---------------------------------------------------------//
-        oOutputWidget.setValue(oOutputWidget.getValue()+"Turning on Join Mode...\n\n");
+        oOutputWidget.setValue(oOutputWidget.getValue()+"-----------------------------------------\nTurning on Join Mode...\n\n");
         // Force it to scroll down to the bottom.
         document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
         // Insert the output into the Telnet log
@@ -225,14 +227,14 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         // and execute the AJAX Request                            //
         //---------------------------------------------------------//
         if (oOutputWidget !== undefined) {
-            oOutputWidget.setValue(oOutputWidget.getValue()+"Loading RapidHA Information...\n\n");
+            oOutputWidget.setValue(oOutputWidget.getValue()+"-----------------------------------------\nLoading RapidHA Information...\n\n");
             // Force it to scroll down to the bottom.
             document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
         }
         // Insert the output into the Telnet log
         me.ZigbeeTelnetLog.push({
             "level" : "I",
-            "content" : "Loading RapidHA Information...\n\n"
+            "content" : "-----------------------------------------\nLoading RapidHA Information...\n\n"
         });
         
         php.AjaxRequest({
@@ -339,13 +341,13 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         // Indicate in the output widget that data is being loaded //
         // and execute the AJAX Request                            //
         //---------------------------------------------------------//
-        oOutputWidget.setValue(oOutputWidget.getValue()+"Running "+sCommand+"...\n\n");
+        oOutputWidget.setValue(oOutputWidget.getValue()+"-----------------------------------------\nRunning "+sCommand+"...\n\n");
         // Force it to scroll down to the bottom.
         document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
         // Insert the output into the Telnet log
         me.ZigbeeTelnetLog.push({
             "level" : "I",
-            "content" : "Running "+sCommand+"...\n\n"
+            "content" : "-----------------------------------------\nRunning "+sCommand+"...\n\n"
         });
         
         php.AjaxRequest({
@@ -398,7 +400,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         // Defaults                                                //
         //---------------------------------------------------------//
         if (fnCallback === undefined) {
-            fnCallback = function (mErrorInfo) {};
+            fnCallback = function () {};
         }
         
         //---------------------------------------------------------//
@@ -565,7 +567,6 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         me.FetchConnectedZigbeeModems(oScope,
             function (mErrorInfo) {
                 var firstSelection = null;
-                var bNoModems = false;
                 
                 // Check if a fatal error occurred
                 if (mErrorInfo.bError === true) {

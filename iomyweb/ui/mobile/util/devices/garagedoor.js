@@ -49,6 +49,8 @@ $.extend(IOMy.devices.garagedoor,{
     LinkTypeID          : -5,
     ThingTypeID         : -5,
 	
+	DevicePageID : "pDeviceGaragedoor",
+	
 	GetCommonUI: function( sPrefix, oViewScope, aDeviceData ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//

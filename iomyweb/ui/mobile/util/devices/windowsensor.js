@@ -47,6 +47,8 @@ $.extend(IOMy.devices.windowsensor,{
     LinkTypeID          : -2,
     ThingTypeID         : -2,
 	
+	DevicePageID : "pDeviceWindowSensor",
+	
 	CallAPI : function (iThingId, oTamperField, oLastAccessedField) {
         //--------------------------------------------------------------------//
         // Declare variables and import modules

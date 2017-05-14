@@ -64,6 +64,8 @@ $.extend(IOMy.devices.weatherfeed,{
         sRoomCBoxID : "Room",
         sLinkNameID : "LinkName" 
     },
+	
+	DevicePageID : "pThermostat",
     
     /**
      * Returns a map of API parameters containing the API URL and parameters.
@@ -575,11 +577,11 @@ $.extend(IOMy.devices.weatherfeed,{
             },
             
             setFailureNotices : function (errMessage) {
-                IOMy.common.showError("Failed to load the weather information:\n\n"+errMessage, "Error");
+                //IOMy.common.showError("Failed to load the weather information:\n\n"+errMessage, "Error");
                 jQuery.sap.log.error(errMessage);
                 
                 if (oScope.byId(sPrefix + me.uiIDs.sTemperatureDisplayID) !== undefined) {
-                    oScope.byId(sPrefix + me.uiIDs.sTemperatureDisplayID).setText( "N/A" );
+                    oScope.byId(sPrefix + me.uiIDs.sTemperatureDisplayID).setText( "Failed to load data." );
                 }
 
                 if (oScope.byId(sPrefix + me.uiIDs.sHumidityDisplayID) !== undefined) {
@@ -591,7 +593,7 @@ $.extend(IOMy.devices.weatherfeed,{
                 }
 
                 if (oScope.byId(sPrefix + me.uiIDs.sConditionDisplayID) !== undefined) {
-                    oScope.byId(sPrefix + me.uiIDs.sConditionDisplayID).setText( "N/A" );
+                    oScope.byId(sPrefix + me.uiIDs.sConditionDisplayID).setText( "" );
                 }
 
                 if (oScope.byId(sPrefix + me.uiIDs.sWindDirectionDisplayID) !== undefined) {

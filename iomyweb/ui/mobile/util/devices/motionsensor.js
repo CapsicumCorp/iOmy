@@ -48,6 +48,8 @@ $.extend(IOMy.devices.motionsensor,{
     RSMisc          : 4000,
     RSBitwiseStatus : 3909,
     RSTemperature   : 1701,
+	
+	DevicePageID : "pMotionSensor",
     
     CallAPI : function (iThingId, oTamperField, oLastMotionField) {
         //--------------------------------------------------------------------//

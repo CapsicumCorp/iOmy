@@ -228,7 +228,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                                         
                                         //-- REFRESH THINGS --//
                                         try {
-                                            IOMy.common.ReloadCoreVariables(
+                                            IOMy.common.ReloadVariableThingList(
                                                 function () {
                                                     //===== BRING UP THE SUCCESS DIALOG BECAUSE THE API RAN SUCCESSFULLY AND THE VARIABLES HAVE BEEN REFRESHED. =====//
                                                     IOMy.common.showSuccess("Update successful.", "Success", 
