@@ -27,6 +27,7 @@ BZIP2NEED_WEB_BROWSER=0
 BZIP2PATCHES="fromgentoo/bzip2-1.0.3-no-test.patch fromgentoo/bzip2-1.0.4-POSIX-shell.patch fromgentoo/bzip2-1.0.4-makefile-CFLAGS.patch fromgentoo/bzip2-1.0.6-saneso.patch"
 #BZIP2PATCHES="fromgentoo/bzip2-1.0.4-man-links.patch"
 BZIP2PATCHES2="fromgentoo/bzip2-1.0.6-mingw.patch fromgentoo/bzip2-1.0.6-out-of-tree-build.patch fromgentoo/bzip2-1.0.6-progress.patch"
+
 OPENSSLTITLE="Openssl"
 OPENSSLVER="1.0.2k"
 OPENSSLPKG="openssl-1.0.2k.tar.gz"
@@ -78,6 +79,9 @@ NCURSESNEED_WEB_BROWSER=0
 NCURSESPATCHES="fromgentoo/ncurses-5.9-no-I-usr-include.patch fromgentoo/ncurses-5.9-gcc-5.patch"
 NCURSESPATCHES2="fromgentoo/ncurses-5.9-rxvt-unicode-9.15.patch"
 
+#NCURSESPATCHES_6.0="fromgentoo/ncurses-6.0-gfbsd.patch fromgentoo/ncurses-6.0-rxvt-unicode-9.15.patch fromgentoo/ncurses-6.0-pkg-config.patch fromgentoo/ncurses-5.9-gcc-5.patch fromgentoo/ncurses-6.0-ticlib.patch fromgentoo/ncurses-6.0-cppflags-cross.patch"
+#NCURSESPATCHES2_6.0=""
+
 MHASHTITLE="mhash"
 MHASHVER="0.9.9.9"
 MHASHPKG="mhash-0.9.9.9.tar.gz"
@@ -103,16 +107,16 @@ LIBMCRYPTNEED_WEB_BROWSER=0
 LIBMCRYPTPATCHES="fromgentoo/libmcrypt-2.5.8-rotate-mask.patch"
 
 PCRETITLE="pcre"
-PCREVER="8.39"
-PCREPKG="pcre-8.39.tar.bz2"
-PCRECOMPILEDIR="pcre-8.39"
+PCREVER="8.40"
+PCREPKG="pcre-8.40.tar.bz2"
+PCRECOMPILEDIR="pcre-8.40"
 PCREHOMEPAGE="http://www.pcre.org/"
 PCRELICENSE="BSD"
 PCREBASEURL="ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/"
 PCREGENTOOPKG="dev-libs/libpcre"
-PCREGENTOOVER="8.39"
+PCREGENTOOVER="8.40"
 PCRENEED_WEB_BROWSER=0
-PCREPATCHES=""
+PCREPATCHES="fromgentoo/libpcre-8.40-pcregrep-multiline-1.patch fromgentoo/libpcre-8.40-pcregrep-multiline-2.patch fromgentoo/libpcre-8.40-jit-else.patch"
 
 LIBPNGTITLE="libpng"
 LIBPNGVER="1.6.27"
@@ -212,15 +216,16 @@ FFMPEGGENTOOVER="3.2.4"
 FFMPEGNEED_WEB_BROWSER=0
 
 LIGHTTPDTITLE="lighttpd"
-LIGHTTPDVER="1.4.43"
-LIGHTTPDPKG="lighttpd-1.4.43.tar.xz"
-LIGHTTPDCOMPILEDIR="lighttpd-1.4.43"
+LIGHTTPDVER="1.4.45"
+LIGHTTPDPKG="lighttpd-1.4.45.tar.xz"
+LIGHTTPDCOMPILEDIR="lighttpd-1.4.45"
 LIGHTTPDHOMEPAGE="http://www.lighttpd.net/"
 LIGHTTPDLICENSE="new-BSD"
 LIGHTTPDBASEURL="http://download.lighttpd.net/lighttpd/releases-1.4.x/"
 LIGHTTPDGENTOOPKG="www-server/lighttpd"
 LIGHTTPDGENTOOVER="1.4.43"
 LIGHTTPDNEED_WEB_BROWSER=0
+LIGHTTPDPATCHES="lighttpd_embedded_arm_support_custom_by_capsicumcorp_for_lighttpd_1.4.45.diff"
 
 PHPTITLE="php"
 PHPVER="5.6.30"
@@ -234,14 +239,14 @@ PHPGENTOOVER="5.6.30"
 PHPNEED_WEB_BROWSER=0
 
 MYSQLTITLE="mysql"
-MYSQLVER="5.6.35"
-MYSQLPKG="mysql-5.6.35.tar.gz"
-MYSQLCOMPILEDIR="mysql-5.6.35"
+MYSQLVER="5.6.36"
+MYSQLPKG="mysql-5.6.36.tar.gz"
+MYSQLCOMPILEDIR="mysql-5.6.36"
 MYSQLHOMEPAGE="http://www.mysql.com/"
 MYSQLLICENSE="GPL-2"
 MYSQLBASEURL="http://cdn.mysql.com/Downloads/MySQL-5.6/"
 MYSQLGENTOOPKG="dev-db/mysql"
-MYSQLGENTOOVER="5.6.35"
+MYSQLGENTOOVER="5.6.36"
 MYSQLNEED_WEB_BROWSER=0
 MYSQLPATCHES="mysql_change_s_iread_and_s_iwrite_to_s_irusr_and_s_iwusr.patch mysql_define_ushort.patch mysql_skip_wchar_iso_10646_check.patch"
 
@@ -283,13 +288,13 @@ BUSYBOXX86BASEURL="http://download.iomy.org/download.php?file="
 BUSYBOXX86NEED_WEB_BROWSER=1
 
 PHPMYADMINTITLE="phpMyAdmin"
-PHPMYADMINVER="4.6.6"
-PHPMYADMINPKG="phpMyAdmin-4.6.6-english.tar.xz"
-PHPMYADMINCOMPILEDIR="phpMyAdmin-4.6.6-english"
+PHPMYADMINVER="4.7.0"
+PHPMYADMINPKG="phpMyAdmin-4.7.0-english.tar.xz"
+PHPMYADMINCOMPILEDIR="phpMyAdmin-4.7.0-english"
 PHPMYADMINHOMEPAGE="https://www.phpmyadmin.net/"
 PHPMYADMINLICENSE="GPL-2"
-PHPMYADMINBASEURL="https://files.phpmyadmin.net/phpMyAdmin/4.6.6/"
+PHPMYADMINBASEURL="https://files.phpmyadmin.net/phpMyAdmin/4.7.0/"
 PHPMYADMINGENTOOPKG="dev-db/phpmyadmin"
-PHPMYADMINGENTOOVER="4.6.6"
+PHPMYADMINGENTOOVER="4.7.0"
 PHPMYADMINNEED_WEB_BROWSER=0
 

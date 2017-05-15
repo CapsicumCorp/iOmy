@@ -43,13 +43,13 @@ DEMODATABASEBASEURL="https://download.iomy.org/download.php?file="
 DEMODATABASENEED_WEB_BROWSER=1
 
 PHPMYADMINTITLE="phpMyAdmin"
-PHPMYADMINVER="4.6.6"
-PHPMYADMINPKG="phpMyAdmin-4.6.6-english.tar.xz"
-PHPMYADMINCOMPILEDIR="phpMyAdmin-4.6.6-english"
+PHPMYADMINVER="4.7.0"
+PHPMYADMINPKG="phpMyAdmin-4.7.0-english.tar.xz"
+PHPMYADMINCOMPILEDIR="phpMyAdmin-4.7.0-english"
 PHPMYADMINHOMEPAGE="https://www.phpmyadmin.net/"
 PHPMYADMINLICENSE="GPL-2"
-PHPMYADMINBASEURL="https://files.phpmyadmin.net/phpMyAdmin/4.6.4/"
+PHPMYADMINBASEURL="https://files.phpmyadmin.net/phpMyAdmin/4.7.0/"
 PHPMYADMINGENTOOPKG="dev-db/phpmyadmin"
-PHPMYADMINGENTOOVER="4.6.6"
+PHPMYADMINGENTOOVER="4.7.0"
 PHPMYADMINNEED_WEB_BROWSER=0
 
