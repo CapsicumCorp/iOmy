@@ -1,6 +1,7 @@
 /*
 Title: Zigbee Data Page UI5 View
 Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
+Modified: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Creates the tiles for showing usage data about a given Zigbee
     device.
 Copyright: Capsicum Corporation 2016, 2017
@@ -36,6 +37,12 @@ sap.ui.controller("mjs.premise.DeviceData", {
 	iCurrentThingState:				0,				//-- INTEGER:		--//
 	iSelectedIOId:					0,
 	sSelectedTimePeriod:			IOMy.graph_jqplot.PeriodDay,
+	
+	bAnalyticsTabSelected:			false,
+	bPeriodTabSelected:				false,
+	bFilterTabSelected:				false,
+	
+	bDrawGraph:						false,
 	
 	/**
 	* Called when a controller is instantiated and its View controls (if available) are already created.
@@ -561,7 +568,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 								"footer" : "Period : "+aTileData.Data.CurrentVals.FilterRB
 							})
 						],
-						press: function (oControlEvent) {
+						"press": function (oControlEvent) {
 							oController.iSelectedIOId = aTileData.Data.IOId;
 							oController.OpenIOTileMenu( oControlEvent, sIndex );
 						}
@@ -1100,6 +1107,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 		var oTempElement2		= null;				//-- OBJECT:		--//
 		var oButton				= null;				//-- OBJECT:		--//
 		var iIndex				= 0;				//-- INT/STRING:	--//
+		var sFilterState		= "";				//-- STRING:		--//
 		//var sValue				= "";				
 		
 		var sTemp               = "";               //-- STRING:		A Temp variable just used to hold a result so that a function doesn't have to be called multiple time to fetch the same value for a comparison --//
@@ -1403,7 +1411,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 		var oController			= this;				//-- OBJECT:		Store the Current Controller scope as a variable so that sub functions can access it. --//
 		var oTile				= null;				//-- OBJECT:		--//
 		
-		var bError				= false;			//-- BOOLEAN:		Used to indicate --//
+		var bError				= false;			//-- BOOLEAN:		Used to indicate that an error occurred somewhere. --//
 		
 		var iThingId			= 0;				//-- INTEGER:		--//
 		var iIOId				= 0;				//-- INTEGER:		--//
@@ -1416,6 +1424,8 @@ sap.ui.controller("mjs.premise.DeviceData", {
 		var iStartStamp			= 0;				//-- INTEGER:		--//
 		var iEndStamp			= 0;				//-- INTEGER:		--//
 		var iSampleRateLimit    = 0;                //-- INTEGER:       --//
+		
+		var bSuccessful;
 		
 		//----------------------------------------------------------------//
 		//-- 2.0 - SETUP VARIABLES										--//

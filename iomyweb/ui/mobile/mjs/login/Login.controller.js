@@ -24,12 +24,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("mjs.login.Login", {
-
-//	events : {
-//		'oLoginButtonSubmit':{
-//			press : 'doLogin'
-//		}
-//	},
 	
     refreshInterval : 600000, // How often the Core variables are refreshed in milliseconds. Default 600 000 (10 minutes)
 	

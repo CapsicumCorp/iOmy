@@ -30,6 +30,7 @@ sap.ui.jsfragment("mjs.fragments.TileSensorMenu", {
 		//-- 1.0 - CREATE UI5 IDS FOR UI5 OBJECTS   --//
 		//--------------------------------------------//
 		var sID_Menu			= this.createId( "Menu" );
+		var sID_AnalyticsRB		= this.createId( "AnalyticsRB" );
 		var sID_TimeRB			= this.createId( "TimeRB" );
 		var sID_FilterRB		= this.createId( "FilterRB" );
 		
@@ -54,7 +55,99 @@ sap.ui.jsfragment("mjs.fragments.TileSensorMenu", {
 		//--------------------------------------------//
 		var oTileSensorMenu = new sap.m.ViewSettingsDialog( sID_Menu, {
 			"title":		"Sensor",
+			"confirm": function() {
+				// Selected index of the analytical options radio button group.
+				var iSelectedIndex = sap.ui.getCore().byId(sID_AnalyticsRB).getSelectedIndex();
+				
+				// If a graph option is selected, we need to direct the user to the selected graph page.
+				if (oController.bDrawGraph) {
+					// If the line graph option was selected, draw one
+					if (iSelectedIndex === 2) {
+						IOMy.common.NavigationChangePage("pGraphLine", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing, "TimePeriod" : oController.sSelectedTimePeriod });
+						
+					// If the bar graph option was selected, draw one
+					} else if (iSelectedIndex === 3) {
+						IOMy.common.NavigationChangePage("pGraphBar", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing });
+						
+					// If the pie graph option was selected, draw one
+					} else if (iSelectedIndex === 4) {
+						IOMy.common.NavigationChangePage("pGraphPie", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing });
+						
+					}
+				}
+			},
 			"customTabs":	[
+				//--------------------------------//
+				//-- ANALYTICS TAB				--//
+				//--------------------------------//
+				new sap.m.ViewSettingsCustomTab({
+					"icon":		"sap-icon://activate",
+					"title":	"Analytics",
+					"content":	[
+						new sap.m.Panel({
+							"backgroundDesign": "Transparent",
+							"content": [
+								new sap.m.VBox({
+									"items": [
+										new sap.m.Text({
+											"width":	"100%",
+											"text":		'NOTE: The analytical options below will use the "Time Period" (except bar and pie graphs) and the "Filter" values setup in the previous tabs in this Menu.'
+										}).addStyleClass("MarBottom20px BG_white PadAll8px BorderRad7px"),
+										new sap.m.RadioButtonGroup( sID_AnalyticsRB, {
+											buttons : [
+												new sap.m.RadioButton({
+													"tooltip":    "Show tile data",
+													"enabled":	true,
+													"text":		"Show Data on Tile",
+													"width":	"210px",
+													"select":	function () {
+														oController.bDrawGraph = false;
+													}
+												}),
+												new sap.m.RadioButton({
+													"tooltip":    "Create Table",
+													"enabled":	false,
+													"text":		"Create Table",
+													"width":	"210px",
+													"select":	function () {
+														oController.bDrawGraph = false;
+													}
+												}),
+												new sap.m.RadioButton({
+													"tooltip":    "Create Line Graph",
+													"enabled":	bLineGraphEnabled,
+													"text":		"Create Line Graph",
+													"width":	"210px",
+													"select":	function () {
+														oController.bDrawGraph = true;
+													}
+												}),
+												new sap.m.RadioButton({
+													"tooltip":    "Create Weekly Bar Graph",
+													"enabled":	bBarGraphEnabled,
+													"text":		"Create Weekly Bar Graph",
+													"width":	"210px",
+													"select":	function () {
+														oController.bDrawGraph = true;
+													}
+												}),
+												new sap.m.RadioButton({
+													"tooltip":    "Create Pie Graph",
+													"enabled":	bBarGraphEnabled,
+													"text":		"Create 6-Hour Pie Graph",
+													"width":	"210px",
+													"select":	function () {
+														oController.bDrawGraph = true;
+													}
+												})
+											]
+										}).addStyleClass("iOmyRadioButtons")
+									]
+								}).addStyleClass("TextCenter")
+							]
+						}).addStyleClass("")
+					]
+				}),
 				//--------------------------------//
 				//-- PERIOD TAB					--//
 				//--------------------------------//
@@ -87,72 +180,6 @@ sap.ui.jsfragment("mjs.fragments.TileSensorMenu", {
 								new sap.m.RadioButtonGroup( sID_FilterRB, {
 									buttons:	[]
 								}).addStyleClass("iOmyRadioButtons")
-							]
-						}).addStyleClass("")
-					]
-				}),
-				//--------------------------------//
-				//-- ANALYTICS TAB				--//
-				//--------------------------------//
-				new sap.m.ViewSettingsCustomTab({
-					"icon":		"sap-icon://activate",
-					"title":	"Analytics",
-					"content":	[
-						new sap.m.Panel({
-							"backgroundDesign": "Transparent",
-							"content": [
-								new sap.m.VBox({
-									"items": [
-										new sap.m.Text({
-											"width":	"100%",
-											"text":		'NOTE: The analytical buttons below will use the "Time Period" and the "Filter" values setup in the previous tabs in this Menu.'
-										}).addStyleClass("MarBottom20px BG_white PadAll8px BorderRad7px"),
-										new sap.m.Button({
-											"tooltip":    "Create Table",
-											"enabled":	false,
-											"text":		"Create Table",
-											//"type":		"Accept",
-											"width":	"210px",
-											"icon":		"sap-icon://table-chart"
-											//"icon":		"sap-icon://GoogleMaterial/adb"
-										}),
-										new sap.m.Button({
-											"tooltip":    "Create Line Graph",
-											"enabled":	bLineGraphEnabled,
-											"text":		"Create Line Graph",
-											//"type":		"Accept",
-											"width":	"210px",
-											"icon":		"sap-icon://line-chart",
-											"press":	function () {
-												IOMy.common.NavigationChangePage("pGraphLine", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing, "TimePeriod" : oController.sSelectedTimePeriod });
-												sap.ui.getCore().byId(sID_Menu).fireConfirm();
-											}
-										}),
-										new sap.m.Button({
-											"tooltip":    "Create Bar Graph",
-											"enabled":	bBarGraphEnabled,
-											"text":		"Create Bar Graph",
-											//"type":		"Accept", 
-											"width":	"210px",
-											"icon":		"sap-icon://vertical-bar-chart-2",
-											"press":	function () {
-												IOMy.common.NavigationChangePage("pGraphBar", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing });
-												sap.ui.getCore().byId(sID_Menu).fireConfirm();
-											}
-										}),
-										new sap.m.Button({
-											"tooltip":    "Create Pie Graph",
-											"enabled":	bBarGraphEnabled,
-											"text":		"Create Pie Graph",
-											//"type":		"Accept",
-											"width":	"210px",
-											"icon":		"sap-icon://pie-chart",
-											"press":	function () {
-												IOMy.common.NavigationChangePage("pGraphPie", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing });
-											}
-										})
-									]
-								}).addStyleClass("TextCenter")
 							]
 						}).addStyleClass("")
 					]
