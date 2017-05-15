@@ -89,13 +89,7 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 							expanded:	false,
 							items:	[
 								new sap.tnt.NavigationListItem({
-									text: "Premise & Hub",
-									select:	function (oControlEvent) {
-										IOMy.common.NavigationChangePage( "pSettingsPremiseList", {}, true );
-									}
-								}),
-								new sap.tnt.NavigationListItem({
-									text: "Links and Items",
+									text: "Device List",
 									select:	function (oControlEvent) {
 										IOMy.common.NavigationChangePage( "pSettingsDeviceList", {}, true );
 									}
@@ -252,12 +246,12 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 						//--------------------------------//
 						//-- UI Staging      			--//
 						//--------------------------------//
-						new sap.tnt.NavigationListItem({
-							text: "UI Staging",
-							select:	function (oControlEvent) {
-								IOMy.common.NavigationChangePage( "pStagingHome", {}, true );
-							}
-						})
+//						new sap.tnt.NavigationListItem({
+//							text: "UI Staging",
+//							select:	function (oControlEvent) {
+//								IOMy.common.NavigationChangePage( "pStagingHome", {}, true );
+//							}
+//						})
 					]
 				}).addStyleClass("IOMYNavMenu")
 			]
