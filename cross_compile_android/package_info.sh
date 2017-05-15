@@ -216,16 +216,16 @@ FFMPEGGENTOOVER="3.2.4"
 FFMPEGNEED_WEB_BROWSER=0
 
 LIGHTTPDTITLE="lighttpd"
-LIGHTTPDVER="1.4.45"
-LIGHTTPDPKG="lighttpd-1.4.45.tar.xz"
-LIGHTTPDCOMPILEDIR="lighttpd-1.4.45"
+LIGHTTPDVER="1.4.43"
+LIGHTTPDPKG="lighttpd-1.4.43.tar.xz"
+LIGHTTPDCOMPILEDIR="lighttpd-1.4.43"
 LIGHTTPDHOMEPAGE="http://www.lighttpd.net/"
 LIGHTTPDLICENSE="new-BSD"
 LIGHTTPDBASEURL="http://download.lighttpd.net/lighttpd/releases-1.4.x/"
 LIGHTTPDGENTOOPKG="www-server/lighttpd"
 LIGHTTPDGENTOOVER="1.4.43"
 LIGHTTPDNEED_WEB_BROWSER=0
-LIGHTTPDPATCHES="lighttpd_embedded_arm_support_custom_by_capsicumcorp_for_lighttpd_1.4.45.diff"
+LIGHTTPDPATCHES="lighttpd_embedded_arm_support_custom_by_capsicumcorp_for_lighttpd_1.4.43.diff"
 
 PHPTITLE="php"
 PHPVER="5.6.30"
