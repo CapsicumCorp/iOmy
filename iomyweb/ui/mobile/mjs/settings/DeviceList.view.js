@@ -58,7 +58,7 @@ sap.ui.jsview("mjs.settings.DeviceList", {
             view : me,
             controller : oController,
             icon : "sap-icon://GoogleMaterial/home",
-            title : "Overview"
+            title : "Device List"
         });
         
         /*oPage.addContent(
