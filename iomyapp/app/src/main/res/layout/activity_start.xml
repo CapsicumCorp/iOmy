@@ -33,15 +33,18 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
     tools:context=".Start">
 
     <ImageView
-        android:layout_width="match_parent"
+        android:layout_width="200dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:src="@drawable/mainlogo"/>
+        android:src="@drawable/mainlogo"
+        android:layout_gravity="center_horizontal" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="52dp"
-        android:text="Thank you for choosing iOmy home automation. Press begin to start the quick installation." />
+        android:text="Thank you for choosing iOmy home automation. Press begin to start the quick installation."
+        android:layout_gravity="center_horizontal"
+        android:textAlignment="center" />
 
     <Button
         android:layout_width="match_parent"
