@@ -626,11 +626,11 @@ sap.ui.controller("mjs.rooms.Room", {
 					if( aData!==undefined && aData!==null) {
 						if(aData.UTS!==undefined && aData.UTS!==null) {
 							//-- If the UTS is less than 10 minutes from the endstamp --//
-                            if( iSampleRateLimit !== null && iSampleRateLimit>=1 && ( aData.UTS <= ( iUTS_End - iSampleRateLimit ) ) ) {
-                                //-- Flag that the IO is offline --//
-                                oController.byId( sIOLabel ).setText("IO Offline");
-                                
-                            } else {
+//                            if( iSampleRateLimit !== null && iSampleRateLimit>=1 && ( aData.UTS <= ( iUTS_End - iSampleRateLimit ) ) ) {
+//                                //-- Flag that the IO is offline --//
+//                                oController.byId( sIOLabel ).setText("IO Offline");
+//                                
+//                            } else {
                                 //-- Display the most recent value --//
                                 var oUI5Object = oController.byId( sIOLabel );
                                 if( oUI5Object!==undefined && oUI5Object!==null && oUI5Object!==false ) {
@@ -648,7 +648,7 @@ sap.ui.controller("mjs.rooms.Room", {
                                 } else {
                                     console.log("Critical Error: PHP API (Most Recent) OnSuccess can't find "+sIOLabel);
                                 }
-                            }
+//                            }
 						} else {
 							oController.byId( sIOLabel ).setText("IO Offline");
 						}
