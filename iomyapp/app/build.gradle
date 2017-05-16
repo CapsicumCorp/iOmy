@@ -13,8 +13,8 @@ model {
             applicationId "com.capsicumcorp.iomy.apps.iomy"
             minSdkVersion.apiLevel 11
             targetSdkVersion.apiLevel 22
-            versionCode 500
-            versionName "0.4.5"
+            versionCode 600
+            versionName "0.4.6"
         }
     }
 
