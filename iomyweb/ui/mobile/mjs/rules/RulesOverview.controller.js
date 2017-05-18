@@ -183,11 +183,11 @@ sap.ui.controller("mjs.rules.RulesOverview", {
 				}
 
 			});
-		} else {
+		 } else {
 			var wContainer = new sap.m.MessageStrip({
 				text : "Your hub is not a valid WatchInputs Hub. Rules are only supported on WatchInputs Hubs."
 			}).addStyleClass("iOmyMessageInfoStrip");
-		}
+	}
         
         //--------------------------------------------------------------------//
         // Draw the containing panel and add it to the page.
@@ -256,16 +256,15 @@ sap.ui.controller("mjs.rules.RulesOverview", {
                             new sap.m.VBox({
                                 items : [
                                     new sap.m.Label({
-                                        text : "Turn On: " + sOntimeString
-                                    }).addStyleClass("Font-RobotoCondensed width100px"),
-
+                                        text : "On: " + sOntimeString
+                                    }).addStyleClass("Font-RobotoCondensed TextCenter flexgrow1"),
                                     new sap.m.Label({
-                                        text : "Turn Off: " + sOfftimeString
-                                    }).addStyleClass("Font-RobotoCondensed width100px")
+                                        text : "Off: " + sOfftimeString
+                                    }).addStyleClass("Font-RobotoCondensed TextCenter flexgrow1")
                                 ]
                             })
                         ]
-                    }).addStyleClass("MarTop12px TextCenter")
+                    }).addStyleClass("MarTop12px TextCenter minwidth100px")
                 ]
             }).addStyleClass("minheight58px ListItem");
         } else {

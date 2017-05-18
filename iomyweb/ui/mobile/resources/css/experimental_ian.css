@@ -29,6 +29,25 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	z-index: 9999;
 	background: url(../images/Preloader_2.gif) center no-repeat #fff;
 }
+/* Testing Flex Grow */
+.flexgrow1 {
+    flex-grow: 1;
+    flex-basis: auto;
+}
+.flexgrow2 {
+    flex-grow: 2;
+    flex-basis: auto;
+}
+.flexgrow3 {
+    flex-grow: 3;
+    flex-basis: auto;
+}
+.flexgrow4 {
+    flex-grow: 4;
+    flex-basis: auto;
+}
+
+
 /* Testing for MotionJPEG */
 .MotionJPEG {
     margin: 0 auto;
