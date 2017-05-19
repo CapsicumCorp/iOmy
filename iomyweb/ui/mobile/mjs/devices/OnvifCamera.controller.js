@@ -316,14 +316,14 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
                         {
                             text: "Edit Stream Information",
                             select:	function (oControlEvent) {
-                                IOMy.common.NavigationChangePage( "pSettingsEditThing", {device : me.oThing}, false );
+                                IOMy.common.NavigationChangePage( "pSettingsEditThing", {"ThingId" : me.oThing.Id}, false );
                             }
                         }
                     ]
                 })
             );
         } catch (e) {
-            jQuery.sap.log.error("Error redrawing the extras menu: "+e.message);
+            jQuery.sap.log.error("Error redrawing the action menu: "+e.message);
         }
 
         // Set the drawn flag so that it will always be loaded.

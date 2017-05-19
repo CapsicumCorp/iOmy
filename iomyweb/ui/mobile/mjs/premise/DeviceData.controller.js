@@ -208,14 +208,14 @@ sap.ui.controller("mjs.premise.DeviceData", {
                                     select:	function (oControlEvent) {
 										//-- Debugging --//
                                         //console.log(JSON.stringify(oController.oCurrentThing));
-                                        IOMy.common.NavigationChangePage( "pSettingsEditThing", {device : oController.oCurrentThing}, false );
+                                        IOMy.common.NavigationChangePage( "pSettingsEditThing", {"ThingId" : oController.iCurrentThing}, false );
                                     }
                                 }
                             ]
                         })
                     );
                 } catch (e) {
-                    jQuery.sap.log.error("Error redrawing the extras menu.")
+                    jQuery.sap.log.error("Error redrawing the action menu.")
                 }
 			}	//-- END onBeforeShow --//
 		});

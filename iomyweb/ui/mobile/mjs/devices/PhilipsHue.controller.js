@@ -348,14 +348,14 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                                     text: "Edit "+me.oThing.DisplayName,
                                     select:	function (oControlEvent) {
                                         //console.log(JSON.stringify(me.oThing));
-                                        IOMy.common.NavigationChangePage( "pSettingsEditThing", {device : me.oThing}, false );
+                                        IOMy.common.NavigationChangePage( "pSettingsEditThing", {"ThingId" : me.oThing.Id}, false );
                                     }
                                 }
                             ]
                         })
                     );
                 } catch (e) {
-                    jQuery.sap.log.error("Error redrawing the extras menu.")
+                    jQuery.sap.log.error("Error redrawing the action menu.")
                 }
             }
         });

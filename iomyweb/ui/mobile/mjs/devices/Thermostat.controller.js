@@ -248,6 +248,31 @@ sap.ui.controller("mjs.devices.Thermostat", {
             content : [me.wMainList]
         });
         
+        //----------------------------------------------------------------------------//
+        //-- REDO THE ACTION MENU                                                   --//
+        //----------------------------------------------------------------------------//
+        me.aElementsToDestroy.push("extrasMenu"+me.mThingInfo.Id);
+        
+        try {
+            thisView.byId("extrasMenuHolder").destroyItems();
+            thisView.byId("extrasMenuHolder").addItem(
+                IOMy.widgets.getActionMenu({
+                    id : me.createId("extrasMenu"+me.mThingInfo.Id),        // Uses the page ID
+                    icon : "sap-icon://GoogleMaterial/more_vert",
+                    items : [
+                        {
+                            text: "Edit "+me.mThingInfo.DisplayName,
+                            select:	function (oControlEvent) {
+                                IOMy.common.NavigationChangePage( "pSettingsEditThing", {"ThingId" : me.mThingInfo.Id}, false );
+                            }
+                        }
+                    ]
+                })
+            );
+        } catch (e) {
+            jQuery.sap.log.error("Error redrawing the action menu: "+e.message);
+        }
+
         thisView.byId("page").addContent(me.wPanel);
     }
 });
