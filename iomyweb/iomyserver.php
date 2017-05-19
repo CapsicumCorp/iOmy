@@ -458,7 +458,7 @@ if($bError===false) {
 						//-- Check Username & Password   --//
 						//---------------------------------//
 						if( isset($aPostAccess['Username']) && isset($aPostAccess['Password']) ) {
-							
+							//-- NOTE: The database adminsitrator accounts are allowed to be used here --//
 							$sDBUsername = $aPostAccess['Username'];
 							$sDBPassword = $aPostAccess['Password'];
 							
@@ -662,27 +662,48 @@ if($bError===false) {
 									$sOwnerUsername = $aPostData['OwnerUsername'];
 									$sOwnerPassword = $aPostData['OwnerPassword'];
 									
-									//-- Check the 'Username' isn't invalid --//
+									//-- Check the 'Username' is invalid --//
 									if( !( strlen( trim( $sOwnerUsername ) ) > 1 ) ) {
 										//-- Flag an error --//
 										$bError = true;
-										$iErrCode  = 0;
+										$iErrCode  = 7304;
 										$sErrMesg .= "Error Code:'7304' \n";
 										$sErrMesg .= "Problem with the 'OwnerUsername' from the 'Data' parameter! \n";
+										$sErrMesg .= "Unable to see any alphanumeric characters. \n";
 										
-									//-- Check if the 'Password' isn't invalid --//
+									//-- Check if the 'Password' is invalid --//
 									} else if( !( strlen( $sOwnerPassword ) > 6 ) ) {
 										//-- Flag an error --//
 										$bError = true;
-										$iErrCode  = 0;
+										$iErrCode  = 7305;
 										$sErrMesg .= "Error Code:'7305' \n";
 										$sErrMesg .= "Problem with the 'OwnerPassword' from the 'Data' parameter! \n";
+										$sErrMesg .= "The 'OwnerPassword' length is not sufficient. \n";
+										
+									//-- Check the 'Username' has not allowed characters --//
+									} else if( AlphaNumericCheck( $sOwnerUsername )!==true ) {
+										//-- Flag an error --//
+										$bError = true;
+										$iErrCode  = 7306;
+										$sErrMesg .= "Error Code:'7306' \n";
+										$sErrMesg .= "Problem 'OwnerUsername' from the 'Data' parameter! \n";
+										$sErrMesg .= "Invalid characters detected in the 'OwnerUsername' from the 'Data' parameter! \n";
+									
+									//-- Check the 'Username' is blacklisted --//
+									} else if( userauth_usernameblacklistcheck( $sOwnerUsername ) ) {
+										//-- Flag an error --//
+										$bError = true;
+										$iErrCode  = 7307;
+										$sErrMesg .= "Error Code:'7307' \n";
+										$sErrMesg .= "Problem 'OwnerUsername' from the 'Data' parameter! \n";
+										$sErrMesg .= "Blacklisted 'OwnerUsername' was used. \n";
+										
 									}
 								} else {
 									//-- Flag an error --//
 									$bError = true;
-									$iErrCode  = 0;
-									$sErrMesg .= "Error Code:'7306' \n";
+									$iErrCode  = 7308;
+									$sErrMesg .= "Error Code:'7308' \n";
 									$sErrMesg .= "Problem with either the 'OwnerUsername' or the 'OwnerPassword' from the 'Data' parameter! \n";
 								}
 							}
@@ -716,12 +737,31 @@ if($bError===false) {
 										$sErrMesg .= "Error Code:'7311' \n";
 										$sErrMesg .= "Problem with the 'WatchInputsPassword' from the 'Data' parameter! \n";
 										$sErrMesg .= "The WatchInputs Password might be insufficient length or have other issues.\n";
+									
+									//-- Check the 'Username' has not allowed characters --//
+									} else if( AlphaNumericCheck( $sWatchInputsUsername )!==true ) {
+										//-- Flag an error --//
+										$bError = true;
+										$iErrCode  = 7312;
+										$sErrMesg .= "Error Code:'7312' \n";
+										$sErrMesg .= "Problem with the 'WatchInputsUsername' from the 'Data' parameter! \n";
+										$sErrMesg .= "Invalid characters detected in the 'WatchInputsUsername' from the 'Data' parameter! \n";
+										
+									//-- Check the 'Username' is blacklisted --//
+									} else if( userauth_usernameblacklistcheck( $sWatchInputsUsername ) ) {
+										//-- Flag an error --//
+										$bError = true;
+										$iErrCode  = 7313;
+										$sErrMesg .= "Error Code:'7313' \n";
+										$sErrMesg .= "Problem with the 'WatchInputsUsername' from the 'Data' parameter! \n";
+										$sErrMesg .= "A blacklisted 'WatchInputsUsername' from the 'Data' parameter was used! \n";
+										
 									}
 								} else {
 									//-- Flag an error --//
 									$bError = true;
-									$iErrCode  = 7312;
-									$sErrMesg .= "Error Code:'7312' \n";
+									$iErrCode  = 7314;
+									$sErrMesg .= "Error Code:'7314' \n";
 									$sErrMesg .= "Problem with either the 'WatchInputsUsername' or the 'WatchInputsPassword' from the 'Data' parameter! \n";
 								}
 							}
@@ -775,7 +815,6 @@ if($bError===false) {
 								$sErrMesg .= "Problem with either the 'HubName', 'HubType' or the 'HubSerialCode' from the 'Data' parameter! \n";
 							}
 						}
-						
 					} else {
 						//-- ERROR:  --//
 						$bError = true;

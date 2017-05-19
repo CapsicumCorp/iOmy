@@ -33,8 +33,38 @@ if (!defined('SITE_BASE')) {
 //========================================================================================================//
 //== #1.0# - DECLARE VARIABLES & INITIALSE                                                              ==//
 //========================================================================================================//
-$realm = "IOMy";
+$userauth_realm = "IOMy";
 
+
+//========================================================================================================//
+//-- #2.0# - CUSTOM HTTP RESPONSE PAGE FUNCTIONS                                                        --//
+//========================================================================================================//
+function userauth_rejected() {
+	header('HTTP/1.0 403 Forbidden');
+	//http_response_code ( 403 );
+	echo "<html>\n";
+	echo "<head><title>403 - Forbidden</title></head>\n";
+	echo "<body>\n";
+	echo "<h1>403 - Forbidden</h1>\n";
+	echo "<p>Invalid Credentials!</p>\n";
+	echo "<p>Please sign in with valid credentials to a valid login API to continue.</p>\n";
+	echo "</body>\n";
+	echo "</html>\n";
+	die();
+}
+
+function userauth_noconfig() {
+	header('HTTP/1.0 501 Not Implemented');
+	//http_response_code ( 403 );
+	echo "<html>\n";
+	echo "<head><title>501 - iOmy Server Not Deployed</title></head>\n";
+	echo "<body>\n";
+	echo "<h1>501 - iOmy Server Not Deployed</h1>\n";
+	echo "<p>Please try setting up the server before accessing this API!</p>\n";
+	echo "</body>\n";
+	echo "</html>\n";
+	die();
+}
 
 
 //========================================================================================================//
@@ -49,12 +79,11 @@ $realm = "IOMy";
 //-- Description: Logout a user by wiping all session data                  --//
 //----------------------------------------------------------------------------//
 function userauth_logout() {
-
 	//-- Unset all of the session variables --//
 	$_SESSION = array();
 	
-	//-- If it's desired to kill the session, also delete the session cookie	--//
-	//-- Note: This will destroy the session, and not just the session data!	--//
+	//-- If it's desired to kill the session, also delete the session cookie --//
+	//-- Note: This will destroy the session, and not just the session data! --//
 	if( isset( $_COOKIE[session_name()] ) ) {
 		setcookie(session_name(), '', time()-42000, '/');
 	}
@@ -66,114 +95,14 @@ function userauth_logout() {
 }
 
 
-//----------------------------------------------------------------------------//
-//-- #3.2# - LOGIN PARAMETER CHECK FUNCTION                                 --//
-//----------------------------------------------------------------------------//
-function userauth_checkparameters( $sUname, $sPword ) {
-	//------------------------------------------------//
-	//-- 1.0 - Initialise Variables                 --//
-	//------------------------------------------------//
-	
-	//-- 1.1 - Declare global variables --//
-	global $Config, $oAdvEncryption;
-	
-	//-- 1.2 - --//
-	$bAbortLogin = false;			//-- BOOLEAN: Flag used to indicate to not continue down the path of attempting to login --//
-	
-	//----------------------------------------------------------------------------------//
-	//-- 2.0 - Check to see if the username has a space at the start or the end of it --//
-	//----------------------------------------------------------------------------------//
-	if( $bAbortLogin===false ) {
-		
-		//-- Uname --//
-		$sTest = trim($sUname);
-		if( empty($sTest)===true ) {
-			
-			//-- Flag that the uname is invalid --//
-			$bAbortLogin = true;
-			
-			//-- DEBUGGING --//
-			if( $Config['Debug']['restrictapicore_login']===true ) { echo "No Username or Password!"; }
-		}
-		
-		//-- Pword --//
-		$sTest = trim($sPword);
-		if( empty($sTest)===true ) {
-			//-- Flag that the pword is invalid --//
-			$bAbortLogin = true;
-			
-			//-- DEBUGGING --//
-			if( $Config['Debug']['restrictapicore_login']===true ) { echo "No Username or Password!"; }
-		}
-		
-		//-- Empty the sTest Variable --//
-		$sTest = "";
-		unset($sTest);
-	}
-	
-	//----------------------------------------------------------------------------------//
-	//-- 3.0 - Check to see if the username has a space at the start or the end of it --//
-	//----------------------------------------------------------------------------------//
-	if( $bAbortLogin===false ) {
-		
-		//-- Check to see if the Username has a space on the start or end --//
-		$bValidUname1 = preg_match('((?=^)(\s*))', $sUname);
-		$bValidUname2 = preg_match('((\s*)(?>$))', $sUname);
-		
-		if( $bValidUname1===0 || $bValidUname1===2 ) {
-			//-- Flag that the uname is invalid --//
-			//$bAbortLogin = true;
-			//-- DEBUGGING --//
-			
-			//if( $Config['Debug']['restrictapicore_login']===true ) { echo "Space at the start or end of the Username!"; }
-		}
-	}
-	
-	//----------------------------------------------------------------------------------//
-	//-- 4.0 - Check to see if the username has symbols in it                         --//
-	//----------------------------------------------------------------------------------//
-	if( $bAbortLogin===false ) {
-		$bValidUname = preg_match('/[a-zA-Z0-9\s]+/', $sUname);
 
-		if( $bValidUname===0 ) {
-			//-- Flag that the uname is invalid --//
-			$bAbortLogin = true;
-			
-			//-- DEBUGGING --//
-			if( $Config['Debug']['restrictapicore_login']===true ) { echo "Symbols in Name!"; }
-		}
-	}
+
+
+function AlphaNumericCheck( $sString ) {
+	//-- Checks if a string has non alphanumeric characters and returns false if it finds anything non-alphanumeric --//
+	$iMatch = preg_match('/[^a-zA-Z0-9\s]+/', $sString);
 	
-	//----------------------------------------------------------------------------------//
-	//-- 5.0 - Check to see if the username is in the list of blacklisted names       --//
-	//----------------------------------------------------------------------------------//
-	if( $bAbortLogin===false ) {
-		$sLUname = strtolower($sUname);
-		if( $sLUname==="root" || $sLUname==="admin" || $sLUname==="administrator" || $sLUname==="sys" || $sLUname==="manager" ) {
-			
-			//-- Flag that the login shouldn't be attempted --//
-			$bAbortLogin = true;
-			
-			//-- Penalise the attempted login further. This is due to the fact that the username they entered is common database Admin account and it is insulting that they thought we would leave those usernames exposed --//
-			sleep(1);
-			
-			//-- DEBUGGING --//
-			if( $Config['Debug']['restrictapicore_login']===true ) { echo "Insulting Username!"; }
-		}
-	}
-	
-	//----------------------------------------------------------------------------------//
-	//-- 6.0 - Cleanup variables                                                      --//
-	//----------------------------------------------------------------------------------//
-	$sUname = "";
-	$sPword = "";
-	unset($sUname);
-	unset($sPword);
-	
-	//----------------------------------------------------------------------------------//
-	//-- 7.0 - Return the Results                                                     --//
-	//----------------------------------------------------------------------------------//
-	if($bAbortLogin===false) {
+	if( $iMatch===0 ) {
 		return true;
 	} else {
 		return false;
@@ -181,31 +110,17 @@ function userauth_checkparameters( $sUname, $sPword ) {
 }
 
 
-
-
-
-
-
-//----------------------------------------------------------------------------//
-//-- #?.1# - AUTHENTICATION MESSAGE FUNCTION								--//
-//----------------------------------------------------------------------------//
-//-- Description: Default Error Message to display							--//
-//----------------------------------------------------------------------------//
-function displayAuthMessage() {
-	global $realm;
+function userauth_usernameblacklistcheck( $sUsername ) {
+	//-- This function is used for checking to see if a username is blacklisted is not --//
 	
-	header('WWW-Authenticate: Basic realm="' . $realm . '"');
-	header('HTTP/1.0 401 Unauthorized');
-	echo '<html><head><title>401 Authorization Required</title></head><body><h1>Authorization Required</h1></body></html>';
+	$sLowerUsername = strtolower($sUsername);
+	if( $sLowerUsername==="root" || $sLowerUsername==="admin" || $sLowerUsername==="administrator" || $sLowerUsername==="sys" || $sLowerUsername==="manager" ) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
-
-
-function UserAuth_ServerNotDeployed() {
-	header('HTTP/1.0 501 Not Implemented');
-	echo '<html><head><title>501 iOMy Server Not Deployed</title></head><body><h1>Please try setting up the server before accessing this API</h1></body></html>';
-	die();
-}
 
 
 

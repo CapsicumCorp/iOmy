@@ -60,20 +60,17 @@ if( isset( $Config ) ) {
 	
 	//-- Check if there is a Database Connection --//
 	if( $oRestrictedApiCore->bRestrictedDB===false ) {
-		http_response_code ( 403 );
-		echo "<h1>403 Forbidden</h1>\n";
-		echo "<p>Invalid Credentials!</p>\n";
-		echo "<p>Please sign in with valid credentials to a valid login API to continue.</p>\n";
-		exit();
+		userauth_rejected();
 	}
 	
 } else {
 	//-- FLAG AN ERROR: So that the APIs themselves know that --//
-	$bError    = true;
-	$iErrCode   = 3;
-	$sErrMesg  .= "Error Code:'0003' \n";
-	$sErrMesg  .= "This system isn't setup at the moment!\n";
-	$sErrMesg  .= "If this system hasn't been used before please run the 'First Run Wizard' for this system to set it up.\n";
+	//$bError    = true;
+	//$iErrCode   = 3;
+	//$sErrMesg  .= "Error Code:'0003' \n";
+	//$sErrMesg  .= "This system isn't setup at the moment!\n";
+	//$sErrMesg  .= "If this system hasn't been used before please run the 'First Run Wizard' for this system to set it up.\n";
+	userauth_noconfig();
 }
 
 

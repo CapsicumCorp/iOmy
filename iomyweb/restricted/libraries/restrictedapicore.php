@@ -63,7 +63,7 @@ require_once SITE_BASE.'/restricted/config/iomy_vanilla.php';
 require_once SITE_BASE.'/restricted/libraries/constants.php';
 require_once SITE_BASE.'/restricted/libraries/dbmysql.php';
 require_once SITE_BASE.'/restricted/libraries/functions.php';
-//require_once SITE_BASE.'/restricted/libraries/userauth.php';
+require_once SITE_BASE.'/restricted/libraries/userauth.php';
 
 
 
@@ -111,7 +111,7 @@ class RestrictedAPICore {
 		//--------------------------------------------------------------------//
 		//-- If the Config is setup                                         --//
 		//--------------------------------------------------------------------//
-		if( isset($aConfig['Core'])  ) {
+		if( isset($aConfig['Core']) ) {
 			if( isset($aConfig['Core']['CryptKey']) ) {
 				
 				//--------------------------------------------------------------------//
@@ -161,6 +161,7 @@ class RestrictedAPICore {
 							$_POST['password']
 						);
 						
+						
 						//-- 2.1.A.2.2: Check if the DB connection succeeded --//
 						if( $this->oRestrictedDB->Initialised===true ) {
 							//----------------------------------//
@@ -199,6 +200,12 @@ class RestrictedAPICore {
 							}
 							
 						}
+					} else {
+						//-- DEBUGGING --//
+						if( $this->bDebugging===true ) { 
+							$this->sDebugMessage .= "Username and Password failed the basic checks! \n";
+						}
+						
 					}
 					//--------------------------------------------------------------------//
 					//-- STEP 3: CLEANUP VARIABLES                                      --//
@@ -506,9 +513,9 @@ class RestrictedAPICore {
 		//-- 4.0 - Check to see if the username has symbols in it                         --//
 		//----------------------------------------------------------------------------------//
 		if( $bAbortLogin===false ) {
-			$bValidUname = preg_match('/[a-zA-Z0-9\s]+/', $sUname);
-		 
-			if( $bValidUname===0 ) {
+			$bValidUname = AlphaNumericCheck($sUname);
+			
+			if( $bValidUname!==true ) {
 				//-- Flag that the uname is invalid --//
 				$bAbortLogin = true;
 				
@@ -524,7 +531,7 @@ class RestrictedAPICore {
 		//----------------------------------------------------------------------------------//
 		if( $bAbortLogin===false ) {
 			$sLUname = strtolower($sUname);
-			if( $sLUname==="root" || $sLUname==="admin" || $sLUname==="administrator" || $sLUname==="sys" || $sLUname==="manager" ) {
+			if( userauth_usernameblacklistcheck( $sUname ) ) {
 				
 				//-- Flag that the login shouldn't be attempted --//
 				$bAbortLogin = true;
