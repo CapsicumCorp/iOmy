@@ -38,9 +38,6 @@ $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/fun
 $.sap.require("IOMy.functions.findInputWidget");
 
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
-$.sap.require("IOMy.functions.generateDeviceListData");
-
-$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
 $.sap.require("IOMy.functions.getCurrentUsername");
 
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
@@ -126,3 +123,12 @@ $.sap.require("IOMy.functions.time.isLeapYear");
 //----------------------------------------------------------------------------//
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
 $.sap.require("IOMy.functions.updateRoomPermissions");
+
+//----------------------------------------------------------------------------//
+// Device Functions
+//----------------------------------------------------------------------------//
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.devices.editThing");
+
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.generateDeviceListData");

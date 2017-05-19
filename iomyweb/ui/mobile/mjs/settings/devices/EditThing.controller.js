@@ -28,6 +28,11 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
     
     thingID : null,
     oThing : null,
+	
+	wThingNameField			: null,
+	wRoomCBox				: null,
+	wEditButton				: null,
+	wPanel					: null,
     
     aElementsToDestroy : [],
     aElementsForAFormToDestroy : [],
@@ -45,9 +50,9 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 		thisView.addEventDelegate({
 			// Everything is rendered in this function run before rendering.
 			onBeforeShow : function (evt) {
-                jQuery.sap.log.debug(JSON.stringify(evt.data.device));
                 // Collect values parsed from the device list.
-                me.oThing = evt.data.device;
+				me.thingID = evt.data.ThingId;
+                me.oThing = IOMy.common.ThingList["_"+me.thingID];
         
 				//-- Clear old instances of the UI --//
                 me.DestroyUI();
@@ -117,11 +122,16 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
     DestroyUI : function() {
         var me          = this;
         var sCurrentID  = "";
+		
+		if (me.wPanel !== null) {
+			me.wPanel.destroy();
+		}
         
         for (var i = 0; i < me.aElementsToDestroy.length; i++) {
             sCurrentID = me.aElementsToDestroy[i];
-            if (me.byId(sCurrentID) !== undefined)
+            if (me.byId(sCurrentID) !== undefined) {
                 me.byId(sCurrentID).destroy();
+			}
         }
         // Destroy whatever other elements are left.
         me.DestroySpecificFormUI();
@@ -139,8 +149,9 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         
         for (var i = 0; i < me.aElementsForAFormToDestroy.length; i++) {
             sCurrentID = me.aElementsForAFormToDestroy[i];
-            if (me.byId(sCurrentID) !== undefined)
+            if (me.byId(sCurrentID) !== undefined) {
                 me.byId(sCurrentID).destroy();
+			}
         }
         
         // Clear the array
@@ -154,8 +165,9 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         //===============================================//
         // Declare Variables
         //===============================================//
-        var me = this;
-        var thisView = me.getView();
+        var me			= this;
+        var thisView	= me.getView();
+		var oLink		= IOMy.common.getLink(me.oThing.LinkId);
         
         //-- Refresh the Navigational buttons --//
         IOMy.common.NavigationRefreshButtons( me );
@@ -174,10 +186,24 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
             text : "Display Name"
         });
         
-        me.aElementsToDestroy.push(me.sThingNameField);
-        var oThingNameField = new sap.m.Input(me.createId(me.sThingNameField), {
+        //me.aElementsToDestroy.push(me.sThingNameField);
+        me.wThingNameField = new sap.m.Input({
             value : me.oThing.DisplayName
         }).addStyleClass("width100Percent");
+
+		//-------------------------------------------------------//
+		// ROOM COMBO BOX
+		//-------------------------------------------------------//
+		var oRoomLabel = new sap.m.Label({
+			text : "Room you wish to place this link in"
+		});
+
+		me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_1").addStyleClass("width100Percent SettingsDropDownInput");
+		me.wRoomCBox.setSelectedKey(oLink.LinkRoomId);
+
+		me.wRoomCBoxHolder = new sap.m.VBox({
+			items : [me.wRoomCBox]
+		}).addStyleClass("width100Percent");
         
         //-----------------------------------------------//
         // FORM BOX FOR SPECIFIC DEVICE TYPES
@@ -189,100 +215,32 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         // UPDATE BUTTON
         //-----------------------------------------------//
         me.aElementsToDestroy.push("updateButton");
-        var oEditButton = new sap.m.VBox({
+        me.wEditButton = new sap.m.VBox({
             items : [
                 new sap.m.Link(me.createId("updateButton"), {
                     text : "Update",
                     press : function () {
-                        var thisButton = this; // Captures the scope of the calling button.
-                        thisButton.setEnabled(false);
-
-                        var bError = false;
-                        var aErrorMessages = [];
-                        var sThingText = me.byId("thingNameField").getValue();
-                        var iThingID = me.oThing.Id;
-                        var mThingIdInfo = IOMy.validation.isThingIDValid(iThingID);
-                        var mThingNameInfo = me.ValidateThingName();
-
-                        //==========================================================//
-                        // Check that the name field is filled out and that the ID
-                        // is valid
-                        //==========================================================//
-                        if (mThingIdInfo.bIsValid === false) {
-                            bError = true;
-                            aErrorMessages = aErrorMessages.concat(mThingIdInfo.aErrorMessages);
-                        }
-                        
-                        if (mThingNameInfo.bIsValid === false) {
-                            bError = true;
-                            aErrorMessages = aErrorMessages.concat(mThingNameInfo.aErrorMessages);
-                        }
-                        
-                        if (bError === false) {
-                            // Run the API to update the device (thing) name
-                            try {
-                                IOMy.apiphp.AjaxRequest({
-                                    url : IOMy.apiphp.APILocation("thing"),
-                                    data : {"Mode" : "EditName", "Id" : iThingID, "Name" : sThingText},
-                                    onSuccess : function () {
-                                        
-                                        //-- REFRESH THINGS --//
-                                        try {
-                                            IOMy.common.ReloadVariableThingList(
-                                                function () {
-                                                    //===== BRING UP THE SUCCESS DIALOG BECAUSE THE API RAN SUCCESSFULLY AND THE VARIABLES HAVE BEEN REFRESHED. =====//
-                                                    IOMy.common.showSuccess("Update successful.", "Success", 
-                                                    function () {
-                                                        IOMy.common.bItemNameChangedMustRefresh = true;
-                                                        IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
-                                                    }, "UpdateMessageBox");
-                                                }
-                                            );
-                                        } catch (e) {
-                                            jQuery.sap.log.error("Error refreshing the Item List: "+e.message);
-                                            this.onComplete();
-                                        }
-
-                                    },
-                                    onFail : function (err) {
-                                        //IOMy.common.showError("Update failed.", "Error");
-                                        IOMy.common.showError(JSON.stringify(err.responseText), "Error");
-                                        
-                                        // Finish the request by enabling the edit button
-                                        this.onComplete();
-                                    },
-                                    
-                                    onComplete : function () {
-                                        //------------------------------------------------------------------------------------------//
-                                        // Re-enable the button once the request and the callback functions have finished executing.
-                                        //------------------------------------------------------------------------------------------//
-                                        thisButton.setEnabled(true);
-                                    }
-                                });
-                            } catch (e00033) {
-                                //===== BRING UP THE ERROR DIALOG BECAUSE SOMETHING'S NOT RIGHT. =====//
-                                IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
-                            }
-                        } else {
-                            IOMy.common.showError(aErrorMessages.join("\n\n"));
-                            jQuery.sap.log.error(aErrorMessages.join("\n"));
-                        }
+						me.EditThing();
                     }
                 }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
             ]
         }).addStyleClass("TextCenter MarTop12px");
 
         var oVertBox = new sap.m.VBox({
-            items : [oThingNameLabel, oThingNameField, oFormBox, oEditButton]
+            items : [
+				oThingNameLabel, me.wThingNameField,
+				oRoomLabel, me.wRoomCBoxHolder,
+				oFormBox, me.wEditButton
+			]
         }).addStyleClass("UserInputForm");
 
         me.aElementsToDestroy.push("devicePanel");
-        var oPanel = new sap.m.Panel(me.createId("devicePanel"), {
+        me.wPanel = new sap.m.Panel(me.createId("devicePanel"), {
             backgroundDesign: "Transparent",
             content: [oVertBox] //-- End of Panel Content --//
         });
 
-        thisView.byId("page").addContent(oPanel);
+        thisView.byId("page").addContent(me.wPanel);
         
         //--------------------------------------------------------------------//
         // Create the action menu
@@ -318,6 +276,190 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                 ]
             })
         );
-    }
+    },
+	
+	EditThing : function () {
+		var me = this;
+		me.byId("updateButton").setEnabled(false);
+
+		var bError					= false;
+		var aErrorMessages			= [];
+		var sThingText				= me.wThingNameField.getValue();
+		var iThingID				= me.oThing.Id;
+		var iRoomID					= me.wRoomCBox.getSelectedKey();
+		var mThingIdInfo			= IOMy.validation.isThingIDValid(iThingID);
+		var mThingNameInfo			= me.ValidateThingName();
+		
+		var bEditingThing			= me.wThingNameField.getEnabled();
+		var bChangingRoom			= me.wRoomCBox.getEnabled();
+		
+		var fnThingSuccess;
+		var fnThingFail;
+		
+		var fnRoomSuccess;
+		var fnRoomFail;
+		
+		var mThingChangeSettings = {};
+		var mRoomChangeSettings = {};
+
+		//==========================================================//
+		// Check that the name field is filled out and that the ID
+		// is valid
+		//==========================================================//
+		if (mThingIdInfo.bIsValid === false) {
+			bError = true;
+			aErrorMessages = aErrorMessages.concat(mThingIdInfo.aErrorMessages);
+		}
+
+		if (mThingNameInfo.bIsValid === false) {
+			bError = true;
+			aErrorMessages = aErrorMessages.concat(mThingNameInfo.aErrorMessages);
+		}
+
+		if (bError === false) {
+			mThingChangeSettings.thingID	= iThingID;
+			mThingChangeSettings.thingName	= sThingText;
+			
+			mRoomChangeSettings.thingID		= iThingID;
+			mRoomChangeSettings.roomID		= iRoomID;
+			
+			//----------------------------------------------------------------//
+			// Create the onSuccess and onFail functions based on what fields
+			// are enabled and/or changed.
+			//----------------------------------------------------------------//
+			if (bEditingThing && bChangingRoom) {
+				//------------------------------------------------------------//
+				// We're editing both the thing name and assigning it to a
+				// room.
+				//------------------------------------------------------------//
+				mThingChangeSettings.successful = true;
+				
+				//------------------------------------------------------------//
+				// Create the success function that will create the callback
+				// functions for the room assignment function.
+				//------------------------------------------------------------//
+				fnThingSuccess = function () {
+					//--------------------------------------------------------//
+					// Create the success function that will popup a message,
+					// indicating complete or partial success.
+					//--------------------------------------------------------//
+					mRoomChangeSettings.onSuccess = function () {
+						IOMy.common.ReloadVariableRoomList(
+							function () {
+								var sMessage;
+								
+								if (mThingChangeSettings.successful === true) {
+									sMessage = "Device renamed to "+sThingText+". Located in "+me.wRoomCBox.getSelectedItem().getText();
+									IOMy.common.NavigationTriggerBackForward();
+								} else {
+									sMessage = "Device couldn't be renamed to "+sThingText+", but is now located in "+me.wRoomCBox.getSelectedItem().getText();
+									
+									IOMy.common.showWarning(sMessage, "", function () {
+										me.byId("updateButton").setEnabled(true);
+									});
+								}
+							},
+							
+							fnThingFail
+						);
+					};
+					
+					//--------------------------------------------------------//
+					// Create the success function that will popup a message,
+					// indicating complete or partial failure.
+					//--------------------------------------------------------//
+					mRoomChangeSettings.onFail = function (sErrorMessage) {
+						var sMessage;
+								
+						if (mThingChangeSettings.successful === true) {
+							sMessage = "Device renamed to "+sThingText+", but failed to move device to "+me.wRoomCBox.getSelectedItem().getText();
+							jQuery.sap.log.warning(sMessage);
+							//IOMy.common.NavigationTriggerBackForward();
+						} else {
+							sMessage = "Device couldn't be renamed. Failed to move device to "+me.wRoomCBox.getSelectedItem().getText();
+							
+							IOMy.common.showError(sMessage, "", function () {
+								me.byId("updateButton").setEnabled(true);
+							});
+							
+							jQuery.sap.log.error(sMessage);
+						}
+					};
+					
+					//-- Call the room assignment function with the correct configuration. --//
+					IOMy.devices.AssignDeviceToRoom(mRoomChangeSettings);
+				};
+				
+				//------------------------------------------------------------//
+				// Create the failure function that will report a failure and
+				// then run the success function to proceed to assign a device
+				// to a room
+				//------------------------------------------------------------//
+				fnThingFail = function (sErrMesg) {
+					jQuery.sap.log.error(sErrMesg);
+					mThingChangeSettings.successful = false;
+					fnThingSuccess();
+				};
+				
+				mThingChangeSettings.onSuccess	= fnThingSuccess;
+				mThingChangeSettings.onFail		= fnThingFail;
+				
+				// Run the API to update the device (thing) name
+				try {
+					IOMy.functions.editThing(mThingChangeSettings);
+
+				} catch (e00033) {
+					jQuery.sap.log.error(e00033.message);
+				}
+			} else {
+				
+				if (bEditingThing) {
+					fnThingFail = function () {
+						me.byId("updateButton").setEnabled(true);
+					};
+					
+					fnThingSuccess = function () {
+						IOMy.common.ReloadVariableThingList({
+							
+							onSuccess : function () {
+								IOMy.common.NavigationTriggerBackForward();
+							}
+						});
+					};
+					
+					mThingChangeSettings.onSuccess	= fnThingSuccess;
+					mThingChangeSettings.onFail		= fnThingFail;
+					
+					IOMy.functions.editThing(mThingChangeSettings);
+				}
+				
+				if (bChangingRoom) {
+					fnRoomFail = function (sMessage) {
+						IOMy.common.showError(sMessage, "", function () {
+							me.byId("updateButton").setEnabled(true);
+						});
+					};
+					
+					fnRoomSuccess = function () {
+						IOMy.common.ReloadVariableThingList({
+							
+							onSuccess : function () {
+								IOMy.common.NavigationTriggerBackForward();
+							}
+						});
+					};
+					
+					mRoomChangeSettings.onSuccess	= fnRoomSuccess;
+					mRoomChangeSettings.onFail		= fnRoomFail;
+					
+					IOMy.devices.AssignDeviceToRoom(mRoomChangeSettings);
+				}
+			}
+			
+		} else {
+			IOMy.common.showError(aErrorMessages.join("\n\n"));
+			jQuery.sap.log.error(aErrorMessages.join("\n"));
+		}
+	}
 
 });

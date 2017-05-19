@@ -107,7 +107,7 @@ $.extend(IOMy.devices,{
         //------------------------------------------------------------//
         // Declare variables
         //------------------------------------------------------------//
-        var me = this; // Capture the scope of the current controller
+        var me = this; // Capture the scope of the devices library
         var sUrl = IOMy.apiphp.APILocation("link");
         
         //------------------------------------------------------------//
@@ -136,6 +136,118 @@ $.extend(IOMy.devices,{
             onFail : function (error) {
                 jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
                 IOMy.common.showError("Error assigning "+sLinkType+":\n\n"+error.responseText, "Cannot move to new room");
+            }
+        });
+    },
+	
+	/**
+     * Function that performs an AJAX request to assign a given link to a given room
+     * 
+     * @param {type} iLinkId                ID of the link to assign to a room
+     * @param {type} iRoomId                ID of the room for the link to be assigned to
+     * @param {type} sLinkType              String to display specifying the type of link being assigned.
+     */
+    AssignDeviceToRoom : function (mSettings) {
+        //------------------------------------------------------------//
+        // Declare variables
+        //------------------------------------------------------------//
+        var me				= this; // Capture the scope of the current controller
+        var bError			= false;
+		var aErrorMessages	= [];
+		var sUrl			= IOMy.apiphp.APILocation("link");
+		var iLinkId;
+		var iRoomId;
+        var mThingIDInfo;
+		var mRoomIDInfo;
+		var fnSuccess;
+		var fnFail;
+		
+		//--------------------------------------------------------------------//
+		// Read the settings map
+		//--------------------------------------------------------------------//
+		if (mSettings !== undefined) {
+			//----------------------------------------------------------------//
+			// REQUIRED: Valid Thing ID to get the link ID
+			//----------------------------------------------------------------//
+			if (mSettings.thingID !== undefined) {
+				mThingIDInfo = IOMy.validation.isThingIDValid(mSettings.thingID);
+				
+				bError			= !mThingIDInfo.bIsValid;
+				aErrorMessages	= aErrorMessages.concat(mThingIDInfo.aErrorMessages);
+				
+				if (!bError) {
+					iLinkId = IOMy.common.ThingList["_"+mSettings.thingID].LinkId;
+				}
+			} else {
+				fnAppendError("Thing ID (thingID) must be specified!");
+			}
+			
+			if (bError) {
+				throw new IllegalArgumentException( aErrorMessages.join("\n") );
+			}
+			
+			//----------------------------------------------------------------//
+			// OPTIONAL: Valid Room ID
+			//----------------------------------------------------------------//
+			if (mSettings.roomID !== undefined) {
+				//-- Room ID --//
+				mRoomIDInfo		= IOMy.validation.isRoomIDValid(mSettings.roomID);
+
+				bError			= !mRoomIDInfo.bIsValid;
+				aErrorMessages	= aErrorMessages.concat(mRoomIDInfo.aErrorMessages);
+				
+				// Throw an exception if one or both IDs are not valid.
+				if (bError) {
+					throw new IllegalArgumentException( aErrorMessages.join("\n") );
+				} else {
+					iRoomId		= mSettings.roomID;
+				}
+			}
+			
+			//--------------------------------------------------------------------//
+			// Check the settings map for two callback functions.
+			//--------------------------------------------------------------------//
+			//-- Success callback --//
+			if (mSettings.onSuccess === undefined) {
+				fnSuccess = function () {};
+			} else {
+				fnSuccess = mSettings.onSuccess;
+			}
+
+			//-- Failure callback --//
+			if (mSettings.onFail === undefined) {
+				fnFail = function () {};
+			} else {
+				fnFail = mSettings.onFail;
+			}
+			
+		} else {
+			throw new MissingSettingsMapException();
+		}
+		
+        //------------------------------------------------------------//
+        // Begin request
+        //------------------------------------------------------------//
+        IOMy.apiphp.AjaxRequest({
+            url : sUrl,
+            data : {"Mode" : "ChooseRoom", "Id" : parseInt(iLinkId), "RoomId" : parseInt(iRoomId)},
+            
+            onSuccess : function (response, data) {
+				try {
+					if (data.Error === false) {
+						fnSuccess();
+
+					} else {
+						fnFail(data.ErrMesg);
+					}
+				} catch (ex) {
+					fnFail(ex.message);
+				}
+            },
+            
+            onFail : function (error) {
+				fnFail("Error (HTTP Status "+error.status+"): "+error.responseText);
+                //jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
             }
         });
     },

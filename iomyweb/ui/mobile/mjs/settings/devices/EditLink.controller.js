@@ -27,9 +27,6 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
     
     linkID : null,
     
-    wRoomCBox : null,
-    wPremiseCBox : null,
-    
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
@@ -63,40 +60,7 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
 					value : sLinkName
 				}).addStyleClass("SettingsTextInput width100Percent");
                 
-                //-------------------------------------------------------//
-                // PREMISE COMBO BOX
-                //-------------------------------------------------------//
-                var oPremiseLabel = new sap.m.Label({
-                    text : "Premise you wish to place this link in"
-                });
-
-                me.wPremiseCBox = IOMy.widgets.getPremiseSelector(me.createId("premiseCBox")).addStyleClass("width100Percent SettingsDropDownInput");
-                me.wPremiseCBox.setSelectedKey(oLink.PremiseId);
-                me.wPremiseCBox.attachChange(
-                    function () {
-                        // Refresh the room select box.
-                        me.wRoomCBox.destroy();
-                        me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_"+me.wPremiseCBox.getSelectedKey()).addStyleClass("width100Percent SettingsDropDownInput");
-                        me.wRoomCBox.setSelectedKey(null);
-                        me.wRoomCBoxHolder.addItem(me.wRoomCBox);
-                    }
-                );
-                
-                //-------------------------------------------------------//
-                // ROOM COMBO BOX
-                //-------------------------------------------------------//
-                var oRoomLabel = new sap.m.Label({
-                    text : "Room you wish to place this link in"
-                });
-
-                me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_"+me.wPremiseCBox.getSelectedKey()).addStyleClass("width100Percent SettingsDropDownInput");
-                me.wRoomCBox.setSelectedKey(oLink.LinkRoomId);
-
-                me.wRoomCBoxHolder = new sap.m.VBox({
-                    items : [me.wRoomCBox]
-                }).addStyleClass("width100Percent");
-				
-				//============================================================//
+                //============================================================//
                 // Create the Update/Edit Button.                             //
                 //============================================================//
 				var oEditButton = new sap.m.VBox({
