@@ -1,2 +1,2 @@
 # Increase VERSION when any file within asset.zip is modified
-ZIPVERSION=4
+ZIPVERSION=5
