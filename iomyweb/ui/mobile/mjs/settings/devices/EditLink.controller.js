@@ -88,28 +88,16 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
                                             url : IOMy.apiphp.APILocation("link"),
                                             data : {"Mode" : "EditName", "Id" : iID, "Name" : sText},
                                             onSuccess : function () {
-                                                //-- REFRESH LINK LIST --//
-                                                IOMy.common.ReloadVariableLinkList(
-                                                    function () {
-                                                        IOMy.common.showSuccess("Update successful.", "Success", 
-                                                        function () {
-                                                            IOMy.devices.AssignLinkToRoom(iID, me.wRoomCBox.getSelectedKey(), oLink.LinkTypeName,
-                                                                function () {
-
-                                                                    // Take the user to the link list settings page.
-                                                                    IOMy.common.NavigationChangePage("pSettingsDeviceList", {}, true);
-
-                                                                }
-                                                            );
-                                                        }, "UpdateMessageBox");
-                                                    }
-                                                );
+                                                IOMy.common.NavigationChangePage("pSettingsDeviceList", {}, true);
                                             },
                                             onFail : function (err) {
                                                 //IOMy.common.showError("Update failed.", "Error");
-                                                IOMy.common.showError(JSON.stringify(err.responseText), "Error");
-                                                // Finish the request by enabling the edit button
-                                                this.onComplete();
+                                                IOMy.common.showError(JSON.stringify(err.responseText), "Error",
+													function () {
+														// Finish the request by enabling the edit button
+														this.onComplete();
+													}
+												);
                                             },
                                             
                                             onComplete : function () {
@@ -131,8 +119,6 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
 				var oVertBox = new sap.m.VBox(me.makeId("vbox"), {
 					items : [
                         oLinkTitle, oLinkNameField,
-                        oPremiseLabel, me.wPremiseCBox,
-                        oRoomLabel, me.wRoomCBoxHolder,
                         oEditButton
                     ]
 				}).addStyleClass("UserInputForm");
