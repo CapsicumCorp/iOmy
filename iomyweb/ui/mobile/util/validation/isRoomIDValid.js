@@ -66,7 +66,7 @@ $.extend(IOMy.validation, {
         }
         
         //--------------------------------------------------------------------//
-        // If there are no errors, check that it exists in the RoomsList
+        // If there are no errors, check that it exists in the RoomList
         // variable.
         //--------------------------------------------------------------------//
         if (bError === false) {

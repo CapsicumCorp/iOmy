@@ -115,11 +115,24 @@ function AttemptToDeleteOnlyRoomException(message, roomName) {
 }
 
 //----------------------------------------------------------------------------//
-// Premises
+// Premises and Rooms
 //----------------------------------------------------------------------------//
 function NoPremisesVisibleException(message) {
     IOmyException.call(this, message);
     this.name       = "NoPremisesVisibleException";
+}
+
+function NoRoomsFoundException(message) {
+	//------------------------------------------------------------------------//
+    // This exception can have a simple "No rooms detected" message if one is
+    // not provided.
+    //------------------------------------------------------------------------//
+    if (message === undefined || message === null || message === "") {
+        message = "No rooms detected!";
+    }
+    
+    ObjectNotFoundException.call(this, message);
+    this.name       = "NoRoomsFoundException";
 }
 
 //----------------------------------------------------------------------------//

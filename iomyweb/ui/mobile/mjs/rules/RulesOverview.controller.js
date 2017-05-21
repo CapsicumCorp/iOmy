@@ -133,54 +133,102 @@ sap.ui.controller("mjs.rules.RulesOverview", {
         var me = this;
         var thisView = me.getView();
 		var mHub = IOMy.common.getHub(1);
+		var sUrl = IOMy.apiphp.APILocation("permissions");
+		var wContainer;
+		
+		//--------------------------------------------------------------------//
+        // Draw the containing panel and add it to the page.
+        //--------------------------------------------------------------------//
+        me.wPanel = new sap.m.Panel ({
+            backgroundDesign: "Transparent"
+        }).addStyleClass("MasterPanel PanelNoPadding PadBottom10px UserInputForm MarTop3px");
         
-		if (mHub.HubTypeId === 2) {
-			//--------------------------------------------------------------------//
-			// Draw the table that shows a list of devices and their on/off times
-			//--------------------------------------------------------------------//
-			var wContainer = new sap.m.VBox({
-				items : [
-					// -- Device Header -- //
-					new sap.m.VBox({
-						items : [
-							// -- HBox Label Container. Aligns children horizontally -- //
-							new sap.m.HBox({
+        thisView.byId("page").addContent(me.wPanel);
+		
+		//--------------------------------------------------------------------//
+        // Find out whether the current user is the owner.
+        //--------------------------------------------------------------------//
+		IOMy.apiphp.AjaxRequest({
+            url : sUrl,
+            data : {
+                "Mode" : "LookupPremisePerms",
+                "UserId" : IOMy.common.UserId,
+                "PremiseId" : mHub.PremiseId
+            },
+            
+            onSuccess : function (responseType, data) {
+                if (data.Error === false) {
+					//--------------------------------------------------------//
+					// Show the rules list if the user is the owner and the hub
+					// is a WatchInputs hub.
+					//--------------------------------------------------------//
+					if (data.Data.Owner === 1) {
+						if (mHub.HubTypeId === 2) {
+							//--------------------------------------------------------------------//
+							// Draw the table that shows a list of devices and their on/off times
+							//--------------------------------------------------------------------//
+							wContainer = new sap.m.VBox({
 								items : [
-									new sap.m.Label({
-										text: "Zigbee Smart Plug"
-									}).addStyleClass("Font-RobotoCondensed")
+									// -- Device Header -- //
+									new sap.m.VBox({
+										items : [
+											// -- HBox Label Container. Aligns children horizontally -- //
+											new sap.m.HBox({
+												items : [
+													new sap.m.Label({
+														text: "Zigbee Smart Plug"
+													}).addStyleClass("Font-RobotoCondensed")
+												]
+											}).addStyleClass("MarLeft3px")
+										]
+									}).addStyleClass("ConsistentMenuHeader ListItem width100Percent")
 								]
-							}).addStyleClass("MarLeft3px")
-						]
-					}).addStyleClass("ConsistentMenuHeader ListItem width100Percent")
-				]
-			});
+							});
 
-			//--------------------------------------------------------------------//
-			// Draw each device into the table
-			//--------------------------------------------------------------------//
-	//        for (var i = 0; i < me.Entries.length; i++) {
-	//            wEntryTable.addItem( me.DrawEntry(me.Entries[i]) );
-	//        }
+							//--------------------------------------------------------------------//
+							// Draw each device into the table
+							//--------------------------------------------------------------------//
+					//        for (var i = 0; i < me.Entries.length; i++) {
+					//            wEntryTable.addItem( me.DrawEntry(me.Entries[i]) );
+					//        }
 
-			$.each(IOMy.common.ThingList, function (sThingIndex, mThing) {
+							$.each(IOMy.common.ThingList, function (sThingIndex, mThing) {
 
-				if (sThingIndex !== undefined && sThingIndex !== null && mThing !== undefined && mThing !== null) {
-					// Looking for Zigbee Smart Plugs
-					if (mThing.TypeId === 2) {
-						try {
-							wContainer.addItem( me.DrawEntry(mThing) );
-						} catch (error) {
-							// Failed to draw the item, expecting a SerialCodeNullException
-							if (error.name !== "SerialCodeNullException") {
-								// Some other exception was thrown. Log it.
-								// .getMessage() is not called because it might not be an iOmy exception.
-								jQuery.sap.log.error(error.name + ": " + error.message);
-							}
-							// Do nothing else.
+								if (sThingIndex !== undefined && sThingIndex !== null && mThing !== undefined && mThing !== null) {
+									// Looking for Zigbee Smart Plugs
+									if (mThing.TypeId === 2) {
+										try {
+											wContainer.addItem( me.DrawEntry(mThing) );
+										} catch (error) {
+											// Failed to draw the thing entry, expecting a SerialCodeNullException
+											if (error.name !== "SerialCodeNullException") {
+												// Some other exception was thrown. Log it.
+												// .getMessage() is not called because it might not be an iOmy exception.
+												jQuery.sap.log.error(error.name + ": " + error.message);
+											}
+											// Do nothing else.
+										}
+									}
+								}
+
+							});
+						} else {
+							wContainer = new sap.m.MessageStrip({
+								text : "Your hub is not a valid WatchInputs Hub. Rules are only supported on WatchInputs Hubs."
+							}).addStyleClass("iOmyMessageInfoStrip");
 						}
+					} else {
+						wContainer = new sap.m.MessageStrip({
+							text : "Only the premise owner is permitted to set device rules on the current version."
+						}).addStyleClass("iOmyMessageInfoStrip");
 					}
+                } else {
+					wContainer = new sap.m.MessageStrip({
+						text : "Only the premise owner is permitted to set device rules on the current version."
+						//text : "Failed to check the owner permission for the current user.\n\n"+data.ErrMesg
+					}).addStyleClass("iOmyMessageInfoStrip");
 				}
+<<<<<<< Updated upstream
 
 			});
 		 } else {
@@ -200,6 +248,23 @@ sap.ui.controller("mjs.rules.RulesOverview", {
         }).addStyleClass("MasterPanel PanelNoPadding PadBottom10px UserInputForm MarTop3px");
         
         thisView.byId("page").addContent(me.wPanel);
+=======
+				
+				me.wPanel.addContent(wContainer);
+            },
+            
+            onFail : function (response) {
+                jQuery.sap.log.error("There was an error accessing the premise permissions: "+JSON.stringify(response));
+                
+				wContainer = new sap.m.MessageStrip({
+					text : "Failed to check the owner permission for the current user."
+				}).addStyleClass("iOmyMessageInfoStrip");
+				
+				me.wPanel.addContent(wContainer);
+            }
+            
+        });
+>>>>>>> Stashed changes
     },
     
     DrawEntry : function (mThing) {
@@ -272,6 +337,32 @@ sap.ui.controller("mjs.rules.RulesOverview", {
         }
         
         return wEntryBox;
-    }
+    },
+	
+	FetchPermissionsForPremise : function (iUserId, iPremiseId) {
+        var me = this;
+        var sUrl = IOMy.apiphp.APILocation("permissions");
+        
+        IOMy.apiphp.AjaxRequest({
+            url : sUrl,
+            data : {
+                "Mode" : "LookupPremisePerms",
+                "UserId" : iUserId,
+                "PremiseId" : iPremiseId
+            },
+            
+            onSuccess : function (responseType, data) {
+                if (data.Error === false) {
+					
+                }
+            },
+            
+            onFail : function (response) {
+                jQuery.sap.log.error("There was an error accessing the premise permissions: "+JSON.stringify(response));
+                IOMy.common.showError("There was an error accessing the premise permissions", "Error");
+            }
+            
+        });
+    },
 	
 });

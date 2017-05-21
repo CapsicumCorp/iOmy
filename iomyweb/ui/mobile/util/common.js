@@ -54,6 +54,8 @@ $.extend(IOMy.common,{
 	//-- Arrays used to store the User's variables
 	//--------------------------------------------//
     CurrentUsername         : null,
+	UserId					: 0,
+	UserDisplayName			: null,
     
 	UserVars : {},			//-- TODO: Check if this variable is still used anywhere --//
 	

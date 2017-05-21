@@ -217,7 +217,7 @@ sap.ui.controller("mjs.settings.DeviceList", {
 													}),
 													src: "sap-icon://edit",
 													press : function () {
-														IOMy.common.NavigationChangePage("pSettingsEditThing", { "device": mThing }, false );
+														IOMy.common.NavigationChangePage("pSettingsEditThing", { "ThingId": mThing.Id }, false );
 													}
 												}).addStyleClass("Text_grey_20 MarTop1d25Rem"),
 											]

@@ -49,16 +49,18 @@ $.extend(IOMy.widgets,{
             //====================================================================//
             if (IOMy.common.RoomsList[sPremiseId] !== undefined) {
                 var oSBox = new sap.m.Select(sId,{
-                    width : "100%"
+                    "width" : "100%"
                 }).addStyleClass("width100Percent");
                 
                 $.each(IOMy.common.RoomsList[sPremiseId],function(sIndex,aRoom) {
                     //-- Verify that the Premise has rooms, other than the pseudo-room Unassigned --//
-                    if( sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null ) {
+                    if( sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null &&
+						aRoom.RoomId !== 1 && aRoom.RoomName !== "Unassigned")
+					{
                         oSBox.addItem(
                             new sap.ui.core.Item({
-                                text : aRoom.RoomName,
-                                key : aRoom.RoomId
+                                "text" : aRoom.RoomName,
+                                "key" : aRoom.RoomId
                             })
                         );
                 
@@ -75,24 +77,16 @@ $.extend(IOMy.widgets,{
                     
                     return oSBox;
                 } else {
-                    sap.ui.getCore().byId(sId).destroy();
-                    
-                    return new sap.m.Input(sId, {
-                        enabled : false,
-                        value : "You have no rooms created."
-                    });
+                    throw new NoRoomsFoundException();
                 }
                 
             } else {
-                return new sap.m.Input(sId, {
-                    enabled : false,
-                    value : "You have no rooms created."
-                });
+                throw new NoRoomsFoundException();
             }
 
         } catch (e) {
-            jQuery.sap.log.error("Error in IOMy.widgets.getRoomSelector(): "+e.message);
-            return new sap.m.Text(sId, {text : "Failed to load the room select box."});
+			e.message = "Error in IOMy.widgets.getRoomSelector(): "+e.message;
+            throw e;
         }
     }
     

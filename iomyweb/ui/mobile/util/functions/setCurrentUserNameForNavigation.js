@@ -29,19 +29,21 @@ $.sap.declare("IOMy.functions.setCurrentUserNameForNavigation",true);
 $.extend(IOMy.functions,{
     
     /**
-     * Procedure that retrieves and stores the user's display name.
+     * Procedure that retrieves and stores the user's display name and the user
+	 * ID.
      */
     setCurrentUserNameForNavigation : function () {
         var me = this;
         
         IOMy.apiodata.AjaxRequest({
             Url             : IOMy.apiodata.ODataLocation("users"),
-            Columns         : ["USERSINFO_DISPLAYNAME"],
+            Columns         : ["USERS_PK","USERSINFO_DISPLAYNAME"],
             WhereClause     : [],
             OrderByClause   : [],
             Limit           : 0,
             
             onSuccess : function (response, data) {
+				IOMy.common.UserId			= data[0].USERS_PK;
                 IOMy.common.UserDisplayName = data[0].USERSINFO_DISPLAYNAME;
             },
             
