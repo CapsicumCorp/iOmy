@@ -228,27 +228,6 @@ sap.ui.controller("mjs.rules.RulesOverview", {
 						//text : "Failed to check the owner permission for the current user.\n\n"+data.ErrMesg
 					}).addStyleClass("iOmyMessageInfoStrip");
 				}
-<<<<<<< Updated upstream
-
-			});
-		 } else {
-			var wContainer = new sap.m.MessageStrip({
-				text : "Your hub is not a valid WatchInputs Hub. Rules are only supported on WatchInputs Hubs."
-			}).addStyleClass("iOmyMessageInfoStrip");
-	}
-        
-        //--------------------------------------------------------------------//
-        // Draw the containing panel and add it to the page.
-        //--------------------------------------------------------------------//
-        me.wPanel = new sap.m.Panel ({
-            backgroundDesign: "Transparent",
-            content: [
-                wContainer
-            ]
-        }).addStyleClass("MasterPanel PanelNoPadding PadBottom10px UserInputForm MarTop3px");
-        
-        thisView.byId("page").addContent(me.wPanel);
-=======
 				
 				me.wPanel.addContent(wContainer);
             },
@@ -264,7 +243,6 @@ sap.ui.controller("mjs.rules.RulesOverview", {
             }
             
         });
->>>>>>> Stashed changes
     },
     
     DrawEntry : function (mThing) {
