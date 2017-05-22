@@ -219,9 +219,55 @@ public class IOMy extends AppCompatActivity
         if (menuItemId == R.id.nav_settings) {
             Intent intent = new Intent(this, SettingsPage.class);
             this.startActivity(intent);
+        } else if (menuItemId == R.id.nav_exit) {
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_iomy);
+            drawer.closeDrawer(GravityCompat.START);
+
+            //Exit the app but only if the user says yes
+            exitAppWithPrompt();
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout_iomy);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void exitAppWithPrompt() {
+        //----------------------------------------------------------------------------//
+        // Create an alert dialog box
+        //----------------------------------------------------------------------------//
+        AlertDialog.Builder confirmationDialogBuilder = new AlertDialog.Builder(this);
+
+        //----------------------------------------------------------------------------//
+        // Set the properties
+        //----------------------------------------------------------------------------//
+        //confirmationDialogBuilder.setTitle("Are you sure you want to exit iOmy?");
+        confirmationDialogBuilder.setMessage("Are you sure you want to exit iOmy?");
+        confirmationDialogBuilder.setTitle("This will stop all iOmy monitoring on this device?");
+        confirmationDialogBuilder.setPositiveButton("Yes",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,
+                                        int id) {
+                        //Shutdown background services
+                        Application.getInstance().stopBackgroundService();
+
+                        //Shutdown app
+                        Application.getInstance().onServiceDestroy();
+                    }
+                }
+        );
+        confirmationDialogBuilder.setNegativeButton("No",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,
+                                        int id) {
+                        dialog.cancel();
+                    }
+                }
+        );
+
+        //----------------------------------------------------------------------------//
+        // Make the dialog appear
+        //----------------------------------------------------------------------------//
+        AlertDialog confirmationDialog = confirmationDialogBuilder.create();
+        confirmationDialog.show();
     }
 }

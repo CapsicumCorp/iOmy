@@ -26,4 +26,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
             android:icon="@drawable/ic_settings"
             android:title="Settings" />
     </group>
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_exit"
+            android:icon="@drawable/ic_exit"
+            android:title="Exit" />
+    </group>
 </menu>
