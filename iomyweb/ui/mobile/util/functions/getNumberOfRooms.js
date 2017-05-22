@@ -39,7 +39,7 @@ $.extend(IOMy.functions,{
 		$.each(IOMy.common.RoomsList, function (sIndex, aPremise) {
             if (sIndex !== null && sIndex !== undefined && aPremise !== null && aPremise !== undefined) {
                 $.each(aPremise, function (sJndex, aRoom) {
-                    if (sJndex !== "Unassigned" && sJndex !== null && sJndex !== undefined && aRoom !== null && aRoom !== undefined) {
+                    if (aRoom.RoomId !== 1 && aRoom.RoomName !== "Unassigned" && sJndex !== null && sJndex !== undefined && aRoom !== null && aRoom !== undefined) {
                         iNum++;
                     }
                 });
@@ -47,6 +47,22 @@ $.extend(IOMy.functions,{
 		});
         
 		return iNum;
+	},
+	
+	unassignedPseudoRoomExists : function () {
+		var bExists = false;
+		
+		$.each(IOMy.common.RoomsList, function (sIndex, aPremise) {
+            if (sIndex !== null && sIndex !== undefined && aPremise !== null && aPremise !== undefined) {
+                $.each(aPremise, function (sJndex, aRoom) {
+                    if (aRoom.RoomId === 1 && aRoom.RoomName === "Unassigned") {
+                        bExists = true;
+                    }
+                });
+            }
+		});
+		
+		return bExists;
 	}
     
 });

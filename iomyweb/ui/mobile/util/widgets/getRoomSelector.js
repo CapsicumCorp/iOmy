@@ -43,6 +43,7 @@ $.extend(IOMy.widgets,{
             // Declare Variables                                                  //
             //====================================================================//
             var iRoomsCounted = 0;
+			var bHasUnassignedRoom = false;
 
             //====================================================================//
             // Create the Select Box                                              //
@@ -65,7 +66,9 @@ $.extend(IOMy.widgets,{
                         );
                 
                         iRoomsCounted++;
-                    }
+                    } else if (aRoom.RoomId === 1 && aRoom.RoomName === "Unassigned") {
+						bHasUnassignedRoom = true;
+					}
                 });
                 
                 if (iRoomsCounted > 0) {
@@ -77,7 +80,11 @@ $.extend(IOMy.widgets,{
                     
                     return oSBox;
                 } else {
-                    throw new NoRoomsFoundException();
+					if (bHasUnassignedRoom) {
+						oSBox.setVisible(false);
+					} else {
+						throw new NoRoomsFoundException();
+					}
                 }
                 
             } else {

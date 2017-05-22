@@ -592,8 +592,9 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         
         for (var i = 0; i < me.aElementsToDestroy.length; i++) {
             sCurrentID = me.aElementsToDestroy[i];
-            if (me.byId(sCurrentID) !== undefined)
+            if (me.byId(sCurrentID) !== undefined) {
                 me.byId(sCurrentID).destroy();
+			}
         }
         
         if (me.wVertBox !== null) {
@@ -659,37 +660,28 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         oHubCBox = IOMy.widgets.getHubSelector(me.createId("hubCBox")).addStyleClass("width100Percent SettingsDropDownInput");
         
         //-------------------------------------------------------//
-        // PREMISE SELECT BOX                                    //
-        //-------------------------------------------------------//
-        oPremiseLabel = new sap.m.Label({
-            text : "Premise you wish to place this link in"
-        });
-        
-        me.wPremiseCBox = IOMy.widgets.getPremiseSelector(me.createId("premiseCBox")).addStyleClass("width100Percent SettingsDropDownInput");
-        me.wPremiseCBox.setSelectedItem(null);
-        me.wPremiseCBox.attachChange(
-            function () {
-                // Refresh the room select box.
-                me.wRoomCBox.destroy();
-                me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_"+me.wPremiseCBox.getSelectedKey()).addStyleClass("width100Percent SettingsDropDownInput");
-                me.wRoomCBox.setSelectedKey(null);
-                me.wRoomCBoxHolder.addItem(me.wRoomCBox);
-            }
-        );
-        
-        //-------------------------------------------------------//
         // ROOM SELECT BOX                                       //
         //-------------------------------------------------------//
         oRoomLabel = new sap.m.Label({
             text : "Room you wish to place this link in"
         });
         
-        me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_"+me.wPremiseCBox.getSelectedKey()).addStyleClass("width100Percent SettingsDropDownInput");
-        me.wRoomCBox.setSelectedItem(null);
-        
-        me.wRoomCBoxHolder = new sap.m.VBox({
-            items : [me.wRoomCBox]
-        }).addStyleClass("width100Percent");
+		try {
+			me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_1").addStyleClass("width100Percent SettingsDropDownInput");
+			me.wRoomCBox.setSelectedItem(null);
+
+			me.wRoomCBoxHolder = new sap.m.VBox({
+				items : [me.wRoomCBox]
+			}).addStyleClass("width100Percent");
+		} catch (ex) {
+			if (ex.name === "NoRoomsFoundException") {
+				me.wRoomCBoxHolder = null;
+			}
+		} finally {
+			if (IOMy.functions.getNumberOfRooms() === 0) {
+				oRoomLabel.setVisible(false);
+			}
+		}
         
         //-------------------------------------------------------//
         // LINK TYPE SELECT BOX                                  //
@@ -719,7 +711,6 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             items : [
                 oHubLabel,oHubCBox,
                 oLinkTypeLabel,oLinkTypeCBox,
-                oPremiseLabel,me.wPremiseCBox,
                 oRoomLabel,me.wRoomCBoxHolder,
                 oFormBox
             ]
