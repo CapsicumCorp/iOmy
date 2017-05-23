@@ -217,39 +217,40 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                     {
                         text : "Delete This Room",
                         select : function () {
-                            var oButton = this;
+                            //var oButton = this;
                             var sDialogTitle = "";
-                            oButton.setEnabled(false);
+                            //oButton.setEnabled(false);
 
                             //-- CONFIRM THAT YOU WISH TO DELETE THIS ROOM --//
                             IOMy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
-                                function () {
-                                    try {
-                                        IOMy.functions.deleteRoom(me.iRoomID,
-                                            function () {
-                                                IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
-                                            }
-                                        );
+                                function (oAction) {
+									if (oAction === sap.m.MessageBox.Action.OK) {
+										try {
+											IOMy.functions.deleteRoom(me.iRoomID,
+												function () {
+													IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+												}
+											);
 
-                                    } catch (err) {
-                                        console.log(JSON.stringify(err));
-                                        
-                                        if (err.name === "DevicesStillInRoomException") {
-                                            sDialogTitle = "Devices still assigned";
-                                            
-                                        } else if (err.name === "AttemptToDeleteOnlyRoomException") {
-                                            sDialogTitle = "Only room registered"
-                                            
-                                        }
-                                        
-                                        IOMy.common.showError(err.message, sDialogTitle,
-                                            function () {
+										} catch (err) {
 
-                                                oButton.setEnabled(true);
-                                            }
-                                        );
-                                        
-                                    }
+											if (err.name === "DevicesStillInRoomException") {
+												sDialogTitle = "Devices still assigned";
+
+											} else if (err.name === "AttemptToDeleteOnlyRoomException") {
+												sDialogTitle = "Only room registered"
+
+											}
+
+											IOMy.common.showError(err.message, sDialogTitle,
+												function () {
+
+													//oButton.setEnabled(true);
+												}
+											);
+
+										}
+									}
                                 }
                             );
                         }
