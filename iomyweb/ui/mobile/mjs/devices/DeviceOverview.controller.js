@@ -177,18 +177,7 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 				select:	function (oControlEvent) {
 					IOMy.common.NavigationChangePage("pSettingsLinkAdd", {room : IOMy.common.RoomSelected});
 				}
-			},	   
-			{
-                text: "NO FILTER",
-                select: function(oControlEvent) {
-                    if (oController.sFilter !== "") {
-                        oController.sFilter = "";
-                        oController.DestroyCurrentDevices();
-                        oController.InitialThingUISetup();
-                        oController.RefreshAjaxDataForUI();
-                    }
-                }
-            },
+			}
         ];
 		//----------------------------------------------------//
 		//-- 2.0 - ADD DEVICES INTO THE APPROPIATE GROUPING	--//
@@ -220,19 +209,6 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
                                 if (oController.aFilters.indexOf(aDevice.TypeName) === -1) {
                                     // Register the device type.
                                     oController.aFilters.push(aDevice.TypeName);
-                                    // Create the filter button.
-                                    aMenuItems.push({
-                                        text: aDevice.TypeName,
-                                        select: function(oControlEvent) {
-                                            if (oController.sFilter !== this.getText()) {
-                                                oController.sFilter = this.getText();
-                                                oController.DestroyCurrentDevices();
-                                                oController.InitialThingUISetup();
-                                                oController.RefreshAjaxDataForUI();
-                                                oController.byId("filterMenu").close();
-                                            }
-                                        }
-                                    });
                                 }
 
                                 if (oController.sFilter === aDevice.TypeName || oController.sFilter === "") {
@@ -402,7 +378,7 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
         } else {
             oVertBox.addItem(
                 new sap.m.MessageStrip({
-                    text : "You have no devices in iOmy. To add devices, you will need to add a link first."
+                    text : "You have no devices set up in iOmy."
                 }).addStyleClass("iOmyMessageInfoStrip")
             );
     
@@ -411,7 +387,7 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
                     items : [
                         new sap.m.Link({
                             //enabled : false,
-                            text : "Add Link",
+                            text : "Add Device",
                             press : function () {
                                 IOMy.common.NavigationChangePage("pSettingsLinkAdd", {});
                             }

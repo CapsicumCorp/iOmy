@@ -116,7 +116,6 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
         var oRoomTitle;
         var oRoomDescTitle;
         var oRoomTypeTitle;
-        var oAddButton;
         
         //-------------------------------------------------------------------//
         // Create Labels.
@@ -195,13 +194,7 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                     }
                 });
             }
-        }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink");
-        
-        oAddButton = new sap.m.VBox({
-            items : [
-                me.wUpdateButton
-            ]
-        }).addStyleClass("TextCenter MarTop12px");
+        }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink MarTop12px");
 
         me.wMainBox = new sap.m.VBox({
             items : [oPremiseTitle, me.wPremise,

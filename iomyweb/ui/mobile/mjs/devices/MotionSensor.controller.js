@@ -54,8 +54,6 @@ sap.ui.controller("mjs.devices.MotionSensor", {
 	onInit: function() {
 		var me = this;
 		var thisView = me.getView();
-        //-- IMPORT THE DEVICE LABEL FUNCTIONS MODULE --//
-        var LabelFunctions = IOMy.functions.DeviceLabels;
         
         thisView.addEventDelegate({
 			// Everything is rendered in this function before rendering.
