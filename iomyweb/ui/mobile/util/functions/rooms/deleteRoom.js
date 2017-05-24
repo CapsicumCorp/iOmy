@@ -84,7 +84,7 @@ $.extend(IOMy.functions, {
         // If this room is the only one registered in iOmy, it should not be
         // deleted.
         //--------------------------------------------------------------------//
-        iNumOfRooms             = IOMy.functions.getNumberOfRooms(true); // TRUE to include the 
+        iNumOfRooms             = IOMy.functions.getNumberOfRooms(true); // TRUE to include the "Unassigned" room.
         if (iNumOfRooms === 1) {
             sErrMessage = "This is the only room left in iOmy! You need at least "+
                     "one room to assign new devices to. This room will not be deleted " +

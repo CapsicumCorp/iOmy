@@ -31,15 +31,26 @@ $.extend(IOMy.functions,{
     /**
      * Retrieve the number of rooms the current user has access to.
      * 
-     * @returns {Number}    Number of rooms.
+	 * @param bIncludeUnassigned				Flag to include the special 'Unassigned' room. Default = false
+     * @returns {Number}						Number of rooms.
      */
-    getNumberOfRooms : function () {
+    getNumberOfRooms : function (bIncludeUnassigned) {
+		var me = this;
+		
+		if (bIncludeUnassigned === undefined) {
+			bIncludeUnassigned = false;
+		}
+		
 		var iNum = 0;
         
 		$.each(IOMy.common.RoomsList, function (sIndex, aPremise) {
             if (sIndex !== null && sIndex !== undefined && aPremise !== null && aPremise !== undefined) {
                 $.each(aPremise, function (sJndex, aRoom) {
-                    if (aRoom.RoomId !== 1 && aRoom.RoomName !== "Unassigned" && sJndex !== null && sJndex !== undefined && aRoom !== null && aRoom !== undefined) {
+					// Here we are eliminating the special "Unassigned" room which is the first room
+					// created during installation if there are no devices found in there.
+					if ( ( (bIncludeUnassigned && me.unassignedPseudoRoomHasDevices()) || (!bIncludeUnassigned && aRoom.RoomId !== 1 && aRoom.RoomName !== "Unassigned") )
+						&& (sJndex !== null && sJndex !== undefined && aRoom !== null && aRoom !== undefined) )
+					{
                         iNum++;
                     }
                 });
@@ -50,19 +61,24 @@ $.extend(IOMy.functions,{
 	},
 	
 	unassignedPseudoRoomExists : function () {
-		var bExists = false;
+		var bExists = IOMy.common.RoomsList["_1"]["_1"].RoomName === "Unassigned";
 		
-		$.each(IOMy.common.RoomsList, function (sIndex, aPremise) {
-            if (sIndex !== null && sIndex !== undefined && aPremise !== null && aPremise !== undefined) {
-                $.each(aPremise, function (sJndex, aRoom) {
-                    if (aRoom.RoomId === 1 && aRoom.RoomName === "Unassigned") {
-                        bExists = true;
-                    }
-                });
-            }
-		});
+//		
+//		$.each(IOMy.common.RoomsList, function (sIndex, aPremise) {
+//            if (sIndex !== null && sIndex !== undefined && aPremise !== null && aPremise !== undefined) {
+//                $.each(aPremise, function (sJndex, aRoom) {
+//                    if (aRoom.RoomId === 1 && aRoom.RoomName === "Unassigned") {
+//                        bExists = true;
+//                    }
+//                });
+//            }
+//		});
 		
 		return bExists;
+	},
+	
+	unassignedPseudoRoomHasDevices : function () {
+		return this.unassignedPseudoRoomExists() && this.getNumberOfDevicesInRoom(1) > 0;
 	}
     
 });

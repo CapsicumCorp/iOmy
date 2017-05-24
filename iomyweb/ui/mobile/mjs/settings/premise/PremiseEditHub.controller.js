@@ -99,7 +99,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
                                                                 
                                                                 IOMy.common.showSuccess("Update successful.", "Success", 
                                                                     function () {
-                                                                        IOMy.common.NavigationChangePage("pSettingsPremiseList", {}, true);
+                                                                        IOMy.common.NavigationTriggerBackForward();
                                                                     },
                                                                 "UpdateMessageBox");
                                                             }

@@ -55,20 +55,22 @@ $.extend(IOMy.widgets,{
                 
                 $.each(IOMy.common.RoomsList[sPremiseId],function(sIndex,aRoom) {
                     //-- Verify that the Premise has rooms, other than the pseudo-room Unassigned --//
-                    if( sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null &&
-						aRoom.RoomId !== 1 && aRoom.RoomName !== "Unassigned")
+                    if( sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null)
 					{
-                        oSBox.addItem(
-                            new sap.ui.core.Item({
-                                "text" : aRoom.RoomName,
-                                "key" : aRoom.RoomId
-                            })
-                        );
-                
-                        iRoomsCounted++;
-                    } else if (aRoom.RoomId === 1 && aRoom.RoomName === "Unassigned") {
-						bHasUnassignedRoom = true;
-					}
+						if (aRoom.RoomId === 1 && aRoom.RoomName === "Unassigned") {
+							bHasUnassignedRoom = true;
+							
+						} else {
+							oSBox.addItem(
+								new sap.ui.core.Item({
+									"text" : aRoom.RoomName,
+									"key" : aRoom.RoomId
+								})
+							);
+						
+							iRoomsCounted++;
+						}	
+                    }
                 });
                 
                 if (iRoomsCounted > 0) {

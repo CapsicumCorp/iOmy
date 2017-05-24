@@ -204,7 +204,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                                     bError = true;
                                 }
                                 if (sAddressStateProvince === "") {
-                                    aErrorLog.push("Subregion is required.");
+                                    aErrorLog.push("State or County is required.");
                                     bError = true;
                                 }
                                 if (sAddressPostcode === "") {
@@ -215,13 +215,14 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                                 if (bError === true) {
                                     jQuery.sap.log.error(aErrorLog.join("\n"));
                                     IOMy.common.showError(aErrorLog.join("\n\n"), "Errors");
+									thisButton.setEnabled(true);
                                 } else {
                                     // Run the API to update the premise address
                                     try {
                                         IOMy.apiphp.AjaxRequest({
                                             url : IOMy.apiphp.APILocation("premises"),
                                             data : {
-                                                "Mode" : "EditPremiseAddress", 
+                                                "Mode" : "EditPremiseAddress",
                                                 "Id" : iPremiseID,
                                                 "AddressLine1" : sAddressLine1,
                                                 "AddressLine2" : sAddressLine2,
@@ -234,7 +235,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                                             },
                                             onSuccess : function () {
                                                 IOMy.common.showSuccess("Update successful.", "Success", function () {
-                                                    IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+                                                    IOMy.common.NavigationTriggerBackForward();
                                                 }, "UpdateMessageBox");
                                             },
                                             onFail : function (response) {
@@ -255,17 +256,16 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                 
                 var oVertBox = new sap.m.VBox({
 					items : [
-								
-								oLanguageTitle, oLanguageField,
-								oLine1Title, oLine1Field,
-								oLine2Title, oLine2Field, 
-								oLine3Title, oLine3Field,
-								oStateTitle, oStateField, 
-								oPostCodeTitle, oPostCodeField,
-								oRegionTitle, oRegionField, 
-								oTimezoneTitle, oTimezoneField, 
-								oEditButton
-							]
+						oLanguageTitle, oLanguageField,
+						oLine1Title, oLine1Field,
+						oLine2Title, oLine2Field, 
+						oLine3Title, oLine3Field,
+						oStateTitle, oStateField, 
+						oPostCodeTitle, oPostCodeField,
+						oRegionTitle, oRegionField, 
+						oTimezoneTitle, oTimezoneField, 
+						oEditButton
+					]
 				}).addStyleClass("UserInputForm");
                 
                 // Destroys the actual panel of the page. This is done to ensure that there

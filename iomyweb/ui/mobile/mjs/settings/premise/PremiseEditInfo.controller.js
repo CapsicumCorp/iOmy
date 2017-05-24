@@ -164,15 +164,6 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                                             },
                                                             
                                                             onSuccess : function () {
-//                                                                IOMy.common.PremiseSelected.FloorCountId = me.byId("premiseFloors").getSelectedKey();
-//                                                                IOMy.common.PremiseSelected.RoomCountId = me.byId("premiseRooms").getSelectedKey();
-//                                                                IOMy.common.PremiseSelected.BedroomCountId = me.byId("premiseBedrooms").getSelectedKey();
-//                                                                IOMy.common.PremiseSelected.OccupantCountId = me.byId("premiseOccupants").getSelectedKey();
-//
-//                                                                IOMy.common.PremiseSelected.FloorCount = me.byId("premiseFloors").getSelectedItem().getText();
-//                                                                IOMy.common.PremiseSelected.RoomCount = me.byId("premiseRooms").getSelectedItem().getText();
-//                                                                IOMy.common.PremiseSelected.BedroomCount = me.byId("premiseBedrooms").getSelectedItem().getText();
-//                                                                IOMy.common.PremiseSelected.OccupantCount = me.byId("premiseOccupants").getSelectedItem().getText();
 
                                                                 IOMy.common.showSuccess("Update successful.", "Success", 
                                                                 function () {
@@ -183,7 +174,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                                                             IOMy.common.CoreVariablesInitialised = true;
                                                                             
                                                                             try {
-                                                                                var viewPremiseList = oApp.getPage("pSettingsPremiseList");
+                                                                                var viewPremiseList = oApp.getPage("pSettingsDeviceList");
                                                                                 var controllerPremiseList = viewPremiseList.getController();
                                                                                 
                                                                                 controllerPremiseList.bInitialised = false;
@@ -192,7 +183,8 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                                                                 jQuery.sap.log.error("Error reloading Premise List: "+e.message);
                                                                             }
                                                                             
-                                                                            IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+                                                                            //IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+																			IOMy.common.NavigationTriggerBackForward();
                                                                             
                                                                         }
                                                                     ); //-- END PREMISE LIST --//

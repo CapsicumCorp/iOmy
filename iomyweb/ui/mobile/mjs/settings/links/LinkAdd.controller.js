@@ -50,13 +50,13 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 			// Everything is rendered in this function run before rendering.
 			onBeforeShow : function (evt) {
 				
-                if (me.bUIReadyToBeWiped) {
+                //if (me.bUIReadyToBeWiped) {
                     // Start the form creation
                     me.DestroyUI();         // STEP 1: Clear any old forms to avoid duplicate IDs
                     me.DrawUI();            // STEP 2: Draw the actual user interface
                     // Reset any old logs
                     IOMy.devices.zigbeesmartplug.ZigbeeTelnetLog = [];
-                }                
+                //}                
 			}
 		});
 	},
@@ -512,15 +512,20 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                         function () {
                             // Set the flag to clear the way for a new UI instance
                             me.bUIReadyToBeWiped = true;
-                            IOMy.devices.AssignLinkToRoom(iLinkId, me.wRoomCBox.getSelectedKey(), sLinkType,
-                                function () {
-                                    if (IOMy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
-                                        oApp.to("pSettingsThingAdd", { LinkId: iLinkId });
-                                    } else {
-                                        IOMy.common.NavigationChangePage("pSettingsDeviceList", {}, true);
-                                    }
-                                }
-                            );
+							
+							if (me.wRoomCBox !== null) {
+								IOMy.devices.AssignLinkToRoom(iLinkId, me.wRoomCBox.getSelectedKey(), sLinkType,
+									function () {
+										if (IOMy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
+											oApp.to("pSettingsThingAdd", { LinkId: iLinkId });
+										} else {
+											IOMy.common.NavigationChangePage("pSettingsDeviceList", {}, true);
+										}
+									}
+								);
+							} else {
+								IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
+							}
                             
                         },
                     "UpdateMessageBox");
@@ -596,6 +601,10 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                 me.byId(sCurrentID).destroy();
 			}
         }
+		
+		if (me.wRoomCBox !== null) {
+			me.wRoomCBox.destroy();
+		}
         
         if (me.wVertBox !== null) {
             me.wVertBox.destroy();
@@ -676,6 +685,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 		} catch (ex) {
 			if (ex.name === "NoRoomsFoundException") {
 				me.wRoomCBoxHolder = null;
+				me.wRoomCBox = null;
 			}
 		} finally {
 			if (IOMy.functions.getNumberOfRooms() === 0) {
