@@ -200,7 +200,7 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
             press : function () {
                 me.PTZMoveLeft();
             }
-        }).addStyleClass("width30px height240px IOMYButton ButtonIconWhite CameraPTZButton");
+        }).addStyleClass("height240px IOMYButton ButtonIconWhite CameraPTZButton");
 
         //-----------------//
         // Right
@@ -212,7 +212,7 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
             press : function () {
                 me.PTZMoveRight();
             }
-        }).addStyleClass("width30px height240px IOMYButton ButtonIconWhite CameraPTZButton");
+        }).addStyleClass("height240px IOMYButton ButtonIconWhite CameraPTZButton");
 
         //-----------------//
         // Down
@@ -258,7 +258,7 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         //==============================================\\
         me.wLocationField = new sap.m.Label({
             text : oRoomInfo.RoomName + " in " + oRoomInfo.PremiseName
-        });
+        }).addStyleClass("NormalWS");
         
         me.wSnapshotTimeField = new sap.m.Label({});
         
@@ -291,7 +291,7 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
                     ]
                 })
             ]
-        });
+        }).addStyleClass("PadAll3px");
 
         var oVertBox = new sap.m.VBox({
             items : [ me.wCameraFeed, oInfoBox ]

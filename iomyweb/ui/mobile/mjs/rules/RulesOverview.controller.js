@@ -292,9 +292,6 @@ sap.ui.controller("mjs.rules.RulesOverview", {
                         ]
                     }).addStyleClass("MarLeft3px BorderRight PadRight3px"),
                     new sap.m.VBox({
-                        layoutData : new sap.m.FlexItemData({
-                            growFactor : 1
-                        }),
                         items: [
                             new sap.m.VBox({
                                 items : [
@@ -307,7 +304,7 @@ sap.ui.controller("mjs.rules.RulesOverview", {
                                 ]
                             })
                         ]
-                    }).addStyleClass("MarTop12px TextCenter minwidth100px")
+                    }).addStyleClass("MarTop12px TextCenter minwidth140px")
                 ]
             }).addStyleClass("minheight58px ListItem");
         } else {
