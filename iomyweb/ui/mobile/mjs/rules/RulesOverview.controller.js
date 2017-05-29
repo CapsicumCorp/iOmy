@@ -28,30 +28,6 @@ sap.ui.controller("mjs.rules.RulesOverview", {
     aElementsToDestroy      : [],
     destroyItemsWithIDs     : IOMy.functions.destroyItemsByIdFromView,
 	
-    Entries : [
-        {
-            "Id" : 1,
-            "DisplayName" : "TV",
-            "SerialCode" : "00137A000000AD88",
-            "OnTime" : "6:00pm",
-            "OffTime" : "12:00am"
-        },
-        {
-            "Id" : 2,
-            "DisplayName" : "Fridge",
-            "SerialCode" : "00137A000000AD87",
-            "OnTime" : "8:00am",
-            "OffTime" : "5:00pm"
-        },
-        {
-            "Id" : 3,
-            "DisplayName" : "Lamp",
-            "SerialCode" : "00137A000000AD86",
-            "OnTime" : "11:00pm",
-            "OffTime" : "6:00am"
-        }
-    ],
-	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
@@ -164,33 +140,26 @@ sap.ui.controller("mjs.rules.RulesOverview", {
 					//--------------------------------------------------------//
 					if (data.Data.Owner === 1) {
 						if (mHub.HubTypeId === 2) {
+							
+							var aEntries = [
+								// -- Device Header -- //
+								new sap.m.VBox({
+									items : [
+										// -- HBox Label Container. Aligns children horizontally -- //
+										new sap.m.HBox({
+											items : [
+												new sap.m.Label({
+													text: "Zigbee Smart Plug"
+												}).addStyleClass("Font-RobotoCondensed")
+											]
+										}).addStyleClass("MarLeft3px")
+									]
+								}).addStyleClass("ConsistentMenuHeader ListItem width100Percent")
+							];
+							
 							//--------------------------------------------------------------------//
-							// Draw the table that shows a list of devices and their on/off times
+							// Draw each device entry
 							//--------------------------------------------------------------------//
-							wContainer = new sap.m.VBox({
-								items : [
-									// -- Device Header -- //
-									new sap.m.VBox({
-										items : [
-											// -- HBox Label Container. Aligns children horizontally -- //
-											new sap.m.HBox({
-												items : [
-													new sap.m.Label({
-														text: "Zigbee Smart Plug"
-													}).addStyleClass("Font-RobotoCondensed")
-												]
-											}).addStyleClass("MarLeft3px")
-										]
-									}).addStyleClass("ConsistentMenuHeader ListItem width100Percent")
-								]
-							});
-
-							//--------------------------------------------------------------------//
-							// Draw each device into the table
-							//--------------------------------------------------------------------//
-					//        for (var i = 0; i < me.Entries.length; i++) {
-					//            wEntryTable.addItem( me.DrawEntry(me.Entries[i]) );
-					//        }
 
 							$.each(IOMy.common.ThingList, function (sThingIndex, mThing) {
 
@@ -198,7 +167,7 @@ sap.ui.controller("mjs.rules.RulesOverview", {
 									// Looking for Zigbee Smart Plugs
 									if (mThing.TypeId === 2) {
 										try {
-											wContainer.addItem( me.DrawEntry(mThing) );
+											aEntries.push( me.DrawEntry(mThing) );
 										} catch (error) {
 											// Failed to draw the thing entry, expecting a SerialCodeNullException
 											if (error.name !== "SerialCodeNullException") {
@@ -212,6 +181,20 @@ sap.ui.controller("mjs.rules.RulesOverview", {
 								}
 
 							});
+							
+							if (aEntries.length > 1) {
+								//--------------------------------------------------------------------//
+								// Draw the table that shows a list of devices and their on/off times
+								//--------------------------------------------------------------------//
+								wContainer = new sap.m.VBox({
+									items : aEntries
+								});
+							
+							} else {
+								wContainer = new sap.m.MessageStrip({
+									text : "No devices to apply rules to."
+								}).addStyleClass("iOmyMessageInfoStrip");
+							}
 						} else {
 							wContainer = new sap.m.MessageStrip({
 								text : "Your hub is not a valid WatchInputs Hub. Rules are only supported on WatchInputs Hubs."
@@ -259,11 +242,11 @@ sap.ui.controller("mjs.rules.RulesOverview", {
                 
                 fnPress = function () {
                     IOMy.common.NavigationChangePage("pRuleNew", {ThingId : mThing.Id, editing : true});
-                }
+                };
             } else {
                 fnPress = function () {
                     IOMy.common.NavigationChangePage("pRuleNew", {ThingId : mThing.Id});
-                }
+                };
             }
 
             var wEntryBox = new sap.m.HBox({

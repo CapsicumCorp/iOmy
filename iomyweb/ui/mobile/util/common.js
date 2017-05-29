@@ -333,16 +333,16 @@ $.extend(IOMy.common,{
 		var cssClass = sCssClass || "";
 		
 		// open a fully configured message box
-		sap.m.MessageBox.show(
+		sap.m.MessageToast.show(
 			sMessage,
 			{
-				icon: sap.m.MessageBox.Icon.SUCCESS,
-				title: sTitle,
-				actions: sap.m.MessageBox.Action.CLOSE,
-				onClose: callbackFn,
-				styleClass : cssClass
+				actions: sap.m.MessageBox.Action.CLOSE
+				//styleClass : cssClass
 			}
 		);
+		// TODO: This is a temporary measure to allow the function to be called after the toast is shown.
+		// TODO: Go through each form and 
+		callbackFn();
 	},
     
     showWarning : function( sMessage, sTitle, fnCallback, sCssClass ){

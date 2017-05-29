@@ -418,11 +418,27 @@ sap.ui.controller("mjs.premise.Overview", {
 					}
                 });
             } else {
-                me.wRoomListBox.addItem(
+                oLayout.addItem(
                     new sap.m.MessageStrip({
-                        text : "You have no rooms visible in "+me.byId("premiseBox").getSelectedItem().getText()+" If you have permission, you can create a new room using the action menu at the top-right corner of the screen."
+                        text : "There are no rooms accessible in "+me.byId("premiseBox").getSelectedItem().getText()+"."
                     }).addStyleClass("iOmyMessageInfoStrip")
                 );
+			
+				oLayout.addItem(
+					new sap.m.VBox({
+						items : [
+							new sap.m.Link({
+								//enabled : false,
+								text : "Add Room",
+								press : function () {
+									IOMy.common.NavigationChangePage("pSettingsRoomAdd", {premiseID : me.byId("premiseBox").getSelectedKey()});
+								}
+							}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
+						]
+					}).addStyleClass("TextCenter MarTop12px")
+				);
+			
+				oLayout.addStyleClass("BorderBottom PadAll6px");
             }
             
             idCount = 0;
@@ -439,7 +455,7 @@ sap.ui.controller("mjs.premise.Overview", {
                 icon : "sap-icon://GoogleMaterial/more_vert",
                 items : [
                     {
-                        text: "New Room",
+                        text: "Add Room",
                         select:	function (oControlEvent) {
                             IOMy.common.NavigationChangePage( "pSettingsRoomAdd", {premiseID : me.byId("premiseBox").getSelectedKey()} );
                         }

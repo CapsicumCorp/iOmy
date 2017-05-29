@@ -88,7 +88,8 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
                                             url : IOMy.apiphp.APILocation("link"),
                                             data : {"Mode" : "EditName", "Id" : iID, "Name" : sText},
                                             onSuccess : function () {
-                                                IOMy.common.NavigationChangePage("pSettingsDeviceList", {}, true);
+												IOMy.common.showSuccess("Link now called "+sText);
+                                                IOMy.common.NavigationBackForward(true);
                                             },
                                             onFail : function (err) {
                                                 //IOMy.common.showError("Update failed.", "Error");

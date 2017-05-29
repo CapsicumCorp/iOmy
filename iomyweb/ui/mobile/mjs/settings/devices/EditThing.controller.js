@@ -375,6 +375,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 								
 								if (mThingChangeSettings.successful === true) {
 									sMessage = "Device renamed to "+sThingText+". Located in "+me.wRoomCBox.getSelectedItem().getText();
+									IOMy.common.showSuccess(sMessage);
 									IOMy.common.NavigationTriggerBackForward();
 								} else {
 									sMessage = "Device couldn't be renamed to "+sThingText+", but is now located in "+me.wRoomCBox.getSelectedItem().getText();
@@ -398,6 +399,11 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 								
 						if (mThingChangeSettings.successful === true) {
 							sMessage = "Device renamed to "+sThingText+", but failed to move device to "+me.wRoomCBox.getSelectedItem().getText();
+							
+							IOMy.common.showWarning(sMessage, "", function () {
+								me.byId("updateButton").setEnabled(true);
+							});
+							
 							jQuery.sap.log.warning(sMessage);
 							//IOMy.common.NavigationTriggerBackForward();
 						} else {
@@ -446,6 +452,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 					fnThingSuccess = function () {
 						IOMy.common.ReloadVariableThingList(
 							function () {
+								IOMy.common.showSuccess("Device now located in "+me.wRoomCBox.getSelectedItem().getText());
 								IOMy.common.NavigationTriggerBackForward();
 							}
 						);
@@ -467,6 +474,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 					fnRoomSuccess = function () {
 						IOMy.common.ReloadVariableThingList(
 							function () {
+								IOMy.common.showSuccess("Device now located in "+me.wRoomCBox.getSelectedItem().getText());
 								IOMy.common.NavigationTriggerBackForward();
 							}
 						);

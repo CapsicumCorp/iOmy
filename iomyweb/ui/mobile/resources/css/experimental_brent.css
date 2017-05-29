@@ -173,6 +173,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 .iOmyMessageInfoStrip {
     background-color: #f9f9f9;
     border-color: #7c7c7c;
+    text-align: center;
 }
 
 /*------------------------------------------------------------------------*/
