@@ -79,6 +79,10 @@ sap.ui.controller("mjs.login.Login", {
 								//------------------------------------------------------------//
 								IOMy.common.RefreshCoreVariables( IOMy.common.aRefreshCoreVariablesFirstRun );
 								
+								//----------------------------------------------------------------------------//
+								// Load the user's display name and ID
+								//----------------------------------------------------------------------------//
+								IOMy.functions.setCurrentUserNameForNavigation();
 								
 							/*
 							} else {
@@ -364,6 +368,10 @@ sap.ui.controller("mjs.login.Login", {
 						//------------------------------------------------------------//
 						IOMy.common.RefreshCoreVariables( IOMy.common.aRefreshCoreVariablesFirstRun );
 						
+						//----------------------------------------------------------------------------//
+						// Load the user's display name and ID
+						//----------------------------------------------------------------------------//
+						IOMy.functions.setCurrentUserNameForNavigation();
 						
 						/*
                         // Load the core variables now.
@@ -396,7 +404,7 @@ sap.ui.controller("mjs.login.Login", {
 								}
 								
 								//----------------------------------------------------------------------------//
-								// Load the user's display name
+								// Load the user's display name and ID
 								//----------------------------------------------------------------------------//
 								IOMy.functions.setCurrentUserNameForNavigation();
 
