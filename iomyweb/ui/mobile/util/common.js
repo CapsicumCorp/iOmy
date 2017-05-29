@@ -42,10 +42,21 @@ $.extend(IOMy.common,{
 	CoreVariablesInitialised: false,
     CoreVariableRefreshIntervalInstance : null,
 	
+	
 	//============================================//
 	//== Core Refresh Variables                 ==//
 	//============================================//
-	bCoreRefreshInProgress: false,
+	oCurrentLoginTimestamp:         0,                  //-- OBJECT:    A javascript date object to hold the last login timestamp so API requests know easily when they have been orphaned. --//
+	bUserCurrentlyLoggedIn:         false,              //-- BOOLEAN:   Used to indicate if a user is currently logged in. If a user isn't logged in then abort all API requests. --//
+	bCoreRefreshInProgress:         false,              //-- BOOLEAN:   Used to indicate if a core variable refresh is currently in progress. --//
+	bCoreVariablesRestart:          false,              //-- BOOLEAN:   Used to indicate that the Core Variables Refresh should restart when it complete the current refresh. --//
+	aCoreVariablesResConfig:        [],                 //-- ARRAY:     --//
+	aCoreVariablesResNextConfig:    [],                 //-- ARRAY:     --//
+	iCoreVariablesLastRefresh:      0,                  //-- INTEGER:   --//
+	iCoreVariablesRefreshInterval:  600000,             //-- INTEGER:   Time in milliseconds of when a Core Variable refresh needs to take place. --//
+	oCoreVariableTimeout:           null,               //-- OBJECT:    --//
+	
+	
 	
 	
 	//============================================//
@@ -59,15 +70,14 @@ $.extend(IOMy.common,{
     
 	UserVars : {},			//-- TODO: Check if this variable is still used anywhere --//
 	
-	UserInfo : {},
-	
+	UserInfo:               {},
+	UserInfoLastUpdate:     new Date(),
 	
 	UserAppVariables: {
 		"PagePerms": {
 			"SettingsThingList":	false,		//-- BOOLEAN:	Flags if the User is allowed to access the "SettingsThingList" Page.		--//
 			"SettingsPremiseList":	false,		//-- BOOLEAN:	Flags if the User is allowed to access the "SettingsPremiseList" Page.		--//
 		}
-		
 	},
 	
     //============================================//
@@ -157,7 +167,7 @@ $.extend(IOMy.common,{
 		
 		return sReturn;
 	},
-
+	
 	
 	CheckSessionInfo : function(aConfig) {
 		//-- Declare scope as a variable --//
@@ -832,6 +842,8 @@ $.extend(IOMy.common,{
      * There are eight steps.
      */
     ReloadCoreVariables : function (fnCallback, fnFailCallback) {
+        //-- NOTE: This function is DEPRECATED for the time being and just left in as a reference temporarily until we are happy with the new CoreVariables system. --//
+        //--     The first 8 API requests were 
         var me = this;
         
         if( me.isCoreVariablesRefreshInProgress(1, fnFailCallback)===false ) {
@@ -1178,82 +1190,503 @@ $.extend(IOMy.common,{
     },
 	
 	//================================================================//
-	//== Refresh Variables											==//
+	//== Refresh Variables                                          ==//
 	//================================================================//
-    /**
-     * Reloads all the core variables into memory to so that iOmy code can fetch
-     * the necessary information without constantly polling the database.
-     * 
-     * @deprecated Use ReloadCoreVariables() instead!
-     */
-	RefreshCoreVariables: function() {
-		//-- NOTE1: bFirstLogin should always be set to false with the exception of the first time it is loaded when the user logs in! --//
-		var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
+	RefreshCoreVariables: function( aConfig, oScope ) {
+		//-- TODO: Possibly make the "onFail" error messages call a function that decides the best course of action. --//
+		//--     eg.  
+		//--     OnFirstRun    - Throw a popup error message with a "ok/retry" button that reloads the page.
+		//--     OnAutoRefresh - Let the user know somehow that they have lost connection to the server and have an option that .
+		var oScope = this;  //-- SCOPE:     Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
+		
 		
 		try {
+			
+			//------------------------------------------------------------------//
+			//-- IF The Core variables aren't already in currently refreshing --//
+			//------------------------------------------------------------------//
 			if( IOMy.common.bCoreRefreshInProgress===false ) {
-				//-- REFRESH PREMISE LIST --//
-				me.RefreshPremiseList({
-					onSuccess : function () {
-						//-- REFRESH HUB LIST --//
-                        IOMy.common.RefreshHubList({
-                            onSuccess: $.proxy(function () {
-                                
-                                //-- REFRESH ROOM LIST --//
-                                IOMy.common.RetreiveRoomList({
-                                    onSuccess: $.proxy(function() {
-	
-                                        //-- REFRESH LINK LIST --//
-                                        IOMy.common.RetrieveLinkList( {
-                                            onSuccess: $.proxy(function() {
-	
-                                                //-- REFRESH LINK TYPES LIST --//
-                                                IOMy.common.RetrieveLinkTypeList( {
-                                                    onSuccess : function () {
-                                                        //-- REFRESH IO LIST --//
-                                                        IOMy.apiphp.RefreshThingList( {
-                                                            onSuccess: $.proxy(function() {
-
-                                                                try {
-                                                                    //-- Flag that the Core Variables have been configured --//
-                                                                    IOMy.common.CoreVariablesInitialised = true;
-                                                                    IOMy.common.bCoreRefreshInProgress = false;
-                                                                    //-- Reset the Navigation array and index after switching users --//
-                                                                    IOMy.common.NavPagesNavigationArray = [];
-                                                                    IOMy.common.NavPagesCurrentIndex = -1;
-                                                                    //-- LOAD THE 1ST Page --//
-                                                                    IOMy.common.NavigationChangePage( IOMy.common.sNavigationDefaultPage, {}, true);
-
-                                                                } catch(e654321) {
-                                                                    //-- ERROR:  TODO: Write a better error message--//
-                                                                    jQuery.sap.log.error(">>>>Critical Error Loading \"Navigation Main\" page<<<<\n"+e654321.message);
-                                                                }
-                                                            }, me)
-                                                        }); //-- END IO LIST --//
-                                                        
-                                                    }
-                                                }); //-- END LINK TYPES LIST --//
-
-                                            }, me)
-                                        }); //-- END LINK LIST --//
-
-                                    }, me)
-                                }); //-- END ROOMS LIST --//
-                                
-                            }, me)
-                        }); //-- END HUB LIST --//
-                        
-					}
-				}); //-- END PREMISE LIST --//
+				
+				//-- Flag that the CoreVariables are refreshing --//
+				IOMy.common.bCoreRefreshInProgress = true;
+				
+				//-- Remove the Restart flag --//
+				IOMy.common.bCoreVariablesRestart = false;
+				
+				
+				//----------------------------------------//
+				//-- PART 1: REFRESH USERINFO LIST      --//
+				//----------------------------------------//
+				IOMy.common.RefreshUserInfoList({
+					onSuccess: $.proxy( function() {
+						
+						//----------------------------------------//
+						//-- PART 2: REFRESH PREMISE LIST       --//
+						//----------------------------------------//
+						IOMy.common.RefreshPremiseList({
+							onSuccess: $.proxy( function() {
+								
+								//----------------------------------------//
+								//-- PART 3: REFRESH HUB LIST           --//
+								//----------------------------------------//
+								IOMy.common.RefreshHubList({
+									onSuccess: $.proxy( function() {
+										
+										//----------------------------------------//
+										//-- PART 4: REFRESH COMM LIST          --//
+										//----------------------------------------//
+										IOMy.common.RefreshCommList({
+											onSuccess: $.proxy( function() {
+												
+												//----------------------------------------//
+												//-- PART 5: REFRESH ROOM LIST          --//
+												//----------------------------------------//
+												IOMy.common.RetreiveRoomList({
+													onSuccess: $.proxy( function() {
+														
+														//----------------------------------------//
+														//-- PART 6: REFRESH LINK LIST          --//
+														//----------------------------------------//
+														IOMy.common.RetrieveLinkList({
+															onSuccess: $.proxy( function() {
+																
+																//----------------------------------------//
+																//-- PART 7: REFRESH IO LIST            --//
+																//----------------------------------------//
+																IOMy.apiphp.RefreshThingList({
+																	onSuccess: $.proxy( function() {
+																		
+																		//-------------------------------------------------------//
+																		//-- Flag that the Core Variables have been configured --//
+																		//-------------------------------------------------------//
+																		IOMy.common.CoreVariablesInitialised = true;
+																		
+																		
+																		//-------------------------------------------------------//
+																		//-- Perform the onSuccess event                       --//
+																		//-------------------------------------------------------//
+																		try {
+																			//-- Update when the last core variables occurred --//
+																			var oTemp = new Date();
+																			IOMy.common.iCoreVariablesLastRefresh = oTemp.getTime();
+																			
+																			//------------------------------------------------------------//
+																			//-- Trigger the normal "onSuccess" event                   --//
+																			if( aConfig.onSuccess ) {
+																				try {
+																					aConfig.onSuccess();
+																				} catch( e00a ) {
+																					jQuery.sap.log.error("Critical Error: Problem when triggering the onSuccess event for the RefreshCoreVariables function.\n"+e00a.message);
+																				}
+																			}
+																			
+																			//------------------------------------------------------------//
+																			//-- Run all the on Success events in the current config    --//
+																			if( IOMy.common.aCoreVariablesResConfig.length >= 1 ) {
+																				$.each( IOMy.common.aCoreVariablesResConfig, function ( iIndex, aTempConfig ) {
+																					//-- Trigger any onSuccess events --//
+																					if( aTempConfig.onSuccess ) {
+																						try {
+																							aTempConfig.onSuccess();
+																						} catch( e00b ) {
+																							jQuery.sap.log.error("Critical Error: Problem when triggering the one of multiple onSuccess events for the RefreshCoreVariables function.\n"+e00b.message);
+																						}
+																					}
+																				});
+																				
+																				//-- Reset the array so this can't be accidentally triggered --//
+																				IOMy.common.aCoreVariablesResConfig = [];
+																			}
+																			
+																			//------------------------------------------------------------//
+																			//-- If the Core Variables needs to restart on completion   --// 
+																			if( IOMy.common.bCoreVariablesRestart===false ) {
+																				//-- Turn off the "RefreshInProgress" state as the refresh has finished --//
+																				IOMy.common.bCoreRefreshInProgress = false;
+																				
+																			} else {
+																				//-- Replace the Current Config with the next --//
+																				IOMy.common.aCoreVariablesResConfig = IOMy.common.aCoreVariablesResNextConfig;
+																				
+																				//-- Start the next refresh Core Variables --//
+																				IOMy.common.bCoreRefreshInProgress = false;
+																				IOMy.common.RefreshCoreVariables({});
+																			}
+																			
+																		} catch( e00 ) {
+																			jQuery.sap.log.error("Critical Error: Problem when doing the final processing in the RefreshCoreVariables function.\n"+e00.message);
+																		}
+																		
+																	}, oScope),
+																	onFail: $.proxy( function() {
+																		IOMy.common.bCoreRefreshInProgress = false;
+																		jQuery.sap.log.error("Error: Failed to update the ThingList for the RefreshCoreVariables function.");
+																		
+																	}, oScope)
+																}); //-- END PART 7 ( IO LIST ) --//
+																
+															}, oScope),
+															onFail: $.proxy(function() {
+																IOMy.common.bCoreRefreshInProgress = false;
+																jQuery.sap.log.error("Error: Failed to update the LinkList for the RefreshCoreVariables function.");
+																
+															}, oScope)
+														}); //-- END PART 6 ( LINK LIST ) --//
+														
+													}, oScope),
+													onFail: $.proxy(function() {
+														IOMy.common.bCoreRefreshInProgress = false;
+														jQuery.sap.log.error("Error: Failed to update the RoomList for the RefreshCoreVariables function.");
+														
+													}, oScope)
+												}); //-- END PART 5 ( ROOMS LIST ) --//
+												
+											}, oScope),
+											onFail: $.proxy(function() {
+												IOMy.common.bCoreRefreshInProgress = false;
+												jQuery.sap.log.error("Error: Failed to update the CommList for the RefreshCoreVariables function.");
+												
+											}, oScope)
+										}); //-- END PART 4 ( COMM LIST ) --//
+										
+									}, oScope),
+									onFail: $.proxy( function() {
+										IOMy.common.bCoreRefreshInProgress = false;
+										jQuery.sap.log.error("Error: Failed to update the HubList for the RefreshCoreVariables function.");
+										
+									}, oScope)
+								}); //-- END PART 3 ( HUB LIST ) --//
+								
+							}, oScope),
+							onFail: $.proxy( function() {
+								IOMy.common.bCoreRefreshInProgress = false;
+								jQuery.sap.log.error("Error: Failed to update the PremiseList for the RefreshCoreVariables function.");
+								
+							}, oScope)
+						}); //-- END PART 2 ( PREMISE LIST ) --//
+					}, oScope),
+					onFail: $.proxy( function() {
+						IOMy.common.bCoreRefreshInProgress = false;
+						jQuery.sap.log.error("Error: Failed to update the UserInfoList for the RefreshCoreVariables function.");
+						
+					}, oScope)
+				}); //-- END PART 1 ( USERINFO LIST ) --//
 			} else {
-				//-- Error has occurred --//
-				IOMy.common.showError( "Reloading of Core variables is already in progress! New attempt has been aborted.", "Core Variables");
+				//-- Flag that the core variables will need to be refreshed again after is completes --//
+				IOMy.common.bCoreVariablesRestart = true;
+				
+				//-- Push the current config into the array of what to do next --//
+				IOMy.common.aCoreVariablesResNextConfig.push( aConfig );
 				
 			}
 		} catch(e1) {
 			jQuery.sap.log.error("RefreshCoreVariables Error! "+e1.message);
 		}
 	},
+	
+	//================================================================//
+	//== Refresh Variables First Run                                ==//
+	//================================================================//
+	//-- Description: This array is used as a Preset that is used   --//
+	//--     after verifing that the user is logged in.             --//
+	//----------------------------------------------------------------//
+	aRefreshCoreVariablesFirstRun: {
+		
+		onSuccess: function() {
+			//-- Reset the Navigation array and index after switching users --//
+			IOMy.common.NavPagesNavigationArray = [];
+			IOMy.common.NavPagesCurrentIndex = -1;
+			//-- Load the 1ST Page --//
+			IOMy.common.NavigationChangePage( IOMy.common.sNavigationDefaultPage, {}, true );
+			
+			//-- Load the optional variables --//
+			IOMy.common.RefreshOptionalVariables({});
+			
+			//-- Setup the AutoRefreshCoreVariables Check --//
+			IOMy.common.RefreshCoreVariableQueueCheck();
+		}
+	},
+	
+	//================================================================//
+	//== Refresh Variables Schedule                                 ==//
+	//================================================================//
+	//-- Description: This function gets run in order to schedule a --//
+	//--     check to see if the CoreVariables needs refreshing.    --//
+	//----------------------------------------------------------------//
+	RefreshCoreVariableQueueCheck: function() {
+		//----------------------------------------//
+		//-- Clear existing timeout             --//
+		//----------------------------------------//
+		try {
+			if( IOMy.common.oCoreVariableTimeout ) {
+				clearTimeout( IOMy.common.oCoreVariableTimeout );
+			}
+		} catch( e0 ) {
+			//-- Do nothing --//
+		}
+		
+		//----------------------------------------//
+		//-- Set new Timeout                    --//
+		//----------------------------------------//
+		try {
+			IOMy.common.oCoreVariableTimeout = setTimeout(
+				function() {
+					IOMy.common.RefreshCoreVariablesCheckEvent();
+				},
+				IOMy.common.iCoreVariablesRefreshInterval
+			);
+		} catch( e1 ) {
+			//-- Do nothing --//
+		}
+	},
+	
+	//================================================================//
+	//== Refresh Variables Check Event                              ==//
+	//================================================================//
+	//-- Description: This gets run by the previous function to     --//
+	//--     perform the check and run the RefreshCoreVariables     --//
+	//--     function if needed.                                    --//
+	//----------------------------------------------------------------//
+	RefreshCoreVariablesCheckEvent: function() {
+		//-- Declare variables --//
+		var oScope         = this;
+		var oDate          = new Date();
+		var iCurrentTime   = oDate.getTime()
+		var iLastRefresh   = IOMy.common.iCoreVariablesLastRefresh;
+		var iDurationLimit = IOMy.common.iCoreVariablesRefreshInterval;
+		//-- Check how long ago the last refresh occurred --//
+		if( ( iCurrentTime - iLastRefresh ) >= iDurationLimit ) {
+			//-- IF RefreshCoreVariables is not running --//
+			if( IOMy.common.bCoreRefreshInProgress===false ) {
+				//-------------------------------------------------------------//
+				//-- OUTCOME A: Refresh                                      --//
+				//-------------------------------------------------------------//
+				
+				//-- Execute the RefreshCoreVariables --//
+				IOMy.common.RefreshCoreVariables(
+					{
+						onSuccess: $.proxy( function() {
+							//--------------------------------------------------------//
+							//-- Queue up the next refreshcore variables check so   --//
+							//-- that it can execute at the desired time            --//
+							//--------------------------------------------------------//
+							IOMy.common.RefreshCoreVariableQueueCheck();
+						}, oScope)
+					},
+					oScope
+				);
+			} else {
+				//-------------------------------------------------------------//
+				//-- OUTCOME B: Reschedule due to it already being performed --//
+				//-------------------------------------------------------------//
+				
+				//-- Queue up the next AutoCheck to happen --//
+				IOMy.common.RefreshCoreVariableQueueCheck();
+			}
+		} else {
+			//-------------------------------------------------------------//
+			//-- OUTCOME C: Reschedule due to already up to date         --//
+			//-------------------------------------------------------------//
+			
+			//-- Queue up the next AutoCheck to happen --//
+			IOMy.common.RefreshCoreVariableQueueCheck();
+		}
+	},
+	
+	
+	//================================================================//
+	//== Refresh Optional Variables                                 ==//
+	//================================================================//
+	RefreshOptionalVariables: function( aConfig ) {
+		//-- NOTES: These should only be polled if they are needed and not on every login attempt. --//
+		//-- TODO: Fix this in a future version so they are only fetched from the APIs when a page that gets loaded depends upon that particular list --//
+		var me				= this;			//-- SCOPE:		Binds the scope to a variable so that this particular scope can be accessed by sub-functions --//
+		
+		
+		try {
+			
+			//------------------------------------------------//
+			//-- PART 1A - Load the Regions                 --//
+			//------------------------------------------------//
+			IOMy.common.LoadRegions({
+				onSuccess: $.proxy( function () {
+					//------------------------------------------------//
+					//-- PART 1B - Load the Languages                --//
+					//------------------------------------------------//
+					IOMy.common.LoadLanguages({
+						onSuccess: $.proxy( function() {
+							//------------------------------------------------//
+							//-- PART 1C - Load the Timezones                --//
+							//------------------------------------------------//
+							IOMy.common.LoadTimezones({
+								onSuccess: $.proxy( function() {
+									
+									
+								}, me),
+								onFail: $.proxy( function() {
+									jQuery.sap.log.error("Error: Failed to update the Timezones for the RefreshOptionalVariables function.");
+									
+								}, me)
+							}); //-- END PART 1C ( Timezones ) --//
+							
+						}, me),
+						onFail: $.proxy( function() {
+							jQuery.sap.log.error("Error: Failed to update the Languages for the RefreshOptionalVariables function.");
+							
+						}, me)
+					}); //-- END PART 1B ( Languages ) --//
+					
+				}, me),
+				onFail: $.proxy( function() {
+					jQuery.sap.log.error("Error: Failed to update the Regions for the RefreshOptionalVariables function.");
+					
+				}, me)
+			}); //-- END PART 1A ( Regions ) --//
+			
+			//------------------------------------------------//
+			//-- PART 2A - Load the Room Types               --//
+			//------------------------------------------------//
+			IOMy.common.RetrieveLinkTypeList({
+				onSuccess: $.proxy( function() {
+					//------------------------------------------------//
+					//-- PART 2B - Load the Premise Bedroom Options  --//
+					//------------------------------------------------//
+					IOMy.common.LoadPremiseBedroomsOptions({
+						onSuccess: $.proxy( function() {
+							//------------------------------------------------//
+							//-- PART 2C - Load the Premise Occupant Options --//
+							//------------------------------------------------//
+							IOMy.common.LoadPremiseOccupantsOptions({
+								onSuccess: $.proxy( function() {
+									
+								}, me),
+								onFail: $.proxy( function() {
+									jQuery.sap.log.error("Error: Failed to update the PremiseFloorOptions for the RefreshOptionalVariables function.");
+									
+								}, me)
+							}); //-- END PART 2C ( Premise Occupant Options ) --//
+							
+						}, me),
+						onFail: $.proxy( function() {
+							jQuery.sap.log.error("Error: Failed to update the PremiseBedroomOptions for the RefreshOptionalVariables function.");
+							
+						}, me)
+					}); //-- END PART 2B ( Premise Bedroom Options ) --//
+					
+				}, me),
+				onFail: $.proxy( function() {
+					jQuery.sap.log.error("Error: Failed to update the LinkTypes for the RefreshOptionalVariables function.");
+					
+				}, me)
+			}); //-- END PART 2A ( Premise Link Types Options ) --//
+			
+			//------------------------------------------------//
+			//-- PART 3A - Load the Room Types              --//
+			//------------------------------------------------//
+			IOMy.common.LoadRoomTypes({
+				onSuccess: $.proxy( function() {
+					//------------------------------------------------//
+					//-- PART 3B - Load the Premise Floor Options   --//
+					//------------------------------------------------//
+					IOMy.common.LoadPremiseFloorsOptions({
+						onSuccess: $.proxy( function() {
+							//------------------------------------------------//
+							//-- PART 3C - Load the Premise Room Options    --//
+							//------------------------------------------------//
+							IOMy.common.LoadPremiseRoomsOptions({
+								onSuccess: $.proxy( function() {
+									
+									
+								}, me),
+								onFail: $.proxy( function() {
+									jQuery.sap.log.error("Error: Failed to update the PremiseRoomOptions for the RefreshOptionalVariables function.");
+									
+								}, me)
+							}); //-- END PART 3C ( Premise Room Options ) --//
+							
+						}, me),
+						onFail: $.proxy( function() {
+							jQuery.sap.log.error("Error: Failed to update the PremiseRoomOptions for the RefreshOptionalVariables function.");
+							
+						}, me)
+					}); //-- END PART 3B ( Premise Floor Options ) --//
+						
+				}, me),
+				onFail: $.proxy( function() {
+					jQuery.sap.log.error("Error: Failed to update the RoomTypes for the RefreshOptionalVariables function.");
+					
+				}, me)
+			}); //-- END PART 3A ( Room Types ) --//
+			
+			
+		} catch(e1) {
+			jQuery.sap.log.error("RefreshOptionalVariables Error! "+e1.message);
+		}
+	},
+	
+	
+	
+	//================================================================//
+	//== CURRENT USER INFORMATION                                   ==//
+	//================================================================//
+	RefreshUserInfoList : function (oConfig) {
+		var me = this;
+		
+		IOMy.apiodata.AjaxRequest({
+			Url: IOMy.apiodata.ODataLocation("users"),
+			Columns: [
+				"USERADDRESS_LINE1",        "USERADDRESS_LINE2",        "USERADDRESS_LINE3",        
+				"USERADDRESS_SUBREGION",    "USERADDRESS_POSTCODE",     "REGION_PK",                
+				"LANGUAGE_PK",              "TIMEZONE_PK",              "TIMEZONE_CC",              
+				"TIMEZONE_LATITUDE",        "TIMEZONE_LONGITUDE",       "TIMEZONE_TZ",              
+				"USERSINFO_PK",             "USERSINFO_TITLE",          "USERSINFO_DISPLAYNAME",    
+				"USERS_USERNAME"
+			],
+			WhereClause: [],
+			OrderByClause: [],
+			onSuccess : function ( sResponseType, aData ) {
+				IOMy.common.UserInfo = {
+					"AddressLine1":       aData[0].USERADDRESS_LINE1,
+					"AddressLine2":       aData[0].USERADDRESS_LINE2,
+					"AddressLine3":       aData[0].USERADDRESS_LINE3,
+					"Postcode":           aData[0].USERADDRESS_POSTCODE,
+					"SubRegionId":        aData[0].USERADDRESS_SUBREGION,
+					"RegionId":           aData[0].REGION_PK,
+					"LanguageId":         aData[0].LANGUAGE_PK,
+					"TimezoneId":         aData[0].TIMEZONE_PK,
+					"TimezoneCC":         aData[0].TIMEZONE_CC,
+					"TimezoneLatitude":   aData[0].TIMEZONE_LATITUDE,
+					"TimezoneLongitude":  aData[0].TIMEZONE_LONGITUDE,
+					"TimezoneTZ":         aData[0].TIMEZONE_TZ,
+					"UserInfoId":         aData[0].USERSINFO_PK,
+					"UserTitle":          aData[0].USERSINFO_TITLE,
+					"Displayname":        aData[0].USERSINFO_DISPLAYNAME,
+				};
+				
+				//-- Update the Timestamp on when the UserInfo was last updated --//
+				IOMy.common.UserInfoLastUpdate = new Date();
+				
+				//-- Store the Username --//
+				IOMy.common.CurrentUsername = aData[0].USERS_USERNAME;
+				IOMy.common.UserDisplayName = aData[0].USERSINFO_DISPLAYNAME;
+					
+				//-- Perform the "onSuccess" function if applicable --//
+				if(oConfig.onSuccess !== undefined) {
+					oConfig.onSuccess();
+				}
+			},
+			
+			onFail : function (response) {
+				jQuery.sap.log.error("Error refreshing UserInfo list: "+JSON.stringify(Response));
+				
+				//-- Perform the "onFail" function if applicable --//
+				if(oConfig.onFail) {
+					oConfig.onFail();
+				}
+			}
+		});
+	},
+	
 	
 	//================================================================//
 	//== PREMISE LIST   											==//

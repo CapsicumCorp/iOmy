@@ -245,6 +245,7 @@ $.extend(IOMy.apiodata,{
 		var iLimit					= 0;			//--  --//
 		var sHTTPMethod				= "";			//-- STRING:		Used to indicate if the "HTTP GET" or "HTTP POST" should be used --//
 		var sDataType				= "";			//-- STRING:		Used to indicate which which DataType should be returned --//
+		var iLoginTimestamp         = 0;            //-- INTEGER:       --//
 		
 		//============================================================//
 		//== Setup Variables										==//
@@ -253,6 +254,9 @@ $.extend(IOMy.apiodata,{
 		iLimit			= aConfig.Limit || 0;
 		sHTTPMethod		= aConfig.HTTPMethod || "GET";
 		sDataType		= aConfig.DataType || "json";
+		iLoginTimestamp = IOMy.common.oCurrentLoginTimestamp.getTime();
+		
+		
 		
 		try {
 			//-- Create the string for the Columns --//
@@ -317,238 +321,292 @@ $.extend(IOMy.apiodata,{
 		//-- TODO: "HTTP POST" Parameters --//
 		
 		//============================================================//
-		//== ODATA API REQUEST										==//
+		//== ODATA API REQUEST                                      ==//
 		//============================================================//
-		oAjax = $.ajax({
-			url : sUrl,								
-			crossDomain : true,						
-			dataType : sDataType,					//-- Expected Result --//
-			type : sHTTPMethod,						//--  --//
-			//data : aData || {},					//-- If there is anything in "data" than include it here --//
-			RetryAttemptCount : 0,
-			RetryAttempLimit : 1,
-			bApiComplete: false,
-			DebugLogString:"",
+		//-- Check that the User is logged in --//
+		if( IOMy.common.bUserCurrentlyLoggedIn===true ) {
 			
-			//============================================================================================//
-			//== AJAX "SUCCESS" EVENT
-			//============================================================================================//
-			success : function( Response, sStatus, XHR ){
-				//====================================//
-				//== 1.1 - Initialise Variables		==//
-				//====================================//
-				var sContentType			= "";
-				var sERType					= "";
-				var aData					= {};				//-- ARRAY:		Used in the "json" mode to pass the ajax results to the onSuccess function --//
-				var sData					= "";				//-- STRING:	Used in other modes to pass the ajax results to the onSuccess function --//
+			oAjax = $.ajax({
+				url : sUrl,								
+				crossDomain : true,						
+				dataType : sDataType,					//-- Expected Result --//
+				type : sHTTPMethod,						//--  --//
+				//data : aData || {},					//-- If there is anything in "data" than include it here --//
+				RetryAttemptCount : 0,
+				RetryAttempLimit : 1,
+				bApiComplete: false,
+				iCurrentLoginTimestamp: iLoginTimestamp,
+				DebugLogString:"",
 				
-				var sDebugLogLines			= "=================================\n";
-				var sDebugHeader			= "\n"+sDebugLogLines+"== Odata Ajax Error!            ==\n"+sDebugLogLines;
-				
-				//================================================//
-				//== 1.2 - Look at and extract the results		==//
-				//================================================//
-				try {
-					if( Response!==null ) {
-						//--------------------------------------------//
-						//-- 1.2.A.1 - Retrieve the "content-type"	--//
-						//--------------------------------------------//
-						sContentType = XHR.getResponseHeader("content-type") || "";
-						
-						if( sDataType==="json" ) {
-							sERType = "application/json";
+				//============================================================================================//
+				//== AJAX "SUCCESS" EVENT
+				//============================================================================================//
+				success : function( Response, sStatus, XHR ){
+					//============================================================//
+					//== 1.1 - Initialise Variables                             ==//
+					//============================================================//
+					var sContentType			= "";
+					var sERType					= "";
+					var aData					= {};				//-- ARRAY:		Used in the "json" mode to pass the ajax results to the onSuccess function --//
+					var sData					= "";				//-- STRING:	Used in other modes to pass the ajax results to the onSuccess function --//
+					
+					var sDebugLogLines			= "=================================\n";
+					var sDebugHeader			= "\n"+sDebugLogLines+"== Odata Ajax Error!            ==\n"+sDebugLogLines;
+					
+					//============================================================//
+					//== 1.2 - Decide what to do on success                     ==//
+					//============================================================//
+					try {
+						//============================================================//
+						//== 1.2.A - IF this task is orphaned                       ==//
+						//============================================================//
+						if( IOMy.common.bUserCurrentlyLoggedIn===false || this.iCurrentLoginTimestamp!==IOMy.common.oCurrentLoginTimestamp.getTime() ) {
+							//-- TODO: Log a message that an Odata API request had to be aborted --//
+							var sErrorMesg1 = "Silently aborting Odata API request (before parsing the sucessful response from the ajax request) due to being logged out!";
+							jQuery.sap.log.info( sErrorMesg1, "", "IOMy.apiodata.AjaxRequest" );
 							
-						//-- TODO: Add the xml atom format mime type --//
-						//} else {
-						//	sExpectedResponseType = "";
-						}
-						
-						//------------------------------------------------------------//
-						//-- 1.2.A.2.A - If the Response ContentType is expected	--//
-						//------------------------------------------------------------//
-						if( sContentType.indexOf(sERType) > -1 ) {
+						//============================================================//
+						//== 1.2.B - ELSEIF the Response isn't null                 ==//
+						//============================================================//
+						} else if( Response!==null ) {
+							//--------------------------------------------//
+							//-- 1.2.A.1 - Retrieve the "content-type"  --//
+							//--------------------------------------------//
+							sContentType = XHR.getResponseHeader("content-type") || "";
 							
-							//----------------------------------------------------//
-							//-- 1.2.A.2.A.A - If Expecting JSON response		--//
-							//----------------------------------------------------//
-							if(sERType==="application/json") {
-								//--DEBUGGING --//
+							if( sDataType==="json" ) {
+								sERType = "application/json";
 								
-								//-- Check the Results --//
-								if (Response.d === undefined) {
-									aConfig.onFail(Response);
-								} else {
-									//-- Check if the Result is undefined --//
-									if( Response.d.results===undefined ) {
-										aData = Response.d;
-										aConfig.onSuccess("JSON", aData);
-									} else {
-										aData = Response.d.results;
-										aConfig.onSuccess("JSON", aData);
-									}
+							//-- TODO: Add the xml atom format mime type --//
+							//} else {
+							//	sExpectedResponseType = "";
+							}
+							
+							//------------------------------------------------------------//
+							//-- 1.2.A.2.A - If the Response ContentType is expected    --//
+							//------------------------------------------------------------//
+							if( sContentType.indexOf(sERType) > -1 ) {
+								
+								//----------------------------------------------------//
+								//-- 1.2.A.2.A.A - If Expecting JSON response       --//
+								//----------------------------------------------------//
+								if(sERType==="application/json") {
+									//--DEBUGGING --//
 									
+									//-- Check the Results --//
+									if (Response.d === undefined) {
+										aConfig.onFail(Response);
+									} else {
+										//-- Check if the Result is undefined --//
+										if( Response.d.results===undefined ) {
+											aData = Response.d;
+											aConfig.onSuccess("JSON", aData);
+										} else {
+											aData = Response.d.results;
+											aConfig.onSuccess("JSON", aData);
+										}
+										
+										
+									}
+									return;
+									
+								//--------------------------------------------------------//
+								//-- 1.2.A.2.A.B - If Expecting XML/Atom	 response	--//
+								//--------------------------------------------------------//
+									
+								//--------------------------------------------------------------------------------------------//
+								//-- 1.2.A.2.A.C - Else this function isn't configured on what to do with this datatype		--//
+								//--------------------------------------------------------------------------------------------//
+								} else {
+									//-- No Method for this response type --//
+									if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
+									jQuery.sap.log.error(this.DebugLogString+"ErrMesg: Unexpected Method for parsing Response type, ExpResType="+sERType, "", "IOMy.apiodata.AjaxRequest" );
 									
 								}
-								return;
-								
-							//--------------------------------------------------------//
-							//-- 1.2.A.2.A.B - If Expecting XML/Atom	 response	--//
-							//--------------------------------------------------------//
-								
-							//--------------------------------------------------------------------------------------------//
-							//-- 1.2.A.2.A.C - Else this function isn't configured on what to do with this datatype		--//
-							//--------------------------------------------------------------------------------------------//
+							
+							//--------------------------------------------------------------------//
+							//-- 1.2.A.2.B - Else then the Response ContentType is not expected	--//
+							//--------------------------------------------------------------------//
 							} else {
-								//-- No Method for this response type --//
-								if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
-								jQuery.sap.log.error(this.DebugLogString+"ErrMesg: Unexpected Method for parsing Response type, ExpResType="+sERType, "", "IOMy.apiodata.AjaxRequest" );
-								
+								//------------------------------------------------------------------------------------//
+								//-- Check to see if the Response is safe (eg. a String) to dump to the console.log --//
+								//------------------------------------------------------------------------------------//
+								if(typeof Response === "string") {
+									//-- Push Error & Content type and Response --//
+									if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
+									jQuery.sap.log.error(this.DebugLogString+"ErrMesg: Unexpected Response, ContentType="+sContentType+"  Response="+Response, "", "IOMy.apiodata.AjaxRequest");
+									
+								} else {
+									//-- Push Error to Console Log --//
+									if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
+									jQuery.sap.log.error(this.DebugLogString+"ErrMesg: Unexpected Response, ContentType="+sContentType+", Expected="+cfg.ExpectedResponseType, "", "IOMy.apiodata.AjaxRequest");
+								}
 							}
-
-						//--------------------------------------------------------------------//
-						//-- 1.2.A.2.B - Else then the Response ContentType is not expected	--//
-						//--------------------------------------------------------------------//
+						//============================================================//
+						//== 1.2.C - ELSE the Response is null                      ==//
+						//============================================================//
 						} else {
-							//------------------------------------------------------------------------------------//
-							//-- Check to see if the Response is safe (eg. a String) to dump to the console.log --//
-							//------------------------------------------------------------------------------------//
-							if(typeof Response === "string") {
-								//-- Push Error & Content type and Response --//
-								if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
-								jQuery.sap.log.error(this.DebugLogString+"ErrMesg: Unexpected Response, ContentType="+sContentType+"  Response="+Response, "", "IOMy.apiodata.AjaxRequest");
-								
-							} else {
-								//-- Push Error to Console Log --//
-								
-								if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
-								jQuery.sap.log.error(this.DebugLogString+"ErrMesg: Unexpected Response, ContentType="+sContentType+", Expected="+cfg.ExpectedResponseType, "", "IOMy.apiodata.AjaxRequest");
-							}
+							//-- Error: Response is null --//
+							
+							if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
+							jQuery.sap.log.error(this.DebugLogString+"ErrMesg: Response is null", "", "IOMy.apiodata.AjaxRequest");
 						}
-					} else {
-						//-- Error : Response is null --//
+					} catch(e1) {
 						
 						if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
-						jQuery.sap.log.error(this.DebugLogString+"ErrMesg: Response is null", "", "IOMy.apiodata.AjaxRequest");
+						jQuery.sap.log.error(this.DebugLogString+"\nCritical Error occurred in the Success Section: "+e1.message, "", "IOMy.apiodata.AjaxRequest");
 					}
-				} catch(e1) {
+				},
+				//============================================================================================//
+				//== AJAX "ERROR" EVENT
+				//============================================================================================//
+				error : function(err) {  //When ajax request occur error,post parameters error.
+					//============================================================//
+					//== 2.1 - Initialise Variables                             ==//
+					//============================================================//
+					var sDebugLogLines = "=================================\n";
 					
-					if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
-					jQuery.sap.log.error(this.DebugLogString+"\nCritical Error occurred in the Success Section: "+e1.message, "", "IOMy.apiodata.AjaxRequest");
-				}
-			},
-
-			//============================================================================================//
-			//== AJAX "ERROR" EVENT
-			//============================================================================================//
-			error : function(err){  //When ajax request occur error,post parameters error.
-				//====================================//
-				//== 2.1 - Initialise Variables		==//
-				//====================================//
-				var sDebugLogLines = "=================================\n";
-				
-				if(this.RetryAttemptCount===0) {
-					this.DebugLogString += "\n"+sDebugLogLines+"== PHP Ajax Error!            ==\n"+sDebugLogLines;
-				}
-				
-				this.RetryAttemptCount++;
-				this.DebugLogString += "Attempt "+this.RetryAttemptCount+"! ";
-				
-				//------------------------------------------------------------------------//
-				//-- 2.3.A - HTTP 500 STATUS CODE: The dreaded error code has occurred!	--//
-				//------------------------------------------------------------------------//
-				if (err.status=='500') {
-					//-- Flag that the API is not complete and should possibly try again (if allowed) --//
-					this.bApiComplete = false;
-					
-				//------------------------------------------------------------------------//
-				//-- 2.3.B - HTTP 200 STATUS CODE: 										--//
-				//------------------------------------------------------------------------//
-				} else if (err.status=="200") {
-					//-- NOTE: API didn't return a valid response (most likely an error message)  --//
-					this.DebugLogString += "Status Code 200: Server returned a error message: (\n"+err.responseText+")\n";
-					//-- Flag that we can try again for a different result as the API Request isn't complete --//
-					this.bApiComplete = false;
+					//============================================================//
+					//== 2.2 - Decide what to do on success                     ==//
+					//============================================================//
+					if( IOMy.common.bUserCurrentlyLoggedIn===true && this.iCurrentLoginTimestamp!==IOMy.common.oCurrentLoginTimestamp.getTime() ) {
 						
-				//------------------------------------------------------------------------//
-				//-- 2.3.C - HTTP 0 STATUS CODE: 										--//
-				//------------------------------------------------------------------------//
-				} else if (err.status=="0") {
-					//-- NOTE: This is a weird non-standard error code (more info on what causes of this needs to be found) --//
-					//-- Log that it happened and try again --//
-					this.DebugLogString += "The HTTP 0 Status Code has been returned! UI Developers need to be notified. \n";
-					//-- Flag that we can try again for a different result as the API Request isn't complete --//
-					this.bApiComplete = false;
-					
-				//------------------------------------------------------------------------//
-				//-- 2.3.D - HTTP 401 STATUS CODE: 										--//
-				//------------------------------------------------------------------------//
-				} else if (err.status=="401") {
-					//-- TODO: This section needs to be looked into further to see if anything needs to be changed --// 
-					
-					if( statusObj ) {
-						IOMy.common.notAuthorized("HTTP Auth has expired! Please log back in to continue.");
+						try {
+							if(this.RetryAttemptCount===0) {
+								this.DebugLogString += "\n"+sDebugLogLines+"== PHP Ajax Error!            ==\n"+sDebugLogLines;
+							}
+							
+							this.RetryAttemptCount++;
+							this.DebugLogString += "Attempt "+this.RetryAttemptCount+"! ";
+							
+							
+							
+							//------------------------------------------------------------------------//
+							//-- 2.3.A - HTTP 500 STATUS CODE: The dreaded error code has occurred!	--//
+							//------------------------------------------------------------------------//
+							if (err.status=='500') {
+								//-- Flag that the API is not complete and should possibly try again (if allowed) --//
+								this.bApiComplete = false;
+								
+							//------------------------------------------------------------------------//
+							//-- 2.3.B - HTTP 200 STATUS CODE: 										--//
+							//------------------------------------------------------------------------//
+							} else if (err.status=="200") {
+								//-- NOTE: API didn't return a valid response (most likely an error message)  --//
+								this.DebugLogString += "Status Code 200: Server returned a error message: (\n"+err.responseText+")\n";
+								//-- Flag that we can try again for a different result as the API Request isn't complete --//
+								this.bApiComplete = false;
+								
+							//------------------------------------------------------------------------//
+							//-- 2.3.C - HTTP 0 STATUS CODE: 										--//
+							//------------------------------------------------------------------------//
+							} else if (err.status=="0") {
+								//-- NOTE: This is a weird non-standard error code (more info on what causes of this needs to be found) --//
+								//-- Log that it happened and try again --//
+								this.DebugLogString += "The HTTP 0 Status Code has been returned! UI Developers need to be notified. \n";
+								//-- Flag that we can try again for a different result as the API Request isn't complete --//
+								this.bApiComplete = false;
+								
+							//------------------------------------------------------------------------//
+							//-- 2.3.D - HTTP 401 STATUS CODE: 										--//
+							//------------------------------------------------------------------------//
+							} else if (err.status=="401") {
+								//-- TODO: This section needs to be looked into further to see if anything needs to be changed --// 
+								
+								if( statusObj ) {
+									IOMy.common.notAuthorized("HTTP Auth has expired! Please log back in to continue.");
+									
+								} else if( aConfig.auth ) {
+									IOMy.common.showError("Incorrect username and/or password. Please retype your username and password again!");
+									IOMy.common.showLoading(false);
+									
+								} else {
+									IOMy.common.showError("Unexpected HTTP 401 Status Code");
+								}
+								
+								//-- Flag that we shouldn't retry the ajax request --// 
+								this.bApiComplete = true;
+								
+							//------------------------------------------------------------------------//
+							//-- 2.2.E - HTTP 403 STATUS CODE:                                      --//
+							//------------------------------------------------------------------------//
+			                } else if (err.status=="403") {
+								//-- Flag that we shouldn't retry the ajax request --//
+								this.bApiComplete = true;
+								//-- Flag that the user isn't currently logged in --//
+								IOMy.common.bUserCurrentlyLoggedIn = false;
+									
+								//-- Run the handle403APIError function --//
+			                    IOMy.apiphp.handle403APIError(aConfig);
+			
+							//------------------------------------------------------------------------//
+							//-- 2.3.F - UNEXPECTED STATUS CODE: 									--//
+							//------------------------------------------------------------------------//
+							} else {
+								//-- Log the Error --//
+								this.DebugLogString += "HTTP Status:"+err.status+"\n The above error code is not expected! \nError Mesgage:"+err.message+"\n";
+								
+								//-- Flag that we shouldn't retry the ajax request (because we assume it won't help the error that we are getting) --//
+								this.bApiComplete = true;
+							}
+							
+						} catch( e20 ) {
+							//-- Flag that this API Request has completed unsuccessfully --//
+							this.bApiComplete = true;
+							jQuery.sap.log.error( "Critical Error occurred in the Odata on error section 1: "+e20.message, "", "IOMy.apiodata.AjaxRequest" );
+						}
 						
-					} else if( aConfig.auth ) {
-						IOMy.common.showError("Incorrect username and/or password. Please retype your username and password again!");
-						IOMy.common.showLoading(false);
+						try {
+							//------------------------------------------------------------------------//
+							//-- 2.4 - RETRY OR FINALISE                                            --//
+							//------------------------------------------------------------------------//
+							//-- 2.4.1.A - IF CONTINUE RETRYING --//
+							//-- API didn't get a desired result and max retries not exceeded --//
+							if( this.bApiComplete===false && this.RetryAttemptCount<this.RetryAttempLimit ) {
+								//-- Display an message --//
+								this.DebugLogString += "-- The API did not yield a desired result and the UI will be retry to see if a desired result can be achieved! --\n\n";
+								
+								//-- RETRY AJAX REQUEST --//
+								$.ajax(this);
+								return;
+								
+							//-- 2.4.1.B - ELSE IF MAXIMUM RETRY ATTEMPTS EXCEEDED	--//
+							//-- API didin't get a desired result before max attempts was exceeded --//
+							} else if( (this.RetryAttemptCount===this.RetryAttempLimit) && this.bApiComplete == false) {
+								this.DebugLogString += sDebugLogLines+"The number of retry attempts to get a desired result from the API has been exceeded! \nThe UI will no make any more attempts with this request.\n"+sDebugLogLines;
+								jQuery.sap.log.error(this.DebugLogString, "", "IOMy.apiodata.AjaxRequest");
+							}
+							
+							//------------------------------------------------------------------------//
+							//-- 2.5 - TRIGGER THE PASSED "FAIL FUNCTION"                           --//
+							//------------------------------------------------------------------------//
+							//-- If we aren't retrying the ajax request we should run the onFail function --//
+							if(aConfig.onFail) {
+								aConfig.onFail(err);
+							}
+						} catch( e21 ) {
+							//-- Flag that this API Request has completed unsuccessfully --//
+							this.bApiComplete = true;
+							jQuery.sap.log.error( "Critical Error occurred in the Odata on error section 2: "+e20.message, "", "IOMy.apiodata.AjaxRequest" );
+						}
 						
+					//============================================================//
+					//== ELSE Add a message to the log                          ==//
+					//============================================================//
 					} else {
-						IOMy.common.showError("Unexpected HTTP 401 Status Code");
+						var sErrorMesg2 = "Silently aborting Odata API request (before parsing the unsucessful response from the ajax request) due to being logged out!!";
+						jQuery.sap.log.info( sErrorMesg2, "", "IOMy.apiodata.AjaxRequest" );
 					}
-					
-					//-- Flag that we shouldn't retry the ajax request --// 
-					this.bApiComplete = true;
-					
-				//------------------------------------------------------------------------//
-                //-- 2.2.E - HTTP 403 STATUS CODE:                                      --//
-                //------------------------------------------------------------------------//
-                } else if (err.status=="403") { 
-                    //-- Flag that we shouldn't retry the ajax request --// 
-                    this.bApiComplete = true;
-
-                    IOMy.apiphp.handle403APIError(aConfig);
-
-                //------------------------------------------------------------------------//
-				//-- 2.3.F - UNEXPECTED STATUS CODE: 									--//
-				//------------------------------------------------------------------------//
-				} else {
-					//-- Log the Error --//
-					this.DebugLogString += "HTTP Status:"+err.status+"\n The above error code is not expected! \nError Mesgage:"+err.message+"\n";
-					
-					//-- Flag that we shouldn't retry the ajax request (because we assume it won't help the error that we are getting) --//
-					this.bApiComplete = true;
-				}
-				
-				//------------------------------------------------------------------------//
-				//-- 2.4 - RETRY OR FINALISE		 									--//
-				//------------------------------------------------------------------------//
-				//-- 2.4.1.A - IF CONTINUE RETRYING --//
-				//-- API didn't get a desired result and max retries not exceeded --//
-				if( this.bApiComplete===false && this.RetryAttemptCount<this.RetryAttempLimit ) {
-					//-- Display an message --//
-					this.DebugLogString += "-- The API did not yield a desired result and the UI will be retry to see if a desired result can be achieved! --\n\n";
-					
-					//-- RETRY AJAX REQUEST --//
-					$.ajax(this);
-					return;
-					
-				//-- 2.4.1.B - ELSE IF MAXIMUM RETRY ATTEMPTS EXCEEDED	--//
-				//-- API didin't get a desired result before max attempts was exceeded --//
-				} else if( (this.RetryAttemptCount===this.RetryAttempLimit) && this.bApiComplete == false) {
-					this.DebugLogString += sDebugLogLines+"The number of retry attempts to get a desired result from the API has been exceeded! \nThe UI will no make any more attempts with this request.\n"+sDebugLogLines;
-					jQuery.sap.log.error(this.DebugLogString, "", "IOMy.apiodata.AjaxRequest");
-				}
-				
-				//------------------------------------------------------------------------//
-				//-- 2.5 - TRIGGER THE PASSED "FAIL FUNCTION"							--//
-				//------------------------------------------------------------------------//
-				//-- If we aren't retrying the ajax request we should run the onFail function --//
-				if(aConfig.onFail) {
-					aConfig.onFail(err);
-				}
-			}
-		
-		});
-	},
+				} //-- END "error" function --//
+			}); //-- END Ajax function --//
+		} else {
+			//============================================================//
+			//== ?.? - IF the User isn't currently logged in            ==//
+			//============================================================//
+			var sErrorMesg = "Silently aborting Odata API request (before starting the ajax request) due to being logged out!";
+			jQuery.sap.log.info( sErrorMesg, "", "IOMy.apiodata.AjaxRequest" );
+			
+		}
+	}
 
 });

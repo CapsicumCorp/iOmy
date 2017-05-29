@@ -39,19 +39,48 @@ sap.ui.controller("mjs.login.Login", {
 		thisView.addEventDelegate({
 			onAfterShow : function (evt) {
 				try {
+					
+					
 					IOMy.common.CheckSessionInfo({
 						//----------------------------------------------------//
 						//-- Function to run if user is currently logged in --//
 						OnUserSessionActive: $.proxy(function(data){
-							
 							if(IOMy.common.CoreVariablesInitialised===true) {
-								//--------------------------------------------//
-								//-- Kick the user to the Navigation Page	--//
-								//--------------------------------------------//
+								//------------------------------------------------------------//
+								//-- Debugging                                              --//
+								//------------------------------------------------------------//
 								//jQuery.sap.log.debug("User has accidentally ended up on the login page! They are now being kicked to the Navigation Page!");
+								
+								//------------------------------------------------------------//
+								//-- Kick the user to the Navigation Page                   --//
+								//------------------------------------------------------------//
 								IOMy.common.NavigationTriggerBackForward( false );
 								
 								//oApp.to("pNavMain");
+							} else {
+								//------------------------------------------------------------//
+								//-- Debugging                                              --//
+								//------------------------------------------------------------//
+								//console.log( "Session active, So refresh core variables" );
+								
+								//------------------------------------------------------------//
+								//-- Display loading status to the User                     --//
+								//------------------------------------------------------------//
+								me.DrawLoginLoading();
+								
+								//------------------------------------------------------------//
+								//-- Flag that the User is currently logged in              --//
+								//------------------------------------------------------------//
+								IOMy.common.oCurrentLoginTimestamp = new Date();
+								IOMy.common.bUserCurrentlyLoggedIn = true;
+								
+								//------------------------------------------------------------//
+								//-- Begin Refreshing the Core Variables                    --//
+								//------------------------------------------------------------//
+								IOMy.common.RefreshCoreVariables( IOMy.common.aRefreshCoreVariablesFirstRun );
+								
+								
+							/*
 							} else {
 								//----------------------------//
 								//-- Refresh Sensor List	--//
@@ -108,23 +137,26 @@ sap.ui.controller("mjs.login.Login", {
                                         }
                                     }
                                 );		//-- The function parameter is set as true to redirect to Navigation Page --//
-							}
+							*/
 							
+							
+							}
 						}),
 						//--------------------------------------------------------//
 						//-- Function to run if user is not currently logged in --//
-						OnUserSessionInactive: $.proxy(function(data){
-							
-							
-							
-							//----------------------------//
-							//-- DRAW LOGIN PROMPT		--//
-							//----------------------------//
+						OnUserSessionInactive: $.proxy( function(data) {
+							//------------------------------------------------------------//
+							//-- Debugging                                              --//
+							//------------------------------------------------------------//
 							//console.log( "Session inactive, Draw Login Prompt" );
-							me.DrawLoginPrompt();
-							//-- Draw the Login form fields to allow the user to log in --//
 							
-						})
+							
+							//------------------------------------------------------------//
+							//-- Draw the Login form fields to allow the user to log in --//
+							//------------------------------------------------------------//
+							me.DrawLoginPrompt();
+							
+						}, me )
 					});
 					
 				} catch(e1) {
@@ -318,7 +350,22 @@ sap.ui.controller("mjs.login.Login", {
 					//-- Check if the User is logged in --//
 					if( oResponseData.login===true ) {
 						
+						//------------------------------------------------------------//
+						//-- Flag that the User is currently logged in              --//
+						//------------------------------------------------------------//
 						me.DrawLoginLoading();
+						
+						//-- Flag that the User is currently logged in --//
+						IOMy.common.oCurrentLoginTimestamp = new Date();
+						IOMy.common.bUserCurrentlyLoggedIn = true;
+						
+						//------------------------------------------------------------//
+						//-- Begin Refreshing the Core Variables                    --//
+						//------------------------------------------------------------//
+						IOMy.common.RefreshCoreVariables( IOMy.common.aRefreshCoreVariablesFirstRun );
+						
+						
+						/*
                         // Load the core variables now.
                         IOMy.common.ReloadCoreVariables( function() {
                             //-- Copy and paste from the "IOMy.common.RefreshCoreVariables" function --//
@@ -357,7 +404,8 @@ sap.ui.controller("mjs.login.Login", {
                                 jQuery.sap.log.error("Login ReloadCoreVars\n"+eLoginCore.message);
                             }
                         });
-                        
+                        */
+
 					} else {
 						//-- TODO: Add the Appropiate Error Messages from the Session Check when Andrew has completed the Better Error Messages --//
 						IOMy.common.showError("Invalid Username or Password!", "User Error");
