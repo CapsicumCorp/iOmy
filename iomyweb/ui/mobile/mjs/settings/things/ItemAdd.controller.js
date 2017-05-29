@@ -224,6 +224,7 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
                 };
             }
         } catch (e2000) {
+			// TODO: DO SOMETHING ABOUT THIS. IT IS NOT USEFUL!
             throw "Error 0x2000: "+e2000.message;
         }
         
@@ -233,13 +234,16 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
 
             try {
                 //-- REFRESH LINK LIST --//
-                IOMy.common.ReloadVariableLinkList();
-
-                IOMy.common.showSuccess(me.byId("thingNameField").getValue()+" successfully created", "Success",
-                    function () {
-                        IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
-                    },
-                "UpdateMessageBox");
+                IOMy.common.ReloadVariableLinkList({
+					onSuccess : function () {
+						IOMy.common.showSuccess(me.byId("thingNameField").getValue()+" successfully created", "Success",
+							function () {
+								IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
+							},
+						"UpdateMessageBox");
+					}
+				});
+						
             } catch (e) {
                 jQuery.sap.log.error("Error refreshing core variables: "+e.message);
                 IOMy.common.showWarning(sLinkType+" successfully created but there was an error refreshing core variables: "+e.message, "Errors");

@@ -195,15 +195,27 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 		// ROOM COMBO BOX
 		//-------------------------------------------------------//
 		var oRoomLabel = new sap.m.Label({
-			text : "Room you wish to place this link in"
+			text : "Room you wish to place this device in"
 		});
 
-		me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_1").addStyleClass("width100Percent SettingsDropDownInput");
-		me.wRoomCBox.setSelectedKey(oLink.LinkRoomId);
+		try {
+			me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_1").addStyleClass("width100Percent SettingsDropDownInput");
+			me.wRoomCBox.setSelectedItem(oLink.LinkRoomId);
 
-		me.wRoomCBoxHolder = new sap.m.VBox({
-			items : [me.wRoomCBox]
-		}).addStyleClass("width100Percent");
+			me.wRoomCBoxHolder = new sap.m.VBox({
+				items : [me.wRoomCBox]
+			}).addStyleClass("width100Percent");
+		} catch (ex) {
+			console.log(ex.message);
+			if (ex.name === "NoRoomsFoundException") {
+				me.wRoomCBoxHolder = null;
+				me.wRoomCBox = null;
+			}
+		} finally {
+			if (IOMy.functions.getNumberOfRooms() === 0) {
+				oRoomLabel.setVisible(false);
+			}
+		}
         
         //-----------------------------------------------//
         // FORM BOX FOR SPECIFIC DEVICE TYPES
@@ -286,12 +298,13 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 		var aErrorMessages			= [];
 		var sThingText				= me.wThingNameField.getValue();
 		var iThingID				= me.oThing.Id;
-		var iRoomID					= me.wRoomCBox.getSelectedKey();
 		var mThingIdInfo			= IOMy.validation.isThingIDValid(iThingID);
 		var mThingNameInfo			= me.ValidateThingName();
 		
 		var bEditingThing			= me.wThingNameField.getEnabled();
-		var bChangingRoom			= me.wRoomCBox.getEnabled();
+		var bChangingRoom;
+
+		var iRoomID;
 		
 		var fnThingSuccess;
 		var fnThingFail;
@@ -315,7 +328,18 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 			bError = true;
 			aErrorMessages = aErrorMessages.concat(mThingNameInfo.aErrorMessages);
 		}
-
+		
+		//--------------------------------------------------------------------//
+		// Set the room ID
+		//--------------------------------------------------------------------//
+		if (me.wRoomCBox !== null) {
+			iRoomID			= me.wRoomCBox.getSelectedKey();
+			bChangingRoom	= me.wRoomCBox.getEnabled();
+		} else {
+			iRoomID = null;
+			bChangingRoom = false;
+		}
+		
 		if (bError === false) {
 			mThingChangeSettings.thingID	= iThingID;
 			mThingChangeSettings.thingName	= sThingText;
@@ -327,7 +351,8 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 			// Create the onSuccess and onFail functions based on what fields
 			// are enabled and/or changed.
 			//----------------------------------------------------------------//
-			if (bEditingThing && bChangingRoom) {
+			if (bEditingThing && (bChangingRoom && iRoomID !== null) ) {
+				
 				//------------------------------------------------------------//
 				// We're editing both the thing name and assigning it to a
 				// room.
@@ -419,12 +444,11 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 					};
 					
 					fnThingSuccess = function () {
-						IOMy.common.ReloadVariableThingList({
-							
-							onSuccess : function () {
+						IOMy.common.ReloadVariableThingList(
+							function () {
 								IOMy.common.NavigationTriggerBackForward();
 							}
-						});
+						);
 					};
 					
 					mThingChangeSettings.onSuccess	= fnThingSuccess;
@@ -433,7 +457,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 					IOMy.functions.editThing(mThingChangeSettings);
 				}
 				
-				if (bChangingRoom) {
+				if (bChangingRoom && iRoomID !== null) {
 					fnRoomFail = function (sMessage) {
 						IOMy.common.showError(sMessage, "", function () {
 							me.byId("updateButton").setEnabled(true);
@@ -441,12 +465,11 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 					};
 					
 					fnRoomSuccess = function () {
-						IOMy.common.ReloadVariableThingList({
-							
-							onSuccess : function () {
+						IOMy.common.ReloadVariableThingList(
+							function () {
 								IOMy.common.NavigationTriggerBackForward();
 							}
-						});
+						);
 					};
 					
 					mRoomChangeSettings.onSuccess	= fnRoomSuccess;

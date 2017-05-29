@@ -102,6 +102,7 @@ $.extend(IOMy.devices,{
      * @param {type} iLinkId                ID of the link to assign to a room
      * @param {type} iRoomId                ID of the room for the link to be assigned to
      * @param {type} sLinkType              String to display specifying the type of link being assigned.
+	 * @deprecated Use IOMy.devices.AssignDeviceToRoom() instead
      */
     AssignLinkToRoom : function (iLinkId, iRoomId, sLinkType, fnCallback) {
         //------------------------------------------------------------//
@@ -157,7 +158,7 @@ $.extend(IOMy.devices,{
 		var sUrl			= IOMy.apiphp.APILocation("link");
 		var iLinkId;
 		var iRoomId;
-        var mThingIDInfo;
+        var mDeviceIDInfo;
 		var mRoomIDInfo;
 		var fnSuccess;
 		var fnFail;
@@ -167,19 +168,31 @@ $.extend(IOMy.devices,{
 		//--------------------------------------------------------------------//
 		if (mSettings !== undefined) {
 			//----------------------------------------------------------------//
-			// REQUIRED: Valid Thing ID to get the link ID
+			// REQUIRED: Either a valid Thing ID to get the link ID, or the
+			// Link ID itself.
 			//----------------------------------------------------------------//
 			if (mSettings.thingID !== undefined) {
-				mThingIDInfo = IOMy.validation.isThingIDValid(mSettings.thingID);
+				mDeviceIDInfo = IOMy.validation.isThingIDValid(mSettings.thingID);
 				
-				bError			= !mThingIDInfo.bIsValid;
-				aErrorMessages	= aErrorMessages.concat(mThingIDInfo.aErrorMessages);
+				bError			= !mDeviceIDInfo.bIsValid;
+				aErrorMessages	= aErrorMessages.concat(mDeviceIDInfo.aErrorMessages);
 				
 				if (!bError) {
 					iLinkId = IOMy.common.ThingList["_"+mSettings.thingID].LinkId;
 				}
 			} else {
-				fnAppendError("Thing ID (thingID) must be specified!");
+				if (mSettings.linkID !== undefined) {
+					mDeviceIDInfo = IOMy.validation.isLinkIDValid(mSettings.linkID);
+				
+					bError			= !mDeviceIDInfo.bIsValid;
+					aErrorMessages	= aErrorMessages.concat(mDeviceIDInfo.aErrorMessages);
+					
+					if (!bError) {
+						iLinkId = mSettings.linkID;
+					}
+				} else {
+					fnAppendError("Thing (thingID) or Link (linkID) must be specified!");
+				}
 			}
 			
 			if (bError) {

@@ -505,30 +505,46 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 
             try {
                 // REFRESH LINK LIST
-                IOMy.common.ReloadVariableLinkList();
-
                 if (data.Error === false || data.Error === undefined) {
-                    IOMy.common.showSuccess(sLinkType+" successfully created", "Success",
-                        function () {
-                            // Set the flag to clear the way for a new UI instance
-                            me.bUIReadyToBeWiped = true;
-							
-							if (me.wRoomCBox !== null) {
-								IOMy.devices.AssignLinkToRoom(iLinkId, me.wRoomCBox.getSelectedKey(), sLinkType,
-									function () {
+					IOMy.common.ReloadVariableCommList(
+						function () {
+							IOMy.common.showSuccess(sLinkType+" successfully created", "Success",
+								function () {
+									// Set the flag to clear the way for a new UI instance
+									me.bUIReadyToBeWiped = true;
+
+									var fnSuccess;
+									var fnFail;
+
+									fnSuccess = function () {
 										if (IOMy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
-											oApp.to("pSettingsThingAdd", { LinkId: iLinkId });
+											oApp.to("pSettingsThingAdd", { "LinkId": iLinkId });
 										} else {
 											IOMy.common.NavigationChangePage("pSettingsDeviceList", {}, true);
 										}
+									};
+
+									fnFail = function (err) {
+										IOMy.common.showWarning("Successfully created device, but could not place it in "+me.wRoomCBox.getSelectedItem().getText()+".", "Warning", fnSuccess);
+
+									};
+
+									if (me.wRoomCBox !== null) {
+										IOMy.devices.AssignDeviceToRoom({
+											"linkID" : iLinkId,
+											"roomID" : me.wRoomCBox.getSelectedKey(),
+
+											"onSuccess" : fnSuccess
+										});
+									} else {
+										fnSuccess();
 									}
-								);
-							} else {
-								IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
-							}
-                            
-                        },
-                    "UpdateMessageBox");
+
+								},
+							"UpdateMessageBox");
+						}
+					);
+							
                 } else {
                     jQuery.sap.log.error("Error creating "+sLinkType+":"+data.ErrMesg, "Error");
                     IOMy.common.showError("Error creating "+sLinkType+":\n\n"+data.ErrMesg, "Error");
