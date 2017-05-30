@@ -305,6 +305,9 @@ public class InstallWizard {
 
         //--- Proceed from the license agreement to the setup question ---//
         } else if (stepCompleted.equals(Titles.licenseAgreementTitle)) {
+            this.summonFirstRunDatabaseStorageLocationPage(activity);
+
+        } else if (stepCompleted.equals(Titles.FirstRunDatabaseStorageLocationTitle)) {
             this.summonSetupQuestions(activity);
 
         } else if (this.installDemoData && stepCompleted.equals(Titles.setupQuestions)) {
@@ -384,6 +387,11 @@ public class InstallWizard {
 
     public void summonLicenseAgreement(Activity activity) {
         Intent intent = new Intent(activity, LicenseAgreement.class);
+        activity.startActivity(intent);
+    }
+
+    public void summonFirstRunDatabaseStorageLocationPage(Activity activity) {
+        Intent intent = new Intent(activity, FirstRunDatabaseStorageLocationPage.class);
         activity.startActivity(intent);
     }
 

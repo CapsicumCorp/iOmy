@@ -53,6 +53,8 @@ public class Settings {
     public static final String PREF_MYSQL_PREMISE_NAME="pref_mysql_premise_name";
     public static final String PREF_MYSQL_HUB_NAME="pref_mysql_hub_name";
 
+    public static final String PREF_DATABASE_STORAGE_LOCATION="pref_database_storage_location";
+
     //Constants for Preference defaults
     //These should be synched with the defaults specified in xml/preferences.xml
     public static final boolean PREF_RUN_FIRST_RUN_WIZARD_DEFAULT=true;
@@ -77,6 +79,8 @@ public class Settings {
 
     public static final String PREF_MYSQL_PREMISE_NAME_DEFAULT="Home";
     public static final String PREF_MYSQL_HUB_NAME_DEFAULT="iOmyHub";
+
+    public static final String PREF_DATABASE_STORAGE_LOCATION_DEFAULT=""; //Use internal storage by default
 
     public Settings() {
         //Do nothing
@@ -510,6 +514,33 @@ public class Settings {
     public static void setMySQLHubName(Context context, String hubName) {
         SharedPreferences.Editor editor=getEditor(context);
         editor.putString(PREF_MYSQL_HUB_NAME, hubName);
+        editor.apply();
+    }
+
+
+    /**
+     * Return from saved settings the current database storage path prefix to use for the MySQL server
+     * @param context Android requires a context to access the Preferences
+     * @return Returns from saved settings the current database storage path prefix to use for the MySQL server
+     */
+    public static String getDatabaseStorageLocation(Context context) {
+        String storageLocation=getSharedPref(context).getString(PREF_DATABASE_STORAGE_LOCATION, PREF_DATABASE_STORAGE_LOCATION_DEFAULT);
+
+        if (storageLocation=="") {
+            //Return internal storage path by default
+            return context.getFilesDir().getPath();
+        }
+        return storageLocation;
+    }
+
+    /**
+     * Update the current database storage path prefix to use for the MySQL server to saved settings
+     * @param context Android requires a context to access the Preferences
+     * @param storageLocation The database storage path prefix to use for the MySQL server to save
+     */
+    public static void setPrefDatabaseStorageLocation(Context context, String storageLocation) {
+        SharedPreferences.Editor editor=getEditor(context);
+        editor.putString(PREF_DATABASE_STORAGE_LOCATION, storageLocation);
         editor.apply();
     }
 }

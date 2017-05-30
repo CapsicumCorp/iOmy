@@ -96,6 +96,9 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
             android:name=".DatabaseProgressPage"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
         <activity
+            android:name=".FirstRunDatabaseStorageLocationPage"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
+        <activity
             android:name=".WebServerSetupDB"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
         <activity
@@ -136,11 +139,9 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
         <activity
             android:name=".SettingsPage"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
-
         <activity
             android:name=".UsbConnected"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize">
-
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>

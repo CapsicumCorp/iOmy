@@ -29,7 +29,7 @@ default-character-set=utf8
 
     basedir="%datafolder%/components/mysql/sbin/"
 
-    datadir="%datafolder%/components/mysql/sbin/data"
+    datadir="%databasefolder%/components/mysql/sbin/data"
 
     tmpdir ="%datafolder%/tmp"
 
@@ -79,4 +79,8 @@ innodb_file_per_table
 collation_server=utf8_unicode_ci
 character_set_server=utf8
 skip-character-set-client-handshake = false
+
+# Some filesystems (FAT32 for example) don't support AIO so disable it
+# https://stackoverflow.com/questions/19265916/file-ib-logfile101-aio-write-returned-os-error-122/23738882
+innodb_use_native_aio=0
 

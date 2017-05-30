@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pre-API 17 can't generate dynamic IDs: https://stackoverflow.com/questions/10261190/android-assign-and-retrieve-ids-dynamically
+      so we have some here for database storage location radio buttons -->
+    <item name="storage_location_internal" type="id" />
+    <item name="storage_location_external" type="id" />
+    <item name="storage_location_external_0" type="id" />
+    <item name="storage_location_external_1" type="id" />
+    <item name="storage_location_external_2" type="id" />
+    <item name="storage_location_external_3" type="id" />
+    <item name="storage_location_external_4" type="id" />
+    <item name="storage_location_external_5" type="id" />
+    <item name="storage_location_external_6" type="id" />
+    <item name="storage_location_external_7" type="id" />
+    <item name="storage_location_external_8" type="id" />
+    <item name="storage_location_external_9" type="id" />
+</resources>

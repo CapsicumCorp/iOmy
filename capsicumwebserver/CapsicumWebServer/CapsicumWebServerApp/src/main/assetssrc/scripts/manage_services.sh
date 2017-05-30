@@ -157,7 +157,13 @@ template_to_conf_mysql() {
     mysqlport="$1"
 		shift
   fi
-  cat "${sbin}/etc/mysql/mysql.ini.template" | ${SED} "s_%datafolder%_${app}_" | ${SED} "s_%mysqlport%_${mysqlport}_" > "${sbin}/etc/mysql/mysql.ini"
+  if [ "$1" == "" ] ; then
+    databaselocation="${app}"
+  else
+    databaselocation="$1"
+    shift
+  fi
+  cat "${sbin}/etc/mysql/mysql.ini.template" | ${SED} "s_%datafolder%_${app}_" | ${SED} "s_%databasefolder%_${databaselocation}_" | ${SED} "s_%mysqlport%_${mysqlport}_" > "${sbin}/etc/mysql/mysql.ini"
 }
 
 # Args: <none>

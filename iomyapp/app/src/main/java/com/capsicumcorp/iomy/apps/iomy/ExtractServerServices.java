@@ -74,6 +74,8 @@ public class ExtractServerServices extends Thread {
     private String CHANGE_PERMISSION;
     private String INTERNAL_LOCATION = null;
     private String EXTERNAL_STORAGE = null;
+    private String databaseStorageLocation=null;
+
     public static final String ASSETSFILENAME = "webserverassets.zip";
     public static final String ASSETSFILEINFOFILENAME = "webserverassetsfileinfo.txt";
     public static final String ASSETSVERSIONFILENAME = "webserverassetsversion.txt";
@@ -206,8 +208,10 @@ public class ExtractServerServices extends Thread {
                 return;
             }
             //Log.println(Log.INFO, "WebServer", "system directory=" + SystemDirectory + " , internal storage=" + context.getFilesDir().getPath());
+            databaseStorageLocation=Settings.getDatabaseStorageLocation(context);
             isUpgrade=false;
             if (!areWebServerAssetsExtracted()) {
+
                 int upgraderesult = doUpgrade();
                 if (upgraderesult < 0) {
                     DoExtractErrorNotification("Upgrade Error", "Failed to upgrade the Web Server files");
@@ -428,7 +432,14 @@ public class ExtractServerServices extends Thread {
                     } else {
                         //Using BufferedOutputStream reduces total extract time on slower devices by quite a lot compared
                         //  to writing direct to a FileOutputStream
-                        BufferedOutputStream fout = new BufferedOutputStream(new FileOutputStream(INTERNAL_LOCATION + "/" + zipEntryName));
+                        BufferedOutputStream fout;
+                        if (zipEntryName.startsWith("components/mysql/sbin/data/")) {
+                            //Use the database storage location for the database files
+                            fout=new BufferedOutputStream(new FileOutputStream(databaseStorageLocation + "/" + zipEntryName));
+                            //Log.println(Log.INFO, "WebServer", "DEBUG Extracting file to: " + databaseStorageLocation + "/" + zipEntryName);
+                        } else {
+                            fout=new BufferedOutputStream(new FileOutputStream(INTERNAL_LOCATION + "/" + zipEntryName));
+                        }
                         byte[] buffer = new byte[4096 * 10];
                         int length;
                         while ((length = zipFileStream[i].read(buffer)) != -1) {
@@ -700,7 +711,13 @@ public class ExtractServerServices extends Thread {
      * @param dirName Directory to create during extracting
      */
     protected void createDirectory(String dirName) {
-        File file = new File(INTERNAL_LOCATION + "/" + dirName);
+        File file;
+        if (dirName.startsWith("components/mysql/sbin/data")) {
+            //Use the database storage location for the database files
+            file = new File(databaseStorageLocation + "/" + dirName);
+        } else {
+            file = new File(INTERNAL_LOCATION + "/" + dirName);
+        }
         if (!file.isDirectory()) file.mkdirs();
     }
 
@@ -808,7 +825,7 @@ public class ExtractServerServices extends Thread {
         try {
             execWithWait(SystemDirectory + "/bin/sh " + INTERNAL_LOCATION + "/scripts/manage_services.sh " + SystemDirectory + " " + INTERNAL_LOCATION + " template_to_conf_lighttpd 8080 ioMy Web Server");
             execWithWait(SystemDirectory + "/bin/sh " + INTERNAL_LOCATION + "/scripts/manage_services.sh " + SystemDirectory + " " + INTERNAL_LOCATION + " template_to_conf_php 128M Australia/Brisbane");
-            execWithWait(SystemDirectory + "/bin/sh " + INTERNAL_LOCATION + "/scripts/manage_services.sh " + SystemDirectory + " " + INTERNAL_LOCATION + " template_to_conf_mysql 3306");
+            execWithWait(SystemDirectory + "/bin/sh " + INTERNAL_LOCATION + "/scripts/manage_services.sh " + SystemDirectory + " " + INTERNAL_LOCATION + " template_to_conf_mysql 3306 "+databaseStorageLocation);
         } catch (Exception e) {
             e.printStackTrace();
         }

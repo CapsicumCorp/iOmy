@@ -13,4 +13,5 @@
 
     <!-- Chooser strings for launching external apps -->
     <string name="app_chooser_rtsp_title">Select Player for Onvif Stream</string>
+    <string name="title_activity_database_storage_location">database_storage_location</string>
 </resources>
