@@ -250,7 +250,11 @@ $.extend(IOMy.apiphp,{
 											
 											//-- Trigger the OnSuccess Event --//
 											if( aConfig.onSuccess ) {
-												aConfig.onSuccess("JSON", Data);
+												try {
+													aConfig.onSuccess("JSON", Data);
+												} catch( e01 ) {
+													jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onSuccess\" section of the passed parameter!. (e01)\n"+e01.message+" \n"+sUrl, "", "IOMy.apiphp.AjaxRequest");
+												}
 											}
 											
 										//--------------------------------------------------------//
@@ -270,7 +274,12 @@ $.extend(IOMy.apiphp,{
 												
 												//-- Trigger the OnSuccess Event --//
 												if( aConfig.onSuccess ) {
-													aConfig.onSuccess("Text", Data);
+													
+													try {
+														aConfig.onSuccess("Text", Data);
+													} catch( e02 ) {
+														jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onSuccess\" section of the passed parameter!. (e02)\n"+e02.message+" \n"+sUrl, "", "IOMy.apiphp.AjaxRequest");
+													}
 												}
 												
 												
@@ -284,7 +293,11 @@ $.extend(IOMy.apiphp,{
 												
 												//-- Trigger the "onFail" event --//
 												if(aConfig.onFail) {
-													aConfig.onFail();
+													try {
+														aConfig.onFail();
+													} catch( e03 ) {
+														jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e03)\n"+e03.message+" \n"+sUrl, "", "IOMy.apiphp.AjaxRequest");
+													}
 												}
 											}
 											
@@ -298,7 +311,11 @@ $.extend(IOMy.apiphp,{
 											
 											//-- Trigger the "onFail" event --//
 											if(aConfig.onFail) {
-												aConfig.onFail();
+												try {
+													aConfig.onFail();
+												} catch( e04 ) {
+													jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e04)\n"+e04.message+" \n"+sUrl, "", "IOMy.apiphp.AjaxRequest");
+												}
 											}
 										}
 										
@@ -316,7 +333,11 @@ $.extend(IOMy.apiphp,{
 											
 											//-- Trigger the "onFail" event --//
 											if(aConfig.onFail) {
-												aConfig.onFail(Response);
+												try {
+													aConfig.onFail(Response);
+												} catch( e05 ) {
+													jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e05)\n"+e05.message+" \n"+sUrl, "", "IOMy.apiphp.AjaxRequest");
+												}
 											}
 											
 										} else {
@@ -325,7 +346,11 @@ $.extend(IOMy.apiphp,{
 											
 											//-- Trigger the "onFail" event --//
 											if(aConfig.onFail) {
-												aConfig.onFail();
+												try {
+													aConfig.onFail();
+												} catch( e06 ) {
+													jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e06)\n"+e06.message+" \n"+sUrl, "", "IOMy.apiphp.AjaxRequest");
+												}
 											}
 										}
 									}
@@ -337,7 +362,11 @@ $.extend(IOMy.apiphp,{
 									
 									//-- Trigger the "onFail" event --//
 									if(aConfig.onFail) {
-										aConfig.onFail();
+										try {
+											aConfig.onFail();
+										} catch( e07 ) {
+											jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e07)\n"+e07.message+" \n"+sUrl, "", "IOMy.apiphp.AjaxRequest");
+										}
 									}
 								}
 							
@@ -465,7 +494,11 @@ $.extend(IOMy.apiphp,{
 								//------------------------------------------------------------------------//
 								//-- If we aren't retrying the ajax request we should run the onFail function --//
 								if(aConfig.onFail) {
-									aConfig.onFail(err);
+									try {
+										aConfig.onFail(err);
+									} catch( e21 ) {
+										jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e21)\n"+e21.message+" \n"+sUrl, "", "IOMy.apiphp.AjaxRequest");
+									}
 								}
 							
 							} else {
@@ -474,8 +507,8 @@ $.extend(IOMy.apiphp,{
 							}
 							
 							
-						} catch(e2) {
-							jQuery.sap.log.error("== Critical Error! == \n"+this.DebugLogString+"\n Error Message="+e2.message , "", "PHP Ajax Request");
+						} catch(e20) {
+							jQuery.sap.log.error("== Critical Error! == \n"+this.DebugLogString+"\n Error Message="+e20.message , "", "PHP Ajax Request");
 						}
 					}
 				});

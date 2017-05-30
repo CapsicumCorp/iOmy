@@ -395,15 +395,34 @@ $.extend(IOMy.apiodata,{
 									
 									//-- Check the Results --//
 									if (Response.d === undefined) {
-										aConfig.onFail(Response);
+										try {
+											aConfig.onFail(Response);
+										} catch( e02 ) {
+											if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
+											jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e02)\n"+e02.message+" \n"+sUrl, "", "IOMy.apiodata.AjaxRequest");
+										}
+										
+										
 									} else {
 										//-- Check if the Result is undefined --//
 										if( Response.d.results===undefined ) {
 											aData = Response.d;
-											aConfig.onSuccess("JSON", aData);
+											try {
+												aConfig.onSuccess("JSON", aData);
+											} catch( e03 ) {
+												if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
+												jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onSuccess\" section of the passed parameter!.(e03)\n"+e03.message+" \n"+sUrl, "", "IOMy.apiodata.AjaxRequest");
+											}
+											
 										} else {
 											aData = Response.d.results;
-											aConfig.onSuccess("JSON", aData);
+											try {
+												aConfig.onSuccess("JSON", aData);
+											} catch( e04 ) {
+												if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
+												jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onSuccess\" section of the passed parameter!. (e04)\n"+e04.message+" \n"+sUrl, "", "IOMy.apiodata.AjaxRequest");
+											}
+											
 										}
 										
 										
@@ -582,7 +601,14 @@ $.extend(IOMy.apiodata,{
 							//------------------------------------------------------------------------//
 							//-- If we aren't retrying the ajax request we should run the onFail function --//
 							if(aConfig.onFail) {
-								aConfig.onFail(err);
+								//aConfig.onFail(err);
+								try {
+									aConfig.onFail( err );
+								} catch( e21 ) {
+									if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
+									jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e21)\n"+e21.message+" \n"+sUrl, "", "IOMy.apiodata.AjaxRequest");
+								}
+								
 							}
 						} catch( e21 ) {
 							//-- Flag that this API Request has completed unsuccessfully --//
