@@ -32,10 +32,11 @@ $.extend(IOMy.widgets,{
      * receive the ID of the room that is currently selected if changing from one room
      * to another.
      * 
-     * @param {string} sId          ID for the select box.
-     * @param {string} sPremiseId   ID of the given premise.
-     * @param {Number} iRoomId      (optional) ID of the room currently set.
-     * @returns {sap.m.Select}      Select box with the rooms in a given premise.
+     * @param {string} sId				ID for the select box.
+     * @param {string} sPremiseId		ID of the given premise.
+     * @param {Number} iRoomId			(optional) ID of the room currently set.
+     * @returns {sap.m.Select}			Select box with the rooms in a given premise.
+	 * @throws NoRoomsFoundException	
      */
     getRoomSelector : function (sId, sPremiseId, iRoomId) {
         try {

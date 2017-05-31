@@ -332,7 +332,7 @@ $.extend(IOMy.common,{
 		var callbackFn = fnCallback || function(){};
 		var cssClass = sCssClass || "";
 		
-		// open a fully configured message box
+		// open a fully configured message toast
 		sap.m.MessageToast.show(
 			sMessage,
 			{
@@ -341,7 +341,7 @@ $.extend(IOMy.common,{
 			}
 		);
 		// TODO: This is a temporary measure to allow the function to be called after the toast is shown.
-		// TODO: Go through each form and 
+		// TODO: Go through each form and move the function code out and place it in the parent function.
 		callbackFn();
 	},
     
@@ -568,80 +568,6 @@ $.extend(IOMy.common,{
             }
         });
     },
-    
-//    LoadStatesProvinces : function () {
-//        var me = this;
-//        
-//        IOMy.apiodata.AjaxRequest({
-//            Url : IOMy.apiodata.ODataLocation("stateprovince"),
-//            Columns : ["STATEPROVINCE_PK","STATEPROVINCE_NAME"],
-//            WhereClause : [],
-//            OrderByClause : ["STATEPROVINCE_NAME asc"],
-//
-//            onSuccess : function (responseType, data) {
-//                try {
-//                    me.StatesProvinces = [];
-//                    
-//                    for (var i = 0; i < data.length; i++) {
-//                        me.StatesProvinces.push({
-//                            StateProvinceId : data[i].STATEPROVINCE_PK,
-//                            StateProvinceName : data[i].STATEPROVINCE_NAME
-//                        });
-//                    }
-//                    
-//                    me.bStatesProvincesLoaded = true;
-//                    
-//                } catch (e) {
-//
-//                    jQuery.sap.log.error("Error gathering States and Provinces: "+JSON.stringify(e.message));
-//                    me.bStatesProvincesLoaded = false;
-//                    
-//                }
-//            },
-//
-//            onFail : function (response) {
-//                jQuery.sap.log.error("Error loading stateprovince OData: "+JSON.stringify(response));
-//                me.bStatesProvincesLoaded = false;
-//            }
-//        });
-//    },
-//    
-//    LoadPostCodes : function () {
-//        var me = this;
-//        
-//        IOMy.apiodata.AjaxRequest({
-//            Url : IOMy.apiodata.ODataLocation("postcode"),
-//            Columns : ["POSTCODE_PK","POSTCODE_NAME"],
-//            WhereClause : [],
-//            OrderByClause : ["POSTCODE_NAME asc"],
-//
-//            onSuccess : function (responseType, data) {
-//                try {
-//                    me.PostCodes = [];
-//                    
-//                    for (var i = 0; i < data.length; i++) {
-//                        me.PostCodes.push({
-//                            PostCodeId : data[i].POSTCODE_PK,
-//                            PostCodeName : data[i].POSTCODE_NAME
-//                        });
-//                    }
-//                    
-//                    me.bPostCodesLoaded = true;
-//                    
-//                } catch (e) {
-//
-//                    jQuery.sap.log.error("Error gathering Post codes: "+JSON.stringify(e.message));
-//                    me.bPostCodesLoaded = false;
-//                    
-//                }
-//            },
-//
-//            onFail : function (response) {
-//                jQuery.sap.log.error("Error loading stateprovince OData: "+JSON.stringify(response));
-//                me.bPostCodesLoaded = false;
-//            }
-//        });
-//    },
     
     LoadTimezones : function (mSettings) {
         var me = this;
@@ -913,15 +839,6 @@ $.extend(IOMy.common,{
                     
                 }
             });
-//            this.LoadStatesProvinces();
-//            this.LoadPostCodes();
-//            this.LoadTimezones();
-//            this.LoadRoomTypes();
-        
-//            // Do the next steps
-//            IOMy.functions.getCurrentUsername( function () {
-//                me.ReloadVariablePremiseList(fnCallback, fnFailCallback);
-//            });
         } else {
 			//-- Keep running this function until the refresh is complete --//
 			me.ReloadCoreVariables(fnCallback, fnFailCallback);
@@ -1384,12 +1301,12 @@ $.extend(IOMy.common,{
 		}
 	},
 	
-	//================================================================//
-	//== Refresh Variables First Run                                ==//
-	//================================================================//
-	//-- Description: This array is used as a Preset that is used   --//
-	//--     after verifing that the user is logged in.             --//
-	//----------------------------------------------------------------//
+	/*
+	 * This array is used as a Preset that is used after verifing that the user
+	 * is logged in.
+	 * 
+	 * @type Array
+	 */
 	aRefreshCoreVariablesFirstRun: {
 		
 		onSuccess: function() {
@@ -1407,12 +1324,10 @@ $.extend(IOMy.common,{
 		}
 	},
 	
-	//================================================================//
-	//== Refresh Variables Schedule                                 ==//
-	//================================================================//
-	//-- Description: This function gets run in order to schedule a --//
-	//--     check to see if the CoreVariables needs refreshing.    --//
-	//----------------------------------------------------------------//
+	/*
+	 * This function gets run in order to schedule a check to see if the
+	 * Core Variables need refreshing.
+	 */
 	RefreshCoreVariableQueueCheck: function() {
 		//----------------------------------------//
 		//-- Clear existing timeout             --//
@@ -1440,13 +1355,10 @@ $.extend(IOMy.common,{
 		}
 	},
 	
-	//================================================================//
-	//== Refresh Variables Check Event                              ==//
-	//================================================================//
-	//-- Description: This gets run by the previous function to     --//
-	//--     perform the check and run the RefreshCoreVariables     --//
-	//--     function if needed.                                    --//
-	//----------------------------------------------------------------//
+	/*
+	 * This gets run by RefreshCoreVariableQueueCheck() to perform the check and
+	 * run the RefreshCoreVariables function if needed.
+	 */
 	RefreshCoreVariablesCheckEvent: function() {
 		//-- Declare variables --//
 		var oScope         = this;

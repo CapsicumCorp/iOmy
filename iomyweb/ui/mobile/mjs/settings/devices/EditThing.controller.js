@@ -135,6 +135,10 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         }
         // Destroy whatever other elements are left.
         me.DestroySpecificFormUI();
+		
+		if (me.wRoomCBox !== null) {
+			me.wRoomCBox.destroy();
+		}
         
         // Clear the array
         me.aElementsToDestroy = [];
@@ -168,6 +172,8 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         var me			= this;
         var thisView	= me.getView();
 		var oLink		= IOMy.common.getLink(me.oThing.LinkId);
+		var bAllowedToEditThing;
+		var bAllowedToChangeRoom;
         
         //-- Refresh the Navigational buttons --//
         IOMy.common.NavigationRefreshButtons( me );
@@ -198,23 +204,17 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 			text : "Room you wish to place this device in"
 		});
 
-		try {
+		if (IOMy.functions.getNumberOfRooms() === 0) {
+			oRoomLabel.setVisible(false);
+			me.wRoomCBoxHolder = null;
+			me.wRoomCBox = null;
+		} else {
 			me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_1").addStyleClass("width100Percent SettingsDropDownInput");
 			me.wRoomCBox.setSelectedItem(oLink.LinkRoomId);
 
 			me.wRoomCBoxHolder = new sap.m.VBox({
 				items : [me.wRoomCBox]
 			}).addStyleClass("width100Percent");
-		} catch (ex) {
-			console.log(ex.message);
-			if (ex.name === "NoRoomsFoundException") {
-				me.wRoomCBoxHolder = null;
-				me.wRoomCBox = null;
-			}
-		} finally {
-			if (IOMy.functions.getNumberOfRooms() === 0) {
-				oRoomLabel.setVisible(false);
-			}
 		}
         
         //-----------------------------------------------//
@@ -305,6 +305,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 		var bChangingRoom;
 
 		var iRoomID;
+		var sRoomText;
 		
 		var fnThingSuccess;
 		var fnThingFail;
@@ -334,9 +335,11 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 		//--------------------------------------------------------------------//
 		if (me.wRoomCBox !== null) {
 			iRoomID			= me.wRoomCBox.getSelectedKey();
+			sRoomText		= me.wRoomCBox.getSelectedItem().getText();
 			bChangingRoom	= me.wRoomCBox.getEnabled();
 		} else {
 			iRoomID = null;
+			sRoomText = null;
 			bChangingRoom = false;
 		}
 		
@@ -374,11 +377,11 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 								var sMessage;
 								
 								if (mThingChangeSettings.successful === true) {
-									sMessage = "Device renamed to "+sThingText+". Located in "+me.wRoomCBox.getSelectedItem().getText();
+									sMessage = "Device renamed to "+sThingText+". Located in "+sRoomText;
 									IOMy.common.showSuccess(sMessage);
 									IOMy.common.NavigationTriggerBackForward();
 								} else {
-									sMessage = "Device couldn't be renamed to "+sThingText+", but is now located in "+me.wRoomCBox.getSelectedItem().getText();
+									sMessage = "Device couldn't be renamed to "+sThingText+", but is now located in "+sRoomText;
 									
 									IOMy.common.showWarning(sMessage, "", function () {
 										me.byId("updateButton").setEnabled(true);
@@ -398,7 +401,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 						var sMessage;
 								
 						if (mThingChangeSettings.successful === true) {
-							sMessage = "Device renamed to "+sThingText+", but failed to move device to "+me.wRoomCBox.getSelectedItem().getText();
+							sMessage = "Device renamed to "+sThingText+", but failed to move device to "+sRoomText;
 							
 							IOMy.common.showWarning(sMessage, "", function () {
 								me.byId("updateButton").setEnabled(true);
@@ -407,7 +410,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 							jQuery.sap.log.warning(sMessage);
 							//IOMy.common.NavigationTriggerBackForward();
 						} else {
-							sMessage = "Device couldn't be renamed. Failed to move device to "+me.wRoomCBox.getSelectedItem().getText();
+							sMessage = "Device couldn't be renamed. Failed to move device to "+sRoomText;
 							
 							IOMy.common.showError(sMessage, "", function () {
 								me.byId("updateButton").setEnabled(true);
@@ -443,7 +446,9 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 					jQuery.sap.log.error(e00033.message);
 				}
 			} else {
-				
+				//------------------------------------------------------------//
+				// We're simply changing the name of a thing.
+				//------------------------------------------------------------//
 				if (bEditingThing) {
 					fnThingFail = function () {
 						me.byId("updateButton").setEnabled(true);
@@ -452,7 +457,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 					fnThingSuccess = function () {
 						IOMy.common.ReloadVariableThingList(
 							function () {
-								IOMy.common.showSuccess("Device now located in "+me.wRoomCBox.getSelectedItem().getText());
+								IOMy.common.showSuccess("Device renamed to "+sThingText);
 								IOMy.common.NavigationTriggerBackForward();
 							}
 						);
@@ -464,6 +469,9 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 					IOMy.functions.editThing(mThingChangeSettings);
 				}
 				
+				//------------------------------------------------------------//
+				// Or moving a device to another room.
+				//------------------------------------------------------------//
 				if (bChangingRoom && iRoomID !== null) {
 					fnRoomFail = function (sMessage) {
 						IOMy.common.showError(sMessage, "", function () {
@@ -474,7 +482,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 					fnRoomSuccess = function () {
 						IOMy.common.ReloadVariableThingList(
 							function () {
-								IOMy.common.showSuccess("Device now located in "+me.wRoomCBox.getSelectedItem().getText());
+								IOMy.common.showSuccess("Device now located in "+sRoomText);
 								IOMy.common.NavigationTriggerBackForward();
 							}
 						);
