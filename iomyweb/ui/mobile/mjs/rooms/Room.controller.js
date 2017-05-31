@@ -634,17 +634,23 @@ sap.ui.controller("mjs.rooms.Room", {
                                 //-- Display the most recent value --//
                                 var oUI5Object = oController.byId( sIOLabel );
                                 if( oUI5Object!==undefined && oUI5Object!==null && oUI5Object!==false ) {
-                                    //----------------------------------------//
-                                    //-- Round to 3 decimal places          --//
-                                    //----------------------------------------//
-                                    var fCalcedValue = ( Math.round( aData.Value * 1000 ) ) / 1000;
-
-                                    //----------------------------------------//
-                                    //-- Show the Results                   --//
-                                    //----------------------------------------//
-                                    oUI5Object.setText( fCalcedValue+" "+aData.UomName);
-
-
+                                    //-- IF the Uom is present --//
+                                    if( typeof aData.UomName!=="undefined" && aData.UomName!==null && aData.UomName!==false && aData.UomName!=="") {
+                                        //----------------------------------------//
+                                        //-- Round to 3 decimal places          --//
+                                        //----------------------------------------//
+                                        var fCalcedValue = ( Math.round( aData.Value * 1000 ) ) / 1000;
+                                        
+                                        //----------------------------------------//
+                                        //-- Show the Results                   --//
+                                        //----------------------------------------//
+                                        oUI5Object.setText( fCalcedValue+" "+aData.UomName);
+                                        
+                                    } else {
+                                        //-- Set it to an empty text field --//
+                                        oUI5Object.setText("");
+                                        
+                                    }
                                 } else {
                                     console.log("Critical Error: PHP API (Most Recent) OnSuccess can't find "+sIOLabel);
                                 }
