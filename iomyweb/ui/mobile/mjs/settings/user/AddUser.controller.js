@@ -254,6 +254,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         });
 
         me.wRegionField = IOMy.widgets.selectBoxRegions().addStyleClass("SettingsDropdownInput");
+		me.wRegionField.setSelectedKey(IOMy.common.UserInfo.RegionId)
 
         //===== LANGUAGE =====//
         var oLanguageTitle = new sap.m.Text({
@@ -286,7 +287,8 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         });
 
         me.wTimezoneField = IOMy.widgets.selectBoxTimezones().addStyleClass("SettingsDropdownInput");
-
+		me.wTimezoneField.setSelectedKey(IOMy.common.UserInfo.TimezoneId);
+		
         //===== RESIDENTIAL ADDRESS =====//
 
         //===== STREET ADDRESS (LINE 1) =====//
@@ -406,7 +408,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                     }
                 }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
             ]
-        }).addStyleClass("TextCenter MarTop12px");
+        }).addStyleClass("TextCenter");
 
         //--------------------------//
         // User Information
