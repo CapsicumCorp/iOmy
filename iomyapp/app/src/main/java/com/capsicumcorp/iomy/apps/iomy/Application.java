@@ -250,6 +250,7 @@ public class Application extends android.app.Application {
     public String getExternalStorageFolderName() {
         return this.ExternalStorageFolderName;
     }
+    public String getCacheStorageFolderName() { return this.getCacheDir().getPath(); }
     public UsbManager getUsbManager() {
     	return this.mUsbManager;
     }

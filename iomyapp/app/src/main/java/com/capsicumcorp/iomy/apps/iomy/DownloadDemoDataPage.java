@@ -74,8 +74,9 @@ public class DownloadDemoDataPage extends ProgressPageWithCustomPercentage {
         fullFilenameUrl = baseUrl + Application.getInstance().getCurrentAppVersionName() + "/" + filenameUrl;
         fullFileInfoFilenameUrl = baseUrl + Application.getInstance().getCurrentAppVersionName() + "/" + fileinfoFilenameUrl;
 
-        outputFilename=Application.getInstance().getInternalStorageFolderName() + "/" + "webservermysqldemodatabase.zip";
-        outputFileInfoFilename=Application.getInstance().getInternalStorageFolderName() + "/" + "webservermysqldemodatabasefileinfo.txt";
+
+        outputFilename=Application.getInstance().getCacheStorageFolderName() + "/" + "webservermysqldemodatabase.zip";
+        outputFileInfoFilename=Application.getInstance().getCacheStorageFolderName() + "/" + "webservermysqldemodatabasefileinfo.txt";
         demodataDownloadedFilename=Application.getInstance().getInternalStorageFolderName() + "/" + "webservermysqldemodatabase.downloaded";
 
         File demodataDownloadedFile=new File(demodataDownloadedFilename);

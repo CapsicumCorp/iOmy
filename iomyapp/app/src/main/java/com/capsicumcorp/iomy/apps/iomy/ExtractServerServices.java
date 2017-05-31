@@ -331,8 +331,8 @@ public class ExtractServerServices extends Thread {
                 zipFilename[0]=ASSETSFILENAME;
                 zipFileStream[0]=new ZipInputStream(assetManager.open(ASSETSFILENAME));
                 fileInfoStream[0]=assetManager.open(ASSETSFILEINFOFILENAME);
-                String demodataFilename=INTERNAL_LOCATION + "/" + "webservermysqldemodatabase.zip";
-                String demodataFileInfoFilename=INTERNAL_LOCATION + "/" + "webservermysqldemodatabasefileinfo.txt";
+                String demodataFilename=Application.getInstance().getCacheStorageFolderName() + "/" + "webservermysqldemodatabase.zip";
+                String demodataFileInfoFilename=Application.getInstance().getCacheStorageFolderName() + "/" + "webservermysqldemodatabasefileinfo.txt";
                 zipFilename[1]="webservermysqldemodatabase.zip";
                 zipFileStream[1]=new ZipInputStream(new FileInputStream(new File(demodataFilename)));
                 fileInfoStream[1]=new FileInputStream(new File(demodataFileInfoFilename));
