@@ -3621,9 +3621,10 @@ int rapidhalib_start(void) {
       result=-1;
     }
   }
-  cmdserverlibifaceptr->cmdserverlib_register_cmd_function("rapidha_firmware_upgrade", "(Experimental) Upgrade the firmware on a RapidHA device", rapidhalib_process_firmware_upgrade_command);
-  cmdserverlibifaceptr->cmdserverlib_register_cmd_function("rapidha_cancel_firmware_upgrade", "(Experimental) Cancel an in progress firmware upgrade on a RapidHA device", rapidhalib_process_cancel_firmware_upgrade_command);
-
+  if (cmdserverlibifaceptr) {
+    cmdserverlibifaceptr->cmdserverlib_register_cmd_function("rapidha_firmware_upgrade", "(Experimental) Upgrade the firmware on a RapidHA device", rapidhalib_process_firmware_upgrade_command);
+    cmdserverlibifaceptr->cmdserverlib_register_cmd_function("rapidha_cancel_firmware_upgrade", "(Experimental) Cancel an in progress firmware upgrade on a RapidHA device", rapidhalib_process_cancel_firmware_upgrade_command);
+  }
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 
   return result;
