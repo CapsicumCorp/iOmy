@@ -25,6 +25,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 	white-space: normal;
 }
 
+/* Custom Class to allow zigbeesmartplug's to allign correctly */
+.webkitflex.hInherit > .sapMFlexItem:first-child {
+	height: 90%;
+}
+
 /* Custom Class the preloader gif */
 .se-pre-con {
 	position: fixed;
@@ -137,7 +142,8 @@ max-width:600px;
 	min-height:73px;
 }
 
-.jbMR1tempfix {
+/* Let all the flexible items be the same length, regardless of its content */
+.webkitflex {
 	-webkit-box-flex: 1;
 }
 /*************************************************** 

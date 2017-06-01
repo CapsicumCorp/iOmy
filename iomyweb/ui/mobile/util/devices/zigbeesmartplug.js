@@ -737,7 +737,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                         press : function () {
                             IOMy.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
                         }
-                    }).addStyleClass("TextSizeMedium PadLeft6px PadBottom0d875Rem PadTop1d25Rem Text_grey_20 iOmyLink"),
+                    }).addStyleClass("TextSizeMedium PadLeft6px PadTop1d25Rem Text_grey_20 iOmyLink"),
 
                     //------------------------------------//
                     //-- Link Serial Code       		--//
@@ -750,9 +750,9 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                                 text: "SN: " + (sSerialCode !== null ? sSerialCode : "N/A")
                             }).addStyleClass("Font-RobotoCondensed TextSizeXSmall Text_grey_20")
                         ]
-                    })/*.addStyleClass("")*/
+                    }).addStyleClass("")
                 ]
-            }).addStyleClass("width80Percent BorderRight jbMR1tempfix")
+            }).addStyleClass("width80Percent BorderRight webkitflex hInherit")
         );
 
         //--------------------------------------------------------------------//
@@ -989,7 +989,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             }
                         }).addStyleClass("MarLeft6px TextSizeMedium MarTop20px Text_grey_20 iOmyLink")
                     ]
-                }).addStyleClass("BorderRight width80Percent jbMR1tempfix"),
+                }).addStyleClass("BorderRight width80Percent webkitflex"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//

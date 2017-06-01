@@ -69,7 +69,7 @@ sap.ui.jsview("mjs.staging.MotionJPEG", {
                     new sap.m.VBox ({
                         items : [
 							new sap.m.Image ({
-							src : "http://10.4.5.141:8080/video",
+							src : "http://localIP:8080/video",
 							}).addStyleClass("MJPEG"),
                         ]
                     }),

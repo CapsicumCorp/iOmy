@@ -71,7 +71,7 @@ $.extend(IOMy.devices.philipshue,{
                         }
                     }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20 iOmyLink")
                 ]
-            }).addStyleClass("width80Percent BorderRight jbMR1tempfix")
+            }).addStyleClass("width80Percent BorderRight webkitflex")
         );
 
         aUIObjectItems.push(

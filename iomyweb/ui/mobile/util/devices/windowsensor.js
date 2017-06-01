@@ -324,7 +324,7 @@ $.extend(IOMy.devices.windowsensor,{
                             }
                         }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20 iOmyLink")
                     ]
-                }).addStyleClass("BorderRight width80Percent jbMR1tempfix"),
+                }).addStyleClass("BorderRight width80Percent webkitflex"),
 
                 //------------------------------------//
                 //-- 2nd is the Device Data			--//

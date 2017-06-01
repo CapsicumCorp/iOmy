@@ -472,7 +472,7 @@ $.extend(IOMy.devices.onvif,{
                         }
                     }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20 iOmyLink")
                 ]
-            }).addStyleClass("BorderRight width80Percent jbMR1tempfix")
+            }).addStyleClass("BorderRight width80Percent webkitflex")
         );
 		
 		aUIObjectItems.push(
