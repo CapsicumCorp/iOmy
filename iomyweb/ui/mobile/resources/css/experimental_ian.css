@@ -67,7 +67,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 }
 
 .MJPEG {
-max-width:600px;
+	max-width:600px;
+	border-right: 1px rgb(188,190,192) solid;
 }
 
 /* Testing for Graphs */
