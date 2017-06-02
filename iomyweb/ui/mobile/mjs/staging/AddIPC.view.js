@@ -114,7 +114,7 @@ sap.ui.jsview("mjs.staging.AddIPC", {
 								/* Parent VBox for Network Address */
 								new sap.m.VBox ({
 									layoutData : new sap.m.FlexItemData({
-										growFactor : 10
+										growFactor : 1
 									}),
 									items : [	
 										new sap.m.Label ({
@@ -170,9 +170,45 @@ sap.ui.jsview("mjs.staging.AddIPC", {
 									}),
 									items : [
 										new sap.m.Label ({
+											layoutData : new sap.m.FlexItemData({
+												growFactor : 1
+											}),
 											text: "Authentication Required?"
-										}).addStyleClass(""),,
+										}).addStyleClass("PadTop15px"),
 										new sap.m.CheckBox ({
+										}).addStyleClass(""),
+									]
+								}).addStyleClass(""),
+							]
+						}).addStyleClass("PadTop5px"),
+						/* Parent HBox for Username / Password Containers */
+						new sap.m.HBox ({
+							items : [
+								/* Parent VBox for Username*/
+								new sap.m.VBox ({
+									layoutData : new sap.m.FlexItemData({
+										growFactor : 1
+									}),
+									items : [	
+										new sap.m.Label ({
+											text: "Username:"
+										}),
+										new sap.m.Input ({
+											type:"Text",
+										}).addStyleClass(""),,
+									]
+								}).addStyleClass("MarRight10px"),
+								/* Parent VBox for Password */
+								new sap.m.VBox ({
+									layoutData : new sap.m.FlexItemData({
+										growFactor : 1
+									}),
+									items : [	
+										new sap.m.Label ({
+											text: "Password:"
+										}),
+										new sap.m.Input ({
+											type:"Text",
 										}).addStyleClass(""),
 									]
 								}).addStyleClass(""),
