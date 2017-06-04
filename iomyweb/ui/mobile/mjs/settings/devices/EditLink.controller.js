@@ -89,7 +89,7 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
                                             data : {"Mode" : "EditName", "Id" : iID, "Name" : sText},
                                             onSuccess : function () {
 												IOMy.common.showSuccess("Link now called "+sText);
-                                                IOMy.common.NavigationBackForward(true);
+                                                IOMy.common.NavigationTriggerBackForward(true);
                                             },
                                             onFail : function (err) {
                                                 //IOMy.common.showError("Update failed.", "Error");

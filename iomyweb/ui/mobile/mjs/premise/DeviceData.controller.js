@@ -1574,9 +1574,9 @@ sap.ui.controller("mjs.premise.DeviceData", {
 							"Id":       iIOId
 						},
 						"onSuccess": function ( sResponseType, aData ) {
-                            iSampleRateLimit = IOMy.common.ThingList["_"+oController.iCurrentThing].IO["_"+iIOId].SamplerateLimit;
-                            
 							try {
+								iSampleRateLimit = IOMy.common.ThingList["_"+oController.iCurrentThing].IO["_"+iIOId].SamplerateLimit;
+								
 								if( aData!==undefined && aData!==null  ) {
 									if( typeof aData['Error']==="undefined" ) {
 										if( aData[0]!==undefined && aData[0]!==null ) {
@@ -1587,7 +1587,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
                                                     //--------------------------------------------//
                                                     //-- IF THERE IS MORE THAN 1 VALUE          --//
                                                     //--------------------------------------------//
-                                                    if( aData.length >=2 ) {
+                                                    if( aData.length >= 2 ) {
 
                                                         //------------------------------------------------------------//
                                                         //-- Work out if it is decreasing, neutral, increasing      --//

@@ -668,7 +668,7 @@ $.extend(IOMy.common,{
                         "LinkConnUsername" : data[i].LINKCONN_USERNAME,
                         "LinkConnPassword" : data[i].LINKCONN_PASSWORD,
                         "LinkConnPort" : data[i].LINKCONN_PORT,
-                        "PremiseId" : data[i].ROOM_PREMISE_FK,
+                        "PremiseId" : data[i].ROOMS_PREMISE_FK,
 						"CommId" : data[i].LINK_COMM_FK
 					});
 				}
@@ -1305,7 +1305,7 @@ $.extend(IOMy.common,{
 	 * This array is used as a Preset that is used after verifing that the user
 	 * is logged in.
 	 * 
-	 * @type Array
+	 * @type map
 	 */
 	aRefreshCoreVariablesFirstRun: {
 		
@@ -1734,7 +1734,7 @@ $.extend(IOMy.common,{
 		//-- ODATA REQUEST PREP				--//
 		//------------------------------------//
 		var sUrl			= IOMy.apiodata.ODataLocation("rooms");
-		var aColumns		= [ "ROOMS_PREMISE_FK", "ROOMS_PK", "ROOMS_NAME", "ROOMS_DESC", "ROOMS_FLOOR", "ROOMTYPE_PK", "ROOMTYPE_NAME", "ROOMTYPE_OUTDOORS" ];
+		var aColumns		= [ "ROOMS_PREMISE_FK", "ROOMS_PK", "ROOMS_NAME", "ROOMS_DESC", "ROOMS_FLOOR", "ROOMTYPE_PK", "ROOMTYPE_NAME", "ROOMTYPE_OUTDOORS", "PERMROOMS_READ", "PERMROOMS_WRITE", "PERMROOMS_STATETOGGLE", "PERMROOMS_DATAREAD" ];
 		var aWhere			= [];
 		var aOrderBy		= [ "ROOMS_PREMISE_FK", "ROOMTYPE_OUTDOORS", "ROOMS_PK" ];
 		
@@ -1798,7 +1798,7 @@ $.extend(IOMy.common,{
 								//------------------------------------------------------------//
 								if( !IOMy.common.RoomsList["_"+iPremiseId]["_"+iRoomId] ) {
 									//-- Create the Room --//
-									IOMy.common.RoomsList["_"+iPremiseId]["_"+iRoomId] = [];
+									IOMy.common.RoomsList["_"+iPremiseId]["_"+iRoomId] = {};
 								}
 								
 								//-- Reset the array --//
@@ -1815,6 +1815,11 @@ $.extend(IOMy.common,{
 								aTemp.RoomTypeId			= parseInt( AjaxData[i].ROOMTYPE_PK );
 								aTemp.RoomTypeName			= AjaxData[i].ROOMTYPE_NAME;
 								aTemp.RoomTypeOutdoors		= parseInt( AjaxData[i].ROOMTYPE_OUTDOORS );
+								
+								aTemp.PermRead				= parseInt( AjaxData[i].PERMROOMS_READ );
+								aTemp.PermWrite				= parseInt( AjaxData[i].PERMROOMS_WRITE );
+								aTemp.PermStateToggle		= parseInt( AjaxData[i].PERMROOMS_STATETOGGLE );
+								aTemp.PermDeviceRead		= parseInt( AjaxData[i].PERMROOMS_DATAREAD );
 								
 								//-- Lookup the Premise Name and position in the PremiseList --//
 								$.each( IOMy.common.PremiseList, function( Key, aPremise ) {
