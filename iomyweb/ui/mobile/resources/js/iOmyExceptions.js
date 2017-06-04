@@ -182,6 +182,19 @@ function LinkNotFoundException(message) {
     this.name       = "LinkNotFoundException";
 }
 
+function RoomNotFoundException(message) {
+	//------------------------------------------------------------------------//
+    // This exception can have a simple "Room not found" message if one is not
+    // provided.
+    //------------------------------------------------------------------------//
+    if (message === undefined || message === null || message === "") {
+        message = "Room Not Found!";
+    }
+    
+    ObjectNotFoundException.call(this, message);
+    this.name       = "RoomNotFoundException";
+}
+
 //----------------------------------------------------------------------------//
 // Device Exceptions
 //----------------------------------------------------------------------------//

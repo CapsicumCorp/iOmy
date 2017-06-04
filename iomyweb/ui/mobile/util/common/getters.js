@@ -125,6 +125,30 @@ $.extend(IOMy.common, {
         }
         
         return oLink;
-    }
+    },
+	
+	getRoom : function (iRoomId) {
+		//--------------------------------------------------------------------//
+        // Variables
+        //--------------------------------------------------------------------//
+        var oRoom = null;
+		
+		//--------------------------------------------------------------------//
+        // Get room and return it
+        //--------------------------------------------------------------------//
+		$.each(this.RoomsList, function (sPremise, aaRoom) {
+			$.each(aaRoom, function (sRoom, mRoom) {
+				if (mRoom.RoomId == iRoomId) {
+					oRoom = mRoom;
+				}
+			});
+		});
+		
+		if (oRoom === null) {
+            throw new RoomNotFoundException();
+        }
+		
+		return oRoom;
+	}
     
 });
