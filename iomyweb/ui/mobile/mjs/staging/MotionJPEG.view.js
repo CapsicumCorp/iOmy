@@ -58,7 +58,7 @@ sap.ui.jsview("mjs.staging.MotionJPEG", {
             view : me,
             controller : oController,
             icon : "sap-icon://GoogleMaterial/home",
-            title : "New Rule"
+            title : "MotionJPEG"
         });
         
         oPage.addContent(
@@ -69,7 +69,7 @@ sap.ui.jsview("mjs.staging.MotionJPEG", {
                     new sap.m.VBox ({
                         items : [
 							new sap.m.Image ({
-							src : "http://10.4.5.141:8080/video",
+							src : "http://localIP:8080/video",
 							}).addStyleClass("MJPEG"),
                         ]
                     }),

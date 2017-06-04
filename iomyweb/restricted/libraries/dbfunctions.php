@@ -565,7 +565,7 @@ function dbGetCurrentUserInfo() {
 //				$sSQL .= "	`USERADDRESS_POSTALLINE3`, ";
 				$sSQL .= "	`REGION_PK`, ";
 				$sSQL .= "	`REGION_NAME`, ";
-				$sSQL .= "	`REGION_ABREVIATION`, ";
+				$sSQL .= "	`REGION_NAME2`, ";
 				$sSQL .= "	`LANGUAGE_PK`, ";
 				$sSQL .= "	`LANGUAGE_NAME`, ";
 				$sSQL .= "	`LANGUAGE_LANGUAGE`, ";
@@ -2220,7 +2220,7 @@ function dbGetPremisesAddressFromPremiseId( $iPremiseId ) {
 				$sSQL .= "    `PREMISEADDRESS_SUBREGION`, ";
 				$sSQL .= "    `REGION_PK`, ";
 				$sSQL .= "    `REGION_NAME`, ";
-				$sSQL .= "    `REGION_ABREVIATION`, ";
+				$sSQL .= "    `REGION_NAME2`, ";
 				$sSQL .= "    `LANGUAGE_PK`, ";
 				$sSQL .= "    `LANGUAGE_NAME`, ";
 				$sSQL .= "    `LANGUAGE_LANGUAGE`, ";

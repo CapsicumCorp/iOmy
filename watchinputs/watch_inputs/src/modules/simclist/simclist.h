@@ -300,7 +300,7 @@ list_hash_t (*list_hashcomputer_string)(const void *el);
  * @param l     must point to a user-provided memory location
  * @return      0 for success. -1 for failure
  */
-int list_init(list_t *restrict l);
+static int list_init(list_t *restrict l);
 
 /**
  * completely remove the list from memory.
@@ -311,7 +311,7 @@ int list_init(list_t *restrict l);
  *
  * @param l     list to destroy
  */
-void list_destroy(list_t *restrict l);
+static void list_destroy(list_t *restrict l);
 
 /**
  * set the comparator function for list elements.
@@ -325,7 +325,7 @@ void list_destroy(list_t *restrict l);
  *
  * @see element_comparator()
  */
-int list_attributes_comparator(list_t *restrict l, element_comparator comparator_fun);
+static int list_attributes_comparator(list_t *restrict l, element_comparator comparator_fun);
 
 /**
  * set a seeker function for list elements.
@@ -339,7 +339,7 @@ int list_attributes_comparator(list_t *restrict l, element_comparator comparator
  *
  * @see element_seeker()
  */
-int list_attributes_seeker(list_t *restrict l, element_seeker seeker_fun);
+static int list_attributes_seeker(list_t *restrict l, element_seeker seeker_fun);
 
 /**
  * require to free element data when list entry is removed (default: don't free).
@@ -371,7 +371,7 @@ int list_attributes_seeker(list_t *restrict l, element_seeker seeker_fun);
  * @see list_meter_double()
  * @see list_meter_string()
  */
-int list_attributes_copy(list_t *restrict l, element_meter metric_fun, int copy_data);
+static int list_attributes_copy(list_t *restrict l, element_meter metric_fun, int copy_data);
 
 /**
  * set the element hash computing function for the list elements.
@@ -391,7 +391,7 @@ int list_attributes_copy(list_t *restrict l, element_meter metric_fun, int copy_
  *
  * @see element_hash_computer()
  */
-int list_attributes_hash_computer(list_t *restrict l, element_hash_computer hash_computer_fun);
+static int list_attributes_hash_computer(list_t *restrict l, element_hash_computer hash_computer_fun);
 
 /**
  * set the element serializer function for the list elements.
@@ -412,7 +412,7 @@ int list_attributes_hash_computer(list_t *restrict l, element_hash_computer hash
  * @see     list_dump_filedescriptor()
  * @see     list_restore_filedescriptor()
  */
-int list_attributes_serializer(list_t *restrict l, element_serializer serializer_fun);
+static int list_attributes_serializer(list_t *restrict l, element_serializer serializer_fun);
 
 /**
  * set the element unserializer function for the list elements.
@@ -434,7 +434,7 @@ int list_attributes_serializer(list_t *restrict l, element_serializer serializer
  * @see     list_dump_filedescriptor()
  * @see     list_restore_filedescriptor()
  */
-int list_attributes_unserializer(list_t *restrict l, element_unserializer unserializer_fun);
+static int list_attributes_unserializer(list_t *restrict l, element_unserializer unserializer_fun);
 
 /**
  * append data at the end of the list.
@@ -446,7 +446,7 @@ int list_attributes_unserializer(list_t *restrict l, element_unserializer unseri
  *
  * @return      1 for success. < 0 for failure
  */
-int list_append(list_t *restrict l, const void *data);
+static int list_append(list_t *restrict l, const void *data);
 
 /**
  * insert data in the head of the list.
@@ -458,7 +458,7 @@ int list_append(list_t *restrict l, const void *data);
  *
  * @return      1 for success. < 0 for failure
  */
-int list_prepend(list_t *restrict l, const void *restrict data);
+static int list_prepend(list_t *restrict l, const void *restrict data);
 
 /**
  * extract the element in the top of the list.
@@ -468,7 +468,7 @@ int list_prepend(list_t *restrict l, const void *restrict data);
  * @param l     list to operate
  * @return      reference to user datum, or NULL on errors
  */
-void *list_fetch(list_t *restrict l);
+static void *list_fetch(list_t *restrict l);
 
 /**
  * retrieve an element at a given position.
@@ -477,7 +477,7 @@ void *list_fetch(list_t *restrict l);
  * @param pos   [0,size-1] position index of the element wanted
  * @return      reference to user datum, or NULL on errors
  */
-void *list_get_at(const list_t *restrict l, unsigned int pos);
+static void *list_get_at(const list_t *restrict l, unsigned int pos);
 
 /**
  * return the maximum element of the list.
@@ -491,7 +491,7 @@ void *list_get_at(const list_t *restrict l, unsigned int pos);
  * @param l     list to operate
  * @return      the reference to the element, or NULL
  */
-void *list_get_max(const list_t *restrict l);
+static void *list_get_max(const list_t *restrict l);
 
 /**
  * return the minimum element of the list.
@@ -505,7 +505,7 @@ void *list_get_max(const list_t *restrict l);
  * @param l     list to operate
  * @return      the reference to the element, or NULL
  */
-void *list_get_min(const list_t *restrict l);
+static void *list_get_min(const list_t *restrict l);
 
 /**
  * retrieve and remove from list an element at a given position.
@@ -514,7 +514,7 @@ void *list_get_min(const list_t *restrict l);
  * @param pos   [0,size-1] position index of the element wanted
  * @return      reference to user datum, or NULL on errors
  */
-void *list_extract_at(list_t *restrict l, unsigned int pos);
+static void *list_extract_at(list_t *restrict l, unsigned int pos);
 
 /**
  * insert an element at a given position.
@@ -524,7 +524,7 @@ void *list_extract_at(list_t *restrict l, unsigned int pos);
  * @param pos   [0,size-1] position index to insert the element at
  * @return      positive value on success. Negative on failure
  */
-int list_insert_at(list_t *restrict l, const void *data, unsigned int pos);
+static int list_insert_at(list_t *restrict l, const void *data, unsigned int pos);
 
 /**
  * expunge the first found given element from the list.
@@ -541,7 +541,7 @@ int list_insert_at(list_t *restrict l, const void *data, unsigned int pos);
  * @see list_attributes_comparator()
  * @see list_delete_at()
  */
-int list_delete(list_t *restrict l, const void *data);
+static int list_delete(list_t *restrict l, const void *data);
 
 /**
  * expunge an element at a given position from the list.
@@ -550,7 +550,7 @@ int list_delete(list_t *restrict l, const void *data);
  * @param pos   [0,size-1] position index of the element to be deleted
  * @return      0 on success. Negative value on failure
  */
-int list_delete_at(list_t *restrict l, unsigned int pos);
+static int list_delete_at(list_t *restrict l, unsigned int pos);
 
 /**
  * expunge an array of elements from the list, given their position range.
@@ -560,7 +560,7 @@ int list_delete_at(list_t *restrict l, unsigned int pos);
  * @param posend    [posstart,size-1] position of the last element to be deleted
  * @return      the number of elements successfully removed
  */
-int list_delete_range(list_t *restrict l, unsigned int posstart, unsigned int posend);
+static int list_delete_range(list_t *restrict l, unsigned int posstart, unsigned int posend);
 
 /**
  * clear all the elements off of the list.
@@ -573,7 +573,7 @@ int list_delete_range(list_t *restrict l, unsigned int posstart, unsigned int po
  * @param l     list to operate
  * @return      the number of elements in the list before cleaning
  */
-int list_clear(list_t *restrict l);
+static int list_clear(list_t *restrict l);
 
 /**
  * inspect the number of elements in the list.
@@ -581,7 +581,7 @@ int list_clear(list_t *restrict l);
  * @param l     list to operate
  * @return      number of elements currently held by the list
  */
-unsigned int list_size(const list_t *restrict l);
+static unsigned int list_size(const list_t *restrict l);
 
 /**
  * inspect whether the list is empty.
@@ -591,7 +591,7 @@ unsigned int list_size(const list_t *restrict l);
  * 
  * @see list_size()
  */
-int list_empty(const list_t *restrict l);
+static int list_empty(const list_t *restrict l);
 
 /**
  * find the position of an element in a list.
@@ -610,7 +610,7 @@ int list_empty(const list_t *restrict l);
  * @see list_attributes_comparator()
  * @see list_get_at()
  */
-int list_locate(const list_t *restrict l, const void *data);
+static int list_locate(const list_t *restrict l, const void *data);
 
 /**
  * returns an element given an indicator.
@@ -625,7 +625,7 @@ int list_locate(const list_t *restrict l, const void *data);
  * @param indicator indicator data to pass to the seeker along with elements
  * @return      reference to the element accepted by the seeker, or NULL if none found
  */
-void *list_seek(list_t *restrict l, const void *indicator);
+static void *list_seek(list_t *restrict l, const void *indicator);
 
 /**
  * inspect whether some data is member of the list.
@@ -646,7 +646,7 @@ void *list_seek(list_t *restrict l, const void *indicator);
  *
  * @see list_attributes_comparator()
  */
-int list_contains(const list_t *restrict l, const void *data);
+static int list_contains(const list_t *restrict l, const void *data);
 
 /**
  * concatenate two lists
@@ -665,7 +665,7 @@ int list_contains(const list_t *restrict l, const void *data);
  * @param dest  reference to the destination list
  * @return      0 for success, -1 for errors
  */
-int list_concat(const list_t *l1, const list_t *l2, list_t *restrict dest);
+static int list_concat(const list_t *l1, const list_t *l2, list_t *restrict dest);
 
 /**
  * sort list elements.
@@ -682,7 +682,7 @@ int list_concat(const list_t *l1, const list_t *l2, list_t *restrict dest);
  *
  * @see list_attributes_comparator()
  */
-int list_sort(list_t *restrict l, int versus);
+static int list_sort(list_t *restrict l, int versus);
 
 /**
  * start an iteration session.
@@ -694,8 +694,8 @@ int list_sort(list_t *restrict l, int versus);
  * 
  * @see list_iterator_stop()
  */
-int list_iterator_start(list_t *restrict l);
-int locked_list_iterator_start(list_t *restrict l);
+static int list_iterator_start(list_t *restrict l);
+static int locked_list_iterator_start(list_t *restrict l);
 
 /**
  * return the next element in the iteration session.
@@ -703,7 +703,7 @@ int locked_list_iterator_start(list_t *restrict l);
  * @param l     list to operate
  * @return		element datum, or NULL on errors
  */
-void *list_iterator_next(list_t *restrict l);
+static void *list_iterator_next(list_t *restrict l);
 
 /**
  * inspect whether more elements are available in the iteration session.
@@ -711,7 +711,7 @@ void *list_iterator_next(list_t *restrict l);
  * @param l     list to operate
  * @return      0 iff no more elements are available.
  */
-int list_iterator_hasnext(const list_t *restrict l);
+static int list_iterator_hasnext(const list_t *restrict l);
 
 /**
  * end an iteration session.
@@ -719,8 +719,8 @@ int list_iterator_hasnext(const list_t *restrict l);
  * @param l     list to operate
  * @return      0 iff the iteration session cannot be stopped
  */
-int list_iterator_stop(list_t *restrict l);
-int locked_list_iterator_stop(list_t *restrict l);
+static int list_iterator_stop(list_t *restrict l);
+static int locked_list_iterator_stop(list_t *restrict l);
 
 /**
  * return the hash of the current status of the list.
@@ -730,7 +730,7 @@ int locked_list_iterator_stop(list_t *restrict l);
  *
  * @return      0 for success; <0 for failure
  */
-int list_hash(const list_t *restrict l, list_hash_t *restrict hash);
+static int list_hash(const list_t *restrict l, list_hash_t *restrict hash);
 
 #ifndef SIMCLIST_NO_DUMPRESTORE
 /**
@@ -748,7 +748,7 @@ int list_hash(const list_t *restrict l, list_hash_t *restrict hash);
  *
  * @see list_dump_filedescriptor()
  */
-int list_dump_getinfo_filedescriptor(int fd, list_dump_info_t *restrict info);
+static int list_dump_getinfo_filedescriptor(int fd, list_dump_info_t *restrict info);
 
 /**
  * get meta informations on a list dump on file.
@@ -763,7 +763,7 @@ int list_dump_getinfo_filedescriptor(int fd, list_dump_info_t *restrict info);
  *
  * @see list_dump_filedescriptor()
  */
-int list_dump_getinfo_file(const char *restrict filename, list_dump_info_t *restrict info);
+static int list_dump_getinfo_file(const char *restrict filename, list_dump_info_t *restrict info);
 
 /**
  * dump the list into an open, writable file descriptor.
@@ -799,7 +799,7 @@ int list_dump_getinfo_file(const char *restrict filename, list_dump_info_t *rest
  * @see list_attributes_copy()
  * @see list_attributes_serializer()
  */
-int list_dump_filedescriptor(const list_t *restrict l, int fd, size_t *restrict len);
+static int list_dump_filedescriptor(const list_t *restrict l, int fd, size_t *restrict len);
 
 /**
  * dump the list to a file name.
@@ -822,7 +822,7 @@ int list_dump_filedescriptor(const list_t *restrict l, int fd, size_t *restrict 
  *
  * This function stores a representation of the list 
  */
-int list_dump_file(const list_t *restrict l, const char *restrict filename, size_t *restrict len);
+static int list_dump_file(const list_t *restrict l, const char *restrict filename, size_t *restrict len);
 
 /**
  * restore the list from an open, readable file descriptor to memory.
@@ -842,7 +842,7 @@ int list_dump_file(const list_t *restrict l, const char *restrict filename, size
  * @param len   location to store the length of the dump read (bytes), or NULL
  * @return      0 if successful; -1 otherwise
  */
-int list_restore_filedescriptor(list_t *restrict l, int fd, size_t *restrict len);
+static int list_restore_filedescriptor(list_t *restrict l, int fd, size_t *restrict len);
 
 /**
  * restore the list from a file name.
@@ -860,7 +860,7 @@ int list_restore_filedescriptor(list_t *restrict l, int fd, size_t *restrict len
  * @param len       location to store the length of the dump read (bytes), or NULL
  * @return          0 if successful; -1 otherwise
  */
-int list_restore_file(list_t *restrict l, const char *restrict filename, size_t *len);
+static int list_restore_file(list_t *restrict l, const char *restrict filename, size_t *len);
 #endif
 
 /* ready-made comparators, meters and hash computers */
@@ -869,201 +869,201 @@ int list_restore_file(list_t *restrict l, const char *restrict filename, size_t 
  * ready-made comparator for int8_t elements.
  * @see list_attributes_comparator()
  */
-int list_comparator_int8_t(const void *a, const void *b);
+static int list_comparator_int8_t(const void *a, const void *b);
 
 /**
  * ready-made comparator for int16_t elements.
  * @see list_attributes_comparator()
  */
-int list_comparator_int16_t(const void *a, const void *b);
+static int list_comparator_int16_t(const void *a, const void *b);
 
 /**
  * ready-made comparator for int32_t elements.
  * @see list_attributes_comparator()
  */
-int list_comparator_int32_t(const void *a, const void *b);
+static int list_comparator_int32_t(const void *a, const void *b);
 
 /**
  * ready-made comparator for int64_t elements.
  * @see list_attributes_comparator()
  */
-int list_comparator_int64_t(const void *a, const void *b);
+static int list_comparator_int64_t(const void *a, const void *b);
 
 /**
  * ready-made comparator for uint8_t elements.
  * @see list_attributes_comparator()
  */
-int list_comparator_uint8_t(const void *a, const void *b);
+static int list_comparator_uint8_t(const void *a, const void *b);
 
 /**
  * ready-made comparator for uint16_t elements.
  * @see list_attributes_comparator()
  */
-int list_comparator_uint16_t(const void *a, const void *b);
+static int list_comparator_uint16_t(const void *a, const void *b);
 
 /**
  * ready-made comparator for uint32_t elements.
  * @see list_attributes_comparator()
  */
-int list_comparator_uint32_t(const void *a, const void *b);
+static int list_comparator_uint32_t(const void *a, const void *b);
 
 /**
  * ready-made comparator for uint64_t elements.
  * @see list_attributes_comparator()
  */
-int list_comparator_uint64_t(const void *a, const void *b);
+static int list_comparator_uint64_t(const void *a, const void *b);
 
 /**
  * ready-made comparator for float elements.
  * @see list_attributes_comparator()
  */
-int list_comparator_float(const void *a, const void *b);
+static int list_comparator_float(const void *a, const void *b);
 
 /**
  * ready-made comparator for double elements.
  * @see list_attributes_comparator()
  */
-int list_comparator_double(const void *a, const void *b);
+static int list_comparator_double(const void *a, const void *b);
 
 /**
  * ready-made comparator for string elements.
  * @see list_attributes_comparator()
  */
-int list_comparator_string(const void *a, const void *b);
+static int list_comparator_string(const void *a, const void *b);
 
                                 /*          metric functions        */
 /**
  * ready-made metric function for int8_t elements.
  * @see list_attributes_copy()
  */
-size_t list_meter_int8_t(const void *el);
+static size_t list_meter_int8_t(const void *el);
 
 /**
  * ready-made metric function for int16_t elements.
  * @see list_attributes_copy()
  */
-size_t list_meter_int16_t(const void *el);
+static size_t list_meter_int16_t(const void *el);
 
 /**
  * ready-made metric function for int32_t elements.
  * @see list_attributes_copy()
  */
-size_t list_meter_int32_t(const void *el);
+static size_t list_meter_int32_t(const void *el);
 
 /**
  * ready-made metric function for int64_t elements.
  * @see list_attributes_copy()
  */
-size_t list_meter_int64_t(const void *el);
+static size_t list_meter_int64_t(const void *el);
 
 /**
  * ready-made metric function for uint8_t elements.
  * @see list_attributes_copy()
  */
-size_t list_meter_uint8_t(const void *el);
+static size_t list_meter_uint8_t(const void *el);
 
 /**
  * ready-made metric function for uint16_t elements.
  * @see list_attributes_copy()
  */
-size_t list_meter_uint16_t(const void *el);
+static size_t list_meter_uint16_t(const void *el);
 
 /**
  * ready-made metric function for uint32_t elements.
  * @see list_attributes_copy()
  */
-size_t list_meter_uint32_t(const void *el);
+static size_t list_meter_uint32_t(const void *el);
 
 /**
  * ready-made metric function for uint64_t elements.
  * @see list_attributes_copy()
  */
-size_t list_meter_uint64_t(const void *el);
+static size_t list_meter_uint64_t(const void *el);
 
 /**
  * ready-made metric function for float elements.
  * @see list_attributes_copy()
  */
-size_t list_meter_float(const void *el);
+static size_t list_meter_float(const void *el);
 
 /**
  * ready-made metric function for double elements.
  * @see list_attributes_copy()
  */
-size_t list_meter_double(const void *el);
+static size_t list_meter_double(const void *el);
 
 /**
  * ready-made metric function for string elements.
  * @see list_attributes_copy()
  */
-size_t list_meter_string(const void *el);
+static size_t list_meter_string(const void *el);
 
                                 /*          hash functions          */
 /**
  * ready-made hash function for int8_t elements.
  * @see list_attributes_hash_computer()
  */
-list_hash_t list_hashcomputer_int8_t(const void *el);
+static list_hash_t list_hashcomputer_int8_t(const void *el);
 
 /**
  * ready-made hash function for int16_t elements.
  * @see list_attributes_hash_computer()
  */
-list_hash_t list_hashcomputer_int16_t(const void *el);
+static list_hash_t list_hashcomputer_int16_t(const void *el);
 
 /**
  * ready-made hash function for int32_t elements.
  * @see list_attributes_hash_computer()
  */
-list_hash_t list_hashcomputer_int32_t(const void *el);
+static list_hash_t list_hashcomputer_int32_t(const void *el);
 
 /**
  * ready-made hash function for int64_t elements.
  * @see list_attributes_hash_computer()
  */
-list_hash_t list_hashcomputer_int64_t(const void *el);
+static list_hash_t list_hashcomputer_int64_t(const void *el);
 
 /**
  * ready-made hash function for uint8_t elements.
  * @see list_attributes_hash_computer()
  */
-list_hash_t list_hashcomputer_uint8_t(const void *el);
+static list_hash_t list_hashcomputer_uint8_t(const void *el);
 
 /**
  * ready-made hash function for uint16_t elements.
  * @see list_attributes_hash_computer()
  */
-list_hash_t list_hashcomputer_uint16_t(const void *el);
+static list_hash_t list_hashcomputer_uint16_t(const void *el);
 
 /**
  * ready-made hash function for uint32_t elements.
  * @see list_attributes_hash_computer()
  */
-list_hash_t list_hashcomputer_uint32_t(const void *el);
+static list_hash_t list_hashcomputer_uint32_t(const void *el);
 
 /**
  * ready-made hash function for uint64_t elements.
  * @see list_attributes_hash_computer()
  */
-list_hash_t list_hashcomputer_uint64_t(const void *el);
+static list_hash_t list_hashcomputer_uint64_t(const void *el);
 
 /**
  * ready-made hash function for float elements.
  * @see list_attributes_hash_computer()
  */
-list_hash_t list_hashcomputer_float(const void *el);
+static list_hash_t list_hashcomputer_float(const void *el);
 
 /**
  * ready-made hash function for double elements.
  * @see list_attributes_hash_computer()
  */
-list_hash_t list_hashcomputer_double(const void *el);
+static list_hash_t list_hashcomputer_double(const void *el);
 
 /**
  * ready-made hash function for string elements.
  * @see list_attributes_hash_computer()
  */
-list_hash_t list_hashcomputer_string(const void *el);
+static list_hash_t list_hashcomputer_string(const void *el);
 
 #ifdef __cplusplus
 }

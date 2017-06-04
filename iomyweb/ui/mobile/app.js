@@ -1639,35 +1639,23 @@ var aPages = [
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.StagingHome\" Page!\n"
 	},
 	{ 
-		"Id":			"pJqplot_line",
-		"Location":		"mjs.staging.LineGraph",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.LineGraph\" Page!\n"
-	},
-	{ 
-		"Id":			"pJqplot_bar",
-		"Location":		"mjs.staging.BarGraph",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.BarGraph\" Page!\n"
-	},
-	{ 
 		"Id":			"pControlTools",
 		"Location":		"mjs.staging.ControlTools",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.ControlTools\" Page!\n"
 	},
 	{ 
-		"Id":			"pDeviceList",
-		"Location":		"mjs.staging.DeviceList",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.DeviceList\" Page!\n"
-	},
-	{ 
 		"Id":			"pMotionJPEG",
 		"Location":		"mjs.staging.MotionJPEG",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.MotionJPEG\" Page!\n"
-	}
+	},
+	{ 
+		"Id":			"pAddIPC",
+		"Location":		"mjs.staging.AddIPC",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.AddIPC\" Page!\n"
+	},
 	
 ];
 

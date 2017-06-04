@@ -292,7 +292,7 @@ sap.ui.controller("mjs.premise.Overview", {
 													}
 												}).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px")
 											]
-										}).addStyleClass("TextOverflowEllipsis width100Percent jbMR1tempfix"),
+										}).addStyleClass("TextOverflowEllipsis width100Percent webkitflex"),
 
 										// === COLLAPSE/EXPAND BUTTON PLACEHOLDER === //
 										// If there are things associated with a room via their links...

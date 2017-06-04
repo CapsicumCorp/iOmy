@@ -1214,9 +1214,12 @@ static void *mainlib_MainThreadLoop(void *thread_val) {
   debuglibifaceptr->debuglib_printf(1, "%s: Using config file: %s\n", __func__, cfg_filename);
   debuglibifaceptr->debuglib_printf(1, "%s: Using time rules file: %s\n", __func__, timerules_filename);
 
-	configlibifaceptr->configlib_setcfgfilename(cfg_filename);
-  timeruleslibifaceptr->setrulesfilename(timerules_filename);
-
+  if (configlibifaceptr) {
+    configlibifaceptr->configlib_setcfgfilename(cfg_filename);
+  }
+  if (timeruleslibifaceptr) {
+    timeruleslibifaceptr->setrulesfilename(timerules_filename);
+  }
   //Wait for quit
   while (!mainlib_getneedtoquit()) {
     shortsleep=0;
