@@ -55,7 +55,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                 me.oThing = IOMy.common.ThingList["_"+me.thingID];
         
 				//-- Clear old instances of the UI --//
-                me.DestroyUI();
+				me.DestroyUI();
 				me.DrawUI();
 			}
 		});
@@ -86,11 +86,11 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 * @memberOf mjs.settings.devices.EditThing
 */
 //	onExit: function() {
-//
-//	}
+//				
+//	},
 
     ValidateThingName : function () {
-        var me                      = this;  // Scope of this controller
+        var me                      = this;		// Scope of this controller
         var bError                  = false;
         var aErrorMessages          = [];
         var mInfo                   = {}; // MAP: Contains the error status and any error messages.
@@ -172,14 +172,16 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         var me			= this;
         var thisView	= me.getView();
 		var oLink		= IOMy.common.getLink(me.oThing.LinkId);
-		var bAllowedToEditThing;
-		var bAllowedToChangeRoom;
+		var oRoom		= IOMy.common.getRoom(oLink.LinkRoomId);
+		var oPremise	= IOMy.common.getPremise(oLink.PremiseId);
+		
+		var bAllowedToEditThing		= (oRoom.PermWrite == 1) ? true : false;
+		var bAllowedToChangeRoom	= (oPremise.PermRoomAdmin == 1) ? true : false;
         
         //-- Refresh the Navigational buttons --//
         IOMy.common.NavigationRefreshButtons( me );
 
         me.thingID = me.oThing.DeviceId;
-        //var iLinkId = me.oThing.LinkId;
         
         //===============================================//
         // Start rendering the page
@@ -192,25 +194,26 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
             text : "Display Name"
         });
         
-        //me.aElementsToDestroy.push(me.sThingNameField);
         me.wThingNameField = new sap.m.Input({
-            value : me.oThing.DisplayName
+            value : me.oThing.DisplayName,
+			enabled : bAllowedToEditThing
         }).addStyleClass("width100Percent");
 
 		//-------------------------------------------------------//
 		// ROOM COMBO BOX
 		//-------------------------------------------------------//
 		var oRoomLabel = new sap.m.Label({
-			text : "Room you wish to place this device in"
+			text : "Assigned room"
 		});
 
 		if (IOMy.functions.getNumberOfRooms() === 0) {
 			oRoomLabel.setVisible(false);
-			me.wRoomCBoxHolder = null;
-			me.wRoomCBox = null;
+			me.wRoomCBoxHolder	= null;
+			me.wRoomCBox		= null;
 		} else {
 			me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_1").addStyleClass("width100Percent SettingsDropDownInput");
-			me.wRoomCBox.setSelectedItem(oLink.LinkRoomId);
+			me.wRoomCBox.setSelectedKey(parseInt(oLink.LinkRoomId));
+			me.wRoomCBox.setEnabled(bAllowedToChangeRoom);
 
 			me.wRoomCBoxHolder = new sap.m.VBox({
 				items : [me.wRoomCBox]
@@ -218,7 +221,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 		}
         
         //-----------------------------------------------//
-        // FORM BOX FOR SPECIFIC DEVICE TYPES
+        // FORM BOX FOR SPECIFIC DEVICE TYPES (FOR THE FUTURE)
         //-----------------------------------------------//
         me.aElementsToDestroy.push("formBox");
         var oFormBox = new sap.m.VBox(me.createId("formBox"), {});
@@ -269,15 +272,6 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                             // Lock the button
                             this.setEnabled(false);
 
-                            var oLink;
-                            // Using the Link List found in common because the scope is global.
-                            for (var j = 0; j < IOMy.common.LinkList.length; j++) {
-                                if (IOMy.common.LinkList[j].LinkId == me.oThing.LinkId) {
-                                    oLink = IOMy.common.LinkList[j];
-                                    break;
-                                }
-                            }
-                            
                             // Change to the edit link page parsing the correct link to the page.
                             IOMy.common.NavigationChangePage("pSettingsEditLink", {link : oLink});
 
@@ -290,6 +284,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         );
     },
 	
+	// TODO: This function belongs to the IOMy.functions library.
 	EditThing : function () {
 		var me = this;
 		me.byId("updateButton").setEnabled(false);
@@ -401,14 +396,13 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 						var sMessage;
 								
 						if (mThingChangeSettings.successful === true) {
-							sMessage = "Device renamed to "+sThingText+", but failed to move device to "+sRoomText;
+							sMessage = "Device renamed to \""+sThingText+"\", but failed to move device to "+sRoomText;
 							
 							IOMy.common.showWarning(sMessage, "", function () {
 								me.byId("updateButton").setEnabled(true);
 							});
 							
 							jQuery.sap.log.warning(sMessage);
-							//IOMy.common.NavigationTriggerBackForward();
 						} else {
 							sMessage = "Device couldn't be renamed. Failed to move device to "+sRoomText;
 							
@@ -457,7 +451,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 					fnThingSuccess = function () {
 						IOMy.common.ReloadVariableThingList(
 							function () {
-								IOMy.common.showSuccess("Device renamed to "+sThingText);
+								IOMy.common.showSuccess("Device renamed to \""+sThingText+"\".");
 								IOMy.common.NavigationTriggerBackForward();
 							}
 						);
@@ -480,7 +474,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 					};
 					
 					fnRoomSuccess = function () {
-						IOMy.common.ReloadVariableThingList(
+						IOMy.common.ReloadVariableCommList(
 							function () {
 								IOMy.common.showSuccess("Device now located in "+sRoomText);
 								IOMy.common.NavigationTriggerBackForward();
