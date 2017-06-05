@@ -158,7 +158,7 @@ sap.ui.controller("mjs.devices.graphs.LineGraph", {
 							"AxisX_Label":          "Time",
 							"AxisX_UseDate":        true,
 							"AxisY_Label":          sUOM,
-							"TimePeriod":           "year"
+							"TimePeriod":           sPeriodType
 						}
 					);
 					

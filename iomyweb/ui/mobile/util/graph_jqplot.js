@@ -60,7 +60,7 @@ $.extend( IOMy.graph_jqplot, {
 	//========================================================================//
 	// Time Period Strings
 	//========================================================================//
-	PeriodDay		: "Day",
+	PeriodDay		: "day",
 	PeriodWeek		: "Week",
 	PeriodFortnight	: "Fortnight",
 	PeriodMonth		: "Month",
@@ -438,7 +438,7 @@ $.extend( IOMy.graph_jqplot, {
 				sAxisX_FormatTickString = "%#I:%M%p";
 				
 			} else if ( sTimePeriod==="day" ) {
-				sAxisX_FormatTickString = "%b&nbsp;%#d %#I:%M%p";
+				sAxisX_FormatTickString = "%b&nbsp%#d\n%#I:%M%p";
 				
 			} else if ( sTimePeriod==="year" ) {
 				sAxisX_FormatTickString = "%#d&nbsp;%b&nbsp;%y";
