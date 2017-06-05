@@ -215,10 +215,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "create table `".$sDBName."`.`LANGUAGE` \n";
 			$sSQL .= "(\n";
 			$sSQL .= "   LANGUAGE_PK          int not null auto_increment comment 'Primary Key', \n";
-			$sSQL .= "   LANGUAGE_REGION_FK   int comment 'Foreign Key', \n";
 			$sSQL .= "   LANGUAGE_NAME        varchar(64), \n";
-			$sSQL .= "   LANGUAGE_LANGUAGE    int not null, \n";
-			$sSQL .= "   LANGUAGE_VARIANT     varchar(64), \n";
 			$sSQL .= "   LANGUAGE_ENCODING    varchar(32), \n";
 			$sSQL .= "   primary key (LANGUAGE_PK)\n";
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
@@ -1527,14 +1524,8 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "SELECT\n";
 			$sSQL .= "    `LANGUAGE_PK`, \n";
 			$sSQL .= "    `LANGUAGE_NAME`, \n";
-			$sSQL .= "    `LANGUAGE_LANGUAGE`, \n";
-			$sSQL .= "    `LANGUAGE_VARIANT`, \n";
-			$sSQL .= "    `LANGUAGE_ENCODING`, \n";
-			$sSQL .= "    `REGION_PK`, \n";
-			$sSQL .= "    `REGION_NAME`, \n";
-			$sSQL .= "    `REGION_NAME2` \n";
+			$sSQL .= "    `LANGUAGE_ENCODING` \n";
 			$sSQL .= "FROM `".$sDBName."`.`LANGUAGE` \n";
-			$sSQL .= "LEFT JOIN `".$sDBName."`.`REGION` ON `LANGUAGE_REGION_FK`=`REGION_PK`;\n";
 			break;
 			
 			
@@ -1650,8 +1641,6 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "	`REGION_NAME2`, \n";
 			$sSQL .= "	`LANGUAGE_PK`, \n";
 			$sSQL .= "	`LANGUAGE_NAME`, \n";
-			$sSQL .= "	`LANGUAGE_LANGUAGE`, \n";
-			$sSQL .= "	`LANGUAGE_VARIANT`, \n";
 			$sSQL .= "	`LANGUAGE_ENCODING`, \n";
 			$sSQL .= "	`TIMEZONE_PK`, \n";
 			$sSQL .= "	`TIMEZONE_CC`, \n";
@@ -1738,8 +1727,6 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "    `PREMISEADDRESS_SUBREGION`, \n";
 			$sSQL .= "    `LANGUAGE_PK`, \n";
 			$sSQL .= "    `LANGUAGE_NAME`, \n";
-			$sSQL .= "    `LANGUAGE_LANGUAGE`, \n";
-			$sSQL .= "    `LANGUAGE_VARIANT`, \n";
 			$sSQL .= "    `LANGUAGE_ENCODING`, \n";
 			$sSQL .= "    `REGION_PK`, \n";
 			$sSQL .= "    `REGION_NAME`, \n";
@@ -4810,10 +4797,34 @@ function DB_CreateDefaultData3( $sDBName ) {
 			/*============================================================
 			  == #6.10# - LANGUAGE                                      ==
 			  ============================================================*/
-			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (LANGUAGE_PK,LANGUAGE_REGION_FK,LANGUAGE_NAME,LANGUAGE_LANGUAGE,LANGUAGE_VARIANT,LANGUAGE_ENCODING) VALUES (1,36,'Australian English',1,'AU','EN-AU'); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (LANGUAGE_PK,LANGUAGE_REGION_FK,LANGUAGE_NAME,LANGUAGE_LANGUAGE,LANGUAGE_VARIANT,LANGUAGE_ENCODING) VALUES (2,826,'United Kingdom English',2,'','EN-GB'); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (1, 'English', 'en'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (2, 'Catalan', 'ca'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (3, 'Czech', 'cs'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (4, 'Danish', 'da'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (5, 'German', 'de'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (6, 'Greek', 'el'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (7, 'Esperanto', 'eo'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (8, 'Spanish', 'es'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (9, 'Estonian', 'et'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (10, 'French', 'fr'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (11, 'Hebrew', 'he'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (12, 'Croatian', 'hr'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (13, 'Italian', 'it'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (14, 'Japanese', 'ja'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (15, 'Korean', 'ko'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (16, 'Luxembourgish', 'ltz'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (17, 'Dutch', 'nl'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (19, 'Norwegian', 'no'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (20, 'Polish', 'pl'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (21, 'Portuguese', 'pt'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (22, 'Portuguese (Brazil)', 'pt-BR'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (23, 'Russian', 'ru'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (24, 'Swedish', 'sv'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (25, 'Turkish', 'tr'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (26, 'Chinese (Simplified)', 'zh-CN'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LANGUAGE` (`LANGUAGE_PK`, `LANGUAGE_NAME`, `LANGUAGE_ENCODING`) VALUES (27, 'Chinese (Traditional)', 'zh-TW'); ";
 			
-	
+			
 			/*============================================================
 			  == #6.12# - TIMEZONE                                      ==
 			  ============================================================*/ 

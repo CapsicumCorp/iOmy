@@ -666,11 +666,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 			$VR_USERSINFO->USERADDRESS_POSTCODE             = $record['USERADDRESS_POSTCODE'];
 			$VR_USERSINFO->REGION_PK                        = $record['REGION_PK'];
 			$VR_USERSINFO->REGION_NAME                      = $record['REGION_NAME'];
-			$VR_USERSINFO->REGION_ABREVIATION               = $record['REGION_ABREVIATION'];
+			$VR_USERSINFO->REGION_NAME2                     = $record['REGION_NAME2'];
 			$VR_USERSINFO->LANGUAGE_PK                      = $record['LANGUAGE_PK'];
 			$VR_USERSINFO->LANGUAGE_NAME                    = $record['LANGUAGE_NAME'];
-			$VR_USERSINFO->LANGUAGE_LANGUAGE                = $record['LANGUAGE_LANGUAGE'];
-			$VR_USERSINFO->LANGUAGE_VARIANT                 = $record['LANGUAGE_VARIANT'];
 			$VR_USERSINFO->LANGUAGE_ENCODING                = $record['LANGUAGE_ENCODING'];
 			$VR_USERSINFO->TIMEZONE_PK                      = $record['TIMEZONE_PK'];
 			$VR_USERSINFO->TIMEZONE_CC                      = $record['TIMEZONE_CC'];
@@ -749,12 +747,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 			$VR_USERSPREMISELOCATIONS->PREMISEADDRESS_SUBREGION     = $record['PREMISEADDRESS_SUBREGION'];
 			$VR_USERSPREMISELOCATIONS->LANGUAGE_PK                  = $record['LANGUAGE_PK'];
 			$VR_USERSPREMISELOCATIONS->LANGUAGE_NAME                = $record['LANGUAGE_NAME'];
-			$VR_USERSPREMISELOCATIONS->LANGUAGE_LANGUAGE            = $record['LANGUAGE_LANGUAGE'];
-			$VR_USERSPREMISELOCATIONS->LANGUAGE_VARIANT             = $record['LANGUAGE_VARIANT'];
 			$VR_USERSPREMISELOCATIONS->LANGUAGE_ENCODING            = $record['LANGUAGE_ENCODING'];
 			$VR_USERSPREMISELOCATIONS->REGION_PK                    = $record['REGION_PK'];
 			$VR_USERSPREMISELOCATIONS->REGION_NAME                  = $record['REGION_NAME'];
-			$VR_USERSPREMISELOCATIONS->REGION_ABREVIATION           = $record['REGION_ABREVIATION'];
+			$VR_USERSPREMISELOCATIONS->REGION_NAME2                 = $record['REGION_NAME2'];
 			$VR_USERSPREMISELOCATIONS->TIMEZONE_PK                  = $record['TIMEZONE_PK'];
 			$VR_USERSPREMISELOCATIONS->TIMEZONE_CC                  = $record['TIMEZONE_CC'];
 			$VR_USERSPREMISELOCATIONS->TIMEZONE_LATITUDE            = $record['TIMEZONE_LATITUDE'];
@@ -1665,15 +1661,14 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		 * @param array $record each row of RSCAT
 		 * @return Object
 		 */
+		 
 		private function _serializeVP_REGION($record) {
 			$VP_REGION = new VP_REGION();
 			$VP_REGION->REGION_PK                           = $record['REGION_PK'];
 			$VP_REGION->REGION_NAME                         = $record['REGION_NAME'];
-			$VP_REGION->REGION_ABREVIATION                  = $record['REGION_ABREVIATION'];
+			$VP_REGION->REGION_NAME2                        = $record['REGION_NAME2'];
 			return $VP_REGION;
 		}
-		
-		
 		
 		
 		/**
@@ -1690,7 +1685,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 			$VP_CURRENCIES->CURRENCIES_ABREVIATION          = $record['CURRENCIES_ABREVIATION'];
 			$VP_CURRENCIES->REGION_PK                       = $record['REGION_PK'];
 			$VP_CURRENCIES->REGION_NAME                     = $record['REGION_NAME'];
-			$VP_CURRENCIES->REGION_ABREVIATION              = $record['REGION_ABREVIATION'];
+			$VP_CURRENCIES->REGION_NAME2                    = $record['REGION_NAME2'];
 			return $VP_CURRENCIES;
 		}
 		
@@ -1705,13 +1700,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 			$VP_LANGUAGES = new VP_LANGUAGES();
 			$VP_LANGUAGES->LANGUAGE_PK                      = $record['LANGUAGE_PK'];
 			$VP_LANGUAGES->LANGUAGE_NAME                    = $record['LANGUAGE_NAME'];
-			$VP_LANGUAGES->LANGUAGE_LANGUAGE                = $record['LANGUAGE_LANGUAGE'];
-			$VP_LANGUAGES->LANGUAGE_VARIANT                 = $record['LANGUAGE_VARIANT'];
 			$VP_LANGUAGES->LANGUAGE_ENCODING                = $record['LANGUAGE_ENCODING'];
-//			$VP_LANGUAGES->REGION_PK                        = $record['REGION_PK'];
-//			$VP_LANGUAGES->REGION_NAME                      = $record['REGION_NAME'];
-//			$VP_LANGUAGES->REGION_ABREVIATION               = $record['REGION_ABREVIATION'];
-
+			
 			return $VP_LANGUAGES;
 		}
 		

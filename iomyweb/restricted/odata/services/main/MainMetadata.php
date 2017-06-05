@@ -141,11 +141,9 @@ class VR_USERSINFO{
 	public $USERADDRESS_POSTCODE;
 	public $REGION_PK;
 	public $REGION_NAME;
-	public $REGION_ABREVIATION;
+	public $REGION_NAME2;
 	public $LANGUAGE_PK;
 	public $LANGUAGE_NAME;
-	public $LANGUAGE_LANGUAGE;
-	public $LANGUAGE_VARIANT;
 	public $LANGUAGE_ENCODING;
 	public $TIMEZONE_PK;
 	public $TIMEZONE_CC;
@@ -211,12 +209,10 @@ class VR_USERSPREMISELOCATIONS{
 	public $PREMISEADDRESS_SUBREGION;
 	public $LANGUAGE_PK;
 	public $LANGUAGE_NAME;
-	public $LANGUAGE_LANGUAGE;
-	public $LANGUAGE_VARIANT;
 	public $LANGUAGE_ENCODING;
 	public $REGION_PK;
 	public $REGION_NAME;
-	public $REGION_ABREVIATION;
+	public $REGION_NAME2;
 	public $TIMEZONE_PK;
 	public $TIMEZONE_CC;
 	public $TIMEZONE_LATITUDE;
@@ -1122,7 +1118,7 @@ class VP_TIMEZONES{
 class VP_REGION{
 	public $REGION_PK;
 	public $REGION_NAME;
-	public $REGION_ABREVIATION;
+	public $REGION_NAME2;
 }
 
 
@@ -1136,7 +1132,7 @@ class VP_CURRENCIES{
 	public $CURRENCIES_ABREVIATION;
 	public $REGION_PK;
 	public $REGION_NAME;
-	public $REGION_ABREVIATION;
+	public $REGION_NAME2;
 }
 
 /**
@@ -1145,12 +1141,10 @@ class VP_CURRENCIES{
 class VP_LANGUAGES{
 	public $LANGUAGE_PK;
 	public $LANGUAGE_NAME;
-	public $LANGUAGE_LANGUAGE;
-	public $LANGUAGE_VARIANT;
 	public $LANGUAGE_ENCODING;
 	public $REGION_PK;
 	public $REGION_NAME;
-	public $REGION_ABREVIATION;
+	public $REGION_NAME2;
 }
 
 
@@ -1297,11 +1291,9 @@ class CreateMainMetadata
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'USERADDRESS_POSTCODE',     EdmPrimitiveType::CHARARRAY     );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'REGION_PK',                EdmPrimitiveType::INT32         );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'REGION_NAME',              EdmPrimitiveType::CHARARRAY     );
-		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'REGION_ABREVIATION',       EdmPrimitiveType::CHARARRAY     );
+		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'REGION_NAME2',             EdmPrimitiveType::CHARARRAY     );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'LANGUAGE_PK',              EdmPrimitiveType::INT32         );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'LANGUAGE_NAME',            EdmPrimitiveType::CHARARRAY     );
-		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'LANGUAGE_LANGUAGE',        EdmPrimitiveType::INT32         );
-		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'LANGUAGE_VARIANT',         EdmPrimitiveType::CHARARRAY     );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'LANGUAGE_ENCODING',        EdmPrimitiveType::CHARARRAY     );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'TIMEZONE_PK',              EdmPrimitiveType::INT32         );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'TIMEZONE_CC',              EdmPrimitiveType::CHARARRAY     );
@@ -1374,12 +1366,10 @@ class CreateMainMetadata
 		$metadata->addPrimitiveProperty(    $VR_USERSPREMISELOCATIONSEntityType,    'PREMISEADDRESS_SUBREGION', EdmPrimitiveType::CHARARRAY);
 		$metadata->addPrimitiveProperty(    $VR_USERSPREMISELOCATIONSEntityType,    'LANGUAGE_PK',              EdmPrimitiveType::INT32);
 		$metadata->addPrimitiveProperty(    $VR_USERSPREMISELOCATIONSEntityType,    'LANGUAGE_NAME',            EdmPrimitiveType::CHARARRAY);
-		$metadata->addPrimitiveProperty(    $VR_USERSPREMISELOCATIONSEntityType,    'LANGUAGE_LANGUAGE',        EdmPrimitiveType::INT32);
-		$metadata->addPrimitiveProperty(    $VR_USERSPREMISELOCATIONSEntityType,    'LANGUAGE_VARIANT',         EdmPrimitiveType::CHARARRAY);
 		$metadata->addPrimitiveProperty(    $VR_USERSPREMISELOCATIONSEntityType,    'LANGUAGE_ENCODING',        EdmPrimitiveType::CHARARRAY);
 		$metadata->addPrimitiveProperty(    $VR_USERSPREMISELOCATIONSEntityType,    'REGION_PK',                EdmPrimitiveType::INT32);
 		$metadata->addPrimitiveProperty(    $VR_USERSPREMISELOCATIONSEntityType,    'REGION_NAME',              EdmPrimitiveType::CHARARRAY);
-		$metadata->addPrimitiveProperty(    $VR_USERSPREMISELOCATIONSEntityType,    'REGION_ABREVIATION',       EdmPrimitiveType::CHARARRAY);
+		$metadata->addPrimitiveProperty(    $VR_USERSPREMISELOCATIONSEntityType,    'REGION_NAME2',             EdmPrimitiveType::CHARARRAY);
 		$metadata->addPrimitiveProperty(    $VR_USERSPREMISELOCATIONSEntityType,    'TIMEZONE_PK',              EdmPrimitiveType::INT32);
 		$metadata->addPrimitiveProperty(    $VR_USERSPREMISELOCATIONSEntityType,    'TIMEZONE_CC',              EdmPrimitiveType::CHARARRAY);
 		$metadata->addPrimitiveProperty(    $VR_USERSPREMISELOCATIONSEntityType,    'TIMEZONE_LATITUDE',        EdmPrimitiveType::CHARARRAY);
@@ -2281,7 +2271,7 @@ class CreateMainMetadata
 		);
 		$metadata->addKeyProperty(          $VP_REGIONEntityType,       'REGION_PK',             EdmPrimitiveType::INT32         );
 		$metadata->addPrimitiveProperty(    $VP_REGIONEntityType,       'REGION_NAME',           EdmPrimitiveType::CHARARRAY     );
-		$metadata->addPrimitiveProperty(    $VP_REGIONEntityType,       'REGION_ABREVIATION',    EdmPrimitiveType::CHARARRAY     );
+		$metadata->addPrimitiveProperty(    $VP_REGIONEntityType,       'REGION_NAME2',          EdmPrimitiveType::CHARARRAY     );
 			
 		$VP_REGIONsResourceSet = $metadata->addResourceSet(
 			'VP_REGION', $VP_REGIONEntityType
@@ -2298,7 +2288,7 @@ class CreateMainMetadata
 		$metadata->addPrimitiveProperty(    $VP_CURRENCIESEntityType,       'CURRENCIES_ABREVIATION',   EdmPrimitiveType::CHARARRAY     );
 		$metadata->addPrimitiveProperty(    $VP_CURRENCIESEntityType,       'REGION_PK',                EdmPrimitiveType::INT32         );
 		$metadata->addPrimitiveProperty(    $VP_CURRENCIESEntityType,       'REGION_NAME',              EdmPrimitiveType::CHARARRAY     );
-		$metadata->addPrimitiveProperty(    $VP_CURRENCIESEntityType,       'REGION_ABREVIATION',       EdmPrimitiveType::CHARARRAY     );
+		$metadata->addPrimitiveProperty(    $VP_CURRENCIESEntityType,       'REGION_NAME2',             EdmPrimitiveType::CHARARRAY     );
 		
 		$VP_CURRENCIESsResourceSet = $metadata->addResourceSet(
 			'VP_CURRENCIES', $VP_CURRENCIESEntityType
@@ -2314,12 +2304,7 @@ class CreateMainMetadata
 		);
 		$metadata->addKeyProperty(          $VP_LANGUAGESEntityType,    'LANGUAGE_PK',              EdmPrimitiveType::INT32         );
 		$metadata->addPrimitiveProperty(    $VP_LANGUAGESEntityType,    'LANGUAGE_NAME',            EdmPrimitiveType::CHARARRAY     );
-		$metadata->addPrimitiveProperty(    $VP_LANGUAGESEntityType,    'LANGUAGE_LANGUAGE',        EdmPrimitiveType::INT32         );
-		$metadata->addPrimitiveProperty(    $VP_LANGUAGESEntityType,    'LANGUAGE_VARIANT',         EdmPrimitiveType::CHARARRAY     );
 		$metadata->addPrimitiveProperty(    $VP_LANGUAGESEntityType,    'LANGUAGE_ENCODING',        EdmPrimitiveType::CHARARRAY     );
-		$metadata->addPrimitiveProperty(    $VP_LANGUAGESEntityType,    'REGION_PK',                EdmPrimitiveType::INT32         );
-		$metadata->addPrimitiveProperty(    $VP_LANGUAGESEntityType,    'REGION_NAME',              EdmPrimitiveType::CHARARRAY     );
-		$metadata->addPrimitiveProperty(    $VP_LANGUAGESEntityType,    'REGION_ABREVIATION',       EdmPrimitiveType::CHARARRAY     );
 			
 		$VP_LANGUAGESsResourceSet = $metadata->addResourceSet(
 			'VP_LANGUAGES', $VP_LANGUAGESEntityType
@@ -2348,12 +2333,12 @@ class CreateMainMetadata
 		$VP_RSSUBCATEntityType = $metadata->addEntityType(
 			new ReflectionClass('VP_RSSUBCAT'), 'VP_RSSUBCAT', 'Public'
 		);
-		$metadata->addPrimitiveProperty(    $VP_RSSUBCATEntityType,					'RSCAT_PK',					EdmPrimitiveType::INT32         );
-		$metadata->addPrimitiveProperty(    $VP_RSSUBCATEntityType,					'RSCAT_NAME',				EdmPrimitiveType::CHARARRAY     );
-		$metadata->addKeyProperty(          $VP_RSSUBCATEntityType,					'RSSUBCAT_PK',				EdmPrimitiveType::INT32         );
-		$metadata->addPrimitiveProperty(    $VP_RSSUBCATEntityType,					'RSSUBCAT_RSCAT_FK',        EdmPrimitiveType::INT32         );
-		$metadata->addPrimitiveProperty(    $VP_RSSUBCATEntityType,					'RSSUBCAT_NAME',            EdmPrimitiveType::CHARARRAY     );
-		$metadata->addPrimitiveProperty(    $VP_RSSUBCATEntityType,					'RSSUBCAT_TYPE',            EdmPrimitiveType::INT32         );
+		$metadata->addPrimitiveProperty(    $VP_RSSUBCATEntityType,         'RSCAT_PK',                 EdmPrimitiveType::INT32         );
+		$metadata->addPrimitiveProperty(    $VP_RSSUBCATEntityType,         'RSCAT_NAME',               EdmPrimitiveType::CHARARRAY     );
+		$metadata->addKeyProperty(          $VP_RSSUBCATEntityType,         'RSSUBCAT_PK',              EdmPrimitiveType::INT32         );
+		$metadata->addPrimitiveProperty(    $VP_RSSUBCATEntityType,         'RSSUBCAT_RSCAT_FK',        EdmPrimitiveType::INT32         );
+		$metadata->addPrimitiveProperty(    $VP_RSSUBCATEntityType,         'RSSUBCAT_NAME',            EdmPrimitiveType::CHARARRAY     );
+		$metadata->addPrimitiveProperty(    $VP_RSSUBCATEntityType,         'RSSUBCAT_TYPE',            EdmPrimitiveType::INT32         );
 			
 		$VP_RSSUBCATsResourceSet = $metadata->addResourceSet(
 			'VP_RSSUBCAT', $VP_RSSUBCATEntityType
@@ -2412,7 +2397,7 @@ class CreateMainMetadata
 		$metadata->addPrimitiveProperty(    $VP_UOMSEntityType,						'UOMCAT_PK',				EdmPrimitiveType::INT32         );
 		$metadata->addPrimitiveProperty(    $VP_UOMSEntityType,						'UOMCAT_NAME',				EdmPrimitiveType::CHARARRAY     ); 
 		$metadata->addPrimitiveProperty(    $VP_UOMSEntityType,						'UOMSUBCAT_PK',				EdmPrimitiveType::INT32         );
-		$metadata->addPrimitiveProperty(    $VP_UOMSEntityType,						'UOMSUBCAT_NAME',            EdmPrimitiveType::CHARARRAY     );
+		$metadata->addPrimitiveProperty(    $VP_UOMSEntityType,						'UOMSUBCAT_NAME',            EdmPrimitiveType::CHARARRAY    );
 		$metadata->addKeyProperty(          $VP_UOMSEntityType,						'UOM_PK',					EdmPrimitiveType::INT32         );
 		$metadata->addPrimitiveProperty(    $VP_UOMSEntityType,						'UOM_NAME',					EdmPrimitiveType::CHARARRAY     );
 		
@@ -2431,7 +2416,7 @@ class CreateMainMetadata
 		$metadata->addKeyProperty(          $VP_ICONSEntityType,            'ICONS_PK',					EdmPrimitiveType::INT32         );
 		$metadata->addPrimitiveProperty(    $VP_ICONSEntityType,            'ICONS_NAME',				EdmPrimitiveType::CHARARRAY     );
 		$metadata->addPrimitiveProperty(    $VP_ICONSEntityType,            'ICONS_ICON',				EdmPrimitiveType::CHARARRAY     );
-		$metadata->addPrimitiveProperty(    $VP_ICONSEntityType,            'ICONSTYPE_NAME',            EdmPrimitiveType::CHARARRAY     );
+		$metadata->addPrimitiveProperty(    $VP_ICONSEntityType,            'ICONSTYPE_NAME',            EdmPrimitiveType::CHARARRAY    );
 		$metadata->addPrimitiveProperty(    $VP_ICONSEntityType,            'ICONSTYPE_PK',				EdmPrimitiveType::INT32         );
 			
 		$VP_ICONSsResourceSet = $metadata->addResourceSet(

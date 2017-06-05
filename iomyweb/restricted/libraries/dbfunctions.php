@@ -568,8 +568,6 @@ function dbGetCurrentUserInfo() {
 				$sSQL .= "	`REGION_NAME2`, ";
 				$sSQL .= "	`LANGUAGE_PK`, ";
 				$sSQL .= "	`LANGUAGE_NAME`, ";
-				$sSQL .= "	`LANGUAGE_LANGUAGE`, ";
-				$sSQL .= "	`LANGUAGE_VARIANT`, ";
 				$sSQL .= "	`LANGUAGE_ENCODING`, ";
 				$sSQL .= "	`TIMEZONE_PK`, ";
 				$sSQL .= "	`TIMEZONE_CC`, ";
@@ -608,8 +606,6 @@ function dbGetCurrentUserInfo() {
 					array( "Name"=>"UserAddressRegionAbrv",				"type"=>"STR" ),
 					array( "Name"=>"UserAddressLanguageId",				"type"=>"INT" ),
 					array( "Name"=>"UserAddressLanguageName",			"type"=>"STR" ),
-					array( "Name"=>"UserAddressLanguage",				"type"=>"STR" ),
-					array( "Name"=>"UserAddressLanguageVariant",		"type"=>"STR" ),
 					array( "Name"=>"UserAddressLanguageEncoding",		"type"=>"STR" ),
 					array( "Name"=>"UserAddressTimezoneId",				"type"=>"INT" ),
 					array( "Name"=>"UserAddressTimezoneCC",				"type"=>"STR" ),
@@ -2223,10 +2219,7 @@ function dbGetPremisesAddressFromPremiseId( $iPremiseId ) {
 				$sSQL .= "    `REGION_NAME2`, ";
 				$sSQL .= "    `LANGUAGE_PK`, ";
 				$sSQL .= "    `LANGUAGE_NAME`, ";
-				$sSQL .= "    `LANGUAGE_LANGUAGE`, ";
-				$sSQL .= "    `LANGUAGE_VARIANT`, ";
 				$sSQL .= "    `LANGUAGE_ENCODING`, ";
-
 				$sSQL .= "    `TIMEZONE_PK`, ";
 				$sSQL .= "    `TIMEZONE_CC`, ";
 				$sSQL .= "    `TIMEZONE_LATITUDE`, ";
@@ -2262,8 +2255,6 @@ function dbGetPremisesAddressFromPremiseId( $iPremiseId ) {
 					array( "Name"=>"AddressRegionAbrv",				"type"=>"STR" ),
 					array( "Name"=>"AddressLanguageId",				"type"=>"INT" ),
 					array( "Name"=>"AddressLanguageName",			"type"=>"STR" ),
-					array( "Name"=>"AddressLanguage",				"type"=>"STR" ),
-					array( "Name"=>"AddressLanguageVariant",		"type"=>"STR" ),
 					array( "Name"=>"AddressLanguageEncoding",		"type"=>"STR" ),
 					array( "Name"=>"AddressTimezoneId",				"type"=>"INT" ),
 					array( "Name"=>"AddressTimezoneCC",				"type"=>"STR" ),

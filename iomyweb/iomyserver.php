@@ -213,7 +213,6 @@ if($bError===false) {
 				$sPostMode!=="02_CreateViewsRestricted5" && $sPostMode!=="02_CreateViewsRestricted6" && 
 				$sPostMode!=="02_CreateDefaultData1"     && $sPostMode!=="02_CreateDefaultData2"     && 
 				$sPostMode!=="02_CreateDefaultData3"     && $sPostMode!=="02_CreateDefaultData4"     && 
-				
 				$sPostMode!=="02_CreatePHPConfig"
 			) {
 				//-- ERROR  --//
@@ -1437,7 +1436,7 @@ if($bError===false) {
 								$iPremiseId = $aTempResult3B['LastId'];
 								
 								
-								$aTempResult3C = DB_InsertPremiseAddress( $sPostDatabaseName, $iPremiseId, 1, 1, 14, "", "0000", "123 Your Street Name", "", "" );
+								$aTempResult3C = DB_InsertPremiseAddress( $sPostDatabaseName, $iPremiseId, 1, 1, 36, "", "0000", "123 Your Street Name", "", "" );
 								
 								if( $aTempResult3C['Error']===true ) {
 									$bError    = true;
@@ -1515,7 +1514,7 @@ if($bError===false) {
 								
 								
 								//-- Give the user address --//
-								$aTempResult4C = DB_InsertUserAddress( $sPostDatabaseName, $iUserId, 1, 14, "", "0000", 1, "", "", "" );
+								$aTempResult4C = DB_InsertUserAddress( $sPostDatabaseName, $iUserId, 1, 36, "", "0000", 1, "", "", "" );
 								
 								if( $aTempResult4C['Error']===true ) {
 									$bError    = true;
@@ -1619,22 +1618,37 @@ if($bError===false) {
 									//-- Extract the User Id --//
 									$iWatchInputsUserId = $aTempResult5C['LastId'];
 									
-									//-- Give the WatchInputs User special permission to the Hub --//
-									$aTempResult5D = DB_InsertPermHub( $sPostDatabaseName, $iWatchInputsUserId, $iHubId );
-									//$aTempResult5D1 = DB_InsertPermPremise( $sPostDatabaseName, $iWatchInputsUserId, $iPremiseId, 1, 1, 1, 1, 1 );
-									
+									//-- Give the user address --//
+									$aTempResult5D = DB_InsertUserAddress( $sPostDatabaseName, $iWatchInputsUserId, 1, 36, "", "0000", 1, "", "", "" );
 									
 									if( $aTempResult5D['Error']===true ) {
 										$bError    = true;
 										$iErrCode  = 7433;
 										$sErrMesg .= "Error Code:'7433' \n";
-										$sErrMesg .= "Problem granting the \"WatchInputs\" user permission to the hub! \n";
+										$sErrMesg .= "Problem inserting the UserAddress! \n";
 										$sErrMesg .= $aTempResult5D['ErrMesg'];
 										
 									} else {
-										//-- Extract the User Id --//
-										$iWatchInputsPermHubId = $aTempResult5D['LastId'];
+										//-- Extract the User Address Id --//
+										$iWatchInputsUserAddressId = $aTempResult5D['LastId'];
+									
+										//-- Give the WatchInputs User special permission to the Hub --//
+										$aTempResult5E = DB_InsertPermHub( $sPostDatabaseName, $iWatchInputsUserId, $iHubId );
+										//$aTempResult5E1 = DB_InsertPermPremise( $sPostDatabaseName, $iWatchInputsUserId, $iPremiseId, 1, 1, 1, 1, 1 );
 										
+										
+										if( $aTempResult5E['Error']===true ) {
+											$bError    = true;
+											$iErrCode  = 7434;
+											$sErrMesg .= "Error Code:'7434' \n";
+											$sErrMesg .= "Problem granting the \"WatchInputs\" user permission to the hub! \n";
+											$sErrMesg .= $aTempResult5E['ErrMesg'];
+											
+										} else {
+											//-- Extract the User Id --//
+											$iWatchInputsPermHubId = $aTempResult5E['LastId'];
+											
+										}
 									}
 								}
 							}
