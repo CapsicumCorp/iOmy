@@ -204,7 +204,10 @@ ul li{
 	border: none;
 }
 
+
+/* To Be Replaced Start */
 /* Style the Footer Button */
+/*
 .FooterHelpButton {
 	border: none;
 	border-radius: 7px;
@@ -212,7 +215,6 @@ ul li{
 	margin-left: 2em;
 	height: 37px;
 }
-
 .FooterHelpButton.sapMBtnBase > div > span.sapMBtnContent {
 	line-height: 1.7rem
 }
@@ -221,7 +223,8 @@ ul li{
 	line-height: 1.9rem;
 	font-weight: normal;
 }
-
+*/
+/* To Be Replaced End */
 /* ============================== */
 /* == #4.4# - Footer Help      == */
 /* ============================== */
@@ -1004,6 +1007,7 @@ button.NavButton.sapMBarChild.sapMBtnBase:focus, .BackForwardButton {
 .sapMInputBaseInner:not(.sapMInputBaseReadonlyInner):not(.sapMInputBaseStateInner):not(.sapMInputBaseDisabledInner):hover, 
 .sapMInputBaseInner:not(.sapMInputBaseReadonlyInner):not(.sapMInputBaseStateInner):not(.sapMInputBaseDisabledInner):focus {
 	border-color: rgb(139, 197, 63);
+	background: rgba(255,255,255,0.2);
 }
 
 /* Changes the focus color for mobile list items from bluecrystal blue to iOmy green */
@@ -1102,7 +1106,7 @@ button.NavButton.sapMBarChild.sapMBtnBase:focus, .BackForwardButton {
 }
 
 .sapMInputBaseInner {
-		font-family: 'Roboto Condensed', sans-serif;
+	font-family: 'Roboto Condensed', sans-serif;
 }
 
 .sapMComboBoxBasePicker > div > div > ul > li.sapMSelectListItemBaseSelected {
@@ -1114,7 +1118,7 @@ button.NavButton.sapMBarChild.sapMBtnBase:focus, .BackForwardButton {
 }
 
 .sapMCbBg.sapMCbMarkChecked:before {
-		color: rgb(139, 197, 63);
+	color: rgb(139, 197, 63);
 }
 
 html.sap-desktop .sapMBtn:focus>.sapMFocusable {
@@ -1136,10 +1140,6 @@ html.sap-desktop .sapMBtn:focus>.sapMFocusable {
     border: 1px solid #6F9A39;
 }
 
-.sapTntNavLIGroup:not(.sapTntNavLIItemDisabled):hover {
-	background-color: #f0f0f0;
-}
-
 .sapMBarPH {
 	height: auto;
 }
@@ -1158,17 +1158,6 @@ html.sap-desktop .sapMBtn:focus>.sapMFocusable {
 	background: rgb(139,197,63);
 }
 
-.sapMSelectListItemBaseSelected {
-	background: #e6f9e6;
-}
-
-.sap-desktop .sapMSlt:not(.sapMSltDisabled):focus {
-	border-color: rgb(139,197,63);
-}
-
-.sapMSltHoverable:hover {
-	border-color: rgb(139,197,63);
-}
 /* ==================================================================================== */
 /* == #20.0# - Settings: Premise List & Overview                                     == */
 /* ==================================================================================== */

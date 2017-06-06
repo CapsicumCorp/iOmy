@@ -20,6 +20,196 @@ You should have received a copy of the GNU General Public License
 along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
+
+/******************************************
+** Belize UI5 Upgrade                    **
+******************************************/
+/* ============================== */
+/* == Color Overides           == */
+/* ============================== */
+/* Changes the TNT Menu icons to "Grey" */
+.sapTntNavLIItem>.sapUiIcon {
+    color: #666666;
+}
+
+/* Changes Button icons to "Grey" */
+.sapMBtnIcon {
+    color: #666666;
+}
+
+/* Changes the NavMenu box shadow to "Light Grey" */
+.sapMBar {
+    box-shadow: inset 0 -0.0625rem #dddddd;
+}
+
+/* Changes the "Help" Dialog's top divider to "Light Green" */
+.sapMMessageDialog.sapMMessageBoxInfo>.sapMBar {
+    box-shadow: inset 0 -0.0625rem rgb(139, 197, 63);
+}
+
+/* Changes the "Active" background color of TNTNavMenu Items to "Light Grey" */
+.sapTntNavLI .sapTntNavLIGroup.sapTntNavLIItem:not(.sapTntNavLIItemDisabled):active,
+.sapTntNavLI .sapTntNavLIGroupItem.sapTntNavLIItem:not(.sapTntNavLIItemDisabled):active {
+	background-color: #f0f0f0; 
+}
+
+/* Changes Button Text to "Black" */
+.sapMIBar-CTX .sapMBtnInner, .sapMBtnInner {
+	color: #333333;
+}
+
+/* Changes Button Text during ":hover" to "Black"*/
+.sapMIBar-CTX .sapMBtn:hover>.sapMBtnHoverable:not(.sapMBtnActive) {
+    background-color: rgba(179,179,179,0.5);
+    color: #333333;
+    border-color: transparent;
+}
+
+/* Changes ":visted" color to "iOmy Green" for links */
+.sapMLnk:visited {
+    color: rgb(139, 197, 63);
+}
+
+/* Changes ":hover" color to "iOmy Green" for links */
+.sapMLnk:hover:not(.sapMLnkDsbl) {
+    color: darkgreen;
+}
+/* Changes link text color to "Grey" */
+.sapMLnk {
+	color: #232323;
+}
+
+/* Changes "Select Box" borders to " iOmy Green" during ":hover"*/
+.sapMSltHoverable:not(.sapMSltState):hover {
+    border-color: rgb(139,197,63);
+    background: #ffffff;
+}
+
+/* Changes "Select Box" borders to " iOmy Green" during ":active"*/
+.sapMSltPressed:not(.sapMSltDisabled):not(.sapMSltState) {
+    border-color: rgb(139,197,63);
+}
+
+/* Changes "Select Box" borders to " iOmy Green" during ":focus" */
+html.sap-desktop .sapMSlt:not(.sapMSltDisabled):not(.sapMSltState):focus {
+    border-color: rgb(139,197,63);
+}
+
+/* Changes "Select Box" item hover to "iOmy Green" during ":hover" */
+.sapMSelectListItemBaseSelected.sapMSelectListItemBaseHoverable:hover {
+    background-color: #e6f9e6;
+}
+
+/* Changes "Select Box" item selected to "iOmy Green" */
+.sapMSelectListItemBaseSelected {
+    background: #e6f9e6;
+}
+
+/* Changes "Select Box" item selected to "dark green" during ":focus" */
+.sapMSelectListItemBase.sapMSelectListItemBasePressed, 
+.sapMSelectListItemBase.sapMSelectListItemBasePressed.sapMSelectListItemBaseSelected {
+    background-color: darkgreen;
+	color: #000000;
+}
+
+/* Changes "Select Box" down arrow to black */
+.sapMSltArrow {
+	color: #000000;
+}
+
+/* Changes "Check Box" borders to " iOmy Green" during "Hover"*/
+.sapMCbHoverable:hover {
+    border-color: rgb(139,197,63);
+    background: #ffffff;
+}
+
+/* Changes "Calendar" selected item to "Dark Green"*/
+.sapUiCalItemSel {
+    background-color: darkgreen;
+}
+
+/* Changes "Calendar" selected item to "Dark Green" during ":hover" & ":focus" */
+html.sap-desktop .sapUiCalItemSel:hover, html.sap-desktop .sapUiCalItemSel:focus {
+    background-color: darkgreen;
+}
+
+/* Changes "Calendar" Heading text color to "Black" */
+.sapUiCalHead>.sapUiCalHeadB, .sapUiCalCancel, html.sap-desktop .sapUiCalHead>.sapUiCalHeadB:hover, 
+html.sap-desktop .sapUiCalHead>.sapUiCalHeadB:focus {
+    color: #000000;
+}
+/* Changes "Calendar" Heading text color to "Black" */
+.sapUiCalHead>button:active, .sapUiCalCancel:active, html.sap-desktop .sapUiCalHead>button:active, 
+html.sap-desktop .sapUiCalHead>button:active>.sapUiCalHeadBAddText, html.sap-desktop .sapUiCalCancel:active {
+    background-color: darkgreen;
+}
+
+/* Changes the TNT Menu Selected Item hover color to "Light Green" */
+.sapTntNavLIItemSelected .sapTntNavLIItem:hover, .sapTntNavLIItemSelected.sapTntNavLIGroupItem.sapTntNavLIGroupItem:hover {
+    background-color: #e6f9e6;
+}
+
+html.sap-desktop .sapMToggleBtnPressed, .sapMToggleBtnPressed, html.sap-desktop .sapMIBar-CTX .sapMToggleBtnPressed,
+ .sapMIBar-CTX .sapMToggleBtnPressed, html.sap-desktop .sapMTB-Transparent-CTX .sapMBtnInner.sapMToggleBtnPressed,
+ .sapMTB-Transparent-CTX .sapMBtnInner.sapMToggleBtnPressed {
+	background-color: #f89a8f;
+	border-color: #f35745;
+ }
+/* ============================== */
+/* == Footers                  == */
+/* ============================== */
+/* Styles the base for the help button */
+.FooterHelpButton {
+	border-radius: 7px;
+	background: rgb(88, 89, 91);
+	margin-top: 12.5%;
+	height: 38px;
+}
+
+/* Changes the text color of "Help" to white and removes the text shadowing */
+.FooterHelpButton > span:first-child, .FooterHelpButton > div > span:first-child {
+	color: #ffffff;
+	text-shadow: 0 1px 0 rgba(0,0,0,0.5);
+	font-size: 0.8rem;
+	line-height: 2rem;
+	height:30px;
+}
+
+/* Center's the Text & Icon for the help button & changes the "?" to white */
+.FooterHelpButton > span > span, .FooterHelpButton > div > span {
+	line-height: 2rem;
+	font-size: 1rem;
+	height: 30px;
+	color: #ffffff;
+}
+
+/* Temporary until Blue Crystal is updated to Belize */
+.FooterHelpButton > div {
+	height: 30px;
+}
+
+/* Sets the Hover color of the "Help" text to white */
+.sapMIBar-CTX .FooterHelpButton.sapMBtn:hover>.sapMBtnHoverable:not(.sapMBtnActive) {
+	color: #ffffff;
+}
+
+/* Fixes the height of the "Telnet Output" box after "Belize" upgrade */
+.TelnetOutput > textarea {
+	height: 100% !important;
+}
+/******************************************
+** UI5 Upgrade End                       **
+******************************************/
+
+/* Custom Class for Telnet Button Font */
+.cTelnetButton > span.sapMBtnInner {
+	font-size: 0.8rem;
+	padding: 0;
+	width: 100px;
+}
+
+
+
 /* Custom Class for Whitespace: Normal */
 .NormalWS {
 	white-space: normal;

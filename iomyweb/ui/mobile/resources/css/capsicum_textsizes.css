@@ -42,6 +42,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		font-size:	0.75rem;
 	}
 	
+	.TextSize0d8Rem {
+		font-size:	0.8rem;
+	}
+	
 	.TextSize1Rem {
 		font-size:	1rem;
 	}

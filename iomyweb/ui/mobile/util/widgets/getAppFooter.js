@@ -83,7 +83,7 @@ $.extend(IOMy.widgets,{
 					press : function () {
 						IOMy.functions.showHelpDialog();
 					}
-				}).addStyleClass("FooterHelpButton IOMYButton MarTop9px MarLeft10px width85px TextLeft Text_white")
+				}).addStyleClass("FooterHelpButton IOMYButton")
             ],
 			contentRight : [
                 new sap.m.Image({

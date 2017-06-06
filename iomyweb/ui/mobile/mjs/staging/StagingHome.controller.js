@@ -29,6 +29,7 @@ sap.ui.controller("mjs.staging.StagingHome", {
 		{ "display" : "Controller" , "link" : "pControlTools" },
 		{ "display" : "MotionJPEG" , "link" : "pMotionJPEG" },
 		{ "display" : "Add IPC" , "link" : "pAddIPC" },
+		{ "display" : "Telnet" , "link" : "pTelnet" },
 	],
 	
 	
@@ -116,7 +117,7 @@ sap.ui.controller("mjs.staging.StagingHome", {
 										press : function () {
 											IOMy.common.NavigationChangePage( aStageLink.link , {} , false);
 										}
-									})
+									}).addStyleClass("iOmyLink"),
 								]
 							})                    
                         );

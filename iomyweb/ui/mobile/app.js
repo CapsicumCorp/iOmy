@@ -1656,6 +1656,12 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.AddIPC\" Page!\n"
 	},
+	{ 
+		"Id":			"pTelnet",
+		"Location":		"mjs.staging.Telnet",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Telnet\" Page!\n"
+	},
 	
 ];
 

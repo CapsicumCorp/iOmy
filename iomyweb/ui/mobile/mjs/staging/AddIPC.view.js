@@ -68,8 +68,8 @@ sap.ui.jsview("mjs.staging.AddIPC", {
 											items: [
 												new sap.ui.core.Item ({
 													text: "MJPEG",
-													key: "mjpeg",
-												}),
+													key: "mjpeg"
+												})
 											],
 										}).addStyleClass(""),
 									]
@@ -88,10 +88,10 @@ sap.ui.jsview("mjs.staging.AddIPC", {
 											items: [
 												new sap.ui.core.Item ({
 													text: "1",
-													key: "1",
+													key: "1"
 												}),
 											],
-										}).addStyleClass(""),
+										}).addStyleClass("")
 									]
 								}).addStyleClass("MarLeft5px"),
 							]
@@ -108,7 +108,7 @@ sap.ui.jsview("mjs.staging.AddIPC", {
 										new sap.m.Input ({
 											type:"Text",
 											placeholder:"http",
-										}).addStyleClass(""),
+										}).addStyleClass("")
 									]
 								}).addStyleClass("width65px"),
 								/* Parent VBox for Network Address */
@@ -123,7 +123,7 @@ sap.ui.jsview("mjs.staging.AddIPC", {
 										new sap.m.Input ({
 											type:"Url",
 											placeholder:"10.0.0.1",
-										}).addStyleClass(""),,
+										}).addStyleClass("")
 									]
 								}).addStyleClass("MarLeft10px MarRight10px"),
 								/* Parent VBox for Port */
@@ -135,7 +135,7 @@ sap.ui.jsview("mjs.staging.AddIPC", {
 										new sap.m.Input ({
 											type:"Number",
 											placeholder:"port",
-										}).addStyleClass(""),
+										}).addStyleClass("")
 									]
 								}).addStyleClass("width65px"),
 							]
@@ -155,7 +155,7 @@ sap.ui.jsview("mjs.staging.AddIPC", {
 										new sap.m.Input ({
 											type:"Text",
 											placeholder:"/Video",
-										}).addStyleClass(""),
+										}).addStyleClass("")
 									]
 								}).addStyleClass(""),
 							]
@@ -175,8 +175,7 @@ sap.ui.jsview("mjs.staging.AddIPC", {
 											}),
 											text: "Authentication Required?"
 										}).addStyleClass("PadTop15px"),
-										new sap.m.CheckBox ({
-										}).addStyleClass(""),
+										new sap.m.CheckBox ({}).addStyleClass("")
 									]
 								}).addStyleClass(""),
 							]
@@ -195,7 +194,7 @@ sap.ui.jsview("mjs.staging.AddIPC", {
 										}),
 										new sap.m.Input ({
 											type:"Text",
-										}).addStyleClass(""),,
+										}).addStyleClass("")
 									]
 								}).addStyleClass("MarRight10px"),
 								/* Parent VBox for Password */
@@ -209,7 +208,7 @@ sap.ui.jsview("mjs.staging.AddIPC", {
 										}),
 										new sap.m.Input ({
 											type:"Text",
-										}).addStyleClass(""),
+										}).addStyleClass("")
 									]
 								}).addStyleClass(""),
 							]
@@ -226,7 +225,7 @@ sap.ui.jsview("mjs.staging.AddIPC", {
 										growFactor : 1
 									}),
 									type:"Default",
-									text: "Cancel",
+									text: "Cancel"
 								}).addStyleClass("width80px"),
 								/* Apply (Accept Type) */
 								new sap.m.Button({
@@ -234,8 +233,8 @@ sap.ui.jsview("mjs.staging.AddIPC", {
 										growFactor : 1
 									}),									
 									type:"Accept",
-									text: "Submit",
-								}).addStyleClass("width80px"),
+									text: "Submit"
+								}).addStyleClass("width80px")
 							]
 						}).addStyleClass("MarTop15px TextCenter")
 					]
