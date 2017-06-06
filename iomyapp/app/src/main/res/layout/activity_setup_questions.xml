@@ -10,24 +10,48 @@
     tools:context="com.capsicumcorp.iomy.apps.iomy.SetupQuestions"
     android:orientation="vertical">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Do you want to run iOmy in demonstration mode? To revert back to normal mode, you will need to clear all data in Settings and run this installer again."
+        android:id="@+id/textView2"
+        android:layout_weight="0" />
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1">
 
-        <CheckBox
+        <RadioGroup
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Download demo data and install iOmy in demonstration mode (Download size is about 300MB. Will take up around 1.7GB!)"
-            android:id="@+id/installDemo"
-            android:checked="false" />
+            android:id="@+id/demoModeOptions">
+
+            <RadioButton
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Do not install demonstration"
+                android:id="@+id/skipDemo"
+                android:checked="false"
+                android:onClick="enableNextButton" />
+
+            <RadioButton
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Download demo data and install iOmy in demonstration mode (Download size is about 300MB. Will take up around 1.7GB!)"
+                android:id="@+id/installDemo"
+                android:checked="false"
+                android:onClick="enableNextButton" />
+        </RadioGroup>
+
     </LinearLayout>
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="NEXT"
-        android:id="@+id/Button"
-        android:onClick="nextPage" />
+        android:id="@+id/NextButton"
+        android:onClick="nextPage"
+        android:enabled="false" />
 </LinearLayout>

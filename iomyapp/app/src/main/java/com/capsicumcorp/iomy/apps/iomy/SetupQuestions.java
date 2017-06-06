@@ -25,7 +25,10 @@ package com.capsicumcorp.iomy.apps.iomy;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 public class SetupQuestions extends AppCompatActivity {
     private InstallWizard installWizard = Constants.installWizard;
@@ -38,6 +41,15 @@ public class SetupQuestions extends AppCompatActivity {
     }
 
     /**
+     * Enables the "Next" button once one of the radio buttons is selected.
+     * @param view
+     */
+    public void enableNextButton(View view) {
+        Button nextButton = (Button) findViewById(R.id.NextButton);
+        nextButton.setEnabled(true);
+    }
+
+    /**
      * Commands the the install wizard module to bring up the next activity.
      */
     public void nextPage(View view) {
@@ -45,14 +57,18 @@ public class SetupQuestions extends AppCompatActivity {
         view.setEnabled(false);
 
         //--------------------------------------------------------------------//
-        // Grab the installation options check boxes
+        // Grab the selected option for normal or demo mode.
         //--------------------------------------------------------------------//
-        CheckBox chkboxInstallDemo = (CheckBox) findViewById(R.id.installDemo);
+        RadioGroup rgp= (RadioGroup) findViewById(R.id.demoModeOptions);
+        int radioButtonID = rgp.getCheckedRadioButtonId();
+        boolean installDemoData = false;
 
         //--------------------------------------------------------------------//
         // Apply the installation parameters
         //--------------------------------------------------------------------//
-        boolean installDemoData=chkboxInstallDemo.isChecked();
+        if (radioButtonID == R.id.installDemo) {
+            installDemoData = true;
+        }
 
         installWizard.setInstallDemoData(installDemoData);
 
