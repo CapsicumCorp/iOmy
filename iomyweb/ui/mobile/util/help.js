@@ -48,7 +48,9 @@ $.extend(IOMy.help,{
     addHelpMessage : function (sPageID, sMessage) {
         this.PageInformation[sPageID] = sMessage;
         
-        oApp.getPage(sPageID).byId("helpButton").setEnabled(true);
+		if (oApp.getPage(sPageID) !== null) {
+			oApp.getPage(sPageID).byId("helpButton").setEnabled(true);
+		}
     }
     
 });

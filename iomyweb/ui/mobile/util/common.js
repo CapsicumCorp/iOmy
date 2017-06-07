@@ -305,17 +305,16 @@ $.extend(IOMy.common,{
 		var callbackFn = fnCallback || function(){};
 		var cssClass = sCssClass || "";
 		
-		// open a fully configured message box
-		sap.m.MessageBox.show(
+		// open a fully configured message toast
+		sap.m.MessageToast.show(
 			sMessage,
 			{
-				icon: sap.m.MessageBox.Icon.INFORMATION,
-				title: sTitle,
-				actions: sap.m.MessageBox.Action.CLOSE,
-				onClose: callbackFn,
-				styleClass : cssClass
+				//styleClass : cssClass
 			}
 		);
+		// TODO: This is a temporary measure to allow the function to be called after the toast is shown.
+		// TODO: Go through each form and move the function code out and place it in the parent function.
+		callbackFn();
 	},
 	
     /**
@@ -336,7 +335,6 @@ $.extend(IOMy.common,{
 		sap.m.MessageToast.show(
 			sMessage,
 			{
-				actions: sap.m.MessageBox.Action.CLOSE
 				//styleClass : cssClass
 			}
 		);
@@ -2081,6 +2079,10 @@ $.extend(IOMy.common,{
 		//-- Debugging --//
 		//jQuery.sap.log.debug( "ChangePage NavArray="+JSON.stringify(this.NavPagesNavigationArray) );
 		//jQuery.sap.log.debug( "ChangePage NavIndex="+JSON.stringify(this.NavPagesCurrentIndex ) );
+		
+		if (oApp.getPage(sPageName) === null) {
+			IOMy.pages.createPage(sPageName);
+		}
 		
 		//-- Navigate to the new Page --//
 		oApp.to( sPageName, aPageData );

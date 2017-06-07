@@ -65,6 +65,9 @@ $.sap.require("IOMy.graph_jqplot");
 $.sap.registerModulePath('IOMy.telnet', sModuleInitialBuildLocation+'util/telnet');
 $.sap.require("IOMy.telnet");
 
+$.sap.registerModulePath('IOMy.pages', sModuleInitialBuildLocation+'util/pages');
+$.sap.require("IOMy.pages");
+
 //----------------------------------------//
 //-- 5.1.1 - LOAD DEVICE FILES  		--//
 //----------------------------------------//
@@ -1535,6 +1538,12 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.OnvifCamera\" Page!\n"
 	},
+	{ 
+		"Id":			"pDeviceMPEGStream",
+		"Location":		"mjs.devices.MotionJPEG",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.devices.MotionJPEG\" Page!\n"
+	},
     {
 		"Id":			"pPhilipsHue",
 		"Location":		"mjs.devices.PhilipsHue",
@@ -1671,47 +1680,47 @@ var aPages = [
  * JS (JavaScript), and also the error message that will be displayed if an error
  * occurs in either its UI5 view or controller.
  */
-$.each( aPages, function (iIndex, aPageData) {
-	try {
-		//--------------------------------//
-		//-- 1.0 - Declare variables	--//
-		//--------------------------------//
-		var sType			= "";
-		var sErMesg			= aPageData.ErrMesg;
-		
-		//--------------------------------//
-		//--
-		//--------------------------------//
-		switch(aPageData.Type) {
-			case "JS":
-				sType =		sap.ui.core.mvc.ViewType.JS;
-				break;
-			
-			case "XML":
-				sType =		sap.ui.core.mvc.ViewType.XML;
-				break;
-			
-		}
-		
-		//------------------------------------//
-        // Add the help information to memory
-        //------------------------------------//
-//        if (aPageData.HelpInfo !== undefined) {
-//            IOMy.help.PageInformation[aPageData.Id] = aPageData.HelpInfo;
-//        }
-		
-        oApp.addPage(
-			new sap.ui.view({
-				id:			aPageData.Id,
-				viewName:	aPageData.Location,
-				type:		sType
-			})
-		);
-
-	} catch(ePLogin) {
-        jQuery.sap.log.error( sErMesg+ePLogin.message );
-	}
-});
+//$.each( aPages, function (iIndex, aPageData) {
+//	try {
+//		//--------------------------------//
+//		//-- 1.0 - Declare variables	--//
+//		//--------------------------------//
+//		var sType			= "";
+//		var sErMesg			= aPageData.ErrMesg;
+//		
+//		//--------------------------------//
+//		//--
+//		//--------------------------------//
+//		switch(aPageData.Type) {
+//			case "JS":
+//				sType =		sap.ui.core.mvc.ViewType.JS;
+//				break;
+//			
+//			case "XML":
+//				sType =		sap.ui.core.mvc.ViewType.XML;
+//				break;
+//			
+//		}
+//		
+//		//------------------------------------//
+//        // Add the help information to memory
+//        //------------------------------------//
+////        if (aPageData.HelpInfo !== undefined) {
+////            IOMy.help.PageInformation[aPageData.Id] = aPageData.HelpInfo;
+////        }
+//		
+//        oApp.addPage(
+//			new sap.ui.view({
+//				id:			aPageData.Id,
+//				viewName:	aPageData.Location,
+//				type:		sType
+//			})
+//		);
+//
+//	} catch(ePLogin) {
+//        jQuery.sap.log.error( sErMesg+ePLogin.message );
+//	}
+//});
 
 //----------------------------------------------------------------------------//
 // Load all the help messages into memory.
@@ -1728,6 +1737,9 @@ $.getJSON(
         
     }
 );
+
+//-- Always create the login page first! --//
+IOMy.pages.createPage("pLogin");
 
 //================================================//
 //== 5.4 - DEPLOY OPENUI5 APP					==//
