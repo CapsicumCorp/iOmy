@@ -434,11 +434,8 @@ $.extend( IOMy.graph_jqplot, {
 			if( sAxisX_CustomTickString!=="" ) {
 				sAxisX_FormatTickString = sAxisX_CustomTickString;
 				
-			} else if ( sTimePeriod==="6hour" ) {
+			} else if ( sTimePeriod==="6hour" || sTimePeriod==="day" ) {
 				sAxisX_FormatTickString = "%#I:%M%p";
-				
-			} else if ( sTimePeriod==="day" ) {
-				sAxisX_FormatTickString = "%b&nbsp%#d\n%#I:%M%p";
 				
 			} else if ( sTimePeriod==="year" ) {
 				sAxisX_FormatTickString = "%#d&nbsp;%b&nbsp;%y";
