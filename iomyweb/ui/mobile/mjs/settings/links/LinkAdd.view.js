@@ -49,7 +49,7 @@ sap.ui.jsview("mjs.settings.links.LinkAdd", {
             view : me,
             controller : oController,
             icon : "sap-icon://IOMy1/appliances",
-            title : "New Link"
+            title : "New Device"
         });
 		
 		

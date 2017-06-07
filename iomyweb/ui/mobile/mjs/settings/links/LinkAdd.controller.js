@@ -54,8 +54,6 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                     // Start the form creation
                     me.DestroyUI();         // STEP 1: Clear any old forms to avoid duplicate IDs
                     me.DrawUI();            // STEP 2: Draw the actual user interface
-                    // Reset any old logs
-                    IOMy.devices.zigbeesmartplug.ZigbeeTelnetLog = [];
                 //}                
 			}
 		});
@@ -841,7 +839,8 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         
         // Labels
         var oIPAddressAndPortLabel;
-        var oDeviceUserTokenLabel;
+        var oDeviceUserNameLabel;
+        var oDeviceUserPasswordLabel;
         // Fields
         // --IP Address and Port
         var oIPAddressField;            // sap.m.Input
@@ -849,7 +848,8 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         var oIPPort;                    // sap.m.Input
         var oIPAddressAndPortBox;       // sap.m.HBox
         // --Device User Token
-        var oDeviceUserTokenField;      // sap.m.Input
+        var oDeviceUserNameField;      // sap.m.Input
+        var oDeviceUserPasswordField;  // sap.m.Input
         
         //--------------------------------------------------------------------//
         // Change the help message for the New Link page.
@@ -879,6 +879,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         me.aElementsForAFormToDestroy.push("IPAddressField");
         oIPAddressField = new sap.m.Input(me.createId("IPAddressField"), {
 			layoutData : new sap.m.FlexItemData({ growFactor : 1 }),
+			placeholder : "Enter IP Address..."
 		}).addStyleClass("SettingsTextInput");
         
 		// TEXT BOX
@@ -890,7 +891,8 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 		// PORT INPUT
         me.aElementsForAFormToDestroy.push("IPPortField");
         oIPPort = new sap.m.Input(me.createId("IPPortField"), {
-            value : "888"
+            value : "888",
+			placeholder : "Port"
         }).addStyleClass("maxwidth80px SettingsTextInput");
         
 		// HBOX CONTAINER
@@ -907,15 +909,17 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         
         // LABEL
         me.aElementsForAFormToDestroy.push("UsernameLabel");
-        oDeviceUserTokenLabel = new sap.m.Label(me.createId("UsernameLabel"), {
+        oDeviceUserNameLabel = new sap.m.Label(me.createId("UsernameLabel"), {
             text : "Username"
         });
-        me.byId("formBox").addItem(oDeviceUserTokenLabel);
+        me.byId("formBox").addItem(oDeviceUserNameLabel);
         
         // FIELD
         me.aElementsForAFormToDestroy.push("Username");
-        oDeviceUserTokenField = new sap.m.Input(me.createId("Username"), {}).addStyleClass("width100Percent SettingsTextInput");
-        me.byId("formBox").addItem(oDeviceUserTokenField);
+        oDeviceUserNameField = new sap.m.Input(me.createId("Username"), {
+			placeholder : "Username of the camera user"
+		}).addStyleClass("width100Percent SettingsTextInput");
+        me.byId("formBox").addItem(oDeviceUserNameField);
         
         //-----------------------------------------------//
         // PASSWORD                                      //
@@ -923,17 +927,18 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         
         // LABEL
         me.aElementsForAFormToDestroy.push("PasswordLabel");
-        oDeviceUserTokenLabel = new sap.m.Label(me.createId("PasswordLabel"), {
+        oDeviceUserPasswordLabel = new sap.m.Label(me.createId("PasswordLabel"), {
             text : "Password"
         });
-        me.byId("formBox").addItem(oDeviceUserTokenLabel);
+        me.byId("formBox").addItem(oDeviceUserPasswordLabel);
         
         // FIELD
         me.aElementsForAFormToDestroy.push("Password");
-        oDeviceUserTokenField = new sap.m.Input(me.createId("Password"), {
-            type : sap.m.InputType.Password
+        oDeviceUserPasswordField = new sap.m.Input(me.createId("Password"), {
+            type : sap.m.InputType.Password,
+			placeholder : "Password for the camera"
         }).addStyleClass("width100Percent SettingsTextInput");
-        me.byId("formBox").addItem(oDeviceUserTokenField);
+        me.byId("formBox").addItem(oDeviceUserPasswordField);
     },
     
 	
