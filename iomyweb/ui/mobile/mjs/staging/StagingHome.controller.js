@@ -30,6 +30,7 @@ sap.ui.controller("mjs.staging.StagingHome", {
 		{ "display" : "MotionJPEG" , "link" : "pMotionJPEG" },
 		{ "display" : "Add IPC" , "link" : "pAddIPC" },
 		{ "display" : "Telnet" , "link" : "pTelnet" },
+		{ "display" : "AddCamera" , "link" : "pAddCamera" },
 	],
 	
 	

@@ -1666,6 +1666,18 @@ var aPages = [
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.AddIPC\" Page!\n"
 	},
 	{ 
+		"Id":			"pAddCamera",
+		"Location":		"mjs.staging.AddCamera",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.AddCamera\" Page!\n"
+	},
+	{ 
+		"Id":			"pCameraPreset",
+		"Location":		"mjs.staging.CameraPreset",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.CameraPreset\" Page!\n"
+	},
+	{ 
 		"Id":			"pTelnet",
 		"Location":		"mjs.staging.Telnet",
 		"Type":			"JS",
