@@ -62,7 +62,7 @@ $.extend(IOMy.pages,{
 	},
 	
 	/**
-	 * Procedure that creates a page if it does not exist already
+	 * This procedure creates a page if it does not exist already.
 	 * 
 	 * @param {type} sID
 	 */
@@ -78,7 +78,19 @@ $.extend(IOMy.pages,{
 				// Declare variables
 				//--------------------------------//
 				var aPageData		= this.getPageData(sID);
+				var sType;
 				sErMesg				= aPageData.ErrMesg;
+				
+				switch(aPageData.Type) {
+					case "JS":
+						sType =		sap.ui.core.mvc.ViewType.JS;
+						break;
+
+					case "XML":
+						sType =		sap.ui.core.mvc.ViewType.XML;
+						break;
+
+				}
 
 				//------------------------------------//
 				// Add the page
@@ -87,7 +99,7 @@ $.extend(IOMy.pages,{
 					new sap.ui.view({
 						id:			aPageData.Id,
 						viewName:	aPageData.Location,
-						type:		"JS"
+						type:		sType
 					})
 				);
 			
