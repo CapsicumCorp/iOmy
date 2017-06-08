@@ -56,6 +56,31 @@ li.sapMSelectListItemBaseInvisible {
 	display: none;
 }
 
+/* focus */
+html.sap-desktop .sapMSelectListItemBase:focus {
+	outline: dotted 1px;
+	outline-offset: -2px;
+}
+
+html[data-sap-ui-browser^="ie"].sap-desktop,
+html[data-sap-ui-browser^="ed"].sap-desktop {
+
+	li.sapMSelectListItemBase.sapMSelectListItemBaseSelected:not(.sapMSelectListRow) {
+		outline: none;
+		position: relative;
+	}
+
+	li.sapMSelectListItemBase.sapMSelectListItemBaseSelected:not(.sapMSelectListRow)::before {
+		content: " ";
+		position: absolute;
+		top: 1px;
+		right: 1px;
+		bottom: 1px;
+		left: 1px;
+		pointer-events: none;
+	}
+}
+
 /* ------------------------------ */
 /* row                            */
 /* ------------------------------ */

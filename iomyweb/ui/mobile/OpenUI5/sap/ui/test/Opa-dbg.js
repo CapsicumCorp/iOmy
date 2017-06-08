@@ -3,15 +3,29 @@
  * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global', 'sap/ui/Device'], function (jQuery, Device) {
+
+/*global Math */
+sap.ui.define([
+	'jquery.sap.global',
+	'sap/ui/Device',
+	'./_LogCollector',
+	'./_ParameterValidator'
+], function ($, Device, _LogCollector, _ParameterValidator) {
 	"use strict";
 
 	///////////////////////////////
 	/// Privates
 	///////////////////////////////
-	var $ = jQuery,
+	var oLogger = $.sap.log.getLogger("sap.ui.test.Opa", _LogCollector.DEFAULT_LEVEL_FOR_OPA_LOGGERS),
+		oLogCollector = _LogCollector.getInstance(),
 		queue = [],
-		context = {};
+		context = {},
+		timeout = -1,
+		isStopped,
+		oDeferred,
+		oValidator = new _ParameterValidator({
+			errorPrefix: "sap.ui.test.Opa#waitFor"
+		});
 
 	function internalWait (fnCallback, oOptions, oDeferred) {
 
@@ -24,12 +38,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'], function (jQuery, Device) 
 		fnCheck();
 
 		function fnCheck () {
-
+			var oResult;
+			oLogCollector.getAndClearLog();
 			try {
-				var oResult = fnCallback();
-			} catch (err) {
-				oDeferred.reject(oOptions);
-				throw err;
+				oResult = fnCallback();
+			} catch (oError) {
+				oDeferred.reject(oOptions, oError);
+				throw oError;
 			}
 
 			if (oResult.result) {
@@ -45,7 +60,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'], function (jQuery, Device) 
 			var iPassedSeconds = Math.round(timeDiff % 60);
 
 			if (oOptions.timeout > iPassedSeconds) {
-				setTimeout(fnCheck, oOptions.pollingInterval);
+				timeout = setTimeout(fnCheck, oOptions.pollingInterval);
 				// timeout not yet reached
 				return;
 			}
@@ -54,7 +69,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'], function (jQuery, Device) 
 				try {
 					oOptions.error(oOptions, oResult.arguments);
 				} finally {
-					oDeferred.reject(oOptions, oResult.arguments);
+					oDeferred.reject(oOptions);
 				}
 				return;
 			}
@@ -64,8 +79,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'], function (jQuery, Device) 
 
 	}
 
-	function internalEmpty(deferred) {
-		var iInitialDelay = Device.browser.msie ? 50 : 0;
+	function internalEmpty (deferred) {
 		if (queue.length === 0) {
 			deferred.resolve();
 			return true;
@@ -73,27 +87,23 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'], function (jQuery, Device) 
 
 		var queueElement = queue.shift();
 
-		// TODO: this only affects IE with the IFrame startup without the frame the timeout can probably be 0 but this need to be evaluated as soon as we have an alternative startup
-		// This has to be here for IFrame with IE - if there is no timeout 50, there is a window with all properties undefined.
-		// Therefore the core code throws exceptions, when functions like setTimeout are called.
-		// I don't have a proper explanation for this.
-		setTimeout(function () {
+		timeout = setTimeout(function () {
 			internalWait(queueElement.callback, queueElement.options, deferred);
-		}, iInitialDelay);
+		}, Opa.config.executionDelay);
 	}
 
-	function ensureNewlyAddedWaitForStatementsPrepended(iPreviousQueueLength, nestedInOptions){
-		var iNewWaitForsCount = queue.length - iPreviousQueueLength;
+	function ensureNewlyAddedWaitForStatementsPrepended (oWaitForCounter, oNestedInOptions){
+		var iNewWaitForsCount = oWaitForCounter.get();
 		if (iNewWaitForsCount) {
-			var aNewWaitFors = queue.splice(iPreviousQueueLength, iNewWaitForsCount);
+			var aNewWaitFors = queue.splice(queue.length - iNewWaitForsCount, iNewWaitForsCount);
 			aNewWaitFors.forEach(function(queueElement) {
-				queueElement.options._nestedIn = nestedInOptions;
+				queueElement.options._nestedIn = oNestedInOptions;
 			});
 			queue = aNewWaitFors.concat(queue);
 		}
 	}
 
-	function createStack(iDropCount) {
+	function createStack (iDropCount) {
 		iDropCount = (iDropCount || 0) + 2;
 
 		if (Device.browser.mozilla) {
@@ -121,6 +131,21 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'], function (jQuery, Device) 
 		stack = stack.split("\n");
 		stack.splice(0, iDropCount);
 		return stack.join("\n");
+	}
+
+	function addStacks (oOptions) {
+		var sResult = "\nCallstack:\n";
+		if (oOptions._stack) {
+			sResult += oOptions._stack;
+			delete oOptions._stack;
+		} else {
+			sResult += "Unknown";
+		}
+		if (oOptions._nestedIn) {
+			sResult += addStacks(oOptions._nestedIn);
+			delete oOptions._nestedIn;
+		}
+		return sResult;
 	}
 	///////////////////////////////
 	/// Public
@@ -156,20 +181,114 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'], function (jQuery, Device) 
 	 * 		<li>timeout : 15 seconds, is increased to 5 minutes if running in debug mode e.g. with URL parameter sap-ui-debug=true</li>
 	 * 		<li>pollingInterval: 400 milliseconds</li>
 	 * </ul>
-	 * You can either directly manipulate the config, or extend it using {@link sap.ui.test.Opa#.extendConfig}
+	 * You can either directly manipulate the config, or extend it using {@link sap.ui.test.Opa.extendConfig}
 	 * @public
 	 */
 	Opa.config = {};
 
 	/**
-	 * Extends and overwrites default values of the Opa.config
+	 * Extends and overwrites default values of the {@link sap.ui.test.Opa.config}.
+	 * Sample usage:
+	 * <pre>
+	 *     <code>
+	 *         var oOpa = new Opa();
+	 *
+	 *         // this statement will  will time out after 15 seconds and poll every 400ms.
+	 *         // those two values come from the defaults of {@link sap.ui.test.Opa.config}.
+	 *         oOpa.waitFor({
+	 *         });
+	 *
+	 *         // All wait for statements added after this will take other defaults
+	 *         Opa.extendConfig({
+	 *             timeout: 10,
+	 *             pollingInterval: 100
+	 *         });
+	 *
+	 *         // this statement will time out after 10 seconds and poll every 100 ms
+	 *         oOpa.waitFor({
+	 *         });
+	 *
+	 *         // this statement will time out after 20 seconds and poll every 100 ms
+	 *         oOpa.waitFor({
+	 *             timeout: 20;
+	 *         });
+	 *     </code>
+	 * </pre>
+	 *
+	 * @since 1.40 The own properties of 'arrangements, actions and assertions' will be kept.
+	 * Here is an example:
+	 * <pre>
+	 *     <code>
+	 *         // An opa action with an own property 'clickMyButton'
+	 *         var myOpaAction = new Opa();
+	 *         myOpaAction.clickMyButton = // function that clicks MyButton
+	 *         Opa.config.actions = myOpaAction;
+	 *
+	 *         var myExtension = new Opa();
+	 *         Opa.extendConfig({
+	 *             actions: myExtension
+	 *         });
+	 *
+	 *         // The clickMyButton function is still available - the function is logged out
+	 *         console.log(Opa.config.actions.clickMyButton);
+	 *
+	 *         // If
+	 *         var mySecondExtension = new Opa();
+	 *         mySecondExtension.clickMyButton = // a different function than the initial one
+	 *         Opa.extendConfig({
+	 *             actions: mySecondExtension
+	 *         });
+	 *
+	 *         // Now clickMyButton function is the function of the second extension not the first one.
+	 *         console.log(Opa.config.actions.clickMyButton);
+	 *     </code>
+	 * </pre>
 	 *
 	 * @param {object} options The values to be added to the existing config
 	 * @public
 	 */
 	Opa.extendConfig = function (options) {
-		Opa.config = jQuery.extend(Opa.config, options);
+		// Opa extend to preserver properties on these three parameters
+		["actions", "assertions", "arrangements"].forEach(function (sArrangeActAssert) {
+			if (!options[sArrangeActAssert]) {
+				return;
+			}
+
+			Object.keys(Opa.config[sArrangeActAssert]).forEach(function (sKey) {
+				if (!options[sArrangeActAssert][sKey]) {
+					options[sArrangeActAssert][sKey] = Opa.config[sArrangeActAssert][sKey];
+				}
+			});
+		});
+
+		Opa.config = $.extend(Opa.config, options);
 	};
+
+	var iExecutionDelay, sExecutionDelayFromUrl = $.sap.getUriParameters().get("opaExecutionDelay");
+
+	if (sExecutionDelayFromUrl){
+		iExecutionDelay = parseInt(sExecutionDelayFromUrl, 10);
+	}
+
+	// These browsers are not executing Promises as microtasks so slow down OPA a bit to let mircotasks before other tasks.
+	// TODO: A proper solution would be waiting for all the active timeouts in the synchronization part until then this is a workaround
+
+	// TODO: Workaround for IE with the IFrame startup. Without the frame the timeout can probably be 0 but this need to be evaluated as soon as we have an alternative startup
+	// This has to be here for IFrame with IE - if there is no timeout 50, there is a window with all properties undefined.
+	// Therefore the core code throws exceptions, when functions like setTimeout are called.
+	// I don't have a proper explanation for this.
+	if (!iExecutionDelay) {
+		// phantom is flagged as safari but actually we do not want to set the tiemout higher in phantomjs
+		var bIsSafariButNotPhantom = Device.browser.safari && !Device.browser.phantomJS;
+
+		if (Device.browser.msie || Device.browser.edge || bIsSafariButNotPhantom) {
+			iExecutionDelay = 50;
+		} else {
+			iExecutionDelay = 0;
+		}
+	}
+
+
 
 	/**
 	 * Reset Opa.config to its default values.
@@ -182,6 +301,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'], function (jQuery, Device) 
 	 * 		<li>assertions: A new Opa instance</li>
 	 * 		<li>timeout : 15 seconds, is increased to 5 minutes if running in debug mode e.g. with URL parameter sap-ui-debug=true</li>
 	 * 		<li>pollingInterval: 400 milliseconds</li>
+	 * 		<li>
+	 * 			executionDelay: 0 or 50 (depending on the browser) or coming from an URL parameter opaExecutionDelay.
+	 * 			The URL parameter takes priority over the browser value. The value is a number representing milliseconds.
+	 * 			The executionDelay will slow down the execution of every single waitFor statement to be delayed by the number of milliseconds.
+	 * 			This does not effect the polling interval it just adds an initial pause.
+	 * 			Use this parameter to slow down OPA when you want to watch your test during development or checking the UI of your app.
+	 * 			It is not recommended to use this parameter in any automated test executions.
+	 * 		</li>
 	 * </ul>
 	 *
 	 * @public
@@ -192,6 +319,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'], function (jQuery, Device) 
 			arrangements : new Opa(),
 			actions : new Opa(),
 			assertions : new Opa(),
+			executionDelay : iExecutionDelay,
 			timeout : 15,
 			pollingInterval : 400,
 			_stackDropCount : 0 //Internal use. Specify numbers of additional stack frames to remove for logging
@@ -217,31 +345,87 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'], function (jQuery, Device) 
 	 * @public
 	 */
 	Opa.emptyQueue = function emptyQueue () {
-		function addStacks(oOptions) {
-			var sResult = "\nCallstack:\n";
-			if (oOptions._stack) {
-				sResult += oOptions._stack;
-				delete oOptions._stack;
-			} else {
-				sResult += "Unknown";
-			}
-			if (oOptions._nestedIn) {
-				sResult += addStacks(oOptions._nestedIn);
-				delete oOptions._nestedIn;
-			}
-			return sResult;
-		}
-
-		var oDeferred = $.Deferred();
+		oDeferred = $.Deferred();
+		isStopped = false;
 
 		internalEmpty(oDeferred);
 
-		return oDeferred.promise().fail(function(oOptions){
+		return oDeferred.promise().fail(function(oOptions, oError){
 			queue = [];
-			oOptions.errorMessage = oOptions.errorMessage || "Failed to wait for check";
-			oOptions.errorMessage += addStacks(oOptions);
-			jQuery.sap.log.error(oOptions.errorMessage);
+			var oStackOptions,
+				sErrorMessage = "";
+
+			if (oOptions.errorMessage) {
+				sErrorMessage = oOptions.errorMessage + "\n";
+			}
+
+			if (isStopped) {
+				sErrorMessage += oOptions.stoppedManually ? "Queue was stopped manually" : "QUnit timeout";
+				oStackOptions = { _stack : createStack(1) };
+			} else if (!oError) {
+				sErrorMessage += "Opa timeout";
+			} else if (oError) {
+				var sExceptionText = oError.toString();
+				// Some browsers don't have the stack property it will be added later for those browsers
+				if (oError.stack) {
+					sExceptionText += "\n" + oError.stack;
+				}
+
+				sErrorMessage += "Exception thrown by the testcode:'" + sExceptionText + "'";
+			}
+
+			if (!oStackOptions) {
+				oStackOptions = oOptions;
+			}
+
+			var sLogs = oLogCollector.getAndClearLog();
+			if (sLogs) {
+				sErrorMessage += "\nThis is what Opa logged:\n" + sLogs;
+			}
+
+			if (!(oError && oError.stack)) {
+				// if we do not have a stack in the exception (IE) manually add it
+				sErrorMessage += addStacks(oStackOptions);
+			}
+
+			oLogger.error(sErrorMessage, "Opa");
+			oOptions.errorMessage = sErrorMessage;
+		}).always(function () {
+			timeout = -1;
+			oDeferred = null;
 		});
+	};
+
+	/**
+	 * Clears the queue and stops running tests so that new tests can be run.
+	 * This means all waitFor statements registered by {@link sap.ui.test.Opa#waitFor} will not be invoked anymore and
+	 * the promise returned by {@link sap.ui.test.Opa.emptyQueue}
+	 * will be rejected or resolved depending on the failTest parameter.
+	 * When its called inside of a check in {@link sap.ui.test.Opa#waitFor}
+	 * the success function of this waitFor will not be called.
+	 * @since 1.40.1
+	 * @public
+	 */
+	Opa.stopQueue = function stopQueue () {
+		Opa._stopQueue(true);
+	};
+
+	Opa._stopQueue = function (bStoppedManually) {
+		// clear queue
+		queue = [];
+
+		// clear running tests
+		if (!oDeferred) {
+			oLogger.warning("stopQueue was called before emptyQueue, queued tests have never been executed", "Opa");
+		} else {
+			if (timeout !== -1) {
+				clearTimeout(timeout);
+			}
+
+			isStopped = true;
+
+			oDeferred.reject({stoppedManually: bStoppedManually});
+		}
 	};
 
 	//create the default config
@@ -262,7 +446,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'], function (jQuery, Device) 
 
 		/**
 		 * Queues up a waitFor command for Opa.
-		 * The Queue will not be emptied until {@link sap.ui.test.Opa#.emptyQueue} is called.
+		 * The Queue will not be emptied until {@link sap.ui.test.Opa.emptyQueue} is called.
 		 * If you are using {@link sap.ui.test.opaQunit}, emptyQueue will be called by the wrapped tests.
 		 *
 		 * If you are using Opa5, waitFor takes additional parameters.
@@ -273,23 +457,29 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'], function (jQuery, Device) 
 		 *
 		 * @public
 		 * @param {object} options These contain check, success and error functions
-		 * @param {integer} [oOptions.timeout] default: 15 - (seconds) Specifies how long the waitFor function polls before it fails.
-		 * @param {integer} [oOptions.pollingInterval] default: 400 - (milliseconds) Specifies how often the waitFor function polls.
-		 * @param {function} [oOptions.check] Will get invoked in every polling interval. If it returns true, the check is successful and the polling will stop.
+		 * @param {int} [options.timeout] default: 15 - (seconds) Specifies how long the waitFor function polls before it fails.
+		 * @param {int} [options.pollingInterval] default: 400 - (milliseconds) Specifies how often the waitFor function polls.
+		 * @param {function} [options.check] Will get invoked in every polling interval.
+		 * If it returns true, the check is successful and the polling will stop.
 		 * The first parameter passed into the function is the same value that gets passed to the success function.
 		 * Returning something other than boolean in the check will not change the first parameter of success.
-		 * @param {function} [oOptions.success] Will get invoked after the check function returns true. If there is no check function defined,
-		 * it will be directly invoked. waitFor statements added in the success handler will be executed before previously added waitFor statements
-		 * @param {string} [oOptions.errorMessage] Will be displayed as an errorMessage depending on your unit test framework.
+		 * @param {function} [options.success] Will get invoked after the check function returns true.
+		 * If there is no check function defined, it will be directly invoked.
+		 * waitFor statements added in the success handler will be executed before previously added waitFor statements.
+		 * @param {string} [options.errorMessage] Will be displayed as an errorMessage depending on your unit test framework.
 		 * Currently the only adapter for Opa is QUnit.
 		 * This message is displayed there if Opa has reached its timeout but QUnit has not yet reached it.
 		 * @returns {jQuery.promise} A promise that gets resolved on success
 		 */
 		waitFor : function (options) {
-			var deferred = $.Deferred();
-				options = $.extend({},
-				Opa.config,
+			var deferred = $.Deferred(),
+				oFilteredConfig = Opa._createFilteredConfig(Opa._aConfigValuesForWaitFor);
+
+			options = $.extend({},
+				oFilteredConfig,
 				options);
+
+			this._validateWaitFor(options);
 
 			options._stack = createStack(1 + options._stackDropCount);
 			delete options._stackDropCount;
@@ -304,22 +494,25 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'], function (jQuery, Device) 
 					if (options.check) {
 						try {
 							bResult = options.check.apply(this, arguments);
-						} catch (err) {
-							deferred.reject(options);
-							throw err;
+						} catch (oError) {
+							deferred.reject(options, oError);
+							throw oError;
 						}
+					}
+
+					if (isStopped) {
+						// skip executing success and don't add new things
+						return { result: true, arguments: arguments };
 					}
 
 					if (bResult) {
 						if (options.success) {
+							var oWaitForCounter = Opa._getWaitForCounter();
+							// do not catch here, there is another catch around the whole function
 							try {
-								var iCurrentQueueLength = queue.length;
 								options.success.apply(this, arguments);
-							} catch (err) {
-								deferred.reject(options);
-								throw err;
 							} finally {
-								ensureNewlyAddedWaitForStatementsPrepended(iCurrentQueueLength, options);
+								ensureNewlyAddedWaitForStatementsPrepended(oWaitForCounter, options);
 							}
 						}
 						deferred.resolve();
@@ -333,18 +526,70 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'], function (jQuery, Device) 
 		},
 
 		/**
-		 * Calls the static extendConfig function in the Opa namespace {@link sap.ui.test.Opa#.extendConfig}
+		 * Calls the static extendConfig function in the Opa namespace {@link sap.ui.test.Opa.extendConfig}
 		 * @public
 		 * @function
 		 */
 		extendConfig : Opa.extendConfig,
 
 		/**
-		 * Calls the static emptyQueue function in the Opa namespace {@link sap.ui.test.Opa#.emptyQueue}
+		 * Calls the static emptyQueue function in the Opa namespace {@link sap.ui.test.Opa.emptyQueue}
 		 * @public
 		 * @function
 		 */
-		emptyQueue : Opa.emptyQueue
+		emptyQueue : Opa.emptyQueue,
+
+		_validateWaitFor: function (oParameters) {
+			oValidator.validate({
+				validationInfo: Opa._validationInfo,
+				inputToValidate: oParameters
+			});
+		}
+	};
+
+	Opa._createFilteredOptions = function (aAllowedProperties, oSource) {
+		var oFilteredOptions = {};
+		aAllowedProperties.forEach(function (sKey) {
+			var vConfigValue = oSource[sKey];
+			if (vConfigValue === undefined) {
+				return;
+			}
+			oFilteredOptions[sKey] = vConfigValue;
+		});
+		return oFilteredOptions;
+	};
+
+	Opa._createFilteredConfig = function (aAllowedProperties) {
+		return Opa._createFilteredOptions(aAllowedProperties, Opa.config);
+	};
+
+	Opa._getWaitForCounter = function () {
+		var iQueueLengthOnCreation = queue.length;
+
+		return {
+			get: function () {
+				var iLength = queue.length - iQueueLengthOnCreation;
+				// never return negative numbers
+				return Math.max(iLength, 0);
+			}
+		};
+	};
+
+	Opa._aConfigValuesForWaitFor = [
+		"errorMessage",
+		"timeout",
+		"pollingInterval",
+		"_stackDropCount"
+	];
+
+	Opa._validationInfo = {
+		error: "func",
+		check: "func",
+		success: "func",
+		timeout: "numeric",
+		pollingInterval: "numeric",
+		_stackDropCount: "numeric",
+		errorMessage: "string"
 	};
 
 

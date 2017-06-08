@@ -28,7 +28,7 @@ sap.ui.define(['jquery.sap.global', './BarInPageEnabler', './ToolbarLayoutData',
 	 * @implements sap.ui.core.Toolbar,sap.m.IBar
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -105,7 +105,8 @@ sap.ui.define(['jquery.sap.global', './BarInPageEnabler', './ToolbarLayoutData',
 					srcControl : {type : "sap.ui.core.Control"}
 				}
 			}
-		}
+		},
+		designTime: true
 	}});
 
 	EnabledPropagator.call(Toolbar.prototype);
@@ -661,6 +662,27 @@ sap.ui.define(['jquery.sap.global', './BarInPageEnabler', './ToolbarLayoutData',
 	};
 
 	/**
+	 * Returns the first sap.m.Title control instance inside the toolbar for the accessibility
+	 *
+	 * @returns {sap.m.Title|undefined}
+	 * @since 1.44
+	 * @protected
+	 */
+	Toolbar.prototype.getTitleControl = function() {
+		if (!sap.m.Title) {
+			return;
+		}
+
+		var aContent = this.getContent();
+		for (var i = 0; i < aContent.length; i++) {
+			var oContent = aContent[i];
+			if (oContent instanceof sap.m.Title && oContent.getVisible()) {
+				return oContent;
+			}
+		}
+	};
+
+	/**
 	 * Returns the first sap.m.Title control id inside the toolbar for the accessibility
 	 *
 	 * @returns {String}
@@ -668,19 +690,8 @@ sap.ui.define(['jquery.sap.global', './BarInPageEnabler', './ToolbarLayoutData',
 	 * @protected
 	 */
 	Toolbar.prototype.getTitleId = function() {
-		if (!sap.m.Title) {
-			return "";
-		}
-
-		var aContent = this.getContent();
-		for (var i = 0; i < aContent.length; i++) {
-			var oContent = aContent[i];
-			if (oContent instanceof sap.m.Title) {
-				return oContent.getId();
-			}
-		}
-
-		return "";
+		var oTitle = this.getTitleControl();
+		return oTitle ? oTitle.getId() : "";
 	};
 
 	///////////////////////////
@@ -688,7 +699,7 @@ sap.ui.define(['jquery.sap.global', './BarInPageEnabler', './ToolbarLayoutData',
 	///////////////////////////
 	/**
 	 * Returns if the bar is sensitive to the container context. Implementation of the IBar interface
-	 * @returns {bool} isContextSensitive
+	 * @returns {boolean} isContextSensitive
 	 * @protected
 	 */
 	Toolbar.prototype.isContextSensitive = BarInPageEnabler.prototype.isContextSensitive;

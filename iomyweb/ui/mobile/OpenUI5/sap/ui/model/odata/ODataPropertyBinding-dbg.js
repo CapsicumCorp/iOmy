@@ -5,7 +5,7 @@
  */
 
 // Provides class sap.ui.model.odata.ODataPropertyBinding
-sap.ui.define(['jquery.sap.global', 'sap/ui/model/ChangeReason', 'sap/ui/model/PropertyBinding'],
+sap.ui.define(['jquery.sap.global', 'sap/ui/model/ChangeReason', 'sap/ui/model/PropertyBinding', 'sap/ui/model/ChangeReason'],
 	function(jQuery, ChangeReason, PropertyBinding) {
 	"use strict";
 
@@ -71,11 +71,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ChangeReason', 'sap/ui/model/P
 	 * @see sap.ui.model.PropertyBinding.prototype.setValue
 	 */
 	ODataPropertyBinding.prototype.setValue = function(oValue){
+		if (this.bSuspended) {
+			return;
+		}
+
 		if (!jQuery.sap.equal(oValue, this.oValue) && this.oModel.setProperty(this.sPath, oValue, this.oContext, true)) {
 			this.oValue = oValue;
 
 			var oDataState = this.getDataState();
 			oDataState.setValue(this.oValue);
+			this.oModel.firePropertyChange({reason: ChangeReason.Binding, path: this.sPath, context: this.oContext, value: oValue});
 		}
 	};
 
@@ -85,6 +90,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ChangeReason', 'sap/ui/model/P
 	 */
 	ODataPropertyBinding.prototype.setContext = function(oContext) {
 		if (this.oContext != oContext) {
+			sap.ui.getCore().getMessageManager().removeMessages(this.getDataState().getControlMessages(), true);
 			this.oContext = oContext;
 			if (this.isRelative()) {
 				this.checkUpdate();
@@ -100,6 +106,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ChangeReason', 'sap/ui/model/P
 	 *
 	 */
 	ODataPropertyBinding.prototype.checkUpdate = function(bForceUpdate){
+		if (this.bSuspended && !bForceUpdate) {
+			return;
+		}
+
 		var oDataState = this.getDataState();
 		var bChanged = false;
 

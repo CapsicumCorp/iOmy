@@ -25,7 +25,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './ListItemBase', './
 	 * @extends sap.m.ListItemBase
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -87,7 +87,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './ListItemBase', './
 		if (this._oPopin) {
 			this._oPopin.destroy(true);
 			this._oPopin = null;
-			this.removePopin();
 		}
 	};
 
@@ -132,7 +131,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './ListItemBase', './
 				ontouchend: this.ontouchend,
 				ontouchcancel: this.ontouchcancel,
 				onsaptabnext: this.onsaptabnext,
-				onsaptabprevious: this.onsaptabprevious
+				onsaptabprevious: this.onsaptabprevious,
+				onsapup: this.onsapup,
+				onsapdown: this.onsapdown
 			}, this).setParent(this, null, true);
 		}
 
@@ -162,7 +163,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './ListItemBase', './
 	 * @protected
 	 */
 	ColumnListItem.prototype.removePopin = function() {
-		this.$Popin().remove();
+		this._oPopin && this.$Popin().remove();
 	};
 
 	/**
@@ -177,15 +178,44 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './ListItemBase', './
 		return this.$().add(this.$Popin()).find(":sapTabbable");
 	};
 
+	ColumnListItem.prototype.getAccessibilityType = function(oBundle) {
+		return oBundle.getText("ACC_CTR_TYPE_ROW");
+	};
+
+	ColumnListItem.prototype.getContentAnnouncement = function(oBundle) {
+		var oTable = this.getTable();
+		if (!oTable) {
+			return;
+		}
+
+		var sAnnouncement = "",
+			aCells = this.getCells(),
+			aColumns = oTable.getColumns(true);
+
+		aColumns.forEach(function(oColumn) {
+			var oCell = aCells[oColumn.getInitialOrder()];
+			if (!oCell || !oColumn.getVisible() || (oColumn.isHidden() && !oColumn.isPopin())) {
+				return;
+			}
+
+			var oHeader = oColumn.getHeader();
+			if (oHeader && oHeader.getVisible()) {
+				sAnnouncement += ListItemBase.getAccessibilityText(oHeader) + " ";
+			}
+
+			sAnnouncement += ListItemBase.getAccessibilityText(oCell, true) + " ";
+		});
+
+		return sAnnouncement;
+	};
+
 	// update the aria-selected for the cells
 	ColumnListItem.prototype.updateSelectedDOM = function(bSelected, $This) {
 		ListItemBase.prototype.updateSelectedDOM.apply(this, arguments);
-		$This.children().attr("aria-selected", bSelected);
 
 		// update popin as well
 		if (this.hasPopin()) {
 			this.$Popin().attr("aria-selected", bSelected);
-			this.$("subcell").attr("aria-selected", bSelected);
 		}
 	};
 
@@ -214,17 +244,18 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './ListItemBase', './
 	};
 
 	// Adds cloned header to the local collection
-	sap.m.ColumnListItem.prototype._addClonedHeader = function(oHeader) {
+	ColumnListItem.prototype._addClonedHeader = function(oHeader) {
 		return this._aClonedHeaders.push(oHeader);
 	};
 
 	// Destroys cloned headers that are generated for popin
-	sap.m.ColumnListItem.prototype._destroyClonedHeaders = function() {
-		this._aClonedHeaders.forEach(function(oClone) {
-			oClone.destroy(true);
-		});
-
-		this._aClonedHeaders = [];
+	ColumnListItem.prototype._destroyClonedHeaders = function() {
+		if (this._aClonedHeaders.length) {
+			this._aClonedHeaders.forEach(function(oClone) {
+				oClone.destroy("KeepDom");
+			});
+			this._aClonedHeaders = [];
+		}
 	};
 
 	// active feedback for pop-in

@@ -16,7 +16,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'jquery.sap.dom', 'jquery.s
 		$.sap.simulateMobileOnDesktop = false;
 
 		// OS overriding mechanism
-		if ((Device.browser.webkit || (Device.browser.msie && Device.browser.version >= 10)) && !jQuery.support.touch) { // on non-touch webkit browsers and IE10 we are interested in overriding
+		if ((Device.browser.webkit || Device.browser.msie) && !jQuery.support.touch) { // on non-touch webkit browsers and IE we are interested in overriding
 
 			var result = document.location.search.match(FAKE_OS_PATTERN);
 			var resultUA = result && result[1] || jQuery.sap.byId("sap-ui-bootstrap").attr("data-sap-ui-xx-fakeOS");
@@ -385,7 +385,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'jquery.sap.dom', 'jquery.s
 					//<link rel="apple-touch-startup-image" href="/startup.png">
 				}
 
-				if (options.preventScroll && !sap.ui.Device.os.blackberry) {
+				if (options.preventScroll && Device.os.ios) {
 					$(window).bind("touchmove", function sapInitMobileTouchMoveHandle(oEvent) {
 						if (!oEvent.isMarked()) {
 							oEvent.preventDefault(); // prevent the rubber-band effect

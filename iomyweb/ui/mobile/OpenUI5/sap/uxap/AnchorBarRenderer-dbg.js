@@ -4,8 +4,8 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["sap/m/ToolbarRenderer", "sap/ui/core/Renderer", "sap/m/BarInPageEnabler", "./library"],
-	function (ToolbarRenderer, Renderer, BarInPageEnabler, library) {
+sap.ui.define(["sap/m/ToolbarRenderer", "sap/ui/core/Renderer", "sap/m/BarInPageEnabler", "./AnchorBar", "./library"],
+	function (ToolbarRenderer, Renderer, BarInPageEnabler, AnchorBar, library) {
 		"use strict";
 
 		/**
@@ -31,7 +31,7 @@ sap.ui.define(["sap/m/ToolbarRenderer", "sap/ui/core/Renderer", "sap/m/BarInPage
 				rm.writeAttributeEscaped("id", oToolbar.getId() + "-scroll");
 				rm.write(">");
 
-				ToolbarRenderer.renderBarContent.apply(this, arguments);
+				AnchorBarRenderer.renderBarItems(rm, oToolbar);
 
 				rm.write("</div>");
 
@@ -42,9 +42,26 @@ sap.ui.define(["sap/m/ToolbarRenderer", "sap/ui/core/Renderer", "sap/m/BarInPage
 
 			BarInPageEnabler.addChildClassTo(oToolbar._oSelect, oToolbar);
 			rm.renderControl(oToolbar._oSelect);
-
 		};
 
+		AnchorBarRenderer.renderBarItems = function (rm, oToolbar) {
+
+			var sSelectedItemId = oToolbar.getSelectedButton();
+			oToolbar.getContent().forEach(function(oControl) {
+				BarInPageEnabler.addChildClassTo(oControl, oToolbar);
+				if (oControl.getId() === sSelectedItemId) {
+					oControl.addStyleClass("sapUxAPAnchorBarButtonSelected");
+				}
+				rm.renderControl(oControl);
+			});
+		};
+
+		AnchorBarRenderer.decorateRootElement = function (rm, oToolbar) {
+			ToolbarRenderer.decorateRootElement.apply(this, arguments);
+			if (oToolbar._sHierarchicalSelectMode === AnchorBar._hierarchicalSelectModes.Icon) {
+				rm.addClass("sapUxAPAnchorBarOverflow");
+			}
+		};
 
 		return AnchorBarRenderer;
 

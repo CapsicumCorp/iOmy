@@ -29,6 +29,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport'],
 		var bReadOnly = !bEnabled || !bEditable;
 		var bInErrorState = sap.ui.core.ValueState.Error == oRadioButton.getValueState();
 		var bInWarningState = sap.ui.core.ValueState.Warning == oRadioButton.getValueState();
+		var bUseEntireWidth = oRadioButton.getUseEntireWidth();
 
 		// Radio Button style class
 		oRm.addClass("sapMRb");
@@ -36,6 +37,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport'],
 		// write the HTML into the render manager
 		oRm.write("<div"); // Control - DIV
 		oRm.writeControlData(oRadioButton);
+
+		if (bUseEntireWidth) {
+			oRm.addStyle("width", oRadioButton.getWidth());
+			oRm.writeStyles();
+		}
 
 		var sTooltipWithStateMessage = ValueStateSupport.enrichTooltip(oRadioButton, oRadioButton.getTooltip_AsString());
 		if (sTooltipWithStateMessage) {
@@ -48,8 +54,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport'],
 			selected: null, // Avoid output aria-selected
 			checked: oRadioButton.getSelected() === true ? true : undefined, // aria-checked=false is default value and must not be set explicitly
 			disabled: !oRadioButton.getEditable() ? true : undefined, // Avoid output aria-disabled=false when the button is editable
-			labelledby: sId + "-label",
-			describedby: sTooltipWithStateMessage ? sId + "-Descr" : undefined
+			labelledby: { value: sId + "-label", append: true },
+			describedby: { value: (sTooltipWithStateMessage ? sId + "-Descr" : undefined), append: true }
 		});
 
 		// Add classes and properties depending on the state

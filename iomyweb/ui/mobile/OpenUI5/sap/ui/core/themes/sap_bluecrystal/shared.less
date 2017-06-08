@@ -15,11 +15,12 @@
 	padding: 2rem;
 }
 
-.sapUiTheme-sap_bluecrystal {
+html.sapUiTheme-sap_bluecrystal {
 	font-size: @sapUiFontSize;
 }
 
-html.sap-phone *, html.sap-tablet * {   /* FIXME!!! (star rule with any-parent selector...) */
+html.sap-phone *, html.sap-tablet:not(.sap-desktop) * {   /* FIXME!!! (star rule with any-parent selector...) */
+	/* for phones and tablets (combi devices are excluded because they should have desktop behavior)*/
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
@@ -28,7 +29,7 @@ html.sap-phone *, html.sap-tablet * {   /* FIXME!!! (star rule with any-parent s
 }
 
 html.sap-phone input, html.sap-phone textarea, html.sap-phone [contenteditable=true], html.sap-phone [contenteditable=true] > div, html.sap-phone .sapUiSelectable,
-html.sap-tablet input, html.sap-tablet textarea, html.sap-tablet [contenteditable=true], html.sap-tablet [contenteditable=true] > div , html.sap-tablet .sapUiSelectable {
+html.sap-tablet:not(.sap-desktop) input, html.sap-tablet:not(.sap-desktop) textarea, html.sap-tablet:not(.sap-desktop) [contenteditable=true], html.sap-tablet:not(.sap-desktop) [contenteditable=true] > div , html.sap-tablet:not(.sap-desktop) .sapUiSelectable {
 	-webkit-user-select: text;
 	-moz-user-select: text;
 	-ms-user-select: text;
@@ -54,7 +55,7 @@ html.sap-tablet input, html.sap-tablet textarea, html.sap-tablet [contenteditabl
 	position: absolute;
 }
 
-.sapUiMedia-Std-Desktop .sapUiBLy {
+html.sapUiMedia-Std-Desktop .sapUiBLy {
 	position: fixed; /* otherwise UX3 shell would not work... */
 }
 

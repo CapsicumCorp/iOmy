@@ -45,9 +45,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer
 			mAttributes["tabindex"] = "-1"; // to get focus events on it, needed for popup autoclose handling
 			mAttributes["title"] = null;
 			oRm.write('<div class="sapMInputValHelp">');
-			oRm.writeIcon("sap-icon://appointment-2", aClasses, mAttributes);
+			oRm.writeIcon(this._getIcon(), aClasses, mAttributes);
 			oRm.write("</div>");
 		}
+
+	};
+
+	DatePickerRenderer._getIcon = function() {
+
+		return "sap-icon://appointment-2";
 
 	};
 
@@ -59,7 +65,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer
 	 */
 	DatePickerRenderer.writeInnerValue = function(oRm, oDP) {
 
-		oRm.writeAttributeEscaped("value", oDP._formatValue(oDP.getDateValue()));
+		if (oDP._bValid) {
+			oRm.writeAttributeEscaped("value", oDP._formatValue(oDP.getDateValue()));
+		} else {
+			oRm.writeAttributeEscaped("value", oDP.getValue());
+		}
 
 	};
 
@@ -70,7 +80,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer
 	 * @param {sap.m.DatePicker} oDP An object representation of the control that should be rendered.
 	 */
 	DatePickerRenderer.writeInnerAttributes = function(oRm, oDP) {
-
+		oRm.writeAttribute("type", "text");
 		if (oDP._bMobile) {
 			// prevent keyboard in mobile devices
 			oRm.writeAttribute("readonly", "readonly");
@@ -95,10 +105,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer
 
 		var mAccessibilityState = InputBaseRenderer.getAccessibilityState.apply(this, arguments);
 
-		mAccessibilityState["multiline"] = false;
 		mAccessibilityState["autocomplete"] = "none";
 		mAccessibilityState["haspopup"] = true;
-		mAccessibilityState["owns"] = oDP.getId() + "-cal";
+		mAccessibilityState["expanded"] = false;
 
 		if (oDP._bMobile && oDP.getEnabled() && oDP.getEditable()) {
 			// if on mobile device readonly property is set, but should not be announced

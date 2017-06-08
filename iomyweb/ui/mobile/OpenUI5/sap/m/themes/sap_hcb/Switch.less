@@ -11,15 +11,6 @@
 @sapMSwitch-TRANSITIONTIME: 175;
 
 /* ------------------------------ */
-/* Switch common styles           */
-/* ------------------------------ */
-
-.sapMSwtText,
-.sapMSwtAcceptReject .sapMSwtHandle {
-	box-sizing: border-box;
-}
-
-/* ------------------------------ */
 /* Switch container               */
 /* ------------------------------ */
 
@@ -29,7 +20,7 @@
 
 /* focus */
 
-.sap-desktop .sapMSwtCont:focus > .sapMSwt {
+html.sap-desktop .sapMSwtCont:focus > .sapMSwt {
 	outline: 0.125rem dotted @sapHCStandardFG;
 }
 
@@ -123,7 +114,6 @@ html[dir=rtl] .sapMSwtTrans > .sapMSwtInner {
 }
 
 .sapMSwtLabel {
-	display: block;
 	width: 1.875rem;
 	padding: 0 0.1875rem;
 	text-transform: uppercase;
@@ -271,26 +261,6 @@ html[dir=rtl] .sapMSwtTrans > .sapMSwtInner {
 	border-color: @sapHCReducedFG;
 }
 
-/*  Workaround for a WebKit bug that causes a rendering issue. @link https://bugs.webkit.org/show_bug.cgi?id=21819
-
-	Affected platforms:
-	BlackBerry 10 Z30 device. */
-
-.sapMSwtAcceptReject .sapMSwtWebKit537-35.sapMSwtHandle {
-	border: none;
-}
-
-.sapMSwtAcceptReject.sapMSwtOn .sapMSwtWebKit537-35.sapMSwtHandle {
-	box-shadow: inset 0 0 0 0.125rem @sapHCPositive;
-}
-
-.sapMSwtAcceptReject.sapMSwtOff .sapMSwtWebKit537-35.sapMSwtHandle {
-	box-shadow: inset 0 0 0 0.125rem @sapHCNegative;
-}
-
-.sapMSwtAcceptReject.sapMSwtDisabled .sapMSwtWebKit537-35.sapMSwtHandle {
-	box-shadow: inset 0 0 0 0.125rem @sapHCReducedFG;
-}
 
 /* =================================================================== */
 /* CSS for control sap.m/Switch.control HCB theme compact size */

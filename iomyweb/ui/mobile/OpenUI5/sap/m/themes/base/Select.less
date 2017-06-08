@@ -3,19 +3,12 @@
 /* ====================================================== */
 
 /* ------------------------------ */
-/* Select commons styles          */
+/* commons styles                 */
 /* ------------------------------ */
 
 .sapMSlt,
-.sapMSltNative,
-.sapMSlt > .sapMSltLabel,
-.sapMSltPicker-CTX .sapMIBar {
+.sapMSlt > .sapMSltLabel {
 	box-sizing: border-box;
-}
-
-.sapMSltNative,
-.sapMSltNative > option {
-	font: inherit;
 }
 
 .sapMSlt,
@@ -35,8 +28,13 @@
 	cursor: pointer;
 }
 
+.sapMSlt > .sapMSltLabel,
+.sapMSltArrow {
+	height: 100%;
+}
+
 /* ------------------------------ */
-/* Select                         */
+/* field                          */
 /* ------------------------------ */
 
 .sapMSlt {
@@ -46,11 +44,12 @@
 }
 
 /* ------------------------------ */
-/* Select Label                   */
+/* label                          */
 /* ------------------------------ */
 
 .sapMSlt > .sapMSltLabel {
 	position: absolute;
+	width: 100%;
 	left: 0;
 	right: 0;
 	text-overflow: ellipsis;
@@ -69,7 +68,7 @@
 }
 
 /* ------------------------------ */
-/* Select Icon                    */
+/* icon                           */
 /* ------------------------------ */
 
 .sapMSltIcon {
@@ -85,16 +84,39 @@
 }
 
 /* ------------------------------ */
-/* Native HTML select element     */
+/* arrow                          */
 /* ------------------------------ */
 
-.sapMSltNative {
-	-webkit-appearance: none;
+.sapMSltArrow::before {
+	font-family: "SAP-icons";
+	speak: none;
+	content: "\e1ef";
+}
+
+/* ------------------------------ */
+/* dropdown list                  */
+/* ------------------------------ */
+
+.sapMSlt > .sapMSelectList {
+	visibility: hidden;
 	position: relative;
 	cursor: inherit;
 	border: none;
 	margin: 0;
 	padding: 0;
-	width: auto;
-	opacity: 0;
+	min-width: 6rem;
+}
+
+/* ------------------------------ */
+/* table context                  */
+/* ------------------------------ */
+
+.sapUiTableCell .sapMSlt,
+.sapUiSizeCondensed .sapUiTableCell .sapMSlt,
+.sapUiSizeCompact .sapUiTableCell .sapMSlt {
+	margin: 0;
+}
+
+.sapUiSizeCondensed .sapUiTableCell .sapMSlt:not(.sapMSltState) {
+	border-color: transparent;
 }

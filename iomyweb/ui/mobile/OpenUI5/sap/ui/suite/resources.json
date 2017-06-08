@@ -12,14 +12,18 @@
       "module": "sap/ui/suite/QuickViewUtils.js",
       "isDebug": true,
       "required": [
-        "jquery.sap.global.js"
+        "jquery.sap.global.js",
+        "sap/ui/core/Control.js",
+        "sap/ui/core/Element.js"
       ]
     },
     {
       "name": "QuickViewUtils.js",
       "module": "sap/ui/suite/QuickViewUtils.js",
       "required": [
-        "jquery.sap.global.js"
+        "jquery.sap.global.js",
+        "sap/ui/core/Control.js",
+        "sap/ui/core/Element.js"
       ]
     },
     {
@@ -56,14 +60,18 @@
       "module": "sap/ui/suite/TaskCircleRenderer.js",
       "isDebug": true,
       "required": [
-        "jquery.sap.global.js"
+        "jquery.sap.global.js",
+        "sap/ui/core/Core.js",
+        "sap/ui/suite/library.js"
       ]
     },
     {
       "name": "TaskCircleRenderer.js",
       "module": "sap/ui/suite/TaskCircleRenderer.js",
       "required": [
-        "jquery.sap.global.js"
+        "jquery.sap.global.js",
+        "sap/ui/core/Core.js",
+        "sap/ui/suite/library.js"
       ]
     },
     {
@@ -94,17 +102,11 @@
     {
       "name": "VerticalProgressIndicatorRenderer-dbg.js",
       "module": "sap/ui/suite/VerticalProgressIndicatorRenderer.js",
-      "isDebug": true,
-      "required": [
-        "jquery.sap.global.js"
-      ]
+      "isDebug": true
     },
     {
       "name": "VerticalProgressIndicatorRenderer.js",
-      "module": "sap/ui/suite/VerticalProgressIndicatorRenderer.js",
-      "required": [
-        "jquery.sap.global.js"
-      ]
+      "module": "sap/ui/suite/VerticalProgressIndicatorRenderer.js"
     },
     {
       "name": "library-all-dbg.js",
@@ -121,8 +123,16 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/core/Core.js",
         "sap/ui/core/library.js"
       ]
+    },
+    {
+      "name": "library-preload.js",
+      "merged": true
+    },
+    {
+      "name": "library-preload.js.map"
     },
     {
       "name": "library-preload.json",
@@ -139,6 +149,7 @@
       "module": "sap/ui/suite/library.js",
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/core/Core.js",
         "sap/ui/core/library.js"
       ]
     },
@@ -158,10 +169,12 @@
     },
     {
       "name": "themes/base/TaskCircle.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/VerticalProgressIndicator.less",
+      "designtime": true,
       "theme": "base"
     },
     {
@@ -188,14 +201,17 @@
     },
     {
       "name": "themes/base/library.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/library.source.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/shared.less",
+      "designtime": true,
       "theme": "base"
     },
     {
@@ -204,10 +220,12 @@
     },
     {
       "name": "themes/sap_hcb/TaskCircle.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/VerticalProgressIndicator.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
@@ -234,14 +252,17 @@
     },
     {
       "name": "themes/sap_hcb/library.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/library.source.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/shared.less",
+      "designtime": true,
       "theme": "sap_hcb"
     }
   ]

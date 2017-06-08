@@ -27,14 +27,14 @@
 /* Custom focus outline:                                                 */
 /* --------------------------------------------------------------------- */
 
-.sap-desktop .sapMBtn:focus > .sapMFocusable {
+html.sap-desktop .sapMBtn:focus > .sapMFocusable {
 	outline:           0.125rem dotted @sapHCStandardFG;
 	outline-offset:   -0.125rem;
 	border-color:      transparent;
 	border-radius:     0;
 }
 
-.sap-desktop .sapMBtn:focus > .sapMFocusable:not(.sapMBtnActive) {
+html.sap-desktop .sapMBtn:focus > .sapMFocusable:not(.sapMBtnActive) {
 	border-radius: 0;
 }
 
@@ -56,8 +56,9 @@
 	border-radius:    0;
 }
 
+/* dotted line appears blurry in IE and EDGE browsers. In these cases use dashed */
 .sapMBtn:focus .sapMBtnFocusDiv {
-	border:           2px dotted @sapHCStandardFG;
+	border:           2px dashed @sapHCStandardFG;
 }
 
 /* ---------------------------------------------------------------------*/
@@ -85,36 +86,8 @@
 /* Special buttons have the same look on a page and in a header/footer. */
 /* ---------------------------------------------------------------------*/
 
-div.sapMBtnInner.sapMBtnEmphasized {
+span.sapMBtnInner.sapMBtnEmphasized {
 	border-width: 0.125rem;
-}
-
-/* ------------------------------------------------ */
-/* Buttons in an ActionSelect                       */
-/* ------------------------------------------------ */
-
-.sapMActionSelectPicker.sapMSltPicker .sapMBtn { //overriding the .sapMSltPicker .sapMBtn selector from Select.less
-	display: block;
-	width: 100%;
-    padding: 0.25rem;
-	text-shadow: none;
-    height: 3rem;
-}
-
-.sapMActionSelectPicker .sapMBtnInner {
- 	border: 1px solid @sapHCStandardFG;
-}
-
-.sapMSltPickerStandalone .sapMBtn {
-	height: 3rem;
-}
-
-.sapMSltPickerStandalone .sapMBtnInner > .sapMBtnContent {
-	line-height: 2.5rem;
-}
-
-.sap-desktop .sapMActionSelectPicker .sapMBtnDefault:focus {
-	outline-color: @sapHCHighlightBG;
 }
 
 /* ------------------------------------------------ */
@@ -124,6 +97,10 @@ div.sapMBtnInner.sapMBtnEmphasized {
 /* increase outline offset */
 .sapMTB > .sapMBtnInner.sapMFocusable:focus {
 	outline-offset:       -0.125rem;
+}
+
+.sapMTB-Info-CTX > .sapUiIcon:focus {
+	outline: 0.125rem dotted @sapHCStandardFG;
 }
 
 /* ------------------------------------------------ */
@@ -142,19 +119,6 @@ div.sapMBtnInner.sapMBtnEmphasized {
 	.sapMBtnContent {
 		line-height:      1.500rem;
 	}
-}
-
-.sapUiSizeCompact.sapMActionSelectPicker.sapMSltPicker .sapMBtnInner {
- 	height:           1.625rem;
-}
-
-.sapUiSizeCompact.sapMActionSelectPicker.sapMSltPicker .sapMBtnContent {
-	line-height:      1.625rem;
-}
-
-.sapUiSizeCompact.sapMActionSelectPicker.sapMSltPicker .sapMBtn {
-	height:           2rem;
-	padding: 0.187rem 0.25rem;
 }
 
 /* ------------------------------------------------ */

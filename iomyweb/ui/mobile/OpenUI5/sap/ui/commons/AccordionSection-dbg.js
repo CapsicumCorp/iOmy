@@ -22,10 +22,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.AccordionSection
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) design time metamodel
 	 */
@@ -46,6 +47,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element'],
 
 			/**
 			 * It is recommended to adjust the settings for the width when the section is set to 'collapsed'.
+			 * @deprecated since 1.34
+			 * Use Accordion's "openedSectionsId" property
 			 */
 			collapsed : {type : "boolean", group : "Behavior", defaultValue : false},
 

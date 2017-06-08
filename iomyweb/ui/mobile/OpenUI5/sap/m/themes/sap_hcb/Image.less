@@ -1,22 +1,16 @@
-.sapMImg {
-	border: none;
+/* ==========================================================================
+   CSS for control sap.m/Image High Contrast Black theme
+  ========================================================================== */
 
-	/* fix the highlight color on tap*/
-	-webkit-tap-highlight-color: rgba(255, 255, 255, 0);
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-webkit-touch-callout: none;
+.sapMLightBoxMagnifyingGlass {
+	background-color: @sapUiContentForegroundColor;
+	border: 1px solid @sapUiContentForegroundBorderColor;
 }
 
-span.sapMImg {
-	display: inline-block;
+.sapMLightBoxMagnifyingGlass:before {
+	color: @sapUiContentIconColor;
 }
 
-.sapMImg.sapMNoImg {
-	visibility: hidden;
-}
-
-/* fix chrome browser yellow border on focus problem*/
-.sapMImg:focus {
-	outline: none;
+.sapMImgFocusable:focus {
+	outline: 1px dotted @sapUiContentFocusColor;
 }

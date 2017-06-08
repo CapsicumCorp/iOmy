@@ -14,6 +14,7 @@
 	propagateModel: false, // boolean
 	width: undefined, // sap.ui.core.CSSSize
 	height: undefined, // sap.ui.core.CSSSize
+	lifecycle: sap.ui.core.ComponentLifecycle.Legacy, // sap.ui.core.ComponentLifecycle
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -36,6 +37,7 @@
 	propagateModel="false"
 	width=""
 	height=""
+	lifecycle="Legacy"
 	component=""
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->

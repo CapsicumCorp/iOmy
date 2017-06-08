@@ -4,18 +4,18 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['sap/ui/model/odata/type/ODataType', 'sap/ui/model/FormatException',
-               'sap/ui/model/ParseException', 'sap/ui/core/format/NumberFormat',
-               'sap/ui/model/ValidateException'],
-	function(ODataType, FormatException, ParseException, NumberFormat, ValidateException) {
+sap.ui.define(['jquery.sap.global', 'sap/ui/model/odata/type/ODataType',
+               'sap/ui/model/FormatException', 'sap/ui/model/ParseException',
+               'sap/ui/core/format/NumberFormat', 'sap/ui/model/ValidateException'],
+	function(jQuery, ODataType, FormatException, ParseException, NumberFormat, ValidateException) {
 	"use strict";
 
 	var rInteger = /^[-+]?(\d+)$/, // user input for an Int64 w/o the sign
 		// The number range of an Int64
-		oRange = {minimum: "-9223372036854775808", maximum: "9223372036854775807"},
+		oRange = {minimum : "-9223372036854775808", maximum : "9223372036854775807"},
 		// The values Number.MIN_SAFE_INTEGER and Number.MAX_SAFE_INTEGER are the largest integer
 		// n such that n and n + 1 are both exactly representable as a Number value.
-		oSafeRange = {minimum: "-9007199254740991", maximum: "9007199254740991"};
+		oSafeRange = {minimum : "-9007199254740991", maximum : "9007199254740991"};
 
 	/**
 	 * Checks whether <code>sValue</code> is in the given range.
@@ -62,7 +62,7 @@ sap.ui.define(['sap/ui/model/odata/type/ODataType', 'sap/ui/model/FormatExceptio
 		var oFormatOptions;
 
 		if (!oType.oFormat) {
-			oFormatOptions = jQuery.extend({groupingEnabled: true}, oType.oFormatOptions);
+			oFormatOptions = jQuery.extend({groupingEnabled : true}, oType.oFormatOptions);
 			oFormatOptions.parseAsString = true;
 			oType.oFormat = NumberFormat.getIntegerInstance(oFormatOptions);
 		}
@@ -122,13 +122,13 @@ sap.ui.define(['sap/ui/model/odata/type/ODataType', 'sap/ui/model/FormatExceptio
 	 * href="http://www.odata.org/documentation/odata-version-2-0/overview#AbstractTypeSystem">
 	 * <code>Edm.Int64</code></a>.
 	 *
-	 * In {@link sap.ui.model.odata.v2.ODataModel ODataModel} this type is represented as a
-	 * <code>string</code>.
+	 * In both {@link sap.ui.model.odata.v2.ODataModel} and {@link sap.ui.model.odata.v4.ODataModel}
+	 * this type is represented as a <code>string</code>.
 	 *
 	 * @extends sap.ui.model.odata.type.ODataType
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @alias sap.ui.model.odata.type.Int64
@@ -157,7 +157,8 @@ sap.ui.define(['sap/ui/model/odata/type/ODataType', 'sap/ui/model/FormatExceptio
 	 * @param {string} sValue
 	 *   the value to be formatted, which is represented as a string in the model
 	 * @param {string} sTargetType
-	 *   the target type; may be "any", "float", "int" or "string".
+	 *   the target type; may be "any", "float", "int", "string", or a type with one of these types
+	 *   as its {@link sap.ui.base.DataType#getPrimitiveType primitive type}.
 	 *   See {@link sap.ui.model.odata.type} for more information.
 	 * @returns {number|string}
 	 *   the formatted output value in the target type; <code>undefined</code> or <code>null</code>
@@ -174,7 +175,7 @@ sap.ui.define(['sap/ui/model/odata/type/ODataType', 'sap/ui/model/FormatExceptio
 		if (sValue === null || sValue === undefined) {
 			return null;
 		}
-		switch (sTargetType) {
+		switch (this.getPrimitiveType(sTargetType)) {
 		case "any":
 			return sValue;
 		case "float":
@@ -219,8 +220,9 @@ sap.ui.define(['sap/ui/model/odata/type/ODataType', 'sap/ui/model/FormatExceptio
 	 *   the value to be parsed; the empty string and <code>null</code> are parsed to
 	 *   <code>null</code>
 	 * @param {string} sSourceType
-	 *   the source type (the expected type of <code>vValue</code>); may be "float", "int" or
-	 *   "string".
+	 *   the source type (the expected type of <code>vValue</code>); may be "float", "int",
+	 *   "string", or a type with one of these types as its
+	 *   {@link sap.ui.base.DataType#getPrimitiveType primitive type}.
 	 *   See {@link sap.ui.model.odata.type} for more information.
 	 * @returns {string}
 	 *   the parsed value
@@ -235,7 +237,7 @@ sap.ui.define(['sap/ui/model/odata/type/ODataType', 'sap/ui/model/FormatExceptio
 		if (vValue === null || vValue === "") {
 			return null;
 		}
-		switch (sSourceType) {
+		switch (this.getPrimitiveType(sSourceType)) {
 		case "string":
 			sResult = getFormatter(this).parse(vValue);
 			if (!sResult) {
@@ -245,8 +247,8 @@ sap.ui.define(['sap/ui/model/odata/type/ODataType', 'sap/ui/model/FormatExceptio
 		case "int":
 		case "float":
 			sResult = NumberFormat.getIntegerInstance({
-					maxIntegerDigits: Infinity,
-					groupingEnabled: false
+					maxIntegerDigits : Infinity,
+					groupingEnabled : false
 				}).format(vValue);
 			break;
 		default:

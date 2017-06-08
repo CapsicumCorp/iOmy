@@ -30,7 +30,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 	 * @class Table Personalization Dialog
 	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @alias sap.m.TablePersoDialog
 	 */
 	var TablePersoDialog = ManagedObject.extend("sap.m.TablePersoDialog", /** @lends sap.m.TablePersoDialog */
@@ -168,10 +168,10 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 			// Check if dialog is rendered
 			if (that._oDialog) {
 				var $dialogCont = that._oDialog.$("cont");
-				var $scrollCont = that._oDialog.$("scrollCont");
+				var $scroll = that._oDialog.$("scroll");
 				if ($dialogCont.children().length > 0) {
 					var iContentHeight = $dialogCont.children()[0].clientHeight;
-					var iPaddingHeight = $scrollCont[0].clientHeight - iContentHeight;
+					var iPaddingHeight = $scroll[0].clientHeight - iContentHeight;
 
 					// Take the header border into account otherwise the scroll container's
 					// height is 2px bigger and causes the selectAllToolbar to scroll as well
@@ -663,7 +663,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 
 	/**
 	 * Filters the columns list with the given value
-	 * @return {TablePersoDialog} the tablePersoDialog instance.
+	 * @return {sap.m.TablePersoDialog} the tablePersoDialog instance.
 	 * @private
 	 */
 	TablePersoDialog.prototype._executeSearch = function () {
@@ -680,7 +680,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 	/**
 	 * Setter to turn on/ switch off TablePersoDialog's grouping mode.
 	 * @param {boolean} bHasGrouping groping mode on or off.
-	 * @return {TablePersoDialog} the TablePersoDialog instance.
+	 * @return {sap.m.TablePersoDialog} the TablePersoDialog instance.
 	 * @public
 	 */
 	TablePersoDialog.prototype.setHasGrouping = function (bHasGrouping) {
@@ -703,7 +703,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 	/**
 	 * Setter to show/hide TablePersoDialog's 'selectAll' checkbox.
 	 * @param {boolean} bShowSelectAll selectAll checkbox visible or not.
-	 * @return {TablePersoDialog} the TablePersoDialog instance.
+	 * @return {sap.m.TablePersoDialog} the TablePersoDialog instance.
 	 * @public
 	 */
 	TablePersoDialog.prototype.setShowSelectAll = function (bShowSelectAll) {
@@ -717,7 +717,7 @@ sap.ui.define(['jquery.sap.global', './Button', './Dialog', './InputListItem', '
 	/**
 	 * Setter to show/hide TablePersoDialog's 'Undo Personalization' button.
 	 * @param {boolean} bShowResetAll 'undo Personalization' button visible or not.
-	 * @return {TablePersoDialog} the TablePersoDialog instance.
+	 * @return {sap.m.TablePersoDialog} the TablePersoDialog instance.
 	 * @public
 	 */
 	TablePersoDialog.prototype.setShowResetAll = function (bShowResetAll) {

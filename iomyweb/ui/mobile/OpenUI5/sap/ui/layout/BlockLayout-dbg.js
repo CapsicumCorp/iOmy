@@ -4,8 +4,8 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['sap/ui/core/Control'],
-	function(Control) {
+sap.ui.define(['sap/ui/core/Control', './library'],
+	function(Control, library) {
 		"use strict";
 
 		/**
@@ -21,7 +21,7 @@ sap.ui.define(['sap/ui/core/Control'],
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.34.9
+		 * @version 1.44.14
 		 *
 		 * @constructor
 		 * @public
@@ -35,6 +35,7 @@ sap.ui.define(['sap/ui/core/Control'],
 			properties : {
 				/**
 				 * Determines the background used for the Layout
+				 * @since 1.42
 				 */
 				background: { type: "sap.ui.layout.BlockBackgroundType", group: "Appearance", defaultValue: "Default" }
 
@@ -54,7 +55,13 @@ sap.ui.define(['sap/ui/core/Control'],
 		 */
 		BlockLayout.CONSTANTS = {
 			breakPointM : 600,
-			breakPointL : 1024
+			breakPointL : 1024,
+			SIZES: {
+				S: 600,  //Phone
+				M: 1024, //Tablet
+				L: 1440, //Desktop
+				XL: null //LargeDesktop
+			}
 		};
 
 		BlockLayout.prototype.onBeforeRendering = function () {
@@ -70,21 +77,46 @@ sap.ui.define(['sap/ui/core/Control'],
 		};
 
 		/**
+		 * Changes background type
+		 *
+		 * @param {string} sNewBackground Background's style of type sap.ui.layout.BlockBackgroundType
+		 * @returns {sap.ui.layout.BlockLayout} BlockLayout instance. Allows method chaining
+		 */
+		BlockLayout.prototype.setBackground = function (sNewBackground) {
+			var sCurBackground = this.getBackground(),
+			// Apply here so if there's an exception the code bellow won't be executed
+				oObject = Control.prototype.setProperty.apply(this, ["background"].concat(Array.prototype.slice.call(arguments)));
+
+			if (this.hasStyleClass("sapUiBlockLayoutBackground" + sCurBackground)) {
+				this.removeStyleClass("sapUiBlockLayoutBackground" + sCurBackground, true);
+			}
+			this.addStyleClass("sapUiBlockLayoutBackground" + sNewBackground, true);
+
+			// Invalidate the whole block layout as the background dependencies, row color sets and accent cells should be resolved properly
+			this.invalidate();
+
+			return oObject;
+		};
+
+		/**
 		 * Handler for the parent resize event
 		 * @private
 		 */
 		BlockLayout.prototype._onParentResize = function () {
-			var domRef = this.getDomRef(),
-				width = domRef.clientWidth;
+			var sProp,
+				domRef = this.getDomRef(),
+				iWidth = domRef.clientWidth,
+				mSizes = BlockLayout.CONSTANTS.SIZES;
 
 			this._removeBreakpointClasses();
 
-			if (width <= BlockLayout.CONSTANTS.breakPointM) {
-				this.addStyleClass("sapUiBlockLayoutSmall", true);
-			} else if (width > BlockLayout.CONSTANTS.breakPointM && width < BlockLayout.CONSTANTS.breakPointL) {
-				this.addStyleClass("sapUiBlockLayoutMedium", true);
-			} else {
-				this.addStyleClass("sapUiBlockLayoutBig", true);
+			// Put additional styles according to SAP_STANDARD_EXTENDED from sap.ui.Device.media.RANGESETS
+			// Not possible to use sap.ui.Device directly as it calculates window size, but here is needed parent's size
+			for (sProp in mSizes) {
+				if (mSizes.hasOwnProperty(sProp) && (mSizes[sProp] === null || mSizes[sProp] > iWidth)) {
+					this.addStyleClass("sapUiBlockLayoutSize" + sProp, true);
+					break;
+				}
 			}
 		};
 
@@ -93,9 +125,13 @@ sap.ui.define(['sap/ui/core/Control'],
 		 * @private
 		 */
 		BlockLayout.prototype._removeBreakpointClasses = function () {
-			this.removeStyleClass("sapUiBlockLayoutBig", true);
-			this.removeStyleClass("sapUiBlockLayoutMedium", true);
-			this.removeStyleClass("sapUiBlockLayoutSmall", true);
+			var mSizes = BlockLayout.CONSTANTS.SIZES;
+
+			for (var prop in mSizes) {
+				if (mSizes.hasOwnProperty(prop)) {
+					this.removeStyleClass("sapUiBlockLayoutSize" + prop, true);
+				}
+			}
 		};
 
 		/**

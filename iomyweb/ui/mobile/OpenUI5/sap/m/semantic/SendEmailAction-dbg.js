@@ -19,7 +19,7 @@ sap.ui.define(['sap/m/semantic/SemanticButton'], function(SemanticButton) {
 	 * @extends sap.m.semantic.SemanticButton
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -29,7 +29,9 @@ sap.ui.define(['sap/m/semantic/SemanticButton'], function(SemanticButton) {
 	 */
 
 	var SendEmailAction = SemanticButton.extend("sap.m.semantic.SendEmailAction", /** @lends sap.m.semantic.SendEmailAction.prototype */ {
-
+		metadata: {
+			library: "sap.m"
+		}
 	});
 
 	return SendEmailAction;

@@ -10,8 +10,10 @@ if ( !jQuery.sap.isDeclared('sap.ui.suite.QuickViewUtils') ) {
  // Provides
 jQuery.sap.declare('sap.ui.suite.QuickViewUtils'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-sap.ui.define("sap/ui/suite/QuickViewUtils",['jquery.sap.global'],
-	function(jQuery) {
+jQuery.sap.require('sap.ui.core.Control'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.core.Element'); // unlisted dependency retained
+sap.ui.define("sap/ui/suite/QuickViewUtils",['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Element'],
+	function(jQuery, Control, Element) {
 	"use strict";
 
 	/**
@@ -32,9 +34,9 @@ sap.ui.define("sap/ui/suite/QuickViewUtils",['jquery.sap.global'],
 			oQV.setModel(oModel);
 			oQV.bindObject("/QuickviewConfigs(name='" + sConfigName + "',thingKey='" + sThingKey + "')",{expand:"Thing,QVAttributes/Attribute,QVActions/Action"});
 
-			var oMQVC = new sap.ui.suite.hcm.QvContent();
+			var oMQVC = new QvContent();
 			oMQVC.bindAggregation("items",{path:"QVAttributes",factory: function(sId, oContext) {
-				var oQVItem = new sap.ui.suite.hcm.QvItem(sId, {label:"{Attribute/label}",link: "{valueLinkURL}",order:"{order}"});
+				var oQVItem = new QvItem(sId, {label:"{Attribute/label}",link: "{valueLinkURL}",order:"{order}"});
 				oQVItem.bindProperty("value","value",mFormatter && mFormatter[oContext.getProperty("Attribute/name")]);
 				return oQVItem;
 			}});
@@ -52,9 +54,9 @@ sap.ui.define("sap/ui/suite/QuickViewUtils",['jquery.sap.global'],
 			oQV.bindProperty("icon", "imageURL");
 			oQV.bindObject("/QuickviewConfigs(name='" + sConfigName + "',thingKey='" + sThingKey + "')",{expand:"Thing,QVAttributes/Attribute,QVActions/Action"});
 
-			var oMQVC = new sap.ui.suite.hcm.QvContent();
+			var oMQVC = new QvContent();
 			oMQVC.bindAggregation("items",{path:"QVAttributes",factory: function(sId, oContext) {
-				var oQVItem = new sap.ui.suite.hcm.QvItem(sId, {label:"{Attribute/label}",link: "{valueLinkURL}",order:"{order}"});
+				var oQVItem = new QvItem(sId, {label:"{Attribute/label}",link: "{valueLinkURL}",order:"{order}"});
 				oQVItem.bindProperty("value","value",mFormatter && mFormatter[oContext.getProperty("Attribute/name")]);
 				return oQVItem;
 			}});
@@ -103,7 +105,7 @@ sap.ui.define("sap/ui/suite/QuickViewUtils",['jquery.sap.global'],
 		}
 	};
 
-	sap.ui.core.Element.extend("sap.ui.suite.hcm.QvItem", {
+	var QvItem = Element.extend("sap.ui.suite.hcm.QvItem", {
 		metadata : {
 			properties: {
 				label: "string",
@@ -115,7 +117,7 @@ sap.ui.define("sap/ui/suite/QuickViewUtils",['jquery.sap.global'],
 		}
 	});
 
-	sap.ui.core.Control.extend("sap.ui.suite.hcm.QvContent", {
+	var QvContent = Control.extend("sap.ui.suite.hcm.QvContent", {
 		metadata : {
 			aggregations: {
 				   "items" : {type : "sap.ui.suite.hcm.QvItem", multiple : true}
@@ -137,9 +139,9 @@ sap.ui.define("sap/ui/suite/QuickViewUtils",['jquery.sap.global'],
 			oRm.write("</div>");
 		},
 		_createQVContent: function(oControl) {
-				var oML = new sap.ui.commons.layout.MatrixLayout({widths:["75px"]}),
-					aItems = oControl.getItems(),
-					oMLRow, oMLCell, oLabel, oTxtView, oLink;
+			var oML = new sap.ui.commons.layout.MatrixLayout({widths:["75px"]}),
+				aItems = oControl.getItems(),
+				oMLRow, oMLCell, oLabel, oTxtView, oLink;
 
 			if (this._oML) {
 				this._oML.destroy();
@@ -182,134 +184,6 @@ sap.ui.define("sap/ui/suite/QuickViewUtils",['jquery.sap.global'],
 }, /* bExport= */ true);
 
 }; // end of sap/ui/suite/QuickViewUtils.js
-if ( !jQuery.sap.isDeclared('sap.ui.suite.TaskCircleRenderer') ) {
-/*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
- * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
- */
-
-// provides default renderer for sap.ui.suite.TaskCircle
-jQuery.sap.declare('sap.ui.suite.TaskCircleRenderer'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-sap.ui.define("sap/ui/suite/TaskCircleRenderer",['jquery.sap.global'],
-	function(jQuery) {
-	"use strict";
-
-
-	/**
-	 * TaskCircle renderer.
-	 * @namespace
-	 */
-	var TaskCircleRenderer = function() {
-	};
-
-
-	/**
-	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
-	 *
-	 * @param {sap.ui.core.RenderManager} oRenderManager the RenderManager that can be used for writing to the Render-Output-Buffer
-	 * @param {sap.ui.core.Control} oControl an object representation of the control that should be rendered
-	 */
-	TaskCircleRenderer.render = function(oRenderManager, oControl){
-	    // convenience variable
-		var rm = oRenderManager;
-
-	    //calculate pixel size
-		var minvalue = oControl.getMinValue();
-		var maxvalue = oControl.getMaxValue();
-		var value = oControl.getValue();
-		if (minvalue < 0 || minvalue == Number.NaN) {
-			minvalue = 0;
-		}
-		if (maxvalue < 0 || maxvalue == Number.NaN) {
-			maxvalue = 1;
-		}
-		if (value < 0 || value == Number.NaN) {
-			value = 0;
-		}
-		var valuestring = value.toString();
-	    var color = oControl.getColor();
-	    var style = 'sapUiTaskCircleColorGray';
-
-	    switch (color) {
-	       case sap.ui.suite.TaskCircleColor.Red:
-	          style = 'sapUiTaskCircleColorRed';
-	          break;
-	       case sap.ui.suite.TaskCircleColor.Yellow:
-	          style = 'sapUiTaskCircleColorYellow';
-	          break;
-	       case sap.ui.suite.TaskCircleColor.Green:
-	          style = 'sapUiTaskCircleColorGreen';
-	          break;
-	       case sap.ui.suite.TaskCircleColor.Gray:
-	          style = 'sapUiTaskCircleColorGray';
-	          break;
-	    }
-	    if (value < minvalue) {
-				minvalue = value;
-	    }
-	    if (value > maxvalue) {
-				maxvalue = value;
-	    }
-
-	    var psmall = 24;
-	    if (minvalue > 10) {
-				psmall = 32;
-	    }
-	    if (minvalue > 100) {
-				psmall = 46;
-	    }
-	    var plarge = 62;
-
-	    var circlesize = parseInt(Math.sqrt((value - minvalue) / (maxvalue - minvalue) * (plarge * plarge - psmall * psmall) + psmall * psmall), 10);
-
-	    var digits = (value + '').length;
-	    var fontsize = circlesize * 0.55;
-	    if (digits > 1) {
-	       fontsize = circlesize / digits;
-	    }
-
-		// write the HTML into the render manager
-	    rm.write("<div");
-	    rm.writeControlData(oControl);
-	    rm.writeAttribute('tabIndex', '0');
-
-		if (oControl.getTooltip_AsString()) {
-			rm.writeAttributeEscaped("title", oControl.getTooltip_AsString());
-		} else {
-			rm.writeAttributeEscaped("title", valuestring);
-		}
-
-	    //ARIA
-	    if ( sap.ui.getCore().getConfiguration().getAccessibility()) {
-		  rm.writeAttribute('role', 'progressbar');
-	      rm.writeAccessibilityState(oControl, {valuemin: minvalue});
-		  rm.writeAccessibilityState(oControl, {valuemax: maxvalue});
-		  rm.writeAccessibilityState(oControl, {valuenow: value});
-		}
-
-	    rm.writeAttribute("class","sapUiTaskCircle " + style);
-
-		rm.addStyle("width", circlesize + "px");
-		rm.addStyle("height", circlesize + "px");
-		rm.addStyle("line-height", circlesize + "px");
-		rm.addStyle("font-size", parseInt(fontsize, 10) + "px");
-		rm.addStyle("border-radius", circlesize + "px");
-		rm.addStyle("-moz-border-radius", circlesize + "px");
-	    rm.writeClasses();
-		rm.writeStyles();
-	    rm.write(">");
-	    rm.write(value);
-	    rm.write("</div>");
-	};
-
-
-	return TaskCircleRenderer;
-
-}, /* bExport= */ true);
-
-}; // end of sap/ui/suite/TaskCircleRenderer.js
 if ( !jQuery.sap.isDeclared('sap.ui.suite.VerticalProgressIndicatorRenderer') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -319,9 +193,7 @@ if ( !jQuery.sap.isDeclared('sap.ui.suite.VerticalProgressIndicatorRenderer') ) 
 
 // provides default renderer for sap.ui.suite.VerticalProgressIndicator
 jQuery.sap.declare('sap.ui.suite.VerticalProgressIndicatorRenderer'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-sap.ui.define("sap/ui/suite/VerticalProgressIndicatorRenderer",['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define("sap/ui/suite/VerticalProgressIndicatorRenderer",function() {
 	"use strict";
 
 
@@ -407,27 +279,19 @@ if ( !jQuery.sap.isDeclared('sap.ui.suite.library') ) {
  */
 jQuery.sap.declare('sap.ui.suite.library'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.core.Core'); // unlisted dependency retained
 jQuery.sap.require('sap.ui.core.library'); // unlisted dependency retained
-sap.ui.define("sap/ui/suite/library",['jquery.sap.global',
+sap.ui.define("sap/ui/suite/library",['jquery.sap.global', 'sap/ui/core/Core',
 	'sap/ui/core/library'], // library dependency
-	function(jQuery) {
+	function(jQuery, Core) {
 
 	"use strict";
 
-	/**
-	 * Suite controls library.
-	 *
-	 * @namespace
-	 * @name sap.ui.suite
-	 * @author SAP SE
-	 * @version 1.34.9
-	 * @public
-	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.suite",
-		version: "1.34.9",
+		version: "1.44.14",
 		dependencies : ["sap.ui.core"],
 		types: [
 			"sap.ui.suite.TaskCircleColor"
@@ -440,16 +304,28 @@ sap.ui.define("sap/ui/suite/library",['jquery.sap.global',
 		elements: []
 	});
 
+	/* eslint-disable no-undef */
+	/**
+	 * Suite controls library.
+	 *
+	 * @namespace
+	 * @alias sap.ui.suite
+	 * @author SAP SE
+	 * @version 1.44.14
+	 * @public
+	 */
+	var thisLibrary = sap.ui.suite;
+	/* eslint-enable no-undef */
 
 	/**
 	 * Defined color values for the Task Circle Control
 	 *
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @enum {string}
 	 * @public
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	sap.ui.suite.TaskCircleColor = {
+	thisLibrary.TaskCircleColor = {
 
 		/**
 		 * Red
@@ -477,7 +353,7 @@ sap.ui.define("sap/ui/suite/library",['jquery.sap.global',
 
 	};
 
-	return sap.ui.suite;
+	return thisLibrary;
 
 });
 
@@ -498,7 +374,8 @@ sap.ui.define("sap/ui/suite/TaskCircle",['jquery.sap.global', 'sap/ui/core/Contr
 	function(jQuery, Control, EnabledPropagator, library) {
 	"use strict";
 
-
+	// shortcut
+	var TaskCircleColor = library.TaskCircleColor;
 
 	/**
 	 * Constructor for a new TaskCircle.
@@ -511,7 +388,7 @@ sap.ui.define("sap/ui/suite/TaskCircle",['jquery.sap.global', 'sap/ui/core/Contr
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author Svetozar Buzdumovic
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -543,7 +420,7 @@ sap.ui.define("sap/ui/suite/TaskCircle",['jquery.sap.global', 'sap/ui/core/Contr
 			/**
 			 * Color of the circle. The default color is red.
 			 */
-			color : {type : "sap.ui.suite.TaskCircleColor", group : "Misc", defaultValue : sap.ui.suite.TaskCircleColor.Gray}
+			color : {type : "sap.ui.suite.TaskCircleColor", group : "Misc", defaultValue : TaskCircleColor.Gray}
 		},
 		associations : {
 
@@ -611,9 +488,141 @@ sap.ui.define("sap/ui/suite/TaskCircle",['jquery.sap.global', 'sap/ui/core/Contr
 
 	return TaskCircle;
 
-}, /* bExport= */ true);
+});
 
 }; // end of sap/ui/suite/TaskCircle.js
+if ( !jQuery.sap.isDeclared('sap.ui.suite.TaskCircleRenderer') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// provides default renderer for sap.ui.suite.TaskCircle
+jQuery.sap.declare('sap.ui.suite.TaskCircleRenderer'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.core.Core'); // unlisted dependency retained
+sap.ui.define("sap/ui/suite/TaskCircleRenderer",['jquery.sap.global', 'sap/ui/core/Core', './library'],
+	function(jQuery, Core, library) {
+	"use strict";
+
+
+	// shortcut
+	var TaskCircleColor = library.TaskCircleColor;
+
+	/**
+	 * TaskCircle renderer.
+	 * @namespace
+	 */
+	var TaskCircleRenderer = function() {
+	};
+
+
+	/**
+	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
+	 *
+	 * @param {sap.ui.core.RenderManager} oRenderManager the RenderManager that can be used for writing to the Render-Output-Buffer
+	 * @param {sap.ui.core.Control} oControl an object representation of the control that should be rendered
+	 */
+	TaskCircleRenderer.render = function(oRenderManager, oControl){
+	    // convenience variable
+		var rm = oRenderManager;
+
+	    //calculate pixel size
+		var minvalue = oControl.getMinValue();
+		var maxvalue = oControl.getMaxValue();
+		var value = oControl.getValue();
+		if (minvalue < 0 || minvalue == Number.NaN) {
+			minvalue = 0;
+		}
+		if (maxvalue < 0 || maxvalue == Number.NaN) {
+			maxvalue = 1;
+		}
+		if (value < 0 || value == Number.NaN) {
+			value = 0;
+		}
+		var valuestring = value.toString();
+	    var color = oControl.getColor();
+	    var style = 'sapUiTaskCircleColorGray';
+
+	    switch (color) {
+	       case TaskCircleColor.Red:
+	          style = 'sapUiTaskCircleColorRed';
+	          break;
+	       case TaskCircleColor.Yellow:
+	          style = 'sapUiTaskCircleColorYellow';
+	          break;
+	       case TaskCircleColor.Green:
+	          style = 'sapUiTaskCircleColorGreen';
+	          break;
+	       case TaskCircleColor.Gray:
+	          style = 'sapUiTaskCircleColorGray';
+	          break;
+	    }
+	    if (value < minvalue) {
+				minvalue = value;
+	    }
+	    if (value > maxvalue) {
+				maxvalue = value;
+	    }
+
+	    var psmall = 24;
+	    if (minvalue > 10) {
+				psmall = 32;
+	    }
+	    if (minvalue > 100) {
+				psmall = 46;
+	    }
+	    var plarge = 62;
+
+	    var circlesize = parseInt(Math.sqrt((value - minvalue) / (maxvalue - minvalue) * (plarge * plarge - psmall * psmall) + psmall * psmall), 10);
+
+	    var digits = (value + '').length;
+	    var fontsize = circlesize * 0.55;
+	    if (digits > 1) {
+	       fontsize = circlesize / digits;
+	    }
+
+		// write the HTML into the render manager
+	    rm.write("<div");
+	    rm.writeControlData(oControl);
+	    rm.writeAttribute('tabIndex', '0');
+
+		if (oControl.getTooltip_AsString()) {
+			rm.writeAttributeEscaped("title", oControl.getTooltip_AsString());
+		} else {
+			rm.writeAttributeEscaped("title", valuestring);
+		}
+
+	    //ARIA
+	    if ( sap.ui.getCore().getConfiguration().getAccessibility()) {
+		  rm.writeAttribute('role', 'progressbar');
+	      rm.writeAccessibilityState(oControl, {valuemin: minvalue});
+		  rm.writeAccessibilityState(oControl, {valuemax: maxvalue});
+		  rm.writeAccessibilityState(oControl, {valuenow: value});
+		}
+
+	    rm.writeAttribute("class","sapUiTaskCircle " + style);
+
+		rm.addStyle("width", circlesize + "px");
+		rm.addStyle("height", circlesize + "px");
+		rm.addStyle("line-height", circlesize + "px");
+		rm.addStyle("font-size", parseInt(fontsize, 10) + "px");
+		rm.addStyle("border-radius", circlesize + "px");
+		rm.addStyle("-moz-border-radius", circlesize + "px");
+	    rm.writeClasses();
+		rm.writeStyles();
+	    rm.write(">");
+	    rm.write(value);
+	    rm.write("</div>");
+	};
+
+
+	return TaskCircleRenderer;
+
+}, /* bExport= */ true);
+
+}; // end of sap/ui/suite/TaskCircleRenderer.js
 if ( !jQuery.sap.isDeclared('sap.ui.suite.VerticalProgressIndicator') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -643,7 +652,7 @@ sap.ui.define("sap/ui/suite/VerticalProgressIndicator",['jquery.sap.global', 'sa
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author Svetozar Buzdumovic
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -765,6 +774,6 @@ sap.ui.define("sap/ui/suite/VerticalProgressIndicator",['jquery.sap.global', 'sa
 
 	return VerticalProgressIndicator;
 
-}, /* bExport= */ true);
+});
 
 }; // end of sap/ui/suite/VerticalProgressIndicator.js

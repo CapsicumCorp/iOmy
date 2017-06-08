@@ -22,10 +22,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/ListBox', 'sap/ui/core/Contr
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.ExactList
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -1052,7 +1053,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/ListBox', 'sap/ui/core/Contr
 					}, function(jRef){
 						//Update BlindLayer of popup
 						jListContRef.addClass("sapUiUx3ExactLstExpandedBL");
-						oList._oPopup._updateBlindLayer();
 						//Adapt the scroll behavior and set the focus
 						adaptScollBehavior(oList);
 						oList.getFocusDomRef().focus();
@@ -1313,11 +1313,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/commons/ListBox', 'sap/ui/core/Contr
 			var iWidth = oList.$("cntnt").height() - 50/*Space for Header Action Buttons - Maybe provide theme parameter in future*/;
 			var $txt = oList.$("head-txt");
 			$txt.css("width", iWidth + "px");
-			if (jQuery("html").attr("data-sap-ui-browser") == "ie8") {
-				//A text with 90px width is correct aligned when bottom:75px is set
-				var iBottom = 75 - (90 - iWidth);
-				$txt.css("bottom", iBottom + "px");
-			}
 		}
 		var aSubLists = oList.getSubLists();
 		for (var i = 0; i < aSubLists.length; i++) {

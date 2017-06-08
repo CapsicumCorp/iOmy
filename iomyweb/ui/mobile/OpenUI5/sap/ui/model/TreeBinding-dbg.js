@@ -5,8 +5,8 @@
  */
 
 // Provides an abstraction for list bindings
-sap.ui.define(['./Binding'],
-	function(Binding) {
+sap.ui.define(['jquery.sap.global', './Binding', './Filter', './Sorter'],
+	function(jQuery, Binding, Filter, Sorter) {
 	"use strict";
 
 
@@ -30,6 +30,7 @@ sap.ui.define(['./Binding'],
 	 *         [aSorters=null] predefined sap.ui.model.sorter/s contained in an array (optional)
 	 * @public
 	 * @alias sap.ui.model.TreeBinding
+	 * @extends sap.ui.model.Binding
 	 */
 	var TreeBinding = Binding.extend("sap.ui.model.TreeBinding", /** @lends sap.ui.model.TreeBinding.prototype */ {
 
@@ -38,14 +39,14 @@ sap.ui.define(['./Binding'],
 			this.aFilters = [];
 
 			this.aSorters = aSorters;
-			if (!jQuery.isArray(this.aSorters) && this.aSorters instanceof sap.ui.model.Sorter) {
+			if (!jQuery.isArray(this.aSorters) && this.aSorters instanceof Sorter) {
 				this.aSorters = [this.aSorters];
 			} else if (!jQuery.isArray(this.aSorters)) {
 				this.aSorters = [];
 			}
 
 			this.aApplicationFilters = aFilters;
-			if (!jQuery.isArray(aFilters) && aFilters instanceof sap.ui.model.Filter) {
+			if (!jQuery.isArray(aFilters) && aFilters instanceof Filter) {
 				this.aApplicationFilters = [aFilters];
 			} else if (!jQuery.isArray(aFilters)) {
 				this.aApplicationFilters = [];
@@ -70,8 +71,8 @@ sap.ui.define(['./Binding'],
 	 *
 	 * @function
 	 * @name sap.ui.model.TreeBinding.prototype.getRootContexts
-	 * @param {integer} iStartIndex the startIndex where to start the retrieval of contexts
-	 * @param {integer} iLength determines how many contexts to retrieve beginning from the start index.
+	 * @param {int} iStartIndex the startIndex where to start the retrieval of contexts
+	 * @param {int} iLength determines how many contexts to retrieve beginning from the start index.
 	 * @return {Array} the array of child contexts for the root node
 	 *
 	 * @public
@@ -83,8 +84,8 @@ sap.ui.define(['./Binding'],
 	 * @function
 	 * @name sap.ui.model.TreeBinding.prototype.getNodeContexts
 	 * @param {Object} oContext the context element of the node
-	 * @param {integer} iStartIndex the startIndex where to start the retrieval of contexts
-	 * @param {integer} iLength determines how many contexts to retrieve beginning from the start index.
+	 * @param {int} iStartIndex the startIndex where to start the retrieval of contexts
+	 * @param {int} iLength determines how many contexts to retrieve beginning from the start index.
 	 * @return {Array} the array of child contexts for the given node
 	 *
 	 * @public
@@ -105,7 +106,7 @@ sap.ui.define(['./Binding'],
 	 * Returns the number of child nodes of a specific context
 	 *
 	 * @param {Object} oContext the context element of the node
-	 * @return {integer} the number of children
+	 * @return {int} the number of children
 	 *
 	 * @public
 	 */

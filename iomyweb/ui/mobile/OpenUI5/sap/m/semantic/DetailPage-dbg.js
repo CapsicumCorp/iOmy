@@ -24,6 +24,7 @@ sap.ui.define(["sap/m/semantic/ShareMenuPage", "sap/m/semantic/SemanticConfigura
 	 * 	<li>{@link sap.m.semantic.ForwardAction}</li>
 	 * 	<li>{@link sap.m.semantic.EditAction}</li>
 	 * 	<li>{@link sap.m.semantic.SaveAction}</li>
+	 * 	<li>{@link sap.m.semantic.DeleteAction}</li>
 	 * 	<li>{@link sap.m.semantic.CancelAction}</li>
 	 * 	<li>{@link sap.m.semantic.FlagAction}</li>
 	 * 	<li>{@link sap.m.semantic.FavoriteAction}</li>
@@ -41,7 +42,7 @@ sap.ui.define(["sap/m/semantic/ShareMenuPage", "sap/m/semantic/SemanticConfigura
 	 * @extends sap.m.semantic.ShareMenuPage
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -51,6 +52,7 @@ sap.ui.define(["sap/m/semantic/ShareMenuPage", "sap/m/semantic/SemanticConfigura
 	 */
 	var DetailPage = ShareMenuPage.extend("sap.m.semantic.DetailPage", /** @lends sap.m.semantic.DetailPage.prototype */ {
 		metadata: {
+			library: "sap.m",
 			aggregations: {
 				/**
 				 * Add action
@@ -99,6 +101,13 @@ sap.ui.define(["sap/m/semantic/ShareMenuPage", "sap/m/semantic/SemanticConfigura
 				 */
 				saveAction: {
 					type: "sap.m.semantic.SaveAction",
+					multiple: false
+				},
+				/**
+				 * Delete action
+				 */
+				deleteAction: {
+					type: "sap.m.semantic.DeleteAction",
 					multiple: false
 				},
 				/**
@@ -192,7 +201,8 @@ sap.ui.define(["sap/m/semantic/ShareMenuPage", "sap/m/semantic/SemanticConfigura
 					type: "sap.m.DraftIndicator",
 					multiple: false
 				}
-			}
+			},
+			designTime : true
 		},
 		renderer: SemanticPageRenderer.render
 	});
@@ -261,6 +271,10 @@ sap.ui.define(["sap/m/semantic/ShareMenuPage", "sap/m/semantic/SemanticConfigura
 		}
 
 		return ShareMenuPage.prototype.destroyAggregation.call(this, sAggregationName, bSuppressInvalidate);
+	};
+
+	DetailPage.prototype.getSemanticRuleSet = function() {
+		return sap.m.semantic.SemanticRuleSetType.Classic; //this page should only use the Classic ruleset (no other rules are specified for this page for now)
 	};
 
 	return DetailPage;

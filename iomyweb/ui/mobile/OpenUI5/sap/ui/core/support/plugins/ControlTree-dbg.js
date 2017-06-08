@@ -7,22 +7,20 @@
 // Provides class sap.ui.core.support.plugins.ControlTree (ControlTree support plugin)
 sap.ui.define([
 	'jquery.sap.global', 'sap/ui/core/support/Plugin', 'sap/ui/core/util/serializer/ViewSerializer', 'sap/ui/thirdparty/jszip',
-	'sap/ui/core/Element', 'sap/ui/core/ElementMetadata', 'sap/ui/core/UIArea', 'sap/ui/core/mvc/View', 'sap/ui/core/mvc/Controller'
-], function(jQuery, Plugin, ViewSerializer, JSZip, Element, ElementMetadata, UIArea, View /*, Controller */) {
+	'sap/ui/base/DataType', 'sap/ui/core/Element', 'sap/ui/core/ElementMetadata', 'sap/ui/core/UIArea', 'sap/ui/core/mvc/View', 'sap/ui/core/mvc/Controller',
+	'sap/ui/model/Binding', 'sap/ui/model/CompositeBinding'
+], function(jQuery, Plugin, ViewSerializer, JSZip, DataType, Element, ElementMetadata, UIArea, View, Controller, Binding, CompositeBinding) {
 	"use strict";
 
-
 	/*global Blob, Uint8Array, alert */
-
-
 
 		var $ = jQuery;
 		/**
 		 * Creates an instance of sap.ui.core.support.plugins.ControlTree.
 		 * @class This class represents the ControlTree plugin for the support tool functionality of UI5. This class is internal and all its functions must not be used by an application.
 		 * @abstract
-		 * @extends sap.ui.base.Object
-		 * @version 1.34.9
+		 * @extends sap.ui.core.support.Plugin
+		 * @version 1.44.14
 		 * @constructor
 		 * @private
 		 * @alias sap.ui.core.support.plugins.ControlTree
@@ -418,7 +416,7 @@ sap.ui.define([
 
 						rm.write('</td><td>');
 
-						rm.write('<div><a class="control-tree sapUiSupportLink" title="' + encode(oContext.location.name) + '" data-sap-ui-control-id="' + encode(oContext.location.id) + '" href="javascript:void(0);">' +
+						rm.write('<div><a class="control-tree sapUiSupportLink" title="' + encode(oContext.location.name) + '" data-sap-ui-control-id="' + encode(oContext.location.id) + '" href="#">' +
 								encode(basename(oContext.location.name)) +
 								' (' + encode(oContext.location.id) + ')</a></div>');
 
@@ -601,7 +599,7 @@ sap.ui.define([
 
 						if (oBinding.model && oBinding.model.location && oBinding.model.location.type) {
 							if (oBinding.model.location.type === 'control') {
-								rm.write('<div><a class="control-tree sapUiSupportLink" title="' + encode(oBinding.model.location.name) + '" data-sap-ui-control-id="' + encode(oBinding.model.location.id) + '" href="javascript:void(0);">' +
+								rm.write('<div><a class="control-tree sapUiSupportLink" title="' + encode(oBinding.model.location.name) + '" data-sap-ui-control-id="' + encode(oBinding.model.location.id) + '" href="#">' +
 										encode(basename(oBinding.model.location.name)) +
 										' (' + encode(oBinding.model.location.id) + ')</a></div>');
 							} else {
@@ -1195,8 +1193,8 @@ sap.ui.define([
 
 				if (oProperty && oProperty.type) {
 
-					var oType = sap.ui.base.DataType.getType(oProperty.type);
-					if (oType instanceof sap.ui.base.DataType) {
+					var oType = DataType.getType(oProperty.type);
+					if (oType instanceof DataType) {
 
 						// DATATYPE
 
@@ -1403,8 +1401,8 @@ sap.ui.define([
 								}).length === 1;
 							}
 
-							var oType = sap.ui.base.DataType.getType(oProperty.type);
-							if (oType && !(oType instanceof sap.ui.base.DataType)) {
+							var oType = DataType.getType(oProperty.type);
+							if (oType && !(oType instanceof DataType)) {
 								mProperty["enumValues"] = oType;
 							}
 						});
@@ -1479,9 +1477,9 @@ sap.ui.define([
 						aBindingInfoBuffer = [ mBindingInfo ];
 					}
 
-					if (mBindingInfo.binding instanceof sap.ui.model.CompositeBinding) {
+					if (mBindingInfo.binding instanceof CompositeBinding) {
 						aBindingBuffer = mBindingInfo.binding.getBindings();
-					} else if (mBindingInfo.binding instanceof sap.ui.model.Binding) {
+					} else if (mBindingInfo.binding instanceof Binding) {
 						aBindingBuffer = [ mBindingInfo.binding ];
 					}
 
@@ -1658,7 +1656,7 @@ sap.ui.define([
 				return;
 			}
 
-			if (oBinding instanceof sap.ui.model.CompositeBinding) {
+			if (oBinding instanceof CompositeBinding) {
 
 				var aBindings = oBinding.getBindings();
 

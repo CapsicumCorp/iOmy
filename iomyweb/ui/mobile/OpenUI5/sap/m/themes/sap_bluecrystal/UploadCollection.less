@@ -12,11 +12,13 @@
 }
 
 /* Item Icon */
+.sapMUCItemIconInactive,
 .sapMUCItemIcon {
-	color:					@sapUiElement;
+	color: @sapUiElement;
 }
 
 /*if no image is provided a standard placeholder is displayed */
+.sapMUCItemPlaceholderInactive,
 .sapMUCItemPlaceholder {
 	background-color: darken(@sapUiGroupContentBackground, 5);
 	color: darken(@sapUiExtraLightBG, 20);
@@ -44,7 +46,6 @@
 		background-image: none;
   		background-color: @sapUiButtonLiteBackground;
   		border-color: @sapUiButtonLiteBorderColor;
-  		color: @sapUiButtonLiteTextColor;
   		text-shadow: none;
   	}
 }
@@ -74,7 +75,7 @@
 
 /* Text: Filename */
 .sapMUCFileName.sapMLnk {
-	font-size: 			@sapMFontLargeSize; /* it cannot be moved to base as the LESS constant is not known there */
+	font-size: @sapMFontLargeSize; /* it cannot be moved to base as the LESS constant is not known there */
 }
 
 .sapMUCAttrContainer, .sapMUCStatusContainer {

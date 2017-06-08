@@ -37,21 +37,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/URI', 'jquery.sap.strings
 				"compare": function () {
 					var ODataUtils;
 
-					jQuery.sap.require("sap.ui.model.odata.ODataUtils");
-					ODataUtils = sap.ui.require("sap/ui/model/odata/ODataUtils");
+					ODataUtils = sap.ui.requireSync("sap/ui/model/odata/v4/ODataUtils");
 					return ODataUtils.compare.apply(ODataUtils, arguments);
 				},
 				"fillUriTemplate": function () {
 					if (!URI.expand) {
-						jQuery.sap.require("sap.ui.thirdparty.URITemplate");
+						/* URI = */ sap.ui.requireSync("sap/ui/thirdparty/URITemplate");
 					}
 					return URI.expand.apply(URI, arguments).toString();
 				},
 				"uriEncode": function () {
 					var ODataUtils;
 
-					jQuery.sap.require("sap.ui.model.odata.ODataUtils");
-					ODataUtils = sap.ui.require("sap/ui/model/odata/ODataUtils");
+					ODataUtils = sap.ui.requireSync("sap/ui/model/odata/ODataUtils");
 					return ODataUtils.formatValue.apply(ODataUtils, arguments);
 				}
 			},
@@ -63,8 +61,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/URI', 'jquery.sap.strings
 		},
 		rDigit = /\d/,
 		sExpressionParser = "sap.ui.base.ExpressionParser",
-		rIdentifier = /[a-z]\w*/i,
-		rLetter = /[a-z]/i,
+		rIdentifier = /[a-z_$][a-z0-9_$]*/i,
+		rIdentifierStart = /[a-z_$]/i,
 		aPerformanceCategories = [sExpressionParser],
 		sPerformanceParse = sExpressionParser + "#parse",
 		mSymbols = { //symbol table
@@ -467,8 +465,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/URI', 'jquery.sap.strings
 	 *   optional source text
 	 */
 	function tokenize(fnResolveBinding, sInput, iStart) {
-		var aBindingsWithStrings = [], // the bindings where every property is still a string
-			aParts = [], // the resulting parts (corresponds to aBindingsWithStrings)
+		var aParts = [], // the resulting parts (corresponds to aPrimitiveValueBindings)
+			aPrimitiveValueBindings = [], // the bindings with primitive values only
 			aTokens = [],
 			oTokenizer = jQuery.sap._createJSTokenizer();
 
@@ -478,42 +476,63 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/URI', 'jquery.sap.strings
 		 *   the binding to save
 		 * @param {number} iStart
 		 *   the binding's start index in the input string
+		 * @param {boolean} [bTargetTypeAny=false]
+		 *   whether the binding's "targetType" should default to "any" (recursively, for all parts)
 		 * @returns {number}
 		 *   the index at which it has been saved/found in aParts
 		 */
-		function saveBindingAsPart(oBinding, iStart) {
-			var oBindingWithString,
+		function saveBindingAsPart(oBinding, iStart, bTargetTypeAny) {
+			var bHasNonPrimitiveValue = false,
+				sKey,
+				oPrimitiveValueBinding,
 				i;
 
-			/**
-			 * Checks whether the binding has other properties but "path" and "model".
-			 * @returns {boolean} <code>true</code> if there are other properties
+			/*
+			 * Sets the target type of the given binding to the default "any", if applicable.
+			 *
+			 * @param {object} oBinding
+			 *   A binding
 			 */
-			function hasMoreThanPathAndModel() {
-				var sKey;
-
-				for (sKey in oBinding) {
-					if (sKey !== "path" && sKey !== "model") {
-						return true;
+			function setTargetType(oBinding) {
+				if (bTargetTypeAny) {
+					if (oBinding.parts) {
+						oBinding.parts.forEach(setTargetType);
+						// Note: targetType not allowed here, see BindingParser.mergeParts
+					} else {
+						oBinding.targetType = oBinding.targetType || "any";
 					}
 				}
-				return false;
 			}
 
-			if (hasMoreThanPathAndModel()) {
+			for (sKey in oBinding) {
+				switch (typeof oBinding[sKey]) {
+					case "boolean":
+					case "number":
+					case "string":
+					case "undefined":
+						break;
+					default:
+						// binding has at least one property of non-primitive value
+						bHasNonPrimitiveValue = true;
+				}
+			}
+			setTargetType(oBinding);
+			if (bHasNonPrimitiveValue) {
 				// the binding must be a complex binding; property "type" (and poss. others) are
 				// newly created objects and thus incomparable -> parse again to have the names
-				oBindingWithString = jQuery.sap.parseJS(sInput, iStart).result;
+				oPrimitiveValueBinding = jQuery.sap.parseJS(sInput, iStart).result;
+				setTargetType(oPrimitiveValueBinding);
 			} else {
-				// only path and model; both are strings and easily comparable
-				oBindingWithString = oBinding;
+				// only primitive values; easily comparable
+				oPrimitiveValueBinding = oBinding;
 			}
 			for (i = 0; i < aParts.length; i += 1) {
-				if (jQuery.sap.equal(aBindingsWithStrings[i], oBindingWithString)) {
+				// Note: order of top-level properties must not matter for equality!
+				if (jQuery.sap.equal(aPrimitiveValueBindings[i], oPrimitiveValueBinding)) {
 					return i;
 				}
 			}
-			aBindingsWithStrings[i] = oBindingWithString;
+			aPrimitiveValueBindings[i] = oPrimitiveValueBinding;
 			aParts[i] = oBinding;
 			return i;
 		}
@@ -529,7 +548,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/URI', 'jquery.sap.strings
 			ch = oTokenizer.getCh();
 			iIndex = oTokenizer.getIndex();
 
-			if (rLetter.test(ch)) {
+			if ((ch === "$" || ch === "%") && sInput[iIndex + 1] === "{") { //binding
+				oBinding = fnResolveBinding(sInput, iIndex + 1);
+				oToken = {
+					id: "BINDING",
+					value: saveBindingAsPart(oBinding.result, iIndex + 1, ch === "%")
+				};
+				oTokenizer.setIndex(oBinding.at); //go to first character after binding string
+			} else if (rIdentifierStart.test(ch)) {
 				aMatches = rIdentifier.exec(sInput.slice(iIndex));
 				switch (aMatches[0]) {
 				case "false":
@@ -547,19 +573,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/URI', 'jquery.sap.strings
 					oTokenizer.setIndex(iIndex + aMatches[0].length);
 				}
 			} else if (rDigit.test(ch)
-					|| ch === "." && rDigit.test(sInput.charAt(oTokenizer.getIndex() + 1))) {
+					|| ch === "." && rDigit.test(sInput[iIndex + 1])) {
 				oToken = {id: "CONSTANT", value: oTokenizer.number()};
 			} else if (ch === "'" || ch === '"') {
 				oToken = {id: "CONSTANT", value: oTokenizer.string()};
-			} else if (ch === "$") {
-				oTokenizer.next("$");
-				oTokenizer.next("{"); //binding
-				oBinding = fnResolveBinding(sInput, oTokenizer.getIndex() - 1);
-				oToken = {
-					id: "BINDING",
-					value: saveBindingAsPart(oBinding.result, iIndex + 1)
-				};
-				oTokenizer.setIndex(oBinding.at); //go to first character after binding string
 			} else {
 				rTokens.lastIndex = iIndex;
 				aMatches = rTokens.exec(sInput);

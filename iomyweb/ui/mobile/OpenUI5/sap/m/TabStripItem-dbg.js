@@ -19,7 +19,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Item", "sap/ui/bas
 		 * @extends sap.ui.core.Item
 		 *
 		 * @author SAP SE
-		 * @version 1.34.9
+		 * @version 1.44.14
 		 *
 		 * @constructor
 		 * @private
@@ -53,7 +53,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Item", "sap/ui/bas
 						parameters: {
 
 							/**
-							 * Tab ID of the tab to be closed.
+							 * The <code>TabStripItem</code> to be closed.
 							 */
 							item: {type: "sap.m.TabStripItem"}
 						}
@@ -79,7 +79,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Item", "sap/ui/bas
 							/**
 							 * The new property value.
 							 */
-							propertyValue:  {type: "mixed"}
+							propertyValue:  {type: "any"}
 						}
 					}
 				}

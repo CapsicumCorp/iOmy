@@ -20,14 +20,18 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 	 * @class
 	 * A NotificationBar is a "toolbar" that can be added to a page to show messages and notifications from the application.
 	 * Its position, height and width is inherited from the element that the notification bar is added to.
+	 * The NotificationBar uses position: fixed; to always stay at the bottom of the screen. This CSS may sometimes cause
+	 * issues when nested deeply inside other controls. To have a proper behavior of the NotificationBar use it as high
+	 * in the control hierarchy as possible.
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.7.0
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.MessagePopover</code> control.
 	 * @alias sap.ui.ux3.NotificationBar
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -1294,13 +1298,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 		};
 
 		/**
-		 * @param [boolean]
-		 *            {bAlwaysShow} if the toggler should be visible all the time
+		 * @param {boolean}
+		 *            bAlwaysShow if the toggler should be visible all the time
 		 *            set this parameter to <b>true</b>
 		 * @public
 		 * @since 1.22.11
 		 */
-		sap.ui.ux3.NotificationBar.prototype.setAlwaysShowToggler = function(bAlwaysShow) {
+		NotificationBar.prototype.setAlwaysShowToggler = function(bAlwaysShow) {
 			// set toggler always to visible if running on a mobile device
 			if (sap.ui.Device.browser.mobile) {
 				bAlwaysShow = true;

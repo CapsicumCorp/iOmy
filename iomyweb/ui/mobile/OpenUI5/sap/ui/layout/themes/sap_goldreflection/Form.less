@@ -3,16 +3,17 @@
 /* Goldreflection                                  */
 /* =============================================== */
 
-@sapUiFormContainerExpImageURL: ~"/img/form/Maximize.png";
-@sapUiFormContainerExpImageDownURL: ~"/img/form/Maximize_hover.png";
-@sapUiFormContainerColImageURL: ~"/img/form/Minimize.png";
-@sapUiFormContainerColImageDownURL: ~"/img/form/Minimize_hover.png";
+@sapUiFormContainerExpImageURL: url("img/form/Maximize.png");
+@sapUiFormContainerExpImageDownURL: url("img/form/Maximize_hover.png");
+@sapUiFormContainerColImageURL: url("img/form/Minimize.png");
+@sapUiFormContainerColImageDownURL: url("img/form/Minimize_hover.png");
 
 .sapUiForm .sapUiFormTitle > button{
 	height: 16px;
 	width: 16px;
 	padding-left: 0;
 	padding-right:0;
+	bottom: 0;
 }
 
 html[data-sap-ui-browser="ie9"] .sapUiFormTitle > .sapUiBtnS.sapUiBtnLite > img{

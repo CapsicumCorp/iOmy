@@ -4,8 +4,8 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', 'sap/m/PageAccessibleLandmarkInfo'],
-	function(jQuery, PageAccessibleLandmarkInfo) {
+sap.ui.define(['sap/m/PageAccessibleLandmarkInfo', 'sap/ui/Device'],
+	function(PageAccessibleLandmarkInfo, Device) {
 	"use strict";
 
 
@@ -25,7 +25,7 @@ sap.ui.define(['jquery.sap.global', 'sap/m/PageAccessibleLandmarkInfo'],
 		var oHeader = null,
 			oFooter = null,
 			oSubHeader = null,
-			sEnableScrolling = oPage.getEnableScrolling() ? " sapMPageScrollEnabled" : "";
+			bLightHeader  = this._isLightHeader(oPage);
 
 		if (oPage.getShowHeader()) {
 			oHeader = oPage._getAnyHeader();
@@ -61,6 +61,11 @@ sap.ui.define(['jquery.sap.global', 'sap/m/PageAccessibleLandmarkInfo'],
 			oRm.addClass("sapMPageBusyCoversAll");
 		}
 
+		var theme = sap.ui.getCore().getConfiguration().getTheme();
+		if (oPage.getFloatingFooter() && oPage.getShowFooter() && theme !== 'sap_hcb') {
+			oRm.addClass("sapMPageFloatingFooter");
+		}
+
 		oRm.writeClasses();
 
 		var sTooltip = oPage.getTooltip_AsString();
@@ -75,33 +80,34 @@ sap.ui.define(['jquery.sap.global', 'sap/m/PageAccessibleLandmarkInfo'],
 
 		//render headers
 		this.renderBarControl(oRm, oPage, oHeader, {
-			context : "header",
-			styleClass : "sapMPageHeader"
+			context: "header",
+			styleClass: "sapMPageHeader" + (bLightHeader ? "" : " sapContrastPlus")
 		});
 
 		this.renderBarControl(oRm, oPage, oSubHeader, {
-			context : "subHeader",
-			styleClass : "sapMPageSubHeader"
+			context: "subHeader",
+			styleClass: "sapMPageSubHeader" + (bLightHeader ? "" : " sapContrastPlus")
 		});
 
 		// render child controls
 		oRm.write('<section id="' + oPage.getId() + '-cont"');
 		PageAccessibleLandmarkInfo._writeLandmarkInfo(oRm, oPage, "content");
-		oRm.write('>');
 
-		if (oPage._bUseScrollDiv) { // fallback to old rendering
-			oRm.write('<div id="' + oPage.getId() + '-scroll" class="sapMPageScroll' + sEnableScrolling + '">');
+		// The vertical scroll bar should be immediately available to avoid flickering
+		// and reduce size recalculations of embedded responsive controls that rely on
+		// the page content width. See ScrollEnablement.js: _setOverflow
+		if (oPage.getEnableScrolling()) {
+			oRm.addStyle("overflow-y", Device.os.ios || Device.os.blackberry ? "scroll" : "auto");
+			oRm.writeStyles();
 		}
+
+		oRm.write('>');
 
 		var aContent = oPage.getContent();
 		var l = aContent.length;
 
 		for (var i = 0; i < l; i++) {
 			oRm.renderControl(aContent[i]);
-		}
-
-		if (oPage._bUseScrollDiv) { // fallback to old rendering
-			oRm.write("</div>");
 		}
 
 		oRm.write("</section>");
@@ -134,6 +140,43 @@ sap.ui.define(['jquery.sap.global', 'sap/m/PageAccessibleLandmarkInfo'],
 		oBarControl.addStyleClass(oOptions.styleClass);
 
 		oRm.renderControl(oBarControl);
+	};
+
+	/**
+	 *	Check whether THIS page is used in scenario where its header should be light
+	 *	Important for Belize styling
+	 *
+	 * @param oPage
+	 * @returns {boolean}
+	 * @private
+	 */
+	PageRenderer._isLightHeader = function (oPage) {
+		var oChild = oPage,
+			oParent = oPage.getParent(),
+			sParentName,
+			sChildName;
+
+		// Loop back to the top to check if there's SplitContainer OR SplitApp OR QuickView and then check if child elem is
+		// sap.m.NavContainer and this Nav container is the master
+		while (oParent) {
+			sParentName = (oParent && oParent.getMetadata().getName()) || "";
+			sChildName = oChild.getMetadata().getName();
+
+			if ((sParentName === "sap.m.Popover" || sParentName === "sap.m.Dialog")
+				&& sChildName === "sap.m.NavContainer") {
+				return true;
+			}
+
+			if (oParent && ["sap.m.SplitApp", "sap.m.SplitContainer"].indexOf(sParentName) > -1
+				&& sChildName === "sap.m.NavContainer" && /\-Master$/.test(oChild.getId())) {
+				return true;
+			}
+
+			oChild = oParent;
+			oParent = oChild.getParent();
+		}
+
+		return false;
 	};
 
 	return PageRenderer;

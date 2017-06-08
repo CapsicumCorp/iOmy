@@ -21,7 +21,6 @@ sap.ui.define([],
 	 * @param {sap.m.GenericTile} oControl the control to be rendered
 	 */
 	NewsContentRenderer.render = function(oRm, oControl) {
-		var sSize = oControl.getSize();
 		var sSubheader = oControl.getSubheader();
 		var sTooltip = oControl.getTooltip_AsString();
 		if (typeof sTooltip !== "string") {
@@ -30,16 +29,10 @@ sap.ui.define([],
 
 		oRm.write("<div");
 		oRm.writeControlData(oControl);
-		oRm.writeAttributeEscaped("title", sTooltip);
 		oRm.writeAttribute("id", oControl.getId() + "-news-content");
 		oRm.writeAttribute("role", "presentation");
-		if (sap.ui.Device.browser.firefox) {
-			oRm.writeAttributeEscaped("aria-label", oControl.getAltText().replace(/\s/g, " ") + "" + sTooltip);
-		} else {
-			oRm.writeAttributeEscaped("aria-label", oControl.getAltText().replace(/\s/g, " ") + " " + sTooltip);
-		}
+		oRm.writeAttributeEscaped("aria-label", sTooltip);
 
-		oRm.addClass(sSize);
 		oRm.addClass("sapMNwC");
 		if (oControl.hasListeners("press")) {
 			oRm.addClass("sapMPointer");
@@ -50,7 +43,6 @@ sap.ui.define([],
 
 		oRm.write("<div");
 		oRm.addClass("sapMNwCCTxt");
-		oRm.addClass(sSize);
 		oRm.writeClasses();
 		oRm.write(">");
 		oRm.renderControl(oControl._oContentText);
@@ -59,7 +51,6 @@ sap.ui.define([],
 		oRm.write("<div");
 		oRm.writeAttribute("id", oControl.getId() + "-subheader");
 		oRm.addClass("sapMNwCSbh");
-		oRm.addClass(sSize);
 		oRm.writeClasses();
 		oRm.write(">");
 		oRm.writeEscaped(sSubheader);

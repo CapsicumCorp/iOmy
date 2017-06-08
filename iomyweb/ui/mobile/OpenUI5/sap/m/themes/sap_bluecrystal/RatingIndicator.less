@@ -9,11 +9,6 @@
 	-webkit-text-fill-color: transparent; /* Chrome & Safari only */
 }
 
-.sapMRIIcon { /* required for size calculation */
-	height: 1.375rem; /* default size */
-	overflow: hidden;
-}
-
 .sapMRIIconSel {
 	color: lighten(@sapUiAccent1, 12);
 	-webkit-text-stroke: 1px darken(@sapUiAccent1, 3);
@@ -66,13 +61,13 @@ html[data-sap-ui-browser^='ie10'] .sapMRIIconUnsel {
 
 
 /* Custom focus outline */
-.sap-desktop .sapMRI:focus:not(.sapMRIDisabled) {
+html.sap-desktop .sapMRI:focus:not(.sapMRIDisabled) {
 	outline: 1px dotted @sapUiFocus;
 	outline-offset: -1px;
 }
 
 /* IE ignores outline-offset. Use an overlay: */
-.sap-desktop[data-sap-ui-browser^="ie"]{
+html[data-sap-ui-browser^="ie"].sap-desktop {
 	.sapMRI:focus {
 		outline: none;
 		position: relative;
@@ -94,8 +89,37 @@ html[data-sap-ui-browser^='ie10'] .sapMRIIconUnsel {
 	height: 1rem; /* default size for the compact mode */
 }
 
-/* Condensed mode */
-.sapUiSizeCondensed .sapUiTableCell .sapMRI .sapUiIcon,
-.sapUiSizeCondensed .sapUiTableCell .sapMRI .sapMImg{
-	vertical-align: top;
+.sapMRI.sapUiRatingIndicatorXS {
+	.sapUiIcon, .sapMImg {
+		padding-right: @sapUiRIIconPaddingXS;
+		vertical-align: top;
+	}
+}
+
+.sapMRI.sapUiRatingIndicatorS {
+	.sapUiIcon, .sapMImg {
+		padding-right: @sapUiRIIconPaddingS;
+		vertical-align: top;
+	}
+}
+
+.sapMRI.sapUiRatingIndicatorM {
+	.sapUiIcon, .sapMImg {
+		padding-right: @sapUiRIIconPaddingM;
+		vertical-align: top;
+	}
+}
+
+.sapMRI.sapUiRatingIndicatorL {
+	.sapUiIcon, .sapMImg {
+		padding-right: @sapUiRIIconPaddingL;
+		vertical-align: top;
+	}
+}
+
+.sapMRI.sapUiRatingIndicatorXS, .sapMRI.sapUiRatingIndicatorS, .sapMRI.sapUiRatingIndicatorM,
+.sapMRI.sapUiRatingIndicatorL {
+	.sapUiIcon:last-child, .sapMImg:last-child {
+		padding-right: 0;
+	}
 }

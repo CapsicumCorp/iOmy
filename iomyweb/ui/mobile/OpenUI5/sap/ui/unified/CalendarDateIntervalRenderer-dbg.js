@@ -21,18 +21,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './CalendarRenderer'
 		oRm.addClass("sapUiCalDateInt");
 		var iDays = oCal._getDays();
 
-		if (iDays > oCal._iDaysLarge) {
+		if (iDays > oCal._getDaysLarge()) {
 			oRm.addClass("sapUiCalIntLarge");
 		}
 
 		if (iDays > oCal._iDaysMonthHead) {
 			oRm.addClass("sapUiCalIntHead");
-		}
-
-		var sWidth = oCal.getWidth();
-		if (sWidth && sWidth != '') {
-			oRm.addStyle("width", sWidth);
-			oRm.writeStyles();
 		}
 
 	};

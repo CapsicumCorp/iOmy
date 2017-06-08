@@ -11,7 +11,7 @@ sap.ui.define(['sap/ui/base/Object', './PageAccessibleLandmarkInfo', 'sap/ui/cor
 
 	var mContexts = {
 		footer : {
-			contextClass : "sapMFooter-CTX",
+			contextClass : "sapMFooter-CTX sapContrast sapContrastPlus",
 			tag : "Footer",
 			internalAriaLabel: "BAR_ARIA_DESCRIPTION_FOOTER"
 		},
@@ -98,6 +98,15 @@ sap.ui.define(['sap/ui/base/Object', './PageAccessibleLandmarkInfo', 'sap/ui/cor
 		},
 
 		/**
+		 * Gets the Bar contexts inside page.
+		 * @returns {Object} with all available contexts.
+		 * @protected
+		 */
+		getContext : function () {
+			return mContexts;
+		},
+
+		/**
 		 * Sets classes and tag according to the context in the page.
 		 *
 		 * Possible contexts are header, footer, subheader.
@@ -106,13 +115,20 @@ sap.ui.define(['sap/ui/base/Object', './PageAccessibleLandmarkInfo', 'sap/ui/cor
 		 * @protected
 		 */
 		applyTagAndContextClassFor : function (sContext) {
-			var oOptions = mContexts[sContext];
+			var oContext;
+
+			if (this.getContext) {
+				oContext = this.getContext();
+			} else {
+				oContext = mContexts;
+			}
+
+			var oOptions = oContext[sContext];
 
 			if (!oOptions) {
 				jQuery.sap.log.error("The context " + sContext + " is not known", this);
 				return this;
 			}
-
 
 			if (!this.isContextSensitive || !this.setHTMLTag) {
 				jQuery.sap.log.error("The bar control you are using does not implement all the members of the IBar interface", this);
@@ -160,11 +176,16 @@ sap.ui.define(['sap/ui/base/Object', './PageAccessibleLandmarkInfo', 'sap/ui/cor
 		 * @private
 		 */
 		_writeLandmarkInfo: function (oRm, oControl) {
+			var role;
+
 			if (oControl._bHasLandmarkInfo) {
 				PageAccessibleLandmarkInfo._writeLandmarkInfo(oRm, oControl.getParent(), oControl._sLandmarkContext);
 			} else {
+				// BCP: 1670153972
+				// Bar in Dialog has to have 'role' attr set to 'heading'
+				role = sap.m.Dialog && oControl.getParent() instanceof sap.m.Dialog ? "heading" : "toolbar";
 				oRm.writeAccessibilityState(oControl, {
-					role: "toolbar"
+					role: role
 				});
 			}
 		},
@@ -231,6 +252,17 @@ sap.ui.define(['sap/ui/base/Object', './PageAccessibleLandmarkInfo', 'sap/ui/cor
 	 */
 	BarInPageEnabler.addChildClassTo = function (oControl) {
 		oControl.addStyleClass("sapMBarChild");
+	};
+
+	/**
+	 * Termination of the BarInPageEnabler control
+	 * @private
+	 */
+	BarInPageEnabler.prototype.exit = function () {
+		if (this._sInternalAriaLabelId) {
+			this._sInternalAriaLabelId.destroy();
+			this._sInternalAriaLabelId = null;
+		}
 	};
 
 	return BarInPageEnabler;

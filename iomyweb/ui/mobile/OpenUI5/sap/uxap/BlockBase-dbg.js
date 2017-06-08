@@ -48,6 +48,7 @@ sap.ui.define([
 
 		var BlockBase = Control.extend("sap.uxap.BlockBase", {
 			metadata: {
+				designTime: true,
 				library: "sap.uxap",
 				properties: {
 					/**
@@ -146,6 +147,7 @@ sap.ui.define([
 		};
 
 		BlockBase.prototype.onBeforeRendering = function () {
+			this._applyMapping();
 			if (!this.getMode() || this.getMode() === "") {
 				if (this.getMetadata().getView("defaultXML")) {
 					this.setMode("defaultXML");
@@ -164,7 +166,7 @@ sap.ui.define([
 
 		BlockBase.prototype.onAfterRendering = function () {
 			if (this._getObjectPageLayout()) {
-				this._getObjectPageLayout()._adjustLayout();
+				this._getObjectPageLayout()._requestAdjustLayout();
 			}
 		};
 
@@ -190,19 +192,6 @@ sap.ui.define([
 
 
 		/**
-		 * This triggers rerendering of itself and its children.<br/> As <code>sap.ui.base.ManagedObject</code> "bubbles up" the
-		 * invalidate, changes to child-<code>Elements</code> will also result in rerendering of the whole sub tree.
-		 * @protected
-		 * @name sap.ui.base.ManagedObject#invalidate
-		 * @function
-		 * @param {*} oOrigin the name of the origin
-		 */
-		BlockBase.prototype.invalidate = function (oOrigin) {
-			this._applyMapping();
-			Control.prototype.invalidate.call(this, oOrigin);
-		};
-
-		/**
 		 * Intercept direct setModel calls.
 		 * @param {*} oModel model instance
 		 * @param {*} sName name of the model
@@ -223,6 +212,7 @@ sap.ui.define([
 			} else {
 				this.getMappings().forEach(function (oMapping, iIndex) {
 					var oModel,
+						oBindingContext,
 						sInternalModelName = oMapping.getInternalModelName(),
 						sExternalPath = oMapping.getExternalPath(),
 						sExternalModelName = oMapping.getExternalModelName(),
@@ -233,20 +223,24 @@ sap.ui.define([
 							throw new Error("BlockBase :: incorrect mapping, one of the modelMapping property is empty");
 						}
 
+						oModel = this.getModel(sExternalModelName);
+						if (!oModel) { // model N/A yet
+							return;
+						}
+
+						//get absolute path (including the external binding context)
+						sPath = oModel.resolve(sExternalPath, this.getBindingContext(sExternalModelName));
+						oBindingContext = this.getBindingContext(sInternalModelName);
+
 						if (!this._isMappingApplied(sInternalModelName) /* check if mapping is set already */
-							|| (this.getModel(sInternalModelName) != this.getModel(sExternalModelName)) /* model changed, then we have to update internal model mapping */) {
+							|| (this.getModel(sInternalModelName) !== this.getModel(sExternalModelName)) /* model changed, then we have to update internal model mapping */
+							|| (oBindingContext && (oBindingContext.getPath() !== sPath)) /* sExternalPath changed, then we have to update internal model mapping */) {
 
 							jQuery.sap.log.info("BlockBase :: mapping external model " + sExternalModelName + " to " + sInternalModelName);
 
-							oModel = this.getModel(sExternalModelName);
-
-							if (oModel) {
-								sPath = oModel.resolve(sExternalPath, this.getBindingContext(sExternalModelName));
-
-								this._oMappingApplied[sInternalModelName] = true;
-								Control.prototype.setModel.call(this, oModel, sInternalModelName);
-								this.setBindingContext(new Context(oModel, sPath), sInternalModelName);
-							}
+							this._oMappingApplied[sInternalModelName] = true;
+							Control.prototype.setModel.call(this, oModel, sInternalModelName);
+							this.setBindingContext(new Context(oModel, sPath), sInternalModelName);
 						}
 					}
 				}, this);
@@ -408,8 +402,8 @@ sap.ui.define([
 		 * @returns {sap.ui.core.mvc.View} view
 		 * @protected
 		 */
-		BlockBase.prototype.createView = function (mParameter) {
-			return sap.ui.xmlview(mParameter);
+		BlockBase.prototype.createView = function (mParameter, sMode) {
+			return sap.ui.xmlview(this.getId() + "-" + sMode, mParameter);
 		};
 
 		/**
@@ -459,7 +453,7 @@ sap.ui.define([
 
 			//check if the new view is not the current one (we may want to have the same view for several modes)
 			if (!oView || mParameter.viewName != oView.getViewName()) {
-				oView = this.createView(mParameter);
+				oView = this.createView(mParameter, sMode);
 
 				//link to the controller defined in the Block
 				if (oView) {
@@ -483,11 +477,14 @@ sap.ui.define([
 			return oView;
 		};
 
+		// This offset is needed so the breakpoints of the simpleForm match those of the GridLayout (offset = left-padding of grid + margins of grid-cells [that create the horizontal spacing between the cells])
+		BlockBase.FORM_ADUSTMENT_OFFSET = 32;
+
 		BlockBase._FORM_ADJUSTMENT_CONST = {
 			breakpoints: {
-				XL: Device.media._predefinedRangeSets.StdExt.points[2],
-				L: Device.media._predefinedRangeSets.StdExt.points[1],
-				M: Device.media._predefinedRangeSets.StdExt.points[0]
+				XL: Device.media._predefinedRangeSets.StdExt.points[2] - BlockBase.FORM_ADUSTMENT_OFFSET,
+				L: Device.media._predefinedRangeSets.StdExt.points[1] - BlockBase.FORM_ADUSTMENT_OFFSET,
+				M: Device.media._predefinedRangeSets.StdExt.points[0] - BlockBase.FORM_ADUSTMENT_OFFSET
 			},
 			labelSpan: {
 				/* values specified by design requirement */
@@ -608,21 +605,21 @@ sap.ui.define([
 
 		BlockBase.prototype._applyFormAdjustmentFields = function (oFormAdjustmentFields, oFormLayout) {
 
-			//oFormLayout.setColumnsXL(oFormAdjustmentFields.columns.XL);
+			oFormLayout.setColumnsXL(oFormAdjustmentFields.columns.XL);
 			oFormLayout.setColumnsL(oFormAdjustmentFields.columns.L);
 			oFormLayout.setColumnsM(oFormAdjustmentFields.columns.M);
 
-			//oFormLayout.setLabelSpanXL(oFormAdjustmentFields.labelSpan.XL);
+			oFormLayout.setLabelSpanXL(oFormAdjustmentFields.labelSpan.XL);
 			oFormLayout.setLabelSpanL(oFormAdjustmentFields.labelSpan.L);
 			oFormLayout.setLabelSpanM(oFormAdjustmentFields.labelSpan.M);
 			oFormLayout.setLabelSpanS(oFormAdjustmentFields.labelSpan.S);
 
-			//oFormLayout.setEmptySpanXL(oFormAdjustmentFields.emptySpan.XL);
+			oFormLayout.setEmptySpanXL(oFormAdjustmentFields.emptySpan.XL);
 			oFormLayout.setEmptySpanL(oFormAdjustmentFields.emptySpan.L);
 			oFormLayout.setEmptySpanM(oFormAdjustmentFields.emptySpan.M);
 			oFormLayout.setEmptySpanS(oFormAdjustmentFields.emptySpan.S);
 
-			//oFormLayout.setBreakpointXL(oFormAdjustmentFields.breakpoint.XL);
+			oFormLayout.setBreakpointXL(oFormAdjustmentFields.breakpoints.XL);
 			oFormLayout.setBreakpointL(oFormAdjustmentFields.breakpoints.L);
 			oFormLayout.setBreakpointM(oFormAdjustmentFields.breakpoints.M);
 		};
@@ -694,6 +691,15 @@ sap.ui.define([
 
 				this.invalidate();
 			}
+		};
+
+		BlockBase.prototype._allowPropagationToLoadedViews = function (bAllow) {
+
+			if (!this._bConnected) {
+				return; /* only loaded views should be affected */
+			}
+
+			this.mSkipPropagation._views = !bAllow; /* skip if now allowed */
 		};
 
 		/**

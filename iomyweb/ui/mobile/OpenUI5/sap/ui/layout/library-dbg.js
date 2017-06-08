@@ -19,16 +19,17 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @namespace
 	 * @name sap.ui.layout
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.layout",
-		version: "1.34.9",
+		version: "1.44.14",
 		dependencies : ["sap.ui.core"],
 		types: [
+			"sap.ui.layout.BackgroundDesign",
 			"sap.ui.layout.GridIndent",
 			"sap.ui.layout.GridPosition",
 			"sap.ui.layout.GridSpan",
@@ -43,6 +44,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 			"sap.ui.layout.Grid",
 			"sap.ui.layout.HorizontalLayout",
 			"sap.ui.layout.ResponsiveFlowLayout",
+			"sap.ui.layout.ResponsiveSplitter",
+			"sap.ui.layout.ResponsiveSplitterPage",
 			"sap.ui.layout.Splitter",
 			"sap.ui.layout.VerticalLayout",
 			"sap.ui.layout.BlockLayoutCell",
@@ -62,10 +65,55 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 			"sap.ui.layout.form.FormContainer",
 			"sap.ui.layout.form.FormElement",
 			"sap.ui.layout.form.GridContainerData",
+			"sap.ui.layout.PaneContainer",
+			"sap.ui.layout.SplitPane",
 			"sap.ui.layout.form.GridElementData"
-		]
+		],
+		extensions: {
+			flChangeHandlers: {
+				"sap.ui.layout.form.SimpleForm": {
+					"renameLabel": "sap/ui/layout/changeHandler/RenameSimpleForm",
+					"renameTitle": "sap/ui/layout/changeHandler/RenameSimpleForm",
+					"moveSimpleFormField": "sap/ui/layout/changeHandler/MoveSimpleForm",
+					"moveSimpleFormGroup": "sap/ui/layout/changeHandler/MoveSimpleForm",
+					"hideSimpleFormField": "sap/ui/layout/changeHandler/HideSimpleForm",
+					"unhideSimpleFormField": "sap/ui/layout/changeHandler/UnhideSimpleForm",
+					"removeSimpleFormGroup": "sap/ui/layout/changeHandler/HideSimpleForm",
+					"addSimpleFormGroup": "sap/ui/layout/changeHandler/AddSimpleFormGroup"
+				}
+			}
+		}
 	});
 
+	/**
+	 * Available Background Design.
+	 *
+	 * @enum {string}
+	 * @public
+	 * @since 1.36.0
+	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.layout.BackgroundDesign = {
+
+		/**
+		 * A solid background color dependent on the theme.
+		 * @public
+		 */
+		Solid : "Solid",
+
+		/**
+		 * Transparent background.
+		 * @public
+		 */
+		Transparent : "Transparent",
+
+		/**
+		 * A translucent background depending on the opacity value of the theme.
+		 * @public
+		 */
+		Translucent : "Translucent"
+
+	};
 
 	/**
 	 * @classdesc A string type that represents Grid's indent values for large, medium and small screens. Allowed values are separated by space Letters L, M or S followed by number of columns from 1 to 11 that the container has to take, for example: "L2 M4 S6", "M11", "s10" or "l4 m4". Note that the parameters have to be provided in the order large  medium  small.
@@ -134,10 +182,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 		/**
 		 * A string type that is used inside the BlockLayout to set predefined background color to the cells inside
 		 * the control.
-		 * @namespace
+		 * @enum {string}
 		 * @public
 		 * @ui5-metamodel This simple type also will be described in the UI5 (legacy) designtime metamodel
-		 * @type {{Default: string, Light: string}}
 		 */
 	sap.ui.layout.BlockBackgroundType = {
 		/**
@@ -149,7 +196,69 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 		 * Background is with predefined light colors
 		 * @public
 		 */
-		Light: "Light"
+		Light: "Light",
+		/**
+		 * Background with bright and dark background colors
+		 * @public
+		 */
+		Mixed: "Mixed",
+		/**
+		 * Background with pre-defined accent colors
+		 * @public
+		 */
+		Accent: "Accent",
+		/**
+		 * For applications that want to make use of e.g. charts in the Blocks, this layout type has spacings around the Blocks
+		 * @public
+		 */
+		Dashboard: "Dashboard"
+	};
+
+	/**
+	 * A string type that is used inside the BlockLayoutRow to set predefined set of colors the cells inside
+	 * the control. Color sets depend on sap.ui.layout.BlockBackgroundType
+	 *
+	 * @enum {string}
+	 * @public
+	 * @ui5-metamodel This simple type also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.layout.BlockRowColorSets = {
+		/**
+		 * sap.ui.layout.BlockBackgroundType.Default: N/A
+		 * sap.ui.layout.BlockBackgroundType.Light: Color Set 1
+		 * sap.ui.layout.BlockBackgroundType.Mixed: Color Set 1
+		 * sap.ui.layout.BlockBackgroundType.Accent: Color Set 1
+		 * sap.ui.layout.BlockBackgroundType.Dashboard: N/A
+		 * @public
+		 */
+		ColorSet1: "ColorSet1",
+		/**
+		 * sap.ui.layout.BlockBackgroundType.Default: N/A
+		 * sap.ui.layout.BlockBackgroundType.Light: Color Set 2
+		 * sap.ui.layout.BlockBackgroundType.Mixed: Color Set 2
+		 * sap.ui.layout.BlockBackgroundType.Accent: Color Set 2
+		 * sap.ui.layout.BlockBackgroundType.Dashboard: N/A
+		 * @public
+		 */
+		ColorSet2: "ColorSet2",
+		/**
+		 * sap.ui.layout.BlockBackgroundType.Default: N/A
+		 * sap.ui.layout.BlockBackgroundType.Light: Color Set 1
+		 * sap.ui.layout.BlockBackgroundType.Mixed: Color Set 1
+		 * sap.ui.layout.BlockBackgroundType.Accent: Color Set 3
+		 * sap.ui.layout.BlockBackgroundType.Dashboard: N/A
+		 * @public
+		 */
+		ColorSet3: "ColorSet3",
+		/**
+		 * sap.ui.layout.BlockBackgroundType.Default: N/A
+		 * sap.ui.layout.BlockBackgroundType.Light: Color Set 2
+		 * sap.ui.layout.BlockBackgroundType.Mixed: Color Set 2
+		 * sap.ui.layout.BlockBackgroundType.Accent: Color Set 4
+		 * sap.ui.layout.BlockBackgroundType.Dashboard: N/A
+		 * @public
+		 */
+		ColorSet4: "ColorSet4"
 	};
 
 	sap.ui.layout.form = sap.ui.layout.form || {};
@@ -271,13 +380,35 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 		OnMinimumWidth: "OnMinimumWidth"
 	};
 
+	/**
+	 * The position of the side content - End (default) and Begin.
+	 *
+	 * @enum {string}
+	 * @public
+	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.layout.SideContentPosition = {
+		/**
+		 * The side content is on the right side of the main container in left-to-right mode and on the left side in right-to-left mode.
+		 * @public
+		 */
+		End : "End",
+
+		/**
+		 * The side content is on the left side of the main container in left-to-right mode and on the right side in right-to-left mode.
+		 * @public
+		 */
+		Begin : "Begin"
+	};
+
 	// factory for Form to create labels an buttons to be overwritten by commons and mobile library
 	if (!sap.ui.layout.form.FormHelper) {
 		sap.ui.layout.form.FormHelper = {
 			createLabel: function(sText){ throw new Error("no Label control available!"); }, /* must return a Label control */
-			createButton: function(sId, fPressFunction, oThis){ throw new Error("no Button control available!"); }, /* must return a button control */
+			createButton: function(sId, fPressFunction){ throw new Error("no Button control available!"); }, /* must return a button control */
 			setButtonContent: function(oButton, sText, sTooltip, sIcon, sIconHovered){ throw new Error("no Button control available!"); },
 			addFormClass: function(){ return null; },
+			setToolbar: function(oToolbar){ return oToolbar; }, /* allow to overwrite toolbar settings */
 			bArrowKeySupport: true, /* enables the keyboard support for arrow keys */
 			bFinal: false /* if true, the helper must not be overwritten by an other library */
 		};

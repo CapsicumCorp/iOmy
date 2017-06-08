@@ -5,22 +5,8 @@
 
 /* Carousel controls: Bulleted */
 .sapMCrslBulleted > span {
-	text-indent: 2rem;
-	line-height: 0;
-	text-decoration: none;
-	overflow: hidden;
-	display: inline-block;
-	padding: 0.25rem;
-	width: 0;
-	height: 0;
-	margin: 0 0.25rem;
-	color: @sapHCStandardBG;
-	background-color: @sapHCStandardBG;
-	-webkit-transition: background-color 0.1s ease-in;
-	-moz-transition: background-color 0.1s ease-in;
-	transition: background-color 0.1s ease-in;
-	box-shadow: 0 0 0 0.0625rem @sapHCStandardFG;
-	border-radius: 50%;
+	border: 1px solid @sapHCStandardFG;;
+	background: @sapHCStandardBG;
 }
 
 .sapMCrslBulleted > span:hover,
@@ -30,8 +16,8 @@
 }
 
 .sapMCrslBulleted > span.sapMCrslActive {
-	color: @sapHCHighlightAltBG;
-	background-color: @sapHCHighlightAltBG;
+	border: none;
+	background-color: @sapHCStandardFG;
 }
 
 /* Carousel controls: HUD */
@@ -41,23 +27,9 @@
 }
 
 .sapMCrslHud a {
-	z-index: 2;
-	opacity: 0;
-	display: none;
-	position: absolute;
-	top: calc(50% - 3.875rem);
-	width: 3rem;
-	height: 3rem;
-	margin: -1.5625px 0 0 0;
-	padding: 0;
-	text-decoration: none;
-	overflow: hidden;
 	background-color: @sapHCStandardFG;
 	color: @sapHCStandardBG;
-	-webkit-transition: opacity 0.1s ease-in;
-	-moz-transition: opacity 0.1s ease-in;
-	transition: opacity 0.1s ease-in;
-	border-radius: 50%;
+	box-shadow: 0 0.25rem 1.875rem 0.125rem fade(@sapHCStandardFG, 80%);
 }
 
 .sapMCrsl {
@@ -65,29 +37,12 @@
     border: 0.125rem solid transparent;
 }
 .sapMCrsl:focus {
-    outline: none;
     border: 0.125rem dotted @sapHCStandardFG;
 }
 
 .sapMCrsl:hover .sapMCrslHud a {
 	opacity: 1;
 	display: block;
-}
-
-.sapMCrslHud .sapMCrslHudInner {
-	border-radius: 50%;
-	margin: 0.25rem;
-	background-color: @sapHCStandardBG;
-	color: @sapHCStandardFG;
-	font-family: "SAP-icons";
-	font-size: 1.375rem;
-	font-weight: bold;
-	text-indent: 0;
-	text-align: center;
-	display: table;
-	z-index: 9;
-	width: 2.5rem;
-	height: 2.5rem;
 }
 
 .sapMCrslHud .sapMCrslPrev {
@@ -98,25 +53,11 @@
 	right: 0.625rem;
 }
 
-html[dir='rtl'] .sapMCrslPrev > .sapMCrslHudInner > .sapUiIcon,
-.sapMCrslNext > .sapMCrslHudInner > .sapUiIcon {
-	left: auto;
-	right: 0;
-	text-indent: 0.0625rem;
+.sapMCrslPrev .sapMCrslArrowInner .sapUiIcon,
+.sapMCrslNext .sapMCrslArrowInner .sapUiIcon {
+  color: @sapHCStandardFG;
 }
 
-html[dir='rtl'] .sapMCrslNext > .sapMCrslHudInner > .sapUiIcon,
-.sapMCrslPrev > .sapMCrslHudInner > .sapUiIcon {
-	right: auto;
-	left: 0;
-	text-indent: -0.0625rem;
-}
-
-.sapMCrslHudInner > .sapUiIcon {
-	display: table-cell;
-	vertical-align: middle;
-	cursor: inherit !important;
-}
 /* extra bits */
 /* captions */
 
@@ -136,20 +77,40 @@ html[dir='rtl'] .sapMCrslNext > .sapMCrslHudInner > .sapUiIcon,
 	overflow: hidden;
 }
 
-.sapMCrslItem.sapMCrslBottomOffset {
-	padding-bottom: 1.6875rem;
-}
-
-.sapMCrslItem.sapMCrslTopOffset {
-  padding-top: 1.6875rem;
-}
-
 /* HCB Additional Styles */
+.sapMCrslControls.sapMCrslControlsBottom,
+.sapMCrslControlsNoArrows.sapMCrslControlsBottom {
+	background: @sapHCStandardBG;
+	border-top: 1px solid @sapHCStandardFG;
 
-.sapMCrslHud .sapMCrslHudInner:hover {
+}
+
+.sapMCrslControls.sapMCrslControlsTop,
+.sapMCrslControlsNoArrows.sapMCrslControlsTop {
+	background: @sapHCStandardBG;
+	border-bottom: 1px solid @sapHCStandardFG;
+}
+
+.sapMCrslHud .sapMCrslPrev, .sapMCrslHud .sapMCrslNext {
+	background-color: @sapHCStandardBG;
+	border: 2px solid #ffffff;
+	border-radius: 50%;
+}
+
+.sapMCrslControls .sapMCrslPrev,
+.sapMCrslControls .sapMCrslNext {
+	background-color: @sapHCStandardBG;
+	border: 2px solid #ffffff;
+	border-radius: 50%;
+}
+
+.sapMCrslPrev:hover, .sapMCrslNext:hover {
 	background: @sapHCHighlightBG;
 }
 
+.sapMCrslPrev:focus, .sapMCrslNext:focus {
+	outline: 0.125rem dotted @sapHCStandardFG;
+}
 .sapMCrslHud a:focus {
 	outline: 0.125rem dotted @sapHCStandardFG;
 }

@@ -4,6 +4,7 @@
 	<jsTemplate><![CDATA[new sap.ui.table.AnalyticalColumn({
 	id: "${id}", // sap.ui.core.ID
 	width: undefined, // sap.ui.core.CSSSize
+	minWidth: 0, // int, since 1.44.1
 	flexible: true, // boolean
 	resizable: true, // boolean
 	hAlign: sap.ui.core.HorizontalAlign.Begin, // sap.ui.core.HorizontalAlign
@@ -43,6 +44,7 @@
 	<xmlTemplate><![CDATA[<AnalyticalColumn xmlns="sap.ui.table"
 	id="${id}"
 	width=""
+	minWidth="0"
 	flexible="true"
 	resizable="true"
 	hAlign="Begin"
@@ -133,7 +135,7 @@
 	columnHeaderVisible: true, // boolean
 	visibleRowCount: 10, // int
 	firstVisibleRow: 0, // int
-	selectionMode: sap.ui.table.SelectionMode.Multi, // sap.ui.table.SelectionMode
+	selectionMode: sap.ui.table.SelectionMode.MultiToggle, // sap.ui.table.SelectionMode
 	selectionBehavior: sap.ui.table.SelectionBehavior.RowSelector, // sap.ui.table.SelectionBehavior
 	selectedIndex: -1, // int
 	editable: true, // boolean
@@ -154,8 +156,6 @@
 	enableSelectAll: true, // boolean, since 1.23.0
 	enableCustomFilter: false, // boolean, since 1.23.0
 	enableBusyIndicator: false, // boolean, since 1.27.0
-	allowColumnReordering: true, // boolean
-	noDataText: undefined, // string, since 1.21.0
 	sumOnTop: false, // boolean
 	numberOfExpandedLevels: 0, // int
 	autoExpandMode: "Bundled", // string
@@ -173,6 +173,7 @@
 	rows: [], // sap.ui.table.Row
 	noData: undefined, // sap.ui.core.Control
 	groupBy: undefined, // sap.ui.table.Column
+	ariaLabelledBy: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -211,7 +212,13 @@
 	}, this], // since 1.21.0
 	customFilter: [function (oEvent) {
 		var ${control} = oEvent.getSource();
-	}, this] // since 1.23.0
+	}, this], // since 1.23.0
+	firstVisibleRowChanged: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this], // since 1.37.0
+	busyStateChanged: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this] // since 1.37.0
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<AnalyticalTable xmlns="sap.ui.table"
@@ -226,7 +233,7 @@
 	columnHeaderVisible="true"
 	visibleRowCount="10"
 	firstVisibleRow="0"
-	selectionMode="Multi"
+	selectionMode="MultiToggle"
 	selectionBehavior="RowSelector"
 	selectedIndex="-1"
 	editable="true"
@@ -247,8 +254,6 @@
 	enableSelectAll="true"
 	enableCustomFilter="false"
 	enableBusyIndicator="false"
-	allowColumnReordering="true"
-	noDataText=""
 	sumOnTop="false"
 	numberOfExpandedLevels="0"
 	autoExpandMode="Bundled"
@@ -256,6 +261,7 @@
 	collapseRecursive="true"
 	dirty=""
 	groupBy=""
+	ariaLabelledBy=""
 	validateFieldGroup=""
 	rowSelectionChange=""
 	columnSelect=""
@@ -268,7 +274,9 @@
 	cellClick=""
 	cellContextmenu=""
 	columnFreeze=""
-	customFilter="">
+	customFilter=""
+	firstVisibleRowChanged=""
+	busyStateChanged="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<title></title> <!-- sap.ui.core.Control -->
@@ -285,6 +293,7 @@
 	<jsTemplate><![CDATA[new sap.ui.table.Column({
 	id: "${id}", // sap.ui.core.ID
 	width: undefined, // sap.ui.core.CSSSize
+	minWidth: 0, // int, since 1.44.1
 	flexible: true, // boolean
 	resizable: true, // boolean
 	hAlign: sap.ui.core.HorizontalAlign.Begin, // sap.ui.core.HorizontalAlign
@@ -319,6 +328,7 @@
 	<xmlTemplate><![CDATA[<Column xmlns="sap.ui.table"
 	id="${id}"
 	width=""
+	minWidth="0"
 	flexible="true"
 	resizable="true"
 	hAlign="Begin"
@@ -391,179 +401,6 @@
 </ColumnMenu>
 ]]></xmlTemplate>
 </Template>
-<Template name="sap.ui.table.DataTable" alias="DataTable,Table">
-	<jsTemplate><![CDATA[new sap.ui.table.DataTable({
-	id: "${id}", // sap.ui.core.ID
-	busy: false, // boolean
-	busyIndicatorDelay: 1000, // int
-	visible: true, // boolean
-	fieldGroupIds: [], // string[], since 1.31
-	width: "auto", // sap.ui.core.CSSSize
-	rowHeight: undefined, // int
-	columnHeaderHeight: undefined, // int
-	columnHeaderVisible: true, // boolean
-	visibleRowCount: 10, // int
-	firstVisibleRow: 0, // int
-	selectionMode: sap.ui.table.SelectionMode.Multi, // sap.ui.table.SelectionMode
-	selectionBehavior: sap.ui.table.SelectionBehavior.RowSelector, // sap.ui.table.SelectionBehavior
-	selectedIndex: -1, // int
-	editable: true, // boolean
-	navigationMode: sap.ui.table.NavigationMode.Scrollbar, // sap.ui.table.NavigationMode
-	threshold: 100, // int
-	enableColumnReordering: true, // boolean
-	enableGrouping: false, // boolean
-	showColumnVisibilityMenu: false, // boolean
-	showNoData: true, // boolean
-	visibleRowCountMode: sap.ui.table.VisibleRowCountMode.Fixed, // sap.ui.table.VisibleRowCountMode, since 1.9.2
-	minAutoRowCount: 5, // int
-	fixedColumnCount: 0, // int
-	fixedRowCount: 0, // int
-	fixedBottomRowCount: 0, // int, since 1.18.7
-	enableColumnFreeze: false, // boolean, since 1.21.0
-	enableCellFilter: false, // boolean, since 1.21.0
-	showOverlay: false, // boolean, since 1.21.2
-	enableSelectAll: true, // boolean, since 1.23.0
-	enableCustomFilter: false, // boolean, since 1.23.0
-	enableBusyIndicator: false, // boolean, since 1.27.0
-	allowColumnReordering: true, // boolean
-	noDataText: undefined, // string, since 1.21.0
-	expandFirstLevel: false, // boolean
-	useGroupMode: false, // boolean
-	groupHeaderProperty: undefined, // string
-	collapseRecursive: true, // boolean
-	rootLevel: 0, // int
-	expandedVisibleRowCount: undefined, // int
-	expanded: false, // boolean
-	hierarchical: false, // boolean
-	tooltip: undefined, // sap.ui.core.TooltipBase
-	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
-	title: undefined, // sap.ui.core.Control
-	footer: undefined, // sap.ui.core.Control
-	toolbar: undefined, // sap.ui.core.Toolbar
-	extension: [], // sap.ui.core.Control
-	columns: [], // sap.ui.table.Column
-	rows: [], // sap.ui.table.Row
-	noData: undefined, // sap.ui.core.Control
-	groupBy: undefined, // sap.ui.table.Column
-	validateFieldGroup: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	rowSelectionChange: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	columnSelect: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	columnResize: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	columnMove: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	sort: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	filter: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	group: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	columnVisibility: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	cellClick: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this], // since 1.21.0
-	cellContextmenu: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this], // since 1.21.0
-	columnFreeze: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this], // since 1.21.0
-	customFilter: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this], // since 1.23.0
-	toggleOpenState: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	rowSelect: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this]
-})
-]]></jsTemplate>
-	<xmlTemplate><![CDATA[<DataTable xmlns="sap.ui.table"
-	id="${id}"
-	busy="false"
-	busyIndicatorDelay="1000"
-	visible="true"
-	fieldGroupIds=""
-	width="auto"
-	rowHeight=""
-	columnHeaderHeight=""
-	columnHeaderVisible="true"
-	visibleRowCount="10"
-	firstVisibleRow="0"
-	selectionMode="Multi"
-	selectionBehavior="RowSelector"
-	selectedIndex="-1"
-	editable="true"
-	navigationMode="Scrollbar"
-	threshold="100"
-	enableColumnReordering="true"
-	enableGrouping="false"
-	showColumnVisibilityMenu="false"
-	showNoData="true"
-	visibleRowCountMode="Fixed"
-	minAutoRowCount="5"
-	fixedColumnCount="0"
-	fixedRowCount="0"
-	fixedBottomRowCount="0"
-	enableColumnFreeze="false"
-	enableCellFilter="false"
-	showOverlay="false"
-	enableSelectAll="true"
-	enableCustomFilter="false"
-	enableBusyIndicator="false"
-	allowColumnReordering="true"
-	noDataText=""
-	expandFirstLevel="false"
-	useGroupMode="false"
-	groupHeaderProperty=""
-	collapseRecursive="true"
-	rootLevel="0"
-	expandedVisibleRowCount=""
-	expanded="false"
-	hierarchical="false"
-	groupBy=""
-	validateFieldGroup=""
-	rowSelectionChange=""
-	columnSelect=""
-	columnResize=""
-	columnMove=""
-	sort=""
-	filter=""
-	group=""
-	columnVisibility=""
-	cellClick=""
-	cellContextmenu=""
-	columnFreeze=""
-	customFilter=""
-	toggleOpenState=""
-	rowSelect="">
-		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
-		<title></title> <!-- sap.ui.core.Control -->
-		<footer></footer> <!-- sap.ui.core.Control -->
-		<toolbar></toolbar> <!-- sap.ui.core.Toolbar -->
-		<extension></extension> <!-- sap.ui.core.Control -->
-		<columns></columns> <!-- sap.ui.table.Column -->
-		<rows></rows> <!-- sap.ui.table.Row -->
-		<noData></noData> <!-- sap.ui.core.Control -->
-</DataTable>
-]]></xmlTemplate>
-</Template>
 <Template name="sap.ui.table.Row" alias="Row">
 	<jsTemplate><![CDATA[new sap.ui.table.Row({
 	id: "${id}", // sap.ui.core.ID
@@ -594,7 +431,7 @@
 	columnHeaderVisible: true, // boolean
 	visibleRowCount: 10, // int
 	firstVisibleRow: 0, // int
-	selectionMode: sap.ui.table.SelectionMode.Multi, // sap.ui.table.SelectionMode
+	selectionMode: sap.ui.table.SelectionMode.MultiToggle, // sap.ui.table.SelectionMode
 	selectionBehavior: sap.ui.table.SelectionBehavior.RowSelector, // sap.ui.table.SelectionBehavior
 	selectedIndex: -1, // int
 	editable: true, // boolean
@@ -615,8 +452,6 @@
 	enableSelectAll: true, // boolean, since 1.23.0
 	enableCustomFilter: false, // boolean, since 1.23.0
 	enableBusyIndicator: false, // boolean, since 1.27.0
-	allowColumnReordering: true, // boolean
-	noDataText: undefined, // string, since 1.21.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -628,160 +463,7 @@
 	rows: [], // sap.ui.table.Row
 	noData: undefined, // sap.ui.core.Control
 	groupBy: undefined, // sap.ui.table.Column
-	validateFieldGroup: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	rowSelectionChange: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	columnSelect: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	columnResize: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	columnMove: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	sort: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	filter: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	group: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	columnVisibility: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	cellClick: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this], // since 1.21.0
-	cellContextmenu: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this], // since 1.21.0
-	columnFreeze: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this], // since 1.21.0
-	customFilter: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this] // since 1.23.0
-})
-]]></jsTemplate>
-	<xmlTemplate><![CDATA[<Table xmlns="sap.ui.table"
-	id="${id}"
-	busy="false"
-	busyIndicatorDelay="1000"
-	visible="true"
-	fieldGroupIds=""
-	width="auto"
-	rowHeight=""
-	columnHeaderHeight=""
-	columnHeaderVisible="true"
-	visibleRowCount="10"
-	firstVisibleRow="0"
-	selectionMode="Multi"
-	selectionBehavior="RowSelector"
-	selectedIndex="-1"
-	editable="true"
-	navigationMode="Scrollbar"
-	threshold="100"
-	enableColumnReordering="true"
-	enableGrouping="false"
-	showColumnVisibilityMenu="false"
-	showNoData="true"
-	visibleRowCountMode="Fixed"
-	minAutoRowCount="5"
-	fixedColumnCount="0"
-	fixedRowCount="0"
-	fixedBottomRowCount="0"
-	enableColumnFreeze="false"
-	enableCellFilter="false"
-	showOverlay="false"
-	enableSelectAll="true"
-	enableCustomFilter="false"
-	enableBusyIndicator="false"
-	allowColumnReordering="true"
-	noDataText=""
-	groupBy=""
-	validateFieldGroup=""
-	rowSelectionChange=""
-	columnSelect=""
-	columnResize=""
-	columnMove=""
-	sort=""
-	filter=""
-	group=""
-	columnVisibility=""
-	cellClick=""
-	cellContextmenu=""
-	columnFreeze=""
-	customFilter="">
-		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
-		<title></title> <!-- sap.ui.core.Control -->
-		<footer></footer> <!-- sap.ui.core.Control -->
-		<toolbar></toolbar> <!-- sap.ui.core.Toolbar -->
-		<extension></extension> <!-- sap.ui.core.Control -->
-		<columns></columns> <!-- sap.ui.table.Column -->
-		<rows></rows> <!-- sap.ui.table.Row -->
-		<noData></noData> <!-- sap.ui.core.Control -->
-</Table>
-]]></xmlTemplate>
-</Template>
-<Template name="sap.ui.table.TreeTable" alias="TreeTable,Table">
-	<jsTemplate><![CDATA[new sap.ui.table.TreeTable({
-	id: "${id}", // sap.ui.core.ID
-	busy: false, // boolean
-	busyIndicatorDelay: 1000, // int
-	visible: true, // boolean
-	fieldGroupIds: [], // string[], since 1.31
-	width: "auto", // sap.ui.core.CSSSize
-	rowHeight: undefined, // int
-	columnHeaderHeight: undefined, // int
-	columnHeaderVisible: true, // boolean
-	visibleRowCount: 10, // int
-	firstVisibleRow: 0, // int
-	selectionMode: sap.ui.table.SelectionMode.Multi, // sap.ui.table.SelectionMode
-	selectionBehavior: sap.ui.table.SelectionBehavior.RowSelector, // sap.ui.table.SelectionBehavior
-	selectedIndex: -1, // int
-	editable: true, // boolean
-	navigationMode: sap.ui.table.NavigationMode.Scrollbar, // sap.ui.table.NavigationMode
-	threshold: 100, // int
-	enableColumnReordering: true, // boolean
-	enableGrouping: false, // boolean
-	showColumnVisibilityMenu: false, // boolean
-	showNoData: true, // boolean
-	visibleRowCountMode: sap.ui.table.VisibleRowCountMode.Fixed, // sap.ui.table.VisibleRowCountMode, since 1.9.2
-	minAutoRowCount: 5, // int
-	fixedColumnCount: 0, // int
-	fixedRowCount: 0, // int
-	fixedBottomRowCount: 0, // int, since 1.18.7
-	enableColumnFreeze: false, // boolean, since 1.21.0
-	enableCellFilter: false, // boolean, since 1.21.0
-	showOverlay: false, // boolean, since 1.21.2
-	enableSelectAll: true, // boolean, since 1.23.0
-	enableCustomFilter: false, // boolean, since 1.23.0
-	enableBusyIndicator: false, // boolean, since 1.27.0
-	allowColumnReordering: true, // boolean
-	noDataText: undefined, // string, since 1.21.0
-	expandFirstLevel: false, // boolean
-	useGroupMode: false, // boolean
-	groupHeaderProperty: undefined, // string
-	collapseRecursive: true, // boolean
-	rootLevel: 0, // int
-	tooltip: undefined, // sap.ui.core.TooltipBase
-	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
-	title: undefined, // sap.ui.core.Control
-	footer: undefined, // sap.ui.core.Control
-	toolbar: undefined, // sap.ui.core.Toolbar
-	extension: [], // sap.ui.core.Control
-	columns: [], // sap.ui.table.Column
-	rows: [], // sap.ui.table.Row
-	noData: undefined, // sap.ui.core.Control
-	groupBy: undefined, // sap.ui.table.Column
+	ariaLabelledBy: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -821,12 +503,15 @@
 	customFilter: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this], // since 1.23.0
-	toggleOpenState: [function (oEvent) {
+	firstVisibleRowChanged: [function (oEvent) {
 		var ${control} = oEvent.getSource();
-	}, this]
+	}, this], // since 1.37.0
+	busyStateChanged: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this] // since 1.37.0
 })
 ]]></jsTemplate>
-	<xmlTemplate><![CDATA[<TreeTable xmlns="sap.ui.table"
+	<xmlTemplate><![CDATA[<Table xmlns="sap.ui.table"
 	id="${id}"
 	busy="false"
 	busyIndicatorDelay="1000"
@@ -838,7 +523,7 @@
 	columnHeaderVisible="true"
 	visibleRowCount="10"
 	firstVisibleRow="0"
-	selectionMode="Multi"
+	selectionMode="MultiToggle"
 	selectionBehavior="RowSelector"
 	selectedIndex="-1"
 	editable="true"
@@ -859,14 +544,8 @@
 	enableSelectAll="true"
 	enableCustomFilter="false"
 	enableBusyIndicator="false"
-	allowColumnReordering="true"
-	noDataText=""
-	expandFirstLevel="false"
-	useGroupMode="false"
-	groupHeaderProperty=""
-	collapseRecursive="true"
-	rootLevel="0"
 	groupBy=""
+	ariaLabelledBy=""
 	validateFieldGroup=""
 	rowSelectionChange=""
 	columnSelect=""
@@ -880,6 +559,176 @@
 	cellContextmenu=""
 	columnFreeze=""
 	customFilter=""
+	firstVisibleRowChanged=""
+	busyStateChanged="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<title></title> <!-- sap.ui.core.Control -->
+		<footer></footer> <!-- sap.ui.core.Control -->
+		<toolbar></toolbar> <!-- sap.ui.core.Toolbar -->
+		<extension></extension> <!-- sap.ui.core.Control -->
+		<columns></columns> <!-- sap.ui.table.Column -->
+		<rows></rows> <!-- sap.ui.table.Row -->
+		<noData></noData> <!-- sap.ui.core.Control -->
+</Table>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.ui.table.TreeTable" alias="TreeTable,Table">
+	<jsTemplate><![CDATA[new sap.ui.table.TreeTable({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	width: "auto", // sap.ui.core.CSSSize
+	rowHeight: undefined, // int
+	columnHeaderHeight: undefined, // int
+	columnHeaderVisible: true, // boolean
+	visibleRowCount: 10, // int
+	firstVisibleRow: 0, // int
+	selectionMode: sap.ui.table.SelectionMode.MultiToggle, // sap.ui.table.SelectionMode
+	selectionBehavior: sap.ui.table.SelectionBehavior.RowSelector, // sap.ui.table.SelectionBehavior
+	selectedIndex: -1, // int
+	editable: true, // boolean
+	navigationMode: sap.ui.table.NavigationMode.Scrollbar, // sap.ui.table.NavigationMode
+	threshold: 100, // int
+	enableColumnReordering: true, // boolean
+	enableGrouping: false, // boolean
+	showColumnVisibilityMenu: false, // boolean
+	showNoData: true, // boolean
+	visibleRowCountMode: sap.ui.table.VisibleRowCountMode.Fixed, // sap.ui.table.VisibleRowCountMode, since 1.9.2
+	minAutoRowCount: 5, // int
+	fixedColumnCount: 0, // int
+	fixedRowCount: 0, // int
+	fixedBottomRowCount: 0, // int, since 1.18.7
+	enableColumnFreeze: false, // boolean, since 1.21.0
+	enableCellFilter: false, // boolean, since 1.21.0
+	showOverlay: false, // boolean, since 1.21.2
+	enableSelectAll: true, // boolean, since 1.23.0
+	enableCustomFilter: false, // boolean, since 1.23.0
+	enableBusyIndicator: false, // boolean, since 1.27.0
+	expandFirstLevel: false, // boolean
+	useGroupMode: false, // boolean
+	groupHeaderProperty: undefined, // string
+	collapseRecursive: true, // boolean
+	rootLevel: 0, // int
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	title: undefined, // sap.ui.core.Control
+	footer: undefined, // sap.ui.core.Control
+	toolbar: undefined, // sap.ui.core.Toolbar
+	extension: [], // sap.ui.core.Control
+	columns: [], // sap.ui.table.Column
+	rows: [], // sap.ui.table.Row
+	noData: undefined, // sap.ui.core.Control
+	groupBy: undefined, // sap.ui.table.Column
+	ariaLabelledBy: [], // sap.ui.core.Control
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	rowSelectionChange: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	columnSelect: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	columnResize: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	columnMove: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	sort: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	filter: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	group: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	columnVisibility: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	cellClick: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this], // since 1.21.0
+	cellContextmenu: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this], // since 1.21.0
+	columnFreeze: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this], // since 1.21.0
+	customFilter: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this], // since 1.23.0
+	firstVisibleRowChanged: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this], // since 1.37.0
+	busyStateChanged: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this], // since 1.37.0
+	toggleOpenState: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<TreeTable xmlns="sap.ui.table"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	width="auto"
+	rowHeight=""
+	columnHeaderHeight=""
+	columnHeaderVisible="true"
+	visibleRowCount="10"
+	firstVisibleRow="0"
+	selectionMode="MultiToggle"
+	selectionBehavior="RowSelector"
+	selectedIndex="-1"
+	editable="true"
+	navigationMode="Scrollbar"
+	threshold="100"
+	enableColumnReordering="true"
+	enableGrouping="false"
+	showColumnVisibilityMenu="false"
+	showNoData="true"
+	visibleRowCountMode="Fixed"
+	minAutoRowCount="5"
+	fixedColumnCount="0"
+	fixedRowCount="0"
+	fixedBottomRowCount="0"
+	enableColumnFreeze="false"
+	enableCellFilter="false"
+	showOverlay="false"
+	enableSelectAll="true"
+	enableCustomFilter="false"
+	enableBusyIndicator="false"
+	expandFirstLevel="false"
+	useGroupMode="false"
+	groupHeaderProperty=""
+	collapseRecursive="true"
+	rootLevel="0"
+	groupBy=""
+	ariaLabelledBy=""
+	validateFieldGroup=""
+	rowSelectionChange=""
+	columnSelect=""
+	columnResize=""
+	columnMove=""
+	sort=""
+	filter=""
+	group=""
+	columnVisibility=""
+	cellClick=""
+	cellContextmenu=""
+	columnFreeze=""
+	customFilter=""
+	firstVisibleRowChanged=""
+	busyStateChanged=""
 	toggleOpenState="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->

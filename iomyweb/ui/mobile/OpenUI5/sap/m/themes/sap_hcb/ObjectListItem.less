@@ -58,28 +58,6 @@
 	color: @sapHCStandardFG;
 }
 
-/* special rendering for browsers without flex support (IE9) */
-li.sapMLIB.sapMLIBNoFlex.sapMObjLItem>.sapMLIBContent>.sapMLIBContentNF>div{
-	/* the outer container has 16px vertical padding */
-	padding-top: 1rem;
-	padding-bottom: 1rem;
-}
-li.sapMLIB.sapMLIBNoFlex.sapMObjLItem>.sapMLIBContent>.sapMLIBContentNF .sapMObjLIntro,
-li.sapMLIB.sapMLIBNoFlex.sapMObjLItem>.sapMLIBContent>.sapMLIBContentNF .sapMObjLAttrRow{
-	display: table;
-	table-layout: fixed;
-	width: 100%;
-}
-li.sapMLIB.sapMLIBNoFlex.sapMObjLItem>.sapMLIBContent>.sapMLIBContentNF .sapMObjLAttrRow>div{
-	display: table-cell;
-}
-li.sapMLIB.sapMLIBNoFlex.sapMObjLItem>.sapMLIBContent>.sapMLIBContentNF .sapMObjLIntro>span{
-	display: table-cell;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
 .sapMObjLAttrDiv.sapMObjAttrWithMarker {
 	padding-top: .1875rem;
 }
@@ -101,11 +79,12 @@ li.sapMLIB.sapMLIBNoFlex.sapMObjLItem>.sapMLIBContent>.sapMLIBContentNF .sapMObj
 }
 
 .sapMLIBSelected .sapMObjLNumber,
-.sapMLIBSelected .sapMObjLNumberUnit {
-	color: @sapHCStandardFG;
-}
-
-.sapMLIB:hover .sapMObjLNumber,
-.sapMLIB:hover .sapMObjLNumberUnit {
+.sapMLIBSelected .sapMObjLNumberUnit,
+.sapMLIBHoverable:hover .sapMObjLNumber,
+.sapMLIBHoverable:hover .sapMObjLNumberUnit,
+.sapMLIBSelected .sapMObjectNumberText,
+.sapMLIBSelected .sapMObjectNumberUnit,
+.sapMLIBHoverable:hover .sapMObjectNumberText,
+.sapMLIBHoverable:hover .sapMObjectNumberUnit {
 	color: @sapHCStandardFG;
 }

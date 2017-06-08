@@ -94,10 +94,30 @@ html[dir=rtl] .sapUxAPAnchorBar.sapUxAPAnchorBarScrollLeft .anchorBarArrowLeft {
 /* OVERVIEW BUTTON IE focus fix */
 html[data-sap-ui-browser^="ie"] {
 	.sapUxAPAnchorBar.sapUxAPAnchorBarOverflow .sapUxAPHierarchicalSelect.sapMSltIconOnly:focus {
-		right: -16px;
+		right: -28px;
+		overflow: visible;
+		&:before {
+			border: 0 none;
+		}
 	}
 }
 
+/* OVERVIEW BUTTON EDGE focus fix */
+html[data-sap-ui-browser^="ed"] {
+	.sapUxAPAnchorBar.sapUxAPAnchorBarOverflow .sapUxAPHierarchicalSelect.sapMSltIconOnly:focus {
+		overflow: visible;
+	}
+}
+
+// Scroll buttons
+.sapUiSizeCompact .sapUxAPAnchorBar.sapUxAPAnchorBarScrollLeft .anchorBarArrow .sapMBtn,
+.sapUiSizeCompact .sapUxAPAnchorBar.sapUxAPAnchorBarScrollRight .anchorBarArrow .sapMBtn {
+	top: 0;
+}
+
+.sapUiSizeCompact .sapUxAPAnchorBar .sapUxAPAnchorBarButton .sapMBtnText>.sapMBtnIcon {
+	top:0;
+}
 /* END "AnchorBar.less" */
 
 /* START "BreadCrumbs.less" */
@@ -206,6 +226,10 @@ html[data-sap-ui-browser^="ie"] {
 	text-indent: 1rem;
 }
 
+.sapUiSizeCompact .sapUxAPHierarchicalSelect .sapMSltIcon {
+	top: 0;
+}
+
 /* END "HierarchicalSelect.less" */
 
 /* START "IconTabBar.less" */
@@ -263,6 +287,10 @@ html[data-sap-ui-browser^="ie"] {
 .sapUiSizeCompact.sapUxAPObjectPageHeaderChangesBtn .sapMBtn {
 	margin-top: -0.125rem;
 }
+
+.sapUxAPObjectPageHeaderSeparator {
+	background-color: @sapHCStandardFG;
+}
 /* END "ObjectPageHeader.less" */
 
 /* START "ObjectPageHeaderContent.less" */
@@ -285,8 +313,16 @@ html[data-sap-ui-browser^="ie"] {
 	height: 3rem;
 }
 
+.sapUiSizeCompact .sapUxAPObjectPageNavigation .sapUxAPObjectChildPage {
+	height: 2rem;
+}
+
 .sapUxAPObjectPageNavigation .sapUxAPITBar.sapUxAPObjectChildPage {
 	height: 3.125rem;
+}
+
+.sapUiSizeCompact .sapUxAPObjectPageNavigation .sapUxAPITBar.sapUxAPObjectChildPage {
+	height: 2.125rem;
 }
 
 /* Overriding the width inherited from BrowserScrollbar.less */
@@ -312,6 +348,30 @@ html[data-sap-ui-browser^="ie"] {
 	border-radius: 0;
 }
 
+/* IE does not support css outline-offset */
+html[data-sap-ui-browser^="ie"].sap-desktop .sapUxAPObjectPageSection:focus {
+	outline: none;
+	position: relative;
+}
+
+html[data-sap-ui-browser^="ie"].sap-desktop .sapUxAPObjectPageSection:focus:before {
+	content: "";
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
+	border: 0.125rem dotted @sapHCStandardFG;
+}
+
+.sapUxAPObjectPageSectionTitle {
+	line-height: 2.9rem;
+}
+
+.sapUiSizeCompact .sapUxAPObjectPageSectionTitle {
+	line-height: 2.4rem;
+}
 /* END "ObjectPageSection.less" */
 
 /* START "ObjectPageSubSection.less" */

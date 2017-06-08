@@ -15,6 +15,14 @@
 @sapUiDtSelectionColor : #35F;
 @sapUiDtCuttedColor : white;
 
+#overlay-container {
+	// to prevent overlay's height from expanding the body
+	position: absolute;
+	overflow: hidden;
+	// position is set in code to prevent RTL style conversion
+}
+
+
 .sapUiDtOverlay {
 	position: absolute;
 	outline: none;
@@ -34,11 +42,13 @@
 		height: 100%;
 		box-sizing: border-box;
 	}
+}
 
+.sapUiDtOverlayFocusable {
 	&:focus {
 		&:before {
 			content: " ";
-			border: 2px solid @sapUiDtFocusColor;
+			border: 2px solid darken(@sapUiSelected, 5);
 		}
 	}
 }
@@ -48,6 +58,10 @@
 	top: 0;
 	left: 0;
 	pointer-events: none;
+}
+
+.sapUiDtOverlayDropZone {
+	z-index: 9999999 !important;
 }
 
 .sapUiDtOverlayTargetZone {
@@ -76,12 +90,6 @@
 .sapUiDtOverlayCutted {
 	background-color: @sapUiDtCuttedColor !important;
 	opacity: 0.5;
-}
-
-#overlay-container {
-	// to prevent overlay's height from expanding the body
-	position: fixed;
-	// position is set in code to prevent RTL style conversion
 }
 
 .sapUiDtDragGhostWrapper {

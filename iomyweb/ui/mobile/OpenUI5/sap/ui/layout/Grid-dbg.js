@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -155,7 +155,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 			if (/XL/gi.test(sDefaultIndent)) {
 				this._setIndentXLChanged(true);
 			}
-			this.setProperty("defaultIndent", sDefaultIndent);
+			return this.setProperty("defaultIndent", sDefaultIndent);
 		};
 
 		Grid.prototype._setIndentXLChanged = function( bChanged) {
@@ -171,7 +171,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 			if (/XL/gi.test(sDefaultSpan)) {
 				this._setSpanXLChanged(true);
 			}
-			this.setProperty("defaultSpan", sDefaultSpan);
+			return this.setProperty("defaultSpan", sDefaultSpan);
 		};
 
 		Grid.prototype._setSpanXLChanged = function( bChanged) {
@@ -279,6 +279,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 
 			return null;
 
+		};
+
+		/**
+		 * @see sap.ui.core.Control#getAccessibilityInfo
+		 * @protected
+		 */
+		Grid.prototype.getAccessibilityInfo = function() {
+			return {children: this.getContent()};
 		};
 
 	}());

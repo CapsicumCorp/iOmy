@@ -14,14 +14,19 @@ sap.ui.define([
 
 	/**
 	 * @class
-	 * List binding implementation for oData format
+	 * List binding implementation for oData format.
 	 *
-	 * @param {sap.ui.model.Model} oModel
-	 * @param {string} sPath
-	 * @param {sap.ui.model.Context} oContext
-	 * @param {array} [aSorters] initial sort order (can be either a sorter or an array of sorters)
-	 * @param {array} [aFilters] predefined filter/s (can be either a filter or an array of filters)
-	 * @param {object} [mParameters]
+	 * @param {sap.ui.model.odata.ODataModel} oModel Model that this list binding belongs to
+	 * @param {string} sPath Path into the model data, relative to the given <code>oContext</code>
+	 * @param {sap.ui.model.Context} oContext Context that the <code>sPath</code> is based on
+	 * @param {array} [aSorters] Initial sort order (can be either a sorter or an array of sorters)
+	 * @param {array} [aFilters] Predefined filter/s (can be either a filter or an array of filters)
+	 * @param {object} [mParameters] A map which contains additional parameters for the binding
+	 * @param {string} [mParameters.expand] Value for the OData <code>$expand</code> query parameter which should be included in the request
+	 * @param {string} [mParameters.select] Value for the OData <code>$select</code> query parameter which should be included in the request
+	 * @param {map} [mParameters.custom] An optional map of custom query parameters. Custom parameters must not start with <code>$</code>
+	 * @param {sap.ui.model.odata.CountMode} [mParameters.countMode] Defines the count mode of this binding;
+	 *           if not specified, the default count mode of the <code>oModel</code> is applied
 	 *
 	 * @public
 	 * @alias sap.ui.model.odata.ODataListBinding
@@ -317,13 +322,13 @@ sap.ui.define([
 						this.aKeys = oRef;
 						this.iLength = oRef.length;
 						this.bLengthFinal = true;
-						this._fireChange();
+						this._fireChange({ reason: ChangeReason.Context });
 					} else if (!this.oModel.resolve(this.sPath, this.oContext) || oRef === null){
 						// if path does not resolve, or data is known to be null (e.g. expanded list)
 						this.aKeys = [];
 						this.iLength = 0;
 						this.bLengthFinal = true;
-						this._fireChange();
+						this._fireChange({ reason: ChangeReason.Context });
 					} else {
 						this.refresh();
 					}
@@ -484,7 +489,7 @@ sap.ui.define([
 					that.bNeedsUpdate = true;
 					that.checkUpdate();
 					that.oModel.fireRequestCompleted({url: sUrl, method: "GET", async: true, success: true});
-					that.fireDataReceived();
+					that.fireDataReceived({data: {}});
 				}, 0);
 			} else {
 				// Execute the request and use the metadata if available
@@ -496,10 +501,6 @@ sap.ui.define([
 
 	};
 
-	/**
-	 * @see sap.ui.model.ListBinding.prototype.getLength
-	 *
-	 */
 	ODataListBinding.prototype.getLength = function() {
 		// If length is not final and larger than zero, add some additional length to enable
 		// scrolling/paging for controls that only do this if more items are available
@@ -511,10 +512,6 @@ sap.ui.define([
 		}
 	};
 
-	/**
-	 * @see sap.ui.model.ListBinding.prototype.isLengthFinal
-	 *
-	 */
 	ODataListBinding.prototype.isLengthFinal = function() {
 		return this.bLengthFinal;
 	};

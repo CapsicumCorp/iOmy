@@ -5,13 +5,15 @@
  */
 
 // Provides control sap.m.Dialog.
-sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './AssociativeOverflowToolbar', './ToolbarSpacer', './library', 'sap/ui/core/Control', 'sap/ui/core/IconPool', 'sap/ui/core/Popup', 'sap/ui/core/delegate/ScrollEnablement', 'sap/ui/core/theming/Parameters', 'sap/ui/core/RenderManager'],
-	function (jQuery, Bar, InstanceManager, AssociativeOverflowToolbar, ToolbarSpacer, library, Control, IconPool, Popup, ScrollEnablement, Parameters, RenderManager) {
+sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './AssociativeOverflowToolbar', './ToolbarSpacer',
+	'./library', 'sap/ui/core/Control', 'sap/ui/core/IconPool', 'sap/ui/core/Popup', 'sap/ui/core/delegate/ScrollEnablement',
+	'sap/ui/core/theming/Parameters', 'sap/ui/core/RenderManager', 'sap/ui/core/InvisibleText', 'sap/ui/core/ResizeHandler','sap/ui/Device'],
+	function (jQuery, Bar, InstanceManager, AssociativeOverflowToolbar, ToolbarSpacer, library, Control, IconPool,
+			  Popup, ScrollEnablement, Parameters, RenderManager, InvisibleText, ResizeHandler, Device) {
 		"use strict";
 
 
 		var ValueState = sap.ui.core.ValueState;
-		var isTheCurrentBrowserIENine = sap.ui.Device.browser.internet_explorer && (sap.ui.Device.browser.version < 10);
 
 		/**
 		 * Constructor for a new Dialog.
@@ -25,7 +27,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 		 * @implements sap.ui.core.PopupInterface
 		 *
 		 * @author SAP SE
-		 * @version 1.34.9
+		 * @version 1.44.14
 		 *
 		 * @constructor
 		 * @public
@@ -94,15 +96,15 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 					contentHeight: {type: "sap.ui.core.CSSSize", group: "Dimension", defaultValue: null},
 
 					/**
-					 * Indicates if user can scroll horizontally inside dialog when the content is bigger than the content area. However, when scrollable control (sap.m.ScrollContainer, sap.m.Page) is in the dialog, this property needs to be set to false to disable the scrolling in dialog in order to make the scrolling in the child control work properly.
-					 * Dialog detects if there's sap.m.NavContainer, sap.m.Page, or sap.m.ScrollContainer as direct child added to dialog. If there is, dialog will turn off scrolling by setting this property to false automatically ignoring the existing value of this property.
+					 * Indicates if user can scroll horizontally inside dialog when the content is bigger than the content area.
+					 * Dialog detects if there's sap.m.NavContainer, sap.m.Page, sap.m.ScrollContainer or sap.m.SplitContainer as direct child added to dialog. If there is, dialog will turn off scrolling by setting this property to false automatically ignoring the existing value of this property.
 					 * @since 1.15.1
 					 */
 					horizontalScrolling: {type: "boolean", group: "Behavior", defaultValue: true},
 
 					/**
-					 * Indicates if user can scroll vertically inside dialog when the content is bignger than the content area. However, when scrollable control (sap.m.ScrollContainer, sap.m.Page) is in the dialog, this property needs to be set to false to disable the scrolling in dialog in order to make the scrolling in the child control work properly.
-					 * Dialog detects if there's sap.m.NavContainer, sap.m.Page, or sap.m.ScrollContainer as direct child added to dialog. If there is, dialog will turn off scrolling by setting this property to false automatically ignoring the existing value of this property.
+					 * Indicates if user can scroll vertically inside dialog when the content is bigger than the content area.
+					 * Dialog detects if there's sap.m.NavContainer, sap.m.Page, sap.m.ScrollContainer or sap.m.SplitContainer as direct child added to dialog. If there is, dialog will turn off scrolling by setting this property to false automatically ignoring the existing value of this property.
 					 * @since 1.15.1
 					 */
 					verticalScrolling: {type: "boolean", group: "Behavior", defaultValue: true},
@@ -117,13 +119,20 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 					 * Indicates whether the dialog is draggable. If this property is set to true, the dialog will be draggable by it's header. This property has a default value false. The Dialog can be draggable only in desktop mode.
 					 * @since 1.30
 					 */
-					draggable: {type: "boolean", group: "Behavior", defaultValue: false}
+					draggable: {type: "boolean", group: "Behavior", defaultValue: false},
+
+					/**
+					 * This property expects a function with one parameter of type <code>Promise</code>. In the function you should call either <code>resolve()</code> or <code>reject()</code> on the <code>Promise</code> object.<br/>
+					 * The function allows you to define custom behaviour which will be executed when the ESCAPE key is pressed. By default when the ESCAPE key is pressed the Dialog is immediately closed.
+					 * @since 1.44
+					 */
+					escapeHandler : {type: "any", group: "Behavior", defaultValue: null}
 				},
 				defaultAggregation: "content",
 				aggregations: {
 
 					/**
-					 * The content inside the dialog.
+					 * The content inside the dialog.<br/><b>Note:</b> When the content of the <code>Dialog</code> is comprised of controls that use <code>position: absolute</code>, such as <code>SplitContainer</code>, the dialog has to have either <code>stretch: true</code> or <code>contentHeight</code> set.
 					 */
 					content: {type: "sap.ui.core.Control", multiple: true, singularName: "content"},
 
@@ -175,7 +184,12 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 					/**
 					 * The hidden aggregation for internal maintained toolbar instance
 					 */
-					_toolbar: {type: "sap.m.OverflowToolbar", multiple: false, visibility: "hidden"}
+					_toolbar: {type: "sap.m.OverflowToolbar", multiple: false, visibility: "hidden"},
+
+					/**
+					 * The hidden aggregation for the Dialog state
+					 */
+					_valueState: {type: "sap.ui.core.InvisibleText", multiple: false, visibility: "hidden"}
 				},
 				associations: {
 
@@ -204,7 +218,12 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 					/**
 					 * Association to controls / ids which describe this control (see WAI-ARIA attribute aria-describedby).
 					 */
-					ariaDescribedBy: {type: "sap.ui.core.Control", multiple: true, singularName: "ariaDescribedBy"}
+					ariaDescribedBy: {type: "sap.ui.core.Control", multiple: true, singularName: "ariaDescribedBy"},
+
+					/**
+					 * Association to controls / ids which label this control (see WAI-ARIA attribute aria-labelledby).
+					 */
+					ariaLabelledBy : {type : "sap.ui.core.Control", multiple : true, singularName : "ariaLabelledBy"}
 				},
 				events: {
 
@@ -273,10 +292,11 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 			this._bRTL = sap.ui.getCore().getConfiguration().getRTL();
 
 			// used to judge if enableScrolling needs to be disabled
-			this._scrollContentList = ["NavContainer", "Page", "ScrollContainer"];
+			this._scrollContentList = ["NavContainer", "Page", "ScrollContainer", "SplitContainer", "MultiInput"];
 
 			this.oPopup = new Popup();
 			this.oPopup.setShadow(true);
+			this.oPopup.setNavigationMode("SCOPE");
 			if (jQuery.device.is.iphone && !this._bMessageType) {
 				this.oPopup.setModal(true, "sapMDialogTransparentBlk");
 			} else {
@@ -284,19 +304,6 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 			}
 
 			this.oPopup.setAnimations(jQuery.proxy(this._openAnimation, this), jQuery.proxy(this._closeAnimation, this));
-
-			//keyboard support for desktop environments
-			//use pseudo event 'onsapescape' to implement keyboard-trigger for closing this dialog
-			//had to implement this on the popup instance because it did not work on the dialog prototype
-			this.oPopup.onsapescape = jQuery.proxy(function (oEvent) {
-				// when the escape is already handled by inner control, nothing should happen inside dialog
-				if (oEvent.originalEvent && oEvent.originalEvent._sapui_handledByControl) {
-					return;
-				}
-				this.close();
-				//event should not trigger any further actions
-				oEvent.stopPropagation();
-			}, this);
 
 			/**
 			 *
@@ -309,12 +316,29 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 				that._adjustScrollingPane();
 
 				//set to hard 50% or the values set from a drag or resize
-				oPosition.at = {
-					left: that._oManuallySetPosition ? that._oManuallySetPosition.x : '50%',
-					top: that._oManuallySetPosition ? that._oManuallySetPosition.y : '50%'
-				};
+				oPosition.at = {};
 
+				if (that._oManuallySetPosition) {
+					oPosition.at.left = that._oManuallySetPosition.x;
+					oPosition.at.top = that._oManuallySetPosition.y;
+				} else {
+					// the top and left position need to be calculated with the
+					// window scroll position
+					oPosition.at.top = 'calc(50% + ' + (window.scrollY === undefined ? window.pageYOffset : window.scrollY) + 'px)';
+
+					if (that._bRTL) {
+						oPosition.at.left = 'auto'; // RTL mode adds right 50% so we have to remove left 50%
+					} else {
+						oPosition.at.left = 'calc(50% + ' + (window.scrollX === undefined ? window.pageXOffset : window.scrollX) + 'px)';
+					}
+				}
+
+				//deregister the content resize handler before repositioning
+				that._deregisterContentResizeHandler();
 				Popup.prototype._applyPosition.call(this, oPosition);
+
+				//register the content resize handler
+				that._registerContentResizeHandler();
 			};
 
 			if (Dialog._bPaddingByDefault) {
@@ -325,28 +349,24 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 		Dialog.prototype.onBeforeRendering = function () {
 			//if content has scrolling, disable scrolling automatically
 			if (this._hasSingleScrollableContent()) {
-				this._forceDisableScrolling = true;
+				this.setProperty("verticalScrolling", false);
+				this.setProperty("horizontalScrolling", false);
 				jQuery.sap.log.info("VerticalScrolling and horizontalScrolling in sap.m.Dialog with ID " + this.getId() + " has been disabled because there's scrollable content inside");
-			} else {
-				this._forceDisableScrolling = false;
-			}
-
-			if (!this._forceDisableScrolling) {
-				if (!this._oScroller) {
-					this._oScroller = new ScrollEnablement(this, this.getId() + "-scroll", {
-						horizontal: this.getHorizontalScrolling(), // will be disabled in adjustScrollingPane if content can fit in
-						vertical: this.getVerticalScrolling(),
-						zynga: false,
-						preventDefault: false,
-						nonTouchScrolling: "scrollbar",
-						// In android stock browser, iScroll has to be used
-						// The scrolling layer using native scrolling is transparent for the browser to dispatch events
-						iscroll: sap.ui.Device.browser.name === "an" ? "force" : undefined
-					});
-				}
+			} else if (!this._oScroller) {
+				this._oScroller = new ScrollEnablement(this, this.getId() + "-scroll", {
+					horizontal: this.getHorizontalScrolling(), // will be disabled in adjustScrollingPane if content can fit in
+					vertical: this.getVerticalScrolling()
+				});
 			}
 
 			this._createToolbarButtons();
+
+			if (sap.ui.getCore().getConfiguration().getAccessibility() && this.getState() != ValueState.None) {
+				var oValueState = new InvisibleText({text: this.getValueStateString(this.getState())});
+
+				this.setAggregation("_valueState", oValueState);
+				this.addAriaLabelledBy(oValueState.getId());
+			}
 		};
 
 		Dialog.prototype.onAfterRendering = function () {
@@ -359,10 +379,16 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 				//restore the focus after rendering when dialog is already open
 				this._setInitialFocus();
 			}
+
+			if (this.getType() === sap.m.DialogType.Message ||
+				(Device.system.phone && !this.getStretch())) {
+				this.$("footer").removeClass("sapContrast sapContrastPlus");
+			}
 		};
 
 		Dialog.prototype.exit = function () {
 			InstanceManager.removeDialogInstance(this);
+			this._deregisterContentResizeHandler();
 			this._deregisterResizeHandler();
 
 			if (this.oPopup) {
@@ -390,6 +416,11 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 				this._iconImage.destroy();
 				this._iconImage = null;
 			}
+
+			if (this._toolbarSpacer) {
+				this._toolbarSpacer.destroy();
+				this._toolbarSpacer = null;
+			}
 		};
 		/* =========================================================== */
 		/*                   end: Lifecycle functions                  */
@@ -412,8 +443,16 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 			// The focus will be change after the dialog is opened;
 			oPopup.setInitialFocusId(this.getId());
 
-			if (oPopup.isOpen()) {
-				return this;
+			var oPopupOpenState = oPopup.getOpenState();
+
+			switch (oPopupOpenState) {
+				case sap.ui.core.OpenState.OPEN:
+				case sap.ui.core.OpenState.OPENING:
+					return this;
+				case sap.ui.core.OpenState.CLOSING:
+					this._bOpenAfterClose = true;
+					break;
+				default:
 			}
 
 			//reset the close trigger
@@ -442,6 +481,8 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 		 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 		 */
 		Dialog.prototype.close = function () {
+			this._bOpenAfterClose = false;
+
 			this.$().removeClass('sapDialogDisableTransition');
 
 			this._deregisterResizeHandler();
@@ -458,6 +499,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 				this._oManuallySetPosition = null;
 				this._oManuallySetSize = null;
 				oPopup.close();
+				this._deregisterContentResizeHandler();
 			}
 			return this;
 		};
@@ -515,6 +557,11 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 
 			InstanceManager.removeDialogInstance(this);
 			this.fireAfterClose({origin: this._oCloseTrigger});
+
+			if (this._bOpenAfterClose) {
+				this._bOpenAfterClose = false;
+				this.open();
+			}
 		};
 
 		/**
@@ -543,6 +590,67 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 			}
 		};
 
+		/**
+		 * Makes sure app developer will always have access to the last created promise
+		 * @returns {{reject: reject, resolve: resolve}}
+		 * @private
+		 */
+		Dialog.prototype._getPromiseWrapper = function () {
+			var that = this;
+
+			return {
+				reject: function () {
+					that.currentPromise.reject();
+				},
+				resolve: function () {
+					that.currentPromise.resolve();
+				}
+			};
+		};
+
+
+		/**
+		 * Event handler for the escape key pressed event.
+		 * If it occurs and the developer hasn't defined the escapeHandler property, the Dialog is immediately closed.
+		 * Else the escapeHandler is executed and the developer may prevent the closing of the Dialog.
+		 * @param {jQuery.EventObject} oEvent The event object
+		 * @private
+		 */
+		Dialog.prototype.onsapescape = function(oEvent) {
+			var oEscapeHandler = this.getEscapeHandler(),
+				oPromiseArgument = {},
+				that = this;
+
+			if (oEvent.originalEvent && oEvent.originalEvent._sapui_handledByControl) {
+				return;
+			}
+
+			if (typeof oEscapeHandler === 'function') {
+				// create a Promise to allow app developers to hook to the 'escape' event
+				// and prevent the closing of the dialog by executing the escape handler function they defined
+				new window.Promise(function (resolve, reject) {
+					oPromiseArgument.resolve = resolve;
+					oPromiseArgument.reject = reject;
+
+					that.currentPromise = oPromiseArgument;
+
+					oEscapeHandler(that._getPromiseWrapper());
+				})
+					.then(function (result) {
+						that.close();
+					})
+					.catch(function () {
+						jQuery.sap.log.info("Disallow dialog closing");
+					});
+			} else {
+
+				this.close();
+			}
+
+			//event should not trigger any further actions
+			oEvent.stopPropagation();
+		};
+
 		/* =========================================================== */
 		/*                      end: event handlers                  */
 		/* =========================================================== */
@@ -558,14 +666,13 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 		 * @private
 		 */
 		Dialog.prototype._openAnimation = function ($Ref, iRealDuration, fnOpened) {
-			$Ref.addClass("sapMDialogOpen");
 
-			if (isTheCurrentBrowserIENine) {
-				$Ref.fadeIn(200, fnOpened);
-			} else {
-				$Ref.css("display", "block");
-				setTimeout(fnOpened, 210); // the time should be longer the longest transition in the CSS, because of focusing and transition relate issues
-			}
+			// Without the timeout, Firefox won't fire the transitionend event
+			// because of display = "none" in the same call stack before.
+			jQuery.sap.delayedCall(0, this, function(){$Ref.addClass("sapMDialogOpen");});
+
+			$Ref.css("display", "block");
+			setTimeout(fnOpened, 300); // the time should be longer the longest transition in the CSS (200ms), because of focusing and transition relate issues especially in IE where 200ms transition sometimes seems to last a little longer
 		};
 
 		/**
@@ -578,11 +685,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 		Dialog.prototype._closeAnimation = function ($Ref, iRealDuration, fnClose) {
 			$Ref.removeClass("sapMDialogOpen");
 
-			if (isTheCurrentBrowserIENine) {
-				$Ref.fadeOut(200, fnClose);
-			} else {
-				setTimeout(fnClose, 210);
-			}
+			setTimeout(fnClose, 300);
 		};
 
 		/**
@@ -592,7 +695,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 		Dialog.prototype._setDimensions = function () {
 			var $this = this.$(),
 				bStretch = this.getStretch(),
-				bStretchOnPhone = this.getStretchOnPhone() && sap.ui.Device.system.phone,
+				bStretchOnPhone = this.getStretchOnPhone() && Device.system.phone,
 				bMessageType = this._bMessageType,
 				oStyles = {};
 
@@ -609,11 +712,23 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 				}
 			}
 
+			if (oStyles.width == 'auto') {
+				oStyles.width = undefined;
+			}
+
+			if (oStyles.height == 'auto') {
+				oStyles.height = undefined;
+			}
+
 			if ((bStretch && !bMessageType) || (bStretchOnPhone)) {
 				this.$().addClass('sapMDialogStretched');
 			}
 
 			$this.css(oStyles);
+
+			if (!bStretch && !this._oManuallySetSize && !this._bDisableRepositioning) {
+				this._applyCustomTranslate();
+			}
 
 			//In Chrome when the dialog is stretched the footer is not rendered in the right position;
 			if (window.navigator.userAgent.toLowerCase().indexOf("chrome") !== -1 && this.getStretch()) {
@@ -660,39 +775,54 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 		 * @private
 		 */
 		Dialog.prototype._onResize = function () {
-			var $dialog,
-				$dialogContent,
-				iDialogWidth,
+			var $dialog = this.$(),
+				$dialogContent = this.$('cont'),
+				sContentHeight = this.getContentHeight(),
 				iDialogHeight,
-				sTranslateX = '',
-				sTranslateY = '';
+				BORDER_THICKNESS = 2; // solves Scrollbar issue in IE when Table is in Dialog
 
-			//if there is a manually set height or height by manually resizing return;
-			if (this.getContentHeight() || this._oManuallySetSize) {
+			//if height is set by manually resizing return;
+			if (this._oManuallySetSize) {
 				return;
 			}
 
-			if (!this.getContentHeight()) {
-				$dialog = this.$();
-				$dialogContent = this.$('cont');
-
+			if (!sContentHeight || sContentHeight == 'auto') {
 				//reset the height so the dialog can grow
 				$dialogContent.css({
 					height: 'auto'
 				});
 
 				//set the newly calculated size by getting it from the browser rendered layout - by the max-height
-				$dialogContent.height(parseInt($dialog.height(), 10) + parseInt($dialog.css("border-top-width"), 10) + parseInt($dialog.css("border-bottom-width"), 10));
+				iDialogHeight = parseFloat($dialog.height()) + BORDER_THICKNESS;
+				$dialogContent.height(Math.round( iDialogHeight));
 			}
 
-			if (this.getStretch()) {
-				return;
+			if (!this.getStretch() && !this._oManuallySetSize && !this._bDisableRepositioning) {
+				this._applyCustomTranslate();
 			}
 
-			iDialogWidth = $dialog.innerWidth();
-			iDialogHeight = $dialog.innerHeight();
+			if (Device.browser.chrome) {
+				// Force repaint of footer to workaround Chrome issue -> 1670422577
+				var $Footer = this.$("footer");
+				$Footer.css("height", "auto");
+				setTimeout(function(){
+					$Footer.css("height", "");
+				}, 10);
+			}
+		};
 
-			if (iDialogWidth % 2 !== 0 || iDialogHeight % 2 !== 0) {
+		/**
+		 *
+		 * @private
+		 */
+		Dialog.prototype._applyCustomTranslate = function() {
+			var $dialog = this.$(),
+				sTranslateX,
+				sTranslateY,
+				iDialogWidth = $dialog.innerWidth(),
+				iDialogHeight = $dialog.innerHeight();
+
+			if (Device.system.desktop && (iDialogWidth % 2 !== 0 || iDialogHeight % 2 !== 0)) {
 				if (!this._bRTL) {
 					sTranslateX = '-' + Math.floor(iDialogWidth / 2) + "px";
 				} else {
@@ -701,6 +831,8 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 
 				sTranslateY = '-' + Math.floor(iDialogHeight / 2) + "px";
 				$dialog.css('transform', 'translate(' + sTranslateX + ',' + sTranslateY + ') scale(1)');
+			} else {
+				$dialog.css('transform', '');
 			}
 		};
 
@@ -717,7 +849,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 		};
 
 		/**
-		 * If a scrollable control (sap.m.NavContainer, sap.m.ScrollContainer, sap.m.Page) is added to dialog's content aggregation as a single child or through one or more sap.ui.mvc.View instances,
+		 * If a scrollable control (sap.m.NavContainer, sap.m.ScrollContainer, sap.m.Page, sap.m.SplitContainer) is added to dialog's content aggregation as a single child or through one or more sap.ui.mvc.View instances,
 		 * the scrolling inside dialog will be disabled in order to avoid wrapped scrolling areas.
 		 *
 		 * If more than one scrollable control is added to dialog, the scrolling needs to be disabled manually.
@@ -857,8 +989,8 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 			var oFocusDomRef;
 
 			if (oControl) {
-				//if someone tryies to focus an existing but not visible control, focus the Dialog itself.
-				if (!oControl.getVisible()) {
+				//if someone tries to focus an existing but not visible control, focus the Dialog itself.
+				if (oControl.getVisible && !oControl.getVisible()) {
 					this.focus();
 					return;
 				}
@@ -882,7 +1014,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 			// Setting focus to DOM Element which can open the on screen keyboard on mobile device doesn't work
 			// consistently across devices. Therefore setting focus to those elements are disabled on mobile devices
 			// and the keyboard should be opened by the User explicitly
-			if (sap.ui.Device.system.desktop || (oFocusDomRef && !/input|textarea|select/i.test(oFocusDomRef.tagName))) {
+			if (Device.system.desktop || (oFocusDomRef && !/input|textarea|select/i.test(oFocusDomRef.tagName))) {
 				jQuery.sap.focus(oFocusDomRef);
 			} else {
 				// Set the focus to the popup itself in order to keep the tab chain
@@ -954,7 +1086,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 			var sAggregationName = sPos.toLowerCase() + "Button",
 				sButtonName = "_o" + this._firstLetterUpperCase(sPos) + "Button";
 
-			if (sap.ui.Device.system.phone) {
+			if (Device.system.phone) {
 				return this.getAggregation(sAggregationName, null, /*avoid infinite loop*/true);
 			} else {
 				return this[sButtonName];
@@ -1017,11 +1149,11 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 		 */
 		Dialog.prototype._deregisterResizeHandler = function () {
 			if (this._resizeListenerId) {
-				sap.ui.core.ResizeHandler.deregister(this._resizeListenerId);
+				ResizeHandler.deregister(this._resizeListenerId);
 				this._resizeListenerId = null;
 			}
 
-			sap.ui.Device.resize.detachHandler(this._onResize);
+			Device.resize.detachHandler(this._onResize, this);
 		};
 
 		/**
@@ -1033,8 +1165,33 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 
 			//The content have to have explicit size so the scroll will work when the user's content is larger then the available space.
 			//This can be removed and the layout change to flex when the support for IE9 is dropped
-			this._resizeListenerId = sap.ui.core.ResizeHandler.register(_$srollSontent.get(0), jQuery.proxy(this._onResize, this));
-			sap.ui.Device.resize.attachHandler(this._onResize.bind(this));
+			this._resizeListenerId = ResizeHandler.register(_$srollSontent.get(0), jQuery.proxy(this._onResize, this));
+			Device.resize.attachHandler(this._onResize, this);
+
+			//set the initial size of the content container so when a dialog with large content is open there will be a scroller
+			this._onResize();
+		};
+
+		/**
+		 *
+		 * @private
+		 */
+		Dialog.prototype._deregisterContentResizeHandler = function () {
+			if (this._sContentResizeListenerId) {
+				ResizeHandler.deregister(this._sContentResizeListenerId);
+				this._sContentResizeListenerId = null;
+			}
+		};
+
+		/**
+		 *
+		 * @param oScrollDomRef
+		 * @private
+		 */
+		Dialog.prototype._registerContentResizeHandler = function() {
+			if (!this._sContentResizeListenerId) {
+				this._sContentResizeListenerId = ResizeHandler.register(this.getDomRef("scrollCont"), jQuery.proxy(this._onResize, this));
+			}
 
 			//set the initial size of the content container so when a dialog with large content is open there will be a scroller
 			this._onResize();
@@ -1073,7 +1230,10 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 			});
 
 			toolbar.removeAllContent();
-			toolbar.addContent(new ToolbarSpacer());
+			if (!("_toolbarSpacer" in this)) {
+				this._toolbarSpacer = new ToolbarSpacer();
+			}
+			toolbar.addContent(this._toolbarSpacer);
 			// attach handler which sets origin parameter only for begin and End buttons
 			aButtons.forEach(function(oBtn) {
 				that._attachHandler(oBtn);
@@ -1110,6 +1270,27 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 			}
 
 			return this._oToolbar;
+		};
+
+		/**
+		 * Returns the sap.ui.core.ValueState state according to the language settings
+		 * @param {sap.ui.core.ValueState|string} sValueState The dialog's value state
+		 * @returns {string} The translated text
+		 * @private
+		 */
+		Dialog.prototype.getValueStateString = function (sValueState) {
+			var rb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
+
+			switch (sValueState) {
+				case (sap.ui.core.ValueState.Success):
+					return rb.getText("LIST_ITEM_STATE_SUCCESS");
+				case (sap.ui.core.ValueState.Warning):
+					return rb.getText("LIST_ITEM_STATE_WARNING");
+				case (sap.ui.core.ValueState.Error):
+					return rb.getText("LIST_ITEM_STATE_ERROR");
+				default:
+					return "";
+			}
 		};
 
 		/* =========================================================== */
@@ -1183,6 +1364,24 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 			return originalResponse;
 		};
 
+		Dialog.prototype.getAriaLabelledBy = function() {
+			var header = this._getAnyHeader(),
+				// Due to a bug in getAssociation in ManagedObject slice the Array
+				// Remove slice when the bug is fixed.
+				labels = this.getAssociation("ariaLabelledBy", []).slice();
+
+			var subHeader = this.getSubHeader();
+			if (subHeader) {
+				labels.unshift(subHeader.getId());
+			}
+
+			if (header) {
+				labels.unshift(header.getId());
+			}
+
+			return labels;
+		};
+
 		Dialog.prototype.setTitle = function (sTitle) {
 			this.setProperty("title", sTitle, true);
 
@@ -1219,6 +1418,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 				$this.toggleClass(Dialog._mStateClasses[sName], !!mFlags[sName]);
 			}
 			this.setIcon(Dialog._mIcons[sState], true);
+			return this;
 		};
 
 		Dialog.prototype.setIcon = function (sIcon, bInternal) {
@@ -1283,12 +1483,19 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 				return this;
 			}
 			this.setProperty("stretchOnPhone", bStretchOnPhone);
-			return this.setProperty("stretch", bStretchOnPhone && sap.ui.Device.system.phone);
+			return this.setProperty("stretch", bStretchOnPhone && Device.system.phone);
 		};
 
 		Dialog.prototype.setVerticalScrolling = function (bValue) {
-			var oldValue = this.getVerticalScrolling();
-			if (oldValue === bValue) {
+			var bOldValue = this.getVerticalScrolling(),
+				bHasSingleScrollableContent = this._hasSingleScrollableContent();
+
+			if (bHasSingleScrollableContent) {
+				jQuery.sap.log.warning("sap.m.Dialog: property verticalScrolling automatically reset to false. See documentation.");
+				bValue = false;
+			}
+
+			if (bOldValue === bValue) {
 				return this;
 			}
 
@@ -1303,8 +1510,15 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 		};
 
 		Dialog.prototype.setHorizontalScrolling = function (bValue) {
-			var oldValue = this.getHorizontalScrolling();
-			if (oldValue === bValue) {
+			var bOldValue = this.getHorizontalScrolling(),
+				bHasSingleScrollableContent = this._hasSingleScrollableContent();
+
+			if (bHasSingleScrollableContent) {
+				jQuery.sap.log.warning("sap.m.Dialog: property horizontalScrolling automatically reset to false. See documentation.");
+				bValue = false;
+			}
+
+			if (bOldValue === bValue) {
 				return this;
 			}
 
@@ -1360,7 +1574,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 			return $target.hasClass('sapMDialogTitle');
 		}
 
-		if (sap.ui.Device.system.desktop) {
+		if (Device.system.desktop) {
 			/**
 			 *
 			 * @param {Object} e
@@ -1399,6 +1613,9 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 						action();
 					}, 0);
 				};
+				var DIALOG_MIN_VISIBLE_SIZE = 30;
+				var windowWidth = window.innerWidth;
+				var windowHeight = window.innerHeight;
 				var initial = {
 					x: e.pageX,
 					y: e.pageY,
@@ -1429,8 +1646,9 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 
 					//set the new position of the dialog on mouse down when the transform is disabled by the class
 					that._$dialog.css({
-						left: that._oManuallySetPosition.x,
-						top: that._oManuallySetPosition.y
+						left: Math.min(Math.max(0, that._oManuallySetPosition.x), windowWidth - DIALOG_MIN_VISIBLE_SIZE),
+						top: Math.min(Math.max(0, that._oManuallySetPosition.y), windowHeight - DIALOG_MIN_VISIBLE_SIZE),
+						transform: ""
 					});
 				}
 
@@ -1446,8 +1664,9 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 
 							//move the dialog
 							that._$dialog.css({
-								left: that._oManuallySetPosition.x,
-								top: that._oManuallySetPosition.y
+								left: Math.min(Math.max(0, that._oManuallySetPosition.x), windowWidth - DIALOG_MIN_VISIBLE_SIZE),
+								top: Math.min(Math.max(0, that._oManuallySetPosition.y), windowHeight - DIALOG_MIN_VISIBLE_SIZE),
+								transform: ""
 							});
 						});
 					});
@@ -1458,6 +1677,9 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 					var styles = {};
 					var minWidth = parseInt(that._$dialog.css('min-width'), 10);
 					var maxLeftOffset = initial.x + initial.width - minWidth;
+
+					// BCP: 1680048166 remove inline set height so that the content resizes together with the mouse pointer
+					that.$('cont').height('');
 
 					$w.on("mousemove.sapMDialog", function (e) {
 						fnMouseMoveHandler(function () {
@@ -1470,6 +1692,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 
 							if (that._bRTL) {
 								styles.left = Math.min(Math.max(e.pageX, 0), maxLeftOffset);
+								styles.transform = "";
 								that._oManuallySetSize.width = initial.width + initial.x - Math.max(e.pageX, 0);
 							}
 
@@ -1484,10 +1707,14 @@ sap.ui.define(['jquery.sap.global', './Bar', './InstanceManager', './Associative
 				}
 
 				$w.on("mouseup.sapMDialog", function () {
+					var $dialog = that.$(),
+						$dialogContent = that.$('cont');
+
 					$w.off("mouseup.sapMDialog, mousemove.sapMDialog");
 
 					if (bResize) {
 						that._$dialog.removeClass('sapMDialogResizing');
+						$dialogContent.height(parseInt($dialog.height(), 10) + parseInt($dialog.css("border-top-width"), 10) + parseInt($dialog.css("border-bottom-width"), 10));
 					}
 				});
 

@@ -34,12 +34,6 @@
 	background-color: @sapHCStandardBG;
 }
 
-.sapMDialogResizeHandler {
-	&:before {
-		border-color: transparent transparent @sapHCStandardFG transparent;
-	}
-
-	&:hover:before {
-		border-color: transparent transparent lighten(@sapHCStandardFG, 15%) transparent;
-	}
+.sapMDialogResizeHandler::before {
+	color: @sapHCStandardFG;
 }

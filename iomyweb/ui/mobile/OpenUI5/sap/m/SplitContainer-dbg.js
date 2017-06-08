@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 *
 	 * NOTE: This control must be rendered as a full screen control in order to make the show/hide master area work properly.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -569,6 +569,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		if (sap.ui.Device.os.windows && sap.ui.Device.browser.internet_explorer) { // not for windows_phone
 			this._oMasterNav.$().append('<iframe class="sapMSplitContainerMasterBlindLayer" src="about:blank"></iframe>');
 		}
+
+		// "sapMSplitContainerNoTransition" prevents initial flickering, after that it needs to be removed
+		jQuery.sap.delayedCall(0, this, function () {
+			this._oMasterNav.removeStyleClass("sapMSplitContainerNoTransition");
+		});
 	};
 	/**************************************************************
 	* END - Life Cycle Methods
@@ -609,7 +614,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			return;
 		}
 
-		var bIsMasterNav = true;
+		var bIsMasterNav = true,
+			metaData = oEvent.srcControl.getMetadata();
 
 		if (jQuery(oEvent.target).closest(".sapMSplitContainerDetail").length > 0) {
 			bIsMasterNav = false;
@@ -623,7 +629,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				// press isn't occurring in master area
 				&& !bIsMasterNav
 				// press isn't triggered by the showMasterButton
-				&& !jQuery.sap.containsOrEquals(this._oShowMasterBtn.getDomRef(), oEvent.target)) {
+				&& !jQuery.sap.containsOrEquals(this._oShowMasterBtn.getDomRef(), oEvent.target)
+				&& (!metaData.getEvent("tap") || !metaData.getEvent("press"))) {
 			this.hideMaster();
 		}
 	};
@@ -1242,7 +1249,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				this._bMasterClosing = true;
 			}
 		} else {
-			if ((this._portraitHide() || this._hideMode()) && this._bMasterisOpen) {
+			if ((this._portraitHide() || this._hideMode()) &&
+				(this._bMasterisOpen || this._oMasterNav.$().hasClass("sapMSplitContainerMasterVisible"))) {
 				if (this._isMie9) {
 					_this$.animate({
 						left: "-=320"
@@ -1491,7 +1499,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	SplitContainer.prototype.setMode = function(sMode) {
 		var sOldMode = this.getMode();
 		if (sOldMode === sMode) {
-			return;
+			return this;
 		}
 		this.setProperty("mode", sMode, true);
 		//the reposition of master and detail area only occurs in tablet and after it's rendered
@@ -1857,6 +1865,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		}
 
 		oPage = this._getRealPage(oPage);
+		if (!oPage) {
+			return;
+		}
 
 		var oHeaderAggregation = SplitContainer._getHeaderButtonAggregation(oPage),
 			sHeaderAggregationName = oHeaderAggregation.sAggregationName,
@@ -1917,6 +1928,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			aAggregationContent,
 			sAggregationName;
 
+		if (!oHeader) {
+			return;
+		}
+
 		if (oHeader.getContentLeft) {
 			aAggregationContent = oHeader.getContentLeft();
 			sAggregationName = "contentLeft";
@@ -1948,6 +1963,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		if (!bHidden && !bNoAnim) {
 			oPage = this._getRealPage(oPage);
+
+			if (!oPage) {
+				return;
+			}
+
 			oHeader = oPage._getAnyHeader();
 			if (oHeader /*&& !this._checkCustomHeader(oPage)*/) {
 				var aHeaderContent = SplitContainer._getHeaderButtonAggregation(oPage).aAggregationContent;

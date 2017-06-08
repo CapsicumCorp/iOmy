@@ -14,17 +14,21 @@ sap.ui.define([], function () {
 	var NotificationListGroupRenderer = {};
 
 	var classNameItem = 'sapMNLG';
+	var classNameBase = 'sapMNLB';
 	var classNameListBaseItem = 'sapMLIB';
-	var classNameAuthor = 'sapMNLG-AuthorPicture';
+	var classNameAuthor = 'sapMNLB-AuthorPicture';
+	var classNameBaseHeader = 'sapMNLB-Header';
 	var classNameHeader = 'sapMNLG-Header';
 	var classNameBody = 'sapMNLG-Body';
+	var classNameBaseFooter = 'sapMNLB-Footer';
 	var classNameFooter = 'sapMNLG-Footer';
-	var classNameCloseButton = 'sapMNLG-CloseButton';
-	var classNamePriority = 'sapMNLG-Priority';
+	var classNameCloseButton = 'sapMNLB-CloseButton';
+	var classNamePriority = 'sapMNLB-Priority';
 	var classNameDetails = 'sapMNLG-Details';
-	var classNameBullet = 'sapMNLG-Bullet';
+	var classNameBullet = 'sapMNLB-Bullet';
 	var classNameDescription = 'sapMNLG-Description';
 	var classNameCollapsed = 'sapMNLG-Collapsed';
+	var classNameSingleItemGroup = 'sapMNLGNoHdrFooter';
 
 	/**
 	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
@@ -33,25 +37,37 @@ sap.ui.define([], function () {
 	 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered
 	 */
 	NotificationListGroupRenderer.render = function (oRm, oControl) {
-		oRm.write('<li');
-		oRm.addClass(classNameItem);
-		oRm.addClass(classNameListBaseItem);
+		if (oControl.getVisible()) {
+			var _bShowGroupHdrFooter = oControl.getShowEmptyGroup() || (oControl._getVisibleItemsCount() > 0);
+			oRm.write('<li');
+			oRm.addClass(classNameItem);
+			oRm.addClass(classNameBase);
+			oRm.addClass(classNameListBaseItem);
+			if (!_bShowGroupHdrFooter) {
+				oRm.addClass(classNameSingleItemGroup);
+			}
 
-		if (oControl.getCollapsed()) {
-			oRm.addClass(classNameCollapsed);
+			if (oControl.getCollapsed()) {
+				oRm.addClass(classNameCollapsed);
+			}
+
+			oRm.writeClasses();
+			oRm.writeControlData(oControl);
+			oRm.writeAttribute('tabindex', '0');
+			oRm.writeAccessibilityState(oControl, {
+				labelledby : oControl._getHeaderTitle().getId()
+			});
+			oRm.write('>');
+			if (_bShowGroupHdrFooter) {
+				this.renderHeader(oRm, oControl);
+				this.renderBody(oRm, oControl);
+				this.renderFooter(oRm, oControl);
+			}
+			oRm.write('</li>');
+		} else {
+			this.renderInvisibleItem(oRm, oControl);
 		}
 
-		oRm.writeClasses();
-		oRm.writeControlData(oControl);
-		oRm.writeAttribute('tabindex', '0');
-		oRm.writeAccessibilityState(oControl, {
-			labelledby : oControl._getHeaderTitle().getId()
-		});
-		oRm.write('>');
-			this.renderHeader(oRm, oControl);
-			this.renderBody(oRm, oControl);
-			this.renderFooter(oRm, oControl);
-		oRm.write('</li>');
 	};
 
 	//================================================================================
@@ -65,7 +81,12 @@ sap.ui.define([], function () {
 	 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered
 	 */
 	NotificationListGroupRenderer.renderHeader = function (oRm, oControl) {
-		oRm.write('<div class=' + classNameHeader + '>');
+		oRm.write('<div');
+		oRm.addClass(classNameBaseHeader);
+		oRm.addClass(classNameHeader);
+
+		oRm.writeClasses();
+		oRm.write('>');
 
 		this.renderPriorityArea(oRm, oControl);
 		this.renderCloseButton(oRm, oControl);
@@ -92,7 +113,7 @@ sap.ui.define([], function () {
 	 */
 	NotificationListGroupRenderer.renderCloseButton = function (oRm, oControl) {
 		if (oControl.getShowCloseButton()) {
-			oRm.renderControl(oControl._closeButton.addStyleClass(classNameCloseButton));
+			oRm.renderControl(oControl.getAggregation('_closeButton').addStyleClass(classNameCloseButton));
 		}
 	};
 
@@ -202,13 +223,21 @@ sap.ui.define([], function () {
 	 */
 	NotificationListGroupRenderer.renderFooter = function (oRm, oControl) {
 		/** @type {sap.m.Button[]} */
-		var aButtons = oControl.getButtons();
+		var buttons = oControl.getButtons();
 
-		oRm.write('<div class=' + classNameFooter + '>');
+		//oRm.write('<div class=' + classNameFooter + '>');
+
+		oRm.write('<div');
+		oRm.addClass(classNameFooter);
+		oRm.addClass(classNameBaseFooter);
+
+		oRm.writeClasses();
+		oRm.write('>');
+
 		this.renderPriorityArea(oRm, oControl);
 		this.renderCollapseGroupButton(oRm, oControl);
 
-		if (aButtons && aButtons.length && oControl.getShowButtons()) {
+		if (buttons && buttons.length && oControl.getShowButtons()) {
 			oRm.renderControl(oControl.getAggregation('_overflowToolbar'));
 		}
 
@@ -229,16 +258,16 @@ sap.ui.define([], function () {
 
 		switch (controlPriority) {
 			case (sap.ui.core.Priority.Low):
-				classPriority = 'sapMNLG-Low';
+				classPriority = 'sapMNLB-Low';
 				break;
 			case (sap.ui.core.Priority.Medium):
-				classPriority = 'sapMNLG-Medium';
+				classPriority = 'sapMNLB-Medium';
 				break;
 			case (sap.ui.core.Priority.High):
-				classPriority = 'sapMNLG-High';
+				classPriority = 'sapMNLB-High';
 				break;
 			default:
-				classPriority = 'sapMNLG-None';
+				classPriority = 'sapMNLB-None';
 				break;
 		}
 
@@ -257,8 +286,22 @@ sap.ui.define([], function () {
 	 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered
 	 */
 	NotificationListGroupRenderer.renderCollapseGroupButton = function (oRm, oControl) {
-		oRm.renderControl(oControl._collapseButton);
+		oRm.renderControl(oControl.getAggregation('_collapseButton'));
 	};
+
+	/**
+	 * Renders the invisible item when the visible property is false.
+	 *
+	 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer
+	 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered
+	 */
+	NotificationListGroupRenderer.renderInvisibleItem = function(oRm, oControl) {
+		oRm.write("<li");
+		oRm.writeInvisiblePlaceholderData(oControl);
+		oRm.write(">");
+		oRm.write("</li>");
+	};
+
 
 	return NotificationListGroupRenderer;
 

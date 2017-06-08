@@ -33,7 +33,7 @@ sap.ui.define(['jquery.sap.global'],
 				CSS_CLASS = SliderRenderer.CSS_CLASS;
 
 			oRm.write("<div");
-			oRm.addClass(CSS_CLASS);
+			this.addClass(oRm, oSlider);
 
 			if (!bEnabled) {
 				oRm.addClass(CSS_CLASS + "Disabled");
@@ -44,14 +44,14 @@ sap.ui.define(['jquery.sap.global'],
 			oRm.writeStyles();
 			oRm.writeControlData(oSlider);
 
-			if (sTooltip) {
+			if (sTooltip && oSlider.getShowHandleTooltip()) {
 				oRm.writeAttributeEscaped("title", sTooltip);
 			}
 
 			oRm.write(">");
 			oRm.write('<div');
 			oRm.writeAttribute("id", oSlider.getId() + "-inner");
-			oRm.addClass(CSS_CLASS + "Inner");
+			this.addInnerClass(oRm, oSlider);
 
 			if (!bEnabled) {
 				oRm.addClass(CSS_CLASS + "InnerDisabled");
@@ -65,8 +65,12 @@ sap.ui.define(['jquery.sap.global'],
 				this.renderProgressIndicator(oRm, oSlider);
 			}
 
-			this.renderHandle(oRm, oSlider);
+			this.renderHandles(oRm, oSlider);
 			oRm.write("</div>");
+
+			this.renderTickmarks(oRm, oSlider);
+
+			this.renderLabels(oRm, oSlider);
 
 			if (oSlider.getName()) {
 				this.renderInput(oRm, oSlider);
@@ -78,24 +82,43 @@ sap.ui.define(['jquery.sap.global'],
 		SliderRenderer.renderProgressIndicator = function(oRm, oSlider) {
 			oRm.write("<div");
 			oRm.writeAttribute("id", oSlider.getId() + "-progress");
-			oRm.addClass(SliderRenderer.CSS_CLASS + "Progress");
+			this.addProgressIndicatorClass(oRm, oSlider);
 			oRm.addStyle("width", oSlider._sProgressValue);
 			oRm.writeClasses();
 			oRm.writeStyles();
 			oRm.write(' aria-hidden="true"></div>');
 		};
 
-		SliderRenderer.renderHandle = function(oRm, oSlider) {
+		/**
+		 * This hook method is reserved for derived classes to render more handles.
+		 *
+		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
+		 * @param {sap.ui.core.Control} oSlider An object representation of the slider that should be rendered.
+		 */
+		SliderRenderer.renderHandles = function(oRm, oSlider) {
+			this.renderHandle(oRm, oSlider,  {
+				id: oSlider.getId() + "-handle"
+			});
+
+			if (oSlider.getShowAdvancedTooltip()) {
+				this.renderTooltips(oRm, oSlider);
+			}
+		};
+
+		SliderRenderer.renderHandle = function(oRm, oSlider, mOptions) {
 			var bEnabled = oSlider.getEnabled();
 
 			oRm.write("<span");
-			oRm.writeAttribute("id", oSlider.getId() + "-handle");
 
-			if (oSlider.getShowHandleTooltip()) {
+			if (mOptions && (mOptions.id !== undefined)) {
+				oRm.writeAttributeEscaped("id", mOptions.id);
+			}
+
+			if (oSlider.getShowHandleTooltip() && !oSlider.getShowAdvancedTooltip()) {
 				this.writeHandleTooltip(oRm, oSlider);
 			}
 
-			oRm.addClass(SliderRenderer.CSS_CLASS + "Handle");
+			this.addHandleClass(oRm, oSlider);
 			oRm.addStyle(sap.ui.getCore().getConfiguration().getRTL() ? "right" : "left", oSlider._sProgressValue);
 			this.writeAccessibilityState(oRm, oSlider);
 			oRm.writeClasses();
@@ -106,6 +129,44 @@ sap.ui.define(['jquery.sap.global'],
 			}
 
 			oRm.write("></span>");
+		};
+
+		/**
+		 * This hook method is reserved for derived classes to render more tooltips.
+		 *
+		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
+		 * @param {sap.ui.core.Control} oSlider An object representation of the slider that should be rendered.
+		 */
+		SliderRenderer.renderTooltips = function(oRm, oSlider) {
+
+			// the tooltips container
+			oRm.write("<div");
+			oRm.writeAttribute("id", oSlider.getId() + "-TooltipsContainer");
+			oRm.addClass(SliderRenderer.CSS_CLASS + "TooltipContainer");
+			oRm.addStyle("left", "0%");
+			oRm.addStyle("right", "0%");
+			oRm.addStyle("min-width", "0%");
+			oRm.writeClasses();
+			oRm.writeStyles();
+			oRm.write(">");
+			this.renderTooltip(oRm, oSlider, oSlider.getInputsAsTooltips());
+			oRm.write("</div>");
+		};
+
+		SliderRenderer.renderTooltip = function(oRm, oSlider, bInput) {
+			if (bInput && oSlider._oInputTooltip) {
+				oRm.renderControl(oSlider._oInputTooltip.tooltip);
+			} else {
+				oRm.write("<span");
+				oRm.addClass(SliderRenderer.CSS_CLASS + "HandleTooltip");
+				oRm.addStyle("width", oSlider._iLongestRangeTextWidth + "px");
+				oRm.writeAttribute("id", oSlider.getId() + "-Tooltip");
+
+				oRm.writeClasses();
+				oRm.writeStyles();
+				oRm.write(">");
+				oRm.write("</span>");
+			}
 		};
 
 		/**
@@ -150,6 +211,68 @@ sap.ui.define(['jquery.sap.global'],
 				valuenow: oSlider.toFixed(oSlider.getValue())
 			});
 		};
+
+		SliderRenderer.renderTickmarks = function (oRm, oSlider) {
+			if (!oSlider.getEnableTickmarks()) {
+				return;
+			}
+
+			oRm.write("<ul class=\"sapMSliderTickmarks\">");
+			oRm.write("<li  class=\"sapMSliderTick\" style=\"width: calc(100% - 1px);\"></li>");
+			oRm.write("</ul>");
+		};
+
+		/**
+		 * This method is reserved for derived classes to add extra CSS classes to the HTML root element of the control.
+		 *
+		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
+		 * @param {sap.ui.core.Control} oSlider An object representation of the control that should be rendered.
+		 * @since 1.36
+		 */
+		SliderRenderer.addClass = function(oRm, oSlider) {
+			oRm.addClass(SliderRenderer.CSS_CLASS);
+		};
+
+		/**
+		 * This method is reserved for derived classes to add extra CSS classes to the inner element.
+		 *
+		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
+		 * @param {sap.ui.core.Control} oSlider An object representation of the control that should be rendered.
+		 * @since 1.38
+		 */
+		SliderRenderer.addInnerClass = function(oRm, oSlider) {
+			oRm.addClass(SliderRenderer.CSS_CLASS + "Inner");
+		};
+
+		/**
+		 * This method is reserved for derived classes to add extra CSS classes to the progress indicator element.
+		 *
+		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
+		 * @param {sap.ui.core.Control} oSlider An object representation of the control that should be rendered.
+		 * @since 1.38
+		 */
+		SliderRenderer.addProgressIndicatorClass = function(oRm, oSlider) {
+			oRm.addClass(SliderRenderer.CSS_CLASS + "Progress");
+		};
+
+		/**
+		 * This method is reserved for derived classes to add extra CSS classes to the handle element.
+		 *
+		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
+		 * @param {sap.ui.core.Control} oSlider An object representation of the control that should be rendered.
+		 * @since 1.38
+		 */
+		SliderRenderer.addHandleClass = function(oRm, oSlider) {
+			oRm.addClass(SliderRenderer.CSS_CLASS + "Handle");
+		};
+
+		/**
+		 * This hook method is reserved for derived classes to render the labels.
+		 *
+		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
+		 * @param {sap.ui.core.Control} oSlider An object representation of the control that should be rendered.
+		 */
+		SliderRenderer.renderLabels = function (oRm, oSlider) {};
 
 		return SliderRenderer;
 

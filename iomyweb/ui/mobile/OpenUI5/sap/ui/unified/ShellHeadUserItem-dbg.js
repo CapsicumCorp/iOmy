@@ -22,12 +22,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/IconPool
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.22.0
 	 * @alias sap.ui.unified.ShellHeadUserItem
+	 * @deprecated Since version 1.44.0.
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	var ShellHeadUserItem = Element.extend("sap.ui.unified.ShellHeadUserItem", /** @lends sap.ui.unified.ShellHeadUserItem.prototype */ { metadata : {
@@ -78,6 +79,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/IconPool
 	};
 
 	ShellHeadUserItem.prototype.onsapspace = ShellHeadUserItem.prototype.onclick;
+	ShellHeadUserItem.prototype.onsapenter = ShellHeadUserItem.prototype.onclick;
 
 	ShellHeadUserItem.prototype.setImage = function(sImage){
 		this.setProperty("image", sImage, true);
@@ -101,7 +103,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/IconPool
 		} else {
 			var $Image = this.$("img-inner");
 			if ($Image.length == 0 || $Image.attr("src") != sImage) {
-				$Ico.css("style", "").attr("aria-label", null).html("<img role='presentation' id='" + this.getId() + "-img-inner' src='" + jQuery.sap.encodeHTML(sImage) + "'></img>");
+				$Ico.css("style", "").attr("aria-label", null).html("<img role='presentation' id='" + this.getId() + "-img-inner' src='" + jQuery.sap.encodeHTML(sImage) + "'/>");
 			}
 		}
 	};

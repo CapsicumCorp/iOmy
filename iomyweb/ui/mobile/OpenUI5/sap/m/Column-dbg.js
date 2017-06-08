@@ -18,11 +18,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 	 * @param {object} [mSettings] initial settings for the new control
 	 *
 	 * @class
-	 * The column allows to define column specific properties that will be applied when rendering the List.
+	 * The <code>sap.m.Column</code> allows to define column specific properties that will be applied when rendering the <code>sap.m.Table</code>.
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -137,6 +137,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 
 	// default media value
 	Column.prototype._media = null;
+
+	Column.prototype.exit = function() {
+		this._clearMedia();
+	};
 
 	Column.prototype._clearMedia = function() {
 		if (this._media && this._minWidth) {
@@ -295,37 +299,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 		}
 		return cls.trim();
 	};
-
-
-	/**
-	 * Returns visible probability of the column
-	 *
-	 * @param {boolean} [bReturnCache] Whether return cache or new result
-	 * @return {boolean}
-	 * @protected
-	 */
-	Column.prototype.isNeverVisible = function(bReturnCache) {
-		if (bReturnCache) {
-			return this._isNeverVisible;
-		}
-
-		if (!this._minWidth) {
-			this._isNeverVisible = false;
-			return this._isNeverVisible;
-		}
-
-		var width = parseFloat(this._minWidth),
-			unit = this._minWidth.replace(/[^a-z]/g, ""),
-			baseFontSize = parseFloat(sap.m.BaseFontSize) || 16;
-
-		if (unit != "px") {
-			width *= baseFontSize;
-		}
-
-		this._isNeverVisible = (width > Math.max(window.screen.width, window.screen.height));
-		return this._isNeverVisible;
-	};
-
 
 	/**
 	 * Sets the visible column index
@@ -597,16 +570,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Element', 'sap/ui/
 	 */
 	Column.prototype.onItemsRemoved = function() {
 		this.clearLastValue();
-	};
-
-	/**
-	 * Determines whether the given width is relative or not
-	 *
-	 * @private
-	 * @returns {boolean}
-	 */
-	Column.prototype.isRelativeWidth = function() {
-		return /^(|auto|[-+]?\d+\.?\d*%|inherit)$/i.test(this.getWidth());
 	};
 
 	return Column;

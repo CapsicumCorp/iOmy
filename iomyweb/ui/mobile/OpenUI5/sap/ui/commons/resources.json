@@ -111,6 +111,9 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/theming/Parameters.js"
       ]
     },
     {
@@ -118,6 +121,9 @@
       "module": "sap/ui/commons/ApplicationHeaderRenderer.js",
       "required": [
         "jquery.sap.global.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/theming/Parameters.js"
       ]
     },
     {
@@ -419,6 +425,10 @@
       ]
     },
     {
+      "name": "ColorPickerMode.type",
+      "designtime": true
+    },
+    {
       "name": "ColorPickerRenderer-dbg.js",
       "module": "sap/ui/commons/ColorPickerRenderer.js",
       "isDebug": true,
@@ -489,6 +499,10 @@
         "sap/ui/model/type/Date.js",
         "sap/ui/core/date/UniversalDate.js",
         "sap/ui/commons/library.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/Popup.js",
+        "sap/ui/unified/library.js"
       ]
     },
     {
@@ -504,6 +518,10 @@
         "sap/ui/model/type/Date.js",
         "sap/ui/core/date/UniversalDate.js",
         "sap/ui/commons/library.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/Popup.js",
+        "sap/ui/unified/library.js"
       ]
     },
     {
@@ -1174,6 +1192,9 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js"
+      ],
+      "condRequired": [
+        "sap/ui/unified/MenuItemBase.js"
       ]
     },
     {
@@ -1181,6 +1202,9 @@
       "module": "sap/ui/commons/MenuItemBase.js",
       "required": [
         "jquery.sap.global.js"
+      ],
+      "condRequired": [
+        "sap/ui/unified/MenuItemBase.js"
       ]
     },
     {
@@ -1784,7 +1808,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/commons/library.js",
-        "sap/ui/core/Control.js"
+        "sap/ui/core/Element.js"
       ]
     },
     {
@@ -1797,7 +1821,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/commons/library.js",
-        "sap/ui/core/Control.js"
+        "sap/ui/core/Element.js"
       ]
     },
     {
@@ -2026,6 +2050,9 @@
         "sap/ui/core/History.js",
         "sap/ui/core/Renderer.js",
         "jquery.sap.dom.js"
+      ],
+      "condRequired": [
+        "sap/ui/commons/Button.js"
       ]
     },
     {
@@ -2047,6 +2074,9 @@
         "sap/ui/core/History.js",
         "sap/ui/core/Renderer.js",
         "jquery.sap.dom.js"
+      ],
+      "condRequired": [
+        "sap/ui/commons/Button.js"
       ]
     },
     {
@@ -2250,7 +2280,10 @@
         "jquery.sap.global.js",
         "sap/ui/commons/library.js",
         "sap/ui/core/Control.js",
-        "sap/ui/core/delegate/ItemNavigation.js"
+        "sap/ui/core/delegate/ItemNavigation.js",
+        "sap/ui/core/Icon.js",
+        "sap/ui/core/delegate/ScrollEnablement.js",
+        "sap/ui/Device.js"
       ]
     },
     {
@@ -2264,7 +2297,10 @@
         "jquery.sap.global.js",
         "sap/ui/commons/library.js",
         "sap/ui/core/Control.js",
-        "sap/ui/core/delegate/ItemNavigation.js"
+        "sap/ui/core/delegate/ItemNavigation.js",
+        "sap/ui/core/Icon.js",
+        "sap/ui/core/delegate/ScrollEnablement.js",
+        "sap/ui/Device.js"
       ]
     },
     {
@@ -3031,6 +3067,9 @@
       "name": "img/1x1.gif"
     },
     {
+      "name": "img/ColorPicker/Alphaslider_BG.png"
+    },
+    {
       "name": "layout/AbsoluteLayout-dbg.js",
       "module": "sap/ui/commons/layout/AbsoluteLayout.js",
       "isDebug": true,
@@ -3446,6 +3485,13 @@
       ]
     },
     {
+      "name": "library-preload.js",
+      "merged": true
+    },
+    {
+      "name": "library-preload.js.map"
+    },
+    {
       "name": "library-preload.json",
       "merged": true
     },
@@ -3623,6 +3669,12 @@
       "raw": "messagebundle.properties"
     },
     {
+      "name": "messagebundle_ms.properties",
+      "module": "sap/ui/commons/messagebundle_ms.properties",
+      "locale": "ms",
+      "raw": "messagebundle.properties"
+    },
+    {
       "name": "messagebundle_nl.properties",
       "module": "sap/ui/commons/messagebundle_nl.properties",
       "locale": "nl",
@@ -3727,242 +3779,307 @@
     },
     {
       "name": "themes/base/AbsoluteLayout.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Accordion.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/AccordionSection.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ApplicationHeader.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/AutoComplete.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/BorderLayout.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Button.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Callout.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/CalloutBase.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Carousel.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/CheckBox.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ColorPicker.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ComboBox.less",
+      "designtime": true,
+      "theme": "base"
+    },
+    {
+      "name": "themes/base/ControlsInUITable.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/DatePicker.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Dialog.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/FileUploader.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Form.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/FormLayout.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/FormattedTextView.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/GridLayout.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/HorizontalDivider.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/HorizontalLayout.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Image.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/InPlaceEdit.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Label.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Link.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ListBox.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/MenuBar.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/MenuButton.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Message.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/MessageBar.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/MessageBox.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/MessageList.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/MessageToast.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Paginator.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Panel.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ProgressIndicator.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/RadioButton.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/RadioButtonGroup.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/RatingIndicator.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ResponsiveContainer.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ResponsiveFlowLayout.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ResponsiveLayout.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/RichTooltip.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/RoadMap.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/RowRepeater.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/SearchField.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/SegmentedButton.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/SimpleForm.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Slider.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Splitter.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/TabStrip.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/TextArea.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/TextField.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/TextView.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ToggleButton.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Toolbar.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Tree.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/TriStateCheckBox.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ValueHelpField.less",
+      "designtime": true,
       "theme": "base"
     },
     {
@@ -4551,14 +4668,17 @@
     },
     {
       "name": "themes/base/jQueryUiBase.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/jQueryUiDatepicker.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/layout.less",
+      "designtime": true,
       "theme": "base"
     },
     {
@@ -4585,10 +4705,12 @@
     },
     {
       "name": "themes/base/library.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/library.source.less",
+      "designtime": true,
       "theme": "base"
     },
     {
@@ -4597,210 +4719,262 @@
     },
     {
       "name": "themes/sap_hcb/AbsoluteLayout.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Accordion.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/AccordionSection.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ApplicationHeader.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/AutoComplete.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/BorderLayout.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Button.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Callout.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/CalloutBase.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Carousel.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/CheckBox.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ColorPicker.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ComboBox.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/DatePicker.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Dialog.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/DropdownBox.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/FormattedTextView.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/HorizontalDivider.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Image.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/InPlaceEdit.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Label.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Link.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ListBox.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/MenuBar.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/MenuButton.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Message.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/MessageBar.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/MessageBox.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/MessageList.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/MessageToast.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Pagniator.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Panel.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ProgressIndicator.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/RadioButton.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/RadioButtonGroup.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/RatingIndicator.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/RichTooltip.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/RoadMap.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/RowRepeater.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/SearchField.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/SegmentedButton.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Slider.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Splitter.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/TabStrip.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/TextArea.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/TextField.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/TextView.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ToggleButton.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Toolbar.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Tree.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/TriStateCheckBox.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ValueHelpField.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
@@ -4812,15 +4986,7 @@
       "theme": "sap_hcb"
     },
     {
-      "name": "themes/sap_hcb/img-RTL/accordion/collapsedRTL.gif",
-      "theme": "sap_hcb"
-    },
-    {
       "name": "themes/sap_hcb/img-RTL/accordion/expanded.gif",
-      "theme": "sap_hcb"
-    },
-    {
-      "name": "themes/sap_hcb/img-RTL/accordion/expandedRTL.gif",
       "theme": "sap_hcb"
     },
     {
@@ -4845,18 +5011,6 @@
     },
     {
       "name": "themes/sap_hcb/img-RTL/formattedTextView/close-hcb.png",
-      "theme": "sap_hcb"
-    },
-    {
-      "name": "themes/sap_hcb/img-RTL/layout/separationLarge.gif",
-      "theme": "sap_hcb"
-    },
-    {
-      "name": "themes/sap_hcb/img-RTL/layout/separationMedium.gif",
-      "theme": "sap_hcb"
-    },
-    {
-      "name": "themes/sap_hcb/img-RTL/layout/separationSmall.gif",
       "theme": "sap_hcb"
     },
     {
@@ -5184,15 +5338,7 @@
       "theme": "sap_hcb"
     },
     {
-      "name": "themes/sap_hcb/img/accordion/collapsedRTL.gif",
-      "theme": "sap_hcb"
-    },
-    {
       "name": "themes/sap_hcb/img/accordion/expanded.gif",
-      "theme": "sap_hcb"
-    },
-    {
-      "name": "themes/sap_hcb/img/accordion/expandedRTL.gif",
       "theme": "sap_hcb"
     },
     {
@@ -5217,18 +5363,6 @@
     },
     {
       "name": "themes/sap_hcb/img/formattedTextView/close-hcb.png",
-      "theme": "sap_hcb"
-    },
-    {
-      "name": "themes/sap_hcb/img/layout/separationLarge.gif",
-      "theme": "sap_hcb"
-    },
-    {
-      "name": "themes/sap_hcb/img/layout/separationMedium.gif",
-      "theme": "sap_hcb"
-    },
-    {
-      "name": "themes/sap_hcb/img/layout/separationSmall.gif",
       "theme": "sap_hcb"
     },
     {
@@ -5549,6 +5683,7 @@
     },
     {
       "name": "themes/sap_hcb/layout.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
@@ -5575,10 +5710,17 @@
     },
     {
       "name": "themes/sap_hcb/library.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/library.source.less",
+      "designtime": true,
+      "theme": "sap_hcb"
+    },
+    {
+      "name": "themes/sap_hcb/shared.less",
+      "designtime": true,
       "theme": "sap_hcb"
     }
   ]

@@ -53,6 +53,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/unified/DateTypeRange.js",
+        "sap/ui/core/format/DateFormat.js",
         "sap/ui/unified/library.js"
       ]
     },
@@ -66,8 +67,13 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/unified/DateTypeRange.js",
+        "sap/ui/core/format/DateFormat.js",
         "sap/ui/unified/library.js"
       ]
+    },
+    {
+      "name": "CalendarAppointmentVisualization.type",
+      "designtime": true
     },
     {
       "name": "CalendarDateInterval-dbg.js",
@@ -87,6 +93,9 @@
         "sap/ui/unified/calendar/YearPicker.js",
         "sap/ui/core/date/UniversalDate.js",
         "sap/ui/unified/library.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/Popup.js"
       ]
     },
     {
@@ -110,6 +119,9 @@
         "sap/ui/unified/calendar/YearPicker.js",
         "sap/ui/core/date/UniversalDate.js",
         "sap/ui/unified/library.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/Popup.js"
       ]
     },
     {
@@ -216,6 +228,9 @@
         "sap/ui/unified/calendar/YearPicker.js",
         "sap/ui/core/date/UniversalDate.js",
         "sap/ui/unified/library.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/Popup.js"
       ]
     },
     {
@@ -237,6 +252,9 @@
         "sap/ui/unified/calendar/YearPicker.js",
         "sap/ui/core/date/UniversalDate.js",
         "sap/ui/unified/library.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/Popup.js"
       ]
     },
     {
@@ -252,6 +270,33 @@
       "module": "sap/ui/unified/CalendarMonthIntervalRenderer.js",
       "required": [
         "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "CalendarOneMonthInterval-dbg.js",
+      "module": "sap/ui/unified/CalendarOneMonthInterval.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/unified/calendar/CalendarUtils.js",
+        "sap/ui/core/date/UniversalDate.js",
+        "sap/ui/unified/library.js",
+        "sap/ui/unified/CalendarDateInterval.js",
+        "sap/ui/unified/CalendarDateIntervalRenderer.js",
+        "sap/ui/unified/calendar/OneMonthDatesRow.js"
+      ]
+    },
+    {
+      "name": "CalendarOneMonthInterval.js",
+      "module": "sap/ui/unified/CalendarOneMonthInterval.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/unified/calendar/CalendarUtils.js",
+        "sap/ui/core/date/UniversalDate.js",
+        "sap/ui/unified/library.js",
+        "sap/ui/unified/CalendarDateInterval.js",
+        "sap/ui/unified/CalendarDateIntervalRenderer.js",
+        "sap/ui/unified/calendar/OneMonthDatesRow.js"
       ]
     },
     {
@@ -306,7 +351,9 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/core/date/UniversalDate.js"
+        "sap/ui/core/date/UniversalDate.js",
+        "sap/ui/unified/CalendarAppointment.js",
+        "sap/ui/unified/CalendarRow.js"
       ]
     },
     {
@@ -314,7 +361,9 @@
       "module": "sap/ui/unified/CalendarRowRenderer.js",
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/core/date/UniversalDate.js"
+        "sap/ui/core/date/UniversalDate.js",
+        "sap/ui/unified/CalendarAppointment.js",
+        "sap/ui/unified/CalendarRow.js"
       ]
     },
     {
@@ -334,6 +383,9 @@
         "sap/ui/unified/calendar/YearPicker.js",
         "sap/ui/core/date/UniversalDate.js",
         "sap/ui/unified/library.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/Popup.js"
       ]
     },
     {
@@ -356,6 +408,9 @@
         "sap/ui/unified/calendar/YearPicker.js",
         "sap/ui/core/date/UniversalDate.js",
         "sap/ui/unified/library.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/Popup.js"
       ]
     },
     {
@@ -371,6 +426,31 @@
       "module": "sap/ui/unified/CalendarTimeIntervalRenderer.js",
       "required": [
         "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "CalendarWeekInterval-dbg.js",
+      "module": "sap/ui/unified/CalendarWeekInterval.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/unified/calendar/CalendarUtils.js",
+        "sap/ui/core/date/UniversalDate.js",
+        "sap/ui/unified/library.js",
+        "sap/ui/unified/CalendarDateInterval.js",
+        "sap/ui/unified/CalendarDateIntervalRenderer.js"
+      ]
+    },
+    {
+      "name": "CalendarWeekInterval.js",
+      "module": "sap/ui/unified/CalendarWeekInterval.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/unified/calendar/CalendarUtils.js",
+        "sap/ui/core/date/UniversalDate.js",
+        "sap/ui/unified/library.js",
+        "sap/ui/unified/CalendarDateInterval.js",
+        "sap/ui/unified/CalendarDateIntervalRenderer.js"
       ]
     },
     {
@@ -508,7 +588,8 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/Control.js",
-        "sap/ui/unified/library.js"
+        "sap/ui/unified/library.js",
+        "sap/ui/core/LabelEnablement.js"
       ]
     },
     {
@@ -521,7 +602,8 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/Control.js",
-        "sap/ui/unified/library.js"
+        "sap/ui/unified/library.js",
+        "sap/ui/core/LabelEnablement.js"
       ]
     },
     {
@@ -569,6 +651,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/Control.js",
+        "sap/ui/Device.js",
         "sap/ui/core/Popup.js",
         "sap/ui/unified/MenuItemBase.js",
         "sap/ui/unified/library.js",
@@ -585,6 +668,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/Control.js",
+        "sap/ui/Device.js",
         "sap/ui/core/Popup.js",
         "sap/ui/unified/MenuItemBase.js",
         "sap/ui/unified/library.js",
@@ -761,6 +845,9 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/unified/library.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/theming/Parameters.js"
       ]
     },
     {
@@ -769,6 +856,9 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/unified/library.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/theming/Parameters.js"
       ]
     },
     {
@@ -1123,7 +1213,8 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/unified/calendar/CalendarUtils.js",
-        "sap/ui/core/date/UniversalDate.js"
+        "sap/ui/core/date/UniversalDate.js",
+        "sap/ui/unified/CalendarLegend.js"
       ]
     },
     {
@@ -1132,7 +1223,8 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/unified/calendar/CalendarUtils.js",
-        "sap/ui/core/date/UniversalDate.js"
+        "sap/ui/core/date/UniversalDate.js",
+        "sap/ui/unified/CalendarLegend.js"
       ]
     },
     {
@@ -1185,6 +1277,52 @@
         "jquery.sap.global.js",
         "sap/ui/unified/calendar/CalendarUtils.js",
         "sap/ui/core/date/UniversalDate.js"
+      ]
+    },
+    {
+      "name": "calendar/OneMonthDatesRow-dbg.js",
+      "module": "sap/ui/unified/calendar/OneMonthDatesRow.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/unified/calendar/DatesRow.js",
+        "sap/ui/unified/calendar/CalendarUtils.js",
+        "sap/ui/unified/library.js"
+      ]
+    },
+    {
+      "name": "calendar/OneMonthDatesRow.js",
+      "module": "sap/ui/unified/calendar/OneMonthDatesRow.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/unified/calendar/DatesRow.js",
+        "sap/ui/unified/calendar/CalendarUtils.js",
+        "sap/ui/unified/library.js"
+      ]
+    },
+    {
+      "name": "calendar/OneMonthDatesRowRenderer-dbg.js",
+      "module": "sap/ui/unified/calendar/OneMonthDatesRowRenderer.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/Renderer.js",
+        "sap/ui/unified/calendar/CalendarUtils.js",
+        "sap/ui/core/date/UniversalDate.js",
+        "sap/ui/unified/calendar/MonthRenderer.js",
+        "sap/ui/unified/calendar/DatesRowRenderer.js"
+      ]
+    },
+    {
+      "name": "calendar/OneMonthDatesRowRenderer.js",
+      "module": "sap/ui/unified/calendar/OneMonthDatesRowRenderer.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/Renderer.js",
+        "sap/ui/unified/calendar/CalendarUtils.js",
+        "sap/ui/core/date/UniversalDate.js",
+        "sap/ui/unified/calendar/MonthRenderer.js",
+        "sap/ui/unified/calendar/DatesRowRenderer.js"
       ]
     },
     {
@@ -1304,6 +1442,13 @@
         "jquery.sap.global.js",
         "sap/ui/core/library.js"
       ]
+    },
+    {
+      "name": "library-preload.js",
+      "merged": true
+    },
+    {
+      "name": "library-preload.js.map"
     },
     {
       "name": "library-preload.json",
@@ -1481,6 +1626,12 @@
       "raw": "messagebundle.properties"
     },
     {
+      "name": "messagebundle_ms.properties",
+      "module": "sap/ui/unified/messagebundle_ms.properties",
+      "locale": "ms",
+      "raw": "messagebundle.properties"
+    },
+    {
       "name": "messagebundle_nl.properties",
       "module": "sap/ui/unified/messagebundle_nl.properties",
       "locale": "nl",
@@ -1585,50 +1736,62 @@
     },
     {
       "name": "themes/base/Calendar.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/CalendarLegend.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/CalendarRow.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ContentSwitcher.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Currency.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/FileUploader.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Menu.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Shell.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ShellHeader.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ShellLayout.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ShellOverlay.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/SplitContainer.less",
+      "designtime": true,
       "theme": "base"
     },
     {
@@ -1663,10 +1826,12 @@
     },
     {
       "name": "themes/base/library.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/library.source.less",
+      "designtime": true,
       "theme": "base"
     },
     {
@@ -1675,42 +1840,52 @@
     },
     {
       "name": "themes/sap_hcb/Calendar.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/CalendarLegend.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/CalendarRow.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Currency.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/FileUploader.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Menu.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Shell.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ShellHeader.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ShellLayout.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ShellOverlay.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
@@ -1745,10 +1920,12 @@
     },
     {
       "name": "themes/sap_hcb/library.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/library.source.less",
+      "designtime": true,
       "theme": "sap_hcb"
     }
   ]

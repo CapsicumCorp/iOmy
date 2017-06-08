@@ -16,7 +16,8 @@
         "sap/tnt/library.js",
         "sap/ui/core/Control.js",
         "sap/m/Popover.js",
-        "sap/ui/core/delegate/ItemNavigation.js"
+        "sap/ui/core/delegate/ItemNavigation.js",
+        "sap/ui/core/InvisibleText.js"
       ]
     },
     {
@@ -31,7 +32,8 @@
         "sap/tnt/library.js",
         "sap/ui/core/Control.js",
         "sap/m/Popover.js",
-        "sap/ui/core/delegate/ItemNavigation.js"
+        "sap/ui/core/delegate/ItemNavigation.js",
+        "sap/ui/core/InvisibleText.js"
       ]
     },
     {
@@ -92,7 +94,7 @@
         "sap/ui/core/Control.js",
         "sap/ui/core/ResizeHandler.js",
         "sap/ui/core/Icon.js",
-        "sap/tnt/NavigationList.js"
+        "sap/ui/core/delegate/ScrollEnablement.js"
       ]
     },
     {
@@ -108,7 +110,7 @@
         "sap/ui/core/Control.js",
         "sap/ui/core/ResizeHandler.js",
         "sap/ui/core/Icon.js",
-        "sap/tnt/NavigationList.js"
+        "sap/ui/core/delegate/ScrollEnablement.js"
       ]
     },
     {
@@ -243,6 +245,13 @@
       ]
     },
     {
+      "name": "library-preload.js",
+      "merged": true
+    },
+    {
+      "name": "library-preload.js.map"
+    },
+    {
       "name": "library-preload.json",
       "merged": true
     },
@@ -277,18 +286,22 @@
     },
     {
       "name": "themes/base/NavigationList.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/SideNavigation.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ToolHeader.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ToolPage.less",
+      "designtime": true,
       "theme": "base"
     },
     {
@@ -315,10 +328,12 @@
     },
     {
       "name": "themes/base/library.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/library.source.less",
+      "designtime": true,
       "theme": "base"
     },
     {
@@ -327,14 +342,17 @@
     },
     {
       "name": "themes/sap_hcb/NavigationList.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/SideNavigation.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ToolHeader.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
@@ -361,10 +379,12 @@
     },
     {
       "name": "themes/sap_hcb/library.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/library.source.less",
+      "designtime": true,
       "theme": "sap_hcb"
     }
   ]

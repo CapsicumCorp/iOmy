@@ -19,7 +19,7 @@ sap.ui.define(['sap/m/semantic/SemanticButton'], function(SemanticButton) {
 	 * @extends sap.m.semantic.SemanticButton
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -29,7 +29,9 @@ sap.ui.define(['sap/m/semantic/SemanticButton'], function(SemanticButton) {
 	 */
 
 	var DiscussInJamAction = SemanticButton.extend("sap.m.semantic.DiscussInJamAction", /** @lends sap.m.semantic.DiscussInJamAction.prototype */ {
-
+		metadata: {
+			library: "sap.m"
+		}
 	});
 
 	return DiscussInJamAction;

@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/LayoutData', './library'],
 	 * @extends sap.ui.core.LayoutData
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -87,6 +87,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/LayoutData', './library'],
 		} else {
 			this.setProperty("linebreak", bLinebreak);
 		}
+		return this;
 	};
 
 	ResponsiveFlowLayoutData.prototype.setLinebreakable = function(bLinebreakable) {
@@ -98,6 +99,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/LayoutData', './library'],
 			this.setProperty("linebreakable", bLinebreakable);
 			// this.setMinWidth(0);
 		}
+		return this;
 	};
 
 	return ResponsiveFlowLayoutData;

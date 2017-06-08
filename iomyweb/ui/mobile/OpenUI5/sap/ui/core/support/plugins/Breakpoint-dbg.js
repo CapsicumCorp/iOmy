@@ -5,8 +5,8 @@
  */
 
 // Provides class sap.ui.core.support.plugins.Breakpoint (Breakpoint support Plugin)
-sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/core/support/Plugin'],
-	function(jQuery, Device, Plugin) {
+sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/core/ElementMetadata', '../Plugin'],
+	function(jQuery, Device, ElementMetadata, Plugin) {
 	"use strict";
 
 	/*global alert */
@@ -287,7 +287,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/core/support/Plugin
 					}
 
 					if (typeof (oObj.getMetadata) === 'function' &&
-						oObj.getMetadata() instanceof sap.ui.core.ElementMetadata) {
+						oObj.getMetadata() instanceof ElementMetadata) {
 						aClasses.push(oObj.getMetadata().getName());
 					}
 				}
@@ -534,7 +534,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/core/support/Plugin
 				text = "Please open your debugger by pressing CTRL + SHIFT + I.";
 			}
 
-			if (Device.browser.internet_explorer) {
+			if (Device.browser.msie) {
 				text = "Please open your debugger using F12, go to the 'Script' tab and attach it by pressing F5.";
 			}
 

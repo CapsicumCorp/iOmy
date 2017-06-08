@@ -13,6 +13,9 @@ sap.ui.define(['jquery.sap.global', './TabStripItem', './TabStrip'], function(jQ
 	 */
 	var TabStripRenderer = {};
 
+		TabStripRenderer.LEFT_OVERRFLOW_BTN_CLASS_NAME = "sapMTSLeftOverflowButtons";
+		TabStripRenderer.RIGHT_OVERRFLOW_BTN_CLASS_NAME = "sapMTSRightOverflowButtons";
+
 	/**
 	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
 	 *
@@ -25,15 +28,23 @@ sap.ui.define(['jquery.sap.global', './TabStripItem', './TabStrip'], function(jQ
 		}
 		this.beginTabStrip(oRm, oControl);
 
-		// for phones show only the select component of the strip
+		// for phones show only the select component of the strip & "+" button
 		if (sap.ui.Device.system.phone === true) {
-			oRm.renderControl(oControl.getAggregation('_select'));
+			this.renderTouchArea(oRm, oControl);
 		} else {
-			this.renderLeftOverflowButtons(oRm, oControl);
+			oRm.write("<div id='" + oControl.getId() + "-leftOverflowButtons' class='" + this.LEFT_OVERRFLOW_BTN_CLASS_NAME + "'>");
+			if (oControl.getAggregation("_leftArrowButton")) {
+				this.renderLeftOverflowButtons(oRm, oControl, false);
+			}
+			oRm.write("</div>");
 			this.beginTabsContainer(oRm, oControl);
 			this.renderItems(oRm, oControl);
 			this.endTabsContainer(oRm);
-			this.renderRightOverflowButtons(oRm, oControl);
+			oRm.write("<div id='" + oControl.getId() + "-rightOverflowButtons' class='" + this.RIGHT_OVERRFLOW_BTN_CLASS_NAME + "'>");
+			if (oControl.getAggregation("_rightArrowButton")) {
+				this.renderRightOverflowButtons(oRm, oControl, false);
+			}
+			oRm.write("</div>");
 			this.renderTouchArea(oRm, oControl);
 		}
 		this.endTabStrip(oRm);
@@ -79,7 +90,6 @@ sap.ui.define(['jquery.sap.global', './TabStripItem', './TabStrip'], function(jQ
 		oRm.writeAccessibilityState(oItem, getTabStripItemAccAttributes(oItem, oControl.getParent(), sap.ui.getCore().byId(oControl.getSelectedItem())));
 
 		oRm.write(">");
-
 
 		oRm.write("<span id='" + getTabTextDomId(oItem) + "' class='" + TabStripItem.CSS_CLASS_LABEL + "'>");
 
@@ -174,13 +184,14 @@ sap.ui.define(['jquery.sap.global', './TabStripItem', './TabStrip'], function(jQ
 	 *
 	 * @param oRm {sap.ui.core.RenderManager} The RenderManager that can be used for writing to the render output buffer
 	 * @param oControl {sap.m.TabStrip} An object representation of the <code>TabStrip</code> control that should be rendered
+	 * @param bFlush {boolean} should the buffer be flushed into the provided DOM node
 	 */
-	TabStripRenderer.renderLeftOverflowButtons = function (oRm, oControl) {
-		oRm.write("<div id='" + oControl.getId() + "-leftOverflowButtons' class='sapMTSLeftOverflowButtons'>");
-		if (!sap.ui.Device.system.phone) {
-			oRm.renderControl(oControl._oLeftArrowButton);
+	TabStripRenderer.renderLeftOverflowButtons = function (oRm, oControl, bFlush) {
+		oRm.renderControl(oControl.getAggregation("_leftArrowButton"));
+
+		if (bFlush) { // flush only on lazy rendering
+			oRm.flush(oControl.$("leftOverflowButtons")[0]);
 		}
-		oRm.write("</div>");
 	};
 
 	/**
@@ -188,15 +199,14 @@ sap.ui.define(['jquery.sap.global', './TabStripItem', './TabStrip'], function(jQ
 	 *
 	 * @param oRm {sap.ui.core.RenderManager} The RenderManager that can be used for writing to the render output buffer
 	 * @param oControl {sap.m.TabStrip} An object representation of the <code>TabStrip</code> control that should be rendered
+	 * @param bFlush {boolean} should the buffer be flushed into the provided DOM node
 	 */
-	TabStripRenderer.renderRightOverflowButtons = function (oRm, oControl) {
-		oRm.write("<div id='" + oControl.getId() + "-rightOverflowButtons'  class='sapMTSRightOverflowButtons'>");
+	TabStripRenderer.renderRightOverflowButtons = function (oRm, oControl, bFlush) {
+		oRm.renderControl(oControl.getAggregation("_rightArrowButton"));
 
-		if (!sap.ui.Device.system.phone) {
-			oRm.renderControl(oControl._oRightArrowButton);
+		if (bFlush) { // flush only on lazy rendering
+			oRm.flush(oControl.$("rightOverflowButtons")[0]);
 		}
-
-		oRm.write("</div>");
 	};
 
 	/**
@@ -229,7 +239,7 @@ sap.ui.define(['jquery.sap.global', './TabStripItem', './TabStrip'], function(jQ
 	 * Returns the accessibility attributes for a given <code>TabStripItem</code>.
 	 *
 	 * @param oItem {sap.m.TabStripItem} The <code>TabStripItem</code> to prepare accessibility attributes for
-	 * @param oTabStripParent {sap.ui.Control} The <code>TabStrip</code> parent control
+	 * @param oTabStripParent {sap.ui.core.Control} The <code>TabStrip</code> parent control
 	 * @param oSelectedItem {sap.m.TabStripItem} The <code>TabStripItem</code> that is currently selected
 	 * @returns {Object} The accessibility attributes for given <code>TabStripItem</code>
 	 * @private

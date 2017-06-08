@@ -48,7 +48,23 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Core", "sap/ui/core/library", "
 			"sap.uxap.ModelMapping",
 			"sap.uxap.ObjectPageHeaderLayoutData"
 		],
-		version: "1.34.9"
+		version: "1.44.14",
+		extensions: {
+			flChangeHandlers: {
+				"sap.uxap.ObjectPageLayout": {
+					"moveControls": "default"
+				},
+				"sap.uxap.ObjectPageSection": {
+					"hideControl": "default",
+					"unhideControl": "default",
+					"stashControl": "default",
+					"unstashControl": "default"
+				},
+	             "sap.ui.core._StashedControl" : {
+                     "unstashControl": "default"
+	            }
+			}
+		}
 	});
 
 	/**
@@ -279,7 +295,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Core", "sap/ui/core/library", "
 		},
 		isTabletScenario: function () {
 
-			if (sap.ui.Device.system.tablet) {
+			if (!sap.ui.Device.system.desktop && sap.ui.Device.system.tablet) {
 				return true;
 			}
 

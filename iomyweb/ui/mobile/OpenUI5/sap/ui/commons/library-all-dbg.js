@@ -142,9 +142,9 @@ sap.ui.define("sap/ui/commons/AccordionRenderer",['jquery.sap.global'],
 		rm.write("<span id='" + oControl.getId() + "-hdrL'>");
 
 		if (oControl.getEnabled()) {
-			rm.write("<a id='" + oControl.getId() + "-minL' class='sapUiAcdSectionMinArrow' href='javascript:void(0)' title='Collapse/Expand'");
+			rm.write("<a id='" + oControl.getId() + "-minL' class='sapUiAcdSectionMinArrow' href='# title='Collapse/Expand'");
 		} else {
-			rm.write("<a id='" + oControl.getId() + "-minL' class='sapUiAcdSectionMinArrow sapUiAcdCursorText' href='javascript:void(0)' title='Collapse/Expand'");
+			rm.write("<a id='" + oControl.getId() + "-minL' class='sapUiAcdSectionMinArrow sapUiAcdCursorText' href='#' title='Collapse/Expand'");
 		}
 
 		rm.write(" tabindex='-1' ");
@@ -391,7 +391,7 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 
 	/**
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @namespace
 	 */
 	var ButtonRenderer = {
@@ -412,7 +412,6 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 		if (oButton.getTooltip_AsString()) {
 			rm.writeAttributeEscaped("title", oButton.getTooltip_AsString());
 		}
-
 		//styling
 		if (oButton.getStyled()) {
 			rm.addClass("sapUiBtnS");
@@ -448,6 +447,14 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 		if (!oButton.getText() && oButton.getIcon()) { // icon, but no text => reduce padding
 			rm.addClass("sapUiBtnIconOnly");
 			bImageOnly = true; // only the image is there, so it must have some meaning
+
+			// add tooltip if available, if not - add the technical name of the icon
+			var oIconInfo = sap.ui.core.IconPool.getIconInfo(oButton.getIcon()),
+				sTooltip = oButton.getTooltip_AsString();
+
+			if (sTooltip || (oIconInfo && oIconInfo.name)) {
+				rm.writeAttributeEscaped("title", sTooltip || oIconInfo.name);
+			}
 		}
 
 		if (oButton.getIcon() && oButton.getText()) {
@@ -589,12 +596,12 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 					var sIcon = oButton.getIconSelected() || oButton.getIconHovered();
 					return sIcon ? sIcon : oButton.getIcon();
 				} else if (oButton.$().hasClass("sapUiBtnFoc")) {
-					return oButton.getIconHovered() || oButton.getIcon();
+					return oButton.getIcon();
 				}
 				return oButton.getIcon();
 			case "mouseout":
 				if (oButton.$().hasClass("sapUiBtnFoc")) {
-					return oButton.getIconHovered() || oButton.getIcon();
+					return oButton.getIcon();
 				}
 				return oButton.getIcon();
 			case "active":
@@ -624,17 +631,13 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 			rm.writeAttribute("alt", ""); // there must be an ALT attribute
 		}
 
-        if (!bImageOnly) {
-            rm.writeAttribute("role", "presentation");
-        }
+		if (!bImageOnly) {
+			rm.writeAttribute("role", "presentation");
+		}
 
 		rm.addClass("sapUiBtnIco");
-        if (oButton.getText()) { // only add a distance to the text if there is text
-			if (oButton.getIconFirst()) {
-				rm.addClass("sapUiBtnIcoL");
-			} else {
-				rm.addClass("sapUiBtnIcoR");
-			}
+		if (oButton.getText()) { // only add a distance to the text if there is text
+			rm.addClass(oButton.getIconFirst() ? "sapUiBtnIcoL" : "sapUiBtnIcoR");
 		}
 		rm.writeClasses();
 
@@ -647,17 +650,11 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 	ButtonRenderer.writeIconHtml = function(oRenderManager, oButton) {
 
 		var rm = oRenderManager;
-		var oIconInfo = sap.ui.core.IconPool.getIconInfo(oButton.getIcon());
 		var aClasses = [];
 		var mAttributes = buildIconAttributes(oButton);
 		aClasses.push("sapUiBtnIco");
 		if (oButton.getText()) { // only add a distance to the text if there is text
-			var bRTL = rm.getConfiguration().getRTL();
-			if ((oButton.getIconFirst() && (!bRTL || oIconInfo.skipMirroring)) || (!oButton.getIconFirst() && !oIconInfo.skipMirroring && bRTL)) {
-				aClasses.push("sapUiBtnIcoL");
-			} else {
-				aClasses.push("sapUiBtnIcoR");
-			}
+			aClasses.push(oButton.getIconFirst() ? "sapUiBtnIcoL" : "sapUiBtnIcoR");
 		}
 
 		rm.writeIcon(oButton.getIcon(), aClasses, mAttributes);
@@ -696,6 +693,7 @@ sap.ui.define("sap/ui/commons/ButtonRenderer",['jquery.sap.global'],
 
 		oAttributes["id"] = oButton.getId() + "-icon";
 		if (sTooltip) { // prevents default icon tooltip
+
 			oAttributes["title"] = null;
 			oAttributes["aria-label"] = null;
 			oAttributes["aria-hidden"] = true;
@@ -1405,7 +1403,7 @@ sap.ui.define("sap/ui/commons/DialogRenderer",['jquery.sap.global'],
 		// Example for an additional button:   rm.write("<a class='sapUiDlgOptBtn'></a>");
 
 		if (oControl.getShowCloseButton()) {
-			rm.write("<a id='", oControl.getId(), "-close' class='sapUiDlgCloseBtn' href='javascript:void(0)'");
+			rm.write("<a id='", oControl.getId(), "-close' class='sapUiDlgCloseBtn' href='#'");
 			rm.write(" tabIndex='-1'"); // according to accessibility experts (O.K. and M.J.), the 'x' should not be tab-able
 			rm.writeAttribute("role","button");
 			rm.writeAttributeEscaped("aria-label", rb.getText("DIALOG_CLOSE_HELP"));
@@ -2205,9 +2203,7 @@ sap.ui.define("sap/ui/commons/LinkRenderer",['jquery.sap.global'],
 		if (oLink.getHref()) {
 			rm.writeAttributeEscaped("href", oLink.getHref());
 		}	else {
-			/*eslint-disable no-script-url */
-			rm.writeAttribute("href", "javascript:void(0);");
-			/*eslint-enable no-script-url */
+			rm.writeAttribute("href", "#");
 		}
 
 		if (oLink.getTarget()) {
@@ -2266,7 +2262,7 @@ sap.ui.define("sap/ui/commons/ListBoxRenderer",['jquery.sap.global', 'sap/ui/cor
 	 * ListBox Renderer
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @namespace
 	 */
 	var ListBoxRenderer = {
@@ -2823,7 +2819,7 @@ sap.ui.define("sap/ui/commons/MenuItemBase",['jquery.sap.global'],
 	 * @extends sap.ui.unified.MenuItemBase
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @since 1.0.0
 	 *
 	 * @deprecated Since version 1.21.0.
@@ -3232,13 +3228,13 @@ sap.ui.define("sap/ui/commons/PaginatorRenderer",['jquery.sap.global', 'jquery.s
 
 		// First page link must only appear when at least 5 pages are available
 		if (oPaginator.getNumberOfPages() > 5) {
-			oRm.write("<a id='" + paginatorId + "--firstPageLink' href='javascript:void(0);' title='");
+			oRm.write("<a id='" + paginatorId + "--firstPageLink' href='#;' title='");
 			oRm.writeEscaped(rb.getText("FIRST_PAGE"));
 			oRm.write("' class='sapUiPagBtn sapUiPagFirst " + linkClass + "' " + linkAcc + "><span class='sapUiPagText'>");
 			oRm.writeEscaped(rb.getText("PAGINATOR_OTHER_PAGE", [1]));
 			oRm.write("</span></a>");
 		}
-		oRm.write("<a id='" + paginatorId + "--backLink' href='javascript:void(0);' title='");
+		oRm.write("<a id='" + paginatorId + "--backLink' href='#' title='");
 		oRm.writeEscaped(rb.getText("PREVIOUS_PAGE"));
 		oRm.write("' class='sapUiPagBtn sapUiPagBack " + linkClass + "' " + linkAcc + "><span class='sapUiPagText'>");
 		oRm.writeEscaped(rb.getText("BACK"));
@@ -3258,16 +3254,16 @@ sap.ui.define("sap/ui/commons/PaginatorRenderer",['jquery.sap.global', 'jquery.s
 		/************************************************************************************
 		 * Render the forward link, forward arrow and last page link when necessary
 		 *************************************************************************************/
-		linkClass = (iCurrentPage == oPaginator.getNumberOfPages()) ? "sapUiLnkDsbl" : "sapUiLnk";
-		linkAcc = (iCurrentPage == 1) ? " aria-disabled='true'" : "";
+		linkClass = (iCurrentPage === oPaginator.getNumberOfPages()) ? "sapUiLnkDsbl" : "sapUiLnk";
+		linkAcc = (iCurrentPage === oPaginator.getNumberOfPages()) ? " aria-disabled='true'" : "";
 
-		oRm.write("<a id='" + paginatorId + "--forwardLink' href='javascript:void(0);' title='");
+		oRm.write("<a id='" + paginatorId + "--forwardLink' href='#' title='");
 		oRm.writeEscaped(rb.getText("NEXT_PAGE"));
 		oRm.write("' class='sapUiPagBtn sapUiPagForward " + linkClass + "' " + linkAcc + "><span class='sapUiPagText'>");
 		oRm.writeEscaped(rb.getText("FORWARD"));
 		oRm.write("</span></a>");
 		if (oPaginator.getNumberOfPages() > 5) {
-			oRm.write("<a id='" + paginatorId + "--lastPageLink' href='javascript:void(0);' title='");
+			oRm.write("<a id='" + paginatorId + "--lastPageLink' href='#' title='");
 			oRm.writeEscaped(rb.getText("LAST_PAGE"));
 			oRm.write("' class='sapUiPagBtn sapUiPagLast " + linkClass + "' " + linkAcc + "><span class='sapUiPagText'>");
 			oRm.writeEscaped(rb.getText("PAGINATOR_OTHER_PAGE", [oPaginator.getNumberOfPages()]));
@@ -3294,7 +3290,7 @@ sap.ui.define("sap/ui/commons/PaginatorRenderer",['jquery.sap.global', 'jquery.s
 			} else {
 				aHtml.push(jQuery.sap.encodeHTML(rb.getText("PAGINATOR_OTHER_PAGE", [i])));
 			}
-			aHtml.push("' href='javascript:void(0);'");
+			aHtml.push("' href='#'");
 			if (i == iCurrent) {
 				aHtml.push(" tabindex='0' class='sapUiLnkDsbl'");
 			} else {
@@ -3475,7 +3471,7 @@ sap.ui.define("sap/ui/commons/PanelRenderer",['jquery.sap.global'],
 
 		var sCollapseTooltip = oControl._rb.getText(oControl.getCollapsed() ? "PANEL_EXPAND" : "PANEL_COLLAPSE");
 		if (oControl.getShowCollapseIcon()) { /* TODO: remove this one and rearrange the other in CSS */
-			rm.write("<a id='" + id + "-collArrow' class='sapUiPanelHdrItem sapUiPanelCollArrow' href='javascript:void(0)' tabindex='0' title='" + sCollapseTooltip + "'");
+			rm.write("<a id='" + id + "-collArrow' class='sapUiPanelHdrItem sapUiPanelCollArrow' href='#' tabindex='0' title='" + sCollapseTooltip + "'");
 			if (accessibility) {
 				//rm.writeAttribute("aria-labelledby", id + "-title");
 				rm.writeAttribute("role", "button");
@@ -3543,7 +3539,7 @@ sap.ui.define("sap/ui/commons/PanelRenderer",['jquery.sap.global'],
 
 	  // collapse icon
 	  if (oControl.getShowCollapseIcon()) {
-			rm.write("<a id='" + id + "-collIco' class='sapUiPanelHdrRightItem sapUiPanelCollIco' href='javascript:void(0)' tabindex='0' title='" + sCollapseTooltip + "'");
+			rm.write("<a id='" + id + "-collIco' class='sapUiPanelHdrRightItem sapUiPanelCollIco' href='#' tabindex='0' title='" + sCollapseTooltip + "'");
 			if (accessibility) {
 				//rm.writeAttribute("aria-labelledby", id + "-title");
 				rm.writeAttribute("role", "button");
@@ -3697,23 +3693,7 @@ sap.ui.define("sap/ui/commons/ProgressIndicatorRenderer",['jquery.sap.global'],
 		oRm.writeAttribute('id', oProgressIndicator.getId() + '-end');
 
 		if (widthBar > 100) {
-			switch (sBarColor) {
-				case "POSITIVE":
-					oRm.addClass('sapUiProgIndPosEnd');
-					break;
-				case "NEGATIVE":
-					oRm.addClass('sapUiProgIndNegEnd');
-					break;
-				case "CRITICAL":
-					oRm.addClass('sapUiProgIndCritEnd');
-					break;
-				case "NEUTRAL":
-					oRm.addClass('sapUiProgIndEnd');
-					break;
-				default:
-					oRm.addClass('sapUiProgIndEnd');
-					break;
-			}
+			oRm.addClass(oProgressIndicator._getProgIndTypeClass(sBarColor));
 		} else {
 			oRm.addClass('sapUiProgIndEndHidden');
 		}
@@ -4237,23 +4217,17 @@ sap.ui.define("sap/ui/commons/RatingIndicatorRenderer",['jquery.sap.global'],
 
 		if (sType == "selected") {
 			sIcon = oRating.getIconSelected();
-			sParam = "sap.ui.commons.RatingIndicator:sapUiRatingSymbolSelected";
+			sParam = "sapUiRatingSymbolSelected";
 		} else if (sType == "unselected") {
 			sIcon = oRating.getIconUnselected();
-			sParam = "sap.ui.commons.RatingIndicator:sapUiRatingSymbolUnselected";
+			sParam = "sapUiRatingSymbolUnselected";
 		} else {
 			sIcon = oRating.getIconHovered();
-			sParam = "sap.ui.commons.RatingIndicator:sapUiRatingSymbolHovered";
+			sParam = "sapUiRatingSymbolHovered";
 		}
 
 		if (!sIcon) {
-			var sThemePath =
-				"themes/" +
-				sap.ui.getCore().getConfiguration().getTheme() + "/" +
-				sap.ui.core.theming.Parameters.get(sParam);
-
-			// The documentation states that sap.ui.resource() should be used for theme-URLs
-			sIcon = sap.ui.resource("sap.ui.commons", sThemePath);
+			sIcon = sap.ui.core.theming.Parameters._getThemeImage(sParam);
 		}
 
 		return sIcon;
@@ -5479,10 +5453,11 @@ sap.ui.define("sap/ui/commons/SegmentedButton",['jquery.sap.global', 'sap/ui/cor
 	 * The SegmentedButton provides a group of multiple buttons. Only one button can be active. The behaviour is more ore less like a radio button group.
 	 * @extends sap.ui.core.Control
 	 * @implements sap.ui.commons.ToolbarItem
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.SegmentedButton</code> control.
 	 * @alias sap.ui.commons.SegmentedButton
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -6202,6 +6177,7 @@ sap.ui.define("sap/ui/commons/TabStripRenderer",['jquery.sap.global'],
 		// convenience variable
 		var rm = oRenderManager;
 		var rb = sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons");
+		var sControlId = oControl.getId();
 
 		//outer DIV
 		rm.write("<div role='presentation'");
@@ -6212,12 +6188,20 @@ sap.ui.define("sap/ui/commons/TabStripRenderer",['jquery.sap.global'],
 		rm.writeStyles();
 		rm.writeControlData(oControl);
 		//header area
-		rm.write("><div class=\"sapUiTabBar\" tabIndex=\"0\"");
+		rm.write('><div class="sapUiTabBar"');
 		if (oControl.getTooltip_AsString()) {
 			rm.writeAttributeEscaped('title', oControl.getTooltip_AsString());
 		}
-		// menu and list header
-		rm.write("><div class=\"sapUiTabMenu\"></div><ul class=\"sapUiTabBarCnt\" role=\"tablist\">");
+		// menu
+		rm.write("><div class=\"sapUiTabMenu\"></div>");
+
+		rm.renderControl(oControl._getLeftArrowControl());
+
+		// scroll container
+		rm.write('<div id="' + sControlId + '-scrollCont" class="sapUiTabStripScrollContainer">');
+
+		// list header
+		rm.write('<ul id="' + sControlId + '-tablist" class="sapUiTabBarCnt" role="tablist">');
 
 		var aTabs = oControl.getTabs();
 		// check if selected tab exists and is visible -> otherwise select first active one
@@ -6329,11 +6313,15 @@ sap.ui.define("sap/ui/commons/TabStripRenderer",['jquery.sap.global'],
 		}
 		rm.write("</ul></div>");
 
+		rm.renderControl(oControl._getRightArrowControl());
+
+		rm.write("</div>");
+
 		if (bWrongIndex) {
 			// still wrong index - no tab is selected -> render empty panel area
 			oControl.setProperty( 'selectedIndex', -1, true );
 			iSelectedIndex = -1;
-			rm.write("<div id=\"" + oControl.getId() + "-panel" + "\" role=\"tabpanel\"");
+			rm.write("<div id=\"" + sControlId + "-panel" + "\" role=\"tabpanel\"");
 			rm.addClass("sapUiTabPanel");
 			if (oControl.getHeight()) {
 				rm.addClass("sapUiTabPanelHeight");
@@ -6409,7 +6397,7 @@ sap.ui.define("sap/ui/commons/TextFieldRenderer",['jquery.sap.global', 'sap/ui/c
 	 * TextField Renderer
 	 * @namespace
 	 * @author SAP
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @since 0.9.0
 	 */
 	var TextFieldRenderer = {};
@@ -8544,6 +8532,17 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRenderer",['jquery.sap.global']
 		var rm = oRenderManager;
 		var r = MatrixLayoutRenderer;
 		var bRTL = sap.ui.getCore().getConfiguration().getRTL();
+		var i = 0;
+		var j = 0;
+		var index = 0;
+		var iLength = 0;
+		var oMatrixLayoutRow;
+		var aCells;
+		var aContentControls;
+		var oMatrixHeight;
+		var oRowHeight;
+		var sSpanHeight;
+		var sVAlign;
 
 		//ARIA
 		rm.write("<TABLE role=\"presentation\"");
@@ -8560,7 +8559,7 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRenderer",['jquery.sap.global']
 		if (sMatrixHeight && sMatrixHeight != 'auto') {
 			rm.addStyle("height", sMatrixHeight);
 			// get value and unit of Layout height (to determine row heights if given in %)
-			var oMatrixHeight = r.getValueUnit( sMatrixHeight );
+			oMatrixHeight = r.getValueUnit( sMatrixHeight );
 		}
 
 		if (oMatrixLayout.getLayoutFixed()) {
@@ -8586,9 +8585,9 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRenderer",['jquery.sap.global']
 		var iCols = oMatrixLayout.getColumns();
 		if (iCols < 1) {
 			// determine number of columns
-			for (var i = 0; i < aRows.length; i++) {
-				var oMatrixLayoutRow = aRows[i];
-				var aCells = oMatrixLayoutRow.getCells();
+			for (i = 0; i < aRows.length; i++) {
+				oMatrixLayoutRow = aRows[i];
+				aCells = oMatrixLayoutRow.getCells();
 				if ( iCols < aCells.length) {
 					iCols = aCells.length;
 				}
@@ -8599,13 +8598,13 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRenderer",['jquery.sap.global']
 		if (iCols > 0) {
 			var aWidths = oMatrixLayout.getWidths();
 			rm.write("<colgroup>");
-			for (var j = 0; j < iCols; j++) {
+			for (j = 0; j < iCols; j++) {
 				rm.write("<col");
 				if (aWidths && aWidths[j] && aWidths[j] != "auto") {
 					rm.addStyle('width', aWidths[j]); // use style because col width in HTML supports only be px or %
 					rm.writeStyles();
 				}
-				rm.write("/>");
+				rm.write("></col>");
 			}
 			rm.write("</colgroup>");
 		}
@@ -8619,8 +8618,8 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRenderer",['jquery.sap.global']
 		rm.write('<TBODY style="width: 100%; height: 100%">');
 
 		// for each row
-		for (var i = 0; i < aRows.length; i++) {
-			var oMatrixLayoutRow = aRows[i];
+		for (i = 0; i < aRows.length; i++) {
+			oMatrixLayoutRow = aRows[i];
 
 			// get value and unit of Row height (to determine row heights if given in %)
 			var sRowHeight = oMatrixLayoutRow.getHeight();
@@ -8629,7 +8628,7 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRenderer",['jquery.sap.global']
 				sRowHeight = "";
 			}
 			if (sRowHeight && oMatrixHeight) {
-				var oRowHeight = r.getValueUnit( sRowHeight );
+				oRowHeight = r.getValueUnit( sRowHeight );
 				if ( oRowHeight.Unit == '%' && oMatrixHeight.Unit != '%') {
 					// Matrix has fix height and Row % -> calculate Row height to fix value
 					sRowHeight = ( oMatrixHeight.Value * oRowHeight.Value / 100 ) + oMatrixHeight.Unit;
@@ -8654,7 +8653,7 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRenderer",['jquery.sap.global']
 			rm.write(">");
 
 			// for each cell
-			var aCells = oMatrixLayoutRow.getCells();
+			aCells = oMatrixLayoutRow.getCells();
 
 			var iColumns = iCols;
 			if (iCols < 1) {
@@ -8670,7 +8669,7 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRenderer",['jquery.sap.global']
 				bColspanInRow = true; // not really but ok for this case
 			}
 
-			for (var j = 0; j < iColumns; j++) {
+			for (j = 0; j < iColumns; j++) {
 				if (j >= (iColumns - iColSpans - oMatrixLayoutRow.RowSpanCells)) {
 				// no more cells because of Colspan
 					break;
@@ -8706,7 +8705,7 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRenderer",['jquery.sap.global']
 					if (sHAlign) {
 						rm.addClass(sHAlign);
 					}
-					var sVAlign = r.getVAlign(oMatrixLayoutCell.getVAlign());
+					sVAlign = r.getVAlign(oMatrixLayoutCell.getVAlign());
 					if (sVAlign) {
 						rm.addStyle("vertical-align", sVAlign);
 					}
@@ -8751,18 +8750,15 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRenderer",['jquery.sap.global']
 								}
 								if (sUnit == "") {
 									sUnit = oHeight.Unit;
-								} else {
-									if (sUnit != oHeight.Unit) {
-										//different unit -> no summarize possible
-										sUnit = false;
-										//break;
-									}
+								} else if (sUnit != oHeight.Unit) {
+									//different unit -> no summarize possible
+									sUnit = false;
 								}
 								fValue = fValue + oHeight.Value;
 							}
 						}
 						if (sUnit != false) {
-							var sSpanHeight = fValue + sUnit;
+							sSpanHeight = fValue + sUnit;
 							rm.addStyle("height", sSpanHeight);
 						}
 					}
@@ -8833,8 +8829,8 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRenderer",['jquery.sap.global']
 						var sDivHeight = "0";
 						var sDivUnit = "";
 						var sInnerDivHeight = "0";
-						var aContentControls = oMatrixLayoutCell.getContent();
-						for (var index = 0, length = aContentControls.length; index < length; index++) {
+						aContentControls = oMatrixLayoutCell.getContent();
+						for (index = 0, iLength = aContentControls.length; index < iLength; index++) {
 							if (aContentControls[index].getHeight && aContentControls[index].getHeight() != "") {
 								// check unit
 								var oControlHeight = r.getValueUnit( aContentControls[index].getHeight() );
@@ -8888,8 +8884,8 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRenderer",['jquery.sap.global']
 						rm.writeClasses(false);
 						rm.write(">"); // DIV
 					}
-					var aContentControls = oMatrixLayoutCell.getContent();
-					for (var index = 0, length = aContentControls.length; index < length; index++) {
+					aContentControls = oMatrixLayoutCell.getContent();
+					for (index = 0, iLength = aContentControls.length; index < iLength; index++) {
 						oRenderManager.renderControl(aContentControls[index]);
 					}
 					if (oMatrixLayout.getLayoutFixed() && sRowHeight) {
@@ -8916,7 +8912,7 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRenderer",['jquery.sap.global']
 		if (bDummyRow && sap.ui.Device.browser.internet_explorer && sap.ui.Device.browser.version >= 9) {
 			// render dummy row to help IE9 to calculate column sizes
 			rm.write("<tr style='height:0;'>");
-			for ( var i = 0; i < iCols; i++) {
+			for (i = 0; i < iCols; i++) {
 				rm.write("<td></td>");
 			}
 			rm.write("</tr>");
@@ -8929,12 +8925,13 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRenderer",['jquery.sap.global']
 
 	/**
 	 * Returns the a classname according to the given
-	 * horizontal alignment and RTL mode or null if an invalid value.
+	 * horizontal alignment and RTL mode or null if an invalid value
 	 * was given.
 	 *
-	 * @param {sap.ui.commons.layout.HAlign} oHAlign
-	 * @param {boolean} bRTL
-	 * @type string
+	 * @param {sap.ui.commons.layout.HAlign} oHAlign horizontal alignment of the cell
+	 * @param {boolean} bRTL RTL mode
+	 * @return {string} classname
+	 * @protected
 	 */
 	MatrixLayoutRenderer.getHAlignClass = function(oHAlign, bRTL) {
 		var sClassPrefix = "sapUiMltCellHAlign";
@@ -8966,125 +8963,141 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRenderer",['jquery.sap.global']
 	 * Returns the value for the HTML "valign" attribute according to the given
 	 * vertical alignment, or NULL if the HTML default is fine.
 	 *
-	 * @param {sap.ui.commons.layout.VAlign} oVAlign
-	 * @type string
+	 * @param {sap.ui.commons.layout.VAlign} oVAlign vertical alignment of the cell
+	 * @return {string} value for the HTML "valign" attribute
+	 * @protected
 	 */
 	MatrixLayoutRenderer.getVAlign = function(oVAlign) {
-	  switch (oVAlign) {
+		switch (oVAlign) {
 		case sap.ui.commons.layout.VAlign.Bottom:
-		  return "bottom";
+			return "bottom";
 
 		case sap.ui.commons.layout.VAlign.Middle:
 			return "middle";
 		case sap.ui.commons.layout.VAlign.Top:
-		  return "top";
-	  }
+			return "top";
 
-	  jQuery.sap.assert(false, "MatrixLayoutRenderer.getVAlign: oVAlign must be a known value");
-	  return null;
+		default:
+			jQuery.sap.assert(false, "MatrixLayoutRenderer.getVAlign: oVAlign must be a known value");
+			return null;
+		}
+
 	};
 
 	/**
 	 * Returns the class name according to the given background design or NULL of
 	 * none is needed.
 	 *
-	 * @param {sap.ui.commons.layout.BackgroundDesign} oBackgroundDesign
-	 * @type string
+	 * @param {sap.ui.commons.layout.BackgroundDesign} oBackgroundDesign background design of the cell
+	 * @return {string} classname
+	 * @protected
 	 */
 	MatrixLayoutRenderer.getBackgroundClass = function(oBackgroundDesign) {
-	  switch (oBackgroundDesign) {
+		switch (oBackgroundDesign) {
 		case sap.ui.commons.layout.BackgroundDesign.Border:
-		  return "sapUiMltBgBorder";
+			return "sapUiMltBgBorder";
 
 		case sap.ui.commons.layout.BackgroundDesign.Fill1:
-		  return "sapUiMltBgFill1";
+			return "sapUiMltBgFill1";
 
 		case sap.ui.commons.layout.BackgroundDesign.Fill2:
-		  return "sapUiMltBgFill2";
+			return "sapUiMltBgFill2";
 
 		case sap.ui.commons.layout.BackgroundDesign.Fill3:
-		  return "sapUiMltBgFill3";
+			return "sapUiMltBgFill3";
 
 		case sap.ui.commons.layout.BackgroundDesign.Header:
-		  return "sapUiMltBgHeader";
+			return "sapUiMltBgHeader";
 
 		case sap.ui.commons.layout.BackgroundDesign.Plain:
-		  return "sapUiMltBgPlain";
+			return "sapUiMltBgPlain";
 
 		case sap.ui.commons.layout.BackgroundDesign.Transparent:
-		  return null;
-	  }
+			return null;
 
-	  jQuery.sap.assert(false, "MatrixLayoutRenderer.getBackgroundClass: oBackgroundDesign must be a known value");
-	  return null;
+		default:
+			jQuery.sap.assert(false, "MatrixLayoutRenderer.getBackgroundClass: oBackgroundDesign must be a known value");
+			return null;
+		}
+
 	};
 
 	/**
 	 * Returns the class name according to the given padding or NULL of
 	 * none is needed.
 	 *
-	 * @param {sap.ui.commons.layout.Padding} oPadding
-	 * @type string
+	 * @param {sap.ui.commons.layout.Padding} oPadding padding of the cell
+	 * @return {string} classname
+	 * @protected
 	 */
 	MatrixLayoutRenderer.getPaddingClass = function(oPadding) {
-	  switch (oPadding) {
+		switch (oPadding) {
 		case sap.ui.commons.layout.Padding.None:
-		  return "sapUiMltPadNone";
+			return "sapUiMltPadNone";
 
 		case sap.ui.commons.layout.Padding.Begin:
-		  return "sapUiMltPadLeft"; //TODO OK with RTL?
+			return "sapUiMltPadLeft";
 
 		case sap.ui.commons.layout.Padding.End:
-		  return "sapUiMltPadRight"; //TODO OK with RTL?
+			return "sapUiMltPadRight";
 
 		case sap.ui.commons.layout.Padding.Both:
-		  return "sapUiMltPadBoth";
+			return "sapUiMltPadBoth";
 
 		case sap.ui.commons.layout.Padding.Neither:
-		  return "sapUiMltPadNeither";
-	  }
+			return "sapUiMltPadNeither";
 
-	  jQuery.sap.assert(false, "MatrixLayoutRenderer.getPaddingClass: oPadding must be a known value");
-	  return null;
+		default:
+			jQuery.sap.assert(false, "MatrixLayoutRenderer.getPaddingClass: oPadding must be a known value");
+		return null;
+		}
+
 	};
 
 	/**
 	 * Returns the class name according to the given separation or NULL of
 	 * none is needed.
 	 *
-	 * @param {sap.ui.commons.layout.Separation} oSeparation
-	 * @type string
+	 * @param {sap.ui.commons.layout.Separation} oSeparation separation of the cell
+	 * @return {string} classname
+	 * @protected
 	 */
 	MatrixLayoutRenderer.getSeparationClass = function(oSeparation) {
-	  switch (oSeparation) {
+		switch (oSeparation) {
 		case sap.ui.commons.layout.Separation.None:
-		  return null;
+			return null;
 
 		case sap.ui.commons.layout.Separation.Small:
-		  return "sapUiMltSepS";
+			return "sapUiMltSepS";
 
 		case sap.ui.commons.layout.Separation.SmallWithLine:
-		  return "sapUiMltSepSWL";
+			return "sapUiMltSepSWL";
 
 		case sap.ui.commons.layout.Separation.Medium:
-		  return "sapUiMltSepM";
+			return "sapUiMltSepM";
 
 		case sap.ui.commons.layout.Separation.MediumWithLine:
-		  return "sapUiMltSepMWL";
+			return "sapUiMltSepMWL";
 
 		case sap.ui.commons.layout.Separation.Large:
-		  return "sapUiMltSepL";
+			return "sapUiMltSepL";
 
 		case sap.ui.commons.layout.Separation.LargeWithLine:
-		  return "sapUiMltSepLWL";
-	  }
+			return "sapUiMltSepLWL";
 
-	  jQuery.sap.assert(false, "MatrixLayoutRenderer.getSeparationClass: oSeparation must be a known value");
-	  return null;
+		default:
+			jQuery.sap.assert(false, "MatrixLayoutRenderer.getSeparationClass: oSeparation must be a known value");
+		return null;
+		}
+
 	};
 
 	/**
 	 * get Value and Unit for size
+	 *
+	 * @param {string} sSize CSS size
+	 * @return {object} object containing value and unit
+	 * @protected
 	 */
 	MatrixLayoutRenderer.getValueUnit = function(sSize) {
 
@@ -9230,14 +9243,14 @@ sap.ui.define("sap/ui/commons/library",['jquery.sap.global', 'sap/ui/base/DataTy
 	 * @namespace
 	 * @name sap.ui.commons
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.commons",
-		version: "1.34.9",
+		version: "1.44.14",
 		dependencies : ["sap.ui.core","sap.ui.layout","sap.ui.unified"],
 		types: [
 			"sap.ui.commons.ButtonStyle",
@@ -9267,7 +9280,8 @@ sap.ui.define("sap/ui/commons/library",['jquery.sap.global', 'sap/ui/base/DataTy
 			"sap.ui.commons.layout.HAlign",
 			"sap.ui.commons.layout.Padding",
 			"sap.ui.commons.layout.Separation",
-			"sap.ui.commons.layout.VAlign"
+			"sap.ui.commons.layout.VAlign",
+			"sap.ui.commons.ColorPickerMode"
 		],
 		interfaces: [
 			"sap.ui.commons.FormattedTextViewControl",
@@ -9312,7 +9326,6 @@ sap.ui.define("sap/ui/commons/library",['jquery.sap.global', 'sap/ui/base/DataTy
 			"sap.ui.commons.RangeSlider",
 			"sap.ui.commons.RatingIndicator",
 			"sap.ui.commons.ResponsiveContainer",
-			"sap.ui.commons.ResponsiveContainerRange",
 			"sap.ui.commons.RichTooltip",
 			"sap.ui.commons.RoadMap",
 			"sap.ui.commons.RowRepeater",
@@ -9349,6 +9362,7 @@ sap.ui.define("sap/ui/commons/library",['jquery.sap.global', 'sap/ui/base/DataTy
 			"sap.ui.commons.MenuItem",
 			"sap.ui.commons.MenuItemBase",
 			"sap.ui.commons.MenuTextFieldItem",
+			"sap.ui.commons.ResponsiveContainerRange",
 			"sap.ui.commons.RoadMapStep",
 			"sap.ui.commons.RowRepeaterFilter",
 			"sap.ui.commons.RowRepeaterSorter",
@@ -9401,6 +9415,30 @@ sap.ui.define("sap/ui/commons/library",['jquery.sap.global', 'sap/ui/base/DataTy
 		 * @public
 		 */
 		Default : "Default"
+
+	};
+
+
+	/**
+	 * different styles for a ColorPicker.
+	 *
+	 * @enum {string}
+	 * @public
+	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.commons.ColorPickerMode = {
+
+			/**
+			 * Color picker works with HSV values.
+			 * @public
+			 */
+			HSV : "HSV",
+
+			/**
+			 * Color picker works with HSL values.
+			 * @public
+			 */
+			HSL : "HSL"
 
 	};
 
@@ -9797,6 +9835,7 @@ sap.ui.define("sap/ui/commons/library",['jquery.sap.global', 'sap/ui/base/DataTy
 	 * Level of a title.
 	 * @since 1.9.1
 	 * @deprecated Since version 1.16.0. Moved to sap.ui.core library. Please use this one.
+	 * @public
 	 */
 	sap.ui.commons.TitleLevel = sap.ui.core.TitleLevel;
 
@@ -10032,6 +10071,7 @@ sap.ui.define("sap/ui/commons/library",['jquery.sap.global', 'sap/ui/base/DataTy
 	/**
 	 * Available FormLayouts used for the SimpleForm.
 	 * @deprecated Since version 1.16.0. Moved to sap.ui.layout library. Please use this one.
+	 * @public
 	 */
 	sap.ui.commons.form.SimpleFormLayout = sap.ui.layout.form.SimpleFormLayout;
 
@@ -10387,11 +10427,11 @@ sap.ui.define("sap/ui/commons/library",['jquery.sap.global', 'sap/ui/base/DataTy
 			createLabel: function(sText){
 				return new sap.ui.commons.Label({text: sText});
 			},
-			createButton: function(sId, fPressFunction, oThis){
+			createButton: function(sId, fPressFunction){
 				var oButton = new sap.ui.commons.Button(sId,{
 					lite: true
 					});
-				oButton.attachEvent('press', fPressFunction, oThis); // attach event this way to have the right this-reference in handler
+				oButton.attachEvent('press', fPressFunction, this); // attach event this way to have the right this-reference in handler
 				return oButton;
 			},
 			setButtonContent: function(oButton, sText, sTooltip, sIcon, sIconHovered){
@@ -10401,6 +10441,7 @@ sap.ui.define("sap/ui/commons/library",['jquery.sap.global', 'sap/ui/base/DataTy
 				oButton.setIconHovered(sIconHovered);
 			},
 			addFormClass: function(){ return null; },
+			setToolbar: function(oToolbar){ return oToolbar; },
 			bArrowKeySupport: true, /* enables the keyboard support for arrow keys */
 			bFinal: false /* to allow mobile to overwrite  */
 		};
@@ -10427,25 +10468,22 @@ sap.ui.define("sap/ui/commons/library",['jquery.sap.global', 'sap/ui/base/DataTy
 
 	//implement table helper factory with m controls
 	//possible is set before layout lib is loaded.
-	jQuery.sap.setObject("sap.ui.table.TableHelper", {
-		createLabel: function(mConfig){
-			return new sap.ui.commons.Label(mConfig);
-		},
-		createTextView: function(mConfig){
-			if (mConfig && !mConfig.wrapping) {
-				mConfig.wrapping = false;
-			}
-			return new sap.ui.commons.TextView(mConfig);
-		},
-		createTextField: function(mConfig){
-			return new sap.ui.commons.TextField(mConfig);
-		},
-		createImage: function(mConfig){
-			return new sap.ui.commons.Image(mConfig);
-		},
-		addTableClass: function() { return "sapUiTableCommons"; },
-		bFinal: false /* to allow mobile to overwrite  */
-	});
+	var oTableHelper = jQuery.sap.getObject("sap.ui.table.TableHelper", 4);
+	if (!oTableHelper || !oTableHelper.bFinal) {
+		jQuery.sap.setObject("sap.ui.table.TableHelper", {
+			createLabel: function(mConfig){
+				return new sap.ui.commons.Label(mConfig);
+			},
+			createTextView: function(mConfig){
+				if (mConfig && !mConfig.wrapping) {
+					mConfig.wrapping = false;
+				}
+				return new sap.ui.commons.TextView(mConfig);
+			},
+			addTableClass: function() { return "sapUiTableCommons"; },
+			bFinal: false /* to allow mobile to overwrite  */
+		});
+	}
 
 	return sap.ui.commons;
 
@@ -10484,10 +10522,11 @@ sap.ui.define("sap/ui/commons/Accordion",['jquery.sap.global', './library', 'sap
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.Accordion
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -11336,10 +11375,19 @@ sap.ui.define("sap/ui/commons/Accordion",['jquery.sap.global', './library', 'sap
 	 * @private
 	 */
 	Accordion.prototype.onAfterRendering = function() {
+		var core = sap.ui.getCore(),
+			that = this;
 
-		// Collect the dom references of the items
-		var oDomRef = this.getDomRef();
-		oDomRef.style.height = oDomRef.clientHeight - 7 + "px";
+		function adjustHeight() {
+			var oDomRef = that.getDomRef();
+			oDomRef.style.height = oDomRef.clientHeight - 7 + "px";
+		}
+
+		if (core.isThemeApplied()) {
+			adjustHeight();
+		} else {
+			core.attachThemeChanged(adjustHeight, this);
+		}
 
 		this.$().sortable({
 			handle: "> div.sapUiAcdSectionHdr > div",
@@ -11381,10 +11429,11 @@ sap.ui.define("sap/ui/commons/AccordionSection",['jquery.sap.global', './library
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.AccordionSection
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) design time metamodel
 	 */
@@ -11405,6 +11454,8 @@ sap.ui.define("sap/ui/commons/AccordionSection",['jquery.sap.global', './library
 
 			/**
 			 * It is recommended to adjust the settings for the width when the section is set to 'collapsed'.
+			 * @deprecated since 1.34
+			 * Use Accordion's "openedSectionsId" property
 			 */
 			collapsed : {type : "boolean", group : "Behavior", defaultValue : false},
 
@@ -11722,10 +11773,11 @@ sap.ui.define("sap/ui/commons/Area",['jquery.sap.global', './library', 'sap/ui/c
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.Area
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -11814,10 +11866,11 @@ sap.ui.define("sap/ui/commons/Button",['jquery.sap.global', './library', 'sap/ui
 	 * @implements sap.ui.commons.ToolbarItem
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Button</code> control.
 	 * @alias sap.ui.commons.Button
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -11941,7 +11994,7 @@ sap.ui.define("sap/ui/commons/Button",['jquery.sap.global', './library', 'sap/ui
 	 * @private
 	 */
 	Button.prototype.onclick = function(oEvent) {
-		if (this.getEnabled()) {
+		if (this.getEnabled() && this.getVisible()) {
 			this.firePress({/* no parameters */});
 		}
 
@@ -12117,6 +12170,28 @@ sap.ui.define("sap/ui/commons/Button",['jquery.sap.global', './library', 'sap/ui
 
 	};
 
+	/**
+	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @protected
+	 */
+	Button.prototype.getAccessibilityInfo = function() {
+		var sDesc = this.getText() || this.getTooltip_AsString();
+		if (!sDesc && this.getIcon()) {
+			var oIconInfo = sap.ui.core.IconPool.getIconInfo(this.getIcon());
+			if (oIconInfo) {
+				sDesc = oIconInfo.text || oIconInfo.name;
+			}
+		}
+
+		return {
+			role: "button",
+			type: sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons").getText("ACC_CTR_TYPE_BUTTON"),
+			description: sDesc,
+			focusable: this.getEnabled(),
+			enabled: this.getEnabled()
+		};
+	};
+
 
 	return Button;
 
@@ -12151,10 +12226,11 @@ sap.ui.define("sap/ui/commons/CalloutBase",['jquery.sap.global', './library', 's
 	 * @extends sap.ui.core.TooltipBase
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Popover</code> control.
 	 * @alias sap.ui.commons.CalloutBase
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -12794,11 +12870,12 @@ sap.ui.define("sap/ui/commons/Carousel",['jquery.sap.global', './library', 'sap/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.8.0
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Carousel</code> control.
 	 * @alias sap.ui.commons.Carousel
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -13400,7 +13477,12 @@ sap.ui.define("sap/ui/commons/Carousel",['jquery.sap.global', './library', 'sap/
 			if (this.getWidth()) {
 				$Me.width(this.getWidth());
 			} else {
-				$Me.width(maxWidth * iVisibleItemsCount + (this.getHandleSize() * 2 - 1));
+				//Fix for the constant shrinking problem if no initial width is set
+				// BCP: 0020751294 0000156634 2016
+				var iDiff = $Me.width() - (maxWidth * iVisibleItemsCount + (this.getHandleSize() * 2 - 1));
+				if (iDiff > 5) {
+					$Me.width(maxWidth * iVisibleItemsCount + (this.getHandleSize() * 2 - 1));
+				}
 			}
 		} else {
 			contentBarSize = $Me.height() - this.getHandleSize() * 2 - 1;
@@ -13607,10 +13689,11 @@ sap.ui.define("sap/ui/commons/CheckBox",['jquery.sap.global', './library', 'sap/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.CheckBox</code> control.
 	 * @alias sap.ui.commons.CheckBox
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -13774,6 +13857,22 @@ sap.ui.define("sap/ui/commons/CheckBox",['jquery.sap.global', './library', 'sap/
 		return this;
 	};
 
+	/**
+	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @protected
+	 */
+	CheckBox.prototype.getAccessibilityInfo = function() {
+		var oBundle = sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons");
+		return {
+			role: "checkbox",
+			type: oBundle.getText("ACC_CTR_TYPE_CHECKBOX"),
+			description: (this.getText() || "") + (this.getChecked() ? (" " + oBundle.getText("ACC_CTR_STATE_CHECKED")) : ""),
+			focusable: this.getEnabled(),
+			enabled: this.getEnabled(),
+			editable: this.getEditable()
+		};
+	};
+
 
 	return CheckBox;
 
@@ -13808,10 +13907,11 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.ColorPicker
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -13825,7 +13925,13 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 			 * As input-parameter, it can be a Hexadecimal string (#FFFFFF), a RGB-string rgb(255,255,255), a HSV-string hsv(360,100,100) or a CSS-colorname 'red'.
 			 * As output-parameter it is a RGB-string containing the current color.
 			 */
-			colorString : {type : "string", group : "Misc", defaultValue : null}
+			colorString : {type : "string", group : "Misc", defaultValue : null},
+
+			/**
+			 * Determines the mode the ColorPicker works with - Hue Saturation and Value (HSV) or Hue Saturation and Lightness (HSL)
+			 * @since 1.38.1
+			 */
+			mode : {type : "sap.ui.commons.ColorPickerMode", group : "Appearance", defaultValue : sap.ui.commons.ColorPickerMode.HSV}
 		},
 		events : {
 
@@ -13864,6 +13970,11 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 					 * Parameter containing the VALUE value (0-100)
 					 */
 					v : {type : "int"},
+
+					/**
+					 * Parameter containing the LIGHTNESS value (0-100)
+					 */
+					l : {type : "int"},
 
 					/**
 					 * Parameter containing the Hexadecimal string (#FFFFFF)
@@ -13914,6 +14025,11 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 					v : {type : "int"},
 
 					/**
+					 * Parameter containing the LIGHTNESS value (0-100)
+					 */
+					l : {type : "int"},
+
+					/**
 					 * Parameter containing the Hexadecimal string (#FFFFFF)
 					 */
 					hex : {type : "string"},
@@ -13927,13 +14043,29 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 		}
 	}});
 
+	// variable that will be used for browser specific prefix of the slider background gradient
+	// it is set in the init function and is used inside _updateAlphaBackground() function
+	var sBrowserPrefix = "";
+	// get the background image of the slider
+	var sBgSrc = sap.ui.resource('sap.ui.commons', 'img/ColorPicker/Alphaslider_BG.png');
+	// get resource bundle
+	var oRb = sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons");
 
 	/**
 	 * Initialization hook... creating composite parts
 	 */
-	ColorPicker.prototype.init = function(){
+	ColorPicker.prototype.init = function() {
 
-		var oRb = sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons");
+		// set gradient prefix depending of the browser
+		if (sap.ui.Device.browser.firefox) {
+			sBrowserPrefix = "-moz-linear-gradient";
+		} else if (sap.ui.Device.browser.msie) {
+			sBrowserPrefix = "-ms-linear-gradient";
+		} else if (sap.ui.Device.browser.webkit) {
+			sBrowserPrefix = "-webkit-linear-gradient";
+		} else {
+			sBrowserPrefix = "linear-gradient";
+		}
 
 		//	declare global variable for the ColorObject
 		this.Color = {
@@ -13942,15 +14074,16 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 				b   :  255,
 				h   :  0,
 				s   :  0,
+				l   :  100,
 				v   :  100,
-				a	:  1,
+				a   :  1,
 				a_old: 1,
-				hex :  "#FFFFFF",
-				old :  "#FFFFFF"
+				hex :  "#ffffff",
+				old :  "#ffffff"
 		};
 
 		//	create global variables
-		this.HexString = "FFFFFF";
+		this.HexString = "ffffff";
 		this.rgbString = "";
 		this.$cpBox = null;
 		this.$cpCur = null;
@@ -13977,190 +14110,193 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 		var cpBoxID = this.getId() + '-cpBox';
 		var cpCurID = this.getId() + '-cpCur';
 		this.oHtmlBox = new sap.ui.core.HTML({
-			content : "<DIV id=" + cpBoxID + " class=sapUiColorPicker-ColorPickerBox><DIV id=" + cpCurID + " class=sapUiColorPicker-ColorPickerCircle></DIV></DIV>"
+			content : "<div id=" + cpBoxID + " class='sapUiColorPicker-ColorPickerBox' style='width: 105px; height: 105px;'><div id=" + cpCurID + " class='sapUiColorPicker-ColorPickerCircle' style='width: 5px; height: 5px;'></div></div>"
 		});
 
 		//	HTML-Control containing the Old Color Box
 		var ocBoxID = this.getId() + '-ocBox';
 		this.oHtmlOldCol = new sap.ui.core.HTML({
-			content : "<DIV id=" + ocBoxID + " class=sapUiColorPicker-ColorPickerOldColor></DIV>"
+			content : "<div id=" + ocBoxID + " class=sapUiColorPicker-ColorPickerOldColor></div>"
 		});
 
 		//	HTML-Control containing the New Color Box
 		var ncBoxID = this.getId() + '-ncBox';
 		this.oHtmlNewCol = new sap.ui.core.HTML({
-			content : "<DIV id=" + ncBoxID + " class=sapUiColorPicker-ColorPickerNewColor></DIV>"
+			content : "<div id=" + ncBoxID + " class=sapUiColorPicker-ColorPickerNewColor></div>"
 		});
 
 		//	label and input field for Hexadecimal value
 		var inpID = this.getId() + '-hxF';
 		var hexValue = this.Color.hex.substr(1);
 		this.oHexField = new sap.ui.commons.TextField({id: inpID, value : hexValue});
-		this.oHexField.addStyleClass("sapUiColorPicker-ColorPickerHexField");
-		this.oHexField.setTooltip(oRb.getText("COLORPICKER_HEX"));
 		this.oHexLabel = new sap.ui.commons.Label();
-		this.oHexLabel.addStyleClass("sapUiColorPicker-ColorPickerLabels");
-		this.oHexLabel.setText("#:");
-		this.oHexLabel.setTooltip(oRb.getText("COLORPICKER_HEX"));
-		this.oHexLabel.setLabelFor(this.oHexField);
+		this._createValueLabelBox(this.oHexField, this.oHexLabel, "COLORPICKER_HEX", "#:", "sapUiColorPicker-ColorPickerHexField");
 
 		//	label and input field for Red Value
 		inpID = this.getId() + '-rF';
-		this.oRedField = new sap.ui.commons.TextField({id: inpID, value: this.Color.r, width:"3em"});
-		this.oRedField.addStyleClass("sapUiColorPicker-ColorPickerInputFieldsLeft");
-		this.oRedField.setTooltip(oRb.getText("COLORPICKER_RED"));
+		this.oRedField = new sap.ui.commons.TextField({id: inpID, value : this.Color.r, width:"3em"});
 		this.oRedLabel = new sap.ui.commons.Label();
-		this.oRedLabel.addStyleClass("sapUiColorPicker-ColorPickerLabels");
-		this.oRedLabel.setText("R:");
-		this.oRedLabel.setTooltip(oRb.getText("COLORPICKER_RED"));
-		this.oRedLabel.setLabelFor(this.oRedField);
+		this._createValueLabelBox(this.oRedField, this.oRedLabel, "COLORPICKER_RED", "R:", "sapUiColorPicker-ColorPickerInputFieldsLeft");
 
 		//	label and input field for Green Value
 		inpID = this.getId() + '-gF';
 		this.oGreenField = new sap.ui.commons.TextField({id: inpID, value : this.Color.g, width:"3em"});
-		this.oGreenField.addStyleClass("sapUiColorPicker-ColorPickerInputFieldsLeft");
-		this.oGreenField.setTooltip(oRb.getText("COLORPICKER_GREEN"));
 		this.oGreenLabel = new sap.ui.commons.Label();
-		this.oGreenLabel.addStyleClass("sapUiColorPicker-ColorPickerLabels");
-		this.oGreenLabel.setText("G:");
-		this.oGreenLabel.setTooltip(oRb.getText("COLORPICKER_GREEN"));
-		this.oGreenLabel.setLabelFor(this.oGreenField);
+		this._createValueLabelBox(this.oGreenField, this.oGreenLabel, "COLORPICKER_GREEN", "G:", "sapUiColorPicker-ColorPickerInputFieldsLeft");
 
 		//	label and input field for Blue Value
 		inpID = this.getId() + '-bF';
 		this.oBlueField = new sap.ui.commons.TextField({id: inpID, value : this.Color.b, width:"3em"});
-		this.oBlueField.addStyleClass("sapUiColorPicker-ColorPickerInputFieldsLeft");
-		this.oBlueField.setTooltip(oRb.getText("COLORPICKER_BLUE"));
 		this.oBlueLabel = new sap.ui.commons.Label();
-		this.oBlueLabel.addStyleClass("sapUiColorPicker-ColorPickerLabels");
-		this.oBlueLabel.setText("B:");
-		this.oBlueLabel.setTooltip(oRb.getText("COLORPICKER_BLUE"));
-		this.oBlueLabel.setLabelFor(this.oBlueField);
+		this._createValueLabelBox(this.oBlueField, this.oBlueLabel, "COLORPICKER_BLUE", "B:", "sapUiColorPicker-ColorPickerInputFieldsLeft");
 
 		//	label and input field for Hue Value
 		inpID = this.getId() + '-hF';
 		this.oHueField = new sap.ui.commons.TextField({id: inpID, value : this.Color.h, width:"3em"});
-		this.oHueField.addStyleClass("sapUiColorPicker-ColorPickerInputFieldsRight");
-		this.oHueField.setTooltip(oRb.getText("COLORPICKER_HUE"));
 		this.oHueLabel = new sap.ui.commons.Label();
-		this.oHueLabel.addStyleClass("sapUiColorPicker-ColorPickerLabels");
-		this.oHueLabel.setText("H:");
-		this.oHueLabel.setTooltip(oRb.getText("COLORPICKER_HUE"));
-		this.oHueLabel.setLabelFor(this.oHueField);
+		this._createValueLabelBox(this.oHueField, this.oHueLabel, "COLORPICKER_HUE", "H:", "sapUiColorPicker-ColorPickerInputFieldsRight");
 
 		//	label and input field for Saturation Value
 		inpID = this.getId() + '-sF';
 		this.oSatField = new sap.ui.commons.TextField({id: inpID, value : this.Color.s, width:"3em"});
-		this.oSatField.addStyleClass("sapUiColorPicker-ColorPickerInputFieldsRight");
-		this.oSatField.setTooltip(oRb.getText("COLORPICKER_SAT"));
 		this.oSatLabel = new sap.ui.commons.Label();
-		this.oSatLabel.addStyleClass("sapUiColorPicker-ColorPickerLabels");
-		this.oSatLabel.setText("S:");
-		this.oSatLabel.setTooltip(oRb.getText("COLORPICKER_SAT"));
-		this.oSatLabel.setLabelFor(this.oSatField);
+		this.oSatUnits = new sap.ui.commons.Label({text:"%"});
+		this._createValueLabelBox(this.oSatField, this.oSatLabel, "COLORPICKER_SAT", "S:", "sapUiColorPicker-ColorPickerInputFieldsRight",this.oSatUnits);
 
-		//	label and input field for Value
+		// label and input field for Lightness
+		inpID = this.getId() + '-lF';
+		this.oLitField = new sap.ui.commons.TextField({id: inpID, value : this.Color.l, width:"3em"});
+		this.oLitLabel = new sap.ui.commons.Label();
+		this.oLitUnits = new sap.ui.commons.Label({text:"%"});
+		this._createValueLabelBox(this.oLitField, this.oLitLabel, "COLORPICKER_LIGHTNESS", "L:", "sapUiColorPicker-ColorPickerInputFieldsRight",this.oLitUnits);
+
+		// label and input field for Alpha
+		inpID = this.getId() + '-aF';
+		this.oAlphaField = new sap.ui.commons.TextField({id: inpID, value : this.Color.a, width:"3em"});
+		this.oAlphaLabel = new sap.ui.commons.Label();
+		this._createValueLabelBox(this.oAlphaField, this.oAlphaLabel, "COLORPICKER_ALPHA", "A:", "sapUiColorPicker-ColorPickerInputFieldsRight");
+
+		// label and input field for Value
 		inpID = this.getId() + '-vF';
 		this.oValField = new sap.ui.commons.TextField({id: inpID, value : this.Color.v, width:"3em"});
-		this.oValField.addStyleClass("sapUiColorPicker-ColorPickerInputFieldsRight");
-		this.oValField.setTooltip(oRb.getText("COLORPICKER_VALUE"));
 		this.oValLabel = new sap.ui.commons.Label();
-		this.oValLabel.addStyleClass("sapUiColorPicker-ColorPickerLabels");
-		this.oValLabel.setText("V:");
-		this.oValLabel.setTooltip(oRb.getText("COLORPICKER_VALUE"));
-		this.oValLabel.setLabelFor(this.oValField);
+		this._createValueLabelBox(this.oValField, this.oValLabel, "COLORPICKER_VALUE", "V:", "sapUiColorPicker-ColorPickerInputFieldsRight");
 
-		//	slider
+		// slider
 		inpID = this.getId() + '-hSLD';
-		this.oSlider = new sap.ui.commons.Slider({id: inpID});
-		this.oSlider.setSmallStepWidth(1);
-		this.oSlider.setMax(360);
+		this.oSlider = new sap.ui.commons.Slider({
+			id: inpID,
+			max: 360,
+			smallStepWidth: 1,
+			tooltip: oRb.getText("COLORPICKER_HUE")
+		});
+
 		this.oSlider.setValue(parseInt(this.oHueField.getValue(), 10),10);
-		this.oSlider.setTooltip(oRb.getText("COLORPICKER_HUE"));
 		this.oSlider.addStyleClass("sapUiColorPicker-ColorPickerSlider");
 
 		// alpha slider
 		inpID = this.getId() + '-aSLD';
-		this.oAlphaSlider = new sap.ui.commons.Slider({id: inpID});
-		this.oAlphaSlider.setMax(1);
-		this.oAlphaSlider.setValue(1);
-		this.oAlphaSlider.setSmallStepWidth(0.01);
-		this.oAlphaSlider.setTooltip(oRb.getText("COLORPICKER_ALPHA"));
+		this.oAlphaSlider = new sap.ui.commons.Slider({
+			id: inpID,
+			max: 1,
+			value: 1,
+			smallStepWidth: 0.01,
+			tooltip: oRb.getText("COLORPICKER_ALPHA")
+		});
 		this.oAlphaSlider.addStyleClass("sapUiColorPicker-ColorPickerAlphaSlider");
 
-		//	1.Horizontal Layout
+		// RGB/HSL output
+		this.oRGBorHSLRBGroup = new sap.ui.commons.RadioButtonGroup({
+			columns: 2,
+			items: [
+				new sap.ui.core.Item({
+					text: "RGB"
+				}),
+				new sap.ui.core.Item({
+					text: "HSL"
+				})
+			],
+			selectedIndex: (this.Color.formatHSL ? 1 : 0 )
+		});
+		this.oRGBorHSLRBGroup.addStyleClass("sapUiColorPickerHSL-RB");
+
+		// 1.Horizontal Layout containing Red field
 		this.oHLayout1 = new sap.ui.layout.HorizontalLayout({
 			content: [this.oRedLabel, this.oRedField]
 		});
 
-		//	2.Horizontal Layout
+		// 2.Horizontal Layout containing Green field
 		this.oHLayout2 = new sap.ui.layout.HorizontalLayout({
 			content: [this.oGreenLabel, this.oGreenField]
 		});
 
-		//	3.Horizontal Layout
+		// 3.Horizontal Layout containing Blue field
 		this.oHLayout3 = new sap.ui.layout.HorizontalLayout({
 			content: [this.oBlueLabel, this.oBlueField]
 		});
 
-		//	4.Horizontal Layout
+		// 4.Horizontal Layout containing Hex field
 		this.oHLayout4 = new sap.ui.layout.HorizontalLayout({
 			content: [this.oHexLabel, this.oHexField]
 		});
 
-		//	5.Horizontal Layout
+		// 5.Horizontal Layout containing Hue field
 		this.oHLayout5 = new sap.ui.layout.HorizontalLayout({
 			content: [this.oHueLabel, this.oHueField]
 		});
 
-		//	6.Horizontal Layout
+		// 6.Horizontal Layout containing Saturation field
 		this.oHLayout6 = new sap.ui.layout.HorizontalLayout({
 			content: [this.oSatLabel, this.oSatField]
 		});
 
-		//	7.Horizontal Layout
+		// 7.Horizontal Layout containing Light field
+		this.oHLayout7a = new sap.ui.layout.HorizontalLayout({
+			content: [this.oLitLabel, this.oLitField, this.oLitUnits]
+		});
+
+		// 7a Horizontal Layout containing Alpha field
+		this.oHLayout7b = new sap.ui.layout.HorizontalLayout({
+			content: [this.oAlphaLabel, this.oAlphaField]
+		});
+
+		// 7.Horizontal Layout containing Value field
 		this.oHLayout7 = new sap.ui.layout.HorizontalLayout({
 			content: [this.oValLabel, this.oValField]
 		});
 
-		//	8.Horizontal Layout
-		this.oHLayout8 = new sap.ui.layout.HorizontalLayout({
-			content: [this.oHtmlOldCol, this.oHtmlNewCol]
-		});
+		// 8.Horizontal Layout
+		this.oHLayout8 = new sap.ui.layout.HorizontalLayout();
 
-		//	Vertical Layout1 containing first four horizontal layouts
+		// Vertical Layout1 containing first four horizontal layouts
 		this.oVLayout1 = new sap.ui.layout.VerticalLayout({
 			content:[ this.oHLayout1, this.oHLayout2, this.oHLayout3, this.oHLayout4]
 		});
 
-		//	Vertical Layout2 containing 2.nd four horizontal layouts
-		this.oVLayout2 = new sap.ui.layout.VerticalLayout({
-			content:[ this.oHLayout5, this.oHLayout6, this.oHLayout7, this.oHLayout8]
-		});
+		this.oVLayout2 = new sap.ui.layout.VerticalLayout();
+
 		this.oVLayout2.addStyleClass("sapUiColorPicker-ColorPickerLastColumn");
 
-		//	add first Row to the Matrix Layout
+		// add first Row to the Matrix Layout
 		this.oMatrix.createRow(this.oHtmlBox, this.oVLayout1, this.oVLayout2);
+
+		this.oHLayout9 = new sap.ui.layout.HorizontalLayout();
 
 		//	create second Row containing slider
 		this.oRow2 = new sap.ui.commons.layout.MatrixLayoutRow();
-		this.oCell = new sap.ui.commons.layout.MatrixLayoutCell({ colSpan : 3 });
-		this.oCell.addContent(this.oSlider);
-		this.oRow2.addCell(this.oCell);
+		this.oCell2 = new sap.ui.commons.layout.MatrixLayoutCell({ colSpan : 3 });
 
-		//	add second Row to the Matrix Layout
+		//	add second Row to the Matrix Layout for the slider or the radio buttons depending of the mode
 		this.oMatrix.addRow(this.oRow2);
 
-		// add another row for the alpha slider
+		// add another row for the alpha slider or slider depending of the mode
 		this.oRow3 = new sap.ui.commons.layout.MatrixLayoutRow();
-		this.oCell = new sap.ui.commons.layout.MatrixLayoutCell({ colSpan : 3 });
-		this.oCell.addContent(this.oAlphaSlider);
-		this.oRow3.addCell(this.oCell);
+		this.oCell3 = new sap.ui.commons.layout.MatrixLayoutCell({ colSpan : 3 });
 
 		//	add third Row to the Matrix Layout
 		this.oMatrix.addRow(this.oRow3);
 
-		//	attach Eventhandler
+		// attach Eventhandler
 		this.oHexField.attachChange(jQuery.proxy(this._handleHexValueChange,this));
 		this.oRedField.attachChange(jQuery.proxy(this._handleRedValueChange,this));
 		this.oGreenField.attachChange(jQuery.proxy(this._handleGreenValueChange,this));
@@ -14168,14 +14304,18 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 		this.oHueField.attachChange(jQuery.proxy(this._handleHueValueChange,this));
 		this.oSatField.attachChange(jQuery.proxy(this._handleSatValueChange,this));
 		this.oValField.attachChange(jQuery.proxy(this._handleValValueChange,this));
+
 		this.oSlider.attachLiveChange(jQuery.proxy(this._handleSliderLiveChange,this));
 		this.oSlider.attachChange(jQuery.proxy(this._handleSliderChange,this));
 		this.oAlphaSlider.attachLiveChange(jQuery.proxy(this._handleAlphaSliderLiveChange,this));
 		this.oAlphaSlider.attachChange(jQuery.proxy(this._handleAlphaSliderChange,this));
 
+		this.oLitField.attachChange(jQuery.proxy(this._handleLitValueChange,this));
+		this.oAlphaField.attachChange(jQuery.proxy(this._handleAlphaValueChange,this));
+		this.oRGBorHSLRBGroup.attachSelect(jQuery.proxy(this._handleRGBorHSLValueChange,this));
+
 		this.data("sap-ui-fastnavgroup", "true", true); // Define group for F6 handling
 	};
-
 
 
 	/**
@@ -14193,18 +14333,129 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 		.unbind("mouseup", this.handleMouseUp);
 
 		//	destroy Objects
+		this.oRGBorHSLRBGroup.destroy();
+		this.oRGBorHSLRBGroup = null;
+
+		this.oSatUnits.destroy();
+		this.oSatUnits = null;
+
+		this.oHLayout7a.destroy();
+		this.oHLayout7a = null;
+
+		this.oHLayout7b.destroy();
+		this.oHLayout7b = null;
+
+		this.oHLayout9.destroy();
+		this.oHLayout9 = null;
+
 		this.oMatrix.destroy();
+		this.oMatrix = null;
+
 	};
 
 
+	/**
+	 * Event before rendering the page
+	 */
+	ColorPicker.prototype.onBeforeRendering = function() {
+		if (this.getMode() === "HSL") {
+			if (!this.oArrow) {
+				this.oArrow = new sap.ui.core.Icon({
+					color: "#333",
+					backgroundColor: "transparent",
+					src: "sap-icon://arrow-right",
+					tooltip: oRb.getText("COLORPICKER_NEW_OLD_COLOR")
+				}).addStyleClass("sapUiColorPicker-Arrow");
+			}
+
+			if (!this.oRGBorHSLLabel) {
+				this.oRGBorHSLLabel = new sap.ui.commons.Label({ text: "Output:", labelFor: this.oRGBorHSLRBGroup});
+			}
+
+			this.oHLayout8.addContent(this.oHtmlOldCol);
+			this.oHLayout8.addContent(this.oArrow);
+			this.oHLayout8.addContent(this.oHtmlNewCol);
+			this.oHLayout8.addStyleClass("sapUiColorPicker-swatches");
+
+			this.oHLayout6.addContent(this.oSatUnits);
+			// Vertical Layout2 containing 2.nd four horizontal layouts
+			this.oVLayout2.addContent(this.oHLayout5);
+			this.oVLayout2.addContent(this.oHLayout6);
+			this.oVLayout2.addContent(this.oHLayout7a);
+			this.oVLayout2.addContent(this.oHLayout7b);
+
+			// add Row for swatches and radio Buttons
+			this.oHLayout9.addContent(this.oHLayout8);
+			this.oHLayout9.addContent(this.oRGBorHSLLabel);
+			this.oHLayout9.addContent(this.oRGBorHSLRBGroup);
+			this.oCell2.addContent(this.oHLayout9);
+			this.oCell2.addStyleClass("sapUiColorPicker-RBRow");
+			this.oRow2.addCell(this.oCell2);
+
+			// add slider
+			this.oCell3.addContent(this.oSlider);
+			this.oRow3.addCell(this.oCell3);
+
+			// add alpha slider
+			this.oRow4 = new sap.ui.commons.layout.MatrixLayoutRow();
+			this.oCell4 = new sap.ui.commons.layout.MatrixLayoutCell({ colSpan : 3 });
+			this.oCell4.addContent(this.oAlphaSlider);
+			this.oRow4.addCell(this.oCell4);
+			this.oMatrix.addRow(this.oRow4);
+
+			this.addStyleClass("sapUiColorPickerHSL");
+		} else {
+			this.oHLayout8.addContent(this.oHtmlOldCol);
+			this.oHLayout8.addContent(this.oHtmlNewCol);
+
+			// Vertical Layout2 containing 2.nd four horizontal layouts
+			this.oVLayout2.addContent(this.oHLayout5);
+			this.oVLayout2.addContent(this.oHLayout6);
+			this.oVLayout2.addContent(this.oHLayout7);
+			this.oVLayout2.addContent(this.oHLayout8);
+
+			// add slider
+			this.oCell2.addContent(this.oSlider);
+			this.oRow2.addCell(this.oCell2);
+
+			// add alpha slider
+			this.oCell3.addContent(this.oAlphaSlider);
+			this.oRow3.addCell(this.oCell3);
+		}
+
+		//	unbind Mousehandler for ColorPickerBox
+		this.$("cpBox").unbind("mousedown", this.handleMouseDown);
+	};
+
+
+	/**
+	 * Style input and label for the colors fields
+	 */
+	ColorPicker.prototype._createValueLabelBox = function(oField, oLabel, sTooltip, sLabelText, sStyle, oUnits) {
+		var oRb = sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons");
+
+		oField.addStyleClass(sStyle);
+		oField.setTooltip(oRb.getText(sTooltip));
+		oLabel.addStyleClass("sapUiColorPicker-ColorPickerLabels");
+		oLabel.setText(sLabelText);
+		oLabel.setTooltip(oRb.getText(sTooltip));
+		oLabel.setLabelFor(oField);
+
+		if (oUnits) {
+			oUnits.setLabelFor(oField);
+			oUnits.addStyleClass("sapUiColorPicker-ColorPickerLabels");
+		}
+	};
 
 	/*
 	 * Evaluate parameter values
 	 */
 	ColorPicker.prototype.setColorString = function(iColorString) {
+		var _sRGBString;
 
 		//	parse string; get the color object
 		this._parseColorString(iColorString);
+		_sRGBString = this._getRGBString();
 
 		//	update UI
 		this.oHexField.setValue(this.Color.hex.substr(1));
@@ -14213,17 +14464,38 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 		this.oBlueField.setValue(this.Color.b);
 		this.oHueField.setValue(this.Color.h);
 		this.oSatField.setValue(this.Color.s);
-		this.oValField.setValue(this.Color.v);
-		this.oSlider.setValue(this.Color.h);
-		this.oAlphaSlider.setValue(this.Color.a);
 
-		//	fire events & update property
-		this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.setProperty('colorString', this._getRGBString(), true); // No re-rendering!
+		if (this.getMode() === "HSL") {
+			this.oLitField.setValue(this.Color.l);
+			this.oAlphaField.setValue(this.Color.a);
+			this.oSlider.setValue(this.Color.h);
+			this.oAlphaSlider.setValue(this.Color.a);
+			this.oRGBorHSLRBGroup.setSelectedIndex(this.Color.formatHSL ? 1 : 0 );
+
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+		} else {
+			this.oValField.setValue(this.Color.v);
+			this.oSlider.setValue(this.Color.h);
+			this.oAlphaSlider.setValue(this.Color.a);
+
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+		}
 	};
 
+	/*
+	 * Evaluate parameter values
+	 */
+	ColorPicker.prototype.isColor = function(iColorString) {
 
+		//	parse string; only check
+		return this._parseColorString(iColorString, true);
+	};
 
 	/**
 	 * Event handler of the mouse down event
@@ -14231,7 +14503,7 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 	ColorPicker.prototype.handleMouseDown = function(e) {
 
 		//	exit if the HEXfield is errorneous
-		if (this.oHexField.getValueState() == sap.ui.core.ValueState.Error) {
+		if (this.oHexField.getValueState() === sap.ui.core.ValueState.Error) {
 			return;
 		}
 
@@ -14250,9 +14522,10 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 	ColorPicker.prototype.handleMouseUp = function(e) {
 
 		//	exit if the HEXfield is errorneous
-		if (this.oHexField.getValueState() == sap.ui.core.ValueState.Error) {
+		if (this.oHexField.getValueState() === sap.ui.core.ValueState.Error) {
 			return;
 		}
+		var _sRGBString = this._getRGBString();
 
 		//	call mouse position handler
 		this.handleMousePos(e);
@@ -14260,8 +14533,14 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 		.unbind("mousemove", this.handleMousePos)
 		.unbind("mouseup", this.handleMouseUp);
 
-		this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.setProperty('colorString', this._getRGBString(), true); // No re-rendering!
+		if (this.getMode() === "HSL") {
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+		} else {
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+		}
+
 	};
 
 
@@ -14270,7 +14549,7 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 	 * Event handler for the mouse position
 	 */
 	ColorPicker.prototype.handleMousePos = function(e) {
-
+		var _sRGBString;
 		//	get offset of the colorpicker box
 		var cpBoxOffset = this.$cpBox.offset();
 
@@ -14293,35 +14572,57 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 
 		//	set the new values
 		this.oSatField.setValue(satValue);
-		this.oValField.setValue(valValue);
 
-		//	process changes
-		this._processHSVchanges();
+		if (this.getMode() === "HSL") {
+			this.oLitField.setValue(valValue);
+			//	process changes
+			this._processHSLchanges();
+			_sRGBString = this._getRGBString();
 
-		//	fire events & update property
-		this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.setProperty('colorString', this._getRGBString(), true); // No re-rendering!
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+		} else {
+			this.oValField.setValue(valValue);
+			//	process changes
+			this._processHSVchanges();
+			_sRGBString = this._getRGBString();
+
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+		}
 	};
-
 
 
 	/**
 	 * Event handler for Slider LIVE changes
 	 */
 	ColorPicker.prototype._handleSliderLiveChange = function() {
-
+		var _sRGBString;
 		//	get the new value
 		var sliderValue = parseInt(this.oSlider.getValue(),10);
 
 		//	set the new hue value in the hue inut field
 		this.oHueField.setValue(sliderValue);
 
-		//	process changes
-		this._processHSVchanges();
+		if (this.getMode() === "HSL") {
+			//	process changes
+			this._processHSLchanges();
+			_sRGBString = this._getRGBString();
 
-		//	fire events & update property
-		this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.setProperty('colorString', this._getRGBString(), true); // No re-rendering!
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+		} else {
+			//	process changes
+			this._processHSVchanges();
+			_sRGBString = this._getRGBString();
+
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+		}
 	};
 
 
@@ -14330,19 +14631,30 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 	 * Event handler for Slider changes
 	 */
 	ColorPicker.prototype._handleSliderChange = function() {
-
+		var _sRGBString;
 		//	get the new value
 		var sliderValue = parseInt(this.oSlider.getValue(),10);
 
 		//	set the new hue value in the hue inut field
 		this.oHueField.setValue(sliderValue);
 
-		//	process changes
-		this._processHSVchanges();
+		if (this.getMode() === "HSL") {
+			//	process changes
+			this._processHSLchanges();
+			_sRGBString = this._getRGBString();
 
-		//	fire Change event
-		this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.setProperty('colorString', this._getRGBString(), true); // No re-rendering!
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+		} else {
+			//	process changes
+			this._processHSVchanges();
+			_sRGBString = this._getRGBString();
+
+			//	fire Change event
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+		}
 	};
 
 
@@ -14351,43 +14663,119 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 	* Event handler for Alpha-Slider LIVE changes
 	*/
 	ColorPicker.prototype._handleAlphaSliderLiveChange = function() {
-
+		var _sRGBString;
 		// get the new value
 		this.Color.a = this.oAlphaSlider.getValue();
 
-		//	process changes
-		this._processHSVchanges();
+		if (this.getMode() === "HSL") {
+			//	set the new hue value in the hue input field
+			this.oAlphaField.setValue(this.Color.a);
 
-		//	fire events & update property
-		this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.setProperty('colorString', this._getRGBString(), true); // No re-rendering!
+			//	process changes
+			this._processHSLchanges();
+			_sRGBString = this._getRGBString();
+
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+		} else {
+			//	process changes
+			this._processHSVchanges();
+			_sRGBString = this._getRGBString();
+
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+		}
 	};
-
 
 
 	/**
 	 * Event handler for Alpha-Slider changes
 	 */
 	ColorPicker.prototype._handleAlphaSliderChange = function() {
-
+		var _sRGBString;
 		//	get the new value
 		this.Color.a = this.oAlphaSlider.getValue();
 
-		//	process changes
-		this._processHSVchanges();
+		if (this.getMode() === "HSL") {
+			//	set the new hue value in the hue input field
+			this.oAlphaField.setValue(this.Color.a);
 
-		//	fire Change event
-		this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.setProperty('colorString', this._getRGBString(), true); // No re-rendering!
+			//	process changes
+			this._processHSLchanges();
+			_sRGBString = this._getRGBString();
+
+			//	fire Change event
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+		} else {
+			//	process changes
+			this._processHSVchanges();
+			_sRGBString = this._getRGBString();
+
+			//	fire Change event
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+		}
 	};
 
+
+	/**
+	 * Event handler for changes of alpha input field
+	 */
+	ColorPicker.prototype._handleAlphaValueChange = function() {
+		var _sRGBString;
+		//	get the new value
+		var alphaValue = parseFloat(this.oAlphaField.getValue(),10);
+
+		//	check for correct value (0-1.0)
+		if (alphaValue < 0 || isNaN(alphaValue)) {
+			alphaValue = 0;
+		}
+		if (alphaValue > 1.0) {
+			alphaValue = 1;
+		}
+
+		//	set the new value
+		this.Color.a = alphaValue;
+
+		//	set the new value (maybe the value has been changed in the above lines)
+		this.oAlphaField.setValue(alphaValue);
+		this.oAlphaSlider.setValue(alphaValue);
+
+		//	process Changes
+		this._processHSLchanges();
+		_sRGBString = this._getRGBString();
+
+		//	update property & fire events
+		this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+		this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+		this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+	};
+
+
+	/**
+	 * Event handler for changes of RGB or HSL radio button field
+	 */
+	ColorPicker.prototype._handleRGBorHSLValueChange = function() {
+		var _sRGBString = this._getRGBString();
+		// store new value
+		this.Color.formatHSL = (this.oRGBorHSLRBGroup.getSelectedIndex() === 1);
+
+		this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+
+		// fire events & update property
+		this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+		this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+	};
 
 
 	/**
 	 * Event handler for changes of hue input field
 	 */
-	ColorPicker.prototype._handleHueValueChange = function(){
-
+	ColorPicker.prototype._handleHueValueChange = function() {
+		var _sRGBString;
 		//	get the new value
 		var hueValue = parseInt(this.oHueField.getValue(),10);
 
@@ -14405,22 +14793,33 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 		//	update slider value
 		this.oSlider.setValue(hueValue);
 
-		//	process Changes
-		this._processHSVchanges();
+		if (this.getMode() === "HSL") {
+			//	process Changes
+			this._processHSLchanges();
+			_sRGBString = this._getRGBString();
 
-		//	fire events & update property
-		this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.setProperty('colorString', this._getRGBString(), true); // No re-rendering!
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+		} else {
+			//	process Changes
+			this._processHSVchanges();
+			_sRGBString = this._getRGBString();
+
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+		}
 	};
-
 
 
 	/**
 	 * Event handler for changes of saturation input field
 	 */
-	ColorPicker.prototype._handleSatValueChange =  function(){
-
+	ColorPicker.prototype._handleSatValueChange = function() {
+		var _sRGBString;
 		//	get the new value
 		var satValue = parseInt(this.oSatField.getValue(),10);
 
@@ -14435,22 +14834,34 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 		//	set the new value (maybe the value has been changed in the above lines)
 		this.oSatField.setValue(satValue);
 
-		//	process Changes
-		this._processHSVchanges();
+		if (this.getMode() === "HSL") {
+			//	process Changes
+			this._processHSLchanges();
+			_sRGBString = this._getRGBString();
 
-		//	fire events & update property
-		this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.setProperty('colorString', this._getRGBString(), true); // No re-rendering!
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+
+		} else {
+			//	process Changes
+			this._processHSVchanges();
+			_sRGBString = this._getRGBString();
+
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+		}
 	};
-
 
 
 	/**
 	 * Event handler for changes of value input field
 	 */
-	ColorPicker.prototype._handleValValueChange = function(){
-
+	ColorPicker.prototype._handleValValueChange = function() {
+		var _sRGBString;
 		//	get the new value
 		var valValue = parseInt(this.oValField.getValue(),10);
 
@@ -14467,20 +14878,50 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 
 		//	process Changes
 		this._processHSVchanges();
+		_sRGBString = this._getRGBString();
 
 		//	fire events & update property
-		this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.setProperty('colorString', this._getRGBString(), true); // No re-rendering!
+		this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+		this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+		this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
 	};
 
+
+	/**
+	 * Event handler for changes of lightness input field
+	 */
+	ColorPicker.prototype._handleLitValueChange = function() {
+		var _sRGBString;
+		//	get the new value
+		var litValue = parseInt(this.oLitField.getValue(), 10);
+
+		//	check for correct value (0-100)
+		if (litValue < 0 || isNaN(litValue)) {
+			litValue = 0;
+		}
+		if (litValue > 100) {
+			litValue = 100;
+		}
+
+		//	set the new value (maybe the value has been changed in the above lines)
+		this.oLitField.setValue(litValue);
+
+		//	process Changes
+		this._processHSLchanges();
+		_sRGBString = this._getRGBString();
+
+		//	fire events & update property
+		this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+		this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+		this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+	};
 
 
 	/**
 	 * Event handler for changes of RED input field
 	 */
-	ColorPicker.prototype._handleRedValueChange = function(){
-
+	ColorPicker.prototype._handleRedValueChange = function() {
+		var _sRGBString;
 		//	get the new value
 		var redValue = parseInt(this.oRedField.getValue(),10);
 
@@ -14497,19 +14938,27 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 
 		//	process changes
 		this._processRGBchanges();
+		_sRGBString = this._getRGBString();
 
-		//	fire events & update property
-		this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.setProperty('colorString', this._getRGBString(), true); // No re-rendering!
+		if (this.getMode() === "HSL") {
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+		} else {
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+		}
 	};
-
 
 
 	/**
 	 * Event handler for changes of GREEN input field
 	 */
-	ColorPicker.prototype._handleGreenValueChange = function(){
+	ColorPicker.prototype._handleGreenValueChange = function() {
+		var _sRGBString;
 
 		//	get the new value
 		var greenValue = parseInt(this.oGreenField.getValue(),10);
@@ -14527,20 +14976,27 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 
 		//	process changes
 		this._processRGBchanges();
+		_sRGBString = this._getRGBString();
 
+		if (this.getMode() === "HSL") {
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+		} else {
 		//	fire events & update property
-		this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.setProperty('colorString', this._getRGBString(), true); // No re-rendering!
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+		}
 	};
-
 
 
 	/**
 	 * Event handler for changes of BLUE input field
 	 */
-	ColorPicker.prototype._handleBlueValueChange = function(){
-
+	ColorPicker.prototype._handleBlueValueChange = function() {
+		var _sRGBString;
 		//	get the new value
 		var blueValue = parseInt(this.oBlueField.getValue(),10);
 
@@ -14557,19 +15013,26 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 
 		//	process changes
 		this._processRGBchanges();
+		_sRGBString = this._getRGBString();
 
+		if (this.getMode() === "HSL") {
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+		} else {
 		//	fire events & update property
-		this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.setProperty('colorString', this._getRGBString(), true); // No re-rendering!
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+		}
 	};
-
 
 
 	/**
 	 * Process changes of Hue, Value and Saturation
 	 */
-	ColorPicker.prototype._processHSVchanges = function(){
+	ColorPicker.prototype._processHSVchanges = function() {
 
 		//	get HSV-values
 		var hueValue   = parseInt(this.oHueField.getValue(),10);
@@ -14609,11 +15072,56 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 	};
 
 
+	/**
+	 * Process changes of Hue, Lightness and Saturation
+	 */
+	ColorPicker.prototype._processHSLchanges = function() {
+
+		//	get HSL-values
+		var hueValue   = parseInt(this.oHueField.getValue(),10) % 360;
+		var satValue   = parseInt(this.oSatField.getValue(),10);
+		var litValue   = parseInt(this.oLitField.getValue(),10);
+
+		//	calculate and set new RGB-values
+		this._calculateRGB(hueValue, satValue, litValue);
+		this.Color.r = this.RGB.r;
+		this.Color.g = this.RGB.g;
+		this.Color.b = this.RGB.b;
+		this.oRedField.setValue(this.Color.r);
+		this.oGreenField.setValue(this.Color.g);
+		this.oBlueField.setValue(this.Color.b);
+
+		//	calculate and set HEX-values from the RGB-values
+		this._calculateHEX(this.Color.r,this.Color.g,this.Color.b);
+		this.oHexField.setValue(this.HexString);
+		this.Color.hex =  "#" + this.oHexField.getValue();
+
+		//	set HSL-values
+		this.Color.h = hueValue;
+		this.Color.s = satValue;
+		this.Color.l = litValue;
+		this.oHueField.setValue(this.Color.h);
+		this.oSatField.setValue(this.Color.s);
+		this.oLitField.setValue(this.Color.l);
+
+		//	update gradient box background
+		this._updateGradientBoxBackground(this.Color.h);
+
+		//	update cursor position
+		this._updateCursorPosition();
+
+		// update alpha slider background
+		this._updateAlphaBackground();
+
+		//	update selected color background
+		this._updateSelColorBackground();
+	};
+
 
 	/**
 	 * Process changes of Red, Green and Blue values
 	 */
-	ColorPicker.prototype._processRGBchanges = function(){
+	ColorPicker.prototype._processRGBchanges = function() {
 
 		//	calculate and set HEX-value from the RGB-values
 		var redValue   = Math.round(parseInt(this.oRedField.getValue(),10));
@@ -14626,7 +15134,12 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 		this._calculateHSV(redValue, greenValue, blueValue);
 		this.oHueField.setValue(this.Color.h);
 		this.oSatField.setValue(this.Color.s);
-		this.oValField.setValue(this.Color.v);
+
+		if (this.getMode() === "HSL") {
+			this.oLitField.setValue(this.Color.l);
+		} else {
+			this.oValField.setValue(this.Color.v);
+		}
 
 		//	update slider value
 		this.oSlider.setValue(parseInt(this.oHueField.getValue(),10));
@@ -14648,21 +15161,20 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 	};
 
 
-
 	/**
 	 * Event handler for changes of HEX input field
 	 */
-	ColorPicker.prototype._handleHexValueChange = function(){
-
-		//	get the new value and convert to uppercase
-		var hexValue = this.oHexField.getValue().toUpperCase();
+	ColorPicker.prototype._handleHexValueChange = function() {
+		var _sRGBString;
+		//	get the new value
+		var hexValue = this.oHexField.getValue().toLowerCase();
 
 		//	check for correct value
-		if (hexValue.substr(0, 1) == '#') {
+		if (hexValue.substr(0, 1) === '#') {
 			hexValue = hexValue.substr(1);
 		}
 		var re = /^([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
-		if (re.test(hexValue) == false) {
+		if (re.test(hexValue) === false) {
 			this.oHexField.setValueState(sap.ui.core.ValueState.Error);
 			this.oSlider.setEnabled(false);
 			this.oAlphaSlider.setEnabled(false);
@@ -14671,9 +15183,15 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 			this.oGreenField.setEnabled(false);
 			this.oBlueField.setEnabled(false);
 			this.oSatField.setEnabled(false);
-			this.oValField.setEnabled(false);
+
+			if (this.getMode() === "HSL") {
+				this.oLitField.setEnabled(false);
+				this.oAlphaField.setEnabled(false);
+			} else {
+				this.oValField.setEnabled(false);
+			}
 			return false;
-		} else if (this.oHexField.getValueState()  == sap.ui.core.ValueState.Error) {
+		} else if (this.oHexField.getValueState() === sap.ui.core.ValueState.Error) {
 			this.oHexField.setValueState(sap.ui.core.ValueState.None);
 			this.oSlider.setEnabled(true);
 			this.oAlphaSlider.setEnabled(true);
@@ -14682,11 +15200,17 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 			this.oGreenField.setEnabled(true);
 			this.oBlueField.setEnabled(true);
 			this.oSatField.setEnabled(true);
-			this.oValField.setEnabled(true);
+
+			if (this.getMode() === "HSL") {
+				this.oLitField.setEnabled(true);
+				this.oAlphaField.setEnabled(true);
+			} else {
+				this.oValField.setEnabled(true);
+			}
 		}
 
 		//	convert from short to long hex (if needed)
-		if (hexValue.length == 3) {
+		if (hexValue.length === 3) {
 			var tempValue = hexValue.charAt(0) + hexValue.charAt(0) + hexValue.charAt(1) + hexValue.charAt(1) + hexValue.charAt(2) + hexValue.charAt(2);
 			hexValue = tempValue;
 		}
@@ -14701,9 +15225,18 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 		this.oBlueField.setValue(this.Color.b);
 		this.oHueField.setValue(this.Color.h);
 		this.oSatField.setValue(this.Color.s);
-		this.oValField.setValue(this.Color.v);
+
+		if (this.getMode() === "HSL") {
+			this.oLitField.setValue(this.Color.l);
+		} else {
+			this.oValField.setValue(this.Color.v);
+		}
 		this.oSlider.setValue(parseInt(this.oHueField.getValue(),10));
 		this.oAlphaSlider.setValue(1);
+
+		if (this.getMode() === "HSL") {
+			this.oAlphaField.setValue(1);
+		}
 
 		//	update gradient box background
 		this._updateGradientBoxBackground(this.Color.h);
@@ -14714,76 +15247,113 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 		//	update selected color background
 		this._updateSelColorBackground();
 
-		//	fire events & update property
-		this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex});
-		this.setProperty('colorString', this._getRGBString(), true); // No re-rendering!
-	};
+		_sRGBString = this._getRGBString();
 
+		if (this.getMode() === "HSL") {
+			//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, l:this.Color.l, alpha:this.Color.a, hex:this.Color.hex, formatHSL:this.Color.formatHSL, colorString: _sRGBString});
+		} else {
+		//	fire events & update property
+			this.setProperty('colorString', _sRGBString, true); // No re-rendering!
+			this.fireLiveChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+			this.fireChange({r:this.Color.r, g:this.Color.g, b:this.Color.b, h:this.Color.h, s:this.Color.s, v:this.Color.v, alpha:this.Color.a, hex:this.Color.hex, colorString: _sRGBString});
+		}
+	};
 
 
 	/**
 	 * Hex-Values have changed ==> process changes
 	 */
-	ColorPicker.prototype._processHexChanges = function (ihexValue){
+	ColorPicker.prototype._processHexChanges = function (ihexValue) {
 
 		//	convert RGB-values
 		this._convertRGB(ihexValue);
 
-		//	calculate and set HSV-values from the RGB-values
-		this._calculateHSV(this.Color.r, this.Color.g, this.Color.b);
+		if (this.getMode() === "HSL") {
+			//	calculate and set HSL-values from the RGB-values
+			this._calculateHSL(this.Color.r, this.Color.g, this.Color.b);
+		} else {
+			//	calculate and set HSV-values from the RGB-values
+			this._calculateHSV(this.Color.r, this.Color.g, this.Color.b);
+		}
 
 		//	all values except hex set; set the hex value
-		this.Color.hex = "#" + ihexValue.toUpperCase();
+		this.Color.hex = "#" + ihexValue.toLowerCase();
 	};
 
+
+	/**
+	 * Update background of alpha slider
+	 */
+	ColorPicker.prototype._updateAlphaBackground = function(e) {
+
+		var newBG = sBrowserPrefix + "(left,rgba(" + this.Color.r + "," + this.Color.g + "," + this.Color.b + ",0),rgba(" + this.Color.r + "," + this.Color.g + "," + this.Color.b + ",1)),url(" + sBgSrc + ")";
+
+		if (this.lastAlphaSliderGradient != newBG) { // check against cached value to prevent flicker
+			jQuery(this.oAlphaSlider.getDomRef()).find(".sapUiSliBar").css("background-image", newBG); // stop flicker
+		}
+		// cache last value to prevent flicker
+		this.lastOpacitySliderGradient = newBG;
+
+	};
 
 
 	/**
 	 * Update Cursor position in the ColorPicker Box
 	 */
-	ColorPicker.prototype._updateCursorPosition = function(){
-
+	ColorPicker.prototype._updateCursorPosition = function() {
+		var x;
 		//	get the width & height
-		var cpCurWidth  = this.$cpCur.width();
-		var cpCurHeight = this.$cpCur.height();
+		var cpCurWidth  = this.$cpCur.outerWidth();
+		var cpCurHeight = this.$cpCur.outerHeight();
 		var cpBoxWidth  = this.$cpBox.width();
 		var cpBoxHeight = this.$cpBox.height();
 
 		//	get the saturation and value
 		var satValue = this.oSatField.getValue();
-		var valValue = this.oValField.getValue();
 
-		//	calculate the x and y values
-		var x = parseInt(valValue * cpBoxWidth / 100,10);
+		if (this.getMode() === "HSL") {
+			var litValue = this.oLitField.getValue();
+			// calculate the x and y values
+			x = Math.round(litValue * cpBoxWidth / 100.0);
+		} else {
+			var valValue = this.oValField.getValue();
+			// calculate the x and y values
+			x = Math.round(valValue * cpBoxWidth / 100.0);
+		}
+
 		//	calculate x if we are in RTL mode
 		if (this.bRtl) {
 			var rX = cpBoxWidth - x;
 			x = rX;
 		}
-		var y = parseInt((1 - satValue / 100) * cpBoxHeight,10);
-		x = Math.min(Math.max(x, 0), cpBoxWidth - cpCurWidth / 2) - cpCurWidth / 2;
-		y = Math.min(Math.max(y, 0), cpBoxHeight - cpCurHeight / 2) - cpCurHeight / 2;
+		var y = Math.round((1 - satValue / 100.0) * cpBoxHeight);
+		x = Math.round(Math.max(x, 0) - cpCurWidth / 2.0 - 1.0);
+		y = Math.round(Math.max(y, 0) - cpCurHeight / 2.0 - 1.0);
 
 		//	set the new cursor position
 		this.$cpCur.css("left", x).css("top", y);
 	};
 
 
-
 	/**
 	 * Calculate RGB-Values from Hue/Saturation/Value
 	 */
-	ColorPicker.prototype._calculateRGB = function( hue, sat, val){
+	ColorPicker.prototype._calculateRGB = function(hue, sat, val) {
 
+		if (this.getMode() === "HSL") {
+			this._calculateRGB_Advanced(hue, sat, val);
+			return;
+		}
 		//hue value is cyclic, so 360 = 0
-		if (hue == 360) {
+		if (hue === 360) {
 			hue = 0;
 		}
 		hue /= 60;
 		sat /= 100;
 		val /= 100;
-
 
 		//Formula taken from http://www.rapidtables.com/convert/color/hsv-to-rgb.htm
 		var c = val * sat;
@@ -14827,11 +15397,86 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 	};
 
 
+	/**
+	 * Calculate RGB-Values from Hue/Saturation/Lightness
+	 */
+	ColorPicker.prototype._calculateRGB_Advanced = function( hue, sat, lit) {
+		var redValue, greenValue, blueValue;
+
+		if (hue < 0) {
+			hue = 0;
+		} else if (hue > 360) { hue = 360; }
+		if (sat > 100) {
+			sat = 1;
+		} else if (sat < 0) { sat = 0; } else { sat = sat / 100; }
+		if (lit > 100) {
+			lit = 1;
+		} else if (lit < 0) { lit = 0; } else { lit = lit / 100; }
+
+		var d = sat * (1 - Math.abs(2 * lit - 1));
+		var m = 255 * (lit - 0.5 * d);
+		var x = d * (1 - Math.abs((hue / 60) % 2 - 1));
+
+		var i = Math.floor(hue / 60);
+
+		var m255x = m + 255 * x;
+		var m255d = m + 255 * d;
+
+		switch (i) {
+		case 0:
+			redValue   = m255d;
+			greenValue = m255x;
+			blueValue  = m;
+			break;
+		case 1:
+			redValue   = m255x;
+			greenValue = m255d;
+			blueValue  = m;
+			break;
+		case 2:
+			redValue   = m;
+			greenValue = m255d;
+			blueValue  = m255x;
+			break;
+		case 3:
+			redValue   = m;
+			greenValue = m255x;
+			blueValue  = m255d;
+			break;
+		case 4:
+			redValue   = m255x;
+			greenValue = m;
+			blueValue  = m255d;
+			break;
+		case 5:
+			redValue   = m255d;
+			greenValue = m;
+			blueValue  = m255x;
+			break;
+		default:
+			redValue   = 0;
+			greenValue = 0;
+			blueValue  = 0;
+		break;
+		}
+		this.RGB.r = Math.round(redValue);
+		this.RGB.g = Math.round(greenValue);
+		this.RGB.b = Math.round(blueValue);
+	};
+
 
 	/**
 	 * Get RGB-String from the current RGB-Values
 	 */
-	ColorPicker.prototype._getRGBString = function( ){
+	ColorPicker.prototype._getRGBString = function() {
+		if (this.Color.formatHSL) {
+			if (this.Color.a < 1) {
+				return "hsla(" + this.Color.h + "," + this.Color.s + "%," + this.Color.l + "%, " + this.Color.a + ")";
+			} else {
+				return "hsl(" + this.Color.h + "," + this.Color.s + "%," + this.Color.l + "%)";
+			}
+		}
+
 		if (this.Color.a < 1) {
 			return "rgba(" + this.Color.r + "," + this.Color.g + "," + this.Color.b + ", " + this.Color.a + ")";
 		} else {
@@ -14840,51 +15485,49 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 	};
 
 
-
 	/**
 	 * Calculate HEX-Values when RGB-values change
 	 */
-	ColorPicker.prototype._calculateHEX = function(red,green,blue){
+	ColorPicker.prototype._calculateHEX = function(red,green,blue) {
 
 		//	convert values
 		var redStr     = red.toString(16);
 		var greenStr   = green.toString(16);
 		var blueStr    = blue.toString(16);
-		if (redStr.length == 1)   {
+		if (redStr.length === 1)   {
 			redStr   = '0' + redStr;
 		}
-		if (greenStr.length == 1) {
+		if (greenStr.length === 1) {
 			greenStr = '0' + greenStr;
 		}
-		if (blueStr.length == 1)  {
+		if (blueStr.length === 1)  {
 			blueStr  = '0' + blueStr;
 		}
 
 		//	return the HexValue
-		this.HexString = (redStr + greenStr + blueStr).toUpperCase();
+		this.HexString = (redStr + greenStr + blueStr).toLowerCase();
 	};
-
 
 
 	/**
 	 * Calculate HSV-Values from RGB-values
 	 */
-	ColorPicker.prototype._calculateHSV = function (red, green, blue){
+	ColorPicker.prototype._calculateHSV = function(red, green, blue) {
 
 		//	calculate values
 		var max			= Math.max(Math.max(red, green), blue);
 		var min			= Math.min(Math.min(red, green), blue);
 		var delta		= (max - min);
 		var valValue	= Math.round(max * 100 / 255);
-		var satValue = (max == 0.0) ? 0 : (100 * delta / max);
+		var satValue = (max === 0.0) ? 0 : (100 * delta / max);
 		var hueValue = 0;
-		if (satValue == 0) {
+		if (satValue === 0) {
 			hueValue = 0;
-		} else if (red == max)   {
+		} else if (red === max)   {
 			hueValue = 60.0 * (green - blue) / delta;
-		} else if (green == max) {
+		} else if (green === max) {
 			hueValue = 120.0 + 60.0 * (blue - red) / delta;
-		} else if (blue == max)  {
+		} else if (blue === max)  {
 			hueValue = 240.0 + 60.0 * (red - green) / delta;
 		}
 		if (hueValue < 0.0) {
@@ -14900,11 +15543,64 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 	};
 
 
+	/**
+	 * Calculate HSL-Values from RGB-values
+	 */
+	ColorPicker.prototype._calculateHSL = function(red, green, blue) {
+
+		//	calculate values
+		var max			= Math.max(red, green, blue);
+		var min			= Math.min(red, green, blue);
+		var d			= (max - min) / 255;
+
+		var litValue = (max + min) / 510;
+		var denominator = 1 - Math.abs(2 * litValue - 1);
+		var lVal = (litValue === 0.0) ? 0 : d / denominator;
+		var satValue = (denominator != 0) ? lVal : 0;
+		var hueValue = 0;
+
+		litValue = Math.round(litValue * 100);
+		satValue = Math.round(satValue * 100);
+
+		if (litValue === 0 || satValue === 0 || (red + green + blue === 765)) {
+			hueValue = 0;
+		} else {
+
+			// The hexagon method does the best numeric conversion on our standard colors as best as I can tell - darin
+
+			// method hexagon begin
+			var C = max - min;
+			if (max === red) {
+				hueValue = ((green - blue) / C) % 6;
+			}
+			if (max === green) {
+				hueValue = (blue - red) / C + 2;
+			}
+			if (max === blue) {
+				hueValue = (red - green) / C + 4;
+			}
+			if (C === 0) {
+				hueValue = 0;
+			}
+
+			hueValue *= 60;
+			if (hueValue < 0) {
+				hueValue += 360;
+			}
+			// method hexagon end
+		}
+
+		//	store the new values
+		this.Color.h = Math.round(hueValue);
+		this.Color.s = satValue;
+		this.Color.l = litValue;
+	};
+
 
 	/**
 	 * Convert HEX-Value to RGB-Values
 	 */
-	ColorPicker.prototype._convertRGB = function(hex){
+	ColorPicker.prototype._convertRGB = function(hex) {
 
 		//	calculate the new values
 		var red   = parseInt(hex.substr(0, 2), 16);
@@ -14918,14 +15614,17 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 	};
 
 
-
 	/**
 	 * Update GradientBox Background
 	 */
-	ColorPicker.prototype._updateGradientBoxBackground = function(hue){
+	ColorPicker.prototype._updateGradientBoxBackground = function(hue) {
 
-		//	calculate RGB-values
-		this._calculateRGB(hue, 100, 100);
+		// calculate RGB-values
+		if (this.getMode() === "HSL") {
+			this._calculateRGB_Advanced(hue, 100, 50);
+		} else {
+			this._calculateRGB(hue, 100, 100);
+		}
 
 		//	calculate Hex-value
 		this._calculateHEX(this.RGB.r,this.RGB.g,this.RGB.b);
@@ -14935,11 +15634,10 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 	};
 
 
-
 	/**
 	 * Update background of "new color box"
 	 */
-	ColorPicker.prototype._updateSelColorBackground = function(){
+	ColorPicker.prototype._updateSelColorBackground = function() {
 
 		//	set the new color
 		this.$("ncBox").css('background-color',this._getRGBString());
@@ -14947,22 +15645,403 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 	};
 
 
-
 	/**
 	 * Parse Input Parameter; evaluate color
 	 */
-	ColorPicker.prototype._parseColorString = function(iColorString){
+	ColorPicker.prototype._parseColorString = function(iColorString, bCheckOnly) {
+		var hexValue = "";
 
-		//	delete #, trim and convert to lower case
-		if (iColorString.substr(0, 1) == '#') {
+		//delete #, trim
+		if (iColorString.substr(0, 1) === '#') {
 			iColorString = iColorString.substr(1);
 		}
-		iColorString = iColorString.replace(/ /g,'');
-		iColorString = iColorString.toLowerCase();
 
-		//	parse Names
+		iColorString = iColorString.replace(/ /g, '');
+		iColorString = iColorString.toLowerCase();
+		hexValue = this._parseColorName(iColorString);
+
+		if (hexValue != "") {
+			if (bCheckOnly) {
+				return true;
+			}
+			this._processHexChanges(hexValue);
+			this.Color.old = this.Color.hex;
+			if (this.getMode() === "HSL") {
+				this.Color.formatHSL = false;
+			}
+			return true;
+		}
+
+		var r = /^([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+		if (r.test(iColorString) === true) {
+			if (bCheckOnly) {
+				return true;
+			}
+			if (iColorString.length == 3) {
+				hexValue = iColorString.charAt(0) + iColorString.charAt(0) + iColorString.charAt(1) + iColorString.charAt(1) + iColorString.charAt(2) + iColorString.charAt(2);
+			} else {
+				hexValue = iColorString;
+			}
+			this._processHexChanges(hexValue);
+			this.Color.old = this.Color.hex;
+			if (this.getMode() === "HSL") {
+				this.Color.formatHSL = false;
+			}
+			return true;
+		}
+		if (iColorString.substr(0, 4) === 'rgba') {
+			return this._parseRGBA(iColorString, bCheckOnly);
+		}
+		if (iColorString.substr(0, 3) === 'rgb') {
+			return this._parseRGB(iColorString, bCheckOnly);
+		}
+		if (this.getMode() == "HSL") {
+			if (iColorString.substr(0, 4) === 'hsla') {
+				return this._parseHSLA(iColorString, bCheckOnly);
+			}
+			if (iColorString.substr(0, 3) === 'hsl') {
+				return this._parseHSL(iColorString, bCheckOnly);
+			}
+		} else {
+			if (iColorString.substr(0, 3) === 'hsv') {
+				return this._parseHSV(iColorString, bCheckOnly);
+			} else {
+				return false;
+			}
+		}
+		return false;
+	};
+
+	/**
+	 * Parses HSV string
+	 */
+	ColorPicker.prototype._parseHSV = function(iColorString) {
+		//	parse HSV
+		//	allowed input: hsv(360,100,100); hsv360,100,100; [hsv(360,0.5,0.5); hsv360,0.5,0.5 later]
+		// remove hsv, "(", ")" and blanks
+		iColorString = iColorString.substr(3);
+		iColorString = iColorString.replace("(",'');
+		iColorString = iColorString.replace(")",'');
+		iColorString = iColorString.split(' ').join('');
+		var re = /^(((\d{1,2})|([1,2]\d{2})|(3[0-5]\d)|(360)),){1}(((\d{1,2})|(100)),){1}((\d{1,2})|(100)){1}$/;
+		if (re.test(iColorString) === true) {
+			//it's a hsv string, get the values
+			var HSVColor = iColorString.split(",");
+			//get RGB values
+			this._calculateRGB(parseInt(HSVColor[0], 10), parseInt(HSVColor[1], 10), parseInt(HSVColor[2], 10));
+			//get Hex values
+			this._calculateHEX(this.RGB.r, this.RGB.g, this.RGB.b);
+			//store the values
+			this.Color.r   = this.RGB.r;
+			this.Color.g   = this.RGB.g;
+			this.Color.b   = this.RGB.b;
+			this.Color.h   = parseInt(HSVColor[0], 10);
+			this.Color.s   = parseInt(HSVColor[1], 10);
+			this.Color.v   = parseInt(HSVColor[2], 10);
+			this.Color.hex = "#" + this.HexString;
+			this.Color.old = this.Color.hex;
+		}
+	};
+
+	/**
+	 * Parses HSL string
+	 */
+	ColorPicker.prototype._parseHSL = function(iColorString, bCheckOnly) {
+		//	parse HSL
+		//	allowed input: hsl(360,100,100); hsl360,100,100; [hsl(360,0.5,0.5); hsl360,0.5,0.5 later]
+		// remove hsl, "(", ")" and blanks
+		iColorString = iColorString.substr(3);
+		iColorString = iColorString.replace("(",'');
+		iColorString = iColorString.replace(")",'');
+		iColorString = iColorString.split(' ').join('');
+		var re = /^(((\d{1,2})|([1,2]\d{2})|(3[0-5]\d)|(360)),){1}(((\d{1,2})|(100))%,){1}(((\d{1,2})|(100))%){1}$/;
+
+		if (re.test(iColorString) === true) {
+			if (bCheckOnly) {
+				return true;
+			}
+			//it's a hsl string, get the values
+			var HSLColor = iColorString.split(",");
+			//get RGB values
+			this._calculateRGB(parseInt(HSLColor[0], 10), parseInt(HSLColor[1], 10), parseInt(HSLColor[2], 10));
+			//get Hex values
+			this._calculateHEX(this.RGB.r, this.RGB.g, this.RGB.b);
+			//store the values
+			this.Color.r   = this.RGB.r;
+			this.Color.g   = this.RGB.g;
+			this.Color.b   = this.RGB.b;
+			this.Color.h   = parseInt(HSLColor[0], 10);
+			this.Color.s   = parseInt(HSLColor[1], 10);
+			this.Color.l   = parseInt(HSLColor[2], 10);
+			this.Color.hex = "#" + this.HexString;
+			this.Color.old = this.Color.hex;
+			this.Color.a = this.Color.a_old = 1;
+			this.Color.formatHSL = true;
+			return true;
+		} else {
+			var re = /^(((\d{1,2})|([1,2]\d{2})|(3[0-5]\d)|(360)),){1}(((\d{1,2})|(100))%,){1}([0]|([0]\.[0-9]+)|(\.[0-9]+)|[1]){1}$/;
+			if (re.test(iColorString) == true) {
+				if (bCheckOnly) {
+					return true;
+				}
+				//it's a hsl string, get the values
+				var HSLColor = iColorString.split(",");
+				//get RGB values
+				this._calculateRGB(parseInt(HSLColor[0], 10), parseInt(HSLColor[1], 10), parseFloat(HSLColor[2]) * 100);
+				//get Hex values
+				this._calculateHEX(this.RGB.r, this.RGB.g, this.RGB.b);
+				//store the values
+				this.Color.r   = this.RGB.r;
+				this.Color.g   = this.RGB.g;
+				this.Color.b   = this.RGB.b;
+				this.Color.h   = parseInt(HSLColor[0], 10);
+				this.Color.s   = parseInt(HSLColor[1], 10);
+				this.Color.l   = parseFloat(HSLColor[2]) * 100;
+				this.Color.hex = "#" + this.HexString;
+				this.Color.old = this.Color.hex;
+				this.Color.a = this.Color.a_old = 1;
+				this.Color.formatHSL = true;
+				return true;
+			} else {
+			var re = /^(((\d{1,2})|([1,2]\d{2})|(3[0-5]\d)|(360)),){1}(([0]|([0]\.[0-9]+)|(\.[0-9]+)|[1]),){1}([0]|([0]\.[0-9]+)|(\.[0-9]+)|[1]){1}$/;
+
+				if (re.test(iColorString) == true) {
+					if (bCheckOnly) {
+						return true;
+					}
+					//it's a hsl string, get the values
+					var HSLColor = iColorString.split(",");
+					//get RGB values
+					this._calculateRGB(parseInt(HSLColor[0], 10), parseFloat(HSLColor[1]) * 100, parseFloat(HSLColor[2]) * 100);
+					//get Hex values
+					this._calculateHEX(this.RGB.r, this.RGB.g, this.RGB.b);
+					//store the values
+					this.Color.r   = this.RGB.r;
+					this.Color.g   = this.RGB.g;
+					this.Color.b   = this.RGB.b;
+					this.Color.h   = parseInt(HSLColor[0], 10);
+					this.Color.s   = parseFloat(HSLColor[1]) * 100;
+					this.Color.l   = parseFloat(HSLColor[2]) * 100;
+					this.Color.hex = "#" + this.HexString;
+					this.Color.old = this.Color.hex;
+					this.Color.a = this.Color.a_old = 1;
+					this.Color.formatHSL = true;
+					return true;
+				} else {
+					var re = /^(((\d{1,2})|([1,2]\d{2})|(3[0-5]\d)|(360)),){1}(([0]|([0]\.[0-9]+)|(\.[0-9]+)|[1]),){1}(((\d{1,2})|(100))%){1}$/;
+					if (re.test(iColorString) == true) {
+						if (bCheckOnly) {
+							return true;
+						}
+						//it's a hsl string, get the values
+						var HSLColor = iColorString.split(",");
+						//get RGB values
+						this._calculateRGB(parseInt(HSLColor[0], 10), parseFloat(HSLColor[1]) * 100, parseInt(HSLColor[2], 10));
+						//get Hex values
+						this._calculateHEX(this.RGB.r, this.RGB.g, this.RGB.b);
+						//store the values
+						this.Color.r   = this.RGB.r;
+						this.Color.g   = this.RGB.g;
+						this.Color.b   = this.RGB.b;
+						this.Color.h   = parseInt(HSLColor[0], 10);
+						this.Color.s   = parseFloat(HSLColor[1]) * 100;
+						this.Color.l   = parseInt(HSLColor[2], 10);
+						this.Color.hex = "#" + this.HexString;
+						this.Color.old = this.Color.hex;
+						this.Color.a = this.Color.a_old = 1;
+						this.Color.formatHSL = true;
+						return true;
+					} else {
+						return false;
+					}
+				}
+			}
+		}
+	};
+
+	/**
+	 * Parses HSLA string
+	 */
+	ColorPicker.prototype._parseHSLA = function(iColorString, bCheckOnly) {
+		//	parse HSLA
+		//	allowed input: hsla(360,100%,100%,0.5) etc.
+		//	check if the string begins with "rgb"
+		// remove hsla, "(", ")" and blanks
+		iColorString = iColorString.substr(4);
+		iColorString = iColorString.replace("(",'');
+		iColorString = iColorString.replace(")",'');
+		iColorString = iColorString.split(' ').join('');
+		var re = /^(((\d{1,2})|([1,2]\d{2})|(3[0-5]\d)|(360)),){1}(((\d{1,2})|(100))%,){1}(((\d{1,2})|(100))%){1},([0]|([0]\.[0-9]+)|(\.[0-9]+)|[1]){1}$/;
+		if (re.test(iColorString) == true) {
+			if (bCheckOnly) {
+				return true;
+			}
+			//it's a hsl string, get the values
+			var HSLColor = iColorString.split(",");
+			//get RGB values
+			this._calculateRGB(parseInt(HSLColor[0], 10), parseInt(HSLColor[1], 10), parseInt(HSLColor[2], 10));
+			//get Hex values
+			this._calculateHEX(this.RGB.r, this.RGB.g, this.RGB.b);
+			//store the values
+			this.Color.r   = this.RGB.r;
+			this.Color.g   = this.RGB.g;
+			this.Color.b   = this.RGB.b;
+			this.Color.h   = parseInt(HSLColor[0],10);
+			this.Color.s   = parseInt(HSLColor[1],10);
+			this.Color.l   = parseInt(HSLColor[2],10);
+			this.Color.hex = "#" + this.HexString;
+			this.Color.old = this.Color.hex;
+			this.Color.a = this.Color.a_old = parseFloat(HSLColor[3]);
+			this.Color.formatHSL = true;
+			return true;
+		} else {
+			var re = /^(((\d{1,2})|([1,2]\d{2})|(3[0-5]\d)|(360)),){1}(((\d{1,2})|(100))%,){1}([0]|([0]\.[0-9]+)|(\.[0-9]+)|[1]){1},([0]|([0]\.[0-9]+)|(\.[0-9]+)|[1]){1}$/;
+			if (re.test(iColorString) == true) {
+				if (bCheckOnly) {
+					return true;
+				}
+				//it's a hsl string, get the values
+				var HSLColor = iColorString.split(",");
+				//get RGB values
+				this._calculateRGB(parseInt(HSLColor[0], 10), parseInt(HSLColor[1], 10), parseFloat(HSLColor[2]) * 100);
+				//get Hex values
+				this._calculateHEX(this.RGB.r, this.RGB.g, this.RGB.b);
+				//store the values
+				this.Color.r   = this.RGB.r;
+				this.Color.g   = this.RGB.g;
+				this.Color.b   = this.RGB.b;
+				this.Color.h   = parseInt(HSLColor[0], 10);
+				this.Color.s   = parseInt(HSLColor[1], 10);
+				this.Color.l   = parseFloat(HSLColor[2]) * 100;
+				this.Color.hex = "#" + this.HexString;
+				this.Color.old = this.Color.hex;
+				this.Color.a = this.Color.a_old = parseFloat(HSLColor[3]);
+				this.Color.formatHSL = true;
+				return true;
+			} else {
+				var re = /^(((\d{1,2})|([1,2]\d{2})|(3[0-5]\d)|(360)),){1}([0]|(([0]\.[0-9]+)|(\.[0-9]+)|[1]),){1}([0]|([0]\.[0-9]+)|(\.[0-9]+)|[1]){1},([0]|([0]\.[0-9]+)|(\.[0-9]+)|[1]){1}$/;
+				if (re.test(iColorString) == true) {
+					if (bCheckOnly) {
+						return true;
+					}
+					//it's a hsl string, get the values
+					var HSLColor = iColorString.split(",");
+					//get RGB values
+					this._calculateRGB(parseInt(HSLColor[0], 10), parseFloat(HSLColor[1]) * 100, parseFloat(HSLColor[2]) * 100);
+					//get Hex values
+					this._calculateHEX(this.RGB.r, this.RGB.g, this.RGB.b);
+					//store the values
+					this.Color.r   = this.RGB.r;
+					this.Color.g   = this.RGB.g;
+					this.Color.b   = this.RGB.b;
+					this.Color.h   = parseInt(HSLColor[0], 10);
+					this.Color.s   = parseFloat(HSLColor[1]) * 100;
+					this.Color.l   = parseFloat(HSLColor[2]) * 100;
+					this.Color.hex = "#" + this.HexString;
+					this.Color.old = this.Color.hex;
+					this.Color.a = this.Color.a_old = parseFloat(HSLColor[3]);
+					this.Color.formatHSL = true;
+					return true;
+				} else {
+					var re = /^(((\d{1,2})|([1,2]\d{2})|(3[0-5]\d)|(360)),){1}([0]|([0]\.[0-9]+)|(\.[0-9]+)|[1]){1}(((\d{1,2})|(100))%){1},([0]|([0]\.[0-9]+)|(\.[0-9]+)|[1]){1}$/;
+					if (re.test(iColorString) == true) {
+						if (bCheckOnly) {
+							return true;
+						}
+						//it's a hsl string, get the values
+						var HSLColor = iColorString.split(",");
+						//get RGB values
+						this._calculateRGB(parseInt(HSLColor[0], 10), parseFloat(HSLColor[1]) * 100, parseInt(HSLColor[2], 10));
+						//get Hex values
+						this._calculateHEX(this.RGB.r, this.RGB.g, this.RGB.b);
+						//store the values
+						this.Color.r   = this.RGB.r;
+						this.Color.g   = this.RGB.g;
+						this.Color.b   = this.RGB.b;
+						this.Color.h   = parseInt(HSLColor[0], 10);
+						this.Color.s   = parseFloat(HSLColor[1]) * 100;
+						this.Color.l   = parseInt(HSLColor[2], 10);
+						this.Color.hex = "#" + this.HexString;
+						this.Color.old = this.Color.hex;
+						this.Color.a = this.Color.a_old = parseFloat(HSLColor[3]);
+						this.Color.formatHSL = true;
+						return true;
+					} else {
+						return false;
+					}
+				}
+			}
+		}
+	};
+
+	/**
+	 * Parses RGB string
+	 */
+	ColorPicker.prototype._parseRGB = function(iColorString, bCheckOnly) {
+		// remove rgb, "(", ")" and blanks
+		iColorString = iColorString.substr(3);
+		iColorString = iColorString.replace("(",'');
+		iColorString = iColorString.replace(")",'');
+		iColorString = iColorString.split(' ').join('');
+		var re = /^(((\d{1,2})|(1\d{2})|(2[0-4]\d)|(25[0-5])),){2}(((\d{1,2})|(1\d{2})|(2[0-4]\d)|(25[0-5]))){1}$/;
+
+		if (re.test(iColorString) == true) {
+
+			if (this.getMode() == "HSL" && bCheckOnly) {
+				return true;
+			}
+			//it's a rgb string, get the values and convert to Hex
+			var RGBColor = iColorString.split(",");
+			this._calculateHEX(parseInt(RGBColor[0],10), parseInt(RGBColor[1],10), parseInt(RGBColor[2],10));
+			//get HSV values
+			this._processHexChanges(this.HexString);
+			this.Color.old = this.Color.hex;
+		}
+		if (this.getMode() == "HSL") {
+			this.Color.formatHSL = false;
+			return true;
+		}
+	};
+
+	/**
+	 * Parses RGBA string
+	 */
+	ColorPicker.prototype._parseRGBA = function(iColorString, bCheckOnly) {
+		// remove rgba, "(", ")" and blanks
+		iColorString = iColorString.substr(4);
+		iColorString = iColorString.replace("(",'');
+		iColorString = iColorString.replace(")",'');
+		iColorString = iColorString.split(' ').join('');
+
+		var re = /^(((\d{1,2})|(1\d{2})|(2[0-4]\d)|(25[0-5])),){2}(((\d{1,2})|(1\d{2})|(2[0-4]\d)|(25[0-5])),){1}([0]|([0]\.[0-9]+)|(\.[0-9]+)|[1]){1}$/;
+
+		if (re.test(iColorString) == true) {
+
+			if (this.getMode() == "HSL" && bCheckOnly) {
+				return true;
+			}
+			//it's a rgba string, get the values and convert to Hex
+			var RGBColor = iColorString.split(",");
+			var sAlpha = iColorString.substr(iColorString.lastIndexOf(",") + 1, (iColorString.length - iColorString.lastIndexOf(",")));
+			this._calculateHEX(parseInt(RGBColor[0],10), parseInt(RGBColor[1],10), parseInt(RGBColor[2],10));
+			//get HSV values
+			this._processHexChanges(this.HexString);
+			this.Color.old = this.Color.hex;
+			this.Color.a = this.Color.a_old = parseFloat(sAlpha);
+		}
+		if (this.getMode() == "HSL") {
+			this.Color.formatHSL = false;
+			return true;
+		}
+	};
+
+	/**
+	 * Check if the given string is predefined color
+	 */
+	ColorPicker.prototype._parseColorName = function(iColorString) {
 		var searchKey = "";
 		var hexValue = "";
+
 		var colorNames = {
 				aliceblue: 				'f0f8ff',
 				antiquewhite: 			'faebd7',
@@ -14989,6 +16068,7 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 				darkcyan: 				'008b8b',
 				darkgoldenrod: 			'b8860b',
 				darkgray: 				'a9a9a9',
+				darkgrey: 				'a9a9a9',
 				darkgreen: 				'006400',
 				darkkhaki: 				'bdb76b',
 				darkmagenta: 			'8b008b',
@@ -15032,6 +16112,7 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 				lightcoral: 			'f08080',
 				lightcyan: 				'e0ffff',
 				lightgoldenrodyellow:	'fafad2',
+				lightgray: 				'd3d3d3',
 				lightgrey: 				'd3d3d3',
 				lightgreen: 			'90ee90',
 				lightpink: 				'ffb6c1',
@@ -15040,6 +16121,7 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 				lightskyblue: 			'87cefa',
 				lightslateblue: 		'8470ff',
 				lightslategray: 		'778899',
+				lightslategrey: 		'778899',
 				lightsteelblue: 		'b0c4de',
 				lightyellow: 			'ffffe0',
 				lime: 					'00ff00',
@@ -15050,7 +16132,7 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 				mediumaquamarine: 		'66cdaa',
 				mediumblue: 			'0000cd',
 				mediumorchid: 			'ba55d3',
-				mediumpurple: 			'9370d8',
+				mediumpurple: 			'9370db',
 				mediumseagreen: 		'3cb371',
 				mediumslateblue: 		'7b68ee',
 				mediumspringgreen: 		'00fa9a',
@@ -15071,7 +16153,7 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 				palegoldenrod: 			'eee8aa',
 				palegreen: 				'98fb98',
 				paleturquoise: 			'afeeee',
-				palevioletred: 			'd87093',
+				palevioletred: 			'db7093',
 				papayawhip: 			'ffefd5',
 				peachpuff: 				'ffdab9',
 				peru: 					'cd853f',
@@ -15092,6 +16174,7 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 				skyblue: 				'87ceeb',
 				slateblue: 				'6a5acd',
 				slategray: 				'708090',
+				slategrey: 				'708090',
 				snow: 					'fffafa',
 				springgreen: 			'00ff7f',
 				steelblue: 				'4682b4',
@@ -15111,117 +16194,20 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 
 		for (searchKey in colorNames) {
 			if (iColorString == searchKey) {
-				hexValue = colorNames[searchKey].toUpperCase();
+				hexValue = colorNames[searchKey].toLowerCase();
+				return hexValue;
 			}
 		}
 
-		if (hexValue != "") {
-			//Found a name; get RGB and HSV values
-			this._processHexChanges(hexValue);
-			this.Color.old = this.Color.hex;
-		}
-
-
-		//	parse HEX
-		//	allowed input: #aabbcc, aabbcc, #abc, abc
-		//	'#' has already been deleted, search only for values
-		//  check for correct value using regular expression
-		var re = /^([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
-		if (re.test(iColorString) == true) {
-			//it's a hex value; check if its aabbcc or abc
-			if (iColorString.length == 3) {
-				var hexValue = iColorString.charAt(0) + iColorString.charAt(0) + iColorString.charAt(1) + iColorString.charAt(1) + iColorString.charAt(2) + iColorString.charAt(2);
-			} else {
-				hexValue = iColorString;
-			}
-			//get RGB and HSV values
-			this._processHexChanges(hexValue);
-			this.Color.old = this.Color.hex;
-		}
-
-
-		//	parse RGBA
-		//	allowed input: rgba(255,255,255,0.3); rgba255,255,255,0.3
-		//	check if the string begins with "rgba"
-		if (iColorString.substr(0, 4) == 'rgba') {
-			// remove rgba, "(", ")" and blanks
-			iColorString = iColorString.substr(4);
-			iColorString = iColorString.replace("(",'');
-			iColorString = iColorString.replace(")",'');
-			iColorString = iColorString.split(' ').join('');
-			var re = /^(((\d{1,2})|(1\d{2})|(2[0-4]\d)|(25[0-5])),){2}(((\d{1,2})|(1\d{2})|(2[0-4]\d)|(25[0-5])),){1}(([0]\.[0-9]*)|(\.[0-9]{2})|[1]){1}$/;
-			if (re.test(iColorString) == true) {
-				//it's a rgba string, get the values and convert to Hex
-				var RGBColor = iColorString.split(",");
-				var sAlpha = iColorString.substr(iColorString.lastIndexOf(",") + 1, (iColorString.length - iColorString.lastIndexOf(",")));
-				this._calculateHEX(parseInt(RGBColor[0],10), parseInt(RGBColor[1],10), parseInt(RGBColor[2],10));
-				//get HSV values
-				this._processHexChanges(this.HexString);
-				this.Color.old = this.Color.hex;
-				this.Color.a = this.Color.a_old = parseFloat(sAlpha);
-			}
-		}
-
-
-		//	parse RGB
-		//	allowed input: rgb(255,255,255); rgb255,255,255
-		//	check if the string begins with "rgb"
-		if (iColorString.substr(0, 3) == 'rgb') {
-			// remove rgb, "(", ")" and blanks
-			iColorString = iColorString.substr(3);
-			iColorString = iColorString.replace("(",'');
-			iColorString = iColorString.replace(")",'');
-			iColorString = iColorString.split(' ').join('');
-			var re = /^(((\d{1,2})|(1\d{2})|(2[0-4]\d)|(25[0-5])),){2}(((\d{1,2})|(1\d{2})|(2[0-4]\d)|(25[0-5]))){1}$/;
-			if (re.test(iColorString) == true) {
-				//it's a rgb string, get the values and convert to Hex
-				var RGBColor = iColorString.split(",");
-				this._calculateHEX(parseInt(RGBColor[0],10), parseInt(RGBColor[1],10), parseInt(RGBColor[2],10));
-				//get HSV values
-				this._processHexChanges(this.HexString);
-				this.Color.old = this.Color.hex;
-			}
-		}
-
-
-		//	parse HSV
-		//	allowed input: hsv(360,100,100); hsv360,100,100; [hsv(360,0.5,0.5); hsv360,0.5,0.5 later]
-		//	check if the string begins with "rgb"
-		if (iColorString.substr(0, 3) == 'hsv') {
-			// remove hsv, "(", ")" and blanks
-			iColorString = iColorString.substr(3);
-			iColorString = iColorString.replace("(",'');
-			iColorString = iColorString.replace(")",'');
-			iColorString = iColorString.split(' ').join('');
-			var re = /^(((\d{1,2})|([1,2]\d{2})|(3[0-5]\d)|(360)),){1}(((\d{1,2})|(100)),){1}((\d{1,2})|(100)){1}$/;
-			if (re.test(iColorString) == true) {
-				//it's a hsv string, get the values
-				var HSVColor = iColorString.split(",");
-				//get RGB values
-				this._calculateRGB(parseInt(HSVColor[0],10), parseInt(HSVColor[1],10), parseInt(HSVColor[2],10));
-				//get Hex values
-				this._calculateHEX(this.RGB.r, this.RGB.g, this.RGB.b);
-				//store the values
-				this.Color.r   = this.RGB.r;
-				this.Color.g   = this.RGB.g;
-				this.Color.b   = this.RGB.b;
-				this.Color.h   = parseInt(HSVColor[0],10);
-				this.Color.s   = parseInt(HSVColor[1],10);
-				this.Color.v   = parseInt(HSVColor[2],10);
-				this.Color.hex = "#" + this.HexString;
-				this.Color.old = this.Color.hex;
-			}
-		} else {
-			return false;
-		}
+		return hexValue;
 	};
-
 
 
 	/**
 	 * Event after rendering the page
 	 */
-	ColorPicker.prototype.onAfterRendering = function (){
+	ColorPicker.prototype.onAfterRendering = function() {
+		var _sRGBString = this._getRGBString();
 
 		// get the jQuery-Object for cpBox and cpCur
 		this.$cpBox = this.$("cpBox");
@@ -15231,26 +16217,21 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 		this.$cpBox.bind("mousedown", jQuery.proxy(this.handleMouseDown, this));
 
 		//	set the background color of the Color Boxes
-		this.$("ncBox").css('background-color',this._getRGBString());
-		this.$("ocBox").css('background-color',this._getRGBString());
+		this.$("ncBox").css('background-color', _sRGBString);
+		this.$("ocBox").css('background-color', _sRGBString);
 
 		//	update the background color of the 'new color box'
 		this._updateGradientBoxBackground(this.Color.h);
 
 		//	update cursor position
 		this._updateCursorPosition();
-	};
 
-
-
-	/**
-	 * Event before rendering the page
-	 */
-	ColorPicker.prototype.onBeforeRendering = function (){
-
-		//	unbind Mousehandler for ColorPickerBox
-		this.$("cpBox").unbind("mousedown", this.handleMouseDown);
-
+		if (this.getMode() == "HSL") {
+			// update alpha slider background
+			this._updateAlphaBackground();
+		}
+		this.oSlider.iShiftGrip =  Math.round(jQuery(this.oSlider.oGrip).outerWidth() / 2);
+		this.oAlphaSlider.iShiftGrip =  Math.round(jQuery(this.oAlphaSlider.oGrip).outerWidth() / 2);
 	};
 
 
@@ -15263,12 +16244,11 @@ sap.ui.define("sap/ui/commons/ColorPicker",['jquery.sap.global', './library', 's
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	ColorPicker.prototype.getRGB = function (){
+	ColorPicker.prototype.getRGB = function() {
 
 		return {r:this.Color.r, g:this.Color.g, b:this.Color.b};
 
 	};
-
 
 	return ColorPicker;
 
@@ -15523,10 +16503,11 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 		 *
 		 * @namespace
 		 * @author SAP SE
-		 * @version 1.34.9
+		 * @version 1.44.14
 		 *
 		 * @constructor
 		 * @public
+		 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Dialog</code> control.
 		 * @alias sap.ui.commons.Dialog
 		 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 		 */
@@ -15786,8 +16767,6 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 		Dialog.prototype.init = function () {
 
 			this.oPopup = new Popup(this, true, true);
-			var eDock = Popup.Dock;
-			this.oPopup.setPosition(eDock.CenterCenter, eDock.CenterCenter, window);
 
 			// the technical minWidth, not the one set via API; will be calculated after rendering
 			this._minWidth = 64;
@@ -15800,6 +16779,7 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 			this._mParameters.that = this;
 			this._mParameters.firstFocusable = this.getId() + "-fhfe";
 			this._mParameters.lastFocusable = this.getId() + "-fhee";
+			this._fnOnResizeRecenter = jQuery.proxy(this._onResize, this);
 		};
 
 		Dialog.prototype.setInitialFocus = function (sId) {
@@ -15886,7 +16866,7 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 			var sCloseBtnId = this.getId() + "-close";
 			if (oEvent.target.id === sCloseBtnId) {
 				this.close();
-				oEvent.preventDefault(); // avoid onbeforeunload event which happens at least in IE9 because of the javascript:void(0); link target
+				oEvent.preventDefault(); // avoid onbeforeunload event which happens at least in IE9 because of the "#" link target
 			}
 			return false;
 		};
@@ -15906,10 +16886,13 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 
 				this.oPopup.attachEvent("opened", this.handleOpened, this);
 				this.oPopup.attachEvent("closed", this.handleClosed, this);
+
 				this.oPopup.setModal(this.getModal());
 				this.oPopup.setAutoClose(this.getAutoClose());
 				this.oPopup.open(400);
+				this._onResize();
 				this._bOpen = true;
+				this._registerContentResizeHandler();
 			}
 		};
 
@@ -16004,6 +16987,7 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 		 */
 		Dialog.prototype.handleClosed = function () {
 			this.oPopup.detachEvent("closed", this.handleClosed, this);
+			this._deregisterContentResizeHandler();
 
 			this.fireClosed(this._oRect);
 			this.close();
@@ -16035,15 +17019,9 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 
 
 		Dialog.prototype.setTitle = function (sText) {
-			if (this.oPopup.getOpenState() === sap.ui.core.OpenState.OPENING) {
-				// if the title is changed while the dialog opens a re-rendering
-				// has to be triggered to apply the position of the dialog's popup
-				// properly
-				this.setProperty("title", sText, /*bSuppressInvalidate*/ false);
-			} else {
-				this.setProperty("title", sText, /*bSuppressInvalidate*/ true);
-				this.$("lbl").text(sText);
-			}
+
+			this.setProperty("title", sText, true); // last parameter avoids invalidation
+			this.$("lbl").text(sText);
 
 			return this;
 		};
@@ -16061,6 +17039,7 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 			// just to ensure that any attached event is being detached
 			this.oPopup.detachEvent("opened", this.handleOpened, this);
 			this.oPopup.detachEvent("closed", this.handleClosed, this);
+			this._deregisterContentResizeHandler();
 
 			this.oPopup.destroy();
 			if (bWasOpen) {
@@ -16071,6 +17050,7 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 			jQuery.sap.clearDelayedCall(this._sDelayedCall);
 			this._sDelayedCall = null;
 			delete this._mParameters;
+			this._fnOnResizeRecenter = null;
 		};
 
 		/**
@@ -16414,9 +17394,9 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 			}
 
 			event = event || window.event;
+			this._deregisterContentResizeHandler();
 
 			if (this.sDragMode == "resize") {
-
 				var deltaX = event.screenX - this.startDragX || 0;
 				var deltaY = event.screenY - this.startDragY || 0;
 
@@ -16466,6 +17446,7 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 			}
 
 			event.cancelBubble = true;
+			this._registerContentResizeHandler();
 			return false;
 		};
 
@@ -16517,6 +17498,33 @@ sap.ui.define("sap/ui/commons/Dialog",['jquery.sap.global', './library', 'sap/ui
 			this.oPopup.getAutoClose();
 		};
 
+		/**
+		*
+		* @private
+		*/
+		Dialog.prototype._deregisterContentResizeHandler = function () {
+			if (this._sContentResizeListenerId) {
+				sap.ui.core.ResizeHandler.deregister(this._sContentResizeListenerId);
+				this._sContentResizeListenerId = null;
+			}
+		};
+
+		/**
+		 *
+		 * @private
+		 */
+		Dialog.prototype._registerContentResizeHandler = function() {
+			if (!this._sContentResizeListenerId) {
+				this._sContentResizeListenerId = sap.ui.core.ResizeHandler.register(this.getDomRef("cont"), this._fnOnResizeRecenter);
+			}
+		};
+
+		Dialog.prototype._onResize = function() {
+			var eDock = Popup.Dock;
+			if (this.oPopup) {
+				this.oPopup.setPosition(eDock.CenterCenter, eDock.CenterCenter, window);
+			}
+		};
 
 		return Dialog;
 
@@ -16565,6 +17573,10 @@ sap.ui.define("sap/ui/commons/DropdownBoxRenderer",['jquery.sap.global', './Comb
 	DropdownBoxRenderer.renderOuterContent = function(rm, oDdb){
 
 		this.renderSelectBox(rm, oDdb, '0');
+
+		if (oDdb.getDisplaySecondaryValues()) {
+			rm.write("<span id=\"" + oDdb.getId() + "-SecVal\" style=\"display: none;\"></span>");
+		}
 
 	};
 
@@ -16619,6 +17631,13 @@ sap.ui.define("sap/ui/commons/DropdownBoxRenderer",['jquery.sap.global', './Comb
 			mProps["invalid"] = true;
 		}
 
+		if (oDdb.getDisplaySecondaryValues()) {
+			mProps["describedby"] = {
+				value: oDdb.getId() + "-SecVal",
+				append: true
+			};
+		}
+
 		rm.writeAccessibilityState(oDdb, mProps);
 
 	};
@@ -16654,7 +17673,7 @@ sap.ui.define("sap/ui/commons/FileUploader",['jquery.sap.global', './library', '
 	 * @extends sap.ui.unified.FileUploader
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -16707,7 +17726,7 @@ sap.ui.define("sap/ui/commons/FileUploaderParameter",['jquery.sap.global', './li
 	 * @extends sap.ui.unified.FileUploaderParameter
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -16759,11 +17778,12 @@ sap.ui.define("sap/ui/commons/FormattedTextView",['jquery.sap.global', './librar
 		 * @class
 		 * The FormattedTextView control allows the usage of a limited set of HTML tags for display.
 		 * @extends sap.ui.core.Control
-		 * @version 1.34.9
+		 * @version 1.44.14
 		 *
 		 * @constructor
 		 * @public
 		 * @since 1.9.0
+		 * @deprecated Since version 1.38. Instead, use the <code>sap.ui.core.HTML</code> control.
 		 * @alias sap.ui.commons.FormattedTextView
 		 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 		 */
@@ -17023,10 +18043,11 @@ sap.ui.define("sap/ui/commons/HorizontalDivider",['jquery.sap.global', './librar
 	 * @class
 	 * Divides the screen in visual areas.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.HorizontalDivider
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -17088,10 +18109,11 @@ sap.ui.define("sap/ui/commons/Image",['jquery.sap.global', './library', 'sap/ui/
 	 * @implements sap.ui.commons.ToolbarItem,sap.ui.commons.FormattedTextViewControl
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Image</code> control.
 	 * @alias sap.ui.commons.Image
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -17197,10 +18219,11 @@ sap.ui.define("sap/ui/commons/ImageMap",['jquery.sap.global', './library', 'sap/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.ImageMap
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -17286,7 +18309,7 @@ sap.ui.define("sap/ui/commons/ImageMap",['jquery.sap.global', './library', 'sap/
 			this.oItemNavigation.setTabIndex0();
 
 			// Find the Image control and add delegate to it
-			var $Images = jQuery("img[useMap=#" + this.getName() + "]");
+			var $Images = jQuery("img[usemap='#" + this.getName() + "']");
 			$Images.each(function(i, image) {
 				var id = image.getAttribute("id");
 				var imageControl = sap.ui.getCore().byId(id);
@@ -17379,10 +18402,11 @@ sap.ui.define("sap/ui/commons/Label",['jquery.sap.global', './library', 'sap/ui/
 	 * @implements sap.ui.commons.ToolbarItem, sap.ui.core.Label
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Label</code> control.
 	 * @alias sap.ui.commons.Label
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -17469,8 +18493,6 @@ sap.ui.define("sap/ui/commons/Label",['jquery.sap.global', './library', 'sap/ui/
 				}
 			}
 
-			// attach to change of required flag of labeled control
-			oFor.attachEvent("requiredChanged",this._handleRequiredChanged, this);
 			this._oFor = oFor;
 		}
 	};
@@ -17483,7 +18505,6 @@ sap.ui.define("sap/ui/commons/Label",['jquery.sap.global', './library', 'sap/ui/
 		}
 
 		if (this._oFor) {
-			this._oFor.detachEvent("requiredChanged",this._handleRequiredChanged, this);
 			this._oFor = undefined;
 		}
 	};
@@ -17495,32 +18516,8 @@ sap.ui.define("sap/ui/commons/Label",['jquery.sap.global', './library', 'sap/ui/
 		}
 
 		if (this._oFor) {
-			this._oFor.detachEvent("requiredChanged",this._handleRequiredChanged, this);
 			this._oFor = undefined;
 		}
-	};
-
-	/**
-	 * Checks whether the Label itself or the associated control is marked as required (they are mutually exclusive).
-	 *
-	 * @protected
-	 * @returns {Boolean} Returns if the Label or the labelled control are required
-	 */
-	Label.prototype.isRequired = function(){
-		// the value of the local required flag is ORed with the result of a "getRequired"
-		// method of the associated "labelFor" control. If the associated control doesn't
-		// have a getRequired method, this is treated like a return value of "false".
-		var oFor = this._getLabeledControl();
-		return this.getRequired() || (oFor && oFor.getRequired && oFor.getRequired() === true);
-
-	};
-
-	/**
-	 * If required flag of labeled control changes after Label is rendered, the Label must be rendered again.
-	 * @private
-	 */
-	Label.prototype._handleRequiredChanged = function(){
-		this.invalidate();
 	};
 
 	/**
@@ -17564,6 +18561,14 @@ sap.ui.define("sap/ui/commons/Label",['jquery.sap.global', './library', 'sap/ui/
 		return sap.ui.getCore().byId(sId);
 	};
 
+	/**
+	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @protected
+	 */
+	Label.prototype.getAccessibilityInfo = function() {
+		return {description: this.getText()};
+	};
+
 	//Enrich Label functionality
 	LabelEnablement.enrich(Label.prototype);
 
@@ -17605,10 +18610,11 @@ sap.ui.define("sap/ui/commons/Link",['jquery.sap.global', './library', 'sap/ui/c
 	 * @implements sap.ui.commons.ToolbarItem,sap.ui.commons.FormattedTextViewControl
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Link</code> control.
 	 * @alias sap.ui.commons.Link
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -17720,7 +18726,7 @@ sap.ui.define("sap/ui/commons/Link",['jquery.sap.global', './library', 'sap/ui/c
 	Link.prototype.onclick = function(oEvent) {
 		if (this.getEnabled()) {
 			// the default behavior will be supressed, when oEvent.preventDefault() is
-			// called or when the link doesn't contain a valid href (javascript:void(0)).
+			// called or when the link doesn't contain a valid href (#)).
 			// The last thing will trigger the onbeforeunload event in IE when not
 			// preventing the default behavior
 			if (!this.firePress() || !this.getHref()) {
@@ -17737,6 +18743,20 @@ sap.ui.define("sap/ui/commons/Link",['jquery.sap.global', './library', 'sap/ui/c
 	 */
 	Link.prototype.onsapenter = function(oEvent) {
 		oEvent.stopPropagation();
+	};
+
+	/**
+	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @protected
+	 */
+	Link.prototype.getAccessibilityInfo = function() {
+		return {
+			role: "link",
+			type: sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons").getText("ACC_CTR_TYPE_LINK"),
+			description: this.getText() || this.getHref() || "",
+			focusable: this.getEnabled(),
+			enabled: this.getEnabled()
+		};
 	};
 
 	return Link;
@@ -17775,10 +18795,11 @@ sap.ui.define("sap/ui/commons/ListBox",['jquery.sap.global', './library', 'sap/u
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.List</code> control.
 	 * @alias sap.ui.commons.ListBox
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -17961,8 +18982,6 @@ sap.ui.define("sap/ui/commons/ListBox",['jquery.sap.global', './library', 'sap/u
 	 * @private
 	 */
 	ListBox.prototype.onThemeChanged = function () {
-		ListBox._fItemHeight = -1;
-		ListBox._iBordersAndStuff = -1;
 		this._sTotalHeight = null;
 		if (!this._bHeightInItems) {
 			this._iVisibleItems = -1; // re-calculation only required for ItemNavigation - shouldn't change when explicitly set
@@ -18371,6 +19390,10 @@ sap.ui.define("sap/ui/commons/ListBox",['jquery.sap.global', './library', 'sap/u
 
 	ListBox.prototype.onclick = function (oEvent) {
 		this._handleUserActivation(oEvent);
+	};
+
+	ListBox.prototype.ontouchmove = function (oEvent) {
+		oEvent.setMarked();
 	};
 
 	ListBox.prototype.onsapspace = function (oEvent) {
@@ -19160,7 +20183,7 @@ sap.ui.define("sap/ui/commons/Menu",['jquery.sap.global', './MenuItemBase', './l
 	 * @extends sap.ui.unified.Menu
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @since 1.0.0
 	 *
 	 * @constructor
@@ -19209,10 +20232,11 @@ sap.ui.define("sap/ui/commons/MenuButton",['jquery.sap.global', './Button', './M
 	 * Common button control that opens a menu when clicked by the user. The control provides an API for configuring the docking position
 	 * of the menu.
 	 * @extends sap.ui.commons.Button
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.MenuButton</code> control.
 	 * @alias sap.ui.commons.MenuButton
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -19508,7 +20532,7 @@ sap.ui.define("sap/ui/commons/MenuItem",['jquery.sap.global', './MenuItemBase', 
 	 * @extends sap.ui.unified.MenuItem
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @since 1.0.0
 	 *
 	 * @constructor
@@ -19560,7 +20584,7 @@ sap.ui.define("sap/ui/commons/MenuTextFieldItem",['jquery.sap.global', './MenuIt
 	 * @extends sap.ui.unified.MenuTextFieldItem
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -19608,7 +20632,7 @@ sap.ui.define("sap/ui/commons/Message",['jquery.sap.global', './Dialog', './libr
 	 * @class
 	 * Creates the "Message"s to be supplied to the "MessageBar" Control.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -19904,7 +20928,7 @@ sap.ui.define("sap/ui/commons/MessageList",['jquery.sap.global', './library', 's
 	 * @class
 	 * Instantiated by the "MessageBar" Control if the user requests to generate the corresponding "MessageList".
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -20122,12 +21146,11 @@ sap.ui.define("sap/ui/commons/MessageToast",['jquery.sap.global', './library', '
 	 * @class
 	 * Responsible for displaying the new incoming messages, one at the time, on top of the MessageBar.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
-	 * @deprecated Since version 1.4.0.
-	 * A new messaging concept will be created in future. Therefore this control might be removed in one of the next versions.
+	 * @deprecated Since version 1.4.0. Instead, use the <code>sap.m.MessageToast</code> control.
 	 * @alias sap.ui.commons.MessageToast
 	 * @ui5-metamodel This control/element also will be described in the UI5 design-time metamodel
 	 */
@@ -20382,10 +21405,11 @@ sap.ui.define("sap/ui/commons/Paginator",['jquery.sap.global', './library', 'sap
 	 * @class
 	 * Provides navigation between pages within a list of numbered pages.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.Paginator
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -20460,70 +21484,7 @@ sap.ui.define("sap/ui/commons/Paginator",['jquery.sap.global', './library', 'sap
 	 * @private
 	 */
 	Paginator.prototype.onclick = function(oEvent){
-		if (oEvent && oEvent.target) {
-
-			// Supress triggering beforeunload in IE
-			oEvent.preventDefault();
-
-			// go up one node if unnamed element is the source
-			var target = oEvent.target;
-			if (!target.id) {
-				target = target.parentNode;
-			}
-
-			if (target.id && target.id != this.getId() + "-pages") {
-
-				// Retrieve from where the event originated
-				var aArray = target.id.split("--");
-
-				// only do something if relevant item has been clicked
-				if (aArray.length > 1) {
-					var lastPart = aArray[aArray.length - 1];
-
-					// What type of event will be sent
-					var sEventType = null;
-
-					// Buffer the current page as the sourcePage
-					var iSrcPage = this.getCurrentPage();
-					var iTargetPage = iSrcPage; // will be changed below
-
-					// we have a number - a page has been clicked
-					if (lastPart.match(/^\d+$/)) {
-						sEventType = sap.ui.commons.PaginatorEvent.Goto;
-						iTargetPage = parseInt(lastPart, 10);
-
-					} else if (lastPart == "firstPageLink") {
-						sEventType = sap.ui.commons.PaginatorEvent.First;
-						iTargetPage = 1;
-
-					} else if (lastPart == "backLink") {
-						sEventType = sap.ui.commons.PaginatorEvent.Previous;
-						iTargetPage = Math.max(iSrcPage - 1, 1);
-
-					} else if (lastPart == "forwardLink") {
-						sEventType = sap.ui.commons.PaginatorEvent.Next;
-						iTargetPage = Math.min(iSrcPage + 1, this.getNumberOfPages());
-
-					} else if (lastPart == "lastPageLink") {
-						sEventType = sap.ui.commons.PaginatorEvent.Last;
-						iTargetPage = this.getNumberOfPages();
-
-					} // else should not happen
-
-					if (iTargetPage != iSrcPage) {
-						if (this.bShowAnimation) {
-							this.setCurrentPage(iTargetPage, true); // update current page without re-rendering...
-							this.triggerPaginatorAnimation(); // ...and animate
-						} else {
-							this.setCurrentPage(iTargetPage); // includes re-rendering
-						}
-
-						// fire the "page" event
-						this.firePage({srcPage:iSrcPage,targetPage:iTargetPage,type:sEventType});
-					}
-				}
-			}
-		}
+		this._handleSelect(oEvent);
 	};
 
 	Paginator.prototype.setCurrentPage = function(iTargetPage, bSuppressRerendering) {
@@ -20695,10 +21656,11 @@ sap.ui.define("sap/ui/commons/Paginator",['jquery.sap.global', './library', 'sap
 		} else if (jQuery.inArray("sapdecrease", aEvents) != -1) {
 			//Moves focus to the left (Left arrow key)
 			this.triggerInternalNavigation(oEvent,"previous");
+		} else if (jQuery.inArray("sapenter", aEvents) != -1) {
+			this._handleSelect(oEvent);
 		}
 
 	};
-
 
 	/**
 	 * This function will navigate left and right in the paginator, skipping non tabbable elements
@@ -20784,8 +21746,72 @@ sap.ui.define("sap/ui/commons/Paginator",['jquery.sap.global', './library', 'sap
 		return this;
 	};
 
+	Paginator.prototype._handleSelect = function(oEvent) {
+		if (oEvent && oEvent.target) {
 
+			// Supress triggering beforeunload in IE
+			oEvent.preventDefault();
 
+			// go up one node if unnamed element is the source
+			var target = oEvent.target;
+			if (!target.id) {
+				target = target.parentNode;
+			}
+
+			if (target.id && target.id != this.getId() + "-pages") {
+
+				// Retrieve from where the event originated
+				var aArray = target.id.split("--");
+
+				// only do something if relevant item has been clicked
+				if (aArray.length > 1) {
+					var lastPart = aArray[aArray.length - 1];
+
+					// What type of event will be sent
+					var sEventType = null;
+
+					// Buffer the current page as the sourcePage
+					var iSrcPage = this.getCurrentPage();
+					var iTargetPage = iSrcPage; // will be changed below
+
+					// we have a number - a page has been clicked
+					if (lastPart.match(/^\d+$/)) {
+						sEventType = sap.ui.commons.PaginatorEvent.Goto;
+						iTargetPage = parseInt(lastPart, 10);
+
+					} else if (lastPart == "firstPageLink") {
+						sEventType = sap.ui.commons.PaginatorEvent.First;
+						iTargetPage = 1;
+
+					} else if (lastPart == "backLink") {
+						sEventType = sap.ui.commons.PaginatorEvent.Previous;
+						iTargetPage = Math.max(iSrcPage - 1, 1);
+
+					} else if (lastPart == "forwardLink") {
+						sEventType = sap.ui.commons.PaginatorEvent.Next;
+						iTargetPage = Math.min(iSrcPage + 1, this.getNumberOfPages());
+
+					} else if (lastPart == "lastPageLink") {
+						sEventType = sap.ui.commons.PaginatorEvent.Last;
+						iTargetPage = this.getNumberOfPages();
+
+					} // else should not happen
+
+					if (iTargetPage != iSrcPage) {
+						if (this.bShowAnimation) {
+							this.setCurrentPage(iTargetPage, true); // update current page without re-rendering...
+							this.triggerPaginatorAnimation(); // ...and animate
+						} else {
+							this.setCurrentPage(iTargetPage); // includes re-rendering
+						}
+
+						// fire the "page" event
+						this.firePage({srcPage:iSrcPage,targetPage:iTargetPage,type:sEventType});
+					}
+				}
+			}
+		}
+	};
 
 	return Paginator;
 
@@ -20821,10 +21847,11 @@ sap.ui.define("sap/ui/commons/Panel",['jquery.sap.global', './library', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Panel</code> control.
 	 * @alias sap.ui.commons.Panel
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -21464,7 +22491,9 @@ sap.ui.define("sap/ui/commons/Panel",['jquery.sap.global', './library', 'sap/ui/
 	Panel.prototype.getScrollTop = function () {
 		var scrollTop = 0;
 		if (this._oScrollDomRef) {
-			scrollTop = this._oScrollDomRef.scrollTop;
+
+			// The scrollTop returns float number when the browser is zoomed and therefore we need to cast it.
+			scrollTop = Math.ceil(this._oScrollDomRef.scrollTop);
 			this.setProperty("scrollTop", scrollTop, true);
 		}
 
@@ -21696,10 +22725,11 @@ sap.ui.define("sap/ui/commons/ProgressIndicator",['jquery.sap.global', './librar
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.ProgressIndicator</code> control.
 	 * @alias sap.ui.commons.ProgressIndicator
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -21772,24 +22802,7 @@ sap.ui.define("sap/ui/commons/ProgressIndicator",['jquery.sap.global', './librar
 		this.oBox  = this.getDomRef("box");
 
 		jQuery(this.oEnd).removeClass('sapUiProgIndEndHidden');
-
-		switch (sBarColor) {
-			case "POSITIVE":
-				jQuery(this.oEnd).addClass('sapUiProgIndPosEnd');
-				break;
-			case "NEGATIVE":
-				jQuery(this.oEnd).addClass('sapUiProgIndNegEnd');
-				break;
-			case "CRITICAL":
-				jQuery(this.oEnd).addClass('sapUiProgIndCritEnd');
-				break;
-			case "NEUTRAL":
-				jQuery(this.oEnd).addClass('sapUiProgIndEnd');
-				break;
-			default:
-				jQuery(this.oEnd).addClass('sapUiProgIndEnd');
-				break;
-		}
+		jQuery(this.oEnd).addClass(this._getProgIndTypeClass(sBarColor));
 
 		if (widthBar > 100) {
 			widthBorder = (10000 / widthBar) + '%';
@@ -21842,24 +22855,7 @@ sap.ui.define("sap/ui/commons/ProgressIndicator",['jquery.sap.global', './librar
 			widthBorder = '100%';
 		}
 
-		switch (sBarColor) {
-			case "POSITIVE":
-				jQuery(this.oEnd).removeClass('sapUiProgIndPosEnd');
-				break;
-			case "NEGATIVE":
-				jQuery(this.oEnd).removeClass('sapUiProgIndNegEnd');
-				break;
-			case "CRITICAL":
-				jQuery(this.oEnd).removeClass('sapUiProgIndCritEnd');
-				break;
-			case "NEUTRAL":
-				jQuery(this.oEnd).removeClass('sapUiProgIndEnd');
-				break;
-			default:
-				jQuery(this.oEnd).removeClass('sapUiProgIndEnd');
-				break;
-		}
-
+		jQuery(this.oEnd).removeClass(this._getProgIndTypeClass(sBarColor));
 		jQuery(this.oEnd).addClass('sapUiProgIndEndHidden');
 
 		if (widthBar > 100) {
@@ -21975,6 +22971,35 @@ sap.ui.define("sap/ui/commons/ProgressIndicator",['jquery.sap.global', './librar
 		return this;
 	};
 
+	ProgressIndicator.prototype._getProgIndTypeClass = function(sBarColor) {
+		switch (sBarColor) {
+			case "POSITIVE":
+				return 'sapUiProgIndPosEnd';
+			case "NEGATIVE":
+				return 'sapUiProgIndNegEnd';
+			case "CRITICAL":
+				return 'sapUiProgIndCritEnd';
+			case "NEUTRAL":
+				return 'sapUiProgIndEnd';
+			default:
+				return 'sapUiProgIndEnd';
+		}
+	};
+
+	/**
+	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @protected
+	 */
+	ProgressIndicator.prototype.getAccessibilityInfo = function() {
+		var oBundle = sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons");
+		return {
+			role: "progressbar",
+			type: oBundle.getText("ACC_CTR_TYPE_PROGRESS"),
+			description: oBundle.getText("ACC_CTR_STATE_PROGRESS", [this.getPercentValue()]),
+			focusable: this.getEnabled(),
+			enabled: this.getEnabled()
+		};
+	};
 
 	return ProgressIndicator;
 
@@ -22014,10 +23039,11 @@ sap.ui.define("sap/ui/commons/RadioButton",['jquery.sap.global', './library', 's
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.RadioButton</code> control.
 	 * @alias sap.ui.commons.RadioButton
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -22318,10 +23344,11 @@ sap.ui.define("sap/ui/commons/RadioButtonGroup",['jquery.sap.global', './library
 	 * usage is supported.
 	 *
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.RadioButtonGroup</code> control.
 	 * @alias sap.ui.commons.RadioButtonGroup
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -23111,11 +24138,12 @@ sap.ui.define("sap/ui/commons/RatingIndicator",['jquery.sap.global', './library'
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @alias sap.ui.commons.RatingIndicator
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.RatingIndicator</code> control.
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy)
 	 * designtime metamodel
 	 */
@@ -23570,6 +24598,21 @@ sap.ui.define("sap/ui/commons/RatingIndicator",['jquery.sap.global', './library'
 		return this;
 	};
 
+	/**
+	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @protected
+	 */
+	RatingIndicator.prototype.getAccessibilityInfo = function() {
+		var oBundle = sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons");
+		return {
+			role: "slider",
+			type: oBundle.getText("ACC_CTR_TYPE_RATING"),
+			description: oBundle.getText("ACC_CTR_STATE_RATING", [this._getDisplayValue(), this.getMaxValue()]),
+			focusable: true,
+			editable: this.getEditable()
+		};
+	};
+
 
 	return RatingIndicator;
 
@@ -23605,10 +24648,11 @@ sap.ui.define("sap/ui/commons/ResponsiveContainer",['jquery.sap.global', './libr
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.ResponsiveContainer
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -23793,9 +24837,9 @@ if ( !jQuery.sap.isDeclared('sap.ui.commons.ResponsiveContainerRange') ) {
 // Provides control sap.ui.commons.ResponsiveContainerRange.
 jQuery.sap.declare('sap.ui.commons.ResponsiveContainerRange'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-jQuery.sap.require('sap.ui.core.Control'); // unlisted dependency retained
-sap.ui.define("sap/ui/commons/ResponsiveContainerRange",['jquery.sap.global', './library', 'sap/ui/core/Control'],
-	function(jQuery, library, Control) {
+jQuery.sap.require('sap.ui.core.Element'); // unlisted dependency retained
+sap.ui.define("sap/ui/commons/ResponsiveContainerRange",['jquery.sap.global', './library', 'sap/ui/core/Element'],
+	function(jQuery, library, Element) {
 	"use strict";
 
 
@@ -23808,17 +24852,18 @@ sap.ui.define("sap/ui/commons/ResponsiveContainerRange",['jquery.sap.global', '.
 	 *
 	 * @class
 	 * Defines a range for the ResponsiveContainer
-	 * @extends sap.ui.core.Control
+	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.ResponsiveContainerRange
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	var ResponsiveContainerRange = Control.extend("sap.ui.commons.ResponsiveContainerRange", /** @lends sap.ui.commons.ResponsiveContainerRange.prototype */ { metadata : {
+	var ResponsiveContainerRange = Element.extend("sap.ui.commons.ResponsiveContainerRange", /** @lends sap.ui.commons.ResponsiveContainerRange.prototype */ { metadata : {
 
 		library : "sap.ui.commons",
 		properties : {
@@ -23883,10 +24928,11 @@ sap.ui.define("sap/ui/commons/RichTooltip",['jquery.sap.global', './library', 's
 	 * @extends sap.ui.core.TooltipBase
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Popover</code> control.
 	 * @alias sap.ui.commons.RichTooltip
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -23998,9 +25044,9 @@ sap.ui.define("sap/ui/commons/RichTooltip",['jquery.sap.global', './library', 's
 	 * This overrides the function of TooltipBase to create a FormattedTextView that
 	 * should be used for rendering
 	 *
-	 * @override sap.ui.core.TooltipBase.setText
+	 * @override
 	 * @param sText
-	 *            {sap.ui.core.string} the text that should be shown
+	 *            {string} the text that should be shown
 	 */
 	RichTooltip.prototype.setText = function(sText) {
 		if (!!sText) {
@@ -24026,8 +25072,8 @@ sap.ui.define("sap/ui/commons/RichTooltip",['jquery.sap.global', './library', 's
 	 * being read and returned. If no text was set an empty string is being
 	 * returned.
 	 *
-	 * @returns {sap.ui.core.string} the text that was previously set.
-	 * @override TooltipBase.getText
+	 * @returns {string} the text that was previously set.
+	 * @override
 	 */
 	RichTooltip.prototype.getText = function() {
 		var oText = this.getAggregation("formattedText");
@@ -24103,10 +25149,11 @@ sap.ui.define("sap/ui/commons/RoadMap",['jquery.sap.global', './library', 'sap/u
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Wizard</code> control.
 	 * @alias sap.ui.commons.RoadMap
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -24637,10 +25684,11 @@ sap.ui.define("sap/ui/commons/RoadMapStep",['jquery.sap.global', './library', 's
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Wizard</code> control.
 	 * @alias sap.ui.commons.RoadMapStep
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -24906,10 +25954,11 @@ sap.ui.define("sap/ui/commons/RowRepeater",['jquery.sap.global', './library', 's
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.ui.table.Table</code> control.
 	 * @alias sap.ui.commons.RowRepeater
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -26456,10 +27505,11 @@ sap.ui.define("sap/ui/commons/RowRepeaterFilter",['jquery.sap.global', './librar
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.ui.table.Table</code> control.
 	 * @alias sap.ui.commons.RowRepeaterFilter
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -26525,10 +27575,11 @@ sap.ui.define("sap/ui/commons/RowRepeaterSorter",['jquery.sap.global', './librar
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.ui.table.Table</code> control.
 	 * @alias sap.ui.commons.RowRepeaterSorter
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -26592,7 +27643,7 @@ sap.ui.define("sap/ui/commons/SearchProvider",['jquery.sap.global', './library',
 	 * @class
 	 * A SearchProvider which can be attached to a Search Field.
 	 * @extends sap.ui.core.search.OpenSearchProvider
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -26658,10 +27709,11 @@ sap.ui.define("sap/ui/commons/Slider",['jquery.sap.global', './library', 'sap/ui
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Slider</code> control.
 	 * @alias sap.ui.commons.Slider
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -27967,51 +29019,39 @@ sap.ui.define("sap/ui/commons/Slider",['jquery.sap.global', './library', 'sap/ui
 	 * @public
 	 */
 	Slider.prototype.setValue = function(fValue) {
+		var iNewPos, fMin, fMax, fBarWidth, bIsVertical,
+			fNewValue = parseFloat(fValue);
 
 		this.setProperty('value', fValue, true); // No re-rendering
-
 		this._lastValue = fValue;
 
-		// Check for number -> if NaN -> no change
-		if ( isNaN(fValue) ) {
+		if (!this.oBar || isNaN(fValue)) {
 			return this;
 		}
 
-		if (!this.oBar) {
-			// Not already rendered -> return and render
-			return this;
-		}
+		fMin = this.getMin();
+		fMax = this.getMax();
+		fBarWidth = this.getBarWidth();
+		bIsVertical = this.getVertical();
 
-		var fNewValue = parseFloat( fValue );
-		var iNewPos;
-
-		if ( fNewValue >= this.getMax() ) {
-			fNewValue   = this.getMax();
-			if (this.getVertical()) {
-				iNewPos = 0;
-			} else {
-				iNewPos = this.getBarWidth();
-			}
-		} else if ( fNewValue <= this.getMin() ) {
-			fNewValue   = this.getMin();
-			if (this.getVertical()) {
-				iNewPos = this.getBarWidth();
-			} else {
-				iNewPos = 0;
-			}
+		if (fNewValue > fMax) {
+			fNewValue = fMax;
+			iNewPos = fBarWidth;
+		} else if (fNewValue < fMin) {
+			fNewValue = fMin;
+			iNewPos = 0;
 		} else {
-			iNewPos = ( fNewValue - this.getMin() ) / ( this.getMax() - this.getMin() ) * this.getBarWidth();
+			iNewPos = (( fNewValue - fMin ) / ( fMax - fMin )) * fBarWidth;
 		}
 
-		if (this.bRtl && !this.getVertical()) {
-			iNewPos = this.getBarWidth() - iNewPos;
+		if (this.bRtl || bIsVertical) {
+			iNewPos = fBarWidth - iNewPos;
 		}
 
-		this.changeGrip( fNewValue, iNewPos, this.oGrip );
+		this.changeGrip(fNewValue, iNewPos, this.oGrip);
 		this._lastValue = fNewValue;
 
 		return this;
-
 	};
 
 	/*
@@ -28323,10 +29363,11 @@ sap.ui.define("sap/ui/commons/Splitter",['jquery.sap.global', './library', 'sap/
 	 * @class
 	 * Allows to split the screen into two areas. Make sure that the container for the splitter has an absolute height or set an absolute height for the splitter using the height property. Otherwise the height of the splitter is calculated by the height of its contents.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.ui.layout.Splitter</code> control.
 	 * @alias sap.ui.commons.Splitter
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -28696,7 +29737,7 @@ sap.ui.define("sap/ui/commons/Splitter",['jquery.sap.global', './library', 'sap/
 	/**
 	 * The selectstart event triggered in IE to select the text.
 	 * @private
-	 * @param {event} oEvent The splitterselectstart event
+	 * @param {jQuery.Event} oEvent The splitterselectstart event
 	 * @return {boolean} false
 	 */
 	Splitter.prototype.splitterSelectStart = function(oEvent){
@@ -29028,10 +30069,11 @@ sap.ui.define("sap/ui/commons/Tab",['jquery.sap.global', './Panel', './library']
 	 * @extends sap.ui.commons.Panel
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.TabContainer</code> control.
 	 * @alias sap.ui.commons.Tab
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -29259,8 +30301,15 @@ jQuery.sap.declare('sap.ui.commons.TabStrip'); // unresolved dependency added by
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 jQuery.sap.require('sap.ui.core.Control'); // unlisted dependency retained
 jQuery.sap.require('sap.ui.core.delegate.ItemNavigation'); // unlisted dependency retained
-sap.ui.define("sap/ui/commons/TabStrip",['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/delegate/ItemNavigation'],
-	function(jQuery, library, Control, ItemNavigation) {
+jQuery.sap.require('sap.ui.core.Icon'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.core.delegate.ScrollEnablement'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.Device'); // unlisted dependency retained
+sap.ui.define("sap/ui/commons/TabStrip",['jquery.sap.global', './library', 'sap/ui/core/Control',
+		'sap/ui/core/delegate/ItemNavigation', 'sap/ui/core/Icon',
+		'sap/ui/core/delegate/ScrollEnablement', 'sap/ui/Device'],
+	function(jQuery, library, Control,
+	         ItemNavigation, Icon,
+	         ScrollEnablement, Device) {
 	"use strict";
 
 
@@ -29278,10 +30327,11 @@ sap.ui.define("sap/ui/commons/TabStrip",['jquery.sap.global', './library', 'sap/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.TabContainer</code> control.
 	 * @alias sap.ui.commons.TabStrip
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -29316,7 +30366,15 @@ sap.ui.define("sap/ui/commons/TabStrip",['jquery.sap.global', './library', 'sap/
 			/**
 			 * The tabs contained in the TabStrip.
 			 */
-			tabs : {type : "sap.ui.commons.Tab", multiple : true, singularName : "tab"}
+			tabs : {type : "sap.ui.commons.Tab", multiple : true, singularName : "tab"},
+			/**
+			 * The left arrow, used for tab scrolling.
+			 */
+			_leftArrowControl: {type: "sap.ui.core.Icon", multiple: false, visibility: "hidden"},
+			/**
+			 * The right arrow, used for tab scrolling.
+			 */
+			_rightArrowControl: {type: "sap.ui.core.Icon", multiple: false, visibility: "hidden"}
 		},
 		events : {
 
@@ -29348,18 +30406,85 @@ sap.ui.define("sap/ui/commons/TabStrip",['jquery.sap.global', './library', 'sap/
 		}
 	}});
 
-	TabStrip.ANIMATION_DURATION = 200;
+	TabStrip.SCROLL_SIZE = 320;
+	TabStrip.ANIMATION_DURATION = sap.ui.getCore().getConfiguration().getAnimation() ? 200 : 0;
+	TabStrip.SCROLL_ANIMATION_DURATION = sap.ui.getCore().getConfiguration().getAnimation() ? 500 : 0;
 
 	TabStrip.prototype.init = function() {
+
+		this._bInitialized = true;
+
+		this._bRtl = sap.ui.getCore().getConfiguration().getRTL();
+		this._iCurrentScrollLeft = 0;
+		this._iMaxOffsetLeft = null;
+		this._scrollable = null;
+
+		this._oScroller = new ScrollEnablement(this, this.getId() + "-tablist", {
+			horizontal: !this.getEnableTabReordering(),
+			vertical: false,
+			nonTouchScrolling: true
+		});
+
 		this.data("sap-ui-fastnavgroup", "true", true); // Define group for F6 handling
+	};
+
+	/**
+	 * Sets whether tab reordering is enabled.
+	 *
+	 * @param {boolean} bValue The value.
+	 * @returns {sap.ui.commons.TabStrip} Pointer to the control instance for chaining.
+	 * @public
+	 */
+	TabStrip.prototype.setEnableTabReordering = function (bValue) {
+
+		this.setProperty("enableTabReordering", bValue, true); // no re-rendering
+
+		if (this._oScroller) {
+			this._oScroller.setHorizontal(!bValue);
+		}
+
+		return this;
+	};
+
+	/**
+	 * Called before the rendering of the control is started.
+	 *
+	 * @override
+	 * @public
+	 */
+	TabStrip.prototype.onBeforeRendering = function () {
+		if (this._sResizeListenerId) {
+			sap.ui.core.ResizeHandler.deregister(this._sResizeListenerId);
+			this._sResizeListenerId = null;
+		}
 	};
 
 	TabStrip.prototype.onAfterRendering = function() {
 
+		if (this._oScroller) {
+			this._oScroller.setIconTabBar(this, jQuery.proxy(this._updateScrollingAppearance, this), null);
+		}
+
 		this._initItemNavigation();
 
-		// Notify the tabs
+		this._updateScrollingAppearance();
+
+		this._sResizeListenerId = sap.ui.core.ResizeHandler.register(this.getDomRef(),  jQuery.proxy(this._updateScrollingAppearance, this));
+
 		var aTabs = this.getTabs();
+		var iSelectedIndex = this.getSelectedIndex();
+		var oTab = aTabs[iSelectedIndex];
+
+		if (this._oScroller && oTab && oTab.$().length > 0) {
+
+			if (!this._oScroller._$Container) {
+				this._oScroller.onAfterRendering();
+			}
+
+			this._scrollIntoView(oTab.$(), TabStrip.SCROLL_ANIMATION_DURATION);
+		}
+
+		// Notify the tabs
 		for (var i = 0;i < aTabs.length;i++) {
 			aTabs[i].onAfterRendering();
 		}
@@ -29449,7 +30574,24 @@ sap.ui.define("sap/ui/commons/TabStrip",['jquery.sap.global', './library', 'sap/
 	 * Called from Element's destroy() method.
 	 * @private
 	 */
-	TabStrip.prototype.exit = function (){
+	TabStrip.prototype.exit = function () {
+
+		this._bInitialized = false;
+
+		this._iCurrentScrollLeft = null;
+		this._iMaxOffsetLeft = null;
+		this._scrollable = null;
+
+		if (this._oScroller) {
+			this._oScroller.destroy();
+			this._oScroller = null;
+		}
+
+		if (this._sResizeListenerId) {
+			sap.ui.core.ResizeHandler.deregister(this._sResizeListenerId);
+			this._sResizeListenerId = null;
+		}
+
 		if (this.oItemNavigation) {
 			this.removeDelegate(this.oItemNavigation);
 			this.oItemNavigation.destroy();
@@ -29529,6 +30671,10 @@ sap.ui.define("sap/ui/commons/TabStrip",['jquery.sap.global', './library', 'sap/
 
 		var aTabs = this.getTabs();
 		var oTab = aTabs[iSelectedIndex];
+
+		if (this._oScroller && oTab && oTab.$().length > 0) {
+			this._scrollIntoView(oTab.$(), TabStrip.SCROLL_ANIMATION_DURATION);
+		}
 
 		if (!oTab && !this.getDomRef()) {
 			// tab don't exist but not rendered. In initial setup index might be set before tab is added
@@ -29685,6 +30831,8 @@ sap.ui.define("sap/ui/commons/TabStrip",['jquery.sap.global', './library', 'sap/
 		if (bTabFocused) {
 			this.oItemNavigation.focusItem(iFocusedIndex);
 		}
+
+		this._updateScrollingAppearance();
 	};
 
 	/*
@@ -29695,39 +30843,53 @@ sap.ui.define("sap/ui/commons/TabStrip",['jquery.sap.global', './library', 'sap/
 	 */
 	TabStrip.prototype.rerenderPanel = function(iOldIndex, fireSelect) {
 
+		var aTabs = this.getTabs();
 		var iNewIndex = this.getSelectedIndex();
-		var oOldTab = this.getTabs()[iOldIndex];
-		var sNewId = this.getTabs()[iNewIndex].getId();
-		var oTab = this.getTabs()[iNewIndex];
+		var oTab = aTabs[iNewIndex];
+		var oOldTab = aTabs[iOldIndex];
 
 		// ensure that events from the controls in the panel are fired
-		jQuery.sap.delayedCall(0, this, function() {
+		jQuery.sap.delayedCall(0, this, function () {
+
+			if (!this._bInitialized) {
+				return;
+			}
 
 			var $panel = this.$().find('.sapUiTabPanel');
 
-			if ($panel.length > 0) {
-				var rm = sap.ui.getCore().createRenderManager();
-				this.getRenderer().renderTabContents(rm, oTab);
-				rm.flush($panel[0]);
-				rm.destroy();
-			}
+			if (oTab) {
+				if ($panel.length > 0) {
+					var rm = sap.ui.getCore().createRenderManager();
+					this.getRenderer().renderTabContents(rm, oTab);
+					rm.flush($panel[0]);
+					rm.destroy();
+				}
 
-			// change the ID and Label of the panel to the current tab
-			$panel.attr("id",sNewId + "-panel").attr("aria-labelledby", sNewId);
+				var sNewId = oTab.getId();
+
+				// change the ID and Label of the panel to the current tab
+				$panel.attr("id", sNewId + "-panel").attr("aria-labelledby", sNewId);
+			} else {
+				$panel.empty();
+			}
 
 			//store the scroll top and left possitions as a property value in order to be restored later
 			oOldTab.setProperty("scrollTop", $panel.scrollTop(), true);
 			oOldTab.setProperty("scrollLeft", $panel.scrollLeft(), true);
 
 			// call after rendering method of tab to set scroll functions
-			oTab.onAfterRendering();
+			if (oTab) {
+				oTab.onAfterRendering();
+			}
 
 			if (fireSelect) {
 				this.fireSelect({index: iNewIndex});
 			}
 		});
 
-		this.toggleTabClasses(iOldIndex, iNewIndex);
+		if (oTab) {
+			this.toggleTabClasses(iOldIndex, iNewIndex);
+		}
 	};
 
 	/*
@@ -29737,39 +30899,48 @@ sap.ui.define("sap/ui/commons/TabStrip",['jquery.sap.global', './library', 'sap/
 	 */
 	TabStrip.prototype.toggleTabClasses = function(iOldIndex, iNewIndex) {
 
+		var aTabs = this.getTabs();
+
 		// change visualization of selected tab and old tab
-		this.getTabs()[iOldIndex].$().toggleClass("sapUiTabSel sapUiTab").attr("aria-selected",false);
+		var oTab = aTabs[iOldIndex];
+		if (oTab) {
+			oTab.$().toggleClass("sapUiTabSel sapUiTab").attr("aria-selected", false);
+		}
 		var iBeforeIndex = iOldIndex - 1;
-		while (iBeforeIndex >= 0 && !this.getTabs()[iBeforeIndex].getVisible()) {
+		while (iBeforeIndex >= 0 && !aTabs[iBeforeIndex].getVisible()) {
 			iBeforeIndex--;
 		}
 		if (iBeforeIndex >= 0) {
-			this.getTabs()[iBeforeIndex].$().removeClass("sapUiTabBeforeSel");
+			aTabs[iBeforeIndex].$().removeClass("sapUiTabBeforeSel");
 		}
 
 		var iAfterIndex = iOldIndex + 1;
-		while (iAfterIndex < this.getTabs().length && !this.getTabs()[iAfterIndex].getVisible()) {
+		while (iAfterIndex < aTabs.length && !aTabs[iAfterIndex].getVisible()) {
 			iAfterIndex++;
 		}
-		if (iAfterIndex < this.getTabs().length) {
-			this.getTabs()[iAfterIndex].$().removeClass("sapUiTabAfterSel");
+		if (iAfterIndex < aTabs.length) {
+			aTabs[iAfterIndex].$().removeClass("sapUiTabAfterSel");
 		}
 
-		this.getTabs()[iNewIndex].$().toggleClass("sapUiTabSel sapUiTab").attr("aria-selected",true);
+		oTab = aTabs[iNewIndex];
+		if (oTab) {
+			oTab.$().toggleClass("sapUiTabSel sapUiTab").attr("aria-selected", true);
+		}
+
 		iBeforeIndex = iNewIndex - 1;
-		while (iBeforeIndex >= 0 && !this.getTabs()[iBeforeIndex].getVisible()) {
+		while (iBeforeIndex >= 0 && !aTabs[iBeforeIndex].getVisible()) {
 			iBeforeIndex--;
 		}
 		if (iBeforeIndex >= 0) {
-			this.getTabs()[iBeforeIndex].$().addClass("sapUiTabBeforeSel");
+			aTabs[iBeforeIndex].$().addClass("sapUiTabBeforeSel");
 		}
 
 		iAfterIndex = iNewIndex + 1;
-		while (iAfterIndex < this.getTabs().length && !this.getTabs()[iAfterIndex].getVisible()) {
+		while (iAfterIndex < aTabs.length && !aTabs[iAfterIndex].getVisible()) {
 			iAfterIndex++;
 		}
-		if (iAfterIndex < this.getTabs().length) {
-			this.getTabs()[iAfterIndex].$().addClass("sapUiTabAfterSel");
+		if (iAfterIndex < aTabs.length) {
+			aTabs[iAfterIndex].$().addClass("sapUiTabAfterSel");
 		}
 	};
 
@@ -30064,7 +31235,7 @@ sap.ui.define("sap/ui/commons/TabStrip",['jquery.sap.global', './library', 'sap/
 	/**
 	 * Checks whether the passed oEvent is a touch event.
 	 * @private
-	 * @param {event} oEvent The event to check
+	 * @param {jQuery.Event} oEvent The event to check
 	 * @return {boolean} false
 	 */
 	TabStrip.prototype._isTouchMode = function(oEvent) {
@@ -30074,8 +31245,8 @@ sap.ui.define("sap/ui/commons/TabStrip",['jquery.sap.global', './library', 'sap/
 	TabStrip.prototype._initItemNavigation = function() {
 
 		// find a collection of all tabs
-		var oFocusRef = this.getFocusDomRef(),
-			aTabs = oFocusRef.lastChild.childNodes,
+		var oFocusRef = this.getDomRef('tablist'),
+			aTabs = oFocusRef.childNodes,
 			aTabDomRefs = [],
 			iSelectedDomIndex = -1;
 
@@ -30090,6 +31261,8 @@ sap.ui.define("sap/ui/commons/TabStrip",['jquery.sap.global', './library', 'sap/
 		//Initialize the ItemNavigation
 		if (!this.oItemNavigation) {
 			this.oItemNavigation = new ItemNavigation();
+			this.oItemNavigation.attachEvent(ItemNavigation.Events.AfterFocus, this._onItemNavigationAfterFocus, this);
+			this.oItemNavigation.setCycling(false);
 			this.addDelegate(this.oItemNavigation);
 		}
 
@@ -30148,6 +31321,217 @@ sap.ui.define("sap/ui/commons/TabStrip",['jquery.sap.global', './library', 'sap/
 		return 0;
 	};
 
+	/**
+	 * Returns the sap.ui.core.Icon control used to display left scrolling arrow.
+	 * @returns {sap.ui.core.Icon}
+	 * @private
+	 */
+	TabStrip.prototype._getLeftArrowControl = function () {
+		var iconControl = this.getAggregation('_leftArrowControl');
+		var that = this;
+
+		if (!iconControl) {
+			iconControl = new Icon({
+				src: 'sap-icon://navigation-left-arrow',
+				noTabStop: true,
+				useIconTooltip: false,
+				tooltip: '',
+				press: function (oEvent) {
+					that._scroll(-TabStrip.SCROLL_SIZE, TabStrip.SCROLL_ANIMATION_DURATION);
+				}
+			}).addStyleClass('sapUiTabStripScrollIcon sapUiTabStripLeftScrollIcon');
+
+			this.setAggregation("_leftArrowControl", iconControl, true);
+		}
+
+		return iconControl;
+	};
+
+	/**
+	 * Returns the sap.ui.core.Icon control used to display right scrolling arrow.
+	 * @returns {sap.ui.core.Icon}
+	 * @private
+	 */
+	TabStrip.prototype._getRightArrowControl = function () {
+		var iconControl = this.getAggregation('_rightArrowControl');
+		var that = this;
+
+		if (!iconControl) {
+			iconControl = new Icon({
+				src: 'sap-icon://navigation-right-arrow',
+				noTabStop: true,
+				useIconTooltip: false,
+				tooltip: '',
+				press: function (oEvent) {
+					that._scroll(TabStrip.SCROLL_SIZE, TabStrip.SCROLL_ANIMATION_DURATION);
+				}
+			}).addStyleClass('sapUiTabStripScrollIcon sapUiTabStripRightScrollIcon');
+
+			this.setAggregation("_rightArrowControl", iconControl, true);
+		}
+
+		return iconControl;
+	};
+
+	TabStrip.prototype._scroll = function(iDelta, iDuration) {
+		var iScrollLeft = this.getDomRef("scrollCont").scrollLeft,
+			iScrollTarget;
+
+		if (this._bRtl && Device.browser.firefox) {
+			iScrollTarget = iScrollLeft - iDelta;
+
+			// Avoid out ofRange situation
+			if (iScrollTarget < -this._iMaxOffsetLeft) {
+				iScrollTarget = -this._iMaxOffsetLeft;
+			}
+			if (iScrollTarget > 0) {
+				iScrollTarget = 0;
+			}
+		} else {
+			iScrollTarget = iScrollLeft + iDelta;
+
+			if (iScrollTarget < 0) {
+				iScrollTarget = 0;
+			}
+			if (iScrollTarget > this._iMaxOffsetLeft) {
+				iScrollTarget = this._iMaxOffsetLeft;
+			}
+		}
+
+		if (this._oScroller) {
+			this._oScroller.scrollTo(iScrollTarget, 0, iDuration);
+		}
+
+		this._iCurrentScrollLeft = iScrollTarget;
+	};
+
+	/**
+	 * Handles scrolling arrow press.
+	 * @private
+	 */
+	TabStrip.prototype._scrollIntoView = function ($item, iDuration) {
+		var $tablist = this.$("tablist"),
+			iTabsPaddingWidth = $tablist.innerWidth() - $tablist.width(),
+			iItemWidth = $item.outerWidth(true),
+			iItemPosLeft = $item.position().left - iTabsPaddingWidth / 2,
+			oScrollContainerDomRef = this.getDomRef("scrollCont"),
+			iScrollLeft = oScrollContainerDomRef.scrollLeft,
+			iContainerWidth = this.$("scrollCont").width(),
+			iNewScrollLeft = iScrollLeft;
+
+		// check if item is outside of viewport
+		if (iItemPosLeft < 0 || iItemPosLeft > iContainerWidth - iItemWidth) {
+
+			if (this._bRtl && Device.browser.firefox) {
+				if (iItemPosLeft < 0) { // right side: make this the last item
+					iNewScrollLeft += iItemPosLeft + iItemWidth - iContainerWidth;
+				} else { // left side: make this the first item
+					iNewScrollLeft += iItemPosLeft;
+				}
+			} else {
+				if (iItemPosLeft < 0) { // left side: make this the first item
+					iNewScrollLeft += iItemPosLeft;
+				} else { // right side: make this the last item
+					iNewScrollLeft += iItemPosLeft + iItemWidth - iContainerWidth;
+				}
+			}
+
+			// store current scroll state to set it after re-rendering
+			this._iCurrentScrollLeft = iNewScrollLeft;
+
+			if (this._oScroller) {
+				this._oScroller.scrollTo(iNewScrollLeft, 0, iDuration);
+			}
+		}
+	};
+
+	/**
+	 * Checks if scrolling is needed.
+	 *
+	 * @returns {boolean} Whether scrolling is needed
+	 * @private
+	 */
+	TabStrip.prototype._hasScrolling = function() {
+		var oTabListDomRef = this.getDomRef("tablist"),
+			scrollCont = this.getDomRef("scrollCont"),
+			bScrollNeeded = oTabListDomRef && (oTabListDomRef.scrollWidth > scrollCont.clientWidth);
+
+		this.$().toggleClass("sapUiTabStripScrollable", bScrollNeeded);
+
+		return bScrollNeeded;
+	};
+
+	/**
+	 * Updates scrolling appearance.
+	 *
+	 * @private
+	 */
+	TabStrip.prototype._updateScrollingAppearance = function() {
+		var oTabListDomRef = this.getDomRef("tablist"),
+			oScrollContainerDomRef = this.getDomRef("scrollCont"),
+			iScrollLeft,
+			realWidth,
+			availableWidth,
+			bScrollBack = false,
+			bScrollForward = false;
+
+		if (this._hasScrolling() && oTabListDomRef && oScrollContainerDomRef) {
+			if (this._bRtl && Device.browser.firefox) {
+				iScrollLeft = -oScrollContainerDomRef.scrollLeft;
+			} else {
+				iScrollLeft = oScrollContainerDomRef.scrollLeft;
+			}
+
+			realWidth = oTabListDomRef.scrollWidth;
+			availableWidth = oScrollContainerDomRef.clientWidth;
+
+			if (Math.abs(realWidth - availableWidth) === 1) {
+				realWidth = availableWidth;
+			}
+
+			if (iScrollLeft > 0) {
+				bScrollBack = true;
+			}
+
+			if ((realWidth > availableWidth) && (iScrollLeft + availableWidth < realWidth)) {
+				bScrollForward = true;
+			}
+		}
+
+		this.$().toggleClass("sapUiTabStripScrollBack", bScrollBack)
+			.toggleClass("sapUiTabStripScrollForward", bScrollForward);
+
+		this._iMaxOffsetLeft = Math.abs(jQuery(oScrollContainerDomRef).width() - jQuery(oTabListDomRef).width());
+	};
+
+	/**
+	 * Adjusts arrows when keyboard is used for navigation and the beginning/end of the toolbar is reached.
+	 * @private
+	 */
+	TabStrip.prototype._onItemNavigationAfterFocus = function(oEvent) {
+		var oIndex = oEvent.getParameter("index"),
+			$event = oEvent.getParameter('event');
+
+		if (!$event) {
+			return;
+		}
+
+		var $target = jQuery($event.target);
+
+		// handle only keyboard navigation here
+		if (!$target || $event.keyCode === undefined) {
+			return;
+		}
+
+		if (oIndex !== null && oIndex !== undefined) {
+
+			var oNext = jQuery($target.parent().children()[oIndex]);
+
+			if (oNext && oNext.length) {
+				this._scrollIntoView(oNext, 0);
+			}
+		}
+	};
 
 	return TabStrip;
 
@@ -30306,10 +31690,11 @@ sap.ui.define("sap/ui/commons/TextField",['jquery.sap.global', './library', 'sap
 	 * @implements sap.ui.commons.ToolbarItem
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Input</code> control.
 	 * @alias sap.ui.commons.TextField
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -31118,6 +32503,21 @@ sap.ui.define("sap/ui/commons/TextField",['jquery.sap.global', './library', 'sap
 
 	};
 
+	/**
+	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @protected
+	 */
+	TextField.prototype.getAccessibilityInfo = function() {
+		return {
+			role: "textbox",
+			type: sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons").getText("ACC_CTR_TYPE_INPUT"),
+			description: this.getValue() || "",
+			focusable: this.getEnabled(),
+			enabled: this.getEnabled(),
+			editable: this.getEnabled() && this.getEditable()
+		};
+	};
+
 
 	return TextField;
 
@@ -31151,10 +32551,11 @@ sap.ui.define("sap/ui/commons/TextView",['jquery.sap.global', './library', 'sap/
 	 * @implements sap.ui.commons.ToolbarItem
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.TextView
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -31251,6 +32652,14 @@ sap.ui.define("sap/ui/commons/TextView",['jquery.sap.global', './library', 'sap/
 		return this;
 	};
 
+	/**
+	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @protected
+	 */
+	TextView.prototype.getAccessibilityInfo = function() {
+		return {description: this.getText()};
+	};
+
 	return TextView;
 
 }, /* bExport= */ true);
@@ -31284,7 +32693,7 @@ sap.ui.define("sap/ui/commons/Title",['jquery.sap.global', './library', 'sap/ui/
 	 * @extends sap.ui.core.Title
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -31360,10 +32769,11 @@ sap.ui.define("sap/ui/commons/ToggleButton",['jquery.sap.global', './Button'],
 	 * @extends sap.ui.commons.Button
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.ToggleButton</code> control.
 	 * @alias sap.ui.commons.ToggleButton
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -31423,6 +32833,20 @@ sap.ui.define("sap/ui/commons/ToggleButton",['jquery.sap.global', './Button'],
 	};
 
 
+	/**
+	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @protected
+	 */
+	ToggleButton.prototype.getAccessibilityInfo = function() {
+		var oInfo = Button.prototype.getAccessibilityInfo.apply(this, arguments);
+		if (this.getPressed()) {
+			oInfo.description = ((oInfo.description || "") + " " +
+				sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons").getText("ACC_CTR_STATE_PRESSED")).trim();
+		}
+		return oInfo;
+	};
+
+
 	return ToggleButton;
 
 }, /* bExport= */ true);
@@ -31458,10 +32882,11 @@ sap.ui.define("sap/ui/commons/Toolbar",['jquery.sap.global', './library', 'sap/u
 		 * @implements sap.ui.core.Toolbar
 		 *
 		 * @author SAP SE
-		 * @version 1.34.9
+		 * @version 1.44.14
 		 *
 		 * @constructor
 		 * @public
+		 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Toolbar</code> control.
 		 * @alias sap.ui.commons.Toolbar
 		 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 		 */
@@ -32494,10 +33919,11 @@ sap.ui.define("sap/ui/commons/ToolbarSeparator",['jquery.sap.global', './library
 	 * @implements sap.ui.commons.ToolbarItem
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Toolbar</code> control.
 	 * @alias sap.ui.commons.ToolbarSeparator
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -32556,10 +33982,11 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	 * @class
 	 * Simple tree to display item in a hierarchical way
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.Tree
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -32795,7 +34222,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	/**
 	 * The general HOME key event of the tree
 	 * @private
-	 * @param {event} oEvent The saphome event object
+	 * @param {jQuery.Event} oEvent The saphome event object
 	 */
 	Tree.prototype.onsaphome = function(oEvent) {
 		this.placeFocus(this.getFirstSibling(oEvent.target));
@@ -32805,7 +34232,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	/**
 	 * The general CTRL+HOME key event of the tree
 	 * @private
-	 * @param {event} oEvent The saphome event object
+	 * @param {jQuery.Event} oEvent The saphome event object
 	 */
 	Tree.prototype.onsaphomemodifiers = function(oEvent) {
 		this.placeFocus(this.getFirst());
@@ -32815,7 +34242,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	/**
 	 * The general END key event of the tree
 	 * @private
-	 * @param {event} oEvent The sapend event object
+	 * @param {jQuery.Event} oEvent The sapend event object
 	 */
 	Tree.prototype.onsapend = function(oEvent) {
 		this.placeFocus(this.getLastSibling(oEvent.target));
@@ -32825,7 +34252,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	/**
 	 * The general CTRL+END key event of the tree
 	 * @private
-	 * @param {event} oEvent The sapend event object
+	 * @param {jQuery.Event} oEvent The sapend event object
 	 */
 	Tree.prototype.onsapendmodifiers = function(oEvent) {
 		this.placeFocus(this.getLast());
@@ -32835,7 +34262,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	/**
 	 * The numpad STAR(*) key event of the tree
 	 * @private
-	 * @param {event} oEvent The sapcollapseall event object
+	 * @param {jQuery.Event} oEvent The sapcollapseall event object
 	 */
 	Tree.prototype.onsapcollapseall = function(oEvent) {
 
@@ -33092,21 +34519,18 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	 * @param {sap.ui.commons.TreeNode} oNode The current node to look at
 	 * @param {sap.ui.commons.TreeNode} oRootNode The root node that was collapsed
 	 */
-	function rememberSelectedChildren(oNode, oRootNode, oTree) {
-		var aNodes = oNode._getNodes();
-		var oCurrentNode = null;
+	function rememberSelectedChildren(oNode, oRootNode) {
+		var aNodes = oNode._getNodes(),
+			oCurrentNode;
+
 		for (var i = 0; i < aNodes.length; i++) {
 			oCurrentNode = aNodes[i];
-
-			if (oTree.getSelectionMode() === sap.ui.commons.TreeSelectionMode.Multi && oCurrentNode.getIsSelected()) {
-				oTree._delMultiSelection(oCurrentNode);
-			}
 
 			if (oCurrentNode.getIsSelected()) {
 				oRootNode.addAssociation("selectedForNodes", oCurrentNode, true);
 			}
 
-			rememberSelectedChildren(oCurrentNode, oRootNode, oTree);
+			rememberSelectedChildren(oCurrentNode, oRootNode);
 		}
 	}
 
@@ -33123,7 +34547,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 
 		// the root node, which needs to update references for selected children,
 		// is also the first node to look at
-		rememberSelectedChildren(oCollapsingNode, oCollapsingNode, this);
+		rememberSelectedChildren(oCollapsingNode, oCollapsingNode);
 
 		//update dom if necessary
 		if (oCollapsingNode.getSelectedForNodes().length) {
@@ -33146,25 +34570,57 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	 * override element updateAggregation method with this one and update the tree node bindings
 	 * @private
 	 */
-	Tree.prototype.updateNodes = function(sReason){
-		var oNode,
-			oContext;
+	Tree.prototype.updateNodes = function(sReason) {
+		var aNodes,
+			oNode,
+			sKey,
+			iNodesLength,
+			i;
+
+		// Delete all old node instances
+		if (sReason === "filter") {
+			aNodes = this.getAggregation("nodes");
+			iNodesLength = aNodes.length;
+			for (i = 0; i < iNodesLength; i++) {
+				aNodes[i].destroy();
+			}
+			// We reset here mSelectedNodes as it collects id's and after filtering
+			// the tree nodes they are recreated with new id's which can be the same as
+			// the old ones and to result of false positives for node selection.
+			this.mSelectedNodes = {};
+		}
 
 		this.updateAggregation("nodes");
 
-		// If the reason for updating the model is "filter" clear selected nodes.
-		if (sReason === "filter") {
-			this._clearSelection();
-		} else {
-			for (var sKey in this.mSelectedContexts) {
-				oContext = this.mSelectedContexts[sKey];
-				oNode = this.getNodeByContext(oContext);
-				if (oNode) {
-					oNode.setIsSelected(true);
-				}
+		for (sKey in this.mSelectedContexts) {
+			oNode = this.getNodeByContext(this.mSelectedContexts[sKey]);
+			if (oNode) {
+				oNode.setIsSelected(true);
+			} else {
+				this.mSelectedContexts = this._removeItemFromObject(this.mSelectedContexts, sKey);
 			}
 		}
 
+	};
+
+	/**
+	 * Clones a flat object removing a key/value pair from the old one
+	 * @param oObject {object} The object from which the key shall be removed
+	 * @param sKeyToRemove {string} Key to be removed from the object
+	 * @returns {object} The new object without the removed key
+	 * @private
+	 */
+	Tree.prototype._removeItemFromObject = function (oObject, sKeyToRemove) {
+		var sKey,
+			oReturn = {};
+
+		for (sKey in oObject) {
+			if (sKey !== sKeyToRemove) {
+				oReturn[sKey] = oObject[sKey];
+			}
+		}
+
+		return oReturn;
 	};
 
 	/**
@@ -33190,9 +34646,12 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 	Tree.prototype.getNodeByContext = function(oContext){
 		var oBindingInfo = this.getBindingInfo("nodes"),
 			sModelName = oBindingInfo && oBindingInfo.model;
+
 		return this.findNode(this, function(oNode) {
-			return oNode.getBindingContext(sModelName) == oContext;
+			var oBindingContext = oNode.getBindingContext(sModelName);
+			return (oContext && oBindingContext && oContext.getPath() === oBindingContext.getPath());
 		});
+
 	};
 
 	/**
@@ -33293,10 +34752,31 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 		}
 		this.iSelectionUpdateTimer = setTimeout(function() {
 			that.mSelectedNodes = {};
-			that.mSelectedContexts = {};
+			that.mSelectedContexts = [];
 			that.updateSelection(that, true);
 			that.iSelectionUpdateTimer = null;
 		}, 0);
+	};
+
+	/**
+	 * Add's node context to the internal mSelectedContexts object.
+	 * Taking care if TreeSelectionMode === Multi to not duplicate the node context in mSelectedContexts.
+	 * @param oContext The binding context of the node
+	 * @private
+	 */
+	Tree.prototype._addSelectedNodeContext = function (oContext) {
+		var sPath;
+		if (oContext && oContext.sPath) {
+			sPath = oContext.sPath;
+			if (this.getSelectionMode() === sap.ui.commons.TreeSelectionMode.Multi) {
+				if (!(sPath in this.mSelectedContexts)) {
+					this.mSelectedContexts[sPath] = oContext;
+				}
+			} else {
+				this.mSelectedContexts = {};
+				this.mSelectedContexts[sPath] = oContext;
+			}
+		}
 	};
 
 	/**
@@ -33315,7 +34795,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 					case sap.ui.commons.TreeSelectionMode.Legacy:
 						if (jQuery.isEmptyObject(that.mSelectedNodes)) {
 							that.mSelectedNodes[oNode.getId()] = oNode;
-							that.mSelectedContexts[oNode.getId()] = that.getNodeContext(oNode);
+							that._addSelectedNodeContext(that.getNodeContext(oNode));
 						}
 						break;
 					case sap.ui.commons.TreeSelectionMode.Single:
@@ -33324,7 +34804,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 							oNode.setIsSelected(false);
 						} else {
 							that.mSelectedNodes[oNode.getId()] = oNode;
-							that.mSelectedContexts[oNode.getId()] = that.getNodeContext(oNode);
+							that._addSelectedNodeContext(that.getNodeContext(oNode));
 						}
 						break;
 					case sap.ui.commons.TreeSelectionMode.Multi:
@@ -33333,7 +34813,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 							oNode.setIsSelected(false);
 						} else {
 							that.mSelectedNodes[oNode.getId()] = oNode;
-							that.mSelectedContexts[oNode.getId()] = that.getNodeContext(oNode);
+							that._addSelectedNodeContext(that.getNodeContext(oNode));
 						}
 						break;
 				}
@@ -33359,7 +34839,7 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 
 		oNode._select(bSuppressEvent, true);
 		this.mSelectedNodes[oNode.getId()] = oNode;
-		this.mSelectedContexts[oNode.getId()] = oContext;
+		this._addSelectedNodeContext(oContext);
 		this.oLeadSelection = oNode;
 		if (!bSuppressEvent) {
 			this.fireSelectionChange({nodes: [oNode], nodeContexts: [oContext]});
@@ -33416,8 +34896,8 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 
 	Tree.prototype._setNodeSelection = function(oNode, bIsSelected, bSuppressEvent) {
 		var aSelectedNodes = [],
-			aSelectedNodeContexts = [];
-		var oVisibleNode;
+			aSelectedNodeContexts = [],
+			oVisibleNode;
 
 		if (this.getSelectionMode() == sap.ui.commons.TreeSelectionMode.Single) {
 			if (bIsSelected) {
@@ -33461,16 +34941,25 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 		}
 		oSelNode._select(bSuppressEvent);
 		this.mSelectedNodes[oSelNode.getId()] = oSelNode;
-		this.mSelectedContexts[oSelNode.getId()] = this.getNodeContext(oSelNode);
+		this._addSelectedNodeContext(this.getNodeContext(oSelNode));
 	};
 
-	Tree.prototype._delMultiSelection = function(oSelNode, bSuppressEvent) {
+	Tree.prototype._delMultiSelection = function(oSelNode) {
+		var oContext;
+
 		if (!oSelNode) {
 			return;
 		}
 		oSelNode._deselect();
-		delete this.mSelectedNodes[oSelNode.getId()];
-		delete this.mSelectedContexts[oSelNode.getId()];
+		this.mSelectedNodes = this._removeItemFromObject(this.mSelectedNodes, oSelNode.getId());
+
+		oContext = oSelNode.getBindingContext();
+
+		if (oContext && oContext.sPath) {
+			if (oContext.sPath in this.mSelectedContexts) {
+				this.mSelectedContexts = this._removeItemFromObject(this.mSelectedContexts, oContext.sPath);
+			}
+		}
 	};
 
 	Tree.prototype._delSelection = function() {
@@ -33497,16 +34986,6 @@ sap.ui.define("sap/ui/commons/Tree",['jquery.sap.global', './library', 'sap/ui/c
 			oVisibleNode = this._getVisibleNode(oParentNode);
 		}
 		return oVisibleNode;
-	};
-
-	/**
-	 * Clears tree selection and fires <code>SelectionChange</code> event with blank parameters.
-	 *
-	 * @private
-	 */
-	Tree.prototype._clearSelection = function () {
-		this._delSelection();
-		this.fireSelectionChange({nodes: [], nodeContexts: []});
 	};
 
 	return Tree;
@@ -33540,10 +35019,11 @@ sap.ui.define("sap/ui/commons/TreeNode",['jquery.sap.global', './library', 'sap/
 	 * @class
 	 * Tree node element
 	 * @extends sap.ui.core.Element
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.TreeNode
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -33888,7 +35368,7 @@ sap.ui.define("sap/ui/commons/TreeNode",['jquery.sap.global', './library', 'sap/
 	//***********************************************************************************
 
 	/** The mouse click event, which will expand/collapse the node
-	 * @param {event} oEvent The click event object
+	 * @param {jQuery.Event} oEvent The click event object
 	 * @private
 	 */
 	TreeNode.prototype.onclick = function(oEvent){
@@ -33935,7 +35415,7 @@ sap.ui.define("sap/ui/commons/TreeNode",['jquery.sap.global', './library', 'sap/
 	//* KEYBOARD NAVIGATION
 	//***********************************************************************************
 	/** The generic selection event (ENTER or SPACE)
-	* @param {event} oEvent The sapselect event object
+	* @param {jQuery.Event} oEvent The sapselect event object
 	 * @private
 	 */
 	TreeNode.prototype.onsapselect = function(oEvent){
@@ -33953,7 +35433,7 @@ sap.ui.define("sap/ui/commons/TreeNode",['jquery.sap.global', './library', 'sap/
 
 	/**
 	 * The numpad + key event, which will expand the current node
-	 * @param {event} oEvent The sapexpand event object
+	 * @param {jQuery.Event} oEvent The sapexpand event object
 	 * @private
 	 */
 	TreeNode.prototype.onsapexpand = function(oEvent) {
@@ -33963,7 +35443,7 @@ sap.ui.define("sap/ui/commons/TreeNode",['jquery.sap.global', './library', 'sap/
 	/**
 	 * The numpad - key event, which will expand the current node
 	 * @private
-	 * @param {event} oEvent The sapcollapse event object
+	 * @param {jQuery.Event} oEvent The sapcollapse event object
 	 */
 	TreeNode.prototype.onsapcollapse = function(oEvent) {
 		this.collapse();
@@ -34108,7 +35588,8 @@ sap.ui.define("sap/ui/commons/TreeNode",['jquery.sap.global', './library', 'sap/
 			if (iNewScrollLeft !== undefined) {
 				mScrollPos.scrollLeft = iNewScrollLeft;
 			}
-			$TreeCont.animate(mScrollPos);
+			// Clear animation queue, so that only the last selected item gets animated
+			$TreeCont.stop(true, true).animate(mScrollPos);
 		}
 	};
 
@@ -34165,11 +35646,12 @@ sap.ui.define("sap/ui/commons/TriStateCheckBox",['jquery.sap.global', './library
 	 * TriStateCheckBox to reflect mixed state for checkboxes. The control can display three states, namely checked, unchecked and mixed. However, mixed state cannot be directly reached by user interaction on the particular control.
 	 * It can be only set by the control's public toggle function, to make a behaviour possible which is e.g. required in checkbox trees.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.7.2
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.TriStateCheckBox
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -34346,10 +35828,11 @@ sap.ui.define("sap/ui/commons/ValueHelpField",['jquery.sap.global', './TextField
 	 * @extends sap.ui.commons.TextField
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Input</code> control.
 	 * @alias sap.ui.commons.ValueHelpField
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -34386,17 +35869,10 @@ sap.ui.define("sap/ui/commons/ValueHelpField",['jquery.sap.global', './TextField
 	}});
 
 
-	ValueHelpField.prototype.onBeforeRendering = function(){
-		var sThemeModuleName = "sap.ui.commons.themes." + sap.ui.getCore().getConfiguration().getTheme();
-		var sIcon = Parameters.get('sap.ui.commons.ValueHelpField:sapUiValueHelpIconDsblUrl');
-
-		this.sIconDsblUrl = jQuery.sap.getModulePath(sThemeModuleName, sIcon);
-
-		sIcon = Parameters.get('sap.ui.commons.ValueHelpField:sapUiValueHelpIconRegularUrl');
-		this.sIconRegularUrl = jQuery.sap.getModulePath(sThemeModuleName, sIcon);
-
-		sIcon = Parameters.get('sap.ui.commons.ValueHelpField:sapUiValueHelpIconHoverUrl');
-		this.sIconHoverUrl = jQuery.sap.getModulePath(sThemeModuleName, sIcon);
+	ValueHelpField.prototype.onBeforeRendering = function() {
+		this.sIconDsblUrl = "sap-icon://value-help";
+		this.sIconRegularUrl = "sap-icon://value-help";
+		this.sIconHoverUrl = "sap-icon://value-help";
 	};
 
 	ValueHelpField.prototype.onmouseover = function (oEvent) {
@@ -34407,8 +35883,7 @@ sap.ui.define("sap/ui/commons/ValueHelpField",['jquery.sap.global', './TextField
 			} else if (this.getIconURL()) {
 				this.sIconHoverUrl = this.sIconRegularUrl;
 			} else {
-				var sIcon = Parameters.get('sap.ui.commons.ValueHelpField:sapUiValueHelpIconHoverUrl');
-				this.sIconHoverUrl = jQuery.sap.getModulePath("sap.ui.commons.themes." + sap.ui.getCore().getConfiguration().getTheme(), sIcon);
+				this.sIconHoverUrl = "sap-icon://value-help";
 			}
 			var oIcon = jQuery.sap.byId(oEvent.target.id);
 			oIcon.attr( 'src', this.sIconHoverUrl );
@@ -34543,7 +36018,7 @@ sap.ui.define("sap/ui/commons/form/Form",['jquery.sap.global', 'sap/ui/commons/l
 	 * @extends sap.ui.layout.form.Form
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -34624,7 +36099,7 @@ sap.ui.define("sap/ui/commons/form/FormContainer",['jquery.sap.global', 'sap/ui/
 	 * @extends sap.ui.layout.form.FormContainer
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -34705,7 +36180,7 @@ sap.ui.define("sap/ui/commons/form/FormElement",['jquery.sap.global', 'sap/ui/co
 	 * @extends sap.ui.layout.form.FormElement
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -34786,7 +36261,7 @@ sap.ui.define("sap/ui/commons/form/FormLayout",['jquery.sap.global', 'sap/ui/com
 	 * @extends sap.ui.layout.form.FormLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -34841,7 +36316,7 @@ sap.ui.define("sap/ui/commons/form/GridContainerData",['jquery.sap.global', 'sap
 	 * @extends sap.ui.layout.form.GridContainerData
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -34899,7 +36374,7 @@ sap.ui.define("sap/ui/commons/form/GridElementData",['jquery.sap.global', 'sap/u
 	 * @extends sap.ui.layout.form.GridElementData
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -34958,7 +36433,7 @@ sap.ui.define("sap/ui/commons/form/GridLayout",['jquery.sap.global', 'sap/ui/com
 	 * @extends sap.ui.layout.form.GridLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -35011,7 +36486,7 @@ sap.ui.define("sap/ui/commons/form/ResponsiveLayout",['jquery.sap.global', 'sap/
 	 * @extends sap.ui.layout.form.ResponsiveLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -35062,7 +36537,7 @@ sap.ui.define("sap/ui/commons/form/SimpleForm",['jquery.sap.global', 'sap/ui/com
 	 * @class
 	 * Use the SimpleForm to create a form based on title, label and fields that are stacked in the content aggregation. Add Title to start a new FormContainer(Group). Add Label to start a new row in the container. Add Input/Display controls as needed. Use LayoutData to influence the layout for special cases in the Input/Display controls.
 	 * @extends sap.ui.layout.form.SimpleForm
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -35143,10 +36618,11 @@ sap.ui.define("sap/ui/commons/layout/BorderLayout",['jquery.sap.global', 'sap/ui
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Page</code> control.
 	 * @alias sap.ui.commons.layout.BorderLayout
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -35514,10 +36990,11 @@ sap.ui.define("sap/ui/commons/layout/BorderLayoutArea",['jquery.sap.global', 'sa
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Page</code> control.
 	 * @alias sap.ui.commons.layout.BorderLayoutArea
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -35627,10 +37104,11 @@ sap.ui.define("sap/ui/commons/layout/HorizontalLayout",['jquery.sap.global', 'sa
 	 * @extends sap.ui.layout.HorizontalLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.ui.layout.HorizontalLayout</code> control.
 	 * @alias sap.ui.commons.layout.HorizontalLayout
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -35676,10 +37154,11 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutCell",['jquery.sap.global', 'sa
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.ui.layout.Grid</code> control.
 	 * @alias sap.ui.commons.layout.MatrixLayoutCell
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -35855,10 +37334,11 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayoutRow",['jquery.sap.global', 'sap
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.ui.layout.Grid</code> control.
 	 * @alias sap.ui.commons.layout.MatrixLayoutRow
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -35988,7 +37468,7 @@ sap.ui.define("sap/ui/commons/layout/PositionContainer",['jquery.sap.global', 's
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -36440,7 +37920,7 @@ sap.ui.define("sap/ui/commons/layout/ResponsiveFlowLayout",['jquery.sap.global',
 	 * @extends sap.ui.layout.ResponsiveFlowLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -36491,7 +37971,7 @@ sap.ui.define("sap/ui/commons/layout/ResponsiveFlowLayoutData",['jquery.sap.glob
 	 * @extends sap.ui.layout.ResponsiveFlowLayoutData
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -36568,7 +38048,7 @@ sap.ui.define("sap/ui/commons/layout/VerticalLayout",['jquery.sap.global', 'sap/
 	 * @extends sap.ui.layout.VerticalLayout
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -36616,10 +38096,11 @@ sap.ui.define("sap/ui/commons/ApplicationHeader",['jquery.sap.global', './librar
 	 * @class
 	 * The application header control stands on the top of any application page. It consists of 4 areas: Logo area, Function area provided by application, Search area, Logout area.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.tnt.ToolHeader</code> control.
 	 * @alias sap.ui.commons.ApplicationHeader
 	 * @ui5-metamodel This control/element also will be described in the UI5 design-time metamodel
 	 */
@@ -36867,10 +38348,11 @@ sap.ui.define("sap/ui/commons/Callout",['jquery.sap.global', './CalloutBase', '.
 	 * @extends sap.ui.commons.CalloutBase
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Popover</code> control.
 	 * @alias sap.ui.commons.Callout
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -36926,10 +38408,11 @@ sap.ui.define("sap/ui/commons/ComboBox",['jquery.sap.global', './TextField', './
 	 * @implements sap.ui.commons.ToolbarItem
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.ComboBox</code> control.
 	 * @alias sap.ui.commons.ComboBox
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -38656,6 +40139,17 @@ sap.ui.define("sap/ui/commons/ComboBox",['jquery.sap.global', './TextField', './
 
 	};
 
+	/**
+	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @protected
+	 */
+	ComboBox.prototype.getAccessibilityInfo = function() {
+		var oInfo = TextField.prototype.getAccessibilityInfo.apply(this, arguments);
+		oInfo.role = "combobox";
+		oInfo.type = sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons").getText("ACC_CTR_TYPE_COMBO");
+		return oInfo;
+	};
+
 	// to overwrite JS doc with new event parameter
 
 	/**
@@ -38724,10 +40218,11 @@ sap.ui.define("sap/ui/commons/DatePicker",['jquery.sap.global', './TextField', '
 	 * @extends sap.ui.commons.TextField
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.DatePicker</code> control.
 	 * @alias sap.ui.commons.DatePicker
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -39205,6 +40700,16 @@ sap.ui.define("sap/ui/commons/DatePicker",['jquery.sap.global', './TextField', '
 
 		};
 
+		/**
+		 * @see sap.ui.core.Control#getAccessibilityInfo
+		 * @protected
+		 */
+		DatePicker.prototype.getAccessibilityInfo = function() {
+			var oInfo = TextField.prototype.getAccessibilityInfo.apply(this, arguments);
+			oInfo.type = sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons").getText("ACC_CTR_TYPE_DATEINPUT");
+			return oInfo;
+		};
+
 		function _getFormatter(oThis){
 
 			var sPattern = "";
@@ -39302,6 +40807,16 @@ sap.ui.define("sap/ui/commons/DatePicker",['jquery.sap.global', './TextField', '
 				oThis._checkChange(); // to prove is something was typed in manually
 			}
 
+			var sCalendarType;
+			var oBinding = oThis.getBinding("value");
+
+			if (oBinding && oBinding.oType && (oBinding.oType instanceof Date1)) {
+				sCalendarType = oBinding.oType.oOutputFormat.oFormatOptions.calendarType;
+			}
+			if (sCalendarType) {
+				oThis._oCalendar.setPrimaryCalendarType(sCalendarType);
+			}
+
 			var oDate = oThis._oDate;
 
 			if (oDate) {
@@ -39395,8 +40910,16 @@ sap.ui.define("sap/ui/commons/DatePicker",['jquery.sap.global', './TextField', '
 
 			if (oOldDate && oThis.getEditable() && oThis.getEnabled()) {
 				// use a new date object to have a real updated property
-				var oDate = new UniversalDate(oOldDate.getTime());
-				oOldDate = new UniversalDate(oOldDate.getTime());
+				var oBinding = oThis.getBinding("value");
+				var sCalendarType;
+
+				if (oBinding && oBinding.oType && (oBinding.oType instanceof Date1)) {
+					sCalendarType = oBinding.oType.oOutputFormat.oFormatOptions.calendarType;
+				} else {
+					sCalendarType = sap.ui.getCore().getConfiguration().getCalendarType();
+				}
+				var oDate = UniversalDate.getInstance(new Date(oOldDate.getTime()), sCalendarType);
+				oOldDate = UniversalDate.getInstance(new Date(oOldDate.getTime()), sCalendarType);
 				var $Input = jQuery(oThis.getInputDomRef());
 				var iPos = $Input.cursorPos();
 
@@ -39633,10 +41156,11 @@ sap.ui.define("sap/ui/commons/DropdownBox",['jquery.sap.global', './ComboBox', '
 	 * The control provides a field that allows end users to an entry out of a list of pre-defined items.
 	 * The choosable items can be provided in the form of a complete <code>ListBox</code>, single <code>ListItems</code>.
 	 * @extends sap.ui.commons.ComboBox
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.ComboBox</code> control.
 	 * @alias sap.ui.commons.DropdownBox
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -40428,13 +41952,36 @@ sap.ui.define("sap/ui/commons/DropdownBox",['jquery.sap.global', './ComboBox', '
 			// if popup is open the text-selection is made by doTypeAhead
 			// do not select all text in this case
 			var $Ref = jQuery(this.getInputDomRef()),
-			l = $Ref.val().length;
+				l = $Ref.val().length;
 			if (l > 0 && !this.mobile) {
-				this._doSelect(0, l);
+				this._callDoSelectAfterFocusIn(0, l);
 			}
 			this._bFocusByOpen = undefined;
 		}
 		ComboBox.prototype.onfocusin.apply(this, arguments);
+	};
+
+	/**
+	 * For IE selecting text by #setSelectedRange method (this is what function _doSelect does)
+	 * provokes focus, so this function makes sure we were not called because of "_doSelect" more than once.
+	 * Edge does not have such behavior.
+	 * @param iStart the 0-based start position for the selection
+	 * @param iEnd the 0-based end position for the selection
+	 * @private
+	 */
+	DropdownBox.prototype._callDoSelectAfterFocusIn = function(iStart, iEnd) {
+		if (!sap.ui.Device.browser.internet_explorer) {
+			this._doSelect(iStart, iEnd);
+		} else {
+			// Enum _eDoSelectAfterFocusIn as well describes the IE flow:  undefined -> "onfocusin" -> "_doSelect",
+			// so make sure we are not called due to _doSelect.
+			if (!this._eDoSelectAfterFocusIn || this._eDoSelectAfterFocusIn !== "_doSelect") {
+				this._eDoSelectAfterFocusIn = "onfocusin";
+				this._doSelect(iStart, iEnd);
+			} else {
+				this._eDoSelectAfterFocusIn = undefined;
+			}
+		}
 	};
 
 
@@ -40724,7 +42271,7 @@ sap.ui.define("sap/ui/commons/DropdownBox",['jquery.sap.global', './ComboBox', '
 	 * @private
 	 */
 	DropdownBox.prototype._prepareOpen = function(oListBox, oPopup){
-		this._oValueBeforeOpen = this.$().val();
+		this._oValueBeforeOpen = jQuery(this.getInputDomRef()).val();
 
 		// remember we opening the popup (needed in applyFocusInfo called after rerendering of ListBox)
 		this._bOpening = true;
@@ -40738,6 +42285,7 @@ sap.ui.define("sap/ui/commons/DropdownBox",['jquery.sap.global', './ComboBox', '
 				iItemIndex = this.indexOfItem(sap.ui.getCore().byId(this.getSelectedItemId()));
 			}
 			this._doTypeAhead("", jQuery(this.getInputDomRef()).val(), true, iItemIndex);
+			this._doSelect(); // select all to have the same behaviour like by navigatin in open list and closing list
 		}
 		return this;
 	};
@@ -40918,6 +42466,25 @@ sap.ui.define("sap/ui/commons/DropdownBox",['jquery.sap.global', './ComboBox', '
 
 	};
 
+	/**
+	 * Focuses the dropdown upon inner ListBox#click.
+	 * As there might be raise condition between the dropdown.focus and listbox.click events for some browsers.
+	 * this method makes sure the events are in the right order (listbox#click->dropdown#focus)
+	 * @private
+	 */
+	DropdownBox.prototype._focusAfterListBoxClick = function() {
+		if (!sap.ui.Device.browser.webkit) {
+			this.focus();
+		} else {
+			var oLB = this._getListBox();
+			oLB.addDelegate({
+				onclick: function() {//this will be executed after the ListBox#onclick handler
+					oLB.removeDelegate(this);
+					this.focus();
+				}.bind(this)});
+		}
+	};
+
 	/*
 	 * Handle the sapfocusleave pseudo event and ensure that when the focus moves to the list box,
 	 * the check change functionality (incl. fireChange) is not triggered.
@@ -40929,7 +42496,7 @@ sap.ui.define("sap/ui/commons/DropdownBox",['jquery.sap.global', './ComboBox', '
 
 		var oLB = this._getListBox();
 		if (oEvent.relatedControlId && jQuery.sap.containsOrEquals(oLB.getFocusDomRef(), sap.ui.getCore().byId(oEvent.relatedControlId).getFocusDomRef())) {
-			this.focus();
+			this._focusAfterListBoxClick();
 		} else {
 			// we left the DropdownBox to another (unrelated) control and thus have to fire the change (if needed).
 			if (this.oPopup && this.oPopup.isOpen()) {
@@ -41328,11 +42895,12 @@ sap.ui.define("sap/ui/commons/InPlaceEdit",['jquery.sap.global', './TextField', 
 	 * @class
 	 * The InPlaceEdit is a functionality to have text in display mode that can be changed in place.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.8.0
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.InPlaceEdit
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -41918,6 +43486,16 @@ sap.ui.define("sap/ui/commons/InPlaceEdit",['jquery.sap.global', './TextField', 
 		};
 
 
+		/**
+		 * @see sap.ui.core.Control#getAccessibilityInfo
+		 * @protected
+		 */
+		InPlaceEdit.prototype.getAccessibilityInfo = function() {
+			var oControl = this.getContent();
+			return oControl && oControl.getAccessibilityInfo ? oControl.getAccessibilityInfo() : null;
+		};
+
+
 		// Private variables
 
 		/**
@@ -42106,16 +43684,10 @@ sap.ui.define("sap/ui/commons/InPlaceEdit",['jquery.sap.global', './TextField', 
 		function iconForUndoButton(oInPlaceEdit){
 
 			if (oInPlaceEdit._oUndoButton) {
-				var sIcon = Parameters.get('sapUiIpeUndoImageURL');
-				var sIconHovered = Parameters.get('sapUiIpeUndoImageDownURL');
-				var sThemeModuleName = "sap.ui.commons.themes." + sap.ui.getCore().getConfiguration().getTheme();
-				if (sIcon) {
-					sIcon = jQuery.sap.getModulePath(sThemeModuleName, sIcon);
-				} else {
+				var sIcon = Parameters._getThemeImage('sapUiIpeUndoImageURL');
+				var sIconHovered = Parameters._getThemeImage('sapUiIpeUndoImageDownURL');
+				if (!sIcon) {
 					sIcon = "sap-icon://decline";
-				}
-				if (sIconHovered) {
-					sIconHovered = jQuery.sap.getModulePath(sThemeModuleName, sIconHovered);
 				}
 				oInPlaceEdit._oUndoButton.setIcon(sIcon);
 				oInPlaceEdit._oUndoButton.setIconHovered(sIconHovered);
@@ -42185,16 +43757,10 @@ sap.ui.define("sap/ui/commons/InPlaceEdit",['jquery.sap.global', './TextField', 
 		function iconForEditButton(oInPlaceEdit){
 
 			if (oInPlaceEdit._oEditButton) {
-				var sIcon = Parameters.get('sapUiIpeEditImageURL');
-				var sIconHovered = Parameters.get('sapUiIpeEditImageDownURL');
-				var sThemeModuleName = "sap.ui.commons.themes." + sap.ui.getCore().getConfiguration().getTheme();
-				if (sIcon) {
-					sIcon = jQuery.sap.getModulePath(sThemeModuleName, sIcon);
-				} else {
+				var sIcon = Parameters._getThemeImage('sapUiIpeEditImageURL');
+				var sIconHovered = Parameters._getThemeImage('sapUiIpeEditImageDownURL');
+				if (!sIcon) {
 					sIcon = "sap-icon://edit";
-				}
-				if (sIconHovered) {
-					sIconHovered = jQuery.sap.getModulePath(sThemeModuleName, sIconHovered);
 				}
 				oInPlaceEdit._oEditButton.setIcon(sIcon);
 				oInPlaceEdit._oEditButton.setIconHovered(sIconHovered);
@@ -42323,10 +43889,11 @@ sap.ui.define("sap/ui/commons/MenuBar",['jquery.sap.global', './Menu', './MenuIt
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.OverflowToolbar</code> control.
 	 * @alias sap.ui.commons.MenuBar
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -42901,12 +44468,11 @@ sap.ui.define("sap/ui/commons/MessageBar",['jquery.sap.global', './library', 'sa
 	 * @class
 	 * Creates an instance of a MessageBar Control, for displaying messages.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
-	 * @deprecated Since version 1.4.0.
-	 * A new messaging concept will be created in future. Therefore this control might be removed in one of the next versions.
+	 * @deprecated Since version 1.4.0. Instead, use the <code>sap.m.MessagePopover</code> control.
 	 * @alias sap.ui.commons.MessageBar
 	 * @ui5-metamodel This control/element also will be described in the UI5 design-time metamodel
 	 */
@@ -43745,10 +45311,11 @@ sap.ui.define("sap/ui/commons/PasswordField",['jquery.sap.global', './TextField'
 	 * @extends sap.ui.commons.TextField
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Input</code> control.
 	 * @alias sap.ui.commons.PasswordField
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -43814,11 +45381,12 @@ sap.ui.define("sap/ui/commons/RangeSlider",['jquery.sap.global', './Slider', './
 	 * @extends sap.ui.commons.Slider
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.8.0
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.RangeSlider</code> control.
 	 * @alias sap.ui.commons.RangeSlider
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -44843,10 +46411,11 @@ sap.ui.define("sap/ui/commons/SearchField",['jquery.sap.global', './ComboBox', '
 	 * @implements sap.ui.commons.ToolbarItem
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.SearchField</code> control.
 	 * @alias sap.ui.commons.SearchField
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -45858,10 +47427,11 @@ sap.ui.define("sap/ui/commons/TextArea",['jquery.sap.global', './TextField', './
 	 * @class
 	 * Control to enter or display multible row text.
 	 * @extends sap.ui.commons.TextField
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.TextArea</code> control.
 	 * @alias sap.ui.commons.TextArea
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -46259,10 +47829,11 @@ sap.ui.define("sap/ui/commons/layout/AbsoluteLayout",['jquery.sap.global', './Po
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.layout.AbsoluteLayout
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -46782,8 +48353,6 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayout",['jquery.sap.global', './Matr
 	function(jQuery, MatrixLayoutCell, MatrixLayoutRow, library, Control, EnabledPropagator) {
 	"use strict";
 
-
-
 	/**
 	 * Constructor for a new layout/MatrixLayout.
 	 *
@@ -46814,10 +48383,11 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayout",['jquery.sap.global', './Matr
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.ui.layout.Grid</code> control.
 	 * @alias sap.ui.commons.layout.MatrixLayout
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -46882,6 +48452,7 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayout",['jquery.sap.global', './Matr
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	MatrixLayout.prototype.createRow = function() {
+
 		var oRow = new MatrixLayoutRow();
 		this.addRow(oRow);
 		for (var i = 0; i < arguments.length; i++) {
@@ -46892,18 +48463,19 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayout",['jquery.sap.global', './Matr
 				oCell = oContent;
 			} else if (oContent instanceof Control) {
 				// any control given, wrap with matrix layout cell first
-				   oCell = new MatrixLayoutCell({content : oContent});
+				oCell = new MatrixLayoutCell({content : oContent});
 			} else if (oContent instanceof Object && oContent.height) {
 				oRow.setHeight(oContent.height);
 			} else {
 				// any string(?) given, display it
 				var sText = oContent ? oContent.toString() : "";
-					oCell = new MatrixLayoutCell({
-						content : new sap.ui.commons.TextView({text : sText})});
+				oCell = new MatrixLayoutCell({
+					content : new sap.ui.commons.TextView({text : sText})});
 			}
-				oRow.addCell(oCell);
+			oRow.addCell(oCell);
 		}
 		return this;
+
 	};
 
 	/*
@@ -46935,6 +48507,7 @@ sap.ui.define("sap/ui/commons/layout/MatrixLayout",['jquery.sap.global', './Matr
 		this.setProperty("widths", aSetWidths);
 
 		return this;
+
 	};
 
 	return MatrixLayout;
@@ -46972,11 +48545,12 @@ sap.ui.define("sap/ui/commons/AutoComplete",['jquery.sap.global', './ComboBox', 
 	 * @implements sap.ui.commons.ToolbarItem
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.10.0
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.AutoComplete
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -47437,9 +49011,10 @@ sap.ui.define("sap/ui/commons/MessageBox",['jquery.sap.global', 'sap/ui/core/lib
 		 *
 		 * @namespace
 		 * @author SAP SE
-		 * @version 1.34.9
+		 * @version 1.44.14
 		 * @public
 		 * @since 0.8.8
+		 * @deprecated Since version 1.38. Instead, use the <code>sap.m.MessageBox</code> control.
 		 * @alias sap.ui.commons.MessageBox
 		 */
 		var MessageBox = {};
@@ -47686,7 +49261,6 @@ sap.ui.define("sap/ui/commons/MessageBox",['jquery.sap.global', 'sap/ui/core/lib
 			oDialog = new Dialog({
 				id: sDialogId,
 				applyContentPadding: false,
-				title: sTitle,
 				accessibleRole: AccessibleRole.AlertDialog,
 				resizable: false,
 				modal: true,
@@ -47694,7 +49268,7 @@ sap.ui.define("sap/ui/commons/MessageBox",['jquery.sap.global', 'sap/ui/core/lib
 				content: oContent,
 				defaultButton: oDefaultButton,
 				closed: onclose
-			});
+			}).setTitle(sTitle);
 
 			oDialog.open();
 

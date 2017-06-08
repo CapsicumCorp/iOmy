@@ -6,11 +6,11 @@
     "type": "library",
     "embeds": [],
     "applicationVersion": {
-      "version": "1.34.9"
+      "version": "1.44.14"
     },
     "title": "Table-like controls, mainly for desktop scenarios.",
     "description": "Table-like controls, mainly for desktop scenarios.",
-    "ach": "CA-UI5-CTR-WDF",
+    "ach": "CA-UI5-TBL",
     "resources": "resources.json",
     "offline": true
   },
@@ -25,13 +25,13 @@
   "sap.ui5": {
     "_version": "1.1.0",
     "dependencies": {
-      "minUI5Version": "1.34",
+      "minUI5Version": "1.44",
       "libs": {
         "sap.ui.core": {
-          "minVersion": "1.34.9"
+          "minVersion": "1.44.14"
         },
         "sap.ui.unified": {
-          "minVersion": "1.34.9"
+          "minVersion": "1.44.14"
         }
       }
     }

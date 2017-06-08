@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './library'],
 	 * @class
 	 * Date range for use in DatePicker
 	 * @extends sap.ui.core.Element
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -39,7 +39,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './library'],
 			startDate : {type : "object", group : "Misc", defaultValue : null},
 
 			/**
-			 * Start date for a date range. If empty only a single date is presented by this DateRange element. This must be a JavaScript date object.
+			 * End date for a date range. If empty only a single date is presented by this DateRange element. This must be a JavaScript date object.
 			 */
 			endDate : {type : "object", group : "Misc", defaultValue : null}
 		}

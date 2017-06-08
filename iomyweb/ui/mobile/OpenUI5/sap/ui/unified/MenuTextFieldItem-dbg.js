@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport', './MenuItem
 	 * @extends sap.ui.unified.MenuItemBase
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @since 1.21.0
 	 *
 	 * @constructor
@@ -123,7 +123,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport', './MenuItem
 				labelledby: {value: /*oMenu.getId() + "-label " + */itemId + "-lbl", append: true}
 			});
 		}
-		rm.write("></input></div></div>");
+		rm.write("/></div></div>");
 
 		// Right border
 		rm.write("<div class=\"sapUiMnuItmR\"></div>");
@@ -210,7 +210,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ValueStateSupport', './MenuItem
 	};
 
 
-	MenuTextFieldItem.prototype.onsapenter = function(oEvent){
+	MenuTextFieldItem.prototype.onkeyup = function(oEvent){
+		//like sapenter but on keyup -> see Menu.prototype.onkeyup
+		if (!jQuery.sap.PseudoEvents.sapenter.fnCheck(oEvent)) {
+			return;
+		}
 		var sValue = this.$("tf").val();
 		this.setValue(sValue);
 		this.getParent().selectItem(this);

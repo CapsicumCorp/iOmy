@@ -34,8 +34,6 @@ invert its text to white as well */
 .sapUiTreeContScroll .sapUiTreeList {
 	float: left;
 	min-width: 100%;
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
 
@@ -123,7 +121,7 @@ html[dir=rtl] .sapUiTreeTitle {
 
 .sapUiTreeNode {
 	list-style: none;
-	background: url(img/tree/TreeNode.gif) no-repeat left 4px;
+	background: none no-repeat left 4px;
 	padding-left: 14px;
 	line-height: 18px;
 	white-space: nowrap;
@@ -137,14 +135,7 @@ html[dir=rtl] .sapUiTreeTitle {
 	float: left;
 	clear: left;
 	width: 100%;
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
 	box-sizing: border-box;
-}
-
-/* use the white icon on black background */
-.sapUiInverted-CTX .sapUiTreeNode {
-	background-image: url(img/tree/TreeNode-inverted.gif);
 }
 
 .sapUiInverted-CTX .sapUiTreeNode:hover {
@@ -171,24 +162,12 @@ html[dir=rtl] .sapUiTreeTitle {
 
 .sapUiTreeNodeExpanded {
 	list-style: none;
-	background-image: url(img/tree/TreeNode_Exp.gif);
 	cursor: pointer;
-}
-
-/* use the white icon on black background */
-.sapUiInverted-CTX .sapUiTreeNodeExpanded {
-	background-image: url(img/tree/TreeNode_Exp-inverted.gif)
 }
 
 .sapUiTreeNodeCollapsed {
 	list-style: none;
-	background-image: url(img/tree/TreeNode_Coll.gif);
 	cursor: pointer;
-}
-
-/* use the white icon on black background */
-.sapUiInverted-CTX .sapUiTreeNodeCollapsed {
-	background-image: url(img/tree/TreeNode_Coll-inverted.gif)
 }
 
 .sapUiTreeChildrenNodes {

@@ -20,10 +20,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @class
 	 * Provides navigation between pages within a list of numbered pages.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.Paginator
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -98,70 +99,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @private
 	 */
 	Paginator.prototype.onclick = function(oEvent){
-		if (oEvent && oEvent.target) {
-
-			// Supress triggering beforeunload in IE
-			oEvent.preventDefault();
-
-			// go up one node if unnamed element is the source
-			var target = oEvent.target;
-			if (!target.id) {
-				target = target.parentNode;
-			}
-
-			if (target.id && target.id != this.getId() + "-pages") {
-
-				// Retrieve from where the event originated
-				var aArray = target.id.split("--");
-
-				// only do something if relevant item has been clicked
-				if (aArray.length > 1) {
-					var lastPart = aArray[aArray.length - 1];
-
-					// What type of event will be sent
-					var sEventType = null;
-
-					// Buffer the current page as the sourcePage
-					var iSrcPage = this.getCurrentPage();
-					var iTargetPage = iSrcPage; // will be changed below
-
-					// we have a number - a page has been clicked
-					if (lastPart.match(/^\d+$/)) {
-						sEventType = sap.ui.commons.PaginatorEvent.Goto;
-						iTargetPage = parseInt(lastPart, 10);
-
-					} else if (lastPart == "firstPageLink") {
-						sEventType = sap.ui.commons.PaginatorEvent.First;
-						iTargetPage = 1;
-
-					} else if (lastPart == "backLink") {
-						sEventType = sap.ui.commons.PaginatorEvent.Previous;
-						iTargetPage = Math.max(iSrcPage - 1, 1);
-
-					} else if (lastPart == "forwardLink") {
-						sEventType = sap.ui.commons.PaginatorEvent.Next;
-						iTargetPage = Math.min(iSrcPage + 1, this.getNumberOfPages());
-
-					} else if (lastPart == "lastPageLink") {
-						sEventType = sap.ui.commons.PaginatorEvent.Last;
-						iTargetPage = this.getNumberOfPages();
-
-					} // else should not happen
-
-					if (iTargetPage != iSrcPage) {
-						if (this.bShowAnimation) {
-							this.setCurrentPage(iTargetPage, true); // update current page without re-rendering...
-							this.triggerPaginatorAnimation(); // ...and animate
-						} else {
-							this.setCurrentPage(iTargetPage); // includes re-rendering
-						}
-
-						// fire the "page" event
-						this.firePage({srcPage:iSrcPage,targetPage:iTargetPage,type:sEventType});
-					}
-				}
-			}
-		}
+		this._handleSelect(oEvent);
 	};
 
 	Paginator.prototype.setCurrentPage = function(iTargetPage, bSuppressRerendering) {
@@ -333,10 +271,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		} else if (jQuery.inArray("sapdecrease", aEvents) != -1) {
 			//Moves focus to the left (Left arrow key)
 			this.triggerInternalNavigation(oEvent,"previous");
+		} else if (jQuery.inArray("sapenter", aEvents) != -1) {
+			this._handleSelect(oEvent);
 		}
 
 	};
-
 
 	/**
 	 * This function will navigate left and right in the paginator, skipping non tabbable elements
@@ -422,8 +361,72 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		return this;
 	};
 
+	Paginator.prototype._handleSelect = function(oEvent) {
+		if (oEvent && oEvent.target) {
 
+			// Supress triggering beforeunload in IE
+			oEvent.preventDefault();
 
+			// go up one node if unnamed element is the source
+			var target = oEvent.target;
+			if (!target.id) {
+				target = target.parentNode;
+			}
+
+			if (target.id && target.id != this.getId() + "-pages") {
+
+				// Retrieve from where the event originated
+				var aArray = target.id.split("--");
+
+				// only do something if relevant item has been clicked
+				if (aArray.length > 1) {
+					var lastPart = aArray[aArray.length - 1];
+
+					// What type of event will be sent
+					var sEventType = null;
+
+					// Buffer the current page as the sourcePage
+					var iSrcPage = this.getCurrentPage();
+					var iTargetPage = iSrcPage; // will be changed below
+
+					// we have a number - a page has been clicked
+					if (lastPart.match(/^\d+$/)) {
+						sEventType = sap.ui.commons.PaginatorEvent.Goto;
+						iTargetPage = parseInt(lastPart, 10);
+
+					} else if (lastPart == "firstPageLink") {
+						sEventType = sap.ui.commons.PaginatorEvent.First;
+						iTargetPage = 1;
+
+					} else if (lastPart == "backLink") {
+						sEventType = sap.ui.commons.PaginatorEvent.Previous;
+						iTargetPage = Math.max(iSrcPage - 1, 1);
+
+					} else if (lastPart == "forwardLink") {
+						sEventType = sap.ui.commons.PaginatorEvent.Next;
+						iTargetPage = Math.min(iSrcPage + 1, this.getNumberOfPages());
+
+					} else if (lastPart == "lastPageLink") {
+						sEventType = sap.ui.commons.PaginatorEvent.Last;
+						iTargetPage = this.getNumberOfPages();
+
+					} // else should not happen
+
+					if (iTargetPage != iSrcPage) {
+						if (this.bShowAnimation) {
+							this.setCurrentPage(iTargetPage, true); // update current page without re-rendering...
+							this.triggerPaginatorAnimation(); // ...and animate
+						} else {
+							this.setCurrentPage(iTargetPage); // includes re-rendering
+						}
+
+						// fire the "page" event
+						this.firePage({srcPage:iSrcPage,targetPage:iTargetPage,type:sEventType});
+					}
+				}
+			}
+		}
+	};
 
 	return Paginator;
 

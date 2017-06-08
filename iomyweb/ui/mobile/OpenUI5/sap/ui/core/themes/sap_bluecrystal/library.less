@@ -28,11 +28,12 @@
 	padding: 2rem;
 }
 
-.sapUiTheme-sap_bluecrystal {
+html.sapUiTheme-sap_bluecrystal {
 	font-size: @sapUiFontSize;
 }
 
-html.sap-phone *, html.sap-tablet * {   /* FIXME!!! (star rule with any-parent selector...) */
+html.sap-phone *, html.sap-tablet:not(.sap-desktop) * {   /* FIXME!!! (star rule with any-parent selector...) */
+	/* for phones and tablets (combi devices are excluded because they should have desktop behavior)*/
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
@@ -41,7 +42,7 @@ html.sap-phone *, html.sap-tablet * {   /* FIXME!!! (star rule with any-parent s
 }
 
 html.sap-phone input, html.sap-phone textarea, html.sap-phone [contenteditable=true], html.sap-phone [contenteditable=true] > div, html.sap-phone .sapUiSelectable,
-html.sap-tablet input, html.sap-tablet textarea, html.sap-tablet [contenteditable=true], html.sap-tablet [contenteditable=true] > div , html.sap-tablet .sapUiSelectable {
+html.sap-tablet:not(.sap-desktop) input, html.sap-tablet:not(.sap-desktop) textarea, html.sap-tablet:not(.sap-desktop) [contenteditable=true], html.sap-tablet:not(.sap-desktop) [contenteditable=true] > div , html.sap-tablet:not(.sap-desktop) .sapUiSelectable {
 	-webkit-user-select: text;
 	-moz-user-select: text;
 	-ms-user-select: text;
@@ -67,7 +68,7 @@ html.sap-tablet input, html.sap-tablet textarea, html.sap-tablet [contenteditabl
 	position: absolute;
 }
 
-.sapUiMedia-Std-Desktop .sapUiBLy {
+html.sapUiMedia-Std-Desktop .sapUiBLy {
 	position: fixed; /* otherwise UX3 shell would not work... */
 }
 
@@ -587,80 +588,25 @@ html[data-sap-ui-browser*="ie"] .sapUiBody {
 
 /****** Safari + Chrome on Desktop ******/
 
-.sap-desktop ::-webkit-scrollbar {
+html.sap-desktop ::-webkit-scrollbar {
 	width: 16px;
 	height: 16px;
 	background-color: @sapUiScrollBarTrackColor;
 }
 
-.sap-desktop ::-webkit-scrollbar-thumb {
+html.sap-desktop ::-webkit-scrollbar-thumb {
 	background-color: @sapUiScrollBarFaceColor;
 }
 
-.sap-desktop ::-webkit-scrollbar-thumb:hover {
+html.sap-desktop ::-webkit-scrollbar-thumb:hover {
 	background-color: @sapUiScrollBarHoverFaceColor;
 }
 
-.sap-desktop ::-webkit-scrollbar-corner {
+html.sap-desktop ::-webkit-scrollbar-corner {
 	background-color: @sapUiScrollBarTrackColor;
 }
 
 /* END "BrowserScrollbar.less" */
-
-/* START "BusyIndicator.less" */
-.sapUiBusy {
-	height: 5px;
-	width: 100%;
-
-	-moz-background-size: 40% 5px;
-	-webkit-background-size: 40% 5px;
-	background-size: 40% 5px;
-
-	background-image: -moz-linear-gradient(left, fade(@sapUiHighlight, 0%), fade(@sapUiHighlight, 0%) 30%, fade(@sapUiHighlight, 100%) 70%, fade(@sapUiHighlight, 0%));
-	background-image: -webkit-linear-gradient(left, fade(@sapUiHighlight, 0%), fade(@sapUiHighlight, 100%) 30%, fade(@sapUiHighlight, 100%) 70%, fade(@sapUiHighlight, 0%));
-	background-image: -webkit-gradient(linear, left top, right top, color-stop(0, fade(@sapUiHighlight, 0%)), color-stop(0.3, fade(@sapUiHighlight, 100%)), color-stop(0.7, fade(@sapUiHighlight, 100%)), color-stop(1, fade(@sapUiHighlight, 0%)));
-	background-image: linear-gradient(left, fade(@sapUiHighlight, 0%), fade(@sapUiHighlight, 100%) 30%, fade(@sapUiHighlight, 100%) 70%, fade(@sapUiHighlight, 0%));
-	/* IE is handled using a real bg image */
-	background-repeat: no-repeat;
-
-	-webkit-animation: slide 1.5s linear infinite;
-	-moz-animation: slide 1.5s linear;
-	animation: slide 1.5s linear infinite;
-}
-
-html[data-sap-ui-browser^=ie] .sapUiBusy {
-	background-color: white;
-	background-image: url(img/Busy.png);
-	background-repeat: repeat-y;
-}
-
-@-webkit-keyframes slide {
-    0% {
-    	background-position: -500px 0;
-    }
-    100% {
-    	background-position: 200% 0;
-    }
-}
-
-@-moz-keyframes slide {
-    0% {
-    	background-position: -500px 0;
-    }
-    100% {
-    	background-position: 200% 0;
-    }
-}
-
-@keyframes slide {
-    0% {
-    	background-position: -500px 0;
-    }
-    100% {
-    	background-position: 200% 0;
-    }
-}
-/* END "BusyIndicator.less" */
 
 /* START "DatePicker.less" */
 /* ============================================== */
@@ -686,14 +632,6 @@ html[data-sap-ui-browser^=ie] .sapUiBusy {
 	width: 1rem;
 	font-size: 1rem;
 	color: @sapUiInvertedElement;
-}
-
-.sapUiSizeCondensed .sapUiTableCell>.sapUiIcon:first-child {
-	padding-left: 0.5rem;
-}
-
-.sapUiSizeCondensed .sapUiTableCell>.sapUiIcon:last-child {
-	padding-right: 0.5rem;
 }
 
 .sapUiIconColorNeutral {

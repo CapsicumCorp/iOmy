@@ -20,10 +20,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './library'],
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.ExactAttribute
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -112,7 +113,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './library'],
 	ExactAttribute._MINWIDTH = 70;
 	ExactAttribute._MAXWIDTH = 500;
 
-	ExactAttribute.prototype.onInit = function (){
+	ExactAttribute.prototype.init = function (){
 		this._getAttributesCallCount = 0;
 	};
 
@@ -309,7 +310,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', './library'],
 	 * @param {string} sPropertyName
 	 * @param {object} oValue
 	 * @param {boolean} bSuppressRerendering
-	 * @see sap.ui.core.Element.prototype.setProperty
+	 * @see sap.ui.base.ManagedObject.prototype.setProperty
 	 * @protected
 	 */
 	ExactAttribute.prototype.setProperty = function(sPropertyName, oValue, bSuppressRerendering) {

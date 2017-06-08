@@ -36,7 +36,10 @@ sap.ui.define(["sap/ui/core/Control", "./library", "sap/m/Button"],
 				properties: {
 
 					/**
-					 * Determines the design of the header - Light or Dark
+					 * Determines the design of the header - Light or Dark.
+					 * <b>Note: </b>This property is deprecated. It will continue to work in the Blue Crystal theme,
+					 * but it will not be taken into account for the Belize themes.
+					 * @deprecated Since version 1.40.1
 					 */
 					contentDesign: {
 						type: "sap.uxap.ObjectPageHeaderDesign",
@@ -62,10 +65,24 @@ sap.ui.define(["sap/ui/core/Control", "./library", "sap/m/Button"],
 
 
 		ObjectPageHeaderContent.prototype.onBeforeRendering = function () {
-			var oParent = this.getParent();
+			var oParent = this.getParent(),
+				oEditHeaderButton = this.getAggregation("_editHeaderButton");
+
+			if (oEditHeaderButton) {
+				return;
+			}
 
 			if (oParent && (oParent instanceof library.ObjectPageLayout) && oParent.getShowEditHeaderButton()) {
-				this._getInternalBtnAggregation("_editHeaderButton", "EDIT_HEADER", "-editHeaderBtn", "Transparent").attachPress(this._handleEditHeaderButtonPress, this);
+				oEditHeaderButton = this._getInternalBtnAggregation("_editHeaderButton", "EDIT_HEADER", "-editHeaderBtn", "Transparent");
+				oEditHeaderButton.attachPress(this._handleEditHeaderButtonPress, this);
+			}
+		};
+
+		ObjectPageHeaderContent.prototype.exit = function () {
+			var oEditHeaderButton = this.getAggregation("_editHeaderButton");
+
+			if (oEditHeaderButton) {
+				oEditHeaderButton.detachPress(this._handleEditHeaderButtonPress, this);
 			}
 		};
 

@@ -5,8 +5,8 @@
  */
 
 // Provides control sap.m.Table.
-sap.ui.define(['jquery.sap.global', './ListBase', './library'],
-	function(jQuery, ListBase, library) {
+sap.ui.define(['jquery.sap.global', './ListBase', './ListItemBase', './library'],
+	function(jQuery, ListBase, ListItemBase, library) {
 	"use strict";
 
 
@@ -19,11 +19,12 @@ sap.ui.define(['jquery.sap.global', './ListBase', './library'],
 	 *
 	 * @class
 	 * <code>sap.m.Table</code> control provides a set of sophisticated and convenience functions for responsive table design.
+	 * To render the <code>sap.m.Table</code> properly, the order of the <code>columns</code> aggregation should match with the order of the items <code>cells</code> aggregation. Also <code>sap.m.Table</code> requires at least one visible <code>sap.m.Column</code> in <code>columns</code> aggregation.
 	 * For mobile devices, the recommended limit of table rows is 100 (based on 4 columns) to assure proper performance. To improve initial rendering on large tables, use the <code>growing</code> feature.
 	 * @extends sap.m.ListBase
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -70,10 +71,11 @@ sap.ui.define(['jquery.sap.global', './ListBase', './library'],
 	// class name for the navigation items
 	Table.prototype.sNavItemClass = "sapMListTblRow";
 
+	// announce all details at the initial focus
+	Table.prototype.iAnnounceDetails = 2;
+
 	Table.prototype.init = function() {
-		this._hasPopin = false;
 		this._iItemNeedsColumn = 0;
-		this._selectAllCheckBox = null;
 		ListBase.prototype.init.call(this);
 	};
 
@@ -116,12 +118,12 @@ sap.ui.define(['jquery.sap.global', './ListBase', './library'],
 
 	Table.prototype.destroyItems = function() {
 		this._notifyColumns("ItemsRemoved");
-		return ListBase.prototype.destroyItems.call(this);
+		return ListBase.prototype.destroyItems.apply(this, arguments);
 	};
 
 	Table.prototype.removeAllItems = function() {
 		this._notifyColumns("ItemsRemoved");
-		return ListBase.prototype.removeAllItems.call(this);
+		return ListBase.prototype.removeAllItems.apply(this, arguments);
 	};
 
 	Table.prototype.removeSelections = function() {
@@ -167,9 +169,15 @@ sap.ui.define(['jquery.sap.global', './ListBase', './library'],
 	 * @overwrite
 	 */
 	Table.prototype.shouldRenderItems = function() {
-		return this.getColumns().some(function(oColumn) {
+		var bHasVisibleColumns = this.getColumns().some(function(oColumn) {
 			return oColumn.getVisible();
 		});
+
+		if (!bHasVisibleColumns) {
+			jQuery.sap.log.warning("No visible columns found in " + this);
+		}
+
+		return bHasVisibleColumns;
 	};
 
 	// this gets called when item type column requirement is changed
@@ -215,7 +223,7 @@ sap.ui.define(['jquery.sap.global', './ListBase', './library'],
 	Table.prototype.setNavigationItems = function(oItemNavigation) {
 		var $Header = this.$("tblHeader");
 		var $Footer = this.$("tblFooter");
-		var $Rows = this.$("tblBody").find(".sapMLIB");
+		var $Rows = this.$("tblBody").children(".sapMLIB");
 
 		var aItemDomRefs = $Header.add($Rows).add($Footer).get();
 		oItemNavigation.setItemDomRefs(aItemDomRefs);
@@ -223,7 +231,11 @@ sap.ui.define(['jquery.sap.global', './ListBase', './library'],
 		// header and footer are in the item navigation but
 		// initial focus should be at the first item row
 		if (oItemNavigation.getFocusedIndex() == -1) {
-			oItemNavigation.setFocusedIndex($Header[0] ? 1 : 0);
+			if (this.getGrowing() && this.getGrowingDirection() == sap.m.ListGrowingDirection.Upwards) {
+				oItemNavigation.setFocusedIndex(aItemDomRefs.length - 1);
+			} else {
+				oItemNavigation.setFocusedIndex($Header[0] ? 1 : 0);
+			}
 		}
 	};
 
@@ -295,10 +307,9 @@ sap.ui.define(['jquery.sap.global', './ListBase', './library'],
 		}
 
 		// find first visible column
-		var $table = jQuery(this.getTableDomRef()),
-			$headRow = $table.find("thead > tr"),
+		var $headRow = this.$("tblHeader"),
 			bHeaderVisible = !$headRow.hasClass("sapMListTblHeaderNone"),
-			aVisibleColumns = $headRow.find(".sapMListTblCell").filter(":visible"),
+			aVisibleColumns = $headRow.find(".sapMListTblCell:visible"),
 			$firstVisibleCol = aVisibleColumns.eq(0);
 
 		// check if only one column is visible
@@ -311,8 +322,11 @@ sap.ui.define(['jquery.sap.global', './ListBase', './library'],
 			});
 		}
 
-		// update GroupHeader colspan according to visible column count and additional selection column
-		$table.find(".sapMGHLICell").attr("colspan", aVisibleColumns.length + !!sap.m.ListBaseRenderer.ModeOrder[this.getMode()]);
+		// update the visible column count and colspan
+		// highlight and navigation columns are getting rendered always
+		this._colCount = aVisibleColumns.length + 2 + !!sap.m.ListBaseRenderer.ModeOrder[this.getMode()];
+		this.$("tblBody").find(".sapMGHLICell").attr("colspan", this.getColSpan());
+		this.$("nodata-text").attr("colspan", this.getColCount());
 
 		// remove or show column header row(thead) according to column visibility value
 		if (!bColVisible && bHeaderVisible) {
@@ -326,14 +340,7 @@ sap.ui.define(['jquery.sap.global', './ListBase', './library'],
 
 	// updates the type column visibility and sets the aria flag
 	Table.prototype._setTypeColumnVisibility = function(bVisible) {
-		var $Table = jQuery(this.getTableDomRef()),
-			$TypeColumnHeader = this.$("tblHeadNav"),
-			iTypeColumnIndex = $TypeColumnHeader.index() + 1,
-			$TypeColumnCells = $Table.find("tr > td:nth-child(" + iTypeColumnIndex + ")");
-
-		$Table.toggleClass("sapMListTblHasNav", bVisible);
-		$TypeColumnHeader.attr("aria-hidden", !bVisible);
-		$TypeColumnCells.attr("aria-hidden", !bVisible);
+		jQuery(this.getTableDomRef()).toggleClass("sapMListTblHasNav", bVisible);
 	};
 
 	// notify all columns with given action and param
@@ -360,12 +367,7 @@ sap.ui.define(['jquery.sap.global', './ListBase', './library'],
 			} else {
 				this.removeSelections(false, true);
 			}
-		}, this).setTabIndex(-1).addEventDelegate({
-			onAfterRendering: function() {
-				// hide this from the screen readers
-				this._selectAllCheckBox.getFocusDomRef().setAttribute("aria-hidden", "true");
-			}
-		}, this));
+		}, this).setTabIndex(-1));
 	};
 
 	/*
@@ -431,11 +433,45 @@ sap.ui.define(['jquery.sap.global', './ListBase', './library'],
 		return !!jQuery(oEvent.target).closest($Footer, this.getTableDomRef()).length;
 	};
 
-	/*
-	 * This gets called after navigation items are focused
-	 * Overwrites the ListItemBase default handling
-	 */
-	Table.prototype.onNavigationItemFocus = function() {
+	// returns accessibility role
+	Table.prototype.getAccessibilityType = function() {
+		return sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("ACC_CTR_TYPE_TABLE");
+	};
+
+	Table.prototype._setHeaderAnnouncement = function() {
+		var oBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m"),
+			sAnnouncement = oBundle.getText("ACC_CTR_TYPE_HEADER_ROW") + " ";
+
+		if (this.isAllSelectableSelected()) {
+			sAnnouncement += oBundle.getText("LIST_ALL_SELECTED");
+		}
+
+		this.getColumns(true).forEach(function(oColumn, i) {
+			var oHeader = oColumn.getHeader();
+			if (oHeader && oHeader.getVisible()) {
+				sAnnouncement += ListItemBase.getAccessibilityText(oHeader) + " ";
+			}
+		});
+
+		this.updateInvisibleText(sAnnouncement);
+	};
+
+	Table.prototype._setFooterAnnouncement = function() {
+		var sAnnouncement = sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("ACC_CTR_TYPE_FOOTER_ROW") + " ";
+		this.getColumns(true).forEach(function(oColumn, i) {
+			var oFooter = oColumn.getFooter();
+			if (oFooter && oFooter.getVisible()) {
+				// announce header as well
+				var oHeader = oColumn.getHeader();
+				if (oHeader && oHeader.getVisible()) {
+					sAnnouncement += ListItemBase.getAccessibilityText(oHeader) + " ";
+				}
+
+				sAnnouncement += ListItemBase.getAccessibilityText(oFooter) + " ";
+			}
+		});
+
+		this.updateInvisibleText(sAnnouncement);
 	};
 
 	// keyboard handling
@@ -445,7 +481,7 @@ sap.ui.define(['jquery.sap.global', './ListBase', './library'],
 		}
 
 		// toggle select all header checkbox and fire its event
-		if (oEvent.target === this.getDomRef("tblHeader") && this._selectAllCheckBox) {
+		if (this._selectAllCheckBox && oEvent.target === this.getDomRef("tblHeader")) {
 			this._selectAllCheckBox.setSelected(!this._selectAllCheckBox.getSelected()).fireSelect();
 			oEvent.preventDefault();
 			oEvent.setMarked();
@@ -454,14 +490,14 @@ sap.ui.define(['jquery.sap.global', './ListBase', './library'],
 
 	// Handle tab key
 	Table.prototype.onsaptabnext = function(oEvent) {
-		if (oEvent.isMarked()) {
+		if (oEvent.isMarked() || this.getKeyboardMode() == sap.m.ListKeyboardMode.Edit) {
 			return;
 		}
 
 		var $Row = jQuery();
 		if (oEvent.target.id == this.getId("nodata")) {
 			$Row = this.$("nodata");
-		} if (this.isHeaderRowEvent(oEvent)) {
+		} else if (this.isHeaderRowEvent(oEvent)) {
 			$Row = this.$("tblHeader");
 		} else if (this.isFooterRowEvent(oEvent)) {
 			$Row = this.$("tblFooter");
@@ -470,12 +506,13 @@ sap.ui.define(['jquery.sap.global', './ListBase', './library'],
 		var oLastTabbableDomRef = $Row.find(":sapTabbable").get(-1) || $Row[0];
 		if (oEvent.target === oLastTabbableDomRef) {
 			this.forwardTab(true);
+			oEvent.setMarked();
 		}
 	};
 
 	// Handle shift-tab key
 	Table.prototype.onsaptabprevious = function(oEvent) {
-		if (oEvent.isMarked()) {
+		if (oEvent.isMarked() || this.getKeyboardMode() == sap.m.ListKeyboardMode.Edit) {
 			return;
 		}
 
@@ -487,6 +524,26 @@ sap.ui.define(['jquery.sap.global', './ListBase', './library'],
 		} else if (sTargetId == this.getId("trigger")) {
 			this.focusPrevious();
 			oEvent.preventDefault();
+		}
+	};
+
+	Table.prototype.onfocusin = function(oEvent) {
+		var oTarget = oEvent.target;
+		if (oTarget.id === this.getId("tblHeader")) {
+			this._setHeaderAnnouncement();
+		} else if (oTarget.id === this.getId("tblFooter")) {
+			this._setFooterAnnouncement();
+		} else if (oTarget.id == this.getId("nodata")) {
+			this.updateInvisibleText(this.getNoDataText(), oTarget);
+		}
+
+		ListBase.prototype.onfocusin.call(this, oEvent);
+	};
+
+	Table.prototype.onsapfocusleave = function(oEvent) {
+		ListBase.prototype.onsapfocusleave.call(this, oEvent);
+		if (this.iAnnounceDetails) {
+			this.iAnnounceDetails = 2;
 		}
 	};
 

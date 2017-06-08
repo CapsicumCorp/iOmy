@@ -19,7 +19,7 @@ sap.ui.define(['sap/m/semantic/SemanticToggleButton'], function(SemanticToggleBu
 	 * @extends sap.m.semantic.SemanticToggleButton
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -29,7 +29,9 @@ sap.ui.define(['sap/m/semantic/SemanticToggleButton'], function(SemanticToggleBu
 	 */
 
 	var FavoriteAction = SemanticToggleButton.extend("sap.m.semantic.FavoriteAction", /** @lends sap.m.semantic.FavoriteAction.prototype */ {
-
+		metadata: {
+			library: "sap.m"
+		}
 	});
 
 	return FavoriteAction;

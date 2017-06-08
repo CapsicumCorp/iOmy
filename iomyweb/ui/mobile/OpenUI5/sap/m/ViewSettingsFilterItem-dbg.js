@@ -24,7 +24,7 @@ sap.ui.define(['jquery.sap.global', './ViewSettingsItem', './library'],
 	 * @extends sap.m.ViewSettingsItem
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -72,7 +72,9 @@ sap.ui.define(['jquery.sap.global', './ViewSettingsItem', './library'],
 				propertyValue   : oEvent.getParameter('propertyValue')
 			});
 		}.bind(this));
-		this.fireFilterDetailItemsAggregationChange();
+		this.fireFilterDetailItemsAggregationChange({
+			item: oObject
+		});
 	};
 
 
@@ -95,7 +97,7 @@ sap.ui.define(['jquery.sap.global', './ViewSettingsItem', './library'],
 	 * Inserts an entity to the aggregation named <code>sAggregationName</code> at position <code>iIndex</code>.
 	 *
 	 * @param sAggregationName {string} The name of the aggregation
-	 * @param oObject {mixed} The value of the aggregation to be inserted
+	 * @param oObject {any} The value of the aggregation to be inserted
 	 * @param bSuppressInvalidate {boolean} Whether to suppress invalidation
 	 * @returns {sap.m.ViewSettingsFilterItem} <code>this</code> pointer for chaining
 	 * @override
@@ -110,7 +112,7 @@ sap.ui.define(['jquery.sap.global', './ViewSettingsItem', './library'],
 	 * Removes an entity from the aggregation named <code>sAggregationName</code>.
 	 *
 	 * @param sAggregationName {string} The name of the aggregation
-	 * @param oObject {mixed} The value of aggregation to be removed
+	 * @param oObject {any} The value of aggregation to be removed
 	 * @param bSuppressInvalidate {boolean} Whether to suppress invalidation
 	 * @returns {sap.m.ViewSettingsFilterItem} <code>this</code> pointer for chaining
 	 * @override

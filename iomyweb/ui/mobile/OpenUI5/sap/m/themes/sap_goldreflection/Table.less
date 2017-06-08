@@ -9,13 +9,16 @@
 	table-layout: fixed;
 }
 
+html[data-sap-ui-browser='ie11'] .sapMListTbl {
+	padding: 1px; /* outline must be visible */
+}
+
 .sapMListTbl .sapMLIB{
 	display: table-row;
 }
 
 .sapMListTbl th:focus,
-.sapMListTbl td:focus,
-.sapMListTbl tr:focus {
+.sapMListTbl td:focus{
 	outline: none;
 }
 
@@ -71,7 +74,6 @@ tr.sapMListTblHeaderNone > th {
 }
 
 .sapMListTblSubCntRow {
-	display: block;
 	overflow : hidden;
 }
 
@@ -79,15 +81,35 @@ tr.sapMListTblHeaderNone > th {
 .sapMListTblSubCntHdr,
 .sapMListTblSubCntVal {
 	display: inline-block;
-	vertical-align: middle;
-}
-
-.sapMListTblSubCntSpr {
-	vertical-align: baseline;
+	vertical-align: top;
 }
 
 .sapMListTblSubCntValBlock{
 	display: block;
+}
+
+.sapMListTblHighlightCol {
+	width: 0;
+	padding: 0;
+}
+
+.sapMListTblHighlightCol + .sapMListTblHeaderCell,
+.sapMListTblHighlightCell + .sapMListTblCell {
+	padding-left: 1rem;
+}
+
+.sapMListHighlight .sapMListTblHighlightCol{
+	width: 0.375rem;
+}
+
+.sapMListTblHighlightCell {
+	padding: 0;
+	position: relative;
+	overflow: hidden;
+}
+
+html[data-sap-ui-browser='ie11'] .sapMListTblHighlightCell > .sapMLIBHighlight {
+	height: 40rem; /* IE11 cannot stretch the height of the cell content */
 }
 
 /* responsive table approach */

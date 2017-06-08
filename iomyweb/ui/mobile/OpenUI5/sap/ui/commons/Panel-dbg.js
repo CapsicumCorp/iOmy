@@ -23,10 +23,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Panel</code> control.
 	 * @alias sap.ui.commons.Panel
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -666,7 +667,9 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	Panel.prototype.getScrollTop = function () {
 		var scrollTop = 0;
 		if (this._oScrollDomRef) {
-			scrollTop = this._oScrollDomRef.scrollTop;
+
+			// The scrollTop returns float number when the browser is zoomed and therefore we need to cast it.
+			scrollTop = Math.ceil(this._oScrollDomRef.scrollTop);
 			this.setProperty("scrollTop", scrollTop, true);
 		}
 

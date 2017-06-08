@@ -7,7 +7,7 @@
 sap.ui.define([
 		'jquery.sap.global',
 		'./Matcher'
-	], function (jQuery, Matcher) {
+	], function ($, Matcher) {
 	"use strict";
 
 	/**
@@ -48,7 +48,7 @@ sap.ui.define([
 		},
 
 		/**
-		 * Checks if the control has a filled aggregation with at least one control that have a property equaling propertyName/Value
+		 * Checks if the control has a filled aggregation with at least one control that have a property equaling propertyName/Value.
 		 *
 		 * @param {sap.ui.core.Control} oControl the control that is checked by the matcher
 		 * @return {boolean} true if the Aggregation set in the property aggregationName is filled, false if it is not.
@@ -59,17 +59,17 @@ sap.ui.define([
 				sAggregationName = this.getAggregationName(),
 				sPropertyName = this.getPropertyName(),
 				vPropertyValue = this.getPropertyValue(),
-				fnAggregation = oControl["get" + jQuery.sap.charToUpperCase(sAggregationName, 0)];
+				fnAggregation = oControl["get" + $.sap.charToUpperCase(sAggregationName, 0)];
 
 			if (!fnAggregation) {
-				jQuery.sap.log.error("Control " + oControl + " does not have an aggregation called: " + sAggregationName, this._sLogPrefix);
+				this._oLogger.error("Control '" + oControl + "' does not have an aggregation called '" + sAggregationName + "'");
 				return false;
 			}
 
 			aAggregation = fnAggregation.call(oControl);
 
 			var bMatches = aAggregation.some(function (vAggregationItem) {
-				var fnPropertyGetter = vAggregationItem["get" + jQuery.sap.charToUpperCase(sPropertyName, 0)];
+				var fnPropertyGetter = vAggregationItem["get" + $.sap.charToUpperCase(sPropertyName, 0)];
 
 				//aggregation item does not have such a property
 				if (!fnPropertyGetter) {
@@ -80,9 +80,9 @@ sap.ui.define([
 			});
 
 			if (!bMatches) {
-				jQuery.sap.log.debug("Control " + oControl + " has no Control with the value " +
-					this.getPropertyValue() + " in the aggregation " +
-					this.getAggregationName(), this._sLogPrefix);
+				this._oLogger.debug("Control '" + oControl + "' has no property '" + sPropertyName + "' with the value '" +
+					vPropertyValue + "' in the aggregation '" +
+					sAggregationName + "'");
 			}
 
 			return bMatches;

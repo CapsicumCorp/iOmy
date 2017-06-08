@@ -20,10 +20,11 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 	 * The control provides a field that allows end users to an entry out of a list of pre-defined items.
 	 * The choosable items can be provided in the form of a complete <code>ListBox</code>, single <code>ListItems</code>.
 	 * @extends sap.ui.commons.ComboBox
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.ComboBox</code> control.
 	 * @alias sap.ui.commons.DropdownBox
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -815,13 +816,36 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 			// if popup is open the text-selection is made by doTypeAhead
 			// do not select all text in this case
 			var $Ref = jQuery(this.getInputDomRef()),
-			l = $Ref.val().length;
+				l = $Ref.val().length;
 			if (l > 0 && !this.mobile) {
-				this._doSelect(0, l);
+				this._callDoSelectAfterFocusIn(0, l);
 			}
 			this._bFocusByOpen = undefined;
 		}
 		ComboBox.prototype.onfocusin.apply(this, arguments);
+	};
+
+	/**
+	 * For IE selecting text by #setSelectedRange method (this is what function _doSelect does)
+	 * provokes focus, so this function makes sure we were not called because of "_doSelect" more than once.
+	 * Edge does not have such behavior.
+	 * @param iStart the 0-based start position for the selection
+	 * @param iEnd the 0-based end position for the selection
+	 * @private
+	 */
+	DropdownBox.prototype._callDoSelectAfterFocusIn = function(iStart, iEnd) {
+		if (!sap.ui.Device.browser.internet_explorer) {
+			this._doSelect(iStart, iEnd);
+		} else {
+			// Enum _eDoSelectAfterFocusIn as well describes the IE flow:  undefined -> "onfocusin" -> "_doSelect",
+			// so make sure we are not called due to _doSelect.
+			if (!this._eDoSelectAfterFocusIn || this._eDoSelectAfterFocusIn !== "_doSelect") {
+				this._eDoSelectAfterFocusIn = "onfocusin";
+				this._doSelect(iStart, iEnd);
+			} else {
+				this._eDoSelectAfterFocusIn = undefined;
+			}
+		}
 	};
 
 
@@ -1111,7 +1135,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 	 * @private
 	 */
 	DropdownBox.prototype._prepareOpen = function(oListBox, oPopup){
-		this._oValueBeforeOpen = this.$().val();
+		this._oValueBeforeOpen = jQuery(this.getInputDomRef()).val();
 
 		// remember we opening the popup (needed in applyFocusInfo called after rerendering of ListBox)
 		this._bOpening = true;
@@ -1125,6 +1149,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 				iItemIndex = this.indexOfItem(sap.ui.getCore().byId(this.getSelectedItemId()));
 			}
 			this._doTypeAhead("", jQuery(this.getInputDomRef()).val(), true, iItemIndex);
+			this._doSelect(); // select all to have the same behaviour like by navigatin in open list and closing list
 		}
 		return this;
 	};
@@ -1305,6 +1330,25 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 
 	};
 
+	/**
+	 * Focuses the dropdown upon inner ListBox#click.
+	 * As there might be raise condition between the dropdown.focus and listbox.click events for some browsers.
+	 * this method makes sure the events are in the right order (listbox#click->dropdown#focus)
+	 * @private
+	 */
+	DropdownBox.prototype._focusAfterListBoxClick = function() {
+		if (!sap.ui.Device.browser.webkit) {
+			this.focus();
+		} else {
+			var oLB = this._getListBox();
+			oLB.addDelegate({
+				onclick: function() {//this will be executed after the ListBox#onclick handler
+					oLB.removeDelegate(this);
+					this.focus();
+				}.bind(this)});
+		}
+	};
+
 	/*
 	 * Handle the sapfocusleave pseudo event and ensure that when the focus moves to the list box,
 	 * the check change functionality (incl. fireChange) is not triggered.
@@ -1316,7 +1360,7 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'sap/ui/core/Hist
 
 		var oLB = this._getListBox();
 		if (oEvent.relatedControlId && jQuery.sap.containsOrEquals(oLB.getFocusDomRef(), sap.ui.getCore().byId(oEvent.relatedControlId).getFocusDomRef())) {
-			this.focus();
+			this._focusAfterListBoxClick();
 		} else {
 			// we left the DropdownBox to another (unrelated) control and thus have to fire the change (if needed).
 			if (this.oPopup && this.oPopup.isOpen()) {

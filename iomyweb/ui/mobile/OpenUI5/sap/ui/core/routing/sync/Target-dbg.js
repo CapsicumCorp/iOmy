@@ -3,7 +3,7 @@
  * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define([], function() {
+sap.ui.define(['jquery.sap.global'], function(jQuery) {
 	"use strict";
 
 	/**
@@ -100,6 +100,10 @@ sap.ui.define([], function() {
 				oView = this._oViews._getView(oViewOptions);
 			}
 
+			this._bindTitleInTitleProvider(oView);
+
+			oView.addDependent(this._oTitleProvider);
+
 			if (oOptions.clearControlAggregation === true) {
 				oControl[oAggregationInfo._sRemoveAllMutator]();
 			}
@@ -107,14 +111,12 @@ sap.ui.define([], function() {
 			jQuery.sap.log.info("Did place the view '" + sViewName + "' with the id '" + oView.getId() + "' into the aggregation '" + oOptions.controlAggregation + "' of a control with the id '" + oControl.getId() + "'", this);
 			oControl[oAggregationInfo._sMutator](oView);
 
-			setTimeout(function() {
-				this.fireDisplay({
-					view : oView,
-					control : oControl,
-					config : this._oOptions,
-					data: vData
-				});
-			}.bind(this), 0);
+			this.fireDisplay({
+				view : oView,
+				control : oControl,
+				config : this._oOptions,
+				data: vData
+			});
 
 			return {
 				oTargetParent : oView,

@@ -11,13 +11,19 @@
 	color: @sapHCStandardFG;
 }
 
-.sap-desktop .sapMObjectAttributeActive:focus {
+html.sap-desktop .sapMObjectAttributeActive:focus {
 	outline: none;
 }
 
-.sap-desktop .sapMObjectAttributeActive:focus > .sapMText {
+html.sap-desktop .sapMObjectAttributeActive:focus > .sapMText {
 	outline: 0.125rem dotted @sapHCStandardFG;
 	outline-offset: -0.125rem;
+}
+
+html[data-sap-ui-browser ^= "ie"], html[data-sap-ui-browser^="ed"] {
+	.sapMObjectAttributeActive:focus > .sapMText {
+		outline-style: dashed;
+	}
 }
 
 .sapMObjectAttributeActive .sapMText {
@@ -44,14 +50,13 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	float: left;
 	max-width: 50%;
+	vertical-align: middle;
 }
 
 .sapMOHR .sapMOHRAttr .sapMObjectAttributeTitle {
 	padding-right: 0.5rem;
 	max-width: 50%;
-	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
 
@@ -65,11 +70,11 @@
 	font-size: @sapMFontMediumSize;
 	font-weight: normal;
 	color: @sapHCStandardFG;
-	float: left;
 	white-space: nowrap;
 	max-width: 0.5rem;
 	margin-left: -0.5rem;
 	overflow: auto;
+	vertical-align: middle;
 }
 
 .sapMOHR .sapMObjectAttributeActive .sapMObjectAttributeText {
@@ -94,7 +99,6 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	max-height: 1rem;
 }
 
 /*=========================================== */

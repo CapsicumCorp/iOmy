@@ -5,11 +5,16 @@
  */
 
 // Provides control sap.ui.table.AnalyticalTable.
-sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTable', './library', 'sap/ui/model/analytics/ODataModelAdapter', 'sap/ui/core/IconPool'],
-	function(jQuery, AnalyticalColumn, Table, TreeTable, library, ODataModelAdapter, IconPool) {
+sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTable', './library', 'sap/ui/model/analytics/ODataModelAdapter', 'sap/ui/model/SelectionModel', 'sap/ui/model/Sorter', 'sap/ui/base/ManagedObject', 'sap/ui/core/Popup', 'sap/ui/unified/Menu', 'sap/ui/unified/MenuItem', './TableUtils'],
+	function(jQuery, AnalyticalColumn, Table, TreeTable, library, ODataModelAdapter, SelectionModel, Sorter, ManagedObject, Popup, Menu, MenuItem, TableUtils) {
 	"use strict";
 
-
+	// shortcuts
+	var GroupEventType = library.GroupEventType,
+		SelectionBehavior = library.SelectionBehavior,
+		SelectionMode = library.SelectionMode,
+		SortOrder = library.SortOrder,
+		TreeAutoExpandMode = library.TreeAutoExpandMode;
 
 	/**
 	 * Constructor for a new AnalyticalTable.
@@ -23,7 +28,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 * @see http://scn.sap.com/docs/DOC-44986
 	 *
 	 * @extends sap.ui.table.Table
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -36,20 +41,62 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		properties : {
 
 			/**
-			 * Specifies if the total values should be displayed in the group headers or on bottom of the row. Does not affact the total sum.
+			 * Specifies if the total values should be displayed in the group headers or on bottom of the row. Does not affect the total sum.
+			 * @deprecated As of version 1.44.0, please use the corresponding binding parameter <code>sumOnTop</code> instead.
+			 *
+			 * Example:
+			 * <pre>
+			 *   oTable.bindRows({
+			 *      path: "...",
+			 *      parameters: {
+			 *         sumOnTop: true
+			 *      }
+			 *   });
+			 * </pre>
+			 *
+			 * The value of the property is only taken into account if no parameter is given in the binding information. Changes to this property after
+			 * the table is bound do not have any effect unless an explicit (re-)bind of the <code>rows</code> aggregation is done.
 			 */
-			sumOnTop : {type : "boolean", group : "Appearance", defaultValue : false},
+			sumOnTop : {type : "boolean", group : "Appearance", defaultValue : false, deprecated: true},
 
 			/**
 			 * Number of levels, which should be opened initially (on first load of data).
+			 * @deprecated As of version 1.44.0, please use the corresponding binding parameter <code>numberOfExpandedLevels</code> instead.
+			 *
+			 * Example:
+			 * <pre>
+			 *   oTable.bindRows({
+			 *      path: "...",
+			 *      parameters: {
+			 *         numberOfExpandedLevels: 1
+			 *      }
+			 *   });
+			 * </pre>
+			 *
+			 * The value of the property is only taken into account if no parameter is given in the binding information. Changes to this property after
+			 * the table is bound do not have any effect unless an explicit (re-)bind of the <code>rows</code> aggregation is done.
 			 */
-			numberOfExpandedLevels : {type : "int", group : "Misc", defaultValue : 0},
+			numberOfExpandedLevels : {type : "int", group : "Misc", defaultValue : 0, deprecated: true},
 
 			/**
-			 * The kind of auto expansion algorithm, e.g. optimised filter conditions, per level requests, ...
-			 * sap.ui.table.TreeAutoExpandMode
+			 * The kind of auto expansion algorithm, e.g. optimized filter conditions, per level requests, ...
+			 * Must be a value of <code>sap.ui.table.TreeAutoExpandMode</code>.
+			 * @deprecated As of version 1.44.0, please use the corresponding binding parameter <code>autoExpandMode</code> instead.
+			 *
+			 * Example:
+			 * <pre>
+			 *   oTable.bindRows({
+			 *      path: "...",
+			 *      parameters: {
+			 *         autoExpandMode: "Bundled"
+			 *      }
+			 *   });
+			 * </pre>
+			 *
+			 * The value of the property is only taken into account if no parameter is given in the binding information. Changes to this property after
+			 * the table is bound do not have any effect unless an explicit (re-)bind of the <code>rows</code> aggregation is done.
 			 */
-			autoExpandMode: {type: "string", group: "Misc", defaultValue: "Bundled" },
+			autoExpandMode: {type: "string", group: "Misc", defaultValue: "Bundled", deprecated: true},
 
 			/**
 			 * Functions which is used to sort the column visibility menu entries e.g.: function(ColumnA, ColumnB) { return 0 = equals, <0 lower, >0 greater }; Other values than functions will be ignored.
@@ -58,31 +105,34 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 
 			/**
 			 * Setting collapseRecursive to true means, that when collapsing a node all subsequent child nodes will also be collapsed.
+			 *
+			 * Calling the setter of this property only has an effect when the tables <code>rows</code> aggregation is already bound and
+			 * the binding supports this feature.
 			 */
 			collapseRecursive : {type: "boolean", defaultValue: true},
 
 			/**
 			 * If dirty the content of the Table will be overlayed.
-			 * @deprecated Since version 1.21.2.
-			 * Please use setShowOverlay instead.
+			 * @deprecated As of version 1.21.2, replaced by {@link sap.ui.table.Table#setShowOverlay}
 			 */
 			dirty : {type : "boolean", group : "Appearance", defaultValue : null, deprecated: true}
-		}
-	}});
-
-
-	// =====================================================================
-	// WE START WITH A COPY OF THE TREETABLE AND REFACTOR THE CODING!
-	// =====================================================================
+		},
+		designTime : true
+	}, renderer: "sap.ui.table.TableRenderer"});
 
 	/**
 	 * This function retrieves the grand total context, in case of an analytical table
 	 * Overidden from Table.js
 	 * @overrides
 	 */
-	AnalyticalTable.prototype._getFixedBottomRowContexts = function (oBinding) {
-		return oBinding.getGrandTotalContext();
+	AnalyticalTable.prototype._getFixedBottomRowContexts = function () {
+		var oBinding = this.getBinding("rows");
+		if (oBinding) {
+			return [oBinding.getGrandTotalNode()];
+		}
 	};
+
+	AnalyticalTable.prototype._getContexts = TreeTable.prototype._getContexts;
 
 	/**
 	 * Initialization of the AnalyticalTable control
@@ -96,53 +146,51 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		this.attachBrowserEvent("contextmenu", this._onContextMenu);
 
 		// defaulting properties
-		this.setSelectionMode(sap.ui.table.SelectionMode.MultiToggle);
+		this.setSelectionMode(SelectionMode.MultiToggle);
 		this.setShowColumnVisibilityMenu(true);
 		this.setEnableColumnFreeze(true);
 		this.setEnableCellFilter(true);
 		this._aGroupedColumns = [];
+		this._bSuspendUpdateAnalyticalInfo = false;
+		TableUtils.Grouping.setGroupMode(this);
+	};
 
-		// adopting properties and load icon fonts for bluecrystal
-		if (sap.ui.getCore().getConfiguration().getTheme() === "sap_bluecrystal") {
-
-			// add the icon fonts
-			jQuery.sap.require("sap.ui.core.IconPool");
-			sap.ui.core.IconPool.insertFontFaceStyle();
-
-			// defaulting the rowHeight -> is set via CSS
+	AnalyticalTable.prototype.exit = function() {
+		if (this._oGroupHeaderMenu) {
+			this._oGroupHeaderMenu.destroy();
+			this._oGroupHeaderMenu = null;
 		}
+
+		Table.prototype.exit.apply(this, arguments);
 	};
 
 	AnalyticalTable.prototype.setFixedRowCount = function() {
-		jQuery.sap.log.error("The property fixedRowCount is not supported by the AnalyticalTable and must not be set!");
+		jQuery.sap.log.error("The property fixedRowCount is not supported by control sap.ui.table.AnalyticalTable!");
 		return this;
 	};
 
 	AnalyticalTable.prototype.setFixedBottomRowCount = function() {
-		jQuery.sap.log.error("The property fixedBottomRowCount is managed by the AnalyticalTable and must not be set!");
+		jQuery.sap.log.error("The property fixedBottomRowCount is managed by control sap.ui.table.AnalyticalTable!");
 		return this;
 	};
 
-	/**
-	 * Rerendering handling
-	 * @private
-	 */
-	AnalyticalTable.prototype.onAfterRendering = function() {
-		Table.prototype.onAfterRendering.apply(this, arguments);
-		this.$().find("[role=grid]").attr("role", "treegrid");
-	};
-
 	AnalyticalTable.prototype.setDirty = function(bDirty) {
-		jQuery.sap.log.error("The property \"dirty\" is deprecated. Please use \"showOverlay\".");
+		jQuery.sap.log.error("The property dirty of control sap.ui.table.AnalyticalTable is deprecated. Please use showOverlay instead.");
 		this.setProperty("dirty", bDirty, true);
 		this.setShowOverlay(this.getDirty());
 		return this;
 	};
 
-	AnalyticalTable.prototype.getModel = function(oModel, sName) {
+	AnalyticalTable.prototype.setEnableGrouping = function(bEnableGrouping) {
+		jQuery.sap.log.error("The property enableGrouping is not supported by control sap.ui.table.AnalyticalTable!");
+		return this;
+	};
+
+	AnalyticalTable.prototype.getModel = function(sName) {
 		var oModel = Table.prototype.getModel.apply(this, arguments);
-		if (oModel) {
-			sap.ui.model.analytics.ODataModelAdapter.apply(oModel);
+		var oRowBindingInfo = this.getBindingInfo("rows");
+		if (oModel && oRowBindingInfo && oRowBindingInfo.model == sName) {
+			ODataModelAdapter.apply(oModel);
 		}
 		return oModel;
 	};
@@ -167,10 +215,9 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		// Sanitize the arguments for API Compatibility: sName, sPath, oTemplate, oSorter, aFilters
 		var oBindingInfoSanitized = this._sanitizeBindingInfo.apply(this, arguments);
 
-		var vReturn = this.bindAggregation("rows", oBindingInfoSanitized);
-		this._bSupressRefresh = true;
-		this._updateColumns();
-		this._bSupressRefresh = false;
+		var vReturn = Table.prototype.bindRows.call(this, oBindingInfoSanitized);
+
+		this._updateTotalRow(true);
 
 		return vReturn;
 	};
@@ -196,7 +243,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 * Overwritten from Table.js - does nothing since the selection is stored in the
 	 */
 	AnalyticalTable.prototype._initSelectionModel = function (sSelectionMode) {
-		this._oSelection = new sap.ui.model.SelectionModel(sSelectionMode);
+		this._oSelection = new SelectionModel(sSelectionMode);
 		return this;
 	};
 
@@ -210,7 +257,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 */
 	AnalyticalTable.prototype.setSelectionMode = function (sSelectionMode) {
 		// clear selection if the mode changes
-		if (sSelectionMode === sap.ui.table.SelectionMode.None) {
+		if (sSelectionMode === SelectionMode.None) {
 			jQuery.sap.log.fatal("SelectionMode 'None' is not supported by the AnalyticalTable.");
 			return this;
 		}
@@ -219,6 +266,9 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		if (oBinding && oBinding.clearSelection) {
 			oBinding.clearSelection();
 		}
+
+		// Check for valid selection modes (e.g. change deprecated mode "Multi" to "MultiToggle")
+		sSelectionMode = TableUtils.sanitizeSelectionMode(this, sSelectionMode);
 
 		// set selection mode independent from clearing the selection
 		this.setProperty("selectionMode", sSelectionMode);
@@ -234,7 +284,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 * @returns {sap.ui.table.Table} this for chaining
 	 */
 	AnalyticalTable.prototype.setSelectionBehavior = function (sBehavior) {
-		if (sBehavior === sap.ui.table.SelectionBehavior.RowOnly) {
+		if (sBehavior === SelectionBehavior.RowOnly) {
 			jQuery.sap.log.fatal("SelectionBehavior 'RowOnly' is not supported by the AnalyticalTable.");
 			return this;
 		} else {
@@ -257,7 +307,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 			aFilters = arguments[3];
 			oBindingInfo = {path: sPath, sorter: aSorters, filters: aFilters};
 			// allow either to pass the template or the factory function as 3rd parameter
-			if (oTemplate instanceof sap.ui.base.ManagedObject) {
+			if (oTemplate instanceof ManagedObject) {
 				oBindingInfo.template = oTemplate;
 			} else if (typeof oTemplate === "function") {
 				oBindingInfo.factory = oTemplate;
@@ -269,7 +319,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		for (var i = 0, l = aColumns.length; i < l; i++) {
 			if (aColumns[i].getSorted()) {
 				oBindingInfo.sorter = oBindingInfo.sorter || [];
-				oBindingInfo.sorter.push(new sap.ui.model.Sorter(aColumns[i].getSortProperty() || aColumns[i].getLeadingProperty(), aColumns[i].getSortOrder() === sap.ui.table.SortOrder.Descending));
+				oBindingInfo.sorter.push(new Sorter(aColumns[i].getSortProperty() || aColumns[i].getLeadingProperty(), aColumns[i].getSortOrder() === SortOrder.Descending));
 			}
 		}
 
@@ -278,9 +328,20 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		// This is the default for the AnalyticalTable.
 		oBindingInfo.parameters = oBindingInfo.parameters || {};
 		oBindingInfo.parameters.analyticalInfo = this._getColumnInformation();
-		oBindingInfo.parameters.sumOnTop = this.getSumOnTop();
-		oBindingInfo.parameters.numberOfExpandedLevels = this.getNumberOfExpandedLevels();
-		oBindingInfo.parameters.autoExpandMode = this.getAutoExpandMode();
+
+		if (!oBindingInfo.parameters.hasOwnProperty("sumOnTop")) {
+			oBindingInfo.parameters.sumOnTop = this.getSumOnTop();
+		}
+		if (!oBindingInfo.parameters.hasOwnProperty("numberOfExpandedLevels")) {
+			oBindingInfo.parameters.numberOfExpandedLevels = this.getNumberOfExpandedLevels();
+		}
+		if (!oBindingInfo.parameters.hasOwnProperty("autoExpandMode")) {
+			var sExpandMode = this.getAutoExpandMode();
+			if (sExpandMode != TreeAutoExpandMode.Bundled && sExpandMode != TreeAutoExpandMode.Sequential) {
+				sExpandMode = TreeAutoExpandMode.Bundled;
+			}
+			oBindingInfo.parameters.autoExpandMode = sExpandMode;
+		}
 
 		// This may fail, in case the model is not yet set.
 		// If this case happens, the ODataModelAdapter is added by the overriden _bindAggregation, which is called during setModel(...)
@@ -363,41 +424,29 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	};
 
 	AnalyticalTable.prototype._updateTableContent = function() {
-		Table.prototype._updateTableContent.apply(this, arguments);
-
 		var oBinding = this.getBinding("rows"),
 			iFirstRow = this.getFirstVisibleRow(),
 			iFixedBottomRowCount = this.getFixedBottomRowCount(),
 			iCount = this.getVisibleRowCount(),
 			aCols = this.getColumns();
 
-		var fnRemoveClasses = function (oRow) {
-			var $row = oRow.getDomRefs(true);
-
-			$row.row.removeAttr("data-sap-ui-level");
-			$row.row.removeData("sap-ui-level");
-			$row.row.removeAttr('aria-level');
-			$row.row.removeAttr('aria-expanded');
-			$row.row.removeClass("sapUiTableGroupHeader sapUiAnalyticalTableSum sapUiAnalyticalTableDummy");
-			$row.rowSelector.html("");
-		};
-
 		var aRows = this.getRows();
 		//check if the table has rows (data to display)
 		if (!oBinding) {
 			// restore initial table state, remove group headers and total row formatting
 			for (var i = 0; i < aRows.length; i++) {
-				fnRemoveClasses(aRows[i]);
+				TableUtils.Grouping.cleanupTableRowForGrouping(this, aRows[i]);
 			}
 			return;
 		}
+
+		var oBindingInfo = this.getBindingInfo("rows");
 
 		for (var iRow = 0, l = Math.min(iCount, aRows.length); iRow < l; iRow++) {
 			var bIsFixedRow = iRow > (iCount - iFixedBottomRowCount - 1) && oBinding.getLength() > iCount,
 				iRowIndex = bIsFixedRow ? (oBinding.getLength() - 1 - (iCount - 1 - iRow)) : iFirstRow + iRow,
 				oRow = aRows[iRow],
 				$row = oRow.$(),
-				$fixedRow = oRow.$("fixed"),
 				$rowHdr = this.$().find("div[data-sap-ui-rowindex=" + $row.attr("data-sap-ui-rowindex") + "]");
 
 			var oContextInfo;
@@ -410,115 +459,22 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 			var iLevel = oContextInfo ? oContextInfo.level : 0;
 
 			if (!oContextInfo || !oContextInfo.context) {
-				fnRemoveClasses(oRow);
+				TableUtils.Grouping.cleanupTableRowForGrouping(this, oRow);
 				if (oContextInfo && !oContextInfo.context) {
 					$row.addClass("sapUiAnalyticalTableDummy");
 					$rowHdr.addClass("sapUiAnalyticalTableDummy");
-					$rowHdr.html('<div class="sapUiAnalyticalTableLoading">' + this._oResBundle.getText("TBL_CELL_LOADING") + '</div>');
+					//TBD: $rowHdr.html('<div class="sapUiAnalyticalTableLoading">' + this._oResBundle.getText("TBL_CELL_LOADING") + '</div>');
 				}
 				continue;
 			}
 
-			var aAriaLabelledByParts = [this.getId() + "-rownumberofrows"];
-			var sAriaTextForSum = "";
-
 			if (oBinding.nodeHasChildren && oBinding.nodeHasChildren(oContextInfo)) {
-				// modify the rows
-				$row.addClass("sapUiTableGroupHeader");
-				$fixedRow.addClass("sapUiTableGroupHeader");
-
-				$rowHdr.attr("aria-haspopup", true);
-
-				var sGroupHeaderText = oBinding.getGroupName(oContextInfo.context, oContextInfo.level);
-
-				var sClass = oContextInfo.nodeState.expanded ? "sapUiTableGroupIconOpen" : "sapUiTableGroupIconClosed";
-
-				if (oContextInfo.nodeState.expanded && !this.getSumOnTop()) {
-					$row.addClass("sapUiTableRowHidden");
-					$fixedRow.addClass("sapUiTableRowHidden");
-					$rowHdr.addClass("sapUiTableRowHidden");
-				}
-
-				var sGroupHeaderMenuButton = "";
-				if ('ontouchstart' in document) {
-					sGroupHeaderMenuButton = "<div class='sapUiTableGroupMenuButton'></div>";
-				}
-				$rowHdr.html("<div id=\"" + oRow.getId() + "-groupHeader\" class=\"sapUiTableGroupIcon " + sClass + "\" tabindex=\"-1\" title=\"" + sGroupHeaderText + "\">" + sGroupHeaderText + "</div>" + sGroupHeaderMenuButton);
-				aAriaLabelledByParts.push(oRow.getId() + "-groupHeader");
-
-				$row.removeClass("sapUiAnalyticalTableSum sapUiAnalyticalTableDummy");
-				$fixedRow.removeClass("sapUiAnalyticalTableSum sapUiAnalyticalTableDummy");
-				$rowHdr.removeClass("sapUiAnalyticalTableSum sapUiAnalyticalTableDummy");
-				$rowHdr.addClass("sapUiTableGroupHeader").removeAttr("title").removeAttr("aria-label");
-
-				$row.attr('aria-expanded', oContextInfo.nodeState.expanded);
-				$fixedRow.attr('aria-expanded', oContextInfo.nodeState.expanded);
-				$rowHdr.attr('aria-expanded', oContextInfo.nodeState.expanded);
-
-				if (oContextInfo.level > 0) {
-					sAriaTextForSum = oBinding.getGroupName(oContextInfo.context, oContextInfo.level);
-				} else {
-					sAriaTextForSum = this._oResBundle.getText("TBL_GRAND_TOTAL_ROW");
-				}
+				TableUtils.Grouping.updateTableRowForGrouping(this, oRow, true, oContextInfo.nodeState.expanded,
+					oContextInfo.nodeState.expanded && !oBindingInfo.parameters.sumOnTop, false, iLevel,
+					oBinding.getGroupName(oContextInfo.context, oContextInfo.level));
 			} else {
-				$row.removeAttr('aria-expanded');
-				$rowHdr.removeAttr('aria-expanded');
-				$fixedRow.removeAttr('aria-expanded');
-				$rowHdr.attr("aria-haspopup", false);
-
-				$rowHdr.removeAttr('aria-describedby');
-
-				$row.removeClass("sapUiTableGroupHeader sapUiTableRowHidden sapUiAnalyticalTableSum sapUiAnalyticalTableDummy");
-
-				$fixedRow.removeClass("sapUiTableGroupHeader sapUiTableRowHidden sapUiAnalyticalTableSum");
-
-				$rowHdr.html("");
-				$rowHdr.removeClass("sapUiTableGroupHeader sapUiAnalyticalTableDummy sapUiAnalyticalTableSum");
-
-				// update aria description for row selection
-				if (!oContextInfo.nodeState.sum) {
-					aAriaLabelledByParts.push(this.getId() + "-rows-row" + $rowHdr.attr("data-sap-ui-rowindex") + "-rowselecttext");
-				}
-
-				if (oContextInfo.nodeState.sum && oContextInfo.context && oContextInfo.context.getObject()) {
-					$row.addClass("sapUiAnalyticalTableSum");
-					$fixedRow.addClass("sapUiAnalyticalTableSum");
-					$rowHdr.addClass("sapUiAnalyticalTableSum");
-
-					sAriaTextForSum;
-					if (oContextInfo.level > 0) {
-						sAriaTextForSum = this._oResBundle.getText("TBL_GROUP_TOTAL_ROW") + " " + oBinding.getGroupName(oContextInfo.context, oContextInfo.level);
-					} else {
-						sAriaTextForSum = this._oResBundle.getText("TBL_GRAND_TOTAL_ROW");
-					}
-				}
-			}
-
-			//set the level of the node on the DOM
-			$row.attr("data-sap-ui-level", iLevel);
-			$fixedRow.attr("data-sap-ui-level", iLevel);
-			$rowHdr.attr("data-sap-ui-level", iLevel);
-			$rowHdr.attr('aria-level', iLevel + 1);
-			$row.attr('aria-level', iLevel + 1);
-			$fixedRow.attr('aria-level', iLevel + 1);
-
-			//set the level of the node as a data-* attribute
-			$row.data("sap-ui-level", iLevel);
-			$fixedRow.data("sap-ui-level", iLevel);
-			$rowHdr.data("sap-ui-level", iLevel);
-
-			if ('ontouchstart' in document) {
-				var iScrollBarOffset = 0;
-				if (this.$().hasClass("sapUiTableVScr")) {
-					iScrollBarOffset += this.$().find('.sapUiTableVSb').width();
-				}
-				var $GroupHeaderMenuButton = $rowHdr.find(".sapUiTableGroupMenuButton");
-
-				if (this._bRtlMode) {
-					$GroupHeaderMenuButton.css("right", (this.$().width() - $GroupHeaderMenuButton.width() + $rowHdr.position().left - iScrollBarOffset) + "px");
-				} else {
-					$GroupHeaderMenuButton.css("left", (this.$().width() - $GroupHeaderMenuButton.width() - $rowHdr.position().left - iScrollBarOffset) + "px");
-				}
+				TableUtils.Grouping.updateTableRowForGrouping(this, oRow, false, false, false, oContextInfo.nodeState.sum, iLevel,
+					oContextInfo.nodeState.sum && oContextInfo.level > 0 ? oBinding.getGroupName(oContextInfo.context, oContextInfo.level) : null);
 			}
 
 			// show or hide the totals if not enabled - needs to be done by Table
@@ -526,168 +482,18 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 			// be cleared in the model - and the binding has no control over the
 			// value mapping - this happens directly via the context!
 			var aCells = oRow.getCells();
-			var aMeasures = [];
 			for (var i = 0, lc = aCells.length; i < lc; i++) {
 				var iCol = aCells[i].data("sap-ui-colindex");
 				var oCol = aCols[iCol];
 				var $td = jQuery(aCells[i].$().closest("td"));
 				if (oBinding.isMeasure(oCol.getLeadingProperty())) {
 					$td.addClass("sapUiTableMeasureCell");
-					if (!oContextInfo.nodeState.sum || oCol.getSummed()) {
-						$td.removeClass("sapUiTableCellHidden");
-						aMeasures.push(oCol.getId());
-						aMeasures.push($td[0].id);
-					} else {
-						$td.addClass("sapUiTableCellHidden");
-					}
-
-					var sAriaTextForSumId = $td[0].id + "-ariaTextForSum";
-					var $AriaTextForSum = jQuery.sap.byId(sAriaTextForSumId);
-					if ($AriaTextForSum.length === 0) {
-						$td.append("<span id=\"" + sAriaTextForSumId + "\" class=\"sapUiHidden\"></span>");
-						$AriaTextForSum = jQuery.sap.byId(sAriaTextForSumId);
-					}
-
-					if (oContextInfo.nodeState.sum || $row.hasClass("sapUiTableGroupHeader")) {
-						$AriaTextForSum.text(sAriaTextForSum);
-						$td.attr("aria-labelledby", sAriaTextForSumId + " " + $td.attr("aria-labelledby"));
-					} else {
-						$AriaTextForSum.text("");
-						$td.removeAriaLabelledBy(sAriaTextForSumId);
-					}
+					$td.toggleClass("sapUiTableCellHidden", oContextInfo.nodeState.sum && !oCol.getSummed());
 				} else {
 					$td.removeClass("sapUiTableMeasureCell");
 				}
 			}
-
-			// connect measures with the group header
-			for (var k = 0; k < aMeasures.length; k++) {
-				aAriaLabelledByParts.push(aMeasures[k]);
-			}
-			// update aria description for row selection
-			$rowHdr.attr("aria-labelledby", aAriaLabelledByParts.join(" "));
-
-			var $targetRow = this.getFixedColumnCount() > 0 ? $fixedRow : $row;
-			this._resizeGroupHeader($rowHdr, $targetRow, oContextInfo.nodeState.expanded);
 		}
-	};
-
-	/*
-	 * Calculates how much width is available for the group header title.
-	 * Logic tries to grant as much space as possible. Especially to use every gap between each sum/dimension label.
-	 * This is important for users for making sure that they can read the group title even when they scrolled horizontally.
-	 * @param {jQuery} $rowHdr the current row header wrapped by jQuery.
-	 * @param {jQuery} $row jQuery collection of the current processed row.
-	 * @param {Boolean} bIsExpanded
-	 *         flag whether the current node is expanded or not.
-	 */
-	AnalyticalTable.prototype._resizeGroupHeader = function($rowHdr, $row, bIsExpanded) {
-		// Group Icon Layouting logic
-		var $groupIcon = $rowHdr.find(".sapUiTableGroupIcon");
-		if ($groupIcon.length === 0 || bIsExpanded) {
-			return;
-		}
-
-		var $MeasureAndSumLabels =  $row.find(".sapUiTableCell > *");
-		var oTableClientRect = this.getDomRef().getBoundingClientRect();
-		$groupIcon.width('');
-		var iGroupPosition = this._bRtlMode ? $groupIcon[0].getBoundingClientRect().left : $groupIcon[0].getBoundingClientRect().right;
-		var iGroupIconWidth = $groupIcon.width();
-
-		var bIsRtlMode = this._bRtlMode;
-
-		$MeasureAndSumLabels.each(function(index) {
-			var $this = jQuery(this);
-			if ($this.text().length === 0) {
-				return true;
-			}
-			var oClientRect = $this[0].getBoundingClientRect();
-			$this.width('auto');
-			var iLabelWidth = $this.width();
-			$this.width('');
-
-			var iOverlap = 0;
-			var bDoResize = false;
-			var sTextAlign = $this.css('text-align');
-			if (!bIsRtlMode) {
-				if (sTextAlign === "left") {
-					iOverlap = iGroupPosition - oClientRect.left;
-					bDoResize = (iOverlap > 0 && oClientRect.left + iLabelWidth > oTableClientRect.left);
-				} else if (sTextAlign === "right") {
-					iOverlap = iGroupPosition - oClientRect.right + iLabelWidth;
-					bDoResize = (iOverlap > 0 && oClientRect.right > oTableClientRect.left);
-				}
-			} else {
-				if (sTextAlign === "left") {
-					iOverlap = oClientRect.left + iLabelWidth - iGroupPosition;
-					bDoResize = (iOverlap > 0 && oClientRect.left < oTableClientRect.right);
-				} else if (sTextAlign === "right") {
-					iOverlap = oClientRect.right - iGroupPosition;
-					bDoResize = (iOverlap > 0 && oClientRect.right < oTableClientRect.right);
-				}
-			}
-
-			if (bDoResize) {
-				$groupIcon.width(iGroupIconWidth - iOverlap);
-				// break loop
-				return false;
-			}
-		});
-	};
-
-	AnalyticalTable.prototype.onclick = function(oEvent) {
-		var $EventTarget = jQuery(oEvent.target);
-		if ($EventTarget.hasClass("sapUiTableGroupIcon")) {
-			this._onNodeSelect(oEvent);
-		} else if ($EventTarget.hasClass("sapUiAnalyticalTableSum")) {
-			// Sums cannot be selected
-			oEvent.preventDefault();
-			return;
-		} else if ($EventTarget.hasClass("sapUiTableGroupMenuButton")) {
-			this._onContextMenu(oEvent);
-			oEvent.preventDefault();
-			return;
-		} else {
-			if (Table.prototype.onclick) {
-				Table.prototype.onclick.apply(this, arguments);
-			}
-		}
-	};
-
-	AnalyticalTable.prototype.onsapselect = function(oEvent) {
-		if (jQuery(oEvent.target).hasClass("sapUiTableGroupIcon")) {
-			this._onNodeSelect(oEvent);
-		} else if (jQuery(oEvent.target).hasClass("sapUiAnalyticalTableSum")) {
-			//Summs connot be selected
-			oEvent.preventDefault();
-			return;
-		} else {
-			var $Target = jQuery(oEvent.target),
-				$TargetDIV = $Target.closest('div.sapUiTableRowHdr');
-			if ($TargetDIV.hasClass('sapUiTableGroupHeader') && $TargetDIV.hasClass('sapUiTableRowHdr')) {
-				var iRowIndex = this.getFirstVisibleRow() + parseInt($TargetDIV.attr("data-sap-ui-rowindex"), 10);
-				var oBinding = this.getBinding("rows");
-				oBinding.toggleIndex(iRowIndex);
-				return;
-			}
-			if (Table.prototype.onsapselect) {
-				Table.prototype.onsapselect.apply(this, arguments);
-			}
-		}
-	};
-
-	AnalyticalTable.prototype._onNodeSelect = function(oEvent) {
-
-		var $parent = jQuery(oEvent.target).parent();
-		if ($parent.length > 0) {
-			var iRowIndex = this.getFirstVisibleRow() + parseInt($parent.attr("data-sap-ui-rowindex"), 10);
-			var oBinding = this.getBinding("rows");
-			oBinding.toggleIndex(iRowIndex);
-		}
-
-		oEvent.preventDefault();
-		oEvent.stopPropagation();
-
 	};
 
 	AnalyticalTable.prototype._onContextMenu = function(oEvent) {
@@ -695,7 +501,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 				jQuery(oEvent.target).closest('.sapUiTableRowHdr.sapUiTableGroupHeader').length > 0) {
 			this._iGroupedLevel = jQuery(oEvent.target).closest('[data-sap-ui-level]').data('sap-ui-level');
 			var oMenu = this._getGroupHeaderMenu();
-			var eDock = sap.ui.core.Popup.Dock;
+			var eDock = Popup.Dock;
 
 			var iLocationX = oEvent.pageX || oEvent.clientX;
 			var iLocationY = oEvent.pageY || oEvent.clientY;
@@ -731,8 +537,8 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		}
 
 		if (!this._oGroupHeaderMenu) {
-			this._oGroupHeaderMenu = new sap.ui.unified.Menu();
-			this._oGroupHeaderMenuVisibilityItem = new sap.ui.unified.MenuItem({
+			this._oGroupHeaderMenu = new Menu();
+			this._oGroupHeaderMenuVisibilityItem = new MenuItem({
 				text: this._oResBundle.getText("TBL_SHOW_COLUMN"),
 				select: function() {
 					var oGroupColumnInfo = getGroupColumnInfo();
@@ -742,12 +548,12 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 							bShowIfGrouped = oColumn.getShowIfGrouped();
 						oColumn.setShowIfGrouped(!bShowIfGrouped);
 
-						that.fireGroup({column: oColumn, groupedColumns: oColumn.getParent()._aGroupedColumns, type:( !bShowIfGrouped ? sap.ui.table.GroupEventType.showGroupedColumn : sap.ui.table.GroupEventType.hideGroupedColumn )});
+						that.fireGroup({column: oColumn, groupedColumns: oColumn.getParent()._aGroupedColumns, type:( !bShowIfGrouped ? GroupEventType.showGroupedColumn : GroupEventType.hideGroupedColumn )});
 					}
 				}
 			});
 			this._oGroupHeaderMenu.addItem(this._oGroupHeaderMenuVisibilityItem);
-			this._oGroupHeaderMenu.addItem(new sap.ui.unified.MenuItem({
+			this._oGroupHeaderMenu.addItem(new MenuItem({
 				text: this._oResBundle.getText("TBL_UNGROUP"),
 				select: function() {
 					var aColumns = that.getColumns(),
@@ -773,7 +579,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 
 								oColumn._bSkipUpdateAI = false;
 								iUngroudpedIndex = i;
-								that.fireGroup({column: oColumn, groupedColumns: oColumn.getParent()._aGroupedColumns, type: sap.ui.table.GroupEventType.ungroup});
+								that.fireGroup({column: oColumn, groupedColumns: oColumn.getParent()._aGroupedColumns, type: GroupEventType.ungroup});
 							} else {
 								iLastGroupedIndex = i;
 							}
@@ -794,11 +600,11 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 							that.insertColumn(oColumn, iLastGroupedIndex);
 						});
 					}
-					that._updateTableColumnDetails();
-					that.updateAnalyticalInfo();
+					that._updateColumns();
+					that._getRowContexts();
 				}
 			}));
-			this._oGroupHeaderMenu.addItem(new sap.ui.unified.MenuItem({
+			this._oGroupHeaderMenu.addItem(new MenuItem({
 				text: this._oResBundle.getText("TBL_UNGROUP_ALL"),
 				select: function() {
 					var aColumns = that.getColumns();
@@ -813,13 +619,13 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 						aColumns[i]._bSkipUpdateAI = false;
 					}
 					that._bSupressRefresh = true;
-					that._updateTableColumnDetails();
-					that.updateAnalyticalInfo();
+					that._updateColumns();
+					that._getRowContexts();
 					that._bSupressRefresh = false;
-					that.fireGroup({column: undefined, groupedColumns: [], type: sap.ui.table.GroupEventType.ungroupAll});
+					that.fireGroup({column: undefined, groupedColumns: [], type: GroupEventType.ungroupAll});
 				}
 			}));
-			this._oGroupHeaderMoveUpItem = new sap.ui.unified.MenuItem({
+			this._oGroupHeaderMoveUpItem = new MenuItem({
 				text: this._oResBundle.getText("TBL_MOVE_UP"),
 				select: function() {
 					var oGroupColumnInfo = getGroupColumnInfo();
@@ -830,14 +636,14 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 						if (iIndex > 0) {
 							that._aGroupedColumns[iIndex] = that._aGroupedColumns.splice(iIndex - 1, 1, that._aGroupedColumns[iIndex])[0];
 							that.updateAnalyticalInfo();
-							that.fireGroup({column: oColumn, groupedColumns: oColumn.getParent()._aGroupedColumns, type: sap.ui.table.GroupEventType.moveUp});
+							that.fireGroup({column: oColumn, groupedColumns: oColumn.getParent()._aGroupedColumns, type: GroupEventType.moveUp});
 						}
 					}
 				},
 				icon: "sap-icon://arrow-top"
 			});
 			this._oGroupHeaderMenu.addItem(this._oGroupHeaderMoveUpItem);
-			this._oGroupHeaderMoveDownItem = new sap.ui.unified.MenuItem({
+			this._oGroupHeaderMoveDownItem = new MenuItem({
 				text: this._oResBundle.getText("TBL_MOVE_DOWN"),
 				select: function() {
 					var oGroupColumnInfo = getGroupColumnInfo();
@@ -848,14 +654,14 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 						if (iIndex < that._aGroupedColumns.length) {
 							that._aGroupedColumns[iIndex] = that._aGroupedColumns.splice(iIndex + 1, 1, that._aGroupedColumns[iIndex])[0];
 							that.updateAnalyticalInfo();
-							that.fireGroup({column: oColumn, groupedColumns: oColumn.getParent()._aGroupedColumns, type: sap.ui.table.GroupEventType.moveDown});
+							that.fireGroup({column: oColumn, groupedColumns: oColumn.getParent()._aGroupedColumns, type: GroupEventType.moveDown});
 						}
 					}
 				},
 				icon: "sap-icon://arrow-bottom"
 			});
 			this._oGroupHeaderMenu.addItem(this._oGroupHeaderMoveDownItem);
-			this._oGroupHeaderMenu.addItem(new sap.ui.unified.MenuItem({
+			this._oGroupHeaderMenu.addItem(new MenuItem({
 				text: this._oResBundle.getText("TBL_SORT_ASC"),
 				select: function() {
 					var oGroupColumnInfo = getGroupColumnInfo();
@@ -868,7 +674,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 				},
 				icon: "sap-icon://up"
 			}));
-			this._oGroupHeaderMenu.addItem(new sap.ui.unified.MenuItem({
+			this._oGroupHeaderMenu.addItem(new MenuItem({
 				text: this._oResBundle.getText("TBL_SORT_DESC"),
 				select: function() {
 					var oGroupColumnInfo = getGroupColumnInfo();
@@ -881,7 +687,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 				},
 				icon: "sap-icon://down"
 			}));
-			this._oGroupHeaderMenu.addItem(new sap.ui.unified.MenuItem({
+			this._oGroupHeaderMenu.addItem(new MenuItem({
 				text: this._oResBundle.getText("TBL_COLLAPSE_LEVEL"),
 				select: function() {
 					// Why -1? Because the "Collapse Level" Menu Entry should collapse TO the given level - 1
@@ -892,7 +698,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 					that.clearSelection();
 				}
 			}));
-			this._oGroupHeaderMenu.addItem(new sap.ui.unified.MenuItem({
+			this._oGroupHeaderMenu.addItem(new MenuItem({
 				text: this._oResBundle.getText("TBL_COLLAPSE_ALL"),
 				select: function() {
 					that.getBinding("rows").collapseToLevel(0);
@@ -938,7 +744,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	/**
 	 * Collapses all nodes (and lower if collapseRecursive is activated)
 	 *
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
+	 * @return {sap.ui.table.AnalyticalTable} a reference on the <code>AnalyticalTable</code> control, can be used for chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -965,7 +771,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 *
 	 * @param {int} iIndex
 	 *         Index of the row to return the context from.
-	 * @type object
+	 * @return {object} The context of a row by its index
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -979,9 +785,26 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		return iIndex >= 0 && oBinding ? oBinding.getNodeByIndex(iIndex) : null;
 	};
 
-	AnalyticalTable.prototype._onColumnMoved = function(oEvent) {
-		Table.prototype._onColumnMoved.apply(this, arguments);
-		this.updateAnalyticalInfo();
+	/**
+	 * This function is used by some composite controls to avoid updating the AnalyticalInfo when several column are added to the table.
+	 * In order to finally update the AnalyticalInfo and request data, resumeUpdateAnalyticalInfo must be called.
+	 * @protected
+	 */
+	AnalyticalTable.prototype.suspendUpdateAnalyticalInfo = function() {
+		this._bSuspendUpdateAnalyticalInfo = true;
+	};
+
+	/**
+	 * This function is used by some composite controls to force updating the AnalyticalInfo
+	 * @param {boolean} bSuppressRefresh binding shall not refresh data
+	 * @param {boolean} bForceChange forces the binding to fire a change event
+	 * @protected
+	 */
+	AnalyticalTable.prototype.resumeUpdateAnalyticalInfo = function(bSupressRefresh, bForceChange) {
+		this._bSuspendUpdateAnalyticalInfo = false;
+		// the binding needs to fire a change event to force the table to request new contexts
+		// only if the callee explicitly don't request a change event, it can be omitted.
+		this._updateColumns(bSupressRefresh, (bForceChange === false ? false : true));
 	};
 
 	AnalyticalTable.prototype.addColumn = function(vColumn, bSuppressInvalidate) {
@@ -991,8 +814,8 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 			this._addGroupedColumn(oColumn.getId());
 		}
 		Table.prototype.addColumn.call(this, oColumn, bSuppressInvalidate);
-		this._updateTableColumnDetails();
-		this.updateAnalyticalInfo(bSuppressInvalidate);
+
+		this._updateColumns(bSuppressInvalidate);
 		return this;
 	};
 
@@ -1002,17 +825,15 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 			this._addGroupedColumn(oColumn.getId());
 		}
 		Table.prototype.insertColumn.call(this, oColumn, iIndex, bSuppressInvalidate);
-		this._updateTableColumnDetails();
-		this.updateAnalyticalInfo(bSuppressInvalidate);
+		this._updateColumns(bSuppressInvalidate);
 		return this;
 	};
 
 	AnalyticalTable.prototype.removeColumn = function(vColumn, bSuppressInvalidate) {
 		var oResult = Table.prototype.removeColumn.apply(this, arguments);
 
-		// only remove from grouped columns if not caused by column move. If this._iNewColPos
-		// is set, the column was moved by user.-
-		if (!this._iNewColPos) {
+		// only remove from grouped columns if not caused by column move.
+		if (!this._bReorderInProcess) {
 			this._aGroupedColumns = jQuery.grep(this._aGroupedColumns, function(sValue) {
 				//check if vColum is an object with getId function
 				if (vColumn.getId) {
@@ -1032,8 +853,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		this._aGroupedColumns = [];
 		var aResult = Table.prototype.removeAllColumns.apply(this, arguments);
 
-		this._updateTableColumnDetails();
-		this.updateAnalyticalInfo(bSuppressInvalidate);
+		this._updateColumns(bSuppressInvalidate);
 
 		return aResult;
 	};
@@ -1053,25 +873,41 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		}
 	};
 
-	AnalyticalTable.prototype._updateColumns = function() {
-		this._updateTableColumnDetails();
-		this.updateAnalyticalInfo();
-	};
-
-	AnalyticalTable.prototype.updateAnalyticalInfo = function(bSupressRefresh) {
-		var oBinding = this.getBinding("rows");
-		if (oBinding) {
-			var aColumnInfo = this._getColumnInformation();
-			oBinding.updateAnalyticalInfo(aColumnInfo);
-			this._updateTotalRow(aColumnInfo, bSupressRefresh);
-			if (bSupressRefresh || this._bSupressRefresh) {
-				return;
-			}
-			this.refreshRows();
+	AnalyticalTable.prototype._updateColumns = function(bSupressRefresh, bForceChange) {
+		if (!this._bSuspendUpdateAnalyticalInfo) {
+			this._updateTableColumnDetails();
+			this.updateAnalyticalInfo(bSupressRefresh, bForceChange);
 		}
 	};
 
-	AnalyticalTable.prototype._updateTotalRow = function(aColumnInfo, bSuppressInvalidate) {
+	AnalyticalTable.prototype.updateAnalyticalInfo = function(bSupressRefresh, bForceChange) {
+		if (this._bSuspendUpdateAnalyticalInfo) {
+			return;
+		}
+
+		var oBinding = this.getBinding("rows");
+		if (oBinding) {
+			var aColumnInfo = this._getColumnInformation();
+			oBinding.updateAnalyticalInfo(aColumnInfo, bForceChange);
+
+			this._updateTotalRow(bSupressRefresh);
+
+			if (bForceChange && this._bBusyIndicatorAllowed && this.getEnableBusyIndicator() == true) {
+				// a request will be issued by the binding. In order to correctly indicate that request, the table must
+				// switch to busy state.
+				this.setBusy(true);
+			}
+		}
+	};
+
+	AnalyticalTable.prototype.refreshRows = function () {
+		sap.ui.table.Table.prototype.refreshRows.apply(this, arguments);
+		// make sure we have a sum row displayed if necessary
+		// check is performed after the metadata was loaded
+		this._updateTotalRow();
+	};
+
+	AnalyticalTable.prototype._updateTotalRow = function(bSuppressInvalidate) {
 		var oBinding = this.getBinding("rows");
 
 		var iFixedBottomRowCount = this.getFixedBottomRowCount();
@@ -1088,6 +924,10 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	};
 
 	AnalyticalTable.prototype._updateTableColumnDetails = function() {
+		if (this._bSuspendUpdateAnalyticalInfo) {
+			return;
+		}
+
 		var oBinding = this.getBinding("rows"),
 			oResult = oBinding && oBinding.getAnalyticalQueryResult();
 
@@ -1191,7 +1031,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	/**
 	 * Returns the total size of the data entries.
 	 *
-	 * @type int
+	 * @return {int} The total size of the data entries
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -1203,17 +1043,6 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		return 0;
 	};
 
-	AnalyticalTable.prototype._hasData = function() {
-		var oBinding = this.getBinding("rows"),
-			iLength = oBinding && (oBinding.getLength() || 0),
-			bHasTotal = oBinding && oBinding.providesGrandTotal() && oBinding.hasTotaledMeasures();
-
-		if (!oBinding || (bHasTotal && iLength < 2) || (!bHasTotal && iLength === 0)) {
-			return false;
-		}
-		return true;
-	};
-
 	AnalyticalTable.prototype._onPersoApplied = function() {
 		Table.prototype._onPersoApplied.apply(this, arguments);
 		this._aGroupedColumns = [];
@@ -1223,8 +1052,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 				this._addGroupedColumn(aColumns[i].getId());
 			}
 		}
-		this._updateTableColumnDetails();
-		this.updateAnalyticalInfo();
+		this._updateColumns();
 	};
 
 	AnalyticalTable.prototype._addGroupedColumn = function(sColumn) {
@@ -1254,7 +1082,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		return this;
 	};
 
-	/***************************************************
+	/* *************************************************
 	 *              Selection of Table Rows            *
 	 ***************************************************/
 
@@ -1266,7 +1094,7 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 		var oBinding = this.getBinding("rows");
 		if (oBinding) {
 			var oRootNode = oBinding.getGrandTotalContextInfo();
-			return oRootNode ? oRootNode.numberOfLeafs : 0;
+			return oRootNode ? oRootNode.totalNumberOfLeafs : 0;
 		}
 	};
 
@@ -1277,28 +1105,25 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 * @return {boolean} true if the index is selected, false otherwise
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
 	 */
-	AnalyticalTable.prototype.isIndexSelected = function (iRowIndex) {
-		return TreeTable.prototype.isIndexSelected.call(this, iRowIndex);
-	};
+	AnalyticalTable.prototype.isIndexSelected = TreeTable.prototype.isIndexSelected;
 
 	/**
-	 * Overriden from Table.js base class.
-	 * In a TreeTable you can only select indices, which correspond to the currently visualized tree.
-	 * Invisible tree nodes (e.g. collapsed child nodes) can not be selected via Index, because they do not
-	 * correspond to a TreeTable row.
+	 * In an <code>AnalyticalTable</code> control you can only select indices, which correspond to the currently visualized tree.
+	 * Invisible nodes (e.g. collapsed child nodes) cannot be selected via Index, because they do not
+	 * correspond to an <code>AnalyticalTable</code> row.
 	 *
-	 * @param {int} iRowIndex The row index which will be selected (if existing)
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
+	 * @param {int} iRowIndex The row index which will be selected (in case it exists)
+	 * @return {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
 	 */
-	AnalyticalTable.prototype.setSelectedIndex = function (iRowIndex) {
-		return TreeTable.prototype.setSelectedIndex.call(this, iRowIndex);
-	};
+	AnalyticalTable.prototype.setSelectedIndex = TreeTable.prototype.setSelectedIndex;
 
 	/**
-	 * Returns an array containing the row indices of all selected tree nodes (ordered ascending).
+	 * Returns an array containing the row indices of all selected tree nodes (in ascending order).
 	 *
 	 * Please be aware of the following:
 	 * Due to performance/network traffic reasons, the getSelectedIndices function returns only all indices
@@ -1308,76 +1133,72 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 * @return {int[]} an array containing all selected indices
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
 	 */
-	AnalyticalTable.prototype.getSelectedIndices = function () {
-		return TreeTable.prototype.getSelectedIndices.call(this);
-	};
+	AnalyticalTable.prototype.getSelectedIndices = TreeTable.prototype.getSelectedIndices;
 
 	/**
-	 * Sets the selection of the TreeTable to the given range (including boundaries).
-	 * Beware: The previous selection will be lost/overriden. If this is not wanted, please use "addSelectionInterval" and
-	 * "removeSelectionIntervall".
+	 * Sets the selection of the <code>AnalyticalTable</code> control to the given range (including boundaries).
+	 *
+	 * <b>Note:</b> The previous selection will be lost/overridden. If this is not the required behavior,
+	 * please use <code>addSelectionInterval</code> and <code>removeSelectionIntervall</code>.
 	 *
 	 * @param {int} iFromIndex the start index of the selection range
 	 * @param {int} iToIndex the end index of the selection range
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
+	 * @return {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
 	 */
-	AnalyticalTable.prototype.setSelectionInterval = function (iFromIndex, iToIndex) {
-		return TreeTable.prototype.setSelectionInterval.call(this, iFromIndex, iToIndex);
-	};
+	AnalyticalTable.prototype.setSelectionInterval = TreeTable.prototype.setSelectionInterval;
 
 	/**
 	 * Marks a range of tree nodes as selected, starting with iFromIndex going to iToIndex.
-	 * The TreeNodes are referenced via their absolute row index.
-	 * Please be aware, that the absolute row index only applies to the the tree which is visualized by the TreeTable.
-	 * Invisible nodes (collapsed child nodes) will not be regarded.
+	 * The nodes are referenced via their absolute row index.
+	 * Please be aware that the absolute row index only applies to the tree which is visualized by the <code>AnalyticalTable</code> control.
+	 * Invisible nodes (collapsed child nodes) will not be taken into account.
 	 *
 	 * Please also take notice of the fact, that "addSelectionInterval" does not change any other selection.
 	 * To override the current selection, please use "setSelctionInterval" or for a single entry use "setSelectedIndex".
 	 *
 	 * @param {int} iFromIndex The starting index of the range which will be selected.
 	 * @param {int} iToIndex The starting index of the range which will be selected.
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
+	 * @return {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
 	 */
-	AnalyticalTable.prototype.addSelectionInterval = function (iFromIndex, iToIndex) {
-		return TreeTable.prototype.addSelectionInterval.call(this, iFromIndex, iToIndex);
-	};
+	AnalyticalTable.prototype.addSelectionInterval = TreeTable.prototype.addSelectionInterval;
 
 	/**
 	 * All rows/tree nodes inside the range (including boundaries) will be deselected.
-	 * Tree nodes are referenced with theit absolute row index inside the tree-
-	 * Please be aware, that the absolute row index only applies to the the tree which is visualized by the TreeTable.
-	 * Invisible nodes (collapsed child nodes) will not be regarded.
+	 * The nodes are referenced with their absolute row index.
+	 * Please be aware that the absolute row index only applies to the tree which is visualized by the <code>AnalyticalTable</code> control.
+	 * Invisible nodes (collapsed child nodes) will not be taken into account.
 	 *
 	 * @param {int} iFromIndex The starting index of the range which will be deselected.
 	 * @param {int} iToIndex The starting index of the range which will be deselected.
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
+	 * @return {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
 	 */
-	AnalyticalTable.prototype.removeSelectionInterval = function (iFromIndex, iToIndex) {
-		return TreeTable.prototype.removeSelectionInterval.call(this, iFromIndex, iToIndex);
-	};
+	AnalyticalTable.prototype.removeSelectionInterval = TreeTable.prototype.removeSelectionInterval;
 
 	/**
 	 * Selects all available nodes/rows.
 	 *
 	 * Explanation of the SelectAll function and what to expect from its behavior:
-	 * All rows/tree nodes locally stored on the client are selected.
+	 * All rows/nodes stored locally on the client are selected.
 	 * In addition all subsequent rows/tree nodes, which will be paged into view are also immediatly selected.
 	 * However, due to obvious performance/network traffic reasons, the SelectAll function will NOT retrieve any data from the backend.
 	 *
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
+	 * @return {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
 	 */
-	AnalyticalTable.prototype.selectAll = function () {
-		return TreeTable.prototype.selectAll.call(this);
-	};
+	AnalyticalTable.prototype.selectAll = TreeTable.prototype.selectAll;
 
 	/**
 	 * Retrieves the lead selection index. The lead selection index is, among other things, used to determine the
@@ -1386,21 +1207,19 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 	 * @return {int[]} an array containing all selected indices (ascending ordered integers)
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
 	 */
-	AnalyticalTable.prototype.getSelectedIndex = function() {
-		return TreeTable.prototype.getSelectedIndex.call(this);
-	};
+	AnalyticalTable.prototype.getSelectedIndex = TreeTable.prototype.getSelectedIndex;
 
 	/**
-	 * Clears the complete selection (all tree table rows/nodes will lose their selection)
+	 * Clears the complete selection (all analytical table rows/nodes will be deselected).
 	 *
-	 * @return {sap.ui.table.TreeTable} a reference on the TreeTable control, can be used for chaining
+	 * @return {sap.ui.table.AnalyticalTable} a reference to the <code>AnalyticalTable</code> control, can be used for chaining
 	 * @public
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
+	 * @function
 	 */
-	AnalyticalTable.prototype.clearSelection = function () {
-		return TreeTable.prototype.clearSelection.call(this);
-	};
+	AnalyticalTable.prototype.clearSelection = TreeTable.prototype.clearSelection;
 
 	AnalyticalTable.prototype._isRowSelectable = function(iRowIndex) {
 		var oBinding = this.getBinding("rows");
@@ -1410,9 +1229,10 @@ sap.ui.define(['jquery.sap.global', './AnalyticalColumn', './Table', './TreeTabl
 			// if there is no binding the selection can't be handled, therefore the row is not selectable
 			return false;
 		}
-
 	};
+
+	AnalyticalTable.prototype._getSelectedIndicesCount = TreeTable.prototype._getSelectedIndicesCount;
 
 	return AnalyticalTable;
 
-}, /* bExport= */ true);
+});

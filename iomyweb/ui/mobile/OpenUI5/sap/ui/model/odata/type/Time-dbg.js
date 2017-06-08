@@ -4,15 +4,15 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['sap/ui/core/format/DateFormat', 'sap/ui/model/FormatException',
-		'sap/ui/model/odata/type/ODataType', 'sap/ui/model/ParseException',
-		'sap/ui/model/ValidateException'],
-	function(DateFormat, FormatException, ODataType, ParseException, ValidateException) {
+sap.ui.define(['jquery.sap.global', 'sap/ui/core/format/DateFormat',
+		'sap/ui/model/FormatException', 'sap/ui/model/odata/type/ODataType',
+		'sap/ui/model/ParseException', 'sap/ui/model/ValidateException'],
+	function(jQuery, DateFormat, FormatException, ODataType, ParseException, ValidateException) {
 	"use strict";
 
 	var oDemoTime = {
-			__edmType: "Edm.Time",
-			ms: 49646000 // "13:47:26"
+			__edmType : "Edm.Time",
+			ms : 49646000 // "13:47:26"
 		};
 
 	/**
@@ -40,7 +40,7 @@ sap.ui.define(['sap/ui/core/format/DateFormat', 'sap/ui/model/FormatException',
 		var oFormatOptions;
 
 		if (!oType.oFormat) {
-			oFormatOptions = jQuery.extend({strictParsing: true}, oType.oFormatOptions);
+			oFormatOptions = jQuery.extend({strictParsing : true}, oType.oFormatOptions);
 			oFormatOptions.UTC = true;
 			oType.oFormat = DateFormat.getTimeInstance(oFormatOptions);
 		}
@@ -74,7 +74,7 @@ sap.ui.define(['sap/ui/core/format/DateFormat', 'sap/ui/model/FormatException',
 
 		oType.oConstraints = undefined;
 		if (vNullable === false || vNullable === "false") {
-			oType.oConstraints = {nullable: false};
+			oType.oConstraints = {nullable : false};
 		} else if (vNullable !== undefined && vNullable !== true && vNullable !== "true") {
 			jQuery.sap.log.warning("Illegal nullable: " + vNullable, null, oType.getName());
 		}
@@ -105,8 +105,8 @@ sap.ui.define(['sap/ui/core/format/DateFormat', 'sap/ui/model/FormatException',
 	 */
 	function toModel(oDate) {
 		return {
-			__edmType: "Edm.Time",
-			ms: ((oDate.getUTCHours() * 60 + oDate.getUTCMinutes()) * 60 + oDate.getUTCSeconds())
+			__edmType : "Edm.Time",
+			ms : ((oDate.getUTCHours() * 60 + oDate.getUTCMinutes()) * 60 + oDate.getUTCSeconds())
 				* 1000 + oDate.getUTCMilliseconds()
 		};
 	}
@@ -129,7 +129,7 @@ sap.ui.define(['sap/ui/core/format/DateFormat', 'sap/ui/model/FormatException',
 	/**
 	 * Constructor for an OData primitive type <code>Edm.Time</code>.
 	 *
-	 * @class This class represents the OData primitive type <a
+	 * @class This class represents the OData V2 primitive type <a
 	 * href="http://www.odata.org/documentation/odata-version-2-0/overview#AbstractTypeSystem">
 	 * <code>Edm.Time</code></a>.
 	 *
@@ -143,7 +143,7 @@ sap.ui.define(['sap/ui/core/format/DateFormat', 'sap/ui/model/FormatException',
 	 * @extends sap.ui.model.odata.type.ODataType
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @alias sap.ui.model.odata.type.Time
 	 * @param {object} [oFormatOptions]
@@ -174,7 +174,8 @@ sap.ui.define(['sap/ui/core/format/DateFormat', 'sap/ui/model/FormatException',
 	 * @param {number} oValue.ms
 	 *   the time in milliseconds
 	 * @param {string} sTargetType
-	 *   the target type; may be "any" or "string".
+	 *   the target type; may be "any", "string", or a type with one of these types as its
+	 *   {@link sap.ui.base.DataType#getPrimitiveType primitive type}.
 	 *   See {@link sap.ui.model.odata.type} for more information.
 	 * @returns {string}
 	 *   the formatted output value in the target type; <code>undefined</code> or <code>null</code>
@@ -187,7 +188,7 @@ sap.ui.define(['sap/ui/core/format/DateFormat', 'sap/ui/model/FormatException',
 		if (oValue === undefined || oValue === null) {
 			return null;
 		}
-		switch (sTargetType) {
+		switch (this.getPrimitiveType(sTargetType)) {
 		case "any":
 			return oValue;
 		case "string":
@@ -215,7 +216,8 @@ sap.ui.define(['sap/ui/core/format/DateFormat', 'sap/ui/model/FormatException',
 	 * @param {string} sValue
 	 *   the value to be parsed, maps <code>""</code> to <code>null</code>
 	 * @param {string} sSourceType
-	 *   the source type (the expected type of <code>sValue</code>); must be "string".
+	 *   the source type (the expected type of <code>sValue</code>); must be "string", or a type
+	 *   with "string" as its {@link sap.ui.base.DataType#getPrimitiveType primitive type}.
 	 *   See {@link sap.ui.model.odata.type} for more information.
 	 * @returns {object}
 	 *   the parsed value as described in {@link #formatValue formatValue}
@@ -229,7 +231,7 @@ sap.ui.define(['sap/ui/core/format/DateFormat', 'sap/ui/model/FormatException',
 		if (sValue === "" || sValue === null) {
 			return null;
 		}
-		if (sSourceType !== "string") {
+		if (this.getPrimitiveType(sSourceType) !== "string") {
 			throw new ParseException("Don't know how to parse " + this.getName() + " from "
 				+ sSourceType);
 		}

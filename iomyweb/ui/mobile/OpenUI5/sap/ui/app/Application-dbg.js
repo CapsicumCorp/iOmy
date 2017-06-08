@@ -9,13 +9,13 @@ sap.ui.define(['jquery.sap.global', './ApplicationMetadata', 'sap/ui/core/Compon
 	"use strict";
 
 
-	
-	
+
+
 		/**
 		 * Abstract application class. Extend this class to create a central application class.
-		 * 
+		 *
 		 * Only one instance is allowed.
-		 * 
+		 *
 		 * @param {string}
 		 *            [sId] optional id for the application; generated automatically if
 		 *            no non-empty id is given Note: this can be omitted, no matter
@@ -23,20 +23,20 @@ sap.ui.define(['jquery.sap.global', './ApplicationMetadata', 'sap/ui/core/Compon
 		 * @param {object}
 		 *            [mSettings] optional map/JSON-object with initial settings for the
 		 *            new application instance
-		 * 
+		 *
 		 * @public
-		 * 
+		 *
 		 * @class Base class for application classes
 		 * @extends sap.ui.core.Component
 		 * @abstract
 		 * @author SAP SE
-		 * @version 1.34.9
+		 * @version 1.44.14
 		 * @name sap.ui.app.Application
 		 * @experimental Since 1.11.1. The Application class is still under construction, so some implementation details can be changed in future.
 		 * @deprecated Since 1.15.1. The Component class is enhanced to take care about the Application code.
 		 */
 		var Application = Component.extend("sap.ui.app.Application", /** @lends sap.ui.app.Application.prototype */ {
-	
+
 			metadata : {
 				"abstract": true,
 				properties: {
@@ -54,9 +54,9 @@ sap.ui.define(['jquery.sap.global', './ApplicationMetadata', 'sap/ui/core/Compon
 				],
 				deprecated: true
 			},
-	
+
 			constructor : function(sId, mSettings) {
-	
+
 				// event handler mappings (compatibility)
 				if (this.onError) {
 					this.onWindowError = this.onError;
@@ -67,34 +67,34 @@ sap.ui.define(['jquery.sap.global', './ApplicationMetadata', 'sap/ui/core/Compon
 				if (this.onExit) {
 					this.onWindowUnload = this.onExit;
 				}
-				
+
 				Component.apply(this, arguments);
-				
+
 				// existence check (only one instance is allowed!)
 				if (sap.ui.getApplication) {
 					throw new Error("Only one instance of sap.ui.app.Application is allowed");
 				}
-	
+
 				// install shortcut
 				sap.ui.getApplication = jQuery.proxy(this._getInstance, this);
-	
-				// wait until Core is initialized to create the models & root component 
+
+				// wait until Core is initialized to create the models & root component
 				sap.ui.getCore().attachInit(jQuery.proxy(function() {
-					
+
 					// init the root component
 					this._initRootComponent();
-					
+
 					// call the application controller
 					this.main();
-					
+
 				}, this));
-	
+
 			},
-	
-	
+
+
 			/**
 			 * Internal function to initialize the root component.
-			 * 
+			 *
 			 * @private
 			 */
 			_initRootComponent : function() {
@@ -102,22 +102,22 @@ sap.ui.define(['jquery.sap.global', './ApplicationMetadata', 'sap/ui/core/Compon
 				// only if a root component exits we load the models and services
 				// and place it into a container
 				if (oRootComponent) {
-					
+
 					// set the root component
 					this.setRootComponent(oRootComponent);
-					
-					// place the component 
+
+					// place the component
 					var oContainer = new sap.ui.core.ComponentContainer({
 						component: oRootComponent
 					});
 					oContainer.placeAt(this.getRoot() || document.body);
 				}
 			},
-	
-	
+
+
 			/**
 			 * Creates and returns the root component. Override this method in your application implementation, if you want to override the default creation by metadata.
-			 * 
+			 *
 			 * @return {sap.ui.core.UIComponent} the root component
 			 * @protected
 			 */
@@ -132,13 +132,13 @@ sap.ui.define(['jquery.sap.global', './ApplicationMetadata', 'sap/ui/core/Compon
 				}
 				return oRootComponent;
 			},
-	
-	
+
+
 			/**
-			 * Returns the application root component. 
-			 * 
+			 * Returns the application root component.
+			 *
 			 * @return {sap.ui.core.Control} The root component
-			 * 
+			 *
 			 * @since 1.13.1
 			 * @public
 			 * @deprecated
@@ -146,49 +146,49 @@ sap.ui.define(['jquery.sap.global', './ApplicationMetadata', 'sap/ui/core/Compon
 			getView : function() {
 				return this.getRootComponent();
 			},
-	
-	
+
+
 			/**
 			 * Returns the application instance
-			 * 
+			 *
 			 * return {sap.ui.app.Application} The application instance
-			 * 
+			 *
 			 * @private
 			 */
 			_getInstance : function() {
 				return this;
 			},
-	
-	
+
+
 			/**
 			 * The main method is called when the DOM and UI5 is completely loaded. Override this method in your Application class implementation to execute code which relies on a loaded DOM / UI5.
-			 * 
+			 *
 			 * @public
 			 */
 			main : function() {},
-	
-	
+
+
 			/**
 			 * On before exit application hook. Override this method in your Application class implementation, to handle cleanup before the real exit or to prompt a question to the user,
 			 * if the application should be exited.
-			 * 
+			 *
 			 * @return {string} return a string if a prompt should be displayed to the user confirming closing the application (e.g. when the application is not yet saved).
 			 * @public
 			 */
 			onBeforeExit : function() {},
-	
-	
+
+
 			/**
 			 * On exit application hook. Override this method in your Application class implementation, to handle cleanup of the application.
-			 * 
+			 *
 			 * @public
 			 */
 			onExit : function() {},
-	
-	
+
+
 			/**
 			 * On error hook. Override this method in your Application class implementation to listen to unhandled errors.
-			 * 
+			 *
 			 * @param {string} sMessage The error message.
 			 * @param {string} sFile The file where the error occurred
 			 * @param {number} iLine The line number of the error
@@ -196,11 +196,11 @@ sap.ui.define(['jquery.sap.global', './ApplicationMetadata', 'sap/ui/core/Compon
 			 * @function
 			 */
 			onError : null, // function(sMessage, sFile, iLine) - function not added directly as it might result in bad stack traces in older browsers
-	
-	
+
+
 			/**
 			 * Sets the configuration model.
-			 * 
+			 *
 			 * @param {string|object|sap.ui.model.Model} vConfig the configuration model, the configuration object or a URI string to load a JSON configuration file.
 			 * @since 1.13.1
 			 * @public
@@ -222,23 +222,23 @@ sap.ui.define(['jquery.sap.global', './ApplicationMetadata', 'sap/ui/core/Compon
 				jQuery.sap.assert(vConfig instanceof sap.ui.model.Model, "the config property value must be a string, an object or an instance of sap.ui.model.Model");
 				this.setProperty("config", vConfig);
 			},
-	
-	
+
+
 			/**
 			 * @see sap.ui.core.Component#destroy
 			 * @public
 			 */
 			destroy : function(bSuppressInvalidate) {
-	
+
 				delete sap.ui.getApplication;
-	
+
 				Component.prototype.destroy.apply(this, arguments);
 			}
-			
-			
+
+
 		}, /* Metadata constructor */ ApplicationMetadata);
-	
-	
+
+
 
 	return Application;
 

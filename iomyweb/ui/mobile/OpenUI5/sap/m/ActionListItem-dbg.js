@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 	 * @extends sap.m.ListItemBase
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -77,6 +77,10 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library', 'sap/ui/core/
 	 * @private
 	 */
 	ActionListItem.prototype.onsapspace = ActionListItem.prototype.onsapenter;
+
+	ActionListItem.prototype.getContentAnnouncement = function() {
+		return this.getText();
+	};
 
 	return ActionListItem;
 

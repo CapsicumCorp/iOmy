@@ -5,8 +5,8 @@
  */
 
 //Provides an abstraction for list bindings
-sap.ui.define(['jquery.sap.global', 'sap/ui/model/ContextBinding'],
-		function(jQuery, ContextBinding) {
+sap.ui.define(['jquery.sap.global', 'sap/ui/model/ContextBinding', 'sap/ui/model/ChangeReason'],
+		function(jQuery, ContextBinding, ChangeReason) {
 	"use strict";
 
 
@@ -19,10 +19,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ContextBinding'],
 	 * @param {sap.ui.model.Model} oModel
 	 * @param {String} sPath
 	 * @param {Object} oContext
-	 * @param {Object} [mParameters]
+	 * @param {map} [mParameters] a map which contains additional parameters for the binding.
+	 * @param {string} [mParameters.expand] for the OData <code>$expand</code> query option parameter which should be included in the request
+	 * @param {string} [mParameters.select] for the OData <code>$select</code> query option parameter which should be included in the request
+	 * @param {map} [mParameters.custom] an optional map of custom query parameters. Custom parameters must not start with <code>$</code>.
 	 * @abstract
 	 * @public
 	 * @alias sap.ui.model.odata.v2.ODataContextBinding
+	 * @extends sap.ui.model.ContextBinding
 	 */
 	var ODataContextBinding = ContextBinding.extend("sap.ui.model.odata.v2.ODataContextBinding", /** @lends sap.ui.model.odata.v2.ODataContextBinding.prototype */ {
 
@@ -41,33 +45,61 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ContextBinding'],
 	ODataContextBinding.prototype.initialize = function() {
 		var that = this,
 			sResolvedPath,
+			bCreatedRelative = this.isRelative() && this.oContext && this.oContext.bCreated,
 			bReloadNeeded;
 
 		// don't fire any requests if metadata is not loaded yet.
-		if (this.oModel.oMetadata.isLoaded() && this.bInitial) {
-			sResolvedPath = this.oModel.resolve(this.sPath, this.oContext);
-			bReloadNeeded = this.oModel._isReloadNeeded(sResolvedPath, this.mParameters);
-			if (sResolvedPath && bReloadNeeded) {
-				this.fireDataRequested();
-			}
-			this.oModel.createBindingContext(this.sPath, this.oContext, this.mParameters, function(oContext) {
-				var oData;
-				that.oElementContext = oContext;
-				that._fireChange();
-				if (sResolvedPath && bReloadNeeded) {
-					if (that.oElementContext) {
-						oData = that.oElementContext.getObject();
-					}
-					//register datareceived call as  callAfterUpdate
-					that.oModel.callAfterUpdate(function() {
-						that.fireDataReceived({data: oData});
-					});
-				}
-			}, bReloadNeeded);
-			this.bInitial = false;
+		if (!this.oModel.oMetadata.isLoaded() || !this.bInitial) {
+			return;
+		}
+		this.bInitial = false;
+
+		// if path cannot be resolved or parent context is created, set element context to null
+		sResolvedPath = this.oModel.resolve(this.sPath, this.oContext);
+		if (!sResolvedPath || bCreatedRelative) {
+			this.oElementContext = null;
+			this._fireChange({ reason: ChangeReason.Context });
+			return;
 		}
 
+		// check whether a request is necessary and create binding context
+		bReloadNeeded = this.oModel._isReloadNeeded(sResolvedPath, this.mParameters);
+		if (bReloadNeeded) {
+			this.fireDataRequested();
+		}
+		this.oModel.createBindingContext(this.sPath, this.oContext, this.mParameters, function(oContext) {
+			var oData;
+			that.oElementContext = oContext;
+			that._fireChange({ reason: ChangeReason.Context });
+			if (bReloadNeeded) {
+				if (that.oElementContext) {
+					oData = that.oElementContext.getObject(that.mParameters);
+				}
+				//register datareceived call as  callAfterUpdate
+				that.oModel.callAfterUpdate(function() {
+					that.fireDataReceived({data: oData});
+				});
+			}
+		}, bReloadNeeded);
 	};
+
+	/**
+	 * @see sap.ui.model.ContextBinding.prototype.checkUpdate
+	 *
+	 * @param {boolean} bForceUpdate
+	 */
+	ODataContextBinding.prototype.checkUpdate = function(bForceUpdate) {
+		var oContext;
+		if (this.bInitial) {
+			return;
+		}
+		oContext = this.oModel.createBindingContext(this.sPath, this.oContext, this.mParameters);
+		if (oContext && oContext !== this.oElementContext) {
+			this.oElementContext = oContext;
+			this._fireChange({ reason: ChangeReason.Context });
+		}
+	};
+
 	/**
 	 * @see sap.ui.model.ContextBinding.prototype.refresh
 	 *
@@ -96,9 +128,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ContextBinding'],
 	ODataContextBinding.prototype._refresh = function(bForceUpdate, mChangedEntities) {
 		var that = this, oData, sKey, oStoredEntry, bChangeDetected = false,
 			mParameters = this.mParameters,
+			bCreatedRelative = this.isRelative() && this.oContext && this.oContext.bCreated,
 			sResolvedPath = this.oModel.resolve(this.sPath, this.oContext);
 
-		if (this.bInitial) {
+		if (this.bInitial || bCreatedRelative) {
 			return;
 		}
 
@@ -126,14 +159,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ContextBinding'],
 			this.oModel.createBindingContext(this.sPath, this.oContext, mParameters, function(oContext) {
 				if (that.oElementContext === oContext) {
 					if (bForceUpdate) {
-						that._fireChange();
+						that._fireChange({ reason: ChangeReason.Context });
 					}
 				} else {
 					that.oElementContext = oContext;
-					that._fireChange();
+					that._fireChange({ reason: ChangeReason.Context });
 				}
 				if (that.oElementContext) {
-					oData = that.oElementContext.getObject();
+					oData = that.oElementContext.getObject(that.mParameters);
 				}
 				//register datareceived call as  callAfterUpdate
 				if (sResolvedPath) {
@@ -156,33 +189,48 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ContextBinding'],
 			oData,
 			sResolvedPath,
 			oData,
+			bCreated = oContext && oContext.bCreated,
 			bReloadNeeded;
 
-		if (this.oContext !== oContext && this.isRelative()) {
+		if (this.oContext !== oContext) {
 			this.oContext = oContext;
+
+			// If binding is initial or not a relative binding, nothing to do here
+			if (this.bInitial || !this.isRelative()) {
+				return;
+			}
+
 			sResolvedPath = this.oModel.resolve(this.sPath, this.oContext);
+
+			// If path doesn't resolve or parent context is created, reset current context
+			if (!sResolvedPath || bCreated) {
+				if (this.oElementContext !== null) {
+					this.oElementContext = null;
+					this._fireChange({ reason: ChangeReason.Context });
+				}
+				return;
+			}
+
+			// Create new binding context and fire change
 			oData = this.oModel._getObject(this.sPath, this.oContext);
 			bReloadNeeded = this.oModel._isReloadNeeded(sResolvedPath, oData, this.mParameters);
 
-			// don't fire any requests if metadata is not loaded yet.
-			if (!this.bInitial) {
-				if (sResolvedPath && bReloadNeeded) {
-					this.fireDataRequested();
-				}
-				this.oModel.createBindingContext(this.sPath, this.oContext, this.mParameters, function(oContext) {
-					that.oElementContext = oContext;
-					that._fireChange();
-					if (sResolvedPath && bReloadNeeded) {
-						if (that.oElementContext) {
-							oData = that.oElementContext.getObject();
-						}
-						//register datareceived call as  callAfterUpdate
-						that.oModel.callAfterUpdate(function() {
-							that.fireDataReceived({data: oData});
-						});
-					}
-				}, bReloadNeeded);
+			if (bReloadNeeded) {
+				this.fireDataRequested();
 			}
+			this.oModel.createBindingContext(this.sPath, this.oContext, this.mParameters, function(oContext) {
+				that.oElementContext = oContext;
+				that._fireChange({ reason: ChangeReason.Context });
+				if (sResolvedPath && bReloadNeeded) {
+					if (that.oElementContext) {
+						oData = that.oElementContext.getObject(that.mParameters);
+					}
+					//register datareceived call as  callAfterUpdate
+					that.oModel.callAfterUpdate(function() {
+						that.fireDataReceived({data: oData});
+					});
+				}
+			}, bReloadNeeded);
 		}
 	};
 

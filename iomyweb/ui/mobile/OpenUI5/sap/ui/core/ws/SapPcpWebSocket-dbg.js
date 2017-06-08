@@ -21,7 +21,7 @@ sap.ui.define(['jquery.sap.global', './WebSocket'],
 	 * @class WebSocket class implementing the pcp-protocol
 	 * @extends sap.ui.core.ws.WebSocket
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @alias sap.ui.core.ws.SapPcpWebSocket
 	 */
 	var SapPcpWebSocket = WebSocket.extend("sap.ui.core.ws.SapPcpWebSocket", /** @lends sap.ui.core.ws.SapPcpWebSocket.prototype */ {
@@ -244,7 +244,7 @@ sap.ui.define(['jquery.sap.global', './WebSocket'],
 	 * If the connection is not yet opened, the message will be queued and sent
 	 * when the connection is established.
 	 *
-	 * @param {string|blob|arraybuffer} message message to send
+	 * @param {string|Blob|ArrayBuffer} message message to send
 	 * @param {object} [oPcpFields] additional pcp-fields as key-value map
 	 * @return {sap.ui.core.ws.SapPcpWebSocket} <code>this</code> to allow method chaining
 	 * @public

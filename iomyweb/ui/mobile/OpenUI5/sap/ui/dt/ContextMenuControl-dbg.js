@@ -16,7 +16,7 @@ sap.ui.define([
 	 * @class Context - Menu for Design time
 	 * @extends sap.ui.unified.Menu
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -78,25 +78,31 @@ sap.ui.define([
 	 *        opened is passed, default true
 	 * @param {function} aMenuItems.enabled? function to determine if the menu entry should be enabled, the element for which the menu should be
 	 *        opened is passed, default true
-	 * @param {object} oElement element for which the menu should be opened
+	 * @param {object} oTargetOverlay overlay for which the menu should be opened
 	 * @private
 	 */
-	ContextMenuControl.prototype.setMenuItems = function(aMenuItems, oElement) {
+	ContextMenuControl.prototype.setMenuItems = function(aMenuItems, oTargetOverlay) {
 		var that = this;
 
 		this.destroyItems();
 
 		aMenuItems.forEach(function(oItem) {
-			if (!oItem.available || oItem.available(oElement)) {
-				var bEnabled = !oItem.enabled || oItem.enabled(oElement);
+			if (!oItem.available || oItem.available(oTargetOverlay)) {
+				var bEnabled = !oItem.enabled || oItem.enabled(oTargetOverlay);
+
+				var sText = oItem.text;
+				if (typeof oItem.text === "function") {
+					sText = oItem.text(oTargetOverlay);
+				}
+
 				var oMenuItem = new MenuItem({
-					text: oItem.text,
+					text: sText,
 					enabled: bEnabled
 				});
 				oMenuItem.data({
 					id: oItem.id
 				});
-				if ((oItem.startSection && typeof (oItem.startSection) === "boolean" ) || (typeof (oItem.startSection) === "function" && oItem.startSection(oElement))) {
+				if ((oItem.startSection && typeof (oItem.startSection) === "boolean" ) || (typeof (oItem.startSection) === "function" && oItem.startSection(oTargetOverlay.getElementInstance()))) {
 					oMenuItem.setStartsSection(true);
 				}
 				that.addItem(oMenuItem);

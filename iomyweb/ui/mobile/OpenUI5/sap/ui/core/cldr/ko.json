@@ -522,8 +522,8 @@
 		"sux": "수메르어",
 		"sv": "스웨덴어",
 		"sw": "스와힐리어",
+		"sw_CD": "콩고 스와힐리어",
 		"swb": "코모로어",
-		"swc": "콩고 스와힐리어",
 		"syc": "시리아어 (고전)",
 		"syr": "시리아어",
 		"szl": "szl",
@@ -620,6 +620,7 @@
 		"zza": "자자어"
 	},
 	"scripts": {
+		"Adlm": "Adlm",
 		"Afak": "아파카 문자",
 		"Aghb": "코카시안 알바니아 문자",
 		"Ahom": "Ahom",
@@ -633,6 +634,7 @@
 		"Bass": "바사바흐 문자",
 		"Batk": "바타크 문자",
 		"Beng": "벵골 문자",
+		"Bhks": "Bhks",
 		"Blis": "블리스기호 문자",
 		"Bopo": "주음부호",
 		"Brah": "브라미",
@@ -665,6 +667,7 @@
 		"Grek": "그리스 문자",
 		"Gujr": "구쟈라티 문자",
 		"Guru": "구르무키 문자",
+		"Hanb": "Hanb",
 		"Hang": "한글",
 		"Hani": "한자",
 		"Hano": "하누누 문자",
@@ -681,6 +684,7 @@
 		"Hung": "고대 헝가리 문자",
 		"Inds": "인더스 문자",
 		"Ital": "고대 이탈리아 문자",
+		"Jamo": "Jamo",
 		"Java": "자바 문자",
 		"Jpan": "일본 문자",
 		"Jurc": "줄첸 문자",
@@ -709,6 +713,7 @@
 		"Mahj": "마하자니 문자",
 		"Mand": "만다이아 문자",
 		"Mani": "마니교 문자",
+		"Marc": "Marc",
 		"Maya": "마야 상형 문자",
 		"Mend": "멘데 문자",
 		"Merc": "메로에 필기체",
@@ -723,6 +728,7 @@
 		"Mymr": "미얀마 문자",
 		"Narb": "옛 북부 아라비아 문자",
 		"Nbat": "나바테아 문자",
+		"Newa": "Newa",
 		"Nkgb": "나시 게바 문자",
 		"Nkoo": "응코 문자",
 		"Nshu": "누슈 문자",
@@ -730,6 +736,7 @@
 		"Olck": "올 치키 문자",
 		"Orkh": "오르혼어",
 		"Orya": "오리야 문자",
+		"Osge": "Osge",
 		"Osma": "오스마니아 문자",
 		"Palm": "팔미라 문자",
 		"Pauc": "Pauc",
@@ -835,6 +842,7 @@
 		"Yiii": "이 문자",
 		"Zinh": "구전 문자",
 		"Zmth": "수학 기호",
+		"Zsye": "Zsye",
 		"Zsym": "기호",
 		"Zxxx": "구전",
 		"Zyyy": "일반 문자",
@@ -879,7 +887,6 @@
 		"AI": "앵귈라",
 		"AL": "알바니아",
 		"AM": "아르메니아",
-		"AN": "네덜란드령 안틸레스",
 		"AO": "앙골라",
 		"AQ": "남극 대륙",
 		"AR": "아르헨티나",
@@ -2459,6 +2466,440 @@
 			"235": "H"
 		}
 	},
+	"ca-persian": {
+		"dateFormats": {
+			"full": "G y년 M월 d일 EEEE",
+			"long": "G y년 M월 d일",
+			"medium": "G y. M. d.",
+			"short": "G y. M. d."
+		},
+		"timeFormats": {
+			"full": "a h시 m분 s초 zzzz",
+			"long": "a h시 m분 s초 z",
+			"medium": "a h:mm:ss",
+			"short": "a h:mm"
+		},
+		"dateTimeFormats": {
+			"full": "{1} {0}",
+			"long": "{1} {0}",
+			"medium": "{1} {0}",
+			"short": "{1} {0}",
+			"availableFormats": {
+				"d": "d일",
+				"E": "ccc",
+				"Ed": "d일 (E)",
+				"EEEEd": "d일 EEEE",
+				"Ehm": "E h:mm a",
+				"EHm": "E HH:mm",
+				"Ehms": "E h:mm:ss a",
+				"EHms": "E HH:mm:ss",
+				"Gy": "G y년",
+				"GyMMM": "G y년 MMM월",
+				"GyMMMd": "G y년 MMM월 d일",
+				"GyMMMEd": "G y년 MMM월 d일 (E)",
+				"GyMMMEEEEd": "G y년 MMM월 d일 EEEE",
+				"h": "a h시",
+				"H": "H시",
+				"HHmmss": "HH:mm:ss",
+				"hm": "a h:mm",
+				"Hm": "HH:mm",
+				"hms": "a h:mm:ss",
+				"Hms": "H시 m분 s초",
+				"M": "M월",
+				"Md": "M. d.",
+				"MEd": "M. d. (E)",
+				"MEEEEd": "M. d. EEEE",
+				"MMM": "LLL",
+				"MMMd": "MMM월 d일",
+				"MMMEd": "MMM월 d일 (E)",
+				"MMMEEEEd": "MMM월 d일 EEEE",
+				"MMMMd": "MMMM월 d일",
+				"ms": "mm:ss",
+				"y": "G y년",
+				"yyyy": "G y년",
+				"yyyyM": "G y. M.",
+				"yyyyMd": "G y. M. d.",
+				"yyyyMEd": "G y. M. d. (E)",
+				"yyyyMEEEEd": "G y. M. d. EEEE",
+				"yyyyMMM": "G y년 MMM월",
+				"yyyyMMMd": "G y년 MMM월 d일",
+				"yyyyMMMEd": "G y년 MMM월 d일 (E)",
+				"yyyyMMMEEEEd": "G y년 MMM월 d일 EEEE",
+				"yyyyMMMM": "G y년 MMMM월",
+				"yyyyQQQ": "G y년 QQQ",
+				"yyyyQQQQ": "G y년 QQQQ"
+			},
+			"appendItems": {
+				"Day": "{0} ({2}: {1})",
+				"Day-Of-Week": "{0} {1}",
+				"Era": "{1} {0}",
+				"Hour": "{0} ({2}: {1})",
+				"Minute": "{0} ({2}: {1})",
+				"Month": "{0} ({2}: {1})",
+				"Quarter": "{0} ({2}: {1})",
+				"Second": "{0} ({2}: {1})",
+				"Timezone": "{0} {1}",
+				"Week": "{0} ({2}: {1})",
+				"Year": "{1} {0}"
+			},
+			"intervalFormats": {
+				"intervalFormatFallback": "{0} ~ {1}",
+				"d": {
+					"d": "d일 ~ d일"
+				},
+				"h": {
+					"a": "a h시 ~ a h시",
+					"h": "a h시 ~ h시"
+				},
+				"H": {
+					"H": "HH ~ HH시"
+				},
+				"hm": {
+					"a": "a h:mm ~ a h:mm",
+					"h": "a h:mm~h:mm",
+					"m": "a h:mm~h:mm"
+				},
+				"Hm": {
+					"H": "HH:mm ~ HH:mm",
+					"m": "HH:mm ~ HH:mm"
+				},
+				"hmv": {
+					"a": "a h:mm ~ a h:mm v",
+					"h": "a h:mm~h:mm v",
+					"m": "a h:mm~h:mm v"
+				},
+				"Hmv": {
+					"H": "HH:mm ~ HH:mm v",
+					"m": "HH:mm ~ HH:mm v"
+				},
+				"hv": {
+					"a": "a h시 ~ a h시(v)",
+					"h": "a h시 ~ h시(v)"
+				},
+				"Hv": {
+					"H": "HH ~ HH시 v"
+				},
+				"M": {
+					"M": "M월 ~ M월"
+				},
+				"Md": {
+					"d": "M. d ~ M. d",
+					"M": "M. d ~ M. d"
+				},
+				"MEd": {
+					"d": "M. d (E) ~ M. d (E)",
+					"M": "M. d (E) ~ M. d (E)"
+				},
+				"MMM": {
+					"M": "MMM ~ MMM"
+				},
+				"MMMd": {
+					"d": "M월 d일 ~ d일",
+					"M": "M월 d일 ~ M월 d일"
+				},
+				"MMMEd": {
+					"d": "M월 d일 (E) ~ d일 (E)",
+					"M": "M월 d일 (E) ~ M월 d일 (E)"
+				},
+				"MMMEEEEd": {
+					"d": "M월 d일 EEEE ~ d일 EEEE",
+					"M": "M월 d일 EEEE ~ M월 d일 EEEE"
+				},
+				"MMMM": {
+					"M": "LLLL ~ LLLL"
+				},
+				"y": {
+					"y": "G y년 ~ y년"
+				},
+				"yM": {
+					"M": "G y. M ~ y. M",
+					"y": "G y. M ~ y. M"
+				},
+				"yMd": {
+					"d": "G y. M. d. ~ y. M. d.",
+					"M": "G y. M. d. ~ y. M. d.",
+					"y": "G y. M. d. ~ y. M. d."
+				},
+				"yMEd": {
+					"d": "G y. M. d. (E) ~ y. M. d. (E)",
+					"M": "G y. M. d. (E) ~ y. M. d. (E)",
+					"y": "G y. M. d. (E) ~ y. M. d. (E)"
+				},
+				"yMMM": {
+					"M": "G y년 M월~M월",
+					"y": "G y년 M월 ~ y년 M월"
+				},
+				"yMMMd": {
+					"d": "G y년 M월 d일~d일",
+					"M": "G y년 M월 d일 ~ M월 d일",
+					"y": "G y년 M월 d일 ~ y년 M월 d일"
+				},
+				"yMMMEd": {
+					"d": "G y년 M월 d일 (E) ~ d일 (E)",
+					"M": "G y년 M월 d일 (E) ~ M월 d일 (E)",
+					"y": "G y년 M월 d일 (E) ~ y년 M월 d일 (E)"
+				},
+				"yMMMEEEEd": {
+					"d": "G y년 M월 d일 EEEE ~ d일 EEEE",
+					"M": "G y년 M월 d일 EEEE ~ M월 d일 EEEE",
+					"y": "G y년 M월 d일 EEEE ~ y년 M월 d일 EEEE"
+				},
+				"yMMMM": {
+					"M": "G y년 MM월 ~ MM월",
+					"y": "G y년 MM월 ~ y년 MM월"
+				}
+			}
+		},
+		"months": {
+			"format": {
+				"abbreviated": [
+					"화르바딘",
+					"오르디베헤쉬트",
+					"호르다드",
+					"티르",
+					"모르다드",
+					"샤흐리바르",
+					"메흐르",
+					"아반",
+					"아자르",
+					"다이",
+					"바흐만",
+					"에스판드"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4",
+					"5",
+					"6",
+					"7",
+					"8",
+					"9",
+					"10",
+					"11",
+					"12"
+				],
+				"wide": [
+					"화르바딘",
+					"오르디베헤쉬트",
+					"호르다드",
+					"티르",
+					"모르다드",
+					"샤흐리바르",
+					"메흐르",
+					"아반",
+					"아자르",
+					"다이",
+					"바흐만",
+					"에스판드"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"화르바딘",
+					"오르디베헤쉬트",
+					"호르다드",
+					"티르",
+					"모르다드",
+					"샤흐리바르",
+					"메흐르",
+					"아반",
+					"아자르",
+					"다이",
+					"바흐만",
+					"에스판드"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4",
+					"5",
+					"6",
+					"7",
+					"8",
+					"9",
+					"10",
+					"11",
+					"12"
+				],
+				"wide": [
+					"화르바딘",
+					"오르디베헤쉬트",
+					"호르다드",
+					"티르",
+					"모르다드",
+					"샤흐리바르",
+					"메흐르",
+					"아반",
+					"아자르",
+					"다이",
+					"바흐만",
+					"에스판드"
+				]
+			}
+		},
+		"days": {
+			"format": {
+				"abbreviated": [
+					"일",
+					"월",
+					"화",
+					"수",
+					"목",
+					"금",
+					"토"
+				],
+				"narrow": [
+					"일",
+					"월",
+					"화",
+					"수",
+					"목",
+					"금",
+					"토"
+				],
+				"short": [
+					"일",
+					"월",
+					"화",
+					"수",
+					"목",
+					"금",
+					"토"
+				],
+				"wide": [
+					"일요일",
+					"월요일",
+					"화요일",
+					"수요일",
+					"목요일",
+					"금요일",
+					"토요일"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"일",
+					"월",
+					"화",
+					"수",
+					"목",
+					"금",
+					"토"
+				],
+				"narrow": [
+					"일",
+					"월",
+					"화",
+					"수",
+					"목",
+					"금",
+					"토"
+				],
+				"short": [
+					"일",
+					"월",
+					"화",
+					"수",
+					"목",
+					"금",
+					"토"
+				],
+				"wide": [
+					"일요일",
+					"월요일",
+					"화요일",
+					"수요일",
+					"목요일",
+					"금요일",
+					"토요일"
+				]
+			}
+		},
+		"quarters": {
+			"format": {
+				"abbreviated": [
+					"1분기",
+					"2분기",
+					"3분기",
+					"4분기"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4"
+				],
+				"wide": [
+					"제 1/4분기",
+					"제 2/4분기",
+					"제 3/4분기",
+					"제 4/4분기"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"1분기",
+					"2분기",
+					"3분기",
+					"4분기"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4"
+				],
+				"wide": [
+					"제 1/4분기",
+					"제 2/4분기",
+					"제 3/4분기",
+					"제 4/4분기"
+				]
+			}
+		},
+		"dayPeriods": {
+			"format": {
+				"abbreviated": [
+					"AM",
+					"PM"
+				],
+				"narrow": [
+					"AM",
+					"PM"
+				],
+				"wide": [
+					"오전",
+					"오후"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"오전",
+					"오후"
+				],
+				"narrow": [
+					"AM",
+					"PM"
+				],
+				"wide": [
+					"오전",
+					"오후"
+				]
+			}
+		},
+		"era-wide": {
+			"0": "AP"
+		},
+		"era-abbreviated": {
+			"0": "AP"
+		},
+		"era-narrow": {
+			"0": "AP"
+		}
+	},
 	"dateFields": {
 		"era": {
 			"displayName": "연호"
@@ -2842,13 +3283,13 @@
 		"CLP": 0,
 		"COP": 0,
 		"CRC": 0,
-		"CZK": 2,
+		"CZK": 0,
 		"DEFAULT": 2,
 		"DJF": 0,
 		"ESP": 0,
 		"GNF": 0,
 		"GYD": 0,
-		"HUF": 2,
+		"HUF": 0,
 		"IDR": 0,
 		"IQD": 0,
 		"IRR": 0,
@@ -2882,7 +3323,7 @@
 		"TMM": 0,
 		"TND": 3,
 		"TRL": 0,
-		"TWD": 2,
+		"TWD": 0,
 		"TZS": 0,
 		"UGX": 0,
 		"UYI": 0,
@@ -2901,7 +3342,7 @@
 	"weekData-weekendStart": 6,
 	"weekData-weekendEnd": 0,
 	"timeData": {
-		"_allowed": "H h",
+		"_allowed": "h H hB hb",
 		"_preferred": "h"
 	},
 	"eras-gregorian": {
@@ -2915,6 +3356,11 @@
 	"eras-islamic": {
 		"0": {
 			"_start": "622-7-15"
+		}
+	},
+	"eras-persian": {
+		"0": {
+			"_start": "622-01-01"
 		}
 	},
 	"eras-japanese": {

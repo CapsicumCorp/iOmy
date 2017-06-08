@@ -17,7 +17,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library'],
 	 * @classdesc Base Class for a Renderer.
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @namespace
 	 * @public
 	 * @alias sap.ui.core.Renderer
@@ -82,13 +82,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library'],
 	 *     "use strict";
 	 *
 	 *     var LabelRenderer = Renderer.extend('sap.m.LabelRenderer', {
-	 *         renderer: function(oRM, oControl) {
+	 *         render: function(oRM, oControl) {
 	 *
 	 *             renderPreamble(oRM, oControl);
 	 *
 	 *             // implementation core renderer logic here
 	 *
-	 *             renderPreamble(oRM, oControl);
+	 *             renderPostamble(oRM, oControl);
 	 *
 	 *         },
 	 *
@@ -115,7 +115,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library'],
 	 *     "use strict";
 	 *
 	 *     var FancyLabelRenderer = LabelRenderer.extend('sap.mylib.FancyLabelRenderer', {
-	 *         renderer: function(oRM, oControl) {
+	 *         render: function(oRM, oControl) {
 	 *
 	 *             // call base renderer
 	 *             LabelRenderer.renderPreamble(oRM, oControl);
@@ -132,8 +132,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library'],
 	 * </pre>
 	 *
 	 * <b>Note:</b> the new signature no longer requires the <code>bExport</code> flag to be set for
-	 * the enclosing {@link sap.ui.define} call. The Renderer base classes takes care of the necessary
-	 * global export of the render. This allows Non-SAP developers to write a renderer that complies with
+	 * the enclosing {@link sap.ui.define} call. The Renderer base class takes care of the necessary
+	 * global export of the renderer. This allows Non-SAP developers to write a renderer that complies with
 	 * the documented restriction for <code>sap.ui.define</code> (no use of bExport = true outside
 	 * sap.ui.core projects).
 	 *
@@ -176,7 +176,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library'],
 	 * @param {sap.ui.core.TextAlign} oTextAlign the text alignment of the Control
 	 * @param {sap.ui.core.TextDirection} oTextDirection the text direction of the Control
 	 * @returns {string} the actual text alignment that must be set for this environment
-	 * @private
+	 * @protected
 	 */
 	Renderer.getTextAlign = function(oTextAlign, oTextDirection) {
 		var sTextAlign = "",

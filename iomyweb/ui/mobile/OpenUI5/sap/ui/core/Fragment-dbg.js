@@ -38,36 +38,45 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Element', './Dec
 	 * @class
 	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @public
 	 * @alias sap.ui.core.Fragment
 	 */
 	var Fragment = ManagedObject.extend("sap.ui.core.Fragment", {
 		metadata: {
 			properties: {
+
+				/*
+				 * The Fragment type. Types "XML", "HTML" and JS" are built-in and always available.
+				 */
 				type: "string"
 			},
 			specialSettings: {
+
 				/*
 				 * Name of the fragment to load
 				 */
-				fragmentName : true,
+				fragmentName : 'string',
+
 				/*
 				 * Content of the fragment
 				 */
-				fragmentContent : true,
+				fragmentContent : 'any',
+
 				/*
 				 * An enclosing view that contains this instance of the fragment (optional)
 				 */
-				containingView : true,
+				containingView : { type: 'sap.ui.core.mvc.View', visibility: 'hidden' },
+
 				/*
 				 * A controller of a containing View that should be used by this fragment (optional)
 				 */
-				oController : true,
+				oController : { type: 'sap.ui.core.mvc.Controller', visibility: 'hidden' },
+
 				/*
 				 * The ID of this fragment (optional)
 				 */
-				sId : true
+				sId : { type: 'sap.ui.core.ID', visibility: 'hidden' }
 			}
 		},
 
@@ -258,7 +267,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Element', './Dec
 	 *
 	 * @param {string} sName the Fragment name
 	 * @param {string} sType the Fragment type, e.g. "XML", "JS", or "HTML"
-	 * @param {sap.ui.core.Controller} [oController] the Controller which should be used by the controls in the Fragment. Note that some Fragments may not need a Controller and other may need one - and even rely on certain methods implemented in the Controller.
+	 * @param {sap.ui.core.mvc.Controller} [oController] the Controller which should be used by the controls in the Fragment. Note that some Fragments may not need a Controller and other may need one - and even rely on certain methods implemented in the Controller.
 	 * @public
 	 * @static
 	 * @return {sap.ui.core.Control|sap.ui.core.Control[]} the root Control(s) of the Fragment content
@@ -490,6 +499,8 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Element', './Dec
 						}
 					});
 				}
+			}, {
+				settings: that._oContainingView._fnSettingsPreprocessor
 			});
 		}
 	});
@@ -517,6 +528,8 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Element', './Dec
 				that._aContent = [];
 				that._aContent = that._aContent.concat(content);
 
+			}, {
+				settings: that._oContainingView._fnSettingsPreprocessor
 			});
 		}
 	});
@@ -626,6 +639,8 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Element', './Dec
 					}// else {
 						// TODO: error
 					//}
+				}, {
+					settings: that._oContainingView._fnSettingsPreprocessor
 				});
 			}
 		});

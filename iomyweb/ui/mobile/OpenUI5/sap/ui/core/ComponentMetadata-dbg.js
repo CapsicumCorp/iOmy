@@ -18,7 +18,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObjectMetadata', 'sap/ui
 	 * @public
 	 * @class
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @since 1.9.2
 	 * @alias sap.ui.core.ComponentMetadata
 	 */
@@ -94,6 +94,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObjectMetadata', 'sap/ui
 			// load the manifest if defined as string
 			if (typeof oManifest === "string" && oManifest === "json") {
 
+				// In contrast to sap.ui.core.Manifest#load the sap-language parameter
+				// won't be added here as the resource is expected to be served from the
+				// preload module cache which does not contain any URL parameters
 				var sResource = sPackage.replace(/\./g, "/") + "/manifest.json";
 				jQuery.sap.log.info("The manifest of the component " + sName + " is loaded from file " + sResource + ".");
 				try {
@@ -199,8 +202,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObjectMetadata', 'sap/ui
 		var oUI5Manifest = this.getManifestEntry("sap.ui5", true),
 			mExtensions = oUI5Manifest && oUI5Manifest["extends"] && oUI5Manifest["extends"].extensions;
 		if (this._iInstanceCount === 0 && !jQuery.isEmptyObject(mExtensions)) {
-			jQuery.sap.require("sap.ui.core.CustomizingConfiguration");
-			var CustomizingConfiguration = sap.ui.require('sap/ui/core/CustomizingConfiguration');
+			var CustomizingConfiguration = sap.ui.requireSync('sap/ui/core/CustomizingConfiguration');
 			CustomizingConfiguration.activateForComponent(this._sComponentName);
 		}
 		this._iInstanceCount++;

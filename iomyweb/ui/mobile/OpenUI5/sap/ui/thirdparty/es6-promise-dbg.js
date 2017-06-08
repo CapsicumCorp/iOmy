@@ -974,10 +974,21 @@
       // ##### END: MODIFIED BY SAP
     } else if (typeof module !== 'undefined' && module['exports']) {
       module['exports'] = lib$es6$promise$umd$$ES6Promise;
-    } else if (typeof this !== 'undefined') {
+      // ##### BEGIN: MODIFIED BY SAP
+      // When require.js was loaded before the core, this will not set the global window.ES6Promise property and thus
+      // keep the rest of the framework from working in browsers that do not have native Promise support.
+      // Original line:
+      // } else if (typeof this !== 'undefined') {
+    }
+    if (typeof this !== 'undefined') {
+      // ##### END: MODIFIED BY SAP
       this['ES6Promise'] = lib$es6$promise$umd$$ES6Promise;
     }
 
-    lib$es6$promise$polyfill$$default();
-}).call(this);
 
+    // ##### BEGIN: MODIFIED BY SAP
+    // Original line:
+    //     lib$es6$promise$polyfill$$default();
+    // Do not automatically call the polyfill method as this will be called by UI5 only when needed.
+    // ##### END: MODIFIED BY SAP
+}).call(this);

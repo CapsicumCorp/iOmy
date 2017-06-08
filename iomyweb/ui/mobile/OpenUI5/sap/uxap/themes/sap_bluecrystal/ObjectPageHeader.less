@@ -14,6 +14,11 @@
 	background-size: 100% 100%;
 }
 
+.sapUxAPObjectPageHeader.sapUxAPObjectPageHeaderDesign-Dark .sapMBreadcrumbsSeparator,
+.sapUxAPObjectPageHeader.sapUxAPObjectPageHeaderDesign-Dark .sapMLnk {
+	color: @sapUiTextInverted;
+}
+
 .sapUxAPObjectPageHeaderDesign-Dark.sapUxAPObjectPageHeader .sapMBar {
 	background-color: transparent;
 	color: @sapUiTextInverted;
@@ -81,7 +86,7 @@
 	}
 }
 
-.sapUiMedia-Std-Phone .sapUxAPObjectPageHeaderIdentifierTitle {
+html.sapUiMedia-Std-Phone .sapUxAPObjectPageHeaderIdentifierTitle {
 	font-size: @sapMFontHeader4Size;
 }
 
@@ -96,8 +101,8 @@
 	color: @sapUiAccent7;
 }
 
-.sapUiMedia-Std-Phone .sapUiSizeCompact.sapUxAPObjectPageHeaderChangesBtn .sapMBtn,
-.sapUiMedia-Std-Phone .sapUiSizeCompact.sapUxAPObjectPageHeaderLockBtn .sapMBtn {
+html.sapUiMedia-Std-Phone .sapUiSizeCompact.sapUxAPObjectPageHeaderChangesBtn .sapMBtn,
+html.sapUiMedia-Std-Phone .sapUiSizeCompact.sapUxAPObjectPageHeaderLockBtn .sapMBtn {
 	margin-top: -0.5rem;
 }
 
@@ -142,4 +147,8 @@ html.sap-desktop .sapUxAPObjectPageHeaderDesign-Dark .sapMBtn:focus .sapMBtnFocu
 
 .sapUxAPObjectPageHeaderDesign-Dark .sapUxAPObjectPageHeaderObjectImageContainer .sapUiIcon {
 	color: @sapUiInvertedElement;
+}
+
+.sapUxAPObjectPageHeaderSeparator {
+	background-color: @sapUiFieldBorderColor;
 }

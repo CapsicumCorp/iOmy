@@ -27,10 +27,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/IconPool
          *
          * @namespace
          * @author SAP SE
-         * @version 1.34.9
+         * @version 1.44.14
          *
          * @constructor
          * @public
+         * @deprecated Since version 1.38. Instead, use the <code>sap.m.Popup</code> control.
          * @alias sap.ui.ux3.ToolPopup
          * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
          */
@@ -265,11 +266,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/IconPool
              * Checks if the ToolPopup already has a tabbable element.
              * If not, it's checked whether the fake-element should be used or if there is an element that could be focused instead.
              *
-             * @param {sap.ui.ux3.ToolPopup} that to get/set instance values
+             * @param {sap.ui.ux3.ToolPopup} context to get/set instance values
              * @returns {string} _sInitialFocusId that has been determined here
              * @private
              */
-            var _fnGetInitialFocus = function (that) {
+            var _fnGetInitialFocus = function (context) {
+                var that = context;
                 jQuery.sap.assert(!!that, "No ToolPopup instance given for _fnGetInitialFocus");
 
                 // if there is an initial focus it was already set to the Popup onBeforeRendering
@@ -285,12 +287,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/IconPool
             /**
              * Determines the new element which will gain the focus.
              *
-             * @param {sap.ui.ux3.ToolPopup} that to get/set instance values
+             * @param {sap.ui.ux3.ToolPopup} context to get/set instance values
              * @private
              */
-            var _fnGetNewFocusElement = function (that) {
+            var _fnGetNewFocusElement = function (context) {
                 var oElement;
                 var oFocusControl;
+                var that = context;
                 var defaultFocusableElements = [that._mParameters.firstFocusable, that._mParameters.lastFocusable];
                 var aTabbables = jQuery(":sapTabbable", that.$()).get();
 
@@ -327,9 +330,25 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/IconPool
              * @returns {Element|sap.ui.core.Element|Object|sap.ui.core.tmpl.Template}
              * @private
              */
-            function _fnGetFocusElementById(id) {
-                var domElement = sap.ui.getCore().byId(id);
-                return domElement;
+            function _fnGetFocusControlById(oToolPopup, id) {
+                var oControl,
+                    parent;
+
+                if (!id) {
+                    return null;
+                }
+
+                oControl = sap.ui.getCore().byId(id);
+
+                while (!oControl && oControl !== oToolPopup) {
+                    if (!id || !document.getElementById(id)) {
+                        return null;
+                    }
+                    parent = document.getElementById(id).parentNode;
+                    id = parent.id;
+                    oControl = sap.ui.getCore().byId(id);
+                }
+                return oControl;
             }
 
             /**
@@ -340,7 +359,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/IconPool
              */
             ToolPopup.prototype.getFocusDomRef = function () {
                 var domRefId;
-                var focusElement = _fnGetFocusElementById(this._sInitialFocusId);
+                var focusElement = _fnGetFocusControlById(this, this._sInitialFocusId);
 
                 // always determine the best initial focus stuff because content might
                 // have changed in the mean time
@@ -348,7 +367,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/IconPool
                 if (!focusElement) {
                     this._bFocusSet = false;
                     domRefId = _fnGetInitialFocus(this);
-                    focusElement = _fnGetFocusElementById(domRefId);
+                    focusElement = _fnGetFocusControlById(this, domRefId);
                 }
 
                 return focusElement ? focusElement.getDomRef() : this.getDomRef();
@@ -865,6 +884,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/IconPool
                     sKey = "left";
 
                     if (oOpenerRect) {
+
                         if (isRTL) {
                             sKey = "right";
                             popupBorder = parseInt(oThis.$().css('border-right-width'), 10) || 0;
@@ -1123,7 +1143,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/IconPool
                 return this;
             };
 
-            var fnChangeContent = function (that, sType) {
+            var fnChangeContent = function (context, sType) {
+                var that = context;
                 if (sType === "content") {
                     fnRenderContent(that);
                 } else if (sType === "buttons") {
@@ -1278,7 +1299,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/IconPool
              * Adds an ID to the Popup that should be focusable as well when using <code>autoclose</code>.
              * Chaining is only possible if a valid type (string) is given.
              *
-             * @param {sap.ui.core.string} [sID] ID of the corresponding element that should be focusable as well
+             * @param {string} [sID] ID of the corresponding element that should be focusable as well
              * @since 1.19.0
              * @public
              * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
@@ -1301,7 +1322,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/IconPool
              * Removes an ID to the Popup that should be focusable as well when using <code>autoclose</code>.
              * Chaining is only possible if a valid type (string) is given.
              *
-             * @param {sap.ui.core.string} [sID] ID of the corresponding element
+             * @param {string} [sID] ID of the corresponding element
              * @since 1.19.0
              * @public
              * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel

@@ -53,6 +53,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer
 	 */
 	InputRenderer.writeInnerAttributes = function(oRm, oControl) {
 		oRm.writeAttribute("type", oControl.getType().toLowerCase());
+		if (oControl.getType() == sap.m.InputType.Number && sap.ui.getCore().getConfiguration().getRTL()) {
+			oRm.writeAttribute("dir", "ltr");
+			oRm.addStyle("text-align", "right");
+		}
+
 		if ((!oControl.getEnabled() && oControl.getType() == "Password")
 				|| (oControl.getShowSuggestion() && oControl._bUseDialog)
 				|| (oControl.getValueHelpOnly() && oControl.getEnabled() && oControl.getEditable() && oControl.getShowValueHelp())) {
@@ -91,19 +96,21 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer
 	 */
 	InputRenderer.writeInnerContent = function(oRm, oControl) {
 
-		if (!oControl.getDescription()) {
+		var id = oControl.getId(),
+			description = oControl.getDescription();
+
+		if (!description) {
 			this.writeValueHelpIcon(oRm, oControl);
-		}else {
-			var sDescription = oControl.getDescription();
-			oRm.write("<span>");
+		} else {
+			oRm.write("<span id=\"" + oControl.getId() + "-Descr\">");
 			this.writeValueHelpIcon(oRm, oControl);
-			oRm.writeEscaped(sDescription);
+			oRm.writeEscaped(description);
 			oRm.write("</span>");
 		}
 
 		if (sap.ui.getCore().getConfiguration().getAccessibility()) {
 			if (oControl.getShowSuggestion() && oControl.getEnabled() && oControl.getEditable()) {
-				oRm.write("<span id=\"" + oControl.getId() + "-SuggDescr\" class=\"sapUiInvisibleText\" role=\"status\" aria-live=\"polite\"></span>");
+				oRm.write("<span id=\"" + id + "-SuggDescr\" class=\"sapUiInvisibleText\" role=\"status\" aria-live=\"polite\"></span>");
 			}
 		}
 
@@ -112,7 +119,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer
 	InputRenderer.writeValueHelpIcon = function(oRm, oControl) {
 
 		if (oControl.getShowValueHelp() && oControl.getEnabled() && oControl.getEditable()) {
-			oRm.write('<div class="sapMInputValHelp">');
+			// Set tabindex to -1 to prevent the focus from going to the underlying list row,
+			// in case when the input is placed inside of a list/table.
+			oRm.write('<div class="sapMInputValHelp" tabindex="-1">');
 			oRm.renderControl(oControl._getValueHelpIcon());
 			oRm.write("</div>");
 		}
@@ -131,6 +140,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer
 			oRm.addStyle("width", oControl.getFieldWidth() || "50%");
 		}
 
+	};
+
+	InputRenderer.getAriaLabelledBy = function(oControl) {
+		var ariaLabels = InputBaseRenderer.getAriaLabelledBy.call(this, oControl) || "";
+		if (oControl.getDescription()) {
+			ariaLabels = ariaLabels + " " + oControl.getId() + "-Descr";
+		}
+		return ariaLabels;
 	};
 
 	InputRenderer.getAriaDescribedBy = function(oControl) {
@@ -158,6 +175,17 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer', './InputBaseRenderer
 
 		return sAriaDescribedBy;
 
+	};
+
+	/**
+	 * Returns aria accessibility role for the control.
+	 * Hook for the subclasses.
+	 *
+	 * @param {sap.ui.core.Control} oControl an object representation of the control
+	 * @returns {String}
+	 */
+	InputRenderer.getAriaRole = function(oControl) {
+		return "";
 	};
 
 	InputRenderer.getAccessibilityState = function(oControl) {

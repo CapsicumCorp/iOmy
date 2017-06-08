@@ -24,6 +24,7 @@ sap.ui.define([ 'jquery.sap.global', "sap/m/semantic/SemanticPage", "sap/m/seman
 	 * 	<li>{@link sap.m.semantic.ForwardAction}</li>
 	 * 	<li>{@link sap.m.semantic.EditAction}</li>
 	 * 	<li>{@link sap.m.semantic.SaveAction}</li>
+	 * 	<li>{@link sap.m.semantic.DeleteAction}</li>
 	 * 	<li>{@link sap.m.semantic.CancelAction}</li>
 	 * 	<li>{@link sap.m.semantic.MultiSelectAction}</li>
 	 * 	<li>{@link sap.m.semantic.FlagAction}</li>
@@ -40,7 +41,7 @@ sap.ui.define([ 'jquery.sap.global', "sap/m/semantic/SemanticPage", "sap/m/seman
 	 * @extends sap.m.semantic.SemanticPage
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -50,6 +51,7 @@ sap.ui.define([ 'jquery.sap.global', "sap/m/semantic/SemanticPage", "sap/m/seman
 	 */
 	var MasterPage = SemanticPage.extend("sap.m.semantic.MasterPage", /** @lends sap.m.semantic.MasterPage.prototype */ {
 		metadata: {
+			library: "sap.m",
 			aggregations: {
 				/**
 				 * Add action
@@ -108,6 +110,13 @@ sap.ui.define([ 'jquery.sap.global', "sap/m/semantic/SemanticPage", "sap/m/seman
 					multiple: false
 				},
 				/**
+				 * Delete action
+				 */
+				deleteAction: {
+					type: "sap.m.semantic.DeleteAction",
+					multiple: false
+				},
+				/**
 				 * Cancel action
 				 */
 				cancelAction: {
@@ -151,6 +160,10 @@ sap.ui.define([ 'jquery.sap.global', "sap/m/semantic/SemanticPage", "sap/m/seman
 
 		SemanticPage.prototype.init.call(this);
 		this._getPage().getLandmarkInfo().setRootLabel(sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("SEMANTIC_MASTER_PAGE_TITLE"));
+	};
+
+	MasterPage.prototype.getSemanticRuleSet = function() {
+		return sap.m.semantic.SemanticRuleSetType.Classic; //this page should only use the Classic ruleset (no other rules are specified for this page for now)
 	};
 
 	return MasterPage;

@@ -523,8 +523,8 @@
 		"sux": "sumerio",
 		"sv": "sueco",
 		"sw": "suajili",
+		"sw_CD": "suajili del Congo",
 		"swb": "comorense",
-		"swc": "suajili del Congo",
 		"syc": "siríaco clásico",
 		"syr": "siriaco",
 		"szl": "szl",
@@ -622,6 +622,7 @@
 		"zza": "zazaki"
 	},
 	"scripts": {
+		"Adlm": "Adlm",
 		"Aghb": "Aghb",
 		"Ahom": "Ahom",
 		"Arab": "árabe",
@@ -634,6 +635,7 @@
 		"Bass": "Bass",
 		"Batk": "batak",
 		"Beng": "bengalí",
+		"Bhks": "Bhks",
 		"Blis": "símbolos blis",
 		"Bopo": "bopomofo",
 		"Brah": "brahmi",
@@ -666,6 +668,7 @@
 		"Grek": "griego",
 		"Gujr": "gujarati",
 		"Guru": "gurmuji",
+		"Hanb": "Hanb",
 		"Hang": "hangul",
 		"Hani": "han",
 		"Hano": "hanunoo",
@@ -682,6 +685,7 @@
 		"Hung": "húngaro antiguo",
 		"Inds": "Indio (harappan)",
 		"Ital": "antigua bastardilla",
+		"Jamo": "Jamo",
 		"Java": "javanés",
 		"Jpan": "japonés",
 		"Kali": "kayah li",
@@ -707,6 +711,7 @@
 		"Mahj": "Mahj",
 		"Mand": "mandeo",
 		"Mani": "Mani",
+		"Marc": "Marc",
 		"Maya": "jeroglíficos mayas",
 		"Mend": "Mend",
 		"Merc": "Merc",
@@ -721,11 +726,13 @@
 		"Mymr": "birmano",
 		"Narb": "Narb",
 		"Nbat": "Nbat",
+		"Newa": "Newa",
 		"Nkoo": "n’ko",
 		"Ogam": "ogham",
 		"Olck": "ol ciki",
 		"Orkh": "orkhon",
 		"Orya": "oriya",
+		"Osge": "Osge",
 		"Osma": "osmaniya",
 		"Palm": "Palm",
 		"Pauc": "Pauc",
@@ -810,6 +817,7 @@
 		"Tale": "tai le",
 		"Talu": "nuevo tai lue",
 		"Taml": "tamil",
+		"Tang": "Tang",
 		"Tavt": "Tavt",
 		"Telu": "telugu",
 		"Teng": "tengwar",
@@ -828,6 +836,7 @@
 		"Yiii": "yi",
 		"Zinh": "heredado",
 		"Zmth": "Zmth",
+		"Zsye": "Zsye",
 		"Zsym": "símbolos",
 		"Zxxx": "no escrito",
 		"Zyyy": "común",
@@ -872,7 +881,6 @@
 		"AI": "Anguila",
 		"AL": "Albania",
 		"AM": "Armenia",
-		"AN": "Antillas Neerlandesas",
 		"AO": "Angola",
 		"AQ": "Antártida",
 		"AR": "Argentina",
@@ -2438,6 +2446,427 @@
 			"235": "H"
 		}
 	},
+	"ca-persian": {
+		"dateFormats": {
+			"full": "EEEE, d 'de' MMMM 'de' y G",
+			"long": "d 'de' MMMM 'de' y G",
+			"medium": "d/M/y G",
+			"short": "d/M/yy G"
+		},
+		"timeFormats": {
+			"full": "H:mm:ss (zzzz)",
+			"long": "H:mm:ss z",
+			"medium": "H:mm:ss",
+			"short": "H:mm"
+		},
+		"dateTimeFormats": {
+			"full": "{1}, {0}",
+			"long": "{1}, {0}",
+			"medium": "{1} {0}",
+			"short": "{1} {0}",
+			"availableFormats": {
+				"d": "d",
+				"E": "ccc",
+				"Ed": "E d",
+				"Ehm": "E h:mm a",
+				"EHm": "E HH:mm",
+				"Ehms": "E h:mm:ss a",
+				"EHms": "E HH:mm:ss",
+				"Gy": "y G",
+				"GyMMM": "MMM y G",
+				"GyMMMd": "d MMM y G",
+				"GyMMMEd": "E, d MMM y G",
+				"GyMMMM": "MMMM 'de' y G",
+				"GyMMMMd": "d 'de' MMMM 'de' y G",
+				"GyMMMMEd": "E, d 'de' MMMM 'de' y G",
+				"h": "hh a",
+				"H": "HH",
+				"hm": "hh:mm a",
+				"Hm": "HH:mm",
+				"hms": "hh:mm:ss a",
+				"Hms": "HH:mm:ss",
+				"M": "L",
+				"Md": "d/M",
+				"MEd": "E, d/M",
+				"MMM": "LLL",
+				"MMMd": "d MMM",
+				"MMMEd": "E, d MMM",
+				"MMMMd": "d 'de' MMMM",
+				"MMMMEd": "E, d 'de' MMMM",
+				"ms": "mm:ss",
+				"y": "y G",
+				"yyyy": "y G",
+				"yyyyM": "M/y GGGGG",
+				"yyyyMd": "d/M/y GGGGG",
+				"yyyyMEd": "E, d/M/y GGGGG",
+				"yyyyMMM": "MMM y G",
+				"yyyyMMMd": "d MMM y G",
+				"yyyyMMMEd": "EEE, d MMM y G",
+				"yyyyMMMM": "MMMM 'de' y G",
+				"yyyyMMMMd": "d 'de' MMMM 'de' y G",
+				"yyyyMMMMEd": "EEE, d 'de' MMMM 'de' y G",
+				"yyyyQQQ": "QQQ y G",
+				"yyyyQQQQ": "QQQQ 'de' y G"
+			},
+			"appendItems": {
+				"Day": "{0} ({2}: {1})",
+				"Day-Of-Week": "{0} {1}",
+				"Era": "{1} {0}",
+				"Hour": "{0} ({2}: {1})",
+				"Minute": "{0} ({2}: {1})",
+				"Month": "{0} ({2}: {1})",
+				"Quarter": "{0} ({2}: {1})",
+				"Second": "{0} ({2}: {1})",
+				"Timezone": "{0} {1}",
+				"Week": "{0} ({2}: {1})",
+				"Year": "{1} {0}"
+			},
+			"intervalFormats": {
+				"intervalFormatFallback": "{0}–{1}",
+				"d": {
+					"d": "d–d"
+				},
+				"h": {
+					"a": "h a – h a",
+					"h": "h–h a"
+				},
+				"H": {
+					"H": "HH–HH"
+				},
+				"hm": {
+					"a": "h:mm a – h:mm a",
+					"h": "h:mm – h:mm a",
+					"m": "h:mm – h:mm a"
+				},
+				"Hm": {
+					"H": "HH:mm – HH:mm",
+					"m": "HH:mm – HH:mm"
+				},
+				"hmv": {
+					"a": "h:mm a – h:mm a v",
+					"h": "h:mm – h:mm a v",
+					"m": "h:mm – h:mm a v"
+				},
+				"Hmv": {
+					"H": "HH:mm – HH:mm v",
+					"m": "HH:mm – HH:mm v"
+				},
+				"hv": {
+					"a": "h a – h a v",
+					"h": "h–h a v"
+				},
+				"Hv": {
+					"H": "HH–HH v"
+				},
+				"M": {
+					"M": "M–M"
+				},
+				"Md": {
+					"d": "d/M–d/M",
+					"M": "d/M–d/M"
+				},
+				"MEd": {
+					"d": "E, d/M – E, d/M",
+					"M": "E, d/M – E, d/M"
+				},
+				"MMM": {
+					"M": "MMM–MMM"
+				},
+				"MMMd": {
+					"d": "d–d 'de' MMM",
+					"M": "d 'de' MMM – d 'de' MMM"
+				},
+				"MMMEd": {
+					"d": "E, d 'de' MMM – E, d 'de' MMM",
+					"M": "E, d 'de' MMM – E, d 'de' MMM"
+				},
+				"y": {
+					"y": "y–y G"
+				},
+				"yM": {
+					"M": "M/y–M/y G",
+					"y": "M/y–M/y G"
+				},
+				"yMd": {
+					"d": "d/M/y–d/M/y G",
+					"M": "d/M/y–d/M/y G",
+					"y": "d/M/y–d/M/y G"
+				},
+				"yMEd": {
+					"d": "E, d/M/y – E, d/M/y G",
+					"M": "E, d/M/y – E, d/M/y G",
+					"y": "E, d/M/y – E, d/M/y G"
+				},
+				"yMMM": {
+					"M": "MMM–MMM 'de' y G",
+					"y": "MMM 'de' y – MMM 'de' y G"
+				},
+				"yMMMd": {
+					"d": "d–d 'de' MMM 'de' y G",
+					"M": "d 'de' MMM – d 'de' MMM y G",
+					"y": "d 'de' MMM 'de' y – d 'de' MMM 'de' y G"
+				},
+				"yMMMEd": {
+					"d": "E, d 'de' MMM – E, d 'de' MMM 'de' y G",
+					"M": "E, d 'de' MMM – E, d 'de' MMM 'de' y G",
+					"y": "E, d 'de' MMM 'de' y – E, d 'de' MMM 'de' y G"
+				},
+				"yMMMM": {
+					"M": "MMMM–MMMM 'de' y G",
+					"y": "MMMM 'de' y – MMMM 'de' y G"
+				}
+			}
+		},
+		"months": {
+			"format": {
+				"abbreviated": [
+					"Farvardin",
+					"Ordibehesht",
+					"Khordad",
+					"Tir",
+					"Mordad",
+					"Shahrivar",
+					"Mehr",
+					"Aban",
+					"Azar",
+					"Dey",
+					"Bahman",
+					"Esfand"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4",
+					"5",
+					"6",
+					"7",
+					"8",
+					"9",
+					"10",
+					"11",
+					"12"
+				],
+				"wide": [
+					"Farvardin",
+					"Ordibehesht",
+					"Khordad",
+					"Tir",
+					"Mordad",
+					"Shahrivar",
+					"Mehr",
+					"Aban",
+					"Azar",
+					"Dey",
+					"Bahman",
+					"Esfand"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"Farvardin",
+					"Ordibehesht",
+					"Khordad",
+					"Tir",
+					"Mordad",
+					"Shahrivar",
+					"Mehr",
+					"Aban",
+					"Azar",
+					"Dey",
+					"Bahman",
+					"Esfand"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4",
+					"5",
+					"6",
+					"7",
+					"8",
+					"9",
+					"10",
+					"11",
+					"12"
+				],
+				"wide": [
+					"Farvardin",
+					"Ordibehesht",
+					"Khordad",
+					"Tir",
+					"Mordad",
+					"Shahrivar",
+					"Mehr",
+					"Aban",
+					"Azar",
+					"Dey",
+					"Bahman",
+					"Esfand"
+				]
+			}
+		},
+		"days": {
+			"format": {
+				"abbreviated": [
+					"dom.",
+					"lun.",
+					"mar.",
+					"mié.",
+					"jue.",
+					"vie.",
+					"sáb."
+				],
+				"narrow": [
+					"D",
+					"L",
+					"M",
+					"X",
+					"J",
+					"V",
+					"S"
+				],
+				"short": [
+					"DO",
+					"LU",
+					"MA",
+					"MI",
+					"JU",
+					"VI",
+					"SA"
+				],
+				"wide": [
+					"domingo",
+					"lunes",
+					"martes",
+					"miércoles",
+					"jueves",
+					"viernes",
+					"sábado"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"dom.",
+					"lun.",
+					"mar.",
+					"mié.",
+					"jue.",
+					"vie.",
+					"sáb."
+				],
+				"narrow": [
+					"D",
+					"L",
+					"M",
+					"X",
+					"J",
+					"V",
+					"S"
+				],
+				"short": [
+					"DO",
+					"LU",
+					"MA",
+					"MI",
+					"JU",
+					"VI",
+					"SA"
+				],
+				"wide": [
+					"domingo",
+					"lunes",
+					"martes",
+					"miércoles",
+					"jueves",
+					"viernes",
+					"sábado"
+				]
+			}
+		},
+		"quarters": {
+			"format": {
+				"abbreviated": [
+					"T1",
+					"T2",
+					"T3",
+					"T4"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4"
+				],
+				"wide": [
+					"1.er trimestre",
+					"2.º trimestre",
+					"3.er trimestre",
+					"4.º trimestre"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"T1",
+					"T2",
+					"T3",
+					"T4"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4"
+				],
+				"wide": [
+					"1.er trimestre",
+					"2.º trimestre",
+					"3.er trimestre",
+					"4.º trimestre"
+				]
+			}
+		},
+		"dayPeriods": {
+			"format": {
+				"abbreviated": [
+					"a. m.",
+					"p. m."
+				],
+				"narrow": [
+					"a. m.",
+					"p. m."
+				],
+				"wide": [
+					"a. m.",
+					"p. m."
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"a. m.",
+					"p. m."
+				],
+				"narrow": [
+					"a. m.",
+					"p. m."
+				],
+				"wide": [
+					"a. m.",
+					"p. m."
+				]
+			}
+		},
+		"era-wide": {
+			"0": "AP"
+		},
+		"era-abbreviated": {
+			"0": "AP"
+		},
+		"era-narrow": {
+			"0": "AP"
+		}
+	},
 	"dateFields": {
 		"era": {
 			"displayName": "era"
@@ -2879,13 +3308,13 @@
 		"CLP": 0,
 		"COP": 0,
 		"CRC": 0,
-		"CZK": 2,
+		"CZK": 0,
 		"DEFAULT": 2,
 		"DJF": 0,
 		"ESP": 0,
 		"GNF": 0,
 		"GYD": 0,
-		"HUF": 2,
+		"HUF": 0,
 		"IDR": 0,
 		"IQD": 0,
 		"IRR": 0,
@@ -2919,7 +3348,7 @@
 		"TMM": 0,
 		"TND": 3,
 		"TRL": 0,
-		"TWD": 2,
+		"TWD": 0,
 		"TZS": 0,
 		"UGX": 0,
 		"UYI": 0,
@@ -2938,7 +3367,7 @@
 	"weekData-weekendStart": 6,
 	"weekData-weekendEnd": 0,
 	"timeData": {
-		"_allowed": "H h",
+		"_allowed": "H hB h hb",
 		"_preferred": "H"
 	},
 	"eras-gregorian": {
@@ -2952,6 +3381,11 @@
 	"eras-islamic": {
 		"0": {
 			"_start": "622-7-15"
+		}
+	},
+	"eras-persian": {
+		"0": {
+			"_start": "622-01-01"
 		}
 	},
 	"eras-japanese": {

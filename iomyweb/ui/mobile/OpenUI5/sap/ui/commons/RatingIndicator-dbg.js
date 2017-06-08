@@ -24,11 +24,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @alias sap.ui.commons.RatingIndicator
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.RatingIndicator</code> control.
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy)
 	 * designtime metamodel
 	 */
@@ -481,6 +482,21 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		}
 		this.setProperty("maxValue", iMaxValue);
 		return this;
+	};
+
+	/**
+	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @protected
+	 */
+	RatingIndicator.prototype.getAccessibilityInfo = function() {
+		var oBundle = sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons");
+		return {
+			role: "slider",
+			type: oBundle.getText("ACC_CTR_TYPE_RATING"),
+			description: oBundle.getText("ACC_CTR_STATE_RATING", [this._getDisplayValue(), this.getMaxValue()]),
+			focusable: true,
+			editable: this.getEditable()
+		};
 	};
 
 

@@ -6,11 +6,6 @@
 	background-color: @sapHCStandardBG;
 }
 
-/* page with standard padding */
-.sapMPage.sapUiStdPage > section > .sapMPageScroll {
-	padding: 1rem;
-}
-
 /* page with header or subHeader */
 .sapMPageWithHeader > section,
 .sapMPageWithSubHeader > section {
@@ -20,11 +15,6 @@
 /* page with header and subHeader */
 .sapMPageWithHeader.sapMPageWithSubHeader > section {
 	top: 6rem;
-}
-
-/* page with footer */
-.sapMPageWithFooter > section {
-	bottom: 3rem;
 }
 
 /* page app icon */
@@ -42,13 +32,13 @@
 
 /* sap.m.Shell + Tiles Page specific style */
 @media (min-height: @sapMShellMinHeightForHeader) {
-	.sap-desktop .sapMShell .sapMPage.sapMPageHideHeaderWhenShellHeader header.sapMIBar {
+	html.sap-desktop .sapMShell .sapMPage.sapMPageHideHeaderWhenShellHeader header.sapMIBar {
 		display: none;
 	}
 }
 
-.sap-tablet .sapUiFioriObjectPage > section,
-.sap-desktop .sapUiFioriObjectPage > section {
+html.sap-tablet .sapUiFioriObjectPage > section,
+html.sap-desktop .sapUiFioriObjectPage > section {
 	padding-bottom: 1rem;
 }
 

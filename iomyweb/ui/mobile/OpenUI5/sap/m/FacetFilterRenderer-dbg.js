@@ -82,20 +82,7 @@ sap.ui.define(['jquery.sap.global'],
 			oRm.writeClasses();
 			oRm.write(">");
 
-			var aLists = oControl._getSequencedLists();
-			for (var i = 0; i < aLists.length; i++) {
-						var button = oControl._getButtonForList(aLists[i]);
-						if (oControl.getShowPersonalization()) {
-								if (!button.getAriaDescribedBy() || button.getAriaDescribedBy() == '')	 {
-									button.addAriaDescribedBy(this.getAriaAnnouncement("ARIA_REMOVE"));
-								}
-						}
-				oRm.renderControl(button);
-				if (oControl.getShowPersonalization()) {
-
-					oRm.renderControl(oControl._getFacetRemoveIcon(aLists[i]));
-				}
-			}
+			FacetFilterRenderer.renderFacetFilterListButtons(oControl, oRm);
 
 			if (oControl.getShowPersonalization()) {
 				oRm.renderControl(oControl.getAggregation("addFacetButton"));
@@ -135,6 +122,18 @@ sap.ui.define(['jquery.sap.global'],
 		oRm.writeClasses();
 		oRm.write(">");
 		var oSummaryBar = oControl.getAggregation("summaryBar");
+
+		// Overrides the Toolbar's method in order to change the role to "button" when the FacetFilter is in "light" mode
+		// and adds "labelledby" info
+		oSummaryBar._writeLandmarkInfo = function (oRm, oControl) {
+			var sFacetFilterText = sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("FACETFILTER_ARIA_FACET_FILTER");
+
+			oRm.writeAccessibilityState(oControl, {
+				role: "button",
+				labelledby: new sap.ui.core.InvisibleText({text: sFacetFilterText}).toStatic().getId()
+			});
+		};
+
 		oRm.renderControl(oSummaryBar);
 		oRm.write("</div>");
 	};
@@ -179,7 +178,7 @@ sap.ui.define(['jquery.sap.global'],
 		if (oControl.getShowPersonalization()) {
 			aDescribedBy.push(this.getAriaAnnouncement("ARIA_REMOVE"));
 		}
-
+		aDescribedBy = aDescribedBy.concat(oControl._aAriaPositionTextIds);
 
 		return aDescribedBy.join(" ");
 	};
@@ -200,7 +199,48 @@ sap.ui.define(['jquery.sap.global'],
 		};
 	};
 
+	FacetFilterRenderer.renderFacetFilterListButtons = function(oControl, oRm) {
+		var aLists = oControl._getSequencedLists(),
+			iLength = aLists.length, oButton,
+			i, sPosition, oAccText,
+			aOldAriaDescribedBy = [], aNewAriaDescribedBy = [],
+			sFacetFilterText = sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("FACETFILTER_ARIA_FACET_FILTER"),
+			sRemoveFilterTextId = this.getAriaAnnouncement("ARIA_REMOVE");
 
+
+		for (i = 0; i < iLength; i++) {
+			oButton = oControl._getButtonForList(aLists[i]);
+
+			//remove all previous InvisibleText(s) related to the positioning
+			aOldAriaDescribedBy = oButton.removeAllAriaDescribedBy();
+			aOldAriaDescribedBy.forEach(destroyItem);
+
+			//get current position
+			sPosition = sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("FACETFILTERLIST_ARIA_POSITION", [(i + 1), iLength]);
+			oAccText = new sap.ui.core.InvisibleText( {text: sFacetFilterText + " " + sPosition}).toStatic();
+			oButton.addAriaDescribedBy(oAccText);
+			aNewAriaDescribedBy.push(oAccText.getId());
+
+			if (oControl.getShowPersonalization()) {
+				oButton.addAriaDescribedBy(FacetFilterRenderer.getAriaAnnouncement("ARIA_REMOVE"));
+			}
+			oRm.renderControl(oButton);
+			if (oControl.getShowPersonalization()) {
+				oRm.renderControl(oControl._getFacetRemoveIcon(aLists[i]));
+			}
+		}
+		//needed because of FacetFilterRenderer.getAriaDescribedBy
+		oControl._aAriaPositionTextIds = aNewAriaDescribedBy;
+
+		function destroyItem (sItemId) {
+			if (sRemoveFilterTextId !== sItemId) {//exclude the acc text for removable facet, because it does not need change.
+				var oItem = sap.ui.getCore().byId(sItemId);
+				if (oItem) {
+					oItem.destroy();
+				}
+			}
+		}
+	};
 
 	return FacetFilterRenderer;
 

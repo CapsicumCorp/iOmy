@@ -2,25 +2,15 @@
   "_version": "1.1.0",
   "resources": [
     {
-      "name": "../../../jquery-1.7.1-dbg.js",
-      "module": "jquery-1.7.1.js",
-      "isDebug": true
-    },
-    {
-      "name": "../../../jquery-1.7.1.js",
-      "module": "jquery-1.7.1.js"
-    },
-    {
       "name": "../../../jquery-sap-dbg.js",
       "module": "jquery-sap.js",
       "isDebug": true,
       "merged": true,
       "included": [
+        "sap/ui/thirdparty/URI.js",
         "sap/ui/thirdparty/es6-promise.js",
         "sap/ui/Device.js",
-        "sap/ui/thirdparty/URI.js",
         "jquery.sap.global.js",
-        "jquery.sap.dom.js",
         "jquery.sap.encoder.js",
         "jquery.sap.events.js",
         "jquery.sap.keycodes.js",
@@ -30,7 +20,8 @@
         "jquery.sap.script.js",
         "jquery.sap.sjax.js",
         "jquery.sap.strings.js",
-        "jquery.sap.xml.js"
+        "jquery.sap.xml.js",
+        "jquery.sap.dom.js"
       ]
     },
     {
@@ -38,11 +29,10 @@
       "module": "jquery-sap.js",
       "merged": true,
       "included": [
+        "sap/ui/thirdparty/URI.js",
         "sap/ui/thirdparty/es6-promise.js",
         "sap/ui/Device.js",
-        "sap/ui/thirdparty/URI.js",
         "jquery.sap.global.js",
-        "jquery.sap.dom.js",
         "jquery.sap.encoder.js",
         "jquery.sap.events.js",
         "jquery.sap.keycodes.js",
@@ -52,35 +42,57 @@
         "jquery.sap.script.js",
         "jquery.sap.sjax.js",
         "jquery.sap.strings.js",
-        "jquery.sap.xml.js"
+        "jquery.sap.xml.js",
+        "jquery.sap.dom.js"
       ]
+    },
+    {
+      "name": "../../../jquery-sap.js.map"
     },
     {
       "name": "../../../jquery-ui-core-dbg.js",
       "module": "jquery-ui-core.js",
-      "isDebug": true
+      "isDebug": true,
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-core.js"
+      ]
     },
     {
       "name": "../../../jquery-ui-core.js",
-      "module": "jquery-ui-core.js"
+      "module": "jquery-ui-core.js",
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-core.js"
+      ]
     },
     {
       "name": "../../../jquery-ui-datepicker-dbg.js",
       "module": "jquery-ui-datepicker.js",
-      "isDebug": true
+      "isDebug": true,
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-datepicker.js"
+      ]
     },
     {
       "name": "../../../jquery-ui-datepicker.js",
-      "module": "jquery-ui-datepicker.js"
+      "module": "jquery-ui-datepicker.js",
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-datepicker.js"
+      ]
     },
     {
       "name": "../../../jquery-ui-position-dbg.js",
       "module": "jquery-ui-position.js",
-      "isDebug": true
+      "isDebug": true,
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-position.js"
+      ]
     },
     {
       "name": "../../../jquery-ui-position.js",
-      "module": "jquery-ui-position.js"
+      "module": "jquery-ui-position.js",
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-position.js"
+      ]
     },
     {
       "name": "../../../jquery.sap.act-dbg.js",
@@ -120,6 +132,9 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/caja-html-sanitizer.js"
       ]
     },
     {
@@ -127,6 +142,9 @@
       "module": "jquery.sap.encoder.js",
       "required": [
         "jquery.sap.global.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/caja-html-sanitizer.js"
       ]
     },
     {
@@ -240,6 +258,10 @@
       "module": "jquery.sap.promise.js",
       "isDebug": true,
       "required": [
+        "jquery.sap.global.js",
+        "sap/ui/Device.js"
+      ],
+      "condRequired": [
         "sap/ui/thirdparty/es6-promise.js"
       ]
     },
@@ -247,6 +269,10 @@
       "name": "../../../jquery.sap.promise.js",
       "module": "jquery.sap.promise.js",
       "required": [
+        "jquery.sap.global.js",
+        "sap/ui/Device.js"
+      ],
+      "condRequired": [
         "sap/ui/thirdparty/es6-promise.js"
       ]
     },
@@ -256,6 +282,7 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/Device.js",
         "jquery.sap.sjax.js"
       ]
     },
@@ -264,6 +291,7 @@
       "module": "jquery.sap.properties.js",
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/Device.js",
         "jquery.sap.sjax.js"
       ]
     },
@@ -352,7 +380,12 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/thirdparty/URI.js"
+        "sap/ui/thirdparty/URI.js",
+        "sap/ui/Device.js",
+        "sap/ui/Global.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/support/trace/E2eTraceLib.js"
       ]
     },
     {
@@ -360,7 +393,12 @@
       "module": "jquery.sap.trace.js",
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/thirdparty/URI.js"
+        "sap/ui/thirdparty/URI.js",
+        "sap/ui/Device.js",
+        "sap/ui/Global.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/support/trace/E2eTraceLib.js"
       ]
     },
     {
@@ -387,6 +425,10 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/Device.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/unorm.js",
+        "sap/ui/thirdparty/unormdata.js"
       ]
     },
     {
@@ -395,6 +437,10 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/Device.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/unorm.js",
+        "sap/ui/thirdparty/unormdata.js"
       ]
     },
     {
@@ -425,97 +471,23 @@
     },
     {
       "name": "../../../sap-ui-core-dbg.js",
-      "module": "sap-ui-core.js",
+      "module": "sap-ui-core-dbg.js",
       "isDebug": true,
       "merged": true,
+      "required": [
+        "sap/ui/core/Core.js"
+      ],
       "included": [
-        "sap/ui/thirdparty/es6-promise.js",
-        "sap/ui/Device.js",
         "sap/ui/thirdparty/URI.js",
+        "sap/ui/thirdparty/es6-promise.js",
         "sap/ui/thirdparty/jquery.js",
+        "sap/ui/Device.js",
         "sap/ui/thirdparty/jqueryui/jquery-ui-position.js",
-        "jquery.sap.global.js",
-        "jquery.sap.act.js",
-        "jquery.sap.dom.js",
-        "jquery.sap.encoder.js",
-        "jquery.sap.events.js",
-        "jquery.sap.keycodes.js",
-        "jquery.sap.mobile.js",
-        "jquery.sap.properties.js",
-        "jquery.sap.resources.js",
-        "jquery.sap.script.js",
-        "jquery.sap.sjax.js",
-        "jquery.sap.strings.js",
-        "jquery.sap.trace.js",
-        "jquery.sap.ui.js",
-        "sap/ui/Global.js",
-        "sap/ui/base/BindingParser.js",
-        "sap/ui/base/DataType.js",
-        "sap/ui/base/Event.js",
-        "sap/ui/base/EventProvider.js",
-        "sap/ui/base/Exception.js",
-        "sap/ui/base/ExpressionParser.js",
-        "sap/ui/base/Interface.js",
-        "sap/ui/base/ManagedObject.js",
-        "sap/ui/base/ManagedObjectMetadata.js",
-        "sap/ui/base/Metadata.js",
-        "sap/ui/base/Object.js",
-        "sap/ui/base/ObjectPool.js",
-        "sap/ui/core/BusyIndicatorUtils.js",
-        "sap/ui/core/Component.js",
-        "sap/ui/core/ComponentMetadata.js",
-        "sap/ui/core/Configuration.js",
-        "sap/ui/core/Control.js",
-        "sap/ui/core/Core.js",
-        "sap/ui/core/CustomStyleClassSupport.js",
-        "sap/ui/core/Element.js",
-        "sap/ui/core/ElementMetadata.js",
-        "sap/ui/core/FocusHandler.js",
-        "sap/ui/core/LabelEnablement.js",
-        "sap/ui/core/Locale.js",
-        "sap/ui/core/Manifest.js",
-        "sap/ui/core/RenderManager.js",
-        "sap/ui/core/ResizeHandler.js",
-        "sap/ui/core/ThemeCheck.js",
-        "sap/ui/core/UIArea.js",
-        "sap/ui/core/message/ControlMessageProcessor.js",
-        "sap/ui/core/message/Message.js",
-        "sap/ui/core/message/MessageManager.js",
-        "sap/ui/core/message/MessageProcessor.js",
-        "sap/ui/model/Binding.js",
-        "sap/ui/model/BindingMode.js",
-        "sap/ui/model/ChangeReason.js",
-        "sap/ui/model/ClientContextBinding.js",
-        "sap/ui/model/ClientListBinding.js",
-        "sap/ui/model/ClientModel.js",
-        "sap/ui/model/ClientPropertyBinding.js",
-        "sap/ui/model/ClientTreeBinding.js",
-        "sap/ui/model/CompositeBinding.js",
-        "sap/ui/model/CompositeDataState.js",
-        "sap/ui/model/CompositeType.js",
-        "sap/ui/model/Context.js",
-        "sap/ui/model/ContextBinding.js",
-        "sap/ui/model/DataState.js",
-        "sap/ui/model/Filter.js",
-        "sap/ui/model/FilterOperator.js",
-        "sap/ui/model/FilterProcessor.js",
-        "sap/ui/model/FilterType.js",
-        "sap/ui/model/FormatException.js",
-        "sap/ui/model/ListBinding.js",
-        "sap/ui/model/Model.js",
-        "sap/ui/model/ParseException.js",
-        "sap/ui/model/PropertyBinding.js",
-        "sap/ui/model/SimpleType.js",
-        "sap/ui/model/Sorter.js",
-        "sap/ui/model/SorterProcessor.js",
-        "sap/ui/model/TreeBinding.js",
-        "sap/ui/model/Type.js",
-        "sap/ui/model/ValidateException.js",
-        "sap/ui/model/message/MessageListBinding.js",
-        "sap/ui/model/message/MessageModel.js",
-        "sap/ui/model/message/MessagePropertyBinding.js",
-        "sap/ui/thirdparty/jquery-mobile-custom.js"
+        "jquery.sap.global.js"
       ]
+    },
+    {
+      "name": "../../../sap-ui-core-dbg.js.map"
     },
     {
       "name": "../../../sap-ui-core-lean-dbg.js",
@@ -526,10 +498,10 @@
         "sap/ui/core/Core.js"
       ],
       "included": [
-        "sap/ui/thirdparty/es6-promise.js",
-        "sap/ui/Device.js",
         "sap/ui/thirdparty/URI.js",
+        "sap/ui/thirdparty/es6-promise.js",
         "sap/ui/thirdparty/jquery.js",
+        "sap/ui/Device.js",
         "sap/ui/thirdparty/jqueryui/jquery-ui-position.js",
         "jquery.sap.global.js"
       ]
@@ -542,106 +514,34 @@
         "sap/ui/core/Core.js"
       ],
       "included": [
-        "sap/ui/thirdparty/es6-promise.js",
-        "sap/ui/Device.js",
         "sap/ui/thirdparty/URI.js",
+        "sap/ui/thirdparty/es6-promise.js",
         "sap/ui/thirdparty/jquery.js",
+        "sap/ui/Device.js",
         "sap/ui/thirdparty/jqueryui/jquery-ui-position.js",
         "jquery.sap.global.js"
       ]
     },
     {
+      "name": "../../../sap-ui-core-lean.js.map"
+    },
+    {
       "name": "../../../sap-ui-core-nojQuery-dbg.js",
-      "module": "sap-ui-core-nojQuery.js",
+      "module": "sap-ui-core-nojQuery-dbg.js",
       "isDebug": true,
       "merged": true,
+      "required": [
+        "sap/ui/core/Core.js"
+      ],
       "included": [
         "sap/ui/thirdparty/es6-promise.js",
-        "sap/ui/Device.js",
         "sap/ui/thirdparty/URI.js",
-        "jquery.sap.global.js",
-        "jquery.sap.act.js",
-        "jquery.sap.dom.js",
-        "jquery.sap.encoder.js",
-        "jquery.sap.events.js",
-        "jquery.sap.keycodes.js",
-        "jquery.sap.mobile.js",
-        "jquery.sap.properties.js",
-        "jquery.sap.resources.js",
-        "jquery.sap.script.js",
-        "jquery.sap.sjax.js",
-        "jquery.sap.strings.js",
-        "jquery.sap.trace.js",
-        "jquery.sap.ui.js",
-        "sap/ui/Global.js",
-        "sap/ui/base/BindingParser.js",
-        "sap/ui/base/DataType.js",
-        "sap/ui/base/Event.js",
-        "sap/ui/base/EventProvider.js",
-        "sap/ui/base/Exception.js",
-        "sap/ui/base/ExpressionParser.js",
-        "sap/ui/base/Interface.js",
-        "sap/ui/base/ManagedObject.js",
-        "sap/ui/base/ManagedObjectMetadata.js",
-        "sap/ui/base/Metadata.js",
-        "sap/ui/base/Object.js",
-        "sap/ui/base/ObjectPool.js",
-        "sap/ui/core/BusyIndicatorUtils.js",
-        "sap/ui/core/Component.js",
-        "sap/ui/core/ComponentMetadata.js",
-        "sap/ui/core/Configuration.js",
-        "sap/ui/core/Control.js",
-        "sap/ui/core/Core.js",
-        "sap/ui/core/CustomStyleClassSupport.js",
-        "sap/ui/core/Element.js",
-        "sap/ui/core/ElementMetadata.js",
-        "sap/ui/core/FocusHandler.js",
-        "sap/ui/core/LabelEnablement.js",
-        "sap/ui/core/Locale.js",
-        "sap/ui/core/Manifest.js",
-        "sap/ui/core/RenderManager.js",
-        "sap/ui/core/ResizeHandler.js",
-        "sap/ui/core/ThemeCheck.js",
-        "sap/ui/core/UIArea.js",
-        "sap/ui/core/message/ControlMessageProcessor.js",
-        "sap/ui/core/message/Message.js",
-        "sap/ui/core/message/MessageManager.js",
-        "sap/ui/core/message/MessageProcessor.js",
-        "sap/ui/model/Binding.js",
-        "sap/ui/model/BindingMode.js",
-        "sap/ui/model/ChangeReason.js",
-        "sap/ui/model/ClientContextBinding.js",
-        "sap/ui/model/ClientListBinding.js",
-        "sap/ui/model/ClientModel.js",
-        "sap/ui/model/ClientPropertyBinding.js",
-        "sap/ui/model/ClientTreeBinding.js",
-        "sap/ui/model/CompositeBinding.js",
-        "sap/ui/model/CompositeDataState.js",
-        "sap/ui/model/CompositeType.js",
-        "sap/ui/model/Context.js",
-        "sap/ui/model/ContextBinding.js",
-        "sap/ui/model/DataState.js",
-        "sap/ui/model/Filter.js",
-        "sap/ui/model/FilterOperator.js",
-        "sap/ui/model/FilterProcessor.js",
-        "sap/ui/model/FilterType.js",
-        "sap/ui/model/FormatException.js",
-        "sap/ui/model/ListBinding.js",
-        "sap/ui/model/Model.js",
-        "sap/ui/model/ParseException.js",
-        "sap/ui/model/PropertyBinding.js",
-        "sap/ui/model/SimpleType.js",
-        "sap/ui/model/Sorter.js",
-        "sap/ui/model/SorterProcessor.js",
-        "sap/ui/model/TreeBinding.js",
-        "sap/ui/model/Type.js",
-        "sap/ui/model/ValidateException.js",
-        "sap/ui/model/message/MessageListBinding.js",
-        "sap/ui/model/message/MessageModel.js",
-        "sap/ui/model/message/MessagePropertyBinding.js",
-        "sap/ui/thirdparty/jquery-mobile-custom.js",
-        "sap/ui/thirdparty/jquery.js"
+        "sap/ui/Device.js",
+        "jquery.sap.global.js"
       ]
+    },
+    {
+      "name": "../../../sap-ui-core-nojQuery-dbg.js.map"
     },
     {
       "name": "../../../sap-ui-core-nojQuery.js",
@@ -649,11 +549,10 @@
       "merged": true,
       "included": [
         "sap/ui/thirdparty/es6-promise.js",
-        "sap/ui/Device.js",
         "sap/ui/thirdparty/URI.js",
+        "sap/ui/Device.js",
         "jquery.sap.global.js",
         "jquery.sap.act.js",
-        "jquery.sap.dom.js",
         "jquery.sap.encoder.js",
         "jquery.sap.events.js",
         "jquery.sap.keycodes.js",
@@ -671,7 +570,6 @@
         "sap/ui/base/Event.js",
         "sap/ui/base/EventProvider.js",
         "sap/ui/base/Exception.js",
-        "sap/ui/base/ExpressionParser.js",
         "sap/ui/base/Interface.js",
         "sap/ui/base/ManagedObject.js",
         "sap/ui/base/ManagedObjectMetadata.js",
@@ -731,23 +629,26 @@
         "sap/ui/model/message/MessageListBinding.js",
         "sap/ui/model/message/MessageModel.js",
         "sap/ui/model/message/MessagePropertyBinding.js",
-        "sap/ui/thirdparty/jquery-mobile-custom.js",
-        "sap/ui/thirdparty/jquery.js"
+        "jquery.sap.dom.js",
+        "sap/ui/base/ExpressionParser.js",
+        "sap/ui/thirdparty/jquery-mobile-custom.js"
       ]
+    },
+    {
+      "name": "../../../sap-ui-core-nojQuery.js.map"
     },
     {
       "name": "../../../sap-ui-core.js",
       "module": "sap-ui-core.js",
       "merged": true,
       "included": [
-        "sap/ui/thirdparty/es6-promise.js",
-        "sap/ui/Device.js",
         "sap/ui/thirdparty/URI.js",
+        "sap/ui/thirdparty/es6-promise.js",
         "sap/ui/thirdparty/jquery.js",
+        "sap/ui/Device.js",
         "sap/ui/thirdparty/jqueryui/jquery-ui-position.js",
         "jquery.sap.global.js",
         "jquery.sap.act.js",
-        "jquery.sap.dom.js",
         "jquery.sap.encoder.js",
         "jquery.sap.events.js",
         "jquery.sap.keycodes.js",
@@ -765,7 +666,6 @@
         "sap/ui/base/Event.js",
         "sap/ui/base/EventProvider.js",
         "sap/ui/base/Exception.js",
-        "sap/ui/base/ExpressionParser.js",
         "sap/ui/base/Interface.js",
         "sap/ui/base/ManagedObject.js",
         "sap/ui/base/ManagedObjectMetadata.js",
@@ -825,8 +725,13 @@
         "sap/ui/model/message/MessageListBinding.js",
         "sap/ui/model/message/MessageModel.js",
         "sap/ui/model/message/MessagePropertyBinding.js",
+        "jquery.sap.dom.js",
+        "sap/ui/base/ExpressionParser.js",
         "sap/ui/thirdparty/jquery-mobile-custom.js"
       ]
+    },
+    {
+      "name": "../../../sap-ui-core.js.map"
     },
     {
       "name": "../../../sap-ui-debug-dbg.js",
@@ -852,6 +757,9 @@
       ]
     },
     {
+      "name": "../../../sap-ui-debug.js.map"
+    },
+    {
       "name": "../../../sap-ui-testenv-dbg.js",
       "module": "sap-ui-testenv.js",
       "isDebug": true,
@@ -873,6 +781,9 @@
       ]
     },
     {
+      "name": "../../../sap-ui-testenv.js.map"
+    },
+    {
       "name": "../Device-dbg.js",
       "module": "sap/ui/Device.js",
       "isDebug": true
@@ -887,7 +798,6 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
-        "jquery.sap.trace.js",
         "jquery.sap.dom.js"
       ]
     },
@@ -896,7 +806,6 @@
       "module": "sap/ui/Global.js",
       "required": [
         "jquery.sap.global.js",
-        "jquery.sap.trace.js",
         "jquery.sap.dom.js"
       ]
     },
@@ -1044,6 +953,11 @@
         "jquery.sap.global.js",
         "sap/ui/thirdparty/URI.js",
         "jquery.sap.strings.js"
+      ],
+      "condRequired": [
+        "sap/ui/model/odata/v4/ODataUtils.js",
+        "sap/ui/thirdparty/URITemplate.js",
+        "sap/ui/model/odata/ODataUtils.js"
       ]
     },
     {
@@ -1053,21 +967,26 @@
         "jquery.sap.global.js",
         "sap/ui/thirdparty/URI.js",
         "jquery.sap.strings.js"
+      ],
+      "condRequired": [
+        "sap/ui/model/odata/v4/ODataUtils.js",
+        "sap/ui/thirdparty/URITemplate.js",
+        "sap/ui/model/odata/ODataUtils.js"
       ]
     },
     {
       "name": "../base/Interface-dbg.js",
       "module": "sap/ui/base/Interface.js",
       "isDebug": true,
-      "required": [
-        "jquery.sap.global.js"
+      "condRequired": [
+        "sap/ui/base/Object.js"
       ]
     },
     {
       "name": "../base/Interface.js",
       "module": "sap/ui/base/Interface.js",
-      "required": [
-        "jquery.sap.global.js"
+      "condRequired": [
+        "sap/ui/base/Object.js"
       ]
     },
     {
@@ -1297,8 +1216,13 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/Device.js",
+        "sap/ui/Global.js",
         "sap/ui/core/Popup.js",
-        "jquery.sap.strings.js"
+        "jquery.sap.strings.js",
+        "jquery.sap.encoder.js"
+      ],
+      "condRequired": [
+        "sap/ui/debug/DebugEnv.js"
       ]
     },
     {
@@ -1307,8 +1231,13 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/Device.js",
+        "sap/ui/Global.js",
         "sap/ui/core/Popup.js",
-        "jquery.sap.strings.js"
+        "jquery.sap.strings.js",
+        "jquery.sap.encoder.js"
+      ],
+      "condRequired": [
+        "sap/ui/debug/DebugEnv.js"
       ]
     },
     {
@@ -1488,7 +1417,6 @@
         "sap/ui/model/TreeBinding.js",
         "sap/ui/model/ClientTreeBinding.js",
         "sap/ui/model/TreeBindingAdapter.js",
-        "sap/ui/table/TreeAutoExpandMode.js",
         "sap/ui/model/ChangeReason.js"
       ]
     },
@@ -1500,7 +1428,6 @@
         "sap/ui/model/TreeBinding.js",
         "sap/ui/model/ClientTreeBinding.js",
         "sap/ui/model/TreeBindingAdapter.js",
-        "sap/ui/table/TreeAutoExpandMode.js",
         "sap/ui/model/ChangeReason.js"
       ]
     },
@@ -1510,6 +1437,7 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/base/DataType.js",
         "sap/ui/model/BindingMode.js",
         "sap/ui/model/ChangeReason.js",
         "sap/ui/model/PropertyBinding.js",
@@ -1522,6 +1450,7 @@
       "module": "sap/ui/model/CompositeBinding.js",
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/base/DataType.js",
         "sap/ui/model/BindingMode.js",
         "sap/ui/model/ChangeReason.js",
         "sap/ui/model/PropertyBinding.js",
@@ -1853,18 +1782,39 @@
       ]
     },
     {
+      "name": "../model/TreeAutoExpandMode-dbg.js",
+      "module": "sap/ui/model/TreeAutoExpandMode.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "../model/TreeAutoExpandMode.js",
+      "module": "sap/ui/model/TreeAutoExpandMode.js",
+      "required": [
+        "jquery.sap.global.js"
+      ]
+    },
+    {
       "name": "../model/TreeBinding-dbg.js",
       "module": "sap/ui/model/TreeBinding.js",
       "isDebug": true,
       "required": [
-        "sap/ui/model/Binding.js"
+        "jquery.sap.global.js",
+        "sap/ui/model/Binding.js",
+        "sap/ui/model/Filter.js",
+        "sap/ui/model/Sorter.js"
       ]
     },
     {
       "name": "../model/TreeBinding.js",
       "module": "sap/ui/model/TreeBinding.js",
       "required": [
-        "sap/ui/model/Binding.js"
+        "jquery.sap.global.js",
+        "sap/ui/model/Binding.js",
+        "sap/ui/model/Filter.js",
+        "sap/ui/model/Sorter.js"
       ]
     },
     {
@@ -1875,7 +1825,7 @@
         "jquery.sap.global.js",
         "sap/ui/model/TreeBinding.js",
         "sap/ui/model/ClientTreeBinding.js",
-        "sap/ui/table/TreeAutoExpandMode.js",
+        "sap/ui/model/TreeAutoExpandMode.js",
         "sap/ui/model/ChangeReason.js",
         "sap/ui/model/TreeBindingUtils.js",
         "sap/ui/model/odata/OperationMode.js"
@@ -1888,7 +1838,7 @@
         "jquery.sap.global.js",
         "sap/ui/model/TreeBinding.js",
         "sap/ui/model/ClientTreeBinding.js",
-        "sap/ui/table/TreeAutoExpandMode.js",
+        "sap/ui/model/TreeAutoExpandMode.js",
         "sap/ui/model/ChangeReason.js",
         "sap/ui/model/TreeBindingUtils.js",
         "sap/ui/model/odata/OperationMode.js"
@@ -1902,7 +1852,6 @@
         "jquery.sap.global.js",
         "sap/ui/model/TreeBinding.js",
         "sap/ui/model/ClientTreeBinding.js",
-        "sap/ui/table/TreeAutoExpandMode.js",
         "sap/ui/model/ChangeReason.js",
         "sap/ui/model/TreeBindingUtils.js"
       ]
@@ -1914,7 +1863,6 @@
         "jquery.sap.global.js",
         "sap/ui/model/TreeBinding.js",
         "sap/ui/model/ClientTreeBinding.js",
-        "sap/ui/table/TreeAutoExpandMode.js",
         "sap/ui/model/ChangeReason.js",
         "sap/ui/model/TreeBindingUtils.js"
       ]
@@ -1968,8 +1916,11 @@
         "jquery.sap.global.js",
         "sap/ui/model/TreeBinding.js",
         "sap/ui/model/ChangeReason.js",
-        "sap/ui/model/Sorter.js",
+        "sap/ui/model/Filter.js",
         "sap/ui/model/FilterOperator.js",
+        "sap/ui/model/FilterType.js",
+        "sap/ui/model/Sorter.js",
+        "sap/ui/model/odata/CountMode.js",
         "sap/ui/model/analytics/odata4analytics.js",
         "sap/ui/model/analytics/BatchResponseCollector.js",
         "sap/ui/model/analytics/AnalyticalVersionInfo.js"
@@ -1982,8 +1933,11 @@
         "jquery.sap.global.js",
         "sap/ui/model/TreeBinding.js",
         "sap/ui/model/ChangeReason.js",
-        "sap/ui/model/Sorter.js",
+        "sap/ui/model/Filter.js",
         "sap/ui/model/FilterOperator.js",
+        "sap/ui/model/FilterType.js",
+        "sap/ui/model/Sorter.js",
+        "sap/ui/model/odata/CountMode.js",
         "sap/ui/model/analytics/odata4analytics.js",
         "sap/ui/model/analytics/BatchResponseCollector.js",
         "sap/ui/model/analytics/AnalyticalVersionInfo.js"
@@ -1997,7 +1951,7 @@
         "jquery.sap.global.js",
         "sap/ui/model/TreeBinding.js",
         "sap/ui/model/analytics/AnalyticalBinding.js",
-        "sap/ui/table/TreeAutoExpandMode.js",
+        "sap/ui/model/TreeAutoExpandMode.js",
         "sap/ui/model/ChangeReason.js",
         "sap/ui/model/odata/ODataTreeBindingAdapter.js",
         "sap/ui/model/TreeBindingAdapter.js",
@@ -2011,7 +1965,7 @@
         "jquery.sap.global.js",
         "sap/ui/model/TreeBinding.js",
         "sap/ui/model/analytics/AnalyticalBinding.js",
-        "sap/ui/table/TreeAutoExpandMode.js",
+        "sap/ui/model/TreeAutoExpandMode.js",
         "sap/ui/model/ChangeReason.js",
         "sap/ui/model/odata/ODataTreeBindingAdapter.js",
         "sap/ui/model/TreeBindingAdapter.js",
@@ -2071,7 +2025,14 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/model/Filter.js",
+        "sap/ui/model/FilterOperator.js",
+        "sap/ui/model/Sorter.js",
         "sap/ui/model/analytics/AnalyticalVersionInfo.js"
+      ],
+      "condRequired": [
+        "sap/ui/model/odata/v2/ODataModel.js",
+        "sap/ui/model/odata/ODataModel.js"
       ]
     },
     {
@@ -2079,7 +2040,14 @@
       "module": "sap/ui/model/analytics/odata4analytics.js",
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/model/Filter.js",
+        "sap/ui/model/FilterOperator.js",
+        "sap/ui/model/Sorter.js",
         "sap/ui/model/analytics/AnalyticalVersionInfo.js"
+      ],
+      "condRequired": [
+        "sap/ui/model/odata/v2/ODataModel.js",
+        "sap/ui/model/odata/ODataModel.js"
       ]
     },
     {
@@ -2351,14 +2319,16 @@
       "module": "sap/ui/model/odata/ODataContextBinding.js",
       "isDebug": true,
       "required": [
-        "sap/ui/model/ContextBinding.js"
+        "sap/ui/model/ContextBinding.js",
+        "sap/ui/model/ChangeReason.js"
       ]
     },
     {
       "name": "../model/odata/ODataContextBinding.js",
       "module": "sap/ui/model/odata/ODataContextBinding.js",
       "required": [
-        "sap/ui/model/ContextBinding.js"
+        "sap/ui/model/ContextBinding.js",
+        "sap/ui/model/ChangeReason.js"
       ]
     },
     {
@@ -2479,6 +2449,8 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/model/BindingMode.js",
+        "sap/ui/model/Context.js",
         "sap/ui/model/Model.js",
         "sap/ui/model/odata/ODataUtils.js",
         "sap/ui/model/odata/CountMode.js",
@@ -2490,6 +2462,9 @@
         "sap/ui/model/odata/ODataMetaModel.js",
         "sap/ui/thirdparty/URI.js",
         "sap/ui/thirdparty/datajs.js"
+      ],
+      "condRequired": [
+        "sap/ui/model/odata/ODataAnnotations.js"
       ]
     },
     {
@@ -2497,6 +2472,8 @@
       "module": "sap/ui/model/odata/ODataModel.js",
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/model/BindingMode.js",
+        "sap/ui/model/Context.js",
         "sap/ui/model/Model.js",
         "sap/ui/model/odata/ODataUtils.js",
         "sap/ui/model/odata/CountMode.js",
@@ -2508,6 +2485,9 @@
         "sap/ui/model/odata/ODataMetaModel.js",
         "sap/ui/thirdparty/URI.js",
         "sap/ui/thirdparty/datajs.js"
+      ],
+      "condRequired": [
+        "sap/ui/model/odata/ODataAnnotations.js"
       ]
     },
     {
@@ -2557,9 +2537,10 @@
         "sap/ui/model/TreeBinding.js",
         "sap/ui/model/odata/v2/ODataTreeBinding.js",
         "sap/ui/model/TreeBindingAdapter.js",
-        "sap/ui/table/TreeAutoExpandMode.js",
+        "sap/ui/model/TreeAutoExpandMode.js",
         "sap/ui/model/ChangeReason.js",
-        "sap/ui/model/TreeBindingUtils.js"
+        "sap/ui/model/TreeBindingUtils.js",
+        "sap/ui/model/odata/OperationMode.js"
       ]
     },
     {
@@ -2570,7 +2551,33 @@
         "sap/ui/model/TreeBinding.js",
         "sap/ui/model/odata/v2/ODataTreeBinding.js",
         "sap/ui/model/TreeBindingAdapter.js",
-        "sap/ui/table/TreeAutoExpandMode.js",
+        "sap/ui/model/TreeAutoExpandMode.js",
+        "sap/ui/model/ChangeReason.js",
+        "sap/ui/model/TreeBindingUtils.js",
+        "sap/ui/model/odata/OperationMode.js"
+      ]
+    },
+    {
+      "name": "../model/odata/ODataTreeBindingFlat-dbg.js",
+      "module": "sap/ui/model/odata/ODataTreeBindingFlat.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/Filter.js",
+        "sap/ui/model/TreeBinding.js",
+        "sap/ui/model/odata/v2/ODataTreeBinding.js",
+        "sap/ui/model/ChangeReason.js",
+        "sap/ui/model/TreeBindingUtils.js"
+      ]
+    },
+    {
+      "name": "../model/odata/ODataTreeBindingFlat.js",
+      "module": "sap/ui/model/odata/ODataTreeBindingFlat.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/Filter.js",
+        "sap/ui/model/TreeBinding.js",
+        "sap/ui/model/odata/v2/ODataTreeBinding.js",
         "sap/ui/model/ChangeReason.js",
         "sap/ui/model/TreeBindingUtils.js"
       ]
@@ -2676,17 +2683,24 @@
     {
       "name": "../model/odata/datajs-dbg.js",
       "module": "sap/ui/model/odata/datajs.js",
-      "isDebug": true
+      "isDebug": true,
+      "condRequired": [
+        "sap/ui/thirdparty/datajs.js"
+      ]
     },
     {
       "name": "../model/odata/datajs.js",
-      "module": "sap/ui/model/odata/datajs.js"
+      "module": "sap/ui/model/odata/datajs.js",
+      "condRequired": [
+        "sap/ui/thirdparty/datajs.js"
+      ]
     },
     {
       "name": "../model/odata/type/Boolean-dbg.js",
       "module": "sap/ui/model/odata/type/Boolean.js",
       "isDebug": true,
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/core/Core.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
@@ -2698,6 +2712,7 @@
       "name": "../model/odata/type/Boolean.js",
       "module": "sap/ui/model/odata/type/Boolean.js",
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/core/Core.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
@@ -2721,10 +2736,36 @@
       ]
     },
     {
+      "name": "../model/odata/type/Date-dbg.js",
+      "module": "sap/ui/model/odata/type/Date.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/format/DateFormat.js",
+        "sap/ui/model/FormatException.js",
+        "sap/ui/model/odata/type/ODataType.js",
+        "sap/ui/model/ParseException.js",
+        "sap/ui/model/ValidateException.js"
+      ]
+    },
+    {
+      "name": "../model/odata/type/Date.js",
+      "module": "sap/ui/model/odata/type/Date.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/format/DateFormat.js",
+        "sap/ui/model/FormatException.js",
+        "sap/ui/model/odata/type/ODataType.js",
+        "sap/ui/model/ParseException.js",
+        "sap/ui/model/ValidateException.js"
+      ]
+    },
+    {
       "name": "../model/odata/type/DateTime-dbg.js",
       "module": "sap/ui/model/odata/type/DateTime.js",
       "isDebug": true,
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/model/odata/type/DateTimeBase.js"
       ]
     },
@@ -2732,6 +2773,7 @@
       "name": "../model/odata/type/DateTime.js",
       "module": "sap/ui/model/odata/type/DateTime.js",
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/model/odata/type/DateTimeBase.js"
       ]
     },
@@ -2740,6 +2782,7 @@
       "module": "sap/ui/model/odata/type/DateTimeBase.js",
       "isDebug": true,
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/core/format/DateFormat.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
@@ -2751,6 +2794,7 @@
       "name": "../model/odata/type/DateTimeBase.js",
       "module": "sap/ui/model/odata/type/DateTimeBase.js",
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/core/format/DateFormat.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
@@ -2763,6 +2807,9 @@
       "module": "sap/ui/model/odata/type/DateTimeOffset.js",
       "isDebug": true,
       "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/format/DateFormat.js",
+        "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/DateTimeBase.js"
       ]
     },
@@ -2770,6 +2817,9 @@
       "name": "../model/odata/type/DateTimeOffset.js",
       "module": "sap/ui/model/odata/type/DateTimeOffset.js",
       "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/format/DateFormat.js",
+        "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/DateTimeBase.js"
       ]
     },
@@ -2778,6 +2828,7 @@
       "module": "sap/ui/model/odata/type/Decimal.js",
       "isDebug": true,
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/core/format/NumberFormat.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
@@ -2789,6 +2840,7 @@
       "name": "../model/odata/type/Decimal.js",
       "module": "sap/ui/model/odata/type/Decimal.js",
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/core/format/NumberFormat.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
@@ -2801,6 +2853,7 @@
       "module": "sap/ui/model/odata/type/Double.js",
       "isDebug": true,
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/core/format/NumberFormat.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
@@ -2812,6 +2865,7 @@
       "name": "../model/odata/type/Double.js",
       "module": "sap/ui/model/odata/type/Double.js",
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/core/format/NumberFormat.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
@@ -2824,6 +2878,7 @@
       "module": "sap/ui/model/odata/type/Guid.js",
       "isDebug": true,
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
         "sap/ui/model/ParseException.js",
@@ -2834,6 +2889,7 @@
       "name": "../model/odata/type/Guid.js",
       "module": "sap/ui/model/odata/type/Guid.js",
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
         "sap/ui/model/ParseException.js",
@@ -2845,6 +2901,7 @@
       "module": "sap/ui/model/odata/type/Int.js",
       "isDebug": true,
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/core/format/NumberFormat.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
@@ -2856,6 +2913,7 @@
       "name": "../model/odata/type/Int.js",
       "module": "sap/ui/model/odata/type/Int.js",
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/core/format/NumberFormat.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
@@ -2898,6 +2956,7 @@
       "module": "sap/ui/model/odata/type/Int64.js",
       "isDebug": true,
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/model/odata/type/ODataType.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/ParseException.js",
@@ -2909,6 +2968,7 @@
       "name": "../model/odata/type/Int64.js",
       "module": "sap/ui/model/odata/type/Int64.js",
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/model/odata/type/ODataType.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/ParseException.js",
@@ -2932,6 +2992,27 @@
       ]
     },
     {
+      "name": "../model/odata/type/Raw-dbg.js",
+      "module": "sap/ui/model/odata/type/Raw.js",
+      "isDebug": true,
+      "required": [
+        "sap/ui/model/FormatException.js",
+        "sap/ui/model/odata/type/ODataType.js",
+        "sap/ui/model/ParseException.js",
+        "sap/ui/model/ValidateException.js"
+      ]
+    },
+    {
+      "name": "../model/odata/type/Raw.js",
+      "module": "sap/ui/model/odata/type/Raw.js",
+      "required": [
+        "sap/ui/model/FormatException.js",
+        "sap/ui/model/odata/type/ODataType.js",
+        "sap/ui/model/ParseException.js",
+        "sap/ui/model/ValidateException.js"
+      ]
+    },
+    {
       "name": "../model/odata/type/SByte-dbg.js",
       "module": "sap/ui/model/odata/type/SByte.js",
       "isDebug": true,
@@ -2951,6 +3032,7 @@
       "module": "sap/ui/model/odata/type/Single.js",
       "isDebug": true,
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/core/format/NumberFormat.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
@@ -2962,6 +3044,7 @@
       "name": "../model/odata/type/Single.js",
       "module": "sap/ui/model/odata/type/Single.js",
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/core/format/NumberFormat.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
@@ -2974,6 +3057,7 @@
       "module": "sap/ui/model/odata/type/String.js",
       "isDebug": true,
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
         "sap/ui/model/ParseException.js",
@@ -2985,6 +3069,7 @@
       "name": "../model/odata/type/String.js",
       "module": "sap/ui/model/odata/type/String.js",
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
         "sap/ui/model/ParseException.js",
@@ -2997,6 +3082,7 @@
       "module": "sap/ui/model/odata/type/Time.js",
       "isDebug": true,
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/core/format/DateFormat.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
@@ -3008,11 +3094,39 @@
       "name": "../model/odata/type/Time.js",
       "module": "sap/ui/model/odata/type/Time.js",
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/core/format/DateFormat.js",
         "sap/ui/model/FormatException.js",
         "sap/ui/model/odata/type/ODataType.js",
         "sap/ui/model/ParseException.js",
         "sap/ui/model/ValidateException.js"
+      ]
+    },
+    {
+      "name": "../model/odata/type/TimeOfDay-dbg.js",
+      "module": "sap/ui/model/odata/type/TimeOfDay.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "jquery.sap.strings.js",
+        "sap/ui/core/format/DateFormat.js",
+        "sap/ui/model/FormatException.js",
+        "sap/ui/model/ParseException.js",
+        "sap/ui/model/ValidateException.js",
+        "sap/ui/model/odata/type/ODataType.js"
+      ]
+    },
+    {
+      "name": "../model/odata/type/TimeOfDay.js",
+      "module": "sap/ui/model/odata/type/TimeOfDay.js",
+      "required": [
+        "jquery.sap.global.js",
+        "jquery.sap.strings.js",
+        "sap/ui/core/format/DateFormat.js",
+        "sap/ui/model/FormatException.js",
+        "sap/ui/model/ParseException.js",
+        "sap/ui/model/ValidateException.js",
+        "sap/ui/model/odata/type/ODataType.js"
       ]
     },
     {
@@ -3025,12 +3139,34 @@
       "module": "sap/ui/model/odata/v2/BatchMode.js"
     },
     {
+      "name": "../model/odata/v2/ODataAnnotations-dbg.js",
+      "module": "sap/ui/model/odata/v2/ODataAnnotations.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/odata/AnnotationParser.js",
+        "sap/ui/Device.js",
+        "sap/ui/base/EventProvider.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v2/ODataAnnotations.js",
+      "module": "sap/ui/model/odata/v2/ODataAnnotations.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/odata/AnnotationParser.js",
+        "sap/ui/Device.js",
+        "sap/ui/base/EventProvider.js"
+      ]
+    },
+    {
       "name": "../model/odata/v2/ODataContextBinding-dbg.js",
       "module": "sap/ui/model/odata/v2/ODataContextBinding.js",
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/model/ContextBinding.js"
+        "sap/ui/model/ContextBinding.js",
+        "sap/ui/model/ChangeReason.js"
       ]
     },
     {
@@ -3038,7 +3174,8 @@
       "module": "sap/ui/model/odata/v2/ODataContextBinding.js",
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/model/ContextBinding.js"
+        "sap/ui/model/ContextBinding.js",
+        "sap/ui/model/ChangeReason.js"
       ]
     },
     {
@@ -3087,7 +3224,7 @@
         "sap/ui/model/BindingMode.js",
         "sap/ui/model/Context.js",
         "sap/ui/model/Model.js",
-        "sap/ui/model/odata/ODataAnnotations.js",
+        "sap/ui/model/odata/v2/ODataAnnotations.js",
         "sap/ui/model/odata/ODataUtils.js",
         "sap/ui/model/odata/CountMode.js",
         "sap/ui/model/odata/UpdateMethod.js",
@@ -3111,7 +3248,7 @@
         "sap/ui/model/BindingMode.js",
         "sap/ui/model/Context.js",
         "sap/ui/model/Model.js",
-        "sap/ui/model/odata/ODataAnnotations.js",
+        "sap/ui/model/odata/v2/ODataAnnotations.js",
         "sap/ui/model/odata/ODataUtils.js",
         "sap/ui/model/odata/CountMode.js",
         "sap/ui/model/odata/UpdateMethod.js",
@@ -3136,6 +3273,7 @@
         "sap/ui/model/TreeBinding.js",
         "sap/ui/model/odata/CountMode.js",
         "sap/ui/model/ChangeReason.js",
+        "sap/ui/model/Filter.js",
         "sap/ui/model/Sorter.js",
         "sap/ui/model/odata/ODataUtils.js",
         "sap/ui/model/TreeBindingUtils.js",
@@ -3143,6 +3281,10 @@
         "sap/ui/model/SorterProcessor.js",
         "sap/ui/model/FilterProcessor.js",
         "sap/ui/model/FilterType.js"
+      ],
+      "condRequired": [
+        "sap/ui/model/odata/ODataTreeBindingFlat.js",
+        "sap/ui/model/odata/ODataTreeBindingAdapter.js"
       ]
     },
     {
@@ -3153,6 +3295,7 @@
         "sap/ui/model/TreeBinding.js",
         "sap/ui/model/odata/CountMode.js",
         "sap/ui/model/ChangeReason.js",
+        "sap/ui/model/Filter.js",
         "sap/ui/model/Sorter.js",
         "sap/ui/model/odata/ODataUtils.js",
         "sap/ui/model/TreeBindingUtils.js",
@@ -3160,7 +3303,405 @@
         "sap/ui/model/SorterProcessor.js",
         "sap/ui/model/FilterProcessor.js",
         "sap/ui/model/FilterType.js"
+      ],
+      "condRequired": [
+        "sap/ui/model/odata/ODataTreeBindingFlat.js",
+        "sap/ui/model/odata/ODataTreeBindingAdapter.js"
       ]
+    },
+    {
+      "name": "../model/odata/v4/AnnotationHelper-dbg.js",
+      "module": "sap/ui/model/odata/v4/AnnotationHelper.js",
+      "isDebug": true,
+      "required": [
+        "sap/ui/model/odata/_AnnotationHelperBasics.js",
+        "sap/ui/model/odata/v4/_AnnotationHelperExpression.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/AnnotationHelper.js",
+      "module": "sap/ui/model/odata/v4/AnnotationHelper.js",
+      "required": [
+        "sap/ui/model/odata/_AnnotationHelperBasics.js",
+        "sap/ui/model/odata/v4/_AnnotationHelperExpression.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/Context-dbg.js",
+      "module": "sap/ui/model/odata/v4/Context.js",
+      "isDebug": true,
+      "required": [
+        "sap/ui/model/Context.js",
+        "sap/ui/model/odata/v4/_ODataHelper.js",
+        "sap/ui/model/odata/v4/lib/_Helper.js",
+        "sap/ui/model/odata/v4/lib/_SyncPromise.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/Context.js",
+      "module": "sap/ui/model/odata/v4/Context.js",
+      "required": [
+        "sap/ui/model/Context.js",
+        "sap/ui/model/odata/v4/_ODataHelper.js",
+        "sap/ui/model/odata/v4/lib/_Helper.js",
+        "sap/ui/model/odata/v4/lib/_SyncPromise.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/ODataContextBinding-dbg.js",
+      "module": "sap/ui/model/odata/v4/ODataContextBinding.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/Binding.js",
+        "sap/ui/model/ChangeReason.js",
+        "sap/ui/model/ContextBinding.js",
+        "sap/ui/model/odata/v4/_ODataHelper.js",
+        "sap/ui/model/odata/v4/Context.js",
+        "sap/ui/model/odata/v4/lib/_Cache.js",
+        "sap/ui/model/odata/v4/lib/_Helper.js",
+        "sap/ui/model/odata/v4/lib/_SyncPromise.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/ODataContextBinding.js",
+      "module": "sap/ui/model/odata/v4/ODataContextBinding.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/Binding.js",
+        "sap/ui/model/ChangeReason.js",
+        "sap/ui/model/ContextBinding.js",
+        "sap/ui/model/odata/v4/_ODataHelper.js",
+        "sap/ui/model/odata/v4/Context.js",
+        "sap/ui/model/odata/v4/lib/_Cache.js",
+        "sap/ui/model/odata/v4/lib/_Helper.js",
+        "sap/ui/model/odata/v4/lib/_SyncPromise.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/ODataListBinding-dbg.js",
+      "module": "sap/ui/model/odata/v4/ODataListBinding.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/Binding.js",
+        "sap/ui/model/ChangeReason.js",
+        "sap/ui/model/FilterType.js",
+        "sap/ui/model/ListBinding.js",
+        "sap/ui/model/odata/OperationMode.js",
+        "sap/ui/model/odata/v4/_ODataHelper.js",
+        "sap/ui/model/odata/v4/Context.js",
+        "sap/ui/model/odata/v4/lib/_Cache.js",
+        "sap/ui/model/odata/v4/lib/_Helper.js",
+        "sap/ui/model/odata/v4/lib/_SyncPromise.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/ODataListBinding.js",
+      "module": "sap/ui/model/odata/v4/ODataListBinding.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/Binding.js",
+        "sap/ui/model/ChangeReason.js",
+        "sap/ui/model/FilterType.js",
+        "sap/ui/model/ListBinding.js",
+        "sap/ui/model/odata/OperationMode.js",
+        "sap/ui/model/odata/v4/_ODataHelper.js",
+        "sap/ui/model/odata/v4/Context.js",
+        "sap/ui/model/odata/v4/lib/_Cache.js",
+        "sap/ui/model/odata/v4/lib/_Helper.js",
+        "sap/ui/model/odata/v4/lib/_SyncPromise.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/ODataMetaModel-dbg.js",
+      "module": "sap/ui/model/odata/v4/ODataMetaModel.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/BindingMode.js",
+        "sap/ui/model/ContextBinding.js",
+        "sap/ui/model/Context.js",
+        "sap/ui/model/FilterProcessor.js",
+        "sap/ui/model/json/JSONListBinding.js",
+        "sap/ui/model/MetaModel.js",
+        "sap/ui/model/PropertyBinding.js",
+        "sap/ui/model/odata/v4/_ODataHelper.js",
+        "sap/ui/model/odata/v4/lib/_SyncPromise.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/ODataMetaModel.js",
+      "module": "sap/ui/model/odata/v4/ODataMetaModel.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/BindingMode.js",
+        "sap/ui/model/ContextBinding.js",
+        "sap/ui/model/Context.js",
+        "sap/ui/model/FilterProcessor.js",
+        "sap/ui/model/json/JSONListBinding.js",
+        "sap/ui/model/MetaModel.js",
+        "sap/ui/model/PropertyBinding.js",
+        "sap/ui/model/odata/v4/_ODataHelper.js",
+        "sap/ui/model/odata/v4/lib/_SyncPromise.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/ODataModel-dbg.js",
+      "module": "sap/ui/model/odata/v4/ODataModel.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/message/Message.js",
+        "sap/ui/model/BindingMode.js",
+        "sap/ui/model/Context.js",
+        "sap/ui/model/Model.js",
+        "sap/ui/model/odata/OperationMode.js",
+        "sap/ui/thirdparty/URI.js",
+        "sap/ui/model/odata/v4/_ODataHelper.js",
+        "sap/ui/model/odata/v4/lib/_MetadataRequestor.js",
+        "sap/ui/model/odata/v4/lib/_Requestor.js",
+        "sap/ui/model/odata/v4/ODataContextBinding.js",
+        "sap/ui/model/odata/v4/ODataListBinding.js",
+        "sap/ui/model/odata/v4/ODataMetaModel.js",
+        "sap/ui/model/odata/v4/ODataPropertyBinding.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/ODataModel.js",
+      "module": "sap/ui/model/odata/v4/ODataModel.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/message/Message.js",
+        "sap/ui/model/BindingMode.js",
+        "sap/ui/model/Context.js",
+        "sap/ui/model/Model.js",
+        "sap/ui/model/odata/OperationMode.js",
+        "sap/ui/thirdparty/URI.js",
+        "sap/ui/model/odata/v4/_ODataHelper.js",
+        "sap/ui/model/odata/v4/lib/_MetadataRequestor.js",
+        "sap/ui/model/odata/v4/lib/_Requestor.js",
+        "sap/ui/model/odata/v4/ODataContextBinding.js",
+        "sap/ui/model/odata/v4/ODataListBinding.js",
+        "sap/ui/model/odata/v4/ODataMetaModel.js",
+        "sap/ui/model/odata/v4/ODataPropertyBinding.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/ODataPropertyBinding-dbg.js",
+      "module": "sap/ui/model/odata/v4/ODataPropertyBinding.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/BindingMode.js",
+        "sap/ui/model/ChangeReason.js",
+        "sap/ui/model/PropertyBinding.js",
+        "sap/ui/model/odata/v4/_ODataHelper.js",
+        "sap/ui/model/odata/v4/lib/_Cache.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/ODataPropertyBinding.js",
+      "module": "sap/ui/model/odata/v4/ODataPropertyBinding.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/BindingMode.js",
+        "sap/ui/model/ChangeReason.js",
+        "sap/ui/model/PropertyBinding.js",
+        "sap/ui/model/odata/v4/_ODataHelper.js",
+        "sap/ui/model/odata/v4/lib/_Cache.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/ODataUtils-dbg.js",
+      "module": "sap/ui/model/odata/v4/ODataUtils.js",
+      "isDebug": true,
+      "required": [
+        "sap/ui/core/format/DateFormat.js",
+        "sap/ui/model/odata/ODataUtils.js",
+        "sap/ui/model/odata/v4/lib/_Helper.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/ODataUtils.js",
+      "module": "sap/ui/model/odata/v4/ODataUtils.js",
+      "required": [
+        "sap/ui/core/format/DateFormat.js",
+        "sap/ui/model/odata/ODataUtils.js",
+        "sap/ui/model/odata/v4/lib/_Helper.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/_AnnotationHelperExpression-dbg.js",
+      "module": "sap/ui/model/odata/v4/_AnnotationHelperExpression.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/odata/_AnnotationHelperBasics.js",
+        "sap/ui/base/BindingParser.js",
+        "sap/ui/base/ManagedObject.js",
+        "sap/ui/core/format/DateFormat.js",
+        "sap/ui/model/odata/ODataUtils.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/_AnnotationHelperExpression.js",
+      "module": "sap/ui/model/odata/v4/_AnnotationHelperExpression.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/odata/_AnnotationHelperBasics.js",
+        "sap/ui/base/BindingParser.js",
+        "sap/ui/base/ManagedObject.js",
+        "sap/ui/core/format/DateFormat.js",
+        "sap/ui/model/odata/ODataUtils.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/_ODataHelper-dbg.js",
+      "module": "sap/ui/model/odata/v4/_ODataHelper.js",
+      "isDebug": true,
+      "required": [
+        "sap/ui/model/odata/v4/lib/_Cache.js",
+        "sap/ui/model/odata/v4/lib/_Helper.js",
+        "sap/ui/model/odata/v4/lib/_Parser.js",
+        "sap/ui/model/odata/v4/lib/_SyncPromise.js",
+        "sap/ui/model/FilterOperator.js",
+        "sap/ui/model/odata/OperationMode.js",
+        "sap/ui/model/Sorter.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/_ODataHelper.js",
+      "module": "sap/ui/model/odata/v4/_ODataHelper.js",
+      "required": [
+        "sap/ui/model/odata/v4/lib/_Cache.js",
+        "sap/ui/model/odata/v4/lib/_Helper.js",
+        "sap/ui/model/odata/v4/lib/_Parser.js",
+        "sap/ui/model/odata/v4/lib/_SyncPromise.js",
+        "sap/ui/model/FilterOperator.js",
+        "sap/ui/model/odata/OperationMode.js",
+        "sap/ui/model/Sorter.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/lib/_Batch-dbg.js",
+      "module": "sap/ui/model/odata/v4/lib/_Batch.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/lib/_Batch.js",
+      "module": "sap/ui/model/odata/v4/lib/_Batch.js",
+      "required": [
+        "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/lib/_Cache-dbg.js",
+      "module": "sap/ui/model/odata/v4/lib/_Cache.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/odata/v4/lib/_Helper.js",
+        "sap/ui/model/odata/v4/lib/_SyncPromise.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/lib/_Cache.js",
+      "module": "sap/ui/model/odata/v4/lib/_Cache.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/odata/v4/lib/_Helper.js",
+        "sap/ui/model/odata/v4/lib/_SyncPromise.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/lib/_Helper-dbg.js",
+      "module": "sap/ui/model/odata/v4/lib/_Helper.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/lib/_Helper.js",
+      "module": "sap/ui/model/odata/v4/lib/_Helper.js",
+      "required": [
+        "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/lib/_MetadataConverter-dbg.js",
+      "module": "sap/ui/model/odata/v4/lib/_MetadataConverter.js",
+      "isDebug": true,
+      "required": [
+        "sap/ui/model/odata/v4/lib/_Helper.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/lib/_MetadataConverter.js",
+      "module": "sap/ui/model/odata/v4/lib/_MetadataConverter.js",
+      "required": [
+        "sap/ui/model/odata/v4/lib/_Helper.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/lib/_MetadataRequestor-dbg.js",
+      "module": "sap/ui/model/odata/v4/lib/_MetadataRequestor.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/odata/v4/lib/_Helper.js",
+        "sap/ui/model/odata/v4/lib/_MetadataConverter.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/lib/_MetadataRequestor.js",
+      "module": "sap/ui/model/odata/v4/lib/_MetadataRequestor.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/odata/v4/lib/_Helper.js",
+        "sap/ui/model/odata/v4/lib/_MetadataConverter.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/lib/_Parser-dbg.js",
+      "module": "sap/ui/model/odata/v4/lib/_Parser.js",
+      "isDebug": true
+    },
+    {
+      "name": "../model/odata/v4/lib/_Parser.js",
+      "module": "sap/ui/model/odata/v4/lib/_Parser.js"
+    },
+    {
+      "name": "../model/odata/v4/lib/_Requestor-dbg.js",
+      "module": "sap/ui/model/odata/v4/lib/_Requestor.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/odata/v4/lib/_Batch.js",
+        "sap/ui/model/odata/v4/lib/_Helper.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/lib/_Requestor.js",
+      "module": "sap/ui/model/odata/v4/lib/_Requestor.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/model/odata/v4/lib/_Batch.js",
+        "sap/ui/model/odata/v4/lib/_Helper.js"
+      ]
+    },
+    {
+      "name": "../model/odata/v4/lib/_SyncPromise-dbg.js",
+      "module": "sap/ui/model/odata/v4/lib/_SyncPromise.js",
+      "isDebug": true
+    },
+    {
+      "name": "../model/odata/v4/lib/_SyncPromise.js",
+      "module": "sap/ui/model/odata/v4/lib/_SyncPromise.js"
     },
     {
       "name": "../model/resource/ResourceModel-dbg.js",
@@ -3523,7 +4064,10 @@
     {
       "name": "../qunit/qunit-dbg.js",
       "module": "sap/ui/qunit/qunit.js",
-      "isDebug": true
+      "isDebug": true,
+      "condRequired": [
+        "sap/ui/thirdparty/qunit.js"
+      ]
     },
     {
       "name": "../qunit/qunit-junit-dbg.js",
@@ -3545,7 +4089,10 @@
     },
     {
       "name": "../qunit/qunit.js",
-      "module": "sap/ui/qunit/qunit.js"
+      "module": "sap/ui/qunit/qunit.js",
+      "condRequired": [
+        "sap/ui/thirdparty/qunit.js"
+      ]
     },
     {
       "name": "../test/ControlTree-dbg.js",
@@ -3572,7 +4119,9 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/Device.js"
+        "sap/ui/Device.js",
+        "sap/ui/test/_LogCollector.js",
+        "sap/ui/test/_ParameterValidator.js"
       ]
     },
     {
@@ -3580,7 +4129,9 @@
       "module": "sap/ui/test/Opa.js",
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/Device.js"
+        "sap/ui/Device.js",
+        "sap/ui/test/_LogCollector.js",
+        "sap/ui/test/_ParameterValidator.js"
       ]
     },
     {
@@ -3592,7 +4143,6 @@
         "sap/ui/test/Opa.js",
         "sap/ui/test/OpaPlugin.js",
         "sap/ui/test/PageObjectFactory.js",
-        "sap/ui/qunit/QUnitUtils.js",
         "sap/ui/base/Object.js",
         "sap/ui/Device.js",
         "sap/ui/test/launchers/iFrameLauncher.js",
@@ -3602,7 +4152,9 @@
         "sap/ui/test/matchers/AggregationFilled.js",
         "sap/ui/test/matchers/PropertyStrictEquals.js",
         "sap/ui/test/pipelines/MatcherPipeline.js",
-        "sap/ui/test/pipelines/ActionPipeline.js"
+        "sap/ui/test/pipelines/ActionPipeline.js",
+        "sap/ui/test/_ParameterValidator.js",
+        "sap/ui/test/_LogCollector.js"
       ]
     },
     {
@@ -3613,7 +4165,6 @@
         "sap/ui/test/Opa.js",
         "sap/ui/test/OpaPlugin.js",
         "sap/ui/test/PageObjectFactory.js",
-        "sap/ui/qunit/QUnitUtils.js",
         "sap/ui/base/Object.js",
         "sap/ui/Device.js",
         "sap/ui/test/launchers/iFrameLauncher.js",
@@ -3623,7 +4174,9 @@
         "sap/ui/test/matchers/AggregationFilled.js",
         "sap/ui/test/matchers/PropertyStrictEquals.js",
         "sap/ui/test/pipelines/MatcherPipeline.js",
-        "sap/ui/test/pipelines/ActionPipeline.js"
+        "sap/ui/test/pipelines/ActionPipeline.js",
+        "sap/ui/test/_ParameterValidator.js",
+        "sap/ui/test/_LogCollector.js"
       ]
     },
     {
@@ -3641,7 +4194,9 @@
         "sap/ui/test/matchers/Ancestor.js",
         "sap/ui/test/matchers/Interactable.js",
         "sap/ui/test/matchers/Visible.js",
-        "sap/ui/test/pipelines/MatcherPipeline.js"
+        "sap/ui/test/pipelines/MatcherPipeline.js",
+        "sap/ui/test/_autoWaiter.js",
+        "sap/ui/test/_opaCorePlugin.js"
       ]
     },
     {
@@ -3655,7 +4210,9 @@
         "sap/ui/test/matchers/Ancestor.js",
         "sap/ui/test/matchers/Interactable.js",
         "sap/ui/test/matchers/Visible.js",
-        "sap/ui/test/pipelines/MatcherPipeline.js"
+        "sap/ui/test/pipelines/MatcherPipeline.js",
+        "sap/ui/test/_autoWaiter.js",
+        "sap/ui/test/_opaCorePlugin.js"
       ]
     },
     {
@@ -3714,22 +4271,126 @@
       ]
     },
     {
+      "name": "../test/_LogCollector-dbg.js",
+      "module": "sap/ui/test/_LogCollector.js",
+      "isDebug": true,
+      "required": [
+        "sap/ui/base/Object.js",
+        "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "../test/_LogCollector.js",
+      "module": "sap/ui/test/_LogCollector.js",
+      "required": [
+        "sap/ui/base/Object.js",
+        "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "../test/_ParameterValidator-dbg.js",
+      "module": "sap/ui/test/_ParameterValidator.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "../test/_ParameterValidator.js",
+      "module": "sap/ui/test/_ParameterValidator.js",
+      "required": [
+        "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "../test/_XHRCounter-dbg.js",
+      "module": "sap/ui/test/_XHRCounter.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/thirdparty/sinon.js",
+        "sap/ui/test/_LogCollector.js"
+      ]
+    },
+    {
+      "name": "../test/_XHRCounter.js",
+      "module": "sap/ui/test/_XHRCounter.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/thirdparty/sinon.js",
+        "sap/ui/test/_LogCollector.js"
+      ]
+    },
+    {
+      "name": "../test/_autoWaiter-dbg.js",
+      "module": "sap/ui/test/_autoWaiter.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/test/_XHRCounter.js",
+        "sap/ui/test/_LogCollector.js",
+        "sap/ui/test/_timeoutCounter.js",
+        "sap/ui/test/_opaCorePlugin.js"
+      ]
+    },
+    {
+      "name": "../test/_autoWaiter.js",
+      "module": "sap/ui/test/_autoWaiter.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/test/_XHRCounter.js",
+        "sap/ui/test/_LogCollector.js",
+        "sap/ui/test/_timeoutCounter.js",
+        "sap/ui/test/_opaCorePlugin.js"
+      ]
+    },
+    {
+      "name": "../test/_opaCorePlugin-dbg.js",
+      "module": "sap/ui/test/_opaCorePlugin.js",
+      "isDebug": true
+    },
+    {
+      "name": "../test/_opaCorePlugin.js",
+      "module": "sap/ui/test/_opaCorePlugin.js"
+    },
+    {
+      "name": "../test/_timeoutCounter-dbg.js",
+      "module": "sap/ui/test/_timeoutCounter.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/test/_LogCollector.js"
+      ]
+    },
+    {
+      "name": "../test/_timeoutCounter.js",
+      "module": "sap/ui/test/_timeoutCounter.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/test/_LogCollector.js"
+      ]
+    },
+    {
       "name": "../test/actions/Action-dbg.js",
       "module": "sap/ui/test/actions/Action.js",
       "isDebug": true,
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/base/ManagedObject.js",
         "sap/ui/qunit/QUnitUtils.js",
-        "sap/ui/test/Opa5.js"
+        "sap/ui/test/Opa5.js",
+        "sap/ui/Device.js"
       ]
     },
     {
       "name": "../test/actions/Action.js",
       "module": "sap/ui/test/actions/Action.js",
       "required": [
+        "jquery.sap.global.js",
         "sap/ui/base/ManagedObject.js",
         "sap/ui/qunit/QUnitUtils.js",
-        "sap/ui/test/Opa5.js"
+        "sap/ui/test/Opa5.js",
+        "sap/ui/Device.js"
       ]
     },
     {
@@ -3738,7 +4399,8 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/test/actions/Action.js"
+        "sap/ui/test/actions/Action.js",
+        "sap/ui/Device.js"
       ]
     },
     {
@@ -3746,7 +4408,8 @@
       "module": "sap/ui/test/actions/EnterText.js",
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/test/actions/Action.js"
+        "sap/ui/test/actions/Action.js",
+        "sap/ui/Device.js"
       ]
     },
     {
@@ -3764,6 +4427,146 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/test/actions/Action.js"
+      ]
+    },
+    {
+      "name": "../test/gherkin/GherkinTestGenerator-dbg.js",
+      "module": "sap/ui/test/gherkin/GherkinTestGenerator.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/Object.js",
+        "sap/ui/test/gherkin/dataTableUtils.js",
+        "sap/ui/test/gherkin/simpleGherkinParser.js"
+      ]
+    },
+    {
+      "name": "../test/gherkin/GherkinTestGenerator.js",
+      "module": "sap/ui/test/gherkin/GherkinTestGenerator.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/Object.js",
+        "sap/ui/test/gherkin/dataTableUtils.js",
+        "sap/ui/test/gherkin/simpleGherkinParser.js"
+      ]
+    },
+    {
+      "name": "../test/gherkin/StepDefinitions-dbg.js",
+      "module": "sap/ui/test/gherkin/StepDefinitions.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/Object.js"
+      ]
+    },
+    {
+      "name": "../test/gherkin/StepDefinitions.js",
+      "module": "sap/ui/test/gherkin/StepDefinitions.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/Object.js"
+      ]
+    },
+    {
+      "name": "../test/gherkin/dataTableUtils-dbg.js",
+      "module": "sap/ui/test/gherkin/dataTableUtils.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "../test/gherkin/dataTableUtils.js",
+      "module": "sap/ui/test/gherkin/dataTableUtils.js",
+      "required": [
+        "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "../test/gherkin/opa5TestHarness-dbg.js",
+      "module": "sap/ui/test/gherkin/opa5TestHarness.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/Object.js",
+        "sap/ui/test/opaQunit.js",
+        "sap/ui/test/Opa5.js",
+        "sap/ui/test/gherkin/GherkinTestGenerator.js",
+        "sap/ui/test/gherkin/dataTableUtils.js",
+        "sap/ui/test/gherkin/StepDefinitions.js",
+        "sap/ui/qunit/qunit-css.js",
+        "sap/ui/qunit/qunit-junit.js",
+        "sap/ui/qunit/qunit-coverage.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/qunit.js"
+      ]
+    },
+    {
+      "name": "../test/gherkin/opa5TestHarness.js",
+      "module": "sap/ui/test/gherkin/opa5TestHarness.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/Object.js",
+        "sap/ui/test/opaQunit.js",
+        "sap/ui/test/Opa5.js",
+        "sap/ui/test/gherkin/GherkinTestGenerator.js",
+        "sap/ui/test/gherkin/dataTableUtils.js",
+        "sap/ui/test/gherkin/StepDefinitions.js",
+        "sap/ui/qunit/qunit-css.js",
+        "sap/ui/qunit/qunit-junit.js",
+        "sap/ui/qunit/qunit-coverage.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/qunit.js"
+      ]
+    },
+    {
+      "name": "../test/gherkin/qUnitTestHarness-dbg.js",
+      "module": "sap/ui/test/gherkin/qUnitTestHarness.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/Object.js",
+        "sap/ui/test/gherkin/GherkinTestGenerator.js",
+        "sap/ui/test/gherkin/StepDefinitions.js",
+        "sap/ui/qunit/qunit-css.js",
+        "sap/ui/qunit/qunit-junit.js",
+        "sap/ui/qunit/qunit-coverage.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/qunit.js"
+      ]
+    },
+    {
+      "name": "../test/gherkin/qUnitTestHarness.js",
+      "module": "sap/ui/test/gherkin/qUnitTestHarness.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/Object.js",
+        "sap/ui/test/gherkin/GherkinTestGenerator.js",
+        "sap/ui/test/gherkin/StepDefinitions.js",
+        "sap/ui/qunit/qunit-css.js",
+        "sap/ui/qunit/qunit-junit.js",
+        "sap/ui/qunit/qunit-coverage.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/qunit.js"
+      ]
+    },
+    {
+      "name": "../test/gherkin/simpleGherkinParser-dbg.js",
+      "module": "sap/ui/test/gherkin/simpleGherkinParser.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "../test/gherkin/simpleGherkinParser.js",
+      "module": "sap/ui/test/gherkin/simpleGherkinParser.js",
+      "required": [
+        "jquery.sap.global.js"
       ]
     },
     {
@@ -3790,7 +4593,9 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/thirdparty/URI.js",
-        "sap/ui/Device.js"
+        "sap/ui/Device.js",
+        "sap/ui/test/_LogCollector.js",
+        "sap/ui/test/_autoWaiter.js"
       ]
     },
     {
@@ -3799,7 +4604,9 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/thirdparty/URI.js",
-        "sap/ui/Device.js"
+        "sap/ui/Device.js",
+        "sap/ui/test/_LogCollector.js",
+        "sap/ui/test/_autoWaiter.js"
       ]
     },
     {
@@ -3817,6 +4624,25 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/test/matchers/Matcher.js"
+      ]
+    },
+    {
+      "name": "../test/matchers/AggregationEmpty-dbg.js",
+      "module": "sap/ui/test/matchers/AggregationEmpty.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/test/matchers/Matcher.js",
+        "sap/ui/test/matchers/AggregationLengthEquals.js"
+      ]
+    },
+    {
+      "name": "../test/matchers/AggregationEmpty.js",
+      "module": "sap/ui/test/matchers/AggregationEmpty.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/test/matchers/Matcher.js",
+        "sap/ui/test/matchers/AggregationLengthEquals.js"
       ]
     },
     {
@@ -3880,13 +4706,31 @@
       ]
     },
     {
+      "name": "../test/matchers/I18NText-dbg.js",
+      "module": "sap/ui/test/matchers/I18NText.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/test/matchers/Matcher.js"
+      ]
+    },
+    {
+      "name": "../test/matchers/I18NText.js",
+      "module": "sap/ui/test/matchers/I18NText.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/test/matchers/Matcher.js"
+      ]
+    },
+    {
       "name": "../test/matchers/Interactable-dbg.js",
       "module": "sap/ui/test/matchers/Interactable.js",
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
         "sap/ui/test/matchers/Matcher.js",
-        "sap/ui/test/matchers/Visible.js"
+        "sap/ui/test/matchers/Visible.js",
+        "sap/ui/test/launchers/iFrameLauncher.js"
       ]
     },
     {
@@ -3895,7 +4739,8 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/test/matchers/Matcher.js",
-        "sap/ui/test/matchers/Visible.js"
+        "sap/ui/test/matchers/Visible.js",
+        "sap/ui/test/launchers/iFrameLauncher.js"
       ]
     },
     {
@@ -3903,14 +4748,18 @@
       "module": "sap/ui/test/matchers/Matcher.js",
       "isDebug": true,
       "required": [
-        "sap/ui/base/ManagedObject.js"
+        "jquery.sap.global.js",
+        "sap/ui/base/ManagedObject.js",
+        "sap/ui/test/_LogCollector.js"
       ]
     },
     {
       "name": "../test/matchers/Matcher.js",
       "module": "sap/ui/test/matchers/Matcher.js",
       "required": [
-        "sap/ui/base/ManagedObject.js"
+        "jquery.sap.global.js",
+        "sap/ui/base/ManagedObject.js",
+        "sap/ui/test/_LogCollector.js"
       ]
     },
     {
@@ -3918,14 +4767,16 @@
       "module": "sap/ui/test/matchers/Properties.js",
       "isDebug": true,
       "required": [
-        "jquery.sap.global.js"
+        "jquery.sap.global.js",
+        "sap/ui/test/_LogCollector.js"
       ]
     },
     {
       "name": "../test/matchers/Properties.js",
       "module": "sap/ui/test/matchers/Properties.js",
       "required": [
-        "jquery.sap.global.js"
+        "jquery.sap.global.js",
+        "sap/ui/test/_LogCollector.js"
       ]
     },
     {
@@ -4005,7 +4856,8 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/base/Object.js",
-        "sap/ui/test/pipelines/PipelineFactory.js"
+        "sap/ui/test/pipelines/PipelineFactory.js",
+        "sap/ui/test/_LogCollector.js"
       ]
     },
     {
@@ -4014,7 +4866,8 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/base/Object.js",
-        "sap/ui/test/pipelines/PipelineFactory.js"
+        "sap/ui/test/pipelines/PipelineFactory.js",
+        "sap/ui/test/_LogCollector.js"
       ]
     },
     {
@@ -4212,74 +5065,24 @@
       "module": "sap/ui/thirdparty/jquery.js"
     },
     {
-      "name": "../thirdparty/jquery/jquery-1.10.1-dbg.js",
-      "module": "sap/ui/thirdparty/jquery/jquery-1.10.1.js",
-      "isDebug": true
-    },
-    {
-      "name": "../thirdparty/jquery/jquery-1.10.1.js",
-      "module": "sap/ui/thirdparty/jquery/jquery-1.10.1.js"
-    },
-    {
-      "name": "../thirdparty/jquery/jquery-1.10.2-dbg.js",
-      "module": "sap/ui/thirdparty/jquery/jquery-1.10.2.js",
-      "isDebug": true
-    },
-    {
-      "name": "../thirdparty/jquery/jquery-1.10.2.js",
-      "module": "sap/ui/thirdparty/jquery/jquery-1.10.2.js"
-    },
-    {
-      "name": "../thirdparty/jquery/jquery-1.11.1-dbg.js",
-      "module": "sap/ui/thirdparty/jquery/jquery-1.11.1.js",
-      "isDebug": true
-    },
-    {
-      "name": "../thirdparty/jquery/jquery-1.11.1.js",
-      "module": "sap/ui/thirdparty/jquery/jquery-1.11.1.js"
-    },
-    {
-      "name": "../thirdparty/jquery/jquery-1.7.1-dbg.js",
-      "module": "sap/ui/thirdparty/jquery/jquery-1.7.1.js",
-      "isDebug": true
-    },
-    {
-      "name": "../thirdparty/jquery/jquery-1.7.1.js",
-      "module": "sap/ui/thirdparty/jquery/jquery-1.7.1.js"
-    },
-    {
-      "name": "../thirdparty/jquery/jquery-1.8.1-dbg.js",
-      "module": "sap/ui/thirdparty/jquery/jquery-1.8.1.js",
-      "isDebug": true
-    },
-    {
-      "name": "../thirdparty/jquery/jquery-1.8.1.js",
-      "module": "sap/ui/thirdparty/jquery/jquery-1.8.1.js"
-    },
-    {
-      "name": "../thirdparty/jquery/jquery-2.1.4-dbg.js",
-      "module": "sap/ui/thirdparty/jquery/jquery-2.1.4.js",
-      "isDebug": true
-    },
-    {
-      "name": "../thirdparty/jquery/jquery-2.1.4.js",
-      "module": "sap/ui/thirdparty/jquery/jquery-2.1.4.js"
-    },
-    {
       "name": "../thirdparty/jqueryui/jquery-effects-blind-dbg.js",
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-blind.js",
       "isDebug": true,
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-blind.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-blind.js"
       ]
     },
     {
       "name": "../thirdparty/jqueryui/jquery-effects-blind.js",
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-blind.js",
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-blind.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-blind.js"
       ]
     },
     {
@@ -4287,16 +5090,20 @@
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-bounce.js",
       "isDebug": true,
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-bounce.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-bounce.js"
       ]
     },
     {
       "name": "../thirdparty/jqueryui/jquery-effects-bounce.js",
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-bounce.js",
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-bounce.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-bounce.js"
       ]
     },
     {
@@ -4304,16 +5111,20 @@
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-clip.js",
       "isDebug": true,
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-clip.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-clip.js"
       ]
     },
     {
       "name": "../thirdparty/jqueryui/jquery-effects-clip.js",
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-clip.js",
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-clip.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-clip.js"
       ]
     },
     {
@@ -4321,16 +5132,20 @@
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-core.js",
       "isDebug": true,
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect.js",
         "sap/ui/thirdparty/jquery.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect.js"
       ]
     },
     {
       "name": "../thirdparty/jqueryui/jquery-effects-core.js",
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-core.js",
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect.js",
         "sap/ui/thirdparty/jquery.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect.js"
       ]
     },
     {
@@ -4338,16 +5153,20 @@
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-drop.js",
       "isDebug": true,
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-drop.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-drop.js"
       ]
     },
     {
       "name": "../thirdparty/jqueryui/jquery-effects-drop.js",
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-drop.js",
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-drop.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-drop.js"
       ]
     },
     {
@@ -4355,16 +5174,20 @@
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-explode.js",
       "isDebug": true,
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-explode.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-explode.js"
       ]
     },
     {
       "name": "../thirdparty/jqueryui/jquery-effects-explode.js",
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-explode.js",
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-explode.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-explode.js"
       ]
     },
     {
@@ -4372,16 +5195,20 @@
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-fade.js",
       "isDebug": true,
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-fade.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-fade.js"
       ]
     },
     {
       "name": "../thirdparty/jqueryui/jquery-effects-fade.js",
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-fade.js",
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-fade.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-fade.js"
       ]
     },
     {
@@ -4389,16 +5216,20 @@
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-fold.js",
       "isDebug": true,
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-fold.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-fold.js"
       ]
     },
     {
       "name": "../thirdparty/jqueryui/jquery-effects-fold.js",
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-fold.js",
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-fold.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-fold.js"
       ]
     },
     {
@@ -4406,16 +5237,20 @@
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-highlight.js",
       "isDebug": true,
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-highlight.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-highlight.js"
       ]
     },
     {
       "name": "../thirdparty/jqueryui/jquery-effects-highlight.js",
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-highlight.js",
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-highlight.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-highlight.js"
       ]
     },
     {
@@ -4423,16 +5258,20 @@
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-pulsate.js",
       "isDebug": true,
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-pulsate.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-pulsate.js"
       ]
     },
     {
       "name": "../thirdparty/jqueryui/jquery-effects-pulsate.js",
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-pulsate.js",
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-pulsate.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-pulsate.js"
       ]
     },
     {
@@ -4440,16 +5279,20 @@
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-scale.js",
       "isDebug": true,
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-scale.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-scale.js"
       ]
     },
     {
       "name": "../thirdparty/jqueryui/jquery-effects-scale.js",
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-scale.js",
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-scale.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-scale.js"
       ]
     },
     {
@@ -4457,16 +5300,20 @@
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-shake.js",
       "isDebug": true,
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-shake.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-shake.js"
       ]
     },
     {
       "name": "../thirdparty/jqueryui/jquery-effects-shake.js",
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-shake.js",
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-shake.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-shake.js"
       ]
     },
     {
@@ -4474,16 +5321,20 @@
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-slide.js",
       "isDebug": true,
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-slide.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-slide.js"
       ]
     },
     {
       "name": "../thirdparty/jqueryui/jquery-effects-slide.js",
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-slide.js",
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-slide.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-slide.js"
       ]
     },
     {
@@ -4491,16 +5342,20 @@
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-transfer.js",
       "isDebug": true,
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-transfer.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-transfer.js"
       ]
     },
     {
       "name": "../thirdparty/jqueryui/jquery-effects-transfer.js",
       "module": "sap/ui/thirdparty/jqueryui/jquery-effects-transfer.js",
       "required": [
-        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-transfer.js",
         "sap/ui/thirdparty/jqueryui/jquery-effects-core.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/jqueryui/jquery-ui-effect-transfer.js"
       ]
     },
     {
@@ -5003,6 +5858,9 @@
       "name": "../thirdparty/licenses/jQuery-MIT-LICENSE.txt"
     },
     {
+      "name": "../thirdparty/licenses/jalaali-js-MIT-LICENSE.txt"
+    },
+    {
       "name": "../thirdparty/licenses/mobify-MIT-LICENSE.txt"
     },
     {
@@ -5321,7 +6179,6 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/Device.js",
         "sap/ui/base/EventProvider.js",
         "sap/ui/core/Popup.js",
         "sap/ui/core/Core.js",
@@ -5333,7 +6190,6 @@
       "module": "sap/ui/core/BusyIndicator.js",
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/Device.js",
         "sap/ui/base/EventProvider.js",
         "sap/ui/core/Popup.js",
         "sap/ui/core/Core.js",
@@ -5345,16 +6201,14 @@
       "module": "sap/ui/core/BusyIndicatorUtils.js",
       "isDebug": true,
       "required": [
-        "jquery.sap.global.js",
-        "sap/ui/Device.js"
+        "jquery.sap.global.js"
       ]
     },
     {
       "name": "BusyIndicatorUtils.js",
       "module": "sap/ui/core/BusyIndicatorUtils.js",
       "required": [
-        "jquery.sap.global.js",
-        "sap/ui/Device.js"
+        "jquery.sap.global.js"
       ]
     },
     {
@@ -5387,7 +6241,14 @@
         "sap/ui/core/Manifest.js",
         "sap/ui/core/ComponentMetadata.js",
         "sap/ui/core/Core.js",
-        "sap/ui/thirdparty/URI.js"
+        "sap/ui/thirdparty/URI.js",
+        "jquery.sap.trace.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/CustomizingConfiguration.js",
+        "sap/ui/core/EventBus.js",
+        "sap/ui/core/service/ServiceFactoryRegistry.js",
+        "sap/ui/model/odata/ODataUtils.js"
       ]
     },
     {
@@ -5399,7 +6260,14 @@
         "sap/ui/core/Manifest.js",
         "sap/ui/core/ComponentMetadata.js",
         "sap/ui/core/Core.js",
-        "sap/ui/thirdparty/URI.js"
+        "sap/ui/thirdparty/URI.js",
+        "jquery.sap.trace.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/CustomizingConfiguration.js",
+        "sap/ui/core/EventBus.js",
+        "sap/ui/core/service/ServiceFactoryRegistry.js",
+        "sap/ui/model/odata/ODataUtils.js"
       ]
     },
     {
@@ -5407,6 +6275,7 @@
       "module": "sap/ui/core/ComponentContainer.js",
       "isDebug": true,
       "required": [
+        "sap/ui/base/ManagedObject.js",
         "sap/ui/core/Control.js",
         "sap/ui/core/Component.js",
         "sap/ui/core/Core.js",
@@ -5421,6 +6290,7 @@
       "name": "ComponentContainer.js",
       "module": "sap/ui/core/ComponentContainer.js",
       "required": [
+        "sap/ui/base/ManagedObject.js",
         "sap/ui/core/Control.js",
         "sap/ui/core/Component.js",
         "sap/ui/core/Core.js",
@@ -5437,6 +6307,10 @@
       "module": "sap/ui/core/ComponentContainerRenderer.js"
     },
     {
+      "name": "ComponentLifecycle.type",
+      "designtime": true
+    },
+    {
       "name": "ComponentMetadata-dbg.js",
       "module": "sap/ui/core/ComponentMetadata.js",
       "isDebug": true,
@@ -5446,6 +6320,9 @@
         "sap/ui/core/Manifest.js",
         "sap/ui/thirdparty/URI.js",
         "jquery.sap.resources.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/CustomizingConfiguration.js"
       ]
     },
     {
@@ -5457,6 +6334,9 @@
         "sap/ui/core/Manifest.js",
         "sap/ui/thirdparty/URI.js",
         "jquery.sap.resources.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/CustomizingConfiguration.js"
       ]
     },
     {
@@ -5516,6 +6396,7 @@
         "sap/ui/core/CustomStyleClassSupport.js",
         "sap/ui/core/Element.js",
         "sap/ui/core/UIArea.js",
+        "sap/ui/core/RenderManager.js",
         "sap/ui/core/ResizeHandler.js",
         "sap/ui/core/BusyIndicatorUtils.js"
       ]
@@ -5532,6 +6413,7 @@
         "sap/ui/core/CustomStyleClassSupport.js",
         "sap/ui/core/Element.js",
         "sap/ui/core/UIArea.js",
+        "sap/ui/core/RenderManager.js",
         "sap/ui/core/ResizeHandler.js",
         "sap/ui/core/BusyIndicatorUtils.js"
       ]
@@ -5544,9 +6426,12 @@
         "jquery.sap.global.js",
         "sap/ui/Device.js",
         "sap/ui/Global.js",
+        "sap/ui/base/BindingParser.js",
         "sap/ui/base/DataType.js",
         "sap/ui/base/EventProvider.js",
+        "sap/ui/base/Interface.js",
         "sap/ui/base/Object.js",
+        "sap/ui/base/ManagedObject.js",
         "sap/ui/core/Component.js",
         "sap/ui/core/Configuration.js",
         "sap/ui/core/Control.js",
@@ -5565,6 +6450,12 @@
         "jquery.sap.properties.js",
         "jquery.sap.resources.js",
         "jquery.sap.script.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/ComponentContainer.js",
+        "sap/ui/core/tmpl/Template.js",
+        "sap/ui/core/IntervalTrigger.js",
+        "sap/ui/core/EventBus.js"
       ]
     },
     {
@@ -5574,9 +6465,12 @@
         "jquery.sap.global.js",
         "sap/ui/Device.js",
         "sap/ui/Global.js",
+        "sap/ui/base/BindingParser.js",
         "sap/ui/base/DataType.js",
         "sap/ui/base/EventProvider.js",
+        "sap/ui/base/Interface.js",
         "sap/ui/base/Object.js",
+        "sap/ui/base/ManagedObject.js",
         "sap/ui/core/Component.js",
         "sap/ui/core/Configuration.js",
         "sap/ui/core/Control.js",
@@ -5595,6 +6489,12 @@
         "jquery.sap.properties.js",
         "jquery.sap.resources.js",
         "jquery.sap.script.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/ComponentContainer.js",
+        "sap/ui/core/tmpl/Template.js",
+        "sap/ui/core/IntervalTrigger.js",
+        "sap/ui/core/EventBus.js"
       ]
     },
     {
@@ -5609,6 +6509,16 @@
     },
     {
       "name": "CustomData.control",
+      "designtime": true
+    },
+    {
+      "name": "CustomData.designtime-dbg.js",
+      "module": "sap/ui/core/CustomData.designtime.js",
+      "isDebug": true
+    },
+    {
+      "name": "CustomData.designtime.js",
+      "module": "sap/ui/core/CustomData.designtime.js",
       "designtime": true
     },
     {
@@ -5702,6 +6612,9 @@
         "sap/ui/core/ElementMetadata.js",
         "jquery.sap.strings.js",
         "jquery.sap.trace.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/CustomData.js"
       ]
     },
     {
@@ -5718,6 +6631,9 @@
         "sap/ui/core/ElementMetadata.js",
         "jquery.sap.strings.js",
         "jquery.sap.trace.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/CustomData.js"
       ]
     },
     {
@@ -5727,6 +6643,9 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/base/ManagedObjectMetadata.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/Renderer.js"
       ]
     },
     {
@@ -5735,6 +6654,9 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/base/ManagedObjectMetadata.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/Renderer.js"
       ]
     },
     {
@@ -5837,8 +6759,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/Control.js",
-        "sap/ui/core/RenderManager.js",
-        "sap/ui/core/library.js"
+        "sap/ui/core/RenderManager.js"
       ]
     },
     {
@@ -5851,8 +6772,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/Control.js",
-        "sap/ui/core/RenderManager.js",
-        "sap/ui/core/library.js"
+        "sap/ui/core/RenderManager.js"
       ]
     },
     {
@@ -5860,14 +6780,14 @@
       "module": "sap/ui/core/HTMLRenderer.js",
       "isDebug": true,
       "required": [
-        "sap/ui/core/library.js"
+        "sap/ui/core/RenderManager.js"
       ]
     },
     {
       "name": "HTMLRenderer.js",
       "module": "sap/ui/core/HTMLRenderer.js",
       "required": [
-        "sap/ui/core/library.js"
+        "sap/ui/core/RenderManager.js"
       ]
     },
     {
@@ -5908,6 +6828,7 @@
         "sap/ui/Device.js",
         "sap/ui/core/Control.js",
         "sap/ui/core/IconPool.js",
+        "sap/ui/core/InvisibleText.js",
         "sap/ui/core/library.js"
       ]
     },
@@ -5923,6 +6844,7 @@
         "sap/ui/Device.js",
         "sap/ui/core/Control.js",
         "sap/ui/core/IconPool.js",
+        "sap/ui/core/InvisibleText.js",
         "sap/ui/core/library.js"
       ]
     },
@@ -5936,9 +6858,11 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/Device.js",
         "sap/ui/core/Core.js",
         "sap/ui/thirdparty/URI.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/Icon.js"
       ]
     },
     {
@@ -5946,9 +6870,11 @@
       "module": "sap/ui/core/IconPool.js",
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/Device.js",
         "sap/ui/core/Core.js",
         "sap/ui/thirdparty/URI.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/Icon.js"
       ]
     },
     {
@@ -5956,14 +6882,18 @@
       "module": "sap/ui/core/IconRenderer.js",
       "isDebug": true,
       "required": [
-        "jquery.sap.global.js"
+        "jquery.sap.global.js",
+        "sap/ui/core/IconPool.js",
+        "sap/ui/core/library.js"
       ]
     },
     {
       "name": "IconRenderer.js",
       "module": "sap/ui/core/IconRenderer.js",
       "required": [
-        "jquery.sap.global.js"
+        "jquery.sap.global.js",
+        "sap/ui/core/IconPool.js",
+        "sap/ui/core/library.js"
       ]
     },
     {
@@ -6258,12 +7188,12 @@
         "sap/ui/Device.js",
         "sap/ui/base/ManagedObject.js",
         "sap/ui/base/Object.js",
+        "sap/ui/base/ObjectPool.js",
         "sap/ui/core/Control.js",
         "sap/ui/core/IntervalTrigger.js",
         "sap/ui/core/RenderManager.js",
-        "sap/ui/core/ResizeHandler.js",
-        "sap/ui/core/PopupSupport.js",
         "sap/ui/core/Element.js",
+        "sap/ui/core/ResizeHandler.js",
         "jquery.sap.script.js"
       ]
     },
@@ -6275,39 +7205,18 @@
         "sap/ui/Device.js",
         "sap/ui/base/ManagedObject.js",
         "sap/ui/base/Object.js",
+        "sap/ui/base/ObjectPool.js",
         "sap/ui/core/Control.js",
         "sap/ui/core/IntervalTrigger.js",
         "sap/ui/core/RenderManager.js",
-        "sap/ui/core/ResizeHandler.js",
-        "sap/ui/core/PopupSupport.js",
         "sap/ui/core/Element.js",
+        "sap/ui/core/ResizeHandler.js",
         "jquery.sap.script.js"
       ]
     },
     {
       "name": "PopupInterface.interface",
       "designtime": true
-    },
-    {
-      "name": "PopupSupport-dbg.js",
-      "module": "sap/ui/core/PopupSupport.js",
-      "isDebug": true,
-      "required": [
-        "jquery.sap.global.js",
-        "sap/ui/Device.js",
-        "sap/ui/core/Element.js",
-        "sap/ui/core/Control.js"
-      ]
-    },
-    {
-      "name": "PopupSupport.js",
-      "module": "sap/ui/core/PopupSupport.js",
-      "required": [
-        "jquery.sap.global.js",
-        "sap/ui/Device.js",
-        "sap/ui/core/Element.js",
-        "sap/ui/core/Control.js"
-      ]
     },
     {
       "name": "Priority.type",
@@ -6326,6 +7235,9 @@
         "jquery.sap.encoder.js",
         "jquery.sap.dom.js",
         "jquery.sap.trace.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/IconPool.js"
       ]
     },
     {
@@ -6340,6 +7252,9 @@
         "jquery.sap.encoder.js",
         "jquery.sap.dom.js",
         "jquery.sap.trace.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/IconPool.js"
       ]
     },
     {
@@ -6391,7 +7306,12 @@
         "jquery.sap.global.js",
         "sap/ui/Device.js",
         "sap/ui/core/Control.js",
-        "sap/ui/core/library.js"
+        "sap/ui/core/library.js",
+        "jquery.sap.script.js",
+        "jquery.sap.trace.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/zyngascroll.js"
       ]
     },
     {
@@ -6405,7 +7325,12 @@
         "jquery.sap.global.js",
         "sap/ui/Device.js",
         "sap/ui/core/Control.js",
-        "sap/ui/core/library.js"
+        "sap/ui/core/library.js",
+        "jquery.sap.script.js",
+        "jquery.sap.trace.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/zyngascroll.js"
       ]
     },
     {
@@ -6455,6 +7380,25 @@
       ]
     },
     {
+      "name": "StashedControlSupport-dbg.js",
+      "module": "sap/ui/core/StashedControlSupport.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/Element.js",
+        "sap/ui/core/Control.js"
+      ]
+    },
+    {
+      "name": "StashedControlSupport.js",
+      "module": "sap/ui/core/StashedControlSupport.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/Element.js",
+        "sap/ui/core/Control.js"
+      ]
+    },
+    {
       "name": "TextAlign.type",
       "designtime": true
     },
@@ -6469,6 +7413,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/Device.js",
+        "sap/ui/Global.js",
         "sap/ui/base/Object.js",
         "sap/ui/thirdparty/URI.js",
         "jquery.sap.script.js"
@@ -6480,6 +7425,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/Device.js",
+        "sap/ui/Global.js",
         "sap/ui/base/Object.js",
         "sap/ui/thirdparty/URI.js",
         "jquery.sap.script.js"
@@ -6576,8 +7522,15 @@
         "jquery.sap.global.js",
         "sap/ui/base/ManagedObject.js",
         "sap/ui/core/Component.js",
+        "sap/ui/core/library.js",
         "sap/ui/core/UIComponentMetadata.js",
+        "sap/ui/core/mvc/Controller.js",
         "sap/ui/core/mvc/View.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/routing/Router.js",
+        "sap/ui/core/routing/Targets.js",
+        "sap/ui/core/routing/Views.js"
       ]
     },
     {
@@ -6591,8 +7544,15 @@
         "jquery.sap.global.js",
         "sap/ui/base/ManagedObject.js",
         "sap/ui/core/Component.js",
+        "sap/ui/core/library.js",
         "sap/ui/core/UIComponentMetadata.js",
+        "sap/ui/core/mvc/Controller.js",
         "sap/ui/core/mvc/View.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/routing/Router.js",
+        "sap/ui/core/routing/Targets.js",
+        "sap/ui/core/routing/Views.js"
       ]
     },
     {
@@ -6601,7 +7561,8 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/core/ComponentMetadata.js"
+        "sap/ui/core/ComponentMetadata.js",
+        "sap/ui/core/library.js"
       ]
     },
     {
@@ -6609,7 +7570,8 @@
       "module": "sap/ui/core/UIComponentMetadata.js",
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/core/ComponentMetadata.js"
+        "sap/ui/core/ComponentMetadata.js",
+        "sap/ui/core/library.js"
       ]
     },
     {
@@ -6626,7 +7588,8 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/core/Element.js"
+        "sap/ui/core/Element.js",
+        "sap/ui/core/library.js"
       ]
     },
     {
@@ -6634,7 +7597,8 @@
       "module": "sap/ui/core/ValueStateSupport.js",
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/core/Element.js"
+        "sap/ui/core/Element.js",
+        "sap/ui/core/library.js"
       ]
     },
     {
@@ -6672,9 +7636,15 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/base/DataType.js",
         "sap/ui/base/ManagedObject.js",
+        "sap/ui/core/CustomData.js",
         "sap/ui/core/mvc/View.js",
-        "sap/ui/core/ExtensionPoint.js"
+        "sap/ui/core/ExtensionPoint.js",
+        "sap/ui/core/StashedControlSupport.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/mvc/XMLView.js"
       ]
     },
     {
@@ -6682,9 +7652,15 @@
       "module": "sap/ui/core/XMLTemplateProcessor.js",
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/base/DataType.js",
         "sap/ui/base/ManagedObject.js",
+        "sap/ui/core/CustomData.js",
         "sap/ui/core/mvc/View.js",
-        "sap/ui/core/ExtensionPoint.js"
+        "sap/ui/core/ExtensionPoint.js",
+        "sap/ui/core/StashedControlSupport.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/mvc/XMLView.js"
       ]
     },
     {
@@ -6694,6 +7670,57 @@
     {
       "name": "boolean.type",
       "designtime": true
+    },
+    {
+      "name": "cache/CacheManager-dbg.js",
+      "module": "sap/ui/core/cache/CacheManager.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/cache/LRUPersistentCache.js",
+        "sap/ui/core/cache/CacheManagerNOP.js",
+        "sap/ui/Device.js"
+      ]
+    },
+    {
+      "name": "cache/CacheManager.js",
+      "module": "sap/ui/core/cache/CacheManager.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/cache/LRUPersistentCache.js",
+        "sap/ui/core/cache/CacheManagerNOP.js",
+        "sap/ui/Device.js"
+      ]
+    },
+    {
+      "name": "cache/CacheManagerNOP-dbg.js",
+      "module": "sap/ui/core/cache/CacheManagerNOP.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "cache/CacheManagerNOP.js",
+      "module": "sap/ui/core/cache/CacheManagerNOP.js",
+      "required": [
+        "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "cache/LRUPersistentCache-dbg.js",
+      "module": "sap/ui/core/cache/LRUPersistentCache.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js"
+      ]
+    },
+    {
+      "name": "cache/LRUPersistentCache.js",
+      "module": "sap/ui/core/cache/LRUPersistentCache.js",
+      "required": [
+        "jquery.sap.global.js"
+      ]
     },
     {
       "name": "cldr/Unicode-Data-Files-LICENSE.txt"
@@ -7038,6 +8065,23 @@
       ]
     },
     {
+      "name": "date/Persian-dbg.js",
+      "module": "sap/ui/core/date/Persian.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/date/UniversalDate.js"
+      ]
+    },
+    {
+      "name": "date/Persian.js",
+      "module": "sap/ui/core/date/Persian.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/date/UniversalDate.js"
+      ]
+    },
+    {
       "name": "date/UniversalDate-dbg.js",
       "module": "sap/ui/core/date/UniversalDate.js",
       "isDebug": true,
@@ -7080,7 +8124,11 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/Device.js",
-        "sap/ui/base/Object.js"
+        "sap/ui/base/Object.js",
+        "sap/ui/core/ResizeHandler.js"
+      ],
+      "condRequired": [
+        "jquery.sap.mobile.js"
       ]
     },
     {
@@ -7089,7 +8137,11 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/Device.js",
-        "sap/ui/base/Object.js"
+        "sap/ui/base/Object.js",
+        "sap/ui/core/ResizeHandler.js"
+      ],
+      "condRequired": [
+        "jquery.sap.mobile.js"
       ]
     },
     {
@@ -7102,10 +8154,11 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/core/library.js",
         "sap/ui/core/Locale.js",
         "sap/ui/core/LocaleData.js",
-        "jquery.sap.strings.js",
-        "sap/ui/core/date/UniversalDate.js"
+        "sap/ui/core/date/UniversalDate.js",
+        "jquery.sap.strings.js"
       ]
     },
     {
@@ -7113,10 +8166,11 @@
       "module": "sap/ui/core/format/DateFormat.js",
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/core/library.js",
         "sap/ui/core/Locale.js",
         "sap/ui/core/LocaleData.js",
-        "jquery.sap.strings.js",
-        "sap/ui/core/date/UniversalDate.js"
+        "sap/ui/core/date/UniversalDate.js",
+        "jquery.sap.strings.js"
       ]
     },
     {
@@ -7126,6 +8180,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/base/Object.js",
+        "sap/ui/core/Locale.js",
         "sap/ui/core/LocaleData.js",
         "sap/ui/core/format/NumberFormat.js"
       ]
@@ -7136,6 +8191,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/base/Object.js",
+        "sap/ui/core/Locale.js",
         "sap/ui/core/LocaleData.js",
         "sap/ui/core/format/NumberFormat.js"
       ]
@@ -7147,6 +8203,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/base/Object.js",
+        "sap/ui/core/Locale.js",
         "sap/ui/core/LocaleData.js"
       ]
     },
@@ -7156,6 +8213,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/base/Object.js",
+        "sap/ui/core/Locale.js",
         "sap/ui/core/LocaleData.js"
       ]
     },
@@ -7172,6 +8230,13 @@
         "sap/ui/base/DataType.js",
         "sap/ui/core/Core.js"
       ]
+    },
+    {
+      "name": "library-preload.js",
+      "merged": true
+    },
+    {
+      "name": "library-preload.js.map"
     },
     {
       "name": "library-preload.json",
@@ -7259,6 +8324,15 @@
         "sap/ui/core/message/Message.js",
         "sap/ui/core/message/ControlMessageProcessor.js"
       ]
+    },
+    {
+      "name": "message/MessageMixin-dbg.js",
+      "module": "sap/ui/core/message/MessageMixin.js",
+      "isDebug": true
+    },
+    {
+      "name": "message/MessageMixin.js",
+      "module": "sap/ui/core/message/MessageMixin.js"
     },
     {
       "name": "message/MessageParser-dbg.js",
@@ -7445,6 +8519,12 @@
       "raw": "messagebundle.properties"
     },
     {
+      "name": "messagebundle_ms.properties",
+      "module": "sap/ui/core/messagebundle_ms.properties",
+      "locale": "ms",
+      "raw": "messagebundle.properties"
+    },
+    {
       "name": "messagebundle_nl.properties",
       "module": "sap/ui/core/messagebundle_nl.properties",
       "locale": "nl",
@@ -7590,6 +8670,9 @@
         "jquery.sap.global.js",
         "sap/ui/base/EventProvider.js",
         "sap/ui/base/ManagedObject.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/Component.js"
       ]
     },
     {
@@ -7599,6 +8682,9 @@
         "jquery.sap.global.js",
         "sap/ui/base/EventProvider.js",
         "sap/ui/base/ManagedObject.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/Component.js"
       ]
     },
     {
@@ -7610,6 +8696,7 @@
         "sap/ui/base/ManagedObject.js",
         "sap/ui/core/DeclarativeSupport.js",
         "sap/ui/core/library.js",
+        "sap/ui/model/resource/ResourceModel.js",
         "sap/ui/core/mvc/View.js"
       ]
     },
@@ -7625,6 +8712,7 @@
         "sap/ui/base/ManagedObject.js",
         "sap/ui/core/DeclarativeSupport.js",
         "sap/ui/core/library.js",
+        "sap/ui/model/resource/ResourceModel.js",
         "sap/ui/core/mvc/View.js"
       ]
     },
@@ -7653,6 +8741,7 @@
         "jquery.sap.global.js",
         "sap/ui/base/ManagedObject.js",
         "sap/ui/core/library.js",
+        "sap/ui/model/resource/ResourceModel.js",
         "sap/ui/core/mvc/View.js"
       ]
     },
@@ -7667,6 +8756,7 @@
         "jquery.sap.global.js",
         "sap/ui/base/ManagedObject.js",
         "sap/ui/core/library.js",
+        "sap/ui/model/resource/ResourceModel.js",
         "sap/ui/core/mvc/View.js"
       ]
     },
@@ -7777,6 +8867,13 @@
         "sap/ui/core/Control.js",
         "sap/ui/core/mvc/Controller.js",
         "sap/ui/core/library.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/mvc/JSView.js",
+        "sap/ui/core/mvc/JSONView.js",
+        "sap/ui/core/mvc/XMLView.js",
+        "sap/ui/core/mvc/HTMLView.js",
+        "sap/ui/core/mvc/TemplateView.js"
       ]
     },
     {
@@ -7792,6 +8889,13 @@
         "sap/ui/core/Control.js",
         "sap/ui/core/mvc/Controller.js",
         "sap/ui/core/library.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/mvc/JSView.js",
+        "sap/ui/core/mvc/JSONView.js",
+        "sap/ui/core/mvc/XMLView.js",
+        "sap/ui/core/mvc/HTMLView.js",
+        "sap/ui/core/mvc/TemplateView.js"
       ]
     },
     {
@@ -7819,11 +8923,24 @@
         "sap/ui/model/resource/ResourceModel.js",
         "sap/ui/base/ManagedObject.js",
         "sap/ui/core/Control.js",
-        "jquery.sap.xml.js"
+        "sap/ui/core/RenderManager.js",
+        "sap/ui/core/cache/CacheManager.js",
+        "jquery.sap.xml.js",
+        "jquery.sap.script.js"
       ]
     },
     {
       "name": "mvc/XMLView.control",
+      "designtime": true
+    },
+    {
+      "name": "mvc/XMLView.designtime-dbg.js",
+      "module": "sap/ui/core/mvc/XMLView.designtime.js",
+      "isDebug": true
+    },
+    {
+      "name": "mvc/XMLView.designtime.js",
+      "module": "sap/ui/core/mvc/XMLView.designtime.js",
       "designtime": true
     },
     {
@@ -7837,7 +8954,10 @@
         "sap/ui/model/resource/ResourceModel.js",
         "sap/ui/base/ManagedObject.js",
         "sap/ui/core/Control.js",
-        "jquery.sap.xml.js"
+        "sap/ui/core/RenderManager.js",
+        "sap/ui/core/cache/CacheManager.js",
+        "jquery.sap.xml.js",
+        "jquery.sap.script.js"
       ]
     },
     {
@@ -7847,8 +8967,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/mvc/ViewRenderer.js",
-        "sap/ui/core/RenderManager.js",
-        "sap/ui/core/library.js"
+        "sap/ui/core/RenderManager.js"
       ]
     },
     {
@@ -7857,8 +8976,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/mvc/ViewRenderer.js",
-        "sap/ui/core/RenderManager.js",
-        "sap/ui/core/library.js"
+        "sap/ui/core/RenderManager.js"
       ]
     },
     {
@@ -7940,6 +9058,7 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/core/library.js",
         "sap/ui/core/routing/HashChanger.js"
       ]
     },
@@ -7948,6 +9067,7 @@
       "module": "sap/ui/core/routing/History.js",
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/core/library.js",
         "sap/ui/core/routing/HashChanger.js"
       ]
     },
@@ -7986,11 +9106,13 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/core/library.js",
         "sap/ui/base/EventProvider.js",
         "sap/ui/core/routing/HashChanger.js",
         "sap/ui/core/routing/Route.js",
         "sap/ui/core/routing/Views.js",
         "sap/ui/core/routing/Targets.js",
+        "sap/ui/core/routing/History.js",
         "sap/ui/thirdparty/crossroads.js"
       ]
     },
@@ -7999,11 +9121,13 @@
       "module": "sap/ui/core/routing/Router.js",
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/core/library.js",
         "sap/ui/base/EventProvider.js",
         "sap/ui/core/routing/HashChanger.js",
         "sap/ui/core/routing/Route.js",
         "sap/ui/core/routing/Views.js",
         "sap/ui/core/routing/Targets.js",
+        "sap/ui/core/routing/History.js",
         "sap/ui/thirdparty/crossroads.js"
       ]
     },
@@ -8013,7 +9137,9 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/core/Control.js",
         "sap/ui/base/EventProvider.js",
+        "sap/ui/core/mvc/View.js",
         "sap/ui/core/routing/async/Target.js",
         "sap/ui/core/routing/sync/Target.js"
       ]
@@ -8023,7 +9149,9 @@
       "module": "sap/ui/core/routing/Target.js",
       "required": [
         "jquery.sap.global.js",
+        "sap/ui/core/Control.js",
         "sap/ui/base/EventProvider.js",
+        "sap/ui/core/mvc/View.js",
         "sap/ui/core/routing/async/Target.js",
         "sap/ui/core/routing/sync/Target.js"
       ]
@@ -8079,74 +9207,124 @@
     {
       "name": "routing/async/Route-dbg.js",
       "module": "sap/ui/core/routing/async/Route.js",
-      "isDebug": true
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/Device.js"
+      ]
     },
     {
       "name": "routing/async/Route.js",
-      "module": "sap/ui/core/routing/async/Route.js"
+      "module": "sap/ui/core/routing/async/Route.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/Device.js"
+      ]
     },
     {
       "name": "routing/async/Target-dbg.js",
       "module": "sap/ui/core/routing/async/Target.js",
-      "isDebug": true
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js"
+      ]
     },
     {
       "name": "routing/async/Target.js",
-      "module": "sap/ui/core/routing/async/Target.js"
+      "module": "sap/ui/core/routing/async/Target.js",
+      "required": [
+        "jquery.sap.global.js"
+      ]
     },
     {
       "name": "routing/async/Targets-dbg.js",
       "module": "sap/ui/core/routing/async/Targets.js",
-      "isDebug": true
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js"
+      ]
     },
     {
       "name": "routing/async/Targets.js",
-      "module": "sap/ui/core/routing/async/Targets.js"
+      "module": "sap/ui/core/routing/async/Targets.js",
+      "required": [
+        "jquery.sap.global.js"
+      ]
     },
     {
       "name": "routing/async/Views-dbg.js",
       "module": "sap/ui/core/routing/async/Views.js",
-      "isDebug": true
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js"
+      ]
     },
     {
       "name": "routing/async/Views.js",
-      "module": "sap/ui/core/routing/async/Views.js"
+      "module": "sap/ui/core/routing/async/Views.js",
+      "required": [
+        "jquery.sap.global.js"
+      ]
     },
     {
       "name": "routing/sync/Route-dbg.js",
       "module": "sap/ui/core/routing/sync/Route.js",
-      "isDebug": true
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js"
+      ]
     },
     {
       "name": "routing/sync/Route.js",
-      "module": "sap/ui/core/routing/sync/Route.js"
+      "module": "sap/ui/core/routing/sync/Route.js",
+      "required": [
+        "jquery.sap.global.js"
+      ]
     },
     {
       "name": "routing/sync/Target-dbg.js",
       "module": "sap/ui/core/routing/sync/Target.js",
-      "isDebug": true
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js"
+      ]
     },
     {
       "name": "routing/sync/Target.js",
-      "module": "sap/ui/core/routing/sync/Target.js"
+      "module": "sap/ui/core/routing/sync/Target.js",
+      "required": [
+        "jquery.sap.global.js"
+      ]
     },
     {
       "name": "routing/sync/Targets-dbg.js",
       "module": "sap/ui/core/routing/sync/Targets.js",
-      "isDebug": true
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js"
+      ]
     },
     {
       "name": "routing/sync/Targets.js",
-      "module": "sap/ui/core/routing/sync/Targets.js"
+      "module": "sap/ui/core/routing/sync/Targets.js",
+      "required": [
+        "jquery.sap.global.js"
+      ]
     },
     {
       "name": "routing/sync/Views-dbg.js",
       "module": "sap/ui/core/routing/sync/Views.js",
-      "isDebug": true
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js"
+      ]
     },
     {
       "name": "routing/sync/Views.js",
-      "module": "sap/ui/core/routing/sync/Views.js"
+      "module": "sap/ui/core/routing/sync/Views.js",
+      "required": [
+        "jquery.sap.global.js"
+      ]
     },
     {
       "name": "search/OpenSearchProvider-dbg.js",
@@ -8197,8 +9375,67 @@
       ]
     },
     {
+      "name": "service/Service-dbg.js",
+      "module": "sap/ui/core/service/Service.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/Object.js"
+      ]
+    },
+    {
+      "name": "service/Service.js",
+      "module": "sap/ui/core/service/Service.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/Object.js"
+      ]
+    },
+    {
+      "name": "service/ServiceFactory-dbg.js",
+      "module": "sap/ui/core/service/ServiceFactory.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/Object.js",
+        "sap/ui/core/service/Service.js"
+      ]
+    },
+    {
+      "name": "service/ServiceFactory.js",
+      "module": "sap/ui/core/service/ServiceFactory.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/Object.js",
+        "sap/ui/core/service/Service.js"
+      ]
+    },
+    {
+      "name": "service/ServiceFactoryRegistry-dbg.js",
+      "module": "sap/ui/core/service/ServiceFactoryRegistry.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/service/ServiceFactory.js"
+      ]
+    },
+    {
+      "name": "service/ServiceFactoryRegistry.js",
+      "module": "sap/ui/core/service/ServiceFactoryRegistry.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/service/ServiceFactory.js"
+      ]
+    },
+    {
       "name": "string.type",
       "designtime": true
+    },
+    {
+      "name": "support/HeaderIcon.svg"
+    },
+    {
+      "name": "support/InteractionTree.css"
     },
     {
       "name": "support/PerformanceRecorder-dbg.js",
@@ -8208,6 +9445,9 @@
         "jquery.sap.global.js",
         "sap/ui/Device.js",
         "sap/ui/core/Core.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/format/DateFormat.js"
       ]
     },
     {
@@ -8217,6 +9457,9 @@
         "jquery.sap.global.js",
         "sap/ui/Device.js",
         "sap/ui/core/Core.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/format/DateFormat.js"
       ]
     },
     {
@@ -8252,6 +9495,12 @@
         "jquery.sap.dom.js",
         "jquery.sap.encoder.js",
         "jquery.sap.script.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/mvc/View.js",
+        "sap/ui/base/ManagedObject.js",
+        "sap/ui/core/XMLTemplateProcessor.js",
+        "sap/ui/thirdparty/datajs.js"
       ]
     },
     {
@@ -8265,7 +9514,16 @@
         "jquery.sap.dom.js",
         "jquery.sap.encoder.js",
         "jquery.sap.script.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/mvc/View.js",
+        "sap/ui/base/ManagedObject.js",
+        "sap/ui/core/XMLTemplateProcessor.js",
+        "sap/ui/thirdparty/datajs.js"
       ]
+    },
+    {
+      "name": "support/TimelineOverview.css"
     },
     {
       "name": "support/ToolsAPI-dbg.js",
@@ -8300,6 +9558,114 @@
       "module": "sap/ui/core/support/bootstrapFallback.js"
     },
     {
+      "name": "support/controls/InteractionSlider-dbg.js",
+      "module": "sap/ui/core/support/controls/InteractionSlider.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/ManagedObject.js"
+      ]
+    },
+    {
+      "name": "support/controls/InteractionSlider.js",
+      "module": "sap/ui/core/support/controls/InteractionSlider.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/ManagedObject.js"
+      ]
+    },
+    {
+      "name": "support/controls/InteractionTree-dbg.js",
+      "module": "sap/ui/core/support/controls/InteractionTree.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/ManagedObject.js",
+        "sap/ui/core/IconPool.js",
+        "sap/m/library.js",
+        "sap/m/Popover.js",
+        "sap/m/Text.js",
+        "sap/ui/layout/form/SimpleForm.js",
+        "sap/m/Button.js",
+        "sap/m/Label.js",
+        "sap/m/Link.js",
+        "sap/ui/core/HTML.js",
+        "sap/ui/core/Title.js"
+      ]
+    },
+    {
+      "name": "support/controls/InteractionTree.js",
+      "module": "sap/ui/core/support/controls/InteractionTree.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/ManagedObject.js",
+        "sap/ui/core/IconPool.js",
+        "sap/m/library.js",
+        "sap/m/Popover.js",
+        "sap/m/Text.js",
+        "sap/ui/layout/form/SimpleForm.js",
+        "sap/m/Button.js",
+        "sap/m/Label.js",
+        "sap/m/Link.js",
+        "sap/ui/core/HTML.js",
+        "sap/ui/core/Title.js"
+      ]
+    },
+    {
+      "name": "support/controls/ObjectViewer-dbg.js",
+      "module": "sap/ui/core/support/controls/ObjectViewer.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/ManagedObject.js"
+      ]
+    },
+    {
+      "name": "support/controls/ObjectViewer.js",
+      "module": "sap/ui/core/support/controls/ObjectViewer.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/ManagedObject.js"
+      ]
+    },
+    {
+      "name": "support/controls/TimelineOverview-dbg.js",
+      "module": "sap/ui/core/support/controls/TimelineOverview.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/ManagedObject.js"
+      ]
+    },
+    {
+      "name": "support/controls/TimelineOverview.js",
+      "module": "sap/ui/core/support/controls/TimelineOverview.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/ManagedObject.js"
+      ]
+    },
+    {
+      "name": "support/controls/TreeViewer-dbg.js",
+      "module": "sap/ui/core/support/controls/TreeViewer.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/ManagedObject.js"
+      ]
+    },
+    {
+      "name": "support/controls/TreeViewer.js",
+      "module": "sap/ui/core/support/controls/TreeViewer.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/base/ManagedObject.js"
+      ]
+    },
+    {
+      "name": "support/interactionSlider.css"
+    },
+    {
       "name": "support/msiebridge.html"
     },
     {
@@ -8309,6 +9675,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/Device.js",
+        "sap/ui/core/ElementMetadata.js",
         "sap/ui/core/support/Plugin.js"
       ]
     },
@@ -8318,6 +9685,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/Device.js",
+        "sap/ui/core/ElementMetadata.js",
         "sap/ui/core/support/Plugin.js"
       ]
     },
@@ -8330,11 +9698,14 @@
         "sap/ui/core/support/Plugin.js",
         "sap/ui/core/util/serializer/ViewSerializer.js",
         "sap/ui/thirdparty/jszip.js",
+        "sap/ui/base/DataType.js",
         "sap/ui/core/Element.js",
         "sap/ui/core/ElementMetadata.js",
         "sap/ui/core/UIArea.js",
         "sap/ui/core/mvc/View.js",
-        "sap/ui/core/mvc/Controller.js"
+        "sap/ui/core/mvc/Controller.js",
+        "sap/ui/model/Binding.js",
+        "sap/ui/model/CompositeBinding.js"
       ]
     },
     {
@@ -8345,11 +9716,14 @@
         "sap/ui/core/support/Plugin.js",
         "sap/ui/core/util/serializer/ViewSerializer.js",
         "sap/ui/thirdparty/jszip.js",
+        "sap/ui/base/DataType.js",
         "sap/ui/core/Element.js",
         "sap/ui/core/ElementMetadata.js",
         "sap/ui/core/UIArea.js",
         "sap/ui/core/mvc/View.js",
-        "sap/ui/core/mvc/Controller.js"
+        "sap/ui/core/mvc/Controller.js",
+        "sap/ui/model/Binding.js",
+        "sap/ui/model/CompositeBinding.js"
       ]
     },
     {
@@ -8375,7 +9749,13 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/core/support/Plugin.js"
+        "sap/ui/core/support/Plugin.js",
+        "sap/ui/core/support/controls/InteractionSlider.js",
+        "sap/ui/core/support/controls/InteractionTree.js",
+        "sap/ui/core/support/controls/TimelineOverview.js",
+        "sap/m/MessageToast.js",
+        "sap/ui/thirdparty/jszip.js",
+        "sap/ui/core/util/File.js"
       ]
     },
     {
@@ -8383,7 +9763,13 @@
       "module": "sap/ui/core/support/plugins/Interaction.js",
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/core/support/Plugin.js"
+        "sap/ui/core/support/Plugin.js",
+        "sap/ui/core/support/controls/InteractionSlider.js",
+        "sap/ui/core/support/controls/InteractionTree.js",
+        "sap/ui/core/support/controls/TimelineOverview.js",
+        "sap/m/MessageToast.js",
+        "sap/ui/thirdparty/jszip.js",
+        "sap/ui/core/util/File.js"
       ]
     },
     {
@@ -8409,7 +9795,8 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/core/support/Plugin.js"
+        "sap/ui/core/support/Plugin.js",
+        "sap/ui/core/support/Support.js"
       ]
     },
     {
@@ -8417,7 +9804,8 @@
       "module": "sap/ui/core/support/plugins/MessageTest.js",
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/core/support/Plugin.js"
+        "sap/ui/core/support/Plugin.js",
+        "sap/ui/core/support/Support.js"
       ]
     },
     {
@@ -8444,7 +9832,8 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/Popup.js",
-        "sap/ui/core/support/Plugin.js"
+        "sap/ui/core/support/Plugin.js",
+        "sap/ui/core/support/Support.js"
       ]
     },
     {
@@ -8453,7 +9842,8 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/Popup.js",
-        "sap/ui/core/support/Plugin.js"
+        "sap/ui/core/support/Plugin.js",
+        "sap/ui/core/support/Support.js"
       ]
     },
     {
@@ -8463,9 +9853,13 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/support/Plugin.js",
+        "sap/ui/core/support/Support.js",
         "sap/ui/core/support/ToolsAPI.js",
         "jquery.sap.encoder.js",
         "jquery.sap.script.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/support/trace/E2eTraceLib.js"
       ]
     },
     {
@@ -8474,9 +9868,13 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/support/Plugin.js",
+        "sap/ui/core/support/Support.js",
         "sap/ui/core/support/ToolsAPI.js",
         "jquery.sap.encoder.js",
         "jquery.sap.script.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/support/trace/E2eTraceLib.js"
       ]
     },
     {
@@ -8494,6 +9892,27 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/support/Plugin.js"
+      ]
+    },
+    {
+      "name": "support/plugins/ViewInfo-dbg.js",
+      "module": "sap/ui/core/support/plugins/ViewInfo.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/support/Plugin.js",
+        "sap/ui/core/support/controls/TreeViewer.js",
+        "sap/ui/core/support/controls/ObjectViewer.js"
+      ]
+    },
+    {
+      "name": "support/plugins/ViewInfo.js",
+      "module": "sap/ui/core/support/plugins/ViewInfo.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/support/Plugin.js",
+        "sap/ui/core/support/controls/TreeViewer.js",
+        "sap/ui/core/support/controls/ObjectViewer.js"
       ]
     },
     {
@@ -8536,42 +9955,103 @@
     },
     {
       "name": "themes/base/BlindLayer.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/BusyIndicator.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Icon.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/LocalBusyIndicator.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ScrollBar.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Shadow.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/TechnicalInfo.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/View.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/base.less",
+      "designtime": true,
       "theme": "base"
     },
     {
-      "name": "themes/base/fonts/SAP-icons.eot",
+      "name": "themes/base/fonts/72-Bold.woff",
+      "theme": "base"
+    },
+    {
+      "name": "themes/base/fonts/72-Bold.woff2",
+      "theme": "base"
+    },
+    {
+      "name": "themes/base/fonts/72-BoldItalic.woff",
+      "theme": "base"
+    },
+    {
+      "name": "themes/base/fonts/72-BoldItalic.woff2",
+      "theme": "base"
+    },
+    {
+      "name": "themes/base/fonts/72-Condensed.woff",
+      "theme": "base"
+    },
+    {
+      "name": "themes/base/fonts/72-Condensed.woff2",
+      "theme": "base"
+    },
+    {
+      "name": "themes/base/fonts/72-CondensedBold.woff",
+      "theme": "base"
+    },
+    {
+      "name": "themes/base/fonts/72-CondensedBold.woff2",
+      "theme": "base"
+    },
+    {
+      "name": "themes/base/fonts/72-Italic.woff",
+      "theme": "base"
+    },
+    {
+      "name": "themes/base/fonts/72-Italic.woff2",
+      "theme": "base"
+    },
+    {
+      "name": "themes/base/fonts/72-Light.woff",
+      "theme": "base"
+    },
+    {
+      "name": "themes/base/fonts/72-Light.woff2",
+      "theme": "base"
+    },
+    {
+      "name": "themes/base/fonts/72-Regular.woff",
+      "theme": "base"
+    },
+    {
+      "name": "themes/base/fonts/72-Regular.woff2",
       "theme": "base"
     },
     {
@@ -8579,7 +10059,16 @@
       "theme": "base"
     },
     {
+      "name": "themes/base/fonts/SAP-icons.woff",
+      "theme": "base"
+    },
+    {
+      "name": "themes/base/fonts/SAP-icons.woff2",
+      "theme": "base"
+    },
+    {
       "name": "themes/base/global.less",
+      "designtime": true,
       "theme": "base"
     },
     {
@@ -8686,22 +10175,27 @@
     },
     {
       "name": "themes/base/library.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/library.source.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/media.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/parameterClasses.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/shared.less",
+      "designtime": true,
       "theme": "base"
     },
     {
@@ -8710,26 +10204,27 @@
     },
     {
       "name": "themes/sap_hcb/BrowserScrollbar.less",
-      "theme": "sap_hcb"
-    },
-    {
-      "name": "themes/sap_hcb/BusyIndicator.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Icon.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/LocalBusyIndicator.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Shadow.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/global.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
@@ -8820,14 +10315,17 @@
     },
     {
       "name": "themes/sap_hcb/library.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/library.source.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/shared.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
@@ -8836,7 +10334,8 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/thirdparty/URI.js"
+        "sap/ui/thirdparty/URI.js",
+        "sap/ui/core/Element.js"
       ]
     },
     {
@@ -8844,7 +10343,8 @@
       "module": "sap/ui/core/theming/Parameters.js",
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/thirdparty/URI.js"
+        "sap/ui/thirdparty/URI.js",
+        "sap/ui/core/Element.js"
       ]
     },
     {
@@ -8875,7 +10375,8 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/Control.js",
-        "sap/ui/core/library.js"
+        "sap/ui/core/library.js",
+        "sap/ui/core/tmpl/DOMAttribute.js"
       ]
     },
     {
@@ -8888,7 +10389,8 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/Control.js",
-        "sap/ui/core/library.js"
+        "sap/ui/core/library.js",
+        "sap/ui/core/tmpl/DOMAttribute.js"
       ]
     },
     {
@@ -8914,6 +10416,7 @@
         "jquery.sap.global.js",
         "sap/ui/core/Core.js",
         "sap/ui/core/tmpl/Template.js",
+        "sap/ui/core/tmpl/TemplateControl.js",
         "sap/ui/thirdparty/handlebars.js",
         "sap/ui/base/ManagedObject.js"
       ]
@@ -8925,6 +10428,7 @@
         "jquery.sap.global.js",
         "sap/ui/core/Core.js",
         "sap/ui/core/tmpl/Template.js",
+        "sap/ui/core/tmpl/TemplateControl.js",
         "sap/ui/thirdparty/handlebars.js",
         "sap/ui/base/ManagedObject.js"
       ]
@@ -8936,7 +10440,12 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/base/ManagedObject.js",
-        "sap/ui/core/Control.js"
+        "sap/ui/base/BindingParser.js",
+        "sap/ui/core/Control.js",
+        "sap/ui/core/RenderManager.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/tmpl/TemplateControl.js"
       ]
     },
     {
@@ -8949,7 +10458,12 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/base/ManagedObject.js",
-        "sap/ui/core/Control.js"
+        "sap/ui/base/BindingParser.js",
+        "sap/ui/core/Control.js",
+        "sap/ui/core/RenderManager.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/tmpl/TemplateControl.js"
       ]
     },
     {
@@ -8959,10 +10473,11 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/Control.js",
-        "sap/ui/core/UIArea.js",
         "sap/ui/core/DeclarativeSupport.js",
         "sap/ui/core/library.js",
-        "sap/ui/core/tmpl/DOMElement.js"
+        "sap/ui/core/UIArea.js",
+        "sap/ui/core/tmpl/DOMElement.js",
+        "sap/ui/core/tmpl/Template.js"
       ]
     },
     {
@@ -8975,10 +10490,11 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/core/Control.js",
-        "sap/ui/core/UIArea.js",
         "sap/ui/core/DeclarativeSupport.js",
         "sap/ui/core/library.js",
-        "sap/ui/core/tmpl/DOMElement.js"
+        "sap/ui/core/UIArea.js",
+        "sap/ui/core/tmpl/DOMElement.js",
+        "sap/ui/core/tmpl/Template.js"
       ]
     },
     {
@@ -9120,16 +10636,14 @@
       "module": "sap/ui/core/util/File.js",
       "isDebug": true,
       "required": [
-        "jquery.sap.global.js",
-        "sap/ui/Device.js"
+        "jquery.sap.global.js"
       ]
     },
     {
       "name": "util/File.js",
       "module": "sap/ui/core/util/File.js",
       "required": [
-        "jquery.sap.global.js",
-        "sap/ui/Device.js"
+        "jquery.sap.global.js"
       ]
     },
     {
@@ -9160,6 +10674,11 @@
         "sap/ui/Device.js",
         "sap/ui/base/ManagedObject.js",
         "sap/ui/thirdparty/sinon.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/sinon-ie.js",
+        "sap/ui/core/util/MockServerAnnotationsHandler.js",
+        "sap/ui/core/util/DraftEnabledMockServer.js"
       ]
     },
     {
@@ -9170,6 +10689,11 @@
         "sap/ui/Device.js",
         "sap/ui/base/ManagedObject.js",
         "sap/ui/thirdparty/sinon.js"
+      ],
+      "condRequired": [
+        "sap/ui/thirdparty/sinon-ie.js",
+        "sap/ui/core/util/MockServerAnnotationsHandler.js",
+        "sap/ui/core/util/DraftEnabledMockServer.js"
       ]
     },
     {

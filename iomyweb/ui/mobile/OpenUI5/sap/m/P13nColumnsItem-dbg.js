@@ -17,7 +17,7 @@ sap.ui.define([
 	 * @param {object} [mSettings] initial settings for the new control
 	 * @class Type for <code>columnsItems</code> aggregation in P13nColumnsPanel control.
 	 * @extends sap.ui.core.Item
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @constructor
 	 * @author SAP SE
 	 * @public
@@ -73,12 +73,12 @@ sap.ui.define([
 				}, // don't set a default value
 
 				/**
-				 * Defines role. The role is reflected in the manner how the dimension will influence the chart layout.
+				 * This property contains the total flag of a table column.
 				 *
-				 * @since 1.34.0
+				 * @since 1.26.0
 				 */
-				role: {
-					type: "string"
+				total: {
+					type: "boolean"
 				}
 			}
 		}

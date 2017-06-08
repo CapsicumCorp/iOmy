@@ -7,12 +7,9 @@
 // Provides class sap.ui.dt.AggregationOverlay.
 sap.ui.define([
 	'jquery.sap.global',
-	'sap/ui/dt/Overlay',
-	'sap/ui/dt/DOMUtil',
-	'sap/ui/dt/ElementUtil',
-	'sap/ui/dt/OverlayUtil'
+	'sap/ui/dt/Overlay'
 ],
-function(jQuery, Overlay, DOMUtil, ElementUtil, OverlayUtil) {
+function(jQuery, Overlay) {
 	"use strict";
 
 
@@ -28,7 +25,7 @@ function(jQuery, Overlay, DOMUtil, ElementUtil, OverlayUtil) {
 	 * @extends sap.ui.core.Overlay
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @private
@@ -96,17 +93,10 @@ function(jQuery, Overlay, DOMUtil, ElementUtil, OverlayUtil) {
 	AggregationOverlay.prototype.getAssociatedDomRef = function() {
 		var oElement = this.getElementInstance();
 		var sAggregationName = this.getAggregationName();
-
-		var oElementDomRef = ElementUtil.getDomRef(oElement);
-		if (oElementDomRef) {
-			var oDesignTimeMetadata = this.getDesignTimeMetadata();
-			var vAggregationDomRef = oDesignTimeMetadata.getDomRef();
-			if (typeof vAggregationDomRef === "function") {
-				return vAggregationDomRef.call(oElement, sAggregationName);
-			} else if (typeof vAggregationDomRef === "string") {
-				return DOMUtil.getDomRefForCSSSelector(oElementDomRef, vAggregationDomRef);
-			}
-		}
+		var oDesignTimeMetadata = this.getDesignTimeMetadata();
+		var vDomRef = oDesignTimeMetadata.getDomRef();
+		var vAggregationDomRef = oDesignTimeMetadata.getAssociatedDomRef(oElement, vDomRef, sAggregationName);
+		return vAggregationDomRef;
 	};
 
 	/**

@@ -43,6 +43,12 @@ sap.ui.define(["jquery.sap.global", "sap/m/Select", "sap/ui/Device", "./library"
 
 	HierarchicalSelect.POPOVER_MIN_WIDTH_REM = 11;
 
+	HierarchicalSelect.prototype.onAfterRendering = function (){
+		Select.prototype.onAfterRendering.apply(this, arguments);
+			/*  incident 1680116122. Redundant tab comes from the select, and it's undesired */
+			this.$().attr("tabindex", "-1");
+	};
+
 	HierarchicalSelect.prototype.onAfterRenderingPicker = function () {
 
 		Select.prototype.onAfterRenderingPicker.call(this);
@@ -89,10 +95,12 @@ sap.ui.define(["jquery.sap.global", "sap/m/Select", "sap/ui/Device", "./library"
 	});
 
 	HierarchicalSelect.prototype._createDialog = function () {
+		var oDialog = Select.prototype._createDialog.call(this),
+			oCustomHeader = oDialog.getCustomHeader();
 
-		var oDialog = Select.prototype._createDialog.call(this);
-
-		oDialog.getCustomHeader().addStyleClass("sapUxAPHierarchicalSelect");
+		if (oCustomHeader){
+			oCustomHeader.addStyleClass("sapUxAPHierarchicalSelect");
+		}
 
 		return oDialog;
 
@@ -138,21 +146,15 @@ sap.ui.define(["jquery.sap.global", "sap/m/Select", "sap/ui/Device", "./library"
 	 * in order to ensure that min-width is not smaller than sap.uxap.HierarchicalSelect.POPOVER_MIN_WIDTH_REM
 	 */
 	HierarchicalSelect.prototype._onAfterRenderingPopover = function () {
+		var oPopover = this.getPicker(),
+			oPopoverDomRef = oPopover.getDomRef("cont"),
+			sMinWidth = oPopoverDomRef.style.minWidth;
 
-		Select.prototype._onAfterRenderingPopover.call(this);
-
-		// ensure popover min-width is not smaller than sap.uxap.HierarchicalSelect.POPOVER_MIN_WIDTH_REM
-		if (Device.system.tablet || Device.system.desktop) {
-
-			var oPopover = this.getPicker(),
-				sMinWidth = oPopover.getDomRef().style.minWidth;
-
-			if (jQuery.sap.endsWith(sMinWidth, "rem")) {
-				sMinWidth = sMinWidth.substring(0, sMinWidth.length - 3);
-				var iMinWidth = parseFloat(sMinWidth);
-				if (iMinWidth < HierarchicalSelect.POPOVER_MIN_WIDTH_REM) {
-					oPopover._setMinWidth(HierarchicalSelect.POPOVER_MIN_WIDTH_REM + "rem");
-				}
+		if (jQuery.sap.endsWith(sMinWidth, "rem")) {
+			sMinWidth = sMinWidth.substring(0, sMinWidth.length - 3);
+			var iMinWidth = parseFloat(sMinWidth);
+			if (iMinWidth < HierarchicalSelect.POPOVER_MIN_WIDTH_REM && oPopoverDomRef) {
+				oPopoverDomRef.style.minWidth = HierarchicalSelect.POPOVER_MIN_WIDTH_REM + "rem";
 			}
 		}
 	};

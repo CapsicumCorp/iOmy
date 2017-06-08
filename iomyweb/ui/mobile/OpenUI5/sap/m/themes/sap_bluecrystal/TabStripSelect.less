@@ -40,7 +40,7 @@
 	}
 }
 
-.sap-phone {
+html.sap-phone {
 	.sapMSlt.sapMTSSlt {
 		background: @sapUiLightestBG;
 		&.sapMSltPressed {
@@ -50,8 +50,16 @@
 		}
 	}
 
-	.sapMDialogScroll {
-		background: @sapUiLightestBG
+	.sapMTSSltDialog .sapMDialogSection {
+		background: @sapUiLightestBG;
 	}
 
+	.sapMSltBar {
+		&.sapMTSSltBar::after {
+			background: @sapUiButtonActiveBackground;
+			color: @sapUiButtonActiveTextColor;
+			text-shadow: none;
+			border: @sapUiButtonActiveBorderColor;
+		}
+	}
 }

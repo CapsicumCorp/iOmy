@@ -7,27 +7,12 @@
   border-bottom: 0;
 }
 
-.sapMNLG-Header > .sapMTitle {
+.sapMNLG-Header > .sapMNLG-Title {
   font-size: @sapMFontLargeSize;
 }
 
-.sapMNLG-None {
-  background-color: @sapUiNeutralBorder;
-}
-
-.sapMNLG-Low {
-  background-color: @sapUiSuccessBorder;
-}
-
-.sapMNLG-Medium {
-  background-color: @sapUiWarningBorder;
-}
-
-.sapMNLG-High {
-  background-color: @sapUiErrorBorder;
-}
-
 .sapMNLG .sapMNLI {
+  margin-top: 0;
   background-color:  lighten(@sapUiExtraLightBG,3);
   border-top: 1px solid @sapUiExtraLightBorder;
 }
@@ -42,7 +27,7 @@
 
 // Focus Styles ========================================================================================================
 
-.sap-desktop .sapMLIB.sapMNLG:focus {
+html.sap-desktop .sapMLIB.sapMNLG:focus {
   outline: none;
 }
 
@@ -52,7 +37,8 @@
   content: " ";
   top: 1px;
   right: 1px;
-  bottom: 0.5625rem;
+  bottom: 1px;
   left: 1px;
   z-index: 2;
+  pointer-events: none;
 }

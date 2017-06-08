@@ -5,8 +5,8 @@
  */
 
 // Provides class sap.ui.core.support.plugins.Selector (Selector support plugin)
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Popup', 'sap/ui/core/support/Plugin'],
-	function(jQuery, Popup, Plugin) {
+sap.ui.define(['jquery.sap.global', 'sap/ui/core/Popup', '../Plugin', '../Support'],
+	function(jQuery, Popup, Plugin, Support) {
 	"use strict";
 
 
@@ -18,8 +18,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Popup', 'sap/ui/core/support/Pl
 		 * @class This class represents the selector plugin for the support tool functionality of UI5. This class is internal and all its functions must not be used by an application.
 		 *
 		 * @abstract
-		 * @extends sap.ui.base.Object
-		 * @version 1.34.9
+		 * @extends sap.ui.core.support.Plugin
+		 * @version 1.44.14
 		 * @constructor
 		 * @private
 		 * @alias sap.ui.core.support.plugins.Selector
@@ -116,7 +116,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Popup', 'sap/ui/core/support/Pl
 						jPopupRef.height(jRef.outerHeight());
 						oPlugin._oPopup.open(0, "BeginTop", "BeginTop", jRef[0], "0 0", "none");
 						if (bSend) {
-							sap.ui.core.support.Support.getStub().sendEvent(oPlugin.getId() + "Select", getElementDetailsForEvent(oElem, oPlugin));
+							Support.getStub().sendEvent(oPlugin.getId() + "Select", getElementDetailsForEvent(oElem, oPlugin));
 						}
 						setTimeout(function(){
 							oPlugin._oPopup.close(0);

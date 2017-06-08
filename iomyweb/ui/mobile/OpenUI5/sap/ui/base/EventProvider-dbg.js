@@ -18,7 +18,7 @@ sap.ui.define(['jquery.sap.global', './Event', './Object', './ObjectPool'],
 	 * @abstract
 	 * @extends sap.ui.base.Object
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @constructor
 	 * @public
 	 * @alias sap.ui.base.EventProvider
@@ -39,12 +39,14 @@ sap.ui.define(['jquery.sap.global', './Event', './Object', './ObjectPool'],
 
 	});
 
+	var EVENT__LISTENERS_CHANGED = "EventHandlerChange";
+
 	/**
 	 * Map of event names and ids, that are provided by this class
 	 * @private
 	 * @static
 	 */
-	EventProvider.M_EVENTS = {EventHandlerChange:"EventHandlerChange"};
+	EventProvider.M_EVENTS = {EventHandlerChange:EVENT__LISTENERS_CHANGED};
 
 	/**
 	 * Pool is defined on the prototype to be shared among all EventProviders
@@ -71,6 +73,7 @@ sap.ui.define(['jquery.sap.global', './Event', './Object', './ObjectPool'],
 	 * @public
 	 */
 	EventProvider.prototype.attachEvent = function(sEventId, oData, fnFunction, oListener) {
+		var mEventRegistry = this.mEventRegistry;
 		jQuery.sap.assert(typeof (sEventId) === "string" && sEventId, "EventProvider.attachEvent: sEventId must be a non-empty string");
 		if (typeof (oData) === "function") {
 		//one could also increase the check in the line above
@@ -82,15 +85,17 @@ sap.ui.define(['jquery.sap.global', './Event', './Object', './ObjectPool'],
 		jQuery.sap.assert(typeof (fnFunction) === "function", "EventProvider.attachEvent: fnFunction must be a function");
 		jQuery.sap.assert(!oListener || typeof (oListener) === "object", "EventProvider.attachEvent: oListener must be empty or an object");
 
-		var aEventListeners = this.mEventRegistry[sEventId];
+		var aEventListeners = mEventRegistry[sEventId];
 		if ( !Array.isArray(aEventListeners) ) {
-			aEventListeners = this.mEventRegistry[sEventId] = [];
+			aEventListeners = mEventRegistry[sEventId] = [];
 		}
 
 		aEventListeners.push({oListener:oListener, fFunction:fnFunction, oData: oData});
 
 		// Inform interested parties about changed EventHandlers
-		this.fireEvent(EventProvider.M_EVENTS.EventHandlerChange, {EventId: sEventId, type: 'listenerAttached'});
+		if ( mEventRegistry[EVENT__LISTENERS_CHANGED] ) {
+			this.fireEvent(EVENT__LISTENERS_CHANGED, {EventId: sEventId, type: 'listenerAttached'});
+		}
 
 		return this;
 	};
@@ -121,6 +126,7 @@ sap.ui.define(['jquery.sap.global', './Event', './Object', './ObjectPool'],
 			fnFunction = oData;
 			oData = undefined;
 		}
+		jQuery.sap.assert(typeof (fnFunction) === "function", "EventProvider.attachEventOnce: fnFunction must be a function");
 		function fnOnce() {
 			this.detachEvent(sEventId, fnOnce);  // ‘this’ is always the control, due to the context ‘undefined’ in the attach call below
 			fnFunction.apply(oListener || this, arguments);  // needs to do the same resolution as in fireEvent
@@ -144,11 +150,12 @@ sap.ui.define(['jquery.sap.global', './Event', './Object', './ObjectPool'],
 	 * @public
 	 */
 	EventProvider.prototype.detachEvent = function(sEventId, fnFunction, oListener) {
+		var mEventRegistry = this.mEventRegistry;
 		jQuery.sap.assert(typeof (sEventId) === "string" && sEventId, "EventProvider.detachEvent: sEventId must be a non-empty string" );
 		jQuery.sap.assert(typeof (fnFunction) === "function", "EventProvider.detachEvent: fnFunction must be a function");
 		jQuery.sap.assert(!oListener || typeof (oListener) === "object", "EventProvider.detachEvent: oListener must be empty or an object");
 
-		var aEventListeners = this.mEventRegistry[sEventId];
+		var aEventListeners = mEventRegistry[sEventId];
 		if ( !Array.isArray(aEventListeners) ) {
 			return this;
 		}
@@ -167,12 +174,12 @@ sap.ui.define(['jquery.sap.global', './Event', './Object', './ObjectPool'],
 		}
 		// If we just deleted the last registered EventHandler, remove the whole entry from our map.
 		if (aEventListeners.length == 0) {
-			delete this.mEventRegistry[sEventId];
+			delete mEventRegistry[sEventId];
 		}
 
-		if (bListenerDetached) {
+		if (bListenerDetached && mEventRegistry[EVENT__LISTENERS_CHANGED] ) {
 			// Inform interested parties about changed EventHandlers
-			this.fireEvent(EventProvider.M_EVENTS.EventHandlerChange, {EventId: sEventId, type: 'listenerDetached' });
+			this.fireEvent(EVENT__LISTENERS_CHANGED, {EventId: sEventId, type: 'listenerDetached' });
 		}
 
 		return this;

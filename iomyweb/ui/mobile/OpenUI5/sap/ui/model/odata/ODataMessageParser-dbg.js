@@ -8,16 +8,19 @@ sap.ui.define(["jquery.sap.global", "sap/ui/Device", "sap/ui/core/library", "sap
 	function(jQuery, Device, coreLibrary, URI, MessageParser, Message) {
 	"use strict";
 
+// shortcuts for enums
+var MessageType = coreLibrary.MessageType;
+
 /**
  * This map is used to translate back-end response severity values to the values defined in the
  * enumeration sap.ui.core.MessageType
  * @see sap.ui.core.ValueState
  */
 var mSeverityMap = {
-	"error":   sap.ui.core.MessageType.Error,
-	"warning": sap.ui.core.MessageType.Warning,
-	"success": sap.ui.core.MessageType.Success,
-	"info":    sap.ui.core.MessageType.Information
+	"error":   MessageType.Error,
+	"warning": MessageType.Warning,
+	"success": MessageType.Success,
+	"info":    MessageType.Information
 };
 
 /**
@@ -28,8 +31,8 @@ var mSeverityMap = {
  * @property {string} target - The target entity path for which the message is meant
  * @property {string} message - The error message description
  * @property {string} code - The error code (message)
- * @property {string} [@sap-severity] - The level of the error (alternatively in v2: oMessageObject.severity) can be one of "success", "info", "warning", "error"
- * @property {string} [severity] - The level of the error (alternatively in v4: oMessageObject.@sap-severity) can be one of "success", "info", "warning", "error"
+ * @property {string} [@sap-severity] - The level of the error (alternatively in V2: oMessageObject.severity) can be one of "success", "info", "warning", "error"
+ * @property {string} [severity] - The level of the error (alternatively in V4: oMessageObject.@sap-severity) can be one of "success", "info", "warning", "error"
  */
 
 /**
@@ -67,7 +70,7 @@ var mSeverityMap = {
  * @extends sap.ui.core.message.MessageParser
  *
  * @author SAP SE
- * @version 1.34.9
+ * @version 1.44.14
  * @public
  * @abstract
  * @alias sap.ui.model.odata.ODataMessageParser
@@ -276,7 +279,7 @@ ODataMessageParser.prototype._propagateMessages = function(aMessages, mRequestIn
 			sTarget = sTarget.substr(0, iPropertyPos + 1);
 		}
 
-		if (mAffectedTargets[sTarget]) {
+		if (mAffectedTargets[sTarget] && !this._lastMessages[i].getPersistent()) {
 			// Message belongs to targets handled/requested by this request
 			aRemovedMessages.push(this._lastMessages[i]);
 		} else {
@@ -316,6 +319,22 @@ ODataMessageParser.prototype._createMessage = function(oMessageObject, mRequestI
 
 	var sDescriptionUrl = oMessageObject.longtext_url ? oMessageObject.longtext_url : "";
 
+	var bPersistent = false;
+	if (!oMessageObject.target && oMessageObject.propertyref) {
+		oMessageObject.target = oMessageObject.propertyref;
+	}
+	// propertyRef is deprecated and should not be used if a target is specified
+	if (typeof oMessageObject.target === "undefined") {
+		oMessageObject.target = "";
+	}
+
+	if (oMessageObject.target.indexOf("/#TRANSIENT#") === 0) {
+		bPersistent = true;
+		oMessageObject.target = oMessageObject.target.substr(12);
+	} else if (oMessageObject.transient) {
+		bPersistent = true;
+	}
+
 	var sTarget = this._createTarget(oMessageObject, mRequestInfo);
 
 	return new Message({
@@ -325,7 +344,8 @@ ODataMessageParser.prototype._createMessage = function(oMessageObject, mRequestI
 		descriptionUrl: sDescriptionUrl,
 		target:    sTarget,
 		processor: this._processor,
-		technical: bIsTechnical
+		technical: bIsTechnical,
+		persistent: bPersistent
 	});
 };
 
@@ -425,13 +445,7 @@ ODataMessageParser.prototype._getFunctionTarget = function(mFunctionInfo, mReque
  * @private
  */
 ODataMessageParser.prototype._createTarget = function(oMessageObject, mRequestInfo) {
-	var sTarget = "";
-
-	if (oMessageObject.target) {
-		sTarget = oMessageObject.target;
-	} else if (oMessageObject.propertyref) {
-		sTarget = oMessageObject.propertyref;
-	}
+	var sTarget = oMessageObject.target;
 
 	if (sTarget.substr(0, 1) !== "/") {
 		var sRequestTarget = "";
@@ -493,7 +507,18 @@ ODataMessageParser.prototype._createTarget = function(oMessageObject, mRequestIn
  */
 ODataMessageParser.prototype._parseHeader = function(/* ref: */ aMessages, oResponse, mRequestInfo) {
 	var sField = this.getHeaderField();
-	if (!oResponse.headers || !oResponse.headers[sField]) {
+	if (!oResponse.headers) {
+		// No header set, nothing to process
+		return;
+	}
+
+	for (var sKey in oResponse.headers) {
+		if (sKey.toLowerCase() === sField.toLowerCase()) {
+			sField = sKey;
+		}
+	}
+
+	if (!oResponse.headers[sField]) {
 		// No header set, nothing to process
 		return;
 	}
@@ -539,7 +564,6 @@ ODataMessageParser.prototype._parseBody = function(/* ref: */ aMessages, oRespon
 
 	// Messages from an error response should contain duplicate messages - the main error should be the
 	// same as the first errordetail error. If this is the case, remove the first one.
-	// TODO: Check if this is actually correct, and if so, check if the below check can be improved
 	if (aMessages.length > 1) {
 		if (
 			aMessages[0].getCode()    == aMessages[1].getCode()    &&
@@ -562,7 +586,7 @@ ODataMessageParser.prototype._parseBody = function(/* ref: */ aMessages, oRespon
  */
 ODataMessageParser.prototype._parseBodyXML = function(/* ref: */ aMessages, oResponse, mRequestInfo, sContentType) {
 	try {
-		// TODO: I do not have a v4 service to test this with.
+		// TODO: I do not have a V4 service to test this with.
 
 		var oDoc = new DOMParser().parseFromString(oResponse.body, sContentType);
 		var aElements = getAllElements(oDoc, [ "error", "errordetail" ]);
@@ -571,7 +595,7 @@ ODataMessageParser.prototype._parseBodyXML = function(/* ref: */ aMessages, oRes
 
 			var oError = {};
 			// Manually set severity in case we get an error response
-			oError["severity"] = sap.ui.core.MessageType.Error;
+			oError["severity"] = MessageType.Error;
 
 			for (var n = 0; n < oNode.childNodes.length; ++n) {
 				var oChildNode = oNode.childNodes[n];
@@ -583,7 +607,7 @@ ODataMessageParser.prototype._parseBodyXML = function(/* ref: */ aMessages, oRes
 				}
 
 				if (sChildName === "message" && oChildNode.hasChildNodes() && oChildNode.firstChild.nodeType !== window.Node.TEXT_NODE) {
-					// Special case for v2 error message - the message is in the child node "value"
+					// Special case for V2 error message - the message is in the child node "value"
 					for (var m = 0; m < oChildNode.childNodes.length; ++m) {
 						if (oChildNode.childNodes[m].nodeName === "value") {
 							oError["message"] = oChildNode.childNodes[m].text || oChildNode.childNodes[m].textContent;
@@ -615,10 +639,10 @@ ODataMessageParser.prototype._parseBodyJSON = function(/* ref: */ aMessages, oRe
 
 		var oError;
 		if (oErrorResponse["error"]) {
-			// v4 response according to OData specification or v2 response according to MS specification and SAP message specification
+			// V4 response according to OData specification or V2 response according to MS specification and SAP message specification
 			oError = oErrorResponse["error"];
 		} else {
-			// Actual v2 response in some tested services
+			// Actual V2 response in some tested services
 			oError = oErrorResponse["odata.error"];
 		}
 
@@ -628,17 +652,17 @@ ODataMessageParser.prototype._parseBodyJSON = function(/* ref: */ aMessages, oRe
 		}
 
 		// Manually set severity in case we get an error response
-		oError["severity"] = sap.ui.core.MessageType.Error;
+		oError["severity"] = MessageType.Error;
 
 		aMessages.push(this._createMessage(oError, mRequestInfo, true));
 
 		// Check if more than one error has been returned from the back-end
 		var aFurtherErrors = null;
 		if (jQuery.isArray(oError.details)) {
-			// v4 errors
+			// V4 errors
 			aFurtherErrors = oError.details;
 		} else if (oError.innererror && jQuery.isArray(oError.innererror.errordetails)) {
-			// v2 errors
+			// V2 errors
 			aFurtherErrors = oError.innererror.errordetails;
 		} else {
 			// No further errors
@@ -699,20 +723,20 @@ ODataMessageParser.prototype._outputMesages = function(aMessages) {
 		var oMessage = aMessages[i];
 		var sOutput = "[OData Message] " + oMessage.getMessage() + " - " + oMessage.getDescription() + " (" + oMessage.getTarget() + ")";
 		switch (aMessages[i].getType()) {
-			case sap.ui.core.MessageType.Error:
+			case MessageType.Error:
 				jQuery.sap.log.error(sOutput);
 				break;
 
-			case sap.ui.core.MessageType.Warning:
+			case MessageType.Warning:
 				jQuery.sap.log.warning(sOutput);
 				break;
 
-			case sap.ui.core.MessageType.Success:
+			case MessageType.Success:
 				jQuery.sap.log.debug(sOutput);
 				break;
 
-			case sap.ui.core.MessageType.Information:
-			case sap.ui.core.MessageType.None:
+			case MessageType.Information:
+			case MessageType.None:
 			default:
 				jQuery.sap.log.info(sOutput);
 				break;

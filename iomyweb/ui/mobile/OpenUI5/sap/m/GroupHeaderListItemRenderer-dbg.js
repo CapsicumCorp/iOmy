@@ -27,13 +27,9 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', 'sap/ui/core/Rende
 		var oTable = oLI.getTable();
 
 		// for table render navigation column always
-		oTable && rm.write('<td role="gridcell" class="sapMListTblNavCol">');
+		oTable && rm.write('<td class="sapMListTblNavCol">');
 		ListItemBaseRenderer.renderType.apply(this, arguments);
 		oTable && rm.write('</td>');
-	};
-
-	// it is not necessary to handle non flex case
-	GroupHeaderListItemRenderer.handleNoFlex = function(rm, oLI) {
 	};
 
 	// GroupHeaderListItem does not respect counter property of the LIB
@@ -42,16 +38,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', 'sap/ui/core/Rende
 
 	// Returns aria accessibility role
 	GroupHeaderListItemRenderer.getAriaRole = function(oLI) {
-		return oLI.getTable() ? "row" : "option";
-	};
-
-	// Returns the inner aria describedby ids for the accessibility
-	GroupHeaderListItemRenderer.getAriaDescribedBy = function(oLI) {
-		// announce group header first
-		var sDescribedBy = this.getAriaAnnouncement("group_header"),
-			sBaseDescribedBy = ListItemBaseRenderer.getAriaDescribedBy.call(this, oLI) || "";
-
-		return sDescribedBy + " " + sBaseDescribedBy;
+		return oLI.getTable() ? "" : "option";
 	};
 
 	/**
@@ -87,7 +74,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', 'sap/ui/core/Rende
 		var oTable = oLI.getTable();
 
 		if (oTable) {
-			rm.write('<td class="sapMGHLICell" role="gridcell"');
+			rm.write('<td class="sapMGHLICell"');
 			rm.writeAttribute("colspan", oTable.getColSpan());
 			rm.write(">");
 		}
@@ -101,21 +88,22 @@ sap.ui.define(['jquery.sap.global', './ListItemBaseRenderer', 'sap/ui/core/Rende
 
 	GroupHeaderListItemRenderer.renderLIContent = function(rm, oLI) {
 		var sTextDir = oLI.getTitleTextDirection();
-		rm.write("<label class='sapMGHLITitle'");
+		rm.write("<span class='sapMGHLITitle'");
 
 		if (sTextDir != sap.ui.core.TextDirection.Inherit) {
 			rm.writeAttribute("dir", sTextDir.toLowerCase());
 		}
+
 		rm.write(">");
-
 		rm.writeEscaped(oLI.getTitle());
+		rm.write("</span>");
 
-		var iCount = oLI.getCount();
+		var iCount = oLI.getCount() || oLI.getCounter();
 		if (iCount) {
+			rm.write("<span class='sapMGHLICounter'>");
 			rm.writeEscaped(" (" + iCount + ")");
+			rm.write("</span>");
 		}
-
-		rm.write("</label>");
 	};
 
 	GroupHeaderListItemRenderer.addLegacyOutlineClass = function(rm, oLI) {

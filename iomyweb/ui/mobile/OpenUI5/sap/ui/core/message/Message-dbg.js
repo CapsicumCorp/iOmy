@@ -22,20 +22,21 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 * @extends sap.ui.base.Object
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 *
 	 * @param {object} [mParameters] (optional) a map which contains the following parameter properties:
-	 * {string} [mParameters.id] The message id: will be defaulted if no id is set
-	 * {string} [mParameters.message] The message text
-	 * {string} [mParameters.description] The message description
-	 * {sap.ui.core.MessageType} [mParameters.type] The message type
-	 * {string} [mParameters.code] The message code
-	 * {sap.ui.core.message.Messageprocessor} [mParameters.processor]
-	 * {string} [mParameters.target] The message target: The syntax MessageProcessor dependent. Read the documentation of the respective MessageProcessor.
-	 * {boolean} [mParameters.persistent] Sets message persistent: If persistent is set true the message
-	 * lifecycle controlled by Application
+	 * @param {string} [mParameters.id] The message id: will be defaulted if no id is set
+	 * @param {string} [mParameters.message] The message text
+	 * @param {string} [mParameters.description] The message description
+	 * @param {string} [mParameters.additionalText] The message additionalText
+	 * @param {sap.ui.core.MessageType} [mParameters.type] The message type
+	 * @param {string} [mParameters.code] The message code
+	 * @param {sap.ui.core.message.MessageProcessor} [mParameters.processor]
+	 * @param {string} [mParameters.target] The message target: The syntax MessageProcessor dependent. Read the documentation of the respective MessageProcessor.
+	 * @param {boolean} [mParameters.persistent] Sets message persistent: If persistent is set <code>true</code> the message lifecycle controlled by the application
+	 * @param {int} [mParameters.date=Date.now()] Sets message date which can be used to remove old messages. Number of milliseconds elapsed since 1 January 1970 00:00:00 UTC
 	 *
 	 * @public
 	 * @alias sap.ui.core.message.Message
@@ -49,7 +50,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 			this.message = mParameters.message;
 			this.description = mParameters.description;
 			this.descriptionUrl = mParameters.descriptionUrl;
-			this.type = mParameters.type;
+			this.additionalText = mParameters.additionalText;
+			this.setType(mParameters.type);
 			this.code = mParameters.code;
 			this.target = mParameters.target;
 			this.processor = mParameters.processor;
@@ -57,7 +59,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 			this.technical = mParameters.technical || false;
 			this.references = mParameters.references || {};
 			this.validation = !!mParameters.validation;
-
+			this.date = mParameters.date || Date.now();
 		}
 	});
 
@@ -104,6 +106,25 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 	 */
 	Message.prototype.getDescription = function() {
 		return this.description;
+	};
+
+	/**
+	 * Sets the additionaltext for the message or merge different additionaltext strings
+	 *
+	 * @private
+	 * @param {string} sAdditionalText The additionaltext.
+	 */
+	Message.prototype.setAdditionalText = function(sAdditionalText) {
+		this.additionalText = sAdditionalText;
+	};
+
+	/**
+	 * Returns the messages additional text.
+	 *
+	 * @returns {string} The additionaltext
+	 */
+	Message.prototype.getAdditionalText = function() {
+		return this.additionalText;
 	};
 
 	/**
@@ -270,6 +291,24 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './MessageProcessor'],
 				}
 			}
 		}
+	};
+
+	/**
+	 * Set the date of the message, this will automatically be set on message creation
+	 *
+	 * @param {int} iDate The message date in number of milliseconds elapsed since 1 January 1970 00:00:00 UTC. As returned by Date.now().
+	 */
+	Message.prototype.setDate = function(iDate) {
+		this.date = iDate;
+	};
+
+	/**
+	 * Set the date of the message
+	 *
+	 *  @returns {int} The message date in number of milliseconds elapsed since 1 January 1970 00:00:00 UTC. As returned by Date.now().
+	 */
+	Message.prototype.getDate = function() {
+		return this.date;
 	};
 
 	return Message;

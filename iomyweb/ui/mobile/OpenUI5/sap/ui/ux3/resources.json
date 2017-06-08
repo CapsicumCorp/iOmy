@@ -125,6 +125,9 @@
         "sap/ui/core/Control.js",
         "sap/ui/core/ResizeHandler.js",
         "sap/ui/ux3/library.js"
+      ],
+      "condRequired": [
+        "sap/ui/model/SelectionModel.js"
       ]
     },
     {
@@ -139,6 +142,9 @@
         "sap/ui/core/Control.js",
         "sap/ui/core/ResizeHandler.js",
         "sap/ui/ux3/library.js"
+      ],
+      "condRequired": [
+        "sap/ui/model/SelectionModel.js"
       ]
     },
     {
@@ -594,17 +600,11 @@
     {
       "name": "FeedRenderer-dbg.js",
       "module": "sap/ui/ux3/FeedRenderer.js",
-      "isDebug": true,
-      "required": [
-        "jquery.sap.global.js"
-      ]
+      "isDebug": true
     },
     {
       "name": "FeedRenderer.js",
-      "module": "sap/ui/ux3/FeedRenderer.js",
-      "required": [
-        "jquery.sap.global.js"
-      ]
+      "module": "sap/ui/ux3/FeedRenderer.js"
     },
     {
       "name": "Feeder-dbg.js",
@@ -666,6 +666,9 @@
         "sap/ui/core/delegate/ItemNavigation.js",
         "sap/ui/ux3/library.js",
         "jquery.sap.dom.js"
+      ],
+      "condRequired": [
+        "sap/ui/commons/Menu.js"
       ]
     },
     {
@@ -681,6 +684,9 @@
         "sap/ui/core/delegate/ItemNavigation.js",
         "sap/ui/ux3/library.js",
         "jquery.sap.dom.js"
+      ],
+      "condRequired": [
+        "sap/ui/commons/Menu.js"
       ]
     },
     {
@@ -754,7 +760,7 @@
       "isDebug": true,
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/core/theming/Parameters.js"
+        "sap/ui/core/Icon.js"
       ]
     },
     {
@@ -762,7 +768,7 @@
       "module": "sap/ui/ux3/NotificationBarRenderer.js",
       "required": [
         "jquery.sap.global.js",
-        "sap/ui/core/theming/Parameters.js"
+        "sap/ui/core/Icon.js"
       ]
     },
     {
@@ -978,6 +984,10 @@
         "sap/ui/core/Control.js",
         "sap/ui/core/theming/Parameters.js",
         "sap/ui/ux3/library.js"
+      ],
+      "condRequired": [
+        "jquery.sap.script.js",
+        "sap/ui/ux3/ShellPersonalization.js"
       ]
     },
     {
@@ -993,6 +1003,10 @@
         "sap/ui/core/Control.js",
         "sap/ui/core/theming/Parameters.js",
         "sap/ui/ux3/library.js"
+      ],
+      "condRequired": [
+        "jquery.sap.script.js",
+        "sap/ui/ux3/ShellPersonalization.js"
       ]
     },
     {
@@ -1033,6 +1047,10 @@
         "sap/ui/base/EventProvider.js",
         "sap/ui/commons/Button.js",
         "sap/ui/commons/Dialog.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/theming/Parameters.js",
+        "sap/ui/ux3/ShellColorPicker.js"
       ]
     },
     {
@@ -1043,6 +1061,10 @@
         "sap/ui/base/EventProvider.js",
         "sap/ui/commons/Button.js",
         "sap/ui/commons/Dialog.js"
+      ],
+      "condRequired": [
+        "sap/ui/core/theming/Parameters.js",
+        "sap/ui/ux3/ShellColorPicker.js"
       ]
     },
     {
@@ -1269,6 +1291,13 @@
       ]
     },
     {
+      "name": "library-preload.js",
+      "merged": true
+    },
+    {
+      "name": "library-preload.js.map"
+    },
+    {
       "name": "library-preload.json",
       "merged": true
     },
@@ -1445,6 +1474,12 @@
       "raw": "messagebundle.properties"
     },
     {
+      "name": "messagebundle_ms.properties",
+      "module": "sap/ui/ux3/messagebundle_ms.properties",
+      "locale": "ms",
+      "raw": "messagebundle.properties"
+    },
+    {
       "name": "messagebundle_nl.properties",
       "module": "sap/ui/ux3/messagebundle_nl.properties",
       "locale": "nl",
@@ -1549,102 +1584,127 @@
     },
     {
       "name": "themes/base/ActionBar.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/CollectionInspector.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/DataSet.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/DataSetSimpleView.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Exact.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ExactArea.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ExactBrowser.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ExactList.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/FacetFilter.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/FacetFilterList.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Feed.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/FeedChunk.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Feeder.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/NavigationBar.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/NotificationBar.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Overlay.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/OverlayContainer.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/OverlayDialog.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/QuickView.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/Shell.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ShellColorPicker.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ShellPersonalization.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ThingInspector.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ThingViewer.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/ToolPopup.less",
+      "designtime": true,
       "theme": "base"
     },
     {
@@ -1983,14 +2043,17 @@
     },
     {
       "name": "themes/base/library.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/library.source.less",
+      "designtime": true,
       "theme": "base"
     },
     {
       "name": "themes/base/shared.less",
+      "designtime": true,
       "theme": "base"
     },
     {
@@ -1999,98 +2062,122 @@
     },
     {
       "name": "themes/sap_hcb/ActionBar.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/CollectionInspector.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/DataSet.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/DataSetSimpleView.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Exact.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ExactArea.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ExactBrowser.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ExactList.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/FacetFilter.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/FacetFilterList.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Feed.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/FeedChunk.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Feeder.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/NavigationBar.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/NotificationBar.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Overlay.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/OverlayContainer.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/QuickView.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/Shell.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ShellColorPicker.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ShellPersonalization.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ThingInspector.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ThingViewer.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/ToolPopup.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
@@ -2111,6 +2198,14 @@
     },
     {
       "name": "themes/sap_hcb/img-RTL/menu_unlisten.png",
+      "theme": "sap_hcb"
+    },
+    {
+      "name": "themes/sap_hcb/img-RTL/navigationbar/facetNext.png",
+      "theme": "sap_hcb"
+    },
+    {
+      "name": "themes/sap_hcb/img-RTL/navigationbar/facetPrev.png",
       "theme": "sap_hcb"
     },
     {
@@ -2207,6 +2302,14 @@
     },
     {
       "name": "themes/sap_hcb/img/menu_unlisten.png",
+      "theme": "sap_hcb"
+    },
+    {
+      "name": "themes/sap_hcb/img/navigationbar/facetNext.png",
+      "theme": "sap_hcb"
+    },
+    {
+      "name": "themes/sap_hcb/img/navigationbar/facetPrev.png",
       "theme": "sap_hcb"
     },
     {
@@ -2309,14 +2412,17 @@
     },
     {
       "name": "themes/sap_hcb/library.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/library.source.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {
       "name": "themes/sap_hcb/shared.less",
+      "designtime": true,
       "theme": "sap_hcb"
     }
   ]

@@ -20,11 +20,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/model/Selecti
 	 * @class
 	 * Collection
 	 * @extends sap.ui.core.Element
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.9.0
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.Collection
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */

@@ -20,10 +20,10 @@ function(ManagedObject) {
 	 * @class
 	 * The Plugin allows to handle the overlays and aggregation overlays from the DesignTime
 	 * The Plugin should be overriden by the real plugin implementations, which define some actions through events attached to an overlays
-	 * @extends sap.ui.core.ManagedObject
+	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @private
@@ -44,13 +44,23 @@ function(ManagedObject) {
 				 * DesignTime where this plugin will be used
 				 */
 				designTime : { // its defined as a property because spa.ui.dt.designTime is a managed object and UI5 only allows associations for elements
-					type : "sap.ui.dt.DesignTime",
+					type : "object",
+					multiple : false
+				},
+
+				commandFactory : {
+					type : "object",
 					multiple : false
 				}
 			},
 			associations : {
 			},
 			events : {
+				elementModified : {
+					command : {
+						type : "sap.ui.dt.command.BaseCommand"
+					}
+				}
 			}
 		}
 	});
@@ -122,13 +132,13 @@ function(ManagedObject) {
 			oOldDesignTime.detachEvent("elementOverlayCreated", this._onElementOverlayCreated, this);
 		}
 
+		this.setProperty("designTime", oDesignTime);
+
 		if (oDesignTime) {
 			this._registerOverlays(oDesignTime);
 
 			oDesignTime.attachEvent("elementOverlayCreated", this._onElementOverlayCreated, this);
 		}
-
-		this.setProperty("designTime", oDesignTime);
 
 		return this;
 	};

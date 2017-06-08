@@ -523,8 +523,8 @@
 		"sux": "שומרית",
 		"sv": "שוודית",
 		"sw": "סווהילית",
+		"sw_CD": "סווהילי קונגולטזית",
 		"swb": "swb",
-		"swc": "סווהילי קונגולטזית",
 		"syc": "סירית קלאסית",
 		"syr": "סורית",
 		"szl": "szl",
@@ -622,6 +622,7 @@
 		"zza": "זאזא"
 	},
 	"scripts": {
+		"Adlm": "Adlm",
 		"Aghb": "Aghb",
 		"Ahom": "Ahom",
 		"Arab": "ערבי",
@@ -634,6 +635,7 @@
 		"Bass": "Bass",
 		"Batk": "Batk",
 		"Beng": "בנגלי",
+		"Bhks": "Bhks",
 		"Bopo": "בופומופו",
 		"Brah": "Brah",
 		"Brai": "ברייל",
@@ -661,6 +663,7 @@
 		"Grek": "יווני",
 		"Gujr": "גוג׳רטי",
 		"Guru": "גורמוקי",
+		"Hanb": "Hanb",
 		"Hang": "האנגול",
 		"Hani": "האן",
 		"Hano": "Hano",
@@ -677,6 +680,7 @@
 		"Hung": "הונגרי עתיק",
 		"Inds": "אינדוס",
 		"Ital": "איטלקי עתיק",
+		"Jamo": "Jamo",
 		"Java": "ג׳אוונזי",
 		"Jpan": "יפני",
 		"Kali": "Kali",
@@ -701,6 +705,7 @@
 		"Mahj": "Mahj",
 		"Mand": "Mand",
 		"Mani": "Mani",
+		"Marc": "Marc",
 		"Maya": "מאיה",
 		"Mend": "Mend",
 		"Merc": "Merc",
@@ -714,11 +719,13 @@
 		"Mymr": "מיאנמר",
 		"Narb": "Narb",
 		"Nbat": "Nbat",
+		"Newa": "Newa",
 		"Nkoo": "Nkoo",
 		"Ogam": "Ogam",
 		"Olck": "Olck",
 		"Orkh": "Orkh",
 		"Orya": "אורייה",
+		"Osge": "Osge",
 		"Osma": "Osma",
 		"Palm": "Palm",
 		"Pauc": "Pauc",
@@ -800,6 +807,7 @@
 		"Tale": "Tale",
 		"Talu": "Talu",
 		"Taml": "טמיל",
+		"Tang": "Tang",
 		"Tavt": "Tavt",
 		"Telu": "טלוגו",
 		"Tfng": "Tfng",
@@ -816,6 +824,7 @@
 		"Yiii": "Yiii",
 		"Zinh": "מורש",
 		"Zmth": "סימון מתמטי",
+		"Zsye": "Zsye",
 		"Zsym": "סימנים",
 		"Zxxx": "לא כתוב",
 		"Zyyy": "רגיל",
@@ -860,7 +869,6 @@
 		"AI": "אנגילה",
 		"AL": "אלבניה",
 		"AM": "ארמניה",
-		"AN": "אנטילים הולנדיים",
 		"AO": "אנגולה",
 		"AQ": "אנטארקטיקה",
 		"AR": "ארגנטינה",
@@ -1171,7 +1179,7 @@
 				"MMM": "LLL",
 				"MMMd": "d בMMM",
 				"MMMEd": "E, d בMMM",
-				"MMMMd": "MMMM d",
+				"MMMMd": "d בMMMM",
 				"ms": "mm:ss",
 				"y": "y",
 				"yM": "M.y",
@@ -1510,12 +1518,12 @@
 		"dayPeriods": {
 			"format": {
 				"abbreviated": [
-					"AM",
-					"PM"
+					"לפנה״צ",
+					"אחה״צ"
 				],
 				"narrow": [
-					"AM",
-					"PM"
+					"לפנה״צ",
+					"אחה״צ"
 				],
 				"wide": [
 					"לפנה״צ",
@@ -1524,16 +1532,16 @@
 			},
 			"stand-alone": {
 				"abbreviated": [
-					"AM",
-					"PM"
+					"לפנה״צ",
+					"אחה״צ"
 				],
 				"narrow": [
-					"AM",
-					"PM"
+					"לפנה״צ",
+					"אחה״צ"
 				],
 				"wide": [
-					"AM",
-					"PM"
+					"לפנה״צ",
+					"אחה״צ"
 				]
 			}
 		},
@@ -1592,7 +1600,7 @@
 				"MMM": "LLL",
 				"MMMd": "d בMMM",
 				"MMMEd": "E, d בMMM",
-				"MMMMd": "MMMM d",
+				"MMMMd": "d בMMMM",
 				"ms": "mm:ss",
 				"y": "y G",
 				"yyyy": "y G",
@@ -1932,12 +1940,12 @@
 		"dayPeriods": {
 			"format": {
 				"abbreviated": [
-					"AM",
-					"PM"
+					"לפנה״צ",
+					"אחה״צ"
 				],
 				"narrow": [
-					"AM",
-					"PM"
+					"לפנה״צ",
+					"אחה״צ"
 				],
 				"wide": [
 					"לפנה״צ",
@@ -1946,16 +1954,16 @@
 			},
 			"stand-alone": {
 				"abbreviated": [
-					"AM",
-					"PM"
+					"לפנה״צ",
+					"אחה״צ"
 				],
 				"narrow": [
-					"AM",
-					"PM"
+					"לפנה״צ",
+					"אחה״צ"
 				],
 				"wide": [
-					"AM",
-					"PM"
+					"לפנה״צ",
+					"אחה״צ"
 				]
 			}
 		},
@@ -2351,12 +2359,12 @@
 		"dayPeriods": {
 			"format": {
 				"abbreviated": [
-					"AM",
-					"PM"
+					"לפנה״צ",
+					"אחה״צ"
 				],
 				"narrow": [
-					"AM",
-					"PM"
+					"לפנה״צ",
+					"אחה״צ"
 				],
 				"wide": [
 					"לפנה״צ",
@@ -2365,16 +2373,16 @@
 			},
 			"stand-alone": {
 				"abbreviated": [
-					"AM",
-					"PM"
+					"לפנה״צ",
+					"אחה״צ"
 				],
 				"narrow": [
-					"AM",
-					"PM"
+					"לפנה״צ",
+					"אחה״צ"
 				],
 				"wide": [
-					"AM",
-					"PM"
+					"לפנה״צ",
+					"אחה״צ"
 				]
 			}
 		},
@@ -2395,6 +2403,425 @@
 			"233": "T",
 			"234": "S",
 			"235": "H"
+		}
+	},
+	"ca-persian": {
+		"dateFormats": {
+			"full": "EEEE, d בMMMM y G",
+			"long": "d בMMMM y G",
+			"medium": "d בMMM y G",
+			"short": "d.M.y GGGGG"
+		},
+		"timeFormats": {
+			"full": "H:mm:ss zzzz",
+			"long": "H:mm:ss z",
+			"medium": "H:mm:ss",
+			"short": "H:mm"
+		},
+		"dateTimeFormats": {
+			"full": "{1} בשעה {0}",
+			"long": "{1} בשעה {0}",
+			"medium": "{1}, {0}",
+			"short": "{1}, {0}",
+			"availableFormats": {
+				"d": "d",
+				"E": "ccc",
+				"Ed": "E ה-d",
+				"Ehm": "E h:mm a",
+				"EHm": "E HH:mm",
+				"Ehms": "E h:mm:ss a",
+				"EHms": "E HH:mm:ss",
+				"Gy": "y G",
+				"GyMMM": "MMM y G",
+				"GyMMMd": "d בMMM y G",
+				"GyMMMEd": "E, d בMMM y G",
+				"h": "‏h a",
+				"H": "H",
+				"hm": "h:mm a",
+				"Hm": "H:mm",
+				"hms": "h:mm:ss a",
+				"Hms": "H:mm:ss",
+				"M": "L",
+				"Md": "d.M",
+				"MEd": "E, d/M",
+				"MMM": "LLL",
+				"MMMd": "d בMMM",
+				"MMMEd": "E, d בMMM",
+				"MMMMd": "MMMM d",
+				"ms": "mm:ss",
+				"y": "y G",
+				"yyyy": "y G",
+				"yyyyM": "M.y G",
+				"yyyyMd": "d.M.y G",
+				"yyyyMEd": "E, d/M/y G",
+				"yyyyMM": "MM/y G",
+				"yyyyMMM": "MMM y G",
+				"yyyyMMMd": "d בMMM y G",
+				"yyyyMMMEd": "E, d בMMM y G",
+				"yyyyMMMM": "G y MMMM",
+				"yyyyQQQ": "G y QQQ",
+				"yyyyQQQQ": "G y QQQQ"
+			},
+			"appendItems": {
+				"Day": "{0} ({2}: {1})",
+				"Day-Of-Week": "{0} {1}",
+				"Era": "{1} {0}",
+				"Hour": "{0} ({2}: {1})",
+				"Minute": "{0} ({2}: {1})",
+				"Month": "{0} ({2}: {1})",
+				"Quarter": "{0} ({2}: {1})",
+				"Second": "{0} ({2}: {1})",
+				"Timezone": "{0} {1}",
+				"Week": "{0} ({2}: {1})",
+				"Year": "{1} {0}"
+			},
+			"intervalFormats": {
+				"intervalFormatFallback": "{0} – {1}",
+				"d": {
+					"d": "d–d"
+				},
+				"h": {
+					"a": "h a – h a",
+					"h": "h–h a"
+				},
+				"H": {
+					"H": "H–H"
+				},
+				"hm": {
+					"a": "h:mm a – h:mm a",
+					"h": "h:mm–h:mm a",
+					"m": "h:mm–h:mm a"
+				},
+				"Hm": {
+					"H": "H:mm–H:mm",
+					"m": "H:mm–H:mm"
+				},
+				"hmv": {
+					"a": "h:mm a – h:mm a v",
+					"h": "h:mm–h:mm a v",
+					"m": "h:mm–h:mm a v"
+				},
+				"Hmv": {
+					"H": "H:mm–H:mm v",
+					"m": "H:mm–H:mm v"
+				},
+				"hv": {
+					"a": "h a – h a v",
+					"h": "h–h a v"
+				},
+				"Hv": {
+					"H": "H–H v"
+				},
+				"M": {
+					"M": "M–M"
+				},
+				"Md": {
+					"d": "dd/MM – dd/MM",
+					"M": "dd/MM – dd/MM"
+				},
+				"MEd": {
+					"d": "EEEE dd/MM – EEEE dd/MM",
+					"M": "EEEE dd/MM – EEEE dd/MM"
+				},
+				"MMM": {
+					"M": "MMM–MMM"
+				},
+				"MMMd": {
+					"d": "d–d MMM",
+					"M": "d MMM – d MMM"
+				},
+				"MMMEd": {
+					"d": "EEEE d MMM – EEEE d MMM",
+					"M": "EEEE d MMM – EEEE d MMM"
+				},
+				"MMMM": {
+					"M": "LLLL–LLLL"
+				},
+				"y": {
+					"y": "y–y"
+				},
+				"yM": {
+					"M": "MM/y – MM/y",
+					"y": "MM/y – MM/y"
+				},
+				"yMd": {
+					"d": "dd/MM/y – dd/MM/y",
+					"M": "dd/MM/y – dd/MM/y",
+					"y": "dd/MM/y – dd/MM/y"
+				},
+				"yMEd": {
+					"d": "EEEE dd/MM/y – EEEE dd/MM/y",
+					"M": "EEEE dd/MM/y – EEEE dd/MM/y",
+					"y": "EEEE dd/MM/y – EEEE dd/MM/y"
+				},
+				"yMMM": {
+					"M": "MMM–MMM y",
+					"y": "MMM y – MMM y"
+				},
+				"yMMMd": {
+					"d": "d–d MMM y",
+					"M": "d MMM – d MMM y",
+					"y": "d MMM y – d MMM y"
+				},
+				"yMMMEd": {
+					"d": "EEEE d MMM – EEEE d MMM y",
+					"M": "EEEE d MMM – EEEE d MMM y",
+					"y": "EEEE d MMM y – EEEE d MMM y"
+				},
+				"yMMMM": {
+					"M": "MMMM – MMMM y G",
+					"y": "MMMM y–MMMM y"
+				}
+			}
+		},
+		"months": {
+			"format": {
+				"abbreviated": [
+					"Farvardin",
+					"Ordibehesht",
+					"Khordad",
+					"Tir",
+					"Mordad",
+					"Shahrivar",
+					"Mehr",
+					"Aban",
+					"Azar",
+					"Dey",
+					"Bahman",
+					"Esfand"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4",
+					"5",
+					"6",
+					"7",
+					"8",
+					"9",
+					"10",
+					"11",
+					"12"
+				],
+				"wide": [
+					"Farvardin",
+					"Ordibehesht",
+					"Khordad",
+					"Tir",
+					"Mordad",
+					"Shahrivar",
+					"Mehr",
+					"Aban",
+					"Azar",
+					"Dey",
+					"Bahman",
+					"Esfand"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"Farvardin",
+					"Ordibehesht",
+					"Khordad",
+					"Tir",
+					"Mordad",
+					"Shahrivar",
+					"Mehr",
+					"Aban",
+					"Azar",
+					"Dey",
+					"Bahman",
+					"Esfand"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4",
+					"5",
+					"6",
+					"7",
+					"8",
+					"9",
+					"10",
+					"11",
+					"12"
+				],
+				"wide": [
+					"Farvardin",
+					"Ordibehesht",
+					"Khordad",
+					"Tir",
+					"Mordad",
+					"Shahrivar",
+					"Mehr",
+					"Aban",
+					"Azar",
+					"Dey",
+					"Bahman",
+					"Esfand"
+				]
+			}
+		},
+		"days": {
+			"format": {
+				"abbreviated": [
+					"יום א׳",
+					"יום ב׳",
+					"יום ג׳",
+					"יום ד׳",
+					"יום ה׳",
+					"יום ו׳",
+					"שבת"
+				],
+				"narrow": [
+					"א׳",
+					"ב׳",
+					"ג׳",
+					"ד׳",
+					"ה׳",
+					"ו׳",
+					"ש׳"
+				],
+				"short": [
+					"א׳",
+					"ב׳",
+					"ג׳",
+					"ד׳",
+					"ה׳",
+					"ו׳",
+					"ש׳"
+				],
+				"wide": [
+					"יום ראשון",
+					"יום שני",
+					"יום שלישי",
+					"יום רביעי",
+					"יום חמישי",
+					"יום שישי",
+					"יום שבת"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"יום א׳",
+					"יום ב׳",
+					"יום ג׳",
+					"יום ד׳",
+					"יום ה׳",
+					"יום ו׳",
+					"שבת"
+				],
+				"narrow": [
+					"א׳",
+					"ב׳",
+					"ג׳",
+					"ד׳",
+					"ה׳",
+					"ו׳",
+					"ש׳"
+				],
+				"short": [
+					"א׳",
+					"ב׳",
+					"ג׳",
+					"ד׳",
+					"ה׳",
+					"ו׳",
+					"ש׳"
+				],
+				"wide": [
+					"יום ראשון",
+					"יום שני",
+					"יום שלישי",
+					"יום רביעי",
+					"יום חמישי",
+					"יום שישי",
+					"יום שבת"
+				]
+			}
+		},
+		"quarters": {
+			"format": {
+				"abbreviated": [
+					"רבעון 1",
+					"רבעון 2",
+					"רבעון 3",
+					"רבעון 4"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4"
+				],
+				"wide": [
+					"רבעון 1",
+					"רבעון 2",
+					"רבעון 3",
+					"רבעון 4"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"רבעון 1",
+					"רבעון 2",
+					"רבעון 3",
+					"רבעון 4"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4"
+				],
+				"wide": [
+					"רבעון 1",
+					"רבעון 2",
+					"רבעון 3",
+					"רבעון 4"
+				]
+			}
+		},
+		"dayPeriods": {
+			"format": {
+				"abbreviated": [
+					"לפנה״צ",
+					"אחה״צ"
+				],
+				"narrow": [
+					"לפנה״צ",
+					"אחה״צ"
+				],
+				"wide": [
+					"לפנה״צ",
+					"אחה״צ"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"לפנה״צ",
+					"אחה״צ"
+				],
+				"narrow": [
+					"לפנה״צ",
+					"אחה״צ"
+				],
+				"wide": [
+					"לפנה״צ",
+					"אחה״צ"
+				]
+			}
+		},
+		"era-wide": {
+			"0": "AP"
+		},
+		"era-abbreviated": {
+			"0": "AP"
+		},
+		"era-narrow": {
+			"0": "AP"
 		}
 	},
 	"dateFields": {
@@ -2997,13 +3424,13 @@
 		"CLP": 0,
 		"COP": 0,
 		"CRC": 0,
-		"CZK": 2,
+		"CZK": 0,
 		"DEFAULT": 2,
 		"DJF": 0,
 		"ESP": 0,
 		"GNF": 0,
 		"GYD": 0,
-		"HUF": 2,
+		"HUF": 0,
 		"IDR": 0,
 		"IQD": 0,
 		"IRR": 0,
@@ -3037,7 +3464,7 @@
 		"TMM": 0,
 		"TND": 3,
 		"TRL": 0,
-		"TWD": 2,
+		"TWD": 0,
 		"TZS": 0,
 		"UGX": 0,
 		"UYI": 0,
@@ -3056,7 +3483,7 @@
 	"weekData-weekendStart": 5,
 	"weekData-weekendEnd": 6,
 	"timeData": {
-		"_allowed": "H",
+		"_allowed": "H hB",
 		"_preferred": "H"
 	},
 	"eras-gregorian": {
@@ -3070,6 +3497,11 @@
 	"eras-islamic": {
 		"0": {
 			"_start": "622-7-15"
+		}
+	},
+	"eras-persian": {
+		"0": {
+			"_start": "622-01-01"
 		}
 	},
 	"eras-japanese": {

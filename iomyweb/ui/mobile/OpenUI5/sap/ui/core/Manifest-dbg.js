@@ -135,7 +135,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/thirdparty/URI
 	 * @class The Manifest class.
 	 * @extends sap.ui.base.Object
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @alias sap.ui.core.Manifest
 	 * @since 1.33.0
 	 */
@@ -345,8 +345,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/thirdparty/URI
 							//var sJsUrl = this.resolveUri(new URI(sFile.slice(0, m.index))).toString();
 							var sJsUrl = sComponentName.replace(/\./g, '/') + (sFile.slice(0, 1) === '/' ? '' : '/') + sFile.slice(0, m.index);
 							jQuery.sap.log.info("Component \"" + sComponentName + "\" is loading JS: \"" + sJsUrl + "\"");
-							// call internal require variant that accepts a requireJS path
-							jQuery.sap._requirePath(sJsUrl);
+							// call internal sap.ui.require variant that accepts a requireJS path and loads the module synchronously
+							sap.ui.requireSync(sJsUrl);
 						}
 					}
 				}
@@ -535,6 +535,23 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/thirdparty/URI
 		    sComponentName = mOptions && mOptions.componentName,
 		    bAsync = mOptions && mOptions.async,
 		    bFailOnError = mOptions && mOptions.failOnError;
+
+		// When loading the manifest via URL the language and client should be
+		// added as query parameter as it may contain language dependent texts
+		// or needs to be loaded from a specific client.
+		// If the language or the client is already provided it won't be overridden
+		// as this is expected to be only done by intension.
+		var oManifestUrl = new URI(sManifestUrl);
+		["sap-language", "sap-client"].forEach(function(sName) {
+			if (!oManifestUrl.hasQuery(sName)) {
+				var sValue = sap.ui.getCore().getConfiguration().getSAPParam(sName);
+				if (sValue) {
+					oManifestUrl.addQuery(sName, sValue);
+				}
+			}
+		});
+		sManifestUrl = oManifestUrl.toString();
+
 		jQuery.sap.log.info("Loading manifest via URL: " + sManifestUrl);
 		var oManifestJSON = jQuery.sap.loadResource({
 			url: sManifestUrl,

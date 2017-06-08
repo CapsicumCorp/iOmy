@@ -24,7 +24,7 @@ sap.ui.define([
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.34.9
+		 * @version 1.44.14
 		 *
 		 * @constructor
 		 * @public
@@ -109,7 +109,6 @@ sap.ui.define([
 			MINIMUM_STEPS: 3,
 			MAXIMUM_STEPS: 8,
 			ANIMATION_TIME: 300,
-			LOCK_TIME: 450,
 			SCROLL_OFFSET: 65
 		};
 
@@ -133,7 +132,7 @@ sap.ui.define([
 			this._saveInitialValidatedState();
 
 			var step = this._getStartingStep();
-			if (this._stepPath.indexOf(step) < 0) {
+			if (step && this._stepPath.indexOf(step) < 0) {
 				this._activateStep(step);
 				this._updateProgressNavigator();
 				this._setNextButtonPosition();
@@ -239,30 +238,44 @@ sap.ui.define([
 		};
 
 		/**
-		 * Goes to the given step.
+		 * Goes to the given step. The step must already be activated and visible. You can't use this method on steps
+		 * that haven't been reached yet.
 		 * @param {sap.m.WizardStep} step The step to go to.
 		 * @param {boolean} focusFirstStepElement Defines whether the focus should be changed to the first element.
 		 * @returns {sap.m.Wizard} Pointer to the control instance for chaining.
 		 * @public
 		 */
 		Wizard.prototype.goToStep = function (step, focusFirstStepElement) {
-			this._scrollLocked = true;
-			this._scroller.scrollTo(0, this._getStepScrollOffset(step), Wizard.CONSTANTS.ANIMATION_TIME);
+			if (!this.getVisible() || this._stepPath.indexOf(step) < 0) {
+				return this;
+			}
 
-			jQuery.sap.delayedCall(Wizard.CONSTANTS.LOCK_TIME, this, function () {
-				var progressNavigator = this._getProgressNavigator();
+			var that = this,
+				scrollProps = {
+					scrollTop: this._getStepScrollOffset(step)
+				},
+				animProps = {
+					queue: false,
+					duration: Wizard.CONSTANTS.ANIMATION_TIME,
+					start: function () {
+						that._scrollLocked = true;
+					},
+					complete: function () {
+						that._scrollLocked = false;
+						var progressNavigator = that._getProgressNavigator();
 
-				if (!progressNavigator) {
-					this._scrollLocked = false;
-					return;
-				}
+						if (!progressNavigator) {
+							return;
+						}
 
-				progressNavigator._updateCurrentStep(this._stepPath.indexOf(step) + 1);
-				this._scrollLocked = false;
-				if (focusFirstStepElement || focusFirstStepElement === undefined) {
-					this._focusFirstStepElement(step);
-				}
-			});
+						progressNavigator._updateCurrentStep(that._stepPath.indexOf(step) + 1, undefined, true);
+						if (focusFirstStepElement || focusFirstStepElement === undefined) {
+							that._focusFirstStepElement(step);
+						}
+					}
+				};
+
+			jQuery(this.getDomRef("step-container")).animate(scrollProps, animProps);
 
 			return this;
 		};
@@ -284,7 +297,7 @@ sap.ui.define([
 				return;
 			}
 
-			this._getProgressNavigator().discardProgress(index);
+			this._getProgressNavigator().discardProgress(index, true);
 
 			this._updateNextButtonState();
 			this._setNextButtonPosition();
@@ -385,7 +398,7 @@ sap.ui.define([
 
 		/**
 		 * Removes all steps from the Wizard.
-		 * @returns {sap.m.Control} Pointer to the Steps that were removed.
+		 * @returns {sap.m.WizardStep[]} Pointer to the Steps that were removed.
 		 * @public
 		 */
 		Wizard.prototype.removeAllSteps = function () {
@@ -401,7 +414,7 @@ sap.ui.define([
 		Wizard.prototype.destroySteps = function () {
 			this._resetStepCount();
 			this._getProgressNavigator().setStepCount(this._getStepCount());
-			return this.destroyAggregations("steps");
+			return this.destroyAggregation("steps");
 		};
 
 		/**************************************** PRIVATE METHODS ***************************************/
@@ -562,14 +575,11 @@ sap.ui.define([
 		 * @private
 		 */
 		Wizard.prototype._handleStepChanged = function (event) {
-			if (this._scrollLocked) {
-				return;
-			}
-
 			var previousStepIndex = event.getParameter("current") - 2;
 			var previousStep = this._stepPath[previousStepIndex];
 			var subsequentStep = this._getNextStep(previousStep, previousStepIndex);
-			this.goToStep(subsequentStep, true);
+			var focusFirstElement = sap.ui.Device.system.desktop ? true : false;
+			this.goToStep(subsequentStep, focusFirstElement);
 		};
 
 		/**
@@ -849,24 +859,27 @@ sap.ui.define([
 				return;
 			}
 
+
+
 			var scrollTop = event.target.scrollTop,
 				progressNavigator = this._getProgressNavigator(),
-				currentStepDOM = this._stepPath[progressNavigator.getCurrentStep() - 1].getDomRef(),
-				stepHeight = currentStepDOM.clientHeight,
+				currentStepDOM = this._stepPath[progressNavigator.getCurrentStep() - 1].getDomRef();
+
+			if (!currentStepDOM) {
+				return;
+			}
+
+			var stepHeight = currentStepDOM.clientHeight,
 				stepOffset = currentStepDOM.offsetTop,
 				stepChangeThreshold = 100;
 
-			this._scrollLocked = true;
-
-			if (scrollTop + stepChangeThreshold >= stepOffset + stepHeight) {
-				progressNavigator.nextStep();
+			if (scrollTop + stepChangeThreshold >= stepOffset + stepHeight && progressNavigator._isActiveStep(progressNavigator._currentStep + 1)) {
+				progressNavigator.nextStep(true);
 			}
 
 			if (scrollTop + stepChangeThreshold <= stepOffset) {
-				progressNavigator.previousStep();
+				progressNavigator.previousStep(true);
 			}
-
-			this._scrollLocked = false;
 		};
 
 		Wizard.prototype._containsStep = function (step) {

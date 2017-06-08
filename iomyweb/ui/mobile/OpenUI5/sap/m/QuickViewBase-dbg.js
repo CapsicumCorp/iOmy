@@ -22,7 +22,7 @@ sap.ui.define([
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -357,6 +357,8 @@ sap.ui.define([
 			mParams.isTopPage = this._oNavContainer.currentPageIsTopPage();
 			this.fireAfterNavigate(mParams);
 
+			this._setLinkWidth();
+
 			// Just wait for the next tick to apply the focus
 			jQuery.sap.delayedCall(0, this, this._restoreFocus);
 		};
@@ -382,6 +384,13 @@ sap.ui.define([
 			}
 		};
 
+		/**
+		 * Hook for classes extending QuickViewBase.
+		 * @private
+		 */
+		QuickViewBase.prototype._setLinkWidth = function() {
+
+		};
 
 		return QuickViewBase;
 

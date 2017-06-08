@@ -21,10 +21,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/ResizeHa
 	 * DataSetSimpleView provides a simple view example for DataSet usage.
 	 * @extends sap.ui.core.Control
 	 * @implements sap.ui.ux3.DataSetView
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.DataSetSimpleView
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -137,7 +138,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/ResizeHa
 	/**
 	 * Eventhandler for the selection of an Item
 	 *
-	 * @param {event} oEvent SelectionChanged event
+	 * @param {sap.ui.base.Event} oEvent SelectionChanged event
 	 * @protected
 	 */
 	DataSetSimpleView.prototype.handleSelection = function(oEvent) {
@@ -215,14 +216,21 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/ResizeHa
 	 * @protected
 	 */
 	DataSetSimpleView.prototype.updateView = function(aDiff) {
+		var i;
 		//if view is not rendered no Dom update is necessary
 		if (!this.getDomRef()) {
+			//just delete all items marked for delete
+			for (i = 0; i < aDiff.length; i++) {
+				if (aDiff[i].type === "delete") {
+					aDiff[i].item.destroy();
+				}
+			}
 			return;
 		}
 		var rm = sap.ui.getCore().createRenderManager(),
 			iLastLength = this.items.length;
 
-		for (var i = 0; i < aDiff.length; i++) {
+		for (i = 0; i < aDiff.length; i++) {
 			var oItem = aDiff[i].item;
 			var iIndex = aDiff[i].index;
 

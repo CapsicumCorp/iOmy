@@ -6,8 +6,6 @@
 .sapMPopover {
 	background-color: @sapUiGroupContentBackground;
 	border: 1px @sapUiContentForegroundBorderColor solid;
-	-webkit-box-shadow: 0px 0px 30px 2px fade(@sapUiDarkShadowTint, 15);
-	-moz-box-shadow: 0px 0px 30px 2px fade(@sapUiDarkShadowTint, 15);
 	box-shadow: 0px 0px 30px 2px fade(@sapUiDarkShadowTint, 15);
 	border-radius: 2px;
 }
@@ -143,7 +141,7 @@ html[data-sap-ui-browser='ie9'] .sapMPopoverSpecialFooter > .sapMBarMiddle > .sa
 	border-top-color: @sapUiPageFooterBackground;
 }
 
-.sap-desktop .sapMPopoverWithFooter > .sapMPopoverArrDown:after {
+html.sap-desktop .sapMPopoverWithFooter > .sapMPopoverArrDown:after {
 	border-top-color: @sapUiPageFooterBackground;
 }
 
@@ -273,8 +271,6 @@ html[dir=rtl][data-sap-ui-browser='ie9'] .sapMPopoverFooterAlignArr.sapMPopoverA
 	}
 
 	.sapMPopoverArrDown:after {
-		border-color: transparent;
-		border-top-color: @sapUiGroupContentBackground;
 		bottom: -7px;
 		left: -8px;
 	}
@@ -309,4 +305,8 @@ html[dir=rtl][data-sap-ui-browser='ie9'] .sapMPopoverFooterAlignArr.sapMPopoverA
 			padding-bottom: 0.25rem;
 		}
 	}
+}
+
+.sapMPopoverResizeHandle {
+	color: @sapUiContentForegroundBorderColor;
 }

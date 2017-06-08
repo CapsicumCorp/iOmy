@@ -20,7 +20,7 @@ sap.ui.define(['sap/ui/core/Element', 'sap/ui/core/Control'],
 		 * @extends sap.ui.core.Element
 		 *
 		 * @author SAP SE
-		 * @version 1.34.9
+		 * @version 1.44.14
 		 *
 		 * @constructor
 		 * @public
@@ -77,7 +77,7 @@ sap.ui.define(['sap/ui/core/Element', 'sap/ui/core/Control'],
 						/**
 						 * The value of the property.
 						 */
-						propertyValue : {type : "mixed"}
+						propertyValue : {type : "any"}
 					}
 				}
 			}

@@ -15,7 +15,7 @@ sap.ui.define([
 	 *
 	 * @class Utility functionality to work with overlays
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @private
 	 * @static
 	 * @since 1.30
@@ -34,25 +34,31 @@ sap.ui.define([
 	};
 
 	/**
-	 * Returns an object with parent, aggregation and index
+	 * Returns an object with public parent, aggregation in public parent and direct index
 	 */
 	OverlayUtil.getParentInformation = function(oElementOverlay) {
-		var oParent = oElementOverlay.getParentElementOverlay();
-		if (oParent) {
-			var oPublicParent = oParent.getElementInstance();
-			var sPublicParentAggregationName = oElementOverlay.getParentAggregationOverlay().getAggregationName();
-
-			var aChildren = ElementUtil.getAggregation(oPublicParent, sPublicParentAggregationName);
+		var oParentOverlay = oElementOverlay.getParentElementOverlay();
+		if (oParentOverlay){
+			//calculate index in direct (maybe in hidden tree) parent
+			var oParent = oParentOverlay.getElementInstance();
+			var sParentAggregationName = oElementOverlay.getParentAggregationOverlay().getAggregationName();
+			var aChildren = ElementUtil.getAggregation(oParent, sParentAggregationName);
 			var oElement = oElementOverlay.getElementInstance();
 			var iIndex = aChildren.indexOf(oElement);
 
+			var oPublicParentOverlay = oElementOverlay.getPublicParentElementOverlay();
+
 			return {
-				parent: oPublicParent,
-				aggregation: sPublicParentAggregationName,
+				publicParent : oPublicParentOverlay.getElementInstance(),
+				publicAggregation: oElementOverlay.getPublicParentAggregationOverlay().getAggregationName(),
+				parent: oParent,
+				aggregation : sParentAggregationName,
 				index: iIndex
 			};
 		} else {
 			return {
+				publicParent : null,
+				publicAggregation : "",
 				parent: null,
 				aggregation: "",
 				index: -1
@@ -65,11 +71,11 @@ sap.ui.define([
 	 *
 	 */
 	OverlayUtil.getClosestOverlayFor = function(oElement) {
-		if (!oElement || !oElement.getParent) {
+		if (!oElement) {
 			return null;
 		}
 
-		var oParent = oElement.getParent();
+		var oParent = oElement;
 		var oParentOverlay = OverlayRegistry.getOverlay(oParent);
 		while (oParent && !oParentOverlay) {
 			oParent = oParent.getParent();
@@ -340,6 +346,24 @@ sap.ui.define([
 		oOverlay.getChildren().forEach(function(oChildOverlay) {
 			that.iterateOverlayTree(oChildOverlay, fnCallback);
 		});
+	};
+
+
+	/**
+	 *
+	 */
+	OverlayUtil.isInOverlayContainer = function(oNode) {
+		if (oNode && jQuery(oNode).closest(".sapUiDtOverlay, #overlay-container").length) {
+			return true;
+		}
+	};
+
+	/**
+	 *
+	 */
+	OverlayUtil.getClosestOverlayForNode = function(oNode) {
+		var oElement = ElementUtil.getClosestElementForNode(oNode);
+		return OverlayUtil.getClosestOverlayFor(oElement);
 	};
 
 	return OverlayUtil;

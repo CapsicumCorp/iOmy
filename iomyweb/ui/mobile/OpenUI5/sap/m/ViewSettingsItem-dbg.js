@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Item'],
 	 * @extends sap.ui.core.Item
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -59,12 +59,16 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Item'],
 					/**
 					 * Value of the changed property.
 					 */
-					propertyValue:  {type: "mixed"}
+					propertyValue:  {type: "any"}
 				}
 			}
 		}
 	}});
 
+	ViewSettingsItem.prototype.setSelected = function(bValue) {
+		ViewSettingsItem.prototype.setProperty.call(this, "selected", bValue, true);
+		return this;
+	};
 
 	/**
 	 * Overriding of the setProperty method in order to fire an event.
@@ -74,14 +78,18 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Item'],
 	 * @param {string} sValue The value of the property
 	 * @param {boolean} bSupressInvalidation
 	 */
-	ViewSettingsItem.prototype.setProperty = function (sName, vValue, bSupressInvalidation) {
+	ViewSettingsItem.prototype.setProperty = function (sName, vValue, bSupressInvalidation, bFireEvent) {
 		sap.ui.base.ManagedObject.prototype.setProperty.apply(this, arguments);
 
-		this.fireItemPropertyChanged({
-			changedItem     : this,
-			propertyKey     : sName,
-			propertyValue   : vValue
-		});
+		bFireEvent = bFireEvent === undefined ? true : bFireEvent;
+
+		if (bFireEvent) {
+			this.fireItemPropertyChanged({
+				changedItem: this,
+				propertyKey: sName,
+				propertyValue: vValue
+			});
+		}
 	};
 
 	return ViewSettingsItem;

@@ -22,13 +22,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/theming/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.15.0
 	 * @experimental Since version 1.15.0.
 	 * API is not yet finished and might change completely
+	 * @deprecated Since version 1.44.0.
 	 * @alias sap.ui.unified.SplitContainer
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */

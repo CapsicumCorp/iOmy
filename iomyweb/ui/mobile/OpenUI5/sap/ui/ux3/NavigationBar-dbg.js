@@ -25,10 +25,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.IconTabBar</code>, <code>sap.m.TabContainer</code> or <code>sap.uxap.ObjectPageLayout</code> control.
 	 * @alias sap.ui.ux3.NavigationBar
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -40,7 +41,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			/**
 			 * Defines whether the navigation bar shall have top-level appearance
 			 */
-			toplevelVariant : {type : "boolean", group : "Misc", defaultValue : false}
+			toplevelVariant: {type: "boolean", group: "Misc", defaultValue: false},
+
+			/**
+			 * Sets the appearance of the menu items in the overflow menu to uppercase
+			 * @since 1.36
+			 */
+			overflowItemsToUpperCase: {type: "boolean", group: "Appearance", defaultValue: false}
 		},
 		defaultAggregation : "items",
 		aggregations : {
@@ -204,6 +211,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			this._checkOverflowIntervalId = null;
 		}
 
+		this._iSoredScrollPosition = this.$("list").scrollLeft();
+
 		if (!!sap.ui.Device.browser.firefox) { // TODO: feature detection... not used yet because of performance implications (may involve creating elements)
 			this.$().unbind("DOMMouseScroll", this._handleScroll);
 		} else {
@@ -278,6 +287,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 			$NavBar.children().scrollTop(0);
 			$NavBar.scrollTop(0);
 		});
+
+		if (this._iSoredScrollPosition) {
+			this.$("list").scrollLeft(this._iSoredScrollPosition);
+		}
 	};
 
 
@@ -310,6 +323,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/delegate
 		this._handleActivation(oEvent);
 	};
 
+	NavigationBar.prototype.setOverflowItemsToUpperCase = function (bValue) {
+		this._getOverflowMenu().toggleStyleClass("sapUiUx3NavBarUpperCaseText", bValue);
+		return this.setProperty("overflowItemsToUpperCase", bValue);
+	};
 
 	NavigationBar.prototype._handleActivation = function(oEvent) {
 		var sTargetId = oEvent.target.id;

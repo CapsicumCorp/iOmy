@@ -5,16 +5,18 @@
  */
 
 sap.ui.define([
-		'jquery.sap.global',
-		'sap/ui/base/Object',
-		'./PipelineFactory'
+		"jquery.sap.global",
+		"sap/ui/base/Object",
+		"./PipelineFactory",
+		"sap/ui/test/_LogCollector"
 	],
-	function($, UI5Object, PipelineFactory) {
+	function($, UI5Object, PipelineFactory, _LogCollector) {
 		"use strict";
 		var oPipelineFactory = new PipelineFactory({
-			name: "Matcher",
-			functionName: "isMatching"
-		});
+				name: "Matcher",
+				functionName: "isMatching"
+			}),
+			oLogger = $.sap.log.getLogger("sap.ui.test.pipelines.MatcherPipeline", _LogCollector.DEFAULT_LEVEL_FOR_OPA_LOGGERS);
 
 		/*
 		 * Internals
@@ -27,7 +29,13 @@ sap.ui.define([
 		function doesValueMatch (aMatchers, vValue) {
 			var vOriginalValue = vValue;
 			var bIsMatching = aMatchers.every(function (oMatcher) {
-				var vMatch = oMatcher.isMatching(vValue);
+				var vMatch;
+				if (vValue) {
+					vMatch = oMatcher.isMatching(vValue);
+				} else {
+					vMatch = oMatcher.isMatching();
+				}
+
 				if (vMatch) {
 					if (vMatch !== true) {
 						// Save truthy values, they will be the input for the next matcher
@@ -51,11 +59,11 @@ sap.ui.define([
 		 *
 		 * @class
 		 * @private
-		 * @alias sap.ui.test.matcherPipeline
+		 * @alias sap.ui.test.pipelines.MatcherPipeline
 		 * @author SAP SE
 		 * @since 1.34
 		 */
-		return UI5Object.extend("sap.ui.test.pipelines.MatcherPipeline",{
+		return UI5Object.extend("sap.ui.test.pipelines.MatcherPipeline", /** @lends sap.ui.test.pipelines.MatcherPipeline.prototype */ {
 
 			/**
 			 * Matches a set or a single control agains matchers that check conditions.
@@ -68,7 +76,6 @@ sap.ui.define([
 			 * @param {sap.ui.core.Element|sap.ui.core.Element[]} options.control The controls to filter.
 			 * @returns {false|sap.ui.core.Element|sap.ui.core.Element[]} The filtered input of options.control. If no control matched, false is returned.
 			 * @private
-			 * @function
 			 */
 			process: function (options) {
 				var vResult,
@@ -103,7 +110,7 @@ sap.ui.define([
 				}, this);
 
 				if (!aMatchedValues.length) {
-					$.sap.log.debug("all results were filtered out by the matchers - skipping the check", this);
+					oLogger.debug("all results were filtered out by the matchers - skipping the check");
 					return false;
 				}
 

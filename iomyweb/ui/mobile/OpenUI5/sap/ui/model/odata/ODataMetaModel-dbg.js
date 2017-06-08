@@ -37,9 +37,9 @@ sap.ui.define([
 	 */
 	var ODataMetaListBinding = JSONListBinding.extend("sap.ui.model.odata.ODataMetaListBinding"),
 		Resolver = ManagedObject.extend("sap.ui.model.odata._resolver", {
-			metadata: {
-				properties: {
-					any: "any"
+			metadata : {
+				properties : {
+					any : "any"
 				}
 			}
 		});
@@ -61,7 +61,7 @@ sap.ui.define([
 	 * but rather use {@link sap.ui.model.odata.ODataModel#getMetaModel getMetaModel} instead!
 	 *
 	 * @param {sap.ui.model.odata.ODataMetadata} oMetadata
-	 *   the OData model's meta data object
+	 *   the OData model's metadata object
 	 * @param {sap.ui.model.odata.ODataAnnotations} [oAnnotations]
 	 *   the OData model's annotations object
 	 * @param {object} [oODataModelInterface]
@@ -71,12 +71,12 @@ sap.ui.define([
 	 *   the {@link sap.ui.model.odata.v2.ODataModel#addAnnotationUrl addAnnotationUrl} method
 	 *   of the OData model, in case this feature is supported
 	 * @param {Promise} [oODataModelInterface.annotationsLoadedPromise]
-	 *   a promise which is resolved by the OData model once meta data and annotations have been
+	 *   a promise which is resolved by the OData model once metadata and annotations have been
 	 *   fully loaded
 	 *
-	 * @class Implementation of an OData meta model which offers a unified access to both OData v2
-	 * meta data and v4 annotations. It uses the existing {@link sap.ui.model.odata.ODataMetadata}
-	 * as a foundation and merges v4 annotations from the existing
+	 * @class Implementation of an OData meta model which offers a unified access to both OData V2
+	 * metadata and V4 annotations. It uses the existing {@link sap.ui.model.odata.ODataMetadata}
+	 * as a foundation and merges V4 annotations from the existing
 	 * {@link sap.ui.model.odata.ODataAnnotations} directly into the corresponding model element.
 	 *
 	 * Also, annotations from the "http://www.sap.com/Protocols/SAPData" namespace are lifted up
@@ -98,7 +98,7 @@ sap.ui.define([
 	 *
 	 * As of 1.29.0, the corresponding vocabulary-based annotations for the following
 	 * "<a href="http://www.sap.com/Protocols/SAPData">SAP Annotations for OData Version 2.0</a>"
-	 * are added, if they are not yet defined in the v4 annotations:
+	 * are added, if they are not yet defined in the V4 annotations:
 	 * <ul>
 	 * <li><code>label</code>;</li>
 	 * <li><code>creatable</code>, <code>deletable</code>, <code>deletable-path</code>,
@@ -116,14 +116,14 @@ sap.ui.define([
 	 * "email;type=home,pref"), "familyname", "givenname", "honorific", "middlename", "name",
 	 * "nickname", "note", "org", "org-unit", "org-role", "photo", "pobox", "region", "street",
 	 * "suffix", "tel" (including support for types, for example "tel;type=cell,pref"), "title" and
-	 * "zip" (mapped to v4 annotation <code>com.sap.vocabularies.Communication.v1.Contact</code>);
+	 * "zip" (mapped to V4 annotation <code>com.sap.vocabularies.Communication.v1.Contact</code>);
 	 * </li>
 	 * <li>"class", "dtend", "dtstart", "duration", "fbtype", "location", "status", "transp" and
-	 * "wholeday" (mapped to v4 annotation
+	 * "wholeday" (mapped to V4 annotation
 	 * <code>com.sap.vocabularies.Communication.v1.Event</code>);</li>
-	 * <li>"body", "from", "received", "sender" and "subject" (mapped to v4 annotation
+	 * <li>"body", "from", "received", "sender" and "subject" (mapped to V4 annotation
 	 * <code>com.sap.vocabularies.Communication.v1.Message</code>);</li>
-	 * <li>"completed", "due", "percent-complete" and "priority" (mapped to v4 annotation
+	 * <li>"completed", "due", "percent-complete" and "priority" (mapped to V4 annotation
 	 * <code>com.sap.vocabularies.Communication.v1.Task</code>).</li>
 	 * </ul>
 	 * </ul>
@@ -169,7 +169,7 @@ sap.ui.define([
 	 * {@link #loaded loaded} has been resolved!
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @alias sap.ui.model.odata.ODataMetaModel
 	 * @extends sap.ui.model.MetaModel
 	 * @public
@@ -182,6 +182,9 @@ sap.ui.define([
 				function load() {
 					var oData;
 
+					if (that.bDestroyed) {
+						throw new Error("Meta model already destroyed");
+					}
 					jQuery.sap.measure.average(sPerformanceLoad, "", aPerformanceCategories);
 					oData = JSON.parse(JSON.stringify(oMetadata.getServiceMetadata()));
 					Utils.merge(oAnnotations ? oAnnotations.getAnnotationsData() : {}, oData);
@@ -288,7 +291,7 @@ sap.ui.define([
 				}
 			}
 			if (!oNode) {
-				if (jQuery.sap.log.isLoggable(jQuery.sap.log.Level.WARNING)) {
+				if (jQuery.sap.log.isLoggable(jQuery.sap.log.Level.WARNING, sODataMetaModel)) {
 					jQuery.sap.log.warning("Invalid part: " + vPart,
 						"path: " + sPath + ", context: "
 							+ (oContext instanceof Context ? oContext.getPath() : oContext),
@@ -351,7 +354,7 @@ sap.ui.define([
 			aSchemas = this.oModel.getObject("/dataServices/schema"),
 			that = this;
 
-		// merge meta data for entity sets/types
+		// merge metadata for entity sets/types
 		oResponse.entitySets.forEach(function (oEntitySet) {
 			var oEntityType,
 				oSchema,
@@ -367,9 +370,9 @@ sap.ui.define([
 					oSchema = Utils.getSchema(aSchemas, sNamespace);
 					oSchema.entityType.push(JSON.parse(JSON.stringify(oEntityType)));
 
-					// visit all entity types before visiting the entity sets to ensure that v2
+					// visit all entity types before visiting the entity sets to ensure that V2
 					// annotations are already lifted up and can be used for calculating entity
-					// set annotations which are based on v2 annotations on entity properties
+					// set annotations which are based on V2 annotations on entity properties
 					Utils.visitParents(oSchema, oResponse.annotations,
 						"entityType", Utils.visitEntityType,
 						oSchema.entityType.length - 1);
@@ -446,7 +449,7 @@ sap.ui.define([
 
 	ODataMetaModel.prototype.destroy = function () {
 		MetaModel.prototype.destroy.apply(this, arguments);
-		return this.oModel.destroy.apply(this.oModel, arguments);
+		return this.oModel && this.oModel.destroy.apply(this.oModel, arguments);
 	};
 
 	/**
@@ -456,9 +459,9 @@ sap.ui.define([
 	 *   an absolute path pointing to an entity or property, e.g.
 	 *   "/ProductSet(1)/ToSupplier/BusinessPartnerID"; this equals the
 	 *   <a href="http://www.odata.org/documentation/odata-version-2-0/uri-conventions#ResourcePath">
-	 *   resource path</a> component of a URI according to OData v2 URI conventions
+	 *   resource path</a> component of a URI according to OData V2 URI conventions
 	 * @returns {sap.ui.model.Context}
-	 *   the context for the corresponding meta data object, i.e. an entity type or its property,
+	 *   the context for the corresponding metadata object, i.e. an entity type or its property,
 	 *   or <code>null</code> in case no path is given
 	 * @throws {Error} in case no context can be determined
 	 * @public
@@ -616,18 +619,22 @@ sap.ui.define([
 	 * @public
 	 */
 	ODataMetaModel.prototype.getODataEntityContainer = function (bAsPath) {
-		var vResult = bAsPath ? undefined : null;
+		var vResult = bAsPath ? undefined : null,
+			aSchemas = this.oModel.getObject("/dataServices/schema");
 
-		(this.oModel.getObject("/dataServices/schema") || []).forEach(function (oSchema, i) {
-			var j = Utils.findIndex(oSchema.entityContainer, "true", "isDefaultEntityContainer");
+		if (aSchemas) {
+			aSchemas.forEach(function (oSchema, i) {
+				var j = Utils.findIndex(oSchema.entityContainer, "true",
+						"isDefaultEntityContainer");
 
-			if (j >= 0) {
-				vResult = bAsPath
-					? "/dataServices/schema/" + i + "/entityContainer/" + j
-					: oSchema.entityContainer[j];
-				return false; //break
-			}
-		});
+				if (j >= 0) {
+					vResult = bAsPath
+						? "/dataServices/schema/" + i + "/entityContainer/" + j
+						: oSchema.entityContainer[j];
+					return false; //break
+				}
+			});
+		}
 
 		return vResult;
 	};
@@ -813,9 +820,9 @@ sap.ui.define([
 				sQualifiedTypeName,
 				mValueLists = Utils.getValueLists(oProperty);
 
-			if (jQuery.isEmptyObject(mValueLists) && oProperty["sap:value-list"]
+			if (!("" in mValueLists) && oProperty["sap:value-list"]
 				&& that.oODataModelInterface.addAnnotationUrl) {
-				// property with value list which is not yet loaded
+				// property with value list which is not yet (fully) loaded
 				bCachePromise = true;
 				sQualifiedTypeName = that.oModel.getObject(aMatches[2]).namespace
 					+ "." + that.oModel.getObject(aMatches[1]).name;

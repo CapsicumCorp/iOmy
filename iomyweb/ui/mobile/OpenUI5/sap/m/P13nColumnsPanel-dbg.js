@@ -18,7 +18,7 @@ sap.ui.define([
 	 * @class The P13nColumnsPanel control is used to define column-specific settings for table personalization.
 	 * @extends sap.m.P13nPanel
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @constructor
 	 * @public
 	 * @since 1.26.0
@@ -31,7 +31,18 @@ sap.ui.define([
 			library: "sap.m",
 			properties: {
 				/**
-				 * Specifies a threshold of visible items.
+				 * Specifies a threshold of visible items. If the end user makes a lot of columns visible, this might cause performance to slow down.
+				 * When this happens, the user can receive a corresponding warning triggered by the <code>visibleItemsThreshold</code> property. The
+				 * property needs to be activated and set to the required value by the consuming application to ensure that the warning message is
+				 * shown when the threshold has been exceeded. In the following example the message will be shown if more than 100 visible columns are
+				 * selected:
+				 *
+				 * <pre>
+				 * customData&gt;
+				 * core:CustomData key=&quot;p13nDialogSettings&quot;
+				 * value='\{&quot;columns&quot;:\{&quot;visible&quot;: true, &quot;payload&quot;: \{&quot;visibleItemsThreshold&quot;: 3\}\}\}' /&gt;
+				 * /customData&gt;
+				 * </pre>
 				 *
 				 * @since 1.26.7
 				 */
@@ -485,7 +496,7 @@ sap.ui.define([
 	 *
 	 * @private
 	 * @param {inteter} iStartIndex is the table index from where the search start
-	 * @returns {integer} is the index of a previous items; if no item is found it will be returned -1
+	 * @returns {int} is the index of a previous items; if no item is found it will be returned -1
 	 */
 	P13nColumnsPanel.prototype._getPreviousItemIndex = function(iStartIndex) {
 		var iResult = -1, i = 0;
@@ -516,7 +527,7 @@ sap.ui.define([
 	 *
 	 * @private
 	 * @param {inteter} iStartIndex is the table index from where the search start
-	 * @returns {integer} is the index of the next item; if no item is found it will be returned -1
+	 * @returns {int} is the index of the next item; if no item is found it will be returned -1
 	 */
 	P13nColumnsPanel.prototype._getNextItemIndex = function(iStartIndex) {
 		var iResult = -1, i = 0, iLength = null;
@@ -719,7 +730,7 @@ sap.ui.define([
 	 * @private
 	 * @param {string} sItemKey is the key for that item for that the index shall be found in the array
 	 * @param {array} aItems is the array in that the item will be searched
-	 * @returns {integer} is the index of the identified item
+	 * @returns {int} is the index of the identified item
 	 */
 	P13nColumnsPanel.prototype._getArrayIndexByItemKey = function(sItemKey, aItems) {
 		var iResult = -1;
@@ -865,6 +876,7 @@ sap.ui.define([
 				this.fireAddColumnsItem({
 					newItem: oColumnsItem
 				});
+				this._notifyChange();
 			} else {
 				oColumnsItem.setIndex(iNewIndex);
 				aExistingColumnsItems.push(oColumnsItem);
@@ -877,6 +889,7 @@ sap.ui.define([
 					newItems: aNewColumnsItems,
 					existingItems: aExistingColumnsItems
 				});
+				this._notifyChange();
 			}
 
 			// fire event for setting of changed data into model
@@ -928,6 +941,7 @@ sap.ui.define([
 					that.fireAddColumnsItem({
 						newItem: oColumnsItem
 					});
+					that._notifyChange();
 				} else {
 					oColumnsItem.setVisible(oItem.visible);
 					// in case a column will be made invisible -> remove the index property
@@ -946,6 +960,7 @@ sap.ui.define([
 					newItems: aNewColumnsItems,
 					existingItems: aExistingColumnsItems
 				});
+				this._notifyChange();
 			}
 
 			// fire event for setting of changed data into model
@@ -1317,14 +1332,16 @@ sap.ui.define([
 	 * @private
 	 */
 	P13nColumnsPanel.prototype.init = function() {
-		var iLiveChangeTimer = 0;
 		var that = this;
+		this._iLiveChangeTimer = 0;
+		this._iSearchTimer = 0;
 		this._bOnBeforeRenderingFirstTimeExecuted = false;
 		this._bOnAfterRenderingFirstTimeExecuted = false;
 		this._aExistingColumnsItems = null;
 		this._aExistingTableItems = null;
 
 		this.setType(sap.m.P13nPanelType.columns);
+		this.setTitle(sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("COLUMSPANEL_TITLE"));
 
 		// ---------------------------------------------------------------
 		// Following object _oTableItemsOrdering handles the table behavior for sorting of included items
@@ -1462,9 +1479,9 @@ sap.ui.define([
 				var sValue = oEvent.getSource().getValue(), iDelay = (sValue ? 300 : 0); // no delay if value is empty
 
 				// execute search after user stops typing for 300ms
-				window.clearTimeout(iLiveChangeTimer);
+				window.clearTimeout(that._iSearchTimer);
 				if (iDelay) {
-					iLiveChangeTimer = window.setTimeout(function() {
+					that._iSearchTimer = window.setTimeout(function() {
 						that._executeSearch();
 					}, iDelay);
 				} else {
@@ -1487,9 +1504,7 @@ sap.ui.define([
 
 		this._oToolbarSpacer = new sap.m.ToolbarSpacer();
 
-
 		this._oToolbar = new sap.m.OverflowToolbar({
-			active: true,
 			design: sap.m.ToolbarDesign.Solid, // Transparent,
 			content: [
 				this._oToolbarSpacer, this._oSearchField, this._oShowSelectedButton, this._oMoveToTopButton, this._oMoveUpButton, this._oMoveDownButton, this._oMoveToBottomButton
@@ -1619,13 +1634,13 @@ sap.ui.define([
 	 * @private
 	 */
 	P13nColumnsPanel.prototype.onAfterRendering = function() {
-		var that = this, iLiveChangeTimer = 0;
+		var that = this;
 
 		// adapt scroll-container very first time to the right size of the browser
 		if (!this._bOnAfterRenderingFirstTimeExecuted) {
 			this._bOnAfterRenderingFirstTimeExecuted = true;
-			window.clearTimeout(iLiveChangeTimer);
-			iLiveChangeTimer = window.setTimeout(function() {
+			window.clearTimeout(this._iLiveChangeTimer);
+			this._iLiveChangeTimer = window.setTimeout(function() {
 				// following line is needed to get layout of OverflowToolbar rearranged IF it is used in a dialog
 				that._oToolbar._resetAndInvalidateToolbar();
 			}, 0);
@@ -1713,6 +1728,9 @@ sap.ui.define([
 
 		this._oTable.destroy();
 		this._oTable = null;
+
+		window.clearTimeout(this._iLiveChangeTimer);
+		window.clearTimeout(this._iSearchTimer);
 	};
 
 	/**
@@ -1891,23 +1909,17 @@ sap.ui.define([
 		return this;
 	};
 
-	/**
-	 * This method is executed before navigation, to provide validation result(s) for columnsPanel
-	 *
-	 * @returns {boolean} true if it is allowed to navigate away from this panel, false if it is not allowed
-	 * @public
-	 * @since 1.26.7
-	 */
 	P13nColumnsPanel.prototype.onBeforeNavigationFrom = function() {
-		var bResult = true;
 		var aSelectedItems = this._oTable.getSelectedItems();
 		var iVisibleItemsThreshold = this.getVisibleItemsThreshold();
+		return !(aSelectedItems && iVisibleItemsThreshold !== -1 && aSelectedItems.length > iVisibleItemsThreshold);
+	};
 
-		if (aSelectedItems && iVisibleItemsThreshold !== -1 && aSelectedItems.length > iVisibleItemsThreshold) {
-			bResult = false;
+	P13nColumnsPanel.prototype._notifyChange = function() {
+		var fListener = this.getChangeNotifier();
+		if (fListener) {
+			fListener(this);
 		}
-
-		return bResult;
 	};
 
 	return P13nColumnsPanel;

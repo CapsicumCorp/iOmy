@@ -48,6 +48,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 		var oBSS = jQuery.sap.scrollbarSize(sScrollBarTouchClass);
 		var sWidth = oBSS.width;
 		var sHeight = oBSS.height;
+		// Fix for Fiory Client and Edge in Mobile Mode on Win8 and Win10
+		if (Device.browser.edge) {
+			if (!sWidth) {
+				sWidth = "15";
+			}
+			if (!sHeight) {
+				sHeight = "15";
+			}
+		}
 
 		if (bVertical) {
 			// First div. <div style="overflow:hidden;width:16px;height:200px">
@@ -67,7 +76,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 			rm.write(" style=\"width:" + sWidth * 2 + "px;height:100%;overflow-y:scroll;overflow-x:hidden");
 			if (bRTL) {
 				//right to left mode. Special handling for mozilla 3.6 and safari - do not render right margin
-				if ((!(!!Device.browser.firefox && Device.browser.version == 3.6)) && (!Device.browser.safari)) {
+				if ((!(Device.browser.firefox && Device.browser.version == 3.6)) && (!Device.browser.safari)) {
 					rm.write(";margin-right:-" + sWidth + "px");
 				}
 			} else {

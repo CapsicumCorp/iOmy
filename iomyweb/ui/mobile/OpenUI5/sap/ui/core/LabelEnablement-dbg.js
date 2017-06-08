@@ -9,6 +9,11 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 	function(jQuery, ManagedObject) {
 	"use strict";
 
+	function lazyInstanceof(o, sModule) {
+		var FNClass = sap.ui.require(sModule);
+		return typeof FNClass === 'function' && (o instanceof FNClass);
+	}
+
 	// Mapping between controls and labels
 	var CONTROL_TO_LABELS_MAPPING = {};
 
@@ -21,7 +26,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 		var oControl = sap.ui.getCore().byId(sId);
 		// a control must only be invalidated if there is already a DOM Ref. If there is no DOM Ref yet, it will get
 		// rendered later in any case. Elements must always be invalidated because they have no own renderer.
-		if (oControl && bInvalidate && (!(oControl instanceof sap.ui.core.Control) || oControl.getDomRef())) {
+		if (oControl && bInvalidate && (!lazyInstanceof(oControl, 'sap/ui/core/Control') || oControl.getDomRef())) {
 			oControl.invalidate();
 		}
 
@@ -72,8 +77,17 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 		}
 
 		//Invalidate related controls
-		toControl(sOldId, true);
-		toControl(sNewId, true);
+		var oOldControl = toControl(sOldId, true);
+		var oNewControl = toControl(sNewId, true);
+
+		if (oOldControl) {
+			oLabel.detachRequiredChange(oOldControl);
+		}
+
+		if (oNewControl) {
+			oLabel.attachRequiredChange(oNewControl);
+		}
+
 	}
 
 	// Checks whether enrich function can be applied on the given control or prototype.
@@ -98,7 +112,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 	 * @see sap.ui.core.LabelEnablement#enrich
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @protected
 	 * @alias sap.ui.core.LabelEnablement
 	 * @namespace
@@ -160,10 +174,6 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 	 */
 	LabelEnablement.isRequired = function(oElement){
 
-		function checkRequired(oElem) {
-			return !!(oElem && oElem.getMetadata().getProperty("required") && oElem.getRequired());
-		}
-
 		if (checkRequired(oElement)) {
 			return true;
 		}
@@ -181,6 +191,9 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 		return false;
 	};
 
+	function checkRequired(oElem) {
+		return !!(oElem && oElem.getMetadata().getProperty("required") && oElem.getRequired());
+	}
 
 	/**
 	 * This function should be called on a label control to enrich it's functionality.
@@ -259,14 +272,87 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject'],
 		}
 
 		oControl.__orig_setRequired = oControl.setRequired;
-		oControl.setRequired = function(sId) {
-			var res = this.__orig_setRequired.apply(this, arguments);
-			toControl(this.__sLabeledControl, true); //invalidate the related control
+		oControl.setRequired = function(bRequired) {
+			var bOldRequired = this.getRequired(),
+				oReturn = this.__orig_setRequired.apply(this, arguments);
+
+			// invalidate the related control only when needed
+			if (this.getRequired() !== bOldRequired) {
+				toControl(this.__sLabeledControl, true);
+			}
+
+			return oReturn;
+		};
+
+		/**
+		 * Checks whether the Label itself or the associated control is marked as required (they are mutually exclusive).
+		 *
+		 * @protected
+		 * @returns {Boolean} Returns if the Label or the labeled control are required
+		 */
+		oControl.isRequired = function(){
+			// the value of the local required flag is ORed with the result of a "getRequired"
+			// method of the associated "labelFor" control. If the associated control doesn't
+			// have a getRequired method, this is treated like a return value of "false".
+			var oFor = toControl(this.getLabelForRendering(), false);
+			return checkRequired(this) || checkRequired(oFor);
+
+		};
+
+		// as in the Form the required change is checked, it'd not needed here
+		oControl.disableRequiredChangeCheck = function(bNoCheck){
+
+			this._bNoRequiredChangeCheck = bNoCheck;
+
+		};
+
+		oControl.attachRequiredChange = function(oFor){
+
+			if (oFor && !this._bNoRequiredChangeCheck) {
+				if (oFor.getMetadata().getProperty("required")) {
+					oFor.attachEvent("_change", _handleControlChange, this);
+				}
+				this._bRequiredAttached = true; // to do not check again if control has no required property
+			}
+
+		};
+
+		oControl.detachRequiredChange = function(oFor){
+
+			if (oFor && !this._bNoRequiredChangeCheck) {
+				if (oFor.getMetadata().getProperty("required")) {
+					oFor.detachEvent("_change", _handleControlChange, this);
+				}
+				this._bRequiredAttached = false; // to do not check again if control has no required property
+			}
+
+		};
+
+		function _handleControlChange(oEvent) {
+
+			if (oEvent.getParameter("name") == "required") {
+				this.invalidate();
+			}
+
+		}
+
+		oControl.__orig_onAfterRendering = oControl.onAfterRendering;
+		oControl.onAfterRendering = function(oEvent) {
+			var res;
+
+			if (this.__orig_onAfterRendering) {
+				res = this.__orig_onAfterRendering.apply(this, arguments);
+			}
+
+			if (!this._bNoRequiredChangeCheck && !this._bRequiredAttached && this.__sLabeledControl) {
+				var oFor = toControl(this.__sLabeledControl, false);
+				this.attachRequiredChange(oFor);
+			}
+
 			return res;
 		};
 
 	};
-
 
 	return LabelEnablement;
 

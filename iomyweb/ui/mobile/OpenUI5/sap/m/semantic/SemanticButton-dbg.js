@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['sap/m/semantic/SemanticControl', 'sap/m/Button', 'sap/m/OverflowToolbarButton'], function(SemanticControl, Button, OverflowToolbarButton) {
+sap.ui.define(['sap/m/semantic/SemanticControl', 'sap/m/Button', 'sap/m/semantic/SemanticOverflowToolbarButton'], function(SemanticControl, Button, SemanticOverflowToolbarButton) {
 	"use strict";
 
 	/**
@@ -13,14 +13,14 @@ sap.ui.define(['sap/m/semantic/SemanticControl', 'sap/m/Button', 'sap/m/Overflow
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * A semantic button is either a {@link sap.m.Button} or {@link sap.m.OverflowButton} ,
+	 * A semantic button is either a {@link sap.m.Button} or {@link sap.m.semantic.SemanticOverflowToolbarButton} ,
 	 * eligible for aggregation content of a {@link sap.m.semantic.SemanticPage}.
 	 *
 	 * @extends sap.m.semantic.SemanticControl
 	 * @abstract
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -31,7 +31,8 @@ sap.ui.define(['sap/m/semantic/SemanticControl', 'sap/m/Button', 'sap/m/Overflow
 
 	var SemanticButton = SemanticControl.extend("sap.m.semantic.SemanticButton", /** @lends sap.m.semantic.SemanticButton.prototype */ {
 		metadata : {
-
+			library : "sap.m",
+			"abstract" : true,
 			properties : {
 
 				/**
@@ -61,7 +62,7 @@ sap.ui.define(['sap/m/semantic/SemanticControl', 'sap/m/Button', 'sap/m/Overflow
 		if (!oControl) {
 
 			var oClass = this._getConfiguration()
-				&& this._getConfiguration().constraints === "IconOnly" ? OverflowToolbarButton : Button;
+				&& this._getConfiguration().constraints === "IconOnly" ? SemanticOverflowToolbarButton : Button;
 
 			var oNewInstance = this._createInstance(oClass);
 
@@ -79,11 +80,10 @@ sap.ui.define(['sap/m/semantic/SemanticControl', 'sap/m/Button', 'sap/m/Overflow
 	};
 
 	SemanticButton.prototype._createInstance = function(oClass) {
-
 		return new oClass({
-				id: this.getId() + "-button",
-				press: jQuery.proxy(this.firePress, this)
-			});
+			id: this.getId() + "-button",
+			press: jQuery.proxy(this.firePress, this)
+		});
 	};
 
 	return SemanticButton;

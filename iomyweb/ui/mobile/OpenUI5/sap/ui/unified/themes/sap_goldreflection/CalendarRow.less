@@ -27,7 +27,7 @@
 	min-height: 5rem;
 }
 
-.sapUiMedia-Std-Phone .sapUiCalendarRowWithHead > .sapUiCalendarRowApps{
+html.sapUiMedia-Std-Phone .sapUiCalendarRowWithHead > .sapUiCalendarRowApps{
 	width: 100%;
 }
 
@@ -74,10 +74,17 @@
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	margin-bottom: 0.25rem;
+	cursor: default;
+}
+
+.sapUiCalendarRowApps > .sapUiCalendarRowAppsIntHead{
+	position: absolute;
+	top: 0;
+	width: auto;
 }
 
 .sapUiCalendarRowAppsIntHeadFirst{
-	border-left: 0.25rem solid @sapUiListBorderColor;
+	border-left: 0.25rem solid darken(@sapUiListBorderColor, 15);
 }
 
 .sapUiCalendarRowAppsIntHeadIcon{
@@ -112,6 +119,10 @@
 	margin-bottom: 0.25rem;
 }
 
+.sapUiCalendarRowAppsRedHeight > .sapUiCalendarRowApps > .sapUiCalendarApp.sapUiCalendarAppTitleOnly{
+	height: 1.375rem;
+}
+
 /* dummy app to calculate minimal size and other things */
 .sapUiCalendarAppDummy{
 	width: 2rem;
@@ -132,12 +143,12 @@
 	padding-right: 0; /* if min-width no padding right to show ellipsis */
 }
 
-.sap-desktop .sapUiCalendarApp:hover:not(:active),
-.sap-desktop .sapUiCalendarApp:focus:not(:active) > .sapUiCalendarAppCont{
+html.sap-desktop .sapUiCalendarApp:hover:not(:active),
+html.sap-desktop .sapUiCalendarApp:focus:not(:active) > .sapUiCalendarAppCont{
 	background-color: @sapUiListHoverBackground;
 }
 
-.sap-desktop .sapUiCalendarApp:hover:not(:active) > .sapUiCalendarAppCont{
+html.sap-desktop .sapUiCalendarApp:hover:not(:active) > .sapUiCalendarAppCont{
 	border-color: @sapUiHighlight;
 }
 
@@ -146,8 +157,8 @@
 	background-color: @sapUiSelected;
 }
 
-.sap-desktop .sapUiCalendarApp.sapUiCalendarAppSel:hover:not(:active),
-.sap-desktop .sapUiCalendarApp.sapUiCalendarAppSel:focus:not(:active) > .sapUiCalendarAppCont{
+html.sap-desktop .sapUiCalendarApp.sapUiCalendarAppSel:hover:not(:active),
+html.sap-desktop .sapUiCalendarApp.sapUiCalendarAppSel:focus:not(:active) > .sapUiCalendarAppCont{
 	background-color: darken(@sapUiSelected, 10);
 }
 
@@ -166,7 +177,7 @@
 	left: 0.375rem;
 	top: 0.375rem;
 /*	vertical-align: middle;*/
-	color: @sapUiElement;
+	color: @sapUiContentIconColor;
 }
 
 .sapUiCalendarAppTitleOnly > .sapUiCalendarAppCont > .sapUiCalendarAppIcon{
@@ -175,6 +186,10 @@
 
 .sapUiCalendarApp.sapUiCalendarAppTitleOnly{
 	line-height: 2.25rem;
+}
+
+.sapUiCalendarRowAppsRedHeight > .sapUiCalendarRowApps > .sapUiCalendarApp.sapUiCalendarAppTitleOnly{
+	line-height: 1rem;
 }
 
 .sapUiCalendarAppTitle,
@@ -204,6 +219,11 @@
 	padding-bottom: 0.375rem;
 }
 
+.sapUiCalendarRowAppsRedHeight > .sapUiCalendarRowApps > .sapUiCalendarApp.sapUiCalendarAppTitleOnly > .sapUiCalendarAppCont > .sapUiCalendarAppTitle{
+	padding-top: 0.125rem;
+	padding-bottom: 0.125rem;
+}
+
 .sapUiCalendarAppText{
 	float: left;
 	color: @sapUiContentLabelColor;
@@ -217,4 +237,68 @@
 	height: 100%;
 	position: absolute;
 	top: 0;
+}
+
+.sapUiCalendarAppContainer {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+
+  & > .sapUiCalendarAppContainerLeft {
+	margin: 0 1rem 0 0;
+	float: left;
+	display: inline-block;
+	padding: 0.5rem 0;
+	line-height: 0.875rem;
+	width: 6rem;
+
+	& > div {
+	  overflow: hidden;
+	  text-overflow: ellipsis;
+	}
+  }
+
+  & > .sapUiCalendarAppContainerRight {
+	margin-right: 1rem;
+	height: 100%;
+
+	& > .sapUiCalendarApp {
+	  position: relative;
+	  margin: 0 1rem 0 0;
+
+	  &:not(.sapUiCalendarAppSel):not(:active) {
+		background-color: transparent;
+	  }
+
+	  & > .sapUiCalendarAppCont {
+		border: none;
+
+		& > .sapUiCalendarAppTitle {
+		  text-overflow: ellipsis;
+		}
+	  }
+	}
+
+	& > .sapUiCalendarRowAppsIntHead {
+	  margin: 0 1rem 0 0;
+	  width: auto;
+	}
+  }
+}
+
+.sapUiCalendarMonthRowAppsS.sapUiCalendarRowAppsInt {
+	border: 0;
+  	background-color: transparent;
+}
+
+.sapMPlanCal .sapUiCalMonthView {
+  width: 100%;
+}
+
+.sapMPlanCal .sapUiCalendarNoApps {
+  height: 2rem;
+  line-height: 2rem;
+  text-align: center;
+  vertical-align: middle;
+  border-top: 0.0625rem solid @sapUiListBorderColor;
 }

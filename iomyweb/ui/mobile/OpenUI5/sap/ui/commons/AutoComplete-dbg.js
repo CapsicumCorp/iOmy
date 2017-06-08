@@ -24,11 +24,12 @@ sap.ui.define(['jquery.sap.global', './ComboBox', './library', 'jquery.sap.strin
 	 * @implements sap.ui.commons.ToolbarItem
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.10.0
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.AutoComplete
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */

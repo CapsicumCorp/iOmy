@@ -3,4 +3,4 @@
  * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['sap/m/semantic/SemanticButton'],function(S){"use strict";var O=S.extend("sap.m.semantic.OpenInAction",{});return O;},true);
+sap.ui.define(['sap/m/semantic/SemanticButton'],function(S){"use strict";var O=S.extend("sap.m.semantic.OpenInAction",{metadata:{library:"sap.m"}});return O;},true);

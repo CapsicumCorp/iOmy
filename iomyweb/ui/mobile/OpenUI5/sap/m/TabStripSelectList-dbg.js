@@ -17,10 +17,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/S
 		 *
 		 * @class
 		 * The <code>sap.m.TabStripSelectList</code> displays a list of items that allows the user to select an item.
-		 * @extends sap.ui.core.SelectList
+		 * @extends sap.m.SelectList
 		 *
 		 * @author SAP SE
-		 * @version 1.34.9
+		 * @version 1.44.14
 		 *
 		 * @constructor
 		 * @public
@@ -83,7 +83,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/S
 				oControl instanceof sap.m.TabStripItem && // only this type has _closeButton aggregation
 				this.getSelectedItem() !== oControl
 			) {
-				oControl.getAggregation('_closeButton').$().removeClass(TabStripItem.CSS_CLASS_CLOSE_BUTTON_INVISIBLE);
+					oControl.getAggregation('_closeButton').$().removeClass(TabStripItem.CSS_CLASS_CLOSE_BUTTON_INVISIBLE);
 			}
 		};
 
@@ -100,7 +100,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/S
 				jQuery(oEvent.target).hasClass('sapMSelectListItem') &&
 				this.getSelectedItem() !== oControl
 			) {
-				oControl.getAggregation('_closeButton').$().addClass(TabStripItem.CSS_CLASS_CLOSE_BUTTON_INVISIBLE);
+					oControl.getAggregation('_closeButton').$().addClass(TabStripItem.CSS_CLASS_CLOSE_BUTTON_INVISIBLE);
 			}
 		};
 
@@ -131,7 +131,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/m/S
 
 		/**
 		 * Changes the visibility of the item's state symbol (*).
-		 * @param {mixed} vItemId
+		 * @param {any} vItemId
 		 * @param {boolean} bShowState
 		 */
 		TabStripSelectList.prototype.changeItemState = function(vItemId, bShowState) {

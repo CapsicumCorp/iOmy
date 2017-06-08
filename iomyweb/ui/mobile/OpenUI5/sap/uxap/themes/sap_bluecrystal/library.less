@@ -21,8 +21,8 @@ Common compact/cozy
 }
 
 /* L fullscreen paddings */
-.sapUiMedia-Std-Desktop .sapUxAPAnchorBar.sapMTB,
-.sapUiMedia-Std-Desktop .sapMSplitContainer.sapMSplitContainerHideMode .sapMSplitContainerDetail .sapUxAPAnchorBar.sapMTB /* overriding selector for desktop in split-container */
+html.sapUiMedia-Std-Desktop .sapUxAPAnchorBar.sapMTB,
+html.sapUiMedia-Std-Desktop .sapMSplitContainer.sapMSplitContainerHideMode .sapMSplitContainerDetail .sapUxAPAnchorBar.sapMTB /* overriding selector for desktop in split-container */
 {
 	padding-left: 2rem;
 }
@@ -283,7 +283,7 @@ html[data-sap-ui-animation="off"] {
 }
 
 /* styling needed to achieve underline of the select label on phone */
-.sapUiMedia-Std-Phone, .sap-phone {
+html.sapUiMedia-Std-Phone, html.sap-phone {
 	.sapUxAPHierarchicalSelect .sapMSltLabel {
 		border-bottom: 0.125rem solid @sapUiExtraDarkBorder;
 	}
@@ -344,6 +344,11 @@ html[data-sap-ui-browser^="cr4"].sap-phone {
 	background-position: 0px -32px;
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
+}
+
+.sapUxAPObjectPageHeader.sapUxAPObjectPageHeaderDesign-Dark .sapMBreadcrumbsSeparator,
+.sapUxAPObjectPageHeader.sapUxAPObjectPageHeaderDesign-Dark .sapMLnk {
+	color: @sapUiTextInverted;
 }
 
 .sapUxAPObjectPageHeaderDesign-Dark.sapUxAPObjectPageHeader .sapMBar {
@@ -413,7 +418,7 @@ html[data-sap-ui-browser^="cr4"].sap-phone {
 	}
 }
 
-.sapUiMedia-Std-Phone .sapUxAPObjectPageHeaderIdentifierTitle {
+html.sapUiMedia-Std-Phone .sapUxAPObjectPageHeaderIdentifierTitle {
 	font-size: @sapMFontHeader4Size;
 }
 
@@ -428,8 +433,8 @@ html[data-sap-ui-browser^="cr4"].sap-phone {
 	color: @sapUiAccent7;
 }
 
-.sapUiMedia-Std-Phone .sapUiSizeCompact.sapUxAPObjectPageHeaderChangesBtn .sapMBtn,
-.sapUiMedia-Std-Phone .sapUiSizeCompact.sapUxAPObjectPageHeaderLockBtn .sapMBtn {
+html.sapUiMedia-Std-Phone .sapUiSizeCompact.sapUxAPObjectPageHeaderChangesBtn .sapMBtn,
+html.sapUiMedia-Std-Phone .sapUiSizeCompact.sapUxAPObjectPageHeaderLockBtn .sapMBtn {
 	margin-top: -0.5rem;
 }
 
@@ -475,6 +480,10 @@ html.sap-desktop .sapUxAPObjectPageHeaderDesign-Dark .sapMBtn:focus .sapMBtnFocu
 .sapUxAPObjectPageHeaderDesign-Dark .sapUxAPObjectPageHeaderObjectImageContainer .sapUiIcon {
 	color: @sapUiInvertedElement;
 }
+
+.sapUxAPObjectPageHeaderSeparator {
+	background-color: @sapUiFieldBorderColor;
+}
 /* END "ObjectPageHeader.less" */
 
 /* START "ObjectPageHeaderContent.less" */
@@ -483,7 +492,7 @@ html.sap-desktop .sapUxAPObjectPageHeaderDesign-Dark .sapMBtn:focus .sapMBtnFocu
 	font-size: @sapMFontMediumSize;
 }
 
-.sapUiMedia-Std-Desktop, .sapUiMedia-Std-Tablet {
+html.sapUiMedia-Std-Desktop, html.sapUiMedia-Std-Tablet {
 	.sapUxAPObjectPageHeaderContent .sapUxAPObjectPageHeaderObjectImage-Circle .sapUxAPObjectPageHeaderObjectImage {
 		border-color: fade(@sapUiAccent7, 20%);
 	}
@@ -536,7 +545,7 @@ html.sap-desktop .sapUxAPObjectPageHeaderDetailsDesign-Dark .sapMBtn:focus .sapM
 
 .sapUxAPObjectPageHeaderDetails {
 	.sapMObjectNumberEmph.sapMObjectNumber {
-		color: @sapUiHeaderText;
+		//color: @sapUiHeaderText;
 		> .sapMObjectNumberText {
 			font-family: @sapUiFontHeaderFamily;
 			font-size: 1.375rem;
@@ -547,6 +556,10 @@ html.sap-desktop .sapUxAPObjectPageHeaderDetailsDesign-Dark .sapMBtn:focus .sapM
 			font-size: @sapMFontSmallSize;
 		}
 	}
+	.sapMObjectNumberEmph.sapMObjectNumber:not(.sapMObjectNumberStatusError):not(.sapMObjectNumberStatusWarning):not(.sapMObjectNumberStatusSuccess) {
+		color: @sapUiHeaderText;
+	}
+
 	.sapMOHTitle .sapMText {
 		color: @sapUiLightText;
 	}
@@ -596,10 +609,23 @@ html.sap-desktop .sapUxAPObjectPageHeaderDetailsDesign-Dark .sapMBtn:focus .sapM
 	height: 2.875rem;
 }
 
+.sapUiSizeCompact .sapUxAPObjectPageNavigation .sapUxAPObjectChildPage {
+	height: 1.875rem;
+}
+
 .sapUxAPObjectPageNavigation .sapUxAPITBar.sapUxAPObjectChildPage {
 	height: 2.9375rem;
 }
 
+.sapUiSizeCompact .sapUxAPObjectPageNavigation .sapUxAPITBar.sapUxAPObjectChildPage {
+	height: 1.9375rem;
+}
+
+.sapUxAPObjectPageFooter .sapUxAPObjectPageFloatingFooter {
+	background: @sapUiPageFooterBackground;
+	border-color: @sapUiPageFooterBorderColor;
+	box-shadow: 0 0.125rem 0.375rem 0 fade(black, 20);
+}
 /* END "ObjectPageLayout.less" */
 
 /* START "ObjectPageSection.less" */
@@ -614,15 +640,27 @@ html.sap-desktop .sapUxAPObjectPageHeaderDetailsDesign-Dark .sapMBtn:focus .sapM
 	border-bottom: 2px solid @sapUiExtraDarkBorder;
 }
 
-.sapUxAPObjectPageSectionTitleUppercase {
-	text-transform: uppercase;
-}
-
 .sapUxAPObjectPageSection:focus {
 	outline: 0.0625rem dotted @sapUiFocus;
 	outline-offset: -0.0625rem;
 }
 
+/* IE does not support css outline-offset */
+html[data-sap-ui-browser^="ie"].sap-desktop .sapUxAPObjectPageSection:focus {
+	outline: none;
+	position: relative;
+}
+
+html[data-sap-ui-browser^="ie"].sap-desktop .sapUxAPObjectPageSection:focus:before {
+	content: "";
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
+	border: 0.0625rem dotted @sapUiFocus;
+}
 /* END "ObjectPageSection.less" */
 
 /* START "ObjectPageSubSection.less" */
@@ -663,6 +701,7 @@ html[data-sap-ui-browser^="ie"] .sapUxAPObjectPageSubSection, .sapUxAPObjectPage
 		position: absolute;
 		left: 0;
 		top: 0;
+		display: block;
 		border: 0.0625rem dotted @sapUiFocus;
 		pointer-events: none;
 	}

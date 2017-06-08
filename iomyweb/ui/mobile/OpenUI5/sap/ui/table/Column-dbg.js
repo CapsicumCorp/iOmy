@@ -5,10 +5,16 @@
  */
 
 // Provides control sap.ui.table.Column.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderManager', 'sap/ui/model/Filter', 'sap/ui/model/Sorter', 'sap/ui/model/Type', 'sap/ui/model/type/String', './library'],
-	function(jQuery, Element, RenderManager, Filter, Sorter, Type, String, library) {
+sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/library', 'sap/ui/core/Popup', 'sap/ui/core/RenderManager',
+		'sap/ui/model/Filter', 'sap/ui/model/FilterOperator', 'sap/ui/model/FilterType', 'sap/ui/model/Sorter', 'sap/ui/model/Type',
+		'sap/ui/model/type/String', './TableUtils', './library', './ColumnMenu'],
+function(jQuery, Element, coreLibrary, Popup, RenderManager, Filter, FilterOperator, FilterType, Sorter, Type, StringType, TableUtils, library, ColumnMenu) {
 	"use strict";
 
+	// shortcuts
+	var HorizontalAlign = coreLibrary.HorizontalAlign,
+		SortOrder = library.SortOrder,
+		ValueState = coreLibrary.ValueState;
 
 	/**
 	 * Constructor for a new Column.
@@ -19,7 +25,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 	 * @class
 	 * The column allows you to define column specific properties that will be applied when rendering the table.
 	 * @extends sap.ui.core.Element
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -32,20 +38,36 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 		properties : {
 
 			/**
-			 * Width of the column. Works only with px/em/rem values. Em are handled like rem values.
+			 * Width of the column in CSS units.
+			 * Default value is <code>auto</code>, see <a href="https://www.w3.org/TR/CSS2/tables.html#width-layout"></a>
+			 * <p>Minimal column width is device-dependent, for example on desktop devices the column will not be smaller than 48px.
+			 * <p>This property can be changed by the user or by the application configuration/personalization.
+			 * <p>If a user adjusts the column width manually, the resulting value is always set in pixels.
+			 * In addition, other columns with width <code>auto</code> get a fixed minimum width and do not shrink after the resizing.
 			 */
 			width : {type : "sap.ui.core.CSSSize", group : "Dimension", defaultValue : null},
+
+			/**
+			 * Defines the minimum width of a column in pixels.
+			 * <p>This property only has an effect if the given column width is flexible, for example with width <code>auto</code>.
+			 * <p>This property only influences the automatic behavior. If a user adjusts the column width manually, the column width can become smaller.
+			 * <p>Minimal column width is device-dependent, for example on desktop devices the column will not be smaller than 48px.
+			 *
+			 * @since 1.44.1
+			 */
+			minWidth : {type : "int", group : "Dimension", defaultValue : 0},
 
 			/**
 			 * If the table is wider than the sum of widths of the visible columns, the columns will be
 			 * resized proportionally to their widths that were set originally. If set to false, the column will be displayed in the
 			 * original width. If all columns are set to not be flexible, an extra "dummy" column will be
 			 * created at the end of the table.
+			 * @deprecated As of version 1.44 this property has no effect. Use the property <code>minWidth</code> in combination with the property <code>width="auto"</code> instead.
 			 */
 			flexible : {type : "boolean", group : "Behavior", defaultValue : true},
 
 			/**
-			 * If set to true, the column can be resized either using the resize-handle (by mouse) or using
+			 * If set to true, the column can be resized either using the resize bar (by mouse) or using
 			 * the keyboard (SHIFT + Left/Right Arrow keys)
 			 */
 			resizable : {type : "boolean", group : "Behavior", defaultValue : true},
@@ -54,7 +76,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 			 * Horizontal alignment of the column content. Controls with a text align do not inherit
 			 * the horizontal alignment. You have to set the text align directly on the template.
 			 */
-			hAlign : {type : "sap.ui.core.HorizontalAlign", group : "Appearance", defaultValue : sap.ui.core.HorizontalAlign.Begin},
+			hAlign : {type : "sap.ui.core.HorizontalAlign", group : "Appearance", defaultValue : HorizontalAlign.Begin},
 
 			/**
 			 * Indicates if the column is sorted. This property only controls if a sort indicator is displayed in the
@@ -67,7 +89,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 			 * rendered if the property <code>sorted</code> is <code>true</code>
 			 * @see sap.ui.table.SortOrder (default value: "Ascending")
 			 */
-			sortOrder : {type : "sap.ui.table.SortOrder", group : "Appearance", defaultValue : sap.ui.table.SortOrder.Ascending},
+			sortOrder : {type : "sap.ui.table.SortOrder", group : "Appearance", defaultValue : SortOrder.Ascending},
 
 			/**
 			 * Specifies the binding property on which the column will sort.
@@ -101,17 +123,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 			/**
 			 * Specifies the value of the filter as string (will be converted into the proper data type). It is possible
 			 * to provide a filterOperator as string, as shown here:
-			 * > 50
-			 * < 100
-			 * >= 150
-			 * <= 200
+			 * <pre>
+			 * &gt; 50
+			 * &lt; 100
+			 * &gt;= 150
+			 * &lt;= 200
 			 * = 250
 			 * != 300
-			 * *something	ends with
-			 * something*	starts with
-			 * *something*	contains
-			 * some..thing	between
-			 * 50..100		between
+			 * *something    ends with
+			 * something*    starts with
+			 * *something*   contains
+			 * some..thing   between
+			 * 50..100       between
+			 * </pre>
 			 */
 			filterValue : {type : "string", group : "Behavior", defaultValue : null},
 
@@ -134,7 +158,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 			 * The function receives the entered filter value as parameter and returns the proper
 			 * value for the filter expression. Another option is to pass the class name of the type,
 			 * e.g.: <code>sap.ui.model.type.Date</code> or an expression similar to the binding syntax,
-			 * e.g.: <code>"\{type: 'sap.ui.model.type.Date', formatOptions: \{UTC: true\}, constraints: {} \}"</code>.
+			 * e.g.: <code>"\{type: 'sap.ui.model.type.Date', formatOptions: \{UTC: true\}, constraints: \{\} \}"</code>.
 			 * Here the escaping is mandatory to avoid handling by the binding parser.
 			 * By default the filter type is <code>sap.ui.model.type.String</code>.
 			 * @since 1.9.2
@@ -179,7 +203,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 			headerSpan : {type : "any", group : "Behavior", defaultValue : 1},
 
 			/**
-			 * Enables auto-resizing of the column on double-clicking the resizer. The width is determined on the widest
+			 * Enables auto-resizing of the column on double clicking the resize bar. The width is determined on the widest
 			 * currently displayed content. It does not consider rows which are currently not scrolled into view.
 			 * Currently only implemented to work with the following controls:
 			 * <code>sap.m.Text, sap.m.Label, sap.m.Link, sap.m.Input,
@@ -214,7 +238,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 			template : {type : "sap.ui.core.Control", multiple : false},
 
 			/**
-			 * The menu used by the column. By default the {@see sap.ui.table.ColumnMenu} is used.
+			 * The menu used by the column. By default the {@link sap.ui.table.ColumnMenu} is used.
+			 *
+			 * <b>Note:</b> Applications must not use or change the default <code>sap.ui.table.ColumnMenu</code> of
+			 * a column in any way or create own instances of <code>sap.ui.table.ColumnMenu</code>.
+			 * To add a custom menu to a column, use the aggregation <code>menu</code> with a new instance of
+			 * <code>sap.ui.unified.Menu</code>.
 			 */
 			menu : {type : "sap.ui.unified.Menu", multiple : false}
 		},
@@ -238,7 +267,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 
 
 	/** default filter type for the columns */
-	Column._DEFAULT_FILTER_TYPE = new String();
+	Column._DEFAULT_FILTER_TYPE = new StringType();
 
 	/**
 	 * called when the column is initialized
@@ -250,26 +279,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 
 		// Skip proppagation of databinding properties to the template
 		this.mSkipPropagation = {template: true};
-
+		// for performance reasons, the cloned column templates shall be stored for later reuse
+		this._aTemplateClones = [];
 	};
 
 	/**
 	 * called when the column is destroyed
 	 */
 	Column.prototype.exit = function() {
-
-		// destroy the sort image
-		var oSortImage = sap.ui.getCore().byId(this.getId() + "-sortIcon");
-		if (oSortImage) {
-			oSortImage.destroy();
-		}
-
-		// destroy the filter image
-		var oFilterImage = sap.ui.getCore().byId(this.getId() + "-filterIcon");
-		if (oFilterImage) {
-			oFilterImage.destroy();
-		}
-
+		this._destroyTemplateClones();
 	};
 
 	/**
@@ -306,16 +324,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 		 * to the Column. But when re-rendering it would update the column cells.
 		 * To notify the Table on proper changes one has to call the method
 		 * invalidate on the Table.
-		*/
+		 */
 		/*
 		 * PART2: we also suppress the re-rendering in case of the column menu is
 		 * rerendered. This is a popup and we use the instance check because of the
 		 * menu behind the getMenu function is lazy created when first accessed.
 		 */
-	  if (oOrigin !== this.getTemplate() && !(oOrigin instanceof sap.ui.table.ColumnMenu)) {
+		if (oOrigin !== this.getTemplate() && !TableUtils.isInstanceOf(oOrigin, "sap/ui/table/ColumnMenu")) {
 			// changes on the template require to call invalidate on the column or table
-	    Element.prototype.invalidate.apply(this, arguments);
-	  }
+			Element.prototype.invalidate.apply(this, arguments);
+		}
 	};
 
 	/*
@@ -324,7 +342,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 	Column.prototype.setLabel = function(vLabel) {
 		var oLabel = vLabel;
 		if (typeof (vLabel) === "string") {
-			oLabel = sap.ui.table.TableHelper.createLabel({text: vLabel});
+			oLabel = library.TableHelper.createLabel({text: vLabel});
 		}
 		this.setAggregation("label", oLabel);
 		return this;
@@ -336,15 +354,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 	Column.prototype.setTemplate = function(vTemplate) {
 		var oTemplate = vTemplate;
 		if (typeof (vTemplate) === "string") {
-			oTemplate = sap.ui.table.TableHelper.createTextView().bindProperty("text", vTemplate);
+			oTemplate = library.TableHelper.createTextView().bindProperty("text", vTemplate);
 		}
 		this.setAggregation("template", oTemplate);
 		// manually invalidate the Column (because of the invalidate decoupling to
 		// prevent invalidations from the databinding part)
 		this.invalidate();
+		this._destroyTemplateClones();
+		var oTable = this.getParent();
+		if (oTable && oTable.invalidateRowsAggregation && this.getVisible() == true) {
+			oTable.invalidateRowsAggregation();
+		}
 		return this;
 	};
-
 
 	/*
 	 * @see JSDoc generated by SAPUI5 control API generator
@@ -365,7 +387,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 	 */
 	Column.prototype.invalidateMenu = function() {
 		var oMenu = this.getAggregation("menu");
-		if (oMenu && oMenu._invalidate) {
+
+		if (this._bMenuIsColumnMenu) {
 			oMenu._invalidate();
 		}
 	};
@@ -443,6 +466,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 	 */
 	Column.prototype.setMenu = function(oMenu) {
 		this.setAggregation("menu", oMenu, true);
+		this._bMenuIsColumnMenu = TableUtils.isInstanceOf(oMenu, "sap/ui/table/ColumnMenu");
 		return this;
 	};
 
@@ -452,22 +476,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 	 * @return {sap.ui.table.ColumnMenu} The created column menu.
 	 */
 	Column.prototype._createMenu = function() {
-		jQuery.sap.require("sap.ui.table.ColumnMenu");
-
 		if (!this._defaultMenu) {
-			this._defaultMenu =  new sap.ui.table.ColumnMenu(this.getId() + "-menu", {ariaLabelledBy: this});
+			this._defaultMenu = new ColumnMenu(this.getId() + "-menu", {ariaLabelledBy: this});
 		}
-
 		return this._defaultMenu;
-	};
-
-	/*
-	 * @see JSDoc generated by SAPUI5 control API generator
-	 */
-	Column.prototype.setWidth = function(sWidth) {
-		this.setProperty("width", sWidth);
-		this.fireEvent('_widthChanged', { newWidth: sWidth });
-		return this;
 	};
 
 	Column.prototype._setAppDefault = function(sProperty, mValue) {
@@ -495,9 +507,17 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 			this.setProperty("filtered", this._appDefaults.filtered, true);
 			this.setProperty("filterValue", this._appDefaults.filterValue, true);
 			this.setProperty("filterOperator", this._appDefaults.filterOperator, true);
-			this._renderSortIcon();
-			this._renderFilterIcon();
+			this._updateIcons();
 		}
+	};
+
+	/*
+	 * @see JSDoc generated by SAPUI5 control API generator
+	 */
+	Column.prototype.setSortProperty = function(sValue) {
+		this.setProperty("sortProperty", sValue);
+		this.invalidateMenu();
+		return this;
 	};
 
 	/*
@@ -506,7 +526,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 	Column.prototype.setSorted = function(bFlag) {
 		this.setProperty("sorted", bFlag, true);
 		this._setAppDefault("sorted", bFlag);
-		this._renderSortIcon();
+		this._updateIcons();
 		return this;
 	};
 
@@ -516,8 +536,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 	Column.prototype.setSortOrder = function(tSortOrder) {
 		this.setProperty("sortOrder", tSortOrder, true);
 		this._setAppDefault("sortOrder", tSortOrder);
-		this._renderSortIcon();
+		this._updateIcons();
 		return this;
+	};
+
+	/*
+	 * @see JSDoc generated by SAPUI5 control API generator
+	 */
+	Column.prototype.setFilterProperty = function(sValue) {
+		this.invalidateMenu();
+		return this.setProperty("filterProperty", sValue);
 	};
 
 	/*
@@ -526,7 +554,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 	Column.prototype.setFiltered = function(bFlag) {
 		this.setProperty("filtered", bFlag, true);
 		this._setAppDefault("filtered", bFlag);
-		this._renderFilterIcon();
+		this._updateIcons();
 		return this;
 	};
 
@@ -536,10 +564,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 	Column.prototype.setFilterValue = function(sValue) {
 		this.setProperty("filterValue", sValue, true);
 		this._setAppDefault("filterValue", sValue);
+
 		var oMenu = this.getMenu();
-		if (oMenu && oMenu instanceof sap.ui.table.ColumnMenu) {
+		if (this._bMenuIsColumnMenu) {
 			oMenu._setFilterValue(sValue);
 		}
+
 		return this;
 	};
 
@@ -547,54 +577,24 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 	 * @see JSDoc generated by SAPUI5 control API generator
 	 */
 	Column.prototype.setFilterOperator = function(sValue) {
-		this.setProperty("filterOperator", sValue, true);
 		this._setAppDefault("filterOperator", sValue);
-		return this;
-	};
-
-
-	/**
-	 * Function is called when mouse button is pressed.
-	 *
-	 * @param {jQuery.Event} oEvent
-	 * @private
-	 */
-	Column.prototype.onmousedown = function(oEvent) {
-		var oMenu = this.getAggregation("menu");
-		this._bSkipOpen = oMenu && oMenu.bOpen;
-	};
-
-
-	/**
-	 * Function is called when mouse leaves the control.
-	 *
-	 * @param {jQuery.Event} oEvent
-	 * @private
-	 */
-	Column.prototype.onmouseout = function(oEvent) {
-		if (this._bSkipOpen && jQuery.sap.checkMouseEnterOrLeave(oEvent, this.getDomRef())){
-			this._bSkipOpen = false;
-		}
+		return this.setProperty("filterOperator", sValue, true);
 	};
 
 	/**
-	 * Open the column menu
-	 * @param [{Object}] oDomRef Optional DOM reference of the element to which the menu should be visually attached. Fallback is the focused DOM reference
+	 * Open the column menu.
+	 * @param {Object} [oDomRef] DOM reference of the element to which the menu should be visually attached. Fallback is the focused DOM reference.
+	 * @param {boolean} [bWithKeyboard=false] Indicates whether or not the first item shall be highlighted when the menu is opened.
 	 * @private
 	 */
 	Column.prototype._openMenu = function(oDomRef, bWithKeyboard) {
-		if (this._bSkipOpen){
-			this._bSkipOpen = false;
-			return;
-		}
-
 		var oMenu = this.getMenu();
 		var bExecuteDefault = this.fireColumnMenuOpen({
 			menu: oMenu
 		});
 
 		if (bExecuteDefault) {
-			var eDock = sap.ui.core.Popup.Dock;
+			var eDock = Popup.Dock;
 			var oFocusDomRef = oDomRef;
 			if (!oDomRef) {
 				oDomRef = this.getDomRef();
@@ -616,7 +616,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 	 */
 	Column.prototype.toggleSort = function() {
 		// by default we sort ascending / only if already is sorted ascending then we toggle
-		this.sort(this.getSorted() && this.getSortOrder() === sap.ui.table.SortOrder.Ascending);
+		this.sort(this.getSorted() && this.getSortOrder() === SortOrder.Ascending);
 	};
 
 
@@ -632,53 +632,48 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	Column.prototype.sort = function(bDescending, bAdd) {
-
 		var oTable = this.getParent();
 		if (oTable) {
+			// add current column to list of sorted columns
 			oTable.pushSortedColumn(this, bAdd);
 			// get the sort order type
-			var oNewSortOrder = bDescending ? sap.ui.table.SortOrder.Descending : sap.ui.table.SortOrder.Ascending;
+			var sNewSortOrder = bDescending ? SortOrder.Descending : SortOrder.Ascending;
 
 			// notify the event listeners
 			var bExecuteDefault = oTable.fireSort({
 				column: this,
-				sortOrder: oNewSortOrder,
+				sortOrder: sNewSortOrder,
 				columnAdded: bAdd
 			});
 
 			if (bExecuteDefault) {
+				var aSortedCols = oTable.getSortedColumns();
+				var aColumns = oTable.getColumns();
 
-				// reset the sorting status of all columns
-				var aSorters = [];
-				var aSortedCols = oTable._aSortedColumns;
-
-				var aCols = oTable.getColumns();
-
-				for (var i = 0, l = aCols.length; i < l; i++) {
-
-					aCols[i].setProperty("sorted", false, true);
-					aCols[i].setProperty("sortOrder", sap.ui.table.SortOrder.Ascending, true);
-					aCols[i]._renderSortIcon();
-					if (jQuery.inArray(aCols[i], aSortedCols) < 0) {
-						delete aCols[i]._oSorter;
+				// reset the sorting status of all columns which are not sorted anymore
+				for (var i = 0, l = aColumns.length; i < l; i++) {
+					if (jQuery.inArray(aColumns[i], aSortedCols) < 0) {
+						// column is not sorted anymore -> reset default and remove sorter
+						aColumns[i].setProperty("sorted", false, true);
+						aColumns[i].setProperty("sortOrder", SortOrder.Ascending, true);
+						aColumns[i]._updateIcons();
+						delete aColumns[i]._oSorter;
 					}
-
 				}
 
+				// update properties of current column
+				this.setProperty("sorted", true, true);
+				this.setProperty("sortOrder", sNewSortOrder, true);
+				this._oSorter = new Sorter(this.getSortProperty(), this.getSortOrder() === SortOrder.Descending);
+
+				// add sorters of all sorted columns to one sorter-array and update sort icon rendering for sorted columns
+				var aSorters = [];
 				for (var i = 0, l = aSortedCols.length; i < l; i++) {
-					// set the sort property of the current column
-					aSortedCols[i].setProperty("sorted", true, true);
-					aSortedCols[i].setProperty("sortOrder", oNewSortOrder, true);
-					aSortedCols[i]._renderSortIcon();
-					if (this === aSortedCols[i]) {
-						this._oSorter = new Sorter(aSortedCols[i].getSortProperty(), aSortedCols[i].getSortOrder() === sap.ui.table.SortOrder.Descending);
-					}
+					aSortedCols[i]._updateIcons();
 					aSorters.push(aSortedCols[i]._oSorter);
 				}
 
-				// set the sorted flag and sort the model
 				if (oTable.isBound("rows")) {
-
 					// sort the binding
 					oTable.getBinding("rows").sort(aSorters);
 
@@ -686,73 +681,43 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 						this._afterSort();
 					}
 				}
-
-				// update the sort icon
-				this._renderSortIcon();
-
 			}
-
 		}
-
 		return this;
-
 	};
 
-	function getHTML(oImage) {
-		var oRenderManager = sap.ui.getCore().createRenderManager(),
-			sHTML = oRenderManager.getHTML(oImage);
-		oRenderManager.destroy();
-		return sHTML;
-	}
+	Column.prototype._updateIcons = function() {
+		var oTable = this.getParent(),
+			bSorted = this.getSorted(),
+			bFiltered = this.getFiltered();
 
-	Column.prototype._renderSortIcon = function() {
-
-		var oTable = this.getParent();
-		if (oTable && oTable.getDomRef()) {
-			if (this.getSorted()) {
-
-				// create the image for the sort order visualization
-				var sCurrentTheme = sap.ui.getCore().getConfiguration().getTheme();
-				var oImage = sap.ui.getCore().byId(this.getId() + "-sortIcon") || sap.ui.table.TableHelper.createImage(this.getId() + "-sortIcon");
-				oImage.addStyleClass("sapUiTableColIconsOrder");
-				if (this.getSortOrder() === sap.ui.table.SortOrder.Ascending) {
-					oImage.setSrc(sap.ui.resource("sap.ui.table", "themes/" + sCurrentTheme + "/img/ico12_sort_asc.gif"));
-				} else {
-					oImage.setSrc(sap.ui.resource("sap.ui.table", "themes/" + sCurrentTheme + "/img/ico12_sort_desc.gif"));
-				}
-
-				// apply the image and aria property to the column
-				var htmlImage = getHTML(oImage);
-				this.$().find(".sapUiTableColIconsOrder").remove();
-				jQuery(htmlImage).prependTo(this.getDomRef("icons"));
-				this.$().attr("aria-sort", this.getSortOrder() === sap.ui.table.SortOrder.Ascending ? "ascending" : "descending");
-
-				this.$().find(".sapUiTableColCell").addClass("sapUiTableColSorted");
-
-			} else {
-
-				// remove the sort indicators
-				this.$().find(".sapUiTableColIconsOrder").remove();
-				this.$().removeAttr("aria-sort");
-
-				this.$().find(".sapUiTableColCell").removeClass("sapUiTableColSorted");
-
-			}
+		if (!oTable || !oTable.getDomRef()) {
+			return;
 		}
 
+		this.$().find(".sapUiTableColCell")
+			.toggleClass("sapUiTableColSF", bSorted || bFiltered)
+			.toggleClass("sapUiTableColFiltered", bFiltered)
+			.toggleClass("sapUiTableColSorted", bSorted)
+			.toggleClass("sapUiTableColSortedD", bSorted && this.getSortOrder() === SortOrder.Descending);
+		oTable._getAccExtension().updateAriaStateOfColumn(this);
+	};
+
+	Column.prototype._renderSortIcon = function() {
+		this._updateIcons();
 	};
 
 	Column.prototype._getFilter = function() {
 
 		var oFilter,
-		    sPath = this.getFilterProperty(),
-		    sValue = this.getFilterValue(),
-		    sOperator = this.getFilterOperator(),
-		    sParsedValue,
-		    sSecondaryParsedValue,
-		    oType = this.getFilterType() || Column._DEFAULT_FILTER_TYPE,
-		    bIsString = oType instanceof String,
-		    aBetween;
+			sPath = this.getFilterProperty(),
+			sValue = this.getFilterValue(),
+			sOperator = this.getFilterOperator(),
+			sParsedValue,
+			sSecondaryParsedValue,
+			oType = this.getFilterType() || Column._DEFAULT_FILTER_TYPE,
+			bIsString = oType instanceof StringType,
+			aBetween;
 
 		if (sValue) {
 
@@ -763,43 +728,43 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 
 				// determine the filter operator depending on the
 				if (sValue.indexOf("=") == 0) {
-					sOperator = sap.ui.model.FilterOperator.EQ;
+					sOperator = FilterOperator.EQ;
 					sParsedValue = sValue.substr(1);
 				} else if (sValue.indexOf("!=") == 0) {
-					sOperator = sap.ui.model.FilterOperator.NE;
+					sOperator = FilterOperator.NE;
 					sParsedValue = sValue.substr(2);
 				} else if (sValue.indexOf("<=") == 0) {
-					sOperator = sap.ui.model.FilterOperator.LE;
+					sOperator = FilterOperator.LE;
 					sParsedValue = sValue.substr(2);
 				} else if (sValue.indexOf("<") == 0) {
-					sOperator = sap.ui.model.FilterOperator.LT;
+					sOperator = FilterOperator.LT;
 					sParsedValue = sValue.substr(1);
 				} else if (sValue.indexOf(">=") == 0) {
-					sOperator = sap.ui.model.FilterOperator.GE;
+					sOperator = FilterOperator.GE;
 					sParsedValue = sValue.substr(2);
 				} else if (sValue.indexOf(">") == 0) {
-					sOperator = sap.ui.model.FilterOperator.GT;
+					sOperator = FilterOperator.GT;
 					sParsedValue = sValue.substr(1);
 				} else if (aBetween) {
 					if (aBetween[1] && aBetween[2]) {
-						sOperator = sap.ui.model.FilterOperator.BT;
+						sOperator = FilterOperator.BT;
 						sParsedValue = aBetween[1];
 						sSecondaryParsedValue = aBetween[2];
 					} else if (aBetween[1] && !aBetween[2]) {
-						sOperator = sap.ui.model.FilterOperator.GE;
+						sOperator = FilterOperator.GE;
 						sParsedValue = aBetween[1];
 					} else {
-						sOperator = sap.ui.model.FilterOperator.LE;
+						sOperator = FilterOperator.LE;
 						sParsedValue = aBetween[2];
 					}
 				} else if (bIsString && sValue.indexOf("*") == 0 && sValue.lastIndexOf("*") == sValue.length - 1) {
-					sOperator = sap.ui.model.FilterOperator.Contains;
+					sOperator = FilterOperator.Contains;
 					sParsedValue = sValue.substr(1, sValue.length - 2);
 				} else if (bIsString && sValue.indexOf("*") == 0) {
-					sOperator = sap.ui.model.FilterOperator.EndsWith;
+					sOperator = FilterOperator.EndsWith;
 					sParsedValue = sValue.substr(1);
 				} else if (bIsString && sValue.lastIndexOf("*") == sValue.length - 1) {
-					sOperator = sap.ui.model.FilterOperator.StartsWith;
+					sOperator = FilterOperator.StartsWith;
 					sParsedValue = sValue.substr(0, sValue.length - 1);
 				} else {
 					if (this.getDefaultFilterOperator()) {
@@ -807,9 +772,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 					} else {
 						if (bIsString) {
 							// Due to compatibility reason we need to use Contains for Strings instead of EQ as default!!
-							sOperator = sap.ui.model.FilterOperator.Contains;
+							sOperator = FilterOperator.Contains;
 						} else {
-							sOperator = sap.ui.model.FilterOperator.EQ;
+							sOperator = FilterOperator.EQ;
 						}
 					}
 					sParsedValue = sValue.substr(0);
@@ -830,8 +795,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 	};
 
 	Column.prototype.filter = function(sValue) {
-
 		var oTable = this.getParent();
+
 		if (oTable && oTable.isBound("rows")) {
 
 			// notify the event listeners
@@ -841,11 +806,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 			});
 
 			if (bExecuteDefault) {
-
 				this.setProperty("filtered", !!sValue, true);
 				this.setProperty("filterValue", sValue, true);
+
 				var oMenu = this.getMenu();
-				if (oMenu && oMenu instanceof sap.ui.table.ColumnMenu) {
+				if (this._bMenuIsColumnMenu) {
 					// update column menu input field
 					oMenu._setFilterValue(sValue);
 				}
@@ -859,12 +824,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 					oMenu = oCol.getMenu();
 					try {
 						oFilter = oCol._getFilter();
-						if (oMenu && oMenu instanceof sap.ui.table.ColumnMenu) {
-							oMenu._setFilterState(sap.ui.core.ValueState.None);
+						if (oCol._bMenuIsColumnMenu) {
+							oMenu._setFilterState(ValueState.None);
 						}
 					} catch (e) {
-						if (oMenu && oMenu instanceof sap.ui.table.ColumnMenu) {
-							oMenu._setFilterState(sap.ui.core.ValueState.Error);
+						if (oCol._bMenuIsColumnMenu) {
+							oMenu._setFilterState(ValueState.Error);
 						}
 						continue;
 					}
@@ -872,9 +837,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 						aFilters.push(oFilter);
 					}
 				}
-				oTable.getBinding("rows").filter(aFilters, sap.ui.model.FilterType.Control);
+				oTable.getBinding("rows").filter(aFilters, FilterType.Control);
 
-				this._renderFilterIcon();
+				this._updateIcons();
 
 			}
 
@@ -898,39 +863,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 		return sValue;
 	};
 
-	Column.prototype._renderFilterIcon = function() {
-		var oTable = this.getParent();
-		if (oTable && oTable.getDomRef()) {
-			var sCurrentTheme = sap.ui.getCore().getConfiguration().getTheme();
-			var oImage = sap.ui.getCore().byId(this.getId() + "-filterIcon") ||
-				sap.ui.table.TableHelper.createImage({
-					id: this.getId() + "-filterIcon",
-					decorative: false,
-					alt: oTable._oResBundle.getText("TBL_FILTER_ICON_TEXT")
-				});
-			oImage.$().remove();
-			oImage.addStyleClass("sapUiTableColIconsFilter");
-			if (this.getFiltered()) {
-				oImage.setSrc(sap.ui.resource("sap.ui.table", "themes/" + sCurrentTheme + "/img/ico12_filter.gif"));
-				var htmlImage = getHTML(oImage);
-				jQuery(htmlImage).prependTo(this.getDomRef("icons"));
-				this.$().find(".sapUiTableColCell").addClass("sapUiTableColFiltered");
-			} else {
-				this.$().find(".sapUiTableColCell").removeClass("sapUiTableColFiltered");
-			}
-		}
-	};
-
 	Column.prototype._restoreIcons = function() {
-
-		if (this.getSorted()) {
-			this._renderSortIcon();
-		}
-
-		if (this.getFiltered()) {
-			this._renderFilterIcon();
-		}
-
+		this._updateIcons();
 	};
 
 	/**
@@ -940,6 +874,24 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 	 */
 	Column.prototype.shouldRender = function() {
 		return this.getVisible() && !this.getGrouped();
+	};
+
+	Column.PROPERTIES_FOR_ROW_INVALIDATION = {visible: true, flexible: true, headerSpan: true};
+	/*
+	 * @see JSDoc generated by SAPUI5 control API generator
+	 */
+	Column.prototype.setProperty = function(sName, vValue) {
+		var oTable = this.getParent();
+
+		if (oTable &&
+			oTable.invalidateRowsAggregation &&
+			this.getProperty(sName) != vValue &&
+			Column.PROPERTIES_FOR_ROW_INVALIDATION[sName] && (this.getVisible() || sName == "visible")) {
+
+			oTable.invalidateRowsAggregation();
+		}
+
+		return Element.prototype.setProperty.apply(this, arguments);
 	};
 
 	/*
@@ -985,6 +937,84 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Element', 'sap/ui/core/RenderMa
 		}
 	};
 
+	/**
+	 * Returns an unused column template clone. Unused means, it does not have a parent.
+	 * @param {sap.ui.core.Control[]} aTemplateClones Array of available column template clones
+	 * @returns {sap.ui.core.Control|undefined} Column template clone or undefined if all clones have parents
+	 * @private
+	 */
+	Column.prototype._getFreeTemplateClone = function(aTemplateClones) {
+		for (var i = 0, l = aTemplateClones.length; i < l; i++) {
+			if (aTemplateClones[i] && aTemplateClones[i].bIsDestroyed) {
+				// remove destroyed clones
+				this._aTemplateClones.splice(i, 1);
+				continue;
+			}
+
+			if (aTemplateClones[i] && !aTemplateClones[i].getParent()) {
+				return aTemplateClones[i];
+			}
+		}
+	};
+
+	/**
+	 * Returns a column template clone. It either finds an unused clone or clones a new one from the column template.
+	 * @param {int} iIndex Index of the column in the column aggregation of the table
+	 * @returns {sap.ui.core.Control} Clone of the column template
+	 * @protected
+	 */
+	// for performance reasons, the index of the column in the column aggregation must
+	// be provided by the caller. Otherwise the columns aggregation would be looped over and over again to
+	// figure out the index.
+	Column.prototype.getTemplateClone = function(iIndex, iRowIndex) {
+		var oClone = this._getFreeTemplateClone(this._aTemplateClones);
+		var oTable = this.getParent();
+
+		if (!oClone) {
+			// no clone found, create a new one
+			var oTemplate = this.getTemplate();
+			if (oTemplate) {
+
+				// Legacy fallback to old cell id scheme for transition phase of visual tests (1.44 only!)
+				var sSuffix;
+				if (oTable && oTable._bUseLegacyCellIds && iRowIndex >= 0) {
+					var _sSuffix = "col" + iIndex + "-row" + iRowIndex;
+					if (!sap.ui.getCore().byId(oTemplate.getId() + "-" + _sSuffix)){
+						sSuffix = _sSuffix;
+					}
+				}
+
+				oClone = oTemplate.clone(sSuffix);
+			}
+		}
+
+		if (oClone) {
+			// update sap-ui-* as the column index in the column aggregation may have changed
+			oClone.data("sap-ui-colindex", iIndex);
+			oClone.data("sap-ui-colid", this.getId());
+			this._aTemplateClones.push(oClone);
+
+			if (oTable) {
+				oTable._getAccExtension().addColumnHeaderLabel(this, oClone);
+			}
+
+			return oClone;
+		}
+	};
+
+	/**
+	 * Destroys all column template clones and clears the clone stack
+	 * @private
+	 */
+	Column.prototype._destroyTemplateClones = function() {
+		for (var i = 0, l = this._aTemplateClones.length; i < l; i++) {
+			if (this._aTemplateClones[i]) {
+				this._aTemplateClones[i].destroy();
+			}
+		}
+		this._aTemplateClones = [];
+	};
+
 	return Column;
 
-}, /* bExport= */ true);
+});

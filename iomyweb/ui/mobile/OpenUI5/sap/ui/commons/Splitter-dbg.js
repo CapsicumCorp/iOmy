@@ -20,10 +20,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @class
 	 * Allows to split the screen into two areas. Make sure that the container for the splitter has an absolute height or set an absolute height for the splitter using the height property. Otherwise the height of the splitter is calculated by the height of its contents.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.ui.layout.Splitter</code> control.
 	 * @alias sap.ui.commons.Splitter
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -393,7 +394,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	/**
 	 * The selectstart event triggered in IE to select the text.
 	 * @private
-	 * @param {event} oEvent The splitterselectstart event
+	 * @param {jQuery.Event} oEvent The splitterselectstart event
 	 * @return {boolean} false
 	 */
 	Splitter.prototype.splitterSelectStart = function(oEvent){

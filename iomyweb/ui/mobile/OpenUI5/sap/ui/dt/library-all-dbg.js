@@ -23,7 +23,7 @@ function(jQuery) {
 	 * Utility functionality for DOM
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @private
 	 * @static
@@ -38,9 +38,10 @@ function(jQuery) {
 	 *
 	 */
 	DOMUtil.getSize = function(oDomRef) {
+		var oClientRec = oDomRef.getBoundingClientRect();
 		return {
-			width : oDomRef.offsetWidth,
-			height : oDomRef.offsetHeight
+			width: oClientRec.width,
+			height: oClientRec.height
 		};
 	};
 
@@ -104,12 +105,18 @@ function(jQuery) {
 	/**
 	 *
 	 */
-	DOMUtil.getGeometry = function(oDomRef) {
+	DOMUtil.getGeometry = function(oDomRef, bUseWindowOffset) {
 		if (oDomRef) {
+			var oOffset = jQuery(oDomRef).offset();
+			if (bUseWindowOffset) {
+				oOffset.left = oOffset.left - jQuery(window).scrollLeft();
+				oOffset.top = oOffset.top - jQuery(window).scrollTop();
+			}
+
 			return {
 				domRef : oDomRef,
 				size : this.getSize(oDomRef),
-				position :  jQuery(oDomRef).offset(),
+				position :  oOffset,
 				visible : this.isVisible(oDomRef)
 			};
 		}
@@ -136,30 +143,38 @@ function(jQuery) {
 	};
 
 	/**
-	 *
+	 * returns jQuery object found in oDomRef for sCSSSelector
+	 * @param  {Element|jQuery} oDomRef to search in
+	 * @param  {string} sCSSSelector jQuery (CSS-like) selector to look for
+	 * @return {jQuery} found domRef
 	 */
 	DOMUtil.getDomRefForCSSSelector = function(oDomRef, sCSSSelector) {
-		if (!sCSSSelector) {
-			return false;
-		}
+		if (sCSSSelector && oDomRef) {
+			var $domRef = jQuery(oDomRef);
 
-		if (sCSSSelector === ":sap-domref") {
-			return oDomRef;
+			if (sCSSSelector === ":sap-domref") {
+				return $domRef;
+			}
+
+			// ":sap-domref > sapMPage" scenario
+			if (sCSSSelector.indexOf(":sap-domref") > -1) {
+				return $domRef.find(sCSSSelector.replace(/:sap-domref/g, ""));
+			}
+
+			// normal selector
+			return $domRef.find(sCSSSelector);
+		} else {
+			// empty jQuery object for typing
+			return jQuery();
 		}
-		// ":sap-domref > sapMPage" scenario
-		if (sCSSSelector.indexOf(":sap-domref") > -1) {
-			return document.querySelector(sCSSSelector.replace(":sap-domref", "#" + this.getEscapedString(oDomRef.id)));
-		}
-		return oDomRef ? oDomRef.querySelector(sCSSSelector) : undefined;
 	};
 
 	/**
 	 *
 	 */
 	DOMUtil.isVisible = function(oDomRef) {
-		oDomRef = jQuery(oDomRef);
-
-		return oDomRef.is(":visible");
+		// mimic the jQuery 1.11.1 impl of the ':visible' selector as the jQuery 2.2.0 selector no longer reports empty SPANs etc. as 'hidden'
+		return oDomRef ? oDomRef.offsetWidth > 0 || oDomRef.offsetHeight > 0 : false;
 	};
 
 	/**
@@ -299,235 +314,8 @@ function(jQuery) {
 
 	return DOMUtil;
 }, /* bExport= */ true);
+
 }; // end of sap/ui/dt/DOMUtil.js
-if ( !jQuery.sap.isDeclared('sap.ui.dt.DesignTimeMetadata') ) {
-/*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
- * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
- */
-
-// Provides class sap.ui.dt.DesignTimeMetadata.
-jQuery.sap.declare('sap.ui.dt.DesignTimeMetadata'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-jQuery.sap.require('sap.ui.base.ManagedObject'); // unlisted dependency retained
-sap.ui.define("sap/ui/dt/DesignTimeMetadata",[
-	'jquery.sap.global',
-	'sap/ui/base/ManagedObject'
-],
-function(jQuery, ManagedObject) {
-	"use strict";
-
-
-	/**
-	 * Constructor for a new DesignTimeMetadata.
-	 *
-	 * @param {string} [sId] id for the new object, generated automatically if no id is given
-	 * @param {object} [mSettings] initial settings for the new object
-	 *
-	 * @class
-	 * The DesignTimeMetadata is a wrapper for the DesignTimeMetadata of the associated element
-	 * @extends sap.ui.core.ManagedObject
-	 *
-	 * @author SAP SE
-	 * @version 1.34.9
-	 *
-	 * @constructor
-	 * @private
-	 * @since 1.30
-	 * @alias sap.ui.dt.DesignTimeMetadata
-	 * @experimental Since 1.30. This class is experimental and provides only limited functionality. Also the API might be changed in future.
-	 */
-	var DesignTimeMetadata = ManagedObject.extend("sap.ui.dt.DesignTimeMetadata", /** @lends sap.ui.dt.DesignTimeMetadata.prototype */ {
-		metadata : {
-			// ---- object ----
-
-			// ---- control specific ----
-			library : "sap.ui.dt",
-			properties : {
-				/**
-				 * Data to be used as DT metadata
-				 */
-				data : {
-					type : "object"
-				}
-			}
-		}
-	});
-
-	/**
-	 * Sets the data as DT metadata, uses default settings, if some fields are not defined in oData
-	 * @param {object} oData to set
-	 * @return {sap.ui.dt.DesignTimeMetadata} returns this
-	 * @protected
-	 */
-	DesignTimeMetadata.prototype.setData = function(oData) {
-
-		var oMergedData = jQuery.extend(true, this.getDefaultData(), oData || {});
-
-		this.setProperty("data", oMergedData);
-		return this;
-	};
-
-	/**
-	 * Returns data, if no data is set, creates a default data
-	 * @return {object} returns data
-	 * @public
-	 */
-	DesignTimeMetadata.prototype.getData = function() {
-		var oData = this.getProperty("data");
-		if (!oData) {
-			this.setData({});
-			oData = this.getProperty("data");
-		}
-
-		return oData;
-	};
-
-	/**
-	 * Returns the default DT metadata
-	 * @return {Object} default data
-	 * @protected
-	 */
-	DesignTimeMetadata.prototype.getDefaultData = function() {
-		return {
-			ignore : false,
-			domRef : undefined,
-			cloneDomRef : false
-		};
-	};
-
-	/**
-	 * Returns property "ignore" of the DT metadata
-	 * @return {boolean} if ignored
-	 * @public
-	 */
-	DesignTimeMetadata.prototype.isIgnored = function() {
-		return this.getData().ignore;
-	};
-
-	/**
-	 * Returns property "copyDom" of the DT metadata
-	 * @return {boolean} if overlay should copy the DOM of its associated element
-	 * @public
-	 */
-	DesignTimeMetadata.prototype.getCloneDomRef = function() {
-		return this.getData().cloneDomRef;
-	};
-
-	/**
-	 * Returns property "domRef" of the DT metadata
-	 * @return {string|Element} assosicated domRef
-	 * @public
-	 */
-	DesignTimeMetadata.prototype.getDomRef = function() {
-		return this.getData().domRef;
-	};
-
-	return DesignTimeMetadata;
-}, /* bExport= */ true);
-}; // end of sap/ui/dt/DesignTimeMetadata.js
-if ( !jQuery.sap.isDeclared('sap.ui.dt.ElementDesignTimeMetadata') ) {
-/*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
- * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
- */
-
-// Provides class sap.ui.dt.ElementDesignTimeMetadata.
-jQuery.sap.declare('sap.ui.dt.ElementDesignTimeMetadata'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-sap.ui.define("sap/ui/dt/ElementDesignTimeMetadata",[
-	'jquery.sap.global',
-	'sap/ui/dt/DesignTimeMetadata'
-],
-function(jQuery, DesignTimeMetadata) {
-	"use strict";
-
-
-	/**
-	 * Constructor for a new ElementDesignTimeMetadata.
-	 *
-	 * @param {string} [sId] id for the new object, generated automatically if no id is given
-	 * @param {object} [mSettings] initial settings for the new object
-	 *
-	 * @class
-	 * The ElementDesignTimeMetadata is a wrapper for the ElementDesignTimeMetadata of the associated element
-	 * @extends sap.ui.core.DesignTimeMetadata
-	 *
-	 * @author SAP SE
-	 * @version 1.34.9
-	 *
-	 * @constructor
-	 * @private
-	 * @since 1.30
-	 * @alias sap.ui.dt.ElementDesignTimeMetadata
-	 * @experimental Since 1.30. This class is experimental and provides only limited functionality. Also the API might be changed in future.
-	 */
-	var ElementDesignTimeMetadata = DesignTimeMetadata.extend("sap.ui.dt.ElementDesignTimeMetadata", /** @lends sap.ui.dt.ElementDesignTimeMetadata.prototype */ {
-		metadata : {
-			// ---- object ----
-
-			// ---- control specific ----
-			library : "sap.ui.dt"
-		}
-	});
-
-	/**
-	 * Returns the default DT metadata
-	 * @return {Object} default data
-	 * @override
-	 */
-	ElementDesignTimeMetadata.prototype.getDefaultData = function(oData) {
-		var oDefaultData = DesignTimeMetadata.prototype.getDefaultData.apply(this, arguments);
-
-		oDefaultData.aggregations  = {
-			layout : {
-				ignore : true
-			},
-			dependents : {
-				ignore : true
-			},
-			customData : {
-				ignore : true
-			}
-		};
-
-		return oDefaultData;
-	};
-
-	/**
-	 * Returns if the DT metadata for an aggregation name exists
-	 * @param {string} sAggregationName an aggregation name
-	 * @return {boolean} returns if the field for an aggregation with a given name exists in DT metadata
-	 * @public
-	 */
-	ElementDesignTimeMetadata.prototype.hasAggregation = function(sAggregationName) {
-		return !!this.getAggregations()[sAggregationName];
-	};
-
-	/**
-	 * Returns the DT metadata for an aggregation name
-	 * @param {string} sAggregationName an aggregation name
-	 * @return {object} returns the DT metadata for an aggregation with a given name
-	 * @public
-	 */
-	ElementDesignTimeMetadata.prototype.getAggregation = function(sAggregationName) {
-		return this.getAggregations()[sAggregationName];
-	};
-
-	/**
-	 * Returns the DT metadata for all aggregations
-	 * @return {map} returns the DT metadata for all aggregations
-	 * @public
-	 */
-	ElementDesignTimeMetadata.prototype.getAggregations = function() {
-		return this.getData().aggregations;
-	};
-
-	return ElementDesignTimeMetadata;
-}, /* bExport= */ true);
-}; // end of sap/ui/dt/ElementDesignTimeMetadata.js
 if ( !jQuery.sap.isDeclared('sap.ui.dt.ElementUtil') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -538,369 +326,460 @@ if ( !jQuery.sap.isDeclared('sap.ui.dt.ElementUtil') ) {
 // Provides object sap.ui.dt.ElementUtil.
 jQuery.sap.declare('sap.ui.dt.ElementUtil'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-sap.ui.define("sap/ui/dt/ElementUtil",[
-	'jquery.sap.global'
-],
-function(jQuery) {
-	"use strict";
+sap.ui.define("sap/ui/dt/ElementUtil",['jquery.sap.global'],
+		function(jQuery) {
+			"use strict";
 
-	/**
-	 * Class for ElementUtil.
-	 *
-	 * @class
-	 * Utility functionality to work with élements, e.g. iterate through aggregations, find parents, ...
-	 *
-	 * @author SAP SE
-	 * @version 1.34.9
-	 *
-	 * @private
-	 * @static
-	 * @since 1.30
-	 * @alias sap.ui.dt.ElementUtil
-	 * @experimental Since 1.30. This class is experimental and provides only limited functionality. Also the API might be changed in future.
-	 */
+			/**
+			 * Class for ElementUtil.
+			 *
+			 * @class Utility functionality to work with élements, e.g. iterate through aggregations, find parents, ...
+			 *
+			 * @author SAP SE
+			 * @version 1.44.14
+			 *
+			 * @private
+			 * @static
+			 * @since 1.30
+			 * @alias sap.ui.dt.ElementUtil
+			 * @experimental Since 1.30. This class is experimental and provides only limited functionality. Also the API
+			 *               might be changed in future.
+			 */
 
-	var ElementUtil = {};
+			var ElementUtil = {};
 
-	/**
-	 *
-	 */
-	ElementUtil.iterateOverElements = function(vElement, fnCallback) {
-		if (vElement && vElement.length) {
-			for (var i = 0; i < vElement.length; i++) {
-				var oElement = vElement[i];
-				if (oElement instanceof sap.ui.core.Element) {
-					fnCallback(oElement);
+			ElementUtil.sACTION_MOVE = 'move';
+			ElementUtil.sACTION_CUT = 'cut';
+			ElementUtil.sACTION_PASTE = 'paste';
+			ElementUtil.sREORDER_AGGREGATION = 'reorder_aggregation';
+
+			/**
+			 *
+			 */
+			ElementUtil.iterateOverElements = function(vElement, fnCallback) {
+				if (vElement && vElement.length) {
+					for (var i = 0; i < vElement.length; i++) {
+						var oElement = vElement[i];
+						if (oElement instanceof sap.ui.core.Element) {
+							fnCallback(oElement);
+						}
+					}
+				} else if (vElement instanceof sap.ui.core.Element) {
+					fnCallback(vElement);
 				}
-			}
-		} else if (vElement instanceof sap.ui.core.Element) {
-			fnCallback(vElement);
-		}
-	};
-
-	/**
-	 *
-	 */
-	ElementUtil.iterateOverAllPublicAggregations = function(oElement, fnCallback) {
-		var that = this;
-
-		var mAggregations = oElement.getMetadata().getAllAggregations();
-		var aAggregationNames = Object.keys(mAggregations);
-
-		aAggregationNames.forEach(function(sAggregationName) {
-			var oAggregation = mAggregations[sAggregationName];
-			var vAggregationValue = that.getAggregation(oElement, sAggregationName);
-
-			fnCallback(oAggregation, vAggregationValue);
-		});
-	};
-
-	/**
-	 *
-	 */
-	ElementUtil.getElementInstance = function(vElement) {
-		if (typeof vElement === "string") {
-			return sap.ui.getCore().byId(vElement);
-		} else {
-			return vElement;
-		}
-	};
-
-	/**
-	 *
-	 */
-	ElementUtil.hasAncestor = function(oElement, oAncestor) {
-		oAncestor = this.fixComponentContainerElement(oAncestor);
-
-		var oParent = this.fixComponentParent(oElement);
-		while (oParent && oParent !== oAncestor) {
-			oParent = oParent.getParent();
-			oParent = this.fixComponentParent(oParent);
-		}
-
-		return !!oParent;
-	};
-
-	/**
-	 * ! Please, use this method only if OverlayUtil.getClosestOverlayForType is not available in your case !
-	 * find the closest element of the given type
-	 * @param  {sap.ui.core.Element} oSourceElement to start search for
-	 * @param  {string} sType to check instance of
-	 * @return {sap.ui.core.Element} element of the given type, if found
-	 */
-	ElementUtil.getClosestElementOfType = function(oSourceElement, sType) {
-		var oElement = oSourceElement;
-
-		while (oElement && !this.isInstanceOf(oElement, sType)) {
-			oElement = oElement.getParent();
-		}
-
-		return oElement;
-	};
-
-	/**
-	 *
-	 */
-	ElementUtil.fixComponentParent = function(oElement) {
-		if (this.isInstanceOf(oElement, "sap.ui.core.UIComponent")) {
-			var oComponentContainer = oElement.oContainer;
-			if (oComponentContainer) {
-				return oComponentContainer.getParent();
-			}
-		} else {
-			return oElement;
-		}
-	};
-
-	/**
-	 *
-	 */
-	ElementUtil.fixComponentContainerElement = function(oElement) {
-		if (this.isInstanceOf(oElement, "sap.ui.core.ComponentContainer")) {
-			//This happens when the compontentContainer has not been rendered yet
-			if (!oElement.getComponentInstance()) {
-				return;
-			}
-			return oElement.getComponentInstance().getAggregation("rootControl");
-		} else {
-			return oElement;
-		}
-	};
-
-	/**
-	 *
-	 */
-	ElementUtil.findAllPublicElements = function(oElement) {
-		var that = this;
-		var aFoundElements = [];
-
-		function internalFind(oElement) {
-			oElement = that.fixComponentContainerElement(oElement);
-			if (oElement) {
-				aFoundElements.push(oElement);
-				that.iterateOverAllPublicAggregations(oElement, function(oAggregation, vElements) {
-					that.iterateOverElements(vElements, internalFind);
-				});
-			}
-		}
-		internalFind(oElement);
-
-		return aFoundElements;
-	};
-
-	/**
-	 *
-	 */
-	ElementUtil.getDomRef = function(oElement) {
-		if (oElement) {
-			var oDomRef;
-			if (oElement.getDomRef) {
-				oDomRef = oElement.getDomRef();
-			}
-			if (!oDomRef && oElement.getRenderedDomRef) {
-				oDomRef = oElement.getRenderedDomRef();
-			}
-			return oDomRef;
-		}
-	};
-
-	/**
-	 *
-	 */
-	ElementUtil.findAllPublicChildren = function(oElement) {
-		var aFoundElements = this.findAllPublicElements(oElement);
-		var iIndex = aFoundElements.indexOf(oElement);
-		if (iIndex > -1) {
-			aFoundElements.splice(iIndex, 1);
-		}
-		return aFoundElements;
-
-	};
-
-	/**
-	 *
-	 */
-	ElementUtil.isElementFiltered = function(oControl, aType) {
-		// TODO: Is this method still needed?
-		var that = this;
-
-		aType = aType || this.getControlFilter();
-		var bFiltered = false;
-
-		aType.forEach(function(sType) {
-			bFiltered = that.isInstanceOf(oControl, sType);
-			if (bFiltered) {
-				return false;
-			}
-		});
-
-		return bFiltered;
-	};
-
-	/**
-	 *
-	 */
-	ElementUtil.findClosestControlInDom = function(oNode) {
-		// TODO: Is this method still needed?
-		if (oNode && oNode.getAttribute("data-sap-ui")) {
-			return sap.ui.getCore().byId(oNode.getAttribute("data-sap-ui"));
-		} else {
-			if (oNode.parentNode) {
-				this.findClosestControlInDom(oNode.parentNode);
-			} else {
-				return null;
-			}
-		}
-	};
-
-	/**
-	 *
-	 */
-	ElementUtil.getAggregationAccessors = function(oElement, sAggregationName) {
-		var oMetadata = oElement.getMetadata();
-		oMetadata.getJSONKeys();
-		var oAggregationMetadata = oMetadata.getAggregation(sAggregationName);
-		if (oAggregationMetadata) {
-			var sGetter = oAggregationMetadata._sGetter;
-
-			// altType getter returns not element (TODO: clarify if getAggregationNameControl getter is a convention)
-			if (oAggregationMetadata.altTypes && oAggregationMetadata.altTypes.length && oElement[oAggregationMetadata._sGetter + "Control"]) {
-				sGetter = oAggregationMetadata._sGetter + "Control";
-			}
-
-			return {
-				get : sGetter,
-				add : oAggregationMetadata._sMutator,
-				remove : oAggregationMetadata._sRemoveMutator,
-				insert : oAggregationMetadata._sInsertMutator
 			};
-		} else {
-			return {};
-		}
-	};
 
-	/**
-	 *
-	 */
-	ElementUtil.getAggregation = function(oElement, sAggregationName) {
-		var oValue;
+			/**
+			 *
+			 */
+			ElementUtil.iterateOverAllPublicAggregations = function(oElement, fnCallback) {
+				var that = this;
 
-		var sGetter = this.getAggregationAccessors(oElement, sAggregationName).get;
-		if (sGetter) {
-			oValue = oElement[sGetter]();
-		} else {
-			oValue = oElement.getAggregation(sAggregationName);
-		}
-		//ATTENTION:
-		//under some unknown circumstances the return oValue looks like an Array but jQuery.isArray() returned undefined => false
-		//that is why we use array ducktyping with a null check!
-		//reproducible with Windows and Chrome (currently 35), when creating a project and opening WYSIWYG editor afterwards on any file
-		//sap.m.Panel.prototype.getHeaderToolbar() returns a single object but an array
-		/*eslint-disable no-nested-ternary */
-		oValue = oValue && oValue.splice ? oValue : (oValue ? [oValue] : []);
-		/*eslint-enable no-nested-ternary */
-		return oValue;
-	};
+				var mAggregations = oElement.getMetadata().getAllAggregations();
+				var aAggregationNames = Object.keys(mAggregations);
 
-	/**
-	 *
-	 */
-	ElementUtil.addAggregation = function(oParent, sAggregationName, oElement) {
-		if (this.hasAncestor(oParent, oElement)) {
-			throw new Error("Trying to add an element to itself or its successors");
-		}
-		var sAggregationAddMutator = this.getAggregationAccessors(oParent, sAggregationName).add;
-		if (sAggregationAddMutator) {
-			oParent[sAggregationAddMutator](oElement);
-		} else {
-			oParent.addAggregation("sAggregationName", oElement);
-		}
+				aAggregationNames.forEach(function(sAggregationName) {
+					var oAggregation = mAggregations[sAggregationName];
+					var vAggregationValue = that.getAggregation(oElement, sAggregationName);
 
-	};
+					fnCallback(oAggregation, vAggregationValue);
+				});
+			};
 
-	/**
-	 *
-	 */
-	ElementUtil.removeAggregation = function(oParent, sAggregationName, oElement) {
-		var sAggregationRemoveMutator = this.getAggregationAccessors(oParent, sAggregationName).remove;
-		if (sAggregationRemoveMutator) {
-			oParent[sAggregationRemoveMutator](oElement);
-		} else {
-			oParent.removeAggregation(sAggregationName, oElement);
-		}
-	};
+			/**
+			 *
+			 */
+			ElementUtil.getElementInstance = function(vElement) {
+				if (typeof vElement === "string") {
+					return sap.ui.getCore().byId(vElement);
+				} else {
+					return vElement;
+				}
+			};
 
-	/**
-	 *
-	 */
-	ElementUtil.insertAggregation = function(oParent, sAggregationName, oElement, iIndex) {
-		if (this.hasAncestor(oParent, oElement)) {
-			throw new Error("Trying to add an element to itself or its successors");
-		}
-		if (this.getAggregation(oParent, sAggregationName).indexOf(oElement) !== -1) {
-			// ManagedObject.insertAggregation won't reposition element, if it's already inside of same aggregation
-			// therefore we need to remove the element and then insert it again. To prevent ManagedObjectObserver from firing
-			// setParent event with parent null, private flag is set.
-			oElement.__bSapUiDtSupressParentChangeEvent = true;
-			try {
-				oParent.removeAggregation(sAggregationName, oElement, true);
-			} finally {
-				delete oElement.__bSapUiDtSupressParentChangeEvent;
-			}
-		}
-		var sAggregationInsertMutator = this.getAggregationAccessors(oParent, sAggregationName).insert;
-		if (sAggregationInsertMutator) {
-			oParent[sAggregationInsertMutator](oElement, iIndex);
-		} else {
-			oParent.insertAggregation(sAggregationName, oElement, iIndex);
-		}
-	};
+			/**
+			 *
+			 */
+			ElementUtil.hasAncestor = function(oElement, oAncestor) {
+				oAncestor = this.fixComponentContainerElement(oAncestor);
 
-	/**
-	 *
-	 */
-	ElementUtil.isValidForAggregation = function(oParent, sAggregationName, oElement) {
-		var oAggregationMetadata = oParent.getMetadata().getAggregation(sAggregationName);
+				var oParent = this.fixComponentParent(oElement);
+				while (oParent && oParent !== oAncestor) {
+					oParent = oParent.getParent();
+					oParent = this.fixComponentParent(oParent);
+				}
 
-		// Make sure that the parent is not inside of the element, or is not the element itself,
-		// e.g. insert a layout inside it's content aggregation.
-		// This check needed as UI5 will have a maximum call stack error otherwise.
-		if (this.hasAncestor(oParent, oElement)) {
-			return false;
-		}
+				return !!oParent;
+			};
 
-		// only for public aggregations
-		if (oAggregationMetadata) {
-			// TODO : test altTypes
-			return this.isInstanceOf(oElement, oAggregationMetadata.type);
-		}
+			/**
+			 *
+			 */
+			ElementUtil.getClosestElementForNode = function(oNode) {
+				var $ClosestElement = jQuery(oNode).closest("[data-sap-ui]");
+				return $ClosestElement.length ? sap.ui.getCore().byId($ClosestElement.data("sap-ui")) : undefined;
+			};
 
-	};
+			/**
+			 * ! Please, use this method only if OverlayUtil.getClosestOverlayForType is not available in your case ! find the
+			 * closest element of the given type
+			 *
+			 * @param {sap.ui.core.Element}
+			 *          oSourceElement to start search for
+			 * @param {string}
+			 *          sType to check instance of
+			 * @return {sap.ui.core.Element} element of the given type, if found
+			 */
+			ElementUtil.getClosestElementOfType = function(oSourceElement, sType) {
+				var oElement = oSourceElement;
 
-	/**
-	 *
-	 */
-	ElementUtil.isInstanceOf = function(oElement, sType) {
-		var oInstance = jQuery.sap.getObject(sType);
-		if (typeof oInstance === "function") {
-			return oElement instanceof oInstance;
-		} else {
-			return false;
-		}
-	};
+				while (oElement && !this.isInstanceOf(oElement, sType)) {
+					oElement = oElement.getParent();
+				}
 
-	/**
-	 *
-	 */
-	ElementUtil.getDesignTimeMetadata = function(oElement) {
-		var oDTMetadata = oElement ? oElement.getMetadata().getDesignTime() : {};
-		return oDTMetadata || {};
-	};
+				return oElement;
+			};
 
+			/**
+			 *
+			 */
+			ElementUtil.fixComponentParent = function(oElement) {
+				if (this.isInstanceOf(oElement, "sap.ui.core.UIComponent")) {
+					var oComponentContainer = oElement.oContainer;
+					if (oComponentContainer) {
+						return oComponentContainer.getParent();
+					}
+				} else {
+					return oElement;
+				}
+			};
 
+			/**
+			 *
+			 */
+			ElementUtil.fixComponentContainerElement = function(oElement) {
+				if (this.isInstanceOf(oElement, "sap.ui.core.ComponentContainer")) {
+					// This happens when the compontentContainer has not been rendered yet
+					if (!oElement.getComponentInstance()) {
+						return;
+					}
+					return oElement.getComponentInstance().getAggregation("rootControl");
+				} else {
+					return oElement;
+				}
+			};
 
-	return ElementUtil;
-}, /* bExport= */ true);
+			/**
+			 *
+			 */
+			ElementUtil.findAllPublicElements = function(oElement) {
+				var that = this;
+				var aFoundElements = [];
+
+				function internalFind(oElement) {
+					oElement = that.fixComponentContainerElement(oElement);
+					if (oElement) {
+						aFoundElements.push(oElement);
+						that.iterateOverAllPublicAggregations(oElement, function(oAggregation, vElements) {
+							that.iterateOverElements(vElements, internalFind);
+						});
+					}
+				}
+				internalFind(oElement);
+
+				return aFoundElements;
+			};
+
+			/**
+			 *
+			 */
+			ElementUtil.getDomRef = function(oElement) {
+				if (oElement) {
+					var oDomRef;
+					if (oElement.getDomRef) {
+						oDomRef = oElement.getDomRef();
+					}
+					if (!oDomRef && oElement.getRenderedDomRef) {
+						oDomRef = oElement.getRenderedDomRef();
+					}
+					return oDomRef;
+				}
+			};
+
+			/**
+			 *
+			 */
+			ElementUtil.findAllPublicChildren = function(oElement) {
+				var aFoundElements = this.findAllPublicElements(oElement);
+				var iIndex = aFoundElements.indexOf(oElement);
+				if (iIndex > -1) {
+					aFoundElements.splice(iIndex, 1);
+				}
+				return aFoundElements;
+
+			};
+
+			/**
+			 *
+			 */
+			ElementUtil.isElementFiltered = function(oControl, aType) {
+				// TODO: Is this method still needed?
+				var that = this;
+
+				aType = aType || this.getControlFilter();
+				var bFiltered = false;
+
+				aType.forEach(function(sType) {
+					bFiltered = that.isInstanceOf(oControl, sType);
+					if (bFiltered) {
+						return false;
+					}
+				});
+
+				return bFiltered;
+			};
+
+			/**
+			 *
+			 */
+			ElementUtil.findClosestControlInDom = function(oNode) {
+				// TODO: Is this method still needed?
+				if (oNode && oNode.getAttribute("data-sap-ui")) {
+					return sap.ui.getCore().byId(oNode.getAttribute("data-sap-ui"));
+				} else {
+					if (oNode.parentNode) {
+						this.findClosestControlInDom(oNode.parentNode);
+					} else {
+						return null;
+					}
+				}
+			};
+
+			/**
+			 *
+			 */
+			ElementUtil.findAllSiblingsInContainer = function(oElement, oContainer) {
+				var oParent = oElement.getParent();
+				if (oParent !== oContainer){
+					var aParents = ElementUtil.findAllSiblingsInContainer(oParent, oContainer);
+					return aParents.map(function(oParent){
+						return ElementUtil.getAggregation(oParent, oElement.sParentAggregationName);
+					}).reduce(function(a, b) {
+						return a.concat(b);
+					}, []);
+				}
+
+				return ElementUtil.getAggregation(oParent, oElement.sParentAggregationName);
+			};
+
+			/**
+			 *
+			 */
+			ElementUtil.getAggregationAccessors = function(oElement, sAggregationName) {
+				var oMetadata = oElement.getMetadata();
+				oMetadata.getJSONKeys();
+				var oAggregationMetadata = oMetadata.getAggregation(sAggregationName);
+				if (oAggregationMetadata) {
+					var sGetter = oAggregationMetadata._sGetter;
+
+					// altType getter returns not element (TODO: clarify if getAggregationNameControl getter is a convention)
+					if (oAggregationMetadata.altTypes && oAggregationMetadata.altTypes.length
+							&& oElement[oAggregationMetadata._sGetter + "Control"]) {
+						sGetter = oAggregationMetadata._sGetter + "Control";
+					}
+
+					return {
+						get : sGetter,
+						add : oAggregationMetadata._sMutator,
+						remove : oAggregationMetadata._sRemoveMutator,
+						insert : oAggregationMetadata._sInsertMutator,
+						removeAll : oAggregationMetadata._sRemoveAllMutator
+					};
+				} else {
+					return {};
+				}
+			};
+
+			/**
+			 *
+			 */
+			ElementUtil.getAggregation = function(oElement, sAggregationName) {
+				var oValue;
+
+				var sGetter = this.getAggregationAccessors(oElement, sAggregationName).get;
+				if (sGetter) {
+					oValue = oElement[sGetter]();
+				} else {
+					oValue = oElement.getAggregation(sAggregationName);
+				}
+				// ATTENTION:
+				// under some unknown circumstances the return oValue looks like an Array but jQuery.isArray() returned
+				// undefined => false
+				// that is why we use array ducktyping with a null check!
+				// reproducible with Windows and Chrome (currently 35), when creating a project and opening WYSIWYG editor
+				// afterwards on any file
+				// sap.m.Panel.prototype.getHeaderToolbar() returns a single object but an array
+				/* eslint-disable no-nested-ternary */
+				oValue = oValue && oValue.splice ? oValue : (oValue ? [oValue] : []);
+				/* eslint-enable no-nested-ternary */
+				return oValue;
+			};
+
+			ElementUtil.getIndexInAggregation = function(oElement, oParent, sAggregationName) {
+				return this.getAggregation(oParent, sAggregationName).indexOf(oElement);
+			};
+
+			/**
+			 *
+			 */
+			ElementUtil.addAggregation = function(oParent, sAggregationName, oElement) {
+				if (this.hasAncestor(oParent, oElement)) {
+					throw new Error("Trying to add an element to itself or its successors");
+				}
+				var sAggregationAddMutator = this.getAggregationAccessors(oParent, sAggregationName).add;
+				if (sAggregationAddMutator) {
+					oParent[sAggregationAddMutator](oElement);
+				} else {
+					oParent.addAggregation("sAggregationName", oElement);
+				}
+
+			};
+
+			/**
+			 *
+			 */
+			ElementUtil.removeAggregation = function(oParent, sAggregationName, oElement) {
+				var sAggregationRemoveMutator = this.getAggregationAccessors(oParent, sAggregationName).remove;
+				if (sAggregationRemoveMutator) {
+					oParent[sAggregationRemoveMutator](oElement);
+				} else {
+					oParent.removeAggregation(sAggregationName, oElement);
+				}
+			};
+
+			/**
+			 *
+			 */
+			ElementUtil.insertAggregation = function(oParent, sAggregationName, oElement, iIndex) {
+				if (this.hasAncestor(oParent, oElement)) {
+					throw new Error("Trying to add an element to itself or its successors");
+				}
+				if (this.getAggregation(oParent, sAggregationName).indexOf(oElement) !== -1) {
+					// ManagedObject.insertAggregation won't reposition element, if it's already inside of same aggregation
+					// therefore we need to remove the element and then insert it again. To prevent ManagedObjectObserver from
+					// firing
+					// setParent event with parent null, private flag is set.
+					oElement.__bSapUiDtSupressParentChangeEvent = true;
+					try {
+						oParent.removeAggregation(sAggregationName, oElement, true);
+					} finally {
+						delete oElement.__bSapUiDtSupressParentChangeEvent;
+					}
+				}
+				var sAggregationInsertMutator = this.getAggregationAccessors(oParent, sAggregationName).insert;
+				if (sAggregationInsertMutator) {
+					oParent[sAggregationInsertMutator](oElement, iIndex);
+				} else {
+					oParent.insertAggregation(sAggregationName, oElement, iIndex);
+				}
+			};
+
+			/**
+			 *
+			 */
+			ElementUtil.isValidForAggregation = function(oParent, sAggregationName, oElement) {
+				var oAggregationMetadata = oParent.getMetadata().getAggregation(sAggregationName);
+
+				// Make sure that the parent is not inside of the element, or is not the element itself,
+				// e.g. insert a layout inside it's content aggregation.
+				// This check needed as UI5 will have a maximum call stack error otherwise.
+				if (this.hasAncestor(oParent, oElement)) {
+					return false;
+				}
+
+				// only for public aggregations
+				if (oAggregationMetadata) {
+					// TODO : test altTypes
+					var sTypeOrInterface = oAggregationMetadata.type;
+					return this.isInstanceOf(oElement, sTypeOrInterface) || this.hasInterface(oElement, sTypeOrInterface);
+				}
+
+			};
+
+			/**
+			 *
+			 */
+			ElementUtil.hasInterface = function(oElement, sInterface) {
+				var aInterfaces = oElement.getMetadata().getInterfaces();
+				return aInterfaces.indexOf(sInterface) !== -1;
+			};
+
+			/**
+			 *
+			 */
+			ElementUtil.isInstanceOf = function(oElement, sType) {
+				var oInstance = jQuery.sap.getObject(sType);
+				if (typeof oInstance === "function") {
+					return oElement instanceof oInstance;
+				} else {
+					return false;
+				}
+			};
+
+			/**
+			 *
+			 */
+			ElementUtil.loadDesignTimeMetadata = function(oElement) {
+				return oElement ? oElement.getMetadata().loadDesignTime() : Promise.resolve({});
+			};
+
+			/**
+			 * .* Executes an array of actions. An action is a JSON object having the following structure: .* .* <action> = { .*
+			 * 'element' : <ui5 id of element to be moved>, .* 'source' : { .* 'index': <source index>, .* 'parent' : <ui5 id
+			 * of element actual parent>, .* 'aggregation' : <name of aggregation> .* }, .* 'target' : { .* 'index': <target
+			 * index>, .* 'parent' : <ui5 id of element future parent>, .* 'aggregation' : <name of aggregation> .* }, .*
+			 * 'changeType' : <name of change type e.g "Move" .* })
+			 */
+			ElementUtil.executeActions = function(aActions) {
+				for (var i = 0; i < aActions.length; i++) {
+					var oAction = aActions[i];
+					switch (oAction.changeType) {
+						case ElementUtil.sACTION_MOVE :
+							var oTargetParent = sap.ui.getCore().byId(oAction.target.parent);
+							var oMovedElement = sap.ui.getCore().byId(oAction.element);
+							ElementUtil.insertAggregation(oTargetParent, oAction.target.aggregation, oMovedElement,
+									oAction.target.index);
+							break;
+						case ElementUtil.sACTION_CUT :
+							var oTargetParent = sap.ui.getCore().byId(oAction.source.parent);
+							var oMovedElement = sap.ui.getCore().byId(oAction.element);
+							ElementUtil.removeAggregation(oTargetParent, oAction.source.aggregation, oMovedElement);
+							break;
+						case ElementUtil.sACTION_PASTE :
+							var oTargetParent = sap.ui.getCore().byId(oAction.target.parent);
+							var oMovedElement = sap.ui.getCore().byId(oAction.element);
+							ElementUtil.insertAggregation(oTargetParent, oAction.target.aggregation, oMovedElement,
+									oAction.target.index);
+							break;
+						case ElementUtil.sREORDER_AGGREGATION :
+							var oTargetParent = sap.ui.getCore().byId(oAction.target.parent);
+							var sAggregationRemoveAllMutator = this
+									.getAggregationAccessors(oTargetParent, oAction.target.aggregation).removeAll;
+							oTargetParent[sAggregationRemoveAllMutator]();
+							var sAggregationAddMutator = this.getAggregationAccessors(oTargetParent, oAction.target.aggregation).add;
+							for (var j = 0; j < oAction.source.elements.length; j++) {
+								var oElement = sap.ui.getCore().byId(oAction.source.elements[j]);
+								oTargetParent[sAggregationAddMutator](oElement);
+							}
+							break;
+						default :
+					}
+				}
+
+			};
+
+			return ElementUtil;
+		}, /* bExport= */true);
 
 }; // end of sap/ui/dt/ElementUtil.js
 if ( !jQuery.sap.isDeclared('sap.ui.dt.ManagedObjectObserver') ) {
@@ -926,7 +805,7 @@ sap.ui.define("sap/ui/dt/ManagedObjectObserver",[
 	 * @class The ManagedObjectObserver observes changes of a ManagedObject and propagates them via events.
 	 * @extends sap.ui.base.ManagedObject
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @constructor
 	 * @private
 	 * @since 1.30
@@ -1385,7 +1264,7 @@ function(Element, ElementUtil) {
 	 * Static registry for Overlays
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @private
 	 * @static
@@ -1474,7 +1353,7 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	 *
 	 * @class Utility functionality to work with overlays
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @private
 	 * @static
 	 * @since 1.30
@@ -1493,25 +1372,31 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	};
 
 	/**
-	 * Returns an object with parent, aggregation and index
+	 * Returns an object with public parent, aggregation in public parent and direct index
 	 */
 	OverlayUtil.getParentInformation = function(oElementOverlay) {
-		var oParent = oElementOverlay.getParentElementOverlay();
-		if (oParent) {
-			var oPublicParent = oParent.getElementInstance();
-			var sPublicParentAggregationName = oElementOverlay.getParentAggregationOverlay().getAggregationName();
-
-			var aChildren = ElementUtil.getAggregation(oPublicParent, sPublicParentAggregationName);
+		var oParentOverlay = oElementOverlay.getParentElementOverlay();
+		if (oParentOverlay){
+			//calculate index in direct (maybe in hidden tree) parent
+			var oParent = oParentOverlay.getElementInstance();
+			var sParentAggregationName = oElementOverlay.getParentAggregationOverlay().getAggregationName();
+			var aChildren = ElementUtil.getAggregation(oParent, sParentAggregationName);
 			var oElement = oElementOverlay.getElementInstance();
 			var iIndex = aChildren.indexOf(oElement);
 
+			var oPublicParentOverlay = oElementOverlay.getPublicParentElementOverlay();
+
 			return {
-				parent: oPublicParent,
-				aggregation: sPublicParentAggregationName,
+				publicParent : oPublicParentOverlay.getElementInstance(),
+				publicAggregation: oElementOverlay.getPublicParentAggregationOverlay().getAggregationName(),
+				parent: oParent,
+				aggregation : sParentAggregationName,
 				index: iIndex
 			};
 		} else {
 			return {
+				publicParent : null,
+				publicAggregation : "",
 				parent: null,
 				aggregation: "",
 				index: -1
@@ -1524,11 +1409,11 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 	 *
 	 */
 	OverlayUtil.getClosestOverlayFor = function(oElement) {
-		if (!oElement || !oElement.getParent) {
+		if (!oElement) {
 			return null;
 		}
 
-		var oParent = oElement.getParent();
+		var oParent = oElement;
 		var oParentOverlay = OverlayRegistry.getOverlay(oParent);
 		while (oParent && !oParentOverlay) {
 			oParent = oParent.getParent();
@@ -1801,6 +1686,24 @@ sap.ui.define("sap/ui/dt/OverlayUtil",[
 		});
 	};
 
+
+	/**
+	 *
+	 */
+	OverlayUtil.isInOverlayContainer = function(oNode) {
+		if (oNode && jQuery(oNode).closest(".sapUiDtOverlay, #overlay-container").length) {
+			return true;
+		}
+	};
+
+	/**
+	 *
+	 */
+	OverlayUtil.getClosestOverlayForNode = function(oNode) {
+		var oElement = ElementUtil.getClosestElementForNode(oNode);
+		return OverlayUtil.getClosestOverlayFor(oElement);
+	};
+
 	return OverlayUtil;
 }, /* bExport= */true);
 
@@ -1830,10 +1733,10 @@ function(ManagedObject) {
 	 * @class
 	 * The Plugin allows to handle the overlays and aggregation overlays from the DesignTime
 	 * The Plugin should be overriden by the real plugin implementations, which define some actions through events attached to an overlays
-	 * @extends sap.ui.core.ManagedObject
+	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @private
@@ -1854,13 +1757,23 @@ function(ManagedObject) {
 				 * DesignTime where this plugin will be used
 				 */
 				designTime : { // its defined as a property because spa.ui.dt.designTime is a managed object and UI5 only allows associations for elements
-					type : "sap.ui.dt.DesignTime",
+					type : "object",
+					multiple : false
+				},
+
+				commandFactory : {
+					type : "object",
 					multiple : false
 				}
 			},
 			associations : {
 			},
 			events : {
+				elementModified : {
+					command : {
+						type : "sap.ui.dt.command.BaseCommand"
+					}
+				}
 			}
 		}
 	});
@@ -1932,13 +1845,13 @@ function(ManagedObject) {
 			oOldDesignTime.detachEvent("elementOverlayCreated", this._onElementOverlayCreated, this);
 		}
 
+		this.setProperty("designTime", oDesignTime);
+
 		if (oDesignTime) {
 			this._registerOverlays(oDesignTime);
 
 			oDesignTime.attachEvent("elementOverlayCreated", this._onElementOverlayCreated, this);
 		}
-
-		this.setProperty("designTime", oDesignTime);
 
 		return this;
 	};
@@ -2014,105 +1927,8 @@ function(ManagedObject) {
 
 	return Plugin;
 }, /* bExport= */ true);
+
 }; // end of sap/ui/dt/Plugin.js
-if ( !jQuery.sap.isDeclared('sap.ui.dt.Preloader') ) {
-/*!
- * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
- * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
- */
-
- /*global Promise */
-
-// Provides object sap.ui.dt.Preloader.
-jQuery.sap.declare('sap.ui.dt.Preloader'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-jQuery.sap.require('sap.ui.core.Element'); // unlisted dependency retained
-sap.ui.define("sap/ui/dt/Preloader",[
-	"sap/ui/core/Element"
-],
-function(Element) {
-	"use strict";
-
-	/**
-	 * Class for Preloader.
-	 *
-	 * @class
-	 * Preloader for design time metadata.
-	 *
-	 * @author SAP SE
-	 * @version 1.34.9
-	 *
-	 * @private
-	 * @static
-	 * @since 1.30
-	 * @alias sap.ui.dt.Preloader
-	 * @experimental Since 1.30. This class is experimental and provides only limited functionality. Also the API might be changed in future.
-	 */
-
-	var Preloader = {
-		aLoadedClasses : []
-	};
-
-	/**
-	 * Loads the design time metadata for a given list of elements.
-	 *
-	 * @param {string[]|sap.ui.core.Element[]} aElements list of elements for which the design time metadata should be loaded. The list entry can be the class name or the control instance.
-	 * @return {Promise} resolved when the design time is loaded for each element
-	 * @public
-	 */
-	Preloader.load = function(aElements) {
-		var that = this;
-		var aQueue = [];
-		aElements.forEach(function(vElement) {
-			var oElement = vElement;
-			if (typeof oElement === "string") {
-				oElement = jQuery.sap.getObject(oElement);
-			}
-			if (oElement && oElement.getMetadata) {
-				var oMetadata = oElement.getMetadata();
-				var sClassName = oMetadata.getName ? oMetadata.getName() : null;
-				var bIsLoaded = sClassName && that.aLoadedClasses.indexOf(sClassName) !== -1;
-				if (!bIsLoaded && oMetadata.loadDesignTime) {
-					that.aLoadedClasses.push(sClassName);
-					aQueue.push(oMetadata.loadDesignTime());
-				}
-			}
-		});
-		return Promise.all(aQueue);
-	};
-
-	/**
-	 * Loads the design time metadata for each element in the given list of libraries.
-	 *
-	 * @param {string[]} aLibraryNames list of libraries for which the design time metadata should be loaded
-	 * @return {Promise} resolved when the design time is loaded for each given library
-	 * @public
-	 */
-	Preloader.loadLibraries = function(aLibraryNames) {
-		var aElementsToLoad = [];
-		aLibraryNames.forEach(function(sLibraryName) {
-			var oLib = sap.ui.getCore().getLoadedLibraries()[sLibraryName];
-			if (oLib) {
-				aElementsToLoad = aElementsToLoad.concat(oLib.controls).concat(oLib.elements);
-			}
-		});
-		return this.load(aElementsToLoad);
-	};
-
-	/**
-	 * Loads the design time metadata for each element of all loaded libraries.
-	 *
-	 * @return {Promise} resolved when the design time is loaded for each library
-	 * @public
-	 */
-	Preloader.loadAllLibraries = function() {
-		return this.loadLibraries(sap.ui.getCore().getLoadedLibraries());
-	};
-
-	return Preloader;
-}, /* bExport= */ true);
-
-}; // end of sap/ui/dt/Preloader.js
 if ( !jQuery.sap.isDeclared('sap.ui.dt.RenderingUtil') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -2136,7 +1952,7 @@ function(jQuery) {
 	 * Utility functionality to work with élements, e.g. iterate through aggregations, find parents, ...
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @private
 	 * @static
@@ -2177,10 +1993,16 @@ function(jQuery) {
 			oRm.writeStyles();
 			oRm.write(">");
 
+			oRm.write("<div");
+			oRm.addClass("sapUiDtOverlayChildren");
+			oRm.writeClasses();
+			oRm.write(">");
 			this._renderChildren(oRm, oOverlay);
 
 			oRm.write("</div>");
+			oRm.write("</div>");
 		}
+
 	};
 
 	/**
@@ -2204,6 +2026,484 @@ function(jQuery) {
 }, /* bExport= */ true);
 
 }; // end of sap/ui/dt/RenderingUtil.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.command.BaseCommand') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+jQuery.sap.declare('sap.ui.dt.command.BaseCommand'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('sap.ui.base.ManagedObject'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/command/BaseCommand",['sap/ui/base/ManagedObject'], function(ManagedObject) {
+	"use strict";
+
+	/**
+	 * Basic implementation for the command pattern.
+	 *
+	 * @class
+	 * @extends sap.ui.base.ManagedObject
+	 *
+	 * @author SAP SE
+	 * @version 1.44.14
+	 *
+	 * @constructor
+	 * @private
+	 * @since 1.40
+	 * @alias sap.ui.dt.command.BaseCommand
+	 * @experimental Since 1.40. This class is experimental and provides only limited functionality. Also the API might be
+	 *               changed in future.
+	 */
+	var BaseCommand = ManagedObject.extend("sap.ui.dt.command.BaseCommand", {
+		metadata : {
+			library : "sap.ui.dt",
+			properties : {
+				element : {
+					type : "sap.ui.core.Element"
+				},
+				elementId : {
+					type : "string"
+				},
+				name : {
+					type : "string"
+				}
+			},
+			associations : {},
+			events : {}
+		}
+	});
+
+	BaseCommand.ERROR_UNKNOWN_ID = "no element for id: ";
+
+	/**
+	 * @protected Template Method to implement execute logic, with ensure precondition Element is available
+	 */
+	BaseCommand.prototype._executeWithElement = function(oElement) {
+	};
+
+	BaseCommand.prototype.execute = function() {
+		this._withElement(this._executeWithElement.bind(this));
+	};
+
+	/**
+	 * @protected Template Method to implement undo logic, with ensure precondition Element is available
+	 */
+	BaseCommand.prototype._undoWithElement = function(oElement) {
+	};
+
+	BaseCommand.prototype.undo = function() {
+		this._withElement(this._undoWithElement.bind(this));
+	};
+
+	BaseCommand.prototype._withElement = function(fn) {
+		var oElement = this._getElement();
+		if (oElement) {
+			fn(oElement);
+		} else {
+			jQuery.sap.log.error(this.getMetadata().getName(), BaseCommand.ERROR_UNKNOWN_ID + this.getElementId());
+		}
+	};
+
+	BaseCommand.prototype.serialize = function() {
+	};
+
+	BaseCommand.prototype.isEnabled = function() {
+		return true;
+	};
+
+	BaseCommand.prototype._getElement = function() {
+		// Check if Element could be complete virtual property (always created by id)
+		var oElement = this.getElement();
+		if (!oElement) {
+			oElement = sap.ui.getCore().byId(this.getElementId());
+			this.setElement(oElement);
+		}
+		return oElement;
+	};
+
+	return BaseCommand;
+
+}, /* bExport= */true);
+
+}; // end of sap/ui/dt/command/BaseCommand.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.command.CommandFactory') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+jQuery.sap.declare('sap.ui.dt.command.CommandFactory'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('sap.ui.base.ManagedObject'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/command/CommandFactory",['sap/ui/base/ManagedObject'], function(ManagedObject) {
+	"use strict";
+
+	var mCommands = {
+		"Move" : {
+			findClass : function(oElement, sCommand, mSettings) {
+				var oMovedElement = (mSettings && mSettings.movedElements && mSettings.movedElements.length > 0)
+						? mSettings.movedElements[0]
+						: undefined;
+				var oElementToBeAnalyzed = oMovedElement ? oMovedElement.element : oElement;
+				var sType = oElementToBeAnalyzed.getMetadata().getName();
+				// TODO: this is too unspecific - could also be a 'normal' Form. The context (SImpleFOrm) shall be taken into
+				// account
+				if (sType === "sap.ui.layout.form.FormContainer" || sType === "sap.ui.layout.form.FormElement") {
+					jQuery.sap.require("sap.ui.dt.command.SimpleFormMove");
+					return sap.ui.dt.command.SimpleFormMove;
+				} else {
+					jQuery.sap.require("sap.ui.dt.command.Move");
+					return sap.ui.dt.command.Move;
+				}
+			}
+		}
+	};
+
+	/**
+	 * Factory for commands. Shall handle the control specific command configuration.
+	 *
+	 * @class
+	 * @extends sap.ui.base.ManagedObject
+	 *
+	 * @author SAP SE
+	 * @version 1.44.14
+	 *
+	 * @constructor
+	 * @private
+	 * @since 1.40
+	 * @alias sap.ui.dt.command.CommandFactory
+	 * @experimental Since 1.40. This class is experimental and provides only limited functionality. Also the API might be
+	 *               changed in future.
+	 */
+	var CommandFactory = ManagedObject.extend("sap.ui.dt.command.CommandFactory", {
+		metadata : {
+			library : "sap.ui.dt",
+			properties : {},
+			associations : {},
+			events : {}
+		}
+	});
+
+	CommandFactory.getCommandFor = function(oElement, sCommand, mSettings) {
+		var mCommand = mCommands[sCommand];
+		var Command = mCommand.clazz;
+		if (!Command && mCommand.findClass) {
+			Command = mCommand.findClass(oElement, sCommand, mSettings);
+		}
+
+		mSettings = jQuery.extend(mSettings, {
+			element : oElement,
+			name : sCommand
+		});
+
+		var oCommand = new Command(mSettings);
+
+		return oCommand;
+	};
+
+	return CommandFactory;
+
+}, /* bExport= */true);
+
+}; // end of sap/ui/dt/command/CommandFactory.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.command.Move') ) {
+/*
+ * ! UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+jQuery.sap.declare('sap.ui.dt.command.Move'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+sap.ui
+		.define("sap/ui/dt/command/Move",['jquery.sap.global', 'sap/ui/dt/command/BaseCommand', 'sap/ui/dt/ElementUtil'],
+				function(jQuery, BaseCommand, ElementUtil) {
+					"use strict";
+
+					/**
+					 * Move Element from one place to another
+					 *
+					 * @class
+					 * @extends sap.ui.dt.command.BaseCommand
+					 * @author SAP SE
+					 * @version 1.44.14
+					 * @constructor
+					 * @private
+					 * @since 1.40
+					 * @alias sap.ui.dt.command.Move
+					 * @experimental Since 1.40. This class is experimental and provides only limited functionality. Also the API
+					 *               might be changed in future.
+					 */
+					var Move = BaseCommand.extend("sap.ui.dt.command.Move", {
+						metadata : {
+							properties : {
+								movedElements : {
+									type : "array"
+								},
+								target : {
+									type : "object"
+								},
+								source : {
+									type : "object"
+								}
+							}
+						}
+					});
+
+					Move.prototype._executeWithElement = function(oElement) {
+						var that = this;
+						this.getMovedElements().forEach(function(mMovedElement){
+							var mSource = that.getSource();
+							var mTarget = that.getTarget();
+							ElementUtil.removeAggregation(mSource.parent, mSource.aggregation, mMovedElement.element);
+							ElementUtil.insertAggregation(mTarget.parent, mTarget.aggregation, mMovedElement.element, mMovedElement.targetIndex);
+						});
+
+
+					};
+
+					return Move;
+
+				}, /* bExport= */true);
+
+}; // end of sap/ui/dt/command/Move.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.command.SimpleFormMove') ) {
+/*
+ * ! UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+jQuery.sap.declare('sap.ui.dt.command.SimpleFormMove'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+sap.ui
+		.define("sap/ui/dt/command/SimpleFormMove",
+				['jquery.sap.global', 'sap/ui/dt/command/BaseCommand', 'sap/ui/dt/ElementUtil'],
+				function(jQuery, BaseCommand, ElementUtil) {
+					"use strict";
+
+					/**
+					 * Move Element from one place to another
+					 *
+					 * @class
+					 * @extends sap.ui.dt.command.BaseCommand
+					 * @author SAP SE
+					 * @version 1.44.14
+					 * @constructor
+					 * @private
+					 * @since 1.40
+					 * @alias sap.ui.dt.command.SimpleFormMove
+					 * @experimental Since 1.40. This class is experimental and provides only limited functionality. Also the API
+					 *               might be changed in future.
+					 */
+					var SimpleFormMove = BaseCommand.extend("sap.ui.dt.command.SimpleFormMove", {
+						metadata : {
+							properties : {
+								movedElements : {
+									type : "array"
+								},
+								target : {
+									type : "object"
+								},
+								source : {
+									type : "object"
+								},
+								changeType : {
+									type : "string",
+									defaultValue : "moveSimpleFormElement"
+								},
+								action : {
+									type : "object"
+								}
+							}
+						}
+					});
+
+					SimpleFormMove.prototype._setReverseAction = function(oAction) {
+						this._reverseAction = oAction;
+					};
+
+					SimpleFormMove.prototype._getReverseAction = function() {
+						return (this._reverseAction);
+					};
+
+					SimpleFormMove.prototype._executeWithElement = function(oElement) {
+
+						oElement = fnGetSimpleFormContainer(oElement);
+						var oAction = this.getAction();
+
+						if (!oAction) {
+							var oSimpleForm = oElement;
+							var aMovedElements = this.getMovedElements();
+							if (aMovedElements.length > 1) {
+								jQuery.sap.log.warning("Moving more than 1 Formelement is not yet supported.");
+							}
+							var oTarget = this.getTarget();
+
+							if (aMovedElements[0].element instanceof sap.ui.layout.form.FormContainer) {
+								oAction = fnMoveFormContainer(oSimpleForm, aMovedElements[0], oTarget);
+							} else if (aMovedElements[0].element instanceof sap.ui.layout.form.FormElement) {
+								oAction = fnMoveFormElement(oSimpleForm, aMovedElements[0], oTarget);
+							}
+							this.setAction(oAction);
+							var oReverseAction = jQuery.extend(true, {}, oAction);
+							oReverseAction.source.elements = fnGetAll(sap.ui.getCore().byId(oAction.target.parent), oAction);
+							this._setReverseAction(oReverseAction);
+						}
+
+						if (oAction) {
+							fnExChangeContent(oAction);
+						}
+					};
+
+					SimpleFormMove.prototype._undoWithElement = function(oElement) {
+						fnSwapAction(this);
+						this._executeWithElement(oElement);
+					};
+
+					var fnGetSimpleFormContainer = function(oElement) {
+						if (ElementUtil.isInstanceOf(oElement, "sap.ui.layout.form.SimpleForm")) {
+							return oElement;
+						} else if (ElementUtil.isInstanceOf(oElement, "sap.ui.layout.form.Form")
+								|| ElementUtil.isInstanceOf(oElement, "sap.ui.layout.form.FormContainer")
+								|| ElementUtil.isInstanceOf(oElement, "sap.ui.layout.form.FormElement")) {
+							return fnGetSimpleFormContainer(oElement.getParent());
+						}
+					};
+
+					var fnMapFormIndexToContentAggregationIndex = function(oType, aContent, inThInstance) {
+						var oResult;
+						var iCurrentGroupIndex = -1;
+						for (var i = 0; i < aContent.length; i++) {
+							if (aContent[i] instanceof oType) {
+								iCurrentGroupIndex++;
+								if (iCurrentGroupIndex === inThInstance) {
+									oResult = aContent[i];
+									break;
+								}
+							}
+						}
+						return aContent.indexOf(oResult);
+					};
+
+					var fnMeasureLengthOfFormContainer = function(oFormContainer) {
+						var aFormElements = oFormContainer.getFormElements();
+						var iMovedLength = aFormElements.reduce(function(previousValue, currentValue, currentIndex, array) {
+							previousValue += currentValue.getFields().length + 1;
+							return previousValue;
+						}, 1);
+						return iMovedLength;
+					};
+
+					var fnExtractElementIds = function(aComponents) {
+						var aResult = [];
+						for (var i = 0; i < aComponents.length; i++) {
+							aResult.push(aComponents[i].getId());
+						}
+						return aResult;
+					};
+
+					var fnArrayRangeCopy = function(aSource, iSourceIndex, aTarget, iTargetIndex, iMovedLength) {
+						var aResult = aTarget;
+						for (var i = 0; i < iMovedLength; i++) {
+							aResult.splice(iTargetIndex + i, 0, aSource[iSourceIndex + i]);
+						}
+						return aResult;
+					};
+
+					var fnCreateReorderAction = function(oParent, aElements) {
+						return {
+							changeType : 'reorder_aggregation',
+							source : {
+								elements : aElements
+							},
+							target : {
+								parent : oParent,
+								aggregation : 'content'
+							}
+						};
+					};
+
+					var fnMoveFormContainer = function(oSimpleForm, mMovedElement, oTarget) {
+						var aContent = oSimpleForm.getContent();
+						var oMovedGroupTitle = mMovedElement.element.getTitle();
+						var iMovedGroupIndex = aContent.indexOf(oMovedGroupTitle);
+
+						var iTargetIndex = fnMapFormIndexToContentAggregationIndex(sap.ui.core.Title, aContent, mMovedElement.targetIndex);
+						var iMovedLength = fnMeasureLengthOfFormContainer(mMovedElement.element);
+
+						var aContentClone = aContent.slice();
+						// Cut the moved group from the result array...
+						aContentClone.splice(iMovedGroupIndex, iMovedLength);
+						// and insert it at the target index
+						aContentClone = fnArrayRangeCopy(aContent, iMovedGroupIndex, aContentClone, iTargetIndex, iMovedLength);
+						return fnCreateReorderAction(oSimpleForm.getId(), fnExtractElementIds(aContentClone));
+					};
+
+					var fnMoveFormElement = function(oSimpleForm, mMovedElement, oTarget) {
+
+						var aContent = oSimpleForm.getContent();
+						var aFormElementsWithinTargetContainer = oTarget.parent.getFormElements();
+
+						var iSourceIndex = aContent.indexOf(mMovedElement.element.getLabel());
+						//use target index as the internal controls have already been modified
+						var iSourceLength = aFormElementsWithinTargetContainer[mMovedElement.targetIndex].getFields().length + 1;
+
+						var iTargetIndex = aContent.indexOf(oTarget.parent.getTitle());
+						if (iTargetIndex > iSourceIndex) {
+							iTargetIndex = iTargetIndex - iSourceLength;
+						}
+						// measure length of all elements before insert point
+						var iOffset = 0;
+						for (var k = 0; k < mMovedElement.targetIndex; k++) {
+							iOffset = iOffset + aFormElementsWithinTargetContainer[k].getFields().length + 1;
+						}
+						iTargetIndex = iTargetIndex + iOffset + 1;
+
+						// Copy the content
+						var aContentClone = aContent.slice();
+						// Cut the moved group from the result array...
+						aContentClone.splice(iSourceIndex, iSourceLength);
+						// and insert it at the target index
+						aContentClone = fnArrayRangeCopy(aContent, iSourceIndex, aContentClone, iTargetIndex, iSourceLength);
+						return fnCreateReorderAction(oSimpleForm.getId(), fnExtractElementIds(aContentClone));
+					};
+
+					var fnGetAll = function(oTargetParent, oAction) {
+						var sAggregationGetAllMutator = ElementUtil.getAggregationAccessors(oTargetParent,
+								oAction.target.aggregation).get;
+						return fnExtractElementIds(oTargetParent[sAggregationGetAllMutator]());
+					};
+
+					var fnRemoveAll = function(oTargetParent, oAction) {
+						var sAggregationRemoveAllMutator = ElementUtil.getAggregationAccessors(oTargetParent,
+								oAction.target.aggregation).removeAll;
+						oTargetParent[sAggregationRemoveAllMutator]();
+					};
+
+					var fnAddAll = function(oTargetParent, oAction) {
+						var sAggregationAddMutator = ElementUtil.getAggregationAccessors(oTargetParent, oAction.target.aggregation).add;
+						var oActElement;
+						for (var j = 0; j < oAction.source.elements.length; j++) {
+							oActElement = sap.ui.getCore().byId(oAction.source.elements[j]);
+							oTargetParent[sAggregationAddMutator](oActElement);
+						}
+					};
+
+					var fnExChangeContent = function(oAction) {
+						var oTargetParent = sap.ui.getCore().byId(oAction.target.parent);
+						fnRemoveAll(oTargetParent, oAction);
+						fnAddAll(oTargetParent, oAction);
+					};
+
+					// swap action with its reverse action, so a client can always get the actual action by calling 'getAction'
+					var fnSwapAction = function(oContext) {
+						var oTmp = oContext._getReverseAction();
+						oContext._setReverseAction(oContext.getAction());
+						oContext.setAction(oTmp);
+					};
+
+					return SimpleFormMove;
+
+				}, /* bExport= */true);
+
+}; // end of sap/ui/dt/command/SimpleFormMove.js
 if ( !jQuery.sap.isDeclared('sap.ui.dt.library') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -2231,14 +2531,14 @@ function(jQuery) {
 	 * @namespace
 	 * @name sap.ui.dt
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @private
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.dt",
-		version: "1.34.9",
+		version: "1.44.14",
 		dependencies : ["sap.ui.core"],
 		types: [
 			"sap.ui.dt.SelectionMode"
@@ -2252,7 +2552,7 @@ function(jQuery) {
 	 * Selection mode of the tree
 	 *
 	 * @enum {string}
-	 * @public
+	 * @private
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	sap.ui.dt.SelectionMode = {
@@ -2306,7 +2606,7 @@ function(Plugin, DOMUtil, OverlayUtil, ElementUtil) {
 	 * @extends sap.ui.dt.plugin.Plugin
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @private
@@ -2539,12 +2839,13 @@ function(Plugin, DOMUtil, OverlayUtil, ElementUtil) {
 	DragDrop.prototype.showGhost = function(oOverlay, oEvent) {
 		var that = this;
 
-		// not supported in IE10+
-		if (oEvent && oEvent.originalEvent && oEvent.originalEvent.dataTransfer && oEvent.originalEvent.dataTransfer.setDragImage) {
+		// IE and Edge do no support dataTransfer.setDragImage on D&D event
+		if (!sap.ui.Device.browser.internet_explorer && !sap.ui.Device.browser.edge && !sap.ui.Device.browser.msie &&
+			oEvent && oEvent.originalEvent && oEvent.originalEvent.dataTransfer && oEvent.originalEvent.dataTransfer.setDragImage) {
 			this._$ghost = this.createGhost(oOverlay, oEvent);
 
 			// ghost should be visible to set it as dragImage
-			this._$ghost.appendTo("body");
+			this._$ghost.appendTo("#overlay-container");
 			// if ghost will be removed without timeout, setDragImage won't work
 			setTimeout(function() {
 				that._removeGhost();
@@ -2755,6 +3056,7 @@ function(Plugin, DOMUtil, OverlayUtil, ElementUtil) {
 		var oAggregationOverlay = sap.ui.getCore().byId(oEvent.currentTarget.id);
 		this.onAggregationDrop(oAggregationOverlay, oEvent);
 
+		oEvent.preventDefault();
 		oEvent.stopPropagation();
 	};
 
@@ -2920,43 +3222,50 @@ if ( !jQuery.sap.isDeclared('sap.ui.dt.plugin.ElementMover') ) {
 // Provides class sap.ui.dt.plugin.ElementMover.
 jQuery.sap.declare('sap.ui.dt.plugin.ElementMover'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('sap.ui.base.ManagedObject'); // unlisted dependency retained
-sap.ui.define("sap/ui/dt/plugin/ElementMover",[
-	'sap/ui/base/ManagedObject', 'sap/ui/dt/ElementUtil', 'sap/ui/dt/OverlayUtil'
-], function(ManagedObject, ElementUtil, OverlayUtil) {
+sap.ui.define("sap/ui/dt/plugin/ElementMover",['sap/ui/base/ManagedObject', 'sap/ui/dt/ElementUtil', 'sap/ui/dt/OverlayUtil',
+		'sap/ui/dt/OverlayRegistry', 'sap/ui/dt/command/CommandFactory'], function(ManagedObject, ElementUtil, OverlayUtil,
+		OverlayRegistry, CommandFactory) {
 	"use strict";
 
 	/**
 	 * Constructor for a new ElementMover.
 	 *
-	 * @param {string} [sId] id for the new object, generated automatically if no id is given
-	 * @param {object} [mSettings] initial settings for the new object
-	 * @class The ElementMover enables movement of UI5 elements based on aggregation types, which can be used by drag and drop or cut and paste
-	 *        behavior.
+	 * @param {string}
+	 *          [sId] id for the new object, generated automatically if no id is given
+	 * @param {object}
+	 *          [mSettings] initial settings for the new object
+	 * @class The ElementMover enables movement of UI5 elements based on aggregation types, which can be used by drag and
+	 *        drop or cut and paste behavior.
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @constructor
 	 * @private
 	 * @since 1.34
 	 * @alias sap.ui.dt.plugin.ElementMover
-	 * @experimental Since 1.34. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 * @experimental Since 1.34. This class is experimental and provides only limited functionality. Also the API might be
+	 *               changed in future.
 	 */
 	var ElementMover = ManagedObject.extend("sap.ui.dt.plugin.ElementMover", /** @lends sap.ui.dt.plugin.ElementMover.prototype */
 	{
-		metadata: {
+		metadata : {
 			// ---- object ----
 
 			// ---- control specific ----
-			library: "sap.ui.dt",
-			properties: {
-				movableTypes: {
-					type: "string[]",
-					defaultValue: [
-						"sap.ui.core.Element"
-					]
+			library : "sap.ui.dt",
+			properties : {
+				commandFactory : {
+					type : "object",
+					defaultValue : CommandFactory
+				},
+				movableTypes : {
+					type : "string[]",
+					defaultValue : ["sap.ui.core.Element"]
 				}
 			},
-			associations: {},
-			events: {}
+			associations : {},
+			events : {
+				'elementMoved' : {}
+			}
 		}
 	});
 
@@ -2968,7 +3277,9 @@ sap.ui.define("sap/ui/dt/plugin/ElementMover",[
 	};
 
 	/**
+	 * Predicate to compute movability of an type
 	 * @public
+	 * @return true if type is movable, false otherwise
 	 */
 	ElementMover.prototype.isMovableType = function(oElement) {
 		var aMovableTypes = this._getMovableTypes();
@@ -2998,7 +3309,8 @@ sap.ui.define("sap/ui/dt/plugin/ElementMover",[
 	/**
 	 * set the moved overlay (only during movements)
 	 *
-	 * @param {sap.ui.dt.Overlay} [oMovedOverlay] overlay which is moved
+	 * @param {sap.ui.dt.Overlay}
+	 *          [oMovedOverlay] overlay which is moved
 	 * @public
 	 */
 	ElementMover.prototype.setMovedOverlay = function(oMovedOverlay) {
@@ -3102,6 +3414,16 @@ sap.ui.define("sap/ui/dt/plugin/ElementMover",[
 		});
 	};
 
+	ElementMover.prototype._isInvalidateSimpleFormEnabled = function(bEnabled, oMovedOverlay) {
+		var oFirstHiddenAggregationOverlay = oMovedOverlay.getFirstHiddenAggregationOverlay();
+		if (oFirstHiddenAggregationOverlay) {
+			var oElementInstance = oFirstHiddenAggregationOverlay.getElementInstance();
+			if (oElementInstance.getMetadata().getName() === "sap.ui.layout.form.SimpleForm") {
+				// activate/deactivate overwrite of the invalidate function
+				oElementInstance._bChangedByMe = !bEnabled;
+			}
+		}
+	};
 
 	/**
 	 * @private
@@ -3112,10 +3434,12 @@ sap.ui.define("sap/ui/dt/plugin/ElementMover",[
 		var oTargetParent = OverlayUtil.getParentInformation(oTargetElementOverlay);
 
 		if (oTargetParent.index !== -1) {
-			ElementUtil.insertAggregation(oTargetParent.parent, oTargetParent.aggregation, oMovedElement, oTargetParent.index);
+			this._isInvalidateSimpleFormEnabled(false, oMovedOverlay);
+			ElementUtil
+					.insertAggregation(oTargetParent.parent, oTargetParent.aggregation, oMovedElement, oTargetParent.index);
+			this._isInvalidateSimpleFormEnabled(true, oMovedOverlay);
 		}
 	};
-
 
 	/**
 	 * @private
@@ -3127,21 +3451,91 @@ sap.ui.define("sap/ui/dt/plugin/ElementMover",[
 		var oSourceAggregationOverlay = oMovedOverlay.getParent();
 		if (oTargetAggregationOverlay !== oSourceAggregationOverlay) {
 			var sTargetAggregationName = oTargetAggregationOverlay.getAggregationName();
+			this._isInvalidateSimpleFormEnabled(false, oMovedOverlay);
 			ElementUtil.addAggregation(oTargetParentElement, sTargetAggregationName, oMovedElement);
+			this._isInvalidateSimpleFormEnabled(true, oMovedOverlay);
 		}
 	};
 
-	/**
-	 * @private
-	 */
+	ElementMover.prototype._compareSourceAndTarget = function(oSource, oTarget) {
+		var vProperty;
+		for (vProperty in oSource) {
+			switch (typeof (oSource[vProperty])) {
+				case 'object':
+					if (oSource[vProperty].getId() !== oTarget[vProperty].getId()) {return false;}
+					break;
+				default:
+					if (oSource[vProperty] !== oTarget[vProperty]) {return false;}
+			}
+		}
+
+		return true;
+	};
+
 	ElementMover.prototype.buildMoveEvent = function() {
+
 		var oMovedOverlay = this.getMovedOverlay();
 		var oMovedElement = oMovedOverlay.getElementInstance();
-		return {
-			element: oMovedElement,
-			source: this._getSource(),
-			target: OverlayUtil.getParentInformation(oMovedOverlay)
-		};
+		var oSource = this._getSource();
+		var oPublicSourceParent = oSource.publicParent;
+		var oSourceParentOverlay = OverlayRegistry.getOverlay(oPublicSourceParent);
+		var oTarget = OverlayUtil.getParentInformation(oMovedOverlay);
+		var iSourceIndex = oSource.index;
+		var iTargetIndex = oTarget.index;
+
+		var bSourceAndTargetAreSame = this._compareSourceAndTarget(oSource, oTarget);
+
+		if (bSourceAndTargetAreSame) {
+			return undefined;
+		}
+		delete oSource.index;
+		delete oTarget.index;
+
+		var oMove = this.getCommandFactory().getCommandFor(oPublicSourceParent, "Move", {
+			movedElements : [{
+				element : oMovedElement,
+				sourceIndex : iSourceIndex,
+				targetIndex : iTargetIndex
+			}],
+			source : oSource,
+			target : oTarget
+		}, oSourceParentOverlay.getDesignTimeMetadata());
+
+		if (oMove) {
+			if (oMove.getMetadata().getName() === "sap.ui.dt.command.SimpleFormMove") {
+				// in case this is a dt command, perform immediately to show 'livechange'
+				oMove.execute();
+			}
+		} else {
+			jQuery.sap.log.error("Invalid move action in design time metadata of " + oSource.parent.getMetadata().getName());
+		}
+		return oMove;
+
+	};
+
+	/**
+	 * TODO: use this algorithm to search beforeHook
+	 *
+	 * @private
+	 */
+	ElementMover.prototype._findAfterHook = function(sName, oMovedOverlay, oSource) {
+		// TODO : move between two parents
+		var oFirstHiddenAggregationOverlay = oMovedOverlay.getFirstHiddenAggregationOverlay();
+		var oPublicParentElementOverlay = oMovedOverlay.getPublicParentElementOverlay();
+		if (oFirstHiddenAggregationOverlay && oPublicParentElementOverlay) {
+			var aggregationName = oFirstHiddenAggregationOverlay.getAggregationName();
+			var oAggregation = oPublicParentElementOverlay.getDesignTimeMetadata().getAggregation(aggregationName);
+			if (oAggregation) {
+				var oAfterHook = oAggregation[sName];
+				if (oAfterHook) {
+					return {
+						method : oAfterHook,
+						context : oPublicParentElementOverlay
+					};
+				}
+			}
+		}
+		return null;
 	};
 
 	return ElementMover;
@@ -3174,7 +3568,7 @@ function(Plugin) {
 	 * @extends sap.ui.dt.Plugin
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @private
@@ -3235,155 +3629,1022 @@ function(Plugin) {
 	return MouseSelection;
 }, /* bExport= */ true);
 }; // end of sap/ui/dt/plugin/MouseSelection.js
-if ( !jQuery.sap.isDeclared('sap.ui.dt.plugin.Rename') ) {
+if ( !jQuery.sap.isDeclared('sap.ui.dt.test.Element') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
  * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-// Provides class sap.ui.dt.plugin.Rename.
-jQuery.sap.declare('sap.ui.dt.plugin.Rename'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-sap.ui.define("sap/ui/dt/plugin/Rename",[
-	'sap/ui/dt/Plugin',
-	'sap/ui/dt/ElementUtil'
+// Provides object sap.ui.dt.test.Element.
+jQuery.sap.declare('sap.ui.dt.test.Element'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/test/Element",[
+	'jquery.sap.global',
+	'sap/ui/dt/ElementUtil',
+	'sap/ui/dt/OverlayRegistry'
 ],
-function(Plugin, ElementUtil) {
+function(jQuery, ElementUtil, OverlayRegistry) {
 	"use strict";
 
 	/**
-	 * Constructor for a new Rename.
+	 * Class for Element tests.
+	 *
+	 * @class
+	 * Utility functionality for Element tests
+	 *
+	 * @author SAP SE
+	 * @version 1.44.14
+	 *
+	 * @private
+	 * @static
+	 * @since 1.38
+	 * @alias sap.ui.dt.test.Element
+	 * @experimental Since 1.38. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 */
+
+	var MIN_SIZE = 5;
+	var ElementTest = {};
+
+
+	/**
+	 * Returns all design time information of the element
+	 * @param  {sap.ui.core.Element} oElement the element to test
+	 * @return {map} result object
+	 */
+	ElementTest.getInfo = function(oElement) {
+		var oMetadata = oElement.getMetadata();
+		var oElementOverlay = OverlayRegistry.getOverlay(oElement);
+
+		return {
+			metadata : oMetadata,
+			overlay : oElementOverlay
+		};
+	};
+
+
+	/**
+	 * Returns all aggregation infos of the element
+	 * @param  {sap.ui.core.Element} oElement the element to test
+	 * @return {map} result object
+	 */
+	ElementTest.getAggregationInfo = function(oElement, sAggregationName) {
+		var mAggregationTest = {
+			ignored : true,
+			domRefDeclared : false,
+			domRefFound : false,
+			domRefVisible : false,
+			overlayTooSmall : false,
+			overlayGeometryCalculatedByChildren : false,
+			overlayVisible : false
+		};
+
+		var mElementInfo = this.getInfo(oElement);
+		var oAggregationOverlay = mElementInfo.overlay.getAggregationOverlay(sAggregationName);
+		var oDesignTimeMetadata = oAggregationOverlay.getDesignTimeMetadata();
+
+		if (!oDesignTimeMetadata.isIgnored()) {
+			mAggregationTest.ignored = false;
+			mAggregationTest.domRefDeclared = !!oDesignTimeMetadata.getDomRef();
+			var oAggregationDomRef = oAggregationOverlay.getAssociatedDomRef();
+			if (oAggregationDomRef) {
+				mAggregationTest.domRefFound = true;
+				mAggregationTest.domRefVisible = jQuery(oAggregationDomRef).is(":visible");
+			}
+
+			var mGeometry = oAggregationOverlay.getGeometry();
+			if (mGeometry) {
+				var mSize = mGeometry.size;
+				mAggregationTest.overlayTooSmall = (mSize.width <= MIN_SIZE || mSize.height <= MIN_SIZE);
+				mAggregationTest.overlayGeometryCalculatedByChildren = !mGeometry.domRef;
+				mAggregationTest.overlayVisible = oAggregationOverlay.$().is(":visible");
+			}
+		}
+
+		return mAggregationTest;
+	};
+
+
+	/**
+	 * Returns all information of all aggregations of the element
+	 * @param  {sap.ui.core.Element} oElement the element to test
+	 * @return {map} result object
+	 */
+	ElementTest.getAggregationsInfo = function(oElement) {
+		var that = this;
+
+		var mAggregationTests = {};
+
+		ElementUtil.iterateOverAllPublicAggregations(oElement, function(oAggregation) {
+			mAggregationTests[oAggregation.name] = that.getAggregationInfo(oElement, oAggregation.name);
+		});
+
+		return mAggregationTests;
+	};
+
+	return ElementTest;
+}, /* bExport= */ true);
+
+}; // end of sap/ui/dt/test/Element.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.test.Test') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// Provides class sap.ui.dt.test.Test.
+jQuery.sap.declare('sap.ui.dt.test.Test'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.base.ManagedObject'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/test/Test",[
+	'jquery.sap.global',
+	'sap/ui/base/ManagedObject'
+],
+function(jQuery, ManagedObject) {
+	"use strict";
+
+	/**
+	 * Constructor for an Test.
 	 *
 	 * @param {string} [sId] id for the new object, generated automatically if no id is given
 	 * @param {object} [mSettings] initial settings for the new object
 	 *
 	 * @class
-	 * The Rename allows to select the Overlays with a mouse click
-	 * @extends sap.ui.dt.Plugin
+	 * The Test class allows to create design time tests.
+	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @private
-	 * @since 1.30
-	 * @alias sap.ui.dt.plugin.Rename
-	 * @experimental Since 1.30. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 * @since 1.38
+	 * @alias sap.ui.dt.test.Test
+	 * @experimental Since 1.38. This class is experimental and provides only limited functionality. Also the API might be changed in future.
 	 */
-	var Rename = Plugin.extend("sap.ui.dt.plugin.Rename", /** @lends sap.ui.dt.plugin.Rename.prototype */ {
+	var Test = ManagedObject.extend("sap.ui.dt.test.Test", /** @lends sap.ui.dt.test.Test.prototype */ {
+		metadata : {
+			"abstract" : true
+		}
+	});
+
+	/**
+	 * @type {map} Status Enum. Provides all availabe status.
+	 * @static
+	 */
+	Test.STATUS = {
+		"SUPPORTED" : {
+			key: "SUPPORTED",
+			text: "supported",
+			value: 3
+		},
+		"PARTIAL_SUPPORTED" : {
+			key: "PARTIAL_SUPPORTED",
+			text: "partial supported",
+			value: 2
+		},
+		"NOT_SUPPORTED" : {
+			key: "NOT_SUPPORTED",
+			text: "not supported",
+			value: 1
+		},
+		"ERROR" : {
+			key: "ERROR",
+			text: "error",
+			value: 0
+		},
+		"UNKNOWN" : {
+			key: "UNKNOWN",
+			text: "unknown",
+			value: 0
+		}
+	};
+
+	/**
+	 * @type {map} Type Enum. Provides all availabe types.
+	 * @static
+	 */
+	Test.TYPE = {
+		"TEST" : "Test",
+		"GROUP" : "Group",
+		"SUITE" : "Suite"
+	};
+
+
+	/**
+	 * Creates a new suite and returns it.
+	 *
+	 * @param {string} sName The name of the suite.
+	 * @param {string} sMessage A message to display
+	 * @return {map} the entry object
+	 *
+	 * @protected
+	 */
+	Test.prototype.createSuite = function(sName, sMessage) {
+		return this.add(
+			null,
+			false,
+			sName,
+			sMessage,
+			null,
+			Test.TYPE.SUITE
+		);
+	};
+
+
+	/**
+	 * Adds a new group to an array.
+	 *
+	 * @param {object[]} aParentChildren the array to insert the group
+	 * @param {string} sName The name of the group.
+	 * @param {string} sMessage A message to display
+	 * @return {map} the entry object
+	 *
+	 * @protected
+	 */
+	Test.prototype.addGroup = function(aParentChildren, sName, sMessage, sNamePostfix) {
+		return this.add(aParentChildren,
+			true,
+			sName + (sNamePostfix ? (" (" + sNamePostfix + ")") : ""),
+			sMessage,
+			null,
+			Test.TYPE.GROUP
+		);
+	};
+
+
+	/**
+	 * Adds a new test to an array.
+	 *
+	 * @param {object[]} aParentChildren the array to insert the test
+	 * @param {boolean} bResult The result of the test.
+	 * @param {string} sName The name of the test.
+	 * @param {string} sMessage A message to display
+	 * @param {map} status The status of the test.
+	 * @return {map} the entry object
+	 *
+	 * @protected
+	 */
+	Test.prototype.addTest = function(aParentChildren, bResult, sName, sMessage, mStatus) {
+		return this.add(aParentChildren,
+			bResult,
+			sName,
+			sMessage,
+			mStatus,
+			Test.TYPE.TEST
+		);
+	};
+
+
+	/**
+	 * Adds a new entry to an array.
+	 *
+	 * @param {object[]} aParentChildren the array to insert the entry
+	 * @param {boolean} bResult The result of the entry.
+	 * @param {string} sName The name of the entry.
+	 * @param {string} sMessage A message to display
+	 * @param {map} mStatus The status of the entry.
+	 * @param {string} sType The type of the entry.
+	 * @return {map} the entry object
+	 *
+	 * @protected
+	 */
+	Test.prototype.add = function(aParentChildren, bResult, sName, sMessage, mStatus, sType) {
+
+		if (!mStatus) {
+			if (bResult) {
+				mStatus = Test.STATUS.SUPPORTED;
+			} else {
+				mStatus = Test.STATUS.NOT_SUPPORTED;
+			}
+		}
+
+		var mEntry = {
+			name : sName,
+			message : sMessage,
+			result : bResult,
+			status : mStatus,
+			type : sType,
+			statistic : {},
+			children : []
+		};
+
+		if (aParentChildren) {
+			aParentChildren.push(mEntry);
+		}
+
+		return mEntry;
+	};
+
+
+	/**
+	 * Runs the tests.
+	 *
+	 * @public
+	 */
+	Test.prototype.run = function() {
+		throw new Error("Abstract method");
+	};
+
+
+	/**
+	 * Aggregates the tests results.
+	 * @return {map} the aggregated result
+	 *
+	 * @protected
+	 */
+	Test.prototype.aggregate = function(mResult) {
+		if (mResult.type != Test.TYPE.TEST && mResult.children.length > 0) {
+			var aChildren = mResult.children;
+
+			var that = this;
+			var aMappedResult = aChildren.map(function(mEntry) {
+				var mChildResult = that.aggregate(mEntry);
+				return {
+					result : mChildResult.result,
+					status : mChildResult.status
+				};
+			});
+
+			if (aMappedResult.length == 1) {
+				aMappedResult.push(aMappedResult[0]);
+			}
+
+			var mReducedResult = aMappedResult.reduce(function(mPreviousValue, mCurrentValue) {
+				return {
+					result : that._getResult(mPreviousValue, mCurrentValue),
+					status : that._getStatus(mPreviousValue, mCurrentValue),
+					statistic : that._getStatistic(mPreviousValue, mCurrentValue)
+				};
+			});
+
+
+			mResult.result = mReducedResult.result;
+			mResult.status = mReducedResult.status;
+			mResult.statistic = mReducedResult.statistic;
+		}
+
+		return mResult;
+	};
+
+
+	/**
+	 * @private
+	 */
+	Test.prototype._getResult = function(mPreviousValue, mCurrentValue) {
+		return !mPreviousValue.result ? false : mCurrentValue.result;
+	};
+
+
+	/**
+	 * @private
+	 */
+	Test.prototype._getStatus = function(mPreviousValue, mCurrentValue) {
+		return mPreviousValue.status.value < mCurrentValue.status.value ? mPreviousValue.status : mCurrentValue.status;
+	};
+
+	/**
+	 * @private
+	 */
+	Test.prototype._getStatistic = function(mPreviousValue, mCurrentValue) {
+		var mStatistic = this._getStatisticObjectForEntry(mPreviousValue);
+		if (mPreviousValue !== mCurrentValue) {
+			mStatistic[mCurrentValue.status.key]++;
+		}
+		return mStatistic;
+	};
+
+
+	/**
+	 * @private
+	 */
+	Test.prototype._getStatisticObjectForEntry = function(mEntry) {
+		var mStatistic = {};
+
+		if (!mEntry.statistic) {
+			for (var sStatus in Test.STATUS) {
+				mStatistic[sStatus] = 0;
+			}
+			mStatistic[mEntry.status.key]++;
+		} else {
+			mStatistic = mEntry.statistic;
+		}
+
+		return mStatistic;
+	};
+
+	return Test;
+}, /* bExport= */ true);
+}; // end of sap/ui/dt/test/Test.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.test.report.QUnit') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+/* global QUnit, assert */
+
+// Provides class sap.ui.dt.test.qunit.QUnit.
+jQuery.sap.declare('sap.ui.dt.test.report.QUnit'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.base.ManagedObject'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/test/report/QUnit",[
+	'jquery.sap.global',
+	'sap/ui/base/ManagedObject'
+],
+function(jQuery, ManagedObject) {
+	"use strict";
+
+
+	/**
+	 * Constructor for an QUnit.
+	 *
+	 * @param {string} [sId] id for the new object, generated automatically if no id is given
+	 * @param {object} [mSettings] initial settings for the new object
+	 *
+	 * @class
+	 * The QUnit report can be used to run qunit tests based on the design time test results.
+	 * @extends sap.ui.base.ManagedObject
+	 *
+	 * @author SAP SE
+	 * @version 1.44.14
+	 *
+	 * @constructor
+	 * @private
+	 * @since 1.38
+	 * @alias sap.ui.dt.test.report.QUnit
+	 * @experimental Since 1.38. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 */
+	var QUnitReport = ManagedObject.extend("sap.ui.dt.test.report.QUnit", /** @lends sap.ui.dt.test.report.QUnit.prototype */ {
 		metadata : {
 			// ---- object ----
 
 			// ---- control specific ----
 			library : "sap.ui.dt",
 			properties : {
-				editableTypes : {
-					type : "string[]",
-					defaultValue : ["sap.ui.core.Element"]
+				data : {
+					type : "object"
 				}
-			},
-			associations : {
-			},
-			events : {
+			}
+		},
+
+
+
+		/**
+		 * Called when the QUnit is initialized
+		 * @protected
+		 */
+		init : function() {
+			if (!QUnit) {
+				throw new Error("QUnit is required for this report.");
+			}
+		},
+
+
+		/**
+		 * Sets the data to use as a base for the QUnit tests.
+		 * @param {object} oData the data to display
+		 *
+		 * @public
+		 */
+		setData : function(oData) {
+			if (oData) {
+				var that = this;
+				var aChildren = oData.children;
+				aChildren.forEach(function(oGroup) {
+					that._createModule(oGroup);
+				});
+			}
+			this.setProperty("data", oData);
+		},
+
+
+		/**
+		 * @private
+		 */
+		_createModule : function(oGroup) {
+			var that = this;
+			QUnit.module(oGroup.message);
+			oGroup.children.forEach(function(oGroup) {
+				that._createTest(oGroup);
+			});
+		},
+
+
+		/**
+		 * @private
+		 */
+		_createTest : function(oGroup) {
+			var that = this;
+
+			QUnit.test(oGroup.name + ": " + oGroup.message, function(assert) {
+				oGroup.children.forEach(function(oGroup) {
+					that._createAssertion(oGroup);
+				});
+			});
+		},
+
+
+		/**
+		 * @private
+		 */
+		_createAssertion : function(oGroup) {
+			if (oGroup.children.length > 0) {
+				oGroup.children.forEach(function(oTest) {
+					assert.ok(oTest.result, oGroup.name + ": " + oTest.message);
+				});
+			} else {
+				assert.ok(true, oGroup.name + ": " + oGroup.message);
 			}
 		}
 	});
 
-	/*
-	 * @private
-	 */
-	Rename.prototype.init = function() {
-		Plugin.prototype.init.apply(this, arguments);
-	};
-
-	/**
-	 * @public
-	 */
-	Rename.prototype.isEditableType = function(oElement) {
-		var aEditableTypes = this._getEditableTypes();
-
-		return aEditableTypes.some(function(sType) {
-			return ElementUtil.isInstanceOf(oElement, sType);
-		});
-	};
-
-	/**
-	 * @private
-	 */
-	Rename.prototype._getEditableTypes = function() {
-		return this.getProperty("editableTypes") || [];
-	};
-
-	/**
-	 * @protected
-	 */
-	Rename.prototype.checkEditable = function(oOverlay) {
-		return true;
-	};
-
-	/*
-	 * @override
-	 */
-	Rename.prototype.registerElementOverlay = function(oOverlay) {
-		var oElement = oOverlay.getElementInstance();
-		if (this.isEditableType(oElement) && this.checkEditable(oOverlay)) {
-			oOverlay.setEditable(true);
-		}
-	};
-
-
-	return Rename;
+	return QUnitReport;
 }, /* bExport= */ true);
-}; // end of sap/ui/dt/plugin/Rename.js
-if ( !jQuery.sap.isDeclared('sap.ui.dt.AggregationDesignTimeMetadata') ) {
+}; // end of sap/ui/dt/test/report/QUnit.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.test.report.Statistic') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
  * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-// Provides class sap.ui.dt.AggregationDesignTimeMetadata.
-jQuery.sap.declare('sap.ui.dt.AggregationDesignTimeMetadata'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+// Provides control sap.ui.dt.test.report.Statistic.
+jQuery.sap.declare('sap.ui.dt.test.report.Statistic'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-sap.ui.define("sap/ui/dt/AggregationDesignTimeMetadata",[
-	'jquery.sap.global',
-	'sap/ui/dt/DesignTimeMetadata'
-],
-function(jQuery, DesignTimeMetadata) {
+jQuery.sap.require('sap.ui.core.Control'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.model.json.JSONModel'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.layout.form.SimpleForm'); // unlisted dependency retained
+jQuery.sap.require('sap.m.Label'); // unlisted dependency retained
+jQuery.sap.require('sap.m.Text'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/test/report/Statistic",['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/model/json/JSONModel', 'sap/ui/layout/form/SimpleForm', "sap/m/Label", "sap/m/Text"],
+	function(jQuery, Control, JSONModel, SimpleForm, Label, Text) {
+	"use strict";
+
+
+
+	/**
+	 * Constructor for a new Statistic report.
+	 *
+	 * @param {string} [sId] id for the new control, generated automatically if no id is given
+	 * @param {object} [mSettings] initial settings for the new control
+	 *
+	 * @class
+	 * The Statistic report can be used to visualize the design time tests.
+	 * @extends sap.ui.core.Control
+	 *
+	 * @author SAP SE
+	 * @version 1.44.14
+	 *
+	 * @constructor
+	 * @private
+	 * @since 1.38
+	 * @alias sap.ui.dt.test.report.Statistic
+	 * @experimental Since 1.38. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	var oStatistic = Control.extend("sap.ui.dt.test.report.Statistic", /** @lends sap.ui.dt.test.report.Statistic.prototype */ { metadata : {
+		properties : {
+			data : {
+				type : "object"
+			}
+		},
+		aggregations : {
+			"_form" : {
+				type : "sap.ui.layout.form.SimpleForm",
+				hidden : true,
+				multiple : false
+			}
+		}
+	},
+
+
+	init : function() {
+		this._oModel = null;
+		this.setAggregation("_form", this._createForm());
+	},
+
+	/**
+	 * Called when the Statistic is destroyed
+	 * @protected
+	 */
+	exit : function() {
+		this.setData(null);
+	},
+
+	setData : function(oData) {
+		if (this._oModel) {
+			this._oModel.destroy();
+			delete this._oModel;
+		}
+		if (oData) {
+			this._oModel = new JSONModel(oData);
+			this._getForm().setModel(this._oModel);
+		} else {
+			this._getForm().setModel(null);
+		}
+		this.setProperty("data", oData);
+	},
+
+
+	_createForm : function() {
+		var oForm = new sap.ui.layout.form.SimpleForm(this.getId() + "--form", {
+			editable : false,
+			title : "Statistics",
+			content : [
+				new Label(this.getId() + "--form-supported-label", {text: "Supported"}),
+				new Text(this.getId() + "--form-supported-value", {text: "{/statistic/SUPPORTED}"}),
+				new Label(this.getId() + "--form-partial-supported-label", {text: "Partial Supported"}),
+				new Text(this.getId() + "--form-partial-supported-value", {text: "{/statistic/PARTIAL_SUPPORTED}"}),
+				new Label(this.getId() + "--form-not-supported-label", {text: "Not Supported"}),
+				new Text(this.getId() + "--form-not-supported-value", {text: "{/statistic/NOT_SUPPORTED}"}),
+				new Label(this.getId() + "--form-unknown-label", {text: "Unknown"}),
+				new Text(this.getId() + "--form-unknown-value", {text: "{/statistic/UNKNOWN}"}),
+				new Label(this.getId() + "--form-error-label", {text: "Error"}),
+				new Text(this.getId() + "--form-error-value", {text: "{/statistic/ERROR}"})
+			]
+		});
+		return oForm;
+	},
+
+	_getForm : function() {
+		return this.getAggregation("_form");
+	}
+});
+
+	return oStatistic;
+
+}, /* bExport= */ true);
+
+}; // end of sap/ui/dt/test/report/Statistic.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.test.report.StatisticRenderer') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// Provides default renderer for control sap.ui.dt.test.report.Statistic
+jQuery.sap.declare('sap.ui.dt.test.report.StatisticRenderer'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/test/report/StatisticRenderer",['jquery.sap.global'],
+	function(jQuery) {
 	"use strict";
 
 
 	/**
-	 * Constructor for a new AggregationDesignTimeMetadata.
+	 * @author SAP SE
+	 * @version 1.44.14
+	 * @namespace
+	 */
+	var StatisticRenderer = {
+	};
+
+	/**
+	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
 	 *
-	 * @param {string} [sId] id for the new object, generated automatically if no id is given
-	 * @param {object} [mSettings] initial settings for the new object
+	 * @param {sap.ui.core.RenderManager} rm The RenderManager that can be used for writing to the render output buffer.
+	 * @param {sap.ui.core.Control} oStatistic An object representation of the control that should be rendered.
+	 */
+	StatisticRenderer.render = function(rm, oStatistic) {
+		rm.addClass("sapUiDtStatisticReport");
+
+		rm.write("<div");
+		rm.writeControlData(oStatistic);
+
+		rm.writeStyles();
+
+		rm.writeClasses();
+
+		rm.write(">");
+
+		rm.renderControl(oStatistic._getForm());
+
+		rm.write("</div>");
+	};
+
+	return StatisticRenderer;
+
+}, /* bExport= */ true);
+
+}; // end of sap/ui/dt/test/report/StatisticRenderer.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.test.report.Table') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// Provides control sap.ui.dt.test.report.Table.
+jQuery.sap.declare('sap.ui.dt.test.report.Table'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.core.Control'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.model.json.JSONModel'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.table.TreeTable'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.table.Column'); // unlisted dependency retained
+jQuery.sap.require('sap.m.Toolbar'); // unlisted dependency retained
+jQuery.sap.require('sap.m.Title'); // unlisted dependency retained
+jQuery.sap.require('sap.m.ToolbarSpacer'); // unlisted dependency retained
+jQuery.sap.require('sap.m.Button'); // unlisted dependency retained
+jQuery.sap.require('sap.m.SearchField'); // unlisted dependency retained
+jQuery.sap.require('sap.m.Text'); // unlisted dependency retained
+jQuery.sap.require('sap.m.RatingIndicator'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.model.Filter'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.model.FilterOperator'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/test/report/Table",['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/model/json/JSONModel', 'sap/ui/table/TreeTable', 'sap/ui/table/Column', 'sap/m/Toolbar', 'sap/m/Title', 'sap/m/ToolbarSpacer', 'sap/m/Button', 'sap/m/SearchField', 'sap/m/Text', 'sap/m/RatingIndicator', 'sap/ui/model/Filter', 'sap/ui/model/FilterOperator'],
+	function(jQuery, Control, JSONModel, TreeTable, Column, Toolbar, Title, ToolbarSpacer, Button, SearchField, Text, RatingIndicator, Filter, FilterOperator) {
+	"use strict";
+
+
+
+	/**
+	 * Constructor for a new Table report.
+	 *
+	 * @param {string} [sId] id for the new control, generated automatically if no id is given
+	 * @param {object} [mSettings] initial settings for the new control
 	 *
 	 * @class
-	 * The AggregationDesignTimeMetadata is a wrapper for the AggregationDesignTimeMetadata of the associated element
-	 * @extends sap.ui.core.DesignTimeMetadata
+	 * The table report can be used to visualize the design time tests.
+	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @private
-	 * @since 1.30
-	 * @alias sap.ui.dt.AggregationDesignTimeMetadata
-	 * @experimental Since 1.30. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 * @since 1.38
+	 * @alias sap.ui.dt.test.report.Table
+	 * @experimental Since 1.38. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
-	var AggregationDesignTimeMetadata = DesignTimeMetadata.extend("sap.ui.dt.AggregationDesignTimeMetadata", /** @lends sap.ui.dt.AggregationDesignTimeMetadata.prototype */ {
-		metadata : {
-			// ---- object ----
-
-			// ---- control specific ----
-			library : "sap.ui.dt"
+	var oTable = Control.extend("sap.ui.dt.test.report.Table", /** @lends sap.ui.dt.test.report.Table.prototype */ { metadata : {
+		properties : {
+			data : {
+				type : "object"
+			}
+		},
+		aggregations : {
+			"_table" : {
+				type : "sap.ui.table.TreeTable",
+				hidden : true,
+				multiple : false
+			}
 		}
-	});
+	},
 
-	return AggregationDesignTimeMetadata;
+
+	/**
+	 * Called when the Table is initialized
+	 * @protected
+	 */
+	init : function() {
+		this.setAggregation("_table", this._createTable());
+	},
+
+
+	/**
+	 * Called when the Table is destroyed
+	 * @protected
+	 */
+	exit : function() {
+		clearTimeout(this._iFilterTimeout);
+		this.setData(null);
+	},
+
+
+	/**
+	 * Sets the data to display in the table
+	 * @param {object} oData the data to display
+	 *
+	 * @public
+	 */
+	setData : function(oData) {
+		if (this._oModel) {
+			this._oModel.destroy();
+			delete this._oModel;
+		}
+		if (oData) {
+			this._oModel = new JSONModel(oData);
+			this._getTable().setModel(this._oModel);
+		} else {
+			this._getTable().setModel(null);
+		}
+		this.setProperty("data", oData);
+	},
+
+
+	/**
+	 * Filters the table.
+	 *
+	 * @param  {sString} sFilter The filter string.
+	 *
+	 * @public
+	 */
+	filter : function(sFilter) {
+		var oModel = this._getTable().getModel();
+		if (oModel) {
+			if (sFilter.length > 0) {
+				// As UI5 does not support filtering on first level, we have to do it on our own
+				var aData = this.getData();
+				var aFilteredData = aData.children.filter(function(oEntry) {
+
+					if (sFilter.indexOf("status=") != -1) {
+						return oEntry.status.value == sFilter.substring(sFilter.indexOf("=") + 1);
+					} else {
+						return oEntry.name.toLowerCase().indexOf(sFilter.toLowerCase()) != -1;
+					}
+				});
+				oModel.setData(aFilteredData);
+			} else {
+				oModel.setData(this.getData());
+			}
+		}
+	},
+
+
+	/**
+	 * @private
+	 */
+	_createTable : function() {
+		var oTable = new TreeTable(this.getId() + "--table", {
+			selectionMode : "MultiToggle",
+			visibleRowCount: 20,
+			enableSelectAll : false,
+			ariaLabelledBy : "title",
+			toolbar : this._createToolbar(),
+			rows : "{path:'/', parameters: {arrayNames:['children']}}",
+			columns : [
+				this._createTextColumn("name", "Name", "{name}"),
+				this._createRatingIndicatorColumn("value", "Status Values", "{status/value}", "{status/text} ({status/value})"),
+				this._createTextColumn("status", "Status", "{status/text}"),
+				this._createTextColumn("message", "Message", "{message}")
+			]
+		});
+
+		return oTable;
+	},
+
+
+	/**
+	 * @private
+	 */
+	_createToolbar : function() {
+		return new Toolbar(this.getId() + "--toolbar", {
+			content : [
+				new ToolbarSpacer(this.getId() + "--toolbar-spacer"),
+				new Button(this.getId() + "--toolbar-collapse-button", {
+					text : "Collapse all",
+					press : this._onCollapseAll.bind(this)
+				}),
+				new Button(this.getId() + "--toolbar-expand-button", {
+					text : "Expand",
+					press : this._onExpandSecondLevel.bind(this)
+				}),
+				new SearchField(this.getId() + "--toolbar-search-field", {
+					liveChange:this._onSearch.bind(this)
+				})
+			]
+		});
+	},
+
+
+	/**
+	 * @private
+	 */
+	_onSearch : function(oEvt) {
+		var that = this;
+
+		var sFilter = oEvt.getParameter('newValue');
+		clearTimeout(this._iFilterTimeout);
+		this._iFilterTimeout = setTimeout(function() {
+			that.filter(sFilter);
+		},100);
+	},
+
+
+	/**
+	 * @private
+	 */
+	_createTextColumn : function(sId, sColumnText, sRowText) {
+		return this._createColumn(sId, sColumnText,
+			new Text({
+				text : sRowText
+			})
+		);
+	},
+
+
+	/**
+	 * @private
+	 */
+	_createRatingIndicatorColumn : function(sId, sColumnText, sRowText, sTooltip) {
+		return this._createColumn(sId, sColumnText,
+			new RatingIndicator({
+				maxValue : 3,
+				value : sRowText,
+				enabled : false,
+				tooltip : sTooltip
+			})
+		);
+	},
+
+
+	/**
+	 * @private
+	 */
+	_createColumn : function(sId, sColumnText, oTemplate) {
+		return new Column(this.getId() + "--table-column-" + sId, {
+			label : sColumnText,
+			width : "13em",
+			template : oTemplate
+		});
+	},
+
+
+	/**
+	 * @private
+	 */
+	_getTable : function() {
+		return this.getAggregation("_table");
+	},
+
+
+	/**
+	 * @private
+	 */
+	_onCollapseAll : function(oEvt) {
+		var oTable = this._getTable();
+		oTable.collapseAll();
+	},
+
+
+	/**
+	 * @private
+	 */
+	_onExpandSecondLevel : function(oEvt) {
+		var oTable = this._getTable();
+		oTable.expandToLevel(2);
+	}
+});
+
+	return oTable;
+
 }, /* bExport= */ true);
-}; // end of sap/ui/dt/AggregationDesignTimeMetadata.js
+
+}; // end of sap/ui/dt/test/report/Table.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.test.report.TableRenderer') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// Provides default renderer for control sap.ui.dt.test.report.Table
+jQuery.sap.declare('sap.ui.dt.test.report.TableRenderer'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/test/report/TableRenderer",['jquery.sap.global'],
+	function(jQuery) {
+	"use strict";
+
+
+	/**
+	 * @author SAP SE
+	 * @version 1.44.14
+	 * @namespace
+	 */
+	var TableRenderer = {
+	};
+
+	/**
+	 * Renders the HTML for the given control, using the provided {@link sap.ui.core.RenderManager}.
+	 *
+	 * @param {sap.ui.core.RenderManager} rm The RenderManager that can be used for writing to the render output buffer.
+	 * @param {sap.ui.core.Control} oTable An object representation of the control that should be rendered.
+	 */
+	TableRenderer.render = function(rm, oTable) {
+		rm.addClass("sapUiDtTableReport");
+
+		rm.write("<div");
+		rm.writeControlData(oTable);
+
+		rm.writeStyles();
+
+		rm.writeClasses();
+
+		rm.write(">");
+
+		rm.renderControl(oTable._getTable());
+
+		rm.write("</div>");
+	};
+
+	return TableRenderer;
+
+}, /* bExport= */ true);
+
+}; // end of sap/ui/dt/test/report/TableRenderer.js
 if ( !jQuery.sap.isDeclared('sap.ui.dt.AggregationOverlayRenderer') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -3400,7 +4661,7 @@ sap.ui.define("sap/ui/dt/AggregationOverlayRenderer",['sap/ui/dt/RenderingUtil']
 
 	/**
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @namespace
 	 */
 	var AggregationOverlayRenderer = {
@@ -3444,7 +4705,7 @@ sap.ui.define("sap/ui/dt/ContextMenuControl",[
 	 * @class Context - Menu for Design time
 	 * @extends sap.ui.unified.Menu
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -3506,25 +4767,31 @@ sap.ui.define("sap/ui/dt/ContextMenuControl",[
 	 *        opened is passed, default true
 	 * @param {function} aMenuItems.enabled? function to determine if the menu entry should be enabled, the element for which the menu should be
 	 *        opened is passed, default true
-	 * @param {object} oElement element for which the menu should be opened
+	 * @param {object} oTargetOverlay overlay for which the menu should be opened
 	 * @private
 	 */
-	ContextMenuControl.prototype.setMenuItems = function(aMenuItems, oElement) {
+	ContextMenuControl.prototype.setMenuItems = function(aMenuItems, oTargetOverlay) {
 		var that = this;
 
 		this.destroyItems();
 
 		aMenuItems.forEach(function(oItem) {
-			if (!oItem.available || oItem.available(oElement)) {
-				var bEnabled = !oItem.enabled || oItem.enabled(oElement);
+			if (!oItem.available || oItem.available(oTargetOverlay)) {
+				var bEnabled = !oItem.enabled || oItem.enabled(oTargetOverlay);
+
+				var sText = oItem.text;
+				if (typeof oItem.text === "function") {
+					sText = oItem.text(oTargetOverlay);
+				}
+
 				var oMenuItem = new MenuItem({
-					text: oItem.text,
+					text: sText,
 					enabled: bEnabled
 				});
 				oMenuItem.data({
 					id: oItem.id
 				});
-				if ((oItem.startSection && typeof (oItem.startSection) === "boolean" ) || (typeof (oItem.startSection) === "function" && oItem.startSection(oElement))) {
+				if ((oItem.startSection && typeof (oItem.startSection) === "boolean" ) || (typeof (oItem.startSection) === "function" && oItem.startSection(oTargetOverlay.getElementInstance()))) {
 					oMenuItem.setStartsSection(true);
 				}
 				that.addItem(oMenuItem);
@@ -3634,10 +4901,9 @@ jQuery.sap.declare('sap.ui.dt.ControlObserver'); // unresolved dependency added 
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 sap.ui.define("sap/ui/dt/ControlObserver",[
 	'jquery.sap.global',
-	'sap/ui/dt/ManagedObjectObserver',
-	'sap/ui/dt/DOMUtil'
+	'sap/ui/dt/ManagedObjectObserver'
 ],
-function(jQuery, ManagedObjectObserver, DOMUtil) {
+function(jQuery, ManagedObjectObserver) {
 	"use strict";
 
 
@@ -3652,7 +4918,7 @@ function(jQuery, ManagedObjectObserver, DOMUtil) {
 	 * @extends sap.ui.dt.ManagedObjectObserver
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @private
@@ -3682,7 +4948,7 @@ function(jQuery, ManagedObjectObserver, DOMUtil) {
 			 * Fired when the DOM of the observed control is changed
 			 */
 			events : {
-				"domChanged" : {}
+				"afterRendering" : {}
 			}
 		}
 	});
@@ -3693,10 +4959,8 @@ function(jQuery, ManagedObjectObserver, DOMUtil) {
 	ControlObserver.prototype.init = function() {
 		ManagedObjectObserver.prototype.init.apply(this, arguments);
 
-		this._fnFireDomChanged = this.fireDomChanged.bind(this);
 		this._oControlDelegate = {
-			onAfterRendering : this._onAfterRendering,
-			onBeforeRendering : this._onBeforeRendering
+			onAfterRendering : this._onAfterRendering
 		};
 	};
 
@@ -3708,7 +4972,6 @@ function(jQuery, ManagedObjectObserver, DOMUtil) {
 	ControlObserver.prototype.observe = function(oControl) {
 		ManagedObjectObserver.prototype.observe.apply(this, arguments);
 
-		this._startObservers();
 		oControl.addEventDelegate(this._oControlDelegate, this);
 	};
 
@@ -3722,8 +4985,6 @@ function(jQuery, ManagedObjectObserver, DOMUtil) {
 		if (oControl) {
 			oControl.removeDelegate(this._oControlDelegate, this);
 		}
-		this._stopObservers();
-		delete this._oMutationObserver;
 
 		ManagedObjectObserver.prototype.unobserve.apply(this, arguments);
 	};
@@ -3731,84 +4992,209 @@ function(jQuery, ManagedObjectObserver, DOMUtil) {
 	/**
 	 * @private
 	 */
-	ControlObserver.prototype._onBeforeRendering = function() {
-		this._stopObservers();
-	};
-
-	/**
-	 * @private
-	 */
 	ControlObserver.prototype._onAfterRendering = function() {
-		this._startObservers();
-		this.fireDomChanged();
-	};
+		this.fireAfterRendering();
 
-	/**
-	 * @private
-	 */
-	ControlObserver.prototype._startMutationObserver = function() {
-		var that = this;
-		var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-		var oDomRef = this.getTargetInstance().getDomRef();
-		if (MutationObserver && oDomRef) {
-			this._oMutationObserver = this._oMutationObserver || new MutationObserver(function(aMutations) {
-				that.fireDomChanged();
-			});
-			this._oMutationObserver.observe(oDomRef, {
-				childList : true,
-				subtree : true,
-				attributes : true,
-				characterData : true // also observe text node changes, see https://dom.spec.whatwg.org/#characterdata
-			});
-		}
-	};
-
-	/**
-	 * @private
-	 */
-	ControlObserver.prototype._stopMutationObserver = function() {
-		if (this._oMutationObserver) {
-			this._oMutationObserver.disconnect();
-		}
-	};
-
-	/**
-	 * @private
-	 */
-	ControlObserver.prototype._startResizeObserver = function() {
-		jQuery(window).on("resize", this._fnFireDomChanged);
-	};
-
-	/**
-	 * @private
-	 */
-	ControlObserver.prototype._stopResizeObserver = function() {
-		jQuery(window).off("resize", this._fnFireDomChanged);
-	};
-
-	/**
-	 * @private
-	 */
-	ControlObserver.prototype._startObservers = function() {
-		var bVisible = DOMUtil.isVisible(this.getTargetInstance().$());
-
-		if (bVisible) {
-			this._startResizeObserver();
-			this._startMutationObserver();
-		}
-	};
-
-	/**
-	 * @private
-	 */
-	ControlObserver.prototype._stopObservers = function() {
-		this._stopResizeObserver();
-		this._stopMutationObserver();
 	};
 
 	return ControlObserver;
 }, /* bExport= */ true);
 }; // end of sap/ui/dt/ControlObserver.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.DesignTimeMetadata') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// Provides class sap.ui.dt.DesignTimeMetadata.
+jQuery.sap.declare('sap.ui.dt.DesignTimeMetadata'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.base.ManagedObject'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/DesignTimeMetadata",[
+	'jquery.sap.global',
+	'sap/ui/base/ManagedObject',
+	'sap/ui/dt/ElementUtil',
+	'sap/ui/dt/DOMUtil'
+],
+function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
+	"use strict";
+
+
+	/**
+	 * Constructor for a new DesignTimeMetadata.
+	 *
+	 * @param {string} [sId] id for the new object, generated automatically if no id is given
+	 * @param {object} [mSettings] initial settings for the new object
+	 *
+	 * @class
+	 * The DesignTimeMetadata is a wrapper for the DesignTimeMetadata of the associated element
+	 * @extends sap.ui.base.ManagedObject
+	 *
+	 * @author SAP SE
+	 * @version 1.44.14
+	 *
+	 * @constructor
+	 * @private
+	 * @since 1.30
+	 * @alias sap.ui.dt.DesignTimeMetadata
+	 * @experimental Since 1.30. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 */
+	var DesignTimeMetadata = ManagedObject.extend("sap.ui.dt.DesignTimeMetadata", /** @lends sap.ui.dt.DesignTimeMetadata.prototype */ {
+		metadata : {
+			// ---- object ----
+
+			// ---- control specific ----
+			library : "sap.ui.dt",
+			properties : {
+				/**
+				 * Data to be used as DT metadata
+				 */
+				data : {
+					type : "object"
+				},
+				/**
+				* Name of the library the control belongs to
+				*/
+				libraryName : "string"
+			}
+		}
+	});
+
+	/**
+	 * Sets the data as DT metadata, uses default settings, if some fields are not defined in oData
+	 * @param {object} oData to set
+	 * @return {sap.ui.dt.DesignTimeMetadata} returns this
+	 * @protected
+	 */
+	DesignTimeMetadata.prototype.setData = function(oData) {
+
+		var oMergedData = jQuery.extend(true, this.getDefaultData(), oData || {});
+
+		this.setProperty("data", oMergedData);
+		return this;
+	};
+
+	/**
+	 * Returns data, if no data is set, creates a default data
+	 * @return {object} returns data
+	 * @public
+	 */
+	DesignTimeMetadata.prototype.getData = function() {
+		var oData = this.getProperty("data");
+		if (!oData) {
+			this.setData({});
+			oData = this.getProperty("data");
+		}
+
+		return oData;
+	};
+
+	/**
+	 * Returns the default DT metadata
+	 * @return {Object} default data
+	 * @protected
+	 */
+	DesignTimeMetadata.prototype.getDefaultData = function() {
+		return {
+			ignore : false,
+			domRef : undefined,
+			cloneDomRef : false
+		};
+	};
+
+	/**
+	 * Returns property "ignore" of the DT metadata
+	 * @return {boolean} if ignored
+	 * @public
+	 */
+	DesignTimeMetadata.prototype.isIgnored = function() {
+		return this.getData().ignore;
+	};
+
+	/**
+	 * Returns property "copyDom" of the DT metadata
+	 * @return {boolean} if overlay should copy the DOM of its associated element
+	 * @public
+	 */
+	DesignTimeMetadata.prototype.getCloneDomRef = function() {
+		return this.getData().cloneDomRef;
+	};
+
+	/**
+	 * Returns property "domRef" of the DT metadata
+	 * @return {string|Element} assosicated domRef
+	 * @public
+	 */
+	DesignTimeMetadata.prototype.getDomRef = function() {
+		return this.getData().domRef;
+	};
+
+	DesignTimeMetadata.prototype.getAssociatedDomRef = function(oElement, vDomRef, sAggregationName) {
+		var oElementDomRef = ElementUtil.getDomRef(oElement);
+		var aArguments = [];
+		aArguments.push(oElement);
+		if (sAggregationName) {
+			aArguments.push(sAggregationName);
+		}
+
+		if (typeof (vDomRef) === "function") {
+			return vDomRef.apply(null, aArguments);
+		} else if (oElementDomRef && typeof (vDomRef) === "string") {
+			return DOMUtil.getDomRefForCSSSelector(oElementDomRef, vDomRef).get(0);
+		}
+
+		return undefined;
+	};
+
+	/**
+	 * Returns action sAction part of designTime metadata (object or changeType string)
+	 * @param  {string} sAction action name
+	 * @param  {object} oElement element instance
+	 * @return {map} part of designTimeMetada, which describes sAction in a map format
+	 * @public
+	 */
+	DesignTimeMetadata.prototype.getAction = function(sAction, oElement) {
+		var mData = this.getData();
+		if (mData.actions && mData.actions[sAction]) {
+			var vAction = mData.actions[sAction];
+			if (typeof (vAction) === "function" ) {
+				vAction = vAction.call(null, oElement);
+			}
+
+			if (typeof (vAction) === "string" ) {
+				return { changeType : vAction };
+			} else {
+				return vAction;
+			}
+		}
+	};
+	/**
+	 * Returns a locale-specific string value for the given key sKey.
+	 *
+	 * The text is searched in this resource bundle according to the fallback chain described in
+	 * {@link jQuery.sap.util.ResourceBundle}. If no text could be found, the key itself is used as text.
+	 *
+	 * If text parameters are given, then any occurrences of the pattern "{<i>n</i>}" with <i>n</i> being an integer
+	 * are replaced by the parameter value with index <i>n</i>.  Note: This replacement is also applied if no text had been found (key).
+	 * For more details on this replacement mechanism refer also:
+	 * @see jQuery.sap.formatMessage
+	 *
+	 * @param {string} sKey
+	 * @param {string[]} [aArgs] List of parameters which should replace the place holders "{n}" (n is the index) in the found locale-specific string value.
+	 * @return {string} The value belonging to the key, if found; otherwise the key itself.
+	 *
+	 * @function
+	 * @public
+	 */
+	DesignTimeMetadata.prototype.getLibraryText = function(sKey, aArgs) {
+		var oLibResourceBundle = sap.ui.getCore().getLibraryResourceBundle(this.getLibraryName());
+		return oLibResourceBundle.getText(sKey, aArgs);
+	};
+	return DesignTimeMetadata;
+}, /* bExport= */ true);
+
+}; // end of sap/ui/dt/DesignTimeMetadata.js
 if ( !jQuery.sap.isDeclared('sap.ui.dt.ElementOverlayRenderer') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -3825,7 +5211,7 @@ sap.ui.define("sap/ui/dt/ElementOverlayRenderer",['sap/ui/dt/RenderingUtil'],
 
 	/**
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @namespace
 	 */
 	var OverlayRenderer = {
@@ -3846,6 +5232,203 @@ sap.ui.define("sap/ui/dt/ElementOverlayRenderer",['sap/ui/dt/RenderingUtil'],
 }, /* bExport= */ true);
 
 }; // end of sap/ui/dt/ElementOverlayRenderer.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.MutationObserver') ) {
+/*
+ * ! UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// Provides class sap.ui.dt.MutationObserver.
+jQuery.sap.declare('sap.ui.dt.MutationObserver'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+jQuery.sap.require('sap.ui.base.ManagedObject'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/MutationObserver",[
+	'jquery.sap.global',
+	'sap/ui/dt/OverlayUtil',
+	'sap/ui/dt/ElementUtil',
+	'sap/ui/base/ManagedObject'
+], function(jQuery, OverlayUtil, ElementUtil, ManagedObject) {
+	"use strict";
+
+	/**
+	 * Constructor for a new MutationObserver.
+	 *
+	 * @param {string} [sId] id for the new object, generated automatically if no id is given
+	 * @param {object} [mSettings] initial settings for the new object
+	 * @class The MutationObserver observes changes of a ManagedObject and propagates them via events.
+	 * @extends sap.ui.base.ManagedObject
+	 * @author SAP SE
+	 * @version 1.44.14
+	 * @constructor
+	 * @private
+	 * @since 1.30
+	 * @alias sap.ui.dt.MutationObserver
+	 * @experimental Since 1.30. This class is experimental and provides only limited functionality. Also the API might be modified in future.
+	 */
+	var MutationObserver = ManagedObject.extend("sap.ui.dt.MutationObserver", /** @lends sap.ui.dt.MutationObserver.prototype */
+	{
+		metadata: {
+			library: "sap.ui.dt",
+			events: {
+				/**
+				 * Event fired when the observed object is modified
+				 */
+				domChanged: {
+					parameters : {
+						type : { type : "string" },
+						elemenIds : { type : "string[]"},
+						targetNodes : { type : "element[]" }
+					}
+				}
+			}
+		}
+	});
+
+	/**
+	 * Called when the MutationObserver is created
+	 *
+	 * @protected
+	 */
+	MutationObserver.prototype.init = function() {
+		var that = this;
+
+		this._fnFireResizeDomChanged = function() {
+			that.fireDomChanged({
+				type : "resize"
+			});
+		};
+		this._onScroll = this._fireDomChangeOnScroll.bind(this);
+
+		this._startMutationObserver();
+		this._startResizeObserver();
+		this._startScrollObserver();
+	};
+
+	/**
+	 * Called when the MutationObserver is destroyed
+	 *
+	 * @protected
+	 */
+	MutationObserver.prototype.exit = function() {
+		this._stopMutationObserver();
+		this._stopResizeObserver();
+		this._stopScrollObserver();
+	};
+
+	/**
+	 * @private
+	 */
+	MutationObserver.prototype._startMutationObserver = function() {
+		var that = this;
+
+		if (this._oMutationObserver) {
+			return;
+		}
+
+		var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+		if (MutationObserver) {
+			this._oMutationObserver = new MutationObserver(function(aMutations) {
+				var aTargetNodes = [];
+				var aElementIds = [];
+				aMutations.forEach(function(oMutation) {
+					var oTarget = oMutation.target;
+
+					// text mutations have no class list, so we use a parent node as a target
+					if (oMutation.type === "characterData") {
+						oTarget = oMutation.target.parentNode;
+					}
+
+					// filter out all mutation in overlays
+					if (!OverlayUtil.isInOverlayContainer(oTarget)) {
+						aTargetNodes.push(oTarget);
+
+						// define closest element to notify it's overlay about the dom mutation
+						var oOverlay = OverlayUtil.getClosestOverlayForNode(oTarget);
+						var sElementId = oOverlay ? oOverlay.getElementInstance().getId() : undefined;
+						if (sElementId) {
+							aElementIds.push(sElementId);
+						}
+					}
+				});
+
+				if (aTargetNodes.length) {
+					that.fireDomChanged({
+						type : "mutation",
+						elementIds : aElementIds,
+						targetNodes : aTargetNodes
+					});
+				}
+			});
+
+			// we should observe whole DOM, otherwise position change of elements can be triggered via outter changes
+			// (like change of body size, container insertions etc.)
+			this._oMutationObserver.observe(window.document, {
+				childList : true,
+				subtree : true,
+				attributes : true,
+				attributeFilter : ["style", "class", "width", "height", "border"],
+				characterData : true // also observe text node changes, see https://dom.spec.whatwg.org/#characterdata
+			});
+		} else {
+			jQuery.sap.log.error("Mutation Observer is not available");
+		}
+	};
+
+	/**
+	 * @private
+	 */
+	MutationObserver.prototype._stopMutationObserver = function() {
+		if (this._oMutationObserver) {
+			this._oMutationObserver.disconnect();
+			delete this._oMutationObserver;
+		}
+	};
+
+	/**
+	 * @private
+	 */
+	MutationObserver.prototype._startResizeObserver = function() {
+		jQuery(window).on("resize", this._fnFireResizeDomChanged);
+	};
+
+	/**
+	 * @private
+	 */
+	MutationObserver.prototype._stopResizeObserver = function() {
+		jQuery(window).off("resize", this._fnFireResizeDomChanged);
+	};
+
+	/**
+	 * @private
+	 */
+	MutationObserver.prototype._fireDomChangeOnScroll = function(oEvent) {
+		var oTarget = oEvent.target;
+		if (!OverlayUtil.isInOverlayContainer(oTarget) && !OverlayUtil.getClosestOverlayForNode(oTarget)) {
+			this.fireDomChanged({
+				type : "scroll"
+			});
+		}
+	};
+
+	/**
+	 * @private
+	 */
+	MutationObserver.prototype._startScrollObserver = function() {
+		window.addEventListener("scroll", this._onScroll, true);
+	};
+
+	/**
+	 * @private
+	 */
+	MutationObserver.prototype._stopScrollObserver = function() {
+		window.removeEventListener("scroll", this._onScroll, true);
+	};
+
+	return MutationObserver;
+}, /* bExport= */true);
+
+}; // end of sap/ui/dt/MutationObserver.js
 if ( !jQuery.sap.isDeclared('sap.ui.dt.Overlay') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -3861,16 +5444,18 @@ jQuery.sap.require('jquery.sap.dom'); // unlisted dependency retained
 sap.ui.define("sap/ui/dt/Overlay",[
 	'jquery.sap.global',
 	'sap/ui/core/Control',
+	'sap/ui/dt/MutationObserver',
 	'sap/ui/dt/ElementUtil',
 	'sap/ui/dt/OverlayUtil',
 	'sap/ui/dt/DOMUtil',
 	'jquery.sap.dom'
 ],
-function(jQuery, Control, ElementUtil, OverlayUtil, DOMUtil) {
+function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	"use strict";
 
 	var sOverlayContainerId = "overlay-container";
 	var oOverlayContainer;
+	var oMutationObserver;
 
 	/**
 	 * Constructor for an Overlay.
@@ -3883,7 +5468,7 @@ function(jQuery, Control, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @private
@@ -3920,6 +5505,13 @@ function(jQuery, Control, ElementUtil, OverlayUtil, DOMUtil) {
 				inHiddenTree : {
 					type : "boolean",
 					defaultValue : false
+				},
+				/**
+				 * Whether the Overlay can get the browser focus (has tabindex)
+				 */
+				focusable : {
+					type : "boolean",
+					defaultValue : false
 				}
 			},
 			associations : {
@@ -3940,6 +5532,14 @@ function(jQuery, Control, ElementUtil, OverlayUtil, DOMUtil) {
 				}
 			},
 			events : {
+				/**
+				 * Event fired when the property "Focusable" is changed
+				 */
+				focusableChange : {
+					parameters : {
+						focusable : { type : "boolean" }
+					}
+				},
 				/**
 				 * Event fired when the Overlay is destroyed
 				 */
@@ -3976,7 +5576,9 @@ function(jQuery, Control, ElementUtil, OverlayUtil, DOMUtil) {
 			if (!oOverlayContainer.length) {
 				oOverlayContainer = jQuery("<div id='" + sOverlayContainerId + "'></div>").css({
 					"top" : "0px",
-					"left" : "0px"
+					"left" : "0px",
+					"right" : "0px",
+					"bottom" : "0px"
 				}).appendTo("body");
 			}
 		}
@@ -3996,13 +5598,35 @@ function(jQuery, Control, ElementUtil, OverlayUtil, DOMUtil) {
 	};
 
 	/**
+	 * @static
+	 */
+	Overlay.getMutationObserver = function() {
+		if (!oMutationObserver) {
+			oMutationObserver = new MutationObserver();
+		}
+		return oMutationObserver;
+	};
+
+	/**
+	 * @static
+	 */
+	Overlay.destroyMutationObserver = function() {
+		if (oMutationObserver) {
+			oMutationObserver.destroy();
+			oMutationObserver = null;
+		}
+	};
+
+	/**
 	 * Called when the Overlay is initialized
 	 * @protected
 	 */
 	Overlay.prototype.init = function() {
 		this._bVisible = null;
 
-		this.attachBrowserEvent("scroll", this._onScroll, this);
+		this._domRefScrollHandler = this._onSyncScrollWithDomRef.bind(this);
+
+		this.attachBrowserEvent("scroll", this._onOverlayScroll, this);
 	};
 
 	/**
@@ -4010,9 +5634,12 @@ function(jQuery, Control, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @protected
 	 */
 	Overlay.prototype.exit = function() {
+		this._detachDomRefScrollHandler();
+
 		delete this._oDomRef;
 		delete this._bVisible;
 		window.clearTimeout(this._iCloneDomTimeout);
+		window.clearTimeout(this._iSyncScrollWithDomRef);
 		this.fireDestroyed();
 	};
 
@@ -4023,17 +5650,6 @@ function(jQuery, Control, ElementUtil, OverlayUtil, DOMUtil) {
 	 */
 	Overlay.prototype._onChildRerenderedEmpty = function() {
 		return true;
-	};
-
-	/*
-	 * Called before Overlay rendering phase
-	 * @protected
-	 */
-	Overlay.prototype.onBeforeRendering = function() {
-		// UI5 restore focus won't restore focus on overlay, because DOM ref isn't changed
-		if (this.hasFocus()) {
-			this._bRestoreFocus = true;
-		}
 	};
 
 	/**
@@ -4047,12 +5663,12 @@ function(jQuery, Control, ElementUtil, OverlayUtil, DOMUtil) {
 			this._updateDom();
 		}
 
-		if (this._bRestoreFocus) {
-			delete this._bRestoreFocus;
-
-			this.focus();
+		var bFocusable = this.isFocusable();
+		if (bFocusable) {
+			this.$().attr("tabindex", 0);
+		} else {
+			this.$().attr("tabindex", null);
 		}
-
 	};
 
 	/**
@@ -4091,21 +5707,56 @@ function(jQuery, Control, ElementUtil, OverlayUtil, DOMUtil) {
 	};
 
 	/**
+	 * Sets whether the Overlay can get the browser focus (tabindex)
+	 * @param {boolean} bFocusable if the Overlay is focusable
+	 * @returns {sap.ui.dt.Overlay} returns this
+	 * @public
+	 */
+	Overlay.prototype.setFocusable = function(bFocusable) {
+		if (this.isFocusable() !== bFocusable) {
+			this.setProperty("focusable", bFocusable);
+			this.toggleStyleClass("sapUiDtOverlayFocusable", bFocusable);
+			this.fireFocusableChange({focusable : bFocusable});
+		}
+
+		return this;
+	};
+
+	/**
+	 * Returns if the Overlay is can get the focus
+	 * @public
+	 * @return {boolean} if the Overlay is focusable
+	 */
+	Overlay.prototype.isFocusable = function() {
+		return this.getFocusable();
+	};
+
+	/**
 	 * Calculate and update CSS styles for the Overlay's DOM
 	 * The calculation is based on original associated DOM state and parent overlays
 	 * This method also calls "applyStyles" method for every child Overlay of this Overlay (cascade)
 	 * @public
 	 */
 	Overlay.prototype.applyStyles = function() {
+		// invalidate cached geometry
+		delete this._mGeometry;
+
 		if (!this.getDomRef()) {
 			return;
 		}
 
-		delete this._mGeometry;
+		if (!this.isVisible()) {
+			this.$().css("display", "none");
+			return;
+		}
+
 		var oGeometry = this.getGeometry();
 
 		if (oGeometry && oGeometry.visible) {
 			var $overlay = this.$();
+
+			// ensure visibility
+			$overlay.css("display", "block");
 
 			var oOverlayParent = this.getParent();
 
@@ -4117,54 +5768,103 @@ function(jQuery, Control, ElementUtil, OverlayUtil, DOMUtil) {
 
 			var mSize = oGeometry.size;
 
+			// OVERLAY SIZE
 			$overlay.css("width", mSize.width + "px");
 			$overlay.css("height", mSize.height + "px");
 			$overlay.css("top", mPosition.top + "px");
 			$overlay.css("left", mPosition.left + "px");
 
-			var iZIndex = DOMUtil.getZIndex(oGeometry.domRef);
-			if (iZIndex) {
-				$overlay.css("z-index", iZIndex);
-			}
-			var oOverflows = DOMUtil.getOverflows(oGeometry.domRef);
-			if (oOverflows) {
-				if (oOverflows.overflowX) {
-					$overlay.css("overflow-x", oOverflows.overflowX);
+			if (oGeometry.domRef) {
+				var iZIndex = DOMUtil.getZIndex(oGeometry.domRef);
+				if (iZIndex) {
+					$overlay.css("z-index", iZIndex);
 				}
-				if (oOverflows.overflowY) {
-					$overlay.css("overflow-y", oOverflows.overflowY);
-				}
-				var iScrollHeight = oGeometry.domRef.scrollHeight;
-				var iScrollWidth = oGeometry.domRef.scrollWidth;
-				if (iScrollHeight > mSize.height || iScrollWidth > mSize.width) {
-					if (!this._oDummyScrollContainer) {
-						this._oDummyScrollContainer = jQuery("<div class='sapUiDtDummyScrollContainer' style='height: " + iScrollHeight + "px; width: " + iScrollWidth + "px;'></div>");
-						this.$().append(this._oDummyScrollContainer);
-					} else {
-						this._oDummyScrollContainer.css({
-							"height": iScrollHeight,
-							"width" : iScrollWidth
-						});
+
+				// OVERFLOW & SCROLLING
+				var oOverflows = DOMUtil.getOverflows(oGeometry.domRef);
+				if (oOverflows) {
+					if (oOverflows.overflowX) {
+						$overlay.css("overflow-x", oOverflows.overflowX);
 					}
-				} else if (this._oDummyScrollContainer) {
-					this._oDummyScrollContainer.remove();
-					delete this._oDummyScrollContainer;
+					if (oOverflows.overflowY) {
+						$overlay.css("overflow-y", oOverflows.overflowY);
+					}
+					var iScrollHeight = oGeometry.domRef.scrollHeight;
+					var iScrollWidth = oGeometry.domRef.scrollWidth;
+					if (iScrollHeight > mSize.height || iScrollWidth > mSize.width) {
+						if (!this._oDummyScrollContainer) {
+							this._oDummyScrollContainer = jQuery("<div class='sapUiDtDummyScrollContainer' style='height: " + iScrollHeight + "px; width: " + iScrollWidth + "px;'></div>");
+							this.$().append(this._oDummyScrollContainer);
+						} else {
+							this._oDummyScrollContainer.css({
+								"height": iScrollHeight,
+								"width" : iScrollWidth
+							});
+						}
+					} else if (this._oDummyScrollContainer) {
+						this._oDummyScrollContainer.remove();
+						delete this._oDummyScrollContainer;
+					}
+					this._attachDomRefScrollHandler();
+
+					this._syncScrollWithDomRef();
 				}
-				DOMUtil.syncScroll(oGeometry.domRef, this.getDomRef());
+
+				this._cloneDomRef(oGeometry.domRef);
 			}
 
 			this.getChildren().forEach(function(oChild) {
 				oChild.applyStyles();
 			});
 
-			if (!this.$().is(":visible")) {
-				this.$().css("display", "block");
-			}
-
-			this._cloneDomRef(oGeometry.domRef);
-		} else if (this.$().is(":visible")) {
+		} else {
 			this.$().css("display", "none");
 		}
+	};
+
+	/**
+	 * @private
+	 */
+	Overlay.prototype._attachDomRefScrollHandler = function() {
+		this._detachDomRefScrollHandler();
+
+		var oGeometry = this.getGeometry();
+		var oDomRef = oGeometry ? oGeometry.domRef : null;
+		if (oDomRef) {
+			this._oDomRefWithScrollHandler = oDomRef;
+
+			jQuery(this._oDomRefWithScrollHandler).on("scroll", this._domRefScrollHandler);
+		}
+	};
+
+	/**
+	 * @private
+	 */
+	Overlay.prototype._detachDomRefScrollHandler = function(oDomRef) {
+		if (this._oDomRefWithScrollHandler) {
+			jQuery(this._oDomRefWithScrollHandler).off("scroll", this._domRefScrollHandler);
+			delete this._oDomRefWithScrollHandler;
+		}
+	};
+
+	/**
+	 * @private
+	 */
+	Overlay.prototype._onSyncScrollWithDomRef = function(oEvt) {
+		window.clearTimeout(this._iSyncScrollWithDomRef);
+		var that = this;
+		// timeout needed so that scroll wheel in chrome windows works fast
+		this._iSyncScrollWithDomRef = window.setTimeout(function() {
+			that._syncScrollWithDomRef();
+			delete that._iSyncScrollWithDomRef;
+		}, 0);
+	};
+
+	/**
+	 * @private
+	 */
+	Overlay.prototype._syncScrollWithDomRef = function(oEvent) {
+		DOMUtil.syncScroll(this._oDomRefWithScrollHandler, this.$());
 	};
 
 	/**
@@ -4178,7 +5878,7 @@ function(jQuery, Control, ElementUtil, OverlayUtil, DOMUtil) {
 	Overlay.prototype.getGeometry = function(bForceCalculation) {
 		if (bForceCalculation || !this._mGeometry) {
 			var oDomRef = this.getAssociatedDomRef();
-			var mGeometry = DOMUtil.getGeometry(oDomRef);
+			var mGeometry = DOMUtil.getGeometry(oDomRef, this.isRoot());
 
 			if (!mGeometry) {
 				var aChildrenGeometry = [];
@@ -4188,6 +5888,7 @@ function(jQuery, Control, ElementUtil, OverlayUtil, DOMUtil) {
 				mGeometry = OverlayUtil.getGeometry(aChildrenGeometry);
 			}
 
+			// cache geometry
 			this._mGeometry = mGeometry;
 		}
 
@@ -4235,30 +5936,75 @@ function(jQuery, Control, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @private
 	 */
 	Overlay.prototype._updateDom = function() {
+		if (this.isRoot()) {
+			this._ensureIsInOverlayContainer();
+
+			// apply styles propagated from root overlays to all their children
+			this.applyStyles();
+		} else {
+			this._ensureDomOrder();
+		}
+	};
+
+	/**
+	 * @private
+	 */
+	Overlay.prototype._ensureDomOrder = function() {
 		var $this = this.$();
 
 		var oParent = this.getParent();
-		if (oParent) {
-			if (oParent.getDomRef) {
-				var oParentDomRef = oParent.getDomRef();
-				if (oParentDomRef !== this.$().parent().get(0)) {
-					$this.appendTo(oParentDomRef);
-				}
+		var $parentDomRef = oParent.$();
+		var $parentContainer = $parentDomRef.find(">.sapUiDtOverlayChildren");
+
+		var bIsDomOrderCorrect;
+
+		var $PreviousChildWithDom;
+
+		var aChildren = oParent.getChildren();
+		var iPreviousChildWithDomIndex = aChildren.indexOf(this) - 1;
+		while (iPreviousChildWithDomIndex >= 0) {
+			$PreviousChildWithDom = aChildren[iPreviousChildWithDomIndex].$();
+			if ($PreviousChildWithDom.length) {
+				break;
+			}
+			iPreviousChildWithDomIndex--;
+		}
+
+		// if our dom is already after out previous sibling
+		if ($PreviousChildWithDom && $PreviousChildWithDom.length) {
+			bIsDomOrderCorrect = $this.prev().get(0) === $PreviousChildWithDom.get(0);
+		// .. or first in parent container
+		} else {
+			bIsDomOrderCorrect = $parentContainer.children().index($this) === 0;
+		}
+
+		if (!bIsDomOrderCorrect) {
+			if ($PreviousChildWithDom && $PreviousChildWithDom.length) {
+				$PreviousChildWithDom.after($this);
 			} else {
-				// instead of adding the created DOM into the UIArea's DOM, we are adding it to overlay-container to avoid clearing of the DOM
-				var oOverlayContainer = Overlay.getOverlayContainer();
-				var $parent = $this.parent();
-				var oParentElement = $parent.length ? $parent.get(0) : null;
-				if (oOverlayContainer !== oParentElement) {
-					$this.appendTo(oOverlayContainer);
-				}
-				this.applyStyles();
+				$parentContainer.prepend($this);
 			}
 		}
 	};
 
+	/**
+	 * @private
+	 */
+	Overlay.prototype._ensureIsInOverlayContainer = function() {
+		var $this = this.$();
+		var $currentDomParent = $this.parent();
+		// instead of adding the created DOM into the UIArea's DOM, we are adding it to overlay-container to avoid clearing of the DOM
+		var oOverlayContainer = Overlay.getOverlayContainer();
+		var oParentElement = $currentDomParent.length ? $currentDomParent.get(0) : null;
+		if (oOverlayContainer !== oParentElement) {
+			$this.appendTo(oOverlayContainer);
+		}
+	};
 
-	Overlay.prototype._onScroll = function() {
+	/**
+	 * @private
+	 */
+	Overlay.prototype._onOverlayScroll = function() {
 		var oGeometry = this.getGeometry();
 		var oDomRef = oGeometry ? oGeometry.domRef : null;
 		if (oDomRef) {
@@ -4315,8 +6061,13 @@ function(jQuery, Control, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @public
 	 */
 	Overlay.prototype.getVisible = function() {
+
 		if (this._bVisible === null) {
-			return !this.getDesignTimeMetadata().isIgnored();
+			if (!this.getLazyRendering()) {
+				return true;
+			}
+			var oDesignTimeMetadata = this.getDesignTimeMetadata();
+			return oDesignTimeMetadata ? !oDesignTimeMetadata.isIgnored() : false;
 		} else {
 			return this.getProperty("visible");
 		}
@@ -4330,6 +6081,39 @@ function(jQuery, Control, ElementUtil, OverlayUtil, DOMUtil) {
 	 */
 	Overlay.prototype.isVisible = function() {
 		return this.getVisible();
+	};
+
+	/**
+	 * Returns if overlay is root
+	 * @public
+	 */
+	Overlay.prototype.isRoot = function() {
+		var oParent = this.getParent();
+		if (oParent) {
+			if (!oParent.getDomRef) {
+				return true;
+			}
+		}
+	};
+
+	/**
+	 * Returns child of first ancestor overlay not flagged as inHiddenTree
+	 *
+	 * @return {sap.ui.dt.ElementOverlay} ElementOverlay public parents child
+	 * @public
+	 */
+	Overlay.prototype.getFirstHiddenAggregationOverlay = function() {
+
+		var oPreviousOverlay = this;
+		var oParentOverlay = this.getParentElementOverlay();
+		while (oParentOverlay && oParentOverlay.isInHiddenTree()
+				&& ElementUtil.isInstanceOf(oParentOverlay, "sap.ui.dt.ElementOverlay")) {
+			oPreviousOverlay = oParentOverlay;
+			oParentOverlay = oParentOverlay.getParentElementOverlay();
+		}
+		if (ElementUtil.isInstanceOf(oParentOverlay, "sap.ui.dt.ElementOverlay")) {
+			return oPreviousOverlay.getParent();
+		}
 	};
 
 	return Overlay;
@@ -4365,7 +6149,7 @@ function(ManagedObject) {
 	 * @extends sap.ui.dt.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @private
@@ -4498,9 +6282,9 @@ sap.ui.define("sap/ui/dt/plugin/ContextMenu",[
 	 * @param {string} [sId] id for the new object, generated automatically if no id is given
 	 * @param {object} [mSettings] initial settings for the new object
 	 * @class The ContextMenu registers event handler to open the context menu. Menu entries can dynamically be added
-	 * @extends sap.ui.core.ManagedObject
+	 * @extends sap.ui.dt.Plugin
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -4514,7 +6298,11 @@ sap.ui.define("sap/ui/dt/plugin/ContextMenu",[
 
 			// ---- control specific ----
 			library: "sap.ui.dt",
-			properties: {},
+			properties: {
+				contextElement : {
+					type : "object"
+				}
+			},
 			associations: {},
 			events: {
 				openedContextMenu: {},
@@ -4552,7 +6340,6 @@ sap.ui.define("sap/ui/dt/plugin/ContextMenu",[
 
 	ContextMenu.prototype.exit = function() {
 		delete this._aMenuItems;
-		delete this._oElement;
 		if (this._oContextMenuControl) {
 			this._oContextMenuControl.destroy();
 			delete this._oContextMenuControl;
@@ -4578,10 +6365,10 @@ sap.ui.define("sap/ui/dt/plugin/ContextMenu",[
 	};
 
 	ContextMenu.prototype.open = function(oOriginalEvent, oTargetOverlay) {
-		this._oElement = oTargetOverlay.getElementInstance();
+		this.setContextElement(oTargetOverlay.getElementInstance());
 
 		this._oContextMenuControl = new ContextMenuControl();
-		this._oContextMenuControl.setMenuItems(this._aMenuItems, this._oElement);
+		this._oContextMenuControl.setMenuItems(this._aMenuItems, oTargetOverlay);
 		this._oContextMenuControl.setOverlayDomRef(oTargetOverlay);
 		this._oContextMenuControl.attachItemSelect(this._onItemSelected, this);
 
@@ -4605,7 +6392,9 @@ sap.ui.define("sap/ui/dt/plugin/ContextMenu",[
 		var sId = oEvent.getParameter("item").data("id");
 		this._aMenuItems.some(function(oItem) {
 			if (sId === oItem.id) {
-				oItem.handler(that._oElement);
+				var oDesignTime = that.getDesignTime();
+				var aSelection = oDesignTime.getSelection();
+				oItem.handler(aSelection);
 				return true;
 			}
 		});
@@ -4675,47 +6464,47 @@ if ( !jQuery.sap.isDeclared('sap.ui.dt.plugin.ControlDragDrop') ) {
 
 // Provides class sap.ui.dt.plugin.ControlDragDrop.
 jQuery.sap.declare('sap.ui.dt.plugin.ControlDragDrop'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-sap.ui.define("sap/ui/dt/plugin/ControlDragDrop",[
-	'sap/ui/dt/plugin/DragDrop', 'sap/ui/dt/plugin/ElementMover', 'sap/ui/dt/ElementUtil'
-], function(DragDrop, ElementMover, ElementUtil) {
+sap.ui.define("sap/ui/dt/plugin/ControlDragDrop",['sap/ui/dt/plugin/DragDrop', 'sap/ui/dt/plugin/ElementMover', 'sap/ui/dt/ElementUtil'], function(
+		DragDrop, ElementMover, ElementUtil) {
 	"use strict";
 
 	/**
 	 * Constructor for a new ControlDragDrop.
 	 *
-	 * @param {string} [sId] id for the new object, generated automatically if no id is given
-	 * @param {object} [mSettings] initial settings for the new object
+	 * @param {string}
+	 *          [sId] id for the new object, generated automatically if no id is given
+	 * @param {object}
+	 *          [mSettings] initial settings for the new object
 	 * @class The ControlDragDrop enables D&D functionality for the overlays based on aggregation types
 	 * @extends sap.ui.dt.plugin.DragDrop"
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @constructor
 	 * @private
 	 * @since 1.30
 	 * @alias sap.ui.dt.plugin.ControlDragDrop
-	 * @experimental Since 1.30. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 * @experimental Since 1.30. This class is experimental and provides only limited functionality. Also the API might be
+	 *               changed in future.
 	 */
 	var ControlDragDrop = DragDrop.extend("sap.ui.dt.plugin.ControlDragDrop", /** @lends sap.ui.dt.plugin.ControlDragDrop.prototype */
 	{
-		metadata: {
+		metadata : {
 			// ---- object ----
 
 			// ---- control specific ----
-			library: "sap.ui.dt",
-			properties: {
-				draggableTypes: {
-					type: "string[]",
-					defaultValue: [
-						"sap.ui.core.Element"
-					]
+			library : "sap.ui.dt",
+			properties : {
+				draggableTypes : {
+					type : "string[]",
+					defaultValue : ["sap.ui.core.Element"]
 				},
-				elementMover: {
-					type: "sap.ui.dt.plugin.ElementMover"
+				elementMover : {
+					type : "sap.ui.dt.plugin.ElementMover"
 				}
 			},
-			associations: {},
-			events: {
-				elementMoved: {}
+			associations : {},
+			events : {
+				elementMoved : {}
 			}
 		}
 	});
@@ -4799,17 +6588,13 @@ sap.ui.define("sap/ui/dt/plugin/ControlDragDrop",[
 	 * @override
 	 */
 	ControlDragDrop.prototype.onDragEnd = function(oOverlay) {
-		var oMoveEvent = this.getElementMover().buildMoveEvent();
+		this.fireElementModified({
+			"command" : this.getElementMover().buildMoveEvent()
+		});
 		delete this._oPreviousTarget;
-
 		this.getElementMover().deactivateAllTargetZones(this.getDesignTime(), sDROP_ZONE_STYLE);
-
 		delete this._oDraggedOverlay;
 		this.getElementMover().setMovedOverlay(null);
-
-		this.fireElementMoved({
-			data: oMoveEvent
-		});
 	};
 
 	/**
@@ -4817,7 +6602,8 @@ sap.ui.define("sap/ui/dt/plugin/ControlDragDrop",[
 	 */
 	ControlDragDrop.prototype.onDragEnter = function(oTargetOverlay, oEvent) {
 		var oDraggedOverlay = this.getDraggedOverlay();
-		if (oTargetOverlay.getElementInstance() !== oDraggedOverlay.getElementInstance() && oTargetOverlay !== this._oPreviousTarget) {
+		if (oTargetOverlay.getElementInstance() !== oDraggedOverlay.getElementInstance()
+				&& oTargetOverlay !== this._oPreviousTarget) {
 			this.getElementMover().repositionOn(oDraggedOverlay, oTargetOverlay);
 		}
 		this._oPreviousTarget = oTargetOverlay;
@@ -4859,7 +6645,7 @@ sap.ui.define("sap/ui/dt/plugin/CutPaste",[
 	 * @class The CutPaste enables Cut & Paste functionality for the overlays based on aggregation types
 	 * @extends sap.ui.dt.Plugin"
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -4900,6 +6686,7 @@ sap.ui.define("sap/ui/dt/plugin/CutPaste",[
 	 */
 	CutPaste.prototype.registerElementOverlay = function(oOverlay) {
 		var oElement = oOverlay.getElementInstance();
+		//Register key down so that ESC is possible on all overlays
 		oOverlay.attachBrowserEvent("keydown", this._onKeyDown, this);
 		if (this.getElementMover().isMovableType(oElement) && this.getElementMover().checkMovable(oOverlay)) {
 			oOverlay.setMovable(true);
@@ -4966,8 +6753,7 @@ sap.ui.define("sap/ui/dt/plugin/CutPaste",[
 	CutPaste.prototype.cut = function(oOverlay) {
 		this.stopCutAndPaste();
 
-		var bMovable = this.getElementMover().isMovableType(oOverlay.getElementInstance());
-		if (bMovable) {
+		if (oOverlay.isMovable()) {
 			this.getElementMover().setMovedOverlay(oOverlay);
 			oOverlay.addStyleClass("sapUiDtOverlayCutted");
 
@@ -4985,20 +6771,22 @@ sap.ui.define("sap/ui/dt/plugin/CutPaste",[
 			var oTargetZoneAggregation = this._getTargetZoneAggregation(oTargetOverlay);
 			if (oTargetZoneAggregation) {
 				this.getElementMover().insertInto(oCutOverlay, oTargetZoneAggregation);
-			} else {
-				if (OverlayUtil.isInTargetZoneAggregation(oTargetOverlay)) {
+			} else if (OverlayUtil.isInTargetZoneAggregation(oTargetOverlay)) {
 					this.getElementMover().repositionOn(oCutOverlay, oTargetOverlay);
-				} else {
-					return;
-				}
+			} else {
+				return;
 			}
 
-			var oMoveEvent = this.getElementMover().buildMoveEvent();
-			this.fireElementMoved({
-				data: oMoveEvent
+			this.fireElementModified({
+				"command" : this.getElementMover().buildMoveEvent()
 			});
 		}
-		oCutOverlay.focus();
+
+		// focus get invalidated, see BCP 1580061207
+		setTimeout(function(){
+			oCutOverlay.focus();
+		},0);
+
 		this.stopCutAndPaste();
 	};
 
@@ -5031,6 +6819,187 @@ sap.ui.define("sap/ui/dt/plugin/CutPaste",[
 }, /* bExport= */true);
 
 }; // end of sap/ui/dt/plugin/CutPaste.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.plugin.TabHandling') ) {
+/*
+ * ! UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+jQuery.sap.declare('sap.ui.dt.plugin.TabHandling'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/plugin/TabHandling",[
+	'jquery.sap.global', 'sap/ui/dt/Plugin', 'sap/ui/dt/Overlay'
+], function(jQuery, Plugin, Overlay) {
+	"use strict";
+
+	/**
+	 * Constructor for a new TabHandling.
+	 *
+	 * @param {string} [sId] id for the new object, generated automatically if no id is given
+	 * @param {object} [mSettings] initial settings for the new object
+	 * @class The TabHandling plugin adjusts the tabindex for the elements.
+	 * @extends sap.ui.dt.Plugin
+	 * @author SAP SE
+	 * @version 1.44.14
+	 * @constructor
+	 * @private
+	 * @since 1.38
+	 * @alias sap.ui.dt.plugin.TabHandling
+	 * @experimental Since 1.38. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 */
+	var TabHandling = Plugin.extend("sap.ui.dt.plugin.TabHandling", /** @lends sap.ui.dt.plugin.TabHandling.prototype */
+	{
+		metadata: {
+			// ---- object ----
+
+			// ---- control specific ----
+			library: "sap.ui.dt",
+			properties: {},
+			associations: {},
+			events: {}
+		}
+	});
+
+
+	TabHandling.prototype.registerElementOverlay = function(oOverlay) {
+		if (oOverlay.isRoot()) {
+			this._removeTabIndex();
+		}
+	};
+
+	/**
+	 * Deregister an overlay
+	 *
+	 * @param {sap.ui.dt.Overlay} oOverlay overlay object
+	 * @override
+	 */
+	TabHandling.prototype.deregisterElementOverlay = function(oOverlay) {
+		if (oOverlay.isRoot()) {
+			this._restoreTabIndex();
+		}
+	};
+
+	TabHandling.prototype.setDesignTime = function(oDesignTime) {
+		Plugin.prototype.setDesignTime.apply(this, arguments);
+		if (oDesignTime) {
+			if (!this._oMutationObserver) {
+				this._oMutationObserver = Overlay.getMutationObserver();
+				this._oMutationObserver.attachDomChanged(this._onDomChanged, this);
+			}
+		} else {
+			this._oMutationObserver.detachDomChanged(this._onDomChanged, this);
+			delete this._oMutationObserver;
+			this._restoreTabIndex();
+		}
+	};
+
+	/**
+	 * Traverse the whole DOM tree and set tab indices to -1 for all elements
+	 *
+	 * @param {sap.ui.core.Element} oRootDom object of the root DOM element
+	 * @private
+	 */
+	TabHandling.prototype._removeTabIndex = function() {
+		var oDesignTime = this.getDesignTime();
+		var aRootElements = oDesignTime.getRootElements();
+		aRootElements.forEach(function(sRootElement) {
+			var oRootDom = sap.ui.getCore().byId(sRootElement).getDomRef();
+			jQuery(oRootDom).find(":focusable:not([tabIndex=-1], #overlay-container *)").each(function(iIndex, oNode) {
+				oNode.setAttribute("data-sap-ui-dt-tabindex", oNode.tabIndex);
+				oNode.setAttribute("tabIndex", -1);
+			});
+		});
+	};
+
+	/**
+	 * Restore the tab indices of all elements of the DOM tree
+	 *
+	 * @private
+	 */
+	TabHandling.prototype._restoreTabIndex = function() {
+		jQuery("[data-sap-ui-dt-tabindex]").each(function(iIndex, oNode) {
+			oNode.setAttribute("tabIndex", oNode.getAttribute("data-sap-ui-dt-tabindex"));
+			oNode.removeAttribute("data-sap-ui-dt-tabindex");
+		});
+	};
+
+	/**
+	 * @private
+	 */
+	TabHandling.prototype._onDomChanged = function() {
+		this._removeTabIndex();
+	};
+
+	return TabHandling;
+}, /* bExport= */true);
+
+}; // end of sap/ui/dt/plugin/TabHandling.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.AggregationDesignTimeMetadata') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// Provides class sap.ui.dt.AggregationDesignTimeMetadata.
+jQuery.sap.declare('sap.ui.dt.AggregationDesignTimeMetadata'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/AggregationDesignTimeMetadata",[
+	'jquery.sap.global',
+	'sap/ui/dt/DesignTimeMetadata'
+],
+function(jQuery, DesignTimeMetadata) {
+	"use strict";
+
+
+	/**
+	 * Constructor for a new AggregationDesignTimeMetadata.
+	 *
+	 * @param {string} [sId] id for the new object, generated automatically if no id is given
+	 * @param {object} [mSettings] initial settings for the new object
+	 *
+	 * @class
+	 * The AggregationDesignTimeMetadata is a wrapper for the AggregationDesignTimeMetadata of the associated element
+	 * @extends sap.ui.core.DesignTimeMetadata
+	 *
+	 * @author SAP SE
+	 * @version 1.44.14
+	 *
+	 * @constructor
+	 * @private
+	 * @since 1.30
+	 * @alias sap.ui.dt.AggregationDesignTimeMetadata
+	 * @experimental Since 1.30. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 */
+	var AggregationDesignTimeMetadata = DesignTimeMetadata.extend("sap.ui.dt.AggregationDesignTimeMetadata", /** @lends sap.ui.dt.AggregationDesignTimeMetadata.prototype */ {
+		metadata : {
+			// ---- object ----
+
+			// ---- control specific ----
+			library : "sap.ui.dt"
+		}
+	});
+
+	AggregationDesignTimeMetadata.prototype.getMoveAction = function(oMovedElement){
+		var mData = this.getData();
+		if (mData.actions && mData.actions.move) {
+			var vMoveChangeType = mData.actions.move;
+			if (typeof (vMoveChangeType) === "function" ){
+				return vMoveChangeType.apply(null, arguments);
+			} else {
+				return vMoveChangeType;
+			}
+		} else {
+			return undefined;
+		}
+
+	};
+
+	return AggregationDesignTimeMetadata;
+}, /* bExport= */ true);
+
+}; // end of sap/ui/dt/AggregationDesignTimeMetadata.js
 if ( !jQuery.sap.isDeclared('sap.ui.dt.AggregationOverlay') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -5043,12 +7012,9 @@ jQuery.sap.declare('sap.ui.dt.AggregationOverlay'); // unresolved dependency add
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
 sap.ui.define("sap/ui/dt/AggregationOverlay",[
 	'jquery.sap.global',
-	'sap/ui/dt/Overlay',
-	'sap/ui/dt/DOMUtil',
-	'sap/ui/dt/ElementUtil',
-	'sap/ui/dt/OverlayUtil'
+	'sap/ui/dt/Overlay'
 ],
-function(jQuery, Overlay, DOMUtil, ElementUtil, OverlayUtil) {
+function(jQuery, Overlay) {
 	"use strict";
 
 
@@ -5064,7 +7030,7 @@ function(jQuery, Overlay, DOMUtil, ElementUtil, OverlayUtil) {
 	 * @extends sap.ui.core.Overlay
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @private
@@ -5132,17 +7098,10 @@ function(jQuery, Overlay, DOMUtil, ElementUtil, OverlayUtil) {
 	AggregationOverlay.prototype.getAssociatedDomRef = function() {
 		var oElement = this.getElementInstance();
 		var sAggregationName = this.getAggregationName();
-
-		var oElementDomRef = ElementUtil.getDomRef(oElement);
-		if (oElementDomRef) {
-			var oDesignTimeMetadata = this.getDesignTimeMetadata();
-			var vAggregationDomRef = oDesignTimeMetadata.getDomRef();
-			if (typeof vAggregationDomRef === "function") {
-				return vAggregationDomRef.call(oElement, sAggregationName);
-			} else if (typeof vAggregationDomRef === "string") {
-				return DOMUtil.getDomRefForCSSSelector(oElementDomRef, vAggregationDomRef);
-			}
-		}
+		var oDesignTimeMetadata = this.getDesignTimeMetadata();
+		var vDomRef = oDesignTimeMetadata.getDomRef();
+		var vAggregationDomRef = oDesignTimeMetadata.getAssociatedDomRef(oElement, vDomRef, sAggregationName);
+		return vAggregationDomRef;
 	};
 
 	/**
@@ -5184,6 +7143,201 @@ function(jQuery, Overlay, DOMUtil, ElementUtil, OverlayUtil) {
 }, /* bExport= */ true);
 
 }; // end of sap/ui/dt/AggregationOverlay.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.ElementDesignTimeMetadata') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// Provides class sap.ui.dt.ElementDesignTimeMetadata.
+jQuery.sap.declare('sap.ui.dt.ElementDesignTimeMetadata'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/ElementDesignTimeMetadata",[
+	'jquery.sap.global',
+	'sap/ui/dt/DesignTimeMetadata',
+	'sap/ui/dt/AggregationDesignTimeMetadata'
+],
+function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
+	"use strict";
+
+
+	/**
+	 * Constructor for a new ElementDesignTimeMetadata.
+	 *
+	 * @param {string} [sId] id for the new object, generated automatically if no id is given
+	 * @param {object} [mSettings] initial settings for the new object
+	 *
+	 * @class
+	 * The ElementDesignTimeMetadata is a wrapper for the ElementDesignTimeMetadata of the associated element
+	 * @extends sap.ui.core.DesignTimeMetadata
+	 *
+	 * @author SAP SE
+	 * @version 1.44.14
+	 *
+	 * @constructor
+	 * @private
+	 * @since 1.30
+	 * @alias sap.ui.dt.ElementDesignTimeMetadata
+	 * @experimental Since 1.30. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 */
+	var ElementDesignTimeMetadata = DesignTimeMetadata.extend("sap.ui.dt.ElementDesignTimeMetadata", /** @lends sap.ui.dt.ElementDesignTimeMetadata.prototype */ {
+		metadata : {
+			// ---- object ----
+
+			// ---- control specific ----
+			library : "sap.ui.dt"
+		}
+	});
+
+	/**
+	 * Returns the default DT metadata
+	 * @return {Object} default data
+	 * @override
+	 */
+	ElementDesignTimeMetadata.prototype.getDefaultData = function(oData) {
+		var oDefaultData = DesignTimeMetadata.prototype.getDefaultData.apply(this, arguments);
+
+		oDefaultData.aggregations  = {
+			layout : {
+				ignore : true
+			},
+			dependents : {
+				ignore : true
+			},
+			customData : {
+				ignore : true
+			},
+			layoutData : {
+				ignore : true
+			},
+			tooltip: {
+				ignore : true
+			}
+		};
+
+		return oDefaultData;
+	};
+
+	/**
+	 * Returns if the DT metadata for an aggregation name exists
+	 * @param {string} sAggregationName an aggregation name
+	 * @return {boolean} returns if the field for an aggregation with a given name exists in DT metadata
+	 * @public
+	 */
+	ElementDesignTimeMetadata.prototype.hasAggregation = function(sAggregationName) {
+		return !!this.getAggregations()[sAggregationName];
+	};
+
+	/**
+	 * Returns the plain DT metadata for an aggregation name
+	 * @param {string} sAggregationName an aggregation name
+	 * @return {object} returns the DT metadata for an aggregation with a given name
+	 * @public
+	 */
+	ElementDesignTimeMetadata.prototype.getAggregation = function(sAggregationName) {
+		return this.getAggregations()[sAggregationName];
+	};
+
+	/**
+	 * Creates a aggregation DT metadata class for an aggregation,
+	 * ensure to destroy it if it is no longer needed, otherwise you get memory leak.
+	 * @param {string} sAggregationName an aggregation name
+	 * @return {sap.ui.dt.AggregationDesignTimeMetadata} returns the aggregation DT metadata for an aggregation with a given name
+	 * @public
+	 */
+	ElementDesignTimeMetadata.prototype.createAggregationDesignTimeMetadata  = function(sAggregationName) {
+		var oData =  this.getAggregation(sAggregationName);
+		return new AggregationDesignTimeMetadata({
+			libraryName : this.getLibraryName(),
+			data : oData
+		});
+	};
+
+	/**
+	 * Returns the DT metadata for all aggregations
+	 * @return {map} returns the DT metadata for all aggregations
+	 * @public
+	 */
+	ElementDesignTimeMetadata.prototype.getAggregations = function() {
+		return this.getData().aggregations;
+	};
+
+	/**
+	 * Returns the relevant container of an element
+	 * This is usually the getParent or the value from a function in DTMetadata
+	 * @param {object} oElement the element for which the relevant container has to be evaluated
+	 * @return {object} returns the relevant container
+	 * @public
+	 */
+	ElementDesignTimeMetadata.prototype.getRelevantContainer = function(oElement) {
+		var fnGetRelevantContainer = this.getData().getRelevantContainer;
+		if (!fnGetRelevantContainer || typeof fnGetRelevantContainer !== "function") {
+			return oElement.getParent();
+		}
+		return fnGetRelevantContainer(oElement);
+	};
+
+	ElementDesignTimeMetadata.prototype.getAggregationAction = function(sAction, oElement) {
+		var vAction;
+		var oAggregations = this.getAggregations();
+		var aActions = [];
+
+		for (var sAggregation in oAggregations) {
+			if (oAggregations[sAggregation].actions && oAggregations[sAggregation].actions[sAction]) {
+				vAction = oAggregations[sAggregation].actions[sAction];
+				if (typeof vAction === "function") {
+					vAction = vAction.call(null, oElement);
+				} else if (typeof (vAction) === "string" ) {
+					vAction = { changeType : vAction };
+				}
+				if (vAction) {
+					vAction.aggregation = sAggregation;
+				}
+				aActions.push(vAction);
+			}
+		}
+		return aActions;
+	};
+
+	ElementDesignTimeMetadata.prototype._getText = function(vName){
+		if (typeof vName === "function") {
+			return vName();
+		} else {
+			return this.getLibraryText(vName);
+		}
+	};
+
+	ElementDesignTimeMetadata.prototype.getAggregationDescription = function(sAggregationName, oElement){
+		var vChildrenName = this.getAggregation(sAggregationName).childrenName;
+		if (typeof vChildrenName === "function") {
+			vChildrenName = vChildrenName.call(null, oElement);
+		}
+		if (vChildrenName){
+			return {
+				singular : this._getText(vChildrenName.singular),
+				plural : this._getText(vChildrenName.plural)
+			};
+		}
+	};
+
+	ElementDesignTimeMetadata.prototype.getName = function(oElement){
+		var vName = this.getData().name;
+		if (typeof vName === "function") {
+			vName = vName.call(null, oElement);
+		}
+		if (vName){
+			return {
+				singular : this._getText(vName.singular),
+				plural : this._getText(vName.plural)
+			};
+		}
+	};
+
+	return ElementDesignTimeMetadata;
+}, /* bExport= */ true);
+
+}; // end of sap/ui/dt/ElementDesignTimeMetadata.js
 if ( !jQuery.sap.isDeclared('sap.ui.dt.ElementOverlay') ) {
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
@@ -5220,7 +7374,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @private
@@ -5247,13 +7401,6 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 				 * Whether the ElementOverlay is selectable, per default this implicitly makes the overlay focusable (TODO discuss)
 				 */
 				selectable : {
-					type : "boolean",
-					defaultValue : false
-				},
-				/**
-				 * Whether the ElementOverlay can get the browser focus (tabindex)
-				 */
-				focusable : {
 					type : "boolean",
 					defaultValue : false
 				},
@@ -5286,6 +7433,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 				 */
 				designTimeMetadata : {
 					type : "sap.ui.dt.ElementDesignTimeMetadata",
+					altTypes : ["object"],
 					multiple : false
 				}
 			},
@@ -5315,21 +7463,11 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 					}
 				},
 				/**
-				 * Event fired when the property "Focusable" is changed
-				 */
-				focusableChange : {
-					parameters : {
-						focusable : { type : "boolean" }
-					}
-				},
-				/**
 				 * Event fired when the property "Editable" is changed
 				 */
 				editableChange : {
 					parameters : {
-						selected : {
-							editable : "boolean"
-						}
+						editable : { type : "boolean" }
 					}
 				},
 				/**
@@ -5363,15 +7501,8 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	ElementOverlay.prototype.init = function() {
 		Overlay.prototype.init.apply(this, arguments);
 
-		this._oDefaultDesignTimeMetadata = null;
-		this.placeAt(Overlay.getOverlayContainer());
-
-		// this is needed to prevent UI5 renderManager from removing overlay's node from DOM in a rendering phase
-		// see RenderManager.js "this._fPutIntoDom" function
-		var oUIArea = this.getUIArea();
-		oUIArea._onChildRerenderedEmpty = function() {
-			return true;
-		};
+		this._oMutationObserver = Overlay.getMutationObserver();
+		this._oMutationObserver.attachDomChanged(this._onDomChanged, this);
 	};
 
 	/**
@@ -5379,18 +7510,50 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @protected
 	 */
 	ElementOverlay.prototype.exit = function() {
-		Overlay.prototype.exit.apply(this, arguments);
+		if (this._oMutationObserver) {
+			this._oMutationObserver.detachDomChanged(this._onDomChanged, this);
+			delete this._oMutationObserver;
+		}
 
-		this._destroyDefaultDesignTimeMetadata();
+		Overlay.prototype.exit.apply(this, arguments);
 
 		this._unobserve();
 		OverlayRegistry.deregister(this._sElementId);
 
 		if (!OverlayRegistry.hasOverlays()) {
+			Overlay.destroyMutationObserver();
 			Overlay.removeOverlayContainer();
 		}
 
 		delete this._sElementId;
+	};
+
+	/**
+	 * @override
+	 */
+	ElementOverlay.prototype.setLazyRendering = function(bLazyRendering) {
+		Overlay.prototype.setLazyRendering.apply(this, arguments);
+
+		if (!bLazyRendering) {
+			this.placeInOverlayContainer();
+		}
+	};
+
+	/**
+	 * Places this ElementOverlay in an overlay container, which causes a rendering only if overlay wasn't rendered before
+	 * Overlay won't be visible without a call of this method
+	 * @public
+	 */
+	ElementOverlay.prototype.placeInOverlayContainer = function() {
+		if (!this.getParent()) {
+			this.placeAt(Overlay.getOverlayContainer());
+			// this is needed to prevent UI5 renderManager from removing overlay's node from DOM in a rendering phase
+			// see RenderManager.js "this._fPutIntoDom" function
+			var oUIArea = this.getUIArea();
+			oUIArea._onChildRerenderedEmpty = function() {
+				return true;
+			};
+		}
 	};
 
 	/**
@@ -5406,25 +7569,61 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 			this._unobserve();
 		}
 
-		this.destroyAggregation("aggregationOverlays");
-		this._destroyDefaultDesignTimeMetadata();
-
 		this.setAssociation("element", vElement);
 		var oElement = this.getElementInstance();
-
-		this._createAggregationOverlays();
-
 
 		this._sElementId = oElement.getId();
 		OverlayRegistry.register(oElement, this);
 		this._observe(oElement);
 
-		var oParentElementOverlay = OverlayUtil.getClosestOverlayFor(oElement);
-		if (oParentElementOverlay) {
-			oParentElementOverlay.sync();
+		if (this.getDesignTimeMetadata()) {
+			this._renderAndCreateAggregation();
 		}
 
 		return this;
+	};
+
+	/**
+	 * @override
+	 */
+	ElementOverlay.prototype.setDesignTimeMetadata = function(vDesignTimeMetada) {
+		var oDesignTimeMetada;
+		if (vDesignTimeMetada instanceof ElementDesignTimeMetadata) {
+			oDesignTimeMetada = vDesignTimeMetada;
+		} else {
+			oDesignTimeMetada = new ElementDesignTimeMetadata({
+				libraryName : this.getElementInstance().getMetadata().getLibraryName(),
+				data : vDesignTimeMetada
+			});
+		}
+
+		var oReturn = this.setAggregation("designTimeMetadata", oDesignTimeMetada);
+
+		if (this.getElementInstance()) {
+			this._renderAndCreateAggregation();
+		}
+
+		return oReturn;
+	};
+
+	/**
+	 * @private
+	 */
+	ElementOverlay.prototype._renderAndCreateAggregation = function() {
+		// detach all children, so then they won't be destroyed
+		this.getAggregationOverlays().forEach(function(oAggregationOverlay) {
+			oAggregationOverlay.getChildren().forEach(function(oElementOverlay) {
+				oElementOverlay.setParent(null);
+			});
+		});
+		this.destroyAggregationOverlays();
+
+		this._createAggregationOverlays();
+
+		var oParentElementOverlay = OverlayUtil.getClosestOverlayFor(this.getElementInstance().getParent());
+		if (oParentElementOverlay) {
+			oParentElementOverlay.sync();
+		}
 	};
 
 	/**
@@ -5478,20 +7677,6 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 
 		return this;
 	};
-	/**
-	 * Sets whether the ElementOverlay can get the browser focus (tabindex)
-	 * @param {boolean} bFocusable if the ElementOverlay is focusable
-	 * @returns {sap.ui.dt.ElementOverlay} returns this
-	 * @public
-	 */
-	ElementOverlay.prototype.setFocusable = function(bFocusable) {
-		if (this.isFocusable() !== bFocusable) {
-			this.setProperty("focusable", bFocusable);
-			this.fireFocusableChange({focusable : bFocusable});
-		}
-
-		return this;
-	};
 
 	/**
 	 * Sets whether the ElementOverlay is movable and toggles corresponding css class
@@ -5528,21 +7713,6 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	};
 
 	/**
-	 * Returns the DesignTime metadata of this ElementOverlay, if no DT metadata exists, creates and returns the default DT metadata object
-	 * @return {sap.ui.DesignTimeMetadata} DT metadata of the ElementOverlay
-	 * @public
-	 */
-	ElementOverlay.prototype.getDesignTimeMetadata = function() {
-		var oDesignTimeMetadata = this.getAggregation("designTimeMetadata");
-		if (!oDesignTimeMetadata && !this._oDefaultDesignTimeMetadata) {
-			this._oDefaultDesignTimeMetadata = new ElementDesignTimeMetadata({
-				data : ElementUtil.getDesignTimeMetadata(this.getElementInstance())
-			});
-		}
-		return oDesignTimeMetadata || this._oDefaultDesignTimeMetadata;
-	};
-
-	/**
 	 * @public
 	 */
 	ElementOverlay.prototype.sync = function() {
@@ -5560,9 +7730,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @private
 	 */
 	ElementOverlay.prototype._createAggregationOverlay = function(sAggregationName, bInHiddenTree) {
-		var oData =  this.getDesignTimeMetadata().getAggregation(sAggregationName);
-
-		var oAggregationDesignTimeMetadata = new AggregationDesignTimeMetadata({data : oData});
+		var oAggregationDesignTimeMetadata = this.getDesignTimeMetadata().createAggregationDesignTimeMetadata(sAggregationName);
 
 		var oAggregationOverlay = new AggregationOverlay({
 			aggregationName : sAggregationName,
@@ -5570,10 +7738,10 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 			designTimeMetadata : oAggregationDesignTimeMetadata,
 			inHiddenTree : bInHiddenTree
 		});
+		this._mAggregationOverlays[sAggregationName] = oAggregationOverlay;
+		this.addAggregation("aggregationOverlays", oAggregationOverlay);
 
 		this._syncAggregationOverlay(oAggregationOverlay);
-
-		this.addAggregation("aggregationOverlays", oAggregationOverlay);
 
 		oAggregationOverlay.attachVisibleChanged(this._onAggregationVisibleChanged, this);
 
@@ -5595,7 +7763,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 		ElementUtil.iterateOverAllPublicAggregations(oElement, function(oAggregation, aAggregationElements) {
 			var sAggregationName = oAggregation.name;
 			mAggregationsWithOverlay[sAggregationName] = true;
-			that._mAggregationOverlays[sAggregationName] = that._createAggregationOverlay(sAggregationName, that.isInHiddenTree());
+			that._createAggregationOverlay(sAggregationName, that.isInHiddenTree());
 		});
 
 		// create aggregation overlays also for a hidden aggregations which are not ignored in the DT Metadata
@@ -5604,21 +7772,14 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 		aAggregationNames.forEach(function (sAggregationName) {
 			var oAggregationMetadata = mAggregationsMetadata[sAggregationName];
 			if (oAggregationMetadata.ignore === false && !mAggregationsWithOverlay[sAggregationName]) {
-				that._mAggregationOverlays[sAggregationName] = that._createAggregationOverlay(sAggregationName, true);
+				// this is needed to point out, that a control is both in public and private tree, so that it has a "public" parent, which can be different from a getParent()
+				// flag is needed so that parents could have possibility to handle actions for the children. The better solution yet to come: probably, propagation of metadata from parents to children
+				var bIsInHiddenTree = oAggregationMetadata.inHiddenTree;
+				that._createAggregationOverlay(sAggregationName, bIsInHiddenTree);
 			}
 		});
 
 		this.sync();
-	};
-
-	/**
-	 * @private
-	 */
-	ElementOverlay.prototype._destroyDefaultDesignTimeMetadata = function() {
-		if (this._oDefaultDesignTimeMetadata) {
-			this._oDefaultDesignTimeMetadata.destroy();
-			this._oDefaultDesignTimeMetadata = null;
-		}
 	};
 
 	/**
@@ -5630,7 +7791,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 			this._oObserver = new ControlObserver({
 				target : oElement
 			});
-			this._oObserver.attachDomChanged(this._onElementDomChanged, this);
+			this._oObserver.attachAfterRendering(this._onElementAfterRendering, this);
 		} else {
 			this._oObserver = new ManagedObjectObserver({
 				target : oElement
@@ -5733,17 +7894,33 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	/**
 	 * @private
 	 */
-	ElementOverlay.prototype._onElementDomChanged = function(oEvent) {
-		delete this._mGeometry;
-
-		this.sync();
-
-		var oParent = this.getParent();
-		if (oParent) {
-			if (!oParent.getDomRef) {
-				this.applyStyles();
+	ElementOverlay.prototype._onDomChanged = function(oEvent) {
+		var aIds = oEvent.getParameters().elementIds || [];
+		var oElement = this.getElementInstance();
+		if (oElement && aIds.indexOf(oElement.getId()) !== -1) {
+			// if element's DOM turns visible (via DOM mutations, classes and so on)
+			if (this._mGeometry && !this._mGeometry.visible) {
+				delete this._mGeometry;
+				this.invalidate();
 			}
 		}
+
+		// update styles (starting from root and update all overlay children)
+		if (this.isRoot()) {
+			this.applyStyles();
+		}
+	};
+
+	/**
+	 * @private
+	 */
+	ElementOverlay.prototype._onElementAfterRendering = function() {
+		// initial rendering of a UI5 element is not catched with a mutation observer
+		if (!this.getDomRef()) {
+			this.invalidate();
+		}
+		// we should sync aggregations onAfterRendering, because elements (or aggregations) might be created invisible
+		this.sync();
 	};
 
 	/**
@@ -5804,20 +7981,6 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	};
 
 	/**
-	 * @protected
-	 */
-	ElementOverlay.prototype.onAfterRendering = function() {
-		Overlay.prototype.onAfterRendering.apply(this, arguments);
-
-		var bFocusable = this.isFocusable();
-		if (bFocusable) {
-			this.$().attr("tabindex", 0);
-		} else {
-			this.$().attr("tabindex", null);
-		}
-	};
-
-	/**
 	 * Returns if the ElementOverlay is selected
 	 * @public
 	 * @return {boolean} if the ElementOverlay is selected
@@ -5833,15 +7996,6 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 */
 	ElementOverlay.prototype.isSelectable = function() {
 		return this.getSelectable();
-	};
-
-	/**
-	 * Returns if the ElementOverlay is can get the focus
-	 * @public
-	 * @return {boolean} if the ElementOverlay is focusable
-	 */
-	ElementOverlay.prototype.isFocusable = function() {
-		return this.getFocusable();
 	};
 
 	/**
@@ -5878,6 +8032,33 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 
 	};
 
+	/**
+	 * Returns agrregation overlay of public parent, which is an ancestor of this overlay
+	 *
+	 * @return {sap.ui.dt.Overlay} Overlay public parent
+	 * @public
+	 */
+	ElementOverlay.prototype.getPublicParentAggregationOverlay = function() {
+		var oAggregationOverlay = this.getParentAggregationOverlay();
+		var oParentElementOverlay = this.getParentElementOverlay();
+		while (oParentElementOverlay && ElementUtil.isInstanceOf(oParentElementOverlay, "sap.ui.dt.ElementOverlay") && oParentElementOverlay.isInHiddenTree()) {
+			oAggregationOverlay = oParentElementOverlay.getParentAggregationOverlay();
+			oParentElementOverlay = oParentElementOverlay.getParentElementOverlay();
+		}
+		return oAggregationOverlay;
+	};
+
+	/**
+	 * Returns first ancestor overlay not flagged as inHiddenTree
+	 * @return {sap.ui.dt.ElementOverlay} ElementOverlay public parent
+	 * @public
+	 */
+	ElementOverlay.prototype.getPublicParentElementOverlay = function() {
+		var oPublicParentAggregationOverlay = this.getPublicParentAggregationOverlay();
+		if (oPublicParentAggregationOverlay) {
+			return oPublicParentAggregationOverlay.getParent();
+		}
+	};
 
 	return ElementOverlay;
 }, /* bExport= */ true);
@@ -5915,10 +8096,10 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @class
 	 * The DesignTime allows to create a set of Overlays above the root elements and
 	 * their public children and manage theire events.
-	 * @extends sap.ui.core.ManagedObject
+	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @private
@@ -5943,7 +8124,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 
 				/**
 				 * DesignTime metadata for classses to use with overlays (will overwrite default DTMetadata fields)
-				 * should have a map structure { "sClassName" : oDTMetadata, ... }
+				 * should have a map structure { "sClassName" : oDesignTimeMetadata, ... }
 				 */
 				 designTimeMetadata : {
 					type : "object"
@@ -5969,7 +8150,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 			},
 			events : {
 				/**
-				 * Event fired when an ElementOverlay is created
+				 * Event fired when an ElementOverlay is created and its designTimeMetadata is loaded
 				 */
 				elementOverlayCreated : {
 					parameters : {
@@ -5991,7 +8172,19 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 					parameters : {
 						selection : { type : "sap.ui.dt.Overlay[]" }
 					}
-				}
+				},
+				/**
+				 * Event fired when DesignTime is syncing overlays with a ControlTree of root elements
+				 */
+				syncing : {},
+				/**
+				 * Event fired when DesignTime's overlays are in-sync with ControlTree of root elements
+				 */
+				synced : {},
+				/**
+				 * Event fired when DesignTime's overlays failed to sync with ControlTree of root elements
+				 */
+				syncFailed : {}
 			}
 		}
 	});
@@ -6001,6 +8194,9 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @protected
 	 */
 	DesignTime.prototype.init = function() {
+		// number of element overlays waiting for their designTimeMetadata
+		this._iOverlaysPending = 0;
+		// array of errors while element overlays waiting for their designTimeMetadata
 		this._oSelection = this.createSelection();
 		this._oSelection.attachEvent("change", function(oEvent) {
 			this.fireSelectionChange({selection: oEvent.getParameter("selection")});
@@ -6012,6 +8208,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @protected
 	 */
 	DesignTime.prototype.exit = function() {
+		delete this._iOverlaysPending;
 		this._destroyAllOverlays();
 		this._oSelection.destroy();
 	};
@@ -6073,7 +8270,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	/**
 	 * Inserts new plugin to use with the DesignTime at a defined position
 	 * @param {sap.ui.dt.Plugin} oPlugin to insert
-	 * @param {integer} iIndex a position to insert the plugin at
+	 * @param {int} iIndex a position to insert the plugin at
 	 * @return {sap.ui.dt.DesignTime} this
 	 * @protected
 	 */
@@ -6130,7 +8327,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 
 	/**
 	 * Returns a designTimeMetadata
-	 * @return {object} designTimeMetadata
+	 * @return {map} designTimeMetadata
 	 * @protected
 	 */
 	DesignTime.prototype.getDesignTimeMetadata = function() {
@@ -6145,11 +8342,11 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 */
 	DesignTime.prototype.getDesignTimeMetadataFor = function(vElement) {
 		var sClassName = vElement;
-		var mDTMetadata = this.getDesignTimeMetadata();
+		var mDesignTimeMetadata = this.getDesignTimeMetadata();
 		if (vElement.getMetadata) {
 			sClassName = vElement.getMetadata().getName();
 		}
-		return mDTMetadata[sClassName];
+		return mDesignTimeMetadata[sClassName];
 	};
 
 	/**
@@ -6161,7 +8358,13 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	DesignTime.prototype.addRootElement = function(vRootElement) {
 		this.addAssociation("rootElements", vRootElement);
 
-		this._createElementOverlay(ElementUtil.getElementInstance(vRootElement));
+		var oRootOverlay = this._createElementOverlay(ElementUtil.getElementInstance(vRootElement));
+
+		// trigger rendering of all overlays only once after DesignTime is synced
+		// to prevent rerendering of UIArea during async loading process
+		this.attachEventOnce("synced", function() {
+			oRootOverlay.placeInOverlayContainer();
+		});
 
 		return this;
 	};
@@ -6198,14 +8401,13 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	/**
 	 * Creates and returns the created instance of ElementOverlay for an element
 	 * @param {string|sap.ui.core.Element} oElement to create ElementOverlay for
-	 * @param {object} oDTMetadata to create ElementOverlay with
+	 * @param {object} oDesignTimeMetadata to create ElementOverlay with
 	 * @return {sap.ui.dt.ElementOverlay} created ElementOverlay
 	 * @protected
 	 */
-	DesignTime.prototype.createElementOverlay = function(oElement, oDTMetadata, bInHiddenTree) {
+	DesignTime.prototype.createElementOverlay = function(oElement, bInHiddenTree) {
 		return new ElementOverlay({
 			inHiddenTree : bInHiddenTree,
-			designTimeMetadata : oDTMetadata ? new ElementDesignTimeMetadata({data : oDTMetadata}) : null,
 			element : oElement
 		});
 	};
@@ -6228,37 +8430,56 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 
 	/**
 	 * @param {sap.ui.core.Element} oElement element
-	 * @return {sap.ui.dt.ElementOverlay} created ElementOverlay
+	 * @return {sap.ui.dt.ElementOverlay} created or already existing instance of ElementOverlay for oElement
 	 * @private
 	 */
 	DesignTime.prototype._createElementOverlay = function(oElement, bInHiddenTree) {
+		var that = this;
+
 		oElement = ElementUtil.fixComponentContainerElement(oElement);
-		if (oElement) {
-			// check if ElementOverlay for the element already exists before creating the new one
-			// (can happen when two aggregations returning the same elements)
-			if (!OverlayRegistry.getOverlay(oElement)) {
-				// merge the DTMetadata from the DesignTime and from UI5
-				var oMetadataFromDesignTime = this.getDesignTimeMetadataFor(oElement);
-				var oDTMetadata = ElementUtil.getDesignTimeMetadata(oElement);
-				jQuery.extend(true, oDTMetadata, oMetadataFromDesignTime);
-				oDTMetadata = oDTMetadata !== {} ? oDTMetadata : null;
-
-				var oElementOverlay = this.createElementOverlay(oElement, oDTMetadata, bInHiddenTree);
-				if (oElementOverlay) {
-					oElementOverlay.attachRequestElementOverlaysForAggregation(this._onRequestElementOverlaysForAggregation, this);
-					// sync should be called directly, because event could already be fired
-					oElementOverlay.sync();
-
-					oElementOverlay.attachElementModified(this._onElementModified, this);
-					oElementOverlay.attachDestroyed(this._onElementOverlayDestroyed, this);
-					oElementOverlay.attachSelectionChange(this._onElementOverlaySelectionChange, this);
-
-					this.fireElementOverlayCreated({elementOverlay : oElementOverlay});
-					return oElementOverlay;
-				}
-
+		var oElementOverlay = OverlayRegistry.getOverlay(oElement);
+		if (oElement && !oElement.bIsDestroyed && !oElementOverlay) {
+			if (this._iOverlaysPending === 0) {
+				this.fireSyncing();
 			}
+			this._iOverlaysPending++;
+
+			oElementOverlay = this.createElementOverlay(oElement, bInHiddenTree);
+			if (oElementOverlay) {
+				oElementOverlay.attachRequestElementOverlaysForAggregation(this._onRequestElementOverlaysForAggregation, this);
+				oElementOverlay.attachElementModified(this._onElementModified, this);
+				oElementOverlay.attachDestroyed(this._onElementOverlayDestroyed, this);
+				oElementOverlay.attachSelectionChange(this._onElementOverlaySelectionChange, this);
+			}
+
+			ElementUtil.loadDesignTimeMetadata(oElement).then(function(oDesignTimeMetadata) {
+				// if oElement is already destroyed while designtime metadata is loading
+				if (!oElement || oElement.bIsDestroyed) {
+					return;
+				}
+				// merge the DTMetadata from the DesignTime and from UI5
+				var oMergedDesignTimeMetadata = oDesignTimeMetadata || {};
+				jQuery.extend(true, oMergedDesignTimeMetadata, that.getDesignTimeMetadataFor(oElement));
+				var oElementDesignTimeMetadata = new ElementDesignTimeMetadata({
+					libraryName : oElement.getMetadata().getLibraryName(),
+					data : oMergedDesignTimeMetadata});
+
+				oElementOverlay.setDesignTimeMetadata(oElementDesignTimeMetadata);
+				that.fireElementOverlayCreated({elementOverlay : oElementOverlay});
+			}).catch(function(oError) {
+				jQuery.sap.log.error("exception occured in sap.ui.dt.DesignTime._createElementOverlay", oError);
+				if (oError instanceof Error) {
+					that.fireSyncFailed();
+				}
+			}).then(function() {
+				that._iOverlaysPending--;
+				if (that._iOverlaysPending === 0) {
+					that.fireSynced();
+				}
+			});
 		}
+
+		return oElementOverlay;
 	};
 
 	/**
@@ -6350,7 +8571,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 
 		var oParams = oEvent.getParameters();
 		if (oParams.type === "addOrSetAggregation" || oParams.type === "insertAggregation") {
-			this._onElementOverlayAddAggregation(oParams.value);
+			this._onElementOverlayAddAggregation(oParams.value, oParams.target, oParams.name);
 		} else if (oParams.type === "setParent") {
 			// timeout is needed because UI5 controls & apps can temporary "dettach" controls from control tree
 			// and add them again later, so the check if the control is dettached from root element's tree is delayed
@@ -6366,13 +8587,13 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @param {sap.ui.core.Element} oElement which was added
 	 * @private
 	 */
-	DesignTime.prototype._onElementOverlayAddAggregation = function(oChild) {
+	DesignTime.prototype._onElementOverlayAddAggregation = function(oChild, oParent, sAggregationName) {
 		// oElement can be of an alternative type (setLabel(sText) for example)
 		if (oChild instanceof sap.ui.core.Element) {
 			var oChildElementOverlay = OverlayRegistry.getOverlay(oChild);
-			// TODO what if it was moved between hidden/public tree? can this happen?
 			if (!oChildElementOverlay) {
-				oChildElementOverlay = this._createElementOverlay(oChild);
+				var bIsInHiddenTree = OverlayRegistry.getOverlay(oParent).getAggregationOverlay(sAggregationName).isInHiddenTree();
+				this._createElementOverlay(oChild, bIsInHiddenTree);
 			}
 		}
 	};
@@ -6439,4 +8660,456 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 
 	return DesignTime;
 }, /* bExport= */ true);
+
 }; // end of sap/ui/dt/DesignTime.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.test.ElementEnablementTest') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// Provides class sap.ui.dt.test.ElementEnablementTest.
+jQuery.sap.declare('sap.ui.dt.test.ElementEnablementTest'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/test/ElementEnablementTest",[
+	'jquery.sap.global',
+	'sap/ui/dt/test/Test',
+	'sap/ui/dt/DesignTime',
+	'sap/ui/dt/test/Element'
+],
+function(jQuery, Test, DesignTime, ElementTest) {
+	"use strict";
+
+
+	/**
+	 * Constructor for an ElementEnablementTest.
+	 *
+	 * @param {string} [sId] id for the new object, generated automatically if no id is given
+	 * @param {object} [mSettings] initial settings for the new object
+	 *
+	 * @class
+	 * The ElementEnablementTest class allows to create a design time test
+	 * which tests a given element on compatibility with the sap.ui.dt.DesignTime.
+	 * @extends sap.ui.dt.test.Test
+	 *
+	 * @author SAP SE
+	 * @version 1.44.14
+	 *
+	 * @constructor
+	 * @private
+	 * @since 1.38
+	 * @alias sap.ui.dt.test.ElementEnablementTest
+	 * @experimental Since 1.38. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 */
+	var ElementEnablementTest = Test.extend("sap.ui.dt.test.ElementEnablementTest", /** @lends sap.ui.dt.test.ElementEnablementTest.prototype */ {
+		metadata : {
+			// ---- object ----
+
+			// ---- control specific ----
+			library : "sap.ui.dt",
+			properties : {
+				type : {
+					type : "string"
+				},
+				create : {
+					type : "any" //function
+				},
+				timeout : {
+					type : "int",
+					defaultValue : 0
+				},
+				groupPostfix : {
+					type : "string"
+				}
+			}
+		}
+	});
+
+
+	/**
+	 * Called when the ElementEnablementTest is initialized
+	 * @protected
+	 */
+	ElementEnablementTest.prototype.init = function() {
+		this._aAggregatedTestResult = null;
+		this._aAggregatedInfoResult = null;
+		this._sAggregation = null;
+		this._$TestAreaDomRef = null;
+	};
+
+
+	/**
+	 * Called when the ElementEnablementTest is destroyed
+	 * @protected
+	 */
+	ElementEnablementTest.prototype.exit = function() {
+		if (this._oDesignTime) {
+			this._oDesignTime.destroy();
+		}
+		window.clearTimeout(this._iTimeout);
+		this._oElement.destroy();
+		if (this._$TestAreaDomRef) {
+			this._$TestAreaDomRef.remove();
+			delete this._$TestAreaDomRef;
+		}
+	};
+
+
+	/**
+	 * @return {Promise} A promise providing the test results.
+	 * @override
+	 */
+	ElementEnablementTest.prototype.run = function() {
+
+		var that = this;
+		return this._setup().then(function() {
+
+			that._mResult = that.createSuite("Element Enablement Test");
+
+			var mElementTest = that.addGroup(that._mResult.children,
+				that.getType(),
+				"Given that an DesignTime is created for " + that.getType()
+			);
+
+			that._testAggregations(mElementTest.children);
+
+			that._mResult = that.aggregate(that._mResult);
+
+			return that._mResult;
+		});
+	};
+
+
+	/**
+	 * @private
+	 */
+	ElementEnablementTest.prototype._createElement = function() {
+		var sType = this.getType();
+		var fnCreate = this.getCreate();
+		var Element = jQuery.sap.getObject(sType);
+
+		var oElement;
+
+		if (fnCreate) {
+			oElement = fnCreate();
+		} else {
+			oElement = new Element();
+		}
+
+		if (oElement.addStyleClass) {
+			oElement.addStyleClass("minSize");
+		}
+
+		return oElement;
+	};
+
+
+	/**
+	 * @private
+	 */
+	ElementEnablementTest.prototype._getTestArea = function() {
+		if (!this._$TestAreaDomRef) {
+			this._$TestAreaDomRef =  jQuery("<div id='" + this.getId() + "--testArea" + "'></div>").css({
+				height : "500px",
+				width: "1000px"// test area needs a height, so that some controls render correctly
+			}).appendTo("body");
+		}
+		return this._$TestAreaDomRef;
+	};
+
+
+	/**
+	 * @private
+	 */
+	ElementEnablementTest.prototype._setup = function() {
+		var that = this;
+
+		window.clearTimeout(this._iTimeout);
+		this._bNoRenderer = false;
+		this._bErrorDuringRendering = false;
+
+		return new Promise(function(fnResolve, fnReject) {
+			that._oElement = that._createElement();
+
+			try {
+				that._oElement.getRenderer();
+			} catch (oError) {
+				that._bNoRenderer = true;
+			}
+
+			if (!that._bNoRenderer) {
+				try {
+					that._oElement.placeAt(that._getTestArea().get(0));
+					sap.ui.getCore().applyChanges();
+				} catch (oError) {
+					that._bErrorDuringRendering = true;
+				}
+
+				if (!that._bErrorDuringRendering) {
+					that._oDesignTime = new DesignTime({
+						rootElements : [that._oElement]
+					});
+					that._oDesignTime.attachEventOnce("synced", function() {
+						sap.ui.getCore().applyChanges();
+						if (that.getTimeout()) {
+							that._iTimeout = window.setTimeout(function() {
+								fnResolve();
+							}, that.getTimeout());
+						} else {
+							fnResolve();
+						}
+
+					}, that);
+				} else {
+					fnResolve();
+				}
+			} else {
+				fnResolve();
+			}
+		});
+	};
+
+
+	/**
+	 * @private
+	 */
+	ElementEnablementTest.prototype._testAggregations = function(aTests) {
+
+		var mAggregationsTests = this.addGroup(
+			aTests,
+			"Aggregations",
+			"Each aggregation needs to be ignored or has a visible domRef maintained in the metadata",
+			this.getGroupPostfix()
+		);
+
+
+		if (this._bNoRenderer) {
+			this.addTest(mAggregationsTests.children,
+				true,
+				"Control has no renderer",
+				"Control has no renderer, not supported by the element test (requires a special element test)",
+				Test.STATUS.UNKNOWN
+			);
+		} else if (this._bErrorDuringRendering) {
+
+			this.addTest(mAggregationsTests.children,
+				true,
+				"Error during rendering",
+				 "Element can't be rendered, not supported by the DesignTime (please, provide a create method for this element)",
+				Test.STATUS.ERROR
+			);
+		} else {
+			var mAggregationsTestInfo = ElementTest.getAggregationsInfo(this._oElement);
+
+			for (var sAggregationName in mAggregationsTestInfo) {
+
+				var mAggregationTestInfo = mAggregationsTestInfo[sAggregationName];
+
+				var mAggregationTest = this.addGroup(mAggregationsTests.children,
+					sAggregationName,
+					(mAggregationTestInfo.ignored ? "Aggregation ignored" : "Aggregation tests")
+				);
+
+				if (!mAggregationTestInfo.ignored) {
+
+					this.addTest(mAggregationTest.children,
+						mAggregationTestInfo.overlayVisible,
+						"Overlay Visible",
+						"Overlay domRef is visible in DOM"
+					);
+
+					if (mAggregationTestInfo.domRefDeclared){
+						this.addTest(mAggregationTest.children,
+							mAggregationTestInfo.domRefDeclared,
+							"Dom Ref Declared",
+							"DomRef is declared in design time metadata"
+						);
+
+						this.addTest(mAggregationTest.children,
+							mAggregationTestInfo.domRefFound,
+							"Dom Ref Found",
+							"Declared DomRef is found in DOM"
+						);
+
+						this.addTest(mAggregationTest.children,
+							mAggregationTestInfo.domRefVisible,
+							"Dom Ref Visible",
+							"Declared DomRef is visible"
+						);
+
+					} else {
+						if (mAggregationTestInfo.overlayVisible) {
+
+							this.addTest(mAggregationTest.children,
+								mAggregationTestInfo.overlayGeometryCalculatedByChildren,
+								"Overlay Geometry calculated by children",
+								"Control might work based on DT Heuristic, but safer with domRefDeclared",
+								Test.STATUS.PARTIAL_SUPPORTED
+							);
+
+						} else {
+
+							this.addTest(mAggregationTest.children,
+								false,
+								"Overlay Dom Ref",
+								"Overlay domRef is not declared and aggregation overlay is not visible (please, declare domRef for this aggregation)",
+								Test.STATUS.PARTIAL_SUPPORTED
+							);
+						}
+					}
+					if (mAggregationTestInfo.overlayTooSmall) {
+						this.addTest(mAggregationTest.children,
+							false,
+							"Overlay too small",
+							"Aggregation Overlay is too small to be accessible, please ensure to render it big enough that it can be reach by a user. If content is needed, provide a create method for this element",
+							Test.STATUS.PARTIAL_SUPPORTED
+						);
+					}
+				}
+			}
+		}
+	};
+
+
+	return ElementEnablementTest;
+}, /* bExport= */ true);
+
+}; // end of sap/ui/dt/test/ElementEnablementTest.js
+if ( !jQuery.sap.isDeclared('sap.ui.dt.test.LibraryEnablementTest') ) {
+/*!
+ * UI development toolkit for HTML5 (OpenUI5)
+ * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
+ */
+
+// Provides class sap.ui.dt.test.LibraryEnablementTest.
+jQuery.sap.declare('sap.ui.dt.test.LibraryEnablementTest'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
+jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
+sap.ui.define("sap/ui/dt/test/LibraryEnablementTest",[
+	'jquery.sap.global',
+	'sap/ui/dt/test/Test',
+	'sap/ui/dt/test/ElementEnablementTest'
+],
+function(jQuery, Test, ElementEnablementTest) {
+	"use strict";
+
+
+	/**
+	 * Constructor for an LibraryEnablementTest.
+	 *
+	 * @param {string} [sId] id for the new object, generated automatically if no id is given
+	 * @param {object} [mSettings] initial settings for the new object
+	 *
+	 * @class
+	 * The LibraryEnablementTest class allows to create a design time test
+	 * which tests a given library on compatibility with the sap.ui.dt.DesignTime.
+	 * @extends sap.ui.dt.test.Test
+	 *
+	 * @author SAP SE
+	 * @version 1.44.14
+	 *
+	 * @constructor
+	 * @private
+	 * @since 1.38
+	 * @alias sap.ui.dt.test.LibraryEnablementTest
+	 * @experimental Since 1.38. This class is experimental and provides only limited functionality. Also the API might be changed in future.
+	 */
+	var LibraryEnablementTest = Test.extend("sap.ui.dt.test.LibraryEnablementTest", /** @lends sap.ui.dt.test.LibraryEnablementTest.prototype */ {
+		metadata : {
+			// ---- object ----
+
+			// ---- control specific ----
+			library : "sap.ui.dt",
+			properties : {
+				libraryName : {
+					type : "string"
+				},
+				testData : {
+					type : "object"
+				}
+			}
+		}
+	});
+
+
+	/**
+	 * @return {Promise} A promise providing the test results.
+	 * @override
+	 */
+	LibraryEnablementTest.prototype.run = function() {
+		var that = this;
+		this._aResult = [];
+		var oTestData = this.getTestData() || {};
+		var sLibraryName = this.getLibraryName();
+		var aElementEnablementTest = [];
+		var oLib = sap.ui.getCore().getLoadedLibraries()[sLibraryName];
+		if (oLib) {
+			var aLibraryControls = oLib.controls;
+			aLibraryControls.forEach(function(sType) {
+				var oElementTestData = oTestData[sType];
+				if (!oElementTestData && oElementTestData !== false) {
+					oElementTestData = {};
+				}
+
+				if (oElementTestData !== false) {
+					oElementTestData.type = sType;
+
+					var oElementTestDataWithoutCreate = null;
+					if (oElementTestData.create) {
+						oElementTestDataWithoutCreate = jQuery.extend({}, oElementTestData);
+						delete oElementTestDataWithoutCreate.create;
+						oElementTestData.groupPostfix = "with create method";
+					}
+
+					aElementEnablementTest.push(new ElementEnablementTest(oElementTestData));
+
+					if (oElementTestDataWithoutCreate) {
+						aElementEnablementTest.push(new ElementEnablementTest(oElementTestDataWithoutCreate));
+					}
+				}
+			});
+		}
+
+		var aResults = [];
+		var fnIterate = function(mResult) {
+			if (mResult) {
+				aResults.push(mResult);
+			}
+			var oElementEnablementTest = aElementEnablementTest.shift();
+			if (oElementEnablementTest) {
+				return oElementEnablementTest.run().then(function(mResult) {
+					oElementEnablementTest.destroy();
+					return fnIterate(mResult);
+				});
+			} else {
+				return Promise.resolve(aResults);
+			}
+		};
+
+
+		return fnIterate().then(function(aResults) {
+			var mResult = that.createSuite("Library Enablement Test");
+
+			aResults.forEach(function(mElementTestResult) {
+				var mChild = mElementTestResult.children[0];
+				var mPreviousChild = mResult.children[mResult.children.length - 1];
+
+				if (mPreviousChild && mChild.name == mPreviousChild.name) {
+					mPreviousChild.children = mPreviousChild.children.concat(mChild.children);
+				} else {
+					mResult.children.push(mChild);
+				}
+			});
+
+			mResult = that.aggregate(mResult);
+
+			return mResult;
+		});
+
+
+	};
+
+	return LibraryEnablementTest;
+}, /* bExport= */ true);
+}; // end of sap/ui/dt/test/LibraryEnablementTest.js

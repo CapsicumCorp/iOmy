@@ -1,13 +1,5 @@
-.sapMIBar {
-	&.sapMTB {
-		padding: 0 0.125rem;
-
-		.sapMBarChild,
-		.sapMBarChild:first-child,
-		.sapMBarChild:last-child {
-			margin: 0 0.125rem;
-		}
-	}
+.sapMIBar.sapMTB  .sapMBarChild {
+  margin-right: 0.25rem;
 }
 
 .sapMTB {
@@ -29,7 +21,7 @@
 
 /* Transparent Toolbar Context */
 .sapMTB-Transparent-CTX.sapMTB {
-	padding-left: 0.875rem;
+	padding-left: 0.75rem;
 }
 
 /* Info Toolbar Context */
@@ -40,8 +32,7 @@
 }
 
 .sapMIBar.sapMTB.sapMTB-Info-CTX > .sapUiIcon {
-  height: 1rem;
-  padding: 0.5rem 0;
+  padding-left: 0.5rem;
 }
 
 .sapMTBActive,
@@ -110,4 +101,24 @@
 	margin-bottom: 0;
 	margin-top: 0;
 	float: none; /* float has no effect on a flexible item */
+}
+
+/*** Toolbar inside of Form as Form- and Container- header ***/
+.sapUiFormContainerToolbar > .sapMTB{
+	border-bottom: none;
+	padding: 0;
+}
+
+.sapUiGridHeader > .sapMTB > .sapMBarChild:first-child,
+.sapUiGridTitle > th > .sapMTB > .sapMBarChild:first-child,
+.sapUiFormResLayout.sapUiFormToolbar > .sapMTB > .sapMBarChild:first-child,
+.sapUiRLContainer > .sapMTB > .sapMBarChild:first-child{
+	margin-left: 0;
+}
+
+.sapUiGridHeader > .sapMTB > .sapMBarChild:last-child,
+.sapUiGridTitle > th > .sapMTB > .sapMBarChild:last-child,
+.sapUiFormResLayout.sapUiFormToolbar > .sapMTB > .sapMBarChild:last-child,
+.sapUiRLContainer > .sapMTB > .sapMBarChild:last-child{
+	margin-right: 0;
 }

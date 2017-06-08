@@ -18,7 +18,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control','sap/m/T
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @since 1.34
 	 *
 	 * @public
@@ -33,6 +33,7 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control','sap/m/T
 
 				/**
 				 * Updates the size of the chart. If not set then the default size is applied based on the device tile.
+				 * @deprecated Since version 1.38.0. The FeedContent control has now a fixed size, depending on the used media (desktop, tablet or phone).
 				 */
 				"size" : {type : "sap.m.Size", group : "Misc", defaultValue : sap.m.Size.Auto},
 
@@ -61,12 +62,13 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control','sap/m/T
 				 */
 				"truncateValueTo" : {type : "int", group : "Misc", defaultValue : 4}
 			},
+			defaultAggregation : "_contentTextAgr",
 			aggregations : {
 
 				/**
 				 * The hidden aggregation for the content text.
 				 */
-				"contentTextAgr" : {type : "sap.m.Text", multiple : false, visibility : "hidden"}
+				"_contentTextAgr" : {type : "sap.m.Text", multiple : false, visibility : "hidden"}
 			},
 			events : {
 				/**
@@ -84,11 +86,41 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control','sap/m/T
 	 */
 	FeedContent.prototype.init = function() {
 		this._oContentText = new sap.m.Text(this.getId() + "-content-text", {
-			maxLines : 3
+			maxLines : 2
 		});
 		this._oContentText.cacheLineHeight = false;
-		this.setAggregation("contentTextAgr", this._oContentText);
-		this.setTooltip("{AltText}"); // TODO Nov. 2015: needs to be checked with ACC. Issue will be addresses via BLI.
+		this.setAggregation("_contentTextAgr", this._oContentText, true);
+		this.setTooltip("{AltText}");
+	};
+
+	FeedContent.prototype.onBeforeRendering = function() {
+		this.$().unbind("mouseenter", this._addTooltip);
+		this.$().unbind("mouseleave", this._removeTooltip);
+	};
+
+	FeedContent.prototype.onAfterRendering = function() {
+		this.$().bind("mouseenter", this._addTooltip.bind(this));
+		this.$().bind("mouseleave", this._removeTooltip.bind(this));
+	};
+
+	FeedContent.prototype.exit = function() {
+		this._oContentText = null;
+	};
+
+	/**
+	 * Sets the control's title attribute in order to show the tooltip.
+	 * @private
+	 */
+	FeedContent.prototype._addTooltip = function() {
+		this.$().attr("title", this.getTooltip_AsString());
+	};
+
+	/**
+	 * Removes the control's tooltip in order to prevent screen readers from reading it.
+	 * @private
+	 */
+	FeedContent.prototype._removeTooltip = function() {
+		this.$().attr("title", null);
 	};
 
 	/* --- Getters and Setters --- */
@@ -101,8 +133,8 @@ sap.ui.define([ 'jquery.sap.global', './library', 'sap/ui/core/Control','sap/m/T
 	FeedContent.prototype.getAltText = function() {
 		var sAltText = "";
 		var bIsFirst = true;
-		if (this.getAggregation("contentTextAgr").getText()) {
-			sAltText += this.getAggregation("contentTextAgr").getText();
+		if (this.getAggregation("_contentTextAgr").getText()) {
+			sAltText += this.getAggregation("_contentTextAgr").getText();
 			bIsFirst = false;
 		}
 		if (this.getSubheader()) {

@@ -6,12 +6,14 @@
 .sapMObjectAttributeDiv .sapMObjectAttributeTitle,
 .sapMObjectAttributeDiv .sapMObjectAttributeText {
 	font-size: .875rem;
+	color: @sapUiContentLabelColor;
 }
 
 .sapMObjectAttributeActive {
 	pointer-events: none;
 }
 
+.sapMListTbl .sapMObjectAttributeActive .sapMText,
 .sapMObjectAttributeActive .sapMText {
 	color: @sapUiLink;
 	cursor: pointer;
@@ -38,4 +40,10 @@
 
 .sapMOH .sapMObjectAttributeText > .sapMText {
 	vertical-align: bottom;
+}
+
+html[data-sap-ui-browser ^= "ie"], html[data-sap-ui-browser^="ed"] {
+	.sapMObjectAttributeDiv {
+		padding: 0.125rem 0.125rem 0.125rem 0.125rem;
+	}
 }

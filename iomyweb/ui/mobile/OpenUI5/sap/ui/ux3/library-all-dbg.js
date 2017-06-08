@@ -926,7 +926,7 @@ sap.ui.define("sap/ui/ux3/ExactListRenderer",['jquery.sap.global'],
 			if (bActiveTitle) {
 				rm.write("<span class=\"sapUiUx3ExactLstHeadTopIco\"></span>");
 			}
-			rm.write("</span></h3>");
+			rm.write("</h3>");
 	    } else {
 			// render the header content for non-top list
 			rm.write("<h3 id=\"" + oControl.getId() + "-head-txt\" class=\"sapUiUx3ExactLstHeadTxt\"");
@@ -1214,7 +1214,7 @@ sap.ui.define("sap/ui/ux3/FeedChunkRenderer",['jquery.sap.global'],
 		rm.write('<img id=' + sMyId + '-thumb');
 		var sThumbnail = oChunk.getThumbnailSrc();
 		if (!sThumbnail) {
-			sThumbnail = jQuery.sap.getModulePath("sap.ui.ux3.themes." + sap.ui.getCore().getConfiguration().getTheme(), sap.ui.core.theming.Parameters.get('sapUiFeedPersonPlaceholder'));
+			sThumbnail = sap.ui.core.theming.Parameters._getThemeImage('sapUiFeedPersonPlaceholder');
 		}
 		rm.writeAttributeEscaped('src', sThumbnail);
 		rm.writeAttributeEscaped('alt', oChunk.getSender());
@@ -1224,9 +1224,7 @@ sap.ui.define("sap/ui/ux3/FeedChunkRenderer",['jquery.sap.global'],
 		// text (starting with sender)
 		rm.write('<DIV class= "sapUiFeedChunkText" >');
 		rm.write('<a id=' + sMyId + '-sender ');
-		/* eslint-disable no-script-url */
-		rm.writeAttribute('href', 'javascript:void(0);');
-		/* eslint-enable no-script-url */
+		rm.writeAttribute('href', '#');
 		rm.write('>');
 		rm.writeEscaped(oChunk.getSender());
 		rm.write('</a> ');
@@ -1323,9 +1321,7 @@ sap.ui.define("sap/ui/ux3/FeedChunkRenderer",['jquery.sap.global'],
 			if (/^@/.test(sWord)) {
 				// @-reference
 				rm.write('<a id=' + oChunk.getId() + '-Ref' + i);
-				/* eslint-disable no-script-url */
-				rm.writeAttribute('href', 'javascript:void(0);');
-				/* eslint-enable no-script-url */
+				rm.writeAttribute('href', '#');
 				rm.write('>');
 				rm.writeEscaped(sWord, true);
 				rm.write('</a>', sSpace);
@@ -1374,9 +1370,7 @@ sap.ui.define("sap/ui/ux3/FeedChunkRenderer",['jquery.sap.global'],
 
 			if (iLength > oChunk.maxComments) {
 				rm.write('<a id=' + oChunk.getId() + '-all ');
-				/* eslint-disable no-script-url */
-				rm.writeAttribute('href', 'javascript:void(0);');
-				/* eslint-enable no-script-url */
+				rm.writeAttribute('href', '#');
 				rm.write('>');
 				if (!oChunk.allComments) {
 					rm.write(oChunk.rb.getText('FEED_ALL_COMMENTS'));
@@ -1431,9 +1425,7 @@ if ( !jQuery.sap.isDeclared('sap.ui.ux3.FeedRenderer') ) {
  */
 
 jQuery.sap.declare('sap.ui.ux3.FeedRenderer'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
-jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-sap.ui.define("sap/ui/ux3/FeedRenderer",['jquery.sap.global'],
-	function(jQuery) {
+sap.ui.define("sap/ui/ux3/FeedRenderer",[], function() {
 	"use strict";
 
 
@@ -1567,11 +1559,10 @@ sap.ui.define("sap/ui/ux3/FeederRenderer",['jquery.sap.global'],
 		rm.write('<img id=' + oFeeder.getId() + '-thumb');
 		var sThumbnail = oFeeder.getThumbnailSrc();
 		if (!sThumbnail) {
-			sThumbnail = jQuery.sap.getModulePath("sap.ui.ux3.themes." + sap.ui.getCore().getConfiguration().getTheme(), sap.ui.core.theming.Parameters.get("sapUiFeedPersonPlaceholder"));
+			sThumbnail = sap.ui.core.theming.Parameters._getThemeImage("sapUiFeedPersonPlaceholder");
 		}
 		rm.writeAttributeEscaped('src', sThumbnail);
 
-	//	rm.writeAttributeEscaped('alt', oChunk.getSender());
 		rm.writeClasses();
 		rm.write('>');
 
@@ -1639,7 +1630,7 @@ sap.ui.define("sap/ui/ux3/NavigationBarRenderer",['jquery.sap.global'],
 		var sId = oControl.getId();
 
 		// write the HTML into the render manager
-		rm.addClass("sapUiUx3NavBar");
+		rm.addClass("sapUiUx3NavBar").addClass("sapUiUx3NavBarUpperCaseText");
 		if (oControl.getToplevelVariant()) {
 			rm.addClass("sapUiUx3NavBarToplevel");
 		}
@@ -1654,9 +1645,9 @@ sap.ui.define("sap/ui/ux3/NavigationBarRenderer",['jquery.sap.global'],
 		rm.write(">");
 		NavigationBarRenderer.renderItems(rm, oControl);
 		rm.write("</ul>");
-		rm.write("<a id='" + sId + "-ofb' tabindex='-1' role='presentation' class='sapUiUx3NavBarBack' href='javascript:void(0)'>&lt;&lt;</a>");
-		rm.write("<a id='" + sId + "-off' tabindex='-1' role='presentation' class='sapUiUx3NavBarForward' href='javascript:void(0)'>&gt;&gt;</a>");
-		rm.write("<a id='" + sId + "-ofl' tabindex='-1' role='presentation' class='sapUiUx3NavBarOverflowBtn' href='javascript:void(0)'>");
+		rm.write("<a id='" + sId + "-ofb' role='presentation' class='sapUiUx3NavBarBack' href='#'></a>");
+		rm.write("<a id='" + sId + "-off' role='presentation' class='sapUiUx3NavBarForward' href='#'></a>");
+		rm.write("<a id='" + sId + "-ofl' role='presentation' class='sapUiUx3NavBarOverflowBtn' href='#'>");
 		rm.writeIcon("sap-icon://overflow", [], { id : sId + "-oflt" });
 		rm.write("</a>");
 		rm.write("</nav>");
@@ -1705,9 +1696,7 @@ sap.ui.define("sap/ui/ux3/NavigationBarRenderer",['jquery.sap.global'],
 				// TL;DR: Not correct, won't fix - because it works and things might depend on the DOM
 				//        being this way.
 				oRm.writeElementData(item);
-				/* eslint-disable no-script-url */
-				oRm.writeAttributeEscaped("href", item.getHref() || "javascript:void(0);");
-				/* eslint-enable no-script-url */
+				oRm.writeAttributeEscaped("href", item.getHref() || '#');
 				oRm.write(" aria-setsize='" + iNoOfItems + "' aria-posinset='" + (i + 1) + "' role='menuitemradio' class='sapUiUx3NavBarItem'");
 				if (bIsSelected) {
 					oRm.write(" tabindex='0'");
@@ -1749,9 +1738,9 @@ if ( !jQuery.sap.isDeclared('sap.ui.ux3.NotificationBarRenderer') ) {
  */
 jQuery.sap.declare('sap.ui.ux3.NotificationBarRenderer'); // unresolved dependency added by SAPUI5 'AllInOne' Builder
 jQuery.sap.require('jquery.sap.global'); // unlisted dependency retained
-jQuery.sap.require('sap.ui.core.theming.Parameters'); // unlisted dependency retained
-sap.ui.define("sap/ui/ux3/NotificationBarRenderer",['jquery.sap.global', 'sap/ui/core/theming/Parameters'],
-	function(jQuery, Parameters) {
+jQuery.sap.require('sap.ui.core.Icon'); // unlisted dependency retained
+sap.ui.define("sap/ui/ux3/NotificationBarRenderer",['jquery.sap.global', 'sap/ui/core/Icon'],
+	function(jQuery, Icon) {
 	"use strict";
 
 
@@ -2165,28 +2154,28 @@ sap.ui.define("sap/ui/ux3/NotificationBarRenderer",['jquery.sap.global', 'sap/ui
 		 * Renders the notifier's icon. If there is no icon set a default icon is
 		 * used
 		 */
-		var fnWriteNotifierIcon = function(oRm, sUri, bMessageNotifier) {
+		var fnWriteNotifierIcon = function (oRm, sUri, bMessageNotifier) {
+			if (sUri == null || sUri == "") {
+				var icon = new Icon({
+					useIconTooltip: false
+				});
+				icon.addStyleClass("sapUiNotifierIcon");
+
+				if (bMessageNotifier) {
+					icon.setSrc("sap-icon://alert");
+				} else {
+					icon.setSrc("sap-icon://notification-2");
+				}
+				oRm.renderControl(icon);
+				return;
+			}
+
 			oRm.write("<img alt=\"\"");
 			oRm.addClass("sapUiNotifierIcon");
 			oRm.writeClasses();
 
-			var iconUrl = "";
-
-			if (sUri == null || sUri == "") {
-				var sThemeModuleName = "sap.ui.ux3.themes." + sap.ui.getCore().getConfiguration().getTheme();
-				if (bMessageNotifier) {
-					iconUrl = jQuery.sap.getModulePath(sThemeModuleName, "/img/notification_bar/alert_white_24.png");
-				} else {
-					iconUrl = jQuery.sap.getModulePath(sThemeModuleName, "/img/notification_bar/notification_24.png");
-				}
-			} else {
-				iconUrl = sUri;
-			}
-
-			oRm.writeAttributeEscaped("src", iconUrl);
-			oRm.write(">");
-
-			oRm.write("</img>");
+			oRm.writeAttributeEscaped("src", sUri);
+			oRm.write("/>");
 		};
 
 		/**
@@ -2883,6 +2872,7 @@ sap.ui.define("sap/ui/ux3/ShellPersonalization",['jquery.sap.global', 'sap/ui/ba
 	 * @param oShell
 	 * @public
 	 * @experimental Since 1.0. The Shell-features Personalization, Color Picker and “Inspect”-Tool are only experimental work and might change or disappear in future versions.
+	 * @deprecated Since 1.36. This class was never released for productive use and will never be.
 	 * @alias sap.ui.ux3.ShellPersonalization
 	 */
 	var ShellPersonalization = EventProvider.extend("sap.ui.ux3.ShellPersonalization", {
@@ -3156,15 +3146,21 @@ sap.ui.define("sap/ui/ux3/ShellPersonalization",['jquery.sap.global', 'sap/ui/ba
 			this.oBgImgHtml = new sap.ui.core.HTML(sId + "bgImageHolder", {
 				preferDOM:true,
 				content:"<div id='" + sId + "bgImageHolder' class='sapUiUx3ShellP13nImgHolder'><img id='" + sId + "bgImageImg' src='"
-				+ (this.oTransientSettings.sBackgroundImageSrc ? this.oTransientSettings.sBackgroundImageSrc : sap.ui.resource('sap.ui.core', 'themes/base/img/1x1.gif')) + "'/></div>"}
+				+ (this.oTransientSettings.sBackgroundImageSrc ?
+						jQuery.sap.encodeHTML(this.oTransientSettings.sBackgroundImageSrc)
+						: sap.ui.resource('sap.ui.core', 'themes/base/img/1x1.gif')) + "'/></div>"}
 			);
 
 			this.oBgImgOpacitySlider = new c.Slider({
-				value:(this.oTransientSettings.fBgImgOpacity !== undefined ? 100 - this.oTransientSettings.fBgImgOpacity * 100 : 100 - ShellPersonalization.getOriginalSettings().fBgImgOpacity * 100),
+				value:(this.oTransientSettings.fBgImgOpacity !== undefined ?
+						100 - this.oTransientSettings.fBgImgOpacity * 100
+						: 100 - ShellPersonalization.getOriginalSettings().fBgImgOpacity * 100),
 				liveChange:jQuery.proxy(this._handleBgImageOpacitySliderChange,this)
 			});
 			this.oSidebarOpacitySlider = new c.Slider({
-				value:(this.oTransientSettings.fSidebarOpacity !== undefined ? 100 - this.oTransientSettings.fSidebarOpacity * 100 : 100 - ShellPersonalization.getOriginalSettings().fSidebarOpacity * 100),
+				value:(this.oTransientSettings.fSidebarOpacity !== undefined ?
+						100 - this.oTransientSettings.fSidebarOpacity * 100
+						: 100 - ShellPersonalization.getOriginalSettings().fSidebarOpacity * 100),
 				liveChange:jQuery.proxy(this._handleSidebarOpacitySliderChange,this)
 			});
 
@@ -3176,10 +3172,14 @@ sap.ui.define("sap/ui/ux3/ShellPersonalization",['jquery.sap.global', 'sap/ui/ba
 			var that = this;
 			oBgColorBtn.attachPress(function(){
 				if (!that.oBgColorPicker.isOpen()) {
-					that.oBgColorPicker.open(sap.ui.ux3.ShellColorPicker.parseCssRgbString(that.getTransientSettingsWithDefaults().sBgColor), sap.ui.core.Popup.Dock.BeginTop, sap.ui.core.Popup.Dock.BeginBottom, that.shell.getDomRef("bgColor"));
+					that.oBgColorPicker.open(sap.ui.ux3.ShellColorPicker.parseCssRgbString(that.getTransientSettingsWithDefaults().sBgColor),
+							sap.ui.core.Popup.Dock.BeginTop, sap.ui.core.Popup.Dock.BeginBottom, that.shell.getDomRef("bgColor"));
 				}
 			});
-			this.oBgPreviewHtml = new sap.ui.core.HTML({preferDom:true,content:"<div id='" + this.shell.getId() + "-bgColor' style='background-color:" + oSettingsWithDefaults.sBgColor + "' class='sapUiUx3ShellColorPickerPreview'></div>"});
+			this.oBgPreviewHtml = new sap.ui.core.HTML({
+				preferDom:true,
+				content:"<div id='" + this.shell.getId() + "-bgColor' style='background-color:" + jQuery.sap.encodeHTML(oSettingsWithDefaults.sBgColor) + "' class='sapUiUx3ShellColorPickerPreview'></div>"
+			});
 
 			var oBgTab = new sap.ui.commons.Tab().setText("Background").addContent(new c.layout.MatrixLayout({layoutFixed:false})
 				.createRow(new c.Label({text:"Background Image:"}), this.oBgImgHtml)
@@ -3193,11 +3193,17 @@ sap.ui.define("sap/ui/ux3/ShellPersonalization",['jquery.sap.global', 'sap/ui/ba
 
 			/* build the second tab */
 
-			this.oByDStyleCb = new c.CheckBox({text:"ByDesign-style Header Bar",checked:this.oTransientSettings.bByDStyle,change:jQuery.proxy(this._handleByDStyleChange,this)});
+			this.oByDStyleCb = new c.CheckBox({
+				text:"ByDesign-style Header Bar",
+				checked:this.oTransientSettings.bByDStyle,change:jQuery.proxy(this._handleByDStyleChange,this)
+			});
 			this.oHdrImgHtml = new sap.ui.core.HTML(sId + "hdrImageHolder", {
 				preferDOM:true,
 				content:"<div id='" + sId + "hdrImageHolder' class='sapUiUx3ShellP13nImgHolder'><img id='" + sId + "hdrImageImg' src='"
-				+ (this.oTransientSettings.sHeaderImageSrc ? this.oTransientSettings.sHeaderImageSrc : sap.ui.resource('sap.ui.core', 'themes/base/img/1x1.gif')) + "'/></div>"}
+				+ (this.oTransientSettings.sHeaderImageSrc ?
+						jQuery.sap.encodeHTML(this.oTransientSettings.sHeaderImageSrc)
+						: sap.ui.resource('sap.ui.core', 'themes/base/img/1x1.gif'))
+				+ "'/></div>"}
 			);
 
 			this.oLineColorPicker = new sap.ui.ux3.ShellColorPicker(sId + "lineColorPicker");
@@ -3208,16 +3214,19 @@ sap.ui.define("sap/ui/ux3/ShellPersonalization",['jquery.sap.global', 'sap/ui/ba
 			var that = this;
 			oLineColorBtn.attachPress(function(){
 				if (!that.oLineColorPicker.isOpen()) {
-					that.oLineColorPicker.open(sap.ui.ux3.ShellColorPicker.parseCssRgbString(that.getTransientSettingsWithDefaults().sLineColor), sap.ui.core.Popup.Dock.BeginTop, sap.ui.core.Popup.Dock.BeginBottom, that.shell.getDomRef("lineColor"));
+					that.oLineColorPicker.open(sap.ui.ux3.ShellColorPicker.parseCssRgbString(that.getTransientSettingsWithDefaults().sLineColor),
+							sap.ui.core.Popup.Dock.BeginTop, sap.ui.core.Popup.Dock.BeginBottom, that.shell.getDomRef("lineColor"));
 				}
 			});
-			this.oLinePreviewHtml = new sap.ui.core.HTML({preferDom:true,content:"<div id='" + this.shell.getId() + "-lineColor' style='background-color:" + oSettingsWithDefaults.sLineColor + "' class='sapUiUx3ShellColorPickerPreview'></div>"});
+			this.oLinePreviewHtml = new sap.ui.core.HTML({
+				preferDom: true,
+				content: "<div id='" + this.shell.getId() + "-lineColor' style='background-color:" + jQuery.sap.encodeHTML(oSettingsWithDefaults.sLineColor)
+				+ "' class='sapUiUx3ShellColorPickerPreview'></div>"});
 
 			var oHdrTab = new sap.ui.commons.Tab().setText("Header Bar").addContent(new c.layout.MatrixLayout({layoutFixed:false})
-				//.createRow(this.oByDStyleCb)
 				.createRow(new c.Label({text:"Line Color (ByD-style only):"}), new c.layout.MatrixLayoutCell().addContent(this.oLinePreviewHtml).addContent(oLineColorBtn))
 				.createRow(null)
-				.createRow(new c.Label({text:"Header Image:"}),	this.oHdrImgHtml)
+				.createRow(new c.Label({text:"Header Image:"}), this.oHdrImgHtml)
 			);
 			tabs.addTab(oHdrTab);
 
@@ -3227,13 +3236,19 @@ sap.ui.define("sap/ui/ux3/ShellPersonalization",['jquery.sap.global', 'sap/ui/ba
 			this.oLogoImgHtml = new sap.ui.core.HTML(sId + "logoImageHolder", {
 				preferDOM:true,
 				content:"<div id='" + sId + "logoImageHolder' class='sapUiUx3ShellP13nImgHolder'><img id='" + sId + "logoImageImg' src='"
-				+ (this.oTransientSettings.sLogoImageSrc ? this.oTransientSettings.sLogoImageSrc : sap.ui.resource('sap.ui.core', 'themes/base/img/1x1.gif')) + "'/></div>"}
+				+ (this.oTransientSettings.sLogoImageSrc ?
+						jQuery.sap.encodeHTML(this.oTransientSettings.sLogoImageSrc)
+						: sap.ui.resource('sap.ui.core', 'themes/base/img/1x1.gif'))
+				+ "'/></div>"}
 			);
 			this.oLogoRbg = new c.RadioButtonGroup()
 				.addItem(new sap.ui.core.Item({text:"Left",key:"left"}))
 				.addItem(new sap.ui.core.Item({text:"Center",key:"center"}))
 				.attachSelect(this._handleLogoAlignChange, this);
-			this.oUseLogoSizeCb = new c.CheckBox({text:"Use original image size",checked:this.oTransientSettings.bUseLogoSize,change:jQuery.proxy(this._handleUseLogoSizeChange,this)});
+			this.oUseLogoSizeCb = new c.CheckBox({
+				text:"Use original image size",
+				checked:this.oTransientSettings.bUseLogoSize,change:jQuery.proxy(this._handleUseLogoSizeChange,this)
+			});
 			var oLogoTab = new sap.ui.commons.Tab().setText("Logo").addContent(new c.layout.MatrixLayout({layoutFixed:false})
 				.createRow(new c.Label({text:"Logo Image:"}), this.oLogoImgHtml)
 				.createRow(new c.Label({text:"Position:"}), this.oLogoRbg)
@@ -3278,18 +3293,27 @@ sap.ui.define("sap/ui/ux3/ShellPersonalization",['jquery.sap.global', 'sap/ui/ba
 		var sId = this.shell.getId() + "-p13n_";
 
 		this.oBgImgHtml.setContent("<div id='" + sId + "bgImageHolder' class='sapUiUx3ShellP13nImgHolder'><img id='" + sId + "bgImageImg' src='"
-				+ (oActualSettings.sBackgroundImageSrc ? oActualSettings.sBackgroundImageSrc : sap.ui.resource('sap.ui.core', 'themes/base/img/1x1.gif')) + "'/></div>");
+				+ (oActualSettings.sBackgroundImageSrc ?
+						jQuery.sap.encodeHTML(oActualSettings.sBackgroundImageSrc)
+						: sap.ui.resource('sap.ui.core', 'themes/base/img/1x1.gif'))
+				+ "'/></div>");
 		this.oBgImgOpacitySlider.setValue(100 - oActualSettings.fBgImgOpacity * 100);
 		this.oSidebarOpacitySlider.setValue(100 - oActualSettings.fSidebarOpacity * 100);
 
 		this.oByDStyleCb.setChecked(oActualSettings.bByDStyle);
 		this.oHdrImgHtml.setContent("<div id='" + sId + "hdrImageHolder' class='sapUiUx3ShellP13nImgHolder'><img id='" + sId + "hdrImageImg' src='"
-				+ (oActualSettings.sHeaderImageSrc ? oActualSettings.sHeaderImageSrc : sap.ui.resource('sap.ui.core', 'themes/base/img/1x1.gif')) + "'/></div>");
+				+ (oActualSettings.sHeaderImageSrc ?
+						jQuery.sap.encodeHTML(oActualSettings.sHeaderImageSrc)
+						: sap.ui.resource('sap.ui.core', 'themes/base/img/1x1.gif'))
+				+ "'/></div>");
 
 		this.oLogoRbg.setSelectedIndex((oActualSettings.sLogoAlign == "center") ? 1 : 0);
 		this.oUseLogoSizeCb.setChecked(oActualSettings.bUseLogoSize);
 		this.oLogoImgHtml.setContent("<div id='" + sId + "logoImageHolder' class='sapUiUx3ShellP13nImgHolder'><img id='" + sId + "logoImageImg' src='"
-				+ (oActualSettings.sLogoImageSrc ? oActualSettings.sLogoImageSrc : sap.ui.resource('sap.ui.core', 'themes/base/img/1x1.gif')) + "'/></div>");
+				+ (oActualSettings.sLogoImageSrc ?
+						jQuery.sap.encodeHTML(oActualSettings.sLogoImageSrc)
+						: sap.ui.resource('sap.ui.core', 'themes/base/img/1x1.gif'))
+				+ "'/></div>");
 	};
 
 
@@ -3342,19 +3366,13 @@ sap.ui.define("sap/ui/ux3/ShellPersonalization",['jquery.sap.global', 'sap/ui/ba
 	};
 
 	ShellPersonalization.prototype.applyBgImage = function(sBgCssImg, sBgImgSrc) {
-		// var sForcedImgSrc = sBgImgSrc ? sBgImgSrc : sBgCssImg.substring(4, sBgCssImg.length - 1);
 		sBgCssImg = sBgCssImg ? sBgCssImg : "";
 		sBgImgSrc = sBgImgSrc ? sBgImgSrc : ShellPersonalization.TRANSPARENT_1x1;
 
 		var oBgImgRef = this.shell.getDomRef("bgImg");
-		// var oBgImgPreviewRef = this.shell.getDomRef("p13n_bgImageImg");
 
 		oBgImgRef.style.backgroundImage = sBgCssImg;
 		oBgImgRef.src = sBgImgSrc;
-
-		/* if (oBgImgPreviewRef) {
-			// TODO: understand why this code exists   oBgImgPreviewRef.src = sForcedImgSrc;
-		} */
 	};
 
 	ShellPersonalization.prototype._handleHeaderImageChange = function(dataUrl, bPersistImmediately) {
@@ -3796,7 +3814,7 @@ sap.ui.define("sap/ui/ux3/ShellRenderer",['jquery.sap.global', 'sap/ui/core/Icon
 
 		// write separator between standard tools and app tools, if required
 		if (bStandardToolPresent && (aToolItems.length > 0)) {
-			rm.write("<hr id='" + sId + "-tp-separator' class='sapUiUx3ShellToolSep'></hr>");
+			rm.write("<hr id='" + sId + "-tp-separator' class='sapUiUx3ShellToolSep'/>");
 		}
 
 		// write app tools
@@ -3806,7 +3824,7 @@ sap.ui.define("sap/ui/ux3/ShellRenderer",['jquery.sap.global', 'sap/ui/core/Icon
 			for (var i = 0; i < aToolItems.length; i++) {
 				var oToolItem = aToolItems[i];
 				if (oToolItem instanceof sap.ui.core.SeparatorItem) { // TODO: not possible
-					rm.write("<hr class='sapUiUx3ShellToolSep'></hr>");
+					rm.write("<hr class='sapUiUx3ShellToolSep'/>");
 				} else {
 					// regular item
 					rm.write("<a id='" + sId + "-tool-" + oToolItem.getId() + "' class='sapUiUx3ShellTool'");
@@ -4423,14 +4441,14 @@ sap.ui.define("sap/ui/ux3/library",['jquery.sap.global',
 	 * @namespace
 	 * @name sap.ui.ux3
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.ux3",
-		version: "1.34.9",
+		version: "1.44.14",
 		dependencies : ["sap.ui.core","sap.ui.commons"],
 		types: [
 			"sap.ui.ux3.ActionBarSocialActions",
@@ -4824,10 +4842,11 @@ sap.ui.define("sap/ui/ux3/ActionBar",['jquery.sap.global', 'sap/ui/core/Control'
 	 *
 	 * When using this control, please be aware that it fulfills rather specific requirements: it has been designed for and is used within composite controls QuickView and ThingInspector.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Toolbar</code> or <code>sap.m.OverflowToolbar</code> control.
 	 * @alias sap.ui.ux3.ActionBar
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -6365,11 +6384,12 @@ sap.ui.define("sap/ui/ux3/Collection",['jquery.sap.global', 'sap/ui/core/Element
 	 * @class
 	 * Collection
 	 * @extends sap.ui.core.Element
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.9.0
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.Collection
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -6568,11 +6588,12 @@ sap.ui.define("sap/ui/ux3/CollectionInspector",['jquery.sap.global', 'sap/ui/cor
 	 * @class
 	 * CollectionInspector
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.9.0
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.CollectionInspector
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -7198,10 +7219,11 @@ sap.ui.define("sap/ui/ux3/DataSet",['jquery.sap.global', 'sap/ui/core/Control', 
 	 * @class
 	 * DataSet
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.DataSet
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -7974,10 +7996,11 @@ sap.ui.define("sap/ui/ux3/DataSetItem",['jquery.sap.global', 'sap/ui/core/Elemen
 	 * @class
 	 * DataSet Item
 	 * @extends sap.ui.core.Element
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.DataSetItem
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -8086,10 +8109,11 @@ sap.ui.define("sap/ui/ux3/DataSetSimpleView",['jquery.sap.global', 'sap/ui/core/
 	 * DataSetSimpleView provides a simple view example for DataSet usage.
 	 * @extends sap.ui.core.Control
 	 * @implements sap.ui.ux3.DataSetView
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.DataSetSimpleView
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -8202,7 +8226,7 @@ sap.ui.define("sap/ui/ux3/DataSetSimpleView",['jquery.sap.global', 'sap/ui/core/
 	/**
 	 * Eventhandler for the selection of an Item
 	 *
-	 * @param {event} oEvent SelectionChanged event
+	 * @param {sap.ui.base.Event} oEvent SelectionChanged event
 	 * @protected
 	 */
 	DataSetSimpleView.prototype.handleSelection = function(oEvent) {
@@ -8280,14 +8304,21 @@ sap.ui.define("sap/ui/ux3/DataSetSimpleView",['jquery.sap.global', 'sap/ui/core/
 	 * @protected
 	 */
 	DataSetSimpleView.prototype.updateView = function(aDiff) {
+		var i;
 		//if view is not rendered no Dom update is necessary
 		if (!this.getDomRef()) {
+			//just delete all items marked for delete
+			for (i = 0; i < aDiff.length; i++) {
+				if (aDiff[i].type === "delete") {
+					aDiff[i].item.destroy();
+				}
+			}
 			return;
 		}
 		var rm = sap.ui.getCore().createRenderManager(),
 			iLastLength = this.items.length;
 
-		for (var i = 0; i < aDiff.length; i++) {
+		for (i = 0; i < aDiff.length; i++) {
 			var oItem = aDiff[i].item;
 			var iIndex = aDiff[i].index;
 
@@ -8608,12 +8639,13 @@ sap.ui.define("sap/ui/ux3/ExactArea",['jquery.sap.global', 'sap/ui/commons/Toolb
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @experimental Since version 1.6.
 	 * API is not yet finished and might change completely
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.ExactArea
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -8695,10 +8727,11 @@ sap.ui.define("sap/ui/ux3/ExactAttribute",['jquery.sap.global', 'sap/ui/core/Ele
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.ExactAttribute
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -8787,7 +8820,7 @@ sap.ui.define("sap/ui/ux3/ExactAttribute",['jquery.sap.global', 'sap/ui/core/Ele
 	ExactAttribute._MINWIDTH = 70;
 	ExactAttribute._MAXWIDTH = 500;
 
-	ExactAttribute.prototype.onInit = function (){
+	ExactAttribute.prototype.init = function (){
 		this._getAttributesCallCount = 0;
 	};
 
@@ -8984,7 +9017,7 @@ sap.ui.define("sap/ui/ux3/ExactAttribute",['jquery.sap.global', 'sap/ui/core/Ele
 	 * @param {string} sPropertyName
 	 * @param {object} oValue
 	 * @param {boolean} bSuppressRerendering
-	 * @see sap.ui.core.Element.prototype.setProperty
+	 * @see sap.ui.base.ManagedObject.prototype.setProperty
 	 * @protected
 	 */
 	ExactAttribute.prototype.setProperty = function(sPropertyName, oValue, bSuppressRerendering) {
@@ -9093,10 +9126,11 @@ sap.ui.define("sap/ui/ux3/ExactList",['jquery.sap.global', 'sap/ui/commons/ListB
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.ExactList
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -10123,7 +10157,6 @@ sap.ui.define("sap/ui/ux3/ExactList",['jquery.sap.global', 'sap/ui/commons/ListB
 					}, function(jRef){
 						//Update BlindLayer of popup
 						jListContRef.addClass("sapUiUx3ExactLstExpandedBL");
-						oList._oPopup._updateBlindLayer();
 						//Adapt the scroll behavior and set the focus
 						adaptScollBehavior(oList);
 						oList.getFocusDomRef().focus();
@@ -10384,11 +10417,6 @@ sap.ui.define("sap/ui/ux3/ExactList",['jquery.sap.global', 'sap/ui/commons/ListB
 			var iWidth = oList.$("cntnt").height() - 50/*Space for Header Action Buttons - Maybe provide theme parameter in future*/;
 			var $txt = oList.$("head-txt");
 			$txt.css("width", iWidth + "px");
-			if (jQuery("html").attr("data-sap-ui-browser") == "ie8") {
-				//A text with 90px width is correct aligned when bottom:75px is set
-				var iBottom = 75 - (90 - iWidth);
-				$txt.css("bottom", iBottom + "px");
-			}
 		}
 		var aSubLists = oList.getSubLists();
 		for (var i = 0; i < aSubLists.length; i++) {
@@ -10625,10 +10653,11 @@ sap.ui.define("sap/ui/ux3/FacetFilter",['jquery.sap.global', 'sap/ui/core/Contro
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.FacetFilter</code> control.
 	 * @alias sap.ui.ux3.FacetFilter
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -10689,10 +10718,11 @@ sap.ui.define("sap/ui/ux3/FacetFilterList",['jquery.sap.global', 'sap/ui/commons
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.FacetFilter</code> control.
 	 * @alias sap.ui.ux3.FacetFilterList
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -11013,12 +11043,13 @@ sap.ui.define("sap/ui/ux3/Feeder",['jquery.sap.global', 'sap/ui/commons/Button',
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @experimental Since version 1.2.
 	 * The whole Feed/Feeder API is still under discussion, significant changes are likely. Especially text presentation (e.g. @-references and formatted text) is not final. Also the Feed model topic is still open.
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.FeedInput</code> control.
 	 * @alias sap.ui.ux3.Feeder
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -11183,11 +11214,6 @@ sap.ui.define("sap/ui/ux3/Feeder",['jquery.sap.global', 'sap/ui/commons/Button',
 			this.oSendButton.setEnabled(true);
 		}
 
-		//Clean input so we avoid having invisible DOM content
-	//	if(!this.oInput.text()){
-	//		this.oInput.empty();
-	//	}
-
 	};
 
 	/**
@@ -11350,10 +11376,11 @@ sap.ui.define("sap/ui/ux3/NavigationBar",['jquery.sap.global', 'sap/ui/core/Cont
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.IconTabBar</code>, <code>sap.m.TabContainer</code> or <code>sap.uxap.ObjectPageLayout</code> control.
 	 * @alias sap.ui.ux3.NavigationBar
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -11365,7 +11392,13 @@ sap.ui.define("sap/ui/ux3/NavigationBar",['jquery.sap.global', 'sap/ui/core/Cont
 			/**
 			 * Defines whether the navigation bar shall have top-level appearance
 			 */
-			toplevelVariant : {type : "boolean", group : "Misc", defaultValue : false}
+			toplevelVariant: {type: "boolean", group: "Misc", defaultValue: false},
+
+			/**
+			 * Sets the appearance of the menu items in the overflow menu to uppercase
+			 * @since 1.36
+			 */
+			overflowItemsToUpperCase: {type: "boolean", group: "Appearance", defaultValue: false}
 		},
 		defaultAggregation : "items",
 		aggregations : {
@@ -11529,6 +11562,8 @@ sap.ui.define("sap/ui/ux3/NavigationBar",['jquery.sap.global', 'sap/ui/core/Cont
 			this._checkOverflowIntervalId = null;
 		}
 
+		this._iSoredScrollPosition = this.$("list").scrollLeft();
+
 		if (!!sap.ui.Device.browser.firefox) { // TODO: feature detection... not used yet because of performance implications (may involve creating elements)
 			this.$().unbind("DOMMouseScroll", this._handleScroll);
 		} else {
@@ -11603,6 +11638,10 @@ sap.ui.define("sap/ui/ux3/NavigationBar",['jquery.sap.global', 'sap/ui/core/Cont
 			$NavBar.children().scrollTop(0);
 			$NavBar.scrollTop(0);
 		});
+
+		if (this._iSoredScrollPosition) {
+			this.$("list").scrollLeft(this._iSoredScrollPosition);
+		}
 	};
 
 
@@ -11635,6 +11674,10 @@ sap.ui.define("sap/ui/ux3/NavigationBar",['jquery.sap.global', 'sap/ui/core/Cont
 		this._handleActivation(oEvent);
 	};
 
+	NavigationBar.prototype.setOverflowItemsToUpperCase = function (bValue) {
+		this._getOverflowMenu().toggleStyleClass("sapUiUx3NavBarUpperCaseText", bValue);
+		return this.setProperty("overflowItemsToUpperCase", bValue);
+	};
 
 	NavigationBar.prototype._handleActivation = function(oEvent) {
 		var sTargetId = oEvent.target.id;
@@ -12186,10 +12229,11 @@ sap.ui.define("sap/ui/ux3/NavigationItem",['jquery.sap.global', 'sap/ui/core/Ite
 	 * @extends sap.ui.core.Item
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.IconTabBar</code>, <code>sap.m.TabContainer</code> or <code>sap.uxap.ObjectPageLayout</code> control.
 	 * @alias sap.ui.ux3.NavigationItem
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -12255,14 +12299,18 @@ sap.ui.define("sap/ui/ux3/NotificationBar",['jquery.sap.global', 'sap/ui/core/Co
 	 * @class
 	 * A NotificationBar is a "toolbar" that can be added to a page to show messages and notifications from the application.
 	 * Its position, height and width is inherited from the element that the notification bar is added to.
+	 * The NotificationBar uses position: fixed; to always stay at the bottom of the screen. This CSS may sometimes cause
+	 * issues when nested deeply inside other controls. To have a proper behavior of the NotificationBar use it as high
+	 * in the control hierarchy as possible.
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.7.0
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.MessagePopover</code> control.
 	 * @alias sap.ui.ux3.NotificationBar
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -13529,13 +13577,13 @@ sap.ui.define("sap/ui/ux3/NotificationBar",['jquery.sap.global', 'sap/ui/core/Co
 		};
 
 		/**
-		 * @param [boolean]
-		 *            {bAlwaysShow} if the toggler should be visible all the time
+		 * @param {boolean}
+		 *            bAlwaysShow if the toggler should be visible all the time
 		 *            set this parameter to <b>true</b>
 		 * @public
 		 * @since 1.22.11
 		 */
-		sap.ui.ux3.NotificationBar.prototype.setAlwaysShowToggler = function(bAlwaysShow) {
+		NotificationBar.prototype.setAlwaysShowToggler = function(bAlwaysShow) {
 			// set toggler always to visible if running on a mobile device
 			if (sap.ui.Device.browser.mobile) {
 				bAlwaysShow = true;
@@ -13586,10 +13634,11 @@ sap.ui.define("sap/ui/ux3/Notifier",['jquery.sap.global', 'sap/ui/commons/Callou
 	 * @extends sap.ui.core.Element
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.Notifier
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -13893,10 +13942,11 @@ sap.ui.define("sap/ui/ux3/Overlay",['jquery.sap.global', 'sap/ui/core/Control', 
 	 * @implements sap.ui.core.PopupInterface
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.Overlay
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -14302,10 +14352,11 @@ sap.ui.define("sap/ui/ux3/OverlayContainer",['jquery.sap.global', './Overlay', '
 	 * @extends sap.ui.ux3.Overlay
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.OverlayContainer
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -14459,10 +14510,11 @@ sap.ui.define("sap/ui/ux3/OverlayDialog",['jquery.sap.global', 'sap/ui/core/Inte
 	 * @class
 	 * Dialog implementation based on the Overlay. If used in a Shell it leaves the Tool-Palette, Pane-Bar and Header-Items accessible.
 	 * @extends sap.ui.ux3.Overlay
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.OverlayDialog
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -14610,8 +14662,8 @@ sap.ui.define("sap/ui/ux3/OverlayDialog",['jquery.sap.global', 'sap/ui/core/Inte
 			bAutoWidth = this.getWidth() === "auto",
 			bAutoHeight = this.getHeight() === "auto";
 
-		var contentWidth = bAutoWidth ? $overlay.width() / 2 : $content.width(),
-			contentHeight = bAutoHeight ? $overlay.height() / 2 : $content.height(),
+		var contentWidth = bAutoWidth ? Math.round($overlay.width() / 2) : $content.width(),
+			contentHeight = bAutoHeight ? Math.round($overlay.height() / 2) : $content.height(),
 			overlayWidth = $overlay.width(),
 			overlayHeight = $overlay.height();
 
@@ -14620,8 +14672,8 @@ sap.ui.define("sap/ui/ux3/OverlayDialog",['jquery.sap.global', 'sap/ui/core/Inte
 
 			$content.css("left", "0").css("right", "auto").css("top", "0").css("bottom", "auto").css("width", this.getWidth()).css("height", this.getHeight());
 
-			this.contentWidth = bAutoWidth ? $overlay.width() / 2 : $content.width();
-			this.contentHeight = bAutoHeight ? $overlay.height() / 2 : $content.height();
+			this.contentWidth = contentWidth;
+			this.contentHeight = contentHeight;
 			this.overlayWidth = overlayWidth;
 			this.overlayHeight = overlayHeight;
 
@@ -14630,10 +14682,10 @@ sap.ui.define("sap/ui/ux3/OverlayDialog",['jquery.sap.global', 'sap/ui/core/Inte
 			if (this.contentWidth < this.overlayWidth) {
 				$content.css("left", "50%");
 				$content.css("right", "auto");
-				$content.css("margin-left", ( -1) * this.contentWidth / 2 + "px");
+				$content.css("margin-left", Math.round(( -1) * this.contentWidth / 2) + "px");
 				$content.css("width",  bAutoHeight ? this.contentWidth : this.getWidth());
 				$close.css("right", "50%");
-				$close.css("margin-right", ( -1) * this.contentWidth / 2 - 10 + "px");
+				$close.css("margin-right", Math.round(( -1) * this.contentWidth / 2 - 10) + "px");
 			} else {
 				$content.css("left", "0");
 				$content.css("right", "10px");
@@ -14646,10 +14698,10 @@ sap.ui.define("sap/ui/ux3/OverlayDialog",['jquery.sap.global', 'sap/ui/core/Inte
 			if (this.contentHeight < this.overlayHeight - 30/*Bottom Border (NotificationBar)*/) {
 				$content.css("top", "50%");
 				$content.css("bottom", "auto");
-				$content.css("margin-top", ( -1) * this.contentHeight / 2 + "px");
+				$content.css("margin-top", Math.round(( -1) * this.contentHeight / 2) + "px");
 				$content.css("height",  bAutoHeight ? this.contentHeight : this.getHeight());
 				$close.css("top", "50%");
-				$close.css("margin-top", ( -1) * this.contentHeight / 2 - 10 + "px");
+				$close.css("margin-top", Math.round(( -1) * this.contentHeight / 2 - 10) + "px");
 			} else {
 				$content.css("top", "10px");
 				$content.css("bottom", "30px");
@@ -14773,10 +14825,11 @@ sap.ui.define("sap/ui/ux3/QuickView",['jquery.sap.global', 'sap/ui/commons/Callo
 	 * @extends sap.ui.commons.CalloutBase
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.QuickView</code> control.
 	 * @alias sap.ui.ux3.QuickView
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -15298,10 +15351,11 @@ sap.ui.define("sap/ui/ux3/Shell",['jquery.sap.global', 'sap/ui/commons/Menu', 's
 	 * The Ux3 GoldReflection Shell, which is an application frame with navigation capabilities.
 	 * It is supposed to be added to a direct child of the BODY tag of a page and there should be no other parts of the page consuming space outside the Shell.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.Shell
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -15957,7 +16011,7 @@ sap.ui.define("sap/ui/ux3/Shell",['jquery.sap.global', 'sap/ui/commons/Menu', 's
 	 * sap.ui.ux3.Shell.PANE_OVERFLOW_BUTTON_MAX_HEIGHT while the current height is saved in
 	 * sap.ui.ux3.Shell.PANE_OVERFLOW_BUTTON_HEIGHT
 	 *
-	 * @returns {bool} Returns whether a change to the button height has been made.
+	 * @returns {boolean} Returns whether a change to the button height has been made.
 	 */
 	Shell.prototype._adaptOverflowButtonHeight = function() {
 		var $Button = this.$("paneBarOverflowButton");
@@ -15997,7 +16051,7 @@ sap.ui.define("sap/ui/ux3/Shell",['jquery.sap.global', 'sap/ui/commons/Menu', 's
 	 * Changes the overflow button from the standard text to the currently active overflowing
 	 * item and back.
 	 *
-	 * @returns {bool} Returns whether a change to the button height has been made.
+	 * @returns {boolean} Returns whether a change to the button height has been made.
 	 */
 	Shell.prototype._changeOverflowButton = function() {
 		// Only if this._sOpenPaneId is not null, an overflow item could be active
@@ -16483,7 +16537,7 @@ sap.ui.define("sap/ui/ux3/Shell",['jquery.sap.global', 'sap/ui/commons/Menu', 's
 	(function() {
 
 		Shell._SHELL_OFFSET_RIGHT = 0;   // can be changed during runtime
-	//	sap.ui.ux3.Shell._PANE_OUTER_DISTANCE = 40; //TODO: Theme Parameter?
+	//	Shell._PANE_OUTER_DISTANCE = 40; //TODO: Theme Parameter?
 
 		Shell.prototype._closePane = function(fCompleteCallback) {
 			if (!this._sOpenPaneId) {
@@ -17957,10 +18011,11 @@ sap.ui.define("sap/ui/ux3/ThingAction",['jquery.sap.global', 'sap/ui/core/Elemen
 	 * @class
 	 * Thing Action for Swatch, QuickView, Thinginspector
 	 * @extends sap.ui.core.Element
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.ThingAction
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -18045,10 +18100,11 @@ sap.ui.define("sap/ui/ux3/ThingGroup",['jquery.sap.global', 'sap/ui/core/Element
 	 * @class
 	 * Thing Group Area
 	 * @extends sap.ui.core.Element
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.ThingGroup
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -18114,11 +18170,12 @@ sap.ui.define("sap/ui/ux3/ThingViewer",['jquery.sap.global', 'sap/ui/core/Contro
 	 * ThingViewer: Same as ThingInspector but decoupled from the Overlay and the ActionBar.
 	 * The control can be added to a Parent container that has a defined width. The ThingViewer fill the whole container. If the parent container has no width defined the control will not work properly.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.9.1
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.ThingViewer
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -18658,10 +18715,11 @@ sap.ui.define("sap/ui/ux3/ToolPopup",['jquery.sap.global', 'sap/ui/core/Control'
          *
          * @namespace
          * @author SAP SE
-         * @version 1.34.9
+         * @version 1.44.14
          *
          * @constructor
          * @public
+         * @deprecated Since version 1.38. Instead, use the <code>sap.m.Popup</code> control.
          * @alias sap.ui.ux3.ToolPopup
          * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
          */
@@ -18896,11 +18954,12 @@ sap.ui.define("sap/ui/ux3/ToolPopup",['jquery.sap.global', 'sap/ui/core/Control'
              * Checks if the ToolPopup already has a tabbable element.
              * If not, it's checked whether the fake-element should be used or if there is an element that could be focused instead.
              *
-             * @param {sap.ui.ux3.ToolPopup} that to get/set instance values
+             * @param {sap.ui.ux3.ToolPopup} context to get/set instance values
              * @returns {string} _sInitialFocusId that has been determined here
              * @private
              */
-            var _fnGetInitialFocus = function (that) {
+            var _fnGetInitialFocus = function (context) {
+                var that = context;
                 jQuery.sap.assert(!!that, "No ToolPopup instance given for _fnGetInitialFocus");
 
                 // if there is an initial focus it was already set to the Popup onBeforeRendering
@@ -18916,12 +18975,13 @@ sap.ui.define("sap/ui/ux3/ToolPopup",['jquery.sap.global', 'sap/ui/core/Control'
             /**
              * Determines the new element which will gain the focus.
              *
-             * @param {sap.ui.ux3.ToolPopup} that to get/set instance values
+             * @param {sap.ui.ux3.ToolPopup} context to get/set instance values
              * @private
              */
-            var _fnGetNewFocusElement = function (that) {
+            var _fnGetNewFocusElement = function (context) {
                 var oElement;
                 var oFocusControl;
+                var that = context;
                 var defaultFocusableElements = [that._mParameters.firstFocusable, that._mParameters.lastFocusable];
                 var aTabbables = jQuery(":sapTabbable", that.$()).get();
 
@@ -18958,9 +19018,25 @@ sap.ui.define("sap/ui/ux3/ToolPopup",['jquery.sap.global', 'sap/ui/core/Control'
              * @returns {Element|sap.ui.core.Element|Object|sap.ui.core.tmpl.Template}
              * @private
              */
-            function _fnGetFocusElementById(id) {
-                var domElement = sap.ui.getCore().byId(id);
-                return domElement;
+            function _fnGetFocusControlById(oToolPopup, id) {
+                var oControl,
+                    parent;
+
+                if (!id) {
+                    return null;
+                }
+
+                oControl = sap.ui.getCore().byId(id);
+
+                while (!oControl && oControl !== oToolPopup) {
+                    if (!id || !document.getElementById(id)) {
+                        return null;
+                    }
+                    parent = document.getElementById(id).parentNode;
+                    id = parent.id;
+                    oControl = sap.ui.getCore().byId(id);
+                }
+                return oControl;
             }
 
             /**
@@ -18971,7 +19047,7 @@ sap.ui.define("sap/ui/ux3/ToolPopup",['jquery.sap.global', 'sap/ui/core/Control'
              */
             ToolPopup.prototype.getFocusDomRef = function () {
                 var domRefId;
-                var focusElement = _fnGetFocusElementById(this._sInitialFocusId);
+                var focusElement = _fnGetFocusControlById(this, this._sInitialFocusId);
 
                 // always determine the best initial focus stuff because content might
                 // have changed in the mean time
@@ -18979,7 +19055,7 @@ sap.ui.define("sap/ui/ux3/ToolPopup",['jquery.sap.global', 'sap/ui/core/Control'
                 if (!focusElement) {
                     this._bFocusSet = false;
                     domRefId = _fnGetInitialFocus(this);
-                    focusElement = _fnGetFocusElementById(domRefId);
+                    focusElement = _fnGetFocusControlById(this, domRefId);
                 }
 
                 return focusElement ? focusElement.getDomRef() : this.getDomRef();
@@ -19496,6 +19572,7 @@ sap.ui.define("sap/ui/ux3/ToolPopup",['jquery.sap.global', 'sap/ui/core/Control'
                     sKey = "left";
 
                     if (oOpenerRect) {
+
                         if (isRTL) {
                             sKey = "right";
                             popupBorder = parseInt(oThis.$().css('border-right-width'), 10) || 0;
@@ -19754,7 +19831,8 @@ sap.ui.define("sap/ui/ux3/ToolPopup",['jquery.sap.global', 'sap/ui/core/Control'
                 return this;
             };
 
-            var fnChangeContent = function (that, sType) {
+            var fnChangeContent = function (context, sType) {
+                var that = context;
                 if (sType === "content") {
                     fnRenderContent(that);
                 } else if (sType === "buttons") {
@@ -19909,7 +19987,7 @@ sap.ui.define("sap/ui/ux3/ToolPopup",['jquery.sap.global', 'sap/ui/core/Control'
              * Adds an ID to the Popup that should be focusable as well when using <code>autoclose</code>.
              * Chaining is only possible if a valid type (string) is given.
              *
-             * @param {sap.ui.core.string} [sID] ID of the corresponding element that should be focusable as well
+             * @param {string} [sID] ID of the corresponding element that should be focusable as well
              * @since 1.19.0
              * @public
              * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
@@ -19932,7 +20010,7 @@ sap.ui.define("sap/ui/ux3/ToolPopup",['jquery.sap.global', 'sap/ui/core/Control'
              * Removes an ID to the Popup that should be focusable as well when using <code>autoclose</code>.
              * Chaining is only possible if a valid type (string) is given.
              *
-             * @param {sap.ui.core.string} [sID] ID of the corresponding element
+             * @param {string} [sID] ID of the corresponding element
              * @since 1.19.0
              * @public
              * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
@@ -20048,10 +20126,11 @@ sap.ui.define("sap/ui/ux3/ExactBrowser",['jquery.sap.global', 'sap/ui/commons/Bu
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.ExactBrowser
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -20450,12 +20529,13 @@ sap.ui.define("sap/ui/ux3/Feed",['jquery.sap.global', 'sap/ui/commons/DropdownBo
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @experimental Since version 1.2.
 	 * The whole Feed/Feeder API is still under discussion, significant changes are likely. Especially text presentation (e.g. @-references and formatted text) is not final. Also the Feed model topic is still open.
+	 * @deprecated Since version 1.38. Instead, use <b>any</b> <code>sap.ui.layout</code> container control.
 	 * @alias sap.ui.ux3.Feed
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -20622,14 +20702,13 @@ sap.ui.define("sap/ui/ux3/Feed",['jquery.sap.global', 'sap/ui/commons/DropdownBo
 			}).setParent(this);
 			this.oToolsButton.attachEvent('itemSelected', this.handleLtoolsButtonSelected, this); // attach event this way to have the right this-reference in handler
 
-			var sIcon = sap.ui.core.theming.Parameters.get('sap.ui.ux3.Feed:sapUiFeedToolsIconUrl');
-			var sIconHover = sap.ui.core.theming.Parameters.get('sap.ui.ux3.Feed:sapUiFeedToolsIconHoverUrl');
-			var sThemeModuleName = "sap.ui.ux3.themes." + sap.ui.getCore().getConfiguration().getTheme();
+			var sIcon = sap.ui.core.theming.Parameters._getThemeImage('sapUiFeedToolsIconUrl');
+			var sIconHover = sap.ui.core.theming.Parameters._getThemeImage('sapUiFeedToolsIconHoverUrl');
 			if (sIcon) {
-				this.oToolsButton.setProperty('icon', jQuery.sap.getModulePath(sThemeModuleName, sIcon), true);
+				this.oToolsButton.setProperty('icon', sIcon, true);
 			}
 			if (sIconHover) {
-				this.oToolsButton.setProperty('iconHovered', jQuery.sap.getModulePath(sThemeModuleName, sIconHover), true);
+				this.oToolsButton.setProperty('iconHovered', sIconHover, true);
 			}
 		}
 
@@ -20669,7 +20748,6 @@ sap.ui.define("sap/ui/ux3/Feed",['jquery.sap.global', 'sap/ui/commons/DropdownBo
 	Feed.prototype.handleFeederSubmit = function(oEvent){
 
 		var oDate = new Date();
-	//	var sDate = String(oDate.getFullYear()) + String(oDate.getMonth()) + String(oDate.getDate()) + String(oDate.getHours()) + String(oDate.getMinutes()) + String(oDate.getSeconds());
 		var sDate = String(oDate);
 
 		var oNewChunk = new sap.ui.ux3.FeedChunk(this.getId() + '-new-' + this.getChunks().length, {
@@ -20685,19 +20763,6 @@ sap.ui.define("sap/ui/ux3/Feed",['jquery.sap.global', 'sap/ui/commons/DropdownBo
 		this.insertChunk(oNewChunk, 0);
 		this.fireChunkAdded({chunk: oNewChunk});
 
-	};
-
-	/*
-	 * overwrite of setLive
-	 */
-	Feed.prototype.setLive = function(bLive) {
-		this.setProperty("live", bLive, true); //no re-rendering because only ToggleButton is changed
-
-		if (this.oLiveButton) {
-			// update ToggleButton
-			this.oLiveButton.setPressed(bLive);
-		}
-		return this;
 	};
 
 	/**
@@ -20956,12 +21021,13 @@ sap.ui.define("sap/ui/ux3/FeedChunk",['jquery.sap.global', 'sap/ui/commons/MenuB
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @experimental Since version 1.2.
 	 * The whole Feed/Feeder API is still under discussion, significant changes are likely. Especially text presentation (e.g. @-references and formatted text) is not final. Also the Feed model topic is still open.
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.FeedListItem</code> control.
 	 * @alias sap.ui.ux3.FeedChunk
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -21204,14 +21270,13 @@ sap.ui.define("sap/ui/ux3/FeedChunk",['jquery.sap.global', 'sap/ui/commons/MenuB
 			}).setParent(this);
 			this.oToolsButton.attachEvent('itemSelected', this.handleToolsButtonSelected, this); // attach event this way to have the right this-reference in handler
 
-			var sIcon = Parameters.get('sap.ui.ux3.Feed:sapUiFeedToolsIconUrl');
-			var sIconHover = Parameters.get('sap.ui.ux3.Feed:sapUiFeedToolsIconHoverUrl');
-			var sThemeModulePath = "sap.ui.ux3.themes." + sap.ui.getCore().getConfiguration().getTheme();
+			var sIcon = Parameters._getThemeImage('sapUiFeedToolsIconUrl');
+			var sIconHover = Parameters._getThemeImage('sapUiFeedToolsIconHoverUrl');
 			if (sIcon) {
-				this.oToolsButton.setProperty('icon', jQuery.sap.getModulePath(sThemeModulePath, sIcon), true);
+				this.oToolsButton.setProperty('icon', sIcon, true);
 			}
 			if (sIconHover) {
-				this.oToolsButton.setProperty('iconHovered', jQuery.sap.getModulePath(sThemeModulePath, sIconHover), true);
+				this.oToolsButton.setProperty('iconHovered', sIconHover, true);
 			}
 		}
 
@@ -21334,6 +21399,7 @@ sap.ui.define("sap/ui/ux3/FeedChunk",['jquery.sap.global', 'sap/ui/commons/MenuB
 			}
 		}
 
+		oEvent.preventDefault();
 		oEvent.stopPropagation(); //to prevent comment chunks to propagate event to parentChunk
 
 	};
@@ -21366,7 +21432,6 @@ sap.ui.define("sap/ui/ux3/FeedChunk",['jquery.sap.global', 'sap/ui/commons/MenuB
 	FeedChunk.prototype.handleCommentFeederSubmit = function(oEvent){
 
 		var oDate = new Date();
-	//	var sDate = String(oDate.getFullYear()) + String(oDate.getMonth()) + String(oDate.getDate()) + String(oDate.getHours()) + String(oDate.getMinutes()) + String(oDate.getSeconds());
 		var sDate = String(oDate);
 
 		var oNewComment = new FeedChunk(this.getId() + '-new-' + this.getComments().length, {
@@ -21658,10 +21723,11 @@ sap.ui.define("sap/ui/ux3/ThingInspector",['jquery.sap.global', './ActionBar', '
 	 * @class
 	 * Thing Inspector
 	 * @extends sap.ui.ux3.Overlay
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.ThingInspector
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -22405,12 +22471,13 @@ sap.ui.define("sap/ui/ux3/Exact",['jquery.sap.global', 'sap/ui/commons/Button', 
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @experimental Since version 1.2.
 	 * API is not yet finished and might change completely
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.ux3.Exact
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */

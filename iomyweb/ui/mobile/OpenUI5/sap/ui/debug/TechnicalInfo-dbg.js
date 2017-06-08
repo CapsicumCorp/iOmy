@@ -5,19 +5,23 @@
  */
 
 // Provides a popup with technical informations about the running SAPUI5 core
-sap.ui.define('sap/ui/debug/TechnicalInfo', ['jquery.sap.global', 'sap/ui/Device', 'sap/ui/core/Popup', 'jquery.sap.strings'],
-	function(jQuery, Device, Popup/* , jQuerySap */) {
+sap.ui.define('sap/ui/debug/TechnicalInfo', ['jquery.sap.global', 'sap/ui/Device', 'sap/ui/Global', 'sap/ui/core/Popup', 'jquery.sap.strings', 'jquery.sap.encoder'],
+	function(jQuery, Device, Global, Popup/* , jQuerySap */) {
 	"use strict";
 
 	/*global alert */
+
+	function encode(any) {
+		return any == null ? "" : jQuery.sap.encodeHTML(String(any));
+	}
 
 	var TechnicalInfo = {
 
 		open : function(callback) {
 
 			function serialize(o) {
-				if (o && window.JSON) {
-					return window.JSON.stringify(o);
+				if (o) {
+					return JSON.stringify(o);
 				}
 				if ( o === "" ) {
 					return '""';
@@ -30,11 +34,11 @@ sap.ui.define('sap/ui/debug/TechnicalInfo', ['jquery.sap.global', 'sap/ui/Device
 				if ( !prefix ) {
 					html.push("<table border='0' cellspacing='0' cellpadding='0'>");
 				}
-				jQuery.each(o, function(i,v) {
+				jQuery.each(o, function(i, v) {
 					if ( !v || typeof v === 'string' || typeof v === 'number' || v instanceof Date ) {
-						html.push("<tr><td>", prefix, "<b>", jQuery.sap.encodeHTML(serialize(i)), "</b></td><td>", jQuery.sap.encodeHTML(serialize(v)), "</td></tr>");
+						html.push("<tr><td>", prefix, "<b>", encode(serialize(i)), "</b></td><td>", encode(serialize(v)), "</td></tr>");
 					} else {
-						html.push("<tr><td>", prefix, "<b>", jQuery.sap.encodeHTML(serialize(i)), "</b></td><td></td></tr>");
+						html.push("<tr><td>", prefix, "<b>", encode(serialize(i)), "</b></td><td></td></tr>");
 						list(v, prefix + "&nbsp;&nbsp;");
 					}
 				});
@@ -50,10 +54,11 @@ sap.ui.define('sap/ui/debug/TechnicalInfo', ['jquery.sap.global', 'sap/ui/Device
 			var ojQSData = this._ojQSData = callback() || {};
 
 			var bCT = false,bLV = false,bEmbedded = true;
-			if ( jQuery.sap.getObject("sap.ui.debug.DebugEnv") ) {
-				bCT = sap.ui.debug.DebugEnv.getInstance().isControlTreeShown();
-				bLV = sap.ui.debug.DebugEnv.getInstance().isTraceWindowShown();
-				bEmbedded = sap.ui.debug.DebugEnv.getInstance().isRunningEmbedded();
+			var DebugEnv = sap.ui.require("sap/ui/debug/DebugEnv");
+			if ( DebugEnv ) {
+				bCT = DebugEnv.getInstance().isControlTreeShown();
+				bLV = DebugEnv.getInstance().isTraceWindowShown();
+				bEmbedded = DebugEnv.getInstance().isRunningEmbedded();
 			}
 			var sDCUrl = "/sapui5-internal/download/index.jsp";
 			var bDC = jQuery.sap.syncHead(sDCUrl);
@@ -63,22 +68,46 @@ sap.ui.define('sap/ui/debug/TechnicalInfo', ['jquery.sap.global', 'sap/ui/Device
 				sOUUrl = "/demokit/optimize-module-set";
 				bOU = jQuery.sap.syncHead(sOUUrl);
 			}
-			var bUseDbgSrc = jQuery.sap.debug();
+			var vDebugInfo = window["sap-ui-debug"];
 			var bUseStatistics = jQuery.sap.statistics();
-			var sWeinreId = jQuery.sap.uid();
-			var sWeinreClientUrl = sap.ui.getCore().getConfiguration().getWeinreServer() + "/client/#" + sWeinreId;
 			var html = [];
 			html.push("<div id='sap-ui-techinfo' class='sapUiTInf sapUiDlg' style='width:800px; position: relative;'>");
 			html.push("<table border='0' cellpadding='3'>");
-			try {
-				var oVersionInfo = sap.ui.getVersionInfo();
-				var sVersion = "<a href='" + sap.ui.resource("", "sap-ui-version.json") + "' target='_blank' title='Open Version Info'>" + oVersionInfo.version + "</a>";
-				html.push("<tr><td align='right' valign='top'><b>SAPUI5 Version</b></td><td>", sVersion, " (built at ", oVersionInfo.buildTimestamp, ", last change ", oVersionInfo.scmRevision, ")</td></tr>");
-			} catch (ex) {
-				html.push("<tr><td align='right' valign='top'><b>SAPUI5 Version</b></td><td>not available</td></tr>");
+
+			// version information
+			function formatBuildInfo(timestamp, scmRevision) {
+				var info = [];
+				if ( timestamp ) {
+					var match = /^(\d{4})(\d{2})(\d{2})-?(\d{2})(\d{2})$/.exec(timestamp);
+					if ( match ) {
+						timestamp = match[1] + '-' + match[2] + '-' + match[3] + 'T' + match[4] + ":" + match[5];
+					}
+					info.push("built at " + encode(timestamp));
+				}
+				if ( scmRevision ) {
+					info.push("last change " + encode(scmRevision));
+				}
+				return info.length === 0 ? "" : " (" + info.join(", ") + ")";
 			}
-			html.push("<tr><td align='right' valign='top'><b>Core Version</b></td><td>", sap.ui.version, " (built at ", sap.ui.buildinfo.buildtime, ", last change ", sap.ui.buildinfo.lastchange, ")</td></tr>");
-			html.push("<tr><td align='right' valign='top'><b>User Agent</b></td><td>", jQuery.sap.encodeHTML(navigator.userAgent), (document.documentMode ? ", Document Mode '" + document.documentMode + "'" : ""), "</td></tr>");
+			var sProductName = "SAPUI5";
+			var sVersionInfoEncoded = "not available";
+			try {
+				var oVersionInfo = Global.getVersionInfo();
+				sProductName = oVersionInfo.name;
+				sVersionInfoEncoded =
+					"<a href='" + sap.ui.resource("", "sap-ui-version.json") + "' target='_blank' title='Open Version Info'>" + encode(oVersionInfo.version) + "</a>" +
+					formatBuildInfo(oVersionInfo.buildTimestamp, oVersionInfo.scmRevision);
+			} catch (ex) {
+				// ignore
+			}
+			html.push("<tr><td align='right' valign='top'><b>" + encode(sProductName) + "</b></td><td>" + sVersionInfoEncoded + "</td></tr>");
+			if ( !/openui5/i.test(sProductName) ) {
+				html.push("<tr><td align='right' valign='top'><b>OpenUI5 Version</b></td><td>", Global.version, formatBuildInfo(Global.buildinfo.buildtime, Global.buildinfo.lastchange), "</td></tr>");
+			}
+			html.push("<tr><td align='right' valign='top'><b>Loaded jQuery Version</b></td><td>", jQuery.fn.jquery, "</td></tr>");
+			html.push("<tr><td align='right' valign='top'><b>User Agent</b></td><td>", encode(navigator.userAgent), (document.documentMode ? ", Document Mode '" + encode(document.documentMode) + "'" : ""), "</td></tr>");
+
+			// configuration
 			html.push("<tr><td align='right' valign='top'><b>Configuration</b></td><td><div class='sapUiTInfCfg'>");
 			list(ojQSData.config);
 			html.push("</div></td></tr>");
@@ -91,10 +120,11 @@ sap.ui.define('sap/ui/debug/TechnicalInfo', ['jquery.sap.global', 'sap/ui/Device
 			if ( bOU ) {
 				html.push("<tr><td></td><td><a id=\"sap-ui-techinfo-optimizeModuleSet\" href=\"" + sOUUrl + "\">Calculate Optimized Module Set URL</a></td></tr>");
 			}
-			html.push("<tr><td align='right' valign='top' rowSpan='7'><b>Debug Tools</b></td>", "<td><input id='sap-ui-techinfo-useDbgSources' type='checkbox'",
-					bUseDbgSrc ? " checked='checked'" : "",
-					"><span ",
-					">Use Debug Sources (reload)</span></input></td></tr>");
+
+			html.push("<tr><td align='right' valign='top' rowSpan='8'><b>Debug Tools</b></td>");
+			html.push("<td><input id='sap-ui-techinfo-useDbgSources' type='checkbox'",
+					vDebugInfo ? " checked='checked'" : "",
+					'>Use <span id="sap-ui-techinfo-cfgDbgSources" class="sapUiTInfPCfg" title="Click to select packages / modules with debug sources">Debug Sources</span> (requires page reload)</td></tr>');
 			html.push("<tr><td>Boot app with different UI5 version on next reload:</td></tr>");
 			html.push("<tr><td style='padding-left: 2rem'><select id='sap-ui-techinfo-reboot-select' style='width: 100%;'>",
 					"<option value='none'>Disabled (no custom reboot URL)</option>",
@@ -105,19 +135,19 @@ sap.ui.define('sap/ui/debug/TechnicalInfo', ['jquery.sap.global', 'sap/ui/Device
 			html.push("<tr><td><input id='sap-ui-techinfo-showControls' type='checkbox'",
 					bCT ? " checked='checked'" : "",
 					bEmbedded ? "" : " readonly='readonly'",
-					"><span ",
+					"/><span ",
 					bEmbedded ? "" : " style='color:grey'",
-					">Show UIAreas, Controls and Properties</span></input></td></tr>");
+					">Show UIAreas, Controls and Properties</span></td></tr>");
 			html.push("<tr><td><input id='sap-ui-techinfo-showLogViewer' type='checkbox' ",
 					bLV ? " checked='checked'" : "",
 					bEmbedded ? "" : " readonly='readonly' style='color:grey'",
-					"><span ",
+					"/><span ",
 					bEmbedded ? "" : " style='color:grey'",
-					">Show Log Viewer</span></input></td></tr>");
+					">Show Log Viewer</span></td></tr>");
 			html.push("<tr><td><input id='sap-ui-techinfo-useStatistics' type='checkbox' ",
 					bUseStatistics ? " checked='checked'" : "",
-					"><span ",
-					">Enable SAP-statistics for oData calls</span></input></td></tr>");
+					"/><span ",
+					">Enable SAP-statistics for oData calls</span></td></tr>");
 			html.push("<tr><td colspan='2' align='center' valign='bottom' height='40'><button id='sap-ui-techinfo-close' class='sapUiBtn sapUiBtnS sapUiBtnNorm sapUiBtnStd'>Close</button></td></tr>");
 			html.push("</table>");
 			if ( bDC ) {
@@ -132,44 +162,26 @@ sap.ui.define('sap/ui/debug/TechnicalInfo', ['jquery.sap.global', 'sap/ui/Device
 				html.push("<input type=\"hidden\" name=\"modules\"/>");
 				html.push("</form>");
 			}
-			if (sap.ui.getCore().getConfiguration().getRTL()) {
-				html.push("<div style='position: absolute; bottom: 5px; left: 5px; text-align: left'>");
-			} else {
-				html.push("<div style='position: absolute; bottom: 5px; right: 5px; text-align: right'>");
-			}
-			html.push("<canvas id='sap-ui-techinfo-qrcode' width='0' height='0'></canvas>");
-			html.push("<br><a id='sap-ui-techinfo-weinre' href=\"" + sWeinreClientUrl + "\" target=\"_blank\">Remote Web Inspector</a>");
-			html.push("</div></div>");
+			html.push("</div>");
 			this._$Ref = jQuery(html.join(""));
-			this._$Ref.find('#sap-ui-techinfo-useDbgSources').click(jQuery.proxy(this.onUseDbgSources, this));
-			this._$Ref.find('#sap-ui-techinfo-reboot').click(jQuery.proxy(this.onUseOtherUI5Version, this));
+			this._$Ref.find('#sap-ui-techinfo-useDbgSources').click(this.onUseDbgSources.bind(this));
+			this._$Ref.find('#sap-ui-techinfo-cfgDbgSources').click(this.onConfigDbgSources.bind(this));
+			this._$Ref.find('#sap-ui-techinfo-reboot').click(this.onUseOtherUI5Version.bind(this));
 			this._$Ref.find('#sap-ui-techinfo-reboot-select').on("change", this.onUI5VersionDropdownChanged);
-			this._$Ref.find('#sap-ui-techinfo-showControls').click(jQuery.proxy(this.onShowControls, this));
-			this._$Ref.find('#sap-ui-techinfo-showLogViewer').click(jQuery.proxy(this.onShowLogViewer, this));
-			this._$Ref.find('#sap-ui-techinfo-more').click(jQuery.proxy(this.onShowAllModules, this));
-			this._$Ref.find('#sap-ui-techinfo-close').click(jQuery.proxy(this.close, this));
-			this._$Ref.find('#sap-ui-techinfo-customModule').click(jQuery.proxy(this.onCreateCustomModule, this));
-			this._$Ref.find('#sap-ui-techinfo-optimizeModuleSet').click(jQuery.proxy(this.onOptimizeModuleSet, this));
-			this._$Ref.find('#sap-ui-techinfo-weinre').click(jQuery.proxy(this.onOpenWebInspector, this));
-			this._$Ref.find('#sap-ui-techinfo-useStatistics').click(jQuery.proxy(this.onUseStatistics, this));
+			this._$Ref.find('#sap-ui-techinfo-showControls').click(this.onShowControls.bind(this));
+			this._$Ref.find('#sap-ui-techinfo-showLogViewer').click(this.onShowLogViewer.bind(this));
+			this._$Ref.find('#sap-ui-techinfo-more').click(this.onShowAllModules.bind(this));
+			this._$Ref.find('#sap-ui-techinfo-close').click(this.close.bind(this));
+			this._$Ref.find('#sap-ui-techinfo-customModule').click(this.onCreateCustomModule.bind(this));
+			this._$Ref.find('#sap-ui-techinfo-optimizeModuleSet').click(this.onOptimizeModuleSet.bind(this));
+			this._$Ref.find('#sap-ui-techinfo-useStatistics').click(this.onUseStatistics.bind(this));
 			this._oPopup = new Popup(this._$Ref.get(0), /*modal*/true, /*shadow*/true, /*autoClose*/false);
-			var bValidBrowser = !Device.browser.internet_explorer || !!Device.browser.internet_explorer && Device.browser.version > 8;
-			var bDevAvailable = bValidBrowser && jQuery.sap.sjax({type: "HEAD", url: sap.ui.resource("sap.ui.dev", "library.js")}).success;
-			if (bDevAvailable) {
-				this._oPopup.attachOpened(function(oEvent) {
-					// since the log, control tree and property list are using
-					// the z-index 999999 the popup needs a higher z-index to
-					// be able to click on the technical info.
-					this._$().css("z-index", "1000000");
-					// add the QR code when the control is available
-					jQuery.sap.require("sap.ui.dev.qrcode.QRCode");
-					if (sap.ui.dev.qrcode.QRCode._renderQRCode) {
-						var sAbsUrl = window.location.href,
-							sWeinreTargetUrl = sAbsUrl + (sAbsUrl.indexOf("?") > 0 ? "&" : "?") + "sap-ui-weinreId=" + sWeinreId;
-						sap.ui.dev.qrcode.QRCode._renderQRCode(jQuery.sap.domById("sap-ui-techinfo-qrcode"), sWeinreTargetUrl);
-					}
-				});
-			}
+			this._oPopup.attachOpened(function(oEvent) {
+				// since the log, control tree and property list are using
+				// the z-index 999999 the popup needs a higher z-index to
+				// be able to click on the technical info.
+				this._$().css("z-index", "1000000");
+			});
 			this._oPopup.open(400);
 			this.populateRebootUrls();
 		},
@@ -212,7 +224,7 @@ sap.ui.define('sap/ui/debug/TechnicalInfo', ['jquery.sap.global', 'sap/ui/Device
 			jQuery.each(modnames, function(i,v) {
 				var mod = modules[v];
 				html.push("<span",
-						" title='", mod.url ? jQuery.sap.encodeHTML(mod.url) : ("embedded in " + mod.parent), "'",
+						" title='", mod.url ? encode(mod.url) : ("embedded in " + mod.parent), "'",
 						" class='sapUiTInfM", CLASS_4_MOD_STATE[mod.state] || "", "'>", v, ",</span> ");
 			});
 			if ( iMore ) {
@@ -260,14 +272,15 @@ sap.ui.define('sap/ui/debug/TechnicalInfo', ['jquery.sap.global', 'sap/ui/Device
 		},
 
 		ensureDebugEnv : function(bShowControls) {
-			if ( !jQuery.sap.getObject("sap.ui.debug.DebugEnv") ) {
+
+			if ( !this._DebugEnv ) {
 				try {
-					jQuery.sap.require("sap-ui-debug");
+					this._DebugEnv = sap.ui.requireSync("sap/ui/debug/DebugEnv");
 					// when sap-ui-debug is loaded, control tree and property list are shown by defualt
 					// so disable them again if they are not desired
 					if ( !bShowControls ) {
-						sap.ui.debug.DebugEnv.getInstance().hideControlTree();
-						sap.ui.debug.DebugEnv.getInstance().hidePropertyList();
+						this._DebugEnv.getInstance().hideControlTree();
+						this._DebugEnv.getInstance().hidePropertyList();
 					}
 				} catch (e) {
 					// failed to load debug env (not installed?)
@@ -285,11 +298,11 @@ sap.ui.define('sap/ui/debug/TechnicalInfo', ['jquery.sap.global', 'sap/ui/Device
 			}
 			if ( this.ensureDebugEnv(true) ) {
 				if ( e.target.checked ) {
-					sap.ui.debug.DebugEnv.getInstance().showControlTree();
-					sap.ui.debug.DebugEnv.getInstance().showPropertyList();
+					this._DebugEnv.getInstance().showControlTree();
+					this._DebugEnv.getInstance().showPropertyList();
 				} else {
-					sap.ui.debug.DebugEnv.getInstance().hideControlTree();
-					sap.ui.debug.DebugEnv.getInstance().hidePropertyList();
+					this._DebugEnv.getInstance().hideControlTree();
+					this._DebugEnv.getInstance().hidePropertyList();
 				}
 			}
 		},
@@ -302,15 +315,272 @@ sap.ui.define('sap/ui/debug/TechnicalInfo', ['jquery.sap.global', 'sap/ui/Device
 			}
 			if ( this.ensureDebugEnv(false) ) {
 				if ( e.target.checked ) {
-					sap.ui.debug.DebugEnv.getInstance().showTraceWindow();
+					this._DebugEnv.getInstance().showTraceWindow();
 				} else {
-					sap.ui.debug.DebugEnv.getInstance().hideTraceWindow();
+					this._DebugEnv.getInstance().hideTraceWindow();
 				}
 			}
 		},
 
 		onUseDbgSources : function(e) {
-			jQuery.sap.debug(!!e.target.checked);
+			var vDebugInfo = window["sap-ui-debug"] = !!e.target.checked;
+			jQuery.sap.debug(vDebugInfo);
+		},
+
+		onConfigDbgSources : function(e) {
+
+			/*
+			 * Tree with package/module names and selection state.
+			 *
+			 * A node with an empty name ("") represents the selection of the parent package.
+			 */
+			var mNames = {};
+
+			/*
+			 * Sets the selection state for a package/module.
+			 * Package names must end with a slash, modules must not.
+			 */
+			function set(sName, value) {
+				sName = sName === '/' ? '' : sName;
+				var oObject = mNames,
+					aNames = sName.split('/'),
+					l = aNames.length, i;
+
+				if ( l > 0 ) {
+					for (i = 0; oObject && i < l - 1; i++) {
+						if (!oObject[aNames[i]] ) {
+							oObject[aNames[i]] = {};
+						}
+						oObject = oObject[aNames[i]];
+					}
+					oObject[aNames[l - 1]] = value;
+				}
+			}
+
+			/*
+			 * Gets the selection state for a package/module.
+			 * Package names must end with a slash, modules must not.
+			 * If an ancestor package of the package/module does not exists, undefined is returned.
+			 */
+			function get(sName) {
+				sName = sName === '/' ? '' : sName;
+				var oObject = mNames,
+					aNames = sName.split('/'),
+					l = aNames.length, i;
+
+				if ( l > 0 ) {
+					for (i = 0; oObject && i < l - 1; i++) {
+						if (!oObject[aNames[i]] ) {
+							return;
+						}
+						oObject = oObject[aNames[i]];
+					}
+					return oObject[aNames[l - 1]];
+				}
+			}
+
+			/*
+			 * Converts the current tree selection in a value suitable for window["sap-ui-debug"]
+			 * Either can be boolean true for "all", or a comma separated list of packages/modules.
+			 * Doesn't support patterns.
+			 */
+			function toDebugInfo(separator) {
+
+				function collect(sName, sBasename, o) {
+					var aChildren, bChildren;
+					if ( typeof o === 'object' ) {
+						if ( o[''] ) {
+							aFilters.push(sName + '/');
+							return;
+						}
+						aChildren = Object.keys(o);
+						bChildren = aChildren.length;
+					}
+					if ( bChildren ) {
+						aChildren.forEach(function(sChild) {
+							if ( sChild === '' ) {
+								return;
+							}
+							if ( o[sChild] === true ) {
+								aFilters.push((sName ? sName + '/' : '') + sChild);
+							} else if ( typeof o[sChild] === 'object' ) {
+								collect((sName ? sName + '/' : '') + sChild, sChild, o[sChild]);
+							}
+						});
+					}
+				}
+
+				if ( get('/') ) {
+					return true;
+				}
+
+				var aFilters = [];
+				collect('', '', mNames);
+
+				return aFilters.join(separator || ',');
+			}
+
+			/*
+			 * Converts a glob pattern to a partial JS regexp.
+			 */
+			function makeRegExp(sGlobPattern) {
+				if ( !/\/\*\*\/$/.test(sGlobPattern) ) {
+					sGlobPattern = sGlobPattern.replace(/\/$/, '/**/');
+				}
+				return sGlobPattern.replace(/\*\*\/|\*|[[\]{}()+?.\\^$|]/g, function(sMatch) {
+					switch (sMatch) {
+						case '**/' : return '(?:[^/]+/)*';
+						case '*'   : return '[^/]*';
+						default    : return '\\' + sMatch;
+					}
+				});
+			}
+
+			// create tree with all modules and empty selection
+			var modules = this._ojQSData.modules;
+			jQuery.each(modules, function(sName, oModule) {
+				set(sName, false);
+			});
+
+			// apply current debug info as tree selection
+			var vDebugInfo = window["sap-ui-debug"];
+			if ( vDebugInfo === true ) {
+				set('/', true);
+			} else if ( vDebugInfo && typeof vDebugInfo === 'string' ) {
+				vDebugInfo.split(/,/).forEach(function(sPattern) {
+					if ( /\*/.test(sPattern) ) {
+						// if a glob pattern is found, select all modules that are matched by it
+						var rFilter = new RegExp("^(?:" + makeRegExp(sPattern) + ")");
+						jQuery.each(modules, function(sName, oModule) {
+							if ( rFilter.test(sName) ) {
+								set(sName, true);
+							}
+						});
+					} else {
+						// for simple package / module names, just select the corresponding tree node
+						set(sPattern, true);
+					}
+				});
+			}
+
+			// create HTML
+			var html = [];
+			html.push('<div class="sapUiTInfPDiag">');
+			html.push('<h1>Select packages/modules that should be loaded as debug sources:</h1>');
+			html.push('<div id="sap-ui-techinfo-packages" class="sapUiTInfPList">');
+
+			function renderNode(sName, sBasename, o) {
+				var aChildren, bChildren, sPackage;
+				if ( typeof o === 'object' ) {
+					aChildren = Object.keys(o);
+					bChildren = aChildren.length;
+				}
+				sPackage = sName + (bChildren ? "/" : "");
+				html.push('<div class="', bChildren ? 'package' : 'module', get(sPackage) ? ' selected' : '', '" data-sap-ui-package="', encode(sPackage), '">');
+				if ( bChildren ) {
+					html.push('<span class="expander">&gt;</span>');
+				}
+				html.push('<span class="name">', encode(sBasename), '</span>');
+				if ( bChildren ) {
+					html.push('<div class="children packages">');
+					aChildren.sort(function(a,b) {
+						var oa = typeof o[a] === 'object';
+						var ob = typeof o[b] === 'object';
+						if ( oa !== ob ) {
+							return oa ? -1 : 1;
+						}
+						if ( a !== b ) {
+							return a < b ? -1 : 1;
+						}
+						return 0;
+					}).forEach(function(sChild) {
+						if ( sChild === '' ) {
+							return;
+						}
+						renderNode((sName ? sName + '/' : '') + sChild, sChild, o[sChild]);
+					});
+					html.push('</div>');
+				}
+				html.push('</div>');
+			}
+
+			renderNode('', '(all)', mNames);
+
+			html.push('</div>');
+			html.push('<div class="result"><strong>sap-ui-debug = </strong><span id="sap-ui-techinfo-packages-result">', encode(vDebugInfo), '</span></div>');
+			html.push('<div class="footer">');
+			html.push("<button id='sap-ui-techinfo-pdiag-close' class='sapUiBtn sapUiBtnS sapUiBtnNorm sapUiBtnStd'>Ok</button>");
+			html.push("<button id='sap-ui-techinfo-pdiag-cancel' class='sapUiBtn sapUiBtnS sapUiBtnNorm sapUiBtnStd'>Cancel</button>");
+			html.push("<span></span>");
+			html.push("<button id='sap-ui-techinfo-pdiag-reset' class='sapUiBtn sapUiBtnS sapUiBtnNorm sapUiBtnStd'>Reset</button>");
+			html.push('</div>');
+			html.push('</div>');
+
+			var $PDiag = jQuery(html.join(""));
+			this._oPopupModules = new Popup($PDiag[0], /*modal*/true, /*shadow*/true, /*autoClose*/false);
+			this._oPopupModules.attachOpened(function(oEvent) {
+				this._$().css("z-index", "1000100");
+			});
+			this._oPopupModules.open(400);
+
+			function updateResult() {
+				$PDiag.find("#sap-ui-techinfo-packages-result").text(toDebugInfo(", "));
+			}
+
+			function close() {
+				this._oPopupModules.destroy();
+				this._oPopupModules = undefined;
+				$PDiag.remove();
+			}
+
+			$PDiag.find("#sap-ui-techinfo-pdiag-reset").click(function(e) {
+				jQuery(".selected", this._oPopupModules._$()).each(function() {
+					set(jQuery(this).attr("data-sap-ui-package"), false);
+				}).removeClass("selected");
+				updateResult();
+			}.bind(this));
+			$PDiag.find("#sap-ui-techinfo-pdiag-cancel").click(function(e) {
+				close.call(this);
+			}.bind(this));
+			$PDiag.find("#sap-ui-techinfo-pdiag-close").click(function(e) {
+				vDebugInfo = toDebugInfo();
+				close.call(this);
+				jQuery.sap.debug(vDebugInfo);
+				window["sap-ui-debug"] = vDebugInfo;
+				this._$Ref.find('#sap-ui-techinfo-useDbgSources').prop('checked', !!vDebugInfo);
+			}.bind(this));
+			$PDiag.find("#sap-ui-techinfo-packages").click(function(e) {
+				var $ = jQuery(e.target);
+				if ( $.hasClass("expander") ) {
+					var $children = jQuery(e.target.nextElementSibling.nextElementSibling); // span expander, span name, div children
+					// expander toggles between three states: none (collapsed), packages (show only child packages), all (show all childrne)
+					if ( $children.hasClass("none") ) {
+						$children.removeClass("none");
+						// if current package doesn't have sub-packages, skip "packages" state
+						if ( $children.children(".package").length > 0 ) {
+							$children.addClass("packages");
+							$.text(">");
+						} else {
+							$children.addClass("all");
+							$.text(">>");
+						}
+					} else if ( $children.hasClass("packages") ) {
+						$children.removeClass("packages");
+						$children.addClass("all");
+						$.text(">>");
+					} else if ( $children.hasClass("all") ) {
+						$children.removeClass("all");
+						$children.addClass("none");
+						$.text("+");
+					}
+				} else if ( $.hasClass("name") ) {
+					var $package = jQuery(e.target.parentNode); // div[.package|.module]
+					$package.toggleClass("selected");
+					set($package.attr('data-sap-ui-package'), $package.hasClass("selected"));
+					updateResult();
+				}
+			});
+
 		},
 
 		populateRebootUrls : function() { // checks whether known URLs where UI5 could be booted from are reachable
@@ -339,7 +609,7 @@ sap.ui.define('sap/ui/debug/TechnicalInfo', ['jquery.sap.global', 'sap/ui/Device
 			for (var i in aUserUrls) {
 				var sUrl = aUserUrls[i];
 				if (!mUrls[sUrl]) {
-					mUrls[sUrl] = jQuery.sap.encodeHTML(sUrl);
+					mUrls[sUrl] = encode(sUrl);
 				}
 			}
 
@@ -418,18 +688,6 @@ sap.ui.define('sap/ui/debug/TechnicalInfo', ['jquery.sap.global', 'sap/ui/Device
 
 		onUseStatistics : function(e) {
 			jQuery.sap.statistics(!!e.target.checked);
-		},
-
-		onOpenWebInspector: function(e) {
-			/*eslint-disable no-alert */
-			if (!sap.ui.getCore().getConfiguration().getWeinreServer()) {
-				alert("Cannot start Web Inspector - WEINRE server is not configured.");
-				e.preventDefault();
-			} else if (!Device.browser.webkit) {
-				alert("Cannot start Web Inspector - WEINRE only runs on WebKit, please use Chrome or Safari.");
-				e.preventDefault();
-			}
-			/*eslint-enable no-alert */
 		}
 
 	};

@@ -23,31 +23,25 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer'],
 	TileContentRenderer.render = function(oRm, oControl) {
 
 		var sTooltip = oControl.getTooltip_AsString();
-		var sAltText = oControl.getAltText ? oControl.getAltText() : "";
+		var sContentTypeClass = oControl._getContentType();
+		if (sContentTypeClass) {
+			sContentTypeClass = jQuery.sap.encodeCSS(sContentTypeClass);
+		}
+		var sFrameTypeClass = jQuery.sap.encodeCSS("sapMFrameType" + oControl.getFrameType());
 
 		oRm.write("<div");
 		oRm.writeControlData(oControl);
 		oRm.addClass("sapMTileCnt");
-		oRm.addClass(oControl._getContentType());
-		oRm.addClass(oControl.getSize());
-		oRm.addClass("ft-" + oControl.getFrameType());
+		oRm.addClass(sContentTypeClass);
+		oRm.addClass(sFrameTypeClass);
 		if (sTooltip.trim()) { // trim check needed since IE11 renders white spaces
 			oRm.writeAttributeEscaped("title", sTooltip);
 		}
-		oRm.writeAttribute("aria-describedby", oControl.getId() + "-info");
 		oRm.writeClasses();
 		oRm.write(">");
 		this._renderContent(oRm, oControl);
 		this._renderFooter(oRm, oControl);
 
-		oRm.write("<div");
-		oRm.writeAttribute("id", oControl.getId() + "-info");
-		oRm.addStyle("display", "none");
-		oRm.writeAttribute("aria-hidden", "true");
-		oRm.writeStyles();
-		oRm.write(">");
-		oRm.writeEscaped(sAltText);
-		oRm.write("</div>");
 		oRm.write("</div>");
 	};
 
@@ -59,18 +53,21 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer'],
 	 * @param {sap.ui.core.Control} oControl an object representation of the control whose content should be rendered
 	 */
 	TileContentRenderer._renderContent = function(oRm, oControl) {
-		var oCnt = oControl.getContent();
-		if (oCnt) {
+		if (!oControl._bRenderContent) {
+			return;
+		}
+
+		var oContent = oControl.getContent();
+		if (oContent) {
 			oRm.write("<div");
 			oRm.addClass("sapMTileCntContent");
-			oRm.addClass(oControl.getSize());
 			oRm.writeClasses();
 			oRm.writeAttribute("id", oControl.getId() + "-content");
 			oRm.write(">");
-			if (!oCnt.hasStyleClass("sapMTcInnerMarker")) {
-				oCnt.addStyleClass("sapMTcInnerMarker");
+			if (!oContent.hasStyleClass("sapMTcInnerMarker")) {
+				oContent.addStyleClass("sapMTcInnerMarker");
 			}
-			oRm.renderControl(oCnt);
+			oRm.renderControl(oContent);
 			oRm.write("</div>");
 		}
 	};
@@ -84,12 +81,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Renderer'],
 	 */
 
 	TileContentRenderer._renderFooter = function(oRm, oControl) {
+		if (!oControl._bRenderFooter) {
+			return;
+		}
+
 		var sTooltip = oControl.getTooltip_AsString();
 		var sFooterTxt = oControl._getFooterText(oRm, oControl);
 		// footer text div
 		oRm.write("<div");
 		oRm.addClass("sapMTileCntFtrTxt");
-		oRm.addClass(oControl.getSize());
 		oRm.writeClasses();
 		oRm.writeAttribute("id", oControl.getId() + "-footer-text");
 		if (sTooltip.trim()) { // check for white space(s) needed since the IE11 renders it

@@ -24,7 +24,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library'],
 	 * @extends sap.m.ListItemBase
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -49,10 +49,11 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library'],
 			count : {type : "string", group : "Data", defaultValue : null},
 
 			/**
-			 * By default, the title is capitalized automatically. To disable this automation, set this property to <b>false</b>.
+			 * Allows to uppercase the group title.
 			 * @since 1.13.2
+			 * @deprecated Since version 1.40.10
 			 */
-			upperCase : {type : "boolean", group : "Appearance", defaultValue : true},
+			upperCase : {type : "boolean", group : "Appearance", defaultValue : false},
 
 			/**
 			 * Defines the title text directionality with enumerated options. By default, the control inherits text direction from the DOM.
@@ -92,6 +93,15 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library'],
 				oColumn.clearLastValue();
 			});
 		}
+	};
+
+	GroupHeaderListItem.prototype.getAccessibilityType = function(oBundle) {
+		var sType = this.getTable() ? "ROW" : "OPTION";
+		return oBundle.getText("LIST_ITEM_GROUP_HEADER") + " " + oBundle.getText("ACC_CTR_TYPE_" + sType);
+	};
+
+	GroupHeaderListItem.prototype.getContentAnnouncement = function() {
+		return this.getTitle();
 	};
 
 	return GroupHeaderListItem;

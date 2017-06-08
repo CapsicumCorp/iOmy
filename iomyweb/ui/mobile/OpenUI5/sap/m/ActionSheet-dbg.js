@@ -5,8 +5,8 @@
  */
 
 // Provides control sap.m.ActionSheet.
-sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './library', 'sap/ui/core/Control', 'sap/ui/core/delegate/ItemNavigation'],
-	function(jQuery, Dialog, Popover, library, Control, ItemNavigation) {
+sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './library', 'sap/ui/core/Control', 'sap/ui/core/delegate/ItemNavigation', 'sap/ui/core/InvisibleText'],
+	function(jQuery, Dialog, Popover, library, Control, ItemNavigation, InvisibleText) {
 	"use strict";
 
 
@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './library', 'sap/u
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -65,7 +65,12 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './library', 'sap/u
 			/**
 			 * The internally managed cancel button.
 			 */
-			_cancelButton : {type : "sap.m.Button", multiple : false, visibility : "hidden"}
+			_cancelButton : {type : "sap.m.Button", multiple : false, visibility : "hidden"},
+
+			/**
+			* Hidden texts used for accesibility
+			*/
+			_invisibleAriaTexts: {type : "sap.ui.core.InvisibleText", multiple : true, visibility : "hidden"}
 		},
 		events : {
 
@@ -454,16 +459,41 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './library', 'sap/u
 		this._parent._adjustScrollingPane();
 	};
 
+	ActionSheet.prototype._addAriaHiddenTexts = function(oButton) {
+		var sButtonId = oButton.getId(),
+			oInvisibleText;
+		if (sap.ui.getCore().getConfiguration().getAccessibility()) {
+			oInvisibleText = new InvisibleText(sButtonId + "-actionSheetHiddenText");
+
+			this.addAggregation("_invisibleAriaTexts", oInvisibleText, false);
+			oButton.addAriaLabelledBy(oInvisibleText.getId());
+		}
+	};
+
+	ActionSheet.prototype._removeAriaHiddenTexts = function(oButton) {
+		oButton.getAriaLabelledBy().forEach(function(sId) {
+			var oControl = sap.ui.getCore().byId(sId);
+
+			if (oControl instanceof InvisibleText && sId.indexOf("actionSheetHiddenText") > -1) {
+				this.removeAggregation("_invisibleAriaTexts", oControl, false);
+				oButton.removeAriaLabelledBy(oControl);
+				oControl.destroy();
+			}
+		}, this);
+	};
+
 	/* Override API methods */
 	ActionSheet.prototype.addButton = function(oButton) {
-		this.addAggregation("buttons",oButton, false);
+		this.addAggregation("buttons", oButton, false);
+		this._addAriaHiddenTexts(oButton);
 		this._preProcessActionButton(oButton);
 		oButton.attachPress(this._buttonSelected, this);
 		return this;
 	};
 
 	ActionSheet.prototype.insertButton = function(oButton, iIndex) {
-		this.insertAggregation("buttons",oButton, iIndex, false);
+		this.insertAggregation("buttons", oButton, iIndex, false);
+		this._addAriaHiddenTexts(oButton);
 		this._preProcessActionButton(oButton);
 		oButton.attachPress(this._buttonSelected, this);
 		return this;
@@ -473,6 +503,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './library', 'sap/u
 		var result = this.removeAggregation("buttons",oButton, false);
 		if (result) {
 			result.detachPress(this._buttonSelected, this);
+			this._removeAriaHiddenTexts(result);
 		}
 		return result;
 	};
@@ -482,6 +513,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './library', 'sap/u
 			that = this;
 		jQuery.each(result, function(i, oButton) {
 			oButton.detachPress(that._buttonSelected, that);
+			that._removeAriaHiddenTexts(oButton);
 		});
 		return result;
 	};
@@ -495,7 +527,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './library', 'sap/u
 		var oClone = Control.prototype.clone.apply(this, arguments);
 
 		for ( var j = 0; j < aButtons.length; j++) {
-			aButtons[i].attachPress(this._buttonSelected, this);
+			aButtons[j].attachPress(this._buttonSelected, this);
 		}
 
 		return oClone;

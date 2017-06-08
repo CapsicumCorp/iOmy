@@ -16,12 +16,14 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * The Text control can be used for embedding longer text paragraphs, that need text wrapping, into your application.
+	 * The <code>Text</code> control can be used for embedding longer text paragraphs, that need text wrapping, into your app.
+	 * If the configured text value contains HTML code or script tags, those will be escaped.<br>
+	 * <b>Note: </b>Line breaks (\r\n, \n\r, \r, \n) will always be visualized except when the <code>wrapping</code> property is set to <code>false</code>.
 	 * @extends sap.ui.core.Control
 	 * @implements sap.ui.core.IShrinkable
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -109,19 +111,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	Text.prototype.ellipsis = '…';
 
 	/**
-	 * Defines whether browser supports native line clamp or not
-	 *
-	 * @since 1.13.2
-	 * @returns {boolean}
-	 * @protected
-	 * @readonly
-	 * @static
-	 */
-	Text.hasNativeLineClamp = (function() {
-		return (typeof document.documentElement.style.webkitLineClamp != "undefined");
-	})();
-
-	/**
 	 * To prevent from the layout thrashing of the textContent call, this method
 	 * first tries to set the nodeValue of the first child if it exists.
 	 *
@@ -134,7 +123,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	Text.setNodeValue = function(oDomRef, sNodeValue) {
 		sNodeValue = sNodeValue || "";
 		var aChildNodes = oDomRef.childNodes;
-		if (aChildNodes.length == 1) {
+		if (aChildNodes.length === 1 && aChildNodes[0].nodeType === window.Node.TEXT_NODE) {
 			aChildNodes[0].nodeValue = sNodeValue;
 		} else {
 			oDomRef.textContent = sNodeValue;
@@ -181,8 +170,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	Text.prototype.onAfterRendering = function() {
 		// check visible, max-lines and line-clamping support
 		if (this.getVisible() &&
-			this.hasMaxLines() &&
-			!this.canUseNativeLineClamp()) {
+			this.hasMaxLines()) {
 
 			// set max-height for maxLines support
 			this.clampHeight();
@@ -219,35 +207,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		}
 
 		return this.getDomRef();
-	};
-
-	/**
-	 * Decides whether the control can use native line clamp feature or not.
-	 *
-	 * In RTL mode native line clamp feature is not supported.
-	 *
-	 * @since 1.20
-	 * @protected
-	 * @return {Boolean}
-	 */
-	Text.prototype.canUseNativeLineClamp = function() {
-		// has line clamp feature
-		if (!Text.hasNativeLineClamp) {
-			return false;
-		}
-
-		// is text direction rtl
-		var oDirection = sap.ui.core.TextDirection;
-		if (this.getTextDirection() == oDirection.RTL) {
-			return false;
-		}
-
-		// is text direction inherited as rtl
-		if (this.getTextDirection() == oDirection.Inherit && sap.ui.getCore().getConfiguration().getRTL()) {
-			return false;
-		}
-
-		return true;
 	};
 
 	/**
@@ -414,6 +373,14 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 
 		// return the found position
 		return iEllipsisPos;
+	};
+
+	/**
+	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @protected
+	 */
+	Text.prototype.getAccessibilityInfo = function() {
+		return {description: this.getText()};
 	};
 
 	return Text;

@@ -4,20 +4,11 @@
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './Matcher'], function (jQuery, Matcher) {
+sap.ui.define(['jquery.sap.global', './Matcher'], function ($, Matcher) {
 	"use strict";
 
 	/**
-	 * AggregationLengthEquals - checks if an aggregation contains at least one entry
-	 *
-	 * 	 * The settings supported by AggregationLengthEquals are:
-	 * <ul>
-	 *	<li>Properties
-	 * 		<ul>
-	 *			<li>{@link #getName name} : string</li>
-	 * 		</ul>
-	 * </li>
-	 * </ul>
+	 * AggregationLengthEquals - checks if an aggregation contains at least one entry.
 	 *
 	 * @class AggregationLengthEquals - checks if an aggregation contains at least one entry
 	 * @param {object} [mSettings] optional map/JSON-object with initial settings for the new AggregationLengthEqualsMatcher
@@ -32,9 +23,15 @@ sap.ui.define(['jquery.sap.global', './Matcher'], function (jQuery, Matcher) {
 		metadata : {
 			publicMethods : [ "isMatching" ],
 			properties : {
+				/**
+				 * The name of the aggregation that is used for matching.
+				 */
 				name : {
 					type : "string"
 				},
+				/**
+				 * The length that aggregation <code>name</code> should have.
+				 */
 				length : {
 					type : "int"
 				}
@@ -50,16 +47,19 @@ sap.ui.define(['jquery.sap.global', './Matcher'], function (jQuery, Matcher) {
 		 */
 		isMatching : function (oControl) {
 			var sAggregationName = this.getName(),
-				fnAggregation = oControl["get" + jQuery.sap.charToUpperCase(sAggregationName, 0)];
+				fnAggregation = oControl["get" + $.sap.charToUpperCase(sAggregationName, 0)];
 
 			if (!fnAggregation) {
-				jQuery.sap.log.error("Control " + oControl + " does not have an aggregation called: " + sAggregationName, this._sLogPrefix);
+				this._oLogger.error("Control '" + oControl + "' does not have an aggregation called '" + sAggregationName + "'");
 				return false;
 			}
-			var bIsMatch = fnAggregation.call(oControl).length === this.getLength();
-			jQuery.sap.log.debug("Control " + oControl + " has an aggregation '"
-					+ sAggregationName + "' and its length " + fnAggregation.call(oControl).length + (bIsMatch ? " matches." : " does not match."),
-					this._sLogPrefix);
+			var iAggregationLength = fnAggregation.call(oControl).length;
+			var iExpectedLength = this.getLength();
+			var bIsMatch = iAggregationLength === iExpectedLength;
+			if (!bIsMatch) {
+				this._oLogger.debug("Control '" + oControl + "' has " + iAggregationLength +
+					" Objects in the aggregation '" + sAggregationName + "' but it should have " + iExpectedLength);
+			}
 			return bIsMatch;
 		}
 

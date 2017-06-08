@@ -31,6 +31,7 @@ sap.ui.define(function () {
 		if (oControl.getShowTitle() && oControl._getInternalTitleVisible()) {
 			oRm.write("<div");
 			oRm.writeAttribute("role", "heading");
+			oRm.writeAttribute("aria-level", oControl._getARIALevel());
 			oRm.writeAttributeEscaped("id", oControl.getId() + "-header");
 			oRm.addClass("sapUxAPObjectPageSectionHeader");
 			oRm.writeClasses();
@@ -54,6 +55,10 @@ sap.ui.define(function () {
 		oRm.write("<div");
 		oRm.addClass("sapUxAPObjectPageSectionContainer");
 		oRm.writeClasses();
+		if (oControl._isHidden){
+			oRm.addStyle("display", "none");
+		}
+		oRm.writeStyles();
 		oRm.write(">");
 
 		oControl.getSubSections().forEach(oRm.renderControl);

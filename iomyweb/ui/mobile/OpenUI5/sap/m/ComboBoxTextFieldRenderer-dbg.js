@@ -32,6 +32,19 @@ sap.ui.define(['jquery.sap.global', './InputBaseRenderer', 'sap/ui/core/Renderer
 			oRm.writeAttribute("autocomplete", "off");
 			oRm.writeAttribute("autocorrect", "off");
 			oRm.writeAttribute("autocapitalize", "off");
+			oRm.writeAttribute("type", "text");
+		};
+
+		/**
+		 * Add role combobox to the outer div.
+		 *
+		 * @param {sap.ui.core.RenderManager} oRm The RenderManager that can be used for writing to the render output buffer.
+		 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered.
+		 */
+		ComboBoxTextFieldRenderer.writeOuterAttributes = function(oRm, oControl) {
+			if (sap.ui.getCore().getConfiguration().getAccessibility()) {
+				oRm.writeAttribute("role", "combobox");
+			}
 		};
 
 		/**
@@ -39,9 +52,7 @@ sap.ui.define(['jquery.sap.global', './InputBaseRenderer', 'sap/ui/core/Renderer
 		 * To be overwritten by subclasses.
 		 *
 		 */
-		ComboBoxTextFieldRenderer.getAriaRole = function() {
-			return "combobox";
-		};
+		ComboBoxTextFieldRenderer.getAriaRole = function() {};
 
 		/**
 		 * Retrieves the accessibility state of the control.
@@ -107,6 +118,10 @@ sap.ui.define(['jquery.sap.global', './InputBaseRenderer', 'sap/ui/core/Renderer
 			if (!oControl.getEditable()) {
 				oRm.addClass(CSS_CLASS + "InnerReadonly");
 			}
+
+			if (oControl.getShowButton()) {
+				oRm.addClass(CSS_CLASS + "InnerWidthExtraPadding");
+			}
 		};
 
 		/**
@@ -129,7 +144,9 @@ sap.ui.define(['jquery.sap.global', './InputBaseRenderer', 'sap/ui/core/Renderer
 		 * @param {sap.ui.core.Control} oControl An object representation of the control that should be rendered.
 		 */
 		ComboBoxTextFieldRenderer.writeInnerContent = function(oRm, oControl) {
-			this.renderButton(oRm, oControl);
+			if (oControl.getShowButton()) {
+				this.renderButton(oRm, oControl);
+			}
 		};
 
 		/**
@@ -142,24 +159,22 @@ sap.ui.define(['jquery.sap.global', './InputBaseRenderer', 'sap/ui/core/Renderer
 		ComboBoxTextFieldRenderer.renderButton = function(oRm, oControl) {
 			var sId = oControl.getId(),
 				sButtonId = sId + "-arrow",
-				sButtonLabelId = sId + "-buttonlabel",
-				oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
+				bAccessibilityOn = sap.ui.getCore().getConfiguration().getAccessibility(),
+				oArrowDownInvisibleLabel = oControl.getAggregation("_buttonLabelText");
 
-			oRm.write('<button tabindex="-1"');
+			oRm.write('<span tabindex="-1" ');
 			oRm.writeAttribute("id", sButtonId);
-			oRm.writeAttribute("aria-labelledby", sButtonLabelId);
+
+			if (bAccessibilityOn) {
+				oRm.writeAttribute("role", "button");
+				oRm.writeAttribute("aria-labelledby", oArrowDownInvisibleLabel.getId());
+			}
+
 			this.addButtonClasses(oRm, oControl);
 			oRm.writeClasses();
 			oRm.write(">");
-			oRm.write("<label");
-			oRm.writeAttribute("id", sButtonLabelId);
-			oRm.addClass("sapUiInvisibleText");
-			oRm.addClass(ComboBoxTextFieldRenderer.CSS_CLASS_COMBOBOXTEXTFIELD + "ButtonLabel");
-			oRm.writeClasses();
-			oRm.write(">");
-			oRm.write(oRb.getText("COMBOBOX_BUTTON"));
-			oRm.write("</label>");
-			oRm.write("</button>");
+			bAccessibilityOn && oRm.renderControl(oArrowDownInvisibleLabel);
+			oRm.write("</span>");
 		};
 
 		/**

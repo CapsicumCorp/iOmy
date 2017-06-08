@@ -11,7 +11,7 @@ sap.ui.define(['jquery.sap.global'],
 	/**
 	 * @author SAP SE
 	 * @version
-	 * 1.34.9
+	 * 1.44.14
 	 * @namespace
 	 */
 	var GridRenderer = {};
@@ -320,7 +320,7 @@ sap.ui.define(['jquery.sap.global'],
 					oRm.addClass("sapUiRespGridHiddenS");
 				}
 
-				// Move - moveBwd shifts a grid element to the left in LTR mode and
+				// Move - moveBackwards shifts a grid element to the left in LTR mode and
 				// opposite in RTL mode
 
 				var sMoveB = oLay.getMoveBackwards();
@@ -336,7 +336,7 @@ sap.ui.define(['jquery.sap.global'],
 						}
 					}
 				}
-				// ... while moveFwd shifts it to the right in LTR mode and opposite
+				// ... while moveForward shifts it to the right in LTR mode and opposite
 				// in RTL
 				var sMoveF = oLay.getMoveForward();
 

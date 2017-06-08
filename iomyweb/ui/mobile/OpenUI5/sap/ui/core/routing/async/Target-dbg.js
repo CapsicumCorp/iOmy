@@ -3,7 +3,7 @@
  * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define([], function() {
+sap.ui.define(['jquery.sap.global'], function(jQuery) {
 	"use strict";
 
 	/**
@@ -63,6 +63,7 @@ sap.ui.define([], function() {
 			}
 
 			var oOptions = this._oOptions,
+				that = this,
 				oView, oControl, oViewContainingTheControl, sViewName, oViewOptions, vValid, sErrorMessage;
 
 			if (oOptions.viewName) {
@@ -85,17 +86,22 @@ sap.ui.define([], function() {
 
 				oSequencePromise = oSequencePromise.then(function(oParentInfo) {
 					// waiting to be loaded
-					return oView.loaded().then(function(oView) {
-						return {
-							view: oView,
-							parentInfo: oParentInfo || {}
-						};
-					}, function(sErrorMessage) {
-						return Promise.reject({
-							name: oOptions.name,
-							error: sErrorMessage
-						});
-					});
+					return oView
+							.loaded()
+							.then(function(oView) {
+								that._bindTitleInTitleProvider(oView);
+
+								oView.addDependent(that._oTitleProvider);
+								return {
+									view: oView,
+									parentInfo: oParentInfo || {}
+								};
+							}, function(sErrorMessage) {
+								return Promise.reject({
+									name: oOptions.name,
+									error: sErrorMessage
+								});
+							});
 				}).then(function(oViewInfo) {
 					// loaded and do placement
 					vValid = this._isValid(oViewInfo.parentInfo);

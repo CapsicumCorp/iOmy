@@ -3,7 +3,7 @@
  * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define([], function() {
+sap.ui.define(['jquery.sap.global'], function(jQuery) {
 	"use strict";
 
 	/**
@@ -17,15 +17,17 @@ sap.ui.define([], function() {
 		/**
 		 * @private
 		 */
-		display: function(vTargets, vData) {
-			this._display(vTargets, vData);
+		display: function(vTargets, vData, sTitleTarget) {
+			this._display(vTargets, vData, sTitleTarget);
 		},
 
 		/**
 		 * @private
 		 */
-		_display: function(vTargets, vData) {
+		_display: function(vTargets, vData, sTitleTarget) {
 			var that = this;
+
+			this._attachTitleChanged(vTargets, sTitleTarget);
 
 			if (jQuery.isArray(vTargets)) {
 				jQuery.each(vTargets, function(i, sTarget) {

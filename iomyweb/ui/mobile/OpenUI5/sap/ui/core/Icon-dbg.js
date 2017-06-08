@@ -5,10 +5,12 @@
  */
 
 // Provides control sap.ui.core.Icon.
-sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './library'],
-	function(jQuery, Device, Control, IconPool, library) {
+sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './InvisibleText', './library'],
+	function(jQuery, Device, Control, IconPool, InvisibleText, library) {
 	"use strict";
 
+	// shortcut
+	var IconColor = library.IconColor;
 
 	/**
 	 * Constructor for a new Icon.
@@ -23,7 +25,7 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './l
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -111,6 +113,13 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './l
 			 */
 			noTabStop : {type : "boolean", group : "Accessibility", defaultValue : false}
 		},
+		aggregations: {
+
+			/**
+			 * Hidden aggregation for holding the InvisibleText instance which is used for outputing the text labeling the control
+			 */
+			_invisibleText : {type : "sap.ui.core.InvisibleText", multiple : false, visibility : "hidden"}
+		},
 		associations : {
 
 			/**
@@ -137,10 +146,7 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './l
 	 * @param {jQuery.Event} oEvent The event object.
 	 * @private
 	 */
-	Icon.prototype.onmousedown = function(oEvent) {
-
-		this._bPressFired = false;
-
+	Icon.prototype[Device.support.touch ? "ontouchstart" : "onmousedown"] = function(oEvent) {
 		if (this.hasListeners("press") || this.hasListeners("tap")) {
 
 			// mark the event for components that needs to know if the event was handled
@@ -171,20 +177,12 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './l
 	};
 
 	/**
-	 * Handle the touchstart event on the Icon.
-	 *
-	 * @param {jQuery.Event} oEvent The event object.
-	 * @private
-	 */
-	Icon.prototype.ontouchstart = Icon.prototype.onmousedown;
-
-	/**
 	 * Handle the mouseup event on the Icon.
 	 *
 	 * @param {jQuery.Event} oEvent The event object.
 	 * @private
 	 */
-	Icon.prototype.onmouseup = function(oEvent) {
+	Icon.prototype[Device.support.touch ? "ontouchend" : "onmouseup"] = function(oEvent) {
 
 		// change the source back only when all fingers leave the icon
 		if (!oEvent.targetTouches || (oEvent.targetTouches && oEvent.targetTouches.length === 0)) {
@@ -193,22 +191,6 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './l
 			this._restoreColors();
 		}
 	};
-
-	/**
-	 * Handle the touchend event on the Icon.
-	 *
-	 * @param {jQuery.Event} oEvent The event object.
-	 * @private
-	 */
-	Icon.prototype.ontouchend = Icon.prototype.onmouseup;
-
-	/**
-	 * Handle the touchcancel event on the Icon.
-	 *
-	 * @param {jQuery.Event} oEvent The event object.
-	 * @private
-	 */
-	Icon.prototype.ontouchcancel = Icon.prototype.onmouseup;
 
 	/**
 	 * Handle the mouseover event on the Icon.
@@ -243,16 +225,9 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './l
 	 *
 	 * @private
 	 */
-	Icon.prototype.onclick = function() {
-		if (this._bPressFired) {
-			return;
-		}
-
+	Icon.prototype[Device.support.touch && !Device.system.desktop ? "ontap" : "onclick"] = function() {
 		this.firePress({/* no parameters */});
-		this._bPressFired = true;
 	};
-
-	Icon.prototype.ontap = Icon.prototype.onclick;
 
 	/* ----------------------------------------------------------- */
 	/* Keyboard handling                                           */
@@ -317,38 +292,42 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './l
 	/* =========================================================== */
 
 	Icon.prototype.setSrc = function(sSrc) {
-		var oIconInfo = IconPool.getIconInfo(sSrc);
+		var oIconInfo = IconPool.getIconInfo(sSrc),
+			$Icon = this.$(),
+			sIconLabel, sTooltip, bUseIconTooltip, aLabelledBy, oInvisibleText;
 
-		if (oIconInfo) {
-			var $Icon = this.$();
+		// when the given sSrc can't be found in IconPool, rerender the icon is needed.
+		this.setProperty("src", sSrc, !!oIconInfo);
+
+		if (oIconInfo && $Icon.length) {
 			$Icon.css("font-family", oIconInfo.fontFamily);
 			$Icon.attr("data-sap-ui-icon-content", oIconInfo.content);
 			$Icon.toggleClass("sapUiIconMirrorInRTL", !oIconInfo.suppressMirroring);
 
-			var sTooltip = this.getTooltip_AsString(),
-				alabelledBy = this.getAriaLabelledBy(),
-				sAlt = this.getAlt(),
-				bUseIconTooltip = this.getUseIconTooltip();
+			sTooltip = this.getTooltip_AsString();
+			aLabelledBy = this.getAriaLabelledBy();
+			bUseIconTooltip = this.getUseIconTooltip();
+			sIconLabel = this._getIconLabel();
 
-			if (sTooltip || bUseIconTooltip) {
-				$Icon.attr("title", sTooltip || oIconInfo.text || oIconInfo.name);
+			if (sTooltip || (bUseIconTooltip && oIconInfo.text)) {
+				$Icon.attr("title", sTooltip || oIconInfo.text);
 			} else {
 				$Icon.attr("title", null);
 			}
 
-			// Only adopt "aria-label" if there is no "labelledby" as this is managed separately
-			if (alabelledBy.length === 0) {
-				if (sAlt || sTooltip || bUseIconTooltip) {
-					$Icon.attr("aria-label", sAlt || sTooltip || oIconInfo.text || oIconInfo.name);
+			if (aLabelledBy.length === 0) { // Only adapt "aria-label" if there is no "labelledby" as this is managed separately
+				if (sIconLabel) {
+					$Icon.attr("aria-label", sIconLabel);
 				} else {
 					$Icon.attr("aria-label", null);
 				}
+			} else { // adapt the text in InvisibleText control
+				oInvisibleText = this.getAggregation("_invisibleText");
+				if (oInvisibleText) {
+					oInvisibleText.setText(sIconLabel);
+				}
 			}
-
 		}
-
-		// when the given sSrc can't be found in IconPool, rerender the icon is needed.
-		this.setProperty("src", sSrc, !!oIconInfo);
 
 		return this;
 	};
@@ -397,11 +376,11 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './l
 			return;
 		}
 
-		jQuery.each(sap.ui.core.IconColor, function(sPropertyName, sPropertyValue) {
+		jQuery.each(IconColor, function(sPropertyName, sPropertyValue) {
 			that.removeStyleClass(sCSSClassNamePrefix + sPropertyValue);
 		});
 
-		if (sColor in sap.ui.core.IconColor) {
+		if (sColor in IconColor) {
 			// reset the relevant css property
 			$Icon.css(sCSSPropName, "");
 			this.addStyleClass(sCSSClassNamePrefix + sColor);
@@ -467,13 +446,70 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './l
 		return this;
 	};
 
-	Icon.prototype._getAccessibilityAttributes = function() {
+	/**
+	 * Returns the string which is set to the 'title' attribute of the DOM output
+	 *
+	 * @return {string|undefined} the string which is output as title attribute
+	 * @private
+	 */
+	Icon.prototype._getOutputTitle = function() {
 		var oIconInfo = IconPool.getIconInfo(this.getSrc()),
-			alabelledBy = this.getAriaLabelledBy(),
 			sTooltip = this.getTooltip_AsString(),
+			bUseIconTooltip = this.getUseIconTooltip();
+
+		if (sTooltip || (bUseIconTooltip && oIconInfo && oIconInfo.text)) {
+			return sTooltip || oIconInfo.text;
+		}
+	};
+
+	/**
+	 * Returns the label which is output to either aria-label or the invisible text which
+	 * is refered in the aria-labelledby attributes.
+	 *
+	 * Screen reader reads out the value which is set to the 'title' attribute. Thus the
+	 * aria-label or aria-labelledBy is used only when the label string is different than
+	 * the string used as 'title' attribute. When the label string is the same as the one
+	 * which is set to the 'title' attribute of the DOM, this method returns undefined in
+	 * order not to set the aria-label or aria-labelledby attribute.
+	 *
+	 * @return {string} the label when it's necessary to be output
+	 * @private
+	 */
+	Icon.prototype._getIconLabel = function() {
+		var oIconInfo = IconPool.getIconInfo(this.getSrc()),
 			sAlt = this.getAlt(),
+			sTooltip = this.getTooltip_AsString(),
 			bUseIconTooltip = this.getUseIconTooltip(),
-			mAccAttributes = {};
+			sLabel = sAlt || sTooltip || (bUseIconTooltip && oIconInfo && (oIconInfo.text || oIconInfo.name)),
+			sOutputTitle = this._getOutputTitle();
+
+		if (sLabel && sLabel !== sOutputTitle) {
+			return sLabel;
+		}
+	};
+
+	Icon.prototype._createInvisibleText = function(sText) {
+		var oInvisibleText = this.getAggregation("_invisibleText");
+
+		if (!oInvisibleText) {
+			oInvisibleText = new InvisibleText(this.getId() + "-label", {
+				text: sText
+			});
+
+			this.setAggregation("_invisibleText", oInvisibleText, true);
+		} else {
+			// avoid triggering invalidation during rendering
+			oInvisibleText.setProperty("text", sText, true);
+		}
+
+		return oInvisibleText;
+	};
+
+	Icon.prototype._getAccessibilityAttributes = function() {
+		var aLabelledBy = this.getAriaLabelledBy(),
+			mAccAttributes = {},
+			sIconLabel = this._getIconLabel(),
+			oInvisibleText;
 
 		if (this.getDecorative()) {
 			mAccAttributes.role = "presentation";
@@ -486,13 +522,37 @@ sap.ui.define(['jquery.sap.global', '../Device', './Control', './IconPool', './l
 			}
 		}
 
-		if (alabelledBy.length > 0) {
-			mAccAttributes.labelledby = alabelledBy.join(" ");
-		} else if (sAlt || sTooltip || (bUseIconTooltip && oIconInfo)) {
-			mAccAttributes.label = sAlt || sTooltip || oIconInfo.text || oIconInfo.name;
+		if (aLabelledBy.length > 0) {
+			if (sIconLabel) {
+				oInvisibleText = this._createInvisibleText(sIconLabel);
+				aLabelledBy.push(oInvisibleText.getId());
+			}
+			mAccAttributes.labelledby = aLabelledBy.join(" ");
+		} else if (sIconLabel) {
+			mAccAttributes.label = sIconLabel;
 		}
 
 		return mAccAttributes;
+	};
+
+	/**
+	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @protected
+	 */
+	Icon.prototype.getAccessibilityInfo = function() {
+		if (this.getDecorative()) {
+			return null;
+		}
+
+		var bHasPressListeners = this.hasListeners("press");
+		var oIconInfo = IconPool.getIconInfo(this.getSrc());
+
+		return {
+			role: bHasPressListeners ? "button" : "img",
+			type: sap.ui.getCore().getLibraryResourceBundle("sap.ui.core").getText(bHasPressListeners ? "ACC_CTR_TYPE_BUTTON" : "ACC_CTR_TYPE_IMAGE"),
+			description: this.getAlt() || this.getTooltip_AsString() || (oIconInfo ? oIconInfo.text || oIconInfo.name : ""),
+			focusable: bHasPressListeners
+		};
 	};
 
 	return Icon;

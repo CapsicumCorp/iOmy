@@ -21,6 +21,7 @@ sap.ui.define([
 		 */
 		constructor: function (oObjectPageLayout) {
 			this._oObjectPageLayout = oObjectPageLayout;
+			this._iScrollDuration = oObjectPageLayout._iScrollToSectionDuration;
 		}
 	});
 
@@ -39,10 +40,11 @@ sap.ui.define([
 		if (!oAnchorBar) {
 
 			oAnchorBar = new AnchorBar({
+				id: this.getObjectPageLayout().getId() + "-anchBar",
 				showPopover: this.getObjectPageLayout().getShowAnchorBarPopover()
 			});
 
-			this.getObjectPageLayout().setAggregation("_anchorBar", oAnchorBar);
+			this.getObjectPageLayout().setAggregation("_anchorBar", oAnchorBar, true);
 		}
 
 		return oAnchorBar;
@@ -59,13 +61,13 @@ sap.ui.define([
 		//tablet & desktop mechanism
 		if (oAnchorBar && this.getObjectPageLayout().getShowAnchorBar()) {
 
-			oAnchorBar.removeAllContent();
+			oAnchorBar._resetControl();
 
 			//first level
 			aSections.forEach(function (oSection) {
 
 				if (!oSection.getVisible() || !oSection._getInternalVisible()) {
-					return true;
+					return;
 				}
 
 				var oButtonClone,
@@ -83,16 +85,26 @@ sap.ui.define([
 							return;
 						}
 
-						var oButtonClone = this._buildAnchorBarButton(oSubSection, false);
+						var oSecondLevelButtonClone = this._buildAnchorBarButton(oSubSection, false);
 
-						if (oButtonClone) {
-							oAnchorBar.addContent(oButtonClone);
+						if (oSecondLevelButtonClone) {
+							oAnchorBar.addContent(oSecondLevelButtonClone);
 						}
 
 					}, this);
 				}
 
 			}, this);
+		}
+	};
+
+	ABHelper.prototype._focusOnSectionWhenUsingKeyboard = function (oEvent) {
+		var oSourceData = oEvent.srcControl.data(),
+			oSection = sap.ui.getCore().byId(oSourceData.sectionId),
+			oObjectPage = this.getObjectPageLayout();
+
+		if (oSection && !oSourceData.bHasSubMenu && !oObjectPage.getUseIconTabBar()) {
+			jQuery.sap.delayedCall(this._iScrollDuration, oSection.$(), "focus");
 		}
 	};
 
@@ -105,46 +117,34 @@ sap.ui.define([
 	 * @private
 	 */
 	ABHelper.prototype._buildAnchorBarButton = function (oSectionBase, bIsSection) {
-
 		var oButtonClone = null,
 			oObjectPageLayout = this.getObjectPageLayout(),
 			oButton,
-			oSectionBindingInfo,
-			sModelName,
-			aSubSections = oSectionBase.getAggregation("subSections");
+			oAnchorBar = this._getAnchorBar(),
+			sId,
+			aSubSections = oSectionBase.getAggregation("subSections"),
+			fnButtonKeyboardUseHandler = this._focusOnSectionWhenUsingKeyboard.bind(this),
+			oEventDelegatesForkeyBoardHandler = {
+				onsapenter: fnButtonKeyboardUseHandler,
+				onsapspace: fnButtonKeyboardUseHandler
+			};
 
 		if (oSectionBase.getVisible() && oSectionBase._getInternalVisible()) {
 			oButton = oSectionBase.getCustomAnchorBarButton();
 
 			//by default we get create a button with the section title as text
 			if (!oButton) {
+				sId = oAnchorBar.getId() + "-" + oSectionBase.getId() + "-anchor";
+
 				oButtonClone = new Button({
-					ariaDescribedBy: oSectionBase
+					ariaDescribedBy: oSectionBase,
+					id: sId
 				});
 
+				oButtonClone.addEventDelegate(oEventDelegatesForkeyBoardHandler);
 				//has a ux rule been applied that we need to reflect here?
-				if (oSectionBase._getInternalTitle() != "") {
-					oButtonClone.setText(oSectionBase._getInternalTitle());
-				} else {
-
-					//is the section title bound to a model? in this case we need to apply the same binding
-					oSectionBindingInfo = oSectionBase.getBindingInfo("title");
-					if (oSectionBindingInfo && oSectionBindingInfo.parts && oSectionBindingInfo.parts.length > 0) {
-
-						sModelName = oSectionBindingInfo.parts[0].model;
-
-						//handle relative binding scenarios
-						oButtonClone.setBindingContext(oSectionBase.getBindingContext(sModelName), sModelName);
-
-						//copy binding information
-						oButtonClone.bindProperty("text", {
-							path: oSectionBindingInfo.parts[0].path,
-							model: sModelName
-						});
-					} else { //otherwise just copy the plain text
-						oButtonClone.setText(oSectionBase.getTitle());
-					}
-				}
+				var sTitle = (oSectionBase._getInternalTitle() != "") ? oSectionBase._getInternalTitle() : oSectionBase.getTitle();
+				oButtonClone.setText(sTitle);
 			} else {
 				oButtonClone = oButton.clone(); //keep original button parent control hierarchy
 			}
@@ -173,16 +173,22 @@ sap.ui.define([
 			}
 
 			if (aSubSections && aSubSections.length > 1) {
-				// the anchor bar need to know if the button has submenu for accessibility rules
-				oButtonClone.addCustomData(new CustomData({
-					key: "bHasSubMenu",
-					value: true
-				}));
+				var iVisibleSubSections = aSubSections.filter(function (oSubSection) {
+					return oSubSection.getVisible();
+				}).length;
 
-				if (oObjectPageLayout.getShowAnchorBarPopover()) {
-					// Add arrow icon-down in order to indicate that on click will open popover
-					oButtonClone.setIcon(IconPool.getIconURI("slim-arrow-down"));
-					oButtonClone.setIconFirst(false);
+				if (iVisibleSubSections > 1) {
+					// the anchor bar need to know if the button has submenu for accessibility rules
+					oButtonClone.addCustomData(new CustomData({
+						key: "bHasSubMenu",
+						value: true
+					}));
+
+					if (oObjectPageLayout.getShowAnchorBarPopover()) {
+						// Add arrow icon-down in order to indicate that on click will open popover
+						oButtonClone.setIcon(IconPool.getIconURI("slim-arrow-down"));
+						oButtonClone.setIconFirst(false);
+					}
 				}
 			}
 		}

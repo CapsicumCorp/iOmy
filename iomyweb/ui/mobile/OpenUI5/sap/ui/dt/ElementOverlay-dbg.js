@@ -32,7 +32,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @private
@@ -59,13 +59,6 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 				 * Whether the ElementOverlay is selectable, per default this implicitly makes the overlay focusable (TODO discuss)
 				 */
 				selectable : {
-					type : "boolean",
-					defaultValue : false
-				},
-				/**
-				 * Whether the ElementOverlay can get the browser focus (tabindex)
-				 */
-				focusable : {
 					type : "boolean",
 					defaultValue : false
 				},
@@ -98,6 +91,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 				 */
 				designTimeMetadata : {
 					type : "sap.ui.dt.ElementDesignTimeMetadata",
+					altTypes : ["object"],
 					multiple : false
 				}
 			},
@@ -127,21 +121,11 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 					}
 				},
 				/**
-				 * Event fired when the property "Focusable" is changed
-				 */
-				focusableChange : {
-					parameters : {
-						focusable : { type : "boolean" }
-					}
-				},
-				/**
 				 * Event fired when the property "Editable" is changed
 				 */
 				editableChange : {
 					parameters : {
-						selected : {
-							editable : "boolean"
-						}
+						editable : { type : "boolean" }
 					}
 				},
 				/**
@@ -175,15 +159,8 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	ElementOverlay.prototype.init = function() {
 		Overlay.prototype.init.apply(this, arguments);
 
-		this._oDefaultDesignTimeMetadata = null;
-		this.placeAt(Overlay.getOverlayContainer());
-
-		// this is needed to prevent UI5 renderManager from removing overlay's node from DOM in a rendering phase
-		// see RenderManager.js "this._fPutIntoDom" function
-		var oUIArea = this.getUIArea();
-		oUIArea._onChildRerenderedEmpty = function() {
-			return true;
-		};
+		this._oMutationObserver = Overlay.getMutationObserver();
+		this._oMutationObserver.attachDomChanged(this._onDomChanged, this);
 	};
 
 	/**
@@ -191,18 +168,50 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @protected
 	 */
 	ElementOverlay.prototype.exit = function() {
-		Overlay.prototype.exit.apply(this, arguments);
+		if (this._oMutationObserver) {
+			this._oMutationObserver.detachDomChanged(this._onDomChanged, this);
+			delete this._oMutationObserver;
+		}
 
-		this._destroyDefaultDesignTimeMetadata();
+		Overlay.prototype.exit.apply(this, arguments);
 
 		this._unobserve();
 		OverlayRegistry.deregister(this._sElementId);
 
 		if (!OverlayRegistry.hasOverlays()) {
+			Overlay.destroyMutationObserver();
 			Overlay.removeOverlayContainer();
 		}
 
 		delete this._sElementId;
+	};
+
+	/**
+	 * @override
+	 */
+	ElementOverlay.prototype.setLazyRendering = function(bLazyRendering) {
+		Overlay.prototype.setLazyRendering.apply(this, arguments);
+
+		if (!bLazyRendering) {
+			this.placeInOverlayContainer();
+		}
+	};
+
+	/**
+	 * Places this ElementOverlay in an overlay container, which causes a rendering only if overlay wasn't rendered before
+	 * Overlay won't be visible without a call of this method
+	 * @public
+	 */
+	ElementOverlay.prototype.placeInOverlayContainer = function() {
+		if (!this.getParent()) {
+			this.placeAt(Overlay.getOverlayContainer());
+			// this is needed to prevent UI5 renderManager from removing overlay's node from DOM in a rendering phase
+			// see RenderManager.js "this._fPutIntoDom" function
+			var oUIArea = this.getUIArea();
+			oUIArea._onChildRerenderedEmpty = function() {
+				return true;
+			};
+		}
 	};
 
 	/**
@@ -218,25 +227,61 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 			this._unobserve();
 		}
 
-		this.destroyAggregation("aggregationOverlays");
-		this._destroyDefaultDesignTimeMetadata();
-
 		this.setAssociation("element", vElement);
 		var oElement = this.getElementInstance();
-
-		this._createAggregationOverlays();
-
 
 		this._sElementId = oElement.getId();
 		OverlayRegistry.register(oElement, this);
 		this._observe(oElement);
 
-		var oParentElementOverlay = OverlayUtil.getClosestOverlayFor(oElement);
-		if (oParentElementOverlay) {
-			oParentElementOverlay.sync();
+		if (this.getDesignTimeMetadata()) {
+			this._renderAndCreateAggregation();
 		}
 
 		return this;
+	};
+
+	/**
+	 * @override
+	 */
+	ElementOverlay.prototype.setDesignTimeMetadata = function(vDesignTimeMetada) {
+		var oDesignTimeMetada;
+		if (vDesignTimeMetada instanceof ElementDesignTimeMetadata) {
+			oDesignTimeMetada = vDesignTimeMetada;
+		} else {
+			oDesignTimeMetada = new ElementDesignTimeMetadata({
+				libraryName : this.getElementInstance().getMetadata().getLibraryName(),
+				data : vDesignTimeMetada
+			});
+		}
+
+		var oReturn = this.setAggregation("designTimeMetadata", oDesignTimeMetada);
+
+		if (this.getElementInstance()) {
+			this._renderAndCreateAggregation();
+		}
+
+		return oReturn;
+	};
+
+	/**
+	 * @private
+	 */
+	ElementOverlay.prototype._renderAndCreateAggregation = function() {
+		// detach all children, so then they won't be destroyed
+		this.getAggregationOverlays().forEach(function(oAggregationOverlay) {
+			oAggregationOverlay.getChildren().forEach(function(oElementOverlay) {
+				oElementOverlay.setParent(null);
+			});
+		});
+		this.destroyAggregationOverlays();
+
+		this._createAggregationOverlays();
+
+		var oParentElementOverlay = OverlayUtil.getClosestOverlayFor(this.getElementInstance().getParent());
+		if (oParentElementOverlay) {
+			oParentElementOverlay.sync();
+		}
 	};
 
 	/**
@@ -290,20 +335,6 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 
 		return this;
 	};
-	/**
-	 * Sets whether the ElementOverlay can get the browser focus (tabindex)
-	 * @param {boolean} bFocusable if the ElementOverlay is focusable
-	 * @returns {sap.ui.dt.ElementOverlay} returns this
-	 * @public
-	 */
-	ElementOverlay.prototype.setFocusable = function(bFocusable) {
-		if (this.isFocusable() !== bFocusable) {
-			this.setProperty("focusable", bFocusable);
-			this.fireFocusableChange({focusable : bFocusable});
-		}
-
-		return this;
-	};
 
 	/**
 	 * Sets whether the ElementOverlay is movable and toggles corresponding css class
@@ -340,21 +371,6 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	};
 
 	/**
-	 * Returns the DesignTime metadata of this ElementOverlay, if no DT metadata exists, creates and returns the default DT metadata object
-	 * @return {sap.ui.DesignTimeMetadata} DT metadata of the ElementOverlay
-	 * @public
-	 */
-	ElementOverlay.prototype.getDesignTimeMetadata = function() {
-		var oDesignTimeMetadata = this.getAggregation("designTimeMetadata");
-		if (!oDesignTimeMetadata && !this._oDefaultDesignTimeMetadata) {
-			this._oDefaultDesignTimeMetadata = new ElementDesignTimeMetadata({
-				data : ElementUtil.getDesignTimeMetadata(this.getElementInstance())
-			});
-		}
-		return oDesignTimeMetadata || this._oDefaultDesignTimeMetadata;
-	};
-
-	/**
 	 * @public
 	 */
 	ElementOverlay.prototype.sync = function() {
@@ -372,9 +388,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @private
 	 */
 	ElementOverlay.prototype._createAggregationOverlay = function(sAggregationName, bInHiddenTree) {
-		var oData =  this.getDesignTimeMetadata().getAggregation(sAggregationName);
-
-		var oAggregationDesignTimeMetadata = new AggregationDesignTimeMetadata({data : oData});
+		var oAggregationDesignTimeMetadata = this.getDesignTimeMetadata().createAggregationDesignTimeMetadata(sAggregationName);
 
 		var oAggregationOverlay = new AggregationOverlay({
 			aggregationName : sAggregationName,
@@ -382,10 +396,10 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 			designTimeMetadata : oAggregationDesignTimeMetadata,
 			inHiddenTree : bInHiddenTree
 		});
+		this._mAggregationOverlays[sAggregationName] = oAggregationOverlay;
+		this.addAggregation("aggregationOverlays", oAggregationOverlay);
 
 		this._syncAggregationOverlay(oAggregationOverlay);
-
-		this.addAggregation("aggregationOverlays", oAggregationOverlay);
 
 		oAggregationOverlay.attachVisibleChanged(this._onAggregationVisibleChanged, this);
 
@@ -407,7 +421,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 		ElementUtil.iterateOverAllPublicAggregations(oElement, function(oAggregation, aAggregationElements) {
 			var sAggregationName = oAggregation.name;
 			mAggregationsWithOverlay[sAggregationName] = true;
-			that._mAggregationOverlays[sAggregationName] = that._createAggregationOverlay(sAggregationName, that.isInHiddenTree());
+			that._createAggregationOverlay(sAggregationName, that.isInHiddenTree());
 		});
 
 		// create aggregation overlays also for a hidden aggregations which are not ignored in the DT Metadata
@@ -416,21 +430,14 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 		aAggregationNames.forEach(function (sAggregationName) {
 			var oAggregationMetadata = mAggregationsMetadata[sAggregationName];
 			if (oAggregationMetadata.ignore === false && !mAggregationsWithOverlay[sAggregationName]) {
-				that._mAggregationOverlays[sAggregationName] = that._createAggregationOverlay(sAggregationName, true);
+				// this is needed to point out, that a control is both in public and private tree, so that it has a "public" parent, which can be different from a getParent()
+				// flag is needed so that parents could have possibility to handle actions for the children. The better solution yet to come: probably, propagation of metadata from parents to children
+				var bIsInHiddenTree = oAggregationMetadata.inHiddenTree;
+				that._createAggregationOverlay(sAggregationName, bIsInHiddenTree);
 			}
 		});
 
 		this.sync();
-	};
-
-	/**
-	 * @private
-	 */
-	ElementOverlay.prototype._destroyDefaultDesignTimeMetadata = function() {
-		if (this._oDefaultDesignTimeMetadata) {
-			this._oDefaultDesignTimeMetadata.destroy();
-			this._oDefaultDesignTimeMetadata = null;
-		}
 	};
 
 	/**
@@ -442,7 +449,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 			this._oObserver = new ControlObserver({
 				target : oElement
 			});
-			this._oObserver.attachDomChanged(this._onElementDomChanged, this);
+			this._oObserver.attachAfterRendering(this._onElementAfterRendering, this);
 		} else {
 			this._oObserver = new ManagedObjectObserver({
 				target : oElement
@@ -545,17 +552,33 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	/**
 	 * @private
 	 */
-	ElementOverlay.prototype._onElementDomChanged = function(oEvent) {
-		delete this._mGeometry;
-
-		this.sync();
-
-		var oParent = this.getParent();
-		if (oParent) {
-			if (!oParent.getDomRef) {
-				this.applyStyles();
+	ElementOverlay.prototype._onDomChanged = function(oEvent) {
+		var aIds = oEvent.getParameters().elementIds || [];
+		var oElement = this.getElementInstance();
+		if (oElement && aIds.indexOf(oElement.getId()) !== -1) {
+			// if element's DOM turns visible (via DOM mutations, classes and so on)
+			if (this._mGeometry && !this._mGeometry.visible) {
+				delete this._mGeometry;
+				this.invalidate();
 			}
 		}
+
+		// update styles (starting from root and update all overlay children)
+		if (this.isRoot()) {
+			this.applyStyles();
+		}
+	};
+
+	/**
+	 * @private
+	 */
+	ElementOverlay.prototype._onElementAfterRendering = function() {
+		// initial rendering of a UI5 element is not catched with a mutation observer
+		if (!this.getDomRef()) {
+			this.invalidate();
+		}
+		// we should sync aggregations onAfterRendering, because elements (or aggregations) might be created invisible
+		this.sync();
 	};
 
 	/**
@@ -616,20 +639,6 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	};
 
 	/**
-	 * @protected
-	 */
-	ElementOverlay.prototype.onAfterRendering = function() {
-		Overlay.prototype.onAfterRendering.apply(this, arguments);
-
-		var bFocusable = this.isFocusable();
-		if (bFocusable) {
-			this.$().attr("tabindex", 0);
-		} else {
-			this.$().attr("tabindex", null);
-		}
-	};
-
-	/**
 	 * Returns if the ElementOverlay is selected
 	 * @public
 	 * @return {boolean} if the ElementOverlay is selected
@@ -645,15 +654,6 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 */
 	ElementOverlay.prototype.isSelectable = function() {
 		return this.getSelectable();
-	};
-
-	/**
-	 * Returns if the ElementOverlay is can get the focus
-	 * @public
-	 * @return {boolean} if the ElementOverlay is focusable
-	 */
-	ElementOverlay.prototype.isFocusable = function() {
-		return this.getFocusable();
 	};
 
 	/**
@@ -690,6 +690,33 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 
 	};
 
+	/**
+	 * Returns agrregation overlay of public parent, which is an ancestor of this overlay
+	 *
+	 * @return {sap.ui.dt.Overlay} Overlay public parent
+	 * @public
+	 */
+	ElementOverlay.prototype.getPublicParentAggregationOverlay = function() {
+		var oAggregationOverlay = this.getParentAggregationOverlay();
+		var oParentElementOverlay = this.getParentElementOverlay();
+		while (oParentElementOverlay && ElementUtil.isInstanceOf(oParentElementOverlay, "sap.ui.dt.ElementOverlay") && oParentElementOverlay.isInHiddenTree()) {
+			oAggregationOverlay = oParentElementOverlay.getParentAggregationOverlay();
+			oParentElementOverlay = oParentElementOverlay.getParentElementOverlay();
+		}
+		return oAggregationOverlay;
+	};
+
+	/**
+	 * Returns first ancestor overlay not flagged as inHiddenTree
+	 * @return {sap.ui.dt.ElementOverlay} ElementOverlay public parent
+	 * @public
+	 */
+	ElementOverlay.prototype.getPublicParentElementOverlay = function() {
+		var oPublicParentAggregationOverlay = this.getPublicParentAggregationOverlay();
+		if (oPublicParentAggregationOverlay) {
+			return oPublicParentAggregationOverlay.getParent();
+		}
+	};
 
 	return ElementOverlay;
 }, /* bExport= */ true);

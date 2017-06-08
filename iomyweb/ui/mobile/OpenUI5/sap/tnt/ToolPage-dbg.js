@@ -20,7 +20,7 @@ sap.ui.define(['./library', 'sap/ui/core/Control', 'sap/ui/Device', 'sap/ui/core
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.34.9
+		 * @version 1.44.14
 		 *
 		 * @constructor
 		 * @public
@@ -72,13 +72,13 @@ sap.ui.define(['./library', 'sap/ui/core/Control', 'sap/ui/Device', 'sap/ui/core
 		 */
 		ToolPage.prototype.setSideExpanded = function(isSideExpanded) {
 			var sideContentAggregation = this.getAggregation('sideContent');
-			var isMediaQueryForPhone = Device.system.phone;
 			var domRef = this.getDomRef();
 
 			this.setProperty('sideExpanded', isSideExpanded, true);
 
-			if (sideContentAggregation && !isMediaQueryForPhone) {
-				sideContentAggregation.setExpanded(isSideExpanded);
+			if (sideContentAggregation) {
+				var newState = Device.system.phone ? true :  isSideExpanded;
+				sideContentAggregation.setExpanded(newState);
 			}
 
 			if (!domRef) {
@@ -136,6 +136,9 @@ sap.ui.define(['./library', 'sap/ui/core/Control', 'sap/ui/Device', 'sap/ui/core
 			}
 
 			switch (this._currentMediaQuery) {
+				case 'Combi':
+					this.setSideExpanded(true);
+					break;
 				case 'Tablet':
 					this.setSideExpanded(false);
 					break;
@@ -175,6 +178,10 @@ sap.ui.define(['./library', 'sap/ui/core/Control', 'sap/ui/Device', 'sap/ui/core
 		 *
 		 */
 		ToolPage.prototype._getDeviceAsString = function () {
+			if (Device.system.combi) {
+				return 'Combi';
+			}
+
 			if (Device.system.phone) {
 				return 'Phone';
 			}

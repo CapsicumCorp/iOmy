@@ -18,11 +18,12 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 	 * @class
 	 * The InPlaceEdit is a functionality to have text in display mode that can be changed in place.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
 	 * @since 1.8.0
+	 * @deprecated Since version 1.38.
 	 * @alias sap.ui.commons.InPlaceEdit
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -608,6 +609,16 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 		};
 
 
+		/**
+		 * @see sap.ui.core.Control#getAccessibilityInfo
+		 * @protected
+		 */
+		InPlaceEdit.prototype.getAccessibilityInfo = function() {
+			var oControl = this.getContent();
+			return oControl && oControl.getAccessibilityInfo ? oControl.getAccessibilityInfo() : null;
+		};
+
+
 		// Private variables
 
 		/**
@@ -796,16 +807,10 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 		function iconForUndoButton(oInPlaceEdit){
 
 			if (oInPlaceEdit._oUndoButton) {
-				var sIcon = Parameters.get('sapUiIpeUndoImageURL');
-				var sIconHovered = Parameters.get('sapUiIpeUndoImageDownURL');
-				var sThemeModuleName = "sap.ui.commons.themes." + sap.ui.getCore().getConfiguration().getTheme();
-				if (sIcon) {
-					sIcon = jQuery.sap.getModulePath(sThemeModuleName, sIcon);
-				} else {
+				var sIcon = Parameters._getThemeImage('sapUiIpeUndoImageURL');
+				var sIconHovered = Parameters._getThemeImage('sapUiIpeUndoImageDownURL');
+				if (!sIcon) {
 					sIcon = "sap-icon://decline";
-				}
-				if (sIconHovered) {
-					sIconHovered = jQuery.sap.getModulePath(sThemeModuleName, sIconHovered);
 				}
 				oInPlaceEdit._oUndoButton.setIcon(sIcon);
 				oInPlaceEdit._oUndoButton.setIconHovered(sIconHovered);
@@ -875,16 +880,10 @@ sap.ui.define(['jquery.sap.global', './TextField', './TextView', './library', 's
 		function iconForEditButton(oInPlaceEdit){
 
 			if (oInPlaceEdit._oEditButton) {
-				var sIcon = Parameters.get('sapUiIpeEditImageURL');
-				var sIconHovered = Parameters.get('sapUiIpeEditImageDownURL');
-				var sThemeModuleName = "sap.ui.commons.themes." + sap.ui.getCore().getConfiguration().getTheme();
-				if (sIcon) {
-					sIcon = jQuery.sap.getModulePath(sThemeModuleName, sIcon);
-				} else {
+				var sIcon = Parameters._getThemeImage('sapUiIpeEditImageURL');
+				var sIconHovered = Parameters._getThemeImage('sapUiIpeEditImageDownURL');
+				if (!sIcon) {
 					sIcon = "sap-icon://edit";
-				}
-				if (sIconHovered) {
-					sIconHovered = jQuery.sap.getModulePath(sThemeModuleName, sIconHovered);
 				}
 				oInPlaceEdit._oEditButton.setIcon(sIcon);
 				oInPlaceEdit._oEditButton.setIconHovered(sIconHovered);

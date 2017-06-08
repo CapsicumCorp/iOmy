@@ -59,8 +59,7 @@ sap.ui.define(['jquery.sap.global'],
 
 			// 1. Input type="search".
 			//    Enclose input into a <form> to show a correct keyboard
-			//    method="post" to prevent unneeded "?" at the end of URL
-			rm.write('<form method="post" action="javascript:void(0);"');
+			rm.write('<form');
 			rm.writeAttribute("id", sId + "-F");
 			rm.addClass('sapMSFF');
 			if (!bShowSearchBtn) {
@@ -106,9 +105,9 @@ sap.ui.define(['jquery.sap.global'],
 			if (sValue) { rm.writeAttributeEscaped("value", sValue); }
 
 			//ARIA attributes
-			if (oSF.getEnabled() && bShowRefreshButton) {
+			if (oSF.getEnabled() && bShowRefreshButton && oSF._sAriaF5Label) {
 				oAccAttributes.describedby = {
-					value: oSF._sAriaF5LabelId,
+					value: oSF._sAriaF5Label.getId(),
 					append: true
 				};
 			}

@@ -24,8 +24,9 @@ sap.ui.define(['jquery.sap.global', './UniversalDate'],
 	 *
 	 * @private
 	 * @alias sap.ui.core.date.Japanese
+	 * @extends sap.ui.core.date.UniversalDate
 	 */
-	var Japanese = UniversalDate.extend("sap.ui.core.date.Japanese", /** @lends sap.ui.core.date.Date.prototype */ {
+	var Japanese = UniversalDate.extend("sap.ui.core.date.Japanese", /** @lends sap.ui.core.date.Japanese.prototype */ {
 		constructor: function() {
 			var aArgs = arguments;
 			if (aArgs.length > 1) {
@@ -228,6 +229,12 @@ sap.ui.define(['jquery.sap.global', './UniversalDate'],
 			oJapanese.day = iDay;
 		}
 		return this._setUTCJapanese(oJapanese);
+	};
+	Japanese.prototype.getWeek = function() {
+		return UniversalDate.getWeekByDate(this.sCalendarType, this.oDate.getFullYear(), this.getMonth(), this.getDate());
+	};
+	Japanese.prototype.getUTCWeek = function() {
+		return UniversalDate.getWeekByDate(this.sCalendarType, this.oDate.getUTCFullYear(), this.getUTCMonth(), this.getUTCDate());
 	};
 
 	return Japanese;

@@ -3,6 +3,7 @@
 	display: -webkit-flex;
 	display: -ms-flexbox;
 	display: flex;
+	overflow: hidden;
 }
 
 .sapUiBlockCellCenteredContent {
@@ -41,10 +42,16 @@
 }
 
 .sapUiBlockCellTitle {
-	color: @sapUiDarkText;
     font-weight: normal;
 	font-size: @sapUiFontHeader2Size;
 	margin-bottom: 1rem;
 	margin-top: 0rem;
 }
 
+/* mixin call for creating container content padding classes (arguments: rootContainer, contentSelector) */
+.sapUiContainerContentPadding(~".sapUiBlockLayoutCell", ~"> .sapUiBlockCellContent");
+
+/* override for standard padding: 2rem for BlockLayoutCell */
+.sapUiBlockLayoutCell.sapUiContentPadding > .sapUiBlockCellContent {
+	padding: 2rem;
+}

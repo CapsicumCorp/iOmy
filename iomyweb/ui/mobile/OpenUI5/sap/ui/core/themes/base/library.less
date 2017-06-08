@@ -13,12 +13,13 @@
 /* Shared CSS for 'base' theme */
 
 .sapUiThemeDesignerCustomCssCheck() when(@sapUiThemeDesignerCustomCss = true){
-	visible:true;
+	content: 'true';
 }
 .sapUiThemeDesignerCustomCssCheck() when not(@sapUiThemeDesignerCustomCss = true){
 }
 
-.sapUiThemeDesignerCustomCss{
+link[id^="sap-ui-theme-"]::after,
+.sapUiThemeDesignerCustomCss {
 	.sapUiThemeDesignerCustomCssCheck;
 }
 
@@ -76,10 +77,8 @@
 	background-color: #CCCCCC;
 	opacity: 0.6;
 	filter: alpha(opacity=60);
-	top: 0px;
-	left: 0px;
-	right: 0px;
-	bottom: 0px;
+	/* the left, right, top, bottom is set in Popup.js because window scroll
+	 position has to be considered */
 	position: fixed;
 	outline: 0 none;
 }
@@ -300,6 +299,7 @@
 	position: absolute !important;
 	clip: rect(1px, 1px, 1px, 1px);
 }
+
 /* END "shared.less" */
 
 
@@ -357,17 +357,37 @@
 	cursor: pointer;
 }
 
-html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
-	transform: scale(-1,1);
-	-ms-transform: scale(-1,1); /* IE 9 */
-	-webkit-transform: scale(-1,1); /* Safari and Chrome */
-}
-
 .sapUiIcon:before {
 	content: attr(data-sap-ui-icon-content);
 	speak: none;
 	font-weight: normal;
 	-webkit-font-smoothing: antialiased;
+}
+
+/*
+ * The mirroring of icon is done on the pesudo element and not the root DOM.
+ * Because:
+ *  1. All direction related css styles are flipped in RTL, for example padding-left
+ *   is changed to padding right in RTL.
+ *  2. The mirroring of an icon in RTL mode flips the css style again which results
+ *   in the wrong direction.
+ *  3. Custom CSS style should be set on the root DOM and not the pesudo element.
+ */
+html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
+	&:before, &:after /* some controls render the icon using 'after' pesudo element */ {
+		transform: scale(-1,1);
+		-ms-transform: scale(-1,1); /* IE 9 */
+		-webkit-transform: scale(-1,1); /* Safari and Chrome */
+		display: inline-block; /* pesudo element has display: inline by default and can't apply the transform css style for RTL mode*/
+	}
+}
+
+/**
+ * The Default color for Icon which always points to the variable across themes.
+ * Therefore it's defined in the base theme.
+ */
+.sapUiIconColorDefault {
+	color: @sapUiContentIconColor;
 }
 
 /* END "Icon.less" */
@@ -393,8 +413,6 @@ html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
 
 	opacity: 0;
 	transition: opacity 0.3s ease-in;
-	-ms-transition: opacity 0.3s ease-in;
-	-moz-transition: opacity 0.3s ease-in;
 	-webkit-transition: opacity 0.3s ease-in;
 }
 
@@ -525,23 +543,13 @@ html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
 	right: 0px;
 }
 
+#sapUiBusyIndicator > .sapUiLocalBusyIndicatorFade {
+	cursor: wait;
+}
+
 /**
  * Keyframe definitions
  */
-.mixin-standard-animation-frames {
-	0%, 80%, 100% {
-		-webkit-transform: scale(0.4);
-		-moz-transform: scale(0.4);
-		-ms-transform: scale(0.4);
-		transform: scale(0.4);
-	}
-	40% {
-		-webkit-transform: scale(1);
-		-moz-transform: scale(1);
-		-ms-transform: scale(1);
-		transform: scale(1);
-	}
-}
 .mixin-standard-background-animation-frames {
 	0%, 80%, 100% {
 		opacity: 1;
@@ -550,6 +558,7 @@ html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
 		opacity: 0.1;
 	}
 }
+
 .mixin-standard-shadow-animation-frames {
 	0%, 80%, 100% {
 		opacity: 0;
@@ -559,20 +568,6 @@ html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
 	}
 }
 
-.mixin-small-animation-frames {
-	0%, 100% {
-		-webkit-transform: scale(0.2);
-		-moz-transform: scale(0.2);
-		-ms-transform: scale(0.2);
-		transform: scale(0.2);
-	}
-	50% {
-		-webkit-transform: scale(1);
-		-moz-transform: scale(1);
-		-ms-transform: scale(1);
-		transform: scale(1);
-	}
-}
 .mixin-small-background-animation-frames {
 	0%, 100% {
 		opacity: 1;
@@ -581,6 +576,7 @@ html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
 		opacity: 0.1;
 	}
 }
+
 .mixin-small-shadow-animation-frames {
 	0%, 100% {
 		opacity: 0;
@@ -593,35 +589,51 @@ html[dir=rtl] .sapUiIconMirrorInRTL:not(.sapUiIconSuppressMirrorInRTL) {
 /**
  * Animations for different browser vendors
  */
-@keyframes sapUiBusyAnimationStandard { .mixin-standard-animation-frames; }
-@-webkit-keyframes sapUiBusyAnimationStandard { .mixin-standard-animation-frames; }
-@-moz-keyframes sapUiBusyAnimationStandard { .mixin-standard-animation-frames; }
-@-ms-keyframes sapUiBusyAnimationStandard { .mixin-standard-animation-frames; }
+@keyframes sapUiBusyAnimationStandard {
+	0%, 80%, 100% {
+		transform: scale(0.4);
+	}
+	40% {
+		transform: scale(1);
+	}
+}
+@-webkit-keyframes sapUiBusyAnimationStandard {
+	0%, 80%, 100% {
+		-webkit-transform: scale(0.4);
+	}
+	40% {
+		-webkit-transform: scale(1);
+	}
+}
 
 @keyframes sapUiBusyAnimationStandardBackground { .mixin-standard-background-animation-frames; }
 @-webkit-keyframes sapUiBusyAnimationStandardBackground { .mixin-standard-background-animation-frames; }
-@-moz-keyframes sapUiBusyAnimationStandardBackground { .mixin-standard-background-animation-frames; }
-@-ms-keyframes sapUiBusyAnimationStandardBackground { .mixin-standard-background-animation-frames; }
 
 @keyframes sapUiBusyAnimationStandardShadow { .mixin-standard-shadow-animation-frames; }
 @-webkit-keyframes sapUiBusyAnimationStandardShadow { .mixin-standard-shadow-animation-frames; }
-@-moz-keyframes sapUiBusyAnimationStandardShadow { .mixin-standard-shadow-animation-frames; }
-@-ms-keyframes sapUiBusyAnimationStandardShadow { .mixin-standard-shadow-animation-frames; }
 
-@keyframes sapUiBusyAnimationSmall { .mixin-small-animation-frames; }
-@-webkit-keyframes sapUiBusyAnimationSmall { .mixin-small-animation-frames; }
-@-moz-keyframes sapUiBusyAnimationSmall { .mixin-small-animation-frames; }
-@-ms-keyframes sapUiBusyAnimationSmall { .mixin-small-animation-frames; }
+@keyframes sapUiBusyAnimationSmall {
+	0%, 100% {
+		transform: scale(0.2);
+	}
+	50% {
+		transform: scale(1);
+	}
+}
+@-webkit-keyframes sapUiBusyAnimationSmall {
+	0%, 100% {
+		-webkit-transform: scale(0.2);
+	}
+	50% {
+		-webkit-transform: scale(1);
+	}
+}
 
 @keyframes sapUiBusyAnimationSmallBackground { .mixin-small-background-animation-frames; }
 @-webkit-keyframes sapUiBusyAnimationSmallBackground { .mixin-small-background-animation-frames; }
-@-moz-keyframes sapUiBusyAnimationSmallBackground { .mixin-small-background-animation-frames; }
-@-ms-keyframes sapUiBusyAnimationSmallBackground { .mixin-small-background-animation-frames; }
 
 @keyframes sapUiBusyAnimationSmallShadow { .mixin-small-shadow-animation-frames; }
 @-webkit-keyframes sapUiBusyAnimationSmallShadow { .mixin-small-shadow-animation-frames; }
-@-moz-keyframes sapUiBusyAnimationSmallShadow { .mixin-small-shadow-animation-frames; }
-@-ms-keyframes sapUiBusyAnimationSmallShadow { .mixin-small-shadow-animation-frames; }
 
 /* END "LocalBusyIndicator.less" */
 
@@ -771,8 +783,6 @@ Usage:
 /* START "Shadow.less" */
 .sapUiShd {
 	box-shadow: @sapUiShadow;
-	-webkit-box-shadow: @sapUiShadow;
-	-moz-box-shadow: @sapUiShadow;
 }
 /* END "Shadow.less" */
 
@@ -791,7 +801,7 @@ Usage:
 
 .sapUiTInfMList {
 	font-size:0.9em;
-	color:@sapUiTextDisabled;
+	color: @sapUiTextDisabled;
 	overflow-y:auto;
 	max-height:12em;
 }
@@ -812,11 +822,129 @@ Usage:
 	text-decoration:line-through;
 }
 
-.sapUiTInfMMore {
-	text-decoration:underline;
+.sapUiTInfMMore, .sapUiTInfPCfg {
+	text-decoration: none;
+	color: @sapLinkColor;
 	cursor:pointer;
 }
 
+.sapUiTInfPMoreHidden {
+	display:none;
+}
+
+.sapUiTInfPDiag {
+	border: 1px solid @sapUiMediumBorder;
+	background: @sapUiExtraLightBG;
+	padding: 6px;
+	font-size:0.9em;
+}
+
+.sapUiTInfPDiag > h1 {
+	font-size: 1em;
+	font-weight: normal;
+}
+
+.sapUiTInfPDiag > h3 {
+	font-size: 0.9em;
+	font-weight: normal;
+	margin-bottom: 0px;
+}
+
+.sapUiTInfPList {
+	font-size: 0.75em;
+	color: @sapUiTextDisabled;
+	background: white;
+	overflow-y: scroll;
+	max-height: 30em;
+}
+
+.sapUiTInfPList .package > .expander {
+	display: inline-block;
+	color: black;
+	background-color: #fcfcfc;
+	width: 12px;
+	text-align: center;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.sapUiTInfPList .package > .name,
+.sapUiTInfPList .module > .name {
+	margin: 2px;
+	padding: 2px 4px;
+	display: inline-block;
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+.sapUiTInfPList .package > .name {
+	color: black;
+	background-color: @sapBackgroundColor;
+}
+
+.sapUiTInfPList .module > .name {
+	margin-left: 14px; /* 12px + 2px standard margin */
+	color: black;
+	background-color: @sapBackgroundColor;
+}
+
+.sapUiTInfPList .children {
+	padding-left: 1em;
+	/* border: 1px dotted lightgrey; */
+}
+
+.sapUiTInfPList .children.none {
+	display: none;
+}
+
+.sapUiTInfPList .children.packages {
+	display: block;
+}
+
+.sapUiTInfPList .children.packages > .package {
+}
+
+.sapUiTInfPList .children.packages > .module {
+	display: none;
+}
+
+.sapUiTInfPList .children.all {
+	display: block;
+}
+
+.sapUiTInfPList .package.selected > .name, .sapUiTInfPList .module.selected > .name {
+	color: white;
+	background-color: blue !important;
+}
+
+.sapUiTInfPList .package.selected .name, .sapUiTInfPList .module.selected > .name {
+	color: white;
+	background-color: lightblue;
+}
+
+.sapUiTInfPList .selected .name {
+	color: white;
+	background-color: #ccccff;
+}
+
+.sapUiTInfPDiag .result {
+	font-size: 0.9em;
+	margin: 8px 4px;
+	width: 600px;
+}
+
+.sapUiTInfPDiag .result > span {
+	word-wrap: break-word;
+}
+
+.sapUiTInfPDiag .footer {
+	padding-top: 5px;
+}
+
+.sapUiTInfPDiag .footer > * {
+	float: right;
+	margin: 2px 8px;
+}
 
 /* END "TechnicalInfo.less" */
 

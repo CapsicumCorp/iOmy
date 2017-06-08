@@ -20,14 +20,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @namespace
 	 * @name sap.ui.commons
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.commons",
-		version: "1.34.9",
+		version: "1.44.14",
 		dependencies : ["sap.ui.core","sap.ui.layout","sap.ui.unified"],
 		types: [
 			"sap.ui.commons.ButtonStyle",
@@ -57,7 +57,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 			"sap.ui.commons.layout.HAlign",
 			"sap.ui.commons.layout.Padding",
 			"sap.ui.commons.layout.Separation",
-			"sap.ui.commons.layout.VAlign"
+			"sap.ui.commons.layout.VAlign",
+			"sap.ui.commons.ColorPickerMode"
 		],
 		interfaces: [
 			"sap.ui.commons.FormattedTextViewControl",
@@ -102,7 +103,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 			"sap.ui.commons.RangeSlider",
 			"sap.ui.commons.RatingIndicator",
 			"sap.ui.commons.ResponsiveContainer",
-			"sap.ui.commons.ResponsiveContainerRange",
 			"sap.ui.commons.RichTooltip",
 			"sap.ui.commons.RoadMap",
 			"sap.ui.commons.RowRepeater",
@@ -139,6 +139,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 			"sap.ui.commons.MenuItem",
 			"sap.ui.commons.MenuItemBase",
 			"sap.ui.commons.MenuTextFieldItem",
+			"sap.ui.commons.ResponsiveContainerRange",
 			"sap.ui.commons.RoadMapStep",
 			"sap.ui.commons.RowRepeaterFilter",
 			"sap.ui.commons.RowRepeaterSorter",
@@ -191,6 +192,30 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 		 * @public
 		 */
 		Default : "Default"
+
+	};
+
+
+	/**
+	 * different styles for a ColorPicker.
+	 *
+	 * @enum {string}
+	 * @public
+	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.ui.commons.ColorPickerMode = {
+
+			/**
+			 * Color picker works with HSV values.
+			 * @public
+			 */
+			HSV : "HSV",
+
+			/**
+			 * Color picker works with HSL values.
+			 * @public
+			 */
+			HSL : "HSL"
 
 	};
 
@@ -587,6 +612,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * Level of a title.
 	 * @since 1.9.1
 	 * @deprecated Since version 1.16.0. Moved to sap.ui.core library. Please use this one.
+	 * @public
 	 */
 	sap.ui.commons.TitleLevel = sap.ui.core.TitleLevel;
 
@@ -822,6 +848,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	/**
 	 * Available FormLayouts used for the SimpleForm.
 	 * @deprecated Since version 1.16.0. Moved to sap.ui.layout library. Please use this one.
+	 * @public
 	 */
 	sap.ui.commons.form.SimpleFormLayout = sap.ui.layout.form.SimpleFormLayout;
 
@@ -1177,11 +1204,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 			createLabel: function(sText){
 				return new sap.ui.commons.Label({text: sText});
 			},
-			createButton: function(sId, fPressFunction, oThis){
+			createButton: function(sId, fPressFunction){
 				var oButton = new sap.ui.commons.Button(sId,{
 					lite: true
 					});
-				oButton.attachEvent('press', fPressFunction, oThis); // attach event this way to have the right this-reference in handler
+				oButton.attachEvent('press', fPressFunction, this); // attach event this way to have the right this-reference in handler
 				return oButton;
 			},
 			setButtonContent: function(oButton, sText, sTooltip, sIcon, sIconHovered){
@@ -1191,6 +1218,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 				oButton.setIconHovered(sIconHovered);
 			},
 			addFormClass: function(){ return null; },
+			setToolbar: function(oToolbar){ return oToolbar; },
 			bArrowKeySupport: true, /* enables the keyboard support for arrow keys */
 			bFinal: false /* to allow mobile to overwrite  */
 		};
@@ -1217,25 +1245,22 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 
 	//implement table helper factory with m controls
 	//possible is set before layout lib is loaded.
-	jQuery.sap.setObject("sap.ui.table.TableHelper", {
-		createLabel: function(mConfig){
-			return new sap.ui.commons.Label(mConfig);
-		},
-		createTextView: function(mConfig){
-			if (mConfig && !mConfig.wrapping) {
-				mConfig.wrapping = false;
-			}
-			return new sap.ui.commons.TextView(mConfig);
-		},
-		createTextField: function(mConfig){
-			return new sap.ui.commons.TextField(mConfig);
-		},
-		createImage: function(mConfig){
-			return new sap.ui.commons.Image(mConfig);
-		},
-		addTableClass: function() { return "sapUiTableCommons"; },
-		bFinal: false /* to allow mobile to overwrite  */
-	});
+	var oTableHelper = jQuery.sap.getObject("sap.ui.table.TableHelper", 4);
+	if (!oTableHelper || !oTableHelper.bFinal) {
+		jQuery.sap.setObject("sap.ui.table.TableHelper", {
+			createLabel: function(mConfig){
+				return new sap.ui.commons.Label(mConfig);
+			},
+			createTextView: function(mConfig){
+				if (mConfig && !mConfig.wrapping) {
+					mConfig.wrapping = false;
+				}
+				return new sap.ui.commons.TextView(mConfig);
+			},
+			addTableClass: function() { return "sapUiTableCommons"; },
+			bFinal: false /* to allow mobile to overwrite  */
+		});
+	}
 
 	return sap.ui.commons;
 

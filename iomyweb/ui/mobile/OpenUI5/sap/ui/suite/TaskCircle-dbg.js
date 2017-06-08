@@ -9,7 +9,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/EnabledP
 	function(jQuery, Control, EnabledPropagator, library) {
 	"use strict";
 
-
+	// shortcut
+	var TaskCircleColor = library.TaskCircleColor;
 
 	/**
 	 * Constructor for a new TaskCircle.
@@ -22,7 +23,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/EnabledP
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author Svetozar Buzdumovic
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -54,7 +55,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/EnabledP
 			/**
 			 * Color of the circle. The default color is red.
 			 */
-			color : {type : "sap.ui.suite.TaskCircleColor", group : "Misc", defaultValue : sap.ui.suite.TaskCircleColor.Gray}
+			color : {type : "sap.ui.suite.TaskCircleColor", group : "Misc", defaultValue : TaskCircleColor.Gray}
 		},
 		associations : {
 
@@ -122,4 +123,4 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/EnabledP
 
 	return TaskCircle;
 
-}, /* bExport= */ true);
+});

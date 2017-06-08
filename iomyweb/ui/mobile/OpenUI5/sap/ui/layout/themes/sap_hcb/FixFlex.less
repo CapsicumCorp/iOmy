@@ -30,15 +30,21 @@
 .sapUiFixFlexFlexible {
 	box-sizing: border-box;
 
+	/* Fixes bug in Chrome 48 where flexbox is broken
+		https://github.com/angular/material/issues/6841 */
+	min-height: 0;
+	min-width: 0;
+
 	display: -webkit-box;
 	display: -webkit-flex;
 	display: -ms-flexbox;
 	display: flex;
 
 	-webkit-box-flex: 1;
-	-webkit-flex-grow: 1;
-	-ms-flex: 1 1;
-	flex-grow: 1;
+	-moz-box-flex: 1;
+	-webkit-flex: 1;
+	-ms-flex: 1;
+	flex: 1;
 
 	-webkit-box-align: start;
 	-webkit-align-items: flex-start;
@@ -111,15 +117,14 @@
    ========================================================================== */
 .sapUiFixFlexInnerScrolling {
 	& > .sapUiFixFlexFlexible {
-		// The change from overflow-y to overflow is needed due to a bug in "Edge" browser
-		// BCP: 1570807842
+		-webkit-overflow-scrolling: touch;
 		overflow: auto;
 
-		-webkit-overflow-scrolling: touch;
-
-		// BCP: 1570807842
-		.sapUiFixFlexFlexibleContainer {
+		.sapUiFixFlexFlexibleContainerGrowing {
 			overflow-x: hidden;
+			overflow-y: visible;
+			width: 100%;
+			position: static;
 		}
 	}
 
@@ -131,7 +136,6 @@
 }
 
 .sapUiFixFlexScrolling {
-	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
 	display: block;
 
@@ -145,8 +149,6 @@
 	}
 
 	&.sapUiFixFlexRow {
-		overflow-x: auto;
-		overflow-y: hidden;
 		white-space: nowrap;
 		& > .sapUiFixFlexFlexible,
 		& > .sapUiFixFlexFixed {

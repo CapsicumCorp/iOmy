@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ChangeReason', 'sap/ui/model/C
 	 * @param {sap.ui.model.Filter|sap.ui.model.Filter[]} [aFilters] predefined filter/s (can be either a filter or an array of filters)
 	 * @param {object} [mParameters]
 	 * @alias sap.ui.model.json.JSONListBinding
-	 * @extends sap.ui.model.ListBinding
+	 * @extends sap.ui.model.ClientListBinding
 	 */
 	var JSONListBinding = ClientListBinding.extend("sap.ui.model.json.JSONListBinding");
 
@@ -48,29 +48,28 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ChangeReason', 'sap/ui/model/C
 		}
 
 		var aContexts = this._getContexts(iStartIndex, iLength),
-			oContextData = {};
+			aContextData = [];
 
 		if (this.bUseExtendedChangeDetection) {
+			// Use try/catch to detect issues with cyclic references in JS objects,
+			// in this case diff will be disabled.
+			try {
+				for (var i = 0; i < aContexts.length; i++) {
+					aContextData.push(this.getContextData(aContexts[i]));
+				}
 
-			for (var i = 0; i < aContexts.length; i++) {
-				oContextData[aContexts[i].getPath()] = aContexts[i].getObject();
+				//Check diff
+				if (this.aLastContextData && iStartIndex < this.iLastEndIndex) {
+					aContexts.diff = jQuery.sap.arraySymbolDiff(this.aLastContextData, aContextData);
+				}
+
+				this.iLastEndIndex = iStartIndex + iLength;
+				this.aLastContexts = aContexts.slice(0);
+				this.aLastContextData = aContextData.slice(0);
+			} catch (oError) {
+				this.bUseExtendedChangeDetection = false;
+				jQuery.sap.log.warning("JSONListBinding: Extended change detection has been disabled as JSON data could not be serialized.");
 			}
-
-			//Check diff
-			if (this.aLastContexts && iStartIndex < this.iLastEndIndex) {
-				var that = this;
-				var aDiff = jQuery.sap.arrayDiff(this.aLastContexts, aContexts, function(oOldContext, oNewContext) {
-					return jQuery.sap.equal(
-							oOldContext && that.oLastContextData && that.oLastContextData[oOldContext.getPath()],
-							oNewContext && oContextData && oContextData[oNewContext.getPath()]
-						);
-				});
-				aContexts.diff = aDiff;
-			}
-
-			this.iLastEndIndex = iStartIndex + iLength;
-			this.aLastContexts = aContexts.slice(0);
-			this.oLastContextData = jQuery.extend(true, {}, oContextData);
 		}
 
 		return aContexts;
@@ -167,8 +166,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/ChangeReason', 'sap/ui/model/C
 				if (this.aLastContexts.length != aContexts.length) {
 					bChangeDetected = true;
 				} else {
-					jQuery.each(this.aLastContexts, function(iIndex, oContext) {
-						if (!jQuery.sap.equal(aContexts[iIndex].getObject(), that.oLastContextData[oContext.getPath()])) {
+					jQuery.each(this.aLastContextData, function(iIndex, oLastData) {
+						var oCurrentData = that.getContextData(aContexts[iIndex]);
+						if (oCurrentData !== oLastData) {
 							bChangeDetected = true;
 							return false;
 						}

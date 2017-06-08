@@ -22,7 +22,7 @@ sap.ui.define(['./Popover', './PopoverRenderer', './OverflowToolbarAssociativePo
 	 * @extends sap.ui.core.Popover
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @private
@@ -76,7 +76,9 @@ sap.ui.define(['./Popover', './PopoverRenderer', './OverflowToolbarAssociativePo
 
 		if (sResult) {
 			oControlObject = sap.ui.getCore().byId(sResult);
-			this._postProcessControl(oControlObject);
+			if (oControlObject) {
+				this._postProcessControl(oControlObject);
+			}
 		}
 		return sResult;
 	};
@@ -88,14 +90,14 @@ sap.ui.define(['./Popover', './PopoverRenderer', './OverflowToolbarAssociativePo
 	 * @private
 	 */
 	OverflowToolbarAssociativePopover.prototype._preProcessControl = function(oControl){
-		var sCtrlClass = oControl.getMetadata().getName(),
+		var sCtrlClass = OverflowToolbarAssociativePopoverControls.getControlClass(oControl),
 			oCtrlConfig = OverflowToolbarAssociativePopoverControls.getControlConfig(oControl),
 			sAttachFnName, sPreProcessFnName;
 
 		// For each event that must close the popover, attach a handler
 		oCtrlConfig.listenForEvents.forEach(function(sEventType) {
 			sAttachFnName = "attach" + fnCapitalize(sEventType);
-			oControl[sAttachFnName](this._closeOnInteraction, this);
+			oControl[sAttachFnName](this._closeOnInteraction.bind(this, oControl));
 		}, this);
 
 		// Call preprocessor function, if any
@@ -120,7 +122,7 @@ sap.ui.define(['./Popover', './PopoverRenderer', './OverflowToolbarAssociativePo
 	 * @private
 	 */
 	OverflowToolbarAssociativePopover.prototype._postProcessControl = function(oControl) {
-		var sCtrlClass = oControl.getMetadata().getName(),
+		var sCtrlClass = OverflowToolbarAssociativePopoverControls.getControlClass(oControl),
 			oCtrlConfig = OverflowToolbarAssociativePopoverControls.getControlConfig(oControl),
 			sDetachFnName, sPostProcessFnName;
 
@@ -148,8 +150,12 @@ sap.ui.define(['./Popover', './PopoverRenderer', './OverflowToolbarAssociativePo
 	 * Many of the controls that enter the popover attach this function to some of their interaction events, such as button click, select choose, etc...
 	 * @private
 	 */
-	OverflowToolbarAssociativePopover.prototype._closeOnInteraction = function() {
-		this.close();
+	OverflowToolbarAssociativePopover.prototype._closeOnInteraction = function(oControl) {
+		var oLayoutData = oControl.getLayoutData();
+
+		if (!oLayoutData || !(oLayoutData instanceof OverflowToolbarLayoutData) || oLayoutData.getCloseOverflowOnInteraction()) {
+			this.close();
+		}
 	};
 
 	/**
@@ -160,6 +166,24 @@ sap.ui.define(['./Popover', './PopoverRenderer', './OverflowToolbarAssociativePo
 	 */
 	OverflowToolbarAssociativePopover.prototype._getContentIdsHash = function () {
 		return this._getAllContent().join(".");
+	};
+
+
+	/**
+	 * Recalculate the margin offsets so the Popover will never cover the control that opens it.
+	 * Overrides the popovers placement rules only for PlacementType.Top
+	 *
+	 * @param {sap.m.PlacementType} sCalculatedPlacement Calculated placement of the Popover
+	 * @param {object} oPosParams used to calculate actual values for the screen margins, so the Popover will never cover the Opener control or goes outside of the viewport
+	 * @override
+	 * @private
+	 */
+	OverflowToolbarAssociativePopover.prototype._recalculateMargins = function (sCalculatedPlacement, oPosParams) {
+		if (sCalculatedPlacement !== sap.m.PlacementType.Top){
+			return Popover.prototype._recalculateMargins.apply(this, arguments);
+		}
+
+		oPosParams._fMarginBottom = oPosParams._fDocumentHeight - oPosParams._$parent.offset().top + this._arrowOffset + oPosParams._fOffsetY;
 	};
 
 	/**

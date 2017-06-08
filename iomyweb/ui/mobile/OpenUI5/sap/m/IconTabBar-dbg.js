@@ -28,7 +28,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @implements sap.m.ObjectHeaderContainer
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -99,10 +99,43 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 			 *
 			 * Depending on the theme, you can change the state of
 			 * the background color to "Solid", "Translucent", or "Transparent".
-			 *
+			 * Default is "Solid".
 			 * @since 1.26
 			 */
-			backgroundDesign : {type : "sap.m.BackgroundDesign", group : "Appearance", defaultValue : sap.m.BackgroundDesign.Solid}
+			backgroundDesign : {type : "sap.m.BackgroundDesign", group : "Appearance", defaultValue : sap.m.BackgroundDesign.Solid},
+
+			/**
+			 * Specifies the header mode.
+			 * <b>Note:</b> The Inline mode works only if no icons are set.
+			 *
+			 * @since 1.40
+			 */
+			headerMode : {type : "sap.m.IconTabHeaderMode", group : "Appearance", defaultValue : sap.m.IconTabHeaderMode.Standard},
+
+			/**
+			 * Specifies if the overflow select list is displayed.
+			 *
+			 * The overflow select list represents a list, where all tab filters are displayed,
+			 * so the user can select specific tab filter easier.
+			 * @since 1.42
+			 */
+			showOverflowSelectList : {type : "boolean", group : "Appearance", defaultValue : false},
+
+			/**
+			 * Specifies the background color of the header.
+			 *
+			 * Depending on the theme, you can change the state of
+			 * the background color to "Solid", "Translucent", or "Transparent".
+			 * Default is "Solid".
+			 * @since 1.44
+			 */
+			headerBackgroundDesign : {type : "sap.m.BackgroundDesign", group : "Appearance", defaultValue : sap.m.BackgroundDesign.Solid},
+
+			/**
+			 * Specifies whether tab reordering is enabled. Relevant only for desktop devices.
+			 * @since 1.46
+			 */
+			enableTabReordering : {type : "boolean", group : "Behavior", defaultValue : false}
 		},
 		aggregations : {
 
@@ -218,6 +251,71 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	IconTabBar.prototype.setExpandable = function (bExpandable) {
 		// set internal property
 		this.setProperty("expandable", bExpandable, true);
+		return this;
+	};
+
+	/**
+	 * Sets the header mode.
+	 * @overwrite
+	 * @public
+	 * @param {sap.m.IconTabHeaderMode} mode new parameter value
+	 * @return {sap.m.IconTabBar} this pointer for chaining
+	 */
+	IconTabBar.prototype.setHeaderMode = function (mode) {
+		// set internal property
+		this.setProperty("headerMode", mode, true);
+
+		this._getIconTabHeader().setMode(mode);
+
+		return this;
+	};
+
+
+	/**
+	 * Sets the header background design.
+	 * @overwrite
+	 * @public
+	 * @param {sap.m.BackgroundDesign} headerBackgroundDesign New parameter value
+	 * @return {sap.m.IconTabBar} this pointer for chaining
+	 */
+	IconTabBar.prototype.setHeaderBackgroundDesign = function (headerBackgroundDesign) {
+		// set internal property
+		this.setProperty("headerBackgroundDesign", headerBackgroundDesign, true);
+
+		this._getIconTabHeader().setBackgroundDesign(headerBackgroundDesign);
+
+		return this;
+	};
+
+	/**
+	 * Sets the showOverflowSelectList property.
+	 * @overwrite
+	 * @public
+	 * @param {boolean} value New value for showOverflowSelectList
+	 * @return {sap.m.IconTabBar} this pointer for chaining
+	 */
+	IconTabBar.prototype.setShowOverflowSelectList = function (value) {
+		// set internal property
+		this.setProperty("showOverflowSelectList", value, true);
+
+		this._getIconTabHeader().setShowOverflowSelectList(value);
+
+		return this;
+	};
+
+	/**
+	 * Sets the enableTabReordering property.
+	 * @overwrite
+	 * @public
+	 * @param {boolean} value New value for enableTabReordering
+	 * @return {sap.m.IconTabBar} this pointer for chaining
+	 */
+	IconTabBar.prototype.setEnableTabReordering = function (value) {
+		// set internal property
+		this.setProperty("enableTabReordering", value, true);
+
+		this._getIconTabHeader().setEnableTabReordering(value);
+
 		return this;
 	};
 
@@ -426,7 +524,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @private
 	 * @param {string} sFunctionName The name of the function to be called
 	 * @param {string} sAggregationName The name of the aggregation asociated
-	 * @returns {mixed} The return type of the called function
+	 * @returns {any} The return type of the called function
 	 */
 	IconTabBar.prototype._callMethodInManagedObject = function (sFunctionName, sAggregationName) {
 		var aArgs = Array.prototype.slice.call(arguments),

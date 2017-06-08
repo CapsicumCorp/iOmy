@@ -17,8 +17,8 @@
 	function defineLessSupport() {
 
 		// Provides class sap.ui.core.plugin.LessSupport
-		sap.ui.define('sap/ui/core/plugin/LessSupport', ['jquery.sap.global', 'sap/ui/core/Core'],
-			function(jQuery, Core) {
+		sap.ui.define('sap/ui/core/plugin/LessSupport', ['jquery.sap.global', 'sap/ui/core/Core', 'sap/ui/core/ThemeCheck'],
+			function(jQuery, Core, ThemeCheck) {
 
 			var LESS_FILENAME = "library.source";
 			var CSS_FILENAME = "library";
@@ -32,7 +32,7 @@
 			 *        feature - DO NOT USE IN PRODUCTIVE SCENARIOS!!
 			 *
 			 * @author Peter Muessig
-			 * @version 1.34.9
+			 * @version 1.44.14
 			 * @private
 			 * @alias sap.ui.core.plugin.LessSupport
 			 */
@@ -80,6 +80,7 @@
 				// configure LESS (development mode + error handling)
 				window.less = window.less || {
 					env: "development",
+					relativeUrls: true,
 					errorReporting: function(sMethod, ex, sRootHref) {
 						/*eslint-disable no-console */
 						if (sMethod === "add" && window.console) {
@@ -130,7 +131,7 @@
 					var ok = true;
 					var check;
 					for (var i = 0; i < aLibs.length; i++) {
-						check = sap.ui.core.ThemeCheck.checkStyle("less:" + aLibs[i], true);
+						check = ThemeCheck.checkStyle("less:" + aLibs[i], true);
 						if (check) {
 							jQuery.sap.byId("sap-ui-theme-" + aLibs[i]).attr("data-sap-ui-ready", "true");
 						}
@@ -144,7 +145,7 @@
 					}
 
 					if (ok) {
-						sap.ui.core.ThemeCheck.themeLoaded = true;
+						ThemeCheck.themeLoaded = true;
 						jQuery.sap.delayedCall(0, oCore, "fireThemeChanged", [{theme: oCore.sTheme}]);
 					} else {
 						that.iCheckThemeAppliedTimeout = jQuery.sap.delayedCall(100, null, checkThemeApplied);
@@ -224,17 +225,19 @@
 				var sBaseUrl = this.oCore._getThemePath(sLibName, this.oCore.sTheme);
 
 				// check if the less file of the current theme is more up-to-date than the css file
+				// or if the last modified of the less file is 0 (no last modified) we assume that it is newer
 				var iLessLastModified = this.getLastModified(sBaseUrl + LESS_FILENAME + ".less");
 				var iCssLastModified = this.getLastModified(sBaseUrl + CSS_FILENAME + ".css");
-				var bUseLess = iLessLastModified > iCssLastModified;
+				var bUseLess = (iLessLastModified == 0 && iCssLastModified > 0) || iLessLastModified > iCssLastModified;
 
 				if (!bUseLess) {
 					var sBaseThemeUrl = this.oCore._getThemePath(sLibName, "base");
 
 					// also check if the less file of the base theme is more up-to-date than the css file
+					// or if the last modified of the less file is 0 (no last modified) we assume that it is newer
 					var iBaseLessLastModified = this.getLastModified(sBaseThemeUrl + LESS_FILENAME + ".less");
 					var iBaseCssLastModified = this.getLastModified(sBaseThemeUrl + CSS_FILENAME + ".css");
-					bUseLess = iBaseLessLastModified > iBaseCssLastModified;
+					bUseLess = (iBaseLessLastModified == 0 && iBaseCssLastModified > 0) || iBaseLessLastModified > iBaseCssLastModified;
 				}
 
 				var sFileName = (bUseLess) ? LESS_FILENAME : CSS_FILENAME;
@@ -489,8 +492,8 @@
 					window.less.refresh();
 
 					// Update Theming Parameters without triggering an library-parameters.json request
-					jQuery.sap.require("sap.ui.core.theming.Parameters");
-					sap.ui.core.theming.Parameters._setOrLoadParameters(mLibVariables);
+					var Parameters = sap.ui.requireSync('sap/ui/core/theming/Parameters');
+					Parameters._setOrLoadParameters(mLibVariables);
 
 					// Restore original function
 					window.less.tree.Rule.prototype.eval = fnLessTreeRuleEval;
@@ -513,7 +516,7 @@
 			LessSupport.refresh = function() {
 				oThis.refreshLess(true);
 				if (oThis.oCore.oThemeCheck) {
-					oThis.oCore.oThemeCheck.fireThemeChangedEvent(false, true);
+					oThis.oCore.oThemeCheck.fireThemeChangedEvent(false);
 				}
 			};
 

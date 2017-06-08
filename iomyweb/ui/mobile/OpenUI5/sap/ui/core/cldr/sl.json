@@ -522,8 +522,8 @@
 		"sux": "sumerščina",
 		"sv": "švedščina",
 		"sw": "svahili",
+		"sw_CD": "svahili (Kongo)",
 		"swb": "šikomor",
-		"swc": "svahili (Kongo)",
 		"syc": "klasična sirščina",
 		"syr": "sirščina",
 		"szl": "szl",
@@ -620,6 +620,7 @@
 		"zza": "zazajščina"
 	},
 	"scripts": {
+		"Adlm": "Adlm",
 		"Aghb": "Aghb",
 		"Ahom": "Ahom",
 		"Arab": "arabski",
@@ -632,6 +633,7 @@
 		"Bass": "Bass",
 		"Batk": "bataški",
 		"Beng": "bengalski",
+		"Bhks": "Bhks",
 		"Blis": "znakovna pisava Bliss",
 		"Bopo": "bopomofo",
 		"Brah": "bramanski",
@@ -664,6 +666,7 @@
 		"Grek": "grški",
 		"Gujr": "gudžaratski",
 		"Guru": "gurmuki",
+		"Hanb": "Hanb",
 		"Hang": "hangul",
 		"Hani": "kanji",
 		"Hano": "hanunski",
@@ -680,6 +683,7 @@
 		"Hung": "staroogrski",
 		"Inds": "induški",
 		"Ital": "staroitalski",
+		"Jamo": "Jamo",
 		"Java": "javanski",
 		"Jpan": "japonski",
 		"Kali": "karenski",
@@ -705,6 +709,7 @@
 		"Mahj": "Mahj",
 		"Mand": "mandanski",
 		"Mani": "manihejski",
+		"Marc": "Marc",
 		"Maya": "majevska slikovna pisava",
 		"Mend": "Mend",
 		"Merc": "Merc",
@@ -719,11 +724,13 @@
 		"Mymr": "mjanmarski",
 		"Narb": "Narb",
 		"Nbat": "Nbat",
+		"Newa": "Newa",
 		"Nkoo": "Nkoo",
 		"Ogam": "ogamski",
 		"Olck": "santalski",
 		"Orkh": "orkonski",
 		"Orya": "orijski",
+		"Osge": "Osge",
 		"Osma": "osmanski",
 		"Palm": "Palm",
 		"Pauc": "Pauc",
@@ -809,6 +816,7 @@
 		"Tale": "Tale",
 		"Talu": "Talu",
 		"Taml": "tamilski",
+		"Tang": "Tang",
 		"Tavt": "tajsko-vietnamski",
 		"Telu": "teluški",
 		"Teng": "tengvarski",
@@ -827,6 +835,7 @@
 		"Yiii": "Yiii",
 		"Zinh": "podedovan",
 		"Zmth": "matematična znamenja",
+		"Zsye": "Zsye",
 		"Zsym": "simboli",
 		"Zxxx": "nenapisano",
 		"Zyyy": "splošno",
@@ -871,7 +880,6 @@
 		"AI": "Angvila",
 		"AL": "Albanija",
 		"AM": "Armenija",
-		"AN": "Nizozemski Antili",
 		"AO": "Angola",
 		"AQ": "Antarktika",
 		"AR": "Argentina",
@@ -2399,6 +2407,422 @@
 			"235": "H"
 		}
 	},
+	"ca-persian": {
+		"dateFormats": {
+			"full": "EEEE, dd. MMMM y G",
+			"long": "dd. MMMM y G",
+			"medium": "d. MMM y G",
+			"short": "d. MM. yy GGGGG"
+		},
+		"timeFormats": {
+			"full": "HH:mm:ss zzzz",
+			"long": "HH:mm:ss z",
+			"medium": "HH:mm:ss",
+			"short": "HH:mm"
+		},
+		"dateTimeFormats": {
+			"full": "{1} {0}",
+			"long": "{1} {0}",
+			"medium": "{1} {0}",
+			"short": "{1} {0}",
+			"availableFormats": {
+				"d": "d",
+				"E": "ccc",
+				"Ed": "E, d.",
+				"Ehm": "E h:mm a",
+				"EHm": "E HH:mm",
+				"Ehms": "E h:mm:ss a",
+				"EHms": "E HH:mm:ss",
+				"Gy": "y G",
+				"GyM": "M/y G",
+				"GyMMM": "MMM y G",
+				"GyMMMd": "d. MMM y G",
+				"GyMMMEd": "E, d. MMM y G",
+				"h": "h a",
+				"H": "HH",
+				"hm": "h:mm a",
+				"Hm": "HH:mm",
+				"hms": "h:mm:ss a",
+				"Hms": "HH:mm:ss",
+				"M": "L",
+				"Md": "d. M.",
+				"MEd": "E, d. MM.",
+				"MMM": "LLL",
+				"MMMd": "d. MMM",
+				"MMMEd": "E, d. MMM",
+				"MMMMd": "d MMMM",
+				"ms": "mm:ss",
+				"y": "y",
+				"yyyy": "y G",
+				"yyyyM": "M/y G",
+				"yyyyMd": "d. M. y G",
+				"yyyyMEd": "E, d. M. y G",
+				"yyyyMMM": "MMM y G",
+				"yyyyMMMd": "d. MMM y G",
+				"yyyyMMMEd": "E, d. MMM y G",
+				"yyyyMMMM": "MMMM y G",
+				"yyyyQQQ": "QQQ y G",
+				"yyyyQQQQ": "QQQQ y G"
+			},
+			"appendItems": {
+				"Day": "{0} ({2}: {1})",
+				"Day-Of-Week": "{0} {1}",
+				"Era": "{1} {0}",
+				"Hour": "{0} ({2}: {1})",
+				"Minute": "{0} ({2}: {1})",
+				"Month": "{0} ({2}: {1})",
+				"Quarter": "{0} ({2}: {1})",
+				"Second": "{0} ({2}: {1})",
+				"Timezone": "{0} {1}",
+				"Week": "{0} ({2}: {1})",
+				"Year": "{1} {0}"
+			},
+			"intervalFormats": {
+				"intervalFormatFallback": "{0} – {1}",
+				"d": {
+					"d": "d.–d."
+				},
+				"h": {
+					"a": "h a – h a",
+					"h": "h–h a"
+				},
+				"H": {
+					"H": "HH–HH"
+				},
+				"hm": {
+					"a": "h:mm a – h:mm a",
+					"h": "h:mm–h:mm a",
+					"m": "h:mm–h:mm a"
+				},
+				"Hm": {
+					"H": "HH:mm–HH:mm",
+					"m": "HH:mm–HH:mm"
+				},
+				"hmv": {
+					"a": "h:mm a – h:mm a v",
+					"h": "h:mm–h:mm a v",
+					"m": "h:mm–h:mm a v"
+				},
+				"Hmv": {
+					"H": "HH:mm–HH:mm v",
+					"m": "HH:mm–HH:mm v"
+				},
+				"hv": {
+					"a": "h a – h a v",
+					"h": "h–h a v"
+				},
+				"Hv": {
+					"H": "HH–HH v"
+				},
+				"M": {
+					"M": "M.–M."
+				},
+				"Md": {
+					"d": "d. – d. M.",
+					"M": "d. M. – d. M."
+				},
+				"MEd": {
+					"d": "E, d. – E, d. M.",
+					"M": "E, d. M. – E, d. M."
+				},
+				"MMM": {
+					"M": "MMM–MMM"
+				},
+				"MMMd": {
+					"d": "d.–d. MMM",
+					"M": "d. MMM – d. MMM"
+				},
+				"MMMEd": {
+					"d": "E, d. – E, d. MMM",
+					"M": "E, d. MMM – E, d. MMM"
+				},
+				"y": {
+					"y": "y–y"
+				},
+				"yM": {
+					"M": "M.–M. y",
+					"y": "M. y – M. y"
+				},
+				"yMd": {
+					"d": "d. M. y – d. M. y",
+					"M": "d. M. – d. M. y",
+					"y": "d. M. y – d. M. y"
+				},
+				"yMEd": {
+					"d": "E, d. – E, d. M. y",
+					"M": "E, d. M. – E, d. M. y",
+					"y": "E, d. M. y – E, d. M. y"
+				},
+				"yMMM": {
+					"M": "MMM – MMM y",
+					"y": "MMM y – MMM y"
+				},
+				"yMMMd": {
+					"d": "d.–d. MMM y",
+					"M": "d. MMM – d. MMM y",
+					"y": "d. MMM y – d. MMM y"
+				},
+				"yMMMEd": {
+					"d": "E, d. MMM – E, d. MMM y",
+					"M": "E, d. MMM – E, d. MMM y",
+					"y": "E, d. MMM y – E, d. MMM y"
+				},
+				"yMMMM": {
+					"M": "MMMM–MMMM y",
+					"y": "MMMM y – MMMM y"
+				}
+			}
+		},
+		"months": {
+			"format": {
+				"abbreviated": [
+					"Farvardin",
+					"Ordibehesht",
+					"Khordad",
+					"Tir",
+					"Mordad",
+					"Shahrivar",
+					"Mehr",
+					"Aban",
+					"Azar",
+					"Dey",
+					"Bahman",
+					"Esfand"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4",
+					"5",
+					"6",
+					"7",
+					"8",
+					"9",
+					"10",
+					"11",
+					"12"
+				],
+				"wide": [
+					"Farvardin",
+					"Ordibehesht",
+					"Khordad",
+					"Tir",
+					"Mordad",
+					"Shahrivar",
+					"Mehr",
+					"Aban",
+					"Azar",
+					"Dey",
+					"Bahman",
+					"Esfand"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"Farvardin",
+					"Ordibehesht",
+					"Khordad",
+					"Tir",
+					"Mordad",
+					"Shahrivar",
+					"Mehr",
+					"Aban",
+					"Azar",
+					"Dey",
+					"Bahman",
+					"Esfand"
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4",
+					"5",
+					"6",
+					"7",
+					"8",
+					"9",
+					"10",
+					"11",
+					"12"
+				],
+				"wide": [
+					"Farvardin",
+					"Ordibehesht",
+					"Khordad",
+					"Tir",
+					"Mordad",
+					"Shahrivar",
+					"Mehr",
+					"Aban",
+					"Azar",
+					"Dey",
+					"Bahman",
+					"Esfand"
+				]
+			}
+		},
+		"days": {
+			"format": {
+				"abbreviated": [
+					"ned.",
+					"pon.",
+					"tor.",
+					"sre.",
+					"čet.",
+					"pet.",
+					"sob."
+				],
+				"narrow": [
+					"n",
+					"p",
+					"t",
+					"s",
+					"č",
+					"p",
+					"s"
+				],
+				"short": [
+					"ned.",
+					"pon.",
+					"tor.",
+					"sre.",
+					"čet.",
+					"pet.",
+					"sob."
+				],
+				"wide": [
+					"nedelja",
+					"ponedeljek",
+					"torek",
+					"sreda",
+					"četrtek",
+					"petek",
+					"sobota"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"ned",
+					"pon",
+					"tor",
+					"sre",
+					"čet",
+					"pet",
+					"sob"
+				],
+				"narrow": [
+					"n",
+					"p",
+					"t",
+					"s",
+					"č",
+					"p",
+					"s"
+				],
+				"short": [
+					"ned.",
+					"pon.",
+					"tor.",
+					"sre.",
+					"čet.",
+					"pet.",
+					"sob."
+				],
+				"wide": [
+					"nedelja",
+					"ponedeljek",
+					"torek",
+					"sreda",
+					"četrtek",
+					"petek",
+					"sobota"
+				]
+			}
+		},
+		"quarters": {
+			"format": {
+				"abbreviated": [
+					"1. čet.",
+					"2. čet.",
+					"3. čet.",
+					"4. čet."
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4"
+				],
+				"wide": [
+					"1. četrtletje",
+					"2. četrtletje",
+					"3. četrtletje",
+					"4. četrtletje"
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"1. čet.",
+					"2. čet.",
+					"3. čet.",
+					"4. čet."
+				],
+				"narrow": [
+					"1",
+					"2",
+					"3",
+					"4"
+				],
+				"wide": [
+					"1. četrtletje",
+					"2. četrtletje",
+					"3. četrtletje",
+					"4. četrtletje"
+				]
+			}
+		},
+		"dayPeriods": {
+			"format": {
+				"abbreviated": [
+					"dop.",
+					"pop."
+				],
+				"narrow": [
+					"d",
+					"p"
+				],
+				"wide": [
+					"dop.",
+					"pop."
+				]
+			},
+			"stand-alone": {
+				"abbreviated": [
+					"dop.",
+					"pop."
+				],
+				"narrow": [
+					"dop.",
+					"pop."
+				],
+				"wide": [
+					"dopoldne",
+					"popoldne"
+				]
+			}
+		},
+		"era-wide": {
+			"0": "AP"
+		},
+		"era-abbreviated": {
+			"0": "AP"
+		},
+		"era-narrow": {
+			"0": "AP"
+		}
+	},
 	"dateFields": {
 		"era": {
 			"displayName": "doba"
@@ -2997,13 +3421,13 @@
 		"CLP": 0,
 		"COP": 0,
 		"CRC": 0,
-		"CZK": 2,
+		"CZK": 0,
 		"DEFAULT": 2,
 		"DJF": 0,
 		"ESP": 0,
 		"GNF": 0,
 		"GYD": 0,
-		"HUF": 2,
+		"HUF": 0,
 		"IDR": 0,
 		"IQD": 0,
 		"IRR": 0,
@@ -3037,7 +3461,7 @@
 		"TMM": 0,
 		"TND": 3,
 		"TRL": 0,
-		"TWD": 2,
+		"TWD": 0,
 		"TZS": 0,
 		"UGX": 0,
 		"UYI": 0,
@@ -3056,7 +3480,7 @@
 	"weekData-weekendStart": 6,
 	"weekData-weekendEnd": 0,
 	"timeData": {
-		"_allowed": "H",
+		"_allowed": "H hB",
 		"_preferred": "H"
 	},
 	"eras-gregorian": {
@@ -3070,6 +3494,11 @@
 	"eras-islamic": {
 		"0": {
 			"_start": "622-7-15"
+		}
+	},
+	"eras-persian": {
+		"0": {
+			"_start": "622-01-01"
 		}
 	},
 	"eras-japanese": {

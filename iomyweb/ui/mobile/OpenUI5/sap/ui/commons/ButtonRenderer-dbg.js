@@ -12,7 +12,7 @@ sap.ui.define(['jquery.sap.global'],
 
 	/**
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @namespace
 	 */
 	var ButtonRenderer = {
@@ -33,7 +33,6 @@ sap.ui.define(['jquery.sap.global'],
 		if (oButton.getTooltip_AsString()) {
 			rm.writeAttributeEscaped("title", oButton.getTooltip_AsString());
 		}
-
 		//styling
 		if (oButton.getStyled()) {
 			rm.addClass("sapUiBtnS");
@@ -69,6 +68,14 @@ sap.ui.define(['jquery.sap.global'],
 		if (!oButton.getText() && oButton.getIcon()) { // icon, but no text => reduce padding
 			rm.addClass("sapUiBtnIconOnly");
 			bImageOnly = true; // only the image is there, so it must have some meaning
+
+			// add tooltip if available, if not - add the technical name of the icon
+			var oIconInfo = sap.ui.core.IconPool.getIconInfo(oButton.getIcon()),
+				sTooltip = oButton.getTooltip_AsString();
+
+			if (sTooltip || (oIconInfo && oIconInfo.name)) {
+				rm.writeAttributeEscaped("title", sTooltip || oIconInfo.name);
+			}
 		}
 
 		if (oButton.getIcon() && oButton.getText()) {
@@ -210,12 +217,12 @@ sap.ui.define(['jquery.sap.global'],
 					var sIcon = oButton.getIconSelected() || oButton.getIconHovered();
 					return sIcon ? sIcon : oButton.getIcon();
 				} else if (oButton.$().hasClass("sapUiBtnFoc")) {
-					return oButton.getIconHovered() || oButton.getIcon();
+					return oButton.getIcon();
 				}
 				return oButton.getIcon();
 			case "mouseout":
 				if (oButton.$().hasClass("sapUiBtnFoc")) {
-					return oButton.getIconHovered() || oButton.getIcon();
+					return oButton.getIcon();
 				}
 				return oButton.getIcon();
 			case "active":
@@ -245,17 +252,13 @@ sap.ui.define(['jquery.sap.global'],
 			rm.writeAttribute("alt", ""); // there must be an ALT attribute
 		}
 
-        if (!bImageOnly) {
-            rm.writeAttribute("role", "presentation");
-        }
+		if (!bImageOnly) {
+			rm.writeAttribute("role", "presentation");
+		}
 
 		rm.addClass("sapUiBtnIco");
-        if (oButton.getText()) { // only add a distance to the text if there is text
-			if (oButton.getIconFirst()) {
-				rm.addClass("sapUiBtnIcoL");
-			} else {
-				rm.addClass("sapUiBtnIcoR");
-			}
+		if (oButton.getText()) { // only add a distance to the text if there is text
+			rm.addClass(oButton.getIconFirst() ? "sapUiBtnIcoL" : "sapUiBtnIcoR");
 		}
 		rm.writeClasses();
 
@@ -268,17 +271,11 @@ sap.ui.define(['jquery.sap.global'],
 	ButtonRenderer.writeIconHtml = function(oRenderManager, oButton) {
 
 		var rm = oRenderManager;
-		var oIconInfo = sap.ui.core.IconPool.getIconInfo(oButton.getIcon());
 		var aClasses = [];
 		var mAttributes = buildIconAttributes(oButton);
 		aClasses.push("sapUiBtnIco");
 		if (oButton.getText()) { // only add a distance to the text if there is text
-			var bRTL = rm.getConfiguration().getRTL();
-			if ((oButton.getIconFirst() && (!bRTL || oIconInfo.skipMirroring)) || (!oButton.getIconFirst() && !oIconInfo.skipMirroring && bRTL)) {
-				aClasses.push("sapUiBtnIcoL");
-			} else {
-				aClasses.push("sapUiBtnIcoR");
-			}
+			aClasses.push(oButton.getIconFirst() ? "sapUiBtnIcoL" : "sapUiBtnIcoR");
 		}
 
 		rm.writeIcon(oButton.getIcon(), aClasses, mAttributes);
@@ -317,6 +314,7 @@ sap.ui.define(['jquery.sap.global'],
 
 		oAttributes["id"] = oButton.getId() + "-icon";
 		if (sTooltip) { // prevents default icon tooltip
+
 			oAttributes["title"] = null;
 			oAttributes["aria-label"] = null;
 			oAttributes["aria-hidden"] = true;

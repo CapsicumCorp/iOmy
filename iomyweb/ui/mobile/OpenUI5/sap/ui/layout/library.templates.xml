@@ -7,7 +7,7 @@
 	busyIndicatorDelay: 1000, // int
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
-	background: sap.ui.layout.BlockBackgroundType.Default, // sap.ui.layout.BlockBackgroundType
+	background: sap.ui.layout.BlockBackgroundType.Default, // sap.ui.layout.BlockBackgroundType, since 1.42
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -76,10 +76,12 @@
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
 	scrollable: false, // boolean
+	rowColorSet: undefined, // sap.ui.layout.BlockRowColorSets, since 1.42
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
 	content: [], // sap.ui.layout.BlockLayoutCell
+	accentCells: [], // sap.ui.layout.BlockLayoutCell, since 1.42
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this]
@@ -92,6 +94,8 @@
 	visible="true"
 	fieldGroupIds=""
 	scrollable="false"
+	rowColorSet=""
+	accentCells=""
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
@@ -450,6 +454,7 @@
 	dependents: [], // sap.ui.core.Control, since 1.19
 	formContainers: [], // sap.ui.layout.form.FormContainer
 	title: undefined, // sap.ui.core.Title
+	toolbar: undefined, // sap.ui.core.Toolbar, since 1.36.0
 	layout: undefined, // sap.ui.layout.form.FormLayout
 	ariaLabelledBy: [], // sap.ui.core.Control, since 1.28.0
 	validateFieldGroup: [function (oEvent) {
@@ -471,6 +476,7 @@
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<formContainers></formContainers> <!-- sap.ui.layout.form.FormContainer -->
 		<title></title> <!-- sap.ui.core.Title -->
+		<toolbar></toolbar> <!-- sap.ui.core.Toolbar, since 1.36.0 -->
 		<layout></layout> <!-- sap.ui.layout.form.FormLayout -->
 </form/Form>
 ]]></xmlTemplate>
@@ -485,18 +491,22 @@
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
 	formElements: [], // sap.ui.layout.form.FormElement
-	title: undefined // sap.ui.core.Title
+	title: undefined, // sap.ui.core.Title
+	toolbar: undefined, // sap.ui.core.Toolbar, since 1.36.0
+	ariaLabelledBy: [] // sap.ui.core.Control, since 1.36.0
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<form/FormContainer xmlns="sap.ui.layout"
 	id="${id}"
 	expanded="true"
 	expandable="false"
-	visible="true">
+	visible="true"
+	ariaLabelledBy="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<formElements></formElements> <!-- sap.ui.layout.form.FormElement -->
 		<title></title> <!-- sap.ui.core.Title -->
+		<toolbar></toolbar> <!-- sap.ui.core.Toolbar, since 1.36.0 -->
 </form/FormContainer>
 ]]></xmlTemplate>
 </Template>
@@ -528,6 +538,7 @@
 	busyIndicatorDelay: 1000, // int
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
+	backgroundDesign: sap.ui.layout.BackgroundDesign.Translucent, // sap.ui.layout.BackgroundDesign, since 1.36.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -542,6 +553,7 @@
 	busyIndicatorDelay="1000"
 	visible="true"
 	fieldGroupIds=""
+	backgroundDesign="Translucent"
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
@@ -591,6 +603,7 @@
 	busyIndicatorDelay: 1000, // int
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
+	backgroundDesign: sap.ui.layout.BackgroundDesign.Translucent, // sap.ui.layout.BackgroundDesign, since 1.36.0
 	singleColumn: false, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
@@ -606,6 +619,7 @@
 	busyIndicatorDelay="1000"
 	visible="true"
 	fieldGroupIds=""
+	backgroundDesign="Translucent"
 	singleColumn="false"
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
@@ -620,6 +634,7 @@
 	busyIndicatorDelay: 1000, // int
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
+	backgroundDesign: sap.ui.layout.BackgroundDesign.Translucent, // sap.ui.layout.BackgroundDesign, since 1.36.0
 	labelSpanXL: -1, // int, since 1.34.0
 	labelSpanL: 4, // int, since 1.16.3
 	labelSpanM: 2, // int, since 1.16.3
@@ -650,6 +665,7 @@
 	busyIndicatorDelay="1000"
 	visible="true"
 	fieldGroupIds=""
+	backgroundDesign="Translucent"
 	labelSpanXL="-1"
 	labelSpanL="4"
 	labelSpanM="2"
@@ -679,6 +695,7 @@
 	busyIndicatorDelay: 1000, // int
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
+	backgroundDesign: sap.ui.layout.BackgroundDesign.Translucent, // sap.ui.layout.BackgroundDesign, since 1.36.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -693,6 +710,7 @@
 	busyIndicatorDelay="1000"
 	visible="true"
 	fieldGroupIds=""
+	backgroundDesign="Translucent"
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
@@ -728,11 +746,13 @@
 	breakpointXL: 1440, // int, since 1.34.0
 	breakpointL: 1024, // int, since 1.16.3
 	breakpointM: 600, // int, since 1.16.3
+	backgroundDesign: sap.ui.layout.BackgroundDesign.Translucent, // sap.ui.layout.BackgroundDesign, since 1.36.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
 	content: [], // sap.ui.core.Element
 	title: undefined, // sap.ui.core.Title, since 1.16.3
+	toolbar: undefined, // sap.ui.core.Toolbar, since 1.36.0
 	ariaLabelledBy: [], // sap.ui.core.Control, since 1.32.0
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -767,12 +787,14 @@
 	breakpointXL="1440"
 	breakpointL="1024"
 	breakpointM="600"
+	backgroundDesign="Translucent"
 	ariaLabelledBy=""
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<content></content> <!-- sap.ui.core.Element -->
 		<title></title> <!-- sap.ui.core.Title, since 1.16.3 -->
+		<toolbar></toolbar> <!-- sap.ui.core.Toolbar, since 1.36.0 -->
 </form/SimpleForm>
 ]]></xmlTemplate>
 </Template>

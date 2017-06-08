@@ -5,8 +5,8 @@
  */
 
 // Provides control sap.m.ListBase.
-sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/ui/core/Control', 'sap/ui/core/delegate/ItemNavigation', 'sap/ui/core/theming/Parameters'],
-	function(jQuery, GroupHeaderListItem, library, Control, ItemNavigation, Parameters) {
+sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './ListItemBase', './library', 'sap/ui/core/Control', 'sap/ui/core/delegate/ItemNavigation', 'sap/ui/core/InvisibleText'],
+	function(jQuery, GroupHeaderListItem, ListItemBase, library, Control, ItemNavigation, InvisibleText) {
 	"use strict";
 
 
@@ -24,7 +24,7 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -116,37 +116,51 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 			/**
 			 * If set to <code>true</code>, enables the growing feature of the control to load more items by requesting from the model.
 			 * <b>Note:</b>: This feature only works when an <code>items</code> aggregation is bound. Growing must not be used together with two-way binding.
-			 * @since 1.16
+			 * @since 1.16.0
 			 */
 			growing : {type : "boolean", group : "Behavior", defaultValue : false},
 
 			/**
 			 * Defines the number of items to be requested from the model for each grow.
 			 * This property can only be used if the <code>growing</code> property is set to <code>true</code>.
-			 * @since 1.16
+			 * @since 1.16.0
 			 */
 			growingThreshold : {type : "int", group : "Misc", defaultValue : 20},
 
 			/**
 			 * Defines the text displayed on the growing button. The default is a translated text ("More") coming from the message bundle.
 			 * This property can only be used if the <code>growing</code> property is set to <code>true</code>.
-			 * @since 1.16
+			 * @since 1.16.0
 			 */
 			growingTriggerText : {type : "string", group : "Appearance", defaultValue : null},
 
 			/**
-			 * If set to true, the user can scroll down to load more items. Otherwise a growing button is displayed at the bottom of the control.
-			 * <b>Note:</b> This property can only be used if the <code>growing</code> property is set to <code>true</code> and only if there is one instance of <code>sap.m.List</code> or <code>sap.m.Table</code> inside the scroll container (e.g <code>sap.m.Page</code>).
-			 * @since 1.16
+			 * If set to true, the user can scroll down/up to load more items. Otherwise a growing button is displayed at the bottom/top of the control.
+			 * <b>Note:</b> This property can only be used if the <code>growing</code> property is set to <code>true</code> and only if there is one instance of <code>sap.m.List</code> or <code>sap.m.Table</code> inside the scrollable scroll container (e.g <code>sap.m.Page</code>).
+			 * @since 1.16.0
 			 */
 			growingScrollToLoad : {type : "boolean", group : "Behavior", defaultValue : false},
 
 			/**
-			 * If set to true, this control remembers the selections after a binding update has been performed (e.g. sorting, filtering).
-			 * <b>Note:</b> If <code>items</code> aggregation is not bound then this property is ignored.
+			 * Defines the direction of the growing feature.
+			 * If set to <code>Downwards</code> the user has to scroll down to load more items or the growing button is displayed at the bottom.
+			 * If set to <code>Upwards</code> the user has to scroll up to load more items or the growing button is displayed at the top.
+			 * @since 1.40.0
+			 */
+			growingDirection : {type : "sap.m.ListGrowingDirection", group : "Behavior", defaultValue : sap.m.ListGrowingDirection.Downwards},
+
+			/**
+			 * If set to true, this control remembers and retains the selection of the items after a binding update has been performed (e.g. sorting, filtering).
+			 * <b>Note:</b> This feature works only if two-way data binding for the <code>selected</code> property of the item is not used. It also needs to be turned off if the binding context of the item does not always point to the same entry in the model, for example, if the order of the data in the <code>JSONModel</code> is changed.
 			 * @since 1.16.6
 			 */
-			rememberSelections : {type : "boolean", group : "Behavior", defaultValue : true}
+			rememberSelections : {type : "boolean", group : "Behavior", defaultValue : true},
+
+			/**
+			 * Defines keyboard handling behavior of the control.
+			 * @since 1.38.0
+			 */
+			keyboardMode : {type : "sap.m.ListKeyboardMode", group : "Behavior", defaultValue : sap.m.ListKeyboardMode.Navigation}
 		},
 		defaultAggregation : "items",
 		aggregations : {
@@ -374,24 +388,26 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 		}
 	}});
 
+	// announce acc states at the initial focus
+	ListBase.prototype.iAnnounceDetails = 1;
+
+	ListBase.getInvisibleText = function() {
+		return this.oInvisibleText || (this.oInvisibleText = new InvisibleText().toStatic());
+	};
 
 	// class name for the navigation items
 	ListBase.prototype.sNavItemClass = "sapMLIB";
 
 	ListBase.prototype.init = function() {
-		this._oGrowingDelegate = null;
-		this._bSelectionMode = false;
-		this._bReceivingData = false;
-		this._oSelectedItem = null;
-		this._aSelectedPaths = [];
 		this._aNavSections = [];
-		this._bUpdating = false;
-		this._bRendering = false;
+		this._aSelectedPaths = [];
+		this._iItemNeedsHighlight = 0;
 		this.data("sap-ui-fastnavgroup", "true", true); // Define group for F6 handling
 	};
 
 	ListBase.prototype.onBeforeRendering = function() {
 		this._bRendering = true;
+		this._bActiveItem = false;
 		this._aNavSections = [];
 		this._removeSwipeContent();
 	};
@@ -477,10 +493,26 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 		return Control.prototype._bindAggregation.apply(this, arguments);
 	};
 
-	ListBase.prototype.destroyItems = function() {
+	ListBase.prototype.destroyItems = function(bSuppressInvalidate) {
+		// check whether we have items to destroy or not
+		if (!this.getItems(true).length) {
+			return this;
+		}
+
+		// clean up the selection
 		this._oSelectedItem = null;
-		return this.destroyAggregation("items");
+
+		// suppress the synchronous DOM removal of the aggregation destroy
+		this.destroyAggregation("items", "KeepDom");
+
+		// invalidate to update the DOM on the next tick of the RenderManager
+		if (!bSuppressInvalidate) {
+			this.invalidate();
+		}
+
+		return this;
 	};
+
 
 	ListBase.prototype.removeAllItems = function(sAggregationName) {
 		this._oSelectedItem = null;
@@ -732,7 +764,7 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 	 *
 	 * @protected
 	 */
-	sap.m.ListBase.prototype.getLastMode = function(sMode) {
+	ListBase.prototype.getLastMode = function(sMode) {
 		return this._sLastMode;
 	};
 
@@ -743,30 +775,27 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 			return this;
 		}
 
-		// update property with invalidate
-		this.setProperty("mode", sMode);
-
 		// determine the selection mode
 		this._bSelectionMode = sMode.indexOf("Select") > -1;
 
 		// remove selections if mode is not a selection mode
 		if (!this._bSelectionMode) {
 			this.removeSelections(true);
-			return this;
+		} else {
+			// update selection status of items
+			var aSelecteds = this.getSelectedItems();
+			if (aSelecteds.length > 1) {
+				// remove selection if there are more than one item is selected
+				this.removeSelections(true);
+			} else if (sOldMode === sap.m.ListMode.MultiSelect) {
+				// if old mode is multi select then we need to remember selected item
+				// in case of new item selection right after setMode call
+				this._oSelectedItem = aSelecteds[0];
+			}
 		}
 
-		// update selection status of items
-		var aSelecteds = this.getSelectedItems();
-		if (aSelecteds.length > 1) {
-			// remove selection if there are more than one item is selected
-			this.removeSelections(true);
-		} else if (sOldMode === sap.m.ListMode.MultiSelect) {
-			// if old mode is multi select then we need to remember selected item
-			// in case of new item selection right after setMode call
-			this._oSelectedItem = aSelecteds[0];
-		}
-
-		return this;
+		// update property with invalidate
+		return this.setProperty("mode", sMode);
 	};
 
 
@@ -798,7 +827,7 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 	 * @since 1.26
 	 * @protected
 	 */
-	sap.m.ListBase.prototype.setSelectedContextPaths = function(aSelectedPaths) {
+	ListBase.prototype.setSelectedContextPaths = function(aSelectedPaths) {
 		this._aSelectedPaths = aSelectedPaths || [];
 	};
 
@@ -809,21 +838,25 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 	 * @since 1.26
 	 * @protected
 	 */
-	sap.m.ListBase.prototype.getSelectedContextPaths = function() {
+	ListBase.prototype.getSelectedContextPaths = function() {
 		return this._aSelectedPaths.slice(0);
 	};
 
-	/* Determines is whether all selectable items are selected or not
+	/* Determines whether all selectable items are selected or not
 	 * @protected
 	 */
 	ListBase.prototype.isAllSelectableSelected = function() {
+		if (this.getMode() != sap.m.ListMode.MultiSelect) {
+			return false;
+		}
+
 		var aItems = this.getItems(true),
 			iSelectedItemCount = this.getSelectedItems().length,
 			iSelectableItemCount = aItems.filter(function(oItem) {
 				return oItem.isSelectable();
 			}).length;
 
-		return aItems.length > 0 && iSelectedItemCount == iSelectableItemCount;
+		return (aItems.length > 0) && (iSelectedItemCount == iSelectableItemCount);
 	};
 
 	/*
@@ -836,11 +869,32 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 		});
 	};
 
+	// return whether list has active item or not
+	ListBase.prototype.getActiveItem = function() {
+		return this._bActiveItem;
+	};
 
 	// this gets called when items DOM is changed
 	ListBase.prototype.onItemDOMUpdate = function(oListItem) {
 		if (!this._bRendering && this.bOutput) {
 			this._startItemNavigation(true);
+		}
+	};
+
+	// this gets called when items active state is changed
+	ListBase.prototype.onItemActiveChange = function(oListItem, bActive) {
+		this._bActiveItem = bActive;
+	};
+
+	// this gets called when item type column requirement is changed
+	ListBase.prototype.onItemHighlightChange = function(oItem, bNeedsHighlight) {
+		this._iItemNeedsHighlight += (bNeedsHighlight ? 1 : -1);
+
+		// update highlight visibility
+		if (this._iItemNeedsHighlight == 1 && bNeedsHighlight) {
+			this.$("listUl").addClass("sapMListHighlight");
+		} else if (this._iItemNeedsHighlight == 0) {
+			this.$("listUl").removeClass("sapMListHighlight");
 		}
 	};
 
@@ -871,6 +925,9 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 	ListBase.prototype.getItemsContainerDomRef = function() {
 		return this.getDomRef("listUl");
 	};
+
+
+	ListBase.prototype.checkGrowingFromScratch = function() {};
 
 	/*
 	 * This hook method gets called if growing feature is enabled and before new page loaded
@@ -907,7 +964,7 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 	 */
 	ListBase.prototype.getMaxItemsCount = function() {
 		var oBinding = this.getBinding("items");
-		if (oBinding) {
+		if (oBinding && oBinding.getLength) {
 			return oBinding.getLength() || 0;
 		}
 		return this.getItems(true).length;
@@ -969,6 +1026,7 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 	ListBase.prototype._fireUpdateFinished = function(oInfo) {
 		this._hideBusyIndicator();
 		jQuery.sap.delayedCall(0, this, function() {
+			this._bItemNavigationInvalidated = true;
 			this.fireUpdateFinished({
 				reason : this._sUpdateReason,
 				actual : oInfo ? oInfo.actual : this.getItems(true).length,
@@ -1036,6 +1094,7 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 			!this._aSelectedPaths.length ||
 			!this.getRememberSelections() ||
 			!this.isBound("items") ||
+			oItem.isSelectedBoundTwoWay() ||
 			oItem.getSelected()) {
 			return;
 		}
@@ -1382,42 +1441,146 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 			title: oGroup.text || oGroup.key
 		});
 
+		oHeader._bGroupHeader = true;
 		this.addAggregation("items", oHeader, bSuppressInvalidate);
 		return oHeader;
 	};
 
 	ListBase.prototype.removeGroupHeaders = function(bSuppressInvalidate) {
 		this.getItems(true).forEach(function(oItem) {
-			if (oItem instanceof GroupHeaderListItem) {
+			if (oItem.isGroupHeader()) {
 				oItem.destroy(bSuppressInvalidate);
 			}
 		});
 	};
 
-	// returns accessibility role
-	ListBase.prototype.getRole = function() {
-		var sMode = this.getMode(),
-			mMode = sap.m.ListMode;
-
-		return (sMode == mMode.None || sMode == mMode.Delete) ? "list" : "listbox";
+	ListBase.prototype.getAccessibilityType = function() {
+		return sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("ACC_CTR_TYPE_LIST");
 	};
 
-	// this gets called after navigation items are focused
-	ListBase.prototype.onNavigationItemFocus = function(oEvent) {
-		var iIndex = oEvent.getParameter("index"),
-			aItemDomRefs = this._oItemNavigation.getItemDomRefs(),
-			oItemDomRef = aItemDomRefs[iIndex],
-			iSetSize = aItemDomRefs.length,
+	ListBase.prototype.getAccessibilityStates = function() {
+		if (!this.getItems(true).length) {
+			return "";
+		}
+
+		var sStates = "",
+			mMode = sap.m.ListMode,
+			sMode = this.getMode(),
+			oBinding = this.getBinding("rows"),
+			oBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m");
+
+		if (sMode == mMode.MultiSelect) {
+			sStates += oBundle.getText("LIST_MULTISELECTABLE") + " ";
+		} else if (sMode == mMode.Delete) {
+			sStates += oBundle.getText("LIST_DELETABLE") + " ";
+		} else if (sMode != mMode.None) {
+			sStates += oBundle.getText("LIST_SELECTABLE") + " ";
+		}
+		if (oBinding && oBinding.isGrouped()) {
+			sStates += oBundle.getText("LIST_GROUPED") + " ";
+		}
+
+		return sStates;
+	};
+
+	ListBase.prototype.getAccessibilityDescription = function() {
+		var sDescription = this.getAriaLabelledBy().map(function(sAriaLabelledBy) {
+			var oAriaLabelledBy = sap.ui.getCore().byId(sAriaLabelledBy);
+			return ListItemBase.getAccessibilityText(oAriaLabelledBy);
+		}).join(" ");
+
+		var oHeaderTBar = this.getHeaderToolbar();
+		if (oHeaderTBar) {
+			var oTitle = oHeaderTBar.getTitleControl();
+			if (oTitle) {
+				sDescription += oTitle.getText() + " ";
+			}
+		} else {
+			sDescription += this.getHeaderText() + " ";
+		}
+
+		sDescription += this.getAccessibilityType() + " ";
+		sDescription += this.getAccessibilityStates() + " ";
+		sDescription += this.getFooterText();
+
+		return sDescription.trim();
+	};
+
+	ListBase.prototype.getAccessibilityInfo = function() {
+		return {
+			description: this.getAccessibilityDescription(),
+			focusable: true
+		};
+	};
+
+	ListBase.prototype.getAccessbilityPosition = function(oItem) {
+		var iSetSize = 0,
+			aItems = this.getVisibleItems(),
+			iPosInset = aItems.indexOf(oItem) + 1,
 			oBinding = this.getBinding("items");
 
 		// use binding length if list is in scroll to load growing mode
 		if (this.getGrowing() && this.getGrowingScrollToLoad() && oBinding && oBinding.isLengthFinal()) {
 			iSetSize = oBinding.getLength();
+			if (oBinding.isGrouped()) {
+				iSetSize += aItems.filter(function(oItem) {
+					return oItem.isGroupHeader() && oItem.getVisible();
+				}).length;
+			}
+		} else {
+			iSetSize = aItems.length;
 		}
 
-		this.getNavigationRoot().setAttribute("aria-activedescendant", oItemDomRef.id);
-		oItemDomRef.setAttribute("aria-posinset", iIndex + 1);
-		oItemDomRef.setAttribute("aria-setsize", iSetSize);
+		return {
+			setSize: iSetSize,
+			posInset: iPosInset
+		};
+	};
+
+	// this gets called when items are focused
+	ListBase.prototype.onItemFocusIn = function(oItem) {
+		if (!sap.ui.getCore().getConfiguration().getAccessibility()) {
+			return;
+		}
+
+		var oItemDomRef = oItem.getDomRef(),
+			mPosition = this.getAccessbilityPosition(oItem);
+
+		if (!oItem.getContentAnnouncement) {
+			// let the screen reader announce the whole content
+			this.getNavigationRoot().setAttribute("aria-activedescendant", oItemDomRef.id);
+			oItemDomRef.setAttribute("aria-posinset", mPosition.posInset);
+			oItemDomRef.setAttribute("aria-setsize", mPosition.setSize);
+		} else {
+			// prepare the announcement for the screen reader
+			var oAccInfo = oItem.getAccessibilityInfo(),
+				oBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m"),
+				sDescription = oAccInfo.type + " ";
+
+			sDescription += oBundle.getText("LIST_ITEM_POSITION", [mPosition.posInset, mPosition.setSize]) + " ";
+			sDescription += oAccInfo.description;
+			this.updateInvisibleText(sDescription, oItemDomRef);
+		}
+	};
+
+	ListBase.prototype.updateInvisibleText = function(sText, oItemDomRef, bPrepend) {
+		var oInvisibleText = ListBase.getInvisibleText(),
+			$FocusedItem = jQuery(oItemDomRef || document.activeElement);
+
+		if (this.iAnnounceDetails) {
+			if (this.iAnnounceDetails == 1) {
+				sText = this.getAccessibilityStates() + " " + sText;
+			} else {
+				sText = this.getAccessibilityInfo().description + " " + sText;
+			}
+			this.iAnnounceDetails = 0;
+		}
+
+		oInvisibleText.setText(sText.trim());
+		$FocusedItem.addAriaLabelledBy(oInvisibleText.getId(), bPrepend);
+		window.setTimeout(function() {
+			$FocusedItem.removeAriaLabelledBy(oInvisibleText.getId());
+		}, 0);
 	};
 
 	/* Keyboard Handling */
@@ -1437,6 +1600,14 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 			return;
 		}
 
+		var sKeyboardMode = this.getKeyboardMode(),
+			mKeyboardMode = sap.m.ListKeyboardMode;
+
+		// ItemNavigation is not necessary if there is no item in edit mode
+		if (sKeyboardMode == mKeyboardMode.Edit && !this.getItems(true).length) {
+			return;
+		}
+
 		// if focus is not on the navigation items then only invalidate the item navigation
 		if (bIfNeeded && !this.getNavigationRoot().contains(document.activeElement)) {
 			this._bItemNavigationInvalidated = true;
@@ -1449,10 +1620,11 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 			this._oItemNavigation.setCycling(false);
 			this.addEventDelegate(this._oItemNavigation);
 
-			// root element should still be tabbable
-			this._oItemNavigation.setTabIndex0();
+			// set the tab index of active items
+			var iTabIndex = (sKeyboardMode == mKeyboardMode.Edit) ? -1 : 0;
+			this._setItemNavigationTabIndex(iTabIndex);
 
-			// implicitly setting table mode with one column
+			// explicitly setting table mode with one column
 			// to disable up/down reaction on events of the cell
 			this._oItemNavigation.setTableMode(true, true).setColumns(1);
 
@@ -1462,9 +1634,6 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 				sapnext : ["alt"],
 				sapprevious : ["alt"]
 			});
-
-			// attach to the focus event of the navigation items
-			this._oItemNavigation.attachEvent(ItemNavigation.Events.BeforeFocus, this.onNavigationItemFocus, this);
 		}
 
 		// TODO: Maybe we need a real paging algorithm here
@@ -1493,7 +1662,11 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 		var aNavigationItems = jQuery(oNavigationRoot).children(".sapMLIB").get();
 		oItemNavigation.setItemDomRefs(aNavigationItems);
 		if (oItemNavigation.getFocusedIndex() == -1) {
-			oItemNavigation.setFocusedIndex(0);
+			if (this.getGrowing() && this.getGrowingDirection() == sap.m.ListGrowingDirection.Upwards) {
+				oItemNavigation.setFocusedIndex(aNavigationItems.length - 1);
+			} else {
+				oItemNavigation.setFocusedIndex(0);
+			}
 		}
 	};
 
@@ -1505,6 +1678,27 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 	 */
 	ListBase.prototype.getItemNavigation = function() {
 		return this._oItemNavigation;
+	};
+
+	// sets the active elements tabindex of ItemNavigation
+	ListBase.prototype._setItemNavigationTabIndex = function(iTabIndex) {
+		if (this._oItemNavigation) {
+			this._oItemNavigation.iActiveTabIndex = iTabIndex;
+			this._oItemNavigation.iTabIndex = iTabIndex;
+		}
+	};
+
+	ListBase.prototype.setKeyboardMode = function(sKeyboardMode) {
+		this.setProperty("keyboardMode", sKeyboardMode, true);
+
+		if (this.isActive()) {
+			var iTabIndex = (sKeyboardMode == sap.m.ListKeyboardMode.Edit) ? -1 : 0;
+			this.$("listUl").prop("tabIndex", iTabIndex);
+			this.$("after").prop("tabIndex", iTabIndex);
+			this._setItemNavigationTabIndex(iTabIndex);
+		}
+
+		return this;
 	};
 
 	/*
@@ -1536,18 +1730,27 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 	 */
 	ListBase.prototype.forwardTab = function(bForward) {
 		this._bIgnoreFocusIn = true;
-		this.$(bForward ? "after" : "listUl").focus();
+		this.$(bForward ? "after" : "before").focus();
 	};
 
 	// move focus out of the table for nodata row
 	ListBase.prototype.onsaptabnext = function(oEvent) {
+		if (oEvent.isMarked() || this.getKeyboardMode() == sap.m.ListKeyboardMode.Edit) {
+			return;
+		}
+
 		if (oEvent.target.id == this.getId("nodata")) {
 			this.forwardTab(true);
+			oEvent.setMarked();
 		}
 	};
 
 	// move focus out of the table for nodata row
 	ListBase.prototype.onsaptabprevious = function(oEvent) {
+		if (oEvent.isMarked() || this.getKeyboardMode() == sap.m.ListKeyboardMode.Edit) {
+			return;
+		}
+
 		var sTargetId = oEvent.target.id;
 		if (sTargetId == this.getId("nodata")) {
 			this.forwardTab(false);
@@ -1684,6 +1887,7 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 
 		// get the last tabbable item or itself and focus
 		var $FocusElement = $Tabbables.eq(-1).add($LastFocused).eq(-1);
+		this.iAnnounceDetails = 2;
 		$FocusElement.focus();
 	};
 
@@ -1703,13 +1907,42 @@ sap.ui.define(['jquery.sap.global', './GroupHeaderListItem', './library', 'sap/u
 		}
 
 		// handle only for backward navigation
-		if (oEvent.isMarked() ||
-			!this._oItemNavigation ||
+		if (oEvent.isMarked() || !this._oItemNavigation ||
+			this.getKeyboardMode() == sap.m.ListKeyboardMode.Edit ||
 			oEvent.target.id != this.getId("after")) {
 			return;
 		}
 
 		this.focusPrevious();
+		oEvent.setMarked();
+	};
+
+	ListBase.prototype.onsapfocusleave = function(oEvent) {
+		if (!this.iAnnounceDetails && this._oItemNavigation && !this.getNavigationRoot().contains(oEvent.target)) {
+			this.iAnnounceDetails = 1;
+		}
+	};
+
+	// this gets called when items up arrow key is pressed for the edit keyboard mode
+	ListBase.prototype.onItemArrowUpDown = function(oListItem, oEvent) {
+		var aItems = this.getItems(true),
+			iIndex = aItems.indexOf(oListItem) + (oEvent.type == "sapup" ? -1 : 1),
+			oItem = aItems[iIndex];
+
+		if (oItem && oItem.isGroupHeader()) {
+			oItem = aItems[iIndex + (oEvent.type == "sapup" ? -1 : 1)];
+		}
+
+		if (!oItem) {
+			return;
+		}
+
+		var $Tabbables = oItem.getTabbables(),
+			iFocusPos = oListItem.getTabbables().index(oEvent.target),
+			$Element = $Tabbables.eq($Tabbables[iFocusPos] ? iFocusPos : -1);
+
+		$Element[0] ? $Element.focus() : oItem.focus();
+		oEvent.preventDefault();
 		oEvent.setMarked();
 	};
 

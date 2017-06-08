@@ -20,12 +20,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @class
 	 * Responsible for displaying the new incoming messages, one at the time, on top of the MessageBar.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
-	 * @deprecated Since version 1.4.0.
-	 * A new messaging concept will be created in future. Therefore this control might be removed in one of the next versions.
+	 * @deprecated Since version 1.4.0. Instead, use the <code>sap.m.MessageToast</code> control.
 	 * @alias sap.ui.commons.MessageToast
 	 * @ui5-metamodel This control/element also will be described in the UI5 design-time metamodel
 	 */

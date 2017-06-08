@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', './Popover', './TabStripSelectList', './libr
 		 * @extends sap.m.Select
 		 *
 		 * @author SAP SE
-		 * @version 1.34.9
+		 * @version 1.44.14
 		 * @since 1.34
 		 *
 		 * @constructor
@@ -51,15 +51,10 @@ sap.ui.define(['jquery.sap.global', './Popover', './TabStripSelectList', './libr
 		 *
 		 * @type {number}
 		 */
-		TabStripSelect.SPACE_BETWEEN_SELECT_BUTTON_AND_POPOVER = -5;
 
-		/**
-		 * Initialization hook.
-		 *
-		 * @override
-		 * @private
-		 */
 		TabStripSelect.prototype.init = function() {
+			TabStripSelect.SPACE_BETWEEN_SELECT_BUTTON_AND_POPOVER = this.$().parents().hasClass('sapUiSizeCompact') ? 2 : 3; // results in 0.1875 rem / results in 0.125 rem
+
 			// set the picker type
 			this.setPickerType(sap.ui.Device.system.phone ? "Dialog" : "Popover");
 
@@ -70,7 +65,7 @@ sap.ui.define(['jquery.sap.global', './Popover', './TabStripSelectList', './libr
 			this._oSelectionOnFocus = null;
 
 			// to detect when the control is in the rendering phase
-			this._bRenderingPhase = false;
+			this.bRenderingPhase = false;
 
 			// to detect if the focusout event is triggered due a rendering
 			this._bFocusoutDueRendering = false;
@@ -107,7 +102,7 @@ sap.ui.define(['jquery.sap.global', './Popover', './TabStripSelectList', './libr
 		 * @override
 		 * @param {string} sFunctionName The name of the called method
 		 * @param {array} aArgs The supplied arguments
-		 * @returns {mixed} The result of the called method
+		 * @returns {any} The result of the called method
 		 * @private
 		 */
 		TabStripSelect.prototype._callMethodInControl = function(sFunctionName, aArgs) {
@@ -146,7 +141,7 @@ sap.ui.define(['jquery.sap.global', './Popover', './TabStripSelectList', './libr
 				    showHeader: false,
 				    placement: sap.m.PlacementType.Vertical,
 				    offsetX: 0,
-				    offsetY: sap.ui.Device.system.phone ? 0 : TabStripSelect.SPACE_BETWEEN_SELECT_BUTTON_AND_POPOVER,
+				    offsetY: TabStripSelect.SPACE_BETWEEN_SELECT_BUTTON_AND_POPOVER,
 				    initialFocus: this,
 				    bounce: false
 			    });
@@ -161,6 +156,7 @@ sap.ui.define(['jquery.sap.global', './Popover', './TabStripSelectList', './libr
 					}
 				}
 			}, oPicker);
+			oPicker.addStyleClass("sapContrastPlus");
 
 			this._decoratePopover(oPicker);
 			return oPicker;
@@ -189,13 +185,29 @@ sap.ui.define(['jquery.sap.global', './Popover', './TabStripSelectList', './libr
 				})
 					.addStyleClass(TabStripSelect.CSS_CLASS + "Bar")
 					.addStyleClass(CSS_CLASS_PARENT + "Bar")
-			});
+			}).addStyleClass(TabStripSelect.CSS_CLASS + "Dialog");
 
 			oDialog.getAggregation("customHeader").attachBrowserEvent("tap", function() {
 				oDialog.close();
 			}, this);
 
 			return oDialog;
+		};
+
+		/**
+		 * This event handler is called before the dialog is opened.
+		 *
+		 * @private
+		 */
+		TabStripSelect.prototype._onBeforeOpenDialog = function() {
+			var oInput = this.getPicker().getCustomHeader().getContentLeft()[0],
+				oSelectedItem = this.getSelectedItem();
+
+			if (oSelectedItem) {
+				oInput.setValue(oSelectedItem.getText());
+				oInput.setTextDirection(this.getTextDirection());
+				oInput.setTextAlign(this.getTextAlign());
+			}
 		};
 
 		/**
@@ -218,17 +230,11 @@ sap.ui.define(['jquery.sap.global', './Popover', './TabStripSelectList', './libr
 			// on phone the picker is a dialog and does not have an offset
 			if (this.getPicker() instanceof sap.m.Popover === true) {
 				this.getPicker().setOffsetX(-iPickerOffsetX);
+				this.getPicker().setOffsetY(this.$().parents().hasClass('sapUiSizeCompact') ? 2 : 3);
 				this.getPicker()._calcPlacement(); // needed to apply the new offset after the popup is open
 			}
 		};
 
-
-		/**
-		 * Cleans up before destruction.
-		 *
-		 * @override
-		 * @private
-		 */
 		TabStripSelect.prototype.exit = function() {
 			Select.prototype.exit.call(this);
 			this._oList.destroy();
@@ -327,16 +333,21 @@ sap.ui.define(['jquery.sap.global', './Popover', './TabStripSelectList', './libr
 		 *
 		 * @override
 		 * @param {string} sValue
+		 * @return {sap.m.TabStripSelect} <code>this</code> for chaining
 		 * @private
 		 */
 		TabStripSelect.prototype.setValue = function(sValue) {
-			var $ModifiedDom = this.$().find(".sapMTabStripSelectListItemModified").eq(0);
+			var $ModifiedDom = this.$().find(".sapMTabStripSelectListItemModified").eq(0),
+				oSelectedItem;
+
 			Select.prototype.setValue.apply(this, arguments);
-			if (this.getSelectedItem().getProperty('modified')) {
+			oSelectedItem = this.getSelectedItem();
+			if (oSelectedItem && oSelectedItem.getProperty('modified')) {
 				$ModifiedDom.removeClass(TabStripItem.CSS_CLASS_STATE_INVISIBLE);
 			} else {
 				$ModifiedDom.addClass(TabStripItem.CSS_CLASS_STATE_INVISIBLE);
 			}
+			return this;
 		};
 
 

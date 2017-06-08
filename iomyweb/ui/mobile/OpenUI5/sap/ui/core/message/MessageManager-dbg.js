@@ -29,7 +29,7 @@ sap.ui.define([
 	 * @extends sap.ui.base.EventProvider
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -176,15 +176,20 @@ sap.ui.define([
 	};
 
 	/**
-	 * sort messages by type 'Error', 'Warning', 'Success', 'Info'
+	 * sort messages by type 'Error', 'Warning', 'Success', 'Information'
 	 *
-	 * @param {map|sap.ui.core.message.Message[]} mMessages Map or array of Messages to be sorted (in order of severity) by their type property
+	 * @param {map|sap.ui.core.message.Message[]} vMessages Map or array of Messages to be sorted (in order of severity) by their type property
 	 * @private
 	 */
-	MessageManager.prototype._sortMessages = function(mMessages) {
-		var mSortOrder = {'Error': 0,'Warning':1,'Success':2,'Info':3};
-		jQuery.each(mMessages, function(sTarget, aMessages){
-			if (!aMessages.length === 0) {
+	MessageManager.prototype._sortMessages = function(vMessages) {
+		var mSortOrder = { 'Error': 0, 'Warning':1, 'Success':2, 'Information':3 };
+
+		if (Array.isArray(vMessages)) {
+			vMessages = { "ignored": vMessages };
+		}
+
+		jQuery.each(vMessages, function(sTarget, aMessages){
+			if (aMessages.length > 0) {
 				aMessages.sort(function(a, b){
 					return mSortOrder[a.type] - mSortOrder[b.type];
 				});
@@ -280,7 +285,7 @@ sap.ui.define([
 		if (aMessages) {
 			for (var i = 0; i < aMessages.length; i++) {
 				var oMsg = aMessages[i];
-				if (jQuery.sap.equal(oMsg, oMessage) && !oMsg.getPersistent()) {
+				if (jQuery.sap.equal(oMsg, oMessage)) {
 					aMessages.splice(i,1);
 					--i; // Decrease counter as one element has been removed
 				}
@@ -334,7 +339,7 @@ sap.ui.define([
 	/**
 	 * Register ManagedObject: Validation and Parse errors are handled by the MessageManager for this object
 	 *
-	 * @param {sap.ui.base.ManageObject} oObject The sap.ui.base.ManageObject
+	 * @param {sap.ui.base.ManagedObject} oObject The sap.ui.base.ManagedObject
 	 * @param {boolean} bHandleValidation Handle validation for this object. If set to true validation/parse events creates Messages and cancel event.
 	 * 					If set to false only the event will be canceled, but no messages will be created
 	 * @public
@@ -353,7 +358,7 @@ sap.ui.define([
 	/**
 	 * Unregister ManagedObject
 	 *
-	 * @param {sap.ui.base.ManageObject} oObject The sap.ui.base.ManageObject
+	 * @param {sap.ui.base.ManagedObject} oObject The sap.ui.base.ManagedObject
 	 * @public
 	 */
 	MessageManager.prototype.unregisterObject = function(oObject) {
@@ -379,7 +384,7 @@ sap.ui.define([
 
 	/**
 	 * Get the MessageModel
-	 * @return {sap.ui.core.message.MessageModel} oMessageModel The Message Model
+	 * @return {sap.ui.model.message.MessageModel} oMessageModel The Message Model
 	 * @public
 	 */
 	MessageManager.prototype.getMessageModel = function() {

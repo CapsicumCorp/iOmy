@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -58,30 +58,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 			this._bIsRegistered = false;
 			this._proxyComputeWidths = jQuery.proxy(computeWidths, this);
 
-			this.oRm = sap.ui.getCore().createRenderManager();
-			this.oRm.writeStylesAndClasses = function() {
-				this.writeStyles();
-				this.writeClasses();
-			};
-			this.oRm.writeHeader = function(sId, oStyles, aClasses) {
-				this.write('<div id="' + sId + '"');
-
-				if (oStyles) {
-					for ( var key in oStyles) {
-						if (key === "width" && oStyles[key] === "100%") {
-							this.addClass("sapUiRFLFullLength");
-						}
-						this.addStyle(key, oStyles[key]);
-					}
-				}
-				for (var i = 0; i < aClasses.length; i++) {
-					this.addClass(aClasses[i]);
-				}
-
-				this.writeStylesAndClasses();
-				this.write(">");
-			};
-
 			this._iRowCounter = 0;
 		};
 		ResponsiveFlowLayout.prototype.exit = function() {
@@ -98,8 +74,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 			delete this._resizeHandlerComputeWidthsID;
 			delete this._proxyComputeWidths;
 
-			this.oRm.destroy();
-			delete this.oRm;
+			if (this.oRm) {
+				this.oRm.destroy();
+				delete this.oRm;
+			}
 
 			delete this._$DomRef;
 			delete this._oDomRef;
@@ -303,19 +281,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 		 * @private
 		 */
 		ResponsiveFlowLayout.prototype.renderContent = function(oTargetWrapping, iWidth) {
-			var r = oTargetWrapping;
-			var iRowProcWidth = 0;
-			var aWidths = [];
-			var i = 0, ii = 0, j = 0, jj = 0;
-			var totalWeight = 0;
-			var iProcWidth = 0;
-			var oCont;
-			var tWeight = 0, tMinWidth = 0;
-			var aBreakWidths = [];
-			var aClasses = [];
-
-			var sId = this.getId();
-			var sHeaderId = "";
+			var r = oTargetWrapping,
+				iRowProcWidth = 0,
+				aWidths = [],
+				i = 0, ii = 0, j = 0, jj = 0,
+				totalWeight = 0,
+				iProcWidth = 0,
+				oCont,
+				tWeight = 0, tMinWidth = 0,
+				aBreakWidths = [],
+				aClasses = [],
+				sId = this.getId(),
+				sHeaderId = "",
+				oRm = this._getRenderManager();
 
 			for (i = 0; i < r.length; i++) {
 				/*
@@ -332,7 +310,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 				}
 				var sRowId = sId + "-row" + this._iRowCounter;
 				var oStyles = {};
-				this.oRm.writeHeader(sRowId, oStyles, aClasses);
+				oRm.writeHeader(sRowId, oStyles, aClasses);
 
 				totalWeight = 0;
 				for (ii = 0; ii < r[i].cont.length; ii++) {
@@ -401,7 +379,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 					aClasses.push("sapUiRFLContainer");
 					oStyles["width"] = iProcWidth + "%";
 					oStyles["min-width"] = oStyles["min-width"] + "px";
-					this.oRm.writeHeader(sHeaderId, oStyles, aClasses);
+					oRm.writeHeader(sHeaderId, oStyles, aClasses);
 
 					/*
 					 * content rendering (render control)
@@ -421,7 +399,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 					}
 
 					oStyles = {};
-					this.oRm.writeHeader("", oStyles, aClasses);
+					oRm.writeHeader("", oStyles, aClasses);
 
 					/*
 					 * Render all following elements into same container if there
@@ -448,13 +426,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 						if (r[i].cont[j].padding) {
 							aClasses.push("sapUiRFLPaddingClass");
 						}
-						this.oRm.writeHeader(sHeaderId, oStyles, aClasses);
+						oRm.writeHeader(sHeaderId, oStyles, aClasses);
 
 						// total percentage for all elements
 						var tPercentage = percW;
 
-						this.oRm.renderControl(oCont.control);
-						this.oRm.write("</div>");
+						oRm.renderControl(oCont.control);
+						oRm.write("</div>");
 
 						/*
 						 * Render all following elements that should wrap with the
@@ -485,19 +463,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 							if (oCont.breakWith[jj].padding) {
 								aClasses.push("sapUiRFLPaddingClass");
 							}
-							this.oRm.writeHeader(sHeaderId, oStyles, aClasses);
+							oRm.writeHeader(sHeaderId, oStyles, aClasses);
 
-							this.oRm.renderControl(oCont.breakWith[jj].control);
-							this.oRm.write("</div>");
+							oRm.renderControl(oCont.breakWith[jj].control);
+							oRm.write("</div>");
 						}
 					} else {
-						this.oRm.renderControl(oCont.control);
+						oRm.renderControl(oCont.control);
 					}
-					this.oRm.write("</div>"); // content
+					oRm.write("</div>"); // content
 
-					this.oRm.write("</div>"); // container
+					oRm.write("</div>"); // container
 				}
-				this.oRm.write("</div>"); // row
+				oRm.write("</div>"); // row
 
 				this._iRowCounter++;
 			}
@@ -524,7 +502,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 
 						// if the width/height changed so the sizes need to be
 						// recalculated
-						var oRowRect = $Row.rect();
+						var oRowRect = this._getElementRect($Row);
 						var oPrevRect = this._rows[i].oRect;
 
 						if (oRowRect && oPrevRect) {
@@ -536,12 +514,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 
 						if (this._bLayoutDataChanged || bRender) {
 
-                            //in IE when setting the innerHTML property to "" the changes do not take effect correctly and all the children are gone
-                            if (sap.ui.Device.browser.internet_explorer){
-                                jQuery(this._oDomRef).empty();
-                            } else {
-                                this._oDomRef.innerHTML = "";
-                            }
+							//in IE when setting the innerHTML property to "" the changes do not take effect correctly and all the children are gone
+							if (sap.ui.Device.browser.internet_explorer){
+								jQuery(this._oDomRef).empty();
+							} else {
+								this._oDomRef.innerHTML = "";
+							}
 
 							// reset this to be clean for next check interval
 							this._bLayoutDataChanged = false;
@@ -550,10 +528,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 					}
 
 					if (this._oDomRef.innerHTML === "") {
-						this.oRm.flush(this._oDomRef);
+						this._getRenderManager().flush(this._oDomRef);
 
 						for (var i = 0; i < this._rows.length; i++) {
-							var oTmpRect = jQuery.sap.byId(sId + "-row" + i).rect();
+							var oTmpRect = this._getElementRect(jQuery.sap.byId(sId + "-row" + i));
 							this._rows[i].oRect = oTmpRect;
 						}
 					}
@@ -721,6 +699,59 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/Interval
 
 			return null;
 
+		};
+
+		/**
+		 * Returns a rectangle describing the current visual positioning of 1st DOM in the collection.
+		 * The difference with the function rect() in jQuery.sap.dom.js is that the height and width are cut to the
+		 * 1st digit after the decimal separator and this is consistent across all browsers.
+		 * @param oElement the jQuery collection to check
+		 * @returns {{top, left, width, height}} or null if no such element
+		 * @private
+		 */
+		ResponsiveFlowLayout.prototype._getElementRect = function (oElement) {
+			var oRect = oElement && oElement.rect();
+
+			if (oRect) {
+				oRect.height = oRect.height.toFixed(1);
+				oRect.width = oRect.width.toFixed(1);
+			}
+			return oRect;
+		};
+
+		/**
+		 * Lazily obtains custom version of render manager
+		 * @private
+		 * @returns {sap.ui.core.RenderManager} instance of render manager.
+		 * Note: the instance is also available as <code>this.oRm</code>
+		 */
+		ResponsiveFlowLayout.prototype._getRenderManager = function () {
+			if (!this.oRm) {
+				this.oRm = sap.ui.getCore().createRenderManager();
+				this.oRm.writeStylesAndClasses = function() {
+					this.writeStyles();
+					this.writeClasses();
+				};
+				this.oRm.writeHeader = function(sId, oStyles, aClasses) {
+					this.write('<div id="' + sId + '"');
+
+					if (oStyles) {
+						for ( var key in oStyles) {
+							if (key === "width" && oStyles[key] === "100%") {
+								this.addClass("sapUiRFLFullLength");
+							}
+							this.addStyle(key, oStyles[key]);
+						}
+					}
+					for (var i = 0; i < aClasses.length; i++) {
+						this.addClass(aClasses[i]);
+					}
+
+					this.writeStylesAndClasses();
+					this.write(">");
+				};
+			}
+			return this.oRm;
 		};
 
 	}());

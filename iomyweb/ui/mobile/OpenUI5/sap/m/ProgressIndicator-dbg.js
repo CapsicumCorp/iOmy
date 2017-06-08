@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -79,36 +79,42 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		}
 	}});
 
-	ProgressIndicator.prototype.onAfterRendering = function() {
-		//if the user sets a height, this wins against everything else, therefore the styles have to be calculated and set here
-		if (!!this.getHeight()) {
-			var lineHeightText = this.$().height();
-			this.$("textRight").css("line-height", lineHeightText + "px");
-			this.$("textLeft").css("line-height", lineHeightText + "px");
-		}
-	};
+	var bUseAnimations = sap.ui.getCore().getConfiguration().getAnimation();
 
 	ProgressIndicator.prototype.setPercentValue = function(fPercentValue) {
-		var that = this;
+		var that = this,
+			$progressBar,
+			fPercentDiff,
+			$progressIndicator = this.$(),
+			fAnimationDuration;
 
-		// validation of fPercentValue
-		if (typeof (fPercentValue) !== "number" || fPercentValue < 0 || fPercentValue > 100) {
-			jQuery.sap.log.error(this + ": percentValue (" + fPercentValue + ") is not correct! It has to be a number between 0-100.");
-			return this;
+		if (!isValidPercentValue(fPercentValue)) {
+			fPercentValue = 0;
+			jQuery.sap.log.warning(this + ": percentValue (" + fPercentValue + ") is not correct! Setting the default percentValue:0.");
 		}
 
 		if (this.getPercentValue() !== fPercentValue) {
-			// animation without rerendering
+			fPercentDiff = this.getPercentValue() - fPercentValue;
 			this.setProperty("percentValue", fPercentValue, true);
-			this.$().addClass("sapMPIAnimate")
-					.attr("aria-valuenow", fPercentValue)
-					.attr("aria-valuetext", this._getAriaValueText({fPercent: fPercentValue}));
 
-			var time = Math.abs(that.getPercentValue() - fPercentValue) * 20;
-			var $Bar = this.$("bar");
-			$Bar.animate({
-				width : fPercentValue + "%"
-			}, time, "linear", function() {
+			if (!$progressIndicator.length) {
+				return this;
+			}
+
+			["sapMPIValueMax", "sapMPIValueMin", "sapMPIValueNormal", "sapMPIValueGreaterHalf"].forEach(function (sClass){
+				$progressIndicator.removeClass(sClass);
+			});
+
+			$progressIndicator.addClass(this._getCSSClassByPercentValue(fPercentValue));
+			$progressIndicator.addClass("sapMPIAnimate")
+				.attr("aria-valuenow", fPercentValue)
+				.attr("aria-valuetext", this._getAriaValueText({fPercent: fPercentValue}));
+
+			fAnimationDuration = bUseAnimations ? Math.abs(fPercentDiff) * 20 : 0;
+			$progressBar = this.$("bar");
+			$progressBar.animate({
+				"flex-basis" : fPercentValue + "%"
+			}, fAnimationDuration, "linear", function() {
 				that._setText.apply(that);
 				that.$().removeClass("sapMPIAnimate");
 			});
@@ -118,14 +124,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	};
 
 	ProgressIndicator.prototype._setText = function() {
-
 		this.$().toggleClass("sapMPIValueGreaterHalf", this.getPercentValue() > 50);
-
 		return this;
 	};
 
 	ProgressIndicator.prototype.setDisplayValue = function(sDisplayValue) {
-
 		// change of value without rerendering
 		this.setProperty("displayValue", sDisplayValue, true);
 		var $textLeft = this.$("textLeft");
@@ -135,6 +138,30 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		this.$().attr("aria-valuetext", this._getAriaValueText({sText: sDisplayValue}));
 
 		return this;
+	};
+
+	/**
+	 * Determines the CSS class, which should be applied to the <code>ProgressIndicator</code>
+	 * for the given <code>percentValue</code>.
+	 * @param {Number} fPercentValue
+	 * @return {String} the CSS class
+	 * @since 1.44
+	 * @private
+	 */
+	ProgressIndicator.prototype._getCSSClassByPercentValue = function(fPercentValue) {
+		if (fPercentValue === 100) {
+			return "sapMPIValueMax sapMPIValueGreaterHalf";
+		}
+
+		if (fPercentValue === 0) {
+			return "sapMPIValueMin";
+		}
+
+		if (fPercentValue <= 50) {
+			return "sapMPIValueNormal";
+		}
+
+		return "sapMPIValueNormal sapMPIValueGreaterHalf";
 	};
 
 	ProgressIndicator.prototype._getAriaValueText = function (oParams) {
@@ -153,6 +180,25 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	ProgressIndicator.prototype._getStateText = function () {
 		return ValueStateSupport.getAdditionalText(this.getState());
 	};
+
+	/**
+	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @protected
+	 */
+	ProgressIndicator.prototype.getAccessibilityInfo = function() {
+		var oBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m");
+		return {
+			role: "progressbar",
+			type: oBundle.getText("ACC_CTR_TYPE_PROGRESS"),
+			description: oBundle.getText("ACC_CTR_STATE_PROGRESS", [this.getPercentValue()]),
+			focusable: this.getEnabled(),
+			enabled: this.getEnabled()
+		};
+	};
+
+	function isValidPercentValue(value) {
+		return (typeof (value) === 'number') && !isNaN(value) && value >= 0 && value <= 100;
+	}
 
 	return ProgressIndicator;
 

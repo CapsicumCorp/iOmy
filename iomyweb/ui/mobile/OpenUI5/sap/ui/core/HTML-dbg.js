@@ -5,12 +5,12 @@
  */
 
 // Provides control sap.ui.core.HTML.
-sap.ui.define(['jquery.sap.global', './Control', './RenderManager', './library'],
-	function(jQuery, Control, RenderManager, library) {
+sap.ui.define(['jquery.sap.global', './Control', './RenderManager'],
+	function(jQuery, Control, RenderManager) {
 	"use strict";
 
 	// local shortcut
-	var RenderPrefixes = library.RenderPrefixes;
+	var RenderPrefixes = RenderManager.RenderPrefixes;
 
 	/**
 	 * Constructor for a new HTML.
@@ -37,7 +37,7 @@ sap.ui.define(['jquery.sap.global', './Control', './RenderManager', './library']
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -66,9 +66,12 @@ sap.ui.define(['jquery.sap.global', './Control', './RenderManager', './library']
 			 * Please consider to consult the jQuery documentation as well.
 			 *
 			 * The HTML control currently doesn't prevent the usage of multiple root nodes in its DOM content
-			 * (e.g. setContent("<div/><div/>")), but this is not a guaranteed feature. The accepted content
-			 * might be restricted to single root nodes in future versions. To notify applications about this
-			 * fact, a warning is written in the log when multiple root nodes are used.
+			 * (e.g. <code>setContent("&lt;div/>&lt;div/>")</code>), but this is not a guaranteed feature.
+			 * The accepted content might be restricted to single root nodes in future versions.
+			 * To notify applications about this fact, a warning is written in the log when multiple root nodes are used.
+			 *
+			 * When changing the content dynamically, ensure that the ID of the root node remains the same as the HTML
+			 * control's ID. Otherwise it cannot be guaranteed that certain lifecycle events take place.
 			 *
 			 * @SecSink {,XSS} The content of the 'content' property is rendered 1:1 to allow the full
 			 * flexibility of HTML in UI5 applications. Applications therefore must ensure, that they don't

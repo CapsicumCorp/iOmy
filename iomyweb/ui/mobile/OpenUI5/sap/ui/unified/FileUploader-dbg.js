@@ -5,8 +5,8 @@
  */
 
 // Provides control sap.ui.unified.FileUploader.
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
-	function(jQuery, Control, library) {
+sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library', 'sap/ui/core/LabelEnablement'],
+	function(jQuery, Control, library, LabelEnablement) {
 	"use strict";
 
 
@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -568,9 +568,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 * @private
 	 */
 	FileUploader.prototype.onAfterRendering = function() {
-
 		// prepare the file upload control and the upload iframe
 		this.prepareFileUploadAndIFrame();
+
+		this._cacheDOMEls();
 
 		// event listener registration for change event
 		jQuery(this.oFileUpload).change(jQuery.proxy(this.handlechange, this));
@@ -585,6 +586,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		if ((!!sap.ui.Device.browser.internet_explorer && sap.ui.Device.browser.version == 9)) {
 			this.oBrowse.$().attr("tabindex", "-1");
 		}
+
+		if (LabelEnablement.isRequired(this)) {
+			this.oBrowse.$().attr("aria-required", "true");
+		}
+
 		jQuery.sap.delayedCall(0, this, this._recalculateWidth);
 
 		this.oFilePath.$().find('input').removeAttr("role").attr("aria-live", "polite");
@@ -595,9 +601,17 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 
 	};
 
+
+	FileUploader.prototype._cacheDOMEls = function() {
+		this.FUEl = this.getDomRef("fu");
+		this.FUDataEl = this.getDomRef("fu_data");
+	};
+
 	FileUploader.prototype.onfocusin = function(oEvent) {
 
-		this.openValueStateMessage();
+		if (!this.oFilePath.shouldValueStateMessageBeOpened || this.oFilePath.shouldValueStateMessageBeOpened()) {
+			this.openValueStateMessage();
+		}
 
 	};
 
@@ -734,20 +748,22 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 
 	FileUploader.prototype.setStyle = function(sStyle) {
 		this.setProperty("style", sStyle, true);
-		if (sStyle == "Transparent") {
-			if (this.oBrowse.setLite) {
-				this.oBrowse.setLite(true);
-			} else {
-				this.oBrowse.setType("Transparent");
-			}
-		} else {
-			if (this.oBrowse.setType) {
-				this.oBrowse.setType(sStyle);
-			} else {
-				if (sStyle == "Emphasized") {
-					sStyle = "Emph";
+		if (sStyle) {
+			if (sStyle == "Transparent") {
+				if (this.oBrowse.setLite) {
+					this.oBrowse.setLite(true);
+				} else {
+					this.oBrowse.setType("Transparent");
 				}
-				this.oBrowse.setStyle(sStyle);
+			} else {
+				if (this.oBrowse.setType) {
+					this.oBrowse.setType(sStyle);
+				} else {
+					if (sStyle == "Emphasized") {
+						sStyle = "Emph";
+					}
+					this.oBrowse.setStyle(sStyle);
+				}
 			}
 		}
 		return this;
@@ -783,12 +799,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 					sapMInnerInput.value = "";
 				}
 				//keep the additional data on the form
-				this.$("fu_data").val(this.getAdditionalData());
+				jQuery(this.FUDataEl).val(this.getAdditionalData());
 			}
 			// only fire event when triggered by user interaction
 			if (bFireEvent) {
 				if (window.File) {
-					oFiles = jQuery.sap.domById(this.getId() + "-fu").files;
+					oFiles = this.FUEl.files;
 				}
 				if (!this.getSameFilenameAllowed() || sValue) {
 					this.fireChange({id:this.getId(), newValue:sValue, files:oFiles});
@@ -848,7 +864,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	FileUploader.prototype.setAdditionalData = function(sAdditionalData) {
 		// set the additional data in the hidden input
 		this.setProperty("additionalData", sAdditionalData, true);
-		var oAdditionalData = this.getDomRef("fu_data");
+		var oAdditionalData = this.FUDataEl;
 		if (oAdditionalData) {
 			sAdditionalData = this.getAdditionalData() || "";
 			oAdditionalData.value = sAdditionalData;
@@ -877,7 +893,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		var oXhr = aXhr[iIndex];
 		var sFilename = oXhr.file.name ? oXhr.file.name : "MultipartFile";
 
-		if (sap.ui.Device.browser.internet_explorer && oXhr.file.type && oXhr.xhr.readyState !== 0) {
+		if ((sap.ui.Device.browser.edge || sap.ui.Device.browser.internet_explorer) && oXhr.file.type && oXhr.xhr.readyState == 1) {
 			var sContentType = oXhr.file.type;
 			oXhr.xhr.setRequestHeader("Content-Type", sContentType);
 			oXhr.requestHeaders.push({name: "Content-Type", value: sContentType});
@@ -972,94 +988,90 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 		var uploadForm = this.getDomRef("fu_form");
 		var iFiles, sHeader, sValue, oXhrEntry;
 		try {
-			if (uploadForm) {
-				this._bUploading = true;
-				if (this.getSendXHR() && window.File) {
-					var aFiles = jQuery.sap.domById(this.getId() + "-fu").files;
-					if (aFiles.length > 0) {
-						if (this.getUseMultipart()) {
-							//one xhr request for all files
-							iFiles = 1;
-						} else {
-							//several xhr requests for every file
-							iFiles = aFiles.length;
-						}
-						// Save references to already uploading files if a new upload comes between upload and complete or abort
-						this._aXhr = this._aXhr || [];
-						for (var j = 0; j < iFiles; j++) {
-							//keep a reference on the current upload xhr
-							this._uploadXHR = new window.XMLHttpRequest();
-							oXhrEntry = {
-								xhr: this._uploadXHR,
-								requestHeaders: []
-							};
-							this._aXhr.push(oXhrEntry);
-							oXhrEntry.xhr.open("POST", this.getUploadUrl(), true);
-							if (this.getHeaderParameters()) {
-								var aHeaderParams = this.getHeaderParameters();
-								for (var i = 0; i < aHeaderParams.length; i++) {
-									sHeader = aHeaderParams[i].getName();
-									sValue = aHeaderParams[i].getValue();
-									oXhrEntry.requestHeaders.push({
-										name: sHeader,
-										value: sValue
-									});
-								}
-							}
-							var sFilename = aFiles[j].name;
-							var aRequestHeaders = oXhrEntry.requestHeaders;
-							oXhrEntry.fileName = sFilename;
-							oXhrEntry.file = aFiles[j];
-							this.fireUploadStart({
-								"fileName": sFilename,
-								"requestHeaders": aRequestHeaders
-							});
-							for (var k = 0; k < aRequestHeaders.length; k++) {
-								// Check if request is still open in case abort() was called.
-								if (oXhrEntry.xhr.readyState === 0) {
-									break;
-								}
-								sHeader = aRequestHeaders[k].name;
-								sValue = aRequestHeaders[k].value;
-								oXhrEntry.xhr.setRequestHeader(sHeader, sValue);
-							}
-						}
-						if (this.getUseMultipart()) {
-							var formData = new window.FormData();
-							var name = jQuery.sap.domById(this.getId() + "-fu").name;
-							for (var l = 0; l < aFiles.length; l++) {
-								formData.append(name, aFiles[l]);
-							}
-							formData.append("_charset_", "UTF-8");
-							var data = jQuery.sap.domById(this.getId() + "-fu_data").name;
-							if (this.getAdditionalData()) {
-								var sData = this.getAdditionalData();
-								formData.append(data, sData);
-							} else {
-								formData.append(data, "");
-							}
-							if (this.getParameters()) {
-								var oParams = this.getParameters();
-								for (var m = 0; m < oParams.length; m++) {
-									var sName = oParams[m].getName();
-									sValue = oParams[m].getValue();
-									formData.append(sName, sValue);
-								}
-							}
-							oXhrEntry.file = formData;
-							this.sendFiles(this._aXhr, 0);
-						} else {
-							this.sendFiles(this._aXhr, 0);
-						}
-						this._bUploading = false;
+			this._bUploading = true;
+			if (this.getSendXHR() && window.File) {
+				var aFiles = this.FUEl.files;
+				if (aFiles.length > 0) {
+					if (this.getUseMultipart()) {
+						//one xhr request for all files
+						iFiles = 1;
+					} else {
+						//several xhr requests for every file
+						iFiles = aFiles.length;
 					}
-				} else {
-					uploadForm.submit();
+					// Save references to already uploading files if a new upload comes between upload and complete or abort
+					this._aXhr = this._aXhr || [];
+					for (var j = 0; j < iFiles; j++) {
+						//keep a reference on the current upload xhr
+						this._uploadXHR = new window.XMLHttpRequest();
+						oXhrEntry = {
+							xhr: this._uploadXHR,
+							requestHeaders: []
+						};
+						this._aXhr.push(oXhrEntry);
+						oXhrEntry.xhr.open("POST", this.getUploadUrl(), true);
+						if (this.getHeaderParameters()) {
+							var aHeaderParams = this.getHeaderParameters();
+							for (var i = 0; i < aHeaderParams.length; i++) {
+								sHeader = aHeaderParams[i].getName();
+								sValue = aHeaderParams[i].getValue();
+								oXhrEntry.requestHeaders.push({
+									name: sHeader,
+									value: sValue
+								});
+							}
+						}
+						var sFilename = aFiles[j].name;
+						var aRequestHeaders = oXhrEntry.requestHeaders;
+						oXhrEntry.fileName = sFilename;
+						oXhrEntry.file = aFiles[j];
+						this.fireUploadStart({
+							"fileName": sFilename,
+							"requestHeaders": aRequestHeaders
+						});
+						for (var k = 0; k < aRequestHeaders.length; k++) {
+							// Check if request is still open in case abort() was called.
+							if (oXhrEntry.xhr.readyState === 0) {
+								break;
+							}
+							sHeader = aRequestHeaders[k].name;
+							sValue = aRequestHeaders[k].value;
+							oXhrEntry.xhr.setRequestHeader(sHeader, sValue);
+						}
+					}
+					if (this.getUseMultipart()) {
+						var formData = new window.FormData();
+						var name = this.FUEl.name;
+						for (var l = 0; l < aFiles.length; l++) {
+							formData.append(name, aFiles[l]);
+						}
+						formData.append("_charset_", "UTF-8");
+						var data = this.FUDataEl.name;
+						if (this.getAdditionalData()) {
+							var sData = this.getAdditionalData();
+							formData.append(data, sData);
+						} else {
+							formData.append(data, "");
+						}
+						if (this.getParameters()) {
+							var oParams = this.getParameters();
+							for (var m = 0; m < oParams.length; m++) {
+								var sName = oParams[m].getName();
+								sValue = oParams[m].getValue();
+								formData.append(sName, sValue);
+							}
+						}
+						oXhrEntry.file = formData;
+						this.sendFiles(this._aXhr, 0);
+					} else {
+						this.sendFiles(this._aXhr, 0);
+					}
+					this._bUploading = false;
+					this._resetValueAfterUploadStart();
 				}
-				jQuery.sap.log.info("File uploading to " + this.getUploadUrl());
-				if (this.getSameFilenameAllowed() && this.getUploadOnChange() && this.getUseMultipart()) {
-					this.setValue("", true);
-				}
+			} else if (uploadForm) {
+				uploadForm.submit();
+				this._resetValueAfterUploadStart();
 			}
 		} catch (oException) {
 			jQuery.sap.log.error("File upload failed:\n" + oException.message);
@@ -1076,7 +1088,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 	 */
 	FileUploader.prototype.abort = function(sHeaderCheck, sValueCheck) {
 		if (!this.getUseMultipart()) {
-			for (var i = 0; i < this._aXhr.length; i++) {
+			var iStart = this._aXhr.length - 1;
+			for (var i = iStart; i > -1 ; i--) {
 				if (sHeaderCheck && sValueCheck) {
 					for (var j = 0; j < this._aXhr[i].requestHeaders.length; j++) {
 						var sHeader = this._aXhr[i].requestHeaders[j].name;
@@ -1439,8 +1452,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 			// create the upload iframe
 			var oIFrameRef = document.createElement("iframe");
 			oIFrameRef.style.display = "none";
-			/*eslint-disable no-script-url */
-			oIFrameRef.src = "javascript:''";
 			/*eslint-enable no-script-url */
 			oIFrameRef.id = this.sId + "-frame";
 			sap.ui.getCore().getStaticAreaRef().appendChild(oIFrameRef);
@@ -1486,6 +1497,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './library'],
 			this.oBrowse.$().removeAriaDescribedBy(this.oFilePath.getId() + "-message");
 		}
 
+	};
+
+	FileUploader.prototype._resetValueAfterUploadStart = function () {
+		jQuery.sap.log.info("File uploading to " + this.getUploadUrl());
+		if (this.getSameFilenameAllowed() && this.getUploadOnChange() && this.getUseMultipart()) {
+			this.setValue("", true);
+		}
 	};
 
 	return FileUploader;

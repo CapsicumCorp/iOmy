@@ -5,8 +5,8 @@
  */
 
 // Provides an abstract property binding.
-sap.ui.define(['jquery.sap.global', './BindingMode', './ChangeReason', './PropertyBinding', './CompositeType', './CompositeDataState'],
-	function(jQuery, BindingMode, ChangeReason, PropertyBinding, CompositeType, CompositeDataState) {
+sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', './BindingMode', './ChangeReason', './PropertyBinding', './CompositeType', './CompositeDataState'],
+	function(jQuery, DataType, BindingMode, ChangeReason, PropertyBinding, CompositeType, CompositeDataState) {
 	"use strict";
 
 
@@ -110,6 +110,9 @@ sap.ui.define(['jquery.sap.global', './BindingMode', './ChangeReason', './Proper
 	 */
 	CompositeBinding.prototype.setValue = function(aValues) {
 		var oValue;
+		if (this.bSuspended) {
+			return;
+		}
 		jQuery.each(this.aBindings, function(i, oBinding) {
 			oValue = aValues[i];
 			if (oValue !== undefined) {
@@ -161,7 +164,8 @@ sap.ui.define(['jquery.sap.global', './BindingMode', './ChangeReason', './Proper
 	 * @public
 	 */
 	CompositeBinding.prototype.setExternalValue = function(oValue) {
-		var aValues, aCurrentValues;
+		var aValues, aCurrentValues,
+			oInternalType = this.sInternalType && DataType.getType(this.sInternalType);
 
 		// No twoway binding when using formatters
 		if (this.fnFormatter) {
@@ -190,13 +194,13 @@ sap.ui.define(['jquery.sap.global', './BindingMode', './ChangeReason', './Proper
 				this.checkDataState(); //data ui state is dirty inform the control
 				throw oException;
 			}
-		} else {
+		} else if (Array.isArray(oValue) && oInternalType instanceof DataType && oInternalType.isArrayType()) {
+			aValues = oValue;
+		} else if (typeof oValue == "string") {
 			// default: multiple values are split by space character together if no formatter or type specified
-			if (typeof oValue == "string") {
-				aValues = oValue.split(" ");
-			} else {
-				aValues = [oValue];
-			}
+			aValues = oValue.split(" ");
+		} else {
+			aValues = [oValue];
 		}
 
 		if (this.bRawValues) {
@@ -245,11 +249,14 @@ sap.ui.define(['jquery.sap.global', './BindingMode', './ChangeReason', './Proper
 	 * @private
 	 */
 	CompositeBinding.prototype._toExternalValue = function(aValues) {
-		var oValue;
+		var oValue,
+			oInternalType = this.sInternalType && DataType.getType(this.sInternalType);
 		if (this.fnFormatter) {
 			oValue = this.fnFormatter.apply(this, aValues);
 		} else if (this.oType) {
 			oValue = this.oType.formatValue(aValues, this.sInternalType);
+		} else if (oInternalType instanceof DataType && oInternalType.isArrayType()) {
+			oValue = aValues;
 		} else if (aValues.length > 1) {
 			// default: multiple values are joined together as space separated list if no formatter or type specified
 			oValue = aValues.join(" ");
@@ -306,6 +313,9 @@ sap.ui.define(['jquery.sap.global', './BindingMode', './ChangeReason', './Proper
 	CompositeBinding.prototype.attachChange = function(fnFunction, oListener) {
 		var that = this;
 		this.fChangeHandler = function(oEvent) {
+			if (that.bSuspended) {
+				return;
+			}
 			var oBinding = oEvent.getSource();
 			if (oBinding.getBindingMode() == BindingMode.OneTime) {
 				oBinding.detachChange(that.fChangeHandler);
@@ -458,7 +468,9 @@ sap.ui.define(['jquery.sap.global', './BindingMode', './ChangeReason', './Proper
 			});
 		}
 		this.bPreventUpdate = false;
-		this.checkUpdate(true);
+		if (!this.bSuspended) {
+			this.checkUpdate(true);
+		}
 		return this;
 	};
 
@@ -477,6 +489,37 @@ sap.ui.define(['jquery.sap.global', './BindingMode', './ChangeReason', './Proper
 	};
 
 	/**
+	 * Suspends the binding update. No change events will be fired.
+	 *
+	 * A refresh call with bForceUpdate set to true will also update the binding and fire a change in suspended mode.
+	 * Special operations on bindings, which require updates to work properly (as paging or filtering in list bindings)
+	 * will also update and cause a change event although the binding is suspended.
+	 * @public
+	 */
+	CompositeBinding.prototype.suspend = function() {
+		this.bSuspended = true;
+		jQuery.each(this.aBindings, function(i, oBinding) {
+			oBinding.suspend();
+		});
+	};
+
+	/**
+	 * Suspends the binding update. No change events will be fired.
+	 *
+	 * A refresh call with bForceUpdate set to true will also update the binding and fire a change in suspended mode.
+	 * Special operations on bindings, which require updates to work properly (as paging or filtering in list bindings)
+	 * will also update and cause a change event although the binding is suspended.
+	 * @public
+	 */
+	CompositeBinding.prototype.resume = function() {
+		jQuery.each(this.aBindings, function(i, oBinding) {
+			oBinding.resume();
+		});
+		this.bSuspended = false;
+		this.checkUpdate(true);
+	};
+
+	/**
 	 * Check whether this Binding would provide new values and in case it changed,
 	 * inform interested parties about this.
 	 *
@@ -485,7 +528,7 @@ sap.ui.define(['jquery.sap.global', './BindingMode', './ChangeReason', './Proper
 	 */
 	CompositeBinding.prototype.checkUpdate = function(bForceUpdate){
 		var bChanged = false;
-		if (this.bPreventUpdate) {
+		if (this.bPreventUpdate || (this.bSuspended && !bForceUpdate)) {
 			return;
 		}
 		var oDataState = this.getDataState();

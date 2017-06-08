@@ -12,6 +12,7 @@
 	unread: false, // boolean
 	selected: false, // boolean
 	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.6
 	text: undefined, // string
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
@@ -45,6 +46,7 @@
 	unread="false"
 	selected="false"
 	counter=""
+	highlight="None"
 	text=""
 	ariaLabelledBy=""
 	validateFieldGroup=""
@@ -75,6 +77,9 @@
 	autoAdjustWidth: false, // boolean, since 1.16
 	textAlign: sap.ui.core.TextAlign.Initial, // sap.ui.core.TextAlign, since 1.28
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28
+	valueState: sap.ui.core.ValueState.None, // sap.ui.core.ValueState, since 1.40.2
+	valueStateText: "", // string, since 1.40.5
+	showSecondaryValues: false, // boolean, since 1.40
 	forceSelection: true, // boolean, since 1.34
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
@@ -108,6 +113,9 @@
 	autoAdjustWidth="false"
 	textAlign="Initial"
 	textDirection="Inherit"
+	valueState="None"
+	valueStateText=""
+	showSecondaryValues="false"
 	forceSelection="true"
 	selectedItem=""
 	ariaLabelledBy=""
@@ -260,6 +268,7 @@
 	contentLeft: [], // sap.ui.core.Control
 	contentMiddle: [], // sap.ui.core.Control
 	contentRight: [], // sap.ui.core.Control
+	ariaLabelledBy: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this]
@@ -274,6 +283,7 @@
 	enableFlexBox="false"
 	translucent="false"
 	design="Auto"
+	ariaLabelledBy=""
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
@@ -333,6 +343,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
+	ariaLabelledBy: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -356,6 +367,7 @@
 	customIconHeight="44px"
 	cancelButtonText=""
 	showCancelButton="false"
+	ariaLabelledBy=""
 	validateFieldGroup=""
 	close="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
@@ -481,6 +493,7 @@
 	pageIndicatorPlacement: sap.m.PlacementType.Bottom, // sap.m.PlacementType
 	showBusyIndicator: true, // boolean
 	busyIndicatorSize: "6em", // sap.ui.core.CSSSize
+	arrowsPlacement: sap.m.CarouselArrowsPlacement.Content, // sap.m.CarouselArrowsPlacement
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -513,6 +526,7 @@
 	pageIndicatorPlacement="Bottom"
 	showBusyIndicator="true"
 	busyIndicatorSize="6em"
+	arrowsPlacement="Content"
 	activePage=""
 	validateFieldGroup=""
 	loadPage=""
@@ -540,6 +554,7 @@
 	width: "", // sap.ui.core.CSSSize
 	activeHandling: true, // boolean
 	editable: true, // boolean, since 1.25
+	valueState: sap.ui.core.ValueState.None, // sap.ui.core.ValueState, since 1.38
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -568,6 +583,7 @@
 	width=""
 	activeHandling="true"
 	editable="true"
+	valueState="None"
 	ariaDescribedBy=""
 	ariaLabelledBy=""
 	validateFieldGroup=""
@@ -630,6 +646,7 @@
 	unread: false, // boolean
 	selected: false, // boolean
 	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.6
 	vAlign: sap.ui.core.VerticalAlign.Inherit, // sap.ui.core.VerticalAlign, since 1.20
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
@@ -664,6 +681,7 @@
 	unread="false"
 	selected="false"
 	counter=""
+	highlight="None"
 	vAlign="Inherit"
 	ariaLabelledBy=""
 	validateFieldGroup=""
@@ -695,7 +713,9 @@
 	showValueStateMessage: true, // boolean, since 1.26.0
 	textAlign: sap.ui.core.TextAlign.Initial, // sap.ui.core.TextAlign, since 1.26.0
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
+	required: false, // boolean, since 1.38.4
 	maxWidth: "100%", // sap.ui.core.CSSSize
+	showButton: true, // boolean, since 1.38
 	selectedKey: "", // string
 	selectedItemId: "", // string
 	showSecondaryValues: false, // boolean, since 1.32.3
@@ -711,6 +731,9 @@
 	change: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
+	loadItems: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this], // since 1.38
 	selectionChange: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this]
@@ -733,7 +756,9 @@
 	showValueStateMessage="true"
 	textAlign="Initial"
 	textDirection="Inherit"
+	required="false"
 	maxWidth="100%"
+	showButton="true"
 	selectedKey=""
 	selectedItemId=""
 	showSecondaryValues="false"
@@ -741,6 +766,7 @@
 	selectedItem=""
 	validateFieldGroup=""
 	change=""
+	loadItems=""
 	selectionChange="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
@@ -766,7 +792,9 @@
 	showValueStateMessage: true, // boolean, since 1.26.0
 	textAlign: sap.ui.core.TextAlign.Initial, // sap.ui.core.TextAlign, since 1.26.0
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
+	required: false, // boolean, since 1.38.4
 	maxWidth: "100%", // sap.ui.core.CSSSize
+	showButton: true, // boolean, since 1.38
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -777,7 +805,10 @@
 	}, this],
 	change: [function (oEvent) {
 		var ${control} = oEvent.getSource();
-	}, this]
+	}, this],
+	loadItems: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this] // since 1.38
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ComboBoxBase xmlns="sap.m"
@@ -797,10 +828,13 @@
 	showValueStateMessage="true"
 	textAlign="Initial"
 	textDirection="Inherit"
+	required="false"
 	maxWidth="100%"
+	showButton="true"
 	ariaLabelledBy=""
 	validateFieldGroup=""
-	change="">
+	change=""
+	loadItems="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<items></items> <!-- sap.ui.core.Item -->
@@ -825,7 +859,9 @@
 	showValueStateMessage: true, // boolean, since 1.26.0
 	textAlign: sap.ui.core.TextAlign.Initial, // sap.ui.core.TextAlign, since 1.26.0
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
+	required: false, // boolean, since 1.38.4
 	maxWidth: "100%", // sap.ui.core.CSSSize
+	showButton: true, // boolean, since 1.38
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -855,7 +891,9 @@
 	showValueStateMessage="true"
 	textAlign="Initial"
 	textDirection="Inherit"
+	required="false"
 	maxWidth="100%"
+	showButton="true"
 	ariaLabelledBy=""
 	validateFieldGroup=""
 	change="">
@@ -876,6 +914,7 @@
 	unread: false, // boolean
 	selected: false, // boolean
 	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.6
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -909,6 +948,7 @@
 	unread="false"
 	selected="false"
 	counter=""
+	highlight="None"
 	ariaLabelledBy=""
 	validateFieldGroup=""
 	tap=""
@@ -974,15 +1014,20 @@
 	showValueStateMessage: true, // boolean, since 1.26.0
 	textAlign: sap.ui.core.TextAlign.Initial, // sap.ui.core.TextAlign, since 1.26.0
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
+	required: false, // boolean, since 1.38.4
 	displayFormat: undefined, // string
 	valueFormat: undefined, // string
 	dateValue: undefined, // object
 	displayFormatType: "", // string, since 1.28.6
 	secondaryCalendarType: undefined, // sap.ui.core.CalendarType, since 1.34.1
+	minDate: undefined, // object, since 1.38.0
+	maxDate: undefined, // object, since 1.38.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
+	specialDates: [], // sap.ui.core.Element, since 1.38.5
 	ariaLabelledBy: [], // sap.ui.core.Control, since 1.27.0
+	legend: undefined, // sap.ui.core.Control, since 1.38.5
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -1008,16 +1053,21 @@
 	showValueStateMessage="true"
 	textAlign="Initial"
 	textDirection="Inherit"
+	required="false"
 	displayFormat=""
 	valueFormat=""
 	dateValue=""
 	displayFormatType=""
 	secondaryCalendarType=""
+	minDate=""
+	maxDate=""
 	ariaLabelledBy=""
+	legend=""
 	validateFieldGroup=""
 	change="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<specialDates></specialDates> <!-- sap.ui.core.Element, since 1.38.5 -->
 </DatePicker>
 ]]></xmlTemplate>
 </Template>
@@ -1039,11 +1089,14 @@
 	showValueStateMessage: true, // boolean, since 1.26.0
 	textAlign: sap.ui.core.TextAlign.Initial, // sap.ui.core.TextAlign, since 1.26.0
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
+	required: false, // boolean, since 1.38.4
 	displayFormat: undefined, // string
 	valueFormat: undefined, // string
 	dateValue: undefined, // object
 	displayFormatType: "", // string, since 1.28.6
 	secondaryCalendarType: undefined, // sap.ui.core.CalendarType, since 1.34.1
+	minDate: undefined, // object, since 1.38.0
+	maxDate: undefined, // object, since 1.38.0
 	delimiter: "-", // string
 	secondDateValue: undefined, // object
 	from: undefined, // object
@@ -1051,7 +1104,9 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
+	specialDates: [], // sap.ui.core.Element, since 1.38.5
 	ariaLabelledBy: [], // sap.ui.core.Control, since 1.27.0
+	legend: undefined, // sap.ui.core.Control, since 1.38.5
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -1077,25 +1132,93 @@
 	showValueStateMessage="true"
 	textAlign="Initial"
 	textDirection="Inherit"
+	required="false"
 	displayFormat=""
 	valueFormat=""
 	dateValue=""
 	displayFormatType=""
 	secondaryCalendarType=""
+	minDate=""
+	maxDate=""
 	delimiter="-"
 	secondDateValue=""
 	from=""
 	to=""
 	ariaLabelledBy=""
+	legend=""
 	validateFieldGroup=""
 	change="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<specialDates></specialDates> <!-- sap.ui.core.Element, since 1.38.5 -->
 </DateRangeSelection>
 ]]></xmlTemplate>
 </Template>
 <Template name="sap.m.DateTimeInput" alias="DateTimeInput,Input">
 	<jsTemplate><![CDATA[new sap.m.DateTimeInput({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	value: undefined, // string
+	width: "100%", // sap.ui.core.CSSSize
+	enabled: true, // boolean
+	editable: true, // boolean, since 1.12.0
+	valueState: sap.ui.core.ValueState.None, // sap.ui.core.ValueState
+	valueStateText: undefined, // string, since 1.26.0
+	showValueStateMessage: true, // boolean, since 1.26.0
+	name: undefined, // string
+	placeholder: undefined, // string
+	textAlign: sap.ui.core.TextAlign.Initial, // sap.ui.core.TextAlign, since 1.26.0
+	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
+	type: sap.m.DateTimeInputType.Date, // sap.m.DateTimeInputType
+	displayFormat: undefined, // string
+	valueFormat: undefined, // string
+	dateValue: undefined, // object
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	ariaLabelledBy: [], // sap.ui.core.Control, since 1.27.0
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	change: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<DateTimeInput xmlns="sap.m"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	value=""
+	width="100%"
+	enabled="true"
+	editable="true"
+	valueState="None"
+	valueStateText=""
+	showValueStateMessage="true"
+	name=""
+	placeholder=""
+	textAlign="Initial"
+	textDirection="Inherit"
+	type="Date"
+	displayFormat=""
+	valueFormat=""
+	dateValue=""
+	ariaLabelledBy=""
+	validateFieldGroup=""
+	change="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+</DateTimeInput>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.m.DateTimePicker" alias="DateTimePicker,Picker">
+	<jsTemplate><![CDATA[new sap.m.DateTimePicker({
 	id: "${id}", // sap.ui.core.ID
 	busy: false, // boolean
 	busyIndicatorDelay: 1000, // int
@@ -1112,18 +1235,21 @@
 	showValueStateMessage: true, // boolean, since 1.26.0
 	textAlign: sap.ui.core.TextAlign.Initial, // sap.ui.core.TextAlign, since 1.26.0
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
-	type: sap.m.DateTimeInputType.Date, // sap.m.DateTimeInputType
+	required: false, // boolean, since 1.38.4
 	displayFormat: undefined, // string
 	valueFormat: undefined, // string
 	dateValue: undefined, // object
+	displayFormatType: "", // string, since 1.28.6
+	secondaryCalendarType: undefined, // sap.ui.core.CalendarType, since 1.34.1
+	minDate: undefined, // object, since 1.38.0
+	maxDate: undefined, // object, since 1.38.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
+	specialDates: [], // sap.ui.core.Element, since 1.38.5
 	ariaLabelledBy: [], // sap.ui.core.Control, since 1.27.0
+	legend: undefined, // sap.ui.core.Control, since 1.38.5
 	validateFieldGroup: [function (oEvent) {
-		var ${control} = oEvent.getSource();
-	}, this],
-	change: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
 	change: [function (oEvent) {
@@ -1131,7 +1257,7 @@
 	}, this]
 })
 ]]></jsTemplate>
-	<xmlTemplate><![CDATA[<DateTimeInput xmlns="sap.m"
+	<xmlTemplate><![CDATA[<DateTimePicker xmlns="sap.m"
 	id="${id}"
 	busy="false"
 	busyIndicatorDelay="1000"
@@ -1148,17 +1274,22 @@
 	showValueStateMessage="true"
 	textAlign="Initial"
 	textDirection="Inherit"
-	type="Date"
+	required="false"
 	displayFormat=""
 	valueFormat=""
 	dateValue=""
+	displayFormatType=""
+	secondaryCalendarType=""
+	minDate=""
+	maxDate=""
 	ariaLabelledBy=""
+	legend=""
 	validateFieldGroup=""
-	change=""
 	change="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
-</DateTimeInput>
+		<specialDates></specialDates> <!-- sap.ui.core.Element, since 1.38.5 -->
+</DateTimePicker>
 ]]></xmlTemplate>
 </Template>
 <Template name="sap.m.Dialog" alias="Dialog">
@@ -1181,6 +1312,7 @@
 	verticalScrolling: true, // boolean, since 1.15.1
 	resizable: false, // boolean, since 1.30
 	draggable: false, // boolean, since 1.30
+	escapeHandler: undefined, // any, since 1.44
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -1194,6 +1326,7 @@
 	rightButton: undefined, // sap.m.Button
 	initialFocus: undefined, // sap.ui.core.Control, since 1.15.0
 	ariaDescribedBy: [], // sap.ui.core.Control
+	ariaLabelledBy: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -1230,10 +1363,12 @@
 	verticalScrolling="true"
 	resizable="false"
 	draggable="false"
+	escapeHandler=""
 	leftButton=""
 	rightButton=""
 	initialFocus=""
 	ariaDescribedBy=""
+	ariaLabelledBy=""
 	validateFieldGroup=""
 	beforeOpen=""
 	afterOpen=""
@@ -1262,6 +1397,7 @@
 	unread: false, // boolean
 	selected: false, // boolean
 	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.6
 	label: undefined, // string
 	value: undefined, // string
 	valueTextDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
@@ -1297,6 +1433,7 @@
 	unread="false"
 	selected="false"
 	counter=""
+	highlight="None"
 	label=""
 	value=""
 	valueTextDirection="Inherit"
@@ -1364,6 +1501,9 @@
 	}, this],
 	reset: [function (oEvent) {
 		var ${control} = oEvent.getSource();
+	}, this],
+	confirm: [function (oEvent) {
+		var ${control} = oEvent.getSource();
 	}, this]
 })
 ]]></jsTemplate>
@@ -1380,7 +1520,8 @@
 	showReset="true"
 	showPopoverOKButton="false"
 	validateFieldGroup=""
-	reset="">
+	reset=""
+	confirm="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<lists></lists> <!-- sap.m.FacetFilterList -->
@@ -1399,6 +1540,7 @@
 	unread: false, // boolean
 	selected: false, // boolean
 	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.6
 	key: undefined, // string
 	text: undefined, // string
 	count: undefined, // int
@@ -1434,6 +1576,7 @@
 	unread="false"
 	selected="false"
 	counter=""
+	highlight="None"
 	key=""
 	text=""
 	count=""
@@ -1469,11 +1612,13 @@
 	modeAnimationOn: true, // boolean
 	showSeparators: sap.m.ListSeparators.All, // sap.m.ListSeparators
 	swipeDirection: sap.m.SwipeDirection.Both, // sap.m.SwipeDirection
-	growing: false, // boolean, since 1.16
-	growingThreshold: 20, // int, since 1.16
-	growingTriggerText: undefined, // string, since 1.16
-	growingScrollToLoad: false, // boolean, since 1.16
+	growing: false, // boolean, since 1.16.0
+	growingThreshold: 20, // int, since 1.16.0
+	growingTriggerText: undefined, // string, since 1.16.0
+	growingScrollToLoad: false, // boolean, since 1.16.0
+	growingDirection: sap.m.ListGrowingDirection.Downwards, // sap.m.ListGrowingDirection, since 1.40.0
 	rememberSelections: true, // boolean, since 1.16.6
+	keyboardMode: sap.m.ListKeyboardMode.Navigation, // sap.m.ListKeyboardMode, since 1.38.0
 	backgroundDesign: sap.m.BackgroundDesign.Solid, // sap.m.BackgroundDesign, since 1.14
 	title: undefined, // string
 	wordWrap: false, // boolean
@@ -1557,7 +1702,9 @@
 	growingThreshold="20"
 	growingTriggerText=""
 	growingScrollToLoad="false"
+	growingDirection="Downwards"
 	rememberSelections="true"
+	keyboardMode="Navigation"
 	backgroundDesign="Solid"
 	title=""
 	wordWrap="false"
@@ -1697,6 +1844,7 @@
 	unread: false, // boolean
 	selected: false, // boolean
 	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.6
 	icon: undefined, // sap.ui.core.URI
 	activeIcon: undefined, // sap.ui.core.URI
 	sender: undefined, // string
@@ -1746,6 +1894,7 @@
 	unread="false"
 	selected="false"
 	counter=""
+	highlight="None"
 	icon=""
 	activeIcon=""
 	sender=""
@@ -1785,6 +1934,9 @@
 	renderType: sap.m.FlexRendertype.Div, // sap.m.FlexRendertype
 	justifyContent: sap.m.FlexJustifyContent.Start, // sap.m.FlexJustifyContent
 	alignItems: sap.m.FlexAlignItems.Stretch, // sap.m.FlexAlignItems
+	wrap: sap.m.FlexWrap.NoWrap, // sap.m.FlexWrap, since 1.36.0
+	alignContent: sap.m.FlexAlignContent.Stretch, // sap.m.FlexAlignContent, since 1.36.0
+	backgroundDesign: sap.m.BackgroundDesign.Transparent, // sap.m.BackgroundDesign, since 1.38.5
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -1808,6 +1960,9 @@
 	renderType="Div"
 	justifyContent="Start"
 	alignItems="Stretch"
+	wrap="NoWrap"
+	alignContent="Stretch"
+	backgroundDesign="Transparent"
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
@@ -1821,9 +1976,14 @@
 	alignSelf: sap.m.FlexAlignSelf.Auto, // sap.m.FlexAlignSelf
 	order: 0, // int
 	growFactor: 0, // float
-	shrinkFactor: 1, // float, since 1.24
-	baseSize: "auto", // sap.ui.core.CSSSize, since 1.32
+	shrinkFactor: 1, // float, since 1.24.0
+	baseSize: "auto", // sap.ui.core.CSSSize, since 1.32.0
+	minHeight: "auto", // sap.ui.core.CSSSize, since 1.36.0
+	maxHeight: "", // sap.ui.core.CSSSize, since 1.36.0
+	minWidth: "auto", // sap.ui.core.CSSSize, since 1.36.0
+	maxWidth: "", // sap.ui.core.CSSSize, since 1.36.0
 	styleClass: "", // string
+	backgroundDesign: sap.m.BackgroundDesign.Transparent, // sap.m.BackgroundDesign, since 1.38.5
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [] // sap.ui.core.Control, since 1.19
@@ -1836,10 +1996,52 @@
 	growFactor="0"
 	shrinkFactor="1"
 	baseSize="auto"
-	styleClass="">
+	minHeight="auto"
+	maxHeight=""
+	minWidth="auto"
+	maxWidth=""
+	styleClass=""
+	backgroundDesign="Transparent">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 </FlexItemData>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.m.FormattedText" alias="FormattedText,Text">
+	<jsTemplate><![CDATA[new sap.m.FormattedText({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	htmlText: "", // string
+	width: undefined, // sap.ui.core.CSSSize
+	convertLinksToAnchorTags: sap.m.LinkConversion.None, // sap.m.LinkConversion, since 1.44.5
+	convertedLinksDefaultTarget: "_blank", // string, since 1.44.5
+	height: undefined, // sap.ui.core.CSSSize
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<FormattedText xmlns="sap.m"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	htmlText=""
+	width=""
+	convertLinksToAnchorTags="None"
+	convertedLinksDefaultTarget="_blank"
+	height=""
+	validateFieldGroup="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+</FormattedText>
 ]]></xmlTemplate>
 </Template>
 <Template name="sap.m.GenericTile" alias="GenericTile,Tile">
@@ -1849,6 +2051,7 @@
 	busyIndicatorDelay: 1000, // int
 	visible: true, // boolean
 	fieldGroupIds: [], // string[], since 1.31
+	mode: sap.m.GenericTileMode.ContentMode, // sap.m.GenericTileMode
 	header: undefined, // string
 	subheader: undefined, // string
 	failedText: undefined, // string
@@ -1877,6 +2080,7 @@
 	busyIndicatorDelay="1000"
 	visible="true"
 	fieldGroupIds=""
+	mode="ContentMode"
 	header=""
 	subheader=""
 	failedText=""
@@ -1907,9 +2111,10 @@
 	unread: false, // boolean
 	selected: false, // boolean
 	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.6
 	title: undefined, // string
 	count: undefined, // string
-	upperCase: true, // boolean, since 1.13.2
+	upperCase: false, // boolean, since 1.13.2
 	titleTextDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
@@ -1943,9 +2148,10 @@
 	unread="false"
 	selected="false"
 	counter=""
+	highlight="None"
 	title=""
 	count=""
-	upperCase="true"
+	upperCase="false"
 	titleTextDirection="Inherit"
 	ariaLabelledBy=""
 	validateFieldGroup=""
@@ -1979,11 +2185,13 @@
 	modeAnimationOn: true, // boolean
 	showSeparators: sap.m.ListSeparators.All, // sap.m.ListSeparators
 	swipeDirection: sap.m.SwipeDirection.Both, // sap.m.SwipeDirection
-	growing: false, // boolean, since 1.16
-	growingThreshold: 20, // int, since 1.16
-	growingTriggerText: undefined, // string, since 1.16
-	growingScrollToLoad: false, // boolean, since 1.16
+	growing: false, // boolean, since 1.16.0
+	growingThreshold: 20, // int, since 1.16.0
+	growingTriggerText: undefined, // string, since 1.16.0
+	growingScrollToLoad: false, // boolean, since 1.16.0
+	growingDirection: sap.m.ListGrowingDirection.Downwards, // sap.m.ListGrowingDirection, since 1.40.0
 	rememberSelections: true, // boolean, since 1.16.6
+	keyboardMode: sap.m.ListKeyboardMode.Navigation, // sap.m.ListKeyboardMode, since 1.38.0
 	backgroundDesign: sap.m.BackgroundDesign.Solid, // sap.m.BackgroundDesign, since 1.14
 	threshold: 20, // int, since 1.16
 	triggerText: undefined, // string, since 1.16
@@ -2053,7 +2261,9 @@
 	growingThreshold="20"
 	growingTriggerText=""
 	growingScrollToLoad="false"
+	growingDirection="Downwards"
 	rememberSelections="true"
+	keyboardMode="Navigation"
 	backgroundDesign="Solid"
 	threshold="20"
 	triggerText=""
@@ -2094,6 +2304,9 @@
 	renderType: sap.m.FlexRendertype.Div, // sap.m.FlexRendertype
 	justifyContent: sap.m.FlexJustifyContent.Start, // sap.m.FlexJustifyContent
 	alignItems: sap.m.FlexAlignItems.Stretch, // sap.m.FlexAlignItems
+	wrap: sap.m.FlexWrap.NoWrap, // sap.m.FlexWrap, since 1.36.0
+	alignContent: sap.m.FlexAlignContent.Stretch, // sap.m.FlexAlignContent, since 1.36.0
+	backgroundDesign: sap.m.BackgroundDesign.Transparent, // sap.m.BackgroundDesign, since 1.38.5
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -2117,11 +2330,57 @@
 	renderType="Div"
 	justifyContent="Start"
 	alignItems="Stretch"
+	wrap="NoWrap"
+	alignContent="Stretch"
+	backgroundDesign="Transparent"
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<items></items> <!-- sap.ui.core.Control -->
 </HBox>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.m.HeaderContainer" alias="HeaderContainer,Container">
+	<jsTemplate><![CDATA[new sap.m.HeaderContainer({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	scrollStep: 300, // int
+	scrollTime: 500, // int
+	showDividers: true, // boolean
+	orientation: sap.ui.core.Orientation.Horizontal, // sap.ui.core.Orientation
+	backgroundDesign: sap.m.BackgroundDesign.Transparent, // sap.m.BackgroundDesign
+	width: undefined, // sap.ui.core.CSSSize
+	height: undefined, // sap.ui.core.CSSSize
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	content: [], // sap.ui.core.Control
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<HeaderContainer xmlns="sap.m"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	scrollStep="300"
+	scrollTime="500"
+	showDividers="true"
+	orientation="Horizontal"
+	backgroundDesign="Transparent"
+	width=""
+	height=""
+	validateFieldGroup="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<content></content> <!-- sap.ui.core.Control -->
+</HeaderContainer>
 ]]></xmlTemplate>
 </Template>
 <Template name="sap.m.IconTabBar" alias="IconTabBar,Bar">
@@ -2139,6 +2398,10 @@
 	stretchContentHeight: false, // boolean, since 1.26
 	applyContentPadding: true, // boolean, since 1.26
 	backgroundDesign: sap.m.BackgroundDesign.Solid, // sap.m.BackgroundDesign, since 1.26
+	headerMode: sap.m.IconTabHeaderMode.Standard, // sap.m.IconTabHeaderMode, since 1.40
+	showOverflowSelectList: false, // boolean, since 1.42
+	headerBackgroundDesign: sap.m.BackgroundDesign.Solid, // sap.m.BackgroundDesign, since 1.44
+	enableTabReordering: false, // boolean, since 1.46
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -2169,6 +2432,10 @@
 	stretchContentHeight="false"
 	applyContentPadding="true"
 	backgroundDesign="Solid"
+	headerMode="Standard"
+	showOverflowSelectList="false"
+	headerBackgroundDesign="Solid"
+	enableTabReordering="false"
 	validateFieldGroup=""
 	select=""
 	expand="">
@@ -2228,6 +2495,10 @@
 	showSelection: true, // boolean
 	selectedKey: undefined, // string, since 1.15.0
 	visible: true, // boolean, since 1.15.0
+	mode: sap.m.IconTabHeaderMode.Standard, // sap.m.IconTabHeaderMode, since 1.40
+	showOverflowSelectList: false, // boolean, since 1.42
+	backgroundDesign: sap.m.BackgroundDesign.Solid, // sap.m.BackgroundDesign, since 1.44
+	enableTabReordering: false, // boolean, since 1.46
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -2249,6 +2520,10 @@
 	showSelection="true"
 	selectedKey=""
 	visible="true"
+	mode="Standard"
+	showOverflowSelectList="false"
+	backgroundDesign="Solid"
+	enableTabReordering="false"
 	validateFieldGroup=""
 	select="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
@@ -2261,6 +2536,7 @@
 	<jsTemplate><![CDATA[new sap.m.IconTabSeparator({
 	id: "${id}", // sap.ui.core.ID
 	icon: "", // sap.ui.core.URI
+	visible: true, // boolean
 	iconDensityAware: true, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
@@ -2270,6 +2546,7 @@
 	<xmlTemplate><![CDATA[<IconTabSeparator xmlns="sap.m"
 	id="${id}"
 	icon=""
+	visible="true"
 	iconDensityAware="true">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
@@ -2298,6 +2575,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
+	detailBox: undefined, // sap.m.LightBox
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -2306,7 +2584,13 @@
 	}, this],
 	press: [function (oEvent) {
 		var ${control} = oEvent.getSource();
-	}, this]
+	}, this],
+	load: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this], // since 1.36.2
+	error: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this] // since 1.36.2
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<Image xmlns="sap.m"
@@ -2329,10 +2613,48 @@
 	backgroundRepeat="no-repeat"
 	validateFieldGroup=""
 	tap=""
+	press=""
+	load=""
+	error="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<detailBox></detailBox> <!-- sap.m.LightBox -->
+</Image>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.m.ImageContent" alias="ImageContent,Content">
+	<jsTemplate><![CDATA[new sap.m.ImageContent({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	src: undefined, // sap.ui.core.URI
+	description: undefined, // string
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	press: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<ImageContent xmlns="sap.m"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	src=""
+	description=""
+	validateFieldGroup=""
 	press="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
-</Image>
+</ImageContent>
 ]]></xmlTemplate>
 </Template>
 <Template name="sap.m.Input" alias="Input">
@@ -2353,6 +2675,7 @@
 	showValueStateMessage: true, // boolean, since 1.26.0
 	textAlign: sap.ui.core.TextAlign.Initial, // sap.ui.core.TextAlign, since 1.26.0
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
+	required: false, // boolean, since 1.38.4
 	type: sap.m.InputType.Text, // sap.m.InputType
 	maxLength: 0, // int
 	dateFormat: "YYYY-MM-dd", // string
@@ -2366,6 +2689,10 @@
 	description: undefined, // string
 	fieldWidth: "50%", // sap.ui.core.CSSSize
 	valueLiveUpdate: false, // boolean, since 1.24
+	selectedKey: "", // string, since 1.44
+	textFormatMode: sap.m.InputTextFormatMode.Value, // sap.m.InputTextFormatMode, since 1.44
+	textFormatter: , // any, since 1.44
+	suggestionRowValidator: , // any, since 1.44
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -2373,6 +2700,8 @@
 	suggestionColumns: [], // sap.m.Column, since 1.21.1
 	suggestionRows: [], // sap.m.ColumnListItem, since 1.21.1
 	ariaLabelledBy: [], // sap.ui.core.Control, since 1.27.0
+	selectedItem: undefined, // sap.ui.core.Item, since 1.44
+	selectedRow: undefined, // sap.m.ColumnListItem, since 1.44
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -2413,6 +2742,7 @@
 	showValueStateMessage="true"
 	textAlign="Initial"
 	textDirection="Inherit"
+	required="false"
 	type="Text"
 	maxLength="0"
 	dateFormat="YYYY-MM-dd"
@@ -2426,7 +2756,13 @@
 	description=""
 	fieldWidth="50%"
 	valueLiveUpdate="false"
+	selectedKey=""
+	textFormatMode="Value"
+	textFormatter=""
+	suggestionRowValidator=""
 	ariaLabelledBy=""
+	selectedItem=""
+	selectedRow=""
 	validateFieldGroup=""
 	change=""
 	liveChange=""
@@ -2460,6 +2796,7 @@
 	showValueStateMessage: true, // boolean, since 1.26.0
 	textAlign: sap.ui.core.TextAlign.Initial, // sap.ui.core.TextAlign, since 1.26.0
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
+	required: false, // boolean, since 1.38.4
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -2489,6 +2826,7 @@
 	showValueStateMessage="true"
 	textAlign="Initial"
 	textDirection="Inherit"
+	required="false"
 	ariaLabelledBy=""
 	validateFieldGroup=""
 	change="">
@@ -2509,6 +2847,7 @@
 	unread: false, // boolean
 	selected: false, // boolean
 	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.6
 	label: undefined, // string
 	labelTextDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.30.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
@@ -2544,6 +2883,7 @@
 	unread="false"
 	selected="false"
 	counter=""
+	highlight="None"
 	label=""
 	labelTextDirection="Inherit"
 	ariaLabelledBy=""
@@ -2597,6 +2937,58 @@
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 </Label>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.m.LightBox" alias="LightBox,Box">
+	<jsTemplate><![CDATA[new sap.m.LightBox({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	imageContent: [], // sap.m.LightBoxItem
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<LightBox xmlns="sap.m"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	validateFieldGroup="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<imageContent></imageContent> <!-- sap.m.LightBoxItem -->
+</LightBox>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.m.LightBoxItem" alias="LightBoxItem,Item">
+	<jsTemplate><![CDATA[new sap.m.LightBoxItem({
+	id: "${id}", // sap.ui.core.ID
+	imageSrc: "", // sap.ui.core.URI
+	alt: "", // string
+	title: "", // string
+	subtitle: "", // string
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [] // sap.ui.core.Control, since 1.19
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<LightBoxItem xmlns="sap.m"
+	id="${id}"
+	imageSrc=""
+	alt=""
+	title=""
+	subtitle="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+</LightBoxItem>
 ]]></xmlTemplate>
 </Template>
 <Template name="sap.m.Link" alias="Link">
@@ -2675,11 +3067,13 @@
 	modeAnimationOn: true, // boolean
 	showSeparators: sap.m.ListSeparators.All, // sap.m.ListSeparators
 	swipeDirection: sap.m.SwipeDirection.Both, // sap.m.SwipeDirection
-	growing: false, // boolean, since 1.16
-	growingThreshold: 20, // int, since 1.16
-	growingTriggerText: undefined, // string, since 1.16
-	growingScrollToLoad: false, // boolean, since 1.16
+	growing: false, // boolean, since 1.16.0
+	growingThreshold: 20, // int, since 1.16.0
+	growingTriggerText: undefined, // string, since 1.16.0
+	growingScrollToLoad: false, // boolean, since 1.16.0
+	growingDirection: sap.m.ListGrowingDirection.Downwards, // sap.m.ListGrowingDirection, since 1.40.0
 	rememberSelections: true, // boolean, since 1.16.6
+	keyboardMode: sap.m.ListKeyboardMode.Navigation, // sap.m.ListKeyboardMode, since 1.38.0
 	backgroundDesign: sap.m.BackgroundDesign.Solid, // sap.m.BackgroundDesign, since 1.14
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
@@ -2746,7 +3140,9 @@
 	growingThreshold="20"
 	growingTriggerText=""
 	growingScrollToLoad="false"
+	growingDirection="Downwards"
 	rememberSelections="true"
+	keyboardMode="Navigation"
 	backgroundDesign="Solid"
 	ariaLabelledBy=""
 	validateFieldGroup=""
@@ -2790,11 +3186,13 @@
 	modeAnimationOn: true, // boolean
 	showSeparators: sap.m.ListSeparators.All, // sap.m.ListSeparators
 	swipeDirection: sap.m.SwipeDirection.Both, // sap.m.SwipeDirection
-	growing: false, // boolean, since 1.16
-	growingThreshold: 20, // int, since 1.16
-	growingTriggerText: undefined, // string, since 1.16
-	growingScrollToLoad: false, // boolean, since 1.16
+	growing: false, // boolean, since 1.16.0
+	growingThreshold: 20, // int, since 1.16.0
+	growingTriggerText: undefined, // string, since 1.16.0
+	growingScrollToLoad: false, // boolean, since 1.16.0
+	growingDirection: sap.m.ListGrowingDirection.Downwards, // sap.m.ListGrowingDirection, since 1.40.0
 	rememberSelections: true, // boolean, since 1.16.6
+	keyboardMode: sap.m.ListKeyboardMode.Navigation, // sap.m.ListKeyboardMode, since 1.38.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -2859,7 +3257,9 @@
 	growingThreshold="20"
 	growingTriggerText=""
 	growingScrollToLoad="false"
+	growingDirection="Downwards"
 	rememberSelections="true"
+	keyboardMode="Navigation"
 	ariaLabelledBy=""
 	validateFieldGroup=""
 	select=""
@@ -2892,6 +3292,7 @@
 	unread: false, // boolean
 	selected: false, // boolean
 	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.6
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -2924,6 +3325,7 @@
 	unread="false"
 	selected="false"
 	counter=""
+	highlight="None"
 	ariaLabelledBy=""
 	validateFieldGroup=""
 	tap=""
@@ -2953,6 +3355,7 @@
 	showValueStateMessage: true, // boolean, since 1.26.0
 	textAlign: sap.ui.core.TextAlign.Initial, // sap.ui.core.TextAlign, since 1.26.0
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
+	required: false, // boolean, since 1.38.4
 	placeholderSymbol: "_", // string
 	mask: undefined, // string
 	tooltip: undefined, // sap.ui.core.TooltipBase
@@ -2985,6 +3388,7 @@
 	showValueStateMessage="true"
 	textAlign="Initial"
 	textDirection="Inherit"
+	required="false"
 	placeholderSymbol="_"
 	mask=""
 	ariaLabelledBy=""
@@ -3015,6 +3419,141 @@
 </MaskInputRule>
 ]]></xmlTemplate>
 </Template>
+<Template name="sap.m.Menu" alias="Menu">
+	<jsTemplate><![CDATA[new sap.m.Menu({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	title: undefined, // string
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	items: [], // sap.m.MenuItem
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	itemSelected: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	closed: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<Menu xmlns="sap.m"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	title=""
+	validateFieldGroup=""
+	itemSelected=""
+	closed="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<items></items> <!-- sap.m.MenuItem -->
+</Menu>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.m.MenuButton" alias="MenuButton,Button">
+	<jsTemplate><![CDATA[new sap.m.MenuButton({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	text: undefined, // string
+	type: sap.m.ButtonType.Default, // sap.m.ButtonType
+	width: undefined, // sap.ui.core.CSSSize
+	enabled: true, // boolean
+	icon: undefined, // sap.ui.core.URI
+	activeIcon: undefined, // sap.ui.core.URI
+	iconDensityAware: true, // boolean
+	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection
+	buttonMode: sap.m.MenuButtonMode.Regular, // sap.m.MenuButtonMode
+	useDefaultActionOnly: false, // boolean
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	menu: undefined, // sap.m.Menu
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	defaultAction: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<MenuButton xmlns="sap.m"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	text=""
+	type="Default"
+	width=""
+	enabled="true"
+	icon=""
+	activeIcon=""
+	iconDensityAware="true"
+	textDirection="Inherit"
+	buttonMode="Regular"
+	useDefaultActionOnly="false"
+	validateFieldGroup=""
+	defaultAction="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<menu></menu> <!-- sap.m.Menu -->
+</MenuButton>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.m.MenuItem" alias="MenuItem,Item">
+	<jsTemplate><![CDATA[new sap.m.MenuItem({
+	id: "${id}", // sap.ui.core.ID
+	text: "", // string
+	enabled: true, // boolean
+	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection
+	key: undefined, // string
+	icon: undefined, // string
+	visible: true, // boolean
+	startsSection: false, // boolean
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	items: [], // sap.m.MenuItem
+	press: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	propertyChanged: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	aggregationChanged: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<MenuItem xmlns="sap.m"
+	id="${id}"
+	text=""
+	enabled="true"
+	textDirection="Inherit"
+	key=""
+	icon=""
+	visible="true"
+	startsSection="false"
+	press=""
+	propertyChanged=""
+	aggregationChanged="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<items></items> <!-- sap.m.MenuItem -->
+</MenuItem>
+]]></xmlTemplate>
+</Template>
 <Template name="sap.m.MessagePage" alias="MessagePage,Page">
 	<jsTemplate><![CDATA[new sap.m.MessagePage({
 	id: "${id}", // sap.ui.core.ID
@@ -3027,7 +3566,7 @@
 	title: undefined, // string
 	showHeader: true, // boolean
 	showNavButton: false, // boolean
-	icon: "IconPool.getIconURI(\"documents\")", // sap.ui.core.URI
+	icon: "sap-icon://documents", // sap.ui.core.URI
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
@@ -3055,7 +3594,7 @@
 	title=""
 	showHeader="true"
 	showNavButton="false"
-	icon="IconPool.getIconURI(documents)"
+	icon="sap-icon://documents"
 	textDirection="Inherit"
 	ariaDescribedBy=""
 	ariaLabelledBy=""
@@ -3083,6 +3622,7 @@
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
 	items: [], // sap.m.MessagePopoverItem
+	headerButton: undefined, // sap.m.Button
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -3134,6 +3674,7 @@
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<items></items> <!-- sap.m.MessagePopoverItem -->
+		<headerButton></headerButton> <!-- sap.m.Button -->
 </MessagePopover>
 ]]></xmlTemplate>
 </Template>
@@ -3146,12 +3687,15 @@
 	key: undefined, // string
 	type: sap.ui.core.MessageType.Error, // sap.ui.core.MessageType
 	title: "", // string
+	subtitle: undefined, // string
 	description: "", // string
 	markupDescription: false, // boolean
 	longtextUrl: undefined, // sap.ui.core.URI
+	counter: undefined, // int
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [] // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Control, since 1.19
+	link: undefined // sap.m.Link
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<MessagePopoverItem xmlns="sap.m"
@@ -3162,11 +3706,14 @@
 	key=""
 	type="Error"
 	title=""
+	subtitle=""
 	description=""
 	markupDescription="false"
-	longtextUrl="">
+	longtextUrl=""
+	counter="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<link></link> <!-- sap.m.Link -->
 </MessagePopoverItem>
 ]]></xmlTemplate>
 </Template>
@@ -3231,7 +3778,9 @@
 	showValueStateMessage: true, // boolean, since 1.26.0
 	textAlign: sap.ui.core.TextAlign.Initial, // sap.ui.core.TextAlign, since 1.26.0
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
+	required: false, // boolean, since 1.38.4
 	maxWidth: "100%", // sap.ui.core.CSSSize
+	showButton: true, // boolean, since 1.38
 	selectedKeys: [], // string[]
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
@@ -3245,6 +3794,9 @@
 	change: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
+	loadItems: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this], // since 1.38
 	selectionChange: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -3270,12 +3822,15 @@
 	showValueStateMessage="true"
 	textAlign="Initial"
 	textDirection="Inherit"
+	required="false"
 	maxWidth="100%"
+	showButton="true"
 	selectedKeys=""
 	ariaLabelledBy=""
 	selectedItems=""
 	validateFieldGroup=""
 	change=""
+	loadItems=""
 	selectionChange=""
 	selectionFinish="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
@@ -3302,6 +3857,7 @@
 	showValueStateMessage: true, // boolean, since 1.26.0
 	textAlign: sap.ui.core.TextAlign.Initial, // sap.ui.core.TextAlign, since 1.26.0
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
+	required: false, // boolean, since 1.38.4
 	type: sap.m.InputType.Text, // sap.m.InputType
 	maxLength: 0, // int
 	dateFormat: "YYYY-MM-dd", // string
@@ -3315,7 +3871,12 @@
 	description: undefined, // string
 	fieldWidth: "50%", // sap.ui.core.CSSSize
 	valueLiveUpdate: false, // boolean, since 1.24
+	selectedKey: "", // string, since 1.44
+	textFormatMode: sap.m.InputTextFormatMode.Value, // sap.m.InputTextFormatMode, since 1.44
+	textFormatter: , // any, since 1.44
+	suggestionRowValidator: , // any, since 1.44
 	enableMultiLineMode: false, // boolean, since 1.28
+	maxTokens: undefined, // int, since 1.36
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -3324,6 +3885,8 @@
 	suggestionRows: [], // sap.m.ColumnListItem, since 1.21.1
 	tokens: [], // sap.m.Token
 	ariaLabelledBy: [], // sap.ui.core.Control, since 1.27.0
+	selectedItem: undefined, // sap.ui.core.Item, since 1.44
+	selectedRow: undefined, // sap.m.ColumnListItem, since 1.44
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -3347,6 +3910,9 @@
 	}, this], // since 1.33.0
 	tokenChange: [function (oEvent) {
 		var ${control} = oEvent.getSource();
+	}, this],
+	tokenUpdate: [function (oEvent) {
+		var ${control} = oEvent.getSource();
 	}, this]
 })
 ]]></jsTemplate>
@@ -3367,6 +3933,7 @@
 	showValueStateMessage="true"
 	textAlign="Initial"
 	textDirection="Inherit"
+	required="false"
 	type="Text"
 	maxLength="0"
 	dateFormat="YYYY-MM-dd"
@@ -3380,8 +3947,15 @@
 	description=""
 	fieldWidth="50%"
 	valueLiveUpdate="false"
+	selectedKey=""
+	textFormatMode="Value"
+	textFormatter=""
+	suggestionRowValidator=""
 	enableMultiLineMode="false"
+	maxTokens=""
 	ariaLabelledBy=""
+	selectedItem=""
+	selectedRow=""
 	validateFieldGroup=""
 	change=""
 	liveChange=""
@@ -3389,7 +3963,8 @@
 	suggest=""
 	suggestionItemSelected=""
 	submit=""
-	tokenChange="">
+	tokenChange=""
+	tokenUpdate="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<suggestionItems></suggestionItems> <!-- sap.ui.core.Item, since 1.16.1 -->
@@ -3485,6 +4060,83 @@
 </NewsContent>
 ]]></xmlTemplate>
 </Template>
+<Template name="sap.m.NotificationListBase" alias="NotificationListBase,Base">
+	<jsTemplate><![CDATA[new sap.m.NotificationListBase({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	type: sap.m.ListType.Inactive, // sap.m.ListType
+	visible: true, // boolean
+	unread: false, // boolean
+	selected: false, // boolean
+	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.6
+	priority: sap.ui.core.Priority.None, // sap.ui.core.Priority
+	title: "", // string
+	datetime: "", // string
+	showButtons: true, // boolean
+	showCloseButton: true, // boolean
+	authorName: "", // string
+	authorPicture: undefined, // sap.ui.core.URI
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	buttons: [], // sap.m.Button
+	ariaLabelledBy: [], // sap.ui.core.Control, since 1.28.0
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	tap: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	detailTap: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	press: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	detailPress: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	close: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<NotificationListBase xmlns="sap.m"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	type="Inactive"
+	visible="true"
+	unread="false"
+	selected="false"
+	counter=""
+	highlight="None"
+	priority="None"
+	title=""
+	datetime=""
+	showButtons="true"
+	showCloseButton="true"
+	authorName=""
+	authorPicture=""
+	ariaLabelledBy=""
+	validateFieldGroup=""
+	tap=""
+	detailTap=""
+	press=""
+	detailPress=""
+	close="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<buttons></buttons> <!-- sap.m.Button -->
+</NotificationListBase>
+]]></xmlTemplate>
+</Template>
 <Template name="sap.m.NotificationListGroup" alias="NotificationListGroup,Group">
 	<jsTemplate><![CDATA[new sap.m.NotificationListGroup({
 	id: "${id}", // sap.ui.core.ID
@@ -3497,15 +4149,17 @@
 	unread: false, // boolean
 	selected: false, // boolean
 	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.6
 	priority: sap.ui.core.Priority.None, // sap.ui.core.Priority
 	title: "", // string
 	datetime: "", // string
 	showButtons: true, // boolean
 	showCloseButton: true, // boolean
-	collapsed: false, // boolean
-	autoPriority: true, // boolean
 	authorName: "", // string
 	authorPicture: undefined, // sap.ui.core.URI
+	collapsed: false, // boolean
+	autoPriority: true, // boolean
+	showEmptyGroup: false, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -3529,7 +4183,10 @@
 	}, this],
 	close: [function (oEvent) {
 		var ${control} = oEvent.getSource();
-	}, this]
+	}, this],
+	onCollapse: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this] // since 1.44
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<NotificationListGroup xmlns="sap.m"
@@ -3543,22 +4200,25 @@
 	unread="false"
 	selected="false"
 	counter=""
+	highlight="None"
 	priority="None"
 	title=""
 	datetime=""
 	showButtons="true"
 	showCloseButton="true"
-	collapsed="false"
-	autoPriority="true"
 	authorName=""
 	authorPicture=""
+	collapsed="false"
+	autoPriority="true"
+	showEmptyGroup="false"
 	ariaLabelledBy=""
 	validateFieldGroup=""
 	tap=""
 	detailTap=""
 	press=""
 	detailPress=""
-	close="">
+	close=""
+	onCollapse="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<buttons></buttons> <!-- sap.m.Button -->
@@ -3578,18 +4238,22 @@
 	unread: false, // boolean
 	selected: false, // boolean
 	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.6
 	priority: sap.ui.core.Priority.None, // sap.ui.core.Priority
 	title: "", // string
-	description: "", // string
-	datetime: undefined, // string
+	datetime: "", // string
 	showButtons: true, // boolean
 	showCloseButton: true, // boolean
 	authorName: "", // string
 	authorPicture: undefined, // sap.ui.core.URI
+	description: "", // string
+	truncate: true, // boolean
+	hideShowMoreButton: false, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
 	buttons: [], // sap.m.Button
+	processingMessage: undefined, // sap.m.MessageStrip
 	ariaLabelledBy: [], // sap.ui.core.Control, since 1.28.0
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -3622,14 +4286,17 @@
 	unread="false"
 	selected="false"
 	counter=""
+	highlight="None"
 	priority="None"
 	title=""
-	description=""
 	datetime=""
 	showButtons="true"
 	showCloseButton="true"
 	authorName=""
 	authorPicture=""
+	description=""
+	truncate="true"
+	hideShowMoreButton="false"
 	ariaLabelledBy=""
 	validateFieldGroup=""
 	tap=""
@@ -3640,6 +4307,7 @@
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<buttons></buttons> <!-- sap.m.Button -->
+		<processingMessage></processingMessage> <!-- sap.m.MessageStrip -->
 </NotificationListItem>
 ]]></xmlTemplate>
 </Template>
@@ -3777,6 +4445,7 @@
 	introTextDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
 	numberTextDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
 	titleSelectorTooltip: "Options", // string, since 1.30.0
+	titleLevel: sap.ui.core.TitleLevel.H1, // sap.ui.core.TitleLevel
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -3784,7 +4453,9 @@
 	firstStatus: undefined, // sap.m.ObjectStatus
 	secondStatus: undefined, // sap.m.ObjectStatus
 	statuses: [], // sap.ui.core.Control, since 1.16.0
+	additionalNumbers: [], // sap.m.ObjectNumber, since 1.38.0
 	headerContainer: undefined, // sap.m.ObjectHeaderContainer, since 1.21.1
+	markers: [], // sap.m.ObjectMarker
 	ariaDescribedBy: [], // sap.ui.core.Control
 	ariaLabelledBy: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
@@ -3837,6 +4508,7 @@
 	introTextDirection="Inherit"
 	numberTextDirection="Inherit"
 	titleSelectorTooltip="Options"
+	titleLevel="H1"
 	ariaDescribedBy=""
 	ariaLabelledBy=""
 	validateFieldGroup=""
@@ -3850,7 +4522,9 @@
 		<firstStatus></firstStatus> <!-- sap.m.ObjectStatus -->
 		<secondStatus></secondStatus> <!-- sap.m.ObjectStatus -->
 		<statuses></statuses> <!-- sap.ui.core.Control, since 1.16.0 -->
+		<additionalNumbers></additionalNumbers> <!-- sap.m.ObjectNumber, since 1.38.0 -->
 		<headerContainer></headerContainer> <!-- sap.m.ObjectHeaderContainer, since 1.21.1 -->
+		<markers></markers> <!-- sap.m.ObjectMarker -->
 </ObjectHeader>
 ]]></xmlTemplate>
 </Template>
@@ -3915,6 +4589,7 @@
 	unread: false, // boolean
 	selected: false, // boolean
 	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.6
 	title: undefined, // string
 	number: undefined, // string
 	numberUnit: undefined, // string
@@ -3936,6 +4611,7 @@
 	attributes: [], // sap.m.ObjectAttribute
 	firstStatus: undefined, // sap.m.ObjectStatus
 	secondStatus: undefined, // sap.m.ObjectStatus
+	markers: [], // sap.m.ObjectMarker
 	ariaLabelledBy: [], // sap.ui.core.Control, since 1.28.0
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -3965,6 +4641,7 @@
 	unread="false"
 	selected="false"
 	counter=""
+	highlight="None"
 	title=""
 	number=""
 	numberUnit=""
@@ -3991,7 +4668,45 @@
 		<attributes></attributes> <!-- sap.m.ObjectAttribute -->
 		<firstStatus></firstStatus> <!-- sap.m.ObjectStatus -->
 		<secondStatus></secondStatus> <!-- sap.m.ObjectStatus -->
+		<markers></markers> <!-- sap.m.ObjectMarker -->
 </ObjectListItem>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.m.ObjectMarker" alias="ObjectMarker,Marker">
+	<jsTemplate><![CDATA[new sap.m.ObjectMarker({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	type: undefined, // sap.m.ObjectMarkerType
+	visibility: undefined, // sap.m.ObjectMarkerVisibility
+	additionalInfo: "", // string
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	press: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<ObjectMarker xmlns="sap.m"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	type=""
+	visibility=""
+	additionalInfo=""
+	validateFieldGroup=""
+	press="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+</ObjectMarker>
 ]]></xmlTemplate>
 </Template>
 <Template name="sap.m.ObjectNumber" alias="ObjectNumber,Number">
@@ -4011,6 +4726,7 @@
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
+	ariaDescribedBy: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this]
@@ -4029,6 +4745,7 @@
 	unit=""
 	textDirection="Inherit"
 	textAlign="Begin"
+	ariaDescribedBy=""
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
@@ -4131,6 +4848,7 @@
 	stayInOverflow: false, // boolean
 	priority: sap.m.OverflowToolbarPriority.High, // sap.m.OverflowToolbarPriority, since 1.32
 	group: 0, // int, since 1.32
+	closeOverflowOnInteraction: true, // boolean, since 1.40
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [] // sap.ui.core.Control, since 1.19
@@ -4144,7 +4862,8 @@
 	moveToOverflow="true"
 	stayInOverflow="false"
 	priority="High"
-	group="0">
+	group="0"
+	closeOverflowOnInteraction="true">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 </OverflowToolbarLayoutData>
@@ -4161,7 +4880,7 @@
 	index: undefined, // int, since 1.26.0
 	visible: undefined, // boolean, since 1.26.0
 	width: undefined, // string, since 1.26.0
-	role: undefined, // string, since 1.34.0
+	total: undefined, // boolean, since 1.26.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [] // sap.ui.core.Control, since 1.19
@@ -4177,7 +4896,7 @@
 	index=""
 	visible=""
 	width=""
-	role="">
+	total="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 </P13nColumnsItem>
@@ -4196,6 +4915,7 @@
 	verticalScrolling: true, // boolean, since 1.26.0
 	validationExecutor: undefined, // object
 	validationListener: undefined, // object
+	changeNotifier: undefined, // object
 	visibleItemsThreshold: -1, // int, since 1.26.7
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
@@ -4231,6 +4951,7 @@
 	verticalScrolling="true"
 	validationExecutor=""
 	validationListener=""
+	changeNotifier=""
 	visibleItemsThreshold="-1"
 	validateFieldGroup=""
 	beforeNavigationTo=""
@@ -4319,8 +5040,10 @@
 	verticalScrolling: true, // boolean, since 1.15.1
 	resizable: false, // boolean, since 1.30
 	draggable: false, // boolean, since 1.30
+	escapeHandler: undefined, // any, since 1.44
 	initialVisiblePanelType: undefined, // string, since 1.26.0
 	showReset: false, // boolean, since 1.26.0
+	showResetEnabled: false, // boolean, since 1.36.0
 	validationExecutor: undefined, // object
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
@@ -4336,6 +5059,7 @@
 	rightButton: undefined, // sap.m.Button
 	initialFocus: undefined, // sap.ui.core.Control, since 1.15.0
 	ariaDescribedBy: [], // sap.ui.core.Control
+	ariaLabelledBy: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -4381,13 +5105,16 @@
 	verticalScrolling="true"
 	resizable="false"
 	draggable="false"
+	escapeHandler=""
 	initialVisiblePanelType=""
 	showReset="false"
+	showResetEnabled="false"
 	validationExecutor=""
 	leftButton=""
 	rightButton=""
 	initialFocus=""
 	ariaDescribedBy=""
+	ariaLabelledBy=""
 	validateFieldGroup=""
 	beforeOpen=""
 	afterOpen=""
@@ -4408,6 +5135,37 @@
 </P13nDialog>
 ]]></xmlTemplate>
 </Template>
+<Template name="sap.m.P13nDimMeasureItem" alias="P13nDimMeasureItem,Item">
+	<jsTemplate><![CDATA[new sap.m.P13nDimMeasureItem({
+	id: "${id}", // sap.ui.core.ID
+	text: "", // string
+	enabled: true, // boolean
+	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection
+	key: undefined, // string
+	columnKey: undefined, // string, since 1.34.0
+	index: -1, // int, since 1.34.0
+	visible: undefined, // boolean, since 1.34.0
+	role: undefined, // string, since 1.34.0
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [] // sap.ui.core.Control, since 1.19
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<P13nDimMeasureItem xmlns="sap.m"
+	id="${id}"
+	text=""
+	enabled="true"
+	textDirection="Inherit"
+	key=""
+	columnKey=""
+	index="-1"
+	visible=""
+	role="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+</P13nDimMeasureItem>
+]]></xmlTemplate>
+</Template>
 <Template name="sap.m.P13nDimMeasurePanel" alias="P13nDimMeasurePanel,Panel">
 	<jsTemplate><![CDATA[new sap.m.P13nDimMeasurePanel({
 	id: "${id}", // sap.ui.core.ID
@@ -4421,13 +5179,13 @@
 	verticalScrolling: true, // boolean, since 1.26.0
 	validationExecutor: undefined, // object
 	validationListener: undefined, // object
-	visibleItemsThreshold: -1, // int, since 1.34.0
+	changeNotifier: undefined, // object
 	chartTypeKey: "", // string, since 1.34.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
 	items: [], // sap.m.P13nItem, since 1.26.0
-	columnsItems: [], // sap.m.P13nColumnsItem, since 1.34.0
+	dimMeasureItems: [], // sap.m.P13nDimMeasureItem, since 1.34.0
 	availableChartTypes: [], // sap.ui.core.Item, since 1.34.0
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -4449,14 +5207,14 @@
 	verticalScrolling="true"
 	validationExecutor=""
 	validationListener=""
-	visibleItemsThreshold="-1"
+	changeNotifier=""
 	chartTypeKey=""
 	validateFieldGroup=""
 	beforeNavigationTo="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<items></items> <!-- sap.m.P13nItem, since 1.26.0 -->
-		<columnsItems></columnsItems> <!-- sap.m.P13nColumnsItem, since 1.34.0 -->
+		<dimMeasureItems></dimMeasureItems> <!-- sap.m.P13nDimMeasureItem, since 1.34.0 -->
 		<availableChartTypes></availableChartTypes> <!-- sap.ui.core.Item, since 1.34.0 -->
 </P13nDimMeasurePanel>
 ]]></xmlTemplate>
@@ -4507,6 +5265,7 @@
 	verticalScrolling: true, // boolean, since 1.26.0
 	validationExecutor: undefined, // object
 	validationListener: undefined, // object
+	changeNotifier: undefined, // object
 	maxIncludes: "-1", // string, since 1.26
 	maxExcludes: "-1", // string, since 1.26
 	containerQuery: false, // boolean, since 1.26
@@ -4545,6 +5304,7 @@
 	verticalScrolling="true"
 	validationExecutor=""
 	validationListener=""
+	changeNotifier=""
 	maxIncludes="-1"
 	maxExcludes="-1"
 	containerQuery="false"
@@ -4603,6 +5363,7 @@
 	verticalScrolling: true, // boolean, since 1.26.0
 	validationExecutor: undefined, // object
 	validationListener: undefined, // object
+	changeNotifier: undefined, // object
 	maxGroups: "-1", // string, since 1.26
 	containerQuery: false, // boolean, since 1.26
 	layoutMode: undefined, // string, since 1.26
@@ -4640,6 +5401,7 @@
 	verticalScrolling="true"
 	validationExecutor=""
 	validationListener=""
+	changeNotifier=""
 	maxGroups="-1"
 	containerQuery="false"
 	layoutMode=""
@@ -4707,6 +5469,7 @@
 	verticalScrolling: true, // boolean, since 1.26.0
 	validationExecutor: undefined, // object
 	validationListener: undefined, // object
+	changeNotifier: undefined, // object
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -4731,6 +5494,7 @@
 	verticalScrolling="true"
 	validationExecutor=""
 	validationListener=""
+	changeNotifier=""
 	validateFieldGroup=""
 	beforeNavigationTo="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
@@ -4779,6 +5543,7 @@
 	verticalScrolling: true, // boolean, since 1.26.0
 	validationExecutor: undefined, // object
 	validationListener: undefined, // object
+	changeNotifier: undefined, // object
 	containerQuery: false, // boolean, since 1.26
 	layoutMode: undefined, // string, since 1.26
 	tooltip: undefined, // sap.ui.core.TooltipBase
@@ -4815,6 +5580,7 @@
 	verticalScrolling="true"
 	validationExecutor=""
 	validationListener=""
+	changeNotifier=""
 	containerQuery="false"
 	layoutMode=""
 	validateFieldGroup=""
@@ -4849,6 +5615,7 @@
 	navButtonType: sap.m.ButtonType.Back, // sap.m.ButtonType, since 1.12
 	showFooter: true, // boolean, since 1.13.1
 	contentOnlyBusy: false, // boolean, since 1.29.0
+	floatingFooter: false, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -4888,6 +5655,7 @@
 	navButtonType="Back"
 	showFooter="true"
 	contentOnlyBusy="false"
+	floatingFooter="false"
 	validateFieldGroup=""
 	navButtonTap=""
 	navButtonPress="">
@@ -4946,6 +5714,8 @@
 	fieldGroupIds: [], // string[], since 1.31
 	count: 1, // int
 	position: 1, // int
+	nextButtonTooltip: "", // string, since 1.36
+	previousButtonTooltip: "", // string, since 1.36
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -4965,6 +5735,8 @@
 	fieldGroupIds=""
 	count="1"
 	position="1"
+	nextButtonTooltip=""
+	previousButtonTooltip=""
 	validateFieldGroup=""
 	positionChange="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
@@ -5036,8 +5808,13 @@
 	width: undefined, // sap.ui.core.CSSSize
 	height: undefined, // sap.ui.core.CSSSize
 	showIntervalHeaders: true, // boolean
+	showEmptyIntervalHeaders: true, // boolean, since 1.38.0
 	showRowHeaders: true, // boolean
 	noDataText: undefined, // string
+	appointmentsReducedHeight: false, // boolean, since 1.38.0
+	appointmentsVisualization: sap.ui.unified.CalendarAppointmentVisualization.Standard, // sap.ui.unified.CalendarAppointmentVisualization, since 1.40.0
+	minDate: undefined, // object, since 1.38.0
+	maxDate: undefined, // object, since 1.38.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -5045,6 +5822,8 @@
 	views: [], // sap.m.PlanningCalendarView
 	specialDates: [], // sap.ui.unified.DateTypeRange
 	toolbarContent: [], // sap.ui.core.Control
+	ariaLabelledBy: [], // sap.ui.core.Control, since 1.40.0
+	legend: undefined, // sap.ui.unified.CalendarLegend, since 1.40.0
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -5077,8 +5856,15 @@
 	width=""
 	height=""
 	showIntervalHeaders="true"
+	showEmptyIntervalHeaders="true"
 	showRowHeaders="true"
 	noDataText=""
+	appointmentsReducedHeight="false"
+	appointmentsVisualization="Standard"
+	minDate=""
+	maxDate=""
+	ariaLabelledBy=""
+	legend=""
 	validateFieldGroup=""
 	appointmentSelect=""
 	intervalSelect=""
@@ -5171,11 +5957,13 @@
 	offsetY: 0, // int
 	showArrow: true, // boolean, since 1.31
 	contentWidth: undefined, // sap.ui.core.CSSSize, since 1.9.0
+	contentMinWidth: "", // sap.ui.core.CSSSize, since 1.36
 	contentHeight: undefined, // sap.ui.core.CSSSize, since 1.9.0
 	enableScrolling: true, // boolean
 	verticalScrolling: true, // boolean, since 1.15.0
 	horizontalScrolling: true, // boolean, since 1.15.0
 	bounce: undefined, // boolean, since 1.16.5
+	resizable: false, // boolean, since 1.36.4
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -5188,6 +5976,7 @@
 	leftButton: undefined, // sap.m.Button
 	rightButton: undefined, // sap.m.Button
 	initialFocus: undefined, // sap.ui.core.Control, since 1.15.0
+	ariaLabelledBy: [], // sap.ui.core.Control
 	ariaDescribedBy: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -5220,14 +6009,17 @@
 	offsetY="0"
 	showArrow="true"
 	contentWidth=""
+	contentMinWidth=""
 	contentHeight=""
 	enableScrolling="true"
 	verticalScrolling="true"
 	horizontalScrolling="true"
 	bounce=""
+	resizable="false"
 	leftButton=""
 	rightButton=""
 	initialFocus=""
+	ariaLabelledBy=""
 	ariaDescribedBy=""
 	validateFieldGroup=""
 	afterOpen=""
@@ -5568,6 +6360,7 @@
 	text: undefined, // string
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection
 	width: "", // sap.ui.core.CSSSize
+	useEntireWidth: false, // boolean, since 1.42
 	activeHandling: true, // boolean
 	editable: true, // boolean, since 1.25
 	valueState: sap.ui.core.ValueState.None, // sap.ui.core.ValueState, since 1.25
@@ -5597,6 +6390,7 @@
 	text=""
 	textDirection="Inherit"
 	width=""
+	useEntireWidth="false"
 	activeHandling="true"
 	editable="true"
 	valueState="None"
@@ -5659,6 +6453,71 @@
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<buttons></buttons> <!-- sap.m.RadioButton -->
 </RadioButtonGroup>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.m.RangeSlider" alias="RangeSlider,Slider">
+	<jsTemplate><![CDATA[new sap.m.RangeSlider({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	width: "100%", // sap.ui.core.CSSSize
+	enabled: true, // boolean
+	name: "", // string
+	min: 0, // float
+	max: 100, // float
+	step: 1, // float
+	progress: true, // boolean
+	value: 0, // float
+	showHandleTooltip: true, // boolean, since 1.31
+	showAdvancedTooltip: false, // boolean, since 1.42
+	inputsAsTooltips: false, // boolean, since 1.42
+	enableTickmarks: false, // boolean, since 1.44
+	value2: 100, // float
+	range: [], // float[]
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	ariaLabelledBy: [], // sap.ui.core.Control, since 1.27.0
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	change: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	liveChange: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<RangeSlider xmlns="sap.m"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	width="100%"
+	enabled="true"
+	name=""
+	min="0"
+	max="100"
+	step="1"
+	progress="true"
+	value="0"
+	showHandleTooltip="true"
+	showAdvancedTooltip="false"
+	inputsAsTooltips="false"
+	enableTickmarks="false"
+	value2="100"
+	range=""
+	ariaLabelledBy=""
+	validateFieldGroup=""
+	change=""
+	liveChange="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+</RangeSlider>
 ]]></xmlTemplate>
 </Template>
 <Template name="sap.m.RatingIndicator" alias="RatingIndicator,Indicator">
@@ -5730,11 +6589,13 @@
 	modal: undefined, // boolean
 	offsetX: undefined, // int
 	offsetY: undefined, // int
+	showArrow: true, // boolean
 	contentWidth: undefined, // sap.ui.core.CSSSize
 	contentHeight: undefined, // sap.ui.core.CSSSize
 	horizontalScrolling: true, // boolean
 	verticalScrolling: true, // boolean
 	showCloseButton: true, // boolean
+	resizable: false, // boolean, since 1.36.4
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -5744,6 +6605,7 @@
 	beginButton: undefined, // sap.m.Button
 	endButton: undefined, // sap.m.Button
 	initialFocus: undefined, // sap.ui.core.Control
+	ariaLabelledBy: [], // sap.ui.core.Control
 	ariaDescribedBy: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -5775,12 +6637,15 @@
 	modal=""
 	offsetX=""
 	offsetY=""
+	showArrow="true"
 	contentWidth=""
 	contentHeight=""
 	horizontalScrolling="true"
 	verticalScrolling="true"
 	showCloseButton="true"
+	resizable="false"
 	initialFocus=""
+	ariaLabelledBy=""
 	ariaDescribedBy=""
 	validateFieldGroup=""
 	beforeOpen=""
@@ -5960,6 +6825,7 @@
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection
 	key: undefined, // string
 	icon: undefined, // string
+	visible: true, // boolean
 	width: undefined, // sap.ui.core.CSSSize
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
@@ -5976,6 +6842,7 @@
 	textDirection="Inherit"
 	key=""
 	icon=""
+	visible="true"
 	width=""
 	press="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
@@ -6001,6 +6868,9 @@
 	autoAdjustWidth: false, // boolean, since 1.16
 	textAlign: sap.ui.core.TextAlign.Initial, // sap.ui.core.TextAlign, since 1.28
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28
+	valueState: sap.ui.core.ValueState.None, // sap.ui.core.ValueState, since 1.40.2
+	valueStateText: "", // string, since 1.40.5
+	showSecondaryValues: false, // boolean, since 1.40
 	forceSelection: true, // boolean, since 1.34
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
@@ -6033,6 +6903,9 @@
 	autoAdjustWidth="false"
 	textAlign="Initial"
 	textDirection="Inherit"
+	valueState="None"
+	valueStateText=""
+	showSecondaryValues="false"
 	forceSelection="true"
 	selectedItem=""
 	ariaLabelledBy=""
@@ -6116,6 +6989,7 @@
 	selectedKey: "", // string
 	selectedItemId: "", // string
 	showSecondaryValues: false, // boolean, since 1.32.3
+	keyboardNavigationMode: sap.m.SelectListKeyboardNavigationMode.Delimited, // sap.m.SelectListKeyboardNavigationMode, since 1.38
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -6145,6 +7019,7 @@
 	selectedKey=""
 	selectedItemId=""
 	showSecondaryValues="false"
+	keyboardNavigationMode="Delimited"
 	selectedItem=""
 	ariaLabelledBy=""
 	validateFieldGroup=""
@@ -6258,6 +7133,9 @@
 	progress: true, // boolean
 	value: 0, // float
 	showHandleTooltip: true, // boolean, since 1.31
+	showAdvancedTooltip: false, // boolean, since 1.42
+	inputsAsTooltips: false, // boolean, since 1.42
+	enableTickmarks: false, // boolean, since 1.44
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -6288,6 +7166,9 @@
 	progress="true"
 	value="0"
 	showHandleTooltip="true"
+	showAdvancedTooltip="false"
+	inputsAsTooltips="false"
+	enableTickmarks="false"
 	ariaLabelledBy=""
 	validateFieldGroup=""
 	change=""
@@ -6489,6 +7370,7 @@
 	unread: false, // boolean
 	selected: false, // boolean
 	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.6
 	title: undefined, // string
 	description: undefined, // string
 	icon: undefined, // sap.ui.core.URI
@@ -6532,6 +7414,7 @@
 	unread="false"
 	selected="false"
 	counter=""
+	highlight="None"
 	title=""
 	description=""
 	icon=""
@@ -6605,6 +7488,122 @@
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 </StandardTile>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.m.StandardTreeItem" alias="StandardTreeItem,Item">
+	<jsTemplate><![CDATA[new sap.m.StandardTreeItem({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	type: sap.m.ListType.Inactive, // sap.m.ListType
+	visible: true, // boolean
+	unread: false, // boolean
+	selected: false, // boolean
+	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.6
+	title: "", // string
+	icon: undefined, // sap.ui.core.URI
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	ariaLabelledBy: [], // sap.ui.core.Control, since 1.28.0
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	tap: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	detailTap: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	press: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	detailPress: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<StandardTreeItem xmlns="sap.m"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	type="Inactive"
+	visible="true"
+	unread="false"
+	selected="false"
+	counter=""
+	highlight="None"
+	title=""
+	icon=""
+	ariaLabelledBy=""
+	validateFieldGroup=""
+	tap=""
+	detailTap=""
+	press=""
+	detailPress="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+</StandardTreeItem>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.m.StepInput" alias="StepInput,Input">
+	<jsTemplate><![CDATA[new sap.m.StepInput({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	min: undefined, // float
+	max: undefined, // float
+	step: 1, // float
+	largerStep: 2, // float
+	value: 0, // float
+	width: undefined, // sap.ui.core.CSSSize
+	valueState: sap.ui.core.ValueState.None, // sap.ui.core.ValueState
+	editable: true, // boolean
+	enabled: true, // boolean
+	displayValuePrecision: 0, // int, since 1.46
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	ariaLabelledBy: [], // sap.ui.core.Control
+	ariaDescribedBy: [], // sap.ui.core.Control
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	change: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<StepInput xmlns="sap.m"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	min=""
+	max=""
+	step="1"
+	largerStep="2"
+	value="0"
+	width=""
+	valueState="None"
+	editable="true"
+	enabled="true"
+	displayValuePrecision="0"
+	ariaLabelledBy=""
+	ariaDescribedBy=""
+	validateFieldGroup=""
+	change="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+</StepInput>
 ]]></xmlTemplate>
 </Template>
 <Template name="sap.m.SuggestionItem" alias="SuggestionItem,Item">
@@ -6764,6 +7763,7 @@
 	selectedKey: "", // string
 	selectedItemId: "", // string
 	showSecondaryValues: false, // boolean, since 1.32.3
+	keyboardNavigationMode: sap.m.SelectListKeyboardNavigationMode.Delimited, // sap.m.SelectListKeyboardNavigationMode, since 1.38
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -6793,6 +7793,7 @@
 	selectedKey=""
 	selectedItemId=""
 	showSecondaryValues="false"
+	keyboardNavigationMode="Delimited"
 	selectedItem=""
 	ariaLabelledBy=""
 	validateFieldGroup=""
@@ -6825,11 +7826,13 @@
 	modeAnimationOn: true, // boolean
 	showSeparators: sap.m.ListSeparators.All, // sap.m.ListSeparators
 	swipeDirection: sap.m.SwipeDirection.Both, // sap.m.SwipeDirection
-	growing: false, // boolean, since 1.16
-	growingThreshold: 20, // int, since 1.16
-	growingTriggerText: undefined, // string, since 1.16
-	growingScrollToLoad: false, // boolean, since 1.16
+	growing: false, // boolean, since 1.16.0
+	growingThreshold: 20, // int, since 1.16.0
+	growingTriggerText: undefined, // string, since 1.16.0
+	growingScrollToLoad: false, // boolean, since 1.16.0
+	growingDirection: sap.m.ListGrowingDirection.Downwards, // sap.m.ListGrowingDirection, since 1.40.0
 	rememberSelections: true, // boolean, since 1.16.6
+	keyboardMode: sap.m.ListKeyboardMode.Navigation, // sap.m.ListKeyboardMode, since 1.38.0
 	backgroundDesign: sap.m.BackgroundDesign.Translucent, // sap.m.BackgroundDesign
 	fixedLayout: true, // boolean, since 1.22
 	showOverlay: false, // boolean, since 1.22.1
@@ -6898,7 +7901,9 @@
 	growingThreshold="20"
 	growingTriggerText=""
 	growingScrollToLoad="false"
+	growingDirection="Downwards"
 	rememberSelections="true"
+	keyboardMode="Navigation"
 	backgroundDesign="Translucent"
 	fixedLayout="true"
 	showOverlay="false"
@@ -7041,12 +8046,15 @@
 	showValueStateMessage: true, // boolean, since 1.26.0
 	textAlign: sap.ui.core.TextAlign.Initial, // sap.ui.core.TextAlign, since 1.26.0
 	textDirection: sap.ui.core.TextDirection.Inherit, // sap.ui.core.TextDirection, since 1.28.0
+	required: false, // boolean, since 1.38.4
 	rows: 2, // int
 	cols: 20, // int
 	height: undefined, // sap.ui.core.CSSSize
 	maxLength: 0, // int
-	wrapping: undefined, // sap.ui.core.Wrapping
+	wrapping: sap.ui.core.Wrapping.None, // sap.ui.core.Wrapping
 	valueLiveUpdate: false, // boolean, since 1.30
+	growing: false, // boolean, since 1.38.0
+	growingMaxLines: 0, // int, since 1.38.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -7079,12 +8087,15 @@
 	showValueStateMessage="true"
 	textAlign="Initial"
 	textDirection="Inherit"
+	required="false"
 	rows="2"
 	cols="20"
 	height=""
 	maxLength="0"
-	wrapping=""
+	wrapping="None"
 	valueLiveUpdate="false"
+	growing="false"
+	growingMaxLines="0"
 	ariaLabelledBy=""
 	validateFieldGroup=""
 	change=""
@@ -7341,6 +8352,9 @@
 	}, this],
 	select: [function (oEvent) {
 		var ${control} = oEvent.getSource();
+	}, this],
+	deselect: [function (oEvent) {
+		var ${control} = oEvent.getSource();
 	}, this]
 })
 ]]></jsTemplate>
@@ -7360,7 +8374,8 @@
 	validateFieldGroup=""
 	"delete"=""
 	press=""
-	select="">
+	select=""
+	deselect="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 </Token>
@@ -7386,6 +8401,9 @@
 	}, this],
 	tokenChange: [function (oEvent) {
 		var ${control} = oEvent.getSource();
+	}, this],
+	tokenUpdate: [function (oEvent) {
+		var ${control} = oEvent.getSource();
 	}, this]
 })
 ]]></jsTemplate>
@@ -7400,7 +8418,8 @@
 	ariaDescribedBy=""
 	ariaLabelledBy=""
 	validateFieldGroup=""
-	tokenChange="">
+	tokenChange=""
+	tokenUpdate="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<tokens></tokens> <!-- sap.m.Token -->
@@ -7529,6 +8548,178 @@
 </ToolbarSpacer>
 ]]></xmlTemplate>
 </Template>
+<Template name="sap.m.Tree" alias="Tree">
+	<jsTemplate><![CDATA[new sap.m.Tree({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	inset: false, // boolean
+	headerText: undefined, // string
+	headerDesign: sap.m.ListHeaderDesign.Standard, // sap.m.ListHeaderDesign, since 1.14
+	footerText: undefined, // string
+	mode: sap.m.ListMode.None, // sap.m.ListMode
+	width: "100%", // sap.ui.core.CSSSize
+	includeItemInSelection: false, // boolean
+	showUnread: false, // boolean
+	noDataText: undefined, // string
+	showNoData: true, // boolean
+	enableBusyIndicator: true, // boolean, since 1.20.2
+	modeAnimationOn: true, // boolean
+	showSeparators: sap.m.ListSeparators.All, // sap.m.ListSeparators
+	swipeDirection: sap.m.SwipeDirection.Both, // sap.m.SwipeDirection
+	growing: false, // boolean, since 1.16.0
+	growingThreshold: 20, // int, since 1.16.0
+	growingTriggerText: undefined, // string, since 1.16.0
+	growingScrollToLoad: false, // boolean, since 1.16.0
+	growingDirection: sap.m.ListGrowingDirection.Downwards, // sap.m.ListGrowingDirection, since 1.40.0
+	rememberSelections: true, // boolean, since 1.16.6
+	keyboardMode: sap.m.ListKeyboardMode.Navigation, // sap.m.ListKeyboardMode, since 1.38.0
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	items: [], // sap.m.ListItemBase
+	swipeContent: undefined, // sap.ui.core.Control
+	headerToolbar: undefined, // sap.m.Toolbar, since 1.16
+	infoToolbar: undefined, // sap.m.Toolbar, since 1.16
+	ariaLabelledBy: [], // sap.ui.core.Control, since 1.28.0
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	select: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	selectionChange: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this], // since 1.16
+	"delete": [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	swipe: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	growingStarted: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this], // since 1.16
+	growingFinished: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this], // since 1.16
+	updateStarted: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this], // since 1.16.3
+	updateFinished: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this], // since 1.16.3
+	itemPress: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this] // since 1.20
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<Tree xmlns="sap.m"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	inset="false"
+	headerText=""
+	headerDesign="Standard"
+	footerText=""
+	mode="None"
+	width="100%"
+	includeItemInSelection="false"
+	showUnread="false"
+	noDataText=""
+	showNoData="true"
+	enableBusyIndicator="true"
+	modeAnimationOn="true"
+	showSeparators="All"
+	swipeDirection="Both"
+	growing="false"
+	growingThreshold="20"
+	growingTriggerText=""
+	growingScrollToLoad="false"
+	growingDirection="Downwards"
+	rememberSelections="true"
+	keyboardMode="Navigation"
+	ariaLabelledBy=""
+	validateFieldGroup=""
+	select=""
+	selectionChange=""
+	"delete"=""
+	swipe=""
+	growingStarted=""
+	growingFinished=""
+	updateStarted=""
+	updateFinished=""
+	itemPress="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<items></items> <!-- sap.m.ListItemBase -->
+		<swipeContent></swipeContent> <!-- sap.ui.core.Control -->
+		<headerToolbar></headerToolbar> <!-- sap.m.Toolbar, since 1.16 -->
+		<infoToolbar></infoToolbar> <!-- sap.m.Toolbar, since 1.16 -->
+</Tree>
+]]></xmlTemplate>
+</Template>
+<Template name="sap.m.TreeItemBase" alias="TreeItemBase,Base">
+	<jsTemplate><![CDATA[new sap.m.TreeItemBase({
+	id: "${id}", // sap.ui.core.ID
+	busy: false, // boolean
+	busyIndicatorDelay: 1000, // int
+	visible: true, // boolean
+	fieldGroupIds: [], // string[], since 1.31
+	type: sap.m.ListType.Inactive, // sap.m.ListType
+	visible: true, // boolean
+	unread: false, // boolean
+	selected: false, // boolean
+	counter: undefined, // int
+	highlight: sap.ui.core.MessageType.None, // sap.ui.core.MessageType, since 1.44.6
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	ariaLabelledBy: [], // sap.ui.core.Control, since 1.28.0
+	validateFieldGroup: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	tap: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	detailTap: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	press: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this],
+	detailPress: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<TreeItemBase xmlns="sap.m"
+	id="${id}"
+	busy="false"
+	busyIndicatorDelay="1000"
+	visible="true"
+	fieldGroupIds=""
+	type="Inactive"
+	visible="true"
+	unread="false"
+	selected="false"
+	counter=""
+	highlight="None"
+	ariaLabelledBy=""
+	validateFieldGroup=""
+	tap=""
+	detailTap=""
+	press=""
+	detailPress="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+</TreeItemBase>
+]]></xmlTemplate>
+</Template>
 <Template name="sap.m.UploadCollection" alias="UploadCollection,Collection">
 	<jsTemplate><![CDATA[new sap.m.UploadCollection({
 	id: "${id}", // sap.ui.core.ID
@@ -7549,6 +8740,8 @@
 	instantUpload: true, // boolean, since 1.30
 	numberOfAttachmentsText: undefined, // string, since 1.30
 	mode: sap.m.ListMode.None, // sap.m.ListMode, since 1.34
+	uploadButtonInvisible: false, // boolean, since 1.42.0
+	terminationEnabled: true, // boolean, since 1.42.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -7556,6 +8749,7 @@
 	headerParameters: [], // sap.m.UploadCollectionParameter
 	parameters: [], // sap.m.UploadCollectionParameter
 	toolbar: undefined, // sap.m.OverflowToolbar, since 1.34
+	infoToolbar: undefined, // sap.m.Toolbar, since 1.44
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -7585,7 +8779,10 @@
 	}, this],
 	beforeUploadStarts: [function (oEvent) {
 		var ${control} = oEvent.getSource();
-	}, this]
+	}, this],
+	selectionChange: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this] // since 1.36.0
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<UploadCollection xmlns="sap.m"
@@ -7607,6 +8804,8 @@
 	instantUpload="true"
 	numberOfAttachmentsText=""
 	mode="None"
+	uploadButtonInvisible="false"
+	terminationEnabled="true"
 	validateFieldGroup=""
 	change=""
 	fileDeleted=""
@@ -7616,13 +8815,15 @@
 	typeMissmatch=""
 	uploadComplete=""
 	uploadTerminated=""
-	beforeUploadStarts="">
+	beforeUploadStarts=""
+	selectionChange="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<items></items> <!-- sap.m.UploadCollectionItem -->
 		<headerParameters></headerParameters> <!-- sap.m.UploadCollectionParameter -->
 		<parameters></parameters> <!-- sap.m.UploadCollectionParameter -->
 		<toolbar></toolbar> <!-- sap.m.OverflowToolbar, since 1.34 -->
+		<infoToolbar></infoToolbar> <!-- sap.m.Toolbar, since 1.44 -->
 </UploadCollection>
 ]]></xmlTemplate>
 </Template>
@@ -7648,6 +8849,7 @@
 	dependents: [], // sap.ui.core.Control, since 1.19
 	attributes: [], // sap.m.ObjectAttribute, since 1.30
 	statuses: [], // sap.m.ObjectStatus, since 1.30
+	markers: [], // sap.m.ObjectMarker, since 1.40
 	fileUploader: undefined // sap.ui.unified.FileUploader
 })
 ]]></jsTemplate>
@@ -7672,6 +8874,7 @@
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<attributes></attributes> <!-- sap.m.ObjectAttribute, since 1.30 -->
 		<statuses></statuses> <!-- sap.m.ObjectStatus, since 1.30 -->
+		<markers></markers> <!-- sap.m.ObjectMarker, since 1.40 -->
 </UploadCollectionItem>
 ]]></xmlTemplate>
 </Template>
@@ -7736,6 +8939,9 @@
 	renderType: sap.m.FlexRendertype.Div, // sap.m.FlexRendertype
 	justifyContent: sap.m.FlexJustifyContent.Start, // sap.m.FlexJustifyContent
 	alignItems: sap.m.FlexAlignItems.Stretch, // sap.m.FlexAlignItems
+	wrap: sap.m.FlexWrap.NoWrap, // sap.m.FlexWrap, since 1.36.0
+	alignContent: sap.m.FlexAlignContent.Stretch, // sap.m.FlexAlignContent, since 1.36.0
+	backgroundDesign: sap.m.BackgroundDesign.Transparent, // sap.m.BackgroundDesign, since 1.38.5
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -7759,6 +8965,9 @@
 	renderType="Div"
 	justifyContent="Start"
 	alignItems="Stretch"
+	wrap="NoWrap"
+	alignContent="Stretch"
+	backgroundDesign="Transparent"
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
@@ -7838,6 +9047,7 @@
 	title: undefined, // string
 	sortDescending: false, // boolean
 	groupDescending: false, // boolean
+	filterSearchOperator: sap.m.StringFilterOperator.StartsWith, // sap.m.StringFilterOperator, since 1.42
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -7860,6 +9070,9 @@
 	}, this],
 	resetFilters: [function (oEvent) {
 		var ${control} = oEvent.getSource();
+	}, this],
+	filterDetailPageOpened: [function (oEvent) {
+		var ${control} = oEvent.getSource();
 	}, this]
 })
 ]]></jsTemplate>
@@ -7872,13 +9085,15 @@
 	title=""
 	sortDescending="false"
 	groupDescending="false"
+	filterSearchOperator="StartsWith"
 	selectedSortItem=""
 	selectedGroupItem=""
 	selectedPresetFilterItem=""
 	validateFieldGroup=""
 	confirm=""
 	cancel=""
-	resetFilters="">
+	resetFilters=""
+	filterDetailPageOpened="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
 		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
 		<sortItems></sortItems> <!-- sap.m.ViewSettingsItem, since 1.16 -->
@@ -8095,6 +9310,29 @@
 </semantic/CancelAction>
 ]]></xmlTemplate>
 </Template>
+<Template name="sap.m.semantic.DeleteAction" alias="DeleteAction,Action">
+	<jsTemplate><![CDATA[new sap.m.semantic.DeleteAction({
+	id: "${id}", // sap.ui.core.ID
+	visible: true, // boolean
+	enabled: true, // boolean
+	tooltip: undefined, // sap.ui.core.TooltipBase
+	customData: [], // sap.ui.core.CustomData
+	dependents: [], // sap.ui.core.Control, since 1.19
+	press: [function (oEvent) {
+		var ${control} = oEvent.getSource();
+	}, this]
+})
+]]></jsTemplate>
+	<xmlTemplate><![CDATA[<semantic/DeleteAction xmlns="sap.m"
+	id="${id}"
+	visible="true"
+	enabled="true"
+	press="">
+		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
+		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+</semantic/DeleteAction>
+]]></xmlTemplate>
+</Template>
 <Template name="sap.m.semantic.DetailPage" alias="DetailPage,Page">
 	<jsTemplate><![CDATA[new sap.m.semantic.DetailPage({
 	id: "${id}", // sap.ui.core.ID
@@ -8108,6 +9346,8 @@
 	showSubHeader: true, // boolean
 	enableScrolling: true, // boolean
 	showFooter: true, // boolean
+	floatingFooter: false, // boolean, since 1.40.1
+	semanticRuleSet: sap.m.semantic.SemanticRuleSetType.Classic, // sap.m.semantic.SemanticRuleSetType, since 1.44
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -8124,6 +9364,7 @@
 	forwardAction: undefined, // sap.m.semantic.ForwardAction
 	editAction: undefined, // sap.m.semantic.EditAction
 	saveAction: undefined, // sap.m.semantic.SaveAction
+	deleteAction: undefined, // sap.m.semantic.DeleteAction
 	cancelAction: undefined, // sap.m.semantic.CancelAction
 	flagAction: undefined, // sap.m.semantic.FlagAction
 	favoriteAction: undefined, // sap.m.semantic.FavoriteAction
@@ -8157,6 +9398,8 @@
 	showSubHeader="true"
 	enableScrolling="true"
 	showFooter="true"
+	floatingFooter="false"
+	semanticRuleSet="Classic"
 	validateFieldGroup=""
 	navButtonPress="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
@@ -8174,6 +9417,7 @@
 		<forwardAction></forwardAction> <!-- sap.m.semantic.ForwardAction -->
 		<editAction></editAction> <!-- sap.m.semantic.EditAction -->
 		<saveAction></saveAction> <!-- sap.m.semantic.SaveAction -->
+		<deleteAction></deleteAction> <!-- sap.m.semantic.DeleteAction -->
 		<cancelAction></cancelAction> <!-- sap.m.semantic.CancelAction -->
 		<flagAction></flagAction> <!-- sap.m.semantic.FlagAction -->
 		<favoriteAction></favoriteAction> <!-- sap.m.semantic.FavoriteAction -->
@@ -8374,6 +9618,8 @@
 	showSubHeader: true, // boolean
 	enableScrolling: true, // boolean
 	showFooter: true, // boolean
+	floatingFooter: false, // boolean, since 1.40.1
+	semanticRuleSet: sap.m.semantic.SemanticRuleSetType.Classic, // sap.m.semantic.SemanticRuleSetType, since 1.44
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -8390,6 +9636,7 @@
 	forwardAction: undefined, // sap.m.semantic.ForwardAction
 	editAction: undefined, // sap.m.semantic.EditAction
 	saveAction: undefined, // sap.m.semantic.SaveAction
+	deleteAction: undefined, // sap.m.semantic.DeleteAction
 	cancelAction: undefined, // sap.m.semantic.CancelAction
 	flagAction: undefined, // sap.m.semantic.FlagAction
 	favoriteAction: undefined, // sap.m.semantic.FavoriteAction
@@ -8423,6 +9670,8 @@
 	showSubHeader="true"
 	enableScrolling="true"
 	showFooter="true"
+	floatingFooter="false"
+	semanticRuleSet="Classic"
 	validateFieldGroup=""
 	navButtonPress="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
@@ -8440,6 +9689,7 @@
 		<forwardAction></forwardAction> <!-- sap.m.semantic.ForwardAction -->
 		<editAction></editAction> <!-- sap.m.semantic.EditAction -->
 		<saveAction></saveAction> <!-- sap.m.semantic.SaveAction -->
+		<deleteAction></deleteAction> <!-- sap.m.semantic.DeleteAction -->
 		<cancelAction></cancelAction> <!-- sap.m.semantic.CancelAction -->
 		<flagAction></flagAction> <!-- sap.m.semantic.FlagAction -->
 		<favoriteAction></favoriteAction> <!-- sap.m.semantic.FavoriteAction -->
@@ -8546,6 +9796,8 @@
 	showSubHeader: true, // boolean
 	enableScrolling: true, // boolean
 	showFooter: true, // boolean
+	floatingFooter: false, // boolean, since 1.40.1
+	semanticRuleSet: sap.m.semantic.SemanticRuleSetType.Classic, // sap.m.semantic.SemanticRuleSetType, since 1.44
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -8562,6 +9814,7 @@
 	forwardAction: undefined, // sap.m.semantic.ForwardAction
 	editAction: undefined, // sap.m.semantic.EditAction
 	saveAction: undefined, // sap.m.semantic.SaveAction
+	deleteAction: undefined, // sap.m.semantic.DeleteAction
 	cancelAction: undefined, // sap.m.semantic.CancelAction
 	sort: undefined, // sap.m.semantic.ISort
 	filter: undefined, // sap.m.semantic.IFilter
@@ -8587,6 +9840,8 @@
 	showSubHeader="true"
 	enableScrolling="true"
 	showFooter="true"
+	floatingFooter="false"
+	semanticRuleSet="Classic"
 	validateFieldGroup=""
 	navButtonPress="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
@@ -8604,6 +9859,7 @@
 		<forwardAction></forwardAction> <!-- sap.m.semantic.ForwardAction -->
 		<editAction></editAction> <!-- sap.m.semantic.EditAction -->
 		<saveAction></saveAction> <!-- sap.m.semantic.SaveAction -->
+		<deleteAction></deleteAction> <!-- sap.m.semantic.DeleteAction -->
 		<cancelAction></cancelAction> <!-- sap.m.semantic.CancelAction -->
 		<sort></sort> <!-- sap.m.semantic.ISort -->
 		<filter></filter> <!-- sap.m.semantic.IFilter -->
@@ -8832,6 +10088,8 @@
 	showSubHeader: true, // boolean
 	enableScrolling: true, // boolean
 	showFooter: true, // boolean
+	floatingFooter: false, // boolean, since 1.40.1
+	semanticRuleSet: sap.m.semantic.SemanticRuleSetType.Classic, // sap.m.semantic.SemanticRuleSetType, since 1.44
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -8860,6 +10118,8 @@
 	showSubHeader="true"
 	enableScrolling="true"
 	showFooter="true"
+	floatingFooter="false"
+	semanticRuleSet="Classic"
 	validateFieldGroup=""
 	navButtonPress="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
@@ -9008,6 +10268,8 @@
 	showSubHeader: true, // boolean
 	enableScrolling: true, // boolean
 	showFooter: true, // boolean
+	floatingFooter: false, // boolean, since 1.40.1
+	semanticRuleSet: sap.m.semantic.SemanticRuleSetType.Classic, // sap.m.semantic.SemanticRuleSetType, since 1.44
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
 	dependents: [], // sap.ui.core.Control, since 1.19
@@ -9037,6 +10299,8 @@
 	showSubHeader="true"
 	enableScrolling="true"
 	showFooter="true"
+	floatingFooter="false"
+	semanticRuleSet="Classic"
 	validateFieldGroup=""
 	navButtonPress="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->

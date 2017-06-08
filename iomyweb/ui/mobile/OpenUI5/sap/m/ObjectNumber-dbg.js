@@ -5,8 +5,8 @@
  */
 
 // Provides control sap.m.ObjectNumber.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/Renderer', 'sap/ui/core/ValueStateSupport'],
-	function(jQuery, library, Control, Renderer, ValueStateSupport) {
+sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/Renderer'],
+	function(jQuery, library, Control, Renderer) {
 	"use strict";
 
 
@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * The ObjectNumber control displays number and number unit properties for an object. The number can be displayed using semantic
 	 * colors to provide additional meaning about the object to the user.
 	 * @extends sap.ui.core.Control
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -71,6 +71,13 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * Sets the horizontal alignment of the number and unit.
 			 */
 			textAlign : {type : "sap.ui.core.TextAlign", group : "Appearance", defaultValue : sap.ui.core.TextAlign.Begin}
+		},
+		associations : {
+
+			/**
+			 * Association to controls / ids which describe this control (see WAI-ARIA attribute aria-describedby).
+			 */
+			ariaDescribedBy: {type: "sap.ui.core.Control", multiple: true, singularName: "ariaDescribedBy"}
 		}
 	}});
 
@@ -88,15 +95,14 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @override
 	 * @public
 	 * @param {sap.ui.core.ValueState} sState The state to be set to
-	 * @returns {ObjectNumber} this pointer for chaining
+	 * @returns {sap.m.ObjectNumber} this pointer for chaining
 	 */
 	ObjectNumber.prototype.setState = function(sState) {
 		//remove the current value state css class
 		this.$().removeClass(this._sCSSPrefixObjNumberStatus + this.getState());
 
-		//do suppress re-rendering
+		//do suppress rerendering
 		this.setProperty("state", sState, true);
-		this._updateTooltipDom();
 
 		//now set the new css state class
 		this.$().addClass(this._sCSSPrefixObjNumberStatus + this.getState());
@@ -110,6 +116,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @override
 	 * @public
 	 * @param {sap.ui.core.TextAlign} sAlign The new value
+	 * @returns {sap.m.ObjectNumber} <code>this</code> pointer for chaining
 	 */
 	ObjectNumber.prototype.setTextAlign = function(sAlign) {
 		var sAlignVal = Renderer.getTextAlign(sAlign, this.getTextDirection());
@@ -119,56 +126,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		sAlignVal = sAlignVal || sAlign;
 		this.$().css("text-align", sAlign);
-	};
-
-	/*
-	 * Overwrite of generated function - no new JS-doc.
-	 * Property setter for the Tooltip
-	 *
-	 * @param {string|sap.ui.core.TooltipBase} vTooltip New tooltip value
-	 * @return {sap.m.ObjectNumber} <code>this</code> to allow method chaining
-	 * @public
-	 * @override
-	 */
-	ObjectNumber.prototype.setTooltip = function(vTooltip) {
-		this._refreshTooltipBaseDelegate(vTooltip);
-		this.setAggregation("tooltip", vTooltip, true);
-
-		this._updateTooltipDom();
-
 		return this;
-	};
-
-	/**
-	 * Enriches the tooltip to contain the string representation of the <code>state</code> property.
-	 * @returns {string} The enriched tooltip string
-	 * @private
-	 */
-	ObjectNumber.prototype._getEnrichedTooltip = function() {
-		var sTooltip = this.getTooltip_AsString(),
-			sToolTipAdditionalValueState = ValueStateSupport.getAdditionalText(this.getState());
-
-		sTooltip = sTooltip || "";
-		if (sToolTipAdditionalValueState) {
-			if (sTooltip) {
-				sTooltip += " ";
-			}
-			sTooltip += sToolTipAdditionalValueState;
-		}
-
-		return sTooltip;
-	};
-
-	/**
-	 * Updates the <code>title</code> attribute of the root dom element to include the <code>state</code>.
-	 * @private
-	 */
-	ObjectNumber.prototype._updateTooltipDom = function() {
-		var oONDomRef = this.getDomRef();
-
-		if (oONDomRef) {
-			jQuery(oONDomRef).attr("title", this._getEnrichedTooltip());
-		}
 	};
 
 	return ObjectNumber;

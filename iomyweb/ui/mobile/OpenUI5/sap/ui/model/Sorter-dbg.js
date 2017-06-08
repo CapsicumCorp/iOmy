@@ -31,6 +31,7 @@ sap.ui.define(['sap/ui/base/Object'],
 	 *        of the default comparator method.
 	 * @public
 	 * @alias sap.ui.model.Sorter
+	 * @extends sap.ui.base.Object
 	 */
 	var Sorter = BaseObject.extend("sap.ui.model.Sorter", /** @lends sap.ui.model.Sorter.prototype */ {
 
@@ -47,6 +48,9 @@ sap.ui.define(['sap/ui/base/Object'],
 			// if a model separator is found in the path, extract model name
 			var iSeparatorPos = this.sPath.indexOf(">");
 			if (iSeparatorPos > 0) {
+				// Model names are ignored, this must be kept for compatibility reasons. But using model names in the
+				// sorter path make no technical sense as the binding cannot access any other models.
+				jQuery.sap.log.error("Model names are not allowed in sorter-paths: \"" + this.sPath + "\"");
 				this.sPath = this.sPath.substr(iSeparatorPos + 1);
 			}
 
@@ -79,6 +83,19 @@ sap.ui.define(['sap/ui/base/Object'],
 				};
 			}
 			return oGroup;
+		},
+
+		/**
+		 * Returns the group function of this Sorter. If grouping is not enabled on this Sorter, it will return
+		 * undefined, if no explicit group function has been defined the default group function is returned.
+		 * The returned function is bound to its Sorter, so it will group according to its own property path,
+		 * even if it is used in the context of another Sorter.
+		 *
+		 * @return {function} The group function
+		 * @public
+		 */
+		getGroupFunction : function() {
+			return this.fnGroup && this.fnGroup.bind(this);
 		}
 
 	});
@@ -95,7 +112,7 @@ sap.ui.define(['sap/ui/base/Object'],
 	 *
 	 * @param {any} a the first value to compare
 	 * @param {any} b the second value to compare
-	 * @returns {integer} -1, 0 or 1 depending on the compare result
+	 * @returns {int} -1, 0 or 1 depending on the compare result
 	 * @public
 	 */
 	Sorter.defaultComparator = function(a, b) {

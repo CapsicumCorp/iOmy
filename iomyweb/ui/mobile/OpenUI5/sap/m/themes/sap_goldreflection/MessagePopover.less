@@ -24,19 +24,44 @@
 		padding-bottom: 1rem;
 	}
 
+	.sapMMsgPopoverDescriptionLink {
+		margin: 1rem 0 0 3rem;
+	}
+
 	.sapMMsgPopoverDescriptionText:empty {
 		display: none;
 	}
 
 	.sapMMsgPopoverTitleText {
 		vertical-align: middle;
-		font-weight: bold;
 	}
 
-	.markupDescription {
-		float: left;
-		padding: 0 1rem 0 3rem;
-		margin-top: 1rem;
+	.sapMSLIDescription {
+		margin-top: 0.125rem;
+		font-size: @sapMFontMediumSize;
+	}
+
+	.sapMSLITitle {
+		padding-bottom: 0;
+		font-size: @sapMFontLargeSize;
+	}
+
+	.sapMSLITitleOnly {
+		font-size: @sapMFontLargeSize;
+	}
+
+	.sapMLIB.sapMLIBActive {
+		.sapMSLIImgIcon {
+			color: @sapUiInvertedElement;
+		}
+	}
+
+	.sapMSLIDescIcon .sapMSLIDescriptionDiv {
+		margin-top: 0.125rem;
+	}
+
+	.sapMSLIInfo {
+		margin: 0;
 	}
 }
 
@@ -75,6 +100,14 @@
 		left: -8px;
 	}
 
+	.sapMMsgPopoverItem {
+		height: 3.5rem;
+	}
+
+	.sapMMsgPopoverItem.sapMSLINoDescIcon {
+		height: 2rem;
+	}
+
 	.sapMMsgPopoverCloseBtn .sapMBtnIcon {
 		width: 1.626rem;
 		height: 1.626rem;
@@ -89,6 +122,11 @@
 		padding: 0;
 	}
 
+	.sapMMsgPopoverCloseBtn .sapMBtnIcon,
+	.sapMMsgPopoverBackBtn .sapMBtnIcon {
+		margin-right: 0;
+	}
+
 	.sapMBtnCustomIcon  {
 		margin-left: 0;
 	}
@@ -98,5 +136,20 @@
 		height: 1.626rem;
 		line-height: 1.626rem;
 		font-size: 1rem;
+	}
+
+	.sapMSLIDescription {
+		margin-top: 0;
+		font-size: @sapMFontMediumSize;
+	}
+
+	.sapMSLITitle {
+		font-size: @sapMFontMediumSize;
+	}
+
+	.sapMSLIDescIcon .sapMSLITitleDiv,
+	.sapMSLIDescIcon .sapMSLIDescriptionDiv {
+		margin-top: 0.125rem;
+		margin-bottom: 0.125rem;
 	}
 }

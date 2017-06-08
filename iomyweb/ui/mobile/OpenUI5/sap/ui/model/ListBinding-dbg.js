@@ -1,4 +1,5 @@
 /*!
+
  * UI development toolkit for HTML5 (OpenUI5)
  * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
@@ -47,6 +48,7 @@ sap.ui.define(['jquery.sap.global', './Binding', './Filter', './Sorter'],
 			}
 			this.aApplicationFilters = aFilters;
 			this.bUseExtendedChangeDetection = false;
+			this.bDetectUpdates = true;
 		},
 
 		metadata : {
@@ -235,7 +237,7 @@ sap.ui.define(['jquery.sap.global', './Binding', './Filter', './Sorter'],
 	 * @param {sap.ui.model.Context} oContext the binding context
 	 * @public
 	 * @returns {object} the group object containing a key property and optional custom properties
-	 * @see sap.ui.model.Sorter.getGroup
+	 * @see sap.ui.model.Sorter#getGroup
 	 */
 	ListBinding.prototype.getGroup = function(oContext) {
 		return this.aSorters[0].getGroup(oContext);
@@ -243,15 +245,57 @@ sap.ui.define(['jquery.sap.global', './Binding', './Filter', './Sorter'],
 
 	/**
 	 * Enable extended change detection
+	 *
+	 * @param {boolean} bDetectUpdates Whether changes within the same entity should cause a delete and insert command
+	 * @param {function|string} vKey The path of the property containing the key or a function getting the context as only parameter to calculate a key to identify an entry
 	 * @private
 	 */
-	ListBinding.prototype.enableExtendedChangeDetection = function( ) {
-		this.bUseExtendedChangeDetection  = true;
+	ListBinding.prototype.enableExtendedChangeDetection = function(bDetectUpdates, vKey) {
+		this.bUseExtendedChangeDetection = true;
+		this.bDetectUpdates = bDetectUpdates;
+		if (typeof vKey === "string") {
+			this.getEntryKey = function(oContext) {
+				return oContext.getProperty(vKey);
+			};
+		} else if (typeof vKey === "function") {
+			this.getEntryKey = vKey;
+		}
 		if (this.update) {
 			this.update();
 		}
 	};
 
+	/**
+	 * Return the data used for the extended change detection. Dependent on the configuration this can either be a
+	 * serialization of the complete data, or just a unique key identifying the entry. If grouping is enabled, the
+	 * grouping key will also be included, to detect grouping changes.
+	 *
+	 * @param {sap.ui.model.Context} oContext the context object
+	 * @returns {string} A string which is used for diff comparison
+	 */
+	ListBinding.prototype.getContextData = function(oContext) {
+		var sContextData;
+		if (this.getEntryKey && !this.bDetectUpdates) {
+			sContextData = this.getEntryKey(oContext);
+			if (this.isGrouped()) {
+				sContextData += "-" + this.getGroup(oContext).key;
+			}
+		} else {
+			sContextData = this.getEntryData(oContext);
+		}
+		return sContextData;
+	};
+
+	/**
+	 * Return the entry data serialized as a string. The default implementation assumes a JS object and uses
+	 * JSON.stringify to serialize it, subclasses may override as needed.
+	 *
+	 * @param {sap.ui.model.Context} oContext the context object
+	 * @returns {string} The serialized object data
+	 */
+	ListBinding.prototype.getEntryData = function(oContext) {
+		return JSON.stringify(oContext.getObject());
+	};
 
 	return ListBinding;
 

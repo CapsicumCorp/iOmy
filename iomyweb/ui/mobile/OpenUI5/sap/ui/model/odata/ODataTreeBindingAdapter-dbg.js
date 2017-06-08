@@ -5,23 +5,25 @@
  */
 
 // Provides class sap.ui.model.odata.ODataTreeBindingAdapter
-sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', './v2/ODataTreeBinding', 'sap/ui/model/TreeBindingAdapter' ,'sap/ui/table/TreeAutoExpandMode', 'sap/ui/model/ChangeReason', 'sap/ui/model/TreeBindingUtils'],
-	function(jQuery, TreeBinding, ODataTreeBinding, TreeBindingAdapter, TreeAutoExpandMode, ChangeReason, TreeBindingUtils) {
+sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', './v2/ODataTreeBinding', 'sap/ui/model/TreeBindingAdapter' ,'sap/ui/model/TreeAutoExpandMode', 'sap/ui/model/ChangeReason', 'sap/ui/model/TreeBindingUtils', './OperationMode'],
+	function(jQuery, TreeBinding, ODataTreeBinding, TreeBindingAdapter, TreeAutoExpandMode, ChangeReason, TreeBindingUtils, OperationMode) {
 	"use strict";
 
 	/**
 	 * Adapter for TreeBindings to add the ListBinding functionality and use the
 	 * tree structure in list based controls.
+	 * Only usable with the sap.ui.table.TreeTable control.
+	 * The functions defined here are only available when you are using a TreeTable and an ODataModel.
 	 *
 	 * @alias sap.ui.model.odata.ODataTreeBindingAdapter
 	 * @function
 	 * @experimental This module is only for experimental and internal use!
-	 * @protected
+	 * @public
 	 */
 	var ODataTreeBindingAdapter = function() {
 
 		// ensure only TreeBindings are enhanced which have not been enhanced yet
-		if (!(this instanceof TreeBinding && this.getContexts === undefined)) {
+		if (!(this instanceof TreeBinding) || this._bIsAdapted) {
 			return;
 		}
 
@@ -56,11 +58,18 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', './v2/ODataTreeB
 
 		//create general tree structure
 		this._createTreeState();
+
+		// restore old tree state if given AND if the binding is running in OperationMode.Client
+		// OperationMode.Auto is not supported, as the binding would behave fundamentally different in case the threshold is rejected.
+		if (this.mParameters.treeState && this.sOperationMode == OperationMode.Client) {
+			this.setTreeState(this.mParameters.treeState);
+		}
 	};
 
 	/**
 	 * Returns true or false, depending on the child count of the given node.
 	 * @override
+	 * @private
 	 */
 	ODataTreeBindingAdapter.prototype.nodeHasChildren = function(oNode) {
 		jQuery.sap.assert(oNode, "ODataTreeBindingAdapter.nodeHasChildren: No node given!");
@@ -80,6 +89,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', './v2/ODataTreeB
 	 * Calculates a group id for the given node.
 	 * The actual group ID differs between hierarchy-annotations and navigation properties
 	 * @override
+	 * @private
 	 */
 	ODataTreeBindingAdapter.prototype._calculateGroupID = function (oNode) {
 
@@ -118,6 +128,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', './v2/ODataTreeB
 		return sGroupID;
 	};
 
+	/**
+	 * Resets all fields, which are used by the TreeBindingAdapter.
+	 * @private
+	 */
 	ODataTreeBindingAdapter.prototype.resetData = function(oContext, mParameters) {
 		var vReturn = ODataTreeBinding.prototype.resetData.call(this, oContext, mParameters);
 
@@ -141,6 +155,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/TreeBinding', './v2/ODataTreeB
 
 		return vReturn;
 	};
+
+	/**
+	 * Returns a tree state handle.
+	 * The tree state handle can be used in to restore the tree state for an v2 ODataTreeBinding running in OperationMode.Client.
+	 * Please see the constructor documentation of sap.ui.model.odata.v2.ODataTreeBinding for the API documentation of the "treeState" constructor parameter.
+	 *
+	 * @name sap.ui.model.odata.ODataTreeBindingAdapter#getCurrentTreeState
+	 * @public
+	 */
 
 	return ODataTreeBindingAdapter;
 

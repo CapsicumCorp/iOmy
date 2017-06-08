@@ -25,10 +25,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @implements sap.ui.commons.ToolbarItem,sap.ui.commons.FormattedTextViewControl
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.Link</code> control.
 	 * @alias sap.ui.commons.Link
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -140,7 +141,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	Link.prototype.onclick = function(oEvent) {
 		if (this.getEnabled()) {
 			// the default behavior will be supressed, when oEvent.preventDefault() is
-			// called or when the link doesn't contain a valid href (javascript:void(0)).
+			// called or when the link doesn't contain a valid href (#)).
 			// The last thing will trigger the onbeforeunload event in IE when not
 			// preventing the default behavior
 			if (!this.firePress() || !this.getHref()) {
@@ -157,6 +158,20 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 */
 	Link.prototype.onsapenter = function(oEvent) {
 		oEvent.stopPropagation();
+	};
+
+	/**
+	 * @see sap.ui.core.Control#getAccessibilityInfo
+	 * @protected
+	 */
+	Link.prototype.getAccessibilityInfo = function() {
+		return {
+			role: "link",
+			type: sap.ui.getCore().getLibraryResourceBundle("sap.ui.commons").getText("ACC_CTR_TYPE_LINK"),
+			description: this.getText() || this.getHref() || "",
+			focusable: this.getEnabled(),
+			enabled: this.getEnabled()
+		};
 	};
 
 	return Link;

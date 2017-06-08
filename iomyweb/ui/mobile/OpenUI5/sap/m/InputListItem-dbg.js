@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library'],
 	 * @extends sap.m.ListItemBase
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
@@ -52,10 +52,18 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library'],
 			 * Content controls can be added
 			 */
 			content : {type : "sap.ui.core.Control", multiple : true, singularName : "content", bindable : "bindable"}
-		}
+		},
+		designTime: true
 	}});
 
+	InputListItem.prototype.getContentAnnouncement = function() {
+		var sAnnouncement = this.getLabel();
+		this.getContent().forEach(function(oContent) {
+			sAnnouncement += ListItemBase.getAccessibilityText(oContent) + " ";
+		});
 
+		return sAnnouncement;
+	};
 
 	return InputListItem;
 

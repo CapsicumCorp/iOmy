@@ -23,10 +23,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @public
+	 * @deprecated Since version 1.38. Instead, use the <code>sap.m.List</code> control.
 	 * @alias sap.ui.commons.ListBox
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
 	 */
@@ -209,8 +210,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @private
 	 */
 	ListBox.prototype.onThemeChanged = function () {
-		ListBox._fItemHeight = -1;
-		ListBox._iBordersAndStuff = -1;
 		this._sTotalHeight = null;
 		if (!this._bHeightInItems) {
 			this._iVisibleItems = -1; // re-calculation only required for ItemNavigation - shouldn't change when explicitly set
@@ -619,6 +618,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 	ListBox.prototype.onclick = function (oEvent) {
 		this._handleUserActivation(oEvent);
+	};
+
+	ListBox.prototype.ontouchmove = function (oEvent) {
+		oEvent.setMarked();
 	};
 
 	ListBox.prototype.onsapspace = function (oEvent) {

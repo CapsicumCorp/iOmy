@@ -18,7 +18,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @since 1.34
 	 *
 	 * @public
@@ -35,6 +35,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 				"footer" : {type : "string", group : "Appearance", defaultValue : null},
 				/**
 				 * Updates the size of the tile. If it is not set, then the default size is applied based on the device tile.
+				 * @deprecated Since version 1.38.0. The TileContent control has now a fixed size, depending on the used media (desktop, tablet or phone).
 				 */
 				"size" : {type : "sap.m.Size", group : "Misc", defaultValue : "Auto"},
 				/**
@@ -54,22 +55,25 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 				 */
 				"frameType" : {type : "sap.m.FrameType", group : "Appearance", defaultValue : sap.m.FrameType.Auto}
 			},
+			defaultAggregation : "content",
 			aggregations : {
 				/**
 				 * The switchable view that depends on the tile type.
 				 */
-				"content" : {type : "sap.ui.core.Control", multiple : false}
+				"content" : {type : "sap.ui.core.Control", multiple : false, bindable : "bindable"}
 			}
 		}
 	});
 
 	/* --- Lifecycle methods --- */
 
-	/**
-	 * Handler for before rendering
-	 */
+	TileContent.prototype.init = function() {
+		this._bRenderFooter = true;
+		this._bRenderContent = true;
+	};
+
 	TileContent.prototype.onBeforeRendering = function() {
-		if (this.getContent()) {
+		if (this.getContent() && this._oDelegate) {
 			if (this.getDisabled()) {
 				this.getContent().addDelegate(this._oDelegate);
 			} else {
@@ -144,7 +148,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 	 *
 	 * @returns {String} The AltText text
 	 */
-	sap.m.TileContent.prototype.getAltText = function() {
+	TileContent.prototype.getAltText = function() {
 		var sAltText = "";
 		var bIsFirst = true;
 		var oContent = this.getContent();
@@ -177,6 +181,28 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control'],
 		}
 		sAltText = this.getAltText();
 		return sAltText ? sAltText : "";
+	};
+
+	/**
+	 * Setter for protected property to enable or disable footer rendering. This function does not invalidate the control.
+	 * @param {boolean} value Determines whether the control's footer is rendered or not
+	 * @returns {sap.m.TileContent} this to allow method chaining
+	 * @protected
+	 */
+	TileContent.prototype.setRenderFooter = function(value) {
+		this._bRenderFooter = value;
+		return this;
+	};
+
+	/**
+	 * Setter for protected property to enable or disable content rendering. This function does not invalidate the control.
+	 * @param {boolean} value Determines whether the control's content is rendered or not
+	 * @returns {sap.m.TileContent} this To allow method chaining
+	 * @protected
+	 */
+	TileContent.prototype.setRenderContent = function(value) {
+		this._bRenderContent = value;
+		return this;
 	};
 
 	return TileContent;

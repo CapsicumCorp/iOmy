@@ -1,74 +1,86 @@
-.sapMNLG-Header .sapMNLG-Priority {
-  top: -1px;
-  &.sapMNLG-None {
-    border-top: 1px solid @sapHCNeutral;
-    border-bottom: 1px solid @sapHCNeutral;
-  }
-
-  &.sapMNLG-Low {
-    border-top: 1px solid @sapHCPositive;
-    border-bottom: 1px solid @sapHCPositive;
-  }
-
-  &.sapMNLG-Medium {
-    border-top: 1px solid @sapHCCritical;
-    border-bottom: 1px solid @sapHCCritical;
-  }
-
-  &.sapMNLG-High {
-    border-top: 1px solid @sapHCNegative;
-    border-bottom: 1px solid @sapHCNegative;
-  }
+.sapMNLG-Header .sapMNLB-Priority {
+  top: calc(~"-1rem - 1px");
 }
 
-.sapMNLG-Body .sapMNLI-Priority {
+.sapMNLG-Footer .sapMNLB-Priority {
   top: 0;
-  &.sapMNLI-None {
-    border: none;
-  }
-  &.sapMNLI-Low {
-    border: none;
-  }
-  &.sapMNLI-Medium {
-    border: none;
-  }
-  &.sapMNLI-High {
-    border: none;
-  }
 }
 
-.sapMNLG-Footer .sapMNLG-Priority {
-  bottom: -1px;
-  &.sapMNLG-None {
+.sapMNLG-Header .sapMNLB-Priority,
+.sapMNLG-Footer .sapMNLB-Priority {
+  &.sapMNLB-None {
+    border-top: none;
     border-bottom: 1px solid @sapHCNeutral;
   }
 
-  &.sapMNLG-Low {
+  &.sapMNLB-Low {
+    border-top: none;
     border-bottom: 1px solid @sapHCPositive;
   }
 
-  &.sapMNLG-Medium {
+  &.sapMNLB-Medium {
+    border-top: none;
     border-bottom: 1px solid @sapHCCritical;
   }
 
-  &.sapMNLG-High {
+  &.sapMNLB-High {
+    border-top: none;
     border-bottom: 1px solid @sapHCNegative;
   }
 }
 
-.sapMNLG-None {
+.sapMNLG-Body .sapMNLB-Priority {
+  top: 0;
+  &.sapMNLB-None {
+    border: none;
+  }
+  &.sapMNLB-Low {
+    border: none;
+  }
+  &.sapMNLB-Medium {
+    border: none;
+  }
+  &.sapMNLB-High {
+    border: none;
+  }
+}
+
+.sapMNLG-Footer .sapMNLB-Priority {
+  top: 0;
+  &.sapMNLB-None {
+    border-top: none;
+    border-bottom: 1px solid @sapHCNeutral;
+  }
+
+  &.sapMNLB-Low {
+    border-top: none;
+    border-bottom: 1px solid @sapHCPositive;
+  }
+
+  &.sapMNLB-Medium {
+    border-top: none;
+    border-bottom: 1px solid @sapHCCritical;
+  }
+
+  &.sapMNLB-High {
+    border-top: none;
+    border-bottom: 1px solid @sapHCNegative;
+  }
+}
+
+.sapMNLB-None {
   background-color: @sapHCNeutral;
 }
 
-.sapMNLG-Low {
+.sapMNLB-Low {
   background-color: @sapHCPositive;
 }
 
-.sapMNLG-Medium {
+.sapMNLB-Medium {
   background-color: @sapHCCritical;
 }
 
-.sapMNLG-High {
+.sapMNLB-High {
   background-color: @sapHCNegative;
 }
 
@@ -80,6 +92,7 @@
 }
 
 .sapMNLG .sapMNLI {
+  margin-top: 0;
   border-left: 0;
   border-right: 0;
 }
@@ -94,24 +107,24 @@
 
 // Focus Styles ========================================================================================================
 
-.sap-desktop .sapMLIB.sapMNLG:focus {
+html.sap-desktop .sapMLIB.sapMNLG:focus {
   outline: none;
 }
 
-.sap-desktop .sapMLIB.sapMNLG:focus::before, {
+html.sap-desktop .sapMLIB.sapMNLG:focus::before {
   content: "";
   border: 0.125rem dotted @sapHCStandardFG;
   border-left-style: solid;
   position: absolute;
   top: 1px;
   right: 1px;
-  bottom: 0.5625rem;
+  bottom: 1px;
   left: 1px;
   pointer-events: none;
   z-index: 2;
 }
 
-.sap-desktop .sapMLIB.sapMNLG:focus::after, {
+html.sap-desktop .sapMLIB.sapMNLG:focus::after {
   content: "";
   border-left: 0.125rem dotted @sapHCStandardBG;
   position: absolute;
@@ -127,7 +140,7 @@ html[data-sap-ui-browser*='ie'].sap-desktop .sapMLIB.sapMNLG:focus .sapMNLI::bef
   border-right: none;
 }
 
-[data-sap-ui-browser^='ie'].sap-desktop .sapMLIB.sapMNLG:focus::before {
+html[data-sap-ui-browser^='ie'].sap-desktop .sapMLIB.sapMNLG:focus::before {
   content: "";
   border: 0.125rem dotted @sapHCStandardFG;
   border-left-style: solid;
@@ -140,7 +153,7 @@ html[data-sap-ui-browser*='ie'].sap-desktop .sapMLIB.sapMNLG:focus .sapMNLI::bef
   z-index: 2;
 }
 
-[data-sap-ui-browser^='ie'].sap-desktop .sapMLIB.sapMNLG:focus::after {
+html[data-sap-ui-browser^='ie'].sap-desktop .sapMLIB.sapMNLG:focus::after {
   content: "";
   border-left: 0.125rem dotted @sapHCStandardBG;
   position: absolute;

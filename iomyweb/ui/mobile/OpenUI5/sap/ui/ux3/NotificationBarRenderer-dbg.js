@@ -3,8 +3,8 @@
  * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
-sap.ui.define(['jquery.sap.global', 'sap/ui/core/theming/Parameters'],
-	function(jQuery, Parameters) {
+sap.ui.define(['jquery.sap.global', 'sap/ui/core/Icon'],
+	function(jQuery, Icon) {
 	"use strict";
 
 
@@ -418,28 +418,28 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/theming/Parameters'],
 		 * Renders the notifier's icon. If there is no icon set a default icon is
 		 * used
 		 */
-		var fnWriteNotifierIcon = function(oRm, sUri, bMessageNotifier) {
+		var fnWriteNotifierIcon = function (oRm, sUri, bMessageNotifier) {
+			if (sUri == null || sUri == "") {
+				var icon = new Icon({
+					useIconTooltip: false
+				});
+				icon.addStyleClass("sapUiNotifierIcon");
+
+				if (bMessageNotifier) {
+					icon.setSrc("sap-icon://alert");
+				} else {
+					icon.setSrc("sap-icon://notification-2");
+				}
+				oRm.renderControl(icon);
+				return;
+			}
+
 			oRm.write("<img alt=\"\"");
 			oRm.addClass("sapUiNotifierIcon");
 			oRm.writeClasses();
 
-			var iconUrl = "";
-
-			if (sUri == null || sUri == "") {
-				var sThemeModuleName = "sap.ui.ux3.themes." + sap.ui.getCore().getConfiguration().getTheme();
-				if (bMessageNotifier) {
-					iconUrl = jQuery.sap.getModulePath(sThemeModuleName, "/img/notification_bar/alert_white_24.png");
-				} else {
-					iconUrl = jQuery.sap.getModulePath(sThemeModuleName, "/img/notification_bar/notification_24.png");
-				}
-			} else {
-				iconUrl = sUri;
-			}
-
-			oRm.writeAttributeEscaped("src", iconUrl);
-			oRm.write(">");
-
-			oRm.write("</img>");
+			oRm.writeAttributeEscaped("src", sUri);
+			oRm.write("/>");
 		};
 
 		/**

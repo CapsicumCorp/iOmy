@@ -12,10 +12,18 @@ objectPageHeader Content
 		line-height: 1.5rem;
 	}
 
+	.sapUxAPObjectPageHeaderContentItem .sapMText {
+		line-height: 1.5rem;
+	}
+
+	.sapMObjectAttributeDiv .sapMText {
+		line-height: normal;
+	}
+
 	.sapUxAPObjectPageHeaderContentItem.sapUiRespGrid {
 		display: inherit;
 	}
-	
+
 	.sapUxAPObjectPageHeaderSeparatorContainer {
 		position: relative;
 		margin-right: 4rem;
@@ -86,6 +94,19 @@ objectPageHeader Content
 		.sapUiVltCell > .sapMObjectAttributeDiv, .sapUiVltCell > .sapMObjStatus {
 			line-height: 1.5rem;
 		}
+
+		/* ProgressIndicator has display flex, but OPHeaderContent override it by setting display inline-block
+		* for each content entry to order the entries horizontally.
+		* In order to keep the display flex behaviour of the PI and the inline-block behaviour inside OPHeaderContent,
+		* we use inline-flex.
+		* NOTE: It`s needed in case PI is direct child of OPHeaderContent only.
+		*/
+		> .sapMPI {
+			display: -ms-inline-flexbox;
+			display: -webkit-inline-flex;
+			display: inline-flex;
+		}
+
 		.sapMPI {
 			width: 10rem !important; /* Progress indicator always use the size provide in the control otherwise... */
 			height: 1rem;
@@ -93,14 +114,6 @@ objectPageHeader Content
 			margin-bottom: 1rem;
 			.sap-phone & {
 				width: 100% !important;
-			}
-
-			.sapMPIText {
-				position: absolute;
-				text-align: center;
-				left: 0;
-				right: 0;
-				line-height: 0.75rem;
 			}
 		}
 		.sapMSlt {
@@ -132,25 +145,22 @@ objectPageHeader Content
 	}
 }
 
-.sapUxAPObjectPageHeaderContentItem .sapUiForm {
-	line-height: 1.5;
-}
-
 html[data-sap-ui-browser^='ie'] .sapUxAPObjectPageHeaderContent div.sapUxAPObjectPageHeaderContentItem {
 	vertical-align: top;
 }
 
-.sapUiMedia-Std-Phone .sapUxAPObjectPageHeaderContent {
-	padding-left: 1rem;
+.sapUiMedia-Std-Desktop .sapUxAPObjectPageHeaderContent {
+	padding-left: 3rem;
 }
 
 .sapUiMedia-Std-Tablet .sapUxAPObjectPageHeaderContent,
-.sapUiMedia-Std-Desktop .sapUxAPObjectPageHeaderContent {
+.sapUiMedia-Std-Desktop .sapMSplitContainer:not(.sapMSplitContainerHideMode) .sapMSplitContainerDetail .sapUxAPObjectPageHeaderContent,
+.sapUiMedia-Std-Tablet .sapMSplitContainer:not(.sapMSplitContainerHideMode) .sapMSplitContainerDetail .sapUxAPObjectPageHeaderContent {
 	padding-left: 2rem;
 }
 
-.sapUiMedia-Std-Desktop .sapMSplitContainerHideMode .sapUxAPObjectPageHeaderContent {
-	padding-left: 3rem;
+.sapUiMedia-Std-Phone .sapUxAPObjectPageHeaderContent {
+	padding-left: 1rem;
 }
 
 .sapUxAPObjectPageHeaderContentHidden {
@@ -163,10 +173,6 @@ html[data-sap-ui-browser^='ie'] .sapUxAPObjectPageHeaderContent div.sapUxAPObjec
 	.sapUxAPObjectPageHeaderSeparatorAfter {
 		background-color: transparent;
 	}
-}
-
-.sapUxAPObjectPageHeaderContentImageContainer {
-	float: left;
 }
 
 .sapUxAPObjectPageHeaderContentImageContainer .sapUiIcon,
@@ -243,7 +249,7 @@ html[data-sap-ui-browser^="cr4"] .sapUxAPObjectPageHeaderContentImageContainer >
 }
 
 .sapUiMedia-Std-Desktop, .sapUiMedia-Std-Tablet {
-	.sapUxAPObjectPageHeaderContent .sapUxAPObjectPageHeaderObjectImage-Circle .sapUxAPObjectPageHeaderObjectImage {
+	.sapUxAPObjectPageHeaderContent .sapUxAPObjectPageHeaderObjectImage-Circle .sapUxAPObjectPageHeaderObjectImage:not(.sapUxAPObjectPageHeaderObjectImageIcon) {
 		border-style: solid;
 	}
 }
@@ -294,4 +300,12 @@ html[data-sap-ui-browser="ie10"] .sapUxAPObjectPageHeaderContentCellLeft {
 	flex-shrink: 0;
 	padding-right: 1rem;
 	align-self: flex-end;
+}
+
+.sapUxAPObjectPageHeaderDetailsHidden > * {
+  visibility: hidden;
+}
+
+.sapUiLoSplitterH.sapUiLoSplitter .sapUxAPObjectPageHeaderContent {
+	white-space: normal;
 }

@@ -7,9 +7,10 @@
 // Provides class sap.ui.dt.ElementDesignTimeMetadata.
 sap.ui.define([
 	'jquery.sap.global',
-	'sap/ui/dt/DesignTimeMetadata'
+	'sap/ui/dt/DesignTimeMetadata',
+	'sap/ui/dt/AggregationDesignTimeMetadata'
 ],
-function(jQuery, DesignTimeMetadata) {
+function(jQuery, DesignTimeMetadata, AggregationDesignTimeMetadata) {
 	"use strict";
 
 
@@ -24,7 +25,7 @@ function(jQuery, DesignTimeMetadata) {
 	 * @extends sap.ui.core.DesignTimeMetadata
 	 *
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 *
 	 * @constructor
 	 * @private
@@ -58,6 +59,12 @@ function(jQuery, DesignTimeMetadata) {
 			},
 			customData : {
 				ignore : true
+			},
+			layoutData : {
+				ignore : true
+			},
+			tooltip: {
+				ignore : true
 			}
 		};
 
@@ -75,7 +82,7 @@ function(jQuery, DesignTimeMetadata) {
 	};
 
 	/**
-	 * Returns the DT metadata for an aggregation name
+	 * Returns the plain DT metadata for an aggregation name
 	 * @param {string} sAggregationName an aggregation name
 	 * @return {object} returns the DT metadata for an aggregation with a given name
 	 * @public
@@ -85,12 +92,98 @@ function(jQuery, DesignTimeMetadata) {
 	};
 
 	/**
+	 * Creates a aggregation DT metadata class for an aggregation,
+	 * ensure to destroy it if it is no longer needed, otherwise you get memory leak.
+	 * @param {string} sAggregationName an aggregation name
+	 * @return {sap.ui.dt.AggregationDesignTimeMetadata} returns the aggregation DT metadata for an aggregation with a given name
+	 * @public
+	 */
+	ElementDesignTimeMetadata.prototype.createAggregationDesignTimeMetadata  = function(sAggregationName) {
+		var oData =  this.getAggregation(sAggregationName);
+		return new AggregationDesignTimeMetadata({
+			libraryName : this.getLibraryName(),
+			data : oData
+		});
+	};
+
+	/**
 	 * Returns the DT metadata for all aggregations
 	 * @return {map} returns the DT metadata for all aggregations
 	 * @public
 	 */
 	ElementDesignTimeMetadata.prototype.getAggregations = function() {
 		return this.getData().aggregations;
+	};
+
+	/**
+	 * Returns the relevant container of an element
+	 * This is usually the getParent or the value from a function in DTMetadata
+	 * @param {object} oElement the element for which the relevant container has to be evaluated
+	 * @return {object} returns the relevant container
+	 * @public
+	 */
+	ElementDesignTimeMetadata.prototype.getRelevantContainer = function(oElement) {
+		var fnGetRelevantContainer = this.getData().getRelevantContainer;
+		if (!fnGetRelevantContainer || typeof fnGetRelevantContainer !== "function") {
+			return oElement.getParent();
+		}
+		return fnGetRelevantContainer(oElement);
+	};
+
+	ElementDesignTimeMetadata.prototype.getAggregationAction = function(sAction, oElement) {
+		var vAction;
+		var oAggregations = this.getAggregations();
+		var aActions = [];
+
+		for (var sAggregation in oAggregations) {
+			if (oAggregations[sAggregation].actions && oAggregations[sAggregation].actions[sAction]) {
+				vAction = oAggregations[sAggregation].actions[sAction];
+				if (typeof vAction === "function") {
+					vAction = vAction.call(null, oElement);
+				} else if (typeof (vAction) === "string" ) {
+					vAction = { changeType : vAction };
+				}
+				if (vAction) {
+					vAction.aggregation = sAggregation;
+				}
+				aActions.push(vAction);
+			}
+		}
+		return aActions;
+	};
+
+	ElementDesignTimeMetadata.prototype._getText = function(vName){
+		if (typeof vName === "function") {
+			return vName();
+		} else {
+			return this.getLibraryText(vName);
+		}
+	};
+
+	ElementDesignTimeMetadata.prototype.getAggregationDescription = function(sAggregationName, oElement){
+		var vChildrenName = this.getAggregation(sAggregationName).childrenName;
+		if (typeof vChildrenName === "function") {
+			vChildrenName = vChildrenName.call(null, oElement);
+		}
+		if (vChildrenName){
+			return {
+				singular : this._getText(vChildrenName.singular),
+				plural : this._getText(vChildrenName.plural)
+			};
+		}
+	};
+
+	ElementDesignTimeMetadata.prototype.getName = function(oElement){
+		var vName = this.getData().name;
+		if (typeof vName === "function") {
+			vName = vName.call(null, oElement);
+		}
+		if (vName){
+			return {
+				singular : this._getText(vName.singular),
+				plural : this._getText(vName.plural)
+			};
+		}
 	};
 
 	return ElementDesignTimeMetadata;

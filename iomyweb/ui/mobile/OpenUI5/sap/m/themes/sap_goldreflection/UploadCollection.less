@@ -4,18 +4,12 @@
 /* Base Theme                                                                            */
 /* ===================================================================================== */
 
-/* until the central focus concept is implemented a workaround is built in sap.m.UploadCollection so that all focus frames are visible */
+/* until the central focus concept is implemented, a workaround is built in sap.m.UploadCollection so that all focus frames are visible */
 /* to remove the workaround the changes below are necessary: */
 /* for .sapMLIB.sapMUCItem.sapMUCListSingleItem, .sapMLIB.sapMUCItem.sapMUCListFirstItem,.sapMLIB.sapMUCItem.sapMUCListLastItem, .sapMLIB.sapMUCItem.sapMUCListItem change padding-left from 0.9rem to 1rem    */
 /* for .sapMUCFileName.sapMLnk delete margin-left:	0.1rem */
 /* for .sapMUCItemIcon, .sapMUCItemImage change margin-right from 0.65rem to 0.75rem, delete margin-top: 0.1rem; margin-bottom:	0.1rem; margin-left: 0.1rem; */
 /* for .sapMUCAttrContainer, .sapMUCStatusContainer delete margin-left: 0.1rem*/
-
-
-/* Align Upload Button in Toolbar */
-.sapMUC .sapMIBar > .sapMBarChild:last-child {
-	margin-right: 		0rem;
-}
 
 /* List Header */
 .sapMTB.sapMUCListHeader {
@@ -79,26 +73,22 @@
 	padding-bottom: 1rem;
 }
 
-/* fallback for IE9 */
-.sapMUCItem .sapMLIBContentNF {
-	padding-top: 1rem;
-	padding-bottom: 1rem;
-}
-
 /* Item icon */
+.sapMUCItemIconInactive,
 .sapMUCItemIcon {
-	font-size:			2.5rem;
+	font-size: 2.5rem;
 }
 
 .sapMImg.sapMUCItemImage{
 	background-size:	cover;
 }
 
+.sapMUCItemIconInactive,
 .sapMUCItemIcon,
 .sapMUCItemImage {
 	height:				3rem;
 	width:				3rem;
-	margin-right:		0.65rem; /* because of the keyboard frame it should be margin and not padding */
+	margin-right:		0.75rem; /* because of the keyboard frame it should be margin and not padding */
 	margin-top:			0.1rem; /* is needed so that keyboard frame is visible; after the central focus concept is implemented delete the margin */
 	margin-bottom:		0.1rem; /* is needed so that keyboard frame is visible; after the central focus concept is implemented delete the margin */
 	margin-left:		0.1rem; /* is needed so that keyboard frame is visible; after the central focus concept is implemented delete the margin */
@@ -111,9 +101,16 @@
 }
 
 /* fallback for IE9 as it does not support flex */
- html[data-sap-ui-browser="ie9"]  .sapMUCItemIcon,
- html[data-sap-ui-browser="ie9"]  .sapMUCItemImage {
+html[data-sap-ui-browser="ie9"] .sapMUCItemIconInactive,
+html[data-sap-ui-browser="ie9"] .sapMUCItemIcon,
+html[data-sap-ui-browser="ie9"] .sapMUCItemImage {
 	float: left;
+}
+
+/*if no image is provided a standard placeholder is displayed */
+.sapMUCItemPlaceholderInactive,
+.sapMUCItemPlaceholder {
+	line-height: 3rem;
 }
 
 /* Text: File name */
@@ -121,11 +118,29 @@
 	font-family:		@sapUiFontFamily;
 	font-weight:		normal;
 	white-space:		nowrap;
-	padding-bottom: 	0.25rem;
+	padding-top:		0.25rem;
 	overflow:			hidden;
 	text-overflow:		ellipsis;
 	opacity:			100;
 	margin-left:		0.1rem;
+}
+
+.sapMUCObjectMarker {
+	margin-left: 0.5rem;
+}
+
+.sapMUCObjectMarker.sapMObjectMarkerText:not(.sapMObjectMarkerIcon) {
+	padding-top: 0.25rem;
+}
+
+.sapMUCObjectMarker.sapMObjectMarkerText,
+.sapMUCObjectMarker.sapMObjectMarkerIcon.sapMObjectMarkerText .sapUiIcon {
+	vertical-align: bottom;
+}
+
+.sapMUCObjectMarkerContainer {
+	display: inline-block;
+	position: absolute;
 }
 
 /*focus for the file name */
@@ -146,6 +161,7 @@
 	padding-bottom:		1.25rem;
 	padding-right:		1.3rem;
 	padding-left:		0.5rem;
+	margin-top:			0rem;
 }
 
 .sapMBusyIndicator.sapMUCloadingIcon .sapMBusySvg {
@@ -228,11 +244,6 @@
 /*fallback for IE9 as it does not support flex */
 html[data-sap-ui-browser="ie9"] .sapMUCTextContainer {
 	width: 80%;
-}
-
-/*fallback for IE9 as it does not support flex */
-html[data-sap-ui-browser="ie9"] .sapMUCItem .sapMLIBContentNF {
-	position: relative;
 }
 
 .sapMUCTextContainer.sapMUCEditMode {
@@ -361,10 +372,6 @@ html[data-sap-ui-browser="ie9"] .sapMUCButtonContainer {
 	margin-top: -0.8125rem;
 	margin-left: -0.875rem;
 	margin-right: -0.125rem;
-}
-
-.sapMLIBContent>.sapMUCItemIcon, .sapMUCItemImage {
-	margin-top: 0;
 }
 
 .sapUiSizeCompact .sapMUCItem>.sapMLIBSelectM {

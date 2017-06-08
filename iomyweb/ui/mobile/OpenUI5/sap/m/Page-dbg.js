@@ -5,23 +5,38 @@
  */
 
 // Provides control sap.m.Page.
-sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/core/delegate/ScrollEnablement"],
-	function (jQuery, library, Control, ScrollEnablement) {
+sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/core/delegate/ScrollEnablement", "sap/m/Title", "sap/m/Button", "sap/m/Bar"],
+	function (jQuery, library, Control, ScrollEnablement, Title, Button, Bar) {
 		"use strict";
 
 
 		/**
 		 * Constructor for a new Page.
 		 *
-		 * @param {string} [sId] id for the new control, generated automatically if no id is given
-		 * @param {object} [mSettings] initial settings for the new control
+		 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
+		 * @param {object} [mSettings] Initial settings for the new control
 		 *
 		 * @class
-		 * A page is a basic container for a mobile application screen. Usually one page is displayed at a time (in landscape mode or on tablets depending on the layout two pages might be displayed side-by-side).
+		 * A container control that holds one whole screen of an application.
 		 * @extends sap.ui.core.Control
+		 * <h3>Overview</h3>
+		 * The sap.m.Page is a container control that holds one whole screen of an application.
+		 * The page has three distinct areas that can hold content - a header, content area and a footer.
+		 * <h3>Structure</h3>
+		 * <h4>Header</h4>
+		 * The top most area of the page is occupied by the header. The standard header includes a navigation button and a title.
+		 * Alternatively, you can create your own custom header, which is defined in the <code>customHeader</code> aggregation.
+		 * <h4>Content</h4>
+		 * The content occupies the main part of the page. Only the content area is scrollable by default.
+		 * This can be prevented by setting  <code>enableScrolling</code> to <code>false</code>.
+		 * <h4>Footer</h4>
+		 * The footer is optional and occupies the fixed bottom part of the page. Alternatively, the footer can be floating above the bottom part of the content.
+		 * This is enabled with the <code>floatingFooter</code> property.
+		 *
+		 * <b>Note:</b> All accessibility information for the different areas and their corresponding ARIA roles is set in the aggregation <code>landmarkInfo</code> of type {@link sap.m.PageAccessibleLandmarkInfo}
 		 *
 		 * @author SAP SE
-		 * @version 1.34.9
+		 * @version 1.44.14
 		 *
 		 * @constructor
 		 * @public
@@ -127,7 +142,13 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 					 * Decides which area is covered by the local BusyIndicator when <code>page.setBusy()</code> is called. By default the entire page is covered, including headers and footer. When this property is set to "true", only the content area is covered (not header/sub header and footer), which is useful e.g. when there is a SearchField in the sub header and live search continuously updates the content area while the user is still able to type.
 					 * @since 1.29.0
 					 */
-					contentOnlyBusy: {type: "boolean", group: "Appearance", defaultValue: false}
+					contentOnlyBusy: {type: "boolean", group: "Appearance", defaultValue: false},
+
+					/**
+					 * Decides whether the floating footer behavior should be enabled.
+					 * When the floating footer behavior is used, the content is visible when it's underneath the footer.
+					 */
+					floatingFooter: {type: "boolean", group:"Appearance", defaultValue: false }
 				},
 				defaultAggregation: "content",
 				aggregations: {
@@ -190,6 +211,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 			}
 		});
 
+		Page.FOOTER_ANIMATION_DURATION = 350;
 
 		// Return true if scrolling is allowed
 		Page.prototype._hasScrolling = function () {
@@ -212,6 +234,10 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 				this._headerTitle.setLevel(this.getTitleLevel());
 			}
 		};
+
+        Page.prototype.onAfterRendering = function () {
+            jQuery.sap.delayedCall(10, this, this._adjustFooterWidth);
+        };
 
 		/**
 		 * Called when the control is destroyed.
@@ -248,7 +274,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 		Page.prototype.setTitle = function (sTitle) {
 			var bWasNull = !this._headerTitle;
 
-			this._headerTitle = this._headerTitle || new sap.m.Title(this.getId() + "-title", {
+			this._headerTitle = this._headerTitle || new Title(this.getId() + "-title", {
 					text: sTitle,
 					level: this.getTitleLevel()
 				});
@@ -268,7 +294,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 			if (!this._navBtn) {
 				var sNavButtonType = this.getNavButtonType();
 
-				this._navBtn = new sap.m.Button(this.getId() + "-navButton", {
+				this._navBtn = new Button(this.getId() + "-navButton", {
 					press: jQuery.proxy(function () {
 						this.fireNavButtonPress();
 						this.fireNavButtonTap();
@@ -307,6 +333,39 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 			return this;
 		};
 
+		Page.prototype.setShowFooter = function (bShowFooter) {
+			if (this.getDomRef()) {
+				(bShowFooter) ? this.$().addClass("sapMPageWithFooter") : this.$().removeClass("sapMPageWithFooter");
+			}
+
+			var $footer = jQuery(this.getDomRef()).find(".sapMPageFooter").last(),
+			    useAnimation = sap.ui.getCore().getConfiguration().getAnimation();
+
+			if (!this.getFloatingFooter()) {
+				this.setProperty("showFooter", bShowFooter);
+				return this;
+			}
+			this.setProperty("showFooter", bShowFooter,true);
+
+			$footer.toggleClass("sapMPageFooterControlShow", bShowFooter);
+			$footer.toggleClass("sapMPageFooterControlHide", !bShowFooter);
+
+			if (bShowFooter) {
+				return this;
+			}
+
+			if (useAnimation) {
+				jQuery.sap.delayedCall(Page.FOOTER_ANIMATION_DURATION, this, function () {
+					$footer.toggleClass("sapUiHidden", bShowFooter);
+			});
+
+			} else {
+				$footer.toggleClass("sapUiHidden", bShowFooter);
+			}
+
+			return this;
+		};
+
 		Page.prototype.setNavButtonType = function (sNavButtonType) {
 			this._ensureNavButton(); // creates this._navBtn, if required
 			if (!sap.ui.Device.os.ios && sNavButtonType == sap.m.ButtonType.Back) {
@@ -339,6 +398,27 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 
 			this.setProperty("icon", sIconSrc, true);
 			return this;
+		};
+
+		Page.prototype._adjustFooterWidth = function () {
+			if (!this.getShowFooter() || !this.getFloatingFooter() || !this.getFooter()) {
+				return;
+			}
+
+			var $footer = jQuery(this.getDomRef()).find(".sapMPageFooter").last();
+
+			if (this._contentHasScroll()) {
+				$footer.css("right", jQuery.position.scrollbarWidth() + "px");
+				$footer.css("width", "initial");
+			} else {
+				$footer.css("right", 0);
+				$footer.css("width", "");
+			}
+		};
+
+		Page.prototype._contentHasScroll = function () {
+			var $section = jQuery.sap.byId(this.getId() + "-cont", this.getDomRef());
+			return $section[0].scrollHeight > $section.innerHeight();
 		};
 
 		/**
@@ -404,23 +484,14 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 		Page.prototype._getInternalHeader = function () {
 			var oInternalHeader = this.getAggregation("_internalHeader");
 			if (!oInternalHeader) {
-				this.setAggregation("_internalHeader", new sap.m.Bar(this.getId() + "-intHeader"), true); // don"t invalidate - this is only called before/during rendering, where invalidation would lead to double rendering,  or when invalidation anyway happens
+				this.setAggregation("_internalHeader", new Bar(this.getId() + "-intHeader"), true); // don"t invalidate - this is only called before/during rendering, where invalidation would lead to double rendering,  or when invalidation anyway happens
 				oInternalHeader = this.getAggregation("_internalHeader");
-				if (sap.ui.Device.os.ios) {
-					if (this.getShowNavButton() && this._navBtn) {
-						this._updateHeaderContent(this._navBtn, "left", 0);
-					}
-					if (this.getTitle() && this._headerTitle) {
-						this._updateHeaderContent(this._headerTitle, "middle", 0);
-					}
-				} else {
-					if (this.getShowNavButton() && this._navBtn) {
-						this._updateHeaderContent(this._navBtn, "left", 0);
-						this._titleIndex = 1;
-					}
-					if (this.getTitle() && this._headerTitle) {
-						this._updateHeaderContent(this._headerTitle, "middle", 0);
-					}
+
+				if (this.getShowNavButton() && this._navBtn) {
+					this._updateHeaderContent(this._navBtn, "left", 0);
+				}
+				if (this.getTitle() && this._headerTitle) {
+					this._updateHeaderContent(this._headerTitle, "middle", 0);
 				}
 			}
 			return oInternalHeader;
@@ -525,6 +596,26 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 			return this._getInternalHeader().destroyContentRight();
 		};
 
+		/**
+		 * Fiori 2.0 adaptation
+		 */
+		Page.prototype.setCustomHeader = function(oHeader) {
+
+			this.setAggregation("customHeader", oHeader);
+
+			if (oHeader && this.mEventRegistry["_adaptableContentChange"] ) {
+				this.fireEvent("_adaptableContentChange", {
+					"parent": this,
+					"adaptableContent": oHeader
+				});
+			}
+
+			return this;
+		};
+
+		Page.prototype._getAdaptableContent = function () {
+			return this._getAnyHeader();
+		};
 
 		return Page;
 

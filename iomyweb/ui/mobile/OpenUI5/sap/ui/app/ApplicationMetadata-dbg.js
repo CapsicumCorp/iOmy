@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ComponentMetadata'],
 	 * @deprecated Since 1.15.1. The Component class is enhanced to take care about the Application code.
 	 * @class
 	 * @author SAP SE
-	 * @version 1.34.9
+	 * @version 1.44.14
 	 * @since 1.13.2
 	 * @name sap.ui.app.ApplicationMetadata
 	 */
@@ -28,10 +28,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ComponentMetadata'],
 		// call super constructor
 		ComponentMetadata.apply(this, arguments);
 	};
-	
+
 	//chain the prototypes
 	ApplicationMetadata.prototype = jQuery.sap.newObject(ComponentMetadata.prototype);
-	
+
 	ApplicationMetadata.preprocessClassInfo = function(oClassInfo) {
 		// if the component is a string we convert this into a "_src" metadata entry
 		// the specific metadata object can decide to support this or gracefully ignore it
@@ -43,15 +43,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ComponentMetadata'],
 		}
 		return oClassInfo;
 	};
-	
+
 	ApplicationMetadata.prototype.applySettings = function(oClassInfo) {
-	
+
 		var oStaticInfo = oClassInfo.metadata;
-	
+
 		ComponentMetadata.prototype.applySettings.call(this, oClassInfo);
-	
+
 		// if the application specifies the metadata property: loadFromFile then
-		// the application metadata will be loaded from the specified file 
+		// the application metadata will be loaded from the specified file
 		// which needs to be located next to the application script file.
 		if (oStaticInfo._src) {
 			jQuery.sap.log.warning("The metadata of the application " + this.getName() + " is loaded from file " + oStaticInfo._src + ". This is a design time feature and not for productive usage!");
@@ -64,13 +64,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ComponentMetadata'],
 				jQuery.sap.log.error("Failed to load application metadata from \"" + oStaticInfo._src + "\"! Reason: " + oResponse.error);
 			}
 		}
-		
+
 		this._mRootComponent = oStaticInfo.rootComponent || null;
-		
+
 	};
-	
+
 	/**
-	 * Returns the root component of the application 
+	 * Returns the root component of the application
 	 * @return {string} root component
 	 * @public
 	 * @name sap.ui.app.ApplicationMetadata#getRootComponent
@@ -79,7 +79,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/ComponentMetadata'],
 	ApplicationMetadata.prototype.getRootComponent = function() {
 		return this._mRootComponent;
 	};
-	
+
 
 	return ApplicationMetadata;
 

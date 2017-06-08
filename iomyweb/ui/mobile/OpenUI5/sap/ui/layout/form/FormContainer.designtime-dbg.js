@@ -12,7 +12,17 @@ sap.ui.define([],
 	return {
 		aggregations : {
 			formElements : {
-				domRef : ":sap-domref"
+				domRef : function(oElement) {
+					var oDomRef = oElement.getDomRef();
+					if (!oDomRef && oElement.getFormElements().length === 0) {
+						var oGroup = oElement.getTitle() || oElement.getToolbar();
+						if (oGroup) {
+							return oGroup.getDomRef();
+						}
+					} else {
+						return oDomRef;
+					}
+				}
 			}
 		}
 	};

@@ -8,16 +8,11 @@
 	padding: 0 1rem 0 1rem;
 }
 
-.sapMLIBFocusable:focus {
-	outline: 0.0625rem dotted @sapUiFocus;
-	outline-offset: -0.0625rem;
-}
-
-.sapMLIBLegacyOutline:focus {
-  	outline: none;
-}
-
 /* IE ignores outline-offset. Use an overlay: */
+.sapMLIBFocusable.sapMLIBLegacyOutline:focus {
+	outline: none;
+}
+
 .sapMLIBLegacyOutline:focus::before {
 	border: 0.0625rem dotted @sapUiFocus;
 }
@@ -166,9 +161,9 @@
 	background : @sapUiListActiveBackground;
 }
 
-.sap-desktop .sapMLIBImgNav:focus,
-.sap-desktop .sapMLIBIconDet:focus,
-.sap-desktop .sapMLIBIconDel:focus {
+html.sap-desktop .sapMLIBImgNav:focus,
+html.sap-desktop .sapMLIBIconDet:focus,
+html.sap-desktop .sapMLIBIconDel:focus {
 	outline: 1px dotted @sapUiFocus;
 	outline-offset: -1px;
 }
