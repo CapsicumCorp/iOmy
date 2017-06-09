@@ -99,6 +99,10 @@ function LookupFunctionConstant( $sValue ) {
 		case "NetvoxMotionSensorLinkTypeId":
 			return 9;
 			
+		case "IPCameraLinkTypeId":
+			return 14;
+			
+			
 		//----------------//
 		//-- THINGS     --//
 		//----------------//
@@ -113,6 +117,9 @@ function LookupFunctionConstant( $sValue ) {
 			
 		case "NetvoxMotionSensorThingTypeId":
 			return 3;
+			
+		case "IPCameraMJPEGThingTypeId":
+			return 18;
 			
 		//----------------//
 		//-- RSTYPES    --//
@@ -368,7 +375,7 @@ function AddPresetLogToPremiseLog( $iPresetLogId, $iUTS, $iPremiseId, $sCustom1 
 		//-- Check to see if any Errors have occurred --//
 		if( $aResult["Error"]===true ) {
 			//-- Display the Error Message that the function returned --//
-			$bError = true;
+			$bError    = true;
 			$sErrMesg .= "Error Code:0x9804! \n";
 			$sErrMesg .= "Error submitting log to the PremiseLog! \n";
 			$sErrMesg .= "Critical Error \n";
@@ -376,7 +383,7 @@ function AddPresetLogToPremiseLog( $iPresetLogId, $iUTS, $iPremiseId, $sCustom1 
 		}
 		
 	} catch( Exception $e2 ) {
-		$bError = true;
+		$bError    = true;
 		$sErrMesg .= "Error Code:0x9805! \n";
 		$sErrMesg .= "Error submitting log to the PremiseLog! \n";
 		$sErrMesg .= "Critical Error \n";
@@ -985,7 +992,6 @@ function UpdateUserPremisePermissions( $iUserId, $iPremiseId, $aDesiredPermissio
 					$sErrMesg .= "Your user doesn't appear to have the \"Owner\" permission needed to perform this operation.";
 					//var_dump($aPremiseResults);
 				}
-				
 			} else {
 				$bError    = true;
 				$iErrCode  = 2;
@@ -993,7 +999,6 @@ function UpdateUserPremisePermissions( $iUserId, $iPremiseId, $aDesiredPermissio
 				$sErrMesg .= $aPremiseResults['ErrMesg'];
 			}
 		}
-		
 		
 		//--------------------------------------------------------//
 		//-- 5.3 - Check if the User has a permissions entry    --//
@@ -1163,6 +1168,7 @@ function SpecialLookupUsersForRoomPerms( $iPremiseId ) {
 	$sErrMesg               = "";           //-- STRING:    --//
 	$aResult                = array();      //-- ARRAY:     --//
 	
+	
 	//------------------------------------------------------------//
 	//-- 5.0 - Begin                                            --//
 	//------------------------------------------------------------//
@@ -1227,6 +1233,8 @@ function SpecialLookupUsersForRoomPerms( $iPremiseId ) {
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
 }
+
+
 
 function LookupUserRoomPermissions( $iUserId, $iRoomId ) {
 	//-- TODO: The functions that gets used by this may need to be put in object to secure against misuse --//
@@ -1329,7 +1337,6 @@ function LookupUserRoomPermissions( $iUserId, $iRoomId ) {
 				//-- Extract the Permissions Id --//
 				if( $aPermissionsResult['Data']['PermId']>=1 ) {
 					
-					
 					//-- Create the Results --//
 					$aResult = array(
 						"Read"        => $aPermissionsResult['Data']['PermRead'],
@@ -1340,7 +1347,6 @@ function LookupUserRoomPermissions( $iUserId, $iRoomId ) {
 				}
 			}
 		}
-		
 	} catch( Exception $e0001 ) {
 		$bError    = true;
 		$iErrCode  = 0;
@@ -1375,8 +1381,6 @@ function UpdateUserRoomPermissions( $iUserId, $iRoomId, $aDesiredPermissions ) {
 	$bDebugging             = false;        //-- BOOLEAN:   --//
 	$bNeedsInserting        = false;        //-- BOOLEAN:   --//
 	$iPremiseId             = 0;            //-- INTEGER:   --//
-	
-	
 	$iRoomPermId            = 0;            //-- INTEGER:   --//
 	$iNewPermDataRead       = 0;            //-- INTEGER:   --//
 	$iNewPermWrite          = 0;            //-- INTEGER:   --//
@@ -1399,7 +1403,6 @@ function UpdateUserRoomPermissions( $iUserId, $iRoomId, $aDesiredPermissions ) {
 				if( $aRoomPremiseId['Data']['PremiseId']>=1 ) {
 					$iPremiseId = $aRoomPremiseId['Data']['PremiseId'];
 					
-
 				} else {
 					$bError    = true;
 					$iErrCode  = 2;

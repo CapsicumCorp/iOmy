@@ -36,7 +36,7 @@ if( !defined('SITE_BASE') ) {
 //-- 1.2 - INITIALISE VARIABLES                             --//
 //------------------------------------------------------------//
 $bError                     = false;        //-- BOOLEAN:       Used to indicate if an error has been caught --//
-$iErrCode                   = 0;            //-- INTEGER:       Used to hold the error code  --//
+$iErrCode                   = 0;            //-- INTEGER:       Used to hold the error code.  --//
 $sErrMesg                   = "";           //-- STRING:        Used to store the error message after an error has been caught --//
 $sOutput                    = "";           //-- STRING:        This is the --//
 $sPostMode                  = "";           //-- STRING:        Used to store which Mode the API should function in.			--//
@@ -54,8 +54,6 @@ $aTempFunctionResult5       = array();      //-- ARRAY:         Used to store th
 
 $iPostHubId                 = 0;            //-- INTEGER:       This is used to store which HubId that should be telnetted to. --//
 $iPostCommId                = 0;            //-- INTEGER:       This is used to store which "Zigbee Comm" to connect to --//
-
-
 $sNetworkAddress            = "";           //-- STRING:        --//
 $iNetworkPort               = 0;            //-- INTEGER:       --//
 $sUserToken                 = "";           //-- STRING:        --//
@@ -191,7 +189,6 @@ if($bError===false) {
 					$sErrMesg .= "Please use a valid \"HubId\" parameter\n";
 					$sErrMesg .= "eg. \n \"1\", \"2\", \"3\" \n\n";
 				}
-				
 			} catch( Exception $e0106 ) {
 				$bError = true;
 				$iErrCode  = 106;
@@ -227,8 +224,6 @@ if($bError===false) {
 		}
 	}
 }
-
-
 
 //====================================================================//
 //== 4.0 - PREPARE                                                  ==//
@@ -281,7 +276,6 @@ if( $bError===false ) {
 				$sErrMesg .= "Problem occurred when preparing for the main function.\n";
 			}
 		}
-		
 		
 		//----------------------------------------------------------------//
 		//-- Check the HubInfo                                          --//
@@ -463,113 +457,104 @@ if( $bError===false ) {
 		//================================================================//
 		} else if( $sPostMode==="RapidHAFormNetwork" ) {
 			try {
-				if( true ) {
-					if( true ) {
-				//if( $iCommWritePerm===1 ) {
-					//if( strlen( $sCommAddress )>=15 ) {
-						//----------------------------//
-						//-- Setup the Results      --//
-						//----------------------------//
-						$aResult = array(
-							"Error" => false,
-							"Data"  => array(
-								"FormNetwork" => array()
-							)
-						);
+				//-- Check if the user has the "Write" permission. --//
+				if( $iCommWritePerm===1 ) {
+					//----------------------------//
+					//-- Setup the Results      --//
+					//----------------------------//
+					$aResult = array(
+						"Error" => false,
+						"Data"  => array(
+							"FormNetwork" => array()
+						)
+					);
+					
+					//----------------------------//
+					//-- RapidHA Info           --//
+					//----------------------------//
+					$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
+					if( $oTelnet->bInitialised===true ) {
+						$oTelnet->WriteArray( array( "get_rapidha_info\n", "quit\n" ) );
+						$aTempFunctionResult1 = $oTelnet->FetchRows( 128, 5, true );
 						
+						if( $aTempFunctionResult1===false || count( $aTempFunctionResult1 )<=4 ) {
+							$bError     = true;
+							$iErrCode   = 3404;
+							$sErrMesg  .= "Error Code:'3404' \n";
+							$sErrMesg  .= "Problem extracting the rapidha info.";
+						}
+					} else {
+						$bError     = true;
+						$iErrCode   = 3403;
+						$sErrMesg  .= "Error Code:'3403' \n";
+						$sErrMesg  .= "Failed to connect to Hub via Telnet.";
+					}
+					
+					//----------------------------//
+					//-- Regex the values       --//
+					//----------------------------//
+					if( $bError===false ) {
+						//-- Setup the initial variables --//
+						$sCurrentCommUUID = "Unknown";
+						
+						foreach( $aTempFunctionResult1 as $sRow ) {
+							//-- Clear the variables --//
+							$aTempFunctionResult2 = array();
+							
+							//-- Check if it is the desired Comm --//
+							preg_match('/^RAPIDHA ADDRESS.*([0-9a-fA-F]{16})/', $sRow, $aTempFunctionResult2);
+							if( count($aTempFunctionResult2)===2 ) {
+								$sCurrentCommUUID = $aTempFunctionResult2[1];
+							}
+							
+							//-- Check if the Comm UUID match --//
+							if( $sCommAddress===$sCurrentCommUUID ) {
+								//-- Check Network State --//
+								preg_match('/^Network\s+State.*Network\s([\w]+)$/', $sRow, $aTempFunctionResult2);
+								if( count($aTempFunctionResult2)===2 ) {
+									$bCommNetworkStateFound = true;
+									
+									if( $aTempFunctionResult2[1]==="Up" || $aTempFunctionResult2[1]==="up" ) {
+										//-- Error --//
+										$bError     = true;
+										$iErrCode   = 3404;
+										$sErrMesg  .= "Error Code:'3404' \n";
+										$sErrMesg  .= "Zigbee modem already has a network!\n";
+										$sErrMesg  .= "Please remove it from a network before trying to add it to a new one!\n";
+									}
+								}
+								
+								//-- Store the row --//
+								$aTempFunctionResult3[] = $sRow;
+							}
+						} //-- ENDFOREACH --//
+					}	//-- ENDIF No Errors --//
+					
+					if( $bError===false ) {
+						if( $bCommNetworkStateFound===false ) {
+							$bError     = true;
+							$iErrCode   = 3405;
+							$sErrMesg  .= "Error Code:'3405 \n";
+							$sErrMesg  .= "Zigbee Modem's network state cannot be determined!\n";
+						}
+					}	//-- ENDIF No Errors --//
+					
+					if( $bError===false ) {
 						//----------------------------//
-						//-- RapidHA Info           --//
+						//-- Form a Network         --//
 						//----------------------------//
 						$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
 						if( $oTelnet->bInitialised===true ) {
-							$oTelnet->WriteArray( array( "get_rapidha_info\n", "quit\n" ) );
-							$aTempFunctionResult1 = $oTelnet->FetchRows( 128, 5, true );
+							$oTelnet->WriteArray( array( "rapidha_form_network ".$sCommAddress."\n", "quit\n" ) );
+							$aResult['Data']['FormNetwork'] = $oTelnet->FetchRows( 128, 5, true );
 							
-							if( $aTempFunctionResult1===false || count( $aTempFunctionResult1 )<=4 ) {
-								$bError     = true;
-								$iErrCode   = 3404;
-								$sErrMesg  .= "Error Code:'3404' \n";
-								$sErrMesg  .= "Problem extracting the rapidha info.";
-							}
 						} else {
 							$bError     = true;
-							$iErrCode   = 3403;
-							$sErrMesg  .= "Error Code:'3403' \n";
-							$sErrMesg  .= "Failed to connect to Hub via Telnet.";
+							$iErrCode   = 3409;
+							$sErrMesg  .= "Error Code:'3409' \n";
+							$sErrMesg  .= "Failed to connect to Hub via Telnet";
 						}
-						
-						//----------------------------//
-						//-- Regex the values       --//
-						//----------------------------//
-						if( $bError===false ) {
-							//-- Setup the initial variables --//
-							$sCurrentCommUUID = "Unknown";
-							
-							foreach( $aTempFunctionResult1 as $sRow ) {
-								//-- Clear the variables --//
-								$aTempFunctionResult2 = array();
-								
-								//-- Check if it is the desired Comm --//
-								preg_match('/^RAPIDHA ADDRESS.*([0-9a-fA-F]{16})/', $sRow, $aTempFunctionResult2);
-								if( count($aTempFunctionResult2)===2 ) {
-									$sCurrentCommUUID = $aTempFunctionResult2[1];
-								}
-								
-								//-- Check if the Comm UUID match --//
-								if( $sCommAddress===$sCurrentCommUUID ) {
-									//-- Check Network State --//
-									preg_match('/^Network\s+State.*Network\s([\w]+)$/', $sRow, $aTempFunctionResult2);
-									if( count($aTempFunctionResult2)===2 ) {
-										$bCommNetworkStateFound = true;
-										
-										if( $aTempFunctionResult2[1]==="Up" || $aTempFunctionResult2[1]==="up" ) {
-											//-- Error --//
-											$bError     = true;
-											$iErrCode   = 3404;
-											$sErrMesg  .= "Error Code:'3404' \n";
-											$sErrMesg  .= "Zigbee modem already has a network!\n";
-											$sErrMesg  .= "Please remove it from a network before trying to add it to a new one!\n";
-										}
-									}
-									
-									//-- Store the row --//
-									$aTempFunctionResult3[] = $sRow;
-								}
-							} //-- ENDFOREACH --//
-						}	//-- ENDIF No Errors --//
-						
-						if( $bError===false ) {
-							if( $bCommNetworkStateFound===false ) {
-								$bError     = true;
-								$iErrCode   = 3405;
-								$sErrMesg  .= "Error Code:'3405 \n";
-								$sErrMesg  .= "Zigbee Modem's network state cannot be determined!\n";
-							}
-						}	//-- ENDIF No Errors --//
-						
-						if( $bError===false ) {
-							//----------------------------//
-							//-- Form a Network         --//
-							//----------------------------//
-							$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
-							if( $oTelnet->bInitialised===true ) {
-								$oTelnet->WriteArray( array( "rapidha_form_network ".$sCommAddress."\n", "quit\n" ) );
-								$aResult['Data']['FormNetwork'] = $oTelnet->FetchRows( 128, 5, true );
-								
-							} else {
-								$bError     = true;
-								$iErrCode   = 3409;
-								$sErrMesg  .= "Error Code:'3409' \n";
-								$sErrMesg  .= "Failed to connect to Hub via Telnet";
-							}
-						}	//-- ENDIF No Errors --//
-					} else {
-						$bError     = true;
-						$iErrCode   = 3402;
-						$sErrMesg  .= "Error Code:'3402' \n";
-						$sErrMesg  .= "Problem with the CommAddress of the provided Comm!\n";
-						$sErrMesg  .= "Please verify that the Comm supports join mode!\n";
-					}
+					}	//-- ENDIF No Errors --//
 				} else {
 					$bError     = true;
 					$iErrCode   = 3401;
@@ -704,7 +689,7 @@ if( $bError===false && $aResult!=false ) {
 	
 	try {
 		//-- Text Error Message --//
-		echo $sOutput;	
+		echo $sOutput;
 		
 	} catch( Exception $e0005 ) {
 		//-- Failsafe Error Message --//

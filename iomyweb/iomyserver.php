@@ -1090,8 +1090,9 @@ if($bError===false) {
 							if( $aTemp['Error']===false ) {
 								$aResult = InsertTheDatabaseCoreValues( $sPostDatabaseName );
 							} else {
-								$bError = true;
-								$sErrMesg = $aTemp['ErrMesg'];
+								$bError    = true;
+								$iErrCode  = 16;
+								$sErrMesg  = $aTemp['ErrMesg'];
 							}
 							
 							break;
@@ -1265,11 +1266,40 @@ if($bError===false) {
 							break;
 							
 						case "02_CreateDefaultData3":
-							$aResult = DB_CreateDefaultData3( $sPostDatabaseName );
+							//--  --//
+							$aTempResult1 = DB_CreateDefaultData3( $sPostDatabaseName );
+							
+							if( $aTempResult1['Error']===false ) {
+								//--  --//
+								$aTempResult2 = DB_CreateDefaultData4( $sPostDatabaseName );
+								
+								if( $aTempResult2['Error']===false ) {
+									//-- Build a Results array --//
+									$aResult = array(
+										"Error"   => false,
+										"Data"    => array(
+											"Part1" => $aTempResult1['Result'],
+											"Part2" => $aTempResult2['Result']
+										)
+									);
+									
+								} else {
+									$bError    = true;
+									$iErrCode  = 5409;
+									$sErrMesg .= "Error Code:'5409' \n";
+									$sErrMesg .= $aTempResult2['ErrMesg'];
+								}
+							} else {
+								$bError    = true;
+								$iErrCode  = 5408;
+								$sErrMesg .= "Error Code:'5408' \n";
+								$sErrMesg .= $aTempResult1['ErrMesg'];
+							}
+							
 							break;
 							
 						case "02_CreateDefaultData4":
-							$aResult = DB_CreateDefaultData4( $sPostDatabaseName );
+							$aResult = DB_CreateDefaultData5( $sPostDatabaseName );
 							break;
 					}
 				}

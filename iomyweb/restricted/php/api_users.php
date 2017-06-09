@@ -33,6 +33,7 @@ if (!defined('SITE_BASE')) {
 //-- 1.2 - INITIALISE VARIABLES                     --//
 //----------------------------------------------------//
 $bError                     = false;        //-- BOOLEAN:       Used to indicate if an error has been caught --//
+$iErrCode                   = 0;            //-- INTEGER:       --//
 $sErrMesg                   = "";           //-- STRING:        Used to store the error message after an error has been caught. --//
 $sOutput                    = "";           //-- STRING:        Used to hold this API Request's body when everything is successful.	--//
 $aResult                    = array();      //-- ARRAY:         Used to store the results. --//
@@ -585,6 +586,14 @@ if($bError===false) {
 				
 				if( $sPostUsername===false || trim($sPostUsername)==="" ) {
 					$bError = true;
+					$sErrMesg .= "Error Code:'0143' \n";
+					$sErrMesg .= "Invalid \"Username\" parameter! \n";
+					$sErrMesg .= "Please use a valid \"Username\" parameter\n";
+				} else if( AlphaNumericCheck( $sPostUsername )!==true ) {
+					$sErrMesg .= "Error Code:'0143' \n";
+					$sErrMesg .= "Invalid \"Username\" parameter! \n";
+					$sErrMesg .= "Please use a valid \"Username\" parameter\n";
+				} else if( userauth_usernameblacklistcheck( $sPostUsername ) ) {
 					$sErrMesg .= "Error Code:'0143' \n";
 					$sErrMesg .= "Invalid \"Username\" parameter! \n";
 					$sErrMesg .= "Please use a valid \"Username\" parameter\n";
