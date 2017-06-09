@@ -36,6 +36,9 @@ $.sap.registerModulePath('IOMy.validation', sModuleInitialBuildLocation+'util/va
 $.sap.require("IOMy.validation.isDOBValid");
 
 $.sap.registerModulePath('IOMy.validation', sModuleInitialBuildLocation+'util/validation');
+$.sap.require("IOMy.validation.isIPv4AddressValid");
+
+$.sap.registerModulePath('IOMy.validation', sModuleInitialBuildLocation+'util/validation');
 $.sap.require("IOMy.validation.isLinkIDValid");
 
 $.sap.registerModulePath('IOMy.validation', sModuleInitialBuildLocation+'util/validation');
