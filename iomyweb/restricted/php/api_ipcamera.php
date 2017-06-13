@@ -363,7 +363,7 @@ if( $bError===false ) {
 				if( $iLinkTypeId!==$iIPCameraLinkTypeId ) {
 					//-- The ThingId that the user passed is not a IP Camera --//
 					$bError     = true;
-					$iErrCode   = 0340;
+					$iErrCode   = 340;
 					$sErrMesg  .= "Error Code:'0340' \n";
 					$sErrMesg  .= "The specified Thing is not a IP Camera!\n";
 					$sErrMesg  .= "Please use the ThingId of a valid IP Camera.\n";
@@ -377,7 +377,7 @@ if( $bError===false ) {
 						
 					} else {
 						$bError     = true;
-						$iErrCode   = 0341;
+						$iErrCode   = 341;
 						$sErrMesg  .= "Error Code:'0341' \n";
 						$sErrMesg  .= "The specified Thing is not a IP Camera!\n";
 						$sErrMesg  .= "Please use the ThingId of a valid IP Camera.\n";
@@ -386,7 +386,7 @@ if( $bError===false ) {
 			} else {
 				//-- ERROR: Could not get Thing Info --//
 				$bError     = true;
-				$iErrCode   = 0349;
+				$iErrCode   = 349;
 				$sErrMesg  .= "Error Code:'0349' \n";
 				$sErrMesg  .= "Problem when looking up the ThingInfo!\n";
 				$sErrMesg  .= $aTempFunctionResult1['ErrMesg'];
