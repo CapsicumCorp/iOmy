@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -105,11 +105,14 @@ sap.ui.define([
 	 * <code>pageable</code>, <code>requires-filter</code>, <code>searchable</code>,
 	 * <code>topable</code>, <code>updatable</code> and <code>updatable-path</code> on entity sets;
 	 * </li>
-	 * <li><code>creatable</code>, <code>display-format</code> ("UpperCase" and "NonNegative"),
-	 * <code>field-control</code>, <code>filterable</code>, <code>filter-restriction</code>,
-	 * <code>heading</code>, <code>precision</code>, <code>quickinfo</code>,
-	 * <code>required-in-filter</code>, <code>sortable</code>, <code>text</code>, <code>unit</code>,
-	 * <code>updatable</code> and <code>visible</code> on properties;</li>
+	 * <li><code>creatable</code>, <code>creatable-path</code>, <code>filterable</code>
+	 * on navigation properties;</li>
+	 * <li><code>aggregation-role</code> ("dimension" and "measure"), <code>creatable</code>,
+	 * <code>display-format</code> ("UpperCase" and "NonNegative"), <code>field-control</code>,
+	 * <code>filterable</code>, <code>filter-restriction</code>, <code>heading</code>,
+	 * <code>precision</code>, <code>quickinfo</code>, <code>required-in-filter</code>,
+	 * <code>sortable</code>, <code>text</code>, <code>unit</code>, <code>updatable</code> and
+	 * <code>visible</code> on properties;</li>
 	 * <li><code>semantics</code>; the following values are supported:
 	 * <ul>
 	 * <li>"bday", "city", "country", "email" (including support for types, for example
@@ -169,7 +172,7 @@ sap.ui.define([
 	 * {@link #loaded loaded} has been resolved!
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @alias sap.ui.model.odata.ODataMetaModel
 	 * @extends sap.ui.model.MetaModel
 	 * @public

@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -26,7 +26,7 @@ sap.ui.define([
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -530,6 +530,41 @@ sap.ui.define([
 
 		if (typeof fnNavigate === "function") {
 			fnNavigate();
+		}
+	};
+
+	/**
+	 * Checks whether a page is in the history stack or not
+	 * @param pageId
+	 * @returns {boolean}
+	 * @private
+	 */
+	NavContainer.prototype._isInPageStack = function (pageId) {
+		return this._pageStack.some(function (oPage) {
+			return oPage.id === pageId;
+		});
+	};
+
+	/**
+	 * Navigates back to a page, if the page is in the history stack. Otherwise, navigates to it.
+	 *
+	 * This method can be used to navigate to previously visited pages which are however not in the stack any more.
+	 * Such a situation can be observed when navigating back to a page several levels back.
+	 * @param pageId
+	 * @param transitionName
+	 * @param data
+	 * @param oTransitionParameters
+	 * @private
+	 */
+	NavContainer.prototype._safeBackToPage = function (pageId, transitionName, data, oTransitionParameters) {
+		if (!this.getPage(pageId)) {
+			return this;
+		}
+
+		if (this._isInPageStack(pageId)) {
+			return this.backToPage(pageId, data, oTransitionParameters);
+		} else {
+			return this.to(pageId, transitionName, data, oTransitionParameters);
 		}
 	};
 

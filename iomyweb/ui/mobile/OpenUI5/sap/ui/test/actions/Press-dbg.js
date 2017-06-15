@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -26,6 +26,7 @@ sap.ui.define(['jquery.sap.global', './Action'], function ($, Action) {
 	 *     <li>sap.m.List - More Button</li>
 	 *     <li>sap.m.Table - More Button</li>
 	 *     <li>sap.m.StandardTile</li>
+	 *     <li>sap.m.ComboBox</li>
 	 *     <li>sap.ui.comp.smartfilterbar.SmartFilterBar - Go Button</li>
 	 * </ul>
 	 *
@@ -68,7 +69,8 @@ sap.ui.define(['jquery.sap.global', './Action'], function ($, Action) {
 				this.getUtils().triggerEvent("selectstart", oActionDomRef);
 				this._createAndDispatchMouseEvent("mouseup", oActionDomRef);
 				this._createAndDispatchMouseEvent("click", oActionDomRef);
-				this._simulateFocusout(oActionDomRef);
+				//Focusout simulation removed in order to fix Press action behavior
+				//since in real scenario manual press action does not fire focusout event
 			}
 		}
 	});
@@ -123,6 +125,7 @@ sap.ui.define(['jquery.sap.global', './Action'], function ($, Action) {
 	Press.controlAdapters["sap.m.Page"] = "navButton";
 	Press.controlAdapters["sap.m.semantic.FullscreenPage"] = "navButton";
 	Press.controlAdapters["sap.m.semantic.DetailPage"] = "navButton";
+	Press.controlAdapters["sap.m.ComboBox"] = "arrow";
 	Press.controlAdapters["sap.ui.comp.smartfilterbar.SmartFilterBar"] = "btnGo";
 
 	return Press;

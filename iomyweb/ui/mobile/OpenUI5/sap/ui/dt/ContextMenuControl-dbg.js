@@ -1,6 +1,6 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 /* global Promise */
@@ -16,7 +16,7 @@ sap.ui.define([
 	 * @class Context - Menu for Design time
 	 * @extends sap.ui.unified.Menu
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -82,8 +82,6 @@ sap.ui.define([
 	 * @private
 	 */
 	ContextMenuControl.prototype.setMenuItems = function(aMenuItems, oTargetOverlay) {
-		var that = this;
-
 		this.destroyItems();
 
 		aMenuItems.forEach(function(oItem) {
@@ -105,9 +103,9 @@ sap.ui.define([
 				if ((oItem.startSection && typeof (oItem.startSection) === "boolean" ) || (typeof (oItem.startSection) === "function" && oItem.startSection(oTargetOverlay.getElementInstance()))) {
 					oMenuItem.setStartsSection(true);
 				}
-				that.addItem(oMenuItem);
+				this.addItem(oMenuItem);
 			}
-		});
+		}, this);
 		return this;
 	};
 

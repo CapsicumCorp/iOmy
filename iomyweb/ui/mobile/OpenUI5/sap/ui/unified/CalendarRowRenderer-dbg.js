@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -352,17 +352,30 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', 'sap/ui/un
 		}
 
 		var sType = oIntervalHeader.appointment.getType();
-		if (sType && sType != sap.ui.unified.CalendarDayType.None) {
+		var sColor = oIntervalHeader.appointment.getColor();
+		if (!sColor && sType && sType != sap.ui.unified.CalendarDayType.None) {
 			oRm.addClass("sapUiCalendarRowAppsIntHead" + sType);
 		}
 
-				oRm.writeStyles();
-				oRm.writeClasses();
-				oRm.write(">"); // div element
+		if (sColor) {
+			if (bRtl) {
+				oRm.addStyle("border-right-color", sColor);
+			} else {
+				oRm.addStyle("border-left-color", sColor);
+			}
+		}
+
+		oRm.writeStyles();
+		oRm.writeClasses();
+		oRm.write(">"); // div element
 
 		oRm.write("<div");
 		oRm.addClass("sapUiCalendarIntervalHeaderCont");
 		oRm.writeClasses();
+		if (sColor) {
+			oRm.addStyle("background-color", oIntervalHeader.appointment._getCSSColorForBackground(sColor));
+			oRm.writeStyles();
+		}
 		oRm.write(">");
 
 		var sIcon = oIntervalHeader.appointment.getIcon();
@@ -406,6 +419,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', 'sap/ui/un
 		var oAppointment = oAppointmentInfo.appointment;
 		var sTooltip = oAppointment.getTooltip_AsString();
 		var sType = oAppointment.getType();
+		var sColor = oAppointment.getColor();
 		var sTitle = oAppointment.getTitle();
 		var sText = oAppointment.getText();
 		var sIcon = oAppointment.getIcon();
@@ -431,7 +445,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', 'sap/ui/un
 
 		if (oAppointment.getSelected()) {
 			oRm.addClass("sapUiCalendarAppSel");
-			mAccProps["selected"] = true;
+			mAccProps["labelledby"].value = mAccProps["labelledby"].value + " " + CalendarRow._oStaticSelectedText.getId();
 		}
 
 		if (oAppointment.getTentative()) {
@@ -471,8 +485,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', 'sap/ui/un
 			oRm.writeAttributeEscaped("title", sTooltip);
 		}
 
-		if (sType && sType != sap.ui.unified.CalendarDayType.None) {
+		if (!sColor && sType && sType != sap.ui.unified.CalendarDayType.None) {
 			oRm.addClass("sapUiCalendarApp" + sType);
+		}
+
+		if (sColor) {
+			if (oRow._bRTL) {
+				oRm.addStyle("border-right-color", sColor);
+			} else {
+				oRm.addStyle("border-left-color", sColor);
+			}
 		}
 
 		oRm.writeAccessibilityState(oAppointment, mAccProps);
@@ -484,6 +506,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/date/UniversalDate', 'sap/ui/un
 		// extra content DIV to make some styling possible
 		oRm.write("<div");
 		oRm.addClass("sapUiCalendarAppCont");
+
+		if (sColor && oRow.getAppointmentsVisualization() === sap.ui.unified.CalendarAppointmentVisualization.Filled) {
+			oRm.addStyle("background-color", oAppointment._getCSSColorForBackground(sColor));
+			oRm.writeStyles();
+		}
+
 		oRm.writeClasses();
 		oRm.write(">"); // div element
 

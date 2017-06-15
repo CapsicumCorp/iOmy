@@ -351,11 +351,6 @@
       "theme": "sap_hcb"
     },
     {
-      "name": "themes/sap_hcb/ToolHeader.less",
-      "designtime": true,
-      "theme": "sap_hcb"
-    },
-    {
       "name": "themes/sap_hcb/library-RTL-dbg.css",
       "isDebug": true,
       "theme": "sap_hcb"

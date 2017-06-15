@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -85,7 +85,7 @@ sap.ui.define([
 		this._oPressHandlers = {};  //keep references on the press handlers we set on first level items (in case of behavior change)
 		this._oSectionInfo = {};    //keep scrolling info on sections
 		this._oScroller = null;
-
+		this._sSelectedKey = null; // keep track of sap.uxap.HierarchicalSelect selected key
 		this._bRtl = sap.ui.getCore().getConfiguration().getRTL();
 
 		//are we on a rtl scenario?
@@ -130,6 +130,8 @@ sap.ui.define([
 	AnchorBar.DOM_CALC_DELAY = 200; // ms
 
 	AnchorBar.prototype.setSelectedButton = function (oButton) {
+		var aSelectItems = this._oSelect.getItems(),
+			bHasSelectItems = aSelectItems.length > 0;
 
 		if (typeof oButton === "string") {
 			oButton = sap.ui.getCore().byId(oButton);
@@ -142,8 +144,9 @@ sap.ui.define([
 			}
 
 			var oSelectedSectionId = oButton.data("sectionId");
+			this._sSelectedKey = oSelectedSectionId;
 
-			if (oSelectedSectionId) {
+			if (oSelectedSectionId && bHasSelectItems) {
 				this._oSelect.setSelectedKey(oSelectedSectionId);
 			}
 
@@ -233,18 +236,20 @@ sap.ui.define([
 		this._oSelect.setUpperCase(bUpperCase);
 		this.toggleStyleClass("sapUxAPAnchorBarUpperCase", bUpperCase);
 
-
 		//create responsive equivalents of the provided controls
 		aContent.forEach(function (oButton) {
-
 			this._createSelectItem(oButton);
 
-			//desktop scenario logic: builds the scrolling anchorBar
+			// desktop scenario logic: builds the scrolling anchorBar
 			if (this._bHasButtonsBar) {
 				this._createPopoverSubMenu(oButton, oPopoverState);
 			}
 
 		}, this);
+
+		if (aContent.length > 0 && this._sSelectedKey) {
+			this._oSelect.setSelectedKey(this._sSelectedKey);
+		}
 	};
 
 	AnchorBar.prototype.addContent = function (oButton, bInvalidate) {
@@ -597,7 +602,7 @@ sap.ui.define([
 	AnchorBar.prototype._adjustSize = function () {
 
 		//size changed => check if switch in display-mode (phone-view vs. desktop-view) needed
-		var sNewMode = library.Utilities.isPhoneScenario() ?
+		var sNewMode = library.Utilities.isPhoneScenario(this._getCurrentMediaContainerRange()) ?
 			AnchorBar._hierarchicalSelectModes.Text :
 			AnchorBar._hierarchicalSelectModes.Icon;
 
@@ -923,15 +928,15 @@ sap.ui.define([
 			oSettings = {},
 			aSections = this.getParent().getSections(),
 			aSubSections = [this.getDomRef()],
-			aCurruntSubSections;
+			aCurrentSubSections;
 
 		//this is needed in order to be sure that next F6 group will be found in sub sections
 		aSections.forEach(function (oSection) {
-			aCurruntSubSections = oSection.getSubSections().map(function (oSubSection) {
+			aCurrentSubSections = oSection.getSubSections().map(function (oSubSection) {
 				return oSubSection.$().attr("tabindex", -1)[0];
 			});
 
-			aSubSections = aSubSections.concat(aCurruntSubSections);
+			aSubSections = aSubSections.concat(aCurrentSubSections);
 		});
 		oSettings.scope = aSubSections;
 

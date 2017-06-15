@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool'],
@@ -770,6 +770,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool'],
 		oRM.addClass("sapMOHROuter");
 		oRM.writeClasses();
 
+		var sTooltip = oOH.getTooltip_AsString();
+		if (sTooltip) {
+			oRM.writeAttributeEscaped("title", sTooltip);
+		}
+
 		//ARIA attributes
 		oRM.writeAccessibilityState({
 			role : "region",
@@ -797,7 +802,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool'],
 		oRM.write(">");
 		oRM.write("<div");
 
-		if (sap.ui.Device.system.desktop && jQuery('html').hasClass("sapUiMedia-Std-Desktop") && oOH.getFullScreenOptimized() && oOH._iCountVisAttrStat >= 1 && oOH._iCountVisAttrStat <= 3) {
+		if (sap.ui.Device.system.desktop && oOH._isMediaSize("Desktop") && oOH.getFullScreenOptimized() && oOH._iCountVisAttrStat >= 1 && oOH._iCountVisAttrStat <= 3) {
 			oRM.addClass("sapMOHRStatesOneOrThree");
 		}
 
@@ -860,8 +865,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool'],
 		oRM.addClass("sapMOHRTitleDiv");
 
 		if (oControl._hasIcon()) {
-			if (sap.ui.Device.system.phone || jQuery('html').hasClass("sapUiMedia-Std-Phone")) {
-				if (sap.ui.Device.orientation.landscape || (jQuery('html').hasClass("sapUiMedia-Std-Phone") && !sap.ui.Device.system.phone)) {
+			if (sap.ui.Device.system.phone || oControl._isMediaSize("Phone")) {
+				if (sap.ui.Device.orientation.landscape || (oControl._isMediaSize("Phone") && !sap.ui.Device.system.phone)) {
 					oRM.addClass("sapMOHRTitleIcon");
 				}
 			} else {
@@ -972,12 +977,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool'],
 			}
 		}
 
-		if ((sap.ui.Device.system.tablet && !sap.ui.Device.system.desktop) || (sap.ui.Device.system.desktop && jQuery('html').hasClass("sapUiMedia-Std-Tablet"))) {
+		if ((sap.ui.Device.system.tablet && !sap.ui.Device.system.desktop) || (sap.ui.Device.system.desktop && oOH._isMediaSize("Tablet"))) {
 			if (!oOH.getFullScreenOptimized() || (sap.ui.Device.orientation.portrait && oOH.getFullScreenOptimized())) { // full screen portrait or master detail
 				iRenderCols = 2; //render two columns
 				sClassColCount = 'sapMOHRTwoCols';
 			} else {
-				if (oOH.getFullScreenOptimized() && ( sap.ui.Device.orientation.landscape || (sap.ui.Device.system.desktop && jQuery('html').hasClass("sapUiMedia-Std-Tablet")))) { //full screen landscape
+				if (oOH.getFullScreenOptimized() && ( sap.ui.Device.orientation.landscape || (sap.ui.Device.system.desktop && oOH._isMediaSize("Tablet")))) { //full screen landscape
 					if (iCountAttrAndStat >= 1 && iCountAttrAndStat <= 2) {
 						iRenderCols = 2; // render two columns
 						sClassColCount = 'sapMOHRTwoCols';
@@ -991,7 +996,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool'],
 			}
 		}
 
-		if (sap.ui.Device.system.phone || (sap.ui.Device.system.desktop && jQuery('html').hasClass("sapUiMedia-Std-Phone"))) {
+		if (sap.ui.Device.system.phone || (sap.ui.Device.system.desktop && oOH._isMediaSize("Phone"))) {
 			iRenderCols = 1; // render one column
 			sClassColCount = 'sapMOHROneCols';
 		}
@@ -1262,6 +1267,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool'],
 
 		oRM.write("<div"); // Start TitleArrow container
 		oRM.writeAttribute("id", oOH.getId() + "-title-arrow");
+		oRM.addStyle("display", "inline-block");
+		oRM.writeStyles();
 		oRM.write(">");
 		this._renderResponsiveTitleAndArrow(oRM, oOH, nCutLen);
 		oRM.write("</div>");

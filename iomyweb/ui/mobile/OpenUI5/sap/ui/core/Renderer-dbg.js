@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -17,7 +17,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library'],
 	 * @classdesc Base Class for a Renderer.
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @namespace
 	 * @public
 	 * @alias sap.ui.core.Renderer
@@ -37,7 +37,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library'],
 			jQuery.sap.assert(typeof sName === 'string' && sName, 'Renderer.extend must be called with a non-empty name for the new renderer');
 			jQuery.sap.assert(oRendererInfo == null || typeof oRendererInfo === 'object', 'oRendererInfo must be an object or can be omitted');
 
-			var oChildRenderer = jQuery.sap.newObject(oBaseRenderer);
+			var oChildRenderer = Object.create(oBaseRenderer);
 			oChildRenderer.extend = createExtendFunction(oChildRenderer);
 			if ( oRendererInfo ) {
 				jQuery.extend(oChildRenderer, oRendererInfo);
@@ -163,7 +163,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library'],
 			return extend(vName, oRendererInfo);
 		} else {
 			// old variant without name: create static 'subclass' of Renderer itself
-			var oChildRenderer = jQuery.sap.newObject(vName);
+			var oChildRenderer = Object.create(vName || null);
 			oChildRenderer._super = vName;
 			oChildRenderer.extend = createExtendFunction(oChildRenderer);
 			return oChildRenderer;

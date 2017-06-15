@@ -1213,8 +1213,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/unified/calendar/CalendarUtils.js",
-        "sap/ui/core/date/UniversalDate.js",
-        "sap/ui/unified/CalendarLegend.js"
+        "sap/ui/core/date/UniversalDate.js"
       ]
     },
     {
@@ -1223,8 +1222,7 @@
       "required": [
         "jquery.sap.global.js",
         "sap/ui/unified/calendar/CalendarUtils.js",
-        "sap/ui/core/date/UniversalDate.js",
-        "sap/ui/unified/CalendarLegend.js"
+        "sap/ui/core/date/UniversalDate.js"
       ]
     },
     {

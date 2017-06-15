@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -25,7 +25,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -1510,8 +1510,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 
 		var $document = jQuery(document);
 
-		$document.unbind("mousemove", this._onTabMove);
-		$document.unbind("mouseup", this._onTabMoved);
+		$document.off("mousemove", this._onTabMove);
+		$document.off("mouseup", this._onTabMoved);
 
 		this._oScroller.setHorizontal(true);
 		this._enableTextSelection();

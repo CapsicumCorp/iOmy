@@ -1,6 +1,6 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -37,7 +37,7 @@ sap.ui.define([
 			* @extends sap.ui.core.Control
 			*
 			* @author SAP SE
-			* @version 1.44.14
+			* @version 1.46.9
 			*
 			* @constructor
 			* @public
@@ -241,6 +241,7 @@ sap.ui.define([
 							tooltip : this._oResourceBundle.getText("PAGE_NAVBUTTON_TEXT"),
 							press : function() {
 								if (mNavContext.navContainer) {
+									mNavContext.quickView._setNavOrigin(null);
 									mNavContext.navContainer.back();
 								}
 							}
@@ -561,6 +562,7 @@ sap.ui.define([
 					e.preventDefault();
 					var sPageId = this.getCustomData()[0].getValue();
 					if (mNavContext.navContainer && sPageId) {
+						mNavContext.quickView._setNavOrigin(this);
 						mNavContext.navContainer.to(sPageId);
 					}
 				};
@@ -588,7 +590,9 @@ sap.ui.define([
 
 					mNavContext.popover.focus();
 
-					mNavContext.quickView._clearContainerHeight();
+					if (mNavContext.quickView.indexOfPage(this) == 0) {
+						mNavContext.quickView._clearContainerHeight();
+					}
 
 					this._createPage();
 

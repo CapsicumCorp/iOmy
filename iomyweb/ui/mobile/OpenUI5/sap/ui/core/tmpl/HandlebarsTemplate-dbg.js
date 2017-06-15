@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -29,7 +29,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core', './Template', './Templat
 	 * @extends sap.ui.core.tmpl.Template
 	 * @abstract
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @alias sap.ui.core.tmpl.HandlebarsTemplate
 	 * @since 1.15
 	 */
@@ -563,7 +563,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Core', './Template', './Templat
 		};
 
 		// ignore the following block helper
-		jQuery.each(["each", "if", "unless", "with"], function(iIndex, sValue) {
+		["each", "if", "unless", "with"].forEach(function(sValue) {
 			oHelpers[sValue] = function() {};
 		});
 

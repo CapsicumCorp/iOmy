@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -9,7 +9,7 @@ sap.ui.define([
 	'jquery.sap.global',
 	'sap/ui/dt/DesignTimeMetadata'
 ],
-function(jQuery, DesignTimeMetadata) {
+function (jQuery, DesignTimeMetadata) {
 	"use strict";
 
 
@@ -24,7 +24,7 @@ function(jQuery, DesignTimeMetadata) {
 	 * @extends sap.ui.core.DesignTimeMetadata
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @private
@@ -41,19 +41,15 @@ function(jQuery, DesignTimeMetadata) {
 		}
 	});
 
-	AggregationDesignTimeMetadata.prototype.getMoveAction = function(oMovedElement){
+	AggregationDesignTimeMetadata.prototype.getMoveAction = function (oMovedElement) {
 		var mData = this.getData();
 		if (mData.actions && mData.actions.move) {
 			var vMoveChangeType = mData.actions.move;
 			if (typeof (vMoveChangeType) === "function" ){
 				return vMoveChangeType.apply(null, arguments);
-			} else {
-				return vMoveChangeType;
 			}
-		} else {
-			return undefined;
+			return vMoveChangeType;
 		}
-
 	};
 
 	return AggregationDesignTimeMetadata;

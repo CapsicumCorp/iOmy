@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -31,7 +31,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/core/Co
 	 * and provides lifecycle events.
 	 *
 	 * @extends sap.ui.core.Control
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -123,7 +123,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/core/Co
 			resourceBundleUrl : 'sap.ui.core.URI',
 
 			/**
-			 * Locale that should be used to load a resourcebundle for this view
+			 * Locale that should be used to load a resource bundle for this view
 			 */
 			resourceBundleLocale : 'string', // should be something like 'languageTag'
 
@@ -261,16 +261,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/core/Co
 
 	function initAsyncState(oView) {
 		oView.oAsyncState = {};
-		oView.oAsyncState.promise = new Promise(function(fnResolve, fnReject) {
-			oView.oAsyncState.complete = function(error) {
-				if (!error) {
-					fnResolve(oView);
-				} else {
-					oView.destroy();
-					fnReject(error);
-				}
-			};
-		});
+		oView.oAsyncState.promise = null;
 	}
 
 	/**
@@ -354,7 +345,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/core/Co
 
 		if (this.initViewSettings) {
 			if (mSettings.async) {
-				this.initViewSettings(mSettings)
+				// async processing starts here
+				this.oAsyncState.promise = this.initViewSettings(mSettings)
 					.then(function() {
 						return fnPropagateOwner(fnInitController);
 					})
@@ -362,9 +354,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/core/Co
 						return that.runPreprocessor("controls", that);
 					})
 					.then(function() {
-						fnPropagateOwner(that.fireAfterInit.bind(that));
-						// resolve/reject the #loaded Promise
-						that.oAsyncState.complete();
+						return fnPropagateOwner(that.fireAfterInit.bind(that));
+					})
+					.then(function() {
+						// async processing ends by resolving with the view
+						return that;
 					});
 			} else {
 				this.initViewSettings(mSettings);
@@ -372,8 +366,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/core/Co
 				this.runPreprocessor("controls", this, true);
 				this.fireAfterInit();
 			}
-		} else if (mSettings.async) {
-			that.oAsyncState.complete();
 		}
 	};
 
@@ -562,7 +554,27 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/core/Co
 			}
 		}
 		oClone = Control.prototype.clone.call(this, sIdSuffix, aLocalIds, {cloneChildren:false, cloneBindings: true});
+
+		// If one of the clones event listeners is the template controller, change it to the views new controller
+		// This prevents the cloned view from firing events on the template views controller
+		var sEvent, aEventListeners, j;
+		for (sEvent in oClone.mEventRegistry) {
+			// ManagedObject already cloned mEventRegistry over to the new object, so we'll work on that
+			aEventListeners = oClone.mEventRegistry[sEvent];
+
+			for (j = aEventListeners.length - 1; j >= 0; j--) {
+				if (aEventListeners[j].oListener === this.getController()) {
+					aEventListeners[j] = {
+						oListener: oClone.getController(),
+						fFunction: aEventListeners[j].fFunction,
+						oData: aEventListeners[j].oData
+					};
+				}
+			}
+		}
+
 		oClone.applySettings(mSettings);
+
 		return oClone;
 	};
 
@@ -662,9 +674,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/core/Co
 	 * Register a preprocessor for all views of a specific type.
 	 *
 	 * The preprocessor can be registered for several stages of view initialization, which are
-	 * dependant from the view type, e.g. "raw", "xml" or already initialized "controls". If there is a preprocessor
+	 * dependent on the view type, e.g. "raw", "xml" or already initialized "controls". If there is a preprocessor
 	 * passed to or activated at the view instance already, that one is used. When several preprocessors are registered
-	 * for one hook, it has to be made sure that they do not conflict when beeing processed serially.
+	 * for one hook, it has to be made sure that they do not conflict when being processed serially.
 	 *
 	 * It can be either a module name as string of an implementation of {@link sap.ui.core.mvc.View.Preprocessor} or a
 	 * function with a signature according to {@link sap.ui.core.mvc.View.Preprocessor.process}.
@@ -757,7 +769,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/core/Co
 	 * <li>The view data <code>vView.viewData</code> can hold user specific data. This data is available
 	 * during the whole lifecycle of the view and the controller</li>
 	 * <li>The view loading mode <code>vView.async</code> must be a boolean and defines if the view source is loaded
-	 * synchronously or asynchronously. In async mode, the view is rendered empty initially, and rerenderd with the
+	 * synchronously or asynchronously. In async mode, the view is rendered empty initially, and re-rendered with the
 	 * loaded view content.</li>
 	 * <li><code>vView.preprocessors</code></li> can hold a map from the specified preprocessor type (e.g. "xml") to an array of
 	 * preprocessor configurations; each configuration consists of a <code>preprocessor</code> property (optional when
@@ -765,7 +777,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/core/Co
 	 * be either a module name as string implementation of {@link sap.ui.core.mvc.View.Preprocessor} or a function according to
 	 * {@link sap.ui.core.mvc.View.Preprocessor.process}. Do not set properties starting with underscore like <code>_sProperty</code>
 	 * property, these are reserved for internal purposes. When several preprocessors are provided for one hook, it has to be made
-	 * sure that they do not conflict when beeing processed serially.
+	 * sure that they do not conflict when being processed serially.
 	 *
 	 * <strong>Note</strong>: These preprocessors are only available to this instance. For global or
 	 * on-demand availability use {@link sap.ui.core.mvc.XMLView.registerPreprocessor}.
@@ -865,7 +877,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObject', 'sap/ui/core/Co
 	* @return {Promise} resolves with the complete view instance, reject with any thrown error
 	*/
 	View.prototype.loaded = function() {
-		if (!this.oAsyncState) {
+		if (!this.oAsyncState || !this.oAsyncState.promise) {
 			// resolve immediately with this view instance
 			return Promise.resolve(this);
 		} else {

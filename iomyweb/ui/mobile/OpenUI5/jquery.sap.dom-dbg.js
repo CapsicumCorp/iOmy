@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -182,7 +182,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 
 	/**
 	 * Sets the text selection in the first element of the collection.
-	 * note: This feature is only supported for input element’s type of text, search, url, tel and password.
+	 *
+	 * <b>Note</b>: This feature is only supported for input element’s type of text, search, url, tel and password.
 	 *
 	 * @param {int} iStart Start position of the selection (inclusive)
 	 * @param {int} iEnd End position of the selection (exclusive)
@@ -197,8 +198,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 		var oDomRef = this.get(0);
 
 		try {
-			if (typeof (oDomRef.selectionStart) === "number") { // Firefox and IE9+
-				// In Chrome 58 and above selection start is set to selection end when the first parameter of a setSelectionRange call is negative.
+			// In Chrome 58 and above selection start is set to selection end when the first parameter of a setSelectionRange call is negative.
+			if (typeof (oDomRef.selectionStart) === "number") {
 				oDomRef.setSelectionRange(iStart > 0 ? iStart : 0, iEnd);
 			} else if (oDomRef.createTextRange) { // IE
 				var oTextEditRange = oDomRef.createTextRange();
@@ -216,7 +217,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 
 	/**
 	 * Retrieve the selected text in the first element of the collection.
-	 * note: This feature is only supported for input element’s type of text, search, url, tel and password.
+	 *
+	 * <b>Note</b>: This feature is only supported for input element’s type of text, search, url, tel and password.
 	 *
 	 * @return {string} The selected text.
 	 * @public
@@ -270,17 +272,18 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 
 
 	/**
-	 * Returns whether oDomRefChild is oDomRefContainer or is contained in oDomRefContainer.
+	 * Returns whether <code>oDomRefChild</code> is contained in or equal to <code>oDomRefContainer</code>.
 	 *
 	 * This is a browser-independent version of the .contains method of Internet Explorer.
-	 * For compatibility reasons it returns true if oDomRefContainer and oDomRefChild are equal.
+	 * For compatibility reasons it returns <code>true</code> if <code>oDomRefContainer</code> and
+	 * <code>oDomRefChild</code> are equal.
 	 *
-	 * This method intentionally does not operate on the jQuery object, as the original jQuery.contains()
+	 * This method intentionally does not operate on the jQuery object, as the original <code>jQuery.contains()</code>
 	 * method also does not do so.
 	 *
 	 * @param {Element} oDomRefContainer The container element
 	 * @param {Element} oDomRefChild The child element (must not be a text node, must be an element)
-	 * @return {boolean} 'true' if oDomRefChild is contained in oDomRefContainer or oDomRefChild is oDomRefContainer
+	 * @return {boolean} Whether <code>oDomRefChild</code> is contained in or equal to <code>oDomRefContainer</code>
 	 * @public
 	 * @author SAP SE
 	 * @since 0.9.0
@@ -295,7 +298,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 
 	/**
 	 * Returns a rectangle describing the current visual positioning of the first DOM object in the collection
-	 * (or null if no element was given)
+	 * (or <code>null</code> if no element was given)
 	 *
 	 * @return {object} An object with left, top, width and height
 	 * @public
@@ -372,7 +375,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 	}
 
 	/**
-	 * Returns true if the first element has a set tabindex
+	 * Returns <code>true</code> if the first element has a set tabindex
 	 *
 	 * @return {boolean} If the first element has a set tabindex
 	 * @public
@@ -389,7 +392,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device'],
 	 * Checks whether an Element is invisible for the end user.
 	 *
 	 * This is a combination of jQuery's :hidden selector (but with a slightly
-	 * different semantic, see below) and a check for CSS visiblity 'hidden'.
+	 * different semantic, see below) and a check for CSS visibility 'hidden'.
 	 *
 	 * Since jQuery 2.x, inline elements (SPAN etc.) might be considered 'visible'
 	 * although they have zero dimensions (e.g. an empty span). In jQuery 1.x such

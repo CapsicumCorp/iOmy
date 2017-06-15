@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.Page.
-sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/core/delegate/ScrollEnablement", "sap/m/Title", "sap/m/Button", "sap/m/Bar"],
-	function (jQuery, library, Control, ScrollEnablement, Title, Button, Bar) {
+sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/core/delegate/ScrollEnablement", "sap/m/Title", "sap/m/Button", "sap/m/Bar", 'sap/ui/core/ContextMenuSupport'],
+	function (jQuery, library, Control, ScrollEnablement, Title, Button, Bar, ContextMenuSupport) {
 		"use strict";
 
 
@@ -18,7 +18,7 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 		 *
 		 * @class
 		 * A container control that holds one whole screen of an application.
-		 * @extends sap.ui.core.Control
+		 *
 		 * <h3>Overview</h3>
 		 * The sap.m.Page is a container control that holds one whole screen of an application.
 		 * The page has three distinct areas that can hold content - a header, content area and a footer.
@@ -35,10 +35,11 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 		 *
 		 * <b>Note:</b> All accessibility information for the different areas and their corresponding ARIA roles is set in the aggregation <code>landmarkInfo</code> of type {@link sap.m.PageAccessibleLandmarkInfo}
 		 *
+		 * @extends sap.ui.core.Control
+		 * @mixes sap.ui.core.ContextMenuSupport
 		 * @author SAP SE
-		 * @version 1.44.14
+		 * @version 1.46.9
 		 *
-		 * @constructor
 		 * @public
 		 * @alias sap.m.Page
 		 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
@@ -210,6 +211,8 @@ sap.ui.define(["jquery.sap.global", "./library", "sap/ui/core/Control", "sap/ui/
 				designTime: true
 			}
 		});
+
+		ContextMenuSupport.apply(Page.prototype);
 
 		Page.FOOTER_ANIMATION_DURATION = 350;
 

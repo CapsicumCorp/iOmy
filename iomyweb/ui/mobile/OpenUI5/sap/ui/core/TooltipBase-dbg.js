@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './Control', './Popup', './library'],
 	 * @class
 	 * Abstract class that can be extended in order to implement any extended tooltip. For example, RichTooltip Control is based on it. It provides the opening/closing behavior and the main "text" property.
 	 * @extends sap.ui.core.Control
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -156,7 +156,7 @@ sap.ui.define(['jquery.sap.global', './Control', './Popup', './library'],
 			var sValue = oDomRef.getAttribute("aria-describedby");
 			var sIdsString = this.getId() + "-title " + this.getId() + "-txt";
 			if (sValue && sValue.indexOf(sIdsString) >= 0) {
-				if (jQuery.trim(sValue) == sIdsString) {
+				if (sValue.trim() == sIdsString) {
 					oDomRef.removeAttribute("aria-describedby");
 				} else  {
 					sValue = sValue.replace(sIdsString, "");
@@ -179,7 +179,7 @@ sap.ui.define(['jquery.sap.global', './Control', './Popup', './library'],
 	 * @private
 	 */
 	TooltipBase.prototype.isStandardTooltip = function(oTooltip) {
-		return  (typeof oTooltip === "string" &&  (jQuery.trim(oTooltip)) !== "");
+		return typeof oTooltip === "string"  &&  !!oTooltip.trim();
 	};
 
 	/**
@@ -298,7 +298,7 @@ sap.ui.define(['jquery.sap.global', './Control', './Popup', './library'],
 	};
 
 	TooltipBase.prototype.handleClosed = function(){
-		this._getPopup().detachClosed(jQuery.proxy(this.handleClosed, this));
+		this._getPopup().detachClosed(this.handleClosed, this);
 		this.fireClosed();
 	};
 

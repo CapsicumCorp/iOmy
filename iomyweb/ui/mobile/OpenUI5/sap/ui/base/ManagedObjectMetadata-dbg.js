@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -55,7 +55,7 @@ sap.ui.define(['jquery.sap.global', './DataType', './Metadata'],
 	 *
 	 *
 	 * @author Frank Weigel
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @since 0.8.6
 	 * @alias sap.ui.base.ManagedObjectMetadata
 	 * @public
@@ -68,7 +68,7 @@ sap.ui.define(['jquery.sap.global', './DataType', './Metadata'],
 	};
 
 	// chain the prototypes
-	ManagedObjectMetadata.prototype = jQuery.sap.newObject(Metadata.prototype);
+	ManagedObjectMetadata.prototype = Object.create(Metadata.prototype);
 
 	var hasOwnProperty = Object.prototype.hasOwnProperty;
 
@@ -516,7 +516,7 @@ sap.ui.define(['jquery.sap.global', './DataType', './Metadata'],
 		// if there is a parent class, produce the flattened "all" views for the element specific metadata
 		// PERFOPT: this could be done lazily
 		var oParent = this.getParent();
-		if ( oParent && oParent instanceof ManagedObjectMetadata ) {
+		if ( oParent instanceof ManagedObjectMetadata ) {
 			this._mAllEvents = jQuery.extend({}, oParent._mAllEvents, this._mEvents);
 			this._mAllProperties = jQuery.extend({}, oParent._mAllProperties, this._mProperties);
 			this._mAllPrivateAggregations = jQuery.extend({}, oParent._mAllPrivateAggregations, this._mPrivateAggregations);
@@ -1041,7 +1041,8 @@ sap.ui.define(['jquery.sap.global', './DataType', './Metadata'],
 
 	ManagedObjectMetadata.prototype.createPropertyBag = function() {
 		if ( !this._fnPropertyBagFactory ) {
-			this._fnPropertyBagFactory = jQuery.sap.factory(this.getPropertyDefaults());
+			this._fnPropertyBagFactory = function PropertyBag() {};
+			this._fnPropertyBagFactory.prototype = this.getPropertyDefaults();
 		}
 		return new (this._fnPropertyBagFactory)();
 	};

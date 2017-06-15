@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -16,7 +16,7 @@ sap.ui.define(['jquery.sap.global', '../Plugin', '../Support', '../ToolsAPI', 'j
 		 *
 		 * @abstract
 		 * @extends sap.ui.core.support.Plugin
-		 * @version 1.44.14
+		 * @version 1.46.9
 		 * @constructor
 		 * @private
 		 * @alias sap.ui.core.support.plugins.TechInfo
@@ -24,7 +24,7 @@ sap.ui.define(['jquery.sap.global', '../Plugin', '../Support', '../ToolsAPI', 'j
 		var TechInfo = Plugin.extend("sap.ui.core.support.plugins.TechInfo", {
 			constructor : function(oSupportStub) {
 				Plugin.apply(this, ["sapUiSupportTechInfo", "Technical Information", oSupportStub]);
-				this._aEventIds = this.isToolPlugin() ? [
+				this._aEventIds = this.runsAsToolPlugin() ? [
 					this.getId() + "Data",
 					this.getId() + "FinishedE2ETrace"
 				] : [
@@ -35,14 +35,13 @@ sap.ui.define(['jquery.sap.global', '../Plugin', '../Support', '../ToolsAPI', 'j
 					this.getId() + "ToggleStatistics"
 				];
 
-				if (this.isToolPlugin()) {
+				if (this.runsAsToolPlugin()) {
 					this.e2eLogLevel = "medium";
 					this.e2eTraceStarted = false;
 				}
 
 			}
 		});
-
 
 		/**
 		 * Handler for sapUiSupportTechInfoData event
@@ -248,7 +247,7 @@ sap.ui.define(['jquery.sap.global', '../Plugin', '../Support', '../ToolsAPI', 'j
 
 		TechInfo.prototype.init = function(oSupportStub){
 			Plugin.prototype.init.apply(this, arguments);
-			if (!this.isToolPlugin()) {
+			if (!this.runsAsToolPlugin()) {
 				sendData(this);
 				return;
 			}
@@ -311,7 +310,7 @@ sap.ui.define(['jquery.sap.global', '../Plugin', '../Support', '../ToolsAPI', 'j
 					if (v) {
 						if (typeof (v) === "string" || typeof (v) === "string" || typeof (v) === "boolean") {
 							val = v;
-						} else if ((jQuery.isArray(v) || jQuery.isPlainObject(v)) && window.JSON) {
+						} else if ((Array.isArray(v) || jQuery.isPlainObject(v)) && window.JSON) {
 							val = window.JSON.stringify(v);
 						}
 					}

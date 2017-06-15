@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -84,6 +84,9 @@ sap.ui.define([
 
 					/**
 					 * Determines whether the show more button should be shown.
+					 *
+					 * <b>Note:</b> The property will take effect if the <code>BlockBase</code> is inside <ObjectPageSubSection</code>
+					 * and would be ignored in case the <code>BlockBase</code> is nested inside another <code>BlockBase</code>.
 					 */
 					"showSubSectionMore": {type: "boolean", group: "Behavior", defaultValue: false}
 				},
@@ -634,11 +637,7 @@ sap.ui.define([
 		 * @private
 		 */
 		BlockBase.prototype._getObjectPageLayout = function () {
-			if (!this._oParentObjectPageLayout) {
-				this._oParentObjectPageLayout = library.Utilities.getClosestOPL(this);
-			}
-
-			return this._oParentObjectPageLayout;
+			return library.Utilities.getClosestOPL(this);
 		};
 
 		/**

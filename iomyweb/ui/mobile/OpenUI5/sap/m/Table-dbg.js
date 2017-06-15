@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -24,7 +24,7 @@ sap.ui.define(['jquery.sap.global', './ListBase', './ListItemBase', './library']
 	 * @extends sap.m.ListBase
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -81,7 +81,16 @@ sap.ui.define(['jquery.sap.global', './ListBase', './ListItemBase', './library']
 
 	Table.prototype.onBeforeRendering = function() {
 		ListBase.prototype.onBeforeRendering.call(this);
+		this._ensureColumnsMedia();
 		this._notifyColumns("ItemsRemoved");
+	};
+
+	Table.prototype._ensureColumnsMedia = function() {
+		this.getColumns().forEach(function (oColumn) {
+			if (oColumn._bShouldAddMedia) {
+				oColumn._addMedia();
+			}
+		});
 	};
 
 	Table.prototype.onAfterRendering = function() {
@@ -277,9 +286,9 @@ sap.ui.define(['jquery.sap.global', './ListBase', './ListItemBase', './library']
 			}
 		}
 
-		this._dirty = window.innerWidth;
+		this._dirty = this._getMediaContainerWidth() || window.innerWidth;
 		if (!this._mutex) {
-			var clean = window.innerWidth;
+			var clean = this._getMediaContainerWidth() || window.innerWidth;
 			this._mutex = true;
 			this.rerender();
 

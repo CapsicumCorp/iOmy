@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define(['jquery.sap.global'],
@@ -11,7 +11,7 @@ sap.ui.define(['jquery.sap.global'],
 	/**
 	 * @author SAP SE
 	 * @version
-	 * 1.44.14
+	 * 1.46.9
 	 * @namespace
 	 */
 	var GridRenderer = {};
@@ -36,7 +36,7 @@ sap.ui.define(['jquery.sap.global'],
 		oRm.writeControlData(oControl);
 		oRm.addClass("sapUiRespGrid");
 
-		var  sMedia = sap.ui.Device.media.getCurrentRange(sap.ui.Device.media.RANGESETS.SAP_STANDARD_EXTENDED).name;
+		var  sMedia = oControl._getCurrentMediaContainerRange(sap.ui.Device.media.RANGESETS.SAP_STANDARD_EXTENDED).name;
 		oRm.addClass("sapUiRespGridMedia-Std-" + sMedia);
 
 		var fHSpacing = oControl.getHSpacing();

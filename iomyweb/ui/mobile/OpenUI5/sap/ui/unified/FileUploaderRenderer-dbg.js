@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -103,7 +103,11 @@ sap.ui.define(['jquery.sap.global'],
 
 		// hidden pure input type file (surrounded by a div which is responsible for giving the input the correct size)
 		var sName = oFileUploader.getName() || oFileUploader.getId();
-		rm.write('<div class="sapUiFupInputMask">');
+		rm.write('<div class="sapUiFupInputMask"');
+		if (sTooltip.length) {
+			rm.writeEscaped('title="' + sTooltip + '"');
+		}
+		rm.write('>');
 		rm.write('<input type="hidden" name="_charset_" aria-hidden="true">');
 		rm.write('<input type="hidden" id="' + oFileUploader.getId() + '-fu_data" aria-hidden="true"');
 		rm.writeAttributeEscaped('name', sName + '-data');

@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -56,7 +56,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	 * {@link sap.m.PlanningCalendarView PlanningCalendarView}'s properties.
 	 *
 	 * @extends sap.ui.core.Control
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -289,7 +289,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 			/**
 			 * <code>viewKey</code> was changed by user interaction.
 			 */
-			viewChange : {}
+			viewChange : {},
+
+			/**
+			 * Fires when a row header is clicked.
+			 * @since 1.46.0
+			 */
+			rowHeaderClick: {
+
+				/**
+				 * The row user clicked on.
+				 */
+				row : {type : "sap.m.PlanningCalendarRow"}
+			}
 		}
 	}});
 
@@ -413,6 +425,22 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		});
 		oTable.attachEvent("selectionChange", _handleTableSelectionChange, this);
 
+		oTable.addDelegate({
+			onBeforeRendering: function () {
+				if (this._rowHeaderClickEvent) {
+					this._rowHeaderClickEvent.off();
+				}
+			},
+			onAfterRendering: function () {
+				this._rowHeaderClickEvent = oTable.$().find(".sapMPlanCalRowHead > div.sapMLIB").click(function (oEvent) {
+					var oRowHeader = jQuery(oEvent.currentTarget).control(0),
+						oRow = sap.ui.getCore().byId(oRowHeader.getAssociation("parentRow"));
+
+					this.fireRowHeaderClick({row: oRow});
+				}.bind(this));
+			}
+		}, false, this);
+
 		this.setAggregation("table", oTable, true);
 
 		this.setStartDate(new Date());
@@ -461,6 +489,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 			this._oToolbar = undefined;
 		}
 
+		// Remove event listener for rowHeaderClick event
+		if (this._rowHeaderClickEvent) {
+			this._rowHeaderClickEvent.off();
+			this._rowHeaderClickEvent = null;
+		}
 	};
 
 	PlanningCalendar.prototype.onBeforeRendering = function(){
@@ -1712,7 +1745,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 			|| oDate.getFullYear() > this.getStartDate().getFullYear();
 	};
 
+	PlanningCalendar.prototype._applyContextualSettings = function () {
+		return Control.prototype._applyContextualSettings.call(this, {contextualWidth: this.$().width()});
+	};
+
 	function _handleResize(oEvent, bNoRowResize){
+
+		this._applyContextualSettings();
 
 		if (oEvent.size.width <= 0) {
 			// only if visible at all
@@ -1727,7 +1766,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		_determineSize.call(this, oEvent.size.width);
 		if (iOldSize != this._iSize) {
 			toggleSizeClasses.call(this, this._iSize);
-			notifyTable.call(this);
+
 			var sKey = this.getViewKey();
 			var oView = this._getView(sKey);
 			var sIntervalType = oView.getIntervalType();
@@ -1796,28 +1835,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 	}
 
-	/** Notifies the table that about the parent container size change.
-	 * In versions > 1.46 such mechanism is provided by the "core". For 1.44 we simulate it by our own with this method.
-	 * This enables the second column (holding CalendarRow with appointments) of the table to be notified about its resize
-	 * event where the column may be render in a popin mode (each cell under this column will be merged with the first cell*/
-	function notifyTable() {
-		var oTable = this.getAggregation("table"),
-			oColumn, oMedia;
-
-		if (oTable) {
-			oColumn = oTable.getColumns()[1];//Column for CalendarRow with the appointments
-			if (oColumn._notifyResize) {
-				oMedia = {"unit": "px"};
-				if (this._iSize < 2) { //Tablet & Phone
-					oMedia.from = 0;
-					oMedia.to = this._iBreakPointDesktop;
-				} else {
-					oMedia.from = this._iBreakPointDesktop;
-				}
-				oColumn._notifyResize(oMedia);
-			}
-		}
-	}
 	function _handleAppointmentSelect(oEvent) {
 
 		var oAppointment = oEvent.getParameter("appointment");
@@ -2062,6 +2079,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 				this._oIntervalTypeSelect.addItem(oItem);
 			}
 		}
+
+		// Toggle interval select visibility if only one items is available there should be no select visible
+		this._oIntervalTypeSelect.setVisible(!(aViews.length === 1));
 
 	}
 

@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -56,7 +56,7 @@ sap.ui.define(['jquery.sap.global', './InstanceManager', 'sap/ui/core/Popup'],
 		 * The message toast has the same behavior on all devices. However, you can adjust the width of the control, for example, for use on a desktop device.
 		 *
 		 * @author SAP SE
-		 * @version 1.44.14
+		 * @version 1.46.9
 		 *
 		 * @namespace
 		 * @public
@@ -207,9 +207,16 @@ sap.ui.define(['jquery.sap.global', './InstanceManager', 'sap/ui/core/Popup'],
 		function createHTMLMarkup(mSettings) {
 			var oMessageToastDomRef = document.createElement("div");
 
-			oMessageToastDomRef.style.width = mSettings.width;
 			oMessageToastDomRef.className = CSSCLASS + " " + ENABLESELECTIONCLASS + " " + BELIZECONTRAST + " " + BELIZECONTRASTPLUS;
-			oMessageToastDomRef.setAttribute("role", "alert");
+
+			if (sap.ui.getCore().getConfiguration().getAccessibility()) {
+				oMessageToastDomRef.setAttribute("role", "alert");
+
+				// prevents JAWS from reading the text of the MessageToast twice
+				oMessageToastDomRef.setAttribute("aria-label", " ");
+			}
+
+			oMessageToastDomRef.style.width = mSettings.width;
 			oMessageToastDomRef.appendChild(document.createTextNode(mSettings.message));
 
 			return oMessageToastDomRef;

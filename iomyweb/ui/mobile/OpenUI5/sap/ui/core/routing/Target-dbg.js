@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -235,6 +235,21 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/base/EventPro
 					}, oView.getController());
 				}
 			},
+
+			/**
+			 * This function is called between the target view is loaded and the view is added to the container.
+			 *
+			 * This function can be used for applying modification on the view or the container to make the rerendering occur
+			 * together with the later aggregation change.
+			 *
+			 * @protected
+			 * @param {object} mArguments
+			 * @param {sap.ui.core.Control} mArguments.container the container where the view will be added
+			 * @param {sap.ui.core.Control} mArguments.view the view which will be added to the container
+			 * @param {object} [mArguments.data] the data passed from {@link sap.ui.core.routing.Target#display} method
+			 * @since 1.46.1
+			 */
+			_beforePlacingViewIntoContainer : function(mArguments) {},
 
 			/**
 			 * Here the magic happens - recursion + placement + view creation needs to be refactored

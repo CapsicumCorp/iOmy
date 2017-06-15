@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -320,11 +320,9 @@ sap.ui.define([
 
 		this._iREMSize = parseInt(jQuery("body").css("font-size"), 10);
 		this._iOffset = parseInt(0.25 * this._iREMSize, 10);
-		this._iScrollBarWidth = jQuery.position.scrollbarWidth();
 
 		this._iResizeId = ResizeHandler.register(this, this._onUpdateScreenSize.bind(this));
 
-		this._oLazyLoading = new LazyLoading(this);
 		this._oABHelper = new ABHelper(this);
 	};
 
@@ -333,12 +331,16 @@ sap.ui.define([
 	 */
 
 	ObjectPageLayout.prototype.onBeforeRendering = function () {
+
+		// The lazy loading helper needs media information, hence instantiated on onBeforeRendering, where contextual width is available
+		this._oLazyLoading = new LazyLoading(this);
+
 		if (!this.getVisible()) {
 			return;
 		}
 
-		this._bMobileScenario = library.Utilities.isPhoneScenario();
-		this._bTabletScenario = library.Utilities.isTabletScenario();
+		this._bMobileScenario = library.Utilities.isPhoneScenario(this._getCurrentMediaContainerRange());
+		this._bTabletScenario = library.Utilities.isTabletScenario(this._getCurrentMediaContainerRange());
 
 		// if we have Header Content on a desktop, check if it is always expanded
 		this._bHContentAlwaysExpanded = this._checkAlwaysShowContentHeader();
@@ -470,13 +472,15 @@ sap.ui.define([
 		var iHeaderOffset = 0,
 			sStyleAttribute = sap.ui.getCore().getConfiguration().getRTL() ? "left" : "right",
 			bHasVerticalScroll = this._hasVerticalScrollBar(),
-			iActionsOffset = this._iOffset;
+			iActionsOffset = this._iOffset,
+			iScrollbarWidth;
 
 		if (sap.ui.Device.system.desktop) {
-			iHeaderOffset = this._iScrollBarWidth;
+			iScrollbarWidth = jQuery.sap.scrollbarSize().width;
+			iHeaderOffset = iScrollbarWidth;
 			if (!bHasVerticalScroll) {
 				iHeaderOffset = 0;
-				iActionsOffset += this._iScrollBarWidth;
+				iActionsOffset += iScrollbarWidth;
 			}
 		}
 		return {"sStyleAttribute": sStyleAttribute, "iActionsOffset": iActionsOffset, "iMarginalsOffset": iHeaderOffset};
@@ -558,21 +562,6 @@ sap.ui.define([
 			this.setProperty("alwaysShowContentHeader", bValue, bSuppressInvalidate);
 		}
 		return this;
-	};
-
-	/**
-	* Overwrite setBusy, because the busyIndicator does not cover the header title,
-	* because the header title has z-index: 2 in order to appear on top of the content
-	* @param {boolean} bBusy
-	* @public
-	*/
-	ObjectPageLayout.prototype.setBusy = function (bBusy) {
-		var $title = this.$("headerTitle"),
-			vResult = Control.prototype.setBusy.call(this, bBusy);
-
-		$title.length > 0 && $title.toggleClass("sapUxAPObjectPageHeaderTitleBusy", bBusy);
-
-		return vResult;
 	};
 
 	ObjectPageLayout.prototype._initializeScroller = function () {
@@ -659,16 +648,11 @@ sap.ui.define([
 	 * @private
 	 */
 	ObjectPageLayout.prototype._expandCollapseHeader = function (bExpand) {
-		var oHeaderTitle = this.getHeaderTitle();
 		if (this._bHContentAlwaysExpanded) {
 			return;
 		}
 
 		if (bExpand && this._bStickyAnchorBar) {
-			// if the title in the header is not always visible but the action buttons are there we have remove the padding of the action buttons
-			if (oHeaderTitle && oHeaderTitle.getIsActionAreaAlwaysVisible() && !oHeaderTitle.getIsObjectTitleAlwaysVisible()) {
-				oHeaderTitle._setActionsPaddingStatus(bExpand);
-			}
 			this._$headerContent.css("height", this.iHeaderContentHeight).children().appendTo(this._$stickyHeaderContent); // when removing the header content, preserve the height of its placeholder, to avoid automatic repositioning of scrolled content as it gets shortened (as its topmost part is cut off)
 			this._toggleStickyHeader(bExpand);
 		} else if (!bExpand && this._bIsHeaderExpanded) {
@@ -1046,6 +1030,21 @@ sap.ui.define([
 	};
 
 	/**
+	 * Resets the internal information of which subsections are in view and immediately
+	 * calls the layout calculation so that an event <code>subSectionEnteredViewPort</code> is fired
+	 * for the subsections that are actually in view. Use this method after a change in bindings
+	 * to the existing object, since it's layout might have changed and the app
+	 * needs to react to the new subsections in view.
+	 * @private
+	 * @sap-restricted
+	 */
+	ObjectPageLayout.prototype._triggerVisibleSubSectionsEvents = function () {
+		if (this.getEnableLazyLoading()) {
+			this._oLazyLoading._triggerVisibleSubSectionsEvents();
+		}
+	};
+
+	/**
 	 * Scrolls the Object page to the given Section.
 	 *
 	 * @param {string} sId The Section ID to scroll to
@@ -1190,6 +1189,12 @@ sap.ui.define([
 				//trouble animation and lazy loading on slow devices.
 				this._connectModelsForSections(aToLoad);
 			}
+
+			aToLoad.forEach(function (subSection) {
+				this.fireEvent("subSectionEnteredViewPort", {
+					subSection: subSection
+				});
+			}, this);
 		}
 	};
 
@@ -1654,8 +1659,7 @@ sap.ui.define([
 				sClosestSectionId = this._getClosestScrolledSectionId(iScrollTop, iPageHeight);
 				sSelectedSectionId = this._getSelectedSectionId();
 
-
-				if (sSelectedSectionId !== sClosestSectionId) { // if the currently visible section is not the currently selected section in the anchorBar
+				if (sClosestSectionId && sSelectedSectionId !== sClosestSectionId) { // if the currently visible section is not the currently selected section in the anchorBar
 					// then change the selection to match the correct section
 					this.getAggregation("_anchorBar").setSelectedButton(this._oSectionInfo[sClosestSectionId].buttonId);
 				}
@@ -1677,8 +1681,8 @@ sap.ui.define([
 		this._oLazyLoading.setLazyLoadingParameters();
 
 		jQuery.sap.delayedCall(ObjectPageLayout.HEADER_CALC_DELAY, this, function () {
-			this._bMobileScenario = library.Utilities.isPhoneScenario();
-			this._bTabletScenario = library.Utilities.isTabletScenario();
+			this._bMobileScenario = library.Utilities.isPhoneScenario(this._getCurrentMediaContainerRange());
+			this._bTabletScenario = library.Utilities.isTabletScenario(this._getCurrentMediaContainerRange());
 
 			if (this._bHContentAlwaysExpanded != this._checkAlwaysShowContentHeader()) {
 				this.invalidate();
@@ -1840,11 +1844,6 @@ sap.ui.define([
 		//switch to stickied
 		if (!this._bHContentAlwaysExpanded && !this._bIsHeaderExpanded) {
 			this._$headerTitle.toggleClass("sapUxAPObjectPageHeaderStickied", bStick);
-		}
-
-		// if the title in the header is not always visible but the action buttons are there we have to adjust header height and remove the padding of the action buttons
-		if (oHeaderTitle && oHeaderTitle.getIsActionAreaAlwaysVisible() && !oHeaderTitle.getIsObjectTitleAlwaysVisible()) {
-			oHeaderTitle._setActionsPaddingStatus(!bStick);
 		}
 
 		if (!this._bStickyAnchorBar && bStick) {
@@ -2127,17 +2126,21 @@ sap.ui.define([
 	};
 
 	/**
-	 * Calls the renderer function that will rerender the ContentHeader when something is changed in the ObjectPageHeader Title
-	 *
+	 * Re-renders the <code>ObjectPageHeaderContent</code> when <code>ObjectPageHeader</code> Title changes.
 	 * @private
 	 */
-	ObjectPageLayout.prototype._headerTitleChangeHandler = function () {
+	ObjectPageLayout.prototype._headerTitleChangeHandler = function (bIsObjectImageChange) {
+		var oRm;
 
-		if (!this.getShowTitleInHeaderContent() || this._bFirstRendering) {
+		if (!this.getShowTitleInHeaderContent()) {
 			return;
 		}
 
-		var oRm = sap.ui.getCore().createRenderManager();
+		if (bIsObjectImageChange) {
+			this._getHeaderContent()._destroyObjectImage(true);
+		}
+
+		oRm = sap.ui.getCore().createRenderManager();
 		this.getRenderer()._rerenderHeaderContentArea(oRm, this);
 		this._getHeaderContent().invalidate();
 		oRm.destroy();

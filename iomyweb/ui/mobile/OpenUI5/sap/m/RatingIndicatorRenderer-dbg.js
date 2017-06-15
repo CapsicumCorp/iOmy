@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool'],
@@ -204,7 +204,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/IconPool'],
     };
 
     RatingIndicatorRenderer.getIconURI = function (sState, oControl) {
-        if (sap.ui.getCore().getConfiguration().getTheme() === "sap_hcb") {
+        var aHighContrastStyles = ["sap_hcb", "sap_belize_hcb", "sap_belize_hcw"];
+        if (aHighContrastStyles.indexOf(sap.ui.getCore().getConfiguration().getTheme()) > -1) {
             if (sState == "UNSELECTED" && oControl.getEnabled()) {
                 return IconPool.getIconURI("unfavorite");
             }

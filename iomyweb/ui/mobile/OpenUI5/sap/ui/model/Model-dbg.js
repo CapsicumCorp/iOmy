@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -38,7 +38,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/message/MessageProcessor', './B
 	 * @extends sap.ui.core.message.MessageProcessor
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -861,10 +861,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/message/MessageProcessor', './B
 	 * @public
 	 */
 	Model.prototype.setMessages = function(mMessages) {
-		//jQuery.sap.assert(!jQuery.isEmptyObject(mMessages), this + ": mMessages passed as emptyObject( {} ). Use null instead!");
-
-		this.mMessages = mMessages || {};
-		if (mMessages !== null || !jQuery.sap.equal(this.mMessages, mMessages)) {
+		mMessages = mMessages || {};
+		if (!jQuery.sap.equal(this.mMessages, mMessages)) {
+			this.mMessages = mMessages;
 			this.checkMessages();
 		}
 	};

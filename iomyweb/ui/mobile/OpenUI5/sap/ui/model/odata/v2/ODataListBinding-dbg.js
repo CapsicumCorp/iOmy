@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -56,7 +56,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 			this.bNeedsUpdate = false;
 			this.bDataAvailable = false;
 			this.bIgnoreSuspend = false;
-			this.bPendingRefresh = true;
+			this.bPendingRefresh = false;
 			this.sGroupId = undefined;
 			this.sRefreshGroupId = undefined;
 			this.bLengthRequested = false;
@@ -397,7 +397,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 		}
 	};
 
-  /**
+	/**
 	 * Check whether expanded list data is available and can be used
 	 *
 	 * @private
@@ -411,16 +411,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 
 		if (!bResolves || oRef === undefined) {
 			this.bUseExpandedList = false;
-			this.aExpandedRefs = undefined;
+			this.aExpandRefs = undefined;
 			return false;
 		} else {
 			this.bUseExpandedList = true;
-			this.aExpandedRefs = oRef;
+			this.aExpandRefs = oRef;
 			if (Array.isArray(oRef)) {
 				// For performance, only check first and last entry, whether reload is needed
 				if (this.oModel._isReloadNeeded("/" + oRef[0]) || this.oModel._isReloadNeeded("/" + oRef[oRef.length - 1])) {
 					this.bUseExpandedList = false;
-					this.aExpandedRefs = undefined;
+					this.aExpandRefs = undefined;
 					return false;
 				}
 				this.aAllKeys = oRef;
@@ -437,6 +437,22 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 				this.bDataAvailable = true;
 			}
 			return true;
+		}
+	};
+
+	/**
+	 * In case the list is cucrently based on expanded data, update the original data array
+	 * if new data has been loaded
+	 *
+	 * @private
+	 * @param {array} aKeys the new key array
+	 */
+	ODataListBinding.prototype.updateExpandedList = function(aKeys) {
+		if (this.aExpandRefs) {
+			for (var i = 0; i < aKeys.length; i++) {
+				this.aExpandRefs[i] = aKeys[i];
+			}
+			this.aExpandRefs.length = aKeys.length;
 		}
 	};
 
@@ -459,7 +475,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 	 *
 	 * @param {int} iStartIndex The start index
 	 * @param {int} iLength The count of data to be requested
-	 * @param {boolean} bPretend Pretend
 	 * Load list data from the server
 	 * @private
 	 */
@@ -577,6 +592,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 
 			// For clientside sorting filtering store all keys separately and set length to final
 			if (that.useClientMode()) {
+				that.updateExpandedList(that.aKeys);
 				that.aAllKeys = that.aKeys.slice();
 				that.iLength = that.aKeys.length;
 				that.bLengthFinal = true;
@@ -878,7 +894,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 			// - set the new keys
 			// - trigger clientside filter/sorter
 			oRef = this.oModel._getObject(this.sPath, this.oContext);
-			bRefChanged = jQuery.isArray(oRef) && !jQuery.sap.equal(oRef,this.aExpandRefs);
+			bRefChanged = Array.isArray(oRef) && !jQuery.sap.equal(oRef, this.aExpandRefs);
 			this.aExpandRefs = oRef;
 			if (bRefChanged) {
 				this.aAllKeys = oRef;
@@ -1140,7 +1156,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 
 		aFilters = this.aFilters.concat(this.aApplicationFilters);
 
-		if (!aFilters || !jQuery.isArray(aFilters) || aFilters.length === 0) {
+		if (!aFilters || !Array.isArray(aFilters) || aFilters.length === 0) {
 			this.aFilters = [];
 			this.aApplicationFilters = [];
 		}
@@ -1237,10 +1253,19 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/model/FilterType', 'sap/ui/model/Lis
 		this.bIgnoreSuspend = false;
 		this.bSuspended = false;
 		if (this.bPendingRefresh) {
+			// _refresh detected a change (or was forced) but did
+			//	not refresh due to active suspension
 			this._refresh();
 		} else {
 			this.checkUpdate();
 		}
+	};
+
+	ODataListBinding.prototype.suspend = function() {
+		if (this.bInitial) {
+			this.bPendingRefresh = true;
+		}
+		ListBinding.prototype.suspend.apply(this, arguments);
 	};
 
 	return ODataListBinding;

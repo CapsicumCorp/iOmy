@@ -1,16 +1,16 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.Input.
 sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List', './Popover',
 		'sap/ui/core/Item', './ColumnListItem', './StandardListItem', './DisplayListItem', 'sap/ui/core/ListItem',
-		'./Table', './Toolbar', './ToolbarSpacer', './library', 'sap/ui/core/IconPool', 'jquery.sap.strings'],
+		'./Table', './Toolbar', './ToolbarSpacer', './library', 'sap/ui/core/IconPool', 'sap/ui/core/InvisibleText'],
 	function(jQuery, Bar, Dialog, InputBase, List, Popover,
 			Item, ColumnListItem, StandardListItem, DisplayListItem, ListItem,
-			Table, Toolbar, ToolbarSpacer, library, IconPool/* , jQuerySap */) {
+			Table, Toolbar, ToolbarSpacer, library, IconPool, InvisibleText) {
 	"use strict";
 
 
@@ -66,7 +66,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 	 *
 	 * @extends sap.m.InputBase
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -186,7 +186,13 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 			 * Defines the validation callback function called when a suggestion row gets selected.
 			 * @since 1.44
 			 */
-			suggestionRowValidator: {type: "any", group: "Misc", defaultValue: ""}
+			suggestionRowValidator: {type: "any", group: "Misc", defaultValue: ""},
+
+			/**
+			 * Specifies whether the suggestions highlighting is enabled.
+			 * @since 1.46
+			 */
+			enableSuggestionsHighlighting: {type: "boolean", group: "Behavior", defaultValue: true}
 		},
 		defaultAggregation : "suggestionItems",
 		aggregations : {
@@ -320,6 +326,29 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 	IconPool.insertFontFaceStyle();
 
 	/**
+	 * Returns true if some word from the text starts with specific value.
+	 */
+	Input._wordStartsWithValue = function(sText, sValue) {
+
+		var index;
+
+		while (sText) {
+			if (jQuery.sap.startsWithIgnoreCase(sText, sValue)) {
+				return true;
+			}
+
+			index = sText.indexOf(' ');
+			if (index == -1) {
+				break;
+			}
+
+			sText = sText.substring(index + 1);
+		}
+
+		return false;
+	};
+
+	/**
 	 * The default filter function for one and two-value. It checks whether the item text begins with the typed value.
 	 * @param {string} sValue the current filter string
 	 * @param {sap.ui.core.Item} oItem the filtered list item
@@ -327,11 +356,16 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 	 * @returns {boolean} true for items that start with the parameter sValue, false for non matching items
 	 */
 	Input._DEFAULTFILTER = function(sValue, oItem) {
-		return jQuery.sap.startsWithIgnoreCase(oItem.getText(), sValue);
+
+		if (oItem instanceof ListItem && Input._wordStartsWithValue(oItem.getAdditionalText(), sValue)) {
+			return true;
+		}
+
+		return Input._wordStartsWithValue(oItem.getText(), sValue);
 	};
 
 	/**
-	 * The default filter function for tabular suggestions. It checks whether the first item text begins with the typed value.
+	 * The default filter function for tabular suggestions. It checks whether some item text begins with the typed value.
 	 * @param {string} sValue the current filter string
 	 * @param {sap.m.ColumnListItem} oColumnListItem the filtered list item
 	 * @private
@@ -342,11 +376,14 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 			i = 0;
 
 		for (; i < aCells.length; i++) {
-			// take first cell with a text method and compare value
+
 			if (aCells[i].getText) {
-				return jQuery.sap.startsWithIgnoreCase(aCells[i].getText(), sValue);
+				if (Input._wordStartsWithValue(aCells[i].getText(), sValue)) {
+					return true;
+				}
 			}
 		}
+
 		return false;
 	};
 
@@ -385,6 +422,15 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 
 		// Counter for concurrent issues with setValue:
 		this._iSetCount = 0;
+
+		this._oRb = sap.ui.getCore().getLibraryResourceBundle("sap.m");
+
+		// Init static hidden text for ARIA
+		if (!Input._sAriaPopupLabelId) {
+			Input._sAriaPopupLabelId = new InvisibleText({
+				text: this._oRb.getText("INPUT_AVALIABLE_VALUES")
+			}).toStatic().getId();
+		}
 	};
 
 	/**
@@ -479,6 +525,10 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 			// click event has to be used in order to focus on the input in dialog
 			// do not open suggestion dialog by click over the value help icon
 			this.$().on("click", jQuery.proxy(function (oEvent) {
+				if (this._onclick) {
+					this._onclick(oEvent);
+				}
+
 				if (this.getShowSuggestion() && this._oSuggestionPopup && oEvent.target.id != this.getId() + "-vhi") {
 					this._oSuggestionPopup.open();
 				}
@@ -923,8 +973,8 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 
 		if (bShowValueHelp && !Input.prototype._sAriaValueHelpLabelId) {
 			// create an F4 ARIA announcement and remember its ID for later use in the renderer:
-			Input.prototype._sAriaValueHelpLabelId = new sap.ui.core.InvisibleText({
-				text: sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("INPUT_VALUEHELP")
+			Input.prototype._sAriaValueHelpLabelId = new InvisibleText({
+				text: this._oRb.getText("INPUT_VALUEHELP")
 			}).toStatic().getId();
 		}
 		return this;
@@ -937,8 +987,8 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 
 		if (bValueHelpOnly && !Input.prototype._sAriaInputDisabledLabelId) {
 			// create an F4 ARIA announcement and remember its ID for later use in the renderer:
-			Input.prototype._sAriaInputDisabledLabelId = new sap.ui.core.InvisibleText({
-				text: sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("INPUT_DISABLED")
+			Input.prototype._sAriaInputDisabledLabelId = new InvisibleText({
+				text: this._oRb.getText("INPUT_DISABLED")
 			}).toStatic().getId();
 		}
 		return this;
@@ -1011,10 +1061,13 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 		if (!this.getEnabled() || !this.getEditable()) {
 			return;
 		}
-		if (!this._oSuggestionPopup || !this._oSuggestionPopup.isOpen()) {
+		if (sDir !== "up" && sDir !== "down") {
 			return;
 		}
-		if (sDir !== "up" && sDir !== "down") {
+
+		oEvent.setMarked();
+
+		if (!this._oSuggestionPopup || !this._oSuggestionPopup.isOpen()) {
 			return;
 		}
 
@@ -1295,15 +1348,21 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 
 		if (sValue.length >= this.getStartSuggestion()) {
 			this._iSuggestDelay = jQuery.sap.delayedCall(300, this, function(){
-				this._bBindingUpdated = false;
-				this.fireSuggest({
-					suggestValue: sValue
-				});
-				// if binding is updated during suggest event, the list items don't need to be refreshed here
-				// because they will be refreshed in updateItems function.
-				// This solves the popup blinking problem
-				if (!this._bBindingUpdated) {
-					this._refreshItemsDelayed();
+
+				if (this._sPrevSuggValue !== sValue) {
+
+					this._bBindingUpdated = false;
+					this.fireSuggest({
+						suggestValue: sValue
+					});
+					// if binding is updated during suggest event, the list items don't need to be refreshed here
+					// because they will be refreshed in updateItems function.
+					// This solves the popup blinking problem
+					if (!this._bBindingUpdated) {
+						this._refreshItemsDelayed();
+					}
+
+					this._sPrevSuggValue = sValue;
 				}
 			});
 		} else if (this._bUseDialog) {
@@ -1314,8 +1373,14 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 				this._oList.destroyItems();
 			}
 		} else if (this._oSuggestionPopup && this._oSuggestionPopup.isOpen()) {
-			this._iPopupListSelectedIndex = -1;
-			this._closeSuggestionPopup();
+
+			jQuery.sap.delayedCall(0, this, function () {
+				var sNewValue = this._$input.val() || '';
+				if (sNewValue < this.getStartSuggestion()) {
+					this._iPopupListSelectedIndex = -1;
+					this._closeSuggestionPopup();
+				}
+			});
 		}
 	};
 
@@ -1348,7 +1413,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 
 		Input.prototype._getShowMoreButton = function() {
 			var that = this,
-				oMessageBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m");
+				oMessageBundle = this._oRb;
 
 			return this._oShowMoreButton || (this._oShowMoreButton = new sap.m.Button({
 				text : oMessageBundle.getText("INPUT_SUGGESTIONS_SHOW_ALL"),
@@ -1555,12 +1620,14 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 				this.$("SuggDescr").text(""); // initialize suggestion ARIA text
 				this.$("inner").removeAttr("aria-haspopup");
 				this.$("inner").removeAttr("aria-activedescendant");
+
+				this._sPrevSuggValue = null;
 			}
 
 		};
 
 		function createSuggestionPopup(oInput) {
-			var oMessageBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m");
+			var oMessageBundle = oInput._oRb;
 
 			if (oInput._bUseDialog) {
 				oInput._oPopupInput = new Input(oInput.getId() + "-popup-input", {
@@ -1675,6 +1742,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 				}));
 
 			oInput._oSuggestionPopup.addStyleClass("sapMInputSuggestionPopup");
+			oInput._oSuggestionPopup.addAriaLabelledBy(Input._sAriaPopupLabelId);
 
 			// add popup as dependent to also propagate the model and bindings to the content of the popover
 			oInput.addDependent(oInput._oSuggestionPopup);
@@ -1708,6 +1776,11 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 						oInput.setSelectionItem(oListItem._oItem, true);
 					}
 				});
+
+				oInput._oList.addEventDelegate({
+					onAfterRendering: oInput._highlightListText.bind(oInput)
+				});
+
 			} else {
 				// tabular suggestions
 				// if no custom filter is set we replace the default filter function here
@@ -1781,6 +1854,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 
 		function refreshListItems(oInput) {
 			var bShowSuggestion = oInput.getShowSuggestion();
+			var oRb = oInput._oRb;
 			oInput._iPopupListSelectedIndex = -1;
 
 			if (!bShowSuggestion ||
@@ -1851,6 +1925,8 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 						aTabularRows[i].setVisible(false);
 					}
 				}
+
+				oInput._oSuggestionTable.invalidate();
 			} else {
 				// filter standard items
 				var bListItem = (aItems[0] instanceof ListItem ? true : false);
@@ -1879,9 +1955,9 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 			if (iItemsLength > 0) {
 				// add items to list
 				if (iItemsLength == 1) {
-					sAriaText = sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("INPUT_SUGGESTIONS_ONE_HIT");
+					sAriaText = oRb.getText("INPUT_SUGGESTIONS_ONE_HIT");
 				} else {
-					sAriaText = sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("INPUT_SUGGESTIONS_MORE_HITS", iItemsLength);
+					sAriaText = oRb.getText("INPUT_SUGGESTIONS_MORE_HITS", iItemsLength);
 				}
 				oInput.$("inner").attr("aria-haspopup", "true");
 
@@ -1906,7 +1982,7 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 					}
 				}
 			} else {
-				sAriaText = sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("INPUT_SUGGESTIONS_NO_HIT");
+				sAriaText = oRb.getText("INPUT_SUGGESTIONS_NO_HIT");
 				oInput.$("inner").removeAttr("aria-haspopup");
 				oInput.$("inner").removeAttr("aria-activedescendant");
 
@@ -1931,6 +2007,82 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 		}
 	})();
 
+	/**
+	 * Creates highlighted text.
+	 * @private
+	 */
+	Input.prototype._createHighlightedText = function(label) {
+		var text = label.innerText,
+			value = this.getValue().toLowerCase(),
+			count = value.length,
+			lowerText = text.toLowerCase(),
+			subString,
+			newText = '';
+
+		if (!Input._wordStartsWithValue(text, value)) {
+			return text;
+		}
+
+		var index = lowerText.indexOf(value);
+
+		// search for the first word which starts with these characters
+		if (index > 0) {
+			index = lowerText.indexOf(' ' + value) + 1;
+		}
+
+		if (index > -1) {
+			newText += text.substring(0, index);
+			subString = text.substring(index, index + count);
+			newText += '<span class="sapMInputHighlight">' + subString + '</span>';
+			newText += text.substring(index + count);
+		} else {
+			newText = text;
+		}
+
+		return newText;
+	};
+
+	/**
+	 * Highlights matched text in the suggestion list.
+	 * @private
+	 *
+	 */
+	Input.prototype._highlightListText = function() {
+
+		if (!this.getEnableSuggestionsHighlighting()) {
+			return;
+		}
+
+		var i,
+			label,
+			labels = this._oList.$().find('.sapMDLILabel, .sapMSLITitleOnly, .sapMDLIValue');
+
+		for (i = 0; i < labels.length; i++) {
+			label = labels[i];
+			label.innerHTML = this._createHighlightedText(label);
+		}
+	};
+
+	/**
+	 * Highlights matched text in the suggestion table.
+	 * @private
+	 *
+	 */
+	Input.prototype._highlightTableText = function() {
+
+		if (!this.getEnableSuggestionsHighlighting()) {
+			return;
+		}
+
+		var i,
+			label,
+			labels = this._oSuggestionTable.$().find('tbody .sapMLabel');
+
+		for (i = 0; i < labels.length; i++) {
+			label = labels[i];
+			label.innerHTML = this._createHighlightedText(label);
+		}
+	};
 
 	Input.prototype.onfocusin = function(oEvent) {
 		InputBase.prototype.onfocusin.apply(this, arguments);
@@ -1941,6 +2093,8 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 			this._triggerSuggest(this.getValue());
 		}
 		this._bPopupHasFocus = undefined;
+
+		this._sPrevSuggValue = null;
 	};
 
 	/**
@@ -1990,6 +2144,11 @@ sap.ui.define(['jquery.sap.global', './Bar', './Dialog', './InputBase', './List'
 					that.setSelectionRow(oSelectedListItem, true);
 				}
 			});
+
+			this._oSuggestionTable.addEventDelegate({
+				onAfterRendering: this._highlightTableText.bind(this)
+			});
+
 			// initially hide the table on phone
 			if (this._bUseDialog) {
 				this._oSuggestionTable.addStyleClass("sapMInputSuggestionTableHidden");

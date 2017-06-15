@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -239,12 +239,17 @@ sap.ui.define([
 			 *     <li>Edm.DateTime: The "displayFormat" constraint is set to the value of the
 			 *     "sap:display-format" annotation of the referenced property.
 			 *     <li>Edm.Decimal: The "precision" and "scale" constraints are set to the values
-			 *     of the corresponding attributes of the referenced property.
+			 *     of the corresponding attributes of the referenced property. The "minimum",
+			 *     "maximum", "minimumExclusive" and "maximumExlusive" constraints are set to the
+			 *     values of the corresponding "Org.OData.Validation.V1" annotation of the
+			 *     referenced property; note that in this case only constant expressions are
+			 *     supported to determine the annotation value.
 			 *     <li>Edm.String: The "maxLength" constraint is set to the value of the
 			 *     corresponding attribute of the referenced property and the "isDigitSequence"
 			 *     constraint is set to the value of the
 			 *     "com.sap.vocabularies.Common.v1.IsDigitSequence" annotation of the referenced
-			 *     property.
+			 *     property; note that in this case only constant expressions are supported to
+			 *     determine the annotation value.
 			 *   </ul>
 			 * </ul>
 			 * Unsupported or incorrect values are turned into a string nevertheless, but indicated

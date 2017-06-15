@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides class sap.ui.core.ComponentMetadata
-sap.ui.define(['jquery.sap.global', './ComponentMetadata', './library'],
-	function(jQuery, ComponentMetadata, library) {
+sap.ui.define(['./ComponentMetadata', './library'],
+	function(ComponentMetadata, library) {
 	"use strict";
 
 	// shortcut for enum(s)
@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './ComponentMetadata', './library'],
 	 * @experimental Since 1.15.1. The Component concept is still under construction, so some implementation details can be changed in future.
 	 * @class
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @since 1.15.1
 	 * @alias sap.ui.core.UIComponentMetadata
 	 */
@@ -34,7 +34,7 @@ sap.ui.define(['jquery.sap.global', './ComponentMetadata', './library'],
 	};
 
 	//chain the prototypes
-	UIComponentMetadata.prototype = jQuery.sap.newObject(ComponentMetadata.prototype);
+	UIComponentMetadata.prototype = Object.create(ComponentMetadata.prototype);
 
 	UIComponentMetadata.preprocessClassInfo = function(oClassInfo) {
 		// if the component is a string we convert this into a "_src" metadata entry

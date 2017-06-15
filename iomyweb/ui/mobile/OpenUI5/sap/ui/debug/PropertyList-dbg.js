@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -18,7 +18,7 @@ sap.ui.define('sap/ui/debug/PropertyList', ['jquery.sap.global', 'sap/ui/base/Da
 	 *
 	 * @extends sap.ui.base.EventProvider
 	 * @author Martin Schaus
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @param {sap.ui.core.Core}
 	 *            oCore the core instance to use for analysis
@@ -191,7 +191,7 @@ sap.ui.define('sap/ui/debug/PropertyList', ['jquery.sap.global', 'sap/ui/base/Da
 					oValue = '(null)';
 				} else if ( oValue  instanceof Element ) {
 					sColor = 'color:#a5a5a5;';
-					if (jQuery.isArray(oValue)) {
+					if (Array.isArray(oValue)) {
 						// array type (copied from primitive values above and modified the value to string / comma separated)
 						oValue = oValue.join(", ");
 					} else {

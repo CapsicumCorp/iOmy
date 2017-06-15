@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -25,20 +25,59 @@ sap.ui.define([
 
 
 	/**
-	 * Constructor for a new Overflow Toolbar
+	 * Constructor for a new <code>OverflowToolbar</code>.
 	 *
-	 * @param {string} [sId] ID for the new control, generated automatically if no id is given
+	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * The OverflowToolbar control is a container based on sap.m.Toolbar, that provides overflow when its content does not fit in the visible area.
+	 * A container control based on {@link sap.m.Toolbar}, that provides overflow when
+	 * its content does not fit in the visible area.
 	 *
-	 * Note: It is recommended that you use OverflowToolbar over {@link sap.m.Toolbar}, unless you want to avoid overflow in favor of shrinking.
+	 * <h3>Overview</h3>
+	 *
+	 * The content of the <code>OverflowToolbar</code> moves into the overflow area from
+	 * right to left when the the available space is not enough in the visible area of
+	 * the container. It can be accessed by the user through the overflow button that
+	 * opens it in a popover.
+	 *
+	 * <b>Note:</b> It is recommended that you use <code>OverflowToolbar</code> over
+	 * {@link sap.m.Toolbar}, unless you want to avoid overflow in favor of shrinking.
+	 *
+	 * <h3>Usage</h3>
+	 *
+	 * Different behavior and priorities can be set for each control inside the
+	 * <code>OverflowToolbar</code>, such as certain actions to appear only in the
+	 * overflow area or to never move there. For more information, see
+	 * {@link sap.m.OverflowToolbarLayoutData} and {@link sap.m.OverflowToolbarPriority}.
+	 *
+	 * Only the following controls can be moved in the overflow area:
+	 *
+	 * <ul><li>{@link sap.m.Button}</li>
+	 * <li>{@link sap.m.CheckBox}</li>
+	 * <li>{@link sap.m.ComboBox}</li>
+	 * <li>{@link sap.m.DatePicker}</li>
+	 * <li>{@link sap.m.DateTimeInput}</li>
+	 * <li>{@link sap.m.DateTimePicker}</li>
+	 * <li>{@link sap.m.Input}</li>
+	 * <li>{@link sap.m.OverflowToolbarButton}</li>
+	 * <li>{@link sap.m.SearchField}</li>
+	 * <li>{@link sap.m.SegmentedButton}</li>
+	 * <li>{@link sap.m.Select}</li>
+	 * <li>{@link sap.m.TimePicker}</li>
+	 * <li>{@link sap.m.ToggleButton}</li>
+	 * <li>{@link sap.ui.comp.smartfield.SmartField}</li>
+	 * <li>{@link sap.ui.comp.smartfield.SmartLabel}</li></ul>
+	 *
+	 * <h3>Responsive behavior</h3>
+	 *
+	 * The height of the toolbar changes on desktop, tablet, and smartphones.
+	 *
 	 * @extends sap.m.Toolbar
 	 * @implements sap.ui.core.Toolbar,sap.m.IBar
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -173,6 +212,7 @@ sap.ui.define([
 			if (this._iPreviousToolbarWidth !== iWidth) {
 				this._iPreviousToolbarWidth = iWidth;
 				this._setControlsOverflowAndShrinking(iWidth);
+				this.fireEvent("_controlWidthChanged");
 			}
 
 		}
@@ -195,17 +235,11 @@ sap.ui.define([
 			return;
 		}
 
-		// Old flexbox polyfill
-		if (Toolbar.hasFlexBoxSupport) {
-			var $This = this.$();
-			var oDomRef = $This[0] || {};
-			$This.removeClass("sapMTBOverflow");
-			var bOverflow = oDomRef.scrollWidth > oDomRef.clientWidth;
-			bOverflow && $This.addClass("sapMTBOverflow");
-			// IE - run the polyfill
-		} else {
-			Toolbar.flexie(this.$());
-		}
+		var $This = this.$();
+		var oDomRef = $This[0] || {};
+		$This.removeClass("sapMTBOverflow");
+		var bOverflow = oDomRef.scrollWidth > oDomRef.clientWidth;
+		bOverflow && $This.addClass("sapMTBOverflow");
 	};
 
 
@@ -510,6 +544,19 @@ sap.ui.define([
 
 		return aToolbarContent.filter(function (oControl) {
 			return aActionSheetContent.indexOf(oControl) === -1;
+		});
+	};
+
+	/**
+	* Returns all the controls from the <code>sap.m.OverflowToolbar</code>,
+	* that are not in the overflow area and their <code>visible</code> property is <code>true</code>.
+	* @private
+	* @sap-restricted
+	* @returns {*|Array.<T>}
+	*/
+	OverflowToolbar.prototype._getVisibleAndNonOverflowContent = function () {
+		return this._getVisibleContent().filter(function (oControl) {
+			return oControl.getVisible();
 		});
 	};
 

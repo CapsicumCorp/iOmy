@@ -1,6 +1,6 @@
 /*
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -43,10 +43,36 @@ sap.ui.define(['jquery.sap.global'],
 		}
 
 		// rendering special day and colors
-		for (i = 0; i < aCustomItems.length; i++) {
-			this.renderLegendItem(oRm, "sapUiCalLegDayType" + oLeg._getItemType(aCustomItems[i]).slice(4), aCustomItems[i]);
-		}
+		if (aCustomItems && aCustomItems.length > 0) {
+			var oFreeTypes = jQuery.extend({}, sap.ui.unified.CalendarDayType);
+			delete oFreeTypes[sap.ui.unified.CalendarDayType.None];
+			var sType;
+			var iTypes = Object.keys(oFreeTypes).length;
 
+			// Remove types that are used
+			for (i = 0; i < aCustomItems.length; ++i) {
+				sType = aCustomItems[i].getType();
+				if (oFreeTypes[sType]) {
+					delete oFreeTypes[sType];
+				}
+			}
+
+			var aFreeTypes = Object.keys(oFreeTypes);
+
+			for (i = 0; i < aCustomItems.length; ++i) {
+				sType = aCustomItems[i].getType();
+				if (!sType || sType === sap.ui.unified.CalendarDayType.None) {
+					if (aFreeTypes[0]) {
+						sType = aFreeTypes.shift();
+					} else {
+						++iTypes;
+						sType = "Type" + iTypes; // event type is not defined, maybe application styled it
+					}
+				}
+
+				this.renderLegendItem(oRm, "sapUiCalLegDayType" + sType.slice(4), aCustomItems[i]);
+			}
+		}
 		oRm.write("</div>");
 	};
 
@@ -61,6 +87,7 @@ sap.ui.define(['jquery.sap.global'],
 
 		var sText = oItem.getText();
 		var sTooltip = oItem.getTooltip_AsString();
+		var sColor = oItem.getColor();
 
 		// new LegendItem
 		oRm.write("<div");
@@ -82,11 +109,14 @@ sap.ui.define(['jquery.sap.global'],
 		// draw the square color
 		oRm.write("<div");
 		oRm.addClass("sapUiUnifiedLegendSquareColor");
+		if (sColor) {
+			oRm.addStyle("background-color", sColor);
+            oRm.writeStyles();
+        }
 		oRm.writeClasses();
 		oRm.write("></div></div>"); // close color, background
 		// write description
 		oRm.write("<div");
-		oRm.writeAttribute("id", oItem.getId() + "-Text");
 		oRm.addClass("sapUiUnifiedLegendDescription");
 		oRm.writeClasses();
 		oRm.write(">");

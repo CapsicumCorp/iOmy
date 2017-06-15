@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -11,7 +11,7 @@
  * This API is independent from any other part of the UI5 framework. This allows it to be loaded beforehand, if it is needed, to create the UI5 bootstrap
  * dynamically depending on the capabilities of the browser or device.
  *
- * @version 1.44.14
+ * @version 1.46.9
  * @namespace
  * @name sap.ui.Device
  * @public
@@ -37,7 +37,7 @@ if (typeof window.sap.ui !== "object") {
 
 	//Skip initialization if API is already available
 	if (typeof window.sap.ui.Device === "object" || typeof window.sap.ui.Device === "function" ) {
-		var apiVersion = "1.44.14";
+		var apiVersion = "1.46.9";
 		window.sap.ui.Device._checkAPIVersion(apiVersion);
 		return;
 	}
@@ -95,7 +95,7 @@ if (typeof window.sap.ui !== "object") {
 
 	//Only used internal to make clear when Device API is loaded in wrong version
 	device._checkAPIVersion = function(sVersion){
-		var v = "1.44.14";
+		var v = "1.46.9";
 		if (v != sVersion) {
 			logger.log(WARNING, "Device API version differs: " + v + " <-> " + sVersion);
 		}
@@ -440,7 +440,8 @@ if (typeof window.sap.ui !== "object") {
 	 * @public
 	 */
 	/**
-	 * If this flag is set to <code>true</code>, the mobile variant of the browser is used.
+	 * If this flag is set to <code>true</code>, the mobile variant of the browser is used or
+	 * a tablet or phone device is detected.
 	 *
 	 * <b>Note:</b> This information might not be available for all browsers.
 	 *
@@ -892,11 +893,6 @@ if (typeof window.sap.ui !== "object") {
 
 	device.support.pointer = !!window.PointerEvent;
 
-	// HOTFIX for Chrome 55+ since it newly introduced PointerEvents and touchevents aren't fired correctly.
-	if (device.browser.name == BROWSER.CHROME && device.browser.version >= 55) {
-		device.support.pointer = false;
-	}
-
 	device.support.matchmedia = !!window.matchMedia;
 	var m = device.support.matchmedia ? window.matchMedia("all and (max-width:0px)") : null; //IE10 doesn't like empty string as argument for matchMedia, FF returns null when running within an iframe with display:none
 	device.support.matchmedialistener = !!(m && m.addListener);
@@ -1130,13 +1126,14 @@ if (typeof window.sap.ui !== "object") {
 		return info;
 	}
 
-	function checkQueries(name, infoOnly){
+	function checkQueries(name, infoOnly, fnMatches){
+		fnMatches = fnMatches || device.media.matches;
 		if (_querysets[name]) {
 			var aQueries = _querysets[name].queries;
 			var info = null;
 			for (var i = 0, len = aQueries.length; i < len; i++) {
 				var q = aQueries[i];
-				if ((q != _querysets[name].currentquery || infoOnly) && device.media.matches(q.from, q.to, _querysets[name].unit)) {
+				if ((q != _querysets[name].currentquery || infoOnly) && fnMatches(q.from, q.to, _querysets[name].unit)) {
 					if (!infoOnly) {
 						_querysets[name].currentquery = q;
 					}
@@ -1196,14 +1193,18 @@ if (typeof window.sap.ui !== "object") {
 		return val;
 	}
 
-	function match_legacy(from, to, unit){
+	function match_legacy_by_size (from, to, unit, size) {
 		from = convertToPx(from, unit);
 		to = convertToPx(to, unit);
 
-		var width = windowSize()[0];
+		var width = size[0];
 		var a = from < 0 || from <= width;
 		var b = to < 0 || width <= to;
 		return a && b;
+	}
+
+	function match_legacy(from, to, unit){
+		return match_legacy_by_size(from, to, unit, windowSize());
 	}
 
 	function match(from, to, unit){
@@ -1236,7 +1237,7 @@ if (typeof window.sap.ui !== "object") {
 	 * @param {object}
 	 *            [oListener] The object that wants to be notified when the event occurs (<code>this</code> context within the
 	 *                        handler function). If it is not specified, the handler function is called in the context of the <code>window</code>.
-	 * @param {String}
+	 * @param {string}
 	 *            sName The name of the range set to listen to. The range set must be initialized beforehand
 	 *                  ({@link sap.ui.Device.media.initRangeSet}). If no name is provided, the
 	 *                  {@link sap.ui.Device.media.RANGESETS.SAP_STANDARD default range set} is used.
@@ -1259,7 +1260,7 @@ if (typeof window.sap.ui !== "object") {
 	 *            fnFunction The handler function to detach from the event
 	 * @param {object}
 	 *            [oListener] The object that wanted to be notified when the event occurred
-	 * @param {String}
+	 * @param {string}
 	 *             sName The name of the range set to listen to. If no name is provided, the
 	 *                   {@link sap.ui.Device.media.RANGESETS.SAP_STANDARD default range set} is used.
 	 *
@@ -1297,15 +1298,15 @@ if (typeof window.sap.ui !== "object") {
 	 * The range names are optional. If they are specified a CSS class (e.g. <code>sapUiMedia-MyRangeSet-Small</code>) is also
 	 * added to the document root depending on the current active range. This can be suppressed via parameter <code>bSuppressClasses</code>.
 	 *
-	 * @param {String}
+	 * @param {string}
 	 *             sName The name of the range set to be initialized - either a {@link sap.ui.Device.media.RANGESETS predefined} or custom one.
 	 *                   The name must be a valid id and consist only of letters and numeric digits.
 	 * @param {int[]}
 	 *             [aRangeBorders] The range borders
-	 * @param {String}
+	 * @param {string}
 	 *             [sUnit] The unit which should be used for the values given in <code>aRangeBorders</code>.
 	 *                     The allowed values are <code>"px"</code> (default), <code>"em"</code> or <code>"rem"</code>
-	 * @param {String[]}
+	 * @param {string[]}
 	 *             [aRangeNames] The names of the ranges. The names must be a valid id and consist only of letters and digits. If names
 	 *             are specified, CSS classes are also added to the document root as described above. This behavior can be
 	 *             switched off explicitly by using <code>bSuppressClasses</code>. <b>Note:</b> <code>aRangeBorders</code> with <code>n</code> entries
@@ -1330,7 +1331,7 @@ if (typeof window.sap.ui !== "object") {
 		}
 
 		if (device.media.hasRangeSet(oConfig.name)) {
-			logger.log(INFO, "Range set " + oConfig.name + " hase already been initialized", 'DEVICE.MEDIA');
+			logger.log(INFO, "Range set " + oConfig.name + " has already been initialized", 'DEVICE.MEDIA');
 			return;
 		}
 
@@ -1383,24 +1384,31 @@ if (typeof window.sap.ui !== "object") {
 	/**
 	 * Returns information about the current active range of the range set with the given name.
 	 *
-	 * @param {String} sName The name of the range set. The range set must be initialized beforehand ({@link sap.ui.Device.media.initRangeSet})
+	 * If the optional parameter <code>iWidth</iWidth> is given, the active range will be determined for that width,
+	 * otherwise it is determined for the current window size.
+	 *
+	 * @param {string} sName The name of the range set. The range set must be initialized beforehand ({@link sap.ui.Device.media.initRangeSet})
+	 * @param {int} [iWidth] An optional width, based on which the range should be determined;
+	 *             If <code>iWidth</code> is not a number, the window size will be used.
+	 * @returns {map} Information about the current active interval of the range set. The returned map has the same structure as the argument of the event handlers ({@link sap.ui.Device.media.attachHandler})
 	 *
 	 * @name sap.ui.Device.media.getCurrentRange
-	 * @return {map} Information about the current active interval of the range set. The returned map has the same structure as the argument of the event handlers ({link sap.ui.Device.media.attachHandler})
 	 * @function
 	 * @public
 	 */
-	device.media.getCurrentRange = function(sName){
+	device.media.getCurrentRange = function(sName, iWidth){
 		if (!device.media.hasRangeSet(sName)) {
 			return null;
 		}
-		return checkQueries(sName, true);
+		return checkQueries(sName, true, isNaN(iWidth) ? null : function(from, to, unit) {
+			return match_legacy_by_size(from, to, unit, [iWidth, 0]);
+		});
 	};
 
 	/**
 	 * Returns <code>true</code> if a range set with the given name is already initialized.
 	 *
-	 * @param {String} sName The name of the range set.
+	 * @param {string} sName The name of the range set.
 	 *
 	 * @name sap.ui.Device.media.hasRangeSet
 	 * @return {boolean} Returns <code>true</code> if a range set with the given name is already initialized
@@ -1417,7 +1425,7 @@ if (typeof window.sap.ui !== "object") {
 	 * Only custom range sets can be removed via this function. Initialized predefined range sets
 	 * ({@link sap.ui.Device.media.RANGESETS}) cannot be removed.
 	 *
-	 * @param {String} sName The name of the range set which should be removed.
+	 * @param {string} sName The name of the range set which should be removed.
 	 *
 	 * @name sap.ui.Device.media.removeRangeSet
 	 * @function
@@ -1474,6 +1482,16 @@ if (typeof window.sap.ui !== "object") {
 	 * If this flag is set to <code>true</code>, the device is recognized as a tablet.
 	 *
 	 * Furthermore, a CSS class <code>sap-tablet</code> is added to the document root element.
+	 *
+	 * <b>Note:</b> This flag is also true for some browsers on desktop devices running on Windows 8 or higher. Also see the
+	 * documentation for {@link sap.ui.Device.system.combi} devices.
+	 * You can use the following logic to ensure that the current device is a tablet device:
+	 *
+	 * <pre>
+	 * if(sap.ui.Device.system.tablet && !sap.ui.Device.system.desktop){
+	 *	...tablet related commands...
+	 * }
+	 * </pre>
 	 *
 	 * @name sap.ui.Device.system.tablet
 	 * @type boolean

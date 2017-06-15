@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -44,7 +44,7 @@ sap.ui.define(["sap/ui/core/Renderer", "./ObjectPageHeaderRenderer"],
 
 			// Header
 			oRm.write("<header ");
-			oRm.writeAttribute("role", "header");
+			oRm.writeAttribute("role", "banner");
 			oRm.writeAttributeEscaped("id", oControl.getId() + "-headerTitle");
 			oRm.addClass("sapUxAPObjectPageHeaderTitle");
 			oRm.addClass("sapContrastPlus");

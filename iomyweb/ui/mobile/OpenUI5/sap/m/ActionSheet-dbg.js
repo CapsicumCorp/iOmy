@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.ActionSheet.
-sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './library', 'sap/ui/core/Control', 'sap/ui/core/delegate/ItemNavigation', 'sap/ui/core/InvisibleText'],
-	function(jQuery, Dialog, Popover, library, Control, ItemNavigation, InvisibleText) {
+sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './library', 'sap/ui/core/Control', 'sap/ui/core/delegate/ItemNavigation', 'sap/ui/core/InvisibleText', 'sap/ui/base/ManagedObject'],
+	function(jQuery, Dialog, Popover, library, Control, ItemNavigation, InvisibleText, ManagedObject) {
 	"use strict";
 
 
@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './library', 'sap/u
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -118,6 +118,9 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './library', 'sap/u
 			cancelButtonPress : {}
 		}
 	}});
+
+	//Keeps the ID of the static aria text for Available Actions
+	var sPopupHiddenLabelId;
 
 	ActionSheet.prototype.init = function() {
 		// this method is kept here empty in case some control inherits from it but forgets to check the existence of this function when chaining the call
@@ -232,7 +235,8 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './library', 'sap/u
 							that.fireCancelButtonPress();
 						}
 						that.fireAfterClose();
-					}
+					},
+					ariaLabelledBy: this.getPopupHiddenLabelId() || undefined
 				}).addStyleClass("sapMActionSheetPopover");
 
 				if (sap.ui.Device.browser.internet_explorer) {
@@ -281,6 +285,8 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './library', 'sap/u
 
 				if (this.getTitle()) {
 					this._parent.addStyleClass("sapMActionSheetDialogWithTitle");
+				} else {
+					this._parent.addAriaLabelledBy(this.getPopupHiddenLabelId() || undefined);
 				}
 
 				if (!sap.ui.Device.system.phone) {
@@ -540,6 +546,35 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './library', 'sap/u
 	 */
 	ActionSheet.prototype._getAllButtons = function() {
 		return this.getButtons();
+	};
+
+	/**
+	 * Gets the ID of the hidden label
+	 * @returns {string} Id of hidden text
+	 * @protected
+	 */
+	ActionSheet.prototype.getPopupHiddenLabelId = function() {
+		if (!sap.ui.getCore().getConfiguration().getAccessibility()) {
+			return "";
+		}
+
+		// Load the resources
+		var oResourceBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m");
+
+		if (!sPopupHiddenLabelId) {
+			sPopupHiddenLabelId = new InvisibleText({
+				text: oResourceBundle.getText("ACTIONSHEET_AVAILABLE_ACTIONS")
+			}).toStatic().getId();
+		}
+		return sPopupHiddenLabelId;
+	};
+
+	/**
+	 * Popup controls should not propagate contextual width
+	 * @private
+	 */
+	ActionSheet.prototype._applyContextualSettings = function () {
+		ManagedObject.prototype._applyContextualSettings.call(this, ManagedObject._defaultContextualSettings);
 	};
 
 	return ActionSheet;

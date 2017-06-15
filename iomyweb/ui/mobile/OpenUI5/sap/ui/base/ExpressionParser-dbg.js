@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -67,13 +67,22 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/URI', 'jquery.sap.strings
 		sPerformanceParse = sExpressionParser + "#parse",
 		mSymbols = { //symbol table
 			"BINDING": {
-				led: unexpected,
+				led: unexpected, // Note: cannot happen due to lbp: 0
 				nud: function (oToken, oParser) {
 					return BINDING.bind(null, oToken.value);
 				}
 			},
+			"ERROR": {
+				lbp: Infinity,
+				led: function (oToken, oParser, fnLeft) {
+					error(oToken.value.message, oToken.value.text, oToken.value.at);
+				},
+				nud: function (oToken, oParser) {
+					error(oToken.value.message, oToken.value.text, oToken.value.at);
+				}
+			},
 			"IDENTIFIER": {
-				led: unexpected,
+				led: unexpected, // Note: cannot happen due to lbp: 0
 				nud: function (oToken, oParser) {
 					if (!(oToken.value in oParser.globals)) {
 						jQuery.sap.log.warning("Unsupported global identifier '" + oToken.value
@@ -85,7 +94,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/URI', 'jquery.sap.strings
 				}
 			},
 			"CONSTANT": {
-				led: unexpected,
+				led: unexpected, // Note: cannot happen due to lbp: 0
 				nud: function (oToken, oParser) {
 					return CONSTANT.bind(null, oToken.value);
 				}
@@ -445,11 +454,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/URI', 'jquery.sap.strings
 	 * @param {object} oToken - the unexpected token
 	 */
 	function unexpected(oToken) {
-		var sToken = oToken.input.slice(oToken.start, oToken.end);
-
-		error("Unexpected " + oToken.id + (sToken !== oToken.id ? ": " + sToken : ""),
-			oToken.input,
-			oToken.start + 1 /*position for error starts counting at 1*/);
+		// Note: position for error starts counting at 1
+		error("Unexpected " + oToken.id, oToken.input, oToken.start + 1);
 	}
 
 	/**
@@ -539,7 +545,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/URI', 'jquery.sap.strings
 
 		/**
 		 * Consumes the next token in the input string and pushes it to the array of tokens.
+		 *
 		 * @returns {boolean} whether a token is recognized
+		 * @throws {Error|Object|SyntaxError}
+		 *   <code>fnResolveBinding</code> may throw <code>SyntaxError</code>;
+		 *   <code>oTokenizer.setIndex()<code> may throw <code>Error</code>;
+		 *   <code>oTokenizer<code> may also throw <code>{name: 'SyntaxError', ...}</code>
 		 */
 		function consumeToken() {
 			var ch, oBinding, iIndex, aMatches, oToken;
@@ -600,8 +611,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/URI', 'jquery.sap.strings
 			while (consumeToken()) { /* deliberately empty */ }
 			/* eslint-enable no-empty */
 		} catch (e) {
-			if (e.name === "SyntaxError") { //handle tokenizer errors
-				error(e.message, e.text, e.at);
+			// Note: new SyntaxError().name === "SyntaxError"
+			if (e.name === "SyntaxError") { // remember tokenizer error
+				aTokens.push({
+					id: "ERROR",
+					value: e
+				});
 			} else {
 				throw e;
 			}
@@ -643,7 +658,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/URI', 'jquery.sap.strings
 	 *   formatter: the formatter function to evaluate the expression which
 	 *     takes the parts corresponding to bindings embedded in the expression as
 	 *     parameters; undefined in case of an invalid expression
-	 *   at: the index of the first character after the expression in sInput
+	 *   at: the index of the first character after the expression in sInput, or
+	 *     <code>undefined</code> if all tokens have been consumed
 	 */
 	function parse(aTokens, sInput, mGlobals) {
 		var fnFormatter,
@@ -721,7 +737,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/URI', 'jquery.sap.strings
 
 		fnFormatter = expression(0); // do this before calling current() below!
 		return {
-			at: current() ? current().start : undefined,
+			at: current() && current().start,
 			// call separate function to reduce the closure size of the formatter
 			formatter: tryCatch(fnFormatter, sInput)
 		};
@@ -788,9 +804,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/thirdparty/URI', 'jquery.sap.strings
 			oTokens = tokenize(fnResolveBinding, sInput, iStart);
 			oResult = parse(oTokens.tokens, sInput, mGlobals || mDefaultGlobals);
 			jQuery.sap.measure.end(sPerformanceParse);
-//			if (iStart === undefined && oTokens.at < sInput.length) {
-//				error("Invalid token in expression", sInput, oTokens.at);
-//			}
 			if (!oTokens.parts.length) {
 				return {
 					constant: oResult.formatter(),

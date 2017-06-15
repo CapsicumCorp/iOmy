@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -64,6 +64,11 @@ sap.ui.define(['jquery.sap.global', './library'],
 			if (blockLayoutCell.getTitle()) {
 				var alignmentClass = "sapUiBlockCell" + blockLayoutCell.getTitleAlignment(),
 					titleClass = "sapUiBlockCellTitle " + alignmentClass;
+
+				// remove bottom margin if cell does not have a content
+				if (blockLayoutCell.getContent().length === 0) {
+					titleClass += " sapUiBlockCellTitleNoContent";
+				}
 
 				var level = blockLayoutCell.getTitleLevel(),
 					autoLevel = level == sap.ui.core.TitleLevel.Auto,

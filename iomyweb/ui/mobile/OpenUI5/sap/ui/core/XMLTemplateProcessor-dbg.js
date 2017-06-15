@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -167,6 +167,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', 'sap/ui/base/Managed
 
 			return aResult;
 
+			function identity(sId) {
+				return sId;
+			}
+
+			function createId(sId) {
+				return oView._oContainingView.createId(sId);
+			}
+
 			/**
 			 * Parses an XML node that might represent a UI5 control or simple XHTML.
 			 * XHTML will be added to the aResult array as a sequence of strings,
@@ -326,21 +334,27 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', 'sap/ui/base/Managed
 			 */
 			function createControlOrExtension(node) { // this will also be extended for Fragments with multiple roots
 
-				if (localName(node) === "ExtensionPoint" && node.namespaceURI === "sap.ui.core") {
-					// create extensionpoint with callback function for defaultContent - will only be executed if there is no customizing configured or if customizing is disabled
-					return ExtensionPoint(oView, node.getAttribute("name"), function(){
-						var children = node.childNodes;
-						var oDefaultContent = [];
-						for (var i = 0; i < children.length; i++) {
-							var oChildNode = children[i];
-							if (oChildNode.nodeType === 1 /* ELEMENT_NODE */) { // text nodes are ignored - plaintext inside extension points is not supported; no warning log because even whitespace is a text node
-								oDefaultContent = jQuery.merge(oDefaultContent, createControls(oChildNode));
+				if (localName(node) === "ExtensionPoint" && node.namespaceURI === "sap.ui.core" ) {
+					if (bEnrichFullIds) {
+						// Processing the different types of ExtensionPoints (XML, JS...) is not possible, hence
+						// they are skipped as well as their potentially overwritten default content.
+						return [];
+					} else {
+						// create extensionpoint with callback function for defaultContent - will only be executed if there is no customizing configured or if customizing is disabled
+						return ExtensionPoint(oView, node.getAttribute("name"), function(){
+							var children = node.childNodes;
+							var oDefaultContent = [];
+							for (var i = 0; i < children.length; i++) {
+								var oChildNode = children[i];
+								if (oChildNode.nodeType === 1 /* ELEMENT_NODE */) { // text nodes are ignored - plaintext inside extension points is not supported; no warning log because even whitespace is a text node
+									oDefaultContent = jQuery.merge(oDefaultContent, createControls(oChildNode));
+								}
 							}
-						}
-						return oDefaultContent;
-					});
+							return oDefaultContent;
+						});
+					}
 
-				} else {
+				}  else {
 					// a plain and simple regular UI5 control
 					return createRegularControls(node);
 				}
@@ -361,7 +375,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', 'sap/ui/base/Managed
 				sStyleClasses = "",
 				aCustomData = [],
 				sSupportData = null;
-
 				if (!oClass) {
 					return [];
 				}
@@ -437,16 +450,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', 'sap/ui/base/Managed
 
 						} else if (oInfo && oInfo._iKind === 3 /* SINGLE_ASSOCIATION */ ) {
 							// ASSOCIATION
-							mSettings[sName] = oView._oContainingView.createId(sValue); // use the value as ID
+							mSettings[sName] = createId(sValue); // use the value as ID
 
 						} else if (oInfo && oInfo._iKind === 4 /* MULTIPLE_ASSOCIATION */ ) {
-							// we support "," and " " to separate IDs
-							/*eslint-disable no-loop-func */
-							mSettings[sName] = jQuery.map(sValue.split(/[\s,]+/g), function(sId) {
-								// Note: empty IDs need to ignored, therefore splitting by a sequence of separators is okay.
-								return sId ? oView._oContainingView.createId(sId) : null;
-							});
-							/*eslint-enable no-loop-func */
+							// we support "," and " " to separate IDs and filter out empty IDs
+							mSettings[sName] = sValue.split(/[\s,]+/g).filter(identity).map(createId);
 
 						} else if (oInfo && oInfo._iKind === 5 /* EVENT */ ) {
 							// EVENT
@@ -495,33 +503,31 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', 'sap/ui/base/Managed
 
 				function handleChild(node, oAggregation, mAggregations, childNode, bActivate) {
 					var oNamedAggregation;
-
 					// inspect only element nodes
 					if (childNode.nodeType === 1 /* ELEMENT_NODE */) {
+
+						if (childNode.namespaceURI === "http://schemas.sap.com/sapui5/extension/sap.ui.mdc.fragmentcontrol/1") {
+							mSettings[localName(childNode)] = childNode.querySelector("*");
+							return;
+						}
 
 						// check for a named aggregation (must have the same namespace as the parent and an aggregation with the same name must exist)
 						oNamedAggregation = childNode.namespaceURI === ns && mAggregations && mAggregations[localName(childNode)];
 						if (oNamedAggregation) {
-
 							// the children of the current childNode are aggregated controls (or HTML) below the named aggregation
 							handleChildren(childNode, oNamedAggregation);
 
 						} else if (oAggregation) {
 							// TODO consider moving this to a place where HTML and SVG nodes can be handled properly
 							// create a StashedControl for inactive controls, which is not placed in an aggregation
-							if (!bActivate && childNode.getAttribute("stashed") === "true") {
+							if (!bActivate && childNode.getAttribute("stashed") === "true" && !bEnrichFullIds) {
 								StashedControlSupport.createStashedControl(getId(oView, childNode), {
-									stashedAlias: childNode.getAttribute("stashedAlias"),
 									sParentId: mSettings["id"],
 									sParentAggregationName: oAggregation.name,
 									fnCreate: function() {
 										return handleChild(node, oAggregation, mAggregations, childNode, true);
 									}
 								});
-								// do not create the control, but still enrich the subtree
-								if (bEnrichFullIds) {
-									XMLTemplateProcessor.enrichTemplateIds(childNode, oView);
-								}
 								return;
 							}
 
@@ -573,7 +579,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', 'sap/ui/base/Managed
 
 				if (bEnrichFullIds && node.hasAttribute("id")) {
 						setId(oView, node);
-				} else {
+				} else if (!bEnrichFullIds) {
 					if (View.prototype.isPrototypeOf(oClass.prototype) && typeof oClass._sType === "string") {
 						// for views having a factory function defined we use the factory function!
 						vNewControlInstance = sap.ui.view(mSettings, undefined, oClass._sType);
@@ -592,7 +598,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', 'sap/ui/base/Managed
 
 				if (!vNewControlInstance) {
 					vNewControlInstance = [];
-				} else if (!jQuery.isArray(vNewControlInstance)) {
+				} else if (!Array.isArray(vNewControlInstance)) {
 					vNewControlInstance = [vNewControlInstance];
 				}
 
@@ -628,12 +634,12 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', 'sap/ui/base/Managed
 				if (xmlNode.getAttributeNS("http://schemas.sap.com/sapui5/extension/sap.ui.core.Internal/1", "id")) {
 					return xmlNode.getAttribute("id");
 				} else {
-					return oView._oContainingView.createId(sId ? sId : xmlNode.getAttribute("id"));
+					return createId(sId ? sId : xmlNode.getAttribute("id"));
 				}
 			}
 
 			function setId(oView, xmlNode) {
-				xmlNode.setAttribute("id", oView._oContainingView.createId(xmlNode.getAttribute("id")));
+				xmlNode.setAttribute("id", createId(xmlNode.getAttribute("id")));
 				xmlNode.setAttributeNS("http://schemas.sap.com/sapui5/extension/sap.ui.core.Internal/1", "id", true);
 			}
 

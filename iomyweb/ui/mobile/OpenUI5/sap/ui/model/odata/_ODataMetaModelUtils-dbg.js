@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -138,6 +138,7 @@ sap.ui.define(["jquery.sap.global"], function (jQuery) {
 			"sap:sortable" : [ "Org.OData.Capabilities.V1.SortRestrictions",
 				"NonSortableProperties" ]
 		},
+		rValueList = /^com\.sap\.vocabularies\.Common\.v1\.ValueList(#.*)?$/,
 		iWARNING = jQuery.sap.log.Level.WARNING,
 		Utils;
 
@@ -354,6 +355,13 @@ sap.ui.define(["jquery.sap.global"], function (jQuery) {
 		 */
 		addV4Annotation : function (o, oExtension, sTypeClass) {
 			switch (oExtension.name) {
+				case "aggregation-role":
+					if (oExtension.value === "dimension") {
+						o["com.sap.vocabularies.Analytics.v1.Dimension"] = oBoolTrue;
+					} else if (oExtension.value === "measure") {
+						o["com.sap.vocabularies.Analytics.v1.Measure"] = oBoolTrue;
+					}
+					break;
 				case "display-format":
 					if (oExtension.value === "NonNegative") {
 						o["com.sap.vocabularies.Common.v1.IsDigitSequence"] = oBoolTrue;
@@ -671,13 +679,15 @@ sap.ui.define(["jquery.sap.global"], function (jQuery) {
 		 * @returns {object} map of ValueList annotations contained in oProperty
 		 */
 		getValueLists : function (oProperty) {
-			var sName,
+			var aMatches,
+				sName,
 				sQualifier,
 				mValueLists = {};
 
 			for (sName in oProperty) {
-				if (jQuery.sap.startsWith(sName, "com.sap.vocabularies.Common.v1.ValueList")) {
-					sQualifier = sName.split("#")[1] || "";
+				aMatches = rValueList.exec(sName);
+				if (aMatches){
+					sQualifier = (aMatches[1] || "").slice(1); // remove leading #
 					mValueLists[sQualifier] = oProperty[sName];
 				}
 			}

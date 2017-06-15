@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -234,7 +234,7 @@ sap.ui.define(['jquery.sap.global'],
 	 *
 	 * Placeholders have the form <code>{ integer }</code>, where any occurrence of
 	 * <code>{0}</code> is replaced by the value with index 0 in <code>aValues</code>,
-	 * <code>{1}</code> y the value with index 1 in <code>aValues</code> etc.
+	 * <code>{1}</code> by the value with index 1 in <code>aValues</code> etc.
 	 *
 	 * To avoid interpretation of curly braces as placeholders, any non-placeholder fragment
 	 * of the pattern can be enclosed in single quotes. The surrounding single quotes will be
@@ -244,10 +244,10 @@ sap.ui.define(['jquery.sap.global'],
 	 *
 	 * Example Pattern Strings:
 	 * <pre>
-	 *   jQuery.sap.formatMessage("Say {0}", ["Hello"]) -> "Say Hello"  // normal use case
-	 *   jQuery.sap.formatMessage("Say '{0}'", ["Hello"]) -> "Say {0}"  // escaped placeholder
-	 *   jQuery.sap.formatMessage("Say ''{0}''", ["Hello"]) -> "Say 'Hello'" // doubled single quote
-	 *   jQuery.sap.formatMessage("Say '{0}'''", ["Hello"]) -> "Say {0}'" // doubled single quote in quoted fragment
+	 *   jQuery.sap.formatMessage("Say {0}",     ["Hello"]) -> "Say Hello"    // normal use case
+	 *   jQuery.sap.formatMessage("Say '{0}'",   ["Hello"]) -> "Say {0}"      // escaped placeholder
+	 *   jQuery.sap.formatMessage("Say ''{0}''", ["Hello"]) -> "Say 'Hello'"  // doubled single quote
+	 *   jQuery.sap.formatMessage("Say '{0}'''", ["Hello"]) -> "Say {0}'"     // doubled single quote in quoted fragment
 	 * </pre>
 	 *
 	 * In contrast to java.util.MessageFormat, format types or format styles are not supported.
@@ -272,7 +272,7 @@ sap.ui.define(['jquery.sap.global'],
 	 */
 	jQuery.sap.formatMessage = function formatMessage(sPattern, aValues) {
 		jQuery.sap.assert(typeof sPattern === "string" || sPattern instanceof String, "pattern must be string");
-		if (arguments.length > 2 || (aValues != null && !jQuery.isArray(aValues))) {
+		if (arguments.length > 2 || (aValues != null && !Array.isArray(aValues))) {
 			aValues = Array.prototype.slice.call(arguments,1);
 		}
 		aValues = aValues || [];

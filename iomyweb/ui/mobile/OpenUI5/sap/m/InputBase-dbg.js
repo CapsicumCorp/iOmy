@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -125,7 +125,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 					value: { type: "string" }
 				}
 			}
-		}
+		},
+		designTime : true
 	}});
 
 	EnabledPropagator.call(InputBase.prototype);
@@ -349,15 +350,35 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * Handles the <code>sapfocusleave</code> event of the input.
 	 *
 	 * @param {jQuery.Event} oEvent The event object.
-	 * @private
 	 */
 	InputBase.prototype.onsapfocusleave = function(oEvent) {
 
-		if (this.bFocusoutDueRendering) {
-			return;
+		if (!this.preventChangeOnFocusLeave(oEvent)) {
+			this.onChange(oEvent);
 		}
+	};
 
-		this.onChange(oEvent);
+	/**
+	 * Hook method to prevent the change event from being fired when the text input field loses focus.
+	 *
+	 * @param {jQuery.Event} [oEvent] The event object.
+	 * @returns {boolean} Whether or not the change event should be prevented.
+	 * @protected
+	 * @since 1.46
+	 */
+	InputBase.prototype.preventChangeOnFocusLeave = function(oEvent) {
+		return this.bFocusoutDueRendering;
+	};
+
+	/*
+	 * Gets the change event additional parameters.
+	 *
+	 * @returns {object} A map object with the parameters
+	 * @protected
+	 * @since 1.48
+	 */
+	InputBase.prototype.getChangeEventParams = function() {
+		return {};
 	};
 
 	/**
@@ -382,9 +403,12 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 *
 	 * @protected
 	 * @param {object} oEvent
+	 * @param {object} [mParameters] Additional event parameters to be passed in to the change event handler if the
+	 * value has changed
 	 * @returns {true|undefined} true when change event is fired
 	 */
-	InputBase.prototype.onChange = function(oEvent) {
+	InputBase.prototype.onChange = function(oEvent, mParameters) {
+		mParameters = mParameters || this.getChangeEventParams();
 
 		// check the control is editable or not
 		if (!this.getEditable() || !this.getEnabled()) {
@@ -414,7 +438,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			this._lastValue = sValue;
 
 			// fire change event
-			this.fireChangeEvent(sValue);
+			this.fireChangeEvent(sValue, mParameters);
 
 			// inform change detection
 			return true;

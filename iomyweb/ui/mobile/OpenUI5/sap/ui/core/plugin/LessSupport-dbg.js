@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -32,7 +32,7 @@
 			 *        feature - DO NOT USE IN PRODUCTIVE SCENARIOS!!
 			 *
 			 * @author Peter Muessig
-			 * @version 1.44.14
+			 * @version 1.46.9
 			 * @private
 			 * @alias sap.ui.core.plugin.LessSupport
 			 */
@@ -349,7 +349,7 @@
 			 */
 			LessSupport.prototype.registerLink = function(oLink) {
 				if (window.less && window.less.sheets) {
-					var iIndex = jQuery.inArray(oLink, window.less.sheets);
+					var iIndex = window.less.sheets.indexOf(oLink);
 					if (iIndex === -1) {
 						window.less.sheets.push(oLink);
 					}
@@ -364,7 +364,7 @@
 			LessSupport.prototype.unregisterLink = function(oLink) {
 				if (window.less && window.less.sheets) {
 					var sLibName = oLink.id.substr(13);
-					var iIndex = jQuery.inArray(oLink, window.less.sheets);
+					var iIndex = window.less.sheets.indexOf(oLink);
 					if (iIndex >= 0) {
 						window.less.sheets.splice(iIndex, 1);
 						// clear the content of the LESS style element

@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -293,16 +293,15 @@ sap.ui.define([
 	Popup.prototype.touchEnabled = Device.support.touch || jQuery.sap.simulateMobileOnDesktop;
 
 	/**
-	 * This property changes how focus handling works. When it's set to true,
-	 * focus will be restored after Popup is closed to the previous focused
-	 * element before Popup is open. Otherwise, this function is disabled.
-	 *
-	 * By default, the focus is restored only in non-touch environments.
+	 * On mobile device, the browser may set the focus to somewhere else after
+	 * the restoring of focus from Popup. This behavior should be prevented in
+	 * order to make sure that the focus is restored to the right DOM element in
+	 * mobile environment.
 	 *
 	 * @type {boolean}
 	 * @private
 	 */
-	Popup.prototype.restoreFocus = (!Device.support.touch && !jQuery.sap.simulateMobileOnDesktop) || Device.system.combi;
+	Popup.prototype.preventBrowserFocus = (Device.support.touch || jQuery.sap.simulateMobileOnDesktop) && !Device.system.combi;
 
 	//****************************************************
 	//Layer et al
@@ -642,11 +641,8 @@ sap.ui.define([
 		jQuery.sap.assert(!offset || typeof offset === "string", "offset must be empty or a string");
 		jQuery.sap.assert(!collision || typeof collision === "string", "collision must be empty or a string");
 
-		// disable for mobile or desktop browser in touch mode
-		if (this.restoreFocus) {
-			// save current focused element to restore the focus after closing
-			this._oPreviousFocus = Popup.getCurrentFocusInfo();
-		}
+		// save current focused element to restore the focus after closing
+		this._oPreviousFocus = Popup.getCurrentFocusInfo();
 
 		// It is mandatroy to check if the new Popup runs within another Popup because
 		// if this new Popup is rendered via 'this._$(true)' and focused (happens e.g. if
@@ -1161,6 +1157,19 @@ sap.ui.define([
 			this.removeChildFromPopup(sParentId, this._popupUID);
 		}
 
+		if (this._bModal && this.preventBrowserFocus) {
+			$Ref.one("mousedown", function(oEvent) {
+				// browser sets the focus after mousedown event
+				// On mobile devices, the restoring of focus may happen before
+				// the delayed mousedown event.
+				// The browser will set the focus to the clicked element again
+				// after restoring of the focus.
+				// Calling 'preventDefault' prevents the browser from setting
+				// the focus after the delayed mousedown event.
+				oEvent.preventDefault();
+			});
+		}
+
 		this._duringClose();
 		if (iRealDuration == 0) { // iRealDuration == 0 means: no animation!
 			this._closed();
@@ -1203,6 +1212,7 @@ sap.ui.define([
 			// update the DomRef because it could have been rerendered during closing
 			$Ref = this._$(/* forceRerender */ false, /* only get DOM */ true);
 			oDomRef = $Ref.length ? $Ref[0] : null;
+
 			if (oDomRef) {
 				// also hide the new DOM ref
 				oDomRef.style.display = "none";
@@ -1213,16 +1223,12 @@ sap.ui.define([
 			}
 		}
 
-		//disabled for mobile or desktop browser in touch mode
-		if (this.restoreFocus) {
-			if (this._bModal) {
-
-				// try to set the focus back to whatever was focused before. Do this here because animation needs to be finished.
-				//- TODO: currently focus is restored only for modal popups. Non modal popups have to do it themselves because the outside focus can change!
-				Popup.applyFocusInfo(this._oPreviousFocus);
-				this._oPreviousFocus = null;
-				this.oLastBlurredElement = null;
-			}
+		if (this._bModal) {
+			// try to set the focus back to whatever was focused before. Do this here because animation needs to be finished.
+			//- TODO: currently focus is restored only for modal popups. Non modal popups have to do it themselves because the outside focus can change!
+			Popup.applyFocusInfo(this._oPreviousFocus);
+			this._oPreviousFocus = null;
+			this.oLastBlurredElement = null;
 		}
 
 		this.bOpen = false;
@@ -1852,7 +1858,7 @@ sap.ui.define([
 	 */
 	Popup.prototype.setAutoCloseAreas = function(aAutoCloseAreas) {
 		//TODO: also handle the case when 'aAutoCloseAreas' is set with null
-		jQuery.sap.assert(jQuery.isArray(aAutoCloseAreas), "aAutoCloseAreas must be an array which contains either sap.ui.core.Element, DOM Element or an ID");
+		jQuery.sap.assert(Array.isArray(aAutoCloseAreas), "aAutoCloseAreas must be an array which contains either sap.ui.core.Element, DOM Element or an ID");
 
 		this._aAutoCloseAreas = [];
 
@@ -1895,7 +1901,7 @@ sap.ui.define([
 			oAreaRef.id = sId;
 			this._aAutoCloseAreas.push(oAreaRef);
 
-			if (jQuery.inArray(sId, this.getChildPopups()) === -1) {
+			if (this.getChildPopups().indexOf(sId) === -1) {
 				this.addChildPopup(sId);
 			}
 		}
@@ -2245,7 +2251,7 @@ sap.ui.define([
 	 * @private
 	 */
 	Popup.prototype._addFocusableArea = function(sChannel, sEvent, oEventData) {
-		if (jQuery.inArray(oEventData.id, this.getChildPopups()) === -1) {
+		if ( this.getChildPopups().indexOf(oEventData.id) === -1) {
 			this.addChildPopup(oEventData.id);
 		}
 	};
@@ -2343,9 +2349,7 @@ sap.ui.define([
 	 */
 	Popup.prototype._showBlockLayer = function() {
 		var $BlockRef = jQuery("#sap-ui-blocklayer-popup"),
-			sClassName = "sapUiBLy" + (this._sModalCSSClass ? " " + this._sModalCSSClass : ""),
-			iWindowScrollX = window.scrollX === undefined ? window.pageXOffset : window.scrollX,
-			iWindowScrollY = window.scrollY === undefined ? window.pageYOffset : window.scrollY;
+			sClassName = "sapUiBLy" + (this._sModalCSSClass ? " " + this._sModalCSSClass : "");
 
 		if ($BlockRef.length === 0) {
 			$BlockRef = jQuery('<div id="sap-ui-blocklayer-popup" tabindex="0" class="' + sClassName + '"></div>');
@@ -2361,13 +2365,7 @@ sap.ui.define([
 		});
 		$BlockRef.css({
 			"z-index" : this._iZIndex - 2,
-			"visibility" : "visible",
-			// the top, bottom, left, and right are calculated base on the
-			// window scroll position
-			"top": iWindowScrollY + "px",
-			"bottom": -1 * iWindowScrollY + "px",
-			"left": iWindowScrollX + "px",
-			"right": -1 * iWindowScrollX + "px"
+			"visibility" : "visible"
 		}).show();
 
 		// prevent HTML page from scrolling

@@ -757,6 +757,29 @@
       ]
     },
     {
+      "name": "flexibility/SimpleForm.flexibility-dbg.js",
+      "module": "sap/ui/layout/flexibility/SimpleForm.flexibility.js",
+      "isDebug": true,
+      "required": [
+        "sap/ui/layout/changeHandler/RenameSimpleForm.js",
+        "sap/ui/layout/changeHandler/MoveSimpleForm.js",
+        "sap/ui/layout/changeHandler/HideSimpleForm.js",
+        "sap/ui/layout/changeHandler/UnhideSimpleForm.js",
+        "sap/ui/layout/changeHandler/AddSimpleFormGroup.js"
+      ]
+    },
+    {
+      "name": "flexibility/SimpleForm.flexibility.js",
+      "module": "sap/ui/layout/flexibility/SimpleForm.flexibility.js",
+      "required": [
+        "sap/ui/layout/changeHandler/RenameSimpleForm.js",
+        "sap/ui/layout/changeHandler/MoveSimpleForm.js",
+        "sap/ui/layout/changeHandler/HideSimpleForm.js",
+        "sap/ui/layout/changeHandler/UnhideSimpleForm.js",
+        "sap/ui/layout/changeHandler/AddSimpleFormGroup.js"
+      ]
+    },
+    {
       "name": "form/Form-dbg.js",
       "module": "sap/ui/layout/form/Form.js",
       "isDebug": true,
@@ -840,6 +863,26 @@
     {
       "name": "form/FormElement.control",
       "designtime": true
+    },
+    {
+      "name": "form/FormElement.designtime-dbg.js",
+      "module": "sap/ui/layout/form/FormElement.designtime.js",
+      "isDebug": true,
+      "required": [
+        "sap/ui/layout/form/Form.js",
+        "sap/ui/layout/form/FormContainer.js",
+        "sap/ui/layout/form/ResponsiveGridLayout.js"
+      ]
+    },
+    {
+      "name": "form/FormElement.designtime.js",
+      "module": "sap/ui/layout/form/FormElement.designtime.js",
+      "designtime": true,
+      "required": [
+        "sap/ui/layout/form/Form.js",
+        "sap/ui/layout/form/FormContainer.js",
+        "sap/ui/layout/form/ResponsiveGridLayout.js"
+      ]
     },
     {
       "name": "form/FormElement.js",
@@ -1606,6 +1649,11 @@
     },
     {
       "name": "themes/sap_hcb/.theming",
+      "theme": "sap_hcb"
+    },
+    {
+      "name": "themes/sap_hcb/BlockLayout.less",
+      "designtime": true,
       "theme": "sap_hcb"
     },
     {

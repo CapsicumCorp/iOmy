@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -22,14 +22,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 	 * @namespace
 	 * @name sap.m
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.m",
-		version: "1.44.14",
+		version: "1.46.9",
 		dependencies : ["sap.ui.core"],
 		types: [
 			"sap.m.BackgroundDesign",
@@ -71,6 +71,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 			"sap.m.OverflowToolbarPriority",
 			"sap.m.P13nPanelType",
 			"sap.m.PageBackgroundDesign",
+			"sap.m.PanelAccessibleRole",
 			"sap.m.PlacementType",
 			"sap.m.PopinDisplay",
 			"sap.m.QuickViewGroupElementType",
@@ -90,6 +91,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 		interfaces: [
 			"sap.m.IBar",
 			"sap.m.IconTab",
+			"sap.m.IScale",
 			"sap.m.semantic.IGroup",
 			"sap.m.semantic.IFilter",
 			"sap.m.semantic.ISort",
@@ -152,6 +154,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 			"sap.m.MenuButton",
 			"sap.m.MessagePage",
 			"sap.m.MessagePopover",
+			"sap.m.MessageView",
 			"sap.m.MessageStrip",
 			"sap.m.MultiComboBox",
 			"sap.m.MultiInput",
@@ -255,6 +258,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 			"sap.m.OverflowToolbarLayoutData",
 			"sap.m.MaskInputRule",
 			"sap.m.MenuItem",
+			"sap.m.MessageItem",
 			"sap.m.MessagePopoverItem",
 			"sap.m.PageAccessibleLandmarkInfo",
 			"sap.m.P13nFilterItem",
@@ -262,6 +266,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 			"sap.m.PlanningCalendarRow",
 			"sap.m.PlanningCalendarView",
 			"sap.m.P13nSortItem",
+			"sap.m.ResponsiveScale",
 			"sap.m.SegmentedButtonItem",
 			"sap.m.SuggestionItem",
 			"sap.m.TabContainerItem",
@@ -273,8 +278,110 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 			"sap.m.ViewSettingsFilterItem",
 			"sap.m.ViewSettingsItem",
 			"sap.m.semantic.SemanticButton",
-			"sap.m.semantic.SemanticSelect"
-		]
+			"sap.m.semantic.SemanticSelect",
+			"sap.m.semantic.AddAction",
+			"sap.m.semantic.CancelAction",
+			"sap.m.semantic.DeleteAction",
+			"sap.m.semantic.DiscussInJamAction",
+			"sap.m.semantic.EditAction",
+			"sap.m.semantic.FavoriteAction",
+			"sap.m.semantic.FilterAction",
+			"sap.m.semantic.FilterSelect",
+			"sap.m.semantic.FlagAction",
+			"sap.m.semantic.ForwardAction",
+			"sap.m.semantic.GroupAction",
+			"sap.m.semantic.GroupSelect",
+			"sap.m.semantic.MainAction",
+			"sap.m.semantic.MessagesIndicator",
+			"sap.m.semantic.MultiSelectAction",
+			"sap.m.semantic.NegativeAction",
+			"sap.m.semantic.OpenInAction",
+			"sap.m.semantic.PositiveAction",
+			"sap.m.semantic.PrintAction",
+			"sap.m.semantic.SaveAction",
+			"sap.m.semantic.SendEmailAction",
+			"sap.m.semantic.SendMessageAction",
+			"sap.m.semantic.ShareInJamAction",
+			"sap.m.semantic.SortAction",
+			"sap.m.semantic.SortSelect"
+		],
+		extensions: {
+			flChangeHandlers: {
+				"sap.m.Bar": {
+					"moveControls": "default"
+				},
+				"sap.m.ListItemBase": {
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.m.StandardListItem": {
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.m.ColumnListItem": {
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.m.CustomListItem": {
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.m.InputListItem": {
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.m.DatePicker": {
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.m.CheckBox": "sap/m/flexibility/CheckBox",
+				"sap.m.Input": {
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.m.InputBase": {
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.m.Label": "sap/m/flexibility/Label",
+				"sap.m.MultiInput": {
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.m.MaskInput": {
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.m.OverflowToolbar": {
+					"moveControls": "default"
+				},
+				"sap.m.Page": "sap/m/flexibility/Page",
+				"sap.m.Panel": "sap/m/flexibility/Panel",
+				"sap.m.RadioButton": "sap/m/flexibility/RadioButton",
+				"sap.m.RatingIndicator": {
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.m.RangeSlider": {
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.m.ScrollContainer": {
+					"hideControl": "default",
+					"moveControls": "default",
+					"unhideControl": "default"
+				},
+				"sap.m.Slider": {
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.m.Text": "sap/m/flexibility/Text",
+				"sap.m.Title": "sap/m/flexibility/Title",
+				"sap.m.Toolbar": {
+					"moveControls": "default"
+				}
+			}
+		}
 	});
 
 
@@ -970,7 +1077,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 	 *
 	 * @enum {string}
 	 * @public
-	 * @since 1.44.5
+	 * @since 1.45.5
 	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	sap.m.LinkConversion = {
@@ -1051,11 +1158,36 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 		 */
 		HeaderMode : "HeaderMode",
 		/**
-		 * Line mode (Only header and subtitle are rendered continuously spanning multiple lines).
+		 * Line mode (Implemented for both, cozy and compact densities. Generic Tile is displayed as in-line element, header and subheader are displayed in one line.
+		 * In case the texts need more than one line, the representation depends on the used density.
+		 * <b>Cozy:</b> The text will be truncated and the full text is shown in a tooltip as soon as the tile is hovered (desktop only).
+		 * <b>Compact:</b> Header and subheader are rendered continuously spanning multiple lines, no tooltip is provided).
 		 * @since 1.44.0
 		 * @public
 		 */
 		LineMode : "LineMode"
+	};
+
+	/**
+	 * Defines the scopes of GenericTile enabling the developer to implement different "flavors" of tiles.
+	 *
+	 * @enum {string}
+	 * @since 1.46.0
+	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 * @public
+	 */
+	sap.m.GenericTileScope = {
+		/**
+		 * Default scope (The default scope of the tile, no action icons are rendered).
+		 * @public
+		 */
+		Display: "Display",
+
+		/**
+		 * Action scope (Possible footer and Error State information is overlaid, "Remove" and "More" icons are added to the tile).
+		 * @public
+		 */
+		Actions: "Actions"
 	};
 
 	/**
@@ -1114,6 +1246,18 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 	 *
 	 * @since 1.22
 	 * @name sap.m.IBar
+	 * @interface
+	 * @public
+	 * @ui5-metamodel This interface also will be described in the UI5 (legacy) designtime metamodel
+	 */
+
+	/**
+	 *
+	 *   Interface for controls which are suitable as a Scale for the Slider/RangeSlider.
+	 *
+	 *
+	 * @since 1.46
+	 * @name sap.m.IScale
 	 * @interface
 	 * @public
 	 * @ui5-metamodel This interface also will be described in the UI5 (legacy) designtime metamodel
@@ -1915,6 +2059,37 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 	};
 
 	/**
+	 * Available Panel Accessible Landmark Roles.
+	 *
+	 * @enum {string}
+	 * @public
+	 * @ui5-metamodel This enumeration also will be described in the UI5 (legacy) designtime metamodel
+	 */
+	sap.m.PanelAccessibleRole = {
+
+		/**
+		 * Represents the ARIA role <code>complementary</code>.
+		 * A section of the page, designed to be complementary to the main content at a similar level in the DOM hierarchy.
+		 * @public
+		 */
+		Complementary : "Complementary",
+
+		/**
+		 * Represents the ARIA role <code>Form</code>.
+		 * A landmark region that contains a collection of items and objects that, as a whole, create a form.
+		 * @public
+		 */
+		Form: "Form",
+
+		/**
+		 * Represents the ARIA role <code>Region</code>.
+		 * A section of a page, that is important enough to be included in a page summary or table of contents.
+		 * @public
+		 */
+		Region: "Region"
+	};
+
+		/**
 	 * Types for the placement of popover control.
 	 *
 	 * @enum {string}
@@ -3694,6 +3869,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Device', 'sap/ui/base/DataType',
 				}, 0);
 			}
 		});
+	}
+
+	// ES6 constant represents the maximum safe integer
+	if (!Number.MAX_SAFE_INTEGER) {
+		Number.MAX_SAFE_INTEGER = Math.pow(2, 53) - 1;
 	}
 
 	return sap.m;

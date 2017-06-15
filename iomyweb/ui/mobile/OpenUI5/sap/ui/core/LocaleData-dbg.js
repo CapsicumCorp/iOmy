@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -10,16 +10,15 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 	"use strict";
 
 	/**
-	 * Creates an instance of the Data.
+	 * Creates an instance of LocaleData for the given locale.
 	 *
-	 * @class Data provides access to locale-specific data, like date formats, number formats, currencies, etc.
+	 * @class Provides access to locale-specific data, like date formats, number formats, currencies, etc.
 	 *
 	 * @param {sap.ui.core.Locale} oLocale the locale
 	 *
 	 * @extends sap.ui.base.Object
 	 * @author SAP SE
-	 * @version 1.44.14
-	 * @constructor
+	 * @version 1.46.9
 	 * @public
 	 * @alias sap.ui.core.LocaleData
 	 */
@@ -47,7 +46,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get orientation (left-to-right or right-to-left)
+		 * Get orientation (left-to-right or right-to-left).
 		 *
 		 * @returns {string} character orientation for this locale
 		 * @public
@@ -57,7 +56,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get locale specific language names
+		 * Get locale specific language names.
 		 *
 		 * @returns {object} map of locale specific language names
 		 * @public
@@ -67,7 +66,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get locale specific script names
+		 * Get locale specific script names.
 		 *
 		 * @returns {object} map of locale specific script names
 		 * @public
@@ -77,7 +76,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get locale specific territory names
+		 * Get locale specific territory names.
 		 *
 		 * @returns {object} map of locale specific territory names
 		 * @public
@@ -87,7 +86,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get month names in width "narrow", "abbreviated" or "wide"
+		 * Get month names in width "narrow", "abbreviated" or "wide".
 		 *
 		 * @param {string} sWidth the required width for the month names
 		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar. If it's not set, it falls back to the calendar type either set in configuration or calculated from locale.
@@ -100,7 +99,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get stand alone month names in width "narrow", "abbreviated" or "wide"
+		 * Get stand alone month names in width "narrow", "abbreviated" or "wide".
 		 *
 		 * @param {string} sWidth the required width for the month names
 		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar. If it's not set, it falls back to the calendar type either set in configuration or calculated from locale.
@@ -113,7 +112,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get day names in width "narrow", "abbreviated" or "wide"
+		 * Get day names in width "narrow", "abbreviated" or "wide".
 		 *
 		 * @param {string} sWidth the required width for the day names
 		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar. If it's not set, it falls back to the calendar type either set in configuration or calculated from locale.
@@ -126,7 +125,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get stand alone day names in width "narrow", "abbreviated" or "wide"
+		 * Get stand alone day names in width "narrow", "abbreviated" or "wide".
 		 *
 		 * @param {string} sWidth the required width for the day names
 		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar. If it's not set, it falls back to the calendar type either set in configuration or calculated from locale.
@@ -139,7 +138,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get quarter names in width "narrow", "abbreviated" or "wide"
+		 * Get quarter names in width "narrow", "abbreviated" or "wide".
 		 *
 		 * @param {string} sWidth the required width for the quarter names
 		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar. If it's not set, it falls back to the calendar type either set in configuration or calculated from locale.
@@ -152,7 +151,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get stand alone quarter names in width "narrow", "abbreviated" or "wide"
+		 * Get stand alone quarter names in width "narrow", "abbreviated" or "wide".
 		 *
 		 * @param {string} sWidth the required width for the quarter names
 		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar. If it's not set, it falls back to the calendar type either set in configuration or calculated from locale.
@@ -165,7 +164,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get day periods in width "narrow", "abbreviated" or "wide"
+		 * Get day periods in width "narrow", "abbreviated" or "wide".
 		 *
 		 * @param {string} sWidth the required width for the day period names
 		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar. If it's not set, it falls back to the calendar type either set in configuration or calculated from locale.
@@ -178,7 +177,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get standalone day periods in width "narrow", "abbreviated" or "wide"
+		 * Get standalone day periods in width "narrow", "abbreviated" or "wide".
 		 *
 		 * @param {string} sWidth the required width for the day period names
 		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar. If it's not set, it falls back to the calendar type either set in configuration or calculated from locale.
@@ -191,7 +190,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get date pattern in format "short", "medium", "long" or "full"
+		 * Get date pattern in format "short", "medium", "long" or "full".
 		 *
 		 * @param {string} sStyle the required style for the date pattern
 		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar. If it's not set, it falls back to the calendar type either set in configuration or calculated from locale.
@@ -204,7 +203,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get time pattern in style "short", "medium", "long" or "full"
+		 * Get time pattern in style "short", "medium", "long" or "full".
 		 *
 		 * @param {string} sStyle the required style for the date pattern
 		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar. If it's not set, it falls back to the calendar type either set in configuration or calculated from locale.
@@ -217,7 +216,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get datetime pattern in style "short", "medium", "long" or "full"
+		 * Get datetime pattern in style "short", "medium", "long" or "full".
 		 *
 		 * @param {string} sStyle the required style for the datetime pattern
 		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar. If it's not set, it falls back to the calendar type either set in configuration or calculated from locale.
@@ -230,7 +229,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get combined datetime pattern with given date and and time style
+		 * Get combined datetime pattern with given date and and time style.
 		 *
 		 * @param {string} sDateStyle the required style for the date part
 		 * @param {string} sTimeStyle the required style for the time part
@@ -266,6 +265,143 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		getCustomDateTimePattern: function(sSkeleton, sCalendarType) {
 			var oAvailableFormats = this._get(getCLDRCalendarName(sCalendarType), "dateTimeFormats", "availableFormats");
 			return this._getFormatPattern(sSkeleton, oAvailableFormats, sCalendarType);
+		},
+
+		/**
+		 * Returns the interval format with the given Id (see CLDR documentation for valid Ids)
+		 * or the fallback format if no interval format with that Id is known.
+		 *
+		 * The empty Id ("") might be used to retrieve the interval format fallback.
+		 *
+		 * @param {string} sId Id of the interval format, e.g. "d-d"
+		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar. If it's not set, it falls back to the calendar type either set in configuration or calculated from locale.
+		 * @returns {string} interval format string with placeholders {0} and {1}
+		 * @public
+		 * @since 1.17.0
+		 */
+		getIntervalPattern : function(sId, sCalendarType) {
+			var oIntervalFormats = this._get(getCLDRCalendarName(sCalendarType), "dateTimeFormats", "intervalFormats"),
+				aIdParts, sIntervalId, sDifference, oInterval, sPattern;
+			if (sId) {
+				aIdParts = sId.split("-");
+				sIntervalId = aIdParts[0];
+				sDifference = aIdParts[1];
+				oInterval = oIntervalFormats[sIntervalId];
+				if (oInterval) {
+					sPattern = oInterval[sDifference];
+					if (sPattern) {
+						return sPattern;
+					}
+				}
+			}
+			return oIntervalFormats.intervalFormatFallback;
+		},
+
+		/**
+		 * Get combined interval pattern using a given pattern and the fallback interval pattern.
+		 *
+		 * If a skeleton based pattern is not available or not wanted, this method can be used to create an interval
+		 * pattern based on a given pattern, using the fallback interval pattern.
+		 *
+		 * @param {string} sPattern the single date pattern to use within the interval pattern
+		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar. If it's not set, it falls back to the calendar type either set in configuration or calculated from locale.
+		 * @returns {string} the calculated interval pattern
+		 * @since 1.46
+		 * @public
+		 */
+		getCombinedIntervalPattern : function(sPattern, sCalendarType) {
+			var oIntervalFormats = this._get(getCLDRCalendarName(sCalendarType), "dateTimeFormats", "intervalFormats"),
+				sFallbackPattern = oIntervalFormats.intervalFormatFallback;
+			return sFallbackPattern.replace(/\{(0|1)\}/g, sPattern);
+		},
+
+		/**
+		 * Get interval pattern for a given skeleton format.
+		 *
+		 * The format string does contain pattern symbols (e.g. "yMMMd" or "Hms") and will be converted into the pattern in the used
+		 * locale, which matches the wanted symbols best. The symbols must be in canonical order, that is:
+		 * Era (G), Year (y/Y), Quarter (q/Q), Month (M/L), Week (w/W), Day-Of-Week (E/e/c), Day (d/D),
+		 * Hour (h/H/k/K/), Minute (m), Second (s), Timezone (z/Z/v/V/O/X/x)
+		 *
+		 * See http://unicode.org/reports/tr35/tr35-dates.html#availableFormats_appendItems
+		 *
+		 * @param {string} sSkeleton the wanted skeleton format for the datetime pattern
+		 * @param {string} sGreatestDiff the symbol matching the greatest difference in the two dates to format
+		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar. If it's not set, it falls back to the calendar type either set in configuration or calculated from locale.
+		 * @returns {string} the best matching interval pattern
+		 * @since 1.46
+		 * @public
+		 */
+		getCustomIntervalPattern : function(sSkeleton, sGreatestDiff, sCalendarType) {
+			var oAvailableFormats = this._get(getCLDRCalendarName(sCalendarType), "dateTimeFormats", "intervalFormats");
+			return this._getFormatPattern(sSkeleton, oAvailableFormats, sCalendarType, sGreatestDiff);
+		},
+
+		/* Helper functions for skeleton pattern processing */
+		_getFormatPattern: function(sSkeleton, oAvailableFormats, sCalendarType, sIntervalDiff) {
+			var sPattern, oIntervalFormats;
+			if (sIntervalDiff) {
+				if (sIntervalDiff == "j" || sIntervalDiff == "J") {
+					sIntervalDiff = this.getPreferredHourSymbol();
+				}
+				oIntervalFormats = oAvailableFormats[sSkeleton];
+				sPattern = oIntervalFormats && oIntervalFormats[sIntervalDiff];
+			} else {
+				sPattern = oAvailableFormats[sSkeleton];
+			}
+			if (!sPattern) {
+				sPattern = this._createFormatPattern(sSkeleton, oAvailableFormats, sCalendarType, sIntervalDiff);
+			}
+			return sPattern;
+		},
+
+		_createFormatPattern: function(sSkeleton, oAvailableFormats, sCalendarType, sIntervalDiff) {
+			var aTokens = this._parseSkeletonFormat(sSkeleton),
+				oBestMatch = this._findBestMatch(aTokens, sSkeleton, oAvailableFormats),
+				sPattern,
+				rMixedSkeleton = /^([GyYqQMLwWEecdD]+)([hHkKjJmszZvVOXx]+)$/;
+
+			if (sIntervalDiff) {
+				// Only use best match, if there are no missing tokens, as there is no possibility
+				// to append items on interval formats
+				if (oBestMatch && oBestMatch.missingTokens.length === 0) {
+					sPattern = oBestMatch.pattern[sIntervalDiff];
+					// if there is no exact match, we need to do further processing
+					if (sPattern && oBestMatch.distance > 0) {
+						sPattern = this._expandFields(sPattern, oBestMatch.patternTokens, aTokens);
+					}
+				}
+				// If no pattern could be found, get the best availableFormat for the skeleton
+				// and use the fallbackIntervalFormat to create the pattern
+				if (!sPattern) {
+					sPattern = this.getCombinedIntervalPattern(
+						this.getCustomDateTimePattern(sSkeleton, sCalendarType), sCalendarType);
+				}
+			} else if (!oBestMatch) {
+				sPattern = sSkeleton;
+			} else {
+				sPattern = oBestMatch.pattern;
+				// if there is no exact match, we need to do further processing
+				if (oBestMatch.distance > 0) {
+					if (oBestMatch.missingTokens.length > 0) {
+						// if tokens are missing create a pattern containing all, otherwise just adjust pattern
+						if (rMixedSkeleton.test(sSkeleton)) {
+							sPattern = this._getMixedFormatPattern(sSkeleton, oAvailableFormats, sCalendarType);
+						} else {
+							sPattern = this._expandFields(oBestMatch.pattern, oBestMatch.patternTokens, aTokens);
+							sPattern = this._appendItems(sPattern, oBestMatch.missingTokens, sCalendarType);
+						}
+					} else {
+						sPattern = this._expandFields(oBestMatch.pattern, oBestMatch.patternTokens, aTokens);
+					}
+				}
+			}
+			// If special input token "J" was used, remove dayperiod from pattern
+			if (sSkeleton.indexOf("J") >= 0) {
+				sPattern = sPattern.replace(/ ?[abB](?=([^']*'[^']*')*[^']*)$/g, "");
+			}
+
+			return sPattern;
 		},
 
 		_parseSkeletonFormat: function(sSkeleton) {
@@ -310,35 +446,26 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 			return aTokens;
 		},
 
-		_getFormatPattern: function(sSkeleton, oAvailableFormats, sCalendarType) {
-			var sPattern = oAvailableFormats[sSkeleton];
-			if (!sPattern) {
-				sPattern = this._createFormatPattern(sSkeleton, oAvailableFormats, sCalendarType);
-			}
-			return sPattern;
-		},
-
-		_createFormatPattern: function(sSkeleton, oAvailableFormats, sCalendarType) {
-			var aTokens = this._parseSkeletonFormat(sSkeleton),
-				aTestTokens,
+		_findBestMatch: function(aTokens, sSkeleton, oAvailableFormats) {
+			var aTestTokens,
 				aMissingTokens,
 				oToken,
 				oTestToken,
 				iTest,
 				iDistance,
 				bMatch,
-				sBestPattern,
-				aBestPatternTokens,
-				aBestMissingTokens,
-				iBestDistance = 10000,
-				sPattern,
-				rMixedSkeleton = /^([GyYqQMLwWEecdD]+)([hHkKjJmszZvVOXx]+)$/,
+				iFirstDiffPos,
 				oTokenSymbol,
 				oTestTokenSymbol,
-				iFirstDiffPos,
-				iBestFirstDiffPos = -1;
+				oBestMatch = {
+					distance: 10000,
+					firstDiffPos: -1
+				};
 			// Loop through all available tokens, find matches and calculate distance
 			for (var sTestSkeleton in oAvailableFormats) {
+				if (sTestSkeleton === "intervalFormatFallback") {
+					continue;
+				}
 				aTestTokens = this._parseSkeletonFormat(sTestSkeleton);
 				iDistance = 0;
 				aMissingTokens = [];
@@ -400,40 +527,17 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 				//  1. the distance is smaller than the best distance or
 				//  2. the distance equals the best distance and the position of the token in the given skeleton which
 				//   isn't the same between the given skeleton and the available skeleton is bigger than the best one's.
-				if (bMatch && (iDistance < iBestDistance || (iDistance === iBestDistance && iFirstDiffPos > iBestFirstDiffPos))) {
-					iBestDistance = iDistance;
-					iBestFirstDiffPos = iFirstDiffPos;
-					aBestMissingTokens = aMissingTokens;
-					sBestPattern = oAvailableFormats[sTestSkeleton];
-					aBestPatternTokens = aTestTokens;
+				if (bMatch && (iDistance < oBestMatch.distance || (iDistance === oBestMatch.distance && iFirstDiffPos > oBestMatch.firstDiffPos))) {
+					oBestMatch.distance = iDistance;
+					oBestMatch.firstDiffPos = iFirstDiffPos;
+					oBestMatch.missingTokens = aMissingTokens;
+					oBestMatch.pattern = oAvailableFormats[sTestSkeleton];
+					oBestMatch.patternTokens = aTestTokens;
 				}
 			}
-
-			// if there is no exact match, we need to do further processing
-			if (iBestDistance == 0) {
-				sPattern = sBestPattern;
-			} else {
-				if (!sBestPattern) {
-					// if no best match could been found, just take the skeleton as pattern
-					sPattern = sSkeleton;
-				} else if (aBestMissingTokens.length > 0) {
-					// if tokens are missing create a pattern containing all, otherwise just adjust pattern
-					if (rMixedSkeleton.test(sSkeleton)) {
-						sPattern = this._getMixedFormatPattern(sSkeleton, oAvailableFormats, sCalendarType);
-					} else {
-						sPattern = this._expandFields(sBestPattern, aBestPatternTokens, aTokens);
-						sPattern = this._appendItems(sPattern, aBestMissingTokens, sCalendarType);
-					}
-				} else {
-					sPattern = this._expandFields(sBestPattern, aBestPatternTokens, aTokens);
-				}
+			if (oBestMatch.pattern) {
+				return oBestMatch;
 			}
-			// If special input token "J" was used, remove dayperiod from pattern
-			if (sSkeleton.indexOf("J") >= 0) {
-				sPattern = sPattern.replace(/ ?[abB](?=([^']*'[^']*')*[^']*)$/, "");
-			}
-
-			return sPattern;
 		},
 
 		_expandFields: function(sPattern, aPatternTokens, aTokens) {
@@ -489,7 +593,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 						// Prevent expanding the length of the field when:
 						// 1. The length in the best matching skeleton (iPatternLength) matches the length of the application provided skeleton (iSkeletonLength) or
 						// 2. The length of the provided skeleton (iSkeletonLength) and the length of the result pattern (iOldLength) are not in the same category (numeric or text)
-						//	because swtiching between numeric to text representation is wrong in all cases
+						//	because switching between numeric to text representation is wrong in all cases
 						if (iSkeletonLength === iPatternLength ||
 							((iSkeletonLength < oSkeletonSymbol.numericCeiling) ?
 								(iPatternLength >= oBestSymbol.numericCeiling) : (iPatternLength < oBestSymbol.numericCeiling)
@@ -560,37 +664,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Returns the interval format with the given Id (see CLDR documentation for valid Ids)
-		 * or the fallback format if no interval format with that Id is known.
-		 *
-		 * The empty Id ("") might be used to retrieve the interval format fallback.
-		 *
-		 * @param {string} sId Id of the interval format, e.g. "d-d"
-		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar. If it's not set, it falls back to the calendar type either set in configuration or calculated from locale.
-		 * @returns {string} interval format string with placeholders {0} and {1}
-		 * @public
-		 * @since 1.17.0
-		 */
-		getIntervalPattern: function(sId, sCalendarType) {
-			var oIntervalFormats = this._get(getCLDRCalendarName(sCalendarType), "dateTimeFormats", "intervalFormats"),
-				aIdParts, sIntervalId, sDifference, oInterval, sPattern;
-			if (sId) {
-				aIdParts = sId.split("-");
-				sIntervalId = aIdParts[0];
-				sDifference = aIdParts[1];
-				oInterval = oIntervalFormats[sIntervalId];
-				if (oInterval) {
-					sPattern = oInterval[sDifference];
-					if (sPattern) {
-						return sPattern;
-					}
-				}
-			}
-			return oIntervalFormats.intervalFormatFallback;
-		},
-
-		/**
-		 * Get number symbol "decimal", "group", "plusSign", "minusSign", "percentSign"
+		 * Get number symbol "decimal", "group", "plusSign", "minusSign", "percentSign".
 		 *
 		 * @param {string} sType the required type of symbol
 		 * @returns {string} the selected number symbol
@@ -602,7 +676,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get decimal format pattern
+		 * Get decimal format pattern.
 		 *
 		 * @returns {string} The pattern
 		 * @public
@@ -612,7 +686,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get currency format pattern
+		 * Get currency format pattern.
 		 *
 		 * @param {string} sContext the context of the currency pattern (standard or accounting)
 		 * @returns {string} The pattern
@@ -627,7 +701,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Get percent format pattern
+		 * Get percent format pattern.
 		 *
 		 * @returns {string} The pattern
 		 * @public
@@ -637,8 +711,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Returns the minimal number of days of the week which must be contained in the
-		 * new year to become the first week of the year. Depending on the country, this
+		 * Returns the required minimal number of days for the first week of a year.
+		 *
+		 * This is the minimal number of days of the week which must be contained in the new year
+		 * for the week to become the first week of the year. Depending on the country, this
 		 * is just a single day (in the US) or at least 4 days (in most of Europe).
 		 *
 		 * All week data information in the CLDR is provided for territories (countries).
@@ -655,9 +731,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 
 		/**
 		 * Returns the day that usually is regarded as the first day
-		 * of a week in the current locale. Days are encoded as integer
-		 * where sunday=0, monday=1 etc.
+		 * of a week in the current locale.
 		 *
+		 * Days are encoded as integer where Sunday=0, Monday=1 etc.
 		 *
 		 * All week data information in the CLDR is provided for territories (countries).
 		 * If the locale of this LocaleData doesn't contain country information (e.g. if it
@@ -706,7 +782,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Returns the number of digits of the specified currency
+		 * Returns the number of digits of the specified currency.
 		 *
 		 * @param {string} sCurrency ISO 4217 currency code
 		 * @returns {int} digits of the currency
@@ -727,7 +803,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Returns the currency symbol for the specified currency, if no symbol is found the ISO 4217 currency code is returned
+		 * Returns the currency symbol for the specified currency, if no symbol is found the ISO 4217 currency code is returned.
 		 *
 		 * @param {string} sCurrency ISO 4217 currency code
 		 * @returns {string} the currency symbol
@@ -764,11 +840,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		 * no scales are given, patterns for all available scales will be returned.
 		 *
 		 * The return array will contain objects looking like:
+		 * <pre>
 		 * {
 		 *     scale: "minute",
 		 *     sign: 1,
 		 *     pattern: "in {0} minutes"
 		 * }
+		 * </pre>
 		 *
 		 * @param {string[]} aScales The scales for which the available patterns should be returned
 		 * @param {string} [sStyle="wide"] @since 1.32.10, 1.34.4 The style of the scale patterns. The valid values are "wide", "short" and "narrow".
@@ -826,7 +904,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Returns the relative format pattern with given scale (year, month, week, ...) and difference value
+		 * Returns the relative format pattern with given scale (year, month, week, ...) and difference value.
 		 *
 		 * @param {string} sScale the scale the relative pattern is needed for
 		 * @param {int} iDiff the difference in the given scale unit
@@ -970,7 +1048,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Returns the display name for a time unit (second, minute, hour, day, week, month, year)
+		 * Returns the display name for a time unit (second, minute, hour, day, week, month, year).
 		 *
 		 * @param {string} sType Type (second, minute, hour, day, week, month, year)
 		 * @param {string} [sStyle="wide"] @since 1.32.10, 1.34.4 the style of the pattern. The valid values are "wide", "short" and "narrow"
@@ -1010,7 +1088,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Returns the short decimal formats (like 1K, 1M....)
+		 * Returns the short decimal formats (like 1K, 1M....).
 		 *
 		 * @param {string} sStyle short or long
 		 * @param {string} sNumber 1000, 10000 ...
@@ -1048,7 +1126,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Returns array of eras
+		 * Returns array of eras.
 		 *
 		 * @param {string} sWidth the style of the era name. It can be 'wide', 'abbreviated' or 'narrow'
 		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar
@@ -1069,7 +1147,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Returns the map of era ids to era dates
+		 * Returns the map of era IDs to era dates.
 		 *
 		 * @param {sap.ui.core.CalendarType} [sCalendarType] the type of calendar
 		 * @return {array} the array of eras containing objects with either an _end or _start property with a date
@@ -1108,7 +1186,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		/**
 		 * Returns the preferred calendar type for the current locale which exists in {@link sap.ui.core.CalendarType}
 		 *
-		 * returns {sap.ui.core.CalendarType} the preferred calendar type
+		 * @returns {sap.ui.core.CalendarType} the preferred calendar type
 		 * @public
 		 * @since 1.28.6
 		 */
@@ -1134,7 +1212,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 		},
 
 		/**
-		 * Returns the preferred hour pattern symbol (h for 12, H for 24 hours) for the current locale
+		 * Returns the preferred hour pattern symbol (h for 12, H for 24 hours) for the current locale.
 		 *
 		 * returns {string} the preferred hour symbol
 		 * @public
@@ -1201,7 +1279,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 	};
 
 	/**
-	 * Default data, in case neither the region specific, nor the language specific fallback can be found
+	 * Default data, in case neither the region specific, nor the language specific fallback can be found.
 	 *
 	 * @private
 	 */
@@ -1283,7 +1361,99 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 						"Year": "{0} {1}"
 					},
 					"intervalFormats": {
-						"intervalFormatFallback":"{0} – {1}"
+						"intervalFormatFallback":"{0} – {1}",
+						"d": {
+							"d": "d – d"
+						},
+						"h": {
+							"a": "h a – h a",
+							"h": "h – h a"
+						},
+						"H": {
+							"H": "HH – HH"
+						},
+						"hm": {
+							"a": "h:mm a – h:mm a",
+							"h": "h:mm – h:mm a",
+							"m": "h:mm – h:mm a"
+						},
+						"Hm": {
+							"H": "HH:mm – HH:mm",
+							"m": "HH:mm – HH:mm"
+						},
+						"hmv": {
+							"a": "h:mm a – h:mm a v",
+							"h": "h:mm – h:mm a v",
+							"m": "h:mm – h:mm a v"
+						},
+						"Hmv": {
+							"H": "HH:mm – HH:mm v",
+							"m": "HH:mm – HH:mm v"
+						},
+						"hv": {
+							"a": "h a – h a v",
+							"h": "h – h a v"
+						},
+						"Hv": {
+							"H": "HH – HH v"
+						},
+						"M": {
+							"M": "M – M"
+						},
+						"Md": {
+							"d": "M/d – M/d",
+							"M": "M/d – M/d"
+						},
+						"MEd": {
+							"d": "E, M/d – E, M/d",
+							"M": "E, M/d – E, M/d"
+						},
+						"MMM": {
+							"M": "MMM – MMM"
+						},
+						"MMMd": {
+							"d": "MMM d – d",
+							"M": "MMM d – MMM d"
+						},
+						"MMMEd": {
+							"d": "E, MMM d – E, MMM d",
+							"M": "E, MMM d – E, MMM d"
+						},
+						"y": {
+							"y": "y – y"
+						},
+						"yM": {
+							"M": "M/y – M/y",
+							"y": "M/y – M/y"
+						},
+						"yMd": {
+							"d": "M/d/y – M/d/y",
+							"M": "M/d/y – M/d/y",
+							"y": "M/d/y – M/d/y"
+						},
+						"yMEd": {
+							"d": "E, M/d/y – E, M/d/y",
+							"M": "E, M/d/y – E, M/d/y",
+							"y": "E, M/d/y – E, M/d/y"
+						},
+						"yMMM": {
+							"M": "MMM – MMM y",
+							"y": "MMM y – MMM y"
+						},
+						"yMMMd": {
+							"d": "MMM d – d, y",
+							"M": "MMM d – MMM d, y",
+							"y": "MMM d, y – MMM d, y"
+						},
+						"yMMMEd": {
+							"d": "E, MMM d – E, MMM d, y",
+							"M": "E, MMM d – E, MMM d, y",
+							"y": "E, MMM d, y – E, MMM d, y"
+						},
+						"yMMMM": {
+							"M": "MMMM – MMMM y",
+							"y": "MMMM y – MMMM y"
+						}
 					}
 				},
 				"months": {
@@ -1506,7 +1676,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 	}());
 
 	/**
-	 * Locale data cache
+	 * Locale data cache.
 	 *
 	 * @private
 	 */
@@ -1527,7 +1697,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', './Configuration', './
 	}
 
 	/**
-	 * Load LocaleData data from the CLDR generated files
+	 * Load LocaleData data from the CLDR generated files.
 	 */
 	function getData(oLocale) {
 

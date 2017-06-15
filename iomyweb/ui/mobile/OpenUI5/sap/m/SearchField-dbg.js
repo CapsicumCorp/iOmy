@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -22,7 +22,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -401,6 +401,11 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		// focus if mouse-clicked on the form outside of the input
 		if (this.getEnabled() && oEvent.target.tagName == "FORM") {
 			this._inputElement.focus();
+		}
+
+		// if the input is on focus and user taps again on it
+		if (this.getEnabled() && oEvent.target.tagName == "INPUT" && document.activeElement === oEvent.target) {
+			this.onFocus(oEvent);
 		}
 	};
 

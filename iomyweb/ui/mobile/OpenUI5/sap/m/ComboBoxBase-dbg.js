@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolbar', './Button', './Bar', './Text', './Title', 'sap/ui/core/IconPool', './library', 'sap/ui/Device'],
-	function(jQuery, Dialog, ComboBoxTextField, Toolbar, Button, Bar, Text, Title, IconPool, library, Device) {
+sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolbar', './Button', './Bar', './Text', './Title', './SelectList', './Popover', 'sap/ui/core/InvisibleText', 'sap/ui/core/IconPool', 'sap/ui/core/ValueStateSupport', './library', 'sap/ui/Device'],
+	function(jQuery, Dialog, ComboBoxTextField, Toolbar, Button, Bar, Text, Title, SelectList, Popover, InvisibleText, IconPool, ValueStateSupport, library, Device) {
 		"use strict";
 
 		/**
@@ -19,7 +19,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 		 * @extends sap.m.ComboBoxTextField
 		 *
 		 * @author SAP SE
-		 * @version 1.44.14
+		 * @version 1.46.9
 		 *
 		 * @constructor
 		 * @public
@@ -75,13 +75,12 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 			}
 		});
 
-		/* =========================================================== */
-		/* Private methods and properties                              */
-		/* =========================================================== */
+		//Keeps the ID of the static aria text for available options
+		var sPickerHiddenLabelId;
 
-		/* ----------------------------------------------------------- */
+		/* =========================================================== */
 		/* Private methods                                             */
-		/* ----------------------------------------------------------- */
+		/* =========================================================== */
 
 		/**
 		 * Called whenever the binding of the aggregation items is changed.
@@ -90,7 +89,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 		ComboBoxBase.prototype.updateItems = function(sReason) {
 			this.bItemsUpdated = false;
 
-			// note: for backward compatibility and to keep the old data binding behavior,
+			// for backward compatibility and to keep the old data binding behavior,
 			// the items should be destroyed before calling .updateAggregation("items")
 			this.destroyItems();
 			this.updateAggregation("items");
@@ -114,26 +113,13 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 		};
 
 		/**
-		 * Gets the <code>list</code>.
-		 *
-		 * @returns {sap.m.SelectList} The list instance object or <code>null</code>.
-		 * @protected
-		 */
-		ComboBoxBase.prototype.getList = function() {
-			if (this.bIsDestroyed) {
-				return null;
-			}
-
-			return this._oList;
-		};
-
-		/**
 		 * Fires the {@link #loadItems} event if the data used to display items in the dropdown list
-		 * is not already loaded and enqueue the <code>mOptions</code> into the message queue for processing.
+		 * is not already loaded and enqueue the <code>fnCallBack</code> and <code>mOptions</code> into a message
+		 * queue for processing.
 		 *
 		 * @param {function} [fnCallBack] A callback function to execute after the items are loaded.
 		 * @param {object} [mOptions] Additional options.
-		 * @param {string} [mOptions.id] Identifier of the message.
+		 * @param {string} [mOptions.name] Identifier of the message.
 		 * @param {boolean} [mOptions.busyIndicator=true] Indicate whether the loading indicator is shown in the
 		 * text field after some delay.
 		 * @param {int} [mOptions.busyIndicatorDelay=300] Indicates the delay in milliseconds after which the busy
@@ -193,14 +179,14 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 			this.bProcessingLoadItemsEvent = false;
 			clearTimeout(this.iLoadItemsEventInitialProcessingTimeoutID);
 
-			// restore the busy indicator state to its previous state (if it has not been changed)
-			// note: this is needed to avoid overriding application settings
+			// restore the busy indicator state to its previous state (if it has not been changed),
+			// this is needed to avoid overriding application settings
 			if (this.bInitialBusyIndicatorState !== this.getBusy()) {
 				this.setInternalBusyIndicator(this.bInitialBusyIndicatorState);
 			}
 
-			// restore the busy indicator delay to its previous state (if it has not been changed)
-			// note: this is needed to avoid overriding application settings
+			// restore the busy indicator delay to its previous state (if it has not been changed),
+			// this is needed to avoid overriding application settings
 			if (this.iInitialBusyIndicatorDelay !== this.getBusyIndicatorDelay()) {
 				this.setInternalBusyIndicatorDelay(this.iInitialBusyIndicatorDelay);
 			}
@@ -241,6 +227,27 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 			}
 		};
 
+		/**
+		 * Gets the ID of the hidden label
+		 * @returns {string} Id of hidden text
+		 * @protected
+		 */
+		ComboBoxBase.prototype.getPickerInvisibleTextId = function() {
+			if (!sap.ui.getCore().getConfiguration().getAccessibility()) {
+				return "";
+			}
+
+			// Load the resources
+			var oResourceBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m");
+
+			if (!sPickerHiddenLabelId) {
+				sPickerHiddenLabelId = new InvisibleText({
+					text: oResourceBundle.getText("COMBOBOX_AVAILABLE_OPTIONS")
+				}).toStatic().getId();
+			}
+			return sPickerHiddenLabelId;
+		};
+
 		/* =========================================================== */
 		/* Lifecycle methods                                           */
 		/* =========================================================== */
@@ -261,9 +268,10 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 			// indicate whether the items are updated
 			this.bItemsUpdated = false;
 
-			// indicates if the picker is opened by the keyboard or by a click on the arrow button
+			// indicates if the picker is opened by the keyboard or by a click/tap on the downward-facing arrow button
 			this.bOpenedByKeyboardOrButton = false;
 
+			this._oPickerValueStateText = null;
 			this.bProcessingLoadItemsEvent = false;
 			this.iLoadItemsEventInitialProcessingTimeoutID = -1;
 			this.aMessageQueue = [];
@@ -273,12 +281,25 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 			this._bDoTypeAhead = true;
 		};
 
+		ComboBoxBase.prototype.onBeforeRendering = function() {
+			var sNoneState = this.getValueState() === sap.ui.core.ValueState.None;
+			ComboBoxTextField.prototype.onBeforeRendering.apply(this, arguments);
+
+			if (!this.isPickerDialog() && sNoneState) {
+				this._showValueStateText(false);
+			}
+		};
+
 		ComboBoxBase.prototype.exit = function() {
 			ComboBoxTextField.prototype.exit.apply(this, arguments);
 
 			if (this.getList()) {
 				this.getList().destroy();
 				this._oList = null;
+			}
+
+			if (this._oPickerValueStateText) {
+				this._oPickerValueStateText.destroy();
 			}
 
 			clearTimeout(this.iLoadItemsEventInitialProcessingTimeoutID);
@@ -340,8 +361,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 			ComboBoxTextField.prototype.ontap.apply(this, arguments);
 
 			var CSS_CLASS = this.getRenderer().CSS_CLASS_COMBOBOXBASE,
-				oControl = oEvent.srcControl;
-
+				oControl = oEvent.srcControl, oPicker;
 
 			// in case of a non-editable or disabled combo box, the picker popup cannot be opened
 			if (!this.getEnabled() || !this.getEditable()) {
@@ -359,16 +379,20 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 					return;
 				}
 
-				// flag if the button or keyboard have been used for opening the picker
+				this.loadItems();
 				this.bOpenedByKeyboardOrButton = true;
 
-				this.loadItems();
+				if (this.isPlatformTablet()) {
+					oPicker = this.getPicker();
+					oPicker.setInitialFocus(oPicker);
+				}
+
 				this.open();
 			}
 
 			if (this.isOpen()) {
 
-				// add the active state to the control's field
+				// add the active state to the text field
 				this.addStyleClass(CSS_CLASS + "Pressed");
 			}
 		};
@@ -383,6 +407,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 		 * @param {jQuery.Event} oEvent The event object.
 		 */
 		ComboBoxBase.prototype.onsapshow = function(oEvent) {
+
 			// in case of a non-editable or disabled combo box, the picker popup cannot be opened
 			if (!this.getEnabled() || !this.getEditable()) {
 				return;
@@ -391,9 +416,8 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 			// mark the event for components that needs to know if the event was handled
 			oEvent.setMarked();
 
-			// note: prevent browser address bar to be open in ie9, when F4 is pressed
 			if (oEvent.keyCode === jQuery.sap.KeyCodes.F4) {
-				oEvent.preventDefault();
+				this.onF4(oEvent);
 			}
 
 			if (this.isOpen()) {
@@ -405,6 +429,18 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 			this.loadItems();
 			this.bOpenedByKeyboardOrButton = true;
 			this.open();
+		};
+
+		/**
+		 * Handles when the F4  key is pressed.
+		 *
+		 * @param {jQuery.Event} oEvent The event object.
+		 * @since 1.46
+		 */
+		ComboBoxBase.prototype.onF4 = function(oEvent) {
+
+			// prevent browser address bar to be open in ie, when F4 is pressed
+			oEvent.preventDefault();
 		};
 
 		/**
@@ -423,7 +459,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 				// mark the event for components that needs to know if the event was handled
 				oEvent.setMarked();
 
-				// note: fix for Firefox
+				// fix for Firefox
 				oEvent.preventDefault();
 
 				this.close();
@@ -455,7 +491,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 
 			var oRelatedControl = sap.ui.getCore().byId(oEvent.relatedControlId);
 
-			// to prevent the change event from firing when the arrow button is pressed
+			// to prevent the change event from firing when the downward-facing arrow button is pressed
 			if (oRelatedControl === this) {
 				return;
 			}
@@ -492,6 +528,20 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 		ComboBoxBase.prototype.addContent = function(oPicker) {};
 
 		/**
+		 * Gets the <code>list</code>.
+		 *
+		 * @returns {sap.m.SelectList} The list instance object or <code>null</code>.
+		 * @protected
+		 */
+		ComboBoxBase.prototype.getList = function() {
+			if (this.bIsDestroyed) {
+				return null;
+			}
+
+			return this._oList;
+		};
+
+		/**
 		 * Sets the property <code>_sPickerType</code>.
 		 *
 		 * @param {string} sPickerType
@@ -509,6 +559,135 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 		 */
 		ComboBoxBase.prototype.getPickerType = function() {
 			return this._sPickerType;
+		};
+
+		ComboBoxBase.prototype.setValueState = function(sValueState) {
+			var sAdditionalText,
+				sValueStateText = this.getValueStateText(),
+				bShow = this.getShowValueStateMessage();
+
+			this._sOldValueState = this.getValueState();
+			ComboBoxTextField.prototype.setValueState.apply(this, arguments);
+			sAdditionalText = ValueStateSupport.getAdditionalText(this);
+
+			if (sValueStateText) {
+				this._showValueStateText(bShow);
+				this._setValueStateText(sValueStateText);
+			} else if (sValueState === sap.ui.core.ValueState.None) {
+				this._showValueStateText(false);
+			} else {
+				this._showValueStateText(bShow);
+				this._setValueStateText(sAdditionalText);
+			}
+
+			this._alignValueStateStyles();
+			return this;
+		};
+
+		ComboBoxBase.prototype.setValueStateText = function(sText) {
+			ComboBoxTextField.prototype.setValueStateText.apply(this, arguments);
+			this._setValueStateText(this.getValueStateText());
+			return this;
+		};
+
+		ComboBoxBase.prototype.setShowValueStateMessage = function(bShow) {
+			ComboBoxTextField.prototype.setShowValueStateMessage.apply(this, arguments);
+			this._showValueStateText(this.getShowValueStateMessage());
+			return this;
+		};
+
+		ComboBoxBase.prototype._showValueStateText = function(bShow) {
+			var oCustomHeader;
+
+			if (this.isPickerDialog()) {
+
+				if (this._oPickerValueStateText) {
+					this._oPickerValueStateText.setVisible(bShow);
+				}
+			} else {
+				oCustomHeader = this._getPickerCustomHeader();
+
+				if (oCustomHeader) {
+					oCustomHeader.setVisible(bShow);
+				}
+			}
+		};
+
+		ComboBoxBase.prototype._setValueStateText = function(sText) {
+			var oHeader;
+
+			if (this.isPickerDialog()) {
+				this._oPickerValueStateText = this.getPickerValueStateText();
+				this._oPickerValueStateText.setText(sText);
+			} else {
+				oHeader = this._getPickerCustomHeader();
+				if (oHeader) {
+					oHeader.getContentLeft()[0].setText(sText);
+				}
+			}
+		};
+
+		ComboBoxBase.prototype._getPickerCustomHeader = function() {
+			var oInternalTitle, oInternalHeader,
+				oPicker = this.getPicker(),
+				sPickerTitleClass = this.getRenderer().CSS_CLASS_COMBOBOXBASE + "PickerTitle";
+
+			if (!oPicker) {
+				return;
+			}
+
+			if (oPicker.getCustomHeader()) {
+				return oPicker.getCustomHeader();
+			}
+
+			oInternalTitle = new Title({ textAlign: "Left" }).addStyleClass(sPickerTitleClass);
+			oInternalHeader = new Bar({ visible: false, contentLeft: oInternalTitle });
+
+			oPicker.setCustomHeader(oInternalHeader);
+
+			return oInternalHeader;
+		};
+
+		ComboBoxBase.prototype._alignValueStateStyles = function() {
+			var sOldValueState = this._sOldValueState,
+				PICKER_CSS_CLASS = this.getRenderer().CSS_CLASS_COMBOBOXBASE + "Picker",
+				sPickerWithState = PICKER_CSS_CLASS + "ValueState",
+				sOldCssClass = PICKER_CSS_CLASS + sOldValueState + "State",
+				sCssClass = PICKER_CSS_CLASS + this.getValueState() + "State",
+				oCustomHeader;
+
+			if (this.isPickerDialog() && this._oPickerValueStateText) {
+				this._oPickerValueStateText.addStyleClass(sPickerWithState);
+				this._oPickerValueStateText.removeStyleClass(sOldCssClass);
+				this._oPickerValueStateText.addStyleClass(sCssClass);
+			} else {
+
+				oCustomHeader = this._getPickerCustomHeader();
+
+				if (oCustomHeader) {
+					oCustomHeader.addStyleClass(sPickerWithState);
+					oCustomHeader.removeStyleClass(sOldCssClass);
+					oCustomHeader.addStyleClass(sCssClass);
+				}
+			}
+		};
+
+		ComboBoxBase.prototype.shouldValueStateMessageBeOpened = function() {
+			var bShouldValueStateMessageBeOpened = ComboBoxTextField.prototype.shouldValueStateMessageBeOpened.apply(this, arguments);
+			return (bShouldValueStateMessageBeOpened && !this.isOpen());
+		};
+
+		ComboBoxBase.prototype.onPropertyChange = function(oControlEvent, oData) {
+			var sNewValue = oControlEvent.getParameter("newValue"),
+				sProperty = oControlEvent.getParameter("name"),
+				sMutator = "set" + sProperty.charAt(0).toUpperCase() + sProperty.slice(1),
+				oControl = (oData && oData.srcControl) || this.getPickerTextField();
+
+			// propagate some property changes to the picker text field
+			if (/\bvalue\b|\benabled\b|\bname\b|\bplaceholder\b|\beditable\b|\btextAlign\b|\btextDirection\b|\bvalueState\b/.test(sProperty) &&
+				oControl && (typeof oControl[sMutator] === "function")) {
+				oControl[sMutator](sNewValue);
+			}
 		};
 
 		/*
@@ -534,6 +713,24 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 				bTablet = Device.system.tablet && bNotCombi;
 
 			return bTablet;
+		};
+
+		/*
+		 * Gets the picker value state message object.
+		 *
+		 * @returns {sap.m.Text}
+		 * @protected
+		 * @since 1.46
+		 */
+		ComboBoxBase.prototype.getPickerValueStateText = function() {
+			var oPicker = this.getPicker();
+
+			if (!this._oPickerValueStateText) {
+				this._oPickerValueStateText = new Text({ width: "100%" });
+				oPicker.insertContent(this._oPickerValueStateText, 0);
+			}
+
+			return this._oPickerValueStateText;
 		};
 
 		/**
@@ -630,7 +827,8 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 				}),
 				beforeOpen: function() {
 					that.updatePickerHeaderTitle();
-				}
+				},
+				ariaLabelledBy: that.getPickerInvisibleTextId() || undefined
 			});
 		};
 
@@ -1015,7 +1213,8 @@ sap.ui.define(['jquery.sap.global', './Dialog', './ComboBoxTextField', './Toolba
 		/**
 		 * Indicates whether the control's picker popup is open.
 		 *
-		 * @returns {boolean} Determines whether the control's picker popup is currently open (this includes opening and closing animations).
+		 * @returns {boolean} Determines whether the control's picker popup is currently open
+		 * (this includes opening and closing animations).
 		 * @public
 		 */
 		ComboBoxBase.prototype.isOpen = function() {

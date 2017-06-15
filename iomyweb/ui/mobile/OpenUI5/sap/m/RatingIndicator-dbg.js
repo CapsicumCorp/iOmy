@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -23,7 +23,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -113,7 +113,8 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 					value : {type : "float"}
 				}
 			}
-		}
+		},
+		designTime : true
 	}});
 
 	///**
@@ -281,24 +282,24 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		 *
 		 * @private
 		 */
-		RatingIndicator.prototype._getIconSizeLabel = function (iPxIconSize) {
-			switch (true) {
-				case (iPxIconSize >= 32):
-					return "L";
-				case (this._iPxIconSize >= 22):
-					return "M";
-				case (this._iPxIconSize >= 16):
-					return "S";
-				case (this._iPxIconSize >= 12):
-					return "XS";
-				default:
-					return "M";
-			}
-		};
+	RatingIndicator.prototype._getIconSizeLabel = function (iPxIconSize) {
+		switch (true) {
+			case (iPxIconSize >= 32):
+				return "L";
+			case (this._iPxIconSize >= 22):
+				return "M";
+			case (this._iPxIconSize >= 16):
+				return "S";
+			case (this._iPxIconSize >= 12):
+				return "XS";
+			default:
+				return "M";
+		}
+	};
 
 	RatingIndicator.prototype._toPx = function (cssSize) {
 		var scopeVal = Math.round(cssSize),
-			scopeTest;
+		scopeTest;
 
 		if (isNaN(scopeVal)) {
 			if (RegExp("^(auto|0)$|^[+-]?[0-9].?([0-9]+)?(px|em|rem|ex|%|in|cm|mm|pt|pc)$").test(cssSize)) {

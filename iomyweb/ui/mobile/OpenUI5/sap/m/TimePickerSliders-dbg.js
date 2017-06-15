@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -9,17 +9,17 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', './TimePickerSlidersR
 		"use strict";
 
 		/**
-		 * Constructor for a new TimePickerSliders.
+		 * Constructor for a new <code>TimePickerSliders</code>.
 		 *
 		 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
 		 * @param {object} [mSettings] Initial settings for the new control
 		 *
 		 * @class
-		 * A picker list container control used inside the {@link sap.m.TimePicker} to hold all the sliders
+		 * A picker list container control used inside the {@link sap.m.TimePicker} to hold all the sliders.
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.44.14
+		 * @version 1.46.9
 		 *
 		 * @constructor
 		 * @private

@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -13,19 +13,17 @@ sap.ui.define(['jquery.sap.global', '../base/EventProvider', './Popup', './Core'
 	 * Provides methods to show or hide a waiting animation covering the whole
 	 * page and blocking user interaction.
 	 * @namespace
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @public
 	 * @alias sap.ui.core.BusyIndicator
 	 */
-	var BusyIndicator = jQuery.extend(jQuery.sap.newObject(EventProvider.prototype), {
+	var BusyIndicator = jQuery.extend( new EventProvider(), {
 		oPopup: null,
 		oDomRef: null,
 		bOpenRequested: false,
 		iDEFAULT_DELAY_MS: 1000,
 		sDOM_ID: "sapUiBusyIndicator"
 	});
-
-	EventProvider.apply(BusyIndicator);
 
 	BusyIndicator.M_EVENTS = {
 		Open: "Open",

@@ -197,6 +197,7 @@ ul li{
 }
 
 /* Set the Footer Background */	
+html.sap-desktop .sapMIBar.sapMFooter-CTX, 
 .sapMIBar-CTX.sapMFooter-CTX.FooterBackgroundColour {
 	background-color: rgb(241,242,242);
 	height: 3.5rem;

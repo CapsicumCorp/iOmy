@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -8,10 +8,6 @@
 sap.ui.define(['jquery.sap.global', '../Plugin', '../Support'],
 	function(jQuery, Plugin, Support) {
 	"use strict";
-
-
-
-
 
 		/**
 		 * Creates an instance of sap.ui.core.support.plugins.MessageTest.
@@ -21,7 +17,7 @@ sap.ui.define(['jquery.sap.global', '../Plugin', '../Support'],
 		 *
 		 * @abstract
 		 * @extends sap.ui.core.support.Plugin
-		 * @version 1.44.14
+		 * @version 1.46.9
 		 * @constructor
 		 * @private
 		 * @alias sap.ui.core.support.plugins.MessageTest
@@ -34,7 +30,6 @@ sap.ui.define(['jquery.sap.global', '../Plugin', '../Support'],
 				this._bFirstTime = true;
 			}
 		});
-
 
 		/**
 		 * Handler for sapUiSupportMessageTestMsg event

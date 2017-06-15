@@ -1,6 +1,6 @@
 /*
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -38,7 +38,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Component', './l
 	 * @extends sap.ui.core.Component
 	 * @abstract
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @alias sap.ui.core.UIComponent
 	 * @since 1.9.2
 	 * @ui5-metamodel This control/element also will be described in the UI5 (legacy) designtime metamodel
@@ -263,7 +263,7 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Component', './l
 		// create the router for the component instance
 		if (vRoutes) {
 			var Router = sap.ui.requireSync("sap/ui/core/routing/Router");
-			var fnRouterConstructor = getConstructorFunctionFor(oRoutingConfig.routerClass || Router);
+			var fnRouterConstructor = getConstructorFunctionFor(this._getRouterClassName() || Router);
 			this._oRouter = new fnRouterConstructor(vRoutes, oRoutingConfig, this, oRoutingManifestEntry.targets);
 			this._oTargets = this._oRouter.getTargets();
 			this._oViews = this._oRouter.getViews();
@@ -590,6 +590,19 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Component', './l
 	 */
 	UIComponent.prototype.setContainer = function(oContainer) {
 		this.oContainer = oContainer;
+		if (oContainer) {
+			this._applyContextualSettings(oContainer._getContextualSettings());
+		} else {
+			this._oContextualSettings = ManagedObject._defaultContextualSettings;
+			if (!this._bIsBeingDestroyed) {
+				setTimeout(function() {
+					// if object is being destroyed or container is set again (move) no propagation is needed
+					if (!this.oContainer) {
+						this._propagateContextualSettings();
+					}
+				}.bind(this), 0);
+			}
+		}
 		return this;
 	};
 
@@ -615,6 +628,19 @@ sap.ui.define(['jquery.sap.global', '../base/ManagedObject', './Component', './l
 	 */
 	UIComponent.prototype.onAfterRendering = function() {};
 
+	/**
+	 * Determines the router class name by checking the "routing" configuration manifest entry.
+	 * Override to change the criteria for determining the router class.
+	 * @sap-restricted sap.suite.ui.generic.template
+	 * @private
+	 * @returns {string|undefined} Name of the router class to be used, or <code>undefined</code> for the default router.
+	 */
+	UIComponent.prototype._getRouterClassName = function() {
+		var oRoutingManifestEntry = this._getManifestEntry("/sap.ui5/routing", true) || {},
+			oRoutingConfig = oRoutingManifestEntry.config || {};
+
+		return oRoutingConfig.routerClass;
+	};
 
 	return UIComponent;
 

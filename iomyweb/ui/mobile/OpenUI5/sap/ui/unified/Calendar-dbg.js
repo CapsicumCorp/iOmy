@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -25,7 +25,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	 * Basic Calendar.
 	 * This calendar is used for DatePickers
 	 * @extends sap.ui.core.Control
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -322,7 +322,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		} else if (this.getDomRef() && this._iMode == 0 && !this._sInvalidateMonth) {
 			// DateRange changed -> only rerender days
 			// do this only once if more DateRanges / Special days are changed
-			this._sInvalidateMonth = jQuery.sap.delayedCall(0, this, this._invalidateMonth, [this]);
+			this._sInvalidateMonth = jQuery.sap.delayedCall(0, this, this._invalidateMonth, [oOrigin]);
 		}
 
 	};
@@ -1325,6 +1325,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		}
 	};
 
+	/**
+	* Returns an array of currently visible days
+	* @returns {Array} visible days
+	* @private
+	*/
+	Calendar.prototype._getVisibleDays = function () {
+	   var oMonth = this.getAggregation("month")[0];
+	   return oMonth._getVisibleDays(oMonth._getDate(), false);
+	};
+
 	/*
 	 * sets the date in the used Month controls
 	 * @param {sap.ui.unified.Calendar} this Calendar instance
@@ -1636,7 +1646,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 
 	};
 
-	Calendar.prototype._invalidateMonth = function() {
+	Calendar.prototype._invalidateMonth = function(oOrigin) {
 
 		this._sInvalidateMonth = undefined;
 
@@ -1649,7 +1659,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 				if (aMonths.length > 1) {
 					oMonth._bNoFocus = true;
 				}
-				oMonth.invalidate();
+				oMonth.invalidate(oOrigin);
 				oMonth._bInvalidateSync = undefined;
 			}
 

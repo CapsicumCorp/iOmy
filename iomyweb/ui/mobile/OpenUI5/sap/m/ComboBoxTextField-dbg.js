@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -19,7 +19,7 @@ sap.ui.define(['jquery.sap.global', './InputBase', './library', 'sap/ui/core/Inv
 		 * @extends sap.m.InputBase
 		 *
 		 * @author SAP SE
-		 * @version 1.44.14
+		 * @version 1.46.9
 		 *
 		 * @constructor
 		 * @public
@@ -42,7 +42,7 @@ sap.ui.define(['jquery.sap.global', './InputBase', './library', 'sap/ui/core/Inv
 					},
 
 					/**
-					 * Indicates whether the dropdown arrow button is shown.
+					 * Indicates whether the dropdown downward-facing arrow button is shown.
 					 * @since 1.38
 					 */
 					showButton: {
@@ -198,10 +198,6 @@ sap.ui.define(['jquery.sap.global', './InputBase', './library', 'sap/ui/core/Inv
 			return this.getDomRef();
 		};
 
-		/**
-		 * @see sap.ui.core.Control#getAccessibilityInfo
-		 * @protected
-		 */
 		ComboBoxTextField.prototype.getAccessibilityInfo = function() {
 			var oInfo = InputBase.prototype.getAccessibilityInfo.apply(this, arguments);
 			oInfo.type = sap.ui.getCore().getLibraryResourceBundle("sap.m").getText("ACC_CTR_TYPE_COMBO");

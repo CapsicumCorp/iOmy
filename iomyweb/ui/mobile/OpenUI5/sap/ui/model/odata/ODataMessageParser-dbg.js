@@ -1,11 +1,11 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define(["jquery.sap.global", "sap/ui/Device", "sap/ui/core/library", "sap/ui/thirdparty/URI", "sap/ui/core/message/MessageParser", "sap/ui/core/message/Message"],
-	function(jQuery, Device, coreLibrary, URI, MessageParser, Message) {
+sap.ui.define(["jquery.sap.global", "sap/ui/model/odata/ODataUtils", "sap/ui/Device", "sap/ui/core/library", "sap/ui/thirdparty/URI", "sap/ui/core/message/MessageParser", "sap/ui/core/message/Message"],
+	function(jQuery, ODataUtils, Device, coreLibrary, URI, MessageParser, Message) {
 	"use strict";
 
 // shortcuts for enums
@@ -70,7 +70,7 @@ var mSeverityMap = {
  * @extends sap.ui.core.message.MessageParser
  *
  * @author SAP SE
- * @version 1.44.14
+ * @version 1.46.9
  * @public
  * @abstract
  * @alias sap.ui.model.odata.ODataMessageParser
@@ -342,7 +342,7 @@ ODataMessageParser.prototype._createMessage = function(oMessageObject, mRequestI
 		code:      sCode,
 		message:   sText,
 		descriptionUrl: sDescriptionUrl,
-		target:    sTarget,
+		target:    ODataUtils._normalizeKey(sTarget),
 		processor: this._processor,
 		technical: bIsTechnical,
 		persistent: bPersistent

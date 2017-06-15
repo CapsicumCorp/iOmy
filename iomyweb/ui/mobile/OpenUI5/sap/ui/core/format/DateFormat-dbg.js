@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -192,7 +192,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/core/Locale',
 	 */
 	DateFormat.createInstance = function(oFormatOptions, oLocale, oInfo) {
 		// Create an instance of the DateFormat
-		var oFormat = jQuery.sap.newObject(this.prototype);
+		var oFormat = Object.create(this.prototype);
 
 		// Handle optional parameters
 		if ( oFormatOptions instanceof Locale ) {

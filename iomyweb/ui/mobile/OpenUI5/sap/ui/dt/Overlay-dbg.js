@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -32,7 +32,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @private
@@ -138,12 +138,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 		if (!oOverlayContainer) {
 			oOverlayContainer = jQuery.sap.byId(sOverlayContainerId);
 			if (!oOverlayContainer.length) {
-				oOverlayContainer = jQuery("<div id='" + sOverlayContainerId + "'></div>").css({
-					"top" : "0px",
-					"left" : "0px",
-					"right" : "0px",
-					"bottom" : "0px"
-				}).appendTo("body");
+				oOverlayContainer = jQuery("<div id='" + sOverlayContainerId + "'></div>").appendTo("body");
 			}
 		}
 		return oOverlayContainer.get(0);
@@ -277,6 +272,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @public
 	 */
 	Overlay.prototype.setFocusable = function(bFocusable) {
+		bFocusable = !!bFocusable;
 		if (this.isFocusable() !== bFocusable) {
 			this.setProperty("focusable", bFocusable);
 			this.toggleStyleClass("sapUiDtOverlayFocusable", bFocusable);
@@ -416,12 +412,11 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 */
 	Overlay.prototype._onSyncScrollWithDomRef = function(oEvt) {
 		window.clearTimeout(this._iSyncScrollWithDomRef);
-		var that = this;
 		// timeout needed so that scroll wheel in chrome windows works fast
 		this._iSyncScrollWithDomRef = window.setTimeout(function() {
-			that._syncScrollWithDomRef();
-			delete that._iSyncScrollWithDomRef;
-		}, 0);
+			this._syncScrollWithDomRef();
+			delete this._iSyncScrollWithDomRef;
+		}.bind(this), 0);
 	};
 
 	/**
@@ -441,19 +436,27 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 */
 	Overlay.prototype.getGeometry = function(bForceCalculation) {
 		if (bForceCalculation || !this._mGeometry) {
-			var oDomRef = this.getAssociatedDomRef();
-			var mGeometry = DOMUtil.getGeometry(oDomRef, this.isRoot());
+			var $DomRef = this.getAssociatedDomRef();
+			var aChildrenGeometry;
 
-			if (!mGeometry) {
-				var aChildrenGeometry = [];
-				this.getChildren().forEach(function(oChildOverlay) {
-					aChildrenGeometry.push(oChildOverlay.getGeometry(true));
+			// dom Ref is either jQuery object with one/multiple elements
+			if ($DomRef) {
+				var bIsRoot = this.isRoot();
+				aChildrenGeometry = jQuery.makeArray($DomRef).map(function($element) {
+					return DOMUtil.getGeometry($element, bIsRoot);
 				});
-				mGeometry = OverlayUtil.getGeometry(aChildrenGeometry);
+			} else {
+				aChildrenGeometry = this.getChildren().map(function(oChildOverlay) {
+					return oChildOverlay.getGeometry(true);
+				});
 			}
 
-			// cache geometry
-			this._mGeometry = mGeometry;
+			if (aChildrenGeometry.length) {
+				// cache geometry
+				this._mGeometry = aChildrenGeometry.length > 1 ? OverlayUtil.getGeometry(aChildrenGeometry) : aChildrenGeometry[0];
+			} else {
+				delete this._mGeometry;
+			}
 		}
 
 		return this._mGeometry;
@@ -548,6 +551,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 			} else {
 				$parentContainer.prepend($this);
 			}
+			oParent.applyStyles();
 		}
 	};
 
@@ -584,6 +588,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @public
 	 */
 	Overlay.prototype.setInHiddenTree = function(bInHiddenTree) {
+		bInHiddenTree = !!bInHiddenTree;
 		if (bInHiddenTree !== this.isInHiddenTree()) {
 
 			this.toggleStyleClass("sapUiDtOverlayInHiddenTree", bInHiddenTree);
@@ -667,8 +672,7 @@ function(jQuery, Control, MutationObserver, ElementUtil, OverlayUtil, DOMUtil) {
 	 * @public
 	 */
 	Overlay.prototype.getFirstHiddenAggregationOverlay = function() {
-
-		var oPreviousOverlay = this;
+		var oPreviousOverlay = this; // eslint-disable-line consistent-this
 		var oParentOverlay = this.getParentElementOverlay();
 		while (oParentOverlay && oParentOverlay.isInHiddenTree()
 				&& ElementUtil.isInstanceOf(oParentOverlay, "sap.ui.dt.ElementOverlay")) {

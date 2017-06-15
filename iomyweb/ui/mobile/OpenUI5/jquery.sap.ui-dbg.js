@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -34,7 +34,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/Global' /* cyclic: , 'sap/ui/core/Co
 		// and 'getRoot' behavior.
 		var aControls = this.control();
 		if (aControls.length > 0) {
-			return jQuery.map(aControls, fgetUIAreaOfCtrl);
+			return aControls.map(fgetUIAreaOfCtrl);
 		}
 
 		var aUIAreas = this.uiarea();

@@ -390,82 +390,6 @@
       ]
     },
     {
-      "name": "command/BaseCommand-dbg.js",
-      "module": "sap/ui/dt/command/BaseCommand.js",
-      "isDebug": true,
-      "required": [
-        "sap/ui/base/ManagedObject.js"
-      ]
-    },
-    {
-      "name": "command/BaseCommand.js",
-      "module": "sap/ui/dt/command/BaseCommand.js",
-      "required": [
-        "sap/ui/base/ManagedObject.js"
-      ]
-    },
-    {
-      "name": "command/CommandFactory-dbg.js",
-      "module": "sap/ui/dt/command/CommandFactory.js",
-      "isDebug": true,
-      "required": [
-        "sap/ui/base/ManagedObject.js"
-      ],
-      "condRequired": [
-        "sap/ui/dt/command/SimpleFormMove.js",
-        "sap/ui/dt/command/Move.js"
-      ]
-    },
-    {
-      "name": "command/CommandFactory.js",
-      "module": "sap/ui/dt/command/CommandFactory.js",
-      "required": [
-        "sap/ui/base/ManagedObject.js"
-      ],
-      "condRequired": [
-        "sap/ui/dt/command/SimpleFormMove.js",
-        "sap/ui/dt/command/Move.js"
-      ]
-    },
-    {
-      "name": "command/Move-dbg.js",
-      "module": "sap/ui/dt/command/Move.js",
-      "isDebug": true,
-      "required": [
-        "jquery.sap.global.js",
-        "sap/ui/dt/command/BaseCommand.js",
-        "sap/ui/dt/ElementUtil.js"
-      ]
-    },
-    {
-      "name": "command/Move.js",
-      "module": "sap/ui/dt/command/Move.js",
-      "required": [
-        "jquery.sap.global.js",
-        "sap/ui/dt/command/BaseCommand.js",
-        "sap/ui/dt/ElementUtil.js"
-      ]
-    },
-    {
-      "name": "command/SimpleFormMove-dbg.js",
-      "module": "sap/ui/dt/command/SimpleFormMove.js",
-      "isDebug": true,
-      "required": [
-        "jquery.sap.global.js",
-        "sap/ui/dt/command/BaseCommand.js",
-        "sap/ui/dt/ElementUtil.js"
-      ]
-    },
-    {
-      "name": "command/SimpleFormMove.js",
-      "module": "sap/ui/dt/command/SimpleFormMove.js",
-      "required": [
-        "jquery.sap.global.js",
-        "sap/ui/dt/command/BaseCommand.js",
-        "sap/ui/dt/ElementUtil.js"
-      ]
-    },
-    {
       "name": "library-all-dbg.js",
       "isDebug": true,
       "merged": true
@@ -601,8 +525,7 @@
         "sap/ui/base/ManagedObject.js",
         "sap/ui/dt/ElementUtil.js",
         "sap/ui/dt/OverlayUtil.js",
-        "sap/ui/dt/OverlayRegistry.js",
-        "sap/ui/dt/command/CommandFactory.js"
+        "sap/ui/dt/OverlayRegistry.js"
       ]
     },
     {
@@ -612,8 +535,7 @@
         "sap/ui/base/ManagedObject.js",
         "sap/ui/dt/ElementUtil.js",
         "sap/ui/dt/OverlayUtil.js",
-        "sap/ui/dt/OverlayRegistry.js",
-        "sap/ui/dt/command/CommandFactory.js"
+        "sap/ui/dt/OverlayRegistry.js"
       ]
     },
     {
@@ -926,11 +848,6 @@
     },
     {
       "name": "themes/sap_hcb/library.source.less",
-      "designtime": true,
-      "theme": "sap_hcb"
-    },
-    {
-      "name": "themes/sap_hcb/shared.less",
       "designtime": true,
       "theme": "sap_hcb"
     }

@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -35,6 +35,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * <ul>
 	 * <li>You need to group or display information and want to give users the option of hiding this information.</li>
 	 * <li>You want to show additional information on demand (for example, a panel could show optional input fields for an advanced search).</li>
+	 * <li>You want to create a panel with controls that do not require user interaction and are not part of a form. Depending on the usage, change the <code>accessibleRole</code> property from the default <code>{@link sap.m.PanelAccessibleRole Form}</code> to <code>{@link sap.m.PanelAccessibleRole Region}</code> or <code>{@link sap.m.PanelAccessibleRole Complementary}</code>.</li>
 	 * </ul>
 	 * <h3>Responsive Behavior</h3>
 	 * <ul>
@@ -49,7 +50,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -106,7 +107,15 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			 * Depending on the theme you can change the state of the background from "Solid" over "Translucent" to "Transparent".
 			 * @since 1.30
 			 */
-			backgroundDesign: {type: "sap.m.BackgroundDesign", group: "Appearance", defaultValue: sap.m.BackgroundDesign.Translucent}
+			backgroundDesign: {type: "sap.m.BackgroundDesign", group: "Appearance", defaultValue: sap.m.BackgroundDesign.Translucent},
+
+			/**
+			 * This property is used to set the accessible aria role of the Panel.
+			 * Depending on the usage you can change the role from the default <code>Form</code> to <code>Region</code> or <code>Complementary</code>.
+			 * @since 1.46
+			 */
+			accessibleRole: {type: "sap.m.PanelAccessibleRole", group: "Accessibility", defaultValue: sap.m.PanelAccessibleRole.Form}
+
 		},
 		defaultAggregation: "content",
 		aggregations: {
@@ -239,6 +248,26 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		this._toggleExpandCollapse();
 		this._toggleCssClasses();
 		this.fireExpand({ expand : bExpanded });
+
+		return this;
+	};
+
+	/**
+	 * Sets the accessibleRole property of the control.
+	 * @param {sap.m.PanelAccessibleRole} sRole Defines the aria role of the control.
+	 * @returns {sap.m.Panel} Pointer to the control instance to allow method chaining.
+	 * @public
+	 */
+	Panel.prototype.setAccessibleRole = function (sRole) {
+		if (sRole === this.getAccessibleRole()) {
+			return this;
+		}
+
+		this.setProperty("accessibleRole", sRole, true);
+
+		if (sap.ui.getCore().getConfiguration().getAccessibility()) {
+			this.$().attr("role", this.getAccessibleRole().toLowerCase());
+		}
 
 		return this;
 	};

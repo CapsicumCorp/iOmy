@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -32,7 +32,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @private
@@ -47,6 +47,16 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 
 			// ---- control specific ----
 			library : "sap.ui.dt",
+			associations: {
+				/**
+				 * Array of plugins, that set editable to true
+				 */
+				editableByPlugins : {
+					type : "any[]",
+					multiple : true,
+					singularName: "editableByPlugin"
+				}
+			},
 			properties : {
 				/**
 				 * Whether the ElementOverlay is selected
@@ -285,12 +295,26 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	};
 
 	/**
-	 * Returns a DOM reference for the associated Element or null, if it can't be found
-	 * @return {Element} DOM element or null
+	 * Returns a jQuery Object reference for the associated Element or undefined, if it can't be found
+	 * @return {jQuery} jQuery object or undefined
 	 * @public
 	 */
 	ElementOverlay.prototype.getAssociatedDomRef = function() {
-		return ElementUtil.getDomRef(this.getElementInstance());
+		var oDomRef = ElementUtil.getDomRef(this.getElementInstance());
+		if (!oDomRef) {
+			var oDesignTimeMetadata = this.getDesignTimeMetadata();
+			if (!oDesignTimeMetadata) {
+				return;
+			}
+			var fnGetDomRef = oDesignTimeMetadata.getDomRef();
+			if (typeof fnGetDomRef === "function") {
+				oDomRef = fnGetDomRef(this.getElementInstance());
+			}
+		}
+
+		if (oDomRef) {
+			return jQuery(oDomRef);
+		}
 	};
 
 	/**
@@ -300,6 +324,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @public
 	 */
 	ElementOverlay.prototype.setSelectable = function(bSelectable) {
+		bSelectable = !!bSelectable;
 		if (bSelectable !== this.isSelectable()) {
 
 			if (!bSelectable) {
@@ -322,6 +347,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @public
 	 */
 	ElementOverlay.prototype.setSelected = function(bSelected, bSuppressEvent) {
+		bSelected = !!bSelected;
 		if (this.isSelectable() && bSelected !== this.isSelected()) {
 			this.setProperty("selected", bSelected);
 			this.toggleStyleClass("sapUiDtOverlaySelected", bSelected);
@@ -343,6 +369,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @public
 	 */
 	ElementOverlay.prototype.setMovable = function(bMovable) {
+		bMovable = !!bMovable;
 		if (this.getMovable() !== bMovable) {
 			this.toggleStyleClass("sapUiDtOverlayMovable", bMovable);
 
@@ -360,6 +387,7 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @public
 	 */
 	ElementOverlay.prototype.setEditable = function(bEditable) {
+		bEditable = !!bEditable;
 		if (this.getEditable() !== bEditable) {
 			this.toggleStyleClass("sapUiDtOverlayEditable", bEditable);
 
@@ -374,13 +402,11 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @public
 	 */
 	ElementOverlay.prototype.sync = function() {
-		var that = this;
-
 		if (this.isVisible()) {
 			var aAggregationOverlays = this.getAggregationOverlays();
 			aAggregationOverlays.forEach(function(oAggregationOverlay) {
-				that._syncAggregationOverlay(oAggregationOverlay);
-			});
+				this._syncAggregationOverlay(oAggregationOverlay);
+			}, this);
 		}
 	};
 
@@ -410,7 +436,6 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @private
 	 */
 	ElementOverlay.prototype._createAggregationOverlays = function() {
-		var that = this;
 		this._mAggregationOverlays = {};
 
 		var oElement = this.getElementInstance();
@@ -421,8 +446,8 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 		ElementUtil.iterateOverAllPublicAggregations(oElement, function(oAggregation, aAggregationElements) {
 			var sAggregationName = oAggregation.name;
 			mAggregationsWithOverlay[sAggregationName] = true;
-			that._createAggregationOverlay(sAggregationName, that.isInHiddenTree());
-		});
+			this._createAggregationOverlay(sAggregationName, this.isInHiddenTree());
+		}.bind(this));
 
 		// create aggregation overlays also for a hidden aggregations which are not ignored in the DT Metadata
 		var mAggregationsMetadata = oDesignTimeMetadata.getAggregations();
@@ -433,9 +458,9 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 				// this is needed to point out, that a control is both in public and private tree, so that it has a "public" parent, which can be different from a getParent()
 				// flag is needed so that parents could have possibility to handle actions for the children. The better solution yet to come: probably, propagation of metadata from parents to children
 				var bIsInHiddenTree = oAggregationMetadata.inHiddenTree;
-				that._createAggregationOverlay(sAggregationName, bIsInHiddenTree);
+				this._createAggregationOverlay(sAggregationName, bIsInHiddenTree);
 			}
-		});
+		}, this);
 
 		this.sync();
 	};
@@ -481,8 +506,6 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 	 * @private
 	 */
 	ElementOverlay.prototype._syncAggregationOverlay = function(oAggregationOverlay) {
-		var that = this;
-
 		if (oAggregationOverlay.isVisible()) {
 			var sAggregationName = oAggregationOverlay.getAggregationName();
 
@@ -499,10 +522,10 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 			var aAggregationElements = ElementUtil.getAggregation(this.getElementInstance(), sAggregationName);
 			aAggregationElements.forEach(function(oAggregationElement) {
 				var oChildElementOverlay = OverlayRegistry.getOverlay(oAggregationElement);
-				if (oChildElementOverlay  && oChildElementOverlay.getParent() !== that) {
+				if (oChildElementOverlay  && oChildElementOverlay.getParent() !== this) {
 					oAggregationOverlay.addChild(oChildElementOverlay);
 				}
-			});
+			}, this);
 		}
 	};
 
@@ -535,7 +558,6 @@ function(Overlay, ControlObserver, ManagedObjectObserver, ElementDesignTimeMetad
 
 		var sAggregationName = oEvent.getParameters().name;
 		if (sAggregationName) {
-			this.sync();
 			var oAggregationOverlay = this.getAggregationOverlay(sAggregationName);
 			// private aggregations are also skipped
 			var bAggregationOverlayVisible = oAggregationOverlay && oAggregationOverlay.isVisible();

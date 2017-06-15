@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -207,11 +207,11 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 					oRoutes = {};
 				}
 
-				if (jQuery.isArray(oRoutes)) {
+				if (Array.isArray(oRoutes)) {
 					//Convert route object
 					aRoutes = oRoutes;
 					oRoutes = {};
-					jQuery.each(aRoutes, function(iRouteIndex, oRouteConfig) {
+					aRoutes.forEach(function(oRouteConfig) {
 						oRoutes[oRouteConfig.name] = oRouteConfig;
 					});
 				}
@@ -241,7 +241,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 				if (this._oRoutes[oConfig.name]) {
 					jQuery.sap.log.error("Route with name " + oConfig.name + " already exists", this);
 				}
-				this._oRoutes[oConfig.name] = new Route(this, oConfig, oParent);
+				this._oRoutes[oConfig.name] = this._createRoute(this, oConfig, oParent);
 			},
 
 			/**
@@ -450,6 +450,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 				});
 			},
 
+			_createRoute : function (oRouter, oConfig, oParent) {
+				return new Route(oRouter, oConfig, oParent);
+			},
+
 			/**
 			 * Returns a cached view for a given name or creates it if it does not yet exists
 			 *
@@ -499,7 +503,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 			 *
 			 * @param {string} sName Name of the route
 			 * @param {object} [oParameters] Parameters for the route
-			 * @param {boolean} [bReplace=false] Defines if the hash should be replaced (no browser history entry) or set (browser history entry)
+			 * @param {boolean} [bReplace=false] If set to <code>true</code>, the hash is replaced, and there will be no entry in the browser history, if set to <code>false</code>, the hash is set and the entry is stored in the browser history.
 			 * @public
 			 * @returns {sap.ui.core.routing.Router} this for chaining.
 			 */
@@ -556,7 +560,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 			 * @param {sap.ui.base.EventProvider} oEvent.getSource
 			 * @param {object} oEvent.getParameters
 			 * @param {string} oEvent.getParameters.name The name of the route
-			 * @param {object} oEvent.getParameters.arguments An key-value pair object which contains the arguments defined in the route
+			 * @param {object} oEvent.getParameters.arguments A key-value pair object which contains the arguments defined in the route
 			 *  resolved with the corresponding information from the current URL hash
 			 * @param {object} oEvent.getParameters.config The configuration object of the route
 			 * @param {sap.ui.core.routing.Route} [oEvent.getParameters.nestedRoute] The nested route instance of this route. The event
@@ -608,6 +612,77 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 			 */
 			fireRouteMatched : function(mArguments) {
 				this.fireEvent("routeMatched", mArguments);
+				return this;
+			},
+
+			/**
+			 * The 'beforeRouteMatched' event is fired before the corresponding target is loaded and placed, when the current URL hash matches:
+			 * <pre>
+			 *  a. the pattern of a route in this router.
+			 *  b. the pattern of its sub-route.
+			 *  c. the pattern of its nested route. When this occurs, the 'nestedRoute' parameter is set with the instance of nested route.
+			 * </pre>
+			 *
+			 *
+			 * @name sap.ui.core.routing.Router#beforeRouteMatched
+			 * @event
+			 * @param {sap.ui.base.Event} oEvent
+			 * @param {sap.ui.base.EventProvider} oEvent.getSource
+			 * @param {object} oEvent.getParameters
+			 * @param {string} oEvent.getParameters.name The name of the route
+			 * @param {object} oEvent.getParameters.arguments A key-value pair object which contains the arguments defined in the route
+			 *  resolved with the corresponding information from the current URL hash
+			 * @param {object} oEvent.getParameters.config The configuration object of the route
+			 * @param {sap.ui.core.routing.Route} [oEvent.getParameters.nestedRoute] The nested route instance of this route. The event
+			 *  is fired on this route because the pattern in the nested route is matched with the current URL hash. This parameter can be
+			 *  used to decide whether the current route is matched because of its nested child route. For more information about nested
+			 *  child route please refer to the documentation of oConfig.parent in {@link sap.ui.core.routing.Route#constructor}
+			 * @public
+			 * @since 1.46.1
+			 */
+
+			/**
+			 * Attach event-handler <code>fnFunction</code> to the 'beforeRouteMatched' event of this <code>sap.ui.core.routing.Router</code>.<br/>
+			 *
+			 *
+			 * @param {object} [oData] The object, that should be passed along with the event-object when firing the event.
+			 * @param {function} fnFunction The function to call, when the event occurs. This function will be called on the
+			 *            oListener-instance (if present) or in a 'static way'.
+			 * @param {object} [oListener] Object on which to call the given function. If empty, this Model is used.
+			 *
+			 * @return {sap.ui.core.routing.Router} <code>this</code> to allow method chaining
+			 * @public
+			 */
+			attachBeforeRouteMatched : function(oData, fnFunction, oListener) {
+				this.attachEvent("beforeRouteMatched", oData, fnFunction, oListener);
+				return this;
+			},
+
+			/**
+			 * Detach event-handler <code>fnFunction</code> from the 'beforeRouteMatched' event of this <code>sap.ui.core.routing.Router</code>.<br/>
+			 *
+			 * The passed function and listener object must match the ones previously used for event registration.
+			 *
+			 * @param {function} fnFunction The function to call, when the event occurs.
+			 * @param {object} oListener Object on which the given function had to be called.
+			 * @return {sap.ui.core.routing.Router} <code>this</code> to allow method chaining
+			 * @public
+			 */
+			detachBeforeRouteMatched : function(fnFunction, oListener) {
+				this.detachEvent("beforeRouteMatched", fnFunction, oListener);
+				return this;
+			},
+
+			/**
+			 * Fire event beforeRouteMatched to attached listeners.
+			 *
+			 * @param {object} [mArguments] the arguments to pass along with the event.
+			 *
+			 * @return {sap.ui.core.routing.Router} <code>this</code> to allow method chaining
+			 * @protected
+			 */
+			fireBeforeRouteMatched : function(mArguments) {
+				this.fireEvent("beforeRouteMatched", mArguments);
 				return this;
 			},
 
@@ -666,7 +741,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 			 * @param {sap.ui.base.EventProvider} oEvent.getSource
 			 * @param {object} oEvent.getParameters
 			 * @param {string} oEvent.getParameters.name The name of the route
-			 * @param {object} oEvent.getParameters.arguments An key-value pair object which contains the arguments defined in the route
+			 * @param {object} oEvent.getParameters.arguments A key-value pair object which contains the arguments defined in the route
 			 *  resolved with the corresponding information from the current URL hash
 			 * @param {object} oEvent.getParameters.config The configuration object of the route
 			 * @public
@@ -966,6 +1041,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/library', 'sap/ui/base/EventPro
 		}
 
 		Router.M_EVENTS = {
+			BEFORE_ROUTE_MATCHED: "beforeRouteMatched",
 			ROUTE_MATCHED: "routeMatched",
 			ROUTE_PATTERN_MATCHED: "routePatternMatched",
 			VIEW_CREATED: "viewCreated",

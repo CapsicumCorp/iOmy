@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -95,8 +95,6 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/TitleLev
 		this._sInternalTitleLevel = TitleLevel.Auto;
 		//hidden status
 		this._isHidden = false;
-
-		this._oParentObjectPageLayout = undefined; //store the parent objectPageLayout
 
 		this._bRtl = sap.ui.getCore().getConfiguration().getRTL();
 	};
@@ -233,11 +231,7 @@ sap.ui.define(["jquery.sap.global", "sap/ui/core/Control", "sap/ui/core/TitleLev
 	 * @private
 	 */
 	ObjectPageSectionBase.prototype._getObjectPageLayout = function () {
-		if (!this._oParentObjectPageLayout) {
-			this._oParentObjectPageLayout = library.Utilities.getClosestOPL(this);
-		}
-
-		return this._oParentObjectPageLayout;
+		return library.Utilities.getClosestOPL(this);
 	};
 
 	/**

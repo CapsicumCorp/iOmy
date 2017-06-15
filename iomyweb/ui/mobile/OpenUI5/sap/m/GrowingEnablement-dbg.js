@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -315,7 +315,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/core/format/Nu
 		// creates list item from the factory
 		createListItem : function(oContext, oBindingInfo) {
 			this._iRenderedDataItems++;
-			var oItem = oBindingInfo.factory("", oContext);
+			var oItem = oBindingInfo.factory(sap.ui.base.ManagedObjectMetadata.uid("clone"), oContext);
 			return oItem.setBindingContext(oContext, oBindingInfo.model);
 		},
 
@@ -567,8 +567,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'sap/ui/core/format/Nu
 			var oTrigger = this._oTrigger,
 				oControl = this._oControl;
 
-			// If there are no visible columns then also hide the trigger.
-			if (!oTrigger || !oControl || !oControl.shouldRenderItems()) {
+			if (!oTrigger || !oControl) {
 				return;
 			}
 

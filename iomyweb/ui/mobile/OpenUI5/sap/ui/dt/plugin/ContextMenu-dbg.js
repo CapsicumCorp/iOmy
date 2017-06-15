@@ -1,6 +1,6 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -18,7 +18,7 @@ sap.ui.define([
 	 * @class The ContextMenu registers event handler to open the context menu. Menu entries can dynamically be added
 	 * @extends sap.ui.dt.Plugin
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @constructor
 	 * @private
 	 * @since 1.34
@@ -122,16 +122,19 @@ sap.ui.define([
 	 * @private
 	 */
 	ContextMenu.prototype._onItemSelected = function(oEvent) {
-		var that = this;
+		var aSelection = [];
 		var sId = oEvent.getParameter("item").data("id");
 		this._aMenuItems.some(function(oItem) {
 			if (sId === oItem.id) {
-				var oDesignTime = that.getDesignTime();
-				var aSelection = oDesignTime.getSelection();
+				var oDesignTime = this.getDesignTime();
+				aSelection = oDesignTime.getSelection();
+
+				jQuery.sap.assert(aSelection.length > 0, "sap.ui.rta - Opening context menu, with empty selection - check event order");
+
 				oItem.handler(aSelection);
 				return true;
 			}
-		});
+		}, this);
 	};
 
 	/**
@@ -143,6 +146,8 @@ sap.ui.define([
 	ContextMenu.prototype._onContextMenu = function(oEvent) {
 		// hide browser-context menu
 		oEvent.preventDefault();
+		document.activeElement.blur();
+
 		var oOverlay = sap.ui.getCore().byId(oEvent.currentTarget.id);
 
 		if (oOverlay && oOverlay.isSelectable()) {

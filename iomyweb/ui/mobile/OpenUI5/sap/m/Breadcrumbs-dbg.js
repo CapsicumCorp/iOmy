@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -31,7 +31,7 @@ sap.ui.define([
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -304,7 +304,7 @@ sap.ui.define([
 			oControlsDistribution = this._getControlDistribution();
 
 		if (!this._bControlDistributionCached || bInvalidateDistribution) {
-			oSelect.removeAllItems();
+			oSelect.destroyItems();
 			aControlsForSelect = Device.system.phone ? this._getItemsForMobile() : oControlsDistribution.aControlsForSelect;
 			aControlsForSelect.map(this._createSelectItem).reverse().forEach(oSelect.insertItem, oSelect);
 			this._bControlDistributionCached = true;
@@ -479,6 +479,12 @@ sap.ui.define([
 		});
 
 		this.addDelegate(oItemNavigation);
+		oItemNavigation.setDisabledModifiers({
+			sapnext : ["alt"],
+			sapprevious : ["alt"],
+			saphome : ["alt"],
+			sapend : ["alt"]
+		});
 		oItemNavigation.setCycling(false);
 		oItemNavigation.setPageSize(Breadcrumbs.PAGEUP_AND_PAGEDOWN_JUMP_SIZE);
 		oItemNavigation.setRootDomRef(this.getDomRef());

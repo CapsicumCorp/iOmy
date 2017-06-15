@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -18,14 +18,14 @@ sap.ui.define(['jquery.sap.global', './FlexBoxStylingHelper', './FlexItemData', 
 	 * @param {object} [mSettings] initial settings for the new control
 	 *
 	 * @class
-	 * The <code>sap.m.FlexBox</code> control builds the container for a flexible box layout.
+	 * The <code>sap.m.FlexBox</code> control builds the container for a flexible box layout.<br>
+	 * <br>
+	 * <b>Note:</b> Be sure to check the <code>renderType</code> setting to avoid issues due to browser inconsistencies.
 	 *
-	 * Browser support:
-	 * This control is not supported in Internet Explorer 9!
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -69,7 +69,9 @@ sap.ui.define(['jquery.sap.global', './FlexBoxStylingHelper', './FlexItemData', 
 			fitContainer : {type : "boolean", group : "Appearance", defaultValue : false},
 
 			/**
-			 * Determines whether the layout is rendered as a series of divs or as an unordered list (ul)
+			 * Determines whether the layout is rendered as a series of divs or as an unordered list (ul).<br>
+			 * <br>
+			 * We recommend to use <code>Bare</code> in most cases to avoid layout issues due to browser inconsistencies.
 			 */
 			renderType : {type : "sap.m.FlexRendertype", group : "Misc", defaultValue : sap.m.FlexRendertype.Div},
 

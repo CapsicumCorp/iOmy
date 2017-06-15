@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.m.Button.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/EnabledPropagator', 'sap/ui/core/IconPool', 'sap/ui/Device'],
-	function(jQuery, library, Control, EnabledPropagator, IconPool, Device) {
+sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/EnabledPropagator', 'sap/ui/core/IconPool', 'sap/ui/Device', 'sap/ui/core/ContextMenuSupport'],
+	function(jQuery, library, Control, EnabledPropagator, IconPool, Device, ContextMenuSupport) {
 	"use strict";
 
 	/**
@@ -18,9 +18,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * @class
 	 * Enables users to trigger actions. For the button UI, you can define some text or an icon, or both.
 	 * @extends sap.ui.core.Control
+	 * @mixes sap.ui.core.ContextMenuSupport
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -119,6 +120,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	//this._bExcludeFromTabChain
 
 	EnabledPropagator.call(Button.prototype);
+	ContextMenuSupport.apply(Button.prototype);
 
 	/**
 	 * Function is called when exiting the control.
@@ -232,7 +234,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		if (this.getEnabled() && this.getVisible()) {
 			// note: on mobile, the press event should be fired after the focus is on the button
 			if ((oEvent.originalEvent && oEvent.originalEvent.type === "touchend")) {
-				this.focus();
+					this.focus();
 			}
 
 			this.fireTap({/* no parameters */}); // (This event is deprecated, use the "press" event instead)

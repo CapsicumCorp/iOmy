@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -29,7 +29,7 @@ sap.ui.define([
 	 * @extends sap.ui.base.EventProvider
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -149,8 +149,9 @@ sap.ui.define([
 	 * @private
 	 */
 	MessageManager.prototype._importMessage = function(oMessage) {
-		var sMessageKey = oMessage.getTarget();
-		var sProcessorId = oMessage.getMessageProcessor().getId();
+		var sMessageKey = oMessage.getTarget(),
+				oProcessor = oMessage.getMessageProcessor(),
+				sProcessorId = oProcessor && oProcessor.getId();
 
 		if (!this.mMessages[sProcessorId]) {
 			this.mMessages[sProcessorId] = {};
@@ -275,8 +276,10 @@ sap.ui.define([
 	 * @private
 	 */
 	MessageManager.prototype._removeMessage = function(oMessage) {
+		var oProcessor = oMessage.getMessageProcessor(),
+				sProcessorId = oProcessor && oProcessor.getId(),
+				mMessages = this.mMessages[sProcessorId];
 
-		var mMessages = this.mMessages[oMessage.getMessageProcessor().getId()];
 		if (!mMessages) {
 			return;
 		}

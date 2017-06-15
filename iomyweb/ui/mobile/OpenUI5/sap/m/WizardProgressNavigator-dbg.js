@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -21,7 +21,7 @@ function (library, Control, ResizeHandler, ItemNavigation, Device, jQuery) {
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @private
@@ -138,7 +138,7 @@ function (library, Control, ResizeHandler, ItemNavigation, Device, jQuery) {
 		this._activeStep = 1;
 		this._cachedSteps = [];
 		this._resourceBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m");
-		this._actionSheet = new sap.m.ActionSheet().addStyleClass("sapUiSizeCompact");
+		this._actionSheet = new sap.m.ActionSheet();
 		this._createAnchorNavigation();
 	};
 

@@ -1,10 +1,10 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
-sap.ui.define([], function() {
+sap.ui.define(["sap/m/GenericTileScope"], function(GenericTileScope) {
 	"use strict";
 
 	/**
@@ -21,11 +21,14 @@ sap.ui.define([], function() {
 	 */
 	SlideTileRenderer.render = function(oRm, oControl) {
 		var sTooltip = oControl.getTooltip_AsString(),
+			sScope = oControl.getScope(),
+			sScopeClass = jQuery.sap.encodeCSS("sapMSTScope" + sScope),
 			iLength;
 
 		oRm.write("<div");
 		oRm.writeControlData(oControl);
 		oRm.addClass("sapMST");
+		oRm.addClass(sScopeClass);
 		if (!this._bAnimationPause) {
 			oRm.addClass("sapMSTPauseIcon");
 		}
@@ -36,11 +39,29 @@ sap.ui.define([], function() {
 		oRm.writeAttribute("tabindex", "0");
 		oRm.writeAttribute("role", "presentation");
 		oRm.write(">");
-		this._renderPausePlayIcon(oRm, oControl);
 		iLength = oControl.getTiles().length;
-		if (iLength > 1) {
+		if (iLength > 1 && sScope === GenericTileScope.Display) {
+			this._renderPausePlayIcon(oRm, oControl);
 			this._renderTilesIndicator(oRm, oControl);
 		}
+		this._renderTiles(oRm, oControl, iLength);
+		if (sScope === GenericTileScope.Actions) {
+			this._renderActionsScope(oRm, oControl);
+		}
+		oRm.write("<div");
+		oRm.addClass("sapMSTFocusDiv");
+		oRm.writeClasses();
+		oRm.writeAttribute("id", oControl.getId() + "-focus");
+		oRm.write(">");
+		oRm.write("</div>");
+		oRm.write("</div>");
+	};
+
+	SlideTileRenderer._renderTiles = function(oRm, oControl, iLength) {
+		oRm.write("<div");
+		oRm.addClass("sapMSTOverflowHidden");
+		oRm.writeClasses();
+		oRm.write(">");
 		for (var i = 0; i < iLength; i++) {
 			oRm.write("<div");
 			oRm.writeAttribute("id", oControl.getId() + "-wrapper-" + i);
@@ -50,12 +71,6 @@ sap.ui.define([], function() {
 			oRm.renderControl(oControl.getTiles()[i]);
 			oRm.write("</div>");
 		}
-		oRm.write("<div");
-		oRm.addClass("sapMSTFocusDiv");
-		oRm.writeClasses();
-		oRm.writeAttribute("id", oControl.getId() + "-focus");
-		oRm.write(">");
-		oRm.write("</div>");
 		oRm.write("</div>");
 	};
 
@@ -97,6 +112,10 @@ sap.ui.define([], function() {
 		}
 	};
 
+	SlideTileRenderer._renderActionsScope = function(oRm, oControl) {
+		oRm.renderControl(oControl._oRemoveButton);
+		oRm.renderControl(oControl._oMoreIcon);
+	};
 
 	return SlideTileRenderer;
 

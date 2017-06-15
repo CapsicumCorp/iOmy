@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -52,7 +52,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 		 *
 		 * @abstract
 		 * @extends sap.ui.core.support.Plugin
-		 * @version 1.44.14
+		 * @version 1.46.9
 		 * @constructor
 		 * @private
 		 * @alias sap.ui.core.support.plugins.Performance
@@ -65,7 +65,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 
 				this._oStub = oSupportStub;
 
-				if (this.isToolPlugin()) {
+				if (this.runsAsToolPlugin()) {
 					this._aEventIds = [
 						this.getId() + "SetMeasurements",
 						this.getId() + "SetActive"
@@ -84,7 +84,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin'],
 
 		Performance.prototype.init = function (oSupportStub) {
 			Plugin.prototype.init.apply(this, arguments);
-			if (this.isToolPlugin()) {
+			if (this.runsAsToolPlugin()) {
 				initInTools.call(this, oSupportStub);
 			} else {
 				initInApps.call(this, oSupportStub);

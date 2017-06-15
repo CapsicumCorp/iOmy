@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -472,10 +472,10 @@ sap.ui.define(['jquery.sap.global', './Filter', 'sap/ui/model/Sorter', 'sap/ui/m
 				sValue = "guid'" + vValue + "'";
 				break;
 			case "Edm.Decimal":
-				sValue = vValue + "M";
+				sValue = vValue + "m";
 				break;
 			case "Edm.Int64":
-				sValue = vValue + "L";
+				sValue = vValue + "l";
 				break;
 			case "Edm.Double":
 				sValue = vValue + "d";
@@ -646,6 +646,35 @@ sap.ui.define(['jquery.sap.global', './Filter', 'sap/ui/model/Sorter', 'sap/ui/m
 			default:
 				return simpleCompare;
 		}
+	};
+
+	/**
+	 * Normalizes the given canonical key.
+	 *
+	 * Although keys contained in OData response must be canonical, there are
+	 * minor differences (like capitalization of suffixes for Decimal, Double,
+	 * Float) which can differ and cause equality checks to fail.
+	 *
+	 * @param {string} sKey The canonical key of an entity
+	 * @returns {string} Normalized key of the entry
+	 * @protected
+	 */
+	// Define regular expression and function outside function to avoid instatiation on every call
+	var rNormalizeString = /([(=,])('.*?')([,)])/g,
+		rNormalizeCase = /[MLDF](?=[,)](?:[^']*'[^']*')*[^']*$)/g,
+		rNormalizeBinary = /([(=,])(X')/g,
+		fnNormalizeString = function(value, p1, p2, p3) {
+			return p1 + encodeURIComponent(decodeURIComponent(p2)) + p3;
+		},
+		fnNormalizeCase = function(value) {
+			return value.toLowerCase();
+		},
+		fnNormalizeBinary = function(value, p1) {
+			return p1 + "binary'";
+		};
+
+	ODataUtils._normalizeKey = function(sKey) {
+		return sKey.replace(rNormalizeString, fnNormalizeString).replace(rNormalizeCase, fnNormalizeCase).replace(rNormalizeBinary, fnNormalizeBinary);
 	};
 
 	return ODataUtils;

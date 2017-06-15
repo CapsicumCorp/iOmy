@@ -17,7 +17,7 @@
 	lifecycle: sap.ui.core.ComponentLifecycle.Legacy, // sap.ui.core.ComponentLifecycle
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	component: undefined, // sap.ui.core.UIComponent
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -41,7 +41,7 @@
 	component=""
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </ComponentContainer>
 ]]></xmlTemplate>
 </Template>
@@ -54,7 +54,7 @@
 	fieldGroupIds: [], // string[], since 1.31
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this]
@@ -68,7 +68,7 @@
 	fieldGroupIds=""
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </Control>
 ]]></xmlTemplate>
 </Template>
@@ -80,7 +80,7 @@
 	writeToDom: false, // boolean, since 1.9.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [] // sap.ui.core.Control, since 1.19
+	dependents: [] // sap.ui.core.Element, since 1.19
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<CustomData xmlns="sap.ui.core"
@@ -89,7 +89,7 @@
 	value=""
 	writeToDom="false">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </CustomData>
 ]]></xmlTemplate>
 </Template>
@@ -98,13 +98,13 @@
 	id: "${id}", // sap.ui.core.ID
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [] // sap.ui.core.Control, since 1.19
+	dependents: [] // sap.ui.core.Element, since 1.19
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<Element xmlns="sap.ui.core"
 	id="${id}">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </Element>
 ]]></xmlTemplate>
 </Template>
@@ -121,7 +121,7 @@
 	visible: true, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -143,7 +143,7 @@
 	validateFieldGroup=""
 	afterRendering="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </HTML>
 ]]></xmlTemplate>
 </Template>
@@ -170,7 +170,7 @@
 	noTabStop: false, // boolean, since 1.30.1
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	ariaLabelledBy: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -204,7 +204,7 @@
 	validateFieldGroup=""
 	press="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </Icon>
 ]]></xmlTemplate>
 </Template>
@@ -218,7 +218,7 @@
 	text: "", // string
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this]
@@ -233,7 +233,7 @@
 	text=""
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </InvisibleText>
 ]]></xmlTemplate>
 </Template>
@@ -246,7 +246,7 @@
 	key: undefined, // string
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [] // sap.ui.core.Control, since 1.19
+	dependents: [] // sap.ui.core.Element, since 1.19
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<Item xmlns="sap.ui.core"
@@ -256,7 +256,7 @@
 	textDirection="Inherit"
 	key="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </Item>
 ]]></xmlTemplate>
 </Template>
@@ -265,13 +265,13 @@
 	id: "${id}", // sap.ui.core.ID
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [] // sap.ui.core.Control, since 1.19
+	dependents: [] // sap.ui.core.Element, since 1.19
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<LayoutData xmlns="sap.ui.core"
 	id="${id}">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </LayoutData>
 ]]></xmlTemplate>
 </Template>
@@ -286,7 +286,7 @@
 	additionalText: undefined, // string
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [] // sap.ui.core.Control, since 1.19
+	dependents: [] // sap.ui.core.Element, since 1.19
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<ListItem xmlns="sap.ui.core"
@@ -298,7 +298,7 @@
 	icon=""
 	additionalText="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </ListItem>
 ]]></xmlTemplate>
 </Template>
@@ -313,7 +313,7 @@
 	height: "100px", // sap.ui.core.CSSSize
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this]
@@ -329,7 +329,7 @@
 	height="100px"
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </LocalBusyIndicator>
 ]]></xmlTemplate>
 </Template>
@@ -343,7 +343,7 @@
 	readOnly: false, // boolean, since 1.19.0
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [] // sap.ui.core.Control, since 1.19
+	dependents: [] // sap.ui.core.Element, since 1.19
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<Message xmlns="sap.ui.core"
@@ -354,7 +354,7 @@
 	level="None"
 	readOnly="false">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </Message>
 ]]></xmlTemplate>
 </Template>
@@ -372,7 +372,7 @@
 	steps: undefined, // int
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -395,7 +395,7 @@
 	validateFieldGroup=""
 	scroll="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </ScrollBar>
 ]]></xmlTemplate>
 </Template>
@@ -408,7 +408,7 @@
 	key: undefined, // string
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [] // sap.ui.core.Control, since 1.19
+	dependents: [] // sap.ui.core.Element, since 1.19
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<SeparatorItem xmlns="sap.ui.core"
@@ -418,7 +418,7 @@
 	textDirection="Inherit"
 	key="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </SeparatorItem>
 ]]></xmlTemplate>
 </Template>
@@ -431,7 +431,7 @@
 	emphasized: false, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [] // sap.ui.core.Control, since 1.19
+	dependents: [] // sap.ui.core.Element, since 1.19
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<Title xmlns="sap.ui.core"
@@ -441,7 +441,7 @@
 	level="Auto"
 	emphasized="false">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </Title>
 ]]></xmlTemplate>
 </Template>
@@ -463,7 +463,7 @@
 	closeDelay: 100, // int
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this],
@@ -490,7 +490,7 @@
 	validateFieldGroup=""
 	closed="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </TooltipBase>
 ]]></xmlTemplate>
 </Template>
@@ -503,7 +503,7 @@
 	fieldGroupIds: [], // string[], since 1.31
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this]
@@ -517,7 +517,7 @@
 	fieldGroupIds=""
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </UIComponent>
 ]]></xmlTemplate>
 </Template>
@@ -526,14 +526,14 @@
 	id: "${id}", // sap.ui.core.ID
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	multipleLayoutData: [] // sap.ui.core.LayoutData
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<VariantLayoutData xmlns="sap.ui.core"
 	id="${id}">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 		<multipleLayoutData></multipleLayoutData> <!-- sap.ui.core.LayoutData -->
 </VariantLayoutData>
 ]]></xmlTemplate>
@@ -551,7 +551,7 @@
 	displayBlock: false, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	content: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -586,7 +586,7 @@
 	afterRendering=""
 	beforeRendering="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 		<content></content> <!-- sap.ui.core.Control -->
 </mvc/HTMLView>
 ]]></xmlTemplate>
@@ -604,7 +604,7 @@
 	displayBlock: false, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	content: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -639,7 +639,7 @@
 	afterRendering=""
 	beforeRendering="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 		<content></content> <!-- sap.ui.core.Control -->
 </mvc/JSONView>
 ]]></xmlTemplate>
@@ -657,7 +657,7 @@
 	displayBlock: false, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	content: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -692,7 +692,7 @@
 	afterRendering=""
 	beforeRendering="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 		<content></content> <!-- sap.ui.core.Control -->
 </mvc/JSView>
 ]]></xmlTemplate>
@@ -710,7 +710,7 @@
 	displayBlock: false, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	content: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -745,7 +745,7 @@
 	afterRendering=""
 	beforeRendering="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 		<content></content> <!-- sap.ui.core.Control -->
 </mvc/TemplateView>
 ]]></xmlTemplate>
@@ -763,7 +763,7 @@
 	displayBlock: false, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	content: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -798,7 +798,7 @@
 	afterRendering=""
 	beforeRendering="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 		<content></content> <!-- sap.ui.core.Control -->
 </mvc/View>
 ]]></xmlTemplate>
@@ -816,7 +816,7 @@
 	displayBlock: false, // boolean
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	content: [], // sap.ui.core.Control
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -851,7 +851,7 @@
 	afterRendering=""
 	beforeRendering="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 		<content></content> <!-- sap.ui.core.Control -->
 </mvc/XMLView>
 ]]></xmlTemplate>
@@ -864,7 +864,7 @@
 	suggestType: "json", // string
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [] // sap.ui.core.Control, since 1.19
+	dependents: [] // sap.ui.core.Element, since 1.19
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<search/OpenSearchProvider xmlns="sap.ui.core"
@@ -873,7 +873,7 @@
 	suggestUrl=""
 	suggestType="json">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </search/OpenSearchProvider>
 ]]></xmlTemplate>
 </Template>
@@ -883,14 +883,14 @@
 	icon: undefined, // string
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [] // sap.ui.core.Control, since 1.19
+	dependents: [] // sap.ui.core.Element, since 1.19
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<search/SearchProvider xmlns="sap.ui.core"
 	id="${id}"
 	icon="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </search/SearchProvider>
 ]]></xmlTemplate>
 </Template>
@@ -901,7 +901,7 @@
 	value: undefined, // string
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [] // sap.ui.core.Control, since 1.19
+	dependents: [] // sap.ui.core.Element, since 1.19
 })
 ]]></jsTemplate>
 	<xmlTemplate><![CDATA[<tmpl/DOMAttribute xmlns="sap.ui.core"
@@ -909,7 +909,7 @@
 	name=""
 	value="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </tmpl/DOMAttribute>
 ]]></xmlTemplate>
 </Template>
@@ -924,7 +924,7 @@
 	tag: "span", // string
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	attributes: [], // sap.ui.core.tmpl.DOMAttribute
 	elements: [], // sap.ui.core.tmpl.DOMElement
 	validateFieldGroup: [function (oEvent) {
@@ -942,7 +942,7 @@
 	tag="span"
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 		<attributes></attributes> <!-- sap.ui.core.tmpl.DOMAttribute -->
 		<elements></elements> <!-- sap.ui.core.tmpl.DOMElement -->
 </tmpl/DOMElement>
@@ -958,7 +958,7 @@
 	content: undefined, // string
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
 	}, this]
@@ -973,7 +973,7 @@
 	content=""
 	validateFieldGroup="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </tmpl/Template>
 ]]></xmlTemplate>
 </Template>
@@ -987,7 +987,7 @@
 	context: undefined, // object
 	tooltip: undefined, // sap.ui.core.TooltipBase
 	customData: [], // sap.ui.core.CustomData
-	dependents: [], // sap.ui.core.Control, since 1.19
+	dependents: [], // sap.ui.core.Element, since 1.19
 	template: undefined, // sap.ui.core.tmpl.Template
 	validateFieldGroup: [function (oEvent) {
 		var ${control} = oEvent.getSource();
@@ -1012,7 +1012,7 @@
 	afterRendering=""
 	beforeRendering="">
 		<tooltip></tooltip> <!-- sap.ui.core.TooltipBase -->
-		<dependents></dependents> <!-- sap.ui.core.Control, since 1.19 -->
+		<dependents></dependents> <!-- sap.ui.core.Element, since 1.19 -->
 </tmpl/TemplateControl>
 ]]></xmlTemplate>
 </Template>

@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -16,10 +16,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin',
 	function(jQuery, Plugin, InteractionSlider, InteractionTree, TimelineOverview, MessageToast, JSZip, File) {
 		"use strict";
 
-
-
-
-
 		/**
 		 * Creates an instance of sap.ui.core.support.plugins.Interaction.
 		 * @class This class represents the plugin for the support tool functionality of UI5. This class is internal and all its functions must not be used by an application.
@@ -28,7 +24,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin',
 		 *
 		 * @abstract
 		 * @extends sap.ui.core.support.Plugin
-		 * @version 1.44.14
+		 * @version 1.46.9
 		 * @constructor
 		 * @private
 		 * @alias sap.ui.core.support.plugins.Interaction
@@ -39,7 +35,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin',
 
 				this._oStub = oSupportStub;
 
-				if (this.isToolPlugin()) {
+				if (this.runsAsToolPlugin()) {
 
 					this._aEventIds = [this.getId() + "SetMeasurements",
 						this.getId() + "SetActive",
@@ -55,7 +51,6 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin',
 							iMicroSeconds = Math.floor((fNow - Math.floor(fNow)) * 1000);
 						return pad0(oNow.getHours(),2) + ":" + pad0(oNow.getMinutes(),2) + ":" + pad0(oNow.getSeconds(),2) + "." + pad0(oNow.getMilliseconds(),3) + pad0(iMicroSeconds,3);
 					};
-
 
 					this._oInteractionSlider = new InteractionSlider();
 					this._oInteractionTree = new InteractionTree({});
@@ -81,7 +76,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/support/Plugin',
 		Interaction.prototype.init = function(oSupportStub){
 			Plugin.prototype.init.apply(this, arguments);
 
-			if (this.isToolPlugin()) {
+			if (this.runsAsToolPlugin()) {
 				initInTools.call(this, oSupportStub);
 			} else {
 				initInApps.call(this, oSupportStub);

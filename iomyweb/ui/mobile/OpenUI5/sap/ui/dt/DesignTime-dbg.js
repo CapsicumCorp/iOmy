@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -30,7 +30,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @private
@@ -109,9 +109,13 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 				 */
 				syncing : {},
 				/**
-				 * Event fired when DesignTime's overlays are in-sync with ControlTree of root elements
+				 * Event fired when DesignTime's overlays are in-sync with ControlTree of root elements and registered at all known plugins
 				 */
 				synced : {},
+				/**
+				 * Event fired when DesignTime's overlays are in-sync with ControlTree of root elements
+				 */
+				syncedPureOverlays : {},
 				/**
 				 * Event fired when DesignTime's overlays failed to sync with ControlTree of root elements
 				 */
@@ -127,11 +131,39 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	DesignTime.prototype.init = function() {
 		// number of element overlays waiting for their designTimeMetadata
 		this._iOverlaysPending = 0;
-		// array of errors while element overlays waiting for their designTimeMetadata
+
 		this._oSelection = this.createSelection();
 		this._oSelection.attachEvent("change", function(oEvent) {
 			this.fireSelectionChange({selection: oEvent.getParameter("selection")});
 		}, this);
+
+		this._collectOverlaysDuringSyncing();
+	};
+
+	DesignTime.prototype._collectOverlaysDuringSyncing = function() {
+		// array of element overlays created between syncing and synced event
+		this._aOverlaysCreatedInLastBatch = [];
+
+		this.attachSyncing(function(){
+			this._aOverlaysCreatedInLastBatch = [];
+		}.bind(this));
+
+		this.attachElementOverlayCreated(function(oEvent){
+			var oNewOverlay = oEvent.getParameter("elementOverlay");
+			this._aOverlaysCreatedInLastBatch.push(oNewOverlay);
+		}.bind(this));
+
+		this.attachSyncedPureOverlays(function(){
+			var aPlugins = this.getPlugins();
+			this._aOverlaysCreatedInLastBatch.forEach(function(oOverlay) {
+				aPlugins.forEach(function(oPlugin) {
+					oPlugin.callElementOverlayRegistrationMethods(oOverlay);
+				});
+			});
+
+			this.fireSynced();
+			this._aOverlaysCreatedInLastBatch = [];
+		}.bind(this));
 	};
 
 	/**
@@ -140,6 +172,7 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 */
 	DesignTime.prototype.exit = function() {
 		delete this._iOverlaysPending;
+		delete this._aOverlaysCreatedInLastBatch;
 		this._destroyAllOverlays();
 		this._oSelection.destroy();
 	};
@@ -349,12 +382,11 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @public
 	 */
 	DesignTime.prototype.getElementOverlays = function() {
-		var that = this;
 		var aElementOverlays = [];
 
 		this._iterateRootElements(function(oRootElement) {
-			aElementOverlays = aElementOverlays.concat(that._getAllElementOverlaysIn(oRootElement));
-		});
+			aElementOverlays = aElementOverlays.concat(this._getAllElementOverlaysIn(oRootElement));
+		}, this);
 
 		return aElementOverlays;
 	};
@@ -365,8 +397,6 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @private
 	 */
 	DesignTime.prototype._createElementOverlay = function(oElement, bInHiddenTree) {
-		var that = this;
-
 		oElement = ElementUtil.fixComponentContainerElement(oElement);
 		var oElementOverlay = OverlayRegistry.getOverlay(oElement);
 		if (oElement && !oElement.bIsDestroyed && !oElementOverlay) {
@@ -390,24 +420,24 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 				}
 				// merge the DTMetadata from the DesignTime and from UI5
 				var oMergedDesignTimeMetadata = oDesignTimeMetadata || {};
-				jQuery.extend(true, oMergedDesignTimeMetadata, that.getDesignTimeMetadataFor(oElement));
+				jQuery.extend(true, oMergedDesignTimeMetadata, this.getDesignTimeMetadataFor(oElement));
 				var oElementDesignTimeMetadata = new ElementDesignTimeMetadata({
 					libraryName : oElement.getMetadata().getLibraryName(),
 					data : oMergedDesignTimeMetadata});
 
 				oElementOverlay.setDesignTimeMetadata(oElementDesignTimeMetadata);
-				that.fireElementOverlayCreated({elementOverlay : oElementOverlay});
-			}).catch(function(oError) {
-				jQuery.sap.log.error("exception occured in sap.ui.dt.DesignTime._createElementOverlay", oError);
+				this.fireElementOverlayCreated({elementOverlay : oElementOverlay});
+			}.bind(this)).catch(function(oError) {
+				jQuery.sap.log.error("exception occured in sap.ui.dt.DesignTime._createElementOverlay", oError.stack || oError);
 				if (oError instanceof Error) {
-					that.fireSyncFailed();
+					this.fireSyncFailed();
 				}
-			}).then(function() {
-				that._iOverlaysPending--;
-				if (that._iOverlaysPending === 0) {
-					that.fireSynced();
+			}.bind(this)).then(function() {
+				this._iOverlaysPending--;
+				if (this._iOverlaysPending === 0) {
+					this.fireSyncedPureOverlays();
 				}
-			});
+			}.bind(this));
 		}
 
 		return oElementOverlay;
@@ -438,25 +468,21 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @private
 	 */
 	DesignTime.prototype._destroyAllOverlays = function() {
-		var that = this;
-
 		this._iterateRootElements(function(oRootElement) {
-			that._destroyOverlaysForElement(oRootElement);
-		});
+			this._destroyOverlaysForElement(oRootElement);
+		}, this);
 	};
 
 	/**
 	 * @private
 	*/
 	DesignTime.prototype._createChildOverlaysForAggregation = function(oElementOverlay, sAggregationName) {
-		var that = this;
-
 		var oAggregationOverlay = oElementOverlay.getAggregationOverlay(sAggregationName);
 		var oElement = oElementOverlay.getElementInstance();
 		var vChildren = ElementUtil.getAggregation(oElement, sAggregationName);
 		ElementUtil.iterateOverElements(vChildren, function(oChild) {
-			that._createElementOverlay(oChild, oAggregationOverlay.isInHiddenTree());
-		});
+			this._createElementOverlay(oChild, oAggregationOverlay.isInHiddenTree());
+		}.bind(this));
 	};
 
 	/**
@@ -498,8 +524,6 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @private
 	 */
 	DesignTime.prototype._onElementModified = function(oEvent) {
-		var that = this;
-
 		var oParams = oEvent.getParameters();
 		if (oParams.type === "addOrSetAggregation" || oParams.type === "insertAggregation") {
 			this._onElementOverlayAddAggregation(oParams.value, oParams.target, oParams.name);
@@ -507,10 +531,10 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 			// timeout is needed because UI5 controls & apps can temporary "dettach" controls from control tree
 			// and add them again later, so the check if the control is dettached from root element's tree is delayed
 			setTimeout(function() {
-				if (!that.bIsDestroyed) {
-					that._checkIfOverlayShouldBeDestroyed(oParams.target, oParams.value);
+				if (!this.bIsDestroyed) {
+					this._checkIfOverlayShouldBeDestroyed(oParams.target);
 				}
-			}, 0);
+			}.bind(this), 0);
 		}
 	};
 
@@ -519,24 +543,31 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @private
 	 */
 	DesignTime.prototype._onElementOverlayAddAggregation = function(oChild, oParent, sAggregationName) {
+		var oParentOverlay = OverlayRegistry.getOverlay(oParent);
+		var oParentAggregationOverlay = oParentOverlay.getAggregationOverlay(sAggregationName);
 		// oElement can be of an alternative type (setLabel(sText) for example)
 		if (oChild instanceof sap.ui.core.Element) {
 			var oChildElementOverlay = OverlayRegistry.getOverlay(oChild);
 			if (!oChildElementOverlay) {
-				var bIsInHiddenTree = OverlayRegistry.getOverlay(oParent).getAggregationOverlay(sAggregationName).isInHiddenTree();
+				var bIsInHiddenTree = oParentOverlay.getAggregationOverlay(sAggregationName).isInHiddenTree();
 				this._createElementOverlay(oChild, bIsInHiddenTree);
+			} else {
+				// element overlay needs to have a correct parent for propagation
+				oParentAggregationOverlay.addChild(oChildElementOverlay);
+
 			}
 		}
 	};
 
 	/**
-	 * @param {sap.ui.core.Element} oElement which parent was changed
-	 * @param {sap.ui.core.Element} oParent new parent
+	 * @param {sap.ui.core.Element} oElement which was modified
 	 * @private
 	 */
 	DesignTime.prototype._checkIfOverlayShouldBeDestroyed = function(oElement, oParent) {
 		var oElementOverlay = OverlayRegistry.getOverlay(oElement);
-		if (oElementOverlay && !this._isElementInRootElements(oElement)) {
+		// Overlays of elements in "dependents" aggregation or not in root elements should be destroyed
+		if (oElementOverlay &&
+			(!this._isElementInRootElements(oElement) || oElement.sParentAggregationName === "dependents")) {
 			oElementOverlay.destroy();
 		}
 	};
@@ -563,12 +594,12 @@ function(ManagedObject, ElementOverlay, OverlayRegistry, Selection, ElementDesig
 	 * @param {function} fnStep function called with every root element
 	 * @private
 	 */
-	DesignTime.prototype._iterateRootElements = function(fnStep) {
+	DesignTime.prototype._iterateRootElements = function(fnStep, oScope) {
 		var aRootElements = this.getRootElements();
 		aRootElements.forEach(function(sRootElementId) {
 			var oRootElement = ElementUtil.getElementInstance(sRootElementId);
-			fnStep(oRootElement);
-		});
+			fnStep.call(oScope || this, oRootElement);
+		}, this);
 	};
 
 	/**

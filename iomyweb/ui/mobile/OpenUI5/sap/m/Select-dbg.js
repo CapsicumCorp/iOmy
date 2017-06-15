@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -19,7 +19,7 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './SelectList', './
 		 * @extends sap.ui.core.Control
 		 *
 		 * @author SAP SE
-		 * @version 1.44.14
+		 * @version 1.46.9
 		 *
 		 * @constructor
 		 * @public
@@ -513,11 +513,12 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './SelectList', './
 		 * @private
 		 */
 		Select.prototype.onBeforeOpen = function(oControlEvent) {
-			var fnPickerTypeBeforeOpen = this["_onBeforeOpen" + this.getPickerType()];
+			var fnPickerTypeBeforeOpen = this["_onBeforeOpen" + this.getPickerType()],
+				CSS_CLASS = this.getRenderer().CSS_CLASS;
 
-			// add the active state to the Select's field
-			this.addStyleClass(this.getRenderer().CSS_CLASS + "Pressed");
-			this.addStyleClass(this.getRenderer().CSS_CLASS + "Expanded");
+			// add the active and expanded states to the field
+			this.addStyleClass(CSS_CLASS + "Pressed");
+			this.addStyleClass(CSS_CLASS + "Expanded");
 
 			// close value state message before opening the picker
 			this.closeValueStateMessage();
@@ -562,7 +563,8 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './SelectList', './
 		 *
 		 */
 		Select.prototype.onBeforeClose = function(oControlEvent) {
-			var oDomRef = this.getFocusDomRef();
+			var oDomRef = this.getFocusDomRef(),
+				CSS_CLASS = this.getRenderer().CSS_CLASS;
 
 			if (oDomRef) {
 
@@ -579,9 +581,9 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './SelectList', './
 				}
 			}
 
-			// remove the active state of the Select's field
-			this.removeStyleClass(this.getRenderer().CSS_CLASS + "Pressed");
-			this.removeStyleClass(this.getRenderer().CSS_CLASS + "Expanded");
+			// remove the active and expanded states of the field
+			this.removeStyleClass(CSS_CLASS + "Pressed");
+			this.removeStyleClass(CSS_CLASS + "Expanded");
 		};
 
 		/**
@@ -2073,6 +2075,12 @@ sap.ui.define(['jquery.sap.global', './Dialog', './Popover', './SelectList', './
 				oDomRef.setAttribute("aria-invalid", true);
 			} else {
 				oDomRef.removeAttribute("aria-invalid");
+			}
+
+			if (this.shouldValueStateMessageBeOpened() && document.activeElement === oDomRef) {
+				this.openValueStateMessage();
+			} else {
+				this.closeValueStateMessage();
 			}
 
 			this.updateValueStateClasses(sValueState, sOldValueState);

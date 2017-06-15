@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -27,7 +27,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 	 * If used inside the calendar the properties and aggregation are directly taken from the parent
 	 * (To not duplicate and sync DateRanges and so on...)
 	 * @extends sap.ui.core.Control
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -170,6 +170,9 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		this._mouseMoveProxy = jQuery.proxy(this._handleMouseMove, this);
 
 		this._iColumns = 7;
+
+		// Currently visible days
+		this._aVisibleDays = [];
 	};
 
 	Month.prototype.exit = function(){
@@ -183,6 +186,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		if (this._sInvalidateMonth) {
 			jQuery.sap.clearDelayedCall(this._sInvalidateMonth);
 		}
+
+		this._aVisibleDays = null;
 
 	};
 
@@ -228,6 +233,10 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		} else if (this.getDomRef() && !this._sInvalidateMonth) {
 			// DateRange changed -> only rerender days
 			// do this only once if more DateRanges / Special days are changed
+			if (oOrigin && oOrigin.sParentAggregationName === "specialDates") {
+				// Don't restore focus if special dates are added
+				this._bNoFocus = true;
+			}
 			if (this._bInvalidateSync) { // set if calendar already invalidates in delayed call
 				_invalidateMonth.call(this);
 			} else {
@@ -1175,6 +1184,62 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/core/Control', 'sap/ui/core/LocaleDa
 		return false;
 	};
 
+	/**
+	 * Generates an array with all the days that should be rendered for given month to display a correct month square matrix.
+	 * If no oStartDate is passed to the method will not generate new ones but will return the previously generated dates.
+	 * @param {object} oStartDate calendar start date of the month in UTC
+	 * @param {boolean} bIncludeBCDates should days before 0001-01-01 be included in the returned array. They are only
+	 * needed for correct rendering of the square month matrix.
+	 * @returns {Array} days to be rendered
+	 * @private
+	 */
+	Month.prototype._getVisibleDays = function (oStartDate, bIncludeBCDates) {
+		var iNextMonth,
+			oDay,
+			oUniversalDate,
+			iDaysOldMonth,
+			oFirstDay,
+			iFirstDayOfWeek,
+			iYear;
+
+		// If date passed generate days for new start date else return the current one
+		if (!oStartDate) {
+			return this._aVisibleDays;
+		}
+
+		this._aVisibleDays = [];
+		iFirstDayOfWeek = this._getFirstDayOfWeek();
+
+		// determine weekday of first day in month
+		oFirstDay = this._newUniversalDate(oStartDate);
+		oFirstDay.setUTCDate(1);
+		iDaysOldMonth = oFirstDay.getUTCDay() - iFirstDayOfWeek;
+		if (iDaysOldMonth < 0) {
+			iDaysOldMonth = 7 + iDaysOldMonth;
+		}
+
+		if (iDaysOldMonth > 0) {
+			// determine first day for display
+			oFirstDay.setUTCDate(1 - iDaysOldMonth);
+		}
+
+		oDay = this._newUniversalDate(oFirstDay);
+		iNextMonth = (oStartDate.getUTCMonth() + 1) % 12;
+		do {
+			iYear = oDay.getUTCFullYear();
+			oUniversalDate = this._newUniversalDate(oDay);
+			if (bIncludeBCDates && iYear < 1) {
+				// For dates before 0001-01-01 we should render only empty squares to keep the month square matrix correct.
+				oUniversalDate._bBeforeFirstYear = true;
+				this._aVisibleDays.push(oUniversalDate);
+			} else if (iYear > 0 && iYear < 10000) { // Days before 0001-01-01 or after 9999-12-31 should not be rendered.
+				this._aVisibleDays.push(oUniversalDate);
+			}
+			oDay.setUTCDate(oDay.getUTCDate() + 1);
+		} while (oDay.getUTCMonth() !== iNextMonth || oDay.getUTCDay() !== iFirstDayOfWeek);
+
+		return this._aVisibleDays;
+	};
 
 	function _initItemNavigation(){
 

@@ -1,12 +1,12 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
 // Provides control sap.uxap.ObjectPageHeaderContent.
-sap.ui.define(["sap/ui/core/Control", "./library", "sap/m/Button"],
-	function (Control, library, Button) {
+sap.ui.define(["sap/ui/core/Control", "./library", "sap/m/Button", "./ObjectImageHelper"],
+	function (Control, library, Button, ObjectImageHelper) {
 		"use strict";
 
 		/**
@@ -58,7 +58,11 @@ sap.ui.define(["sap/ui/core/Control", "./library", "sap/m/Button"],
 					 *
 					 * Internal aggregation for the "Edit Header" button.
 					 */
-					_editHeaderButton: {type: "sap.m.Button", multiple: false, visibility: "hidden"}
+					_editHeaderButton: {type: "sap.m.Button", multiple: false, visibility: "hidden"},
+
+					_objectImage: {type: "sap.ui.core.Control", multiple: false, visibility: "hidden"},
+
+					_placeholder: {type: "sap.ui.core.Icon", multiple: false, visibility: "hidden"}
 				}
 			}
 		});
@@ -100,6 +104,44 @@ sap.ui.define(["sap/ui/core/Control", "./library", "sap/m/Button"],
 				this.setAggregation(sAggregationName, oBtn);
 			}
 			return this.getAggregation(sAggregationName);
+		};
+
+		ObjectPageHeaderContent.prototype._getObjectImage = function() {
+			if (!this.getAggregation("_objectImage")) {
+
+				var oParent = this.getParent(),
+					oHeader = oParent && oParent.getHeaderTitle && oParent.getHeaderTitle(),
+					oObjectImage = oHeader && ObjectImageHelper.createObjectImage(oHeader);
+
+				if (oObjectImage) {
+					this.setAggregation("_objectImage", oObjectImage, true); // this is always called before rendering, so suppress invalidate
+				}
+			}
+			return this.getAggregation("_objectImage");
+		};
+
+		ObjectPageHeaderContent.prototype._destroyObjectImage = function(bSuppressInvalidate) {
+			var oOldImage = this.getAggregation("_objectImage");
+			if (oOldImage) {
+				oOldImage.destroy();
+				this.getAggregation("_objectImage", null, bSuppressInvalidate);
+			}
+		};
+
+		ObjectPageHeaderContent.prototype._getPlaceholder = function() {
+			if (!this.getAggregation("_placeholder")) {
+
+				var oParent = this.getParent(),
+					oHeader = oParent && oParent.getHeaderTitle && oParent.getHeaderTitle(),
+					bShowPlaceholder = oHeader.getShowPlaceholder();
+
+				var oPlaceholder = bShowPlaceholder && ObjectImageHelper.createPlaceholder();
+
+				if (oPlaceholder) {
+					this.setAggregation("_placeholder", oPlaceholder, true); // this is always called before rendering, so suppress invalidate
+				}
+			}
+			return this.getAggregation("_placeholder");
 		};
 
 		/**

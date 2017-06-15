@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -21,20 +21,18 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		 * @param {object} [mSettings] Initial settings for the new control
 		 *
 		 * @class
-		 * <strong><i>Overview</i></strong>
-		 * <br><br>
-		 * A {@link sap.m.MessagePopover} is used to display a summarized list of different types of messages (errors, warnings, success and information).
+		 * A summarized list of different types of messages.
+		 * <h3>Overview</h3>
+		 * A message popover is used to display a summarized list of different types of messages (errors, warnings, success and information).
 		 * It provides a handy and systemized way to navigate and explore details for every message.
-		 * <br><br>
-		 * <strong>Notes:</strong>
+		 * <h4>Notes:</h4>
 		 * <ul>
-		 * <li> Messages can have descriptions pre-formatted with HTML markup. In this case, the <code>markupDescription</code> has to be set to <code>true</code>. </li>
-		 * <li> If the message cannot be fully displayed or includes a long description, the message popover provides navigation to the detailed description. </li>
+		 * <li> Messages can have descriptions pre-formatted with HTML markup. In this case, the <code>markupDescription</code> has to be set to <code>true</code>.</li>
+		 * <li> If the message cannot be fully displayed or includes a long description, the message popover provides navigation to the detailed description.</li>
 		 * </ul>
-		 * <strong><i>Structure</i></strong>
-		 * <br><br>
+		 * <h3>Structure</h3>
 		 * The message popover stores all messages in an association of type {@link sap.m.MessagePopoverItem} named <code>items</code>.
-		 * <br>
+		 *
 		 * A set of properties determines how the items are rendered:
 		 * <ul>
 		 * <li> counter - An integer that is used to indicate the number of errors for each type </li>
@@ -42,18 +40,16 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		 * <li> title/subtitle - The title and subtitle of the message</li>
 		 * <li> description - The long text description of the message</li>
 		 * </ul>
-		 * <strong><i>Usage</i></strong>
-		 * <br><br>
+		 * <h3>Usage</h3>
 		 * With the message concept, MessagePopover provides a way to centrally manage messages and show them to the user without additional work for the developer.
 		 * The message popover is triggered from a messaging button in the footer toolbar. If an error has occurred at any validation point,
 		 * the total number of messages should be incremented, but the user's work shouldn't be interrupted.
-		 * <br><br>
-		 * <strong><i>Responsive Behavior</i></strong>
-		 * <br><br>
+		 * <h3>Responsive Behavior</h3>
 		 * On mobile phones, the message popover is automatically shown in full screen mode.
-		 * <br><br>
+		 * @extends sap.ui.core.Control
+		 *
 		 * @author SAP SE
-		 * @version 1.44.14
+		 * @version 1.46.9
 		 *
 		 * @constructor
 		 * @public
@@ -523,9 +519,9 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 			this._detailsPage.addEventDelegate({
 				onclick: function(oEvent) {
 					var target = oEvent.target;
-					if (target.nodeName.toUpperCase() === 'A' &&
-						(target.className.indexOf('sapMMsgPopoverItemDisabledLink') !== -1 ||
-						target.className.indexOf('sapMMsgPopoverItemPendingLink') !== -1)) {
+					if (target.nodeName.toUpperCase() === "A" &&
+						(target.className.indexOf("sapMMsgPopoverItemDisabledLink") !== -1 ||
+						target.className.indexOf("sapMMsgPopoverItemPendingLink") !== -1)) {
 
 						oEvent.preventDefault();
 					}
@@ -774,9 +770,9 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 		 * @private
 		 */
 		MessagePopover.prototype._setTitle = function (oMessagePopoverItem) {
-			this._oMessageTitleText = new Text(this.getId() + 'MessageTitleText', {
+			this._oMessageTitleText = new Text(this.getId() + "MessageTitleText", {
 				text: oMessagePopoverItem.getTitle()
-			}).addStyleClass('sapMMsgPopoverTitleText');
+			}).addStyleClass("sapMMsgPopoverTitleText");
 			this._detailsPage.addAggregation("content", this._oMessageTitleText);
 		};
 
@@ -791,13 +787,13 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 			this._oLastSelectedItem = oMessagePopoverItem;
 			if (oMessagePopoverItem.getMarkupDescription()) {
 				// description is sanitized in MessagePopoverItem.setDescription()
-				this._oMessageDescriptionText = new HTML(this.getId() + 'MarkupDescription', {
+				this._oMessageDescriptionText = new HTML(this.getId() + "MarkupDescription", {
 					content: "<div class='sapMMsgPopoverDescriptionText'>" + oMessagePopoverItem.getDescription() + "</div>"
 				});
 			} else {
-				this._oMessageDescriptionText = new Text(this.getId() + 'MessageDescriptionText', {
+				this._oMessageDescriptionText = new Text(this.getId() + "MessageDescriptionText", {
 					text: oMessagePopoverItem.getDescription()
-				}).addStyleClass('sapMMsgPopoverDescriptionText');
+				}).addStyleClass("sapMMsgPopoverDescriptionText");
 			}
 
 			this._detailsPage.addContent(this._oMessageDescriptionText);
@@ -816,7 +812,7 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 
 			jQuery.sap.log.warning("You have entered invalid URL");
 
-			return '';
+			return "";
 		};
 
 		MessagePopover.prototype._queueValidation = function (href) {
@@ -931,8 +927,8 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 							}
 
 							// Adapt the link style
-							$link.removeClass('sapMMsgPopoverItemPendingLink');
-							$link.toggleClass('sapMMsgPopoverItemDisabledLink', !result.allowed);
+							$link.removeClass("sapMMsgPopoverItemPendingLink");
+							$link.toggleClass("sapMMsgPopoverItemDisabledLink", !result.allowed);
 
 							that.fireUrlValidated();
 						})
@@ -989,7 +985,7 @@ sap.ui.define(["jquery.sap.global", "./ResponsivePopover", "./Button", "./Toolba
 				}
 			}.bind(this);
 
-			this._previousIconTypeClass = this._previousIconTypeClass || '';
+			this._previousIconTypeClass = this._previousIconTypeClass || "";
 
 			this.fireItemSelect({
 				item: oMessagePopoverItem,

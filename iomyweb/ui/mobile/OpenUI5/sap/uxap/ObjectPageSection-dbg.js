@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -97,16 +97,15 @@ sap.ui.define([
 	ObjectPageSection.prototype.init = function () {
 		ObjectPageSectionBase.prototype.init.call(this);
 		this._sContainerSelector = ".sapUxAPObjectPageSectionContainer";
-		Device.media.attachHandler(this._updateImportance, this, ObjectPageSection.MEDIA_RANGE);
 	};
 
 	ObjectPageSection.prototype.exit = function () {
-		Device.media.detachHandler(this._updateImportance, this, ObjectPageSection.MEDIA_RANGE);
+		this._detachMediaContainerWidthChange(this._updateImportance, this);
 	};
 
 	ObjectPageSection.prototype._getImportanceLevelToHide = function (oCurrentMedia) {
 		var oObjectPage = this._getObjectPageLayout(),
-			oMedia = oCurrentMedia || Device.media.getCurrentRange(ObjectPageSection.MEDIA_RANGE),
+			oMedia = oCurrentMedia || this._getCurrentMediaContainerRange(),
 			bShowOnlyHighImportance = oObjectPage && oObjectPage.getShowOnlyHighImportance();
 
 		return this._determineTheLowestLevelOfImportanceToShow(oMedia.name, bShowOnlyHighImportance);
@@ -158,7 +157,13 @@ sap.ui.define([
 			this.setAggregation(sAriaLabeledBy, this._getAriaLabelledBy(), true); // this is called onBeforeRendering, so suppress invalidate
 		}
 
+		this._detachMediaContainerWidthChange(this._updateImportance, this);
+
 		this._updateImportance();
+	};
+
+	ObjectPageSection.prototype.onAfterRendering = function () {
+		this._attachMediaContainerWidthChange(this._updateImportance, this);
 	};
 
 	/**

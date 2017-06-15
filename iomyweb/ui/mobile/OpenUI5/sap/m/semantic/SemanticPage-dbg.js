@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -14,7 +14,9 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * A semantic page is an enhanced {@link sap.m.Page}, that can contain controls with semantic meaning @see sap.m.semantic.SemanticControl.<br>
+	 * A semantic page is an enhanced {@link sap.m.Page}, that can contain controls with semantic meaning, see {@link sap.m.semantic.SemanticControl}.
+	 *
+	 * <b>Note:</b> This control implements the SAP Fiori 1.0 design guidelines. For SAP Fiori 2.0, see the {@link sap.f.semantic.SemanticPage}.
 	 *
 	 * Content specified in the {@link sap.m.semantic.SemanticPage#semanticControls} aggregations will be automatically positioned in dedicated sections of the footer or the header of the page, depending on the control's semantics.<br>
 	 * For example, a semantic button of type {@link sap.m.semantic.PositiveAction} will be positioned in the right side of the footer, and in logically correct sequence order with respect to any other included semantic controls.<br>
@@ -35,7 +37,7 @@ function (jQuery, SegmentedContainer, SemanticConfiguration, Button, Title, Acti
 	 * @abstract
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public

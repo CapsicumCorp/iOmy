@@ -1,47 +1,44 @@
 /*!
 * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
 */
 
 // Provides control sap.m.ViewSettingsDialog.
-sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/IconPool', './Toolbar', './CheckBox', './SearchField', './List', './StandardListItem'],
-function(jQuery, library, Control, IconPool, Toolbar, CheckBox, SearchField, List, StandardListItem) {
+sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/core/IconPool', './Toolbar', './CheckBox', './SearchField', './List', './StandardListItem', 'sap/ui/base/ManagedObject'],
+function(jQuery, library, Control, IconPool, Toolbar, CheckBox, SearchField, List, StandardListItem, ManagedObject) {
 	"use strict";
 
 	var LIST_ITEM_SUFFIX = "-list-item";
 
 	/**
-	 * Constructor for a new ViewSettingsDialog.
+	 * Constructor for a new <code>ViewSettingsDialog</code>.
 	 *
 	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * <strong><i>Overview</i></strong>
-	 * <br><br>
-	 * The {@link sap.m.ViewSettingsDialog} helps the user to sort, filter, or group data
-	 * within a (master) {@link sap.m.List List} or a {@link sap.m.Table Table}. The dialog
-	 * is triggered by icon buttons in the table toolbar. Each button shows a dropdown
-	 * list icon.
-	 * <br><br>
-	 * The {@link sap.m.ViewSettingsDialog ViewSettingsDialog} is a composite control,
-	 * consisting of a modal {@link sap.m.Popover Popover} and several internal lists.
+	 * Helps the user to sort, filter, or group data within a (master) {@link sap.m.List} or a
+	 * {@link sap.m.Table}. The dialog is triggered by icon buttons in the table toolbar. Each
+	 * button shows a dropdown list icon.
+	 *
+	 * <h3>Overview</h3>
+	 *
+	 * The <code>ViewSettingsDialog</code> is a composite control,
+	 * consisting of a modal {@link sap.m.Popover} and several internal lists.
 	 * There are three different tabs (Sort, Group, Filter) in the dialog that can be
 	 * activated by filling the respective associations. If only one association is
 	 * filled, the other tabs are automatically hidden. The selected options can be used
 	 * to create sorters and filters for the table.
-	 * <br><br>
-	 * <b>Note: </b>If the app does not offer all three sorting, filtering, and grouping
+	 *
+	 * <b>Note:</b> If the app does not offer all three sorting, filtering, and grouping
 	 * functionalities, but only one of these (such as sort), we recommend placing the
-	 * icon button directly in the toolbar.
-	 * Do not place sort, filter, or group buttons in the footer toolbar if they refer to
-	 * a table.
-	 * Place group, sort, and filter buttons in the footer toolbar if they refer to a
-	 * master list.
-	 * <br><br>
-	 * <strong><i>Usage</i></strong>
-	 * <br><br>
+	 * icon button directly in the toolbar. Do not place sort, filter, or group buttons in
+	 * the footer toolbar if they refer to a table. Place group, sort, and filter buttons
+	 * in the footer toolbar if they refer to a master list.
+	 *
+	 * <h3>Usage</h3>
+	 *
 	 * <i>When to use?</i>
 	 * <ul><li>If you need to allow the user to sort line items in a manageable list or
 	 * table (up to 20 columns)</li>
@@ -49,21 +46,23 @@ function(jQuery, library, Control, IconPool, Toolbar, CheckBox, SearchField, Lis
 	 * (up to 20 columns)</li>
 	 * <li>If you need to allow the user to group line items in a manageable list or
 	 * table (up to 20 columns)</li></ul>
+	 *
 	 * <i>When not to use?</i>
 	 * <ul><li>If you have complex tables (more than 20 columns)</li>
 	 * <li>If you need to rearrange columns within your table (use the
-	 * {@link sap.m.TablePersoDialog TablePersoDialog} instead)</li>
+	 * {@link sap.m.TablePersoDialog} instead)</li>
 	 * <li>If you need very specific sort, filter, or column sorting options within
-	 * complex tables (use the {@link sap.m.P13nDialog P13nDialog} instead)</li></ul>
-	 * <strong><i>Responsive behavior</i></strong>
-	 * <br><br>
+	 * complex tables (use the {@link sap.m.P13nDialog} instead)</li></ul>
+	 *
+	 * <h3>Responsive behavior</h3>
+	 *
 	 * The popover dialog appears as a modal window on desktop and tablet screen sizes,
 	 * but full screen on smartphones.
 	 *
 	 * @extends sap.ui.core.Control
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -300,10 +299,10 @@ function(jQuery, library, Control, IconPool, Toolbar, CheckBox, SearchField, Lis
 
 		// sap.ui.core.Popup removes its content on close()/destroy() automatically from the static UIArea,
 		// but only if it added it there itself. As we did that, we have to remove it also on our own
-		if ( this._bAppendedToUIArea ) {
+		if ( this._bAppendedToUIArea && this._dialog ) {
 			var oStatic = sap.ui.getCore().getStaticAreaRef();
 			oStatic = sap.ui.getCore().getUIArea(oStatic);
-			oStatic.removeContent(this, true);
+			oStatic.removeContent(this._dialog, true);
 		}
 
 		// controls that are internally managed and may or may not be assigned to an
@@ -1016,11 +1015,16 @@ function(jQuery, library, Control, IconPool, Toolbar, CheckBox, SearchField, Lis
 	 * @ui5-metamodel This method also will be described in the UI5 (legacy) designtime metamodel
 	 */
 	ViewSettingsDialog.prototype.open = function(sPageId) {
+
 		// add to static UI area manually because we don't have a renderer
+
 		if (!this.getParent() && !this._bAppendedToUIArea) {
 			var oStatic = sap.ui.getCore().getStaticAreaRef();
 			oStatic = sap.ui.getCore().getUIArea(oStatic);
-			oStatic.addContent(this, true);
+			// add as content the Dialog to the Static area and not the ViewSettingsDialog
+			// once the Static area is invalidated, the Dialog will be rendered and not the ViewSettingsDialog which has no renderer
+			// and uses the renderer of the Dialog
+			oStatic.addContent(this._getDialog(), true);
 			this._bAppendedToUIArea = true;
 		}
 
@@ -2963,6 +2967,14 @@ function(jQuery, library, Control, IconPool, Toolbar, CheckBox, SearchField, Lis
 	/* =========================================================== */
 	/* end: event handlers */
 	/* =========================================================== */
+
+	/**
+	 * Popup controls should not propagate contextual width
+	 * @private
+	 */
+	ViewSettingsDialog.prototype._applyContextualSettings = function () {
+		ManagedObject.prototype._applyContextualSettings.call(this, ManagedObject._defaultContextualSettings);
+	};
 
 	/**
 	 * Handle the "content" aggregation of a custom tab, as the items in it might be transferred to the dialog page

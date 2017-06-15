@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -30,7 +30,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	 * The tokenizer can only be used as part of {@link sap.m.MultiComboBox MultiComboBox},{@link sap.m.MultiInput MultiInput} or {@link sap.ui.comp.valuehelpdialog.ValueHelpDialog ValueHelpDialog}
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -367,12 +367,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				that._doScrollToEnd();
 			});
 		}
-
-		if (this._bCopyToClipboardSupport) {
-			this.$().on("copy", function(oEvent){
-				that.oncopy(oEvent);
-			});
-		}
 	};
 
 	Tokenizer.prototype.invalidate = function(oOrigin) {
@@ -382,32 +376,6 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 		} else {
 			Control.prototype.invalidate.call(this, oOrigin);
 		}
-	};
-
-	/**
-	 * Handles the copy event
-	 *
-	 * @param {jQuery.Event}
-	 *            oEvent - the occuring event
-	 * @private
-	 */
-	Tokenizer.prototype.oncopy = function(oEvent) {
-		var aSelectedTokens = this.getSelectedTokens();
-		var sSelectedText = "";
-		for (var i = 0; i < aSelectedTokens.length; i++) {
-			sSelectedText = sSelectedText + (i > 0 ? "\r\n" : "") + aSelectedTokens[i].getText();
-		}
-
-		if (!sSelectedText) {
-			return;
-		}
-
-		if (window.clipboardData) {
-			window.clipboardData.setData("text", sSelectedText);
-		} else {
-			oEvent.originalEvent.clipboardData.setData('text/plain', sSelectedText);
-		}
-		oEvent.preventDefault();
 	};
 
 	/**
@@ -451,7 +419,7 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 	};
 
 	/**
-	 * Handle the key down event for Ctrl+ a
+	 * Handle the key down event for Ctrl+ a , Ctrl+ c and Ctrl+ x
 	 *
 	 * @param {jQuery.Event}
 	 *            oEvent - the occuring event
@@ -463,9 +431,10 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 			this._changeAllTokensSelection(false);
 		}
 
-		if ((oEvent.ctrlKey || oEvent.metaKey) && oEvent.which === jQuery.sap.KeyCodes.A) { //metaKey for MAC command
+		// ctrl/meta + c OR ctrl/meta + A
+		if ((oEvent.ctrlKey || oEvent.metaKey) && oEvent.which === jQuery.sap.KeyCodes.A) {
 
-			//to check how many tokens are selected before Ctrl + A in MultiInput
+			//to check how many tokens are selected before Ctrl + A in Tokenizer
 			this._iSelectedToken = this.getSelectedTokens().length;
 
 			if (this.getTokens().length > 0) {
@@ -473,9 +442,113 @@ sap.ui.define(['jquery.sap.global', './library', 'sap/ui/core/Control', 'sap/ui/
 				this._changeAllTokensSelection(true);
 				oEvent.preventDefault();
 			}
-
 		}
 
+		// ctrl/meta + c OR ctrl/meta + Insert
+		if ((oEvent.ctrlKey || oEvent.metaKey) && (oEvent.which === jQuery.sap.KeyCodes.C || oEvent.which === jQuery.sap.KeyCodes.INSERT)) {
+			this._copy();
+		}
+
+		// ctr/meta + x OR Shift + Delete
+		if (((oEvent.ctrlKey || oEvent.metaKey) && oEvent.which === jQuery.sap.KeyCodes.X) || (oEvent.shiftKey && oEvent.which === jQuery.sap.KeyCodes.DELETE)) {
+			if (this.getEditable()) {
+				this._cut();
+			} else {
+				this._copy();
+			}
+		}
+	};
+
+	/**
+	 * Handles the copy event
+	 *
+	 * @param {ClipboardEvent}
+	 *            oEvent - the occuring event
+	 * @private
+	 */
+	Tokenizer.prototype._copy = function() {
+		var selectedTokens = this.getSelectedTokens(),
+			selectedText = "",
+			token,
+			copyToClipboard = function(oEvent) {
+				if (oEvent.clipboardData) {
+					oEvent.clipboardData.setData('text/plain', selectedText);
+				} else {
+					oEvent.originalEvent.clipboardData.setData('text/plain', selectedText);
+				}
+
+				oEvent.preventDefault();
+			};
+
+		for (var i = 0; i < selectedTokens.length; i++) {
+			token = selectedTokens[i];
+			selectedText += (i > 0 ? "\r\n" : "") + token.getText();
+		}
+
+		if (!selectedText) {
+			return;
+		}
+
+		if (Device.browser.msie && window.clipboardData) {
+			window.clipboardData.setData("text", selectedText);
+		} else {
+			document.addEventListener('copy', copyToClipboard);
+			document.execCommand('copy');
+			document.removeEventListener('copy', copyToClipboard);
+		}
+	};
+
+	/**
+	 * Handles the cut event
+	 *
+	 * @param {ClipboardEvent}
+	 *            oEvent - the occuring event
+	 * @private
+	 */
+	Tokenizer.prototype._cut = function() {
+		var self = this,
+			selectedTokens = self.getSelectedTokens(),
+			selectedText = "",
+			removedTokens = [],
+			token,
+			cutToClipboard = function(oEvent) {
+				if (oEvent.clipboardData) {
+					oEvent.clipboardData.setData('text/plain', selectedText);
+				} else {
+					oEvent.originalEvent.clipboardData.setData('text/plain', selectedText);
+				}
+
+				oEvent.preventDefault();
+			};
+
+		for (var i = 0; i < selectedTokens.length; i++) {
+			token = selectedTokens[i];
+			selectedText += (i > 0 ? "\r\n" : "") + token.getText();
+			if (token.getEditable()) {
+				self.removeToken(token);
+				removedTokens.push(token);
+			}
+		}
+
+		if (removedTokens.length > 0) {
+			self.fireTokenUpdate({
+				addedTokens : [],
+				removedTokens : removedTokens,
+				type : Tokenizer.TokenUpdateType.Removed
+			});
+		}
+
+		if (!selectedText) {
+			return;
+		}
+
+		if (Device.browser.msie && window.clipboardData) {
+			window.clipboardData.setData("text", selectedText);
+		} else {
+			document.addEventListener('cut', cutToClipboard);
+			document.execCommand('cut');
+			document.removeEventListener('cut', cutToClipboard);
+		}
 	};
 
 	/**

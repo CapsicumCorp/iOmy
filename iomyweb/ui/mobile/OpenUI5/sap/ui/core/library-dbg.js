@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -14,7 +14,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', './Core'],
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.core",
-		version: "1.44.14",
+		version: "1.46.9",
 		types: [
 
 			// builtin types
@@ -63,7 +63,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', './Core'],
 			"sap.ui.core.IShrinkable",
 			"sap.ui.core.Label",
 			"sap.ui.core.PopupInterface",
-			"sap.ui.core.Toolbar"
+			"sap.ui.core.Toolbar",
+			"sap.ui.core.IContextMenu"
 		],
 		controls: [
 			"sap.ui.core.ComponentContainer",
@@ -98,7 +99,23 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', './Core'],
 			"sap.ui.core.search.OpenSearchProvider",
 			"sap.ui.core.search.SearchProvider",
 			"sap.ui.core.tmpl.DOMAttribute"
-		]
+		],
+		extensions: {
+			"sap.ui.support" : {
+				diagnosticPlugins: [
+					"sap/ui/core/support/plugins/TechInfo",
+					"sap/ui/core/support/plugins/ControlTree",
+					"sap/ui/core/support/plugins/Debugging",
+					"sap/ui/core/support/plugins/Trace",
+					"sap/ui/core/support/plugins/Selector",
+					"sap/ui/core/support/plugins/Breakpoint",
+					"sap/ui/core/support/plugins/ViewInfo",
+					"sap/ui/core/support/plugins/LocalStorage",
+					"sap/ui/core/support/plugins/Interaction",
+					"sap/ui/core/support/plugins/Performance"
+				]
+			}
+		}
 	});
 
 	/* eslint-disable no-undef */
@@ -111,7 +128,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', './Core'],
 	 * @namespace
 	 * @alias sap.ui.core
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @public
 	 */
 	var thisLib = sap.ui.core;
@@ -1379,6 +1396,24 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType', './Core'],
 	 * @ui5-metamodel This interface also will be described in the UI5 (legacy) designtime metamodel
 	 */
 
+	/**
+	 * Marker interface for controls that can serve as a context menu.
+	 * Implementation of this interface should implement <li><code>openAsContextMenu</code></li> method.
+	 *
+	 * @name sap.ui.core.IContextMenu
+	 * @interface
+	 * @public
+	 * @ui5-metamodel This interface also will be described in the UI5 (legacy) designtime metamodel
+	 */
+
+	/**
+	 * Opens the control by given opener ref.
+	 * @param {string} oEvent oncontextmenu event
+	 * @param {sap.ui.core.Element|DOMRef} oOpenerRef The element which will get the focus back again after the menu was closed.
+	 *
+	 * @function
+	 * @name sap.ui.core.IContextMenu.openAsContextMenu
+	 */
 
 	/**
 	 * @classdesc A string type that represents an RFC 3986 conformant URI.

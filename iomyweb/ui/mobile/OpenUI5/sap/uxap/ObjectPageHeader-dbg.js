@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -18,9 +18,10 @@ sap.ui.define([
 	"sap/m/Button",
 	"sap/m/ActionSheet",
 	"sap/m/Image",
+	"./ObjectImageHelper",
 	"./library"
 ], function (Control, IconPool, CustomData, Icon, Device, Breadcrumbs, ObjectPageHeaderActionButton,
-			 ResizeHandler, Text, Button, ActionSheet, Image, library) {
+			 ResizeHandler, Text, Button, ActionSheet, Image, ObjectImageHelper, library) {
 	"use strict";
 
 	/**
@@ -182,6 +183,7 @@ sap.ui.define([
 				 * Icon for the identifier line.
 				 */
 				_objectImage: {type: "sap.ui.core.Control", multiple: false, visibility: "hidden"},
+				_placeholder: {type: "sap.ui.core.Icon", multiple: false, visibility: "hidden"},
 				_lockIconCont: {type: "sap.m.Button", multiple: false, visibility: "hidden"},
 				_lockIcon: {type: "sap.m.Button", multiple: false, visibility: "hidden"},
 				_titleArrowIconCont: {type: "sap.m.Button", multiple: false, visibility: "hidden"},
@@ -262,6 +264,8 @@ sap.ui.define([
 	ObjectPageHeader.prototype._iAvailablePercentageForActions = 0.3;
 
 	ObjectPageHeader.prototype.init = function () {
+		this._bFirstRendering = true;
+
 		if (!this.oLibraryResourceBundle) {
 			this.oLibraryResourceBundle = sap.ui.getCore().getLibraryResourceBundle("sap.m"); // get resource translation bundle
 		}
@@ -270,18 +274,18 @@ sap.ui.define([
 		}
 
 		// Overflow button
-		this._oOverflowActionSheet = this._getInternalAggregation("_overflowActionSheet");
-		this._oOverflowButton = this._getInternalAggregation("_overflowButton").attachPress(this._handleOverflowButtonPress, this);
-		this._oExpandButton = this._getInternalAggregation("_expandButton");
+		this._oOverflowActionSheet = this._lazyLoadInternalAggregation("_overflowActionSheet", true);
+		this._oOverflowButton = this._lazyLoadInternalAggregation("_overflowButton", true).attachPress(this._handleOverflowButtonPress, this);
+		this._oExpandButton = this._lazyLoadInternalAggregation("_expandButton", true);
 		this._oActionSheetButtonMap = {};
-		this._oFlagIcon = this._getInternalAggregation("_flagIcon");
-		this._oFavIcon = this._getInternalAggregation("_favIcon");
-		this._oTitleArrowIcon = this._getInternalAggregation("_titleArrowIcon").attachPress(this._handleArrowPress, this);
-		this._oTitleArrowIconCont = this._getInternalAggregation("_titleArrowIconCont").attachPress(this._handleArrowPress, this);
-		this._oLockIcon = this._getInternalAggregation("_lockIcon").attachPress(this._handleLockPress, this);
-		this._oLockIconCont = this._getInternalAggregation("_lockIconCont").attachPress(this._handleLockPress, this);
-		this._oChangesIcon = this._getInternalAggregation("_changesIcon").attachPress(this._handleChangesPress, this);
-		this._oChangesIconCont = this._getInternalAggregation("_changesIconCont").attachPress(this._handleChangesPress, this);
+		this._oFlagIcon = this._lazyLoadInternalAggregation("_flagIcon", true);
+		this._oFavIcon = this._lazyLoadInternalAggregation("_favIcon", true);
+		this._oTitleArrowIcon = this._lazyLoadInternalAggregation("_titleArrowIcon", true).attachPress(this._handleArrowPress, this);
+		this._oTitleArrowIconCont = this._lazyLoadInternalAggregation("_titleArrowIconCont", true).attachPress(this._handleArrowPress, this);
+		this._oLockIcon = this._lazyLoadInternalAggregation("_lockIcon", true).attachPress(this._handleLockPress, this);
+		this._oLockIconCont = this._lazyLoadInternalAggregation("_lockIconCont", true).attachPress(this._handleLockPress, this);
+		this._oChangesIcon = this._lazyLoadInternalAggregation("_changesIcon", true).attachPress(this._handleChangesPress, this);
+		this._oChangesIconCont = this._lazyLoadInternalAggregation("_changesIconCont", true).attachPress(this._handleChangesPress, this);
 	};
 
 	ObjectPageHeader.prototype._handleOverflowButtonPress = function (oEvent) {
@@ -307,30 +311,8 @@ sap.ui.define([
 	};
 
 	ObjectPageHeader._internalAggregationFactory = {
-		"_objectImage": function (oParent) {
-			var oObjectImage,
-				sObjectImageURI = oParent.getObjectImageURI();
-
-			if (sObjectImageURI.indexOf("sap-icon://") == 0) {
-				oObjectImage = new Icon();
-				oObjectImage.addStyleClass("sapUxAPObjectPageHeaderObjectImageIcon");
-			} else {
-				oObjectImage = new Image({
-					densityAware: oParent.getObjectImageDensityAware(),
-					alt: oParent.getObjectImageAlt(),
-					decorative: false
-				});
-
-				oObjectImage.addStyleClass("sapUxAPObjectPageHeaderObjectImage");
-			}
-
-			oObjectImage.setSrc(sObjectImageURI);
-
-			if (oParent.getObjectImageAlt()) {
-				oObjectImage.setTooltip(oParent.getObjectImageAlt());
-			}
-			return oObjectImage;
-		},
+		"_objectImage": ObjectImageHelper.createObjectImage,
+		"_placeholder": ObjectImageHelper.createPlaceholder,
 		"_overflowActionSheet": function () {
 			return new ActionSheet({placement: sap.m.PlacementType.Bottom});
 		},
@@ -391,9 +373,9 @@ sap.ui.define([
 	};
 
 
-	ObjectPageHeader.prototype._getInternalAggregation = function (sAggregationName) {
+	ObjectPageHeader.prototype._lazyLoadInternalAggregation = function (sAggregationName, bSuppressInvalidate) {
 		if (!this.getAggregation(sAggregationName)) {
-			this.setAggregation(sAggregationName, ObjectPageHeader._internalAggregationFactory[sAggregationName](this));
+			this.setAggregation(sAggregationName, ObjectPageHeader._internalAggregationFactory[sAggregationName](this), bSuppressInvalidate);
 		}
 		return this.getAggregation(sAggregationName);
 	};
@@ -404,7 +386,10 @@ sap.ui.define([
 		if (this.getProperty(sPropertyName) !== newValue) {
 			aArguments.unshift(sPropertyName);
 			this.setProperty.apply(this, aArguments);
-			this._notifyParentOfChanges();
+
+			if (!this._bFirstRendering) {
+				this._notifyParentOfChanges();
+			}
 		}
 
 		return this;
@@ -417,14 +402,17 @@ sap.ui.define([
 			aArguments.unshift(sPropertyName);
 			this.setProperty.apply(this, aArguments);
 			this._destroyObjectImage();
-			this._notifyParentOfChanges();
+
+			if (!this._bFirstRendering) {
+				this._notifyParentOfChanges(true);
+			}
 		}
 
 		return this;
 	};
 
 	ObjectPageHeader.prototype._proxyMethodToBreadCrumbControl = function (sFuncName, aArguments) {
-		var oBreadCrumbs = this._getInternalAggregation("_breadCrumbs"),
+		var oBreadCrumbs = this._lazyLoadInternalAggregation("_breadCrumbs"),
 			vResult = oBreadCrumbs[sFuncName].apply(oBreadCrumbs, aArguments);
 		this.invalidate();
 		return vResult;
@@ -441,19 +429,13 @@ sap.ui.define([
 	ObjectPageHeader.prototype._shiftHeaderTitle = function () {
 
 		var oParent = this.getParent(),
-			oShiftOffsetParams,
-			$actions,
-			iActionsOffset;
+			oShiftOffsetParams;
 
 		if (!oParent || (typeof oParent._calculateShiftOffset !== "function")) {
 			return;
 		}
 
 		oShiftOffsetParams = oParent._calculateShiftOffset();
-		$actions = this.$().find(".sapUxAPObjectPageHeaderIdentifierActions");
-		iActionsOffset = parseInt($actions.css(oShiftOffsetParams.sStyleAttribute), 10);
-
-		$actions.css(oShiftOffsetParams.sStyleAttribute, iActionsOffset + "px");
 
 		if (typeof oParent._shiftHeader === "function") {
 			oParent._shiftHeader(oShiftOffsetParams.sStyleAttribute, oShiftOffsetParams.iMarginalsOffset + "px");
@@ -461,8 +443,8 @@ sap.ui.define([
 	};
 
 	/**
-	 * get current title and if it is different from the new one rerender the HeaderContent
-	 * @param {string} sTitle title string
+	 * get current title and if it is different from the new one re-render the HeaderContent
+	 * @param {string} sNewTitle title string
 	 * @return {*} this
 	 */
 	ObjectPageHeader.prototype.setObjectTitle = function (sNewTitle) {
@@ -522,7 +504,7 @@ sap.ui.define([
 	aObjectImageProperties.forEach(fnGenerateSetterForObjectImageProperties);
 
 	ObjectPageHeader.prototype.getBreadCrumbsLinks = function () {
-		return this._getInternalAggregation("_breadCrumbs").getLinks();
+		return this._lazyLoadInternalAggregation("_breadCrumbs").getLinks();
 	};
 
 	ObjectPageHeader.prototype.addBreadCrumbLink = function () {
@@ -560,13 +542,6 @@ sap.ui.define([
 	};
 
 	ObjectPageHeader.prototype.onBeforeRendering = function () {
-		if (this.getShowPlaceholder()) {
-			this._oPlaceholder = IconPool.createControlByURI({
-				src: IconPool.getIconURI("picture"),
-				visible: true
-			});
-		}
-
 		var oSideBtn = this.getSideContentButton();
 		if (oSideBtn && !oSideBtn.getTooltip()) {
 			oSideBtn.setTooltip(this.oLibraryResourceBundleOP.getText("TOOLTIP_OP_SHOW_SIDE_CONTENT"));
@@ -623,6 +598,7 @@ sap.ui.define([
 		this._oFavIcon.setVisible(this.getMarkFavorite());
 		this._oFlagIcon.setVisible(this.getMarkFlagged());
 		this._attachDetachActionButtonsHandler(false);
+		this._bFirstRendering = false;
 	};
 
 	/**
@@ -646,7 +622,7 @@ sap.ui.define([
 	};
 
 	ObjectPageHeader.prototype._handleImageNotFoundError = function () {
-		var oObjectImage = this._getInternalAggregation("_objectImage"),
+		var oObjectImage = this._lazyLoadInternalAggregation("_objectImage"),
 			oParent = this.getParent(),
 			$context = oParent ? oParent.$() : this.$();
 
@@ -660,11 +636,11 @@ sap.ui.define([
 	};
 
 	ObjectPageHeader.prototype._clearImageNotFoundHandler = function (){
-		this._getInternalAggregation("_objectImage").$().off("error");
+		this._lazyLoadInternalAggregation("_objectImage").$().off("error");
 	};
 
 	ObjectPageHeader.prototype.onAfterRendering = function () {
-		var $objectImage = this._getInternalAggregation("_objectImage").$();
+		var $objectImage = this._lazyLoadInternalAggregation("_objectImage").$();
 		this._adaptLayout();
 
 		this._clearImageNotFoundHandler();
@@ -832,7 +808,7 @@ sap.ui.define([
 	 * @private
 	 */
 	ObjectPageHeader.prototype._adaptActions = function (iAvailableSpaceForActions) {
-		var bMobileScenario = jQuery("html").hasClass("sapUiMedia-Std-Phone") || Device.system.phone,
+		var bMobileScenario = library.Utilities.isPhoneScenario(this._getCurrentMediaContainerRange()) || Device.system.phone,
 			iVisibleActionsWidth = this._oOverflowButton.$().show().width(),
 			aActions = this.getActions(),
 			iActionsLength = aActions.length,
@@ -915,26 +891,17 @@ sap.ui.define([
 	/*************************************************************************************/
 
 	/**
-	 * rerender the title in the ContentHeader if something in it is changed
+	 * Notifies the parent control, when <code>ObjectPageHeader> changes.
+	 * @param {boolean}
+	 *            bIsObjectImageChange - flag if an image-related property was changed
 	 * @private
 	 */
-	ObjectPageHeader.prototype._notifyParentOfChanges = function () {
-		if (this.getParent() && typeof this.getParent()._headerTitleChangeHandler === "function") {
-			this.getParent()._headerTitleChangeHandler();
+	ObjectPageHeader.prototype._notifyParentOfChanges = function (bIsObjectImageChange) {
+		var oParent = this.getParent();
+
+		if (oParent && typeof oParent._headerTitleChangeHandler === "function") {
+			oParent._headerTitleChangeHandler(bIsObjectImageChange);
 		}
-	};
-
-	/**
-	 * check if the ActionBar has padding on top, if not in case of rerendering of the control it has to be removed
-	 * @returns {boolean}
-	 * @private
-	 */
-	ObjectPageHeader.prototype._getActionsPaddingStatus = function () {
-		return this.$("actions").hasClass("sapUxAPObjectPageHeaderIdentifierActionsNoPadding");
-	};
-
-	ObjectPageHeader.prototype._setActionsPaddingStatus = function (bShow) {
-		return this.$("actions").toggleClass("sapUxAPObjectPageHeaderIdentifierActionsNoPadding", bShow);
 	};
 
 	ObjectPageHeader.prototype.exit = function () {

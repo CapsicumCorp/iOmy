@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -19,14 +19,14 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 	 * @namespace
 	 * @name sap.ui.layout
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @public
 	 */
 
 	// delegate further initialization of this library to the Core
 	sap.ui.getCore().initLibrary({
 		name : "sap.ui.layout",
-		version: "1.44.14",
+		version: "1.46.9",
 		dependencies : ["sap.ui.core"],
 		types: [
 			"sap.ui.layout.BackgroundDesign",
@@ -71,15 +71,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/DataType',
 		],
 		extensions: {
 			flChangeHandlers: {
-				"sap.ui.layout.form.SimpleForm": {
-					"renameLabel": "sap/ui/layout/changeHandler/RenameSimpleForm",
-					"renameTitle": "sap/ui/layout/changeHandler/RenameSimpleForm",
-					"moveSimpleFormField": "sap/ui/layout/changeHandler/MoveSimpleForm",
-					"moveSimpleFormGroup": "sap/ui/layout/changeHandler/MoveSimpleForm",
-					"hideSimpleFormField": "sap/ui/layout/changeHandler/HideSimpleForm",
-					"unhideSimpleFormField": "sap/ui/layout/changeHandler/UnhideSimpleForm",
-					"removeSimpleFormGroup": "sap/ui/layout/changeHandler/HideSimpleForm",
-					"addSimpleFormGroup": "sap/ui/layout/changeHandler/AddSimpleFormGroup"
+				"sap.ui.layout.form.SimpleForm": "sap/ui/layout/flexibility/SimpleForm",
+				"sap.ui.layout.HorizontalLayout": {
+					"moveControls": "default",
+					"hideControl": "default",
+					"unhideControl": "default"
+				},
+				"sap.ui.layout.VerticalLayout": {
+					"moveControls": "default",
+					"hideControl": "default",
+					"unhideControl": "default"
 				}
 			}
 		}

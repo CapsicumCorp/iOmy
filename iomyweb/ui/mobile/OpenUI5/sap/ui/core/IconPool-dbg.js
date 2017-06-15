@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define(['jquery.sap.global', './Core', 'sap/ui/thirdparty/URI'],
@@ -183,13 +183,13 @@ sap.ui.define(['jquery.sap.global', './Core', 'sap/ui/thirdparty/URI'],
 				'mirrored-task-circle': 0xe25c, 'mirrored-task-circle-2': 0xe25d, 'checklist-item': 0xe25e, 'checklist-item-2': 0xe25f,
 				'checklist': 0xe260, 'checklist-2': 0xe261, 'chart-table-view': 0xe262, 'filter-analytics': 0xe263, 'filter-facets': 0xe264,
 				'filter-fields': 0xe265, 'indent': 0xe266, 'outdent': 0xe267, 'heading1': 0x1e268, 'heading2': 0x1e269, 'heading3': 0x1e26a,
-				'decrease-line-height': 0xe26b, 'increase-line-height': 0xe26c
+				'decrease-line-height': 0xe26b, 'increase-line-height': 0xe26c, 'fx': 0x1e26d
 			}
 		};
 
 		var bFontFaceInserted = false;
 
-		var oCoreResourceBundle = core.getLibraryResourceBundle("sap.ui.core");
+		var oCoreResourceBundle = sap.ui.getCore().getLibraryResourceBundle("sap.ui.core");
 
 		// lazy dependency, to avoid cycle
 		var Icon;
@@ -439,7 +439,7 @@ sap.ui.define(['jquery.sap.global', './Core', 'sap/ui/thirdparty/URI'],
 		};
 
 		/**
-		 * Returns all name of icons that are registerd under the given collection.
+		 * Returns all name of icons that are registered under the given collection.
 		 * @param {string} collectionName the name of collection where icon names are retrieved.
 		 * @return {array} An array contains all of the registered icon names under the given collection.
 		 * @static
@@ -456,7 +456,7 @@ sap.ui.define(['jquery.sap.global', './Core', 'sap/ui/thirdparty/URI'],
 				return;
 			}
 
-			var sFontPath = jQuery.sap.getModulePath("sap.ui.core", '/') + "themes/base/fonts/", sFontFace;
+			var sFontPath = jQuery.sap.getModulePath("sap.ui.core.themes.base", "/fonts/"), sFontFace;
 
 			/* This is the font used in sap.ui.core.Icon */
 			sFontFace = "@font-face {" +
@@ -480,6 +480,7 @@ sap.ui.define(['jquery.sap.global', './Core', 'sap/ui/thirdparty/URI'],
 			"application/rtf": "sap-icon://doc-attachment",
 			"application/pdf": "sap-icon://pdf-attachment",
 			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "sap-icon://excel-attachment",
+			"application/vnd.ms-excel": "sap-icon://excel-attachment",
 			"application/msexcel": "sap-icon://excel-attachment",
 			"application/vnd.ms-powerpoint": "sap-icon://ppt-attachment",
 			"application/vnd.openxmlformats-officedocument.presentationml.presentation": "sap-icon://ppt-attachment",

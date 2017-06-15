@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -43,9 +43,7 @@ sap.ui.define(['jquery.sap.global', './BarInPageEnabler'],
 		}
 
 
-		if (!sap.m.Toolbar.hasFlexBoxSupport) {
-			rm.addClass("sapMTBNoFlex");
-		} else if (!sap.m.Toolbar.hasNewFlexBoxSupport) {
+		if (!sap.m.Toolbar.hasNewFlexBoxSupport) {
 			rm.addClass("sapMTBOldFlex");
 		} else {
 			rm.addClass("sapMTBNewFlex");

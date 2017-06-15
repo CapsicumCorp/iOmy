@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -23,6 +23,7 @@ sap.ui.define([
 		timeout = -1,
 		isStopped,
 		oDeferred,
+		isEmptyQueueStarted,
 		oValidator = new _ParameterValidator({
 			errorPrefix: "sap.ui.test.Opa#waitFor"
 		});
@@ -345,6 +346,12 @@ sap.ui.define([
 	 * @public
 	 */
 	Opa.emptyQueue = function emptyQueue () {
+		if (isEmptyQueueStarted) {
+			throw new Error("Opa is emptying its queue. Calling Opa.emptyQueue() is not supported at this time.");
+		}
+
+		isEmptyQueueStarted = true;
+
 		oDeferred = $.Deferred();
 		isStopped = false;
 
@@ -393,6 +400,7 @@ sap.ui.define([
 		}).always(function () {
 			timeout = -1;
 			oDeferred = null;
+			isEmptyQueueStarted = false;
 		});
 	};
 

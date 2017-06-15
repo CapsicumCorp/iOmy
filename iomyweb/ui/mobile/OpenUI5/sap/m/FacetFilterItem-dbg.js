@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -12,15 +12,15 @@ sap.ui.define(['jquery.sap.global', './ListItemBase', './library'],
 
 
 	/**
-	 * Constructor for a new FacetFilterItem.
+	 * Constructor for a new <code>FacetFilterItem</code>.
 	 *
-	 * @param {string} [sId] ID for the new control, generated automatically if no id is given
+	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
 	 * @param {object} [mSettings] Initial settings for the new control
 	 *
 	 * @class
-	 * Represents a value for the FacetFilterList control.
+	 * Represents a value for the {@link sap.m.FacetfilterList} control.
 	 * @extends sap.m.ListItemBase
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public

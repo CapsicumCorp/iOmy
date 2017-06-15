@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -20,7 +20,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObjectMetadata'],
 	 *
 	 * @class
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @since 0.8.6
 	 * @alias sap.ui.core.ElementMetadata
 	 */
@@ -31,7 +31,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObjectMetadata'],
 	};
 
 	//chain the prototypes
-	ElementMetadata.prototype = jQuery.sap.newObject(ManagedObjectMetadata.prototype);
+	ElementMetadata.prototype = Object.create(ManagedObjectMetadata.prototype);
 
 	/**
 	 * Calculates a new id based on a prefix.
@@ -114,13 +114,13 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/ManagedObjectMetadata'],
 
 			var oParent = this.getParent();
 			var oBaseRenderer;
-			if ( oParent && oParent instanceof ElementMetadata ) {
+			if ( oParent instanceof ElementMetadata ) {
 				oBaseRenderer = oParent.getRenderer();
 			}
 			if ( !oBaseRenderer ) {
 				oBaseRenderer = sap.ui.requireSync('sap/ui/core/Renderer');
 			}
-			var oRenderer = jQuery.sap.newObject(oBaseRenderer);
+			var oRenderer = Object.create(oBaseRenderer);
 			jQuery.extend(oRenderer, vRenderer);
 			jQuery.sap.setObject(this.getRendererName(), oRenderer);
 		}

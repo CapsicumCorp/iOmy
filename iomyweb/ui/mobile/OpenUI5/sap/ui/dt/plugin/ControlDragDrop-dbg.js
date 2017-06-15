@@ -1,6 +1,6 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -19,7 +19,7 @@ sap.ui.define(['sap/ui/dt/plugin/DragDrop', 'sap/ui/dt/plugin/ElementMover', 'sa
 	 * @class The ControlDragDrop enables D&D functionality for the overlays based on aggregation types
 	 * @extends sap.ui.dt.plugin.DragDrop"
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @constructor
 	 * @private
 	 * @since 1.30
@@ -43,10 +43,7 @@ sap.ui.define(['sap/ui/dt/plugin/DragDrop', 'sap/ui/dt/plugin/ElementMover', 'sa
 					type : "sap.ui.dt.plugin.ElementMover"
 				}
 			},
-			associations : {},
-			events : {
-				elementMoved : {}
-			}
+			associations : {}
 		}
 	});
 
@@ -118,7 +115,7 @@ sap.ui.define(['sap/ui/dt/plugin/DragDrop', 'sap/ui/dt/plugin/ElementMover', 'sa
 	/**
 	 * @override
 	 */
-	ControlDragDrop.prototype.onDragStart = function(oOverlay, oEvent) {
+	ControlDragDrop.prototype.onDragStart = function(oOverlay) {
 		this._oDraggedOverlay = oOverlay;
 		this.getElementMover().setMovedOverlay(oOverlay);
 
@@ -129,9 +126,6 @@ sap.ui.define(['sap/ui/dt/plugin/DragDrop', 'sap/ui/dt/plugin/ElementMover', 'sa
 	 * @override
 	 */
 	ControlDragDrop.prototype.onDragEnd = function(oOverlay) {
-		this.fireElementModified({
-			"command" : this.getElementMover().buildMoveEvent()
-		});
 		delete this._oPreviousTarget;
 		this.getElementMover().deactivateAllTargetZones(this.getDesignTime(), sDROP_ZONE_STYLE);
 		delete this._oDraggedOverlay;
@@ -141,7 +135,7 @@ sap.ui.define(['sap/ui/dt/plugin/DragDrop', 'sap/ui/dt/plugin/ElementMover', 'sa
 	/**
 	 * @override
 	 */
-	ControlDragDrop.prototype.onDragEnter = function(oTargetOverlay, oEvent) {
+	ControlDragDrop.prototype.onDragEnter = function(oTargetOverlay) {
 		var oDraggedOverlay = this.getDraggedOverlay();
 		if (oTargetOverlay.getElementInstance() !== oDraggedOverlay.getElementInstance()
 				&& oTargetOverlay !== this._oPreviousTarget) {

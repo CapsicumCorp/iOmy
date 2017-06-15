@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -42,6 +42,7 @@ sap.ui.define([], function () {
     NotificationListItemRenderer.render = function (oRm, oControl) {
         if (oControl.getVisible()) {
             var id = oControl.getId();
+            var labelledBy = (id + '-title') + ' ' + (id + '-body') + ' ' + (id + '-info');
 
             oRm.write('<li');
             oRm.addClass(classNameItem);
@@ -53,8 +54,7 @@ sap.ui.define([], function () {
             // ARIA
             oRm.writeAccessibilityState(oControl, {
                 role: "listitem",
-                labelledby: id + '-title',
-                describedby: (id + '-body') + ' ' + (id + '-info')
+                labelledby: labelledBy
             });
 
             oRm.writeClasses();

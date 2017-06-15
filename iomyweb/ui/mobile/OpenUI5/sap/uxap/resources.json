@@ -250,7 +250,8 @@
         "jquery.sap.global.js",
         "sap/ui/Device.js",
         "sap/ui/base/Metadata.js",
-        "sap/uxap/ObjectPageSubSection.js"
+        "sap/uxap/ObjectPageSubSection.js",
+        "sap/uxap/library.js"
       ]
     },
     {
@@ -260,7 +261,8 @@
         "jquery.sap.global.js",
         "sap/ui/Device.js",
         "sap/ui/base/Metadata.js",
-        "sap/uxap/ObjectPageSubSection.js"
+        "sap/uxap/ObjectPageSubSection.js",
+        "sap/uxap/library.js"
       ]
     },
     {
@@ -285,6 +287,27 @@
       ]
     },
     {
+      "name": "ObjectImageHelper-dbg.js",
+      "module": "sap/uxap/ObjectImageHelper.js",
+      "isDebug": true,
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/Icon.js",
+        "sap/ui/core/IconPool.js",
+        "sap/m/Image.js"
+      ]
+    },
+    {
+      "name": "ObjectImageHelper.js",
+      "module": "sap/uxap/ObjectImageHelper.js",
+      "required": [
+        "jquery.sap.global.js",
+        "sap/ui/core/Icon.js",
+        "sap/ui/core/IconPool.js",
+        "sap/m/Image.js"
+      ]
+    },
+    {
       "name": "ObjectPageConfigurationMode.type",
       "designtime": true
     },
@@ -305,6 +328,7 @@
         "sap/m/Button.js",
         "sap/m/ActionSheet.js",
         "sap/m/Image.js",
+        "sap/uxap/ObjectImageHelper.js",
         "sap/uxap/library.js"
       ]
     },
@@ -328,6 +352,7 @@
         "sap/m/Button.js",
         "sap/m/ActionSheet.js",
         "sap/m/Image.js",
+        "sap/uxap/ObjectImageHelper.js",
         "sap/uxap/library.js"
       ]
     },
@@ -376,7 +401,8 @@
       "required": [
         "sap/ui/core/Control.js",
         "sap/uxap/library.js",
-        "sap/m/Button.js"
+        "sap/m/Button.js",
+        "sap/uxap/ObjectImageHelper.js"
       ]
     },
     {
@@ -389,7 +415,8 @@
       "required": [
         "sap/ui/core/Control.js",
         "sap/uxap/library.js",
-        "sap/m/Button.js"
+        "sap/m/Button.js",
+        "sap/uxap/ObjectImageHelper.js"
       ]
     },
     {
@@ -399,7 +426,7 @@
       "required": [
         "sap/uxap/ObjectPageHeaderRenderer.js",
         "sap/uxap/ObjectPageLayout.js",
-        "sap/ui/core/Icon.js"
+        "sap/uxap/ObjectImageHelper.js"
       ]
     },
     {
@@ -408,7 +435,7 @@
       "required": [
         "sap/uxap/ObjectPageHeaderRenderer.js",
         "sap/uxap/ObjectPageLayout.js",
-        "sap/ui/core/Icon.js"
+        "sap/uxap/ObjectImageHelper.js"
       ]
     },
     {
@@ -446,7 +473,8 @@
       "isDebug": true,
       "required": [
         "sap/uxap/ObjectPageLayout.js",
-        "sap/ui/core/Icon.js"
+        "sap/ui/core/Icon.js",
+        "sap/uxap/ObjectImageHelper.js"
       ]
     },
     {
@@ -454,7 +482,8 @@
       "module": "sap/uxap/ObjectPageHeaderRenderer.js",
       "required": [
         "sap/uxap/ObjectPageLayout.js",
-        "sap/ui/core/Icon.js"
+        "sap/ui/core/Icon.js",
+        "sap/uxap/ObjectImageHelper.js"
       ]
     },
     {
@@ -1233,11 +1262,6 @@
     },
     {
       "name": "themes/sap_hcb/ObjectPageHeader.less",
-      "designtime": true,
-      "theme": "sap_hcb"
-    },
-    {
-      "name": "themes/sap_hcb/ObjectPageHeaderContent.less",
       "designtime": true,
       "theme": "sap_hcb"
     },

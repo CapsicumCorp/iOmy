@@ -1,6 +1,6 @@
 /*
  * ! UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -13,12 +13,12 @@ sap.ui.define([
 	/**
 	 * Constructor for a new P13nColumnsPanel.
 	 *
-	 * @param {string} [sId] id for the new control, generated automatically if no id is given
+	 * @param {string} [sId] ID for the new control, generated automatically if no ID is given
 	 * @param {object} [mSettings] initial settings for the new control
-	 * @class The P13nColumnsPanel control is used to define column-specific settings for table personalization.
+	 * @class The <code>P13nColumnsPanel</code> control is used to define column-specific settings for table personalization.
 	 * @extends sap.m.P13nPanel
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @constructor
 	 * @public
 	 * @since 1.26.0
@@ -67,7 +67,7 @@ sap.ui.define([
 				},
 
 				/**
-				 * Internal aggregation for the toolbar.
+				 * Internal aggregation for the toolbar content.
 				 */
 				content: {
 					type: "sap.ui.core.Control",
@@ -172,6 +172,12 @@ sap.ui.define([
 				this._changeColumnsItemsIndexes(iOldIndex, iNewIndex);
 				this._afterMoveItem();
 			}
+
+			if (this._oMoveToTopButton.getEnabled()) {
+				this._oMoveToTopButton.focus();
+			} else {
+				this._oSelectedItem.focus();
+			}
 		}
 	};
 
@@ -201,6 +207,12 @@ sap.ui.define([
 				this._handleItemIndexChanged(this._oSelectedItem, iNewIndex);
 				this._changeColumnsItemsIndexes(iOldIndex, iNewIndex);
 				this._afterMoveItem();
+			}
+
+			if (this._oMoveUpButton.getEnabled()) {
+				this._oMoveUpButton.focus();
+			} else {
+				this._oSelectedItem.focus();
 			}
 		}
 	};
@@ -234,6 +246,12 @@ sap.ui.define([
 				this._changeColumnsItemsIndexes(iOldIndex, iNewIndex);
 				this._afterMoveItem();
 			}
+
+			if (this._oMoveDownButton.getEnabled()) {
+				this._oMoveDownButton.focus();
+			} else {
+				this._oSelectedItem.focus();
+			}
 		}
 	};
 
@@ -265,6 +283,12 @@ sap.ui.define([
 				this._handleItemIndexChanged(this._oSelectedItem, iNewIndex);
 				this._changeColumnsItemsIndexes(iOldIndex, iNewIndex);
 				this._afterMoveItem();
+			}
+
+			if (this._oMoveToBottomButton.getEnabled()) {
+				this._oMoveToBottomButton.focus();
+			} else {
+				this._oSelectedItem.focus();
 			}
 		}
 	};
@@ -977,7 +1001,7 @@ sap.ui.define([
 	};
 
 	/**
-	 * get ColumnsItem by a given ColumnsKey
+	 * Create ColumnsItem by a given ColumnsKey
 	 *
 	 * @private
 	 * @param {string} sItemKey is the columns key with that a ColumnsItem can be identified
@@ -1326,11 +1350,6 @@ sap.ui.define([
 	/* Lifecycle methods */
 	/* =========================================================== */
 
-	/**
-	 * Initialization hook.
-	 *
-	 * @private
-	 */
 	P13nColumnsPanel.prototype.init = function() {
 		var that = this;
 		this._iLiveChangeTimer = 0;
@@ -1418,11 +1437,14 @@ sap.ui.define([
 			icon: sap.ui.core.IconPool.getIconURI("collapse-group"),
 			text: this._oRb.getText('COLUMNSPANEL_MOVE_TO_TOP'),
 			tooltip: this._oRb.getText('COLUMNSPANEL_MOVE_TO_TOP'),
+			type: sap.m.ButtonType.Transparent,
 			press: function() {
 				that._ItemMoveToTop();
 			},
 			layoutData: new sap.m.OverflowToolbarLayoutData({
-				"moveToOverflow": true
+				moveToOverflow: true,
+				priority: sap.m.OverflowToolbarPriority.Low,
+				group: 2
 			})
 		});
 
@@ -1430,11 +1452,14 @@ sap.ui.define([
 			icon: sap.ui.core.IconPool.getIconURI("slim-arrow-up"),
 			text: this._oRb.getText('COLUMNSPANEL_MOVE_UP'),
 			tooltip: this._oRb.getText('COLUMNSPANEL_MOVE_UP'),
+			type: sap.m.ButtonType.Transparent,
 			press: function() {
 				that._ItemMoveUp();
 			},
 			layoutData: new sap.m.OverflowToolbarLayoutData({
-				"moveToOverflow": true
+				moveToOverflow: true,
+				priority: sap.m.OverflowToolbarPriority.High,
+				group: 1
 			})
 		});
 
@@ -1442,11 +1467,14 @@ sap.ui.define([
 			icon: sap.ui.core.IconPool.getIconURI("slim-arrow-down"),
 			text: this._oRb.getText('COLUMNSPANEL_MOVE_DOWN'),
 			tooltip: this._oRb.getText('COLUMNSPANEL_MOVE_DOWN'),
+			type: sap.m.ButtonType.Transparent,
 			press: function() {
 				that._ItemMoveDown();
 			},
 			layoutData: new sap.m.OverflowToolbarLayoutData({
-				"moveToOverflow": true
+				moveToOverflow: true,
+				priority: sap.m.OverflowToolbarPriority.High,
+				group: 1
 			})
 		});
 
@@ -1454,21 +1482,27 @@ sap.ui.define([
 			icon: sap.ui.core.IconPool.getIconURI("expand-group"),
 			text: this._oRb.getText('COLUMNSPANEL_MOVE_TO_BOTTOM'),
 			tooltip: this._oRb.getText('COLUMNSPANEL_MOVE_TO_BOTTOM'),
+			type: sap.m.ButtonType.Transparent,
 			press: function() {
 				that._ItemMoveToBottom();
 			},
 			layoutData: new sap.m.OverflowToolbarLayoutData({
-				"moveToOverflow": true
+				moveToOverflow: true,
+				priority: sap.m.OverflowToolbarPriority.Low,
+				group: 2
 			})
 		});
 
 		this._oShowSelectedButton = new sap.m.Button({
 			text: this._oRb.getText('COLUMNSPANEL_SHOW_SELECTED'),
+			tooltip: this._oRb.getText('COLUMNSPANEL_SHOW_SELECTED'),
+			type: sap.m.ButtonType.Transparent,
 			press: function() {
 				that._swopShowSelectedButton();
 			},
 			layoutData: new sap.m.OverflowToolbarLayoutData({
-				"moveToOverflow": true
+				moveToOverflow: true,
+				priority: sap.m.OverflowToolbarPriority.High
 			})
 		});
 		this._bShowSelected = false;
@@ -1505,7 +1539,7 @@ sap.ui.define([
 		this._oToolbarSpacer = new sap.m.ToolbarSpacer();
 
 		this._oToolbar = new sap.m.OverflowToolbar({
-			design: sap.m.ToolbarDesign.Solid, // Transparent,
+			design: sap.m.ToolbarDesign.Auto,
 			content: [
 				this._oToolbarSpacer, this._oSearchField, this._oShowSelectedButton, this._oMoveToTopButton, this._oMoveUpButton, this._oMoveDownButton, this._oMoveToBottomButton
 			]
@@ -1590,11 +1624,6 @@ sap.ui.define([
 		this._oTableItemsOrdering.fCheckReOrdering();
 	};
 
-	/**
-	 * Required adaptations before rendering
-	 *
-	 * @private
-	 */
 	P13nColumnsPanel.prototype.onBeforeRendering = function() {
 
 		// Execute following lines only if this control is started the first time!
@@ -1628,11 +1657,6 @@ sap.ui.define([
 		this._calculateMoveButtonAppearance();
 	};
 
-	/**
-	 * Required adaptations after rendering
-	 *
-	 * @private
-	 */
 	P13nColumnsPanel.prototype.onAfterRendering = function() {
 		var that = this;
 
@@ -1698,11 +1722,6 @@ sap.ui.define([
 		return oPayload;
 	};
 
-	/**
-	 * Cleans up before destruction.
-	 *
-	 * @public
-	 */
 	P13nColumnsPanel.prototype.exit = function() {
 
 		sap.ui.core.ResizeHandler.deregister(this._sContainerResizeListener);
@@ -1733,14 +1752,6 @@ sap.ui.define([
 		window.clearTimeout(this._iSearchTimer);
 	};
 
-	/**
-	 * Add item to items aggregation
-	 *
-	 * @public
-	 * @since 1.26.0
-	 * @returns {sap.m.P13nColumnsPanel} <code>this</code> to allow method chaining.
-	 * @param {sap.m.P13nItem} oItem is the new item that shall be added
-	 */
 	P13nColumnsPanel.prototype.addItem = function(oItem) {
 		P13nPanel.prototype.addItem.apply(this, arguments);
 
@@ -1748,15 +1759,6 @@ sap.ui.define([
 		return this;
 	};
 
-	/**
-	 * Add item to items aggregation
-	 *
-	 * @public
-	 * @since 1.26.0
-	 * @returns {sap.m.P13nColumnsPanel} <code>this</code> to allow method chaining.
-	 * @param {int} iIndex is the index where the new item shall be inserted
-	 * @param {sap.m.P13nItem} oItem is the new item that shall be added
-	 */
 	P13nColumnsPanel.prototype.insertItem = function(iIndex, oItem) {
 		P13nPanel.prototype.insertItem.apply(this, arguments);
 
@@ -1764,14 +1766,6 @@ sap.ui.define([
 		return this;
 	};
 
-	/**
-	 * Remove item from items aggregation
-	 *
-	 * @public
-	 * @since 1.26.0
-	 * @returns {sap.m.P13nItem} The removed item or null.
-	 * @param {sap.m.P13nItem} oItem is the item that shall be removed
-	 */
 	P13nColumnsPanel.prototype.removeItem = function(oItem) {
 		var oTableItemToBeRemoved = null, iItemIndex = null, aTableItems = null, sItemKey = null;
 
@@ -1796,13 +1790,6 @@ sap.ui.define([
 		return oItem;
 	};
 
-	/**
-	 * Remove all item from items aggregation
-	 *
-	 * @public
-	 * @since 1.26.0
-	 * @returns {sap.m.P13nItem[]} An array of the removed items (might be empty).
-	 */
 	P13nColumnsPanel.prototype.removeAllItems = function() {
 		var aItems = P13nPanel.prototype.removeAllItems.apply(this, arguments);
 		if (this._oTable) {
@@ -1811,13 +1798,6 @@ sap.ui.define([
 		return aItems;
 	};
 
-	/**
-	 * Destroy all items from items aggregation
-	 *
-	 * @public
-	 * @since 1.26.0
-	 * @returns {sap.m.P13nColumnsPanel} <code>this</code> to allow method chaining.
-	 */
 	P13nColumnsPanel.prototype.destroyItems = function() {
 		P13nPanel.prototype.destroyItems.apply(this, arguments);
 
@@ -1827,14 +1807,6 @@ sap.ui.define([
 		return this;
 	};
 
-	/**
-	 * Add ColumnsItem to columnsItems aggregation
-	 *
-	 * @public
-	 * @since 1.26.0
-	 * @returns {sap.m.P13nColumnsPanel} <code>this</code> to allow method chaining.
-	 * @param {sap.m.P13nColumnsItem} oColumnsItem is the new ColumnsItem that shall be added
-	 */
 	P13nColumnsPanel.prototype.addColumnsItem = function(oColumnsItem) {
 		this.addAggregation("columnsItems", oColumnsItem);
 
@@ -1844,15 +1816,6 @@ sap.ui.define([
 		return this;
 	};
 
-	/**
-	 * Insert ColumnsItem to columnsItems aggregation
-	 *
-	 * @public
-	 * @since 1.26.0
-	 * @returns {sap.m.P13nColumnsPanel} <code>this</code> to allow method chaining.
-	 * @param {int} iIndex is the index where the columnsItem item shall be inserted
-	 * @param {sap.m.P13nColumnsItem} oColumnsItem is the new columnsItem that shall be inserted
-	 */
 	P13nColumnsPanel.prototype.insertColumnsItem = function(iIndex, oColumnsItem) {
 		this.insertAggregation("columnsItems", oColumnsItem, iIndex);
 
@@ -1862,14 +1825,6 @@ sap.ui.define([
 		return this;
 	};
 
-	/**
-	 * Remove ColumnsItem from columnsItems aggregation
-	 *
-	 * @public
-	 * @since 1.26.0
-	 * @returns {sap.m.P13nColumnsItem} The removed item or null.
-	 * @param {sap.m.P13nColumnsItem} oColumnsItem is the ColumnsItem that shall be removed
-	 */
 	P13nColumnsPanel.prototype.removeColumnsItem = function(oColumnsItem) {
 		oColumnsItem = this.removeAggregation("columnsItems", oColumnsItem);
 
@@ -1879,13 +1834,6 @@ sap.ui.define([
 		return oColumnsItem;
 	};
 
-	/**
-	 * Remove all ColumnsItems from columnsItems aggregation
-	 *
-	 * @public
-	 * @since 1.26.0
-	 * @returns {sap.m.P13nColumnsItem[]} An array of the removed items (might be empty).
-	 */
 	P13nColumnsPanel.prototype.removeAllColumnsItems = function() {
 		var aColumnsItems = this.removeAllAggregation("columnsItems");
 
@@ -1894,13 +1842,6 @@ sap.ui.define([
 		return aColumnsItems;
 	};
 
-	/**
-	 * Destroy all instances from columnsItems aggregation
-	 *
-	 * @public
-	 * @since 1.26.0
-	 * @returns {sap.m.P13nColumnsPanel} <code>this</code> to allow method chaining.
-	 */
 	P13nColumnsPanel.prototype.destroyColumnsItems = function() {
 		this.destroyAggregation("columnsItems");
 

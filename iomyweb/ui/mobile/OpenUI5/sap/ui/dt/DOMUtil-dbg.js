@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -18,7 +18,7 @@ function(jQuery) {
 	 * Utility functionality for DOM
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @private
 	 * @static
@@ -221,7 +221,14 @@ function(jQuery) {
 				sContent = oSrc.getAttribute(sContent);
 			}
 
-			// pseudo elements can't be inserted via js, so we should create a real elements, which copy pseudo styling
+			// due to a firefox bug sContent can be null after oSrc.getAttribute
+			// sContent is requried for copy pseudo styling
+			if (sContent === null || sContent === undefined) {
+				sContent = "";
+			}
+
+			// pseudo elements can't be inserted via js, so we should create a real elements,
+			// which copy pseudo styling
 			var oAfterElement = jQuery("<span></span>");
 			if (sPseudoElement === ":after") {
 				oAfterElement.appendTo(oDest);
@@ -249,21 +256,6 @@ function(jQuery) {
 		}
 
 		DOMUtil._copyStylesTo(mStyles, oDest);
-
-
-		mStyles = window.getComputedStyle(oSrc, ":after");
-		var sContent = mStyles.getPropertyValue("content");
-		if (sContent && sContent !== "none") {
-			if (sContent.indexOf("attr(") === 0) {
-				sContent = sContent.replace("attr(", "");
-				sContent = sContent.replace(")", "");
-				sContent = oSrc.getAttribute(sContent);
-			}
-			var oAfterElement = jQuery("<span></span>").appendTo(oDest);
-			oAfterElement.text(sContent.replace(/\"/g, ""));
-			DOMUtil._copyStylesTo(mStyles, oAfterElement.get(0));
-			oAfterElement.css("display", "inline");
-		}
 
 		this._copyPseudoElement(":after", oSrc, oDest);
 		this._copyPseudoElement(":before", oSrc, oDest);
@@ -297,14 +289,11 @@ function(jQuery) {
 	 */
 	DOMUtil.cloneDOMAndStyles = function(oNode, oTarget) {
 		oNode = jQuery(oNode).get(0);
-		oTarget = jQuery(oTarget).get(0);
 
 		var oCopy = oNode.cloneNode(true);
 		this.copyComputedStyles(oNode, oCopy);
 
-		var $copy = jQuery(oCopy);
-
-		jQuery(oTarget).append($copy);
+		jQuery(oTarget).append(oCopy);
 	};
 
 	return DOMUtil;

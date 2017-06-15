@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -16,7 +16,7 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'jquery.sap.script'],
 	 *
 	 * @extends sap.ui.base.Object
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @constructor
 	 * @private
 	 * @alias sap.ui.core.util.LibraryInfo
@@ -195,16 +195,16 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/Object', 'jquery.sap.script'],
 				sVersion = iMajor + "." + iMinor + "." + iPatch;
 			}
 
+			// replace the placeholders for major, minor and patch
+			sUrl = sUrl.replace("{major}", iMajor);
+			sUrl = sUrl.replace("{minor}", iMinor);
+			sUrl = sUrl.replace("{patch}", iPatch);
+
 			// if the URL should be resolved against the library the URL
 			// is relative to the library root path
 			if ($Doc.attr("resolve") == "lib") {
-				sUrl = "{major}.{minor}.{patch}/" + oData.url + sUrl;
+				sUrl = oData.url + sUrl;
 			}
-
-			// replace the placeholders for major, minor and patch
-			sUrl = sUrl.replace(/\{major\}/g, iMajor);
-			sUrl = sUrl.replace(/\{minor\}/g, iMinor);
-			sUrl = sUrl.replace(/\{patch\}/g, iPatch);
 
 			// load the changelog/releasenotes
 			jQuery.ajax({

@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', './Target', './async/Targets', './sync/Targets'],
@@ -360,8 +360,8 @@ sap.ui.define(['jquery.sap.global', 'sap/ui/base/EventProvider', './Target', './
 				var that = this,
 					aResult = [];
 
-				if (jQuery.isArray(vName)) {
-					jQuery.each(vName, function (i, sName) {
+				if (Array.isArray(vName)) {
+					vName.forEach(function (sName) {
 						var oTarget = that._mTargets[sName];
 
 						if (oTarget) {

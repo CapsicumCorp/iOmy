@@ -1,6 +1,6 @@
 /*
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -18,13 +18,13 @@ sap.ui.define(['jquery.sap.global', './Delegate'],
 	 * @param {function} [fnGetEventHandlerName] delegate function which returns the event handler name
 	 * @param {function} [fnMemorizePackage] a delegate function to memorize the control packages
 	 *
-	 * @public
 	 * @class XML serializer delegate class.
 	 * @extends sap.ui.core.util.serializer.delegate.Delegate
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 * @alias sap.ui.core.util.serializer.delegate.XML
-	 * @experimental Since 1.15.1. The XML serializer delegate is still under construction, so some implementation details can be changed in future.
+	 * @private
+	 * @sap-restricted sap.watt com.sap.webide
 	 */
 	var XML = Delegate.extend("sap.ui.core.util.serializer.delegate.XML", /** @lends sap.ui.core.util.serializer.delegate.XML.prototype */
 	{

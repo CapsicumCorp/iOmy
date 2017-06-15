@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -21,7 +21,7 @@ sap.ui.define(['jquery.sap.global', './InputBase', './MaskInputRule', 'sap/ui/co
 	 *
 	 * @author SAP SE
 	 * @extends sap.m.InputBase
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @public
@@ -235,7 +235,7 @@ sap.ui.define(['jquery.sap.global', './InputBase', './MaskInputRule', 'sap/ui/co
 			this._setupMaskVariables();
 		}
 		// We don't need to validate the initial MaskInput placeholder value because this will break setting it to empty value on focusout
-		if (this._oTempValue._aInitial.join('') !== sValue && sValue.length) {
+		if (this._oTempValue._aInitial.join('') !== sValue) {// sValue is never null/undefined here
 			this._applyRules(sValue);
 		}
 

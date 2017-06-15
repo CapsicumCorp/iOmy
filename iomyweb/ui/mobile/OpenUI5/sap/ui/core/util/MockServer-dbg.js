@@ -1,6 +1,6 @@
 /*
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -34,7 +34,7 @@ sap.ui
 			 * @extends sap.ui.base.ManagedObject
 			 * @abstract
 			 * @author SAP SE
-			 * @version 1.44.14
+			 * @version 1.46.9
 			 * @public
 			 * @alias sap.ui.core.util.MockServer
 			 */
@@ -617,7 +617,7 @@ sap.ui
 					//TODO do the check using the property type and not value
 					// remove number suffixes from EDM types decimal, Int64, Single
 					var sTypecheck = sValue[sValue.length - 1];
-					if (sTypecheck === "M" || sTypecheck === "L" || sTypecheck === "f") {
+					if (sTypecheck === "M" || sTypecheck === "m" || sTypecheck === "L" || sTypecheck === "f") {
 						sValue = sValue.substring(0, sValue.length - 1);
 					}
 					//fix for filtering on date time properties

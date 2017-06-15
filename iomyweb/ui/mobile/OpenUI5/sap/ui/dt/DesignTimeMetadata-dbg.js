@@ -1,6 +1,6 @@
 /*!
  * UI development toolkit for HTML5 (OpenUI5)
- * (c) Copyright 2009-2016 SAP SE or an SAP affiliate company.
+ * (c) Copyright 2009-2017 SAP SE or an SAP affiliate company.
  * Licensed under the Apache License, Version 2.0 - see LICENSE.txt.
  */
 
@@ -26,7 +26,7 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 	 * @extends sap.ui.base.ManagedObject
 	 *
 	 * @author SAP SE
-	 * @version 1.44.14
+	 * @version 1.46.9
 	 *
 	 * @constructor
 	 * @private
@@ -117,13 +117,22 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 
 	/**
 	 * Returns property "domRef" of the DT metadata
-	 * @return {string|Element} assosicated domRef
+	 * @return {string|Element} Returns reference to the relevant DOM element or its selector
 	 * @public
 	 */
 	DesignTimeMetadata.prototype.getDomRef = function() {
 		return this.getData().domRef;
 	};
 
+
+	/**
+	 * Returns a DOM representation for an Element or aggregation, if it can be found or undefined
+	 * @param {Object} oElement Element we need DomRef for
+	 * @param {String|Function} vDomRef Selector or Function for fetchting DomRef
+	 * @param {String} sAggregationName Aggregation Name
+	 * @return {jQuery} Returns associated DOM references wrapped by jQuery object
+	 * @public
+	 */
 	DesignTimeMetadata.prototype.getAssociatedDomRef = function(oElement, vDomRef, sAggregationName) {
 		var oElementDomRef = ElementUtil.getDomRef(oElement);
 		var aArguments = [];
@@ -133,12 +142,12 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 		}
 
 		if (typeof (vDomRef) === "function") {
-			return vDomRef.apply(null, aArguments);
-		} else if (oElementDomRef && typeof (vDomRef) === "string") {
-			return DOMUtil.getDomRefForCSSSelector(oElementDomRef, vDomRef).get(0);
-		}
+			var vRes = vDomRef.apply(null, aArguments);
 
-		return undefined;
+			return vRes ? jQuery(vRes) : vRes;
+		} else if (oElementDomRef && typeof (vDomRef) === "string") {
+			return DOMUtil.getDomRefForCSSSelector(oElementDomRef, vDomRef);
+		}
 	};
 
 	/**
@@ -174,7 +183,7 @@ function(jQuery, ManagedObject, ElementUtil, DOMUtil) {
 	 * For more details on this replacement mechanism refer also:
 	 * @see jQuery.sap.formatMessage
 	 *
-	 * @param {string} sKey
+	 * @param {string} sKey Key
 	 * @param {string[]} [aArgs] List of parameters which should replace the place holders "{n}" (n is the index) in the found locale-specific string value.
 	 * @return {string} The value belonging to the key, if found; otherwise the key itself.
 	 *
