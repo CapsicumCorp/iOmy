@@ -325,6 +325,11 @@ sap.ui.controller("mjs.premise.DeviceData", {
 						//------------------------------------//
 						//-- CREATE THE TILE DATA           --//
 						//------------------------------------//
+						
+						
+						
+						
+						
 						//-- NOTE: This is commented out temporarily until we go back to using 4 IO values --//
 /*
 						aTempTileData = {
@@ -522,8 +527,8 @@ sap.ui.controller("mjs.premise.DeviceData", {
 						"frameType":    "OneByOne",
 						"size":         "Auto",
 						"tileContent":  [
-							new sap.m.TileContent({
-								"content": new sap.ui.core.HTML( oController.createId( aTileData.Data.TileName+'_value' ), {
+							new sap.m.TileContent( oController.createId( aTileData.Data.TileName+'_content' ), {
+								"content":  new sap.ui.core.HTML( oController.createId( aTileData.Data.TileName+'_value' ), {
 									"content":    "<div class=\"TileToggleThingStatusLabel\">"+ aTileData.Data.CurrentVals.sValue+"</div>"
 								}).addStyleClass("")
 							})
@@ -558,7 +563,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 						"frameType":    "OneByOne",
 						"size":         "Auto",
 						"tileContent":  [
-							new sap.m.TileContent({
+							new sap.m.TileContent( oController.createId( aTileData.Data.TileName+'_content' ), {
 								"content": new sap.m.NumericContent( oController.createId( aTileData.Data.TileName+'_value' ), {
 									"truncateValueTo":      5,
 									"value":                "",
@@ -1123,7 +1128,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 		oTempElement1       = sap.ui.getCore().byId( sTempFragId1 );
 		
 		//--------------------------------------------------------//
-		//-- 3.0 - 												--//
+		//-- 4.0 - 												--//
 		//--------------------------------------------------------//
 		switch( sCategory ) {
 			case "TimeRB":
@@ -1425,7 +1430,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 		var iEndStamp			= 0;				//-- INTEGER:		--//
 		var iSampleRateLimit    = 0;                //-- INTEGER:       --//
 		
-		var bSuccessful;
+		var bSuccessful         = false;
 		
 		//----------------------------------------------------------------//
 		//-- 2.0 - SETUP VARIABLES										--//
@@ -1618,6 +1623,13 @@ sap.ui.controller("mjs.premise.DeviceData", {
 										}
 									}
 								}
+								
+								//----------------------------------------//
+								//-- IF NO VALID VALUES WERE FOUND      --//
+								//----------------------------------------//
+								if( bSuccessful!==true ) {
+									oController.UpdateGenericTileWithNewValue( oController, iArrayId, "NA", "", "None", "Error" );
+								}
 							} catch( e5678) {
 								console.log( e5678.message );
 							}
@@ -1632,9 +1644,6 @@ sap.ui.controller("mjs.premise.DeviceData", {
 							oController.RecursiveLoadAjaxData();
 						}
 					});
-							
-							
-					
 					
 				//----------------------------//
 				//-- MINIMUM VALUE			--//
@@ -1921,6 +1930,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
 									bSuccessful = oController.UpdateGenericTileWithNewValue( oController, iArrayId, "NA", "", "None", "Error" );
 								}
 								
+								
 							} catch( e5678 ) {
 								console.log( e5678.message );
 							}
@@ -2106,8 +2116,6 @@ sap.ui.controller("mjs.premise.DeviceData", {
 				console.log("TileIOMenu Error: Unrecognised to Time Period!");
 			}
 		}
-
-		
 	},
 	
 	//====================================================================================================================//
@@ -2122,10 +2130,33 @@ sap.ui.controller("mjs.premise.DeviceData", {
 		//----------------------------------------------------------------//
 		//-- 1.0 - INITIALISE VARIABLES                                 --//
 		//----------------------------------------------------------------//
-		var oTileDisplay		= null;					//-- OBJECT:		The UI5 object that displays the value to the user on the tile --//
+		var oTileDisplay        = null;     //-- OBJECT:        The UI5 object that displays the value to the user on the tile.           --//
+		var oTileContent        = null;     //-- OBJECT:        The UI5 object that is the container for the main data that is displayed. --//
+		var sFooterLabel        = "";       //-- STRING:        --//
+		
 		
 		//----------------------------------------------------------------//
-		//-- 2.0 - UPDATE THE TILE IO WITH NEW VALUE                --//
+		//-- 2.0 - CHECK TILE DATA                                      --//
+		//----------------------------------------------------------------//
+		try {
+			if( typeof oController.aTiles[iArrayId]!=="undefined" ) {
+				
+				sFooterLabel = oController.ConvertTileTimePeriodToUserFriendly( oController.aTiles[iArrayId].Data.CurrentVals["TimeRB"] );
+				
+				oTileContent = oController.getView().byId( oController.createId( oController.aTiles[iArrayId].Data.TileName+'_content' ) );
+				
+				if( oTileContent ) {
+					oTileContent.setFooter( sFooterLabel );
+					
+				}
+			}
+			
+		} catch( e1 ) {
+			return false;
+		}
+		
+		//----------------------------------------------------------------//
+		//-- 5.0 - UPDATE THE TILE IO WITH NEW VALUE                    --//
 		//----------------------------------------------------------------//
 		
 		//-- Set the new Value --//
@@ -2196,6 +2227,58 @@ sap.ui.controller("mjs.premise.DeviceData", {
 		//-- 9.0 - RETURN RESULTS                                       --//
 		//----------------------------------------------------------------//
 		return sAPIUrl;
+	},
+	
+	
+	
+	ConvertTileTimePeriodToUserFriendly: function( sTimePeriod ) {
+		//----------------------------------------------------------------//
+		//-- 1.0 - INITIALISE VARIABLES                                 --//
+		//----------------------------------------------------------------//
+		var sReturn = "";    //-- STRING:    --//
+		
+		//----------------------------------------------------------------//
+		//-- 2.0 - CONVERT TYPE INTEGER TO ODATA STRING                 --//
+		//----------------------------------------------------------------//
+		switch( sTimePeriod ) {
+			case "CurV":
+				sReturn = "Most Recent";
+				break;
+				
+			case "Day":
+				sReturn = "24 hours";
+				break;
+				
+			case "Week":
+				sReturn = "7 days";
+				break;
+				
+			case "Fortnight":
+				sReturn = "14 days";
+				break;
+				
+			case "Month":
+				sReturn = "31 days";
+				break;
+				
+			case "Quarter":
+				sReturn = "91 days";
+				break;
+				
+			case "Year":
+				sReturn = "365 days";
+				break;
+				
+			default:
+				sReturn = "";
+				break;
+		}
+		
+		//----------------------------------------------------------------//
+		//-- 9.0 - RETURN RESULTS                                       --//
+		//----------------------------------------------------------------//
+		return sReturn;
+		
 	}
 	
 	
