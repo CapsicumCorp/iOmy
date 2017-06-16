@@ -111,7 +111,7 @@ $.extend(IOMy.devices.onvif,{
 		// Check that the Thing ID passed the test. Throw an exception if not.
 		//--------------------------------------------------------------------//
 		if (bError) {
-			throw ThingIDNotValidException(aErrorMessages.join("\n"));
+			throw new ThingIDNotValidException(aErrorMessages.join("\n"));
 		}
 		
 		//--------------------------------------------------------------------//
@@ -130,7 +130,7 @@ $.extend(IOMy.devices.onvif,{
 		});
 		
 		if (iIOId === null) {
-			throw StreamURLNotFoundException();
+			throw new StreamURLNotFoundException();
 		}
 		
 		//--------------------------------------------------------------------//

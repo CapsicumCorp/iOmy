@@ -27,7 +27,9 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 	wMPEGImage				: null,
 	wPanel					: null,
 	
-	sStreamUrl				: null,
+	//sStreamUrl				: null,
+	aElementsToDestroy		: [],
+	
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -45,11 +47,37 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 				//-- Refresh the Navigational buttons --//
 				IOMy.common.NavigationRefreshButtons( me );
 				
-				me.sStreamUrl = evt.data.StreamUrl;
+				me.byId("NavSubHead_Title").setText( IOMy.common.ThingList["_"+evt.data.ThingId].DisplayName.toUpperCase() );
 				
-				if (me.wMPEGImage !== null) {
-					me.wMPEGImage.setSrc(me.sStreamUrl);
+				me.DestroyUI();
+				me.DrawUI();
+				
+				try {
+					IOMy.devices.ipcamera.loadStreamUrl({
+						thingID : evt.data.ThingId,
+
+						onSuccess : function (sUrl) {
+							if (me.wMPEGImage !== null) {
+								me.wMPEGImage.attachError(
+									function () {
+										me.wMPEGImage.setAlt("Failed to load stream");
+										IOMy.common.showMessage("Failed to load stream.");
+									}
+								);
+								me.wMPEGImage.setSrc(sUrl);
+							}
+						},
+
+						onFail : function (sErrorMessage) {
+							me.wMPEGImage.setAlt("Failed to load stream");
+							IOMy.common.showMessage("Failed to load stream: "+sErrorMessage);
+						}
+					})
+				} catch (ex) {
+					me.wMPEGImage.setAlt("Failed to load stream");
+					IOMy.common.showMessage("Failed to load stream: "+ex.message);
 				}
+				
 			}
 		});
 	},
@@ -69,7 +97,7 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 * @memberOf mjs.devices.MotionJPEG
 */
 	onAfterRendering: function() {
-		this.DrawUI();
+		
 	},
 
 /**
@@ -84,20 +112,40 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 		this.wMPEGImage = null;
 	},
 	
+	/**
+     * Procedure that destroys the previous incarnation of the UI. Must be called by onInit before
+     * (re)creating the page.
+     */
+    DestroyUI : function() {
+        var me          = this;
+        var sCurrentID  = "";
+        
+        for (var i = 0; i < me.aElementsToDestroy.length; i++) {
+            sCurrentID = me.aElementsToDestroy[i];
+            if (me.byId(sCurrentID) !== undefined) {
+                me.byId(sCurrentID).destroy();
+            }
+        }
+        
+        if (me.wPanel !== null) {
+            me.wPanel.destroy();
+        }
+        
+        // Clear the array
+        me.aElementsToDestroy = [];
+    },
+	
 	DrawUI : function () {
 		var me = this;
 		var oView		= me.getView();
 		
-		try {
+//		try {
 			//-- Draw the Image with the video stream as its source. --//
 			me.wMPEGImage = new sap.m.Image ({
-				src : me.sStreamUrl,
+				//src : me.sStreamUrl,
 				densityAware : false,
 				decorative : false,
-				alt : "Failed to load stream",
-				error : function () {
-					IOMy.common.showMessage("Failed to load stream");
-				}
+				alt : "Loading..."
 			}).addStyleClass("MJPEG");
 
 			//-- Main Panel --//
@@ -111,9 +159,9 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 					})
 				]
 			}).addStyleClass("PadBottom10px MotionJPEG MarTop3px");
-		} catch (ex) {
-			IOMy.common.showMessage("Failed to load stream: "+ex.message);
-		}
+//		} catch (ex) {
+//			IOMy.common.showMessage("Failed to load stream: "+ex.message);
+//		}
 		
 		oView.byId("page").addContent(me.wPanel);
 	}

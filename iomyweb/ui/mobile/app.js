@@ -81,6 +81,9 @@ $.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devic
 $.sap.require("IOMy.devices.onvif");
 
 $.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
+$.sap.require("IOMy.devices.ipcamera");
+
+$.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
 $.sap.require("IOMy.devices.motionsensor");
 
 $.sap.registerModulePath('IOMy.devices', sModuleInitialBuildLocation+'util/devices');
@@ -1526,6 +1529,18 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.permissions.PremisePermission\" Page!\n"
 	},
+	{ 
+		"Id":			"pSettingsCameraPresets",
+		"Location":		"mjs.settings.devices.CameraPreset",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.devices.CameraPreset\" Page!\n"
+	},
+	{ 
+		"Id":			"pSettingsAddCamera",
+		"Location":		"mjs.settings.devices.AddCamera",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.devices.AddCamera\" Page!\n"
+	},
     {
 		"Id":			"pDeviceData",
 		"Location":		"mjs.premise.DeviceData",
@@ -1661,9 +1676,9 @@ var aPages = [
 	},
 	{ 
 		"Id":			"pAddIPC",
-		"Location":		"mjs.staging.AddIPC",
+		"Location":		"mjs.settings.AddIPC",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.AddIPC\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.AddIPC\" Page!\n"
 	},
 	{ 
 		"Id":			"pAddCamera",

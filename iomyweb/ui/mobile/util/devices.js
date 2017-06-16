@@ -327,6 +327,10 @@ $.extend(IOMy.devices,{
         //-- Weather Feed --//
         } else if ( iThingTypeId===14) {
             return IOMy.devices.weatherfeed.DevicePageID;
+            
+        //-- IP Camera --//
+        } else if ( iThingTypeId===18) {
+            return IOMy.devices.ipcamera.DevicePageID;
 		
 		//-----------------------------------//
         // --- Experimental Device Pages --- //
@@ -396,6 +400,11 @@ $.extend(IOMy.devices,{
         //-- Weather Feed --//
         } else if ( aDeviceData.DeviceTypeId===14) {
             oUIObject = IOMy.devices.weatherfeed.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+            
+            
+        //-- IP Camera --//
+        } else if ( aDeviceData.DeviceTypeId===18) {
+            oUIObject = IOMy.devices.ipcamera.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-----------------------------------//
         // --- Experimental Device Pages --- //
@@ -471,6 +480,10 @@ $.extend(IOMy.devices,{
         //-- Weather Feed --//
         } else if ( aDeviceData.DeviceTypeId===14) {
             oUIObject = IOMy.devices.weatherfeed.GetCommonUI( sPrefix, oViewScope, aDeviceData );
+			
+        //-- IP Camera --//
+        } else if ( aDeviceData.DeviceTypeId===18) {
+            oUIObject = IOMy.devices.ipcamera.GetCommonUI( sPrefix, oViewScope, aDeviceData );
             
         //-----------------------------------//
         // --- Experimental Device Pages --- //
