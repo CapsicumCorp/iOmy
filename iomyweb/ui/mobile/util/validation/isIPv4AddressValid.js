@@ -37,7 +37,7 @@ $.extend(IOMy.validation, {
 
 		if (aThreeDots === null || aThreeDots.length !== 3) {
 			bError = true; // No. FAIL!
-			aErrorMessages.push("There must be only 4 parts separated by dots ('.') in an IPv4 address");
+			aErrorMessages.push("There must be only 4 parts separated by dots ('.') in an IPv4 address.");
 		} else {
 			//---------------------------------------------------------//
 			// There are three dots. Are the four parts valid numbers? //
@@ -56,16 +56,16 @@ $.extend(IOMy.validation, {
 				
 				if (aIPAddressParts[i].length > 1 && aIPAddressParts[i].charAt(0) === "0") {
 					bError = true;
-					aErrorMessages.push("One of the numbers start with '0'");
+					aErrorMessages.push("One of the numbers start with '0'.");
 				}
 
 				if (bIPAddressFormatError === true) {
 					bError = true;
-					aErrorMessages.push("One of the numbers contains invalid characters");
+					aErrorMessages.push("One of the numbers contains invalid characters.");
 					break;
 				} else if (parseInt(aIPAddressParts[i]) < 0 || parseInt(aIPAddressParts[i]) > 255) {
 					bError = true;
-					aErrorMessages.push("One of the numbers is greater than 255 or a negative number");
+					aErrorMessages.push("One of the numbers is greater than 255 or a negative number.");
 					break;
 				}
 			}

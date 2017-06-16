@@ -1541,6 +1541,12 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.devices.AddCamera\" Page!\n"
 	},
+	{ 
+		"Id":			"pSettingsAddIPC",
+		"Location":		"mjs.settings.devices.AddIPC",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.devices.AddIPC\" Page!\n"
+	},
     {
 		"Id":			"pDeviceData",
 		"Location":		"mjs.premise.DeviceData",
@@ -1676,9 +1682,9 @@ var aPages = [
 	},
 	{ 
 		"Id":			"pAddIPC",
-		"Location":		"mjs.settings.AddIPC",
+		"Location":		"mjs.staging.AddIPC",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.AddIPC\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.AddIPC\" Page!\n"
 	},
 	{ 
 		"Id":			"pAddCamera",

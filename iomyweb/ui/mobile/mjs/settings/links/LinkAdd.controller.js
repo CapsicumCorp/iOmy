@@ -22,8 +22,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("mjs.settings.links.LinkAdd", {
-	api : IOMy.apiphp,
-	functions : IOMy.functions,
     
     // WIDGETS
     // TODO: Have all major widgets defined in the scope of the controller itself
@@ -36,6 +34,8 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
     bUIReadyToBeWiped : true,
     aElementsToDestroy : [],
     aElementsForAFormToDestroy : [],
+	
+	iLinkTypeId			: null,
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -50,11 +50,12 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 			// Everything is rendered in this function run before rendering.
 			onBeforeShow : function (evt) {
 				
-                //if (me.bUIReadyToBeWiped) {
-                    // Start the form creation
-                    me.DestroyUI();         // STEP 1: Clear any old forms to avoid duplicate IDs
-                    me.DrawUI();            // STEP 2: Draw the actual user interface
-                //}                
+				if (evt.data.LinkTypeId !== undefined) {
+					me.iLinkTypeId = evt.data.LinkTypeId;
+				}
+				// Start the form creation
+				me.DestroyUI();         // STEP 1: Clear any old forms to avoid duplicate IDs
+				me.DrawUI();            // STEP 2: Draw the actual user interface        
 			}
 		});
 	},
@@ -715,6 +716,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         });
         
         oLinkTypeCBox = IOMy.widgets.getLinkTypeSelector(me.createId("linkTypeCBox")).addStyleClass("SettingsDropDownInput");
+		oLinkTypeCBox.setSelectedKey(me.iLinkTypeId);
         oLinkTypeCBox.attachChange(
             function () {
                 me.ChangeLinkForm(this);

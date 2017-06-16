@@ -32,6 +32,9 @@ $.extend(IOMy.devices.onvif,{
     sProfileLookupErrors    : [],
     
     proceedToCreateItem     : true,
+	
+	LinkTypeId				: 6,
+	ThingTypeId				: 12,
     
     /**
      * These IDs are used in the elements that are defined in this module. These

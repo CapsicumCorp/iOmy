@@ -94,6 +94,12 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 										IOMy.common.NavigationChangePage( "pSettingsDeviceList", {}, true );
 									}
 								}),
+								new sap.tnt.NavigationListItem({
+									text: "New Camera",
+									select:	function (oControlEvent) {
+										IOMy.common.NavigationChangePage( "pSettingsAddCamera", {}, true );
+									}
+								}),
 								//--------------------------------//
 								//-- EDIT USER PAGES			--//
 								//--------------------------------//

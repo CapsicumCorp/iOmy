@@ -1361,7 +1361,7 @@ $.extend(IOMy.common,{
 		//-- Declare variables --//
 		var oScope         = this;
 		var oDate          = new Date();
-		var iCurrentTime   = oDate.getTime()
+		var iCurrentTime   = oDate.getTime();
 		var iLastRefresh   = IOMy.common.iCoreVariablesLastRefresh;
 		var iDurationLimit = IOMy.common.iCoreVariablesRefreshInterval;
 		//-- Check how long ago the last refresh occurred --//
@@ -2257,6 +2257,28 @@ $.extend(IOMy.common,{
 		
 		
 		
+	},
+	
+	NavigationToggleNavButtons : function (oController, bEnabled) {
+		//--------------------------------------------------------------------//
+		// Get the buttons
+		//--------------------------------------------------------------------//
+		var oBackButton		= oController.byId("NavSubHead_BackBtn");
+		var oForwardButton	= oController.byId("NavSubHead_ForwardBtn");
+		
+		//--------------------------------------------------------------------//
+		// Toggle the back button
+		//--------------------------------------------------------------------//
+		if (oBackButton) {
+			oBackButton.setEnabled(bEnabled);
+		}
+		
+		//--------------------------------------------------------------------//
+		// Toggle the forward button
+		//--------------------------------------------------------------------//
+		if (oForwardButton) {
+			oForwardButton.setEnabled(bEnabled);
+		}
 	}
 	
 });
