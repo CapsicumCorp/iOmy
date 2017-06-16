@@ -155,6 +155,10 @@ html.sap-desktop .sapMToggleBtnPressed, .sapMToggleBtnPressed, html.sap-desktop 
 	background-color: #f89a8f;
 	border-color: #f35745;
  }
+ 
+ .sapMNCValue.Neutral, .sapMNCIndicator.Neutral, .sapMNCScale.Neutral {
+    color: #666666;
+}
 /* ============================== */
 /* == Footers                  == */
 /* ============================== */

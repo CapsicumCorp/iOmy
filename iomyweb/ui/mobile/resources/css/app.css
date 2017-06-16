@@ -197,7 +197,7 @@ ul li{
 }
 
 /* Set the Footer Background */	
-html.sap-desktop .sapMIBar.sapMFooter-CTX, 
+html.sap-desktop .sapMIBar-CTX.sapMFooter-CTX.FooterBackgroundColour, 
 .sapMIBar-CTX.sapMFooter-CTX.FooterBackgroundColour {
 	background-color: rgb(241,242,242);
 	height: 3.5rem;
@@ -349,7 +349,7 @@ ul.IOMYNavMenu > li:first-child > div.sapTntNavLIGroup.sapTntNavLIItem > .sapTnt
 	text-align: center;
 	width: 100%;
 	font-size: 1.25rem;
-	color: navy;
+	color: #666666;
 }
 
 /* ============================== */
@@ -876,6 +876,11 @@ ul.IOMYNavMenu > li > ul > li.sapTntNavLIGroupItem {
 	border-color: rgb(139,197,63);
 }
 
+/* Changes the border color to "Dark Green" during a :Hover event */
+.sapMSwtHoverable.sapMSwtOn:not(.sapMSwtAcceptReject):hover {
+	border-color: #209920;
+}
+
 .DeviceOverviewStatusToggleSwitch > .sapMSwtOff:not(.sapMSwtAcceptReject) {
 	background: #ffffff none repeat scroll 0 0;
 	border-color: #cc2020;
@@ -892,6 +897,8 @@ ul.IOMYNavMenu > li > ul > li.sapTntNavLIGroupItem {
 .DeviceOverviewStatusToggleSwitch > .sapMSwtHoverable.sapMSwtOn:hover:not(.sapMSwtAcceptReject) {
 	background: #209920 none repeat scroll 0 0;
 }
+
+
 
 .DeviceOverviewStatusToggleSwitch > .sapMSwtOff:hover:not(.sapMSwtAcceptReject) {
 	background: #ffe9e9 none repeat scroll 0 0;
