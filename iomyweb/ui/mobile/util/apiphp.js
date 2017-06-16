@@ -113,6 +113,10 @@ $.extend(IOMy.apiphp,{
             case "onvifthumbnail":
 				sReturn = sUrlRestricted+'/php/api_onvifthumbnail.php';
 				break;
+				
+			case "ipcamera":
+				sReturn = sUrlRestricted+'/php/api_ipcamera.php';
+				break;
                 
             case "philipshue":
 				sReturn = sUrlRestricted+'/php/api_philipshue.php';
