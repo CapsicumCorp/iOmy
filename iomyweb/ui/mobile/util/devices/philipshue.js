@@ -151,6 +151,7 @@ $.extend(IOMy.devices.philipshue,{
                     change: function () {
                         //-- Bind a link to this button for subfunctions --//
                         var oCurrentButton = this;
+						oCurrentButton.setEnabled(false);
                         //-- AJAX --//
                         IOMy.apiphp.AjaxRequest({
                             url: IOMy.apiphp.APILocation("statechange"),
@@ -160,7 +161,8 @@ $.extend(IOMy.devices.philipshue,{
                                 "Id": aDeviceData.DeviceId
                             },
                             onFail : function(response) {
-                                IOMy.common.showError(response.message, "Error Changing Device Status");
+                                IOMy.common.showError(response.responseText, "Error Changing Device Status");
+								oCurrentButton.setEnabled(true);
                             },
                             onSuccess : function( sExpectedDataType, aAjaxData ) {
                                 //console.log(aAjaxData.ThingPortStatus);
@@ -168,6 +170,7 @@ $.extend(IOMy.devices.philipshue,{
                                 if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
                                     IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
                                 }
+								oCurrentButton.setEnabled(true);
                             }
                         });
                     }
@@ -307,12 +310,9 @@ $.extend(IOMy.devices.philipshue,{
                 new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
                     state: bButtonStatus,
                     change: function () {
-                //new sap.m.ToggleButton( oViewScope.createId( sPrefix+"_StatusToggle"), {
-                    //text: sStatusButtonText,
-                    //pressed: bButtonStatus,
-                    //press : function () {
                         //-- Bind a link to this button for subfunctions --//
                         var oCurrentButton = this;
+						oCurrentButton.setEnabled(false);
                         //-- AJAX --//
                         IOMy.apiphp.AjaxRequest({
                             url: IOMy.apiphp.APILocation("statechange"),
@@ -322,7 +322,11 @@ $.extend(IOMy.devices.philipshue,{
                                 "Id": aDeviceData.DeviceId
                             },
                             onFail : function(response) {
-                                IOMy.common.showError(response.message, "Error Changing Device Status");
+                                IOMy.common.showError(response.message, "Error Changing Device Status",
+									function () {
+										oCurrentButton.setEnabled(true);
+									}
+								);
                             },
                             onSuccess : function( sExpectedDataType, aAjaxData ) {
                                 //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
@@ -336,6 +340,7 @@ $.extend(IOMy.devices.philipshue,{
                                     //}
 
                                     IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
+									oCurrentButton.setEnabled(true);
                                 }
                             }
                         });

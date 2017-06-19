@@ -183,6 +183,8 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                 var oOnOffSwitch = new sap.m.Switch( me.createId("StatusToggle"), {
                     state: me.iDeviceState === 1 ? true : false,
                     change: function () {
+						var oCurrentButton = this;
+						oCurrentButton.setEnabled(false);
                         //-- AJAX --//
                         IOMy.apiphp.AjaxRequest({
                             url: IOMy.apiphp.APILocation("statechange"),
@@ -193,7 +195,11 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                             },
                             onFail : function(response) {
                                 //IOMy.common.showError("Check to make sure that the bridge and lamp are connected and that you have permission to turn it on or off in this room.", "Error Changing Device Status");
-                                IOMy.common.showError(response.responseText, "Error Changing Device Status");
+                                IOMy.common.showError(response.responseText, "Error Changing Device Status",
+									function () {
+										oCurrentButton.setEnabled(true);
+									}
+								);
                             },
                             onSuccess : function( sExpectedDataType, aAjaxData ) {
                                 var bEnabled;
@@ -213,6 +219,8 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
 
                                     IOMy.common.ThingList["_"+me.oThing.Id].Status = aAjaxData.ThingStatus;
                                 }
+								
+								oCurrentButton.setEnabled(true);
                             }
                         });
                     }
