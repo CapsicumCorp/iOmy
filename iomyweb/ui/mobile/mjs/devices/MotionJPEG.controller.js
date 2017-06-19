@@ -30,6 +30,7 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 	//sStreamUrl				: null,
 	aElementsToDestroy		: [],
 	
+	iThingId				: 0,
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -48,6 +49,8 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 				IOMy.common.NavigationRefreshButtons( me );
 				
 				me.byId("NavSubHead_Title").setText( IOMy.common.ThingList["_"+evt.data.ThingId].DisplayName.toUpperCase() );
+				
+				me.iThingId = evt.data.ThingId;
 				
 				me.DestroyUI();
 				me.DrawUI();
@@ -140,30 +143,50 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 		var oView		= me.getView();
 		
 //		try {
-			//-- Draw the Image with the video stream as its source. --//
-			me.wMPEGImage = new sap.m.Image ({
-				//src : me.sStreamUrl,
-				densityAware : false,
-				decorative : false,
-				alt : "Loading..."
-			}).addStyleClass("MJPEG");
+		//-- Draw the Image with the video stream as its source. --//
+		me.wMPEGImage = new sap.m.Image ({
+			//src : me.sStreamUrl,
+			densityAware : false,
+			decorative : false,
+			alt : "Loading..."
+		}).addStyleClass("MJPEG");
 
-			//-- Main Panel --//
-			me.wPanel = new sap.m.Panel ({
-				backgroundDesign: "Transparent",
-				content: [
-					new sap.m.VBox ({
-						items : [
-							me.wMPEGImage
-						]
-					})
-				]
-			}).addStyleClass("PadBottom10px MotionJPEG MarTop3px");
-//		} catch (ex) {
-//			IOMy.common.showMessage("Failed to load stream: "+ex.message);
-//		}
+		//-- Main Panel --//
+		me.wPanel = new sap.m.Panel ({
+			backgroundDesign: "Transparent",
+			content: [
+				new sap.m.VBox ({
+					items : [
+						me.wMPEGImage
+					]
+				})
+			]
+		}).addStyleClass("PadBottom10px MotionJPEG MarTop3px");
 		
 		oView.byId("page").addContent(me.wPanel);
+		
+		//----------------------------------------------------------------------------//
+        // Build the action menu
+        //----------------------------------------------------------------------------//
+        try {
+            oView.byId("extrasMenuHolder").destroyItems();
+            oView.byId("extrasMenuHolder").addItem(
+                IOMy.widgets.getActionMenu({
+                    id : me.createId("extrasMenu"+me.iThingId),        // Uses the page ID
+                    icon : "sap-icon://GoogleMaterial/more_vert",
+                    items : [
+                        {
+                            text: "Edit " + IOMy.common.ThingList["_"+me.iThingId].DisplayName,
+                            select:	function (oControlEvent) {
+                                IOMy.common.NavigationChangePage( "pSettingsEditThing", {"ThingId" : me.iThingId}, false );
+                            }
+                        }
+                    ]
+                })
+            );
+        } catch (e) {
+            jQuery.sap.log.error("Error drawing the action menu: "+e.message);
+        }
 	}
 	
 });

@@ -98,7 +98,7 @@ sap.ui.jsview("mjs.settings.devices.AddIPC", {
 		//-- Video stream path --//
 		me.wStreamPath = new sap.m.Input ({
 			type:"Text",
-			placeholder:"/Video"
+			placeholder:"e.g. video"
 		}).addStyleClass("");
 		
 		//-- Authentication required tick box --//

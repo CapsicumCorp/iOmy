@@ -60,8 +60,8 @@ sap.ui.jsview("mjs.settings.devices.AddCamera", {
 								icon: "resources/images/logo/IP_Webcam.png",
 								type:"Navigation",
 								press : function () {
-											IOMy.common.NavigationChangePage( "pSettingsAddIPC" , {} , false);
-										},
+									IOMy.common.NavigationChangePage( "pSettingsAddIPC" , {} , false);
+								},
 								firstStatus : new sap.m.ObjectStatus ({
 									text : "App",
 								}),

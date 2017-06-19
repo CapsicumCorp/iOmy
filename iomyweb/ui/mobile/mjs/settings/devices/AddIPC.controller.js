@@ -107,6 +107,7 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 	},
 	
 	SubmitForm : function () {
+		//-- Disable buttons to avoid race conditions. --//
 		this.ToggleControlButtons(false);
 		
 		//--------------------------------------------------------------------//
@@ -132,10 +133,6 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 			bError = true;
 			aErrorMessages.push(sMessage);
 		};
-		
-		//-- Disable buttons to avoid race conditions. --//
-		oView.wSubmitButton.setEnabled(false);
-		oView.wCancelButton.setEnabled(true);
 		
 		//--------------------------------------------------------------------//
 		// Check that all the fields are filled out. Exception is the protocol
