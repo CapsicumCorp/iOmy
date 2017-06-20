@@ -139,10 +139,16 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
     },
 	
 	DrawUI : function () {
-		var me = this;
+		//--------------------------------------------------------------------//
+        // Capture contexts
+        //--------------------------------------------------------------------//
+		var me			= this;
 		var oView		= me.getView();
 		
-//		try {
+		//--------------------------------------------------------------------//
+        // Create the widgets.
+        //--------------------------------------------------------------------//
+		
 		//-- Draw the Image with the video stream as its source. --//
 		me.wMPEGImage = new sap.m.Image ({
 			//src : me.sStreamUrl,
@@ -165,9 +171,9 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 		
 		oView.byId("page").addContent(me.wPanel);
 		
-		//----------------------------------------------------------------------------//
-        // Build the action menu
-        //----------------------------------------------------------------------------//
+		//--------------------------------------------------------------------//
+        // Build the action menu.
+        //--------------------------------------------------------------------//
         try {
             oView.byId("extrasMenuHolder").destroyItems();
             oView.byId("extrasMenuHolder").addItem(

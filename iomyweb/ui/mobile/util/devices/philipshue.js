@@ -143,7 +143,7 @@ $.extend(IOMy.devices.philipshue,{
         } else {
 
             //----------------------------//
-            //-- TOGGLEABLE BUTTON		--//
+            //-- SWITCH					--//
             //----------------------------//
             oUIStatusContainer.addItem(
                 new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
@@ -152,6 +152,7 @@ $.extend(IOMy.devices.philipshue,{
                         //-- Bind a link to this button for subfunctions --//
                         var oCurrentButton = this;
 						oCurrentButton.setEnabled(false);
+						
                         //-- AJAX --//
                         IOMy.apiphp.AjaxRequest({
                             url: IOMy.apiphp.APILocation("statechange"),
@@ -161,11 +162,13 @@ $.extend(IOMy.devices.philipshue,{
                                 "Id": aDeviceData.DeviceId
                             },
                             onFail : function(response) {
-                                IOMy.common.showError(response.responseText, "Error Changing Device Status");
-								oCurrentButton.setEnabled(true);
+                                IOMy.common.showError(response.message, "Error Changing Device Status",
+									function () {
+										oCurrentButton.setEnabled(true);
+									}
+								);
                             },
                             onSuccess : function( sExpectedDataType, aAjaxData ) {
-                                //console.log(aAjaxData.ThingPortStatus);
                                 //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
                                 if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
                                     IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
@@ -175,7 +178,6 @@ $.extend(IOMy.devices.philipshue,{
                         });
                     }
                 }).addStyleClass("DeviceOverviewStatusToggleSwitch") //-- END of ToggleButton --//
-                //}).addStyleClass("DeviceOverviewStatusToggleButton TextWhite Font-RobotoCondensed Font-Large"); //-- END of ToggleButton --//
             );
         }
 
@@ -304,7 +306,7 @@ $.extend(IOMy.devices.philipshue,{
         } else {
 
             //----------------------------//
-            //-- TOGGLEABLE BUTTON		--//
+            //-- SWITCH					--//
             //----------------------------//
             oUIStatusContainer.addItem(
                 new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
@@ -313,6 +315,7 @@ $.extend(IOMy.devices.philipshue,{
                         //-- Bind a link to this button for subfunctions --//
                         var oCurrentButton = this;
 						oCurrentButton.setEnabled(false);
+						
                         //-- AJAX --//
                         IOMy.apiphp.AjaxRequest({
                             url: IOMy.apiphp.APILocation("statechange"),
@@ -331,22 +334,13 @@ $.extend(IOMy.devices.philipshue,{
                             onSuccess : function( sExpectedDataType, aAjaxData ) {
                                 //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
                                 if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
-                                    //-- If turned Off --//
-                                    //if( aAjaxData.DevicePortStatus===0 ) {
-                                        //oCurrentButton.setText("Off");
-                                    //-- Else Turned On --//
-                                    //} else {
-                                        //oCurrentButton.setText("On");
-                                    //}
-
                                     IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
-									oCurrentButton.setEnabled(true);
                                 }
+								oCurrentButton.setEnabled(true);
                             }
                         });
                     }
                 }).addStyleClass("DeviceOverviewStatusToggleSwitch") //-- END of ToggleButton --//
-                //}).addStyleClass("DeviceOverviewStatusToggleButton TextWhite Font-RobotoCondensed Font-Large"); //-- END of ToggleButton --//
             );
         }
 

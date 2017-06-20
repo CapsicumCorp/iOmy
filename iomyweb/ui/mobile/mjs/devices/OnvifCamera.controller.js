@@ -371,6 +371,8 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         me.wBtnMoveRight.setEnabled(bStatus);
     },
     
+	//-- TODO: These PTZ functions can be moved to the onvif device module. --//
+	
     PTZMove : function (iPosX, iPosY) {
         var me = this;
         

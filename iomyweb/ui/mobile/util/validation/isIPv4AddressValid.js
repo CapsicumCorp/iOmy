@@ -71,6 +71,9 @@ $.extend(IOMy.validation, {
 			}
 		}
 		
+		//-------------------------------------------------//
+		// Prepare the result map.
+		//-------------------------------------------------//
 		mResult.bValid			= !bError;
 		mResult.aErrorMessages	= aErrorMessages;
 		
