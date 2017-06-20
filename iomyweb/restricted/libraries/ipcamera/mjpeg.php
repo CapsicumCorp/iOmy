@@ -957,14 +957,17 @@ class IPCamera {
 		
 		//-- 4.1 - Username (Optional)  --//
 		if( isset( $aData['Username'] ) ) {
-			if( is_string( $aData['Username']!==null && $aData['Username']!==false && $aData['Username'] ) ) {
+			if( $aData['Username']!==null && $aData['Username']!==false && is_string( $aData['Username'] ) ) {
+				
 				$sUsername = $aData['Username'];
 			}
 		}
+		
+		
 			
 		//-- 4.2 - Password (Optional) --//
 		if( isset( $aData['Password'] ) ) {
-			if( is_string( $aData['Password']!==null && $aData['Password']!==false && $aData['Password'] ) ) {
+			if( $aData['Username']!==null && $aData['Username']!==false && is_string( $aData['Password'] ) ) {
 				$sPassword = $aData['Password'];
 			}
 		}
