@@ -111,21 +111,21 @@ if($bError===false) {
 		//-- Verify that the mode is supported --//
 		if( 
 			$sPostMode!=="AddNewIPCamera"               && $sPostMode!=="TestStream"                    && 
-			$sPostMode!=="FetchStreamUrl"               
+			$sPostMode!=="FetchStreamUrl"               && $sPostMode!=="EditIPCamera"                  
 		) {
 			$bError    = true;
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
 			$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-			$sErrMesg .= "eg. \n \"TestStream\" or \"AddNewIPCamera\" \n\n";
+			$sErrMesg .= "eg. \n \"TestStream\", \"FetchStreamUrl\", \"AddNewIPCamera\" or \"EditIPCamera\" \n\n";
 		}
 		
 	} catch( Exception $e0011 ) {
-		$bError = true;
+		$bError    = true;
 		$sErrMesg .= "Error Code:'0102' \n";
 		$sErrMesg .= "No \"Mode\" parameter! \n";
 		$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-		$sErrMesg .= "eg. \n \"TestStream\" or \"AddNewIPCamera\" \n\n";
+		$sErrMesg .= "eg. \n \"TestStream\", \"FetchStreamUrl\", \"AddNewIPCamera\" or \"EditIPCamera\" \n\n";
 		//sErrMesg .= e0011.message;
 	}
 	
@@ -133,7 +133,7 @@ if($bError===false) {
 	//-- 2.2.3 - Retrieve "Data"                        --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="TestStream" || $sPostMode==="AddNewIPCamera" ) {
+		if( $sPostMode==="TestStream" || $sPostMode==="AddNewIPCamera" || $sPostMode==="EditIPCamera" ) {
 			try {
 				//-- Retrieve the json "Data" --//
 				$sPostData = $aHTTPData["Data"];
@@ -175,7 +175,7 @@ if($bError===false) {
 	//-- 2.2.3 - Retrieve "IPCamType"                   --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="TestStream" || $sPostMode==="AddNewIPCamera" ) {
+		if( $sPostMode==="TestStream" || $sPostMode==="AddNewIPCamera" || $sPostMode==="EditIPCamera" ) {
 			try {
 				//-- Retrieve the "IPCamType" --//
 				$sPostIPCamType = $aHTTPData["IPCamType"];
@@ -229,7 +229,7 @@ if($bError===false) {
 	//-- 2.2.10 - Retrieve Thing Id                     --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="FetchStreamUrl" ) {
+		if( $sPostMode==="FetchStreamUrl" || $sPostMode==="EditIPCamera" ) {
 			try {
 				//-- Retrieve the "ThingId" --//
 				$iPostThingId = $aHTTPData["ThingId"];
@@ -264,22 +264,7 @@ if( $bError===false ) {
 		//================================================================//
 		//== 4.1 - Check if the Modes is supported in demo mode         ==//
 		//================================================================//
-		/*
-		if( $oRestrictedApiCore->CheckIfDemoMode() ) {
-			//-- IF Mode is unsupported --//
-			if( 
-				$sPostMode==="AddNewOnvifServer"             && $sPostMode==="ListServerInfo"                && 
-				$sPostMode==="NewThing"                      && $sPostMode==="PTZAbsoluteMove"               && 
-				$sPostMode==="PTZTimedMove"                  && $sPostMode==="LookupVideoSources"            && 
-				$sPostMode==="LookupProfiles"                
-			) {
-				$bError    = true;
-				$iErrCode  = 310;
-				$sErrMesg .= "Error Code:'0310' \n";
-				$sErrMesg .= "This feature is not supported while the iOmy server is in demonstration mode!";
-			}
-		}
-		*/
+		
 		
 		//================================================================//
 		//== 4.2 - Lookup Hub and Comm Info                             ==//
@@ -344,7 +329,7 @@ if( $bError===false ) {
 		//================================================================//
 		//== 4.4 - Lookup Thing Info                                    ==//
 		//================================================================//
-		if( $sPostMode==="FetchStreamUrl" ) {
+		if( $sPostMode==="FetchStreamUrl" || $sPostMode==="EditIPCamera" ) {
 			$iIPCameraLinkTypeId       = LookupFunctionConstant("IPCameraLinkTypeId");
 			$iIPCameraMJPEGThingTypeId = LookupFunctionConstant("IPCameraMJPEGThingTypeId");
 			
@@ -406,7 +391,9 @@ if( $bError===false ) {
 		//-- 4.6 - ESTABLISH THE PHP ONVIF OBJECT                                   --//
 		//----------------------------------------------------------------------------//
 		if( $bError===false ) {
-			if( $sPostMode==="TestStream"                || $sPostMode==="AddNewIPCamera"           ) {
+			if( 
+				$sPostMode==="TestStream"                || $sPostMode==="AddNewIPCamera"            
+			) {
 				switch( $sPostIPCamType ) {
 					case "MJPEG":
 						//-- Load the required Library --//
@@ -429,10 +416,12 @@ if( $bError===false ) {
 						$bError    = true;
 						$iErrCode  = 360;
 						$sErrMesg .= "Error Code:'0360'\n";
-						$sErrMesg .= "Couldn't initialise Onvif Class!\n";
+						$sErrMesg .= "Couldn't initialise IP Camera Class!\n";
 						break;
 				}
-			} else if( $sPostMode==="FetchStreamUrl" ) {
+			} else if( 
+				$sPostMode==="FetchStreamUrl"              || $sPostMode==="EditIPCamera"                
+			) {
 				
 				switch( $sPostIPCamType ) {
 					case "MJPEG":
@@ -456,11 +445,9 @@ if( $bError===false ) {
 						$bError    = true;
 						$iErrCode  = 360;
 						$sErrMesg .= "Error Code:'0360'\n";
-						$sErrMesg .= "Couldn't initialise Onvif Class!\n";
+						$sErrMesg .= "Couldn't initialise IP Camera Class!\n";
 						break;
 				}
-				
-				
 			}
 		}	//-- ENDIF No errors detected --//
 	} catch( Exception $e0300 ) {
@@ -545,11 +532,11 @@ if( $bError===false ) {
 					}
 				}
 				
-			} catch( Exception $e2400 ) {
+			} catch( Exception $e3400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
-				$sErrMesg .= "Error Code:'2400' \n";
-				$sErrMesg .= $e2400->getMessage();
+				$sErrMesg .= "Error Code:'3400' \n";
+				$sErrMesg .= $e3400->getMessage();
 			}
 			
 			
@@ -568,9 +555,31 @@ if( $bError===false ) {
 			} catch( Exception $e1400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
+				$sErrMesg .= "Error Code:'4400' \n";
+				$sErrMesg .= $e4400->getMessage();
+			}
+			
+			
+		//================================================================//
+		//== 5.4 - MODE: Edit IP Camera                                 ==//
+		//================================================================//
+		} else if( $sPostMode==="EditIPCamera" ) {
+			
+			try {
+				//--------------------------------------------------------------------//
+				//-- 5.1.1 - Motion JPEG Stream                                     --//
+				//--------------------------------------------------------------------//
+				$aResult = $oIPCam->UpdateDeviceDetails( $aPostData );
+				
+				
+			} catch( Exception $e1400 ) {
+				//-- Display an Error Message --//
+				$bError    = true;
 				$sErrMesg .= "Error Code:'1400' \n";
 				$sErrMesg .= $e1400->getMessage();
 			}
+			
+			
 			
 		//================================================================//
 		//== Unsupported Mode                                           ==//

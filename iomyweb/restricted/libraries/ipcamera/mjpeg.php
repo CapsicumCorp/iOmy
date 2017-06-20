@@ -178,7 +178,7 @@ class IPCamera {
 		$sUrlAuthSection        = "";
 		$sUrl                   = "";
 		
-
+		
 		//----------------------------------------------------//
 		//-- 2.0 - EXTRACT VARIABLES                        --//
 		//----------------------------------------------------//
@@ -204,7 +204,7 @@ class IPCamera {
 			$bError    = true;
 			//$iErrCode  = 230;
 			//$sErrMesg .= "Error Code:'0230' \n";
-			$sErrMesg .= $e0300->getMessage();
+			$sErrMesg .= $e0230->getMessage();
 		}
 			
 		//----------------------------------------------------//
@@ -229,7 +229,7 @@ class IPCamera {
 			}
 			
 			//-- Add the Path to the Url--//
-			if( $sPath!=="" ) {
+			if( $sPath!=="" && $sPath!=="/" ) {
 				$sUrl .= "/".$sPath;
 			}
 			
@@ -592,11 +592,9 @@ class IPCamera {
 		$sPassword              = "";
 		$sProtocol              = "";
 		$sPath                  = "";
-		
 		$sModelId               = "";
 		$sSerialCode            = "";
 		$sManufacturer          = "";
-		
 		
 		$aCheckLink             = array();          //-- ARRAY:     --//
 		$aLinkData              = array();          //-- ARRAY:     --//
@@ -754,7 +752,7 @@ class IPCamera {
 									"SampleRate"        => "-1",
 									"SampleRateMax"     => "-1",
 									"SampleRateLimit"   => "-1"
-								),
+								)
 							)
 						)
 					)
@@ -837,32 +835,32 @@ class IPCamera {
 									//-- Check the RSType       --//
 									//----------------------------//
 									switch( $aIOInfoTemp['Data']['RSTypeId'] ) {
-										//-- Stream Profile --//
+										//-- Network Address --//
 										case 3960:
 											$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $sNetworkAddress, true );
 											break;
 											
-										//-- Stream Url --//
+										//-- Network Port --//
 										case 3961:
 											$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $iNetworkPort, true );
 											break;
 											
-										//-- Thumbnail Profile --//
+										//-- Username --//
 										case 3962:
 											$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $sUsername, true );
 											break;
 											
-										//-- Thumbnail Url --//
+										//-- Password --//
 										case 3963:
 											$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $sPassword, true );
 											break;
 											
-										//-- Thumbnail Profile --//
+										//-- Path --//
 										case 3964:
 											$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $sPath, true );
 											break;
 											
-										//-- Thumbnail Url --//
+										//-- Protocol --//
 										case 3965:
 											$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $sProtocol, true );
 											break;
@@ -927,7 +925,384 @@ class IPCamera {
 				"ErrMesg" => $sErrMesg 
 			);
 		}
+	} //-- ENDFUNCTION AddToTheDatabase --//
+	
+	
+	private function ValidateData( $aData ) {
+		//------------------------------------------------------------------------------//
+		//-- 1.0 - DECLARE VARIABLES                                                  --//
+		//------------------------------------------------------------------------------//
+		$bError                     = false;        //-- BOOLEAN:       Used to indicate if an error has been caught. --//
+		$sErrMesg                   = "";           //-- STRING:        Used to contain the error message if an error gets caught. --//
+		$aResult                    = array();      //-- ARRAY:         Used to hold the result that this function returns if successful. --//
+		
+		$sNetworkAddress            = "";
+		$iNetworkPort               = 0;
+		$sUsername                  = "";
+		$sPassword                  = "";
+		$sProtocol                  = "";
+		$sPath                      = "";
+		
+		//------------------------------------------------------------------------------//
+		//-- 4.0 - Optional Variables                                                 --//
+		//------------------------------------------------------------------------------//
+		
+		//-- 4.1 - Username (Optional)  --//
+		if( isset( $aData['Username'] ) ) {
+			if( is_string( $aData['Username'] ) ) {
+				$sUsername = $aData['Username'];
+			}
+		}
+			
+		//-- 4.2 - Password (Optional) --//
+		if( isset( $aData['Password'] ) ) {
+			if( is_string( $aData['Password'] ) ) {
+				$sPassword = $aData['Password'];
+			}
+		}
+		
+		
+		//------------------------------------------------------------------------------//
+		//-- 5.0 - Mandatory Variables                                                --//
+		//------------------------------------------------------------------------------//
+		
+		//------------------------------------//
+		//-- 5.1 - Network Address          --//
+		if( $bError===false ) {
+			if( isset( $aData['NetworkAddress'] ) ) {
+				//-- Check if it is a string --//
+				if( is_string( $aData['NetworkAddress'] ) ) {
+					//-- Extract the variable --//
+					$sNetworkAddress = $aData['NetworkAddress'];
+					
+				} else {
+					//-- ERROR: Invalid String --//
+					$bError    = true;
+					$sErrMesg .= "The \"NetworkAddress\" is not a valid string! \n";
+				}
+			} else {
+				//-- ERROR: Failed to find the element in the array --//
+				$bError    = true;
+				$sErrMesg .= "Failed to find the \"NetworkAddress\" in the array! \n";
+			}
+		}
+		
+		//------------------------------------//
+		//-- 5.2 - Network Port             --//
+		if( $bError===false ) {
+			if( isset( $aData['NetworkPort'] ) ) {
+				//-- Check if it is numeric --//
+				if( is_numeric( $aData['NetworkPort'] ) ) {
+					//-- Convert to an Integer --//
+					$iNetworkPort = intval( $aData['NetworkPort'] );
+					
+					
+				} else {
+					//-- ERROR: Invalid String --//
+					$bError    = true;
+					$sErrMesg .= "The \"NetworkPort\" is not a valid string! \n";
+				}
+			} else {
+				//-- ERROR: Failed to find the element in the array --//
+				$bError    = true;
+				$sErrMesg .= "Failed to find the \"NetworkPort\" in the array! \n";
+			}
+		}
+		
+		//------------------------------------//
+		//-- 5.3 - Path                     --//
+		if( $bError===false ) {
+			if( isset( $aData['Path'] ) ) {
+				//-- Check if it is a string --//
+				if( is_string( $aData['Path'] ) ) {
+					//-- Extract the variable --//
+					$sPath = $aData['Path'];
+					
+				} else {
+					//-- ERROR: Invalid String --//
+					$bError    = true;
+					$sErrMesg .= "The \"Path\" is not a valid string! \n";
+				}
+			} else {
+				//-- ERROR: Failed to find the element in the array --//
+				$bError    = true;
+				$sErrMesg .= "Failed to find the \"Path\" in the array! \n";
+			}
+		}
+		
+		//------------------------------------//
+		//-- 5.4 - Protocol                 --//
+		if( $bError===false ) {
+			if( isset( $aData['Protocol'] ) ) {
+				//-- Check if it is a string --//
+				if( is_string( $aData['Protocol'] ) ) {
+					//-- Extract the variable --//
+					$sProtocol = $aData['Protocol'];
+					
+				} else {
+					//-- ERROR: Invalid String --//
+					$bError    = true;
+					$sErrMesg .= "The \"Protocol\" is not a valid string! \n";
+				}
+			} else {
+				//-- ERROR: Failed to find the element in the array --//
+				$bError    = true;
+				$sErrMesg .= "Failed to find the \"Protocol\" in the array! \n";
+			}
+		}
+		
+		
+		//------------------------------------------------------------------------------//
+		//-- 9.0 - PARSE THE JSON REPONSE                                             --//
+		//------------------------------------------------------------------------------//
+		if( $bError===false ) {
+			//--------------------------------//
+			//-- 9.A - SUCCESS              --//
+			//--------------------------------//
+			return array( 
+				"Error" => false, 
+				"Data"  => array(
+					"Username"       => $sUsername,
+					"Password"       => $sPassword,
+					"NetworkAddress" => $sNetworkAddress,
+					"NetworkPort"    => $iNetworkPort,
+					"Path"           => $sPath,
+					"Protocol"       => $sProtocol
+				)
+			);
+		} else {
+			//--------------------------------//
+			//-- 9.B - FAILURE              --//
+			//--------------------------------//
+			return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+		}
 	}
+	
+	public function UpdateDeviceDetails( $aData ) {
+		//------------------------------------------------------------------------------//
+		//-- 1.0 - INITIALISE                                                         --//
+		//------------------------------------------------------------------------------//
+		$bError                     = false;        //-- BOOLEAN:       Used to indicate if an error has been caught. --//
+		$sErrMesg                   = "";           //-- STRING:        Used to contain the error message if an error gets caught. --//
+		$aResult                    = array();      //-- ARRAY:         Used to hold the result that this function returns if successful. --//
+		
+		$iUTS                       = time();       //-- INTEGER:       Holds the Current Unix Timestamp.  --//
+		$aIOList                    = array();      //-- ARRAY:         Holds the IOs that this Thing has. --//
+		$aThingInfo                 = array();      //-- ARRAY:         --//
+		$aInsertErrMesgs            = array();      //-- ARRAY:         --//
+		
+		$sUsername                  = "";           //-- STRING:        --//
+		$sPassword                  = "";           //-- STRING:        --//
+		$sNetworkAddress            = "";           //-- STRING:        --//
+		$iNetworkPort               = 0;            //-- INTEGER:       --//
+		$sPath                      = "";           //-- STRING:        --//
+		$sProtocol                  = "";           //-- STRING:        --//
+		
+		$bNetworkAddressSubmit      = false;        //-- BOOLEAN:       --//
+		$bNetworkPortSubmit         = false;        //-- BOOLEAN:       --//
+		$bUsernameSubmit            = false;        //-- BOOLEAN:       --//
+		$bPasswordSubmit            = false;        //-- BOOLEAN:       --//
+		$bPathSubmit                = false;        //-- BOOLEAN:       --//
+		$bProtocolSubmit            = false;        //-- BOOLEAN:       --//
+		
+		
+		//-- Constants --//
+		$iNetworkAddressRSTypeId    = LookupFunctionConstant("StreamNetworkAddressRSTypeId");
+		$iNetworkPortRSTypeId       = LookupFunctionConstant("StreamNetworkPortRSTypeId");
+		$iNetworkUsernameRSTypeId   = LookupFunctionConstant("StreamUsernameRSTypeId");
+		$iNetworkPasswordRSTypeId   = LookupFunctionConstant("StreamPasswordRSTypeId");
+		$iStreamPathRSTypeId        = LookupFunctionConstant("StreamPathRSTypeId");
+		$iStreamProtocolRSTypeId    = LookupFunctionConstant("StreamProtocolRSTypeId");
+		
+		
+		//------------------------------------------------------------------------------//
+		//-- 2.0 - CHECK TO MAKE SURE THIS OBJECT CAN POLL DATA                       --//
+		//------------------------------------------------------------------------------//
+		if( $this->sObjectState!=="DB" ) {
+			$bError    = true;
+			$sErrMesg  = "IP Camera Object is not setup to be able to perform this request!";
+		}
+		
+		
+		//------------------------------------------------------------------------------//
+		//-- 3.0 - CHECK THE THING PERMISSIONS                                        --//
+		//------------------------------------------------------------------------------//
+		if( $bError===false ) {
+			$aThingInfo = GetThingInfo( $this->iThingId );
+			
+			if( $aThingInfo['Error']===false ) {
+				if( !($aThingInfo['Data']['PermWrite']>=1) ) {
+					//-- ERROR: User is missing the Write Permission --//
+					$bError    = true;
+					$sErrMesg .= "Insufficient permissions!\n";
+					$sErrMesg .= "Your user doesn't appear to have the \"Write\" permission needed to perform this operation.\n";
+				}
+			} else {
+				//-- ERROR: Failed to lookup the Thing Info --//
+				$bError    = true;
+				$sErrMesg .= "Can not retrieve the Thing Info.\n";
+				$sErrMesg .= $aThingInfo['ErrMesg'];
+			}
+		}
+		//------------------------------------------------------------------------------//
+		//-- 4.0 - EXTRACT THE VARIABLES AND TEST THE STREAM                          --//
+		//------------------------------------------------------------------------------//
+		if( $bError===false ) {
+			//-- Parse the Data --//
+			$aParsedData     = $this->ValidateData($aData);
+			
+			
+			if( $aParsedData['Error']===false ) {
+				$sUsername         = $aParsedData['Data']['Username'];
+				$sPassword         = $aParsedData['Data']['Password'];
+				$sNetworkAddress   = $aParsedData['Data']['NetworkAddress'];
+				$iNetworkPort      = $aParsedData['Data']['NetworkPort'];
+				$sPath             = $aParsedData['Data']['Path'];
+				$sProtocol         = $aParsedData['Data']['Protocol'];
+				
+			} else {
+				$bError      = true;
+				$sErrMesg   .= "Failed to validate the parameters!\n";
+				$sErrMesg   .= $aParsedData['ErrMesg'];
+			}
+		}
+		
+		//------------------------------------------------------------------------------//
+		//-- 5.0 -                                                                    --//
+		//------------------------------------------------------------------------------//
+		if( $bError===false ) {
+			$aIOList = GetIOsFromThingId( $this->iThingId );
+			
+			//-- Check for errors --//
+			if( $aIOList['Error']===false ) {
+			
+				//-----------------------------------------------------------------------------------------//
+				//-- Verify that the desired IO Ids are found and stored to their appropiate variables   --//
+				//-----------------------------------------------------------------------------------------//
+				foreach( $aIOList['Data'] as $aIO ) {
+					//------------------------------------//
+					//-- Stream Network Address         --//
+					//------------------------------------//
+					if( $aIO['RSTypeId']===$iNetworkAddressRSTypeId ) {
+						
+						$aTempFunctionResult = InsertNewIODataValue( $aIO['IOId'], $iUTS, $sNetworkAddress );
+						
+						if( $aTempFunctionResult['Error']===true ) {
+							$aInsertErrMesgs[] = "Problem submitting the \"Network Address\" to the Database! ".$aTempFunctionResult['ErrMesg'];
+						} else {
+							$bNetworkAddressSubmit     = true;
+							$aResult['NetworkAddress'] = array( "Success"=>true );
+						}
+						
+					//------------------------------------//
+					//-- Stream Network Port            --//
+					//------------------------------------//
+					} else if( $aIO['RSTypeId']===$iNetworkPortRSTypeId ) {
+						
+						$aTempFunctionResult = InsertNewIODataValue( $aIO['IOId'], $iUTS, $iNetworkPort );
+						
+						if( $aTempFunctionResult['Error']===true ) {
+							$aInsertErrMesgs[] = "Problem submitting the \"Network Port\" to the Database! ".$aTempFunctionResult['ErrMesg'];
+						} else {
+							$bNetworkPortSubmit     = true;
+							$aResult['NetworkPort'] = array( "Success"=>true );
+						}
+						
+					//------------------------------------//
+					//-- Stream Username                --//
+					//------------------------------------//
+					} else if( $aIO['RSTypeId']===$iNetworkUsernameRSTypeId ) {
+						
+						$aTempFunctionResult = InsertNewIODataValue( $aIO['IOId'], $iUTS, $sUsername );
+						
+						if( $aTempFunctionResult['Error']===true ) {
+							$aInsertErrMesgs[] = "Problem submitting the \"Username\" to the Database! ".$aTempFunctionResult['ErrMesg'];
+						} else {
+							$bUsernameSubmit     = true;
+							$aResult['Username'] = array( "Success"=>true );
+						}
+						
+					//------------------------------------//
+					//-- Stream Password                --//
+					//------------------------------------//
+					} else if( $aIO['RSTypeId']===$iNetworkPasswordRSTypeId ) {
+						
+						$aTempFunctionResult = InsertNewIODataValue( $aIO['IOId'], $iUTS, $sPassword );
+						
+						if( $aTempFunctionResult['Error']===true ) {
+							$aInsertErrMesgs[] = "Problem submitting the \"Password\" to the Database! ".$aTempFunctionResult['ErrMesg'];
+						} else {
+							$bPasswordSubmit = true;
+							$aResult['Password'] = array( "Success"=>true );
+						}
+						
+					//------------------------------------//
+					//-- Stream Path                    --//
+					//------------------------------------//
+					} else if( $aIO['RSTypeId']===$iStreamPathRSTypeId ) {
+						
+						$aTempFunctionResult = InsertNewIODataValue( $aIO['IOId'], $iUTS, $sPath );
+						
+						if( $aTempFunctionResult['Error']===true ) {
+							$aInsertErrMesgs[] = "Problem submitting the \"Path\" to the Database! ".$aTempFunctionResult['ErrMesg'];
+						} else {
+							$bPathSubmit = true;
+							$aResult['Path'] = array( "Success"=>true );
+						}
+						
+					//------------------------------------//
+					//-- Stream Protocol                --//
+					//------------------------------------//
+					} else if( $aIO['RSTypeId']===$iStreamProtocolRSTypeId ) {
+						$aTempFunctionResult = InsertNewIODataValue( $aIO['IOId'], $iUTS, $sProtocol );
+						
+						if( $aTempFunctionResult['Error']===true ) {
+							$aInsertErrMesgs[] = "Problem submitting the \"Protocol\" to the Database! ".$aTempFunctionResult['ErrMesg'];
+						} else {
+							$bProtocolSubmit = true;
+							$aResult['Protocol'] = array( "Success"=>true );
+						}
+					}
+				} //-- END Foreach --//
+				
+			} else {
+				//-- Display the error --//
+				$bError = true;
+				$sErrMesg .= "Error when retrieving the IOs from the ThingId \n";
+				$sErrMesg .= $aWeatherIOs['ErrMesg'];
+			}
+		}
+		
+		
+		//------------------------------------------------------------------------------//
+		//-- 7.0 - CHECK TO SEE IF AN INSERT FAILED                                   --//
+		//------------------------------------------------------------------------------//
+		if( $bError===false) {
+			if( count($aInsertErrMesgs)>=1 ) {
+				//-- Flag an Error --//
+				$bError    = true;
+				//-- Add all the insert error messsages --//
+				foreach( $aInsertErrMesgs as $sInsertErrMesg ) {
+					$sErrMesg .= "Problem submitting the \"Network address\" to the Database! ";
+				}
+			}
+		}
+		//------------------------------------------------------------------------------//
+		//-- 9.0 - PARSE THE JSON REPONSE                                             --//
+		//------------------------------------------------------------------------------//
+		if( $bError===false ) {
+			//------------------------//
+			//-- 9.A - SUCCESS      --//
+			//------------------------//
+			return array( "Error"=>false, "Data"=>$aResult );
+	
+		} else {
+			//------------------------//
+			//-- 9.B - FAILURE      --//
+			//------------------------//
+			return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+		}
+	} //-- ENDFUNCTION POLLWEATHER --//
 	
 }
 	

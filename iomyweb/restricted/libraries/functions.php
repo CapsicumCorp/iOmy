@@ -163,6 +163,23 @@ function LookupFunctionConstant( $sValue ) {
 		case "OnvifThumbnailUrlRSTypeId":
 			return 3973;
 			
+		case "StreamNetworkAddressRSTypeId":
+			return 3960;
+		
+		case "StreamNetworkPortRSTypeId":
+			return 3961;
+			
+		case "StreamUsernameRSTypeId":
+			return 3962;
+			
+		case "StreamPasswordRSTypeId":
+			return 3963;
+			
+		case "StreamPathRSTypeId":
+			return 3964;
+			
+		case "StreamProtocolRSTypeId":
+			return 3965;
 			
 		default:
 			return false;
