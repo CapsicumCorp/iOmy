@@ -619,6 +619,8 @@ class IPCamera {
 			//----------------------------------------------------------------//
 			//-- 3.0 - SETUP VARIABLES                                      --//
 			//----------------------------------------------------------------//
+			
+			//-- 3.1 - Check the Object state --//
 			if( $bError===false ) {
 				if( $this->sObjectState!=="Non-DB" ) {
 					$bError   = true;
@@ -627,24 +629,30 @@ class IPCamera {
 				}
 			}
 			
-			
+			//-- 3.2 - Validate Parameters --//
 			if( $bError===false ) {
 				
-				if( isset( $aData['Username'] ) ) {
-					$sUsername = $aData['Username'];
-				}
+				//-- Parse the Data --//
+				$aParsedData     = $this->ValidateData($aData);
 				
-				if( isset( $aData['Password'] ) ) {
-					$sPassword = $aData['Password'];
+				
+				if( $aParsedData['Error']===false ) {
+					$sUsername         = $aParsedData['Data']['Username'];
+					$sPassword         = $aParsedData['Data']['Password'];
+					$sNetworkAddress   = $aParsedData['Data']['NetworkAddress'];
+					$iNetworkPort      = $aParsedData['Data']['NetworkPort'];
+					$sPath             = $aParsedData['Data']['Path'];
+					$sProtocol         = $aParsedData['Data']['Protocol'];
+					
+				} else {
+					$bError      = true;
+					$sErrMesg   .= "Failed to validate the parameters!\n";
+					$sErrMesg   .= $aParsedData['ErrMesg'];
 				}
+			}
 			
-				//-- Setup the URL --//
-				$sNetworkAddress = $aData['NetworkAddress'];
-				$iNetworkPort    = $aData['NetworkPort'];
-				$sPath           = $aData['Path'];
-				$sProtocol       = $aData['Protocol'];
-				
-				
+			//-- 3.3 - Setup the Device's Link info --//
+			if( $bError===false ) {
 				$sLinkName       = "IP Camera MJPEG";
 				$sInfoName       = "IP Camera MJPEG";
 				$sInfoManu       = "";
@@ -949,14 +957,14 @@ class IPCamera {
 		
 		//-- 4.1 - Username (Optional)  --//
 		if( isset( $aData['Username'] ) ) {
-			if( is_string( $aData['Username'] ) ) {
+			if( is_string( $aData['Username']!==null && $aData['Username']!==false && $aData['Username'] ) ) {
 				$sUsername = $aData['Username'];
 			}
 		}
 			
 		//-- 4.2 - Password (Optional) --//
 		if( isset( $aData['Password'] ) ) {
-			if( is_string( $aData['Password'] ) ) {
+			if( is_string( $aData['Password']!==null && $aData['Password']!==false && $aData['Password'] ) ) {
 				$sPassword = $aData['Password'];
 			}
 		}
