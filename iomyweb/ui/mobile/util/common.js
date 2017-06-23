@@ -395,23 +395,93 @@ $.extend(IOMy.common,{
 	 * @param {type} sMsg
 	 * @returns {sap.m.BusyIndicator|null}
 	 */
-	showLoading : function(oContext, bShow, sMsg){
-		var oIndicator = null;
+	showLoading : function(mSettings){
+		//--------------------------------------------------------------------//
+		// Variables
+		//--------------------------------------------------------------------//
+		var oIndicator			= null;
+		var bError				= false;
+		var aErrorMessages		= [];
+		var aWarningMessages	= [];
+		var bShow				= true;
+		var sMsg				= "";
+		var oContext;
+		
+		var fnAppendError = function (sMessage) {
+			bError = true;
+			aErrorMessages.push(sMessage);
+		};
 		
 		//--------------------------------------------------------------------//
-		// If we are showing the indicator, create one. Otherwise destroy it.
+		// Check that the required parameters are set.
 		//--------------------------------------------------------------------//
-		if(bShow) {
-			oIndicator = new sap.m.BusyIndicator(oContext.createId("loading"), {
-				text					: sMsg,
-				customIcon				: "resources/images/Preloader_2.gif",
-				customIconDensityAware	: false,
-				customIconHeight		: "150px",
-				customIconWidth			: "150px",
-				customIconRotationSpeed	: 0
-			}).addStyleClass("MarAuto0px MarTop20px width100Percent");
+		if (mSettings !== undefined) {
+			//----------------------------------------------------------------//
+			// Find the context of the view or controller
+			//----------------------------------------------------------------//
+			if (mSettings.context !== undefined) {
+				oContext = mSettings.context;
+				
+				//------------------------------------------------------------//
+				// Find the createId() function that views and controllers
+				// have.
+				//------------------------------------------------------------//
+				if (oContext.createId === undefined) {
+					fnAppendError("Invalid view or controller context!");
+				}
+			} else {
+				fnAppendError("View or controller context must be specified.");
+			}
+			
+			//----------------------------------------------------------------//
+			// See if the show property was given.
+			//----------------------------------------------------------------//
+			if (mSettings.show !== undefined) {
+				//------------------------------------------------------------//
+				// Check that the value given was a boolean value. If it is not,
+				// log a warning message and default to true.
+				//------------------------------------------------------------//
+				if (typeof mSettings.show === "boolean") {
+					bShow = mSettings.show;
+					
+				} else {
+					aWarningMessages.push("'show' parameter given was '"+typeof mSettings.show+"'. Expected a boolean. 'show' will be true.");
+				}
+			}
+			
+			//----------------------------------------------------------------//
+			// See if the text property was given.
+			//----------------------------------------------------------------//
+			if (mSettings.text !== undefined) {
+				sMsg = mSettings.text;
+			}
+		}
+		
+		for (var i = 0; i < aWarningMessages.length; i++) {
+			jQuery.sap.log.warning(aWarningMessages[i]);
+		}
+		
+		if (bError) {
+			for (var i = 0; i < aErrorMessages.length; i++) {
+				jQuery.sap.log.error(aErrorMessages[i]);
+			}
 		} else {
-			oContext.byId("loading").destroy();
+		
+			//--------------------------------------------------------------------//
+			// If we are showing the indicator, create one. Otherwise destroy it.
+			//--------------------------------------------------------------------//
+			if(bShow) {
+				oIndicator = new sap.m.BusyIndicator(oContext.createId("loading"), {
+					text					: sMsg,
+					customIcon				: "resources/images/Preloader_2.gif",
+					customIconDensityAware	: false,
+					customIconHeight		: "150px",
+					customIconWidth			: "150px",
+					customIconRotationSpeed	: 0
+				}).addStyleClass("MarAuto0px MarTop20px width100Percent");
+			} else {
+				oContext.byId("loading").destroy();
+			}
 		}
 		
 		return oIndicator;

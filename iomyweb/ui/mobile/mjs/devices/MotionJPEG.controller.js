@@ -27,7 +27,6 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 	wMPEGImage				: null,
 	wPanel					: null,
 	
-	//sStreamUrl				: null,
 	aElementsToDestroy		: [],
 	
 	iThingId				: 0,
@@ -55,6 +54,14 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 				me.DestroyUI();
 				me.DrawUI();
 				
+				me.wPanel.setVisible(false);
+				thisView.byId("page").addContent(
+					IOMy.common.showLoading({
+						"show" : true,
+						"context" : me
+					})
+				);
+				
 				try {
 					IOMy.devices.ipcamera.loadStreamUrl({
 						thingID : evt.data.ThingId,
@@ -66,18 +73,35 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 										IOMy.common.showMessage("Failed to load stream.");
 									}
 								);
+								
+								me.wPanel.setVisible(true);
+								IOMy.common.showLoading({
+									"show" : false,
+									"context" : me
+								});
+								
 								me.wMPEGImage.setSrc(sUrl);
 							}
 						},
 
 						onFail : function (sErrorMessage) {
-							me.wMPEGImage.setAlt("Failed to load stream");
-							//IOMy.common.showMessage("Failed to load stream: "+sErrorMessage);
+							me.wPanel.setVisible(true);
+							IOMy.common.showLoading({
+								"show" : false,
+								"context" : me
+							});
+							
+							IOMy.common.showMessage("Failed to load stream: "+sErrorMessage);
 						}
-					})
+					});
 				} catch (ex) {
-					me.wMPEGImage.setAlt("Failed to load stream");
 					IOMy.common.showMessage("Failed to load stream: "+ex.message);
+					
+					me.wPanel.setVisible(true);
+					IOMy.common.showLoading({
+						"show" : false,
+						"context" : me
+					});
 				}
 				
 			}
@@ -153,7 +177,7 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 			//src : me.sStreamUrl,
 			densityAware : false,
 			decorative : false,
-			alt : "Loading..."
+			alt : "Failed to load stream"
 		}).addStyleClass("MJPEG");
 
 		//-- Main Panel --//

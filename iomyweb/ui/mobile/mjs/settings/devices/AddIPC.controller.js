@@ -69,7 +69,12 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 					me.CancelInput();
 					me.ToggleControlButtons(false);
 					me.ToggleFields(false);
-					thisView.byId("page").addContent(IOMy.common.showLoading(thisView, true));
+					thisView.byId("page").addContent(
+						IOMy.common.showLoading({
+							show : true,
+							context : thisView
+						})
+					);
 					thisView.wPanel.setVisible(false);
 					
 					IOMy.devices.ipcamera.loadCameraInformation({
@@ -90,12 +95,19 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 							me.ToggleFields(true);
 							
 							thisView.wPanel.setVisible(true);
-							IOMy.common.showLoading(thisView, false);
+							IOMy.common.showLoading({
+								show : false,
+								context : thisView
+							});
 						},
 						
 						"onFail" : function () {
 							thisView.wPanel.setVisible(true);
-							IOMy.common.showLoading(thisView, false);
+							IOMy.common.showLoading({
+								show : false,
+								context : thisView
+							});
+							
 							IOMy.common.showMessage("Failed to load camera information");
 						}
 					});
