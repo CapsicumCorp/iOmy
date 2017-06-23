@@ -300,7 +300,7 @@ $.extend(IOMy.common,{
      * @param {type} fnCallback     (optional) Function to execute on close.
      * @param {type} sCssClass      (optional) CSS Classes in a string separated by spaces.
      */
-	showMessage : function( sMessage, sTitle, fnCallback, sCssClass ){
+	showMessage : function( sMessage, sTitle, fnCallback, sCssClass, bAutoClose ){
 		//-- --//
 		var callbackFn = fnCallback || function(){};
 		var cssClass = sCssClass || "";
@@ -309,6 +309,8 @@ $.extend(IOMy.common,{
 		sap.m.MessageToast.show(
 			sMessage,
 			{
+				autoClose : bAutoClose || true
+				// TODO: Allow a callback function to be called when the toast closes.
 				//styleClass : cssClass
 			}
 		);
@@ -326,21 +328,8 @@ $.extend(IOMy.common,{
      * @param {type} fnCallback     (optional) Function to execute on close.
      * @param {type} sCssClass      (optional) CSS Classes in a string separated by spaces.
      */
-	showSuccess : function( sMessage, sTitle, fnCallback, sCssClass ){
-		//-- --//
-		var callbackFn = fnCallback || function(){};
-		var cssClass = sCssClass || "";
-		
-		// open a fully configured message toast
-		sap.m.MessageToast.show(
-			sMessage,
-			{
-				//styleClass : cssClass
-			}
-		);
-		// TODO: This is a temporary measure to allow the function to be called after the toast is shown.
-		// TODO: Go through each form and move the function code out and place it in the parent function.
-		callbackFn();
+	showSuccess : function( sMessage, sTitle, fnCallback, sCssClass, bAutoClose ){
+		this.showMessage( sMessage, sTitle, fnCallback, sCssClass, bAutoClose );
 	},
     
     showWarning : function( sMessage, sTitle, fnCallback, sCssClass ){
@@ -398,19 +387,34 @@ $.extend(IOMy.common,{
 	//================================================//
 	//== Show and hide Loading.						==//
 	//================================================//
-	showLoading : function(bShow, sMsg, iDelay){
+	/**
+	 * Shows or hides the loading indicator image.
+	 * 
+	 * @param {type} oContext				
+	 * @param {type} bShow
+	 * @param {type} sMsg
+	 * @returns {sap.m.BusyIndicator|null}
+	 */
+	showLoading : function(oContext, bShow, sMsg){
+		var oIndicator = null;
+		
+		//--------------------------------------------------------------------//
+		// If we are showing the indicator, create one. Otherwise destroy it.
+		//--------------------------------------------------------------------//
 		if(bShow) {
-			sap.ui.core.BusyIndicator.show( iDelay || 0 );
-			$('#sapUiBusyIndicator').empty();
-			$('#sapUiBusyIndicator').append([
-				'<div class="custom-loading-indicator">', 
-				'<div class="custom-loading-icon"></div>',
-				'<div class="loading-text">' + (sMsg || 'Loading...') + '</div>' ,
-				'</div>'
-            ].join(''));
+			oIndicator = new sap.m.BusyIndicator(oContext.createId("loading"), {
+				text					: sMsg,
+				customIcon				: "resources/images/Preloader_2.gif",
+				customIconDensityAware	: false,
+				customIconHeight		: "100%",
+				customIconWidth			: "100%",
+				customIconRotationSpeed	: 0
+			}).addStyleClass("MarAuto0px MarTop20px");
 		} else {
-			sap.ui.core.BusyIndicator.hide();
+			oContext.byId("loading").destroy();
 		}
+		
+		return oIndicator;
 	},
 	
 	createLoadingStatusObj : function( statusObj, comp ){

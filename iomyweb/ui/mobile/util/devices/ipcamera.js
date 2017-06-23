@@ -47,11 +47,10 @@ $.extend(IOMy.devices.ipcamera,{
 	
 	DevicePageID : "pDeviceMPEGStream",
 	
-	getStreamURL : function(mSettings) {
+	loadCameraInformation : function(mSettings) {
 		var me				= this;
 		var bError			= false;
 		var aErrorMessages	= [];
-		var iIOCount		= 0;
 		var iNetAddrIO		= 0;
 		var iNetPortIO		= 0;
 		var iUsernameIO		= 0;
@@ -70,11 +69,35 @@ $.extend(IOMy.devices.ipcamera,{
 		var fnUpdateCounter = function () {
 			me.ODataCallsToMake--;
 			if (me.ODataCallsToMake === 0) {
-				var sStreamURL  = urlProtocol + "://" + urlAddress + ":" + urlPort + "/" + urlPath;
+				var mThing					= IOMy.common.ThingList["_"+iThingId];
+				var bAuthenticationRequired = false;
+				var mData		= {
+					Hub		: mThing.HubId,
+					
+				};
+				
+				//------------------------------------------------------------//
+				// Begin gathering connection data.
+				//------------------------------------------------------------//
+				if ( (me.urlUsername !== undefined && me.urlUsername !== null) &&
+					 (me.urlPassword !== undefined && me.urlPassword !== null) )
+				{
+					bAuthenticationRequired = true;
+				}
 				
 				me.runningODataCalls = false;
+				me.ODataCallsToMake = 6;
 				
-				console.log(sStreamURL);
+				mData.Protocol					= me.urlProtocol;
+				mData.Address					= me.urlAddress;
+				mData.Port						= me.urlPort;
+				mData.Path						= me.urlPath;
+				mData.Username					= me.urlUsername;
+				mData.Password					= me.urlPassword;
+				mData.AuthenticationRequired	= bAuthenticationRequired;
+				
+				//-- Run the success callback with the connection settings. --//
+				fnSuccess(mData);
 			}
 		};
 		
@@ -85,7 +108,7 @@ $.extend(IOMy.devices.ipcamera,{
             //----------------------------------------------------------------//
             // REQUIRED: Find the hub ID
             //----------------------------------------------------------------//
-			mThingIdInfo	= IOMy.validation.isThingIDValid(mSettings.ThingId);
+			mThingIdInfo	= IOMy.validation.isThingIDValid(mSettings.thingID);
 			bError			= !mThingIdInfo.bIsValid;
 			aErrorMessages	= mThingIdInfo.aErrorMessages;
             
@@ -95,7 +118,7 @@ $.extend(IOMy.devices.ipcamera,{
             if (bError) {
                 throw new ThingIDNotValidException("* "+aErrorMessages.join("\n* "));
             } else {
-				iThingId = mSettings.ThingId;
+				iThingId = mSettings.thingID;
 			}
             
             //----------------------------------------------------------------//
@@ -133,7 +156,9 @@ $.extend(IOMy.devices.ipcamera,{
 		mThing = IOMy.common.ThingList["_"+iThingId];
 		
 		$.each(mThing.IO, function (sIndex, mIO) {
-			
+			//----------------------------------------------------------------//
+			// Get the correct IOs
+			//----------------------------------------------------------------//
 			if (sIndex !== undefined && sIndex !== null && mIO !== undefined && mIO !== null) {
 				if (mIO.RSTypeId === me.RSNetworkAddress) {
 					iNetAddrIO = mIO.Id;
@@ -152,6 +177,9 @@ $.extend(IOMy.devices.ipcamera,{
 			
 		});
 		
+		//--------------------------------------------------------------------//
+		// If any of the IOs are missing, then this is not a valid IP camera.
+		//--------------------------------------------------------------------//
 		if (iNetAddrIO === 0 || iNetPortIO === 0 || iUsernameIO === 0 ||
 			iPasswordIO === 0 || iPathIO === 0 || iProtocolIO === 0)
 		{
@@ -161,7 +189,7 @@ $.extend(IOMy.devices.ipcamera,{
 		//--------------------------------------------------------------------//
 		// Run a request to fetch the URL
 		//--------------------------------------------------------------------//
-		sUrl = IOMy.apiodata.ODataLocation("datamedstring");
+		sUrl = IOMy.apiodata.ODataLocation("datashortstring");
 		
 		aConfigs = [
 			
@@ -230,6 +258,7 @@ $.extend(IOMy.devices.ipcamera,{
 				Columns			: ["CALCEDVALUE"],
 				WhereClause		: ["IO_PK eq " + aConfigs[i].ID],
 				OrderByClause	: [],
+				Limit			: 1,
 
 				onSuccess : aConfigs[i].onSuccess,
 
@@ -312,7 +341,6 @@ $.extend(IOMy.devices.ipcamera,{
 			onSuccess : function(responseType, data) {
 				try {
 					if (data.Error === false) {
-						//IOMy.common.NavigationChangePage("pDeviceMPEGStream", { "StreamUrl" : data.Data.sUrl });
 						fnSuccess(data.Data.sUrl);
 					} else {
 						fnFail(data.ErrMesg);

@@ -145,6 +145,158 @@ sap.ui.jsview("mjs.settings.devices.AddIPC", {
 			}
 		}).addStyleClass("width80px");
 		
+		//-- Main Panel --//
+		me.wPanel = new sap.m.Panel ({
+			backgroundDesign: "Transparent",
+			content: [
+				/* Parent HBox for Type & Hub Containers */
+				new sap.m.HBox ({
+					items : [
+						/* Parent VBox for Type */
+						new sap.m.VBox ({
+							layoutData : new sap.m.FlexItemData({
+								growFactor : 1
+							}),
+							items : [
+								new sap.m.Label ({
+									text: "Type:"
+								}),
+								me.wFileTypeSelector,
+							]
+						}).addStyleClass("MarRight5px"),
+						/* Parent VBox for Hub ID */
+						new sap.m.VBox ({
+							layoutData : new sap.m.FlexItemData({
+								growFactor : 1
+							}),
+							items : [	
+								new sap.m.Label ({
+									text: "Hub:"
+								}),
+								me.wHubSelector,
+							]
+						}).addStyleClass("MarLeft5px")
+					]
+				}).addStyleClass(),
+				/* Parent HBox for Protocol, Network Address & Port Containers */
+				new sap.m.HBox ({
+					items : [
+						/* Parent VBox for Protocol */
+						new sap.m.VBox ({
+							items : [
+								new sap.m.Label ({
+									text: "Protocol:"
+								}),
+								me.wProtocol
+							]
+						}).addStyleClass("width65px"),
+
+						/* Parent VBox for Network Address */
+						new sap.m.VBox ({
+							layoutData : new sap.m.FlexItemData({
+								growFactor : 1
+							}),
+							items : [	
+								new sap.m.Label ({
+									text: "Network Address:"
+								}),
+								me.wIPAddress
+							]
+						}).addStyleClass("MarLeft10px MarRight10px"),
+
+						/* Parent VBox for Port */
+						new sap.m.VBox ({
+							items : [	
+								new sap.m.Label ({
+									text: "Port:"
+								}),
+								me.wIPPort
+							]
+						}).addStyleClass("width65px"),
+					]
+				}).addStyleClass("PadTop5px"),
+
+				/* Parent HBox for Video Path Container */
+				new sap.m.HBox ({
+					items : [
+						/* Parent VBox for Video Path Input */
+						new sap.m.VBox ({
+							layoutData : new sap.m.FlexItemData({
+								growFactor : 1
+							}),
+							items : [
+								new sap.m.Label ({
+									text: "Path:"
+								}),
+								me.wStreamPath
+							]
+						}).addStyleClass(""),
+					]
+				}).addStyleClass("PadTop5px"),
+				/* Parent HBox for Auth Required Container */
+				new sap.m.HBox ({
+					items : [
+						/* Parent HBox for Auth Required Label / Checkbox */
+						new sap.m.HBox ({
+							layoutData : new sap.m.FlexItemData({
+								growFactor : 1
+							}),
+							items : [
+								new sap.m.Label ({
+									layoutData : new sap.m.FlexItemData({
+										growFactor : 1
+									}),
+									text: "Authentication Required?"
+								}).addStyleClass("PadTop15px"),
+								me.wAuthenticationCheckBox
+							]
+						}).addStyleClass(""),
+					]
+				}).addStyleClass("PadTop5px"),
+				/* Parent HBox for Username / Password Containers */
+				new sap.m.HBox ({
+					items : [
+						/* Parent VBox for Username*/
+						new sap.m.VBox ({
+							layoutData : new sap.m.FlexItemData({
+								growFactor : 1
+							}),
+							items : [	
+								new sap.m.Label ({
+									text: "Username:"
+								}),
+								me.wUsername
+							]
+						}).addStyleClass("MarRight10px"),
+						/* Parent VBox for Password */
+						new sap.m.VBox ({
+							layoutData : new sap.m.FlexItemData({
+								growFactor : 1
+							}),
+							items : [	
+								new sap.m.Label ({
+									text: "Password:"
+								}),
+								me.wPassword
+							]
+						}).addStyleClass("")
+					]
+				}).addStyleClass("PadTop5px"),
+				/* Parent HBox for Cancel, Apply, Discard */
+				new sap.m.HBox ({	
+					layoutData : new sap.m.FlexItemData({
+						growFactor : 1
+					}),
+					items : [
+						/* Cancel (Default Type) */
+						me.wCancelButton,
+						/* Submit (Accept Type) */
+						me.wSubmitButton
+					]
+				}).addStyleClass("MarTop15px TextCenter")
+			]
+		}).addStyleClass("PadBottom10px MotionJPEG MarTop3px");
+		
 		//-- The page itself --//
 		var oPage = new IOMy.widgets.IOMyPage({
             view : me,
@@ -154,157 +306,7 @@ sap.ui.jsview("mjs.settings.devices.AddIPC", {
         });
 
 		oPage.addContent(
-            //-- Main Panel --//
-            new sap.m.Panel ({
-                backgroundDesign: "Transparent",
-                content: [
-					/* Parent HBox for Type & Hub Containers */
-					new sap.m.HBox ({
-						items : [
-							/* Parent VBox for Type */
-							new sap.m.VBox ({
-								layoutData : new sap.m.FlexItemData({
-									growFactor : 1
-								}),
-								items : [
-									new sap.m.Label ({
-										text: "Type:"
-									}),
-									me.wFileTypeSelector,
-								]
-							}).addStyleClass("MarRight5px"),
-							/* Parent VBox for Hub ID */
-							new sap.m.VBox ({
-								layoutData : new sap.m.FlexItemData({
-									growFactor : 1
-								}),
-								items : [	
-									new sap.m.Label ({
-										text: "Hub:"
-									}),
-									me.wHubSelector,
-								]
-							}).addStyleClass("MarLeft5px")
-						]
-					}).addStyleClass(),
-					/* Parent HBox for Protocol, Network Address & Port Containers */
-					new sap.m.HBox ({
-						items : [
-							/* Parent VBox for Protocol */
-							new sap.m.VBox ({
-								items : [
-									new sap.m.Label ({
-										text: "Protocol:"
-									}),
-									me.wProtocol
-								]
-							}).addStyleClass("width65px"),
-							
-							/* Parent VBox for Network Address */
-							new sap.m.VBox ({
-								layoutData : new sap.m.FlexItemData({
-									growFactor : 1
-								}),
-								items : [	
-									new sap.m.Label ({
-										text: "Network Address:"
-									}),
-									me.wIPAddress
-								]
-							}).addStyleClass("MarLeft10px MarRight10px"),
-							
-							/* Parent VBox for Port */
-							new sap.m.VBox ({
-								items : [	
-									new sap.m.Label ({
-										text: "Port:"
-									}),
-									me.wIPPort
-								]
-							}).addStyleClass("width65px"),
-						]
-					}).addStyleClass("PadTop5px"),
-					
-					/* Parent HBox for Video Path Container */
-					new sap.m.HBox ({
-						items : [
-							/* Parent VBox for Video Path Input */
-							new sap.m.VBox ({
-								layoutData : new sap.m.FlexItemData({
-									growFactor : 1
-								}),
-								items : [
-									new sap.m.Label ({
-										text: "Path:"
-									}),
-									me.wStreamPath
-								]
-							}).addStyleClass(""),
-						]
-					}).addStyleClass("PadTop5px"),
-					/* Parent HBox for Auth Required Container */
-					new sap.m.HBox ({
-						items : [
-							/* Parent HBox for Auth Required Label / Checkbox */
-							new sap.m.HBox ({
-								layoutData : new sap.m.FlexItemData({
-									growFactor : 1
-								}),
-								items : [
-									new sap.m.Label ({
-										layoutData : new sap.m.FlexItemData({
-											growFactor : 1
-										}),
-										text: "Authentication Required?"
-									}).addStyleClass("PadTop15px"),
-									me.wAuthenticationCheckBox
-								]
-							}).addStyleClass(""),
-						]
-					}).addStyleClass("PadTop5px"),
-					/* Parent HBox for Username / Password Containers */
-					new sap.m.HBox ({
-						items : [
-							/* Parent VBox for Username*/
-							new sap.m.VBox ({
-								layoutData : new sap.m.FlexItemData({
-									growFactor : 1
-								}),
-								items : [	
-									new sap.m.Label ({
-										text: "Username:"
-									}),
-									me.wUsername
-								]
-							}).addStyleClass("MarRight10px"),
-							/* Parent VBox for Password */
-							new sap.m.VBox ({
-								layoutData : new sap.m.FlexItemData({
-									growFactor : 1
-								}),
-								items : [	
-									new sap.m.Label ({
-										text: "Password:"
-									}),
-									me.wPassword
-								]
-							}).addStyleClass("")
-						]
-					}).addStyleClass("PadTop5px"),
-					/* Parent HBox for Cancel, Apply, Discard */
-					new sap.m.HBox ({	
-						layoutData : new sap.m.FlexItemData({
-							growFactor : 1
-						}),
-						items : [
-							/* Cancel (Default Type) */
-							me.wCancelButton,
-							/* Submit (Accept Type) */
-							me.wSubmitButton
-						]
-					}).addStyleClass("MarTop15px TextCenter")
-				]
-			}).addStyleClass("PadBottom10px MotionJPEG MarTop3px")
+			me.wPanel
 		);
 		
 		return oPage;

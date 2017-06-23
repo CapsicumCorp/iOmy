@@ -63,7 +63,6 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 							if (me.wMPEGImage !== null) {
 								me.wMPEGImage.attachError(
 									function () {
-										me.wMPEGImage.setAlt("Failed to load stream");
 										IOMy.common.showMessage("Failed to load stream.");
 									}
 								);
@@ -73,7 +72,7 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 
 						onFail : function (sErrorMessage) {
 							me.wMPEGImage.setAlt("Failed to load stream");
-							IOMy.common.showMessage("Failed to load stream: "+sErrorMessage);
+							//IOMy.common.showMessage("Failed to load stream: "+sErrorMessage);
 						}
 					})
 				} catch (ex) {
@@ -185,6 +184,12 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
                             text: "Edit " + IOMy.common.ThingList["_"+me.iThingId].DisplayName,
                             select:	function (oControlEvent) {
                                 IOMy.common.NavigationChangePage( "pSettingsEditThing", {"ThingId" : me.iThingId}, false );
+                            }
+                        },
+                        {
+                            text: "Edit Connection Settings",
+                            select:	function (oControlEvent) {
+                                IOMy.common.NavigationChangePage( "pSettingsAddIPC", {"ThingId" : me.iThingId}, false );
                             }
                         }
                     ]
