@@ -89,14 +89,14 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 							me.ToggleControlButtons(true);
 							me.ToggleFields(true);
 							
-						/*	thisView.wPanel.setVisible(true);
+							thisView.wPanel.setVisible(true);
 							IOMy.common.showLoading(thisView, false);
-						*/},
+						},
 						
 						"onFail" : function () {
-						/*	thisView.wPanel.setVisible(true);
+							thisView.wPanel.setVisible(true);
 							IOMy.common.showLoading(thisView, false);
-						*/	IOMy.common.showMessage("Failed to load camera information");
+							IOMy.common.showMessage("Failed to load camera information");
 						}
 					});
 				} else {
