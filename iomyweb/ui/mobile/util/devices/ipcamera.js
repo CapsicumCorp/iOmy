@@ -72,7 +72,7 @@ $.extend(IOMy.devices.ipcamera,{
 				var mThing					= IOMy.common.ThingList["_"+iThingId];
 				var bAuthenticationRequired = false;
 				var mData		= {
-					Hub		: mThing.HubId,
+					Hub		: IOMy.functions.getHubConnectedToThing(mThing.Id).HubId,
 					
 				};
 				
@@ -95,6 +95,8 @@ $.extend(IOMy.devices.ipcamera,{
 				mData.Username					= me.urlUsername;
 				mData.Password					= me.urlPassword;
 				mData.AuthenticationRequired	= bAuthenticationRequired;
+				
+				console.log(mData);
 				
 				//-- Run the success callback with the connection settings. --//
 				fnSuccess(mData);
@@ -257,7 +259,7 @@ $.extend(IOMy.devices.ipcamera,{
 				Url				: sUrl,
 				Columns			: ["CALCEDVALUE"],
 				WhereClause		: ["IO_PK eq " + aConfigs[i].ID],
-				OrderByClause	: [],
+				OrderByClause	: ["UTS desc"],
 				Limit			: 1,
 
 				onSuccess : aConfigs[i].onSuccess,
