@@ -406,10 +406,10 @@ $.extend(IOMy.common,{
 				text					: sMsg,
 				customIcon				: "resources/images/Preloader_2.gif",
 				customIconDensityAware	: false,
-				customIconHeight		: "100%",
-				customIconWidth			: "100%",
+				customIconHeight		: "150px",
+				customIconWidth			: "150px",
 				customIconRotationSpeed	: 0
-			}).addStyleClass("MarAuto0px MarTop20px");
+			}).addStyleClass("MarAuto0px MarTop20px width100Percent");
 		} else {
 			oContext.byId("loading").destroy();
 		}
