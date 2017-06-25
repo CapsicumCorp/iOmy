@@ -96,8 +96,6 @@ $.extend(IOMy.devices.ipcamera,{
 				mData.Password					= me.urlPassword;
 				mData.AuthenticationRequired	= bAuthenticationRequired;
 				
-				console.log(mData);
-				
 				//-- Run the success callback with the connection settings. --//
 				fnSuccess(mData);
 			}

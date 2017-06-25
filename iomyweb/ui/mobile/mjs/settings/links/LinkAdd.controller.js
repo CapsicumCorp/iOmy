@@ -132,7 +132,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                     //-------------------------------------------------//
                     // Is the username given?                          //
                     //-------------------------------------------------//
-                    mUsernameInfo = me.ValidateUsername();
+                    /*mUsernameInfo = me.ValidateUsername();
                     if (mUsernameInfo.bError === true) {
                         bError = true;
                         aErrorMessages = aErrorMessages.concat(mUsernameInfo.aErrorMessages);
@@ -145,7 +145,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                     if (mPasswordInfo.bError === true) {
                         bError = true;
                         aErrorMessages = aErrorMessages.concat(mPasswordInfo.aErrorMessages);
-                    }
+                    }*/
                     
                 //====================================================================//
                 // PHILIPS HUE BRIDGE                                                 //
@@ -372,7 +372,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         return mInfo;
     },
     
-    ValidateUsername : function () {
+    /*ValidateUsername : function () {
         var me                      = this;
         var bError                  = false;
         var aErrorMessages          = [];
@@ -420,7 +420,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         mInfo.aErrorMessages = aErrorMessages;
         
         return mInfo;
-    },
+    },*/
     
     /**
      * Fetches a map of information to use when performing an AJAX request on an API that
@@ -794,7 +794,11 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                                     }
 
                                     jQuery.sap.log.error(sErrorMessage);
-                                    IOMy.common.showError(sErrorMessage);
+                                    IOMy.common.showError(sErrorMessage, "",
+										function () {
+											thisButton.setEnabled(true);
+										}
+									);
                                 }
                             } catch (e) {
                                 bError = true; // No.
@@ -807,7 +811,11 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                                 }
                                 
                                 jQuery.sap.log.error(sErrorMessage);
-                                IOMy.common.showError(sErrorMessage);
+                                IOMy.common.showError(sErrorMessage, "", 
+									function () {
+										thisButton.setEnabled(true);
+									}
+								);
                             }
                         }
                     }
