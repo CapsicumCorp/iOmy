@@ -327,16 +327,15 @@ $.extend(IOMy.apiodata,{
 		if( IOMy.common.bUserCurrentlyLoggedIn===true ) {
 			
 			oAjax = $.ajax({
-				url : sUrl,								
-				crossDomain : true,						
-				dataType : sDataType,					//-- Expected Result --//
-				type : sHTTPMethod,						//--  --//
-				//data : aData || {},					//-- If there is anything in "data" than include it here --//
-				RetryAttemptCount : 0,
-				RetryAttempLimit : 1,
-				bApiComplete: false,
+				url:                    sUrl,
+				crossDomain:            true,
+				dataType:               sDataType,      //-- Expected Result --//
+				type:                   sHTTPMethod,    //--  --//
+				RetryAttemptCount:      0,
+				RetryAttempLimit:       1,
+				bApiComplete:           false,
 				iCurrentLoginTimestamp: iLoginTimestamp,
-				DebugLogString:"",
+				DebugLogString:         "",
 				
 				//============================================================================================//
 				//== AJAX "SUCCESS" EVENT
@@ -430,11 +429,11 @@ $.extend(IOMy.apiodata,{
 									return;
 									
 								//--------------------------------------------------------//
-								//-- 1.2.A.2.A.B - If Expecting XML/Atom	 response	--//
+								//-- 1.2.A.2.A.B - If Expecting XML/Atom response       --//
 								//--------------------------------------------------------//
 									
 								//--------------------------------------------------------------------------------------------//
-								//-- 1.2.A.2.A.C - Else this function isn't configured on what to do with this datatype		--//
+								//-- 1.2.A.2.A.C - Else this function isn't configured on what to do with this datatype     --//
 								//--------------------------------------------------------------------------------------------//
 								} else {
 									//-- No Method for this response type --//
@@ -444,7 +443,7 @@ $.extend(IOMy.apiodata,{
 								}
 							
 							//--------------------------------------------------------------------//
-							//-- 1.2.A.2.B - Else then the Response ContentType is not expected	--//
+							//-- 1.2.A.2.B - Else then the Response ContentType is not expected --//
 							//--------------------------------------------------------------------//
 							} else {
 								//------------------------------------------------------------------------------------//
@@ -485,10 +484,19 @@ $.extend(IOMy.apiodata,{
 					//============================================================//
 					var sDebugLogLines = "=================================\n";
 					
+					
 					//============================================================//
-					//== 2.2 - Decide what to do on success                     ==//
+					//== 2.2.A - IF this task is orphaned                       ==//
 					//============================================================//
-					if( IOMy.common.bUserCurrentlyLoggedIn===true && this.iCurrentLoginTimestamp!==IOMy.common.oCurrentLoginTimestamp.getTime() ) {
+					if( IOMy.common.bUserCurrentlyLoggedIn===false || this.iCurrentLoginTimestamp!==IOMy.common.oCurrentLoginTimestamp.getTime() ) {
+						//-- TODO: Log a message that an Odata API request had to be aborted --//
+						var sErrorMesg1 = "Silently aborting Odata API request (before parsing the unsucessful response from the ajax request) due to being logged out!";
+						jQuery.sap.log.info( sErrorMesg1, "", "IOMy.apiodata.AjaxRequest" );
+							
+					//============================================================//
+					//== 2.2.B - ELSE the task is not orphaned                  ==//
+					//============================================================//
+					} else {
 						
 						try {
 							if(this.RetryAttemptCount===0) {
@@ -501,14 +509,14 @@ $.extend(IOMy.apiodata,{
 							
 							
 							//------------------------------------------------------------------------//
-							//-- 2.3.A - HTTP 500 STATUS CODE: The dreaded error code has occurred!	--//
+							//-- 2.3.A - HTTP 500 STATUS CODE: The dreaded error code has occurred! --//
 							//------------------------------------------------------------------------//
 							if (err.status=='500') {
 								//-- Flag that the API is not complete and should possibly try again (if allowed) --//
 								this.bApiComplete = false;
 								
 							//------------------------------------------------------------------------//
-							//-- 2.3.B - HTTP 200 STATUS CODE: 										--//
+							//-- 2.3.B - HTTP 200 STATUS CODE:                                      --//
 							//------------------------------------------------------------------------//
 							} else if (err.status=="200") {
 								//-- NOTE: API didn't return a valid response (most likely an error message)  --//
@@ -517,7 +525,7 @@ $.extend(IOMy.apiodata,{
 								this.bApiComplete = false;
 								
 							//------------------------------------------------------------------------//
-							//-- 2.3.C - HTTP 0 STATUS CODE: 										--//
+							//-- 2.3.C - HTTP 0 STATUS CODE:                                        --//
 							//------------------------------------------------------------------------//
 							} else if (err.status=="0") {
 								//-- NOTE: This is a weird non-standard error code (more info on what causes of this needs to be found) --//
@@ -527,7 +535,7 @@ $.extend(IOMy.apiodata,{
 								this.bApiComplete = false;
 								
 							//------------------------------------------------------------------------//
-							//-- 2.3.D - HTTP 401 STATUS CODE: 										--//
+							//-- 2.3.D - HTTP 401 STATUS CODE:                                      --//
 							//------------------------------------------------------------------------//
 							} else if (err.status=="401") {
 								//-- TODO: This section needs to be looked into further to see if anything needs to be changed --// 
@@ -549,17 +557,17 @@ $.extend(IOMy.apiodata,{
 							//------------------------------------------------------------------------//
 							//-- 2.2.E - HTTP 403 STATUS CODE:                                      --//
 							//------------------------------------------------------------------------//
-			                } else if (err.status=="403") {
+							} else if (err.status=="403") {
 								//-- Flag that we shouldn't retry the ajax request --//
 								this.bApiComplete = true;
 								//-- Flag that the user isn't currently logged in --//
 								IOMy.common.bUserCurrentlyLoggedIn = false;
 									
 								//-- Run the handle403APIError function --//
-			                    IOMy.apiphp.handle403APIError(aConfig);
+								IOMy.apiphp.handle403APIError(aConfig);
 			
 							//------------------------------------------------------------------------//
-							//-- 2.3.F - UNEXPECTED STATUS CODE: 									--//
+							//-- 2.3.F - UNEXPECTED STATUS CODE:                                    --//
 							//------------------------------------------------------------------------//
 							} else {
 								//-- Log the Error --//
@@ -615,13 +623,6 @@ $.extend(IOMy.apiodata,{
 							this.bApiComplete = true;
 							jQuery.sap.log.error( "Critical Error occurred in the Odata on error section 2: "+e20.message, "", "IOMy.apiodata.AjaxRequest" );
 						}
-						
-					//============================================================//
-					//== ELSE Add a message to the log                          ==//
-					//============================================================//
-					} else {
-						var sErrorMesg2 = "Silently aborting Odata API request (before parsing the unsucessful response from the ajax request) due to being logged out!!";
-						jQuery.sap.log.info( sErrorMesg2, "", "IOMy.apiodata.AjaxRequest" );
 					}
 				} //-- END "error" function --//
 			}); //-- END Ajax function --//

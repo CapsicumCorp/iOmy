@@ -190,6 +190,7 @@ $.extend(IOMy.apiphp,{
 		sERType         = aConfig.ExpectedResponseType;
 		bAsync          = aConfig.async || true;
 		
+		iLoginTimestamp = IOMy.common.oCurrentLoginTimestamp.getTime();
 		
 		//------------------------------------------------//
 		//-- 3.0 - Make the Ajax Request                --//
@@ -224,7 +225,7 @@ $.extend(IOMy.apiphp,{
 						var sDebugHeader   = "\n"+sDebugLogLines+"== PHP Ajax Error!            ==\n"+sDebugLogLines;
 						
 						try {
-							if( IOMy.common.bUserCurrentlyLoggedIn===true && this.iCurrentLoginTimestamp!==IOMy.common.oCurrentLoginTimestamp.getTime() ) {
+							if( IOMy.common.bUserCurrentlyLoggedIn===true && this.iCurrentLoginTimestamp===IOMy.common.oCurrentLoginTimestamp.getTime() ) {
 								
 								//-- Increment the attempt count even though this was a success! --//
 								this.RetryAttemptCount++;
@@ -378,7 +379,7 @@ $.extend(IOMy.apiphp,{
 							//-- ELSE This is ajax task has been orphaned           --//
 							//--------------------------------------------------------//
 							} else {
-								var sErrorMesg2 = "Silently aborting PHP API request (before parsing the unsucessful response from the ajax request) due to being logged out!!";
+								var sErrorMesg2 = "Silently aborting PHP API request (before parsing the sucessful response from the ajax request) due to being logged out!!";
 								jQuery.sap.log.info( sErrorMesg2, "", "IOMy.apiphp.AjaxRequest" );
 							}
 							
@@ -392,7 +393,7 @@ $.extend(IOMy.apiphp,{
 					//============================================================================================//
 					error:function(err) {
 						try {
-							if( IOMy.common.bUserCurrentlyLoggedIn===true && this.iCurrentLoginTimestamp!==IOMy.common.oCurrentLoginTimestamp.getTime() ) {
+							if( IOMy.common.bUserCurrentlyLoggedIn===true && this.iCurrentLoginTimestamp===IOMy.common.oCurrentLoginTimestamp.getTime() ) {
 								//================================================//
 								//== 2.1 - Initialise Variables                 ==//
 								//================================================//
