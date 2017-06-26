@@ -71,65 +71,6 @@ $.extend(IOMy.functions,{
             // Now see what the true length of the password is.
             if (iPasswordLength >= iExpectedPasswordLength) {
                 bEightChars = true;
-                // Go through every single character, analyse each one to see if it's a letter, number, or symbol
-                for (var i = 0; i < iPasswordLength; i++) {
-                    if (bContinueCheck === true) {
-                        break;
-                    }
-                    // Is it a number?
-                    if (!isNaN(sPassword.charAt(i))) {
-                        iNumbers++;
-
-                    // Is it a letter?
-                    } else if (sPassword.charAt(i).match(/[A-Z]/i) !== null) { // i for case-Insensitive
-                        // Is it upper or lower case.
-                        if (sPassword.charAt(i).match(/[A-Z]/g) !== null) {
-                            iUpperCaseLetters++;
-                        } else if (sPassword.charAt(i).match(/[a-z]/g) !== null) {
-                            iLowerCaseLetters++;
-                        }
-                        iLetters++;
-
-                    // So it must be some sort of symbol.
-                    } else {
-                        iSymbols++;
-                    }
-                }
-
-                //----------------------------------------------------------------------------------------//
-                // Check that all the criteria have been met
-                //----------------------------------------------------------------------------------------//
-                // Are there iNumbers?
-                if (iNumbers > 0) {
-                    bHasANumber = true;
-                } else {
-                    aValidationErrorMessages.push("* Password must have a number.");
-                }
-
-                // Are there iLetters?
-                if (iLetters > 0) {
-                    // Are there upper-case iLetters?
-                    if (iUpperCaseLetters > 0) {
-                        bHasAnUpperCaseLetter = true;
-                    } else {
-                        aValidationErrorMessages.push("* Password must have at least one upper-case letter.");
-                    }
-
-                    // Are there lower-case iLetters?
-                    if (iLowerCaseLetters > 0) {
-                        bHasALowerCaseLetter = true;
-                    } else {
-                        aValidationErrorMessages.push("* Password must have at least one lower-case letter.");
-                    }
-                } else {
-                    aValidationErrorMessages.push("* Password must contain letters.");
-                }
-
-                if (iSymbols > 0) {
-                    bHasASymbol = true;
-                } else {
-                    aValidationErrorMessages.push("* Password must have a symbol (!, @, %, etc).");
-                }
 
             //---------------------------------------------------------------------------------//
             // Someone was cheeky enough to try and circumvent the 8 character limit by placing
@@ -144,6 +85,70 @@ $.extend(IOMy.functions,{
         } else {
             aValidationErrorMessages.push("* Password must be at least 8 characters.");
         }
+		
+		//---------------------------------------------------------------------------------//
+		// Go through every single character, analyse each one to see if it's a letter,
+		// number, or symbol.
+		//---------------------------------------------------------------------------------//
+		for (var i = 0; i < iPasswordLength; i++) {
+			if (bContinueCheck === true) {
+				break;
+			}
+			// Is it a number?
+			if (!isNaN(sPassword.charAt(i))) {
+				iNumbers++;
+
+			// Is it a letter?
+			} else if (sPassword.charAt(i).match(/[A-Z]/i) !== null) { // i for case-Insensitive
+				// Is it upper or lower case.
+				if (sPassword.charAt(i).match(/[A-Z]/g) !== null) {
+					iUpperCaseLetters++;
+				} else if (sPassword.charAt(i).match(/[a-z]/g) !== null) {
+					iLowerCaseLetters++;
+				}
+				iLetters++;
+
+			// So it must be some sort of symbol.
+			} else {
+				iSymbols++;
+			}
+		}
+
+		//----------------------------------------------------------------------------------------//
+		// Check that all the criteria have been met
+		//----------------------------------------------------------------------------------------//
+		// Are there numbers?
+		if (iNumbers > 0) {
+			bHasANumber = true;
+		} else {
+			aValidationErrorMessages.push("* Password must have a number.");
+		}
+
+		// Are there letters?
+		if (iLetters > 0) {
+			// Are there upper-case letters?
+			if (iUpperCaseLetters > 0) {
+				bHasAnUpperCaseLetter = true;
+			} else {
+				aValidationErrorMessages.push("* Password must have at least one upper-case letter.");
+			}
+
+			// Are there lower-case letters?
+			if (iLowerCaseLetters > 0) {
+				bHasALowerCaseLetter = true;
+			} else {
+				aValidationErrorMessages.push("* Password must have at least one lower-case letter.");
+			}
+		} else {
+			aValidationErrorMessages.push("* Password must contain letters.");
+		}
+
+		// Are there symbols?
+		if (iSymbols > 0) {
+			bHasASymbol = true;
+		} else {
+			aValidationErrorMessages.push("* Password must have a symbol (!, @, %, etc).");
+		}
 
         //----------------------------------------------------------------------------------------//
         // Verify validity and generate error messages when not all of the conditions are met.
