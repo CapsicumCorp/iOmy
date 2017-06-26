@@ -8563,4 +8563,142 @@ function dbDeleteIndexOnTable( $oDBConn, $sTableName, $sIndexName ) {
 }
 
 
+
+function DB_APICore_UserData( $oDBConnection ) {
+	//----------------------------------------//
+	//-- 1.0 - Declare Variables            --//
+	//----------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+
+	//-- 1.2 - Other Varirables --//
+	$aResult        = array();
+	$aReturn        = array();
+	$sSQL           = "";
+	$bError         = false;
+	$sErrMesg       = "";
+	$aTemporaryView = array();
+	$sView          = "";
+
+	//----------------------------------------//
+	//-- 3.0 - SQL QUERY                    --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			//-- Retrieve the View in an array --//
+			$aTemporaryView = NonDataViewName("Users");
+			if ( $aTemporaryView["Error"]===true ) {
+				//-- if an error has occurred --//
+				$bError = true;
+				$sErrMesg = $aTemporaryView["ErrMesg"];
+	
+			} else {
+				
+				$sView = $aTemporaryView["View"];
+				$sSQL .= "SELECT ";
+				$sSQL .= "	`USERS_PK`, ";
+				$sSQL .= "	`USERS_STATE`, ";
+				$sSQL .= "	`USERS_USERNAME`, ";
+				$sSQL .= "	`USERADDRESS_PK`, ";
+				$sSQL .= "	`USERADDRESS_LINE1`, ";
+				$sSQL .= "	`USERADDRESS_LINE2`, ";
+				$sSQL .= "	`USERADDRESS_LINE3`, ";
+				$sSQL .= "	`USERADDRESS_SUBREGION`, ";
+				$sSQL .= "	`USERADDRESS_POSTCODE`, ";
+				$sSQL .= "	`REGION_PK`, ";
+				$sSQL .= "	`REGION_NAME`, ";
+				$sSQL .= "	`REGION_NAME2`, ";
+				$sSQL .= "	`LANGUAGE_PK`, ";
+				$sSQL .= "	`LANGUAGE_NAME`, ";
+				$sSQL .= "	`LANGUAGE_ENCODING`, ";
+				$sSQL .= "	`TIMEZONE_PK`, ";
+				$sSQL .= "	`TIMEZONE_CC`, ";
+				$sSQL .= "	`TIMEZONE_LATITUDE`, ";
+				$sSQL .= "	`TIMEZONE_LONGITUDE`, ";
+				$sSQL .= "	`TIMEZONE_TZ`, ";
+				$sSQL .= "	`USERSINFO_PK`, ";
+				$sSQL .= "	`USERSINFO_TITLE`, ";
+				$sSQL .= "	`USERSINFO_GIVENNAMES`, ";
+				$sSQL .= "	`USERSINFO_SURNAMES`, ";
+				$sSQL .= "	`USERSINFO_DISPLAYNAME`, ";
+				$sSQL .= "	`USERSINFO_EMAIL`, ";
+				$sSQL .= "	`USERSINFO_PHONENUMBER`, ";
+				$sSQL .= "	`USERSINFO_DOB`, ";
+				$sSQL .= "	`USERSGENDER_PK`, ";
+				$sSQL .= "	`USERSGENDER_NAME` ";
+				$sSQL .= "FROM `".$sView."` ";
+				
+				$aInputVals = array();
+				
+				$aOutputCols = array(
+					array( "Name"=>"UserId",                            "type"=>"INT" ),
+					array( "Name"=>"UserState",                         "type"=>"STR" ),
+					array( "Name"=>"Username",                          "type"=>"STR" ),
+					array( "Name"=>"UserAddressId",                     "type"=>"STR" ),
+					array( "Name"=>"UserAddressLine1",                  "type"=>"STR" ),
+					array( "Name"=>"UserAddressLine2",                  "type"=>"STR" ),
+					array( "Name"=>"UserAddressLine3",                  "type"=>"STR" ),
+					array( "Name"=>"UserAddressSubRegion",              "type"=>"STR" ),
+					array( "Name"=>"UserAddressPostcode",               "type"=>"STR" ),
+					array( "Name"=>"UserAddressRegionId",               "type"=>"INT" ),
+					array( "Name"=>"UserAddressRegionName",             "type"=>"STR" ),
+					array( "Name"=>"UserAddressRegionAbrv",             "type"=>"STR" ),
+					array( "Name"=>"UserAddressLanguageId",             "type"=>"INT" ),
+					array( "Name"=>"UserAddressLanguageName",           "type"=>"STR" ),
+					array( "Name"=>"UserAddressLanguageEncoding",       "type"=>"STR" ),
+					array( "Name"=>"UserAddressTimezoneId",             "type"=>"INT" ),
+					array( "Name"=>"UserAddressTimezoneCC",             "type"=>"STR" ),
+					array( "Name"=>"UserAddressTimezoneLatitude",       "type"=>"STR" ),
+					array( "Name"=>"UserAddressTimezoneLongitude",      "type"=>"STR" ),
+					array( "Name"=>"UserAddressTimezoneTZ",             "type"=>"STR" ),
+					array( "Name"=>"UserInfoId",                        "type"=>"INT" ),
+					array( "Name"=>"UserInfoTitle",                     "type"=>"STR" ),
+					array( "Name"=>"UserInfoGivennames",                "type"=>"STR" ),
+					array( "Name"=>"UserInfoSurnames",                  "type"=>"STR" ),
+					array( "Name"=>"UserInfoDisplayname",               "type"=>"STR" ),
+					array( "Name"=>"UserInfoEmail",                     "type"=>"STR" ),
+					array( "Name"=>"UserInfoPhonenumber",               "type"=>"STR" ),
+					array( "Name"=>"UserInfoDoB",                       "type"=>"STR" ),
+					array( "Name"=>"UserInfoGenderId",                  "type"=>"INT" ),
+					array( "Name"=>"UserInfoGenderName",                "type"=>"STR" )
+				);
+				
+				//----------------------------------------------//
+				//-- 
+				//----------------------------------------------//
+				$aResult = $oDBConnection->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+				
+			}
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 9.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if($bError===false) {
+		$aReturn = array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		$aReturn = array( "Error"=>true, "ErrMesg"=>"APICoreUserInfo: ".$sErrMesg );
+	}
+	return $aReturn;
+}
+
+
 ?>

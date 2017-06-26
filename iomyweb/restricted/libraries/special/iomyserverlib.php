@@ -1062,7 +1062,7 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 			break;
 			
 		/*==============================================================*/
-		/* Table: REGION & CURRENCIES                                */
+		/* Table: REGION & CURRENCIES                                   */
 		/*==============================================================*/
 		case 'Region':
 			//$sSQL .= "alter table `".$sDBName."`.REGION add constraint FK_REGION_CURRENCIES foreign key (REGION_CURRENCIES_FK) references `".$sDBName."`.CURRENCIES (CURRENCIES_PK) on delete restrict on update restrict; \n";
@@ -1524,7 +1524,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "    `LANGUAGE_PK`, \n";
 			$sSQL .= "    `LANGUAGE_NAME`, \n";
 			$sSQL .= "    `LANGUAGE_ENCODING` \n";
-			$sSQL .= "FROM `".$sDBName."`.`LANGUAGE` \n";
+			$sSQL .= "FROM `".$sDBName."`.`LANGUAGE`; \n";
 			break;
 			
 			

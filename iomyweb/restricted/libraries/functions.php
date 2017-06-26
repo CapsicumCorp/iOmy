@@ -865,7 +865,6 @@ function LookupUserPremisePermissions( $iUserId, $iPremiseId ) {
 				}
 			}
 		}
-		
 	} catch( Exception $e0001 ) {
 		$bError    = true;
 		$iErrCode  = 0;
@@ -3652,6 +3651,42 @@ function GetServerAddonVersions() {
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
 }
+
+
+function APICore_UserData( $oDBConnection ) {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError         = false;        //-- BOOLEAN:   --//
+	$sErrMesg       = "";           //-- STRING:    --//
+	$aResult        = array();      //-- ARRAY:     --//
+	
+	//------------------------------------------------------------//
+	//-- 5.0 - Lookup Thing Info                                --//
+	//------------------------------------------------------------//
+	try {
+		
+		$aResult = DB_APICore_UserData( $oDBConnection );
+			
+	} catch( Exception $e1 ) {
+		$bError = true;
+		$sErrMesg .= "Critical Error occurred when attempting to lookup the Server Version! \n";
+		$sErrMesg .= $e1->getMessage();
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
 
 //========================================================================================================================//
 //== #20.0# - Server Modification Functions                                                                             ==//

@@ -137,7 +137,7 @@ class RestrictedAPICore {
 				//--------------------------------------------------------------------//
 				//-- 2.3.A - If the User attempting to login                        --//
 				//--------------------------------------------------------------------//
-				if( isset($_POST['AttemptLogin']) && $_POST['AttemptLogin']==true) {
+				if( isset($_POST['AttemptLogin']) && $_POST['AttemptLogin']==true ) {
 					$iDBId = 0;
 					
 					//--------------------------------------------------------------------//
@@ -162,7 +162,7 @@ class RestrictedAPICore {
 						);
 						
 						
-						//-- 2.1.A.2.2: Check if the DB connection succeeded --//
+						//-- Check if the DB connection succeeded --//
 						if( $this->oRestrictedDB->Initialised===true ) {
 							//----------------------------------//
 							//-- LOGIN ATTEMPT WAS SUCCESSFUL --//
@@ -172,8 +172,8 @@ class RestrictedAPICore {
 							$_SESSION['User']                   = array();
 							$_SESSION['User'][SESSION_LOGGEDIN] = true;
 							$_SESSION['User'][SESSION_LASTON]   = time();
-							$_SESSION['User'][SESSION_USER]     = $this->encrypt($_POST['username']);
-							$_SESSION['User'][SESSION_PASSWORD] = $this->encrypt($_POST['password']);
+							$_SESSION['User'][SESSION_USER]     = $this->encrypt( $_POST['username'] );
+							$_SESSION['User'][SESSION_PASSWORD] = $this->encrypt( $_POST['password'] );
 							$_SESSION['User'][SESSION_IP]       = getenv( "REMOTE_ADDR" );
 							
 							//-- FLAG THAT THE LOGIN ATTEMPT IS SUCCESSFUL --//
@@ -183,7 +183,7 @@ class RestrictedAPICore {
 							
 							//-- DEBUGGING --//
 							if( $this->bDebugging===true ) { 
-								$this->sDebugMessage .= "DB_Connection!\n"; 
+								$this->sDebugMessage .= "DB_Connection! \n"; 
 							}
 							
 						} else {
@@ -198,17 +198,115 @@ class RestrictedAPICore {
 							if( $this->bDebugging===true ) { 
 								$this->sDebugMessage .= "DB_Rejection!\n";
 							}
-							
 						}
 					} else {
 						//-- DEBUGGING --//
 						if( $this->bDebugging===true ) { 
 							$this->sDebugMessage .= "Username and Password failed the basic checks! \n";
 						}
-						
 					}
+					
 					//--------------------------------------------------------------------//
-					//-- STEP 3: CLEANUP VARIABLES                                      --//
+					//-- STEP 3 - Setup Server Version Variables                        --//
+					//--------------------------------------------------------------------//
+					if( $this->bLoginResult===true && $this->bRestrictedDB===true ) {
+						
+						//-- Setup the array --//
+						$_SESSION['SoftwareVersion'] = array(
+							"Main"         => array(),
+							"Addons"       => array(),
+							"DemoMode"     => false,
+							"VanillaMode"  => false
+						);
+						
+						
+						
+						//-- Fetch the Server Version --//
+						$aServerVersionTemp = dbSpecialGetServerVersion( $this->oRestrictedDB );
+						
+						//-- Check for errors --//
+						if( $aServerVersionTemp['Error']===false ) {
+							//-- Extract the VersionIds --//
+							$this->aIOMyDBVersion = $aServerVersionTemp['Data'];
+							
+							//-- Store the Version in the session that way we don't have to poll it evertime --//
+							$_SESSION['SoftwareVersion']['Main'] = $this->CheckDBVersion();
+							
+							//--------------------------------------------------------//
+							//-- STEP 3.2 - Lookup Addons                           --//
+							//--------------------------------------------------------//
+							$aServerAddonsTemp = dbSpecialGetServerAddonVersions( $this->oRestrictedDB, $aServerVersionTemp['Data']['CoreId'] );
+							
+							if( $aServerAddonsTemp['Error']===false ) {
+								//--------------------------------------------//
+								//-- OPTION A: ADDONS DETECTED              --//
+								//--------------------------------------------//
+								
+								//-- Store the Server version --//
+								$this->aDBServerAddons = $aServerAddonsTemp['Data'];
+								
+								//-- Store the Server Addons in the session --//
+								$_SESSION['SoftwareVersion']['Addons'] = $aServerAddonsTemp['Data'];
+								
+								//-- Setup a variable to check if a non-standard add-on is installed --//
+								$bNonStandardAddon = false;
+								
+								//-- Check if the server is in demonstration mode --//
+								foreach( $this->aDBServerAddons as $aDBServerAddon ) {
+									
+									if( $aDBServerAddon['AddonName']==="Demo Mode" ) {
+										//--------------------------------------------//
+										//-- OPTION A: DEMO MODE                    --//
+										//--------------------------------------------//
+										$this->bDemoMode = true;
+										$_SESSION['SoftwareVersion']['DemoMode'] = true;
+										//-- Flag that the Demo Data Addon is installed --//
+										$bNonStandardAddon = true;
+										
+									} else if( $aDBServerAddon['AddonName']==="iOmy (Vanilla)" ) {
+										//-- Non-standard add-on detected --//
+										$bNonStandardAddon = true;
+									}
+								}
+								
+								if( $bNonStandardAddon===false ) {
+									//--------------------------------------------//
+									//-- OPTION B: VANILLA IOMY                 --//
+									//--------------------------------------------//
+									$this->bVanillaIOMy = true;
+									$_SESSION['SoftwareVersion']['VanillaMode'] = true;
+									
+								} else {
+									//--------------------------------------------//
+									//-- OPTION C: IOMY WITH ADDONS             --//
+									//--------------------------------------------//
+									$this->bVanillaIOMy = false;
+									$_SESSION['SoftwareVersion']['VanillaMode'] = false;
+								}
+								
+							} else {
+								//--------------------------------------------//
+								//-- OPTION E: FAILED TO LOAD ADDONS        --//
+								//--------------------------------------------//
+								
+							}
+						} else {
+							//--------------------------------------------//
+							//-- OPTION F: FAILED TO LOAD VERSION       --//
+							//--------------------------------------------//
+							
+						} //-- END OF VERSION --//
+					}
+					
+					//--------------------------------------------------------------------//
+					//-- STEP 4 - Setup User Data                                       --//
+					//--------------------------------------------------------------------//
+					if( $this->bLoginResult===true && $this->bRestrictedDB===true ) {
+						$this->LoadUserDataIntoSession();
+					}
+					
+					//--------------------------------------------------------------------//
+					//-- STEP 5 - CLEANUP VARIABLES                                     --//
 					//--------------------------------------------------------------------//
 					$_POST['username'] = "";
 					$_POST['password'] = "";
@@ -264,9 +362,10 @@ class RestrictedAPICore {
 												//-- Open the Database connection --//
 												$this->oRestrictedDB = new DBMySQL(
 													$this->aPrimaryDBConfig, 
-													$this->decrypt($_SESSION['User'][SESSION_USER]),
-													$this->decrypt($_SESSION['User'][SESSION_PASSWORD])
+													$this->decrypt( $_SESSION['User'][SESSION_USER] ),
+													$this->decrypt( $_SESSION['User'][SESSION_PASSWORD] )
 												);
+												
 												//--------------------------------------------------------------------//
 												//-- VERIFICATION STEP 8: Check if the DB connection succeeded      --//
 												//--------------------------------------------------------------------//
@@ -280,85 +379,21 @@ class RestrictedAPICore {
 														$this->sDebugMessage .= "API Access Granted!\n";
 													}
 													
-													
 													//--------------------------------------------------------------------//
-													//-- VERIFICATION STEP 9: Lookup the Server version                 --//
+													//-- Load the Session data                                          --//
 													//--------------------------------------------------------------------//
-													$oRestrictedApiCore = $this;
+													$this->LoadSessionData();
 													
 													
-													$aServerVersionTemp = dbSpecialGetServerVersion( $this->oRestrictedDB );
-													
-													
-													//echo "\n\n";
-													//var_dump( $aServerVersionTemp );
-													//echo "\n\n";
-														
-													//--  --//
-													if( $aServerVersionTemp['Error']===false ) {
-														//-- Extract the VersionIds --//
-														$this->aIOMyDBVersion = $aServerVersionTemp['Data'];
-														
-														$aServerAddonsTemp = dbSpecialGetServerAddonVersions( $this->oRestrictedDB, $aServerVersionTemp['Data']['CoreId'] );
-														
-														
-														if( $aServerAddonsTemp['Error']===false ) {
-															//--------------------------------------------//
-															//-- OPTION A: ADDONS DETECTED              --//
-															//--------------------------------------------//
-														
-															//-- Store the Server version --//
-															$this->aDBServerAddons = $aServerAddonsTemp['Data'];
-																
-															//-- Check if the server is in demonstration mode --//
-															foreach( $this->aDBServerAddons as $aDBServerAddon ) {
-																//--------------------------------------------//
-																//-- OPTION A2: DEMO MODE                   --//
-																//--------------------------------------------//
-																
-																if( $aDBServerAddon['AddonName']==="Demo Mode" ) {
-																	$this->bDemoMode = true;
-																}
-															}
-															
-															
-														} else if( $aServerAddonsTemp['ErrMesg']!=="ServerAddonVersion: No Rows Found! Code:0" ) {
-															
-															if( $this->aIOMyDBVersion==="iOmy (Vanilla)" ) {
-																//--------------------------------------------//
-																//-- OPTION B: NORMAL VANILLA               --//
-																//--------------------------------------------//
-																
-																
-																//-- Flag that everything looks normal--//
-																$this->bVanillaIOMy = true;
-															} else {
-																//--------------------------------------------//
-																//-- OPTION C: CUSTOM WITH NO ADDONS        --//
-																//--------------------------------------------//
-																
-																
-															}
-														} else {
-															//--------------------------------------------//
-															//-- OPTION D: FAILED TO LOAD ADDONS        --//
-															//--------------------------------------------//
-															
-															
-														}
-													} else {
-														//--------------------------------------------//
-														//-- OPTION E: FAILED TO LOAD VERSION       --//
-														//--------------------------------------------//
-														
-														
-													}
 												} else {
 													//--------------------------------------------------//
 													//-- Failed to initialise the Database Connection --//
 													//--------------------------------------------------//
 													
-													
+													//-- DEBUGGING --//
+													if( $this->bDebugging===true ) { 
+														$this->sDebugMessage .= "Failed to open the Database connection!\n";
+													}
 												}
 											}
 										}
@@ -423,6 +458,8 @@ class RestrictedAPICore {
 	
 	
 	function __destruct() {
+		
+		
 		
 	}
 	
@@ -557,7 +594,7 @@ class RestrictedAPICore {
 		//----------------------------------------------------------------------------------//
 		//-- 7.0 - Return the Results                                                     --//
 		//----------------------------------------------------------------------------------//
-		if($bAbortLogin===false) {
+		if( $bAbortLogin===false ) {
 			return true;
 		} else {
 			return false;
@@ -631,6 +668,57 @@ class RestrictedAPICore {
 	}
 	
 	
+	private function LoadSessionData() {
+		//--------------------------------------------------------------------//
+		//-- Lookup the Server version                                      --//
+		//--------------------------------------------------------------------//
+		$this->aIOMyDBVersion  = $_SESSION['SoftwareVersion']['Main'];
+		$this->aDBServerAddons = $_SESSION['SoftwareVersion']['Addons'];
+		$this->bDemoMode       = $_SESSION['SoftwareVersion']['DemoMode'];
+		$this->bVanillaIOMy    = $_SESSION['SoftwareVersion']['VanillaMode'];
+		
+		//--------------------------------------------------------------------//
+		//-- Set the Timezone from the session value                        --//
+		//--------------------------------------------------------------------//
+		if( isset( $_SESSION['UserData']['UserAddressTimezoneTZ'] ) ) {
+			if( $_SESSION['UserData']['UserAddressTimezoneTZ']!==null && $_SESSION['UserData']['UserAddressTimezoneTZ']!==false && $_SESSION['UserData']['UserAddressTimezoneTZ']!=="" ) {
+				date_default_timezone_set( $_SESSION['UserData']['UserAddressTimezoneTZ'] );
+			}
+		} 
+		
+		return true;
+	}
+	
+	
+	
+	private function LoadUserDataIntoSession() {
+		//------------------------------------------------------------//
+		//-- 1.0 - Initialise Variables                             --//
+		//------------------------------------------------------------//
+		
+		
+		//----------------------------------------------------------------------------------//
+		//-- 2.0 - Check to see if the username has a space at the start or the end of it --//
+		//----------------------------------------------------------------------------------//
+		$aResult = APICore_UserData( $this->oRestrictedDB );
+		
+		//------------------------------------------------------------//
+		//-- 9.0 - Return the results                               --//
+		//------------------------------------------------------------//
+		if( $aResult['Error']===false ) {
+			$_SESSION['UserData'] = $aResult['Data'];
+			
+			return true;
+			
+		} else {
+			return false;
+			
+		}
+	}
+	
+	
+	
+	
 	/**
 	 **********************************************************************************************************
 	 * Decrypt the data with the provided key
@@ -654,7 +742,7 @@ class RestrictedAPICore {
 
 		//-- STEP 3 --//
 		list ($cipherKey, $macKey, $iv) = $this->Crypt_getKeys($salt, $sCryptKey);
-
+		
 		if ( !hash_equals(hash_hmac('sha512', $enc, $macKey, true), $mac) ) {
 			 return false;
 		}
