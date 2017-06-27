@@ -178,104 +178,96 @@ public class InstallWizard {
         int letters                     = 0;
         int upperCaseLetters            = 0;
         int lowerCaseLetters            = 0;
+        String errorMessage             = "";
 
         //----------------------------------//
         // How long is the password?
         //----------------------------------//
         if (passwordLength >= expectedPasswordLength) {
-            // Take any spaces off the end of the password.
+            //---------------------------------------------------------------------------------//
+            // Take any spaces off the end of the password in case someone was cheeky enough to
+            // try to circumvent the 8 character limit by placing spaces on either sides of the
+            // characters. No chance!
+            //---------------------------------------------------------------------------------//
             password = password.trim();
             passwordLength = password.length();
 
             // Now see what the true length of the password is.
             if (passwordLength >= expectedPasswordLength) {
                 eightChars = true;
-                // Go through every single character, analyse each one to see if it's a letter, number, or symbol
-                for (int i = 0; i < passwordLength; i++) {
-                    if (continueCheck == true) {
-                        break;
-                    }
-                    // Is it a number?
-                    if (Character.isDigit(password.charAt(i))) {
-                        numbers++;
-
-                    // Is it a letter?
-                    } else if (Character.isLetter(password.charAt(i))) {
-                        // Is it upper or lower case.
-                        if (Character.isUpperCase(password.charAt(i))) {
-                            upperCaseLetters++;
-                        } else if (Character.isLowerCase(password.charAt(i))) {
-                            lowerCaseLetters++;
-                        }
-                        letters++;
-
-                    // So it must be some sort of symbol.
-                    } else {
-                        symbols++;
-                    }
-                }
-
-                //----------------------------------------------------------------------------------------//
-                // Check that all the criteria have been met
-                //----------------------------------------------------------------------------------------//
-                // Are there numbers?
-                if (numbers > 0) {
-                    hasANumber = true;
-                } else {
-                    this.validationErrorMessages.add("Password must have a number.");
-                }
-
-                // Are there letters?
-                if (letters > 0) {
-                    // Are there upper-case letters?
-                    if (upperCaseLetters > 0) {
-                        hasAnUpperCaseLetter = true;
-                    } else {
-                        this.validationErrorMessages.add("Password must have at least one upper-case letter.");
-                    }
-
-                    // Are there lower-case letters?
-                    if (lowerCaseLetters > 0) {
-                        hasALowerCaseLetter = true;
-                    } else {
-                        this.validationErrorMessages.add("Password must have at least one lower-case letter.");
-                    }
-                } else {
-                    this.validationErrorMessages.add("Password must contain letters.");
-                }
-
-                if (symbols > 0) {
-                    hasASymbol = true;
-                } else {
-                    this.validationErrorMessages.add("Password must have a symbol (!, @, %, etc).");
-                }
-
-            //---------------------------------------------------------------------------------//
-            // Someone was cheeky enough to try to circumvent the 8 character limit by placing
-            // spaces on either sides of the characters. No chance!
-            //---------------------------------------------------------------------------------//
-            } else {
-                this.validationErrorMessages.add("Password must be at least 8 characters. No trailing spaces.");
             }
-        //---------------------------------------------------------------------------------//
-        // The password simply isn't long enough to be secure!
-        //---------------------------------------------------------------------------------//
-        } else {
-            this.validationErrorMessages.add("Password must be at least 8 characters.");
+        }
+
+        //------------------------------------------------------------------------------------------------//
+        // Go through every single character, analyse each one to see if it's a letter, number, or symbol.
+        //------------------------------------------------------------------------------------------------//
+        for (int i = 0; i < passwordLength; i++) {
+            if (continueCheck == true) {
+                break;
+            }
+            // Is it a number?
+            if (Character.isDigit(password.charAt(i))) {
+                numbers++;
+
+                // Is it a letter?
+            } else if (Character.isLetter(password.charAt(i))) {
+                // Is it upper or lower case.
+                if (Character.isUpperCase(password.charAt(i))) {
+                    upperCaseLetters++;
+                } else if (Character.isLowerCase(password.charAt(i))) {
+                    lowerCaseLetters++;
+                }
+                letters++;
+
+                // So it must be some sort of symbol.
+            } else {
+                symbols++;
+            }
+        }
+
+        //----------------------------------------------------------------------------------------//
+        // Check that all the criteria have been met
+        //----------------------------------------------------------------------------------------//
+        // Are there numbers?
+        if (numbers > 0) {
+            hasANumber = true;
+        }
+
+        // Are there letters?
+        if (letters > 0) {
+            // Are there upper-case letters?
+            if (upperCaseLetters > 0) {
+                hasAnUpperCaseLetter = true;
+            }
+
+            // Are there lower-case letters?
+            if (lowerCaseLetters > 0) {
+                hasALowerCaseLetter = true;
+            }
+        }
+
+        if (symbols > 0) {
+            hasASymbol = true;
         }
 
         //----------------------------------------------------------------------------------------//
         // Verify validity and generate error messages when not all of the conditions are met.
         //----------------------------------------------------------------------------------------//
-        if (eightChars == true && hasAnUpperCaseLetter == true && hasALowerCaseLetter == true &&
-                hasANumber == true && hasASymbol == true) {
+        if (eightChars && hasAnUpperCaseLetter && hasALowerCaseLetter && hasANumber && hasASymbol) {
 
             valid = true;
 
         } else { // One of the conditions has not been met
             valid = false;
-            // Populate the error log with the relevant messages.
+            // Populate the error log detailing the expected format.
+            errorMessage += "Password must:\n";
+            errorMessage += "  * Be at least 8 characters. No trailing spaces\n";
+            errorMessage += "  * Have at least one upper-case letter\n";
+            errorMessage += "  * Have at least one lower-case letter\n";
+            errorMessage += "  * Have at least one number\n";
+            errorMessage += "  * Have a symbol (!, @, %, etc).";
 
+            this.validationErrorMessages.add(errorMessage);
         }
 
         return valid;

@@ -45,6 +45,7 @@ $.extend(IOMy.functions,{
     validateSecurePassword : function (sPassword) {
         var bValid;
         var aValidationErrorMessages    = [];
+		var sErrorMessage				= "";
         var mInfo                       = {};
         var bContinueCheck              = false;
         var bEightChars                 = false;
@@ -64,26 +65,18 @@ $.extend(IOMy.functions,{
         // How long is the password?
         //----------------------------------//
         if (iPasswordLength >= iExpectedPasswordLength) {
-            // Take any spaces off the end of the password.
+            //---------------------------------------------------------------------------------//
+            // Take any spaces off the end of the password in case someone was cheeky enough to
+            // try to circumvent the 8 character limit by placing spaces on either sides of the
+            // characters. No chance!
+            //---------------------------------------------------------------------------------//
             sPassword = sPassword.trim();
             iPasswordLength = sPassword.length;
 
             // Now see what the true length of the password is.
             if (iPasswordLength >= iExpectedPasswordLength) {
                 bEightChars = true;
-
-            //---------------------------------------------------------------------------------//
-            // Someone was cheeky enough to try and circumvent the 8 character limit by placing
-            // spaces on either sides of the characters. No chance!
-            //---------------------------------------------------------------------------------//
-            } else {
-                aValidationErrorMessages.push("* Password must be at least 8 characters. No trailing spaces.");
             }
-        //---------------------------------------------------------------------------------//
-        // The password simply isn't long enough to be secure!
-        //---------------------------------------------------------------------------------//
-        } else {
-            aValidationErrorMessages.push("* Password must be at least 8 characters.");
         }
 		
 		//---------------------------------------------------------------------------------//
@@ -120,8 +113,6 @@ $.extend(IOMy.functions,{
 		// Are there numbers?
 		if (iNumbers > 0) {
 			bHasANumber = true;
-		} else {
-			aValidationErrorMessages.push("* Password must have a number.");
 		}
 
 		// Are there letters?
@@ -129,25 +120,17 @@ $.extend(IOMy.functions,{
 			// Are there upper-case letters?
 			if (iUpperCaseLetters > 0) {
 				bHasAnUpperCaseLetter = true;
-			} else {
-				aValidationErrorMessages.push("* Password must have at least one upper-case letter.");
 			}
 
 			// Are there lower-case letters?
 			if (iLowerCaseLetters > 0) {
 				bHasALowerCaseLetter = true;
-			} else {
-				aValidationErrorMessages.push("* Password must have at least one lower-case letter.");
 			}
-		} else {
-			aValidationErrorMessages.push("* Password must contain letters.");
 		}
 
 		// Are there symbols?
 		if (iSymbols > 0) {
 			bHasASymbol = true;
-		} else {
-			aValidationErrorMessages.push("* Password must have a symbol (!, @, %, etc).");
 		}
 
         //----------------------------------------------------------------------------------------//
@@ -162,7 +145,14 @@ $.extend(IOMy.functions,{
         } else { // One of the conditions has not been met
             bValid = false;
             // Populate the error log with the relevant messages.
-
+			sErrorMessage += "* Password must:\n";
+			sErrorMessage += "	- Be at least 8 characters. No trailing spaces\n";
+			sErrorMessage += "	- Have at least one upper-case letter\n";
+			sErrorMessage += "	- Have at least one lower-case letter\n";
+			sErrorMessage += "	- Have at least one number\n";
+			sErrorMessage += "	- Have a symbol (!, @, %, etc)";
+			
+			aValidationErrorMessages.push(sErrorMessage);
         }
         
         //-------------------------------------------------------------------//

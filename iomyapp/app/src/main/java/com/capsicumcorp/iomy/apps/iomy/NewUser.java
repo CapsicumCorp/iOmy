@@ -91,7 +91,7 @@ public class NewUser extends AppCompatActivity {
             params.gravity = Gravity.TOP;
             errorNoticeView.setLayoutParams(params);
             TextView textView = (TextView) errorNoticeView.findViewById(android.support.design.R.id.snackbar_text);
-            textView.setMaxLines(6);  // We wish to have a maximum 6 lines
+            textView.setMaxLines(12);  // We wish to have a maximum 12 lines
             errorNotice.show();
             // Clear the error log
             this.installWizard.validationErrorMessages.clear();
@@ -116,22 +116,20 @@ public class NewUser extends AppCompatActivity {
             valid = false;
             installWizard.validationErrorMessages.add("Password must be entered.");
         } else {
+            valid = installWizard.isValidPassword(installWizard.ownerPassword);
+            if (valid) {
+                Log.v("New User", "Valid");
+            } else {
+                Log.v("New User", "Not Valid");
+            }
+
             if (this.installWizard.confirmOwnerPassword.length() == 0) {
-                valid = false;
                 installWizard.validationErrorMessages.add("You must re-enter password to confirm.");
+                valid = false;
             } else {
                 if (!this.installWizard.ownerPassword.equals(this.installWizard.confirmOwnerPassword)) {
                     valid = false;
                     this.installWizard.validationErrorMessages.add("Passwords don't match.");
-                } else {
-                    valid = installWizard.isValidPassword(installWizard.ownerPassword);
-                    if (valid) {
-                        Log.v("New User", "Valid");
-                    } else {
-                        Log.v("New User", "Not Valid");
-                    }
-                    // Confirm password
-
                 }
             }
         }
