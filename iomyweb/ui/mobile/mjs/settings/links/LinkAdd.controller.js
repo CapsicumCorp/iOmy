@@ -517,7 +517,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 
 									fnSuccess = function () {
 										if (IOMy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
-											oApp.to("pSettingsThingAdd", { "LinkId": iLinkId });
+											IOMy.common.NavigationChangePage("pSettingsThingAdd", { "LinkId": iLinkId });
 										} else {
 											IOMy.common.NavigationChangePage("pSettingsDeviceList", {}, true);
 										}
@@ -662,7 +662,6 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         // UI5 Objects used in all link forms
         var oLinkTypeLabel, oHubLabel;
         var oLinkTypeCBox, oHubCBox;
-        var oPremiseLabel;
         var oRoomLabel;
         var oAddButton; // Button to add link
         var oFormBox, oPanel; // Container elements
