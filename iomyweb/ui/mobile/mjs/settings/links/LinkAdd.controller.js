@@ -519,7 +519,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 										if (IOMy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
 											IOMy.common.NavigationChangePage("pSettingsThingAdd", { "LinkId": iLinkId });
 										} else {
-											IOMy.common.NavigationChangePage("pSettingsDeviceList", {}, true);
+											IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
 										}
 									};
 

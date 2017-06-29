@@ -234,15 +234,15 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
 
             try {
                 //-- REFRESH LINK LIST --//
-                IOMy.common.ReloadVariableLinkList({
-					onSuccess : function () {
+                IOMy.common.ReloadVariableLinkList(
+					function () {
 						IOMy.common.showSuccess(me.byId("thingNameField").getValue()+" successfully created", "Success",
 							function () {
 								IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
 							},
 						"UpdateMessageBox");
 					}
-				});
+				);
 						
             } catch (e) {
                 jQuery.sap.log.error("Error refreshing core variables: "+e.message);
@@ -324,7 +324,7 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
         // LINK COMBO BOX
         //-------------------------------------------------------//
         oLinkLabel = new sap.m.Label({
-            text : "Link you wish to connect the new item to"
+            text : "Device you wish to connect the new item to"
         });
         
         oLinkCBox = IOMy.widgets.getLinkSelector(me.createId("linkCBox"), me.iLinkId).addStyleClass("width100Percent SettingsDropDownInput");
