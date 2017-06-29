@@ -67,10 +67,6 @@ sap.ui.jsview("mjs.login.Login", {
         
         return oPage;
         
-//		return new sap.m.Page({
-//			content: [ oLoginPanel ],
-//			footer : IOMy.widgets.getAppFooter()
-//		}).setShowHeader(false).addStyleClass("MainBackground MasterPage");
 	}
 
 });

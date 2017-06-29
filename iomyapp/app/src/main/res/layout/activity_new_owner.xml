@@ -52,7 +52,8 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/owner_username" />
+                android:id="@+id/owner_username"
+                android:capitalize="sentences" />
 
             <TextView
                 android:layout_width="wrap_content"
