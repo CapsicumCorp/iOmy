@@ -37,13 +37,13 @@ if( !defined('SITE_BASE') ) {
 //------------------------------------------------------------//
 //-- 1.2 - INITIALISE VARIABLES                             --//
 //------------------------------------------------------------//
-$bError                     = false;        //-- BOOLEAN:       Used to indicate if an error has been caught --//
-$sErrMesg                   = "";           //-- STRING:        Used to store the error message after an error has been caught --//
+$bError                     = false;        //-- BOOLEAN:       Used to indicate if an error has been caught. --//
+$sErrMesg                   = "";           //-- STRING:        Used to store the error message after an error has been caught. --//
 $sOutput                    = "";           //-- STRING:        Used to hold this API Request's body when everything is successful. --//
-$aResult                    = array();      //-- ARRAY:         Used to store the results.			--//
+$aResult                    = array();      //-- ARRAY:         Used to store the results. --//
 
-$sPostMode                  = "";           //-- STRING:        Used to store which Mode the API should function in.			--//
-$sPostNetworkAddress        = "";           //-- STRING:        Used to store the "DeviceNetworkAddress" that is passed as a HTTP POST variable.		--//
+$sPostMode                  = "";           //-- STRING:        Used to store which Mode the API should function in. --//
+$sPostNetworkAddress        = "";           //-- STRING:        Used to store the "DeviceNetworkAddress" that is passed as a HTTP POST variable. --//
 $iPostNetworkPort           = "";           //-- INTEGER:       Used to store the "".				--//
 $sPostUsername              = "";           //-- STRING:        Used to store the "".				--//
 $sPostPassword              = "";           //-- STRING:        Used to store the "".				--//
@@ -66,7 +66,7 @@ $iAPICommTypeId             = 0;            //-- INTEGER:       Will hold the th
 $iLinkPermWrite             = 0;            //-- INTEGER:       --//
 $iThumbUrlRSTypeId          = 0;            //-- INTEGER:       --//
 $iThumbUrlId                = 0;            //-- INTEGER:       --//
-$iUTS                       = 0;
+$iUTS                       = 0;            //-- INTEGER:       --//
 
 
 //------------------------------------------------------------//
@@ -282,7 +282,7 @@ if( $bError===false ) {
 							
 						} else {
 							$bError = true;
-							$iErrCode  = 0306;
+							$iErrCode  = 306;
 							$sErrMesg .= "Error Code:'0306' \n";
 							$sErrMesg .= "Problem when fetching the Link info\n";
 							$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
@@ -290,7 +290,7 @@ if( $bError===false ) {
 						
 					} else {
 						$bError = true;
-						$iErrCode  = 0307;
+						$iErrCode  = 307;
 						$sErrMesg .= "Error Code:'0307' \n";
 						$sErrMesg .= "Problem when fetching the Link info\n";
 						$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
@@ -312,7 +312,7 @@ if( $bError===false ) {
 				
 				if( $oPHPOnvifClient->bInitialised===false ) {
 					$bError = true;
-					$iErrCode  = 0309;
+					$iErrCode  = 309;
 					$sErrMesg .= "Error Code:'0309'\n";
 					$sErrMesg .= "Couldn't initialise Onvif Class!\n";
 					$sErrMesg .= json_encode( $oPHPOnvifClient->aErrorMessges );
@@ -352,7 +352,7 @@ if( $bError===false ) {
 					if( !($iThumbUrlId>0) ) {
 						//-- Id isn't greater than zero --//
 						$bError = true;
-						$iErrCode  = 0310;
+						$iErrCode  = 310;
 						$sErrMesg .= "Error Code:'0310' \n";
 						$sErrMesg .= "Can not find the 'ThumbnailUrl' IO.\n";
 					
@@ -366,7 +366,7 @@ if( $bError===false ) {
 						
 						if( $aTempFunctionResult2['Error']===true ) {
 							$bError = true;
-							$iErrCode  = 0311;
+							$iErrCode  = 311;
 							$sErrMesg .= "Error Code:'0311' \n";
 							$sErrMesg .= "Can not retrieve the 'ThumbnailUrl' IO Info.\n";
 							$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
@@ -385,7 +385,7 @@ if( $bError===false ) {
 								
 							} else {
 								$bError = true;
-								$iErrCode  = 0312;
+								$iErrCode  = 312;
 								$sErrMesg .= "Error Code:'0313' \n";
 								$sErrMesg .= "Can not retrieve the 'ThumbnailUrl' most recent value.\n";
 								$sErrMesg .= $aTempFunctionResult3['ErrMesg'];
@@ -396,7 +396,7 @@ if( $bError===false ) {
 				} else {
 					//-- Display the error --//
 					$bError = true;
-					$iErrCode  = 0313;
+					$iErrCode  = 313;
 					$sErrMesg .= "Error Code:'0313' \n";
 					$sErrMesg .= "Error when retrieving the IOs from the ThingId \n";
 					$sErrMesg .= $aTempFunctionResult1['ErrMesg'];
@@ -406,8 +406,8 @@ if( $bError===false ) {
 		
 	} catch( Exception $e0300 ) {
 		$bError = true;
-		$iErrCode  = 0300;
-		$sErrMesg .= "Error Code:'0300' \n";
+		$iErrCode  = 300;
+		$sErrMesg .= "Error Code:'300' \n";
 		$sErrMesg .= $e0300->getMessage();
 	}
 }
@@ -460,8 +460,6 @@ if( $bError===false ) {
 						$sErrMesg .= "File doesn't exist!\n";
 					}
 				}
-				
-				
 				
 				//----------------------------------------//
 				//-- OPEN THE THUMBNAIL AND PASS IT ON  --//
