@@ -70,6 +70,8 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
 							press : function () {
 								var thisButton = this; // Captures the scope of the calling button.
                                 thisButton.setEnabled(false);
+								//-- Toggle navigation buttons --//
+								IOMy.common.NavigationToggleNavButtons(me, false);
 								
 								var sText = me.byId("linkField").getValue();
 								var iID = me.linkID;
@@ -88,11 +90,22 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
                                             url : IOMy.apiphp.APILocation("link"),
                                             data : {"Mode" : "EditName", "Id" : iID, "Name" : sText},
                                             onSuccess : function () {
-												IOMy.common.showSuccess("Link now called "+sText);
-                                                IOMy.common.NavigationTriggerBackForward(true);
+												IOMy.common.RefreshCoreVariables({
+													
+													onSuccess : function () {
+														IOMy.common.showMessage({
+															text : "Link now called "+sText,
+															view : thisView
+														});
+														//-- Toggle navigation buttons --//
+														IOMy.common.NavigationToggleNavButtons(me, true);
+
+														IOMy.common.NavigationTriggerBackForward();
+													}
+													
+												});
                                             },
                                             onFail : function (err) {
-                                                //IOMy.common.showError("Update failed.", "Error");
                                                 IOMy.common.showError(JSON.stringify(err.responseText), "Error",
 													function () {
 														// Finish the request by enabling the edit button
@@ -106,6 +119,8 @@ sap.ui.controller("mjs.settings.devices.EditLink", {
                                                 // Re-enable the button once the request and the callback functions have finished executing.
                                                 //------------------------------------------------------------------------------------------//
                                                 thisButton.setEnabled(true);
+												//-- Toggle navigation buttons --//
+												IOMy.common.NavigationToggleNavButtons(me, true);
                                             }
                                         });
                                     } catch (e00033) {

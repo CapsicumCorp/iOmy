@@ -265,21 +265,17 @@ sap.ui.controller("mjs.settings.user.AddUser", {
 
         //===== STATE =====//
         var oStateTitle = new sap.m.Text({
-            text : "State / County"
+            text : "Subregion"
         });
 
-        me.wStateField = new sap.m.Input({
-            
-        }).addStyleClass("SettingsDropdownInput");
+        me.wStateField = new sap.m.Input({}).addStyleClass("SettingsDropdownInput");
 
         //===== POST CODE =====//
         var oPostCodeTitle = new sap.m.Text({
             text : "Post Code / Zip Code"
         });
 
-        me.wPostCodeField = new sap.m.Input({
-            
-        }).addStyleClass("SettingsDropdownInput");
+        me.wPostCodeField = new sap.m.Input({}).addStyleClass("SettingsDropdownInput");
 
         //===== TIMEZONE =====//
         var oTimezoneTitle = new sap.m.Text({
@@ -527,6 +523,8 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         var bError = false;
         var aLogErrors = [];
         var sDialogTitle;
+		
+		IOMy.common.NavigationToggleNavButtons(me, false);
 
         //-----------------------------------//
         // Validate the date of birth
@@ -624,17 +622,20 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                     },
 
                     onSuccess : function () {
-                        IOMy.common.showSuccess("User "+sDisplayname+" created successfully!", "Success", 
-                            function () {
-                                IOMy.common.NavigationTriggerBackForward(false);
-                            }
-                        , "UpdateMessageBox");
+                        IOMy.common.showMessage({
+							text : "User "+sDisplayname+" created successfully! Please assign the correct premise permissions for "+sDisplayname,
+							view : me.getView()
+						});
+						
+						IOMy.common.NavigationToggleNavButtons(me, true);
+						IOMy.common.NavigationChangePage("pSettingsPremisePermissions", {});
                     },
                     onFail : function (response) {
                         // Report the error in a popup message.
                         IOMy.common.showError(response.responseText, "Error",
                             function () {
                                 thisButton.setEnabled(true);
+								IOMy.common.NavigationToggleNavButtons(me, true);
                             }
                         );
                     }

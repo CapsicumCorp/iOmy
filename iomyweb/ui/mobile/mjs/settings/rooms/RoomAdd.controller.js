@@ -165,32 +165,42 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
             text : "Add Room",
             enabled : false,
             press : function () {
-                
+                var oButton = this;
+				
+				//-- Disable this button and the navigation controls. --//
+				oButton.setEnabled(false);
+				IOMy.common.NavigationToggleNavButtons(me, false);
+				
                 IOMy.functions.addRoom({
                     callingWidget   : me.wUpdateButton,
                     userID          : me.userId,
                     
                     onSuccess       : function () {
                         //----------------------------------------------------//
-                        // Show the success message and reload the core
-                        // variables.
+                        // Reload Core Variables
                         //----------------------------------------------------//
-                        IOMy.common.showSuccess(me.wRoomName.getValue()+" added successfully.", "Success", 
-                            function () {
-                                //-- REFRESH ROOMS --//
-                                IOMy.common.ReloadVariableRoomList( 
-                                    function () {
-                                        try {
-                                            IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+						
+						//-- REFRESH ROOMS --//
+						IOMy.common.RefreshCoreVariables({
+							onSuccess : function () {
+								try {
+									IOMy.common.showMessage({
+										text : me.wRoomName.getValue()+" added successfully.",
+										view : thisView
+									});
 
-                                        } catch(e654321) {
-                                            //-- ERROR:  TODO: Write a better error message--//
-                                            jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
-                                        }
-                                    }
-                                ); //-- END ROOMS LIST --//
-                            },
-                        "UpdateMessageBox");
+									IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+
+								} catch(e654321) {
+									//-- ERROR:  TODO: Write a better error message--//
+									jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
+								} finally {
+									//-- Enable this button and the navigation controls. --//
+									oButton.setEnabled(true);
+									IOMy.common.NavigationToggleNavButtons(me, true);
+								}
+							}
+						}); //-- END ROOMS LIST --//
                     }
                 });
             }
@@ -200,7 +210,6 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
             items : [oPremiseTitle, me.wPremise,
                     oRoomTitle, me.wRoomName, 
                     oRoomDescTitle, me.wRoomDescription,
-                    /*oFloorsTitle, oFloorsField,*/
                     oRoomTypeTitle, me.wRoomType,
                     me.wUpdateButton]
         }).addStyleClass("UserInputForm");

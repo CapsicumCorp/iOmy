@@ -28,6 +28,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
     
     loadLocaleCBoxItems : IOMy.functions.loadLocaleCBoxItems,
     
+	// TODO: Use the relevant core variables instead of gathering information from OData.
     loadLocaleInfo : function (iPremiseId) {
         var me = this;
         
@@ -121,7 +122,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                 
                 //===== STATE =====//
                 var oStateTitle = new sap.m.Text({
-                    text : "State / County"
+                    text : "State / Province"
                 });
     		    
 				var oStateField = new sap.m.Input(me.createId("addressState"), {
@@ -204,7 +205,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                                     bError = true;
                                 }
                                 if (sAddressStateProvince === "") {
-                                    aErrorLog.push("State or County is required.");
+                                    aErrorLog.push("State / Province is required.");
                                     bError = true;
                                 }
                                 if (sAddressPostcode === "") {
@@ -234,15 +235,22 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                                                 "AddressLanguage" : sAddressLanguage
                                             },
                                             onSuccess : function () {
-                                                IOMy.common.showSuccess("Update successful.", "Success", function () {
-                                                    IOMy.common.NavigationTriggerBackForward();
-                                                }, "UpdateMessageBox");
+                                                IOMy.common.showMessage({
+													text : "Premise address updated successfully.",
+													view : thisView
+												});
+												
+												IOMy.common.NavigationTriggerBackForward();
                                             },
                                             onFail : function (response) {
-                                                //IOMy.common.showError("Update failed.", "Error");
-                                                IOMy.common.showError(response.responseText, "Error");
+                                                IOMy.common.showError(response.responseText, "Error",
+													function () {
+														thisButton.setEnabled(true);
+														IOMy.common.NavigationToggleNavButtons(me, true);
+													}
+												);
                                                 jQuery.sap.log.error(JSON.stringify(response));
-                                                thisButton.setEnabled(true);
+
                                             }
                                         });
                                     } catch (e00033) {
@@ -292,6 +300,10 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                             {
                                 text: "Edit Information",
                                 select:	function (oControlEvent) {
+									if (oApp.getPage("pSettingsPremiseInfo") === null) {
+										IOMy.pages.createPage("pSettingsPremiseInfo");
+									}
+									
                                     oApp.to("pSettingsPremiseInfo", {});
                                 }
                             }

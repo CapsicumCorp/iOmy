@@ -111,6 +111,7 @@ sap.ui.controller("mjs.settings.user.UserEditPassword", {
 							text : "Update",
 							press : function () {
 								this.setEnabled(false);
+								IOMy.common.NavigationToggleNavButtons(me, false);
 								
                                 var sOldPasswd = me.byId("oldPasswordField").getValue();
                                 var sNewPasswd1 = me.byId("newPasswordField").getValue();
@@ -150,7 +151,12 @@ sap.ui.controller("mjs.settings.user.UserEditPassword", {
                                     
                                     // Toss up an error dialog and place the error(s) in the error log.
                                     jQuery.sap.log.error(aLogErrors.join("\n"));
-                                    IOMy.common.showError(aLogErrors.join("\n\n"), sDialogTitle);
+                                    IOMy.common.showError(aLogErrors.join("\n\n"), sDialogTitle,
+										function () {
+											this.setEnabled(true);
+											IOMy.common.NavigationToggleNavButtons(me, true);
+										}
+									);
                                 } else {
                                     // Run the API to update the user's password
                                     try {
@@ -161,13 +167,17 @@ sap.ui.controller("mjs.settings.user.UserEditPassword", {
                                                 "OldPassword" : sOldPasswd, "NewPassword" : sNewPasswd1
                                             },
                                             onSuccess : function () {
-                                                IOMy.common.showSuccess("Password Changed. Log back in to continue using IOMy.", "Success", 
+                                                IOMy.common.showWarning("Log back in to continue using IOMy.", "Password Changed", 
                                                 function () {
                                                     window.location.reload(true); // TRUE forces a proper refresh from the server, not the cache.
                                                 }, "UpdateMessageBox");
                                             },
                                             error : function () {
-                                                IOMy.common.showError("Update failed.", "Error");
+                                                IOMy.common.showError("Update failed.", "Error",
+													function () {
+														IOMy.common.NavigationToggleNavButtons(me, false);
+													}
+												);
                                             }
                                         });
                                     } catch (e00033) {

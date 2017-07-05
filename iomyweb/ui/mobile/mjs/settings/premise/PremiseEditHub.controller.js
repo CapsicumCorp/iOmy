@@ -68,6 +68,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
                             press : function () {
                                 var thisButton = this;
 								thisButton.setEnabled(false);
+								IOMy.common.NavigationToggleNavButtons(me, false);
 								
 								var sHubText = me.byId("hubField").getValue();
 								var iHubID = me.hubID;
@@ -83,32 +84,19 @@ sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
                                             data : {"Mode" : "EditName", "Id" : iHubID, "Name" : sHubText},
                                             onSuccess : function () {
                                                 
-                                                IOMy.common.ReloadVariableHubList(
-                                                    function () {
-                                                        var viewPremiseList = oApp.getPage("pSettingsPremiseList");
-                                                        var controllerPremiseList = viewPremiseList.getController();
+                                                IOMy.common.RefreshCoreVariables({
+                                                    onSuccess: function () {
+                                                        IOMy.common.showMessage({
+															text : "Hub successfully updated.",
+															view : thisView
+														});
 
-                                                        //-- STEP 1 of 3 - EMPTY THE PREMISE LIST PAGE --//
-                                                        controllerPremiseList.RemoveExistingSettingsPremiseList( controllerPremiseList, viewPremiseList );
-
-                                                        //-- STEP 2 of 3 - REFRESH CORE VARIABLES --//
-                                                        IOMy.common.ReloadVariablePremiseList(
-                                                            function () {
-                                                                //-- STEP 3 of 3 - REDRAW THE PAGE --//
-                                                                controllerPremiseList.RedrawSettingsPremiseList( controllerPremiseList, viewPremiseList );
-                                                                
-                                                                IOMy.common.showSuccess("Update successful.", "Success", 
-                                                                    function () {
-                                                                        IOMy.common.NavigationTriggerBackForward();
-                                                                    },
-                                                                "UpdateMessageBox");
-                                                            }
-                                                        );
+														IOMy.common.NavigationToggleNavButtons(me, true);
+														IOMy.common.NavigationTriggerBackForward();
                                                     }
-                                                );
+												});
                                             },
                                             onFail : function (response) {
-                                                //IOMy.common.showError("Update failed.", "Error");
                                                 IOMy.common.showError(response.responseText, "Error");
                                                 jQuery.sap.log.error(JSON.stringify(response));
                                                 this.onComplete();
@@ -116,6 +104,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
                                             
                                             onComplete : function () {
                                                 thisButton.setEnabled(true);
+												IOMy.common.NavigationToggleNavButtons(me, true);
                                             }
                                         });
                                     } catch (e00033) {

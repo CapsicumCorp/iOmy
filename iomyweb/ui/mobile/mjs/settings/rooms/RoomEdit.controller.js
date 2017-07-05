@@ -161,21 +161,24 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
             text : "Update",
             press : function () {
                 var thisButton = this;
+				IOMy.common.NavigationToggleNavButtons(me, false);
 
                 try {
                     //--------------------------------------------//
                     // Update the room details.
                     //--------------------------------------------//
                     IOMy.functions.updateRoom(me.iRoomID, {
-                        callingWidget : thisButton
+                        callingWidget : thisButton,
+						view : thisView
                     });
                 } catch (eUpdateRoomError) {
                     //--------------------------------------------//
                     // Catch any exceptions.
                     //--------------------------------------------//
-                    IOMy.common.showError("There was a problem updating the room.", "Error Updating Room",
+                    IOMy.common.showError("There was a problem updating the room:\n\n"+eUpdateRoomError.message, "Error Updating Room",
                         function () {
                             thisButton.setEnabled(true);
+							IOMy.common.NavigationToggleNavButtons(me, false);
                         }
                     );
 
@@ -219,7 +222,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                         select : function () {
                             //var oButton = this;
                             var sDialogTitle = "";
-                            //oButton.setEnabled(false);
+                            IOMy.common.NavigationToggleNavButtons(me, false);
 
                             //-- CONFIRM THAT YOU WISH TO DELETE THIS ROOM --//
                             IOMy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
@@ -228,6 +231,10 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 										try {
 											IOMy.functions.deleteRoom(me.iRoomID,
 												function () {
+													IOMy.common.showMessage({
+														text : me.wRoomName.getValue() + " successfully removed.",
+														view : thisView
+													})
 													IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
 												}
 											);
@@ -244,7 +251,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 
 											IOMy.common.showError(err.message, sDialogTitle,
 												function () {
-
+													IOMy.common.NavigationToggleNavButtons(me, true);
 													//oButton.setEnabled(true);
 												}
 											);

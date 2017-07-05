@@ -123,6 +123,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 							press : function () {
                                 var thisButton = this; // Captures the scope of the button calling this function.
 								thisButton.setEnabled(false); // Lock button
+								IOMy.common.NavigationToggleNavButtons(me, false);
 								
 								var sPremiseText = me.byId("premiseField").getValue();
                                 var bError = false;
@@ -165,30 +166,23 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                                             
                                                             onSuccess : function () {
 
-                                                                IOMy.common.showSuccess("Update successful.", "Success", 
-                                                                function () {
-                                                                    //-- REFRESH PREMISES --//
-                                                                    IOMy.common.ReloadVariablePremiseList(
-                                                                        function() {
+																//-- REFRESH PREMISES --//
+																IOMy.common.RefreshCoreVariables({
+																	onSuccess : function() {
 
-                                                                            IOMy.common.CoreVariablesInitialised = true;
-                                                                            
-                                                                            try {
-                                                                                var viewPremiseList = oApp.getPage("pSettingsDeviceList");
-                                                                                var controllerPremiseList = viewPremiseList.getController();
-                                                                                
-                                                                                controllerPremiseList.bInitialised = false;
-                                                                                //controllerPremiseList.RedrawSettingsPremiseList(controllerPremiseList, viewPremiseList);
-                                                                            } catch (e) {
-                                                                                jQuery.sap.log.error("Error reloading Premise List: "+e.message);
-                                                                            }
-                                                                            
-                                                                            //IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
-																			IOMy.common.NavigationTriggerBackForward();
-                                                                            
-                                                                        }
-                                                                    ); //-- END PREMISE LIST --//
-                                                                }, "UpdateMessageBox");
+																		IOMy.common.CoreVariablesInitialised = true;
+
+																		IOMy.common.showMessage({
+																			text : "Premise has been updated successfully.",
+																			view : thisView
+																		});
+
+																		IOMy.common.NavigationToggleNavButtons(me, true);
+																		IOMy.common.NavigationTriggerBackForward();
+
+																	}
+																});
+                                                                
                                                             },
                                                             
                                                             onFail : function (response) {
@@ -226,6 +220,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                             
                                             onComplete : function () {
                                                 thisButton.setEnabled(true); // Unlock button
+												IOMy.common.NavigationToggleNavButtons(me, true);
                                             }
                                         });
                                     } catch (e00033) {
@@ -265,7 +260,11 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                             {
                                 text: "Edit Address",
                                 select:	function (oControlEvent) {
-                                    oApp.to("pSettingsPremiseAddress", {premise : IOMy.common.PremiseSelected})
+									if (oApp.getPage("pSettingsPremiseAddress") === null) {
+										IOMy.pages.createPage("pSettingsPremiseAddress");
+									}
+									
+                                    oApp.to("pSettingsPremiseAddress", {premise : IOMy.common.PremiseSelected});
                                 }
                             }
                         ]

@@ -70,7 +70,10 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 							if (me.wMPEGImage !== null) {
 								me.wMPEGImage.attachError(
 									function () {
-										IOMy.common.showMessage("Failed to load stream.");
+										IOMy.common.showMessage({
+											text : "Failed to load stream.",
+											view : thisView
+										});
 									}
 								);
 								
@@ -91,11 +94,17 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 								"context" : me
 							});
 							
-							IOMy.common.showMessage("Failed to load stream: "+sErrorMessage);
+							IOMy.common.showMessage({
+								text : "Failed to load stream: "+sErrorMessage,
+								view : thisView
+							});
 						}
 					});
 				} catch (ex) {
-					IOMy.common.showMessage("Failed to load stream: "+ex.message);
+					IOMy.common.showMessage({
+						text : "Failed to load stream: "+ex.message,
+						view : thisView
+					});
 					
 					me.wPanel.setVisible(true);
 					IOMy.common.showLoading({

@@ -534,7 +534,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
     UpdatePermissionsForPremise : function (iUserId, iPremiseId) {
         var me = this;
         var sUrl = IOMy.apiphp.APILocation("permissions");
-       //console.log(iPremiseId);
+		IOMy.common.NavigationToggleNavButtons(me, false);
         
         //==============================================================//
         // Fetch the permission status
@@ -590,21 +590,24 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
             
             onSuccess : function (responseType, data) {
                 if (data.Error === false) {
-                    IOMy.common.ReloadVariablePremiseList(
-                        function () {
-                            IOMy.common.showSuccess("Premise Permissions updated successfully!", "Success",
-                                function () {
-                                    me.wApplyButton.setEnabled(true);
-                                }
-                            );
+                    IOMy.common.RefreshCoreVariables({
+                        onSuccess : function () {
+                            IOMy.common.showMessage({
+								text : "Premise Permissions updated successfully!",
+								view : me.getView()
+							});
+							
+							IOMy.common.NavigationToggleNavButtons(me, true);
+							me.wApplyButton.setEnabled(true);
                         }
-                    );
+					});
                     // Reset the changed flag for this premise
                     me.premisesChanged["_"+iPremiseId] = false;
                 } else {
                     jQuery.sap.log.error("There was an error updating the premise permissions: "+data.ErrMesg);
-                    IOMy.common.showError("There was an error updating the premise permissions", "Error",
+                    IOMy.common.showError("There was an error updating the premise permissions:\n"+data.ErrMesg, "Error",
                         function () {
+							IOMy.common.NavigationToggleNavButtons(me, true);
                             me.wApplyButton.setEnabled(true);
                         }
                     );
@@ -613,8 +616,9 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
             
             onFail : function (response) {
                 jQuery.sap.log.error("There was an error updating the premise permissions: "+JSON.stringify(response));
-                IOMy.common.showError("There was an error updating the premise permissions", "Error",
+                IOMy.common.showError("There was an error updating the premise permissions:\n"+JSON.stringify(response), "Error",
                     function () {
+						IOMy.common.NavigationToggleNavButtons(me, true);
                         me.wApplyButton.setEnabled(true);
                     }
                 );

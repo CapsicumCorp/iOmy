@@ -96,51 +96,6 @@ $.extend(IOMy.devices,{
         return oLink;
     },
     
-    /**
-     * Function that performs an AJAX request to assign a given link to a given room
-     * 
-     * @param {type} iLinkId                ID of the link to assign to a room
-     * @param {type} iRoomId                ID of the room for the link to be assigned to
-     * @param {type} sLinkType              String to display specifying the type of link being assigned.
-	 * @deprecated Use IOMy.devices.AssignDeviceToRoom() instead
-     */
-    AssignLinkToRoom : function (iLinkId, iRoomId, sLinkType, fnCallback) {
-        //------------------------------------------------------------//
-        // Declare variables
-        //------------------------------------------------------------//
-        var me = this; // Capture the scope of the devices library
-        var sUrl = IOMy.apiphp.APILocation("link");
-        
-        //------------------------------------------------------------//
-        // Begin request
-        //------------------------------------------------------------//
-        IOMy.apiphp.AjaxRequest({
-            url : sUrl,
-            data : {"Mode" : "ChooseRoom", "Id" : parseInt(iLinkId), "RoomId" : parseInt(iRoomId)},
-            
-            onSuccess : function (response) {
-                if (response.Error === false || response.Error === undefined) {
-                    IOMy.common.showSuccess(sLinkType+" successfully assigned", "Success",
-                        function () {
-                            
-                            // Head back to the previous page after the core variables have been updated.
-                            IOMy.common.ReloadCoreVariables(fnCallback);
-                            
-                        },
-                    "UpdateMessageBox");
-                } else {
-                    jQuery.sap.log.error("Error assigning "+sLinkType+":"+response.ErrMesg, "Error");
-                    IOMy.common.showError("Error assigning "+sLinkType+":\n\n"+response.ErrMesg, "Error");
-                }
-            },
-            
-            onFail : function (error) {
-                jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
-                IOMy.common.showError("Error assigning "+sLinkType+":\n\n"+error.responseText, "Cannot move to new room");
-            }
-        });
-    },
-	
 	/**
      * Function that performs an AJAX request to assign a given link to a given room
      * 

@@ -281,12 +281,15 @@ sap.ui.controller("mjs.settings.DeviceList", {
 												//-----------------------------//
 												// Notification
 												//-----------------------------//
-												new sap.m.Text({
+												new sap.m.Link({
 													layoutData : new sap.m.FlexItemData({
 														growFactor : 9
 													}),
 													text : "No devices attached to this hub",
-													width: "100%"
+													width: "100%",
+													press : function () {
+														IOMy.common.NavigationChangePage("pSettingsLinkAdd", {}, false );
+													}
 												}).addStyleClass("Font-RobotoCondensed TextSizeMedium Text_grey_20 MarTop1d0Rem iOmyLink"),
 
 //												//-----------------------------//

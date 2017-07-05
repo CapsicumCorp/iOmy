@@ -177,6 +177,12 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 				select:	function (oControlEvent) {
 					IOMy.common.NavigationChangePage("pSettingsLinkAdd", {room : IOMy.common.RoomSelected});
 				}
+			},
+			{
+				text: "Add Camera",
+				select:	function (oControlEvent) {
+					IOMy.common.NavigationChangePage("pSettingsAddCamera", {});
+				}
 			}
         ];
 		//----------------------------------------------------//
@@ -637,7 +643,10 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 				oController.RecursiveLoadAjaxData();
 			},
 			"onFail" : function (response) {
-				IOMy.common.showError("There was an error retriving the value of IO "+iIOId);
+				IOMy.common.showMessage({
+					text : "There was an error retriving the value of IO "+iIOId,
+					view : oController.getView()
+				});
 				// Add to the IO Error count
 				oController.iIOErrorCount++;
 				
@@ -756,7 +765,10 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 					"onFail": function (response) {
 						oController.byId( sIOLabel ).setText("IO Offline");
 						
-						IOMy.common.showError("There was an error retriving the Totaled value");
+						IOMy.common.showMessage({
+							text : "There was an error retriving the Totaled value",
+							view : oController.getView()
+						});
 						
 						//-- Update the Last Ajax Request Date --//
 						//me.aLastAjaxUpdatePerRoom["_"+me.roomID]	= Date();
@@ -769,7 +781,10 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 				
 			},
 			"onFail": function (response) {
-				IOMy.common.showError("There was an error retriving the Totaled value");
+				IOMy.common.showMessage({
+					text : "There was an error retriving the Totaled value",
+					view : oController.getView()
+				});
 			}
 		});
 	}

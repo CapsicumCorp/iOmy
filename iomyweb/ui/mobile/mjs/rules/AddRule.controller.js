@@ -91,6 +91,19 @@ sap.ui.controller("mjs.rules.AddRule", {
 	onExit: function() {
 
 	},
+	
+	ToggleControls : function (bEnabled) {
+		var me = this;
+		
+		me.wCancelButton.setEnabled(bEnabled);
+		me.wApplyButton.setEnabled(bEnabled);
+		
+		if (me.bEditing) {
+			me.wDiscardButton.setEnabled(bEnabled);
+		}
+		
+		IOMy.common.NavigationToggleNavButtons(me, bEnabled);
+	},
     
     /**
      * Procedure that destroys the previous incarnation of the UI. Must be called by onInit before
@@ -276,32 +289,58 @@ sap.ui.controller("mjs.rules.AddRule", {
 		var aErrorMessages	= [];
         var mThing			= IOMy.common.ThingList["_"+me.iThingId];
         var sSerialCode		= IOMy.common.getLink(mThing.LinkId).LinkSerialCode;
+		
+		me.ToggleControls(false);
         
 		if (me.wOnTime.getDateValue() === null) {
-			
+			bError = true;
+			aErrorMessages.push("Time the device turns on must be given!");
 		}
 		
-        var mRule = {
-            "Type" : "DeviceTimeRule",
-            "Serial" : sSerialCode,
-            //"Serial" : "009483746873",
-            "Ontime" : IOMy.time.GetMilitaryTimeFromDate(me.wOnTime.getDateValue()),
-            "Offtime" : IOMy.time.GetMilitaryTimeFromDate(me.wOffTime.getDateValue()),
-        };
-        
-        IOMy.rules.applyRule({
-            rule : mRule,
-            hubID : 1,
-            
-            onSuccess : function () {
-                IOMy.common.showSuccess("Rule for "+mThing.DisplayName+" was successfully applied.", "Success");
-				IOMy.common.NavigationChangePage( "pRuleDeviceList", {}, true);
-            },
-            
-            onFail : function (sError) {
-                IOMy.common.showError("Rule for "+mThing.DisplayName+" could not be applied.\n\n"+sError, "Success");
-            }
-        });
+		if (me.wOffTime.getDateValue() === null) {
+			bError = true;
+			aErrorMessages.push("Time the device turns off must be given!");
+		}
+		
+		if (!bError) {
+			var mRule = {
+				"Type" : "DeviceTimeRule",
+				"Serial" : sSerialCode,
+				//"Serial" : "009483746873",
+				"Ontime" : IOMy.time.GetMilitaryTimeFromDate(me.wOnTime.getDateValue()),
+				"Offtime" : IOMy.time.GetMilitaryTimeFromDate(me.wOffTime.getDateValue()),
+			};
+
+			IOMy.rules.applyRule({
+				rule : mRule,
+				hubID : 1,
+
+				onSuccess : function () {
+					IOMy.common.showMessage({
+						text : "Rule for "+mThing.DisplayName+" was successfully applied.",
+						view : me.getView()
+					});
+					
+					me.ToggleControls(true);
+					IOMy.common.NavigationChangePage( "pRuleDeviceList", {}, true);
+				},
+
+				onFail : function (sError) {
+					IOMy.common.showError("Rule for "+mThing.DisplayName+" could not be applied.\n\n"+sError, "Error",
+						function () {
+							me.ToggleControls(true);
+						}
+					);
+				}
+			});
+		} else {
+			IOMy.common.showMessage({
+				text : aErrorMessages.join('\n'),
+				view : me.getView()
+			});
+			
+			me.ToggleControls(true);
+		}
         
     },
     
@@ -309,6 +348,8 @@ sap.ui.controller("mjs.rules.AddRule", {
         var me          = this;
         var mThing      = IOMy.common.ThingList["_"+me.iThingId];
         var sSerialCode = IOMy.common.getLink(mThing.LinkId).LinkSerialCode;
+		
+		me.ToggleControls(false);
         
         IOMy.common.showConfirmQuestion("Are you sure you wish to discard this rule?", "",
             function () {
@@ -318,16 +359,29 @@ sap.ui.controller("mjs.rules.AddRule", {
 						Serial : sSerialCode,
 
 						onSuccess : function () {
-							IOMy.common.showSuccess("Rule for "+mThing.DisplayName+" was successfully removed.", "Success");
+							IOMy.common.showMessage({
+								text : "Rule for "+mThing.DisplayName+" was successfully removed.",
+								view : me.getView()
+							});
+							
+							me.ToggleControls(true);
 							IOMy.common.NavigationChangePage( "pRuleDeviceList", {}, true);
 						},
 
 						onFail : function (sError) {
-							IOMy.common.showError("Rule for "+mThing.DisplayName+" could not be removed.\n\n"+sError, "Success");
+							IOMy.common.showError("Rule for "+mThing.DisplayName+" could not be removed.\n\n"+sError, "Error",
+								function () {
+									me.ToggleControls(true);
+								}
+							);
 						}
 					});
 				} catch (error) {
-					IOMy.common.showError("Rule for "+mThing.DisplayName+" could not be removed.\n\n"+error.message, "Success");
+					IOMy.common.showError("Rule for "+mThing.DisplayName+" could not be removed.\n\n"+error.message, "Error",
+						function () {
+							me.ToggleControls(true);
+						}
+					);
 				}
             }
         );

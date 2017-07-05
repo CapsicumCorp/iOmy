@@ -129,24 +129,6 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                         aErrorMessages = aErrorMessages.concat(mIPAddressInfo.aErrorMessages);
                     }
                     
-                    //-------------------------------------------------//
-                    // Is the username given?                          //
-                    //-------------------------------------------------//
-                    /*mUsernameInfo = me.ValidateUsername();
-                    if (mUsernameInfo.bError === true) {
-                        bError = true;
-                        aErrorMessages = aErrorMessages.concat(mUsernameInfo.aErrorMessages);
-                    }
-                    
-                    //-------------------------------------------------//
-                    // Is the password given?                          //
-                    //-------------------------------------------------//
-                    mPasswordInfo = me.ValidatePassword();
-                    if (mPasswordInfo.bError === true) {
-                        bError = true;
-                        aErrorMessages = aErrorMessages.concat(mPasswordInfo.aErrorMessages);
-                    }*/
-                    
                 //====================================================================//
                 // PHILIPS HUE BRIDGE                                                 //
                 //====================================================================//
@@ -505,44 +487,47 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             try {
                 // REFRESH LINK LIST
                 if (data.Error === false || data.Error === undefined) {
-					IOMy.common.ReloadVariableCommList(
-						function () {
-							IOMy.common.showSuccess(sLinkType+" successfully created", "Success",
-								function () {
-									// Set the flag to clear the way for a new UI instance
-									me.bUIReadyToBeWiped = true;
+					IOMy.common.RefreshCoreVariables({
+						onSuccess : function () {
+							IOMy.common.showMessage({
+								text : sLinkType+" successfully created",
+								view : me.getView()
+							});
+							
+							// Set the flag to clear the way for a new UI instance
+							me.bUIReadyToBeWiped = true;
 
-									var fnSuccess;
-									var fnFail;
+							var fnSuccess;
+							var fnFail;
 
-									fnSuccess = function () {
-										if (IOMy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
-											IOMy.common.NavigationChangePage("pSettingsThingAdd", { "LinkId": iLinkId });
-										} else {
-											IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
-										}
-									};
+							fnSuccess = function () {
+								IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
+								
+								if (IOMy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
+									IOMy.common.NavigationChangePage("pSettingsThingAdd", { "LinkId": iLinkId });
+								} else {
+									IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
+								}
+							};
 
-									fnFail = function (err) {
-										IOMy.common.showWarning("Successfully created device, but could not place it in "+me.wRoomCBox.getSelectedItem().getText()+".", "Warning", fnSuccess);
+							fnFail = function (err) {
+								IOMy.common.showWarning("Successfully created device, but could not place it in "+me.wRoomCBox.getSelectedItem().getText()+".", "Warning", fnSuccess);
 
-									};
+							};
 
-									if (me.wRoomCBox !== null) {
-										IOMy.devices.AssignDeviceToRoom({
-											"linkID" : iLinkId,
-											"roomID" : me.wRoomCBox.getSelectedKey(),
+							if (me.wRoomCBox !== null) {
+								IOMy.devices.AssignDeviceToRoom({
+									"linkID" : iLinkId,
+									"roomID" : me.wRoomCBox.getSelectedKey(),
 
-											"onSuccess" : fnSuccess
-										});
-									} else {
-										fnSuccess();
-									}
-
-								},
-							"UpdateMessageBox");
+									"onSuccess" : fnSuccess,
+									"onFail"	: fnFail
+								});
+							} else {
+								fnSuccess();
+							}
 						}
-					);
+					});
 							
                 } else {
                     jQuery.sap.log.error("Error creating "+sLinkType+":"+data.ErrMesg, "Error");
@@ -686,7 +671,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         // ROOM SELECT BOX                                       //
         //-------------------------------------------------------//
         oRoomLabel = new sap.m.Label({
-            text : "Room you wish to place this link in"
+            text : "Room where this device goes in"
         });
         
 		try {
@@ -711,7 +696,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         // LINK TYPE SELECT BOX                                  //
         //-------------------------------------------------------//
         oLinkTypeLabel = new sap.m.Label({
-            text : "Link Type"
+            text : "Device Type"
         });
         
         oLinkTypeCBox = IOMy.widgets.getLinkTypeSelector(me.createId("linkTypeCBox")).addStyleClass("SettingsDropDownInput");
@@ -742,18 +727,17 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         }).addStyleClass("UserInputForm");
         
         //-------------------------------------------------------//
-        // ADD LINK BUTTON                                       //
+        // Add device button
         //-------------------------------------------------------//
         me.aElementsToDestroy.push("addButton");
         oAddButton = new sap.m.VBox({
             items : [
                 new sap.m.Link(me.createId("addButton"), {
-                    //enabled : false,
-                    text : "Add Link",
+                    text : "Add Device",
 					
-                    //--------------------------------------------------------------//
-                    // FUNCTION TO ADD THE LINK BY CLICKING ON THE ADD LINK BUTTON  //
-                    //--------------------------------------------------------------//
+                    //--------------------------------------------------------------------//
+                    // Add Device, TODO: Move these functions into separate areas!
+                    //--------------------------------------------------------------------//
                     press : function() {
                         var thisButton = this; // Captures the scope of the calling button.
                         thisButton.setEnabled(false); // Lock the button
@@ -776,10 +760,10 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                             aErrorMessages = mInfo.aErrorMessages;
 
                             //-------------------------------------------------//
-                            // Try to add the link                             //
+                            // Try to add the device                             //
                             //-------------------------------------------------//
                             try {
-                                // IF EVERYTHING IS VALID, ADD THE LINK
+                                // IF EVERYTHING IS VALID, ADD THE DEVICE
                                 if (bError === false) {
                                     var mData = me.FetchAPIAndParameters();
                                     IOMy.apiphp.AjaxRequest(mData);
@@ -863,6 +847,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         //--------------------------------------------------------------------//
         // Change the help message for the New Link page.
         //--------------------------------------------------------------------//
+		// TODO: Stick this in the locale file. Alter the mechanism to accommodate these extra messages.
         IOMy.help.PageInformation["pSettingsLinkAdd"] = "" +
             "To create an Onvif Server, enter the IP address and port of the " +
             "onvif supported camera. The default port is normally 888.\n\nAfter " +
@@ -926,7 +911,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         // FIELD
         me.aElementsForAFormToDestroy.push("Username");
         oDeviceUserNameField = new sap.m.Input(me.createId("Username"), {
-			placeholder : "Username of the camera user"
+			placeholder : "Username for the camera"
 		}).addStyleClass("width100Percent SettingsTextInput");
         me.byId("formBox").addItem(oDeviceUserNameField);
         
@@ -974,6 +959,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         //--------------------------------------------------------------------//
         // Change the help message for the New Link page.
         //--------------------------------------------------------------------//
+		// TODO: Stick this in the locale file. Alter the mechanism to accommodate these extra messages.
         IOMy.help.PageInformation["pSettingsLinkAdd"] = "" +
             "Enter the IP address and port of the Philips Hue bridge, and also " +
             "the device user token for your device. This is located in your " +

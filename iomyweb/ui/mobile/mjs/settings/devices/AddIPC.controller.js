@@ -65,7 +65,10 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 					me.bEditing = true;
 					me.iThingId = evt.data.ThingId;
 					
-					
+					//--------------------------------------------------------//
+					// Clear all fields, disable buttons, and show the loading
+					// animation, hiding the panel.
+					//--------------------------------------------------------//
 					me.CancelInput();
 					me.ToggleControlButtons(false);
 					me.ToggleFields(false);
@@ -77,10 +80,16 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 					);
 					thisView.wPanel.setVisible(false);
 					
+					//--------------------------------------------------------//
+					// Load the camera information.
+					//--------------------------------------------------------//
 					IOMy.devices.ipcamera.loadCameraInformation({
 						"thingID" : evt.data.ThingId,
 						
 						"onSuccess" : function (mData) {
+							//------------------------------------------------//
+							// Populate the fields and bring the page back up.
+							//------------------------------------------------//
 							thisView.wHubSelector.setSelectedKey(mData.Hub);
 							thisView.wProtocol.setValue(mData.Protocol);
 							thisView.wIPAddress.setValue(mData.Address);
@@ -102,13 +111,19 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 						},
 						
 						"onFail" : function () {
+							//------------------------------------------------//
+							// Populate the fields.
+							//------------------------------------------------//
 							thisView.wPanel.setVisible(true);
 							IOMy.common.showLoading({
 								show : false,
 								context : thisView
 							});
 							
-							IOMy.common.showMessage("Failed to load camera information");
+							IOMy.common.showMessage({
+								text : "Failed to load camera information",
+								view : thisView
+							});
 						}
 					});
 				} else {
@@ -244,9 +259,6 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 	 * The default port is 80. The default protocol is http.
 	 */
 	SubmitForm : function () {
-		//-- Disable buttons to avoid race conditions. --//
-		this.ToggleControlButtons(false);
-		
 		//--------------------------------------------------------------------//
 		// Variables
 		//--------------------------------------------------------------------//
@@ -271,6 +283,10 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 			bError = true;
 			aErrorMessages.push(sMessage);
 		};
+		
+		//-- Disable buttons to avoid race conditions. --//
+		this.ToggleControlButtons(false);
+		IOMy.common.NavigationToggleNavButtons(me, false); // Disable the navigation buttons.
 		
 		//--------------------------------------------------------------------//
 		// Check that all the fields are filled out. Exception is the protocol
@@ -330,8 +346,13 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 		// execution.
 		//--------------------------------------------------------------------//
 		if (bError) {
-			IOMy.common.showMessage(aErrorMessages.join("\n"));
+			IOMy.common.showMessage({
+				text : aErrorMessages.join("\n"),
+				view : oView
+			});
+			
 			me.ToggleControlButtons(true);
+			IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
 		} else {
 			//----------------------------------------------------------------//
 			// Prepare the 'Data' parameter string.
@@ -361,20 +382,32 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 				"onSuccess"	: function (responseType, data) {
 					try {
 						if (data.Error === true) {
-							IOMy.common.showMessage(data.ErrMesg, "Error");
-							me.ToggleControlButtons(true);
+							IOMy.common.showError(data.ErrMesg, "Error",
+								function () {
+									me.ToggleControlButtons(true);
+									IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
+								}
+							);
+							
 						} else {
 							IOMy.common.RefreshCoreVariables({
 								
 								onSuccess : function () {
 									if (me.bEditing) {
-										IOMy.common.showMessage("Connection configuration updated successfully.");
+										IOMy.common.showMessage({
+											text : "Connection configuration updated successfully.",
+											view : oView
+										});
 									} else {
-										IOMy.common.showMessage("Webcam successfully added!");
+										IOMy.common.showMessage({
+											text : "Webcam successfully added!",
+											view : oView
+										});
 									}
 									
 									me.CancelInput();
-									IOMy.common.NavigationTriggerBackForward();
+									IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
+									IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
 									me.ToggleControlButtons(true);
 									me.ToggleFields(true);
 								}
@@ -383,14 +416,24 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 							
 						}
 					} catch (ex) {
-						IOMy.common.showMessage("Error adding the camera: "+ex.message);
+						IOMy.common.showMessage({
+							text : "Error adding the camera: "+ex.message,
+							view : oView
+						});
+						
 						me.ToggleControlButtons(true);
+						IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
 					}
 				},
 				
 				"onFail"	: function (error) {
-					IOMy.common.showMessage("Error adding the camera: "+error.responseText);
+					IOMy.common.showMessage({
+						text : "Error adding the camera: "+error.responseText,
+						view : oView
+					});
+					
 					me.ToggleControlButtons(true);
+					IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
 				}
 			});
 		}

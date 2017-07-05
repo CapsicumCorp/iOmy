@@ -105,6 +105,7 @@ sap.ui.controller("mjs.settings.user.EditUserInformation", {
 							//enabled : false,
 							press : function () {
 								this.setEnabled(false);
+								IOMy.common.NavigationToggleNavButtons(me, false);
 								
 								var iUserID = me.userId;
                                 //var sTitle = me.byId("titleField").getValue();
@@ -145,7 +146,12 @@ sap.ui.controller("mjs.settings.user.EditUserInformation", {
                                 
                                 if (bError === true) {
                                     jQuery.sap.log.error(aLogErrors.join("\n"));
-                                    IOMy.common.showError(aLogErrors.join("\n\n"), sDialogTitle);
+                                    IOMy.common.showError(aLogErrors.join("\n\n"), sDialogTitle,
+										function () {
+											this.setEnabled(true);
+											IOMy.common.NavigationToggleNavButtons(me, true);
+										}
+									);
                                 } else {
                                     // Run the API to update the user information
                                     try {
@@ -162,20 +168,27 @@ sap.ui.controller("mjs.settings.user.EditUserInformation", {
                                                 "Gender" : 2
                                             },
                                             onSuccess : function () {
-                                                IOMy.common.showSuccess("Update successful.", "Success", 
-                                                function () {
-                                                    IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
-                                                }, "UpdateMessageBox");
+                                                IOMy.common.showSuccess({
+													text : "Your user information updated successfully",
+													view : thisView
+												});
+												
+												IOMy.common.NavigationToggleNavButtons(me, true);
+												IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
                                             },
-                                            error : function () {
-                                                IOMy.common.showError("Update failed.", "Error");
+                                            error : function (error) {
+                                                IOMy.common.showError("Update failed: "+error.responseText, "Error",
+													function () {
+														this.setEnabled(true);
+														IOMy.common.NavigationToggleNavButtons(me, true);
+													}
+												);
                                             }
                                         });
                                     } catch (e00033) {
                                         IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
                                     }
                                 }
-								this.setEnabled(true);
 							}
 						}).addStyleClass("SettingsLinks AcceptSubmitButton iOmyLink TextCenter")
 					]
@@ -194,8 +207,9 @@ sap.ui.controller("mjs.settings.user.EditUserInformation", {
 				// Destroys the actual panel of the page. This is done to ensure that there
 				// are no elements left over which would increase the page size each time
 				// the page is visited.
-				if (me.byId("userInfoPanel") !== undefined)
+				if (me.byId("userInfoPanel") !== undefined) {
 					me.byId("userInfoPanel").destroy();
+				}
 				
 				var oPanel = new sap.m.Panel(me.createId("userInfoPanel"), {
 					backgroundDesign: "Transparent",

@@ -300,23 +300,89 @@ $.extend(IOMy.common,{
      * @param {type} fnCallback     (optional) Function to execute on close.
      * @param {type} sCssClass      (optional) CSS Classes in a string separated by spaces.
      */
-	showMessage : function( sMessage, sTitle, fnCallback, sCssClass, bAutoClose ){
-		//-- --//
-		var callbackFn = fnCallback || function(){};
-		var cssClass = sCssClass || "";
+	showMessage : function( mSettings ){
 		
-		// open a fully configured message toast
-		sap.m.MessageToast.show(
-			sMessage,
-			{
-				autoClose : bAutoClose || true
-				// TODO: Allow a callback function to be called when the toast closes.
-				//styleClass : cssClass
+		var bError				= false;
+		var aErrorMessages		= [];
+		var aWarningMessages	= [];
+		var bAutoClose			= true;
+		var sMessage;
+		var oCurrentView;
+		
+		var fnAppendError = function (sMessage) {
+			bError = true;
+			aErrorMessages.push(sMessage);
+		};
+		
+		//--------------------------------------------------------------------//
+		// Check that the required parameters are set.
+		//--------------------------------------------------------------------//
+		if (mSettings !== undefined) {
+			//----------------------------------------------------------------//
+			// Find the context of the view or controller
+			//----------------------------------------------------------------//
+			if (mSettings.view !== undefined) {
+				oCurrentView = mSettings.view;
+				
+				//------------------------------------------------------------//
+				// Find the createId() function that views and controllers
+				// have.
+				//------------------------------------------------------------//
+				if (oCurrentView.createId === undefined) {
+					fnAppendError("Invalid view! Ensure that the object is a UI5 View or Controller.");
+				}
+			} else {
+				fnAppendError("'view' must be specified.");
 			}
-		);
-		// TODO: This is a temporary measure to allow the function to be called after the toast is shown.
-		// TODO: Go through each form and move the function code out and place it in the parent function.
-		callbackFn();
+			
+			//----------------------------------------------------------------//
+			// See if the show property was given.
+			//----------------------------------------------------------------//
+			if (mSettings.autoClose !== undefined) {
+				//------------------------------------------------------------//
+				// Check that the value given was a boolean value. If it is not,
+				// log a warning message and default to true.
+				//------------------------------------------------------------//
+				if (typeof mSettings.autoClose === "boolean") {
+					bAutoClose = mSettings.autoClose;
+					
+				} else {
+					aWarningMessages.push("'autoClose' parameter given was of type '"+typeof mSettings.autoClose+"'. Expected a boolean. 'autoClose' will be true.");
+				}
+			}
+			
+			//----------------------------------------------------------------//
+			// See if the text property was given.
+			//----------------------------------------------------------------//
+			if (mSettings.text !== undefined) {
+				sMessage = mSettings.text;
+			} else {
+				fnAppendError("'text' was not specified.");
+			}
+			
+			if (bError) {
+				throw new IllegalArgumentException(aErrorMessages.join('\n'));
+			}
+			
+		} else {
+			throw new MissingSettingsMapException("Settings were not given! These settings must include:\n\n* 'view': either the View or Controller of the UI5 page the message should display on.\n* 'text': Message to display.");
+		}
+		
+		oCurrentView.expectingMessage = true;
+		
+		if (oApp.getCurrentPage().expectingMessage === true) {
+			// open a fully configured message toast
+			sap.m.MessageToast.show(
+				sMessage,
+				{
+					autoClose : bAutoClose || true
+					// TODO: Allow a callback function to be called when the toast closes.
+					//styleClass : cssClass
+				}
+			);
+		}
+		
+		oCurrentView.expectingMessage = false;
 	},
 	
     /**
@@ -329,7 +395,7 @@ $.extend(IOMy.common,{
      * @param {type} sCssClass      (optional) CSS Classes in a string separated by spaces.
      */
 	showSuccess : function( sMessage, sTitle, fnCallback, sCssClass, bAutoClose ){
-		this.showMessage( sMessage, sTitle, fnCallback, sCssClass, bAutoClose );
+		this.showMessage( sMessage, bAutoClose );
 	},
     
     showWarning : function( sMessage, sTitle, fnCallback, sCssClass ){
@@ -390,9 +456,11 @@ $.extend(IOMy.common,{
 	/**
 	 * Shows or hides the loading indicator image.
 	 * 
-	 * @param {type} oContext				
-	 * @param {type} bShow
-	 * @param {type} sMsg
+	 * @param {type} mSettings
+	 * @param {type} mSettings.view
+	 * @param {type} mSettings.text
+	 * @param {type} mSettings.show
+	 * 
 	 * @returns {sap.m.BusyIndicator|null}
 	 */
 	showLoading : function(mSettings){
@@ -427,10 +495,10 @@ $.extend(IOMy.common,{
 				// have.
 				//------------------------------------------------------------//
 				if (oContext.createId === undefined) {
-					fnAppendError("Invalid view or controller context!");
+					fnAppendError("Invalid view or controller context! Ensure that the object is a UI5 View or Controller.");
 				}
 			} else {
-				fnAppendError("View or controller context must be specified.");
+				fnAppendError("View or controller 'context' must be specified.");
 			}
 			
 			//----------------------------------------------------------------//
@@ -445,7 +513,7 @@ $.extend(IOMy.common,{
 					bShow = mSettings.show;
 					
 				} else {
-					aWarningMessages.push("'show' parameter given was '"+typeof mSettings.show+"'. Expected a boolean. 'show' will be true.");
+					aWarningMessages.push("'show' parameter given was of type '"+typeof mSettings.show+"'. Expected a boolean. 'show' will be true.");
 				}
 			}
 			
@@ -455,6 +523,8 @@ $.extend(IOMy.common,{
 			if (mSettings.text !== undefined) {
 				sMsg = mSettings.text;
 			}
+		} else {
+			throw new MissingSettingsMapException("Settings were not given! These settings must include:\n\n* 'context': either the View or Controller of the UI5 page the message should display on.");
 		}
 		
 		for (var i = 0; i < aWarningMessages.length; i++) {
@@ -462,14 +532,18 @@ $.extend(IOMy.common,{
 		}
 		
 		if (bError) {
+			//----------------------------------------------------------------//
+			// If any errors have occurred, log them.
+			//----------------------------------------------------------------//
 			for (var i = 0; i < aErrorMessages.length; i++) {
 				jQuery.sap.log.error(aErrorMessages[i]);
 			}
 		} else {
 		
-			//--------------------------------------------------------------------//
-			// If we are showing the indicator, create one. Otherwise destroy it.
-			//--------------------------------------------------------------------//
+			//----------------------------------------------------------------//
+			// If we are showing the indicator, create one. Otherwise destroy
+			// it.
+			//----------------------------------------------------------------//
 			if(bShow) {
 				oIndicator = new sap.m.BusyIndicator(oContext.createId("loading"), {
 					text					: sMsg,
@@ -2154,6 +2228,7 @@ $.extend(IOMy.common,{
 		//jQuery.sap.log.debug( "ChangePage NavArray="+JSON.stringify(this.NavPagesNavigationArray) );
 		//jQuery.sap.log.debug( "ChangePage NavIndex="+JSON.stringify(this.NavPagesCurrentIndex ) );
 		
+		//-- Load the page into the app if it's not loaded already. --//
 		if (oApp.getPage(sPageName) === null) {
 			IOMy.pages.createPage(sPageName);
 		}

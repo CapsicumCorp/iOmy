@@ -505,8 +505,11 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                             
                             for (var i = 0; i < data.length; i++) {
                                 mRoomInfo = data[i];
-                                mRoomInfo["Index"] = "_"+mRoomInfo.ROOMS_PK;
-                                me.DrawRoomEntry(mRoomInfo);
+								
+								if (mRoomInfo.ROOMS_PK !== 1 && mRoomInfo.ROOMS_NAME !== "Unassigned") {
+									mRoomInfo["Index"] = "_"+mRoomInfo.ROOMS_PK;
+									me.DrawRoomEntry(mRoomInfo);
+								}
                             }
                             
                             premisePermRoomsRequest.onComplete();
@@ -666,6 +669,8 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
     UpdatePermissionsForRoom : function (iUserId, iPos, aRoomIDs) {
         var me = this;
         var sUrl = IOMy.apiphp.APILocation("permissions");
+		
+		//IOMy.common.NavigationToggleNavButtons(me, false);
         
         //==============================================================//
         // Fetch the permission status
@@ -757,31 +762,31 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                     // successfully.
                     //--------------------------------------------------------//
                     else if (me.aErrors.length > 0 && me.aErrors.length < aRoomIDs.length) {
-                        IOMy.common.ReloadVariablePremiseList(
-                            function () {
+                        IOMy.common.RefreshCoreVariables({
+                            onSuccess : function () {
                                 IOMy.common.showWarning("Some permissions updated successfully, but some could not be updated.\n\n"+me.aErrors.join('\n'), "Error",
                                     function () {
                                         me.wApplyButton.setEnabled(true);
                                     }
                                 );
                             }
-                        );
+						});
                     }
                     //--------------------------------------------------------//
-                    // If some rooms failed to have new permissions set, then
-                    // report it as a warning, but mention that some were 
-                    // successfully.
+                    // Everything went completely well. Show a message toast.
                     //--------------------------------------------------------//
                     else if (me.aErrors.length === 0) {
-                        IOMy.common.ReloadVariablePremiseList(
-                            function () {
-                                IOMy.common.showSuccess("Room Permissions updated successfully!", "Success",
-                                    function () {
-                                        me.wApplyButton.setEnabled(true);
-                                    }
-                                );
+                        IOMy.common.RefreshCoreVariables({
+                            onSuccess : function () {
+                                IOMy.common.showMessage({
+									text : "Room Permissions updated successfully!",
+									view : me.getView()
+								});
+								
+								me.wApplyButton.setEnabled(true);
+								//IOMy.common.NavigationToggleNavButtons(me, true);
                             }
-                        );
+						});
                     }
                     
                     // Clear error log

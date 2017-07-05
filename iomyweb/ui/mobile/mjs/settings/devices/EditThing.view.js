@@ -49,7 +49,7 @@ sap.ui.jsview("mjs.settings.devices.EditThing", {
             view : me,
             controller : oController,
             icon : "sap-icon://GoogleMaterial/settings",
-            title : "Edit Item"
+            title : "Edit Thing"
         });	
 		
 //    	var oPage = new sap.m.Page(this.createId("page"), {

@@ -260,34 +260,36 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         //--------------------------------------------------------------------//
         // Create the action menu
         //--------------------------------------------------------------------//
-        thisView.byId("extrasMenuHolder").destroyItems();
-        thisView.byId("extrasMenuHolder").addItem(
-            IOMy.widgets.getActionMenu({
-                id : me.createId("extrasMenu"),        // Uses the page ID
-                icon : "sap-icon://GoogleMaterial/more_vert",
-                items : [
-                    {
-                        text: "Edit Link",
-                        select:	function (oControlEvent) {
-                            // Lock the button
-                            this.setEnabled(false);
-
-                            // Change to the edit link page parsing the correct link to the page.
-                            IOMy.common.NavigationChangePage("pSettingsEditLink", {link : oLink});
-
-                            // Unlock the button
-                            this.setEnabled(true);
-                        }
-                    }
-                ]
-            })
-        );
+//        thisView.byId("extrasMenuHolder").destroyItems();
+//        thisView.byId("extrasMenuHolder").addItem(
+//            IOMy.widgets.getActionMenu({
+//                id : me.createId("extrasMenu"),        // Uses the page ID
+//                icon : "sap-icon://GoogleMaterial/more_vert",
+//                items : [
+//                    {
+//                        text: "Edit Link",
+//                        select:	function (oControlEvent) {
+//                            // Lock the button
+//                            this.setEnabled(false);
+//
+//                            // Change to the edit link page parsing the correct link to the page.
+//                            IOMy.common.NavigationChangePage("pSettingsEditLink", {link : oLink});
+//
+//                            // Unlock the button
+//                            this.setEnabled(true);
+//                        }
+//                    }
+//                ]
+//            })
+//        );
     },
 	
 	// TODO: This function belongs to the IOMy.functions library.
 	EditThing : function () {
 		var me = this;
 		me.byId("updateButton").setEnabled(false);
+		//-- Toggle navigation buttons --//
+		IOMy.common.NavigationToggleNavButtons(me, false);
 
 		var bError					= false;
 		var aErrorMessages			= [];
@@ -367,25 +369,35 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 					// indicating complete or partial success.
 					//--------------------------------------------------------//
 					mRoomChangeSettings.onSuccess = function () {
-						IOMy.common.ReloadVariableRoomList(
-							function () {
+						IOMy.common.RefreshCoreVariables({
+							onSuccess : function () {
 								var sMessage;
 								
 								if (mThingChangeSettings.successful === true) {
 									sMessage = "Device renamed to "+sThingText+". Located in "+sRoomText;
-									IOMy.common.showSuccess(sMessage);
+									IOMy.common.showMessage({
+										text : sMessage,
+										view : me.getView()
+									});
+									
+									//-- Toggle navigation buttons --//
+									IOMy.common.NavigationToggleNavButtons(me, true);
+									
 									IOMy.common.NavigationTriggerBackForward();
 								} else {
 									sMessage = "Device couldn't be renamed to "+sThingText+", but is now located in "+sRoomText;
 									
 									IOMy.common.showWarning(sMessage, "", function () {
 										me.byId("updateButton").setEnabled(true);
+										
+										//-- Toggle navigation buttons --//
+										IOMy.common.NavigationToggleNavButtons(me, true);
 									});
 								}
 							},
 							
-							fnThingFail
-						);
+							onFail : fnThingFail
+						});
 					};
 					
 					//--------------------------------------------------------//
@@ -400,6 +412,8 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 							
 							IOMy.common.showWarning(sMessage, "", function () {
 								me.byId("updateButton").setEnabled(true);
+								//-- Toggle navigation buttons --//
+								IOMy.common.NavigationToggleNavButtons(me, true);
 							});
 							
 							jQuery.sap.log.warning(sMessage);
@@ -408,6 +422,8 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 							
 							IOMy.common.showError(sMessage, "", function () {
 								me.byId("updateButton").setEnabled(true);
+								//-- Toggle navigation buttons --//
+								IOMy.common.NavigationToggleNavButtons(me, true);
 							});
 							
 							jQuery.sap.log.error(sMessage);
@@ -449,12 +465,17 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 					};
 					
 					fnThingSuccess = function () {
-						IOMy.common.ReloadVariableThingList(
-							function () {
-								IOMy.common.showSuccess("Device renamed to \""+sThingText+"\".");
+						IOMy.common.RefreshCoreVariables({
+							onSuccess : function () {
+								IOMy.common.showMessage({
+									text : "Device renamed to \""+sThingText+"\".",
+									view : me.getView()
+								});
+								
+								IOMy.common.NavigationToggleNavButtons(me, true);
 								IOMy.common.NavigationTriggerBackForward();
 							}
-						);
+						});
 					};
 					
 					mThingChangeSettings.onSuccess	= fnThingSuccess;
@@ -470,16 +491,23 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 					fnRoomFail = function (sMessage) {
 						IOMy.common.showError(sMessage, "", function () {
 							me.byId("updateButton").setEnabled(true);
+							//-- Toggle navigation buttons --//
+							IOMy.common.NavigationToggleNavButtons(me, true);
 						});
 					};
 					
 					fnRoomSuccess = function () {
-						IOMy.common.ReloadVariableCommList(
-							function () {
-								IOMy.common.showSuccess("Device now located in "+sRoomText);
+						IOMy.common.RefreshCoreVariables({ 
+							onSuccess : function () {
+								IOMy.common.showMessage({
+									text : "Device now located in "+sRoomText,
+									view : me.getView()
+								});
+								
+								IOMy.common.NavigationToggleNavButtons(me, true);
 								IOMy.common.NavigationTriggerBackForward();
 							}
-						);
+						});
 					};
 					
 					mRoomChangeSettings.onSuccess	= fnRoomSuccess;

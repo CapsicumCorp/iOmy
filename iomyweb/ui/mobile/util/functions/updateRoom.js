@@ -55,6 +55,7 @@ $.extend(IOMy.functions, {
         var wRoomName           = null;
         var wRoomDescription    = null;
         var wRoomType           = null;
+		var oContext			= null;
         
         var mRoomValidation     = IOMy.validation.isRoomIDValid(iRoomId);
         
@@ -90,6 +91,11 @@ $.extend(IOMy.functions, {
             // If so, capture it and disable it.
             wCallingWidget = mInfo.callingWidget;
             wCallingWidget.setEnabled(false);
+        }
+		
+		//-- Check that the controller or view context is specified. --//
+        if (mInfo.view !== undefined || mInfo.view !== null) {
+            oContext = mInfo.view;
         }
         
         //----------------------------------------------//
@@ -183,36 +189,44 @@ $.extend(IOMy.functions, {
                             "Desc" : sRoomDesc, "Floor" : 1,
                             "RoomTypeId" : iRoomTypeId},
                     onSuccess : function () {
+						
+						//-- REFRESH ROOMS --//
+						IOMy.common.RefreshCoreVariables({
+							//-------------------------------//
+							// Success callback function
+							//-------------------------------//
+							onSuccess : function() {
+								try {
+									if (oContext !== null) {
+										IOMy.common.showMessage({
+											text : "Room updated successfully.",
+											view : oContext
+										});
+									}
 
-                        IOMy.common.showSuccess("Update successful.", "Success", 
-                        function () {
-                            //-- REFRESH ROOMS --//
-                            IOMy.common.ReloadVariableRoomList(
-                                //-------------------------------//
-                                // Success callback function
-                                //-------------------------------//
-                                function() {
-                                    try {
-                                        //-- Flag that the Core Variables have been configured --//
-                                        IOMy.common.CoreVariablesInitialised = true;
-                                        IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+									//-- Flag that the Core Variables have been configured --//
+									IOMy.common.CoreVariablesInitialised = true;
+									IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
 
-                                    } catch(e654321) {
-                                        //-- ERROR:  TODO: Write a better error message--//
-                                        jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
-                                    }
-                                },
-                                
-                                //-------------------------------//
-                                // Failure callback function
-                                //-------------------------------//
-                                function() {
-                                    if (wCallingWidget !== null) {
-                                        wCallingWidget.setEnabled(true);
-                                    }
-                                }
-                            );
-                        }, "UpdateMessageBox");
+								} catch(e654321) {
+									//-- ERROR:  TODO: Write a better error message--//
+									jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
+								}
+							},
+
+							//-------------------------------//
+							// Failure callback function
+							//-------------------------------//
+							onFail : function() {
+								if (wCallingWidget !== null) {
+									wCallingWidget.setEnabled(true);
+								}
+								
+								if (oContext !== null) {
+									IOMy.common.NavigationToggleNavButtons(oContext, true);
+								}
+							}
+						});
                     },
                     onFail : function (response) {
                         IOMy.common.showError(response.responseText, "Error");
@@ -230,6 +244,10 @@ $.extend(IOMy.functions, {
                         if (wCallingWidget !== null) {
                             wCallingWidget.setEnabled(true);
                         }
+						
+						if (oContext !== null) {
+							IOMy.common.NavigationToggleNavButtons(oContext, true);
+						}
                     }
                 });
             } catch (e00033) {

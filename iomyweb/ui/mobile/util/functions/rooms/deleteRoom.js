@@ -105,12 +105,10 @@ $.extend(IOMy.functions, {
 
                 onSuccess : function () {
                     
-                    IOMy.common.showSuccess("Room successfully removed.", "Success", 
-                        function () {
-                            //-- REFRESH ROOMS --//
-                            IOMy.common.ReloadVariableRoomList(fnCallback);
-                        },
-                    "UpdateMessageBox");
+                    IOMy.common.RefreshCoreVariables({
+						onSuccess : fnCallback
+					});
+					
                 },
 
                 onFail : function (response) {

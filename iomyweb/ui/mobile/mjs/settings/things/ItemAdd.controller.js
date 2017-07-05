@@ -207,7 +207,7 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
         var iLinkId = me.byId("linkCBox").getSelectedKey();
         var fnGetLinkType = IOMy.functions.getLinkTypeIDOfLink;
         
-        try {
+//        try {
             //--------------------------------------------------------------------//
             // ONVIF STREAM
             //--------------------------------------------------------------------//
@@ -223,10 +223,10 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
                     "CameraName" : me.byId("thingNameField").getValue()
                 };
             }
-        } catch (e2000) {
-			// TODO: DO SOMETHING ABOUT THIS. IT IS NOT USEFUL!
-            throw "Error 0x2000: "+e2000.message;
-        }
+//        } catch (e2000) {
+//			// TODO: DO SOMETHING ABOUT THIS. IT IS NOT USEFUL!
+//            throw "Error 0x2000: "+e2000.message;
+//        }
         
         // These functions are not necessarily to do with a specific link type.
         mData.onSuccess = function (response) {
@@ -234,19 +234,28 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
 
             try {
                 //-- REFRESH LINK LIST --//
-                IOMy.common.ReloadVariableLinkList(
-					function () {
-						IOMy.common.showSuccess(me.byId("thingNameField").getValue()+" successfully created", "Success",
-							function () {
-								IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
-							},
-						"UpdateMessageBox");
+                IOMy.common.RefreshCoreVariables({
+					
+					onSuccess : function () {
+						IOMy.common.showMessage({
+							text : me.byId("thingNameField").getValue()+" successfully created",
+							view : me.getView()
+						});
+						
+						IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
+						IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
 					}
-				);
+				});
 						
             } catch (e) {
+				// TODO: Check to see whether this is needed and if so, how to handle this error better.
                 jQuery.sap.log.error("Error refreshing core variables: "+e.message);
-                IOMy.common.showWarning(sLinkType+" successfully created but there was an error refreshing core variables: "+e.message, "Errors");
+                IOMy.common.showWarning(sLinkType+" successfully created but there was an error refreshing core variables: "+e.message, "Errors",
+					function () {
+						IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
+						IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
+					}
+				);
             }
         };
         
@@ -256,6 +265,7 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
             
             // Re-enable the add link button
             me.byId("addButton").setEnabled(true);
+			IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
         };
         
         return mData;
@@ -290,8 +300,9 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
         
         for (var i = 0; i < me.aElementsForAFormToDestroy.length; i++) {
             sCurrentID = me.aElementsForAFormToDestroy[i];
-            if (me.byId(sCurrentID) !== undefined)
+            if (me.byId(sCurrentID) !== undefined) {
                 me.byId(sCurrentID).destroy();
+			}
         }
         
         // Clear the array
@@ -324,7 +335,7 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
         // LINK COMBO BOX
         //-------------------------------------------------------//
         oLinkLabel = new sap.m.Label({
-            text : "Device you wish to connect the new item to"
+            text : "Device to connect to"
         });
         
         oLinkCBox = IOMy.widgets.getLinkSelector(me.createId("linkCBox"), me.iLinkId).addStyleClass("width100Percent SettingsDropDownInput");
@@ -368,11 +379,12 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
                     text : "Create",
                     enabled : false,
                     //-------------------------------------------------------//
-                    // FUNCTION TO UPDATE THE LINK BY CLICKING ON THE UPDATE LINK BUTTON
+                    // Add the thing
                     //-------------------------------------------------------//
                     press : function() {
                         var thisButton = this; // Captures the scope of the button.
                         thisButton.setEnabled(false); // Lock the button
+						IOMy.common.NavigationToggleNavButtons(me, false); // Disable the navigation buttons.
                         
                         try {
                             // Error checking variables
@@ -390,9 +402,9 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
                         mInfo = me.ValidateFormData();
                         
                         if (mInfo.bError === false) {
-                            //-------------------------------------------------//
-                            // Try to add the item
-                            //-------------------------------------------------//
+                            //------------------------------------------------//
+                            // Try to add the thing
+                            //------------------------------------------------//
                             try {
                                 var mData = me.FetchAPIAndParameters();
                                 IOMy.apiphp.AjaxRequest(mData);
@@ -409,6 +421,7 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
                                 jQuery.sap.log.error(sErrorMessage);
                                 IOMy.common.showError(sErrorMessage, "Error", function () {
                                     thisButton.setEnabled(true); // Unlock the button
+									IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
                                 });
                             }
                         } else {

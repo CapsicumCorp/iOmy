@@ -119,7 +119,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                 
                 //===== STATE =====//
                 var oStateTitle = new sap.m.Text({
-                    text : "State / County"
+                    text : "State / Province"
                 });
     		    
 				var oStateField = new sap.m.Input(me.createId("addressState"), {
@@ -182,6 +182,8 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 							press : function () {
                                 var thisButton = this;
                                 thisButton.setEnabled(false);
+								IOMy.common.NavigationToggleNavButtons(me, false);
+								
                                 var aErrorLog = [];
                                 var bError = false;
                                 var sAddressStateProvince = me.byId("addressState").getValue();
@@ -192,7 +194,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                                     bError = true;
                                 }
                                 if (sAddressStateProvince === "") {
-                                    aErrorLog.push("Subregion is required.");
+                                    aErrorLog.push("State / Province is required.");
                                     bError = true;
                                 }
                                 if (sAddressPostcode === "") {
@@ -202,8 +204,12 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                                 
                                 if (bError === true) {
                                     jQuery.sap.log.error(aErrorLog.join("\n"));
-                                    IOMy.common.showError(aErrorLog.join("\n\n"), "Errors");
-                                    thisButton.setEnabled(true);
+                                    IOMy.common.showError(aErrorLog.join("\n\n"), "Errors",
+										function () {
+											thisButton.setEnabled(true);
+											IOMy.common.NavigationToggleNavButtons(me, true);
+										}
+									);
                                 } else {
                                     // Run the API to update the user's address
                                     try {
@@ -222,19 +228,33 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                                                 "AddressLanguage" : me.byId("addressLanguage").getSelectedKey()
                                             },
                                             onSuccess : function () {
-                                                IOMy.common.showSuccess("Update successful.", "Success", function () {
-                                                    IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
-                                                }, "UpdateMessageBox");
+                                                IOMy.common.showMessage({
+													text : "Your address updated successfully",
+													view : thisView
+												});
+												
                                                 thisButton.setEnabled(true);
+												IOMy.common.NavigationToggleNavButtons(me, true);
+												IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
                                             },
                                             onFail : function (response) {
-                                                IOMy.common.showError("Update failed.", "Error");
+                                                IOMy.common.showError("Update failed.", "Error",
+													function () {
+														thisButton.setEnabled(true);
+														IOMy.common.NavigationToggleNavButtons(me, true);
+													}
+												);
+											
                                                 jQuery.sap.log.error(JSON.stringify(response));
-                                                thisButton.setEnabled(true);
                                             }
                                         });
                                     } catch (e00033) {
-                                        IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
+                                        IOMy.common.showError("Error accessing API: "+e00033.message, "Error",
+											function () {
+												thisButton.setEnabled(true);
+												IOMy.common.NavigationToggleNavButtons(me, true);
+											}
+										);
                                     }
                                 }
 							}
