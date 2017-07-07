@@ -1,7 +1,9 @@
 /*
-Title: Add IP Camera
-Author: Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
-Description: Gives an example page for UI5 Control Objects
+Title: Telnet Page Controller
+Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+	Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
+Description: Defines the functions for the widgets that interact with the telnet
+	library.
 Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
@@ -88,15 +90,10 @@ sap.ui.controller("mjs.settings.telnet.Telnet", {
 	
 	/**
 	 * Displays output to the screen.
-	 * 
-	 * @param {type} sOutput			Result of the command
 	 */
 	AppendOutput : function () {
 		var me			= this;
 		var oView		= me.getView();
-//		var sContents	= oView.wTextAreaOutput.getValue();
-//		
-//		sContents += sOutput;
 		
 		oView.wTextAreaOutput.setValue(
 			IOMy.telnet.compileLog().join("\n------------------------------------\n")

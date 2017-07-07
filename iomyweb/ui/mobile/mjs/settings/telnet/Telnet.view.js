@@ -2,8 +2,9 @@
 Title: Telnet Page
 Author: Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
 	Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
-Description: 
+Description: Page for displaying a telnet console.
 Copyright: Capsicum Corporation 2016, 2017
+
 This file is part of iOmy.
 iOmy is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

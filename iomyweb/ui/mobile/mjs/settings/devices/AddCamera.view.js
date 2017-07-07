@@ -1,8 +1,9 @@
 /*
 Title: Add IP Camera
 Author: Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
+	Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: 
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016, 2017
 This file is part of iOmy.
 iOmy is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -63,15 +64,16 @@ sap.ui.jsview("mjs.settings.devices.AddCamera", {
 									IOMy.common.NavigationChangePage( "pSettingsAddIPC" , {} , false);
 								},
 								firstStatus : new sap.m.ObjectStatus ({
-									text : "App",
+									text : "App"
 								}),
 								attributes : [
 									new sap.m.ObjectAttribute ({ 
-									title : "by",
-									text : "Pavel Khelbovich",
+										title : "by",
+										text : "Pavel Khelbovich"
 									})
-								], 	
+								]
 							}).addStyleClass(""),
+							
 							new sap.m.ObjectListItem ({
 								title:"Onvif",
 								iconDensityAware : false,
@@ -81,18 +83,18 @@ sap.ui.jsview("mjs.settings.devices.AddCamera", {
 									IOMy.common.NavigationChangePage( "pSettingsLinkAdd" , { "LinkTypeId" : IOMy.devices.onvif.LinkTypeId } , false);
 								},
 								firstStatus : new sap.m.ObjectStatus ({
-									text : "Device",
+									text : "Device"
 								}),
 								attributes : [
 									new sap.m.ObjectAttribute ({ 
 										title : "by",
-										text : "www.onvif.org",
+										text : "www.onvif.org"
 									})
-								], 	
-							}).addStyleClass(""),
-						],
-					}).addStyleClass("PadLeft7px PadRight7px"),
-				],
+								]
+							}).addStyleClass("")
+						]
+					}).addStyleClass("PadLeft7px PadRight7px")
+				]
 			}).addStyleClass("PadBottom10px PanelNoPadding UserInputForm")
 		);
 		return oPage;
