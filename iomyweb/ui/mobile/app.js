@@ -1659,6 +1659,12 @@ var aPages = [
     	"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.rules.RulesOverview\" Page!\n"
 	},
+	{ 
+		"Id":			"pTelnetPage",
+		"Location":		"mjs.settings.telnet.Telnet",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.telnet.Telnet\" Page!\n"
+	},
     //--------------------------------------------------------------------//
     // Staging
     //--------------------------------------------------------------------//

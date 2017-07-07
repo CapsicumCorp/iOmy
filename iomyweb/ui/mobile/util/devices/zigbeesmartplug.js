@@ -154,7 +154,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                 sOutput += "-----------------------------------------\n";
                 sOutput += "Turn On Join Mode\n";
                 sOutput += "-----------------------------------------\n\n";
-                sOutput += JSON.stringify(response);
+                sOutput += response.responseText;
                 sOutput += "\n\n";
                 
                 // Insert the output into the Telnet log
@@ -284,8 +284,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
             
             onFail : function (response) {
                 var oOutputWidget = oScope.byId(me.uiIDs.sTelnetOutputTextAreaID);
-                var sOutput = "";
-                sOutput = JSON.stringify(response);
+                var sOutput = response.responseText;
                 
                 // Insert the output into the Telnet log
                 me.ZigbeeTelnetLog.push({
@@ -363,7 +362,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
             },
             
             onFail : function (response) {
-                var sOutput = JSON.stringify(response);
+                var sOutput = response.responseText;
                 
                 this.onComplete(sOutput, true);
             },
@@ -859,7 +858,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                 new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
                     state: bButtonStatus,
                     change: function () {
-                        //-- Bind a link to this button for subfunctions --//
+                        //-- Bind the context of this button for subfunctions --//
                         var oCurrentButton = this;
                         //-- AJAX --//
                         IOMy.apiphp.AjaxRequest({
@@ -871,14 +870,23 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             },
                             onFail : function(response) {
                                 IOMy.common.showError(response.responseText, "Error Changing Device Status");
+								
+								oCurrentButton.setState( !oCurrentButton.getState() );
+								
                             },
                             onSuccess : function( sExpectedDataType, aAjaxData ) {
                                 //console.log(aAjaxData.ThingPortStatus);
                                 //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
-                                if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
+                                if( aAjaxData.DevicePortStatus!==undefined && aAjaxData.DevicePortStatus!==null ) {
                                     IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
                                     IOMy.common.ThingList["_"+aDeviceData.DeviceId].UILastUpdate = new Date();
                                 }
+								
+								if (aAjaxData.ThingStatus === 1) {
+									oCurrentButton.setState(true);
+								} else {
+									oCurrentButton.setState(false);
+								}
                             }
                         });
                     }
@@ -1080,6 +1088,12 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                                     IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
                                     IOMy.common.ThingList["_"+aDeviceData.DeviceId].UILastUpdate = new Date();
                                 }
+								
+								if (aAjaxData.ThingStatus === 1) {
+									oCurrentButton.setState(true);
+								} else {
+									oCurrentButton.setState(false);
+								}
                             }
                         });
                     }

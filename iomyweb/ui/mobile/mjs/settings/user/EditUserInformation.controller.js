@@ -168,7 +168,7 @@ sap.ui.controller("mjs.settings.user.EditUserInformation", {
                                                 "Gender" : 2
                                             },
                                             onSuccess : function () {
-                                                IOMy.common.showSuccess({
+                                                IOMy.common.showMessage({
 													text : "Your user information updated successfully",
 													view : thisView
 												});

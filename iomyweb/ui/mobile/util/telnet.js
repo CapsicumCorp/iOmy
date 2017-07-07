@@ -1,6 +1,6 @@
 /*
 Title: iOmy Telnet Library
-Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
+Author: Brent (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Functions that interact with a telnet interface.
 Copyright: Capsicum Corporation 2016, 2017
 
@@ -28,23 +28,28 @@ IOMy.telnet = new sap.ui.base.Object();
 $.extend(IOMy.telnet,{
     
     bRunningCommand         : false,
-    ZigbeeTelnetLog         : [],
+    TelnetLog				: {},
+	
+	mxExecutionCallbacks	: new Mutex(),
+	iLogIndex				: 0,
     
     /**
-     * Runs a custom command via telnet to the hub.
+     * Runs a telnet command to the hub.
      * 
-     * @param {type} oScope
-     * @param {type} oInputWidget
-     * @returns {undefined}
+     * @param {object} mSettings			Parameters
+     * @param {object} mSettings.command	Telnet Command
+     * @param {object} mSettings.onSuccess	(Optional) Function to run if execution is successful
+     * @param {object} mSettings.onFail		(Optional) Function to run upon failure
      */
     RunCommand : function (mSettings) {
-        //---------------------------------------------------------//
-        // Import modules, widgets and scope                       //
-        //---------------------------------------------------------//
+        //--------------------------------------------------------------------//
+        // Import modules and widgets.
+        //--------------------------------------------------------------------//
         var me              = this;
         var php             = IOMy.apiphp;
         var bError          = false;
         var aErrorMessages  = [];
+		var iLogIndex		= me.iLogIndex++;
         var fnSuccess;
         var fnFail;
         
@@ -53,15 +58,15 @@ $.extend(IOMy.telnet,{
             aErrorMessages.push(sErrMesg);
         };
         
-        //---------------------------------------------------------//
-        // API Parameters                                          //
-        //---------------------------------------------------------//
+        //--------------------------------------------------------------------//
+        // API Parameters.
+        //--------------------------------------------------------------------//
         var sUrl            = php.APILocation("hubtelnet");
-        var iHubId          = 1;
+        var iHubId          = 1; // TODO: Remember to change this when we officially support multiple hubs and premises.
         var sCommand;
         
         //--------------------------------------------------------------------//
-        // Check that all the parameters are there
+        // Check that all the parameters are there.
         //--------------------------------------------------------------------//
         if (mSettings !== undefined) {
             //----------------------------------------------------------------//
@@ -78,13 +83,6 @@ $.extend(IOMy.telnet,{
             //----------------------------------------------------------------//
             if (bError) {
                 throw new MissingArgumentException("* "+aErrorMessages.join("\n* "));
-            }
-            
-            //----------------------------------------------------------------//
-            // OPTIONAL: Find the onBefore callback function and execute it
-            //----------------------------------------------------------------//
-            if (mSettings.onBefore !== undefined) {
-                mSettings.onBefore();
             }
             
             //----------------------------------------------------------------//
@@ -111,57 +109,87 @@ $.extend(IOMy.telnet,{
         
         // Indicating that a telnet command is running
         me.bRunningCommand = true;
-        
-        // Insert the output into the Telnet log
-        me.ZigbeeTelnetLog.push({
-            "level" : "I",
-            "content" : "Running "+sCommand+"...\n\n"
-        });
+		
+		me.TelnetLog["_"+iLogIndex] = {
+			"level" : !bError ? "I" : "E",
+			"content" : "Running " + sCommand + "..."
+		};
+		
+		fnSuccess();
         
         php.AjaxRequest({
             url : sUrl,
             data : {"Mode" : "CustomTelnetCommand", "HubId" : iHubId, "CustomCommand" : sCommand},
             
             onSuccess : function (dataType, data) {
-                try {
-                    if (data.Error === false || data.Error === undefined) {
-                        var sOutput = data.Data.Custom.join("\n");
-                        this.logOutput(sOutput, false);
-                        
-                        IOMy.rules.loadRules({
-							hubID : iHubId
-						});
-                        
-                        fnSuccess();
-                    } else {
-                        this.logOutput(sOutput, true);
-                        fnFail(data.ErrMesg);
-                    }
-                } catch (error) {
-                    this.logOutput(error.name + ": " + error.message);
-                    fnFail(error.message);
-                }
+				var req = this;
+				
+				me.mxExecutionCallbacks.synchronize({
+					
+					task : function () {
+						try {
+							if (data.Error === false || data.Error === undefined) {
+								var sOutput = "\n	* " + data.Data.Custom.join("\n	* ");
+								req.logOutput(sOutput, false);
+
+								IOMy.rules.loadRules({
+									hubID : iHubId
+								});
+
+								fnSuccess(sOutput);
+							} else {
+								req.logOutput(sOutput, true);
+								fnFail(sOutput, data.ErrMesg);
+							}
+						} catch (error) {
+							req.logOutput(error.name + ": " + error.message);
+							fnFail(sOutput, error.message);
+						}
+					}
+					
+				});
             },
             
             onFail : function (response) {
-                var sOutput = JSON.stringify(response);
-                this.logOutput(sOutput, true);
-                
-                fnFail(response.responseText);
+				var req = this;
+				
+				me.mxExecutionCallbacks.synchronize({
+					
+					task : function () {
+						var sOutput = response.responseText;
+						req.logOutput(sOutput, true);
+
+						fnFail(sOutput, response.responseText);
+					}
+					
+				});
             },
             
-            logOutput : function (output, bError) {
-                var sOutput = output;
+            logOutput : function (sOutput, bError) {
+				
+				if (bError) {
+					me.TelnetLog["_"+iLogIndex].level = "E";
+				}
                 
-                // Insert the output into the Telnet log
-                me.ZigbeeTelnetLog.push({
-                    "level" : !bError ? "I" : "E",
-                    "content" : sOutput
-                });
+				// Insert the output into the Telnet log
+				me.TelnetLog["_"+iLogIndex].content = sCommand + ": " + sOutput;
                 
                 me.bRunningCommand = false;
             }
         });
     },
+	
+	compileLog : function () {
+		var me				= this;
+		var aLog			= [];
+		var mEntry;
+		
+		$.each(me.TelnetLog, function (sI, mEntry) {
+			aLog.push( mEntry.level + ": " + mEntry.content );
+			
+		});
+		
+		return aLog;
+	}
     
 });

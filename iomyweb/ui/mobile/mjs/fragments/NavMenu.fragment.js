@@ -100,6 +100,12 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 										IOMy.common.NavigationChangePage( "pSettingsAddCamera", {}, true );
 									}
 								}),
+								new sap.tnt.NavigationListItem({
+									text: "Telnet",
+									select:	function (oControlEvent) {
+										IOMy.common.NavigationChangePage( "pTelnetPage", {}, true );
+									}
+								}),
 								//--------------------------------//
 								//-- EDIT USER PAGES			--//
 								//--------------------------------//

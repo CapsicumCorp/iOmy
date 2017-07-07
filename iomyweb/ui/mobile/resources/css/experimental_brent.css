@@ -227,3 +227,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 .sap-phone .sapMTimePickerDropDown .sapMTimePickerContainer .sapMTPColumn.sapMTPSliderExpanded .sapMTimePickerSlider .sapMTPPickerSelectionFrame {
     border: 2px solid #8FC74A;
 }
+
+.cTelnetButton > span.sapMBtnInner.sapMToggleBtnPressed:not(.sapMBtnDisabled) {
+    background-color: #6dac3e;
+    border-color: #53852d;
+}
