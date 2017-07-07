@@ -235,12 +235,18 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                                                 "AddressLanguage" : sAddressLanguage
                                             },
                                             onSuccess : function () {
-                                                IOMy.common.showMessage({
-													text : "Premise address updated successfully.",
-													view : thisView
-												});
-												
-												IOMy.common.NavigationTriggerBackForward();
+												IOMy.common.RefreshCoreVariables({
+													
+													onSuccess : function () {
+														IOMy.common.showMessage({
+															text : "Premise address updated successfully.",
+															view : thisView
+														});
+
+														IOMy.common.NavigationTriggerBackForward();
+													}
+													
+												})
                                             },
                                             onFail : function (response) {
                                                 IOMy.common.showError(response.responseText, "Error",
