@@ -201,13 +201,11 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                 // Run this function if successful
                 //--------------------------------//
                 function () {
-                    var mPremise;
                     //------------------------------------------------------------//
                     // Draw the premise list complete with the permissions settings.
                     //------------------------------------------------------------//
-                    for (var i = 0; i < IOMy.common.PremiseList.length; i++) {
-                        mPremise = IOMy.common.PremiseList[i];
-                        //console.log("mPremise.Id                            === "+mPremise.Id);
+                    $.each(IOMy.common.PremiseList, function (sI, mPremise) {
+						//console.log("mPremise.Id                            === "+mPremise.Id);
                         //console.log("me.wPremiseSelectBox.getSelectedKey()  === "+me.wPremiseSelectBox.getSelectedKey());
                         if (mPremise.Id == me.wPremiseSelectBox.getSelectedKey()) {
 
@@ -216,7 +214,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                             me.DrawPremiseEntry(mPremise);
 
                         }
-                    };
+					});
                     
                     me.wUserSelectBox.setSelectedKey(me.iUserId);
                     me.FetchPermissionsForPremise(me.wUserSelectBox.getSelectedKey(), me.wPremiseSelectBox.getSelectedKey());

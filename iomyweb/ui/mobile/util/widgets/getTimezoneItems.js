@@ -36,14 +36,14 @@ $.extend(IOMy.widgets,{
         var aItems = [];
         
         // Make the list of select box items
-        for (var i = 0; i < aTimezones.length; i++) {
-            aItems.push(
+        $.each(aTimezones, function (sI, mTimezone) {
+			aItems.push(
                 new sap.ui.core.Item({
-                    text : aTimezones[i].TimezoneName,
-                    key : aTimezones[i].TimezoneId
+                    text : mTimezone.TimezoneName,
+                    key : mTimezone.TimezoneId
                 })
             );
-        }
+		})
         
         return aItems;
     }

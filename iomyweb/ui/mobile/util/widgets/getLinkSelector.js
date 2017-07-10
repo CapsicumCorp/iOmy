@@ -52,14 +52,14 @@ $.extend(IOMy.widgets,{
                 width : "100%"
             });
 
-            for (var i = 0; i < IOMy.common.LinkList.length; i++) {
-                oSBox.addItem(
+            $.each(IOMy.common.LinkList, function (sI, mLink) {
+				oSBox.addItem(
                     new sap.ui.core.Item({
-                        text : IOMy.common.LinkList[i].LinkName,
-                        key : IOMy.common.LinkList[i].LinkId
+                        text : mLink.LinkName,
+                        key : mLink.LinkId
                     })
                 );
-            }
+			});
 
             if (iLinkId !== undefined && iLinkId !== null) {
                 oSBox.setSelectedKey(iLinkId);

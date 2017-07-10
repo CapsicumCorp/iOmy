@@ -750,12 +750,11 @@ $.extend(IOMy.devices.zigbeesmartplug,{
 		//------------------------------------//
         // Capture Link Serial Code
 		//------------------------------------//
-        for (var i = 0; i < IOMy.common.LinkList.length; i++) {
-            if (IOMy.common.LinkList[i].LinkId == aDeviceData.LinkId) {
-                sSerialCode = IOMy.common.LinkList[i].LinkSerialCode;
-                break;
+        $.each(IOMy.common.LinkList, function (sI, mLink) {
+            if (mLink.LinkId == aDeviceData.LinkId) {
+                sSerialCode = mLink.LinkSerialCode;
             }
-        }
+        });
         
 		//------------------------------------//
 		// Fetch UI

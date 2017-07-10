@@ -41,19 +41,19 @@ $.extend(IOMy.widgets,{
             //====================================================================\\
             // Create the Select Box                                               \\
             //====================================================================\\
-            if (IOMy.common.PremiseList.length !== 0) {
+            if (JSON.stringify(IOMy.common.PremiseList) !== {}) {
                 var oSBox = new sap.m.Select(sId,{
                     width : "100%"
                 });
                 
-                for (var i = 0; i < IOMy.common.PremiseList.length; i++) {
-                    oSBox.addItem(
+                $.each(IOMy.common.PremiseList, function (sI, mPremise) {
+					oSBox.addItem(
                         new sap.ui.core.Item({
-                            text : IOMy.common.PremiseList[i].Name,
-                            key : IOMy.common.PremiseList[i].Id
+                            text : mPremise.Name,
+                            key : mPremise.Id
                         })
                     );
-                }
+				});
 
                 if (iPremiseId !== undefined && iPremiseId !== null) {
                     oSBox.setSelectedKey(iPremiseId);

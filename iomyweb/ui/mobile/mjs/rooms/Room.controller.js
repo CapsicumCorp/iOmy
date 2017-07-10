@@ -366,23 +366,6 @@ sap.ui.controller("mjs.rooms.Room", {
                             IOMy.common.NavigationChangePage("pSettingsRoomEdit", {room : IOMy.common.RoomSelected});
                         }
                     }
-//                    {
-//                        text: "Delete this Room",
-//                        select:    function (oControlEvent) {
-//                            var iSelected;
-//
-//                            // Find the Premise List item that has the ID of the currently selected premise.
-//                            for (var i = 0; i < IOMy.common.PremiseList.length; i++) {
-//                                if (IOMy.common.PremiseList[i].Id == me.byId("premiseBox").getSelectedKey()) {
-//                                    // Grab the correct list index.
-//                                    iSelected = i;
-//                                    break;
-//                                }
-//                            }
-//
-//                            IOMy.common.NavigationChangePage( "pSettingsPremise", {premise : IOMy.common.PremiseList[iSelected]} );
-//                        }
-//                    }
                 ]
             })
         );

@@ -86,12 +86,9 @@ $.extend(IOMy.devices,{
         
         var oLink = null;
         // Using the Link List found in common because the scope is global.
-        for (var j = 0; j < IOMy.common.LinkList.length; j++) {
-            if (IOMy.common.LinkList[j].LinkId === iLinkId) {
-                oLink = IOMy.common.LinkList[j];
-                break;
-            }
-        }
+        if (IOMy.common.LinkList["_"+iLinkId] !== undefined) {
+			oLink = IOMy.common.getLink(iLinkId);
+		}
         
         return oLink;
     },

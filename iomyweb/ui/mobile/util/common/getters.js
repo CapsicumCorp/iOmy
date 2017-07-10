@@ -42,15 +42,9 @@ $.extend(IOMy.common, {
         //--------------------------------------------------------------------//
         // Get premise and return it
         //--------------------------------------------------------------------//
-        for (var i = 0; i < this.PremiseList.length; i++) {
-            // There is still an inconsistency with the data types of these two
-            // IDs. They are the same value but not the same type. This is why
-            // two equal signs are used to compare instead of the preferred three.
-            if (this.PremiseList[i].Id == iPremiseId) {
-                oPremise = this.PremiseList[i];
-                break;
-            }
-        }
+        if (this.PremiseList["_"+iPremiseId] !== undefined) {
+			oPremise = this.PremiseList["_"+iPremiseId];
+		}
         
         if (oPremise === null) {
             throw new PremiseNotFoundException();
@@ -62,10 +56,10 @@ $.extend(IOMy.common, {
 	/**
      * Fetches a hub from IOMy.common.HubList
      * 
-     * @param {type} iHubId				ID of the premise to retrieve from memory
-     * @returns {Object}                The premise object
+     * @param {type} iHubId				ID of the hub to retrieve from memory
+     * @returns {Object}                The hub object
      * 
-     * @throws PremiseNotFoundException
+     * @throws HubNotFoundException
      */
     getHub : function (iHubId) {
         //--------------------------------------------------------------------//
@@ -76,15 +70,9 @@ $.extend(IOMy.common, {
         //--------------------------------------------------------------------//
         // Get hub and return it
         //--------------------------------------------------------------------//
-        for (var i = 0; i < this.HubList.length; i++) {
-            // There is still an inconsistency with the data types of these two
-            // IDs. They are the same value but not the same type. This is why
-            // two equal signs are used to compare instead of the preferred three.
-            if (this.HubList[i].HubId == iHubId) {
-                oHub = this.HubList[i];
-                break;
-            }
-        }
+		if (this.HubList["_"+iHubId] !== undefined) {
+			oHub = this.HubList["_"+iHubId];
+		}
         
         if (oHub === null) {
             throw new HubNotFoundException();
@@ -108,17 +96,11 @@ $.extend(IOMy.common, {
         var oLink = null;
         
         //--------------------------------------------------------------------//
-        // Get premise and return it
+        // Get link and return it
         //--------------------------------------------------------------------//
-        for (var i = 0; i < this.LinkList.length; i++) {
-            // There is still an inconsistency with the data types of these two
-            // IDs. They are the same value but not the same type. This is why
-            // two equal signs are used to compare instead of the preferred three.
-            if (this.LinkList[i].LinkId == iLinkId) {
-                oLink = this.LinkList[i];
-                break;
-            }
-        }
+        if (this.LinkList["_"+iLinkId] !== undefined) {
+			oLink = this.LinkList["_"+iLinkId];
+		}
         
         if (oLink === null) {
             throw new LinkNotFoundException();

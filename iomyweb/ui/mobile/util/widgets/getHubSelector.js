@@ -51,14 +51,14 @@ $.extend(IOMy.widgets,{
                 width : "100%"
             });
 
-            for (var i = 0; i < IOMy.common.HubList.length; i++) {
-                oSBox.addItem(
+            $.each(IOMy.common.HubList, function (sI, mHub) {
+				oSBox.addItem(
                     new sap.ui.core.Item({
-                        text : IOMy.common.HubList[i].HubName,
-                        key : IOMy.common.HubList[i].HubId
+                        text : mHub.HubName,
+                        key : mHub.HubId
                     })
                 );
-            }
+			});
 
             if (iHubId !== undefined && iHubId !== null) {
                 oSBox.setSelectedKey(iHubId);

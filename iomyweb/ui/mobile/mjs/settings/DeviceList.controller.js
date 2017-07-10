@@ -1,8 +1,9 @@
 /*
-Title: Rules Overview Controller
-Author: Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
+Title: Device List
+Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+	Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
 Description: 
-Copyright: Capsicum Corporation 2015, 2016
+Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
 

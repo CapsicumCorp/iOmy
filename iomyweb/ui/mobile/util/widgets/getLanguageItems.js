@@ -38,14 +38,14 @@ $.extend(IOMy.widgets,{
         var aItems = [];
         
         // Make the list of select box items
-        for (var i = 0; i < aLanguage.length; i++) {
-            aItems.push(
+        $.each(aLanguage, function (sI, mLanguage) {
+			aItems.push(
                 new sap.ui.core.Item({
-                    text : aLanguage[i].LanguageName,
-                    key : aLanguage[i].LanguageId
+                    text : mLanguage.LanguageName,
+                    key : mLanguage.LanguageId
                 })
             );
-        }
+		});
         
         return aItems;
     }

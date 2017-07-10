@@ -87,7 +87,7 @@ sap.ui.controller("mjs.premise.Overview", {
                 });
 
                 //-- Build the room list if there are any premises visible. --//
-                if (IOMy.common.PremiseList.length !== 0) {
+                if (JSON.stringify(IOMy.common.PremiseList) !== "{}") {
                     me.composeRoomList();
                 }
                 
@@ -465,13 +465,12 @@ sap.ui.controller("mjs.premise.Overview", {
                         select:	function (oControlEvent) {
                             // Find the Premise List item that has the ID of
                             // the currently selected premise and store it.
-                            for (var i = 0; i < IOMy.common.PremiseList.length; i++) {
-                                if (IOMy.common.PremiseList[i].Id == me.byId("premiseBox").getSelectedKey()) {
+                            $.each(IOMy.common.PremiseList, function (sI, mPremise) {
+								if (mPremise.Id == me.byId("premiseBox").getSelectedKey()) {
                                     // Grab the correct list index.
-                                    IOMy.common.PremiseSelected = IOMy.common.PremiseList[i];
-                                    break;
+                                    IOMy.common.PremiseSelected = mPremise;
                                 }
-                            }
+							});
 
                             IOMy.common.NavigationChangePage( "pSettingsPremiseInfo", {} );
                         }
@@ -481,13 +480,12 @@ sap.ui.controller("mjs.premise.Overview", {
                         select:	function (oControlEvent) {
                             // Find the Premise List item that has the ID of
                             // the currently selected premise and store it.
-                            for (var i = 0; i < IOMy.common.PremiseList.length; i++) {
-                                if (IOMy.common.PremiseList[i].Id == me.byId("premiseBox").getSelectedKey()) {
+                            $.each(IOMy.common.PremiseList, function (sI, mPremise) {
+								if (mPremise.Id == me.byId("premiseBox").getSelectedKey()) {
                                     // Grab the correct list index.
-                                    IOMy.common.PremiseSelected = IOMy.common.PremiseList[i];
-                                    break;
+                                    IOMy.common.PremiseSelected = mPremise;
                                 }
-                            }
+							})
 
                             IOMy.common.NavigationChangePage( "pSettingsPremiseAddress", {premise : IOMy.common.PremiseSelected} );
                         }

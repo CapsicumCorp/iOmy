@@ -1480,12 +1480,6 @@ var aPages = [
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.user.EditUserAddress\" Page!\n"
 	},
     {
-		"Id":			"pSettingsPremiseList",
-		"Location":		"mjs.settings.PremiseList",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.settings.PremiseList\" Page!\n"
-	},
-    {
 		"Id":			"pSettingsPremiseInfo",
 		"Location":		"mjs.settings.premise.PremiseEditInfo",
 		"Type":			"JS",

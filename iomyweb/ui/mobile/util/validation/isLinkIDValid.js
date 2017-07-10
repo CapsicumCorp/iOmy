@@ -28,8 +28,9 @@ $.extend(IOMy.validation, {
     
     /**
      * Checks a given Link ID to see if it's valid. Three things it checks for
-     * are whether it's defined, if so, then checks whether it's a valid number,
-     * and checks that the corresponding Link is found in IOMy.common.LinkList.
+     * are first whether it's defined, if so, then checks whether it's a valid
+     * number, and checks that the corresponding Link is found in
+	 * IOMy.common.LinkList.
      * 
      * @param {type} iLinkId       ID of a Link to check.
      * @returns {map}              Map containg error status and any error messages

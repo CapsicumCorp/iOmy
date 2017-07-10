@@ -50,20 +50,20 @@ $.extend(IOMy.widgets,{
                 width : "100%"
             });
 
-            for (var i = 0; i < IOMy.common.LinkTypeList.length; i++) {
-                if (IOMy.common.LinkTypeList[i].LinkTypeId == 2 ||
-                        IOMy.common.LinkTypeList[i].LinkTypeId == 6 ||
-                        IOMy.common.LinkTypeList[i].LinkTypeId == 7 ||
-                        IOMy.common.LinkTypeList[i].LinkTypeId == 8) 
+            $.each(IOMy.common.LinkTypeList, function (sI, mLinkType) {
+                if (mLinkType.LinkTypeId == 2 ||
+					mLinkType.LinkTypeId == 6 ||
+					mLinkType.LinkTypeId == 7 ||
+					mLinkType.LinkTypeId == 8) 
                 {
                     oCBox.addItem(
                         new sap.ui.core.Item({
-                            text : IOMy.common.LinkTypeList[i].LinkTypeName,
-                            key : IOMy.common.LinkTypeList[i].LinkTypeId
+                            text : mLinkType.LinkTypeName,
+                            key : mLinkType.LinkTypeId
                         })
                     );
                 }
-            }
+            });
 
             if (iLinkTypeId !== undefined && iLinkTypeId !== null) {
                 oCBox.setSelectedKey(iLinkTypeId);

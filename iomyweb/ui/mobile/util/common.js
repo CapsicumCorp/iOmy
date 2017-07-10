@@ -83,27 +83,23 @@ $.extend(IOMy.common,{
     //============================================//
 	//== LOCALE OPTIONS         				==//
 	//============================================//
-    bRegionsLoaded        : false,
+    bRegionsLoaded			: false,
     bLanguagesLoaded        : false,
-    bStatesProvincesLoaded  : false,
-    bPostCodesLoaded        : false,
     bTimezonesLoaded        : false,
     
-    Regions               : [],
-    Languages               : [],
-    StatesProvinces         : [],
-    PostCodes               : [],
-    Timezones               : [],
+    Regions					: {},
+    Languages               : {},
+    Timezones               : {},
     
 	//============================================//
 	//== PREMISE AND GATEWAY LIST				==//
 	//============================================//
 	//-- An Array used to store the 
 	//--------------------------------------------//
-	PremiseList:					[],
-	HubList:					[],
+	PremiseList:					{},
+	HubList:						{},
 	PremiseListLastUpdate:			new Date(),
-	HubListLastUpdate:			new Date(),
+	HubListLastUpdate:				new Date(),
 	PremiseSelected:				[],
 	
 	RoomsList:						{},
@@ -114,9 +110,9 @@ $.extend(IOMy.common,{
 	//============================================//
 	//-- An Array used to store the Thing List  --//
 	//--------------------------------------------//
-    LinkList                        : [],
+    LinkList                        : {},
     LinkListLastUpdate:   			new Date(),
-    LinkTypeList                    : [],
+    LinkTypeList                    : {},
 	ThingList						: {},
     ThingListLastUpdate:			new Date(),
 	RSCategoriesList				: [],
@@ -211,7 +207,7 @@ $.extend(IOMy.common,{
 				sErrMesg += "These are common causes for this error message. \n";
 				sErrMesg += "1.) Database Problem: \tThe IOMy Database may have stopped running! Please check with whoever manages your system. \n";
 				sErrMesg += "2.) IOMY Version Upgrade: \tThe Person that manages your IOMy system may be rolling out a new update. \n";
-				IOMy.common.showError(sErrMesg, "Authentication Error",
+				IOMy.common.showError(sErrMesg, "Access Error",
                     function () {
                         // Refresh the page to redirect to the login page.
                         window.location.reload(true);
@@ -611,14 +607,14 @@ $.extend(IOMy.common,{
 
             onSuccess : function (responseType, data) {
                 try {
-                    me.Regions = [];
+                    me.Regions = {};
                     
                     for (var i = 0; i < data.length; i++) {
-                        me.Regions.push({
+                        me.Regions["_"+data[i].REGION_PK] = {
                             RegionId            : data[i].REGION_PK,
                             RegionName          : data[i].REGION_NAME,
                             RegionAbbreviation  : data[i].REGION_NAME2
-                        });
+                        };
                     }
                     
                     me.bRegionsLoaded = true;
@@ -675,13 +671,13 @@ $.extend(IOMy.common,{
 
             onSuccess : function (responseType, data) {
                 try {
-                    me.Languages = [];
+                    me.Languages = {};
                     
                     for (var i = 0; i < data.length; i++) {
-                        me.Languages.push({
+                        me.Languages["_"+data[i].LANGUAGE_PK] = {
                             LanguageId : data[i].LANGUAGE_PK,
                             LanguageName : data[i].LANGUAGE_NAME
-                        });
+                        };
                     }
                     
                     me.bLanguagesLoaded = true;
@@ -737,13 +733,13 @@ $.extend(IOMy.common,{
 
             onSuccess : function (responseType, data) {
                 try {
-                    me.Timezones = [];
+                    me.Timezones = {};
                     
                     for (var i = 0; i < data.length; i++) {
-                        me.Timezones.push({
+                        me.Timezones["_"+data[i].TIMEZONE_PK] = {
                             TimezoneId : data[i].TIMEZONE_PK,
                             TimezoneName : data[i].TIMEZONE_TZ
-                        });
+                        };
                     }
                     
                     me.bTimezonesLoaded = true;
@@ -783,10 +779,10 @@ $.extend(IOMy.common,{
 			OrderByClause : ["LINK_PK asc"],
 			
 			onSuccess : function (responseType, data) {
-				me.LinkList = [];
+				me.LinkList = {};
                 
 				for (var i = 0; i < data.length; i++) {
-					me.LinkList.push({
+					me.LinkList["_"+data[i].LINK_PK] = {
 						"LinkId" : data[i].LINK_PK,
 						"LinkName" : data[i].LINK_NAME,
 						"LinkSerialCode" : data[i].LINK_SERIALCODE,
@@ -803,7 +799,7 @@ $.extend(IOMy.common,{
                         "LinkConnPort" : data[i].LINKCONN_PORT,
                         "PremiseId" : data[i].ROOMS_PREMISE_FK,
 						"CommId" : data[i].LINK_COMM_FK
-					});
+					};
 				}
                 
                 //--------------------------------------------------------//
@@ -846,21 +842,14 @@ $.extend(IOMy.common,{
 			OrderByClause : ["LINKTYPE_PK asc"],
 			
 			onSuccess : function (responseType, data) {
-				me.LinkTypeList = [];
+				me.LinkTypeList = {};
 				
 				for (var i = 0; i < data.length; i++) {
-					me.LinkTypeList.push({
+					me.LinkTypeList["_"+data[i].LINKTYPE_PK] = {
 						"LinkTypeId" : data[i].LINKTYPE_PK,
 						"LinkTypeName" : data[i].LINKTYPE_NAME,
-					});
+					};
 				}
-                
-                //--------------------------------------------------------//
-                // ONLY add these hard-coded devices if user is 'demo'.
-                //--------------------------------------------------------//
-//                if (IOMy.common.CurrentUsername === "demo") {
-//                    IOMy.experimental.addDemoDataToLinkTypeList();
-//                }
 				
 				//-- Perform the "onSuccess" function if applicable --//
 				if(oConfig.onSuccess !== undefined) {
@@ -1751,10 +1740,10 @@ $.extend(IOMy.common,{
 			OrderByClause : ["PREMISE_NAME asc"],
 			
 			onSuccess : function (responseType, data) {
-				me.PremiseList = [];
+				me.PremiseList = {};
 				
 				for (var i = 0; i < data.length; i++) {
-					me.PremiseList.push({
+					me.PremiseList["_"+data[i].PREMISE_PK] = {
 						"Id" : data[i].PREMISE_PK,
 						"Name" : data[i].PREMISE_NAME,
 						"Desc" : data[i].PREMISE_DESCRIPTION,
@@ -1770,7 +1759,7 @@ $.extend(IOMy.common,{
 						"PermWrite" : data[i].PERMPREMISE_WRITE,
 						"PermOwner" : data[i].PERMPREMISE_OWNER,
                         "PermRoomAdmin" : data[i].PERMPREMISE_ROOMADMIN
-					});
+					};
 				}
 				
 				//-- Update the Timestamp on when the PremiseList was last updated --//
@@ -1820,10 +1809,10 @@ $.extend(IOMy.common,{
 			
 			onSuccess : function (sResponseType, aData) {
 				//-- Clear the HubList --//
-				me.HubList = [];
+				me.HubList = {};
 				
 				for (var i = 0; i < aData.length; i++) {
-					me.HubList.push({
+					me.HubList["_"+aData[i].HUB_PK] = {
 						"PermRead":					aData[i].PERMPREMISE_READ,
 						"PermWrite":				aData[i].PERMPREMISE_WRITE,
 						"PermOwner":				aData[i].PERMPREMISE_OWNER,
@@ -1835,7 +1824,7 @@ $.extend(IOMy.common,{
 						"HubIPAddress":             aData[i].HUB_IPADDRESS,
 						"HubTypeId":                aData[i].HUBTYPE_PK,
 						"HubTypeName":              aData[i].HUBTYPE_NAME
-					});
+					};
 				}
 				
 				//-- Update the Timestamp on when the HubList was last updated --//

@@ -36,16 +36,13 @@ $.extend(IOMy.functions,{
      */
     getLinkTypeIDOfLink : function (iLinkId) {
         var iLinkTypeId = null;
-        var oLink;
         
-        for (var i = 0; i < IOMy.common.LinkList.length; i++) {
-            oLink = IOMy.common.LinkList[i];
-            if (oLink.LinkId == iLinkId) {
-                iLinkTypeId = oLink.LinkTypeId;
-                break;
+        $.each(IOMy.common.LinkList.length, function (sI, mLink) {
+			if (mLink.LinkId == iLinkId) {
+                iLinkTypeId = mLink.LinkTypeId;
             }
-        }
-        
+	    });
+		
         return iLinkTypeId;
     }
     

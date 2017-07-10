@@ -38,14 +38,14 @@ $.extend(IOMy.widgets,{
         var aItems = [];
         
         // Make the list of select box items
-        for (var i = 0; i < aRegions.length; i++) {
-            aItems.push(
+		$.each(aRegions, function (sI, mRegion) {
+			aItems.push(
                 new sap.ui.core.Item({
-                    text : aRegions[i].RegionName,
-                    key : aRegions[i].RegionId
+                    text : mRegion.RegionName,
+                    key : mRegion.RegionId
                 })
             );
-        }
+		});
         
         return aItems;
     },

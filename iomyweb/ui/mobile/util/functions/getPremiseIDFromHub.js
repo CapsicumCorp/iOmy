@@ -37,17 +37,13 @@ $.extend(IOMy.functions,{
     getPremiseIDFromHub : function (iHubId) {
         var iPremiseId = -1;
         var aHubList = IOMy.common.HubList;
-        var mHub;
         
-        for (var i = 0; i < aHubList.length; i++) {
-            mHub = aHubList[i];
-            
-            // If the target hub is found, then grab its Premise ID, and end the loop.
+        $.each(aHubList, function (sI, mHub) {
+			// If the target hub is found, then grab its Premise ID.
             if (mHub.HubId == iHubId) {
                 iPremiseId = mHub.PremiseId;
-                break;
             }
-        }
+		});
         
         return iPremiseId;
     }

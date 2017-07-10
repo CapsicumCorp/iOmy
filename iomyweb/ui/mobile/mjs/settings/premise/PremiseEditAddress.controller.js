@@ -246,7 +246,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 														IOMy.common.NavigationTriggerBackForward();
 													}
 													
-												})
+												});
                                             },
                                             onFail : function (response) {
                                                 IOMy.common.showError(response.responseText, "Error",

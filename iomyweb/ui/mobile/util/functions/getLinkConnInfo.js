@@ -36,22 +36,18 @@ $.extend(IOMy.functions,{
      */
     getLinkConnInfo : function (iLinkId) {
         var mLinkConnInfo = {};
-        var oLink;
-        
-        for (var i = 0; i < IOMy.common.LinkList.length; i++) {
-            oLink = IOMy.common.LinkList[i];
-            if (oLink.LinkId == iLinkId) {
+		
+        $.each(IOMy.common.LinkList, function (sI, mLink) {
+			if (mLink.LinkId == iLinkId) {
                 // Collect the Link Conn information from memory.
-                mLinkConnInfo.LinkConnId = oLink.LinkConnId;
-                mLinkConnInfo.LinkConnName = oLink.LinkConnName;
-                mLinkConnInfo.LinkConnAddress = oLink.LinkConnAddress;
-                mLinkConnInfo.LinkConnUsername = oLink.LinkConnUsername;
-                mLinkConnInfo.LinkConnPassword = oLink.LinkConnPassword;
-                mLinkConnInfo.LinkConnPort = oLink.LinkConnPort;
-                
-                break;
+                mLinkConnInfo.LinkConnId = mLink.LinkConnId;
+                mLinkConnInfo.LinkConnName = mLink.LinkConnName;
+                mLinkConnInfo.LinkConnAddress = mLink.LinkConnAddress;
+                mLinkConnInfo.LinkConnUsername = mLink.LinkConnUsername;
+                mLinkConnInfo.LinkConnPassword = mLink.LinkConnPassword;
+                mLinkConnInfo.LinkConnPort = mLink.LinkConnPort;
             }
-        }
+		});
         
         return mLinkConnInfo;
     }
