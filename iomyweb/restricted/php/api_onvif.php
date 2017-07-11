@@ -38,10 +38,10 @@ if( !defined('SITE_BASE') ) {
 $bError                     = false;        //-- BOOLEAN:       Used to indicate if an error has been caught --//
 $sErrMesg                   = "";           //-- STRING:        Used to store the error message after an error has been caught --//
 $sOutput                    = "";           //-- STRING:        Used to hold this API Request's body when everything is successful. --//
-$aResult                    = array();      //-- ARRAY:         Used to store the results.			--//
+$aResult                    = array();      //-- ARRAY:         Used to store the results.  --//
 
-$sPostMode                  = "";           //-- STRING:        Used to store which Mode the API should function in.			--//
-$sPostNetworkAddress        = "";           //-- STRING:        Used to store the "DeviceNetworkAddress" that is passed as a HTTP POST variable.		--//
+$sPostMode                  = "";           //-- STRING:        Used to store which Mode the API should function in. --//
+$sPostNetworkAddress        = "";           //-- STRING:        Used to store the "DeviceNetworkAddress" that is passed as a HTTP POST variable. --//
 $iPostNetworkPort           = "";           //-- INTEGER:       Used to store the "".	--//
 $sPostUsername              = "";           //-- STRING:        Used to store the "".	--//
 $sPostPassword              = "";           //-- STRING:        Used to store the "".	--//
@@ -50,8 +50,8 @@ $sPostThumbProfileName      = "";           //-- STRING:        --//
 $sPostCapabilitiesType      = "";           //-- STRING:        --//
 $sOnvifCameraName           = "";           //-- STRING:        --//
 $sOnvifProfileName          = "";           //-- STRING:        --//
-$aSensorList                = array();      //-- ARRAY:         Used to store the 
-$aTempFunctionResult        = array();      //-- ARRAY:         Used to store the functions results before being parsed and converted to the correct format to be returned.		--//
+$aSensorList                = array();      //-- ARRAY:         Used to store the --//
+$aTempFunctionResult        = array();      //-- ARRAY:         Used to store the functions results before being parsed and converted to the correct format to be returned. --//
 $iPostLinkId                = 0;            //-- INTEGER:       --//
 $iPostThingId               = 0;            //-- INTEGER:       --//
 $aTempFunctionResult1       = array();      //-- ARRAY:         --//
@@ -61,6 +61,8 @@ $bFound                     = false;        //-- BOOLEAN:       Used to indicate
 $iAPICommTypeId             = 0;            //-- INTEGER:       Will hold the the CommTypeId for comparisons --//
 $iLinkPermWrite             = 0;            //-- INTEGER:       --//
 $aCommInfo                  = array();      //-- ARRAY:         --//
+$sPostStreamAuth            = "";           //-- STRING:        Used to hold the Stream Authentication in a JSON string if the "Stream Url" and the "Thumbnail Url" require it. --//
+$aPostStreamAuth            = array();      //-- ARRAY:         Used to Stream Authentication after it has been converted into an array. --//
 
 //------------------------------------------------------------//
 //-- 1.3 - Import Required Libraries                        --//
@@ -92,6 +94,7 @@ if($bError===false) {
 		array( "Name"=>'StreamProfile',             "DataType"=>'STR' ),
 		array( "Name"=>'ThumbnailProfile',          "DataType"=>'STR' ),
 		array( "Name"=>'CameraName',                "DataType"=>'STR' ),
+		array( "Name"=>'StreamAuth',                "DataType"=>'STR' ),
 		array( "Name"=>'PosX',                      "DataType"=>'FLO' ),
 		array( "Name"=>'PosY',                      "DataType"=>'FLO' ),
 		array( "Name"=>'Zoom',                      "DataType"=>'FLO' ),
@@ -120,7 +123,8 @@ if($bError===false) {
 			$sPostMode!=="PTZAbsoluteMove"              && $sPostMode!=="PTZTimedMove"                  && 
 			$sPostMode!=="NetAddressCheckForOnvif"      && $sPostMode!=="NetAddressListCapabilities"    && 
 			$sPostMode!=="NetAddressLookupDeviceTime"   && $sPostMode!=="LookupVideoSources"            && 
-			$sPostMode!=="LookupProfiles"               
+			$sPostMode!=="LookupProfiles"               && $sPostMode!=="ChangeThingProfiles"           
+			
 		) {
 			$bError    = true;
 			$sErrMesg .= "Error Code:'0101' \n";
@@ -148,7 +152,7 @@ if($bError===false) {
 				$sPostNetworkAddress = $aHTTPData["DeviceNetworkAddress"];
 				
 				if( $sPostNetworkAddress===false ) {
-					$bError = true;
+					$bError    = true;
 					$sErrMesg .= "Error Code:'0103' \n";
 					$sErrMesg .= "Non numeric \"DeviceNetworkAddress\" parameter! \n";
 					$sErrMesg .= "Please use a valid \"DeviceNetworkAddress\" parameter\n";
@@ -267,7 +271,7 @@ if($bError===false) {
 	//-- 2.2.3.A - Retrieve Thing Id                    --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="PTZAbsoluteMove" || $sPostMode==="PTZTimedMove" ) {
+		if( $sPostMode==="PTZAbsoluteMove" || $sPostMode==="PTZTimedMove" || $sPostMode==="ChangeThingProfiles" ) {
 			try {
 				//-- Retrieve the "ThingId" --//
 				$iPostThingId = $aHTTPData["ThingId"];
@@ -350,7 +354,7 @@ if($bError===false) {
 	//-- 2.2.?.? - Retrieve "StreamProfile"             --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="NewThing" ) {
+		if( $sPostMode==="NewThing" || $sPostMode==="ChangeThingProfiles" ) {
 			try {
 				//-- Retrieve the "StreamProfile" name --//
 				$sPostStreamProfileName = $aHTTPData["StreamProfile"];
@@ -377,7 +381,7 @@ if($bError===false) {
 	//-- 2.2.?.? - Retrieve "ThumbnailProfile"          --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="NewThing" ) {
+		if( $sPostMode==="NewThing" || $sPostMode==="ChangeThingProfiles" ) {
 			try {
 				//-- Retrieve the "ThumbnailProfile" --//
 				$sPostThumbProfileName = $aHTTPData["ThumbnailProfile"];
@@ -426,8 +430,6 @@ if($bError===false) {
 			}
 		}
 	}
-	
-	
 	
 	//----------------------------------------------------//
 	//-- 2.2.?.? - Retrieve "PosX"                      --//
@@ -540,6 +542,42 @@ if($bError===false) {
 			}
 		}
 	}
+	
+	//----------------------------------------------------//
+	//-- 2.2.?.? - Retrieve Stream Authentication       --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		if( $sPostMode==="NewThing" || $sPostMode==="ChangeThingProfiles" ) {
+			try {
+				//-- Retrieve the "CapabilitiesType" --//
+				$sPostStreamAuth = $aHTTPData["StreamAuth"];
+				
+				if( $sPostStreamAuth!=="" && $sPostStreamAuth!==false && $sPostStreamAuth!==null ) {
+					//------------------------------------------------//
+					//-- "StreamAuth" JSON Parsing                  --//
+					//------------------------------------------------//
+					$aPostStreamAuth = json_decode( $sPostStreamAuth, true );
+					
+					//------------------------------------------------//
+					//-- IF "null" or a false like value            --//
+					//------------------------------------------------//
+					if( $aPostStreamAuth===null  ) {
+						$aPostStreamAuth = false;
+					}
+				} else {
+					$aPostStreamAuth = false;
+				}
+				
+			} catch( Exception $e0134 ) {
+				$bError    = true;
+				$iErrCode  = 134;
+				$sErrMesg .= "Error Code:'0134' \n";
+				$sErrMesg .= "Problem with the \"StreamAuth\" parameter!\n";
+				$sErrMesg .= "Please use a valid JSON \"StreamAuth\" parameter.\n";
+				$sErrMesg .= "eg. \n { \"Username\":\"Owner\", \"Password\":\"*******\" } \n\n";
+			}
+		}
+	}
 }
 
 
@@ -646,7 +684,7 @@ if( $bError===false ) {
 		//================================================================//
 		//== 4.4 - Lookup Thing Info                                    ==//
 		//================================================================//
-		if( $sPostMode==="PTZAbsoluteMove" || $sPostMode==="PTZTimedMove" ) {
+		if( $sPostMode==="PTZAbsoluteMove" || $sPostMode==="PTZTimedMove" || $sPostMode==="ChangeThingProfiles" ) {
 			
 			$iOnvifThingTypeId = LookupFunctionConstant("OnvifThingTypeId");
 			
@@ -687,7 +725,8 @@ if( $bError===false ) {
 		if( 
 			$sPostMode==="LookupVideoSources"   || $sPostMode==="NewThing"             || 
 			$sPostMode==="PTZAbsoluteMove"      || $sPostMode==="PTZTimedMove"         || 
-			$sPostMode==="LookupProfiles"       || $sPostMode==="ListServerInfo" 
+			$sPostMode==="LookupProfiles"       || $sPostMode==="ListServerInfo"       || 
+			$sPostMode==="ChangeThingProfiles"
 		) {
 			//----------------------------------------------------------------------------//
 			//-- STEP 2: Look up the details to the "Link" that belongs to that "Thing" --//
@@ -713,6 +752,7 @@ if( $bError===false ) {
 					//-- Lookup the Comm Info --//
 					$aCommInfo = GetCommInfo( $aTempFunctionResult2['Data']['LinkCommId'] );
 					
+					//--  --//
 					if( $aCommInfo['Error']===false ) {
 						$iLinkCommType          = $aCommInfo['Data']['CommTypeId'];
 						
@@ -734,6 +774,7 @@ if( $bError===false ) {
 			}	//-- ENDIF No errors detected --//
 		}	//-- ENDIF --//
 		
+		
 		//----------------------------------------------------------------------------//
 		//-- 4.6 - ESTABLISH THE PHP ONVIF OBJECT                                   --//
 		//----------------------------------------------------------------------------//
@@ -743,7 +784,7 @@ if( $bError===false ) {
 				$sPostMode==="NetworkAddressServerInfo" || $sPostMode==="ListServerInfo"           || 
 				$sPostMode==="LookupVideoSources"       || $sPostMode==="LookupProfiles"           || 
 				$sPostMode==="PTZAbsoluteMove"          || $sPostMode==="PTZTimedMove"             || 
-				$sPostMode==="PTZTimedMove"  
+				$sPostMode==="PTZTimedMove"             || $sPostMode==="ChangeThingProfiles"      
 			) {
 				//--------------------------------------------------------------------//
 				//-- 4.6.1 - Check if a PHPOnvif class can be created for that IP   --//
@@ -1049,7 +1090,7 @@ if( $bError===false ) {
 		//================================================================//
 		//== 5.6 - MODE: Add New LINK or THING                          ==//
 		//================================================================//
-		} else if( $sPostMode==="AddNewOnvifServer" || $sPostMode==="NewThing" ){
+		} else if( $sPostMode==="AddNewOnvifServer" || $sPostMode==="NewThing" || $sPostMode==="ChangeThingProfiles" ) {
 			try {
 				if( $sPostMode==="AddNewOnvifServer" ) {
 					//--------------------------------------------------------------------//
@@ -1076,7 +1117,7 @@ if( $bError===false ) {
 							$bError = true;
 							$iErrCode  = 6401+$aTempFunctionResult2['ErrCode'];
 							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
-							$sErrMesg .= "Problem when adding the new Comm to the database\n";
+							$sErrMesg .= "Problem when adding the new Comm to the database.\n";
 							$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
 						}
 					}
@@ -1089,13 +1130,13 @@ if( $bError===false ) {
 					if( $aResult['Error']===true ) {
 						$bError = true;
 						$sErrMesg .= "Error Code:'6431' \n";
-						$sErrMesg .= "Error occurred while submitting the Thing into the Database\n";
+						$sErrMesg .= "Error occurred while submitting the Link into the Database.\n";
 						$sErrMesg .= $aResult['ErrMesg'];
 					}
 						
 				} else if( $sPostMode==="NewThing" ) {
 					//--------------------------------------------------------------------//
-					//-- Lookup if the User has the "Write" Permission to the Premise   --//
+					//-- Lookup if the User has the "Write" Permission to the Device   --//
 					//--------------------------------------------------------------------//
 					if( $iLinkPermWrite!==1 ) {
 						$bError = true;
@@ -1111,7 +1152,35 @@ if( $bError===false ) {
 						//--------------------------------//
 						//-- Create the Profile         --//
 						//--------------------------------//
-						$aResult = $oPHPOnvifClient->AddStreamsAsThingInDatabase( $iPostLinkId, $sPostStreamProfileName, $sPostThumbProfileName, $sOnvifCameraName );
+						$aResult = $oPHPOnvifClient->AddStreamsAsThingInDatabase( $iPostLinkId, $sPostStreamProfileName, $sPostThumbProfileName, $sOnvifCameraName, $aPostStreamAuth );
+						
+						if( $aResult['Error']===true ) {
+							$bError = true;
+							$sErrMesg .= "Error Code:'6433' \n";
+							$sErrMesg .= "Error occurred while submitting the Thing into the Database\n";
+							$sErrMesg .= $aResult['ErrMesg'];
+						}
+					}
+					
+				} else if( $sPostMode==="ChangeThingProfiles" ) {
+					//--------------------------------------------------------------------//
+					//-- Lookup if the User has the "Write" Permission to the Device   --//
+					//--------------------------------------------------------------------//
+					if( $iLinkPermWrite!==1 ) {
+						$bError = true;
+						$sErrMesg .= "Error Code:'6432' \n";
+						$sErrMesg .= "Permission issue detected!\n";
+						$sErrMesg .= "The User doesn't appear to have the \"Write\" permission to add a Thing.\n";
+					}
+					
+					//--------------------------------------------------------------------//
+					//-- Add the stream to the database                                 --//
+					//--------------------------------------------------------------------//
+					if( $bError===false ) {
+						//--------------------------------//
+						//-- Create the Profile         --//
+						//--------------------------------//
+						$aResult = $oPHPOnvifClient->EditThingStreamsInDatabase( $iPostThingId, $sPostStreamProfileName, $sPostThumbProfileName, $aPostStreamAuth );
 						
 						if( $aResult['Error']===true ) {
 							$bError = true;
@@ -1178,8 +1247,6 @@ if( $bError===false ) {
 					//-- ELSEIF - Mode is PTZTimedMove                                  --//
 					//--------------------------------------------------------------------//
 					} else if( $sPostMode==="PTZTimedMove" ) {
-
-						
 						
 						//--------------------------------------------------------------------//
 						//-- 5.8.4 - Perform the PTZ Timed Move                             --//
@@ -1216,7 +1283,7 @@ if( $bError===false ) {
 		} else {
 			$bError = true;
 			$sErrMesg .= "Error Code:'0401' \n";
-			$sErrMesg .= "Problem with the 'Mode' Parameters! \n";
+			$sErrMesg .= "Problem with the 'Mode' Parameter! \n";
 		}
 		
 	} catch( Exception $e0400 ) {

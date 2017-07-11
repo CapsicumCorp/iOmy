@@ -4247,13 +4247,9 @@ function ContainsPhpXmlSoapAttribute( $aXmlSoapElement, $sAttributeName, $bRemov
 								//-- Return Sub Element --//
 								return $SubElement;
 							}
-							
-							
 						}
 					}
-					
 				}
-				
 			}//-- ENDIF Verify SubElement --//
 		}//-- END FOREACH SubElement --//
 		
@@ -4261,7 +4257,6 @@ function ContainsPhpXmlSoapAttribute( $aXmlSoapElement, $sAttributeName, $bRemov
 		//-- Critical Error so return false --//
 		return false;
 	}
-	
 	
 	//--------------------------------------------//
 	//-- 9.0 - RETURN FALSE                     --//
@@ -4272,7 +4267,237 @@ function ContainsPhpXmlSoapAttribute( $aXmlSoapElement, $sAttributeName, $bRemov
 
 
 
+function ParseReplaceAndRebuildUrl( $sUrl, $aReplaceData ) {
+	//--------------------------------------------//
+	//-- 1.0 - DECLARE VARIABLES                --//
+	//--------------------------------------------//
+	$bError           = false;
+	$sErrMesg         = "";
+	$aResult          = array();
+	
+	$sFinalUrl        = "";
+	$aUrlParmeters    = array();
+	
+	
+	//--------------------------------------------//
+	//-- 2.0 - EXTRACT VARIABLES FROM URL       --//
+	//--------------------------------------------//
+	$aUrlParmeters = parse_url( $sUrl );
+	
+	if( $aUrlParmeters===false ) {
+		$bError    = false;
+		$sErrMesg .= "Unable to parse the URL! \n";
+	}
+	
+	
+	//--------------------------------------------//
+	//-- 4.0 - EDIT PART OF THE URL             --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		//------------------------//
+		//-- 4.1 - Protocol     --//
+		if( isset( $aReplaceData['protocol'] ) ) {
+			$aUrlParmeters['scheme'] = $aReplaceData['protocol'];
+		}
+		
+		//------------------------//
+		//-- 4.2 - Host         --//
+		if( isset( $aReplaceData['host'] ) ) {
+			$aUrlParmeters['host'] = $aReplaceData['host'];
+		}
+		
+		//------------------------//
+		//-- 4.3 - Port         --//
+		if( isset( $aReplaceData['port'] ) ) {
+			$aUrlParmeters['port'] = $aReplaceData['port'];
+		}
+		
+		//------------------------//
+		//-- 4.4 - User         --//
+		if( isset( $aReplaceData['user'] ) ) {
+			$aUrlParmeters['user'] = $aReplaceData['user'];
+		}
+		
+		//------------------------//
+		//-- 4.5 - Password     --//
+		if( isset( $aReplaceData['password'] ) ) {
+			$aUrlParmeters['password'] = $aReplaceData['password'];
+		}
+		
+		//------------------------//
+		//-- 4.6 - Path         --//
+		if( isset( $aReplaceData['path'] ) ) {
+			$aUrlParmeters['path'] = $aReplaceData['path'];
+		}
+		
+		//------------------------//
+		//-- 4.7 - Query        --//
+		if( isset( $aReplaceData['query'] ) ) {
+			$aUrlParmeters['query'] = $aReplaceData['query'];
+		}
+		
+		//------------------------//
+		//-- 4.8 - Fragment     --//
+		if( isset( $aReplaceData['fragment'] ) ) {
+			$aUrlParmeters['fragment'] = $aReplaceData['fragment'];
+		}
+	}
+	
+	
+	//--------------------------------------------//
+	//-- 8.0 - BUILD THE URL                    --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		$sFinishedURL = RebuildTheURL( $aUrlParmeters );
+	}
+	
+	
+	//--------------------------------------------//
+	//-- 9.0 - RETURN RESULTS                   --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return array( "Error"=>false, "Url"=>$sFinishedURL );
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
 
+
+
+
+function RebuildTheURL( $aUrlParameters ) {
+	
+	//--------------------------------------------//
+	//-- 1.0 - DECLARE VARIABLES                --//
+	//--------------------------------------------//
+	$bError             = false;
+	$sErrMesg           = "";
+	$aResult            = array();
+	
+	$sFinishedURL       = "";
+	$sProtocol          = "";
+	$sAuthSection       = "";
+	$sHostname          = "";
+	$sPort              = "";
+	$sQuery             = "";
+	$sFragment          = "";
+	
+	//----------------------------------------------------//
+	//-- 4.0 - SETUP THE VARIABLES                      --//
+	//----------------------------------------------------//
+	
+	//------------------------------------//
+	//-- 4.1 - Scheme / Protocol        --//
+	if( $bError===false ) {
+		if( isset( $aUrlParameters['scheme'] ) ) {
+			//-- Check if it is the special 'file' rule --//
+			if( $aUrlParameters['scheme']==="file" ) {
+				//-- Add the special triple slash --//
+				$sProtocol = "file:///";
+				
+			} else {
+				//-- Add the Scheme / Protocol --//
+				$sProtocol = $aUrlParameters['scheme']."://";
+				
+			}
+		} else {
+			//-- Default to "http://" --//
+			$sProtocol = "http://";
+		}
+	}
+	
+	
+	//------------------------------------//
+	//-- 4.2 - Username and Password    --//
+	if( $bError===false ) {
+		if( isset( $aUrlParameters['user'] ) && isset( $aUrlParameters['password'] ) ) {
+			//-- Check if the 'user' and 'password' is valid --//
+			if( $aUrlParameters['user']!==null && $aUrlParameters['user']!==false && $aUrlParameters['user']!=="" ) {
+				if( $aUrlParameters['password']!==null && $aUrlParameters['password']!==false && $aUrlParameters['password']!=="" ) {
+					//-- Create the Authentication section --//
+					$sAuthSection = urlencode( $aUrlParameters['user'] ).":".urlencode( $aUrlParameters['password']."@" );
+				}
+			}
+		} else {
+			//-- Leave blank --//
+			
+		}
+	}
+	
+		
+	//------------------------------------//
+	//-- 4.3 - Host                     --//
+	if( $bError===false ) {
+		if( isset( $aUrlParameters['host'] ) ) {
+			if( $aUrlParameters['host']!==null && $aUrlParameters['host']!==false && $aUrlParameters['host']!=="" ) {
+				//-- Set the hostname --//
+				$sHostname = $aUrlParameters['host'];
+			}
+			
+		} else {
+			//-- ERROR:  --//
+			$bError = true;
+			$sErrMesg .= "Missing the Hostname!";
+			
+		}
+	}
+		
+	//------------------------------------//
+	//-- 4.4 - Port                     --//
+	if( $bError===false ) {
+		if( isset( $aUrlParameters['port'] ) ) {
+			if( $aUrlParameters['port']!==null && $aUrlParameters['port']!==false && $aUrlParameters['port']!=="" ) {
+				//-- Set the Port --//
+				$sPort = ":".$aUrlParameters['port'];
+				
+			}
+		}
+	}
+	
+	//------------------------------------//
+	//-- 4.5 - Path                     --//
+	if( $bError===false ) {
+		if( isset( $aUrlParameters['query'] ) ) {
+			if( $aUrlParameters['query']!==null && $aUrlParameters['query']!==false && $aUrlParameters['query']!=="" ) {
+				//-- Query --//
+				$sQuery = $aUrlParameters['query'];
+				
+			}
+		}
+	}
+	
+	//------------------------------------//
+	//-- 4.6 - Fragment                 --//
+	if( $bError===false ) {
+		if( isset( $aUrlParameters['fragment'] ) ) {
+			if( $aUrlParameters['fragment']!==null && $aUrlParameters['fragment']!==false && $aUrlParameters['fragment']!=="" ) {
+				//-- Fragment --//
+				$sFragment = $aUrlParameters['fragment'];
+			}
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - BUILD THE URL                            --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		$sFinishedURL = $sProtocol.$sAuthSection.$sHostname.$sPort.$sQuery.$sFragment;
+	}
+	
+	//--------------------------------------------//
+	//-- 9.0 - RETURN RESULTS                   --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return array( "Error"=>false, "Url"=>$sFinishedURL );
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+	
+}
 
 
 ?>

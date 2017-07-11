@@ -85,6 +85,7 @@ class PHPOnvif {
 	protected $sNetworkPort         = '';           //-- STRING:        Used to hold the IP Port that is used for Onvif				--//
 	protected $sUsername            = '';           //-- STRING:        --//
 	protected $sPassword            = '';           //-- STRING:        --//
+	protected $bEnvelopeSecurity    = false;        //-- BOOLEAN:       --//
 	protected $sDeviceOnvifUrl      = '';           //-- STRING:        --//
 	protected $iDeltaTime           = 0;            //-- INTEGER:       --//
 	protected $aDateAndTime         = array();      //-- ARRAY:         --//
@@ -100,6 +101,9 @@ class PHPOnvif {
 		//----------------------------------------------------//
 		//-- 1.0 - INITIALISE                               --//
 		//----------------------------------------------------//
+		$bNoAuth      = false;
+		
+		
 		$this->sNetworkAddress  = $sIPAddress;
 		$this->sNetworkPort     = $sIPPort;
 		$this->sUsername        = $sUsername;
@@ -130,13 +134,38 @@ class PHPOnvif {
 				
 				//-- Flag that the initial connection was made --//
 				$this->bInitialised = true;
+				$this->SetEnvelopeSecurity(true);
 				
 			//--------------------------------------------//
-			//-- ELSE error extracting Date and Time    --//
+			//-- ELSE IF No date and time support       --//
 			//--------------------------------------------//
 			} else {
-				$this->aErrorMessges[] = "InitialConnection: Couldn't extract date and time!";
+				
+				$aChild1 = GetChildTag( $aTempDateAndTime['Result'], "Body", 1 );
+				
+				if( $aChild1 ) {
+					$aChild2 = GetChildTag( $aChild1, "GetSystemDateAndTimeResponse", 1 );
+					
+					if( $aChild2 ) {
+						$bNoAuth = true;
+						
+					} 
+				}
+				
+				if( $bNoAuth ) {
+					$this->SetEnvelopeSecurity(false);
+					$this->bInitialised = true;
+					
+				//--------------------------------------------//
+				//-- ELSE error extracting Date and Time    --//
+				//--------------------------------------------//
+				} else {
+					
+					$this->aErrorMessges[] = "InitialConnection: Couldn't extract date and time!";
+					
+				}
 			}
+			
 			
 		//--------------------------------------------//
 		//-- ELSE Error fetching Date and Time      --//
@@ -158,6 +187,14 @@ class PHPOnvif {
 	//========================================================================================================================//
 	//== #4.0# - GET DEVICE DATE AND TIME FUNCTION                                                                          ==//
 	//========================================================================================================================//
+	public function SetEnvelopeSecurity( $bEnvelopeSecurity ) {
+		$this->bEnvelopeSecurity = $bEnvelopeSecurity;
+		
+		return true;
+	}
+	
+	
+	
 	public function GetDeviceDateAndTime() {
 		//----------------------------------------------------------------//
 		//-- 1.0 - INITIALISE                                           --//
@@ -168,14 +205,19 @@ class PHPOnvif {
 		//----------------------------------------------------------------//
 		//-- 2.0 - Prepare for HTTP Request                             --//
 		//----------------------------------------------------------------//
-		$sEnvelope .= $this->CreateStartOfEnvelope( "Basic", array() );
 		$sEnvelope .= '<GetSystemDateAndTime xmlns="http://www.onvif.org/ver10/device/wsdl"/>';
-		$sEnvelope .= $this->CreateEndOfEnvelope( "Basic" );
+		
 		
 		//----------------------------------------------------------------//
 		//-- 3.0 - Execute the HTTP Request                             --//
 		//----------------------------------------------------------------//
 		$aResult = $this->HTTPOnvifRequest( $sEnvelope );
+		
+		//echo "\n Envelope=\n";
+		//var_dump( $aResult );
+		//echo "\n\nResult=\n";
+		//var_dump( $aResult );
+		//echo "\n";
 		
 		//----------------------------------------------------------------//
 		//-- 9.0 - RETURN RESULTS                                       --//
@@ -204,13 +246,9 @@ class PHPOnvif {
 		//----------------------------------------------------------------//
 		//-- 2.0 - PREPARE FOR HTTP REQUEST                             --//
 		//----------------------------------------------------------------//
-		$aTokenDetails  = $this->CreateToken();
-		
-		$sEnvelope     .= $this->CreateStartOfEnvelope( "SecurityUsernameToken", $aTokenDetails );
 		$sEnvelope     .= '<GetCapabilities xmlns="http://www.onvif.org/ver10/device/wsdl">';
 		$sEnvelope     .= '<Category>'.$sCapabilityType.'</Category>';
 		$sEnvelope     .= '</GetCapabilities>';
-		$sEnvelope     .= $this->CreateEndOfEnvelope( "SecurityUsernameToken" );
 		
 		//----------------------------------------------------------------//
 		//-- 3.0 - EXECUTE THE HTTP REQUEST                             --//
@@ -244,11 +282,7 @@ class PHPOnvif {
 		//----------------------------------------------------------------//
 		//-- 2.0 - PREPARE FOR HTTP REQUEST                             --//
 		//----------------------------------------------------------------//
-		$aTokenDetails  = $this->CreateToken();
-		
-		$sEnvelope .= $this->CreateStartOfEnvelope( "SecurityUsernameToken", $aTokenDetails );
 		$sEnvelope .= '<GetDeviceInformation xmlns="http://www.onvif.org/ver10/device/wsdl" />';
-		$sEnvelope .= $this->CreateEndOfEnvelope( "SecurityUsernameToken" );
 		
 		//----------------------------------------------------------------//
 		//-- 3.0 - EXECUTE THE HTTP REQUEST                             --//
@@ -276,11 +310,8 @@ class PHPOnvif {
 		//----------------------------------------------------------------//
 		//-- 2.0 - Prepare for HTTP Request                             --//
 		//----------------------------------------------------------------//
-		$aTokenDetails   = $this->CreateToken();
-		
-		$sEnvelope      .= $this->CreateStartOfEnvelope( "SecurityUsernameToken", $aTokenDetails );
 		$sEnvelope      .= '<GetVideoSources xmlns="http://www.onvif.org/ver10/media/wsdl"/>';
-		$sEnvelope      .= $this->CreateEndOfEnvelope( "SecurityUsernameToken" );
+		
 		
 		//var_dump( $sEnvelope );
 		//----------------------------------------------------------------//
@@ -305,11 +336,7 @@ class PHPOnvif {
 		//----------------------------------------------------------------//
 		//-- 2.0 - Prepare for HTTP Request                             --//
 		//----------------------------------------------------------------//
-		$aTokenDetails   = $this->CreateToken();
-		
-		$sEnvelope      .= $this->CreateStartOfEnvelope( "SecurityUsernameToken", $aTokenDetails );
 		$sEnvelope      .= '<GetProfiles xmlns="http://www.onvif.org/ver10/media/wsdl"/>';
-		$sEnvelope      .= $this->CreateEndOfEnvelope( "SecurityUsernameToken" );
 		
 		//----------------------------------------------------------------//
 		//-- 3.0 - Execute the HTTP Request                             --//
@@ -333,9 +360,6 @@ class PHPOnvif {
 		//----------------------------------------------------------------//
 		//-- 2.0 - Prepare for HTTP Request                             --//
 		//----------------------------------------------------------------//
-		$aTokenDetails   = $this->CreateToken();
-		
-		$sEnvelope      .= $this->CreateStartOfEnvelope( "SecurityUsernameToken", $aTokenDetails );
 		$sEnvelope      .= '<StreamSetup>';
 		$sEnvelope      .= '<Stream xmlns="http://www.onvif.org/ver10/schema">%%STREAM%%</Stream>';
 		$sEnvelope      .= '<Transport xmlns="http://www.onvif.org/ver10/schema">';
@@ -343,7 +367,6 @@ class PHPOnvif {
 		$sEnvelope      .= '</Transport>';
 		$sEnvelope      .= '</StreamSetup>';
 		$sEnvelope      .= '<ProfileToken>%%PROFILETOKEN%%</ProfileToken>';
-		$sEnvelope      .= $this->CreateEndOfEnvelope( "SecurityUsernameToken" );
 		
 		//----------------------------------------------------------------//
 		//-- 3.0 - Execute the HTTP Request                             --//
@@ -663,7 +686,6 @@ class PHPOnvif {
 								//--------------------------------------------//
 								//-- PART 3.5 - VidSource Bounds            --//
 								$aProfileVideoSourceBounds = GetChildTag( $aProfileVideoSource, "Bounds", 1 );
-								
 								
 								if( $aProfileVideoSourceBounds ) {
 									
@@ -1118,7 +1140,7 @@ class PHPOnvif {
 									}
 								}
 								
-
+								
 								//--------------------------------------------//
 								//-- PART 7.6 - PTZ PanTiltLimits           --//
 								$aProfilePTZPanTiltLimits = GetChildTag( $aProfileVideoEnc, "PanTiltLimits", 1 );
@@ -1311,7 +1333,6 @@ class PHPOnvif {
 		//--------------------------------//
 		//-- Create the Envelope        --//
 		//--------------------------------//
-		$sEnvelope      .= $this->CreateStartOfEnvelope( "SecurityUsernameToken", $aTokenDetails );
 		$sEnvelope      .= '<GetStreamUri xmlns="http://www.onvif.org/ver10/media/wsdl">';
 		$sEnvelope      .= '<ProfileToken>'.$sProfileToken.'</ProfileToken>';
 		$sEnvelope      .= '<StreamSetup>';
@@ -1321,7 +1342,6 @@ class PHPOnvif {
 		$sEnvelope      .= '</Transport>';
 		$sEnvelope      .= '</StreamSetup>';
 		$sEnvelope      .= '</GetStreamUri>';
-		$sEnvelope      .= $this->CreateEndOfEnvelope( "SecurityUsernameToken" );
 		
 		//----------------------------------------------------------------//
 		//-- 3.0 - Execute the HTTP Request                             --//
@@ -1502,9 +1522,7 @@ class PHPOnvif {
 		//--------------------------------//
 		//-- Create the Envelope        --//
 		//--------------------------------//
-		$sEnvelope      .= $this->CreateStartOfEnvelope( "SecurityUsernameToken", $aTokenDetails );
 		$sEnvelope      .= '<GetConfigurations xmlns="http://www.onvif.org/ver20/ptz/wsdl/GetConfigurations" />';
-		$sEnvelope      .= $this->CreateEndOfEnvelope( "SecurityUsernameToken" );
 	
 		//----------------------------------------------------------------//
 		//-- 3.0 - Execute the HTTP Request                             --//
@@ -1528,12 +1546,10 @@ class PHPOnvif {
 		//----------------------------------------------------------------//
 		//-- 2.0 - Prepare for HTTP Request								--//
 		//----------------------------------------------------------------//
-		$aTokenDetails      = $this->CreateToken();
-		
+
 		//--------------------------------//
 		//-- Create the Envelope        --//
 		//--------------------------------//
-		$sEnvelope      .= $this->CreateStartOfEnvelope( "SecurityUsernameToken", $aTokenDetails );
 		$sEnvelope      .= '<RelativeMove xmlns="http://www.onvif.org/ver20/ptz/wsdl">';
 		$sEnvelope      .= '<ProfileToken>'.$sProfileToken.'</ProfileToken>';
 		$sEnvelope      .= '<Translation>';
@@ -1546,7 +1562,6 @@ class PHPOnvif {
 //			$sEnvelope      .= '	</Speed>';
 //		}
 		$sEnvelope      .= '</RelativeMove>';
-		$sEnvelope      .= $this->CreateEndOfEnvelope( "SecurityUsernameToken" );
 				
 		//----------------------------------------------------------------//
 		//-- 3.0 - Execute the HTTP Request                             --//
@@ -1570,12 +1585,10 @@ class PHPOnvif {
 		//----------------------------------------------------------------//
 		//-- 2.0 - Prepare for HTTP Request                             --//
 		//----------------------------------------------------------------//
-		$aTokenDetails      = $this->CreateToken();
-		
 		//--------------------------------//
 		//-- Create the Envelope        --//
 		//--------------------------------//
-		$sEnvelope      .= $this->CreateStartOfEnvelope( "SecurityUsernameToken", $aTokenDetails );
+
 		$sEnvelope      .= '<AbsoluteMove xmlns="http://www.onvif.org/ver20/ptz/wsdl">';
 		$sEnvelope      .= '<ProfileToken>'.$sProfileToken.'</ProfileToken>';
 		$sEnvelope      .= '<Position>';
@@ -1589,7 +1602,6 @@ class PHPOnvif {
 		}
 		$sEnvelope      .= '</Position>';
 		$sEnvelope      .= '</AbsoluteMove>';
-		$sEnvelope      .= $this->CreateEndOfEnvelope( "SecurityUsernameToken" );
 		//----------------------------------------------------------------//
 		//-- 3.0 - Execute the HTTP Request                             --//
 		//----------------------------------------------------------------//
@@ -1613,19 +1625,16 @@ class PHPOnvif {
 		//----------------------------------------------------------------//
 		//-- 2.0 - Prepare for HTTP Request                             --//
 		//----------------------------------------------------------------//
-		$aTokenDetails   = $this->CreateToken();
-		
+
 		//--------------------------------//
 		//-- Create the Envelope        --//
 		//--------------------------------//
-		$sEnvelope      .= $this->CreateStartOfEnvelope( "SecurityUsernameToken", $aTokenDetails );
 		$sEnvelope      .= '<ContinuousMove xmlns="http://www.onvif.org/ver20/ptz/wsdl">';
 		$sEnvelope      .= '<ProfileToken>'.$sProfileToken.'</ProfileToken>';
 		$sEnvelope      .= '<Velocity>';
 		$sEnvelope      .= '<PanTilt x="'.$fPosX.'" y="'.$fPosY.'" space="http://www.onvif.org/ver10/tptz/PanTiltSpaces/VelocityGenericSpace" xmlns="http://www.onvif.org/ver10/schema"/>';
 		$sEnvelope      .= '</Velocity>';
 		$sEnvelope      .= '</AbsoluteMove>';
-		$sEnvelope      .= $this->CreateEndOfEnvelope( "SecurityUsernameToken" );
 		//----------------------------------------------------------------//
 		//-- 3.0 - Execute the HTTP Request                             --//
 		//----------------------------------------------------------------//
@@ -1655,13 +1664,11 @@ class PHPOnvif {
 		//----------------------------------------------------------------//
 		//-- 4.0 - Create the Envelope                                  --//
 		//----------------------------------------------------------------//
-		$sEnvelope       = $this->CreateStartOfEnvelope( "SecurityUsernameToken", $aTokenDetails );
 		$sEnvelope      .= '<Stop xmlns="http://www.onvif.org/ver20/ptz/wsdl">';
 		$sEnvelope      .= '<ProfileToken>'.$sProfileToken.'</ProfileToken>';
 		//$sEnvelope      .= '<PanTilt>';
 		//$sEnvelope      .= '</PanTilt>';
 		$sEnvelope      .= '</Stop>';
-		$sEnvelope      .= $this->CreateEndOfEnvelope( "SecurityUsernameToken" );
 		//----------------------------------------------------------------//
 		//-- 3.0 - Execute the HTTP Request                             --//
 		//----------------------------------------------------------------//
@@ -1852,7 +1859,7 @@ class PHPOnvif {
 	//================================================================================================//
 	//== ADD THE CURRENT BRIDGE TO DATABASE                                                         ==//
 	//================================================================================================//
-	public function AddStreamsAsThingInDatabase( $iLinkId, $sStreamProfileName, $sThumbnailProfileName, $sOnvifCameraName ) {
+	public function AddStreamsAsThingInDatabase( $iLinkId, $sStreamProfileName, $sThumbnailProfileName, $sOnvifCameraName, $aPostStreamAuth ) {
 		//----------------------------------------------------------------//
 		//-- 1.0 - INITIALISE                                           --//
 		//----------------------------------------------------------------//
@@ -1875,7 +1882,10 @@ class PHPOnvif {
 		
 		$iUTS                   = 0;                //-- INTEGER:   --//
 		
+		$sUsername              = "";               //-- STRING:    --//
+		$sPassword              = "";               //-- STRING:    --//
 		
+		//-- Global Variables --//
 		global $oRestrictedApiCore;
 		
 		//--------------------------------------------------------------------//
@@ -2048,9 +2058,9 @@ class PHPOnvif {
 						"Type"              => "6",
 						"Name"              => "Stream Profile",
 						"BaseConvert"       => "1",
-						"SampleRate"        => "300",
-						"SampleRateMax"     => "300",
-						"SampleRateLimit"   => "1200"
+						"SampleRate"        => "-1",
+						"SampleRateMax"     => "-1",
+						"SampleRateLimit"   => "-1"
 					),
 					//-- Stream Url --//
 					array(
@@ -2059,9 +2069,9 @@ class PHPOnvif {
 						"Type"              => "7",
 						"Name"              => "Stream Url",
 						"BaseConvert"       => "1",
-						"SampleRate"        => "300",
-						"SampleRateMax"     => "300",
-						"SampleRateLimit"   => "1200"
+						"SampleRate"        => "-1",
+						"SampleRateMax"     => "-1",
+						"SampleRateLimit"   => "-1"
 					),
 					//-- Thumbnail Profile Name --//
 					array(
@@ -2070,9 +2080,9 @@ class PHPOnvif {
 						"Type"              => "6",
 						"Name"              => "Thumbnail Profile",
 						"BaseConvert"       => "1",
-						"SampleRate"        => "300",
-						"SampleRateMax"     => "300",
-						"SampleRateLimit"   => "1200"
+						"SampleRate"        => "-1",
+						"SampleRateMax"     => "-1",
+						"SampleRateLimit"   => "-1"
 					),
 					//-- Thumbnail Url --//
 					array(
@@ -2081,9 +2091,31 @@ class PHPOnvif {
 						"Type"              => "7",
 						"Name"              => "Thumbnail Url",
 						"BaseConvert"       => "1",
-						"SampleRate"        => "300",
-						"SampleRateMax"     => "300",
-						"SampleRateLimit"   => "1200"
+						"SampleRate"        => "-1",
+						"SampleRateMax"     => "-1",
+						"SampleRateLimit"   => "-1"
+					),
+					//-- Stream Username --//
+					array(
+						"RSType"            => "3962",
+						"UoM"               => "1",
+						"Type"              => "7",
+						"Name"              => "Username",
+						"BaseConvert"       => "1",
+						"SampleRate"        => "-1",
+						"SampleRateMax"     => "-1",
+						"SampleRateLimit"   => "-1"
+					),
+					//-- Stream Password --//
+					array(
+						"RSType"            => "3963",
+						"UoM"               => "1",
+						"Type"              => "7",
+						"Name"              => "Password",
+						"BaseConvert"       => "1",
+						"SampleRate"        => "-1",
+						"SampleRateMax"     => "-1",
+						"SampleRateLimit"   => "-1"
 					)
 				)
 			);
@@ -2117,8 +2149,8 @@ class PHPOnvif {
 			} else {
 				$aResult['Data'][] = $aNewThingResult['Thing'];
 			}
-			
 		}
+		
 		
 		//--------------------------------------------------------------------//
 		//-- 6.0 - Insert the Profile Names and URLs into the database      --//
@@ -2127,6 +2159,22 @@ class PHPOnvif {
 			
 			//-- Store the current time --//
 			$iUTS = time();
+			
+			//-- Check if the Username and Password are required on the streams --//
+			if( isset( $aPostStreamAuth['Username'] ) && isset( $aPostStreamAuth['Password'] ) ) {
+				$sUsername = $aPostStreamAuth['Username'];
+				$sPassword = $aPostStreamAuth['Password'];
+				
+				
+				if( $sUsername!==null && $sUsername!==false && $sUsername!=="" ) {
+					if( $sPassword!==null && $sPassword!==false && $sPassword!=="" ) {
+						
+						//-- Add the Username and password to the URLs --//
+						$aStreamProfile['Uri'] = ParseReplaceAndRebuildUrl( $aStreamProfile['Uri'], array( "user"=>$sUsername, "password"=>$sPassword ) );
+						$aThumbProfile['Uri']  = ParseReplaceAndRebuildUrl( $aThumbProfile['Uri'],  array( "user"=>$sUsername, "password"=>$sPassword ) );
+					}
+				}
+			}
 			
 			//----------------------------------------------------------------//
 			//-- Foreach IO add the appropriate value to the database       --//
@@ -2175,12 +2223,22 @@ class PHPOnvif {
 										$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $aThumbProfile['Uri'], true );
 										break;
 										
+									//-- Username --//
+									case 3962:
+										$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $sUsername, true );
+										break;
+										
+									//-- Password --//
+									case 3963:
+										$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $sPassword, true );
+										break;
+										
 									//-- Unknown Id --//
 									default:
-										echo "<br />\nUnknown RSTypeId!<br />\n";
-										$aInsertResult = array( "Error"=>false );
+										//echo "<br />\nUnknown RSTypeId!<br />\n";
+										//$aInsertResult = array( "Error"=>false );
 										break;
-									
+										
 								}	//-- ENDSWITCH  --//
 								
 								//----------------------------//
@@ -2197,7 +2255,6 @@ class PHPOnvif {
 						}	//-- ENDIF No errors have occurred --//
 					}
 				}	//-- ENDIF No errors --//
-				
 			}	//-- ENDFOREACH IO --//
 		}	//-- ENDIF No errors --//
 		
@@ -2329,12 +2386,12 @@ class PHPOnvif {
 	//================================================================================================//
 	//== HTTP ONVIF REQUEST FUNCTION                                                                ==//
 	//================================================================================================//
-	protected function HTTPOnvifRequest( $sPOSTData ) {
+	protected function HTTPOnvifRequestSend( $sPOSTData ) {
 		//----------------------------------------------------------------//
 		//-- 1.0 - INITIALISE                                           --//
 		//----------------------------------------------------------------//
-		$aResult		= array();		//-- ARRAY:			Used to hold the result of if this function succeeded or failed in getting the desired result.	--//
-		$sURL			= "";			//-- STRING:		--//
+		$aResult        = array();      //-- ARRAY:         Used to hold the result of if this function succeeded or failed in getting the desired result.	--//
+		$sURL           = "";           //-- STRING:        --//
 		
 		
 		//----------------------------------------------------------------//
@@ -2379,6 +2436,52 @@ class PHPOnvif {
 		}
 		
 		return $aResult;
+	}
+	
+	
+	protected function HTTPOnvifRequest( $sEnvelopeContent, $sEnvelopeType="Default" ) {
+		//----------------------------------------------------------------//
+		//-- 1.0 - INITIALISE                                           --//
+		//----------------------------------------------------------------//
+		$aTokenDetails = array();
+		$sEnvelope     = "";
+		
+		//----------------------------------------------------------------//
+		//-- 3.0 - WORKOUT THE ENVELOPE TYPE                            --//
+		//----------------------------------------------------------------//
+		if( $sEnvelopeType!=="Basic" && $sEnvelopeType!=="SecurityUsernameToken" ) {
+			if( $this->bEnvelopeSecurity!==false ) {
+				$sEnvelopeType = "SecurityUsernameToken";
+			} else {
+				$sEnvelopeType = "Basic";
+			}
+		}
+		
+		
+		//----------------------------------------------------------------//
+		//-- 4.0 -                                                      --//
+		//----------------------------------------------------------------//
+		if( $sEnvelopeType==="SecurityUsernameToken" ) {
+			$aTokenDetails   = $this->CreateToken();
+		}
+		
+		
+		
+		//----------------------------------------------------------------//
+		//-- 5.0 - ADD THE HEADER AND FOOTER                            --//
+		//----------------------------------------------------------------//
+		$sEnvelope     .= $this->CreateStartOfEnvelope( $sEnvelopeType, $aTokenDetails );
+		$sEnvelope     .= $sEnvelopeContent;
+		$sEnvelope     .= $this->CreateEndOfEnvelope( $sEnvelopeType );
+		
+		
+		
+		//----------------------------------------------------------------//
+		//-- 6.0 - EXECUTE AND RETURN                                   --//
+		//----------------------------------------------------------------//
+		return $this->HTTPOnvifRequestSend( $sEnvelope );
+		
+		
 	}
 	
 	
