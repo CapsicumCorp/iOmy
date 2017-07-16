@@ -334,28 +334,17 @@ sap.ui.controller("mjs.settings.DeviceList", {
 		
 		oView.byId("page").addContent(me.wPanel);
 		
-		//-- Insert the action menu used to list options to either add a link or an item to a link. --//
+		//-- Insert the action menu used to add a device. --//
         oView.byId("extrasMenuHolder").destroyItems();
         oView.byId("extrasMenuHolder").addItem(
             IOMy.widgets.getActionMenu({
-                id : me.createId("extrasMenu"),        // Uses the page ID
+                id : me.createId("extrasMenu"),
                 tooltip: "Action Menu",
-                //icon : "sap-icon://GoogleMaterial/add_circle",
                 items : [
                     {
-                        text: "Add Link",
+                        text: "Add Device",
                         select : function () {
                             IOMy.common.NavigationChangePage( "pSettingsLinkAdd", {}, false );
-                        }
-                    },
-                    {
-                        text: "Add Item",
-                        select : function () {
-                            if (IOMy.common.LinkList.length > 0) {
-                                IOMy.common.NavigationChangePage( "pSettingsThingAdd", {}, false );
-                            } else {
-                                IOMy.common.showError("You must add a link first before creating an item!", "No Links");
-                            }
                         }
                     }
                 ]

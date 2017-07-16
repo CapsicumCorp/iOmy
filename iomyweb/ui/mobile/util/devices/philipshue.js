@@ -26,6 +26,8 @@ IOMy.devices.philipshue = new sap.ui.base.Object();
 
 $.extend(IOMy.devices.philipshue,{
 	Devices: [],
+	
+	LinkTypeId		: 7,
     
     RSHue           : 3901,
     RSSaturation    : 3902,

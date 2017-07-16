@@ -41,6 +41,8 @@ $.extend(IOMy.devices.onvif,{
      * elements are used in forms that handle information about onvif devices.
      */
     uiIDs       : {
+        sCameraNameLabelID       : "CameraNameLabel",
+        sCameraNameFieldID       : "CameraNameField",
         sStreamProfileLabelID    : "StreamProfileLabel",
         sStreamProfileFieldID    : "StreamProfileField",
         sThumbnailProfileLabelID : "ThumbnailProfileLabel",
@@ -228,15 +230,14 @@ $.extend(IOMy.devices.onvif,{
         
     },
     
-    CreateThingForm : function(oScope, iLinkId, oFormBox, aElementsToEnableOnSuccess, aElementsToEnableOnFailure) {
+    CreateThingForm : function(oScope, iLinkId, oFormBox, aElementsToEnableOnSuccess) {
         var me = this; // Scope of the Onvif module.
-        
-        // Disable the update button on its form
-        // oUpdateButton.setEnabled(false);
         
         //===============================================//
         // DECLARE VARIABLES                             //
         //===============================================//
+		var oCameraNameLabel;
+		var oCameraNameField;
         var oStreamProfileLabel;
         var oStreamProfileField;
         var oThumbnailProfileLabel;
@@ -249,16 +250,30 @@ $.extend(IOMy.devices.onvif,{
             aElementsToEnableOnSuccess = [];
         }
         
-        if (aElementsToEnableOnFailure === undefined) {
-            aElementsToEnableOnFailure = aElementsToEnableOnSuccess;
-        }
-        
         //===============================================//
         // CONSTRUCT ELEMENTS                            //
         //===============================================//
         
         //-----------------------------------------------//
-        // STREAM PROFILE                                //
+        // CAMERA NAME
+        //-----------------------------------------------//
+        
+        // LABEL
+        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sCameraNameLabelID);
+        oCameraNameLabel = new sap.m.Label(oScope.createId(me.uiIDs.sCameraNameLabelID),{
+            text : "Stream name"
+        }).addStyleClass("width100Percent");
+        oFormBox.addItem(oCameraNameLabel);
+        
+        // FIELD
+        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sCameraNameFieldID);
+        oCameraNameField = new sap.m.Input(oScope.createId(me.uiIDs.sCameraNameFieldID),{
+            value : "",
+        }).addStyleClass("width100Percent");
+        oFormBox.addItem(oCameraNameField);
+        
+        //-----------------------------------------------//
+        // STREAM PROFILE
         //-----------------------------------------------//
         
         // LABEL
@@ -270,13 +285,15 @@ $.extend(IOMy.devices.onvif,{
         
         // FIELD
         oScope.aElementsForAFormToDestroy.push(me.uiIDs.sStreamProfileFieldID);
-        oStreamProfileField = new sap.m.ComboBox(oScope.createId(me.uiIDs.sStreamProfileFieldID),{
-            value : "Loading Profiles"
+        oStreamProfileField = new sap.m.Select(oScope.createId(me.uiIDs.sStreamProfileFieldID),{
+            value : "Loading Profiles",
+			width : "100%",
+			enabled : false
         }).addStyleClass("width100Percent");
         oFormBox.addItem(oStreamProfileField);
         
         //-----------------------------------------------//
-        // THUMBNAIL PROFILE                             //
+        // THUMBNAIL PROFILE
         //-----------------------------------------------//
         
         // LABEL
@@ -288,9 +305,11 @@ $.extend(IOMy.devices.onvif,{
         
         // FIELD
         oScope.aElementsForAFormToDestroy.push(me.uiIDs.sThumbnailProfileFieldID);
-        oThumbnailProfileField = new sap.m.ComboBox(oScope.createId(me.uiIDs.sThumbnailProfileFieldID),{
-            value : "Loading Profiles"
-        }).addStyleClass("width100Percent");
+        oThumbnailProfileField = new sap.m.Select(oScope.createId(me.uiIDs.sThumbnailProfileFieldID),{
+            value : "Loading Profiles",
+			width : "100%",
+			enabled : false
+        });
         oFormBox.addItem(oThumbnailProfileField);
         
         //===============================================//
@@ -318,7 +337,10 @@ $.extend(IOMy.devices.onvif,{
                     );
                 }
                 oStreamProfileField.setSelectedKey(me.aProfiles[0].ProfileToken);
+				oStreamProfileField.setEnabled(true);
+				
                 oThumbnailProfileField.setSelectedKey(me.aProfiles[0].ProfileToken);
+				oThumbnailProfileField.setEnabled(true);
                 
                 // Enable the elements that are needed.
                 for (var i = 0; i < aElementsToEnableOnSuccess.length; i++) {
@@ -335,21 +357,12 @@ $.extend(IOMy.devices.onvif,{
                 // Change the text to notify of a failure.
                 oStreamProfileField.setValue("Failed to load profiles.");
                 oThumbnailProfileField.setValue("Failed to load profiles.");
-                
-                // Enable the elements that are needed.
-                for (var i = 0; i < aElementsToEnableOnFailure.length; i++) {
-                    try {
-                        aElementsToEnableOnFailure[i].setEnabled(true);
-                    } catch (e) {
-                        jQuery.sap.log.error("Could not enable a UI5 element probably because it doesn't have an enabled property. Skipping.");
-                    }
-                }
             }
         );
         
     },
-    
-    ValidateStreamProfile: function (oScope) {
+	
+	ValidateStreamProfile: function (oScope) {
         var me                      = this;   // Scope of the onvif module
         var bError                  = false;  //
         var aErrorMessages          = [];     //
@@ -413,6 +426,11 @@ $.extend(IOMy.devices.onvif,{
         // Check the Onvif stream form data                //
         //-------------------------------------------------//
         try {
+			if (oScope.byId(me.uiIDs.sCameraNameFieldID).getValue().length === 0) {
+				bError = true;
+				aErrorMessages.push("A name must be given for the camera.");
+			}
+			
             // Check the stream profile
             mStreamProfileInfo      = me.ValidateStreamProfile(oScope);
             if (mStreamProfileInfo.bError === true) {
@@ -446,10 +464,9 @@ $.extend(IOMy.devices.onvif,{
      * @param {type} sPrefix
      * @param {type} oViewScope
      * @param {type} aDeviceData
-     * @param {type} bIsUnassigned
      * @returns {unresolved}
      */
-    GetCommonUI: function( sPrefix, oViewScope, aDeviceData, bIsUnassigned ) {
+    GetCommonUI: function( sPrefix, oViewScope, aDeviceData ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//

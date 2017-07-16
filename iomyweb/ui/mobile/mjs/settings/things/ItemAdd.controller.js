@@ -47,9 +47,10 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
                 // Collect the link ID if one exists. Only necessary if this page
                 // is accessed by the new link page after everything is created.
                 if (evt.data.LinkId !== undefined) {
-                    console.log(evt.data.LinkId);
                     me.iLinkId = evt.data.LinkId;
                 }
+				
+//				thisView.byId("NavSubHead_Title").setText(IOMy.common.LinkList["_"+me.iLinkId].LinkName);
                 
                 // Start the form creation
                 me.DestroyUI();         // STEP 1: Clear any old forms to avoid duplicate IDs
@@ -204,7 +205,7 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
         var me = this;              // Preserving this scope
         var mData = {};             // Map for the AJAX request
         var sLinkType = "";
-        var iLinkId = me.byId("linkCBox").getSelectedKey();
+        var iLinkId = me.iLinkId;
         var fnGetLinkType = IOMy.functions.getLinkTypeIDOfLink;
         
 //        try {
@@ -392,7 +393,6 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
                             var mInfo                   = false;
                             var aErrorMessages          = [];
                             var sErrorMessage           = "";
-                            var iLinkTypeId             = IOMy.functions.getLinkTypeIDOfLink(me.byId("linkCBox").getSelectedKey());
                         } catch (e) {
                             bError = true;
                             jQuery.sap.log.error("Error 0x1000: There was an error declaring variables: "+e.message);
@@ -489,17 +489,9 @@ sap.ui.controller("mjs.settings.things.ItemAdd", {
         
         //---- Onvif Stream ----//
         if (iLinkTypeId == 6) {
-            IOMy.devices.onvif.CreateThingForm(me, oLinkCBox.getSelectedKey(), oFormBox, [me.byId("addButton"), me.byId("linkCBox")], [me.byId("linkCBox")]);
-        //---- Philips Hue ----//
-        } else if (iLinkTypeId == 7) {
-            me.byId("linkCBox").setEnabled(true); // Unlock this combo box.
-            me.byId("addButton").setEnabled(false);
-            IOMy.common.showMessage(me.byId("linkCBox").getSelectedItem().getText()+" should have already added all the light bulbs it could detect.");
-        } else {
-            me.byId("linkCBox").setEnabled(true); // Unlock this combo box.
-            me.byId("addButton").setEnabled(true); // Unlock the add button
+            IOMy.devices.onvif.CreateThingForm(me, me.iLinkId, oFormBox, [me.byId("addButton")], []);
         }
-        
+		
         me.aElementsToDestroy.push("panel");
         oPanel = new sap.m.Panel(me.createId("panel"), {
             content : [oVertBox]

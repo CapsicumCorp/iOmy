@@ -385,19 +385,6 @@ $.extend(IOMy.common,{
 		oCurrentView.expectingMessage = false;
 	},
 	
-    /**
-     * Displays an information popup with a message. It can call a function once
-     * the user closes the dialog.
-     * 
-     * @param {type} sMessage       Message.
-     * @param {type} sTitle         Dialog title.
-     * @param {type} fnCallback     (optional) Function to execute on close.
-     * @param {type} sCssClass      (optional) CSS Classes in a string separated by spaces.
-     */
-	showSuccess : function( sMessage, sTitle, fnCallback, sCssClass, bAutoClose ){
-		this.showMessage( sMessage, bAutoClose );
-	},
-    
     showWarning : function( sMessage, sTitle, fnCallback, sCssClass ){
 		//-- --//
 		var callbackFn = fnCallback || function(){};

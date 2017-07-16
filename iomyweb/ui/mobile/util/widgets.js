@@ -110,3 +110,6 @@ $.sap.require("IOMy.widgets.roomTypesSelectBox");
 
 $.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.selectBoxLocale");
+
+$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
+$.sap.require("IOMy.widgets.selectBoxNewDeviceOptions");

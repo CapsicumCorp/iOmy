@@ -37,6 +37,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
     bJoinModeToggleCoolDownPeriod : 5000, // 3 minute cooldown (in milliseconds)
     intervalCooldown : null,
     oZigbeeInput : null,
+	wTelnetLogArea : null,
     sEnableTempJoinButtonText : "Join Device",
     sEnableTempJoinButtonTimerText : "Join Device",
     bRunningCommand : false,
@@ -525,7 +526,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         });
     },
     
-    CreateLinkForm : function(oScope, oFormBox, aElementsToEnableOnSuccess, aElementsToEnableOnFailure) {
+    CreateLinkForm : function(oScope, oFormBox) {
         var me = this;
         var oFormItem;
         var oAPIModesHBox = new sap.m.HBox(oScope.createId(me.uiIDs.sAPIModesHBoxID), {}).addStyleClass("width100Percent");
@@ -630,8 +631,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         
 		// "resoruces\js\ZigbeeCustomTelnetInput.js" for VBox
         oFormItem = new ZigbeeCustomTelnetInput(oScope.createId(me.uiIDs.sCustomTelnetCommandFieldID), {
-            scope : oScope,
-            enabled : !me.bRunningCommand
+            scope : oScope
         });
         oFormItem.widget.addStyleClass("");
         oFormBox.addItem(oFormItem.widget);
@@ -686,20 +686,34 @@ $.extend(IOMy.devices.zigbeesmartplug,{
             growing : true
         }).addStyleClass("width100Percent TelnetOutput");
         
-        // Populate it with any prior output.
+        oFormBox.addItem(oFormItem);
+		
+		//me.PopulateTelnetLogArea(oScope);
+		me.ToggleZigbeeCommands(oScope, false);
+    },
+	
+	PopulateTelnetLogArea : function (oScope) {
+		var me			= this;
+		var sTextAreaId = oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner");
+		var oFormItem	= oScope.byId(me.uiIDs.sTelnetOutputTextAreaID);
+		
+		// Populate it with any prior output.
         if (me.ZigbeeTelnetLog.length > 0) {
             var output = "";
             for (var i = 0; i < me.ZigbeeTelnetLog.length; i++) {
                 output += me.ZigbeeTelnetLog[i].content;
             }
+			
             oFormItem.setValue(output);
             oFormItem.selectText(output.length, output.length);
             // Force it to scroll down to the bottom.
-            document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
+			try {
+				document.getElementById(sTextAreaId).scrollTop = document.getElementById(sTextAreaId).scrollHeight;
+			} catch (e) {
+				// Do nothing.
+			}
         }
-        
-        oFormBox.addItem(oFormItem);
-    },
+	},
 	
 	// For All other pages except the DeviceOverview Page. See "GetCommonUIForDeviceOverview"
 	GetCommonUI: function( sPrefix, oViewScope, aDeviceData, bIsUnassigned ) {

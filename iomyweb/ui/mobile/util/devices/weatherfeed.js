@@ -1,10 +1,8 @@
 /*
-Title: Devices Module for iOmy
+Title: Open Weather Map Module for iOmy
 Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
 Modified: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
-Description: Helps to draw the list entry of a device and its information. Used
-    as a wrapper for a variety of modules for each device type, which follow a
-    similar structure to this module such as same function names to this one.
+Description: Contains functions for Open Weather Map support
 Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
@@ -27,20 +25,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 $.sap.declare("IOMy.devices",true);
 IOMy.devices.weatherfeed = new sap.ui.base.Object();
 
-/**
- * This global module provides a mechanism to draw a device entry in lists such as
- * Device Overview, and Room Overview. Each entry will display information about
- * the device, or otherwise item, whether it's on or off, it varies between each
- * device type.
- * 
- * Error Codes are defined according to this convention:
- * 
- * 8:       Link ID
- * 81xx:    Link Form Validation Errors
- * 82xx:    Exceptions
- */
 $.extend(IOMy.devices.weatherfeed,{
 	Devices: [],
+	
+	LinkTypeId		: 8,
     
     uiIDs : {
         //---------------------------------------------//

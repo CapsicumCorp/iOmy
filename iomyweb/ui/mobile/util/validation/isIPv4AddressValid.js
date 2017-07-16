@@ -78,5 +78,41 @@ $.extend(IOMy.validation, {
 		mResult.aErrorMessages	= aErrorMessages;
 		
 		return mResult;
+	},
+	
+	isIPv4PortValid : function (sIPPort) {
+		//-------------------------------------------------//
+		// Variables
+		//-------------------------------------------------//
+		var bError					= false;
+		var aErrorMessages			= [];
+		var aDigits					= [];
+		var aInvalidChars			= [];
+		var aIPAddressParts			= [];
+		var bIPAddressFormatError	= false;
+		var mResult					= {};
+		
+		//-------------------------------------------------//
+		// Check that the IP address is given.
+		//-------------------------------------------------//
+		if (sIPPort === null || sIPPort === undefined || sIPPort === false || sIPPort.length === 0) {
+			throw new MissingArgumentException("Where is the IPv4 port?");
+		}
+		
+		//aDigits			= sIPPort.match(/[0-9]/g);
+		aInvalidChars	= sIPPort.match(/[^0-9]/g);
+		
+		if (aInvalidChars !== null) {
+			bError = true;
+			aErrorMessages.push("The port contains invalid character(s).");
+		}
+		
+		//-------------------------------------------------//
+		// Prepare the result map.
+		//-------------------------------------------------//
+		mResult.bValid			= !bError;
+		mResult.aErrorMessages	= aErrorMessages;
+		
+		return mResult;
 	}
 });

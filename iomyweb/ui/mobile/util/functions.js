@@ -132,3 +132,6 @@ $.sap.require("IOMy.functions.devices.editThing");
 
 $.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
 $.sap.require("IOMy.functions.generateDeviceListData");
+
+$.sap.registerModulePath('IOMy.functions', sModuleInitialBuildLocation+'util/functions');
+$.sap.require("IOMy.functions.getNewDeviceOptions");
