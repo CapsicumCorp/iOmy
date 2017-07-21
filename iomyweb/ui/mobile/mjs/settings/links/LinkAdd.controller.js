@@ -56,6 +56,8 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 				
 				if (evt.data.LinkTypeId !== undefined) {
 					me.iLinkTypeId = evt.data.LinkTypeId;
+				} else {
+					me.iLinkTypeId = null;
 				}
 				
 				// Start the form creation
@@ -721,7 +723,13 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         });
         
         me.wDeviceOptionCBox = IOMy.widgets.selectBoxNewDeviceOptions(me.createId("linkTypeCBox")).addStyleClass("SettingsDropDownInput");
-		//me.wDeviceOptionCBox.setSelectedKey(me.iLinkTypeId);
+
+		if (me.iLinkTypeId !== null) {
+			me.wDeviceOptionCBox.setSelectedKey("type"+me.iLinkTypeId);
+		} else {
+			me.wDeviceOptionCBox.setSelectedKey(null);
+		}
+		
         me.wDeviceOptionCBox.attachChange(
             function () {
                 me.ChangeLinkForm(this);
