@@ -104,7 +104,6 @@ $.extend(IOMy.devices.philipshue,{
         //--------------------------------------------------------------------//
 
         //-- Initialise Variables --//
-        var sStatusButtonText			= "";
         var bButtonStatus				= false;
 
         //-- Store the Device Status --//
@@ -114,10 +113,8 @@ $.extend(IOMy.devices.philipshue,{
 
         //-- Set Text --//
         if( iDeviceStatus===0 ) {
-            sStatusButtonText	= "Off";
             bButtonStatus		= false;
         } else {
-            sStatusButtonText	= "On";
             bButtonStatus		= true;
         }
 
@@ -166,14 +163,21 @@ $.extend(IOMy.devices.philipshue,{
                             onFail : function(response) {
                                 IOMy.common.showError(response.message, "Error Changing Device Status",
 									function () {
+										oCurrentButton.setState( !oCurrentButton.getState() );
+										
 										oCurrentButton.setEnabled(true);
 									}
 								);
                             },
                             onSuccess : function( sExpectedDataType, aAjaxData ) {
-                                //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
-                                if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
+                                if( aAjaxData.ThingStatus!==undefined && aAjaxData.ThingStatus!==null ) {
                                     IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
+									
+									if (aAjaxData.ThingStatus === 0) {
+										oCurrentButton.setState(false);
+									} else if (aAjaxData.ThingStatus === 1) {
+										oCurrentButton.setState(true);
+									}
                                 }
 								oCurrentButton.setEnabled(true);
                             }

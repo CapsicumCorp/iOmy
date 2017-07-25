@@ -198,13 +198,14 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                                 IOMy.common.showError(response.responseText, "Error Changing Device Status",
 									function () {
 										oCurrentButton.setEnabled(true);
+										oCurrentButton.setState( !oCurrentButton.getState() );
 									}
 								);
                             },
                             onSuccess : function( sExpectedDataType, aAjaxData ) {
                                 var bEnabled;
 
-                                if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
+                                if( aAjaxData.ThingStatus!==undefined && aAjaxData.ThingStatus!==null ) {
                                     //-- If Turned Off --//
                                     if( aAjaxData.ThingStatus===0 ) {
                                         bEnabled = false;
@@ -212,7 +213,9 @@ sap.ui.controller("mjs.devices.PhilipsHue", {
                                     } else {
                                         bEnabled = true;
                                     }
-
+									
+									oCurrentButton.setState(bEnabled);
+									
                                     me.byId("hueSlider").setEnabled(bEnabled);
                                     me.byId("satSlider").setEnabled(bEnabled);
                                     me.byId("briSlider").setEnabled(bEnabled);
