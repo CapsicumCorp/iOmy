@@ -24,8 +24,10 @@ package com.capsicumcorp.iomy.apps.iomy;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -138,6 +140,14 @@ public class IOMy extends AppCompatActivity
         WebSettings iomySettings = iomy.getSettings();
         iomySettings.setJavaScriptEnabled(true);
         iomySettings.setAppCacheEnabled(false);
+
+        // Enable debugging on the webview.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
+                WebView.setWebContentsDebuggingEnabled(true);
+            }
+        }
+
         // Enable launching external apps after an AJAX request.
         iomySettings.setJavaScriptCanOpenWindowsAutomatically(true);
         iomy.setWebViewClient(new WebViewClient() {
