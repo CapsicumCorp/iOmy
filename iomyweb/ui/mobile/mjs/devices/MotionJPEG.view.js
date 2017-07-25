@@ -47,7 +47,7 @@ sap.ui.jsview("mjs.devices.MotionJPEG", {
         var oPage = new IOMy.widgets.IOMyPage({
             view : me,
             controller : oController,
-            icon : "sap-icon://GoogleMaterial/home",
+            icon : "sap-icon://GoogleMaterial/videocam",
             title : "MotionJPEG"
         });
 		
