@@ -72,7 +72,7 @@ sap.ui.jsview("mjs.settings.telnet.Telnet", {
 			}
 		});
 		
-		me.wToggleShowDebug = new sap.m.ToggleButton({
+		me.wToggleShowDebug = new sap.m.Button({
 			layoutData : new sap.m.FlexItemData({
 				growFactor : 1
 			}),
@@ -80,13 +80,7 @@ sap.ui.jsview("mjs.settings.telnet.Telnet", {
 			text: "Show Debug",
 			
 			press : function () {
-				if (this.getPressed()) {
-					this.setText("Hide Debug");
-					oController.ExecuteCommand("debug output show");
-				} else {
-					this.setText("Show Debug")
-					oController.ExecuteCommand("debug output hide");
-				}
+				oController.ExecuteCommand("debug output show");
 			}
 		}).addStyleClass("cTelnetButton");
 		
