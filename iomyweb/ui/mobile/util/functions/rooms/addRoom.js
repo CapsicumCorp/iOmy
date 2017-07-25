@@ -42,6 +42,7 @@ $.extend(IOMy.functions, {
         var wRoomName           = null;
         var wRoomDescription    = null;
         var wRoomType           = null;
+		var oPage;
         
         //--------------------------------------------------------------------//
         // Check room info map and assign default values if necessary.
@@ -77,6 +78,16 @@ $.extend(IOMy.functions, {
 
         //----------------------------------------------//
         //-- Check that premise field is specified.   --//
+        //----------------------------------------------//
+        if (mSettings.view === undefined || mSettings.view === null) {
+            bError = true;
+            aErrorMessages.push("UI5 view or controller not specified.");
+        } else {
+            oPage = mSettings.view;
+        }
+        
+        //----------------------------------------------//
+        //-- Check that the UI5 page scope is given.  --//
         //----------------------------------------------//
         if (mSettings.roomPremise === undefined || mSettings.roomPremise === null) {
             //---------------------------------------------------------//
@@ -221,6 +232,7 @@ $.extend(IOMy.functions, {
                                 userID          : parseInt(iUserId),
                                 roomID          : iRoomId,
                                 callingWidget   : wCallingWidget,
+								view			: oPage,
                                 onSuccess       : fnSuccess,
                                 onFail          : fnFail,
                                 
@@ -234,12 +246,15 @@ $.extend(IOMy.functions, {
 
                     },
                     onFail : function (response) {
-                        IOMy.common.showError("Update failed.", "Error");
+                        IOMy.common.showError("Update failed:\n\n"+response.responseText, "Error");
                         jQuery.sap.log.error(JSON.stringify(response));
+						
                         //-- Enable this switch --//
                         if (wCallingWidget !== null) {
                             wCallingWidget.setEnabled(true);
                         }
+						
+						IOMy.common.NavigationToggleNavButtons(oPage, true);
                     }
                 });
             } catch (e00033) {

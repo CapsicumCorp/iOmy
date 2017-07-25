@@ -174,6 +174,7 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                 IOMy.functions.addRoom({
                     callingWidget   : me.wUpdateButton,
                     userID          : me.userId,
+					view			: me,
                     
                     onSuccess       : function () {
                         //----------------------------------------------------//

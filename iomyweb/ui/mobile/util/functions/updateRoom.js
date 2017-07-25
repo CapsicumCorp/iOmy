@@ -207,6 +207,14 @@ $.extend(IOMy.functions, {
 									//-- Flag that the Core Variables have been configured --//
 									IOMy.common.CoreVariablesInitialised = true;
 									IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+									
+									if (wCallingWidget !== null) {
+										wCallingWidget.setEnabled(true);
+									}
+
+									if (oContext !== null) {
+										IOMy.common.NavigationToggleNavButtons(oContext, true);
+									}
 
 								} catch(e654321) {
 									//-- ERROR:  TODO: Write a better error message--//
@@ -221,7 +229,7 @@ $.extend(IOMy.functions, {
 								if (wCallingWidget !== null) {
 									wCallingWidget.setEnabled(true);
 								}
-								
+
 								if (oContext !== null) {
 									IOMy.common.NavigationToggleNavButtons(oContext, true);
 								}

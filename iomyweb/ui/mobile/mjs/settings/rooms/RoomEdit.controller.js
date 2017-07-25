@@ -178,7 +178,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                     IOMy.common.showError("There was a problem updating the room:\n\n"+eUpdateRoomError.message, "Error Updating Room",
                         function () {
                             thisButton.setEnabled(true);
-							IOMy.common.NavigationToggleNavButtons(me, false);
+							IOMy.common.NavigationToggleNavButtons(me, true);
                         }
                     );
 
@@ -223,6 +223,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                             //var oButton = this;
                             var sDialogTitle = "";
                             IOMy.common.NavigationToggleNavButtons(me, false);
+							me.wUpdateButton.setEnabled(false);
 
                             //-- CONFIRM THAT YOU WISH TO DELETE THIS ROOM --//
                             IOMy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
@@ -235,6 +236,8 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 														text : me.wRoomName.getValue() + " successfully removed.",
 														view : thisView
 													})
+													IOMy.common.NavigationToggleNavButtons(me, true);
+													me.wUpdateButton.setEnabled(true);
 													IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
 												}
 											);
@@ -252,11 +255,14 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 											IOMy.common.showError(err.message, sDialogTitle,
 												function () {
 													IOMy.common.NavigationToggleNavButtons(me, true);
-													//oButton.setEnabled(true);
+													me.wUpdateButton.setEnabled(true);
 												}
 											);
 
 										}
+									} else {
+										IOMy.common.NavigationToggleNavButtons(me, true);
+										me.wUpdateButton.setEnabled(true);
 									}
                                 }
                             );
