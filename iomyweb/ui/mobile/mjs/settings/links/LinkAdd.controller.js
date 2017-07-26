@@ -396,7 +396,6 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
     FetchAPIAndParameters : function () {
         var me					= this;           // Preserving this scope
         var mData				= {};             // Map for the AJAX request
-		var mOnvifCamValidation	= {};
         var sLinkType			= "";
 		var sSBoxKey			= me.byId("linkTypeCBox").getSelectedItem().getKey();
 		var mEntry				= me.DeviceOptions[sSBoxKey];
@@ -630,10 +629,12 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 		
 		if (me.wRoomCBox !== null) {
 			me.wRoomCBox.destroy();
+			me.wRoomCBox = null;
 		}
         
         if (me.wVertBox !== null) {
             me.wVertBox.destroy();
+			me.wVertBox = null;
         }
         
         // Destroy whatever other elements are left.
@@ -644,7 +645,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
     },
     
     /**
-     * Procedure that destroys specific form elements. These elements pertain to the a 
+     * Procedure that destroys specific form elements.
      */
     DestroySpecificFormUI : function() {
         var me          = this;

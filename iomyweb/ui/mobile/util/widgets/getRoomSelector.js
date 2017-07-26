@@ -49,6 +49,10 @@ $.extend(IOMy.widgets,{
             //====================================================================//
             // Create the Select Box                                              //
             //====================================================================//
+			if (sap.ui.getCore().byId(sId) !== undefined) {
+				sap.ui.getCore().byId(sId).destroy();
+			}
+			
             if (IOMy.common.RoomsList[sPremiseId] !== undefined) {
                 var oSBox = new sap.m.Select(sId,{
                     "width" : "100%"
