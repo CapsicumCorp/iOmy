@@ -455,35 +455,36 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                 };
 			}
         } catch (e2000) {
-            throw "Error 0x2000: "+e2000.message;
+            jQuery.sap.log.error("Error refreshing core variables: "+e.message);
+			IOMy.common.showWarning(sLinkType+" successfully created but there was an error refreshing core variables: "+e.message, "Errors");
         }
         
         // These functions are not necessarily to do with a specific device type.
         mData.onSuccess = function (response, data) {
-            jQuery.sap.log.debug("Success: "+JSON.stringify(response));
-            jQuery.sap.log.debug("Success: "+JSON.stringify(data));
-            
-            //--------------------------------------------------------------//
-            // Find the new Link ID                                         //
-            //--------------------------------------------------------------//
-            var iLinkId = 0;
-            
-            // Should be in this variable
-            if (data.Data !== undefined) {
-                if (data.Data.LinkId !== undefined) {
-                    iLinkId = data.Data.LinkId;
-                }
-            // I found the Open Weather Map feed link ID in this variable!
-            } else if (data.WeatherStation !== undefined) {
-                if (data.WeatherStation.LinkId !== undefined) {
-                    iLinkId = data.WeatherStation.LinkId;
-                }
+			if (data.Error !== true) {
+				jQuery.sap.log.debug("Success: "+JSON.stringify(response));
+				jQuery.sap.log.debug("Success: "+JSON.stringify(data));
+
+				//--------------------------------------------------------------//
+				// Find the new Link ID                                         //
+				//--------------------------------------------------------------//
+				var iLinkId = 0;
+
+				// Should be in this variable
+				if (data.Data !== undefined) {
+					if (data.Data.LinkId !== undefined) {
+						iLinkId = data.Data.LinkId;
+					}
+				// I found the Open Weather Map feed link ID in this variable!
+				} else if (data.WeatherStation !== undefined) {
+					if (data.WeatherStation.LinkId !== undefined) {
+						iLinkId = data.WeatherStation.LinkId;
+					}
+				}
             } else {
                 jQuery.sap.log.error("An error has occurred with the link ID: consult the \"Success\" output above this console");
-                IOMy.common.showError("Error creating "+sLinkType+":\n\n"+error.responseText);
+                IOMy.common.showError("Error creating "+sLinkType+":\n\n"+data.ErrMesg);
             }
-			
-			console.log(iLinkId);
 
             try {
                 // REFRESH LINK LIST

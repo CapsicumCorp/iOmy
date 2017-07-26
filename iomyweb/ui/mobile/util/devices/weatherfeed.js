@@ -64,22 +64,24 @@ $.extend(IOMy.devices.weatherfeed,{
     FetchAddLinkAPIAndParameters : function (oScope) {
         var me = this;              // Capture the scope of the device module
         var mData = {};             // Map for the AJAX request
+		var iRoomId;
+		
+		if (oScope.wRoomCBox === null) {
+			iRoomId = 1;
+		} else {
+			iRoomId = oScope.wRoomCBox.getSelectedItem().getKey();
+		}
         
-        try {
-            mData.url = IOMy.apiphp.APILocation("weather");
-            mData.data = {
-                "Mode" : "AddWeatherStation",
-                "HubId" : oScope.byId("hubCBox").getSelectedKey(),
-                "WeatherType" : "OpenWeatherMap",
-                "Username" : oScope.byId(me.uiIDs.sKeyCodeID+"Field").getValue(),
-                "StationCode" : oScope.byId(me.uiIDs.sStationCodeID+"Field").getValue(),
-                "RoomId" : oScope.wRoomCBox.getSelectedItem().getKey(),
-                "Data" : "{\"Name\" : \""+oScope.byId(me.uiIDs.sLinkNameID+"Field").getValue()+"\"}"
-            };
-            
-        } catch (eAddLink8200) {
-            throw "Error ADDLINK_8200: "+eAddLink8200.message;
-        }
+        mData.url = IOMy.apiphp.APILocation("weather");
+		mData.data = {
+			"Mode" : "AddWeatherStation",
+			"HubId" : oScope.byId("hubCBox").getSelectedKey(),
+			"WeatherType" : "OpenWeatherMap",
+			"Username" : oScope.byId(me.uiIDs.sKeyCodeID+"Field").getValue(),
+			"StationCode" : oScope.byId(me.uiIDs.sStationCodeID+"Field").getValue(),
+			"RoomId" : iRoomId,
+			"Data" : "{\"Name\" : \""+oScope.byId(me.uiIDs.sLinkNameID+"Field").getValue()+"\"}"
+		};
         
         return mData;
     },
