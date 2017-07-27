@@ -64,6 +64,7 @@ $aPostData                  = array();      //-- ARRAY:         Used to store th
 
 $aUserInfo                  = array();      //-- ARRAY:         Used to store the "User Information" that most modes in this API depend on.  --//
 $aUserServerPermissions     = array();      //-- ARRAY:         --//
+$aUserDBInsert              = array();      //-- ARRAY:         --//
 
 $bTransactionStarted        = false;        //-- BOOLEAN:       Used to indicate if a transaction has been started --//
 $sDBUsername                = "";           //-- STRING:        --//
@@ -1053,19 +1054,19 @@ if( $bError===false ) {
 					}
 					
 					
-					$aResult = CreateDatabaseUser( $sPostUsername, $sPostNewPassword, $sUserLocation );
+					$aUserDBInsert = CreateDatabaseUser( $sPostUsername, $sPostNewPassword, $sUserLocation );
 					
 					//-- IF No errors have occurred then extract the UserId --//
-					if( $aResult['Error']===true ) {
+					if( $aUserDBInsert['Error']===true ) {
 						$bError    = true;
 						$iErrCode  = 4404;
 						$sErrMesg .= "Error Code:'4404' \n";
-						$sErrMesg .= $aResult['ErrMesg'];
+						$sErrMesg .= $aUserDBInsert['ErrMesg'];
 					}
 				}
 				
 				//----------------------------------------//
-				//-- Commit or rollback the Changes     --//
+				//-- Commit or rollback the changes     --//
 				//----------------------------------------//
 				if( $bTransactionStarted===true ) {
 					if( $bError===false ) {
@@ -1081,6 +1082,20 @@ if( $bError===false ) {
 						$oRestrictedApiCore->oRestrictedDB->dbRollback();
 						
 					}
+				}
+				
+				//----------------------------------------//
+				//-- Create the Result                  --//
+				//----------------------------------------//
+				if( $bError===false ) {
+					$aResult = array(
+						"Error" => false,
+						"Data"  => array(
+							"UserId"        => $iUserId,
+							"UserAddressId" => $iUserAddressId,
+							"UserInfoId"    => $iUserInfoId
+						)
+					);
 				}
 				
 			} catch( Exception $e4400 ) {
