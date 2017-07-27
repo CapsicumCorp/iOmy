@@ -67,6 +67,11 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         // }
     ],
     
+    ResetJoinButtonText : function (oScope) {
+        var me = this;
+        oScope.byId(me.uiIDs.sEnableJoinModeButtonID).setText( me.sEnableTempJoinButtonText );
+    },
+    
     /**
      * Enables or disables the telnet command widgets.
      * 
@@ -185,9 +190,10 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             // Re-enable the button that called this function after the
                             // cooldown period expires.
                             try {
-                                oButton.setText(sText);
+                                me.ResetJoinButtonText(oScope);
                             } catch (e) {
                                 // Ignore
+                                jQuery.sap.log.error(e.message);
                             } finally {
                                 me.sEnableTempJoinButtonText = sText;
                             }
@@ -280,6 +286,22 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                     }
                     
                     this.onComplete();
+                    
+                    IOMy.common.RefreshCoreVariables({
+                        onSuccess : function () {
+                            IOMy.common.showMessage({
+                                text : "Join completed.",
+                                view : oScope.getView()
+                            });
+                        }
+                    });
+                } else {
+                    if (oOutputWidget !== undefined) {
+                        oOutputWidget.setValue(oOutputWidget.getValue() + data.ErrMesg);
+
+                        // Force it to scroll down to the bottom.
+                        document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
+                    }
                 }
             },
             
@@ -295,7 +317,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                 
                 if (oOutputWidget !== undefined) {
                     oOutputWidget.setValue(oOutputWidget.getValue() + sOutput);
-                    
+
                     // Force it to scroll down to the bottom.
                     document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
                 }
@@ -306,6 +328,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
             onComplete : function () {
                 // Indicating that a telnet command has finished executing
                 me.bRunningCommand = false;
+                
                 // Re-enable the button that called this function as well as the custom telnet input box
                 me.ToggleZigbeeCommands(oScope, true);
             }
@@ -682,8 +705,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         
         oScope.aElementsForAFormToDestroy.push(me.uiIDs.sTelnetOutputTextAreaID);
         oFormItem = new sap.m.TextArea(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID), {
-            editable : false,
-            growing : true
+            editable : false
         }).addStyleClass("width100Percent TelnetOutput");
         
         oFormBox.addItem(oFormItem);

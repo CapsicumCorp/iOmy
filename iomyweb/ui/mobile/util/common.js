@@ -1722,7 +1722,7 @@ $.extend(IOMy.common,{
 			},
 			
 			onFail : function (response) {
-				jQuery.sap.log.error("Error refreshing UserInfo list: "+JSON.stringify(Response));
+				jQuery.sap.log.error("Error refreshing UserInfo list: "+JSON.stringify(response));
 				
 				//-- Perform the "onFail" function if applicable --//
 				if(oConfig.onFail) {

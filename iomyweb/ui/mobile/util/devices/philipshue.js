@@ -161,7 +161,7 @@ $.extend(IOMy.devices.philipshue,{
                                 "Id": aDeviceData.DeviceId
                             },
                             onFail : function(response) {
-                                IOMy.common.showError(response.message, "Error Changing Device Status",
+                                IOMy.common.showError(response.responseText, "Error",
 									function () {
 										oCurrentButton.setState( !oCurrentButton.getState() );
 										
@@ -267,7 +267,6 @@ $.extend(IOMy.devices.philipshue,{
         //--------------------------------------------------------------------//
 
         //-- Initialise Variables --//
-        var sStatusButtonText			= "";
         var bButtonStatus				= false;
 
         //-- Store the Device Status --//
@@ -278,10 +277,8 @@ $.extend(IOMy.devices.philipshue,{
 
         //-- Set Text --//
         if( iDeviceStatus===0 ) {
-            sStatusButtonText	= "Off";
             bButtonStatus		= false;
         } else {
-            sStatusButtonText	= "On";
             bButtonStatus		= true;
         }
 
