@@ -26,48 +26,15 @@ $.sap.declare("IOMy.functions.getNewDeviceOptions",true);
 $.extend(IOMy.functions, {
 	
 	/**
-	 * Creates a JSON data structure containing all things organised into their
-	 * hubs, which are placed into their premises.
+	 * Creates a JSON structure that contains a list of device types, and onvif
+	 * servers for users to select from.
 	 * 
-	 * Resulting structure is something like this:
-	 * 
-	 * {
-	 *     "Premises" : {
-	 *         "_1" : {
-	 *             "PremiseId": 1,
-	 *             "PremiseName": "Holiday Home",
-	 *             "Hubs": {
-	 *                 "_1": {
-	 *                     "HubId": 1,
-	 *                     "HubName": "Android Set-Top-Box",
-	 *                     "Things": {
-	 *                         "_43": {
-	 *                             "Id": 43,
-	 *                             "DisplayName": "Plug for TV"
-	 *                             ...
-	 *                         }
-	 *                     }
-	 *                 },
-	 *                 "_2": {
-	 *                     ...
-	 *                 }
-	 *             }
-	 *         }
-	 *     }
-	 * }
-	 * 
-	 * @returns {Object}		Data structure for the Device List page to read from.
+	 * @returns {Object}		Data structure
 	 */
 	getNewDeviceOptions : function () {
 		//--------------------------------------------------------------------//
 		// Variables
 		//--------------------------------------------------------------------//
-		var me					= this; // Scope captured for sub functions.
-		var iIndex				= 0;
-		//-- Error handling --//
-		var bRefreshing			= true;
-		var bError				= false;
-		var aErrorMessages		= [];
 		
 		//-- List --//
 		var structOptions		= {};

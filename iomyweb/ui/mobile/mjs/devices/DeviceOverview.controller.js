@@ -24,11 +24,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 
 sap.ui.controller("mjs.devices.DeviceOverview", {
-	api: IOMy.apiphp,
-	oData: IOMy.apiodata,
-	functions : IOMy.functions,
-	common : IOMy.common,
-	
 		
 	//timerInterval		: null,
 	aAjaxTasks:{ 
@@ -190,7 +185,7 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 		//----------------------------------------------------//
 		oController.aFilters = []; // Clear the list of filters in case any new device types appear or disappear in the list.
 		
-		oController.dLastDeviceUpdate = oController.common.ThingListLastUpdate; // Set when the Thing/Item list was last updated.
+		oController.dLastDeviceUpdate = IOMy.common.ThingListLastUpdate; // Set when the Thing/Item list was last updated.
 		
 		//-- Reset the UI Groupings --//
 		oController.aUIGroupingData = {};
