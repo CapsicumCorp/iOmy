@@ -123,7 +123,6 @@ sap.ui.controller("mjs.settings.user.AddUser", {
     DrawUI : function () {
         var me                  = this;
         var thisView            = me.getView();
-        var loadLocaleCBoxItems = IOMy.functions.loadLocaleCBoxItems;
         //============================================================//
         // Start rendering the page
         //============================================================//
@@ -141,6 +140,18 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                 })
             ]
         }).addStyleClass("ConsistentMenuHeader BorderTop ListItem");
+        
+        //------------------------------------------------------//
+        // Display name
+        //------------------------------------------------------//
+        var oDisplayNameLabel = new sap.m.Label({
+            text : "User's display Name"
+        });
+
+        me.wDisplayNameField = new sap.m.Input({
+            value : "",
+            maxLength : 60
+        }).addStyleClass("SettingsTextInput");
         
         //------------------------------------------------------//
         // Given names (First and Middle names)
@@ -187,18 +198,6 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             maxLength : 60
         }).addStyleClass("SettingsTextInput");
 
-        //------------------------------------------------------//
-        // Display name/Username
-        //------------------------------------------------------//
-        var oDisplayNameLabel = new sap.m.Label({
-            text : "Display Name"
-        });
-
-        me.wDisplayNameField = new sap.m.Input({
-            value : "",
-            maxLength : 60
-        }).addStyleClass("SettingsTextInput");
-        
         //------------------------------------------------------//
         // Date of Birth
         //------------------------------------------------------//
@@ -265,7 +264,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
 
         //===== STATE =====//
         var oStateTitle = new sap.m.Text({
-            text : "Subregion"
+            text : "State / Province"
         });
 
         me.wStateField = new sap.m.Input({}).addStyleClass("SettingsDropdownInput");
@@ -313,8 +312,6 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         me.wAddressLine3Field = new sap.m.Input({
             value : ""
         }).addStyleClass("SettingsTextInput");
-        
-        //loadLocaleCBoxItems(me, me.wRegionField.getSelectedIndex().getKey());
         
         //----------------------------------------------//
         // Username and Password Section
@@ -411,11 +408,11 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         //--------------------------//
         me.wUserInformationVertBox = new sap.m.VBox({
             items : [
+                oDisplayNameLabel, me.wDisplayNameField,
 				oGenderLabel, me.wGenderField,
 				oTitleLabel, me.wTitleField,
                 oGivenNamesLabel, me.wGivenNamesField,
                 oSurnameLabel, me.wSurnameField,
-                oDisplayNameLabel, me.wDisplayNameField,
                 oDateOfBirthLabel, me.wDateOfBirthField,
                 oEmailLabel, me.wEmailField,
                 oContactPhoneNumberLabel, me.wContactPhoneField
@@ -544,6 +541,10 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         //-----------------------------------//
         // Validate Input
         //-----------------------------------//
+        if (sDisplayname === "") {
+            aLogErrors.push("* User's display name must be filled out");
+        }
+        
         if (sAddressLine1 === "") {
             aLogErrors.push("* Street Address (Line 1) must be filled out");
         }
@@ -621,14 +622,19 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                         "Data" : "{\"Username\":\""+me.wDBRootUsernameField.getValue()+"\",\"Password\":\""+me.wDBRootPasswordField.getValue()+"\",\"URI\":\"localhost\"}",
                     },
 
-                    onSuccess : function () {
-                        IOMy.common.showMessage({
-							text : "User "+sDisplayname+" created successfully! Please assign the correct premise permissions for "+sDisplayname,
-							view : me.getView()
+                    onSuccess : function (responseType, data) {
+						IOMy.common.RefreshCoreVariables({
+							onSuccess : function () {
+								IOMy.common.showMessage({
+									text : "User "+sDisplayname+" created successfully! Please assign the correct premise permissions for "+sDisplayname,
+									view : me.getView()
+								});
+								
+								IOMy.common.NavigationToggleNavButtons(me, true);
+								IOMy.common.NavigationChangePage("pSettingsPremisePermissions", {userID : data.Data.UserId});
+							}
 						});
 						
-						IOMy.common.NavigationToggleNavButtons(me, true);
-						IOMy.common.NavigationChangePage("pSettingsPremisePermissions", {});
                     },
                     onFail : function (response) {
                         // Report the error in a popup message.

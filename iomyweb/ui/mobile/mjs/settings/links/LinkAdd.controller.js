@@ -53,6 +53,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 		thisView.addEventDelegate({
 			// Everything is rendered in this function run before rendering.
 			onBeforeShow : function (evt) {
+                me.DeviceOptions = IOMy.functions.getNewDeviceOptions();
 				
 				if (evt.data.LinkTypeId !== undefined) {
 					me.iLinkTypeId = evt.data.LinkTypeId;

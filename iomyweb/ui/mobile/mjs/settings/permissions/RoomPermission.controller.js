@@ -27,7 +27,8 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
     // Properties
     //========================================================================//
     
-    aElementsToDestroy      : [],
+    aElementsToDestroy  : [],
+	iUserId				: null,
     
     // Flags
     bRefreshUI              : false,
@@ -70,6 +71,12 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                 // Start the form creation
                 me.DestroyUI();         // STEP 1: Clear any old forms to avoid duplicate IDs
                 me.DrawUI();            // STEP 2: Draw the actual user interface               
+				
+				if (evt.data.userID !== undefined && evt.data.userID !== null) {
+					me.iUserId = evt.data.userID;
+				} else {
+					me.iUserId = null;
+				}
 			}
 		});
 	},
@@ -505,11 +512,8 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                             
                             for (var i = 0; i < data.length; i++) {
                                 mRoomInfo = data[i];
-								
-								if (mRoomInfo.ROOMS_PK !== 1 && mRoomInfo.ROOMS_NAME !== "Unassigned") {
-									mRoomInfo["Index"] = "_"+mRoomInfo.ROOMS_PK;
-									me.DrawRoomEntry(mRoomInfo);
-								}
+								mRoomInfo["Index"] = "_"+mRoomInfo.ROOMS_PK;
+								me.DrawRoomEntry(mRoomInfo);
                             }
                             
                             premisePermRoomsRequest.onComplete();
@@ -521,6 +525,7 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
                         },
                         
                         onComplete : function () {
+                            me.wUserSelectBox.setSelectedKey(me.iUserId);
                             thisView.byId("page").addContent(me.wPanel);
                         }
                     });

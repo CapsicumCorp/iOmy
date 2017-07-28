@@ -27,12 +27,13 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
     // Properties
     //========================================================================//
     
-    aElementsToDestroy      : [],
+    aElementsToDestroy  : [],
+	iUserId             : null,
     
     // Flags
-    bRefreshUI              : false,
-    premisesExpanded        : {},
-    premisesChanged         : {},
+    bRefreshUI          : false,
+    premisesExpanded    : {},
+    premisesChanged     : {},
     
     // Widgets
     wUserLabel                  : null,
@@ -65,7 +66,14 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
 				
                 // Start the form creation
                 me.DestroyUI();         // STEP 1: Clear any old forms to avoid duplicate IDs
-                me.DrawUI();            // STEP 2: Draw the actual user interface               
+                me.DrawUI();            // STEP 2: Draw the actual user interface   
+				
+				if (evt.data.userID !== undefined && evt.data.userID !== null) {
+					me.iUserId = evt.data.userID;
+				} else {
+					me.iUserId = null;
+				}
+				
 			}
 		});
 	},
@@ -209,6 +217,9 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
 
                         }
                     };
+                    
+                    me.wUserSelectBox.setSelectedKey(me.iUserId);
+                    me.FetchPermissionsForPremise(me.wUserSelectBox.getSelectedKey(), me.wPremiseSelectBox.getSelectedKey());
                     
                     thisView.byId("page").addContent(me.wPanel);
                 },
@@ -596,6 +607,10 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
 								text : "Premise Permissions updated successfully!",
 								view : me.getView()
 							});
+							
+							if (me.iUserId !== null) {
+								IOMy.common.NavigationChangePage("pSettingsRoomPermissions", {userID : me.iUserId});
+							}
 							
 							IOMy.common.NavigationToggleNavButtons(me, true);
 							me.wApplyButton.setEnabled(true);

@@ -61,6 +61,7 @@ $.extend(IOMy.functions, {
         var iInfoAccess         = 0;
         var iWriteAccess        = 0;
         var iDeviceManageAccess = 0;
+		var oPage;
         
         //--------------------------------------------------------------------//
         // Check the settings map and assign default values if necessary.
@@ -178,6 +179,16 @@ $.extend(IOMy.functions, {
             bError = true;
             aErrorMessages.push("Device management permission setting must be set either as a boolean or a number (0 or 1)!");
         }
+		
+		//----------------------------------------------//
+        //-- Check that premise field is specified.   --//
+        //----------------------------------------------//
+        if (mSettings.view === undefined || mSettings.view === null) {
+            bError = true;
+            aErrorMessages.push("UI5 view or controller not specified.");
+        } else {
+            oPage = mSettings.view;
+        }
         
         //--------------------------------------------------------------------//
         // Check that the calling widget is specified.
@@ -239,6 +250,8 @@ $.extend(IOMy.functions, {
                             if (wCallingWidget !== null) {
                                 wCallingWidget.setEnabled(true);
                             }
+							
+							IOMy.common.NavigationToggleNavButtons(oPage, true);
                         }
                     },
 
@@ -253,6 +266,8 @@ $.extend(IOMy.functions, {
                         if (wCallingWidget !== null) {
                             wCallingWidget.setEnabled(true);
                         }
+						
+						IOMy.common.NavigationToggleNavButtons(oPage, true);
                     }
 
                 });
