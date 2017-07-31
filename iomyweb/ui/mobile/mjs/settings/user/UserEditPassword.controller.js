@@ -110,19 +110,21 @@ sap.ui.controller("mjs.settings.user.UserEditPassword", {
 						new sap.m.Link(me.createId("editButton"), {
 							text : "Update",
 							press : function () {
-								this.setEnabled(false);
+                                var oButton = this;
+								oButton.setEnabled(false);
 								IOMy.common.NavigationToggleNavButtons(me, false);
 								
+                                var aLogErrors = [];
+                                var sDialogTitle = "";
                                 var sOldPasswd = me.byId("oldPasswordField").getValue();
                                 var sNewPasswd1 = me.byId("newPasswordField").getValue();
                                 var sNewPasswd2 = me.byId("confirmPasswordField").getValue();
-                                
+                                var mPasswordValidationInfo;
+                                    
                                 // Check that the new password and confirm new password fields
                                 // are equal. If not, flag an error and exit.
                                 if (sNewPasswd1 !== sNewPasswd2 || sOldPasswd === "" || sNewPasswd1 === "" ||
                                     sNewPasswd2 === "") {
-                                    var aLogErrors = [];
-                                    var sDialogTitle = "";
                                     
                                     // Has the current password been entered?
                                     if (sOldPasswd === "") {
@@ -136,7 +138,7 @@ sap.ui.controller("mjs.settings.user.UserEditPassword", {
                                             sDialogTitle = "Enter New Password";
                                         } else if (sNewPasswd2 === "") {
                                             aLogErrors.push("You must enter your password twice to check that the password you entered is correct.");
-                                            sDialogTitle = "Entered Password Once";
+                                            sDialogTitle = "Confirm New Password";
                                         }
                                     } else {
                                         // Do the new passwords match?
@@ -146,17 +148,30 @@ sap.ui.controller("mjs.settings.user.UserEditPassword", {
                                         }
                                     }
                                     
-                                    if (aLogErrors.length > 1)
-                                        sDialogTitle = "Errors";
+                                }
+                                
+                                //-- Check that the password is secure enough. --//
+                                if (sNewPasswd1 !== "") {
+                                    mPasswordValidationInfo = IOMy.functions.validateSecurePassword(sNewPasswd1);
                                     
+                                    if (!mPasswordValidationInfo.bValid) {
+                                        aLogErrors = aLogErrors.concat(mPasswordValidationInfo.aValidationErrorMessages);
+                                        sDialogTitle = "Insecure Password";
+                                    }
+                                }
+                                
+                                if (aLogErrors.length > 0) {
+                                    if (aLogErrors.length > 1) {
+                                        sDialogTitle = "Errors";
+                                    }
                                     // Toss up an error dialog and place the error(s) in the error log.
                                     jQuery.sap.log.error(aLogErrors.join("\n"));
                                     IOMy.common.showError(aLogErrors.join("\n\n"), sDialogTitle,
-										function () {
-											this.setEnabled(true);
-											IOMy.common.NavigationToggleNavButtons(me, true);
-										}
-									);
+                                        function () {
+                                            oButton.setEnabled(true);
+                                            IOMy.common.NavigationToggleNavButtons(me, true);
+                                        }
+                                    );
                                 } else {
                                     // Run the API to update the user's password
                                     try {
@@ -172,12 +187,12 @@ sap.ui.controller("mjs.settings.user.UserEditPassword", {
                                                     window.location.reload(true); // TRUE forces a proper refresh from the server, not the cache.
                                                 }, "UpdateMessageBox");
                                             },
-                                            error : function () {
-                                                IOMy.common.showError("Update failed.", "Error",
-													function () {
-														IOMy.common.NavigationToggleNavButtons(me, false);
-													}
-												);
+                                            error : function (response) {
+                                                IOMy.common.showError("Update failed:\n\n"+response.responseText, "Error",
+                                                    function () {
+                                                        IOMy.common.NavigationToggleNavButtons(me, true);
+                                                    }
+                                                );
                                             }
                                         });
                                     } catch (e00033) {
@@ -185,7 +200,6 @@ sap.ui.controller("mjs.settings.user.UserEditPassword", {
                                         IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
                                     }
                                 }
-								this.setEnabled(true);
 							}
 						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
 					]

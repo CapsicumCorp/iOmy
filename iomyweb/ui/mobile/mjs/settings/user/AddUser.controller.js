@@ -145,7 +145,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         // Display name
         //------------------------------------------------------//
         var oDisplayNameLabel = new sap.m.Label({
-            text : "User's display Name"
+            text : "User's Display Name"
         });
 
         me.wDisplayNameField = new sap.m.Input({
