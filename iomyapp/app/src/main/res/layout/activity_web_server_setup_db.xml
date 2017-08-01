@@ -55,7 +55,8 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
             android:id="@+id/dbSchema"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="IOMY"/>
+            android:text="IOMY"
+            android:singleLine="true" />
     </ScrollView>
 
     <!-- SERVER PORT FIELD -->

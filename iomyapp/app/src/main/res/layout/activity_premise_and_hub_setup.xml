@@ -56,7 +56,8 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/premiseNameField"
-                android:text="Home" />
+                android:text="Home"
+                android:singleLine="true" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -68,7 +69,8 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
                 android:id="@+id/premiseHubNameField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="iOmyHub" />
+                android:text="iOmyHub"
+                android:singleLine="true" />
         </LinearLayout>
     </ScrollView>
 

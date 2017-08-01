@@ -53,7 +53,8 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/owner_username"
-                android:capitalize="sentences" />
+                android:capitalize="sentences"
+                android:singleLine="true" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -66,7 +67,8 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
                 android:ems="10"
-                android:id="@+id/owner_password" />
+                android:id="@+id/owner_password"
+                android:singleLine="true" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -79,7 +81,8 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
                 android:ems="10"
-                android:id="@+id/owner_confirm_password" />
+                android:id="@+id/owner_confirm_password"
+                android:singleLine="true" />
         </LinearLayout>
     </ScrollView>
 
