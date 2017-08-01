@@ -228,14 +228,20 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                                                 "AddressLanguage" : me.byId("addressLanguage").getSelectedKey()
                                             },
                                             onSuccess : function () {
-                                                IOMy.common.showMessage({
-													text : "Your address updated successfully",
-													view : thisView
-												});
-												
-                                                thisButton.setEnabled(true);
-												IOMy.common.NavigationToggleNavButtons(me, true);
-												IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
+                                                IOMy.common.RefreshCoreVariables({
+                                                    
+                                                    onSuccess : function () {
+                                                        IOMy.common.showMessage({
+                                                            text : "Your address updated successfully",
+                                                            view : thisView
+                                                        });
+
+                                                        thisButton.setEnabled(true);
+                                                        IOMy.common.NavigationToggleNavButtons(me, true);
+                                                        IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
+                                                    }
+                                                    
+                                                })
                                             },
                                             onFail : function (response) {
                                                 IOMy.common.showError("Update failed.", "Error",
@@ -280,11 +286,11 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                 // Destroys the actual panel of the page. This is done to ensure that there
 				// are no elements left over which would increase the page size each time
 				// the page is visited.
-				if (me.byId("premisePanel") !== undefined) {
-					me.byId("premisePanel").destroy();
+				if (me.byId("userPanel") !== undefined) {
+					me.byId("userPanel").destroy();
                 }
     		    
-    		    var oPanel = new sap.m.Panel(me.createId("premisePanel"), {
+    		    var oPanel = new sap.m.Panel(me.createId("userPanel"), {
     		    	backgroundDesign: "Transparent",
 					content: [oVertBox] //-- End of Panel Content --//
 				}).addStyleClass("PanelNoTopOrSidesPadding");

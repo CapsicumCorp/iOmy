@@ -102,7 +102,7 @@ sap.ui.controller("mjs.settings.user.EditUserInformation", {
 					items : [
 						new sap.m.Link(me.createId("editButton"), {
 							text : "Update",
-							//enabled : false,
+							enabled : false,
 							press : function () {
 								this.setEnabled(false);
 								IOMy.common.NavigationToggleNavButtons(me, false);
@@ -126,8 +126,9 @@ sap.ui.controller("mjs.settings.user.EditUserInformation", {
 //                                    aLogErrors.push("Given name(s) must be specified.");
 //                                if (sSurnames === "")
 //                                    aLogErrors.push("Surname is required");
-                                if (sDisplayname === "")
+                                if (sDisplayname === "") {
                                     aLogErrors.push("Display name is required.");
+                                }
 //                                if (sEmail === "")
 //                                    aLogErrors.push("Email is required");
 //                                if (sPhone === "")
@@ -168,13 +169,19 @@ sap.ui.controller("mjs.settings.user.EditUserInformation", {
                                                 "Gender" : 2
                                             },
                                             onSuccess : function () {
-                                                IOMy.common.showMessage({
-													text : "Your user information updated successfully",
-													view : thisView
-												});
-												
-												IOMy.common.NavigationToggleNavButtons(me, true);
-												IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
+                                                IOMy.common.RefreshCoreVariables({
+                                                    
+                                                    onSuccess : function () {
+                                                        IOMy.common.showMessage({
+                                                            text : "Your user information updated successfully",
+                                                            view : thisView
+                                                        });
+
+                                                        IOMy.common.NavigationToggleNavButtons(me, true);
+                                                        IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
+                                                    }
+                                                    
+                                                });
                                             },
                                             error : function (error) {
                                                 IOMy.common.showError("Update failed: "+error.responseText, "Error",
