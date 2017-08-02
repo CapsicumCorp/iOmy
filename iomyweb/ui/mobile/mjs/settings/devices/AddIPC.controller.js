@@ -95,10 +95,10 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 							thisView.wIPAddress.setValue(mData.Address);
 							thisView.wIPPort.setValue(mData.Port);
 							thisView.wStreamPath.setValue(mData.Path);
-							thisView.wUsername.setValue(mData.Username);
-							thisView.wPassword.setValue(mData.Password);
+//							thisView.wUsername.setValue(mData.Username);
+//							thisView.wPassword.setValue(mData.Password);
 
-							thisView.wAuthenticationCheckBox.setSelected(mData.AuthenticationRequired);
+							//thisView.wAuthenticationCheckBox.setSelected(mData.AuthenticationRequired);
 							
 							me.ToggleControlButtons(true);
 							me.ToggleFields(true);
@@ -175,13 +175,13 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 		oView.wIPPort.setEnabled(bEnabled);
 		oView.wStreamPath.setEnabled(bEnabled);
 		
-		if (oView.wAuthenticationCheckBox.getSelected() === true) {
-			this.ToggleAuthenticationFields(bEnabled);
-		} else {
-			this.ToggleAuthenticationFields(false);
-		}
-		
-		oView.wAuthenticationCheckBox.setEnabled(bEnabled);
+//		if (oView.wAuthenticationCheckBox.getSelected() === true) {
+//			this.ToggleAuthenticationFields(bEnabled);
+//		} else {
+//			this.ToggleAuthenticationFields(false);
+//		}
+//		
+//		oView.wAuthenticationCheckBox.setEnabled(bEnabled);
 	},
 	
 	/**
@@ -230,20 +230,20 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 		oView.wIPPort.setValue("");
 		oView.wStreamPath.setValue("");
 		
-		oView.wAuthenticationCheckBox.setSelected(false);
-		oView.wUsername.setValue("");
-		oView.wPassword.setValue("");
+//		oView.wAuthenticationCheckBox.setSelected(false);
+//		oView.wUsername.setValue("");
+//		oView.wPassword.setValue("");
 		
 	},
 	
-	CheckAuthenticationFieldsForSpaces : function () {
-		var oView = this.getView();
-		
-		var sUsername = oView.wUsername.getValue();
-		var sPassword =	oView.wPassword.getValue();
-		
-		return (sUsername.indexOf(" ") > -1 || sPassword.indexOf(" ") > -1);
-	},
+//	CheckAuthenticationFieldsForSpaces : function () {
+//		var oView = this.getView();
+//		
+//		var sUsername = oView.wUsername.getValue();
+//		var sPassword =	oView.wPassword.getValue();
+//		
+//		return (sUsername.indexOf(" ") > -1 || sPassword.indexOf(" ") > -1);
+//	},
 	
 	/**
 	 * Takes all of the data from the form and checks that all of the required
@@ -274,9 +274,9 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 		var sIPAddress					= oView.wIPAddress.getValue();
 		var sIPPort						= oView.wIPPort.getValue();
 		var sStreamPath					= oView.wStreamPath.getValue();
-		var bAuthenticationRequired		= oView.wAuthenticationCheckBox.getSelected();
-		var sUsername					= oView.wUsername.getValue();
-		var sPassword					= oView.wPassword.getValue();
+//		var bAuthenticationRequired		= oView.wAuthenticationCheckBox.getSelected();
+//		var sUsername					= oView.wUsername.getValue();
+//		var sPassword					= oView.wPassword.getValue();
 		var mIPAddressResult;
 		
 		var fnAppendError = function (sMessage) {
@@ -327,19 +327,19 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 		// If authentication is required, check that the username and
 		// password are specified.
 		//--------------------------------------------------------------------//
-		if (bAuthenticationRequired) {
-			if (sUsername === "") {
-				fnAppendError("Username must be specified.");
-			}
-			
-			if (sPassword === "") {
-				fnAppendError("Password must be given.");
-			}
-			
-			if (me.CheckAuthenticationFieldsForSpaces() === true) {
-				fnAppendError("Neither the username nor the password can contain spaces.");
-			}
-		}
+//		if (bAuthenticationRequired) {
+//			if (sUsername === "") {
+//				fnAppendError("Username must be specified.");
+//			}
+//			
+//			if (sPassword === "") {
+//				fnAppendError("Password must be given.");
+//			}
+//			
+//			if (me.CheckAuthenticationFieldsForSpaces() === true) {
+//				fnAppendError("Neither the username nor the password can contain spaces.");
+//			}
+//		}
 		
 		//--------------------------------------------------------------------//
 		// Report any errors via a message toast popup. Otherwise continue
@@ -366,9 +366,9 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 			sAPIDataString += sMode+"&IPCamType="+sFileType+"&HubId="+iHubId;
 			sAPIDataString += "&Data={\"NetworkAddress\":\""+sIPAddress+"\",\"NetworkPort\":\""+sIPPort+"\",\"Protocol\":\""+sProtocol+"\",\"Path\":\""+sStreamPath+"\"";
 			
-			if (bAuthenticationRequired) {
-				sAPIDataString += ",\"Username\":\""+sUsername+"\",\"Password\":\""+sPassword+"\"";
-			}
+//			if (bAuthenticationRequired) {
+//				sAPIDataString += ",\"Username\":\""+sUsername+"\",\"Password\":\""+sPassword+"\"";
+//			}
 			sAPIDataString += "}";
 		
 			//----------------------------------------------------------------//

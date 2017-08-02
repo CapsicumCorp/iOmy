@@ -31,9 +31,9 @@ sap.ui.jsview("mjs.settings.devices.AddIPC", {
 	wIPAddress				: null,
 	wIPPort					: null,
 	wStreamPath				: null,
-	wAuthenticationCheckBox	: null,
-	wUsername				: null,
-	wPassword				: null,
+//	wAuthenticationCheckBox	: null,
+//	wUsername				: null,
+//	wPassword				: null,
 	wCancelButton			: null,
 	wSubmitButton			: null,
 	wPanel					: null,
@@ -101,24 +101,24 @@ sap.ui.jsview("mjs.settings.devices.AddIPC", {
 			placeholder:"e.g. video"
 		}).addStyleClass("");
 		
-		//-- Authentication required tick box --//
-		me.wAuthenticationCheckBox = new sap.m.CheckBox({
-			select : function () {
-				oController.ToggleAuthenticationFields(this.getSelected());
-			}
-		});
-		
-		//-- Username --//
-		me.wUsername = new sap.m.Input ({
-			type:"Text",
-			enabled: false
-		}).addStyleClass("");
-		
-		//-- Password --//
-		me.wPassword = new sap.m.Input ({
-			type:"Password",
-			enabled: false
-		}).addStyleClass("");
+//		//-- Authentication required tick box --//
+//		me.wAuthenticationCheckBox = new sap.m.CheckBox({
+//			select : function () {
+//				oController.ToggleAuthenticationFields(this.getSelected());
+//			}
+//		});
+//		
+//		//-- Username --//
+//		me.wUsername = new sap.m.Input ({
+//			type:"Text",
+//			enabled: false
+//		}).addStyleClass("");
+//		
+//		//-- Password --//
+//		me.wPassword = new sap.m.Input ({
+//			type:"Password",
+//			enabled: false
+//		}).addStyleClass("");
 		
 		//-- Cancel Button --//
 		me.wCancelButton = new sap.m.Button({
@@ -233,55 +233,55 @@ sap.ui.jsview("mjs.settings.devices.AddIPC", {
 						}).addStyleClass(""),
 					]
 				}).addStyleClass("PadTop5px"),
-				/* Parent HBox for Auth Required Container */
-				new sap.m.HBox ({
-					items : [
-						/* Parent HBox for Auth Required Label / Checkbox */
-						new sap.m.HBox ({
-							layoutData : new sap.m.FlexItemData({
-								growFactor : 1
-							}),
-							items : [
-								new sap.m.Label ({
-									layoutData : new sap.m.FlexItemData({
-										growFactor : 1
-									}),
-									text: "Authentication Required?"
-								}).addStyleClass("PadTop15px"),
-								me.wAuthenticationCheckBox
-							]
-						}).addStyleClass(""),
-					]
-				}).addStyleClass("PadTop5px"),
-				/* Parent HBox for Username / Password Containers */
-				new sap.m.HBox ({
-					items : [
-						/* Parent VBox for Username*/
-						new sap.m.VBox ({
-							layoutData : new sap.m.FlexItemData({
-								growFactor : 1
-							}),
-							items : [	
-								new sap.m.Label ({
-									text: "Username:"
-								}),
-								me.wUsername
-							]
-						}).addStyleClass("MarRight10px"),
-						/* Parent VBox for Password */
-						new sap.m.VBox ({
-							layoutData : new sap.m.FlexItemData({
-								growFactor : 1
-							}),
-							items : [	
-								new sap.m.Label ({
-									text: "Password:"
-								}),
-								me.wPassword
-							]
-						}).addStyleClass("")
-					]
-				}).addStyleClass("PadTop5px"),
+//				/* Parent HBox for Auth Required Container */
+//				new sap.m.HBox ({
+//					items : [
+//						/* Parent HBox for Auth Required Label / Checkbox */
+//						new sap.m.HBox ({
+//							layoutData : new sap.m.FlexItemData({
+//								growFactor : 1
+//							}),
+//							items : [
+//								new sap.m.Label ({
+//									layoutData : new sap.m.FlexItemData({
+//										growFactor : 1
+//									}),
+//									text: "Authentication Required?"
+//								}).addStyleClass("PadTop15px"),
+//								me.wAuthenticationCheckBox
+//							]
+//						}).addStyleClass(""),
+//					]
+//				}).addStyleClass("PadTop5px"),
+//				/* Parent HBox for Username / Password Containers */
+//				new sap.m.HBox ({
+//					items : [
+//						/* Parent VBox for Username*/
+//						new sap.m.VBox ({
+//							layoutData : new sap.m.FlexItemData({
+//								growFactor : 1
+//							}),
+//							items : [	
+//								new sap.m.Label ({
+//									text: "Username:"
+//								}),
+//								me.wUsername
+//							]
+//						}).addStyleClass("MarRight10px"),
+//						/* Parent VBox for Password */
+//						new sap.m.VBox ({
+//							layoutData : new sap.m.FlexItemData({
+//								growFactor : 1
+//							}),
+//							items : [	
+//								new sap.m.Label ({
+//									text: "Password:"
+//								}),
+//								me.wPassword
+//							]
+//						}).addStyleClass("")
+//					]
+//				}).addStyleClass("PadTop5px"),
 				/* Parent HBox for Cancel, Apply, Discard */
 				new sap.m.HBox ({	
 					layoutData : new sap.m.FlexItemData({
