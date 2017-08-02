@@ -345,30 +345,34 @@ sap.ui.controller("mjs.rooms.Room", {
         }).addStyleClass("PanelNoPadding UserInputForm TableSideBorders MarTop3px BorderTop");
 
         thisView.byId("page").addContent( oPanel );
+        
         //-- Update the LastRoomId --//
         oController.iLastRoomId = IOMy.common.RoomSelected.RoomId;
         
         thisView.byId("extrasMenuHolder").destroyItems();
-        thisView.byId("extrasMenuHolder").addItem(
-            IOMy.widgets.getActionMenu({
-                id : oController.createId("extrasMenu"),        // Uses the page ID
-                icon : "sap-icon://GoogleMaterial/more_vert",
-                items : [
-                    {
-                        text: "Add Device",
-                        select:    function (oControlEvent) {
-                            IOMy.common.NavigationChangePage("pSettingsLinkAdd", {room : IOMy.common.RoomSelected});
-                        }
-                    },
-                                        {
-                        text: "Edit Room Information",
-                        select:    function (oControlEvent) {
-                            IOMy.common.NavigationChangePage("pSettingsRoomEdit", {room : IOMy.common.RoomSelected});
-                        }
-                    }
-                ]
-            })
-        );
+        
+        if (oController.iLastRoomId !== 1 && IOMy.common.RoomSelected.RoomName !== "Unassigned") {
+            thisView.byId("extrasMenuHolder").addItem(
+                IOMy.widgets.getActionMenu({
+                    id : oController.createId("extrasMenu"),        // Uses the page ID
+                    icon : "sap-icon://GoogleMaterial/more_vert",
+                    items : [
+                        {
+                            text: "Add Device",
+                            select:    function (oControlEvent) {
+                                IOMy.common.NavigationChangePage("pSettingsLinkAdd", {roomID : IOMy.common.RoomSelected.RoomId});
+                            }
+                        },
+//                        {
+//                            text: "Edit Room Information",
+//                            select:    function (oControlEvent) {
+//                                IOMy.common.NavigationChangePage("pSettingsRoomEdit", {room : IOMy.common.RoomSelected});
+//                            }
+//                        }
+                    ]
+                })
+            );
+        }
     },
 
     //============================================================================================//
