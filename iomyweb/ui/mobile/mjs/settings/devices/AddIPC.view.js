@@ -301,7 +301,7 @@ sap.ui.jsview("mjs.settings.devices.AddIPC", {
 		var oPage = new IOMy.widgets.IOMyPage({
             view : me,
             controller : oController,
-            icon : "sap-icon://GoogleMaterial/Camera",
+            icon : "sap-icon://GoogleMaterial/videocam",
             title : "Add IPC"
         });
 
