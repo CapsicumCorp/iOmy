@@ -54,7 +54,8 @@ $.extend(IOMy.widgets,{
                 if (mLinkType.LinkTypeId == 2 ||
 					mLinkType.LinkTypeId == 6 ||
 					mLinkType.LinkTypeId == 7 ||
-					mLinkType.LinkTypeId == 8) 
+					mLinkType.LinkTypeId == 8 || 
+					mLinkType.LinkTypeId == IOMy.devices.ipcamera.LinkTypeId) 
                 {
                     oCBox.addItem(
                         new sap.ui.core.Item({

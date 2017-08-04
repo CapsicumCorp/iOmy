@@ -264,10 +264,6 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 		//--------------------------------------------------------------------//
 		var me							= this;
 		var oView						= me.getView();
-		var bError						= false;
-		var aErrorMessages				= [];
-		var sMode						= "";
-		var sAPIDataString				= "";
 		var sFileType					= oView.wFileTypeSelector.getSelectedKey();
 		var iHubId						= oView.wHubSelector.getSelectedKey();
 		var sProtocol					= oView.wProtocol.getValue();
@@ -277,166 +273,57 @@ sap.ui.controller("mjs.settings.devices.AddIPC", {
 //		var bAuthenticationRequired		= oView.wAuthenticationCheckBox.getSelected();
 //		var sUsername					= oView.wUsername.getValue();
 //		var sPassword					= oView.wPassword.getValue();
-		var mIPAddressResult;
+
+        var fnFail = function (sErrMesg) {
+            IOMy.common.showMessage({
+                text : "Error adding the camera:\n"+sErrMesg,
+                view : oView
+            });
+
+            me.ToggleControlButtons(true);
+            IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
+        };
 		
-		var fnAppendError = function (sMessage) {
-			bError = true;
-			aErrorMessages.push(sMessage);
-		};
+        //--------------------------------------------------------------------//
+        // Submit to the database.
+        //--------------------------------------------------------------------//
+        
+        me.ToggleControlButtons(false);
+        IOMy.common.NavigationToggleNavButtons(me, false); // Enable the navigation buttons.
+        
+        try {
+            IOMy.devices.ipcamera.submitWebcamInformation({
+                fileType        : sFileType,
+                editing         : me.bEditing,
+                thingID         : me.iThingId,
+                hubID           : iHubId,
+                protocol        : sProtocol,
+                ipAddress       : sIPAddress,
+                ipPort          : sIPPort,
+                streamPath      : sStreamPath,
+
+                onSuccess : function () {
+                    IOMy.common.showMessage({
+                        text : "Connection configuration updated successfully.",
+                        view : oView
+                    });
+
+                    me.CancelInput();
+                    IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
+                    IOMy.common.NavigationTriggerBackForward();
+                    //IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
+                    me.ToggleControlButtons(true);
+                    me.ToggleFields(true);
+                },
+
+                onFail : fnFail
+            });
+            
+        } catch (ex) {
+            jQuery.sap.log.error(ex.message);
+            fnFail(ex.message);
+        }
 		
-		//-- Disable buttons to avoid race conditions. --//
-		this.ToggleControlButtons(false);
-		IOMy.common.NavigationToggleNavButtons(me, false); // Disable the navigation buttons.
-		
-		//--------------------------------------------------------------------//
-		// Check that all the fields are filled out. Exception is the protocol
-		// field, which defaults to 'http'
-		//--------------------------------------------------------------------//
-		
-		//-- Check IP Address --//
-		if (sIPAddress === "") {
-			fnAppendError("IP Address must be specified!");
-		} else {
-			//-- Verify that the IP address format is correct. --//
-			try {
-				mIPAddressResult = IOMy.validation.isIPv4AddressValid(sIPAddress);
-				
-				bError = !mIPAddressResult.bValid;
-				aErrorMessages = aErrorMessages.concat(mIPAddressResult.aErrorMessages);
-			} catch (ex) {
-				fnAppendError("Could not validate IP address: " + ex.name + ", " + ex.message);
-			}
-		}
-		
-		//-- Stream Path --//
-		if (sStreamPath === "") {
-			fnAppendError("Path to the stream must be specified.");
-		}
-		
-		//-- Check Port --//
-		if (sIPPort === "") {
-			sIPPort = "80";
-		}
-		
-		//-- Check Protocol --//
-		if (sProtocol === "") {
-			sProtocol = "http";
-		}
-		
-		//--------------------------------------------------------------------//
-		// If authentication is required, check that the username and
-		// password are specified.
-		//--------------------------------------------------------------------//
-//		if (bAuthenticationRequired) {
-//			if (sUsername === "") {
-//				fnAppendError("Username must be specified.");
-//			}
-//			
-//			if (sPassword === "") {
-//				fnAppendError("Password must be given.");
-//			}
-//			
-//			if (me.CheckAuthenticationFieldsForSpaces() === true) {
-//				fnAppendError("Neither the username nor the password can contain spaces.");
-//			}
-//		}
-		
-		//--------------------------------------------------------------------//
-		// Report any errors via a message toast popup. Otherwise continue
-		// execution.
-		//--------------------------------------------------------------------//
-		if (bError) {
-			IOMy.common.showMessage({
-				text : aErrorMessages.join("\n"),
-				view : oView
-			});
-			
-			me.ToggleControlButtons(true);
-			IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
-		} else {
-			//----------------------------------------------------------------//
-			// Prepare the 'Data' parameter string.
-			//----------------------------------------------------------------//
-			if (me.bEditing) {
-				sMode = "Mode=EditIPCamera&ThingId="+me.iThingId;
-			} else {
-				sMode = "Mode=AddNewIPCamera";
-			}
-			
-			sAPIDataString += sMode+"&IPCamType="+sFileType+"&HubId="+iHubId;
-			sAPIDataString += "&Data={\"NetworkAddress\":\""+sIPAddress+"\",\"NetworkPort\":\""+sIPPort+"\",\"Protocol\":\""+sProtocol+"\",\"Path\":\""+sStreamPath+"\"";
-			
-//			if (bAuthenticationRequired) {
-//				sAPIDataString += ",\"Username\":\""+sUsername+"\",\"Password\":\""+sPassword+"\"";
-//			}
-			sAPIDataString += "}";
-		
-			//----------------------------------------------------------------//
-			// Run the request
-			//----------------------------------------------------------------//
-			IOMy.apiphp.AjaxRequest({
-				"url"		: IOMy.apiphp.APILocation("ipcamera"),
-				"type"		: "POST",
-				"data"		: sAPIDataString,
-				
-				"onSuccess"	: function (responseType, data) {
-					try {
-						if (data.Error === true) {
-							IOMy.common.showError(data.ErrMesg, "Error",
-								function () {
-									me.ToggleControlButtons(true);
-									IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
-								}
-							);
-							
-						} else {
-							IOMy.common.RefreshCoreVariables({
-								
-								onSuccess : function () {
-									if (me.bEditing) {
-										IOMy.common.showMessage({
-											text : "Connection configuration updated successfully.",
-											view : oView
-										});
-									} else {
-										IOMy.common.showMessage({
-											text : "Webcam successfully added!",
-											view : oView
-										});
-									}
-									
-									me.CancelInput();
-									IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
-									IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
-									me.ToggleControlButtons(true);
-									me.ToggleFields(true);
-								}
-								
-							});
-							
-						}
-					} catch (ex) {
-						IOMy.common.showMessage({
-							text : "Error adding the camera: "+ex.message,
-							view : oView
-						});
-						
-						me.ToggleControlButtons(true);
-						IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
-					}
-				},
-				
-				"onFail"	: function (error) {
-					IOMy.common.showMessage({
-						text : "Error adding the camera: "+error.responseText,
-						view : oView
-					});
-					
-					me.ToggleControlButtons(true);
-					IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
-				}
-			});
-		}
 	}
 	
 });

@@ -57,7 +57,8 @@ $.extend(IOMy.functions, {
 			if (mDeviceType.LinkTypeId === IOMy.devices.zigbeesmartplug.LinkTypeID ||
 				mDeviceType.LinkTypeId === IOMy.devices.onvif.LinkTypeId ||
 				mDeviceType.LinkTypeId === IOMy.devices.philipshue.LinkTypeId ||
-				mDeviceType.LinkTypeId === IOMy.devices.weatherfeed.LinkTypeId)
+				mDeviceType.LinkTypeId === IOMy.devices.weatherfeed.LinkTypeId ||
+                mDeviceType.LinkTypeId === IOMy.devices.ipcamera.LinkTypeId)
 			{
 				structOptions["type"+mDeviceType.LinkTypeId] = {
 					"Id"		: mDeviceType.LinkTypeId,
