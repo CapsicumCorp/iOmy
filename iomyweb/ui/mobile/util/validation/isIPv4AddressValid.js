@@ -38,38 +38,38 @@ $.extend(IOMy.validation, {
 		if (aThreeDots === null || aThreeDots.length !== 3) {
 			bError = true; // No. FAIL!
 			aErrorMessages.push("There must be only 4 parts separated by dots ('.') in an IPv4 address.");
-		} else {
-			//---------------------------------------------------------//
-			// There are three dots. Are the four parts valid numbers? //
-			//---------------------------------------------------------//
-			aIPAddressParts = sIPAddress.split('.');
-
-			// Check each number
-			for (var i = 0; i < aIPAddressParts.length; i++) {
-				for (var j = 0; j < aIPAddressParts[i].length; j++) {
-					// Spaces and the plus symbol are ignored by isNaN(). isNaN() covers the rest.
-					if (aIPAddressParts[i].charAt(j) === ' ' || aIPAddressParts[i].charAt(j) === '+' || isNaN(aIPAddressParts[i].charAt(j))) {
-						bIPAddressFormatError = true; // INVALID CHARACTER
-						break;
-					}
-				}
-				
-				if (aIPAddressParts[i].length > 1 && aIPAddressParts[i].charAt(0) === "0") {
-					bError = true;
-					aErrorMessages.push("One of the numbers start with '0'.");
-				}
-
-				if (bIPAddressFormatError === true) {
-					bError = true;
-					aErrorMessages.push("One of the numbers contains invalid characters.");
-					break;
-				} else if (parseInt(aIPAddressParts[i]) < 0 || parseInt(aIPAddressParts[i]) > 255) {
-					bError = true;
-					aErrorMessages.push("One of the numbers is greater than 255 or a negative number.");
-					break;
-				}
-			}
 		}
+        
+        //---------------------------------------------------------//
+        // There are three dots. Are the four parts valid numbers? //
+        //---------------------------------------------------------//
+        aIPAddressParts = sIPAddress.split('.');
+
+        // Check each number
+        for (var i = 0; i < aIPAddressParts.length; i++) {
+            for (var j = 0; j < aIPAddressParts[i].length; j++) {
+                // Spaces and the plus symbol are ignored by isNaN(). isNaN() covers the rest.
+                if (aIPAddressParts[i].charAt(j) === ' ' || aIPAddressParts[i].charAt(j) === '+' || isNaN(aIPAddressParts[i].charAt(j))) {
+                    bIPAddressFormatError = true; // INVALID CHARACTER
+                    break;
+                }
+            }
+
+            if (aIPAddressParts[i].length > 1 && aIPAddressParts[i].charAt(0) === "0") {
+                bError = true;
+                aErrorMessages.push("One of the numbers start with '0'.");
+            }
+
+            if (bIPAddressFormatError === true) {
+                bError = true;
+                aErrorMessages.push("One of the numbers contains invalid characters.");
+                break;
+            } else if (parseInt(aIPAddressParts[i]) < 0 || parseInt(aIPAddressParts[i]) > 255) {
+                bError = true;
+                aErrorMessages.push("One of the numbers is greater than 255 or a negative number.");
+                break;
+            }
+        }
 		
 		//-------------------------------------------------//
 		// Prepare the result map.
@@ -86,10 +86,7 @@ $.extend(IOMy.validation, {
 		//-------------------------------------------------//
 		var bError					= false;
 		var aErrorMessages			= [];
-		var aDigits					= [];
 		var aInvalidChars			= [];
-		var aIPAddressParts			= [];
-		var bIPAddressFormatError	= false;
 		var mResult					= {};
 		
 		//-------------------------------------------------//

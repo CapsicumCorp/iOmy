@@ -47,7 +47,7 @@ $.extend(IOMy.widgets,{
         }
         
         // Default to Australia
-        wSBox.setSelectedKey(14);
+        wSBox.setSelectedKey(36);
         
         return wSBox;
     },

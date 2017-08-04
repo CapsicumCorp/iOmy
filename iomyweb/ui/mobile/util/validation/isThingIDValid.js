@@ -84,7 +84,7 @@ $.extend(IOMy.validation, {
         //--------------------------------------------------------------------//
         if (bIsValid === false) {
             bError = true;
-            fnAppendError("Thing does not exist!");
+            fnAppendError("Thing not found!");
         }
         
         //--------------------------------------------------------------------//
