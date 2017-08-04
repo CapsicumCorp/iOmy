@@ -64,6 +64,13 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                     me.iLinkTypeId = null;
                 }
                 
+                //-- Room to select --//
+                if (evt.data.RoomId !== undefined) {
+                    me.iRoomId = evt.data.RoomId;
+                } else {
+                    me.iRoomId = null;
+                }
+                
                 // Start the form creation
                 me.DestroyUI();         // STEP 1: Clear any old forms to avoid duplicate IDs
                 me.DrawUI();            // STEP 2: Draw the actual user interface        

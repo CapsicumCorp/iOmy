@@ -335,8 +335,9 @@ sap.ui.controller("mjs.rooms.Room", {
         }); //-- END FOREACH LOOP --//
         
         //-- Main Page Body --//
-        if (oController.byId("Panel") !== undefined)
+        if (oController.byId("Panel") !== undefined) {
             oController.byId("Panel").destroy();
+        }
 
         var oPanel = new sap.m.Panel( oController.createId("Panel"), {
            //-- Add Grouping box to Panel --//
@@ -351,7 +352,9 @@ sap.ui.controller("mjs.rooms.Room", {
         
         thisView.byId("extrasMenuHolder").destroyItems();
         
-        if (oController.iLastRoomId !== 1 && IOMy.common.RoomSelected.RoomName !== "Unassigned") {
+        if (oController.iLastRoomId === 1 && IOMy.common.RoomSelected.RoomName === "Unassigned") {
+            // Do nothing
+        } else {
             thisView.byId("extrasMenuHolder").addItem(
                 IOMy.widgets.getActionMenu({
                     id : oController.createId("extrasMenu"),        // Uses the page ID
@@ -360,7 +363,7 @@ sap.ui.controller("mjs.rooms.Room", {
                         {
                             text: "Add Device",
                             select:    function (oControlEvent) {
-                                IOMy.common.NavigationChangePage("pSettingsLinkAdd", {roomID : IOMy.common.RoomSelected.RoomId});
+                                IOMy.common.NavigationChangePage("pSettingsLinkAdd", {RoomId : IOMy.common.RoomSelected.RoomId});
                             }
                         },
 //                        {

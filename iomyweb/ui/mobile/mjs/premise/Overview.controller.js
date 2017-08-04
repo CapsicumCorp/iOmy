@@ -259,10 +259,10 @@ sap.ui.controller("mjs.premise.Overview", {
 												new sap.m.Button(me.createId("roomLink"+sIndex), {
 													text : aRoom.RoomName,
 													press : function () {
-                                                        if (aRoom.RoomId !== 1 && aRoom.RoomName !== "Unassigned") {
-                                                            IOMy.common.NavigationChangePage("pSettingsRoomEdit", {room : aRoom});
-                                                        } else {
+                                                        if (aRoom.RoomId === 1 && aRoom.RoomName === "Unassigned") {
                                                             IOMy.common.NavigationChangePage("pRoomsOverview", {room : aRoom});
+                                                        } else {
+                                                            IOMy.common.NavigationChangePage("pSettingsRoomEdit", {room : aRoom});
                                                         }
 													}
 												}).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px")
