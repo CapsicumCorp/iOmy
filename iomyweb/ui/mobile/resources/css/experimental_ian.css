@@ -24,6 +24,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 /******************************************
 ** Belize UI5 Upgrade                    **
 ******************************************/
+.pre-wrap {
+	white-space: pre-wrap;
+}
+
 /* ============================== */
 /* == Color Overides           == */
 /* ============================== */

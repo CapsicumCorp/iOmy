@@ -1,5 +1,5 @@
 /*
-Title: Add IP Camera
+Title: Permissions Overhaul
 Author: Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
 Description: Gives an example page for UI5 Control Objects
 Copyright: Capsicum Corporation 2016, 2017
@@ -21,12 +21,12 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-sap.ui.controller("mjs.staging.Telnet", {
+sap.ui.controller("mjs.staging.PermissionOverhaul", {
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
-* @memberOf mjs.staging.Telnet
+* @memberOf mjs.staging.PermissionOverhaul
 */
 
 	onInit: function() {
@@ -48,7 +48,7 @@ sap.ui.controller("mjs.staging.Telnet", {
 /**
 * Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered
 * (NOT before the first rendering! onInit() is used for that one!).
-* @memberOf mjs.staging.Telnet
+* @memberOf mjs.staging.PermissionOverhaul
 */
 	onBeforeRendering: function() {
 
@@ -57,7 +57,7 @@ sap.ui.controller("mjs.staging.Telnet", {
 /**
 * Called when the View has been rendered (so its HTML is part of the document). Post-rendering manipulations of the HTML could be done here.
 * This hook is the same one that SAPUI5 controls get after being rendered.
-* @memberOf mjs.template.Template
+* @memberOf mjs.staging.PermissionOverhaul
 */
 	onAfterRendering: function() {
 
@@ -65,7 +65,7 @@ sap.ui.controller("mjs.staging.Telnet", {
 
 /**
 * Called when the Controller is destroyed. Use this one to free resources and finalize activities.
-* @memberOf mjs.template.Template
+* @memberOf mjs.staging.PermissionOverhaul
 */
 	onExit: function() {
 

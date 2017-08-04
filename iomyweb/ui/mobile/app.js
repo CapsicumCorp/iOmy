@@ -1675,34 +1675,10 @@ var aPages = [
 		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.ControlTools\" Page!\n"
 	},
 	{ 
-		"Id":			"pMotionJPEG",
-		"Location":		"mjs.staging.MotionJPEG",
+		"Id":			"pPermissionOverhaul",
+		"Location":		"mjs.staging.PermissionOverhaul",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.MotionJPEG\" Page!\n"
-	},
-	{ 
-		"Id":			"pAddIPC",
-		"Location":		"mjs.staging.AddIPC",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.AddIPC\" Page!\n"
-	},
-	{ 
-		"Id":			"pAddCamera",
-		"Location":		"mjs.staging.AddCamera",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.AddCamera\" Page!\n"
-	},
-	{ 
-		"Id":			"pCameraPreset",
-		"Location":		"mjs.staging.CameraPreset",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.CameraPreset\" Page!\n"
-	},
-	{ 
-		"Id":			"pTelnet",
-		"Location":		"mjs.staging.Telnet",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.Telnet\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"mjs.staging.PermissionOverhaul\" Page!\n"
 	},
 	
 ];

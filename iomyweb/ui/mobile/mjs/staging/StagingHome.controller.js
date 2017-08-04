@@ -27,10 +27,7 @@ sap.ui.controller("mjs.staging.StagingHome", {
 	bDeployed : false, //-- Sets the deployed status to false --//
 	Staginglinks : [
 		{ "display" : "Controller" , "link" : "pControlTools" },
-		{ "display" : "MotionJPEG" , "link" : "pMotionJPEG" },
-		{ "display" : "Add IPC" , "link" : "pAddIPC" },
-		{ "display" : "Telnet" , "link" : "pTelnet" },
-		{ "display" : "AddCamera" , "link" : "pAddCamera" },
+		{ "display" : "Permissions" , "link" : "pPermissionOverhaul" },
 	],
 	
 	
