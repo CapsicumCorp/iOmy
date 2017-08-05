@@ -394,7 +394,7 @@ static const char *nativeseriallib_serial_port_get_unique_id(void *serialport) {
     if (!nativeseriallib_serialdevices[i].inuse || nativeseriallib_serialdevices[i].removed) {
       continue;
     }
-    if (strcmp(serialportptr->filename, nativeseriallib_serialdevices[i].filename)==0) {
+    if (strcmp(serialportptr->uniqueid, nativeseriallib_serialdevices[i].uniqueid)==0) {
       uniqueid=nativeseriallib_serialdevices[i].uniqueid;
       break;
     }
@@ -632,7 +632,7 @@ static void nativeseriallib_serial_port_no_longer_using(void *serialport) {
     if (!nativeseriallib_serialdevices[i].inuse) {
       continue;
     }
-    if (strcmp(serialportptr->filename, nativeseriallib_serialdevices[i].filename)==0) {
+    if (strcmp(serialportptr->uniqueid, nativeseriallib_serialdevices[i].uniqueid)==0) {
       debuglibifaceptr->debuglib_printf(1, "%s: Resources for serial port: %s are being freed\n", __func__, nativeseriallib_serialdevices[i].filename);
       if (nativeseriallib_serialdevices[i].fd!=-1) {
         nativeseriallib_closeserialport(nativeseriallib_serialdevices[i].fd, nativeseriallib_serialdevices[i].oldserporttio);
@@ -827,7 +827,7 @@ static int nativeserialib_adddevice(char *filename) {
   {
     char *tmpstr;
 
-    tmpstr=(char *) malloc(strlen(nativeseriallib_moduleinfo_ver_1.modulename)+strlen(filename)+2);
+    tmpstr=(char *) malloc(strlen(nativeseriallib_moduleinfo_ver_1.modulename)+strlen(filename)+6);
     if (!tmpstr) {
       if (fd!=-1) {
         nativeseriallib_closeserialport(fd, oldserporttio);
@@ -840,7 +840,7 @@ static int nativeserialib_adddevice(char *filename) {
       debuglibifaceptr->debuglib_printf(1, "Exiting %s: Failed to allocate ram for serial device uniqueid\n", __func__);
       return -5;
     }
-    sprintf(tmpstr, "%s:%s", nativeseriallib_moduleinfo_ver_1.modulename, filename);
+    sprintf(tmpstr, "%s:%s_%d", nativeseriallib_moduleinfo_ver_1.modulename, filename, i);
     nativeseriallib_serialdevices[i].uniqueid=tmpstr;
   }
   nativeseriallib_serialdevices[i].fd=fd;
