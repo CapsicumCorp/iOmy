@@ -391,7 +391,7 @@ static const char *nativeseriallib_serial_port_get_unique_id(void *serialport) {
 
   PTHREAD_LOCK(&nativeseriallibmutex);
   for (i=0; i<nativeseriallib_numserialdevices; i++) {
-    if (!nativeseriallib_serialdevices[i].inuse && !nativeseriallib_serialdevices[i].removed) {
+    if (!nativeseriallib_serialdevices[i].inuse || nativeseriallib_serialdevices[i].removed) {
       continue;
     }
     if (strcmp(serialportptr->filename, nativeseriallib_serialdevices[i].filename)==0) {
