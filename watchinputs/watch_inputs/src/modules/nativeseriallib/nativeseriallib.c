@@ -686,7 +686,7 @@ int serial_port_wait_ready_to_receive(void *serialport) {
   nativeserialdevice_t *serialportptr=serialport;
   int lerrno;
   struct pollfd fds[1];
-  int result;
+  int result=-2;
 
   nativeseriallib_locknativeserial();
   if (!serialportptr->inuse || serialportptr->removed) {
