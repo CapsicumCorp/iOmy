@@ -326,9 +326,6 @@ void dbcounterlib_shutdown(void) {
     debuglibifaceptr->debuglib_printf(1, "Exiting %s, Still in use, use count=%d\n", __func__, dbcounterlib_inuse);
     return;
   }
-  //Finished using the database library
-  dblibifaceptr->shutdown();
-
   if (counters) {
     int i;
 
@@ -339,6 +336,9 @@ void dbcounterlib_shutdown(void) {
     counters=NULL;
     gnumcounters=0;
   }
+  //Finished using the database library
+  dblibifaceptr->shutdown();
+
   dbcounterlib_timejumpedbacksmallcnt=dbcounterlib_timejumpedforwardsmallcnt=0;
   dbcounterlib_timejumpedbacklargecnt=dbcounterlib_timejumpedforwardlargecnt=0;
 
