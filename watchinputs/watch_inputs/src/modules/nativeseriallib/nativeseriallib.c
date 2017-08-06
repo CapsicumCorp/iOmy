@@ -37,6 +37,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "config.h"
 
+#ifndef __ANDROID__
+#include <execinfo.h>
+#endif
 #include <errno.h>
 #include <inttypes.h>
 #include <poll.h>
@@ -63,6 +66,65 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "modules/debuglib/debuglib.h"
 #include "modules/commonlib/commonlib.h"
 #include "modules/serialportlib/serialportlib.h"
+
+#ifdef DEBUG
+#warning "NATIVESERIALLIB_PTHREAD_LOCK and NATIVESERIALLIB_PTHREAD_UNLOCK debugging has been enabled"
+#include <errno.h>
+#define NATIVESERIALLIB_PTHREAD_LOCK(mutex) { \
+  int lockresult; \
+  lockresult=pthread_mutex_lock(mutex); \
+  if (lockresult==EDEADLK) { \
+    printf("-------------------- WARNING --------------------\nMutex deadlock in file: %s function: %s line: %d\n-------------------------------------------------\n", __FILE__, __func__, __LINE__); \
+    nativeseriallib_backtrace(); \
+  } else if (lockresult!=0) { \
+    printf("-------------------- WARNING --------------------\nMutex lock returned error: %d in file: %s function: %s line: %d\n-------------------------------------------------\n", lockresult, __FILE__, __func__, __LINE__); \
+    nativeseriallib_backtrace(); \
+  } \
+}
+
+#define NATIVESERIALLIB_PTHREAD_UNLOCK(mutex) { \
+  int lockresult; \
+  lockresult=pthread_mutex_unlock(mutex); \
+  if (lockresult==EPERM) { \
+    printf("-------------------- WARNING --------------------\nMutex already unlocked in file: %s function: %s line: %d\n-------------------------------------------------\n", __FILE__, __func__, __LINE__); \
+    nativeseriallib_backtrace(); \
+  } else if (lockresult!=0) { \
+    printf("-------------------- WARNING --------------------\nMutex unlock returned error: %d in file: %s function: %s line: %d\n-------------------------------------------------\n", lockresult, __FILE__, __func__, __LINE__); \
+    nativeseriallib_backtrace(); \
+  } \
+}
+
+#else
+
+#define NATIVESERIALLIB_PTHREAD_LOCK(mutex) pthread_mutex_lock(mutex)
+#define NATIVESERIALLIB_PTHREAD_UNLOCK(mutex) pthread_mutex_unlock(mutex)
+
+#endif
+
+#ifdef NATIVESERIALLIB_LOCKDEBUG
+#define LOCKDEBUG_ENTERINGFUNC() { \
+  debuglibifaceptr->debuglib_printf(1, "Entering %s thread id: %lu line: %d\n", __func__, pthread_self(), __LINE__); \
+}
+#else
+  #define LOCKDEBUG_ENTERINGFUNC() { }
+#endif
+
+#ifdef NATIVESERIALLIB_LOCKDEBUG
+#define LOCKDEBUG_EXITINGFUNC() { \
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s thread id: %lu line: %d\n", __func__, pthread_self(), __LINE__); \
+}
+#else
+  #define LOCKDEBUG_EXITINGFUNC() { }
+#endif
+
+#ifdef NATIVESERIALLIB_LOCKDEBUG
+#define LOCKDEBUG_ADDDEBUGLIBIFACEPTR() const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=nativeseriallib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+#else
+#define LOCKDEBUG_ADDDEBUGLIBIFACEPTR() { }
+#endif
+
+
+
 
 #define SERBUFSIZE 20
 
@@ -185,15 +247,138 @@ static serialdevicelib_iface_ver_1_t nativeseriallib_device_iface_ver_1={
   .serial_port_no_longer_using=nativeseriallib_serial_port_no_longer_using
 };
 
+#ifndef __ANDROID__
+//Display a stack back trace
+//Modified from the backtrace man page example
+static void nativeseriallib_backtrace(void) {
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) nativeseriallib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  int j, nptrs;
+  void *buffer[100];
+  char **strings;
+
+  nptrs = backtrace(buffer, 100);
+  debuglibifaceptr->debuglib_printf(1, "%s: backtrace() returned %d addresses\n", __func__, nptrs);
+
+  //The call backtrace_symbols_fd(buffer, nptrs, STDOUT_FILENO)
+  //would produce similar output to the following:
+
+  strings = backtrace_symbols(buffer, nptrs);
+  if (strings == NULL) {
+    debuglibifaceptr->debuglib_printf(1, "%s: More backtrace info unavailable\n", __func__);
+    return;
+  }
+  for (j = 0; j < nptrs; j++) {
+    debuglibifaceptr->debuglib_printf(1, "%s: %s\n", __func__, strings[j]);
+  }
+  free(strings);
+}
+#else
+//backtrace is only supported on glibc
+static void nativeseriallib_backtrace(void) {
+  //Do nothing on non-backtrace supported systems
+}
+#endif
+
+static pthread_key_t lockkey;
+static pthread_once_t lockkey_onceinit = PTHREAD_ONCE_INIT;
+static int havelockkey=0;
+
+//Initialise a thread local store for the lock counter
+static void nativeseriallib_makelockkey(void) {
+  int result;
+
+  result=pthread_key_create(&lockkey, NULL);
+  if (result!=0) {
+    debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) nativeseriallib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+    debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu Failed to create lockkey: %d\n", __func__, pthread_self(), result);
+  } else {
+    havelockkey=1;
+  }
+}
+
+/*
+  Apply the nativeserial mutex lock if not already applied otherwise increment the lock count
+*/
+static void nativeseriallib_locknativeserial() {
+  LOCKDEBUG_ADDDEBUGLIBIFACEPTR();
+  long *lockcnt;
+
+  LOCKDEBUG_ENTERINGFUNC();
+
+  (void) pthread_once(&lockkey_onceinit, nativeseriallib_makelockkey);
+  if (!havelockkey) {
+    debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) nativeseriallib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lockkey not created\n", __func__, pthread_self(), __LINE__);
+    return;
+  }
+  //Get the lock counter from thread local store
+  lockcnt = (long *) pthread_getspecific(lockkey);
+  if (lockcnt==NULL) {
+    //Allocate storage for the lock counter and set to 0
+    lockcnt=(long *) calloc(1, sizeof(long));
+    (void) pthread_setspecific(lockkey, lockcnt);
+  }
+  if ((*lockcnt)==0) {
+    //Lock the thread if not already locked
+    NATIVESERIALLIB_PTHREAD_LOCK(&nativeseriallibmutex);
+  }
+  //Increment the lock count
+  ++(*lockcnt);
+
+#ifdef NATIVESERIALLIB_LOCKDEBUG
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lock count=%ld\n", __func__, pthread_self(), __LINE__, *lockcnt);
+#endif
+}
+
+/*
+  Decrement the lock count and if 0, release the nativeserial mutex lock
+*/
+static void nativeseriallib_unlocknativeserial() {
+  LOCKDEBUG_ADDDEBUGLIBIFACEPTR();
+  long *lockcnt;
+
+  LOCKDEBUG_ENTERINGFUNC();
+
+  (void) pthread_once(&lockkey_onceinit, nativeseriallib_makelockkey);
+  if (!havelockkey) {
+    debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) nativeseriallib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lockkey not created\n", __func__, pthread_self(), __LINE__);
+    return;
+  }
+  //Get the lock counter from thread local store
+  lockcnt = (long *) pthread_getspecific(lockkey);
+  if (lockcnt==NULL) {
+    debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) nativeseriallib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+    debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu LOCKING MISMATCH TRIED TO UNLOCK WHEN LOCK COUNT IS 0 AND ALREADY UNLOCKED\n", __func__, pthread_self());
+    nativeseriallib_backtrace();
+    return;
+  }
+  --(*lockcnt);
+  if ((*lockcnt)==0) {
+    //Unlock the thread if not already unlocked
+    NATIVESERIALLIB_PTHREAD_UNLOCK(&nativeseriallibmutex);
+  }
+#ifdef NATIVESERIALLIB_LOCKDEBUG
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lock count=%ld\n", __func__, pthread_self(), __LINE__, *lockcnt);
+#endif
+
+  if ((*lockcnt)==0) {
+    //Deallocate storage for the lock counter so don't have to free it at thread exit
+    free(lockcnt);
+    lockcnt=NULL;
+    (void) pthread_setspecific(lockkey, lockcnt);
+  }
+}
+
 /*
   Thread safe get the number of serial devices
 */
 static int nativeseriallib_getnumserialdevices(void) {
   int val;
 
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   val=nativeseriallib_numserialdevices;
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 
   return val;
 }
@@ -202,9 +387,9 @@ static int nativeseriallib_getnumserialdevices(void) {
   Thread safe set the number of serial devices
 */
 static void nativeseriallib_setnumserialdevices(int numserialdevices) {
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   nativeseriallib_numserialdevices=numserialdevices;
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 }
 
 /*
@@ -213,9 +398,9 @@ static void nativeseriallib_setnumserialdevices(int numserialdevices) {
 static int nativeseriallib_getdeviceneedtoclose(int serdevidx) {
   int val;
 
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   val=nativeseriallib_serialdevices[serdevidx].needtoclose;
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 
   return val;
 }
@@ -224,9 +409,9 @@ static int nativeseriallib_getdeviceneedtoclose(int serdevidx) {
   Thread safe set device need to close
 */
 static void nativeseriallib_setdeviceneedtoclose(int serdevidx, int needtoclose) {
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   nativeseriallib_serialdevices[serdevidx].needtoclose=needtoclose;
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 }
 
 /*
@@ -389,7 +574,7 @@ static const char *nativeseriallib_serial_port_get_unique_id(void *serialport) {
   nativeserialdevice_t *serialportptr=serialport;
   const char *uniqueid="Unknown";
 
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   for (i=0; i<nativeseriallib_numserialdevices; i++) {
     if (!nativeseriallib_serialdevices[i].inuse || nativeseriallib_serialdevices[i].removed) {
       continue;
@@ -399,7 +584,7 @@ static const char *nativeseriallib_serial_port_get_unique_id(void *serialport) {
       break;
     }
   }
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 
   return uniqueid;
 }
@@ -409,9 +594,9 @@ static int nativeseriallib_serial_port_reset(void *serialport) {
   nativeserialdevice_t *serialportptr=serialport;
   int controlbits, fd;
 
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   if (!serialportptr->inuse || serialportptr->removed) {
-    PTHREAD_UNLOCK(&nativeseriallibmutex);
+    nativeseriallib_unlocknativeserial();
     return 0;
   }
   debuglibifaceptr->debuglib_printf(1, "%s: Resetting serial device: %s\n", __func__, serialportptr->filename);
@@ -427,7 +612,7 @@ static int nativeseriallib_serial_port_reset(void *serialport) {
 
   nativeseriallib_configureserialport(serialportptr->fd);
 
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 
   return 1;
 }
@@ -436,13 +621,13 @@ static int nativeseriallib_serial_port_get_baud_rate(void *serialport) {
   nativeserialdevice_t *serialportptr=serialport;
   int32_t baudrate;
 
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   if (!serialportptr->inuse || serialportptr->removed) {
-    PTHREAD_UNLOCK(&nativeseriallibmutex);
+    nativeseriallib_unlocknativeserial();
     return 0;
   }
   baudrate=serialportptr->baudrate;
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 
   return baudrate;
 }
@@ -453,14 +638,14 @@ static int nativeseriallib_serial_port_set_baud_rate(void *serialport, int32_t b
   int i, result, numbaudrates, baudidx;
   struct termios newtio;
 
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   if (!serialportptr->inuse || serialportptr->removed) {
-    PTHREAD_UNLOCK(&nativeseriallibmutex);
+    nativeseriallib_unlocknativeserial();
     return -2;
   }
   result=tcgetattr(serialportptr->fd, &newtio); //Get current port settings
   if (result==-1) {
-    PTHREAD_UNLOCK(&nativeseriallibmutex);
+    nativeseriallib_unlocknativeserial();
     return -1;
   }
   //Check if the requested baud rate is supported
@@ -472,7 +657,7 @@ static int nativeseriallib_serial_port_set_baud_rate(void *serialport, int32_t b
   }
   if (i==numbaudrates) {
     //Baud rate not supported
-    PTHREAD_UNLOCK(&nativeseriallibmutex);
+    nativeseriallib_unlocknativeserial();
     return -3;
   }
   baudidx=i;
@@ -488,7 +673,7 @@ static int nativeseriallib_serial_port_set_baud_rate(void *serialport, int32_t b
     return -1;
   }
   serialportptr->baudrate=baudrates[baudidx];
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 
   return 1;
 }
@@ -503,9 +688,9 @@ int serial_port_wait_ready_to_receive(void *serialport) {
   struct pollfd fds[1];
   int result;
 
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   if (!serialportptr->inuse || serialportptr->removed) {
-    PTHREAD_UNLOCK(&nativeseriallibmutex);
+    nativeseriallib_unlocknativeserial();
     return -2;
   }
   while (!serialportptr->removed && serialportptr->inuse && !needtoquit) {
@@ -513,11 +698,11 @@ int serial_port_wait_ready_to_receive(void *serialport) {
     fds[0].events=POLLIN;
 
     //Unlock while waiting
-    PTHREAD_UNLOCK(&nativeseriallibmutex);
+    nativeseriallib_unlocknativeserial();
     result=poll(fds, 1, 1000);
 
     //Relock after waiting
-    PTHREAD_LOCK(&nativeseriallibmutex);
+    nativeseriallib_locknativeserial();
     lerrno=errno;
     if (result==0 || (result==-1 && lerrno==EINTR)) {
       //Timeout
@@ -538,7 +723,7 @@ int serial_port_wait_ready_to_receive(void *serialport) {
     result=1;
     break;
   }
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 
   return result;
 }
@@ -552,9 +737,9 @@ int serial_port_receive_data(void *serialport, char *serbuf, int count) {
   nativeserialdevice_t *serialportptr=serialport;
   int lerrno, serbufcnt;
 
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   if (!serialportptr->inuse || serialportptr->removed) {
-    PTHREAD_UNLOCK(&nativeseriallibmutex);
+    nativeseriallib_unlocknativeserial();
     return -1;
   }
   serbufcnt=read(serialportptr->fd, serbuf, count);
@@ -563,13 +748,13 @@ int serial_port_receive_data(void *serialport, char *serbuf, int count) {
     if (serbufcnt==0 && lerrno==0) {
       //Device might be removed
       debuglibifaceptr->debuglib_printf(1, "%s: Failed to read from serial port: %s\n", __func__, serialportptr->uniqueid);
-      PTHREAD_UNLOCK(&nativeseriallibmutex);
+      nativeseriallib_unlocknativeserial();
       return -lerrno;
     }
 #ifdef NATIVESERIALLIB_MOREDEBUG
     if (lerrno!=EAGAIN) {
       //Not really ready to receive data, but just return 0 here
-      PTHREAD_UNLOCK(&nativeseriallibmutex);
+      nativeseriallib_unlocknativeserial();
       debuglibifaceptr->debuglib_printf(1, "%s: read returned errno: %d\n\n", __func__, lerrno);
       return 0;
     }
@@ -578,7 +763,7 @@ int serial_port_receive_data(void *serialport, char *serbuf, int count) {
     debuglibifaceptr->debuglib_printf(1, "%s: Received serial data from serial port: %s: Length=%d\n\n", __func__, serialportptr->uniqueid, serbufcnt);
 #endif
   }
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
   return serbufcnt;
 }
 
@@ -594,10 +779,10 @@ int nativeseriallib_serial_port_send(void *serialport, const void *buf, size_t c
 #ifdef NATIVESERIALLIB_MOREDEBUG
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
 #endif
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   if (serialportptr->fd==-1) {
     //serial device not open
-    PTHREAD_UNLOCK(&nativeseriallibmutex);
+    nativeseriallib_unlocknativeserial();
     return -3;
   }
 #ifdef NATIVESERIALLIB_MOREDEBUG
@@ -608,7 +793,7 @@ int nativeseriallib_serial_port_send(void *serialport, const void *buf, size_t c
   if (result<0) {
     debuglibifaceptr->debuglib_printf(1, "%s: Problem writing to serial device: %s, errno: %d\n", __func__, serialportptr->filename, lerrno);
   }
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 #ifdef NATIVESERIALLIB_MOREDEBUG
   debuglibifaceptr->debuglib_printf(1, "%s: Send result=%d, errno=%d\n", __func__, result, lerrno);
 #endif
@@ -627,7 +812,7 @@ static void nativeseriallib_serial_port_no_longer_using(void *serialport) {
 #ifdef NATIVESERIALLIB_MOREDEBUG
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
 #endif
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   for (i=0; i<nativeseriallib_numserialdevices; i++) {
     if (!nativeseriallib_serialdevices[i].inuse) {
       continue;
@@ -656,7 +841,7 @@ static void nativeseriallib_serial_port_no_longer_using(void *serialport) {
       break;
     }
   }
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 
 #ifdef NATIVESERIALLIB_MOREDEBUG
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
@@ -680,7 +865,7 @@ static int serialib_isdeviceadded(char *filename) {
 #ifdef NATIVESERIALLIB_MOREDEBUG
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
 #endif
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   for (i=0; i<nativeseriallib_numserialdevices; i++) {
     if (!nativeseriallib_serialdevices[i].inuse || nativeseriallib_serialdevices[i].removed) {
       continue;
@@ -692,7 +877,7 @@ static int serialib_isdeviceadded(char *filename) {
       }
     }
   }
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 
 #ifdef NATIVESERIALLIB_MOREDEBUG
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
@@ -787,7 +972,7 @@ static int nativeserialib_adddevice(char *filename) {
 #endif
     return -2;
   }
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   //Find an empty slot
   for (i=0; i<MAX_SERIAL_PORTS; i++) {
     if (!nativeseriallib_serialdevices[i].inuse) {
@@ -809,7 +994,7 @@ static int nativeserialib_adddevice(char *filename) {
     nativeseriallib_serialdevices[i].removed=1;
     nativeseriallib_serialdevices[i].inuse=0;
 
-    PTHREAD_UNLOCK(&nativeseriallibmutex);
+    nativeseriallib_unlocknativeserial();
     debuglibifaceptr->debuglib_printf(1, "Exiting %s: Max limit of %d devices has been reached\n", __func__, MAX_SERIAL_PORTS);
 
     return -3;
@@ -820,7 +1005,7 @@ static int nativeserialib_adddevice(char *filename) {
     if (fd!=-1) {
       nativeseriallib_closeserialport(fd, oldserporttio);
     }
-    PTHREAD_UNLOCK(&nativeseriallibmutex);
+    nativeseriallib_unlocknativeserial();
     debuglibifaceptr->debuglib_printf(1, "Exiting %s: Failed to allocate ram for serial device filename: %s\n", __func__, filename);
     return -4;
   }
@@ -836,7 +1021,7 @@ static int nativeserialib_adddevice(char *filename) {
         free(nativeseriallib_serialdevices[i].filename);
         nativeseriallib_serialdevices[i].filename=NULL;
       }
-      PTHREAD_UNLOCK(&nativeseriallibmutex);
+      nativeseriallib_unlocknativeserial();
       debuglibifaceptr->debuglib_printf(1, "Exiting %s: Failed to allocate ram for serial device uniqueid\n", __func__);
       return -5;
     }
@@ -853,7 +1038,7 @@ static int nativeserialib_adddevice(char *filename) {
   if (i==nativeseriallib_numserialdevices) {
     ++nativeseriallib_numserialdevices;
   }
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 
   //Notify the serial port library of the new serial device
   if (serialportlibifaceptr->serial_port_add(&nativeseriallib_device_iface_ver_1, &nativeseriallib_serialdevices[i])!=1) {
@@ -880,7 +1065,7 @@ static void nativeseriallib_checkserialdeviceremoved(void) {
 #ifdef NATIVESERIALLIB_MOREDEBUG
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
 #endif
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   for (i=0; i<nativeseriallib_numserialdevices; i++) {
     if (!nativeseriallib_serialdevices[i].inuse) {
       continue;
@@ -906,7 +1091,7 @@ static void nativeseriallib_checkserialdeviceremoved(void) {
       }
     }
   }
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 
 #ifdef NATIVESERIALLIB_MOREDEBUG
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
@@ -976,12 +1161,12 @@ static void nativeseriallib_dnotifysighandler(int sig, siginfo_t *si, void *data
 
   debuglibifaceptr->debuglib_printf(1, "%s: dnotify signal received, threadid=%lu\n", __func__, pthread_self());
 
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   nativeseriallib_retryserial=0; //Reset serial retry value as a serial device has been detected or removed
 
   //Wakeup main thread
   sem_post(&nativeseriallib_mainthreadsleepsem);
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 }
 
 /*
@@ -1065,17 +1250,17 @@ static void *nativeseriallib_mainloop(void *val) {
 }
 
 static void nativeseriallib_setneedtoquit(int val) {
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   needtoquit=val;
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 }
 
 static int nativeseriallib_getneedtoquit() {
   int val;
 
-  PTHREAD_LOCK(&nativeseriallibmutex);
+  nativeseriallib_locknativeserial();
   val=needtoquit;
-  PTHREAD_UNLOCK(&nativeseriallibmutex);
+  nativeseriallib_unlocknativeserial();
 
   return val;
 }
