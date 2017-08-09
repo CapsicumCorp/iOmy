@@ -24,8 +24,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 sap.ui.controller("mjs.premise.Overview", {
     
-	rooms : [],
-	aStoredDevices : [],
+    rooms : [],
+    aStoredDevices : [],
     
     wRoomListBox        : null,
     wMainBox            : null,
@@ -40,18 +40,18 @@ sap.ui.controller("mjs.premise.Overview", {
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
 * @memberOf mjs.premise.Overview
 */
-	onInit: function() {
-		var me = this;
-		var thisView = me.getView();
-		
-		thisView.addEventDelegate({
-			onBeforeShow : function (evt) {
+    onInit: function() {
+        var me = this;
+        var thisView = me.getView();
+        
+        thisView.addEventDelegate({
+            onBeforeShow : function (evt) {
                 me.DestroyUI();
                 var oPremiseCBox;
-				//----------------------------------------------------//
-				//-- Refresh the Navigational buttons               --//
                 //----------------------------------------------------//
-				IOMy.common.NavigationRefreshButtons( me );
+                //-- Refresh the Navigational buttons               --//
+                //----------------------------------------------------//
+                IOMy.common.NavigationRefreshButtons( me );
                 
                 me.aElementsToDestroy.push("verticalBox");
                 me.aElementsToDestroy.push("premiseBox");
@@ -97,9 +97,9 @@ sap.ui.controller("mjs.premise.Overview", {
                 }).addStyleClass("PanelNoPadding MarTop0px PadBottom15px UserInputForm");
 
                 thisView.byId("page").addContent(me.wPanel);
-			}
-		});
-	},
+            }
+        });
+    },
     
     /**
      * Procedure that destroys the previous incarnation of the UI. Must be called by onInit before
@@ -117,7 +117,7 @@ sap.ui.controller("mjs.premise.Overview", {
         // Clear the array
         me.aElementsToDestroy = [];
     },
-	
+    
     /**
      * Procedure for creating the UI elements that make up the entire list of
      * rooms in the currently selected premise.
@@ -125,15 +125,15 @@ sap.ui.controller("mjs.premise.Overview", {
      * @param {int} iPremiseId         (optional) ID of the currently selected premise.
      * @memberOf mjs.premise.Overview
      */
-	composeRoomList : function (iPremiseId) {
-		var me = this;
-		var thisView = me.getView();
-		var bDrawingRoomEntry = true;
+    composeRoomList : function (iPremiseId) {
+        var me = this;
+        var thisView = me.getView();
+        var bDrawingRoomEntry = true;
 //        var iNumOfButtons = 0;
 //        var iPremiseKey = (iPremiseId !== undefined ? iPremiseId : null);
-		
-		if (me.timerInterval !== null)
-			clearInterval(me.timerInterval);
+        
+        if (me.timerInterval !== null)
+            clearInterval(me.timerInterval);
         
         me.wRoomListBox = new sap.m.VBox({
             items: []
@@ -145,9 +145,9 @@ sap.ui.controller("mjs.premise.Overview", {
             me.byId("premiseBox").setSelectedKey(null);
         }
 
-		me.rooms = [];
-		
-		if (me.byId("premiseBox").getSelectedKey() > 0 && IOMy.common.RoomsList["_"+me.byId("premiseBox").getSelectedKey()] !== undefined) {
+        me.rooms = [];
+        
+        if (me.byId("premiseBox").getSelectedKey() > 0 && IOMy.common.RoomsList["_"+me.byId("premiseBox").getSelectedKey()] !== undefined) {
             var rooms = IOMy.common.RoomsList["_"+me.byId("premiseBox").getSelectedKey()];
             jQuery.sap.log.debug(JSON.stringify(rooms));
 
@@ -213,66 +213,69 @@ sap.ui.controller("mjs.premise.Overview", {
                     
                     //-- Verify that the Premise has rooms --//
                     if( sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null )
-					{
-						if (aRoom.RoomId === 1 && aRoom.RoomName === "Unassigned" && JSON.stringify(aRoom.Things) === "{}") {
-							bDrawingRoomEntry = false;
-						} else {
-							bDrawingRoomEntry = true;
-						}
-						
-						if (bDrawingRoomEntry) {
-							// Clean up any old elements with IDs.
-							me.aElementsToDestroy.push("roomName"+sIndex);
-							me.aElementsToDestroy.push("roomLink"+sIndex);
+                    {
+                        if (aRoom.RoomId === 1 && aRoom.RoomName === "Unassigned" && JSON.stringify(aRoom.Things) === "{}") {
+                            bDrawingRoomEntry = false;
+                        } else {
+                            bDrawingRoomEntry = true;
+                        }
+                        
+                        if (bDrawingRoomEntry) {
+                            // Clean up any old elements with IDs.
+                            me.aElementsToDestroy.push("roomName"+sIndex);
+                            me.aElementsToDestroy.push("roomLink"+sIndex);
 
-							// Retrieve number of devices in a given room
-							iDevicesInRoom = IOMy.functions.getNumberOfDevicesInRoom(aRoom.RoomId);
+                            // Retrieve number of devices in a given room
+                            iDevicesInRoom = IOMy.functions.getNumberOfDevicesInRoom(aRoom.RoomId);
 
-							//=========== Create the room entry =============//
-							me.wRoomListBox.addItem(
-								new sap.m.HBox({
-									items : [
-										// === NUMBER OF DEVICES ASSIGNED TO A ROOM ===//
-										new sap.m.VBox({
-											items : [
-												new sap.m.Link({
-													textAlign : "Center",
-													text : iDevicesInRoom,
+                            //=========== Create the room entry =============//
+                            me.wRoomListBox.addItem(
+                                new sap.m.HBox({
+                                    items : [
+                                        // === NUMBER OF DEVICES ASSIGNED TO A ROOM ===//
+                                        new sap.m.VBox({
+                                            items : [
+                                                new sap.m.Link({
+                                                    textAlign : "Center",
+                                                    text : iDevicesInRoom,
                                                     
                                                     press : function () {
                                                         if (JSON.stringify(aRoom.Things) !== "{}") {
                                                             IOMy.common.NavigationChangePage("pRoomsOverview", {room : aRoom});
                                                         } else {
-                                                            IOMy.common.showMessage({
-                                                                text : "No devices in "+aRoom.RoomName+".",
-                                                                view : thisView
-                                                            });
+                                                            IOMy.common.showConfirmQuestion("Do you wish to add a device in "+aRoom.RoomName+"?", "No devices in "+aRoom.RoomName,
+                                                                function (oAction) {
+                                                                    if (oAction === sap.m.MessageBox.Action.OK) {
+                                                                        IOMy.common.NavigationChangePage("pSettingsLinkAdd", {RoomId : aRoom.RoomId});
+                                                                    }
+                                                                }
+                                                            );
                                                         }
                                                     }
-												}).addStyleClass("TextBold NumberLabel MarTop10px MarLeft5px MarRight5px")
-											]
-										}).addStyleClass("FlexNoShrink width60px BorderRight TextCenter"),
+                                                }).addStyleClass("TextBold NumberLabel MarTop10px MarLeft5px MarRight5px")
+                                            ]
+                                        }).addStyleClass("FlexNoShrink width60px BorderRight TextCenter"),
 
-										// === ROOM LINK === //
-										new sap.m.VBox({
-											items : [
-												new sap.m.Button(me.createId("roomLink"+sIndex), {
-													text : aRoom.RoomName,
-													press : function () {
+                                        // === ROOM LINK === //
+                                        new sap.m.VBox({
+                                            items : [
+                                                new sap.m.Button(me.createId("roomLink"+sIndex), {
+                                                    text : aRoom.RoomName,
+                                                    press : function () {
                                                         if (aRoom.RoomId === 1 && aRoom.RoomName === "Unassigned") {
                                                             IOMy.common.NavigationChangePage("pRoomsOverview", {room : aRoom});
                                                         } else {
                                                             IOMy.common.NavigationChangePage("pSettingsRoomEdit", {room : aRoom});
                                                         }
-													}
-												}).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px")
-											]
-										}).addStyleClass("TextOverflowEllipsis width100Percent webkitflex"),
-									]
-								}).addStyleClass("ListItem minheight20px")
-							);
-						}
-					}
+                                                    }
+                                                }).addStyleClass("ButtonNoBorder PremiseOverviewRoomButton IOMYButton TextLeft TextSize16px")
+                                            ]
+                                        }).addStyleClass("TextOverflowEllipsis width100Percent webkitflex"),
+                                    ]
+                                }).addStyleClass("ListItem minheight20px")
+                            );
+                        }
+                    }
                 });
             } else {
                 oLayout.addItem(
@@ -280,22 +283,22 @@ sap.ui.controller("mjs.premise.Overview", {
                         text : "There are no rooms accessible in "+me.byId("premiseBox").getSelectedItem().getText()+"."
                     }).addStyleClass("iOmyMessageInfoStrip")
                 );
-			
-				oLayout.addItem(
-					new sap.m.VBox({
-						items : [
-							new sap.m.Link({
-								//enabled : false,
-								text : "Add Room",
-								press : function () {
-									IOMy.common.NavigationChangePage("pSettingsRoomAdd", {premiseID : me.byId("premiseBox").getSelectedKey()});
-								}
-							}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
-						]
-					}).addStyleClass("TextCenter MarTop12px")
-				);
-			
-				oLayout.addStyleClass("BorderBottom PadAll6px");
+            
+                oLayout.addItem(
+                    new sap.m.VBox({
+                        items : [
+                            new sap.m.Link({
+                                //enabled : false,
+                                text : "Add Room",
+                                press : function () {
+                                    IOMy.common.NavigationChangePage("pSettingsRoomAdd", {premiseID : me.byId("premiseBox").getSelectedKey()});
+                                }
+                            }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
+                        ]
+                    }).addStyleClass("TextCenter MarTop12px")
+                );
+            
+                oLayout.addStyleClass("BorderBottom PadAll6px");
             }
 
             me.lastUpdated = IOMy.common.RoomsListLastUpdate;
@@ -311,36 +314,36 @@ sap.ui.controller("mjs.premise.Overview", {
                 items : [
                     {
                         text: "Add Room",
-                        select:	function (oControlEvent) {
+                        select:    function (oControlEvent) {
                             IOMy.common.NavigationChangePage( "pSettingsRoomAdd", {premiseID : me.byId("premiseBox").getSelectedKey()} );
                         }
                     },
                     {
                         text: "Edit Information",
-                        select:	function (oControlEvent) {
+                        select:    function (oControlEvent) {
                             // Find the Premise List item that has the ID of
                             // the currently selected premise and store it.
                             $.each(IOMy.common.PremiseList, function (sI, mPremise) {
-								if (mPremise.Id == me.byId("premiseBox").getSelectedKey()) {
+                                if (mPremise.Id == me.byId("premiseBox").getSelectedKey()) {
                                     // Grab the correct list index.
                                     IOMy.common.PremiseSelected = mPremise;
                                 }
-							});
+                            });
 
                             IOMy.common.NavigationChangePage( "pSettingsPremiseInfo", {} );
                         }
                     },
                     {
                         text: "Edit Address",
-                        select:	function (oControlEvent) {
+                        select:    function (oControlEvent) {
                             // Find the Premise List item that has the ID of
                             // the currently selected premise and store it.
                             $.each(IOMy.common.PremiseList, function (sI, mPremise) {
-								if (mPremise.Id == me.byId("premiseBox").getSelectedKey()) {
+                                if (mPremise.Id == me.byId("premiseBox").getSelectedKey()) {
                                     // Grab the correct list index.
                                     IOMy.common.PremiseSelected = mPremise;
                                 }
-							})
+                            })
 
                             IOMy.common.NavigationChangePage( "pSettingsPremiseAddress", {premise : IOMy.common.PremiseSelected} );
                         }
@@ -350,32 +353,32 @@ sap.ui.controller("mjs.premise.Overview", {
         );
         
         me.wMainBox.addItem(me.wRoomListBox);
-	},
-	
+    },
+    
 /**
 * Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered
 * (NOT before the first rendering! onInit() is used for that one!).
 * @memberOf mjs.premise.Overview
 */
-//	onBeforeRendering: function() {
+//    onBeforeRendering: function() {
 //        
-//	},
+//    },
 
 /**
 * Called when the View has been rendered (so its HTML is part of the document). Post-rendering manipulations of the HTML could be done here.
 * This hook is the same one that SAPUI5 controls get after being rendered.
 * @memberOf mjs.premise.Overview
 */
-//	onAfterRendering: function() {
-//		
-//	}
-	
+//    onAfterRendering: function() {
+//        
+//    }
+    
 /**
 * Called when the Controller is destroyed. Use this one to free resources and finalize activities.
 * @memberOf mjs.premise.Overview
 */
-//	onExit: function() {
+//    onExit: function() {
 //
-//	}
+//    }
 
 });

@@ -23,7 +23,7 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("mjs.settings.rooms.RoomEdit", {
-	functions : IOMy.functions,
+    functions : IOMy.functions,
     odata : IOMy.apiodata,
     
     iRoomID : null,
@@ -43,61 +43,61 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
 * @memberOf mjs.settings.rooms.RoomEdit
 */
-	onInit: function() {
-		var me = this;
-		var thisView = me.getView();
-		
-		thisView.addEventDelegate({
-			// Everything is rendered in this function run before rendering.
-			onBeforeShow : function (evt) {
-				//-- Refresh the Navigational buttons --//
-				IOMy.common.NavigationRefreshButtons( me );
-				
+    onInit: function() {
+        var me = this;
+        var thisView = me.getView();
+        
+        thisView.addEventDelegate({
+            // Everything is rendered in this function run before rendering.
+            onBeforeShow : function (evt) {
+                //-- Refresh the Navigational buttons --//
+                IOMy.common.NavigationRefreshButtons( me );
                 
-				// Collect values parsed from the device list.
-				me.iRoomID = evt.data.room.RoomId;
-				me.mRoom = IOMy.common.RoomsList["_"+evt.data.room.PremiseId]["_"+me.iRoomID];
-				//console.log(me.iRoomID);
-				
+                
+                // Collect values parsed from the device list.
+                me.iRoomID = evt.data.room.RoomId;
+                me.mRoom = IOMy.common.RoomsList["_"+evt.data.room.PremiseId]["_"+me.iRoomID];
+                //console.log(me.iRoomID);
+                
                 // Start rendering the page
-				
+                
                 //-- Set Room name as the title --//
                 thisView.byId("NavSubHead_Title").setText(me.mRoom.RoomName.toUpperCase());
                 
                 me.DestroyUI();
                 me.DrawUI();
                 
-			}
-		});
-	},
+            }
+        });
+    },
 
 /**
 * Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered
 * (NOT before the first rendering! onInit() is used for that one!).
 * @memberOf mjs.settings.rooms.RoomEdit
 */
-//	onBeforeRendering: function() {
+//    onBeforeRendering: function() {
 //
-//	},
+//    },
 
 /**
 * Called when the View has been rendered (so its HTML is part of the document). Post-rendering manipulations of the HTML could be done here.
 * This hook is the same one that SAPUI5 controls get after being rendered.
 * @memberOf mjs.settings.rooms.RoomEdit
 */
-//	onAfterRendering: function() {
-//		
-//	},
-	
-	
-	
+//    onAfterRendering: function() {
+//        
+//    },
+    
+    
+    
 /**
 * Called when the Controller is destroyed. Use this one to free resources and finalize activities.
 * @memberOf mjs.settings.rooms.RoomEdit
 */
-//	onExit: function() {
+//    onExit: function() {
 //
-//	}
+//    }
 
     DestroyUI : function () {
         //--------------------------//
@@ -122,7 +122,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
         // Declare and initialise variables.
         //-------------------------------------------------------------------//
         var me = this;
-		var thisView = me.getView();
+        var thisView = me.getView();
         var oRoomTitle;
         var oRoomDescTitle;
         var oRoomTypeTitle;
@@ -161,7 +161,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
             text : "Update",
             press : function () {
                 var thisButton = this;
-				IOMy.common.NavigationToggleNavButtons(me, false);
+                IOMy.common.NavigationToggleNavButtons(me, false);
 
                 try {
                     //--------------------------------------------//
@@ -169,7 +169,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                     //--------------------------------------------//
                     IOMy.functions.updateRoom(me.iRoomID, {
                         callingWidget : thisButton,
-						view : thisView
+                        view : thisView
                     });
                 } catch (eUpdateRoomError) {
                     //--------------------------------------------//
@@ -178,7 +178,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                     IOMy.common.showError("There was a problem updating the room:\n\n"+eUpdateRoomError.message, "Error Updating Room",
                         function () {
                             thisButton.setEnabled(true);
-							IOMy.common.NavigationToggleNavButtons(me, true);
+                            IOMy.common.NavigationToggleNavButtons(me, true);
                         }
                     );
 
@@ -223,47 +223,48 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                             //var oButton = this;
                             var sDialogTitle = "";
                             IOMy.common.NavigationToggleNavButtons(me, false);
-							me.wUpdateButton.setEnabled(false);
+                            me.wUpdateButton.setEnabled(false);
 
                             //-- CONFIRM THAT YOU WISH TO DELETE THIS ROOM --//
                             IOMy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
                                 function (oAction) {
-									if (oAction === sap.m.MessageBox.Action.OK) {
-										try {
-											IOMy.functions.deleteRoom(me.iRoomID,
-												function () {
-													IOMy.common.showMessage({
-														text : me.wRoomName.getValue() + " successfully removed.",
-														view : thisView
-													})
-													IOMy.common.NavigationToggleNavButtons(me, true);
-													me.wUpdateButton.setEnabled(true);
-													IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
-												}
-											);
+                                    if (oAction === sap.m.MessageBox.Action.OK) {
+                                        try {
+                                            IOMy.functions.deleteRoom(me.iRoomID,
+                                                function () {
+                                                    IOMy.common.showMessage({
+                                                        text : me.wRoomName.getValue() + " successfully removed.",
+                                                        view : thisView
+                                                    })
+                                                    IOMy.common.NavigationToggleNavButtons(me, true);
+                                                    me.wUpdateButton.setEnabled(true);
+                                                    IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+                                                }
+                                            );
 
-										} catch (err) {
+                                        } catch (err) {
 
-											if (err.name === "DevicesStillInRoomException") {
-												sDialogTitle = "Devices still assigned";
+                                            if (err.name === "DevicesStillInRoomException") {
+                                                sDialogTitle = "Devices still assigned";
 
-											} else if (err.name === "AttemptToDeleteOnlyRoomException") {
-												sDialogTitle = "Only room registered"
+                                            } else if (err.name === "AttemptToDeleteOnlyRoomException") {
+                                                // NOTE: This is probably not needed anymore with the way the "Unassigned" pseudo-room works.
+                                                sDialogTitle = "Only room registered"
 
-											}
+                                            }
 
-											IOMy.common.showError(err.message, sDialogTitle,
-												function () {
-													IOMy.common.NavigationToggleNavButtons(me, true);
-													me.wUpdateButton.setEnabled(true);
-												}
-											);
+                                            IOMy.common.showError(err.message, sDialogTitle,
+                                                function () {
+                                                    IOMy.common.NavigationToggleNavButtons(me, true);
+                                                    me.wUpdateButton.setEnabled(true);
+                                                }
+                                            );
 
-										}
-									} else {
-										IOMy.common.NavigationToggleNavButtons(me, true);
-										me.wUpdateButton.setEnabled(true);
-									}
+                                        }
+                                    } else {
+                                        IOMy.common.NavigationToggleNavButtons(me, true);
+                                        me.wUpdateButton.setEnabled(true);
+                                    }
                                 }
                             );
                         }
