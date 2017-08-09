@@ -1157,9 +1157,10 @@ static void nativeseriallib_findserialdevices(void) {
 }
 
 static void nativeseriallib_dnotifysighandler(int sig, siginfo_t *si, void *data) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=nativeseriallib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  //debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=nativeseriallib_deps[DEBUGLIB_DEPIDX].ifaceptr;
 
-  debuglibifaceptr->debuglib_printf(1, "%s: dnotify signal received, threadid=%lu\n", __func__, pthread_self());
+  //NOTE: Until debuglib supports recusive locking this may cause a deadlock as a signal can trigger from anywhere
+  //debuglibifaceptr->debuglib_printf(1, "%s: dnotify signal received, threadid=%lu\n", __func__, pthread_self());
 
   nativeseriallib_locknativeserial();
   nativeseriallib_retryserial=0; //Reset serial retry value as a serial device has been detected or removed
