@@ -34,7 +34,7 @@ $.extend(IOMy.widgets,{
      * @param {type} fnSuccessCallback          Function to call after the select box is created or changed.
      * @param {type} fnFailCallback             Function to call after failure.
      */
-    getListOfUsersForPremisePermissions : function (oSBox, iPremise, fnSuccessCallback, fnFailCallback) {
+    getListOfUsersForPremisePermissions : function (oSBox, iUser, iPremise, fnSuccessCallback, fnFailCallback) {
         var sUrl = IOMy.apiphp.APILocation("permissions");
         
         IOMy.apiphp.AjaxRequest({
@@ -50,7 +50,6 @@ $.extend(IOMy.widgets,{
                 //------------------------------------------------------------//
                 if (data.Error === false) {
                     var mUserInfo;
-                    var mFirstUserInfo = null;
                     var iNumOfUsers = data.Data.length;
                     var iErrors = 0;
                     
@@ -58,11 +57,6 @@ $.extend(IOMy.widgets,{
                         try {
                             mUserInfo = data.Data[i];
                              
-                            // Catch the first user in the list and get it's ID later
-                            if (mFirstUserInfo === null) {
-                                mFirstUserInfo = mUserInfo;
-                            }
-                            
                             oSBox.addItem(
                                 new sap.ui.core.Item({
                                     text : mUserInfo.UserDisplayName,
@@ -74,8 +68,15 @@ $.extend(IOMy.widgets,{
                             jQuery.sap.log.error("Failed to add the User Details to the select box: "+e.message);
                         }
                     }
-                    // Set the selected key to be that of the first item in the select box
-                    oSBox.setSelectedKey(mFirstUserInfo.UsersId);
+                    // Set the selected key to be that of the first item in the select box,
+                    // OR a particular user.
+                    oSBox.setSelectedKey(iUser);
+                    
+                    if (iUser !== null) {
+                        oSBox.setEnabled(false);
+                    } else {
+                        oSBox.setEnabled(true);
+                    }
                     
                     if (iNumOfUsers !== iErrors) {
                         oSBox.attachChange(fnSuccessCallback);
