@@ -416,18 +416,24 @@ sap.ui.controller("mjs.login.Login", {
 
 					} else {
 						//-- TODO: Add the Appropiate Error Messages from the Session Check when Andrew has completed the Better Error Messages --//
-						IOMy.common.showError("Invalid Username or Password!", "User Error");
+                        
+                        //-- If the user was simply unsuccessful, get them to check their username or password. --//
+                        if (oResponseData.ErrCode === "0001") {
+                            IOMy.common.showError(oResponseData.ErrMesg+"\nPlease check that your username and password are correct.", "Login Error");
+                        } else {
+                            IOMy.common.showError(oResponseData.ErrMesg, "Login Error");
+                        }
 					}
 				},
 				error : function(err) {
 					//-- TODO: Replace this with a more apporpiate error --//
 					jQuery.sap.log.error(JSON.stringify(err));
-					IOMy.common.showError("A connection error has occurred. Please try again. If the problem persists, restart iOmy.", "User Error");
+					IOMy.common.showError("A connection error has occurred. Please try again. If the problem persists, restart iOmy\n\n"+err.responseText, "Login Error");
 				}
 			});
 		} else {
 			//-- ERROR --//
-			IOMy.common.showError("Either the Username or Password field was empty!", "User Error");
+			IOMy.common.showError("Either the Username or Password field was empty!", "Login Error");
 		}
 	}
 	
