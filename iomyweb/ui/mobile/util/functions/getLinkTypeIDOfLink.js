@@ -37,7 +37,7 @@ $.extend(IOMy.functions,{
     getLinkTypeIDOfLink : function (iLinkId) {
         var iLinkTypeId = null;
         
-        $.each(IOMy.common.LinkList.length, function (sI, mLink) {
+        $.each(IOMy.common.LinkList, function (sI, mLink) {
 			if (mLink.LinkId == iLinkId) {
                 iLinkTypeId = mLink.LinkTypeId;
             }
