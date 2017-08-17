@@ -57,6 +57,7 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                     me.iUserId = evt.data.userID;
                 } else {
                     me.iUserId = null;
+                    IOMy.common.NavigationRefreshButtons( me );
                     //thisView.wSelectUser.setSelectedKey(null);
                 }
                 
@@ -98,7 +99,13 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
         var oView = this.getView();
         
         oView.wButtonApply.setEnabled(bEnabled);
-        oView.wButtonCancel.setEnabled(bEnabled);
+        oView.wSliderPermissionLevel.setEnabled(bEnabled);
+        
+        if (this.iUserId === null) {
+            oView.wButtonCancel.setEnabled(bEnabled);
+        } else {
+            oView.wButtonCancel.setEnabled(false);
+        }
         
         IOMy.common.NavigationToggleNavButtons(this, bEnabled);
     },
@@ -114,16 +121,16 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
         
         // Populate the users select box with the viewable users
         IOMy.widgets.getListOfUsersForPremisePermissions(thisView.wSelectUser, me.iUserId, thisView.wSelectPremise.getSelectedKey(),
-            //--------------------------------//
+            //----------------------------------------------------------------//
             // Run this function if successful
-            //--------------------------------//
+            //----------------------------------------------------------------//
             function () {
                 me.FetchPermissionsForPremise();
             },
 
-            //--------------------------------//
+            //----------------------------------------------------------------//
             // Run this function if there's a problem
-            //--------------------------------//
+            //----------------------------------------------------------------//
             function (sError) {
                 // Show an error message and go back to the previous page
                 // once closed.
@@ -187,32 +194,42 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                         var data = data.Data;
                         
                         //----------------------------------------------------//
-                        // Basic read access (see that it exists) permission
+                        // Determine the permission level the current user has
                         //----------------------------------------------------//
                         if (data.Read === 0) {
-                            me.iPermissionLevel = 0;
+                            me.iPermissionLevel = 0; // No Access
                             
                         } else if (data.Read === 1) {
-                            me.iPermissionLevel = 1;
+                            me.iPermissionLevel = 1; // Read-only
                             
                             //----------------------------------------------------//
                             // Permission to modify the premise
                             //----------------------------------------------------//
                             if (data.Write === 1) {
-                                me.iPermissionLevel = 2;
+                                me.iPermissionLevel = 2; // Read and Write
                                 
                                 if (data.RoomAdmin === 1) {
-                                    me.iPermissionLevel = 3;
+                                    me.iPermissionLevel = 3; // Room Management and Read/Write
                                 }
                             }
 
                         }
                         
+                        //----------------------------------------------------//
+                        // Set the slider value and the current permission level
+                        // on screen. Enable all the controls.
+                        //----------------------------------------------------//
                         oView.wSliderPermissionLevel.setValue( me.iPermissionLevel );
                         oView.wLabelPermissionLevel.setText( me.aPermissionLevels[ me.iPermissionLevel ] );
                         
                         me.toggleButtons(true);
                         
+                        //----------------------------------------------------//
+                        // If the user selected is in fact the owner of the
+                        // premise, the slider should be disabled as well as the
+                        // apply button, otherwise the page should function
+                        // normally.
+                        //----------------------------------------------------//
                         if (data.Owner === 1) {
                             oView.wSliderPermissionLevel.setEnabled(false);
                             oView.wButtonApply.setEnabled(false);
@@ -228,7 +245,11 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
                         
                     } catch (e) {
                         jQuery.sap.log.error("There was an error setting the permissions on the screen: "+e.message);
-                        me.toggleButtons(true);
+                        IOMy.common.showError("(BUG IF YOU SEE THIS!)\nThere was an error setting the permissions on the screen: "+e.message, "",
+                            function () {
+                                me.toggleButtons(true);
+                            }
+                        );
                     }
                 } else {
                     IOMy.common.showError(data.ErrMesg, "Error",
@@ -315,6 +336,12 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
         });
     },
     
+    /**
+     * Takes the permission level from the permission slider and uses it to form
+     * an object containing the current permission settings 
+     * 
+     * @returns {map}   Permission Settings
+     */
     determinePermissionSettings : function () {
         var oView               = this.getView();
         var iPermissionLevel    = oView.wSliderPermissionLevel.getValue();
@@ -339,6 +366,10 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
         return mPermissions;
     },
     
+    /**
+     * Takes the value from the permission level slider and uses it as an index
+     * to access the string in this.aPermissionLevels array.
+     */
     setPermissionLevelText : function () {
         var oView   = this.getView();
         var iLevel  = oView.wSliderPermissionLevel.getValue();

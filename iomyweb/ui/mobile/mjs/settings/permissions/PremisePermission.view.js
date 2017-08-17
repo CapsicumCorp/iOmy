@@ -27,6 +27,7 @@ sap.ui.jsview("mjs.settings.permissions.PremisePermission", {
     wSelectUser             : null,
     wSelectPremise          : null,
     wSliderPermissionLevel  : null,
+    wLabelPermissionLevel   : null,
     
     wButtonApply        : null,
     wButtonCancel       : null,
@@ -82,7 +83,11 @@ sap.ui.jsview("mjs.settings.permissions.PremisePermission", {
             text: "Cancel",
             type: "Reject",
             press : function () {
-                IOMy.common.NavigationTriggerBackForward();
+                if (oController.iUserId === null) {
+                    IOMy.common.NavigationTriggerBackForward();
+                } else {
+                    IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
+                }
             }
         }).addStyleClass("MarLeft15px");
         
