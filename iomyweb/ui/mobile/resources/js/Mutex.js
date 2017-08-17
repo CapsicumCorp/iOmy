@@ -34,17 +34,29 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
  * that tasks are not executed sequentially but as needed by a function, giving
  * the programmer greater flexibility.
  * 
- * @param {type} manual				Whether it operates manually. Default false.
+ * A Javascript object is optionally parsed as an argument that contains the
+ * parameter 'manual'. This is a boolean flag to indicate whether to let the
+ * mutex control the flow of execution (false)(default) or the programmer 
+ * (true).
+ * 
+ * @param {map} mSettings               Map containing settings (optional)
  * @returns {Mutex}
  */
-function Mutex(manual) {
-	if (manual === undefined || manual === null) {
-		manual = false;
-	}
+function Mutex(mSettings) {
+    if (mSettings !== undefined && mSettings !== null) {
+        if (mSettings.manual === undefined || mSettings.manual === null) {
+            this.manual = false;
+        } else {
+            this.manual = mSettings.manual;
+        }
+    } else {
+        this.manual = false;
+    }
+    
+	
 	
 	this.queue = [];
 	this.busy = false;
-	this.manual = manual;
 }
 
 /**
