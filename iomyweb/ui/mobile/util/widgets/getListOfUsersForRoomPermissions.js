@@ -29,11 +29,12 @@ $.extend(IOMy.widgets,{
      * Retrieve a list of users to be shown on the Room Permissions page.
      * 
      * @param {type} oSBox                      Select/combo box to populate
+     * @param {type} iUser                      User ID
      * @param {type} iPremise                   Premise ID
      * @param {type} fnSuccessCallback          Function to call after the select box is created or changed.
      * @param {type} fnFailCallback             Function to call after failure.
      */
-    getListOfUsersForRoomPermissions : function (oSBox, iPremise, fnSuccessCallback, fnFailCallback) {
+    getListOfUsersForRoomPermissions : function (oSBox, iUser, iPremise, fnSuccessCallback, fnFailCallback) {
         var sUrl = IOMy.apiphp.APILocation("permissions");
         
         IOMy.apiphp.AjaxRequest({
@@ -74,8 +75,15 @@ $.extend(IOMy.widgets,{
                         }
                     }
                     
-                    // Set the selected key to be that of the first item in the select box
-                    oSBox.setSelectedKey(mFirstUserInfo.UsersId);
+                    // Set the selected key to be that of the first item in the select box,
+                    // OR a particular user.
+                    oSBox.setSelectedKey(iUser);
+                    
+                    if (iUser !== null) {
+                        oSBox.setEnabled(false);
+                    } else {
+                        oSBox.setEnabled(true);
+                    }
                     
                     if (iNumOfUsers !== iErrors) {
                         oSBox.attachChange(fnSuccessCallback);
