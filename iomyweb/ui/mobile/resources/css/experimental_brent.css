@@ -232,3 +232,14 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
     background-color: #6dac3e;
     border-color: #53852d;
 }
+
+/* Login Button */
+.LoginPageSubmit > span.sapMBtnInner.sapMBtnAccept {
+    background-color: #2b7d2b;
+    border-color: #2b7d2b;
+    color: #f7f7f7;
+    text-shadow: none;
+}
+.LoginPageSubmit > span.sapMBtnInner.sapMBtnAccept > .sapMBtnIcon {
+    color: #f7f7f7;
+}
