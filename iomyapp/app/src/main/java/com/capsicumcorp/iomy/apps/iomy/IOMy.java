@@ -252,7 +252,7 @@ public class IOMy extends AppCompatActivity
         //----------------------------------------------------------------------------//
         //confirmationDialogBuilder.setTitle("Are you sure you want to exit iOmy?");
         confirmationDialogBuilder.setMessage("Are you sure you want to exit iOmy?");
-        confirmationDialogBuilder.setTitle("This will stop all iOmy monitoring on this device?");
+        confirmationDialogBuilder.setTitle("This will stop all iOmy monitoring on this device!");
         confirmationDialogBuilder.setPositiveButton("Yes",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog,

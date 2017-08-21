@@ -240,14 +240,20 @@ sap.ui.controller("mjs.premise.Overview", {
                                                     text : iDevicesInRoom,
                                                     
                                                     press : function () {
+                                                        var oLink = this;
+                                                        oLink.setEnabled(false);
+                                                        
                                                         if (JSON.stringify(aRoom.Things) !== "{}") {
                                                             IOMy.common.NavigationChangePage("pRoomsOverview", {room : aRoom});
+                                                            oLink.setEnabled(true);
                                                         } else {
                                                             IOMy.common.showConfirmQuestion("Do you wish to add a device in "+aRoom.RoomName+"?", "No devices in "+aRoom.RoomName,
                                                                 function (oAction) {
                                                                     if (oAction === sap.m.MessageBox.Action.OK) {
                                                                         IOMy.common.NavigationChangePage("pSettingsLinkAdd", {RoomId : aRoom.RoomId});
                                                                     }
+                                                                    
+                                                                    oLink.setEnabled(true); // Re-enable the button regardless.
                                                                 }
                                                             );
                                                         }

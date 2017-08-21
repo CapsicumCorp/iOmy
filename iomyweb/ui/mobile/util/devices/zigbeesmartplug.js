@@ -453,6 +453,8 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         var aFilter             = ["COMMTYPE_PK eq "+me.CommTypeID];
         var aOrderBy            = [];
         
+        oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).setEnabled(false);
+        
         //---------------------------------------------------------//
         // Start the Request                                       //
         //---------------------------------------------------------//
@@ -632,6 +634,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             }
                         });
 
+                        oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).setEnabled(true);
                         oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).setSelectedKey(firstSelection.CommId);
                         me.iSelectedCommID = firstSelection.CommId;
                         me.ToggleZigbeeCommands(oScope, !me.bRunningCommand);

@@ -43,7 +43,7 @@ $.extend(IOMy.widgets,{
                     key : mTimezone.TimezoneId
                 })
             );
-		})
+		});
         
         return aItems;
     }

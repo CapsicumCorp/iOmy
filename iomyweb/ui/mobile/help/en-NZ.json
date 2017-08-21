@@ -25,5 +25,5 @@
     
     "pOnvif": "Displays the camera stream thumbnail if the camera is on. If the camera has PTZ support, there will be controls around the page.",
     
-    "pTelnetPage" : "This page allows you to interact with WatchInputs via telnet. The input field accepts the following commands:\n\nhelp: Show a list of commands on the screen\n\nversioninfo: Show the version of WatchInputs\n\nmodulesinfo: Show a list modules currently loaded\n\nget_rapidha_info: Display information about connected rapidha dongles\n\nget_zigbee_info: Display information about the devices on a Zigbee network\n\ndebug output show: Show recent debug information\n\ndebug output hide: Hide debugging information"
+    "pTelnetPage" : "This page allows you to interact with WatchInputs via telnet. The input field accepts the following commands:\n\nhelp: Show a list of commands on the screen\n\nversioninfo: Show the version of WatchInputs\n\nmodulesinfo: Show a list modules currently loaded\n\nget_rapidha_info: Display information about connected RapidHA dongles\n\nget_zigbee_info: Display information about the devices on a Zigbee network\n\ndebug output show: Show recent debug information\n\ndebug output hide: Hide debugging information"
 }
