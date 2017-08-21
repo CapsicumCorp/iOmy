@@ -59,6 +59,7 @@ sap.ui.jsview("mjs.settings.telnet.Telnet", {
 			submit : function () {
 				if (this.getValue().length > 0) {
 					oController.ExecuteCommand(this.getValue());
+                    this.setValue("");
 				}
 			}
 		}).addStyleClass("");
@@ -68,6 +69,7 @@ sap.ui.jsview("mjs.settings.telnet.Telnet", {
 			press : function () {
 				if (me.wInputTelnetCommand.getValue().length > 0) {
 					oController.ExecuteCommand(me.wInputTelnetCommand.getValue());
+                    me.wInputTelnetCommand.setValue("");
 				}
 			}
 		});

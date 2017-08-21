@@ -43,6 +43,8 @@ sap.ui.controller("mjs.settings.telnet.Telnet", {
 				
 				//-- Refresh the Navigational buttons --//
 				IOMy.common.NavigationRefreshButtons( me );
+                
+                me.ExecuteCommand("help");
 			}
 		});
 	},
@@ -98,6 +100,7 @@ sap.ui.controller("mjs.settings.telnet.Telnet", {
 		oView.wTextAreaOutput.setValue(
 			IOMy.telnet.compileLog().join("\n------------------------------------\n")
 		);
+    
 		me.ScrollTextAreaToBottom();
 	},
 	
