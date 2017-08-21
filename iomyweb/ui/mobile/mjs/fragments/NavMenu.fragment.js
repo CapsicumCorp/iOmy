@@ -89,15 +89,15 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 							expanded:	false,
 							items:	[
 								new sap.tnt.NavigationListItem({
-									text: "Device List",
+									text: "New Device",
 									select:	function (oControlEvent) {
-										IOMy.common.NavigationChangePage( "pSettingsDeviceList", {}, true );
+										IOMy.common.NavigationChangePage( "pSettingsLinkAdd", {}, true );
 									}
 								}),
 								new sap.tnt.NavigationListItem({
-									text: "New Camera",
+									text: "Device List",
 									select:	function (oControlEvent) {
-										IOMy.common.NavigationChangePage( "pSettingsAddCamera", {}, true );
+										IOMy.common.NavigationChangePage( "pSettingsDeviceList", {}, true );
 									}
 								}),
 								new sap.tnt.NavigationListItem({

@@ -172,12 +172,6 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
 				select:	function (oControlEvent) {
 					IOMy.common.NavigationChangePage("pSettingsLinkAdd", {room : IOMy.common.RoomSelected});
 				}
-			},
-			{
-				text: "Add Camera",
-				select:	function (oControlEvent) {
-					IOMy.common.NavigationChangePage("pSettingsAddCamera", {});
-				}
 			}
         ];
 		//----------------------------------------------------//
