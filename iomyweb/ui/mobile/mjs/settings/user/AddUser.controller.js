@@ -282,7 +282,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         });
 
         me.wTimezoneField = IOMy.widgets.selectBoxTimezones().addStyleClass("SettingsDropdownInput");
-		me.wTimezoneField.setSelectedKey(IOMy.common.UserInfo.TimezoneId);
+		me.wTimezoneField.setSelectedKey(310);
 		
         //===== RESIDENTIAL ADDRESS =====//
 
@@ -377,7 +377,9 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             text : "Username"
         });
         
-        me.wDBRootUsernameField = new sap.m.Input({}).addStyleClass("SettingsTextInput");
+        me.wDBRootUsernameField = new sap.m.Input({
+            placeholder : "root"
+        }).addStyleClass("SettingsTextInput");
         
         // -- PASSWORD --//
         var oDBRootPasswordLabel = new sap.m.Label({
@@ -431,7 +433,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
 				oStateTitle, me.wStateField,
                 oPostCodeTitle, me.wPostCodeField,
 				oRegionTitle, me.wRegionField,
-                oTimezoneTitle, me.wTimezoneField,
+                oTimezoneTitle, me.wTimezoneField
             ]
         }).addStyleClass("UserFormSection PadAll10px");
         
@@ -514,6 +516,8 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         var iAddressTimezone        = me.wTimezoneField.getSelectedKey();
         var iAddressLanguage        = me.wLanguageField.getSelectedKey();
         var sUsername               = me.wUsernameField.getValue();
+        var sDBUsername             = me.wDBRootUsernameField.getValue();
+        var sDBPassword             = me.wDBRootPasswordField.getValue();
         var mPasswordValidationInfo;
         var mDOBValidationInfo;
 
@@ -542,11 +546,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         // Validate Input
         //-----------------------------------//
         if (sDisplayname === "") {
-            aLogErrors.push("* User's display name must be filled out");
-        }
-        
-        if (sAddressLine1 === "") {
-            aLogErrors.push("* Street Address (Line 1) must be filled out");
+            sDisplayname = sUsername;
         }
         
         if (sUsername === "") {
@@ -569,11 +569,11 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             aLogErrors.push("* The new passwords don't match.");
         }
         
-        if (me.wDBRootUsernameField.getValue() === "") {
-            aLogErrors.push("* The database admin username is required");
+        if (sDBUsername === "") {
+            sDBUsername = "root"
         }
         
-        if (me.wDBRootPasswordField.getValue() === "") {
+        if (sDBPassword === "") {
             aLogErrors.push("* The database admin password is required");
         }
 
@@ -592,6 +592,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
             IOMy.common.showError(aLogErrors.join("\n\n"), sDialogTitle,
                 function () {
                     thisButton.setEnabled(true);
+                    IOMy.common.NavigationToggleNavButtons(me, true);
                 }
             );
         } else {
@@ -619,7 +620,7 @@ sap.ui.controller("mjs.settings.user.AddUser", {
                         "AddressLanguage" : iAddressLanguage,
                         "Username" : sUsername,
                         "NewPassword" : me.wPasswordField.getValue(),
-                        "Data" : "{\"Username\":\""+me.wDBRootUsernameField.getValue()+"\",\"Password\":\""+me.wDBRootPasswordField.getValue()+"\",\"URI\":\"localhost\"}",
+                        "Data" : "{\"Username\":\""+sDBUsername+"\",\"Password\":\""+sDBPassword+"\",\"URI\":\"localhost\"}",
                     },
 
                     onSuccess : function (responseType, data) {
