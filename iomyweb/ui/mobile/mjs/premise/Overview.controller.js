@@ -280,7 +280,7 @@ sap.ui.controller("mjs.premise.Overview", {
             } else {
                 oLayout.addItem(
                     new sap.m.MessageStrip({
-                        text : "There are no rooms accessible in "+me.byId("premiseBox").getSelectedItem().getText()+"."
+                        text : "No rooms are configured in "+me.byId("premiseBox").getSelectedItem().getText()+"."
                     }).addStyleClass("iOmyMessageInfoStrip")
                 );
             
