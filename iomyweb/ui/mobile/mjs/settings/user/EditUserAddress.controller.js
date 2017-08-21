@@ -189,18 +189,18 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                                 var sAddressStateProvince = me.byId("addressState").getValue();
                                 var sAddressPostcode = me.byId("addressPostCode").getValue()
                                 
-                                if (me.byId("addressLine1").getValue() === "") {
-                                    aErrorLog.push("Street Address is required.");
-                                    bError = true;
-                                }
-                                if (sAddressStateProvince === "") {
-                                    aErrorLog.push("State / Province is required.");
-                                    bError = true;
-                                }
-                                if (sAddressPostcode === "") {
-                                    aErrorLog.push("Post code is required.");
-                                    bError = true;
-                                }
+//                                if (me.byId("addressLine1").getValue() === "") {
+//                                    aErrorLog.push("Street Address is required.");
+//                                    bError = true;
+//                                }
+//                                if (sAddressStateProvince === "") {
+//                                    aErrorLog.push("State / Province is required.");
+//                                    bError = true;
+//                                }
+//                                if (sAddressPostcode === "") {
+//                                    aErrorLog.push("Post code is required.");
+//                                    bError = true;
+//                                }
                                 
                                 if (bError === true) {
                                     jQuery.sap.log.error(aErrorLog.join("\n"));
@@ -232,7 +232,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                                                     
                                                     onSuccess : function () {
                                                         IOMy.common.showMessage({
-                                                            text : "Your address updated successfully",
+                                                            text : "Your address details have been updated.",
                                                             view : thisView
                                                         });
 
@@ -241,7 +241,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                                                         IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
                                                     }
                                                     
-                                                })
+                                                });
                                             },
                                             onFail : function (response) {
                                                 IOMy.common.showError("Update failed.", "Error",

@@ -200,18 +200,18 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                                 var aErrorLog = [];
                                 
                                 // Error checking and validation
-                                if (sAddressLine1 === "") {
-                                    aErrorLog.push("Street Address is required.");
-                                    bError = true;
-                                }
-                                if (sAddressStateProvince === "") {
-                                    aErrorLog.push("State / Province is required.");
-                                    bError = true;
-                                }
-                                if (sAddressPostcode === "") {
-                                    aErrorLog.push("Post code is required.");
-                                    bError = true;
-                                }
+//                                if (sAddressLine1 === "") {
+//                                    aErrorLog.push("Street Address is required.");
+//                                    bError = true;
+//                                }
+//                                if (sAddressStateProvince === "") {
+//                                    aErrorLog.push("State / Province is required.");
+//                                    bError = true;
+//                                }
+//                                if (sAddressPostcode === "") {
+//                                    aErrorLog.push("Post code is required.");
+//                                    bError = true;
+//                                }
                                 
                                 if (bError === true) {
                                     jQuery.sap.log.error(aErrorLog.join("\n"));
@@ -255,6 +255,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 														IOMy.common.NavigationToggleNavButtons(me, true);
 													}
 												);
+                                            
                                                 jQuery.sap.log.error(JSON.stringify(response));
 
                                             }
