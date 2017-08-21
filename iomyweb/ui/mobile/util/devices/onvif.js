@@ -233,6 +233,14 @@ $.extend(IOMy.devices.onvif,{
     CreateThingForm : function(oScope, iLinkId, oFormBox, aElementsToEnableOnSuccess) {
         var me = this; // Scope of the Onvif module.
         
+        //--------------------------------------------------------------------//
+        // Change the help message for the New Link page.
+        //--------------------------------------------------------------------//
+        IOMy.help.PageInformation["pSettingsLinkAdd"] = "" +
+            "The stream name is required. Selecting a higher quality profile for " +
+            "the video and a lower quality profile for the thumbnail will result in " +
+            "better performance.";
+        
         //===============================================//
         // DECLARE VARIABLES                             //
         //===============================================//

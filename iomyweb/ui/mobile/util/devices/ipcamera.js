@@ -362,6 +362,13 @@ $.extend(IOMy.devices.ipcamera,{
     createNewDeviceForm : function () {
         var oPage               = oApp.getPage("pSettingsLinkAdd").getController();
         
+        //--------------------------------------------------------------------//
+        // Change the help message for the New Link page.
+        //--------------------------------------------------------------------//
+        IOMy.help.PageInformation["pSettingsLinkAdd"] = "" +
+            "You will need to specify the IP address of the device, and the path of the video stream. " +
+            "The default protocol is 'http', and the default port is 80.";
+        
         //-- File Type --//
         oPage.wFileTypeSelector = new sap.m.Select({
             width: "100%",                                            
@@ -382,7 +389,7 @@ $.extend(IOMy.devices.ipcamera,{
         //-- IP Address --//
         oPage.wIPAddress = new sap.m.Input ({
             type: "Url",
-            placeholder: "10.0.0.1"
+            placeholder: "e.g. 10.0.0.1"
         }).addStyleClass("");
         
         //-- IP Port --//
