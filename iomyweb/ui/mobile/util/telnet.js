@@ -129,7 +129,7 @@ $.extend(IOMy.telnet,{
 					task : function () {
 						try {
 							if (data.Error === false || data.Error === undefined) {
-								var sOutput = "\n	* " + data.Data.Custom.join("\n	* ");
+								var sOutput = "\n    " + data.Data.Custom.join("\n    ");
 								req.logOutput(sOutput, false);
 
 								IOMy.rules.loadRules({
