@@ -192,11 +192,9 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                             try {
                                 me.ResetJoinButtonText(oScope);
                             } catch (e) {
-                                // Ignore
                                 jQuery.sap.log.error(e.message);
-                            } finally {
-                                me.sEnableTempJoinButtonText = sText;
                             }
+                            
                             me.bJoinModeToggleCoolingDown = false;
                             //oButton.setEnabled(true);
                             clearInterval(me.intervalCooldown);

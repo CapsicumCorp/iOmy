@@ -41,22 +41,7 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 							icon:		"sap-icon://GoogleMaterial/person",
 							text:		IOMy.common.UserDisplayName,
 							expanded:	true,
-							items:	[
-							],
-//							select:		function (oControlEvent) {
-//								//---------------------------------------------------//
-//								//-- TOGGLE SELECTED STATUS IF MEDIA IS MOBILE     --//
-//								//---------------------------------------------------//
-//                                var mSystem = sap.ui.Device.system;
-//                                
-//                                if (mSystem.desktop === false) {
-//                                    if( this.getExpanded() ) {
-//                                        this.setExpanded(false);
-//                                    } else {
-//                                        this.setExpanded(true);
-//                                    }
-//                                }
-//							}
+							items:	[],
 						}),
 						//--------------------------------//
 						//-- DEVICE OVERVIEW			--//
@@ -158,40 +143,21 @@ sap.ui.jsfragment("mjs.fragments.NavMenu", {
 									}
 								})
 							],
-//							select:		function (oControlEvent) {
-//								//---------------------------------------------------//
-//								//-- TOGGLE SELECTED STATUS IF MEDIA IS MOBILE     --//
-//								//---------------------------------------------------//
-//                                var mSystem = sap.ui.Device.system;
-//                                
-//                                if (mSystem.desktop === false) {
-//                                    if( this.getExpanded() ) {
-//                                        this.setExpanded(false);
-//                                    } else {
-//                                        this.setExpanded(true);
-//                                    }
-//                                }
-//							}
+							select:		function (oControlEvent) {
+								//---------------------------------------------------//
+								//-- TOGGLE SELECTED STATUS IF MEDIA IS MOBILE     --//
+								//---------------------------------------------------//
+                                var mSystem = sap.ui.Device.system;
+                                
+                                if (mSystem.desktop === false) {
+                                    if( this.getExpanded() ) {
+                                        this.setExpanded(false);
+                                    } else {
+                                        this.setExpanded(true);
+                                    }
+                                }
+							}
 						}),
-//						new sap.tnt.NavigationListItem({
-//							icon:		"sap-icon://GoogleMaterial/settings",
-//							text:		"Permissions",
-//							expanded:	true,
-//							items:	[
-//								
-//							]
-//						}),
-//						
-//						//--------------------------------//
-//						//-- RULE DEVICE LIST           --//
-//						//--------------------------------//
-//						new sap.tnt.NavigationListItem({
-//							icon:	"sap-icon://GoogleMaterial/home",
-//							text:	"Rules",
-//							select:	function (oControlEvent) {
-//								IOMy.common.NavigationChangePage( "pRuleDeviceList", {}, true );
-//							}
-//						}),
                         
                         //--------------------------------//
 						//-- SIGN OUT   				--//

@@ -1586,9 +1586,9 @@ sap.ui.controller("mjs.premise.DeviceData", {
 									if( typeof aData['Error']==="undefined" ) {
 										if( aData[0]!==undefined && aData[0]!==null ) {
 											if( aData[0].UTS!==undefined && aData[0].UTS!==null ) {
-                                                if (iSampleRateLimit !== null && iSampleRateLimit>=1 && ( aData[0].UTS <= ( iEndStamp - iSampleRateLimit ) )) {
-                                                    bSuccessful = false;
-                                                } else {
+//                                                if (iSampleRateLimit !== null && iSampleRateLimit>=1 && ( aData[0].UTS <= ( iEndStamp - iSampleRateLimit ) )) {
+//                                                    bSuccessful = false;
+//                                                } else {
                                                     //--------------------------------------------//
                                                     //-- IF THERE IS MORE THAN 1 VALUE          --//
                                                     //--------------------------------------------//
@@ -1618,7 +1618,7 @@ sap.ui.controller("mjs.premise.DeviceData", {
                                                         //-- Set the colour to Neutral since not enough data provided to determine if up, down, neutral --//
                                                         bSuccessful = oController.UpdateGenericTileWithNewValue( oController, iArrayId, aData[0].Value, aData[0].UOM_NAME, "None", "Neutral" );
                                                     }
-                                                }
+//                                                }
 											}
 										}
 									}

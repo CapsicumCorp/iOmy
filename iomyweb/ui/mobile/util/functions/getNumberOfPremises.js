@@ -35,7 +35,13 @@ $.extend(IOMy.functions,{
      * @returns {Number}    Number of premises visible to the user.
      */
     getNumberOfPremises : function () {
-		return IOMy.common.PremiseList.length;
+        var iCount = 0;
+        
+        $.each(IOMy.common.PremiseList, function (sI, mPremise) {
+            iCount++;
+        });
+        
+		return iCount;
     }
     
 });

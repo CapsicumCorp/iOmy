@@ -39,6 +39,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
  * mutex control the flow of execution (false)(default) or the programmer 
  * (true).
  * 
+ * Based on the example at https://blog.jcoglan.com/2016/07/12/mutexes-and-javascript/
+ * 
  * @param {map} mSettings               Map containing settings (optional)
  * @returns {Mutex}
  */
