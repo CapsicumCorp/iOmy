@@ -150,6 +150,11 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                 }
             }
         );
+    
+        if (IOMy.functions.getNumberOfPremises() === 1) {
+            oPremiseTitle.setVisible(false);
+            me.wPremise.setVisible(false);
+        }
 
         me.wRoomName = new sap.m.Input(me.createId("roomName"), {
             value : ""

@@ -77,6 +77,11 @@ sap.ui.controller("mjs.premise.Overview", {
                     }
                 }
                 
+                if (IOMy.functions.getNumberOfPremises() === 1) {
+                    thisView.byId("NavSubHead_Title").setText(oPremiseCBox.getSelectedItem().getText().toUpperCase());
+                    oPremiseCBox.setVisible(false);
+                }
+                
                 var oPremiseCBoxContainer = new sap.m.VBox({
                     items : [oPremiseCBox]
                 }).addStyleClass("UserInputForm width100Percent");
@@ -129,6 +134,7 @@ sap.ui.controller("mjs.premise.Overview", {
         var me = this;
         var thisView = me.getView();
         var bDrawingRoomEntry = true;
+        var sNoRoomsConfiguredMsg;
 //        var iNumOfButtons = 0;
 //        var iPremiseKey = (iPremiseId !== undefined ? iPremiseId : null);
         
@@ -158,10 +164,7 @@ sap.ui.controller("mjs.premise.Overview", {
             // Layout Object
             var oLayout = new sap.m.VBox({
                 items: []
-            }).addStyleClass("");
-
-            // ID management
-            var idCount = 0; 
+            }).addStyleClass(""); 
 
             var oLine = new sap.ui.core.HTML({
                 content : ["<div class='Line'></div>"]
@@ -205,9 +208,6 @@ sap.ui.controller("mjs.premise.Overview", {
                 // CONSTRUCT THE ROOM LIST
                 //==============================================//
                 var iDevicesInRoom;
-                var aDevice;
-                // Create the collapse/expand icon in an array of widgets.
-                var aDeviceArrow;
                 
                 $.each(rooms,function(sIndex,aRoom) {
                     
@@ -284,9 +284,15 @@ sap.ui.controller("mjs.premise.Overview", {
                     }
                 });
             } else {
+                if (IOMy.functions.getNumberOfPremises() === 1) {
+                    sNoRoomsConfiguredMsg = "No rooms are configured.";
+                } else {
+                    sNoRoomsConfiguredMsg = "No rooms are configured in "+me.byId("premiseBox").getSelectedItem().getText()+".";
+                }
+                
                 oLayout.addItem(
                     new sap.m.MessageStrip({
-                        text : "No rooms are configured in "+me.byId("premiseBox").getSelectedItem().getText()+"."
+                        text : sNoRoomsConfiguredMsg
                     }).addStyleClass("iOmyMessageInfoStrip")
                 );
             
@@ -294,7 +300,6 @@ sap.ui.controller("mjs.premise.Overview", {
                     new sap.m.VBox({
                         items : [
                             new sap.m.Link({
-                                //enabled : false,
                                 text : "Add Room",
                                 press : function () {
                                     IOMy.common.NavigationChangePage("pSettingsRoomAdd", {premiseID : me.byId("premiseBox").getSelectedKey()});
