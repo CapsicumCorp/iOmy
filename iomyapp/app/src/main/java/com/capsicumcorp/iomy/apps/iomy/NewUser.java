@@ -22,7 +22,9 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
 package com.capsicumcorp.iomy.apps.iomy;
 
+import android.content.DialogInterface;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -78,21 +80,44 @@ public class NewUser extends AppCompatActivity {
             String errorMessages = "";
             for (int i = 0; i < this.installWizard.validationErrorMessages.size(); i++) {
                 if (i > 0) {
-                    errorMessages += "\n";
+                    errorMessages += "\n\n";
                 }
                 errorMessages += this.installWizard.validationErrorMessages.get(i);
             }
             // Bring up the notice.
-            LinearLayout linearLayout=(LinearLayout)findViewById(R.id.owner_form);
-            Snackbar errorNotice = Snackbar.make(linearLayout, errorMessages, 5000);
-            // Retrieve the text view that holds the message(s)
-            View errorNoticeView = errorNotice.getView();
-            LinearLayout.LayoutParams params=(LinearLayout.LayoutParams)view.getLayoutParams();
-            params.gravity = Gravity.TOP;
-            errorNoticeView.setLayoutParams(params);
-            TextView textView = (TextView) errorNoticeView.findViewById(android.support.design.R.id.snackbar_text);
-            textView.setMaxLines(12);  // We wish to have a maximum 12 lines
-            errorNotice.show();
+//            LinearLayout linearLayout=(LinearLayout)findViewById(R.id.owner_form);
+//            Snackbar errorNotice = Snackbar.make(linearLayout, errorMessages, 5000);
+//            // Retrieve the text view that holds the message(s)
+//            View errorNoticeView = errorNotice.getView();
+//            LinearLayout.LayoutParams params=(LinearLayout.LayoutParams)view.getLayoutParams();
+//            params.gravity = Gravity.TOP;
+//            errorNoticeView.setLayoutParams(params);
+//            TextView textView = (TextView) errorNoticeView.findViewById(android.support.design.R.id.snackbar_text);
+//            textView.setMaxLines(12);  // We wish to have a maximum 12 lines
+//            errorNotice.show();
+
+            //----------------------------------------------------------------------------//
+            // Create an alert dialog box
+            //----------------------------------------------------------------------------//
+            AlertDialog.Builder confirmationDialogBuilder = new AlertDialog.Builder(this);
+
+            //----------------------------------------------------------------------------//
+            // Set the properties
+            //----------------------------------------------------------------------------//
+            confirmationDialogBuilder.setMessage(errorMessages);
+            confirmationDialogBuilder.setNeutralButton("OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,
+                                        int id) {
+                        dialog.cancel();
+                    }
+                }
+            );
+
+            AlertDialog confirmationDialog = confirmationDialogBuilder.create();
+            confirmationDialog.show();
+
+
             // Clear the error log
             this.installWizard.validationErrorMessages.clear();
         }
@@ -102,8 +127,6 @@ public class NewUser extends AppCompatActivity {
 
     public boolean isValidData() {
         boolean valid = true;
-        TextView tv;
-        String label;
 
         // Does the username exist?
         if (installWizard.ownerUsername.length() == 0) {
@@ -115,22 +138,22 @@ public class NewUser extends AppCompatActivity {
         if (installWizard.ownerPassword.length() == 0) {
             valid = false;
             installWizard.validationErrorMessages.add("Password must be entered.");
-        } else {
-            valid = installWizard.isValidPassword(installWizard.ownerPassword);
-            if (valid) {
-                Log.v("New User", "Valid");
-            } else {
-                Log.v("New User", "Not Valid");
-            }
+        }
 
-            if (this.installWizard.confirmOwnerPassword.length() == 0) {
-                installWizard.validationErrorMessages.add("You must re-enter password to confirm.");
+        valid = installWizard.isValidPassword(installWizard.ownerPassword);
+        if (valid) {
+            Log.v("New User", "Valid");
+        } else {
+            Log.v("New User", "Not Valid");
+        }
+
+        if (this.installWizard.confirmOwnerPassword.length() == 0) {
+            installWizard.validationErrorMessages.add("You must re-enter password to confirm.");
+            valid = false;
+        } else {
+            if (!this.installWizard.ownerPassword.equals(this.installWizard.confirmOwnerPassword)) {
                 valid = false;
-            } else {
-                if (!this.installWizard.ownerPassword.equals(this.installWizard.confirmOwnerPassword)) {
-                    valid = false;
-                    this.installWizard.validationErrorMessages.add("Passwords don't match.");
-                }
+                this.installWizard.validationErrorMessages.add("Passwords don't match.");
             }
         }
 
