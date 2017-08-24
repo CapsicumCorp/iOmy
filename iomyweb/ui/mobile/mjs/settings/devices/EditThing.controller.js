@@ -114,6 +114,24 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         
         return mInfo;
     },
+    
+    areThereChanges : function () {
+        var iThingID				= this.oThing.Id;
+		var sOldThingText           = IOMy.common.ThingList["_"+iThingID].DisplayName;
+        var iOldRoomID              = IOMy.common.ThingList["_"+iThingID].RoomId;
+        var sThingText				= this.wThingNameField.getValue();
+        
+		var bDifferentThingName     = sOldThingText !== sThingText;
+        var bDifferentRoom;
+        
+        if (this.wRoomCBox === null) {
+            bDifferentRoom = false;
+        } else {
+            bDifferentRoom = iOldRoomID != this.wRoomCBox.getSelectedKey();
+        }
+        
+        return (bDifferentThingName || bDifferentRoom);
+    },
 
     /**
      * Procedure that destroys the previous incarnation of the UI. Must be called by onInit before
@@ -196,7 +214,11 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         
         me.wThingNameField = new sap.m.Input({
             value : me.oThing.DisplayName,
-			enabled : bAllowedToEditThing
+			enabled : bAllowedToEditThing,
+            liveChange : function () {
+                var bChanges = me.areThereChanges();
+                me.byId("updateButton").setEnabled(bChanges);
+            }
         }).addStyleClass("width100Percent");
 
 		//-------------------------------------------------------//
@@ -214,6 +236,12 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 			me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_1").addStyleClass("width100Percent SettingsDropDownInput");
 			me.wRoomCBox.setSelectedKey(parseInt(oLink.LinkRoomId));
 			me.wRoomCBox.setEnabled(bAllowedToChangeRoom);
+            me.wRoomCBox.attachChange(
+                function () {
+                    var bChanges = me.areThereChanges();
+                    me.byId("updateButton").setEnabled(bChanges);
+                }
+            );
 
 			me.wRoomCBoxHolder = new sap.m.VBox({
 				items : [me.wRoomCBox]
@@ -234,6 +262,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
             items : [
                 new sap.m.Link(me.createId("updateButton"), {
                     text : "Update",
+                    enabled : false,
                     press : function () {
 						me.EditThing();
                     }
@@ -257,31 +286,6 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 
         thisView.byId("page").addContent(me.wPanel);
         
-        //--------------------------------------------------------------------//
-        // Create the action menu
-        //--------------------------------------------------------------------//
-//        thisView.byId("extrasMenuHolder").destroyItems();
-//        thisView.byId("extrasMenuHolder").addItem(
-//            IOMy.widgets.getActionMenu({
-//                id : me.createId("extrasMenu"),        // Uses the page ID
-//                icon : "sap-icon://GoogleMaterial/more_vert",
-//                items : [
-//                    {
-//                        text: "Edit Link",
-//                        select:	function (oControlEvent) {
-//                            // Lock the button
-//                            this.setEnabled(false);
-//
-//                            // Change to the edit link page parsing the correct link to the page.
-//                            IOMy.common.NavigationChangePage("pSettingsEditLink", {link : oLink});
-//
-//                            // Unlock the button
-//                            this.setEnabled(true);
-//                        }
-//                    }
-//                ]
-//            })
-//        );
     },
 	
 	// TODO: This function belongs to the IOMy.functions library.
@@ -297,6 +301,8 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 		var iThingID				= me.oThing.Id;
 		var mThingIdInfo			= IOMy.validation.isThingIDValid(iThingID);
 		var mThingNameInfo			= me.ValidateThingName();
+        var sOldThingText           = IOMy.common.ThingList["_"+iThingID].DisplayName;
+        var iOldRoomID              = IOMy.common.ThingList["_"+iThingID].RoomId;
 		
 		var bEditingThing			= me.wThingNameField.getEnabled();
 		var bChangingRoom;
@@ -326,14 +332,28 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 			bError = true;
 			aErrorMessages = aErrorMessages.concat(mThingNameInfo.aErrorMessages);
 		}
-		
+        
+		//--------------------------------------------------------------------//
+        // Has the thing name changed?
+		//--------------------------------------------------------------------//
+        if (sThingText === sOldThingText) {
+            bEditingThing = false;
+        }
+        
 		//--------------------------------------------------------------------//
 		// Set the room ID
 		//--------------------------------------------------------------------//
 		if (me.wRoomCBox !== null) {
 			iRoomID			= me.wRoomCBox.getSelectedKey();
-			sRoomText		= me.wRoomCBox.getSelectedItem().getText();
-			bChangingRoom	= me.wRoomCBox.getEnabled();
+            
+            //-- Check that a different room has actually been changed. --//
+            if (iRoomID == iOldRoomID) {
+                bChangingRoom   = false;
+            } else {
+                sRoomText		= me.wRoomCBox.getSelectedItem().getText();
+                bChangingRoom	= me.wRoomCBox.getEnabled();
+            }
+            
 		} else {
 			iRoomID = null;
 			sRoomText = null;
@@ -374,7 +394,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 								var sMessage;
 								
 								if (mThingChangeSettings.successful === true) {
-									sMessage = "Device renamed to "+sThingText+". Located in "+sRoomText;
+									sMessage = "Device renamed to "+sThingText+", and now located in "+sRoomText;
 									IOMy.common.showMessage({
 										text : sMessage,
 										view : me.getView()
@@ -408,7 +428,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 						var sMessage;
 								
 						if (mThingChangeSettings.successful === true) {
-							sMessage = "Device renamed to \""+sThingText+"\", but failed to move device to "+sRoomText;
+							sMessage = "Device renamed to "+sThingText+", but failed to move device to "+sRoomText;
 							
 							IOMy.common.showWarning(sMessage, "", function () {
 								me.byId("updateButton").setEnabled(true);
