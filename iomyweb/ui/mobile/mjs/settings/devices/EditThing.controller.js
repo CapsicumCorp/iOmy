@@ -286,6 +286,24 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 
         thisView.byId("page").addContent(me.wPanel);
         
+        //--------------------------------------------------------------------//
+        // Create the action menu.
+        //--------------------------------------------------------------------//
+        thisView.byId("extrasMenuHolder").destroyItems();
+        thisView.byId("extrasMenuHolder").addItem(
+            IOMy.widgets.getActionMenu({
+                id : me.createId("extrasMenu"),        // Uses the page ID
+                icon : "sap-icon://GoogleMaterial/more_vert",
+                items : [
+                    {
+                        text: "Add Room",
+                        select:    function (oControlEvent) {
+                            IOMy.common.NavigationChangePage( "pSettingsRoomAdd", {} );
+                        }
+                    }
+                ]
+            })
+        );
     },
 	
 	// TODO: This function belongs to the IOMy.functions library.
@@ -520,7 +538,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 						IOMy.common.RefreshCoreVariables({ 
 							onSuccess : function () {
 								IOMy.common.showMessage({
-									text : "Device now located in "+sRoomText,
+									text : "Device is now located in "+sRoomText,
 									view : me.getView()
 								});
 								

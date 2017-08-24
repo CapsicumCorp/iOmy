@@ -195,7 +195,8 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 										view : thisView
 									});
 
-									IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+									//IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+                                    IOMy.common.NavigationTriggerBackForward();
 
 								} catch(e654321) {
 									//-- ERROR:  TODO: Write a better error message--//
