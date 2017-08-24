@@ -840,17 +840,9 @@ if( $bError===false ) {
 							$aResult = $oPHPPhilipsHue->ChangeLightHueSatBright( $sHWId, $iPostHue, $iPostSaturation, $iPostBrightness );
 							
 							
-							//----------------------------------------------------------------//
-							//-- If Successful then check if the Light List needs updating  --//
-							//----------------------------------------------------------------//
+
 							if($aResult['Error']===false) {
-								//-- If the User has Write Permission --//
-								if( $bWritePerm===true ) {
-									
-									$aTempFunctionResult4 = $oPHPPhilipsHue->AutoAddNewLights( $iLinkId );
-									
-									
-								}	//-- ENDIF User has the Write Permission --//
+
 							} else {
 								$bError     = true;
 								$iErrCode   = 3401;
@@ -866,10 +858,26 @@ if( $bError===false ) {
 							$sErrMesg  .= "The Light may be disconnected or incorrect credentials have been used. \n";
 						}
 						
+						//----------------------------------------------------------------//
+						//-- Check if the Light List needs updating                     --//
+						//----------------------------------------------------------------//
+						try {
+							//-- If the User has Write Permission --//
+							if( $bWritePerm===true ) {
+									
+								$aTempFunctionResult4 = $oPHPPhilipsHue->AutoAddNewLights( $iLinkId );
+										
+										
+							}	//-- ENDIF User has the Write Permission --//
+						} catch( Exception $e3403 ) {
+							
+						}
+						
+						
 					} else {
 						$bError     = true;
-						$iErrCode   = 3403;
-						$sErrMesg  .= "Error Code:'3403' \n";
+						$iErrCode   = 3406;
+						$sErrMesg  .= "Error Code:'3406' \n";
 						$sErrMesg  .= "Problem when connecting to the Philips Hue Bridge! \n";
 						$sErrMesg  .= $oPHPPhilipsHue->aErrorMessges[0];
 					}

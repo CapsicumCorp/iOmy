@@ -275,10 +275,24 @@ if( $bError===false ) {
 										}
 										
 									} else {
+										//-- Flag an Error --//
 										$bError = true;
 										$sErrMesg .= "Error Code:'2407' \n";
 										$sErrMesg .= "Device is unknown! \n";
 										$sErrMesg .= "That particular Philips Hue device may have been disconnected or invalid credentials used!\n";
+										
+									}
+									
+									//--------------------------------------------------------//
+									//-- Check if the Lightbulb has changed its Id          --//
+									//--------------------------------------------------------//
+									try {
+										//-- If the User has Write Permission --//
+										if( $aStateResults['Data']['PermWrite']===true ) {
+											$aTempFunctionResult4 = $oPHPPhilipsHue->AutoAddNewLights( $aStateResults['Data']['LinkId'] );
+										}	//-- ENDIF User has the Write Permission --//
+									} catch( Exception $e2407 ) {
+										
 									}
 								} else {
 									$bError = true;
