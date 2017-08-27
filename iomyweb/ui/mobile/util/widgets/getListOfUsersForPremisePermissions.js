@@ -29,10 +29,11 @@ $.extend(IOMy.widgets,{
     /**
      * Retrieves a list of users to be shown on the Premise Permissions page.
      * 
-     * @param {type} oSBox                      Select/combo box to populate
-     * @param {type} iPremise                   Premise ID
-     * @param {type} fnSuccessCallback          Function to call after the select box is created or changed.
-     * @param {type} fnFailCallback             Function to call after failure.
+     * @param {sap.m.Select} oSBox             Select/combo box to populate
+     * @param {int} iUser                      User ID
+     * @param {int} iPremise                   Premise ID
+     * @param {function} fnSuccessCallback     Function to call after the select box is created or changed.
+     * @param {function} fnFailCallback        Function to call after failure.
      */
     getListOfUsersForPremisePermissions : function (oSBox, iUser, iPremise, fnSuccessCallback, fnFailCallback) {
         var sUrl = IOMy.apiphp.APILocation("permissions");

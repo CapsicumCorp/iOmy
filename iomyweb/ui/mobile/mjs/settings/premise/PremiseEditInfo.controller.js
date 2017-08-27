@@ -71,13 +71,6 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 					value : sPremiseDesc
 				}).addStyleClass("width100Percent SettingsTextInput");
                 
-                var oOccupantsTitle = new sap.m.Text({
-                    text : "Occupants"
-                });
-    		    
-				var oOccupantsField = IOMy.widgets.selectBoxPremiseOccupantCount(me.createId("premiseOccupants")).addStyleClass("width100Percent SettingsDropdownInput");
-                oOccupantsField.setSelectedKey(aPremise.OccupantCountId);
-                
                 var oBedroomsTitle = new sap.m.Text({
                     text : "Bedrooms"
                 });
@@ -85,9 +78,23 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 				var oBedroomsField = IOMy.widgets.selectBoxPremiseBedroomCount(me.createId("premiseBedrooms")).addStyleClass("width100Percent SettingsDropdownInput");
                 oBedroomsField.setSelectedKey(aPremise.BedroomCountId);
                 
+                var oOccupantsTitle = new sap.m.Text({
+                    text : "Occupants"
+                });
+    		    
+				var oOccupantsField = IOMy.widgets.selectBoxPremiseOccupantCount(me.createId("premiseOccupants")).addStyleClass("width100Percent SettingsDropdownInput");
+                oOccupantsField.setSelectedKey(aPremise.OccupantCountId);
+                
+                var oNumberOfUsersLabel = new sap.m.Text(me.createId("numberOfUsers"), {
+                    text : "Finding number of users in the premise."
+                });
+                
                 var oCol1 = new sap.m.VBox({
-                    items : [oOccupantsTitle,oOccupantsField,
-                            oBedroomsTitle,oBedroomsField]
+                    items : [
+                        oBedroomsTitle,oBedroomsField,
+                        oOccupantsTitle,oOccupantsField,
+                        oNumberOfUsersLabel
+                    ]
                 }).addStyleClass("PadRight5px width50Percent");
                 
                 var oFloorsTitle = new sap.m.Text({
@@ -104,9 +111,16 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 				var oRoomsField = IOMy.widgets.selectBoxPremiseRoomCount(me.createId("premiseRooms")).addStyleClass("width100Percent SettingsDropdownInput");
                 oRoomsField.setSelectedKey(aPremise.RoomCountId);
                 
+                var oNumberOfRoomsLabel = new sap.m.Text({
+                    text : IOMy.functions.getNumberOfRoomsInPremise(me.PremiseID)+" rooms configured in "+sPremiseName+"."
+                });
+                
                 var oCol2 = new sap.m.VBox({
-                    items : [oFloorsTitle,oFloorsField,
-                            oRoomsTitle,oRoomsField]
+                    items : [
+                        oFloorsTitle,oFloorsField,
+                        oRoomsTitle,oRoomsField,
+                        oNumberOfRoomsLabel
+                    ]
                 }).addStyleClass("width50Percent");
                 
                 var oCBoxGrid = new sap.m.HBox({
@@ -128,6 +142,11 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 								var sPremiseText = me.byId("premiseField").getValue();
                                 var bError = false;
                                 var aErrorLog = [];
+                                
+                                if (sPremiseText === "") {
+                                    bError = true;
+                                    aErrorLog.push("Premise must have a name.");
+                                }
                                 
                                 if (bError === true) {
                                     // One or more errors were found in the form. DO NOT PROCEED.
@@ -240,8 +259,9 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 		    	// Destroys the actual panel of the page. This is done to ensure that there
 				// are no elements left over which would increase the page size each time
 				// the page is visited.
-				if (me.byId("panel") !== undefined)
+				if (me.byId("panel") !== undefined) {
 					me.byId("panel").destroy();
+                }
     		    
     		    var oPanel = new sap.m.Panel(me.createId("panel"), {
     		    	backgroundDesign: "Transparent",
@@ -250,26 +270,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 				
 				thisView.byId("page").addContent(oPanel);
                 
-                // Create the extras menu for the Premise Edit Info page.
-                thisView.byId("extrasMenuHolder").destroyItems();
-                thisView.byId("extrasMenuHolder").addItem(
-                    IOMy.widgets.getActionMenu({
-                        id : me.createId("extrasMenu"),        // Uses the page ID
-                        icon : "sap-icon://GoogleMaterial/more_vert",
-                        items : [
-                            {
-                                text: "Edit Address",
-                                select:	function (oControlEvent) {
-									if (oApp.getPage("pSettingsPremiseAddress") === null) {
-										IOMy.pages.createPage("pSettingsPremiseAddress");
-									}
-									
-                                    oApp.to("pSettingsPremiseAddress", {premise : IOMy.common.PremiseSelected});
-                                }
-                            }
-                        ]
-                    })
-                );
+                me.fetchNumberOfUsersForPremise();
 			}
 		});
 	},
@@ -301,5 +302,51 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 //	onExit: function() {
 //
 //	}
+
+    fetchNumberOfUsersForPremise : function () {
+        var me      = this;
+        var sUrl    = IOMy.apiphp.APILocation("permissions");
+        
+        IOMy.apiphp.AjaxRequest({
+            url : sUrl,
+            data : {
+                "Mode" : "LookupUsersForPremisePerms",
+                "PremiseId" : me.PremiseID
+            },
+            
+            onSuccess : function (responseType, data) {
+                //------------------------------------------------------------//
+                // Display the the number of users, or an error message.
+                //------------------------------------------------------------//
+                if (data.Error === false) {
+                    var iNumOfUsers = data.Data.length;
+                    var sMessage;
+                    
+                    if (iNumOfUsers === 0) {
+                        sMessage = "No one can access this premise.";
+                    } else if (iNumOfUsers === 1) {
+                        sMessage = iNumOfUsers+" user can access this premise.";
+                    } else {
+                        sMessage = iNumOfUsers+" users can access this premise.";
+                    }
+                    
+                    me.byId("numberOfUsers").setText(sMessage);
+                    
+                } else {
+                    var sErrorMessage = "There was an error accessing the list of users: "+data.ErrMesg;
+                    me.byId("numberOfUsers").setText("Failed to find the number of users.");
+                    
+                    jQuery.sap.log.error(sErrorMessage);
+                }
+            },
+            
+            onFail : function (response) {
+                var sErrorMessage = "There was an error accessing the list of users: "+JSON.stringify(response);
+                me.byId("numberOfUsers").setText("Failed to find the number of users.");
+                
+                jQuery.sap.log.error(sErrorMessage);
+            }
+        });
+    }
 
 });

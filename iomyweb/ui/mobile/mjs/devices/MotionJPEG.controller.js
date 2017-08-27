@@ -70,18 +70,27 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 							if (me.wMPEGImage !== null) {
 								me.wMPEGImage.attachError(
 									function () {
-										IOMy.common.showMessage({
-											text : "Failed to load stream.",
-											view : thisView
-										});
+                                        IOMy.common.showLoading({
+                                            "show" : false,
+                                            "context" : me
+                                        });
+//										IOMy.common.showMessage({
+//											text : "Failed to load stream.",
+//											view : thisView
+//										});
 									}
 								);
+                            
+                                me.wMPEGImage.attachLoad(
+                                    function () {
+                                        IOMy.common.showLoading({
+                                            "show" : false,
+                                            "context" : me
+                                        });
+                                    }
+                                );
 								
 								me.wPanel.setVisible(true);
-								IOMy.common.showLoading({
-									"show" : false,
-									"context" : me
-								});
 								
 								me.wMPEGImage.setSrc(sUrl);
 							}

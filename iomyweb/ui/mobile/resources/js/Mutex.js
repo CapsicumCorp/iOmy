@@ -54,8 +54,6 @@ function Mutex(mSettings) {
     } else {
         this.manual = false;
     }
-    
-	
 	
 	this.queue = [];
 	this.busy = false;

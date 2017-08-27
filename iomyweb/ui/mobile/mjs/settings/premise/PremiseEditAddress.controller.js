@@ -199,20 +199,6 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                                 var bError = false;
                                 var aErrorLog = [];
                                 
-                                // Error checking and validation
-//                                if (sAddressLine1 === "") {
-//                                    aErrorLog.push("Street Address is required.");
-//                                    bError = true;
-//                                }
-//                                if (sAddressStateProvince === "") {
-//                                    aErrorLog.push("State / Province is required.");
-//                                    bError = true;
-//                                }
-//                                if (sAddressPostcode === "") {
-//                                    aErrorLog.push("Post code is required.");
-//                                    bError = true;
-//                                }
-                                
                                 if (bError === true) {
                                     jQuery.sap.log.error(aErrorLog.join("\n"));
                                     IOMy.common.showError(aErrorLog.join("\n\n"), "Errors");
@@ -239,7 +225,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 													
 													onSuccess : function () {
 														IOMy.common.showMessage({
-															text : "Premise address updated successfully.",
+															text : "Premise address updated.",
 															view : thisView
 														});
 
@@ -296,27 +282,6 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 				}).addStyleClass("PanelNoTopPadding");
 				
 				thisView.byId("page").addContent(oPanel);
-                
-                // Create the extras menu for the Premise Edit Address page.
-                thisView.byId("extrasMenuHolder").destroyItems();
-                thisView.byId("extrasMenuHolder").addItem(
-                    IOMy.widgets.getActionMenu({
-                        id : me.createId("extrasMenu"),        // Uses the page ID
-                        icon : "sap-icon://GoogleMaterial/more_vert",
-                        items : [
-                            {
-                                text: "Edit Information",
-                                select:	function (oControlEvent) {
-									if (oApp.getPage("pSettingsPremiseInfo") === null) {
-										IOMy.pages.createPage("pSettingsPremiseInfo");
-									}
-									
-                                    oApp.to("pSettingsPremiseInfo", {});
-                                }
-                            }
-                        ]
-                    })
-                );
                 
                 me.loadLocaleInfo(aPremise.Id);
 			}
