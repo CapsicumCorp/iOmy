@@ -23,8 +23,10 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
 package com.capsicumcorp.iomy.apps.iomy;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.View;
@@ -80,17 +82,38 @@ public class PremiseAndHubSetup extends AppCompatActivity {
                 }
                 errorMessages += this.installWizard.validationErrorMessages.get(i);
             }
-            // Bring up the notice.
-            LinearLayout linearLayout=(LinearLayout)findViewById(R.id.premiseHubForm);
-            Snackbar errorNotice = Snackbar.make(linearLayout, errorMessages, 5000);
-            // Retrieve the text view that holds the message(s)
-            View errorNoticeView = errorNotice.getView();
-            LinearLayout.LayoutParams params=(LinearLayout.LayoutParams)view.getLayoutParams();
-            params.gravity = Gravity.TOP;
-            errorNoticeView.setLayoutParams(params);
-            TextView textView = (TextView) errorNoticeView.findViewById(android.support.design.R.id.snackbar_text);
-            textView.setMaxLines(6);  // We wish to have a maximum 6 lines
-            errorNotice.show();
+//            // Bring up the notice.
+//            LinearLayout linearLayout=(LinearLayout)findViewById(R.id.premiseHubForm);
+//            Snackbar errorNotice = Snackbar.make(linearLayout, errorMessages, 5000);
+//            // Retrieve the text view that holds the message(s)
+//            View errorNoticeView = errorNotice.getView();
+//            LinearLayout.LayoutParams params=(LinearLayout.LayoutParams)view.getLayoutParams();
+//            params.gravity = Gravity.TOP;
+//            errorNoticeView.setLayoutParams(params);
+//            TextView textView = (TextView) errorNoticeView.findViewById(android.support.design.R.id.snackbar_text);
+//            textView.setMaxLines(6);  // We wish to have a maximum 6 lines
+//            errorNotice.show();
+
+            //----------------------------------------------------------------------------//
+            // Create an alert dialog box
+            //----------------------------------------------------------------------------//
+            AlertDialog.Builder confirmationDialogBuilder = new AlertDialog.Builder(this);
+
+            //----------------------------------------------------------------------------//
+            // Set the properties
+            //----------------------------------------------------------------------------//
+            confirmationDialogBuilder.setMessage(errorMessages);
+            confirmationDialogBuilder.setNeutralButton("OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,
+                                            int id) {
+                            dialog.cancel();
+                        }
+                    }
+            );
+
+            AlertDialog confirmationDialog = confirmationDialogBuilder.create();
+            confirmationDialog.show();
             // Clear the error log
             this.installWizard.validationErrorMessages.clear();
         }
