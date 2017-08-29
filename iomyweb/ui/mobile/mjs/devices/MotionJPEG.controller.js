@@ -55,11 +55,21 @@ sap.ui.controller("mjs.devices.MotionJPEG", {
 				me.DrawUI();
 				
 				me.wPanel.setVisible(false);
+                
+                //------------------------------------------------------------//
+                // Wipe out the existing loading animation and create the new
+                // one.
+                //------------------------------------------------------------//
+                IOMy.common.showLoading({
+                    "show" : false,
+                    "context" : me
+                })
+                
 				thisView.byId("page").addContent(
-					IOMy.common.showLoading({
-						"show" : true,
-						"context" : me
-					})
+                    IOMy.common.showLoading({
+                        "show" : true,
+                        "context" : me
+                    })
 				);
 				
 				try {
