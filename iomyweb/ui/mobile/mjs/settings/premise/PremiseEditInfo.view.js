@@ -50,7 +50,7 @@ sap.ui.jsview("mjs.settings.premise.PremiseEditInfo", {
             view : me,
             controller : oController,
             icon : "sap-icon://GoogleMaterial/home",
-            title : "Edit Premise"
+            title : "Premise Info"
         });	
 		
 		

@@ -88,10 +88,6 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 				var oOccupantsField = IOMy.widgets.selectBoxPremiseOccupantCount(me.createId("premiseOccupants")).addStyleClass("width100Percent SettingsDropdownInput");
                 oOccupantsField.setSelectedKey(aPremise.OccupantCountId);
                 
-                var oNumberOfUsersLabel = new sap.m.Text(me.createId("numberOfUsers"), {
-                    text : "Finding number of users in the premise."
-                });
-                
                 var oCol1 = new sap.m.VBox({
                     items : [
                         oBedroomsTitle,oBedroomsField,
@@ -113,19 +109,6 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
     		    
 				var oRoomsField = IOMy.widgets.selectBoxPremiseRoomCount(me.createId("premiseRooms")).addStyleClass("width100Percent SettingsDropdownInput");
                 oRoomsField.setSelectedKey(aPremise.RoomCountId);
-                
-                var iNumberOfRooms = IOMy.functions.getNumberOfRoomsInPremise(me.PremiseID);
-                var sNumberOfRoomsText;
-                
-                if (iNumberOfRooms === 1) {
-                    sNumberOfRoomsText = IOMy.functions.getNumberOfRoomsInPremise(me.PremiseID)+" room configured in "+sPremiseName+".";
-                } else {
-                    sNumberOfRoomsText = IOMy.functions.getNumberOfRoomsInPremise(me.PremiseID)+" rooms configured in "+sPremiseName+".";
-                }
-                
-                var oNumberOfRoomsLabel = new sap.m.Text({
-                    text : IOMy.functions.getNumberOfRoomsInPremise(me.PremiseID)+" rooms configured in "+sPremiseName+"."
-                });
                 
                 var oCol2 = new sap.m.VBox({
                     items : [
@@ -321,50 +304,5 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 //
 //	}
 
-    fetchNumberOfUsersForPremise : function () {
-        var me      = this;
-        var sUrl    = IOMy.apiphp.APILocation("permissions");
-        
-        IOMy.apiphp.AjaxRequest({
-            url : sUrl,
-            data : {
-                "Mode" : "LookupUsersForPremisePerms",
-                "PremiseId" : me.PremiseID
-            },
-            
-            onSuccess : function (responseType, data) {
-                //------------------------------------------------------------//
-                // Display the the number of users, or an error message.
-                //------------------------------------------------------------//
-                if (data.Error === false) {
-                    var iNumOfUsers = data.Data.length;
-                    var sMessage;
-                    
-                    if (iNumOfUsers === 0) {
-                        sMessage = "No one can access this premise.";
-                    } else if (iNumOfUsers === 1) {
-                        sMessage = iNumOfUsers+" user can access this premise.";
-                    } else {
-                        sMessage = iNumOfUsers+" users can access this premise.";
-                    }
-                    
-                    me.byId("numberOfUsers").setText(sMessage);
-                    
-                } else {
-                    var sErrorMessage = "There was an error accessing the list of users: "+data.ErrMesg;
-                    me.byId("numberOfUsers").setText("Failed to find the number of users.");
-                    
-                    jQuery.sap.log.error(sErrorMessage);
-                }
-            },
-            
-            onFail : function (response) {
-                var sErrorMessage = "There was an error accessing the list of users: "+JSON.stringify(response);
-                me.byId("numberOfUsers").setText("Failed to find the number of users.");
-                
-                jQuery.sap.log.error(sErrorMessage);
-            }
-        });
-    }
-
+    
 });
