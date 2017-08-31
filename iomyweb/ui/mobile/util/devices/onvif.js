@@ -465,6 +465,37 @@ $.extend(IOMy.devices.onvif,{
         return mInfo;
     },
     
+    showSnapshot : function (iThingId, oCallingButton) {
+        var oRPopover = new sap.m.ResponsivePopover({
+            title : IOMy.common.ThingList["_"+iThingId].DisplayName,
+            content : [
+                new sap.m.Image({
+                    densityAware : false,
+                    alt : "Failed to acquire snapshot",
+                    src : IOMy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+iThingId,
+                    width: "100%",
+                    
+                    error : function () {
+                        this.destroy();
+                        
+                        oRPopover.addContent(
+                            new sap.m.VBox({
+                                items : [
+                                    new sap.m.Text({
+                                        text : "Snapshot not available",
+                                        textAlign : sap.ui.core.TextAlign.Center
+                                    }).addStyleClass("width100Percent TextBold MarTop20px")
+                                ]
+                            })
+                        );
+                    }
+                })
+            ]
+        });
+        
+        oRPopover.openBy(oCallingButton);
+    },
+    
     /**
      * Creates a Onvif stream UI entry in a page such as room overview. This is to be
      * called from the GetCommonUI in the main devices module.
@@ -519,6 +550,9 @@ $.extend(IOMy.devices.onvif,{
                                     new sap.m.Button ({
                                         width: "100%",
                                         icon : "sap-icon://GoogleMaterial/photo_camera",
+                                        press : function () {
+                                            me.showSnapshot(aDeviceData.DeviceId, this);
+                                        }
                                     })
                                 ]
                             })

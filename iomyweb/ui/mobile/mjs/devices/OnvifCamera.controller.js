@@ -372,7 +372,6 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
     },
     
 	//-- TODO: These PTZ functions can be moved to the onvif device module. --//
-	
     PTZMove : function (iPosX, iPosY) {
         var me = this;
         
@@ -400,34 +399,37 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
 
         } catch (ePTZError) {
             jQuery.sap.log.error(JSON.stringify(ePTZError.message));
-            IOMy.common.showError(ePTZError.message);
-            // Unlock all the PTZ buttons
-            me.setPTZButtonsEnabled(true);
+            IOMy.common.showError(ePTZError.message, "",
+                function () {
+                    // Unlock all the PTZ buttons
+                    me.setPTZButtonsEnabled(true);
+                }
+            );
         }
     },
     
     PTZMoveUp : function () {
         var me = this;
         
-        me.PTZMove(0, 1);
+        me.PTZMove(0, 5);
     },
     
     PTZMoveDown : function () {
         var me = this;
         
-        me.PTZMove(0, -1);
+        me.PTZMove(0, -5);
     },
     
     PTZMoveLeft : function () {
         var me = this;
         
-        me.PTZMove(-1, 0);
+        me.PTZMove(-5, 0);
     },
     
     PTZMoveRight : function () {
         var me = this;
         
-        me.PTZMove(1, 0);
+        me.PTZMove(5, 0);
     },
     
     //---------------------------------------------------//
