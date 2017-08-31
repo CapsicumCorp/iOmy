@@ -21,6 +21,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+$.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
+
 sap.ui.controller("mjs.settings.links.LinkAdd", {
     
     // WIDGETS
@@ -212,157 +214,6 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         mValidationInfo.aErrorMessages = aErrorMessages;
         
         return mValidationInfo;
-    },
-    
-//    ValidateHub : function () {
-//        var me                      = this;
-//        var bError                  = false;
-//        var aErrorMessages          = [];
-//        var mInfo                   = {}; // MAP: Contains the error status and any error messages.
-//        
-//        //-------------------------------------------------//
-//        // Is the hub a proper hub (does it have an ID)    //
-//        //-------------------------------------------------//
-//        try {
-//            // TODO: Is this really needed anymore?
-//            if (me.byId("hubCBox").getSelectedKey() === "") {
-//                bError = true;
-//                aErrorMessages.push("Hub is not valid");
-//            }
-//        } catch (e) {
-//            bError = true;
-//            aErrorMessages.push("Error 0x1001: There was an error checking the hub: "+e.message);
-//        }
-//        
-//        // Prepare the return value
-//        mInfo.bError = bError;
-//        mInfo.aErrorMessages = aErrorMessages;
-//        
-//        return mInfo;
-//    },
-    
-//    ValidateLinkType : function () {
-//        var me                      = this;
-//        var bError                  = false;
-//        var aErrorMessages          = [];
-//        var mInfo                   = {}; // MAP: Contains the error status and any error messages.
-//        
-//        //----------------------------------------------------------//
-//        // Is the link type a proper link type (does it have an ID) //
-//        //----------------------------------------------------------//
-//        try {
-//            // -- #TODO:# Is this really needed anymore? -- //
-//            if (me.byId("linkTypeCBox").getSelectedKey() === "") {
-//                bError = true;
-//                aErrorMessages.push("Link type is not valid");
-//            }
-//        } catch (e) {
-//            bError = true;
-//            aErrorMessages.push("Error 0x1002: There was an error checking the link type: "+e.message);
-//        }
-//        
-//        // Prepare the return value
-//        mInfo.bError = bError;
-//        mInfo.aErrorMessages = aErrorMessages;
-//        
-//        return mInfo;
-//    },
-    
-    ValidateIPAddress : function () {
-        var me                      = this;
-        var bError                  = false;
-        var bIPAddressFormatError   = false;
-        var aErrorMessages          = [];
-        var mInfo                   = {};
-        // IP Address validation
-        var aThreeDots;
-        var aIPAddressParts;
-        // Form data variables
-        var sIPAddress              = me.byId("IPAddressField").getValue();
-        var sIPPort                 = me.byId("IPPortField").getValue();
-        
-        //-------------------------------------------------//
-        // Is the IP address given?                        //
-        //-------------------------------------------------//
-        try {
-            if (sIPAddress === "") {
-                bError = true; // No
-                aErrorMessages.push("IP address must be filled out");
-
-            //-------------------------------------------------//
-            // If so, is it a valid IP address?                //
-            //-------------------------------------------------//
-            } else {
-                //-------------------------------------------------//
-                // Are there three dots in the IP Address?         //
-                //-------------------------------------------------//
-                aThreeDots = sIPAddress.match(/\./g);
-
-                if (aThreeDots === null || aThreeDots.length !== 3) {
-                    bError = true; // No. FAIL!
-                    aErrorMessages.push("IP address is not valid - there must be only 4 parts separated by dots ('.') in an IPv4 address");
-                } else {
-                    //---------------------------------------------------------//
-                    // There are three dots. Are the four parts valid numbers? //
-                    //---------------------------------------------------------//
-                    aIPAddressParts = sIPAddress.split('.');
-
-                    // Check each number
-                    for (var i = 0; i < aIPAddressParts.length; i++) {
-                        for (var j = 0; j < aIPAddressParts[i].length; j++) {
-                            // Spaces and the plus symbol are ignored by isNaN(). isNaN() covers the rest.
-                            if (aIPAddressParts[i].charAt(j) === ' ' || aIPAddressParts[i].charAt(j) === '+' || isNaN(aIPAddressParts[i].charAt(j))) {
-                                bIPAddressFormatError = true; // INVALID CHARACTER
-                                break;
-                            }
-                        }
-
-                        if (bIPAddressFormatError === true) {
-                            bError = true;
-                            aErrorMessages.push("IP address is not valid - one of the numbers contains invalid characters");
-                            break;
-                        } else if (parseInt(aIPAddressParts[i]) < 0 || parseInt(aIPAddressParts[i]) > 255) {
-                            bError = true;
-                            aErrorMessages.push("IP address is not valid - one of the numbers is greater than 255 or a negative number");
-                            break;
-                        }
-                    }
-                }
-            }
-        } catch (e) {
-            bError = true;
-            aErrorMessages.push("Error 0x1003: There was an error checking the IP Address: "+e.message);
-        }
-        
-        //-------------------------------------------------//
-        // Is the port given?                              //
-        //-------------------------------------------------//
-        try {
-            if (sIPPort === "") {
-                bError = true;
-                aErrorMessages.push("IP port must be filled out");
-            // Now, is the port a valid number...
-            } else {
-                for (var i = 0; i < sIPPort.length; i++) {
-                    // Spaces, and the plus and minus symbols are ignored by isNaN(). isNaN() covers the rest.
-                    if (sIPPort.charAt(i) === ' ' || sIPPort.charAt(i) === '-' ||
-                        sIPPort.charAt(i) === '+' || isNaN(sIPPort.charAt(i)))
-                    {
-                        bError = true; // INVALID CHARACTER!
-                        aErrorMessages.push("IP port not valid");
-                        break;
-                    }
-                }
-            }
-        } catch (e) {
-            bError = true;
-            aErrorMessages.push("Error 0x1004: There was an error checking the IP Port: "+e.message);
-        }
-        
-        mInfo.bError = bError;
-        mInfo.aErrorMessages = aErrorMessages;
-        
-        return mInfo;
     },
     
     /**
@@ -566,7 +417,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             IOMy.common.showError("Error creating "+sLinkType+":\n\n"+error.responseText);
             
             // Re-enable the add link button
-            me.byId("addButton").setEnabled(true);
+            me.byId("buttonBox").setEnabled(true);
         };
         
         return mData;
@@ -590,13 +441,13 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             iLinkTypeId = mEntry.Id;
             me.iLinkId = null;
             
-            me.byId("addButton").setEnabled(true);
+            me.byId("buttonBox").setEnabled(true);
             
             // If the form is for the Zigbee device type, hide the add device button.
             if (iLinkTypeId == 2) {
-                me.byId("addButton").setVisible(false);
+                me.byId("buttonBox").setVisible(false);
             } else {
-                me.byId("addButton").setVisible(true);
+                me.byId("buttonBox").setVisible(true);
             }
             
             // Zigbee 
@@ -618,10 +469,11 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             }
         } else if (mEntry.Type === "device") {
             me.iLinkId = mEntry.Id;
-            me.byId("addButton").setEnabled(false);
-            me.byId("addButton").setVisible(true);
+            me.byId("buttonBox").setEnabled(false);
+            me.byId("buttonBox").setVisible(true);
             
-            IOMy.devices.onvif.CreateThingForm(me, me.iLinkId, me.byId("formBox"), [me.byId("addButton")]);
+            IOMy.devices.onvif.CreateThingForm(me, me.iLinkId, me.byId("formBox"), [me.byId("buttonBox")]);
+            me.byId("buttonBox").setCancelEnabled(true);
         }
     },
 
@@ -781,117 +633,117 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         //-------------------------------------------------------//
         // Add device button
         //-------------------------------------------------------//
-        me.aElementsToDestroy.push("addButton");
-        oAddButton = new sap.m.VBox({
-            items : [
-                new sap.m.Link(me.createId("addButton"), {
-                    text : "Add Device",
-                    
-                    //--------------------------------------------------------------------//
-                    // Add Device, TODO: Move these functions into separate areas!
-                    //--------------------------------------------------------------------//
-                    press : function() {
-                        var thisButton = this; // Captures the scope of the calling button.
-                        thisButton.setEnabled(false); // Lock the button
-                        IOMy.common.NavigationToggleNavButtons(me, false); // Lock the navigation buttons.
-                        
-                        // Error checking variables
-                        var bError                  = false;
-                        var mInfo                   = false;
-                        var aErrorMessages          = [];
-                        var sErrorMessage           = "";
-                        var mEntry                  = me.DeviceOptions[ me.byId("linkTypeCBox").getSelectedKey() ];
-                
-                        var fnFail = function (sErrMesg) {
-                            IOMy.common.showError("Error adding the camera:\n\n"+sErrMesg, "", 
+        me.aElementsToDestroy.push("buttonBox");
+        oAddButton = new IOMy.widgets.AcceptCancelButtonGroup(me.createId("buttonBox"), {
+            
+            cancelPress : function () {
+                IOMy.common.NavigationTriggerBackForward();
+            },
+            
+            //----------------------------------------------------------------//
+            // Add Device, TODO: Move these functions into separate areas!
+            //----------------------------------------------------------------//
+            acceptPress : function() {
+                var thisButton = this; // Captures the scope of the calling button.
+                thisButton.setEnabled(false); // Lock the button
+                IOMy.common.NavigationToggleNavButtons(me, false); // Lock the navigation buttons.
+
+                // Error checking variables
+                var bError                  = false;
+                var mInfo                   = false;
+                var aErrorMessages          = [];
+                var sErrorMessage           = "";
+                var mEntry                  = me.DeviceOptions[ me.byId("linkTypeCBox").getSelectedKey() ];
+
+                var fnFail = function (sErrMesg) {
+                    IOMy.common.showError("Error adding the camera:\n\n"+sErrMesg, "", 
+                        function () {
+                            thisButton.setEnabled(true);
+                            IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
+                        }
+                    );
+                };
+
+                // If this is a webcam we're adding, there is a different mechanism for
+                // adding it.
+                if (mEntry.Type === "type" && mEntry.Id == IOMy.devices.ipcamera.LinkTypeId) {
+                    try {
+                        IOMy.devices.ipcamera.submitWebcamInformation({
+                            fileType        : me.wFileTypeSelector.getSelectedKey(),
+                            hubID           : me.byId("hubCBox").getSelectedKey(),
+                            protocol        : me.wProtocol.getValue(),
+                            ipAddress       : me.wIPAddress.getValue(),
+                            ipPort          : me.wIPPort.getValue(),
+                            streamPath      : me.wStreamPath.getValue(),
+
+                            onSuccess : function () {
+                                IOMy.common.showMessage({
+                                    text : "New webcam successfully created!",
+                                    view : thisView
+                                });
+
+                                IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
+                                IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
+                            },
+
+                            onFail : fnFail
+                        });
+                    } catch (ex) {
+                        fnFail(ex.message);
+                    }
+
+                } else {
+                    // VALIDATE FORM DATA
+                    if (bError === false) {
+                        mInfo = me.ValidateFormData();
+                        bError = mInfo.bError;
+                        aErrorMessages = mInfo.aErrorMessages;
+
+                        //------------------------------------------------//
+                        // Try to add the device                          //
+                        //------------------------------------------------//
+                        try {
+                            // IF EVERYTHING IS VALID, ADD THE DEVICE
+                            if (bError === false) {
+                                var mData = me.FetchAPIAndParameters();
+                                IOMy.apiphp.AjaxRequest(mData);
+
+                            // OTHERWISE BRING UP AN ERROR MESSAGE ON THE SCREEN 
+                            } else {
+                                if (aErrorMessages.length === 1) {
+                                    sErrorMessage = "There was an error: \n\n"+aErrorMessages.join('\n');
+                                } else {
+                                    sErrorMessage = "There were "+aErrorMessages.length+" errors:\n\n"+aErrorMessages.join('\n\n');
+                                }
+
+                                jQuery.sap.log.error(sErrorMessage);
+                                IOMy.common.showError(sErrorMessage, "",
+                                    function () {
+                                        thisButton.setEnabled(true);
+                                    }
+                                );
+                            }
+                        } catch (e) {
+                            bError = true; // No.
+                            aErrorMessages.push("Error 0x1010: There was an error retrieving the API parameters: "+e.message);
+
+                            if (aErrorMessages.length === 1) {
+                                sErrorMessage = "There was an error: \n\n"+aErrorMessages.join('\n');
+                            } else {
+                                sErrorMessage = "There were "+aErrorMessages.length+" errors:\n\n"+aErrorMessages.join('\n\n');
+                            }
+
+                            jQuery.sap.log.error(sErrorMessage);
+                            IOMy.common.showError(sErrorMessage, "", 
                                 function () {
                                     thisButton.setEnabled(true);
-                                    IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
                                 }
                             );
-                        };
-                        
-                        // If this is a webcam we're adding, there is a different mechanism for
-                        // adding it.
-                        if (mEntry.Type === "type" && mEntry.Id == IOMy.devices.ipcamera.LinkTypeId) {
-                            try {
-                                IOMy.devices.ipcamera.submitWebcamInformation({
-                                    fileType        : me.wFileTypeSelector.getSelectedKey(),
-                                    hubID           : me.byId("hubCBox").getSelectedKey(),
-                                    protocol        : me.wProtocol.getValue(),
-                                    ipAddress       : me.wIPAddress.getValue(),
-                                    ipPort          : me.wIPPort.getValue(),
-                                    streamPath      : me.wStreamPath.getValue(),
-
-                                    onSuccess : function () {
-                                        IOMy.common.showMessage({
-                                            text : "New webcam successfully created!",
-                                            view : thisView
-                                        });
-                                        
-                                        IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
-                                        IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
-                                    },
-
-                                    onFail : fnFail
-                                });
-                            } catch (ex) {
-                                fnFail(ex.message);
-                            }
-                            
-                        } else {
-                            // VALIDATE FORM DATA
-                            if (bError === false) {
-                                mInfo = me.ValidateFormData();
-                                bError = mInfo.bError;
-                                aErrorMessages = mInfo.aErrorMessages;
-
-                                //------------------------------------------------//
-                                // Try to add the device                          //
-                                //------------------------------------------------//
-                                try {
-                                    // IF EVERYTHING IS VALID, ADD THE DEVICE
-                                    if (bError === false) {
-                                        var mData = me.FetchAPIAndParameters();
-                                        IOMy.apiphp.AjaxRequest(mData);
-
-                                    // OTHERWISE BRING UP AN ERROR MESSAGE ON THE SCREEN 
-                                    } else {
-                                        if (aErrorMessages.length === 1) {
-                                            sErrorMessage = "There was an error: \n\n"+aErrorMessages.join('\n');
-                                        } else {
-                                            sErrorMessage = "There were "+aErrorMessages.length+" errors:\n\n"+aErrorMessages.join('\n\n');
-                                        }
-
-                                        jQuery.sap.log.error(sErrorMessage);
-                                        IOMy.common.showError(sErrorMessage, "",
-                                            function () {
-                                                thisButton.setEnabled(true);
-                                            }
-                                        );
-                                    }
-                                } catch (e) {
-                                    bError = true; // No.
-                                    aErrorMessages.push("Error 0x1010: There was an error retrieving the API parameters: "+e.message);
-
-                                    if (aErrorMessages.length === 1) {
-                                        sErrorMessage = "There was an error: \n\n"+aErrorMessages.join('\n');
-                                    } else {
-                                        sErrorMessage = "There were "+aErrorMessages.length+" errors:\n\n"+aErrorMessages.join('\n\n');
-                                    }
-
-                                    jQuery.sap.log.error(sErrorMessage);
-                                    IOMy.common.showError(sErrorMessage, "", 
-                                        function () {
-                                            thisButton.setEnabled(true);
-                                        }
-                                    );
-                                }
-                            }
                         }
                     }
-                }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
-            ]
+                }
+            }
+            
         }).addStyleClass("TextCenter MarTop12px");
         me.wVertBox.addItem(oAddButton);
         

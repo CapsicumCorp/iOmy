@@ -22,6 +22,8 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+$.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
+
 sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 	functions : IOMy.functions,
     odata : IOMy.apiodata,
@@ -64,7 +66,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
                 me.byId("addressLine2").setValue(displayData.PREMISEADDRESS_LINE2);
                 me.byId("addressLine3").setValue(displayData.PREMISEADDRESS_LINE3);
                 
-                me.byId("UpdateLink").setEnabled(true);
+                me.byId("buttonBox").setAcceptEnabled(true);
             },
             
             onFail : function (response) {
@@ -101,7 +103,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 				me.functions.destroyItemsByIdFromView(me, [
 	                "addressRegion", "addressLanguage", "addressState",
                     "addressPostCode", "addressTimezone", "addressLine1",
-                    "addressLine2", "addressLine3", "UpdateLink"
+                    "addressLine2", "addressLine3", "buttonBox"
 	            ]);
                 
                 //===== REGION =====//
@@ -177,82 +179,94 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 					value : ""
 				}).addStyleClass("width100Percent SettingsTextInput");
 				
-				var oEditButton = new sap.m.VBox({
-					items : [
-						new sap.m.Link(me.createId("UpdateLink"), {
-                            enabled : false,
-							text : "Update",
-							press : function () {
-                                var thisButton = this;
-								thisButton.setEnabled(false);
-								
-								var iPremiseID = me.premiseID;
-                                var sAddressLine1 = me.byId("addressLine1").getValue();
-                                var sAddressLine2 = me.byId("addressLine2").getValue();
-                                var sAddressLine3 = me.byId("addressLine3").getValue();
-                                var sAddressRegion = me.byId("addressRegion").getSelectedKey();
-                                var sAddressStateProvince = me.byId("addressState").getValue();
-                                var sAddressPostcode = me.byId("addressPostCode").getValue();
-                                var sAddressTimezone = me.byId("addressTimezone").getSelectedKey();
-                                var sAddressLanguage = me.byId("addressLanguage").getSelectedKey();
-                                
-                                var bError = false;
-                                var aErrorLog = [];
-                                
-                                if (bError === true) {
-                                    jQuery.sap.log.error(aErrorLog.join("\n"));
-                                    IOMy.common.showError(aErrorLog.join("\n\n"), "Errors");
-									thisButton.setEnabled(true);
-                                } else {
-                                    // Run the API to update the premise address
-                                    try {
-                                        IOMy.apiphp.AjaxRequest({
-                                            url : IOMy.apiphp.APILocation("premises"),
-                                            data : {
-                                                "Mode" : "EditPremiseAddress",
-                                                "Id" : iPremiseID,
-                                                "AddressLine1" : sAddressLine1,
-                                                "AddressLine2" : sAddressLine2,
-                                                "AddressLine3" : sAddressLine3,
-                                                "AddressRegion" : sAddressRegion,
-                                                "AddressSubRegion" : sAddressStateProvince,
-                                                "AddressPostcode" : sAddressPostcode,
-                                                "AddressTimezone" : sAddressTimezone,
-                                                "AddressLanguage" : sAddressLanguage
-                                            },
-                                            onSuccess : function () {
-												IOMy.common.RefreshCoreVariables({
-													
-													onSuccess : function () {
-														IOMy.common.showMessage({
-															text : "Premise address updated.",
-															view : thisView
-														});
+				var oEditButton = new IOMy.widgets.AcceptCancelButtonGroup(me.createId("buttonBox"), {
+					
+                    cancelPress : function () {
+                        IOMy.common.NavigationTriggerBackForward();
+                    },
+                    
+                    acceptPress : function () {
+                        var thisButtonBox = this;
+                        thisButtonBox.setEnabled(false);
+                        IOMy.common.NavigationToggleNavButtons(me, false);
 
-														IOMy.common.NavigationTriggerBackForward();
-													}
-													
-												});
-                                            },
-                                            onFail : function (response) {
-                                                IOMy.common.showError(response.responseText, "Error",
-													function () {
-														thisButton.setEnabled(true);
-														IOMy.common.NavigationToggleNavButtons(me, true);
-													}
-												);
-                                            
-                                                jQuery.sap.log.error(JSON.stringify(response));
+                        var iPremiseID = me.premiseID;
+                        var sAddressLine1 = me.byId("addressLine1").getValue();
+                        var sAddressLine2 = me.byId("addressLine2").getValue();
+                        var sAddressLine3 = me.byId("addressLine3").getValue();
+                        var sAddressRegion = me.byId("addressRegion").getSelectedKey();
+                        var sAddressStateProvince = me.byId("addressState").getValue();
+                        var sAddressPostcode = me.byId("addressPostCode").getValue();
+                        var sAddressTimezone = me.byId("addressTimezone").getSelectedKey();
+                        var sAddressLanguage = me.byId("addressLanguage").getSelectedKey();
 
-                                            }
-                                        });
-                                    } catch (e00033) {
-                                        IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
-                                    }
+                        var bError = false;
+                        var aErrorLog = [];
+
+                        if (bError === true) {
+                            jQuery.sap.log.error(aErrorLog.join("\n"));
+                            IOMy.common.showError(aErrorLog.join("\n\n"), "Errors",
+                                function () {
+                                    thisButtonBox.setEnabled(true);
+                                    IOMy.common.NavigationToggleNavButtons(me, true);
                                 }
-							}
-						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
-					]
+                            );
+                            
+                        } else {
+                            // Run the API to update the premise address
+                            try {
+                                IOMy.apiphp.AjaxRequest({
+                                    url : IOMy.apiphp.APILocation("premises"),
+                                    data : {
+                                        "Mode" : "EditPremiseAddress",
+                                        "Id" : iPremiseID,
+                                        "AddressLine1" : sAddressLine1,
+                                        "AddressLine2" : sAddressLine2,
+                                        "AddressLine3" : sAddressLine3,
+                                        "AddressRegion" : sAddressRegion,
+                                        "AddressSubRegion" : sAddressStateProvince,
+                                        "AddressPostcode" : sAddressPostcode,
+                                        "AddressTimezone" : sAddressTimezone,
+                                        "AddressLanguage" : sAddressLanguage
+                                    },
+                                    onSuccess : function () {
+                                        IOMy.common.RefreshCoreVariables({
+
+                                            onSuccess : function () {
+                                                IOMy.common.showMessage({
+                                                    text : "Premise address updated.",
+                                                    view : thisView
+                                                });
+
+                                                IOMy.common.NavigationToggleNavButtons(me, true);
+                                                IOMy.common.NavigationTriggerBackForward();
+                                            }
+
+                                        });
+                                    },
+                                    onFail : function (response) {
+                                        IOMy.common.showError(response.responseText, "Error",
+                                            function () {
+                                                thisButtonBox.setEnabled(true);
+                                                IOMy.common.NavigationToggleNavButtons(me, true);
+                                            }
+                                        );
+
+                                        jQuery.sap.log.error(JSON.stringify(response));
+
+                                    }
+                                });
+                            } catch (e00033) {
+                                IOMy.common.showError("Error accessing API: "+e00033.message, "Error",
+                                    function () {
+                                        thisButtonBox.setEnabled(true);
+                                        IOMy.common.NavigationToggleNavButtons(me, true);
+                                    }
+                                );
+                            }
+                        }
+                    }
+                    
 				}).addStyleClass("TextCenter MarTop12px");
                 
                 var oVertBox = new sap.m.VBox({
@@ -283,6 +297,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 				
 				thisView.byId("page").addContent(oPanel);
                 
+                me.byId("buttonBox").setAcceptEnabled(false);
                 me.loadLocaleInfo(aPremise.Id);
 			}
 		});

@@ -21,6 +21,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+$.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
+
 sap.ui.controller("mjs.settings.user.UserEditPassword", {
 	api : IOMy.apiphp,
     odata : IOMy.apiodata,
@@ -43,6 +45,8 @@ sap.ui.controller("mjs.settings.user.UserEditPassword", {
             onSuccess : function (responseType, data) {
                 var displayData = data[0];
                 me.currentUserID = displayData.USERS_PK;
+                
+                me.byId("buttonBox").setAcceptEnabled(true);
             },
             
             onFail : function (response) {
@@ -69,7 +73,7 @@ sap.ui.controller("mjs.settings.user.UserEditPassword", {
 				// Start rendering the page
 				me.functions.destroyItemsByIdFromView(me, [
                     "oldPasswordField", "newPasswordField",
-                    "confirmPasswordField", "editButton", "requiredNotice"
+                    "confirmPasswordField", "buttonBox", "requiredNotice"
                 ]);
                 
                 // -- OLD PASSWORD -- \\
@@ -102,107 +106,104 @@ sap.ui.controller("mjs.settings.user.UserEditPassword", {
                     type : sap.m.InputType.Password
 				}).addStyleClass("width100Percent SettingsTextInput");
                 
-                // User ID
-				me.loadUserKey(); // Load the current user ID
-				
-				var oEditButton = new sap.m.VBox({
-					items : [
-						new sap.m.Link(me.createId("editButton"), {
-							text : "Update",
-							press : function () {
-                                var oButton = this;
-								oButton.setEnabled(false);
-								IOMy.common.NavigationToggleNavButtons(me, false);
-								
-                                var aLogErrors = [];
-                                var sDialogTitle = "";
-                                var sOldPasswd = me.byId("oldPasswordField").getValue();
-                                var sNewPasswd1 = me.byId("newPasswordField").getValue();
-                                var sNewPasswd2 = me.byId("confirmPasswordField").getValue();
-                                var mPasswordValidationInfo;
-                                    
-                                // Check that the new password and confirm new password fields
-                                // are equal. If not, flag an error and exit.
-                                if (sNewPasswd1 !== sNewPasswd2 || sOldPasswd === "" || sNewPasswd1 === "" ||
-                                    sNewPasswd2 === "") {
-                                    
-                                    // Has the current password been entered?
-                                    if (sOldPasswd === "") {
-                                        aLogErrors.push("You must enter your current password."); // No it hasn't.
-                                        sDialogTitle = "Enter Current Password";
-                                    }
-                                    // Are one or both new password fields empty?
-                                    if (sNewPasswd1 === "" || sNewPasswd2 === "") {
-                                        if ((sNewPasswd1 === "" && sNewPasswd2 === "") || sNewPasswd1 === "") {
-                                            aLogErrors.push("You forgot to enter the new password.");
-                                            sDialogTitle = "Enter New Password";
-                                        } else if (sNewPasswd2 === "") {
-                                            aLogErrors.push("You must enter your password twice to check that the password you entered is correct.");
-                                            sDialogTitle = "Confirm New Password";
-                                        }
-                                    } else {
-                                        // Do the new passwords match?
-                                        if (sNewPasswd1 !== sNewPasswd2) {
-                                            aLogErrors.push("The new passwords you entered don't match.");
-                                            sDialogTitle = "Confirm New Password";
-                                        }
-                                    }
-                                    
+                var oEditButton = new IOMy.widgets.AcceptCancelButtonGroup(me.createId("buttonBox"), {
+					
+                    cancelPress : function () {
+                        IOMy.common.NavigationTriggerBackForward();
+                    },
+                    
+                    acceptPress : function () {
+                        var oButton = this;
+                        oButton.setEnabled(false);
+                        IOMy.common.NavigationToggleNavButtons(me, false);
+
+                        var aLogErrors = [];
+                        var sDialogTitle = "";
+                        var sOldPasswd = me.byId("oldPasswordField").getValue();
+                        var sNewPasswd1 = me.byId("newPasswordField").getValue();
+                        var sNewPasswd2 = me.byId("confirmPasswordField").getValue();
+                        var mPasswordValidationInfo;
+
+                        // Check that the new password and confirm new password fields
+                        // are equal. If not, flag an error and exit.
+                        if (sNewPasswd1 !== sNewPasswd2 || sOldPasswd === "" || sNewPasswd1 === "" ||
+                            sNewPasswd2 === "") {
+
+                            // Has the current password been entered?
+                            if (sOldPasswd === "") {
+                                aLogErrors.push("You must enter your current password."); // No it hasn't.
+                                sDialogTitle = "Enter Current Password";
+                            }
+                            // Are one or both new password fields empty?
+                            if (sNewPasswd1 === "" || sNewPasswd2 === "") {
+                                if ((sNewPasswd1 === "" && sNewPasswd2 === "") || sNewPasswd1 === "") {
+                                    aLogErrors.push("You forgot to enter the new password.");
+                                    sDialogTitle = "Enter New Password";
+                                } else if (sNewPasswd2 === "") {
+                                    aLogErrors.push("You must enter your password twice to check that the password you entered is correct.");
+                                    sDialogTitle = "Confirm New Password";
                                 }
-                                
-                                //-- Check that the password is secure enough. --//
-                                if (sNewPasswd1 !== "") {
-                                    mPasswordValidationInfo = IOMy.functions.validateSecurePassword(sNewPasswd1);
-                                    
-                                    if (!mPasswordValidationInfo.bValid) {
-                                        aLogErrors = aLogErrors.concat(mPasswordValidationInfo.aValidationErrorMessages);
-                                        sDialogTitle = "Insecure Password";
-                                    }
+                            } else {
+                                // Do the new passwords match?
+                                if (sNewPasswd1 !== sNewPasswd2) {
+                                    aLogErrors.push("The new passwords you entered don't match.");
+                                    sDialogTitle = "Confirm New Password";
                                 }
-                                
-                                if (aLogErrors.length > 0) {
-                                    if (aLogErrors.length > 1) {
-                                        sDialogTitle = "Errors";
-                                    }
-                                    // Toss up an error dialog and place the error(s) in the error log.
-                                    jQuery.sap.log.error(aLogErrors.join("\n"));
-                                    IOMy.common.showError(aLogErrors.join("\n\n"), sDialogTitle,
+                            }
+
+                        }
+
+                        //-- Check that the password is secure enough. --//
+                        if (sNewPasswd1 !== "") {
+                            mPasswordValidationInfo = IOMy.functions.validateSecurePassword(sNewPasswd1);
+
+                            if (!mPasswordValidationInfo.bValid) {
+                                aLogErrors = aLogErrors.concat(mPasswordValidationInfo.aValidationErrorMessages);
+                                sDialogTitle = "Insecure Password";
+                            }
+                        }
+
+                        if (aLogErrors.length > 0) {
+                            if (aLogErrors.length > 1) {
+                                sDialogTitle = "Errors";
+                            }
+                            // Toss up an error dialog and place the error(s) in the error log.
+                            jQuery.sap.log.error(aLogErrors.join("\n"));
+                            IOMy.common.showError(aLogErrors.join("\n\n"), sDialogTitle,
+                                function () {
+                                    oButton.setEnabled(true);
+                                    IOMy.common.NavigationToggleNavButtons(me, true);
+                                }
+                            );
+                        } else {
+                            // Run the API to update the user's password
+                            try {
+                                IOMy.apiphp.AjaxRequest({
+                                    url : IOMy.apiphp.APILocation("users"),
+                                    data : {
+                                        "Mode" : "EditPassword", "Id" : me.currentUserID,
+                                        "OldPassword" : sOldPasswd, "NewPassword" : sNewPasswd1
+                                    },
+                                    onSuccess : function () {
+                                        IOMy.common.showWarning("Log back in to continue using IOMy.", "Password Changed", 
                                         function () {
-                                            oButton.setEnabled(true);
-                                            IOMy.common.NavigationToggleNavButtons(me, true);
-                                        }
-                                    );
-                                } else {
-                                    // Run the API to update the user's password
-                                    try {
-                                        IOMy.apiphp.AjaxRequest({
-                                            url : IOMy.apiphp.APILocation("users"),
-                                            data : {
-                                                "Mode" : "EditPassword", "Id" : me.currentUserID,
-                                                "OldPassword" : sOldPasswd, "NewPassword" : sNewPasswd1
-                                            },
-                                            onSuccess : function () {
-                                                IOMy.common.showWarning("Log back in to continue using IOMy.", "Password Changed", 
-                                                function () {
-                                                    window.location.reload(true); // TRUE forces a proper refresh from the server, not the cache.
-                                                }, "UpdateMessageBox");
-                                            },
-                                            error : function (response) {
-                                                IOMy.common.showError("Update failed:\n\n"+response.responseText, "Error",
-                                                    function () {
-                                                        IOMy.common.NavigationToggleNavButtons(me, true);
-                                                    }
-                                                );
+                                            window.location.reload(true); // TRUE forces a proper refresh from the server, not the cache.
+                                        }, "UpdateMessageBox");
+                                    },
+                                    error : function (response) {
+                                        IOMy.common.showError("Update failed:\n\n"+response.responseText, "Error",
+                                            function () {
+                                                IOMy.common.NavigationToggleNavButtons(me, true);
                                             }
-                                        });
-                                    } catch (e00033) {
-                                        jQuery.sap.log.error("Error accessing API: "+e00033.message);
-                                        IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
+                                        );
                                     }
-                                }
-							}
-						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
-					]
+                                });
+                            } catch (e00033) {
+                                jQuery.sap.log.error("Error accessing API: "+e00033.message);
+                                IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
+                            }
+                        }
+                    }
 				}).addStyleClass("TextCenter MarTop12px");
         		
 				var oVertBox = new sap.m.VBox({
@@ -222,6 +223,11 @@ sap.ui.controller("mjs.settings.user.UserEditPassword", {
     		    	backgroundDesign: "Transparent",
 					content: [oVertBox] //-- End of Panel Content --//
 				});
+                
+                me.byId("buttonBox").setAcceptEnabled(false);
+                
+                // User ID
+				me.loadUserKey(); // Load the current user ID
                 
 				//thisView.byId("page").addContent(oRequiredNotice);
 				thisView.byId("page").addContent(oPanel);

@@ -22,6 +22,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+$.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
+
 sap.ui.controller("mjs.settings.devices.EditThing", {
 	api : IOMy.apiphp,
 	functions : IOMy.functions,
@@ -217,7 +219,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 			enabled : bAllowedToEditThing,
             liveChange : function () {
                 var bChanges = me.areThereChanges();
-                me.byId("updateButton").setEnabled(bChanges);
+                me.byId("buttonBox").setAcceptEnabled(bChanges);
             }
         }).addStyleClass("width100Percent");
 
@@ -239,7 +241,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
             me.wRoomCBox.attachChange(
                 function () {
                     var bChanges = me.areThereChanges();
-                    me.byId("updateButton").setEnabled(bChanges);
+                    me.byId("buttonBox").setAcceptEnabled(bChanges);
                 }
             );
 
@@ -257,17 +259,17 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         //-----------------------------------------------//
         // UPDATE BUTTON
         //-----------------------------------------------//
-        me.aElementsToDestroy.push("updateButton");
-        me.wEditButton = new sap.m.VBox({
-            items : [
-                new sap.m.Link(me.createId("updateButton"), {
-                    text : "Update",
-                    enabled : false,
-                    press : function () {
-						me.EditThing();
-                    }
-                }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
-            ]
+        me.aElementsToDestroy.push("buttonBox");
+        me.wEditButton = new IOMy.widgets.AcceptCancelButtonGroup(me.createId("buttonBox"), {
+            
+            acceptPress : function () {
+                me.EditThing();
+            },
+            
+            cancelPress : function () {
+                IOMy.common.NavigationTriggerBackForward();
+            }
+            
         }).addStyleClass("TextCenter MarTop12px");
 
         var oVertBox = new sap.m.VBox({
@@ -285,6 +287,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         });
 
         thisView.byId("page").addContent(me.wPanel);
+        me.byId("buttonBox").setAcceptEnabled(false);
         
         //--------------------------------------------------------------------//
         // Create the action menu.
@@ -309,7 +312,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 	// TODO: This function belongs to the IOMy.functions library.
 	EditThing : function () {
 		var me = this;
-		me.byId("updateButton").setEnabled(false);
+		me.byId("buttonBox").setEnabled(false);
 		//-- Toggle navigation buttons --//
 		IOMy.common.NavigationToggleNavButtons(me, false);
 
@@ -426,7 +429,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 									sMessage = "Device couldn't be renamed to "+sThingText+", but is now located in "+sRoomText;
 									
 									IOMy.common.showWarning(sMessage, "", function () {
-										me.byId("updateButton").setEnabled(true);
+										me.byId("buttonBox").setEnabled(true);
 										
 										//-- Toggle navigation buttons --//
 										IOMy.common.NavigationToggleNavButtons(me, true);
@@ -449,7 +452,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 							sMessage = "Device renamed to "+sThingText+", but failed to move device to "+sRoomText;
 							
 							IOMy.common.showWarning(sMessage, "", function () {
-								me.byId("updateButton").setEnabled(true);
+								me.byId("buttonBox").setEnabled(true);
 								//-- Toggle navigation buttons --//
 								IOMy.common.NavigationToggleNavButtons(me, true);
 							});
@@ -459,7 +462,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 							sMessage = "Device couldn't be renamed. Failed to move device to "+sRoomText;
 							
 							IOMy.common.showError(sMessage, "", function () {
-								me.byId("updateButton").setEnabled(true);
+								me.byId("buttonBox").setEnabled(true);
 								//-- Toggle navigation buttons --//
 								IOMy.common.NavigationToggleNavButtons(me, true);
 							});
@@ -499,7 +502,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 				//------------------------------------------------------------//
 				if (bEditingThing) {
 					fnThingFail = function () {
-						me.byId("updateButton").setEnabled(true);
+						me.byId("buttonBox").setEnabled(true);
 					};
 					
 					fnThingSuccess = function () {
@@ -528,7 +531,7 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
 				if (bChangingRoom && iRoomID !== null) {
 					fnRoomFail = function (sMessage) {
 						IOMy.common.showError(sMessage, "", function () {
-							me.byId("updateButton").setEnabled(true);
+							me.byId("buttonBox").setEnabled(true);
 							//-- Toggle navigation buttons --//
 							IOMy.common.NavigationToggleNavButtons(me, true);
 						});

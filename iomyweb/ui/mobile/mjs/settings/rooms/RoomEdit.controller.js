@@ -22,6 +22,8 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+$.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
+
 sap.ui.controller("mjs.settings.rooms.RoomEdit", {
     functions : IOMy.functions,
     odata : IOMy.apiodata,
@@ -157,10 +159,14 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
 
         me.wRoomType = fnRoomTypesSelectBox(me.createId("roomType"), me.mRoom.RoomTypeId).addStyleClass("width100Percent SettingsDropdownInput");
         
-        me.wUpdateButton = new sap.m.Link({
-            text : "Update",
-            press : function () {
-                var thisButton = this;
+        me.wUpdateButton = new IOMy.widgets.AcceptCancelButtonGroup({
+            
+            cancelPress : function () {
+                IOMy.common.NavigationTriggerBackForward();
+            },
+            
+            acceptPress : function () {
+                var thisButtonBox = this;
                 IOMy.common.NavigationToggleNavButtons(me, false);
 
                 try {
@@ -168,7 +174,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                     // Update the room details.
                     //--------------------------------------------//
                     IOMy.functions.updateRoom(me.iRoomID, {
-                        callingWidget : thisButton,
+                        callingWidget : thisButtonBox,
                         view : thisView
                     });
                 } catch (eUpdateRoomError) {
@@ -177,7 +183,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                     //--------------------------------------------//
                     IOMy.common.showError("There was a problem updating the room:\n\n"+eUpdateRoomError.message, "Error Updating Room",
                         function () {
-                            thisButton.setEnabled(true);
+                            thisButtonBox.setEnabled(true);
                             IOMy.common.NavigationToggleNavButtons(me, true);
                         }
                     );
@@ -185,7 +191,7 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                     jQuery.sap.log.error(eUpdateRoomError.message);
                 }
             }
-        }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink");
+        }).addStyleClass("TextCenter");
 
         oEditButton = new sap.m.VBox({
             items : [
@@ -197,7 +203,6 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
             items : [
                 oRoomTitle, me.wRoomName,
                 oRoomDescTitle, me.wRoomDescription,
-                /*oFloorsTitle, oFloorsField,*/
                 oRoomTypeTitle, me.wRoomType,
                 oEditButton
             ]

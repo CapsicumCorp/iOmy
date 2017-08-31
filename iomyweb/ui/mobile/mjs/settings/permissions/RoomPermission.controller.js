@@ -134,8 +134,6 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
         //----------------------------------------------------------------//
         IOMy.widgets.getListOfUsersForRoomPermissions(thisView.wSelectUser, me.iUserId, iPremiseId,
             function () {
-                //me.FetchPermissionsForRoom();
-                
                 me.refreshRoomSelectBox();
             },
 

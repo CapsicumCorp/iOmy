@@ -21,10 +21,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+$.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
+
 sap.ui.controller("mjs.settings.user.EditUserInformation", {
-	api : IOMy.apiphp,
-	odata : IOMy.apiodata,
-	functions : IOMy.functions,
     
     userId : 0,
     
@@ -48,10 +47,10 @@ sap.ui.controller("mjs.settings.user.EditUserInformation", {
 				// While the page and user info is loading, flag it.
 				me.bLoadingUserInfo = true;
 				
-				me.functions.destroyItemsByIdFromView(me, [
+				IOMy.functions.destroyItemsByIdFromView(me, [
 					"givenNamesField", "surnameField",
                     "displayNameField", "emailField", "contactPhoneNumberField",
-                    "editButton", "requiredNotice"
+                    "buttonBox", "requiredNotice"
 				]);
                 
 				var oGivenNamesLabel = new sap.m.Label({
@@ -98,107 +97,95 @@ sap.ui.controller("mjs.settings.user.EditUserInformation", {
 					value : ""
 				}).addStyleClass("SettingsTextInput width100Percent");
 				
-				var oEditButton = new sap.m.VBox({
-					items : [
-						new sap.m.Link(me.createId("editButton"), {
-							text : "Update",
-							enabled : false,
-							press : function () {
-								this.setEnabled(false);
-								IOMy.common.NavigationToggleNavButtons(me, false);
-								
-								var iUserID = me.userId;
-                                //var sTitle = me.byId("titleField").getValue();
-                                var sGivennames = me.byId("givenNamesField").getValue();
-                                var sSurnames = me.byId("surnameField").getValue();
-                                var sDisplayname = me.byId("displayNameField").getValue();
-                                var sEmail = me.byId("emailField").getValue();
-                                var sPhone = me.byId("contactPhoneNumberField").getValue();
-                                //var iGender = me.byId("genderField").getSelectedKey();
-                                
-                                var bError = false;
-                                var aLogErrors = [];
-                                var sDialogTitle;
-                                
-//                                if (sTitle === "")
-//                                    aLogErrors.push("Title isn't specified.");
-//                                if (sGivennames === "")
-//                                    aLogErrors.push("Given name(s) must be specified.");
-//                                if (sSurnames === "")
-//                                    aLogErrors.push("Surname is required");
-                                if (sDisplayname === "") {
-                                    aLogErrors.push("Display name is required.");
-                                }
-//                                if (sEmail === "")
-//                                    aLogErrors.push("Email is required");
-//                                if (sPhone === "")
-//                                    aLogErrors.push("Phone number is required");
-//                                if (me.byId("genderField").getValue() === "")
-//                                    aLogErrors.push("Gender field must not be blank");
-                                
-                                if (aLogErrors.length > 0) {
-                                    if (aLogErrors.length > 1) 
-                                        sDialogTitle = "Errors";
-                                    else if (aLogErrors.length === 1)
-                                        sDialogTitle = "Error";
-                                    
-                                    bError = true;
-                                }
-                                
-                                if (bError === true) {
-                                    jQuery.sap.log.error(aLogErrors.join("\n"));
-                                    IOMy.common.showError(aLogErrors.join("\n\n"), sDialogTitle,
-										function () {
-											this.setEnabled(true);
-											IOMy.common.NavigationToggleNavButtons(me, true);
-										}
-									);
-                                } else {
-                                    // Run the API to update the user information
-                                    try {
-                                        IOMy.apiphp.AjaxRequest({
-                                            url : IOMy.apiphp.APILocation("users"),
-                                            data : {
-                                                "Mode" : "EditUserInfo", "Id" : iUserID,
-                                                "Title" : "Mr",
-                                                "Givennames" : sGivennames,
-                                                "Surnames" : sSurnames,
-                                                "Displayname" : sDisplayname,
-                                                "Email" : sEmail,
-                                                "Phone" : sPhone,
-                                                "Gender" : 2
-                                            },
-                                            onSuccess : function () {
-                                                IOMy.common.RefreshCoreVariables({
-                                                    
-                                                    onSuccess : function () {
-                                                        IOMy.common.showMessage({
-                                                            text : "Your user information updated successfully",
-                                                            view : thisView
-                                                        });
+				var oEditButton = new IOMy.widgets.AcceptCancelButtonGroup(me.createId("buttonBox"), {
+					
+                    cancelPress : function () {
+                        IOMy.common.NavigationTriggerBackForward();
+                    },
+                    
+                    acceptPress : function () {
+                        var oButtonBox = this;
+                        oButtonBox.setEnabled(false);
+                        IOMy.common.NavigationToggleNavButtons(me, false);
 
-                                                        IOMy.common.NavigationToggleNavButtons(me, true);
-                                                        IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
-                                                    }
-                                                    
-                                                });
-                                            },
-                                            error : function (error) {
-                                                IOMy.common.showError("Update failed: "+error.responseText, "Error",
-													function () {
-														this.setEnabled(true);
-														IOMy.common.NavigationToggleNavButtons(me, true);
-													}
-												);
-                                            }
-                                        });
-                                    } catch (e00033) {
-                                        IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
-                                    }
+                        var iUserID = me.userId;
+                        //var sTitle = me.byId("titleField").getValue();
+                        var sGivennames = me.byId("givenNamesField").getValue();
+                        var sSurnames = me.byId("surnameField").getValue();
+                        var sDisplayname = me.byId("displayNameField").getValue();
+                        var sEmail = me.byId("emailField").getValue();
+                        var sPhone = me.byId("contactPhoneNumberField").getValue();
+                        //var iGender = me.byId("genderField").getSelectedKey();
+
+                        var bError = false;
+                        var aLogErrors = [];
+                        var sDialogTitle;
+
+                        if (sDisplayname === "") {
+                            aLogErrors.push("Display name is required.");
+                        }
+
+                        if (aLogErrors.length > 0) {
+                            if (aLogErrors.length > 1) 
+                                sDialogTitle = "Errors";
+                            else if (aLogErrors.length === 1)
+                                sDialogTitle = "Error";
+
+                            bError = true;
+                        }
+
+                        if (bError === true) {
+                            jQuery.sap.log.error(aLogErrors.join("\n"));
+                            IOMy.common.showError(aLogErrors.join("\n\n"), sDialogTitle,
+                                function () {
+                                    oButtonBox.setEnabled(true);
+                                    IOMy.common.NavigationToggleNavButtons(me, true);
                                 }
-							}
-						}).addStyleClass("SettingsLinks AcceptSubmitButton iOmyLink TextCenter")
-					]
+                            );
+                        } else {
+                            // Run the API to update the user information
+                            try {
+                                IOMy.apiphp.AjaxRequest({
+                                    url : IOMy.apiphp.APILocation("users"),
+                                    data : {
+                                        "Mode" : "EditUserInfo", "Id" : iUserID,
+                                        "Title" : "Mr",
+                                        "Givennames" : sGivennames,
+                                        "Surnames" : sSurnames,
+                                        "Displayname" : sDisplayname,
+                                        "Email" : sEmail,
+                                        "Phone" : sPhone,
+                                        "Gender" : 2
+                                    },
+                                    onSuccess : function () {
+                                        IOMy.common.RefreshCoreVariables({
+
+                                            onSuccess : function () {
+                                                IOMy.common.showMessage({
+                                                    text : "Your user information updated successfully",
+                                                    view : thisView
+                                                });
+
+                                                IOMy.common.NavigationToggleNavButtons(me, true);
+                                                IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
+                                            }
+
+                                        });
+                                    },
+                                    error : function (error) {
+                                        IOMy.common.showError("Update failed: "+error.responseText, "Error",
+                                            function () {
+                                                oButtonBox.setEnabled(true);
+                                                IOMy.common.NavigationToggleNavButtons(me, true);
+                                            }
+                                        );
+                                    }
+                                });
+                            } catch (e00033) {
+                                IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
+                            }
+                        }
+                    }
 				}).addStyleClass("TextCenter MarTop12px");
 				
 				var oVertBox = new sap.m.VBox({
@@ -223,6 +210,7 @@ sap.ui.controller("mjs.settings.user.EditUserInformation", {
 					content: [oVertBox] //-- End of Panel Content --//
 				});
 				
+                me.byId("buttonBox").setAcceptEnabled(false);
 				me.loadCurrentUserInfo();
 				
 				thisView.byId("page").addContent(oPanel);
@@ -235,8 +223,8 @@ sap.ui.controller("mjs.settings.user.EditUserInformation", {
 	loadCurrentUserInfo : function () {
 		var me = this;
 		
-		me.odata.AjaxRequest({
-			Url: me.odata.ODataLocation("users"),
+		IOMy.apiodata.AjaxRequest({
+			Url: IOMy.apiodata.ODataLocation("users"),
 			Columns : ["USERS_PK","USERSINFO_SURNAMES","USERSINFO_GIVENNAMES",
 					"USERSINFO_DISPLAYNAME","USERSINFO_EMAIL","USERSINFO_PHONENUMBER",
                     "USERSGENDER_PK"],
@@ -253,7 +241,7 @@ sap.ui.controller("mjs.settings.user.EditUserInformation", {
 				me.byId("emailField").setValue(data.USERSINFO_EMAIL);
 				me.byId("contactPhoneNumberField").setValue(data.USERSINFO_PHONENUMBER);
 				me.bLoadingUserInfo = false;
-				me.byId("editButton").setEnabled(true);
+				me.byId("buttonBox").setEnabled(true);
 			},
 			
 			onFail : function (response) {

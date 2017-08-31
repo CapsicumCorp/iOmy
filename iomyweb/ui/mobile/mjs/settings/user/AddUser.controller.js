@@ -21,6 +21,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+$.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
+
 sap.ui.controller("mjs.settings.user.AddUser", {
 	
     wGivenNamesField        : null,
@@ -394,15 +396,16 @@ sap.ui.controller("mjs.settings.user.AddUser", {
         //--------------------------//
         // Edit Button
         //--------------------------//
-        me.wEditButton = new sap.m.VBox({
-            items : [
-                new sap.m.Link(me.createId("editButton"), {
-                    text : "Create User",
-                    press : function () {
-                        me.AddUser(this);
-                    }
-                }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
-            ]
+        me.wEditButton = new IOMy.widgets.AcceptCancelButtonGroup({
+            
+            acceptPress : function () {
+                me.AddUser(this);
+            },
+            
+            cancelPress : function () {
+                IOMy.common.NavigationTriggerBackForward();
+            }
+            
         }).addStyleClass("TextCenter");
 
         //--------------------------//

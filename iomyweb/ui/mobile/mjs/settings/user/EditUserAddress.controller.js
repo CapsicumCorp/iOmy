@@ -21,9 +21,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+$.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
+
 sap.ui.controller("mjs.settings.user.EditUserAddress", {
-	functions : IOMy.functions,
-    odata : IOMy.apiodata,
     
     userId : 0,
     
@@ -34,8 +34,8 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
     loadUserInfo : function () {
         var me = this;
         
-        me.odata.AjaxRequest({
-            Url : me.odata.ODataLocation("users"),
+        IOMy.apiodata.AjaxRequest({
+            Url : IOMy.apiodata.ODataLocation("users"),
             Columns : ["USERS_PK", "REGION_NAME", "REGION_PK", "LANGUAGE_PK", "LANGUAGE_NAME", 
                         "USERADDRESS_POSTCODE", "USERADDRESS_SUBREGION",
                         "TIMEZONE_PK", "TIMEZONE_TZ", "USERADDRESS_LINE1", "USERADDRESS_LINE2",
@@ -65,7 +65,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                 me.byId("addressLine2").setValue(displayData.USERADDRESS_LINE2);
                 me.byId("addressLine3").setValue(displayData.USERADDRESS_LINE3);
                 
-                me.byId("UpdateLink").setEnabled(true);
+                me.byId("buttonBox").setAcceptEnabled(true);
                 
                 me.userId = displayData.USERS_PK;
             },
@@ -95,10 +95,10 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 				
 				// Start rendering the page
 				
-				me.functions.destroyItemsByIdFromView(me, [
+				IOMy.functions.destroyItemsByIdFromView(me, [
 	                "addressLanguage", "addressRegion", "addressState",
                     "addressPostCode", "addressTimezone", "addressLine1",
-                    "addressLine2", "addressLine3", "UpdateLink"
+                    "addressLine2", "addressLine3", "buttonBox"
 	            ]);
                 
                 //===== REGION =====//
@@ -174,42 +174,109 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 					value : ""
 				}).addStyleClass("width100Percent SettingsTextInput");
 				
-				var oEditButton = new sap.m.VBox({
+                var oEditButton = new IOMy.widgets.AcceptCancelButtonGroup(me.createId("buttonBox"), {
+                    
+                    cancelPress : function () {
+                        IOMy.common.NavigationTriggerBackForward();
+                    },
+                    
+                    acceptPress : function () {
+                        var thisButton = this;
+                        thisButton.setEnabled(false);
+                        IOMy.common.NavigationToggleNavButtons(me, false);
+
+                        var aErrorLog = [];
+                        var bError = false;
+                        var sAddressStateProvince = me.byId("addressState").getValue();
+                        var sAddressPostcode = me.byId("addressPostCode").getValue()
+
+                        if (bError === true) {
+                            jQuery.sap.log.error(aErrorLog.join("\n"));
+                            IOMy.common.showError(aErrorLog.join("\n\n"), "Errors",
+                                function () {
+                                    thisButton.setEnabled(true);
+                                    IOMy.common.NavigationToggleNavButtons(me, true);
+                                }
+                            );
+                        } else {
+                            // Run the API to update the user's address
+                            try {
+                                IOMy.apiphp.AjaxRequest({
+                                    url : IOMy.apiphp.APILocation("users"),
+                                    data : {
+                                        "Mode" : "EditUserAddress", 
+                                        "Id" : me.userId,
+                                        "AddressLine1" : me.byId("addressLine1").getValue(),
+                                        "AddressLine2" : me.byId("addressLine2").getValue(),
+                                        "AddressLine3" : me.byId("addressLine3").getValue(),
+                                        "AddressRegion" : me.byId("addressRegion").getSelectedKey(),
+                                        "AddressSubRegion" : sAddressStateProvince,
+                                        "AddressPostcode" : sAddressPostcode,
+                                        "AddressTimezone" : me.byId("addressTimezone").getSelectedKey(),
+                                        "AddressLanguage" : me.byId("addressLanguage").getSelectedKey()
+                                    },
+                                    onSuccess : function () {
+                                        IOMy.common.RefreshCoreVariables({
+
+                                            onSuccess : function () {
+                                                IOMy.common.showMessage({
+                                                    text : "Your address details have been updated.",
+                                                    view : thisView
+                                                });
+
+                                                thisButton.setEnabled(true);
+                                                IOMy.common.NavigationToggleNavButtons(me, true);
+                                                IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
+                                            }
+
+                                        });
+                                    },
+                                    onFail : function (response) {
+                                        IOMy.common.showError("Update failed.", "Error",
+                                            function () {
+                                                thisButton.setEnabled(true);
+                                                IOMy.common.NavigationToggleNavButtons(me, true);
+                                            }
+                                        );
+
+                                        jQuery.sap.log.error(JSON.stringify(response));
+                                    }
+                                });
+                            } catch (e00033) {
+                                IOMy.common.showError("Error accessing API: "+e00033.message, "Error",
+                                    function () {
+                                        thisButton.setEnabled(true);
+                                        IOMy.common.NavigationToggleNavButtons(me, true);
+                                    }
+                                );
+                            }
+                        }
+                    }
+                }).addStyleClass("TextCenter MarTop15px");
+                
+				/*var oEditButton = new sap.m.VBox({
 					items : [
 						new sap.m.Link(me.createId("UpdateLink"), {
                             enabled : false,
 							text : "Update",
-							press : function () {
+                            press : function () {
                                 var thisButton = this;
                                 thisButton.setEnabled(false);
-								IOMy.common.NavigationToggleNavButtons(me, false);
-								
+                                IOMy.common.NavigationToggleNavButtons(me, false);
+
                                 var aErrorLog = [];
                                 var bError = false;
                                 var sAddressStateProvince = me.byId("addressState").getValue();
                                 var sAddressPostcode = me.byId("addressPostCode").getValue()
-                                
-//                                if (me.byId("addressLine1").getValue() === "") {
-//                                    aErrorLog.push("Street Address is required.");
-//                                    bError = true;
-//                                }
-//                                if (sAddressStateProvince === "") {
-//                                    aErrorLog.push("State / Province is required.");
-//                                    bError = true;
-//                                }
-//                                if (sAddressPostcode === "") {
-//                                    aErrorLog.push("Post code is required.");
-//                                    bError = true;
-//                                }
-                                
+
                                 if (bError === true) {
                                     jQuery.sap.log.error(aErrorLog.join("\n"));
                                     IOMy.common.showError(aErrorLog.join("\n\n"), "Errors",
-										function () {
-											thisButton.setEnabled(true);
-											IOMy.common.NavigationToggleNavButtons(me, true);
-										}
-									);
+                                        function () {
+                                            thisButton.setEnabled(true);
+                                            IOMy.common.NavigationToggleNavButtons(me, true);
+                                        }
+                                    );
                                 } else {
                                     // Run the API to update the user's address
                                     try {
@@ -229,7 +296,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                                             },
                                             onSuccess : function () {
                                                 IOMy.common.RefreshCoreVariables({
-                                                    
+
                                                     onSuccess : function () {
                                                         IOMy.common.showMessage({
                                                             text : "Your address details have been updated.",
@@ -240,33 +307,33 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
                                                         IOMy.common.NavigationToggleNavButtons(me, true);
                                                         IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
                                                     }
-                                                    
+
                                                 });
                                             },
                                             onFail : function (response) {
                                                 IOMy.common.showError("Update failed.", "Error",
-													function () {
-														thisButton.setEnabled(true);
-														IOMy.common.NavigationToggleNavButtons(me, true);
-													}
-												);
-											
+                                                    function () {
+                                                        thisButton.setEnabled(true);
+                                                        IOMy.common.NavigationToggleNavButtons(me, true);
+                                                    }
+                                                );
+
                                                 jQuery.sap.log.error(JSON.stringify(response));
                                             }
                                         });
                                     } catch (e00033) {
                                         IOMy.common.showError("Error accessing API: "+e00033.message, "Error",
-											function () {
-												thisButton.setEnabled(true);
-												IOMy.common.NavigationToggleNavButtons(me, true);
-											}
-										);
+                                            function () {
+                                                thisButton.setEnabled(true);
+                                                IOMy.common.NavigationToggleNavButtons(me, true);
+                                            }
+                                        );
                                     }
                                 }
-							}
+                            }
 						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
 					]
-				}).addStyleClass("TextCenter MarTop12px");
+				}).addStyleClass("TextCenter MarTop15px");*/
                 
                 var oVertBox = new sap.m.VBox({
 					items : [ 
@@ -298,6 +365,7 @@ sap.ui.controller("mjs.settings.user.EditUserAddress", {
 				
 				thisView.byId("page").addContent(oPanel);
                 
+                me.byId("buttonBox").setAcceptEnabled(false);
                 me.loadUserInfo();
 			}
 		});

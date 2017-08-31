@@ -21,8 +21,10 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+$.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
+
 sap.ui.controller("mjs.settings.rooms.RoomAdd", {
-	functions : IOMy.functions,
+    functions : IOMy.functions,
     odata : IOMy.apiodata,
     
     userId : 0,
@@ -32,7 +34,7 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
     wRoomName           : null,
     wRoomDescription    : null,
     wRoomType           : null,
-    wUpdateButton       : null,
+    wAddButton       : null,
     wMainBox            : null,
     wPanel              : null,
     
@@ -43,14 +45,14 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
 * @memberOf mjs.settings.premise.EditPremise
 */
-	onInit: function() {
-		var me = this;
-		var thisView = me.getView();
-		
-		thisView.addEventDelegate({
-			// Everything is rendered in this function run before rendering.
-			onBeforeShow : function (evt) {
-				//-- Refresh the Navigational buttons --//
+    onInit: function() {
+        var me = this;
+        var thisView = me.getView();
+        
+        thisView.addEventDelegate({
+            // Everything is rendered in this function run before rendering.
+            onBeforeShow : function (evt) {
+                //-- Refresh the Navigational buttons --//
                 IOMy.common.NavigationRefreshButtons( me );
                 
                 me.premiseID = evt.data.premiseID;
@@ -58,37 +60,37 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
                 me.DestroyUI();
                 me.DrawUI();
         
-			}
-		});
-	},
+            }
+        });
+    },
 
 /**
 * Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered
 * (NOT before the first rendering! onInit() is used for that one!).
 * @memberOf mjs.settings.premise.EditPremise
 */
-//	onBeforeRendering: function() {
+//    onBeforeRendering: function() {
 //
-//	},
+//    },
 
 /**
 * Called when the View has been rendered (so its HTML is part of the document). Post-rendering manipulations of the HTML could be done here.
 * This hook is the same one that SAPUI5 controls get after being rendered.
 * @memberOf mjs.settings.premise.EditPremise
 */
-//	onAfterRendering: function() {
-//		
-//	},
-	
-	
-	
+//    onAfterRendering: function() {
+//        
+//    },
+    
+    
+    
 /**
 * Called when the Controller is destroyed. Use this one to free resources and finalize activities.
 * @memberOf mjs.settings.premise.EditPremise
 */
-//	onExit: function() {
+//    onExit: function() {
 //
-//	},
+//    },
 
     DestroyUI : function () {
         //--------------------------//
@@ -143,9 +145,9 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
         me.wPremise.attachChange(
             function () {
                 if (IOMy.common.hasRoomAdminAccess(me.wPremise.getSelectedKey())) {
-                    me.byId("addButton").setEnabled(true);
+                    me.byId("buttonBox").setEnabled(true);
                 } else {
-                    me.byId("addButton").setEnabled(false);
+                    me.byId("buttonBox").setEnabled(false);
                     
                 }
             }
@@ -166,59 +168,65 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
 
         me.wRoomType = fnRoomTypesSelectBox(me.createId("roomType")).addStyleClass("width100Percent SettingsDropdownInput");
 
-        me.wUpdateButton = new sap.m.Link(me.createId("addButton"), {
-            text : "Add Room",
-            enabled : false,
-            press : function () {
-                var oButton = this;
-				
-				//-- Disable this button and the navigation controls. --//
-				oButton.setEnabled(false);
-				IOMy.common.NavigationToggleNavButtons(me, false);
-				
+        me.wAddButton = new IOMy.widgets.AcceptCancelButtonGroup(me.createId("buttonBox"), {
+            
+            cancelPress : function () {
+                IOMy.common.NavigationTriggerBackForward();
+            },
+            
+            acceptPress : function () {
+                var oButtonBox = this;
+                
+                //-- Disable this button and the navigation controls. --//
+                oButtonBox.setEnabled(false);
+                IOMy.common.NavigationToggleNavButtons(me, false);
+                
                 IOMy.functions.addRoom({
-                    callingWidget   : me.wUpdateButton,
+                    callingWidget   : oButtonBox,
                     userID          : me.userId,
-					view			: me,
+                    view            : me,
                     
                     onSuccess       : function () {
                         //----------------------------------------------------//
                         // Reload Core Variables
                         //----------------------------------------------------//
-						
-						//-- REFRESH ROOMS --//
-						IOMy.common.RefreshCoreVariables({
-							onSuccess : function () {
-								try {
-									IOMy.common.showMessage({
-										text : me.wRoomName.getValue()+" added successfully.",
-										view : thisView
-									});
+                        
+                        //-- REFRESH ROOMS --//
+                        IOMy.common.RefreshCoreVariables({
+                            onSuccess : function () {
+                                try {
+                                    IOMy.common.showMessage({
+                                        text : me.wRoomName.getValue()+" added successfully.",
+                                        view : thisView
+                                    });
 
-									//IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+                                    //IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
                                     IOMy.common.NavigationTriggerBackForward();
 
-								} catch(e654321) {
-									//-- ERROR:  TODO: Write a better error message--//
-									jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
-								} finally {
-									//-- Enable this button and the navigation controls. --//
-									oButton.setEnabled(true);
-									IOMy.common.NavigationToggleNavButtons(me, true);
-								}
-							}
-						}); //-- END ROOMS LIST --//
+                                } catch(e654321) {
+                                    //-- ERROR:  TODO: Write a better error message--//
+                                    jQuery.sap.log.error(">>>>Critical Error Loading Room List.<<<<\n"+e654321.message);
+                                } finally {
+                                    //-- Enable this button and the navigation controls. --//
+                                    oButtonBox.setEnabled(true);
+                                    IOMy.common.NavigationToggleNavButtons(me, true);
+                                }
+                            }
+                        }); //-- END ROOMS LIST --//
                     }
                 });
             }
-        }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink MarTop12px");
+            
+        }).addStyleClass("TextCenter MarTop12px");
 
         me.wMainBox = new sap.m.VBox({
-            items : [oPremiseTitle, me.wPremise,
-                    oRoomTitle, me.wRoomName, 
-                    oRoomDescTitle, me.wRoomDescription,
-                    oRoomTypeTitle, me.wRoomType,
-                    me.wUpdateButton]
+            items : [
+                oPremiseTitle,  me.wPremise,
+                oRoomTitle,     me.wRoomName, 
+                oRoomDescTitle, me.wRoomDescription,
+                oRoomTypeTitle, me.wRoomType,
+                me.wAddButton
+            ]
         }).addStyleClass("UserInputForm");
 
         me.wPanel = new sap.m.Panel(me.createId("panel"), {
@@ -227,33 +235,36 @@ sap.ui.controller("mjs.settings.rooms.RoomAdd", {
         });
 
         thisView.byId("page").addContent(me.wPanel);
+        me.byId("buttonBox").setAcceptEnabled(false);
+        
+        me.byId("buttonBox").getAcceptButton().setText("Create");
 
         // Load the user ID
         me.loadCurrentUserID();
     },
     
     loadCurrentUserID : function () {
-		var me = this;
-		
-		IOMy.apiodata.AjaxRequest({
-			Url: IOMy.apiodata.ODataLocation("users"),
-			Columns : ["USERS_PK"],
-			WhereClause : [],
-			OrderByClause : [],
-			
-			onSuccess : function (responseType, data) {
-				data = data[0];
+        var me = this;
+        
+        IOMy.apiodata.AjaxRequest({
+            Url: IOMy.apiodata.ODataLocation("users"),
+            Columns : ["USERS_PK"],
+            WhereClause : [],
+            OrderByClause : [],
+            
+            onSuccess : function (responseType, data) {
+                data = data[0];
                 
                 me.userId = data.USERS_PK;
                 if (IOMy.common.hasRoomAdminAccess(me.wPremise.getSelectedKey())) {
-                    me.byId("addButton").setEnabled(true);
+                    me.byId("buttonBox").setAcceptEnabled(true);
                 }
-			},
-			
-			onFail : function (response) {
-				jQuery.sap.log.error("Error loading user information: "+JSON.stringify(response));
-			}
-		});
-	}
+            },
+            
+            onFail : function (response) {
+                jQuery.sap.log.error("Error loading user information: "+JSON.stringify(response));
+            }
+        });
+    }
 
 });

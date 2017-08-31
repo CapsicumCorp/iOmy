@@ -22,6 +22,8 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+$.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
+
 sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 	functions : IOMy.functions,
     odata : IOMy.apiodata,
@@ -52,7 +54,8 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 				
 				me.functions.destroyItemsByIdFromView(me, [
 	                "premiseField", "premiseDesc", "premiseOccupants",
-                    "premiseBedrooms", "premiseFloors", "premiseRooms"
+                    "premiseBedrooms", "premiseFloors", "premiseRooms",
+                    "numberOfUsers"
 	            ]);
 				
 				var oPremiseTitle = new sap.m.Text({
@@ -111,6 +114,15 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 				var oRoomsField = IOMy.widgets.selectBoxPremiseRoomCount(me.createId("premiseRooms")).addStyleClass("width100Percent SettingsDropdownInput");
                 oRoomsField.setSelectedKey(aPremise.RoomCountId);
                 
+                var iNumberOfRooms = IOMy.functions.getNumberOfRoomsInPremise(me.PremiseID);
+                var sNumberOfRoomsText;
+                
+                if (iNumberOfRooms === 1) {
+                    sNumberOfRoomsText = IOMy.functions.getNumberOfRoomsInPremise(me.PremiseID)+" room configured in "+sPremiseName+".";
+                } else {
+                    sNumberOfRoomsText = IOMy.functions.getNumberOfRoomsInPremise(me.PremiseID)+" rooms configured in "+sPremiseName+".";
+                }
+                
                 var oNumberOfRoomsLabel = new sap.m.Text({
                     text : IOMy.functions.getNumberOfRoomsInPremise(me.PremiseID)+" rooms configured in "+sPremiseName+"."
                 });
@@ -127,95 +139,90 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                     items : [oCol1, oCol2]
                 });
 				
-                //===========================//
-                // CREATE EDIT/UPDATE BUTTON //
-                //===========================//
-				var oEditButton = new sap.m.VBox({
-					items : [
-						new sap.m.Link({
-							text : "Update",
-							press : function () {
-                                var thisButton = this; // Captures the scope of the button calling this function.
-								thisButton.setEnabled(false); // Lock button
-								IOMy.common.NavigationToggleNavButtons(me, false);
-								
-								var sPremiseText = me.byId("premiseField").getValue();
-                                var bError = false;
-                                var aErrorLog = [];
-                                
-                                if (sPremiseText === "") {
-                                    bError = true;
-                                    aErrorLog.push("Premise must have a name.");
-                                }
-                                
-                                if (bError === true) {
-                                    // One or more errors were found in the form. DO NOT PROCEED.
-                                    jQuery.sap.log.error(aErrorLog.join("\n"));
-                                    IOMy.common.showError(aErrorLog.join("\n\n"), "Errors");
-                                } else {
-                                
-                                    var sPremiseDesc = me.byId("premiseDesc").getValue();
+                //------------------------------------------------------------//
+                // Create the submit and cancel buttons
+                //------------------------------------------------------------//
+				var oEditButton = new IOMy.widgets.AcceptCancelButtonGroup({
+					
+                    cancelPress : function () {
+                        IOMy.common.NavigationTriggerBackForward();
+                    },
+                    
+                    acceptPress : function () {
+                        var thisButtonBox = this; // Captures the scope of the button calling this function.
+                        thisButtonBox.setEnabled(false); // Lock button
+                        IOMy.common.NavigationToggleNavButtons(me, false);
 
-                                    // Run the API to update the premise information
-                                    try {
+                        var sPremiseText = me.byId("premiseField").getValue();
+                        var bError = false;
+                        var aErrorLog = [];
+
+                        if (sPremiseText === "") {
+                            bError = true;
+                            aErrorLog.push("Premise must have a name.");
+                        }
+
+                        if (bError === true) {
+                            // One or more errors were found in the form. DO NOT PROCEED.
+                            jQuery.sap.log.error(aErrorLog.join("\n"));
+                            IOMy.common.showError(aErrorLog.join("\n\n"), "Errors",
+                                function () {
+                                    thisButtonBox.setEnabled(true);
+                                    IOMy.common.NavigationToggleNavButtons(me, true);
+                                }
+                            );
+                        } else {
+
+                            var sPremiseDesc = me.byId("premiseDesc").getValue();
+
+                            // Run the API to update the premise information
+                            try {
+                                IOMy.apiphp.AjaxRequest({
+                                    url : IOMy.apiphp.APILocation("premises"),
+                                    data : {"Mode" : "EditName", "Id" : me.PremiseID, "Name" : sPremiseText},
+                                    onSuccess : function () {
+                                        var requestParameters = this;
+
+                                        IOMy.common.PremiseSelected.Name = sPremiseText;
+
                                         IOMy.apiphp.AjaxRequest({
                                             url : IOMy.apiphp.APILocation("premises"),
-                                            data : {"Mode" : "EditName", "Id" : me.PremiseID, "Name" : sPremiseText},
+                                            data : {"Mode" : "EditDesc", "Id" : me.PremiseID, "Desc" : sPremiseDesc},
                                             onSuccess : function () {
-                                                var requestParameters = this;
 
-                                                IOMy.common.PremiseSelected.Name = sPremiseText;
+                                                IOMy.common.PremiseSelected.Desc = sPremiseDesc;
 
                                                 IOMy.apiphp.AjaxRequest({
                                                     url : IOMy.apiphp.APILocation("premises"),
-                                                    data : {"Mode" : "EditDesc", "Id" : me.PremiseID, "Desc" : sPremiseDesc},
+                                                    data : {
+                                                        "Mode" : "EditPremiseInfo", "Id" : me.PremiseID, 
+                                                        "PremiseInfoOccupants" : me.byId("premiseOccupants").getSelectedKey(),
+                                                        "PremiseInfoBedrooms" : me.byId("premiseBedrooms").getSelectedKey(),
+                                                        "PremiseInfoFloors" : me.byId("premiseFloors").getSelectedKey(),
+                                                        "PremiseInfoRooms" : me.byId("premiseRooms").getSelectedKey()
+                                                    },
+
                                                     onSuccess : function () {
 
-                                                        IOMy.common.PremiseSelected.Desc = sPremiseDesc;
+                                                        //-- REFRESH PREMISES --//
+                                                        IOMy.common.RefreshCoreVariables({
+                                                            onSuccess : function() {
 
-                                                        IOMy.apiphp.AjaxRequest({
-                                                            url : IOMy.apiphp.APILocation("premises"),
-                                                            data : {
-                                                                "Mode" : "EditPremiseInfo", "Id" : me.PremiseID, 
-                                                                "PremiseInfoOccupants" : me.byId("premiseOccupants").getSelectedKey(),
-                                                                "PremiseInfoBedrooms" : me.byId("premiseBedrooms").getSelectedKey(),
-                                                                "PremiseInfoFloors" : me.byId("premiseFloors").getSelectedKey(),
-                                                                "PremiseInfoRooms" : me.byId("premiseRooms").getSelectedKey()
-                                                            },
-                                                            
-                                                            onSuccess : function () {
+                                                                IOMy.common.CoreVariablesInitialised = true;
 
-																//-- REFRESH PREMISES --//
-																IOMy.common.RefreshCoreVariables({
-																	onSuccess : function() {
+                                                                IOMy.common.showMessage({
+                                                                    text : "Premise has been updated successfully.",
+                                                                    view : thisView
+                                                                });
 
-																		IOMy.common.CoreVariablesInitialised = true;
+                                                                IOMy.common.NavigationToggleNavButtons(me, true);
+                                                                IOMy.common.NavigationTriggerBackForward();
 
-																		IOMy.common.showMessage({
-																			text : "Premise has been updated successfully.",
-																			view : thisView
-																		});
-
-																		IOMy.common.NavigationToggleNavButtons(me, true);
-																		IOMy.common.NavigationTriggerBackForward();
-
-																	}
-																});
-                                                                
-                                                            },
-                                                            
-                                                            onFail : function (response) {
-                                                                // There's something wrong in either the code or the
-                                                                // parameters parsed.
-                                                                //IOMy.common.showError("Update failed.", "Error");
-                                                                IOMy.common.showError(response.responseText, "Error");
-                                                                jQuery.sap.log.error(JSON.stringify(response));
-                                                                
-                                                                requestParameters.onComplete(); // Unlock the button
                                                             }
                                                         });
+
                                                     },
-                                                    
+
                                                     onFail : function (response) {
                                                         // There's something wrong in either the code or the
                                                         // parameters parsed.
@@ -227,28 +234,39 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                                                     }
                                                 });
                                             },
+
                                             onFail : function (response) {
                                                 // There's something wrong in either the code or the
                                                 // parameters parsed.
                                                 //IOMy.common.showError("Update failed.", "Error");
                                                 IOMy.common.showError(response.responseText, "Error");
                                                 jQuery.sap.log.error(JSON.stringify(response));
-                                                
-                                                this.onComplete();
-                                            },
-                                            
-                                            onComplete : function () {
-                                                thisButton.setEnabled(true); // Unlock button
-												IOMy.common.NavigationToggleNavButtons(me, true);
+
+                                                requestParameters.onComplete(); // Unlock the button
                                             }
                                         });
-                                    } catch (e00033) {
-                                        IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
+                                    },
+                                    onFail : function (response) {
+                                        // There's something wrong in either the code or the
+                                        // parameters parsed.
+                                        //IOMy.common.showError("Update failed.", "Error");
+                                        IOMy.common.showError(response.responseText, "Error");
+                                        jQuery.sap.log.error(JSON.stringify(response));
+
+                                        this.onComplete();
+                                    },
+
+                                    onComplete : function () {
+                                        thisButtonBox.setEnabled(true); // Unlock button
+                                        IOMy.common.NavigationToggleNavButtons(me, true);
                                     }
-                                }
-							}
-						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
-					]
+                                });
+                            } catch (e00033) {
+                                IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
+                            }
+                        }
+                    }
+                    
 				}).addStyleClass("TextCenter MarTop12px");
                 
                 var oVertBox = new sap.m.VBox({

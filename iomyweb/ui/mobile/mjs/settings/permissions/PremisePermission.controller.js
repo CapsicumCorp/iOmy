@@ -51,8 +51,6 @@ sap.ui.controller("mjs.settings.permissions.PremisePermission", {
             // Everything is rendered in this function run before rendering.
             onBeforeShow : function (evt) {
                 
-                // Start the form creation
-                
                 if (evt.data.userID !== undefined && evt.data.userID !== null) {
                     me.iUserId = evt.data.userID;
                 } else {

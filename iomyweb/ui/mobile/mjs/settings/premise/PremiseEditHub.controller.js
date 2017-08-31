@@ -21,6 +21,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+$.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
+
 sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
 	api : IOMy.apiphp,
 	functions : IOMy.functions,
@@ -61,59 +63,64 @@ sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
 				// Hub ID
 				me.hubID = iID;
 				
-				var oEditButton = new sap.m.VBox({
-					items : [
-						new sap.m.Link({
-							text : "Update",
-                            press : function () {
-                                var thisButton = this;
-								thisButton.setEnabled(false);
-								IOMy.common.NavigationToggleNavButtons(me, false);
-								
-								var sHubText = me.byId("hubField").getValue();
-								var iHubID = me.hubID;
-								
-                                if (sHubText === "") {
-                                    jQuery.sap.log.error("Hub must have a name");
-                                    IOMy.common.showError("Hub must have a name", "Error");
-                                } else {
-                                    // Run the API to update the name of the hub
-                                    try {
-                                        IOMy.apiphp.AjaxRequest({
-                                            url : IOMy.apiphp.APILocation("hubs"),
-                                            data : {"Mode" : "EditName", "Id" : iHubID, "Name" : sHubText},
-                                            onSuccess : function () {
-                                                
-                                                IOMy.common.RefreshCoreVariables({
-                                                    onSuccess: function () {
-                                                        IOMy.common.showMessage({
-															text : "Hub successfully updated.",
-															view : thisView
-														});
+				var oEditButton = new IOMy.widgets.AcceptCancelButtonGroup({
+					
+                    cancelPress : function () {
+                        IOMy.common.NavigationTriggerBackForward();
+                    },
+                    
+                    acceptPress : function () {
+                        var thisButtonBox = this;
+                        thisButtonBox.setEnabled(false);
+                        IOMy.common.NavigationToggleNavButtons(me, false);
 
-														IOMy.common.NavigationToggleNavButtons(me, true);
-														IOMy.common.NavigationTriggerBackForward();
-                                                    }
-												});
-                                            },
-                                            onFail : function (response) {
-                                                IOMy.common.showError(response.responseText, "Error");
-                                                jQuery.sap.log.error(JSON.stringify(response));
-                                                this.onComplete();
-                                            },
-                                            
-                                            onComplete : function () {
-                                                thisButton.setEnabled(true);
-												IOMy.common.NavigationToggleNavButtons(me, true);
+                        var sHubText = me.byId("hubField").getValue();
+                        var iHubID = me.hubID;
+
+                        if (sHubText === "") {
+                            jQuery.sap.log.error("Hub must have a name");
+                            IOMy.common.showError("Hub must have a name", "Error",
+                                function () {
+                                    thisButtonBox.setEnabled(true);
+                                }
+                            );
+                        } else {
+                            // Run the API to update the name of the hub
+                            try {
+                                IOMy.apiphp.AjaxRequest({
+                                    url : IOMy.apiphp.APILocation("hubs"),
+                                    data : {"Mode" : "EditName", "Id" : iHubID, "Name" : sHubText},
+                                    onSuccess : function () {
+
+                                        IOMy.common.RefreshCoreVariables({
+                                            onSuccess: function () {
+                                                IOMy.common.showMessage({
+                                                    text : "Hub successfully updated.",
+                                                    view : thisView
+                                                });
+
+                                                IOMy.common.NavigationToggleNavButtons(me, true);
+                                                IOMy.common.NavigationTriggerBackForward();
                                             }
                                         });
-                                    } catch (e00033) {
-                                        IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
+                                    },
+                                    onFail : function (response) {
+                                        IOMy.common.showError(response.responseText, "Error");
+                                        jQuery.sap.log.error(JSON.stringify(response));
+                                        this.onComplete();
+                                    },
+
+                                    onComplete : function () {
+                                        thisButtonBox.setEnabled(true);
+                                        IOMy.common.NavigationToggleNavButtons(me, true);
                                     }
-                                }
-							}
-						}).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
-					]
+                                });
+                            } catch (e00033) {
+                                IOMy.common.showError("Error accessing API: "+e00033.message, "Error");
+                            }
+                        }
+                    }
+                    
 				}).addStyleClass("TextCenter MarTop12px");
         		
 				var oVertBox = new sap.m.VBox({
@@ -123,8 +130,9 @@ sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
 		    	// Destroys the actual panel of the page. This is done to ensure that there
 				// are no elements left over which would increase the page size each time
 				// the page is visited.
-				if (me.byId("hubPanel") !== undefined)
+				if (me.byId("hubPanel") !== undefined) {
 					me.byId("hubPanel").destroy();
+                }
     		    
     		    var oPanel = new sap.m.Panel(me.createId("hubPanel"), {
     		    	backgroundDesign: "Transparent",
@@ -132,19 +140,6 @@ sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
 				});
 				
 				thisView.byId("page").addContent(oPanel);
-                
-//                thisView.byId("extrasMenuHolder").addItem(
-//                    IOMy.widgets.getActionMenu({
-//                        id : me.createId("extrasMenu"),        // Uses the page ID
-//                        icon : "sap-icon://GoogleMaterial/more_vert",
-//                        items : [
-//                            {
-//                                // TODO: Make the delete hub function
-//                                text: "Delete "+sName,
-//                            }
-//                        ]
-//                    })
-//                );
 			}
 		});
 	},

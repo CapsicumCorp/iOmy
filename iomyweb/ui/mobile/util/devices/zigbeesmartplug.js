@@ -288,7 +288,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                     IOMy.common.RefreshCoreVariables({
                         onSuccess : function () {
                             IOMy.common.showMessage({
-                                text : "Join completed.",
+                                text : "Join completed. Your devices should appear in 5 minutes.",
                                 view : oScope.getView()
                             });
                         }
@@ -565,7 +565,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
             "feedback from each telnet command called.\n\nThis will add all zigbee devices " +
             "attached to a zigbee dongle as links and items.";
         
-        oScope.byId("addButton").setEnabled(false);
+        oScope.byId("buttonBox").setEnabled(false);
         
         oScope.aElementsForAFormToDestroy.push(me.uiIDs.sAPIModesHBoxID);
         //--------------------------------------------------------------------//
@@ -672,7 +672,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
 				growFactor : 1
 			}),
             items : [
-                new sap.m.Link(oScope.createId(me.uiIDs.sEnableJoinModeButtonID), {
+                new sap.m.Button(oScope.createId(me.uiIDs.sEnableJoinModeButtonID), {
                     text : "Join Devices",
                     // If it's not cooling down, then it will be enabled
                     enabled : !me.bRunningCommand,
@@ -685,7 +685,7 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                         // The command to re-enable this button is called by this function
                         me.TurnOnZigbeeJoinMode(oScope);
                     }
-                }).addStyleClass("SettingsLinks width100Percent TelnetCommandButton TextCenter")
+                }).addStyleClass("width100Percent TextCenter")
             ]
         }).addStyleClass("TextCenter");
         oAPIModesHBox.addItem(oFormItem);
