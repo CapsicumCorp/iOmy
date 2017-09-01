@@ -380,13 +380,12 @@ sap.ui.controller("mjs.devices.DeviceOverview", {
             oVertBox.addItem(
                 new sap.m.VBox({
                     items : [
-                        new sap.m.Link({
-                            //enabled : false,
+                        new sap.m.Button({
                             text : "Add Device",
                             press : function () {
                                 IOMy.common.NavigationChangePage("pSettingsLinkAdd", {});
                             }
-                        }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
+                        }).addStyleClass("width100Percent")
                     ]
                 }).addStyleClass("TextCenter MarTop12px")
             );

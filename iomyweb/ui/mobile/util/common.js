@@ -57,6 +57,10 @@ $.extend(IOMy.common,{
     oCoreVariableTimeout:           null,               //-- OBJECT:    --//
     
     
+    //============================================//
+    // Mutexes
+    //============================================//
+    mxToasts : new Mutex({ manual : true }),
     
     
     //============================================//
@@ -297,7 +301,7 @@ $.extend(IOMy.common,{
      * @param {type} sCssClass      (optional) CSS Classes in a string separated by spaces.
      */
     showMessage : function( mSettings ){
-        
+        var me                    = this;
         var bError                = false;
         var aErrorMessages        = [];
         var aWarningMessages    = [];
@@ -347,7 +351,7 @@ $.extend(IOMy.common,{
             if (mSettings.duration !== undefined) {
                 iMilliseconds = mSettings.duration;
             } else {
-                iMilliseconds = 3000; // As this is the default for UI5 toasts.
+                iMilliseconds = 4000;
             }
             
             //----------------------------------------------------------------//
@@ -375,21 +379,35 @@ $.extend(IOMy.common,{
         }
         
         oCurrentView.expectingMessage = true;
-        
-        if (oApp.getCurrentPage().expectingMessage === true) {
-            // open a fully configured message toast
-            sap.m.MessageToast.show(
-                sMessage,
-                {
-                    autoClose : bAutoClose || true,
-                    duration : iMilliseconds
-                    // TODO: Allow a callback function to be called when the toast closes.
-                    //styleClass : cssClass
+
+        me.mxToasts.synchronize({
+            task : function () {
+                if (oApp.getCurrentPage().expectingMessage === true) {
+                    // open a fully configured message toast
+                    sap.m.MessageToast.show(
+                        sMessage,
+                        {
+                            autoClose : bAutoClose || true,
+                            duration : iMilliseconds,
+                            onClose : function () {
+                                me.mxToasts.dequeue();
+                                
+                                if (!me.mxToasts.busy) {
+                                    oCurrentView.expectingMessage = false;
+                                }
+                            }
+                            // TODO: Allow a callback function to be called when the toast closes.
+                            //styleClass : cssClass
+                        }
+                    );
                 }
-            );
-        }
+            }
+        });
         
-        oCurrentView.expectingMessage = false;
+        if (!me.mxToasts.busy) {
+            me.mxToasts.dequeue();
+        }
+
     },
     
     showWarning : function( sMessage, sTitle, fnCallback, sCssClass ){
@@ -548,7 +566,9 @@ $.extend(IOMy.common,{
                     customIconRotationSpeed    : 0
                 }).addStyleClass("MarAuto0px MarTop20px width100Percent");
             } else {
-                oContext.byId("loading").destroy();
+                if (oContext.byId("loading") !== undefined) {
+                    oContext.byId("loading").destroy();
+                }
             }
         }
         

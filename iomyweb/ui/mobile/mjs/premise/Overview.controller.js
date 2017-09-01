@@ -299,12 +299,12 @@ sap.ui.controller("mjs.premise.Overview", {
                 oLayout.addItem(
                     new sap.m.VBox({
                         items : [
-                            new sap.m.Link({
+                            new sap.m.Button({
                                 text : "Add Room",
                                 press : function () {
                                     IOMy.common.NavigationChangePage("pSettingsRoomAdd", {premiseID : me.byId("premiseBox").getSelectedKey()});
                                 }
-                            }).addStyleClass("SettingsLinks AcceptSubmitButton TextCenter iOmyLink")
+                            }).addStyleClass("width100Percent")
                         ]
                     }).addStyleClass("TextCenter MarTop12px")
                 );
