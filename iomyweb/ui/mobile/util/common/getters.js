@@ -131,6 +131,47 @@ $.extend(IOMy.common, {
         }
 		
 		return oRoom;
-	}
+	},
+    
+    //------------------------------------------------------------------------//
+    // Advanced Getters
+    //------------------------------------------------------------------------//
+    
+    getFirstTimezoneOfRegion : function (iRegion) {
+        var aaTimezones     = this.getTimezonesOfRegion(iRegion);
+        var mFirstTimezone;
+        
+        $.each(aaTimezones, function (sI, mTimezone) {
+            mFirstTimezone = mTimezone;
+            return false; // Terminate the loop.
+        });
+        
+        return mFirstTimezone;
+    },
+    
+    getTimezonesOfRegion : function (iRegion) {
+        var sRegionCode     = null;
+        var aaTimezones     = {};
+        
+        if (iRegion !== undefined && iRegion !== null) {
+            if (isNaN(iRegion)) {
+                throw new IllegalArgumentException("Invalid Region ID: It contains non-numerical characters.");
+            }
+        } else {
+            throw new MissingArgumentException("Region ID must be specified");
+        }
+        
+        sRegionCode = this.Regions["_"+iRegion].RegionAbbreviation;
+        
+        $.each(this.Timezones, function (sI, mTimezone) {
+            
+            if (sRegionCode === mTimezone.TimezoneRegionCode) {
+                aaTimezones["_"+mTimezone.TimezoneId] = mTimezone;
+            }
+            
+        });
+        
+        return aaTimezones;
+    }
     
 });
