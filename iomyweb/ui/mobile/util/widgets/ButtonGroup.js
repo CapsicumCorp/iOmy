@@ -40,8 +40,6 @@ sap.m.HBox.extend("IOMy.widgets.ButtonGroup", {
     layoutData : new sap.m.FlexItemData({
         growFactor : 1
     }),
-
-    styleClass : "MarTop15px TextCenter",
     
     init : function () {
         sap.m.HBox.prototype.init.call(this);
@@ -80,7 +78,7 @@ sap.m.HBox.extend("IOMy.widgets.ButtonGroup", {
      */
     addItem : function (oButton) {
         if (oButton instanceof sap.m.Button) {
-            sap.m.HBox.prototype.addItem.call(this,oButton);
+            sap.m.HBox.prototype.addItem.call(this, oButton);
             
         } else {
             throw new IllegalArgumentException("The widget given is not a UI5 Button");

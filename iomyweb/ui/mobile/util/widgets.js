@@ -36,80 +36,29 @@ $.extend(IOMy.widgets,{
 //----------------------------------------//
 //-- LOAD OTHER MODULES                 --//
 //----------------------------------------//
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.IOMyPage");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getActionMenu");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getAppFooter");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getGenderSelectBox");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getHubSelector");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getIOMYPageHeaderNav");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getIPAddressAndPortField");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getLanguageItems");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getLinkSelector");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getLinkTypeSelector");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getListOfUsersForPremisePermissions");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getListOfUsersForRoomPermissions");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getNavigationalSubHeader");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getPermissionSelectBox");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getPostCodeItems");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getPremiseSelector");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getRegionItems");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getRoomOptions");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getRoomSelector");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getStateProvinceItems");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.getTimezoneItems");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.premiseOptionsSelectBox");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.thingsSelectBox");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.roomTypesSelectBox");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.selectBoxLocale");
-
-$.sap.registerModulePath('IOMy.widgets', sModuleInitialBuildLocation+'util/widgets');
 $.sap.require("IOMy.widgets.selectBoxNewDeviceOptions");
