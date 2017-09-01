@@ -71,7 +71,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 /* Changes ":visted" color to "iOmy Green" for links */
 .sapMLnk:visited {
-    color: rgb(139, 197, 63);
+    color: black;
 }
 
 /* Changes ":hover" color to "iOmy Green" for links */

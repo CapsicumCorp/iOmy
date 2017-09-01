@@ -25,7 +25,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 sap.ui.controller("mjs.login.Login", {
 	
-    refreshInterval : 600000, // How often the Core variables are refreshed in milliseconds. Default 600 000 (10 minutes)
+    refreshInterval : 300000, // How often the Core variables are refreshed in milliseconds. Default 300 000 (5 minutes)
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -199,6 +199,12 @@ sap.ui.controller("mjs.login.Login", {
 //
 //	}
 
+    ToggleInputsAndButton : function (bEnabled) {
+        this.byId("oLoginInputUser").setEnabled(bEnabled);
+        this.byId("oLoginInputPWord").setEnabled(bEnabled);
+        this.byId("oLoginButtonSubmit").setEnabled(bEnabled);
+    },
+
 	/********************************************************
 	 * DRAW LOGIN PROMPT
 	 ********************************************************
@@ -279,6 +285,7 @@ sap.ui.controller("mjs.login.Login", {
 			maxLength: 40,
 			width: "200px",
             submit : function (oControlEvent) {
+                me.ToggleInputsAndButton(false);
 				me.doLogin();
 			}
 		}).addStyleClass("LoginTextInput");
@@ -286,7 +293,7 @@ sap.ui.controller("mjs.login.Login", {
 		//--------------------------------------------//
 		//-- Input - Submit Button					--//
 		//--------------------------------------------//
-		var oLoginInputSubmit = new sap.m.Button("oLoginButtonSubmit", {
+		var oLoginInputSubmit = new sap.m.Button( this.createId("oLoginButtonSubmit"), {
 			tooltip: "Login",
 			text: "Login",
 			type: "Accept",
@@ -294,6 +301,7 @@ sap.ui.controller("mjs.login.Login", {
             iconFirst: false,
 			width: "200px",
             press : function (oControlEvent) {
+                me.ToggleInputsAndButton(false);
 				me.doLogin();
 			}
 		}).addStyleClass("MarBottom15px ButtonIconWhite LoginPageSubmit");
@@ -372,68 +380,44 @@ sap.ui.controller("mjs.login.Login", {
 						// Load the user's display name and ID
 						//----------------------------------------------------------------------------//
 						IOMy.functions.setCurrentUserNameForNavigation();
-						
-						/*
-                        // Load the core variables now.
-                        IOMy.common.ReloadCoreVariables( function() {
-                            //-- Copy and paste from the "IOMy.common.RefreshCoreVariables" function --//
-                            try {
-                                //-- Flag that the Core Variables have been configured --//
-                                IOMy.common.CoreVariablesInitialised = true;
-                                //-- Reset the Navigation array and index after switching users --//
-                                IOMy.common.NavPagesNavigationArray = [];
-                                IOMy.common.NavPagesCurrentIndex = -1;
-                                //-- LOAD THE 1ST Page --//
-                                IOMy.common.NavigationChangePage( IOMy.common.sNavigationDefaultPage, {}, true);
-                                
-                                // Reload them every 10 minutes
-                                IOMy.common.CoreVariableRefreshIntervalInstance = setInterval(function () {
-                                   // console.log("Another 10 minutes is up!");
-                                    IOMy.common.ReloadVariablePremiseList();
-                                }, me.refreshInterval);
-                                
-                                //----------------------------------------------------------------------------//
-                                // Load all the device rules into memory.
-                                //----------------------------------------------------------------------------//
-                                try {
-									IOMy.rules.loadRules({
-										hubID : 1
-									});
-								} catch (ex) {
-									jQuery.sap.log.warning(ex.message);
-								}
-								
-								//----------------------------------------------------------------------------//
-								// Load the user's display name and ID
-								//----------------------------------------------------------------------------//
-								IOMy.functions.setCurrentUserNameForNavigation();
-
-                            } catch(eLoginCore) {
-                                jQuery.sap.log.error("Login ReloadCoreVars\n"+eLoginCore.message);
-                            }
-                        });
-                        */
 
 					} else {
 						//-- TODO: Add the Appropiate Error Messages from the Session Check when Andrew has completed the Better Error Messages --//
                         
                         //-- If the user was simply unsuccessful, get them to check their username or password. --//
                         if (oResponseData.ErrCode === "0001") {
-                            IOMy.common.showError(oResponseData.ErrMesg+"\nPlease check that your username and password are correct.", "Login Error");
+                            IOMy.common.showError(oResponseData.ErrMesg+"\nPlease check that your username and password are correct.", "Login Error",
+                                function () {
+                                    me.ToggleInputsAndButton(true);
+                                }
+                            );
+                        
                         } else {
-                            IOMy.common.showError(oResponseData.ErrMesg, "Login Error");
+                            IOMy.common.showError(oResponseData.ErrMesg, "Error",
+                                function () {
+                                    me.ToggleInputsAndButton(true);
+                                }
+                            );
                         }
 					}
 				},
 				error : function(err) {
 					//-- TODO: Replace this with a more apporpiate error --//
 					jQuery.sap.log.error(JSON.stringify(err));
-					IOMy.common.showError("A connection error has occurred. Please try again. If the problem persists, restart iOmy\n\n"+err.responseText, "Login Error");
+					IOMy.common.showError("A connection error has occurred. Please try again. If the problem persists, restart iOmy", "Connection Error",
+                        function () {
+                            me.ToggleInputsAndButton(true);
+                        }
+                    );
 				}
 			});
 		} else {
 			//-- ERROR --//
-			IOMy.common.showError("Either the Username or Password field was empty!", "Login Error");
+			IOMy.common.showError("Either the Username or Password field was empty!", "Login Error",
+                function () {
+                    me.ToggleInputsAndButton(true);
+                }
+            );
 		}
 	}
 	
