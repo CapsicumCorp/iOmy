@@ -128,6 +128,8 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         
         if (this.wRoomCBox === null) {
             bDifferentRoom = false;
+        } else if (iOldRoomID == 1) {
+            bDifferentRoom = true;
         } else {
             bDifferentRoom = iOldRoomID != this.wRoomCBox.getSelectedKey();
         }
@@ -307,6 +309,9 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
                 ]
             })
         );
+    
+        
+        me.byId("buttonBox").setAcceptEnabled(me.areThereChanges());
     },
 	
 	// TODO: This function belongs to the IOMy.functions library.

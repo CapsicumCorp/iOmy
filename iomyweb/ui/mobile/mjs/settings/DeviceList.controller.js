@@ -304,22 +304,9 @@ sap.ui.controller("mjs.settings.DeviceList", {
 													press : function () {
 														IOMy.common.NavigationChangePage("pSettingsLinkAdd", {}, false );
 													}
-												}).addStyleClass("Text_grey_20 MarTop1d25Rem"),
+												}).addStyleClass("Text_grey_20 MarTop1d25Rem")
 											]
-										}),
-										
-										//----------------------------------------//
-										// Footer
-										//----------------------------------------//
-										new sap.m.HBox({
-											width: "100%",
-											items : [
-												//-- Device Type --//
-												new sap.m.Label({
-													text: "Press the plus on the right to add a device to this hub."
-												}).addStyleClass("Font-RobotoCondensed TextSizeXSmall Text_grey_20")
-											]
-										}).addStyleClass("")
+										})
 									]
 								}).addStyleClass("MarLeft4px PadRight4px")
 							]

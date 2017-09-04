@@ -91,8 +91,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                 var oCol1 = new sap.m.VBox({
                     items : [
                         oBedroomsTitle,oBedroomsField,
-                        oOccupantsTitle,oOccupantsField,
-                        oNumberOfUsersLabel
+                        oOccupantsTitle,oOccupantsField
                     ]
                 }).addStyleClass("PadRight5px width50Percent");
                 
@@ -113,8 +112,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
                 var oCol2 = new sap.m.VBox({
                     items : [
                         oFloorsTitle,oFloorsField,
-                        oRoomsTitle,oRoomsField,
-                        oNumberOfRoomsLabel
+                        oRoomsTitle,oRoomsField
                     ]
                 }).addStyleClass("width50Percent");
                 
@@ -270,11 +268,9 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 				}).addStyleClass("PanelNoTopPadding");
 				
 				thisView.byId("page").addContent(oPanel);
-                
-                me.fetchNumberOfUsersForPremise();
 			}
 		});
-	},
+	}
 
 /**
 * Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered
