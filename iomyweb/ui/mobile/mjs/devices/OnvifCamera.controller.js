@@ -377,35 +377,28 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         
         // Lock all the PTZ buttons
         me.setPTZButtonsEnabled(false);
+        
+        IOMy.devices.onvif.PTZMove({
+            thingID : me.iID,
+            profileName : me.sThumbnailProfileName,
+            xpos : iPosX,
+            ypos : iPosY,
+            
+            onSuccess : function (response) {
+                jQuery.sap.log.debug(JSON.stringify(response));
+                me.loadThumbnail();
+            },
 
-        try {
-            IOMy.apiphp.AjaxRequest({
-                url : IOMy.apiphp.APILocation("onvif"),
-                data : { Mode : "PTZTimedMove",
-                         ProfileName : me.sThumbnailProfileName,
-                         PosX : iPosX, PosY : iPosY, ThingId : me.iID},
-
-                onSuccess : function (response) {
-                    jQuery.sap.log.debug(JSON.stringify(response));
-                    me.loadThumbnail();
-                },
-
-                onFail : function (response) {
-                    jQuery.sap.log.error(JSON.stringify(response));
-                    // Unlock all the PTZ buttons
-                    me.setPTZButtonsEnabled(true);
-                }
-            });
-
-        } catch (ePTZError) {
-            jQuery.sap.log.error(JSON.stringify(ePTZError.message));
-            IOMy.common.showError(ePTZError.message, "",
-                function () {
-                    // Unlock all the PTZ buttons
-                    me.setPTZButtonsEnabled(true);
-                }
-            );
-        }
+            onFail : function (sErrMesg) {
+                jQuery.sap.log.error(sErrMesg);
+                IOMy.common.showError(sErrMesg, "Error",
+                    function () {
+                        // Unlock all the PTZ buttons
+                        me.setPTZButtonsEnabled(true);
+                    }
+                );
+            }
+        });
     },
     
     PTZMoveUp : function () {
@@ -448,7 +441,7 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
      */
     loadThumbnail : function() {
         var me = this;
-        var sAPIUrl = IOMy.apiphp.APILocation("onvif");
+        
         //---------------------------------------------------//
         // Check that it can find the device before it does anything
         //---------------------------------------------------//
@@ -520,9 +513,6 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         
         sNameWhereClause = aNameWhereClause.join(" or ");
         sUrlWhereClause = aUrlWhereClause.join(" or ");
-        
-        //console.log(JSON.stringify(sNameWhereClause));
-        //console.log(JSON.stringify(sUrlWhereClause));
         
         // Start loading the profile names
         IOMy.apiodata.AjaxRequest({

@@ -230,6 +230,109 @@ $.extend(IOMy.devices.onvif,{
         
     },
     
+    //------------------------------------------------------------------------//
+    // Create the PTZ control functionality
+    //------------------------------------------------------------------------//
+    PTZMove : function (mSettings) {
+        var bError          = false;
+        var aErrorMessages  = [];
+        var iPosX;
+        var iPosY;
+        var iThingId;
+        var sProfileName;
+        var mThingIdInfo;
+        var fnSuccess;
+        var fnFail;
+        
+        var fnAppendError = function (sMessage) {
+            bError = true;
+            aErrorMessages.push(sMessage);
+        };
+        
+        if (mSettings !== undefined) {
+            
+            mThingIdInfo = IOMy.validation.isThingIDValid(mSettings.thingID)
+            if (mThingIdInfo.bIsValid) {
+                iThingId = mSettings.thingID;
+            } else {
+                bError          = true;
+                aErrorMessages  = mThingIdInfo.aErrorMessages;
+            }
+            
+            if (mSettings.xpos !== undefined) {
+                iPosX = parseInt(mSettings.xpos);
+            } else {
+                iPosX = 0;
+            }
+            
+            if (mSettings.ypos !== undefined) {
+                iPosY = parseInt(mSettings.ypos);
+            } else {
+                iPosY = 0;
+            }
+            
+            if (iPosX === 0 && iPosY === 0) {
+                fnAppendError("X and Y positions are not set to change.");
+            }
+            
+            if (mSettings.profileName !== undefined) {
+                sProfileName = mSettings.profileName;
+            } else {
+                fnAppendError("Profile name has not been given.");
+            }
+            
+            if (mSettings.onSuccess !== undefined) {
+                fnSuccess = mSettings.onSuccess;
+            } else {
+                fnSuccess = function () {};
+            }
+            
+            if (mSettings.onFail !== undefined) {
+                fnFail = mSettings.onFail;
+            } else {
+                fnFail = function () {};
+            }
+            
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join("\n"));
+            }
+            
+        } else {
+            throw new MissingSettingsMapException("Parameters are required. (profileName, xpos and/or ypos, thingID)");
+        }
+
+        try {
+            IOMy.apiphp.AjaxRequest({
+                url : IOMy.apiphp.APILocation("onvif"),
+                data : {
+                    Mode : "PTZTimedMove",
+                    ProfileName : sProfileName,
+                    PosX : iPosX, PosY : iPosY,
+                    ThingId : iThingId
+                },
+
+                onSuccess : function (data) {
+                    if (data.Error) {
+                        fnFail(data.ErrMesg);
+                    } else {
+                        fnSuccess();
+                    }
+                },
+                
+                onFail : function (response) {
+                    fnFail(response.responseText);
+                }
+            });
+
+        } catch (ePTZError) {
+            fnFail(ePTZError.message);
+        }
+    },
+    
+    //------------------------------------------------------------------------//
+    // Form to create the stream
+    //------------------------------------------------------------------------//
+    
     CreateThingForm : function(oScope, iLinkId, oFormBox, aElementsToEnableOnSuccess) {
         var me = this; // Scope of the Onvif module.
         
