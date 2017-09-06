@@ -3,7 +3,7 @@
     
     "pForceSwitchUser": "If at anytime you wish to switch from one user to the next, simply enter the username and password. The current session will terminate once you switch users.",
     
-    "pPremiseOverview": "The Premise Overview features a combo box complete with a list of premises that are available to the user. Below the premise combo box is a list of rooms that are registered with the currently selected premise.\n\nThere is a button to the right of the name of the room that allows you to show or hide its list of devices.\n\nEach device can be tapped to lead into the device information page.\n\nThe action menu will allow you to edit the information and address of the currently selected premise, and add a new room.",
+    "pPremiseOverview": "You should be able to see a list of rooms in a premise with the number of devices to the left of each one. If there are no rooms, you can press the button to add one.\n\nThe 'Unassigned' area will only appear if there are any devices that have not yet been assigned to a room.",
     
     "pDeviceOverview": "This is the home page.\n\nHere is a list of all the devices that the current user has access to, regardless of their location. Some of these can be switched on or off depending on whether the current user has permission to do this.",
     
