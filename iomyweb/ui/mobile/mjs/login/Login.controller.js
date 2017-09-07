@@ -273,7 +273,10 @@ sap.ui.controller("mjs.login.Login", {
 			type: "Text",
 			placeholder: "Username",
 			maxLength: 40,
-			width: "200px"
+			width: "200px",
+            submit : function (oControlEvent) {
+                me.byId("oLoginInputPWord").focus();
+            }
 		}).addStyleClass("LoginTextInput");
 		
 		//--------------------------------------------//
