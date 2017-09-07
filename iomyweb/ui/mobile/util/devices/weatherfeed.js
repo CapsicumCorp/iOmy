@@ -66,10 +66,14 @@ $.extend(IOMy.devices.weatherfeed,{
         var mData = {};             // Map for the AJAX request
 		var iRoomId;
 		
-		if (oScope.wRoomCBox === null) {
+		if (oScope.byId("roomCBox") === null || oScope.byId("roomCBox") === undefined) {
 			iRoomId = 1;
 		} else {
-			iRoomId = oScope.wRoomCBox.getSelectedItem().getKey();
+            if (oScope.byId("roomCBox").getSelectedKey() !== "") {
+                iRoomId = oScope.byId("roomCBox").getSelectedKey();
+            } else {
+                iRoomId = 1;
+            }
 		}
         
         mData.url = IOMy.apiphp.APILocation("weather");

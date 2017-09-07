@@ -74,8 +74,7 @@ $.extend(IOMy.devices.ipcamera,{
                 var mThing                    = IOMy.common.ThingList["_"+iThingId];
                 var bAuthenticationRequired   = false;
                 var mData        = {
-                    Hub        : IOMy.functions.getHubConnectedToThing(mThing.Id).HubId,
-                    
+                    Hub        : IOMy.functions.getHubConnectedToThing(mThing.Id).HubId
                 };
                 
                 //------------------------------------------------------------//
@@ -310,9 +309,10 @@ $.extend(IOMy.devices.ipcamera,{
                 fnAppendError("Thing ID (thingID) must be specified!");
             }
             
-            //--------------------------------------------------------------------//
+            //----------------------------------------------------------------//
             // Check the settings map for two callback functions.
-            //--------------------------------------------------------------------//
+            //----------------------------------------------------------------//
+            
             //-- Success callback --//
             if (mSettings.onSuccess === undefined) {
                 fnSuccess = function () {};
@@ -336,7 +336,7 @@ $.extend(IOMy.devices.ipcamera,{
         // any errors.
         //--------------------------------------------------------------------//
         IOMy.apiphp.AjaxRequest({
-            url            : IOMy.apiphp.APILocation("ipcamera"),
+            url         : IOMy.apiphp.APILocation("ipcamera"),
             type        : "POST",
             data        : "Mode=FetchStreamUrl&ThingId="+iThingId,
 
@@ -690,13 +690,7 @@ $.extend(IOMy.devices.ipcamera,{
                         fnFail(data.ErrMesg);
 
                     } else {
-                        IOMy.common.RefreshCoreVariables({
-
-                            onSuccess : function () {
-                                fnSuccess();
-                            }
-
-                        });
+                        fnSuccess(data);
 
                     }
                 } catch (ex) {
@@ -710,6 +704,53 @@ $.extend(IOMy.devices.ipcamera,{
         });
     },
     
+    showSnapshot : function (iThingId, oCallingButton) {
+        var me = this;
+        var oRPopover = new sap.m.ResponsivePopover({
+            title : IOMy.common.ThingList["_"+iThingId].DisplayName,
+        });
+        
+        var fnShowUnavailable = function () {
+            oRPopover.addContent(
+                new sap.m.VBox({
+                    items : [
+                        new sap.m.Text({
+                            text : "Snapshot not available",
+                            textAlign : sap.ui.core.TextAlign.Center
+                        }).addStyleClass("width100Percent TextBold MarTop20px")
+                    ]
+                })
+            );
+        };
+        
+        me.loadStreamUrl({
+            thingID : iThingId,
+            onSuccess : function (sUrl) {
+                oRPopover.addContent(
+                    new sap.m.Image({
+                        densityAware : false,
+                        alt : "Failed to acquire snapshot",
+                        src : sUrl,
+                        width: "100%",
+
+                        error : function () {
+                            this.destroy();
+
+                            fnShowUnavailable();
+                        }
+                    })
+                );
+
+            },
+            
+            onFail : function () {
+                fnShowUnavailable();
+            }
+        });
+        
+        oRPopover.openBy(oCallingButton);
+    },
+    
     /**
      * Creates an IP Camera UI entry in a page such as room overview. This is to be
      * called from the GetCommonUI in the main devices module.
@@ -721,7 +762,7 @@ $.extend(IOMy.devices.ipcamera,{
      */
     GetCommonUI: function( sPrefix, oViewScope, aDeviceData ) {
         //------------------------------------//
-        //-- 1.0 - Initialise Variables        --//
+        //-- 1.0 - Initialise Variables     --//
         //------------------------------------//
         
         var me                    = this;
@@ -729,7 +770,7 @@ $.extend(IOMy.devices.ipcamera,{
         var aUIObjectItems        = [];     //-- ARRAY:             --//
          
         //------------------------------------//
-        //-- 2.0 - Fetch UI                    --//
+        //-- 2.0 - Fetch UI                 --//
         //------------------------------------//
         aUIObjectItems.push(
             //------------------------------------//
@@ -750,7 +791,7 @@ $.extend(IOMy.devices.ipcamera,{
         
         aUIObjectItems.push(
             //------------------------------------//
-            //-- 2nd is the onvif buttons        --//
+            //-- 2nd is the onvif buttons       --//
             //------------------------------------//
             new sap.m.HBox({
                 items : [
@@ -759,14 +800,17 @@ $.extend(IOMy.devices.ipcamera,{
                         //-- Take Snapshot              --//
                         //--------------------------------//
                         items: [
-                            new sap.m.VBox({
-                                items : [
-                                    new sap.m.Button ({
-                                        width: "100%",
-                                        icon : "sap-icon://GoogleMaterial/photo_camera",
-                                    })
-                                ]
-                            })
+//                            new sap.m.VBox({
+//                                items : [
+//                                    new sap.m.Button ({
+//                                        width: "100%",
+//                                        icon : "sap-icon://GoogleMaterial/photo_camera",
+//                                        press : function () {
+//                                            me.showSnapshot(aDeviceData.DeviceId, this);
+//                                        }
+//                                    })
+//                                ]
+//                            })
                         ]
                     }).addStyleClass("MarLeft10px MarAuto0px minwidth70px"),
                     new sap.m.VBox( oViewScope.createId( sPrefix+"_Screenshot"), {

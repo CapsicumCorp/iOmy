@@ -40,11 +40,97 @@ $.extend(IOMy.devices.philipshue,{
         
         me.sColourBoxID = sID;
         
-        if (sap.ui.getCore().byId(sID) !== undefined)
+        if (sap.ui.getCore().byId(sID) !== undefined) {
             sap.ui.getCore().byId(sID).destroy();
+        }
         
         var oColourBox = new sap.m.FlexBox(sID, {}).addStyleClass("width40px height40px FlexNoShrink");
         return oColourBox;
+    },
+    
+    CreateLinkForm : function (oScope) {
+        //===============================================//
+        // DECLARE VARIABLES                             //
+        //===============================================//
+        
+        // Labels
+        var oIPAddressAndPortLabel;
+        var oDeviceUserTokenLabel;
+        // Fields
+        // IP Address and Port
+        var oIPAddressField;            // sap.m.Input
+        var oColon;                     // sap.m.Text
+        var oIPPort;                    // sap.m.Input
+        var oIPAddressAndPortBox;       // sap.m.HBox
+        // Device User Token
+        var oDeviceUserTokenField;      // sap.m.Input
+        
+        //--------------------------------------------------------------------//
+        // Change the help message for the New Link page.
+        //--------------------------------------------------------------------//
+        // TODO: Stick this in the locale file. Alter the mechanism to accommodate these extra messages.
+        IOMy.help.PageInformation["pSettingsLinkAdd"] = "" +
+            "Enter the IP address and port of the Philips Hue bridge, and also " +
+            "the device user token for your device. This is located in your " +
+            "Philips Hue bridge manual.\n\nAdding the bridge to iOmy will also " +
+            "attempt to add all devices attached to the bridge as items in iOmy.";
+        
+        //===============================================//
+        // CONSTRUCT ELEMENTS                            //
+        //===============================================//
+        
+        //-----------------------------------------------//
+        // IP ADDRESS AND PORT                           //
+        //-----------------------------------------------//
+        
+        // LABEL
+        oScope.aElementsForAFormToDestroy.push("IPAddressLabel");
+        oIPAddressAndPortLabel = new sap.m.Label(oScope.createId("IPAddressLabel"), {
+            text : "IP Address and port (eg. 10.9.9.9 : 80)"
+        });
+        oScope.byId("formBox").addItem(oIPAddressAndPortLabel);
+        
+        // FIELD
+        oScope.aElementsForAFormToDestroy.push("IPAddressField");
+        oIPAddressField = new sap.m.Input(oScope.createId("IPAddressField"), {
+            layoutData : new sap.m.FlexItemData({ growFactor : 1 }),
+            placeholder : "Enter IP Address..."
+        }).addStyleClass("width100Percent SettingsTextInput");
+        
+        oScope.aElementsForAFormToDestroy.push("Colon");
+        oColon = new sap.m.Text(oScope.createId("Colon"), {
+            text : ":"
+        }).addStyleClass("PadLeft5px PadRight5px FlexNoShrink MarTop15px");
+        
+        oScope.aElementsForAFormToDestroy.push("IPPortField");
+        oIPPort = new sap.m.Input(oScope.createId("IPPortField"), {
+            value : "80"
+        }).addStyleClass("maxwidth80px SettingsTextInput");
+        
+        oScope.aElementsForAFormToDestroy.push("IPBox");
+        oIPAddressAndPortBox = new sap.m.HBox(oScope.createId("IPBox"), {
+            layoutData : new sap.m.FlexItemData({ growFactor : 1 }),
+            items : [ oIPAddressField,oColon,oIPPort ]
+        }).addStyleClass("width100Percent IPAddressBox");
+        oScope.byId("formBox").addItem(oIPAddressAndPortBox);
+        
+        //-----------------------------------------------//
+        // DEVICE USER TOKEN FIELD                       //
+        //-----------------------------------------------//
+        
+        // LABEL
+        oScope.aElementsForAFormToDestroy.push("DeviceUserTokenLabel");
+        oDeviceUserTokenLabel = new sap.m.Label(oScope.createId("DeviceUserTokenLabel"), {
+            text : "Device User Token Label"
+        });
+        oScope.byId("formBox").addItem(oDeviceUserTokenLabel);
+        
+        // FIELD
+        oScope.aElementsForAFormToDestroy.push("DeviceUserTokenField");
+        oDeviceUserTokenField = new sap.m.Input(oScope.createId("DeviceUserTokenField"), {
+            placeholder : "Located in your Philips Hue bridge manual"
+        }).addStyleClass("width100Percent SettingsTextInput");
+        oScope.byId("formBox").addItem(oDeviceUserTokenField);
     },
     
     GetCommonUI: function( sPrefix, oViewScope, aDeviceData ) {

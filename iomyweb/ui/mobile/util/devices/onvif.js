@@ -330,7 +330,121 @@ $.extend(IOMy.devices.onvif,{
     },
     
     //------------------------------------------------------------------------//
-    // Form to create the stream
+    // Form to create the server.
+    //------------------------------------------------------------------------//
+    CreateLinkForm : function (oScope) {
+        //===============================================//
+        // DECLARE VARIABLES                             //
+        //===============================================//
+        
+        // Labels
+        var oIPAddressAndPortLabel;
+        var oDeviceUserNameLabel;
+        var oDeviceUserPasswordLabel;
+        // Fields
+        // --IP Address and Port
+        var oIPAddressField;            // sap.m.Input
+        var oColon;                     // sap.m.Text
+        var oIPPort;                    // sap.m.Input
+        var oIPAddressAndPortBox;       // sap.m.HBox
+        // --Device User Token
+        var oDeviceUserNameField;      // sap.m.Input
+        var oDeviceUserPasswordField;  // sap.m.Input
+        
+        //--------------------------------------------------------------------//
+        // Change the help message for the New Link page.
+        //--------------------------------------------------------------------//
+        // TODO: Stick this in the locale file. Alter the mechanism to accommodate these extra messages.
+        IOMy.help.PageInformation["pSettingsLinkAdd"] = "" +
+            "To create an Onvif Server, enter the IP address and port of the " +
+            "onvif supported camera. The default port is normally 888.\n\nAfter " +
+            "the server is created, iOmy will take you to add a camera item to " +
+            "the newly created server.";
+        
+        //===============================================//
+        // CONSTRUCT ELEMENTS                            //
+        //===============================================//
+        
+        //-----------------------------------------------//
+        // IP ADDRESS AND PORT                           //
+        //-----------------------------------------------//
+        
+        // IP ADDRESS LABEL
+        oScope.aElementsForAFormToDestroy.push("IPAddressLabel");
+        oIPAddressAndPortLabel = new sap.m.Label(oScope.createId("IPAddressLabel"), {
+            text : "IP Address and port (eg. 10.9.9.9:80)"
+        });
+        oScope.byId("formBox").addItem(oIPAddressAndPortLabel);
+        
+        // IP ADDRESS INPUT
+        oScope.aElementsForAFormToDestroy.push("IPAddressField");
+        oIPAddressField = new sap.m.Input(oScope.createId("IPAddressField"), {
+            layoutData : new sap.m.FlexItemData({ growFactor : 1 }),
+            placeholder : "Enter IP Address..."
+        }).addStyleClass("SettingsTextInput");
+        
+        // TEXT BOX
+        oScope.aElementsForAFormToDestroy.push("Colon");
+        oColon = new sap.m.Text(oScope.createId("Colon"), {
+            text : ":"
+        }).addStyleClass("PadLeft5px PadRight5px FlexNoShrink MarTop15px");
+        
+        // PORT INPUT
+        oScope.aElementsForAFormToDestroy.push("IPPortField");
+        oIPPort = new sap.m.Input(oScope.createId("IPPortField"), {
+            value : "888",
+            placeholder : "Port",
+            type : "Number"
+        }).addStyleClass("maxwidth80px SettingsTextInput");
+        
+        // HBOX CONTAINER
+        oScope.aElementsForAFormToDestroy.push("IPBox");
+        oIPAddressAndPortBox = new sap.m.HBox(oScope.createId("IPBox"), {
+            layoutData : new sap.m.FlexItemData({ growFactor : 1 }),
+            items : [ oIPAddressField,oColon,oIPPort ]
+        }).addStyleClass("IPAddressBox");
+        oScope.byId("formBox").addItem(oIPAddressAndPortBox);
+        
+        //-----------------------------------------------//
+        // USERNAME                                      //
+        //-----------------------------------------------//
+        
+        // LABEL
+        oScope.aElementsForAFormToDestroy.push("UsernameLabel");
+        oDeviceUserNameLabel = new sap.m.Label(oScope.createId("UsernameLabel"), {
+            text : "Username"
+        });
+        oScope.byId("formBox").addItem(oDeviceUserNameLabel);
+        
+        // FIELD
+        oScope.aElementsForAFormToDestroy.push("Username");
+        oDeviceUserNameField = new sap.m.Input(oScope.createId("Username"), {
+            placeholder : "Username for the camera"
+        }).addStyleClass("width100Percent SettingsTextInput");
+        oScope.byId("formBox").addItem(oDeviceUserNameField);
+        
+        //-----------------------------------------------//
+        // PASSWORD                                      //
+        //-----------------------------------------------//
+        
+        // LABEL
+        oScope.aElementsForAFormToDestroy.push("PasswordLabel");
+        oDeviceUserPasswordLabel = new sap.m.Label(oScope.createId("PasswordLabel"), {
+            text : "Password"
+        });
+        oScope.byId("formBox").addItem(oDeviceUserPasswordLabel);
+        
+        // FIELD
+        oScope.aElementsForAFormToDestroy.push("Password");
+        oDeviceUserPasswordField = new sap.m.Input(oScope.createId("Password"), {
+            type : sap.m.InputType.Password,
+            placeholder : "Password for the camera"
+        }).addStyleClass("width100Percent SettingsTextInput");
+        oScope.byId("formBox").addItem(oDeviceUserPasswordField);
+    },
+    
+    //------------------------------------------------------------------------//
+    // Form to create the stream.
     //------------------------------------------------------------------------//
     
     CreateThingForm : function(oScope, iLinkId, oFormBox, aElementsToEnableOnSuccess) {

@@ -30,6 +30,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
     // rather than in DrawUI().
     wDeviceOptionCBox       : null,
     wDeviceOptionCBoxHolder : null,
+    wRoomLabel              : null,
     wRoomCBox               : null,
     wRoomCBoxHolder         : null,
     wFormBox                : null,
@@ -120,19 +121,6 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         var bError                  = false;
         var aErrorMessages          = [];
         var mEntry                  = me.DeviceOptions[ me.byId("linkTypeCBox").getSelectedKey() ];
-        
-        //mHubInfo        = me.ValidateHub();
-        //mLinkTypeInfo   = me.ValidateLinkType();
-        
-//        if (mHubInfo.bError === true) {
-//            bError = true;
-//            aErrorMessages = aErrorMessages.concat(mHubInfo.aErrorMessages);
-//        }
-        
-//        if (mLinkTypeInfo.bError === true) {
-//            bError = true;
-//            aErrorMessages = aErrorMessages.concat(mLinkTypeInfo.aErrorMessages);
-//        }
         
         if (bError === false) {
             try {
@@ -255,11 +243,11 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
      * @returns {map}
      */
     FetchAPIAndParameters : function () {
-        var me                    = this;           // Preserving this scope
-        var mData                = {};             // Map for the AJAX request
-        var sLinkType            = "";
-        var sSBoxKey            = me.byId("linkTypeCBox").getSelectedItem().getKey();
-        var mEntry                = me.DeviceOptions[sSBoxKey];
+        var me          = this;           // Preserving this scope
+        var mData       = {};             // Map for the AJAX request
+        var sLinkType   = "";
+        var sSBoxKey    = me.byId("linkTypeCBox").getSelectedItem().getKey();
+        var mEntry      = me.DeviceOptions[sSBoxKey];
         
         try {
             if (mEntry.Type === "type") {
@@ -314,7 +302,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                     "CameraName" : me.byId("CameraNameField").getValue()
                 };
             }
-        } catch (e2000) {
+        } catch (e) {
             jQuery.sap.log.error("Error refreshing core variables: "+e.message);
             IOMy.common.showWarning(sLinkType+" successfully created but there was an error refreshing core variables: "+e.message, "Errors");
         }
@@ -359,9 +347,10 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                             // Set the flag to clear the way for a new UI instance
                             me.bUIReadyToBeWiped = true;
 
-                            if (me.DeviceOptions[ me.wDeviceOptionCBox.getSelectedKey() ].Type === "type") {
+                            if (mEntry.Type === "type") {
                                 var fnSuccess;
                                 var fnFail;
+                                var iRoomId;
 
                                 fnSuccess = function () {
                                     IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
@@ -381,21 +370,30 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                                 };
 
                                 fnFail = function (err) {
-                                    IOMy.common.showWarning("Successfully created device, but could not place it in "+me.wRoomCBox.getSelectedItem().getText()+".", "Warning", fnSuccess);
+                                    IOMy.common.showWarning("Successfully created device, but could not place it in "+me.byId("roomCBox").getSelectedItem().getText()+".", "Warning", fnSuccess);
 
                                 };
 
-                                if (me.wRoomCBox !== null) {
-                                    IOMy.devices.AssignDeviceToRoom({
-                                        "linkID" : iLinkId,
-                                        "roomID" : me.wRoomCBox.getSelectedKey(),
-
-                                        "onSuccess" : fnSuccess,
-                                        "onFail"    : fnFail
-                                    });
+                                if (me.byId("roomCBox") !== null && me.byId("roomCBox") !== undefined) {
+                                    iRoomId = me.byId("roomCBox").getSelectedKey();
                                 } else {
-                                    fnSuccess();
+                                    iRoomId = 1;
                                 }
+                                
+                                if (iRoomId === "") {
+                                    iRoomId = 1;
+                                }
+                                
+                                IOMy.devices.AssignDeviceToRoom({
+                                    "linkID" : iLinkId,
+                                    "roomID" : iRoomId,
+
+                                    "onSuccess" : fnSuccess,
+                                    "onFail"    : fnFail
+                                });
+//                                } else {
+//                                    fnSuccess();
+//                                }
                             } else {
                                 IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
                             }
@@ -454,18 +452,44 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             if (iLinkTypeId == 2) {
                 IOMy.devices.zigbeesmartplug.CreateLinkForm(me, me.byId("formBox"));
                 IOMy.devices.zigbeesmartplug.PopulateTelnetLogArea(me);
+                
+                if (me.wRoomCBox !== null && me.wRoomCBox !== undefined) {
+                    me.wRoomCBox.setVisible(false);
+                    me.wRoomLabel.setVisible(false);
+                }
             // Onvif Server
             } else if (iLinkTypeId == 6) {
-                me.CreateOnvifServerForm();
+                IOMy.devices.onvif.CreateLinkForm(me);
+                
+                if (me.wRoomCBox !== null && me.wRoomCBox !== undefined) {
+                    me.wRoomCBox.setVisible(true);
+                    me.wRoomLabel.setVisible(true);
+                }
+                
             // Philips Hue Bridge
             } else if (iLinkTypeId == 7) {
-                me.CreatePhilipsHueBridgeForm();
+                IOMy.devices.philipshue.CreateLinkForm(me);
+                
+                if (me.wRoomCBox !== null && me.wRoomCBox !== undefined) {
+                    me.wRoomCBox.setVisible(true);
+                    me.wRoomLabel.setVisible(true);
+                }
             // Open Weather Map
             } else if (iLinkTypeId == 8) {
                 IOMy.devices.weatherfeed.CreateLinkForm(me, me.byId("formBox"));
+                
+                if (me.wRoomCBox !== null && me.wRoomCBox !== undefined) {
+                    me.wRoomCBox.setVisible(true);
+                    me.wRoomLabel.setVisible(true);
+                }
             // IP Webcam
             } else if (iLinkTypeId == IOMy.devices.ipcamera.LinkTypeId) {
                 IOMy.devices.ipcamera.createNewDeviceForm();
+                
+                if (me.wRoomCBox !== null && me.wRoomCBox !== undefined) {
+                    me.wRoomCBox.setVisible(true);
+                    me.wRoomLabel.setVisible(true);
+                }
             }
         } else if (mEntry.Type === "device") {
             me.iLinkId = mEntry.Id;
@@ -492,7 +516,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             }
         }
         
-        if (me.wRoomCBox !== null) {
+        if (me.wRoomCBox !== null && me.wRoomCBox !== undefined) {
             me.wRoomCBox.destroy();
             me.wRoomCBox = null;
         }
@@ -543,7 +567,6 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         // UI5 Objects used in all link forms
         var oLinkTypeLabel, oHubLabel;
         var oHubCBox;
-        var oRoomLabel;
         var oAddButton; // Button to add link
         var oPanel; // Container
         
@@ -566,24 +589,28 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         //-------------------------------------------------------//
         // ROOM SELECT BOX                                       //
         //-------------------------------------------------------//
-        oRoomLabel = new sap.m.Label({
+        me.wRoomLabel = new sap.m.Label({
             text : "Room to put this device in"
         });
         
         try {
-            me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_1").addStyleClass("width100Percent SettingsDropDownInput");
-            me.wRoomCBox.setSelectedKey(me.iRoomId);
-
+            me.wRoomCBox = IOMy.widgets.getRoomSelector(me.createId("roomCBox"), "_1");
             me.wRoomCBoxHolder = new sap.m.VBox({
                 items : [me.wRoomCBox]
             }).addStyleClass("width100Percent");
         } catch (ex) {
             me.wRoomCBoxHolder = null;
             me.wRoomCBox = null;
+            jQuery.sap.log.error(ex.message);
         } finally {
             if (IOMy.functions.getNumberOfRooms() === 0) {
-                oRoomLabel.setVisible(false);
+                me.wRoomLabel.setVisible(false);
             }
+        }
+        
+        if (me.wRoomCBox !== null && me.wRoomCBox !== undefined) {
+            me.wRoomCBox.setSelectedKey(me.iRoomId);
+            me.wRoomCBox.addStyleClass("width100Percent SettingsDropDownInput");
         }
         
         //-------------------------------------------------------//
@@ -599,6 +626,10 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             me.wDeviceOptionCBox.setSelectedKey("type"+me.iLinkTypeId);
         } else {
             me.wDeviceOptionCBox.setSelectedKey(null);
+        }
+        
+        if (me.iRoomId !== null) {
+            me.wDeviceOptionCBox.setSelectedKey("type"+IOMy.devices.onvif.LinkTypeId);
         }
         
         me.wDeviceOptionCBox.attachChange(
@@ -625,7 +656,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             items : [
                 oHubLabel,oHubCBox,
                 oLinkTypeLabel,me.wDeviceOptionCBoxHolder,
-                oRoomLabel,me.wRoomCBoxHolder,
+                me.wRoomLabel,me.wRoomCBoxHolder,
                 me.wFormBox
             ]
         }).addStyleClass("UserInputForm");
@@ -644,104 +675,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             // Add Device, TODO: Move these functions into separate areas!
             //----------------------------------------------------------------//
             acceptPress : function() {
-                var thisButton = this; // Captures the scope of the calling button.
-                thisButton.setEnabled(false); // Lock the button
-                IOMy.common.NavigationToggleNavButtons(me, false); // Lock the navigation buttons.
-
-                // Error checking variables
-                var bError                  = false;
-                var mInfo                   = false;
-                var aErrorMessages          = [];
-                var sErrorMessage           = "";
-                var mEntry                  = me.DeviceOptions[ me.byId("linkTypeCBox").getSelectedKey() ];
-
-                var fnFail = function (sErrMesg) {
-                    IOMy.common.showError("Error adding the camera:\n\n"+sErrMesg, "", 
-                        function () {
-                            thisButton.setEnabled(true);
-                            IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
-                        }
-                    );
-                };
-
-                // If this is a webcam we're adding, there is a different mechanism for
-                // adding it.
-                if (mEntry.Type === "type" && mEntry.Id == IOMy.devices.ipcamera.LinkTypeId) {
-                    try {
-                        IOMy.devices.ipcamera.submitWebcamInformation({
-                            fileType        : me.wFileTypeSelector.getSelectedKey(),
-                            hubID           : me.byId("hubCBox").getSelectedKey(),
-                            protocol        : me.wProtocol.getValue(),
-                            ipAddress       : me.wIPAddress.getValue(),
-                            ipPort          : me.wIPPort.getValue(),
-                            streamPath      : me.wStreamPath.getValue(),
-
-                            onSuccess : function () {
-                                IOMy.common.showMessage({
-                                    text : "New webcam successfully created!",
-                                    view : thisView
-                                });
-
-                                IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
-                                IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
-                            },
-
-                            onFail : fnFail
-                        });
-                    } catch (ex) {
-                        fnFail(ex.message);
-                    }
-
-                } else {
-                    // VALIDATE FORM DATA
-                    if (bError === false) {
-                        mInfo = me.ValidateFormData();
-                        bError = mInfo.bError;
-                        aErrorMessages = mInfo.aErrorMessages;
-
-                        //------------------------------------------------//
-                        // Try to add the device                          //
-                        //------------------------------------------------//
-                        try {
-                            // IF EVERYTHING IS VALID, ADD THE DEVICE
-                            if (bError === false) {
-                                var mData = me.FetchAPIAndParameters();
-                                IOMy.apiphp.AjaxRequest(mData);
-
-                            // OTHERWISE BRING UP AN ERROR MESSAGE ON THE SCREEN 
-                            } else {
-                                if (aErrorMessages.length === 1) {
-                                    sErrorMessage = "There was an error: \n\n"+aErrorMessages.join('\n');
-                                } else {
-                                    sErrorMessage = "There were "+aErrorMessages.length+" errors:\n\n"+aErrorMessages.join('\n\n');
-                                }
-
-                                jQuery.sap.log.error(sErrorMessage);
-                                IOMy.common.showError(sErrorMessage, "",
-                                    function () {
-                                        thisButton.setEnabled(true);
-                                    }
-                                );
-                            }
-                        } catch (e) {
-                            bError = true; // No.
-                            aErrorMessages.push("Error 0x1010: There was an error retrieving the API parameters: "+e.message);
-
-                            if (aErrorMessages.length === 1) {
-                                sErrorMessage = "There was an error: \n\n"+aErrorMessages.join('\n');
-                            } else {
-                                sErrorMessage = "There were "+aErrorMessages.length+" errors:\n\n"+aErrorMessages.join('\n\n');
-                            }
-
-                            jQuery.sap.log.error(sErrorMessage);
-                            IOMy.common.showError(sErrorMessage, "", 
-                                function () {
-                                    thisButton.setEnabled(true);
-                                }
-                            );
-                        }
-                    }
-                }
+                me.createDevice();
             }
             
         }).addStyleClass("TextCenter MarTop12px");
@@ -763,207 +697,141 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         
     },
     
-    
-    // #TODO:# Move Function to "util\devices\onvif.js"
-    CreateOnvifServerForm : function () {
-        //===============================================//
-        // DECLARE VARIABLES                             //
-        //===============================================//
+    createDevice : function () {
+        var me = this; // Captures the scope of the calling button.
+        var thisView = me.getView();
         
-        var me = this;                  // Used for capturing this scope.
-        
-        // Labels
-        var oIPAddressAndPortLabel;
-        var oDeviceUserNameLabel;
-        var oDeviceUserPasswordLabel;
-        // Fields
-        // --IP Address and Port
-        var oIPAddressField;            // sap.m.Input
-        var oColon;                     // sap.m.Text
-        var oIPPort;                    // sap.m.Input
-        var oIPAddressAndPortBox;       // sap.m.HBox
-        // --Device User Token
-        var oDeviceUserNameField;      // sap.m.Input
-        var oDeviceUserPasswordField;  // sap.m.Input
-        
-        //--------------------------------------------------------------------//
-        // Change the help message for the New Link page.
-        //--------------------------------------------------------------------//
-        // TODO: Stick this in the locale file. Alter the mechanism to accommodate these extra messages.
-        IOMy.help.PageInformation["pSettingsLinkAdd"] = "" +
-            "To create an Onvif Server, enter the IP address and port of the " +
-            "onvif supported camera. The default port is normally 888.\n\nAfter " +
-            "the server is created, iOmy will take you to add a camera item to " +
-            "the newly created server.";
-        
-        //===============================================//
-        // CONSTRUCT ELEMENTS                            //
-        //===============================================//
-        
-        //-----------------------------------------------//
-        // IP ADDRESS AND PORT                           //
-        //-----------------------------------------------//
-        
-        // IP ADDRESS LABEL
-        me.aElementsForAFormToDestroy.push("IPAddressLabel");
-        oIPAddressAndPortLabel = new sap.m.Label(me.createId("IPAddressLabel"), {
-            text : "IP Address and port (eg. 10.9.9.9:80)"
-        });
-        me.byId("formBox").addItem(oIPAddressAndPortLabel);
-        
-        // IP ADDRESS INPUT
-        me.aElementsForAFormToDestroy.push("IPAddressField");
-        oIPAddressField = new sap.m.Input(me.createId("IPAddressField"), {
-            layoutData : new sap.m.FlexItemData({ growFactor : 1 }),
-            placeholder : "Enter IP Address..."
-        }).addStyleClass("SettingsTextInput");
-        
-        // TEXT BOX
-        me.aElementsForAFormToDestroy.push("Colon");
-        oColon = new sap.m.Text(me.createId("Colon"), {
-            text : ":"
-        }).addStyleClass("PadLeft5px PadRight5px FlexNoShrink MarTop15px");
-        
-        // PORT INPUT
-        me.aElementsForAFormToDestroy.push("IPPortField");
-        oIPPort = new sap.m.Input(me.createId("IPPortField"), {
-            value : "888",
-            placeholder : "Port"
-        }).addStyleClass("maxwidth80px SettingsTextInput");
-        
-        // HBOX CONTAINER
-        me.aElementsForAFormToDestroy.push("IPBox");
-        oIPAddressAndPortBox = new sap.m.HBox(me.createId("IPBox"), {
-            layoutData : new sap.m.FlexItemData({ growFactor : 1 }),
-            items : [ oIPAddressField,oColon,oIPPort ]
-        }).addStyleClass("IPAddressBox");
-        me.byId("formBox").addItem(oIPAddressAndPortBox);
-        
-        //-----------------------------------------------//
-        // USERNAME                                      //
-        //-----------------------------------------------//
-        
-        // LABEL
-        me.aElementsForAFormToDestroy.push("UsernameLabel");
-        oDeviceUserNameLabel = new sap.m.Label(me.createId("UsernameLabel"), {
-            text : "Username"
-        });
-        me.byId("formBox").addItem(oDeviceUserNameLabel);
-        
-        // FIELD
-        me.aElementsForAFormToDestroy.push("Username");
-        oDeviceUserNameField = new sap.m.Input(me.createId("Username"), {
-            placeholder : "Username for the camera"
-        }).addStyleClass("width100Percent SettingsTextInput");
-        me.byId("formBox").addItem(oDeviceUserNameField);
-        
-        //-----------------------------------------------//
-        // PASSWORD                                      //
-        //-----------------------------------------------//
-        
-        // LABEL
-        me.aElementsForAFormToDestroy.push("PasswordLabel");
-        oDeviceUserPasswordLabel = new sap.m.Label(me.createId("PasswordLabel"), {
-            text : "Password"
-        });
-        me.byId("formBox").addItem(oDeviceUserPasswordLabel);
-        
-        // FIELD
-        me.aElementsForAFormToDestroy.push("Password");
-        oDeviceUserPasswordField = new sap.m.Input(me.createId("Password"), {
-            type : sap.m.InputType.Password,
-            placeholder : "Password for the camera"
-        }).addStyleClass("width100Percent SettingsTextInput");
-        me.byId("formBox").addItem(oDeviceUserPasswordField);
-    },
-    
-    
-    // #TODO:# Move Function to "util\devices\philipshue.js" 
-    CreatePhilipsHueBridgeForm : function () {
-        //===============================================//
-        // DECLARE VARIABLES                             //
-        //===============================================//
-        
-        var me = this;                  // Used for capturing this scope.
-        
-        // Labels
-        var oIPAddressAndPortLabel;
-        var oDeviceUserTokenLabel;
-        // Fields
-        // IP Address and Port
-        var oIPAddressField;            // sap.m.Input
-        var oColon;                     // sap.m.Text
-        var oIPPort;                    // sap.m.Input
-        var oIPAddressAndPortBox;       // sap.m.HBox
-        // Device User Token
-        var oDeviceUserTokenField;      // sap.m.Input
-        
-        //--------------------------------------------------------------------//
-        // Change the help message for the New Link page.
-        //--------------------------------------------------------------------//
-        // TODO: Stick this in the locale file. Alter the mechanism to accommodate these extra messages.
-        IOMy.help.PageInformation["pSettingsLinkAdd"] = "" +
-            "Enter the IP address and port of the Philips Hue bridge, and also " +
-            "the device user token for your device. This is located in your " +
-            "Philips Hue bridge manual.\n\nAdding the bridge to iOmy will also " +
-            "attempt to add all devices attached to the bridge as items in iOmy.";
-        
-        //===============================================//
-        // CONSTRUCT ELEMENTS                            //
-        //===============================================//
-        
-        //-----------------------------------------------//
-        // IP ADDRESS AND PORT                           //
-        //-----------------------------------------------//
-        
-        // LABEL
-        me.aElementsForAFormToDestroy.push("IPAddressLabel");
-        oIPAddressAndPortLabel = new sap.m.Label(me.createId("IPAddressLabel"), {
-            text : "IP Address and port (eg. 10.9.9.9 : 80)"
-        });
-        me.byId("formBox").addItem(oIPAddressAndPortLabel);
-        
-        // FIELD
-        me.aElementsForAFormToDestroy.push("IPAddressField");
-        oIPAddressField = new sap.m.Input(me.createId("IPAddressField"), {
-            layoutData : new sap.m.FlexItemData({ growFactor : 1 }),
-            placeholder : "Enter IP Address..."
-        }).addStyleClass("width100Percent SettingsTextInput");
-        
-        me.aElementsForAFormToDestroy.push("Colon");
-        oColon = new sap.m.Text(me.createId("Colon"), {
-            text : ":"
-        }).addStyleClass("PadLeft5px PadRight5px FlexNoShrink MarTop15px");
-        
-        me.aElementsForAFormToDestroy.push("IPPortField");
-        oIPPort = new sap.m.Input(me.createId("IPPortField"), {
-            value : "80"
-        }).addStyleClass("maxwidth80px SettingsTextInput");
-        
-        me.aElementsForAFormToDestroy.push("IPBox");
-        oIPAddressAndPortBox = new sap.m.HBox(me.createId("IPBox"), {
-            layoutData : new sap.m.FlexItemData({ growFactor : 1 }),
-            items : [ oIPAddressField,oColon,oIPPort ]
-        }).addStyleClass("width100Percent IPAddressBox");
-        me.byId("formBox").addItem(oIPAddressAndPortBox);
-        
-        //-----------------------------------------------//
-        // DEVICE USER TOKEN FIELD                       //
-        //-----------------------------------------------//
-        
-        // LABEL
-        me.aElementsForAFormToDestroy.push("DeviceUserTokenLabel");
-        oDeviceUserTokenLabel = new sap.m.Label(me.createId("DeviceUserTokenLabel"), {
-            text : "Device User Token Label"
-        });
-        me.byId("formBox").addItem(oDeviceUserTokenLabel);
-        
-        // FIELD
-        me.aElementsForAFormToDestroy.push("DeviceUserTokenField");
-        oDeviceUserTokenField = new sap.m.Input(me.createId("DeviceUserTokenField"), {
-            placeholder : "Located in your Philips Hue bridge manual"
-        }).addStyleClass("width100Percent SettingsTextInput");
-        me.byId("formBox").addItem(oDeviceUserTokenField);
-    }
+        me.byId("buttonBox").setEnabled(false); // Lock the button
+        IOMy.common.NavigationToggleNavButtons(me, false); // Lock the navigation buttons.
 
+        // Error checking variables
+        var bError                  = false;
+        var mInfo                   = false;
+        var aErrorMessages          = [];
+        var sErrorMessage           = "";
+        var mEntry                  = me.DeviceOptions[ me.byId("linkTypeCBox").getSelectedKey() ];
+
+        var fnFail = function (sErrMesg) {
+            IOMy.common.showError("Error adding the camera:\n\n"+sErrMesg, "", 
+                function () {
+                    me.byId("buttonBox").setEnabled(true);
+                    IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
+                }
+            );
+        };
+
+        // If this is a webcam we're adding, there is a different mechanism for
+        // adding it.
+        if (mEntry.Type === "type" && mEntry.Id == IOMy.devices.ipcamera.LinkTypeId) {
+            try {
+                IOMy.devices.ipcamera.submitWebcamInformation({
+                    "fileType"        : me.wFileTypeSelector.getSelectedKey(),
+                    "hubID"           : me.byId("hubCBox").getSelectedKey(),
+                    "protocol"        : me.wProtocol.getValue(),
+                    "ipAddress"       : me.wIPAddress.getValue(),
+                    "ipPort"          : me.wIPPort.getValue(),
+                    "streamPath"      : me.wStreamPath.getValue(),
+
+                    "onSuccess" : function (mData) {
+                        
+                        if (mData.Error === false) {
+                            
+                            IOMy.devices.AssignDeviceToRoom({
+                                "linkID" : mData.Data.LinkId,
+                                "roomID" : me.byId("roomCBox").getSelectedKey(),
+
+                                "onSuccess" : function() {
+                                    IOMy.common.RefreshCoreVariables({
+
+                                        "onSuccess" : function () {
+                                            IOMy.common.showMessage({
+                                                "text" : "New webcam successfully created!",
+                                                "view" : thisView
+                                            });
+
+                                            IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
+                                            IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
+                                        }
+
+                                    });
+                                },
+
+                                "onFail"    : function () {
+                                    IOMy.common.RefreshCoreVariables({
+
+                                        "onSuccess" : function () {
+                                            IOMy.common.showWarning("Successfully created device, but could not place it in "+me.byId("roomCBox").getSelectedItem().getText()+".", "Warning",
+                                                function () {
+                                                    IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
+                                                    IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
+                                                }
+                                            );
+                                        }
+
+                                    });
+                                }
+                            });
+                        } else {
+                            fnFail(mData.ErrMesg);
+                        }
+
+                    },
+
+                    "onFail" : fnFail
+                });
+            } catch (ex) {
+                fnFail(ex.message);
+            }
+
+        } else {
+            // VALIDATE FORM DATA
+            if (bError === false) {
+                mInfo = me.ValidateFormData();
+                bError = mInfo.bError;
+                aErrorMessages = mInfo.aErrorMessages;
+
+                //------------------------------------------------//
+                // Try to add the device                          //
+                //------------------------------------------------//
+                try {
+                    // IF EVERYTHING IS VALID, ADD THE DEVICE
+                    if (bError === false) {
+                        var mData = me.FetchAPIAndParameters();
+                        IOMy.apiphp.AjaxRequest(mData);
+
+                    // OTHERWISE BRING UP AN ERROR MESSAGE ON THE SCREEN 
+                    } else {
+                        if (aErrorMessages.length === 1) {
+                            sErrorMessage = "There was an error: \n\n"+aErrorMessages.join('\n');
+                        } else {
+                            sErrorMessage = "There were "+aErrorMessages.length+" errors:\n\n"+aErrorMessages.join('\n\n');
+                        }
+
+                        jQuery.sap.log.error(sErrorMessage);
+                        IOMy.common.showError(sErrorMessage, "",
+                            function () {
+                                me.byId("buttonBox").setEnabled(true);
+                            }
+                        );
+                    }
+                } catch (e) {
+                    bError = true; // No.
+                    aErrorMessages.push("Error 0x1010: There was an error retrieving the API parameters: "+e.message);
+
+                    if (aErrorMessages.length === 1) {
+                        sErrorMessage = "There was an error: \n\n"+aErrorMessages.join('\n');
+                    } else {
+                        sErrorMessage = "There were "+aErrorMessages.length+" errors:\n\n"+aErrorMessages.join('\n\n');
+                    }
+
+                    jQuery.sap.log.error(sErrorMessage);
+                    IOMy.common.showError(sErrorMessage, "", 
+                        function () {
+                            me.byId("buttonBox").setEnabled(true);
+                        }
+                    );
+                }
+            }
+        }
+    }
 });

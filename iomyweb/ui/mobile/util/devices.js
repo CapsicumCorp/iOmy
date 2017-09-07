@@ -134,14 +134,14 @@ $.extend(IOMy.devices,{
 				}
 			} else {
 				if (mSettings.linkID !== undefined) {
-					mDeviceIDInfo = IOMy.validation.isLinkIDValid(mSettings.linkID);
-				
-					bError			= !mDeviceIDInfo.bIsValid;
-					aErrorMessages	= aErrorMessages.concat(mDeviceIDInfo.aErrorMessages);
-					
-					if (!bError) {
+//					mDeviceIDInfo = IOMy.validation.isLinkIDValid(mSettings.linkID);
+//				
+//					bError			= !mDeviceIDInfo.bIsValid;
+//					aErrorMessages	= aErrorMessages.concat(mDeviceIDInfo.aErrorMessages);
+//					
+//					if (!bError) {
 						iLinkId = mSettings.linkID;
-					}
+//					}
 				} else {
 					fnAppendError("Thing (thingID) or Link (linkID) must be specified!");
 				}
