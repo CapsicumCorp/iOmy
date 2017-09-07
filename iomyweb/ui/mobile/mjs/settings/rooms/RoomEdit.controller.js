@@ -225,57 +225,64 @@ sap.ui.controller("mjs.settings.rooms.RoomEdit", {
                     {
                         text : "Delete This Room",
                         select : function () {
-                            //var oButton = this;
-                            var sDialogTitle = "";
-                            IOMy.common.NavigationToggleNavButtons(me, false);
-                            me.wUpdateButton.setEnabled(false);
-
-                            //-- CONFIRM THAT YOU WISH TO DELETE THIS ROOM --//
-                            IOMy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
-                                function (oAction) {
-                                    if (oAction === sap.m.MessageBox.Action.OK) {
-                                        try {
-                                            IOMy.functions.deleteRoom(me.iRoomID,
-                                                function () {
-                                                    IOMy.common.showMessage({
-                                                        text : me.wRoomName.getValue() + " successfully removed.",
-                                                        view : thisView
-                                                    })
-                                                    IOMy.common.NavigationToggleNavButtons(me, true);
-                                                    me.wUpdateButton.setEnabled(true);
-                                                    IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
-                                                }
-                                            );
-
-                                        } catch (err) {
-
-                                            if (err.name === "DevicesStillInRoomException") {
-                                                sDialogTitle = "Devices still assigned";
-
-                                            } else if (err.name === "AttemptToDeleteOnlyRoomException") {
-                                                // NOTE: This is probably not needed anymore with the way the "Unassigned" pseudo-room works.
-                                                sDialogTitle = "Only room registered"
-
-                                            }
-
-                                            IOMy.common.showError(err.message, sDialogTitle,
-                                                function () {
-                                                    IOMy.common.NavigationToggleNavButtons(me, true);
-                                                    me.wUpdateButton.setEnabled(true);
-                                                }
-                                            );
-
-                                        }
-                                    } else {
-                                        IOMy.common.NavigationToggleNavButtons(me, true);
-                                        me.wUpdateButton.setEnabled(true);
-                                    }
-                                }
-                            );
+                            me.deleteRoom();
                         }
                     }
                 ]
             })
+        );
+    },
+    
+    deleteRoom : function () {
+        var me = this;
+        var thisView = me.getView();
+        var sDialogTitle;
+        
+        IOMy.common.NavigationToggleNavButtons(me, false);
+        me.wUpdateButton.setEnabled(false);
+
+        //-- CONFIRM THAT YOU WISH TO DELETE THIS ROOM --//
+        IOMy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
+            function (oAction) {
+                if (oAction === sap.m.MessageBox.Action.OK) {
+                    try {
+                        IOMy.functions.deleteRoom(me.iRoomID,
+                            function () {
+                                IOMy.common.showMessage({
+                                    text : me.wRoomName.getValue() + " successfully removed.",
+                                    view : thisView
+                                });
+                                IOMy.common.NavigationToggleNavButtons(me, true);
+                                me.wUpdateButton.setEnabled(true);
+                                IOMy.common.NavigationChangePage("pPremiseOverview", {}, true);
+                            }
+                        );
+
+                    } catch (err) {
+
+                        if (err.name === "DevicesStillInRoomException") {
+                            sDialogTitle = "Devices still assigned";
+
+                        } else if (err.name === "AttemptToDeleteOnlyRoomException") {
+                            // NOTE: This is probably not needed anymore with the way the "Unassigned" pseudo-room works.
+                            sDialogTitle = "Only room registered";
+
+                        }
+
+                        IOMy.common.showError(err.message, sDialogTitle,
+                            function () {
+                                IOMy.common.NavigationToggleNavButtons(me, true);
+                                me.wUpdateButton.setEnabled(true);
+                            }
+                        );
+
+                    }
+                    
+                } else {
+                    IOMy.common.NavigationToggleNavButtons(me, true);
+                    me.wUpdateButton.setEnabled(true);
+                }
+            }
         );
     }
 
