@@ -25,8 +25,6 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 $.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
 
 sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
-	functions : IOMy.functions,
-    odata : IOMy.apiodata,
     
     PremiseID : 0,
 /**
@@ -52,7 +50,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditInfo", {
 				
 				// Start rendering the page
 				
-				me.functions.destroyItemsByIdFromView(me, [
+				IOMy.functions.destroyItemsByIdFromView(me, [
 	                "premiseField", "premiseDesc", "premiseOccupants",
                     "premiseBedrooms", "premiseFloors", "premiseRooms",
                     "numberOfUsers"

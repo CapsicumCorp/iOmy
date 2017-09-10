@@ -339,37 +339,6 @@ $.extend(IOMy.devices.weatherfeed,{
         return mInfo;
     },
     
-    /*ValidateRoom : function (oScope) {
-        var me                      = this;
-        var bError                  = false;
-        var aErrorMessages          = [];
-        var mInfo                   = {}; // MAP: Contains the error status and any error messages.
-        var oField                  = oScope.byId(me.uiIDs.sRoomCBoxID+"Field");
-        
-        //-------------------------------------------------\\
-        // Is the hub a proper hub (does it have an ID)
-        //-------------------------------------------------\\
-        try {
-            if (oField.getSelectedKey() === "") {
-                bError = true;
-                if (oField.getValue().trim().length === 0) {
-                    aErrorMessages.push("Room must be specified");
-                } else {
-                    aErrorMessages.push("Room is not valid");
-                }
-            }
-        } catch (e) {
-            bError = true;
-            aErrorMessages.push("Error 0x8101: There was an error checking the room: "+e.message);
-        }
-        
-        // Prepare the return value
-        mInfo.bError = bError;
-        mInfo.aErrorMessages = aErrorMessages;
-        
-        return mInfo;
-    },*/
-    
     ValidateKeyCode : function (oScope) {
         var me                      = this;
         var bError                  = false;

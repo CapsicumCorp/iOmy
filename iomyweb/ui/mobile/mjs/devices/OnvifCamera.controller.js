@@ -371,7 +371,20 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         me.wBtnMoveRight.setEnabled(bStatus);
     },
     
-	//-- TODO: These PTZ functions can be moved to the onvif device module. --//
+	/**
+     * Wrapper function for the PTZ Move command in the IOMy.devices.onvif
+     * library to send the desired number of steps vertically and horizontally
+     * to the function.
+     * 
+     * Examples:
+     * 
+     * * PTZMove(-4,2)      4 steps left and 2 steps up
+     * * PTZMove(2,2)       2 steps right and 2 steps up
+     * * PTZMove(0,-5)      5 steps down
+     * 
+     * @param {type} iPosX      Steps to move horizontally
+     * @param {type} iPosY      Steps to move vertically
+     */
     PTZMove : function (iPosX, iPosY) {
         var me = this;
         
@@ -522,8 +535,6 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
             OrderByClause   : [],
             
             onSuccess : function (type, data) {
-               //console.log(type);
-                //console.log(JSON.stringify(data));
                 
                 if (data.length > 0) {
                     me.sStreamProfileName       = data[0].DATASHORTSTRING_VALUE;
@@ -565,6 +576,6 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         });
         
                 
-    },
+    }
 
 });

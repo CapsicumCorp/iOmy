@@ -44,7 +44,7 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
     iLinkId                 : null,
     iRoomId                 : null,
     
-    DeviceOptions        : IOMy.functions.getNewDeviceOptions(),
+    DeviceOptions        : null,
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -58,7 +58,6 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         thisView.addEventDelegate({
             // Everything is rendered in this function run before rendering.
             onBeforeShow : function (evt) {
-                me.DeviceOptions = IOMy.functions.getNewDeviceOptions();
                 
                 //-- Device type to select --//
                 if (evt.data.LinkTypeId !== undefined) {
@@ -74,9 +73,22 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                     me.iRoomId = null;
                 }
                 
-                // Start the form creation
-                me.DestroyUI();         // STEP 1: Clear any old forms to avoid duplicate IDs
-                me.DrawUI();            // STEP 2: Draw the actual user interface        
+                if (IOMy.common.bLinkTypesLoaded) {
+                    me.DeviceOptions = IOMy.functions.getNewDeviceOptions();
+                    
+                    // Start the form creation
+                    me.DestroyUI();         // STEP 1: Clear any old forms to avoid duplicate IDs
+                    me.DrawUI();            // STEP 2: Draw the actual user interface        
+                } else {
+                    IOMy.common.RetrieveLinkTypeList({
+                        onSuccess : function () {
+                            me.DeviceOptions = IOMy.functions.getNewDeviceOptions();
+                            
+                            me.DestroyUI();         // STEP 1: Clear any old forms to avoid duplicate IDs
+                            me.DrawUI();            // STEP 2: Draw the actual user interface
+                        }
+                    });
+                }
             }
         });
     },
@@ -99,8 +111,6 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 //        
 //    },
     
-    
-    
 /**
 * Called when the Controller is destroyed. Use this one to free resources and finalize activities.
 * @memberOf mjs.settings.links.LinkAdd
@@ -111,7 +121,6 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
 
     ValidateFormData : function () {
         var me                      = this;
-        //var mHubInfo                = {};
         var mIPAddressInfo          = {};
         var mIPPortInfo             = {};
         var mDeviceUserTokenInfo    = {};

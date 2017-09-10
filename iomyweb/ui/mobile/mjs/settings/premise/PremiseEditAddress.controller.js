@@ -25,8 +25,6 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 $.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
 
 sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
-	functions : IOMy.functions,
-    odata : IOMy.apiodata,
     
     loadLocaleCBoxItems : IOMy.functions.loadLocaleCBoxItems,
     
@@ -34,8 +32,8 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
     loadLocaleInfo : function (iPremiseId) {
         var me = this;
         
-        me.odata.AjaxRequest({
-            Url : me.odata.ODataLocation("premiselocation"),
+        IOMy.apiodata.AjaxRequest({
+            Url : IOMy.apiodata.ODataLocation("premiselocation"),
             Columns : ["REGION_NAME", "REGION_PK", "LANGUAGE_PK", "LANGUAGE_NAME", 
                         "PREMISEADDRESS_POSTCODE", "PREMISEADDRESS_SUBREGION",
                         "TIMEZONE_PK", "TIMEZONE_TZ", "PREMISEADDRESS_LINE1", "PREMISEADDRESS_LINE2",
@@ -100,7 +98,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditAddress", {
 				
 				// Start rendering the page
 				
-				me.functions.destroyItemsByIdFromView(me, [
+				IOMy.functions.destroyItemsByIdFromView(me, [
 	                "addressRegion", "addressLanguage", "addressState",
                     "addressPostCode", "addressTimezone", "addressLine1",
                     "addressLine2", "addressLine3", "buttonBox"

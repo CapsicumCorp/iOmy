@@ -44,6 +44,13 @@ $.extend(IOMy.devices,{
 	bLoadingFieldsFromAPI			: false,
 	bLoadingFieldsFromOData			: false,
     
+    /**
+     * Returns the current on/off status of a given device in the form of "On"
+     * or "Off".
+     * 
+     * @param {type} iThingId               ID of the device.
+     * @returns {String} Human-readable status
+     */
     GetDeviceStatus : function (iThingId) {
         var sStatus;
         var iStatus = IOMy.common.ThingList["_"+iThingId].Status;
@@ -70,7 +77,7 @@ $.extend(IOMy.devices,{
                 
             });
         } else {
-            IOMy.common.ThingList["_"+iThingId].Status = iState;
+            //IOMy.common.ThingList["_"+iThingId].Status = iState;
         }
         
     },
@@ -78,8 +85,8 @@ $.extend(IOMy.devices,{
     /**
      * Returns a map of the link a thing (specified by its ID) is connected to.
      * 
-     * @param {type} iThingId           // ID of the thing
-     * @returns {JS Object}             // Link referenced by its thing/item
+     * @param {type} iThingId        ID of the thing
+     * @returns {object}             Link referenced by its thing/item
      */
     GetLinkOfThing : function(iThingId) {
         var iLinkId = IOMy.common.ThingList["_"+iThingId].LinkId;
@@ -94,11 +101,20 @@ $.extend(IOMy.devices,{
     },
     
 	/**
-     * Function that performs an AJAX request to assign a given link to a given room
+     * Function that performs an AJAX request to assign a given device to a
+     * given room.
      * 
-     * @param {type} iLinkId                ID of the link to assign to a room
-     * @param {type} iRoomId                ID of the room for the link to be assigned to
-     * @param {type} sLinkType              String to display specifying the type of link being assigned.
+     * Required parameters:
+     * 
+     * thingID OR linkID:       Takes either the thing ID (preferred) or link ID to indicate which link to move.
+     * roomID:                  The ID of the room to move the device to.
+     * 
+     * Optional parameters:
+     * 
+     * onSuccess:       Function to run after a successful execution.
+     * onFail:          Function to run after an error is encountered.
+     * 
+     * @param {type} mSettings
      */
     AssignDeviceToRoom : function (mSettings) {
         //------------------------------------------------------------//
@@ -152,7 +168,7 @@ $.extend(IOMy.devices,{
 			}
 			
 			//----------------------------------------------------------------//
-			// OPTIONAL: Valid Room ID
+			// Valid Room ID
 			//----------------------------------------------------------------//
 			if (mSettings.roomID !== undefined) {
 				//-- Room ID --//
@@ -161,13 +177,15 @@ $.extend(IOMy.devices,{
 				bError			= !mRoomIDInfo.bIsValid;
 				aErrorMessages	= aErrorMessages.concat(mRoomIDInfo.aErrorMessages);
 				
-				// Throw an exception if one or both IDs are not valid.
+				// Throw an exception if the room ID is invalid.
 				if (bError) {
 					throw new IllegalArgumentException( aErrorMessages.join("\n") );
 				} else {
 					iRoomId		= mSettings.roomID;
 				}
-			}
+			} else {
+                fnAppendError("Room ID (roomID) must be specified!");
+            }
 			
 			//--------------------------------------------------------------------//
 			// Check the settings map for two callback functions.
@@ -221,6 +239,7 @@ $.extend(IOMy.devices,{
      * Validates the room selection mainly just to ensure that everything (like
      * the room ID) is correct and hasn't been tampered with in some way.
      * 
+     * @deprecated Use IOMy.validation.isRoomIDValid instead. Also this was from when we were still using combo boxes.
      * @param {UI5 view} oScope
      * @returns {map}
      */
@@ -251,6 +270,12 @@ $.extend(IOMy.devices,{
         return mInfo;
     },
 	
+    /**
+     * Fetches the ID of a specific page to interact with a particular device.
+     * 
+     * @param {Number} iThingTypeId             ID of the thing type.
+     * @returns {string} Page ID of the appropriate device page.
+     */
 	getDevicePageID : function (iThingTypeId) {
 		//-- Zigbee Netvox Smart Plug --//
 		if( iThingTypeId===2 ) {
@@ -314,6 +339,16 @@ $.extend(IOMy.devices,{
         }
 	},
 	
+    /**
+     * Draws the device entry UI of a given device. The UI will be chosen
+     * according to the type of device specified.
+     * 
+     * @param {string} sPrefix          Prefixes appended to each element ID created.
+     * @param {object} oViewScope       The scope or context of the page it is supposed to show on.
+     * @param {object} aDeviceData      Data of a given device.
+     * 
+     * @returns {sap.m.HBox}    The device entry to be placed in the UI.
+     */
 	GetCommonUI: function( sPrefix, oViewScope, aDeviceData ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
@@ -394,6 +429,14 @@ $.extend(IOMy.devices,{
 		return oUIObject;
 	},
     
+    /**
+     * @deprecated Use GetCommonUI instead.
+     * 
+     * @param {type} sPrefix
+     * @param {type} oViewScope
+     * @param {type} aDeviceData
+     * @returns {unresolved}
+     */
     GetCommonUIForDeviceOverview: function( sPrefix, oViewScope, aDeviceData ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//

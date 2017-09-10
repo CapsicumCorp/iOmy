@@ -1,7 +1,8 @@
 /*
 Title: Extension of Functions Library (Get Device Type Options for New Device)
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
-Description: A function to create a list of options for .
+Description: A function to create a list of options for selecting a device
+    option in the New Devices page.
 Copyright: Capsicum Corporation 2017
 
 This file is part of iOmy.
@@ -28,6 +29,21 @@ $.extend(IOMy.functions, {
 	/**
 	 * Creates a JSON structure that contains a list of device types, and onvif
 	 * servers for users to select from.
+     * 
+     * Example:
+     * 
+     * {
+     *     "type2" : {
+     *         "Id" : 2,
+     *         "Name" : "New Zigbee Dongle",
+     *         "Type" : "type"
+     *     },
+     *     "device120" : {
+     *         "Id" : 120,
+     *         "Name" : "Onvif Server",
+     *         "Type" : "device"
+     *     }
+     * }
 	 * 
 	 * @returns {Object}		Data structure
 	 */

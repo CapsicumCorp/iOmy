@@ -25,8 +25,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 $.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
 
 sap.ui.controller("mjs.settings.devices.EditThing", {
-	api : IOMy.apiphp,
-	functions : IOMy.functions,
     
     thingID : null,
     oThing : null,

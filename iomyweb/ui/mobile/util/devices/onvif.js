@@ -682,18 +682,36 @@ $.extend(IOMy.devices.onvif,{
         return mInfo;
     },
     
-    showSnapshot : function (iThingId, oCallingButton) {
+    showSnapshot : function (iThingId, oCallingButton, oPage) {
         var oRPopover = new sap.m.ResponsivePopover({
             title : IOMy.common.ThingList["_"+iThingId].DisplayName,
             content : [
+                IOMy.common.showLoading({
+                    "show" : true,
+                    "text" : "Fetching Snapshot...",
+                    "context" : oPage
+                }),
+                    
                 new sap.m.Image({
                     densityAware : false,
                     alt : "Failed to acquire snapshot",
                     src : IOMy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+iThingId,
                     width: "100%",
                     
+                    load : function () {
+                        IOMy.common.showLoading({
+                            "show" : false,
+                            "context" : oPage
+                        });
+                    },
+                    
                     error : function () {
                         this.destroy();
+                        
+                        IOMy.common.showLoading({
+                            "show" : false,
+                            "context" : oPage
+                        });
                         
                         oRPopover.addContent(
                             new sap.m.VBox({
@@ -768,7 +786,7 @@ $.extend(IOMy.devices.onvif,{
                                         width: "100%",
                                         icon : "sap-icon://GoogleMaterial/photo_camera",
                                         press : function () {
-                                            me.showSnapshot(aDeviceData.DeviceId, this);
+                                            me.showSnapshot(aDeviceData.DeviceId, this, oViewScope);
                                         }
                                     })
                                 ]

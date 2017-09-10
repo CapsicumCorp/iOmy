@@ -38,6 +38,13 @@ $.extend(IOMy.time,{
 	/**************************************************************
 	** Get Current UTS                                           **
 	***************************************************************/
+   
+    /**
+     * Converts a Javascript date to a more usable map.
+     * 
+     * @param {type} oDate      Javascript Date
+     * @returns {object}        Date in a map format
+     */
 	ExtractTimeDataFromJSDate: function( oDate ) {
 		//----------------------------------------------------//
 		//-- 1.0 - Declare Variables                        --//
@@ -83,6 +90,12 @@ $.extend(IOMy.time,{
 	/**************************************************************
 	** Get Current UTS                                           **
 	***************************************************************/
+    
+    /**
+     * Generates the current time in UTS.
+     * 
+     * @returns {Number} Current time in Unix Timestamp format.
+     */
 	GetCurrentUTS: function() {
 		//----------------------------------------------------//
 		//-- 1.0 - Declare Variables                        --//

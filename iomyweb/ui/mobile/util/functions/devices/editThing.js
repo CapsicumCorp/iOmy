@@ -26,7 +26,6 @@ $.sap.declare("IOMy.functions.devices.editThing",true);
 $.extend(IOMy.functions, {
 	
 	editThing : function (mSettings) {
-		var me						= this;
 		var bError					= false;
 		var aErrorMessages			= [];
 		var iThingId;
