@@ -1,4 +1,5 @@
 include ':usbSerialForAndroid'
+include ':CSRmeshLibrary'
 include ':WatchInputsAndroid'
 include ':ndksimclist'
 include ':ndkdebuglib'
@@ -25,6 +26,7 @@ include ':app'
 final watchinputsdir="../watchinputs"
 
 project(":usbSerialForAndroid").projectDir=file(watchinputsdir+"/usbSerialForAndroid")
+project(":CSRmeshLibrary").projectDir=file(watchinputsdir+"/CSRmeshLibrary")
 project(":WatchInputsAndroid").projectDir=file(watchinputsdir+"/WatchInputsAndroid")
 project(":ndksimclist").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/simclist")
 project(":ndkdebuglib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/debuglib")

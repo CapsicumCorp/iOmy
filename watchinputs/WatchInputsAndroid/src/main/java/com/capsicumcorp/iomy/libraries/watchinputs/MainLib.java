@@ -23,8 +23,11 @@ package com.capsicumcorp.iomy.libraries.watchinputs;
 
 import java.io.File;
 
+import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.usb.UsbManager;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
@@ -52,6 +55,7 @@ public class MainLib {
     private WebApiClientLib mWebApiClientLib;
     private LockLib mLockLib;
     private TimeRulesLib mTimeRulesLib;
+    private BluetoothHWAndroidLib mBluetoothHWAndroidLib;
 
     public native int jniinit();
     public native int jniloadModule(long module);
@@ -94,13 +98,23 @@ public class MainLib {
         mWebApiClientLib=new WebApiClientLib(AppName);
         mLockLib=new LockLib(AppName);
         mTimeRulesLib=new TimeRulesLib(AppName);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            mBluetoothHWAndroidLib = new BluetoothHWAndroidLib(context);
+        }
     }
 
     public int init() {
-        return jniinit();
+        int result=jniinit();
+
+        mBluetoothHWAndroidLib.init();
+
+        return result;
     }
 
     public void shutdown() {
+        //Temp for Testing
+        mBluetoothHWAndroidLib.shutdown();
+
         jnicleanup();
     }
 
