@@ -133,6 +133,7 @@ public class BluetoothHWAndroidLib implements AssociationListener {
         return 0;
     }
     private void instanceShutdown() {
+        mService.disconnectBridge();
         mService.setHandler(null);
         mMeshHandler.removeCallbacksAndMessages(null);
         context.unbindService(mServiceConnection);
@@ -182,7 +183,9 @@ public class BluetoothHWAndroidLib implements AssociationListener {
 
         //TODO: Add device store
         // set next device id to be used according with the last device used in the database.
-        mService.setNextDeviceId(1);
+        //NOTE: Do not call this if there are no devices in the database as the CSRMesh library will
+        //  set the first id
+        //mService.setNextDeviceId(1);
 
         // set TTL to the library
         //TODO: Add device store
@@ -249,8 +252,14 @@ public class BluetoothHWAndroidLib implements AssociationListener {
                     }*/
                     break;
                 }
+                case MeshService.MESSAGE_LE_DISCONNECT_COMPLETE:
+                    //TODO: Handle the case if the app is exiting
+                    parentActivity.connect();
+                    break;
                 case MeshService.MESSAGE_BRIDGE_CONNECT_TIMEOUT:
-                    //TODO: If this message occurs, the CSRMesh library seems to give up so find a way to get it to restart again
+                    // If this message occurs, the CSRMesh library seems to give up call disconnect
+                    //   and then reconnect to get CSRMesh going again
+                    parentActivity.mService.disconnectBridge();
                     break;
                 case MeshService.MESSAGE_TIMEOUT:{
                     int expectedMsg = msg.getData().getInt(MeshService.EXTRA_EXPECTED_MESSAGE);
@@ -264,6 +273,7 @@ public class BluetoothHWAndroidLib implements AssociationListener {
                     }
                     meshRequestId = msg.getData().getInt(MeshService.EXTRA_MESH_REQUEST_ID);
                     Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib message timeout: expected message: "+expectedMsg+" id: "+id+" meshRequestId: "+meshRequestId);
+                    //TODO: Handle various timeouts such as association timeout
                     //parentActivity.onMessageTimeout(expectedMsg, id, meshRequestId);
                     break;
                 }
