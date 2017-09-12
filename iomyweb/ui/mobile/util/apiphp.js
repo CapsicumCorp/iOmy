@@ -208,7 +208,7 @@ $.extend(IOMy.apiphp,{
 					data: aConfig.data || {},                      //-- If there is anything in "data" then include it here.                                     --//
 					async: bAsync,
 					RetryAttemptCount: 0,                          //-- The current count of how many attempts to get a successful Ajax request have been made.  --//
-					RetryAttemptLimit: 1,                          //-- Maximum amount of times the Ajax request should be retried before giving up.             --//
+					RetryAttemptLimit: 3,                          //-- Maximum amount of times the Ajax request should be retried before giving up.             --//
 					bApiComplete: false,                           //-- Indicates if the API is flagged as "still attempting" or "aborting/successful".          --//
 					iCurrentLoginTimestamp: iLoginTimestamp,       //-- Holds the Login Timestamp so the API know to abort if this value changes.                --//
 					DebugLogString: "",                            //-- This is used to store the DebuggingLog.                                                  --//
