@@ -106,15 +106,10 @@ public class MainLib {
     public int init() {
         int result=jniinit();
 
-        mBluetoothHWAndroidLib.init();
-
         return result;
     }
 
     public void shutdown() {
-        //Temp for Testing
-        mBluetoothHWAndroidLib.shutdown();
-
         jnicleanup();
     }
 
@@ -248,6 +243,17 @@ public class MainLib {
             Log.println(Log.INFO, AppName, "MainLib.loadModules: Failed to load module: timeruleslib");
             return -1;
         }
+        //Add BluetoothHWAndroid library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            modulesinfo = mBluetoothHWAndroidLib.jnigetmodulesinfo();
+            result = jniloadModule(modulesinfo);
+            if (result != 0) {
+                Log.println(Log.INFO, AppName, "MainLib.loadModules: Failed to load module: bluetoothHWAndroidLib");
+                return -1;
+            }
+        } else {
+            Log.println(Log.INFO, AppName, "MainLib.loadModules: Not loading bluetoothHWAndroidLib module as it requires Android >= 4.3");
+        }
         return 0;
     }
 
@@ -283,5 +289,4 @@ public class MainLib {
     static {
         System.loadLibrary("watch_inputs");
     }
-
 }

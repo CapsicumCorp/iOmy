@@ -44,6 +44,7 @@ model {
                     project ':ndkwebapiclientlib'
                     project ':ndklocklib'
                     project ':ndktimeruleslib'
+                    project ':ndkbluetoothhwandroidlib'
                     project ':ndkwatchinputs'
                 }
             }

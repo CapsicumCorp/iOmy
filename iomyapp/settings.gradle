@@ -19,6 +19,7 @@ include ':ndkuserspaceusbserialandroidlib'
 include ':ndkwebapiclientlib'
 include ':ndklocklib'
 include ':ndktimeruleslib'
+include ':ndkbluetoothhwandroidlib'
 include ':ndkwatchinputs'
 
 include ':app'
@@ -46,4 +47,5 @@ project(":ndkuserspaceusbserialandroidlib").projectDir=file(watchinputsdir+"/wat
 project(":ndkwebapiclientlib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/webapiclientlib")
 project(":ndklocklib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/locklib")
 project(":ndktimeruleslib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/timeruleslib")
+project(":ndkbluetoothhwandroidlib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/bluetoothhwandroidlib")
 project(":ndkwatchinputs").projectDir=file(watchinputsdir+"/watch_inputs/src/main")

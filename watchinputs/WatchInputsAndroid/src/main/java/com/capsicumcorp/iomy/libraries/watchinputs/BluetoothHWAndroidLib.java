@@ -24,31 +24,15 @@ package com.capsicumcorp.iomy.libraries.watchinputs;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
 import java.util.UUID;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothProfile;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.content.pm.FeatureInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
@@ -57,9 +41,6 @@ import android.os.Message;
 import android.os.ParcelUuid;
 import android.util.Log;
 import android.util.SparseArray;
-import android.widget.Toast;
-
-import com.csr.mesh.BatteryModelApi;
 import com.csr.mesh.ConfigModelApi;
 import com.csr.mesh.MeshService;
 import com.csr.mesh.PowerModelApi;
@@ -69,18 +50,10 @@ import com.csr.mesh.SuperLightModelApi;
 public class BluetoothHWAndroidLib implements AssociationListener {
     private static BluetoothHWAndroidLib instance;
     private Context context=null;
-	private static BluetoothAdapter mBluetoothAdapter;
-	private static boolean mLEScanning=false;
-	private static Handler mLEHandler;
 
-	//public static native void jniRemoveQueueItem(int messtype, String address, String serviceuuid, String uuid);
-	//public static native int jniAddDevice(String name, String address, int bttype);
-	//public static native void jniGattSetConnectionState(String address, int connectionState);
-	//public static native void jniGattSetFinishedServiceDiscovery(String address, int status);
-	//public static native int jniAddBtGattService(String address, String uuid, int type);
-	//public static native int jniAddBtGattCharacteristic(String address, String serviceuuid, String uuid, int properties);
-	//public static native int jniProcessReceivedCharacteristic(String address, String serviceuuid, String uuid, byte[] bytes, int status);
-	//public native long jnigetmodulesinfo();
+	public native long jnigetmodulesinfo();
+
+    private boolean shuttingdown=false; //Set to true when we are shutting down
 
     //CSRMesh variables
     /*package*/ static final int DEVICE_LOCAL_ADDRESS =  0x8000;
@@ -114,29 +87,44 @@ public class BluetoothHWAndroidLib implements AssociationListener {
 	}
 	@TargetApi(18)
     public static int init() {
-        int result=0;
-    	BluetoothManager lBluetoothManager;
-
-        getInstance().instanceInit();
-    	return result;
+    	return 0;
     }
     public static void shutdown() {
-        getInstance().instanceShutdown();
     }
-    private int instanceInit() {
+
+    public static int startCSRMesh() {
+        //CSRMesh needs access to a context which better handled by an instance of the class instead of as static
+        return getInstance().instanceStartCSRMesh();
+    }
+    public static int stopCSRMesh() {
+        return getInstance().instanceStopCSRMesh();
+    }
+    private int instanceStartCSRMesh() {
         // Make a connection to MeshService to enable us to use its services.
-        Intent bindIntent = new Intent(context, MeshService.class);
-        context.bindService(bindIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        shuttingdown=false;
+        try {
+            Intent bindIntent = new Intent(context, MeshService.class);
+            context.bindService(bindIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
-        mAssListener = this;
-
+            mAssListener = this;
+        } catch (Exception e) {
+            displayException("instanceStartCSRMesh", e);
+            return -1;
+        }
         return 0;
     }
-    private void instanceShutdown() {
-        mService.disconnectBridge();
-        mService.setHandler(null);
-        mMeshHandler.removeCallbacksAndMessages(null);
-        context.unbindService(mServiceConnection);
+    private int instanceStopCSRMesh() {
+        shuttingdown=true;
+        try {
+            mService.disconnectBridge();
+            mService.setHandler(null);
+            mMeshHandler.removeCallbacksAndMessages(null);
+            context.unbindService(mServiceConnection);
+        } catch (Exception e) {
+            displayException("instanceStartCSRMesh", e);
+            return -1;
+        }
+        return 0;
     }
     public static void displayException(String functionName, Exception e) {
         StringWriter sw = new StringWriter();
@@ -206,11 +194,12 @@ public class BluetoothHWAndroidLib implements AssociationListener {
 
         public void handleMessage(Message msg) {
             BluetoothHWAndroidLib parentActivity = mActivity.get();
-            Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib ----------------------------------------------------------------------------");
-            Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib ----------------------------------------------------------------------------");
             Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib.handleMessage="+msg.what+"");
-            Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib ----------------------------------------------------------------------------");
-            Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib ----------------------------------------------------------------------------");
+            if (parentActivity.shuttingdown) {
+                //Ignore all messages since we are shutting down
+                Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib.handleMessage Ignoring message due to CSRMesh shutdown");
+                return;
+            }
             switch (msg.what) {
                 case MeshService.MESSAGE_LE_CONNECTED: {
                     Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib Found device: "+msg.getData().getString(MeshService.EXTRA_DEVICE_ADDRESS));
@@ -506,7 +495,7 @@ public class BluetoothHWAndroidLib implements AssociationListener {
         }
     }
 
-    /*static {
+    static {
         System.loadLibrary("bluetoothhwandroidlib");
-    }*/
+    }
 }
