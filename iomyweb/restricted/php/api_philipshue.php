@@ -74,7 +74,7 @@ $aHubData                   = array();      //-- ARRAY:         --//
 $aNewCommData               = array();      //-- ARRAY:         --//
 $bTransactionStarted        = false;        //-- BOOLEAN:       --//
 $bFound                     = false;        //-- BOOLEAN:       Used to indicate if a match is found or not --//
-
+$iWritePerm                 = 0;            //-- INTEGER:       Used for storing the write permission of a Thing --//
 
 //- Constants that need to be added to a function in the fuctions library --//
 $iHueThingTypeId            = 0;            //-- INTEGER:       This is used to hold the "ThingTypeId" of a Philips Hue Light.     --//
@@ -445,7 +445,7 @@ if( $bError===false ) {
 			if( $aTempFunctionResult1['Error']===false ) {
 				$iThingTypeId   = $aTempFunctionResult1['Data']['ThingTypeId'];
 				$iLinkId        = $aTempFunctionResult1['Data']['LinkId'];
-				$bWritePerm     = $aTempFunctionResult1['Data']['PermWrite'];
+				$iWritePerm     = $aTempFunctionResult1['Data']['PermWrite'];
 				
 				//-- Display an error if the Thing Type is not a Philips Hue --//
 				//-- TODO: Add the correct ThingTypeId --//
@@ -840,10 +840,7 @@ if( $bError===false ) {
 							$aResult = $oPHPPhilipsHue->ChangeLightHueSatBright( $sHWId, $iPostHue, $iPostSaturation, $iPostBrightness );
 							
 							
-
-							if($aResult['Error']===false) {
-
-							} else {
+							if($aResult['Error']===true) {
 								$bError     = true;
 								$iErrCode   = 3401;
 								$sErrMesg  .= "Error Code:'3401' \n";
@@ -863,14 +860,13 @@ if( $bError===false ) {
 						//----------------------------------------------------------------//
 						try {
 							//-- If the User has Write Permission --//
-							if( $bWritePerm===true ) {
-									
+							if( $iWritePerm===1 ) {
+								
 								$aTempFunctionResult4 = $oPHPPhilipsHue->AutoAddNewLights( $iLinkId );
-										
-										
+								
 							}	//-- ENDIF User has the Write Permission --//
 						} catch( Exception $e3403 ) {
-							
+							//echo "AutoAdd Error!";
 						}
 						
 						
