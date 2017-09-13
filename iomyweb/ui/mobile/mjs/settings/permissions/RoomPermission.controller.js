@@ -103,11 +103,11 @@ sap.ui.controller("mjs.settings.permissions.RoomPermission", {
         oView.wButtonApply.setEnabled(bEnabled);
         oView.wSliderPermissionLevel.setEnabled(bEnabled);
         
-        if (this.iUserId === null) {
-            oView.wButtonCancel.setEnabled(bEnabled);
-        } else {
-            oView.wButtonCancel.setEnabled(false);
-        }
+//        if (this.iUserId === null) {
+//            oView.wButtonCancel.setEnabled(bEnabled);
+//        } else {
+//            oView.wButtonCancel.setEnabled(false);
+//        }
         
         IOMy.common.NavigationToggleNavButtons(this, bEnabled);
     },
