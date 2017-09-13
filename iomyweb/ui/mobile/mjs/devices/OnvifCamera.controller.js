@@ -225,9 +225,9 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
                 me.PTZMoveDown();
             }
         }).addStyleClass("width100Percent height30px IOMYButton ButtonIconWhite CameraPTZButton")
-        //==============================================\\
-        // DRAW CAMERA FEED                             \\
-        //==============================================\\
+        //==============================================//
+        // DRAW CAMERA FEED                             //
+        //==============================================//
         
         me.wCameraFeed = new sap.m.VBox(me.createId("CameraThumbnail"), {
             items : [
@@ -253,9 +253,9 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
             ]
         }).addStyleClass("width100Percent height300px BG_grey_10 CameraThumbnail");
 
-        //==============================================\\
-        // DRAW DATE, TIME, AND ROOM                    \\
-        //==============================================\\
+        //==============================================//
+        // DRAW DATE, TIME, AND ROOM                    //
+        //==============================================//
         me.wLocationField = new sap.m.Label({
             text : oRoomInfo.RoomName + " in " + oRoomInfo.PremiseName
         }).addStyleClass("NormalWS");
@@ -491,7 +491,11 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
             // Function if Lookup fails (Onvif server not found)
             function (response) {
                 jQuery.sap.log.error("Error checking for the Onvif device (onFail): "+IOMy.devices.onvif.sProfileLookupErrors);
-                me.wSnapshotTimeField.setText("Failed to load snapshot");
+                me.wSnapshotTimeField.setText("Failed to load the latest snapshot");
+                
+                // If there is an error, the page is to be redrawn when the user
+                // goes back to the same device.
+                me.bUIDrawn = false;
             }
         );
     },
