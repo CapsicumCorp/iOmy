@@ -101,8 +101,7 @@ $.extend(IOMy.devices,{
     },
     
 	/**
-     * Function that performs an AJAX request to assign a given device to a
-     * given room.
+     * Performs an AJAX request to assign a given device to a given room.
      * 
      * Required parameters:
      * 
@@ -243,32 +242,32 @@ $.extend(IOMy.devices,{
      * @param {UI5 view} oScope
      * @returns {map}
      */
-    ValidateRoom : function (oScope) {
-        var me                      = this;
-        var bError                  = false;
-        var aErrorMessages          = [];
-        var mInfo                   = {}; // MAP: Contains the error status and any error messages.
-        var oField                  = oScope.byId(me.uiIDs.sRoomCBoxID+"Field");
-        
-        //-------------------------------------------------//
-        // Is the hub a proper hub (does it have an ID)
-        //-------------------------------------------------//
-        try {
-            if (oField.getSelectedKey() === "") {
-                bError = true;
-                aErrorMessages.push("Room is not valid");
-            }
-        } catch (e) {
-            bError = true;
-            aErrorMessages.push("Error 0x8101: There was an error checking the room: "+e.message);
-        }
-        
-        // Prepare the return value
-        mInfo.bError = bError;
-        mInfo.aErrorMessages = aErrorMessages;
-        
-        return mInfo;
-    },
+//    ValidateRoom : function (oScope) {
+//        var me                      = this;
+//        var bError                  = false;
+//        var aErrorMessages          = [];
+//        var mInfo                   = {}; // MAP: Contains the error status and any error messages.
+//        var oField                  = oScope.byId(me.uiIDs.sRoomCBoxID+"Field");
+//        
+//        //-------------------------------------------------//
+//        // Is the hub a proper hub (does it have an ID)
+//        //-------------------------------------------------//
+//        try {
+//            if (oField.getSelectedKey() === "") {
+//                bError = true;
+//                aErrorMessages.push("Room is not valid");
+//            }
+//        } catch (e) {
+//            bError = true;
+//            aErrorMessages.push("Error 0x8101: There was an error checking the room: "+e.message);
+//        }
+//        
+//        // Prepare the return value
+//        mInfo.bError = bError;
+//        mInfo.aErrorMessages = aErrorMessages;
+//        
+//        return mInfo;
+//    },
 	
     /**
      * Fetches the ID of a specific page to interact with a particular device.

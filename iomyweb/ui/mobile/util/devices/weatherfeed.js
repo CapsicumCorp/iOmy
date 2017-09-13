@@ -90,6 +90,15 @@ $.extend(IOMy.devices.weatherfeed,{
         return mData;
     },
     
+    /**
+     * Returns a Google Material icon to depict the current weather.
+     * 
+     * "Clear" will return a sun.
+     * "Cloudy" will of course return clouds.
+     * 
+     * @param {type} sText          Current Conditions
+     * @returns {String}
+     */
     GetWeatherIcon : function (sText) {
         //===============================================\\
         // DECLARE VARIABLES

@@ -132,9 +132,19 @@ $.extend(IOMy.time,{
 	
 	
 	
-	/**************************************************************
-	** 
-	***************************************************************/
+	/**
+     * Returns the time in UTS format of a certain period before the current or
+     * a given time (also in UTS format).
+     * 
+     * A period is required to fetch the start time of the period. Valid string
+     * values are "day", "week", "fortnight", "month", "quarter", "year", and
+     * "epoch".
+     * 
+     * @param {type} sPeriod        Period in time to use to generate the start time.
+     * @param {type} iEndStamp      The end time in UTS (defaults to the current time)
+     * 
+     * @returns {Number}            The start time in UTS
+     */
 	GetStartStampForTimePeriod: function( sPeriod, iEndStamp ) {
 		//------------------------------------------------------------//
 		//-- 1.0 - Declare Variables                                --//
@@ -212,7 +222,13 @@ $.extend(IOMy.time,{
 		
 	},
 	
-	
+	/**
+     * Converts a Javascript date object to military time (e.g. "0955")
+     * 
+     * @param {Date} date       Javascript date
+     * 
+     * @returns {String}        Date in military time (string format)
+     */
 	GetMilitaryTimeFromDate : function (date) {
         //--------------------------------------------------------------------//
         // Variables
@@ -250,6 +266,12 @@ $.extend(IOMy.time,{
         return sMilitaryTime;
     },
 	
+    /**
+     * Converts a military time string into a Javascript Date object.
+     * 
+     * @param {type} sMilTime       Military time.
+     * @returns {Date}              Javascript date object.
+     */
 	GetDateFromMilitaryTime : function (sMilTime) {
         //--------------------------------------------------------------------//
         // Variables
