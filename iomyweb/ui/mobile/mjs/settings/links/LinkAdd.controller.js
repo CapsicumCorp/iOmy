@@ -144,12 +144,12 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                         mIPAddressInfo = IOMy.validation.isIPv4AddressValid( me.byId("IPAddressField").getValue() );
                         mIPPortInfo = IOMy.validation.isIPv4PortValid( me.byId("IPPortField").getValue() );
                         
-                        if (mIPAddressInfo.bError === true) {
+                        if (mIPAddressInfo.bValid === false) {
                             bError = true;
                             aErrorMessages = aErrorMessages.concat(mIPAddressInfo.aErrorMessages);
                         }
                         
-                        if (mIPPortInfo.bError === true) {
+                        if (mIPPortInfo.bValid === false) {
                             bError = true;
                             aErrorMessages = aErrorMessages.concat(mIPPortInfo.aErrorMessages);
                         }
@@ -164,12 +164,12 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                         mIPAddressInfo = IOMy.validation.isIPv4AddressValid( me.byId("IPAddressField").getValue() );
                         mIPPortInfo = IOMy.validation.isIPv4PortValid( me.byId("IPPortField").getValue() );
                         
-                        if (mIPAddressInfo.bError === true) {
+                        if (mIPAddressInfo.bValid === false) {
                             bError = true;
                             aErrorMessages = aErrorMessages.concat(mIPAddressInfo.aErrorMessages);
                         }
                         
-                        if (mIPPortInfo.bError === true) {
+                        if (mIPPortInfo.bValid === false) {
                             bError = true;
                             aErrorMessages = aErrorMessages.concat(mIPPortInfo.aErrorMessages);
                         }
@@ -318,6 +318,8 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
         
         // These functions are not necessarily to do with a specific device type.
         mData.onSuccess = function (response, data) {
+            var bCompletelySuccessful = true;
+            
             if (data.Error !== true) {
                 jQuery.sap.log.debug("Success: "+JSON.stringify(response));
                 jQuery.sap.log.debug("Success: "+JSON.stringify(data));
@@ -346,22 +348,24 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
             try {
                 // REFRESH LINK LIST
                 if (data.Error === false || data.Error === undefined) {
-                    IOMy.common.RefreshCoreVariables({
-                        onSuccess : function () {
-                            IOMy.common.showMessage({
-                                text : sLinkType+" successfully created",
-                                view : me.getView()
-                            });
-                            
-                            // Set the flag to clear the way for a new UI instance
-                            me.bUIReadyToBeWiped = true;
+                    // Set the flag to clear the way for a new UI instance
+                    me.bUIReadyToBeWiped = true;
 
-                            if (mEntry.Type === "type") {
-                                var fnSuccess;
-                                var fnFail;
-                                var iRoomId;
+                    if (mEntry.Type === "type") {
+                        var fnSuccess;
+                        var fnFail;
+                        var iRoomId;
 
-                                fnSuccess = function () {
+                        fnSuccess = function () {
+                            IOMy.common.RefreshCoreVariables({
+                                onSuccess : function () {
+                                    if (bCompletelySuccessful) {
+                                        IOMy.common.showMessage({
+                                            text : sLinkType+" successfully created",
+                                            view : me.getView()
+                                        });
+                                    }
+                                    
                                     IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
 
                                     if (IOMy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
@@ -376,38 +380,49 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                                     } else {
                                         IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
                                     }
-                                };
-
-                                fnFail = function (err) {
-                                    IOMy.common.showWarning("Successfully created device, but could not place it in "+me.byId("roomCBox").getSelectedItem().getText()+".", "Warning", fnSuccess);
-
-                                };
-
-                                if (me.byId("roomCBox") !== null && me.byId("roomCBox") !== undefined) {
-                                    iRoomId = me.byId("roomCBox").getSelectedKey();
-                                } else {
-                                    iRoomId = 1;
                                 }
-                                
-                                if (iRoomId === "") {
-                                    iRoomId = 1;
-                                }
-                                
-                                IOMy.devices.AssignDeviceToRoom({
-                                    "linkID" : iLinkId,
-                                    "roomID" : iRoomId,
+                            });
+                        };
 
-                                    "onSuccess" : fnSuccess,
-                                    "onFail"    : fnFail
+                        fnFail = function (err) {
+                            bCompletelySuccessful = false;
+                            
+                            jQuery.sap.log.error(err);
+                            IOMy.common.showWarning("Successfully created device, but could not place it in "+me.byId("roomCBox").getSelectedItem().getText()+".", "Warning", fnSuccess);
+
+                        };
+
+                        if (me.byId("roomCBox") !== null && me.byId("roomCBox") !== undefined) {
+                            iRoomId = me.byId("roomCBox").getSelectedKey();
+                        } else {
+                            iRoomId = 1;
+                        }
+
+                        if (iRoomId === "") {
+                            iRoomId = 1;
+                        }
+
+                        IOMy.devices.AssignDeviceToRoom({
+                            "linkID" : iLinkId,
+                            "roomID" : iRoomId,
+
+                            "onSuccess" : fnSuccess,
+                            "onFail"    : fnFail
+                        });
+                        
+                    } else {
+                        IOMy.common.RefreshCoreVariables({
+                            onSuccess : function () {
+                                IOMy.common.showMessage({
+                                    text : me.byId("CameraNameField").getValue()+" successfully created",
+                                    view : me.getView()
                                 });
-//                                } else {
-//                                    fnSuccess();
-//                                }
-                            } else {
+                                
+                                IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
                                 IOMy.common.NavigationChangePage("pDeviceOverview", {}, true);
                             }
-                        }
-                    });
+                        });
+                    }
                             
                 } else {
                     jQuery.sap.log.error("Error creating "+sLinkType+":"+data.ErrMesg, "Error");
