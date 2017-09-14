@@ -16,6 +16,7 @@ model {
         }
         CFlags.addAll(COMMON_CFLAGS)
         cppFlags.addAll(COMMON_CPPFLAGS)
+        cppFlags.add("-I" + getBoostIncDir())
         if (rootProject.ext.has('NDKSTL')) {
             stl NDKSTL
         }

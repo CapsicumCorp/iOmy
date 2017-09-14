@@ -27,6 +27,7 @@ import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.UUID;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -34,6 +35,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
@@ -52,11 +54,12 @@ public class BluetoothHWAndroidLib implements AssociationListener {
     private static BluetoothHWAndroidLib instance;
     private Context context=null;
 
-    public native int jniaddcsrmeshdeviceforpairing(String shortName, int uuidHash);
-    public native void jnicsrmeshdevicepaired(int uuidHash, int deviceId);
-    public native void jniCSRMeshDeviceInfoModelLow(int deviceId, long bitmap);
+    private native int jniaddcsrmeshdeviceforpairing(String shortName, int uuidHash);
+    private native void jnicsrmeshdevicepaired(int uuidHash, int deviceId);
+    private native void jniCSRMeshDeviceInfoModelLow(int deviceId, long bitmap);
 	public native long jnigetmodulesinfo();
 
+    private String bluetoothHostMacAddress;
     private boolean shuttingdown=false; //Set to true when we are shutting down
 
     //CSRMesh variables
@@ -88,7 +91,28 @@ public class BluetoothHWAndroidLib implements AssociationListener {
     public BluetoothHWAndroidLib(Context context) {
         this.context=context;
         this.instance=this;
-	}
+
+        //https://stackoverflow.com/questions/25653129/how-to-get-bluetooth-mac-address-on-android
+        String result = null;
+        if (context.checkCallingOrSelfPermission(Manifest.permission.BLUETOOTH)
+                == PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                // Hardware ID are restricted in Android 6+
+                // https://developer.android.com/about/versions/marshmallow/android-6.0-changes.html#behavior-hardware-id
+                // Getting bluetooth mac via reflection for devices with Android 6+
+                result = android.provider.Settings.Secure.getString(context.getContentResolver(),
+                        "bluetooth_address");
+            } else {
+                BluetoothAdapter bta = BluetoothAdapter.getDefaultAdapter();
+                result = bta != null ? bta.getAddress() : "";
+            }
+        }
+        //-----------------------------------------------------------------------------------------
+
+        bluetoothHostMacAddress=result;
+
+        Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib Mac Address="+bluetoothHostMacAddress);
+    }
 	@TargetApi(18)
     public static int init() {
     	return 0;
@@ -223,6 +247,7 @@ public class BluetoothHWAndroidLib implements AssociationListener {
                     break;
                 }
                 case MeshService.MESSAGE_LE_DISCONNECTED: {
+                    //TODO: If numconnections is 0, set all devices to not connected as the bridge is down
                     int numConnections = msg.getData().getInt(MeshService.EXTRA_NUM_CONNECTIONS);
                     String address = msg.getData().getString(MeshService.EXTRA_DEVICE_ADDRESS);
                     Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib Disconnected device: "+address+" now have num connections: "+numConnections);
@@ -298,7 +323,6 @@ public class BluetoothHWAndroidLib implements AssociationListener {
                     byte[] appearance = msg.getData().getByteArray(MeshService.EXTRA_APPEARANCE);
                     String shortName = msg.getData().getString(MeshService.EXTRA_SHORTNAME);
                     int uuidHash = msg.getData().getInt(MeshService.EXTRA_UUIDHASH_31);
-                    Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib New device associating with shortName: "+shortName+" uuidHash: "+String.format("0x%x", uuidHash));
                     parentActivity.jniaddcsrmeshdeviceforpairing(shortName, uuidHash);
                     /*if (parentActivity.mAssListener != null) {
                         parentActivity.mUuidHashToAppearance.put(uuidHash, shortName);
@@ -344,7 +368,7 @@ public class BluetoothHWAndroidLib implements AssociationListener {
                             ConfigModelApi.DeviceInfo.values()[msg.getData().getByte(MeshService.EXTRA_DEVICE_INFO_TYPE)];
                     if (infoType == ConfigModelApi.DeviceInfo.MODEL_LOW) {
                         long bitmap = msg.getData().getLong(MeshService.EXTRA_DEVICE_INFORMATION);
-                        jniCSRMeshDeviceInfoModelLow(deviceId, bitmap);
+                        parentActivity.jniCSRMeshDeviceInfoModelLow(deviceId, bitmap);
                         //Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib device info: deviceId: "+deviceId+" bitmap: "+bitmap);
                         // If the uuidHash was saved for this device id then this is an expected message, so process it.
                         /*if (uuidHash != 0) {
@@ -403,6 +427,9 @@ public class BluetoothHWAndroidLib implements AssociationListener {
     }
     public static void CSRMeshGetModelInfoLow(int deviceId) {
         ConfigModelApi.getInfo(deviceId, ConfigModelApi.DeviceInfo.MODEL_LOW);
+    }
+    public static String getbluetoothHostMacAddress() {
+        return getInstance().bluetoothHostMacAddress;
     }
     public void newUuid(UUID uuid, int uuidHash, int rssi, int ttl) {
         Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib newUuid: uuid="+uuid + " uuidHash="+uuidHash+" rssi: "+rssi + " ttl: "+ttl);

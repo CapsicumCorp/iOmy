@@ -34,6 +34,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <string>
 #include <sstream>
+#include <typeinfo>
 #include <boost/chrono.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/recursive_mutex.hpp>
@@ -61,7 +62,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 using boost::asio::ip::tcp;
 
 static std::list<webapiclient_zigbeelink_t> webapi_zigbeelinks_queue;
-static std::list<webapiclient_zigbeecomm_t> webapi_zigbeecomms_queue;
+
+//List is a pointer so can hold derived objects instead of just the base class
+static std::list<webapiclient_comm_t *> webapi_comms_queue;
 
 static boost::recursive_mutex webapiclientlibmutex;
 
@@ -70,6 +73,7 @@ static boost::thread webapiclientlib_mainthread;
 //Function Declarations
 static bool webapiclientlib_add_zigbee_link_to_webapi_queue(const webapiclient_zigbeelink_t& zigbeelink);
 static bool webapiclientlib_add_zigbee_comm_to_webapi_queue(const webapiclient_zigbeecomm_t& zigbeecomm);
+static bool webapiclientlib_add_bluetooth_comm_to_webapi_queue(const webapiclient_bluetoothcomm_t& bluetoothcomm);
 static void webapiclientlib_setneedtoquit(bool val);
 static int webapiclientlib_getneedtoquit();
 static int webapiclientlib_start(void);
@@ -94,7 +98,8 @@ static webapiclientlib_ifaceptrs_ver_1_t webapiclientlib_ifaceptrs_ver_1={
   webapiclientlib_init,
   webapiclientlib_shutdown,
   webapiclientlib_add_zigbee_link_to_webapi_queue,
-  webapiclientlib_add_zigbee_comm_to_webapi_queue
+  webapiclientlib_add_zigbee_comm_to_webapi_queue,
+  webapiclientlib_add_bluetooth_comm_to_webapi_queue
 };
 
 static moduleiface_ver_1_t webapiclientlib_ifaces[]={
@@ -262,25 +267,25 @@ std::string zigbeelink_to_json(const webapiclient_zigbeelink_t &zigbeelink) {
 	return streamstr.str();
 }
 
-std::string zigbeecomm_to_json(const webapiclient_zigbeecomm_t &zigbeecomm) {
-	using boost::property_tree::ptree;
-	ptree pt;
+std::string comm_to_json(const webapiclient_comm_t& comm) {
+  using boost::property_tree::ptree;
+  ptree pt;
 
-	pt.put("HubId", zigbeecomm.hubpk);
-	pt.put("Type", 3); //3=Zigbee comm
-	pt.put("Name", zigbeecomm.name);
+  pt.put("HubId", comm.hubpk);
+  pt.put("Type", comm.type);
+  pt.put("Name", comm.name);
 
-	//Zigbee Addresses are 64-bit hexidecimal without the 0x part
-	std::ostringstream tmphexstr;
-	tmphexstr.width(16);
-	tmphexstr.fill('0');
-	tmphexstr << std::uppercase << std::hex << zigbeecomm.addr;
-	pt.put("Address", tmphexstr.str());
+  //Zigbee Addresses are 64-bit hexidecimal without the 0x part
+  std::ostringstream tmphexstr;
+  tmphexstr.width(16);
+  tmphexstr.fill('0');
+  tmphexstr << std::uppercase << std::hex << comm.addr;
+  pt.put("Address", tmphexstr.str());
 
-	std::ostringstream streamstr;
-	write_json(streamstr, pt);
+  std::ostringstream streamstr;
+  write_json(streamstr, pt);
 
-	return streamstr.str();
+  return streamstr.str();
 }
 
 //Add a zigbee link to a queue for adding via the web api
@@ -305,26 +310,38 @@ static bool webapiclientlib_add_zigbee_link_to_webapi_queue(const webapiclient_z
 	return true;
 }
 
+//Add a comm to a queue for adding via the web api
+static bool webapiclientlib_add_comm_to_webapi_queue(webapiclient_comm_t* comm) {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) webapiclientlib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
+
+  debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
+
+  debuglibifaceptr->debuglib_printf(1, "%s: Adding Comm with address: %016" PRIX64 " to webapi queue\n", __func__, comm->addr);
+  {
+    boost::lock_guard<boost::recursive_mutex> guard(webapiclientlibmutex);
+
+    //Just add to the queue and quickly exit as the list can be pruned later in the webapi thread
+    webapi_comms_queue.push_back(comm);
+  }
+  //Testing Code
+  debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: JSON output: \"%s\"\n", __func__, comm_to_json(*comm).c_str());
+
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
+  return true;
+}
+
 //Add a zigbee comm to a queue for adding via the web api
 static bool webapiclientlib_add_zigbee_comm_to_webapi_queue(const webapiclient_zigbeecomm_t& zigbeecomm) {
-	debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) webapiclientlib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
+    webapiclient_zigbeecomm_t *comm=new webapiclient_zigbeecomm_t;
+  *comm=zigbeecomm;
+  return webapiclientlib_add_comm_to_webapi_queue(comm);
+}
 
-	debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
-
-	debuglibifaceptr->debuglib_printf(1, "%s: Adding Zigbee comm with address: %016" PRIX64 " to webapi queue\n", __func__, zigbeecomm.addr);
-
-	{
-		boost::lock_guard<boost::recursive_mutex> guard(webapiclientlibmutex);
-
-		//Just add to the queue and quickly exit as the list can be pruned later in the webapi thread
-		webapi_zigbeecomms_queue.push_back(zigbeecomm);
-	}
-
-	//Testing Code
-	debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: JSON output: \"%s\"\n", __func__, zigbeecomm_to_json(zigbeecomm).c_str());
-
-	debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
-	return true;
+//Add a bluetooth comm to a queue for adding via the web api
+static bool webapiclientlib_add_bluetooth_comm_to_webapi_queue(const webapiclient_bluetoothcomm_t& bluetoothcomm) {
+    webapiclient_bluetoothcomm_t *comm=new webapiclient_bluetoothcomm_t;
+  *comm=bluetoothcomm;
+  return webapiclientlib_add_comm_to_webapi_queue(comm);
 }
 
 //Setup a http request
@@ -435,7 +452,7 @@ private:
 	unsigned httpstatuscode;
 	long httpbodylen;
 	std::list<webapiclient_zigbeelink_t>::iterator zigbeelinksit;
-	std::list<webapiclient_zigbeecomm_t>::iterator zigbeecommsit;
+	std::list<webapiclient_comm_t *>::iterator commsit;
 	int requestmode; //1=Adding Link, 2=Adding Comm
 
 	//See http://stackoverflow.com/questions/21120361/boostasioasync-write-and-buffers-over-65536-bytes
@@ -486,11 +503,11 @@ public:
 		//Loop through the zigbee comms and links queues adding each one at a time
 		{
 			boost::lock_guard<boost::recursive_mutex> guard(webapiclientlibmutex);
-			if (webapi_zigbeelinks_queue.empty() && webapi_zigbeecomms_queue.empty()) {
+			if (webapi_zigbeelinks_queue.empty() && webapi_comms_queue.empty() && webapi_comms_queue.empty()) {
 				//No need to connect if the queue is empty
 				return;
 			}
-			zigbeecommsit=webapi_zigbeecomms_queue.begin();
+			commsit=webapi_comms_queue.begin();
 			zigbeelinksit=webapi_zigbeelinks_queue.begin();
 		}
 		// Start an asynchronous resolve to translate the server and service names
@@ -579,30 +596,30 @@ private:
 
 
   void send_comm_request(void) {
-		bool zigbeecommokay;
-		std::list<webapiclient_zigbeecomm_t>::iterator zigbeecommsendit;
+		bool commokay;
+		std::list<webapiclient_comm_t *>::iterator commsendit;
 
 		//Send the next request or close connection if nothing else to send
 		{
 			boost::lock_guard<boost::recursive_mutex> guard(webapiclientlibmutex);
-			zigbeecommsendit=webapi_zigbeecomms_queue.end();
+			commsendit=webapi_comms_queue.end();
 		}
 		//Don't send the zigbee comm until all checks pass
-		zigbeecommokay=false;
-		while (!zigbeecommokay && zigbeecommsit!=zigbeecommsendit) {
-			if (!zigbeecommsit->hubpk || !zigbeecommsit->okaytoadd) {
+		commokay=false;
+		while (!commokay && commsit!=commsendit) {
+			if (!(*commsit)->hubpk || !(*commsit)->okaytoadd) {
 				//Step to next comm
-				++zigbeecommsit;
+				++commsit;
 				
 				continue;
 			}
-			zigbeecommokay=true;
+			commokay=true;
 		}
-		if (zigbeecommokay && !webapiclientlib_getneedtoquit()) {
+		if (commokay && !webapiclientlib_getneedtoquit()) {
 			reset_http_body();
 
 			hc.addFormField("Mode", "AddComm");
-			hc.addFormField("Data", zigbeecomm_to_json(*zigbeecommsit));
+			hc.addFormField("Data", comm_to_json(**commsit).c_str());
 			std::ostream request_stream(&commrequest_);
 			debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending comm request: %s\n", __func__, hc.toString().c_str());
 			request_stream << hc.toString();
@@ -849,15 +866,16 @@ private:
 			//Send next request
 			//send_link_request();
 		} else if (requestmode==2) {
-			std::list<webapiclient_zigbeecomm_t>::iterator zigbeecommsprevit=zigbeecommsit;
+			std::list<webapiclient_comm_t *>::iterator commsprevit=commsit;
 
 			debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Removing Comm from add queue due to success\n", __func__);
 
 			//Step to next zigbee comm before erasing the one that just got added
-			++zigbeecommsit;
+			++commsit;
 
 			//Erase the zigbeecomm that just got added
-			webapi_zigbeecomms_queue.erase(zigbeecommsprevit);
+      delete (*commsprevit);
+			webapi_comms_queue.erase(commsprevit);
 
       //Only send one request at a time for now until HTTP/1.1 with Chunked Transfer Encoding is implemented
       stop();
@@ -880,7 +898,7 @@ private:
 			debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Skipping adding Comm for now due to error\n", __func__);
 
 			//Skip the current comm link for now and step to next comm link
-			++zigbeecommsit;
+			++commsit;
 
 			//Send next request
 			send_comm_request();
@@ -957,15 +975,15 @@ private:
 
 		//Once we have begin and end iterators we shouldn't need a lock to traverse the list unless we modify the contents
 		webapiclientlibmutex.lock();
-		auto webapi_zigbeecomms_queueitbegin=webapi_zigbeecomms_queue.begin();
-		auto webapi_zigbeecomms_queueitend=webapi_zigbeecomms_queue.end();
+		auto webapi_comms_queueitbegin=webapi_comms_queue.begin();
+		auto webapi_comms_queueitend=webapi_comms_queue.end();
 		webapiclientlibmutex.unlock();
 
-		for (auto &it=webapi_zigbeecomms_queueitbegin; it!=webapi_zigbeecomms_queueitend; it++) {
+		for (auto &it=webapi_comms_queueitbegin; it!=webapi_comms_queueitend; it++) {
 			webapiclientlibmutex.lock();
-			it->hubpk=hubpk;
+            (*it)->hubpk=hubpk;
 			webapiclientlibmutex.unlock();
-			debuglibifaceptr->debuglib_printf(1, "%s: Found Hub PK: %" PRId64 " for Queued Zigbee device: %016" PRIX64 "\n", __func__, hubpk, it->addr);
+			debuglibifaceptr->debuglib_printf(1, "%s: Found Hub PK: %" PRId64 " for Queued device: %016" PRIX64 "\n", __func__, hubpk, (*it)->addr);
 		}
 	}
 
@@ -1016,29 +1034,29 @@ private:
 
 		//Once we have begin and end iterators we shouldn't need a lock to traverse the list unless we modify the contents
 		webapiclientlibmutex.lock();
-		auto webapi_zigbeecomms_queueitbegin=webapi_zigbeecomms_queue.begin();
-		auto webapi_zigbeecomms_queueitend=webapi_zigbeecomms_queue.end();
+		auto webapi_comms_queueitbegin=webapi_comms_queue.begin();
+		auto webapi_comms_queueitend=webapi_comms_queue.end();
 		webapiclientlibmutex.unlock();
-		std::list< std::list<webapiclient_zigbeecomm_t>::iterator > zigbeecomms_to_remove;
+		std::list< std::list<webapiclient_comm_t *>::iterator > comms_to_remove;
 
 		result=dblibifaceptr->begin();
     if (result<0) {
       debuglibifaceptr->debuglib_printf(1, "%s: Failed to start database transaction\n", __func__);
       return;
     }
-		for (auto &it=webapi_zigbeecomms_queueitbegin; it!=webapi_zigbeecomms_queueitend; it++) {
+		for (auto &it=webapi_comms_queueitbegin; it!=webapi_comms_queueitend; it++) {
 			int result;
 			int64_t commpk;
 
 			//Check the database to see if the zigbee device has already been added
-			result=dblibifaceptr->getcommpk(it->addr, &commpk);
+			result=dblibifaceptr->getcommpk((*it)->addr, &commpk);
 			if (result==0) {
-				debuglibifaceptr->debuglib_printf(1, "%s: Going to remove Comm device from queue: %016" PRIX64 " as it is already in the database\n", __func__, it->addr);
-				zigbeecomms_to_remove.push_back(it);
+				debuglibifaceptr->debuglib_printf(1, "%s: Going to remove Comm device from queue: %016" PRIX64 " as it is already in the database\n", __func__, (*it)->addr);
+				comms_to_remove.push_back(it);
 			} else if (result<-1) {
-				debuglibifaceptr->debuglib_printf(1, "%s: Failed to check with database for Comm device: %016" PRIX64 ", postponing sending to webapi\n", __func__, it->addr);
+				debuglibifaceptr->debuglib_printf(1, "%s: Failed to check with database for Comm device: %016" PRIX64 ", postponing sending to webapi\n", __func__, (*it)->addr);
 			} else {
-				it->okaytoadd=true;
+                (*it)->okaytoadd=true;
 			}
 		}
 		result=dblibifaceptr->end();
@@ -1046,9 +1064,10 @@ private:
       dblibifaceptr->rollback();
     }
 		webapiclientlibmutex.lock();
-		for (auto const &it : zigbeecomms_to_remove) {
-			debuglibifaceptr->debuglib_printf(1, "%s: Removing Comm device from queue: %016" PRIX64 "\n", __func__, it->addr);
-			webapi_zigbeecomms_queue.erase(it);
+		for (auto const &it : comms_to_remove) {
+			debuglibifaceptr->debuglib_printf(1, "%s: Removing Comm device from queue: %016" PRIX64 "\n", __func__, (*it)->addr);
+            delete (*it);
+			webapi_comms_queue.erase(it);
 		}
 		webapiclientlibmutex.unlock();
 		//debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
@@ -1132,7 +1151,7 @@ private:
 			configlibifaceptr->getnamevalue_cpp("webapiconfig", "httppassword", webapihttppass);
 			configlibifaceptr->getnamevalue_cpp("webapiconfig", "apiusername", webapiuser);
 			configlibifaceptr->getnamevalue_cpp("webapiconfig", "apipassword", webapipass);
-			if (!missingval && (!webapi_zigbeelinks_queue.empty() || !webapi_zigbeecomms_queue.empty())) {
+			if (!missingval && (!webapi_zigbeelinks_queue.empty() || !webapi_comms_queue.empty())) {
 				debuglibifaceptr->debuglib_printf(1, "%s: Starting client connection\n", __func__);
 				client.start(webapihostname, webapiport, webapiurl, webapiuser, webapipass, webapihttpuser, webapihttppass);
 			}
@@ -1259,7 +1278,11 @@ static void webapiclientlib_shutdown(void) {
   dblibifaceptr->shutdown();
 
 	webapi_zigbeelinks_queue.clear();
-	webapi_zigbeecomms_queue.clear();
+
+  for (auto const &it : webapi_comms_queue) {
+    delete it;
+  }
+  webapi_comms_queue.clear();
 
 	debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 

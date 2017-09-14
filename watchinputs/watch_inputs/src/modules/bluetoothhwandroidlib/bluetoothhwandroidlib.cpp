@@ -53,6 +53,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "moduleinterface.h"
 #include "bluetoothhwandroidlib.hpp"
 #include "modules/debuglib/debuglib.h"
+#include "modules/dbcounterlib/dbcounterlib.h"
+#include "modules/webapiclientlib/webapiclientlib.hpp"
+#include "modules/dblib/dblib.h"
 #include "modules/commonlib/commonlib.h"
 
 #ifdef DEBUG
@@ -148,7 +151,18 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace bluetoothhwandroidlib {
 
+//TODO: Set this to 60 once debugging is complete
 static const int CSRMESHDEVICEPOLLTIME=5;
+static const int CSRMESHMAXDEVICETIMEOUTS=2; //Max allowed timeouts with no success responses for a device before marking as not connected
+
+//CSRMesh Models
+static const int CSRMESH_MODEL_POWER=19;
+static const int CSRMESH_MODEL_LIGHT=20;
+
+//TODO: Add requesting for vid, pid, and version so can identify devices that support SuperLightModelAPI
+//  as it uses the same bit as standard LightModelAPI
+static const int CSRMESH_DEVICETYPE_UNKNOWN=0;
+static const int CSRMESH_DEVICETYPE_LIGHT_WITH_POWEROFF=1; //A light with RGB values and poweroff
 
 //CSRMesh definitions
 typedef struct csrmeshdevice csrmeshdevice_t;
@@ -162,7 +176,12 @@ struct csrmeshdevice {
   bool paired=false; //True=This device is fully paired, should have deviceId at this stage
   bool pairing=false; //True=This device is currently pairing
   bool havemodelbitmap=false; //True=We don't need to ask for model bitmap info
-  time_t lastpolltime=0; //Number of seconds since epoc
+  int devicetype=CSRMESH_DEVICETYPE_UNKNOWN; //A number indicating the type of this device
+  bool indb=false; //True=This device is in the database so dbcounters can be setup
+  bool connected=true; //false=This device hasn't responded to requests for a while so marked as not connected
+  time_t lastpolltime=0; //Time in seconds that the last device refresh was
+  time_t lastpollresponsetime=0; //Time in seconds that the last device response from refresh was
+  int numtimeouts=0; //Current number of timeouts with no success packets in between
 };
 
 std::string gCSKMeshNetworkKey=""; //Randomised network key used for CSRMesh encryption
@@ -178,6 +197,8 @@ bool csrmeshdiscoverymodeactive=false; //Set to true when csrmesh has full disco
 bool csrmeshautopair=true; //Whether to enable auto pairing or not
 
 //---------------------------------------
+
+bool gbluetoothmacaddraddedtowebapi=false; //True=The bluetooth host mac address has been queue in the web api to add to the database
 
 #ifdef DEBUG
 static pthread_mutexattr_t gerrorcheckmutexattr;
@@ -207,8 +228,6 @@ static int init(void);
 static void shutdown(void);
 
 //Module Interface Definitions
-#define DEBUGLIB_DEPIDX 0
-
 static const bluetoothhwandroidlib_ifaceptrs_ver_1_t gifaceptrs_ver_1={
   init,
   shutdown,
@@ -230,6 +249,24 @@ static moduledep_ver_1_t gdeps[]={
     "debuglib",
 		nullptr,
     DEBUGLIBINTERFACE_VER_1,
+    1
+  },
+  {
+    "dbcounterlib",
+    nullptr,
+    DBCOUNTERLIBINTERFACE_VER_1,
+    1
+  },
+  {
+    "webapiclientlib",
+    nullptr,
+    WEBAPICLIENTLIBINTERFACE_VER_1,
+    1
+  },
+  {
+    "dblib",
+    nullptr,
+    DBLIBINTERFACE_VER_1,
     1
   },
   {
@@ -425,6 +462,86 @@ static int JNIDetachThread(int& wasdetached) {
   return result;
 }
 
+//Caller should check that the database is ready first
+//Add the Bluetooth Host Mac address to the Database as a Comm via Web API
+void addBluetoothHostMacAddressToDatabase(uint64_t addr) {
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  const webapiclientlib_ifaceptrs_ver_1_t *webapiclientlibifaceptr=reinterpret_cast<const webapiclientlib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("webapiclientlib", WEBAPICLIENTLIBINTERFACE_VER_1));
+  webapiclient_bluetoothcomm_t bluetoothcomm;
+
+  bluetoothcomm.hubpk=0;
+  bluetoothcomm.name="Bluetooth";
+  bluetoothcomm.addr=addr;
+
+  webapiclientlibifaceptr->add_bluetooth_comm_to_webapi_queue(bluetoothcomm);
+}
+
+//Check if the database is connected and has a comm entry for the current bluetooth host device
+bool databaseReadyBluetooth() {
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  const dblib_ifaceptrs_ver_1_t *dblibifaceptr=reinterpret_cast<const dblib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("dblib", DBLIBINTERFACE_VER_1));
+  JNIEnv *env;
+  jmethodID methodid;
+  int wasdetached=0, result=0;
+  const char *bluetoothHostMacAddress;
+  std::string bluetoothHostMacAddressStr, minbluetoothHostMacAddressStr;
+  jstring jbluetoothHostMacAddress;
+
+  if (!dblibifaceptr->is_initialised()) {
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s, Database not connected yet\n", __func__);
+    return false;
+  }
+  if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
+    return false;
+  }
+  //Get bluetooth host mac address
+  methodid=env->GetStaticMethodID(gbluetoothhwandroidlib_class, "getbluetoothHostMacAddress", "()Ljava/lang/String;");
+  jbluetoothHostMacAddress=static_cast<jstring>(env->CallStaticObjectMethod(gbluetoothhwandroidlib_class, methodid));
+  bluetoothHostMacAddress=env->GetStringUTFChars(jbluetoothHostMacAddress, NULL);
+  bluetoothHostMacAddressStr=bluetoothHostMacAddress;
+  env->ReleaseStringUTFChars(jbluetoothHostMacAddress, bluetoothHostMacAddress);
+  JNIDetachThread(wasdetached);
+
+  //Remove colons
+  minbluetoothHostMacAddressStr=bluetoothHostMacAddressStr.substr(0, 2);
+  minbluetoothHostMacAddressStr+=bluetoothHostMacAddressStr.substr(3, 2);
+  minbluetoothHostMacAddressStr+=bluetoothHostMacAddressStr.substr(6, 2);
+  minbluetoothHostMacAddressStr+=bluetoothHostMacAddressStr.substr(9, 2);
+  minbluetoothHostMacAddressStr+=bluetoothHostMacAddressStr.substr(12, 2);
+  minbluetoothHostMacAddressStr+=bluetoothHostMacAddressStr.substr(15, 2);
+
+  debuglibifaceptr->debuglib_printf(1, "%s: Checking database for Comm with Bluetooth address: %s\n", __func__, minbluetoothHostMacAddressStr.c_str());
+
+  result=dblibifaceptr->begin();
+  if (result<0) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Failed to start database transaction\n", __func__);
+    return false;
+  }
+  //Check the database to see if the bluetooth host is added to a comm
+  uint64_t addr=0;
+  int64_t commpk=-1;
+  bool haveCommPK=false;
+  sscanf(minbluetoothHostMacAddressStr.c_str(), "%" SCNx64, &addr);
+  result=dblibifaceptr->getcommpk(addr, &commpk);
+  if (result==0) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Found Comm PK: %" PRId64 " with address: %016" PRIX64 "\n", __func__, commpk, addr);
+    haveCommPK=true;
+  }
+  result=dblibifaceptr->end();
+  if (result<0) {
+    dblibifaceptr->rollback();
+  }
+  if (haveCommPK) {
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s, Database is ready for Bluetooth\n", __func__);
+    return true;
+  } else if (!gbluetoothmacaddraddedtowebapi) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Comm with Bluetooth address: %016" PRIX64 " not found in database\n", __func__, addr);
+    addBluetoothHostMacAddressToDatabase(addr);
+    gbluetoothmacaddraddedtowebapi=true;
+  }
+  return false;
+}
+
 static const char alphanum[] =
 "0123456789"
 "!@#$%^&*"
@@ -461,7 +578,9 @@ static void setCSRMeshNetworkKey(void) {
     return;
   }
 
-  gCSKMeshNetworkKey=generateRandomString();
+  //TODO: Change to random key once debugging is complete
+  //gCSKMeshNetworkKey=generateRandomString();
+  gCSKMeshNetworkKey="TestKey";
   debuglibifaceptr->debuglib_printf(1, "%s: Setting CSRMesh Network Key to \"%s\"\n", __func__, gCSKMeshNetworkKey.c_str());
 
   methodid=env->GetStaticMethodID(gbluetoothhwandroidlib_class, "setCSRMeshNetworkKey", "(Ljava/lang/String;)V");
@@ -583,7 +702,7 @@ static void csrmeshdevicepaired(jint uuidHash, jint deviceId) {
   gcsrmeshdevices[deviceId].paired=true;
   debuglibifaceptr->debuglib_printf(1, "%s: Device: %s associated with uuidHash: %08X and device Id: %08X\n", __func__, gcsrmeshdevices[deviceId].shortName.c_str(), uuidHash, deviceId);
 
-  //Wakeup the main thread to start handling the device
+  //Wakeup the main thread to poll the device for info
   sem_post(&gmainthreadsleepsem);
 
   unlockbluetoothhwandroid();
@@ -616,6 +735,8 @@ static void csrmeshCheckIfNeedToPairDevice() {
         unlockbluetoothhwandroid();
         return;
       }
+      //TODO: Flash the device if possible so the user knows which one is pairing
+
       methodid=env->GetStaticMethodID(gbluetoothhwandroidlib_class, "CSRMeshAssociateDevice", "(I)V");
       env->CallStaticVoidMethod(gbluetoothhwandroidlib_class, methodid, gcsrmeshdeviceit.second.uuidHash);
       JNIDetachThread(wasdetached);
@@ -632,11 +753,11 @@ static void csrmeshPollDevices() {
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
   struct timespec curtime;
 
-  lockbluetoothhwandroid();
-
   clock_gettime(CLOCK_REALTIME, &curtime);
+
+  lockbluetoothhwandroid();
   for (auto &gcsrmeshdeviceit : gcsrmeshdevices) {
-    if (curtime.tv_sec+CSRMESHDEVICEPOLLTIME>gcsrmeshdeviceit.second.lastpolltime) {
+    if (curtime.tv_sec>gcsrmeshdeviceit.second.lastpolltime+CSRMESHDEVICEPOLLTIME) {
       debuglibifaceptr->debuglib_printf(1, "%s: Checking if device: deviceId: %08X, uuidHash: %08X is connected\n", __func__, gcsrmeshdeviceit.second.deviceId, gcsrmeshdeviceit.second.uuidHash);
       gcsrmeshdeviceit.second.lastpolltime=curtime.tv_sec;
 
@@ -644,7 +765,7 @@ static void csrmeshPollDevices() {
       int wasdetached=0;
       if (JNIAttachThread(env, wasdetached)==JNI_OK) {
         jmethodID methodid=env->GetStaticMethodID(gbluetoothhwandroidlib_class, "CSRMeshGetModelInfoLow", "(I)V");
-        env->CallStaticVoidMethod(gbluetoothhwandroidlib_class, methodid);
+        env->CallStaticVoidMethod(gbluetoothhwandroidlib_class, methodid, gcsrmeshdeviceit.second.deviceId);
         JNIDetachThread(wasdetached);
       }
     }
@@ -653,6 +774,63 @@ static void csrmeshPollDevices() {
 }
 
 static void CSRMeshDeviceInfoModelLow(jint deviceId, jlong bitmap) {
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  struct timespec curtime;
+
+  clock_gettime(CLOCK_REALTIME, &curtime);
+
+  lockbluetoothhwandroid();
+  try {
+    if (!gcsrmeshdevices.at(deviceId).havemodelbitmap && (gcsrmeshdevices.at(deviceId).modelbitmap & 0xFFFFFFFF)==0) {
+      //Add low bitmap info
+      gcsrmeshdevices[deviceId].modelbitmap|=(bitmap & 0xFFFFFFFF);
+      gcsrmeshdevices[deviceId].havemodelbitmap=true;
+
+      debuglibifaceptr->debuglib_printf(1, "%s: Received bitmap: %08X for deviceId: %08X\n", __func__, (int32_t) (bitmap & 0xFFFFFFFF), deviceId);
+
+      //Wakeup the main thread to start handling the device
+      sem_post(&gmainthreadsleepsem);
+    }
+
+    //Update poll response time
+    gcsrmeshdevices[deviceId].lastpollresponsetime=curtime.tv_sec;
+  } catch (std::out_of_range& e) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Received bitmap: %08X for unknown deviceId: %08X\n", __func__, (int32_t) (bitmap & 0xFFFFFFFF), deviceId);
+  }
+  unlockbluetoothhwandroid();
+}
+
+//Identify the type of each device, add to database if necessary, and setup database counters
+static void csrmeshSyncIdentifyDevices(void) {
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+
+  lockbluetoothhwandroid();
+  for (auto &gcsrmeshdeviceit : gcsrmeshdevices) {
+    if (gcsrmeshdeviceit.second.havemodelbitmap==true) {
+      //Can identify the device
+      if (gcsrmeshdeviceit.second.devicetype==CSRMESH_DEVICETYPE_UNKNOWN) {
+        int64_t bitmap;
+
+        bitmap=gcsrmeshdeviceit.second.modelbitmap;
+        if (((bitmap >> CSRMESH_MODEL_LIGHT) & 1)==1 && ((bitmap >> CSRMESH_MODEL_POWER) & 1)==1) {
+          debuglibifaceptr->debuglib_printf(1, "%s: device: %08X, %s is a RGB Light with On/Off\n", __func__, gcsrmeshdeviceit.second.deviceId, gcsrmeshdeviceit.second.shortName.c_str());
+          gcsrmeshdeviceit.second.devicetype=CSRMESH_DEVICETYPE_LIGHT_WITH_POWEROFF;
+        }
+      }
+      if (gcsrmeshdeviceit.second.devicetype!=CSRMESH_DEVICETYPE_UNKNOWN && !gcsrmeshdeviceit.second.indb) {
+        //TODO: Add the device to the database
+      }
+      if (gcsrmeshdeviceit.second.indb) {
+      //TODO: Setup database counters
+      }
+    }
+  }
+  unlockbluetoothhwandroid();
+}
+
+//Synch devices info with info in database
+static void csrmeshSyncDevicesWithDatabase(void) {
+  //TODO: Synch database counter values with device values
 }
 
 static unsigned csrmeshGetNumDevices() {
@@ -668,6 +846,7 @@ static unsigned csrmeshGetNumDevices() {
   Main serial thread loop that manages initialisation, shutdown, and connections to the usb serial devices
 */
 static void *mainloop(void *) {
+  bool databaseReady=false;
   bool csrmeshNetworKeySet=false;
   bool csrmeshstarted=false;
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
@@ -678,6 +857,15 @@ static void *mainloop(void *) {
   while (!getneedtoquit()) {
     clock_gettime(CLOCK_REALTIME, &waittime);
 
+    if (!databaseReady) {
+      if (!databaseReadyBluetooth()) {
+        waittime.tv_sec+=1;
+        sem_timedwait(&gmainthreadsleepsem, &waittime);
+        continue;
+      } else {
+        databaseReady=true;
+      }
+    }
     if (!csrmeshNetworKeySet) {
       setCSRMeshNetworkKey();
       csrmeshNetworKeySet=true;
@@ -692,9 +880,11 @@ static void *mainloop(void *) {
     } else {
       csrmeshCheckIfNeedToPairDevice();
       csrmeshPollDevices();
+      csrmeshSyncIdentifyDevices();
+      csrmeshSyncDevicesWithDatabase();
       if (csrmeshGetNumDevices()>0) {
         //Regularly synchronise device state with database
-        waittime.tv_sec+=5;
+        waittime.tv_sec+=1;
       } else {
         waittime.tv_sec+=120;
       }
@@ -838,6 +1028,8 @@ static void shutdown(void) {
   gcsrmeshdevicesuuid.clear();
   csrmeshdiscoverymodeactive=false;
   csrmeshautopair=true;
+
+  gbluetoothmacaddraddedtowebapi=false;
 
 #ifdef DEBUG
   //Destroy main mutexes

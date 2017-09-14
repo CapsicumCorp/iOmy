@@ -34,7 +34,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/config/abi_prefix.hpp>
 
 typedef struct webapiclient_zigbeelink webapiclient_zigbeelink_t;
+typedef struct webapiclient_comm webapiclient_comm_t;
 typedef struct webapiclient_zigbeecomm webapiclient_zigbeecomm_t;
+typedef struct webapiclient_bluetoothcomm webapiclient_bluetoothcomm_t;
 
 typedef struct webapiclientlib_ifaceptrs_ver_1 webapiclientlib_ifaceptrs_ver_1_t;
 struct webapiclientlib_ifaceptrs_ver_1 {
@@ -42,6 +44,7 @@ struct webapiclientlib_ifaceptrs_ver_1 {
   void (*shutdown)(void);
 	bool (*add_zigbee_link_to_webapi_queue)(const webapiclient_zigbeelink_t& zigbeelink);
 	bool (*add_zigbee_comm_to_webapi_queue)(const webapiclient_zigbeecomm_t& zigbeecomm);
+  bool (*add_bluetooth_comm_to_webapi_queue)(const webapiclient_bluetoothcomm_t& bluetoothcomm);
 };
 
 typedef struct webapiclient_io webapiclient_io_t;
@@ -74,12 +77,40 @@ struct webapiclient_zigbeelink {
 	std::map<std::int32_t, webapiclient_zigbeething_t> things;
 };
 
+//Defines a structure for a generic comm device for all the fields of the web api
+//NOTE: The functions need to be defined in the hpp file as well so the other libraries
+//  can link them in properly
+class webapiclient_comm {
+  public:
+    std::int64_t hubpk=0; //Database PK value of the hub (Webapi may use the serial number or hostname of the device to lookup)
+    std::string name;
+    std::uint64_t addr;
+    bool okaytoadd=false; //Set to true when we have successfully checked with tha database that the comm doesn't exist
+
+    int type=0;
+
+    //This makes the class polymorphic
+    webapiclient_comm() { }
+    virtual ~webapiclient_comm() { }
+    int getType(void) { return type; }
+    void setType(int type) { this->type=type; }
+};
+
 //Defines a structure for a zigbee comm device for all the fields of the web api
-struct webapiclient_zigbeecomm {
-	std::int64_t hubpk=0; //Database PK value of the hub (Webapi may use the serial number or hostname of the device to lookup)
-	std::string name;
-	std::uint64_t addr;
-	bool okaytoadd=false; //Set to true when we have successfully checked with tha database that the comm doesn't exist
+//NOTE: Using struct instead of class so zigbee library doesn't need updating
+struct webapiclient_zigbeecomm : webapiclient_comm {
+  public:
+    webapiclient_zigbeecomm() {
+      setType(3); //3=Zigbee comm
+    }
+};
+
+//Defines a structure for a bluetooth comm device for all the fields of the web api
+struct webapiclient_bluetoothcomm : webapiclient_comm {
+  public:
+    webapiclient_bluetoothcomm() {
+      setType(4); //4=Bluetooth comm
+    }
 };
 
 #define WEBAPICLIENTLIBINTERFACE_VER_1 1 //A version number for the webapiclientlib interface version

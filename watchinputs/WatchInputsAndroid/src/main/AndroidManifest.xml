@@ -11,4 +11,5 @@
     <uses-sdk
         tools:overrideLibrary="com.hoho.android.usbserial, com.csr.mesh"
         />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
 </manifest>
