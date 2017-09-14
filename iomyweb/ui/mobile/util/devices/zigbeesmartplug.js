@@ -846,7 +846,6 @@ $.extend(IOMy.devices.zigbeesmartplug,{
         //--------------------------------------------------------------------//
 
         //-- Initialise Variables --//
-        var sStatusButtonText			= "";
         var bButtonStatus				= false;
 
         //-- Store the Device Status --//
@@ -857,10 +856,8 @@ $.extend(IOMy.devices.zigbeesmartplug,{
 
         //-- Set Text --//
         if( iDeviceStatus===0 ) {
-            sStatusButtonText	= "Off";
             bButtonStatus		= false;
         } else {
-            sStatusButtonText	= "On";
             bButtonStatus		= true;
         }
 
@@ -896,6 +893,8 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                     change: function () {
                         //-- Bind the context of this button for subfunctions --//
                         var oCurrentButton = this;
+                        oCurrentButton.setEnabled(false);
+                        
                         //-- AJAX --//
                         IOMy.apiphp.AjaxRequest({
                             url: IOMy.apiphp.APILocation("statechange"),
@@ -908,21 +907,23 @@ $.extend(IOMy.devices.zigbeesmartplug,{
                                 IOMy.common.showError(response.responseText, "Error Changing Device Status");
 								
 								oCurrentButton.setState( !oCurrentButton.getState() );
-								
+								oCurrentButton.setEnabled(true);
                             },
                             onSuccess : function( sExpectedDataType, aAjaxData ) {
                                 //console.log(aAjaxData.ThingPortStatus);
                                 //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
-                                if( aAjaxData.DevicePortStatus!==undefined && aAjaxData.DevicePortStatus!==null ) {
+                                if( aAjaxData.ThingStatus!==undefined && aAjaxData.ThingStatus!==null ) {
                                     IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
-                                    IOMy.common.ThingList["_"+aDeviceData.DeviceId].UILastUpdate = new Date();
+                                    //IOMy.common.ThingList["_"+aDeviceData.DeviceId].UILastUpdate = new Date();
+                                    
+                                    if (aAjaxData.ThingStatus === 1) {
+                                        oCurrentButton.setState(true);
+                                    } else {
+                                        oCurrentButton.setState(false);
+                                    }
                                 }
-								
-								if (aAjaxData.ThingStatus === 1) {
-									oCurrentButton.setState(true);
-								} else {
-									oCurrentButton.setState(false);
-								}
+                                
+                                oCurrentButton.setEnabled(true);
                             }
                         });
                     }
