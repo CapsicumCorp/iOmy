@@ -28,6 +28,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 //NOTE: Some versions of Android may be limited to 512 local references so we need to delete them fairly rapidly
 
+//NOTE: CSRMesh can only pair one device at a time
+
 #ifndef __ANDROID__
 #include <execinfo.h>
 #endif
@@ -145,6 +147,37 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 namespace bluetoothhwandroidlib {
+
+static const int CSRMESHDEVICEPOLLTIME=5;
+
+//CSRMesh definitions
+typedef struct csrmeshdevice csrmeshdevice_t;
+struct csrmeshdevice {
+  std::string shortName=""; //The friendly name of the device
+  std::string uuid=""; //This doesn't need to be saved
+  int32_t uuidHash=0; //This is used for some commands
+  int32_t deviceId=0; //This is used for some commands
+  int64_t modelbitmap=0; //Indicates the supported csrmesh models
+  bool needtopair=false; //True=This device is ready for pairing
+  bool paired=false; //True=This device is fully paired, should have deviceId at this stage
+  bool pairing=false; //True=This device is currently pairing
+  bool havemodelbitmap=false; //True=We don't need to ask for model bitmap info
+  time_t lastpolltime=0; //Number of seconds since epoc
+};
+
+std::string gCSKMeshNetworkKey=""; //Randomised network key used for CSRMesh encryption
+
+//deviceId, csrmeshdevice_t
+std::map<int32_t, csrmeshdevice_t> gcsrmeshdevices;
+
+//uuidHash, csrmeshdevice_t
+//Temporary storage for csrmesh devices that are pairing
+std::map<int32_t, csrmeshdevice_t> gcsrmeshdevicesuuid;
+
+bool csrmeshdiscoverymodeactive=false; //Set to true when csrmesh has full discovery mode enabled
+bool csrmeshautopair=true; //Whether to enable auto pairing or not
+
+//---------------------------------------
 
 #ifdef DEBUG
 static pthread_mutexattr_t gerrorcheckmutexattr;
@@ -392,6 +425,53 @@ static int JNIDetachThread(int& wasdetached) {
   return result;
 }
 
+static const char alphanum[] =
+"0123456789"
+"!@#$%^&*"
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+"abcdefghijklmnopqrstuvwxyz";
+
+static int stringLength = sizeof(alphanum) - 1;
+
+static char genRandom() {
+  return alphanum[rand() % stringLength];
+}
+
+static std::string generateRandomString() {
+  srand(time(0));
+  std::string Str;
+  for(unsigned int i = 0; i < 10; ++i)
+  {
+    Str += genRandom();
+  }
+  return Str;
+}
+
+//Set a randomized network key for CSRMesh if not found in the database
+//TODO: Retrieve existing value from database
+static void setCSRMeshNetworkKey(void) {
+#ifdef __ANDROID__
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  JNIEnv *env;
+  jmethodID methodid;
+  int wasdetached=0;
+  jstring jnetworkKey;
+
+  if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
+    return;
+  }
+
+  gCSKMeshNetworkKey=generateRandomString();
+  debuglibifaceptr->debuglib_printf(1, "%s: Setting CSRMesh Network Key to \"%s\"\n", __func__, gCSKMeshNetworkKey.c_str());
+
+  methodid=env->GetStaticMethodID(gbluetoothhwandroidlib_class, "setCSRMeshNetworkKey", "(Ljava/lang/String;)V");
+  jnetworkKey=env->NewStringUTF(gCSKMeshNetworkKey.c_str());
+  env->CallStaticVoidMethod(gbluetoothhwandroidlib_class, methodid, jnetworkKey);
+  env->DeleteLocalRef(jnetworkKey);
+  JNIDetachThread(wasdetached);
+#endif
+}
+
 //Start CSRMesh library which will also initialise Bluetooth
 static int startCSRMesh(void) {
 #ifdef __ANDROID__
@@ -399,6 +479,8 @@ static int startCSRMesh(void) {
   JNIEnv *env;
   jmethodID methodid;
   int result=0, wasdetached=0;
+
+  //TODO: Set next device id from database
 
   if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
     return -1;
@@ -438,17 +520,155 @@ static int stopCSRMesh(void) {
   } else {
     debuglibifaceptr->debuglib_printf(1, "%s: CSRMesh failed to stop: %d\n", __func__, result);
   }
-
   return result;
 #else
   return -1;
 #endif
 }
 
+#ifdef __ANDROID__
+//Store info about a CSRMesh device that has appeared in pairing mode
+static jint addcsrmeshdeviceforpairing(JNIEnv* env, jstring shortName, jint uuidHash) {
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  int wasdetached=0;
+  const char *lshortName;
+  std::string shortNameStr;
+
+  if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
+    return -1;
+  }
+  shortNameStr=lshortName=env->GetStringUTFChars(shortName, 0);
+  env->ReleaseStringUTFChars(shortName, lshortName);
+  JNIDetachThread(wasdetached);
+
+  //Check if this device is already added
+  lockbluetoothhwandroid();
+  try {
+    if (gcsrmeshdevicesuuid.at(uuidHash).uuidHash==uuidHash) {
+      unlockbluetoothhwandroid();
+      return 0;
+    }
+  } catch (std::out_of_range& e) {
+    gcsrmeshdevicesuuid[uuidHash].shortName=shortNameStr;
+    gcsrmeshdevicesuuid[uuidHash].uuidHash=uuidHash;
+    gcsrmeshdevicesuuid[uuidHash].needtopair=true;
+  }
+  unlockbluetoothhwandroid();
+  debuglibifaceptr->debuglib_printf(1, "%s: Found new device: %s with uuidHash: %08X\n", __func__, shortNameStr.c_str(), uuidHash);
+  //Wakeup the main thread to start pairing process
+  sem_post(&gmainthreadsleepsem);
+
+  return 0;
+}
+#endif
+
+static void csrmeshdevicepaired(jint uuidHash, jint deviceId) {
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+
+  lockbluetoothhwandroid();
+  try {
+    if (gcsrmeshdevicesuuid.at(uuidHash).uuidHash==uuidHash) {
+      //Do nothing
+    }
+  } catch (std::out_of_range& e) {
+    //We just paired a device that hasn't been seen yet so add basic info
+    gcsrmeshdevicesuuid[uuidHash].shortName="Unknown";
+    gcsrmeshdevicesuuid[uuidHash].uuidHash=uuidHash;
+  }
+  gcsrmeshdevices[deviceId]=gcsrmeshdevicesuuid[uuidHash];
+  gcsrmeshdevicesuuid.erase(uuidHash); //Remove temporary pairing entry
+
+  gcsrmeshdevices[deviceId].deviceId=deviceId;
+  gcsrmeshdevices[deviceId].pairing=false;
+  gcsrmeshdevices[deviceId].paired=true;
+  debuglibifaceptr->debuglib_printf(1, "%s: Device: %s associated with uuidHash: %08X and device Id: %08X\n", __func__, gcsrmeshdevices[deviceId].shortName.c_str(), uuidHash, deviceId);
+
+  //Wakeup the main thread to start handling the device
+  sem_post(&gmainthreadsleepsem);
+
+  unlockbluetoothhwandroid();
+}
+
+static void csrmeshCheckIfNeedToPairDevice() {
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  JNIEnv *env;
+  jmethodID methodid;
+  int wasdetached=0;
+
+  lockbluetoothhwandroid();
+  if (!csrmeshautopair) {
+    //Auto pairing isn't enabled
+    unlockbluetoothhwandroid();
+    return;
+  }
+  //First check if we are already pairing a device
+  for (auto const &gcsrmeshdeviceit : gcsrmeshdevicesuuid) {
+    if (gcsrmeshdeviceit.second.pairing) {
+      unlockbluetoothhwandroid();
+      return;
+    }
+  }
+  //Check if we need to pair a device
+  for (auto &gcsrmeshdeviceit : gcsrmeshdevicesuuid) {
+    if (gcsrmeshdeviceit.second.needtopair) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Pairing device: uuidHash: %08X\n", __func__, gcsrmeshdeviceit.second.uuidHash);
+      if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
+        unlockbluetoothhwandroid();
+        return;
+      }
+      methodid=env->GetStaticMethodID(gbluetoothhwandroidlib_class, "CSRMeshAssociateDevice", "(I)V");
+      env->CallStaticVoidMethod(gbluetoothhwandroidlib_class, methodid, gcsrmeshdeviceit.second.uuidHash);
+      JNIDetachThread(wasdetached);
+      gcsrmeshdeviceit.second.needtopair=false;
+      gcsrmeshdeviceit.second.pairing=true;
+      break;
+    }
+  }
+  unlockbluetoothhwandroid();
+}
+
+//Poll all devices for info and to see if connected
+static void csrmeshPollDevices() {
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  struct timespec curtime;
+
+  lockbluetoothhwandroid();
+
+  clock_gettime(CLOCK_REALTIME, &curtime);
+  for (auto &gcsrmeshdeviceit : gcsrmeshdevices) {
+    if (curtime.tv_sec+CSRMESHDEVICEPOLLTIME>gcsrmeshdeviceit.second.lastpolltime) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Checking if device: deviceId: %08X, uuidHash: %08X is connected\n", __func__, gcsrmeshdeviceit.second.deviceId, gcsrmeshdeviceit.second.uuidHash);
+      gcsrmeshdeviceit.second.lastpolltime=curtime.tv_sec;
+
+      JNIEnv *env;
+      int wasdetached=0;
+      if (JNIAttachThread(env, wasdetached)==JNI_OK) {
+        jmethodID methodid=env->GetStaticMethodID(gbluetoothhwandroidlib_class, "CSRMeshGetModelInfoLow", "(I)V");
+        env->CallStaticVoidMethod(gbluetoothhwandroidlib_class, methodid);
+        JNIDetachThread(wasdetached);
+      }
+    }
+  }
+  unlockbluetoothhwandroid();
+}
+
+static void CSRMeshDeviceInfoModelLow(jint deviceId, jlong bitmap) {
+}
+
+static unsigned csrmeshGetNumDevices() {
+  unsigned size;
+  lockbluetoothhwandroid();
+  size=gcsrmeshdevices.size();
+  unlockbluetoothhwandroid();
+
+  return size;
+}
+
 /*
   Main serial thread loop that manages initialisation, shutdown, and connections to the usb serial devices
 */
 static void *mainloop(void *) {
+  bool csrmeshNetworKeySet=false;
   bool csrmeshstarted=false;
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
   struct timespec waittime;
@@ -458,7 +678,11 @@ static void *mainloop(void *) {
   while (!getneedtoquit()) {
     clock_gettime(CLOCK_REALTIME, &waittime);
 
-    if (!csrmeshstarted) {
+    if (!csrmeshNetworKeySet) {
+      setCSRMeshNetworkKey();
+      csrmeshNetworKeySet=true;
+    }
+    if (!csrmeshstarted && csrmeshNetworKeySet) {
       if (startCSRMesh()==0) {
         csrmeshstarted=true;
       }
@@ -466,7 +690,14 @@ static void *mainloop(void *) {
     if (!csrmeshstarted) {
       waittime.tv_sec+=1;
     } else {
-      waittime.tv_sec+=120;
+      csrmeshCheckIfNeedToPairDevice();
+      csrmeshPollDevices();
+      if (csrmeshGetNumDevices()>0) {
+        //Regularly synchronise device state with database
+        waittime.tv_sec+=5;
+      } else {
+        waittime.tv_sec+=120;
+      }
     }
     sem_timedwait(&gmainthreadsleepsem, &waittime);
   }
@@ -603,6 +834,10 @@ static void shutdown(void) {
 
   //Reset globals to initial values
   gneedtoquit=0;
+  gcsrmeshdevices.clear();
+  gcsrmeshdevicesuuid.clear();
+  csrmeshdiscoverymodeactive=false;
+  csrmeshautopair=true;
 
 #ifdef DEBUG
   //Destroy main mutexes
@@ -622,6 +857,9 @@ extern moduleinfo_ver_generic_t *bluetoothhwandroidlib_getmoduleinfo();
 
 //JNI Exports
 #ifdef __ANDROID__
+JNIEXPORT jint JNICALL Java_com_capsicumcorp_iomy_libraries_watchinputs_BluetoothHWAndroidLib_jniaddcsrmeshdeviceforpairing(JNIEnv* env, jobject, jstring shortName, jint uuidHash);
+JNIEXPORT void JNICALL Java_com_capsicumcorp_iomy_libraries_watchinputs_BluetoothHWAndroidLib_jnicsrmeshdevicepaired(JNIEnv*, jobject, jint uuidHash, jint deviceId);
+JNIEXPORT void JNICALL Java_com_capsicumcorp_iomy_libraries_watchinputs_BluetoothHWAndroidLib_jniCSRMeshDeviceInfoModelLow(JNIEnv*, jobject, jint deviceId, jlong bitmap);
 JNIEXPORT jlong JNICALL Java_com_capsicumcorp_iomy_libraries_watchinputs_BluetoothHWAndroidLib_jnigetmodulesinfo( JNIEnv* UNUSED(env), jobject UNUSED(obj));
 #endif
 }
@@ -631,6 +869,18 @@ moduleinfo_ver_generic_t *bluetoothhwandroidlib_getmoduleinfo() {
 }
 
 #ifdef __ANDROID__
+JNIEXPORT jint JNICALL Java_com_capsicumcorp_iomy_libraries_watchinputs_BluetoothHWAndroidLib_jniaddcsrmeshdeviceforpairing(JNIEnv* env, jobject, jstring shortName, jint uuidHash) {
+  return bluetoothhwandroidlib::addcsrmeshdeviceforpairing(env, shortName, uuidHash);
+}
+
+JNIEXPORT void JNICALL Java_com_capsicumcorp_iomy_libraries_watchinputs_BluetoothHWAndroidLib_jnicsrmeshdevicepaired(JNIEnv*, jobject, jint uuidHash, jint deviceId) {
+  bluetoothhwandroidlib::csrmeshdevicepaired(uuidHash, deviceId);
+}
+
+JNIEXPORT void JNICALL Java_com_capsicumcorp_iomy_libraries_watchinputs_BluetoothHWAndroidLib_jniCSRMeshDeviceInfoModelLow(JNIEnv*, jobject, jint deviceId, jlong bitmap) {
+  bluetoothhwandroidlib::CSRMeshDeviceInfoModelLow(deviceId, bitmap);
+}
+
 JNIEXPORT jlong JNICALL Java_com_capsicumcorp_iomy_libraries_watchinputs_BluetoothHWAndroidLib_jnigetmodulesinfo( JNIEnv* UNUSED(env), jobject UNUSED(obj)) {
   //First cast to from pointer to long as that is the same size as a pointer then extend to jlong if necessary
   //  jlong is always >= unsigned long

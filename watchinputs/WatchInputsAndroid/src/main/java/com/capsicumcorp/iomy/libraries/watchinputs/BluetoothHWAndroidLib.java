@@ -24,6 +24,7 @@ package com.capsicumcorp.iomy.libraries.watchinputs;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.UUID;
 
 import android.annotation.TargetApi;
@@ -51,6 +52,9 @@ public class BluetoothHWAndroidLib implements AssociationListener {
     private static BluetoothHWAndroidLib instance;
     private Context context=null;
 
+    public native int jniaddcsrmeshdeviceforpairing(String shortName, int uuidHash);
+    public native void jnicsrmeshdevicepaired(int uuidHash, int deviceId);
+    public native void jniCSRMeshDeviceInfoModelLow(int deviceId, long bitmap);
 	public native long jnigetmodulesinfo();
 
     private boolean shuttingdown=false; //Set to true when we are shutting down
@@ -68,7 +72,7 @@ public class BluetoothHWAndroidLib implements AssociationListener {
     // Listeners
     private AssociationListener mAssListener;
 
-    private String CSRMeshNetworkKey="TestKey";
+    private String csrMeshNetworkKey="";
 
     //Testing
     //private int deviceID=0x10000;
@@ -166,8 +170,7 @@ public class BluetoothHWAndroidLib implements AssociationListener {
         mService.setMeshListeningMode(true, true);
         mService.autoConnect(1, 15000, 0, 2);
 
-        //TODO: Migrate this to a random key that saves to config
-        mService.setNetworkPassPhrase(CSRMeshNetworkKey);
+        mService.setNetworkPassPhrase(csrMeshNetworkKey);
 
         //TODO: Add device store
         // set next device id to be used according with the last device used in the database.
@@ -295,11 +298,13 @@ public class BluetoothHWAndroidLib implements AssociationListener {
                     byte[] appearance = msg.getData().getByteArray(MeshService.EXTRA_APPEARANCE);
                     String shortName = msg.getData().getString(MeshService.EXTRA_SHORTNAME);
                     int uuidHash = msg.getData().getInt(MeshService.EXTRA_UUIDHASH_31);
-                    if (parentActivity.mAssListener != null) {
+                    Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib New device associating with shortName: "+shortName+" uuidHash: "+String.format("0x%x", uuidHash));
+                    parentActivity.jniaddcsrmeshdeviceforpairing(shortName, uuidHash);
+                    /*if (parentActivity.mAssListener != null) {
                         parentActivity.mUuidHashToAppearance.put(uuidHash, shortName);
                         // This was received after discover was enabled so let the UUID listener know.
                         parentActivity.mAssListener.newAppearance(uuidHash, appearance, shortName);
-                    }
+                    }*/
                     break;
                 }
                 case MeshService.MESSAGE_DEVICE_ASSOCIATED: {
@@ -307,9 +312,10 @@ public class BluetoothHWAndroidLib implements AssociationListener {
                     // Request supported models before adding to DeviceStore, and the UI.
                     int deviceId = msg.getData().getInt(MeshService.EXTRA_DEVICE_ID);
                     int uuidHash = msg.getData().getInt(MeshService.EXTRA_UUIDHASH_31);
-                    Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib New device associating with id: "+String.format("0x%x", deviceId)+" uuidHash: "+String.format("0x%x", uuidHash));
+                    parentActivity.jnicsrmeshdevicepaired(uuidHash, deviceId);
+                    //Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib New device associating with id: "+String.format("0x%x", deviceId)+" uuidHash: "+String.format("0x%x", uuidHash));
 
-                    parentActivity.deviceID=deviceId;
+                    //parentActivity.deviceID=deviceId;
                     /*if (parentActivity.mDeviceStore.getDevice(deviceId) == null) {
                         // Save the device id with the UUID hash so that we can store the UUID hash in the device
                         // object when MESSAGE_CONFIG_MODELS is received.
@@ -323,7 +329,7 @@ public class BluetoothHWAndroidLib implements AssociationListener {
                     }*/
                     // If we don't already know about this device request its model support.
                     // We only need the lower 64-bits, so just request those.
-                    ConfigModelApi.getInfo(deviceId, ConfigModelApi.DeviceInfo.MODEL_LOW);
+                    //ConfigModelApi.getInfo(deviceId, ConfigModelApi.DeviceInfo.MODEL_LOW);
                     break;
                 }
                 case MeshService.MESSAGE_ASSOCIATING_DEVICE:
@@ -338,7 +344,8 @@ public class BluetoothHWAndroidLib implements AssociationListener {
                             ConfigModelApi.DeviceInfo.values()[msg.getData().getByte(MeshService.EXTRA_DEVICE_INFO_TYPE)];
                     if (infoType == ConfigModelApi.DeviceInfo.MODEL_LOW) {
                         long bitmap = msg.getData().getLong(MeshService.EXTRA_DEVICE_INFORMATION);
-                        Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib device info: deviceId: "+deviceId+" bitmap: "+bitmap);
+                        jniCSRMeshDeviceInfoModelLow(deviceId, bitmap);
+                        //Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib device info: deviceId: "+deviceId+" bitmap: "+bitmap);
                         // If the uuidHash was saved for this device id then this is an expected message, so process it.
                         /*if (uuidHash != 0) {
                             // Remove the uuidhash from the array as we have received its model support now.
@@ -391,7 +398,12 @@ public class BluetoothHWAndroidLib implements AssociationListener {
         }
     }
 
-
+    public static void setCSRMeshNetworkKey(String networkKey) {
+        getInstance().csrMeshNetworkKey=networkKey;
+    }
+    public static void CSRMeshGetModelInfoLow(int deviceId) {
+        ConfigModelApi.getInfo(deviceId, ConfigModelApi.DeviceInfo.MODEL_LOW);
+    }
     public void newUuid(UUID uuid, int uuidHash, int rssi, int ttl) {
         Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib newUuid: uuid="+uuid + " uuidHash="+uuidHash+" rssi: "+rssi + " ttl: "+ttl);
         associateDevice(uuidHash, null);
@@ -406,6 +418,9 @@ public class BluetoothHWAndroidLib implements AssociationListener {
 //        activateAttentionMode(uuidHash, true);
 
         //associateDevice(uuidHash, null);
+    }
+    public static void CSRMeshAssociateDevice(int uuidHash) {
+        getInstance().associateDevice(uuidHash, null);
     }
     public void deviceAssociated(boolean success, String message) {
         //Disable discovery once a device is associated
