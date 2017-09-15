@@ -332,7 +332,7 @@ $.extend(IOMy.apiodata,{
 				dataType:               sDataType,      //-- Expected Result --//
 				type:                   sHTTPMethod,    //--  --//
 				RetryAttemptCount:      0,
-				RetryAttempLimit:       1,
+				RetryAttempLimit:       3,
 				bApiComplete:           false,
 				iCurrentLoginTimestamp: iLoginTimestamp,
 				DebugLogString:         "",
