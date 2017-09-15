@@ -1466,7 +1466,7 @@ if($bError===false) {
 								$iPremiseId = $aTempResult3B['LastId'];
 								
 								
-								$aTempResult3C = DB_InsertPremiseAddress( $sPostDatabaseName, $iPremiseId, 1, 1, 36, "", "0000", "123 Your Street Name", "", "" );
+								$aTempResult3C = DB_InsertPremiseAddress( $sPostDatabaseName, $iPremiseId, 1, 310, 36, "", "0000", "123 Your Street Name", "", "" );
 								
 								if( $aTempResult3C['Error']===true ) {
 									$bError    = true;
