@@ -87,12 +87,6 @@ class PseudoRestrictedAPICore {
 	public      $oRestrictedDB;
 	
 	//--  --//
-	
-	
-	
-	
-	
-	
 }
 
 
@@ -575,17 +569,16 @@ if($bError===false) {
 				//-- 5.2.5 - Add the new Thing                                  --//
 				//----------------------------------------------------------------//
 				if( $bError===false ) {
-					
 					//-- Add the new thing --//
 					$aResult = PrepareAddNewThing( $iLinkId, $aPostData, 0, "", "" );
 					
 					//-- Check for errors --//
-					if( $aTempResult["Error"]===true ) {
+					if( $aResult["Error"]===true ) {
 						//-- Display an Error Message --//
 						$bError    = true;
-						$iErrCode  = 2410+$aTempResult['ErrCode'];
+						$iErrCode  = 2410+$aResult['ErrCode'];
 						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
-						$sErrMesg .= $aTempResult["ErrMesg"];
+						$sErrMesg .= $aResult["ErrMesg"];
 					}
 				}
 				
