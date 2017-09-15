@@ -37,6 +37,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 public class MysqlLib {
+    private static MysqlLib instance;
+
     //Watch Inputs database version 1
     private static int MYSQLLIB_GETPORT_UNIQUEID=0; //Get the unique id for an ioport
     private static int MYSQLLIB_GETSENSOR_UNIQUEID=1; //Get the unique id for an ioport sensor
@@ -58,16 +60,27 @@ public class MysqlLib {
     private static int MYSQLLIB_GETCOMMPK=17; //Get the pk for a comm
     private static int MYSQLLIB_GETLINKPK=18; //Get the pk for a link
     private static int MYSQLLIB_GETLINKCOMMPK=19; //Get the comm pk that is associated with a link
+    private static final int MYSQLLIB_GETLINK_USERNAME_PASSWORD=20; //Get the username and password associated with a link
 
-    private static Context context=null;
+    private Context context=null;
     private static boolean dbloaded=false;
     private static Connection dbconn=null; 
     private static PreparedStatement[] preparedStmts;
 
+    //Temp variables returned from database queries
+    private String usernameStr, passwordStr;
+
     public native long jnigetmodulesinfo();
 
+    public static MysqlLib getInstance() {
+        if (instance == null)
+            throw new IllegalStateException();
+        return instance;
+    }
+
     public MysqlLib(Context context) {
-        MysqlLib.context=context;
+        this.instance=this;
+        this.context=context;
         MysqlLib.preparedStmts=new PreparedStatement[32];
     }
 
@@ -88,7 +101,7 @@ public class MysqlLib {
 
     //TODO: This might need some fixing as not all variables should be uninitialised
     public static void shutdown() {
-        context=null;
+        getInstance().context=null;
         //Log.println(Log.INFO, "Watch Inputs", "In MysqlLib shutdown");
     }
     public static void displayException(String functionName, Exception e) {
@@ -641,40 +654,53 @@ public class MysqlLib {
         }
         return pk;
     }
-    public static long getLinkCommPK(String addr) {
-        long pk=-2;
-        int psidx=MYSQLLIB_GETLINKCOMMPK;
+    public static int getDBLinkUsernamePassword(long linkPK) {
+        int result=-1;
+        String username="", password="";
+        int psidx=MYSQLLIB_GETLINK_USERNAME_PASSWORD;
 
         //Log.println(Log.INFO, MainActivity.AppName, "MysqlLib.getLinkCommPK: DEBUG: addr="+addr+" iotechtype="+iotechtype+" portid="+portid);
         if (preparedStmts[psidx]!=null) {
             ResultSet rs=null;
 
             try {
-                preparedStmts[psidx].setString(1, addr);
+                preparedStmts[psidx].setLong(1, linkPK);
                 rs=preparedStmts[psidx].executeQuery();
                 if (rs!=null) {
                     if (rs.first()) {
-                        pk=rs.getLong(1);
+                        username=rs.getString(1);
+                        password=rs.getString(2);
+                        result=0;
                     } else {
                         //PK doesn't exist
-                        pk=-1;
+                        result=-1;
                     }
                 } else {
                     //PK doesn't exist
-                    pk=-1;
+                    result=-1;
                 }
             } catch ( SQLException e) {
-                displayException("getLinkCommPK", e);
+                displayException("getDBLinkUsernamePassword_methodid", e);
             }
             if (rs!=null) {
                 try {
                     rs.close();
                 } catch ( SQLException e) {
-                    displayException("getLinkCommPK", e);
+                    displayException("getDBLinkUsernamePassword_methodid", e);
                 }
             }
         }
-        return pk;
+        if (result==0) {
+            getInstance().usernameStr=username;
+            getInstance().passwordStr=password;
+        }
+        return result;
+    }
+    public static String getLinkUsernameStr() {
+        return getInstance().usernameStr;
+    }
+    public static String getLinkPasswordStr() {
+        return getInstance().passwordStr;
     }
     static {
         System.loadLibrary("mysqllib");

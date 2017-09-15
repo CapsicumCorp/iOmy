@@ -184,6 +184,7 @@ struct csrmeshdevice {
   int numtimeouts=0; //Current number of timeouts with no success packets in between
 };
 
+uint64_t gBluetoothHostMacAddress=0;
 std::string gCSKMeshNetworkKey=""; //Randomised network key used for CSRMesh encryption
 
 //deviceId, csrmeshdevice_t
@@ -193,12 +194,14 @@ std::map<int32_t, csrmeshdevice_t> gcsrmeshdevices;
 //Temporary storage for csrmesh devices that are pairing
 std::map<int32_t, csrmeshdevice_t> gcsrmeshdevicesuuid;
 
+bool csrmeshNetworKeySet=false;
 bool csrmeshdiscoverymodeactive=false; //Set to true when csrmesh has full discovery mode enabled
 bool csrmeshautopair=true; //Whether to enable auto pairing or not
 
 //---------------------------------------
 
-bool gbluetoothmacaddraddedtowebapi=false; //True=The bluetooth host mac address has been queue in the web api to add to the database
+bool gbluetoothmacaddraddedtowebapi=false; //True=The bluetooth host mac address has been queued in the web api to add to the database
+bool gcsrmeshaddedtowebapi=false; //True=The CSRMesh link info has been queued in the web api to add to the database
 
 #ifdef DEBUG
 static pthread_mutexattr_t gerrorcheckmutexattr;
@@ -462,10 +465,60 @@ static int JNIDetachThread(int& wasdetached) {
   return result;
 }
 
+static const char alphanum[] =
+"0123456789"
+"!@#$%^&*"
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+"abcdefghijklmnopqrstuvwxyz";
+
+static int stringLength = sizeof(alphanum) - 1;
+
+static char genRandom() {
+  return alphanum[rand() % stringLength];
+}
+
+static std::string generateRandomString() {
+  srand(time(0));
+  std::string Str;
+  for(unsigned int i = 0; i < 10; ++i)
+  {
+    Str += genRandom();
+  }
+  return Str;
+}
+
+//Set the network key for CSRMesh
+static void setCSRMeshNetworkKey(std::string networkKey) {
+#ifdef __ANDROID__
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  JNIEnv *env;
+  jmethodID methodid;
+  int wasdetached=0;
+  jstring jnetworkKey;
+
+  if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
+    return;
+  }
+  debuglibifaceptr->debuglib_printf(1, "%s: Setting CSRMesh Network Key to \"%s\"\n", __func__, networkKey.c_str());
+  gCSKMeshNetworkKey=networkKey;
+
+  methodid=env->GetStaticMethodID(gbluetoothhwandroidlib_class, "setCSRMeshNetworkKey", "(Ljava/lang/String;)V");
+  jnetworkKey=env->NewStringUTF(networkKey.c_str());
+  env->CallStaticVoidMethod(gbluetoothhwandroidlib_class, methodid, jnetworkKey);
+  env->DeleteLocalRef(jnetworkKey);
+  JNIDetachThread(wasdetached);
+#endif
+}
+
+//Set a random network key for CSRMesh
+static void setCSRMeshNetworkKey() {
+  std::string networkKey=generateRandomString();
+  setCSRMeshNetworkKey(networkKey);
+}
+
 //Caller should check that the database is ready first
 //Add the Bluetooth Host Mac address to the Database as a Comm via Web API
 void addBluetoothHostMacAddressToDatabase(uint64_t addr) {
-  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
   const webapiclientlib_ifaceptrs_ver_1_t *webapiclientlibifaceptr=reinterpret_cast<const webapiclientlib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("webapiclientlib", WEBAPICLIENTLIBINTERFACE_VER_1));
   webapiclient_bluetoothcomm_t bluetoothcomm;
 
@@ -474,6 +527,25 @@ void addBluetoothHostMacAddressToDatabase(uint64_t addr) {
   bluetoothcomm.addr=addr;
 
   webapiclientlibifaceptr->add_bluetooth_comm_to_webapi_queue(bluetoothcomm);
+}
+
+//Caller should check that the database is ready first
+//Add the CSRMesh to the Database as a Link via Web API using the Bluetooth Host address as the unique address
+void addCSRMeshToDatabase(uint64_t addr, std::string CSKMeshNetworkKey) {
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  const webapiclientlib_ifaceptrs_ver_1_t *webapiclientlibifaceptr=reinterpret_cast<const webapiclientlib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("webapiclientlib", WEBAPICLIENTLIBINTERFACE_VER_1));
+  webapiclient_csrmeshlink_t csrmeshlink;
+
+  debuglibifaceptr->debuglib_printf(1, "%s: Adding CSRMesh with address: %016" PRIX64 " as a link with Network Key: \"%s\"\n", __func__, addr, CSKMeshNetworkKey.c_str());
+
+  csrmeshlink.localpk=0;
+  csrmeshlink.localaddr=addr;
+  csrmeshlink.modelname="Qualcomm Blutooth CSRMesh";
+  csrmeshlink.addr=addr;
+  csrmeshlink.userstr="CSRMesh Bridge";
+  csrmeshlink.networkKey=CSKMeshNetworkKey;
+
+  webapiclientlibifaceptr->add_csrmesh_link_to_webapi_queue(csrmeshlink);
 }
 
 //Check if the database is connected and has a comm entry for the current bluetooth host device
@@ -532,6 +604,10 @@ bool databaseReadyBluetooth() {
     dblibifaceptr->rollback();
   }
   if (haveCommPK) {
+    lockbluetoothhwandroid();
+    gBluetoothHostMacAddress=addr;
+    unlockbluetoothhwandroid();
+
     debuglibifaceptr->debuglib_printf(1, "Exiting %s, Database is ready for Bluetooth\n", __func__);
     return true;
   } else if (!gbluetoothmacaddraddedtowebapi) {
@@ -542,53 +618,73 @@ bool databaseReadyBluetooth() {
   return false;
 }
 
-static const char alphanum[] =
-"0123456789"
-"!@#$%^&*"
-"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-"abcdefghijklmnopqrstuvwxyz";
-
-static int stringLength = sizeof(alphanum) - 1;
-
-static char genRandom() {
-  return alphanum[rand() % stringLength];
-}
-
-static std::string generateRandomString() {
-  srand(time(0));
-  std::string Str;
-  for(unsigned int i = 0; i < 10; ++i)
-  {
-    Str += genRandom();
-  }
-  return Str;
-}
-
-//Set a randomized network key for CSRMesh if not found in the database
-//TODO: Retrieve existing value from database
-static void setCSRMeshNetworkKey(void) {
-#ifdef __ANDROID__
+void loadCSRMeshInfoFromDatabase(void ) {
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
-  JNIEnv *env;
-  jmethodID methodid;
-  int wasdetached=0;
-  jstring jnetworkKey;
+  const dblib_ifaceptrs_ver_1_t *dblibifaceptr=reinterpret_cast<const dblib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("dblib", DBLIBINTERFACE_VER_1));
+  int result=0;
+  uint64_t btaddr=0;
 
-  if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
+  lockbluetoothhwandroid();
+  btaddr=gBluetoothHostMacAddress;
+  unlockbluetoothhwandroid();
+
+  result=dblibifaceptr->begin();
+  if (result<0) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Failed to start database transaction\n", __func__);
     return;
   }
+  //Check the database to see if the CSRMesh link info has been added
+  int64_t linkpk=-1;
+  bool haveLinkPK=false;
+  result=dblibifaceptr->getlinkpk(btaddr, &linkpk);
+  if (result==0) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Found CSRMesh PK: %" PRId64 " with address: %016" PRIX64 "\n", __func__, linkpk, btaddr);
+    haveLinkPK=true;
+  }
+  result=dblibifaceptr->end();
+  if (result<0) {
+    dblibifaceptr->rollback();
+  }
+  if (haveLinkPK) {
+    char *csrmeshusername=nullptr, *csrmeshpassword=nullptr;
+    int getresult=-1;
 
-  //TODO: Change to random key once debugging is complete
-  //gCSKMeshNetworkKey=generateRandomString();
-  gCSKMeshNetworkKey="TestKey";
-  debuglibifaceptr->debuglib_printf(1, "%s: Setting CSRMesh Network Key to \"%s\"\n", __func__, gCSKMeshNetworkKey.c_str());
+    //Retrieve Network Key from database
+    result=dblibifaceptr->begin();
+    if (result<0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to start database transaction\n", __func__);
+      return;
+    }
+    getresult=dblibifaceptr->getlinkusernamepassword(linkpk, &csrmeshusername, &csrmeshpassword);
+    if (getresult==0) {
+      if (csrmeshusername) {
+        //Not needed
+        free(csrmeshusername);
+      }
+      if (csrmeshpassword) {
+        std::string networkKey=csrmeshpassword;
+        free(csrmeshpassword);
 
-  methodid=env->GetStaticMethodID(gbluetoothhwandroidlib_class, "setCSRMeshNetworkKey", "(Ljava/lang/String;)V");
-  jnetworkKey=env->NewStringUTF(gCSKMeshNetworkKey.c_str());
-  env->CallStaticVoidMethod(gbluetoothhwandroidlib_class, methodid, jnetworkKey);
-  env->DeleteLocalRef(jnetworkKey);
-  JNIDetachThread(wasdetached);
-#endif
+        setCSRMeshNetworkKey(networkKey);
+        csrmeshNetworKeySet=true;
+        debuglibifaceptr->debuglib_printf(1, "%s: CSRMesh Network Key from database: \"%s\"\n", __func__, gCSKMeshNetworkKey.c_str());
+      }
+    }
+    //TODO: Retrieve CSRMesh devices from Things list
+
+    result=dblibifaceptr->end();
+    if (result<0) {
+      dblibifaceptr->rollback();
+    }
+  } else if (!gcsrmeshaddedtowebapi) {
+    debuglibifaceptr->debuglib_printf(1, "%s: CSRMesh with Bluetooth address: %016" PRIX64 " not found in database\n", __func__, btaddr);
+    //Set a new randomised key and store in the database
+    setCSRMeshNetworkKey();
+    csrmeshNetworKeySet=true;
+
+    addCSRMeshToDatabase(btaddr, gCSKMeshNetworkKey);
+    gcsrmeshaddedtowebapi=true;
+  }
 }
 
 //Start CSRMesh library which will also initialise Bluetooth
@@ -847,7 +943,6 @@ static unsigned csrmeshGetNumDevices() {
 */
 static void *mainloop(void *) {
   bool databaseReady=false;
-  bool csrmeshNetworKeySet=false;
   bool csrmeshstarted=false;
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
   struct timespec waittime;
@@ -867,15 +962,15 @@ static void *mainloop(void *) {
       }
     }
     if (!csrmeshNetworKeySet) {
-      setCSRMeshNetworkKey();
-      csrmeshNetworKeySet=true;
+      //The network key and devices info comes from the database after it has been generated once
+      loadCSRMeshInfoFromDatabase();
     }
     if (!csrmeshstarted && csrmeshNetworKeySet) {
       if (startCSRMesh()==0) {
         csrmeshstarted=true;
       }
     }
-    if (!csrmeshstarted) {
+    if (!csrmeshstarted || !csrmeshNetworKeySet) {
       waittime.tv_sec+=1;
     } else {
       csrmeshCheckIfNeedToPairDevice();
@@ -970,7 +1065,10 @@ static int init(void) {
     debuglibifaceptr->debuglib_printf(1, "Exiting %s, already initialised, use count=%d\n", __func__, ginuse);
     return 0;
   }
-#ifdef __ANDROID__
+  //Let the database library know that we want to use it
+  dblibifaceptr->init();
+
+  #ifdef __ANDROID__
   if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
     return -1;
   }
@@ -1022,6 +1120,9 @@ static void shutdown(void) {
   JNIDetachThread(wasdetached);
 #endif
 
+  //Finished using the database library
+  dblibifaceptr->shutdown();
+
   //Reset globals to initial values
   gneedtoquit=0;
   gcsrmeshdevices.clear();
@@ -1030,6 +1131,11 @@ static void shutdown(void) {
   csrmeshautopair=true;
 
   gbluetoothmacaddraddedtowebapi=false;
+  gcsrmeshaddedtowebapi=false;
+
+  csrmeshNetworKeySet=false;
+  gBluetoothHostMacAddress=0;
+  gCSKMeshNetworkKey="";
 
 #ifdef DEBUG
   //Destroy main mutexes

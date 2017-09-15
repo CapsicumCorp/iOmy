@@ -35,6 +35,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 typedef class webapiclient_link webapiclient_link_t;
 typedef class webapiclient_zigbeelink webapiclient_zigbeelink_t;
+typedef class webapiclient_csrmeshlink webapiclient_csrmeshlink_t;
 typedef class webapiclient_comm webapiclient_comm_t;
 typedef class webapiclient_zigbeecomm webapiclient_zigbeecomm_t;
 typedef class webapiclient_bluetoothcomm webapiclient_bluetoothcomm_t;
@@ -44,6 +45,7 @@ struct webapiclientlib_ifaceptrs_ver_1 {
   int (*init)(void);
   void (*shutdown)(void);
 	bool (*add_zigbee_link_to_webapi_queue)(const webapiclient_zigbeelink_t& zigbeelink);
+  bool (*add_csrmesh_link_to_webapi_queue)(const webapiclient_csrmeshlink_t& csrmeshlink);
 	bool (*add_zigbee_comm_to_webapi_queue)(const webapiclient_zigbeecomm_t& zigbeecomm);
   bool (*add_bluetooth_comm_to_webapi_queue)(const webapiclient_bluetoothcomm_t& bluetoothcomm);
 };
@@ -85,6 +87,12 @@ class webapiclient_zigbeelink : public webapiclient_link {
 public:
   //hwid, thing
   std::map<std::int32_t, webapiclient_zigbeething_t> things;
+};
+
+//Defines a structure for a CSRMesh for all the fields of the web api
+class webapiclient_csrmeshlink : public webapiclient_link {
+public:
+  std::string networkKey; //The network key for the CSRMesh network; Maps to api: ConnPassword
 };
 
 //Defines a structure for a generic comm device for all the fields of the web api

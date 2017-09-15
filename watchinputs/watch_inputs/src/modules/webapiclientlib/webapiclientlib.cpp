@@ -2,7 +2,7 @@
 Title: Web API Client Library for Watch Inputs
 Author: Matthew Stapleton (Capsicum Corporation) <matthew@capsicumcorp.com>
 Description: This module connects to the ioMy Web API to pass various info back and forth
-Copyright: Capsicum Corporation 2016
+Copyright: Capsicum Corporation 2016-2017
 
 This file is part of Watch Inputs which is part of the iOmy project.
 
@@ -72,6 +72,7 @@ static boost::thread webapiclientlib_mainthread;
 
 //Function Declarations
 static bool webapiclientlib_add_zigbee_link_to_webapi_queue(const webapiclient_zigbeelink_t& zigbeelink);
+static bool webapiclientlib_add_csrmesh_link_to_webapi_queue(const webapiclient_csrmeshlink_t& csrmeshlink);
 static bool webapiclientlib_add_zigbee_comm_to_webapi_queue(const webapiclient_zigbeecomm_t& zigbeecomm);
 static bool webapiclientlib_add_bluetooth_comm_to_webapi_queue(const webapiclient_bluetoothcomm_t& bluetoothcomm);
 static void webapiclientlib_setneedtoquit(bool val);
@@ -98,6 +99,7 @@ static webapiclientlib_ifaceptrs_ver_1_t webapiclientlib_ifaceptrs_ver_1={
   webapiclientlib_init,
   webapiclientlib_shutdown,
   webapiclientlib_add_zigbee_link_to_webapi_queue,
+  webapiclientlib_add_csrmesh_link_to_webapi_queue,
   webapiclientlib_add_zigbee_comm_to_webapi_queue,
   webapiclientlib_add_bluetooth_comm_to_webapi_queue
 };
@@ -219,7 +221,7 @@ static std::string url_encode(const std::string &value) {
     return escaped.str();
 }
 
-std::string link_to_json(const webapiclient_link_t &link) {
+std::string link_to_json(const webapiclient_link_t& link) {
 	using boost::property_tree::ptree;
 	ptree pt;
 	std::ostringstream tmphexstr;
@@ -227,6 +229,8 @@ std::string link_to_json(const webapiclient_link_t &link) {
 	pt.put("CommId", link.localpk);
   if (typeid(link)==typeid(webapiclient_zigbeelink_t)) {
     pt.put("Type", 2); //2=Zigbee device
+  } else if (typeid(link)==typeid(webapiclient_csrmeshlink_t)) {
+    pt.put("Type", 15); //15=Qualcomm CSRmesh Link
   } else {
     debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) webapiclientlib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
 
@@ -240,6 +244,14 @@ std::string link_to_json(const webapiclient_link_t &link) {
 	tmphexstr << std::uppercase << std::hex << link.addr;
 	pt.put("SerialCode", tmphexstr.str());
 	pt.put("Displayname", link.userstr);
+  if (typeid(link)==typeid(webapiclient_csrmeshlink_t)) {
+    pt.put("State", 1);
+    pt.put("InfoManufacturer", "Qualcomm");
+    pt.put("InfoManufacturerUrl", "www.qualcomm.com");
+    pt.put("ConnCryptTypeId", 1);
+    pt.put("ConnUsername", "");
+    pt.put("ConnPassword", dynamic_cast<const webapiclient_csrmeshlink&>(link).networkKey);
+  }
   if (typeid(link)==typeid(webapiclient_zigbeelink_t)) {
     ptree thingspt;
     for (const auto &thingit : dynamic_cast<const webapiclient_zigbeelink_t&>(link).things) {
@@ -319,8 +331,15 @@ static bool webapiclientlib_add_link_to_webapi_queue(webapiclient_link_t* link) 
 
 //Add a zigbee link to a queue for adding via the web api
 static bool webapiclientlib_add_zigbee_link_to_webapi_queue(const webapiclient_zigbeelink_t& zigbeelink) {
-  webapiclient_link_t *link=new webapiclient_link_t;
+  webapiclient_zigbeelink_t *link=new webapiclient_zigbeelink_t;
   *link=zigbeelink;
+  return webapiclientlib_add_link_to_webapi_queue(link);
+}
+
+//Add a CSRMesh link to a queue for adding via the web api
+static bool webapiclientlib_add_csrmesh_link_to_webapi_queue(const webapiclient_csrmeshlink_t& csrmeshlink) {
+  webapiclient_csrmeshlink_t *link=new webapiclient_csrmeshlink_t;
+  *link=csrmeshlink;
   return webapiclientlib_add_link_to_webapi_queue(link);
 }
 

@@ -86,6 +86,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #define MYSQLLIB_GETLINKPK 18 //Get the pk for a link address
 #define MYSQLLIB_GETLINKCOMMPK 19 //Get the comm pk that is associated with a link address
 
+static const int MYSQLLIB_GETLINK_USERNAME_PASSWORD=20; //Get the username and password associated with a link
+
 //A unique id for a port on a device
 //This is not public so may change at any time
 typedef struct {
@@ -124,6 +126,8 @@ static const char *mysqllib_stmts[]={
 	"SELECT COMM_PK FROM VW_COMM WHERE COMM_ADDRESS = ?",
 	"SELECT LINK_PK FROM VW_LINK WHERE LINK_SERIALCODE = ?",
 	"SELECT COMM_PK FROM VW_LINK WHERE LINK_SERIALCODE = ?",
+
+  "SELECT LINKCONN_USERNAME, LINKCONN_PASSWORD FROM VW_LINK WHERE LINK_PK = ?",
 };
 
 static int num_stmts = sizeof(mysqllib_stmts)/sizeof(char *);
@@ -187,6 +191,7 @@ int mysqllib_update_sensor_datatinyint_value(const void *uniqueid, int64_t date,
 int mysqllib_getcommpk(uint64_t addr, int64_t *commpk);
 int mysqllib_getlinkpk(uint64_t addr, int64_t *linkpk);
 int mysqllib_getlinkcommpk(uint64_t addr, int64_t *commpk);
+int mysqllib_getlinkusernamepassword(int64_t linkpk, char **username, char **password);
 void mysqllib_freeuniqueid(void *uniqueid);
 
 //C Exports
@@ -233,6 +238,7 @@ static mysqllib_ifaceptrs_ver_1_t thislib_ifaceptrs_ver_1={
   mysqllib_getcommpk,
   mysqllib_getlinkpk,
   mysqllib_getlinkcommpk,
+  mysqllib_getlinkusernamepassword,
   mysqllib_freeuniqueid
 };
 
@@ -3170,6 +3176,85 @@ int mysqllib_getlinkcommpk(uint64_t addr, int64_t *commpk) {
     return 0;
   }
   return thisvalue;
+}
+
+/*
+  Get the username and password associated with a link
+  Args: link pk
+  On success, username and password will be set, and 0 will be returned
+  Returns -1 if link doesn't exist, < -1 on another error
+  Caller should free username and password when no longer needed
+*/
+//NOTE: Only implemented in Java at the moment
+int mysqllib_getlinkusernamepassword(int64_t linkpk, char **username, char **password) {
+#ifdef __ANDROID__
+  JNIEnv *env;
+  jmethodID getDBLinkUsernamePassword_methodid;
+  jmethodID getLinkUsernameStr_methodid;
+  jmethodID getLinkPasswordStr_methodid;
+  jstring jusername, jpassword;
+  const char *usernameFromJava, *passwordFromJava;
+  int wasdetached=0;
+#endif
+  int locdbloaded;
+  char thisaddr[17];
+  int result;
+
+#ifdef __ANDROID__
+  if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
+    return -2;
+  }
+  getDBLinkUsernamePassword_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getDBLinkUsernamePassword", "(J)I");
+  getLinkUsernameStr_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getLinkUsernameStr", "()Ljava/lang/String;");
+  getLinkPasswordStr_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getLinkPasswordStr", "()Ljava/lang/String;");
+#endif
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
+    JNIDetachThread(wasdetached);
+#endif
+    return -3;
+  }
+#ifdef __ANDROID__
+  result=env->CallStaticIntMethod(mysqllib_mysql_class, getDBLinkUsernamePassword_methodid, linkpk);
+  if (result==0) {
+    //Get the username and password
+    jusername=static_cast<jstring>(env->CallStaticObjectMethod(mysqllib_mysql_class, getLinkUsernameStr_methodid));
+    usernameFromJava=env->GetStringUTFChars(jusername, NULL);
+    *username=strdup(usernameFromJava);
+    env->ReleaseStringUTFChars(jusername, usernameFromJava);
+    if (!(*username)) {
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      JNIDetachThread(wasdetached);
+      debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to allocate ram for username\n", __func__);
+      return -4;
+    }
+    jpassword=static_cast<jstring>(env->CallStaticObjectMethod(mysqllib_mysql_class, getLinkPasswordStr_methodid));
+    passwordFromJava=env->GetStringUTFChars(jpassword, NULL);
+    *password=strdup(passwordFromJava);
+    env->ReleaseStringUTFChars(jpassword, passwordFromJava);
+    if (!(*password)) {
+      free(*username);
+      *username=nullptr;
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      JNIDetachThread(wasdetached);
+      debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to allocate ram for password\n", __func__);
+      return -5;
+    }
+  }
+#endif
+  PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
+  JNIDetachThread(wasdetached);
+#endif
+  return result;
 }
 
 //Free a unique id from memory if memory was allocated for it
