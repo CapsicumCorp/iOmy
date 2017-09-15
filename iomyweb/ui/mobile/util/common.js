@@ -126,7 +126,7 @@ $.extend(IOMy.common,{
     //============================================//
     //== Navigational Variables                    ==//
     //============================================//
-    NavPagesNavigationArray            : [],            //-- ARRAY:            This array holds the list of Pages (and Parameters).    --//
+    NavPagesNavigationArray         : [],            //-- ARRAY:            This array holds the list of Pages (and Parameters).    --//
     NavPagesCurrentIndex            : -1,            //-- INTEGER:        This is the index of what page the User is on. NOTE: 0 indicates that the user is on the "Navigation Main" Page (or "Login" Page)    --//
     
     //============================================//
@@ -134,6 +134,7 @@ $.extend(IOMy.common,{
     //============================================//
     bItemNameChangedMustRefresh     : false,        //-- BOOLEAN:       Indicates whether to refresh certain pages after changing the name of an item   --//
     bSessionTerminated              : false,        //-- BOOLEAN:       Indicates whether the session was terminated for whatever reason. Sets to true when an API request (OData or PHP) encounters a HTTP 403 error.   --//
+    bLinkTypesLoaded                : false,
     
     //============================================//
     //== CONFIGURATION VARIABLES                ==//
@@ -883,6 +884,8 @@ $.extend(IOMy.common,{
                     };
                 }
                 
+                me.bLinkTypesLoaded = true;
+                
                 //-- Perform the "onSuccess" function if applicable --//
                 if(oConfig.onSuccess !== undefined) {
                     oConfig.onSuccess();
@@ -1624,25 +1627,25 @@ $.extend(IOMy.common,{
                             //------------------------------------------------//
                             IOMy.common.LoadPremiseOccupantsOptions({
                                 onSuccess: $.proxy( function() {
-                                    
+
                                 }, me),
                                 onFail: $.proxy( function() {
                                     jQuery.sap.log.error("Error: Failed to update the PremiseFloorOptions for the RefreshOptionalVariables function.");
-                                    
+
                                 }, me)
                             }); //-- END PART 2C ( Premise Occupant Options ) --//
-                            
+
                         }, me),
                         onFail: $.proxy( function() {
                             jQuery.sap.log.error("Error: Failed to update the PremiseBedroomOptions for the RefreshOptionalVariables function.");
-                            
+
                         }, me)
                     }); //-- END PART 2B ( Premise Bedroom Options ) --//
-                    
+
                 }, me),
                 onFail: $.proxy( function() {
                     jQuery.sap.log.error("Error: Failed to update the LinkTypes for the RefreshOptionalVariables function.");
-                    
+
                 }, me)
             }); //-- END PART 2A ( Premise Link Types Options ) --//
             

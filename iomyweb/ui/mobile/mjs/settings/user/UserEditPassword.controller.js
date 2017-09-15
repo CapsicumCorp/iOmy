@@ -24,9 +24,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 $.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
 
 sap.ui.controller("mjs.settings.user.UserEditPassword", {
-	api : IOMy.apiphp,
-    odata : IOMy.apiodata,
-	functions : IOMy.functions,
     
     currentUserID : 0,
     /**
@@ -36,8 +33,8 @@ sap.ui.controller("mjs.settings.user.UserEditPassword", {
     loadUserKey : function () {
         var me = this;
         
-        me.odata.AjaxRequest({
-            Url : me.odata.ODataLocation("users"),
+        IOMy.apiodata.AjaxRequest({
+            Url : IOMy.apiodata.ODataLocation("users"),
             Columns : ["USERS_PK"],
             WhereClause : [],
             OrderByClause : [],
@@ -71,7 +68,7 @@ sap.ui.controller("mjs.settings.user.UserEditPassword", {
 				IOMy.common.NavigationRefreshButtons( me );
 				
 				// Start rendering the page
-				me.functions.destroyItemsByIdFromView(me, [
+				IOMy.functions.destroyItemsByIdFromView(me, [
                     "oldPasswordField", "newPasswordField",
                     "confirmPasswordField", "buttonBox", "requiredNotice"
                 ]);

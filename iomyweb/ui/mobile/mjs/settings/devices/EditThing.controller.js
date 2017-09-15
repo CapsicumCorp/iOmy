@@ -25,8 +25,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 $.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
 
 sap.ui.controller("mjs.settings.devices.EditThing", {
-	api : IOMy.apiphp,
-	functions : IOMy.functions,
     
     thingID : null,
     oThing : null,
@@ -295,20 +293,23 @@ sap.ui.controller("mjs.settings.devices.EditThing", {
         // Create the action menu.
         //--------------------------------------------------------------------//
         thisView.byId("extrasMenuHolder").destroyItems();
-        thisView.byId("extrasMenuHolder").addItem(
-            IOMy.widgets.getActionMenu({
-                id : me.createId("extrasMenu"),        // Uses the page ID
-                icon : "sap-icon://GoogleMaterial/more_vert",
-                items : [
-                    {
-                        text: "Add Room",
-                        select:    function (oControlEvent) {
-                            IOMy.common.NavigationChangePage( "pSettingsRoomAdd", {} );
+        
+        if (IOMy.common.hasRoomAdminAccess( me.oThing.PremiseId )) {
+            thisView.byId("extrasMenuHolder").addItem(
+                IOMy.widgets.getActionMenu({
+                    id : me.createId("extrasMenu"),        // Uses the page ID
+                    icon : "sap-icon://GoogleMaterial/more_vert",
+                    items : [
+                        {
+                            text: "Add Room",
+                            select:    function (oControlEvent) {
+                                IOMy.common.NavigationChangePage( "pSettingsRoomAdd", {} );
+                            }
                         }
-                    }
-                ]
-            })
-        );
+                    ]
+                })
+            );
+        }
     
         
         me.byId("buttonBox").setAcceptEnabled(me.areThereChanges());

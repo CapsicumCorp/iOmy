@@ -80,6 +80,12 @@ $.extend(IOMy.validation, {
 		return mResult;
 	},
 	
+    /**
+     * Checks whether a given IPv4 port is valid.
+     * 
+     * @param {type} sIPPort        IP Port to check
+     * @returns {map}               Data containing the result
+     */
 	isIPv4PortValid : function (sIPPort) {
 		//-------------------------------------------------//
 		// Variables

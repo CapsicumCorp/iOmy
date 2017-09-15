@@ -29,6 +29,13 @@ $.extend(IOMy.rules, {
     
     RulesList : {},
 	
+    /**
+     * Checks a given hub to check whether the rules feature can be used for
+     * the hub.
+     * 
+     * @param {type} iHub       ID of the hub
+     * @returns {Boolean}       Whether the hub is supported or not
+     */
 	doesHubSupportDeviceRules : function (iHub) {
 		//--------------------------------------------------------------------//
         // Check the hub ID.
@@ -57,6 +64,20 @@ $.extend(IOMy.rules, {
 		return bSupported;
 	},
     
+    /**
+     * Loads all of the rules into memory.
+     * 
+     * Required parameters in mSettings:
+     * 
+     * hubID                : ID of the hub
+     * 
+     * Optional parameters:
+     * 
+     * onSuccess            : function to run if the rules have loaded successfully
+     * onFail(sErrMesg)     : function to run after an error is encountered. Accepts an error message as a parameter.
+     * 
+     * @param {type} mSettings          Map containing parameters
+     */
     loadRules : function (mSettings) {
         //--------------------------------------------------------------------//
         // Declare and initialise variables
@@ -133,6 +154,9 @@ $.extend(IOMy.rules, {
             throw new MissingSettingsMapException();
         }
         
+        //--------------------------------------------------------------------//
+        // Run the API to acquire the list of rules.
+        //--------------------------------------------------------------------//
         IOMy.apiphp.AjaxRequest({
             
             url : sURL,
@@ -146,6 +170,10 @@ $.extend(IOMy.rules, {
                 try {
                     
                     if (data.Error === false) {
+                        //----------------------------------------------------//
+                        // Create the list of rules identified by the serial
+                        // numbers of the devices.
+                        //----------------------------------------------------//
                         var aData = data.Data.timerules;
                         var mRule = {};
                         
@@ -188,6 +216,20 @@ $.extend(IOMy.rules, {
         
     },
     
+    /**
+     * Saves the list of rules to the device rules file.
+     * 
+     * Required parameters in mSettings:
+     * 
+     * hubID                : ID of the hub
+     * 
+     * Optional parameters:
+     * 
+     * onSuccess            : function to run if successful
+     * onFail(sErrMesg)     : function to run after an error is encountered. Accepts an error message as a parameter
+     * 
+     * @param {type} mSettings      Map containing parameters.
+     */
     saveRules : function (mSettings) {
         //--------------------------------------------------------------------//
         // Declare and initialise variables
@@ -321,6 +363,25 @@ $.extend(IOMy.rules, {
         });
     },
     
+    /**
+     * Creates a new, or edits an exisiting rule to the Rules list and saves the
+     * changes.
+     * 
+     * Required parameters in mSettings:
+     * 
+     * hubID                : ID of the hub
+     * rule                 : Object containing times to turn a device on or off
+     * rule.Serial          : Serial ID of the device
+     * rule.Ontime          : Time to turn the device on
+     * rule.Offtime         : Time to turn the device off
+     * 
+     * Optional parameters:
+     * 
+     * onSuccess            : function to run if successful
+     * onFail(sErrMesg)     : function to run after an error is encountered. Accepts an error message as a parameter
+     * 
+     * @param {type} mSettings          Map containing parameters
+     */
     applyRule : function (mSettings) {
         //--------------------------------------------------------------------//
         // Declare and initialise variables
@@ -410,6 +471,21 @@ $.extend(IOMy.rules, {
         }
     },
     
+    /**
+     * Removes a rule from the list and saves the changes.
+     * 
+     * Required parameters in mSettings:
+     * 
+     * hubID                : ID of the hub
+     * Serial               : Serial number of the device to discard the rule for
+     * 
+     * Optional parameters:
+     * 
+     * onSuccess            : function to run if successful
+     * onFail(sErrMesg)     : function to run after an error is encountered. Accepts an error message as a parameter
+     * 
+     * @param {type} mSettings          Map containing parameters
+     */
     discardRule : function (mSettings) {
         
         var bError          = false;
@@ -470,19 +546,3 @@ $.extend(IOMy.rules, {
     }
     
 });
-
-//----------------------------------------//
-//-- LOAD RULE FUNCTIONS                --//
-//----------------------------------------//
-
-//----------------------------------------------------------------------------//
-// Rule management
-//----------------------------------------------------------------------------//
-//$.sap.registerModulePath('IOMy.rules', sModuleInitialBuildLocation+'util/validation');
-//$.sap.require("IOMy.rules.addRule");
-//
-//$.sap.registerModulePath('IOMy.rules', sModuleInitialBuildLocation+'util/validation');
-//$.sap.require("IOMy.rules.editRule");
-//
-//$.sap.registerModulePath('IOMy.rules', sModuleInitialBuildLocation+'util/validation');
-//$.sap.require("IOMy.rules.deleteRule");

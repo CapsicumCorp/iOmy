@@ -296,18 +296,20 @@ sap.ui.controller("mjs.premise.Overview", {
                     }).addStyleClass("iOmyMessageInfoStrip")
                 );
             
-                oLayout.addItem(
-                    new sap.m.VBox({
-                        items : [
-                            new sap.m.Button({
-                                text : "Add Room",
-                                press : function () {
-                                    IOMy.common.NavigationChangePage("pSettingsRoomAdd", {premiseID : me.byId("premiseBox").getSelectedKey()});
-                                }
-                            }).addStyleClass("width100Percent")
-                        ]
-                    }).addStyleClass("TextCenter MarTop12px")
-                );
+                if (IOMy.common.hasRoomAdminAccess(me.byId("premiseBox").getSelectedKey())) {
+                    oLayout.addItem(
+                        new sap.m.VBox({
+                            items : [
+                                new sap.m.Button({
+                                    text : "Add Room",
+                                    press : function () {
+                                        IOMy.common.NavigationChangePage("pSettingsRoomAdd", {premiseID : me.byId("premiseBox").getSelectedKey()});
+                                    }
+                                }).addStyleClass("width100Percent")
+                            ]
+                        }).addStyleClass("TextCenter MarTop12px")
+                    );
+                }
             
                 oLayout.addStyleClass("BorderBottom PadAll6px");
             }
@@ -316,50 +318,59 @@ sap.ui.controller("mjs.premise.Overview", {
         }
         
         // Insert the action menu to the bottom left of the page.
+        var aMenuItems = [];
+        
+        if (IOMy.common.hasRoomAdminAccess(me.byId("premiseBox").getSelectedKey())) {
+            aMenuItems.push(
+                {
+                    text: "Add Room",
+                    select:    function (oControlEvent) {
+                        IOMy.common.NavigationChangePage( "pSettingsRoomAdd", {premiseID : me.byId("premiseBox").getSelectedKey()} );
+                    }
+                }
+            );
+        }
+        
+        aMenuItems = aMenuItems.concat([
+            {
+                text: "Edit Information",
+                select:    function (oControlEvent) {
+                    // Find the Premise List item that has the ID of
+                    // the currently selected premise and store it.
+                    $.each(IOMy.common.PremiseList, function (sI, mPremise) {
+                        if (mPremise.Id == me.byId("premiseBox").getSelectedKey()) {
+                            // Grab the correct list index.
+                            IOMy.common.PremiseSelected = mPremise;
+                        }
+                    });
+
+                    IOMy.common.NavigationChangePage( "pSettingsPremiseInfo", {} );
+                }
+            },
+            {
+                text: "Edit Address",
+                select:    function (oControlEvent) {
+                    // Find the Premise List item that has the ID of
+                    // the currently selected premise and store it.
+                    $.each(IOMy.common.PremiseList, function (sI, mPremise) {
+                        if (mPremise.Id == me.byId("premiseBox").getSelectedKey()) {
+                            // Grab the correct list index.
+                            IOMy.common.PremiseSelected = mPremise;
+                        }
+                    });
+
+                    IOMy.common.NavigationChangePage( "pSettingsPremiseAddress", {premise : IOMy.common.PremiseSelected} );
+                }
+            }
+        ]);
+        
         me.wRoomListBox.addItem(oLayout);
         thisView.byId("extrasMenuHolder").destroyItems();
         thisView.byId("extrasMenuHolder").addItem(
             IOMy.widgets.getActionMenu({
                 id : me.createId("extrasMenu"),        // Uses the page ID
                 icon : "sap-icon://GoogleMaterial/more_vert",
-                items : [
-                    {
-                        text: "Add Room",
-                        select:    function (oControlEvent) {
-                            IOMy.common.NavigationChangePage( "pSettingsRoomAdd", {premiseID : me.byId("premiseBox").getSelectedKey()} );
-                        }
-                    },
-                    {
-                        text: "Edit Information",
-                        select:    function (oControlEvent) {
-                            // Find the Premise List item that has the ID of
-                            // the currently selected premise and store it.
-                            $.each(IOMy.common.PremiseList, function (sI, mPremise) {
-                                if (mPremise.Id == me.byId("premiseBox").getSelectedKey()) {
-                                    // Grab the correct list index.
-                                    IOMy.common.PremiseSelected = mPremise;
-                                }
-                            });
-
-                            IOMy.common.NavigationChangePage( "pSettingsPremiseInfo", {} );
-                        }
-                    },
-                    {
-                        text: "Edit Address",
-                        select:    function (oControlEvent) {
-                            // Find the Premise List item that has the ID of
-                            // the currently selected premise and store it.
-                            $.each(IOMy.common.PremiseList, function (sI, mPremise) {
-                                if (mPremise.Id == me.byId("premiseBox").getSelectedKey()) {
-                                    // Grab the correct list index.
-                                    IOMy.common.PremiseSelected = mPremise;
-                                }
-                            })
-
-                            IOMy.common.NavigationChangePage( "pSettingsPremiseAddress", {premise : IOMy.common.PremiseSelected} );
-                        }
-                    }
-                ]
+                items : aMenuItems
             })
         );
         

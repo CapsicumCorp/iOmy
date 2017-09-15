@@ -225,9 +225,9 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
                 me.PTZMoveDown();
             }
         }).addStyleClass("width100Percent height30px IOMYButton ButtonIconWhite CameraPTZButton")
-        //==============================================\\
-        // DRAW CAMERA FEED                             \\
-        //==============================================\\
+        //==============================================//
+        // DRAW CAMERA FEED                             //
+        //==============================================//
         
         me.wCameraFeed = new sap.m.VBox(me.createId("CameraThumbnail"), {
             items : [
@@ -253,9 +253,9 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
             ]
         }).addStyleClass("width100Percent height300px BG_grey_10 CameraThumbnail");
 
-        //==============================================\\
-        // DRAW DATE, TIME, AND ROOM                    \\
-        //==============================================\\
+        //==============================================//
+        // DRAW DATE, TIME, AND ROOM                    //
+        //==============================================//
         me.wLocationField = new sap.m.Label({
             text : oRoomInfo.RoomName + " in " + oRoomInfo.PremiseName
         }).addStyleClass("NormalWS");
@@ -371,7 +371,20 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         me.wBtnMoveRight.setEnabled(bStatus);
     },
     
-	//-- TODO: These PTZ functions can be moved to the onvif device module. --//
+	/**
+     * Wrapper function for the PTZ Move command in the IOMy.devices.onvif
+     * library to send the desired number of steps vertically and horizontally
+     * to the function.
+     * 
+     * Examples:
+     * 
+     * * PTZMove(-4,2)      4 steps left and 2 steps up
+     * * PTZMove(2,2)       2 steps right and 2 steps up
+     * * PTZMove(0,-5)      5 steps down
+     * 
+     * @param {type} iPosX      Steps to move horizontally
+     * @param {type} iPosY      Steps to move vertically
+     */
     PTZMove : function (iPosX, iPosY) {
         var me = this;
         
@@ -478,7 +491,11 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
             // Function if Lookup fails (Onvif server not found)
             function (response) {
                 jQuery.sap.log.error("Error checking for the Onvif device (onFail): "+IOMy.devices.onvif.sProfileLookupErrors);
-                me.wSnapshotTimeField.setText("Failed to load snapshot");
+                me.wSnapshotTimeField.setText("Failed to load the latest snapshot");
+                
+                // If there is an error, the page is to be redrawn when the user
+                // goes back to the same device.
+                me.bUIDrawn = false;
             }
         );
     },
@@ -522,8 +539,6 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
             OrderByClause   : [],
             
             onSuccess : function (type, data) {
-               //console.log(type);
-                //console.log(JSON.stringify(data));
                 
                 if (data.length > 0) {
                     me.sStreamProfileName       = data[0].DATASHORTSTRING_VALUE;
@@ -565,6 +580,6 @@ sap.ui.controller("mjs.devices.OnvifCamera", {
         });
         
                 
-    },
+    }
 
 });

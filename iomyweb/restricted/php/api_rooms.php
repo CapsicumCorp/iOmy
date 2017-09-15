@@ -333,7 +333,7 @@ if( $bError===false ) {
 				//--------------------------------------------------------------------//
 				//-- 5.2.1 - Lookup information about the Room                      --//
 				//--------------------------------------------------------------------//
-				$aTempDataResult = dbGetPremisesInfoFromPremiseId( $iPostPremiseId );
+				$aTempDataResult = GetPremisesInfoFromPremiseId( $iPostPremiseId );
 				
 				if( $aTempDataResult["Error"]===true ) {
 					//-- Display an Error Message --//
@@ -348,7 +348,7 @@ if( $bError===false ) {
 				//--------------------------------------------------------------------//
 				if( $bError===false ) {
 					//-- Verify that the user has permission to change the name --//
-					if( $aTempDataResult["Data"]["PermOwner"]===1 ) {
+					if( $aTempDataResult["Data"]["PermRoomAdmin"]===1 ) {
 						
 						//-- Change the Room Info --//
 						$aResult = AddNewRoom( $iPostPremiseId, $sPostName, $iPostFloor, $sPostDesc, $iPostRoomTypeId );

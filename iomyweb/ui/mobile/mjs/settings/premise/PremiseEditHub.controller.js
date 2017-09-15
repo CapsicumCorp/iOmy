@@ -24,8 +24,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 $.sap.require("IOMy.widgets.AcceptCancelButtonGroup");
 
 sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
-	api : IOMy.apiphp,
-	functions : IOMy.functions,
     
     hubID : 0,
 /**
@@ -47,7 +45,7 @@ sap.ui.controller("mjs.settings.premise.PremiseEditHub", {
                 var iID = aHub.HubId;
                 var sName = aHub.HubName;
 				// Start rendering the page
-				me.functions.destroyItemsByIdFromView(me, [
+				IOMy.functions.destroyItemsByIdFromView(me, [
 	                "hubID", "hubField"
 	            ]);
                 

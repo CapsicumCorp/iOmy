@@ -28,6 +28,11 @@ $.extend(IOMy.common, {
 	CommList			: {},
 	CommListLastUpdate	: new Date(),
 	
+    /**
+     * Loads/reloads the Comm List into memory.
+     * 
+     * @param {type} oConfig
+     */
 	RefreshCommList : function (oConfig) {
 		var me = this; 
 		

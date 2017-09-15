@@ -35,6 +35,13 @@ $.extend(IOMy.devices.philipshue,{
 	
 	DevicePageID : "pPhilipsHue",
     
+    /**
+     * Create a 40px by 40px square so that it can show the colour of the
+     * Philips Hue lamp.
+     * 
+     * @param {type} sID            
+     * @returns {sap.m.FlexBox}     Empty box for showing the colour of the Philips Hue lamp
+     */
     CreateColourBox : function (sID) {
         var me = this;
         

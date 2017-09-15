@@ -231,14 +231,19 @@ IOMy.widgets.ButtonGroup.extend("IOMy.widgets.AcceptCancelButtonGroup", {
     },
     
     /**
-     * Enables (default) or disables the accept button.
+     * Fetches the accept button.
      * 
-     * @param {type} bEnabled       Enabled/Disabled status
+     * @returns {sap.m.Button}  Accept button
      */
     getAcceptButton : function () {
         return this._wAcceptButton;
     },
     
+    /**
+     * Fetches the cancel button.
+     * 
+     * @returns {sap.m.Button}  Cancel button
+     */
     getCancelButton : function () {
         return this._wCancelButton;
     }

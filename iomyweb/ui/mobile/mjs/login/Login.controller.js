@@ -275,7 +275,8 @@ sap.ui.controller("mjs.login.Login", {
 			maxLength: 40,
 			width: "200px",
             submit : function (oControlEvent) {
-                me.byId("oLoginInputPWord").focus();
+                me.ToggleInputsAndButton(false);
+				me.doLogin();
             }
 		}).addStyleClass("LoginTextInput");
 		
