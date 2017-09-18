@@ -66,6 +66,8 @@ static std::list<webapiclient_link_t *> webapi_links_queue;
 //List is a pointer so can hold derived objects instead of just the base class
 static std::list<webapiclient_comm_t *> webapi_comms_queue;
 
+static std::list<webapiclient_thing_t *> webapi_things_queue;
+
 static boost::recursive_mutex webapiclientlibmutex;
 
 static boost::thread webapiclientlib_mainthread;
@@ -75,6 +77,7 @@ static bool webapiclientlib_add_zigbee_link_to_webapi_queue(const webapiclient_z
 static bool webapiclientlib_add_csrmesh_link_to_webapi_queue(const webapiclient_csrmeshlink_t& csrmeshlink);
 static bool webapiclientlib_add_zigbee_comm_to_webapi_queue(const webapiclient_zigbeecomm_t& zigbeecomm);
 static bool webapiclientlib_add_bluetooth_comm_to_webapi_queue(const webapiclient_bluetoothcomm_t& bluetoothcomm);
+static bool webapiclientlib_add_csrmesh_thing_to_webapi_queue(const webapiclient_csrmeshthing_t& csrmeshthing);
 static void webapiclientlib_setneedtoquit(bool val);
 static int webapiclientlib_getneedtoquit();
 static int webapiclientlib_start(void);
@@ -101,7 +104,8 @@ static webapiclientlib_ifaceptrs_ver_1_t webapiclientlib_ifaceptrs_ver_1={
   webapiclientlib_add_zigbee_link_to_webapi_queue,
   webapiclientlib_add_csrmesh_link_to_webapi_queue,
   webapiclientlib_add_zigbee_comm_to_webapi_queue,
-  webapiclientlib_add_bluetooth_comm_to_webapi_queue
+  webapiclientlib_add_bluetooth_comm_to_webapi_queue,
+  webapiclientlib_add_csrmesh_thing_to_webapi_queue
 };
 
 static moduleiface_ver_1_t webapiclientlib_ifaces[]={
@@ -307,6 +311,42 @@ std::string comm_to_json(const webapiclient_comm_t& comm) {
   return streamstr.str();
 }
 
+std::string thing_to_json(const webapiclient_thing_t& thing) {
+  using boost::property_tree::ptree;
+  ptree pt;
+  ptree thingpt;
+  std::ostringstream tmphexstr;
+
+  thingpt.put("LinkId", thing.linkpk);
+  thingpt.put("Type", thing.type);
+  thingpt.put("State", thing.state);
+  thingpt.put("HWId", thing.hwid);
+  thingpt.put("Name", thing.name);
+  if (typeid(thing)==typeid(webapiclient_csrmeshthing_t)) {
+    const webapiclient_csrmeshthing_t& csrmeshthing=dynamic_cast<const webapiclient_csrmeshthing_t&>(thing);
+
+    thingpt.put("SerialCode", csrmeshthing.serialcode);
+    ptree iospt;
+    for (const auto &ioit : csrmeshthing.io) {
+      ptree iopt;
+
+      iopt.put("RSType", ioit.rstype);
+      iopt.put("UoM", ioit.uom);
+      iopt.put("Type", ioit.iotype);
+      iopt.put("Name", ioit.name);
+      iopt.put("BaseConvert", ioit.baseconvert);
+      iopt.put("SampleRate", ioit.samplerate);
+
+      iospt.push_back(std::make_pair("", iopt));
+    }
+    thingpt.put_child("IOs", iospt);
+  }
+  std::ostringstream streamstr;
+  write_json(streamstr, thingpt);
+
+  return streamstr.str();
+}
+
 //Add a link to a queue for adding via the web api
 static bool webapiclientlib_add_link_to_webapi_queue(webapiclient_link_t* link) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) webapiclientlib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
@@ -375,6 +415,34 @@ static bool webapiclientlib_add_bluetooth_comm_to_webapi_queue(const webapiclien
   webapiclient_bluetoothcomm_t *comm=new webapiclient_bluetoothcomm_t;
   *comm=bluetoothcomm;
   return webapiclientlib_add_comm_to_webapi_queue(comm);
+}
+
+//Add a thing to a queue for adding via the web api
+static bool webapiclientlib_add_thing_to_webapi_queue(webapiclient_thing_t* thing) {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) webapiclientlib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
+
+  debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
+
+  debuglibifaceptr->debuglib_printf(1, "%s: Adding device with name: %s to webapi queue\n", __func__, thing->name.c_str());
+  {
+    boost::lock_guard<boost::recursive_mutex> guard(webapiclientlibmutex);
+
+    //Just add to the queue and quickly exit as the list can be pruned later in the webapi thread
+    webapi_things_queue.push_back(thing);
+  }
+
+  //Testing Code
+  debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: JSON output: \"%s\"\n", __func__, thing_to_json(*thing).c_str());
+
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
+  return true;
+}
+
+//Add a CSRMesh thing to a queue for adding via the web api
+static bool webapiclientlib_add_csrmesh_thing_to_webapi_queue(const webapiclient_csrmeshthing_t& csrmeshthing) {
+  webapiclient_csrmeshthing_t *thing=new webapiclient_csrmeshthing_t;
+  *thing=csrmeshthing;
+  return webapiclientlib_add_thing_to_webapi_queue(thing);
 }
 
 //Setup a http request
@@ -486,13 +554,15 @@ private:
 	long httpbodylen;
 	std::list<webapiclient_link_t *>::iterator linksit;
 	std::list<webapiclient_comm_t *>::iterator commsit;
-	int requestmode; //1=Adding Link, 2=Adding Comm
+  std::list<webapiclient_thing_t *>::iterator thingsit;
+	int requestmode; //1=Adding Link, 2=Adding Comm, 3=Adding Thing
 
 	//See http://stackoverflow.com/questions/21120361/boostasioasync-write-and-buffers-over-65536-bytes
 	//These variables need to stay allocated while the asio request is active so can't be local to a single function
   httpclient hc;
   boost::asio::streambuf commrequest_;
   boost::asio::streambuf linkrequest_;
+  boost::asio::streambuf thingrequest_;
 
 public:
 	asioclient(boost::asio::io_service& io_service)
@@ -536,12 +606,13 @@ public:
 		//Loop through the zigbee comms and links queues adding each one at a time
 		{
 			boost::lock_guard<boost::recursive_mutex> guard(webapiclientlibmutex);
-			if (webapi_links_queue.empty() && webapi_comms_queue.empty() && webapi_comms_queue.empty()) {
+			if (webapi_links_queue.empty() && webapi_comms_queue.empty() && webapi_things_queue.empty()) {
 				//No need to connect if the queue is empty
 				return;
 			}
 			commsit=webapi_comms_queue.begin();
 			linksit=webapi_links_queue.begin();
+      thingsit=webapi_things_queue.begin();
 		}
 		// Start an asynchronous resolve to translate the server and service names
     // into a list of endpoints.
@@ -701,11 +772,51 @@ private:
 			boost::asio::async_write(socket_, linkrequest_,
 					boost::bind(&asioclient::handle_write_request, this,
 						boost::asio::placeholders::error));
+    } else if (!webapiclientlib_getneedtoquit()) {
+      send_thing_request();
 		} else {
 			stop();
 		}
 	}
-	
+
+  void send_thing_request(void) {
+    bool thingokay;
+    std::list<webapiclient_thing_t *>::iterator thingsendit;
+
+    //Send the next request or close connection if nothing else to send
+    {
+      boost::lock_guard<boost::recursive_mutex> guard(webapiclientlibmutex);
+      thingsendit=webapi_things_queue.end();
+    }
+    //Don't send the thing until all checks pass
+    thingokay=false;
+    while (!thingokay && thingsit!=thingsendit) {
+      if (!(*thingsit)->linkpk || !(*thingsit)->okaytoadd) {
+        //Step to next thing
+        ++thingsit;
+
+        continue;
+      }
+      thingokay=true;
+    }
+    if (thingokay && !webapiclientlib_getneedtoquit()) {
+      reset_http_body();
+
+      hc.addFormField("Mode", "AddThing");
+      hc.addFormField("Data", thing_to_json(**thingsit));
+      std::ostream request_stream(&thingrequest_);
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending thing request: %s\n", __func__, hc.toString().c_str());
+      request_stream << hc.toString();
+
+      requestmode=3;
+      boost::asio::async_write(socket_, thingrequest_,
+          boost::bind(&asioclient::handle_write_request, this,
+            boost::asio::placeholders::error));
+    } else {
+      stop();
+    }
+  }
+
 	void handle_write_request(const boost::system::error_code& err) {
 		if (stopped_) {
 			return;
@@ -899,6 +1010,22 @@ private:
       stop();
 			//Send next request
 			//send_link_request();
+    } else if (requestmode==3) {
+      std::list<webapiclient_thing_t *>::iterator thingsprevit=thingsit;
+
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Removing Thing from add queue due to success\n", __func__);
+
+      //Step to next thing before erasing the one that just got added
+      ++thingsit;
+
+      //Erase the thing that just got added
+      delete (*thingsprevit);
+      webapi_things_queue.erase(thingsprevit);
+
+      //Only send one request at a time for now until HTTP/1.1 with Chunked Transfer Encoding is implemented
+      stop();
+      //Send next request
+      //send_link_request();
 		} else if (requestmode==2) {
 			std::list<webapiclient_comm_t *>::iterator commsprevit=commsit;
 
@@ -928,6 +1055,14 @@ private:
 
 			//Send next request
 			send_link_request();
+    } else if (requestmode==3) {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Skipping adding Thing for now due to error\n", __func__);
+
+      //Skip the current thing for now and step to next link
+      ++thingsit;
+
+      //Send next request
+      send_thing_request();
 		} else if (requestmode==2) {
 			debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Skipping adding Comm for now due to error\n", __func__);
 
@@ -1058,6 +1193,43 @@ private:
     }
 	}
 
+//Get the link pk for things based on the local address
+  void set_linkpk_for_things(void) {
+    debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) webapiclientlib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
+    dblib_ifaceptrs_ver_1_t *dblibifaceptr=(dblib_ifaceptrs_ver_1_t *) webapiclientlib_getmoduledepifaceptr("dblib",  DBLIBINTERFACE_VER_1);;
+    int result;
+
+    //Once we have begin and end iterators we shouldn't need a lock to traverse the list unless we modify the contents
+    webapiclientlibmutex.lock();
+    auto webapi_things_queueitbegin=webapi_things_queue.begin();
+    auto webapi_things_queueitend=webapi_things_queue.end();
+    webapiclientlibmutex.unlock();
+
+    result=dblibifaceptr->begin();
+    if (result<0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to start database transaction\n", __func__);
+      return;
+    }
+    for (auto &it=webapi_things_queueitbegin; it!=webapi_things_queueitend; it++) {
+      int result;
+      int64_t linkpk;
+
+      //Check the database to see if the link is linked to a comm
+      debuglibifaceptr->debuglib_printf(1, "%s: Searching for Link PK from address: %016" PRIX64 " for Queued Thing: %08" PRIX32 "\n", __func__, (*it)->localaddr, (*it)->hwid);
+      result=dblibifaceptr->getlinkpk((*it)->localaddr, &linkpk);
+      if (result==0) {
+        webapiclientlibmutex.lock();
+        (*it)->linkpk=linkpk;
+        webapiclientlibmutex.unlock();
+        debuglibifaceptr->debuglib_printf(1, "%s: Found Link PK: %" PRId64 " from address: %016" PRIX64 " for Queued Thing: %08" PRIX32 "\n", __func__, linkpk, (*it)->localaddr, (*it)->hwid);
+      }
+    }
+    result=dblibifaceptr->end();
+    if (result<0) {
+      dblibifaceptr->rollback();
+    }
+  }
+
 	//Remove comm devices from the webapi queue that don't need to be re-added
 	void remove_already_added_comm_devices(void) {
 		debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) webapiclientlib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
@@ -1156,6 +1328,55 @@ private:
 		//debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 	}
 
+  //Remove things from the webapi queue that don't need to be re-added
+  void remove_already_added_things(void) {
+    debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) webapiclientlib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
+    dblib_ifaceptrs_ver_1_t *dblibifaceptr=(dblib_ifaceptrs_ver_1_t *) webapiclientlib_getmoduledepifaceptr("dblib",  DBLIBINTERFACE_VER_1);;
+    int result;
+
+    //debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
+
+    //Once we have begin and end iterators we shouldn't need a lock to traverse the list unless we modify the contents
+    webapiclientlibmutex.lock();
+    auto webapi_things_queueitbegin=webapi_things_queue.begin();
+    auto webapi_things_queueitend=webapi_things_queue.end();
+    webapiclientlibmutex.unlock();
+    std::list< std::list<webapiclient_thing_t *>::iterator > things_to_remove;
+
+    result=dblibifaceptr->begin();
+    if (result<0) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to start database transaction\n", __func__);
+      return;
+    }
+    for (auto &it=webapi_things_queueitbegin; it!=webapi_things_queueitend; it++) {
+      int result;
+      int64_t thingpk;
+
+      //Check the database to see if the thing has already been added
+      result=dblibifaceptr->getthingpk((*it)->serialcode, (*it)->hwid, &thingpk);
+      if (result==0) {
+        debuglibifaceptr->debuglib_printf(1, "%s: Going to remove Thing from queue: %08" PRIX32 " as it is already in the database\n", __func__, (*it)->hwid);
+        things_to_remove.push_back(it);
+      } else if (result<-1) {
+        debuglibifaceptr->debuglib_printf(1, "%s: Failed to check with database for Thing: %08" PRIX32 ", postponding sending to webapi\n", __func__, (*it)->hwid);
+      } else {
+        (*it)->okaytoadd=true;
+      }
+    }
+    result=dblibifaceptr->end();
+    if (result<0) {
+      dblibifaceptr->rollback();
+    }
+    webapiclientlibmutex.lock();
+    for (auto const &it : things_to_remove) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Removing Thing from queue: %08" PRIX32 "\n", __func__, (*it)->hwid);
+      delete (*it);
+      webapi_things_queue.erase(it);
+    }
+    webapiclientlibmutex.unlock();
+    //debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
+  }
+
 	void update_timer_loop() {
 		dblib_ifaceptrs_ver_1_t *dblibifaceptr=(dblib_ifaceptrs_ver_1_t *) webapiclientlib_getmoduledepifaceptr("dblib", DBLIBINTERFACE_VER_1);;
 		configlib_ifaceptrs_ver_1_cpp_t *configlibifaceptr=(configlib_ifaceptrs_ver_1_cpp_t *) webapiclientlib_getmoduledepifaceptr("configlib", CONFIGLIBINTERFACECPP_VER_1);
@@ -1170,6 +1391,8 @@ private:
 			remove_already_added_comm_devices();
 			set_locakpk_for_links();
 			remove_already_added_links();
+      set_linkpk_for_things();
+      remove_already_added_things();
 			std::string webapihostname="", webapiport="80", webapiurl="", webapihttpuser="", webapihttppass="", webapiuser="", webapipass="";
 			bool result, missingval=false;
 
@@ -1186,7 +1409,7 @@ private:
 			configlibifaceptr->getnamevalue_cpp("webapiconfig", "httppassword", webapihttppass);
 			configlibifaceptr->getnamevalue_cpp("webapiconfig", "apiusername", webapiuser);
 			configlibifaceptr->getnamevalue_cpp("webapiconfig", "apipassword", webapipass);
-			if (!missingval && (!webapi_links_queue.empty() || !webapi_comms_queue.empty())) {
+			if (!missingval && (!webapi_links_queue.empty() || !webapi_comms_queue.empty() || !webapi_things_queue.empty())) {
 				debuglibifaceptr->debuglib_printf(1, "%s: Starting client connection\n", __func__);
 				client.start(webapihostname, webapiport, webapiurl, webapiuser, webapipass, webapihttpuser, webapihttppass);
 			}

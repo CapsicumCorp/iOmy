@@ -60,7 +60,8 @@ public class MysqlLib {
     private static int MYSQLLIB_GETCOMMPK=17; //Get the pk for a comm
     private static int MYSQLLIB_GETLINKPK=18; //Get the pk for a link
     private static int MYSQLLIB_GETLINKCOMMPK=19; //Get the comm pk that is associated with a link
-    private static final int MYSQLLIB_GETLINK_USERNAME_PASSWORD=20; //Get the username and password associated with a link
+    private static final int MYSQLLIB_GETTHINGPK=20; //Get the pk for a thing address and hwid
+    private static final int MYSQLLIB_GETLINK_USERNAME_PASSWORD=21; //Get the username and password associated with a link
 
     private Context context=null;
     private static boolean dbloaded=false;
@@ -649,6 +650,42 @@ public class MysqlLib {
                     rs.close();
                 } catch ( SQLException e) {
                     displayException("getLinkPK", e);
+                }
+            }
+        }
+        return pk;
+    }
+    public static long getThingPK(String serialcode, int hwid) {
+        long pk=-2;
+        int psidx=MYSQLLIB_GETTHINGPK;
+
+        //Log.println(Log.INFO, MainActivity.AppName, "MysqlLib.getLinkPK: DEBUG: addr="+addr+" iotechtype="+iotechtype+" portid="+portid);
+        if (preparedStmts[psidx]!=null) {
+            ResultSet rs=null;
+
+            try {
+                preparedStmts[psidx].setString(1, serialcode);
+                preparedStmts[psidx].setInt(2, hwid);
+                rs=preparedStmts[psidx].executeQuery();
+                if (rs!=null) {
+                    if (rs.first()) {
+                        pk=rs.getLong(1);
+                    } else {
+                        //PK doesn't exist
+                        pk=-1;
+                    }
+                } else {
+                    //PK doesn't exist
+                    pk=-1;
+                }
+            } catch ( SQLException e) {
+                displayException("getThingPK", e);
+            }
+            if (rs!=null) {
+                try {
+                    rs.close();
+                } catch ( SQLException e) {
+                    displayException("getThingPK", e);
                 }
             }
         }

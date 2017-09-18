@@ -141,6 +141,7 @@ int dblib_update_sensor_datatinyint_value(const void *uniqueid, int64_t date, ui
 int dblib_getcommpk(uint64_t addr, int64_t *commpk);
 int dblib_getlinkpk(uint64_t addr, int64_t *linkpk);
 int dblib_getlinkcommpk(uint64_t addr, int64_t *commpk);
+static int dblib_getthingpk(uint64_t serialcode, int32_t hwid, int64_t *thingpk);
 int dblib_getlinkusernamepassword(int64_t linkpk, char **username, char **password);
 
 int dblib_configload_post();
@@ -180,6 +181,7 @@ static dblib_ifaceptrs_ver_1_t dblib_ifaceptrs_ver_1={
   .getcommpk=dblib_getcommpk,
   .getlinkpk=dblib_getlinkpk,
   .getlinkcommpk=dblib_getlinkcommpk,
+  .getthingpk=dblib_getthingpk,
   .getlinkusernamepassword=dblib_getlinkusernamepassword,
   .freeuniqueid=dblib_freeuniqueid
 };
@@ -946,6 +948,25 @@ int dblib_getlinkcommpk(uint64_t addr, int64_t *commpk) {
   PTHREAD_UNLOCK(&dblibmutex);
   if (ldbtype==DBLIB_DBTYPE_MYSQL) {
     return mysqllibifaceptr->getlinkcommpk(addr, commpk);
+  }
+  return -2;
+}
+
+/*
+  Get thing pk associated with a thing
+  Args: thing serialcode, hwid
+  On success, 64-bit thing pk will be set, and 0 will be returned
+  Returns -1 if thing doesn't exist, < -1 on another error
+*/
+static int dblib_getthingpk(uint64_t serialcode, int32_t hwid, int64_t *thingpk) {
+  mysqllib_ifaceptrs_ver_1_t *mysqllibifaceptr=dblib_deps[MYSQLLIB_DEPIDX].ifaceptr;
+  int ldbtype;
+
+  PTHREAD_LOCK(&dblibmutex);
+  ldbtype=dblib_dbtype;
+  PTHREAD_UNLOCK(&dblibmutex);
+  if (ldbtype==DBLIB_DBTYPE_MYSQL) {
+    return mysqllibifaceptr->getthingpk(serialcode, hwid, thingpk);
   }
   return -2;
 }

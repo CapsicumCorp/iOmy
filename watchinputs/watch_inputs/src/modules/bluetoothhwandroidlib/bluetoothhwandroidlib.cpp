@@ -671,6 +671,7 @@ void loadCSRMeshInfoFromDatabase(void ) {
       }
     }
     //TODO: Retrieve CSRMesh devices from Things list
+    //TODO: Set next device id from database
 
     result=dblibifaceptr->end();
     if (result<0) {
@@ -694,8 +695,6 @@ static int startCSRMesh(void) {
   JNIEnv *env;
   jmethodID methodid;
   int result=0, wasdetached=0;
-
-  //TODO: Set next device id from database
 
   if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
     return -1;
@@ -777,6 +776,68 @@ static jint addcsrmeshdeviceforpairing(JNIEnv* env, jstring shortName, jint uuid
 }
 #endif
 
+static void csrmeshAddDeviceToDatabase(int32_t uuidHash, int32_t deviceId) {
+  const webapiclientlib_ifaceptrs_ver_1_t *webapiclientlibifaceptr=reinterpret_cast<const webapiclientlib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("webapiclientlib", WEBAPICLIENTLIBINTERFACE_VER_1));
+  webapiclient_csrmeshthing_t csrmeshthing;
+
+  lockbluetoothhwandroid();
+
+  if (gcsrmeshdevices[deviceId].devicetype==CSRMESH_DEVICETYPE_LIGHT_WITH_POWEROFF) {
+    csrmeshthing.localaddr=gBluetoothHostMacAddress;
+    csrmeshthing.type=19; //CSRMesh Light Bulb with On/Off
+    csrmeshthing.state=1;
+    csrmeshthing.hwid=deviceId;
+    //csrmeshthing.name=gcsrmeshdevices[deviceId].shortName;
+    csrmeshthing.name="CSRMesh Light";
+    csrmeshthing.serialcode=uuidHash;
+    {
+      webapiclient_io io;
+
+      //Hue
+      io.rstype=3901;
+      io.uom=1;
+      io.iotype=2;
+      io.samplerate=300;
+      io.baseconvert=1;
+      io.name="Hue";
+      csrmeshthing.io.push_back(io);
+    }
+    {
+      webapiclient_io io;
+
+      //Saturation
+      io.rstype=3902;
+      io.uom=1;
+      io.iotype=2;
+      io.samplerate=300;
+      io.baseconvert=1;
+      io.name="Saturation";
+      csrmeshthing.io.push_back(io);
+    }
+    {
+      webapiclient_io io;
+
+      //Brightness
+      io.rstype=3903;
+      io.uom=1;
+      io.iotype=2;
+      io.samplerate=300;
+      io.baseconvert=1;
+      io.name="Brightness";
+      csrmeshthing.io.push_back(io);
+    }
+  } else {
+    //Unknown device type
+    unlockbluetoothhwandroid();
+    return;
+  }
+  webapiclientlibifaceptr->add_csrmesh_thing_to_webapi_queue(csrmeshthing);
+  gcsrmeshdevices[deviceId].indb=true;
+
+  unlockbluetoothhwandroid();
+
+}
+
 static void csrmeshdevicepaired(jint uuidHash, jint deviceId) {
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
@@ -796,6 +857,7 @@ static void csrmeshdevicepaired(jint uuidHash, jint deviceId) {
   gcsrmeshdevices[deviceId].deviceId=deviceId;
   gcsrmeshdevices[deviceId].pairing=false;
   gcsrmeshdevices[deviceId].paired=true;
+
   debuglibifaceptr->debuglib_printf(1, "%s: Device: %s associated with uuidHash: %08X and device Id: %08X\n", __func__, gcsrmeshdevices[deviceId].shortName.c_str(), uuidHash, deviceId);
 
   //Wakeup the main thread to poll the device for info
@@ -914,7 +976,8 @@ static void csrmeshSyncIdentifyDevices(void) {
         }
       }
       if (gcsrmeshdeviceit.second.devicetype!=CSRMESH_DEVICETYPE_UNKNOWN && !gcsrmeshdeviceit.second.indb) {
-        //TODO: Add the device to the database
+        //Add device as a thing to the database
+        csrmeshAddDeviceToDatabase(gcsrmeshdeviceit.second.uuidHash, gcsrmeshdeviceit.second.deviceId);
       }
       if (gcsrmeshdeviceit.second.indb) {
       //TODO: Setup database counters
@@ -1052,6 +1115,7 @@ static void stop(void) {
 */
 static int init(void) {
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  const dblib_ifaceptrs_ver_1_t *dblibifaceptr=reinterpret_cast<const dblib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("dblib", DBLIBINTERFACE_VER_1));
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID init_methodid;
@@ -1093,6 +1157,7 @@ static int init(void) {
 */
 static void shutdown(void) {
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  const dblib_ifaceptrs_ver_1_t *dblibifaceptr=reinterpret_cast<const dblib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("dblib", DBLIBINTERFACE_VER_1));
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID shutdown_methodid;

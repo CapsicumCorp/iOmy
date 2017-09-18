@@ -67,6 +67,7 @@ typedef struct {
   int (*getcommpk)(uint64_t addr, int64_t *commpk);
   int (*getlinkpk)(uint64_t addr, int64_t *linkpk);
   int (*getlinkcommpk)(uint64_t addr, int64_t *commpk);
+  int (*getthingpk)(uint64_t serialcode, int32_t hwid, int64_t *thingpk);
   int (*getlinkusernamepassword)(int64_t linkpk, char **username, char **password);
   void (*freeuniqueid)(void *uniqueid);
 } mysqllib_ifaceptrs_ver_1_t;

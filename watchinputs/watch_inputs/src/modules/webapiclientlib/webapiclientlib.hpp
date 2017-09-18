@@ -39,6 +39,9 @@ typedef class webapiclient_csrmeshlink webapiclient_csrmeshlink_t;
 typedef class webapiclient_comm webapiclient_comm_t;
 typedef class webapiclient_zigbeecomm webapiclient_zigbeecomm_t;
 typedef class webapiclient_bluetoothcomm webapiclient_bluetoothcomm_t;
+typedef class webapiclient_thing webapiclient_thing_t;
+typedef class webapiclient_zigbeething webapiclient_zigbeething_t;
+typedef class webapiclient_csrmeshthing webapiclient_csrmeshthing_t;
 
 typedef struct webapiclientlib_ifaceptrs_ver_1 webapiclientlib_ifaceptrs_ver_1_t;
 struct webapiclientlib_ifaceptrs_ver_1 {
@@ -48,6 +51,7 @@ struct webapiclientlib_ifaceptrs_ver_1 {
   bool (*add_csrmesh_link_to_webapi_queue)(const webapiclient_csrmeshlink_t& csrmeshlink);
 	bool (*add_zigbee_comm_to_webapi_queue)(const webapiclient_zigbeecomm_t& zigbeecomm);
   bool (*add_bluetooth_comm_to_webapi_queue)(const webapiclient_bluetoothcomm_t& bluetoothcomm);
+  bool (*add_csrmesh_thing_to_webapi_queue)(const webapiclient_csrmeshthing_t& csrmeshthing);
 };
 
 typedef struct webapiclient_io webapiclient_io_t;
@@ -60,11 +64,29 @@ struct webapiclient_io {
 	std::string name;
 };
 
-typedef struct webapiclient_zigbeething webapiclient_zigbeething_t;
-struct webapiclient_zigbeething {
-	std::int32_t type; //Thing Type
-	std::int32_t state;
+//Defines a structure for a generic thing for all the fields of the web api
+class webapiclient_thing {
+public:
+  std::int64_t localaddr=0; //64-bit address of the local device that this device is attached to
+  std::int64_t linkpk=0; //Database PK value of the link (filled in by the web api)
+  std::int32_t type; //Thing Type
+  std::int32_t state;
+  std::int32_t hwid=0;
+  std::string name="";
+  std::int64_t serialcode=0;
+  bool okaytoadd=false; //Set to true when we have successfully checked with tha database that the link doesn't exist
+
+  virtual ~webapiclient_thing() { }
+};
+
+class webapiclient_zigbeething : public webapiclient_thing {
+public:
 	std::list<webapiclient_io_t> io;
+};
+
+class webapiclient_csrmeshthing : public webapiclient_thing {
+public:
+  std::list<webapiclient_io_t> io;
 };
 
 //Defines a structure for a generic link for all the fields of the web api

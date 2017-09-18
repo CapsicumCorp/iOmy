@@ -86,7 +86,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #define MYSQLLIB_GETLINKPK 18 //Get the pk for a link address
 #define MYSQLLIB_GETLINKCOMMPK 19 //Get the comm pk that is associated with a link address
 
-static const int MYSQLLIB_GETLINK_USERNAME_PASSWORD=20; //Get the username and password associated with a link
+static const int MYSQLLIB_GETTHINGPK=20; //Get the pk for a thing address and hwid
+static const int MYSQLLIB_GETLINK_USERNAME_PASSWORD=21; //Get the username and password associated with a link
 
 //A unique id for a port on a device
 //This is not public so may change at any time
@@ -126,6 +127,7 @@ static const char *mysqllib_stmts[]={
 	"SELECT COMM_PK FROM VW_COMM WHERE COMM_ADDRESS = ?",
 	"SELECT LINK_PK FROM VW_LINK WHERE LINK_SERIALCODE = ?",
 	"SELECT COMM_PK FROM VW_LINK WHERE LINK_SERIALCODE = ?",
+  "SELECT THING_PK FROM VW_THING WHERE THING_SERIALCODE = ? AND THING_HWID = ?",
 
   "SELECT LINKCONN_USERNAME, LINKCONN_PASSWORD FROM VW_LINK WHERE LINK_PK = ?",
 };
@@ -191,6 +193,7 @@ int mysqllib_update_sensor_datatinyint_value(const void *uniqueid, int64_t date,
 int mysqllib_getcommpk(uint64_t addr, int64_t *commpk);
 int mysqllib_getlinkpk(uint64_t addr, int64_t *linkpk);
 int mysqllib_getlinkcommpk(uint64_t addr, int64_t *commpk);
+int mysqllib_getthingpk(uint64_t serialcode, int32_t hwid, int64_t *thingpk);
 int mysqllib_getlinkusernamepassword(int64_t linkpk, char **username, char **password);
 void mysqllib_freeuniqueid(void *uniqueid);
 
@@ -238,6 +241,7 @@ static mysqllib_ifaceptrs_ver_1_t thislib_ifaceptrs_ver_1={
   mysqllib_getcommpk,
   mysqllib_getlinkpk,
   mysqllib_getlinkcommpk,
+  mysqllib_getthingpk,
   mysqllib_getlinkusernamepassword,
   mysqllib_freeuniqueid
 };
@@ -3172,6 +3176,64 @@ int mysqllib_getlinkcommpk(uint64_t addr, int64_t *commpk) {
 #endif
   if (thisvalue>=0) {
 		*commpk=thisvalue;
+
+    return 0;
+  }
+  return thisvalue;
+}
+
+/*
+  Get thing pk associated with a thing
+  Args: thing serialcode, hwid
+  On success, 64-bit thing pk will be set, and 0 will be returned
+  Returns -1 if thing doesn't exist, < -1 on another error
+*/
+//NOTE: Only implemented in Java at the moment
+int mysqllib_getthingpk(uint64_t serialcode, int32_t hwid, int64_t *thingpk) {
+#ifdef __ANDROID__
+  JNIEnv *env;
+  jmethodID getThingPK_methodid;
+  jstring jtmpstr;
+  jint jtmpint;
+  int wasdetached=0;
+#endif
+  int locdbloaded;
+  char thisaddr[17];
+  jint thishwid;
+  int64_t thisvalue;
+
+#ifdef __ANDROID__
+  if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
+    return -2;
+  }
+  getThingPK_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getThingPK", "(Ljava/lang/String;I)J");
+#endif
+  sprintf(thisaddr, "%016" PRIX64, serialcode);
+  thishwid=hwid;
+
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
+    JNIDetachThread(wasdetached);
+#endif
+    return -3;
+  }
+#ifdef __ANDROID__
+  jtmpstr=env->NewStringUTF(thisaddr);
+  thisvalue=env->CallStaticLongMethod(mysqllib_mysql_class, getThingPK_methodid, jtmpstr, thishwid);
+#endif
+  PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
+  env->DeleteLocalRef(jtmpstr);
+  JNIDetachThread(wasdetached);
+#endif
+  if (thisvalue>=0) {
+    *thingpk=thisvalue;
 
     return 0;
   }
