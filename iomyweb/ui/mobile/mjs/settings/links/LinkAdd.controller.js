@@ -772,12 +772,23 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                     "streamPath"      : me.wStreamPath.getValue(),
 
                     "onSuccess" : function (mData) {
+                        var iRoomId;
                         
                         if (mData.Error === false) {
                             
+                            if (me.byId("roomCBox") !== null && me.byId("roomCBox") !== undefined) {
+                                iRoomId = me.byId("roomCBox").getSelectedKey();
+                            } else {
+                                iRoomId = 1;
+                            }
+                            
+                            if (iRoomId === "") {
+                                iRoomId = 1;
+                            }
+                            
                             IOMy.devices.AssignDeviceToRoom({
                                 "linkID" : mData.Data.LinkId,
-                                "roomID" : me.byId("roomCBox").getSelectedKey(),
+                                "roomID" : iRoomId,
 
                                 "onSuccess" : function() {
                                     IOMy.common.RefreshCoreVariables({
