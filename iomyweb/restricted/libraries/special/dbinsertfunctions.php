@@ -352,6 +352,7 @@ function PrepareAddNewLink( $aLink ) {
 			}
 		}
 		
+		
 		//----------------------------------------------------//
 		//-- (Optional) Check Link 'State'                  --//
 		//----------------------------------------------------//
@@ -889,10 +890,17 @@ function PrepareAddNewThing( $iLinkId, $aThing, $iThingDefaultHWID, $sLinkDispla
 			$iThingHWID = $aThing['HWId'];
 			
 			//-- Perform Validation --//
-			if(  !is_int( $iThingHWID )  ) {
+			if ( is_int( $aThing['HWId'] ) && $aThing['HWId']>0 ) {
+				//-- INTEGER --//
+				$iThingHWID = $aThing['HWId'];
+			} else if( is_string( $aThing['HWId'] ) && is_numeric( $aThing['HWId'] ) ) {
+				//-- STRING --//
+				$iThingHWID = intval( $aThing['HWId'] );
+			} else {
 				//-- Set the ThingDefault to the default --//
 				$iThingHWID = $iThingDefaultHWID;
 			}
+			
 		} else {
 			$iThingHWID = $iThingDefaultHWID;
 		}
