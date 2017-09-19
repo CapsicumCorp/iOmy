@@ -426,20 +426,35 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                             
                 } else {
                     jQuery.sap.log.error("Error creating "+sLinkType+":"+data.ErrMesg, "Error");
-                    IOMy.common.showError("Error creating "+sLinkType+":\n\n"+data.ErrMesg, "Error");
+                    IOMy.common.showError("Error creating "+sLinkType+":\n\n"+data.ErrMesg, "Error",
+                        function () {
+                            IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
+                            // Re-enable the add link button
+                            me.byId("buttonBox").setEnabled(true);
+                        }
+                    );
                 }
             } catch (e) {
                 jQuery.sap.log.error("Error refreshing core variables: "+e.message);
-                IOMy.common.showWarning(sLinkType+" successfully created but there was an error refreshing core variables: "+e.message, "Errors");
+                IOMy.common.showWarning(sLinkType+" successfully created but there was an error refreshing core variables: "+e.message, "Errors",
+                    function () {
+                        IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
+                        // Re-enable the add link button
+                        me.byId("buttonBox").setEnabled(true);
+                    }
+                );
             }
         };
         
         mData.onFail = function (error) {
             jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
-            IOMy.common.showError("Error creating "+sLinkType+":\n\n"+error.responseText);
-            
-            // Re-enable the add link button
-            me.byId("buttonBox").setEnabled(true);
+            IOMy.common.showError("Error creating "+sLinkType+":\n\n"+error.responseText,
+                function () {
+                    IOMy.common.NavigationToggleNavButtons(me, true); // Enable the navigation buttons.
+                    // Re-enable the add link button
+                    me.byId("buttonBox").setEnabled(true);
+                }
+            );
         };
         
         return mData;
@@ -757,12 +772,23 @@ sap.ui.controller("mjs.settings.links.LinkAdd", {
                     "streamPath"      : me.wStreamPath.getValue(),
 
                     "onSuccess" : function (mData) {
+                        var iRoomId;
                         
                         if (mData.Error === false) {
                             
+                            if (me.byId("roomCBox") !== null && me.byId("roomCBox") !== undefined) {
+                                iRoomId = me.byId("roomCBox").getSelectedKey();
+                            } else {
+                                iRoomId = 1;
+                            }
+                            
+                            if (iRoomId === "") {
+                                iRoomId = 1;
+                            }
+                            
                             IOMy.devices.AssignDeviceToRoom({
                                 "linkID" : mData.Data.LinkId,
-                                "roomID" : me.byId("roomCBox").getSelectedKey(),
+                                "roomID" : iRoomId,
 
                                 "onSuccess" : function() {
                                     IOMy.common.RefreshCoreVariables({
