@@ -70,6 +70,7 @@ public class BluetoothHWAndroidLib implements AssociationListener {
     private SparseArray<String> mUuidHashToAppearance = new SparseArray<String>();
     private MeshService mService = null;
 
+    private int csrMeshNextDeviceId;
     private int mAssociationTransactionId = -1;
 
     // Listeners
@@ -200,8 +201,9 @@ public class BluetoothHWAndroidLib implements AssociationListener {
         // set next device id to be used according with the last device used in the database.
         //NOTE: Do not call this if there are no devices in the database as the CSRMesh library will
         //  set the first id
-        //mService.setNextDeviceId(1);
-
+        if (csrMeshNextDeviceId>0) {
+            mService.setNextDeviceId(csrMeshNextDeviceId);
+        }
         // set TTL to the library
         //TODO: Add device store
         mService.setTTL(255);
@@ -424,6 +426,9 @@ public class BluetoothHWAndroidLib implements AssociationListener {
 
     public static void setCSRMeshNetworkKey(String networkKey) {
         getInstance().csrMeshNetworkKey=networkKey;
+    }
+    public static void setCSRMeshNextDeviceId(int nextDeviceId) {
+        getInstance().csrMeshNextDeviceId=nextDeviceId;
     }
     public static void CSRMeshGetModelInfoLow(int deviceId) {
         ConfigModelApi.getInfo(deviceId, ConfigModelApi.DeviceInfo.MODEL_LOW);

@@ -760,27 +760,23 @@ public class MysqlLib {
                 preparedStmts[psidx].setLong(1, linkPK);
                 rs=preparedStmts[psidx].executeQuery();
                 if (rs!=null) {
-                    if (rs.first()) {
-                        result = 0;
-                        while (rs.next()) {
-                            tmpval = rs.getInt("THING_HWID");
-                            if (rs.wasNull()) {
-                                tmpval = -1; //Redefine as -1 if NULL
-                            }
-                            thingHwid.add(tmpval);
-                            tmpval = rs.getInt("THING_OUTPUTHWID");
-                            if (rs.wasNull()) {
-                                tmpval = -1; //Redefine as -1 if NULL
-                            }
-                            thingOutputHwid.add(tmpval);
-                            thingType.add(rs.getInt("THINGTYPE_PK"));
-                            thingSerialCode.add(rs.getString("THING_SERIALCODE"));
-                            thingName.add(rs.getString("THING_NAME"));
-                            ++numThings;
+                    rs.beforeFirst();
+                    result = 0;
+                    while (rs.next()) {
+                        tmpval = rs.getInt("THING_HWID");
+                        if (rs.wasNull()) {
+                            tmpval = -1; //Redefine as -1 if NULL
                         }
-                    } else {
-                        //PK doesn't exist
-                        result=-1;
+                        thingHwid.add(tmpval);
+                        tmpval = rs.getInt("THING_OUTPUTHWID");
+                        if (rs.wasNull()) {
+                            tmpval = -1; //Redefine as -1 if NULL
+                        }
+                        thingOutputHwid.add(tmpval);
+                        thingType.add(rs.getInt("THINGTYPE_PK"));
+                        thingSerialCode.add(rs.getString("THING_SERIALCODE"));
+                        thingName.add(rs.getString("THING_NAME"));
+                        ++numThings;
                     }
                 } else {
                     //PK doesn't exist
@@ -807,16 +803,18 @@ public class MysqlLib {
         }
         return result;
     }
-    public static String getLinkUsernameStr(int row) {
+    public static String getLinkUsernameStr() {
         return getInstance().usernameStr;
     }
-    public static String getLinkPasswordStr(int row) {
+    public static String getLinkPasswordStr() {
         return getInstance().passwordStr;
     }
     public static int getThingHwid(int row) {
+        Log.println(Log.INFO, MainLib.getInstance().getAppName(), "iOmy: MysqlLib.getThingHwid: row="+row+" hwid="+getInstance().thingHwid.get(row));
         return getInstance().thingHwid.get(row);
     }
     public static int getThingOutputHwid(int row) {
+        Log.println(Log.INFO, MainLib.getInstance().getAppName(), "iOmy: MysqlLib.getOutputHwid: row="+row+" hwid="+getInstance().thingOutputHwid.get(row));
         return getInstance().thingOutputHwid.get(row);
     }
     public static int getThingType(int row) {

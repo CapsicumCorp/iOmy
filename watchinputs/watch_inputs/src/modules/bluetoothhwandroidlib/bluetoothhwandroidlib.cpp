@@ -516,6 +516,25 @@ static void setCSRMeshNetworkKey() {
   setCSRMeshNetworkKey(networkKey);
 }
 
+//Set the next device id for CSRMesh
+static void setCSRMeshNextDeviceId(int32_t nextDeviceId) {
+#ifdef __ANDROID__
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  JNIEnv *env;
+  jmethodID methodid;
+  int wasdetached=0;
+
+  if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
+    return;
+  }
+  debuglibifaceptr->debuglib_printf(1, "%s: Setting CSRMesh Next Device ID to %" PRId32 "\n", __func__, nextDeviceId);
+
+  methodid=env->GetStaticMethodID(gbluetoothhwandroidlib_class, "setCSRMeshNextDeviceId", "(I)V");
+  env->CallStaticVoidMethod(gbluetoothhwandroidlib_class, methodid, nextDeviceId);
+  JNIDetachThread(wasdetached);
+#endif
+}
+
 //Caller should check that the database is ready first
 //Add the Bluetooth Host Mac address to the Database as a Comm via Web API
 void addBluetoothHostMacAddressToDatabase(uint64_t addr) {
@@ -668,10 +687,50 @@ void loadCSRMeshInfoFromDatabase(void ) {
     char **thingSerialCode;
     std::int32_t *thingType;
     char **thingName;
+    int32_t nextDeviceId=-1;
+
+    lockbluetoothhwandroid();
     numThings=dblibifaceptr->getThingInfo(linkpk, &thingHwid, &thingOutputHwid, &thingSerialCode, &thingType, &thingName);
+    if (numThings>0) {
+      for (int i; i<numThings; i++) {
+        int32_t hash;
 
-    //TODO: Set next device id from database
+        debuglibifaceptr->debuglib_printf(1, "%s: Importing device from database with LinkPK=%" PRId64 ", index=%d, Hwid=%" PRId32", outputhwid=%" PRId32 ", type=%" PRId32 " serialcode=%s, name=%s\n", __func__, linkpk, i, thingHwid[i], thingOutputHwid[i], thingType[i], thingSerialCode[i], thingName[i]);
+        if (thingHwid[i]>nextDeviceId) {
+          nextDeviceId=thingHwid[i];
+        }
+        gcsrmeshdevices[ thingHwid[i] ].shortName=thingName[i];
+        sscanf(thingSerialCode[i], "%" SCNd32, &hash);
+        gcsrmeshdevices[ thingHwid[i] ].uuidHash=hash;
+        gcsrmeshdevices[ thingHwid[i] ].deviceId=thingHwid[i];
+        gcsrmeshdevices[ thingHwid[i] ].needtopair=false;
+        gcsrmeshdevices[ thingHwid[i] ].paired=true;
+        gcsrmeshdevices[ thingHwid[i] ].pairing=false;
+        gcsrmeshdevices[ thingHwid[i] ].havemodelbitmap=false;
+        if (thingType[i]==19) {
+          gcsrmeshdevices[ thingHwid[i] ].devicetype=CSRMESH_DEVICETYPE_LIGHT_WITH_POWEROFF;
+        }
+        gcsrmeshdevices[ thingHwid[i] ].indb=true;
+        gcsrmeshdevices[ thingHwid[i] ].connected=true;
 
+        if (thingSerialCode[i]) {
+          free(thingSerialCode[i]);
+        }
+        if (thingName[i]) {
+          free(thingName[i]);
+        }
+      }
+      free(thingHwid);
+      free(thingOutputHwid);
+      free(thingType);
+      free(thingSerialCode);
+      free(thingName);
+    }
+    if (nextDeviceId!=-1) {
+      ++nextDeviceId;
+      setCSRMeshNextDeviceId(nextDeviceId);
+    }
+    unlockbluetoothhwandroid();
   } else if (!gcsrmeshaddedtowebapi) {
     debuglibifaceptr->debuglib_printf(1, "%s: CSRMesh with Bluetooth address: %016" PRIX64 " not found in database\n", __func__, btaddr);
     //Set a new randomised key and store in the database

@@ -184,6 +184,7 @@ static dblib_ifaceptrs_ver_1_t dblib_ifaceptrs_ver_1={
   .getlinkcommpk=dblib_getlinkcommpk,
   .getthingpk=dblib_getthingpk,
   .getlinkusernamepassword=dblib_getlinkusernamepassword,
+  .getThingInfo=dblib_getThingInfo,
   .freeuniqueid=dblib_freeuniqueid
 };
 
