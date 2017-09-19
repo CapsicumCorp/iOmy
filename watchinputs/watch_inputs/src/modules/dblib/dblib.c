@@ -143,6 +143,7 @@ int dblib_getlinkpk(uint64_t addr, int64_t *linkpk);
 int dblib_getlinkcommpk(uint64_t addr, int64_t *commpk);
 static int dblib_getthingpk(uint64_t serialcode, int32_t hwid, int64_t *thingpk);
 int dblib_getlinkusernamepassword(int64_t linkpk, char **username, char **password);
+int dblib_getThingInfo(int64_t linkpk, int32_t **thingHwid, int32_t **thingOutputHwid, char ***thingSerialCode, int32_t **thingType, char ***thingName);
 
 int dblib_configload_post();
 
@@ -987,6 +988,31 @@ int dblib_getlinkusernamepassword(int64_t linkpk, char **username, char **passwo
   PTHREAD_UNLOCK(&dblibmutex);
   if (ldbtype==DBLIB_DBTYPE_MYSQL) {
     return mysqllibifaceptr->getlinkusernamepassword(linkpk, username, password);
+  }
+  return -2;
+}
+
+/*
+  Get info from all things for a link
+  Args: linkpk The pk of the link for the things
+        thingHwid Returns an array of Hwids 1 for each Thing: element=-1 if no hwid defined
+        thingOutputHwid Returns an array of Output Hwids 1 for each Thing: element=-1 if no output hwid defined
+        thingSerialCode Returns an array of Serial Codes 1 for each Thing
+        thingType Returns an array of Type 1 for each Thing
+        thingName Returns an array of Names 1 for each Thing
+  On success, The thing arrays will be set, and <numThings> will be returned
+  Returns -1 if link doesn't exist, < -1 on another error
+  Caller should free the thing arrays when no longer needed
+*/
+int dblib_getThingInfo(int64_t linkpk, int32_t **thingHwid, int32_t **thingOutputHwid, char ***thingSerialCode, int32_t **thingType, char ***thingName) {
+  mysqllib_ifaceptrs_ver_1_t *mysqllibifaceptr=dblib_deps[MYSQLLIB_DEPIDX].ifaceptr;
+  int ldbtype;
+
+  PTHREAD_LOCK(&dblibmutex);
+  ldbtype=dblib_dbtype;
+  PTHREAD_UNLOCK(&dblibmutex);
+  if (ldbtype==DBLIB_DBTYPE_MYSQL) {
+    return mysqllibifaceptr->getThingInfo(linkpk, thingHwid, thingOutputHwid, thingSerialCode, thingType, thingName);
   }
   return -2;
 }

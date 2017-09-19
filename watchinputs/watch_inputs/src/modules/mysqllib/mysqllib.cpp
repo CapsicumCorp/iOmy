@@ -88,6 +88,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 static const int MYSQLLIB_GETTHINGPK=20; //Get the pk for a thing address and hwid
 static const int MYSQLLIB_GETLINK_USERNAME_PASSWORD=21; //Get the username and password associated with a link
+static const int MYSQLLIB_GETTHING_INFO=22; //Get about about all things for a link
 
 //A unique id for a port on a device
 //This is not public so may change at any time
@@ -130,6 +131,7 @@ static const char *mysqllib_stmts[]={
   "SELECT THING_PK FROM VW_THING WHERE THING_SERIALCODE = ? AND THING_HWID = ?",
 
   "SELECT LINKCONN_USERNAME, LINKCONN_PASSWORD FROM VW_LINK WHERE LINK_PK = ?",
+  "SELECT THING_HWID, THING_OUTPUTHWID, THING_SERIALCODE, THINGTYPE_PK, THING_NAME FROM VR_THING WHERE LINK_PK = ?"
 };
 
 static int num_stmts = sizeof(mysqllib_stmts)/sizeof(char *);
@@ -195,6 +197,7 @@ int mysqllib_getlinkpk(uint64_t addr, int64_t *linkpk);
 int mysqllib_getlinkcommpk(uint64_t addr, int64_t *commpk);
 int mysqllib_getthingpk(uint64_t serialcode, int32_t hwid, int64_t *thingpk);
 int mysqllib_getlinkusernamepassword(int64_t linkpk, char **username, char **password);
+int mysqllib_getThingInfo(int64_t linkpk, int32_t **thingHwid, int32_t **thingOutputHwid, char ***thingSerialCode, int32_t **thingType, char ***thingName);
 void mysqllib_freeuniqueid(void *uniqueid);
 
 //C Exports
@@ -243,6 +246,7 @@ static mysqllib_ifaceptrs_ver_1_t thislib_ifaceptrs_ver_1={
   mysqllib_getlinkcommpk,
   mysqllib_getthingpk,
   mysqllib_getlinkusernamepassword,
+  mysqllib_getThingInfo,
   mysqllib_freeuniqueid
 };
 
@@ -3269,6 +3273,101 @@ int mysqllib_getlinkusernamepassword(int64_t linkpk, char **username, char **pas
   getDBLinkUsernamePassword_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getDBLinkUsernamePassword", "(J)I");
   getLinkUsernameStr_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getLinkUsernameStr", "()Ljava/lang/String;");
   getLinkPasswordStr_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getLinkPasswordStr", "()Ljava/lang/String;");
+#endif
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
+    JNIDetachThread(wasdetached);
+#endif
+    return -3;
+  }
+#ifdef __ANDROID__
+  result=env->CallStaticIntMethod(mysqllib_mysql_class, getDBLinkUsernamePassword_methodid, linkpk);
+  if (result==0) {
+    //Get the username and password
+    jusername=static_cast<jstring>(env->CallStaticObjectMethod(mysqllib_mysql_class, getLinkUsernameStr_methodid));
+    usernameFromJava=env->GetStringUTFChars(jusername, NULL);
+    *username=strdup(usernameFromJava);
+    env->ReleaseStringUTFChars(jusername, usernameFromJava);
+    if (!(*username)) {
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      JNIDetachThread(wasdetached);
+      debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to allocate ram for username\n", __func__);
+      return -4;
+    }
+    jpassword=static_cast<jstring>(env->CallStaticObjectMethod(mysqllib_mysql_class, getLinkPasswordStr_methodid));
+    passwordFromJava=env->GetStringUTFChars(jpassword, NULL);
+    *password=strdup(passwordFromJava);
+    env->ReleaseStringUTFChars(jpassword, passwordFromJava);
+    if (!(*password)) {
+      free(*username);
+      *username=nullptr;
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      JNIDetachThread(wasdetached);
+      debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to allocate ram for password\n", __func__);
+      return -5;
+    }
+  }
+#endif
+  PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
+  JNIDetachThread(wasdetached);
+#endif
+  return result;
+}
+
+
+/*
+  Get info from all things for a link
+  Args: linkpk The pk of the link for the things
+        thingHwid Returns an array of Hwids 1 for each Thing: element=-1 if no hwid defined
+        thingOutputHwid Returns an array of Output Hwids 1 for each Thing: element=-1 if no output hwid defined
+        thingSerialCode Returns an array of Serial Codes 1 for each Thing
+        thingType Returns an array of Type 1 for each Thing
+        thingName Returns an array of Names 1 for each Thing
+  On success, The thing arrays will be set, and <numThings> will be returned
+  Returns -1 if link doesn't exist, < -1 on another error
+  Caller should free the thing arrays when no longer needed
+*/
+//NOTE: Only implemented in Java at the moment
+int mysqllib_getThingInfo(int64_t linkpk, int32_t **thingHwid, int32_t **thingOutputHwid, char ***thingSerialCode, int32_t **thingType, char ***thingName) {
+#ifdef __ANDROID__
+  JNIEnv *env;
+  jmethodID getDBThingInfo_methodid;
+  jmethodID getThingHwid_methodid;
+  jmethodID getThingOutputHwid_methodid;
+  jmethodID getThingType_methodid;
+  jmethodID getThingSerialCodeStr_methodid;
+  jmethodID getThingNameStr_methodid;
+  jint jnumThings=0;
+  jint jthingHwid;
+  jint jthingOutputHwid;
+  jint jthingType;
+  jstring jthingSerialCode, jthingName;
+  const char *thingSerialCodeFromJava, *thingNameFromJava;
+  int wasdetached=0;
+#endif
+  int locdbloaded;
+  char thisaddr[17];
+  int result=0;
+
+#ifdef __ANDROID__
+  if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
+    return -2;
+  }
+  getDBThingInfo_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getDBThingInfo", "(J)I");
+  getThingHwid_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getThingHwid", "()I");
+  getThingOutputHwid_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getThingOutputHwid", "()I");
+  getThingType_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getThingType", "()I");
+  getThingSerialCodeStr_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getThingSerialCodeStr", "()Ljava/lang/String;");
+  getThingNameStr_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getThingNameStr", "()Ljava/lang/String;");
 #endif
   //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
   PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);

@@ -641,20 +641,11 @@ void loadCSRMeshInfoFromDatabase(void ) {
     debuglibifaceptr->debuglib_printf(1, "%s: Found CSRMesh PK: %" PRId64 " with address: %016" PRIX64 "\n", __func__, linkpk, btaddr);
     haveLinkPK=true;
   }
-  result=dblibifaceptr->end();
-  if (result<0) {
-    dblibifaceptr->rollback();
-  }
   if (haveLinkPK) {
     char *csrmeshusername=nullptr, *csrmeshpassword=nullptr;
     int getresult=-1;
 
     //Retrieve Network Key from database
-    result=dblibifaceptr->begin();
-    if (result<0) {
-      debuglibifaceptr->debuglib_printf(1, "%s: Failed to start database transaction\n", __func__);
-      return;
-    }
     getresult=dblibifaceptr->getlinkusernamepassword(linkpk, &csrmeshusername, &csrmeshpassword);
     if (getresult==0) {
       if (csrmeshusername) {
@@ -670,13 +661,17 @@ void loadCSRMeshInfoFromDatabase(void ) {
         debuglibifaceptr->debuglib_printf(1, "%s: CSRMesh Network Key from database: \"%s\"\n", __func__, gCSKMeshNetworkKey.c_str());
       }
     }
-    //TODO: Retrieve CSRMesh devices from Things list
+    //Retrieve CSRMesh devices from the Things list
+    int numThings=0;
+    std::int32_t *thingHwid;
+    std::int32_t *thingOutputHwid;
+    char **thingSerialCode;
+    std::int32_t *thingType;
+    char **thingName;
+    numThings=dblibifaceptr->getThingInfo(linkpk, &thingHwid, &thingOutputHwid, &thingSerialCode, &thingType, &thingName);
+
     //TODO: Set next device id from database
 
-    result=dblibifaceptr->end();
-    if (result<0) {
-      dblibifaceptr->rollback();
-    }
   } else if (!gcsrmeshaddedtowebapi) {
     debuglibifaceptr->debuglib_printf(1, "%s: CSRMesh with Bluetooth address: %016" PRIX64 " not found in database\n", __func__, btaddr);
     //Set a new randomised key and store in the database
@@ -685,6 +680,10 @@ void loadCSRMeshInfoFromDatabase(void ) {
 
     addCSRMeshToDatabase(btaddr, gCSKMeshNetworkKey);
     gcsrmeshaddedtowebapi=true;
+  }
+  result=dblibifaceptr->end();
+  if (result<0) {
+    dblibifaceptr->rollback();
   }
 }
 
@@ -788,6 +787,8 @@ static void csrmeshAddDeviceToDatabase(int32_t uuidHash, int32_t deviceId) {
     csrmeshthing.state=1;
     csrmeshthing.hwid=deviceId;
     //csrmeshthing.name=gcsrmeshdevices[deviceId].shortName;
+    //NOTE: PHP's json_decode can only interpret UTF-8 characters so use a generic string for now
+    //  as some light bulbs have non-UTF-8 characters in the string
     csrmeshthing.name="CSRMesh Light";
     csrmeshthing.serialcode=uuidHash;
     {
@@ -893,8 +894,6 @@ static void csrmeshCheckIfNeedToPairDevice() {
         unlockbluetoothhwandroid();
         return;
       }
-      //TODO: Flash the device if possible so the user knows which one is pairing
-
       methodid=env->GetStaticMethodID(gbluetoothhwandroidlib_class, "CSRMeshAssociateDevice", "(I)V");
       env->CallStaticVoidMethod(gbluetoothhwandroidlib_class, methodid, gcsrmeshdeviceit.second.uuidHash);
       JNIDetachThread(wasdetached);
