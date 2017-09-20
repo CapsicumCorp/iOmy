@@ -34,10 +34,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #define MODULES_DIR "modules"
 #endif
 
-#define WATCH_INPUTS_VERSION "0.7.1"
+#define WATCH_INPUTS_VERSION "0.8.0"
 #define WATCH_INPUTS_COPYRIGHT "This program is part of Watch Inputs which is part of the iOmy project.\nCopyright (c) 2007-2016, Capsicum Corporation\n"
-#define ANDROID_WATCH_INPUTS_VERSIONCODE "7100"
-#define ANDROID_WATCH_INPUTS_VERSION "0.7.1"
+#define ANDROID_WATCH_INPUTS_VERSIONCODE "8000"
+#define ANDROID_WATCH_INPUTS_VERSION "0.8.0"
 
 
 extern char *cfg_filename;
