@@ -3,4 +3,5 @@ iomyapp version 0.4.1 used asset version 2
 iomyapp version 0.4.2 used asset version 3
 iomyapp version 0.4.4 used asset version 4
 iomyapp version 0.4.6 used asset version 5
+iomyapp version 0.4.8 used asset version 6
 
