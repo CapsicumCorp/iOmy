@@ -810,11 +810,9 @@ public class MysqlLib {
         return getInstance().passwordStr;
     }
     public static int getThingHwid(int row) {
-        Log.println(Log.INFO, MainLib.getInstance().getAppName(), "iOmy: MysqlLib.getThingHwid: row="+row+" hwid="+getInstance().thingHwid.get(row));
         return getInstance().thingHwid.get(row);
     }
     public static int getThingOutputHwid(int row) {
-        Log.println(Log.INFO, MainLib.getInstance().getAppName(), "iOmy: MysqlLib.getOutputHwid: row="+row+" hwid="+getInstance().thingOutputHwid.get(row));
         return getInstance().thingOutputHwid.get(row);
     }
     public static int getThingType(int row) {

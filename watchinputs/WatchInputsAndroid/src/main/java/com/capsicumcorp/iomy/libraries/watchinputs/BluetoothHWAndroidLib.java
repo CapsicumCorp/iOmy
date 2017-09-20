@@ -67,21 +67,16 @@ public class BluetoothHWAndroidLib implements AssociationListener {
     /*package*/ static final int ATTENTION_DURATION_MS = 20000;
     /*package*/ static final int ATTRACTION_DURATION_MS = 5000;
 
-    private SparseArray<String> mUuidHashToAppearance = new SparseArray<String>();
     private MeshService mService = null;
 
     private int csrMeshNextDeviceId;
     private int mAssociationTransactionId = -1;
+    private boolean csrMeshBridgeConnected=false; //If false then we shouldn't try and sent any packets
 
     // Listeners
     private AssociationListener mAssListener;
 
     private String csrMeshNetworkKey="";
-
-    //Testing
-    //private int deviceID=0x10000;
-    private int deviceID=0x1;
-    private boolean theColor=false;
 
     public static BluetoothHWAndroidLib getInstance() {
         if (instance == null)
@@ -116,7 +111,10 @@ public class BluetoothHWAndroidLib implements AssociationListener {
     }
 	@TargetApi(18)
     public static int init() {
-    	return 0;
+        getInstance().csrMeshBridgeConnected=false;
+        getInstance().csrMeshNetworkKey="";
+
+        return 0;
     }
     public static void shutdown() {
     }
@@ -150,7 +148,7 @@ public class BluetoothHWAndroidLib implements AssociationListener {
             mMeshHandler.removeCallbacksAndMessages(null);
             context.unbindService(mServiceConnection);
         } catch (Exception e) {
-            displayException("instanceStartCSRMesh", e);
+            displayException("instanceStopCSRMesh", e);
             return -1;
         }
         return 0;
@@ -190,6 +188,9 @@ public class BluetoothHWAndroidLib implements AssociationListener {
     };
 
     private void connect() {
+        if (csrMeshNetworkKey=="") {
+            return;
+        }
         mService.setHandler(mMeshHandler);
         mService.setLeScanCallback(mScanCallBack);
         mService.setMeshListeningMode(true, true);
@@ -197,7 +198,6 @@ public class BluetoothHWAndroidLib implements AssociationListener {
 
         mService.setNetworkPassPhrase(csrMeshNetworkKey);
 
-        //TODO: Add device store
         // set next device id to be used according with the last device used in the database.
         //NOTE: Do not call this if there are no devices in the database as the CSRMesh library will
         //  set the first id
@@ -205,7 +205,6 @@ public class BluetoothHWAndroidLib implements AssociationListener {
             mService.setNextDeviceId(csrMeshNextDeviceId);
         }
         // set TTL to the library
-        //TODO: Add device store
         mService.setTTL(255);
     }
 
@@ -223,7 +222,7 @@ public class BluetoothHWAndroidLib implements AssociationListener {
 
         public void handleMessage(Message msg) {
             BluetoothHWAndroidLib parentActivity = mActivity.get();
-            Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib.handleMessage="+msg.what+"");
+            //Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib.handleMessage="+msg.what+" "+msg.getData());
             if (parentActivity.shuttingdown) {
                 //Ignore all messages since we are shutting down
                 Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib.handleMessage Ignoring message due to CSRMesh shutdown");
@@ -246,10 +245,12 @@ public class BluetoothHWAndroidLib implements AssociationListener {
                         //parentActivity.setLightColorRGB(parentActivity.deviceID, 0, 0, 255, 99);
                         parentActivity.theColor=true;
                     }*/
+                    //TODO: call the C++ library so it can set the link as connected
+                    parentActivity.csrMeshBridgeConnected=true;
                     break;
                 }
                 case MeshService.MESSAGE_LE_DISCONNECTED: {
-                    //TODO: If numconnections is 0, set all devices to not connected as the bridge is down
+                    //TODO: If numconnections is 0, call the C++ library so it can set the link as not connected
                     int numConnections = msg.getData().getInt(MeshService.EXTRA_NUM_CONNECTIONS);
                     String address = msg.getData().getString(MeshService.EXTRA_DEVICE_ADDRESS);
                     Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib Disconnected device: "+address+" now have num connections: "+numConnections);
@@ -269,15 +270,22 @@ public class BluetoothHWAndroidLib implements AssociationListener {
                         parentActivity.mConnected = false;
                         parentActivity.showProgress(parentActivity.getString(R.string.connecting));
                     }*/
+                    if (numConnections==0) {
+                        parentActivity.csrMeshBridgeConnected = false;
+                    }
                     break;
                 }
                 case MeshService.MESSAGE_LE_DISCONNECT_COMPLETE:
-                    //TODO: Handle the case if the app is exiting
-                    parentActivity.connect();
+                    //If we get this message then the bridge is probably down
+                    parentActivity.csrMeshBridgeConnected = false;
+                    if (!parentActivity.shuttingdown) {
+                        parentActivity.connect();
+                    }
                     break;
                 case MeshService.MESSAGE_BRIDGE_CONNECT_TIMEOUT:
                     // If this message occurs, the CSRMesh library seems to give up call disconnect
                     //   and then reconnect to get CSRMesh going again
+                    parentActivity.csrMeshBridgeConnected=false;
                     parentActivity.mService.disconnectBridge();
                     break;
                 case MeshService.MESSAGE_TIMEOUT:{
@@ -294,6 +302,10 @@ public class BluetoothHWAndroidLib implements AssociationListener {
                     Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib message timeout: expected message: "+expectedMsg+" id: "+id+" meshRequestId: "+meshRequestId);
                     //TODO: Handle various timeouts such as association timeout
                     //parentActivity.onMessageTimeout(expectedMsg, id, meshRequestId);
+                    break;
+                }
+                case MeshService.MESSAGE_PACKET_NOT_SENT: {
+                    Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib message packet not sent");
                     break;
                 }
                 case MeshService.MESSAGE_DEVICE_DISCOVERED: {
@@ -418,8 +430,9 @@ public class BluetoothHWAndroidLib implements AssociationListener {
 
                     }
                     break;
-                }                default:
-                    Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib.handleMessage unhandled="+msg.what+"");
+                }
+                default:
+                    Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib.handleMessage unhandled="+msg.what+" "+msg.getData());
             }
         }
     }
@@ -431,6 +444,9 @@ public class BluetoothHWAndroidLib implements AssociationListener {
         getInstance().csrMeshNextDeviceId=nextDeviceId;
     }
     public static void CSRMeshGetModelInfoLow(int deviceId) {
+        if (!getInstance().csrMeshBridgeConnected) {
+            return;
+        }
         ConfigModelApi.getInfo(deviceId, ConfigModelApi.DeviceInfo.MODEL_LOW);
     }
     public static String getbluetoothHostMacAddress() {
@@ -463,12 +479,17 @@ public class BluetoothHWAndroidLib implements AssociationListener {
     }
 
     public void activateAttentionMode(int uuidHash, boolean enabled) {
-
+        if (!csrMeshBridgeConnected) {
+            return;
+        }
         // enable the new uuidHash.
         mService.setAttentionPreAssociation(uuidHash, enabled, ATTRACTION_DURATION_MS);
     }
 
     public boolean associateDevice(int uuidHash, String shortCode) {
+        if (!csrMeshBridgeConnected) {
+            return false;
+        }
         try {
             if (shortCode == null) {
                 mAssociationTransactionId = mService.associateDevice(uuidHash, 0, false);
@@ -495,7 +516,10 @@ public class BluetoothHWAndroidLib implements AssociationListener {
         if (brightness < 0 || brightness > 99) {
             throw new NumberFormatException("Brightness value should be between 0 and 99");
         }
-        Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib device: "+deviceID+" setLightColor: Red: "+(int) red+" Green: "+(int) green+" Blue: "+(int) blue+" Brightness: "+(int) brightness);
+        if (!csrMeshBridgeConnected) {
+            return;
+        }
+        Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib device: "+deviceId+" setLightColor: Red: "+(int) red+" Green: "+(int) green+" Blue: "+(int) blue+" Brightness: "+(int) brightness);
 
         //Color Type: 1 RGB
         //Color Type: 2 Kelvin?
@@ -508,7 +532,9 @@ public class BluetoothHWAndroidLib implements AssociationListener {
         if (brightness < 0 || brightness > 99) {
             throw new NumberFormatException("Brightness value should be between 0 and 99");
         }
-
+        if (!csrMeshBridgeConnected) {
+            return;
+        }
         // Convert currentColor to HSV space and make the brightness (value) calculation. Then convert back to RGB to
         // make the colour to send.
         // Don't modify currentColor with the brightness or else it will deviate from the HS colour selected on the
@@ -523,7 +549,7 @@ public class BluetoothHWAndroidLib implements AssociationListener {
         green=(byte) (mColorToSend >> 8);
         blue=(byte) (mColorToSend & 0xff);
 
-        Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib device: "+deviceID+" setLightColor: Red: "+(int) red+" Green: "+(int) green+" Blue: "+(int) blue+" Brightness: "+(int) brightness);
+        Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib device: "+deviceId+" setLightColor: Red: "+(int) red+" Green: "+(int) green+" Blue: "+(int) blue+" Brightness: "+(int) brightness);
 
         //Color Type: 1 RGB
         //Color Type: 2 Kelvin?
@@ -534,11 +560,14 @@ public class BluetoothHWAndroidLib implements AssociationListener {
     }
 
     public void setLightPower(int deviceId, PowerModelApi.PowerState state) {
-        Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib device: "+deviceID+" setLightPower: state: "+state);
+        if (!csrMeshBridgeConnected) {
+            return;
+        }
+        Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib device: "+deviceId+" setLightPower: state: "+state);
         try {
             PowerModelApi.setState(deviceId, state, false);
         } catch (Exception e) {
-            Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib device: "+deviceID+" setLightPower: state: "+state+" Exception: "+e.getMessage());
+            Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib device: "+deviceId+" setLightPower: state: "+state+" Exception: "+e.getMessage());
         }
     }
 
