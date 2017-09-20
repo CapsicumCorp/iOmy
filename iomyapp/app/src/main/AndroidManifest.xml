@@ -164,6 +164,12 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
         <service android:name=".iOmyServices" />
 
+        <service
+            android:name="com.csr.mesh.MeshService"
+            android:enabled="true"
+            android:exported="false" >
+        </service>
+
         <activity android:name=".SetupQuestions"></activity>
     </application>
 

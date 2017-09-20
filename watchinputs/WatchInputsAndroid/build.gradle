@@ -21,6 +21,12 @@ repositories {
 //NOTE: Using MySQL JDBC Connector 5.0 series as >=5.1 contains JDBC4 classes which were compiled with Java 8 and can't be excluded
 dependencies {
     compile project(':usbSerialForAndroid')
+    compile project(':CSRmeshLibrary')
+
+    // See license in CSRmeshLibrary\spongy_castle_licence.txt
+    compile 'com.madgag.spongycastle:core:1.51.0.0'
+    compile 'com.madgag.spongycastle:pkix:1.51.0.0'
+
 
     // https://mvnrepository.com/artifact/mysql/mysql-connector-java
     compile group: 'mysql', name: 'mysql-connector-java', version: '5.0.8'

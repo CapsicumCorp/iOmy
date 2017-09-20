@@ -34,9 +34,13 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class MysqlLib {
+    private static MysqlLib instance;
+
     //Watch Inputs database version 1
     private static int MYSQLLIB_GETPORT_UNIQUEID=0; //Get the unique id for an ioport
     private static int MYSQLLIB_GETSENSOR_UNIQUEID=1; //Get the unique id for an ioport sensor
@@ -58,16 +62,34 @@ public class MysqlLib {
     private static int MYSQLLIB_GETCOMMPK=17; //Get the pk for a comm
     private static int MYSQLLIB_GETLINKPK=18; //Get the pk for a link
     private static int MYSQLLIB_GETLINKCOMMPK=19; //Get the comm pk that is associated with a link
+    private static final int MYSQLLIB_GETTHINGPK=20; //Get the pk for a thing address and hwid
+    private static final int MYSQLLIB_GETLINK_USERNAME_PASSWORD=21; //Get the username and password associated with a link
+    private static final int MYSQLLIB_GETTHING_INFO=22; //Get about about all things for a link
 
-    private static Context context=null;
+    private Context context=null;
     private static boolean dbloaded=false;
     private static Connection dbconn=null; 
     private static PreparedStatement[] preparedStmts;
 
+    //Temp variables returned from database queries
+    private String usernameStr, passwordStr;
+    private List<Integer> thingHwid=new ArrayList<Integer>();
+    private List<Integer> thingOutputHwid=new ArrayList<Integer>();
+    private List<Integer> thingType=new ArrayList<Integer>();
+    private List<String> thingSerialCode=new ArrayList<String>();
+    private List<String> thingName=new ArrayList<String>();
+
     public native long jnigetmodulesinfo();
 
+    public static MysqlLib getInstance() {
+        if (instance == null)
+            throw new IllegalStateException();
+        return instance;
+    }
+
     public MysqlLib(Context context) {
-        MysqlLib.context=context;
+        this.instance=this;
+        this.context=context;
         MysqlLib.preparedStmts=new PreparedStatement[32];
     }
 
@@ -88,7 +110,7 @@ public class MysqlLib {
 
     //TODO: This might need some fixing as not all variables should be uninitialised
     public static void shutdown() {
-        context=null;
+        getInstance().context=null;
         //Log.println(Log.INFO, "Watch Inputs", "In MysqlLib shutdown");
     }
     public static void displayException(String functionName, Exception e) {
@@ -641,16 +663,17 @@ public class MysqlLib {
         }
         return pk;
     }
-    public static long getLinkCommPK(String addr) {
+    public static long getThingPK(String serialcode, int hwid) {
         long pk=-2;
-        int psidx=MYSQLLIB_GETLINKCOMMPK;
+        int psidx=MYSQLLIB_GETTHINGPK;
 
-        //Log.println(Log.INFO, MainActivity.AppName, "MysqlLib.getLinkCommPK: DEBUG: addr="+addr+" iotechtype="+iotechtype+" portid="+portid);
+        //Log.println(Log.INFO, MainActivity.AppName, "MysqlLib.getLinkPK: DEBUG: addr="+addr+" iotechtype="+iotechtype+" portid="+portid);
         if (preparedStmts[psidx]!=null) {
             ResultSet rs=null;
 
             try {
-                preparedStmts[psidx].setString(1, addr);
+                preparedStmts[psidx].setString(1, serialcode);
+                preparedStmts[psidx].setInt(2, hwid);
                 rs=preparedStmts[psidx].executeQuery();
                 if (rs!=null) {
                     if (rs.first()) {
@@ -664,17 +687,142 @@ public class MysqlLib {
                     pk=-1;
                 }
             } catch ( SQLException e) {
-                displayException("getLinkCommPK", e);
+                displayException("getThingPK", e);
             }
             if (rs!=null) {
                 try {
                     rs.close();
                 } catch ( SQLException e) {
-                    displayException("getLinkCommPK", e);
+                    displayException("getThingPK", e);
                 }
             }
         }
         return pk;
+    }
+    public static int getDBLinkUsernamePassword(long linkPK) {
+        int result=-1;
+        String username="", password="";
+        int psidx=MYSQLLIB_GETLINK_USERNAME_PASSWORD;
+
+        //Log.println(Log.INFO, MainActivity.AppName, "MysqlLib.getLinkCommPK: DEBUG: addr="+addr+" iotechtype="+iotechtype+" portid="+portid);
+        if (preparedStmts[psidx]!=null) {
+            ResultSet rs=null;
+
+            try {
+                preparedStmts[psidx].setLong(1, linkPK);
+                rs=preparedStmts[psidx].executeQuery();
+                if (rs!=null) {
+                    if (rs.first()) {
+                        username=rs.getString(1);
+                        password=rs.getString(2);
+                        result=0;
+                    } else {
+                        //PK doesn't exist
+                        result=-1;
+                    }
+                } else {
+                    //PK doesn't exist
+                    result=-1;
+                }
+            } catch ( SQLException e) {
+                displayException("getDBLinkUsernamePassword", e);
+            }
+            if (rs!=null) {
+                try {
+                    rs.close();
+                } catch ( SQLException e) {
+                    displayException("getDBLinkUsernamePassword", e);
+                }
+            }
+        }
+        if (result==0) {
+            getInstance().usernameStr=username;
+            getInstance().passwordStr=password;
+        }
+        return result;
+    }
+    public static int getDBThingInfo(long linkPK) {
+        int result=-1;
+        List<Integer> thingHwid=new ArrayList<Integer>();
+        List<Integer> thingOutputHwid=new ArrayList<Integer>();
+        List<Integer> thingType=new ArrayList<Integer>();
+        List<String> thingSerialCode=new ArrayList<String>();
+        List<String> thingName=new ArrayList<String>();
+        int psidx=MYSQLLIB_GETTHING_INFO;
+        int tmpval;
+        int numThings=0;
+
+        //Log.println(Log.INFO, MainActivity.AppName, "MysqlLib.getLinkCommPK: DEBUG: addr="+addr+" iotechtype="+iotechtype+" portid="+portid);
+        if (preparedStmts[psidx]!=null) {
+            ResultSet rs=null;
+
+            try {
+                preparedStmts[psidx].setLong(1, linkPK);
+                rs=preparedStmts[psidx].executeQuery();
+                if (rs!=null) {
+                    rs.beforeFirst();
+                    result = 0;
+                    while (rs.next()) {
+                        tmpval = rs.getInt("THING_HWID");
+                        if (rs.wasNull()) {
+                            tmpval = -1; //Redefine as -1 if NULL
+                        }
+                        thingHwid.add(tmpval);
+                        tmpval = rs.getInt("THING_OUTPUTHWID");
+                        if (rs.wasNull()) {
+                            tmpval = -1; //Redefine as -1 if NULL
+                        }
+                        thingOutputHwid.add(tmpval);
+                        thingType.add(rs.getInt("THINGTYPE_PK"));
+                        thingSerialCode.add(rs.getString("THING_SERIALCODE"));
+                        thingName.add(rs.getString("THING_NAME"));
+                        ++numThings;
+                    }
+                } else {
+                    //PK doesn't exist
+                    result=-1;
+                }
+            } catch ( SQLException e) {
+                displayException("getDBThingInfo", e);
+            }
+            if (rs!=null) {
+                try {
+                    rs.close();
+                } catch ( SQLException e) {
+                    displayException("getDBThingInfo", e);
+                }
+            }
+        }
+        if (result==0) {
+            getInstance().thingHwid=thingHwid;
+            getInstance().thingOutputHwid=thingOutputHwid;
+            getInstance().thingType=thingType;
+            getInstance().thingSerialCode=thingSerialCode;
+            getInstance().thingName=thingName;
+            result=numThings;
+        }
+        return result;
+    }
+    public static String getLinkUsernameStr() {
+        return getInstance().usernameStr;
+    }
+    public static String getLinkPasswordStr() {
+        return getInstance().passwordStr;
+    }
+    public static int getThingHwid(int row) {
+        return getInstance().thingHwid.get(row);
+    }
+    public static int getThingOutputHwid(int row) {
+        return getInstance().thingOutputHwid.get(row);
+    }
+    public static int getThingType(int row) {
+        return getInstance().thingType.get(row);
+    }
+    public static String getThingSerialCodeStr(int row) {
+        return getInstance().thingSerialCode.get(row);
+    }
+    public static String getThingNameStr(int row) {
+        return getInstance().thingName.get(row);
     }
     static {
         System.loadLibrary("mysqllib");

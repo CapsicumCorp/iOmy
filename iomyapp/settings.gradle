@@ -1,4 +1,5 @@
 include ':usbSerialForAndroid'
+include ':CSRmeshLibrary'
 include ':WatchInputsAndroid'
 include ':ndksimclist'
 include ':ndkdebuglib'
@@ -18,6 +19,7 @@ include ':ndkuserspaceusbserialandroidlib'
 include ':ndkwebapiclientlib'
 include ':ndklocklib'
 include ':ndktimeruleslib'
+include ':ndkbluetoothhwandroidlib'
 include ':ndkwatchinputs'
 
 include ':app'
@@ -25,6 +27,7 @@ include ':app'
 final watchinputsdir="../watchinputs"
 
 project(":usbSerialForAndroid").projectDir=file(watchinputsdir+"/usbSerialForAndroid")
+project(":CSRmeshLibrary").projectDir=file(watchinputsdir+"/CSRmeshLibrary")
 project(":WatchInputsAndroid").projectDir=file(watchinputsdir+"/WatchInputsAndroid")
 project(":ndksimclist").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/simclist")
 project(":ndkdebuglib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/debuglib")
@@ -44,4 +47,5 @@ project(":ndkuserspaceusbserialandroidlib").projectDir=file(watchinputsdir+"/wat
 project(":ndkwebapiclientlib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/webapiclientlib")
 project(":ndklocklib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/locklib")
 project(":ndktimeruleslib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/timeruleslib")
+project(":ndkbluetoothhwandroidlib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/bluetoothhwandroidlib")
 project(":ndkwatchinputs").projectDir=file(watchinputsdir+"/watch_inputs/src/main")

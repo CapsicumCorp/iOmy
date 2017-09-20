@@ -23,8 +23,11 @@ package com.capsicumcorp.iomy.libraries.watchinputs;
 
 import java.io.File;
 
+import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.usb.UsbManager;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
@@ -52,6 +55,7 @@ public class MainLib {
     private WebApiClientLib mWebApiClientLib;
     private LockLib mLockLib;
     private TimeRulesLib mTimeRulesLib;
+    private BluetoothHWAndroidLib mBluetoothHWAndroidLib;
 
     public native int jniinit();
     public native int jniloadModule(long module);
@@ -94,10 +98,15 @@ public class MainLib {
         mWebApiClientLib=new WebApiClientLib(AppName);
         mLockLib=new LockLib(AppName);
         mTimeRulesLib=new TimeRulesLib(AppName);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            mBluetoothHWAndroidLib = new BluetoothHWAndroidLib(context);
+        }
     }
 
     public int init() {
-        return jniinit();
+        int result=jniinit();
+
+        return result;
     }
 
     public void shutdown() {
@@ -234,6 +243,17 @@ public class MainLib {
             Log.println(Log.INFO, AppName, "MainLib.loadModules: Failed to load module: timeruleslib");
             return -1;
         }
+        //Add BluetoothHWAndroid library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            modulesinfo = mBluetoothHWAndroidLib.jnigetmodulesinfo();
+            result = jniloadModule(modulesinfo);
+            if (result != 0) {
+                Log.println(Log.INFO, AppName, "MainLib.loadModules: Failed to load module: bluetoothHWAndroidLib");
+                return -1;
+            }
+        } else {
+            Log.println(Log.INFO, AppName, "MainLib.loadModules: Not loading bluetoothHWAndroidLib module as it requires Android >= 4.3");
+        }
         return 0;
     }
 
@@ -269,5 +289,4 @@ public class MainLib {
     static {
         System.loadLibrary("watch_inputs");
     }
-
 }

@@ -9,6 +9,7 @@
         sufficient checks in the main program before using this library at runtime
     -->
     <uses-sdk
-        tools:overrideLibrary="com.hoho.android.usbserial"
+        tools:overrideLibrary="com.hoho.android.usbserial, com.csr.mesh"
         />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
 </manifest>

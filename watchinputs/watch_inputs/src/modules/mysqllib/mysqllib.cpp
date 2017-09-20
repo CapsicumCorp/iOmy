@@ -86,6 +86,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #define MYSQLLIB_GETLINKPK 18 //Get the pk for a link address
 #define MYSQLLIB_GETLINKCOMMPK 19 //Get the comm pk that is associated with a link address
 
+static const int MYSQLLIB_GETTHINGPK=20; //Get the pk for a thing address and hwid
+static const int MYSQLLIB_GETLINK_USERNAME_PASSWORD=21; //Get the username and password associated with a link
+static const int MYSQLLIB_GETTHING_INFO=22; //Get about about all things for a link
+
 //A unique id for a port on a device
 //This is not public so may change at any time
 typedef struct {
@@ -124,6 +128,10 @@ static const char *mysqllib_stmts[]={
 	"SELECT COMM_PK FROM VW_COMM WHERE COMM_ADDRESS = ?",
 	"SELECT LINK_PK FROM VW_LINK WHERE LINK_SERIALCODE = ?",
 	"SELECT COMM_PK FROM VW_LINK WHERE LINK_SERIALCODE = ?",
+  "SELECT THING_PK FROM VW_THING WHERE THING_SERIALCODE = ? AND THING_HWID = ?",
+
+  "SELECT LINKCONN_USERNAME, LINKCONN_PASSWORD FROM VW_LINK WHERE LINK_PK = ?",
+  "SELECT THING_HWID, THING_OUTPUTHWID, THING_SERIALCODE, THINGTYPE_PK, THING_NAME FROM VW_THING WHERE LINK_PK = ?"
 };
 
 static int num_stmts = sizeof(mysqllib_stmts)/sizeof(char *);
@@ -187,6 +195,9 @@ int mysqllib_update_sensor_datatinyint_value(const void *uniqueid, int64_t date,
 int mysqllib_getcommpk(uint64_t addr, int64_t *commpk);
 int mysqllib_getlinkpk(uint64_t addr, int64_t *linkpk);
 int mysqllib_getlinkcommpk(uint64_t addr, int64_t *commpk);
+int mysqllib_getthingpk(uint64_t serialcode, int32_t hwid, int64_t *thingpk);
+int mysqllib_getlinkusernamepassword(int64_t linkpk, char **username, char **password);
+int mysqllib_getThingInfo(int64_t linkpk, int32_t **thingHwid, int32_t **thingOutputHwid, char ***thingSerialCode, int32_t **thingType, char ***thingName);
 void mysqllib_freeuniqueid(void *uniqueid);
 
 //C Exports
@@ -233,6 +244,9 @@ static mysqllib_ifaceptrs_ver_1_t thislib_ifaceptrs_ver_1={
   mysqllib_getcommpk,
   mysqllib_getlinkpk,
   mysqllib_getlinkcommpk,
+  mysqllib_getthingpk,
+  mysqllib_getlinkusernamepassword,
+  mysqllib_getThingInfo,
   mysqllib_freeuniqueid
 };
 
@@ -3170,6 +3184,237 @@ int mysqllib_getlinkcommpk(uint64_t addr, int64_t *commpk) {
     return 0;
   }
   return thisvalue;
+}
+
+/*
+  Get thing pk associated with a thing
+  Args: thing serialcode, hwid
+  On success, 64-bit thing pk will be set, and 0 will be returned
+  Returns -1 if thing doesn't exist, < -1 on another error
+*/
+//NOTE: Only implemented in Java at the moment
+int mysqllib_getthingpk(uint64_t serialcode, int32_t hwid, int64_t *thingpk) {
+#ifdef __ANDROID__
+  JNIEnv *env;
+  jmethodID getThingPK_methodid;
+  jstring jtmpstr;
+  int wasdetached=0;
+#endif
+  int locdbloaded;
+  char thisaddr[17];
+  jint thishwid;
+  int64_t thisvalue;
+
+#ifdef __ANDROID__
+  if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
+    return -2;
+  }
+  getThingPK_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getThingPK", "(Ljava/lang/String;I)J");
+#endif
+  sprintf(thisaddr, "%016" PRIX64, serialcode);
+  thishwid=hwid;
+
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
+    JNIDetachThread(wasdetached);
+#endif
+    return -3;
+  }
+#ifdef __ANDROID__
+  jtmpstr=env->NewStringUTF(thisaddr);
+  thisvalue=env->CallStaticLongMethod(mysqllib_mysql_class, getThingPK_methodid, jtmpstr, thishwid);
+#endif
+  PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
+  env->DeleteLocalRef(jtmpstr);
+  JNIDetachThread(wasdetached);
+#endif
+  if (thisvalue>=0) {
+    *thingpk=thisvalue;
+
+    return 0;
+  }
+  return thisvalue;
+}
+
+/*
+  Get the username and password associated with a link
+  Args: link pk
+  On success, username and password will be set, and 0 will be returned
+  Returns -1 if link doesn't exist, < -1 on another error
+  Caller should free username and password when no longer needed
+*/
+//NOTE: Only implemented in Java at the moment
+int mysqllib_getlinkusernamepassword(int64_t linkpk, char **username, char **password) {
+#ifdef __ANDROID__
+  JNIEnv *env;
+  jmethodID getDBLinkUsernamePassword_methodid;
+  jmethodID getLinkUsernameStr_methodid;
+  jmethodID getLinkPasswordStr_methodid;
+  jstring jusername, jpassword;
+  const char *usernameFromJava, *passwordFromJava;
+  int wasdetached=0;
+#endif
+  int locdbloaded;
+  int result;
+
+#ifdef __ANDROID__
+  if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
+    return -2;
+  }
+  getDBLinkUsernamePassword_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getDBLinkUsernamePassword", "(J)I");
+  getLinkUsernameStr_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getLinkUsernameStr", "()Ljava/lang/String;");
+  getLinkPasswordStr_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getLinkPasswordStr", "()Ljava/lang/String;");
+#endif
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
+    JNIDetachThread(wasdetached);
+#endif
+    return -3;
+  }
+#ifdef __ANDROID__
+  result=env->CallStaticIntMethod(mysqllib_mysql_class, getDBLinkUsernamePassword_methodid, linkpk);
+  if (result==0) {
+    //Get the username and password
+    jusername=static_cast<jstring>(env->CallStaticObjectMethod(mysqllib_mysql_class, getLinkUsernameStr_methodid));
+    usernameFromJava=env->GetStringUTFChars(jusername, NULL);
+    *username=strdup(usernameFromJava);
+    env->ReleaseStringUTFChars(jusername, usernameFromJava);
+    if (!(*username)) {
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      JNIDetachThread(wasdetached);
+      debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to allocate ram for username\n", __func__);
+      return -4;
+    }
+    jpassword=static_cast<jstring>(env->CallStaticObjectMethod(mysqllib_mysql_class, getLinkPasswordStr_methodid));
+    passwordFromJava=env->GetStringUTFChars(jpassword, NULL);
+    *password=strdup(passwordFromJava);
+    env->ReleaseStringUTFChars(jpassword, passwordFromJava);
+    if (!(*password)) {
+      free(*username);
+      *username=nullptr;
+      PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+      JNIDetachThread(wasdetached);
+      debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to allocate ram for password\n", __func__);
+      return -5;
+    }
+  }
+#endif
+  PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
+  JNIDetachThread(wasdetached);
+#endif
+  return result;
+}
+
+/*
+  Get info from all things for a link
+  Args: linkpk The pk of the link for the things
+        thingHwid Returns an array of Hwids 1 for each Thing: element=-1 if no hwid defined
+        thingOutputHwid Returns an array of Output Hwids 1 for each Thing: element=-1 if no output hwid defined
+        thingSerialCode Returns an array of Serial Codes 1 for each Thing
+        thingType Returns an array of Type 1 for each Thing
+        thingName Returns an array of Names 1 for each Thing
+  On success, The thing arrays will be set, and <numThings> will be returned
+  Returns -1 if link doesn't exist, < -1 on another error
+  Caller should free the thing arrays when no longer needed
+*/
+//NOTE: Only implemented in Java at the moment
+//TODO: Extra error checking if calloc fails
+int mysqllib_getThingInfo(int64_t linkpk, int32_t **thingHwid, int32_t **thingOutputHwid, char ***thingSerialCode, int32_t **thingType, char ***thingName) {
+#ifdef __ANDROID__
+  JNIEnv *env;
+  jmethodID getDBThingInfo_methodid;
+  jmethodID getThingHwid_methodid;
+  jmethodID getThingOutputHwid_methodid;
+  jmethodID getThingType_methodid;
+  jmethodID getThingSerialCodeStr_methodid;
+  jmethodID getThingNameStr_methodid;
+  jint jnumThings=0;
+  jint jthingHwid;
+  jint jthingOutputHwid;
+  jint jthingType;
+  jstring jthingSerialCode, jthingName;
+  const char *thingSerialCodeFromJava, *thingNameFromJava;
+  int wasdetached=0;
+#endif
+  int locdbloaded;
+  int result=0;
+
+#ifdef __ANDROID__
+  if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
+    return -2;
+  }
+  getDBThingInfo_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getDBThingInfo", "(J)I");
+  getThingHwid_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getThingHwid", "(I)I");
+  getThingOutputHwid_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getThingOutputHwid", "(I)I");
+  getThingType_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getThingType", "(I)I");
+  getThingSerialCodeStr_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getThingSerialCodeStr", "(I)Ljava/lang/String;");
+  getThingNameStr_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getThingNameStr", "(I)Ljava/lang/String;");
+#endif
+  //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
+  PTHREAD_LOCK(&thislibmutex);
+  locdbloaded=dbloaded;
+  PTHREAD_UNLOCK(&thislibmutex);
+  if (!locdbloaded) {
+    PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
+    JNIDetachThread(wasdetached);
+#endif
+    return -3;
+  }
+#ifdef __ANDROID__
+  result=env->CallStaticIntMethod(mysqllib_mysql_class, getDBThingInfo_methodid, linkpk);
+  if (result>0) {
+    jnumThings=result;
+
+    //Allocate ram for the things
+    *thingHwid=(int32_t *) calloc(jnumThings, sizeof(int32_t));
+    *thingOutputHwid=(int32_t *) calloc(jnumThings, sizeof(int32_t));
+    *thingType=(int32_t *) calloc(jnumThings, sizeof(int32_t));
+    *thingSerialCode=(char **) calloc(jnumThings, sizeof(char *));
+    *thingName=(char **) calloc(jnumThings, sizeof(char *));
+    for (int i=0; i<jnumThings; ++i) {
+      jthingHwid=env->CallStaticIntMethod(mysqllib_mysql_class, getThingHwid_methodid, i);
+      jthingOutputHwid=env->CallStaticIntMethod(mysqllib_mysql_class, getThingOutputHwid_methodid, i);
+      jthingType=env->CallStaticIntMethod(mysqllib_mysql_class, getThingType_methodid, i);
+
+      (*thingHwid)[i]=jthingHwid;
+      (*thingOutputHwid)[i]=jthingOutputHwid;
+      (*thingType)[i]=jthingType;
+
+      jthingSerialCode=static_cast<jstring>(env->CallStaticObjectMethod(mysqllib_mysql_class, getThingSerialCodeStr_methodid, i));
+      thingSerialCodeFromJava=env->GetStringUTFChars(jthingSerialCode, NULL);
+      (*thingSerialCode)[i]=strdup(thingSerialCodeFromJava);
+      env->ReleaseStringUTFChars(jthingSerialCode, thingSerialCodeFromJava);
+
+      jthingName=static_cast<jstring>(env->CallStaticObjectMethod(mysqllib_mysql_class, getThingNameStr_methodid, i));
+      thingNameFromJava=env->GetStringUTFChars(jthingName, NULL);
+      (*thingName)[i]=strdup(thingNameFromJava);
+      env->ReleaseStringUTFChars(jthingName, thingNameFromJava);
+    }
+  }
+#endif
+  PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
+#ifdef __ANDROID__
+  JNIDetachThread(wasdetached);
+#endif
+  return result;
 }
 
 //Free a unique id from memory if memory was allocated for it

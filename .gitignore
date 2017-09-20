@@ -64,4 +64,6 @@ $RECYCLE.BIN/
 # Mac OS files
 .DS_Store
 
+# Object files
+*.o
 
