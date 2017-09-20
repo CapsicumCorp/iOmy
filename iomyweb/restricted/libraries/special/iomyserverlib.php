@@ -4339,32 +4339,32 @@ function DB_CreateDefaultData3( $sDBName ) {
 			/*============================================================
 			  == #6.9# - REGION                                         ==
 			  ============================================================*/
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONLOC` (`REGIONLOC_PK`, `REGIONLOC_NAME`) VALUES (  2, 'Africa'); ";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONLOC` (`REGIONLOC_PK`, `REGIONLOC_NAME`) VALUES (  9, 'Oceania'); ";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONLOC` (`REGIONLOC_PK`, `REGIONLOC_NAME`) VALUES ( 10, 'Antarctica'); ";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONLOC` (`REGIONLOC_PK`, `REGIONLOC_NAME`) VALUES ( 19, 'Americas'); ";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONLOC` (`REGIONLOC_PK`, `REGIONLOC_NAME`) VALUES (142, 'Asia'); ";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONLOC` (`REGIONLOC_PK`, `REGIONLOC_NAME`) VALUES (150, 'Europe'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONLOC` (`REGIONLOC_PK`, `REGIONLOC_NAME`) VALUES (   2, 'Africa'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONLOC` (`REGIONLOC_PK`, `REGIONLOC_NAME`) VALUES (   9, 'Oceania'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONLOC` (`REGIONLOC_PK`, `REGIONLOC_NAME`) VALUES (  10, 'Antarctica'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONLOC` (`REGIONLOC_PK`, `REGIONLOC_NAME`) VALUES (  19, 'Americas'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONLOC` (`REGIONLOC_PK`, `REGIONLOC_NAME`) VALUES ( 142, 'Asia'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONLOC` (`REGIONLOC_PK`, `REGIONLOC_NAME`) VALUES ( 150, 'Europe'); ";
 
 			
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (5, 19, 'South America'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES ( 5, 19, 'South America'); ";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (10, 10, 'Antarctica'); ";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (11, 2, 'Western Africa'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (11,  2, 'Western Africa'); ";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (13, 19, 'Central America'); ";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (14, 2, 'Eastern Africa'); ";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (15, 2, 'Northern Africa'); ";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (17, 2, 'Middle Africa'); ";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (18, 2, 'Southern Africa'); ";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (21, 19, 'Northern America'); ";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (29, 19, 'Caribbean'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (14,  2, 'Eastern Africa'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (15,  2, 'Northern Africa'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (17,  2, 'Middle Africa'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (18,  2, 'Southern Africa'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (21,  19, 'Northern America'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (29,  19, 'Caribbean'); ";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (30, 142, 'Eastern Asia'); ";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (34, 142, 'Southern Asia'); ";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (35, 142, 'South-Eastern Asia'); ";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (39, 150, 'Southern Europe'); ";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (53, 9, 'Australia and New Zealand'); ";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (54, 9, 'Melanesia'); ";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (57, 9, 'Micronesia'); ";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (61, 9, 'Polynesia'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (53,   9, 'Australia and New Zealand'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (54,   9, 'Melanesia'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (57,   9, 'Micronesia'); ";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (61,   9, 'Polynesia'); ";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (143, 142, 'Central Asia'); ";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (145, 142, 'Western Asia'); ";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`REGIONSUBLOC` (`REGIONSUBLOC_PK`, `REGIONSUBLOC_REGIONLOC_FK`, `REGIONSUBLOC_NAME`) VALUES (151, 150, 'Eastern Europe'); ";
@@ -5271,7 +5271,7 @@ function DB_CreateDefaultData5( $sDBName ) {
 			$sSQL .= "INSERT INTO `".$sDBName."`.`COMMTYPE` ( COMMTYPE_PK, COMMTYPE_NAME ) VALUES ( 1, 'Legacy' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`COMMTYPE` ( COMMTYPE_PK ,COMMTYPE_NAME ) VALUES ( 2, 'PHP API' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`COMMTYPE` ( COMMTYPE_PK ,COMMTYPE_NAME ) VALUES ( 3, 'Zigbee' ); \n";
-			
+			$sSQL .= "INSERT INTO `".$sDBName."`.`COMMTYPE` ( COMMTYPE_PK ,COMMTYPE_NAME ) VALUES ( 3, 'Bluetooth' ); \n";
 			
 			/*============================================================
 			  == #6.9# - DATATYPES                                      ==
@@ -5347,7 +5347,7 @@ function DB_CreateDefaultData5( $sDBName ) {
 			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Window Sensor' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Garage Door' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'IP Camera' ); \n";
-			
+			$sSQL .= "INSERT INTO `".$sDBName."`.`LINKTYPE` ( `LINKTYPE_NAME` ) VALUES ( 'Qualcomm CSRmesh' ); \n";
 			
 			/*============================================================
 			  == #6.9# - THINGTYPE                                      ==
@@ -5370,6 +5370,7 @@ function DB_CreateDefaultData5( $sDBName ) {
 			$sSQL .= "INSERT INTO `".$sDBName."`.`THINGTYPE` ( `THINGTYPE_NAME` ) VALUES ( 'Window Sensor' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`THINGTYPE` ( `THINGTYPE_NAME` ) VALUES ( 'Garage Door' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`THINGTYPE` ( `THINGTYPE_NAME` ) VALUES ( 'MJPEG IP Camera' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`THINGTYPE` ( `THINGTYPE_NAME` ) VALUES ( 'CSRMesh Light Bulb with On/Off' ); \n";
 			
 			/*============================================================
 			  == #6.9# - ROOMTYPE                                       ==
@@ -6675,7 +6676,7 @@ function InsertTheDatabaseCoreValues( $sDBName ) {
 		//----------------------------------------------------//
 		//-- 3.1 - Perform the insert                       --//
 		//----------------------------------------------------//
-		$aCoreResult = DB_InsertCore( $sDBName, "iOmy (Vanilla)", 0, 4, 8, $iCurrentUTS );
+		$aCoreResult = DB_InsertCore( $sDBName, "iOmy (Vanilla)", 0, 4, 9, $iCurrentUTS );
 		
 		//----------------------------------------------------//
 		//-- 3.2 - Check for errors                         --//
@@ -6700,7 +6701,7 @@ function InsertTheDatabaseCoreValues( $sDBName ) {
 		//----------------------------------------------------//
 		//-- 4.1 - Insert the Schema Name into the database --//
 		//----------------------------------------------------//
-		$aCoreAddonResult = DB_InsertCoreAddon( $sDBName, $iCoreId, "iOmy Schema", 0, 4, 8, $iCurrentUTS );
+		$aCoreAddonResult = DB_InsertCoreAddon( $sDBName, $iCoreId, "iOmy Schema", 0, 4, 9, $iCurrentUTS );
 		
 		//----------------------------------------------------//
 		//-- 4.2 - Check for errors                         --//
