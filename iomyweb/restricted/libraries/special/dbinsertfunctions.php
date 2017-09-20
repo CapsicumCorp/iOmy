@@ -2,7 +2,7 @@
 
 //========================================================================================================//
 //== @Author: Andrew Somerville <support@capsicumcorp.com>
-//== @Description: This is a library used to do inserting for WatchInputs as well as other APIs.
+//== @Description: This is a library used to do inserting for APIs. WatchInputs API uses a different library.
 //== @Copyright: Capsicum Corporation 2016
 //== 
 //== This file is part of Backend of the iOmy project.
@@ -886,9 +886,6 @@ function PrepareAddNewThing( $iLinkId, $aThing, $iThingDefaultHWID, $sLinkDispla
 	//----------------------------------------------------------------//
 	if( $bError===false ) {
 		if( isset($aThing['HWId']) ) {
-			//-- Store the "HWId" --//
-			$iThingHWID = $aThing['HWId'];
-			
 			//-- Perform Validation --//
 			if ( is_int( $aThing['HWId'] ) && $aThing['HWId']>0 ) {
 				//-- INTEGER --//
@@ -1008,8 +1005,8 @@ function PrepareAddNewThing( $iLinkId, $aThing, $iThingDefaultHWID, $sLinkDispla
 			$iThingId = $aTempResult5['Data']['ThingId'];
 			
 			$aResult = array (
-				"ThingId" => $iThingId,
-				"IOs"     => array()
+				"ThingId"   => $iThingId,
+				"IOs"       => array()
 			);
 		}
 	}
