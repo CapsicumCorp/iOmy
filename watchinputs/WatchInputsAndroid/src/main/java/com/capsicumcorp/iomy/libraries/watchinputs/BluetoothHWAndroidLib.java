@@ -470,6 +470,13 @@ public class BluetoothHWAndroidLib implements AssociationListener {
     public static void CSRMeshAssociateDevice(int uuidHash) {
         getInstance().associateDevice(uuidHash, null);
     }
+    public static void csrMeshSetDeviceOnOff(int deviceId, int state) {
+        if (state==0) {
+            getInstance().setLightPower(deviceId, PowerModelApi.PowerState.OFF);
+        } else if (state==1) {
+            getInstance().setLightPower(deviceId, PowerModelApi.PowerState.ON);
+        }
+    }
     public void deviceAssociated(boolean success, String message) {
         //Disable discovery once a device is associated
         mService.setDeviceDiscoveryFilterEnabled(false);

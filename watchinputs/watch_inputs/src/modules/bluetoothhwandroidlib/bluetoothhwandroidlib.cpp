@@ -47,6 +47,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #include <string>
 #include <vector>
+#include <typeinfo>
 #ifdef __ANDROID__
 #include <jni.h>
 #endif
@@ -164,9 +165,48 @@ static const int CSRMESH_MODEL_LIGHT=20;
 static const int CSRMESH_DEVICETYPE_UNKNOWN=0;
 static const int CSRMESH_DEVICETYPE_LIGHT_WITH_POWEROFF=1; //A light with RGB values and poweroff
 
+typedef class genericattr genericattr_t;
+typedef class onoffattr onoffattr_t;
+typedef class dataintattr dataintattr_t;
+class genericattr {
+public:
+  time_t invaltime=0; //The time that the attribute value was received from the device
+  time_t outvaltime=0; //The time that the attribute value was sent to the device
+  time_t indbvaltime=0; //The time that the attribute value was read from the in counter
+  time_t outdbvaltime=0; //The time that the attribute value was sent to an out/update counter
+  time_t invalchangedtime=0; //The last time that the received attribute value from the device was different from the previous value
+  time_t indbvalchangedtime=0; //The last time that the incoming database value was different from the previous value
+
+  int dbincounter=-1, dbupdatecounter=-1, dboutcounter=-1;
+
+  std::string name; //Name of Attribute
+
+  int dbfieldtype;
+  std::string dbfieldname;
+  long dbinfieldinitialinterval=-1;
+  long dbinfieldinterval=-1;
+  long dbupdatefieldinterval=-1;
+  long dboutfieldinterval=-1;
+
+  virtual ~genericattr();
+};
+
+class onoffattr : public genericattr {
+public:
+  int32_t prevval=0, val=0; //Updated each time a attribute value arrives from the device
+  int32_t prevdbval=0, dbval=0; //Updated each time an in counter is read
+};
+
+class dataintattr : public genericattr {
+public:
+  int32_t prevval=0, val=0; //Updated each time a attribute value arrives from the device
+  int32_t prevdbval=0, dbval=0; //Updated each time an in counter is read
+};
+
 //CSRMesh definitions
-typedef struct csrmeshdevice csrmeshdevice_t;
-struct csrmeshdevice {
+typedef class csrmeshdevice csrmeshdevice_t;
+class csrmeshdevice {
+public:
   std::string shortName=""; //The friendly name of the device
   std::string uuid=""; //This doesn't need to be saved
   int32_t uuidHash=0; //This is used for some commands
@@ -182,6 +222,11 @@ struct csrmeshdevice {
   time_t lastpolltime=0; //Time in seconds that the last device refresh was
   time_t lastpollresponsetime=0; //Time in seconds that the last device response from refresh was
   int numtimeouts=0; //Current number of timeouts with no success packets in between
+
+  //Name of Attribute, attribute info
+  std::map<std::string, genericattr_t *> attrs;
+
+  ~csrmeshdevice();
 };
 
 uint64_t gBluetoothHostMacAddress=0;
@@ -465,6 +510,29 @@ static int JNIDetachThread(int& wasdetached) {
   return result;
 }
 
+genericattr::~genericattr() {
+  const dbcounterlib_ifaceptrs_ver_1_t *dbcounterlibifaceptr=reinterpret_cast<const dbcounterlib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("dbcounterlib", DBCOUNTERLIBINTERFACE_VER_1));
+
+  if (this->dbincounter!=-1) {
+    dbcounterlibifaceptr->scheduledeletecounter(this->dbincounter);
+    this->dbincounter=-1;
+  }
+  if (this->dbupdatecounter!=-1) {
+    dbcounterlibifaceptr->scheduledeletecounter(this->dbupdatecounter);
+    this->dbupdatecounter=-1;
+  }
+  if (this->dboutcounter!=-1) {
+    dbcounterlibifaceptr->scheduledeletecounter(this->dboutcounter);
+    this->dboutcounter=-1;
+  }
+}
+
+csrmeshdevice::~csrmeshdevice() {
+  for (auto &attrsit : attrs) {
+    delete attrsit.second;
+  }
+}
+
 static const char alphanum[] =
 "0123456789"
 "!@#$%^&*"
@@ -707,9 +775,10 @@ void loadCSRMeshInfoFromDatabase(void ) {
         gcsrmeshdevices[ thingHwid[i] ].paired=true;
         gcsrmeshdevices[ thingHwid[i] ].pairing=false;
         gcsrmeshdevices[ thingHwid[i] ].havemodelbitmap=false;
-        if (thingType[i]==19) {
-          gcsrmeshdevices[ thingHwid[i] ].devicetype=CSRMESH_DEVICETYPE_LIGHT_WITH_POWEROFF;
-        }
+
+        //Leave device identification to live checking functions so they can set all the values properly
+        gcsrmeshdevices[ thingHwid[i] ].devicetype=CSRMESH_DEVICETYPE_UNKNOWN;
+
         gcsrmeshdevices[ thingHwid[i] ].indb=true;
         gcsrmeshdevices[ thingHwid[i] ].connected=true;
 
@@ -795,6 +864,26 @@ static int stopCSRMesh(void) {
   return result;
 #else
   return -1;
+#endif
+}
+
+//Turn a device on or off
+static void csrmeshSetDeviceOnOff(int32_t deviceId, bool state) {
+#ifdef __ANDROID__
+  JNIEnv *env;
+  jmethodID methodid;
+  int result=0, wasdetached=0;
+
+  if (JNIAttachThread(env, wasdetached)!=JNI_OK) {
+    return;
+  }
+  methodid=env->GetStaticMethodID(gbluetoothhwandroidlib_class, "csrMeshSetDeviceOnOff", "(II)V");
+  if (state) {
+    env->CallStaticVoidMethod(gbluetoothhwandroidlib_class, methodid, deviceId, 1);
+  } else {
+    env->CallStaticVoidMethod(gbluetoothhwandroidlib_class, methodid, deviceId, 0);
+  }
+  JNIDetachThread(wasdetached);
 #endif
 }
 
@@ -1007,7 +1096,6 @@ static void CSRMeshDeviceInfoModelLow(jint deviceId, jlong bitmap) {
       //Wakeup the main thread to start handling the device
       sem_post(&gmainthreadsleepsem);
     }
-
     //Update poll response time
     gcsrmeshdevices[deviceId].lastpollresponsetime=curtime.tv_sec;
   } catch (std::out_of_range& e) {
@@ -1031,14 +1119,34 @@ static void csrmeshSyncIdentifyDevices(void) {
         if (((bitmap >> CSRMESH_MODEL_LIGHT) & 1)==1 && ((bitmap >> CSRMESH_MODEL_POWER) & 1)==1) {
           debuglibifaceptr->debuglib_printf(1, "%s: device: %08X, %s is a RGB Light with On/Off\n", __func__, gcsrmeshdeviceit.second.deviceId, gcsrmeshdeviceit.second.shortName.c_str());
           gcsrmeshdeviceit.second.devicetype=CSRMESH_DEVICETYPE_LIGHT_WITH_POWEROFF;
+
+          //Setup attributes
+          //NOTE: No update or out counters will be created as CSRMesh is unable to retrieve
+          //  current values from a device
+          gcsrmeshdeviceit.second.attrs["On/Off"]=new onoffattr_t();
+          gcsrmeshdeviceit.second.attrs["On/Off"]->name="On/Off";
+          gcsrmeshdeviceit.second.attrs["On/Off"]->dbfieldtype=DBCOUNTERLIB_COUNTER_WATTUSE_IOPORT_STATE;
+          gcsrmeshdeviceit.second.attrs["On/Off"]->dbfieldname="";
+          gcsrmeshdeviceit.second.attrs["On/Off"]->dbinfieldinitialinterval=1;
+          gcsrmeshdeviceit.second.attrs["On/Off"]->dbinfieldinterval=5;
         }
       }
-      if (gcsrmeshdeviceit.second.devicetype!=CSRMESH_DEVICETYPE_UNKNOWN && !gcsrmeshdeviceit.second.indb) {
-        //Add device as a thing to the database
-        csrmeshAddDeviceToDatabase(gcsrmeshdeviceit.second.uuidHash, gcsrmeshdeviceit.second.deviceId);
-      }
-      if (gcsrmeshdeviceit.second.indb) {
-      //TODO: Setup database counters
+      if (gcsrmeshdeviceit.second.devicetype!=CSRMESH_DEVICETYPE_UNKNOWN) {
+        if (!gcsrmeshdeviceit.second.indb) {
+          //Add device as a thing to the database
+          csrmeshAddDeviceToDatabase(gcsrmeshdeviceit.second.uuidHash, gcsrmeshdeviceit.second.deviceId);
+        }
+        if (gcsrmeshdeviceit.second.indb) {
+          const dbcounterlib_ifaceptrs_ver_1_t *dbcounterlibifaceptr=reinterpret_cast<const dbcounterlib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("dbcounterlib", DBCOUNTERLIBINTERFACE_VER_1));
+
+          //Setup database counters
+          for (auto &attrit : gcsrmeshdeviceit.second.attrs) {
+            if (attrit.second->dbinfieldinitialinterval>0 && attrit.second->dbinfieldinterval && attrit.second->dbincounter==-1) {
+              debuglibifaceptr->debuglib_printf(1, "%s: Setting up database counter for attribute: %s on device: %08" PRIX32 " with database field name: %s and db refresh interval: %d\n", __func__, attrit.first.c_str(), gcsrmeshdeviceit.second.deviceId, attrit.second->dbfieldname.c_str(), attrit.second->dbinfieldinterval);
+              attrit.second->dbincounter=dbcounterlibifaceptr->new_1multival_incounter(gBluetoothHostMacAddress, gcsrmeshdeviceit.second.deviceId, attrit.second->dbfieldtype, attrit.second->dbfieldname.c_str(), attrit.second->dbinfieldinitialinterval, attrit.second->dbinfieldinterval);
+            }
+          }
+        }
       }
     }
   }
@@ -1047,7 +1155,51 @@ static void csrmeshSyncIdentifyDevices(void) {
 
 //Synch devices info with info in database
 static void csrmeshSyncDevicesWithDatabase(void) {
-  //TODO: Synch database counter values with device values
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  const dbcounterlib_ifaceptrs_ver_1_t *dbcounterlibifaceptr=reinterpret_cast<const dbcounterlib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("dbcounterlib", DBCOUNTERLIBINTERFACE_VER_1));
+  int result;
+  struct timespec curtime;
+
+  clock_gettime(CLOCK_REALTIME, &curtime);
+  lockbluetoothhwandroid();
+  for (auto &gcsrmeshdeviceit : gcsrmeshdevices) {
+    for (auto &attrit : gcsrmeshdeviceit.second.attrs) {
+      struct timespec curtime;
+
+      //Get the time for every attribute as it may take a while to iterate over all the attributes
+      clock_gettime(CLOCK_REALTIME, &curtime);
+      if (attrit.second->dbincounter>=0) {
+        //Get value from database
+        multitypeval_t tmpmultival;
+        result=dbcounterlibifaceptr->get_1multival_incountervalues(attrit.second->dbincounter, &tmpmultival);
+        if (result==DBCOUNTERLIB_INCOUNTER_STATUS_ALLVALUESSET) {
+          if (typeid(*attrit.second)==typeid(onoffattr)) {
+            onoffattr_t *onoffattr=dynamic_cast<onoffattr_t *>(attrit.second);
+
+            int32_t tmpdbval=tmpmultival.sval32bit;
+
+            onoffattr->indbvaltime=curtime.tv_sec;
+            if (attrit.second->indbvalchangedtime==0 || onoffattr->dbval!=tmpdbval) {
+              //Only update if we haven't updated yet or the value is different from previous
+              attrit.second->indbvalchangedtime=curtime.tv_sec;
+              onoffattr->prevdbval=onoffattr->dbval;
+              onoffattr->dbval=tmpdbval;
+
+              if (onoffattr->val!=onoffattr->dbval) {
+                //Copy to write val as it is different
+                attrit.second->outvaltime=curtime.tv_sec;
+                onoffattr->prevval=onoffattr->val;
+                onoffattr->val=onoffattr->dbval;
+                debuglibifaceptr->debuglib_printf(1, "%s: Changing value for device: %08" PRIX32 " Attribute: %s from %d to %d\n", __func__, gcsrmeshdeviceit.second.deviceId, attrit.first.c_str(), onoffattr->prevval, onoffattr->val);
+                csrmeshSetDeviceOnOff(gcsrmeshdeviceit.second.deviceId, onoffattr->val);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  unlockbluetoothhwandroid();
 }
 
 static unsigned csrmeshGetNumDevices() {
