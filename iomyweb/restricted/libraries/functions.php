@@ -1874,6 +1874,86 @@ function GetRoomInfoFromRoomId( $iRoomId ) {
 }
 
 
+
+function ValidateRoomAccess( $iRoomId, $iDesiredPremiseId ) {
+	//----------------------------------------------------------------//
+	//-- DESCRIPTION:                                               --//
+	//-- This function is for verifing that the User can access the --//
+	//-- the Room and that the room is in the desired premise       --//
+	//----------------------------------------------------------------//
+	
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError       = false;
+	$sErrMesg     = "";
+	$aRoomData    = array();
+	$aPremiseData = array();
+	$aResult      = array();
+	
+	try {
+		//------------------------------------------------------------//
+		//-- 2.0 - Lookup Room Info                                 --//
+		//------------------------------------------------------------//
+		$aRoomData = GetRoomInfoFromRoomId( $iRoomId );
+		
+		
+		if( $aRoomData['Error']===true ) {
+			$bError    = true;
+			$sErrMesg .= "Room wasn't found! \n";
+			$sErrMesg .= "Room either doesn't exist or you do not have permission to access it!\n";
+			
+		}
+		//------------------------------------------------------------//
+		//-- 3.0 - Checking if Room is in premise                   --//
+		//------------------------------------------------------------//
+		if( $bError===false ) {
+			if( $aRoomData['Data']['PremiseId']!==$iDesiredPremiseId ) {
+				$bError    = true;
+				$sErrMesg .= "Room is not located in the desired premise! \n";
+				$sErrMesg .= "Please choose a room that is located in the same premise \n";
+			}
+		}
+		
+		
+		//------------------------------------------------------------//
+		//-- 4.0 - Check if the User has permission                 --//
+		//------------------------------------------------------------//
+		if( $bError===false ) {
+			$aPremiseData = GetPremisesInfoFromPremiseId( $iDesiredPremiseId );
+			
+			if( $aPremiseData['Error']===true ) {
+				$bError    = true;
+				$sErrMesg .= "Problem looking up the Premise for that Room! \n";
+				$sErrMesg .= "Premise either doesn't exist or you do not have permission to access it \n";
+				
+			} else if( $aPremiseData['Data']['PermRoomAdmin']!==1 && $aPremiseData['Data']['PermRoomAdmin']!=="1" ) {
+				$bError    = true;
+				$sErrMesg .= "Insufficient Premise permissions! \n";
+				$sErrMesg .= "Your User account is missing the RoomAdmin permission to the Hub's Premise! \n";
+				
+			}
+		}
+	} catch( Exception $e1 ) {
+		$bError    = true;
+		$sErrMesg .= "Problem validating the Room! \n";
+		$sErrMesg .= $e1->getMessage();
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>array( "Valid"=>true ) );
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+
 function GetFirstRoomIdFromRoomList() {
 	//-- Retrieve the Premise Info --//
 	$aResult = dbGetFirstRoomIdFromRoomList();

@@ -55,6 +55,7 @@ $aSensorList                = array();      //-- ARRAY:         Used to store th
 $aTempFunctionResult        = array();      //-- ARRAY:         Used to store the functions results before being parsed and converted to the correct format to be returned. --//
 $iPostLinkId                = 0;            //-- INTEGER:       --//
 $iPostThingId               = 0;            //-- INTEGER:       --//
+$iPostRoomId                = 0;            //-- INTEGER:       --//
 $aTempFunctionResult1       = array();      //-- ARRAY:         --//
 $aTempFunctionResult2       = array();      //-- ARRAY:         --//
 $aTempFunctionResult3       = array();      //-- ARRAY:         --//
@@ -66,7 +67,9 @@ $sUrlAuthSection            = "";           //-- STRING:        --//
 $bDebugging                 = false;        //-- BOOLEAN:       Used to enable debugging output if set to true --//
 
 
-
+$iPremiseId                 = 0;            //-- INTEGER:       --//
+$aHubData                   = array();      //-- ARRAY:         --//
+$aRoomInfo                  = array();      //-- ARRAY:         --//
 
 
 //------------------------------------------------------------//
@@ -88,6 +91,7 @@ if($bError===false) {
 	$RequiredParmaters = array(
 		array( "Name"=>'Mode',                      "DataType"=>'STR' ),
 		array( "Name"=>'HubId',                     "DataType"=>'INT' ),
+		array( "Name"=>'RoomId',                    "DataType"=>'INT' ),
 		array( "Name"=>'LinkId',                    "DataType"=>'INT' ),
 		array( "Name"=>'ThingId',                   "DataType"=>'INT' ),
 		array( "Name"=>'IPCamType',                 "DataType"=>'STR' ),
@@ -251,6 +255,30 @@ if($bError===false) {
 			}
 		}
 	}
+	
+	//----------------------------------------------------//
+	//-- 2.2.?.? - Retrieve Room Id                     --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		if( $sPostMode==="AddNewIPCamera" ) {
+			try {
+				//-- Retrieve the "RoomId" --//
+				$iPostRoomId = $aHTTPData["RoomId"];
+				
+				if( $iPostRoomId===false || !($iPostRoomId>=1) ) {
+					//-- Use default if none is specified --//
+					$iPostRoomId = -1;
+				}
+				
+			} catch( Exception $e0140 ) {
+				$bError = true;
+				$sErrMesg .= "Error Code:'0140' \n";
+				$sErrMesg .= "Incorrect \"RoomId\" parameter!\n";
+				$sErrMesg .= "Please use a valid \"RoomId\" parameter\n";
+				$sErrMesg .= "eg. \n \"1\", \"2\" or \"3\" \n\n";
+			}
+		}
+	}
 }
 
 
@@ -266,6 +294,8 @@ if( $bError===false ) {
 		//================================================================//
 		
 		
+		
+		
 		//================================================================//
 		//== 4.2 - Lookup Hub and Comm Info                             ==//
 		//================================================================//
@@ -273,58 +303,82 @@ if( $bError===false ) {
 			//-- Lookup the "API Comm" Type to be used to be compared --//
 			$iAPICommTypeId = LookupFunctionConstant("APICommTypeId");
 			
-			//--------------------------------------------------------------------//
-			//-- 4.2.3 - Lookup if the User has Write premise permission        --//
-			//--------------------------------------------------------------------//
-			if( $bError===false ) {
-				$aHubData = HubRetrieveInfoAndPermission( $iPostHubId );
-				
-				if( $aHubData['Error']===false) {
-					//-- Store the Write Permission --//
-					$iWritePermission = $aHubData['Data']['PermWrite'];
-						
-					if( $iWritePermission===0 ) {
-						$bError    = true;
-						$iErrCode  = 1203;
-						$sErrMesg .= "Error Code:'1203' \n";
-						$sErrMesg .= "Permission issue detected!\n";
-						$sErrMesg .= "The User doesn't appear to have the \"Write\" permission for that Hub.\n";
-					}
-				} else {
-					$bError    = true;
-					$iErrCode  = 1204;
-					$sErrMesg .= "Error Code:'1204' \n";
-					$sErrMesg .= "Problem looking up the data for the selected Hub\n";
-					$sErrMesg .= $aHubData['ErrMesg'];
-				}
-			}
+			//----------------------------------------------------------------//
+			//-- STEP 1 - Lookup details for the Hub                        --//
+			//----------------------------------------------------------------//
+			$aHubData = HubRetrieveInfoAndPermission( $iPostHubId );
 			
-			//--------------------------------------------------------------------//
-			//-- 4.2.4 - Check if a "PHP API" Comm is setup on the Hub          --//
-			//--------------------------------------------------------------------//
-			if( $bError===false ) {
-				$aTempFunctionResult1 = GetCommsFromHubId( $iPostHubId );
+			if( $aHubData['Error']===true ) {
+				$bError = true;
+				$iErrCode  = 1202;
+				$sErrMesg .= "Error Code:'1202' \n";
+				$sErrMesg .= "Problem looking up the data for the selected Hub\n";
+				$sErrMesg .= $aHubData['ErrMesg'];
 				
-				if( $aTempFunctionResult1['Error']===false ) {
-					//-- FOREACH Comm found --//
-					foreach( $aTempFunctionResult1['Data'] as $aComm ) {
-						//-- If no errors and no matches found --//
-						if( $bError===false && $bFound===false ) {
-							//-- Perform the check to see if CommType matches --//
-							if( $aComm['CommTypeId']===$iAPICommTypeId ) {
-								//-- Match found --//
-								$bFound  = true;
-								$iCommId = $aComm['CommId'];
+			} else {
+				//-- Extract the Premise Id --//
+				$iPremiseId = $aHubData['Data']['PremiseId'];
+				
+				//----------------------------------------------------------------//
+				//-- STEP 2 - Validate the Room with desired Hub                --//
+				//----------------------------------------------------------------//
+				$aRoomValidate = ValidateRoomAccess( $iPostRoomId, $iPremiseId );
+				
+				if( $aRoomValidate['Error']===true ) {
+					$bError    = true;
+					$sErrMesg .= "Error Code:'1203' \n";
+					$sErrMesg .= $aRoomValidate['ErrMesg'];
+					
+				} else {
+					//----------------------------------------------------------------//
+					//-- STEP 3 - Lookup Room details                               --//
+					//----------------------------------------------------------------//
+					$aRoomInfo = GetRoomInfoFromRoomId( $iPostRoomId );
+					
+					if( $aRoomInfo['Error']===true ) {
+						$bError    = true;
+						$sErrMesg .= "Error Code:'1204' \n";
+						$sErrMesg .= "Problem looking up Room! \n";
+						$sErrMesg .= $aRoomInfo['ErrMesg'];
+						
+					} else {
+						//----------------------------------------------------------------//
+						//-- STEP 4 - Check if a "PHP API" Comm is setup on the Hub     --//
+						//----------------------------------------------------------------//
+						$aTempFunctionResult1 = GetCommsFromHubId( $iPostHubId );
+						
+						if( $aTempFunctionResult1['Error']===false ) {
+							//-- FOREACH Comm found --//
+							foreach( $aTempFunctionResult1['Data'] as $aComm ) {
+								//-- If no errors and no matches found --//
+								if( $bError===false && $bFound===false ) {
+									//-- Perform the check to see if CommType matches --//
+									if( $aComm['CommTypeId']===$iAPICommTypeId ) {
+										//-- Match found --//
+										$bFound  = true;
+										$iCommId = $aComm['CommId'];
+									}
+								}
+							} //-- ENDFOREACH Comm --//
+						} else {
+							//-- ELSE No Comms are found --//
+							$bFound = false;
+							
+							//------------------------------------------------------------//
+							//-- If no Comm is setup then check Hub Write Permission    --//
+							//------------------------------------------------------------//
+							if( $aHubData['Data']['PermWrite']===0 ) {
+								$bError = true;
+								$iErrCode  = 1205;
+								$sErrMesg .= "Error Code:'1205' \n";
+								$sErrMesg .= "Permission issue detected!\n";
+								$sErrMesg .= "The User doesn't appear to have the \"Write\" permission for that Hub\n";
 							}
 						}
-					} //-- ENDFOREACH Comm --//
-				} else {
-					//-- ELSE No Comms are found --//
-					$bFound = false;
+					}
 				}
 			}
 		}
-		
 		
 		//================================================================//
 		//== 4.4 - Lookup Thing Info                                    ==//
@@ -381,7 +435,6 @@ if( $bError===false ) {
 		if( $bError===false ) {
 			if( $sPostMode==="TestStream" || $sPostMode==="AddNewIPCamera" ) {
 				$sObjectMode = "Non-DB";
-				
 				$aObjectData = array();
 			}
 		}
@@ -422,7 +475,6 @@ if( $bError===false ) {
 			} else if( 
 				$sPostMode==="FetchStreamUrl"              || $sPostMode==="EditIPCamera"                
 			) {
-				
 				switch( $sPostIPCamType ) {
 					case "MJPEG":
 						//-- Load the required Library --//
@@ -521,7 +573,7 @@ if( $bError===false ) {
 				//-- Add the Bridge to the database                                 --//
 				//--------------------------------------------------------------------//
 				if( $bError===false ) {
-					$aResult = $oIPCam->AddToTheDatabase( $iCommId, $aPostData );
+					$aResult = $oIPCam->AddToTheDatabase( $iCommId, $iPostRoomId, $aPostData );
 					
 					//var_dump($aResult);
 					if( $aResult['Error']===true ) {

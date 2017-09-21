@@ -158,7 +158,7 @@ class Weather_OpenWeatherMap {
 	//================================================================================================//
 	//== #3.1# - ADD THE CURRENT BRIDGE TO DATABASE                                                 ==//
 	//================================================================================================//
-	public function AddThisToTheDatabase( $iCommId, $iRoomId, $sLinkName ) {
+	public function AddThisToTheDatabase( $iCommId, $iRoomId, $sLinkName, $sThingName ) {
 		//-- This function is used to add a "non-DB" to a "DB" Weather Source --//
 		
 		
@@ -208,7 +208,7 @@ class Weather_OpenWeatherMap {
 				"Things"                => array(
 					array(
 						"Type"          => "14",
-						"Name"          => "Outside Weather Feed",
+						"Name"          => $sThingName,
 						"State"         => 1,
 						"HWId"          => 0,
 						"OutputHWId"    => 0,

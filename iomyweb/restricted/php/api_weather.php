@@ -76,6 +76,7 @@ $iWindDirectionRSTypeId     = 0;            //-- INTEGER:       --//
 $iWindSpeedRSTypeId         = 0;            //-- INTEGER:       --//
 $sLinkSerial                = "";           //-- STRING:        --//
 $sStationCode               = "";           //-- STRING:        --//
+$sThingName                 = "";
 
 $aNewCommData               = array();      //-- ARRAY:         --//
 $aRoomInfo                  = array();      //-- ARRAY:         --//
@@ -86,6 +87,9 @@ $aWeatherIOs                = array();      //-- ARRAY:         --//
 $aStationCodeResult         = array();      //-- ARRAY:         --//
 $aTempFunctionResult        = array();      //-- ARRAY:         --//
 $aCommInfo                  = array();      //-- ARRAY:         Used to hold the Comm Info--//
+$aRoomValidate              = array();      //-- ARRAY:         --//
+$aHubData                   = array();      //-- ARRAY:         --//
+$aTempFunctionResult1       = array();      //-- ARRAY:         --//
 
 $bTransactionStarted        = false;        //-- BOOLEAN:       --//
 $bTemp1                     = false;        //-- BOOLEAN:       --//
@@ -98,10 +102,8 @@ $sLinkName                  = "";           //-- STRING:        --//
 
 $aWeatherIOsToBeParsed      = array();      //-- ARRAY:         --//
 $aWeatherStationResult      = array();      //-- ARRAY:         --//
-
 $oWeather                   = null;         //-- OBJECT:        --//
 $aWeatherObjectData         = array();      //-- ARRAY:         --//
-
 $aInsertResult              = array();      //-- ARRAY:         --//
 
 
@@ -112,14 +114,10 @@ $aInsertResult              = array();      //-- ARRAY:         --//
 //------------------------------------------------------------//
 //-- 1.3 - IMPORT REQUIRED LIBRARIES                        --//
 //------------------------------------------------------------//
-require_once SITE_BASE.'/restricted/php/core.php';                                   //-- This should call all the additional libraries needed --//
-
-
+require_once SITE_BASE.'/restricted/php/core.php';                                   //-- This should call the usual API set of libraries needed --//
 require_once SITE_BASE.'/restricted/libraries/special/dbinsertfunctions.php';        //-- This library is used to perform the inserting of a new Onvif Server and Streams into the database --//
 require_once SITE_BASE.'/restricted/libraries/weather/owm.php';
 require_once SITE_BASE.'/restricted/libraries/weather/demoweather.php';
-
-
 
 
 //------------------------------------------------------------//
@@ -213,7 +211,7 @@ if($bError===false) {
 					$sErrMesg .= "Invalid \"WeatherType\" parameter! \n";
 					$sErrMesg .= "Please use a valid \"WeatherType\" parameter\n";
 					$sErrMesg .= "eg. \n \"OpenWeatherMap\", \"\", \"\" \n\n";
-				} 
+				}
 			} catch( Exception $e0104 ) {
 				$bError = true;
 				$iErrCode  = 104;
@@ -430,21 +428,82 @@ if( $bError===false ) {
 		//================================================================//
 		if( $sPostMode==="AddWeatherStation" ) {
 			try {
-				$aRoomInfo = GetRoomInfoFromRoomId( $iPostRoomId );
 				
-				if( $aRoomInfo['Error']===false ) {
-					//-- Extract the Values --//
-					$iPremiseId     = $aRoomInfo['Data']['PremiseId'];
-					$iPermRoomWrite = $aRoomInfo['Data']['PermWrite'];
+				//----------------------------------------------------------------//
+				//-- STEP 1 - Lookup details for the Hub                        --//
+				//----------------------------------------------------------------//
+				$aHubData = HubRetrieveInfoAndPermission( $iPostHubId );
+				
+				if( $aHubData['Error']===true ) {
+					$bError = true;
+					$iErrCode  = 1202;
+					$sErrMesg .= "Error Code:'1202' \n";
+					$sErrMesg .= "Problem looking up the data for the selected Hub\n";
+					$sErrMesg .= $aHubData['ErrMesg'];
 					
 				} else {
-					$bError = true;
-					$sErrMesg .= "Error Code:'0302' \n";
-					$sErrMesg .= "Problem looking up Room! \n";
-					$sErrMesg .= $aRoomInfo['ErrMesg'];
+					//-- Extract the Premise Id --//
+					$iPremiseId = $aHubData['Data']['PremiseId'];
+					
+					//----------------------------------------------------------------//
+					//-- STEP 2 - Validate the Room with desired Hub                --//
+					//----------------------------------------------------------------//
+					$aRoomValidate = ValidateRoomAccess( $iPostRoomId, $iPremiseId );
+					
+					if( $aRoomValidate['Error']===true ) {
+						$bError    = true;
+						$sErrMesg .= "Error Code:'1203' \n";
+						$sErrMesg .= $aRoomValidate['ErrMesg'];
+						
+					} else {
+						//----------------------------------------------------------------//
+						//-- STEP 3 - Lookup Room details                               --//
+						//----------------------------------------------------------------//
+						$aRoomInfo = GetRoomInfoFromRoomId( $iPostRoomId );
+						
+						if( $aRoomInfo['Error']===true ) {
+							$bError    = true;
+							$sErrMesg .= "Error Code:'1204' \n";
+							$sErrMesg .= "Problem looking up Room! \n";
+							$sErrMesg .= $aRoomInfo['ErrMesg'];
+							
+						} else {
+							//----------------------------------------------------------------//
+							//-- STEP 4 - Check if a "PHP API" Comm is setup on the Hub     --//
+							//----------------------------------------------------------------//
+							$aTempFunctionResult1 = GetCommsFromHubId( $iPostHubId );
+							
+							if( $aTempFunctionResult1['Error']===false ) {
+								//-- FOREACH Comm found --//
+								foreach( $aTempFunctionResult1['Data'] as $aComm ) {
+									//-- If no errors and no matches found --//
+									if( $bError===false && $bFound===false ) {
+										//-- Perform the check to see if CommType matches --//
+										if( $aComm['CommTypeId']===$iAPICommTypeId ) {
+											//-- Match found --//
+											$bFound  = true;
+											$iCommId = $aComm['CommId'];
+										}
+									}
+								} //-- ENDFOREACH Comm --//
+							} else {
+								//-- ELSE No Comms are found --//
+								$bFound = false;
+								
+								//------------------------------------------------------------//
+								//-- If no Comm is setup then check Hub Write Permission    --//
+								//------------------------------------------------------------//
+								if( $aHubData['Data']['PermWrite']===0 ) {
+									$bError = true;
+									$iErrCode  = 1205;
+									$sErrMesg .= "Error Code:'1205' \n";
+									$sErrMesg .= "Permission issue detected!\n";
+									$sErrMesg .= "The User doesn't appear to have the \"Write\" permission for that Hub\n";
+								}
+							}
+						}
+					}
 				}
-				
-				
 			} catch( Exception $e0301 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
@@ -453,43 +512,7 @@ if( $bError===false ) {
 			}
 		}
 		
-		//================================================================//
-		//== 4.2 - Check if PHP API Comm has been setup on the Premise  ==//
-		//================================================================//
-		if( $bError===false ) {
-			if( $sPostMode==="AddWeatherStation" ) {
-				try {
-					$aCommsLookup = GetCommsFromHubId( $iPostHubId );
-					
-					if( $aCommsLookup['Error']===false ) {
-						//-------------------------------------------------------------//
-						//-- Check each Comm to see if it matches the "PHP API" Comm --//
-						//-------------------------------------------------------------//
-						foreach( $aCommsLookup['Data'] as $aComm ) {
-							//-- If no errors and no matches found --//
-							if( $bError===false && $bFound===false ) {
-								//-- Perform the check to see if CommType matches --//
-								if( $aComm['CommTypeId']===$iAPICommTypeId ) {
-									//-- Match found --//
-									$bFound         = true;
-									$iCommId        = $aComm['CommId'];
-									$iPermRoomWrite = $aComm['PermWrite'];
-								}
-							}
-						}
-					} else {
-						//-- Flag that no comms were found --//
-						$bFound = false;
-					}
-					
-				} catch( Exception $e0305 ) {
-					//-- Display an Error Message --//
-					$bError    = true;
-					$sErrMesg .= "Error Code:'0305' \n";
-					$sErrMesg .= $e0305->getMessage();
-				}
-			}
-		} //-- ENDIF No errors have occurred --//
+
 		
 		//================================================================//
 		//== 4.3 - Check the Thing Information                          ==//
@@ -509,10 +532,9 @@ if( $bError===false ) {
 						if( $iThingTypeId!==$iWeatherThingTypeId ) {
 							$bError    = true;
 							$sErrMesg .= "Error Code:'0331' \n";
-							$sErrMesg .= "The ThingId doesn't isn't attached to a \"Weather\" Thing! ";
+							$sErrMesg .= "The ThingId doesn't isn't attached to a \"Weather\" Thing! \n";
 							$sErrMesg .= "Please use a valid ThingId! ";
 						}
-						
 					} else {
 						$bError    = true;
 						$sErrMesg .= "Error Code:'0332' \n";
@@ -543,7 +565,7 @@ if( $bError===false ) {
 					$sNetworkPort     = $aLinkInfo['Data']['LinkConnPort'];
 					$sUserToken       = $aLinkInfo['Data']['LinkConnUsername'];
 					
-					$aCommInfo = GetCommInfo( $aLinkInfo['Data']['LinkCommId'] );
+					$aCommInfo        = GetCommInfo( $aLinkInfo['Data']['LinkCommId'] );
 					
 					
 					if( $aCommInfo['Error']===false ) {
@@ -604,7 +626,6 @@ if( $bError===false ) {
 							$sErrMesg .= "Error Code:'0338' \n";
 							$sErrMesg .= "Critical error! \n";
 							$sErrMesg .= "Failed to initialise weather object. \n";
-							
 						}
 						
 					//----------------------------------------------------------------------------//
@@ -681,114 +702,114 @@ if( $bError===false ) {
 				//-- 5.1.4 - If Comm is found then Add the Thing                    --//
 				//--------------------------------------------------------------------//
 				if( $bError===false ) {
-					//-------------------------------------------------//
-					//-- If the User has permission to edit the room --//
-					//-------------------------------------------------//
-					if( $iPermRoomWrite===1 ) {
-						//-----------------------------------------------------//
-						//-- CHECK TO SEE IF THE WEATHER FEED IS SUPPORTED   --//
-						//-----------------------------------------------------//
+					
+					//-----------------------------------------------------//
+					//-- CHECK TO SEE IF THE WEATHER FEED IS SUPPORTED   --//
+					//-----------------------------------------------------//
+					
+					
+					//----------------------------------------------------------------------------//
+					//-- IF TYPE: OpenWeatherMap                                                --//
+					//----------------------------------------------------------------------------//
+					if( $sPostWeatherType==="OpenWeatherMap" ) {
+						//----------------------------------------//
+						//-- Setup the Data to the Object       --//
+						//----------------------------------------//
+						$aWeatherObjectData = array(
+							"ObjectState" => "non-DB",
+							"UserToken"   => $sPostUsername,
+							"WeatherCode" => $sPostStationCode
+						);
+						
+						//----------------------------------------//
+						//-- Create the OpenWeatherMap Object   --//
+						//----------------------------------------//
+						$oWeather = new Weather_OpenWeatherMap( $aWeatherObjectData );
 						
 						
-						//----------------------------------------------------------------------------//
-						//-- IF TYPE: OpenWeatherMap                                                --//
-						//----------------------------------------------------------------------------//
-						if( $sPostWeatherType==="OpenWeatherMap" ) {
-							//----------------------------------------//
-							//-- Setup the Data to the Object       --//
-							//----------------------------------------//
-							$aWeatherObjectData = array(
-								"ObjectState" => "non-DB",
-								"UserToken"   => $sPostUsername,
-								"WeatherCode" => $sPostStationCode
-							);
-							
-							//----------------------------------------//
-							//-- Create the OpenWeatherMap Object   --//
-							//----------------------------------------//
-							$oWeather = new Weather_OpenWeatherMap( $aWeatherObjectData );
-							
-							
-							if( $oWeather->bInitialised===true ) {
-								
-								if( isset($aPostData['Name']) ) {
-									$sLinkName = $aPostData['Name'];
-								} else {
-									$sLinkName = "OWM Feed";
-								}
-								
-								//------------------------------------//
-								//-- Add to the Database            --//
-								//------------------------------------//
-								$aInsertResult = $oWeather->AddThisToTheDatabase( $iCommId, $iPostRoomId, $sLinkName );
-								
-								if( $aInsertResult['Error']===true ) {
-									$bError = true;
-									$iErrCode  = 1410;
-									$sErrMesg .= "Error Code:'1410' \n";
-									$sErrMesg .= "Failed to add the weather feed to the database!\n";
-									$sErrMesg .= $aInsertResult['ErrMesg'];
-									
-								} else {
-									//----------------------------------------------------------------//
-									//-- Foreach IO add the appropriate value to the database       --//
-									//----------------------------------------------------------------//
-									if( isset($aInsertResult['Data']['Things']) ) {
-										if( isset( $aInsertResult['Data']['Things'][0] ) ) {
-											$aWeatherStationResult = $oWeather->UpdateTheWeatherStationCode( $aInsertResult['Data']['Things'][0]['ThingId'], $sPostStationCode );
-											
-											if( $aWeatherStationResult['Error']===false ) {
-												
-												$aResult = array(
-													"WeatherStation" => $aInsertResult['Data'],
-													"WeatherStationData" => $aWeatherStationResult['Data']
-												);
-												
-											} else {
-												$bError = true;
-												$iErrCode  = 1407;
-												$sErrMesg .= "Error Code:'1407' \n";
-												$sErrMesg .= "Failed to add the weather feed to the database!";
-											}
-										} else {
-											$bError = true;
-											$iErrCode  = 1406;
-											$sErrMesg .= "Error Code:'1406' \n";
-											$sErrMesg .= "Problem when updating the weatherstationcode.\n";
-										} 
-									} else {
-										$bError = true;
-										$iErrCode  = 1405;
-										$sErrMesg .= "Error Code:'1405' \n";
-										$sErrMesg .= "Problem when updating the weatherstationcode.\n";
-									}
-								}
-								
+						if( $oWeather->bInitialised===true ) {
+							//------------------------------------//
+							//-- Link Name Check                --//
+							//------------------------------------//
+							if( isset($aPostData['LinkName']) ) {
+								$sLinkName = $aPostData['LinkName'];
 							} else {
-								$bError = true;
-								$iErrCode  = 1404;
-								$sErrMesg .= "Error Code:'1404' \n";
-								$sErrMesg .= "Problem when setting up the Weather Object.\n";
-								$sErrMesg .= json_encode( $oWeather->aErrorMessges );
+								$sLinkName = "OWM Feed";
 							}
 							
-						//----------------------------------------------------------------------------//
-						//-- ELSE TYPE: Unsupported                                                 --//
-						//----------------------------------------------------------------------------//
+							//------------------------------------//
+							//-- Thing Name Check               --//
+							//------------------------------------//
+							if( isset($aPostData['ThingName']) ) {
+								$sThingName = $aPostData['ThingName'];
+							} else {
+								$sThingName = "Outside Weather";
+							}
+							
+							//------------------------------------//
+							//-- Add to the Database            --//
+							//------------------------------------//
+							$aInsertResult = $oWeather->AddThisToTheDatabase( $iCommId, $iPostRoomId, $sLinkName, $sThingName );
+							
+							if( $aInsertResult['Error']===true ) {
+								$bError = true;
+								$iErrCode  = 1410;
+								$sErrMesg .= "Error Code:'1410' \n";
+								$sErrMesg .= "Failed to add the weather feed to the database!\n";
+								$sErrMesg .= $aInsertResult['ErrMesg'];
+								
+							} else {
+								//----------------------------------------------------------------//
+								//-- Foreach IO add the appropriate value to the database       --//
+								//----------------------------------------------------------------//
+								if( isset($aInsertResult['Data']['Things']) ) {
+									if( isset( $aInsertResult['Data']['Things'][0] ) ) {
+										$aWeatherStationResult = $oWeather->UpdateTheWeatherStationCode( $aInsertResult['Data']['Things'][0]['ThingId'], $sPostStationCode );
+										
+										if( $aWeatherStationResult['Error']===false ) {
+											
+											$aResult = array(
+												"WeatherStation" => $aInsertResult['Data'],
+												"WeatherStationData" => $aWeatherStationResult['Data']
+											);
+											
+										} else {
+											$bError = true;
+											$iErrCode  = 1407;
+											$sErrMesg .= "Error Code:'1407' \n";
+											$sErrMesg .= "Failed to add the weather feed to the database!";
+										}
+									} else {
+										$bError = true;
+										$iErrCode  = 1406;
+										$sErrMesg .= "Error Code:'1406' \n";
+										$sErrMesg .= "Problem when updating the weatherstationcode.\n";
+									} 
+								} else {
+									$bError = true;
+									$iErrCode  = 1405;
+									$sErrMesg .= "Error Code:'1405' \n";
+									$sErrMesg .= "Problem when updating the weatherstationcode.\n";
+								}
+							}
+							
 						} else {
-							$bError    = true;
-							$iErrCode  = 1402;
-							$sErrMesg .= "Error Code:'1402' \n";
-							$sErrMesg .= "Unsupported Weather Type!";
+							$bError = true;
+							$iErrCode  = 1404;
+							$sErrMesg .= "Error Code:'1404' \n";
+							$sErrMesg .= "Problem when setting up the Weather Object.\n";
+							$sErrMesg .= json_encode( $oWeather->aErrorMessges );
 						}
 						
-						
+					//----------------------------------------------------------------------------//
+					//-- ELSE TYPE: Unsupported                                                 --//
+					//----------------------------------------------------------------------------//
 					} else {
 						$bError    = true;
-						$iErrCode  = 1401;
-						$sErrMesg .= "Error Code:'1401' \n";
-						$sErrMesg .= "User has no write permission!";
-					}	//-- ENDIF User has write permission to a room --//
+						$iErrCode  = 1402;
+						$sErrMesg .= "Error Code:'1402' \n";
+						$sErrMesg .= "Unsupported Weather Type!";
+					}
 				}	//-- ENDIF No errors are found --//
 				
 			} catch( Exception $e1400 ) {
@@ -810,7 +831,6 @@ if( $bError===false ) {
 					$oRestrictedApiCore->oRestrictedDB->dbEndTransaction();
 				}
 			}
-			
 			
 		//================================================================//
 		//== 5.3 - MODE: Fetch the Current Weather                      ==//
@@ -864,9 +884,7 @@ if( $bError===false ) {
 								$sErrMesg .= "Error Code:'2412' \n";
 								$sErrMesg .= "Error: failed to get new values! \n";
 								$sErrMesg .= $aResult['ErrMesg'];
-							
 							}
-							
 							
 						} else {
 							$bError = true;
@@ -903,6 +921,7 @@ if( $bError===false ) {
 		$sErrMesg .= $e0400->getMessage();
 	}
 }
+
 
 //====================================================================//
 //== 9.0 - FINALISE                                                 ==//

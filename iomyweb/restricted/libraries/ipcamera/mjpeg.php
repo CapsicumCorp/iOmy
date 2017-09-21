@@ -572,7 +572,7 @@ class IPCamera {
 	//================================================================================================//
 	//== ADD THE CURRENT BRIDGE TO DATABASE                                                         ==//
 	//================================================================================================//
-	public function AddToTheDatabase( $iCommId, $aData ) {
+	public function AddToTheDatabase( $iCommId, $iRoomId, $aData ) {
 		//----------------------------------------------------------------//
 		//-- 1.0 - INITIALISE                                           --//
 		//----------------------------------------------------------------//
@@ -662,15 +662,16 @@ class IPCamera {
 			//----------------------------------------------------------------//
 			//-- 4.0 - Make sure that the Bridge isn't in the database      --//
 			//----------------------------------------------------------------//
-			if($bError===false) {
-				$aCheckLink = CheckIfLinkAlreadyExists( $iCommId, $sSerialCode, $sConnAddress, $sInfoName );
-				
-				if( $aCheckLink!==false ) {
-					$bError     = true;
-					$iErrCode   = 2;
-					$sErrMesg   = "The Device(Link) already exists in the database\n";
-				}
-			}
+			//if($bError===false) {
+			//	$aCheckLink = CheckIfLinkAlreadyExists( $iCommId, $sSerialCode, $sConnAddress, $sInfoName );
+			//	
+			//	if( $aCheckLink!==false ) {
+			//		$bError     = true;
+			//		$iErrCode   = 2;
+			//		$sErrMesg   = "The Device(Link) already exists in the database\n";
+			//	}
+			//}
+			//-- NOTE: Commented out as there may be more than one stream per IP Address --//
 			
 			//----------------------------------------------------------------//
 			//-- 5.0 - Create the IP Camera Link                            --//
@@ -693,6 +694,7 @@ class IPCamera {
 					"ConnName"              => "IP Camera MJPEG",
 					"ConnUsername"          => $sUsername,
 					"ConnPassword"          => $sPassword,
+					"RoomId"                => $iRoomId,
 					"Things"                => array(
 						array(
 							"Type"          => $iThingType,

@@ -53,7 +53,7 @@ $aTempFunctionResult5       = array();      //-- ARRAY:         Used to store th
 $iPostHubId                 = 0;            //-- INTEGER:       This is used to store which HubId that the new Bridge should be added to. --//
 $iPostLinkId                = 0;            //-- INTEGER:       This is used to store which "Philips Hue Bridge" to connect to --//
 $iPostThingId               = 0;            //-- INTEGER:       This is used to store which "Philips Hue Light" that the user wants to change. --//
-
+$iPostRoomId                = 0;            //-- INTEGER:       This is used to store which room the "Philips Hue Bridge" gets added to --//
 $iLinkId                    = 0;            //-- INTEGER:       Used to hold the Link Id of the newly created Philips Hue Bridge in the database --//
 $iThingTypeId               = 0;            //-- INTEGER:       Stores the ThingTypeId to verify if they are --//
 
@@ -119,6 +119,7 @@ if($bError===false) {
 		array( "Name"=>'DevicePort',                "DataType"=>'INT' ),
 		array( "Name"=>'DeviceUserToken',           "DataType"=>'STR' ),
 		array( "Name"=>'HubId',                     "DataType"=>'INT' ),
+		array( "Name"=>'RoomId',                    "DataType"=>'INT' ),
 		array( "Name"=>'ThingId',                   "DataType"=>'INT' ),
 		array( "Name"=>'Hue',                       "DataType"=>'INT' ),
 		array( "Name"=>'Saturation',                "DataType"=>'INT' ),
@@ -363,6 +364,30 @@ if($bError===false) {
 			}
 		}
 	}
+	
+	//----------------------------------------------------//
+	//-- 2.2.?.? - Retrieve Room Id                     --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		if( $sPostMode==="AddNewBridge" ) {
+			try {
+				//-- Retrieve the "RoomId" --//
+				$iPostRoomId = $aHTTPData["RoomId"];
+				
+				if( $iPostRoomId===false || !($iPostRoomId>=1) ) {
+					//-- Use default if none is specified --//
+					$iPostRoomId = -1;
+				}
+				
+			} catch( Exception $e0120 ) {
+				$bError = true;
+				$sErrMesg .= "Error Code:'0120' \n";
+				$sErrMesg .= "Incorrect \"RoomId\" parameter!\n";
+				$sErrMesg .= "Please use a valid \"RoomId\" parameter\n";
+				$sErrMesg .= "eg. \n \"1\", \"2\" or \"3\" \n\n";
+			}
+		}
+	}
 }
 
 
@@ -374,58 +399,83 @@ if( $bError===false ) {
 	try {
 		if( $sPostMode==="AddNewBridge" ) {
 			try {
+				
 				//----------------------------------------------------------------//
-				//-- Check if the User has the "Write" permission to the Hub    --//
+				//-- STEP 1 - Lookup details for the Hub                        --//
 				//----------------------------------------------------------------//
 				$aHubData = HubRetrieveInfoAndPermission( $iPostHubId );
 				
-				if( $aHubData['Error']===false) {
-					//-- Store the Write Permission --//
-					$iWritePermission = $aHubData['Data']['PermWrite'];
-					
-					if( $iWritePermission===0 ) {
-						$bError = true;
-						$iErrCode  = 1203;
-						$sErrMesg .= "Error Code:'1203' \n";
-						$sErrMesg .= "Permission issue detected!\n";
-						$sErrMesg .= "The User doesn't appear to have the \"Write\" permission for that Hub\n";
-					}
-					
-				} else {
+				if( $aHubData['Error']===true ) {
 					$bError = true;
 					$iErrCode  = 1202;
 					$sErrMesg .= "Error Code:'1202' \n";
 					$sErrMesg .= "Problem looking up the data for the selected Hub\n";
 					$sErrMesg .= $aHubData['ErrMesg'];
-				}
-				
-				//----------------------------------------------------------------//
-				//-- Check if a "PHP API" Comm is setup on the Hub              --//
-				//----------------------------------------------------------------//
-				if( $bError===false ) {
-					$aTempFunctionResult1 = GetCommsFromHubId( $iPostHubId );
 					
+				} else {
+					//-- Extract the Premise Id --//
+					$iPremiseId = $aHubData['Data']['PremiseId'];
 					
-					if( $aTempFunctionResult1['Error']===false ) {
-						//-- FOREACH Comm found --//
-						foreach( $aTempFunctionResult1['Data'] as $aComm ) {
-							//-- If no errors and no matches found --//
-							if( $bError===false && $bFound===false ) {
-								//-- Perform the check to see if CommType matches --//
-								if( $aComm['CommTypeId']===$iAPICommTypeId ) {
-									//-- Match found --//
-									$bFound  = true;
-									$iCommId = $aComm['CommId'];
-									
+					//----------------------------------------------------------------//
+					//-- STEP 2 - Validate the Room with desired Hub                --//
+					//----------------------------------------------------------------//
+					$aRoomValidate = ValidateRoomAccess( $iPostRoomId, $iPremiseId );
+					
+					if( $aRoomValidate['Error']===true ) {
+						$bError    = true;
+						$sErrMesg .= "Error Code:'1203' \n";
+						$sErrMesg .= $aRoomValidate['ErrMesg'];
+						
+					} else {
+						//----------------------------------------------------------------//
+						//-- STEP 3 - Lookup Room details                               --//
+						//----------------------------------------------------------------//
+						$aRoomInfo = GetRoomInfoFromRoomId( $iPostRoomId );
+						
+						if( $aRoomInfo['Error']===true ) {
+							$bError    = true;
+							$sErrMesg .= "Error Code:'1204' \n";
+							$sErrMesg .= "Problem looking up Room! \n";
+							$sErrMesg .= $aRoomInfo['ErrMesg'];
+							
+						} else {
+							//----------------------------------------------------------------//
+							//-- STEP 4 - Check if a "PHP API" Comm is setup on the Hub     --//
+							//----------------------------------------------------------------//
+							$aTempFunctionResult1 = GetCommsFromHubId( $iPostHubId );
+							
+							if( $aTempFunctionResult1['Error']===false ) {
+								//-- FOREACH Comm found --//
+								foreach( $aTempFunctionResult1['Data'] as $aComm ) {
+									//-- If no errors and no matches found --//
+									if( $bError===false && $bFound===false ) {
+										//-- Perform the check to see if CommType matches --//
+										if( $aComm['CommTypeId']===$iAPICommTypeId ) {
+											//-- Match found --//
+											$bFound  = true;
+											$iCommId = $aComm['CommId'];
+										}
+									}
+								} //-- ENDFOREACH Comm --//
+							} else {
+								//-- ELSE No Comms are found --//
+								$bFound = false;
+								
+								//------------------------------------------------------------//
+								//-- If no Comm is setup then check Hub Write Permission    --//
+								//------------------------------------------------------------//
+								if( $aHubData['Data']['PermWrite']===0 ) {
+									$bError = true;
+									$iErrCode  = 1205;
+									$sErrMesg .= "Error Code:'1205' \n";
+									$sErrMesg .= "Permission issue detected!\n";
+									$sErrMesg .= "The User doesn't appear to have the \"Write\" permission for that Hub\n";
 								}
 							}
-						} //-- ENDFOREACH Comm --//
-					} else {
-						//-- ELSE No Comms are found --//
-						$bFound = false;
-						
+						}
 					}
 				}
+				
 			} catch( Exception $e1201 ) {
 				$bError = true;
 				$iErrCode  = 1201;
@@ -493,7 +543,6 @@ if( $bError===false ) {
 							$sNetworkPort     = $aTempFunctionResult2['Data']['LinkConnPort'];
 							$sUserToken       = $aTempFunctionResult2['Data']['LinkConnUsername'];
 							$sHWId            = strval( $aTempFunctionResult1['Data']['ThingHWId'] );
-							
 							
 							//-- Flag that this request needs to use the "PhilipsHue" PHP Object to update the device --//
 							$bUsePHPObject = true;
@@ -638,9 +687,6 @@ if( $bError===false ) {
 	}
 }
 
-
-
-
 //====================================================================//
 //== 5.0 - MAIN                                                     ==//
 //====================================================================//
@@ -697,7 +743,7 @@ if( $bError===false ) {
 					if( $oPHPPhilipsHue->bInitialised===true ) {
 						
 						//-- Add the Philips Hue Bridge to the Database --//
-						$aTempFunctionResult3 = $oPHPPhilipsHue->AddThisBridgeToTheDatabase( $iCommId );
+						$aTempFunctionResult3 = $oPHPPhilipsHue->AddThisBridgeToTheDatabase( $iCommId, $iPostRoomId );
 						
 						//-- Check for errors --//
 						if( $aTempFunctionResult3['Error']===false ) {

@@ -54,6 +54,7 @@ $aSensorList                = array();      //-- ARRAY:         Used to store th
 $aTempFunctionResult        = array();      //-- ARRAY:         Used to store the functions results before being parsed and converted to the correct format to be returned. --//
 $iPostLinkId                = 0;            //-- INTEGER:       --//
 $iPostThingId               = 0;            //-- INTEGER:       --//
+$iPostRoomId                = 0;            //-- INTEGER:       --//
 $aTempFunctionResult1       = array();      //-- ARRAY:         --//
 $aTempFunctionResult2       = array();      //-- ARRAY:         --//
 $aTempFunctionResult3       = array();      //-- ARRAY:         --//
@@ -63,6 +64,15 @@ $iLinkPermWrite             = 0;            //-- INTEGER:       --//
 $aCommInfo                  = array();      //-- ARRAY:         --//
 $sPostStreamAuth            = "";           //-- STRING:        Used to hold the Stream Authentication in a JSON string if the "Stream Url" and the "Thumbnail Url" require it. --//
 $aPostStreamAuth            = array();      //-- ARRAY:         Used to Stream Authentication after it has been converted into an array. --//
+
+$iPremiseId                 = 0;            //-- INTEGER:       --//
+$aHubData                   = array();      //-- ARRAY:         --//
+$aRoomValidate              = array();      //-- ARRAY:         --//
+$aRoomInfo                  = array();      //-- ARRAY:         --//
+$aTempFunctionResult1       = array();      //-- ARRAY:         --//
+
+
+
 
 //------------------------------------------------------------//
 //-- 1.3 - Import Required Libraries                        --//
@@ -90,6 +100,7 @@ if($bError===false) {
 		array( "Name"=>'HubId',                     "DataType"=>'INT' ),
 		array( "Name"=>'LinkId',                    "DataType"=>'INT' ),
 		array( "Name"=>'ThingId',                   "DataType"=>'INT' ),
+		array( "Name"=>'RoomId',                    "DataType"=>'INT' ),
 		array( "Name"=>'ProfileName',               "DataType"=>'STR' ),
 		array( "Name"=>'StreamProfile',             "DataType"=>'STR' ),
 		array( "Name"=>'ThumbnailProfile',          "DataType"=>'STR' ),
@@ -157,7 +168,7 @@ if($bError===false) {
 					$sErrMesg .= "Non numeric \"DeviceNetworkAddress\" parameter! \n";
 					$sErrMesg .= "Please use a valid \"DeviceNetworkAddress\" parameter\n";
 					$sErrMesg .= "eg. \n \"10.1.1.42\", \"10.1.1.24\", \"10.1.1.30\" \n\n";
-				} 
+				}
 			} catch( Exception $e0104 ) {
 				$bError = true;
 				$sErrMesg .= "Error Code:'0104' \n";
@@ -543,6 +554,7 @@ if($bError===false) {
 		}
 	}
 	
+
 	//----------------------------------------------------//
 	//-- 2.2.?.? - Retrieve Stream Authentication       --//
 	//----------------------------------------------------//
@@ -575,6 +587,30 @@ if($bError===false) {
 				$sErrMesg .= "Problem with the \"StreamAuth\" parameter!\n";
 				$sErrMesg .= "Please use a valid JSON \"StreamAuth\" parameter.\n";
 				$sErrMesg .= "eg. \n { \"Username\":\"Owner\", \"Password\":\"*******\" } \n\n";
+			}
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 2.2.?.? - Retrieve Room Id                     --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		if( $sPostMode==="AddNewOnvifServer" ) {
+			try {
+				//-- Retrieve the "RoomId" --//
+				$iPostRoomId = $aHTTPData["RoomId"];
+				
+				if( $iPostRoomId===false || !($iPostRoomId>=1) ) {
+					//-- Use default if none is specified --//
+					$iPostRoomId = -1;
+				}
+				
+			} catch( Exception $e0136 ) {
+				$bError = true;
+				$sErrMesg .= "Error Code:'0136' \n";
+				$sErrMesg .= "Incorrect \"RoomId\" parameter!\n";
+				$sErrMesg .= "Please use a valid \"RoomId\" parameter\n";
+				$sErrMesg .= "eg. \n \"1\", \"2\" or \"3\" \n\n";
 			}
 		}
 	}
@@ -612,58 +648,85 @@ if( $bError===false ) {
 			//-- Lookup the "API Comm" Type to be used to be compared --//
 			$iAPICommTypeId = LookupFunctionConstant("APICommTypeId");
 			
-			//--------------------------------------------------------------------//
-			//-- 4.2.3 - Lookup if the User has Write premise permission        --//
-			//--------------------------------------------------------------------//
-			if( $bError===false ) {
-				$aHubData = HubRetrieveInfoAndPermission( $iPostHubId );
+			
+			
+			//----------------------------------------------------------------//
+			//-- STEP 1 - Lookup details for the Hub                        --//
+			//----------------------------------------------------------------//
+			$aHubData = HubRetrieveInfoAndPermission( $iPostHubId );
+			
+			if( $aHubData['Error']===true ) {
+				$bError = true;
+				$iErrCode  = 1202;
+				$sErrMesg .= "Error Code:'1202' \n";
+				$sErrMesg .= "Problem looking up the data for the selected Hub\n";
+				$sErrMesg .= $aHubData['ErrMesg'];
 				
-				if( $aHubData['Error']===false) {
-					//-- Store the Write Permission --//
-					$iWritePermission = $aHubData['Data']['PermWrite'];
-						
-					if( $iWritePermission===0 ) {
-						$bError    = true;
-						$iErrCode  = 1203;
-						$sErrMesg .= "Error Code:'1203' \n";
-						$sErrMesg .= "Permission issue detected!\n";
-						$sErrMesg .= "The User doesn't appear to have the \"Write\" permission for that Hub.\n";
-					}
+			} else {
+				//-- Extract the Premise Id --//
+				$iPremiseId = $aHubData['Data']['PremiseId'];
+				
+				//----------------------------------------------------------------//
+				//-- STEP 2 - Validate the Room with desired Hub                --//
+				//----------------------------------------------------------------//
+				$aRoomValidate = ValidateRoomAccess( $iPostRoomId, $iPremiseId );
+				
+				if( $aRoomValidate['Error']===true ) {
+					$bError    = true;
+					$sErrMesg .= "Error Code:'1203' \n";
+					$sErrMesg .= $aRoomValidate['ErrMesg'];
 					
 				} else {
-					$bError    = true;
-					$iErrCode  = 1204;
-					$sErrMesg .= "Error Code:'1204' \n";
-					$sErrMesg .= "Problem looking up the data for the selected Hub\n";
-					$sErrMesg .= $aHubData['ErrMesg'];
+					//----------------------------------------------------------------//
+					//-- STEP 3 - Lookup Room details                               --//
+					//----------------------------------------------------------------//
+					$aRoomInfo = GetRoomInfoFromRoomId( $iPostRoomId );
+					
+					if( $aRoomInfo['Error']===true ) {
+						$bError    = true;
+						$sErrMesg .= "Error Code:'1204' \n";
+						$sErrMesg .= "Problem looking up Room! \n";
+						$sErrMesg .= $aRoomInfo['ErrMesg'];
+						
+					} else {
+						//----------------------------------------------------------------//
+						//-- STEP 4 - Check if a "PHP API" Comm is setup on the Hub     --//
+						//----------------------------------------------------------------//
+						$aTempFunctionResult1 = GetCommsFromHubId( $iPostHubId );
+						
+						if( $aTempFunctionResult1['Error']===false ) {
+							//-- FOREACH Comm found --//
+							foreach( $aTempFunctionResult1['Data'] as $aComm ) {
+								//-- If no errors and no matches found --//
+								if( $bError===false && $bFound===false ) {
+									//-- Perform the check to see if CommType matches --//
+									if( $aComm['CommTypeId']===$iAPICommTypeId ) {
+										//-- Match found --//
+										$bFound  = true;
+										$iCommId = $aComm['CommId'];
+									}
+								}
+							} //-- ENDFOREACH Comm --//
+						} else {
+							//-- ELSE No Comms are found --//
+							$bFound = false;
+							
+							//------------------------------------------------------------//
+							//-- If no Comm is setup then check Hub Write Permission    --//
+							//------------------------------------------------------------//
+							if( $aHubData['Data']['PermWrite']===0 ) {
+								$bError = true;
+								$iErrCode  = 1205;
+								$sErrMesg .= "Error Code:'1205' \n";
+								$sErrMesg .= "Permission issue detected!\n";
+								$sErrMesg .= "The User doesn't appear to have the \"Write\" permission for that Hub\n";
+							}
+						}
+					}
 				}
 			}
 			
-			//--------------------------------------------------------------------//
-			//-- 4.2.4 - Check if a "PHP API" Comm is setup on the Hub          --//
-			//--------------------------------------------------------------------//
-			if( $bError===false ) {
-				$aTempFunctionResult1 = GetCommsFromHubId( $iPostHubId );
-				
-				if( $aTempFunctionResult1['Error']===false ) {
-					//-- FOREACH Comm found --//
-					foreach( $aTempFunctionResult1['Data'] as $aComm ) {
-						//-- If no errors and no matches found --//
-						if( $bError===false && $bFound===false ) {
-							//-- Perform the check to see if CommType matches --//
-							if( $aComm['CommTypeId']===$iAPICommTypeId ) {
-								//-- Match found --//
-								$bFound  = true;
-								$iCommId = $aComm['CommId'];
-							}
-						}
-					} //-- ENDFOREACH Comm --//
-				} else {
-					//-- ELSE No Comms are found --//
-					$bFound = false;
-					
-				}
-			}
+			
 			
 			//--------------------------------------------------------------------//
 			//-- 4.2.5 - Check if the device Supports Onvif                     --//
@@ -1125,7 +1188,7 @@ if( $bError===false ) {
 					//--------------------------------------------------------------------//
 					//-- Add the Bridge to the database                                 --//
 					//--------------------------------------------------------------------//
-					$aResult = $oPHPOnvifClient->AddThisBridgeToTheDatabase( $iCommId );
+					$aResult = $oPHPOnvifClient->AddThisBridgeToTheDatabase( $iCommId, $iPostRoomId );
 					
 					if( $aResult['Error']===true ) {
 						$bError = true;

@@ -149,7 +149,7 @@ class PHPOnvif {
 					if( $aChild2 ) {
 						$bNoAuth = true;
 						
-					} 
+					}
 				}
 				
 				if( $bNoAuth ) {
@@ -1688,7 +1688,7 @@ class PHPOnvif {
 	//================================================================================================//
 	//== ADD THE CURRENT BRIDGE TO DATABASE                                                         ==//
 	//================================================================================================//
-	public function AddThisBridgeToTheDatabase( $iCommId ) {
+	public function AddThisBridgeToTheDatabase( $iCommId, $iRoomId=-1 ) {
 		//----------------------------------------------------------------//
 		//-- 1.0 - INITIALISE                                           --//
 		//----------------------------------------------------------------//
@@ -1816,6 +1816,10 @@ class PHPOnvif {
 				"Things"                => array()
 			);
 			
+			
+			if( $iRoomId>=1 ) {
+				$aLinkData['RoomId'] = $iRoomId;
+			}
 			//------------------------//
 			//-- DEBUGGING          --//
 			//echo "\n";
@@ -1857,7 +1861,7 @@ class PHPOnvif {
 	
 	
 	//================================================================================================//
-	//== ADD THE CURRENT BRIDGE TO DATABASE                                                         ==//
+	//== ADD THE STREAMS AS A DEVICE IN THE DATABASE                                                ==//
 	//================================================================================================//
 	public function AddStreamsAsThingInDatabase( $iLinkId, $sStreamProfileName, $sThumbnailProfileName, $sOnvifCameraName, $aPostStreamAuth ) {
 		//----------------------------------------------------------------//
@@ -2457,15 +2461,12 @@ class PHPOnvif {
 			}
 		}
 		
-		
 		//----------------------------------------------------------------//
 		//-- 4.0 -                                                      --//
 		//----------------------------------------------------------------//
 		if( $sEnvelopeType==="SecurityUsernameToken" ) {
 			$aTokenDetails   = $this->CreateToken();
 		}
-		
-		
 		
 		//----------------------------------------------------------------//
 		//-- 5.0 - ADD THE HEADER AND FOOTER                            --//
@@ -2474,8 +2475,7 @@ class PHPOnvif {
 		$sEnvelope     .= $sEnvelopeContent;
 		$sEnvelope     .= $this->CreateEndOfEnvelope( $sEnvelopeType );
 		
-		
-		
+
 		//----------------------------------------------------------------//
 		//-- 6.0 - EXECUTE AND RETURN                                   --//
 		//----------------------------------------------------------------//

@@ -59,18 +59,18 @@ class PHPPhilipsHue {
 		//----------------------------------------------------//
 		if( $aHueBridgeConfig["Error"]===false ) {
 			//-- Store the User Config --//
-			$this->aHueBridgeConfig	= $aHueBridgeConfig['Data'];
+			$this->aHueBridgeConfig = $aHueBridgeConfig['Data'];
 			
 			//-- Refresh the Lights List --//
-			$aLightsLookup		= $this->RefreshLightsList();
+			$aLightsLookup = $this->RefreshLightsList();
 				
 			if( $aLightsLookup['Error']===false ) {
 				//-- Flag that the initial connection was made --//
-				$this->bInitialised		= true;
+				$this->bInitialised = true;
 				
 			} else {
 				//--------------------//
-				//-- ERROR			--//
+				//-- ERROR          --//
 				//--------------------//
 				$this->aErrorMessges[] = "InitialConnection: Couldn't extract the Light List!";
 			}
@@ -78,7 +78,7 @@ class PHPPhilipsHue {
 			
 		} else {
 			//--------------------//
-			//-- ERROR			--//
+			//-- ERROR          --//
 			//--------------------//
 			$this->aErrorMessges[] = "InitialConnection: Connection Failed!";
 		}
@@ -631,7 +631,7 @@ class PHPPhilipsHue {
 	//================================================================================================//
 	//== ADD THE CURRENT BRIDGE TO DATABASE                                                         ==//
 	//================================================================================================//
-	public function AddThisBridgeToTheDatabase( $iCommId ) {
+	public function AddThisBridgeToTheDatabase( $iCommId, $iRoomId=-1 ) {
 		//----------------------------------------------------------------//
 		//-- 1.0 - INITIALISE                                           --//
 		//----------------------------------------------------------------//
@@ -685,6 +685,10 @@ class PHPPhilipsHue {
 				"ConnPassword"          => "",
 				"Things"                => array()
 			);
+			
+			if( $iRoomId>=1 ) {
+				$aLinkData['RoomId'] = $iRoomId;
+			}
 		}
 		
 		//----------------------------------------------------------------//
