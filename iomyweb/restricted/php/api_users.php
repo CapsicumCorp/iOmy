@@ -799,9 +799,9 @@ if( $bError===false ) {
 							$sErrMesg .= $aResult["ErrMesg"];
 							
 						} else {
-							//--------------------------------------------//
-							//-- Prepare variables for the Users Log    --//
-							//--------------------------------------------//
+							//------------------------------------------------//
+							//-- Prepare variables for the Users Log        --//
+							//------------------------------------------------//
 							//-- TODO: Fix up the log --//
 							//$iUserLogId		= 13;
 							//$iUserId			= $aUserInfo["Data"]["UserId"];
@@ -861,6 +861,13 @@ if( $bError===false ) {
 							$sErrMesg .= $aResult["ErrMesg"];
 							
 						} else {
+							//------------------------------------------------//
+							//-- Get the APICore to Refresh Session Data    --//
+							//------------------------------------------------//
+							$oRestrictedApiCore->RefreshSessionData();
+							
+							
+							
 							//--------------------------------------------//
 							//-- Prepare variables for the Users Log    --//
 							//--------------------------------------------//
@@ -1097,7 +1104,6 @@ if( $bError===false ) {
 						)
 					);
 				}
-				
 			} catch( Exception $e4400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
