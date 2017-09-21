@@ -352,7 +352,7 @@ if( $bError===false ) {
 							"CurrentStatus"     => array(
 								"Motion"            => $aCurrentStatus['Data']['CurrentMotion'],
 								"Tamper"            => $aCurrentStatus['Data']['Tamper'],
-								"LowBatter"         => $aCurrentStatus['Data']['LowBattery'],
+								"LowBattery"        => $aCurrentStatus['Data']['LowBattery'],
 								"UTS"               => $aCurrentStatus['Data']['UTS'],
 							)
 						)
@@ -371,7 +371,7 @@ if( $bError===false ) {
 								"CurrentStatus"     => array(
 									"Motion"            => $aCurrentStatus['Data']['CurrentMotion'],
 									"Tamper"            => $aCurrentStatus['Data']['Tamper'],
-									"LowBatter"         => $aCurrentStatus['Data']['LowBattery'],
+									"LowBattery"        => $aCurrentStatus['Data']['LowBattery'],
 									"UTS"               => $aCurrentStatus['Data']['UTS'],
 								)
 							)
