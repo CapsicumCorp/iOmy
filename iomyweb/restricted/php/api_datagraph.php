@@ -221,18 +221,24 @@ if($bError===false) {
 	//-- 2.2.5 - Retrieve Desired "Points"              --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
+		//-- NOTE: Possibly make this part of the "Data" array HTTP Parameter in the future. --//
 		try {
 			if( $sPostMode==="GraphLine" ) {
-				//-- Retrieve the "Points" --//
-				$iPostPoints = $aHTTPData["Points"];
-				
-				if( $iPostPoints===false ) {
-					$bError    = true;
-					$iErrCode  = 109;
-					$sErrMesg .= "Error Code:'0109' \n";
-					$sErrMesg .= "Non numeric \"Points\" parameter! \n";
-					$sErrMesg .= "Please use a valid \"Points\" parameter.\n";
-					$sErrMesg .= "eg. \n 1, 2, 3 \n\n";
+				//-- Check the "Data Type" --//
+				if( isset( $aPostData['Type'] ) ) {
+					if( $aPostData['Type']==="NormalAvg" ) {
+						//-- Retrieve the "Points" --//
+						$iPostPoints = $aHTTPData["Points"];
+						
+						if( $iPostPoints===false ) {
+							$bError    = true;
+							$iErrCode  = 109;
+							$sErrMesg .= "Error Code:'0109' \n";
+							$sErrMesg .= "Non numeric \"Points\" parameter! \n";
+							$sErrMesg .= "Please use a valid \"Points\" parameter.\n";
+							$sErrMesg .= "eg. \n 1, 2, 3 \n\n";
+						}
+					}
 				}
 			}
 		} catch( Exception $e0110 ) {
@@ -245,9 +251,6 @@ if($bError===false) {
 		}
 	}
 }
-
-
-
 
 
 //====================================================================//
@@ -286,6 +289,11 @@ if( $bError===false ) {
 									$bUsesIO = true;
 									$iIOId   = $aPostData['IOId'];
 									
+								} else if( $sPostMode==="GraphLine" && $sDataType==="Normal" ) {
+									//-- Extract the IO Id and flag that the IO is used --//
+									$bUsesIO = true;
+									$iIOId   = $aPostData['IOId'];
+									
 								} else if( $sPostMode==="6HourPiePreviousDay" && $sDataType==="Normal" ) {
 									//-- Extract the IO Id and flag that the IO is used --//
 									$bUsesIO = true;
@@ -308,7 +316,6 @@ if( $bError===false ) {
 								$sErrMesg .= "Invalid or missing \"Type\" in the \"Data\" parameter! \n";
 								$sErrMesg .= "";
 							}
-							
 						} //-- ELSE the mode doesn't need anything but the type --//
 						
 					} else {
@@ -346,7 +353,7 @@ if( $bError===false ) {
 				if( $bUsesIO===true ) {
 					//-- Call the function that checks if the user has access to the IO --//
 					$aTempIOInfo = GetIOInfo($iIOId);
-						
+					
 					//-- IF no errors have occurred --//
 					if( $aTempIOInfo["Error"]===false ) {
 						$aIOInfo    = $aTempIOInfo["Data"];
@@ -424,7 +431,7 @@ if( $bError===false ) {
 		if( $bError===false ) {
 			try {
 				if( $sPostMode==="GraphLine" ) {
-					//-- "IO Line" Sample rate checks --//
+					//-- "IO Avg Agregation Line" Sample rate checks --//
 					if( $sDataType==="NormalAvg" ) {
 						//-- Make sure that the Sample Rate of the IO indicates that it is suitable --//
 						if( $iIOSampleRate>=1 && $iIOSampleRateMax>=1 ) {
@@ -471,10 +478,21 @@ if( $bError===false ) {
 		//================================================================//
 		if( $sPostMode==="GraphLine" ) {
 			try {
+				//--------------------------------------------------------//
+				//-- IF "IO Avg Aggregation Line" Graph                 --//
+				//--------------------------------------------------------//
 				if( $sDataType==="NormalAvg" ) {
 					//-- Fetch the Line Data --//
 					$aResult = GetGraphLineIOAvg( $iIOId, $iIODataType, $iPostStartUTS, $iPostEndUTS, $iLineGraphDiff );
+				
+				//--------------------------------------------------------//
+				//-- ELSEIF "IO Line" Graph                             --//
+				//--------------------------------------------------------//
+				} else if( $sDataType==="Normal" ) {
+					//-- Fetch the Line Data --//
+					$aResult = GetGraphLineIO( $iIOId, $iIODataType, $iPostStartUTS, $iPostEndUTS );
 				}
+				
 			} catch( Exception $e1400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;

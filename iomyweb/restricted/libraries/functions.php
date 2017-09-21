@@ -160,6 +160,15 @@ function LookupFunctionConstant( $sValue ) {
 		case "LightBrightnessRSTypeId":
 			return 3903;
 			
+		case "OnvifStreamProfileRSTypeId":
+			return 3970;
+			
+		case "OnvifStreamUrlRSTypeId":
+			return 3971;
+			
+		case "OnvifThumbnailProfileRSTypeId":
+			return 3972;
+			
 		case "OnvifThumbnailUrlRSTypeId":
 			return 3973;
 			
@@ -1822,7 +1831,6 @@ function ChangePremiseInfo( $aPremiseInfo, $sPostInfoOccupants, $sPostInfoBedroo
 //========================================================================================================================//
 //== #6.0# - Rooms Functions																							==//
 //========================================================================================================================//
-
 function GetRoomInfoFromRoomId( $iRoomId ) {
 	//------------------------------------------------------------//
 	//-- 1.0 - Initialise                                       --//
@@ -1840,7 +1848,7 @@ function GetRoomInfoFromRoomId( $iRoomId ) {
 			if( $aResult["ErrMesg"]==="GetRoomInfoFromId: No Rows Found! Code:1" ) {
 				$bError = true;
 				$sErrMesg .= "Room not found! \nRoom either doesn't exist or you do not have permission to access it!\n";
-
+				
 			} else {
 				$bError = true;
 				$sErrMesg .= "Error occurred when attempting to lookup Room Info! \n";
@@ -1888,7 +1896,7 @@ function ChangeRoomInfo( $iRoomId, $sName, $iFloor, $sDesc, $iRoomsTypeId ) {
 	$sErrMesg		= "";
 	$aResult		= array();
 	
-			
+	
 	//------------------------------------------------------------//
 	//-- 2.0 - Begin											--//
 	//------------------------------------------------------------//
@@ -3521,7 +3529,6 @@ function GetIOSpecialTotaledEnumValue( $iIODataType, $iIOId, $iStartStamp, $iEnd
 	} else {
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
-	
 }
 
 
@@ -3546,6 +3553,21 @@ function GetGraphLineIOAvg( $sIOId, $iIODataType, $sPostStartUTS, $sPostEndUTS, 
 }
 
 
+function GetGraphLineIO( $sIOId, $iIODataType, $sPostStartUTS, $sPostEndUTS ) {
+	
+	//-- Ensure that certain parameters are integers --//
+	$iIOId          = intval( $sIOId, 10 );
+	$iStartUTS      = intval( $sPostStartUTS, 10 );
+	$iEndUTS        = intval( $sPostEndUTS, 10 );
+	
+	//-- Convert Datatype to name --//
+	$aConvertedDataType = ConvertDataTypeToName( $iIODataType );
+	
+	//-- Retrieve the IO Aggregation Data --//
+	$aResult = dbGetGraphLineIO( $aConvertedDataType["Value"], $iIOId, $iStartUTS, $iEndUTS );
+	//-- Return the results --//
+	return $aResult;
+}
 
 
 
