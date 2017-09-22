@@ -2674,6 +2674,49 @@ function LinkUpdateConnectionInfo( $iConnId, $iConnProtocolId, $iConnFrequencyId
 }
 
 
+function LinkUpdateConnectionAddress( $iConnId, $sConnAddress ) {
+	//------------------------------------------------//
+	//-- 1.0 - Initialise                           --//
+	//------------------------------------------------//
+	$bError         = false;            //-- BOOLEAN:       Used to indicate if at least one error has been caught.     --//
+	$sErrMesg       = "";               //-- STRING:        Stores the error message when an error is caught.           --//
+	$aResult        = array();          //-- ARRAY:         Stores the result of this function if no errors occur.      --//
+	
+	
+	//------------------------------------------------//
+	//-- 2.0 - Main                                 --//
+	//------------------------------------------------//
+	try {
+		$aResult = dbUpdateLinkConnectionAddress( $iConnId, $sConnAddress );
+		
+		if( $aResult["Error"]===true ) {
+			$bError = true;
+			$sErrMesg .= "Error occurred when attempting to update the Link Connection info! \n";
+			$sErrMesg .= $aResult["ErrMesg"];
+		}
+		
+	} catch( Exception $e1 ) {
+		$bError = true;
+		$sErrMesg .= "Critical Error occurred when attempting to update the Link Connection info! \n";
+		$sErrMesg .= $e1->getMessage();
+	}
+	
+	
+	//------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message  --//
+	//------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+		
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+		
+	}
+}
+
+
 function AddNewLinkConnectionInfo( $iConnProtocolId, $iConnFrequencyId, $iConnCryptTypeId, $sConnAddress, $iConnPort, $sConnName, $sUsername, $sPassword, $bSQLTransaction=false ) {
 	//------------------------------------------------//
 	//-- 1.0 - Initialise                           --//

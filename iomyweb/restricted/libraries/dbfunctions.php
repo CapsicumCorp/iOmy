@@ -5391,6 +5391,80 @@ function dbUpdateLinkConnectionInfo( $iConnId, $iConnProtocolId, $iConnFrequency
 	}
 }
 
+function dbUpdateLinkConnectionAddress( $iConnId, $sConnAddress ) {
+	//------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                       --//
+	//--    This function is used update the LINKCONN_ADDRESS entry         --//
+	//------------------------------------------------------------------------//
+	
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$aResult            = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught --//
+	$sSchema            = "";           //-- STRING:    Used to store the name of the schema that needs updating.    --//
+	$aInputVals         = array();      //-- ARRAY:     Used to store the SQL Input values so they can be bound to the query to help prevent injection --//
+	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			//-- Retrieve the Schema name --//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "UPDATE `".$sSchema."`.`LINKCONN` ";
+			$sSQL .= "SET ";
+			$sSQL .= "    `LINKCONN_ADDRESS`        = :Address ";
+			$sSQL .= "WHERE `LINKCONN_PK`           = :ConnId ";
+			
+			$aInputVals = array(
+				array( "Name"=>"Address",           "type"=>"STR",      "value"=>$sConnAddress          ),
+				array( "Name"=>"ConnId",            "type"=>"INT",      "value"=>$iConnId               )
+			);
+			
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true ) {
+				$bError    = true;
+				$sErrMesg .= $aResult["ErrMesg"];
+			}
+		} catch( Exception $e3 ) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return array( "Error"=>$aResult["Error"], "Data"=>array( "Result"=>"Updated succesfully") );
+		
+	} else {
+		//var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
+		return array( "Error"=>true, "ErrMesg"=>"LinkConnUpdateAddress: ".$sErrMesg );
+	}
+}
+
 
 function dbCheckIfLinkInfoAlreadyExists( $sLinkInfoName, $sLinkInfoManufacturer, $sLinkInfoManufacturerUrl ) {
 	//----------------------------------------------------//

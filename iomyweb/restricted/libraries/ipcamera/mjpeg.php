@@ -1102,8 +1102,12 @@ class IPCamera {
 		$iUTS                       = time();       //-- INTEGER:       Holds the Current Unix Timestamp.  --//
 		$aIOList                    = array();      //-- ARRAY:         Holds the IOs that this Thing has. --//
 		$aThingInfo                 = array();      //-- ARRAY:         --//
+		$aLinkInfo                  = array();      //-- ARRAY:         --//
+		$aLinkAddressResult         = array();      //-- ARRAY:         --//
 		$aInsertErrMesgs            = array();      //-- ARRAY:         --//
 		
+		$iLinkId                    = 0;            //-- INTEGER:       --//
+		$iLinkConnId                = 0;            //-- INTEGER        --//
 		$sUsername                  = "";           //-- STRING:        --//
 		$sPassword                  = "";           //-- STRING:        --//
 		$sNetworkAddress            = "";           //-- STRING:        --//
@@ -1149,6 +1153,10 @@ class IPCamera {
 					$bError    = true;
 					$sErrMesg .= "Insufficient permissions!\n";
 					$sErrMesg .= "Your user doesn't appear to have the \"Write\" permission needed to perform this operation.\n";
+				} else {
+					//-- Extract the Link Info --//
+					$iLinkId = $aThingInfo['Data']['LinkId'];
+					
 				}
 			} else {
 				//-- ERROR: Failed to lookup the Thing Info --//
@@ -1181,14 +1189,48 @@ class IPCamera {
 		}
 		
 		//------------------------------------------------------------------------------//
-		//-- 5.0 -                                                                    --//
+		//-- 5.0 - UPDATE THE LINK NETWORK ADDRESS                                    --//
+		//------------------------------------------------------------------------------//
+		if( $bError===false ) {
+			//--------------------------------------------//
+			//-- Lookup the Link Info                   --//
+			//--------------------------------------------//
+			$aLinkInfo = GetLinkInfo( $iLinkId );
+			
+			if( $aLinkInfo['Error']===false ) {
+				$iLinkConnId = $aLinkInfo['Data']['LinkConnId'];
+				
+				//--------------------------------------------//
+				//-- Update the Link Conn Address           --//
+				//--------------------------------------------//
+				$aLinkAddressResult = LinkUpdateConnectionAddress( $iLinkConnId, $sNetworkAddress );
+				
+				
+				if( $aLinkAddressResult['Error']===true ) {
+					//-- Error --//
+					$bError    = true;
+					$sErrMesg .= "Error when updating the Link Connection Address!\n";
+					$sErrMesg .= $aLinkAddressResult['ErrMesg'];
+				}
+				
+			} else {
+				//-- Error --//
+				$bError    = true;
+				$sErrMesg .= "Error when looking up the Link Info\n";
+				$sErrMesg .= $aLinkInfo['ErrMesg'];
+			}
+		}
+		
+		
+		//------------------------------------------------------------------------------//
+		//-- 6.0 - UPDATE THE IO VALUES                                               --//
 		//------------------------------------------------------------------------------//
 		if( $bError===false ) {
 			$aIOList = GetIOsFromThingId( $this->iThingId );
 			
 			//-- Check for errors --//
 			if( $aIOList['Error']===false ) {
-			
+				
 				//-----------------------------------------------------------------------------------------//
 				//-- Verify that the desired IO Ids are found and stored to their appropiate variables   --//
 				//-----------------------------------------------------------------------------------------//
@@ -1206,6 +1248,7 @@ class IPCamera {
 							$bNetworkAddressSubmit     = true;
 							$aResult['NetworkAddress'] = array( "Success"=>true );
 						}
+						
 						
 					//------------------------------------//
 					//-- Stream Network Port            --//
