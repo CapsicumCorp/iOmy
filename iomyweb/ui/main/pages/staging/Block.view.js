@@ -144,6 +144,20 @@ sap.ui.jsview("pages.staging.Block", {
 												})
 											]
 										}),
+										new sap.ui.layout.BlockLayoutCell ({
+											content : [
+												new sap.ui.layout.VerticalLayout ({
+													width: "100%",
+													content : [
+														new sap.m.Link ({
+															text : "Advanced",
+															emphasized : true,
+															href : ""
+														}).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
+													]
+												})
+											]
+										}),
 									]
 								}),						
 							],

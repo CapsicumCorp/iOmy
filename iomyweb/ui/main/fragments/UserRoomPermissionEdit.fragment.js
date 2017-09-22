@@ -13,22 +13,6 @@ sap.ui.jsfragment("fragments.UserRoomPermissionEdit", {
 		oFragContent = new sap.ui.layout.form.FormContainer({
 			formElements : [
 				new sap.ui.layout.form.FormElement({
-					label : "User",
-					fields: [
-						new sap.m.Select ({
-							enabled: false,
-							items : [
-								new sap.ui.core.Item ({
-									text:"Freshwater Office"
-								}),
-								new sap.ui.core.Item ({
-									text:"etc"
-								}),
-							]
-						})
-					]
-				}),
-				new sap.ui.layout.form.FormElement({
 					label : "Premise",
 					fields: [
 						new sap.m.Select ({

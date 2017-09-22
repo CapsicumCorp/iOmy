@@ -1,4 +1,4 @@
-sap.ui.jsfragment("fragments.UserPremisePermissionEdit", {
+sap.ui.jsfragment("fragments.DBAuth", {
 	
 	createContent: function( oController ) {
 		
@@ -7,52 +7,27 @@ sap.ui.jsfragment("fragments.UserPremisePermissionEdit", {
 		//--------------------------------------------//
 		var oFragContent = null;
 		
+		
 		//--------------------------------------------//
 		//-- 5.0 - CREATE UI                        --//
 		//--------------------------------------------//
 		oFragContent = new sap.ui.layout.form.FormContainer({
 			formElements : [
 				new sap.ui.layout.form.FormElement({
-					label : "Premise",
+					label : "Username",
 					fields: [
-						new sap.m.Select ({
-							items : [
-								new sap.ui.core.Item ({
-									text:"Freshwater Office"
-								}),
-								new sap.ui.core.Item ({
-									text:"etc"
-								}),
-							]
-						})
+						new sap.m.Input ({})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Permission Level",
+					label : "Password",
 					fields: [
-						new sap.m.Select ({
-							items : [
-								new sap.ui.core.Item ({
-									text:"No Access"
-								}),
-								new sap.ui.core.Item ({
-									text:"Read"
-								}),
-								new sap.ui.core.Item ({
-									text:"Read/Write"
-								}),
-								new sap.ui.core.Item ({
-									text:"Premise Management, Read/Write"
-								}),
-							]
-						})
+						new sap.m.Input ({})
 					]
-				}),
-				
+				})
 			]
-		});	
-				
-				
+		});
+							
 		//--------------------------------------------//
 		//-- 9.0 - RETURN FORM                      --//
 		//--------------------------------------------//

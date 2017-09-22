@@ -28,9 +28,7 @@ IomyRe.widgets = new sap.ui.base.Object();
 
 $.extend( IomyRe.widgets, {
 	
-	/** ***************************************
-	*	Top Navigation for iOmy               *
-	*************************************** **/
+	//-- Top Navigation for all pages --//
 	getToolPageHeader : function (oCurrentController) {
 	
 		//----------------------------------------------------//
@@ -134,9 +132,7 @@ $.extend( IomyRe.widgets, {
 	},
 	
 	
-	/** ***************************************
-	*	Side Navigation for iOmy              *
-	*************************************** **/
+	//-- Side Navigation for all pages --//
 	getToolPageSideContent : function (oCurrentController) {
 	
 		//----------------------------------------------------//
@@ -201,7 +197,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://family-protection",
 			text: "Users",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
+				IomyRe.common.NavigationChangePage( "pUserForm" , {} , false);
 			}
 		});
 		
@@ -250,6 +246,7 @@ $.extend( IomyRe.widgets, {
 		return oToolSideNav;
 	},
 	
+	//-- CSR Button for the "Day Light Mode" button --//
 	CSRbutton : function (oCurrentController) {
 		//----------------------------------------------------//
 		//-- 1.0 - Initialise                               --//
@@ -268,7 +265,7 @@ $.extend( IomyRe.widgets, {
 		});
 		
 		oDescLabel = new sap.m.Label ({
-			text: "White Light",
+			text: "Day Light Mode",
 			
 		});
 		
@@ -291,6 +288,8 @@ $.extend( IomyRe.widgets, {
 		
 	},
 	
+	
+	//-- Scroll Container for the "RGB" colorpicker --//
 	RGBContainer : function (oCurrentController) {
 		var oScrollContainer;
 		var oView = oCurrentController.getView();  //-- Defines oView based on the Controller that's being passed --//
@@ -309,6 +308,7 @@ $.extend( IomyRe.widgets, {
 		return oScrollContainer;
 	},
 	
+	//-- Scroll Container for the "Mjpeg" image --//
 	MJPEGCont : function (oCurrentController, sImgSRC) {
 		var oScrollContainer;
 		var oView = oCurrentController.getView();  //-- Defines oView based on the Controller that's being passed --//
@@ -329,6 +329,7 @@ $.extend( IomyRe.widgets, {
 		return oScrollContainer;
 	},
 	
+	//-- Provides the "Page" with a Title --//
 	DeviceToolbar : function (oCurrentController, sDevName) {
 		//----------------------------------------------------//
 		//-- 1.0 - Initialise                               --//
@@ -360,6 +361,69 @@ $.extend( IomyRe.widgets, {
 		//----------------------------------------------------//
 		
 		return oToolbar;
-	}
+	},
+	
+	UserForm : function (oCurrentController, sPageSectionID, sSubSectionID, sFormID, bEditable, sSectionTitle) {
+		//----------------------------------------------------//
+		//-- 1.0 - Initialise                               --//
+		//----------------------------------------------------//	
+		var oView = oCurrentController.getView();  //-- Defines oView based on the Controller that's being passed --//
+		var oPageSection;
+		var oSubSection;
+		
+		//----------------------------------------------------//
+		//-- 2.0 - Create the Content                       --//
+		//----------------------------------------------------//
+		oSubSection = new sap.uxap.ObjectPageSubSection(oView.createId(sSubSectionID), {
+			blocks : [
+				new sap.ui.layout.form.Form( oView.createId(sFormID),{
+					editable: bEditable,
+					layout : new sap.ui.layout.form.ResponsiveGridLayout ({
+						labelSpanXL: 3,
+						labelSpanL: 3,
+						labelSpanM: 3,
+						labelSpanS: 12,
+						adjustLabelSpan: false,
+						emptySpanXL: 3,
+						emptySpanL: 2,
+						emptySpanM: 0,
+						emptySpanS: 0,
+						columnsXL: 1,
+						columnsL: 1,
+						columnsM: 1,
+						columnsS: 1,
+						singleContainerFullSize: false
+					}),
+					toolbar : new sap.m.Toolbar({
+						content : [
+							new sap.m.Title ({
+								text: sSectionTitle
+							})
+						]
+					}).addStyleClass("MarBottom1d0Rem"),
+					formContainers : [
+					
+					]
+				})
+			]
+		});
+		
+		//----------------------------------------------------//
+		//-- 3.0 - Fill the Page Section                    --//
+		//----------------------------------------------------//
+		oPageSection = new sap.uxap.ObjectPageSection(oView.createId(sPageSectionID), {
+			visible: false,
+			showTitle: false,
+			title: sSectionTitle,
+			subSections : [
+				oSubSection
+			]
+		});
+		
+		//----------------------------------------------------//
+		//-- 4.0 - Return the Results                       --//
+		//----------------------------------------------------//
+		return oPageSection;
+	},
 	
 });

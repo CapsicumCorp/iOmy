@@ -110,6 +110,12 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.device.Mjpeg\" Page!\n"
 	},
+	{
+		"Id":			"pUserForm",
+		"Location":		"pages.staging.user.UserForm",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.user.UserForm\" Page!\n"
+	},
 
 ];
 

@@ -22,7 +22,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-sap.ui.jsview("pages.staging.user.UserSettings", {
+sap.ui.jsview("pages.staging.user.UserForm", {
 	
 	/*************************************************************************************************** 
 	** 1.0 - Controller Declaration
@@ -32,7 +32,7 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 	* @memberOf pages.staging.UserSettings
 	****************************************************************************************************/ 
 	getControllerName : function() {
-		return "pages.staging.user.UserSettings";
+		return "pages.staging.user.UserForm";
 	},
 
 	/*************************************************************************************************** 
@@ -54,145 +54,21 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 					isObjectIconAlwaysVisible: true,
 					enableLazyLoading: true,
 					showTitleinHeaderContent: true,
-					headerTitle : sap.uxap.ObjectPageHeader ({
-						objectTitle: "Freshwater1",
-						objectShape: sap.uxap.ObjectPageHeaderPictureShape.Circle,
-						objectSubtitle: "Owner / Administrator",
+					headerTitle : new sap.uxap.ObjectPageHeader ({
+						objectTitle: "Add New User",
 					}),
 					sections : [
-						new sap.uxap.ObjectPageSection(oView.createId("Info"), {
-							showTitle: false,
-							title: "Information",
-							subSections : [
-								new sap.uxap.ObjectPageSubSection(oView.createId("InfoBlock"), {
-									blocks : [
-										new sap.ui.layout.form.Form( oView.createId("InfoBlock_Form"),{
-											editable: false,
-											layout : new sap.ui.layout.form.ResponsiveGridLayout ({
-												labelSpanXL: 3,
-												labelSpanL: 3,
-												labelSpanM: 3,
-												labelSpanS: 12,
-												adjustLabelSpan: false,
-												emptySpanXL: 3,
-												emptySpanL: 2,
-												emptySpanM: 0,
-												emptySpanS: 0,
-												columnsXL: 1,
-												columnsL: 1,
-												columnsM: 1,
-												columnsS: 1,
-												singleContainerFullSize: false
-											}),
-											toolbar : new sap.m.Toolbar({
-												content : [
-													new sap.m.Title ({
-														text: "Information",
-													}),
-													new sap.m.ToolbarSpacer ({}),
-													new sap.m.Button ( oView.createId("InfoBlock_BtnEdit"), {
-														icon:    "sap-icon://edit",
-														type:    "Transparent",
-														press:   function() {
-															oController.ToggleButtonsAndView( oController, "EditInfo" );
-														}
-													}),
-													new sap.m.Button( oView.createId("InfoBlock_BtnSave"), {
-														icon:    "sap-icon://save",
-														visible: false,
-														press:   function( oEvent ) {
-															//oController.UpdateValues( oController );
-															oController.ToggleButtonsAndView( oController, "ShowInfo" );
-														}
-													}),
-													new sap.m.Button( oView.createId("InfoBlock_BtnCancel"), {
-														icon:    "sap-icon://cancel",
-														visible: false,
-														press:   function( oEvent ) {
-															//oController.RefreshModel( oController, {} );
-															oController.ToggleButtonsAndView( oController, "ShowInfo" );
-														}
-													})
-												]
-											}).addStyleClass("MarBottom1d0Rem"),
-											formContainers : [
-											
-											]
-										})
-									]
-								})
-							]
-						}),
-						new sap.uxap.ObjectPageSection(oView.createId("Address"), {
-							showTitle: false,
-							subSections : [
-								new sap.uxap.ObjectPageSubSection(oView.createId("AddrBlock"), {
-									title: "Address",
-									blocks : [ 
-										new sap.ui.layout.form.Form( oView.createId("AddrBlock_Form"),{
-											editable: false,
-											layout : new sap.ui.layout.form.ResponsiveGridLayout ({
-												labelSpanXL: 3,
-												labelSpanL: 3,
-												labelSpanM: 3,
-												labelSpanS: 12,
-												adjustLabelSpan: false,
-												emptySpanXL: 3,
-												emptySpanL: 2,
-												emptySpanM: 0,
-												emptySpanS: 0,
-												columnsXL: 1,
-												columnsL: 1,
-												columnsM: 1,
-												columnsS: 1,
-												singleContainerFullSize: false
-											}),
-											toolbar : new sap.m.Toolbar({
-												content : [
-													new sap.m.Title ({
-														text: "Address",
-													}),
-													new sap.m.ToolbarSpacer ({}),
-													new sap.m.Button ( oView.createId("AddrBlock_BtnEdit"), {
-														icon:    "sap-icon://edit",
-														type:    "Transparent",
-														press:   function() {
-															oController.ToggleButtonsAndView( oController, "EditAddress" );
-														}
-													}),
-													new sap.m.Button( oView.createId("AddrBlock_BtnSave"), {
-														icon:    "sap-icon://save",
-														visible: false,
-														press:   function( oEvent ) {
-															//oController.UpdateValues( oController );
-															oController.ToggleButtonsAndView( oController, "ShowAddress" );
-														}
-													}),
-													new sap.m.Button( oView.createId("AddrBlock_BtnCancel"), {
-														icon:    "sap-icon://cancel",
-														visible: false,
-														press:   function( oEvent ) {
-															//oController.RefreshModel( oController, {} );
-															oController.ToggleButtonsAndView( oController, "ShowAddress" );
-														}
-													})
-												]
-											}).addStyleClass("MarBottom1d0Rem"),
-											formContainers : [
-											
-											]
-										})
-									]										
-								})
-							]
-						}),
+						IomyRe.widgets.UserForm(oController, "Login", "LoginBlock", "LoginBlock_Form", true , "Login Details"),
+						IomyRe.widgets.UserForm(oController, "DBAuth", "DBAuthBlock", "DBAuthBlock_Form", true , "Database Authentication"),
+						IomyRe.widgets.UserForm(oController, "Info", "InfoBlock", "InfoBlock_Form", false , "Information"),
+						IomyRe.widgets.UserForm(oController, "Address", "AddrBlock", "AddrBlock_Form", false , "Address"),
 						new sap.uxap.ObjectPageSection(oView.createId("PremPermissions"), {
 							showTitle: false,
 							title: "Premise Permissions",
 							subSections : [
-								new sap.uxap.ObjectPageSubSection(oView.createId("PremPBlock"), {
+								new sap.uxap.ObjectPageSubSection(oView.createId("PremPermBlock"), {
 									blocks : [
-										new sap.ui.layout.form.Form( oView.createId("PremPBlock_Form"),{
+										new sap.ui.layout.form.Form( oView.createId("PremPermBlock_Form"),{
 											editable: false,
 											layout : new sap.ui.layout.form.ResponsiveGridLayout ({
 												labelSpanXL: 3,
@@ -216,14 +92,14 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 														text: "Premise Permissions",
 													}),
 													new sap.m.ToolbarSpacer ({}),
-													new sap.m.Button ( oView.createId("PremPBlock_BtnEdit"), {
+													new sap.m.Button ( oView.createId("PremPermBlock_BtnEdit"), {
 														icon:    "sap-icon://edit",
 														type:    "Transparent",
 														press:   function() {
 															oController.ToggleButtonsAndView( oController, "EditPremPermissions" );
 														}
 													}),
-													new sap.m.Button( oView.createId("PremPBlock_BtnSave"), {
+													new sap.m.Button( oView.createId("PremPermBlock_BtnSave"), {
 														icon:    "sap-icon://save",
 														visible: false,
 														press:   function( oEvent ) {
@@ -231,7 +107,7 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 															oController.ToggleButtonsAndView( oController, "ShowPremPermissions" );
 														}
 													}),
-													new sap.m.Button( oView.createId("PremPBlock_BtnCancel"), {
+													new sap.m.Button( oView.createId("PremPermBlock_BtnCancel"), {
 														icon:    "sap-icon://cancel",
 														visible: false,
 														press:   function( oEvent ) {
@@ -250,13 +126,13 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 								})
 							]
 						}),
-						new sap.uxap.ObjectPageSection(oView.createId("UserRoomPermissions"), {
+						new sap.uxap.ObjectPageSection(oView.createId("RoomPerm"), {
 							showTitle: false,
 							title: "Room Permissions",
 							subSections : [
-								new sap.uxap.ObjectPageSubSection(oView.createId("UserRoomPermissionsBlock"), {
+								new sap.uxap.ObjectPageSubSection(oView.createId("RoomPermBlock"), {
 									blocks : [
-										new sap.ui.layout.form.Form( oView.createId("UserRoomPermissionsBlock_Form"),{
+										new sap.ui.layout.form.Form( oView.createId("RoomPermBlock_Form"),{
 											editable: false,
 											layout : new sap.ui.layout.form.ResponsiveGridLayout ({
 												labelSpanXL: 3,
@@ -280,14 +156,14 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 														text: "Room Permissions",
 													}),
 													new sap.m.ToolbarSpacer ({}),
-													new sap.m.Button ( oView.createId("UserRoomPermissionsBlock_BtnEdit"), {
+													new sap.m.Button ( oView.createId("RoomPermBlock_BtnEdit"), {
 														icon:    "sap-icon://edit",
 														type:    "Transparent",
 														press:   function() {
 															oController.ToggleButtonsAndView( oController, "EditRoomPermissions" );
 														}
 													}),
-													new sap.m.Button( oView.createId("UserRoomPermissionsBlock_BtnSave"), {
+													new sap.m.Button( oView.createId("RoomPermBlock_BtnSave"), {
 														icon:    "sap-icon://save",
 														visible: false,
 														press:   function( oEvent ) {
@@ -295,7 +171,7 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 															oController.ToggleButtonsAndView( oController, "ShowRoomPermissions" );
 														}
 													}),
-													new sap.m.Button( oView.createId("UserRoomPermissionsBlock_BtnCancel"), {
+													new sap.m.Button( oView.createId("RoomPermBlock_BtnCancel"), {
 														icon:    "sap-icon://cancel",
 														visible: false,
 														press:   function( oEvent ) {
