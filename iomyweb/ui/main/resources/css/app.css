@@ -1,0 +1,162 @@
+/*
+Title: App Style Sheet
+Authors: 
+    Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
+    Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
+Description: 
+Copyright: Capsicum Corporation 2015, 2016, 2017
+*/
+
+/* ================================================================================== */
+/* ============================== Table of Contents ================================= */
+/* == #1.0# - Base Classes                                                         == */
+/* == #2.0# - Andrew Common Classes                                                == */
+/* == #3.0# - Common Css Classes                                                   == */
+/* ================================================================================== */
+
+/* ================================================================================== */
+/* == #1.0# Base Classes                                                           == */
+/* ================================================================================== */
+
+/* ================================================================================== */
+/* == #2.0# - Andrew Common Classes                                                == */
+/* ================================================================================== */
+.FloatLeft {
+	float: left;
+}
+
+.FloatRight {
+	float: right;
+}
+
+/* Clears Floating */
+/* NOTE: Needs to be applied to a dummy element below the floating elements	*/
+.FloatClear {
+	clear: both;
+}
+
+/* Div auto centers if the Div is smaller than its parent Div */
+/* NOTE: The child Div(the one that gets this as its class) should be the only child of the parent Div */
+.ElementCenter {
+	margin: auto;
+}
+
+.ElementChildCenter > *{
+	margin: auto;
+}
+
+/* Element is not visible and doesn't occupy space on the web browser */
+.ElementHidden {
+	display: none;
+}
+
+/* Element is not visible but still occupies space on the web browser */
+.ElementInvisible {
+	visibility: hidden;
+}
+
+.TextCenter {
+	text-align: center;
+}
+
+.TextLeft {
+	text-align: left;
+}
+
+.TextRight {
+	text-align: right;
+}	
+
+/* ================================================================================== */
+/* == #3.0# - Common Css Classes                                                   == */
+/* ================================================================================== */
+
+.LoginForm {
+    background-color: #8cc63e;
+	padding-top: 25px;
+	padding-bottom: 25px;
+	margin-top: 30px;
+}
+
+.sapMPanelContent {
+	padding: 0;
+}
+
+.sapMScrollContScroll>.DevicePage>.sapMListUl>.sapMLIB.sapMGHLI {
+	background: #f1f1f1;
+}
+
+.Pointer {
+	cursor: pointer;
+}
+
+/* Centers the top block (title) text */
+.BlockTitle > div > div.sapUiBlockCellContent > h2 {
+	text-align: center;
+}
+
+/* Removes most of the padding in the BlockTitle Cell */
+.BlockTitle > div > div.sapUiBlockCellContent {
+	padding: 0.5rem 0.75rem;
+}
+
+/* Overrides */
+.sapContrast.sapTntToolHeader.sapMTB, .sapContrast .sapTntToolHeader.sapMTB {
+    background-color: white;
+	border-bottom: 5px solid #8FC74A;
+	border-top: 0px solid grey;
+	border-left: 0px solid grey;
+	border-right: 0px solid grey;
+}
+
+.sapContrast.sapTntSideNavigationSeparator, .sapContrast .sapTntSideNavigationSeparator {
+    background-color: lightgrey;
+}
+
+.sapContrast :not(.sapMBtnDisabled) .sapMBtnTransparent>.sapMBtnIcon {
+    color: black;
+}
+
+.sapContrast.sapMBtnTransparent, .sapContrast .sapMBtnTransparent {
+    background-image: none;
+    background-color: transparent;
+    border-color: transparent;
+    color: black;
+}
+
+.sapContrast.sapMBtnInner, .sapContrast .sapMBtnInner {
+    text-shadow: none;
+}
+
+.sapContrast.sapTntSideNavigation, .sapContrast .sapTntSideNavigation {
+    background: white;
+    border-right: 5px solid lightgrey;
+}
+
+.sapContrast.sapTntNavLIGroup, .sapContrast .sapTntNavLIGroup {
+    border-bottom: 0px solid grey;
+}
+
+.sapContrast.sapTntNavLIItemSelected .sapTntNavLIItem:hover, .sapContrast .sapTntNavLIItemSelected .sapTntNavLIItem:hover {
+    background-color: lightgrey; 
+}
+
+.sapContrast.sapTntNavLIItem:not(.sapTntNavLIItemDisabled):hover, .sapContrast .sapTntNavLIItem:not(.sapTntNavLIItemDisabled):hover {
+    background-color: lightgrey;
+}
+
+.sapContrast.sapTntNavLIItemSelected .sapTntNavLIItem, .sapContrast .sapTntNavLIItemSelected .sapTntNavLIItem {
+    background-color: lightgrey;
+}
+
+.sapContrast.sapTntNavLIItem>.sapUiIcon, .sapContrast .sapTntNavLIItem>.sapUiIcon {
+    color: black;
+}
+
+.sapContrast.sapTntNavLIItem, .sapContrast .sapTntNavLIItem {
+    background-color: white;
+}
+
+.sapContrast.sapTntNavLIItem>.sapMText, .sapContrast .sapTntNavLIItem>.sapMText {
+    color: black;
+}

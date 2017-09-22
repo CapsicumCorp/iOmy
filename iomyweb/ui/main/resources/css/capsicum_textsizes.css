@@ -1,0 +1,235 @@
+/*
+Title: Text Sizes CSS Rules
+Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
+    Daniel Scott-Smith (Capsicum Corporation) <daniel@capsicumcorp.com>
+    Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+Description: A set of commonly used text sizes
+Copyright: Capsicum Corporation 2015, 2016, 2017
+
+This file is part of iOmy.
+
+iOmy is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+iOmy is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+	/************************/
+	/* REMS					*/
+	/************************/
+	.TextSize0d25 {
+		font-size:	0.25rem;
+	}
+
+	.TextSize0d33Rem {
+		font-size:	0.333rem;
+	}
+	
+	.TextSize0d5Rem {
+		font-size:	0.5rem;
+	}
+	
+	.TextSize0d75Rem {
+		font-size:	0.75rem;
+	}
+	
+	.TextSize0d8Rem {
+		font-size:	0.8rem;
+	}
+	
+	.TextSize1Rem {
+		font-size:	1rem;
+	}
+	
+	.TextSize1d25Rem {
+		font-size:	1.25rem;
+	}
+
+	.TextSize1d33Rem {
+		font-size:	1.333rem;
+	}
+	
+	.TextSize1d5Rem {
+		font-size:	1.5rem;
+	}
+	
+	.TextSize1d75Rem {
+		font-size:	1.75rem;
+	}
+	.TextSize2Rem {
+		font-size:	2rem;
+	}
+	.TextSize2d25Rem {
+		font-size:	1.25rem;
+	}
+
+	.TextSize2d33Rem {
+		font-size:	2.333rem;
+	}
+	
+	.TextSize2d5Rem {
+		font-size:	2.5rem;
+	}
+	
+	.TextSize2d75Rem {
+		font-size:	2.75rem;
+	}
+	
+	.TextSize3Rem {
+		font-size: 3rem;
+	}
+
+
+
+	/************************/
+	/* Special Sizes		*/
+	/************************/
+	
+	.TextSizeXXSmall {
+		font-size: xx-small;
+	}
+	
+	.TextSizeXSmall {
+		font-size: x-small;
+	}
+	
+	.TextSizeSmall {
+		font-size: small;
+	}
+	
+	.TextSizeMedium {
+		font-size: medium;
+	}
+	
+	.TextSizeLarge {
+		font-size: large;
+	}
+	
+	.TextSizeXLarge {
+		font-size: x-large;
+	}
+	
+	.TextSizeXXLarge {
+		font-size: xx-large;
+	}
+	
+	/************************/
+	/* Fixed Pixel Size		*/
+	/************************/
+	
+	.TextSize40px {
+		font-size: 40px;
+	}
+	
+	.TextSize38px {
+		font-size: 38px;
+	}
+	
+	.TextSize36px {
+		font-size: 36px;
+	}
+	
+	.TextSize34px {
+		font-size: 34px;
+	}
+	
+	.TextSize32px {
+		font-size: 32px;
+	}
+	
+	.TextSize30px {
+		font-size: 30px;
+	}
+
+	.TextSize28px {
+		font-size: 28px;
+	}
+	
+	.TextSize26px {
+		font-size: 26px;
+	}
+	
+	.TextSize24px {
+		font-size: 24px;
+	}
+	
+	.TextSize22px {
+		font-size: 22px;
+	}
+	
+	.TextSize20px {
+		font-size: 20px;
+	}
+	
+	.TextSize18px {
+		font-size: 18px;
+	}
+	
+	.TextSize16px {
+		font-size: 16px;
+	}
+	
+	.TextSize14px {
+		font-size: 14px;
+	}
+	
+	.TextSize13px {
+		font-size: 13px;
+	}
+	
+	.TextSize12px {
+		font-size: 12px;
+	}
+	
+	.TextSize11px {
+		font-size: 11px;
+	}
+	
+	.TextSize10px {
+		font-size: 10px;
+	}
+	
+	.TextSize9px {
+		font-size: 9px;
+	}
+	
+	.TextSize8px {
+		font-size: 8px;
+	}
+	
+	.TextSize7px {
+		font-size: 7px;
+	}
+	
+	.TextSize6px {
+		font-size: 6px;
+	}
+	
+	.TextSize5px {
+		font-size: 5px;
+	}
+	
+	.TextSize4px {
+		font-size: 4px;
+	}
+	
+	.TextSize3px {
+		font-size: 3px;
+	}
+	
+	.TextSize2px {
+		font-size: 2px;
+	}
+	
+	.TextSize1px {
+		font-size: 1px;
+	}
