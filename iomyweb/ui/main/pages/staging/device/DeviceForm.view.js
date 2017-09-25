@@ -108,6 +108,10 @@ sap.ui.jsview("pages.staging.device.DeviceForm", {
 																			key: "start"
 																		}),
 																		new sap.ui.core.Item ({
+																			text: "CSR Mesh",
+																			key: "CSRM"
+																		}),
+																		new sap.ui.core.Item ({
 																			text: "IP Camera",
 																			key: "IPC"
 																		}),

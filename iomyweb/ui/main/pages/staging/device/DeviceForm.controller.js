@@ -68,7 +68,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
 	DevTypeToggle : function ( oController, sDevType) {
 		var oView = oController.getView();
 		var oTarget = oView.byId("DevType");
-		console.log(sDevType);
+		//console.log(sDevType);
 		
 		try {
 			if (sDevType === "ZSP") {
@@ -77,6 +77,9 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
 			} else if (sDevType === "PHB") {
 				oView.byId("DevSettings").setVisible( true );
 				IomyRe.common.ShowFormFragment( oController, "PhillipsHueBridge", "DevSettingsBlock", "Block" );
+			} else if (sDevType === "CSRM") {
+				oView.byId("DevSettings").setVisible( true );
+				IomyRe.common.ShowFormFragment( oController, "CSRMesh", "DevSettingsBlock", "Block" );
 			} else if (sDevType === "IPC") {
 				oView.byId("DevSettings").setVisible( true );
 				IomyRe.common.ShowFormFragment( oController, "IPCamera", "DevSettingsBlock", "Block" );
