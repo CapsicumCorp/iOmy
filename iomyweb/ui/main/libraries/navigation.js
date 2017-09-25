@@ -65,6 +65,10 @@ $.extend( IomyRe.navigation, {
 					new sap.m.Button ({
 						text: "Add Device",
 						type: sap.m.ButtonType.Transparent,
+						press : function () {
+							IomyRe.common.NavigationChangePage( "pDeviceForm" , {} , false);
+						}
+						
 					}),	
 					new sap.m.Button ({
 						text: "Add Premise",
@@ -81,6 +85,9 @@ $.extend( IomyRe.navigation, {
 					new sap.m.Button ({
 						text: "Add User",
 						type: sap.m.ButtonType.Transparent,
+						press : function () {
+							IomyRe.common.NavigationChangePage( "pUserForm" , {} , false);
+						}
 					}),
 				],
 				afterClose: function () {
@@ -133,6 +140,9 @@ $.extend( IomyRe.navigation, {
 					new sap.m.Button ({
 						text: "Edit Device",
 						type: sap.m.ButtonType.Transparent,
+						press : function () {
+							IomyRe.common.NavigationChangePage( "pDeviceForm" , {} , false);
+						}
 					}),	
 					new sap.m.Button ({
 						text: "Edit Premise",
@@ -149,6 +159,9 @@ $.extend( IomyRe.navigation, {
 					new sap.m.Button ({
 						text: "Edit User",
 						type: sap.m.ButtonType.Transparent,
+						press : function () {
+							IomyRe.common.NavigationChangePage( "pUserForm" , {} , false);
+						}
 					}),
 				],
 				afterClose: function () {

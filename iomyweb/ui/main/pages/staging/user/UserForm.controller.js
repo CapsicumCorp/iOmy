@@ -51,7 +51,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 
 				
 				//-- Check the parameters --//
-				oController.UserForm( oController, "AddUser");
+				oController.UserForm( oController, "EditUser");
 				
 				//-- Defines the Device Type --//
 				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
@@ -89,87 +89,91 @@ sap.ui.controller("pages.staging.user.UserForm", {
 		var oView = this.getView();	
 		
 		try {
-			if(sMode === "AddLogin") {
-				//-- New User Login Info --//
-				oView.byId("Login").setVisible( true );
-				IomyRe.common.ShowFormFragment( oController, "AddLogin", "LoginBlock_Form", "FormContainer" );
-			} else if(sMode === "DBAuth") {
-				//-- DB Auth Credentials --//
-				oView.byId("DBAuth").setVisible( true );
-				IomyRe.common.ShowFormFragment( oController, "DBAuth", "DBAuthBlock_Form", "FormContainer" );
-			} else if( sMode === "ShowInfo" ) {
-				//-- Show Info --//
-				oView.byId("Info").setVisible( true );
-				IomyRe.forms.ToggleFormMode(oController, "InfoBlock_Form", false);
-				IomyRe.common.ShowFormFragment( oController, "UserInfoDisplay", "InfoBlock_Form", "FormContainer" );
-				
-			} else if( sMode === "AddInfo" ) {
-				//-- Edit Info --//
-				oView.byId("Info").setVisible( true );
-				IomyRe.forms.ToggleFormMode(oController, "InfoBlock_Form", true);
-				IomyRe.common.ShowFormFragment( oController, "UserInfoEdit", "InfoBlock_Form", "FormContainer" );
-				
-			} else if ( sMode === "ShowAddress" ) {
-				//-- Show Address --//
-				oView.byId("Address").setVisible( true );
-				IomyRe.forms.ToggleFormMode(oController, "AddrBlock_Form", false);
-				IomyRe.common.ShowFormFragment( oController, "UserAddressDisplay", "AddrBlock_Form", "FormContainer" );
-				
-			} else if ( sMode === "AddAddress" ) {
-				//-- Edit Address --//
-				oView.byId("Address").setVisible( true );
-				IomyRe.forms.ToggleFormMode(oController, "AddrBlock_Form", true);
-				IomyRe.common.ShowFormFragment( oController, "UserAddressEdit", "AddrBlock_Form", "FormContainer" );
-				
-			} else if ( sMode === "ShowPremPermissions" ) {
-				//-- Show Permissions --//
-				oView.byId("PremPermBlock_BtnEdit").setVisible( true );
-				oView.byId("PremPermBlock_BtnSave").setVisible( false );
-				oView.byId("PremPermBlock_BtnCancel").setVisible( false );
-				IomyRe.forms.ToggleFormMode(oController, "PremPermBlock_Form", false);
-				IomyRe.common.ShowFormFragment( oController, "UserPremisePermissionDisplay", "PremPermBlock_Form", "FormContainer" );
-				
-			} else if ( sMode === "AddPremPermissions" ) {
-				//-- Edit Permissions --//
-				oView.byId("PremPermBlock_BtnEdit").setVisible( false );
-				oView.byId("PremPermBlock_BtnSave").setVisible( false );
-				oView.byId("PremPermBlock_BtnCancel").setVisible( false );
-				IomyRe.forms.ToggleFormMode(oController, "PremPermBlock_Form", true);
-				IomyRe.common.ShowFormFragment( oController, "UserPremisePermissionEdit", "PremPermBlock_Form", "FormContainer" );
-			
-			} else if ( sMode === "EditPremPermissions" ) {
-				//-- Edit Permissions --//
-				oView.byId("PremPermBlock_BtnEdit").setVisible( false );
-				oView.byId("PremPermBlock_BtnSave").setVisible( true );
-				oView.byId("PremPermBlock_BtnCancel").setVisible( true );
-				IomyRe.forms.ToggleFormMode(oController, "PremPermBlock_Form", true);
-				IomyRe.common.ShowFormFragment( oController, "UserPremisePermissionEdit", "PremPermBlock_Form", "FormContainer" );
-			
-			} else if ( sMode === "ShowRoomPermissions" ) {
-				//-- Show Permissions --//
-				oView.byId("RoomPermBlock_BtnEdit").setVisible( true );
-				oView.byId("RoomPermBlock_BtnSave").setVisible( false );
-				oView.byId("RoomPermBlock_BtnCancel").setVisible( false );
-				IomyRe.forms.ToggleFormMode(oController, "RoomPermBlock_Form", false);
-				IomyRe.common.ShowFormFragment( oController, "UserRoomPermissionDisplay", "RoomPermBlock_Form", "FormContainer" );
-				
-			} else if ( sMode === "AddRoomPermissions" ) {
-				//-- Edit Permissions --//
-				oView.byId("RoomPermBlock_BtnEdit").setVisible( false );
-				oView.byId("RoomPermBlock_BtnSave").setVisible( false );
-				oView.byId("RoomPermBlock_BtnCancel").setVisible( false );
-				IomyRe.forms.ToggleFormMode(oController, "RoomPermBlock_Form", true);
-				IomyRe.common.ShowFormFragment( oController, "UserRoomPermissionEdit", "RoomPermBlock_Form", "FormContainer" );
-				
-			} else if ( sMode === "EditRoomPermissions" ) {
-				//-- Edit Permissions --//
-				oView.byId("RoomPermBlock_BtnEdit").setVisible( false );
-				oView.byId("RoomPermBlock_BtnSave").setVisible( true );
-				oView.byId("RoomPermBlock_BtnCancel").setVisible( true );
-				IomyRe.forms.ToggleFormMode(oController, "RoomPermBlock_Form", true);
-				IomyRe.common.ShowFormFragment( oController, "UserRoomPermissionEdit", "RoomPermBlock_Form", "FormContainer" );
-			} else {
-				$.sap.log.error("ToggleButtonsAndView: Critcal Error. sMode set incorrectly:"+sMode);
+			switch(sMode) {
+				case "AddLogin":
+					//-- New User Login Info --//
+					oView.byId("Login").setVisible( true );
+					IomyRe.common.ShowFormFragment( oController, "AddLogin", "LoginBlock_Form", "FormContainer" );
+				break;
+				case "DBAuth":
+					//-- DB Auth Credentials --//
+					oView.byId("DBAuth").setVisible( true );
+					IomyRe.common.ShowFormFragment( oController, "DBAuth", "DBAuthBlock_Form", "FormContainer" );
+				break;
+				case "ShowInfo":
+					//-- Show Info --//
+					oView.byId("Info").setVisible( true );
+					IomyRe.forms.ToggleFormMode(oController, "InfoBlock_Form", false);
+					IomyRe.common.ShowFormFragment( oController, "UserInfoDisplay", "InfoBlock_Form", "FormContainer" );
+				break;
+				case "AddInfo":
+					//-- Edit Info --//
+					oView.byId("Info").setVisible( true );
+					IomyRe.forms.ToggleFormMode(oController, "InfoBlock_Form", true);
+					IomyRe.common.ShowFormFragment( oController, "UserInfoEdit", "InfoBlock_Form", "FormContainer" );
+				break;
+				case "ShowAddress":
+					//-- Show Address --//
+					oView.byId("Address").setVisible( true );
+					IomyRe.forms.ToggleFormMode(oController, "AddrBlock_Form", false);
+					IomyRe.common.ShowFormFragment( oController, "UserAddressDisplay", "AddrBlock_Form", "FormContainer" );
+				break;
+				case "AddAddress":
+					//-- Edit Address --//
+					oView.byId("Address").setVisible( true );
+					IomyRe.forms.ToggleFormMode(oController, "AddrBlock_Form", true);
+					IomyRe.common.ShowFormFragment( oController, "UserAddressEdit", "AddrBlock_Form", "FormContainer" );
+				break;
+				case "ShowPremPermissions":
+					//-- Show Permissions --//
+					oView.byId("PremPermBlock_BtnEdit").setVisible( true );
+					oView.byId("PremPermBlock_BtnSave").setVisible( false );
+					oView.byId("PremPermBlock_BtnCancel").setVisible( false );
+					IomyRe.forms.ToggleFormMode(oController, "PremPermBlock_Form", false);
+					IomyRe.common.ShowFormFragment( oController, "UserPremisePermissionDisplay", "PremPermBlock_Form", "FormContainer" );
+				break;
+				case "AddPremPermissions":
+					//-- Edit Permissions --//
+					oView.byId("PremPermBlock_BtnEdit").setVisible( false );
+					oView.byId("PremPermBlock_BtnSave").setVisible( false );
+					oView.byId("PremPermBlock_BtnCancel").setVisible( false );
+					IomyRe.forms.ToggleFormMode(oController, "PremPermBlock_Form", true);
+					IomyRe.common.ShowFormFragment( oController, "UserPremisePermissionEdit", "PremPermBlock_Form", "FormContainer" );
+				break;
+				case "EditPremPermissions":
+					//-- Edit Permissions --//
+					oView.byId("PremPermBlock_BtnEdit").setVisible( false );
+					oView.byId("PremPermBlock_BtnSave").setVisible( true );
+					oView.byId("PremPermBlock_BtnCancel").setVisible( true );
+					IomyRe.forms.ToggleFormMode(oController, "PremPermBlock_Form", true);
+					IomyRe.common.ShowFormFragment( oController, "UserPremisePermissionEdit", "PremPermBlock_Form", "FormContainer" );
+				break;
+				case "ShowRoomPermissions":
+					//-- Show Permissions --//
+					oView.byId("RoomPermBlock_BtnEdit").setVisible( true );
+					oView.byId("RoomPermBlock_BtnSave").setVisible( false );
+					oView.byId("RoomPermBlock_BtnCancel").setVisible( false );
+					IomyRe.forms.ToggleFormMode(oController, "RoomPermBlock_Form", false);
+					IomyRe.common.ShowFormFragment( oController, "UserRoomPermissionDisplay", "RoomPermBlock_Form", "FormContainer" );
+				break;
+				case "AddRoomPermissions":
+					//-- Edit Permissions --//
+					oView.byId("RoomPermBlock_BtnEdit").setVisible( false );
+					oView.byId("RoomPermBlock_BtnSave").setVisible( false );
+					oView.byId("RoomPermBlock_BtnCancel").setVisible( false );
+					IomyRe.forms.ToggleFormMode(oController, "RoomPermBlock_Form", true);
+					IomyRe.common.ShowFormFragment( oController, "UserRoomPermissionEdit", "RoomPermBlock_Form", "FormContainer" );
+				break;
+				case "EditRoomPermissions":
+					//-- Edit Permissions --//
+					oView.byId("RoomPermBlock_BtnEdit").setVisible( false );
+					oView.byId("RoomPermBlock_BtnSave").setVisible( true );
+					oView.byId("RoomPermBlock_BtnCancel").setVisible( true );
+					IomyRe.forms.ToggleFormMode(oController, "RoomPermBlock_Form", true);
+					IomyRe.common.ShowFormFragment( oController, "UserRoomPermissionEdit", "RoomPermBlock_Form", "FormContainer" );
+				break;
+				default:
+					$.sap.log.error("ToggleButtonsAndView: Critcal Error. sMode set incorrectly:"+sMode);
 			}
 		} catch(e1) {
 			$.sap.log.error("ToggleButtonsAndView: Critcal Error:"+e1.message);

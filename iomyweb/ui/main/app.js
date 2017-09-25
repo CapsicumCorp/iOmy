@@ -122,6 +122,12 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.user.UserForm\" Page!\n"
 	},
+	{
+		"Id":			"pDeviceForm",
+		"Location":		"pages.staging.device.DeviceForm",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.device.DeviceForm\" Page!\n"
+	},
 
 ];
 
