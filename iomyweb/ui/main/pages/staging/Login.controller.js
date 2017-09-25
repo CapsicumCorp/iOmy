@@ -160,14 +160,14 @@ sap.ui.controller("pages.staging.Login", {
         //------------------------------------------------------------//
         //-- Begin Refreshing the Core Variables                    --//
         //------------------------------------------------------------//
-        //IOMy.common.RefreshCoreVariables( IOMy.common.aRefreshCoreVariablesFirstRun );
+        IomyRe.common.RefreshCoreVariables( IomyRe.common.aRefreshCoreVariablesFirstRun );
 
         //----------------------------------------------------------------------------//
         // Load the user's display name and ID
         //----------------------------------------------------------------------------//
         //IOMy.functions.setCurrentUserNameForNavigation();
 
-        IomyRe.common.NavigationChangePage( "pBlock" , {} , false);
+        //IomyRe.common.NavigationChangePage( "pBlock" , {} , false);
         //oController.ToggleInputsAndButton(true);
         
         oView.byId("page").destroyContent();

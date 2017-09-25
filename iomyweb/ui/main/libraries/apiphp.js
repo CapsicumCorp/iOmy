@@ -535,7 +535,7 @@ $.extend(IomyRe.apiphp,{
 	//--    replace the existing version. Many pages require this list to be setup in order for --//
 	//--    those pages to be able to work.                                                     --//
 	//--------------------------------------------------------------------------------------------//
-	RefreshThingList: function( oConfig ) {
+	/*RefreshThingList: function( oConfig ) {
 		//---------------------------------------------------------------------------//
 		//-- NOTE: aConfig is an associative array that has the following elements --//
 		//---------------------------------------------------------------------------//
@@ -823,7 +823,7 @@ $.extend(IomyRe.apiphp,{
                 oConfig.onFail();
             }
 		}
-	},
+	},*/
     
     /**
      * Replace the onFail function with one that brings up an error popup that

@@ -193,6 +193,7 @@ $.extend( IomyRe.navigation, {
                                     "AttemptLogin":	"1"
                                 },
                                 success : function( oResponseData, sHTTPCode, jqXHR ) {
+                                    IomyRe.common.WipeCoreVariables();
                                     IomyRe.common.NavigationChangePage( "pLogin" , {});
                                 }
                             });
@@ -210,5 +211,5 @@ $.extend( IomyRe.navigation, {
 			$.sap.log.error(" UserMenu: Critical Error "+e1.message);
 			return false;	
 		}			
-	},
+	}
 });

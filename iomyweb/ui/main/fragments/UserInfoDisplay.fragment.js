@@ -13,7 +13,7 @@ sap.ui.jsfragment("fragments.UserInfoDisplay", {
 		oFragContent = new sap.ui.layout.form.FormContainer({
 			formElements : [
 				new sap.ui.layout.form.FormElement({
-					label : " Given Names",
+					label : "Given Names",
 					fields: [
 						new sap.m.Text ({
 							text:"Capsicum"
