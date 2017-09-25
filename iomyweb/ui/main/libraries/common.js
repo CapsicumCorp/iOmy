@@ -10,19 +10,122 @@ Copyright: Capsicum Corporation 2015, 2016, 2017
 
 $.sap.declare("IomyRe.common",true);
 
+$.sap.require("sap.m.MessageBox");
+
 IomyRe.common = new sap.ui.base.Object();
 
 $.extend(IomyRe.common,{
 	
-	
+	ConfigVars : function(sString) {
+        
+        var sReturn = "";
+        switch(sString) {
+            case "URLServer":
+                sReturn = '/';
+                break;
+                
+            case "URLPublicApi":
+                sReturn = '/public';
+                break;
+                
+            case "URLRestrictedApi":
+                sReturn = '/restricted';
+                break;
+                
+            case "URLRestrictedOData":
+                sReturn = '/restricted/odata';
+                break;
+                
+            case "URLUserInterface":
+                sReturn = '/ui/main';
+                break;
+        }
+        
+        return sReturn;
+    },
+    
 	//============================================//
 	//== Initialisation Variable				==//
 	//============================================//
 	//-- Variables that are used to declare if	--//
 	//-- a login has been successful or not		--//
 	//--------------------------------------------//
+	CheckSessionInfo : function(aConfig) {
+        
+        $.ajax({
+            url: IomyRe.apiphp.APILocation("sessioncheck"),
+            type: "POST",
+            //================================================//
+            //== ON SUCCESS
+            //================================================//
+            success: function(response) {
+                //================================================//
+                //== Initialise variables                        ==//
+                //================================================//
+                var sErrMesg = "";        //-- STRING: Used to store an error message should an error occur --//
+                
+                //================================================//
+                //== 2.A - User is currently logged in            ==//
+                //================================================//
+                if (response.login===true) {
+                    aConfig.OnUserSessionActive(response);
+                    
+                //================================================//
+                //== 2.B - User is not logged in                ==//
+                //================================================//
+                } else {    
+                    //-- Return that the user is not logged on --//
+                    aConfig.OnUserSessionInactive(response);
+                    
+                }
+            },
+            //================================================//
+            //== IF AN ERROR OCCURS
+            //================================================//
+			error : function(){
+				var sErrMesg	= "";
+				//-- Display an error message --//
+				sErrMesg += "Failed to access the server! \n";
+				sErrMesg += "These are common causes for this error message. \n";
+				sErrMesg += "1.) Database Problem: \tThe iOmy Database may have stopped running! Please check with whoever manages your system. \n";
+				sErrMesg += "2.) iOmy Version Upgrade: \tThe Person that manages your iOmy system may be rolling out a new update. \n";
+                IomyRe.common.showError(sErrMesg, "Access Error",
+                    function () {
+                        // Refresh the page to redirect to the login page.
+                        window.location.reload(true);
+                    }
+                );
+                
+            }
+        });
+    },
 	
-	
+	//============================================//
+    // Core Variables
+	//============================================//
+    
+    /*
+     * This array is used as a Preset that is used after verifing that the user
+     * is logged in.
+     * 
+     * @type map
+     */
+    aRefreshCoreVariablesFirstRun: {
+        
+        onSuccess: function() {
+            //-- Reset the Navigation array and index after switching users --//
+            IOMy.common.NavPagesNavigationArray = [];
+            IOMy.common.NavPagesCurrentIndex = -1;
+            //-- Load the 1ST Page --//
+            IOMy.common.NavigationChangePage( IOMy.common.sNavigationDefaultPage, {}, true );
+            
+            //-- Load the optional variables --//
+            IOMy.common.RefreshOptionalVariables({});
+            
+            //-- Setup the AutoRefreshCoreVariables Check --//
+            IOMy.common.RefreshCoreVariableQueueCheck();
+        }
+    },
 	
 	//============================================//
 	//== Navigational Variables					==//
@@ -278,65 +381,6 @@ $.extend(IomyRe.common,{
 		
 	},
 	
-	//----------------------------------------------------------------------------------------//
-	//-- This function is used to change pages either pack or forward ( depending on what	--//
-	//-- the user has clicked )																--//
-	//----------------------------------------------------------------------------------------//
-	NavigationTriggerBackForward: function( bForwardTriggered ) {
-		//-- Restart the status of the extras menu      --//
-        IomyRe.widgets.extrasMenuOpen = false;
-        
-        // Declare variables
-		var sName		= "";
-		var aData		= {};
-		
-		//-- IF the app requested to go forward a page --//
-		if( bForwardTriggered===true ) {
-			if( IomyRe.common.NavPagesNavigationArray.length > (IomyRe.common.NavPagesCurrentIndex+1) ) {
-				//-- Increase the Current Index back to the next value --//
-				//$.sap.log.debug("NavForward CurrentLength="+IomyRe.common.NavPagesNavigationArray.length);
-				//$.sap.log.debug("NavForward CurrentIndex="+IomyRe.common.NavPagesCurrentIndex);
-				IomyRe.common.NavPagesCurrentIndex++;
-				//$.sap.log.debug("NavForward NewIndex="+IomyRe.common.NavPagesCurrentIndex);
-				sName = IomyRe.common.NavPagesNavigationArray[IomyRe.common.NavPagesCurrentIndex].Name;
-				aData = IomyRe.common.NavPagesNavigationArray[IomyRe.common.NavPagesCurrentIndex].Data;
-				//-- Navigate to the next Page --//
-				oApp.to( sName, "Slide", aData );
-				//-- Return Success --//
-				return true;
-				
-			} else {
-				//-- Return Failure (Since there is no further pages to navigate to)--//'
-				return false;
-			}
-		//-- ELSE assume going back a page is what is requested --//
-		} else {
-			//-- If the Page is on the Default Page or Glitched and a back rquest is requested --//
-			if( IomyRe.common.NavPagesCurrentIndex<=0) {
-				//-- Set the index to zero (aka Default Page) --//
-				IomyRe.common.NavPagesCurrentIndex = -1;
-				//-- Navigate back to the Default Page --//
-				oApp.to( IomyRe.common.sNavigationDefaultPage, "c_SlideBack", {} );
-				
-			} else {
-				//-- Decrease the Current Index back to the previous value --//
-				//$.sap.log.debug("NavBack CurrentIndex="+IomyRe.common.NavPagesCurrentIndex);
-				IomyRe.common.NavPagesCurrentIndex--;
-				//$.sap.log.debug("NavBack NewIndex="+IomyRe.common.NavPagesCurrentIndex);
-				
-				sName = IomyRe.common.NavPagesNavigationArray[IomyRe.common.NavPagesCurrentIndex].Name;
-				aData = IomyRe.common.NavPagesNavigationArray[IomyRe.common.NavPagesCurrentIndex].Data;
-				
-				//$.sap.log.debug("NavBack NavArray="+JSON.stringify(IomyRe.common.NavPagesNavigationArray) );
-				//$.sap.log.debug("NavBack BackPage="+JSON.stringify(IomyRe.common.NavPagesNavigationArray[IomyRe.common.NavPagesCurrentIndex]) );
-				//-- Navigate back to the previous Page --//
-				oApp.to( sName, "c_SlideBack", aData );
-			}
-			//-- Return Success --//
-			return true;
-		}
-	},
-	
 	NavigationReturnToHome: function() {
 		//-- Restart the status of the extras menu      --//
         IomyRe.widgets.extrasMenuOpen = false;
@@ -354,115 +398,6 @@ $.extend(IomyRe.common,{
         oApp.to( IomyRe.common.sNavigationDefaultPage, "c_SlideBack", {} );
 		
 		return true;
-	},
-	
-	NavigationForwardPresent: function() {
-		$.sap.log.debug("Array="+IomyRe.common.NavPagesNavigationArray.length+"  Index="+IomyRe.common.NavPagesCurrentIndex)
-		
-		if( IomyRe.common.NavPagesNavigationArray.length > (IomyRe.common.NavPagesCurrentIndex+1) ) {
-			return true;
-		} else {
-			return false;
-		}
-	},
-	
-	NavigationRefreshButtons: function( oController ) {
-        //------------------------------------------------//
-		//-- Restart the status of the extras menu      --//
-		//------------------------------------------------//
-        IomyRe.widgets.extrasMenuOpen = false;
-        
-		//------------------------------------------------//
-		//-- 1.0 - Initialise Variables                 --//
-		//------------------------------------------------//
-		var bBackPresent				= false;				//-- BOOLEAN:		Used to indicate if a Back Button should be present		--//
-		var bForwardPresent				= false;				//-- BOOLEAN:		Used to indicate if a Forward Button should be present	--//
-		
-		var oBackButton					= null;					//-- OBJECT:		Used to store the back button from the page if it can be found --//
-		var oForwardButton				= null;					//-- OBJECT:		Used to store the forward button from the page if it can be found--//
-		//------------------------------------------------//
-		//-- 2.0 - Debugging                            --//
-		//------------------------------------------------//
-		//$.sap.log.debug("Array="+IomyRe.common.NavPagesNavigationArray.length+"  Index="+IomyRe.common.NavPagesCurrentIndex)
-		
-		
-		
-		//------------------------------------------------//
-		//-- 3.0 - Check if Forward should be present   --//
-		//------------------------------------------------//
-		
-		//-- If the Current Index is not flagged as needing to be reset --//
-		if( IomyRe.common.NavPagesCurrentIndex >= 0) {
-			if( IomyRe.common.NavPagesNavigationArray.length > (IomyRe.common.NavPagesCurrentIndex+1) ) {
-				bForwardPresent		= true;
-			} 
-		}
-		
-		//------------------------------------------------//
-		//-- 4.0 - Check if Back should be present      --//
-		//------------------------------------------------//
-		if( IomyRe.common.NavPagesCurrentIndex >= 1 ) {
-			bBackPresent		= true;
-		}
-		
-		
-		//------------------------------------------------//
-		//-- 6.0 - Toggle Forward                       --//
-		//------------------------------------------------//
-		oForwardButton = oController.byId("NavSubHead_ForwardBtn");
-		
-		if( oForwardButton ) {
-			if( bForwardPresent===true ) {
-				oForwardButton.setVisible( true );
-				//console.log("NavHeader: Show forward button!");
-			} else {
-				oForwardButton.setVisible( false );
-				//console.log("NavHeader: Hide forward button!");
-			}
-		} else {
-			//console.log("NavHeader: Can't find forward button!");
-		}
-		
-		
-		//------------------------------------------------//
-		//-- 7.0 - Toggle Back                          --//
-		//------------------------------------------------//
-		oBackButton = oController.byId("NavSubHead_BackBtn");
-		
-		if( oBackButton ) {
-			if( bBackPresent===true ) {
-				oBackButton.setVisible( true );
-				//console.log("NavHeader: Show back button!");
-			} else {
-				oBackButton.setVisible( false );
-				//console.log("NavHeader: Hide back button!");
-			}
-		} else {
-			//console.log("NavHeader: Can't find back button!");
-		}
-	
-	},
-	
-	NavigationToggleNavButtons : function (oController, bEnabled) {
-		//--------------------------------------------------------------------//
-		// Get the buttons
-		//--------------------------------------------------------------------//
-		var oBackButton		= oController.byId("NavSubHead_BackBtn");
-		var oForwardButton	= oController.byId("NavSubHead_ForwardBtn");
-		
-		//--------------------------------------------------------------------//
-		// Toggle the back button
-		//--------------------------------------------------------------------//
-		if (oBackButton) {
-			oBackButton.setEnabled(bEnabled);
-		}
-		
-		//--------------------------------------------------------------------//
-		// Toggle the forward button
-		//--------------------------------------------------------------------//
-		if (oForwardButton) {
-			oForwardButton.setEnabled(bEnabled);
-		}
 	},
 	
 	//============================================================================//

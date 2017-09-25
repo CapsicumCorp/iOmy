@@ -183,7 +183,19 @@ $.extend( IomyRe.navigation, {
 						text: 'Logout',
 						type: sap.m.ButtonType.Transparent,
 						press : function () {
-							IomyRe.common.NavigationChangePage( "pLogin" , {} , false);
+                            $.ajax({
+                                url : IomyRe.apiphp.APILocation('sessioncheck'), 
+                                type : "POST",
+                                dataType : "json",
+                                data : {
+                                    "username":	"",
+                                    "password":	"",
+                                    "AttemptLogin":	"1"
+                                },
+                                success : function( oResponseData, sHTTPCode, jqXHR ) {
+                                    IomyRe.common.NavigationChangePage( "pLogin" , {});
+                                }
+                            });
 						}
 					})
 				],

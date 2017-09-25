@@ -9,6 +9,12 @@ Copyright: Capsicum Corporation 2017
 //================================================//
 //== 1.0 - CAPSICUM LOAD JS MODULES				==//
 //================================================//
+$.sap.registerModulePath('IomyRe.apiphp', sModuleInitialBuildLocation+'libraries/apiphp');
+$.sap.require("IomyRe.apiphp");
+
+$.sap.registerModulePath('IomyRe.apiodata', sModuleInitialBuildLocation+'libraries/apiodata');
+$.sap.require("IomyRe.apiodata");
+
 $.sap.registerModulePath('IomyRe.common', sModuleInitialBuildLocation+'libraries/common');
 $.sap.require("IomyRe.common");
 

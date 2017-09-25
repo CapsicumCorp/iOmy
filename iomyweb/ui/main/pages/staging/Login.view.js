@@ -46,51 +46,61 @@ sap.ui.jsview("pages.staging.Login", {
 		var oView = this;
 		
         return new sap.m.Page( oView.createId("page"), {
-			title: "Login",
-			content: [ 
-				new sap.m.Panel( oView.createId("panel"), {
-					backgroundDesign: "Transparent",
-					content : [ 
-						new sap.m.VBox ({
-							items : [
-								new sap.m.Image ({
-									src : "resources/images/logo.png",
-									densityAware: false,
-								}).addStyleClass("height200px MarTop15px")
-							]
-						}).addStyleClass("height200px"),
-						new sap.m.VBox ({
-							items : [
-								new sap.m.Input({
-									type: "Text",
-									placeholder: "Username",
-									maxLength: 40,
-									width: "200px"
-								}).addStyleClass("LoginTextInput"),
-								new sap.m.Input({
-									type: "Text",
-									placeholder: "Password",
-									maxLength: 40,
-									width: "200px"
-								}).addStyleClass("LoginTextInput"),
-								new sap.m.Button({
-									tooltip: "Login",
-									text: "Login",
-									type: "Default",
-									icon: "sap-icon://accept",
-									iconFirst: false,
-									width: "200px",
-									press : function () {
-										IomyRe.common.NavigationChangePage( "pBlock" , {} , false);
-									},
-								}).addStyleClass("")
-							]
-						}).addStyleClass("LoginForm"),
-					]
-				}).addStyleClass("TextCenter") 
-			],
-			/* footer : Termite.common.getAppFooter() */
+			title: "Login"
 		}).setShowHeader(false).addStyleClass("MainBackground");
-	}
+	},
+    
+    drawLogin : function (oController) {
+        var oView = this;
+        
+        return new sap.m.Panel( oView.createId("panel"), {
+            backgroundDesign: "Transparent",
+            content : [ 
+                new sap.m.VBox ({
+                    items : [
+                        new sap.m.Image ({
+                            src : "resources/images/logo.png",
+                            densityAware: false
+                        }).addStyleClass("height200px MarTop15px")
+                    ]
+                }).addStyleClass("height200px"),
+                new sap.m.VBox ({
+                    items : [
+                        new sap.m.Input(oView.createId("inputUsername"), {
+                            type: "Text",
+                            placeholder: "Username",
+                            maxLength: 40,
+                            width: "200px",
+                            submit : function () {
+                                oController.doLogin();
+                            }
+                        }).addStyleClass("LoginTextInput"),
+
+                        new sap.m.Input(oView.createId("inputPassword"), {
+                            type: "Password",
+                            placeholder: "Password",
+                            maxLength: 40,
+                            width: "200px",
+                            submit : function () {
+                                oController.doLogin();
+                            }
+                        }).addStyleClass("LoginTextInput"),
+
+                        new sap.m.Button(oView.createId("buttonSubmit"), {
+                            tooltip: "Login",
+                            text: "Login",
+                            type: "Default",
+                            icon: "sap-icon://accept",
+                            iconFirst: false,
+                            width: "200px",
+                            press : function () {
+                                oController.doLogin();
+                            }
+                        }).addStyleClass("")
+                    ]
+                }).addStyleClass("LoginForm")
+            ]
+        }).addStyleClass("TextCenter");
+    }
 
 });
