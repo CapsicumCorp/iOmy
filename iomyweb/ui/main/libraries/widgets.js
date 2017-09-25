@@ -70,6 +70,7 @@ $.extend( IomyRe.widgets, {
 			layoutData : new sap.m.OverflowToolbarLayoutData({
 				priority : sap.m.OverflowToolbarPriority.NeverOverflow
 			}),
+            densityAware : false,
 			width: "70px",
 			height: "40px",
 			src: "resources/images/mini-logo.png"
