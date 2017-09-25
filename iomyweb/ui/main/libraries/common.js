@@ -82,11 +82,11 @@ $.extend(IomyRe.common,{
     Regions                 : {},
     Languages               : {},
     Timezones               : {},
-    RoomTypes               : [],
-    PremiseOccupantsOptions : [],
-    PremiseRoomsOptions     : [],
-    PremiseFloorsOptions    : [],
-    PremiseBedroomsOptions  : [],
+    RoomTypes               : {},
+    PremiseOccupantsOptions : {},
+    PremiseRoomsOptions     : {},
+    PremiseFloorsOptions    : {},
+    PremiseBedroomsOptions  : {},
     LinkTypeList            : {},
     
     //============================================//
@@ -1900,14 +1900,14 @@ $.extend(IomyRe.common,{
                     //--------------------------------------------------------//
                     // Refresh the variable and reload the room type array.
                     //--------------------------------------------------------//
-                    me.RoomTypes = [];
+                    me.RoomTypes = {};
                     
                     for (var i = 0; i < data.length; i++) {
-                        me.RoomTypes.push({
+                        me.RoomTypes["_"+data[i].ROOMTYPE_PK] = {
                             RoomTypeId : parseInt(data[i].ROOMTYPE_PK),
                             RoomTypeName : data[i].ROOMTYPE_NAME,
                             RoomTypeOutdoors : parseInt(data[i].ROOMTYPE_OUTDOORS)
-                        });
+                        };
                     }
                     
                     me.bRoomTypesLoaded = true;
@@ -1976,13 +1976,13 @@ $.extend(IomyRe.common,{
 
             onSuccess : function (responseType, data) {
                 try {
-                    me.PremiseOccupantsOptions = [];
+                    me.PremiseOccupantsOptions = {};
                     
                     for (var i = 0; i < data.length; i++) {
-                        me.PremiseOccupantsOptions.push({
+                        me.PremiseOccupantsOptions["_"+data[i].PREMISEOCCUPANTS_PK] = {
                             OccupantCount   : data[i].PREMISEOCCUPANTS_NAME,
                             OccupantCountId : data[i].PREMISEOCCUPANTS_PK
-                        });
+                        };
                     }
 
                     me.bPremiseOccupantsOptionsLoaded = true;
@@ -2051,13 +2051,13 @@ $.extend(IomyRe.common,{
 
             onSuccess : function (responseType, data) {
                 try {
-                    me.PremiseRoomsOptions = [];
+                    me.PremiseRoomsOptions = {};
                     
                     for (var i = 0; i < data.length; i++) {
-                        me.PremiseRoomsOptions.push({
+                        me.PremiseRoomsOptions["_"+data[i].PREMISEROOMS_PK] = {
                             RoomCount   : data[i].PREMISEROOMS_NAME,
                             RoomCountId : data[i].PREMISEROOMS_PK
-                        });
+                        };
                     }
 
                     me.bPremiseRoomsOptionsLoaded = true;
@@ -2125,13 +2125,13 @@ $.extend(IomyRe.common,{
 
             onSuccess : function (responseType, data) {
                 try {
-                    me.PremiseFloorsOptions = [];
+                    me.PremiseFloorsOptions = {};
                     
                     for (var i = 0; i < data.length; i++) {
-                        me.PremiseFloorsOptions.push({
+                        me.PremiseFloorsOptions["_"+data[i].PREMISEFLOORS_PK] = {
                             FloorCount   : data[i].PREMISEFLOORS_NAME,
                             FloorCountId : data[i].PREMISEFLOORS_PK
-                        });
+                        };
                     }
 
                     me.bPremiseFloorsOptionsLoaded = true;
@@ -2200,13 +2200,13 @@ $.extend(IomyRe.common,{
 
             onSuccess : function (responseType, data) {
                 try {
-                    me.PremiseBedroomsOptions = [];
+                    me.PremiseBedroomsOptions = {};
                     
                     for (var i = 0; i < data.length; i++) {
-                        me.PremiseBedroomsOptions.push({
+                        me.PremiseBedroomsOptions["_"+data[i].PREMISEBEDROOMS_PK] = {
                             BedroomCount   : data[i].PREMISEBEDROOMS_COUNT,
                             BedroomCountId : data[i].PREMISEBEDROOMS_PK
-                        });
+                        };
                     }
 
                     me.bPremiseBedroomsOptionsLoaded = true;
