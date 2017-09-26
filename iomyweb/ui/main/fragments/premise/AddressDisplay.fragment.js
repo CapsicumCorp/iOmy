@@ -1,4 +1,4 @@
-sap.ui.jsfragment("fragments.UserAddressDisplay", {
+sap.ui.jsfragment("fragments.premise.AddressDisplay", {
 	
 	createContent: function( oController ) {
 		

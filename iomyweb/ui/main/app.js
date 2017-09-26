@@ -137,6 +137,12 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.device.DeviceForm\" Page!\n"
 	},
+	{
+		"Id":			"pPremiseForm",
+		"Location":		"pages.staging.premise.PremiseForm",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.premise.PremiseForm\" Page!\n"
+	},
 
 ];
 

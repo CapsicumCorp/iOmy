@@ -1,4 +1,4 @@
-sap.ui.jsfragment("fragments.UserAddressDisplay", {
+sap.ui.jsfragment("fragments.premise.AddressEdit", {
 	
 	createContent: function( oController ) {
 		
@@ -14,33 +14,37 @@ sap.ui.jsfragment("fragments.UserAddressDisplay", {
 		oFragContent = new sap.ui.layout.form.FormContainer({
 			formElements : [
 				new sap.ui.layout.form.FormElement({
-					label : "Language",
+					label : "Language:",
 					fields: [
-						new sap.m.Text ({
-							text:"English"
+						new sap.m.Select ({
+							items : [
+								new sap.ui.core.Item ({
+									text:"English"
+								}),
+								new sap.ui.core.Item ({
+									text:"etc"
+								}),
+							]
+						})
+					]
+				}),new sap.ui.layout.form.FormElement({
+					label : "Street Address:",
+					fields: [
+						new sap.m.Input ({
 						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Street Address",
+					label : "Unit Number (if applicable):",
 					fields: [
-						new sap.m.Text ({
-							text:"12 Water Street"
-						})
-					]
-				}),
-				new sap.ui.layout.form.FormElement({
-					label : "Unit Number (if applicable)",
-					fields: [
-						new sap.m.Text ({
-							text:"Unit 15"
+						new sap.m.Input ({
 						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "City / Suburb",
 					fields: [
-						new sap.m.Text ({
+						new sap.m.Input ({
 							text:""
 						})
 					]
@@ -48,35 +52,47 @@ sap.ui.jsfragment("fragments.UserAddressDisplay", {
 				new sap.ui.layout.form.FormElement({
 					label : "State / Province",
 					fields: [
-						new sap.m.Text ({
-							text: "Queensland"
+						new sap.m.Input ({
 						}),
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "Post Code / Zip Code",
 					fields: [
-						new sap.m.Text ({
-							text: "4655"
+						new sap.m.Input ({
 						}),
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "Country / Region",
 					fields: [
-						new sap.m.Text ({
-							text: "Australia"
-						}),
+						new sap.m.Select ({
+							items : [
+								new sap.ui.core.Item ({
+									text:"Australia"
+								}),
+								new sap.ui.core.Item ({
+									text:"etc"
+								}),
+							]
+						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "Timezone",
 					fields: [
-						new sap.m.Text ({
-							text: "Australia/Brisbane"
-						}),
+						new sap.m.Select ({
+							items : [
+								new sap.ui.core.Item ({
+									text:"Australia/Brisbane"
+								}),
+								new sap.ui.core.Item ({
+									text:"etc"
+								}),
+							]
+						})
 					]
-				}),
+				})
 			]
 		});
 							

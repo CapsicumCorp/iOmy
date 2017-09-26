@@ -1,4 +1,4 @@
-sap.ui.jsfragment("fragments.UserAddressDisplay", {
+sap.ui.jsfragment("fragments.premise.InfoDisplay", {
 	
 	createContent: function( oController ) {
 		
@@ -14,67 +14,51 @@ sap.ui.jsfragment("fragments.UserAddressDisplay", {
 		oFragContent = new sap.ui.layout.form.FormContainer({
 			formElements : [
 				new sap.ui.layout.form.FormElement({
-					label : "Language",
+					label : "Name",
 					fields: [
 						new sap.m.Text ({
-							text:"English"
+							text: "Freshwater Home"
 						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Street Address",
+					label : "Description",
 					fields: [
 						new sap.m.Text ({
-							text:"12 Water Street"
+							text: "No Place Like It!"
 						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Unit Number (if applicable)",
+					label : "Bedrooms",
 					fields: [
 						new sap.m.Text ({
-							text:"Unit 15"
+							text: "5+"
 						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "City / Suburb",
+					label : "Floors",
 					fields: [
 						new sap.m.Text ({
-							text:""
+							text: "2"
 						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "State / Province",
+					label : "Occupants",
 					fields: [
 						new sap.m.Text ({
-							text: "Queensland"
-						}),
+							text: "5+"
+						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Post Code / Zip Code",
+					label : "Rooms",
 					fields: [
 						new sap.m.Text ({
-							text: "4655"
-						}),
-					]
-				}),
-				new sap.ui.layout.form.FormElement({
-					label : "Country / Region",
-					fields: [
-						new sap.m.Text ({
-							text: "Australia"
-						}),
-					]
-				}),
-				new sap.ui.layout.form.FormElement({
-					label : "Timezone",
-					fields: [
-						new sap.m.Text ({
-							text: "Australia/Brisbane"
-						}),
+							text: "10+"
+						})
 					]
 				}),
 			]
