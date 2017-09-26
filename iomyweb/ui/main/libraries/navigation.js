@@ -68,12 +68,7 @@ $.extend( IomyRe.navigation, {
 						press : function () {
 							IomyRe.common.NavigationChangePage( "pDeviceForm" , {} , false);
 						}
-						
 					}),	
-					new sap.m.Button ({
-						text: "Add Premise",
-						type: sap.m.ButtonType.Transparent,
-					}),
 					new sap.m.Button ({
 						text: "Add Room",
 						type: sap.m.ButtonType.Transparent,
@@ -147,6 +142,9 @@ $.extend( IomyRe.navigation, {
 					new sap.m.Button ({
 						text: "Edit Premise",
 						type: sap.m.ButtonType.Transparent,
+						press : function () {
+							IomyRe.common.NavigationChangePage( "pPremiseForm" , {} , false);
+						}
 					}),
 					new sap.m.Button ({
 						text: "Edit Room",
