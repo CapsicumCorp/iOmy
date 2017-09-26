@@ -21,11 +21,20 @@ $.sap.require("IomyRe.common");
 $.sap.registerModulePath('IomyRe.navigation', sModuleInitialBuildLocation+'libraries/navigation');
 $.sap.require("IomyRe.navigation");
 
+$.sap.registerModulePath('IomyRe.devices', sModuleInitialBuildLocation+'libraries/devices');
+$.sap.require("IomyRe.devices");
+
+$.sap.registerModulePath('IomyRe.functions', sModuleInitialBuildLocation+'libraries/functions');
+$.sap.require("IomyRe.functions");
+
 $.sap.registerModulePath('IomyRe.widgets', sModuleInitialBuildLocation+'libraries/widgets');
 $.sap.require("IomyRe.widgets");
 
 $.sap.registerModulePath('IomyRe.forms', sModuleInitialBuildLocation+'libraries/forms');
 $.sap.require("IomyRe.forms");
+
+$.sap.registerModulePath('IomyRe.pages', sModuleInitialBuildLocation+'libraries/pages');
+$.sap.require("IomyRe.pages");
 
 
 //================================================//
@@ -137,40 +146,42 @@ var aPages = [
  * JS (JavaScript), and also the error message that will be displayed if an error
  * occurs in either its UI5 view or controller.
  */
-$.each( aPages, function (iIndex, aPageData) {
-	try {
-		//--------------------------------//
-		//-- 1.0 - Declare variables	--//
-		//--------------------------------//
-		var sType			= "";
-		var sErMesg			= aPageData.ErrMesg;
-		
-		//--------------------------------//
-		//--
-		//--------------------------------//
-		switch(aPageData.Type) {
-			case "JS":
-				sType =		sap.ui.core.mvc.ViewType.JS;
-				break;
-			
-			case "XML":
-				sType =		sap.ui.core.mvc.ViewType.XML;
-				break;
-			
-		}
-		
-        oApp.addPage(
-			new sap.ui.view({
-				id:			aPageData.Id,
-				viewName:	aPageData.Location,
-				type:		sType
-			})
-		);
+//$.each( aPages, function (iIndex, aPageData) {
+//	try {
+//		//--------------------------------//
+//		//-- 1.0 - Declare variables	--//
+//		//--------------------------------//
+//		var sType			= "";
+//		var sErMesg			= aPageData.ErrMesg;
+//		
+//		//--------------------------------//
+//		//--
+//		//--------------------------------//
+//		switch(aPageData.Type) {
+//			case "JS":
+//				sType =		sap.ui.core.mvc.ViewType.JS;
+//				break;
+//			
+//			case "XML":
+//				sType =		sap.ui.core.mvc.ViewType.XML;
+//				break;
+//			
+//		}
+//		
+//        oApp.addPage(
+//			new sap.ui.view({
+//				id:			aPageData.Id,
+//				viewName:	aPageData.Location,
+//				type:		sType
+//			})
+//		);
+//
+//	} catch(ePLogin) {
+//        jQuery.sap.log.error( sErMesg+ePLogin.message );
+//	}
+//});
 
-	} catch(ePLogin) {
-        jQuery.sap.log.error( sErMesg+ePLogin.message );
-	}
-});
+IomyRe.pages.createPage("pLogin");
 
 //================================================//
 //== 5.4 - DEPLOY OPENUI5 APP					==//

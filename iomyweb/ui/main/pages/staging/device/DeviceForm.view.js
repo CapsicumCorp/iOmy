@@ -22,6 +22,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+$.sap.require("IomyRe.widgets.selectBoxNewDeviceOptions");
+$.sap.require("IomyRe.widgets.selectBoxHub");
+$.sap.require("IomyRe.widgets.selectBoxRoom");
+
 sap.ui.jsview("pages.staging.device.DeviceForm", {
 	
 	/*************************************************************************************************** 
@@ -95,47 +99,13 @@ sap.ui.jsview("pages.staging.device.DeviceForm", {
 														new sap.ui.layout.form.FormElement({
 															label : "",
 															fields: [ 
-																new sap.m.Select (oView.createId("DevTypeSelect"),{
+																IomyRe.widgets.selectBoxNewDeviceOptions (oView.createId("DevTypeSelect"),{
 																	selectedKey : "start",
 																	change : function () {
 																		var DevTypeSelect = this;
 																		var sDevType = DevTypeSelect.getSelectedKey();
 																		oController.DevTypeToggle(oController, sDevType);
-																	},
-																	items : [
-																		new sap.ui.core.Item ({
-																			text: "Please choose a device type",
-																			key: "start"
-																		}),
-																		new sap.ui.core.Item ({
-																			text: "CSR Mesh",
-																			key: "CSRM"
-																		}),
-																		new sap.ui.core.Item ({
-																			text: "IP Camera",
-																			key: "IPC"
-																		}),
-																		new sap.ui.core.Item ({
-																			text: "Open Weather Map Feed",
-																			key: "OWM"
-																		}),																	
-																		new sap.ui.core.Item ({
-																			text: "Onvif Camera",
-																			key: "OnVCam"
-																		}),														
-																		new sap.ui.core.Item ({
-																			text: "Onvif Server",
-																			key: "OnVServ"
-																		}),																		
-																		new sap.ui.core.Item ({
-																			text: "Phillips Hue Bridge",
-																			key: "PHB"
-																		}),
-																		new sap.ui.core.Item ({
-																			text: "Zigbee Smart Plug",
-																			key: "ZSP"
-																		})
-																	]	
+																	}
 																})
 															]
 														}),

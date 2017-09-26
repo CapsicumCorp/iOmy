@@ -42,39 +42,15 @@ sap.ui.jsfragment("fragments.OnvifServer", {
 						new sap.ui.layout.form.FormElement({
 							label : "Hub",
 							fields: [ 
-								new sap.m.Select (oView.createId("HubSelect"),{
-									items : [
-										new sap.ui.core.Item ({
-											text: "Please choose a Hub",
-											key: "start"
-										}),
-										new sap.ui.core.Item ({
-											text: "AndroidSTB",
-											key: "AndSTB"
-										})
-									]	
-								})
+								IomyRe.widgets.selectBoxHub("HubSelect")
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
 							label : "Put this device in",
 							fields: [ 
-								new sap.m.Select (oView.createId("RoomSelection"),{
-									items : [
-										new sap.ui.core.Item ({
-											text: "Room1",
-											key: "Room1"
-										}),
-										new sap.ui.core.Item ({
-											text: "Room2",
-											key: "Room2"
-										}),
-										new sap.ui.core.Item ({
-											text: "Room3",
-											key: "Room3"
-										})
-									]
-								})
+								IomyRe.widgets.selectBoxRoom({
+                                    id : "RoomSelection"
+                                })
 							]
 						}),
 						new sap.ui.layout.form.FormElement({

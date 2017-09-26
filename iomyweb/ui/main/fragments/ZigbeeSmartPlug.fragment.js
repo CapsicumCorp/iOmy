@@ -42,18 +42,7 @@ sap.ui.jsfragment("fragments.ZigbeeSmartPlug", {
 						new sap.ui.layout.form.FormElement({
 							label : "Hub",
 							fields: [ 
-								new sap.m.Select (oView.createId("HubSelect"),{
-									items : [
-										new sap.ui.core.Item ({
-											text: "Please choose a Hub",
-											key: "start"
-										}),
-										new sap.ui.core.Item ({
-											text: "AndroidSTB",
-											key: "AndSTB"
-										}),
-									]	
-								})
+								IomyRe.widgets.selectBoxHub("HubSelect")
 							]
 						}),
 						new sap.ui.layout.form.FormElement({

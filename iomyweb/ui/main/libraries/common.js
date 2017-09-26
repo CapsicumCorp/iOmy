@@ -78,6 +78,7 @@ $.extend(IomyRe.common,{
     bPremiseOccupantsOptionsLoaded  : false,
     bPremiseFloorsOptionsLoaded     : false,
     bPremiseBedroomsOptionsLoaded   : false,
+    bLinkTypesLoaded                : false,
     
     Regions                 : {},
     Languages               : {},
@@ -127,7 +128,6 @@ $.extend(IomyRe.common,{
     //============================================//
     bItemNameChangedMustRefresh     : false,        //-- BOOLEAN:       Indicates whether to refresh certain pages after changing the name of an item   --//
     bSessionTerminated              : false,        //-- BOOLEAN:       Indicates whether the session was terminated for whatever reason. Sets to true when an API request (OData or PHP) encounters a HTTP 403 error.   --//
-    bLinkTypesLoaded                : false,
     
     
     ConfigVars : function(sString) {
@@ -2395,13 +2395,72 @@ $.extend(IomyRe.common,{
         //$.sap.log.debug( "ChangePage NavArray="+JSON.stringify(this.NavPagesNavigationArray) );
         //$.sap.log.debug( "ChangePage NavIndex="+JSON.stringify(this.NavPagesCurrentIndex ) );
         
-        //if (oApp.getPage(sPageName) === null) {
-        //    IomyRe.pages.createPage(sPageName);
-        //}
+        if (oApp.getPage(sPageName) === null) {
+            IomyRe.pages.createPage(sPageName);
+        }
         
         //-- Navigate to the new Page --//
         oApp.to( sPageName, aPageData );
         
+    },
+    
+    //----------------------------------------------------------------------------------------//
+    //-- This function is used to change pages either back or forward ( depending on what    --//
+    //-- the user has clicked )                                                                --//
+    //----------------------------------------------------------------------------------------//
+    NavigationTriggerBackForward: function( bForwardTriggered ) {
+        //-- Restart the status of the extras menu      --//
+        IOMy.widgets.extrasMenuOpen = false;
+        
+        // Declare variables
+        var sName        = "";
+        var aData        = {};
+        
+        //-- IF the app requested to go forward a page --//
+        if( bForwardTriggered===true ) {
+            if( IOMy.common.NavPagesNavigationArray.length > (IOMy.common.NavPagesCurrentIndex+1) ) {
+                //-- Increase the Current Index back to the next value --//
+                //jQuery.sap.log.debug("NavForward CurrentLength="+IOMy.common.NavPagesNavigationArray.length);
+                //jQuery.sap.log.debug("NavForward CurrentIndex="+IOMy.common.NavPagesCurrentIndex);
+                IOMy.common.NavPagesCurrentIndex++;
+                //jQuery.sap.log.debug("NavForward NewIndex="+IOMy.common.NavPagesCurrentIndex);
+                sName = IOMy.common.NavPagesNavigationArray[IOMy.common.NavPagesCurrentIndex].Name;
+                aData = IOMy.common.NavPagesNavigationArray[IOMy.common.NavPagesCurrentIndex].Data;
+                //-- Navigate to the next Page --//
+                oApp.to( sName, "Slide", aData );
+                //-- Return Success --//
+                return true;
+                
+            } else {
+                //-- Return Failure (Since there is no further pages to navigate to)--//'
+                return false;
+            }
+        //-- ELSE assume going back a page is what is requested --//
+        } else {
+            //-- If the Page is on the Default Page or Glitched and a back rquest is requested --//
+            if( IOMy.common.NavPagesCurrentIndex<=0) {
+                //-- Set the index to zero (aka Default Page) --//
+                IOMy.common.NavPagesCurrentIndex = -1;
+                //-- Navigate back to the Default Page --//
+                oApp.to( IOMy.common.sNavigationDefaultPage, "c_SlideBack", {} );
+                
+            } else {
+                //-- Decrease the Current Index back to the previous value --//
+                //jQuery.sap.log.debug("NavBack CurrentIndex="+IOMy.common.NavPagesCurrentIndex);
+                IOMy.common.NavPagesCurrentIndex--;
+                //jQuery.sap.log.debug("NavBack NewIndex="+IOMy.common.NavPagesCurrentIndex);
+                
+                sName = IOMy.common.NavPagesNavigationArray[IOMy.common.NavPagesCurrentIndex].Name;
+                aData = IOMy.common.NavPagesNavigationArray[IOMy.common.NavPagesCurrentIndex].Data;
+                
+                //jQuery.sap.log.debug("NavBack NavArray="+JSON.stringify(IOMy.common.NavPagesNavigationArray) );
+                //jQuery.sap.log.debug("NavBack BackPage="+JSON.stringify(IOMy.common.NavPagesNavigationArray[IOMy.common.NavPagesCurrentIndex]) );
+                //-- Navigate back to the previous Page --//
+                oApp.to( sName, "c_SlideBack", aData );
+            }
+            //-- Return Success --//
+            return true;
+        }
     },
     
     NavigationReturnToHome: function() {

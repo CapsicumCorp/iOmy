@@ -426,5 +426,45 @@ $.extend( IomyRe.widgets, {
 		//----------------------------------------------------//
 		return oPageSection;
 	},
-	
+    
+    
+    //------------------------------------------------------------------------//
+    // The select boxes
+    //------------------------------------------------------------------------//
+    
+	/**
+     * Returns a select box containing a list of device types and onvif servers
+     * 
+     * @param {string} sId          ID for the select box.
+     * @returns {sap.m.Select}      Select box with the options.
+     */
+    selectBoxNewDeviceOptions : function (sId, mSettings) {
+        //================================================================//
+		// Declare Variables
+		//================================================================//
+		var aaOptions = IOMy.functions.getNewDeviceOptions();
+		var oSBox;
+
+		//================================================================//
+		// Create the Select Box
+		//================================================================//
+		oSBox = new sap.m.Select(sId,{
+			width : "100%"
+		});
+
+		$.each(aaOptions, function(sIndex,mEntry) {
+			if( sIndex!==undefined && sIndex!==null && mEntry!==undefined && mEntry!==null ) {
+				oSBox.addItem(
+					new sap.ui.core.Item({
+						text : mEntry.Name,
+						key : sIndex
+					})
+				);
+			}
+		});
+		
+		oSBox.setSelectedKey(null);
+
+		return oSBox;
+    }
 });

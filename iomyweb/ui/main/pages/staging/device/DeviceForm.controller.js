@@ -22,10 +22,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+$.sap.require("IomyRe.functions.getNewDeviceOptions");
+$.sap.require("IomyRe.widgets.selectBoxNewDeviceOptions");
+
 sap.ui.controller("pages.staging.device.DeviceForm", {
 	aFormFragments: 	{},
-	
-	
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -37,7 +38,13 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
 		var oController = this;			//-- SCOPE: Allows subfunctions to access the current scope --//
 		var oView = this.getView();
 		
-		
+//		if (!IomyRe.common.bLinkTypesLoaded) {
+//            IomyRe.common.RetrieveLinkTypeList({
+//                onSuccess : function () {
+//                    
+//                }
+//            });
+//        }
 		
 		oView.addEventDelegate({
 
@@ -68,39 +75,87 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
 	DevTypeToggle : function ( oController, sDevType) {
 		var oView = oController.getView();
 		var oTarget = oView.byId("DevType");
-		//console.log(sDevType);
+		console.log(sDevType);
+        
+        if (sDevType === "start") {
+            oView.byId("DevSettings").setVisible( false );
+        } else {
+            oView.byId("DevSettings").setVisible( true );
+            
+            switch (sDevType) {
+
+                //-- Zigbee Devices --//
+                case "linkType"+IomyRe.devices.zigbeesmartplug.LinkTypeId:
+                    IomyRe.common.ShowFormFragment( oController, "ZigbeeSmartPlug", "DevSettingsBlock", "Block" );
+                    break;
+                    
+                //-- Philips Hue Bridge --//
+                case "linkType"+IomyRe.devices.philipshue.LinkTypeId:
+                    IomyRe.common.ShowFormFragment( oController, "PhillipsHueBridge", "DevSettingsBlock", "Block" );
+                    break;
+                    
+                //-- Onvif Server --//
+                case "linkType"+IomyRe.devices.onvif.LinkTypeId:
+                    IomyRe.common.ShowFormFragment( oController, "OnvifServer", "DevSettingsBlock", "Block" );
+                    break;
+                    
+                //-- Onvif Stream --//
+                case "thingType"+IomyRe.devices.onvif.ThingTypeId:
+                    IomyRe.common.ShowFormFragment( oController, "OnvifCamera", "DevSettingsBlock", "Block" );
+                    break;
+                    
+                //-- IP Webcam (MJPEG Stream) --//
+                case "linkType"+IomyRe.devices.ipcamera.LinkTypeId:
+                    IomyRe.common.ShowFormFragment( oController, "IPCamera", "DevSettingsBlock", "Block" );
+                    break;
+                    
+                //-- Open Weather Map --//
+                case "linkType"+IomyRe.devices.weatherfeed.LinkTypeId:
+                    IomyRe.common.ShowFormFragment( oController, "OpenWeatherMap", "DevSettingsBlock", "Block" );
+                    break;
+                    
+                //-- CSR Mesh (Bluetooth) --//
+//                case "linkType"+IomyRe.devices.csrmesh.LinkTypeId:
+//                    IomyRe.common.ShowFormFragment( oController, "CSRMesh", "DevSettingsBlock", "Block" );
+//                    break;
+                    
+                default:
+                    $.sap.log.error("DevTypeToggle: Critcal Error. sDevType set incorrectly:"+sDevType);
+                    break;
+            }
+        }
 		
-		try {
-			if (sDevType === "ZSP") {
-				oView.byId("DevSettings").setVisible( true );
-				IomyRe.common.ShowFormFragment( oController, "ZigbeeSmartPlug", "DevSettingsBlock", "Block" );
-			} else if (sDevType === "PHB") {
-				oView.byId("DevSettings").setVisible( true );
-				IomyRe.common.ShowFormFragment( oController, "PhillipsHueBridge", "DevSettingsBlock", "Block" );
-			} else if (sDevType === "CSRM") {
-				oView.byId("DevSettings").setVisible( true );
-				IomyRe.common.ShowFormFragment( oController, "CSRMesh", "DevSettingsBlock", "Block" );
-			} else if (sDevType === "IPC") {
-				oView.byId("DevSettings").setVisible( true );
-				IomyRe.common.ShowFormFragment( oController, "IPCamera", "DevSettingsBlock", "Block" );
-			} else if (sDevType === "OWM") {
-				oView.byId("DevSettings").setVisible( true );
-				IomyRe.common.ShowFormFragment( oController, "OpenWeatherMap", "DevSettingsBlock", "Block" );
-			} else if (sDevType === "OnVCam") {
-				oView.byId("DevSettings").setVisible( true );
-				IomyRe.common.ShowFormFragment( oController, "OnvifCamera", "DevSettingsBlock", "Block" );
-			} else if (sDevType === "OnVServ") {
-				oView.byId("DevSettings").setVisible( true );
-				IomyRe.common.ShowFormFragment( oController, "OnvifServer", "DevSettingsBlock", "Block" );
-			} else if (sDevType === "start") {
-				oView.byId("DevSettings").setVisible( false );
-			} else {
-				$.sap.log.error("DevTypeToggle: Critcal Error. sDevType set incorrectly:"+sDevType);
-			}
-		} catch(e1) {
-			$.sap.log.error("DevTypeToggle: Critcal Error:"+e1.message);
-			return false;
-		}
+//		try {
+//			if (sDevType === "ZSP") {
+//				oView.byId("DevSettings").setVisible( true );
+//				IomyRe.common.ShowFormFragment( oController, "ZigbeeSmartPlug", "DevSettingsBlock", "Block" );
+//			} else if (sDevType === "PHB") {
+//				oView.byId("DevSettings").setVisible( true );
+//				IomyRe.common.ShowFormFragment( oController, "PhillipsHueBridge", "DevSettingsBlock", "Block" );
+//			} else if (sDevType === "CSRM") {
+//				oView.byId("DevSettings").setVisible( true );
+//				IomyRe.common.ShowFormFragment( oController, "CSRMesh", "DevSettingsBlock", "Block" );
+//			} else if (sDevType === "IPC") {
+//				oView.byId("DevSettings").setVisible( true );
+//				IomyRe.common.ShowFormFragment( oController, "IPCamera", "DevSettingsBlock", "Block" );
+//			} else if (sDevType === "OWM") {
+//				oView.byId("DevSettings").setVisible( true );
+//				IomyRe.common.ShowFormFragment( oController, "OpenWeatherMap", "DevSettingsBlock", "Block" );
+//			} else if (sDevType === "OnVCam") {
+//				oView.byId("DevSettings").setVisible( true );
+//				IomyRe.common.ShowFormFragment( oController, "OnvifCamera", "DevSettingsBlock", "Block" );
+//			} else if (sDevType === "OnVServ") {
+//				oView.byId("DevSettings").setVisible( true );
+//				IomyRe.common.ShowFormFragment( oController, "OnvifServer", "DevSettingsBlock", "Block" );
+//			} else if (sDevType === "start") {
+//				oView.byId("DevSettings").setVisible( false );
+//			} else {
+//				$.sap.log.error("DevTypeToggle: Critcal Error. sDevType set incorrectly:"+sDevType);
+//			}
+//		} catch(e1) {
+//			$.sap.log.error("DevTypeToggle: Critcal Error:"+e1.message);
+//			return false;
+//		}
 	},
 
 	
