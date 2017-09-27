@@ -76,40 +76,46 @@ $.extend( IomyRe.widgets, {
 			src: "resources/images/mini-logo.png"
 		});
 		
-		oAdd = new sap.m.Button ({
+		oAdd = new sap.m.OverflowToolbarButton ({
 			layoutData : new sap.m.OverflowToolbarLayoutData({
-				priority : sap.m.OverflowToolbarPriority.NeverOverflow
+				priority : sap.m.OverflowToolbarPriority.High
 			}),
 			icon: "sap-icon://add",
+			text: "Add",
 			type: "Transparent",
 			press: function(oControlEvent) {
 				IomyRe.navigation.AddMenu(oControlEvent, oView);
 			}	
 		});
 		
-		oEdit = new sap.m.Button ({
+		oEdit = new sap.m.OverflowToolbarButton ({
 			layoutData : new sap.m.OverflowToolbarLayoutData({
-				priority : sap.m.OverflowToolbarPriority.NeverOverflow
+				priority : sap.m.OverflowToolbarPriority.High
 			}),
 			icon: "sap-icon://edit",
+			text: "Edit",
 			type: "Transparent",
 			press: function(oControlEvent) {
 				IomyRe.navigation.EditMenu(oControlEvent, oView);
 			}	
 		});
 		
-		oSwitchView = new sap.m.Button ({
+		oSwitchView = new sap.m.OverflowToolbarButton ({
 			layoutData : new sap.m.OverflowToolbarLayoutData({
-				priority : sap.m.OverflowToolbarPriority.NeverOverflow
+				priority : sap.m.OverflowToolbarPriority.High
 			}),
 			icon: "sap-icon://switch-views",
 			type: "Transparent",
+			text: "View By",
 			press: function(oControlEvent) {
 				IomyRe.navigation.GroupMenu(oControlEvent, oView);
 			}	
 		});
 		
 		oSettings = new sap.m.Button (oView.createId("openMenu"), {
+			layoutData : new sap.m.OverflowToolbarLayoutData({
+				priority : sap.m.OverflowToolbarPriority.High
+			}),
 			text: "Hi, Freshwater1!",
 			type: "Transparent",
 			press: function(oControlEvent) {
