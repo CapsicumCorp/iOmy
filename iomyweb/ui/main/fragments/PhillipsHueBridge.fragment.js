@@ -42,7 +42,7 @@ sap.ui.jsfragment("fragments.PhillipsHueBridge", {
 						new sap.ui.layout.form.FormElement({
 							label : "Hub",
 							fields: [ 
-								IomyRe.widgets.selectBoxHub("HubSelect")
+								IomyRe.widgets.selectBoxHub(oView.createId("HubSelect"))
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
@@ -56,19 +56,22 @@ sap.ui.jsfragment("fragments.PhillipsHueBridge", {
 						new sap.ui.layout.form.FormElement({
 							label : "Network Address",
 							fields: [ 
-								new sap.m.Input ({
-									placeholder : "Enter IP Address"
+								new sap.m.Input({
+									placeholder: "Enter IP Address",
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/IPAddress}"
 								}),
-								new sap.m.Input ({
-									placeholder: "Enter Port Number"
-								})
+								new sap.m.Input({
+									placeholder: "Enter Port Number",
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/IPPort}"
+								}),
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
 							label : "Device Token Label",
 							fields: [ 
 								new sap.m.Input ({
-									placeholder : "Located in your Phillips Hue bridge manual"
+									placeholder : "Located in your Phillips Hue bridge manual",
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/DeviceToken}"
 								})
 							]
 						}),

@@ -27,7 +27,7 @@ IomyRe.devices.zigbeesmartplug = new sap.ui.base.Object();
 $.extend(IomyRe.devices.zigbeesmartplug,{
 	Devices: [],
     
-    CommTypeID : 3,                         // This SHOULD NOT change!
+    CommTypeId : 3,                         // This SHOULD NOT change!
     LinkTypeId : 2,
     
     iSelectedCommID : null,
@@ -97,8 +97,6 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
         //---------------------------------------------------------//
         var me              = this;
         var php             = IomyRe.apiphp;
-        var oOutputWidget   = oScope.byId(me.uiIDs.sTelnetOutputTextAreaID);
-        var oButton         = oScope.byId(me.uiIDs.sEnableJoinModeButtonID);
         var sText           = oButton.getText();
         
         //---------------------------------------------------------//
@@ -448,10 +446,8 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
             // Hub Information
             "HUB_PK","HUB_NAME","HUB_SERIALNUMBER","HUB_IPADDRESS"
         ];
-        var aFilter             = ["COMMTYPE_PK eq "+me.CommTypeID];
+        var aFilter             = ["COMMTYPE_PK eq "+me.CommTypeId];
         var aOrderBy            = [];
-        
-        oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).setEnabled(false);
         
         //---------------------------------------------------------//
         // Start the Request                                       //
@@ -529,7 +525,9 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
 						aErrorMessages.push(e.message);
 						// Disable the command widgets because no modems were detected.
 						me.ToggleZigbeeCommands(oScope, false);
-					}
+					} else {
+                        throw e;
+                    }
                 }
                 
                 //------------------------------------------------------------------//
@@ -549,173 +547,7 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
         });
     },
     
-    CreateLinkForm : function(oScope, oFormBox) {
-        var me = this;
-        var oFormItem;
-        var oAPIModesHBox = new sap.m.HBox(oScope.createId(me.uiIDs.sAPIModesHBoxID), {}).addStyleClass("width100Percent");
-        var showErrorDialog = IomyRe.common.showError;
-        
-        //--------------------------------------------------------------------//
-        // Change the help message for the New Link page.
-        //--------------------------------------------------------------------//
-        IomyRe.help.PageInformation["pSettingsLinkAdd"] = "" +
-            "If there are Zigbee modems detected, they will show in its select box, " +
-            "and you will be able to add all zigbee devices by pressing the 'Join Devices' " +
-            "button.\n\nThere is an area where telnet output is displayed. This contains " +
-            "feedback from each telnet command called.\n\nThis will add all zigbee devices " +
-            "attached to a zigbee dongle as links and items.";
-        
-        oScope.byId("buttonBox").setEnabled(false);
-        
-        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sAPIModesHBoxID);
-        //--------------------------------------------------------------------//
-        // Zigbee Modems                                                      //
-        //--------------------------------------------------------------------//
-        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sZigbeeModemsLabelID);
-        oFormItem = new sap.m.Label(oScope.createId(me.uiIDs.sZigbeeModemsLabelID), {
-            text : "Attached Zigbee Modems"
-        });
-        oFormBox.addItem(oFormItem);
-        
-        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sZigbeeModemsSBoxID);
-        oFormItem = new sap.m.Select(oScope.createId(me.uiIDs.sZigbeeModemsSBoxID), {
-            width : "100%",
-            change : function () {
-                me.iSelectedCommID = this.getSelectedKey();
-            }
-        }).addStyleClass("width100Percent");
-        oFormBox.addItem(oFormItem);
-        
-        // Attempt to fetch the Zigbee modems
-        me.FetchConnectedZigbeeModems(oScope,
-            function (mErrorInfo) {
-                var firstSelection = null;
-                
-                // Check if a fatal error occurred
-                if (mErrorInfo.bError === true) {
-                    // If so report it and take no further action.
-                    jQuery.sap.log.error(mErrorInfo.aErrorMessages.join("\n"));
-                    showErrorDialog(mErrorInfo.aErrorMessages.join("\n\n"));
-                } else {
-                    // Otherwise, first check how many records failed to load.
-                    // If any records failed to load, report them then continue.
-                    if (mErrorInfo.iRecordErrorCount > 0) {
-                        jQuery.sap.log.error(mErrorInfo.aErrorMessages.join("\n"));
-                        showErrorDialog(mErrorInfo.aErrorMessages.join("\n\n"));
-                    }
-                    
-                    // Now populate the Zigbee modem select box
-                    if (JSON.stringify(me.ConnectedZigbeeModems) === "{}") {
-                        oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).addItem(
-                            new sap.ui.core.Item({
-                                text : "No Zigbee Modems Detected"
-                            })
-                        );
-                
-                        oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).setEnabled(false);
-                        me.ToggleZigbeeCommands(oScope, false);
-                    } else {
-                        $.each(me.ConnectedZigbeeModems, function(sIndex, aModem) {
-                            if (sIndex !== undefined && sIndex !== null
-                                    && aModem !== undefined && aModem !== null)
-                            {
-                                oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).addItem(
-                                    new sap.ui.core.Item({
-                                        text : aModem.CommName,
-                                        key : aModem.CommId
-                                    })
-                                );
-
-                                if (firstSelection === null) {
-                                    firstSelection = aModem;
-                                }
-                            }
-                        });
-
-                        oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).setEnabled(true);
-                        oScope.byId(me.uiIDs.sZigbeeModemsSBoxID).setSelectedKey(firstSelection.CommId);
-                        me.iSelectedCommID = firstSelection.CommId;
-                        me.ToggleZigbeeCommands(oScope, !me.bRunningCommand);
-                    }
-                }
-                
-            }
-        );
-        
-        //--------------------------------------------------------------------//
-        // Zigbee Custom Telnet Commands                                      //
-        //--------------------------------------------------------------------//
-        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sCustomTelnetCommandLabelID);
-        oFormItem = new sap.m.Label(oScope.createId(me.uiIDs.sCustomTelnetCommandLabelID), {
-            text : "Custom Telnet Command"
-        });
-        oFormBox.addItem(oFormItem);
-        
-        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sCustomTelnetCommandFieldID);
-        
-		// "resoruces\js\ZigbeeCustomTelnetInput.js" for VBox
-        oFormItem = new ZigbeeCustomTelnetInput(oScope.createId(me.uiIDs.sCustomTelnetCommandFieldID), {
-            scope : oScope
-        });
-        oFormItem.widget.addStyleClass("");
-        oFormBox.addItem(oFormItem.widget);
-        me.oZigbeeInput = oFormItem;
-        
-        //--------------------------------------------------------------------//
-        // Enable Join Mode                                                   //
-        //--------------------------------------------------------------------//
-        oScope.aElementsForAFormToDestroy.push("EnableJoinModeButtonHolder");
-        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sEnableJoinModeButtonID);
-        
-        oFormItem = new sap.m.VBox(oScope.createId("EnableJoinModeButtonHolder"), {
-			layoutData : new sap.m.FlexItemData({
-				growFactor : 1
-			}),
-            items : [
-                new sap.m.Button(oScope.createId(me.uiIDs.sEnableJoinModeButtonID), {
-                    text : "Join Devices",
-                    // If it's not cooling down, then it will be enabled
-                    enabled : !me.bRunningCommand,
-                    press : function () {
-                        // Show that it is loading a timer 
-                        this.setText(me.sEnableTempJoinButtonText + " - Loading");
-                        me.bJoinModeToggleCoolingDown = true;
-                        me.ToggleZigbeeCommands(oScope, false);
-                        
-                        // The command to re-enable this button is called by this function
-                        me.TurnOnZigbeeJoinMode(oScope);
-                    }
-                }).addStyleClass("width100Percent TextCenter")
-            ]
-        }).addStyleClass("TextCenter");
-        oAPIModesHBox.addItem(oFormItem);
-        
-        //--------------------------------------------------------------------//
-        // Placeholder for the Zigbee telnet command buttons                  //
-        //--------------------------------------------------------------------//
-        oFormBox.addItem(oAPIModesHBox);
-        
-        //--------------------------------------------------------------------//
-        // Telnet output label and text area                                  //
-        //--------------------------------------------------------------------//
-        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sTelnetOutputLabelID);
-        oFormItem = new sap.m.Label(oScope.createId(me.uiIDs.sTelnetOutputLabelID), {
-            text : "Telnet Output"
-        });
-        oFormBox.addItem(oFormItem);
-        
-        oScope.aElementsForAFormToDestroy.push(me.uiIDs.sTelnetOutputTextAreaID);
-        oFormItem = new sap.m.TextArea(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID), {
-            editable : false
-        }).addStyleClass("width100Percent TelnetOutput");
-        
-        oFormBox.addItem(oFormItem);
-		
-		//me.PopulateTelnetLogArea(oScope);
-		me.ToggleZigbeeCommands(oScope, false);
-    },
-	
-	PopulateTelnetLogArea : function (oScope) {
+    PopulateTelnetLogArea : function (oScope) {
 		var me			= this;
 		var sTextAreaId = oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner");
 		var oFormItem	= oScope.byId(me.uiIDs.sTelnetOutputTextAreaID);

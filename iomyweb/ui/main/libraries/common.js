@@ -2521,25 +2521,25 @@ $.extend(IomyRe.common,{
         try {
             if( oTarget ) {
                 if( sTargetType === "FormContainer" ) {
-                    console.log("Add FormContainer");
+                    //console.log("Add FormContainer");
                     oTarget.destroyFormContainers();
                     oTarget.addFormContainer( IomyRe.common.GetFormFragment( oController, sFragmentName) );
                     return oTarget;
                     
                 } else if (sTargetType === "Item") {
-                    console.log("Add Item");
+                    //console.log("Add Item");
                     oTarget.destroyItems();
                     oTarget.addItem( IomyRe.common.GetFormFragment( oController, sFragmentName) );
                     return oTarget;
                     
                 } else if (sTargetType === "Block") {
-                    console.log("Add Block");
+                    //console.log("Add Block");
                     oTarget.destroyBlocks();
                     oTarget.addBlock( IomyRe.common.GetFormFragment( oController, sFragmentName) );
                     return oTarget;
                     
                 } else {
-                    console.log("Add Content");
+                    //console.log("Add Content");
                     oTarget.removeAllContent();
                     oTarget.addContent( IomyRe.common.GetFormFragment( oController, sFragmentName) );
                     return oTarget;
@@ -2552,6 +2552,6 @@ $.extend(IomyRe.common,{
             $.sap.log.error("ShowFormFragment: Critical Error "+e1.message);
             return false;
         }
-    },
+    }
     
 });

@@ -42,24 +42,19 @@ sap.ui.jsfragment("fragments.ZigbeeSmartPlug", {
 						new sap.ui.layout.form.FormElement({
 							label : "Hub",
 							fields: [ 
-								IomyRe.widgets.selectBoxHub("HubSelect")
+								IomyRe.widgets.selectBoxHub(oView.createId("HubSelect"))
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
 							label : "Modem",
 							fields: [ 
-								new sap.m.Select (oView.createId("ZigModemSelect"),{
-									items : [
-										new sap.ui.core.Item ({
-											text: "Please choose a Modem",
-											key: "start"
-										}),
-										new sap.ui.core.Item ({
-											text: "RapidHA",
-											key: "RHA"
-										}),
-									]	
-								})
+                                IomyRe.widgets.selectBoxZigbeeModem(oView.createId("ZigModemSelect"), {
+                                    onSuccess : function () {
+                                        oView.byId("CustomTelnetInput").setEnabled(true);
+                                        oView.byId("CustomTelnetButton").setEnabled(true);
+                                        oView.byId("JoinDevicesButton").setEnabled(true);
+                                    }
+                                })
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
@@ -71,9 +66,11 @@ sap.ui.jsfragment("fragments.ZigbeeSmartPlug", {
 											layoutData : new sap.m.FlexItemData({
 												growFactor : 1
 											}),
+                                            enabled : false
 										}),
-										new sap.m.Button ({
+										new sap.m.Button (oView.createId("CustomTelnetButton"),{
 											text:"+",
+                                            enabled : false
 										})
 									]
 								})
@@ -82,11 +79,12 @@ sap.ui.jsfragment("fragments.ZigbeeSmartPlug", {
 						new sap.ui.layout.form.FormElement({
 							label : "",
 							fields: [ 
-								new sap.m.Button ({
+								new sap.m.Button (oView.createId("JoinDevicesButton"), {
 									layoutData : new sap.m.FlexItemData({
 										growFactor : 1
 									}),
 									text:"Join Devices",
+                                    enabled : false
 								})
 							]
 						}),

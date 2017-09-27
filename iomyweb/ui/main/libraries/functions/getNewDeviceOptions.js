@@ -27,8 +27,8 @@ $.sap.declare("IomyRe.functions.getNewDeviceOptions",true);
 $.extend(IomyRe.functions, {
 	
 	/**
-	 * Creates a JSON structure that contains a list of device types, and onvif
-	 * servers for users to select from.
+	 * Creates a JSON structure that contains a list of device types for users
+     * to select from.
      * 
      * Example:
      * 
@@ -87,6 +87,110 @@ $.extend(IomyRe.functions, {
             "Id"		: IomyRe.devices.onvif.ThingTypeId,
             "Name"		: "Onvif Stream",
             "Type"		: "thing"
+        };
+		
+		return structOptions;
+	},
+    
+    /**
+	 * Creates a JSON structure that contains a list of device types for users
+     * to select from.
+     * 
+     * Example:
+     * 
+     * {
+     *     "type2" : {
+     *         "Id" : 2,
+     *         "Name" : "New Zigbee Dongle",
+     *         "Type" : "type"
+     *     },
+     * }
+	 * 
+	 * @returns {Object}		Data structure
+	 */
+	getDeviceFormJSON : function () {
+		//--------------------------------------------------------------------//
+		// Variables
+		//--------------------------------------------------------------------//
+		
+		//-- List --//
+		var structOptions		= {};
+		
+		//-- Import core variables --//
+		var aDeviceList;
+		var aDeviceTypeList;
+		
+		//--------------------------------------------------------------------//
+		// Get the core variables for this function
+		//--------------------------------------------------------------------//
+		aDeviceList		= IomyRe.common.LinkList;
+		aDeviceTypeList	= IomyRe.common.LinkTypeList;
+		
+		//--------------------------------------------------------------------//
+		// Begin Constructing the structure by adding device types.
+		//--------------------------------------------------------------------//
+		$.each(aDeviceTypeList, function (sI, mDeviceType) {
+			// TODO: Place all of these options in alphabetical order.
+			if (mDeviceType.LinkTypeId === IomyRe.devices.onvif.LinkTypeId)
+			{
+				structOptions["linkType"+mDeviceType.LinkTypeId] = {
+                    "Hub" : "",
+                    "Room" : "",
+                    "IPAddress" : "",
+                    "IPPort" : "",
+                    "DisplayName" : "",
+                    "Username" : "",
+                    "Password" : "",
+                };
+			}
+			
+			if (mDeviceType.LinkTypeId === IomyRe.devices.philipshue.LinkTypeId)
+			{
+				structOptions["linkType"+mDeviceType.LinkTypeId] = {
+                    "Hub" : "",
+                    "Room" : "",
+                    "IPAddress" : "",
+                    "IPPort" : "",
+                    "DeviceToken" : "",
+                    "DisplayName" : ""
+                };
+			}
+			
+			if (mDeviceType.LinkTypeId === IomyRe.devices.weatherfeed.LinkTypeId)
+			{
+				structOptions["linkType"+mDeviceType.LinkTypeId] = {
+                    "Hub" : "",
+                    "Room" : "",
+                    "DisplayName" : "",
+                    "StationCode" : "",
+                    "KeyCode" : ""
+                };
+			}
+			
+			if (mDeviceType.LinkTypeId === IomyRe.devices.ipcamera.LinkTypeId)
+			{
+				structOptions["linkType"+mDeviceType.LinkTypeId] = {
+                    "Hub" : "",
+                    "Room" : "",
+                    "Protocol" : "",
+                    "IPAddress" : "",
+                    "IPPort" : "",
+                    "DisplayName" : "",
+                    "Username" : "",
+                    "Password" : "",
+                };
+			}
+			
+		});
+		
+		//--------------------------------------------------------------------//
+		// Add the onvif camera option
+		//--------------------------------------------------------------------//
+		structOptions["thingType"+IomyRe.devices.onvif.ThingTypeId] = {
+            "DisplayName" : "",
+            "OnvifServer" : "",
+            "StreamProfile" : "",
+            "ThumbnailProfile" : ""
         };
 		
 		return structOptions;

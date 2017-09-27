@@ -436,21 +436,62 @@ $.extend( IomyRe.widgets, {
      * Returns a select box containing a list of device types and onvif servers
      * 
      * @param {string} sId          ID for the select box.
+     * @param {object} mSettings    Map containing parameters.
+     * 
      * @returns {sap.m.Select}      Select box with the options.
+     * 
+     * @throws IllegalArgumentException if either the ID or the settings map is of an incorrect type.
      */
     selectBoxNewDeviceOptions : function (sId, mSettings) {
         //================================================================//
 		// Declare Variables
 		//================================================================//
-		var aaOptions = IOMy.functions.getNewDeviceOptions();
-		var oSBox;
+		try {
+            var aaOptions = IomyRe.functions.getNewDeviceOptions();
+            var oSBox;
+            var sID;
+        } catch (e) {
+            jQuery.sap.log.error(e.name+": "+e.message);
+        }
 
+        
 		//================================================================//
-		// Create the Select Box
+        // Process any settings and create the select box
 		//================================================================//
-		oSBox = new sap.m.Select(sId,{
-			width : "100%"
-		});
+        if (typeof sId === "string") {
+            sID = sId;
+            
+            if (typeof mSettings === "object") {
+
+                if (mSettings === undefined) {
+                    mSettings = {};
+                }
+
+                mSettings.items = [
+                    new sap.ui.core.Item ({
+                        text: "Please choose a device type",
+                        key: "start"
+                    })
+                ];
+
+                oSBox = new sap.m.Select(sId, mSettings);
+                
+            } else {
+                throw new IllegalArgumentException("'mSettings' is not an object. Type given: '"+typeof mSettings+"'.");
+            }
+            
+        } else if (typeof sId === "object") {
+            //----------------------------------------------------------------//
+            // The first parameter must in fact be the settings map.
+            //----------------------------------------------------------------//
+            mSettings = sId;
+            
+            oSBox = new sap.m.Select(mSettings);
+            
+        } else {
+            throw new IllegalArgumentException("Element ID is not a valid type. Must be a string. Type given: '"+typeof sId+"'.");
+        }
+		
 
 		$.each(aaOptions, function(sIndex,mEntry) {
 			if( sIndex!==undefined && sIndex!==null && mEntry!==undefined && mEntry!==null ) {
@@ -463,8 +504,371 @@ $.extend( IomyRe.widgets, {
 			}
 		});
 		
-		oSBox.setSelectedKey(null);
+		//oSBox.setSelectedKey(null);
 
 		return oSBox;
+    },
+    
+    /**
+     * Returns a select box containing a list of rooms within a given premise. Can also
+     * receive the ID of the room that is currently selected if changing from one room
+     * to another.
+     * 
+     * @param {object} mSettings        Parameters
+     * @returns {sap.m.Select}          Select box with the rooms in a given premise.
+     * 
+     * @throws NoRoomsFoundException when there are no rooms visible to the user.
+     */
+    selectBoxRoom : function (mSettings) {
+        var bError              = false;
+        var aErrorMessages      = [];
+        var aItems              = [];
+        var aFirstItem          = [];
+        var sId;
+        var sPremiseId;
+        var iRoomId;
+        var bIncludeUnassigned;
+        var bAddAllRoomOption;
+        var oSBox;
+        
+        if (mSettings !== undefined) {
+            
+            if (mSettings.premiseID === undefined || mSettings.premiseID === null) {
+                
+                //--------------------------------------------------------------------//
+                // Fetch the premise ID.
+                // 
+                // NOTE: This currently selects the first premise in the list, which is
+                // normally the only one in the list. When we start adding support for
+                // multiple premises, this code will need to be redone.
+                //--------------------------------------------------------------------//
+                $.each(IomyRe.common.PremiseList, function (sI, mPremise) {
+                    sPremiseId = sI;
+                    return false;
+                });
+                
+            } else {
+                sPremiseId = mSettings.premiseID;
+                
+                if (isNaN(sPremiseId)) {
+                    if (sPremiseId.charAt(0) !== '_') {
+                        bError = true;
+                        aErrorMessages = "Premise ID is not in a valid format.";
+                    }
+                } else {
+                    sPremiseId = "_" + sPremiseId;
+                }
+            }
+            
+            if (mSettings.id === undefined || mSettings.id === null) {
+                sId = null;
+            } else {
+                sId = mSettings.id;
+            }
+            
+            if (mSettings.roomID === undefined || mSettings.roomID === null) {
+                iRoomId = null;
+            } else {
+                iRoomId = mSettings.roomID;
+            }
+            
+            if (mSettings.showUnassigned === undefined || mSettings.showUnassigned === null) {
+                bIncludeUnassigned = false;
+            } else {
+                bIncludeUnassigned = mSettings.showUnassigned;
+            }
+            
+            if (mSettings.showAllRoomOption === undefined || mSettings.showAllRoomOption === null) {
+                bAddAllRoomOption = false;
+            } else {
+                bAddAllRoomOption = mSettings.showAllRoomOption;
+            }
+            
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join("\n"));
+            }
+            
+        } else {
+            //--------------------------------------------------------------------//
+            // Fetch the premise ID.
+            // 
+            // NOTE: This currently selects the first premise in the list, which is
+            // normally the only one in the list. When we start adding support for
+            // multiple premises, this code will need to be redone.
+            //--------------------------------------------------------------------//
+            $.each(IomyRe.common.PremiseList, function (sI, mPremise) {
+                sPremiseId = sI;
+                return false;
+            });
+            
+            iRoomId = null;
+            bIncludeUnassigned = false;
+            bAddAllRoomOption = false;
+        }
+        
+        try {
+            //====================================================================//
+            // Declare Variables                                                  //
+            //====================================================================//
+            var iRoomsCounted = 0;
+            var bHasUnassignedRoom = false;
+            
+            if (bIncludeUnassigned === undefined || bIncludeUnassigned === null) {
+                bIncludeUnassigned = false;
+            }
+
+            //====================================================================//
+            // Create the Select Box                                              //
+            //====================================================================//
+            if (sap.ui.getCore().byId(sId) !== undefined) {
+                sap.ui.getCore().byId(sId).destroy();
+            }
+            
+            if (IomyRe.common.RoomsList[sPremiseId] !== undefined) {
+                
+                if (bAddAllRoomOption) {
+                    aFirstItem.push(
+                        new sap.ui.core.Item({
+                            "text" : "All Rooms",
+                            "key" : 0
+                        })
+                    );
+                }
+                
+                $.each(IomyRe.common.RoomsList[sPremiseId],function(sIndex,aRoom) {
+                    //-- Verify that the Premise has rooms, other than the pseudo-room Unassigned --//
+                    if( sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null)
+                    {
+                        if (aRoom.RoomId === 1 && aRoom.RoomName === "Unassigned" && !bIncludeUnassigned) {
+                            bHasUnassignedRoom = true;
+                            
+                        } else {
+                            aItems.push(
+                                new sap.ui.core.Item({
+                                    "text" : aRoom.RoomName,
+                                    "key" : aRoom.RoomId
+                                })
+                            );
+                        
+                            iRoomsCounted++;
+                        }
+                    }
+                });
+                
+                aItems = aFirstItem.concat(aItems);
+                
+                if (sId !== null) {
+                    oSBox = new sap.m.Select(sId,{
+                        "items" : aItems
+                    }).addStyleClass("width100Percent");
+
+                } else {
+                    oSBox = new sap.m.Select({
+                        "items" : aItems
+                    }).addStyleClass("width100Percent");
+                }
+                
+                if (iRoomsCounted > 0) {
+                    if (iRoomId !== undefined && iRoomId !== null) {
+                        oSBox.setSelectedKey(iRoomId);
+                    } else {
+                        oSBox.setSelectedKey(null);
+                    }
+                    
+                    return oSBox;
+                } else {
+                    if (bHasUnassignedRoom) {
+                        oSBox.setVisible(false);
+                    } else {
+                        throw new NoRoomsFoundException();
+                    }
+                }
+                
+            } else {
+                throw new NoRoomsFoundException();
+            }
+
+        } catch (e) {
+            e.message = "Error in IomyRe.widgets.selectBoxRoom(): "+e.message;
+            throw e;
+        }
+    },
+    
+    /**
+     * Returns a select box containing a list of hubs accessible to the current user.
+     * Can also accept a hub ID to immediately set that particular hub as currently
+     * selected.
+     * 
+     * @param {string} sId          ID for the select box.
+     * @param {Number} iHubId       ID of the given hub.
+     * @returns {mixed}             Either the select box filled with hubs or a text widget with an error message.
+     */
+    selectBoxHub : function (sId, iHubId) {
+        var oElement;
+        
+        try {
+            //====================================================================//
+            // Clean up                                                           //
+            //====================================================================//
+            if (sap.ui.getCore().byId(sId) !== undefined)
+                sap.ui.getCore().byId(sId).destroy();
+
+            //====================================================================//
+            // Create the Combo Box                                               //
+            //====================================================================//
+            var oSBox = new sap.m.Select(sId,{
+                width : "100%"
+            });
+
+            $.each(IomyRe.common.HubList, function (sI, mHub) {
+				oSBox.addItem(
+                    new sap.ui.core.Item({
+                        text : mHub.HubName,
+                        key : mHub.HubId
+                    })
+                );
+			});
+
+            if (iHubId !== undefined && iHubId !== null) {
+                oSBox.setSelectedKey(iHubId);
+            } else {
+                oSBox.setSelectedKey(null);
+            }
+
+            oElement = oSBox;
+            
+        } catch (e) {
+            jQuery.sap.log.error("Error in IomyRe.widgets.selectBoxHub(): "+e.message);
+            IomyRe.common.showError("Failed to load the hub combo box\n\n"+e.message, "Error");
+            oElement = new sap.m.Text(sId, {text : "Failed to load the hub combo box."});
+            
+        } finally {
+            
+            return oElement; // Either a combo box or an error message.
+        }
+    },
+    
+    /**
+     * Returns a select box that will contain any Zigbee or Rapid HA modems that
+     * were detected. This function refreshes the Comm list to get the latest
+     * information which will run an AJAX request.
+     * 
+     * The select box itself will be returned, but the list may still be
+     * generated, thus the widget will remain disabled until completed. Parsing
+     * the success and fail callbacks is recommended for additional actions.
+     * 
+     * If no modems are detected neither of the callbacks will run and will
+     * display a message in the widget saying so. The widget will remain
+     * disabled.
+     * 
+     * @param {object} mSettings        Parameters
+     * @returns {sap.m.Select}          Select box with the modems.
+     * 
+     * @throws NoRoomsFoundException when there are no rooms visible to the user.
+     */
+    selectBoxZigbeeModem : function (sId, mSettings) {
+        var bError              = false;
+        var aErrorMessages      = [];
+        var iModemCount         = 0;
+        var sID;
+        var oSBox;
+        var fnSuccess;
+        var fnFail;
+        
+        if (typeof sId === "string") {
+            sID = sId;
+            
+            if (mSettings !== undefined && mSettings !== null) {
+                if (typeof mSettings !== "object") {
+                    throw new IllegalArgumentException("'mSettings' is not an object. Type given: '"+typeof mSettings+"'.");
+                }
+            }
+            
+            oSBox = new sap.m.Select(sID, {
+                enabled : false
+            });
+            
+        } else if (typeof sId === "object") {
+            //----------------------------------------------------------------//
+            // The first parameter must in fact be the settings map.
+            //----------------------------------------------------------------//
+            mSettings = sId;
+            
+            oSBox = new sap.m.Select({
+                enabled : false
+            });
+            
+        } else {
+            throw new IllegalArgumentException("Element ID is not a valid type. Must be a string. Type given: '"+typeof sId+"'.");
+        }
+        
+        if (mSettings !== undefined) {
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+            } else {
+                fnSuccess = function () {};
+            }
+            
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+            } else {
+                fnFail = function () {};
+            }
+            
+        } else {
+            fnSuccess   = function () {};
+            fnFail      = function () {};
+        }
+        
+        try {
+
+            //====================================================================//
+            // Create the Select Box                                              //
+            //====================================================================//
+//            if (sap.ui.getCore().byId(sID) !== undefined) {
+//                sap.ui.getCore().byId(sID).destroy();
+//            }
+            
+            IomyRe.common.RefreshCommList({
+                
+                onSuccess : function () {
+                    
+                    $.each(IomyRe.common.CommList, function (sI, mComm) {
+                        
+                        if (mComm.CommTypeId == IomyRe.devices.zigbeesmartplug.CommTypeId) {
+                            oSBox.addItem(
+                                new sap.ui.core.Item({
+                                    key : mComm.CommId,
+                                    text : mComm.CommName
+                                })
+                            );
+                        
+                            iModemCount++;
+                        }
+                        
+                    });
+                    
+                    if (iModemCount > 0) {
+                        oSBox.setEnabled(true);
+                        fnSuccess();
+                        
+                    } else {
+                        oSBox.addItem(
+                            new sap.ui.core.Item({
+                                key : -1,
+                                text : "No modems detected"
+                            })
+                        );
+                    }
+                }
+                
+            });
+            
+            return oSBox;
+
+        } catch (e) {
+            e.message = "Error in IomyRe.widgets.selectBoxZigbeeModem(): "+e.message;
+            throw e;
+        }
     }
 });

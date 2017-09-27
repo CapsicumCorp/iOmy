@@ -42,7 +42,7 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 						new sap.ui.layout.form.FormElement({
 							label : "Hub",
 							fields: [ 
-								IomyRe.widgets.selectBoxHub("HubSelect")
+								IomyRe.widgets.selectBoxHub(oView.createId("HubSelect"))
 							]
 						}),
 						new sap.ui.layout.form.FormElement({

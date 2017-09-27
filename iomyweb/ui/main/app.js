@@ -26,6 +26,7 @@ $.sap.require("IomyRe.devices");
 
 $.sap.registerModulePath('IomyRe.functions', sModuleInitialBuildLocation+'libraries/functions');
 $.sap.require("IomyRe.functions");
+$.sap.require("IomyRe.functions.getNewDeviceOptions");
 
 $.sap.registerModulePath('IomyRe.widgets', sModuleInitialBuildLocation+'libraries/widgets');
 $.sap.require("IomyRe.widgets");
@@ -35,6 +36,15 @@ $.sap.require("IomyRe.forms");
 
 $.sap.registerModulePath('IomyRe.pages', sModuleInitialBuildLocation+'libraries/pages');
 $.sap.require("IomyRe.pages");
+
+$.sap.registerModulePath('IomyRe.telnet', sModuleInitialBuildLocation+'libraries/telnet');
+$.sap.require("IomyRe.telnet");
+
+$.sap.registerModulePath('IomyRe.rules', sModuleInitialBuildLocation+'libraries/rules');
+$.sap.require("IomyRe.rules");
+
+$.sap.registerModulePath('IomyRe.validation', sModuleInitialBuildLocation+'libraries/validation');
+$.sap.require("IomyRe.validation");
 
 
 //================================================//
