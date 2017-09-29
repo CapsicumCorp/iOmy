@@ -24,6 +24,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 sap.ui.controller("pages.staging.user.UserForm", {
 	aFormFragments: 	{},
+	bEditable: false,
 	
 	
 	
@@ -41,7 +42,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 
 			onBeforeShow: function ( oEvent ) {
 				//-- Store the Current Id --//
-				//oController.iCurrentId = oEvent.data.Id;
+				oController.bEditable = oEvent.data.bPageType;
 				
 				//-- Refresh Nav Buttons --//
 				//MyApp.common.NavigationRefreshButtons( oController );
@@ -51,7 +52,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 
 				
 				//-- Check the parameters --//
-				oController.UserForm( oController, "EditUser");
+				oController.UserForm(oController);
 				
 				//-- Defines the Device Type --//
 				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
@@ -61,19 +62,12 @@ sap.ui.controller("pages.staging.user.UserForm", {
 		
 	},
 	
-	UserForm: function (oController, sForm) {
+	UserForm: function (oController) {
 		try {			
-			if(sForm === "AddUser") {
-				oController.ToggleButtonsAndView( oController, "AddLogin");
-				oController.ToggleButtonsAndView( oController, "DBAuth");
-				oController.ToggleButtonsAndView( oController, "AddInfo");
-				oController.ToggleButtonsAndView( oController, "AddAddress");
-				oController.ToggleButtonsAndView( oController, "AddPremPermissions");
-				oController.ToggleButtonsAndView( oController, "AddRoomPermissions");
-				
-			} else if(sForm === "EditUser") {
-				oController.ToggleButtonsAndView( oController, "ShowInfo");
-				oController.ToggleButtonsAndView( oController, "ShowAddress");
+			if(oController.bEditable === false) {
+				oController.ToggleButtonsAndView( oController, "AddUser");
+			} else if(oController.bEditable === true) {
+				oController.ToggleButtonsAndView( oController, "EditUser");
 				oController.ToggleButtonsAndView( oController, "ShowPremPermissions");
 				oController.ToggleButtonsAndView( oController, "ShowRoomPermissions");
 			} else {
@@ -85,44 +79,71 @@ sap.ui.controller("pages.staging.user.UserForm", {
 		}
 	},
 	
+	getObjectPageTitle : function (oController) {
+		var sObjectTitle = "";
+		var oPageHeader = "";
+
+		if (oController.bEditable === true) {
+			sObjectTitle = "Edit User";
+		} else {
+			sObjectTitle = "Add User";
+		}
+		
+		oPageHeader = new sap.uxap.ObjectPageHeader ({
+			objectTitle: sObjectTitle
+		});
+		
+		return oPageHeader;
+	},
+	
 	ToggleButtonsAndView: function ( oController, sMode ) {
 		var oView = this.getView();	
 		
 		try {
 			switch(sMode) {
-				case "AddLogin":
+				case "AddUser":
 					//-- New User Login Info --//
 					oView.byId("Login").setVisible( true );
 					IomyRe.common.ShowFormFragment( oController, "AddLogin", "LoginBlock_Form", "FormContainer" );
-				break;
-				case "DBAuth":
 					//-- DB Auth Credentials --//
 					oView.byId("DBAuth").setVisible( true );
 					IomyRe.common.ShowFormFragment( oController, "DBAuth", "DBAuthBlock_Form", "FormContainer" );
+					//-- Add Info --//
+					oView.byId("Info").setVisible( true );
+					IomyRe.forms.ToggleFormMode(oController, "InfoBlock_Form", true);
+					IomyRe.common.ShowFormFragment( oController, "UserInfoEdit", "InfoBlock_Form", "FormContainer" );
+					//-- Add Address --//
+					oView.byId("Address").setVisible( true );
+					IomyRe.forms.ToggleFormMode(oController, "AddrBlock_Form", true);
+					IomyRe.common.ShowFormFragment( oController, "UserAddressEdit", "AddrBlock_Form", "FormContainer" );
+					//-- Add Permissions --//
+					oView.byId("PremPermBlock_BtnEdit").setVisible( false );
+					oView.byId("PremPermBlock_BtnSave").setVisible( false );
+					oView.byId("PremPermBlock_BtnCancel").setVisible( false );
+					IomyRe.forms.ToggleFormMode(oController, "PremPermBlock_Form", true);
+					IomyRe.common.ShowFormFragment( oController, "UserPremisePermissionEdit", "PremPermBlock_Form", "FormContainer" );
+					//-- Add Permissions --//
+					oView.byId("RoomPermBlock_BtnEdit").setVisible( false );
+					oView.byId("RoomPermBlock_BtnSave").setVisible( false );
+					oView.byId("RoomPermBlock_BtnCancel").setVisible( false );
+					IomyRe.forms.ToggleFormMode(oController, "RoomPermBlock_Form", true);
+					IomyRe.common.ShowFormFragment( oController, "UserRoomPermissionEdit", "RoomPermBlock_Form", "FormContainer" );
 				break;
-				case "ShowInfo":
+				case "EditUser":
+					//-- New User Login Info --//
+					oView.byId("Login").setVisible( false );
+					IomyRe.common.ShowFormFragment( oController, "Blank", "LoginBlock_Form", "FormContainer" );
+					//-- DB Auth Credentials --//
+					oView.byId("DBAuth").setVisible( false );
+					IomyRe.common.ShowFormFragment( oController, "Blank", "DBAuthBlock_Form", "FormContainer" );
 					//-- Show Info --//
 					oView.byId("Info").setVisible( true );
 					IomyRe.forms.ToggleFormMode(oController, "InfoBlock_Form", false);
 					IomyRe.common.ShowFormFragment( oController, "UserInfoDisplay", "InfoBlock_Form", "FormContainer" );
-				break;
-				case "AddInfo":
-					//-- Edit Info --//
-					oView.byId("Info").setVisible( true );
-					IomyRe.forms.ToggleFormMode(oController, "InfoBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "UserInfoEdit", "InfoBlock_Form", "FormContainer" );
-				break;
-				case "ShowAddress":
 					//-- Show Address --//
 					oView.byId("Address").setVisible( true );
 					IomyRe.forms.ToggleFormMode(oController, "AddrBlock_Form", false);
 					IomyRe.common.ShowFormFragment( oController, "UserAddressDisplay", "AddrBlock_Form", "FormContainer" );
-				break;
-				case "AddAddress":
-					//-- Edit Address --//
-					oView.byId("Address").setVisible( true );
-					IomyRe.forms.ToggleFormMode(oController, "AddrBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "UserAddressEdit", "AddrBlock_Form", "FormContainer" );
 				break;
 				case "ShowPremPermissions":
 					//-- Show Permissions --//
@@ -132,13 +153,13 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					IomyRe.forms.ToggleFormMode(oController, "PremPermBlock_Form", false);
 					IomyRe.common.ShowFormFragment( oController, "UserPremisePermissionDisplay", "PremPermBlock_Form", "FormContainer" );
 				break;
-				case "AddPremPermissions":
-					//-- Edit Permissions --//
-					oView.byId("PremPermBlock_BtnEdit").setVisible( false );
-					oView.byId("PremPermBlock_BtnSave").setVisible( false );
-					oView.byId("PremPermBlock_BtnCancel").setVisible( false );
-					IomyRe.forms.ToggleFormMode(oController, "PremPermBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "UserPremisePermissionEdit", "PremPermBlock_Form", "FormContainer" );
+				case "ShowRoomPermissions":
+				//-- Show Room Permissions --//
+					oView.byId("RoomPermBlock_BtnEdit").setVisible( true );
+					oView.byId("RoomPermBlock_BtnSave").setVisible( false );
+					oView.byId("RoomPermBlock_BtnCancel").setVisible( false );
+					IomyRe.forms.ToggleFormMode(oController, "RoomPermBlock_Form", false);
+					IomyRe.common.ShowFormFragment( oController, "UserRoomPermissionDisplay", "RoomPermBlock_Form", "FormContainer" );	
 				break;
 				case "EditPremPermissions":
 					//-- Edit Permissions --//
@@ -147,22 +168,6 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					oView.byId("PremPermBlock_BtnCancel").setVisible( true );
 					IomyRe.forms.ToggleFormMode(oController, "PremPermBlock_Form", true);
 					IomyRe.common.ShowFormFragment( oController, "UserPremisePermissionEdit", "PremPermBlock_Form", "FormContainer" );
-				break;
-				case "ShowRoomPermissions":
-					//-- Show Permissions --//
-					oView.byId("RoomPermBlock_BtnEdit").setVisible( true );
-					oView.byId("RoomPermBlock_BtnSave").setVisible( false );
-					oView.byId("RoomPermBlock_BtnCancel").setVisible( false );
-					IomyRe.forms.ToggleFormMode(oController, "RoomPermBlock_Form", false);
-					IomyRe.common.ShowFormFragment( oController, "UserRoomPermissionDisplay", "RoomPermBlock_Form", "FormContainer" );
-				break;
-				case "AddRoomPermissions":
-					//-- Edit Permissions --//
-					oView.byId("RoomPermBlock_BtnEdit").setVisible( false );
-					oView.byId("RoomPermBlock_BtnSave").setVisible( false );
-					oView.byId("RoomPermBlock_BtnCancel").setVisible( false );
-					IomyRe.forms.ToggleFormMode(oController, "RoomPermBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "UserRoomPermissionEdit", "RoomPermBlock_Form", "FormContainer" );
 				break;
 				case "EditRoomPermissions":
 					//-- Edit Permissions --//

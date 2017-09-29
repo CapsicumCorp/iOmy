@@ -33,7 +33,7 @@ $.extend( IomyRe.forms, {
 		var oView = oController.getView();	
 		var bFormEdit = oView.byId(sFormId).getEditable();
 		
-		console.log(bFormEdit);
+		//console.log(bFormEdit);
 		
 		try {
 			oView.byId(sFormId).setEditable(bEditable);	

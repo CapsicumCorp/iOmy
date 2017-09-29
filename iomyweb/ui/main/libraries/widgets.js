@@ -196,7 +196,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://add-activity",
 			text: "Rules",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pRuleList" , {} , false);
+				IomyRe.common.NavigationChangePage( "pRulesList" , {} , false);
 			}
 		});
 		
@@ -204,7 +204,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://family-protection",
 			text: "Users",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pUserForm" , {} , false);
+				IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
 			}
 		});
 		
@@ -212,7 +212,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://chain-link",
 			text: "Important Links",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
+				IomyRe.common.NavigationChangePage( "pUserForm" , {} , false);
 			}
 		});
 		
@@ -220,7 +220,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://compare",
 			text: "Legal Information",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
+				IomyRe.common.NavigationChangePage( "" , {} , false);
 			}
 		});
 		

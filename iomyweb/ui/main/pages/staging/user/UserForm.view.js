@@ -54,9 +54,7 @@ sap.ui.jsview("pages.staging.user.UserForm", {
 					isObjectIconAlwaysVisible: true,
 					enableLazyLoading: true,
 					showTitleinHeaderContent: true,
-					headerTitle : new sap.uxap.ObjectPageHeader ({
-						objectTitle: "Add New User",
-					}),
+					headerTitle : oController.getObjectPageTitle(oController),
 					sections : [
 						IomyRe.widgets.UserForm(oController, "Login", "LoginBlock", "LoginBlock_Form", true , "Login Details"),
 						IomyRe.widgets.UserForm(oController, "DBAuth", "DBAuthBlock", "DBAuthBlock_Form", true , "Database Authentication"),

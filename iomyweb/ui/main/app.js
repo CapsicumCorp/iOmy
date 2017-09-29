@@ -142,6 +142,12 @@ var aPages = [
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.user.UserForm\" Page!\n"
 	},
 	{
+		"Id":			"pUserList",
+		"Location":		"pages.staging.user.UserList",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.user.UserList\" Page!\n"
+	},
+	{
 		"Id":			"pDeviceForm",
 		"Location":		"pages.staging.device.DeviceForm",
 		"Type":			"JS",
@@ -152,6 +158,25 @@ var aPages = [
 		"Location":		"pages.staging.premise.PremiseForm",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.premise.PremiseForm\" Page!\n"
+	},
+	{
+		"Id":			"pWeatherFeed",
+		"Location":		"pages.staging.device.WeatherFeed",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.device.WeatherFeed\" Page!\n"
+	},
+	{
+		"Id":			"pMotionSensor",
+		"Location":		"pages.staging.device.MotionSensor",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.device.MotionSensor\" Page!\n"
+	},
+	
+	{
+		"Id":			"pRulesList",
+		"Location":		"pages.staging.RulesList",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.RulesList\" Page!\n"
 	},
 
 ];

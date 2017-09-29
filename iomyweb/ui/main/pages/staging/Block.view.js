@@ -119,7 +119,9 @@ sap.ui.jsview("pages.staging.Block", {
 														new sap.m.Link ({
 															text : "Users",
 															emphasized : true,
-															href : ""
+															press : function () {
+																IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
+															}
 														}).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
 													]
 												})
@@ -138,7 +140,9 @@ sap.ui.jsview("pages.staging.Block", {
 														new sap.m.Link ({
 															text : "Rules",
 															emphasized : true,
-															href : ""
+															press : function () {
+																IomyRe.common.NavigationChangePage( "pRulesList" , {} , false);
+															}
 														}).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
 													]
 												})
@@ -152,7 +156,9 @@ sap.ui.jsview("pages.staging.Block", {
 														new sap.m.Link ({
 															text : "Advanced",
 															emphasized : true,
-															href : ""
+															press : function () {
+																IomyRe.common.NavigationChangePage( "pTelnet" , {} , false);
+															}
 														}).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
 													]
 												})

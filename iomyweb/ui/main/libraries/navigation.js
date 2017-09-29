@@ -81,7 +81,7 @@ $.extend( IomyRe.navigation, {
 						text: "Add User",
 						type: sap.m.ButtonType.Transparent,
 						press : function () {
-							IomyRe.common.NavigationChangePage( "pUserForm" , {} , false);
+							IomyRe.common.NavigationChangePage( "pUserForm" , {"bPageType": false} , false);
 						}
 					}),
 				],
@@ -158,7 +158,7 @@ $.extend( IomyRe.navigation, {
 						text: "Edit User",
 						type: sap.m.ButtonType.Transparent,
 						press : function () {
-							IomyRe.common.NavigationChangePage( "pUserForm" , {} , false);
+							IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
 						}
 					}),
 				],

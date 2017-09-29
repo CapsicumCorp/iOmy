@@ -203,7 +203,10 @@ sap.ui.jsview("pages.staging.Device", {
 										new sap.m.ObjectAttribute ({
 											text: "Weather Outside: Clear",
 										}),
-									]
+									],
+									press : function () {
+										IomyRe.common.NavigationChangePage( "pWeatherFeed" , {} , false);
+									},
 								}),
 								new sap.m.GroupHeaderListItem ({
 									title: "Motion Sensor"
@@ -226,7 +229,10 @@ sap.ui.jsview("pages.staging.Device", {
 												text: "Disable Alarm"
 											})
 										}),
-									]
+									],
+									press : function () {
+										IomyRe.common.NavigationChangePage( "pMotionSensor" , {} , false);
+									},
 								}),
 							],
 						}).addStyleClass("DevicePage")
