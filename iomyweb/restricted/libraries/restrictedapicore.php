@@ -380,6 +380,11 @@ class RestrictedAPICore {
 													}
 													
 													//--------------------------------------------------------------------//
+													//-- Check that the user account is still active                    --//
+													//--------------------------------------------------------------------//
+													$this->LookupUserData();
+													
+													//--------------------------------------------------------------------//
 													//-- Load the Session data                                          --//
 													//--------------------------------------------------------------------//
 													$this->LoadSessionData();
@@ -689,6 +694,28 @@ class RestrictedAPICore {
 		return true;
 	}
 	
+	private function LookupUserData() {
+		
+		$aUserTemp = APICore_UserData( $this->oRestrictedDB );
+		
+		if( $aUserTemp['Error']===false ) {
+			if( $aUserTemp['Data']['UserState']>=1 ) {
+				//-- Success: Return the result --//
+				return $aUserTemp['Data'];
+				
+			} else {
+				//-- Critical Error: User has been disabled --//
+				userauth_rejected();
+				
+			}
+		} else {
+			//-- Critical Error: Can't lookup user data --//
+			$this->UserAuth_UserDetails();
+			
+			
+		}
+	}
+	
 	
 	
 	private function LoadUserDataIntoSession() {
@@ -706,8 +733,7 @@ class RestrictedAPICore {
 		//-- 9.0 - Return the results                               --//
 		//------------------------------------------------------------//
 		if( $aResult['Error']===false ) {
-			$_SESSION['UserData'] = $aResult['Data'];
-			
+			$_SESSION['UserData'] = $this->LookupUserData();
 			return true;
 			
 		} else {
@@ -1006,6 +1032,13 @@ class RestrictedAPICore {
 	public function UserAuth_ServerNotDeployed() {
 		header('HTTP/1.0 501 Not Implemented');
 		echo '<html><head><title>501 iOMy Server Not Deployed</title></head><body><h1>Please try setting up the server before accessing this API</h1></body></html>';
+		die();
+	}
+	
+	
+	public function UserAuth_UserDetails() {
+		header('HTTP/1.0 520 User Account Corruption');
+		echo '<html><head><title>520 User Error</title></head><body><h1>User account has become corrupted!</h1></body></html>';
 		die();
 	}
 }

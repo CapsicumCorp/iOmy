@@ -215,7 +215,6 @@ if( $bError===false ) {
 					}
 				}
 				
-				
 				//----------------------------------------------------------------------------//
 				//-- PART 4 - Work out which new ThingState the Thing needs to be set to    --//
 				//----------------------------------------------------------------------------//
@@ -288,11 +287,12 @@ if( $bError===false ) {
 									//--------------------------------------------------------//
 									try {
 										//-- If the User has Write Permission --//
-										if( $aStateResults['Data']['PermWrite']===true ) {
-											$aTempFunctionResult4 = $oPHPPhilipsHue->AutoAddNewLights( $aStateResults['Data']['LinkId'] );
+										if( $aStateResults['Data']['PermWrite']===1 ) {
+											$aTempFunctionResult4 = $oSpecialPHPObject->AutoAddNewLights( $aStateResults['Data']['LinkId'] );
+											
 										}	//-- ENDIF User has the Write Permission --//
 									} catch( Exception $e2407 ) {
-										
+										//echo "AutoAdd Error!";
 									}
 								} else {
 									$bError = true;
@@ -417,7 +417,7 @@ if( $bError===false ) {
 			try {
 				//-- Retrieve the state of the Link --//
 				$aStateResults = LinkRetrieveState( $iPostId );
-
+				
 				//-- If no errors are found --//
 				if( $aStateResults["Error"]===false ) {
 					

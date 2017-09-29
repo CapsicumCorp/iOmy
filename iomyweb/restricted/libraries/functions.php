@@ -1643,10 +1643,191 @@ function UpdateUserRoomPermissions( $iUserId, $iRoomId, $aDesiredPermissions ) {
 
 
 
+function ChangeUserState( $iUserId, $iUserState ) {
+	//------------------------------------------------//
+	//-- 1.0 - Initialise                           --//
+	//------------------------------------------------//
+	$bError           = false;            //-- BOOLEAN:       Used to indicate if at least one error has been caught.     --//
+	$iErrCode         = 0;                //-- INTEGER:       --//
+	$sErrMesg         = "";               //-- STRING:        Stores the error message when an error is caught.           --//
+	$aResult          = array();          //-- ARRAY:         Stores the result of this function if no errors occur.      --//
+	$aUserServerPerms = array();          //-- ARRAY:         --//
 	
+	
+	//------------------------------------------------//
+	//-- 2.0 - Main                                 --//
+	//------------------------------------------------//
+	try {
+		
+		//-- Check if the User has Add User Permissions --//
+		$aUserServerPerms = GetUserServerPermissions();
+		
+		
+		if( $aUserServerPerms['Error']===false ) {
+			//-- Check if the variable is set --//
+			if( isset($aUserServerPerms['Data']['PermServerAddUser']) ) {
+				if( $aUserServerPerms['Data']['PermServerAddUser']===1 ) {
+					
+					//-- Update the User State --//
+					$aResult = dbChangeUserState( $iUserId, $iUserState );
+					
+					if( $aResult["Error"]===true ) {
+						$bError = true;
+						$iErrCode  = 4;
+						$sErrMesg .= "Error occurred when attempting to change the user state! \n";
+						$sErrMesg .= $aResult["ErrMesg"];
+					}
+					
+				} else {
+					//-- ERROR: User doesn't have permission --//
+					$bError    = true;
+					$iErrCode  = 3;
+					$sErrMesg .= "The user doesn't seem to have permission to change the user state.\n";
+				}
+				
+			} else {
+				//-- ERROR: Can not see the correct permission --//
+				$bError    = true;
+				$iErrCode  = 2;
+				$sErrMesg .= "Unexpected error when looking up the current user's permissions to change the user state.\n";
+			}
+		} else {
+			//-- ERROR:  --//
+			$bError    = true;
+			$iErrCode  = 1;
+			$sErrMesg .= "Problem looking up the current user's server permissions.\n";
+			$sErrMesg .= $aUserServerPermissions['ErrMesg'];
+		}
+		
+	} catch( Exception $e1 ) {
+		$bError = true;
+		$iErrCode  = 0;
+		$sErrMesg .= "Critical Error occurred when attempting to change the user state! \n";
+		$sErrMesg .= $e1->getMessage();
+	}
+	
+	
+	//------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message  --//
+	//------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+		
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg, "ErrCode"=>$iErrCode );
+		
+	}
+}
+
+
+function GetAllUsers() {
+	//------------------------------------------------//
+	//-- 1.0 - Initialise                           --//
+	//------------------------------------------------//
+	$bError           = false;            //-- BOOLEAN:       Used to indicate if at least one error has been caught.     --//
+	$sErrMesg         = "";               //-- STRING:        Stores the error message when an error is caught.           --//
+	$aResult          = array();          //-- ARRAY:         Stores the result of this function if no errors occur.      --//
+	$aUserServerPerms = array();          //-- ARRAY:         --//
+	
+	
+	//------------------------------------------------//
+	//-- 2.0 - Main                                 --//
+	//------------------------------------------------//
+	try {
+		
+		//-- Check if the User has Add User Permissions --//
+		$aUserServerPerms = GetUserServerPermissions();
+		
+		
+		if( $aUserServerPerms['Error']===false ) {
+			//-- Check if the variable is set --//
+			if( isset($aUserServerPerms['Data']['PermServerAddUser']) ) {
+				if( $aUserServerPerms['Data']['PermServerAddUser']===1 ) {
+					
+					//-- Update the User State --//
+					$aResult = dbGetAllUsers();
+					
+					if( $aResult["Error"]===true ) {
+						$bError = true;
+						$sErrMesg .= "Error occurred when attempting to lookup the user list! \n";
+						$sErrMesg .= $aResult["ErrMesg"];
+					}
+					
+				} else {
+					//-- ERROR: User doesn't have permission --//
+					$bError    = true;
+					$sErrMesg .= "The user doesn't seem to have permission to lookup the user list.\n";
+				}
+				
+			} else {
+				//-- ERROR: Can not see the correct permission --//
+				$bError    = true;
+				$sErrMesg .= "Unexpected error when looking up the current user's permissions to lookup the user list.\n";
+			}
+		} else {
+			//-- ERROR:  --//
+			$bError    = true;
+			$sErrMesg .= "Problem looking up the current user's server permissions.\n";
+			$sErrMesg .= $aUserServerPermissions['ErrMesg'];
+		}
+		
+	} catch( Exception $e1 ) {
+		$bError = true;
+		$sErrMesg .= "Critical Error occurred when attempting to lookup the user list! \n";
+		$sErrMesg .= $e1->getMessage();
+	}
+	
+	
+	//------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message  --//
+	//------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+		
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+		
+	}
+}
+
 //========================================================================================================================//
-//== #5.0# - Premise Functions																							==//
+//== #5.0# - Premise Functions                                                                                          ==//
 //========================================================================================================================//
+function GetAllPremiseInfo() {
+	//------------------------------------------------//
+	//-- 1.0 - Declare Variables                    --//
+	//------------------------------------------------//
+	$aResult = array();
+	
+	
+	//------------------------------------------------//
+	//-- 5.0 - Fetch from the Database              --//
+	//------------------------------------------------//
+	try {
+		//-- Lookup all Premise Info --//
+		$aResult = dbGetAllPremiseInfo();
+		
+		//-- Check for errors --//
+		if( $aResult["Error"]===true ) {
+			$aResult = array( "Error"=>true, "ErrMesg"=>"No Premise found! \nYour user account doesn't seem to have permission to access at least one premise!\n" );
+		}
+		
+	} catch( Exception $e1 ) {
+		$aResult = array( "Error"=>true, "ErrMesg"=>"Critical Error! \nProblem when looking up the info on all the premises.\n" );
+		
+	}
+	
+	//------------------------------------------------//
+	//-- 9.0 - Return the result                    --//
+	//------------------------------------------------//
+	return $aResult;
+}
+
+
 function GetPremisesInfoFromPremiseId( $iId ) {
 	//-- Retrieve all the premises --//
 	$aResult = dbGetPremisesInfoFromPremiseId( $iId );
@@ -2632,7 +2813,7 @@ function AddNewLink( $iCommId, $iLinkTypeId, $iInfoId, $iConnectionId, $sSerialC
 
 
 
-function LinkUpdateConnectionInfo( $iConnId, $iConnProtocolId, $iConnFrequencyId, $iConnCryptTypeId, $sConnAddress, $sConnName, $sUsername, $sPassword ) {
+function LinkUpdateConnectionInfo( $iConnId, $iConnProtocolId, $iConnFrequencyId, $iConnCryptTypeId, $sConnAddress, $sConnName, $sUsername, $sPassword, $iPort ) {
 	//------------------------------------------------//
 	//-- 1.0 - Initialise                           --//
 	//------------------------------------------------//
@@ -2644,7 +2825,7 @@ function LinkUpdateConnectionInfo( $iConnId, $iConnProtocolId, $iConnFrequencyId
 	//-- 2.0 - Main                                 --//
 	//------------------------------------------------//
 	try {
-		$aResult = dbUpdateLinkConnectionInfo( $iConnId, $iConnProtocolId, $iConnFrequencyId, $iConnCryptTypeId, $sConnAddress, $sConnName, $sUsername, $sPassword );
+		$aResult = dbUpdateLinkConnectionInfo( $iConnId, $iConnProtocolId, $iConnFrequencyId, $iConnCryptTypeId, $sConnAddress, $sConnName, $sUsername, $sPassword, $iPort );
 		
 		if( $aResult["Error"]===true ) {
 			$bError = true;
@@ -2971,8 +3152,6 @@ function GetThingInfo($iThingId) {
 		//------------------------//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
-	
-	
 }
 
 
@@ -3812,7 +3991,7 @@ function APICore_UserData( $oDBConnection ) {
 	try {
 		
 		$aResult = DB_APICore_UserData( $oDBConnection );
-			
+		
 	} catch( Exception $e1 ) {
 		$bError = true;
 		$sErrMesg .= "Critical Error occurred when attempting to lookup the Server Version! \n";
@@ -3906,8 +4085,8 @@ function CreateIndexOnTable( $oDBConn, $sTableName, $sNewIndexName, $sTableColum
 		//-- 9.B - FAILURE --//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
-	
 }
+
 
 
 function DeleteIndexOnTable( $oDBConn, $sTableName, $sIndexName ) {
@@ -3940,7 +4119,6 @@ function DeleteIndexOnTable( $oDBConn, $sTableName, $sIndexName ) {
 		//-- 9.B - FAILURE --//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
-	
 }
 
 

@@ -643,6 +643,8 @@ class IPCamera {
 					$iNetworkPort      = $aParsedData['Data']['NetworkPort'];
 					$sPath             = $aParsedData['Data']['Path'];
 					$sProtocol         = $aParsedData['Data']['Protocol'];
+					$sDisplayName      = $aParsedData['Data']['Displayname'];
+					$sLinkName         = $aParsedData['Data']['Linkname'];
 					
 				} else {
 					$bError      = true;
@@ -653,7 +655,6 @@ class IPCamera {
 			
 			//-- 3.3 - Setup the Device's Link info --//
 			if( $bError===false ) {
-				$sLinkName       = "IP Camera MJPEG";
 				$sInfoName       = "IP Camera MJPEG";
 				$sInfoManu       = "";
 				$sConnAddress    = $sNetworkAddress;
@@ -681,7 +682,7 @@ class IPCamera {
 					"CommId"                => $iCommId,
 					"Type"                  => $iLinkType,
 					"SerialCode"            => "",
-					"Displayname"           => $sInfoName,
+					"Displayname"           => $sLinkName,
 					"State"                 => "1",
 					"InfoName"              => $sInfoName,
 					"InfoManufacturer"      => $sInfoManu,
@@ -698,7 +699,7 @@ class IPCamera {
 					"Things"                => array(
 						array(
 							"Type"          => $iThingType,
-							"Name"          => "IP Camera MJPEG",
+							"Name"          => $sDisplayName,
 							"State"         => 1,
 							"HWId"          => 0,
 							"OutputHWId"    => 0,

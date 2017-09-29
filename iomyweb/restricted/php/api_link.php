@@ -44,6 +44,7 @@ $iPostRoomId                = "";           //-- STRING:        Used to store th
 $iPostConFrequencyId        = 0;            //-- INTEGER:       Stores the desired "Link Connection Frequency Id".  --//
 $iPostConCryptTypeId        = 0;            //-- INTEGER:       Stores the desired "Link Connection CryptType Id".  --//
 $iPostConProtocolId         = 0;            //-- INTEGER:       Stores the desired "Link Connection Protocol Id".   --//
+$iPostConPort               = 0;            //-- INTEGER:       Stores the desired "Link Connection Port".          --//
 $sPostConAddress            = "";           //-- STRING:        Stores the desired "Link Connection Address".       --//
 $sPostConName               = "";           //-- STRING:        Stores the desired "Link Connection Name".          --//
 $sPostConUsername           = "";           //-- STRING:        Stores the desired "Link Connection Username".      --//
@@ -83,6 +84,7 @@ if($bError===false) {
 		array( "Name"=>'ConnCryptTypeId',       "DataType"=>'INT' ),
 		array( "Name"=>'ConnProtocolId',        "DataType"=>'INT' ),
 		array( "Name"=>'ConnAddress',           "DataType"=>'STR' ),
+		array( "Name"=>'ConnPort',              "DataType"=>'INT' ),
 		array( "Name"=>'ConnName',              "DataType"=>'STR' ),
 		array( "Name"=>'ConnUsername',          "DataType"=>'STR' ),
 		array( "Name"=>'ConnPassword',          "DataType"=>'STR' )
@@ -363,7 +365,7 @@ if($bError===false) {
 	
 	
 	//----------------------------------------------------//
-	//-- ConnPassword --//
+	//-- ConnPassword                                   --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
 		if( $sPostMode==="EditConnectData" ) {
@@ -389,9 +391,26 @@ if($bError===false) {
 	}
 	
 	//----------------------------------------------------//
-	//--  --//
+	//-- ConnPort                                       --//
 	//----------------------------------------------------//
-	
+	if( $bError===false ) {
+		if( $sPostMode==="EditConnectData" ) {
+			try {
+				//-- Retrieve the Link "ConnPort" --//
+				$iPostConPort = $aHTTPData["ConnPort"];
+				
+				if( $iPostConPort===false ) {
+					$iPostConPort = null;
+				}
+			} catch( Exception $e0122 ) {
+				$bError = true;
+				$iErrCode  = 122;
+				$sErrMesg .= "Error Code:'0122' \n";
+				$sErrMesg .= "Incorrect \"ConnPort\" parameter!\n";
+				$sErrMesg .= "Please use a valid \"ConnPort\" parameter.\n";
+			}
+		}
+	}
 	
 	
 	
@@ -654,7 +673,7 @@ if( $bError===false ) {
 						//--------------------------------------------------------------------//
 						//-- 5.3.2.A.2 - Update Connection Info                             --//
 						//--------------------------------------------------------------------//
-						$aResult = LinkUpdateConnectionInfo( $aLinkInfo["Data"]["DeviceConnId"], $iPostConProtocolId, $iPostConFrequencyId, $iPostConCryptTypeId, $sPostConAddress, $sPostConName, $sPostConUsername, $sPostConPassword );
+						$aResult = LinkUpdateConnectionInfo( $aLinkInfo["Data"]["LinkConnId"], $iPostConProtocolId, $iPostConFrequencyId, $iPostConCryptTypeId, $sPostConAddress, $sPostConName, $sPostConUsername, $sPostConPassword, $iPostConPort );
 						
 						if( $aResult["Error"]===true ) {
 							//-- Display an Error Message --//

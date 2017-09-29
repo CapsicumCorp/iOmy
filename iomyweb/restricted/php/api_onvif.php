@@ -41,6 +41,7 @@ $sOutput                    = "";           //-- STRING:        Used to hold thi
 $aResult                    = array();      //-- ARRAY:         Used to store the results.  --//
 
 $sPostMode                  = "";           //-- STRING:        Used to store which Mode the API should function in. --//
+$sPostDisplayname           = "";           //-- STRING:        --//
 $sPostNetworkAddress        = "";           //-- STRING:        Used to store the "DeviceNetworkAddress" that is passed as a HTTP POST variable. --//
 $iPostNetworkPort           = "";           //-- INTEGER:       Used to store the "".	--//
 $sPostUsername              = "";           //-- STRING:        Used to store the "".	--//
@@ -93,6 +94,7 @@ require_once SITE_BASE.'/restricted/php/core.php';                              
 if($bError===false) {
 	$RequiredParmaters = array(
 		array( "Name"=>'Mode',                      "DataType"=>'STR' ),
+		array( "Name"=>'DisplayName',               "DataType"=>'STR' ),
 		array( "Name"=>'DeviceNetworkAddress',      "DataType"=>'STR' ),
 		array( "Name"=>'DeviceOnvifPort',           "DataType"=>'INT' ),
 		array( "Name"=>'OnvifUsername',             "DataType"=>'STR' ),
@@ -611,6 +613,33 @@ if($bError===false) {
 				$sErrMesg .= "Incorrect \"RoomId\" parameter!\n";
 				$sErrMesg .= "Please use a valid \"RoomId\" parameter\n";
 				$sErrMesg .= "eg. \n \"1\", \"2\" or \"3\" \n\n";
+			}
+		}
+	}
+	
+	
+	//----------------------------------------------------//
+	//-- 2.2.?.? - Retrieve Room Id                     --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		if( $sPostMode==="AddNewOnvifServer" ) {
+			try {
+				$sPostDisplayname = $aHTTPData["DisplayName"];
+				
+				if( $sPostDisplayname===false ) {
+					$bError    = true;
+					$sErrMesg .= "Error Code:'0137' \n";
+					$sErrMesg .= "Invalid \"DisplayName\" parameter! \n";
+					$sErrMesg .= "Please use a valid \"DisplayName\" parameter\n";
+					$sErrMesg .= "eg. \n \"Home Onvif Server\", \"Work Onvif Server\" or \"Front Door Camera\" \n\n";
+				}
+				
+			} catch( Exception $e0136 ) {
+				$bError = true;
+				$sErrMesg .= "Error Code:'0138' \n";
+				$sErrMesg .= "Incorrect \"DisplayName\" parameter!\n";
+				$sErrMesg .= "Please use a valid \"DisplayName\" parameter\n";
+				$sErrMesg .= "eg. \n \"Home Onvif Server\", \"Work Onvif Server\" or \"Front Door Camera\" \n\n";
 			}
 		}
 	}
@@ -1188,7 +1217,7 @@ if( $bError===false ) {
 					//--------------------------------------------------------------------//
 					//-- Add the Bridge to the database                                 --//
 					//--------------------------------------------------------------------//
-					$aResult = $oPHPOnvifClient->AddThisBridgeToTheDatabase( $iCommId, $iPostRoomId );
+					$aResult = $oPHPOnvifClient->AddThisBridgeToTheDatabase( $iCommId, $iPostRoomId, $sPostDisplayname );
 					
 					if( $aResult['Error']===true ) {
 						$bError = true;

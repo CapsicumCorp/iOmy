@@ -123,7 +123,8 @@ if($bError===false) {
 		array( "Name"=>'ThingId',                   "DataType"=>'INT' ),
 		array( "Name"=>'Hue',                       "DataType"=>'INT' ),
 		array( "Name"=>'Saturation',                "DataType"=>'INT' ),
-		array( "Name"=>'Brightness',                "DataType"=>'INT' )
+		array( "Name"=>'Brightness',                "DataType"=>'INT' ),
+		array( "Name"=>'DisplayName',               "DataType"=>'STR' )
 	);
 	
 	$aHTTPData = FetchHTTPDataParameters($RequiredParmaters);
@@ -385,6 +386,33 @@ if($bError===false) {
 				$sErrMesg .= "Incorrect \"RoomId\" parameter!\n";
 				$sErrMesg .= "Please use a valid \"RoomId\" parameter\n";
 				$sErrMesg .= "eg. \n \"1\", \"2\" or \"3\" \n\n";
+			}
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 2.2.?.? - Retrieve "CameraName"                --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		if( $sPostMode==="AddNewBridge" ) {
+			try {
+				//-- Retrieve the "CameraName" --//
+				$sPostDisplayName = $aHTTPData["DisplayName"];
+				
+				if( $sPostDisplayName===false ) {
+					$bError = true;
+					$sErrMesg .= "Error Code:'0121' \n";
+					$sErrMesg .= "Invalid \"DisplayName\" parameter! \n";
+					$sErrMesg .= "Please use a valid \"DisplayName\" parameter\n";
+					$sErrMesg .= "eg. \n \"Philips Hue Bridge\" \n\n";
+				}
+				
+			} catch( Exception $e0122 ) {
+				$bError = true;
+				$sErrMesg .= "Error Code:'0122' \n";
+				$sErrMesg .= "Incorrect \"DisplayName\" parameter!\n";
+				$sErrMesg .= "Please use a valid \"DisplayName\" parameter\n";
+				$sErrMesg .= "eg. \n \"Philips Hue Bridge\" \n\n";
 			}
 		}
 	}
@@ -743,7 +771,7 @@ if( $bError===false ) {
 					if( $oPHPPhilipsHue->bInitialised===true ) {
 						
 						//-- Add the Philips Hue Bridge to the Database --//
-						$aTempFunctionResult3 = $oPHPPhilipsHue->AddThisBridgeToTheDatabase( $iCommId, $iPostRoomId );
+						$aTempFunctionResult3 = $oPHPPhilipsHue->AddThisBridgeToTheDatabase( $iCommId, $iPostRoomId, $sPostDisplayName );
 						
 						//-- Check for errors --//
 						if( $aTempFunctionResult3['Error']===false ) {
@@ -813,8 +841,6 @@ if( $bError===false ) {
 						$sErrMesg .= "Problem connecting to the Philips Hue Bridge!\n";
 					}
 				}
-				
-				
 			} catch( Exception $e1400 ) {
 				//-- Display an Error Message --//
 				$bError     = true;

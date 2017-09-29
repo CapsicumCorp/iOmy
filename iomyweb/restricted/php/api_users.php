@@ -73,6 +73,9 @@ $sDBURI                     = "";           //-- STRING:        --//
 $iUserId                    = 0;            //-- INTEGER:       --//
 $sUserLocation              = "";           //-- STRING:        --//
 
+$aUserPremisePerms          = array();      //-- ARRAY:         --//
+$bOwnerPermFound            = false;        //-- BOOLEAN:       --//
+
 $iLogNowUTS                 = 0;            //-- INTEGER:       --//
 $iPresetLogId               = 0;            //-- INTEGER:       --//
 $sLogCustom1                = "";           //-- STRING:        Special variable for the User Log. --//
@@ -137,12 +140,16 @@ if($bError===false) {
 		
 		//-- Verify that the mode is supported --//
 		//if( $sPostMode!=="EditUserInfo" && $sPostMode!=="EditUserAddress" && $sPostMode!=="EditPassword" && $sPostMode!=="AddUser" ) {
-		if( $sPostMode!=="EditUserInfo" && $sPostMode!=="EditUserAddress" && $sPostMode!=="EditPassword" && $sPostMode!=="AddUser" ) {
+		if( 
+			$sPostMode!=="EditUserInfo"         && $sPostMode!=="EditUserAddress"      && 
+			$sPostMode!=="EditPassword"         && $sPostMode!=="AddUser"              && 
+			$sPostMode!=="ChangeUserState"      && $sPostMode!=="AdminUserList"        
+		) {
 			$bError = true;
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
 			$sErrMesg .= "Please use a valid \"Mode\" parameter.\n";
-			$sErrMesg .= "eg. \n \"EditUserInfo\", \"EditUserAddress\" or \"EditPassword\". \n\n";
+			$sErrMesg .= "eg. \n \"EditUserInfo\", \"EditUserAddress\", \"EditPassword\", \"AddUser\" or \"ChangeUserState\". \n\n";
 		}
 		
 	} catch( Exception $e0011 ) {
@@ -150,7 +157,7 @@ if($bError===false) {
 		$sErrMesg .= "Error Code:'0102' \n";
 		$sErrMesg .= "No \"Mode\" parameter! \n";
 		$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-		$sErrMesg .= "eg. \n \"EditUserInfo\", \"EditUserAddress\" or \"EditPassword\". \n\n";
+		$sErrMesg .= "eg. \n \"EditUserInfo\", \"EditUserAddress\", \"EditPassword\", \"AddUser\" or \"ChangeUserState\". \n\n";
 		//sErrMesg .= e0011.message;
 	}
 	
@@ -414,9 +421,9 @@ if($bError===false) {
 					$sErrMesg .= "Please use a valid \"AddressLine3\" parameter\n";
 				}
 			}
-
+			
 			//----------------------------------------------------//
-			//-- 2.2.8.B - Retrieve User Address Region        --//
+			//-- 2.2.8.B - Retrieve User Address Region         --//
 			//----------------------------------------------------//
 			if( $bError===false ) {
 				try {
@@ -612,7 +619,7 @@ if($bError===false) {
 	//-- 2.2.3.E - Retrieve "Data" Array                --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="AddUser" ) {
+		if( $sPostMode==="AddUser" || $sPostMode==="ChangeUserState" ) {
 			try {
 				//-- Retrieve the "Data" --//
 				$sPostData = $aHTTPData["Data"];
@@ -753,6 +760,142 @@ if( $bError===false ) {
 			$sErrMesg .= "Error Code:'4300' \n";
 			$sErrMesg .= "Problem adding a new user!\n";
 			$sErrMesg .= "Critical error has occurred when looking up the current user's password.\n";
+		}
+	}
+	
+	//----------------------------------------------------------------//
+	//-- Extract UserId and New State                               --//
+	//----------------------------------------------------------------//
+	if( $bError===false ) {
+		if( $sPostMode==="ChangeUserState" ) {
+			try {
+				if( isset( $aPostData['UserId'] ) && isset( $aPostData['NewState'] ) ) {
+					//----------------------------------------------------------------//
+					//-- Extract the UserId                                         --//
+					//----------------------------------------------------------------//
+					if( $bError===false ) {
+						if( is_numeric( $aPostData['UserId'] ) ) {
+							$iUserId   = intval( $aPostData['UserId'], 10 );
+							
+							if( $iUserId<=0 ) {
+								//-- Error: UserId --//
+								$bError    = true;
+								$sErrMesg .= "Error Code:'5313' \n";
+								$sErrMesg .= "Problem extracting the UserId from the Data Parameter!\n";
+								$sErrMesg .= "Please ensure that the UserId is a valid number.\n";
+								
+							} else {
+								$aCurrentUserInfo = GetCurrentUserInfo();
+								
+								if( $aCurrentUserInfo['Error']===false ) {
+									if( $iUserId===$aCurrentUserInfo['Data']['UserId']) {
+										//-- Error: --//
+										$bError    = true;
+										$sErrMesg .= "Error Code:'5317' \n";
+										$sErrMesg .= "Problem with the UserId from the Data Parameter!\n";
+										$sErrMesg .= "You are not allowed to modify your own user account.\n";
+									} else {
+										//-- Check the UserList to make sure the User is there --//
+										$aUserList = GetAllUsers();
+										
+										if( $aUserList['Error']===false ) {
+											$bUserFound = false;
+											
+											foreach( $aUserList['Data'] as $aUser ) {
+												if( $aUser['UserId']===$iUserId ) {
+													//-- Found the User --//
+													$bUserFound = true;
+												}
+											}
+											
+											if( $bUserFound===false ) {
+												$bError    = true;
+												$sErrMesg .= "Error Code:'5318' \n";
+												$sErrMesg .= "Problem with the UserId from the Data Parameter!\n";
+												$sErrMesg .= "The provided UserId cannot be found in the User List.\n";
+											}
+											
+										} else {
+											$bError    = true;
+											$sErrMesg .= "Error Code:'5319' \n";
+											$sErrMesg .= "Problem when looking up the User List to check if the User exists!\n";
+										}
+									}
+									
+								} else {
+									//-- Error: --//
+									$bError    = true;
+									$sErrMesg .= "Error Code:'5316' \n";
+									$sErrMesg .= "Problem when looking up information about your user account!\n";
+								}
+								
+							}
+						} else {
+							//-- Error: UserId --//
+							$bError    = true;
+							$sErrMesg .= "Error Code:'5312' \n";
+							$sErrMesg .= "Problem extracting the UserId from the Data Parameter!\n";
+							$sErrMesg .= "Please ensure that the UserId is a valid number.\n";
+							
+						}
+					}
+					
+					//----------------------------------------------------------------//
+					//-- Extract the NewState                                       --//
+					//----------------------------------------------------------------//
+					if( $bError===false ) {
+						if( is_numeric( $aPostData['NewState'] ) ) {
+							$iNewState = intval( $aPostData['NewState'], 10 );
+							
+							if( $iNewState!==0 && $iNewState!==1 ) {
+								$bError    = true;
+								$sErrMesg .= "Error Code:'5314' \n";
+								$sErrMesg .= "Problem extracting the NewState from the Data Parameter!\n";
+								$sErrMesg .= "Please ensure that the NewState number is supported.\n";
+							}
+						} else {
+							//-- Error: NewState --//
+							$bError    = true;
+							$sErrMesg .= "Error Code:'5315' \n";
+							$sErrMesg .= "Problem extracting the NewState from the Data Parameter!\n";
+							$sErrMesg .= "Please ensure that the NewState is a valid number.\n";
+							
+						}
+					}
+					
+					//----------------------------------------------------------------//
+					//-- Lookup the other user's permissions                        --//
+					//----------------------------------------------------------------//
+					
+					//-- NOTE: This will have to be changed to a Server UserAdmin permission in the future --//
+					//if( $bError===false ) {
+					//}
+					
+					
+				} else {
+					if( isset( $aPostData['UserId'] ) ) {
+						//-- Error: UserId is missing --//
+						$bError    = true;
+						$sErrMesg .= "Error Code:'5301' \n";
+						$sErrMesg .= "Problem extracting the UserId from the Data Parameter!\n";
+						$sErrMesg .= "Please ensure that the UserId is a valid number.\n";
+					} else {
+						//-- Error: NewState is missing --//
+						$bError    = true;
+						$sErrMesg .= "Error Code:'5302' \n";
+						$sErrMesg .= "Problem changing User's state!\n";
+						$sErrMesg .= "Critical error has occurred.\n";
+					}
+				}
+				
+			} catch( Exception $e5300 ) {
+				//-- CRITICAL ERROR --//
+				$bError    = true;
+				$sErrMesg .= "Error Code:'5300' \n";
+				$sErrMesg .= "Problem changing User's state!\n";
+				$sErrMesg .= "Critical error has occurred.\n";
+				
+			}
 		}
 	}
 }
@@ -1112,6 +1255,60 @@ if( $bError===false ) {
 			}
 			
 			
+		//================================================================//
+		//== 5.5 - MODE: Add New User                                   ==//
+		//================================================================//
+		} else if( $sPostMode==="ChangeUserState" ) {
+			try {
+				//----------------------------------------------------------------//
+				//-- Set the new User State                                     --//
+				//----------------------------------------------------------------//
+				if( $bError===false ) {
+					$aResult = ChangeUserState( $iUserId, $iNewState );
+					
+					if( $aResult['Error'] ) {
+						$bError    = true;
+						$iErrCode  = 5401+$aResult['ErrCode'];
+						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg .= "Problem updating the User State!\n";
+						$sErrMesg .= $aResult['ErrMesg'];
+					}
+				}
+				
+				
+			} catch( Exception $e5400 ) {
+				//-- Display an Error Message --//
+				$bError    = true;
+				$sErrMesg .= "Error Code:'5400' \n";
+				$sErrMesg .= $e5400->getMessage();
+			}
+			
+		//================================================================//
+		//== 5.5 - MODE: Add New User                                   ==//
+		//================================================================//
+		} else if( $sPostMode==="AdminUserList" ) {
+			try {
+				//----------------------------------------------------------------//
+				//-- Set the new User State                                     --//
+				//----------------------------------------------------------------//
+				if( $bError===false ) {
+					$aResult = GetAllUsers();
+					
+					if( $aResult['Error'] ) {
+						$bError    = true;
+						$sErrMesg .= "Error Code:'6401' \n";
+						$sErrMesg .= "Problem updating the User State!\n";
+						$sErrMesg .= $aResult['ErrMesg'];
+					}
+				}
+				
+				
+			} catch( Exception $e5400 ) {
+				//-- Display an Error Message --//
+				$bError    = true;
+				$sErrMesg .= "Error Code:'6400' \n";
+				$sErrMesg .= $e5400->getMessage();
+			}
 		//================================================================//
 		//== Unsupported Mode                                           ==//
 		//================================================================//

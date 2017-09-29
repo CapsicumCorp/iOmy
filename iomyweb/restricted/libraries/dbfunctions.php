@@ -887,6 +887,150 @@ function dbChangeUserPassword( $sPassword ) {
 }
 
 
+function dbChangeUserState( $iUserId, $iUserState ) {
+	//--------------------------------------------//
+	//-- 1.0 - Declare Variables                --//
+	//--------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$aResult            = array();  //-- ARRAY:     --//
+	$sSQL               = "";       //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;    //-- BOOL:      --//
+	$sErrMesg           = "";       //-- STRING:    --//
+	$sSchema            = "";       //-- STRING:    Used to store the name of the schema that needs updating. --//
+	$aInputVals         = array();  //-- ARRAY:     --//
+	
+	
+	//--------------------------------------------//
+	//-- 2.0 - SQL Query                        --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			$sSQL .= "UPDATE `USERS` ";
+			$sSQL .= "SET ";
+			$sSQL .= "  `USERS_STATE` = :State ";
+			$sSQL .= "WHERE `USERS_PK` = :UserId ";
+			
+			$aInputVals = array(
+				array( "Name"=>"State",             "type"=>"INT",      "value"=>$iUserState ),
+				array( "Name"=>"UserId",            "type"=>"BINT",     "value"=>$iUserId    )
+			);
+			
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			
+		} catch( Exception $e2 ) {
+			$bError    = true;
+			$sErrMesg .= $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true ) {
+				$bError = true;
+				$sErrMesg .= $aResult["ErrMesg"];
+			}
+		} catch( Exception $e ) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 5.0 Return Results or Error Message    --//
+	//--------------------------------------------// 
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return array( "Error"=>false,   "Data"=>array("Result"=>"Updated succesfully"));
+	} else {
+		return array( "Error"=>true,    "ErrMesg"=>"ChangeUserState: ".$sErrMesg );
+	}
+}
+
+function dbGetAllUsers() {
+	//--------------------------------------------//
+	//-- 1.0 - Declare Variables                --//
+	//--------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;        //-- BOOL:      --//
+	$sErrMesg           = "";           //-- STRING:    --//
+	$aInputVals         = array();      //-- ARRAY:     --//
+	
+	
+	$sCurrentSchema     = dbGetCurrentSchema();
+	
+	//----------------------------------------//
+	//-- 3.0 - SQL QUERY                    --//
+	//----------------------------------------//
+	try {
+		
+		$sSQL .= "SELECT ";
+		$sSQL .= "	`USERS_PK`, ";
+		$sSQL .= "	`USERS_USERSINFO_FK`, ";
+		$sSQL .= "	`USERS_USERNAME`, ";
+		$sSQL .= "	`USERS_STATE` ";
+		$sSQL .= "FROM `".$sCurrentSchema."`.`USERS` ";
+		$sSQL .= "WHERE `USERS_STATE` >= 0 ";
+		
+		$aInputVals = array();
+		
+		$aOutputCols = array(
+			array( "Name"=>"UserId",                        "type"=>"INT" ),
+			array( "Name"=>"UserInfoId",                    "type"=>"INT" ),
+			array( "Name"=>"Username",                      "type"=>"STR" ),
+			array( "Name"=>"UserState",                     "type"=>"INT" )
+		);
+		
+		
+		//----------------------------------------------//
+		//-- Execute the SQL Query                    --//
+		//----------------------------------------------//
+		$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+			
+			
+	} catch( Exception $e2 ) {
+		$bError   = true;
+		$sErrMesg = $e2->getMessage();
+	}
+	
+	
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 9.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if($bError===false) {
+		$aReturn = array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		$aReturn = array( "Error"=>true, "ErrMesg"=>"AllUsers: ".$sErrMesg );
+	}
+	return $aReturn;
+}
+
 function dbGetUserServerPermissions() {
 	//--------------------------------------------//
 	//-- 1.0 - Declare Variables                --//
@@ -2048,6 +2192,118 @@ function dbUpdateUserRoomPermissions( $iRoomPermId, $iPermRead, $iPermWriter, $i
 //========================================================================================================================//
 //== #5.0# - Premise Functions                                                                                          ==//
 //========================================================================================================================//
+function dbGetAllPremiseInfo() {
+	//----------------------------------------//
+	//-- 1.0 - Declare Variables            --//
+	//----------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;        //-- BOOLEAN:   --//
+	$sErrMesg           = "";           //-- STRING:    --//
+	$sView              = "";           //-- STRING:    --//
+	$aTemporaryView     = array();      //-- ARRAY:     A array to store information about which view to use like the viewname and columns. --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			//-- Retrieve the View in an array --//
+			$aTemporaryView = NonDataViewName("Premises");
+			if ( $aTemporaryView["Error"]===true ) {
+				//-- if an error has occurred --//
+				$bError = true;
+				$sErrMesg = $aTemporaryView["ErrMesg"];
+				
+			} else {
+				//-- store the view --//
+				$sView = $aTemporaryView["View"];
+				
+				$sSQL .= "SELECT ";
+				$sSQL .= "    `PERMPREMISE_OWNER`, ";
+				$sSQL .= "    `PERMPREMISE_WRITE`, ";
+				$sSQL .= "    `PERMPREMISE_STATETOGGLE`, ";
+				$sSQL .= "    `PERMPREMISE_READ`, ";
+				$sSQL .= "    `PERMPREMISE_ROOMADMIN`, ";
+				$sSQL .= "    `PREMISE_PK`, ";
+				$sSQL .= "    `PREMISE_NAME`, ";
+				$sSQL .= "    `PREMISE_DESCRIPTION`, ";
+				$sSQL .= "    `PREMISEINFO_PK`, ";
+				$sSQL .= "    `PREMISEBEDROOMS_PK`, ";
+				$sSQL .= "    `PREMISEBEDROOMS_COUNT`, ";
+				$sSQL .= "    `PREMISEOCCUPANTS_PK`, ";
+				$sSQL .= "    `PREMISEOCCUPANTS_NAME`, ";
+				$sSQL .= "    `PREMISEROOMS_PK`, ";
+				$sSQL .= "    `PREMISEROOMS_NAME`, ";
+				$sSQL .= "    `PREMISEFLOORS_PK`, ";
+				$sSQL .= "    `PREMISEFLOORS_NAME` ";
+				$sSQL .= "FROM `".$sView."` ";
+				
+				//-- Set the SQL Input Parameters --//
+				$aInputVals = array();
+				
+				//-- Set the SQL Output Columns --//
+				$aOutputCols = array(
+					array( "Name"=>"PermOwner",             "type"=>"INT" ),
+					array( "Name"=>"PermWrite",             "type"=>"INT" ),
+					array( "Name"=>"PermStateToggle",       "type"=>"INT" ),
+					array( "Name"=>"PermRead",              "type"=>"INT" ),
+					array( "Name"=>"PermRoomAdmin",         "type"=>"INT" ),
+					array( "Name"=>"PremiseId",             "type"=>"INT" ),
+					array( "Name"=>"PremiseName",           "type"=>"STR" ),
+					array( "Name"=>"PremiseDesc",           "type"=>"STR" ),
+					array( "Name"=>"PremiseInfoId",         "type"=>"INT" ),
+					array( "Name"=>"BedroomsId",            "type"=>"INT" ),
+					array( "Name"=>"BedroomsName",          "type"=>"STR" ),
+					array( "Name"=>"OccupantsId",           "type"=>"INT" ),
+					array( "Name"=>"OccupantsName",         "type"=>"STR" ),
+					array( "Name"=>"RoomsId",               "type"=>"INT" ),
+					array( "Name"=>"RoomsName",             "type"=>"STR" ),
+					array( "Name"=>"FloorsId",              "type"=>"INT" ),
+					array( "Name"=>"FloorsName",            "type"=>"STR" )
+				);
+				
+				//-- Execute the SQL Query --//
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+			}
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"GetAllPremises: ".$sErrMesg );
+	}
+	
+}
+
 
 function dbGetPremisesInfoFromPremiseId( $iId ) {
 	//----------------------------------------//
@@ -2163,6 +2419,8 @@ function dbGetPremisesInfoFromPremiseId( $iId ) {
 		return array( "Error"=>true, "ErrMesg"=>"GetPremiseInfoFromId: ".$sErrMesg );
 	}
 }
+
+
 
 
 function dbGetPremisesAddressFromPremiseId( $iPremiseId ) {
@@ -5302,7 +5560,7 @@ function dbAddNewLinkInfo( $sLinkInfoName, $sLinkInfoManufacturer, $sLinkInfoMan
 //----------------------------------------------------------------------------//
 //-- UPDATE LINK CONNECTION                                                 --//
 //----------------------------------------------------------------------------//
-function dbUpdateLinkConnectionInfo( $iConnId, $iConnProtocolId, $iConnFrequencyId, $iConnCryptTypeId, $sConnAddress, $sConnName, $sUsername, $sPassword ) {
+function dbUpdateLinkConnectionInfo( $iConnId, $iConnProtocolId, $iConnFrequencyId, $iConnCryptTypeId, $sConnAddress, $sConnName, $sUsername, $sPassword, $iPort ) {
 	//------------------------------------------------------------------------//
 	//-- DESCRIPTION:                                                       --//
 	//--    This function is used update the LINKCONN entry                 --//
@@ -5334,14 +5592,15 @@ function dbUpdateLinkConnectionInfo( $iConnId, $iConnProtocolId, $iConnFrequency
 			
 			$sSQL .= "UPDATE `".$sSchema."`.`LINKCONN` ";
 			$sSQL .= "SET ";
-			$sSQL .= "    `LINKCONN_IOPROTOCOL_FK`  = :ProtocolId, ";
-			$sSQL .= "    `LINKCONN_IOFREQUENCY_FK` = :FrequencyId, ";
-			$sSQL .= "    `LINKCONN_IOCRYPTTYPE_FK` = :CryptTypeId, ";
-			$sSQL .= "    `LINKCONN_ADDRESS`        = :Address, ";
-			$sSQL .= "    `LINKCONN_NAME`           = :Name, ";
-			$sSQL .= "    `LINKCONN_USERNAME`       = :Username, ";
-			$sSQL .= "    `LINKCONN_PASSWORD`       = :Password ";
-			$sSQL .= "WHERE `LINKCONN_PK`           = :ConnId ";
+			$sSQL .= "    `LINKCONN_LINKPROTOCOL_FK`  = :ProtocolId, ";
+			$sSQL .= "    `LINKCONN_LINKFREQ_FK`      = :FrequencyId, ";
+			$sSQL .= "    `LINKCONN_LINKCRYPTTYPE_FK` = :CryptTypeId, ";
+			$sSQL .= "    `LINKCONN_ADDRESS`          = :Address, ";
+			$sSQL .= "    `LINKCONN_PORT`             = :Port, ";
+			$sSQL .= "    `LINKCONN_NAME`             = :Name, ";
+			$sSQL .= "    `LINKCONN_USERNAME`         = :Username, ";
+			$sSQL .= "    `LINKCONN_PASSWORD`         = :Password ";
+			$sSQL .= "WHERE `LINKCONN_PK`             = :ConnId ";
 			
 			
 			$aInputVals = array(
@@ -5349,6 +5608,7 @@ function dbUpdateLinkConnectionInfo( $iConnId, $iConnProtocolId, $iConnFrequency
 				array( "Name"=>"FrequencyId",       "type"=>"INT",      "value"=>$iConnFrequencyId      ),
 				array( "Name"=>"CryptTypeId",       "type"=>"INT",      "value"=>$iConnCryptTypeId      ),
 				array( "Name"=>"Address",           "type"=>"STR",      "value"=>$sConnAddress          ),
+				array( "Name"=>"Port",              "type"=>"INT",      "value"=>$iPort                 ),
 				array( "Name"=>"Name",              "type"=>"STR",      "value"=>$sConnName             ),
 				array( "Name"=>"Username",          "type"=>"STR",      "value"=>$sUsername             ),
 				array( "Name"=>"Password",          "type"=>"STR",      "value"=>$sPassword             ),
@@ -8762,7 +9022,7 @@ function DB_APICore_UserData( $oDBConnection ) {
 	//----------------------------------------//
 	
 	//-- 1.1 - Global Variables --//
-
+	
 	//-- 1.2 - Other Varirables --//
 	$aResult        = array();
 	$aReturn        = array();
@@ -8771,7 +9031,7 @@ function DB_APICore_UserData( $oDBConnection ) {
 	$sErrMesg       = "";
 	$aTemporaryView = array();
 	$sView          = "";
-
+	
 	//----------------------------------------//
 	//-- 3.0 - SQL QUERY                    --//
 	//----------------------------------------//
@@ -8824,9 +9084,9 @@ function DB_APICore_UserData( $oDBConnection ) {
 				
 				$aOutputCols = array(
 					array( "Name"=>"UserId",                            "type"=>"INT" ),
-					array( "Name"=>"UserState",                         "type"=>"STR" ),
+					array( "Name"=>"UserState",                         "type"=>"INT" ),
 					array( "Name"=>"Username",                          "type"=>"STR" ),
-					array( "Name"=>"UserAddressId",                     "type"=>"STR" ),
+					array( "Name"=>"UserAddressId",                     "type"=>"INT" ),
 					array( "Name"=>"UserAddressLine1",                  "type"=>"STR" ),
 					array( "Name"=>"UserAddressLine2",                  "type"=>"STR" ),
 					array( "Name"=>"UserAddressLine3",                  "type"=>"STR" ),
