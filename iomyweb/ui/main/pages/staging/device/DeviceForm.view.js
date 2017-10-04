@@ -21,7 +21,6 @@ You should have received a copy of the GNU General Public License
 along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-$.sap.require("IomyRe.functions.getNewDeviceOptions");
 
 sap.ui.jsview("pages.staging.device.DeviceForm", {
 	

@@ -21,11 +21,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IOMy.telnet",true);
+$.sap.declare("IomyRe.telnet",true);
 
-IOMy.telnet = new sap.ui.base.Object();
+IomyRe.telnet = new sap.ui.base.Object();
 
-$.extend(IOMy.telnet,{
+$.extend(IomyRe.telnet,{
     
     bRunningCommand         : false,
     TelnetLog				: {},
@@ -46,7 +46,7 @@ $.extend(IOMy.telnet,{
         // Import modules and widgets.
         //--------------------------------------------------------------------//
         var me              = this;
-        var php             = IOMy.apiphp;
+        var php             = IomyRe.apiphp;
         var bError          = false;
         var aErrorMessages  = [];
 		var iLogIndex		= me.iLogIndex++;
@@ -132,7 +132,7 @@ $.extend(IOMy.telnet,{
 								var sOutput = "\n    " + data.Data.Custom.join("\n    ");
 								req.logOutput(sOutput, false);
 
-								IOMy.rules.loadRules({
+								IomyRe.rules.loadRules({
 									hubID : iHubId
 								});
 

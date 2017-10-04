@@ -21,11 +21,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IOMy.rules",true);
+$.sap.declare("IomyRe.rules",true);
 
-IOMy.rules = new sap.ui.base.Object();
+IomyRe.rules = new sap.ui.base.Object();
 
-$.extend(IOMy.rules, {
+$.extend(IomyRe.rules, {
     
     RulesList : {},
 	
@@ -50,7 +50,7 @@ $.extend(IOMy.rules, {
 		var bSupported;
 		
 		try {
-			mHub = IOMy.common.getHub(iHub);
+			mHub = IomyRe.common.getHub(iHub);
 		} catch (ex) {
 			throw ex;
 		}
@@ -85,7 +85,7 @@ $.extend(IOMy.rules, {
 		var me				= this;
         var bError          = false;
         var aErrorMessages  = [];
-        var sURL            = IOMy.apiphp.APILocation("devicerules");
+        var sURL            = IomyRe.apiphp.APILocation("devicerules");
         var iHub;
 		var mHub;
         var fnSuccess;
@@ -110,7 +110,7 @@ $.extend(IOMy.rules, {
             }
 			
 			try {
-				mHub = IOMy.common.getHub(iHub);
+				mHub = IomyRe.common.getHub(iHub);
 				
 				if (mHub.HubTypeId !== 2) {
 					fnAppendError("The given hub does not support device rules.");
@@ -157,7 +157,7 @@ $.extend(IOMy.rules, {
         //--------------------------------------------------------------------//
         // Run the API to acquire the list of rules.
         //--------------------------------------------------------------------//
-        IOMy.apiphp.AjaxRequest({
+        IomyRe.apiphp.AjaxRequest({
             
             url : sURL,
             data : {
@@ -180,7 +180,7 @@ $.extend(IOMy.rules, {
                         for (var i = 0; i < aData.length; i++) {
                             mRule = aData[i];
                             
-                            IOMy.rules.RulesList[mRule.Serial] = mRule;
+                            IomyRe.rules.RulesList[mRule.Serial] = mRule;
                         }
                         
                         if (aData.length === 0) {
@@ -236,7 +236,7 @@ $.extend(IOMy.rules, {
         //--------------------------------------------------------------------//
         var bError          = false;
         var aErrorMessages  = [];
-        var sURL            = IOMy.apiphp.APILocation("devicerules");
+        var sURL            = IomyRe.apiphp.APILocation("devicerules");
         var aTimeRules      = [];
         var mRulesConfig;
         var iHub;
@@ -300,7 +300,7 @@ $.extend(IOMy.rules, {
         //--------------------------------------------------------------------//
         // Compose an array of rules out of the associative array
         //--------------------------------------------------------------------//
-        $.each(IOMy.rules.RulesList, function (sSerialCode, mRuleInfo) {
+        $.each(IomyRe.rules.RulesList, function (sSerialCode, mRuleInfo) {
             
             if (sSerialCode !== undefined && sSerialCode !== null &&
                 mRuleInfo !== undefined && mRuleInfo !== null)
@@ -317,7 +317,7 @@ $.extend(IOMy.rules, {
         //--------------------------------------------------------------------//
         // Update the rules file.
         //--------------------------------------------------------------------//
-        IOMy.apiphp.AjaxRequest({
+        IomyRe.apiphp.AjaxRequest({
             
             url : sURL,
             data : {
@@ -333,7 +333,7 @@ $.extend(IOMy.rules, {
                     if (responseData.Error === false) {
                         
                         // Run the telnet command to reload the rules file
-                        IOMy.telnet.RunCommand({
+                        IomyRe.telnet.RunCommand({
                             "command"   : "timerules_reload",
                             "onSuccess" : fnSuccess,
                             "onFail"    : fnFail

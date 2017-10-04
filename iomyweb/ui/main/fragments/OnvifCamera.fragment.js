@@ -42,85 +42,56 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 						new sap.ui.layout.form.FormElement({
 							label : "Assign to Onvif Server",
 							fields: [ 
-								new sap.m.Select({
-									items : [
-										new sap.ui.core.Item ({
-											text: "Server1",
-											key: "Serv1"
-										}),
-										new sap.ui.core.Item ({
-											text: "Server2",
-											key: "Serv2"
-										}),
-										new sap.ui.core.Item ({
-											text: "Server3",
-											key: "Serv3"
-										})
-									]
+								IomyRe.widgets.selectBoxOnvifServer(oView.createId("SelectOnvifServer"), {
+									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Server}",
+                                    change : function () {
+                                        oController.LoadOnvifProfilesForSelectBoxes();
+                                    }
 								})
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
 							label : "Stream Name",
 							fields: [ 
-								new sap.m.Input({})
+								new sap.m.Input(oView.createId("InputStreamName"), {
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/CameraName}"
+                                })
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
 							label : "Profile to use for the video stream",
 							fields: [ 
-								new sap.m.Select({
-									items : [
-										new sap.ui.core.Item ({
-											text: "Stream1",
-											key: "St1"
-										}),
-										new sap.ui.core.Item ({
-											text: "Stream2",
-											key: "St2"
-										}),
-										new sap.ui.core.Item ({
-											text: "Stream3",
-											key: "St3"
-										})
-									]
+								new sap.m.Select(oView.createId("SelectStreamProfile"), {
+									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/StreamProfile}"
 								})
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
 							label : "Profile to use for thumbnails",
 							fields: [ 
-								new sap.m.Select({
-									items : [
-										new sap.ui.core.Item ({
-											text: "Stream1",
-											key: "St1"
-										}),
-										new sap.ui.core.Item ({
-											text: "Stream2",
-											key: "St2"
-										}),
-										new sap.ui.core.Item ({
-											text: "Stream3",
-											key: "St3"
-										})
-									]
+								new sap.m.Select(oView.createId("SelectThumbnailProfile"), {
+									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/ThumbnailProfile}"
 								})
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
 							label : "",
-							fields: [ 
-								new sap.m.Button ({
+							fields: [
+								new sap.m.Button (oView.createId("ButtonSubmit"), {
 									type: sap.m.ButtonType.Accept,
-									text: "Save"
+									text: "Save",
+                                    press : function () {
+                                        if (oController.bLoadingOnvifProfiles !== true) {
+                                            oController.CreateDevice();
+                                        }
+                                    }
 								}),
-								new sap.m.Button ({
+								new sap.m.Button (oView.createId("ButtonCancel"), {
 									type: sap.m.ButtonType.Reject,
 									text: "Cancel"
-								}),
+								})
 							]
-						}),
+						})
 					]
 				})
 			]

@@ -2410,7 +2410,7 @@ $.extend(IomyRe.common,{
     //----------------------------------------------------------------------------------------//
     NavigationTriggerBackForward: function( bForwardTriggered ) {
         //-- Restart the status of the extras menu      --//
-        IOMy.widgets.extrasMenuOpen = false;
+        IomyRe.widgets.extrasMenuOpen = false;
         
         // Declare variables
         var sName        = "";
@@ -2418,14 +2418,14 @@ $.extend(IomyRe.common,{
         
         //-- IF the app requested to go forward a page --//
         if( bForwardTriggered===true ) {
-            if( IOMy.common.NavPagesNavigationArray.length > (IOMy.common.NavPagesCurrentIndex+1) ) {
+            if( IomyRe.common.NavPagesNavigationArray.length > (IomyRe.common.NavPagesCurrentIndex+1) ) {
                 //-- Increase the Current Index back to the next value --//
-                //jQuery.sap.log.debug("NavForward CurrentLength="+IOMy.common.NavPagesNavigationArray.length);
-                //jQuery.sap.log.debug("NavForward CurrentIndex="+IOMy.common.NavPagesCurrentIndex);
-                IOMy.common.NavPagesCurrentIndex++;
-                //jQuery.sap.log.debug("NavForward NewIndex="+IOMy.common.NavPagesCurrentIndex);
-                sName = IOMy.common.NavPagesNavigationArray[IOMy.common.NavPagesCurrentIndex].Name;
-                aData = IOMy.common.NavPagesNavigationArray[IOMy.common.NavPagesCurrentIndex].Data;
+                //jQuery.sap.log.debug("NavForward CurrentLength="+IomyRe.common.NavPagesNavigationArray.length);
+                //jQuery.sap.log.debug("NavForward CurrentIndex="+IomyRe.common.NavPagesCurrentIndex);
+                IomyRe.common.NavPagesCurrentIndex++;
+                //jQuery.sap.log.debug("NavForward NewIndex="+IomyRe.common.NavPagesCurrentIndex);
+                sName = IomyRe.common.NavPagesNavigationArray[IomyRe.common.NavPagesCurrentIndex].Name;
+                aData = IomyRe.common.NavPagesNavigationArray[IomyRe.common.NavPagesCurrentIndex].Data;
                 //-- Navigate to the next Page --//
                 oApp.to( sName, "Slide", aData );
                 //-- Return Success --//
@@ -2438,23 +2438,23 @@ $.extend(IomyRe.common,{
         //-- ELSE assume going back a page is what is requested --//
         } else {
             //-- If the Page is on the Default Page or Glitched and a back rquest is requested --//
-            if( IOMy.common.NavPagesCurrentIndex<=0) {
+            if( IomyRe.common.NavPagesCurrentIndex<=0) {
                 //-- Set the index to zero (aka Default Page) --//
-                IOMy.common.NavPagesCurrentIndex = -1;
+                IomyRe.common.NavPagesCurrentIndex = -1;
                 //-- Navigate back to the Default Page --//
-                oApp.to( IOMy.common.sNavigationDefaultPage, "c_SlideBack", {} );
+                oApp.to( IomyRe.common.sNavigationDefaultPage, "c_SlideBack", {} );
                 
             } else {
                 //-- Decrease the Current Index back to the previous value --//
-                //jQuery.sap.log.debug("NavBack CurrentIndex="+IOMy.common.NavPagesCurrentIndex);
-                IOMy.common.NavPagesCurrentIndex--;
-                //jQuery.sap.log.debug("NavBack NewIndex="+IOMy.common.NavPagesCurrentIndex);
+                //jQuery.sap.log.debug("NavBack CurrentIndex="+IomyRe.common.NavPagesCurrentIndex);
+                IomyRe.common.NavPagesCurrentIndex--;
+                //jQuery.sap.log.debug("NavBack NewIndex="+IomyRe.common.NavPagesCurrentIndex);
                 
-                sName = IOMy.common.NavPagesNavigationArray[IOMy.common.NavPagesCurrentIndex].Name;
-                aData = IOMy.common.NavPagesNavigationArray[IOMy.common.NavPagesCurrentIndex].Data;
+                sName = IomyRe.common.NavPagesNavigationArray[IomyRe.common.NavPagesCurrentIndex].Name;
+                aData = IomyRe.common.NavPagesNavigationArray[IomyRe.common.NavPagesCurrentIndex].Data;
                 
-                //jQuery.sap.log.debug("NavBack NavArray="+JSON.stringify(IOMy.common.NavPagesNavigationArray) );
-                //jQuery.sap.log.debug("NavBack BackPage="+JSON.stringify(IOMy.common.NavPagesNavigationArray[IOMy.common.NavPagesCurrentIndex]) );
+                //jQuery.sap.log.debug("NavBack NavArray="+JSON.stringify(IomyRe.common.NavPagesNavigationArray) );
+                //jQuery.sap.log.debug("NavBack BackPage="+JSON.stringify(IomyRe.common.NavPagesNavigationArray[IomyRe.common.NavPagesCurrentIndex]) );
                 //-- Navigate back to the previous Page --//
                 oApp.to( sName, "c_SlideBack", aData );
             }

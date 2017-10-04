@@ -26,7 +26,6 @@ $.sap.require("IomyRe.devices");
 
 $.sap.registerModulePath('IomyRe.functions', sModuleInitialBuildLocation+'libraries/functions');
 $.sap.require("IomyRe.functions");
-$.sap.require("IomyRe.functions.getNewDeviceOptions");
 
 $.sap.registerModulePath('IomyRe.widgets', sModuleInitialBuildLocation+'libraries/widgets');
 $.sap.require("IomyRe.widgets");

@@ -42,13 +42,17 @@ sap.ui.jsfragment("fragments.ZigbeeSmartPlug", {
 						new sap.ui.layout.form.FormElement({
 							label : "Hub",
 							fields: [ 
-								IomyRe.widgets.selectBoxHub(oView.createId("HubSelect"))
+								IomyRe.widgets.selectBoxHub(oView.createId("HubSelect"), {
+                                    selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Hub}"
+                                })
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
 							label : "Modem",
 							fields: [ 
                                 IomyRe.widgets.selectBoxZigbeeModem(oView.createId("ZigModemSelect"), {
+                                    selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Modem}",
+                                    
                                     onSuccess : function () {
                                         oView.byId("CustomTelnetInput").setEnabled(true);
                                         oView.byId("CustomTelnetButton").setEnabled(true);

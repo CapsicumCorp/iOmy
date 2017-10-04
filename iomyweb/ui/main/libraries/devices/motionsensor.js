@@ -21,10 +21,10 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IOMy.devices.motionsensor",true);
-IOMy.devices.motionsensor = new sap.ui.base.Object();
+$.sap.declare("IomyRe.devices.motionsensor",true);
+IomyRe.devices.motionsensor = new sap.ui.base.Object();
 
-$.extend(IOMy.devices.motionsensor,{
+$.extend(IomyRe.devices.motionsensor,{
 	Devices: [],
     
     //---------------------------------------------------//
@@ -56,7 +56,7 @@ $.extend(IOMy.devices.motionsensor,{
         // Declare variables and import modules
         //--------------------------------------------------------------------//
         var me = this;
-        var php = IOMy.apiphp;
+        var php = IomyRe.apiphp;
         var sUrl = php.APILocation("motionsensor");
         var mData = {
             "Mode" : "GetMotionData",
@@ -87,7 +87,7 @@ $.extend(IOMy.devices.motionsensor,{
                     
                     if (oLastMotionField !== undefined && oLastMotionField !== null) {
                         oLastMotionField.setText(
-                            IOMy.functions.getLengthOfTimePassed({
+                            IomyRe.functions.getLengthOfTimePassed({
                                 "UTS" : iUTS
                             })
                         );
@@ -150,7 +150,7 @@ $.extend(IOMy.devices.motionsensor,{
         // Declare variables and import modules
         //--------------------------------------------------------------------//
         var me = this;
-        var odata = IOMy.apiodata;
+        var odata = IomyRe.apiodata;
         
         //--------------------------------------------------------------------//
         // Send the AJAX request
@@ -265,7 +265,7 @@ $.extend(IOMy.devices.motionsensor,{
 						width: "85%",
                         text : aDeviceData.DeviceName,
                         press : function () {
-                            IOMy.common.NavigationChangePage("pMotionSensor", {ThingId : aDeviceData.DeviceId});
+                            IomyRe.common.NavigationChangePage("pMotionSensor", {ThingId : aDeviceData.DeviceId});
                         }
                     }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20 iOmyLink")
                 ]
@@ -369,21 +369,21 @@ $.extend(IOMy.devices.motionsensor,{
 //                        //-- Bind a link to this button for subfunctions --//
 //                        var oCurrentButton = this;
 //                        //-- AJAX --//
-//                        IOMy.apiphp.AjaxRequest({
-//                            url: IOMy.apiphp.APILocation("statechange"),
+//                        IomyRe.apiphp.AjaxRequest({
+//                            url: IomyRe.apiphp.APILocation("statechange"),
 //                            type: "POST",
 //                            data: { 
 //                                "Mode":"ThingToggleStatus", 
 //                                "Id": aDeviceData.DeviceId
 //                            },
 //                            onFail : function(response) {
-//                                IOMy.common.showError(response.message, "Error Changing Device Status");
+//                                IomyRe.common.showError(response.message, "Error Changing Device Status");
 //                            },
 //                            onSuccess : function( sExpectedDataType, aAjaxData ) {
 //                                console.log(aAjaxData.ThingPortStatus);
 //                                //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
 //                                if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
-//                                    IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
+//                                    IomyRe.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
 //                                }
 //                            }
 //                        });
@@ -425,7 +425,7 @@ $.extend(IOMy.devices.motionsensor,{
                         new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
                             text : aDeviceData.DeviceName,
                             press : function () {
-                                IOMy.common.NavigationChangePage("pMotionSensor", {ThingId : aDeviceData.DeviceId});
+                                IomyRe.common.NavigationChangePage("pMotionSensor", {ThingId : aDeviceData.DeviceId});
                             }
                         }).addStyleClass("TextSizeMedium MarLeft6px Text_grey_20")
                     ]
@@ -524,15 +524,15 @@ $.extend(IOMy.devices.motionsensor,{
 //                        //-- Bind a link to this button for subfunctions --//
 //                        var oCurrentButton = this;
 //                        //-- AJAX --//
-//                        IOMy.apiphp.AjaxRequest({
-//                            url: IOMy.apiphp.APILocation("statechange"),
+//                        IomyRe.apiphp.AjaxRequest({
+//                            url: IomyRe.apiphp.APILocation("statechange"),
 //                            type: "POST",
 //                            data: { 
 //                                "Mode":"ThingToggleStatus", 
 //                                "Id": aDeviceData.DeviceId
 //                            },
 //                            onFail : function(response) {
-//                                IOMy.common.showError(response.message, "Error Changing Device Status");
+//                                IomyRe.common.showError(response.message, "Error Changing Device Status");
 //                            },
 //                            onSuccess : function( sExpectedDataType, aAjaxData ) {
 //                                //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
@@ -545,7 +545,7 @@ $.extend(IOMy.devices.motionsensor,{
 //                                        //oCurrentButton.setText("On");
 //                                    //}
 //
-//                                    IOMy.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
+//                                    IomyRe.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
 //                                }
 //                            }
 //                        });

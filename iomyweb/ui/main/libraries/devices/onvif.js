@@ -35,19 +35,6 @@ $.extend(IomyRe.devices.onvif,{
 	
 	LinkTypeId				: 6,
 	ThingTypeId				: 12,
-    
-    /**
-     * These IDs are used in the elements that are defined in this module. These
-     * elements are used in forms that handle information about onvif devices.
-     */
-    uiIDs       : {
-        sCameraNameLabelID       : "CameraNameLabel",
-        sCameraNameFieldID       : "CameraNameField",
-        sStreamProfileLabelID    : "StreamProfileLabel",
-        sStreamProfileFieldID    : "StreamProfileField",
-        sThumbnailProfileLabelID : "ThumbnailProfileLabel",
-        sThumbnailProfileFieldID : "ThumbnailProfileField"
-    },
 	
 	RSStreamProfile		: 3970,
 	RSStreamURL			: 3971,
@@ -174,25 +161,41 @@ $.extend(IomyRe.devices.onvif,{
      * 
      * @param {type} iLinkId            ID of the Onvif server
      * @param {type} fnCallback         Function called if successful
+     * 
+     * @throws IllegalArgumentException if the link ID is missing or invalid.
+     * @throws MissingSettingsMapException if there are no parameters specified in a JSON array.
      */
-    LookupProfiles : function(iLinkId, fnSuccessCallback, fnFailCallback) {
+    LookupProfiles : function(mSettings) {
         var me = this;
         var bError = false;
+        var iLinkId;
+        var fnFailCallback;
+        var fnSuccessCallback;
         
         //---------------------------------------------------------------//
         // Check that both the link ID and callback functions are given. //
         //---------------------------------------------------------------//
-        if (iLinkId === undefined || isNaN(iLinkId)) {
-            bError = true;
-            jQuery.sap.log.error("A valid link ID must be given and must be a number.");
-        }
-        
-        if (fnFailCallback === undefined) {
-            fnFailCallback = function () {};
-        }
-        
-        if (fnSuccessCallback === undefined) {
-            fnSuccessCallback = function () {};
+        if (mSettings !== undefined || mSettings !== null) {
+            if (mSettings.linkID === undefined || isNaN(mSettings.linkID)) {
+                throw new IllegalArgumentException("Link ID must be given and be a valid number");
+            } else {
+                iLinkId = mSettings.linkID;
+            }
+
+            if (mSettings.onFail === undefined) {
+                fnFailCallback = function () {};
+            } else {
+                fnFailCallback = mSettings.onFail;
+            }
+
+            if (mSettings.onSuccess === undefined) {
+                fnSuccessCallback = function () {};
+            } else {
+                fnSuccessCallback = mSettings.onSuccess;
+            }
+            
+        } else {
+            throw new MissingSettingsMapException("You must specify the ID of the Onvif Server that contains the profiles.");
         }
         
         // If all went well...
@@ -211,11 +214,8 @@ $.extend(IomyRe.devices.onvif,{
                 },
 
                 onSuccess : function (status, response) {
-                    // Capture the profiles
-                    me.aProfiles = response.Data;
-
                     // Call the callback function if one is defined.
-                    fnSuccessCallback();
+                    fnSuccessCallback(response.Data);
                 },
 
                 onFail : function (response) {
@@ -223,7 +223,7 @@ $.extend(IomyRe.devices.onvif,{
                     me.sProfileLookupErrors = response.responseText;
                     
                     // Call the fail callback function if one is defined.
-                    fnFailCallback();
+                    fnFailCallback(response);
                 }
             });
         }
@@ -329,101 +329,6 @@ $.extend(IomyRe.devices.onvif,{
         }
     },
     
-    ValidateStreamProfile: function (oScope) {
-        var me                      = this;   // Scope of the onvif module
-        var bError                  = false;  //
-        var aErrorMessages          = [];     //
-        var mInfo                   = {};     // MAP: Contains the error status and any error messages.
-        
-        //---------------------------------------------------//
-        // Is the stream profile valid? (does it have an ID) //
-        //---------------------------------------------------//
-        try {
-            if (oScope.byId(me.uiIDs.sStreamProfileFieldID).getSelectedKey() === "") {
-                bError = true;
-                aErrorMessages.push("Stream profile is not valid");
-            }
-        } catch (e) {
-            bError = true;
-            aErrorMessages.push("Error 0x12001: There was an error checking the stream profile: "+e.message);
-        }
-        
-        // Prepare the return value
-        mInfo.bError = bError;
-        mInfo.aErrorMessages = aErrorMessages;
-        
-        return mInfo;
-    },
-    
-    ValidateThumbnailProfile : function (oScope) {
-        var me                      = this; // Scope of the onvif module
-        var bError                  = false;
-        var aErrorMessages          = [];
-        var mInfo                   = {}; // MAP: Contains the error status and any error messages.
-        
-        //-------------------------------------------------\\
-        // Is the thumbnail profile valid? (does it have an ID)
-        //-------------------------------------------------\\
-        try {
-            if (oScope.byId(me.uiIDs.sThumbnailProfileFieldID).getSelectedKey() === "") {
-                bError = true;
-                aErrorMessages.push("Thumbnail profile is not valid");
-            }
-        } catch (e) {
-            bError = true;
-            aErrorMessages.push("Error 0x12002: There was an error checking the thumbnail profile: "+e.message);
-        }
-        
-        // Prepare the return value
-        mInfo.bError = bError;
-        mInfo.aErrorMessages = aErrorMessages;
-        
-        return mInfo;
-    },
-    
-    ValidateThingFormData : function (oScope) {
-        var me                      = this;   // Scope of the onvif module
-        var bError                  = false;  //
-        var aErrorMessages          = [];     //
-        var mInfo                   = {};     // MAP: Contains the error status and any error messages.
-        var mStreamProfileInfo      = {};     //
-        var mThumbnailProfileInfo   = {};     //
-        
-        //-------------------------------------------------//
-        // Check the Onvif stream form data                //
-        //-------------------------------------------------//
-        try {
-			if (oScope.byId(me.uiIDs.sCameraNameFieldID).getValue().length === 0) {
-				bError = true;
-				aErrorMessages.push("A name must be given for the camera.");
-			}
-			
-            // Check the stream profile
-            mStreamProfileInfo      = me.ValidateStreamProfile(oScope);
-            if (mStreamProfileInfo.bError === true) {
-                bError = true;
-                aErrorMessages = aErrorMessages.concat(mStreamProfileInfo.aErrorMessages);
-            }
-            
-            // Check the thumbnail profile
-            mThumbnailProfileInfo   = me.ValidateThumbnailProfile(oScope);
-            if (mThumbnailProfileInfo.bError === true) {
-                bError = true;
-                aErrorMessages = aErrorMessages.concat(mThumbnailProfileInfo.aErrorMessages);
-            }
-            
-        } catch (e) {
-            bError = true;
-            aErrorMessages.push("Error 0x12003: There was an error checking the onvif stream data: "+e.message);
-        }
-        
-        // Prepare the return value
-        mInfo.bError = bError;
-        mInfo.aErrorMessages = aErrorMessages;
-        
-        return mInfo;
-    },
-    
     showSnapshot : function (iThingId, oCallingButton, oPage) {
         var oRPopover = new sap.m.ResponsivePopover({
             title : IomyRe.common.ThingList["_"+iThingId].DisplayName,
@@ -471,257 +376,5 @@ $.extend(IomyRe.devices.onvif,{
         });
         
         oRPopover.openBy(oCallingButton);
-    },
-    
-    /**
-     * Creates a Onvif stream UI entry in a page such as room overview. This is to be
-     * called from the GetCommonUI in the main devices module.
-     * 
-     * @param {type} sPrefix
-     * @param {type} oViewScope
-     * @param {type} aDeviceData
-     * @returns {unresolved}
-     */
-    GetCommonUI: function( sPrefix, oViewScope, aDeviceData ) {
-		//------------------------------------//
-		//-- 1.0 - Initialise Variables		--//
-		//------------------------------------//
-		
-		var me					= this;
-		var oUIObject			= null;   //-- OBJECT:            --//
-		var aUIObjectItems		= [];     //-- ARRAY:             --//
-         
-        //------------------------------------//
-		//-- 2.0 - Fetch UI					--//
-		//------------------------------------//
-		aUIObjectItems.push(
-            //------------------------------------//
-            //-- 1st is the Device Label		--//
-            //------------------------------------//
-            new sap.m.VBox({
-                items : [
-                    new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
-						width: "85%",
-                        text : aDeviceData.DeviceName,
-                        press : function () {
-                            IomyRe.common.NavigationChangePage("pOnvif", {ThingId : aDeviceData.DeviceId});
-                        }
-                    }).addStyleClass("TextSizeMedium MarLeft6px MarTop20px Text_grey_20 iOmyLink")
-                ]
-            }).addStyleClass("BorderRight width80Percent webkitflex")
-        );
-		
-		aUIObjectItems.push(
-            //------------------------------------//
-			//-- 2nd is the onvif buttons		--//
-			//------------------------------------//
-			new sap.m.HBox({
-                items : [
-                    new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
-                        //--------------------------------//
-                        //-- Take Snapshot              --//
-                        //--------------------------------//
-                        items: [
-                            new sap.m.VBox({
-                                items : [
-                                    new sap.m.Button ({
-                                        width: "100%",
-                                        icon : "sap-icon://GoogleMaterial/photo_camera",
-                                        press : function () {
-                                            me.showSnapshot(aDeviceData.DeviceId, this, oViewScope);
-                                        }
-                                    })
-                                ]
-                            })
-                        ]
-                    }).addStyleClass("MarLeft10px MarAuto0px minwidth70px"),
-                    new sap.m.VBox( oViewScope.createId( sPrefix+"_Screenshot"), {
-                        //--------------------------------//
-                        //-- Open Live Stream           --//
-                        //--------------------------------//
-                        items: [
-                            new sap.m.VBox({
-                                items : [
-                                    new sap.m.Button ({
-                                        width: "100%",
-                                        icon : "sap-icon://GoogleMaterial/videocam",
-                                        press : function () {
-											try {
-												me.getStreamURL({
-													ThingId : aDeviceData.DeviceId,
-
-													onSuccess : function(sUrl) {
-														window.open(sUrl);
-													},
-
-													onFail : function (response) {
-														IomyRe.common.showError(response.responseText, "Couldn't load the stream");
-													}
-												});
-											} catch (ex) {
-												IomyRe.common.showError(ex.message, "Couldn't load the stream");
-											}
-                                        }
-                                    })
-                                ]
-                            })
-                        ]
-                    }).addStyleClass("MarLeft10px MarAuto0px minwidth70px")
-                ]
-            }).addStyleClass("minwidth170px minheight58px")
-        );
-		
-        oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
-            items: aUIObjectItems
-        }).addStyleClass("ListItem");
-		
-		
-		//------------------------------------//
-		//-- 3.0 - RETURN THE RESULTS		--//
-		//------------------------------------//
-		return oUIObject;
-	},
-    
-    GetCommonUITaskList: function( Prefix, oViewScope, aDeviceData ) {
-		//------------------------------------//
-		//-- 1.0 - Initialise Variables		--//
-		//------------------------------------//
-		
-		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
-		
-		//------------------------------------//
-		//-- 2.0 - Fetch TASKS				--//
-		//------------------------------------//
-		if( aDeviceData.IOs!==undefined ) {
-            
-        } else {
-            //-- TODO: Write a error message --//
-            jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
-        }
-		return aTasks;
-	},
-    
-    GetCommonUIForDeviceOverview: function( sPrefix, oViewScope, aDeviceData ) {
-		//------------------------------------//
-		//-- 1.0 - Initialise Variables		--//
-		//------------------------------------//
-		
-		var oUIObject			= null;					//-- OBJECT:			--//
-		
-		//------------------------------------//
-		//-- 2.0 - Fetch UI					--//
-		//------------------------------------//
-		//console.log(aDeviceData.DeviceId);
-
-        oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
-            items: [
-                //------------------------------------//
-                //-- 1st is the Device Label		--//
-                //------------------------------------//
-                new sap.m.VBox({
-                    items : [
-                        new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
-                            text : aDeviceData.DeviceName,
-                            press : function () {
-                                IomyRe.common.NavigationChangePage("pOnvif", {ThingId : aDeviceData.DeviceId});
-                            }
-                        }).addStyleClass("TextSizeMedium MarLeft6px Text_grey_20")
-                    ]
-                }).addStyleClass("BorderRight width80Percent DeviceLabelMargin"),
-				
-				//------------------------------------//
-                //-- 2nd is the Device Data			--//
-                //------------------------------------//
-                new sap.m.HBox({
-                    items : [
-						new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
-                            //--------------------------------//
-                            //-- Draw the Data Boxes		--//
-                            //--------------------------------//
-                            items: [
-                                new sap.m.VBox({
-                                    items : [
-										new sap.m.Button ({
-											width: "100%",
-											icon : "sap-icon://GoogleMaterial/visibility",
-										})
-                                    ]
-                                })
-                            ]
-                        }).addStyleClass("MarLeft10px MarAuto0px minwidth70px"),
-                        new sap.m.VBox( oViewScope.createId( sPrefix+"_Screenshot"), {
-                            //--------------------------------//
-                            //-- Draw the Data Boxes		--//
-                            //--------------------------------//
-                            items: [
-                                new sap.m.VBox({
-                                    items : [
-										new sap.m.Button ({
-											width: "100%",
-											icon : "sap-icon://GoogleMaterial/camera",
-										})
-                                    ]
-                                })
-                            ]
-                        }).addStyleClass("MarLeft10px MarAuto0px minwidth70px")
-                    ]
-                }).addStyleClass("minwidth170px minheight58px")
-            ]
-        }).addStyleClass("ListItem");
-
-		//------------------------------------//
-		//-- 9.0 - RETURN THE RESULTS		--//
-		//------------------------------------//
-		return oUIObject;
-	},
-	
-	GetCommonUITaskListForDeviceOverview: function( Prefix, oViewScope, aDeviceData ) {
-		//------------------------------------//
-		//-- 1.0 - Initialise Variables		--//
-		//------------------------------------//
-		//console.log(JSON.stringify(aDeviceData));
-		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
-		
-		//------------------------------------//
-		//-- 2.0 - Fetch TASKS				--//
-		//------------------------------------//
-		if( aDeviceData.IOs!==undefined ) {
-            $.each(aDeviceData.IOs, function (sIndex, aIO) {
-                
-            });
-        } else {
-            //  #TODO:# - Write a error message
-            jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
-        }
-		return aTasks;
-	},
-	
-	GetObjectIdList: function( sPrefix, oViewScope, aDeviceData ) {
-		//------------------------------------//
-		//-- 1.0 - Initialise Variables		--//
-		//------------------------------------//
-		var aObjectIdList = [];
-		
-		//------------------------------------//
-		//-- 2.0 - Fetch Definition names	--//
-		//------------------------------------//
-		
-		//-- TODO: These devices need to be in their own definition file --//
-		if( aDeviceData.DeviceTypeId===2 ) {
-			
-			aObjectIdList = [
-				sPrefix+"_Container",
-				sPrefix+"_Label",
-				sPrefix+"_DataContainer",
-				sPrefix+"_StatusContainer",
-				sPrefix+"_StatusToggle"
-			];
-			
-		}
-	
-		//------------------------------------//
-		//-- 9.0 - RETURN THE RESULTS		--//
-		//------------------------------------//
-		return aObjectIdList;
-	}
+    }
 });

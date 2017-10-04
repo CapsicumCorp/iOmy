@@ -42,14 +42,17 @@ sap.ui.jsfragment("fragments.OnvifServer", {
 						new sap.ui.layout.form.FormElement({
 							label : "Hub",
 							fields: [ 
-								IomyRe.widgets.selectBoxHub(oView.createId("HubSelect"))
+								IomyRe.widgets.selectBoxHub(oView.createId("HubSelect"), {
+                                    selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Hub}"
+                                })
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
 							label : "Put this device in",
 							fields: [ 
 								IomyRe.widgets.selectBoxRoom({
-                                    id : "RoomSelection"
+                                    id : "RoomSelection",
+                                    selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Room}"
                                 })
 							]
 						}),
@@ -88,7 +91,10 @@ sap.ui.jsfragment("fragments.OnvifServer", {
 							fields: [ 
 								new sap.m.Button ({
 									type: sap.m.ButtonType.Accept,
-									text: "Save"
+									text: "Save",
+                                    press : function () {
+                                        oController.CreateDevice();
+                                    }
 								}),
 								new sap.m.Button ({
 									type: sap.m.ButtonType.Reject,

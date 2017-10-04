@@ -530,6 +530,7 @@ $.extend( IomyRe.widgets, {
         var aErrorMessages      = [];
         var aItems              = [];
         var aFirstItem          = [];
+        var iFirstRoomId        = null;
         var sId;
         var sPremiseId;
         var iRoomId;
@@ -570,6 +571,7 @@ $.extend( IomyRe.widgets, {
                 sId = null;
             } else {
                 sId = mSettings.id;
+                mSettings.id = undefined;
             }
             
             if (mSettings.roomID === undefined || mSettings.roomID === null) {
@@ -632,6 +634,13 @@ $.extend( IomyRe.widgets, {
             
             if (IomyRe.common.RoomsList[sPremiseId] !== undefined) {
                 
+                aFirstItem.push(
+                    new sap.ui.core.Item({
+                        "text" : "Please select a room",
+                        "key" : -1
+                    })
+                );
+                
                 if (bAddAllRoomOption) {
                     aFirstItem.push(
                         new sap.ui.core.Item({
@@ -649,6 +658,10 @@ $.extend( IomyRe.widgets, {
                             bHasUnassignedRoom = true;
                             
                         } else {
+                            if (iFirstRoomId === null) {
+                                iFirstRoomId = aRoom.RoomId;
+                            }
+                            
                             aItems.push(
                                 new sap.ui.core.Item({
                                     "text" : aRoom.RoomName,
@@ -663,22 +676,20 @@ $.extend( IomyRe.widgets, {
                 
                 aItems = aFirstItem.concat(aItems);
                 
+                mSettings.items = aItems;
+                
                 if (sId !== null) {
-                    oSBox = new sap.m.Select(sId,{
-                        "items" : aItems
-                    }).addStyleClass("width100Percent");
+                    oSBox = new sap.m.Select(sId, mSettings);
 
                 } else {
-                    oSBox = new sap.m.Select({
-                        "items" : aItems
-                    }).addStyleClass("width100Percent");
+                    oSBox = new sap.m.Select(mSettings);
                 }
                 
                 if (iRoomsCounted > 0) {
                     if (iRoomId !== undefined && iRoomId !== null) {
                         oSBox.setSelectedKey(iRoomId);
                     } else {
-                        oSBox.setSelectedKey(null);
+                        oSBox.setSelectedKey(iFirstRoomId);
                     }
                     
                     return oSBox;
@@ -709,48 +720,59 @@ $.extend( IomyRe.widgets, {
      * @param {Number} iHubId       ID of the given hub.
      * @returns {mixed}             Either the select box filled with hubs or a text widget with an error message.
      */
-    selectBoxHub : function (sId, iHubId) {
-        var oElement;
+    selectBoxHub : function (sId, mSettings, iHubId) {
+        var iFirstHubId         = null;
+        var aItems              = [];
+        var aFirstItem          = [];
         
         try {
             //====================================================================//
             // Clean up                                                           //
             //====================================================================//
-            if (sap.ui.getCore().byId(sId) !== undefined)
+            if (sap.ui.getCore().byId(sId) !== undefined) {
                 sap.ui.getCore().byId(sId).destroy();
+            }
 
             //====================================================================//
             // Create the Combo Box                                               //
             //====================================================================//
-            var oSBox = new sap.m.Select(sId,{
-                width : "100%"
-            });
-
+            aFirstItem.push(
+                new sap.ui.core.Item({
+                    "text" : "Please select a hub",
+                    "key" : -1
+                })
+            );
+            
             $.each(IomyRe.common.HubList, function (sI, mHub) {
-				oSBox.addItem(
+                if (iFirstHubId === null) {
+                    iFirstHubId = mHub.HubId;
+                }
+                
+				aItems.push(
                     new sap.ui.core.Item({
                         text : mHub.HubName,
                         key : mHub.HubId
                     })
                 );
 			});
+            
+            aItems = aFirstItem.concat(aItems);
+            mSettings.items = aItems;
+            
+            var oSBox = new sap.m.Select(sId, mSettings);
 
             if (iHubId !== undefined && iHubId !== null) {
                 oSBox.setSelectedKey(iHubId);
             } else {
-                oSBox.setSelectedKey(null);
+                oSBox.setSelectedKey(iFirstHubId);
             }
-
-            oElement = oSBox;
+            
+            return oSBox;
             
         } catch (e) {
-            jQuery.sap.log.error("Error in IomyRe.widgets.selectBoxHub(): "+e.message);
-            IomyRe.common.showError("Failed to load the hub combo box\n\n"+e.message, "Error");
-            oElement = new sap.m.Text(sId, {text : "Failed to load the hub combo box."});
+            e.message = "Error in IomyRe.widgets.selectBoxHub(): "+e.message;
+            throw e;
             
-        } finally {
-            
-            return oElement; // Either a combo box or an error message.
         }
     },
     
@@ -773,8 +795,6 @@ $.extend( IomyRe.widgets, {
      * @throws NoRoomsFoundException when there are no rooms visible to the user.
      */
     selectBoxZigbeeModem : function (sId, mSettings) {
-        var bError              = false;
-        var aErrorMessages      = [];
         var iModemCount         = 0;
         var sID;
         var oSBox;
@@ -827,21 +847,19 @@ $.extend( IomyRe.widgets, {
         }
         
         try {
-
-            //====================================================================//
-            // Create the Select Box                                              //
-            //====================================================================//
-//            if (sap.ui.getCore().byId(sID) !== undefined) {
-//                sap.ui.getCore().byId(sID).destroy();
-//            }
-            
             IomyRe.common.RefreshCommList({
                 
                 onSuccess : function () {
                     
+                    var iFirstModem = null;
+                    
                     $.each(IomyRe.common.CommList, function (sI, mComm) {
                         
                         if (mComm.CommTypeId == IomyRe.devices.zigbeesmartplug.CommTypeId) {
+                            if (iFirstModem === null) {
+                                iFirstModem = mComm.CommId;
+                            }
+                            
                             oSBox.addItem(
                                 new sap.ui.core.Item({
                                     key : mComm.CommId,
@@ -855,6 +873,8 @@ $.extend( IomyRe.widgets, {
                     });
                     
                     if (iModemCount > 0) {
+                        oSBox.setSelectedKey(iFirstModem);
+                        
                         oSBox.setEnabled(true);
                         fnSuccess();
                         
@@ -876,5 +896,206 @@ $.extend( IomyRe.widgets, {
             e.message = "Error in IomyRe.widgets.selectBoxZigbeeModem(): "+e.message;
             throw e;
         }
+    },
+    
+    selectBoxOnvifProfiles : function (sId, mSettings) {
+        var sID;
+        var iLinkId;
+        var oSBox;
+        var fnSuccess;
+        var fnFail;
+        
+        if (typeof sId === "string") {
+            sID = sId;
+            
+            if (mSettings !== undefined && mSettings !== null) {
+                if (typeof mSettings !== "object") {
+                    throw new IllegalArgumentException("'mSettings' is not an object. Type given: '"+typeof mSettings+"'.");
+                }
+            } else {
+                mSettings.enabled = false;
+            }
+            
+            oSBox = new sap.m.Select(sID, mSettings);
+            
+        } else if (typeof sId === "object") {
+            //----------------------------------------------------------------//
+            // The first parameter must in fact be the settings map.
+            //----------------------------------------------------------------//
+            mSettings = sId;
+            mSettings.enabled = false;
+            
+            oSBox = new sap.m.Select(mSettings);
+            
+        } else {
+            throw new IllegalArgumentException("Element ID is not a valid type. Must be a string. Type given: '"+typeof sId+"'.");
+        }
+        
+        if (mSettings !== undefined) {
+            if (mSettings.linkID === undefined || isNaN(mSettings.linkID)) {
+                throw new IllegalArgumentException("Link ID must be given and be a valid number");
+            } else {
+                iLinkId = mSettings.linkID;
+            }
+            
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+            } else {
+                fnSuccess = function () {};
+            }
+            
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+            } else {
+                fnFail = function () {};
+            }
+            
+        } else {
+            throw new MissingSettingsMapException("Settings object must be parsed. It must contain a valid 'linkID' parameter.");
+        }
+        
+        try {
+            IomyRe.devices.onvif.LookupProfiles({
+                linkID : iLinkId,
+                
+                onSuccess : function (aProfiles) {
+                    
+                    for (var i = 0; i < aProfiles.length; i++) {
+                        oSBox.addItem(
+                            new sap.ui.core.Item({
+                                "key" : aProfiles[i].ProfileToken,
+                                "text" : aProfiles[i].ProfileName
+                            })
+                        );
+                    }
+                },
+                
+                onFail : function () {
+                    oSBox.addItem(
+                        new sap.ui.core.Item({
+                            "text" : "Failed to load profiles."
+                        })
+                    );
+                }
+            });
+            
+            return oSBox;
+        } catch (e) {
+            e.message = "Error in IomyRe.widgets.selectBoxOnvifProfiles(): "+e.message;
+            throw e;
+        }
+    },
+    
+    selectBoxOnvifServer : function (sId, mSettings) {
+        var bFirstElementFound  = false;
+        var bEnabled            = true;
+        var aItems              = [];
+        var aFirstItem          = [];
+        var sID;
+        var oSBox;
+        var fnSuccess;
+        var fnFail;
+        
+        if (typeof sId === "string") {
+            sID = sId;
+            
+            if (mSettings !== undefined && mSettings !== null) {
+                if (typeof mSettings !== "object") {
+                    throw new IllegalArgumentException("'mSettings' is not an object. Type given: '"+typeof mSettings+"'.");
+                }
+            } else {
+                mSettings = {};
+                mSettings.enabled = false;
+            }
+            
+            //oSBox = new sap.m.Select(sID, mSettings);
+            
+        } else if (typeof sId === "object") {
+            //----------------------------------------------------------------//
+            // The first parameter must in fact be the settings map.
+            //----------------------------------------------------------------//
+            mSettings = sId;
+            mSettings.enabled = false;
+            sId = null;
+            
+            //oSBox = new sap.m.Select(mSettings);
+            
+        } else {
+            throw new IllegalArgumentException("Element ID is not a valid type. Must be a string. Type given: '"+typeof sId+"'.");
+        }
+        
+        if (mSettings !== undefined) {
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+            } else {
+                fnSuccess = function () {};
+            }
+            
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+            } else {
+                fnFail = function () {};
+            }
+            
+        } else {
+            fnSuccess   = function () {};
+            fnFail      = function () {};
+        }
+        
+        try {
+            
+            aFirstItem.push(
+                new sap.ui.core.Item({
+                    text : "Please select Onvif device",
+                    key : -1
+                })
+            );
+        
+            $.each(IomyRe.common.LinkList, function (sI, mLink) {
+                
+                if (!bFirstElementFound) {
+                    bFirstElementFound = true;
+                }
+                
+                if (mLink.LinkTypeId == IomyRe.devices.onvif.LinkTypeId) {
+                    aItems.push(
+                        new sap.ui.core.Item({
+                            key : mLink.LinkId,
+                            text : mLink.LinkName
+                        })
+                    );
+                }
+                
+            });
+            
+            if (!bFirstElementFound) {
+                aItems.push(
+                    new sap.ui.core.Item({
+                        text : "No Onvif cameras or servers detected."
+                    })
+                );
+            
+                bEnabled = false;
+                
+            } else {
+                aItems = aFirstItem.concat(aItems);
+            }
+            
+            mSettings.items = aItems;
+            mSettings.enabled = bEnabled;
+            
+            if (sId !== null) {
+                oSBox = new sap.m.Select(sId, mSettings);
+
+            } else {
+                oSBox = new sap.m.Select(mSettings);
+            }
+            
+            return oSBox;
+        } catch (e) {
+            e.message = "Error in IomyRe.widgets.selectBoxOnvifServer(): "+e.message;
+            throw e;
+        }
     }
+    
 });
