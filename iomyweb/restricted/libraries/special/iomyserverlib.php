@@ -5269,9 +5269,9 @@ function DB_CreateDefaultData5( $sDBName ) {
 			  == #6.9# - COMMTYPES                                      ==
 			  ============================================================*/
 			$sSQL .= "INSERT INTO `".$sDBName."`.`COMMTYPE` ( COMMTYPE_PK, COMMTYPE_NAME ) VALUES ( 1, 'Legacy' ); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COMMTYPE` ( COMMTYPE_PK ,COMMTYPE_NAME ) VALUES ( 2, 'PHP API' ); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COMMTYPE` ( COMMTYPE_PK ,COMMTYPE_NAME ) VALUES ( 3, 'Zigbee' ); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`COMMTYPE` ( COMMTYPE_PK ,COMMTYPE_NAME ) VALUES ( 3, 'Bluetooth' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`COMMTYPE` ( COMMTYPE_PK, COMMTYPE_NAME ) VALUES ( 2, 'PHP API' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`COMMTYPE` ( COMMTYPE_PK, COMMTYPE_NAME ) VALUES ( 3, 'Zigbee' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`COMMTYPE` ( COMMTYPE_PK, COMMTYPE_NAME ) VALUES ( 4, 'Bluetooth' ); \n";
 			
 			/*============================================================
 			  == #6.9# - DATATYPES                                      ==
