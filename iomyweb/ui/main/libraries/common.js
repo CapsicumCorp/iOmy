@@ -113,7 +113,6 @@ $.extend(IomyRe.common,{
     CommListLastUpdate              : new Date(),
     LinkList                        : {},
     LinkListLastUpdate:               new Date(),
-    LinkTypeList                    : {},
     ThingList                        : {},
     ThingListLastUpdate:            new Date(),
 
@@ -1187,7 +1186,7 @@ $.extend(IomyRe.common,{
                                 
                                 IomyRe.common.RoomsList["_"+iPremiseId]["_"+iRoomId] = aTemp;
                             } else {
-                                console.log("Invalid PremiseId or RoomId");
+                                $.sap.log.error("Invalid PremiseId or RoomId");
                             }
                             
                         }
@@ -1202,7 +1201,7 @@ $.extend(IomyRe.common,{
                     }
                     
                 } catch(e11) {
-                    console.log("LoginRoomsList Error 11: "+e11.message);
+                    $.sap.log.error("LoginRoomsList Error 11: "+e11.message);
                     //-- Perform the "onFail" function if applicable --//
                     if(oConfig.onFail) {
                         oConfig.onFail();

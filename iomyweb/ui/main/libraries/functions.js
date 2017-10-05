@@ -26,6 +26,44 @@ $.sap.declare("IomyRe.functions",true);
 IomyRe.functions = new sap.ui.base.Object();
 
 $.extend(IomyRe.functions, {
+    
+    /**
+	 * Retrives the hub that a thing is connected to.
+	 * 
+	 * @param {type} iThingId		ID of the Thing
+	 * @returns {Object}			Map containing the hub that a thing is associated with.
+	 * 
+	 * @throws IllegalArgumentException when the Thing ID is either not given, invalid, or if it refers to a thing that doesn't exist.
+	 *\/
+	getHubConnectedToLink : function (iLinkId) {
+		//--------------------------------------------------------------------//
+		// Variables
+		//--------------------------------------------------------------------//
+		var bError			= true;
+		var aErrorMessages	= [];
+		var mLinkIdInfo     = IomyRe.validation.isLinkIDValid(iLinkId);
+		var iCommId;
+		var iHubId;
+		
+		//--------------------------------------------------------------------//
+		// Check Thing ID
+		//--------------------------------------------------------------------//
+		bError = !mLinkIdInfo.bIsValid;
+		aErrorMessages = aErrorMessages.concat(mLinkIdInfo.aErrorMessages);
+		
+		if (bError) {
+			throw new IllegalArgumentException(aErrorMessages.join("\n"));
+		}
+		
+		//--------------------------------------------------------------------//
+		// Find its Comm ID and Hub ID and get the hub using the Hub ID.
+		//--------------------------------------------------------------------//
+		iCommId	= IomyRe.common.LinkList["_"+iLinkId].CommId;
+		iHubId	= IomyRe.common.CommList["_"+iCommId].HubId;
+		
+		return IomyRe.common.HubList["_"+iHubId];
+		
+	},*/
 	
 	/**
 	 * Creates a JSON structure that contains a list of device types for users
@@ -144,7 +182,7 @@ $.extend(IomyRe.functions, {
 			{
 				structOptions["linkType"+mDeviceType.LinkTypeId] = {
                     "Hub" : "",
-                    "Room" : "",
+                    "Room" : "1",
                     "IPAddress" : "",
                     "IPPort" : "",
                     "DisplayName" : "",
@@ -157,7 +195,7 @@ $.extend(IomyRe.functions, {
 			{
 				structOptions["linkType"+mDeviceType.LinkTypeId] = {
                     "Hub" : "",
-                    "Room" : "",
+                    "Room" : "1",
                     "IPAddress" : "",
                     "IPPort" : "",
                     "DeviceToken" : "",
@@ -169,7 +207,7 @@ $.extend(IomyRe.functions, {
 			{
 				structOptions["linkType"+mDeviceType.LinkTypeId] = {
                     "Hub" : "",
-                    "Room" : "",
+                    "Room" : "1",
                     "DisplayName" : "",
                     "StationCode" : "",
                     "KeyCode" : ""
@@ -180,7 +218,7 @@ $.extend(IomyRe.functions, {
 			{
 				structOptions["linkType"+mDeviceType.LinkTypeId] = {
                     "Hub" : "",
-                    "Room" : "",
+                    "Room" : "1",
                     "Protocol" : "http",
                     "IPAddress" : "",
                     "IPPort" : "",
@@ -197,7 +235,7 @@ $.extend(IomyRe.functions, {
 		// Add the onvif camera option
 		//--------------------------------------------------------------------//
 		structOptions["thingType"+IomyRe.devices.onvif.ThingTypeId] = {
-            "DisplayName" : "",
+            "CameraName" : "",
             "OnvifServer" : "",
             "StreamProfile" : "",
             "ThumbnailProfile" : ""

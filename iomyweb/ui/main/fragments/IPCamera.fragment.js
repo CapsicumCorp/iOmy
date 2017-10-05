@@ -57,12 +57,21 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
+							label : "Display Name",
+							fields: [ 
+								new sap.m.Input ({
+									placeholder : "Name of the Camera Stream",
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/DisplayName}"
+								})
+							]
+						}),
+						new sap.ui.layout.form.FormElement({
 							label : "Type",
 							fields: [ 
 								new sap.m.Select({
 									items : [
 										new sap.ui.core.Item ({
-											text: "MJEPG IP Camera",
+											text: "MJPEG IP Camera",
 											key: "MJPEG"
 										}),
 										new sap.ui.core.Item ({
@@ -86,6 +95,7 @@ sap.ui.jsfragment("fragments.IPCamera", {
 								}),
 								new sap.m.Input({
 									placeholder: "Enter Port Number",
+                                    type : "Number",
                                     value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/IPPort}"
 								}),
 							]
@@ -111,10 +121,13 @@ sap.ui.jsfragment("fragments.IPCamera", {
 								}),
 								new sap.m.Button ({
 									type: sap.m.ButtonType.Reject,
-									text: "Cancel"
-								}),
+									text: "Cancel",
+                                    press : function () {
+                                        oController.CancelInput();
+                                    }
+								})
 							]
-						}),
+						})
 					]
 				})
 			]

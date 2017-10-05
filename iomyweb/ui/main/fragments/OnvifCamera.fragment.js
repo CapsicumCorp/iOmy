@@ -43,7 +43,7 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 							label : "Assign to Onvif Server",
 							fields: [ 
 								IomyRe.widgets.selectBoxOnvifServer(oView.createId("SelectOnvifServer"), {
-									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Server}",
+									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/OnvifServer}",
                                     change : function () {
                                         oController.LoadOnvifProfilesForSelectBoxes();
                                     }
@@ -88,7 +88,10 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 								}),
 								new sap.m.Button (oView.createId("ButtonCancel"), {
 									type: sap.m.ButtonType.Reject,
-									text: "Cancel"
+									text: "Cancel",
+                                    press : function () {
+                                        oController.CancelInput();
+                                    }
 								})
 							]
 						})

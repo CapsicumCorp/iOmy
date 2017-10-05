@@ -47,13 +47,22 @@ sap.ui.jsfragment("fragments.PhillipsHueBridge", {
                                 })
 							]
 						}),
-						new sap.ui.layout.form.FormElement({
+						new sap.ui.layout.form.FormElement(oView.createId("RoomFormElement"), {
 							label : "Put this device in",
 							fields: [ 
 								IomyRe.widgets.selectBoxRoom({
                                     id : "RoomSelection",
                                     selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Room}"
                                 })
+							]
+						}),
+						new sap.ui.layout.form.FormElement({
+							label : "Display Name",
+							fields: [ 
+								new sap.m.Input ({
+									placeholder : "Name of the Bridge",
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/DisplayName}"
+								})
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
@@ -65,6 +74,7 @@ sap.ui.jsfragment("fragments.PhillipsHueBridge", {
 								}),
 								new sap.m.Input({
 									placeholder: "Enter Port Number",
+                                    type : "Number",
                                     value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/IPPort}"
 								}),
 							]
@@ -90,7 +100,10 @@ sap.ui.jsfragment("fragments.PhillipsHueBridge", {
 								}),
 								new sap.m.Button ({
 									type: sap.m.ButtonType.Reject,
-									text: "Cancel"
+									text: "Cancel",
+                                    press : function () {
+                                        oController.CancelInput();
+                                    }
 								}),
 							]
 						}),

@@ -85,26 +85,19 @@ sap.ui.jsview("pages.staging.device.DeviceForm", {
 											toolbar : new sap.m.Toolbar({
 												content : [
 													new sap.m.Title ({
-														text: "Device Type",
+														text: "Device Type"
 													})
 												]
 											}).addStyleClass("MarBottom1d0Rem"),
 											formContainers : [
 												new sap.ui.layout.form.FormContainer({
 													formElements : [
-														new sap.ui.layout.form.FormElement({
+														new sap.ui.layout.form.FormElement(oView.createId("DeviceTypeFormElement"), {
 															label : "",
 															fields: [ 
-																IomyRe.widgets.selectBoxNewDeviceOptions (oView.createId("DevTypeSelect"),{
-																	selectedKey : "start",
-																	change : function () {
-																		var DevTypeSelect = this;
-																		var sDevType = DevTypeSelect.getSelectedKey();
-																		oController.DevTypeToggle(oController, sDevType);
-																	}
-																})
+																
 															]
-														}),
+														})
 													]
 												})
 											]
@@ -126,7 +119,7 @@ sap.ui.jsview("pages.staging.device.DeviceForm", {
 									
 								})
 							]
-						}),					
+						})
 					]
 					
 				}).addStyleClass("")

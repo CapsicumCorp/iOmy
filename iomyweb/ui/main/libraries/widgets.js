@@ -692,14 +692,21 @@ $.extend( IomyRe.widgets, {
                         oSBox.setSelectedKey(iFirstRoomId);
                     }
                     
-                    return oSBox;
                 } else {
                     if (bHasUnassignedRoom) {
-                        oSBox.setVisible(false);
+                        oSBox.destroyItems();
+                        oSBox.addItem(
+                            new sap.ui.core.Item({
+                                text : "No rooms configured"
+                            })
+                        );
+                        oSBox.setEnabled(false);
                     } else {
                         throw new NoRoomsFoundException();
                     }
                 }
+                
+                return oSBox;
                 
             } else {
                 throw new NoRoomsFoundException();

@@ -92,7 +92,10 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 								}),
 								new sap.m.Button ({
 									type: sap.m.ButtonType.Reject,
-									text: "Cancel"
+									text: "Cancel",
+                                    press : function () {
+                                        oController.CancelInput();
+                                    }
 								})
 							]
 						})

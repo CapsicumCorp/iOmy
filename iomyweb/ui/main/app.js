@@ -70,7 +70,7 @@ try {
 		sap.m.NavContainer.transitions.slide.to
 	);
 } catch( e1 ) {
-	console.log("Error with Custom Transition");
+	$.sap.log.error("Error with Custom Transition.");
 }
 
 
@@ -186,42 +186,42 @@ var aPages = [
  * JS (JavaScript), and also the error message that will be displayed if an error
  * occurs in either its UI5 view or controller.
  */
-//$.each( aPages, function (iIndex, aPageData) {
-//	try {
-//		//--------------------------------//
-//		//-- 1.0 - Declare variables	--//
-//		//--------------------------------//
-//		var sType			= "";
-//		var sErMesg			= aPageData.ErrMesg;
-//		
-//		//--------------------------------//
-//		//--
-//		//--------------------------------//
-//		switch(aPageData.Type) {
-//			case "JS":
-//				sType =		sap.ui.core.mvc.ViewType.JS;
-//				break;
-//			
-//			case "XML":
-//				sType =		sap.ui.core.mvc.ViewType.XML;
-//				break;
-//			
-//		}
-//		
-//        oApp.addPage(
-//			new sap.ui.view({
-//				id:			aPageData.Id,
-//				viewName:	aPageData.Location,
-//				type:		sType
-//			})
-//		);
-//
-//	} catch(ePLogin) {
-//        jQuery.sap.log.error( sErMesg+ePLogin.message );
-//	}
-//});
+$.each( aPages, function (iIndex, aPageData) {
+	try {
+		//--------------------------------//
+		//-- 1.0 - Declare variables	--//
+		//--------------------------------//
+		var sType			= "";
+		var sErMesg			= aPageData.ErrMesg;
+		
+		//--------------------------------//
+		//--
+		//--------------------------------//
+		switch(aPageData.Type) {
+			case "JS":
+				sType =		sap.ui.core.mvc.ViewType.JS;
+				break;
+			
+			case "XML":
+				sType =		sap.ui.core.mvc.ViewType.XML;
+				break;
+			
+		}
+		
+        oApp.addPage(
+			new sap.ui.view({
+				id:			aPageData.Id,
+				viewName:	aPageData.Location,
+				type:		sType
+			})
+		);
 
-IomyRe.pages.createPage("pLogin");
+	} catch(ePLogin) {
+        jQuery.sap.log.error( sErMesg+ePLogin.message );
+	}
+});
+
+//IomyRe.pages.createPage("pLogin");
 
 //================================================//
 //== 5.4 - DEPLOY OPENUI5 APP					==//

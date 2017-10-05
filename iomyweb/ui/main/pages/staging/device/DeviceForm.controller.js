@@ -29,6 +29,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
     bLoadingOnvifProfiles   : false,
 	DeviceOptions           : null,
     
+    bDeviceOptionSelectorDrawn  : false,
+    
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
@@ -59,6 +61,21 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
 				//-- Update the Model --//
 				//oController.RefreshModel( oController, {} );
 				//oController.DevTypeToggle(oController);
+                
+                if (!oController.bDeviceOptionSelectorDrawn) {
+                    var oSBox = IomyRe.widgets.selectBoxNewDeviceOptions (oView.createId("DevTypeSelect"),{
+                        selectedKey : "start",
+                        change : function () {
+                            var DevTypeSelect = this;
+                            var sDevType = DevTypeSelect.getSelectedKey();
+                            oController.DevTypeToggle(oController, sDevType);
+                        }
+                    });
+
+                    oView.byId("DeviceTypeFormElement").addField(oSBox);
+                    
+                    oController.bDeviceOptionSelectorDrawn = true;
+                }
 				
 				//-- Check the parameters --//
 				oView.byId("DevTypeSelect").setSelectedKey("start");
@@ -82,10 +99,15 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
 		});
 		
 	},
+    
+    onBeforeRendering : function () {
+        
+    },
 	
     ToggleOnvifStreamControls : function (bEnabled) {
         var oView = this.getView();
         
+        oView.byId("SelectOnvifServer").setEnabled(bEnabled);
         oView.byId("InputStreamName").setEnabled(bEnabled);
         oView.byId("SelectStreamProfile").setEnabled(bEnabled);
         oView.byId("SelectThumbnailProfile").setEnabled(bEnabled);
@@ -96,7 +118,6 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         var bEditing = oController.bEditExisting;
 		var oView = oController.getView();
 		//var oTarget = oView.byId("DevType");
-		console.log(sDevType);
         
         if (sDevType === "start") {
             oView.byId("DevSettings").setVisible( false );
@@ -139,6 +160,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 case "thingType"+IomyRe.devices.onvif.ThingTypeId:
                     IomyRe.common.ShowFormFragment( oController, "OnvifCamera", "DevSettingsBlock", "Block" );
                     
+                    oController.SetHubIdOfOnvifServer();
                     oController.LoadOnvifProfilesForSelectBoxes();
                     
                     if (bEditing) {
@@ -248,12 +270,17 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
 		
 	},
     
+    CancelInput : function () {
+        IomyRe.common.NavigationTriggerBackForward();
+    },
+    
     LoadOnvifProfilesForSelectBoxes : function () {
         var oController = this;
         var oView       = oController.getView();
         var iLinkId     = oView.byId("SelectOnvifServer").getSelectedKey();
         
         oController.ToggleOnvifStreamControls(false);
+        oView.byId("SelectOnvifServer").setEnabled(false);
         
         oView.byId("SelectStreamProfile").destroyItems();
         oView.byId("SelectThumbnailProfile").destroyItems();
@@ -301,11 +328,25 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     );
 
                     oController.ToggleOnvifStreamControls(false);
+                    oView.byId("SelectOnvifServer").setEnabled(true);
 
                     oController.bLoadingOnvifProfiles = false;
                 }
             });
+        } else {
+            oView.byId("SelectOnvifServer").setEnabled(true);
         }
+    },
+    
+    SetHubIdOfOnvifServer : function () {
+        var oController         = this;
+        var oView               = oController.getView();
+//        var sDevTypeKey         = oView.byId("DevTypeSelect").getSelectedKey();
+//        var iLinkId             = oView.getModel().getProperty("/"+sDevTypeKey+"/Server");
+//        
+//        oView.getModel().setProperty( "/"+sDevTypeKey+"/HubId", IomyRe.functions.getHubConnectedToLink(iLinkId).HubId);
+        
+        oView.byId("DevTypeSelect").setSelectedKey("thingType"+IomyRe.devices.onvif.ThingTypeId);
     },
     
     CreateDevice : function () {
@@ -314,6 +355,14 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         var sDevTypeKey         = oView.byId("DevTypeSelect").getSelectedKey();
         var oCurrentFormData    = oView.getModel().getProperty( "/"+sDevTypeKey+"/" );
         var mData               = {};
+        var oModel              = oView.getModel();
+        
+        console.log(sDevTypeKey);
+        console.log(JSON.stringify(oCurrentFormData));
+        
+        if (isNaN(oCurrentFormData.Room) || oCurrentFormData.Room < 1) {
+            oCurrentFormData.Room = 1;
+        }
         
         switch (sDevTypeKey) {
             case "linkType"+IomyRe.devices.onvif.LinkTypeId :
@@ -323,6 +372,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                         "Mode" : "AddNewOnvifServer",
                         "HubId" : oCurrentFormData.Hub,
                         "RoomId" : oCurrentFormData.Room,
+                        "DisplayName" : oCurrentFormData.DisplayName,
                         "DeviceNetworkAddress" : oCurrentFormData.IPAddress,
                         "DeviceOnvifPort" : oCurrentFormData.IPPort,
                         "OnvifUsername" : oCurrentFormData.Username,
@@ -338,6 +388,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                         "Mode" : "AddNewBridge",
                         "HubId" : oCurrentFormData.Hub,
                         "RoomId" : oCurrentFormData.Room,
+                        "DisplayName" : oCurrentFormData.DisplayName,
                         "DeviceNetworkAddress" : oCurrentFormData.IPAddress,
                         "DevicePort" : oCurrentFormData.IPPort,
                         "DeviceUserToken" : oCurrentFormData.DeviceToken
@@ -351,6 +402,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     data : {
                         "Mode" : "AddWeatherStation",
                         "HubId" : oCurrentFormData.Hub,
+                        "DisplayName" : oCurrentFormData.DisplayName,
                         "WeatherType" : "OpenWeatherMap",
                         "Username" : oCurrentFormData.KeyCode,
                         "StationCode" : oCurrentFormData.StationCode,
@@ -367,12 +419,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                         "Mode" : "AddNewIPCamera",
                         "HubId" : oCurrentFormData.Hub,
                         "RoomId" : oCurrentFormData.Room,
-                        "Data" : {
-                            "NetworkAddress" : oCurrentFormData.IPAddress,
-                            "NetworkPort" : oCurrentFormData.IPPort,
-                            "Protocol" : oCurrentFormData.Protocol,
-                            "Path" : oCurrentFormData.Path
-                        }
+                        "DisplayName" : oCurrentFormData.DisplayName,
+                        "Data" : "{\"NetworkAddress\":\""+oCurrentFormData.IPAddress+"\",\"NetworkPort\":\""+oCurrentFormData.IPPort+"\",\"Protocol\":\""+oCurrentFormData.Protocol+"\",\"Path\":\""+oCurrentFormData.Path+"\"}"
                     }
                 };
                 break;
@@ -416,31 +464,32 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                         iLinkId = data.WeatherStation.LinkId;
                     }
                 }
+                
+                IomyRe.common.RefreshCoreVariables({
+                    onSuccess : function () {
+                        oController.RefreshModel({
+                            onSuccess : function () {
+                                IomyRe.common.showMessage({
+                                    text : "Device successfully created",
+                                    view : oView
+                                });
+
+                                if (IomyRe.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
+                                    oCurrentFormData.OnvifServer = iLinkId;
+                                    oController.DevTypeToggle(oController, "thingType"+IomyRe.devices.onvif.ThingTypeId);
+
+                                } else {
+                                    //IomyRe.common.NavigationChangePage("pBlock", {}, true);
+                                }
+                            }
+                        });
+                    }
+                });
             } else {
                 jQuery.sap.log.error("An error has occurred with the link ID: consult the \"Success\" output above this console");
                 IomyRe.common.showError("Error creating device:\n\n"+data.ErrMesg);
             }
             
-            IomyRe.common.RefreshCoreVariables({
-                onSuccess : function () {
-                    oController.RefreshModel({
-                        onSuccess : function () {
-                            IomyRe.common.showMessage({
-                                text : "Device successfully created",
-                                view : oView
-                            });
-
-                            if (IomyRe.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
-                                oCurrentFormData.OnvifServer = iLinkId;
-                                oController.DevTypeToggle(oController, "thingType"+IomyRe.devices.onvif.ThingTypeId);
-
-                            } else {
-                                IomyRe.common.NavigationChangePage("pDeviceOverview", {}, true);
-                            }
-                        }
-                    });
-                }
-            });
         };
         
         mData.onFail = function (error) {
