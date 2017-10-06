@@ -26,8 +26,6 @@ sap.ui.controller("pages.staging.user.UserForm", {
 	aFormFragments: 	{},
 	bEditable: false,
 	
-	
-	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
@@ -41,8 +39,8 @@ sap.ui.controller("pages.staging.user.UserForm", {
 		oView.addEventDelegate({
 
 			onBeforeShow: function ( oEvent ) {
-				//-- Store the Current Id --//
 				oController.bEditable = oEvent.data.bPageType;
+				//-- Store the Current Id --//
 				
 				//-- Refresh Nav Buttons --//
 				//MyApp.common.NavigationRefreshButtons( oController );
@@ -53,6 +51,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 				
 				//-- Check the parameters --//
 				oController.UserForm(oController);
+				oView.byId("ObjectPageLayout").setHeaderTitle(oController.getObjectPageTitle(oController));
 				
 				//-- Defines the Device Type --//
 				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
@@ -82,7 +81,8 @@ sap.ui.controller("pages.staging.user.UserForm", {
 	getObjectPageTitle : function (oController) {
 		var sObjectTitle = "";
 		var oPageHeader = "";
-
+		console.log(oController.bEditable);
+		
 		if (oController.bEditable === true) {
 			sObjectTitle = "Edit User";
 		} else {
