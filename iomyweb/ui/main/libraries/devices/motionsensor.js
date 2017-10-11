@@ -25,7 +25,9 @@ $.sap.declare("IomyRe.devices.motionsensor",true);
 IomyRe.devices.motionsensor = new sap.ui.base.Object();
 
 $.extend(IomyRe.devices.motionsensor,{
-	Devices: [],
+    Devices: [],
+    
+    ThingTypeId : 3,
     
     //---------------------------------------------------//
     // Module properties
@@ -48,8 +50,8 @@ $.extend(IomyRe.devices.motionsensor,{
     RSMisc          : 4000,
     RSBitwiseStatus : 3909,
     RSTemperature   : 1701,
-	
-	DevicePageID : "pMotionSensor",
+    
+    DevicePageID : "pMotionSensor",
     
     CallAPI : function (iThingId, oTamperField, oLastMotionField) {
         //--------------------------------------------------------------------//
@@ -226,25 +228,25 @@ $.extend(IomyRe.devices.motionsensor,{
             
         });
     },
-	
-	GetCommonUI: function( sPrefix, oViewScope, aDeviceData, bIsUnassigned ) {
-		//------------------------------------//
-		//-- 1.0 - Initialise Variables		--//
-		//------------------------------------//
-		
-		var oUIObject			= null;					//-- OBJECT:			--//
-		var aUIObjectItems		= [];					//-- ARRAY:             --//
+    
+    GetCommonUI: function( sPrefix, oViewScope, aDeviceData, bIsUnassigned ) {
+        //------------------------------------//
+        //-- 1.0 - Initialise Variables        --//
+        //------------------------------------//
+        
+        var oUIObject            = null;                    //-- OBJECT:            --//
+        var aUIObjectItems        = [];                    //-- ARRAY:             --//
         
         
-        //-- 1.1 - Set default values		--//
+        //-- 1.1 - Set default values        --//
         if (bIsUnassigned === undefined)
             bIsUnassigned = false;
         
-		//------------------------------------//
-		//-- 2.0 - Fetch UI					--//
-		//------------------------------------//
-		
-		//console.log(aDeviceData.DeviceId);
+        //------------------------------------//
+        //-- 2.0 - Fetch UI                    --//
+        //------------------------------------//
+        
+        //console.log(aDeviceData.DeviceId);
         
         // If the UI is for the Unassigned Devices List, include 
         if (bIsUnassigned === true) {
@@ -257,12 +259,12 @@ $.extend(IomyRe.devices.motionsensor,{
         
         aUIObjectItems.push(
             //------------------------------------//
-            //-- 1st is the Device Label		--//
+            //-- 1st is the Device Label        --//
             //------------------------------------//
             new sap.m.VBox({
                 items : [
                     new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
-						width: "85%",
+                        width: "85%",
                         text : aDeviceData.DeviceName,
                         press : function () {
                             IomyRe.common.NavigationChangePage("pMotionSensor", {ThingId : aDeviceData.DeviceId});
@@ -274,13 +276,13 @@ $.extend(IomyRe.devices.motionsensor,{
 
         aUIObjectItems.push(
             //------------------------------------//
-            //-- 2nd is the Device Data			--//
+            //-- 2nd is the Device Data            --//
             //------------------------------------//
             new sap.m.VBox({
                 items : [
                     new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
                         //--------------------------------//
-                        //-- Draw the Data Boxes		--//
+                        //-- Draw the Data Boxes        --//
                         //--------------------------------//
 
                         items: [
@@ -293,7 +295,7 @@ $.extend(IomyRe.devices.motionsensor,{
                                         text : "Last Motion:"
                                     }).addStyleClass("Font-RobotoCondensed"),
 
-                                    new sap.m.Label( oViewScope.createId( sPrefix+"_LastMotion" ),	{} ).addStyleClass("Font-RobotoCondensed")
+                                    new sap.m.Label( oViewScope.createId( sPrefix+"_LastMotion" ),    {} ).addStyleClass("Font-RobotoCondensed")
                                 ]
                             })
                         ]
@@ -307,44 +309,44 @@ $.extend(IomyRe.devices.motionsensor,{
         }).addStyleClass("ListItem");
 
         //--------------------------------------------------------------------//
-        //-- ADD THE STATUS BUTTON TO THE UI								--//
+        //-- ADD THE STATUS BUTTON TO THE UI                                --//
         //--------------------------------------------------------------------//
 
 //        //-- Initialise Variables --//
-//        var sStatusButtonText			= "";
-//        var bButtonStatus				= false;
+//        var sStatusButtonText            = "";
+//        var bButtonStatus                = false;
 //
 //        //-- Store the Device Status --//
-//        var iDeviceStatus		= aDeviceData.DeviceStatus;
-//        var iTogglePermission	= aDeviceData.PermToggle;
-//        //var iTogglePermission	= 0;
+//        var iDeviceStatus        = aDeviceData.DeviceStatus;
+//        var iTogglePermission    = aDeviceData.PermToggle;
+//        //var iTogglePermission    = 0;
 //
 //
 //        //-- Set Text --//
 //        if( iDeviceStatus===0 ) {
-//            sStatusButtonText	= "Off";
-//            bButtonStatus		= false;
+//            sStatusButtonText    = "Off";
+//            bButtonStatus        = false;
 //        } else {
-//            sStatusButtonText	= "On";
-//            bButtonStatus		= true;
+//            sStatusButtonText    = "On";
+//            bButtonStatus        = true;
 //        }
 //
 //        //-- DEBUGGING --//
 //        //jQuery.sap.log.debug("PERM = "+sPrefix+" "+iTogglePermission);
 //
 //        //------------------------------------//
-//        //-- Make the Container				--//
+//        //-- Make the Container                --//
 //        //------------------------------------//
 //        var oUIStatusContainer = new sap.m.VBox( oViewScope.createId( sPrefix+"_StatusContainer"), {
 //            items:[] 
-//        }).addStyleClass("minwidth80px PadTop10px PadLeft5px");	//-- END of VBox that holds the Toggle Button
+//        }).addStyleClass("minwidth80px PadTop10px PadLeft5px");    //-- END of VBox that holds the Toggle Button
 //
 //
 //        //-- Add the Button's background colour class --//
 //        if( iTogglePermission===0 ) {
 //
 //            //----------------------------//
-//            //-- NON TOGGLEABLE BUTTON	--//
+//            //-- NON TOGGLEABLE BUTTON    --//
 //            //----------------------------//
 //            oUIStatusContainer.addItem(
 //                new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
@@ -356,7 +358,7 @@ $.extend(IomyRe.devices.motionsensor,{
 //        } else {
 //
 //            //----------------------------//
-//            //-- TOGGLEABLE BUTTON		--//
+//            //-- TOGGLEABLE BUTTON        --//
 //            //----------------------------//
 //            oUIStatusContainer.addItem(
 //                new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
@@ -394,31 +396,31 @@ $.extend(IomyRe.devices.motionsensor,{
 //        }
 //
 //        oUIObject.addItem(oUIStatusContainer);
-		
-		
-		//------------------------------------//
-		//-- 9.0 - RETURN THE RESULTS		--//
-		//------------------------------------//
-		return oUIObject;
-	},
+        
+        
+        //------------------------------------//
+        //-- 9.0 - RETURN THE RESULTS        --//
+        //------------------------------------//
+        return oUIObject;
+    },
     
     GetCommonUIForDeviceOverview: function( sPrefix, oViewScope, aDeviceData ) {
-		//------------------------------------//
-		//-- 1.0 - Initialise Variables		--//
-		//------------------------------------//
-		
-		var oUIObject			= null;					//-- OBJECT:			--//
-		
-		//------------------------------------//
-		//-- 2.0 - Fetch UI					--//
-		//------------------------------------//
-		
-		//console.log(aDeviceData.DeviceId);
+        //------------------------------------//
+        //-- 1.0 - Initialise Variables        --//
+        //------------------------------------//
+        
+        var oUIObject            = null;                    //-- OBJECT:            --//
+        
+        //------------------------------------//
+        //-- 2.0 - Fetch UI                    --//
+        //------------------------------------//
+        
+        //console.log(aDeviceData.DeviceId);
 
         oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
             items: [
                 //------------------------------------//
-                //-- 1st is the Device Label		--//
+                //-- 1st is the Device Label        --//
                 //------------------------------------//
                 new sap.m.VBox({
                     items : [
@@ -432,13 +434,13 @@ $.extend(IomyRe.devices.motionsensor,{
                 }).addStyleClass("BorderRight width80Percent DeviceLabelMargin"),
 
                 //------------------------------------//
-                //-- 2nd is the Device Data			--//
+                //-- 2nd is the Device Data            --//
                 //------------------------------------//
                 new sap.m.VBox({
                     items : [
                         new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
                             //--------------------------------//
-                            //-- Draw the Data Boxes		--//
+                            //-- Draw the Data Boxes        --//
                             //--------------------------------//
 
                             items: [
@@ -451,7 +453,7 @@ $.extend(IomyRe.devices.motionsensor,{
                                             text : "Last Motion:"
                                         }).addStyleClass("Font-RobotoCondensed"),
                                         
-                                        new sap.m.Label( oViewScope.createId( sPrefix+"_LastMotion" ),	{} ).addStyleClass("Font-RobotoCondensed")
+                                        new sap.m.Label( oViewScope.createId( sPrefix+"_LastMotion" ),    {} ).addStyleClass("Font-RobotoCondensed")
                                     ]
                                 })
                             ]
@@ -462,44 +464,44 @@ $.extend(IomyRe.devices.motionsensor,{
         }).addStyleClass("ListItem");
 
 //        //--------------------------------------------------------------------//
-//        //-- ADD THE STATUS BUTTON TO THE UI								--//
+//        //-- ADD THE STATUS BUTTON TO THE UI                                --//
 //        //--------------------------------------------------------------------//
 //
 //        //-- Initialise Variables --//
-//        var sStatusButtonText			= "";
-//        var bButtonStatus				= false;
+//        var sStatusButtonText            = "";
+//        var bButtonStatus                = false;
 //
 //        //-- Store the Device Status --//
-//        var iDeviceStatus		= aDeviceData.DeviceStatus;
-//        var iTogglePermission	= aDeviceData.PermToggle;
-//        //var iTogglePermission	= 0;
+//        var iDeviceStatus        = aDeviceData.DeviceStatus;
+//        var iTogglePermission    = aDeviceData.PermToggle;
+//        //var iTogglePermission    = 0;
 //
 //
 //        //-- Set Text --//
 //        if( iDeviceStatus===0 ) {
-//            sStatusButtonText	= "Off";
-//            bButtonStatus		= false;
+//            sStatusButtonText    = "Off";
+//            bButtonStatus        = false;
 //        } else {
-//            sStatusButtonText	= "On";
-//            bButtonStatus		= true;
+//            sStatusButtonText    = "On";
+//            bButtonStatus        = true;
 //        }
 //
 //        //-- DEBUGGING --//
 //        //jQuery.sap.log.debug("PERM = "+sPrefix+" "+iTogglePermission);
 //
 //        //------------------------------------//
-//        //-- Make the Container				--//
+//        //-- Make the Container                --//
 //        //------------------------------------//
 //        var oUIStatusContainer = new sap.m.VBox( oViewScope.createId( sPrefix+"_StatusContainer"), {
 //            items:[] 
-//        }).addStyleClass("PadTop5px PadLeft5px width10Percent minwidth80px");	//-- END of VBox that holds the Toggle Button
+//        }).addStyleClass("PadTop5px PadLeft5px width10Percent minwidth80px");    //-- END of VBox that holds the Toggle Button
 //
 //
 //        //-- Add the Button's background colour class --//
 //        if( iTogglePermission===0 ) {
 //
 //            //----------------------------//
-//            //-- NON TOGGLEABLE BUTTON	--//
+//            //-- NON TOGGLEABLE BUTTON    --//
 //            //----------------------------//
 //            oUIStatusContainer.addItem(
 //                new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
@@ -511,7 +513,7 @@ $.extend(IomyRe.devices.motionsensor,{
 //        } else {
 //
 //            //----------------------------//
-//            //-- TOGGLEABLE BUTTON		--//
+//            //-- TOGGLEABLE BUTTON        --//
 //            //----------------------------//
 //            oUIStatusContainer.addItem(
 //                new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
@@ -559,79 +561,79 @@ $.extend(IomyRe.devices.motionsensor,{
         //oUIObject.addItem(new sap.m.VBox({}).addStyleClass("width6px"));
 
 
-		//------------------------------------//
-		//-- 9.0 - RETURN THE RESULTS		--//
-		//------------------------------------//
-		return oUIObject;
-	},
-	
-	GetCommonUITaskList: function( Prefix, oViewScope, aDeviceData ) {
-		//------------------------------------//
-		//-- 1.0 - Initialise Variables		--//
-		//------------------------------------//
-		
-		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
-		
-		//------------------------------------//
-		//-- 2.0 - Fetch TASKS				--//
-		//------------------------------------//
-		if( aDeviceData.IOs!==undefined ) {
+        //------------------------------------//
+        //-- 9.0 - RETURN THE RESULTS        --//
+        //------------------------------------//
+        return oUIObject;
+    },
+    
+    GetCommonUITaskList: function( Prefix, oViewScope, aDeviceData ) {
+        //------------------------------------//
+        //-- 1.0 - Initialise Variables        --//
+        //------------------------------------//
+        
+        var aTasks            = { "High":[], "Low":[] };                    //-- ARRAY:            --//
+        
+        //------------------------------------//
+        //-- 2.0 - Fetch TASKS                --//
+        //------------------------------------//
+        if( aDeviceData.IOs!==undefined ) {
             
         } else {
             //-- TODO: Write a error message --//
             jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
         }
-		return aTasks;
-	},
+        return aTasks;
+    },
     
     GetCommonUITaskListForDeviceOverview: function( Prefix, oViewScope, aDeviceData ) {
-		//------------------------------------//
-		//-- 1.0 - Initialise Variables		--//
-		//------------------------------------//
-		//console.log(JSON.stringify(aDeviceData));
-		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
-		
-		//------------------------------------//
-		//-- 2.0 - Fetch TASKS				--//
-		//------------------------------------//
-		if( aDeviceData.IOs!==undefined ) {
+        //------------------------------------//
+        //-- 1.0 - Initialise Variables        --//
+        //------------------------------------//
+        //console.log(JSON.stringify(aDeviceData));
+        var aTasks            = { "High":[], "Low":[] };                    //-- ARRAY:            --//
+        
+        //------------------------------------//
+        //-- 2.0 - Fetch TASKS                --//
+        //------------------------------------//
+        if( aDeviceData.IOs!==undefined ) {
             this.CallAPI(aDeviceData.DeviceId, null, oViewScope.byId( Prefix+"_LastMotion" ));
         } else {
             //-- TODO: Write a error message --//
             jQuery.sap.log.error("Device "+aDeviceData.DeviceName+" has no IOs");
         }
-		return aTasks;
-	},
-	
-	
-	GetObjectIdList: function( sPrefix, oViewScope, aDeviceData ) {
-		//------------------------------------//
-		//-- 1.0 - Initialise Variables		--//
-		//------------------------------------//
-		var aObjectIdList = [];
-		
-		
-		//------------------------------------//
-		//-- 2.0 - Fetch Definition names	--//
-		//------------------------------------//
-		
-		//-- TODO: These devices need to be in their own definition file --//
-		if( aDeviceData.DeviceTypeId===2 ) {
-			
-			aObjectIdList = [
-				sPrefix+"_Container",
-				sPrefix+"_Label",
-				sPrefix+"_DataContainer",
-				sPrefix+"_StatusContainer",
-				sPrefix+"_StatusToggle"
-			];
-			
-		}
-		
-		
-		//------------------------------------//
-		//-- 9.0 - RETURN THE RESULTS		--//
-		//------------------------------------//
-		return aObjectIdList;
-	}
+        return aTasks;
+    },
+    
+    
+    GetObjectIdList: function( sPrefix, oViewScope, aDeviceData ) {
+        //------------------------------------//
+        //-- 1.0 - Initialise Variables        --//
+        //------------------------------------//
+        var aObjectIdList = [];
+        
+        
+        //------------------------------------//
+        //-- 2.0 - Fetch Definition names    --//
+        //------------------------------------//
+        
+        //-- TODO: These devices need to be in their own definition file --//
+        if( aDeviceData.DeviceTypeId===2 ) {
+            
+            aObjectIdList = [
+                sPrefix+"_Container",
+                sPrefix+"_Label",
+                sPrefix+"_DataContainer",
+                sPrefix+"_StatusContainer",
+                sPrefix+"_StatusToggle"
+            ];
+            
+        }
+        
+        
+        //------------------------------------//
+        //-- 9.0 - RETURN THE RESULTS        --//
+        //------------------------------------//
+        return aObjectIdList;
+    }
 });

@@ -26,9 +26,10 @@ $.sap.declare("IomyRe.devices",true);
 IomyRe.devices.weatherfeed = new sap.ui.base.Object();
 
 $.extend(IomyRe.devices.weatherfeed,{
-	Devices: [],
-	
-	LinkTypeId		: 8,
+    Devices: [],
+    
+    LinkTypeId        : 8,
+    ThingTypeId       : 14,
     
     /**
      * Returns a Google Material icon to depict the current weather.

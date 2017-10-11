@@ -25,10 +25,11 @@ $.sap.declare("IomyRe.devices.zigbeesmartplug",true);
 IomyRe.devices.zigbeesmartplug = new sap.ui.base.Object();
 
 $.extend(IomyRe.devices.zigbeesmartplug,{
-	Devices: [],
+    Devices: [],
     
     CommTypeId : 3,                         // This SHOULD NOT change!
     LinkTypeId : 2,
+    ThingTypeId : 2,
     
     iSelectedCommID : null,
     
@@ -36,25 +37,8 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
     bJoinModeToggleCoolingDown : false,
     bJoinModeToggleCoolDownPeriod : 5000, // 3 minute cooldown (in milliseconds)
     intervalCooldown : null,
-    oZigbeeInput : null,
-	wTelnetLogArea : null,
-    sEnableTempJoinButtonText : "Join Device",
-    sEnableTempJoinButtonTimerText : "Join Device",
+    wTelnetLogArea : null,
     bRunningCommand : false,
-    
-    uiIDs : {
-        sZigbeeModemsLabelID : "ZigbeeModemsLabel",
-        sZigbeeModemsSBoxID : "ZigbeeModemsSBox",
-        sTelnetOutputLabelID : "TelnetOutputLabel",
-        sTelnetOutputTextAreaID : "TelnetOutputTextArea",
-        sCustomTelnetCommandLabelID : "CustomTelnetCommandLabel",
-        sCustomTelnetCommandFieldID : "CustomTelnetCommandField",
-        sAPIModesHBoxID : "APIModesHBox",
-        sGetRapidHAInfoButtonID : "GetRapidHAInfoButton",
-        sEnableJoinModeButtonID : "EnableJoinModeButton"
-    },
-	
-	DevicePageID : "pDeviceData",
     
     //========================================================================//
     // TELNET FUNCTIONALITY                                                   //
@@ -67,59 +51,73 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
         // }
     ],
     
-    ResetJoinButtonText : function (oScope) {
-        var me = this;
-        oScope.byId(me.uiIDs.sEnableJoinModeButtonID).setText( me.sEnableTempJoinButtonText );
-    },
-    
-    /**
-     * Enables or disables the telnet command widgets.
-     * 
-     * @param {type} oScope             Controller that contains the enable join mode button.
-     * @param {type} bEnabled           Boolean switch to enable or disable the telnet controls.
-     */
-    ToggleZigbeeCommands : function (oScope, bEnabled) {
-        var me = this;
-        
-        try {
-            me.oZigbeeInput.input.setEnabled(bEnabled);
-            me.oZigbeeInput.menuButton.setEnabled(bEnabled);
-            oScope.byId(me.uiIDs.sEnableJoinModeButtonID).setEnabled(bEnabled);
-        } catch (e) {
-            // Report it silently.
-            jQuery.sap.log.warning(e.message);
-        }
-    },
-    
-    TurnOnZigbeeJoinMode : function (oScope) {
+    TurnOnZigbeeJoinMode : function (mSettings) {
         //---------------------------------------------------------//
         // Import modules, widgets and scope                       //
         //---------------------------------------------------------//
         var me              = this;
         var php             = IomyRe.apiphp;
-        var sText           = oButton.getText();
+        var bError          = false;
+        var aErrorMessages  = [];
+        var sUrl            = php.APILocation("hubtelnet");
+        var iCommId;
+        var fnSuccess;
+        var fnFail;
         
-        //---------------------------------------------------------//
-        // API Parameters                                          //
-        //---------------------------------------------------------//
-        var sUrl = php.APILocation("hubtelnet");
-        var iCommId = me.iSelectedCommID;
+        var fnAppendError = function (sErrMesg) {
+            bError = true;
+            aErrorMessages.push(sErrMesg);
+        };
+        
+        //--------------------------------------------------------------------//
+        // Check that all the parameters are there.
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined) {
+            //----------------------------------------------------------------//
+            // REQUIRED: Find the modem (comm) ID
+            //----------------------------------------------------------------//
+            if (mSettings.modemID === undefined || mSettings.modemID === null) {
+                fnAppendError("'modemID' not given");
+            } else {
+                iCommId = mSettings.modemID;
+            }
+            
+            //----------------------------------------------------------------//
+            // Check for errors and throw an exception if there are errors.
+            //----------------------------------------------------------------//
+            if (bError) {
+                throw new MissingArgumentException("* "+aErrorMessages.join("\n* "));
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onSuccess callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onSuccess === undefined) {
+                fnSuccess = function () {};
+            } else {
+                fnSuccess = mSettings.onSuccess;
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onFail callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onFail === undefined) {
+                fnFail = function () {};
+            } else {
+                fnFail = mSettings.onFail;
+            }
+            
+        } else {
+            fnAppendError("'modemID' not given");
+            
+            throw new MissingSettingsMapException("* "+aErrorMessages.join("\n* "));
+        }
         
         // Indicating that a telnet command is running
         me.bRunningCommand = true;
         
-        //---------------------------------------------------------//
-        // Indicate in the output widget that data is being loaded //
-        // and execute the AJAX Request                            //
-        //---------------------------------------------------------//
-        oOutputWidget.setValue(oOutputWidget.getValue()+"-----------------------------------------\nTurning on Join Mode...\n\n");
         // Force it to scroll down to the bottom.
-        document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
-        // Insert the output into the Telnet log
-        me.ZigbeeTelnetLog.push({
-            "level" : "I",
-            "content" : "Turning on Join Mode...\n\n"
-        });
+        //document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
         
         php.AjaxRequest({
             url : sUrl,
@@ -127,118 +125,84 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
         
             onSuccess : function (dataType, data) {
                 if (data.Error === false || data.Error === undefined) {
-                    
-                    var sOutput = "";
-                    
-                    // Gather the RapidHA Information
-                    sOutput += "-----------------------------------------\n";
-                    sOutput += "Turn On Join Mode\n";
-                    sOutput += "-----------------------------------------\n\n";
-                    sOutput += data.Data.JoinMode.join("\n");
-                    sOutput += "\n\n";
-                    
-                    // Insert the output into the Telnet log
-                    me.ZigbeeTelnetLog.push({
-                        "level" : "I",
-                        "content" : sOutput
-                    });
-                    
-                    if (oOutputWidget !== undefined) {
-                        oOutputWidget.setValue(oOutputWidget.getValue() + sOutput);
-                        // Force it to scroll down to the bottom.
-                        document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
-                    }
-
-                    this.onComplete();
+                    fnSuccess(data.Data.JoinMode.join("\n"));
+                } else {
+                    fnFail(data.ErrMesg);
                 }
+                
+                me.bRunningCommand = false;
             },
             
             onFail : function (response) {
-                var sOutput = "";
-                sOutput += "-----------------------------------------\n";
-                sOutput += "Turn On Join Mode\n";
-                sOutput += "-----------------------------------------\n\n";
-                sOutput += response.responseText;
-                sOutput += "\n\n";
-                
-                // Insert the output into the Telnet log
-                me.ZigbeeTelnetLog.push({
-                    "level" : "E",
-                    "content" : sOutput
-                });
-                
-                if (oOutputWidget !== undefined) {
-                    oOutputWidget.setValue(oOutputWidget.getValue() + sOutput);
-                    // Force it to scroll down to the bottom.
-                    document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
-                }
-                
-                this.onComplete();
-            },
-            
-            onComplete : function () {
-                // The calling button and its text
-                var iTime       = me.bJoinModeToggleCoolDownPeriod / 1000;
-                var iElapsed    = 0;
-                
-                me.intervalCooldown = setInterval(
-                    function () {
-                        me.ToggleZigbeeCommands(oScope, false); // Make sure the telnet controls are disabled.
-                        if (iTime === iElapsed) {
-                            // Re-enable the button that called this function after the
-                            // cooldown period expires.
-                            try {
-                                me.ResetJoinButtonText(oScope);
-                            } catch (e) {
-                                jQuery.sap.log.error(e.message);
-                            }
-                            
-                            me.bJoinModeToggleCoolingDown = false;
-                            //oButton.setEnabled(true);
-                            clearInterval(me.intervalCooldown);
-                            me.GetRapidHAInfo(oScope);
-                        } else {
-                            oButton.setText(sText + " - " + (iTime - iElapsed));
-                            me.sEnableTempJoinButtonTimerText = sText + " - " + (iTime - iElapsed);
-                            iElapsed++; 
-                        }
-                        
-                    }, 1000
-                );
+                fnFail(response.responseText);
+                me.bRunningCommand = false;
             }
         });
     },
     
-    GetRapidHAInfo : function (oScope) {
+    GetRapidHAInfo : function (mSettings) {
         //---------------------------------------------------------//
         // Import modules, widgets and scope                       //
         //---------------------------------------------------------//
-        var me = this;
-        var php = IomyRe.apiphp;
-        var oOutputWidget = oScope.byId(me.uiIDs.sTelnetOutputTextAreaID);
-        var sRapidHAOutput = "";
-        var sZigbeeOutput = "";
+        var me              = this;
+        var php             = IomyRe.apiphp;
+        var bError          = false;
+        var aErrorMessages  = [];
+        var sUrl            = php.APILocation("hubtelnet");
+        var iCommId;
+        var fnSuccess;
+        var fnFail;
         
-        //---------------------------------------------------------//
-        // API Parameters                                          //
-        //---------------------------------------------------------//
-        var sUrl = php.APILocation("hubtelnet");
-        var iCommId = me.iSelectedCommID;
+        var fnAppendError = function (sErrMesg) {
+            bError = true;
+            aErrorMessages.push(sErrMesg);
+        };
         
-        //---------------------------------------------------------//
-        // Indicate in the output widget that data is being loaded //
-        // and execute the AJAX Request                            //
-        //---------------------------------------------------------//
-        if (oOutputWidget !== undefined) {
-            oOutputWidget.setValue(oOutputWidget.getValue()+"-----------------------------------------\nLoading RapidHA Information...\n\n");
-            // Force it to scroll down to the bottom.
-            document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
+        //--------------------------------------------------------------------//
+        // Check that all the parameters are there.
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined) {
+            //----------------------------------------------------------------//
+            // REQUIRED: Find the modem (comm) ID
+            //----------------------------------------------------------------//
+            if (mSettings.modemID === undefined || mSettings.modemID === null) {
+                fnAppendError("'modemID' not given");
+            } else {
+                iCommId = mSettings.modemID;
+            }
+            
+            //----------------------------------------------------------------//
+            // Check for errors and throw an exception if there are errors.
+            //----------------------------------------------------------------//
+            if (bError) {
+                throw new MissingArgumentException("* "+aErrorMessages.join("\n* "));
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onSuccess callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onSuccess === undefined) {
+                fnSuccess = function () {};
+            } else {
+                fnSuccess = mSettings.onSuccess;
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onFail callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onFail === undefined) {
+                fnFail = function () {};
+            } else {
+                fnFail = mSettings.onFail;
+            }
+            
+        } else {
+            fnAppendError("'modemID' not given");
+            
+            throw new MissingSettingsMapException("* "+aErrorMessages.join("\n* "));
         }
-        // Insert the output into the Telnet log
-        me.ZigbeeTelnetLog.push({
-            "level" : "I",
-            "content" : "-----------------------------------------\nLoading RapidHA Information...\n\n"
-        });
+        
+        me.bRunningCommand = true;
         
         php.AjaxRequest({
             url : sUrl,
@@ -247,169 +211,27 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
             onSuccess : function (dataType, data) {
                 if (data.Error === false || data.Error === undefined) {
                     
-                    var oOutputWidget = oScope.byId(me.uiIDs.sTelnetOutputTextAreaID);
+                    fnSuccess(data);
                     
-                    // Gather the RapidHA Information
-                    sRapidHAOutput += "-----------------------------------------\n";
-                    sRapidHAOutput += "RapidHA Information:\n";
-                    sRapidHAOutput += "-----------------------------------------\n\n";
-                    sRapidHAOutput += data.Data.RapidHAInfo.join("\n");
-                    sRapidHAOutput += "\n\n";
-                    
-                    // Insert the output into the Telnet log
-                    me.ZigbeeTelnetLog.push({
-                        "level" : "I",
-                        "content" : sRapidHAOutput
-                    });
-                    
-                    // Gather the Zigbee Information
-                    sZigbeeOutput += "-----------------------------------------\n";
-                    sZigbeeOutput += "Zigbee Information:\n";
-                    sZigbeeOutput += "-----------------------------------------\n\n";
-                    sZigbeeOutput += data.Data.RapidHAInfo.join("\n");
-                    sZigbeeOutput += "\n\n";
-                    
-                    // Insert the output into the Telnet log
-                    me.ZigbeeTelnetLog.push({
-                        "level" : "I",
-                        "content" : sZigbeeOutput
-                    });
-                    
-                    if (oOutputWidget !== undefined) {
-                        oOutputWidget.setValue(oOutputWidget.getValue() + sRapidHAOutput+sZigbeeOutput);
-                        // Force it to scroll down to the bottom.
-                        document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
-                    }
-                    
-                    this.onComplete();
-                    
-                    IomyRe.common.RefreshCoreVariables({
-                        onSuccess : function () {
-                            IomyRe.common.showMessage({
-                                text : "Join completed. Your devices should appear in 5 minutes.",
-                                view : oScope.getView()
-                            });
-                        }
-                    });
+//                    IomyRe.common.RefreshCoreVariables({
+//                        onSuccess : function () {
+//                            IomyRe.common.showMessage({
+//                                text : "Join completed. Your devices should appear in 5 minutes.",
+//                                view : oScope.getView()
+//                            });
+//                        }
+//                    });
                 } else {
-                    if (oOutputWidget !== undefined) {
-                        oOutputWidget.setValue(oOutputWidget.getValue() + data.ErrMesg);
-
-                        // Force it to scroll down to the bottom.
-                        document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
-                    }
+                    fnFail(data.ErrMesg);
                 }
+                
+                me.bRunningCommand = false;
             },
             
             onFail : function (response) {
-                var oOutputWidget = oScope.byId(me.uiIDs.sTelnetOutputTextAreaID);
-                var sOutput = response.responseText;
                 
-                // Insert the output into the Telnet log
-                me.ZigbeeTelnetLog.push({
-                    "level" : "E",
-                    "content" : sOutput
-                });
-                
-                if (oOutputWidget !== undefined) {
-                    oOutputWidget.setValue(oOutputWidget.getValue() + sOutput);
-
-                    // Force it to scroll down to the bottom.
-                    document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
-                }
-                
-                this.onComplete();
-            },
-            
-            onComplete : function () {
-                // Indicating that a telnet command has finished executing
                 me.bRunningCommand = false;
-                
-                // Re-enable the button that called this function as well as the custom telnet input box
-                me.ToggleZigbeeCommands(oScope, true);
-            }
-        });
-    },
-    
-    /**
-     * Runs a custom command via telnet to the hub.
-     * 
-     * @param {type} oScope
-     * @param {type} oInputWidget
-     * @returns {undefined}
-     */
-    ExecuteCustomCommand : function (oScope, oInputWidget) {
-        //---------------------------------------------------------//
-        // Import modules, widgets and scope                       //
-        //---------------------------------------------------------//
-        var me              = this;
-        var php             = IomyRe.apiphp;
-        var oOutputWidget   = oScope.byId(me.uiIDs.sTelnetOutputTextAreaID);
-        
-        //---------------------------------------------------------//
-        // API Parameters                                          //
-        //---------------------------------------------------------//
-        var sUrl            = php.APILocation("hubtelnet");
-        var iHubId          = oScope.byId("hubCBox").getSelectedKey();
-        var sCommand        = oInputWidget.getValue();
-        
-        // Indicating that a telnet command is running
-        me.bRunningCommand = true;
-        
-        //---------------------------------------------------------//
-        // Indicate in the output widget that data is being loaded //
-        // and execute the AJAX Request                            //
-        //---------------------------------------------------------//
-        oOutputWidget.setValue(oOutputWidget.getValue()+"-----------------------------------------\nRunning "+sCommand+"...\n\n");
-        // Force it to scroll down to the bottom.
-        document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
-        // Insert the output into the Telnet log
-        me.ZigbeeTelnetLog.push({
-            "level" : "I",
-            "content" : "-----------------------------------------\nRunning "+sCommand+"...\n\n"
-        });
-        
-        php.AjaxRequest({
-            url : sUrl,
-            data : {"Mode" : "CustomTelnetCommand", "HubId" : iHubId, "CustomCommand" : sCommand},
-            
-            onSuccess : function (dataType, data) {
-                if (data.Error === false || data.Error === undefined) {
-                    var sOutput = data.Data.Custom.join("\n");
-                    
-                    this.onComplete(sOutput, false);
-                }
-            },
-            
-            onFail : function (response) {
-                var sOutput = response.responseText;
-                
-                this.onComplete(sOutput, true);
-            },
-            
-            onComplete : function (output, bError) {
-                var sOutput = "";
-                sOutput += "-----------------------------------------\n";
-                sOutput += "Custom Command: "+sCommand+"\n";
-                sOutput += "-----------------------------------------\n\n";
-                sOutput += output;
-                sOutput += "\n\n";
-                
-                // Insert the output into the Telnet log
-                me.ZigbeeTelnetLog.push({
-                    "level" : !bError ? "I" : "E",
-                    "content" : sOutput
-                });
-                
-                if (oOutputWidget !== undefined) {
-                    oOutputWidget.setValue(oOutputWidget.getValue() + sOutput);
-                    
-                    // Force it to scroll down to the bottom.
-                    document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
-                }
-                
-                me.ToggleZigbeeCommands(oScope, true);
-                me.bRunningCommand = false;
+                fnFail(response.responseText);
             }
         });
     },
@@ -515,17 +337,17 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
                     }
                     
                 } catch (e) {
-					//--------------------------------------------------------//
-					// We're looking for an exception thrown because there were
-					// no zigbee modems detected. If a different exception is
-					// thrown, that's a problem!
-					//--------------------------------------------------------//
-					if (e.name !== "NoZigbeeModemsException") {
-						bError = true;
-						aErrorMessages.push(e.message);
-						// Disable the command widgets because no modems were detected.
-						me.ToggleZigbeeCommands(oScope, false);
-					} else {
+                    //--------------------------------------------------------//
+                    // We're looking for an exception thrown because there were
+                    // no zigbee modems detected. If a different exception is
+                    // thrown, that's a problem!
+                    //--------------------------------------------------------//
+                    if (e.name !== "NoZigbeeModemsException") {
+                        bError = true;
+                        aErrorMessages.push(e.message);
+                        // Disable the command widgets because no modems were detected.
+                        me.ToggleZigbeeCommands(oScope, false);
+                    } else {
                         throw e;
                     }
                 }
@@ -548,438 +370,29 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
     },
     
     PopulateTelnetLogArea : function (oScope) {
-		var me			= this;
-		var sTextAreaId = oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner");
-		var oFormItem	= oScope.byId(me.uiIDs.sTelnetOutputTextAreaID);
-		
-		// Populate it with any prior output.
+        var me            = this;
+        var sTextAreaId = oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner");
+        var oFormItem    = oScope.byId(me.uiIDs.sTelnetOutputTextAreaID);
+        
+        // Populate it with any prior output.
         if (me.ZigbeeTelnetLog.length > 0) {
             var output = "";
             for (var i = 0; i < me.ZigbeeTelnetLog.length; i++) {
                 output += me.ZigbeeTelnetLog[i].content;
             }
-			
+            
             oFormItem.setValue(output);
             oFormItem.selectText(output.length, output.length);
             // Force it to scroll down to the bottom.
-			try {
-				document.getElementById(sTextAreaId).scrollTop = document.getElementById(sTextAreaId).scrollHeight;
-			} catch (e) {
-				// Do nothing.
-			}
-        }
-	},
-	
-	// For All other pages except the DeviceOverview Page. See "GetCommonUIForDeviceOverview"
-	GetCommonUI: function( sPrefix, oViewScope, aDeviceData, bIsUnassigned ) {
-		//------------------------------------//
-		//-- 1.0 - Initialise Variables		--//
-		//------------------------------------//
-		
-		var oUIObject			= null;					//-- OBJECT:			--//
-		var aUIObjectItems		= [];					//-- ARRAY:             --//
-        var sSerialCode         = "";
-        
-		//------------------------------------//
-        // Capture Link Serial Code
-		//------------------------------------//
-        $.each(IomyRe.common.LinkList, function (sI, mLink) {
-            if (mLink.LinkId == aDeviceData.LinkId) {
-                sSerialCode = mLink.LinkSerialCode;
+            try {
+                document.getElementById(sTextAreaId).scrollTop = document.getElementById(sTextAreaId).scrollHeight;
+            } catch (e) {
+                // Do nothing.
             }
-        });
-        
-		//------------------------------------//
-		// Fetch UI
-		//------------------------------------//
-        aUIObjectItems.push(
-            new sap.m.VBox({
-                items : [
-                    //------------------------------------//
-                    //-- Label                          --//
-                    //------------------------------------//
-                    new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
-                        width: "85%",
-                        text : aDeviceData.DeviceName,
-                        press : function () {
-                            IomyRe.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
-                        }
-                    }).addStyleClass("TextSizeMedium PadLeft6px PadTop1d25Rem Text_grey_20 iOmyLink"),
-
-                    //------------------------------------//
-                    //-- Link Serial Code       		--//
-                    //------------------------------------//
-                    new sap.m.HBox({
-                        width: "100%",
-                        justifyContent: "End",
-                        items : [
-                            new sap.m.Label({
-                                text: "SN: " + (sSerialCode !== null ? sSerialCode : "N/A")
-                            }).addStyleClass("Font-RobotoCondensed TextSizeXSmall Text_grey_20")
-                        ]
-                    }).addStyleClass("")
-                ]
-            }).addStyleClass("width80Percent BorderRight webkitflex hInherit")
-        );
-
-        //--------------------------------------------------------------------//
-        // If the current page is the device overview page, then only 1 field is
-        // shown.
-        //--------------------------------------------------------------------//
-        if (oViewScope.getView().getId() === "pDeviceOverview") {
-            aUIObjectItems.push(
-                new sap.m.VBox({
-                    items : [
-                        new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
-                            //--------------------------------//
-                            //-- Draw the Data Boxes		--//
-                            //--------------------------------//
-                            items: [
-                                new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass(" Font-RobotoCondensed")
-                            ]
-                        }).addStyleClass("MarLeft12px MarTop20px")
-                    ]
-                }).addStyleClass("minheight58px minwidth90px")
-            );
+        }
+    },
     
-        //--------------------------------------------------------------------//
-        // Otherwise all 4 fields are shown.
-        //--------------------------------------------------------------------//
-        } else {
-            aUIObjectItems.push(
-                //------------------------------------//
-                //-- 2nd is the Device Data			--//
-                //------------------------------------//
-                new sap.m.VBox({
-                    items : [
-                        new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
-                            //--------------------------------//
-                            //-- Draw the Data Boxes		--//
-                            //--------------------------------//
-
-                            items: [
-                                new sap.m.Text( oViewScope.createId( sPrefix+"_Volt" ),	{} ).addStyleClass("Font-RobotoCondensed"),
-                                new sap.m.Text( oViewScope.createId( sPrefix+"_Amp" ),	{} ).addStyleClass("Font-RobotoCondensed"),
-                                new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass("Font-RobotoCondensed"),
-                                new sap.m.Text( oViewScope.createId( sPrefix+"_kWh" ),	{} ).addStyleClass("Font-RobotoCondensed")
-                            ]
-                        }).addStyleClass("MarLeft12px")
-                    ]
-                }).addStyleClass("minwidth90px minheight58px")
-            );
-        }
-
-        oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
-            items: aUIObjectItems
-        }).addStyleClass("ListItem");
-
-        //--------------------------------------------------------------------//
-        //-- ADD THE STATUS BUTTON TO THE UI								--//
-        //--------------------------------------------------------------------//
-
-        //-- Initialise Variables --//
-        var bButtonStatus				= false;
-
-        //-- Store the Device Status --//
-        var iDeviceStatus		= aDeviceData.DeviceStatus;
-        var iTogglePermission	= aDeviceData.PermToggle;
-        //var iTogglePermission	= 0;
-
-
-        //-- Set Text --//
-        if( iDeviceStatus===0 ) {
-            bButtonStatus		= false;
-        } else {
-            bButtonStatus		= true;
-        }
-
-        //------------------------------------//
-        //-- Make the Container				--//
-        //------------------------------------//
-        var oUIStatusContainer = new sap.m.VBox( oViewScope.createId( sPrefix+"_StatusContainer"), {
-            items:[] 
-        }).addStyleClass("minwidth80px DeviceLabelMargin");	//-- END of VBox that holds the Toggle Button
-
-
-        //-- Add the Button's background colour class --//
-        if( iTogglePermission===0 ) {
-
-            //----------------------------//
-            //-- NON TOGGLEABLE BUTTON	--//
-            //----------------------------//
-            oUIStatusContainer.addItem(
-                new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
-                    state: bButtonStatus,
-                    enabled: false
-                }).addStyleClass("DeviceOverviewStatusToggleSwitch")
-            );
-
-        } else {
-
-            //----------------------------//
-            //-- TOGGLEABLE BUTTON		--//
-            //----------------------------//
-            oUIStatusContainer.addItem(
-                new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
-                    state: bButtonStatus,
-                    change: function () {
-                        //-- Bind the context of this button for subfunctions --//
-                        var oCurrentButton = this;
-                        oCurrentButton.setEnabled(false);
-                        
-                        //-- AJAX --//
-                        IomyRe.apiphp.AjaxRequest({
-                            url: IomyRe.apiphp.APILocation("statechange"),
-                            type: "POST",
-                            data: { 
-                                "Mode":"ThingToggleStatus", 
-                                "Id": aDeviceData.DeviceId
-                            },
-                            onFail : function(response) {
-                                IomyRe.common.showError(response.responseText, "Error Changing Device Status");
-								
-								oCurrentButton.setState( !oCurrentButton.getState() );
-								oCurrentButton.setEnabled(true);
-                            },
-                            onSuccess : function( sExpectedDataType, aAjaxData ) {
-                                //console.log(aAjaxData.ThingPortStatus);
-                                //jQuery.sap.log.debug( JSON.stringify( aAjaxData ) );
-                                if( aAjaxData.ThingStatus!==undefined && aAjaxData.ThingStatus!==null ) {
-                                    IomyRe.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
-                                    //IomyRe.common.ThingList["_"+aDeviceData.DeviceId].UILastUpdate = new Date();
-                                    
-                                    if (aAjaxData.ThingStatus === 1) {
-                                        oCurrentButton.setState(true);
-                                    } else {
-                                        oCurrentButton.setState(false);
-                                    }
-                                }
-                                
-                                oCurrentButton.setEnabled(true);
-                            }
-                        });
-                    }
-                }).addStyleClass("DeviceOverviewStatusToggleSwitch MarTop4px") //-- END of ToggleButton --//
-            );
-        }
-
-        oUIObject.addItem(oUIStatusContainer);
-		
-		
-		//------------------------------------//
-		//-- 9.0 - RETURN THE RESULTS		--//
-		//------------------------------------//
-		return oUIObject;
-	},
-    
-    GetCommonUITaskList: function( Prefix, oViewScope, aDeviceData ) {
-		//------------------------------------//
-		//-- 1.0 - Initialise Variables		--//
-		//------------------------------------//
-		//console.log(JSON.stringify(aDeviceData));
-		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
-		
-		//------------------------------------//
-		//-- 2.0 - Fetch TASKS				--//
-		//------------------------------------//
-		if( aDeviceData.IOs!==undefined ) {
-            $.each(aDeviceData.IOs, function (sIndex, aIO) {
-                if( aIO.RSTypeId===102 || aIO.RSTypeId===103 ) {
-                    aTasks.Low.push({
-                        "Type":"DeviceValueKWHTotal", 
-                        "Data":{ 
-                            "IOId":             aIO.Id, 
-                            "IODataType":       aIO.DataTypeName,
-                            "IOUoMName":        aIO.UoMName,
-                            "SamplerateLimit":  aIO.SamplerateLimit,
-                            "LabelId":			Prefix+"_kWh"
-                        }
-                    });
-
-                } else if( aIO.RSTypeId===2001 ) {
-                    aTasks.High.push({
-                        "Type":"DeviceValueKW", 
-                        "Data":{ 
-                            "IOId":             aIO.Id, 
-                            "IODataType":       aIO.DataTypeName,
-                            "SamplerateLimit":  aIO.SamplerateLimit,
-                            "LabelId":			Prefix+"_kW"
-                        }
-                    });
-
-                } else if (aIO.RSTypeId === 2101) {
-                    //-- VOLT DATA --//
-                    aTasks.High.push({
-                        "Type":"DeviceValueVolt", 
-                        "Data":{ 
-                            "IOId":             aIO.Id, 
-                            "IODataType":       aIO.DataTypeName,
-                            "SamplerateLimit":  aIO.SamplerateLimit,
-                            "LabelId":			Prefix+"_Volt"
-                        }
-                    });
-                } else if (aIO.RSTypeId === 2201) {
-                    //-- AMP DATA --//
-                    aTasks.High.push({
-                        "Type":"DeviceValueAmp", 
-                        "Data":{ 
-                            "IOId":             aIO.Id, 
-                            "IODataType":       aIO.DataTypeName,
-                            "SamplerateLimit":  aIO.SamplerateLimit,
-                            "LabelId":			Prefix+"_Amp"
-                        }
-                    });
-                }
-            });
-        } else {
-            //-- TODO: Write a error message --//
-            jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
-        }
-		return aTasks;
-	},
-    
-    GetCommonUIForDeviceOverview: function( sPrefix, oViewScope, aDeviceData ) {
-		//------------------------------------//
-		//-- 1.0 - Initialise Variables		--//
-		//------------------------------------//
-		
-		var oUIObject			= null;					//-- OBJECT:			--//
-		
-		//------------------------------------//
-		//-- 2.0 - Fetch UI					--//
-		//------------------------------------//
-		
-		//console.log(aDeviceData.DeviceId);
-
-        oUIObject = new sap.m.HBox( oViewScope.createId( sPrefix+"_Container"), {
-            items: [
-                //------------------------------------//
-                //-- 1st is the Device Label		--//
-                //------------------------------------//
-                new sap.m.VBox({
-                    items : [
-                        new sap.m.Link( oViewScope.createId( sPrefix+"_Label"), {
-							width: "85%",
-                            text : aDeviceData.DeviceName,
-                            press : function () {
-                                IomyRe.common.NavigationChangePage("pDeviceData", {ThingId : aDeviceData.DeviceId});
-                            }
-                        }).addStyleClass("MarLeft6px TextSizeMedium MarTop20px Text_grey_20 iOmyLink")
-                    ]
-                }).addStyleClass("BorderRight width80Percent webkitflex"),
-
-                //------------------------------------//
-                //-- 2nd is the Device Data			--//
-                //------------------------------------//
-                new sap.m.VBox({
-                    items : [
-                        new sap.m.VBox( oViewScope.createId( sPrefix+"_DataContainer"), {
-                            //--------------------------------//
-                            //-- Draw the Data Boxes		--//
-                            //--------------------------------//
-                            items: [
-                                new sap.m.Text( oViewScope.createId( sPrefix+"_kW" ),	{} ).addStyleClass(" Font-RobotoCondensed")
-                            ]
-                        }).addStyleClass("MarLeft12px MarTop20px")
-                    ]
-                }).addStyleClass("minheight58px minwidth90px")
-            ]
-        }).addStyleClass("ListItem");
-
-        //--------------------------------------------------------------------//
-        //-- ADD THE STATUS BUTTON TO THE UI								--//
-        //--------------------------------------------------------------------//
-
-        //-- Initialise Variables --//
-        var bButtonStatus				= false;
-
-        //-- Store the Device Status --//
-        var iDeviceStatus		= aDeviceData.DeviceStatus;
-        var iTogglePermission	= aDeviceData.PermToggle;
-        //var iTogglePermission	= 0;
-
-
-        //-- Set Text --//
-        if( iDeviceStatus===0 ) {
-            bButtonStatus		= false;
-        } else {
-            bButtonStatus		= true;
-        }
-
-        //-- DEBUGGING --//
-        //jQuery.sap.log.debug("PERM = "+sPrefix+" "+iTogglePermission);
-
-        //------------------------------------//
-        //-- Make the Container				--//
-        //------------------------------------//
-        var oUIStatusContainer = new sap.m.VBox( oViewScope.createId( sPrefix+"_StatusContainer"), {
-            items:[] 
-        }).addStyleClass("minwidth80px");	//-- END of VBox that holds the Toggle Button
-
-
-        //-- Add the Button's background colour class --//
-        if( iTogglePermission===0 ) {
-
-            //----------------------------//
-            //-- NON TOGGLEABLE BUTTON	--//
-            //----------------------------//
-            oUIStatusContainer.addItem(
-                new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
-                    state: bButtonStatus,
-                    enabled: false
-                }).addStyleClass("DeviceOverviewStatusToggleSwitch")
-            );
-
-        } else {
-
-            //----------------------------//
-            //-- TOGGLEABLE BUTTON		--//
-            //----------------------------//
-            oUIStatusContainer.addItem(
-                new sap.m.Switch( oViewScope.createId( sPrefix+"_StatusToggle"), {
-                    state: bButtonStatus,
-                    change: function () {
-                        //-- Bind a link to this button for subfunctions --//
-                        var oCurrentButton = this;
-                        //-- AJAX --//
-                        IomyRe.apiphp.AjaxRequest({
-                            url: IomyRe.apiphp.APILocation("statechange"),
-                            type: "POST",
-                            data: { 
-                                "Mode":"ThingToggleStatus", 
-                                "Id": aDeviceData.DeviceId
-                            },
-                            onFail : function(response) {
-                                IomyRe.common.showError(response.message, "Error Changing Device Status");
-                            },
-                            onSuccess : function( sExpectedDataType, aAjaxData ) {
-                                if( aAjaxData.DevicePortStatus!==undefined || aAjaxData.DevicePortStatus!==null ) {
-                                    IomyRe.common.ThingList["_"+aDeviceData.DeviceId].Status = aAjaxData.ThingStatus;
-                                    IomyRe.common.ThingList["_"+aDeviceData.DeviceId].UILastUpdate = new Date();
-                                }
-								
-								if (aAjaxData.ThingStatus === 1) {
-									oCurrentButton.setState(true);
-								} else {
-									oCurrentButton.setState(false);
-								}
-                            }
-                        });
-                    }
-                }).addStyleClass("DeviceOverviewStatusToggleSwitch MarTop4px") //-- END of ToggleButton --//
-            );
-        }
-
-        oUIObject.addItem(oUIStatusContainer);
-
-
-		//------------------------------------//
-		//-- 9.0 - RETURN THE RESULTS		--//
-		//------------------------------------//
-		return oUIObject;
-	},
-	
-	GetCommonUITaskListForDeviceOverview: function( Prefix, oViewScope, aDeviceData ) {
+    GetUITaskList: function( Prefix, aDeviceData ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
@@ -998,51 +411,15 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
                             "IOId":             aIO.Id, 
                             "IODataType":       aIO.DataTypeName,
                             "SamplerateLimit":  aIO.SamplerateLimit,
-                            "LabelId":			Prefix+"_kW"
+                            "LabelId":			Prefix
                         }
                     });
                 }
             });
         } else {
             //-- TODO: Write a error message --//
-            jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
+            jQuery.sap.log.error("Device "+aDeviceData.DeviceName+" has no IOs");
         }
 		return aTasks;
-	},
-	
-	
-	GetObjectIdList: function( sPrefix, oViewScope, aDeviceData ) {
-		//------------------------------------//
-		//-- 1.0 - Initialise Variables		--//
-		//------------------------------------//
-		var aObjectIdList = [];
-		
-		
-		//------------------------------------//
-		//-- 2.0 - Fetch Definition names	--//
-		//------------------------------------//
-		
-		//-- TODO: These devices need to be in their own definition file --//
-		if( aDeviceData.DeviceTypeId===2 ) {
-			
-			aObjectIdList = [
-				sPrefix+"_Container",
-				sPrefix+"_Label",
-				sPrefix+"_DataContainer",
-				sPrefix+"_Volt",
-				sPrefix+"_Amp",
-				sPrefix+"_kW",
-				sPrefix+"_kWh",
-				sPrefix+"_StatusContainer",
-				sPrefix+"_StatusToggle"
-			];
-			
-		}
-		
-		
-		//------------------------------------//
-		//-- 9.0 - RETURN THE RESULTS		--//
-		//------------------------------------//
-		return aObjectIdList;
 	}
 });

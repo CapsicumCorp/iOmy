@@ -23,11 +23,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("pages.staging.device.DeviceForm", {
-	aFormFragments: 	{},
+    aFormFragments:     {},
     
     bEditExisting           : false,
     bLoadingOnvifProfiles   : false,
-	DeviceOptions           : null,
+    DeviceOptions           : null,
     
     bDeviceOptionSelectorDrawn  : false,
     
@@ -37,30 +37,30 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
 * @memberOf pages.template.Template
 */
 
-	onInit: function() {
-		var oController = this;			//-- SCOPE: Allows subfunctions to access the current scope --//
-		var oView = this.getView();
-		
-//		if (!IomyRe.common.bLinkTypesLoaded) {
+    onInit: function() {
+        var oController = this;            //-- SCOPE: Allows subfunctions to access the current scope --//
+        var oView = this.getView();
+        
+//        if (!IomyRe.common.bLinkTypesLoaded) {
 //            IomyRe.common.RetrieveLinkTypeList({
 //                onSuccess : function () {
 //                    
 //                }
 //            });
 //        }
-		
-		oView.addEventDelegate({
+        
+        oView.addEventDelegate({
 
-			onBeforeShow: function ( oEvent ) {
-				//-- Store the Current Id --//
-				//oController.iCurrentId = oEvent.data.Id;
-				
-				//-- Refresh Nav Buttons --//
-				//MyApp.common.NavigationRefreshButtons( oController );
-				
-				//-- Update the Model --//
-				//oController.RefreshModel( oController, {} );
-				//oController.DevTypeToggle(oController);
+            onBeforeShow: function ( oEvent ) {
+                //-- Store the Current Id --//
+                //oController.iCurrentId = oEvent.data.Id;
+                
+                //-- Refresh Nav Buttons --//
+                //MyApp.common.NavigationRefreshButtons( oController );
+                
+                //-- Update the Model --//
+                //oController.RefreshModel( oController, {} );
+                //oController.DevTypeToggle(oController);
                 
                 if (!oController.bDeviceOptionSelectorDrawn) {
                     var oSBox = IomyRe.widgets.selectBoxNewDeviceOptions (oView.createId("DevTypeSelect"),{
@@ -76,13 +76,13 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     
                     oController.bDeviceOptionSelectorDrawn = true;
                 }
-				
-				//-- Check the parameters --//
-				oView.byId("DevTypeSelect").setSelectedKey("start");
-				oView.byId("DevSettings").setVisible( false );
-				
-				//-- Defines the Device Type --//
-				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                
+                //-- Check the parameters --//
+                oView.byId("DevTypeSelect").setSelectedKey("start");
+                oView.byId("DevSettings").setVisible( false );
+                
+                //-- Defines the Device Type --//
+                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
                 //-- Are we editing an existing device? --//
                 if (oEvent.data.editing !== undefined) {
@@ -94,16 +94,16 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 oController.DeviceOptions = IomyRe.functions.getNewDeviceOptions();
                 
                 oController.RefreshModel();
-			}
-			
-		});
-		
-	},
+            }
+            
+        });
+        
+    },
     
     onBeforeRendering : function () {
         
     },
-	
+    
     ToggleOnvifStreamControls : function (bEnabled) {
         var oView = this.getView();
         
@@ -113,11 +113,11 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         oView.byId("SelectThumbnailProfile").setEnabled(bEnabled);
         oView.byId("ButtonSubmit").setEnabled(bEnabled);
     },
-	
-	DevTypeToggle : function ( oController, sDevType) {
+    
+    DevTypeToggle : function ( oController, sDevType) {
         var bEditing = oController.bEditExisting;
-		var oView = oController.getView();
-		//var oTarget = oView.byId("DevType");
+        var oView = oController.getView();
+        //var oTarget = oView.byId("DevType");
         
         if (sDevType === "start") {
             oView.byId("DevSettings").setVisible( false );
@@ -204,71 +204,82 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     break;
             }
         }
-		
-//		try {
-//			if (sDevType === "ZSP") {
-//				oView.byId("DevSettings").setVisible( true );
-//				IomyRe.common.ShowFormFragment( oController, "ZigbeeSmartPlug", "DevSettingsBlock", "Block" );
-//			} else if (sDevType === "PHB") {
-//				oView.byId("DevSettings").setVisible( true );
-//				IomyRe.common.ShowFormFragment( oController, "PhillipsHueBridge", "DevSettingsBlock", "Block" );
-//			} else if (sDevType === "CSRM") {
-//				oView.byId("DevSettings").setVisible( true );
-//				IomyRe.common.ShowFormFragment( oController, "CSRMesh", "DevSettingsBlock", "Block" );
-//			} else if (sDevType === "IPC") {
-//				oView.byId("DevSettings").setVisible( true );
-//				IomyRe.common.ShowFormFragment( oController, "IPCamera", "DevSettingsBlock", "Block" );
-//			} else if (sDevType === "OWM") {
-//				oView.byId("DevSettings").setVisible( true );
-//				IomyRe.common.ShowFormFragment( oController, "OpenWeatherMap", "DevSettingsBlock", "Block" );
-//			} else if (sDevType === "OnVCam") {
-//				oView.byId("DevSettings").setVisible( true );
-//				IomyRe.common.ShowFormFragment( oController, "OnvifCamera", "DevSettingsBlock", "Block" );
-//			} else if (sDevType === "OnVServ") {
-//				oView.byId("DevSettings").setVisible( true );
-//				IomyRe.common.ShowFormFragment( oController, "OnvifServer", "DevSettingsBlock", "Block" );
-//			} else if (sDevType === "start") {
-//				oView.byId("DevSettings").setVisible( false );
-//			} else {
-//				$.sap.log.error("DevTypeToggle: Critcal Error. sDevType set incorrectly:"+sDevType);
-//			}
-//		} catch(e1) {
-//			$.sap.log.error("DevTypeToggle: Critcal Error:"+e1.message);
-//			return false;
-//		}
-	},
+    },
 
     RefreshModel: function( oConfig ) {
-		//---------------------------------------------------//
+        //---------------------------------------------------//
         // If oConfig is undefined. Give it an empty object.
-		//---------------------------------------------------//
+        //---------------------------------------------------//
         if (oConfig === undefined || oConfig === null) {
             oConfig = {};
         }
         
-		//------------------------------------------------//
-		//-- Declare Variables                          --//
-		//------------------------------------------------//
+        //------------------------------------------------//
+        //-- Declare Variables                          --//
+        //------------------------------------------------//
         var oController      = this;
-		var oView            = oController.getView();
-		
-		//------------------------------------------------//
-		//-- Build and Bind Model to the View           --//
-		//------------------------------------------------//
+        var oView            = oController.getView();
+        
+        //------------------------------------------------//
+        //-- Build and Bind Model to the View           --//
+        //------------------------------------------------//
         var oJSON = IomyRe.functions.getDeviceFormJSON();
         
-		oView.setModel( 
-			new sap.ui.model.json.JSONModel(oJSON)
-		);
-		
-		//------------------------------------------------//
-		//-- Trigger the onSuccess Event                --//
-		//------------------------------------------------//
-		if( oConfig.onSuccess ) {
-			oConfig.onSuccess();
-		}
-		
-	},
+        oJSON.Rooms = oController.PrepareRoomListForModel(1);
+        oJSON.Hubs  = IomyRe.common.HubList;
+        
+        oView.setModel( 
+            new sap.ui.model.json.JSONModel(oJSON)
+        );
+        
+        //------------------------------------------------//
+        //-- Trigger the onSuccess Event                --//
+        //------------------------------------------------//
+        if( oConfig.onSuccess ) {
+            oConfig.onSuccess();
+        }
+        
+    },
+    
+    SetPremiseId : function () {
+        var oController         = this;
+        var oView               = oController.getView();
+        var sDevTypeKey         = oView.byId("DevTypeSelect").getSelectedKey();
+        var oCurrentFormData    = oView.getModel().getProperty( "/"+sDevTypeKey+"/" );
+        var iPremiseId          = oView.getModel().getProperty("/Hubs")["_"+oCurrentFormData.Hub].PremiseId;
+        
+        oView.getModel().setProperty("/"+sDevTypeKey+"/Premise", iPremiseId);
+        oView.getModel().setProperty("/Rooms/", oController.PrepareRoomListForModel(iPremiseId));
+    },
+    
+    PrepareRoomListForModel : function (iPremiseId) {
+        var aRoomList           = IomyRe.common.RoomsList["_"+iPremiseId];
+        var iRoomCount          = 0;
+        var iUnassignedRoomId   = 0;
+        var bUnassignedOnly     = true;
+        
+        $.each(aRoomList, function (sI, mRoom) {
+            iRoomCount++;
+            
+            if (mRoom.RoomName === "Unassigned" && iRoomCount === 1) {
+                iUnassignedRoomId = mRoom.RoomId;
+                bUnassignedOnly = true;
+            } else {
+                bUnassignedOnly = false;
+                return false;
+            }
+        });
+        
+        if (bUnassignedOnly) {
+            aRoomList = {};
+            aRoomList["_"+iUnassignedRoomId] = {
+                "RoomId" : iUnassignedRoomId,
+                "RoomName" : "No rooms configured for premise"
+            };
+        }
+        
+        return aRoomList;
+    },
     
     CancelInput : function () {
         IomyRe.common.NavigationTriggerBackForward();
@@ -360,11 +371,17 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         console.log(sDevTypeKey);
         console.log(JSON.stringify(oCurrentFormData));
         
+        // If the Room ID either less than 1 or an invalid value, like null or 
+        // undefined, set it to the 'Unassigned' room.
         if (isNaN(oCurrentFormData.Room) || oCurrentFormData.Room < 1) {
             oCurrentFormData.Room = 1;
         }
         
+        //--------------------------------------------------------------------//
+        // Prepare the URL and parameters for the call to create a device.
+        //--------------------------------------------------------------------//
         switch (sDevTypeKey) {
+            // Onvif Camera Device
             case "linkType"+IomyRe.devices.onvif.LinkTypeId :
                 mData = {
                     url : IomyRe.apiphp.APILocation("onvif"),
@@ -381,6 +398,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 };
                 break;
             
+            // Philips Hue Bridge
             case "linkType"+IomyRe.devices.philipshue.LinkTypeId :
                 mData = {
                     url : IomyRe.apiphp.APILocation("philipshue"),
@@ -396,6 +414,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 };
                 break;
             
+            // Open Weather Map
             case "linkType"+IomyRe.devices.weatherfeed.LinkTypeId :
                 mData = {
                     url : IomyRe.apiphp.APILocation("weather"),
@@ -412,6 +431,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 };
                 break;
             
+            // IP Webcam Stream
             case "linkType"+IomyRe.devices.ipcamera.LinkTypeId :
                 mData = {
                     url : IomyRe.apiphp.APILocation("ipcamera"),
@@ -425,6 +445,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 };
                 break;
                 
+            // Onvif Stream
             case "thingType"+IomyRe.devices.onvif.ThingTypeId :
                 mData = {
                     url : IomyRe.apiphp.APILocation("onvif"),
@@ -505,6 +526,73 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         // Run the request to create or edit an existing device.
         //--------------------------------------------------------------------//
         IomyRe.apiphp.AjaxRequest(mData);
+    },
+    
+    StartZigbeeJoin : function () {
+        var oView               = this.getView();
+        var iCommId             = oView.byId("ZigModemSelect").getSelectedKey();
+        
+        IomyRe.devices.zigbeesmartplug.TurnOnZigbeeJoinMode({
+            modemID : iCommId,
+            
+            onSuccess : function (result) {
+                
+                console.log(JSON.stringify(result));
+                
+                var oLogContents = oView.byId("TelnetOutput").getValue();
+                
+                oLogContents += result+"\n-------------------------------------\n";
+                oView.byId("TelnetOutput").setValue(oLogContents);
+                
+                // Force it to scroll down to the bottom.
+                document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
+                
+                IomyRe.devices.zigbeesmartplug.GetRapidHAInfo({
+                    modemID : iCommId,
+                    
+                    onSuccess : function (result) {
+                        
+                        console.log(JSON.stringify(result));
+                        
+                        var oLogContents = oView.byId("TelnetOutput").getValue();
+                
+                        oLogContents += result+"\n-------------------------------------\n";
+                        oView.byId("TelnetOutput").setValue(oLogContents);
+                
+                        // Force it to scroll down to the bottom.
+                        document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
+                        
+                        IomyRe.common.RefreshCoreVariables({
+                            onSuccess : function () {
+                                IomyRe.common.showMessage({
+                                    text : "Join completed. Your devices should appear in 5 minutes.",
+                                    view : oView.getView()
+                                });
+                            }
+                        });
+                    },
+                    
+                    onFail : function (sError) {
+                        var oLogContents = oView.byId("TelnetOutput").getValue();
+                
+                        oLogContents += result+"\n-------------------------------------\n";
+                        oView.byId("TelnetOutput").setValue(oLogContents);
+                    }
+                });
+                
+                
+            },
+            
+            onFail : function (sError) {
+                var oLogContents = oView.byId("TelnetOutput").getValue();
+                oLogContents += sError+"\n-------------------------------------\n";
+                
+                oView.byId("TelnetOutput").setValue(oLogContents);
+                
+                // Force it to scroll down to the bottom.
+                document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
+            }
+        });
     }
-	
+    
 });

@@ -27,112 +27,90 @@ IomyRe.functions = new sap.ui.base.Object();
 
 $.extend(IomyRe.functions, {
     
-    /**
-	 * Retrives the hub that a thing is connected to.
-	 * 
-	 * @param {type} iThingId		ID of the Thing
-	 * @returns {Object}			Map containing the hub that a thing is associated with.
-	 * 
-	 * @throws IllegalArgumentException when the Thing ID is either not given, invalid, or if it refers to a thing that doesn't exist.
-	 *\/
-	getHubConnectedToLink : function (iLinkId) {
-		//--------------------------------------------------------------------//
-		// Variables
-		//--------------------------------------------------------------------//
-		var bError			= true;
-		var aErrorMessages	= [];
-		var mLinkIdInfo     = IomyRe.validation.isLinkIDValid(iLinkId);
-		var iCommId;
-		var iHubId;
-		
-		//--------------------------------------------------------------------//
-		// Check Thing ID
-		//--------------------------------------------------------------------//
-		bError = !mLinkIdInfo.bIsValid;
-		aErrorMessages = aErrorMessages.concat(mLinkIdInfo.aErrorMessages);
-		
-		if (bError) {
-			throw new IllegalArgumentException(aErrorMessages.join("\n"));
-		}
-		
-		//--------------------------------------------------------------------//
-		// Find its Comm ID and Hub ID and get the hub using the Hub ID.
-		//--------------------------------------------------------------------//
-		iCommId	= IomyRe.common.LinkList["_"+iLinkId].CommId;
-		iHubId	= IomyRe.common.CommList["_"+iCommId].HubId;
-		
-		return IomyRe.common.HubList["_"+iHubId];
-		
-	},*/
-	
-	/**
-	 * Creates a JSON structure that contains a list of device types for users
-     * to select from.
-     * 
-     * Example:
-     * 
-     * {
-     *     "type2" : {
-     *         "Id" : 2,
-     *         "Name" : "New Zigbee Dongle",
-     *         "Type" : "type"
-     *     },
-     * }
-	 * 
-	 * @returns {Object}		Data structure
-	 */
-	getNewDeviceOptions : function () {
-		//--------------------------------------------------------------------//
-		// Variables
-		//--------------------------------------------------------------------//
-		
-		//-- List --//
-		var structOptions		= {};
-		
-		//-- Import core variables --//
-		var aDeviceList;
-		var aDeviceTypeList;
-		
-		//--------------------------------------------------------------------//
-		// Get the core variables for this function
-		//--------------------------------------------------------------------//
-		aDeviceList		= IomyRe.common.LinkList;
-		aDeviceTypeList	= IomyRe.common.LinkTypeList;
-		
-		//--------------------------------------------------------------------//
-		// Begin Constructing the structure by adding device types.
-		//--------------------------------------------------------------------//
-		$.each(aDeviceTypeList, function (sI, mDeviceType) {
-			// TODO: Place all of these options in alphabetical order.
-			if (mDeviceType.LinkTypeId === IomyRe.devices.zigbeesmartplug.LinkTypeId ||
-				mDeviceType.LinkTypeId === IomyRe.devices.onvif.LinkTypeId ||
-				mDeviceType.LinkTypeId === IomyRe.devices.philipshue.LinkTypeId ||
-				mDeviceType.LinkTypeId === IomyRe.devices.weatherfeed.LinkTypeId ||
-                mDeviceType.LinkTypeId === IomyRe.devices.ipcamera.LinkTypeId)
-			{
-				structOptions["linkType"+mDeviceType.LinkTypeId] = {
-					"Id"		: mDeviceType.LinkTypeId,
-					"Name"		: mDeviceType.LinkTypeName,
-					"Type"		: "link"
-				};
-			}
-			
-		});
-		
-		//--------------------------------------------------------------------//
-		// Add the onvif camera option
-		//--------------------------------------------------------------------//
-		structOptions["thingType"+IomyRe.devices.onvif.ThingTypeId] = {
-            "Id"		: IomyRe.devices.onvif.ThingTypeId,
-            "Name"		: "Onvif Stream",
-            "Type"		: "thing"
-        };
-		
-		return structOptions;
-	},
+    
+    createDeviceListData : function () {
+        var aaDeviceList            = {};
+        
+        $.each( IomyRe.common.ThingList, function( sIndex, mThing ) {
+
+            //-- Check to make sure the Device is defined (Best to do this for each result from a foreach) --//
+            if ( mThing!==undefined ) {
+
+                //--------------------------------------------//
+                //-- If Grouping isn't setup yet            --//
+                //--------------------------------------------//
+                if( aaDeviceList["thingType"+mThing.TypeId] === undefined ) {
+                    //-- Define the Grouping --//
+                    //me.aUIGroupingDataPerRoom[sDeviceGrouping] = {
+                    aaDeviceList["thingType"+mThing.TypeId] = {
+                        "Name": mThing.TypeName,        //-- Display the name of the Grouping --//
+                        "Prefix":"Dev",                //-- Prefix to make object have a unique Id --//
+                        "Devices":[]                //-- Array to store the devices in the Grouping --//
+                    };
+                }
+
+                //--------------------------------------------//
+                //-- Add the Devices into the Grouping        --//
+                //--------------------------------------------//
+                aaDeviceList["thingType"+mThing.TypeId].Devices.push({
+                    "DeviceId":          mThing.Id,
+                    "DeviceName":        mThing.DisplayName,
+                    "DeviceTypeId":      mThing.TypeId,
+                    "DeviceTypeName":    mThing.TypeName,
+                    "DeviceStatus":      mThing.Status,
+                    "LinkId":            mThing.LinkId,
+                    "PermToggle":        mThing.PermToggle,
+                    "IOs":               mThing.IO,
+                    "RoomId":            mThing.RoomId,
+                    "PremiseId":         mThing.PremiseId,
+                    "UILastUpdate":      mThing.UILastUpdate
+                });
+            }
+        });
+        
+        return aaDeviceList;
+    },
     
     /**
-	 * Creates a JSON structure that contains a list of device types for users
+     * Retrives the hub that a thing is connected to.
+     * 
+     * @param {type} iThingId        ID of the Thing
+     * @returns {Object}            Map containing the hub that a thing is associated with.
+     * 
+     * @throws IllegalArgumentException when the Thing ID is either not given, invalid, or if it refers to a thing that doesn't exist.
+     *\/
+    getHubConnectedToLink : function (iLinkId) {
+        //--------------------------------------------------------------------//
+        // Variables
+        //--------------------------------------------------------------------//
+        var bError            = true;
+        var aErrorMessages    = [];
+        var mLinkIdInfo     = IomyRe.validation.isLinkIDValid(iLinkId);
+        var iCommId;
+        var iHubId;
+        
+        //--------------------------------------------------------------------//
+        // Check Thing ID
+        //--------------------------------------------------------------------//
+        bError = !mLinkIdInfo.bIsValid;
+        aErrorMessages = aErrorMessages.concat(mLinkIdInfo.aErrorMessages);
+        
+        if (bError) {
+            throw new IllegalArgumentException(aErrorMessages.join("\n"));
+        }
+        
+        //--------------------------------------------------------------------//
+        // Find its Comm ID and Hub ID and get the hub using the Hub ID.
+        //--------------------------------------------------------------------//
+        iCommId    = IomyRe.common.LinkList["_"+iLinkId].CommId;
+        iHubId    = IomyRe.common.CommList["_"+iCommId].HubId;
+        
+        return IomyRe.common.HubList["_"+iHubId];
+        
+    },*/
+    
+    /**
+     * Creates a JSON structure that contains a list of device types for users
      * to select from.
      * 
      * Example:
@@ -144,80 +122,151 @@ $.extend(IomyRe.functions, {
      *         "Type" : "type"
      *     },
      * }
-	 * 
-	 * @returns {Object}		Data structure
-	 */
-	getDeviceFormJSON : function () {
-		//--------------------------------------------------------------------//
-		// Variables
-		//--------------------------------------------------------------------//
-		
-		//-- List --//
-		var structOptions		= {};
-		
-		//-- Import core variables --//
-		var aDeviceList;
-		var aDeviceTypeList;
-		
-		//--------------------------------------------------------------------//
-		// Get the core variables for this function
-		//--------------------------------------------------------------------//
-		aDeviceList		= IomyRe.common.LinkList;
-		aDeviceTypeList	= IomyRe.common.LinkTypeList;
-		
-		//--------------------------------------------------------------------//
-		// Begin Constructing the structure by adding device types.
-		//--------------------------------------------------------------------//
-		$.each(aDeviceTypeList, function (sI, mDeviceType) {
-			// TODO: Place all of these options in alphabetical order.
-			if (mDeviceType.LinkTypeId === IomyRe.devices.zigbeesmartplug.LinkTypeId)
-			{
-				structOptions["linkType"+mDeviceType.LinkTypeId] = {
+     * 
+     * @returns {Object}        Data structure
+     */
+    getNewDeviceOptions : function () {
+        //--------------------------------------------------------------------//
+        // Variables
+        //--------------------------------------------------------------------//
+        
+        //-- List --//
+        var structOptions        = {};
+        
+        //-- Import core variables --//
+        var aDeviceList;
+        var aDeviceTypeList;
+        
+        //--------------------------------------------------------------------//
+        // Get the core variables for this function
+        //--------------------------------------------------------------------//
+        aDeviceList        = IomyRe.common.LinkList;
+        aDeviceTypeList    = IomyRe.common.LinkTypeList;
+        
+        //--------------------------------------------------------------------//
+        // Begin Constructing the structure by adding device types.
+        //--------------------------------------------------------------------//
+        $.each(aDeviceTypeList, function (sI, mDeviceType) {
+            // TODO: Place all of these options in alphabetical order.
+            if (mDeviceType.LinkTypeId === IomyRe.devices.zigbeesmartplug.LinkTypeId ||
+                mDeviceType.LinkTypeId === IomyRe.devices.onvif.LinkTypeId ||
+                mDeviceType.LinkTypeId === IomyRe.devices.philipshue.LinkTypeId ||
+                mDeviceType.LinkTypeId === IomyRe.devices.weatherfeed.LinkTypeId ||
+                mDeviceType.LinkTypeId === IomyRe.devices.ipcamera.LinkTypeId)
+            {
+                structOptions["linkType"+mDeviceType.LinkTypeId] = {
+                    "Id"        : mDeviceType.LinkTypeId,
+                    "Name"        : mDeviceType.LinkTypeName,
+                    "Type"        : "link"
+                };
+            }
+            
+        });
+        
+        //--------------------------------------------------------------------//
+        // Add the onvif camera option
+        //--------------------------------------------------------------------//
+        structOptions["thingType"+IomyRe.devices.onvif.ThingTypeId] = {
+            "Id"        : IomyRe.devices.onvif.ThingTypeId,
+            "Name"        : "Onvif Stream",
+            "Type"        : "thing"
+        };
+        
+        return structOptions;
+    },
+    
+    /**
+     * Creates a JSON structure that contains a list of device types for users
+     * to select from.
+     * 
+     * Example:
+     * 
+     * {
+     *     "type2" : {
+     *         "Id" : 2,
+     *         "Name" : "New Zigbee Dongle",
+     *         "Type" : "type"
+     *     },
+     * }
+     * 
+     * @returns {Object}        Data structure
+     */
+    getDeviceFormJSON : function () {
+        //--------------------------------------------------------------------//
+        // Variables
+        //--------------------------------------------------------------------//
+        
+        //-- List --//
+        var structOptions        = {};
+        
+        //-- Import core variables --//
+        var aDeviceList;
+        var aDeviceTypeList;
+        
+        //--------------------------------------------------------------------//
+        // Get the core variables for this function
+        //--------------------------------------------------------------------//
+        aDeviceList        = IomyRe.common.LinkList;
+        aDeviceTypeList    = IomyRe.common.LinkTypeList;
+        
+        //--------------------------------------------------------------------//
+        // Begin Constructing the structure by adding device types.
+        //--------------------------------------------------------------------//
+        $.each(aDeviceTypeList, function (sI, mDeviceType) {
+            // TODO: Place all of these options in alphabetical order.
+            if (mDeviceType.LinkTypeId === IomyRe.devices.zigbeesmartplug.LinkTypeId)
+            {
+                structOptions["linkType"+mDeviceType.LinkTypeId] = {
                     "Hub" : "",
+                    "Premise" : "",
                     "Modem" : ""
                 };
-			}
-			
-			if (mDeviceType.LinkTypeId === IomyRe.devices.onvif.LinkTypeId)
-			{
-				structOptions["linkType"+mDeviceType.LinkTypeId] = {
+            }
+            
+            if (mDeviceType.LinkTypeId === IomyRe.devices.onvif.LinkTypeId)
+            {
+                structOptions["linkType"+mDeviceType.LinkTypeId] = {
                     "Hub" : "",
+                    "Premise" : "",
                     "Room" : "1",
                     "IPAddress" : "",
                     "IPPort" : "",
                     "DisplayName" : "",
                     "Username" : "",
-                    "Password" : "",
+                    "Password" : ""
                 };
-			}
-			
-			if (mDeviceType.LinkTypeId === IomyRe.devices.philipshue.LinkTypeId)
-			{
-				structOptions["linkType"+mDeviceType.LinkTypeId] = {
+            }
+            
+            if (mDeviceType.LinkTypeId === IomyRe.devices.philipshue.LinkTypeId)
+            {
+                structOptions["linkType"+mDeviceType.LinkTypeId] = {
                     "Hub" : "",
+                    "Premise" : "",
                     "Room" : "1",
                     "IPAddress" : "",
                     "IPPort" : "",
                     "DeviceToken" : "",
                     "DisplayName" : ""
                 };
-			}
-			
-			if (mDeviceType.LinkTypeId === IomyRe.devices.weatherfeed.LinkTypeId)
-			{
-				structOptions["linkType"+mDeviceType.LinkTypeId] = {
+            }
+            
+            if (mDeviceType.LinkTypeId === IomyRe.devices.weatherfeed.LinkTypeId)
+            {
+                structOptions["linkType"+mDeviceType.LinkTypeId] = {
                     "Hub" : "",
+                    "Premise" : "",
                     "Room" : "1",
                     "DisplayName" : "",
                     "StationCode" : "",
                     "KeyCode" : ""
                 };
-			}
-			
-			if (mDeviceType.LinkTypeId === IomyRe.devices.ipcamera.LinkTypeId)
-			{
-				structOptions["linkType"+mDeviceType.LinkTypeId] = {
+            }
+            
+            if (mDeviceType.LinkTypeId === IomyRe.devices.ipcamera.LinkTypeId)
+            {
+                structOptions["linkType"+mDeviceType.LinkTypeId] = {
                     "Hub" : "",
+                    "Premise" : "",
                     "Room" : "1",
                     "Protocol" : "http",
                     "IPAddress" : "",
@@ -225,24 +274,77 @@ $.extend(IomyRe.functions, {
                     "Path" : "",
                     "DisplayName" : "",
                     "Username" : "",
-                    "Password" : "",
+                    "Password" : ""
                 };
-			}
-			
-		});
-		
-		//--------------------------------------------------------------------//
-		// Add the onvif camera option
-		//--------------------------------------------------------------------//
-		structOptions["thingType"+IomyRe.devices.onvif.ThingTypeId] = {
+            }
+            
+        });
+        
+        //--------------------------------------------------------------------//
+        // Add the onvif camera option
+        //--------------------------------------------------------------------//
+        structOptions["thingType"+IomyRe.devices.onvif.ThingTypeId] = {
             "CameraName" : "",
             "OnvifServer" : "",
             "StreamProfile" : "",
             "ThumbnailProfile" : ""
         };
-		
-		return structOptions;
-	},
+        
+//        structOptions["linkType"+mDeviceType.LinkTypeId] = {
+//            "Hub" : {
+//                "type" : "Integer",
+//                "required" : true,
+//                "minValue" : 1,
+//                "value" : ""
+//            },
+//            "Room" : {
+//                "type" : "Integer",
+//                "required" : true,
+//                "validator" : IomyRe.validation.isRoomIDValid,
+//                "minValue" : 1,
+//                "default" : 1,
+//                "value" : ""
+//            },
+//            "Protocol" : {
+//                "type" : "String",
+//                "required" : true,
+//                "default" : "http",
+//                "value" : ""
+//            },
+//            "IPAddress" : {
+//                "type" : "String",
+//                "required" : true,
+//                "validator" : IomyRe.validation.isIPv4AddressValid,
+//                "value" : ""
+//            },
+//            "IPPort" : {
+//                "type" : "String",
+//                "required" : true,
+//                "validator" : IomyRe.validation.isIPv4PortValid,
+//                "value" : ""
+//            },
+//            "Path" : {
+//                "type" : "String",
+//                "required" : true,
+//                "value" : ""
+//            },
+//            "DisplayName" : {
+//                "type" : "String",
+//                "required" : true,
+//                "value" : ""
+//            },
+//            "Username" :{
+//                "type" : "String",
+//                "value" : ""
+//            },
+//            "Password" : {
+//                "type" : "String",
+//                "value" : ""
+//            }
+//        };
+        
+        return structOptions;
+    },
     
     /**
      * Gets the link type ID from a given link.
@@ -352,5 +454,5 @@ $.extend(IomyRe.functions, {
         
         return sDate + sTime;
     }
-	
+    
 });

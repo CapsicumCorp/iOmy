@@ -36,10 +36,11 @@ $.extend(IomyRe.telnet,{
     /**
      * Runs a telnet command to the hub.
      * 
-     * @param {object} mSettings			Parameters
-     * @param {object} mSettings.command	Telnet Command
-     * @param {object} mSettings.onSuccess	(Optional) Function to run if execution is successful
-     * @param {object} mSettings.onFail		(Optional) Function to run upon failure
+     * @param {object}      mSettings			Parameters
+     * @param {string}      mSettings.command	Telnet Command
+     * @param {number}      mSettings.command	Telnet Command
+     * @param {function}    mSettings.onSuccess	(Optional) Function to run if execution is successful
+     * @param {function}    mSettings.onFail	(Optional) Function to run upon failure
      */
     RunCommand : function (mSettings) {
         //--------------------------------------------------------------------//
@@ -62,7 +63,7 @@ $.extend(IomyRe.telnet,{
         // API Parameters.
         //--------------------------------------------------------------------//
         var sUrl            = php.APILocation("hubtelnet");
-        var iHubId          = 1; // TODO: Remember to change this when we officially support multiple hubs and premises.
+        var iHubId;
         var sCommand;
         
         //--------------------------------------------------------------------//
@@ -74,6 +75,15 @@ $.extend(IomyRe.telnet,{
             //----------------------------------------------------------------//
             if (mSettings.command === undefined || mSettings.command === null) {
                 fnAppendError("Telnet command not given");
+            } else {
+                sCommand = mSettings.command;
+            }
+            
+            //----------------------------------------------------------------//
+            // REQUIRED: Find the hub ID
+            //----------------------------------------------------------------//
+            if (mSettings.hubID === undefined || mSettings.hubID === null) {
+                fnAppendError("'hubID' not given");
             } else {
                 sCommand = mSettings.command;
             }
@@ -104,7 +114,10 @@ $.extend(IomyRe.telnet,{
             }
             
         } else {
-            throw new MissingSettingsMapException();
+            fnAppendError("Telnet command not given");
+            fnAppendError("'hubID' not given");
+            
+            throw new MissingSettingsMapException("* "+aErrorMessages.join("\n* "));
         }
         
         // Indicating that a telnet command is running

@@ -43,7 +43,18 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 							label : "Hub",
 							fields: [ 
 								IomyRe.widgets.selectBoxHub(oView.createId("HubSelect"), {
-                                    selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Hub}"
+                                    selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Hub}",
+                                    template : {
+                                        path : "/Hubs",
+                                        item : new sap.ui.core.Item({
+                                            key : "{HubId}",
+                                            text : "{HubName}"
+                                        })
+                                    },
+                                    
+                                    change : function () {
+                                        oController.SetPremise();
+                                    }
                                 })
 							]
 						}),
@@ -51,8 +62,14 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 							label : "Put this device in",
 							fields: [ 
 								IomyRe.widgets.selectBoxRoom({
-                                    id : "RoomSelection",
-                                    selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Room}"
+                                    selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Room}",
+                                    template : {
+                                        path : "/Rooms",
+                                        item : new sap.ui.core.Item({
+                                            key : "{RoomId}",
+                                            text : "{RoomName}"
+                                        })
+                                    }
                                 })
 							]
 						}),
@@ -68,7 +85,14 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 							label : "Key Code",
 							fields: [ 
 								new sap.m.Input ({
-                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/KeyCode}"
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/KeyCode}",
+                                    liveChange : function () {
+                                        if (this.getValue() === "") {
+                                            this.setValueState(sap.ui.core.ValueState.Error);
+                                        } else {
+                                            this.setValueState(sap.ui.core.ValueState.None);
+                                        }
+                                    }
                                 })
 							]
 						}),

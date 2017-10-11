@@ -26,47 +26,47 @@ $.sap.declare("IomyRe.devices.onvif",true);
 IomyRe.devices.onvif = new sap.ui.base.Object();
 
 $.extend(IomyRe.devices.onvif,{
-	Devices                 : [],
+    Devices                 : [],
     
     aProfiles               : [],
     sProfileLookupErrors    : [],
     
     proceedToCreateItem     : true,
-	
-	LinkTypeId				: 6,
-	ThingTypeId				: 12,
-	
-	RSStreamProfile		: 3970,
-	RSStreamURL			: 3971,
-	RSThumbnailProfile	: 3972,
-	RSThumbnailURL		: 3973,
-	RSPTZAxisX			: 3974,
-	RSPTZAxisY			: 3975,
-	
-	DevicePageID : "pOnvif",
-	
-	getStreamURL : function(mSettings) {
-		var me				= this;
-		var bError			= false;
-		var aErrorMessages	= [];
-		var iIOId			= null;
-		var iThingId;
-		var sUrl;
-		var mThingIdInfo;
-		var mThing;
-		var fnSuccess;
-		var fnFail;
-		
-		//--------------------------------------------------------------------//
+    
+    LinkTypeId                : 6,
+    ThingTypeId               : 12,
+    
+    RSStreamProfile        : 3970,
+    RSStreamURL            : 3971,
+    RSThumbnailProfile    : 3972,
+    RSThumbnailURL        : 3973,
+    RSPTZAxisX            : 3974,
+    RSPTZAxisY            : 3975,
+    
+    DevicePageID : "pOnvif",
+    
+    getStreamURL : function(mSettings) {
+        var me                = this;
+        var bError            = false;
+        var aErrorMessages    = [];
+        var iIOId            = null;
+        var iThingId;
+        var sUrl;
+        var mThingIdInfo;
+        var mThing;
+        var fnSuccess;
+        var fnFail;
+        
+        //--------------------------------------------------------------------//
         // Check that all the parameters are there
         //--------------------------------------------------------------------//
         if (mSettings !== undefined) {
             //----------------------------------------------------------------//
             // REQUIRED: Find the hub ID
             //----------------------------------------------------------------//
-			mThingIdInfo	= IomyRe.validation.isThingIDValid(mSettings.ThingId);
-			bError			= !mThingIdInfo.bIsValid;
-			aErrorMessages	= mThingIdInfo.aErrorMessages;
+            mThingIdInfo    = IomyRe.validation.isThingIDValid(mSettings.ThingId);
+            bError            = !mThingIdInfo.bIsValid;
+            aErrorMessages    = mThingIdInfo.aErrorMessages;
             
             //----------------------------------------------------------------//
             // Check for errors and throw an exception if there are errors.
@@ -74,8 +74,8 @@ $.extend(IomyRe.devices.onvif,{
             if (bError) {
                 throw new ThingIDNotValidException("* "+aErrorMessages.join("\n* "));
             } else {
-				iThingId = mSettings.ThingId;
-			}
+                iThingId = mSettings.ThingId;
+            }
             
             //----------------------------------------------------------------//
             // OPTIONAL: Find the onSuccess callback function
@@ -98,62 +98,62 @@ $.extend(IomyRe.devices.onvif,{
         } else {
             throw new MissingSettingsMapException();
         }
-		
-		//--------------------------------------------------------------------//
-		// Check that the Thing ID passed the test. Throw an exception if not.
-		//--------------------------------------------------------------------//
-		if (bError) {
-			throw new ThingIDNotValidException(aErrorMessages.join("\n"));
-		}
-		
-		//--------------------------------------------------------------------//
-		// Fetch the IO for the stream URL
-		//--------------------------------------------------------------------//
-		mThing = IomyRe.common.ThingList["_"+iThingId];
-		
-		$.each(mThing.IO, function (sIndex, mIO) {
-			
-			if (sIndex !== undefined && sIndex !== null && mIO !== undefined && mIO !== null) {
-				if (mIO.RSTypeId === me.RSStreamURL) {
-					iIOId = mIO.Id;
-				}
-			}
-			
-		});
-		
-		if (iIOId === null) {
-			throw new StreamURLNotFoundException();
-		}
-		
-		//--------------------------------------------------------------------//
-		// Run a request to fetch the URL
-		//--------------------------------------------------------------------//
-		sUrl = IomyRe.apiodata.ODataLocation("datamedstring");
-		
-		IomyRe.apiodata.AjaxRequest({
-			Url				: sUrl,
-			Columns			: ["CALCEDVALUE"],
-			WhereClause		: ["IO_PK eq " + iIOId],
-			OrderByClause	: [],
-			
-			onSuccess : function (response, data) {
-				var mErrorInfo = {};
-				
-				if (data.length > 0 && data[0] !== undefined && data[0].CALCEDVALUE) {
-					// Parse the URL through the success callback function.
-					fnSuccess(data[0].CALCEDVALUE);
-				} else {
-					mErrorInfo.status = -1;
-					mErrorInfo.responseText = "No Stream URL Found";
-					fnFail(mErrorInfo);
-				}
-			},
-			
-			onFail : function (response) {
-				fnFail(response);
-			}
-		});
-	},
+        
+        //--------------------------------------------------------------------//
+        // Check that the Thing ID passed the test. Throw an exception if not.
+        //--------------------------------------------------------------------//
+        if (bError) {
+            throw new ThingIDNotValidException(aErrorMessages.join("\n"));
+        }
+        
+        //--------------------------------------------------------------------//
+        // Fetch the IO for the stream URL
+        //--------------------------------------------------------------------//
+        mThing = IomyRe.common.ThingList["_"+iThingId];
+        
+        $.each(mThing.IO, function (sIndex, mIO) {
+            
+            if (sIndex !== undefined && sIndex !== null && mIO !== undefined && mIO !== null) {
+                if (mIO.RSTypeId === me.RSStreamURL) {
+                    iIOId = mIO.Id;
+                }
+            }
+            
+        });
+        
+        if (iIOId === null) {
+            throw new StreamURLNotFoundException();
+        }
+        
+        //--------------------------------------------------------------------//
+        // Run a request to fetch the URL
+        //--------------------------------------------------------------------//
+        sUrl = IomyRe.apiodata.ODataLocation("datamedstring");
+        
+        IomyRe.apiodata.AjaxRequest({
+            Url                : sUrl,
+            Columns            : ["CALCEDVALUE"],
+            WhereClause        : ["IO_PK eq " + iIOId],
+            OrderByClause    : [],
+            
+            onSuccess : function (response, data) {
+                var mErrorInfo = {};
+                
+                if (data.length > 0 && data[0] !== undefined && data[0].CALCEDVALUE) {
+                    // Parse the URL through the success callback function.
+                    fnSuccess(data[0].CALCEDVALUE);
+                } else {
+                    mErrorInfo.status = -1;
+                    mErrorInfo.responseText = "No Stream URL Found";
+                    fnFail(mErrorInfo);
+                }
+            },
+            
+            onFail : function (response) {
+                fnFail(response);
+            }
+        });
+    },
     
     /**
      * Retrives a list of profiles within an Onvif server identified by its link

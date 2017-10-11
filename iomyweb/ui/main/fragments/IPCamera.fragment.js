@@ -43,7 +43,18 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							label : "Hub",
 							fields: [ 
 								IomyRe.widgets.selectBoxHub(oView.createId("HubSelect"), {
-                                    selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Hub}"
+                                    selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Hub}",
+                                    template : {
+                                        path : "/Hubs",
+                                        item : new sap.ui.core.Item({
+                                            key : "{HubId}",
+                                            text : "{HubName}"
+                                        })
+                                    },
+                                    
+                                    change : function () {
+                                        oController.SetPremiseId();
+                                    }
                                 })
 							]
 						}),
@@ -51,8 +62,14 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							label : "Put this device in",
 							fields: [ 
 								IomyRe.widgets.selectBoxRoom({
-                                    id : "RoomSelection",
-                                    selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Room}"
+                                    selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Room}",
+                                    template : {
+                                        path : "/Rooms",
+                                        item : new sap.ui.core.Item({
+                                            key : "{RoomId}",
+                                            text : "{RoomName}"
+                                        })
+                                    }
                                 })
 							]
 						}),

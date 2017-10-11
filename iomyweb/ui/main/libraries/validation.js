@@ -317,41 +317,152 @@ $.extend(IomyRe.validation, {
         return mResults;
     },
     
+    isFormFieldValid : function (mField) {
+        //-------------------------------------------------//
+        // Variables
+        //-------------------------------------------------//
+        var bError                  = false;
+        var aErrorMessages          = [];
+        var mResults                = {};
+        var bRequired               = false;
+        var bDefaultValue           = null;
+        var sGivenValue             = null;
+        var sType                   = "String";
+        
+        // Lambda function to run if there are errors.
+        var fnAppendError   = function (sErrMesg) {
+            bError = true;
+            aErrorMessages.push(sErrMesg);
+            jQuery.sap.log.error(sErrMesg);
+        };
+        
+        //--------------------------------------------------------------------//
+        // Check if the field is actually specified, and if so, check if it's a
+        // valid JS Object.
+        //--------------------------------------------------------------------//
+        if (mField === undefined || mField === null) {
+            fnAppendError("A field object must be given.");
+        } else if (typeof mField !== "object") {
+            fnAppendError("The field parameter is an invalid type. Expecting object, '"+typeof mField+"' given.");
+        }
+        
+        //--------------------------------------------------------------------//
+        // Error Checking Round 1:
+        // 
+        // If the field parameter is valid, check if the field is required, and
+        // if a value was given.
+        //--------------------------------------------------------------------//
+        if (!bError) {
+            if (mField.required) {
+                bRequired = mField.required;
+            }
+            
+            //----------------------------------------------------------------//
+            // Check if a default value was given then the value itself.
+            //----------------------------------------------------------------//
+            if (mField.default !== undefined && mField.default !== null && mField.default !== "") {
+                bDefaultValue = mField.default;
+            }
+            
+            if (mField.value !== undefined && mField.value !== null && mField.value !== "") {
+                sGivenValue = mField.default;
+            }
+            
+            //----------------------------------------------------------------//
+            // Use the default value if the actual value is not specified.
+            //----------------------------------------------------------------//
+            if (sGivenValue === null && bDefaultValue !== null) {
+                sGivenValue = bDefaultValue;
+            }
+            
+            //----------------------------------------------------------------//
+            // If required check if there is a value, or at least the default
+            // value.
+            //----------------------------------------------------------------//
+            if (bRequired && sGivenValue === null) {
+                fnAppendError("$FIELD is required.");
+            }
+        }
+        
+        //--------------------------------------------------------------------//
+        // Error Checking Round 2:
+        //
+        // If the value exists, then check the expected type and find if the
+        // value is appropriate to the specified type. If 'type' isn't given, a 
+        // 'String' is assumed.
+        //--------------------------------------------------------------------//
+        if (!bError && sGivenValue !== null) {
+            if (mField.type !== undefined && mField.type !== null) {
+                sType = mField.type;
+            }
+            
+            if (sType === "Integer" || sType === "Float" || sType === "Number") {
+                if (isNaN(sGivenValue)) {
+                    fnAppendError("$FIELD is not a valid number");
+                } else {
+                    //--------------------------------------------------------//
+                    // Check that the number is a whole number if we're
+                    // expecting an integer.
+                    //--------------------------------------------------------//
+                    if (sType === "Integer" && (sGivenValue > Math.floor(sGivenValue))) {
+                        fnAppendError("$FIELD is not a whole number. Integers must be whole numbers (4, 33, etc.).");
+                    }
+                }
+            }
+            
+            if (sType === "Boolean") {
+                if (typeof sGivenValue === "boolean") {
+                    
+                } else if (!isNaN(sGivenValue)) {
+                    
+                }
+            }
+        }
+        
+        //--------------------------------------------------------------------//
+        // Prepare the results map
+        //--------------------------------------------------------------------//
+        mResults.bIsValid       = !bError;
+        mResults.aErrorMessages = aErrorMessages;
+        
+        return mResults;
+    },
+    
     /**
-	 * Checks an IPv4 address to see if it's in a valid format.
-	 * 
-	 * @param {type} sIPAddress				IP Address to validate.
-	 * @returns {map}						The map containing result information including whether it's valid and any error message.
-	 * 
-	 * @throws MissingArgumentException		if the address is not given, of course.
-	 */
-	isIPv4AddressValid : function (sIPAddress) {
-		//-------------------------------------------------//
-		// Variables
-		//-------------------------------------------------//
-		var bError					= false;
-		var aErrorMessages			= [];
-		var aThreeDots				= [];
-		var aIPAddressParts			= [];
-		var bIPAddressFormatError	= false;
-		var mResult					= {};
-		
-		//-------------------------------------------------//
-		// Check that the IP address is given.
-		//-------------------------------------------------//
-		if (sIPAddress === null || sIPAddress === undefined || sIPAddress === false || sIPAddress.length === 0) {
-			throw new MissingArgumentException("Where is the IPv4 address?");
-		}
-		
-		//-------------------------------------------------//
-		// Are there three dots in the IP Address?         //
-		//-------------------------------------------------//
-		aThreeDots = sIPAddress.match(/\./g);
+     * Checks an IPv4 address to see if it's in a valid format.
+     * 
+     * @param {type} sIPAddress                IP Address to validate.
+     * @returns {map}                        The map containing result information including whether it's valid and any error message.
+     * 
+     * @throws MissingArgumentException        if the address is not given, of course.
+     */
+    isIPv4AddressValid : function (sIPAddress) {
+        //-------------------------------------------------//
+        // Variables
+        //-------------------------------------------------//
+        var bError                    = false;
+        var aErrorMessages            = [];
+        var aThreeDots                = [];
+        var aIPAddressParts           = [];
+        var bIPAddressFormatError     = false;
+        var mResult                   = {};
+        
+        //-------------------------------------------------//
+        // Check that the IP address is given.
+        //-------------------------------------------------//
+        if (sIPAddress === null || sIPAddress === undefined || sIPAddress === false || sIPAddress.length === 0) {
+            throw new MissingArgumentException("Where is the IPv4 address?");
+        }
+        
+        //-------------------------------------------------//
+        // Are there three dots in the IP Address?         //
+        //-------------------------------------------------//
+        aThreeDots = sIPAddress.match(/\./g);
 
-		if (aThreeDots === null || aThreeDots.length !== 3) {
-			bError = true; // No. FAIL!
-			aErrorMessages.push("There must be only 4 parts separated by dots ('.') in an IPv4 address.");
-		}
+        if (aThreeDots === null || aThreeDots.length !== 3) {
+            bError = true; // No. FAIL!
+            aErrorMessages.push("There must be only 4 parts separated by dots ('.') in an IPv4 address.");
+        }
         
         //---------------------------------------------------------//
         // There are three dots. Are the four parts valid numbers? //
@@ -383,60 +494,60 @@ $.extend(IomyRe.validation, {
                 break;
             }
         }
-		
-		//-------------------------------------------------//
-		// Prepare the result map.
-		//-------------------------------------------------//
-		mResult.bValid			= !bError;
-		mResult.aErrorMessages	= aErrorMessages;
-		
-		return mResult;
-	},
-	
+        
+        //-------------------------------------------------//
+        // Prepare the result map.
+        //-------------------------------------------------//
+        mResult.bValid            = !bError;
+        mResult.aErrorMessages    = aErrorMessages;
+        
+        return mResult;
+    },
+    
     /**
      * Checks whether a given IPv4 port is valid.
      * 
      * @param {type} sIPPort        IP Port to check
      * @returns {map}               Data containing the result
      */
-	isIPv4PortValid : function (sIPPort) {
-		//-------------------------------------------------//
-		// Variables
-		//-------------------------------------------------//
-		var bError					= false;
-		var aErrorMessages			= [];
-		var aInvalidChars			= [];
-		var mResult					= {};
-		
-		//-------------------------------------------------//
-		// Check that the IP address is given.
-		//-------------------------------------------------//
-		if (sIPPort === null || sIPPort === undefined || sIPPort === false || sIPPort.length === 0) {
-			throw new MissingArgumentException("Where is the IPv4 port?");
-		}
-		
-		//aDigits			= sIPPort.match(/[0-9]/g);
-		aInvalidChars	= sIPPort.match(/[^0-9]/g);
-		
-		if (aInvalidChars !== null) {
-			bError = true;
-			aErrorMessages.push("The port contains invalid character(s).");
-		}
-		
-		//-------------------------------------------------//
-		// Prepare the result map.
-		//-------------------------------------------------//
-		mResult.bValid			= !bError;
-		mResult.aErrorMessages	= aErrorMessages;
-		
-		return mResult;
-	},
+    isIPv4PortValid : function (sIPPort) {
+        //-------------------------------------------------//
+        // Variables
+        //-------------------------------------------------//
+        var bError                    = false;
+        var aErrorMessages            = [];
+        var aInvalidChars             = [];
+        var mResult                   = {};
+        
+        //-------------------------------------------------//
+        // Check that the IP address is given.
+        //-------------------------------------------------//
+        if (sIPPort === null || sIPPort === undefined || sIPPort === false || sIPPort.length === 0) {
+            throw new MissingArgumentException("Where is the IPv4 port?");
+        }
+        
+        //aDigits            = sIPPort.match(/[0-9]/g);
+        aInvalidChars    = sIPPort.match(/[^0-9]/g);
+        
+        if (aInvalidChars !== null) {
+            bError = true;
+            aErrorMessages.push("The port contains invalid character(s).");
+        }
+        
+        //-------------------------------------------------//
+        // Prepare the result map.
+        //-------------------------------------------------//
+        mResult.bValid            = !bError;
+        mResult.aErrorMessages    = aErrorMessages;
+        
+        return mResult;
+    },
     
     /**
      * Checks a given Link ID to see if it's valid. Three things it checks for
      * are first whether it's defined, if so, then checks whether it's a valid
      * number, and checks that the corresponding Link is found in
-	 * IomyRe.common.LinkList.
+     * IomyRe.common.LinkList.
      * 
      * @param {type} iLinkId       ID of a Link to check.
      * @returns {map}              Map containg error status and any error messages
@@ -552,9 +663,9 @@ $.extend(IomyRe.validation, {
                 if (sPremiseID !== undefined && sPremiseID !== null &&
                         oPremise !== undefined && oPremise !== null)
                 {
-					if (oPremise.Id == iPremiseId) {
-						bIsValid = true;
-					}
+                    if (oPremise.Id == iPremiseId) {
+                        bIsValid = true;
+                    }
                 }
 
             });

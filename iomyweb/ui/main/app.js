@@ -39,6 +39,9 @@ $.sap.require("IomyRe.pages");
 $.sap.registerModulePath('IomyRe.telnet', sModuleInitialBuildLocation+'libraries/telnet');
 $.sap.require("IomyRe.telnet");
 
+$.sap.registerModulePath('IomyRe.time', sModuleInitialBuildLocation+'libraries/time');
+$.sap.require("IomyRe.time");
+
 $.sap.registerModulePath('IomyRe.rules', sModuleInitialBuildLocation+'libraries/rules');
 $.sap.require("IomyRe.rules");
 

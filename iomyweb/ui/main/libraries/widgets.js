@@ -525,18 +525,40 @@ $.extend( IomyRe.widgets, {
      * 
      * @throws NoRoomsFoundException when there are no rooms visible to the user.
      */
-    selectBoxRoom : function (mSettings) {
+    selectBoxRoom : function (sId, mSettings) {
         var bError              = false;
         var aErrorMessages      = [];
         var aItems              = [];
         var aFirstItem          = [];
         var iFirstRoomId        = null;
-        var sId;
+        var mTemplate           = null;
+        var sModelPath;
         var sPremiseId;
         var iRoomId;
         var bIncludeUnassigned;
         var bAddAllRoomOption;
         var oSBox;
+        
+        if (typeof sId === "string") {
+            
+            if (mSettings !== undefined && mSettings !== null) {
+                if (typeof mSettings !== "object") {
+                    throw new IllegalArgumentException("'mSettings' is not an object. Type given: '"+typeof mSettings+"'.");
+                }
+            } else {
+                mSettings = {};
+            }
+            
+        } else if (typeof sId === "object") {
+            //----------------------------------------------------------------//
+            // The first parameter must in fact be the settings map.
+            //----------------------------------------------------------------//
+            mSettings = sId;
+            sId = null;
+            
+        } else {
+            throw new IllegalArgumentException("Element ID is not a valid type. Must be a string. Type given: '"+typeof sId+"'.");
+        }
         
         if (mSettings !== undefined) {
             
@@ -567,13 +589,6 @@ $.extend( IomyRe.widgets, {
                 }
             }
             
-            if (mSettings.id === undefined || mSettings.id === null) {
-                sId = null;
-            } else {
-                sId = mSettings.id;
-                mSettings.id = undefined;
-            }
-            
             if (mSettings.roomID === undefined || mSettings.roomID === null) {
                 iRoomId = null;
             } else {
@@ -590,6 +605,30 @@ $.extend( IomyRe.widgets, {
                 bAddAllRoomOption = false;
             } else {
                 bAddAllRoomOption = mSettings.showAllRoomOption;
+            }
+            
+            if (mSettings.template !== undefined && mSettings.template !== null && mSettings.template !== false) {
+                var mTemplateSettings = mSettings.template;
+                
+                if (mTemplateSettings.path === undefined || mTemplateSettings.path === null) {
+                    bError = true;
+                    aErrorMessages = "Path to the data in the model has not been specified.";
+                }
+                
+                if (mTemplateSettings.item === undefined || mTemplateSettings.path === null) {
+                    bError = true;
+                    aErrorMessages = "Item template is not given.";
+                } else if (mTemplateSettings.path instanceof sap.ui.core.Item) {
+                    bError = true;
+                    aErrorMessages = "Item template is not a valid UI5 Item (sap.ui.core.Item).";
+                }
+                
+                if (!bError) {
+                    mTemplate = {
+                        path : mTemplateSettings.path,
+                        template : mTemplateSettings.item
+                    };
+                }
             }
             
             if (bError) {
@@ -632,85 +671,97 @@ $.extend( IomyRe.widgets, {
                 sap.ui.getCore().byId(sId).destroy();
             }
             
-            if (IomyRe.common.RoomsList[sPremiseId] !== undefined) {
-                
-                aFirstItem.push(
-                    new sap.ui.core.Item({
-                        "text" : "Please select a room",
-                        "key" : -1
-                    })
-                );
-                
-                if (bAddAllRoomOption) {
+            if (mTemplate === null) {
+                if (IomyRe.common.RoomsList[sPremiseId] !== undefined) {
+
                     aFirstItem.push(
                         new sap.ui.core.Item({
-                            "text" : "All Rooms",
-                            "key" : 0
+                            "text" : "Please select a room",
+                            "key" : -1
                         })
                     );
-                }
-                
-                $.each(IomyRe.common.RoomsList[sPremiseId],function(sIndex,aRoom) {
-                    //-- Verify that the Premise has rooms, other than the pseudo-room Unassigned --//
-                    if( sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null)
-                    {
-                        if (aRoom.RoomId === 1 && aRoom.RoomName === "Unassigned" && !bIncludeUnassigned) {
-                            bHasUnassignedRoom = true;
-                            
-                        } else {
-                            if (iFirstRoomId === null) {
-                                iFirstRoomId = aRoom.RoomId;
+
+                    if (bAddAllRoomOption) {
+                        aFirstItem.push(
+                            new sap.ui.core.Item({
+                                "text" : "All Rooms",
+                                "key" : 0
+                            })
+                        );
+                    }
+
+                    $.each(IomyRe.common.RoomsList[sPremiseId],function(sIndex,aRoom) {
+                        //-- Verify that the Premise has rooms, other than the pseudo-room Unassigned --//
+                        if( sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null)
+                        {
+                            if (aRoom.RoomId === 1 && aRoom.RoomName === "Unassigned" && !bIncludeUnassigned) {
+                                bHasUnassignedRoom = true;
+
+                            } else {
+                                if (iFirstRoomId === null) {
+                                    iFirstRoomId = aRoom.RoomId;
+                                }
+
+                                aItems.push(
+                                    new sap.ui.core.Item({
+                                        "text" : aRoom.RoomName,
+                                        "key" : aRoom.RoomId
+                                    })
+                                );
+
+                                iRoomsCounted++;
                             }
-                            
-                            aItems.push(
+                        }
+                    });
+
+                    aItems = aFirstItem.concat(aItems);
+
+                    mSettings.items = aItems;
+
+                    if (sId !== null) {
+                        oSBox = new sap.m.Select(sId, mSettings);
+
+                    } else {
+                        oSBox = new sap.m.Select(mSettings);
+                    }
+
+                    if (iRoomsCounted > 0) {
+                        if (iRoomId !== undefined && iRoomId !== null) {
+                            oSBox.setSelectedKey(iRoomId);
+                        } else {
+                            oSBox.setSelectedKey(iFirstRoomId);
+                        }
+
+                    } else {
+                        if (bHasUnassignedRoom) {
+                            oSBox.destroyItems();
+                            oSBox.addItem(
                                 new sap.ui.core.Item({
-                                    "text" : aRoom.RoomName,
-                                    "key" : aRoom.RoomId
+                                    text : "No rooms configured"
                                 })
                             );
-                        
-                            iRoomsCounted++;
+                            oSBox.setEnabled(false);
+                        } else {
+                            throw new NoRoomsFoundException();
                         }
                     }
-                });
+
+                } else {
+                    throw new NoRoomsFoundException();
+                }
                 
-                aItems = aFirstItem.concat(aItems);
-                
-                mSettings.items = aItems;
-                
+            } else {
+                mSettings.items = mTemplate;
+
                 if (sId !== null) {
                     oSBox = new sap.m.Select(sId, mSettings);
 
                 } else {
                     oSBox = new sap.m.Select(mSettings);
                 }
-                
-                if (iRoomsCounted > 0) {
-                    if (iRoomId !== undefined && iRoomId !== null) {
-                        oSBox.setSelectedKey(iRoomId);
-                    } else {
-                        oSBox.setSelectedKey(iFirstRoomId);
-                    }
-                    
-                } else {
-                    if (bHasUnassignedRoom) {
-                        oSBox.destroyItems();
-                        oSBox.addItem(
-                            new sap.ui.core.Item({
-                                text : "No rooms configured"
-                            })
-                        );
-                        oSBox.setEnabled(false);
-                    } else {
-                        throw new NoRoomsFoundException();
-                    }
-                }
-                
-                return oSBox;
-                
-            } else {
-                throw new NoRoomsFoundException();
             }
+            
+            return oSBox;
 
         } catch (e) {
             e.message = "Error in IomyRe.widgets.selectBoxRoom(): "+e.message;
@@ -728,9 +779,67 @@ $.extend( IomyRe.widgets, {
      * @returns {mixed}             Either the select box filled with hubs or a text widget with an error message.
      */
     selectBoxHub : function (sId, mSettings, iHubId) {
+        var bError              = false;
+        var aErrorMessages      = [];
         var iFirstHubId         = null;
         var aItems              = [];
         var aFirstItem          = [];
+        var mTemplate           = null;
+        var sID;
+        var oSBox;
+        
+        if (typeof sId === "string") {
+            sID = sId;
+            
+            if (mSettings !== undefined && mSettings !== null) {
+                if (typeof mSettings !== "object") {
+                    throw new IllegalArgumentException("'mSettings' is not an object. Type given: '"+typeof mSettings+"'.");
+                }
+            }
+            
+            oSBox = new sap.m.Select(sID, {
+                enabled : false
+            });
+            
+        } else if (typeof sId === "object") {
+            //----------------------------------------------------------------//
+            // The first parameter must in fact be the settings map.
+            //----------------------------------------------------------------//
+            mSettings = sId;
+            
+            oSBox = new sap.m.Select({
+                enabled : false
+            });
+            
+        } else {
+            throw new IllegalArgumentException("Element ID is not a valid type. Must be a string. Type given: '"+typeof sId+"'.");
+        }
+        
+        if (mSettings.template !== undefined && mSettings.template !== null && mSettings.template !== false) {
+            var mTemplateSettings = mSettings.template;
+
+            if (mTemplateSettings.path === undefined || mTemplateSettings.path === null) {
+                bError = true;
+                aErrorMessages = "Path to the data in the model has not been specified.";
+            }
+
+            if (mTemplateSettings.item === undefined || mTemplateSettings.path === null) {
+                bError = true;
+                aErrorMessages = "Item template is not given.";
+            } else if (mTemplateSettings.path instanceof sap.ui.core.Item) {
+                bError = true;
+                aErrorMessages = "Item template is not a valid UI5 Item (sap.ui.core.Item).";
+            }
+
+            if (!bError) {
+                mTemplate = {
+                    path : mTemplateSettings.path,
+                    template : mTemplateSettings.item
+                };
+            } else {
+                throw new IllegalArgumentException(aErrorMessages.join("\n"));
+            }
+        }
         
         try {
             //====================================================================//
@@ -741,37 +850,54 @@ $.extend( IomyRe.widgets, {
             }
 
             //====================================================================//
-            // Create the Combo Box                                               //
+            // Create the Select Box
             //====================================================================//
-            aFirstItem.push(
-                new sap.ui.core.Item({
-                    "text" : "Please select a hub",
-                    "key" : -1
-                })
-            );
-            
-            $.each(IomyRe.common.HubList, function (sI, mHub) {
-                if (iFirstHubId === null) {
-                    iFirstHubId = mHub.HubId;
-                }
-                
-				aItems.push(
+            if (mTemplate === null) {
+                aFirstItem.push(
                     new sap.ui.core.Item({
-                        text : mHub.HubName,
-                        key : mHub.HubId
+                        "text" : "Please select a hub",
+                        "key" : -1
                     })
                 );
-			});
-            
-            aItems = aFirstItem.concat(aItems);
-            mSettings.items = aItems;
-            
-            var oSBox = new sap.m.Select(sId, mSettings);
 
-            if (iHubId !== undefined && iHubId !== null) {
-                oSBox.setSelectedKey(iHubId);
+                $.each(IomyRe.common.HubList, function (sI, mHub) {
+                    if (iFirstHubId === null) {
+                        iFirstHubId = mHub.HubId;
+                    }
+
+                    aItems.push(
+                        new sap.ui.core.Item({
+                            text : mHub.HubName,
+                            key : mHub.HubId
+                        })
+                    );
+                });
+
+                aItems = aFirstItem.concat(aItems);
+                mSettings.items = aItems;
+
+                if (sId !== null) {
+                    oSBox = new sap.m.Select(sId, mSettings);
+
+                } else {
+                    oSBox = new sap.m.Select(mSettings);
+                }
+
+                if (iHubId !== undefined && iHubId !== null) {
+                    oSBox.setSelectedKey(iHubId);
+                } else {
+                    oSBox.setSelectedKey(iFirstHubId);
+                }
+            
             } else {
-                oSBox.setSelectedKey(iFirstHubId);
+                mSettings.items = mTemplate;
+
+                if (sId !== null) {
+                    oSBox = new sap.m.Select(sId, mSettings);
+
+                } else {
+                    oSBox = new sap.m.Select(mSettings);
+                }
             }
             
             return oSBox;
@@ -802,7 +928,10 @@ $.extend( IomyRe.widgets, {
      * @throws NoRoomsFoundException when there are no rooms visible to the user.
      */
     selectBoxZigbeeModem : function (sId, mSettings) {
+        var bError              = false;
+        var aErrorMessages      = [];
         var iModemCount         = 0;
+        var mTemplate           = null;
         var sID;
         var oSBox;
         var fnSuccess;
@@ -817,25 +946,52 @@ $.extend( IomyRe.widgets, {
                 }
             }
             
-            oSBox = new sap.m.Select(sID, {
-                enabled : false
-            });
+            mSettings.enabled = false;
+            
+            oSBox = new sap.m.Select(sId, mSettings);
             
         } else if (typeof sId === "object") {
             //----------------------------------------------------------------//
             // The first parameter must in fact be the settings map.
             //----------------------------------------------------------------//
             mSettings = sId;
+            mSettings.enabled = false;
             
-            oSBox = new sap.m.Select({
-                enabled : false
-            });
+            sId = null;
+            
+            oSBox = new sap.m.Select(mSettings);
             
         } else {
             throw new IllegalArgumentException("Element ID is not a valid type. Must be a string. Type given: '"+typeof sId+"'.");
         }
         
         if (mSettings !== undefined) {
+            if (mSettings.template !== undefined && mSettings.template !== null && mSettings.template !== false) {
+                var mTemplateSettings = mSettings.template;
+
+                if (mTemplateSettings.path === undefined || mTemplateSettings.path === null) {
+                    bError = true;
+                    aErrorMessages = "Path to the data in the model has not been specified.";
+                }
+
+                if (mTemplateSettings.item === undefined || mTemplateSettings.path === null) {
+                    bError = true;
+                    aErrorMessages = "Item template is not given.";
+                } else if (mTemplateSettings.path instanceof sap.ui.core.Item) {
+                    bError = true;
+                    aErrorMessages = "Item template is not a valid UI5 Item (sap.ui.core.Item).";
+                }
+
+                if (!bError) {
+                    mTemplate = {
+                        path : mTemplateSettings.path,
+                        template : mTemplateSettings.item
+                    };
+                } else {
+                    throw new IllegalArgumentException(aErrorMessages.join("\n"));
+                }
+            }
+            
             if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
                 fnSuccess = mSettings.onSuccess;
             } else {
@@ -855,36 +1011,36 @@ $.extend( IomyRe.widgets, {
         
         try {
             IomyRe.common.RefreshCommList({
-                
+
                 onSuccess : function () {
-                    
+
                     var iFirstModem = null;
-                    
+
                     $.each(IomyRe.common.CommList, function (sI, mComm) {
-                        
+
                         if (mComm.CommTypeId == IomyRe.devices.zigbeesmartplug.CommTypeId) {
                             if (iFirstModem === null) {
                                 iFirstModem = mComm.CommId;
                             }
-                            
+
                             oSBox.addItem(
                                 new sap.ui.core.Item({
                                     key : mComm.CommId,
                                     text : mComm.CommName
                                 })
                             );
-                        
+
                             iModemCount++;
                         }
-                        
+
                     });
-                    
+
                     if (iModemCount > 0) {
                         oSBox.setSelectedKey(iFirstModem);
-                        
+
                         oSBox.setEnabled(true);
                         fnSuccess();
-                        
+
                     } else {
                         oSBox.addItem(
                             new sap.ui.core.Item({
@@ -894,7 +1050,7 @@ $.extend( IomyRe.widgets, {
                         );
                     }
                 }
-                
+
             });
             
             return oSBox;

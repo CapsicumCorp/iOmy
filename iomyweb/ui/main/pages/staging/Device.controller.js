@@ -23,32 +23,641 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("pages.staging.Device", {
+    
+    aaDeviceList : {},
+    
+    aAjaxTasks:{ 
+		"Low":						[],			//-- ARRAY:			Sub-array that is used to hold the list of slower ajax requests which can be left to last to be run.		--//
+		"Mid":						[],			//-- ARRAY:			Sub-array that is used to hold the list of mid range ajax requests which can be left to lrun in between the high and low tasks.		--//
+		"High":						[]			//-- ARRAY:			Sub-array that is used to hold the list of quick ajax requests that can be run before the slower tasks.		--//
+	},											//-- ARRAY:			Used to store the list of Ajax tasks to execute to update the page. --//
 	
+    iIOCount:                       0,          //-- INTEGER:       Counts the number of IOs detected. --//
+    iIOErrorCount:                  0,          //-- INTEGER:       Counts the number of IOs that failed to load. --//
+    aIOErrorMessages:               [],         //-- ARRAY:         An array for the error messages that are generated when an error occurs with one of the IOs. --//
+    
+	iCachingSeconds:				300,		//-- INTEGER:		The Time in seconds of how long to cache the Page before it needs refreshing. (Hugely decreases the Server workload)	--//
+	dLastAjaxUpdate:				null,		//-- DATE:			Stores the last time the page had the Ajax values updated.			--//
+	dLastDeviceUpdate:				null,		//-- DATE:			Stores the last time the page had the Ajax values updated.			--//
+	iLastRoomId:					-100,		//-- INTEGER:		Stores the last RoomId so that if the RoomId changes the page will need to be redrawn.--//
+	aCurrentRoomData:				{},			//-- ARRAY:			Used to store the current room data			--//
+	aElementsToDestroy:				[],			//-- ARRAY:			Stores a list of Ids of UI5 Objects to destroy on Page Redraw		--//
+    
+    
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
 * @memberOf pages.template.Template
 */
 
-	onInit: function() {
-		var oController = this;			//-- SCOPE: Allows subfunctions to access the current scope --//
-		var oView = this.getView();
-		
-		oView.addEventDelegate({
-			onBeforeShow : function (evt) {
-				//----------------------------------------------------//
-				//-- Enable/Disable Navigational Forward Button		--//
-				//----------------------------------------------------//
-				
-				//-- Refresh the Navigational buttons --//
-				//-- IOMy.common.NavigationRefreshButtons( oController ); --//
-				
-				//-- Defines the Device Type --//
-				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
-			}
-		});
-			
-		
-	},
-	
+    onInit: function() {
+        var oController = this;            //-- SCOPE: Allows subfunctions to access the current scope --//
+        var oView = this.getView();
+        
+        oView.addEventDelegate({
+            onBeforeShow : function (evt) {
+                //----------------------------------------------------//
+                //-- Enable/Disable Navigational Forward Button        --//
+                //----------------------------------------------------//
+                
+                //-- Refresh the Navigational buttons --//
+                //-- IomyRe.common.NavigationRefreshButtons( oController ); --//
+                
+                //-- Defines the Device Type --//
+                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                
+                oController.BuildDeviceListUI();
+                oController.RefreshAjaxDataForUI();
+            }
+        });
+            
+        
+    },
+    
+    
+    BuildDeviceListUI : function () {
+        var oController = this;
+        var oView       = this.getView();
+        var wList       = oView.byId("DeviceList");
+        var bHasDevices = false;
+        
+        // Wipe the old list.
+        oView.byId("DeviceList").destroyItems();
+        
+        // Fetch the list from the core variables.
+        oController.aaDeviceList = IomyRe.functions.createDeviceListData();
+        
+        //--------------------------------------------------------------------//
+        // Construct the Device List
+        //--------------------------------------------------------------------//
+        $.each(oController.aaDeviceList, function (sI, mTypeBlock) {
+            
+            bHasDevices = true;
+            
+            //----------------------------------------------------------------//
+            // Create the Group Header
+            //----------------------------------------------------------------//
+            wList.addItem(
+                new sap.m.GroupHeaderListItem ({
+                    title: mTypeBlock.Name
+                })
+            );
+        
+            //----------------------------------------------------------------//
+            // Create the items under that grouping
+            //----------------------------------------------------------------//
+            $.each(mTypeBlock.Devices, function (sJ, mDevice) {
+                switch (mDevice.DeviceTypeId) {
+                    //--------------------------------------------------------//
+                    // Zigbee Smart Plug UI Entry
+                    //--------------------------------------------------------//
+                    case IomyRe.devices.zigbeesmartplug.ThingTypeId:
+                        wList.addItem(
+                            new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
+                                title: mDevice.DeviceName,
+                                type: "Active",
+                                number: "Loading...",
+                                numberUnit: "",
+                                attributes : [
+                                    new sap.m.ObjectAttribute ({
+                                        text: "link",
+                                        customContent : new sap.m.Link ({
+                                            text: "Toggle State"
+                                        })
+                                    }),
+                                    new sap.m.ObjectAttribute ({
+                                        text: "Status: "+(mDevice.DeviceStatus == 1 ? "On" : "Off")
+                                    })
+                                ],
+                                press : function () {
+                                    IomyRe.common.NavigationChangePage( "pTile" , {} , false);
+                                }
+                            })
+                        );
+                    
+                        break;
+                        
+                    //--------------------------------------------------------//
+                    // Philips Hue UI Entry
+                    //--------------------------------------------------------//
+                    case IomyRe.devices.philipshue.ThingTypeId:
+                        wList.addItem(
+                            new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
+                                title: mDevice.DeviceName,
+                                type: "Active",
+                                number: "Blue",
+                                numberUnit: "hue",
+                                attributes : [
+                                    new sap.m.ObjectAttribute ({
+                                        text: "link",
+                                        customContent : new sap.m.Link ({
+                                            text: "Toggle State"
+                                        })
+                                    }),
+                                    new sap.m.ObjectAttribute ({
+                                        text: "Status: "+(mDevice.DeviceStatus == 1 ? "On" : "Off")
+                                    }),
+                                ],
+                                press : function () {
+                                    IomyRe.common.NavigationChangePage( "pRGBlight" , {} , false);
+                                }
+                            })
+                        );
+                    
+                        break;
+                        
+                    //--------------------------------------------------------//
+                    // Onvif Stream UI Entry
+                    //--------------------------------------------------------//
+                    case IomyRe.devices.onvif.ThingTypeId:
+                        wList.addItem(
+                            new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
+                                title: mDevice.DeviceName,
+                                type: "Active",
+                                number: "Monitoring",
+                                numberUnit: "activity",
+                                attributes : [
+                                    new sap.m.ObjectAttribute ({
+                                        text: "link",
+                                        customContent : new sap.m.Link ({
+                                            text: "Take Screenshot"
+                                        })
+                                    }),
+                                    new sap.m.ObjectAttribute ({
+                                        text: "link",
+                                        customContent : new sap.m.Link ({
+                                            text: "Record"
+                                        })
+                                    })
+                                ]
+                            })
+                        );
+                    
+                        break;
+                        
+                    //--------------------------------------------------------//
+                    // IP Webcam Stream UI Entry
+                    //--------------------------------------------------------//
+                    case IomyRe.devices.ipcamera.ThingTypeId:
+                        wList.addItem(
+                            new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
+                                title: mDevice.DeviceName,
+                                type: "Active",
+                                number: "Monitoring",
+                                numberUnit: "activity",
+                                attributes : [
+                                    new sap.m.ObjectAttribute ({
+                                        text: "link",
+                                        customContent : new sap.m.Link ({
+                                            text: "Take Screenshot"
+                                        })
+                                    }),
+                                    new sap.m.ObjectAttribute ({
+                                        text: "link",
+                                        customContent : new sap.m.Link ({
+                                            text: "Record"
+                                        })
+                                    })
+                                ],
+                                press : function () {
+                                    IomyRe.common.NavigationChangePage( "pMJPEG" , {} , false);
+                                }
+                            })
+                        );
+                    
+                        break;
+                        
+                    //--------------------------------------------------------//
+                    // Weather Feed UI Entry
+                    //--------------------------------------------------------//
+                    case IomyRe.devices.weatherfeed.ThingTypeId:
+                        wList.addItem(
+                            new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
+                                title: mDevice.DeviceName,
+                                type: "Active",
+                                number: "22°C",
+                                numberUnit: "Inside",
+                                attributes : [
+                                    new sap.m.ObjectAttribute ({
+                                        text: "Humidity: 84%",
+                                    }),
+                                    new sap.m.ObjectAttribute ({
+                                        text: "Weather Outside: Clear",
+                                    })
+                                ],
+                                press : function () {
+                                    IomyRe.common.NavigationChangePage( "pWeatherFeed" , {} , false);
+                                }
+                            })
+                        );
+                    
+                        break;
+                        
+                    //--------------------------------------------------------//
+                    // Motion Sensor UI Entry
+                    //--------------------------------------------------------//
+                    case IomyRe.devices.motionsensor.ThingTypeId:
+                        wList.addItem(
+                            new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
+                                title: mDevice.DeviceName,
+                                type: "Active",
+                                number: "No Motion",
+                                numberUnit: "Detected",
+                                attributes : [
+                                    new sap.m.ObjectAttribute ({
+                                        text: "link",
+                                        customContent : new sap.m.Link ({
+                                            text: "Enable Alarm"
+                                        })
+                                    }),
+                                    new sap.m.ObjectAttribute ({
+                                        text: "link",
+                                        customContent : new sap.m.Link ({
+                                            text: "Disable Alarm"
+                                        })
+                                    }),
+                                ],
+                                press : function () {
+                                    IomyRe.common.NavigationChangePage( "pMotionSensor" , {} , false);
+                                }
+                            })
+                        );
+                    
+                        break;
+                        
+                    //--------------------------------------------------------//
+                    // Nothing that we have an entry for yet.
+                    //--------------------------------------------------------//
+                    default:
+                        break;
+                }
+                
+            });
+            
+        });
+        
+        
+    },
+    
+    RefreshAjaxDataForUI: function() {
+        //----------------------------------------------------//
+        //-- 1.0 - Initialise Variables                        --//
+        //----------------------------------------------------//
+        var oController            = this;
+        var thisView            = oController.getView();
+        
+        //----------------------------------------------------//
+        //-- 2.0 - Fetch a list of Ajax tasks                --//
+        //----------------------------------------------------//
+        $.each( oController.aaDeviceList, function( sIndex, aGrouping ) {
+            //-- 3.1.3 - Draw the UI for each Device --//
+            $.each( aGrouping.Devices, function( sIndex, aDevice ) {
+                //-- Create the Prefix --//
+                var sPrefix = "entry"+aDevice.DeviceId;
+                
+                //-- Add the Tasks to populate the UI --//
+                //console.log(JSON.stringify(aDevice));
+                var aNewTasks = IomyRe.devices.GetUITaskList( sPrefix, aDevice );
+                //jQuery.sap.log.debug( JSON.stringify(aNewTasks) );
+                
+                //-- High Priority --//
+                if( aNewTasks.High!==undefined && aNewTasks.High!==null ) {
+                    if( aNewTasks.High.length > 0 ) {
+                        oController.aAjaxTasks.High.push.apply( oController.aAjaxTasks.High, aNewTasks.High );
+                    }
+                }
+                //-- Low Priority --//
+                if( aNewTasks.Low!==undefined && aNewTasks.Low!==null ) {
+                    if( aNewTasks.Low.length > 0 ) {
+                        oController.aAjaxTasks.Low.push.apply( oController.aAjaxTasks.Low, aNewTasks.Low );
+                    }
+                }
+            });
+        });
+        
+        //----------------------------------------------------//
+        //-- 3.0 - Execute the Ajax Tasks                    --//
+        //----------------------------------------------------//
+        //-- Invert the array so that the tasks that were added first will be the first to be fetched --//
+        oController.aAjaxTasks.High.reverse();
+        oController.aAjaxTasks.Low.reverse();
+        
+        //-- Load 2 recursive Ajax Tasks --//
+        oController.RecursiveLoadAjaxData();
+        oController.RecursiveLoadAjaxData();
+        
+        //-- Update when the last Ajax data request occurred --//
+        oController.dLastAjaxUpdate = new Date();
+        
+    },
+    
+    //====================================================//
+    //== RECURSIVE AJAX LOADER                            ==//
+    //====================================================//
+    RecursiveLoadAjaxData: function() {
+        var oController        = this;            //-- SCOPE:        Binds the current controller scope for subfunctions                    --//
+        var aTask            = {};            //-- ARRAY:        This will hold a task that has being pulled from the task list --//
+
+        if (IomyRe.common.bSessionTerminated === false) {
+            //-- Check the Length of the array to see if there is any jobs to do --//
+            if( oController.aAjaxTasks.High.length > 0 ) {
+                //-- Pull a task from the array --//
+                aTask = oController.aAjaxTasks.High.pop();
+                oController.RunAjaxTask(aTask);
+
+            } else if( oController.aAjaxTasks.Mid.length > 0 ) {
+                //-- Pull a task from the array --//
+                aTask = oController.aAjaxTasks.Mid.pop();
+                oController.RunAjaxTask(aTask);
+
+            } else {
+                if( oController.aAjaxTasks.Low.length > 0 ) {
+                    //-- Pull a task from the array --//
+                    aTask = oController.aAjaxTasks.Low.pop();
+                    oController.RunAjaxTask(aTask);
+
+                }
+            }
+        }
+    },
+    
+    RunAjaxTask: function( aTask ) {
+        
+        //-- Extract the task type --//
+        var sTaskType = aTask.Type;
+        
+        switch( sTaskType ) {
+            case "DeviceValueKWHTotal":
+                this.GetDeviceIOTotaledValue( aTask );
+                break;
+                
+            case "DeviceValueKW":
+                this.GetDeviceIORecentValue( aTask );
+                break;
+                
+            case "DeviceValueVolt":
+                this.GetDeviceIORecentValue( aTask );
+                break;
+                
+            case "DeviceValueAmp":
+                this.GetDeviceIORecentValue( aTask );
+                break;
+                
+            default:
+                //-- ERROR: Unknown Task Type --//
+            
+        }
+        return true;
+    },
+    
+    GetDeviceIORecentValue: function ( aTask ) {
+        //--------------------------------------------------------//
+        //-- 1.0 - Initialise                                    --//
+        //--------------------------------------------------------//
+        var oController            = this;            //-- OBJECT:        Binds the current Controller's scope to a variable for sub-functions to access    --//
+        var iIOId               = 0;            //-- INTEGER:        The IO Id to poll the Data for                                                --//
+        var sIODataType         = "";            //-- STRING:        The IO's Datatype is stored so that we know what Odata URL to poll            --//
+        var sIOLabel            = "";            //-- STRING:        This will hold the nickname of which odata url to poll for data                   --//
+        var iSampleRateLimit    = null;         //-- INTEGER:        Sample rate limit in seconds                                                --//
+        var iUTS_Start            = 0;            //-- INTEGER:        Used to hold the current period's starting Unix Timestamp                         --//
+        var iUTS_End            = 0;            //-- INTEGER:        Used to hold the current period's ending Unix Timestamp                           --//
+        var sAjaxUrl            = "";            //-- STRING:        --//
+        var aAjaxColumns        = [];            //-- ARRAY:            --//
+        var aAjaxWhereClause    = [];            //-- ARRAY:            --//
+        var aAjaxOrderByClause    = [];            //-- ARRAY:            --//
+        
+        //--------------------------------------------------------//
+        //-- 2.0 - Check if Ajax Request should be run            --//
+        //--------------------------------------------------------//
+        try {
+            iIOId               = aTask.Data.IOId;
+            sIODataType         = aTask.Data.IODataType;
+            sIOLabel            = aTask.Data.LabelId;
+            iSampleRateLimit    = aTask.Data.SamplerateLimit;
+            // Add to the IO count
+            oController.iIOCount++;
+            
+        } catch( e1000 ) {
+            jQuery.sap.log.error("Error: Extracting Task data!"); 
+        }
+        
+        //--------------------------------------------------------//
+        //-- 3.0 - Prepare for Ajax Request                        --//
+        //--------------------------------------------------------//
+        //iUTS_Start                = IomyRe.common.GetStartOfCurrentPeriod();
+        iUTS_End                = IomyRe.time.GetCurrentUTS();
+        
+        
+
+        //--------------------------------------------------------//
+        //-- 4.0 - Check if Ajax Request should be run            --//
+        //--------------------------------------------------------//
+        IomyRe.apiphp.AjaxRequest({
+            "url": IomyRe.apiphp.APILocation("mostrecent"),
+            "data": {
+                "Mode":     "MostRecentValue",
+                "Id":       iIOId
+            },
+            "onSuccess": function ( sResponseType, aData ) {
+                try {
+                    if( aData!==undefined && aData!==null) {
+                        if(aData.UTS!==undefined && aData.UTS!==null) {
+                            //-- If the UTS is less than 10 minutes from the endstamp --//
+//                            if( iSampleRateLimit !== null && iSampleRateLimit>=1 && ( aData.UTS <= ( iUTS_End - iSampleRateLimit ) ) ) {
+//                                //-- Flag that the IO is offline --//
+//                                oController.byId( sIOLabel ).setText("IO Offline");
+//                                
+//                            } else {
+                                //-- Display the most recent value --//
+                                var oUI5Object = oController.byId( sIOLabel );
+                                if( oUI5Object!==undefined && oUI5Object!==null && oUI5Object!==false ) {
+                                    
+                                    //-- IF the Uom is present --//
+                                    if( typeof aData.UomName!=="undefined" && aData.UomName!==null && aData.UomName!==false && aData.UomName!=="") {
+                                        //----------------------------------------//
+                                        //-- Round to 3 decimal places          --//
+                                        //----------------------------------------//
+                                        var fCalcedValue = ( Math.round( aData.Value * 1000 ) ) / 1000;
+    
+                                        //----------------------------------------//
+                                        //-- Show the Results                   --//
+                                        //----------------------------------------//
+                                        oUI5Object.setNumber( fCalcedValue );
+                                        oUI5Object.setNumberUnit( aData.UomName );
+                                        
+                                    } else {
+                                        //-- Set it to an empty text field --//
+                                        oUI5Object.setNumber("");
+                                        oUI5Object.setNumberUnit("");
+                                        
+                                    }
+
+                                } else {
+                                    console.log("Critical Error: PHP API (Most Recent) OnSuccess can't find "+sIOLabel);
+                                }
+//                            }
+                        } else {
+                            oController.byId( sIOLabel ).setText("IO Offline");
+                        }
+                    } else {
+                        oController.byId( sIOLabel ).setText("IO Offline");
+                    }
+                    
+                } catch( e5678) {
+                    console.log( e5678.message );
+                }
+                
+                //-- Update the Last Ajax Request Date --//
+                oController.dLastAjaxUpdate    = Date();
+                
+                //-- Recursively check for more Tasks --//
+                oController.RecursiveLoadAjaxData();
+            },
+            "onFail" : function (response) {
+                IomyRe.common.showMessage({
+                    text : "There was an error retriving the value of IO "+iIOId,
+                    view : oController.getView()
+                });
+                // Add to the IO Error count
+                oController.iIOErrorCount++;
+                
+                //-- Recursively check for more Tasks --//
+                oController.RecursiveLoadAjaxData();
+            }
+        });
+    
+    },
+    
+    
+    
+    GetDeviceIOTotaledValue: function ( aTask ) {
+        //------------------------------------------------------------------------------------//
+        //-- NOTE:    This is a special workaround for when the Device doesn't have the        --//
+        //--        "Current kWh" but only the "Total kWh the device has ever seen"            --//
+        //------------------------------------------------------------------------------------//
+        
+        //--------------------------------------------------------//
+        //-- 1.0 - Initialise                                    --//
+        //--------------------------------------------------------//
+        var oController            = this;
+        var iIOId            = 0;            //-- INTEGER:        The IO Id to poll the Data for                                         --//
+        var sIOLabel        = "";            //-- STRING:        This will hold the nickname of which odata url to poll for data            --//
+        var sIOUoMName        = "";
+        var iUTS_Start            = 0;            //-- INTEGER:        Used to hold the current period's starting Unix Timestamp                --//
+        var iUTS_End            = 0;            //-- INTEGER:        Used to hold the current period's ending Unix Timestamp                    --//
+        
+        //--------------------------------------------------------//
+        //-- 2.0 - Check if Ajax Request should be run            --//
+        //--------------------------------------------------------//
+        try {
+            iIOId            = aTask.Data.IOId;
+            sIOLabel        = aTask.Data.LabelId;
+            sIOUoMName        = aTask.Data.IOUoMName;
+        } catch( e1000 ) {
+            jQuery.sap.log.error("Error: Extracting Task data!"); 
+        }
+        
+        //--------------------------------------------------------//
+        //-- 3.0 - Prepare for Ajax Request                        --//
+        //--------------------------------------------------------//
+        iUTS_Start                = IomyRe.common.GetStartOfCurrentPeriod();
+        iUTS_End                = IomyRe.common.GetEndOfCurrentPeriod();
+        
+        //--------------------------------------------------------//
+        //-- 4.0 - Check if Ajax Request should be run            --//
+        //--------------------------------------------------------//
+        
+        //----------------------------//
+        //-- 4.1 - Maximum Value    --//
+        //----------------------------//
+        IomyRe.apiphp.AjaxRequest({
+            "url": IomyRe.apiphp.APILocation("aggregation"),
+            "data": {
+                "Id":        iIOId,
+                "Mode":        "Max",
+                "StartUTS":    iUTS_Start,
+                "EndUTS":    iUTS_End
+            },
+            "onSuccess": function ( sResponseType, aMaxData ) {
+                //----------------------------//
+                //-- 4.2 - Minimum Value    --//
+                //----------------------------//
+                IomyRe.apiphp.AjaxRequest({
+                    "url": IomyRe.apiphp.APILocation("aggregation"),
+                    "data": {
+                        "Id":        iIOId,
+                        "Mode":        "Min",
+                        "StartUTS":    iUTS_Start,
+                        "EndUTS":    iUTS_End
+                    },
+                    "onSuccess": function ( sResponseType, aMinData ) {
+                        //--------------------------------------------------------------------//
+                        //-- STEP 3: Minimum Value                                            --//
+                        //-- Make a guess at the kWh (minus Minimum from Maximum value)        --//
+                        //--------------------------------------------------------------------//
+                        
+                        if( aMaxData.Value!==undefined && aMaxData.Value!==null ) {
+                            if( aMinData.Value!==undefined && aMinData.Value!==null ) {
+                                
+                                var iValue        = ( Math.round( (aMaxData.Value - aMinData.Value) * 1000) ) / 1000;
+                                var sUoM        = aMaxData.UOM_NAME;
+                                
+                                var oUI5Object = oController.byId( sIOLabel )
+                                if( oUI5Object!==undefined && oUI5Object!==null && oUI5Object!==false ) {
+                                    if(aMaxData.UOM_NAME!==undefined && aMaxData.UOM_NAME!==null ) {
+                                        
+                                        
+                                        oUI5Object.setText( iValue+" "+aMaxData.UOM_NAME );
+                                    } else {
+                                        oUI5Object.setText( iValue+" "+sIOUoMName );
+                                    }
+                                } else {
+                                    console.log("Critical Error: Odata OnSuccess can't find "+sIOLabel)
+                                }
+                                
+                                
+                            } else {
+                                //-- TODO: Write a better error message --//
+                                oController.byId( sIOLabel ).setText("IO Offline");
+                            }
+                        } else {
+                            //-- TODO: Write a better error message --//
+                            oController.byId( sIOLabel ).setText("IO Offline");
+                        }
+
+                        
+                        //-- Update the Last Ajax Request Date --//
+                        //me.aLastAjaxUpdatePerRoom["_"+me.roomID]    = Date();
+                        oController.dLastAjaxUpdate    = Date();
+                        
+                        //-- Recursively check for more Tasks --//
+                        oController.RecursiveLoadAjaxData();
+                    },
+                    "onFail": function (response) {
+                        oController.byId( sIOLabel ).setText("IO Offline");
+                        
+                        IomyRe.common.showMessage({
+                            text : "There was an error retriving the Totaled value",
+                            view : oController.getView()
+                        });
+                        
+                        //-- Update the Last Ajax Request Date --//
+                        //me.aLastAjaxUpdatePerRoom["_"+me.roomID]    = Date();
+                        oController.dLastAjaxUpdate    = Date();
+                        
+                        //-- Recursively check for more Tasks --//
+                        oController.RecursiveLoadAjaxData();
+                    }
+                });
+                
+            },
+            "onFail": function (response) {
+                IomyRe.common.showMessage({
+                    text : "There was an error retriving the Totaled value",
+                    view : oController.getView()
+                });
+            }
+        });
+    }
+    
 });

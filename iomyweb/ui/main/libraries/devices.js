@@ -272,36 +272,34 @@ $.extend(IomyRe.devices,{
         //-- IP Camera --//
         } else if ( iThingTypeId===18) {
             return IomyRe.devices.ipcamera.DevicePageID;
-		
-		//-----------------------------------//
-        // --- Experimental Device Pages --- //
-        //-----------------------------------//
-        //-- Door Lock --//
-//        } else if ( iThingTypeId==="-1") {
-//            return IomyRe.devices.zigbeesmartplug.DevicePageID;
-//            
-//        //-- Window Sensor --//
-//        } else if ( iThingTypeId==="-2") {
-//            return IomyRe.devices.zigbeesmartplug.DevicePageID;
-//            
-//        //-- Bluetooth Scales --//
-//        } else if ( iThingTypeId==="-3") {
-//            return IomyRe.devices.bluetoothscale.DevicePageID;
-//            
-//        //-- Blood Pressure Montior --//
-//        } else if ( iThingTypeId==="-4") {
-//            return IomyRe.devices.bpm.DevicePageID;
-//            
-//        //-- Remote Controlled Garage Door --//
-//        } else if ( iThingTypeId==="-5") {
-//           return IomyRe.devices.garagedoor.DevicePageID;
-//            
-//        //-- Thermostat --//
-//        } else if ( iThingTypeId==="-6") {
-//           return IomyRe.devices.thermostat.DevicePageID;
-//            
         }
+	},
+    
+    GetUITaskList: function( Prefix, aDeviceData ) {
+		//------------------------------------//
+		//-- 1.0 - Initialise Variables		--//
+		//------------------------------------//
+		//console.log(JSON.stringify(aDeviceData));
+		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
+		
+		//------------------------------------//
+		//-- 2.0 - Fetch TASKS				--//
+		//------------------------------------//
+        
+        //-- Zigbee Netvox Smart Plug --//
+		if( aDeviceData.DeviceTypeId===2 ) {
+            if( aDeviceData.IOs!==undefined ) {
+                aTasks = IomyRe.devices.zigbeesmartplug.GetUITaskList( Prefix, aDeviceData );
+            } else {
+                //-- TODO: Write a error message --//
+                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
+            }
+            
+		}
+        
+		return aTasks;
 	}
+	
     
 });
 

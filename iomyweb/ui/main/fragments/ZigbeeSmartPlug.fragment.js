@@ -32,7 +32,7 @@ sap.ui.jsfragment("fragments.ZigbeeSmartPlug", {
 			toolbar : new sap.m.Toolbar({
 				content : [
 					new sap.m.Title ({
-						text: "Device Settings",
+						text: "Device Settings"
 					})
 				]
 			}).addStyleClass("MarBottom1d0Rem"),
@@ -43,7 +43,18 @@ sap.ui.jsfragment("fragments.ZigbeeSmartPlug", {
 							label : "Hub",
 							fields: [ 
 								IomyRe.widgets.selectBoxHub(oView.createId("HubSelect"), {
-                                    selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Hub}"
+                                    selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Hub}",
+                                    template : {
+                                        path : "/Hubs",
+                                        item : new sap.ui.core.Item({
+                                            key : "{HubId}",
+                                            text : "{HubName}"
+                                        })
+                                    },
+                                    
+                                    change : function () {
+                                        oController.SetPremiseId();
+                                    }
                                 })
 							]
 						}),
@@ -51,7 +62,7 @@ sap.ui.jsfragment("fragments.ZigbeeSmartPlug", {
 							label : "Modem",
 							fields: [ 
                                 IomyRe.widgets.selectBoxZigbeeModem(oView.createId("ZigModemSelect"), {
-                                    selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Modem}",
+                                    //selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Modem}",
                                     
                                     onSuccess : function () {
                                         oView.byId("CustomTelnetInput").setEnabled(true);
@@ -88,14 +99,18 @@ sap.ui.jsfragment("fragments.ZigbeeSmartPlug", {
 										growFactor : 1
 									}),
 									text:"Join Devices",
-                                    enabled : false
+                                    enabled : false,
+                                    
+                                    press : function () {
+                                        oController.StartZigbeeJoin();
+                                    }
 								})
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
 							label : "",
 							fields: [ 
-								new sap.m.TextArea ({
+								new sap.m.TextArea (oView.createId("TelnetOutput"), {
 									enabled: false,
 									layoutData : new sap.m.FlexItemData({
 										growFactor : 1

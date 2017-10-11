@@ -25,13 +25,14 @@ $.sap.declare("IomyRe.devices.philipshue",true);
 IomyRe.devices.philipshue = new sap.ui.base.Object();
 
 $.extend(IomyRe.devices.philipshue,{
-	Devices: [],
-	
-	LinkTypeId		: 7,
+    Devices: [],
+    
+    LinkTypeId        : 7,
+    ThingTypeId       : 13,
     
     RSHue           : 3901,
     RSSaturation    : 3902,
     RSBrightness    : 3903,
-	
-	DevicePageID : "pPhilipsHue"
+    
+    DevicePageID : "pPhilipsHue"
 });
