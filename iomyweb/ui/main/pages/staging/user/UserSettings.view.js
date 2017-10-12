@@ -101,8 +101,8 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 														icon:    "sap-icon://save",
 														visible: false,
 														press:   function( oEvent ) {
-															//oController.UpdateValues( oController );
-															oController.ToggleButtonsAndView( oController, "ShowInfo" );
+															oController.UpdateUserInfoValues( oController );
+															//oController.ToggleButtonsAndView( oController, "ShowInfo" );
 														}
 													}),
 													new sap.m.Button( oView.createId("InfoBlock_BtnCancel"), {
@@ -164,8 +164,8 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 														icon:    "sap-icon://save",
 														visible: false,
 														press:   function( oEvent ) {
-															//oController.UpdateValues( oController );
-															oController.ToggleButtonsAndView( oController, "ShowAddress" );
+															oController.UpdateUserAddressValues( oController );
+															//oController.ToggleButtonsAndView( oController, "ShowAddress" );
 														}
 													}),
 													new sap.m.Button( oView.createId("AddrBlock_BtnCancel"), {

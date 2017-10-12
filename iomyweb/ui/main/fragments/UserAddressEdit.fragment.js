@@ -7,6 +7,20 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 		//--------------------------------------------//
 		var oFragContent = null;
 		
+		var oItemTemplateTimezones = new sap.ui.core.Item({
+			key:  "{TimezoneId}",
+			text: "{TimezoneName}"
+		});
+		
+		var oItemTemplateRegions = new sap.ui.core.Item({
+			key:  "{RegionId}",
+			text: "{RegionName}"
+		});
+		
+		var oItemTemplateLanguages = new sap.ui.core.Item({
+			key:  "{LanguageId}",
+			text: "{LanguageName}"
+		});
 		
 		//--------------------------------------------//
 		//-- 5.0 - CREATE UI                        --//
@@ -17,14 +31,11 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 					label : "Language",
 					fields: [
 						new sap.m.Select ({
-							items : [
-								new sap.ui.core.Item ({
-									text:"English"
-								}),
-								new sap.ui.core.Item ({
-									text:"etc"
-								}),
-							]
+							selectedKey: "{/UserInfo/LanguageId}",
+							items: {
+								path: "/Languages",
+								template: oItemTemplateLanguages
+							},
 						})
 					]
 				}),
@@ -32,7 +43,7 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 					label : "Street Address:",
 					fields: [
 						new sap.m.Input ({
-							text:"12 Water Street"
+							value:"{/UserInfo/AddressLine1}"
 						})
 					]
 				}),
@@ -40,7 +51,7 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 					label : "Unit Number (if applicable):",
 					fields: [
 						new sap.m.Input ({
-							text:"Unit 15"
+							value:"{/UserInfo/AddressLine2}"
 						})
 					]
 				}),
@@ -48,7 +59,7 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 					label : "City / Suburb",
 					fields: [
 						new sap.m.Input ({
-							text:""
+							value:"{/UserInfo/AddressLine3}"
 						})
 					]
 				}),
@@ -56,7 +67,7 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 					label : "State / Province",
 					fields: [
 						new sap.m.Input ({
-							text: "Queensland"
+							value: "{/UserInfo/SubRegion}"
 						}),
 					]
 				}),
@@ -64,7 +75,7 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 					label : "Post Code / Zip Code",
 					fields: [
 						new sap.m.Input ({
-							text: "4655"
+							value: "{/UserInfo/Postcode}"
 						}),
 					]
 				}),
@@ -72,14 +83,11 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 					label : "Country / Region",
 					fields: [
 						new sap.m.Select ({
-							items : [
-								new sap.ui.core.Item ({
-									text:"Australia"
-								}),
-								new sap.ui.core.Item ({
-									text:"etc"
-								}),
-							]
+							selectedKey: "{/UserInfo/RegionId}",
+							items: {
+								path: "/Regions",
+								template: oItemTemplateRegions
+							},
 						})
 					]
 				}),
@@ -87,17 +95,14 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 					label : "Timezone",
 					fields: [
 						new sap.m.Select ({
-							items : [
-								new sap.ui.core.Item ({
-									text:"Australia/Brisbane"
-								}),
-								new sap.ui.core.Item ({
-									text:"etc"
-								}),
-							]
+							selectedKey: "{/UserInfo/TimezoneId}",
+							items: {
+								path: "/Timezones",
+								template: oItemTemplateTimezones
+							}
 						})
 					]
-				}),
+				})
 			]
 		});
 							

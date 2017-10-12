@@ -52,7 +52,7 @@ $.extend(IomyRe.common,{
     //-- Arrays used to store the User's variables
     //--------------------------------------------//
     CurrentUsername         : null,
-    UserId                    : 0,
+    UserId                    : 0, //-- Not being updated when user logs in --//
     UserDisplayName            : null,
     
     UserVars : {},            //-- TODO: Check if this variable is still used anywhere --//
@@ -896,7 +896,8 @@ $.extend(IomyRe.common,{
                 "LANGUAGE_PK",              "TIMEZONE_PK",              "TIMEZONE_CC",              
                 "TIMEZONE_LATITUDE",        "TIMEZONE_LONGITUDE",       "TIMEZONE_TZ",              
                 "USERSINFO_PK",             "USERSINFO_TITLE",          "USERSINFO_DISPLAYNAME",    
-                "USERS_USERNAME"
+                "USERS_USERNAME",           "USERSINFO_GIVENNAMES",      "USERSINFO_SURNAMES",
+                "USERSINFO_EMAIL",          "USERSINFO_PHONENUMBER",    "USERSGENDER_PK"
             ],
             WhereClause: [],
             OrderByClause: [],
@@ -906,7 +907,7 @@ $.extend(IomyRe.common,{
                     "AddressLine2":       aData[0].USERADDRESS_LINE2,
                     "AddressLine3":       aData[0].USERADDRESS_LINE3,
                     "Postcode":           aData[0].USERADDRESS_POSTCODE,
-                    "SubRegionId":        aData[0].USERADDRESS_SUBREGION,
+                    "SubRegion":          aData[0].USERADDRESS_SUBREGION,
                     "RegionId":           aData[0].REGION_PK,
                     "LanguageId":         aData[0].LANGUAGE_PK,
                     "TimezoneId":         aData[0].TIMEZONE_PK,
@@ -917,6 +918,11 @@ $.extend(IomyRe.common,{
                     "UserInfoId":         aData[0].USERSINFO_PK,
                     "UserTitle":          aData[0].USERSINFO_TITLE,
                     "Displayname":        aData[0].USERSINFO_DISPLAYNAME,
+                    "Givenname":          aData[0].USERSINFO_GIVENNAMES,
+                    "Surname":            aData[0].USERSINFO_SURNAMES,
+                    "Email":              aData[0].USERSINFO_EMAIL,
+                    "Phone":              aData[0].USERSINFO_PHONENUMBER,
+                    "Gender":             aData[0].USERSGENDER_PK 
                 };
                 
                 //-- Update the Timestamp on when the UserInfo was last updated --//
@@ -2301,6 +2307,43 @@ $.extend(IomyRe.common,{
         this.RoomList       = {};
         this.UserInfo       = {};
     },
+    
+    LookupRegionNameFromRegionId: function( iRegionId ) {
+		if( iRegionId>=1 ) {
+			var sRegionCode = "_"+iRegionId;
+			var aRegion     = IomyRe.common.Regions[sRegionCode];
+			
+			var sRegionName     = aRegion.RegionName;
+			return sRegionName;
+		} else {
+			return false;
+		}
+	},
+    
+    LookupTimezoneNameFromTimezoneId: function( iTimezoneId ) {
+		if( iTimezoneId>=1 ) {
+			var sTimezoneCode = "_"+iTimezoneId;
+			var aTimezone     = IomyRe.common.Timezones[sTimezoneCode];
+			
+			var sTimezoneName     = aTimezone.TimezoneName;
+			return sTimezoneName;
+		} else {
+			return false;
+		}
+	},
+    
+    LookupLanguageNameFromLanguageId: function( iLanguageId ) {
+		if( iLanguageId>=1 ) {
+			var sLanguageCode = "_"+iLanguageId;
+			var aLanguage     = IomyRe.common.Languages[sLanguageCode];
+			
+			var sLanguageName     = aLanguage.LanguageName;
+			return sLanguageName;
+		} else {
+			return false;
+		}
+	},
+    
     
     //============================================//
     //== NAVIGATION FUNCTIONS                    ==//

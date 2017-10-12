@@ -17,7 +17,7 @@ sap.ui.jsfragment("fragments.UserAddressDisplay", {
 					label : "Language",
 					fields: [
 						new sap.m.Text ({
-							text:"English"
+							text: "{ path:'/UserInfo/LanguageId', formatter:'IomyRe.common.LookupLanguageNameFromLanguageId'}"
 						})
 					]
 				}),
@@ -25,7 +25,7 @@ sap.ui.jsfragment("fragments.UserAddressDisplay", {
 					label : "Street Address",
 					fields: [
 						new sap.m.Text ({
-							text:"12 Water Street"
+							text:"{/UserInfo/AddressLine1}"
 						})
 					]
 				}),
@@ -33,7 +33,7 @@ sap.ui.jsfragment("fragments.UserAddressDisplay", {
 					label : "Unit Number (if applicable)",
 					fields: [
 						new sap.m.Text ({
-							text:"Unit 15"
+							text:"{/UserInfo/AddressLine2}"
 						})
 					]
 				}),
@@ -41,7 +41,7 @@ sap.ui.jsfragment("fragments.UserAddressDisplay", {
 					label : "City / Suburb",
 					fields: [
 						new sap.m.Text ({
-							text:""
+							text:"{/UserInfo/AddressLine3}"
 						})
 					]
 				}),
@@ -49,7 +49,7 @@ sap.ui.jsfragment("fragments.UserAddressDisplay", {
 					label : "State / Province",
 					fields: [
 						new sap.m.Text ({
-							text: "Queensland"
+							text: "{/UserInfo/SubRegion}"
 						}),
 					]
 				}),
@@ -57,23 +57,23 @@ sap.ui.jsfragment("fragments.UserAddressDisplay", {
 					label : "Post Code / Zip Code",
 					fields: [
 						new sap.m.Text ({
-							text: "4655"
+							text: "{/UserInfo/Postcode}"
 						}),
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "Country / Region",
 					fields: [
-						new sap.m.Text ({
-							text: "Australia"
-						}),
+						new sap.m.Text({
+							text: "{ path:'/UserInfo/RegionId', formatter:'IomyRe.common.LookupRegionNameFromRegionId'}"
+						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "Timezone",
 					fields: [
 						new sap.m.Text ({
-							text: "Australia/Brisbane"
+							text: "{ path:'/UserInfo/TimezoneId', formatter:'IomyRe.common.LookupTimezoneNameFromTimezoneId'}"
 						}),
 					]
 				}),

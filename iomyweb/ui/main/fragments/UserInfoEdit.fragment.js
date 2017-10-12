@@ -16,7 +16,7 @@ sap.ui.jsfragment("fragments.UserInfoEdit", {
 					label : "Given Names",
 					fields: [
 						new sap.m.Input ({
-							text:"Capsicum"
+							value:"{/UserInfo/Givenname}"
 						})
 					]
 				}),
@@ -24,7 +24,7 @@ sap.ui.jsfragment("fragments.UserInfoEdit", {
 					label : "Surname",
 					fields: [
 						new sap.m.Input ({
-							text:"Corporation"
+							value:"{/UserInfo/Surname}"
 						})
 					]
 				}),
@@ -32,7 +32,7 @@ sap.ui.jsfragment("fragments.UserInfoEdit", {
 					label : "Display Name",
 					fields: [
 						new sap.m.Input ({
-							text:"Freshwater Office"
+							value:"{/UserInfo/Displayname}"
 						})
 					]
 				}),
@@ -40,7 +40,7 @@ sap.ui.jsfragment("fragments.UserInfoEdit", {
 					label : "Alert Email",
 					fields: [
 						new sap.m.Input ({
-							text:"support@capsicumcorp.com"
+							value:"{/UserInfo/Email}"
 						})
 					]
 				}),
@@ -48,7 +48,7 @@ sap.ui.jsfragment("fragments.UserInfoEdit", {
 					label : "Alert Mobile",
 					fields: [
 						new sap.m.Input ({
-							text: ""
+							value: "{/UserInfo/Phone}"
 						}),
 					]
 				})
