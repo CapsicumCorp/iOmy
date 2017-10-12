@@ -27,21 +27,22 @@ sap.ui.controller("pages.staging.Device", {
     aaDeviceList : {},
     
     aAjaxTasks:{ 
-		"Low":						[],			//-- ARRAY:			Sub-array that is used to hold the list of slower ajax requests which can be left to last to be run.		--//
-		"Mid":						[],			//-- ARRAY:			Sub-array that is used to hold the list of mid range ajax requests which can be left to lrun in between the high and low tasks.		--//
-		"High":						[]			//-- ARRAY:			Sub-array that is used to hold the list of quick ajax requests that can be run before the slower tasks.		--//
-	},											//-- ARRAY:			Used to store the list of Ajax tasks to execute to update the page. --//
-	
+        "Low": [],            //-- ARRAY:            Sub-array that is used to hold the list of slower ajax requests which can be left to last to be run.        --//
+        "Mid": [],            //-- ARRAY:            Sub-array that is used to hold the list of mid range ajax requests which can be left to lrun in between the high and low tasks.        --//
+        "High": []            //-- ARRAY:            Sub-array that is used to hold the list of quick ajax requests that can be run before the slower tasks.        --//
+    }, //-- ARRAY:            Used to store the list of Ajax tasks to execute to update the page. --//
+    
     iIOCount:                       0,          //-- INTEGER:       Counts the number of IOs detected. --//
     iIOErrorCount:                  0,          //-- INTEGER:       Counts the number of IOs that failed to load. --//
     aIOErrorMessages:               [],         //-- ARRAY:         An array for the error messages that are generated when an error occurs with one of the IOs. --//
     
-	iCachingSeconds:				300,		//-- INTEGER:		The Time in seconds of how long to cache the Page before it needs refreshing. (Hugely decreases the Server workload)	--//
-	dLastAjaxUpdate:				null,		//-- DATE:			Stores the last time the page had the Ajax values updated.			--//
-	dLastDeviceUpdate:				null,		//-- DATE:			Stores the last time the page had the Ajax values updated.			--//
-	iLastRoomId:					-100,		//-- INTEGER:		Stores the last RoomId so that if the RoomId changes the page will need to be redrawn.--//
-	aCurrentRoomData:				{},			//-- ARRAY:			Used to store the current room data			--//
-	aElementsToDestroy:				[],			//-- ARRAY:			Stores a list of Ids of UI5 Objects to destroy on Page Redraw		--//
+    iCachingSeconds:                300,        //-- INTEGER:        The Time in seconds of how long to cache the Page before it needs refreshing. (Hugely decreases the Server workload)    --//
+    dLastAjaxUpdate:                null,       //-- DATE:            Stores the last time the page had the Ajax values updated.            --//
+    dLastDeviceUpdate:              null,       //-- DATE:            Stores the last time the page had the Ajax values updated.            --//
+    iLastRoomId:                    null,       //-- INTEGER:        Stores the last RoomId.     --//
+    iLastPremiseId:                 null,       //-- INTEGER:        Stores the last PremiseId.  --//
+    aCurrentRoomData:               {},         //-- ARRAY:            Used to store the current room data            --//
+    aElementsToDestroy:             [],         //-- ARRAY:            Stores a list of Ids of UI5 Objects to destroy on Page Redraw        --//
     
     
 /**
@@ -57,14 +58,28 @@ sap.ui.controller("pages.staging.Device", {
         oView.addEventDelegate({
             onBeforeShow : function (evt) {
                 //----------------------------------------------------//
-                //-- Enable/Disable Navigational Forward Button        --//
+                // Find the room ID, if specified, and store it.
                 //----------------------------------------------------//
+                if (evt.data.roomID !== undefined && evt.data.roomID !== null) {
+                    oController.iLastRoomId = evt.data.roomID;
+                } else {
+                    oController.iLastRoomId = null;
+                }
                 
-                //-- Refresh the Navigational buttons --//
-                //-- IomyRe.common.NavigationRefreshButtons( oController ); --//
+                if (evt.data.premiseID !== undefined && evt.data.premiseID !== null) {
+                    oController.iLastPremiseId = evt.data.premiseID;
+                } else {
+                    oController.iLastPremiseId = null;
+                }
                 
                 //-- Defines the Device Type --//
                 IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                
+                oController.aAjaxTasks = { 
+                    "Low": [],
+                    "Mid": [],
+                    "High": []
+                };
                 
                 oController.BuildDeviceListUI();
                 oController.RefreshAjaxDataForUI();
@@ -76,16 +91,21 @@ sap.ui.controller("pages.staging.Device", {
     
     
     BuildDeviceListUI : function () {
-        var oController = this;
-        var oView       = this.getView();
-        var wList       = oView.byId("DeviceList");
-        var bHasDevices = false;
+        var oController     = this;
+        var oView           = this.getView();
+        var wList           = oView.byId("DeviceList");
+        var bHasDevices     = false;
         
         // Wipe the old list.
-        oView.byId("DeviceList").destroyItems();
+        wList.destroyItems();
         
         // Fetch the list from the core variables.
-        oController.aaDeviceList = IomyRe.functions.createDeviceListData();
+        oController.aaDeviceList = IomyRe.functions.createDeviceListData({
+            filter : {
+                roomID : oController.iLastRoomId,
+                premiseID : oController.iLastPremiseId
+            }
+        });
         
         //--------------------------------------------------------------------//
         // Construct the Device List
@@ -134,9 +154,9 @@ sap.ui.controller("pages.staging.Device", {
                                 }
                             })
                         );
-                    
+
                         break;
-                        
+
                     //--------------------------------------------------------//
                     // Philips Hue UI Entry
                     //--------------------------------------------------------//
@@ -163,9 +183,9 @@ sap.ui.controller("pages.staging.Device", {
                                 }
                             })
                         );
-                    
+
                         break;
-                        
+
                     //--------------------------------------------------------//
                     // Onvif Stream UI Entry
                     //--------------------------------------------------------//
@@ -192,9 +212,9 @@ sap.ui.controller("pages.staging.Device", {
                                 ]
                             })
                         );
-                    
+
                         break;
-                        
+
                     //--------------------------------------------------------//
                     // IP Webcam Stream UI Entry
                     //--------------------------------------------------------//
@@ -224,9 +244,9 @@ sap.ui.controller("pages.staging.Device", {
                                 }
                             })
                         );
-                    
+
                         break;
-                        
+
                     //--------------------------------------------------------//
                     // Weather Feed UI Entry
                     //--------------------------------------------------------//
@@ -235,14 +255,17 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "22°C",
-                                numberUnit: "Inside",
+                                //number: "22°C",
+                                number: "",
+                                //numberUnit: "Inside",
+                                numberUnit: "",
                                 attributes : [
-                                    new sap.m.ObjectAttribute ({
-                                        text: "Humidity: 84%",
+                                    new sap.m.ObjectAttribute (oView.createId("humidity"+mDevice.DeviceId), {
+                                        text: "Loading..."
                                     }),
-                                    new sap.m.ObjectAttribute ({
-                                        text: "Weather Outside: Clear",
+                                    new sap.m.ObjectAttribute (oView.createId("outside"+mDevice.DeviceId), {
+                                        //text: "Weather Outside: Clear"
+                                        text: ""
                                     })
                                 ],
                                 press : function () {
@@ -250,9 +273,9 @@ sap.ui.controller("pages.staging.Device", {
                                 }
                             })
                         );
-                    
+
                         break;
-                        
+
                     //--------------------------------------------------------//
                     // Motion Sensor UI Entry
                     //--------------------------------------------------------//
@@ -261,8 +284,8 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "No Motion",
-                                numberUnit: "Detected",
+                                number: "",
+                                numberUnit: "Loading...",
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
                                         text: "link",
@@ -275,23 +298,22 @@ sap.ui.controller("pages.staging.Device", {
                                         customContent : new sap.m.Link ({
                                             text: "Disable Alarm"
                                         })
-                                    }),
+                                    })
                                 ],
                                 press : function () {
                                     IomyRe.common.NavigationChangePage( "pMotionSensor" , {} , false);
                                 }
                             })
                         );
-                    
+
                         break;
-                        
+
                     //--------------------------------------------------------//
                     // Nothing that we have an entry for yet.
                     //--------------------------------------------------------//
                     default:
                         break;
                 }
-                
             });
             
         });
@@ -304,7 +326,7 @@ sap.ui.controller("pages.staging.Device", {
         //-- 1.0 - Initialise Variables                        --//
         //----------------------------------------------------//
         var oController            = this;
-        var thisView            = oController.getView();
+        var oView                  = oController.getView();
         
         //----------------------------------------------------//
         //-- 2.0 - Fetch a list of Ajax tasks                --//
@@ -313,11 +335,78 @@ sap.ui.controller("pages.staging.Device", {
             //-- 3.1.3 - Draw the UI for each Device --//
             $.each( aGrouping.Devices, function( sIndex, aDevice ) {
                 //-- Create the Prefix --//
-                var sPrefix = "entry"+aDevice.DeviceId;
+                var sPrefix     = "entry"+aDevice.DeviceId;
+                var aNewTasks   = [];
+                
+                var mTaskListSettings = {
+                    deviceData : aDevice,
+                    labelWidgetID : sPrefix
+                };
+                
+                //-- For certain devices extra information should be parsed to it. --//
+                if (IomyRe.devices.weatherfeed !== undefined) {
+                    
+                    //--------------------------------------------------------//
+                    // For Open Weather Map feeds, create functions to display
+                    // information on the device entry.
+                    //--------------------------------------------------------//
+                    if (aDevice.DeviceTypeId == IomyRe.devices.weatherfeed.ThingTypeId) {
+                        mTaskListSettings.onSuccess = function (data) {
+                            oView.byId(sPrefix).setNumber(data.Temperature.Value + data.Temperature.UomName);
+                            
+                            oView.byId("humidity"+aDevice.DeviceId).setText("Humidity: " + data.Humidity.Value + data.Humidity.UomName);
+                            
+                            //-- Update the Last Ajax Request Date --//
+                            oController.dLastAjaxUpdate    = new Date();
+                            //-- Recursively check for more Tasks --//
+                            oController.RecursiveLoadAjaxData();
+                        };
+                        
+                        mTaskListSettings.onFail = function (sErrMessage) {
+                            $.sap.log.error(sErrMessage);
+                            
+                            oView.byId(sPrefix).setNumber("N/A");
+                            
+                            oView.byId("humidity"+aDevice.DeviceId).setText("Failed to load data");
+                            
+                            //-- Recursively check for more Tasks --//
+                            oController.RecursiveLoadAjaxData();
+                        };
+                    }
+                }
+                
+                if (IomyRe.devices.motionsensor !== undefined) {
+                    //--------------------------------------------------------//
+                    // For Open Weather Map feeds, create functions to display
+                    // information on the device entry.
+                    //--------------------------------------------------------//
+                    if (aDevice.DeviceTypeId == IomyRe.devices.motionsensor.ThingTypeId) {
+                        mTaskListSettings.onSuccess = function (data) {
+                            oView.byId(sPrefix).setNumber(data.HumanReadable.UTS);
+                            oView.byId(sPrefix).setNumberUnit("Since last motion");
+                            
+                            //-- Update the Last Ajax Request Date --//
+                            oController.dLastAjaxUpdate    = new Date();
+                            //-- Recursively check for more Tasks --//
+                            oController.RecursiveLoadAjaxData();
+                        };
+                        
+                        mTaskListSettings.onFail = function (sErrMessage) {
+                            $.sap.log.error(sErrMessage);
+                            
+                            oView.byId(sPrefix).setNumber("N/A");
+                            
+                            oView.byId("humidity"+aDevice.DeviceId).setText("Failed to load data");
+                            
+                            //-- Recursively check for more Tasks --//
+                            oController.RecursiveLoadAjaxData();
+                        };
+                    }
+                }
                 
                 //-- Add the Tasks to populate the UI --//
                 //console.log(JSON.stringify(aDevice));
-                var aNewTasks = IomyRe.devices.GetUITaskList( sPrefix, aDevice );
+                aNewTasks = IomyRe.devices.GetUITaskList(mTaskListSettings);
                 //jQuery.sap.log.debug( JSON.stringify(aNewTasks) );
                 
                 //-- High Priority --//
@@ -401,6 +490,10 @@ sap.ui.controller("pages.staging.Device", {
                 
             case "DeviceValueAmp":
                 this.GetDeviceIORecentValue( aTask );
+                break;
+                
+            case "Function":
+                aTask.Execute();
                 break;
                 
             default:
@@ -508,7 +601,7 @@ sap.ui.controller("pages.staging.Device", {
                 }
                 
                 //-- Update the Last Ajax Request Date --//
-                oController.dLastAjaxUpdate    = Date();
+                oController.dLastAjaxUpdate    = new Date();
                 
                 //-- Recursively check for more Tasks --//
                 oController.RecursiveLoadAjaxData();
@@ -602,14 +695,15 @@ sap.ui.controller("pages.staging.Device", {
                                 var iValue        = ( Math.round( (aMaxData.Value - aMinData.Value) * 1000) ) / 1000;
                                 var sUoM        = aMaxData.UOM_NAME;
                                 
-                                var oUI5Object = oController.byId( sIOLabel )
+                                var oUI5Object = oController.byId( sIOLabel );
                                 if( oUI5Object!==undefined && oUI5Object!==null && oUI5Object!==false ) {
                                     if(aMaxData.UOM_NAME!==undefined && aMaxData.UOM_NAME!==null ) {
                                         
-                                        
-                                        oUI5Object.setText( iValue+" "+aMaxData.UOM_NAME );
+                                        oUI5Object.setNumber( iValue );
+                                        oUI5Object.setNumberUnit( sUoM );
                                     } else {
-                                        oUI5Object.setText( iValue+" "+sIOUoMName );
+                                        oUI5Object.setNumber( iValue );
+                                        oUI5Object.setNumberUnit( sIOUoMName );
                                     }
                                 } else {
                                     console.log("Critical Error: Odata OnSuccess can't find "+sIOLabel)

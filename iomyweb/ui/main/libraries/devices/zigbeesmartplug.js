@@ -383,7 +383,9 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
             
             oFormItem.setValue(output);
             oFormItem.selectText(output.length, output.length);
-            // Force it to scroll down to the bottom.
+            
+            // Force the text area to scroll down to the bottom if it's still on
+            // the page.
             try {
                 document.getElementById(sTextAreaId).scrollTop = document.getElementById(sTextAreaId).scrollHeight;
             } catch (e) {
@@ -392,7 +394,7 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
         }
     },
     
-    GetUITaskList: function( Prefix, aDeviceData ) {
+    GetUITaskList: function( mSettings ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
@@ -402,8 +404,8 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
 		//------------------------------------//
 		//-- 2.0 - Fetch TASKS				--//
 		//------------------------------------//
-		if( aDeviceData.IOs!==undefined ) {
-            $.each(aDeviceData.IOs, function (sIndex, aIO) {
+		if( mSettings.deviceData.IOs!==undefined ) {
+            $.each(mSettings.deviceData.IOs, function (sIndex, aIO) {
                 if( aIO.RSTypeId===2001 ) {
                     aTasks.High.push({
                         "Type":"DeviceValueKW", 
@@ -411,14 +413,14 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
                             "IOId":             aIO.Id, 
                             "IODataType":       aIO.DataTypeName,
                             "SamplerateLimit":  aIO.SamplerateLimit,
-                            "LabelId":			Prefix
+                            "LabelId":			mSettings.labelWidgetID
                         }
                     });
                 }
             });
         } else {
             //-- TODO: Write a error message --//
-            jQuery.sap.log.error("Device "+aDeviceData.DeviceName+" has no IOs");
+            jQuery.sap.log.error("Device "+mSettings.deviceData.DeviceName+" has no IOs");
         }
 		return aTasks;
 	}

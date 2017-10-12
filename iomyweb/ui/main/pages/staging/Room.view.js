@@ -56,93 +56,9 @@ sap.ui.jsview("pages.staging.Room", {
 					height: "100%",
 					vertical : true,
 					content : [
-						new sap.m.List ({
+						new sap.m.List (oView.createId("RoomList"), {
 							mode: sap.m.ListMode.None,
-							items: [
-								new sap.m.GroupHeaderListItem ({
-									title: "Freshwater Office"
-								}),
-								new sap.m.ObjectListItem ({		
-									title: "Reception",
-									type: "Active",
-									number: "3",
-									numberUnit: "Devices",
-									attributes : [
-										new sap.m.ObjectAttribute ({
-											text: "link",
-											customContent : new sap.m.Link ({
-												text: "Toggle Room State"
-											})
-										}),
-										new sap.m.ObjectAttribute ({
-											text: "Status: On"
-										}),							
-									],
-									press : function () {
-										IomyRe.common.NavigationChangePage( "pDevice" , {} , false);
-									},
-								}),
-								new sap.m.ObjectListItem ({		
-									title: "Matthew's Office",
-									type: "Active",
-									number: "2",
-									numberUnit: "Devices",
-									attributes : [
-										new sap.m.ObjectAttribute ({
-											text: "link",
-											customContent : new sap.m.Link ({
-												text: "Toggle Room State"
-											})
-										}),
-										new sap.m.ObjectAttribute ({
-											text: "Status: On"
-										}),								
-									],
-									press : function () {
-										IomyRe.common.NavigationChangePage( "pDevice" , {} , false);
-									},
-								}),
-								new sap.m.ObjectListItem ({		
-									title: "Back Area",
-									type: "Active",
-									number: "5",
-									numberUnit: "Devices",
-									attributes : [
-										new sap.m.ObjectAttribute ({
-											text: "link",
-											customContent : new sap.m.Link ({
-												text: "Toggle Room State"
-											})
-										}),
-										new sap.m.ObjectAttribute ({
-											text: "Status: On"
-										}),								
-									],
-									press : function () {
-										IomyRe.common.NavigationChangePage( "pDevice" , {} , false);
-									},
-								}),
-								new sap.m.ObjectListItem ({		
-									title: "Kitchen",
-									type: "Active",
-									number: "2",
-									numberUnit: "Devices",
-									attributes : [
-										new sap.m.ObjectAttribute ({
-											text: "link",
-											customContent : new sap.m.Link ({
-												text: "Toggle Room State"
-											})
-										}),
-										new sap.m.ObjectAttribute ({
-											text: "Status: On"
-										}),							
-									],
-									press : function () {
-										IomyRe.common.NavigationChangePage( "pDevice" , {} , false);
-									},
-								}),
-							],
+							items: []
 						}).addStyleClass("DevicePage")
 					]
 				})

@@ -28,43 +28,68 @@ IomyRe.functions = new sap.ui.base.Object();
 $.extend(IomyRe.functions, {
     
     
-    createDeviceListData : function () {
+    createDeviceListData : function (mSettings) {
         var aaDeviceList            = {};
+        var iPremiseId              = 0;
+        var iRoomId                 = 0;
         
+        //--------------------------------------------------------------------//
+        // Look for any specified filters and apply them.
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined && mSettings !== null) {
+            
+            if (mSettings.filter !== undefined || mSettings.filter !== null) {
+                
+                if (mSettings.filter.premiseID) {
+                    iPremiseId = mSettings.filter.premiseID;
+                }
+                
+                if (mSettings.filter.roomID) {
+                    iRoomId = mSettings.filter.roomID;
+                }
+                
+            }
+            
+        }
+        
+        //--------------------------------------------------------------------//
+        // Construct the Device List using any filters specified.
+        //--------------------------------------------------------------------//
         $.each( IomyRe.common.ThingList, function( sIndex, mThing ) {
 
             //-- Check to make sure the Device is defined (Best to do this for each result from a foreach) --//
             if ( mThing!==undefined ) {
 
-                //--------------------------------------------//
-                //-- If Grouping isn't setup yet            --//
-                //--------------------------------------------//
-                if( aaDeviceList["thingType"+mThing.TypeId] === undefined ) {
-                    //-- Define the Grouping --//
-                    //me.aUIGroupingDataPerRoom[sDeviceGrouping] = {
-                    aaDeviceList["thingType"+mThing.TypeId] = {
-                        "Name": mThing.TypeName,        //-- Display the name of the Grouping --//
-                        "Prefix":"Dev",                //-- Prefix to make object have a unique Id --//
-                        "Devices":[]                //-- Array to store the devices in the Grouping --//
-                    };
-                }
+                if ((iPremiseId === 0 || iPremiseId == mThing.PremiseId) && (iRoomId === 0 || iRoomId == mThing.RoomId)) {
+                    //--------------------------------------------//
+                    //-- If Grouping isn't setup yet            --//
+                    //--------------------------------------------//
+                    if( aaDeviceList["thingType"+mThing.TypeId] === undefined ) {
+                        //-- Define the Grouping --//
+                        aaDeviceList["thingType"+mThing.TypeId] = {
+                            "Name": mThing.TypeName,        //-- Display the name of the Grouping --//
+                            "Prefix":"Dev",                 //-- Prefix to make object have a unique Id --//
+                            "Devices":[]                    //-- Array to store the devices in the Grouping --//
+                        };
+                    }
 
-                //--------------------------------------------//
-                //-- Add the Devices into the Grouping        --//
-                //--------------------------------------------//
-                aaDeviceList["thingType"+mThing.TypeId].Devices.push({
-                    "DeviceId":          mThing.Id,
-                    "DeviceName":        mThing.DisplayName,
-                    "DeviceTypeId":      mThing.TypeId,
-                    "DeviceTypeName":    mThing.TypeName,
-                    "DeviceStatus":      mThing.Status,
-                    "LinkId":            mThing.LinkId,
-                    "PermToggle":        mThing.PermToggle,
-                    "IOs":               mThing.IO,
-                    "RoomId":            mThing.RoomId,
-                    "PremiseId":         mThing.PremiseId,
-                    "UILastUpdate":      mThing.UILastUpdate
-                });
+                    //--------------------------------------------//
+                    //-- Add the Devices into the Grouping        --//
+                    //--------------------------------------------//
+                    aaDeviceList["thingType"+mThing.TypeId].Devices.push({
+                        "DeviceId":          mThing.Id,
+                        "DeviceName":        mThing.DisplayName,
+                        "DeviceTypeId":      mThing.TypeId,
+                        "DeviceTypeName":    mThing.TypeName,
+                        "DeviceStatus":      mThing.Status,
+                        "LinkId":            mThing.LinkId,
+                        "PermToggle":        mThing.PermToggle,
+                        "IOs":               mThing.IO,
+                        "RoomId":            mThing.RoomId,
+                        "PremiseId":         mThing.PremiseId,
+                        "UILastUpdate":      mThing.UILastUpdate
+                    });
+                }
             }
         });
         
@@ -368,6 +393,36 @@ $.extend(IomyRe.functions, {
         } catch (e) {
             $.sap.log.error("An error occurred in IomyRe.functions.getLinkTypeIDOfLink(): "+e.name+": "+e.message);
         }
+    },
+    
+    getNumberOfDevicesInPremise : function (iPremiseId) {
+        var mIDInfo = IomyRe.validation.isPremiseIDValid(iPremiseId);
+        var iCount  = 0;
+        
+        if (mIDInfo.bIsValid) {
+            $.each(IomyRe.common.ThingList, function (sI, mThing) {
+                if (iPremiseId == mThing.PremiseId) {
+                    iCount++;
+                }
+            });
+        }
+        
+        return iCount;
+    },
+    
+    getNumberOfDevicesInRoom : function (iRoomId) {
+        var mIDInfo = IomyRe.validation.isRoomIDValid(iRoomId);
+        var iCount  = 0;
+        
+        if (mIDInfo.bIsValid) {
+            $.each(IomyRe.common.ThingList, function (sI, mThing) {
+                if (iRoomId == mThing.RoomId) {
+                    iCount++;
+                }
+            });
+        }
+        
+        return iCount;
     },
     
     /**

@@ -53,17 +53,47 @@ $.extend(IomyRe.devices.motionsensor,{
     
     DevicePageID : "pMotionSensor",
     
-    CallAPI : function (iThingId, oTamperField, oLastMotionField) {
+    CallAPI : function (mSettings) {
         //--------------------------------------------------------------------//
         // Declare variables and import modules
         //--------------------------------------------------------------------//
         var me = this;
         var php = IomyRe.apiphp;
         var sUrl = php.APILocation("motionsensor");
-        var mData = {
-            "Mode" : "GetMotionData",
-            "ThingId" : iThingId
-        };
+        var mThingIdInfo;
+        var iThingId;
+        var fnSuccess;
+        var fnFail;
+        
+        if (mSettings !== undefined) {
+            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
+                mThingIdInfo = IomyRe.validation.isThingIDValid(mSettings.thingID);
+                
+                if (!mThingIdInfo.bIsValid) {
+                    throw new IllegalArgumentException(mThingIdInfo.aErrorMessages.join("\n"));
+                } else {
+                    iThingId = mSettings.thingID;
+                }
+                
+            } else {
+                throw new MissingArgumentException("Thing ID must be given.");
+            }
+            
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+            } else {
+                fnSuccess = function () {};
+            }
+            
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+            } else {
+                fnFail = function () {};
+            }
+            
+        } else {
+            throw new MissingSettingsMapException("Thing ID must be given.");
+        }
         
         //--------------------------------------------------------------------//
         // Indicate that the API is being loaded and send the AJAX request
@@ -73,7 +103,10 @@ $.extend(IomyRe.devices.motionsensor,{
         
         php.AjaxRequest({
             "url" : sUrl,
-            "data" : mData,
+            "data" : {
+                "Mode" : "GetMotionData",
+                "ThingId" : iThingId
+            },
             
             "onSuccess" : function (response, data) {
                 // Check the error condition.
@@ -87,29 +120,20 @@ $.extend(IomyRe.devices.motionsensor,{
                     var iUTS    = mResponseData.MostRecentMotion;
                     var bTamper = mResponseData.CurrentStatus.Tamper;
                     
-                    if (oLastMotionField !== undefined && oLastMotionField !== null) {
-                        oLastMotionField.setText(
-                            IomyRe.functions.getLengthOfTimePassed({
-                                "UTS" : iUTS
-                            })
-                        );
-                    }
-            
-                    if (oTamperField !== undefined && oTamperField !== null) {
-                        oTamperField.setText(bTamper === false ? "Secure" : "Not Secure");
-
-                        //--------------------------------------------------------//
-                        // If the device has detected possible tampering, then set
-                        // the text colour to red.
-                        //--------------------------------------------------------//
-                        if (bTamper === true) {
-                            oTamperField.addStyleClass("Text_red_13");
-                        }
-                    }
+                    
+                    var mHumanReadable = {
+                        "UTS" : IomyRe.functions.getLengthOfTimePassed({
+                            "UTS" : iUTS
+                        })
+                    };
+                    
+                    mResponseData.HumanReadable = mHumanReadable;
+                    
+                    fnSuccess(mResponseData);
+                    
+                } else {
+                    fnFail(data.ErrMesg);
                 }
-                
-                // Conclude the request callback
-                this.onComplete();
             },
             
             "onFail" : function (response) {
@@ -117,32 +141,7 @@ $.extend(IomyRe.devices.motionsensor,{
                 jQuery.sap.log.error("There was an error fetching information about the tamper status and how long since the last motion was detected:\n\n" + JSON.stringify(response));
                 
                 // Conclude the request callback
-                this.onComplete();
-            },
-            
-            "onComplete" : function () {
-                //------------------------------------------------------------//
-                // Decrement the OData Field count
-                //------------------------------------------------------------//
-//                console.log("====================================================================");
-//                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
-                jQuery.sap.log.debug("====================================================================");
-                jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
-                
-                me.bLoadingFieldsFromAPI = false;
-                
-//                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
-                jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
-                
-                //------------------------------------------------------------//
-                // If this is final OData request and the API has finished its
-                // call, reset the loading motion sensor OData fields flag, and
-                // reset the fields to fetch back to the default number.
-                //------------------------------------------------------------//
-                if (me.iODataFieldsToFetch === 0 && me.bWaitingToLoadAPI === false && me.bLoadingFieldsFromAPI === false) {
-                    me.bLoadingMotionSensorFields = false;
-                    me.iODataFieldsToFetch = 2;
-                }
+                fnFail(response.responseText);
             }
         });
     },
@@ -567,73 +566,25 @@ $.extend(IomyRe.devices.motionsensor,{
         return oUIObject;
     },
     
-    GetCommonUITaskList: function( Prefix, oViewScope, aDeviceData ) {
+    GetUITaskList: function( mSettings ) {
         //------------------------------------//
         //-- 1.0 - Initialise Variables        --//
         //------------------------------------//
+        var oModule         = this;
+        var aTasks          = { "High":[], "Low":[] };                    //-- ARRAY:            --//
         
-        var aTasks            = { "High":[], "Low":[] };                    //-- ARRAY:            --//
         
-        //------------------------------------//
-        //-- 2.0 - Fetch TASKS                --//
-        //------------------------------------//
-        if( aDeviceData.IOs!==undefined ) {
-            
-        } else {
-            //-- TODO: Write a error message --//
-            jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
-        }
+        aTasks.High.push({
+            "Type":"Function", 
+            "Execute": function () {
+                oModule.CallAPI({
+                    thingID     : mSettings.deviceData.DeviceId,
+                    onSuccess   : mSettings.onSuccess,
+                    onFail      : mSettings.onFail
+                });
+            }
+        });
+        
         return aTasks;
-    },
-    
-    GetCommonUITaskListForDeviceOverview: function( Prefix, oViewScope, aDeviceData ) {
-        //------------------------------------//
-        //-- 1.0 - Initialise Variables        --//
-        //------------------------------------//
-        //console.log(JSON.stringify(aDeviceData));
-        var aTasks            = { "High":[], "Low":[] };                    //-- ARRAY:            --//
-        
-        //------------------------------------//
-        //-- 2.0 - Fetch TASKS                --//
-        //------------------------------------//
-        if( aDeviceData.IOs!==undefined ) {
-            this.CallAPI(aDeviceData.DeviceId, null, oViewScope.byId( Prefix+"_LastMotion" ));
-        } else {
-            //-- TODO: Write a error message --//
-            jQuery.sap.log.error("Device "+aDeviceData.DeviceName+" has no IOs");
-        }
-        return aTasks;
-    },
-    
-    
-    GetObjectIdList: function( sPrefix, oViewScope, aDeviceData ) {
-        //------------------------------------//
-        //-- 1.0 - Initialise Variables        --//
-        //------------------------------------//
-        var aObjectIdList = [];
-        
-        
-        //------------------------------------//
-        //-- 2.0 - Fetch Definition names    --//
-        //------------------------------------//
-        
-        //-- TODO: These devices need to be in their own definition file --//
-        if( aDeviceData.DeviceTypeId===2 ) {
-            
-            aObjectIdList = [
-                sPrefix+"_Container",
-                sPrefix+"_Label",
-                sPrefix+"_DataContainer",
-                sPrefix+"_StatusContainer",
-                sPrefix+"_StatusToggle"
-            ];
-            
-        }
-        
-        
-        //------------------------------------//
-        //-- 9.0 - RETURN THE RESULTS        --//
-        //------------------------------------//
-        return aObjectIdList;
     }
 });

@@ -275,27 +275,65 @@ $.extend(IomyRe.devices,{
         }
 	},
     
-    GetUITaskList: function( Prefix, aDeviceData ) {
+    GetUITaskList: function( mSettings ) {
 		//------------------------------------//
 		//-- 1.0 - Initialise Variables		--//
 		//------------------------------------//
 		//console.log(JSON.stringify(aDeviceData));
 		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
+        
+        var bError          = false;
+        var aErrorMessages  = [];
+        
+        var fnAppendError = function (sErrMessage) {
+            bError          = true;
+            aErrorMessages  = sErrMessage;
+        };
+        
+//        mSettings.deviceData;
+//        mSettings.labelWidgetID;
+//        mSettings.onSuccess;
+//        mSettings.onFail;
+
+        if (mSettings !== undefined && mSettings !== null) {
+            
+            if (mSettings.deviceData === undefined || mSettings.deviceData === null) {
+                fnAppendError("Device information from the Thing List must be given.");
+            }
+            
+            if (mSettings.labelWidgetID === undefined || mSettings.labelWidgetID === null) {
+                fnAppendError("ID of the label widget should be given so that any data can be displayed.");
+            }
+            
+            if (bError) {
+                throw new MissingArgumentException(aErrorMessages.join("\n"));
+            }
+            
+        } else {
+            fnAppendError("Device information from the Thing List must be given.");
+            fnAppendError("ID of the label widget should be given so that any data can be displayed.");
+            
+            throw new MissingSettingsMapException(aErrorMessages.join("\n"));
+        }
 		
 		//------------------------------------//
 		//-- 2.0 - Fetch TASKS				--//
 		//------------------------------------//
         
         //-- Zigbee Netvox Smart Plug --//
-		if( aDeviceData.DeviceTypeId===2 ) {
-            if( aDeviceData.IOs!==undefined ) {
-                aTasks = IomyRe.devices.zigbeesmartplug.GetUITaskList( Prefix, aDeviceData );
-            } else {
-                //-- TODO: Write a error message --//
-                jQuery.sap.log.error("Device "+aDeviceData.DisplayName+" has no IOs");
+		if( mSettings.deviceData.IOs!==undefined ) {
+            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.zigbeesmartplug.ThingTypeId ) {
+                aTasks = IomyRe.devices.zigbeesmartplug.GetUITaskList(mSettings);
             }
             
-		}
+            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.weatherfeed.ThingTypeId ) {
+                aTasks = IomyRe.devices.weatherfeed.GetUITaskList(mSettings);
+            }
+            
+		} else {
+            //-- TODO: Write a error message --//
+            jQuery.sap.log.error("Device "+mSettings.deviceData.DisplayName+" has no IOs");
+        }
         
 		return aTasks;
 	}
