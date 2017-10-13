@@ -7,30 +7,24 @@ sap.ui.jsfragment("fragments.UserPremisePermissionDisplay", {
 		//--------------------------------------------//
 		var oFragContent = null;
 		
+		var oItemTemplatePremise = new sap.ui.layout.form.FormElement({
+			label : "{Name}",
+			fields: [
+				new sap.m.Text ({
+					//text:"Read/Write"
+					text: "{ path:'Id', formatter:'IomyRe.common.LookupPremisePermissionFromId'}"
+				})
+			]
+		});
+		
 		//--------------------------------------------//
 		//-- 5.0 - CREATE UI                        --//
 		//--------------------------------------------//
 		oFragContent = new sap.ui.layout.form.FormContainer({
-			formElements : [
-				new sap.ui.layout.form.FormElement({
-					label : "Freshwater Office",
-					fields: [
-						new sap.m.Text ({
-							text:"Read/Write"
-						})
-					]
-				}),
-				new sap.ui.layout.form.FormElement({
-					label : "Lee's House",
-					fields: [
-						new sap.m.Text ({
-							text:"Premise Management, Read/Write"
-						})
-					]
-				}),
-
-				
-			]
+			formElements : {
+				path: "/Premise",
+				template: oItemTemplatePremise
+			}
 		});	
 				
 				

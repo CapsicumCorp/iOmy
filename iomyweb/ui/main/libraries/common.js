@@ -52,7 +52,7 @@ $.extend(IomyRe.common,{
     //-- Arrays used to store the User's variables
     //--------------------------------------------//
     CurrentUsername         : null,
-    UserId                    : 0, //-- Not being updated when user logs in --//
+    UserId                    : 0, //-- Use UserInfo.UserId --//
     UserDisplayName            : null,
     
     UserVars : {},            //-- TODO: Check if this variable is still used anywhere --//
@@ -101,6 +101,7 @@ $.extend(IomyRe.common,{
     HubListLastUpdate:                new Date(),
     PremiseSelected:                [],
     
+    AllRoomsList:                     {},
     RoomsList:                        {},
     RoomsListLastUpdate:            new Date(),
     
@@ -897,7 +898,8 @@ $.extend(IomyRe.common,{
                 "TIMEZONE_LATITUDE",        "TIMEZONE_LONGITUDE",       "TIMEZONE_TZ",              
                 "USERSINFO_PK",             "USERSINFO_TITLE",          "USERSINFO_DISPLAYNAME",    
                 "USERS_USERNAME",           "USERSINFO_GIVENNAMES",      "USERSINFO_SURNAMES",
-                "USERSINFO_EMAIL",          "USERSINFO_PHONENUMBER",    "USERSGENDER_PK"
+                "USERSINFO_EMAIL",          "USERSINFO_PHONENUMBER",    "USERSGENDER_PK",
+                "USERS_PK"
             ],
             WhereClause: [],
             OrderByClause: [],
@@ -922,7 +924,8 @@ $.extend(IomyRe.common,{
                     "Surname":            aData[0].USERSINFO_SURNAMES,
                     "Email":              aData[0].USERSINFO_EMAIL,
                     "Phone":              aData[0].USERSINFO_PHONENUMBER,
-                    "Gender":             aData[0].USERSGENDER_PK 
+                    "Gender":             aData[0].USERSGENDER_PK,
+                    "UserId":             aData[0].USERS_PK
                 };
                 
                 //-- Update the Timestamp on when the UserInfo was last updated --//
@@ -1191,12 +1194,13 @@ $.extend(IomyRe.common,{
                                 IomyRe.common.RoomsList["_"+iPremiseId]["_"+iRoomId] = {};
                                 
                                 IomyRe.common.RoomsList["_"+iPremiseId]["_"+iRoomId] = aTemp;
+                                
+                                IomyRe.common.AllRoomsList["_"+iRoomId] = aTemp;
                             } else {
                                 $.sap.log.error("Invalid PremiseId or RoomId");
-                            }
-                            
+                            }  
                         }
-                    } 
+                    }
                     
                     //-- Update the Timestamp on when the RoomsList was last updated --//
                     me.RoomsListLastUpdate = new Date();
@@ -2308,6 +2312,59 @@ $.extend(IomyRe.common,{
         this.UserInfo       = {};
     },
     
+    LookupPremisePermissionFromId: function( iPremiseId ) {
+		if( iPremiseId>=1 ) {
+			var sPremiseCode = "_"+iPremiseId;
+			var aPremise     = IomyRe.common.PremiseList[sPremiseCode];
+			
+			var iPremiseWrite         = aPremise.PermWrite;
+            var iPremiseOwner         = aPremise.PermOwner;
+            var iPremiseRoomAdmin     = aPremise.PermRoomAdmin;
+            var sPermissionText       = "";
+            
+            if (iPremiseOwner === 1) {
+                sPermissionText = "Premise Owner";   
+            } else if (iPremiseRoomAdmin === 1) {
+                 sPermissionText = "Room Admin Access";
+            } else if (iPremiseWrite === 1) {
+                 sPermissionText = "Write Access";
+            } else {
+                 sPermissionText = "Read Only Access";
+            }
+            
+			return sPermissionText;
+		} else {
+			return false;
+		}
+	},
+    
+    LookupRoomPermissionFromId: function( iRoomId ) {
+		if( iRoomId>=1 ) {
+			var sRoomCode = "_"+iRoomId;
+			var aRoom     = IomyRe.common.AllRoomsList[sRoomCode];
+			
+			var iRoomRead              = aRoom.PermDeviceRead;             
+            var iRoomWrite             = aRoom.PermWrite;            
+            var iRoomStateToggle       = aRoom.PermStateToggle;
+            
+            if (iRoomRead === 0) {          
+                sPermissionText = "No Access";            
+            } else {
+                if(iRoomWrite === 1) {   
+                    sPermissionText = "Full Access";  
+                } else if (iRoomStateToggle === 1) { 
+                    sPermissionText = "Read / State Toggle";
+                } else {
+                    sPermissionText = "Read Only Access";
+                }
+            }
+            
+			return sPermissionText;
+		} else {
+			return false;
+		}
+	},
+    
     LookupRegionNameFromRegionId: function( iRegionId ) {
 		if( iRegionId>=1 ) {
 			var sRegionCode = "_"+iRegionId;
@@ -2343,7 +2400,6 @@ $.extend(IomyRe.common,{
 			return false;
 		}
 	},
-    
     
     //============================================//
     //== NAVIGATION FUNCTIONS                    ==//
@@ -2561,39 +2617,39 @@ $.extend(IomyRe.common,{
         var oTarget = oController.getView().byId( sFragmentTarget );
         
         try {
-            if( oTarget ) {
-                if( sTargetType === "FormContainer" ) {
+            switch(sTargetType) {
+                case "FormContainer":
                     //console.log("Add FormContainer");
                     oTarget.destroyFormContainers();
                     oTarget.addFormContainer( IomyRe.common.GetFormFragment( oController, sFragmentName) );
-                    return oTarget;
-                    
-                } else if (sTargetType === "Item") {
+                break;
+                //case "FormElement":
+                //    //console.log("Add FormElement");
+                //    oTarget.destroyFormElements();
+                //    oTarget.addFormElement( IomyRe.common.GetFormFragment( oController, sFragmentName) );
+                //break;
+                case "Item":
                     //console.log("Add Item");
                     oTarget.destroyItems();
                     oTarget.addItem( IomyRe.common.GetFormFragment( oController, sFragmentName) );
-                    return oTarget;
-                    
-                } else if (sTargetType === "Block") {
+                break;
+                case "Block":
                     //console.log("Add Block");
                     oTarget.destroyBlocks();
                     oTarget.addBlock( IomyRe.common.GetFormFragment( oController, sFragmentName) );
-                    return oTarget;
-                    
-                } else {
+                break;
+                default: 
                     //console.log("Add Content");
                     oTarget.removeAllContent();
                     oTarget.addContent( IomyRe.common.GetFormFragment( oController, sFragmentName) );
-                    return oTarget;
-                }
-            } else {
-                $.sap.log.error("ShowFormFragment: Critical error! with fragment target");
+                break;
             }
+            return oTarget;
         //-- TODO: Replace this with a better error message --//
         } catch(e1) {
             $.sap.log.error("ShowFormFragment: Critical Error "+e1.message);
             return false;
         }
-    }
-    
+        
+    } 
 });

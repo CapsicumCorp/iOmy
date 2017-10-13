@@ -7,75 +7,24 @@ sap.ui.jsfragment("fragments.UserRoomPermissionDisplay", {
 		//--------------------------------------------//
 		var oFragContent = null;
 		
+		var oItemTemplateRooms = new sap.ui.layout.form.FormElement({
+			label : "{RoomName}",
+			fields: [
+				new sap.m.Text ({
+					//text:"Read/Write"
+					text: "{ path:'RoomId', formatter:'IomyRe.common.LookupRoomPermissionFromId'}"
+				})
+			]
+		});
+		
 		//--------------------------------------------//
 		//-- 5.0 - CREATE UI                        --//
 		//--------------------------------------------//
 		oFragContent = new sap.ui.layout.form.FormContainer({
-			formElements : [
-				new sap.ui.layout.form.FormElement({
-					fields : [
-						new sap.m.Title ({
-							text:"Freshwater Office"
-						})
-					]
-				}),
-				new sap.ui.layout.form.FormElement({
-					label : "Office",
-					fields: [
-						new sap.m.Text ({
-							text:"Read/Write"
-						})
-					]
-				}),
-				new sap.ui.layout.form.FormElement({
-					label : "Master Bedroom",
-					fields: [
-						new sap.m.Text ({
-							text:"Device Management, Read/Write"
-						})
-					]
-				}),
-				new sap.ui.layout.form.FormElement({
-					label : "Lounge Room",
-					fields: [
-						new sap.m.Text ({
-							text:"Device Management, Read/Write"
-						})
-					]
-				}),
-				new sap.ui.layout.form.FormElement({
-					fields: [
-						new sap.m.Title ({
-							text:"Lee's House"
-						})
-					]
-				}),
-				new sap.ui.layout.form.FormElement({
-					label : "Office",
-					fields: [
-						new sap.m.Text ({
-							text:" Read/Write"
-						})
-					]
-				}),
-				new sap.ui.layout.form.FormElement({
-					label : "Master Bedroom",
-					fields: [
-						new sap.m.Text ({
-							text:"Device Management, Read/Write"
-						})
-					]
-				}),
-				new sap.ui.layout.form.FormElement({
-					label : "Lounge Room",
-					fields: [
-						new sap.m.Text ({
-							text:"Device Management, Read/Write"
-						})
-					]
-				}),
-				
-			]
+			formElements : {
+				path: "/Rooms",
+				template: oItemTemplateRooms
+			}
 		});	
 				
 				

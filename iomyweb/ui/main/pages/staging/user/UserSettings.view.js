@@ -215,34 +215,14 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 													new sap.m.Title ({
 														text: "Premise Permissions",
 													}),
-													new sap.m.ToolbarSpacer ({}),
-													new sap.m.Button ( oView.createId("PremPBlock_BtnEdit"), {
-														icon:    "sap-icon://edit",
-														type:    "Transparent",
-														press:   function() {
-															oController.ToggleButtonsAndView( oController, "EditPremPermissions" );
-														}
-													}),
-													new sap.m.Button( oView.createId("PremPBlock_BtnSave"), {
-														icon:    "sap-icon://save",
-														visible: false,
-														press:   function( oEvent ) {
-															//oController.UpdateValues( oController );
-															oController.ToggleButtonsAndView( oController, "ShowPremPermissions" );
-														}
-													}),
-													new sap.m.Button( oView.createId("PremPBlock_BtnCancel"), {
-														icon:    "sap-icon://cancel",
-														visible: false,
-														press:   function( oEvent ) {
-															//oController.RefreshModel( oController, {} );
-															oController.ToggleButtonsAndView( oController, "ShowPremPermissions" );
-														}
-													})
 												]
 											}).addStyleClass("MarBottom1d0Rem"),
 											formContainers : [
-											
+												new sap.ui.layout.form.FormContainer(oView.createId("PremPBlock_FormContainer"),{
+													formElements : [
+														
+													]
+												})
 											]
 										})
 									]									

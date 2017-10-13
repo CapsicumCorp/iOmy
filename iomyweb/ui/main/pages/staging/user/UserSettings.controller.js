@@ -46,6 +46,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 				
 				//-- Refresh Nav Buttons --//
 				//MyApp.common.NavigationRefreshButtons( oController );
+				IomyRe.common.SearchAllRooms();
 				
 				//-- Update the Model --//
 				oController.RefreshModel( oController, {} );
@@ -63,7 +64,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		});
 		
 	},
-	
+
 	RefreshModel: function( oController, oConfig ) {
 		//------------------------------------------------//
 		//-- Declare Variables                          --//
@@ -89,9 +90,11 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 				"Regions":               IomyRe.common.Regions,
 				"Languages":             IomyRe.common.Languages,
 				"Timezones":             IomyRe.common.Timezones,
-				"UserInfo":              aUserData 
+				"Premise":               IomyRe.common.PremiseList,
+				"Rooms":                 IomyRe.common.AllRoomsList,
+				"UserInfo":              aUserData
 			})
-		);
+		);	
 		
 		
 		//oController.UpdateVisibleInclusions( oController );
@@ -112,7 +115,8 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		//-- STEP 1 - Extract Values from the Model     --//
 		//------------------------------------------------//
 		var oCurrentFormData = oController.getView().getModel().getProperty("/UserInfo/");
-		var oTest = oController.getView().getModel();
+		//var oTest = oController.getView().getModel();
+		
 		//------------------------------------------------//
 		//-- STEP 2 - Check for Errors                  --//
 		//------------------------------------------------//
@@ -200,7 +204,8 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		//-- STEP 1 - Extract Values from the Model     --//
 		//------------------------------------------------//
 		var oCurrentFormData = oController.getView().getModel().getProperty("/UserInfo/");
-		var oTest = oController.getView().getModel();
+		//var oTest = oController.getView().getModel();
+		
 		//------------------------------------------------//
 		//-- STEP 2 - Check for Errors                  --//
 		//------------------------------------------------//
@@ -322,22 +327,9 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 				
 				case "ShowPremPermissions":
 					//-- Show Permissions --//
-					oView.byId("PremPBlock_BtnEdit").setVisible( true );
-					oView.byId("PremPBlock_BtnSave").setVisible( false );
-					oView.byId("PremPBlock_BtnCancel").setVisible( false );
 					IomyRe.forms.ToggleFormMode(oController, "PremPBlock_Form", false);
-					IomyRe.common.ShowFormFragment( oController, "UserPremisePermissionDisplay", "PremPBlock_Form", "FormContainer" );
+					IomyRe.common.ShowFormFragment(oController, "UserPremisePermissionDisplay", "PremPBlock_Form", "FormContainer");
 				break;
-				
-				case "EditPremPermissions":
-					//-- Edit Permissions --//
-					oView.byId("PremPBlock_BtnEdit").setVisible( false );
-					oView.byId("PremPBlock_BtnSave").setVisible( true );
-					oView.byId("PremPBlock_BtnCancel").setVisible( true );
-					IomyRe.forms.ToggleFormMode(oController, "PremPBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "UserPremisePermissionEdit", "PremPBlock_Form", "FormContainer" );
-				break;
-			
 				case "ShowRoomPermissions":
 					//-- Show Permissions --//
 					oView.byId("UserRoomPermissionsBlock_BtnEdit").setVisible( true );
