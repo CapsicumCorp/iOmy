@@ -110,7 +110,7 @@ $.extend(IomyRe.rules, {
             }
 			
 			try {
-				mHub = IomyRe.common.getHub(iHub);
+				mHub = IomyRe.common.HubList["_"+iHub];
 				
 				if (mHub.HubTypeId !== 2) {
 					fnAppendError("The given hub does not support device rules.");
@@ -151,7 +151,7 @@ $.extend(IomyRe.rules, {
             }
             
         } else {
-            throw new MissingSettingsMapException();
+            throw new MissingSettingsMapException("A Hub (hubID) must be specified.");
         }
         
         //--------------------------------------------------------------------//

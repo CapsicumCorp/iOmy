@@ -49,7 +49,9 @@ sap.ui.controller("pages.staging.RulesList", {
 				//oController.RefreshModel( oController, {} );
 				
 				//-- Check the parameters --//
-				oController.RefreshModel(oController, {} );
+                oController.LoadList();
+                
+				//oController.RefreshModel(oController, {} );
 				//-- Defines the Device Type --//
 				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 			}
@@ -57,37 +59,57 @@ sap.ui.controller("pages.staging.RulesList", {
 		});
 		
 	},
+    
+    LoadList : function () {
+        var oController = this;
+        var oView       = oController.getView();
+        
+        IomyRe.rules.loadRules({
+            hubID : 1,
+            
+            onSuccess : function () {
+                oController.RefreshModel(oController, {});
+            },
+            
+            onFail : function (sErrMessage) {
+                
+            }
+        });
+    },
+    
 	RefreshModel: function( oController, oConfig ) {
 		//------------------------------------------------//
 		//-- Declare Variables                          --//
 		//------------------------------------------------//
-		var oView            = oController.getView();
-		
+		var oView           = oController.getView();
+        var aaRulesList     = IomyRe.rules.RulesList;
+        var aRules          = [];
+        var mRule;
+        
+        //--------------------------------------------------------------------//
+		//-- Create the model-friendly data from the rules list             --//
+		//--------------------------------------------------------------------//
+        $.each(IomyRe.common.ThingList, function (sI, mThing) {
+            
+            if (mThing.TypeId == IomyRe.devices.zigbeesmartplug) {
+                mRule = aaRulesList[mThing.SerialNumber];
+                
+                aRules.push({
+                    "DeviceName": mThing.ThingName,
+                    "DeviceType": mThing.TypeName,
+                    "EventType" : "Off",
+                    "EventTime" : mRule.Offtime
+                });
+            }
+            
+        });
+        
 		//------------------------------------------------//
 		//-- Build and Bind Model to the View           --//
 		//------------------------------------------------//
 		oView.setModel( 
 			new sap.ui.model.json.JSONModel({
-				"RulesList":   [
-					{
-						"DeviceName": "Dining Room Lamp",
-						"DeviceType": "Zigbee Smart Plug",
-						"EventType" : "On",
-						"EventTime" : "29/09/2017 7:00 PM",
-					},
-					{
-						"DeviceName": "Kids TV",
-						"DeviceType": "Zigbee Smart Plug",
-						"EventType" : "Off",
-						"EventTime" : "29/09/2017 8:00 PM",
-					},
-					{
-						"DeviceName": "Dining Room Lamp",
-						"DeviceType": "Zigbee Smart Plug",
-						"EventType" : "Off",
-						"EventTime" : "29/09/2017 8:30 PM",
-					},
-				]
+				"RulesList":   aRules
 			})
 		);
 		
@@ -98,6 +120,6 @@ sap.ui.controller("pages.staging.RulesList", {
 			oConfig.onSuccess();
 		}
 		
-	},
+	}
 
 });

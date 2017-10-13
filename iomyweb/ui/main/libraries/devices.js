@@ -330,6 +330,10 @@ $.extend(IomyRe.devices,{
                 aTasks = IomyRe.devices.weatherfeed.GetUITaskList(mSettings);
             }
             
+            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.motionsensor.ThingTypeId ) {
+                aTasks = IomyRe.devices.motionsensor.GetUITaskList(mSettings);
+            }
+            
 		} else {
             //-- TODO: Write a error message --//
             jQuery.sap.log.error("Device "+mSettings.deviceData.DisplayName+" has no IOs");

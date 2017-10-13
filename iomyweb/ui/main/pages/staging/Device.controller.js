@@ -206,7 +206,24 @@ sap.ui.controller("pages.staging.Device", {
                                     new sap.m.ObjectAttribute ({
                                         text: "link",
                                         customContent : new sap.m.Link ({
-                                            text: "Record"
+                                            text: "View Stream",
+                                            press : function () {
+                                                try {
+                                                    IomyRe.devices.onvif.getStreamURL({
+                                                        ThingId : mDevice.DeviceId,
+
+                                                        onSuccess : function(sUrl) {
+                                                            window.open(sUrl);
+                                                        },
+
+                                                        onFail : function (response) {
+                                                            IomyRe.common.showError(response.responseText, "Couldn't load the stream");
+                                                        }
+                                                    });
+                                                } catch (ex) {
+                                                    IomyRe.common.showError(ex.message, "Couldn't load the stream");
+                                                }
+                                            }
                                         })
                                     })
                                 ]
@@ -226,12 +243,12 @@ sap.ui.controller("pages.staging.Device", {
                                 number: "Monitoring",
                                 numberUnit: "activity",
                                 attributes : [
-                                    new sap.m.ObjectAttribute ({
-                                        text: "link",
-                                        customContent : new sap.m.Link ({
-                                            text: "Take Screenshot"
-                                        })
-                                    }),
+//                                    new sap.m.ObjectAttribute ({
+//                                        text: "link",
+//                                        customContent : new sap.m.Link ({
+//                                            text: "Take Screenshot"
+//                                        })
+//                                    }),
                                     new sap.m.ObjectAttribute ({
                                         text: "link",
                                         customContent : new sap.m.Link ({
@@ -284,7 +301,7 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "",
+                                number: "Last Motion",
                                 numberUnit: "Loading...",
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
@@ -343,7 +360,9 @@ sap.ui.controller("pages.staging.Device", {
                     labelWidgetID : sPrefix
                 };
                 
-                //-- For certain devices extra information should be parsed to it. --//
+                //------------------------------------------------------------//
+                // For certain devices extra information should be parsed to it.
+                //------------------------------------------------------------//
                 if (IomyRe.devices.weatherfeed !== undefined) {
                     
                     //--------------------------------------------------------//
@@ -355,6 +374,7 @@ sap.ui.controller("pages.staging.Device", {
                             oView.byId(sPrefix).setNumber(data.Temperature.Value + data.Temperature.UomName);
                             
                             oView.byId("humidity"+aDevice.DeviceId).setText("Humidity: " + data.Humidity.Value + data.Humidity.UomName);
+                            oView.byId("outside"+aDevice.DeviceId).setText("Outside: " + data.Condition.Value);
                             
                             //-- Update the Last Ajax Request Date --//
                             oController.dLastAjaxUpdate    = new Date();
@@ -377,13 +397,12 @@ sap.ui.controller("pages.staging.Device", {
                 
                 if (IomyRe.devices.motionsensor !== undefined) {
                     //--------------------------------------------------------//
-                    // For Open Weather Map feeds, create functions to display
+                    // For motion sensors, create functions to display
                     // information on the device entry.
                     //--------------------------------------------------------//
                     if (aDevice.DeviceTypeId == IomyRe.devices.motionsensor.ThingTypeId) {
                         mTaskListSettings.onSuccess = function (data) {
-                            oView.byId(sPrefix).setNumber(data.HumanReadable.UTS);
-                            oView.byId(sPrefix).setNumberUnit("Since last motion");
+                            oView.byId(sPrefix).setNumberUnit(data.HumanReadable.UTS);
                             
                             //-- Update the Last Ajax Request Date --//
                             oController.dLastAjaxUpdate    = new Date();
@@ -394,9 +413,7 @@ sap.ui.controller("pages.staging.Device", {
                         mTaskListSettings.onFail = function (sErrMessage) {
                             $.sap.log.error(sErrMessage);
                             
-                            oView.byId(sPrefix).setNumber("N/A");
-                            
-                            oView.byId("humidity"+aDevice.DeviceId).setText("Failed to load data");
+                            oView.byId(sPrefix).setNumberUnit("N/A");
                             
                             //-- Recursively check for more Tasks --//
                             oController.RecursiveLoadAjaxData();
