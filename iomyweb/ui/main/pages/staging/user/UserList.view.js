@@ -71,7 +71,7 @@ sap.ui.jsview("pages.staging.user.UserList", {
 			type: "Transparent",
 			width: "100%",
 			press : function () {
-				IomyRe.common.NavigationChangePage( "pUserForm" , {"bPageType": true} , false);
+				IomyRe.common.NavigationChangePage( "pUserForm" , {"userID" : "{UserId}", "bPageType": true} , false);
 			}
 		})
 		

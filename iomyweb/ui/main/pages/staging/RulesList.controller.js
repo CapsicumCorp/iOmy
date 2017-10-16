@@ -85,6 +85,7 @@ sap.ui.controller("pages.staging.RulesList", {
         var aaRulesList     = IomyRe.rules.RulesList;
         var aRules          = [];
         var mRule;
+        var sSerialCode;
         
         //--------------------------------------------------------------------//
 		//-- Create the model-friendly data from the rules list             --//
@@ -92,7 +93,8 @@ sap.ui.controller("pages.staging.RulesList", {
         $.each(IomyRe.common.ThingList, function (sI, mThing) {
             
             if (mThing.TypeId == IomyRe.devices.zigbeesmartplug) {
-                mRule = aaRulesList[mThing.SerialNumber];
+                sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
+                mRule = aaRulesList[sSerialCode];
                 
                 aRules.push({
                     "DeviceName": mThing.ThingName,

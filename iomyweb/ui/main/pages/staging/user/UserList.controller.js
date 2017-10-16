@@ -51,7 +51,7 @@ sap.ui.controller("pages.staging.user.UserList", {
 				//oController.RefreshModel( oController, {} );
 				
 				//-- Check the parameters --//
-				oController.RefreshModel(oController, {} );
+				oController.GetListOfUsers();
 				//-- Defines the Device Type --//
 				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 			}
@@ -59,43 +59,80 @@ sap.ui.controller("pages.staging.user.UserList", {
 		});
 		
 	},
+    
+    GetListOfUsers : function() {
+        var oController = this;
+        var oView       = this.getView();
+        var sUrl        = IomyRe.apiphp.APILocation("users");
+        
+        IomyRe.apiphp.AjaxRequest({
+            url : sUrl,
+            data : {
+                "Mode" : "AdminUserList"
+            },
+            
+            onSuccess : function (responseType, data) {
+                try {
+                    if (data.Error) {
+                        $.sap.log.error(data.ErrMesg);
+                        
+                        IomyRe.common.showError(data.ErrMesg, "Error");
+                        
+                    } else {
+                        oController.RefreshModel(oController, {
+                            data : data.Data
+                        });
+                    }
+                } catch (e) {
+                    $.sap.log.error(e.name + ": " + e.message);
+                    IomyRe.common.showError(e.message, "Error (BUG)");
+                }
+            }
+        });
+        
+    },
+    
 	RefreshModel: function( oController, oConfig ) {
 		//------------------------------------------------//
 		//-- Declare Variables                          --//
 		//------------------------------------------------//
-		var oView            = oController.getView();
-		
-		//------------------------------------------------//
-		//-- Build and Bind Model to the View           --//
-		//------------------------------------------------//
-		oView.setModel( 
-			new sap.ui.model.json.JSONModel({
-				"UserList":   [
-					{
-						"Username": "Johnstone",
-						"FirstName": "John",
-						"LastName" : "Stone",
-						"DisplayName" : "John",
-						"Status" : "Enabled"
-					},
-					{
-						"Username": "Johnstone",
-						"FirstName": "Jane",
-						"LastName" : "Stone",
-						"DisplayName" : "Jane",
-						"Status" : "Disabled"
-					},
-				]
-			})
-		);
-		
-		//------------------------------------------------//
-		//-- Trigger the onSuccess Event                --//
-		//------------------------------------------------//
-		if( oConfig.onSuccess ) {
-			oConfig.onSuccess();
-		}
-		
+		var oView           = oController.getView();
+        var aUsers          = [];
+        
+        if (oConfig.data) {
+            
+            //------------------------------------------------//
+            //-- Create the user list for the model         --//
+            //------------------------------------------------//
+            for (var i = 0; i < oConfig.data.length; i++) {
+                aUsers.push({
+                    "UserId" : oConfig.data[i].UserId,
+                    "Username": oConfig.data[i].Username,
+                    "FirstName": oConfig.data[i].UserGivennames,
+                    "LastName" : oConfig.data[i].UserSurnames,
+                    "DisplayName" : oConfig.data[i].UserDisplayname,
+                    "Status" : oConfig.data[i].UserState === 1 ? "Enabled" : "Disabled"
+                });
+            }
+
+            //------------------------------------------------//
+            //-- Build and Bind Model to the View           --//
+            //------------------------------------------------//
+            oView.setModel( 
+                new sap.ui.model.json.JSONModel({
+                    "UserList": aUsers
+                })
+            );
+
+            //------------------------------------------------//
+            //-- Trigger the onSuccess Event                --//
+            //------------------------------------------------//
+            if( oConfig.onSuccess ) {
+                oConfig.onSuccess();
+            }
+        } else {
+            throw new MissingArgumentException("User data is required. This is obtained from the users API to list all users.");
+        }
 	},
 
 });
