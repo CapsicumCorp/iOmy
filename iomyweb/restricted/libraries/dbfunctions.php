@@ -979,8 +979,12 @@ function dbGetAllUsers() {
 		$sSQL .= "	`USERS_PK`, ";
 		$sSQL .= "	`USERS_USERSINFO_FK`, ";
 		$sSQL .= "	`USERS_USERNAME`, ";
-		$sSQL .= "	`USERS_STATE` ";
+		$sSQL .= "	`USERS_STATE`, ";
+		$sSQL .= "	`USERSINFO_GIVENNAMES`, ";
+		$sSQL .= "	`USERSINFO_SURNAMES`, ";
+		$sSQL .= "	`USERSINFO_DISPLAYNAME` ";
 		$sSQL .= "FROM `".$sCurrentSchema."`.`USERS` ";
+		$sSQL .= "INNER JOIN `".$sCurrentSchema."`.`USERSINFO` ON `USERS_USERSINFO_FK` = `USERSINFO_PK` ";
 		$sSQL .= "WHERE `USERS_STATE` >= 0 ";
 		
 		$aInputVals = array();
@@ -989,7 +993,10 @@ function dbGetAllUsers() {
 			array( "Name"=>"UserId",                        "type"=>"INT" ),
 			array( "Name"=>"UserInfoId",                    "type"=>"INT" ),
 			array( "Name"=>"Username",                      "type"=>"STR" ),
-			array( "Name"=>"UserState",                     "type"=>"INT" )
+			array( "Name"=>"UserState",                     "type"=>"INT" ),
+			array( "Name"=>"UserGivennames",                "type"=>"STR" ),
+			array( "Name"=>"UserSurnames",                  "type"=>"STR" ),
+			array( "Name"=>"UserDisplayname",               "type"=>"STR" )
 		);
 		
 		
