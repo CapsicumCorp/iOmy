@@ -46,7 +46,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 				
 				//-- Refresh Nav Buttons --//
 				//MyApp.common.NavigationRefreshButtons( oController );
-				IomyRe.common.SearchAllRooms();
+				
 				
 				//-- Update the Model --//
 				oController.RefreshModel( oController, {} );
