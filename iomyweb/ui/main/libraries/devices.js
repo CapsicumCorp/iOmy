@@ -64,22 +64,63 @@ $.extend(IomyRe.devices,{
         return sStatus;
     },
     
-    ToggleDeviceStatus : function (iThingId) {
-        // TODO: Work out what to do with this!
-        if (iThingId > 0) {
-            var sUrl = IomyRe.apiphp.APILocation("statechange");
-            
-            IomyRe.apiphp.AjaxRequest({
-                url: sUrl,
-                data : { "Mode" : "ThingToggleStatus", "Id" : iThingId },
-                
-                
-                
-            });
-        } else {
-            //IomyRe.common.ThingList["_"+iThingId].Status = iState;
-        }
+    RunSwitch : function (mSettings) {
+        var mThingIdInfo;
+        var iThingId;
+        var fnSuccess;
+        var fnFail;
         
+        if (mSettings !== undefined) {
+            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
+                mThingIdInfo = IomyRe.validation.isThingIDValid(mSettings.thingID);
+                
+                if (!mThingIdInfo.bIsValid) {
+                    throw new IllegalArgumentException(mThingIdInfo.aErrorMessages.join("\n"));
+                } else {
+                    iThingId = mSettings.thingID;
+                }
+                
+            } else {
+                throw new MissingArgumentException("Thing ID must be given.");
+            }
+            
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+            } else {
+                fnSuccess = function () {};
+            }
+            
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+            } else {
+                fnFail = function () {};
+            }
+            
+        } else {
+            throw new MissingSettingsMapException("Thing ID must be given.");
+        }
+
+        //-- AJAX --//
+        IomyRe.apiphp.AjaxRequest({
+            url: IomyRe.apiphp.APILocation("statechange"),
+            type: "POST",
+            data: { 
+                "Mode":"ThingToggleStatus", 
+                "Id": iThingId
+            },
+            onFail : function(response) {
+                
+                fnFail(response.responseText);
+                
+            },
+            onSuccess : function( sExpectedDataType, aAjaxData ) {
+                if( aAjaxData.ThingStatus!==undefined && aAjaxData.ThingStatus!==null ) {
+                    IomyRe.common.ThingList["_"+iThingId].Status = aAjaxData.ThingStatus;
+                }
+                
+                fnSuccess(IomyRe.common.ThingList["_"+iThingId].Status);
+            }
+        });
     },
     
     /**

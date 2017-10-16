@@ -142,10 +142,17 @@ sap.ui.controller("pages.staging.Device", {
                                     new sap.m.ObjectAttribute ({
                                         text: "link",
                                         customContent : new sap.m.Link ({
-                                            text: "Toggle State"
+                                            text: "Toggle State",
+                                            press : function () {
+                                                oController.RunSwitch({
+                                                    "thingID" : mDevice.DeviceId,
+                                                    "switchWidget" : this,
+                                                    "statusAttribute" : oView.byId("deviceStatus"+mDevice.DeviceId)
+                                                });
+                                            }
                                         })
                                     }),
-                                    new sap.m.ObjectAttribute ({
+                                    new sap.m.ObjectAttribute (oView.createId("deviceStatus"+mDevice.DeviceId), {
                                         text: "Status: "+(mDevice.DeviceStatus == 1 ? "On" : "Off")
                                     })
                                 ],
@@ -171,12 +178,19 @@ sap.ui.controller("pages.staging.Device", {
                                     new sap.m.ObjectAttribute ({
                                         text: "link",
                                         customContent : new sap.m.Link ({
-                                            text: "Toggle State"
+                                            text: "Toggle State",
+                                            press : function () {
+                                                oController.RunSwitch({
+                                                    "thingID" : mDevice.DeviceId,
+                                                    "switchWidget" : this,
+                                                    "statusAttribute" : oView.byId("deviceStatus"+mDevice.DeviceId)
+                                                });
+                                            }
                                         })
                                     }),
-                                    new sap.m.ObjectAttribute ({
+                                    new sap.m.ObjectAttribute (oView.createId("deviceStatus"+mDevice.DeviceId), {
                                         text: "Status: "+(mDevice.DeviceStatus == 1 ? "On" : "Off")
-                                    }),
+                                    })
                                 ],
                                 press : function () {
                                     IomyRe.common.NavigationChangePage( "pRGBlight" , {} , false);
@@ -336,6 +350,68 @@ sap.ui.controller("pages.staging.Device", {
         });
         
         
+    },
+    
+    RunSwitch : function (mSettings) {
+        var mThingIdInfo;
+        var oCallingWidget;
+        var oStatusAttribute;
+        var iThingId;
+        
+        if (mSettings !== undefined) {
+            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
+                mThingIdInfo = IomyRe.validation.isThingIDValid(mSettings.thingID);
+                
+                if (!mThingIdInfo.bIsValid) {
+                    throw new IllegalArgumentException(mThingIdInfo.aErrorMessages.join("\n"));
+                } else {
+                    iThingId = mSettings.thingID;
+                }
+                
+            } else {
+                throw new MissingArgumentException("Thing ID must be given.");
+            }
+            
+            if (mSettings.switchWidget !== undefined && mSettings.switchWidget !== null) {
+                oCallingWidget = mSettings.switchWidget;
+            } else {
+                throw new MissingArgumentException("Switch status attribute must be given.");
+            }
+            
+            if (mSettings.statusAttribute !== undefined && mSettings.statusAttribute !== null) {
+                oStatusAttribute = mSettings.statusAttribute;
+            } else {
+                throw new MissingArgumentException("Switch status attribute must be given.");
+            }
+            
+        } else {
+            throw new MissingSettingsMapException("Thing ID must be given.\nSwitch status attribute must be given.");
+        }
+        
+        oCallingWidget.setEnabled(false);
+        
+        IomyRe.devices.RunSwitch({
+            thingID : iThingId,
+            
+            onSuccess : function (iStatus) {
+                if (iStatus === 0) {
+                    oStatusAttribute.setText("Status: Off");
+                } else if (iStatus === 1) {
+                    oStatusAttribute.setText("Status: On");
+                }
+                
+                oCallingWidget.setEnabled(true);
+            },
+            
+            onFail : function (sErrMessage) {
+                IomyRe.common.showError(sErrMessage, "Error",
+                    function () {
+                        oStatusAttribute.setText( "Status: "+(IomyRe.common.ThingList["_"+iThingId].Status === 1 ? "On" : "Off") );
+                        oCallingWidget.setEnabled(true);
+                    }
+                );
+            }
+        });
     },
     
     RefreshAjaxDataForUI: function() {
