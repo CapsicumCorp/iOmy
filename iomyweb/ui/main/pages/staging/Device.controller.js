@@ -157,7 +157,7 @@ sap.ui.controller("pages.staging.Device", {
                                     })
                                 ],
                                 press : function () {
-                                    IomyRe.common.NavigationChangePage( "pTile" , {} , false);
+                                    IomyRe.common.NavigationChangePage( "pTile" , { "ThingId": mDevice.DeviceId } , false);
                                 }
                             })
                         );
@@ -193,7 +193,7 @@ sap.ui.controller("pages.staging.Device", {
                                     })
                                 ],
                                 press : function () {
-                                    IomyRe.common.NavigationChangePage( "pRGBlight" , {} , false);
+                                    IomyRe.common.NavigationChangePage( "pRGBlight" , { "ThingId": mDevice.DeviceId } , false);
                                 }
                             })
                         );
@@ -352,12 +352,26 @@ sap.ui.controller("pages.staging.Device", {
         
     },
     
+    /**
+     * Calls the API to turn a given device (thingID) on or off.
+     * 
+     * The map must contain these parameters:
+     * 
+     * thingID:         ID of the device to switch on or off.
+     * switchWidget:    Link or button that called this function.
+     * statusAttribute: A sap.m.ObjectAttribute instance that shows the status.
+     * 
+     * @param {type} mSettings
+     */
     RunSwitch : function (mSettings) {
         var mThingIdInfo;
         var oCallingWidget;
         var oStatusAttribute;
         var iThingId;
         
+        //--------------------------------------------------------------------//
+        // Fetch the Thing ID, switch button, and the status attribute widget.
+        //--------------------------------------------------------------------//
         if (mSettings !== undefined) {
             if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
                 mThingIdInfo = IomyRe.validation.isThingIDValid(mSettings.thingID);
@@ -388,6 +402,10 @@ sap.ui.controller("pages.staging.Device", {
             throw new MissingSettingsMapException("Thing ID must be given.\nSwitch status attribute must be given.");
         }
         
+        
+        //--------------------------------------------------------------------//
+        // Disable the calling widget and toggle the on/off status.
+        //--------------------------------------------------------------------//
         oCallingWidget.setEnabled(false);
         
         IomyRe.devices.RunSwitch({

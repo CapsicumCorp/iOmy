@@ -64,12 +64,28 @@ $.extend(IomyRe.devices,{
         return sStatus;
     },
     
+    /**
+     * Turns a device on or off. The settings map takes the following
+     * required parameters:
+     * 
+     * thingID:         ID of the device to switch on or off.
+     * 
+     * Optional Parameters:
+     * 
+     * onSuccess:       Function to run if successful.
+     * onFail:          Function to run after an error occurs.
+     * 
+     * @param {type} mSettings          The parameters
+     */
     RunSwitch : function (mSettings) {
         var mThingIdInfo;
         var iThingId;
         var fnSuccess;
         var fnFail;
         
+        //--------------------------------------------------------------------//
+        // Fetch the Thing ID and the onSuccess and onFail callbacks.
+        //--------------------------------------------------------------------//
         if (mSettings !== undefined) {
             if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
                 mThingIdInfo = IomyRe.validation.isThingIDValid(mSettings.thingID);
@@ -100,7 +116,9 @@ $.extend(IomyRe.devices,{
             throw new MissingSettingsMapException("Thing ID must be given.");
         }
 
-        //-- AJAX --//
+        //--------------------------------------------------------------------//
+        // Run the AJAX request to switch on or off.
+        //--------------------------------------------------------------------//
         IomyRe.apiphp.AjaxRequest({
             url: IomyRe.apiphp.APILocation("statechange"),
             type: "POST",
@@ -114,11 +132,15 @@ $.extend(IomyRe.devices,{
                 
             },
             onSuccess : function( sExpectedDataType, aAjaxData ) {
-                if( aAjaxData.ThingStatus!==undefined && aAjaxData.ThingStatus!==null ) {
-                    IomyRe.common.ThingList["_"+iThingId].Status = aAjaxData.ThingStatus;
+                if (aAjaxData.Error !== true) {
+                    if( aAjaxData.ThingStatus!==undefined && aAjaxData.ThingStatus!==null ) {
+                        IomyRe.common.ThingList["_"+iThingId].Status = aAjaxData.ThingStatus;
+                    }
+
+                    fnSuccess(IomyRe.common.ThingList["_"+iThingId].Status);
+                } else {
+                    fnFail(aAjaxData.ErrMesg);
                 }
-                
-                fnSuccess(IomyRe.common.ThingList["_"+iThingId].Status);
             }
         });
     },
