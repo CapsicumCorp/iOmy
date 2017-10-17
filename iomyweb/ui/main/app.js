@@ -48,6 +48,13 @@ $.sap.require("IomyRe.rules");
 $.sap.registerModulePath('IomyRe.validation', sModuleInitialBuildLocation+'libraries/validation');
 $.sap.require("IomyRe.validation");
 
+//----------------------------------------//
+//-- 1.2 - Optional Libraries           --//
+//----------------------------------------//
+$.sap.registerModulePath('IomyRe.graph_jqplot', sModuleInitialBuildLocation+'libraries/graph_jqplot');
+
+
+
 
 //================================================//
 //== 2.0 - INITIALISE APPLICATION				==//
@@ -109,9 +116,9 @@ var aPages = [
 	},
 	{
 		"Id":			"pTile",
-		"Location":		"pages.staging.Tile",
+		"Location":		"pages.staging.device.IOTiles",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.Tile\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.device.IOTiles\" Page!\n"
 	},
 	{
 		"Id":			"pPremise",

@@ -462,6 +462,19 @@ $.extend(IomyRe.apiphp,{
 									//-- Run the handle403APIError function --//
 		                            IomyRe.apiphp.handle403APIError(aConfig);
 									
+									
+								//------------------------------------------------------------------------//
+								//-- 2.2.F - HTTP 520 STATUS CODE: CORRUPTED USER DATA                  --//
+								//------------------------------------------------------------------------//
+								} else if( err.status=="520" ) {
+									//-- Flag that we shouldn't retry the ajax request --// 
+									this.bApiComplete = true;
+									
+									//-- Flag that the user isn't currently logged in --//
+									IomyRe.common.bUserCurrentlyLoggedIn = false;
+									
+									IomyRe.common.showError("HTTP 520 Status Code: Corrupted User Data! Please contact the administrator to ");
+									
 								//------------------------------------------------------------------------//
 								//-- 2.2.F - UNEXPECTED STATUS CODE:                                    --//
 								//------------------------------------------------------------------------//
