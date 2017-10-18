@@ -62,33 +62,65 @@ sap.ui.controller("pages.staging.user.UserList", {
     
     GetListOfUsers : function() {
         var oController = this;
-        var oView       = this.getView();
-        var sUrl        = IomyRe.apiphp.APILocation("users");
-        
-        IomyRe.apiphp.AjaxRequest({
-            url : sUrl,
-            data : {
-                "Mode" : "AdminUserList"
-            },
-            
-            onSuccess : function (responseType, data) {
-                try {
-                    if (data.Error) {
-                        $.sap.log.error(data.ErrMesg);
+        var bError      = false;
+        var sErrMesg    = "";
+
+        //------------------------------------------------//
+        //-- STEP 1 - Fetch User List from Database     --//
+        //------------------------------------------------//
+        try {
+            if( bError===false ) {
+                IomyRe.apiphp.AjaxRequest({
+                    url:       IomyRe.apiphp.APILocation("users"),
+                    data:      {
+                        "Mode":              "AdminUserList",
+                    },
+                    
+                    onSuccess: function ( sType, aData ) {
+                        var aConfig = this;
                         
-                        IomyRe.common.showError(data.ErrMesg, "Error");
-                        
-                    } else {
-                        oController.RefreshModel(oController, {
-                            data : data.Data
-                        });
+                        try {
+                            if( sType==="JSON" && aData.Error===false ) {
+                                try {
+                                    if(typeof aData.Data!=="undefined") {
+                                        IomyRe.common.UserList = {};
+                                        
+                                        for (var i = 0; i < aData.Data.length; i++) {
+                                            IomyRe.common.UserList["_"+aData.Data.UserId] = aData.Data;
+                                        }
+                                        //------------------------------------------------//
+                                        //-- STEP 2 - Update the Controller Model       --//
+                                        //------------------------------------------------//
+                                        oController.RefreshModel( oController, { data : aData.Data } );
+                                        //-- END RefreshControllerModel (STEP 2) --//
+                                    } else {
+                                        jQuery.sap.log.error("Error with the 'aData.Data' in 'GetListOfUsers' function ");
+                                    }
+                                } catch( e3 ) {
+                                    jQuery.sap.log.error("Error with a bug in the code that processes the User List data! "+e3.message);
+                                }
+                            } else {
+                                //-- Run the fail event
+                                if( aConfig.onFail ) {
+                                    aConfig.onFail();
+                                }
+                                
+                                jQuery.sap.log.error("Error with a bug in the 'AdminUserList' successful API result! Expecting JSON. Received "+sType);
+                            }
+                        } catch( e2 ) {
+                            jQuery.sap.log.error("Error with the 'AdminUserList' success in the 'UserList' controller! "+e2.message);
+                        }
+                    },
+                    onFail: function (response) {
+                        jQuery.sap.log.error("Error with the 'AdminUserList' API Request! "+response.responseText);
                     }
-                } catch (e) {
-                    $.sap.log.error(e.name + ": " + e.message);
-                    IomyRe.common.showError(e.message, "Error (BUG)");
-                }
+                });
+            } else {
+                IomyRe.common.showError( sErrMesg, "Error" );
             }
-        });
+        } catch( e1 ) {
+            jQuery.sap.log.error("Error with the 'UserList' in the 'UserList' controller! "+e1.message);
+        }
         
     },
     
@@ -133,6 +165,6 @@ sap.ui.controller("pages.staging.user.UserList", {
         } else {
             throw new MissingArgumentException("User data is required. This is obtained from the users API to list all users.");
         }
-	},
+	}
 
 });

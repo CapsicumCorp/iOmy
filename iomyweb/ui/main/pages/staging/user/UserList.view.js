@@ -70,15 +70,9 @@ sap.ui.jsview("pages.staging.user.UserList", {
 			text: "Edit",
 			type: "Transparent",
 			width: "100%",
-			press : function () {
+			press : function (oEvent) {
 				IomyRe.common.NavigationChangePage( "pUserForm" , {
-                    "userID" : "{UserId}", 
-                    "userName" : "{Username}",
-                    "firstName" : "{FirstName}",
-                    "lastName" : "{LastName}",
-                    "displayName" : "{DisplayName}",
-                    "status" : "{Status}",
-                    
+                    "userID" : oEvent.getSource().getBindingContext().getProperty("UserId"),
                     "bPageType": true
                 } , false);
 			}

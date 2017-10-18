@@ -58,6 +58,7 @@ $.extend(IomyRe.common,{
     UserVars : {},            //-- TODO: Check if this variable is still used anywhere --//
     
     UserInfo:               {},
+    UserList:               {},
     UserInfoLastUpdate:     new Date(),
     
     UserAppVariables: {
