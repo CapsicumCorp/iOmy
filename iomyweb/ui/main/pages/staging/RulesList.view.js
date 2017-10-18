@@ -69,7 +69,7 @@ sap.ui.jsview("pages.staging.RulesList", {
 			/*press : function () {
 				IomyRe.common.NavigationChangePage( "pUserList" , {"bPageType": true} , false);
 			}*/
-		})
+		});
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "Rules List",
@@ -102,7 +102,7 @@ sap.ui.jsview("pages.staging.RulesList", {
 								new sap.m.ToolbarSpacer({}),
 								new sap.m.ToolbarSpacer({}),
 								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
+								new sap.m.ToolbarSpacer({})
 							]
 						})
 					],
@@ -137,8 +137,8 @@ sap.ui.jsview("pages.staging.RulesList", {
 								text:"Edit" 
 							}),
 							template : oColEdit
-						}),
-					],
+						})
+					]
 				})
 			]
 		}).addStyleClass("MainBackground");

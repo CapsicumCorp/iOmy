@@ -565,8 +565,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                         IomyRe.common.RefreshCoreVariables({
                             onSuccess : function () {
                                 IomyRe.common.showMessage({
-                                    text : "Join completed. Your devices should appear in 5 minutes.",
-                                    view : oView.getView()
+                                    text : "Join completed. Your devices should appear within 5 minutes.",
+                                    view : oView
                                 });
                             }
                         });

@@ -92,16 +92,25 @@ sap.ui.controller("pages.staging.RulesList", {
 		//--------------------------------------------------------------------//
         $.each(IomyRe.common.ThingList, function (sI, mThing) {
             
-            if (mThing.TypeId == IomyRe.devices.zigbeesmartplug) {
+            if (mThing.TypeId == IomyRe.devices.zigbeesmartplug.ThingTypeId) {
                 sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
                 mRule = aaRulesList[sSerialCode];
                 
-                aRules.push({
-                    "DeviceName": mThing.ThingName,
-                    "DeviceType": mThing.TypeName,
-                    "EventType" : "Off",
-                    "EventTime" : mRule.Offtime
-                });
+                if (mRule !== undefined && mRule !== null) {
+                    aRules.push({
+                        "DeviceName": mThing.ThingName,
+                        "DeviceType": mThing.TypeName,
+                        "EventType" : "On",
+                        "EventTime" : IomyRe.functions.getTimestampString(IomyRe.time.GetDateFromMilitaryTime( mRule.Ontime ), "", true, false)
+                    });
+
+                    aRules.push({
+                        "DeviceName": mThing.ThingName,
+                        "DeviceType": mThing.TypeName,
+                        "EventType" : "Off",
+                        "EventTime" : IomyRe.functions.getTimestampString(IomyRe.time.GetDateFromMilitaryTime( mRule.Offtime ), "", true, false)
+                    });
+                }
             }
             
         });

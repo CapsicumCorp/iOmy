@@ -150,72 +150,6 @@ $.extend(IomyRe.functions, {
      * 
      * @returns {Object}        Data structure
      */
-    getNewDeviceOptions : function () {
-        //--------------------------------------------------------------------//
-        // Variables
-        //--------------------------------------------------------------------//
-        
-        //-- List --//
-        var structOptions        = {};
-        
-        //-- Import core variables --//
-        var aDeviceList;
-        var aDeviceTypeList;
-        
-        //--------------------------------------------------------------------//
-        // Get the core variables for this function
-        //--------------------------------------------------------------------//
-        aDeviceList        = IomyRe.common.LinkList;
-        aDeviceTypeList    = IomyRe.common.LinkTypeList;
-        
-        //--------------------------------------------------------------------//
-        // Begin Constructing the structure by adding device types.
-        //--------------------------------------------------------------------//
-        $.each(aDeviceTypeList, function (sI, mDeviceType) {
-            // TODO: Place all of these options in alphabetical order.
-            if (mDeviceType.LinkTypeId === IomyRe.devices.zigbeesmartplug.LinkTypeId ||
-                mDeviceType.LinkTypeId === IomyRe.devices.onvif.LinkTypeId ||
-                mDeviceType.LinkTypeId === IomyRe.devices.philipshue.LinkTypeId ||
-                mDeviceType.LinkTypeId === IomyRe.devices.weatherfeed.LinkTypeId ||
-                mDeviceType.LinkTypeId === IomyRe.devices.ipcamera.LinkTypeId)
-            {
-                structOptions["linkType"+mDeviceType.LinkTypeId] = {
-                    "Id"        : mDeviceType.LinkTypeId,
-                    "Name"        : mDeviceType.LinkTypeName,
-                    "Type"        : "link"
-                };
-            }
-            
-        });
-        
-        //--------------------------------------------------------------------//
-        // Add the onvif camera option
-        //--------------------------------------------------------------------//
-        structOptions["thingType"+IomyRe.devices.onvif.ThingTypeId] = {
-            "Id"        : IomyRe.devices.onvif.ThingTypeId,
-            "Name"        : "Onvif Stream",
-            "Type"        : "thing"
-        };
-        
-        return structOptions;
-    },
-    
-    /**
-     * Creates a JSON structure that contains a list of device types for users
-     * to select from.
-     * 
-     * Example:
-     * 
-     * {
-     *     "type2" : {
-     *         "Id" : 2,
-     *         "Name" : "New Zigbee Dongle",
-     *         "Type" : "type"
-     *     },
-     * }
-     * 
-     * @returns {Object}        Data structure
-     */
     getDeviceFormJSON : function () {
         //--------------------------------------------------------------------//
         // Variables
@@ -528,6 +462,72 @@ $.extend(IomyRe.functions, {
         } catch (e) {
             $.sap.log.error("An error occurred in IomyRe.functions.getLinkTypeIDOfLink(): "+e.name+": "+e.message);
         }
+    },
+    
+    /**
+     * Creates a JSON structure that contains a list of device types for users
+     * to select from.
+     * 
+     * Example:
+     * 
+     * {
+     *     "type2" : {
+     *         "Id" : 2,
+     *         "Name" : "New Zigbee Dongle",
+     *         "Type" : "type"
+     *     },
+     * }
+     * 
+     * @returns {Object}        Data structure
+     */
+    getNewDeviceOptions : function () {
+        //--------------------------------------------------------------------//
+        // Variables
+        //--------------------------------------------------------------------//
+        
+        //-- List --//
+        var structOptions        = {};
+        
+        //-- Import core variables --//
+        var aDeviceList;
+        var aDeviceTypeList;
+        
+        //--------------------------------------------------------------------//
+        // Get the core variables for this function
+        //--------------------------------------------------------------------//
+        aDeviceList        = IomyRe.common.LinkList;
+        aDeviceTypeList    = IomyRe.common.LinkTypeList;
+        
+        //--------------------------------------------------------------------//
+        // Begin Constructing the structure by adding device types.
+        //--------------------------------------------------------------------//
+        $.each(aDeviceTypeList, function (sI, mDeviceType) {
+            // TODO: Place all of these options in alphabetical order.
+            if (mDeviceType.LinkTypeId === IomyRe.devices.zigbeesmartplug.LinkTypeId ||
+                mDeviceType.LinkTypeId === IomyRe.devices.onvif.LinkTypeId ||
+                mDeviceType.LinkTypeId === IomyRe.devices.philipshue.LinkTypeId ||
+                mDeviceType.LinkTypeId === IomyRe.devices.weatherfeed.LinkTypeId ||
+                mDeviceType.LinkTypeId === IomyRe.devices.ipcamera.LinkTypeId)
+            {
+                structOptions["linkType"+mDeviceType.LinkTypeId] = {
+                    "Id"        : mDeviceType.LinkTypeId,
+                    "Name"        : mDeviceType.LinkTypeName,
+                    "Type"        : "link"
+                };
+            }
+            
+        });
+        
+        //--------------------------------------------------------------------//
+        // Add the onvif camera option
+        //--------------------------------------------------------------------//
+        structOptions["thingType"+IomyRe.devices.onvif.ThingTypeId] = {
+            "Id"        : IomyRe.devices.onvif.ThingTypeId,
+            "Name"        : "Onvif Stream",
+            "Type"        : "thing"
+        };
+        
+        return structOptions;
     },
     
     getNumberOfDevicesInPremise : function (iPremiseId) {

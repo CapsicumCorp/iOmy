@@ -71,9 +71,18 @@ sap.ui.jsview("pages.staging.user.UserList", {
 			type: "Transparent",
 			width: "100%",
 			press : function () {
-				IomyRe.common.NavigationChangePage( "pUserForm" , {"userID" : "{UserId}", "bPageType": true} , false);
+				IomyRe.common.NavigationChangePage( "pUserForm" , {
+                    "userID" : "{UserId}", 
+                    "userName" : "{Username}",
+                    "firstName" : "{FirstName}",
+                    "lastName" : "{LastName}",
+                    "displayName" : "{DisplayName}",
+                    "status" : "{Status}",
+                    
+                    "bPageType": true
+                } , false);
 			}
-		})
+		});
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "User Settings",
