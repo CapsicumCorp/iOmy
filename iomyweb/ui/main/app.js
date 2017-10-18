@@ -206,6 +206,12 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.graphs.PieGraph\" Page!\n"
 	},
+	{
+		"Id":			"pRoomForm",
+		"Location":		"pages.staging.room.RoomForm",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.room.RoomForm\" Page!\n"
+	},
 
 ];
 

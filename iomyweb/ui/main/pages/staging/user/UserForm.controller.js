@@ -25,7 +25,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 sap.ui.controller("pages.staging.user.UserForm", {
 	aFormFragments: 	{},
 	bEditable: false,
-	
+	userID : null,
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
@@ -39,15 +39,17 @@ sap.ui.controller("pages.staging.user.UserForm", {
 		oView.addEventDelegate({
 
 			onBeforeShow: function ( oEvent ) {
+				//-- Store the page type (Insert / Edit) --//
 				oController.bEditable = oEvent.data.bPageType;
-				//-- Store the Current Id --//
+				
+				//-- Store the Users Id --//
+				oController.iUserId = oEvent.data.userID;
 				
 				//-- Refresh Nav Buttons --//
 				//MyApp.common.NavigationRefreshButtons( oController );
 				
 				//-- Update the Model --//
 				//oController.RefreshModel( oController, {} );
-
 				
 				//-- Check the parameters --//
 				oController.UserForm(oController);
@@ -58,6 +60,31 @@ sap.ui.controller("pages.staging.user.UserForm", {
 			}
 			
 		});
+		
+	},
+	
+	
+	RefreshModel : function( oController, oConfig ) {
+		//------------------------------------------------//
+		//-- Declare Variables                          --//
+		//------------------------------------------------//
+		var oView            = oController.getView();
+		
+		//------------------------------------------------//
+		//-- Build and Bind Model to the View           --//
+		//------------------------------------------------//
+		oView.setModel( 
+			new sap.ui.model.json.JSONModel({
+				"UserInfo":              oController.aUserListData
+			})
+		);	
+		
+		//------------------------------------------------//
+		//-- Trigger the onSuccess Event                --//
+		//------------------------------------------------//
+		if( oConfig.onSuccess ) {
+			oConfig.onSuccess();
+		}
 		
 	},
 	

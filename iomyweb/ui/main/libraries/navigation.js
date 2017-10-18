@@ -72,6 +72,9 @@ $.extend( IomyRe.navigation, {
 					new sap.m.Button ({
 						text: "Add Room",
 						type: sap.m.ButtonType.Transparent,
+						press : function () {
+							IomyRe.common.NavigationChangePage( "pRoomForm" ,  {"bPageType": false} , false);
+						}
 					}),
 					new sap.m.Button ({
 						text: "Add Rule",
