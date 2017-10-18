@@ -68,7 +68,7 @@ sap.ui.jsview("pages.staging.graphs.LineGraph", {
 			header : IomyRe.widgets.getToolPageHeader( oController ),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
 			mainContents: [ 
-				IomyRe.widgets.DeviceToolbar(oController, "Tile View"),
+				IomyRe.widgets.DeviceToolbar(oController, "Line Graph"),
 				new sap.ui.core.HTML ({
                     content: "<div id=\"LineGraphPage_Main\" class=\"\" style=\"\"></div><div id=\"LineGraphPage_Main_Info\" class=\"PadAll5px PadLeft0px\" ></div>"
                 }).addStyleClass("")

@@ -58,7 +58,6 @@ sap.ui.controller("pages.staging.Room", {
         var oView               = this.getView();
         var wList               = oView.byId("RoomList");
         var bHasRooms           = false;
-        var bFoundUnassigned    = false;
         
         // Wipe the old list.
         wList.destroyItems();
@@ -70,8 +69,6 @@ sap.ui.controller("pages.staging.Room", {
         // Construct the Room List
         //--------------------------------------------------------------------//
         $.each(oController.aaRoomList, function (sI, mPremise) {
-            
-            bHasRooms = true;
             
             var mFirstRoom = null;
             
@@ -88,6 +85,9 @@ sap.ui.controller("pages.staging.Room", {
             // Create the items under that grouping
             //----------------------------------------------------------------//
             $.each(mPremise, function (sJ, mRoom) {
+                var bOmitEntry = false;
+                bHasRooms = true;
+                
                 /*
                  * Take the first room in the premise and put it aside.
                  * Check that the name is called "Unassigned".
@@ -97,7 +97,6 @@ sap.ui.controller("pages.staging.Room", {
                  * If we are not omitting the room
                  *     Display it.
                  */
-                var bOmitEntry = false;
                 
                 if (mFirstRoom === null) {
                     mFirstRoom = mRoom;
@@ -134,7 +133,27 @@ sap.ui.controller("pages.staging.Room", {
                 
             });
             
-            bFoundUnassigned = false;
+            //----------------------------------------------------------------//
+            // If there are no rooms in the premise
+            //----------------------------------------------------------------//
+            if (!bHasRooms) {
+                wList.addItem(
+                    new sap.m.ObjectListItem ({        
+                        title: "No rooms",
+                        type: "Active",
+                        number: IomyRe.functions.getNumberOfDevicesInRoom(mRoom.RoomId),
+                        numberUnit: "Devices",
+                        attributes : [
+                            new sap.m.ObjectAttribute ({
+                                text: "Tap to add a room"
+                            })
+                        ],
+                        press : function () {
+                            //IomyRe.common.NavigationChangePage( "pDevice" , {roomID : mRoom.RoomId} , false);
+                        }
+                    })
+                );
+            }
             
         });
         
