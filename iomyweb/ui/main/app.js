@@ -188,24 +188,24 @@ var aPages = [
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.RulesList\" Page!\n"
 	},
     
-//	{
-//		"Id":			"pGraphLine",
-//		"Location":		"pages.staging.graphs.LineGraph",
-//		"Type":			"JS",
-//		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.graphs.LineGraph\" Page!\n"
-//	},
-//	{
-//		"Id":			"pGraphBar",
-//		"Location":		"pages.staging.graphs.BarGraph",
-//		"Type":			"JS",
-//		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.graphs.BarGraph\" Page!\n"
-//	},
-//	{
-//		"Id":			"pGraphPie",
-//		"Location":		"pages.staging.graphs.PieGraph",
-//		"Type":			"JS",
-//		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.graphs.PieGraph\" Page!\n"
-//	},
+	{
+		"Id":			"pGraphLine",
+		"Location":		"pages.staging.graphs.LineGraph",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.graphs.LineGraph\" Page!\n"
+	},
+	{
+		"Id":			"pGraphBar",
+		"Location":		"pages.staging.graphs.BarGraph",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.graphs.BarGraph\" Page!\n"
+	},
+	{
+		"Id":			"pGraphPie",
+		"Location":		"pages.staging.graphs.PieGraph",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.graphs.PieGraph\" Page!\n"
+	},
 
 ];
 

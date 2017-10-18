@@ -74,7 +74,7 @@ sap.ui.controller("pages.staging.Room", {
             bHasRooms = true;
             
             var mFirstRoom = null;
-            var bOmitEntry = false;
+            
             //----------------------------------------------------------------//
             // Create the Group Header
             //----------------------------------------------------------------//
@@ -97,6 +97,7 @@ sap.ui.controller("pages.staging.Room", {
                  * If we are not omitting the room
                  *     Display it.
                  */
+                var bOmitEntry = false;
                 
                 if (mFirstRoom === null) {
                     mFirstRoom = mRoom;
