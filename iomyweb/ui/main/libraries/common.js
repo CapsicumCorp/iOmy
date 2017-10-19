@@ -2541,7 +2541,7 @@ $.extend(IomyRe.common,{
                 //-- Set the index to zero (aka Default Page) --//
                 IomyRe.common.NavPagesCurrentIndex = -1;
                 //-- Navigate back to the Default Page --//
-                oApp.to( IomyRe.common.sNavigationDefaultPage, "c_SlideBack", {} );
+                oApp.to( IomyRe.common.sNavigationDefaultPage, "slide", {} );
                 
             } else {
                 //-- Decrease the Current Index back to the previous value --//
@@ -2555,7 +2555,7 @@ $.extend(IomyRe.common,{
                 //jQuery.sap.log.debug("NavBack NavArray="+JSON.stringify(IomyRe.common.NavPagesNavigationArray) );
                 //jQuery.sap.log.debug("NavBack BackPage="+JSON.stringify(IomyRe.common.NavPagesNavigationArray[IomyRe.common.NavPagesCurrentIndex]) );
                 //-- Navigate back to the previous Page --//
-                oApp.to( sName, "c_SlideBack", aData );
+                oApp.to( sName, "slide", aData );
             }
             //-- Return Success --//
             return true;
@@ -2576,7 +2576,7 @@ $.extend(IomyRe.common,{
         //-- Set the index to zero (aka Navigation Main Page) --//
         IomyRe.common.NavPagesCurrentIndex = -1;
         //-- Navigate back to the "Navigation Main" Page --//
-        oApp.to( IomyRe.common.sNavigationDefaultPage, "c_SlideBack", {} );
+        oApp.to( IomyRe.common.sNavigationDefaultPage, "slide", {} );
         
         return true;
     },

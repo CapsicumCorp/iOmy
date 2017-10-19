@@ -73,15 +73,15 @@ var oApp = new sap.m.App("oApp");
 //----------------------------------------//
 //-- 2.1 - Custom Transitions         --//
 //----------------------------------------//
-try {
-	oApp.addCustomTransition( 
-		"c_SlideBack", 
-		sap.m.NavContainer.transitions.slide.back,
-		sap.m.NavContainer.transitions.slide.to
-	);
-} catch( e1 ) {
-	$.sap.log.error("Error with Custom Transition.");
-}
+//try {
+//	oApp.addCustomTransition( 
+//		"c_SlideBack", 
+//		sap.m.NavContainer.transitions.slide.back,
+//		sap.m.NavContainer.transitions.slide.to
+//	);
+//} catch( e1 ) {
+//	$.sap.log.error("Error with Custom Transition.");
+//}
 
 
 //================================================//
