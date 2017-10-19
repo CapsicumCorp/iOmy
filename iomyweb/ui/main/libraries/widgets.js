@@ -297,18 +297,26 @@ $.extend( IomyRe.widgets, {
 	
 	
 	//-- Scroll Container for the "RGB" colorpicker --//
-	RGBContainer : function (oCurrentController) {
+	RGBContainer : function (oCurrentController, mSettings) {
 		var oScrollContainer;
 		var oView = oCurrentController.getView();  //-- Defines oView based on the Controller that's being passed --//
+        var fnChange;
+        
+        //--------------------------------------------------------------------//
+        // Find the parameters map and fetch properties
+        //--------------------------------------------------------------------//
+        if (mSettings === undefined || mSettings === null) {
+            mSettings = {};
+        }
+        
+        mSettings.mode = sap.ui.unified.ColorPickerMode.HSV;
 		
 		oScrollContainer = new sap.m.ScrollContainer (oView.createId("RGB_Cont"), {
 			width: "100%",
 			height: "100%",
 			vertical : true,
 			content : [
-				new sap.ui.unified.ColorPicker (oView.createId("CPicker"), {
-					mode: sap.ui.unified.ColorPickerMode.HSV							
-				}).addStyleClass("ElementChildCenter PadTop2d0Rem")
+				new sap.ui.unified.ColorPicker (oView.createId("CPicker"), mSettings).addStyleClass("ElementChildCenter PadTop2d0Rem")
 			]
 		});
 		

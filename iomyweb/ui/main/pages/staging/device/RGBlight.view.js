@@ -51,7 +51,11 @@ sap.ui.jsview("pages.staging.device.RGBlight", {
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
 			mainContents : [
 				IomyRe.widgets.DeviceToolbar(oController, "Main Office Light"),
-				IomyRe.widgets.RGBContainer(oController)
+				IomyRe.widgets.RGBContainer(oController, {
+                    change : function (oControlEvent) {
+                        oController.ChangeLightColour(oControlEvent);
+                    }
+                })
 			]
 		}).addStyleClass("MainBackground");
 	}
