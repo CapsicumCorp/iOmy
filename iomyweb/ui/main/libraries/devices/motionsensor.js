@@ -57,7 +57,7 @@ $.extend(IomyRe.devices.motionsensor,{
         //--------------------------------------------------------------------//
         // Declare variables and import modules
         //--------------------------------------------------------------------//
-        var me = this;
+        var oModule = this;
         var php = IomyRe.apiphp;
         var sUrl = php.APILocation("motionsensor");
         var mThingIdInfo;
@@ -98,8 +98,8 @@ $.extend(IomyRe.devices.motionsensor,{
         //--------------------------------------------------------------------//
         // Indicate that the API is being loaded and send the AJAX request
         //--------------------------------------------------------------------//
-        me.bWaitingToLoadAPI        = false;
-        me.bLoadingFieldsFromAPI    = true;
+        oModule.bWaitingToLoadAPI        = false;
+        oModule.bLoadingFieldsFromAPI    = true;
         
         php.AjaxRequest({
             "url" : sUrl,
@@ -146,20 +146,70 @@ $.extend(IomyRe.devices.motionsensor,{
         });
     },
     
-    FetchField : function (iIOId, oTextWidget) {
+    FetchODataFields : function (mSettings) {
         //--------------------------------------------------------------------//
         // Declare variables and import modules
         //--------------------------------------------------------------------//
-        var me = this;
-        var odata = IomyRe.apiodata;
+        var oModule     = this;
+        var aaIOs       = IOMy.common.ThingList["_"+iThingId].IO;
+        var aIOIDs      = [];
+        var mThingIdInfo;
+        var iThingId;
+        var fnSuccess;
+        var fnFail;
+        
+        //--------------------------------------------------------------------//
+        // Find and fetch the device ID from the parameter map. Report if
+        // it is missing.
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined) {
+            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
+                mThingIdInfo = IomyRe.validation.isThingIDValid(mSettings.thingID);
+                
+                if (!mThingIdInfo.bIsValid) {
+                    throw new IllegalArgumentException(mThingIdInfo.aErrorMessages.join("\n"));
+                } else {
+                    iThingId = mSettings.thingID;
+                }
+                
+            } else {
+                throw new MissingArgumentException("Thing ID must be given.");
+            }
+            
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+            } else {
+                fnSuccess = function () {};
+            }
+            
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+            } else {
+                fnFail = function () {};
+            }
+            
+        } else {
+            throw new MissingSettingsMapException("Thing ID must be given.");
+        }
+        
+        //--------------------------------------------------------------------//
+        // Prepare the IO ID array
+        //--------------------------------------------------------------------//
+        $.each(aaIOs, function (sI, mIO) {
+            if (sI !== undefined && sI !== null && mIO !== undefined && mIO !== null) {
+                if (mIO.RSTypeId == oModule.RSBattery || mIO.RSTypeId == oModule.RSTemperature ) {
+                    aIOIDs.push("IO_PK eq "+mIO.Id);
+                }
+            }
+        });
         
         //--------------------------------------------------------------------//
         // Send the AJAX request
         //--------------------------------------------------------------------//
-        odata.AjaxRequest({
-            "Url"             : odata.ODataLocation("dataint"),
+        IomyRe.apiodata.AjaxRequest({
+            "Url"             : IomyRe.apiodata.ODataLocation("dataint"),
             "Columns"         : ["CALCEDVALUE", "UTS", "UOM_PK", "UOM_NAME"],
-            "WhereClause"     : ["IO_PK eq "+iIOId],
+            "WhereClause"     : [aIOIDs.join(" or ")],
             "OrderByClause"   : [],
             
             "onSuccess" : function (responseType, data) {
@@ -179,53 +229,39 @@ $.extend(IomyRe.devices.motionsensor,{
                 //------------------------------------------------------------//
                 // Set the text in the relevant field on the motion sensor page.
                 //------------------------------------------------------------//
-                oTextWidget.setText(data.CALCEDVALUE + sUOMName);
-                
-                // Conclude the request callback
-                this.onComplete();
+                fnSuccess(data.CALCEDVALUE + sUOMName);
             },
             
             "onFail" : function (response) {
-                me.iODataFieldsFailedToFetch++;
-                
                 // Log errors
                 jQuery.sap.log.error("There was an error fetching data for IO "+iIOId+":\n\n" + JSON.stringify(response));
                 
-                // Conclude the request callback
-                this.onComplete();
             },
             
-            "onComplete" : function () {
-                //------------------------------------------------------------//
-                // Decrement the OData Field count
-                //------------------------------------------------------------//
-//                console.log("====================================================================");
-//                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
-                jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
-                jQuery.sap.log.debug("====================================================================");
-                
-                if (me.iODataFieldsToFetch > 0) {
-                    me.iODataFieldsToFetch--;
-                } else {
-                    // Log this as an error
-                    jQuery.sap.log.error("Something is wrong! The remaining OData field count for the current motion sensor is already 0!");
-                }
-                
-//                console.log("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
-                jQuery.sap.log.debug("Motion Sensor OData Fields to fetch: "+me.iODataFieldsToFetch);
-                
-                //------------------------------------------------------------//
-                // If this is final OData request and the API has finished its
-                // call, reset the loading motion sensor OData fields flag, and
-                // reset the fields to fetch back to the default number.
-                //------------------------------------------------------------//
-                if (me.iODataFieldsToFetch === 0 && me.bWaitingToLoadAPI === false && me.bLoadingFieldsFromAPI === false) {
-                    me.bLoadingMotionSensorFields = false;
-                    me.iODataFieldsToFetch = 2;
-                }
-            }
-            
         });
+    },
+    
+    FetchAllCurrentData : function (iThingId) {
+        //--------------------------------------------------------------------//
+        // Declare variables and import modules and global variables
+        //--------------------------------------------------------------------//
+        var oModule = this; // Capture the scope of the current device module.
+        var mData   = {};
+        
+        oModule.CallAPI({
+            thingID : iThingId,
+            
+            onSuccess : function (mResult) {
+                
+                
+                oModule.FetchODataFields({
+                    thingID : iThingId,
+                    
+                    
+                });
+                
+            }
+        })
     },
     
     GetUITaskList: function( mSettings ) {
