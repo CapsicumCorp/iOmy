@@ -7,6 +7,15 @@ sap.ui.jsfragment("fragments.room.AddRoom", {
 		//--------------------------------------------//
 		var oFragContent = null;
 		
+		var oItemTemplateRoomTypes = new sap.ui.core.Item({
+			key:  "{RoomTypeId}",
+			text: "{RoomTypeName}"
+		});
+		
+		var oItemTemplatePremises = new sap.ui.core.Item({
+			key:  "{Id}",
+			text: "{Name}"
+		});
 		
 		//--------------------------------------------//
 		//-- 5.0 - CREATE UI                        --//
@@ -14,21 +23,43 @@ sap.ui.jsfragment("fragments.room.AddRoom", {
 		oFragContent = new sap.ui.layout.form.FormContainer({
 			formElements : [
 				new sap.ui.layout.form.FormElement({
-					label : "Name",
+					label : "Room Name",
 					fields: [ 
-						new sap.m.Input ({})
+						new sap.m.Input ({
+							value:"{/CurrentRoom/RoomName}"
+						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "Description",
 					fields: [
-						new sap.m.Input ({})
+						new sap.m.Input ({
+							value:"{/CurrentRoom/RoomDesc}"
+						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "Room Type",
 					fields: [
-						new sap.m.Select ({})
+						new sap.m.Select ({
+							selectedKey: "{/CurrentRoom/RoomTypeId}",
+							items: {
+								path: "/RoomTypes",
+								template: oItemTemplateRoomTypes
+							},
+						})
+					]
+				}),
+				new sap.ui.layout.form.FormElement({
+					label : "Assigned Premise",
+					fields: [
+						new sap.m.Select ({
+							selectedKey: "{/CurrentRoom/PremiseId}",
+							items: {
+								path: "/Premises",
+								template: oItemTemplatePremises
+							},
+						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
@@ -36,11 +67,17 @@ sap.ui.jsfragment("fragments.room.AddRoom", {
 					fields: [
 						new sap.m.Button ({
 							text: "Save",
-							type: sap.m.ButtonType.Accept
+							type: sap.m.ButtonType.Accept,
+							press:   function( oEvent ) {
+								oController.InsertRoomInfoValues( oController );
+							}
 						}),
 						new sap.m.Button ({
 							text: "Cancel",
-							type: sap.m.ButtonType.Reject
+							type: sap.m.ButtonType.Reject,
+							press:   function( oEvent ) {
+								IomyRe.common.NavigationChangePage( "pBlock" ,  {} , false);
+							}
 						}),
 					]
 				}),

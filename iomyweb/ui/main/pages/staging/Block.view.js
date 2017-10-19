@@ -104,7 +104,7 @@ sap.ui.jsview("pages.staging.Block", {
 															text : "Rooms",
 															emphasized : true,
 															press : function () {
-																IomyRe.common.NavigationChangePage( "pRoomList" , {} , false);
+																IomyRe.common.NavigationChangePage( "pRoomList" , {bEditing: false} , false);
 															}
 														}).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
 													]

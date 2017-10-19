@@ -85,16 +85,17 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		//------------------------------------------------//
 		//-- Build and Bind Model to the View           --//
 		//------------------------------------------------//
-		oView.setModel( 
-			new sap.ui.model.json.JSONModel({
-				"Regions":               IomyRe.common.Regions,
-				"Languages":             IomyRe.common.Languages,
-				"Timezones":             IomyRe.common.Timezones,
-				"Premise":               IomyRe.common.PremiseList,
-				"Rooms":                 IomyRe.common.AllRoomsList,
-				"UserInfo":              aUserData
-			})
-		);	
+		var oModel = new sap.ui.model.json.JSONModel({
+			"Regions":               IomyRe.common.Regions,
+			"Languages":             IomyRe.common.Languages,
+			"Timezones":             IomyRe.common.Timezones,
+			"Premise":               IomyRe.common.PremiseList,
+			"Rooms":                 IomyRe.common.AllRoomsList,
+			"UserInfo":              aUserData
+		});
+		
+		oModel.setSizeLimit(420);
+		oView.setModel( oModel );	
 		
 		
 		//oController.UpdateVisibleInclusions( oController );

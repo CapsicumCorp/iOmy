@@ -23,19 +23,22 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("pages.staging.Room", {
-    
+    bEditing : false,
+    sPageId : "",
+    mPageData : {},
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
 * @memberOf pages.template.Template
 */
 
+
     onInit: function() {
         var oController = this;            //-- SCOPE: Allows subfunctions to access the current scope --//
         var oView = this.getView();
             
         oView.addEventDelegate({
-            onBeforeShow : function (evt) {
+            onBeforeShow : function (oEvent) {
                 //----------------------------------------------------//
                 //-- Enable/Disable Navigational Forward Button        --//
                 //----------------------------------------------------//
@@ -43,6 +46,36 @@ sap.ui.controller("pages.staging.Room", {
                 //-- Refresh the Navigational buttons --//
                 //-- IOMy.common.NavigationRefreshButtons( me ); --//
                 
+                //-- Checks the oEvent passed from navigation.js --//
+                try {
+                    if (oEvent.data.bEditing !== undefined) {
+                        oController.bEditing = oEvent.data.bEditing;
+                    } else {
+                         oController.bEditing = false;
+                    }
+                } catch(e1) {
+                    $.sap.log.error("onBeforeShow: oEvent.data.bEditing Critcal Error:"+e1.message);
+                    return false;
+                }
+                
+                //-- If check to determinate the destination after selecting a room --//
+                try {
+                    if (oController.bEditing === false) {
+                        oController.sPageId = "pDevice";
+                        oController.mPageData = {};
+                        
+                    } else if(oController.bEditing === true) {
+                        oController.sPageId = "pRoomForm";
+                        oController.mPageData = {
+                            bEditing : oController.bEditing
+                        };
+                    } else {
+                         $.sap.log.error("Critical Error with bEditing, current state is:"+bEditing);
+                    }
+                } catch(e1) {
+                    $.sap.log.error("onBeforeShow: bEditing Critcal Error:"+e1.message);
+                    return false;
+                }
                 //-- Defines the Device Type --//
                 IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
@@ -52,7 +85,7 @@ sap.ui.controller("pages.staging.Room", {
             
         
     },
-    
+
     BuildRoomListUI : function () {
         var oController         = this;
         var oView               = this.getView();
@@ -87,6 +120,7 @@ sap.ui.controller("pages.staging.Room", {
             $.each(mPremise, function (sJ, mRoom) {
                 var bOmitEntry = false;
                 bHasRooms = true;
+                
                 
                 /*
                  * Take the first room in the premise and put it aside.
@@ -125,7 +159,11 @@ sap.ui.controller("pages.staging.Room", {
                                 })
                             ],
                             press : function () {
-                                IomyRe.common.NavigationChangePage( "pDevice" , {roomID : mRoom.RoomId} , false);
+                                var mPageDataTemp = oController.mPageData;
+                                mPageDataTemp.RoomId = mRoom.RoomId;
+                                mPageDataTemp.PremiseId = mRoom.PremiseId;
+                                
+                                IomyRe.common.NavigationChangePage( oController.sPageId , mPageDataTemp , false);
                             }
                         })
                     );

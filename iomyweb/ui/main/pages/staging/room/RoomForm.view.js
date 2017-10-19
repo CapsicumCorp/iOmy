@@ -57,7 +57,6 @@ sap.ui.jsview("pages.staging.room.RoomForm", {
 					sections : [
 						new sap.uxap.ObjectPageSection(oView.createId("Room"), {
 							showTitle: false,
-							title: "Premise Permissions",
 							subSections : [
 								new sap.uxap.ObjectPageSubSection(oView.createId("RoomBlock"), {
 									blocks : [
@@ -81,8 +80,7 @@ sap.ui.jsview("pages.staging.room.RoomForm", {
 											}),
 											toolbar : new sap.m.Toolbar({
 												content : [
-													new sap.m.Title ({
-														text: "Add / Edit Form",
+													new sap.m.Title (oView.createId("RoomToolbarTitle"),{
 													}),
 												]
 											}).addStyleClass("MarBottom1d0Rem"),

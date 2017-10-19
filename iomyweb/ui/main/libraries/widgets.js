@@ -188,7 +188,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://idea-wall",
 			text: "Room",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pRoomList" , {} , false);
+				IomyRe.common.NavigationChangePage( "pRoomList" , {bEditing: false} , false);
 			}
 		});
 		

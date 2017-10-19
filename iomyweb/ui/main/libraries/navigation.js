@@ -73,7 +73,7 @@ $.extend( IomyRe.navigation, {
 						text: "Add Room",
 						type: sap.m.ButtonType.Transparent,
 						press : function () {
-							IomyRe.common.NavigationChangePage( "pRoomForm" ,  {"bPageType": false} , false);
+							IomyRe.common.NavigationChangePage( "pRoomForm" ,  {"bEditing": false} , false);
 						}
 					}),
 					new sap.m.Button ({
@@ -152,6 +152,9 @@ $.extend( IomyRe.navigation, {
 					new sap.m.Button ({
 						text: "Edit Room",
 						type: sap.m.ButtonType.Transparent,
+						press : function () {
+							IomyRe.common.NavigationChangePage( "pRoomList" ,  {"bEditing": true} , false);
+						}
 					}),
 					new sap.m.Button ({
 						text: "Edit Rule",
