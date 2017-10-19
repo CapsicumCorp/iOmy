@@ -63,8 +63,8 @@ sap.ui.jsview("pages.staging.device.WeatherFeed", {
 									label : "Weather Outside:",
 									content : [
 										//-- Column 2 for Weather Outside Row --//
-										new sap.m.Text ({
-											text : "Clear"
+										new sap.m.Text (oView.createId("WeatherOutside"), {
+											text : ""
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
@@ -73,8 +73,8 @@ sap.ui.jsview("pages.staging.device.WeatherFeed", {
 									label : "Temperature:",
 									content : [
 										//-- Column 2 for Temperature Row --//
-										new sap.m.Text ({
-											text : "24°C"
+										new sap.m.Text (oView.createId("Temperature"), {
+											text : ""
 										})
 										
 									]
@@ -84,8 +84,8 @@ sap.ui.jsview("pages.staging.device.WeatherFeed", {
 									label : "Sunrise:",
 									content : [
 										//-- Column 2 for Sunrise Row --//
-										new sap.m.Text ({
-											text : "5:31:56AM"
+										new sap.m.Text (oView.createId("Sunrise"), {
+											text : ""
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
@@ -94,8 +94,8 @@ sap.ui.jsview("pages.staging.device.WeatherFeed", {
 									label : "Sunset:",
 									content : [
 										//-- Column 2 for Sunset Row --//
-										new sap.m.Text ({
-											text : "5:47:02PM"
+										new sap.m.Text (oView.createId("Sunset"), {
+											text : ""
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
@@ -104,8 +104,8 @@ sap.ui.jsview("pages.staging.device.WeatherFeed", {
 									label : "Humidity:",
 									content : [
 										//-- Column 2 for Humidity Row --//
-										new sap.m.Text ({
-											text : "84%"
+										new sap.m.Text (oView.createId("Humidity"), {
+											text : ""
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
@@ -114,8 +114,8 @@ sap.ui.jsview("pages.staging.device.WeatherFeed", {
 									label : "Wind Direction:",
 									content : [
 										//-- Column 2 for Wind Direction Row --//
-										new sap.m.Text ({
-											text : "NNW"
+										new sap.m.Text (oView.createId("WindDirection"), {
+											text : ""
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
@@ -124,8 +124,8 @@ sap.ui.jsview("pages.staging.device.WeatherFeed", {
 									label : "Wind Speed:",
 									content : [
 										//-- Column 2 for Wind Speed Row --//
-										new sap.m.Text ({
-											text : "7.03 km/h"
+										new sap.m.Text (oView.createId("WindSpeed"), {
+											text : ""
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
@@ -134,8 +134,8 @@ sap.ui.jsview("pages.staging.device.WeatherFeed", {
 									label : "Air Pressure:",
 									content : [
 										//-- Column 2 for Air Pressure Row --//
-										new sap.m.Text ({
-											text : "1027Pa"
+										new sap.m.Text (oView.createId("AirPressure"), {
+											text : ""
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),

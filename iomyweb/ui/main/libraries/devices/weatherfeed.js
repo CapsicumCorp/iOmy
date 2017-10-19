@@ -198,7 +198,7 @@ $.extend(IomyRe.devices.weatherfeed,{
                     var dateSunrise     = new Date(sunrise.Value * 1000);
                     var dateSunset      = new Date(sunset.Value * 1000);
                     var humanReadable   = {
-                        WindDirectionHR : me.getWindDirection( parseFloat(windDirection.Value.toString()) ),
+                        WindDirection   : me.getWindDirection( parseFloat(windDirection.Value.toString()) ),
                         SunriseTime     : IomyRe.functions.getTimestampString(dateSunrise, ""),
                         SunsetTime      : IomyRe.functions.getTimestampString(dateSunset, "")
                     };

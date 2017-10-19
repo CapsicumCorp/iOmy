@@ -33,7 +33,7 @@ sap.ui.controller("pages.staging.device.WeatherFeed", {
 		var oView = this.getView();
 		
 		oView.addEventDelegate({
-			onBeforeShow : function (evt) {
+			onBeforeShow : function (oEvent) {
 				
 				//-- Set Static parameters --//
 				//-- (#ToDo# - Pull from the DB) --//
@@ -43,10 +43,31 @@ sap.ui.controller("pages.staging.device.WeatherFeed", {
 				
 				//-- Updates Paramaters & ID's on Load --//
 				//-- Brent to add in logic to update the UI with id's from the Database --//
+                
+                oController.LoadData(oEvent.data.ThingId);
 			}
 		});		
 	},
 	
-		
+	LoadData : function (iThingId) {
+        var oController = this;
+        var oView       = this.getView();
+        
+        IomyRe.devices.weatherfeed.FetchCurrentWeather({
+            thingID : iThingId,
+            
+            onSuccess : function (mData) {
+                oView.byId("WeatherOutside").setText(mData.Condition.Value);
+                oView.byId("Temperature").setText(mData.Temperature.Value + mData.Temperature.UomName);
+                oView.byId("Sunrise").setText(mData.HumanReadable.SunriseTime);
+                oView.byId("Sunset").setText(mData.HumanReadable.SunsetTime);
+                oView.byId("Humidity").setText(mData.Humidity.Value + mData.Humidity.UomName);
+                oView.byId("WindDirection").setText(mData.HumanReadable.WindDirection);
+                oView.byId("WindSpeed").setText(mData.WindSpeed.Value + mData.WindSpeed.UomName);
+                oView.byId("AirPressure").setText(mData.Pressure.Value + mData.Pressure.UomName);
+                
+            }
+        });
+    }
 		
 });
