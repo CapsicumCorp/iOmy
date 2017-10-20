@@ -251,35 +251,35 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 											}
 										});									
 									} else {
-										jQuery.sap.log.error("Error with the 'InfoEdit' success event that was passed as a parameter in the 'InfoEdit' controller! ");
+										jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success event that was passed as a parameter in the 'RoomForm' controller!");
 									}
 									
 								} catch( e3 ) {
-									jQuery.sap.log.error("Error with the 'InfoEdit' success event that was passed as a parameter in the 'InfoEdit' controller! "+e3.message);
+									jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success event that was passed as a parameter in the 'RoomForm' controller! "+e3.message);
 								}
 							} else {
 								//-- Run the fail event
 								//if( aConfig.onFail ) {
 								//	aConfig.onFail();
 								//}
-								jQuery.sap.log.error("Error with the 'InfoEdit' successful API result in the 'InfoEdit' controller!");
+								jQuery.sap.log.error("Error with the 'UpdateRoomPerms' successful API result in the 'RoomForm' controller!");
 							}
 						} catch( e2 ) {
-							jQuery.sap.log.error("Error with the 'InfoEdit' success in the 'InfoEdit' controller! "+e2.message);
+							jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success in the 'RoomForm' controller! "+e2.message);
 						}
 					},
 					onFail: function () {
 						//if( aConfig.onFail ) {
 						//	aConfig.onFail();
 						//}
-						jQuery.sap.log.error("Error with the 'InfoEdit' API Request when editing a LandPackage in the 'InfoEdit' controller!");
+						jQuery.sap.log.error("Error with the 'UpdateRoomPerms' API Request when inserting Room Permissions in the 'RoomForm' controller!");
 					}
 				});
 			} else {
 				IomyRe.common.showError( sErrMesg, "Error" );
 			}
 		} catch( e1 ) {
-			jQuery.sap.log.error("Error with the 'InfoEdit' in the 'InfoEdit' controller! "+e1.message);
+			jQuery.sap.log.error("Error with 'AddRoom' in the 'RoomForm' controller! "+e1.message);
 		}
 	},
 	

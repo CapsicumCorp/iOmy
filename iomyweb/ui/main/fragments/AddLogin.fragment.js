@@ -16,19 +16,25 @@ sap.ui.jsfragment("fragments.AddLogin", {
 				new sap.ui.layout.form.FormElement({
 					label : "Username",
 					fields: [ 
-						new sap.m.Input ({})
+						new sap.m.Input ({
+							value:"{/NewUser/Username}"
+						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "Password",
 					fields: [
-						new sap.m.Input ({})
+						new sap.m.Input ({
+							value:"{/NewUser/Password}"
+						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "Confirm Password",
 					fields: [
-						new sap.m.Input ({})
+						new sap.m.Input ({
+							value:"{/NewUser/ConfirmPassword}"
+						})
 					]
 				}),
 			]

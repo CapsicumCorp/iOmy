@@ -16,13 +16,17 @@ sap.ui.jsfragment("fragments.DBAuth", {
 				new sap.ui.layout.form.FormElement({
 					label : "Username",
 					fields: [
-						new sap.m.Input ({})
+						new sap.m.Input ({
+							value:"{/NewUser/DBUser}"
+						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "Password",
 					fields: [
-						new sap.m.Input ({})
+						new sap.m.Input ({
+							value:"{/NewUser/DBPassword}"
+						})
 					]
 				})
 			]

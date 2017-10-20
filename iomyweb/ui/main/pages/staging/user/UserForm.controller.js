@@ -26,6 +26,10 @@ sap.ui.controller("pages.staging.user.UserForm", {
 	aFormFragments: 	{},
 	bEditable: false,
 	userID : null,
+	
+	mxFetchRequests     : new Mutex({ manual : true }), // Mutex with the queue managed by the controller rather than the mutex.
+    mxUpdateRequests    : new Mutex({ manual : true }), // Mutex with the queue managed by the controller rather than the mutex.
+	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
@@ -49,7 +53,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 				//MyApp.common.NavigationRefreshButtons( oController );
 				
 				//-- Update the Model --//
-				//oController.RefreshModel( oController, {} );
+				oController.RefreshModel( oController, {} );
 				
 				//-- Check the parameters --//
 				oController.UserForm(oController);
@@ -64,21 +68,105 @@ sap.ui.controller("pages.staging.user.UserForm", {
 	},
 	
 	
-	RefreshModel : function( oController, oConfig ) {
+	RefreshModel: function( oController, oConfig ) {
 		//------------------------------------------------//
 		//-- Declare Variables                          --//
 		//------------------------------------------------//
-		var oView            = oController.getView();
-		
+		var oView = oController.getView();
+		var	aNewUserData = {
+			//-- New User Info --//
+			Username:          "",
+			Password:          "",
+			ConfirmPassword:   "",
+			//-- Database Login --//
+			DBUser:            "root",
+			DBPassword:        "",
+			//-- User Info --//
+			Gender:            3,
+			Title:             "",
+			Givenname:         "",
+			Surname:           "",
+			Displayname:       "",
+			DOB:               "1990-01-01",
+			Email:             "",
+			Phone:             "",	
+			//-- User Address --//
+			LanguageId:        1,
+			AddressLine1:      "",
+			AddressLine2:      "",
+			AddressLine3:      "",
+			SubRegion:         "",
+			Postcode:          "",
+			RegionId:          36,
+			TimezoneId:        310,
+			//-- User Permissions --//
+			PremiseId:         0,
+			PremPermId:        2,
+			RoomId:            0,
+			RoomPermId:        2
+		};    
+		var aRoomData = {};
+		var aPremiseData = {};
+
+		//------------------------------------------------//
+		//-- Setup "All" in the Premise & Room Array    --//
+		//------------------------------------------------//
+		if(oController.bEditable !== true ) {
+			try {
+				try {
+					if( typeof IomyRe.common.AllRoomsList!=="undefined" ) {
+						aRoomData = JSON.parse(JSON.stringify(IomyRe.common.AllRoomsList ));
+						aRoomData['_0'] = {
+							RoomId: 0,
+							RoomName: "All Rooms"
+						};
+					}
+				}catch(e1){
+					$.sap.log.error("RefreshModel: Critcal Error setting up 'All' in AllRoomsList:"+e1.message);
+					return false;
+				}
+				
+				try {
+					if( typeof IomyRe.common.PremiseList!=="undefined" ) {
+						aPremiseData = JSON.parse(JSON.stringify(IomyRe.common.PremiseList ));
+						aPremiseData['_0'] = {
+							Id: 0,
+							Name: "All Premise"
+						};
+					}
+				}catch(e1){
+					$.sap.log.error("RefreshModel: Critcal Error setting up 'All' in PremiseList:"+e1.message);
+					return false;
+				}
+			} catch(e2) {
+				$.sap.log.error("RefreshModel: Critcal Error:"+e2.message);
+				return false;
+			}
+		} else {
+			if( typeof IomyRe.common.AllRoomsList!=="undefined" ) {
+				aRoomData = JSON.parse(JSON.stringify(IomyRe.common.AllRoomsList ));
+			}
+			if( typeof IomyRe.common.PremiseList!=="undefined" ) {
+				aPremiseData = JSON.parse(JSON.stringify(IomyRe.common.PremiseList ));
+			}
+		}
 		//------------------------------------------------//
 		//-- Build and Bind Model to the View           --//
 		//------------------------------------------------//
-		oView.setModel( 
-			new sap.ui.model.json.JSONModel({
-				"UserInfo":              oController.aUserListData
-			})
-		);	
+		var oModel = new sap.ui.model.json.JSONModel({
+			"Regions":               IomyRe.common.Regions,
+			"Languages":             IomyRe.common.Languages,
+			"Timezones":             IomyRe.common.Timezones,
+			"Premise":               aPremiseData,
+			"Rooms":                 aRoomData,
+			"NewUser":               aNewUserData
+		});
 		
+		oModel.setSizeLimit(420);
+		oView.setModel( oModel );	
+		
+		
+		//oController.UpdateVisibleInclusions( oController );
 		//------------------------------------------------//
 		//-- Trigger the onSuccess Event                --//
 		//------------------------------------------------//
@@ -86,6 +174,299 @@ sap.ui.controller("pages.staging.user.UserForm", {
 			oConfig.onSuccess();
 		}
 		
+	},
+	
+	InsertNewUserInfo: function (oController) {
+		var bError   = false;
+		var sErrMesg = "";
+		
+		//------------------------------------------------//
+		//-- STEP 1 - Extract Values from the Model     --//
+		//------------------------------------------------//
+		var oCurrentFormData = oController.getView().getModel().getProperty("/NewUser/");
+		
+		//------------------------------------------------//
+		//-- STEP 2 - Check for Errors                  --//
+		//------------------------------------------------//
+
+		
+		//------------------------------------------------//
+		//-- STEP 3 - Update Database                   --//
+		//------------------------------------------------//
+		//-- Add User Section --//
+		try {
+			if( bError===false ) {
+				 IomyRe.apiphp.AjaxRequest({
+                    url : IomyRe.apiphp.APILocation("users"),
+                    data : {
+                        "Mode" :                 "AddUser",
+                        "Title" :                oCurrentFormData.Title,
+                        "Givennames" :           oCurrentFormData.Givenname,
+                        "Surnames" :             oCurrentFormData.Surname,
+                        "Displayname" :          oCurrentFormData.Displayname,
+                        "Email" :                oCurrentFormData.Email,
+                        "Phone" :                oCurrentFormData.Phone,
+                        "Gender" :               oCurrentFormData.Gender,
+                        "DoB" :                  oCurrentFormData.DOB,
+                        "AddressLine1" :         oCurrentFormData.AddressLine1,
+                        "AddressLine2" :         oCurrentFormData.AddressLine2,
+                        "AddressLine3" :         oCurrentFormData.AddressLine3,
+                        "AddressRegion" :        oCurrentFormData.RegionId,
+                        "AddressSubRegion" :     oCurrentFormData.SubRegion,
+                        "AddressPostcode" :      oCurrentFormData.Postcode,
+                        "AddressTimezone" :      oCurrentFormData.TimezoneId,
+                        "AddressLanguage" :      oCurrentFormData.LanguageId,
+                        "Username" :             oCurrentFormData.Username,
+                        "NewPassword" :          oCurrentFormData.Password,
+                        "Data" :                 "{\"Username\":\""+oCurrentFormData.DBUser+"\",\"Password\":\""+oCurrentFormData.DBPassword+"\",\"URI\":\"localhost\"}",
+                    },
+					onSuccess: function ( sType, mData ) {
+						//-- Premise Permissions Section --//
+						try {
+							if( sType==="JSON" && mData.Error===false ) {
+								try {
+									if(typeof mData.Data.UserId !== "undefined") {
+										var sUserId = mData.Data.UserId;
+										var iUserId = parseInt(sUserId);
+										
+										var iPremiseRead = 0;
+										var iPremiseWrite = 0;
+										var iRoomAdmin = 0;
+										
+										//-- If check to see what permissions need to be passed --//
+										if (oCurrentFormData.PremPermId === 2 ) {
+											//-- Read Access--//
+											iPremiseRead = 1;
+											iPremiseWrite = 0;
+											iRoomAdmin = 0; 
+										} else if (oCurrentFormData.PremPermId === 3) {
+											//-- Read/Write Access--//
+											iPremiseRead = 1;
+											iPremiseWrite = 1;
+											iRoomAdmin = 0;
+											
+										} else if (oCurrentFormData.PremPermId === 4) {
+											//-- Room Admin Access--//
+											iPremiseRead = 1;
+											iPremiseWrite = 1;
+											iRoomAdmin = 1;
+											
+										} else {
+											//-- No Access--//
+											iPremiseRead = 0;
+											iPremiseWrite = 0;
+											iRoomAdmin = 0;
+										}
+										
+										//-- If Check to see if single premise or all premise --//
+										if (oCurrentFormData.PremiseId === 0) {
+											$.each(IomyRe.common.PremiseList, function (sI, mPremise) {
+												oController.mxUpdateRequests.synchronize({
+													task : function () {
+														IomyRe.apiphp.AjaxRequest({
+															url : IomyRe.apiphp.APILocation("permissions"),
+															data : {
+																"Mode" : "UpdatePremisePerms",
+																"UserId" : iUserId,
+																"PremiseId" : mPremise.Id,
+																"Data" : "{\"Read\":"+iPremiseRead+",\"Write\":"+iPremiseWrite+",\"RoomAdmin\":"+iRoomAdmin+"}"
+															},			
+															onSuccess : function (responseType, data) {
+																// Keep the queue going.
+																oController.mxUpdateRequests.dequeue();
+																
+																// The queue is empty
+																if (!oController.mxUpdateRequests.busy) {
+																	oController.InsertNewRoomPermissions(oController, sType, mData);
+																}
+															},
+															onFail : function (response) {
+																IomyRe.common.showError(response.responseText, "Error",
+																	function () {
+																		if (oController.mxUpdateRequests.busy) {
+																			oController.mxUpdateRequests.dequeue();
+																		}
+																		
+																		if (!oController.mxUpdateRequests.busy) {
+																			
+																		}
+																	}
+																);
+															}
+														});
+													}
+												});
+											});										
+											oController.mxUpdateRequests.dequeue();
+										} else {
+											IomyRe.apiphp.AjaxRequest({
+												url : IomyRe.apiphp.APILocation("permissions"),
+												data : {
+													"Mode" : "UpdatePremisePerms",
+													"UserId" : iUserId,
+													"PremiseId" : oCurrentFormData.PremiseId,
+													"Data" : "{\"Read\":"+iPremiseRead+",\"Write\":"+iPremiseWrite+",\"RoomAdmin\":"+iRoomAdmin+"}"
+												},
+												onSuccess : function (responseType, mData) {
+													if (data.Error === false) {
+														oController.InsertNewRoomPermissions(oController, sType, mData);
+													} else {
+														jQuery.sap.log.error("There was an error updating the premise permissions: "+data.ErrMesg);
+													}
+												},
+												onFail : function (response) {
+													jQuery.sap.log.error("There was an error updating the premise permissions: "+JSON.stringify(response));
+												}
+											});
+										}
+									} else {
+										jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success event that was passed as a parameter in the 'RoomForm' controller!");
+									}
+									
+								} catch( e3 ) {
+									jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success event that was passed as a parameter in the 'RoomForm' controller! "+e3.message);
+								}
+							} else {
+								jQuery.sap.log.error("Error with the 'UpdateRoomPerms' successful API result in the 'RoomForm' controller!");
+							}
+						} catch( e2 ) {
+							jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success in the 'RoomForm' controller! "+e2.message);
+						}
+					},
+					onFail: function () {
+						//if( aConfig.onFail ) {
+						//	aConfig.onFail();
+						//}
+						jQuery.sap.log.error("Error with the 'UpdateRoomPerms' API Request when inserting Room Permissions in the 'RoomForm' controller!");
+					}
+				});
+			} else {
+				IomyRe.common.showError( sErrMesg, "Error" );
+			}
+		} catch( e1 ) {
+			jQuery.sap.log.error("Error with 'AddRoom' in the 'RoomForm' controller! "+e1.message);
+		}
+	},
+	
+	InsertNewRoomPermissions: function (oController, sType, mData ) {
+		var oCurrentFormData = oController.getView().getModel().getProperty("/NewUser/");
+		//-- Premise Permissions Section --//
+		try {
+			if( sType==="JSON" && mData.Error===false ) {
+				try {
+					if(typeof mData.Data.UserId !== "undefined") {
+						var sUserId = mData.Data.UserId;
+						var iUserId = parseInt(sUserId);
+						
+						var iRoomRead = 0;
+						var iRoomDataRead = 0;
+						var iRoomWrite = 0;
+						var iRoomStateToggle = 0;
+						
+						//-- If check to see what permissions need to be passed --//
+						if (oCurrentFormData.PremPermId === 2 ) {
+							//-- Read Access--//
+							iRoomRead = 1;
+							iRoomDataRead = 1;
+							iRoomWrite = 0;
+							iRoomStateToggle = 0;
+							
+						} else if (oCurrentFormData.RoomPremId === 3) {
+							//-- Read / Device Toggle Access--//
+							iRoomRead = 1;
+							iRoomDataRead = 1;
+							iRoomWrite = 0;
+							iRoomStateToggle = 1;
+							
+						} else if (oCurrentFormData.RoomPremId === 4) {
+							//-- Read/Write Access--//
+							iRoomRead = 1;
+							iRoomDataRead = 1;
+							iRoomWrite = 1;
+							iRoomStateToggle = 1;
+							
+						} else {
+							//-- No Access--//
+							iRoomRead = 0;
+							iRoomDataRead = 0;
+							iRoomWrite = 0;
+							iRoomStateToggle = 0;
+						}
+						
+						//-- If Check to see if single Room or all Rooms --//
+						if (oCurrentFormData.RoomId === 0) {
+							$.each(IomyRe.common.AllRoomsList, function (sI, mRoom) {
+								oController.mxUpdateRequests.synchronize({
+									task : function () {
+										IomyRe.apiphp.AjaxRequest({
+											url : IomyRe.apiphp.APILocation("permissions"),
+											data : {
+												"Mode" : "UpdateRoomPerms",
+												"UserId" : iUserId,
+												"RoomId" : mRoom.RoomId,
+												"Data" : "{\"Read\":"+iRoomRead+",\"DataRead\":"+iRoomDataRead+",\"Write\":"+iRoomWrite+",\"StateToggle\":"+iRoomStateToggle+"}"
+											},			
+											onSuccess : function (responseType, data) {
+												// Keep the queue going.
+												oController.mxUpdateRequests.dequeue();
+												
+												// The queue is empty
+												if (!oController.mxUpdateRequests.busy) {
+													IomyRe.common.RefreshCoreVariables({
+														onSuccess : function () {
+															IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
+														}
+													});
+												}
+											},
+											onFail : function (response) {
+												IomyRe.common.showError(response.responseText, "Error",
+													function () {
+														if (oController.mxUpdateRequests.busy) {
+															oController.mxUpdateRequests.dequeue();
+														}
+														
+														if (!oController.mxUpdateRequests.busy) {
+															
+														}
+													}
+												);
+											}
+										});
+									}
+								});
+							});										
+							oController.mxUpdateRequests.dequeue();
+						} else {
+							IomyRe.apiphp.AjaxRequest({
+								url : IomyRe.apiphp.APILocation("permissions"),
+								data : {
+									"Mode" : "UpdateRoomPerms",
+									"UserId" : iUserId,
+									"RoomId" : oCurrentFormData.RoomId,
+									"Data" : "{\"Read\":"+iRoomRead+",\"DataRead\":"+iRoomDataRead+",\"Write\":"+iRoomWrite+",\"StateToggle\":"+iRoomStateToggle+"}"
+								},
+								onSuccess : function (responseType, mData) {
+									IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
+								},
+								onFail : function (response) {
+									jQuery.sap.log.error("There was an error updating the premise permissions: "+JSON.stringify(response));
+								}
+							});
+						}
+					} else {
+						jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success event that was passed as a parameter in the 'RoomForm' controller!");
+					}
+					
+				} catch( e3 ) {
+					jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success event that was passed as a parameter in the 'RoomForm' controller! "+e3.message);
+				}
+			} else {
+				jQuery.sap.log.error("Error with the 'UpdateRoomPerms' successful API result in the 'RoomForm' controller!");
+			}
+		} catch( e2 ) {
+			jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success in the 'RoomForm' controller! "+e2.message);
+		}
 	},
 	
 	UserForm: function (oController) {
@@ -119,7 +500,6 @@ sap.ui.controller("pages.staging.user.UserForm", {
 		oPageHeader = new sap.uxap.ObjectPageHeader ({
 			objectTitle: sObjectTitle
 		});
-		
 		return oPageHeader;
 	},
 	
@@ -138,23 +518,23 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					//-- Add Info --//
 					oView.byId("Info").setVisible( true );
 					IomyRe.forms.ToggleFormMode(oController, "InfoBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "UserInfoEdit", "InfoBlock_Form", "FormContainer" );
+					IomyRe.common.ShowFormFragment( oController, "AddUserInfo", "InfoBlock_Form", "FormContainer" );
 					//-- Add Address --//
 					oView.byId("Address").setVisible( true );
 					IomyRe.forms.ToggleFormMode(oController, "AddrBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "UserAddressEdit", "AddrBlock_Form", "FormContainer" );
+					IomyRe.common.ShowFormFragment( oController, "AddUserAddress", "AddrBlock_Form", "FormContainer" );
 					//-- Add Permissions --//
 					oView.byId("PremPermBlock_BtnEdit").setVisible( false );
 					oView.byId("PremPermBlock_BtnSave").setVisible( false );
 					oView.byId("PremPermBlock_BtnCancel").setVisible( false );
 					IomyRe.forms.ToggleFormMode(oController, "PremPermBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "UserPremisePermissionEdit", "PremPermBlock_Form", "FormContainer" );
+					IomyRe.common.ShowFormFragment( oController, "AddPremisePermission", "PremPermBlock_Form", "FormContainer" );
 					//-- Add Permissions --//
 					oView.byId("RoomPermBlock_BtnEdit").setVisible( false );
 					oView.byId("RoomPermBlock_BtnSave").setVisible( false );
 					oView.byId("RoomPermBlock_BtnCancel").setVisible( false );
 					IomyRe.forms.ToggleFormMode(oController, "RoomPermBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "UserRoomPermissionEdit", "RoomPermBlock_Form", "FormContainer" );
+					IomyRe.common.ShowFormFragment( oController, "AddRoomPermission", "RoomPermBlock_Form", "FormContainer" );
 				break;
 				case "EditUser":
 					//-- New User Login Info --//

@@ -169,31 +169,31 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 									});    //-- END LandPackagesList (STEP 5) --//
 									
 								} catch( e3 ) {
-									jQuery.sap.log.error("Error with the 'InfoEdit' success event that was passed as a parameter in the 'InfoEdit' controller! "+e3.message);
+									jQuery.sap.log.error("Error with the 'UpdateUserInfoValues' success event that was passed as a parameter in the 'UserSettings' controller! "+e3.message);
 								}
 							} else {
 								//-- Run the fail event
 								//if( aConfig.onFail ) {
 								//	aConfig.onFail();
 								//}
-								jQuery.sap.log.error("Error with the 'InfoEdit' successful API result in the 'InfoEdit' controller!");
+								jQuery.sap.log.error("Error with the 'UpdateUserInfoValues' successful API result in the 'UserSettings' controller!");
 							}
 						} catch( e2 ) {
-							jQuery.sap.log.error("Error with the 'InfoEdit' success in the 'InfoEdit' controller! "+e2.message);
+							jQuery.sap.log.error("Error with the 'UpdateUserInfoValues' success in the 'UserSettings' controller! "+e2.message);
 						}
 					},
 					onFail: function () {
 						//if( aConfig.onFail ) {
 						//	aConfig.onFail();
 						//}
-						jQuery.sap.log.error("Error with the 'InfoEdit' API Request when editing a LandPackage in the 'InfoEdit' controller!");
+						jQuery.sap.log.error("Error with the 'UpdateUserInfoValues' API Request when editing a LandPackage in the 'UserSettings' controller!");
 					}
 				});
 			} else {
 				IomyRe.common.showError( sErrMesg, "Error" );
 			}
 		} catch( e1 ) {
-			jQuery.sap.log.error("Error with the 'InfoEdit' in the 'InfoEdit' controller! "+e1.message);
+			jQuery.sap.log.error("Error with'UpdateUserInfoValues' in the 'UserSettings' controller! "+e1.message);
 		}
 	},
 	
