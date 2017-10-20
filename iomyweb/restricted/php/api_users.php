@@ -890,7 +890,6 @@ if( $bError===false ) {
 					}
 					
 				} else {
-					var_dump($aPostData);
 					if( ! isset( $aPostData['UserId'] ) ) {
 						//-- Error: UserId is missing --//
 						$bError    = true;
@@ -899,7 +898,6 @@ if( $bError===false ) {
 						$sErrMesg .= "Please ensure that the UserId is a valid number.\n";
 					} 
 				}
-				
 			} catch( Exception $e0349 ) {
 				//-- CRITICAL ERROR --//
 				$bError    = true;
