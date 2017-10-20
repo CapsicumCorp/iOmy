@@ -977,26 +977,55 @@ function dbGetAllUsers() {
 		
 		$sSQL .= "SELECT ";
 		$sSQL .= "	`USERS_PK`, ";
-		$sSQL .= "	`USERS_USERSINFO_FK`, ";
 		$sSQL .= "	`USERS_USERNAME`, ";
 		$sSQL .= "	`USERS_STATE`, ";
+		$sSQL .= "	`USERSINFO_PK`, ";
+		$sSQL .= "	`USERSINFO_TITLE`, ";
+		$sSQL .= "	`USERSINFO_USERSGENDER_FK`, ";
 		$sSQL .= "	`USERSINFO_GIVENNAMES`, ";
 		$sSQL .= "	`USERSINFO_SURNAMES`, ";
-		$sSQL .= "	`USERSINFO_DISPLAYNAME` ";
+		$sSQL .= "	`USERSINFO_DISPLAYNAME`, ";
+		$sSQL .= "	`USERSINFO_EMAIL`, ";
+		$sSQL .= "	`USERSINFO_PHONENUMBER`, ";
+		$sSQL .= "	`USERSINFO_DOB`, ";
+		$sSQL .= "	`USERADDRESS_PK`, ";
+		$sSQL .= "	`USERADDRESS_LANGUAGE_FK`, ";
+		$sSQL .= "	`USERADDRESS_REGION_FK`, ";
+		$sSQL .= "	`USERADDRESS_TIMEZONE_FK`, ";
+		$sSQL .= "	`USERADDRESS_LINE1`, ";
+		$sSQL .= "	`USERADDRESS_LINE2`, ";
+		$sSQL .= "	`USERADDRESS_LINE3`, ";
+		$sSQL .= "	`USERADDRESS_POSTCODE`, ";
+		$sSQL .= "	`USERADDRESS_SUBREGION` ";
 		$sSQL .= "FROM `".$sCurrentSchema."`.`USERS` ";
 		$sSQL .= "INNER JOIN `".$sCurrentSchema."`.`USERSINFO` ON `USERS_USERSINFO_FK` = `USERSINFO_PK` ";
+		$sSQL .= "INNER JOIN `".$sCurrentSchema."`.`USERADDRESS` ON `USERS_PK` = `USERADDRESS_USERS_FK` ";
 		$sSQL .= "WHERE `USERS_STATE` >= 0 ";
 		
 		$aInputVals = array();
 		
 		$aOutputCols = array(
-			array( "Name"=>"UserId",                        "type"=>"INT" ),
-			array( "Name"=>"UserInfoId",                    "type"=>"INT" ),
-			array( "Name"=>"Username",                      "type"=>"STR" ),
-			array( "Name"=>"UserState",                     "type"=>"INT" ),
-			array( "Name"=>"UserGivennames",                "type"=>"STR" ),
-			array( "Name"=>"UserSurnames",                  "type"=>"STR" ),
-			array( "Name"=>"UserDisplayname",               "type"=>"STR" )
+			array( "Name"=>"Id",                        "type"=>"INT" ),
+			array( "Name"=>"Username",                  "type"=>"STR" ),
+			array( "Name"=>"State",                     "type"=>"INT" ),
+			array( "Name"=>"InfoId",                    "type"=>"INT" ),
+			array( "Name"=>"Title",                     "type"=>"INT" ),
+			array( "Name"=>"GenderId",                  "type"=>"INT" ),
+			array( "Name"=>"Givennames",                "type"=>"STR" ),
+			array( "Name"=>"Surnames",                  "type"=>"STR" ),
+			array( "Name"=>"Displayname",               "type"=>"STR" ),
+			array( "Name"=>"Email",                     "type"=>"STR" ),
+			array( "Name"=>"Phone",                     "type"=>"STR" ),
+			array( "Name"=>"DOB",                       "type"=>"STR" ),
+			array( "Name"=>"AddressId",                 "type"=>"INT" ),
+			array( "Name"=>"LanguageId",                "type"=>"INT" ),
+			array( "Name"=>"RegionId",                  "type"=>"INT" ),
+			array( "Name"=>"TimezoneId",                "type"=>"INT" ),
+			array( "Name"=>"Line1",                     "type"=>"STR" ),
+			array( "Name"=>"Line2",                     "type"=>"STR" ),
+			array( "Name"=>"Line3",                     "type"=>"STR" ),
+			array( "Name"=>"Postcode",                  "type"=>"STR" ),
+			array( "Name"=>"SubRegion",                 "type"=>"STR" )
 		);
 		
 		
@@ -1004,8 +1033,7 @@ function dbGetAllUsers() {
 		//-- Execute the SQL Query                    --//
 		//----------------------------------------------//
 		$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
-			
-			
+		
 	} catch( Exception $e2 ) {
 		$bError   = true;
 		$sErrMesg = $e2->getMessage();
