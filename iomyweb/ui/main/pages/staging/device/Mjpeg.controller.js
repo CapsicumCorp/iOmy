@@ -21,33 +21,58 @@ You should have received a copy of the GNU General Public License
 along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-$.sap.require("sap.ui.unified.ColorPicker");
+
 sap.ui.controller("pages.staging.device.Mjpeg", {
-	
+    
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
 * @memberOf pages.template.Template
 */
-	onInit: function() {
-		var oController = this;			//-- SCOPE: Allows subfunctions to access the current scope --//
-		var oView = this.getView();
-		
-		oView.addEventDelegate({
-			onBeforeShow : function (evt) {
-				
-				//-- Set Static parameters --//
-				//-- (#ToDo# - Pull from the DB) --//
-				
-				//-- Defines the Screen Type --//
-				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
-				
-				//-- Updates Paramaters & ID's on Load --//
-				//-- Brent to add in logic to update the UI with id's from the Database --//
-			}
-		});		
-	},
-	
-		
-		
+    onInit: function() {
+        var oController = this;            //-- SCOPE: Allows subfunctions to access the current scope --//
+        var oView = this.getView();
+        
+        oView.addEventDelegate({
+            onBeforeShow : function (oEvent) {
+                
+                //-- Set Static parameters --//
+                
+                //-- Defines the Screen Type --//
+                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                
+                //-- Updates Paramaters & ID's on Load --//
+                oView.byId("MJPEG_Img").setSrc("");
+                oController.LoadStream(oEvent.data.ThingId);
+            }
+        });
+    },
+    
+    /**
+     * Loads the stream URL and sets the MJPEG Image widget to use that as the
+     * src property.
+     * 
+     * @param {type} iThingId           ID of the stream
+     */
+    LoadStream : function (iThingId) {
+        var oView           = this.getView();
+        var oImage          = oView.byId("MJPEG_Img");
+        
+        //--------------------------------------------------------------------//
+        // Load the URL and use it.
+        //--------------------------------------------------------------------//
+        IomyRe.devices.ipcamera.loadStreamUrl({
+            thingID : iThingId,
+
+            onSuccess : function (sUrl) {
+                oImage.setSrc(sUrl);
+            },
+
+            onFail : function (sErrorMessage) {
+                IomyRe.common.showError(sErrorMessage, "Stream Not Available");
+            }
+        });
+    }
+    
+    
 });

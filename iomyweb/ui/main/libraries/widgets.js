@@ -300,10 +300,9 @@ $.extend( IomyRe.widgets, {
 	RGBContainer : function (oCurrentController, mSettings) {
 		var oScrollContainer;
 		var oView = oCurrentController.getView();  //-- Defines oView based on the Controller that's being passed --//
-        var fnChange;
         
         //--------------------------------------------------------------------//
-        // Find the parameters map and fetch properties
+        // Find the parameters map for the widget
         //--------------------------------------------------------------------//
         if (mSettings === undefined || mSettings === null) {
             mSettings = {};
@@ -324,20 +323,27 @@ $.extend( IomyRe.widgets, {
 	},
 	
 	//-- Scroll Container for the "Mjpeg" image --//
-	MJPEGCont : function (oCurrentController, sImgSRC) {
+	MJPEGCont : function (oCurrentController, mSettings) {
 		var oScrollContainer;
 		var oView = oCurrentController.getView();  //-- Defines oView based on the Controller that's being passed --//
+        
+        //--------------------------------------------------------------------//
+        // Find the parameters map for the widget
+        //--------------------------------------------------------------------//
+        if (mSettings === undefined || mSettings === null) {
+            mSettings = {};
+        }
+        
+        mSettings.width     = "75%";
+        mSettings.height    = "75%";
+        mSettings.alt       = "Stream not available";
 		
 		oScrollContainer = new sap.m.ScrollContainer (oView.createId("MJPEG_Cont"), {
 			width: "100%",
 			height: "100%",
 			vertical : true,
 			content : [
-				new sap.m.Image (oView.createId("MJPEG_Img"), {
-					width: "75%",
-					height: "75%",
-					src: sImgSRC
-				}).addStyleClass("MarLeft14Per")
+				new sap.m.Image (oView.createId("MJPEG_Img"), mSettings).addStyleClass("MarLeft14Per")
 			]
 		});
 		

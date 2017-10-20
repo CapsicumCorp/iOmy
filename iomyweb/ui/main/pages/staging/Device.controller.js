@@ -275,7 +275,7 @@ sap.ui.controller("pages.staging.Device", {
                                     })
                                 ],
                                 press : function () {
-                                    IomyRe.common.NavigationChangePage( "pMJPEG" , {} , false);
+                                    IomyRe.common.NavigationChangePage( "pMJPEG" , { "ThingId": mDevice.DeviceId } , false);
                                 }
                             })
                         );
