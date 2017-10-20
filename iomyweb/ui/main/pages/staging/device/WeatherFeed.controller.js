@@ -58,7 +58,7 @@ sap.ui.controller("pages.staging.device.WeatherFeed", {
             
             onSuccess : function (mData) {
                 oView.byId("WeatherOutside").setText(mData.Condition.Value);
-                oView.byId("Temperature").setText(mData.Temperature.Value + mData.Temperature.UomName);
+                oView.byId("Temperature").setText(mData.Temperature.Value.toFixed(1) + mData.Temperature.UomName);
                 oView.byId("Sunrise").setText(mData.HumanReadable.SunriseTime);
                 oView.byId("Sunset").setText(mData.HumanReadable.SunsetTime);
                 oView.byId("Humidity").setText(mData.Humidity.Value + mData.Humidity.UomName);

@@ -466,7 +466,7 @@ sap.ui.controller("pages.staging.Device", {
                     //--------------------------------------------------------//
                     if (aDevice.DeviceTypeId == IomyRe.devices.weatherfeed.ThingTypeId) {
                         mTaskListSettings.onSuccess = function (data) {
-                            oView.byId(sPrefix).setNumber(data.Temperature.Value + data.Temperature.UomName);
+                            oView.byId(sPrefix).setNumber(data.Temperature.Value.toFixed(1) + data.Temperature.UomName);
                             
                             oView.byId("humidity"+aDevice.DeviceId).setText("Humidity: " + data.Humidity.Value + data.Humidity.UomName);
                             oView.byId("outside"+aDevice.DeviceId).setText("Outside: " + data.Condition.Value);
