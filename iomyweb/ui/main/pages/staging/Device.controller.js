@@ -24,6 +24,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 sap.ui.controller("pages.staging.Device", {
     
+    bEditing            : false,            //-- BOOLEAN:   Determine whether the list is for editing device information or act as a way to view device data.
+    mPageData           : {},               //-- OBJECT:    Map containing data to parse to page.   --//
+    sPageId             : {},               //-- STRING:    ID of the page that each entry should go to. Either "pDevice" or "pDeviceForm".         --//
+    
     aaDeviceList : {},
     
     aAjaxTasks:{ 
@@ -286,21 +290,18 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                //number: "22°C",
                                 number: "",
-                                //numberUnit: "Inside",
                                 numberUnit: "",
                                 attributes : [
                                     new sap.m.ObjectAttribute (oView.createId("humidity"+mDevice.DeviceId), {
                                         text: "Loading..."
                                     }),
                                     new sap.m.ObjectAttribute (oView.createId("outside"+mDevice.DeviceId), {
-                                        //text: "Weather Outside: Clear"
                                         text: ""
                                     })
                                 ],
                                 press : function () {
-                                    IomyRe.common.NavigationChangePage( "pWeatherFeed" , {} , false);
+                                    IomyRe.common.NavigationChangePage( "pWeatherFeed" , { "ThingId" : mDevice.DeviceId } , false);
                                 }
                             })
                         );
@@ -332,7 +333,7 @@ sap.ui.controller("pages.staging.Device", {
                                     })
                                 ],
                                 press : function () {
-                                    IomyRe.common.NavigationChangePage( "pMotionSensor" , {} , false);
+                                    IomyRe.common.NavigationChangePage( "pMotionSensor" , { "ThingId" : mDevice.DeviceId } , false);
                                 }
                             })
                         );

@@ -33,7 +33,7 @@ sap.ui.controller("pages.staging.device.MotionSensor", {
 		var oView = this.getView();
 		
 		oView.addEventDelegate({
-			onBeforeShow : function (evt) {
+			onBeforeShow : function (oEvent) {
 				
 				//-- Set Static parameters --//
 				//-- (#ToDo# - Pull from the DB) --//
@@ -41,12 +41,33 @@ sap.ui.controller("pages.staging.device.MotionSensor", {
 				//-- Defines the Screen Type --//
 				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 				
+                oController.LoadCurrentData(oEvent.data.ThingId);
 				//-- Updates Paramaters & ID's on Load --//
 				//-- Brent to add in logic to update the UI with id's from the Database --//
 			}
-		});		
+		});
 	},
 	
-		
+	LoadCurrentData : function (iThingId) {
+        var oView = this.getView();
+        
+        IomyRe.devices.motionsensor.FetchAllCurrentData({
+            thingID : iThingId,
+            
+            onSuccess : function (mData) {
+                
+                $.each (mData, function (sI, vField) {
+                    
+                    oView.byId(sI).setText(vField);
+                    
+                });
+                
+            },
+            
+            onFail : function (sErrMessage) {
+                $.sap.log.error(sErrMessage);
+            }
+        });
+    }
 		
 });

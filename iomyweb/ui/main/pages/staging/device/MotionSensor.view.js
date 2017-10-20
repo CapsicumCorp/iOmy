@@ -63,8 +63,8 @@ sap.ui.jsview("pages.staging.device.MotionSensor", {
 									label : "Status:",
 									content : [
 										//-- Column 2 for Weather Outside Row --//
-										new sap.m.Text ({
-											text : "On"
+										new sap.m.Text (oView.createId("Status"), {
+											text : "Loading"
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
@@ -73,8 +73,8 @@ sap.ui.jsview("pages.staging.device.MotionSensor", {
 									label : "Temperature:",
 									content : [
 										//-- Column 2 for Temperature Row --//
-										new sap.m.Text ({
-											text : "26°C"
+										new sap.m.Text (oView.createId("Temperature"), {
+											text : ""
 										})
 										
 									]
@@ -83,9 +83,9 @@ sap.ui.jsview("pages.staging.device.MotionSensor", {
 								new sap.m.InputListItem ({
 									label : "Last Motion:",
 									content : [
-										//-- Column 2 for Sunrise Row --//
-										new sap.m.Text ({
-											text : "254d 19h 5m 3s"
+										//-- Column 2 for Last Motion Row --//
+										new sap.m.Text (oView.createId("TimeSinceLastMotion"), {
+											text : ""
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
@@ -93,9 +93,9 @@ sap.ui.jsview("pages.staging.device.MotionSensor", {
 								new sap.m.InputListItem ({
 									label : "Battery:",
 									content : [
-										//-- Column 2 for Sunset Row --//
-										new sap.m.Text ({
-											text : "3V"
+										//-- Column 2 for Battery Voltage Row --//
+										new sap.m.Text (oView.createId("BatteryVoltage"), {
+											text : ""
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
@@ -103,9 +103,9 @@ sap.ui.jsview("pages.staging.device.MotionSensor", {
 								new sap.m.InputListItem ({
 									label : "Tamper:",
 									content : [
-										//-- Column 2 for Humidity Row --//
-										new sap.m.Text ({
-											text : "Secure"
+										//-- Column 2 for Tamper Row --//
+										new sap.m.Text (oView.createId("TamperStatus"), {
+											text : ""
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),

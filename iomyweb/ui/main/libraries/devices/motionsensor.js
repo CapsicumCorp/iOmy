@@ -151,8 +151,8 @@ $.extend(IomyRe.devices.motionsensor,{
         // Declare variables and import modules
         //--------------------------------------------------------------------//
         var oModule     = this;
-        var aaIOs       = IOMy.common.ThingList["_"+iThingId].IO;
         var aIOIDs      = [];
+        var aaIOs;
         var mThingIdInfo;
         var iThingId;
         var fnSuccess;
@@ -195,6 +195,8 @@ $.extend(IomyRe.devices.motionsensor,{
         //--------------------------------------------------------------------//
         // Prepare the IO ID array
         //--------------------------------------------------------------------//
+        aaIOs = IomyRe.common.ThingList["_"+iThingId].IO;
+        
         $.each(aaIOs, function (sI, mIO) {
             if (sI !== undefined && sI !== null && mIO !== undefined && mIO !== null) {
                 if (mIO.RSTypeId == oModule.RSBattery || mIO.RSTypeId == oModule.RSTemperature ) {
@@ -208,60 +210,166 @@ $.extend(IomyRe.devices.motionsensor,{
         //--------------------------------------------------------------------//
         IomyRe.apiodata.AjaxRequest({
             "Url"             : IomyRe.apiodata.ODataLocation("dataint"),
-            "Columns"         : ["CALCEDVALUE", "UTS", "UOM_PK", "UOM_NAME"],
+            "Columns"         : ["CALCEDVALUE", "UTS", "UOM_PK", "UOM_NAME", "RSTYPE_PK"],
             "WhereClause"     : [aIOIDs.join(" or ")],
             "OrderByClause"   : [],
             
             "onSuccess" : function (responseType, data) {
-                //------------------------------------------------------------//
-                // Variables
-                //------------------------------------------------------------//
-                var data        = data[0];
-                var sUOMName    = data.UOM_NAME;
-                
-                //------------------------------------------------------------//
-                // This is a temporary workaround to eliminate a character from
-                // the UOM_NAME (Â) which comes from the OData service. This
-                // affected the temperature field.
-                //------------------------------------------------------------//
-                sUOMName = sUOMName.replace("Â", "");
-                
-                //------------------------------------------------------------//
-                // Set the text in the relevant field on the motion sensor page.
-                //------------------------------------------------------------//
-                fnSuccess(data.CALCEDVALUE + sUOMName);
+                try {
+                    if (responseType === "JSON") {
+                        if (data.Error !== true) {
+                            //------------------------------------------------------------//
+                            // Variables
+                            //------------------------------------------------------------//
+                            var mResult = {};
+
+                            for (var i = 0; i < data.length; i++) {
+                                //--------------------------------------------------------//
+                                // This is a temporary workaround to eliminate a character
+                                // from the UOM_NAME (Â) which comes from the OData service.
+                                // This affects the temperature field.
+                                //--------------------------------------------------------//
+                                data[i].UOM_NAME = data[i].UOM_NAME.replace("Â", "");
+
+                                if (data[i].RSTYPE_PK === oModule.RSBattery) {
+                                    mResult.BatteryVoltage = data[i].CALCEDVALUE + data[i].UOM_NAME;
+
+                                } else if (data[i].RSTYPE_PK === oModule.RSTemperature) {
+                                    mResult.Temperature = data[i].CALCEDVALUE + data[i].UOM_NAME;
+
+                                }
+                            }
+
+                            //------------------------------------------------------------//
+                            // Run the success callback parsing the result data.
+                            //------------------------------------------------------------//
+                            fnSuccess(mResult);
+
+                        } else {
+                            fnFail(data.ErrMesg);
+                        }
+                    } else {
+                        fnFail("Response data type received was not in a valid JSON format. Type Received: "+responseType);
+                    }
+                } catch (e) {
+                    fnFail("An error in a callback function for IomyRe.devices.motionsensor.FetchODataFields():\n\n" + e.name + ": " + e.message);
+                }
             },
             
             "onFail" : function (response) {
                 // Log errors
-                jQuery.sap.log.error("There was an error fetching data for IO "+iIOId+":\n\n" + JSON.stringify(response));
+                var sErrMessage = "There was an error fetching data using IomyRe.devices.motionsensor.FetchODataFields():\n\n" + response.responseText;
+                
+                jQuery.sap.log.error(sErrMessage);
+                fnFail(sErrMessage);
                 
             },
             
         });
     },
     
-    FetchAllCurrentData : function (iThingId) {
+    FetchAllCurrentData : function (mSettings) {
         //--------------------------------------------------------------------//
         // Declare variables and import modules and global variables
         //--------------------------------------------------------------------//
-        var oModule = this; // Capture the scope of the current device module.
-        var mData   = {};
+        var oModule             = this; // Capture the scope of the current device module.
+        var sUnavailableString  = "N/A";
+        var mThingIdInfo;
+        var iThingId;
+        var fnSuccess;
+        var fnFail;
         
+        var mData   = {
+            Status              : sUnavailableString,
+            TimeSinceLastMotion : sUnavailableString,
+            TamperStatus        : sUnavailableString,
+            BatteryVoltage      : sUnavailableString,
+            Temperature         : sUnavailableString
+        };
+        
+        //--------------------------------------------------------------------//
+        // Find and fetch the device ID from the parameter map. Report if
+        // it is missing.
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined) {
+            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
+                mThingIdInfo = IomyRe.validation.isThingIDValid(mSettings.thingID);
+                
+                if (!mThingIdInfo.bIsValid) {
+                    throw new IllegalArgumentException(mThingIdInfo.aErrorMessages.join("\n"));
+                } else {
+                    iThingId = mSettings.thingID;
+                }
+                
+            } else {
+                throw new MissingArgumentException("Thing ID must be given.");
+            }
+            
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+            } else {
+                fnSuccess = function () {};
+            }
+            
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+            } else {
+                fnFail = function () {};
+            }
+            
+        } else {
+            throw new MissingSettingsMapException("Thing ID must be given.");
+        }
+        
+        //--------------------------------------------------------------------//
+        // Fetch the status.
+        //--------------------------------------------------------------------//
+        mData.Status = IomyRe.devices.GetDeviceStatus(iThingId);
+        
+        //--------------------------------------------------------------------//
+        // Fetch the time since the last detected motion and the tamper status.
+        //--------------------------------------------------------------------//
         oModule.CallAPI({
             thingID : iThingId,
             
             onSuccess : function (mResult) {
+                mData.TimeSinceLastMotion   = mResult.HumanReadable.UTS;
+                mData.TamperStatus          = mResult.CurrentStatus.Tamper === false ? "Secure" : "Not Secure";
                 
-                
+                //------------------------------------------------------------//
+                // Fetch the battery and temperature values.
+                //------------------------------------------------------------//
                 oModule.FetchODataFields({
                     thingID : iThingId,
                     
-                    
+                    onSuccess : function (mResult) {
+                        mData.BatteryVoltage    = mResult.BatteryVoltage;
+                        mData.Temperature       = mResult.Temperature;
+                        
+                        fnSuccess(mData);
+                    }
                 });
                 
+            },
+            
+            onFail : function (sErrorMessage) {
+                //------------------------------------------------------------//
+                // Fetch the battery and temperature values.
+                //------------------------------------------------------------//
+                oModule.FetchODataFields({
+                    thingID : iThingId,
+                    
+                    onSuccess : function (mResult) {
+                        mData.BatteryVoltage    = mResult.BatteryVoltage;
+                        mData.Temperature       = mResult.Temperature;
+                        
+                        fnSuccess(mData);
+                    }
+                });
+                
+                fnFail(sErrorMessage);
             }
-        })
+        });
     },
     
     GetUITaskList: function( mSettings ) {
