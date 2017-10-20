@@ -108,31 +108,45 @@ $.extend(IomyRe.devices.motionsensor,{
                 "ThingId" : iThingId
             },
             
-            "onSuccess" : function (response, data) {
-                // Check the error condition.
-                if (data.Error === false) {
-                    //--------------------------------------------------------//
-                    // If no error has been reported, get the data and display
-                    // it.
-                    //--------------------------------------------------------//
-                    var mResponseData = data.Data;
-                    
-                    var iUTS    = mResponseData.MostRecentMotion;
-                    var bTamper = mResponseData.CurrentStatus.Tamper;
-                    
-                    
-                    var mHumanReadable = {
-                        "UTS" : IomyRe.functions.getLengthOfTimePassed({
-                            "UTS" : iUTS
-                        })
-                    };
-                    
-                    mResponseData.HumanReadable = mHumanReadable;
-                    
-                    fnSuccess(mResponseData);
-                    
-                } else {
-                    fnFail(data.ErrMesg);
+            "onSuccess" : function (responseType, data) {
+                
+                try {
+                    if (responseType === "JSON") {
+                        if (data.Error !== true) {
+                            
+                            try {
+                                //--------------------------------------------------------//
+                                // If no error has been reported, get the data and display
+                                // it.
+                                //--------------------------------------------------------//
+                                var mResponseData = data.Data;
+
+                                var iUTS    = mResponseData.MostRecentMotion;
+                                var bTamper = mResponseData.CurrentStatus.Tamper;
+
+
+                                var mHumanReadable = {
+                                    "UTS" : IomyRe.functions.getLengthOfTimePassed({
+                                        "UTS" : iUTS
+                                    })
+                                };
+
+                                mResponseData.HumanReadable = mHumanReadable;
+
+                                fnSuccess(mResponseData);
+                                
+                            } catch (e) {
+                                fnFail("An error in the success function for IomyRe.devices.motionsensor.CallAPI():\n\n" + e.name + ": " + e.message);
+                            }
+
+                        } else {
+                            fnFail(data.ErrMesg);
+                        }
+                    } else {
+                        fnFail("Response data type received was not in a valid JSON format. Type Received: "+responseType);
+                    }
+                } catch (e) {
+                    fnFail("An error in the fail function for IomyRe.devices.motionsensor.CallAPI():\n\n" + e.name + ": " + e.message);
                 }
             },
             
@@ -218,32 +232,38 @@ $.extend(IomyRe.devices.motionsensor,{
                 try {
                     if (responseType === "JSON") {
                         if (data.Error !== true) {
-                            //------------------------------------------------------------//
-                            // Variables
-                            //------------------------------------------------------------//
-                            var mResult = {};
+                            
+                            try {
+                                //------------------------------------------------------------//
+                                // Variables
+                                //------------------------------------------------------------//
+                                var mResult = {};
 
-                            for (var i = 0; i < data.length; i++) {
-                                //--------------------------------------------------------//
-                                // This is a temporary workaround to eliminate a character
-                                // from the UOM_NAME (Â) which comes from the OData service.
-                                // This affects the temperature field.
-                                //--------------------------------------------------------//
-                                data[i].UOM_NAME = data[i].UOM_NAME.replace("Â", "");
+                                for (var i = 0; i < data.length; i++) {
+                                    //--------------------------------------------------------//
+                                    // This is a temporary workaround to eliminate a character
+                                    // from the UOM_NAME (Â) which comes from the OData service.
+                                    // This affects the temperature field.
+                                    //--------------------------------------------------------//
+                                    data[i].UOM_NAME = data[i].UOM_NAME.replace("Â", "");
 
-                                if (data[i].RSTYPE_PK === oModule.RSBattery) {
-                                    mResult.BatteryVoltage = data[i].CALCEDVALUE + data[i].UOM_NAME;
+                                    if (data[i].RSTYPE_PK === oModule.RSBattery) {
+                                        mResult.BatteryVoltage = data[i].CALCEDVALUE + data[i].UOM_NAME;
 
-                                } else if (data[i].RSTYPE_PK === oModule.RSTemperature) {
-                                    mResult.Temperature = data[i].CALCEDVALUE + data[i].UOM_NAME;
+                                    } else if (data[i].RSTYPE_PK === oModule.RSTemperature) {
+                                        mResult.Temperature = data[i].CALCEDVALUE + data[i].UOM_NAME;
 
+                                    }
                                 }
-                            }
 
-                            //------------------------------------------------------------//
-                            // Run the success callback parsing the result data.
-                            //------------------------------------------------------------//
-                            fnSuccess(mResult);
+                                //------------------------------------------------------------//
+                                // Run the success callback parsing the result data.
+                                //------------------------------------------------------------//
+                                fnSuccess(mResult);
+                                
+                            } catch (e) {
+                                fnFail("An error in the success function for IomyRe.devices.motionsensor.FetchODataFields():\n\n" + e.name + ": " + e.message);
+                            }
 
                         } else {
                             fnFail(data.ErrMesg);
@@ -252,7 +272,7 @@ $.extend(IomyRe.devices.motionsensor,{
                         fnFail("Response data type received was not in a valid JSON format. Type Received: "+responseType);
                     }
                 } catch (e) {
-                    fnFail("An error in a callback function for IomyRe.devices.motionsensor.FetchODataFields():\n\n" + e.name + ": " + e.message);
+                    fnFail("An error in the fail function for IomyRe.devices.motionsensor.FetchODataFields():\n\n" + e.name + ": " + e.message);
                 }
             },
             
@@ -263,7 +283,7 @@ $.extend(IomyRe.devices.motionsensor,{
                 jQuery.sap.log.error(sErrMessage);
                 fnFail(sErrMessage);
                 
-            },
+            }
             
         });
     },
