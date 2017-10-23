@@ -358,7 +358,7 @@ $.extend( IomyRe.widgets, {
 		var oToolbar;
 		var oDevTitle;
 		var oTSpacer1;
-		var oTspacer2;
+		var oTSpacer2;
 		
 		//----------------------------------------------------//
 		//-- 2.0 - Create the Content                       --//

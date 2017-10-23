@@ -2420,7 +2420,7 @@ $.extend(IomyRe.common,{
      * led from the "Navigation Main" page to this current page.
      * 
      * @param {string} sPageName            ID of the page, aka a UI5 View, to change to.
-     * @param {JS object} aPageData         (optional) Associative array of any data to parse to the page.
+     * @param {object} aPageData            (optional) Associative array of any data to parse to the page.
      * @param {boolean} bResetNavArray      (optional) Boolean flag declaring that a reset is required (default = false)
      */
     NavigationChangePage: function( sPageName, aPageData, bResetNavArray ) {
@@ -2496,6 +2496,15 @@ $.extend(IomyRe.common,{
         
         if (oApp.getPage(sPageName) === null) {
             IomyRe.pages.createPage(sPageName);
+        }
+        
+        //--------------------------------------------------------------------//
+        // If the side menu was open when this function is called, close it.
+        //--------------------------------------------------------------------//
+        if (oApp.getCurrentPage().byId("toolPage") !== undefined) {
+            if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === true) {
+                IomyRe.navigation.onSideNavButtonPress(null, oApp.getCurrentPage());
+            }
         }
         
         //-- Navigate to the new Page --//
