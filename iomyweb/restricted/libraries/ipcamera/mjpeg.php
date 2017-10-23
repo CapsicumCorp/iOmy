@@ -124,7 +124,7 @@ class IPCamera {
 				case "TestStream":
 					$aResult = $this->TestStream( $aData );
 					break;
-				
+					
 				case "BuildStream":
 					$aResult = $this->TestStream( $aData );
 					break;
@@ -643,8 +643,8 @@ class IPCamera {
 					$iNetworkPort      = $aParsedData['Data']['NetworkPort'];
 					$sPath             = $aParsedData['Data']['Path'];
 					$sProtocol         = $aParsedData['Data']['Protocol'];
-					$sDisplayName      = $aParsedData['Data']['Displayname'];
-					$sLinkName         = $aParsedData['Data']['Linkname'];
+					$sDisplayName      = $aParsedData['Data']['DisplayName'];
+					$sLinkName         = $aParsedData['Data']['LinkName'];
 					
 				} else {
 					$bError      = true;
@@ -1065,7 +1065,47 @@ class IPCamera {
 			}
 		}
 		
+		//------------------------------------//
+		//-- 5.5 - Link Name                --//
+		if( $bError===false ) {
+			if( isset( $aData['LinkName'] ) ) {
+				//-- Check if it is a string --//
+				if( is_string( $aData['LinkName'] ) ) {
+					//-- Extract the variable --//
+					$sLinkName = $aData['LinkName'];
+					
+				} else {
+					//-- ERROR: Invalid String --//
+					$bError    = true;
+					$sErrMesg .= "The \"LinkName\" is not a valid string! \n";
+				}
+			} else {
+				//-- ERROR: Failed to find the element in the array --//
+				$bError    = true;
+				$sErrMesg .= "Failed to find the \"LinkName\" in the array! \n";
+			}
+		}
 		
+		//------------------------------------//
+		//-- 5.6 - Display Name             --//
+		if( $bError===false ) {
+			if( isset( $aData['DisplayName'] ) ) {
+				//-- Check if it is a string --//
+				if( is_string( $aData['DisplayName'] ) ) {
+					//-- Extract the variable --//
+					$sDisplayName = $aData['DisplayName'];
+					
+				} else {
+					//-- ERROR: Invalid String --//
+					$bError    = true;
+					$sErrMesg .= "The \"DisplayName\" is not a valid string! \n";
+				}
+			} else {
+				//-- ERROR: Failed to find the element in the array --//
+				$bError    = true;
+				$sErrMesg .= "Failed to find the \"DisplayName\" in the array! \n";
+			}
+		}
 		//------------------------------------------------------------------------------//
 		//-- 9.0 - PARSE THE JSON REPONSE                                             --//
 		//------------------------------------------------------------------------------//
@@ -1081,7 +1121,9 @@ class IPCamera {
 					"NetworkAddress" => $sNetworkAddress,
 					"NetworkPort"    => $iNetworkPort,
 					"Path"           => $sPath,
-					"Protocol"       => $sProtocol
+					"Protocol"       => $sProtocol,
+					"LinkName"       => $sLinkName,
+					"DisplayName"    => $sDisplayName
 				)
 			);
 		} else {

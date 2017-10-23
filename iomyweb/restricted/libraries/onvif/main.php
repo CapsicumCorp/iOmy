@@ -1800,7 +1800,7 @@ class PHPOnvif {
 				"CommId"                => $iCommId,
 				"Type"                  => $iLinkType,
 				"SerialCode"            => "",
-				"Displayname"           => $sInfoName,
+				"Displayname"           => $sLinkName,
 				"State"                 => "1",
 				"InfoName"              => $sInfoName,
 				"InfoManufacturer"      => $sInfoManu,
