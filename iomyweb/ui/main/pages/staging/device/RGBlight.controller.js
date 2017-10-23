@@ -28,6 +28,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
     fSaturationConversionRate       : 1.44,         // 144 / 100 (100 being the max saturation value)
     fLightConversionRate            : 2.54,         // 254 / 100 (likewise)
 	iThingId                        : null,
+	iThingTypeId                        : null,
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -40,15 +41,28 @@ sap.ui.controller("pages.staging.device.RGBlight", {
 		
 		oView.addEventDelegate({
 			onBeforeShow : function (oEvent) {
+                var iTypeId;
                 
                 if (oEvent.data.ThingId !== undefined && oEvent.data.ThingId !== null) {
                     oController.iThingId = oEvent.data.ThingId;
+                    iTypeId = IomyRe.common.ThingList["_"+oEvent].TypeId;
                 }
 				
-				//-- Set Static parameters --//
-				//-- (#ToDo# - Pull from the DB) --//
 				oController.InitialDeviceInfoLoad();
 				oController.RGBUiDraw();
+                
+                if (iTypeId == IomyRe.devices.philipshue.ThingTypeId) {
+                    oController.fHueConversionRate          = 65535 / 360;  // 65535 (2^16 - 1) is the maximum value the Philips Hue API will accept.
+                    oController.fSaturationConversionRate   = 1.44;         // 144 / 100 (100 being the max saturation value)
+                    oController.fLightConversionRate        = 2.54;         // 254 / 100 (likewise)
+                    
+                } else if (iTypeId == IomyRe.devices.csrmesh.ThingTypeId) {
+                    oController.fHueConversionRate          = 1;
+                    oController.fSaturationConversionRate   = 2.55;
+                    oController.fLightConversionRate        = 2.55;
+                }
+                
+                oController.iThingTypeId = iTypeId;
 				
 				//-- Defines the Screen Type --//
 				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
@@ -75,8 +89,8 @@ sap.ui.controller("pages.staging.device.RGBlight", {
 		try {
 			if (mThing.TypeId === IomyRe.devices.philipshue.ThingTypeId) {
 				//$.sap.log.error("RGBUiDraw:" +RGBType);
-//			} else if (iRGBType === "CSR") {
-//				oView.byId("RGB_Cont").addContent(IomyRe.widgets.CSRbutton(oController));
+			} else if (mThing.TypeId === IomyRe.devices.csrmesh.ThingTypeId) {
+				oView.byId("RGB_Cont").addContent(IomyRe.widgets.CSRbutton(this));
 			}		
 		} catch(e1) {
 			$.sap.log.error("RGBUiDraw: Critcal Error."+e1.message);

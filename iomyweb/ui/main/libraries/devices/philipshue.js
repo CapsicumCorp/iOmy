@@ -1,7 +1,7 @@
 /*
 Title: Philips Hue Device Module
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
-Description: Provides the UI for a Philips Hue device entry.
+Description: Provides the information for a Philips Hue device.
 Copyright: Capsicum Corporation 2016, 2017
 
 This file is part of iOmy.
@@ -34,5 +34,5 @@ $.extend(IomyRe.devices.philipshue,{
     RSSaturation    : 3902,
     RSBrightness    : 3903,
     
-    DevicePageID : "pPhilipsHue"
+    DevicePageID : "pPhilipsHue" // TODO: Is this really necessary anymore?
 });
