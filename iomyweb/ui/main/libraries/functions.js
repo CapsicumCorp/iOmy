@@ -135,18 +135,8 @@ $.extend(IomyRe.functions, {
     },*/
     
     /**
-     * Creates a JSON structure that contains a list of device types for users
-     * to select from.
-     * 
-     * Example:
-     * 
-     * {
-     *     "type2" : {
-     *         "Id" : 2,
-     *         "Name" : "New Zigbee Dongle",
-     *         "Type" : "type"
-     *     },
-     * }
+     * Creates a JSON structure of New Device form data that is used in the
+     * JSON model to store user input for submission.
      * 
      * @returns {Object}        Data structure
      */
@@ -227,11 +217,13 @@ $.extend(IomyRe.functions, {
                     "Hub" : "",
                     "Premise" : "",
                     "Room" : "1",
+                    "IPCamType" : "MJPEG",
                     "Protocol" : "http",
                     "IPAddress" : "",
                     "IPPort" : "",
                     "Path" : "",
                     "DisplayName" : "",
+                    "LinkName" : "",
                     "Username" : "",
                     "Password" : ""
                 };

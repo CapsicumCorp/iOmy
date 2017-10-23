@@ -74,7 +74,16 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
-							label : "Display Name",
+							label : "Device Name",
+							fields: [ 
+								new sap.m.Input ({
+									placeholder : "Name of the IP Webcam",
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/LinkName}"
+								})
+							]
+						}),
+						new sap.ui.layout.form.FormElement({
+							label : "Stream Name",
 							fields: [ 
 								new sap.m.Input ({
 									placeholder : "Name of the Camera Stream",
@@ -86,16 +95,14 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							label : "Type",
 							fields: [ 
 								new sap.m.Select({
-									items : [
-										new sap.ui.core.Item ({
-											text: "MJPEG IP Camera",
-											key: "MJPEG"
-										}),
-										new sap.ui.core.Item ({
-											text: "Example",
-											key: "Ex"
-										}),
-									]
+									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/IPCamType}",
+                                    items : {
+                                        path : "/IPCamTypes",
+                                        template : new sap.ui.core.Item({
+                                            key : "{TypeName}",
+                                            text : "{TypeName}"
+                                        })
+                                    }
 								}),
 							]
 						}),

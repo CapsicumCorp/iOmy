@@ -225,8 +225,13 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         //------------------------------------------------//
         var oJSON = IomyRe.functions.getDeviceFormJSON();
         
-        oJSON.Rooms = oController.PrepareRoomListForModel(1);
-        oJSON.Hubs  = IomyRe.common.HubList;
+        oJSON.Rooms         = oController.PrepareRoomListForModel(1);
+        oJSON.Hubs          = IomyRe.common.HubList;
+        oJSON.IPCamTypes    = {
+            "_1" : {
+                "TypeName" : "MJPEG"
+            }
+        };
         
         oView.setModel( 
             new sap.ui.model.json.JSONModel(oJSON)
@@ -439,8 +444,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                         "Mode" : "AddNewIPCamera",
                         "HubId" : oCurrentFormData.Hub,
                         "RoomId" : oCurrentFormData.Room,
-                        "DisplayName" : oCurrentFormData.DisplayName,
-                        "Data" : "{\"NetworkAddress\":\""+oCurrentFormData.IPAddress+"\",\"NetworkPort\":\""+oCurrentFormData.IPPort+"\",\"Protocol\":\""+oCurrentFormData.Protocol+"\",\"Path\":\""+oCurrentFormData.Path+"\"}"
+                        "IPCamType" : oCurrentFormData.IPCamType,
+                        "Data" : "{\"NetworkAddress\":\""+oCurrentFormData.IPAddress+"\",\"NetworkPort\":\""+oCurrentFormData.IPPort+"\",\"Protocol\":\""+oCurrentFormData.Protocol+"\",\"Path\":\""+oCurrentFormData.Path+"\",\"Displayname\":\""+oCurrentFormData.DisplayName+"\",\"LinkName\":\""+oCurrentFormData.LinkName+"\"}"
                     }
                 };
                 break;
