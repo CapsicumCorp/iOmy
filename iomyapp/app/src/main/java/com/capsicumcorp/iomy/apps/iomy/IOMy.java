@@ -217,7 +217,7 @@ public class IOMy extends AppCompatActivity
         if (savedInstanceState != null) {
             iomy.restoreState(savedInstanceState);
         } else {
-            iomy.loadUrl("http://" + Constants.installWizard.hostname + ":"+Constants.installWizard.webserverport+"/ui/mobile/");
+            iomy.loadUrl("http://" + Constants.installWizard.hostname + ":"+Constants.installWizard.webserverport+"/ui/main/");
         }
     }
     @SuppressWarnings("StatementWithEmptyBody")
