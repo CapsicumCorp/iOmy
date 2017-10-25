@@ -2501,8 +2501,11 @@ $.extend(IomyRe.common,{
         //--------------------------------------------------------------------//
         // If the side menu was open when this function is called, close it.
         //--------------------------------------------------------------------//
+//        console.log(sap.ui.Device.system.desktop);
+//        console.log(sap.ui.Device.system.phone);
+//        console.log(sap.ui.Device.system.tablet);
         if (oApp.getCurrentPage().byId("toolPage") !== undefined) {
-            if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === true) {
+            if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === true && !sap.ui.Device.system.desktop) {
                 IomyRe.navigation.onSideNavButtonPress(null, oApp.getCurrentPage());
             }
         }
