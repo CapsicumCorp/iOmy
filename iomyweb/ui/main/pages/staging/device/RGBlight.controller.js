@@ -28,7 +28,9 @@ sap.ui.controller("pages.staging.device.RGBlight", {
     fSaturationConversionRate       : 1.44,         // 144 / 100 (100 being the max saturation value)
     fLightConversionRate            : 2.54,         // 254 / 100 (likewise)
 	iThingId                        : null,
-	iThingTypeId                        : null,
+	iThingTypeId                    : null,
+    
+    bFirstRun                       : true,
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -45,7 +47,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 
                 if (oEvent.data.ThingId !== undefined && oEvent.data.ThingId !== null) {
                     oController.iThingId = oEvent.data.ThingId;
-                    iTypeId = IomyRe.common.ThingList["_"+oEvent].TypeId;
+                    iTypeId = IomyRe.common.ThingList["_"+oEvent.data.ThingId].TypeId;
                 }
 				
 				oController.InitialDeviceInfoLoad();
@@ -66,22 +68,18 @@ sap.ui.controller("pages.staging.device.RGBlight", {
 				
 				//-- Defines the Screen Type --//
 				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
-				
-				//-- Updates Paramaters & ID's on Load --//
-				//-- Brent to add in logic to update the UI with id's from the Database --//
 			}
 		});		
 	},
 	
 	//-- Sets the RGB Color parameters based on static data --//
-	//--  (#ToDo# - convert to pull from the DB) --//
 	RGBInit: function (sHSV) {
-		var oView = this.getView();
+        var oController = this;
+		var oView       = this.getView();
 		oView.byId("CPicker").setColorString(sHSV);
 	},
 		
 	//-- Adds a "WhiteLight" button if the devicetype === "CSR" --//
-	//--  (#ToDo# - Convert to pull RGBType from Thinglist) --//
 	RGBUiDraw: function () {
 		var oView       = this.getView();
         var mThing      = IomyRe.common.ThingList["_"+this.iThingId];
@@ -190,21 +188,25 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var iSat        = Math.floor(mParameters.s * this.fSaturationConversionRate);
         var iLight      = Math.floor(mParameters.v * this.fLightConversionRate);
         
-        IomyRe.apiphp.AjaxRequest({
-            url : IomyRe.apiphp.APILocation("philipshue"),
-            method : "POST",
-            data : {
-                Mode : "ChangeHueSatLig",
-                ThingId : oController.iThingId,
-                Hue : iHue,
-                Saturation : iSat,
-                Brightness : iLight
-            },
-            
-            onFail : function (response) {
-                jQuery.sap.log.error("There was a fatal error changing information about the current Hue device: "+JSON.stringify(response));
-            }
-        });
+        if (!oController.bFirstRun) {
+            IomyRe.apiphp.AjaxRequest({
+                url : IomyRe.apiphp.APILocation("philipshue"),
+                method : "POST",
+                data : {
+                    Mode : "ChangeHueSatLig",
+                    ThingId : oController.iThingId,
+                    Hue : iHue,
+                    Saturation : iSat,
+                    Brightness : iLight
+                },
+
+                onFail : function (response) {
+                    jQuery.sap.log.error("There was a fatal error changing information about the current Hue device: "+JSON.stringify(response));
+                }
+            });
+        } else {
+            oController.bFirstRun = false;
+        }
     }
 		
 });

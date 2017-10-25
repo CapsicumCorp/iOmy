@@ -47,14 +47,25 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 				//oController.iCurrentId = oEvent.data.Id;
 				
 				oController.mPageData = oEvent.data;
-				oController.bEditing = oController.mPageData.bEditing;
+                
+                if (oController.mPageData.bEditing !== undefined && oController.mPageData.bEditing !== null) {
+                    oController.bEditing = oController.mPageData.bEditing;
+                } else {
+                    oController.bEditing = false;
+                }
+                
 				try {
-					if (oController.bEditing !== false) {
+					if (oController.bEditing === true) {
 						var sRoomCode = "_"+oController.mPageData.RoomId;
 						var sPremiseCode = "_"+oController.mPageData.PremiseId;
 						oController.mRoomData = IomyRe.common.RoomsList[sPremiseCode][sRoomCode];
 					} else {
-						
+						oController.mRoomData = {
+                            "RoomName"      : "",
+                            "RoomDesc"      : "",
+                            "PremiseId"     : "",
+                            "RoomTypeId"    : ""
+                        };
 					}
 				} catch(e1) {
 					jQuery.sap.log.error("Error with the onBeforeShow 'bEditing' :"+e1.message);

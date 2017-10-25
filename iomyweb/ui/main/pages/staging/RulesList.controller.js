@@ -98,14 +98,14 @@ sap.ui.controller("pages.staging.RulesList", {
                 
                 if (mRule !== undefined && mRule !== null) {
                     aRules.push({
-                        "DeviceName": mThing.ThingName,
+                        "DeviceName": mThing.DisplayName,
                         "DeviceType": mThing.TypeName,
                         "EventType" : "On",
                         "EventTime" : IomyRe.functions.getTimestampString(IomyRe.time.GetDateFromMilitaryTime( mRule.Ontime ), "", true, false)
                     });
 
                     aRules.push({
-                        "DeviceName": mThing.ThingName,
+                        "DeviceName": mThing.DisplayName,
                         "DeviceType": mThing.TypeName,
                         "EventType" : "Off",
                         "EventTime" : IomyRe.functions.getTimestampString(IomyRe.time.GetDateFromMilitaryTime( mRule.Offtime ), "", true, false)
