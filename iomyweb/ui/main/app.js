@@ -151,6 +151,12 @@ var aPages = [
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.user.UserForm\" Page!\n"
 	},
 	{
+		"Id":			"pNewUser",
+		"Location":		"pages.staging.user.NewUser",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.user.NewUser\" Page!\n"
+	},
+	{
 		"Id":			"pUserList",
 		"Location":		"pages.staging.user.UserList",
 		"Type":			"JS",
