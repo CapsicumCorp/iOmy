@@ -51,7 +51,7 @@ sap.ui.controller("pages.staging.Room", {
                     if (oEvent.data.bEditing !== undefined) {
                         oController.bEditing = oEvent.data.bEditing;
                     } else {
-                         oController.bEditing = false;
+                        oController.bEditing = false;
                     }
                 } catch(e1) {
                     $.sap.log.error("onBeforeShow: oEvent.data.bEditing Critcal Error:"+e1.message);
@@ -137,6 +137,7 @@ sap.ui.controller("pages.staging.Room", {
                     
                     if (mFirstRoom.RoomName === "Unassigned") {
                         bOmitEntry = true;
+                        bHasRooms = false;
                     }
                 }
                 
@@ -179,15 +180,15 @@ sap.ui.controller("pages.staging.Room", {
                     new sap.m.ObjectListItem ({        
                         title: "No rooms",
                         type: "Active",
-                        number: IomyRe.functions.getNumberOfDevicesInRoom(mRoom.RoomId),
-                        numberUnit: "Devices",
+                        //number: IomyRe.functions.getNumberOfDevicesInRoom(mRoom.RoomId),
+                        //numberUnit: "Devices",
                         attributes : [
                             new sap.m.ObjectAttribute ({
                                 text: "Tap to add a room"
                             })
                         ],
                         press : function () {
-                            //IomyRe.common.NavigationChangePage( "pDevice" , {roomID : mRoom.RoomId} , false);
+                            IomyRe.common.NavigationChangePage( "pRoomForm" , {} , false);
                         }
                     })
                 );
