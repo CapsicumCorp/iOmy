@@ -81,6 +81,10 @@ sap.ui.jsfragment("fragments.ZigbeeSmartPlug", {
 											layoutData : new sap.m.FlexItemData({
 												growFactor : 1
 											}),
+                                            
+                                            submit : function () {
+                                                oController.RunZigbeeCommand();
+                                            }
                                             //enabled : false
 										}),
 										new sap.m.Button (oView.createId("CustomTelnetButton"),{

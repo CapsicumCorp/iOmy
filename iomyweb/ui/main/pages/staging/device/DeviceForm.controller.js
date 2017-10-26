@@ -374,9 +374,6 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         var mData               = {};
         var oModel              = oView.getModel();
         
-        console.log(sDevTypeKey);
-        console.log(JSON.stringify(oCurrentFormData));
-        
         // If the Room ID either less than 1 or an invalid value, like null or 
         // undefined, set it to the 'Unassigned' room.
         if (isNaN(oCurrentFormData.Room) || oCurrentFormData.Room < 1) {
@@ -534,13 +531,55 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         IomyRe.apiphp.AjaxRequest(mData);
     },
     
+    RunZigbeeCommand : function () {
+        var oView               = this.getView();
+        var sDevTypeKey         = oView.byId("DevTypeSelect").getSelectedKey();
+        var iHubId              = oView.getModel().getProperty( "/"+sDevTypeKey+"/" ).Hub;
+        var sCommand            = oView.byId("CustomTelnetInput").getValue();
+        var oLogContents        = oView.byId("TelnetOutput").getValue();
+        
+        oLogContents += "Running "+sCommand+"...\n";
+        oView.byId("TelnetOutput").setValue(oLogContents);
+        
+        IomyRe.telnet.RunCommand({
+            command : sCommand,
+            hubID : iHubId,
+
+            onSuccess : function (result) {
+                //console.log(JSON.stringify(result));
+
+                oLogContents = oView.byId("TelnetOutput").getValue();
+
+                oLogContents += result+"\n-------------------------------------\n";
+                oView.byId("TelnetOutput").setValue(oLogContents);
+
+                // Force it to scroll down to the bottom.
+                document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
+
+                IomyRe.common.RefreshCoreVariables({
+                    onSuccess : function () {
+                        IomyRe.common.showMessage({
+                            text : sCommand+" executed successfully",
+                            view : oView
+                        });
+                    }
+                });
+            },
+
+            onFail : function (sError) {
+                var oLogContents = oView.byId("TelnetOutput").getValue();
+
+                oLogContents += sError+"\n-------------------------------------\n";
+                oView.byId("TelnetOutput").setValue(oLogContents);
+            }
+        });
+    },
+    
     OpenZigbeeMenu : function (oControlEvent) {
         var oController         = this;
         var oView               = this.getView();
-        var sDevTypeKey         = oView.byId("DevTypeSelect").getSelectedKey();
-        var sMenuID             = "ZigbeeCommandMenu"
+        var sMenuID             = "ZigbeeCommandMenu";
         var oNavList            = new sap.tnt.NavigationList({});
-        var iHubId              = oView.getModel().getProperty( "/"+sDevTypeKey+"/" ).Hub;
         var aCommands           = [
             "versioninfo",
             "modulesinfo",
@@ -559,38 +598,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     text : sCommand,
                     select : function() {
                         oView.byId("CustomTelnetInput").setValue(sCommand);
-//                        IomyRe.telnet.RunCommand({
-//                            command : sCommand,
-//                            hubID : iHubId,
-//                            
-//                            onSuccess : function (data) {
-//                                //console.log(JSON.stringify(result));
-//
-//                                var oLogContents = oView.byId("TelnetOutput").getValue();
-//
-//                                oLogContents += JSON.stringify(data.Data.Custom.join("\n"))+"\n-------------------------------------\n";
-//                                oView.byId("TelnetOutput").setValue(oLogContents);
-//
-//                                // Force it to scroll down to the bottom.
-//                                document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
-//
-//                                IomyRe.common.RefreshCoreVariables({
-//                                    onSuccess : function () {
-//                                        IomyRe.common.showMessage({
-//                                            text : sCommand+" executed successfully",
-//                                            view : oView
-//                                        });
-//                                    }
-//                                });
-//                            },
-//
-//                            onFail : function (sError) {
-//                                var oLogContents = oView.byId("TelnetOutput").getValue();
-//
-//                                oLogContents += sError+"\n-------------------------------------\n";
-//                                oView.byId("TelnetOutput").setValue(oLogContents);
-//                            }
-//                        });
+                        
+                        oController.RunZigbeeCommand()
                         
                         sap.ui.getCore().byId(sMenuID).close();
                     }

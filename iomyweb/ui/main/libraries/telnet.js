@@ -85,7 +85,7 @@ $.extend(IomyRe.telnet,{
             if (mSettings.hubID === undefined || mSettings.hubID === null) {
                 fnAppendError("'hubID' not given");
             } else {
-                sCommand = mSettings.command;
+                iHubId = mSettings.hubID;
             }
             
             //----------------------------------------------------------------//
@@ -127,8 +127,6 @@ $.extend(IomyRe.telnet,{
 			"level" : !bError ? "I" : "E",
 			"content" : "Running " + sCommand + "..."
 		};
-		
-		fnSuccess();
         
         php.AjaxRequest({
             url : sUrl,
