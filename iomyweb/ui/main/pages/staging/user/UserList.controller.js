@@ -86,7 +86,7 @@ sap.ui.controller("pages.staging.user.UserList", {
                                         IomyRe.common.UserList = {};
                                         
                                         for (var i = 0; i < aData.Data.length; i++) {
-                                            IomyRe.common.UserList["_"+aData.Data.UserId] = aData.Data;
+                                            IomyRe.common.UserList["_"+aData.Data[i].Id] = aData.Data[i];
                                         }
                                         //------------------------------------------------//
                                         //-- STEP 2 - Update the Controller Model       --//
@@ -130,20 +130,28 @@ sap.ui.controller("pages.staging.user.UserList", {
 		//------------------------------------------------//
 		var oView           = oController.getView();
         var aUsers          = [];
-        
+        var sUserState      = "";
+		
         if (oConfig.data) {
             
             //------------------------------------------------//
             //-- Create the user list for the model         --//
             //------------------------------------------------//
             for (var i = 0; i < oConfig.data.length; i++) {
+				
+				if (oConfig.data[i].UserState === 0 || oConfig.data[i].UserState === '0' ) {
+					sUserState = "Disabled";
+				} else {
+					sUserState = "Enabled";
+				}
+				
                 aUsers.push({
                     "UserId" : oConfig.data[i].UserId,
                     "Username": oConfig.data[i].Username,
                     "FirstName": oConfig.data[i].Givennames,
                     "LastName" : oConfig.data[i].Surnames,
                     "DisplayName" : oConfig.data[i].Displayname,
-                    "Status" : oConfig.data[i].UserState === 1 ? "Disabled" : "Enabled"
+                    "Status" : sUserState
                 });
             }
 
