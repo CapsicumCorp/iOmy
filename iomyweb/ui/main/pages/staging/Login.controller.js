@@ -236,13 +236,34 @@ sap.ui.controller("pages.staging.Login", {
                     );
 				}
 			});
-		} else {
+		} else if (sUsername === "" && sPassword === "") {
 			//-- ERROR --//
-			IomyRe.common.showError("Either the Username or Password field was empty!", "Login Error",
+			IomyRe.common.showError("You must enter your username and password to continue.", "Login Error",
                 function () {
                     oController.ToggleInputsAndButton(true);
                 }
             );
+            
+            
+        } else {
+                        
+            if (sUsername === "") {
+                //-- ERROR --//
+                IomyRe.common.showError("A username is required to login.", "Login Error",
+                    function () {
+                        oController.ToggleInputsAndButton(true);
+                    }
+                );
+                
+            } else if (sPassword === "") {
+                //-- ERROR --//
+                IomyRe.common.showError("A password is required to login.", "Login Error",
+                    function () {
+                        oController.ToggleInputsAndButton(true);
+                    }
+                );
+                
+            }
 		}
 	}
 	
