@@ -27,6 +27,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
     
     bEditExisting           : false,
     bLoadingOnvifProfiles   : false,
+    bZigbeeCommandMenuOpen  : false,
     DeviceOptions           : null,
     
     bDeviceOptionSelectorDrawn  : false,
@@ -445,7 +446,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                         "HubId" : oCurrentFormData.Hub,
                         "RoomId" : oCurrentFormData.Room,
                         "IPCamType" : oCurrentFormData.IPCamType,
-                        "Data" : "{\"NetworkAddress\":\""+oCurrentFormData.IPAddress+"\",\"NetworkPort\":\""+oCurrentFormData.IPPort+"\",\"Protocol\":\""+oCurrentFormData.Protocol+"\",\"Path\":\""+oCurrentFormData.Path+"\",\"Displayname\":\""+oCurrentFormData.DisplayName+"\",\"LinkName\":\""+oCurrentFormData.LinkName+"\"}"
+                        "Data" : "{\"NetworkAddress\":\""+oCurrentFormData.IPAddress+"\",\"NetworkPort\":\""+oCurrentFormData.IPPort+"\",\"Protocol\":\""+oCurrentFormData.Protocol+"\",\"Path\":\""+oCurrentFormData.Path+"\",\"DisplayName\":\""+oCurrentFormData.DisplayName+"\",\"LinkName\":\""+oCurrentFormData.LinkName+"\"}"
                     }
                 };
                 break;
@@ -533,6 +534,96 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         IomyRe.apiphp.AjaxRequest(mData);
     },
     
+    OpenZigbeeMenu : function (oControlEvent) {
+        var oController         = this;
+        var oView               = this.getView();
+        var sDevTypeKey         = oView.byId("DevTypeSelect").getSelectedKey();
+        var sMenuID             = "ZigbeeCommandMenu"
+        var oNavList            = new sap.tnt.NavigationList({});
+        var iHubId              = oView.getModel().getProperty( "/"+sDevTypeKey+"/" ).Hub;
+        var aCommands           = [
+            "versioninfo",
+            "modulesinfo",
+            "debug output show",
+            "debug output hide",
+            "get_rapidha_info",
+            "get_zigbee_info"
+        ];
+        
+        //------------------------------------------------------------//
+        // Insert each of the telnet commands to the menu.            //
+        //------------------------------------------------------------//
+		$.each(aCommands, function (iIndex, sCommand) {
+			oNavList.addItem(
+                new sap.tnt.NavigationListItem({
+                    text : sCommand,
+                    select : function() {
+                        oView.byId("CustomTelnetInput").setValue(sCommand);
+//                        IomyRe.telnet.RunCommand({
+//                            command : sCommand,
+//                            hubID : iHubId,
+//                            
+//                            onSuccess : function (data) {
+//                                //console.log(JSON.stringify(result));
+//
+//                                var oLogContents = oView.byId("TelnetOutput").getValue();
+//
+//                                oLogContents += JSON.stringify(data.Data.Custom.join("\n"))+"\n-------------------------------------\n";
+//                                oView.byId("TelnetOutput").setValue(oLogContents);
+//
+//                                // Force it to scroll down to the bottom.
+//                                document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
+//
+//                                IomyRe.common.RefreshCoreVariables({
+//                                    onSuccess : function () {
+//                                        IomyRe.common.showMessage({
+//                                            text : sCommand+" executed successfully",
+//                                            view : oView
+//                                        });
+//                                    }
+//                                });
+//                            },
+//
+//                            onFail : function (sError) {
+//                                var oLogContents = oView.byId("TelnetOutput").getValue();
+//
+//                                oLogContents += sError+"\n-------------------------------------\n";
+//                                oView.byId("TelnetOutput").setValue(oLogContents);
+//                            }
+//                        });
+                        
+                        sap.ui.getCore().byId(sMenuID).close();
+                    }
+                })
+            );
+		});
+        
+        if (oController.bZigbeeCommandMenuOpen !== true) {
+            // Get or create a new extra menu
+            var oButton = oControlEvent.getSource();
+            var oMenu;
+            if (sap.ui.getCore().byId(sMenuID) === undefined) {
+                oMenu = new sap.m.Popover(sMenuID, {
+                    placement: sap.m.PlacementType.Bottom,
+                    showHeader : false,
+                    content: [oNavList]
+                }).addStyleClass("IOMYNavMenuContainer");
+            } else {
+                oMenu = sap.ui.getCore().byId(sMenuID);
+            }
+
+            oMenu.attachAfterClose(function () {
+                oController.bZigbeeCommandMenuOpen = false;
+            });
+
+            oMenu.openBy(oButton);
+            oController.bZigbeeCommandMenuOpen = true;
+
+        } else {
+            sap.ui.getCore().byId(sMenuID).close();
+        }
+    },
+    
     StartZigbeeJoin : function () {
         var oView               = this.getView();
         var iCommId             = oView.byId("ZigModemSelect").getSelectedKey();
@@ -557,11 +648,11 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     
                     onSuccess : function (result) {
                         
-                        console.log(JSON.stringify(result));
+                        //console.log(JSON.stringify(result));
                         
                         var oLogContents = oView.byId("TelnetOutput").getValue();
                 
-                        oLogContents += result+"\n-------------------------------------\n";
+                        oLogContents += JSON.stringify(result)+"\n-------------------------------------\n";
                         oView.byId("TelnetOutput").setValue(oLogContents);
                 
                         // Force it to scroll down to the bottom.
