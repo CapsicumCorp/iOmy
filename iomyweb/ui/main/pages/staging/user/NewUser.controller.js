@@ -78,7 +78,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
 			Givenname:         "",
 			Surname:           "",
 			Displayname:       "",
-			DOB:               "1990-01-01",
+			DOB:               new Date(1990,0,1),
 			Email:             "",
 			Phone:             "",	
 			//-- User Address --//
@@ -165,7 +165,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
 		//------------------------------------------------//
 		//-- STEP 2 - Check for Errors                  --//
 		//------------------------------------------------//
-
+		var sDate = oCurrentFormData.DOB.getFullYear()+'-'+(oCurrentFormData.DOB.getMonth()+1)+'-'+oCurrentFormData.DOB.getDate();
 		
 		//------------------------------------------------//
 		//-- STEP 3 - Update Database                   --//
@@ -184,7 +184,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
                         "Email" :                oCurrentFormData.Email,
                         "Phone" :                oCurrentFormData.Phone,
                         "Gender" :               oCurrentFormData.Gender,
-                        "DoB" :                  oCurrentFormData.DOB,
+                        "DoB" :                  sDate,
                         "AddressLine1" :         oCurrentFormData.AddressLine1,
                         "AddressLine2" :         oCurrentFormData.AddressLine2,
                         "AddressLine3" :         oCurrentFormData.AddressLine3,
