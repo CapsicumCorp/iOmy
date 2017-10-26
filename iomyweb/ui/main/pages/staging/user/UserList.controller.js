@@ -140,10 +140,10 @@ sap.ui.controller("pages.staging.user.UserList", {
                 aUsers.push({
                     "UserId" : oConfig.data[i].UserId,
                     "Username": oConfig.data[i].Username,
-                    "FirstName": oConfig.data[i].UserGivennames,
-                    "LastName" : oConfig.data[i].UserSurnames,
-                    "DisplayName" : oConfig.data[i].UserDisplayname,
-                    "Status" : oConfig.data[i].UserState === 1 ? "Enabled" : "Disabled"
+                    "FirstName": oConfig.data[i].Givennames,
+                    "LastName" : oConfig.data[i].Surnames,
+                    "DisplayName" : oConfig.data[i].Displayname,
+                    "Status" : oConfig.data[i].UserState === 1 ? "Disabled" : "Enabled"
                 });
             }
 
