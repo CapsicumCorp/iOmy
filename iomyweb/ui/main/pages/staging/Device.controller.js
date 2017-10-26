@@ -1,6 +1,7 @@
 /*
 Title: Template UI5 Controller
-Author: Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
+Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+    Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
 Description: Draws either a username and password prompt, or a loading app
     notice for the user to log into iOmy.
 Copyright: Capsicum Corporation 2015, 2016
@@ -64,14 +65,14 @@ sap.ui.controller("pages.staging.Device", {
                 //----------------------------------------------------//
                 // Find the room ID, if specified, and store it.
                 //----------------------------------------------------//
-                if (evt.data.roomID !== undefined && evt.data.roomID !== null) {
-                    oController.iLastRoomId = evt.data.roomID;
+                if (evt.data.RoomId !== undefined && evt.data.RoomId !== null) {
+                    oController.iLastRoomId = evt.data.RoomId;
                 } else {
                     oController.iLastRoomId = null;
                 }
                 
-                if (evt.data.premiseID !== undefined && evt.data.premiseID !== null) {
-                    oController.iLastPremiseId = evt.data.premiseID;
+                if (evt.data.PremiseId !== undefined && evt.data.PremiseId !== null) {
+                    oController.iLastPremiseId = evt.data.PremiseId;
                 } else {
                     oController.iLastPremiseId = null;
                 }
@@ -215,36 +216,34 @@ sap.ui.controller("pages.staging.Device", {
                                 number: "Monitoring",
                                 numberUnit: "activity",
                                 attributes : [
+//                                    new sap.m.ObjectAttribute ({
+//                                        text: "link",
+//                                        customContent : new sap.m.Link ({
+//                                            text: "Take Screenshot"
+//                                        })
+//                                    }),
                                     new sap.m.ObjectAttribute ({
-                                        text: "link",
-                                        customContent : new sap.m.Link ({
-                                            text: "Take Screenshot"
-                                        })
-                                    }),
-                                    new sap.m.ObjectAttribute ({
-                                        text: "link",
-                                        customContent : new sap.m.Link ({
-                                            text: "View Stream",
-                                            press : function () {
-                                                try {
-                                                    IomyRe.devices.onvif.getStreamURL({
-                                                        ThingId : mDevice.DeviceId,
-
-                                                        onSuccess : function(sUrl) {
-                                                            window.open(sUrl);
-                                                        },
-
-                                                        onFail : function (response) {
-                                                            IomyRe.common.showError(response.responseText, "Couldn't load the stream");
-                                                        }
-                                                    });
-                                                } catch (ex) {
-                                                    IomyRe.common.showError(ex.message, "Couldn't load the stream");
-                                                }
-                                            }
-                                        })
+                                        text: "Tap to view stream"
                                     })
-                                ]
+                                ],
+                                
+                                press : function () {
+                                    try {
+                                        IomyRe.devices.onvif.getStreamURL({
+                                            ThingId : mDevice.DeviceId,
+
+                                            onSuccess : function(sUrl) {
+                                                window.open(sUrl);
+                                            },
+
+                                            onFail : function (response) {
+                                                IomyRe.common.showError(response.responseText, "Couldn't load the stream");
+                                            }
+                                        });
+                                    } catch (ex) {
+                                        IomyRe.common.showError(ex.message, "Couldn't load the stream");
+                                    }
+                                }
                             })
                         );
 
