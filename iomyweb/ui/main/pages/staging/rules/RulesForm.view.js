@@ -1,7 +1,7 @@
 /*
 Title: Template UI5 View
 Author: Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
-Description: Creates the page list all Premises and their information in a given
+Description: Creates the page list all devices and their information in a given
     room.
 Copyright: Capsicum Corporation 2016
 
@@ -22,17 +22,17 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-sap.ui.jsview("pages.staging.Room", {
+sap.ui.jsview("pages.staging.rules.RulesForm", {
 	
 	/*************************************************************************************************** 
 	** 1.0 - Controller Declaration
 	**************************************************************************************************** 
 	* Specifies the Controller belonging to this View. 
 	* In the case that it is not implemented, or that "null" is returned, this View does not have a Controller.
-	* @memberOf pages.staging.Room
+	* @memberOf pages.staging.UserSettings
 	****************************************************************************************************/ 
 	getControllerName : function() {
-		return "pages.staging.Room";
+		return "pages.staging.rules.RulesForm";
 	},
 
 	/*************************************************************************************************** 
@@ -40,28 +40,62 @@ sap.ui.jsview("pages.staging.Room", {
 	**************************************************************************************************** 
 	* Is initially called once after the Controller has been instantiated. It is the place where the UI is constructed. 
 	* Since the Controller is given to this method, its event handlers can be attached right away. 
-	* @memberOf pages.staging.Room
+	* @memberOf pages.staging.UserSettings
 	****************************************************************************************************/ 
 	createContent : function(oController) {
 		var oView = this;
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
-			title: "Room List",
-			header : IomyRe.widgets.getToolPageHeader( oController ),
+			title: "Room Form",
+			header : IomyRe.widgets.getToolPageHeader(oController),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
 			mainContents: [ 
-				new sap.m.ScrollContainer ({
-					width: "100%",
-					height: "100%",
-					vertical : true,
-					content : [
-						IomyRe.widgets.DeviceToolbar(oController, "Room List"),
-						new sap.m.List (oView.createId("RoomList"), {
-							mode: sap.m.ListMode.None,
-							items: []
-						}).addStyleClass("DevicePage")
+				new sap.uxap.ObjectPageLayout (oView.createId("ObjectPageLayout"), {
+					isObjectIconAlwaysVisible: true,
+					enableLazyLoading: true,
+					showTitleinHeaderContent: true,
+					sections : [
+						new sap.uxap.ObjectPageSection(oView.createId("Rule"), {
+							showTitle: false,
+							subSections : [
+								new sap.uxap.ObjectPageSubSection(oView.createId("RuleBlock"), {
+									blocks : [
+										new sap.ui.layout.form.Form( oView.createId("RuleBlock_Form"),{
+											editable: true,
+											layout : new sap.ui.layout.form.ResponsiveGridLayout ({
+												labelSpanXL: 3,
+												labelSpanL: 3,
+												labelSpanM: 3,
+												labelSpanS: 12,
+												adjustLabelSpan: false,
+												emptySpanXL: 3,
+												emptySpanL: 2,
+												emptySpanM: 0,
+												emptySpanS: 0,
+												columnsXL: 1,
+												columnsL: 1,
+												columnsM: 1,
+												columnsS: 1,
+												singleContainerFullSize: false
+											}),
+											toolbar : new sap.m.Toolbar({
+												content : [
+													new sap.m.Title (oView.createId("RuleToolbarTitle"),{
+													}),
+												]
+											}).addStyleClass("MarBottom1d0Rem"),
+											formContainers : [
+											
+											]
+										})
+									]									
+									
+								})
+							]
+						}),
 					]
-				})
+					
+				}).addStyleClass("")
 			]
 		}).addStyleClass("MainBackground");
 	}

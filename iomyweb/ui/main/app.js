@@ -218,6 +218,12 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.room.RoomForm\" Page!\n"
 	},
+	{
+		"Id":			"pRulesForm",
+		"Location":		"pages.staging.rules.RulesForm",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.rules.RulesForm\" Page!\n"
+	},
 
 ];
 

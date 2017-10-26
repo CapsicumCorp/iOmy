@@ -79,6 +79,9 @@ $.extend( IomyRe.navigation, {
 					new sap.m.Button ({
 						text: "Add Rule",
 						type: sap.m.ButtonType.Transparent,
+						press : function () {
+							IomyRe.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": false} , false);
+						}
 					}),
 					new sap.m.Button ({
 						text: "Add User",
@@ -159,6 +162,9 @@ $.extend( IomyRe.navigation, {
 					new sap.m.Button ({
 						text: "Edit Rule",
 						type: sap.m.ButtonType.Transparent,
+						press : function () {
+							IomyRe.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": true} , false);
+						}
 					}),
 					new sap.m.Button ({
 						text: "Edit User",

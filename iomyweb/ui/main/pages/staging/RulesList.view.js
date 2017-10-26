@@ -84,11 +84,17 @@ sap.ui.jsview("pages.staging.RulesList", {
 							content : [
 								new sap.m.Button ({
 									text: "Add",
-									type: sap.m.ButtonType.Accept
+									type: sap.m.ButtonType.Accept,
+									press : function () {
+										IomyRe.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": false} , false);
+									}
 								}),
 								new sap.m.Button({
 									text: "Discard",
-									type: sap.m.ButtonType.Reject
+									type: sap.m.ButtonType.Reject,
+									//press : function () {
+									//	IomyRe.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": false} , false);
+									//}
 								}),
 								new sap.m.ToolbarSpacer({}),
 								new sap.m.ToolbarSpacer({}),
