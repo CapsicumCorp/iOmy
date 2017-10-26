@@ -44,8 +44,11 @@ $.extend( IomyRe.widgets, {
 		var oSwitchView;				//-- OBJECT:	Stores the UI5 Button that holds the SwitchView Button / Menu	--//
 		var oSettings;					//-- OBJECT:	Stores the UI5 Button that holds the Settings Button / Menu		--//
 		var oToolHeader;				//-- OBJECT:	This variable stores the ToolPage header and is returned.		--//	
-
+		var sDisplayName;                  //-- String:	This variable stores the Users Displayname.		--//
+		
 		var oView = oCurrentController.getView();  //-- Defines oView based on the Controller that's being passed --//
+
+		sDisplayName = IomyRe.common.UserInfo.Displayname;
 		
 		//----------------------------------------------------//
 		//-- 2.0 - Create ToolHeader Content                --//
@@ -116,7 +119,7 @@ $.extend( IomyRe.widgets, {
 			layoutData : new sap.m.OverflowToolbarLayoutData({
 				priority : sap.m.OverflowToolbarPriority.High
 			}),
-			text: "Hi, Freshwater1!",
+			text: "Hi,"+sDisplayName,
 			type: "Transparent",
 			press: function(oControlEvent) {
 				IomyRe.navigation.UserMenu(oControlEvent, oView);
