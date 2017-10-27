@@ -260,21 +260,21 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
     },
     
     PrepareRoomListForModel : function (iPremiseId) {
-        var aRoomList           = IomyRe.common.RoomsList["_"+iPremiseId];
-        var iRoomCount          = 0;
+        var aRoomList           = JSON.parse( JSON.stringify( IomyRe.common.RoomsList["_"+iPremiseId] ) );
+        var iRoomCount          = IomyRe.functions.getNumberOfRoomsInPremise(iPremiseId);
         var iUnassignedRoomId   = 0;
         var bUnassignedOnly     = true;
         
         $.each(aRoomList, function (sI, mRoom) {
-            iRoomCount++;
+            iUnassignedRoomId = mRoom.RoomId;
             
             if (mRoom.RoomName === "Unassigned" && iRoomCount === 1) {
-                iUnassignedRoomId = mRoom.RoomId;
                 bUnassignedOnly = true;
             } else {
                 bUnassignedOnly = false;
-                return false;
             }
+            
+            return false;
         });
         
         if (bUnassignedOnly) {
@@ -283,6 +283,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 "RoomId" : iUnassignedRoomId,
                 "RoomName" : "No rooms configured for premise"
             };
+        } else {
+            delete aRoomList["_"+iUnassignedRoomId];
         }
         
         return aRoomList;
