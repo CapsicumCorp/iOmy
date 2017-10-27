@@ -119,23 +119,28 @@ sap.ui.controller("pages.staging.Room", {
             //----------------------------------------------------------------//
             $.each(mPremise, function (sJ, mRoom) {
                 var bOmitEntry = false;
+                var iDeviceCount;
+                var iRoomCount;
                 bHasRooms = true;
                 
                 
                 /*
                  * Take the first room in the premise and put it aside.
                  * Check that the name is called "Unassigned".
-                 * If room name is "Unassigned"
+                 * 
+                 * If room name is "Unassigned" and either there are no devices
+                 * in there or there are no other rooms,
                  *     Specify that we omit the entry.
                  * 
                  * If we are not omitting the room
                  *     Display it.
                  */
-                
                 if (mFirstRoom === null) {
                     mFirstRoom = mRoom;
+                    iDeviceCount = IomyRe.functions.getNumberOfDevicesInRoom(mFirstRoom.RoomId);
+                    iRoomCount = IomyRe.functions.getNumberOfRoomsInPremise(mFirstRoom.PremiseId);
                     
-                    if (mFirstRoom.RoomName === "Unassigned") {
+                    if (mFirstRoom.RoomName === "Unassigned" && (iDeviceCount === 0 || iRoomCount === 1) ) {
                         bOmitEntry = true;
                         bHasRooms = false;
                     }

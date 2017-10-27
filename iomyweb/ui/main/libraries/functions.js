@@ -552,6 +552,21 @@ $.extend(IomyRe.functions, {
         return iCount;
     },
     
+    getNumberOfRoomsInPremise : function (iPremiseId) {
+        var mIDInfo = IomyRe.validation.isPremiseIDValid(iPremiseId);
+        var iCount  = 0;
+        
+        if (mIDInfo.bIsValid) {
+            $.each(IomyRe.common.RoomsList["_"+iPremiseId], function (sI, mRoom) {
+                if (sI !== undefined && sI !== null && mRoom !== undefined && mRoom !== null) {
+                    iCount++;
+                }
+            });
+        }
+        
+        return iCount;
+    },
+    
     /**
      * Generates a human-readable timestamp from a JS Date.
      * 
