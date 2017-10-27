@@ -32,7 +32,7 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 			toolbar : new sap.m.Toolbar({
 				content : [
 					new sap.m.Title ({
-						text: "Device Settings",
+						text: "Device Settings"
 					})
 				]
 			}).addStyleClass("MarBottom1d0Rem"),
@@ -62,7 +62,14 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 							label : "Profile to use for the video stream",
 							fields: [ 
 								new sap.m.Select(oView.createId("SelectStreamProfile"), {
-									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/StreamProfile}"
+									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/StreamProfile}",
+                                    items : {
+                                        path : "/OnvifProfiles",
+                                        template : new sap.ui.core.Item({
+                                            key : "{Token}",
+                                            text : "{Name}"
+                                        })
+                                    }
 								})
 							]
 						}),
@@ -70,7 +77,14 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 							label : "Profile to use for thumbnails",
 							fields: [ 
 								new sap.m.Select(oView.createId("SelectThumbnailProfile"), {
-									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/ThumbnailProfile}"
+									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/ThumbnailProfile}",
+                                    items : {
+                                        path : "/OnvifProfiles",
+                                        template : new sap.ui.core.Item({
+                                            key : "{Token}",
+                                            text : "{Name}"
+                                        })
+                                    }
 								})
 							]
 						}),

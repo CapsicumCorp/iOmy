@@ -228,6 +228,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         
         oJSON.Rooms         = oController.PrepareRoomListForModel(1);
         oJSON.Hubs          = IomyRe.common.HubList;
+        oJSON.OnvifProfiles = {};
         oJSON.IPCamTypes    = {
             "_1" : {
                 "TypeName" : "MJPEG"
@@ -291,66 +292,82 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         IomyRe.common.NavigationTriggerBackForward();
     },
     
+    /**
+     * Loads from an Onvif Server all of the available profiles to add in the
+     * model for the onvif profiles select boxes on the Onvif Stream fragment.
+     */
     LoadOnvifProfilesForSelectBoxes : function () {
         var oController = this;
         var oView       = oController.getView();
         var iLinkId     = oView.byId("SelectOnvifServer").getSelectedKey();
+        var oModelData  = JSON.parse(oView.getModel().getJSON());
         
         oController.ToggleOnvifStreamControls(false);
         oView.byId("SelectOnvifServer").setEnabled(false);
         
-        oView.byId("SelectStreamProfile").destroyItems();
-        oView.byId("SelectThumbnailProfile").destroyItems();
-        
         if (iLinkId > 0) {
             oController.bLoadingOnvifProfiles = true;
+            
+            oModelData.OnvifProfiles = {
+                "loading" : {
+                    "Token" : "loading",
+                    "Name" : "Loading Profiles..."
+                }
+            };
+
+            oView.setModel( 
+                new sap.ui.model.json.JSONModel(oModelData)
+            );
             
             IomyRe.devices.onvif.LookupProfiles({
                 linkID : iLinkId,
 
                 onSuccess : function (aProfiles) {
+                    var oModelData = JSON.parse(oView.getModel().getJSON());
+                    oModelData.OnvifProfiles = {};
+                    
                     for (var i = 0; i < aProfiles.length; i++) {
-
-                        oView.byId("SelectStreamProfile").addItem(
-                            new sap.ui.core.Item({
-                                key : aProfiles[i].ProfileToken,
-                                text : aProfiles[i].ProfileName
-                            })
-                        );
-
-                        oView.byId("SelectThumbnailProfile").addItem(
-                            new sap.ui.core.Item({
-                                key : aProfiles[i].ProfileToken,
-                                text : aProfiles[i].ProfileName
-                            })
-                        );
+                        oModelData.OnvifProfiles["token"+aProfiles[i].ProfileToken] = {
+                            "Token" : aProfiles[i].ProfileToken,
+                            "Name" : aProfiles[i].ProfileName
+                        };
 
                     }
 
                     oController.ToggleOnvifStreamControls(true);
                     oController.bLoadingOnvifProfiles = false;
+                    
+                    oView.setModel( 
+                        new sap.ui.model.json.JSONModel(oModelData)
+                    );
                 },
 
                 onFail : function () {
-                    oView.byId("SelectStreamProfile").addItem(
-                        new sap.ui.core.Item({
-                            text : "Failed to load profiles."
-                        })
-                    );
-
-                    oView.byId("SelectThumbnailProfile").addItem(
-                        new sap.ui.core.Item({
-                            text : "Failed to load profiles."
-                        })
-                    );
+                    var oModelData = JSON.parse(oView.getModel().getJSON());
+                    oModelData.OnvifProfiles = {
+                        "error" : {
+                            "Token" : "error",
+                            "Name" : "Failed to load profiles."
+                        }
+                    };
 
                     oController.ToggleOnvifStreamControls(false);
                     oView.byId("SelectOnvifServer").setEnabled(true);
 
                     oController.bLoadingOnvifProfiles = false;
+                    
+                    oView.setModel( 
+                        new sap.ui.model.json.JSONModel(oModelData)
+                    );
                 }
             });
         } else {
+            oModelData.OnvifProfiles = {};
+
+            oView.setModel( 
+                new sap.ui.model.json.JSONModel(oModelData)
+            );
+            
             oView.byId("SelectOnvifServer").setEnabled(true);
         }
     },
@@ -454,7 +471,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     url : IomyRe.apiphp.APILocation("onvif"),
                     data : {
                         "Mode" : "NewThing",
-                        "LinkId" : oCurrentFormData.Server,
+                        "LinkId" : oCurrentFormData.OnvifServer,
                         "StreamProfile" : oCurrentFormData.StreamProfile,
                         "ThumbnailProfile" : oCurrentFormData.ThumbnailProfile,
                         "CameraName" : oCurrentFormData.CameraName
@@ -499,11 +516,18 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                                 });
 
                                 if (IomyRe.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
-                                    oCurrentFormData.OnvifServer = iLinkId;
+                                    oView.byId("DevTypeSelect").setSelectedKey("thingType"+IomyRe.devices.onvif.ThingTypeId);
+                                    
+                                    //oCurrentFormData.OnvifServer = iLinkId;
                                     oController.DevTypeToggle(oController, "thingType"+IomyRe.devices.onvif.ThingTypeId);
 
                                 } else {
                                     //IomyRe.common.NavigationChangePage("pBlock", {}, true);
+                                }
+                                
+                                if (oView.byId("DevTypeSelect").getSelectedKey() === "thingType"+IomyRe.devices.onvif.ThingTypeId) {
+                                    oController.ToggleOnvifStreamControls(false);
+                                    oView.byId("SelectOnvifServer").setEnabled(true);
                                 }
                             }
                         });
@@ -518,11 +542,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         
         mData.onFail = function (error) {
             jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
-            IomyRe.common.showError("Error creating device:\n\n"+error.responseText, "",
-                function () {
-                    
-                }
-            );
+            IomyRe.common.showError("Error creating device:\n\n"+error.responseText, "");
         };
         
         //--------------------------------------------------------------------//
