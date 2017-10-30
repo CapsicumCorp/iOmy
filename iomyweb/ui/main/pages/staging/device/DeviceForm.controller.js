@@ -462,7 +462,16 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                         "HubId" : oCurrentFormData.Hub,
                         "RoomId" : oCurrentFormData.Room,
                         "IPCamType" : oCurrentFormData.IPCamType,
-                        "Data" : "{\"NetworkAddress\":\""+oCurrentFormData.IPAddress+"\",\"NetworkPort\":\""+oCurrentFormData.IPPort+"\",\"Protocol\":\""+oCurrentFormData.Protocol+"\",\"Path\":\""+oCurrentFormData.Path+"\",\"DisplayName\":\""+oCurrentFormData.DisplayName+"\",\"LinkName\":\""+oCurrentFormData.LinkName+"\"}"
+                        "Data" : JSON.stringify({
+                            "NetworkAddress"    : oCurrentFormData.IPAddress,
+                            "NetworkPort"       : oCurrentFormData.IPPort,
+                            "Protocol"          : oCurrentFormData.Protocol,
+                            "Path"              : oCurrentFormData.Path,
+                            "DisplayName"       : oCurrentFormData.DisplayName,
+                            "LinkName"          : oCurrentFormData.LinkName,
+                            "Username"          : oCurrentFormData.Username,
+                            "Password"          : oCurrentFormData.Password
+                        })
                     }
                 };
                 break;

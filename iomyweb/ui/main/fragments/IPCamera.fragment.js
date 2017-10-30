@@ -134,6 +134,24 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
+							label : "Username",
+							fields: [ 
+								new sap.m.Input({
+									placeholder: "optional",
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Username}"
+								}),
+							]
+						}),
+						new sap.ui.layout.form.FormElement({
+							label : "Password",
+							fields: [ 
+								new sap.m.Input({
+									placeholder: "optional",
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Password}"
+								}),
+							]
+						}),
+						new sap.ui.layout.form.FormElement({
 							label : "",
 							fields: [ 
 								new sap.m.Button ({
