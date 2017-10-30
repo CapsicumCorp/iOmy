@@ -77,6 +77,12 @@ sap.ui.controller("pages.staging.Device", {
                     oController.iLastPremiseId = null;
                 }
                 
+                if (evt.data.bEditing !== undefined && evt.data.bEditing !== null) {
+                    oController.bEditing = evt.data.bEditing;
+                } else {
+                    oController.bEditing = false;
+                }
+                
                 //-- Defines the Device Type --//
                 IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
@@ -100,6 +106,8 @@ sap.ui.controller("pages.staging.Device", {
         var oView           = this.getView();
         var wList           = oView.byId("DeviceList");
         var bHasDevices     = false;
+        var bEditing        = oController.bEditing;
+        var sPageId         = "";
         
         // Wipe the old list.
         wList.destroyItems();
@@ -137,6 +145,7 @@ sap.ui.controller("pages.staging.Device", {
                     // Zigbee Smart Plug UI Entry
                     //--------------------------------------------------------//
                     case IomyRe.devices.zigbeesmartplug.ThingTypeId:
+                        
                         wList.addItem(
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
@@ -162,7 +171,13 @@ sap.ui.controller("pages.staging.Device", {
                                     })
                                 ],
                                 press : function () {
-                                    IomyRe.common.NavigationChangePage( "pTile" , { "ThingId": mDevice.DeviceId } , false);
+                                    if (bEditing) {
+                                        sPageId = "pDeviceForm";
+                                    } else {
+                                        sPageId = "pTile";
+                                    }
+                                    
+                                    IomyRe.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId } , false);
                                 }
                             })
                         );
@@ -173,6 +188,7 @@ sap.ui.controller("pages.staging.Device", {
                     // Philips Hue UI Entry
                     //--------------------------------------------------------//
                     case IomyRe.devices.philipshue.ThingTypeId:
+                        
                         wList.addItem(
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
@@ -198,7 +214,13 @@ sap.ui.controller("pages.staging.Device", {
                                     })
                                 ],
                                 press : function () {
-                                    IomyRe.common.NavigationChangePage( "pRGBlight" , { "ThingId": mDevice.DeviceId } , false);
+                                    if (bEditing) {
+                                        sPageId = "pDeviceForm";
+                                    } else {
+                                        sPageId = "pRGBlight";
+                                    }
+                                    
+                                    IomyRe.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId } , false);
                                 }
                             })
                         );
@@ -209,6 +231,7 @@ sap.ui.controller("pages.staging.Device", {
                     // Onvif Stream UI Entry
                     //--------------------------------------------------------//
                     case IomyRe.devices.onvif.ThingTypeId:
+                        
                         wList.addItem(
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
@@ -228,20 +251,29 @@ sap.ui.controller("pages.staging.Device", {
                                 ],
                                 
                                 press : function () {
-                                    try {
-                                        IomyRe.devices.onvif.getStreamURL({
-                                            ThingId : mDevice.DeviceId,
+                                    //----------------------------------------------------------//
+                                    // If were looking to edit a device, open the form,
+                                    // otherwise, open the stream in another app.
+                                    //----------------------------------------------------------//
+                                    if (bEditing) {
+                                        IomyRe.common.NavigationChangePage( "pDeviceForm" , { "ThingId": mDevice.DeviceId } , false);
+                                        
+                                    } else {
+                                        try {
+                                            IomyRe.devices.onvif.getStreamURL({
+                                                ThingId : mDevice.DeviceId,
 
-                                            onSuccess : function(sUrl) {
-                                                window.open(sUrl);
-                                            },
+                                                onSuccess : function(sUrl) {
+                                                    window.open(sUrl);
+                                                },
 
-                                            onFail : function (response) {
-                                                IomyRe.common.showError(response.responseText, "Couldn't load the stream");
-                                            }
-                                        });
-                                    } catch (ex) {
-                                        IomyRe.common.showError(ex.message, "Couldn't load the stream");
+                                                onFail : function (response) {
+                                                    IomyRe.common.showError(response.responseText, "Couldn't load the stream");
+                                                }
+                                            });
+                                        } catch (ex) {
+                                            IomyRe.common.showError(ex.message, "Couldn't load the stream");
+                                        }
                                     }
                                 }
                             })
@@ -253,6 +285,7 @@ sap.ui.controller("pages.staging.Device", {
                     // IP Webcam Stream UI Entry
                     //--------------------------------------------------------//
                     case IomyRe.devices.ipcamera.ThingTypeId:
+                        
                         wList.addItem(
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
@@ -274,7 +307,13 @@ sap.ui.controller("pages.staging.Device", {
                                     })
                                 ],
                                 press : function () {
-                                    IomyRe.common.NavigationChangePage( "pMJPEG" , { "ThingId": mDevice.DeviceId } , false);
+                                    if (bEditing) {
+                                        sPageId = "pDeviceForm";
+                                    } else {
+                                        sPageId = "pMJPEG";
+                                    }
+                                    
+                                    IomyRe.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId } , false);
                                 }
                             })
                         );
@@ -285,6 +324,7 @@ sap.ui.controller("pages.staging.Device", {
                     // Weather Feed UI Entry
                     //--------------------------------------------------------//
                     case IomyRe.devices.weatherfeed.ThingTypeId:
+                        
                         wList.addItem(
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
@@ -300,7 +340,13 @@ sap.ui.controller("pages.staging.Device", {
                                     })
                                 ],
                                 press : function () {
-                                    IomyRe.common.NavigationChangePage( "pWeatherFeed" , { "ThingId" : mDevice.DeviceId } , false);
+                                    if (bEditing) {
+                                        sPageId = "pDeviceForm";
+                                    } else {
+                                        sPageId = "pWeatherFeed";
+                                    }
+                                    
+                                    IomyRe.common.NavigationChangePage( sPageId , { "ThingId" : mDevice.DeviceId } , false);
                                 }
                             })
                         );
@@ -311,6 +357,7 @@ sap.ui.controller("pages.staging.Device", {
                     // Motion Sensor UI Entry
                     //--------------------------------------------------------//
                     case IomyRe.devices.motionsensor.ThingTypeId:
+                        
                         wList.addItem(
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
@@ -332,7 +379,13 @@ sap.ui.controller("pages.staging.Device", {
                                     })
                                 ],
                                 press : function () {
-                                    IomyRe.common.NavigationChangePage( "pMotionSensor" , { "ThingId" : mDevice.DeviceId } , false);
+                                    if (bEditing) {
+                                        sPageId = "pDeviceForm";
+                                    } else {
+                                        sPageId = "pMotionSensor";
+                                    }
+                                    
+                                    IomyRe.common.NavigationChangePage( sPageId , { "ThingId" : mDevice.DeviceId } , false);
                                 }
                             })
                         );

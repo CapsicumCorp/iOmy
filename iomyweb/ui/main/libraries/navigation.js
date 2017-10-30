@@ -142,7 +142,12 @@ $.extend( IomyRe.navigation, {
 						text: "Edit Device",
 						type: sap.m.ButtonType.Transparent,
 						press : function () {
-							IomyRe.common.NavigationChangePage( "pDeviceForm" , {} , false);
+                            if (oApp.getCurrentPage().getId() === "pDevice") {
+                                oApp.getCurrentPage().getController().bEditing = true;
+                                
+                            } else {
+                                IomyRe.common.NavigationChangePage( "pDevice" , {"bEditing": true} , false);
+                            }
 						}
 					}),	
 					new sap.m.Button ({

@@ -29,6 +29,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
     bLoadingOnvifProfiles   : false,
     bZigbeeCommandMenuOpen  : false,
     DeviceOptions           : null,
+    iThingId                : null,
     
     bDeviceOptionSelectorDrawn  : false,
     
@@ -63,33 +64,43 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 //oController.RefreshModel( oController, {} );
                 //oController.DevTypeToggle(oController);
                 
-                if (!oController.bDeviceOptionSelectorDrawn) {
-                    var oSBox = IomyRe.widgets.selectBoxNewDeviceOptions (oView.createId("DevTypeSelect"),{
-                        selectedKey : "start",
-                        change : function () {
-                            var DevTypeSelect = this;
-                            var sDevType = DevTypeSelect.getSelectedKey();
-                            oController.DevTypeToggle(oController, sDevType);
-                        }
-                    });
-
-                    oView.byId("DeviceTypeFormElement").addField(oSBox);
-                    
-                    oController.bDeviceOptionSelectorDrawn = true;
-                }
-                
                 //-- Check the parameters --//
-                oView.byId("DevTypeSelect").setSelectedKey("start");
                 oView.byId("DevSettings").setVisible( false );
                 
                 //-- Defines the Device Type --//
                 IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
                 //-- Are we editing an existing device? --//
-                if (oEvent.data.editing !== undefined) {
-                    oController.bEditExisting = oEvent.data.editing;
+                if (oEvent.data.ThingId !== undefined && oEvent.data.ThingId !== null) {
+                    oController.bEditExisting   = true;
+                    oController.iThingId        = oEvent.data.ThingId;
                 } else {
-                    oController.bEditExisting = false;
+                    oController.bEditExisting   = false;
+                    oController.iThingId        = null;
+                }
+                
+                if (!oController.bEditExisting) {
+                    IomyRe.common.ShowFormFragment( oController, "DeviceFormEdit", "DevTypeBlock", "Block" );
+                } else {
+                    IomyRe.common.ShowFormFragment( oController, "DeviceFormAdd", "DevTypeBlock", "Block" );
+                    
+                    if (!oController.bDeviceOptionSelectorDrawn) {
+                        var oSBox = IomyRe.widgets.selectBoxNewDeviceOptions (oView.createId("DevTypeSelect"),{
+                            selectedKey : "start",
+                            change : function () {
+                                var DevTypeSelect = this;
+                                var sDevType = DevTypeSelect.getSelectedKey();
+                                oController.DevTypeToggle(oController, sDevType);
+                            }
+                        });
+
+                        oView.byId("DeviceTypeFormElement").addField(oSBox);
+
+                        oController.bDeviceOptionSelectorDrawn = true;
+                        
+                        oView.byId("DevTypeSelect").setSelectedKey("start");
+                
+                    }
                 }
                 
                 oController.DeviceOptions = IomyRe.functions.getNewDeviceOptions();
@@ -235,6 +246,15 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             }
         };
         
+        if (oController.bEditExisting) {
+            var oCurrentDevice = JSON.parse( JSON.stringify( IomyRe.common.ThingList["_"+oController.iThingId] ) );
+            
+            oJSON.CurrentDevice = {
+                "ThingName" : oCurrentDevice.DisplayName,
+                "RoomId"    : oCurrentDevice.RoomId
+            };
+        }
+        
         oView.setModel( 
             new sap.ui.model.json.JSONModel(oJSON)
         );
@@ -260,6 +280,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
     },
     
     PrepareRoomListForModel : function (iPremiseId) {
+        var bEditing            = this.bEditExisting;
         var aRoomList           = JSON.parse( JSON.stringify( IomyRe.common.RoomsList["_"+iPremiseId] ) );
         var iRoomCount          = IomyRe.functions.getNumberOfRoomsInPremise(iPremiseId);
         var iUnassignedRoomId   = 0;
@@ -279,10 +300,13 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         
         if (bUnassignedOnly) {
             aRoomList = {};
-            aRoomList["_"+iUnassignedRoomId] = {
-                "RoomId" : iUnassignedRoomId,
-                "RoomName" : "No rooms configured for premise"
-            };
+            
+            if (!bEditing) {
+                aRoomList["_"+iUnassignedRoomId] = {
+                    "RoomId" : iUnassignedRoomId,
+                    "RoomName" : "No rooms configured for premise"
+                };
+            }
         } else {
             delete aRoomList["_"+iUnassignedRoomId];
         }
@@ -291,7 +315,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
     },
     
     CancelInput : function () {
-        IomyRe.common.NavigationTriggerBackForward();
+        //IomyRe.common.NavigationTriggerBackForward();
+        IomyRe.common.NavigationChangePage("pDevice", {}, true);
     },
     
     /**
