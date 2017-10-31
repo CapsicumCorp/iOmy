@@ -79,7 +79,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     oController.iThingId        = null;
                 }
                 
-                if (!oController.bEditExisting) {
+                if (oController.bEditExisting) {
                     IomyRe.common.ShowFormFragment( oController, "DeviceFormEdit", "DevTypeBlock", "Block" );
                 } else {
                     IomyRe.common.ShowFormFragment( oController, "DeviceFormAdd", "DevTypeBlock", "Block" );
@@ -298,6 +298,10 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             return false;
         });
         
+        /*
+         * If there is only room available in a given premise, an empty room list
+         * should be returned. If that's the case, then the 
+         */
         if (bUnassignedOnly) {
             aRoomList = {};
             
@@ -308,15 +312,18 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 };
             }
         } else {
-            delete aRoomList["_"+iUnassignedRoomId];
+            if (!bEditing) {
+                delete aRoomList["_"+iUnassignedRoomId];
+            }
         }
         
         return aRoomList;
     },
     
     CancelInput : function () {
-        //IomyRe.common.NavigationTriggerBackForward();
-        IomyRe.common.NavigationChangePage("pDevice", {}, true);
+        var oController = this;
+        
+        IomyRe.common.NavigationChangePage("pDevice", { "bEditing" : oController.iThingId !== null }, true);
     },
     
     /**
@@ -423,6 +430,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         if (isNaN(oCurrentFormData.Room) || oCurrentFormData.Room < 1) {
             oCurrentFormData.Room = 1;
         }
+        
+        oView.byId("ButtonSubmit").setEnabled(false);
         
         //--------------------------------------------------------------------//
         // Prepare the URL and parameters for the call to create a device.
@@ -565,26 +574,61 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                                     oController.ToggleOnvifStreamControls(false);
                                     oView.byId("SelectOnvifServer").setEnabled(true);
                                 }
+                                
+                                oView.byId("ButtonSubmit").setEnabled(true);
                             }
                         });
                     }
                 });
             } else {
                 jQuery.sap.log.error("An error has occurred with the link ID: consult the \"Success\" output above this console");
-                IomyRe.common.showError("Error creating device:\n\n"+data.ErrMesg);
+                IomyRe.common.showError("Error creating device:\n\n"+data.ErrMesg, "", function () {
+                    oView.byId("ButtonSubmit").setEnabled(false);
+                });
             }
             
         };
         
         mData.onFail = function (error) {
             jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
-            IomyRe.common.showError("Error creating device:\n\n"+error.responseText, "");
+            IomyRe.common.showError("Error creating device:\n\n"+error.responseText, "", function () {
+                oView.byId("ButtonSubmit").setEnabled(true);
+            });
         };
         
         //--------------------------------------------------------------------//
-        // Run the request to create or edit an existing device.
+        // Run the request to create a device.
         //--------------------------------------------------------------------//
         IomyRe.apiphp.AjaxRequest(mData);
+    },
+    
+    EditDevice : function () {
+        var oController         = this;
+        var oView               = oController.getView();
+        var oCurrentFormData    = oView.getModel().getProperty( "/CurrentDevice/" );
+        
+        oView.byId("ButtonSubmit").setEnabled(false);
+        
+        //--------------------------------------------------------------------//
+        // Run the request to edit an existing device.
+        //--------------------------------------------------------------------//
+        IomyRe.devices.editThing({
+            thingID     : oController.iThingId,
+            thingName   : oCurrentFormData.ThingName,
+            roomID      : oCurrentFormData.RoomId,
+            
+            onSuccess : function () {
+                oView.byId("ButtonSubmit").setEnabled(true);
+            },
+            
+            onWarning : function () {
+                oView.byId("ButtonSubmit").setEnabled(true);
+            },
+            
+            onFail : function () {
+                oView.byId("ButtonSubmit").setEnabled(true);
+            }
+        });
     },
     
     RunZigbeeCommand : function () {

@@ -37,12 +37,12 @@ IomyRe.devices = new sap.ui.base.Object();
  * of devices.
  */
 $.extend(IomyRe.devices,{
-	Devices: [],
-	
-	iODataFieldsToFetch				: 0,
-	bWaitingToLoadAPI				: false,
-	bLoadingFieldsFromAPI			: false,
-	bLoadingFieldsFromOData			: false,
+    Devices: [],
+    
+    iODataFieldsToFetch                : 0,
+    bWaitingToLoadAPI                : false,
+    bLoadingFieldsFromAPI            : false,
+    bLoadingFieldsFromOData            : false,
     
     /**
      * Returns the current on/off status of a given device in the form of "On"
@@ -157,13 +157,13 @@ $.extend(IomyRe.devices,{
         var oLink = null;
         // Using the Link List found in common because the scope is global.
         if (IomyRe.common.LinkList["_"+iLinkId] !== undefined) {
-			oLink = IomyRe.common.getLink(iLinkId);
-		}
+            oLink = IomyRe.common.getLink(iLinkId);
+        }
         
         return oLink;
     },
     
-	/**
+    /**
      * Performs an AJAX request to assign a given device to a given room.
      * 
      * Required parameters:
@@ -182,94 +182,94 @@ $.extend(IomyRe.devices,{
         //------------------------------------------------------------//
         // Declare variables
         //------------------------------------------------------------//
-        var me				= this; // Capture the scope of the current controller
-        var bError			= false;
-		var aErrorMessages	= [];
-		var sUrl			= IomyRe.apiphp.APILocation("link");
-		var iLinkId;
-		var iRoomId;
+        var me                = this; // Capture the scope of the current controller
+        var bError            = false;
+        var aErrorMessages    = [];
+        var sUrl            = IomyRe.apiphp.APILocation("link");
+        var iLinkId;
+        var iRoomId;
         var mDeviceIDInfo;
-		var mRoomIDInfo;
-		var fnSuccess;
-		var fnFail;
-		
-		//--------------------------------------------------------------------//
-		// Read the settings map
-		//--------------------------------------------------------------------//
-		if (mSettings !== undefined) {
-			//----------------------------------------------------------------//
-			// REQUIRED: Either a valid Thing ID to get the link ID, or the
-			// Link ID itself.
-			//----------------------------------------------------------------//
-			if (mSettings.thingID !== undefined) {
-				mDeviceIDInfo = IomyRe.validation.isThingIDValid(mSettings.thingID);
-				
-				bError			= !mDeviceIDInfo.bIsValid;
-				aErrorMessages	= aErrorMessages.concat(mDeviceIDInfo.aErrorMessages);
-				
-				if (!bError) {
-					iLinkId = IomyRe.common.ThingList["_"+mSettings.thingID].LinkId;
-				}
-			} else {
-				if (mSettings.linkID !== undefined) {
-//					mDeviceIDInfo = IomyRe.validation.isLinkIDValid(mSettings.linkID);
-//				
-//					bError			= !mDeviceIDInfo.bIsValid;
-//					aErrorMessages	= aErrorMessages.concat(mDeviceIDInfo.aErrorMessages);
-//					
-//					if (!bError) {
-						iLinkId = mSettings.linkID;
-//					}
-				} else {
-					fnAppendError("Thing (thingID) or Link (linkID) must be specified!");
-				}
-			}
-			
-			if (bError) {
-				throw new IllegalArgumentException( aErrorMessages.join("\n") );
-			}
-			
-			//----------------------------------------------------------------//
-			// Valid Room ID
-			//----------------------------------------------------------------//
-			if (mSettings.roomID !== undefined) {
-				//-- Room ID --//
-				mRoomIDInfo		= IomyRe.validation.isRoomIDValid(mSettings.roomID);
+        var mRoomIDInfo;
+        var fnSuccess;
+        var fnFail;
+        
+        //--------------------------------------------------------------------//
+        // Read the settings map
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined) {
+            //----------------------------------------------------------------//
+            // REQUIRED: Either a valid Thing ID to get the link ID, or the
+            // Link ID itself.
+            //----------------------------------------------------------------//
+            if (mSettings.thingID !== undefined) {
+                mDeviceIDInfo = IomyRe.validation.isThingIDValid(mSettings.thingID);
+                
+                bError            = !mDeviceIDInfo.bIsValid;
+                aErrorMessages    = aErrorMessages.concat(mDeviceIDInfo.aErrorMessages);
+                
+                if (!bError) {
+                    iLinkId = IomyRe.common.ThingList["_"+mSettings.thingID].LinkId;
+                }
+            } else {
+                if (mSettings.linkID !== undefined) {
+//                    mDeviceIDInfo = IomyRe.validation.isLinkIDValid(mSettings.linkID);
+//                
+//                    bError            = !mDeviceIDInfo.bIsValid;
+//                    aErrorMessages    = aErrorMessages.concat(mDeviceIDInfo.aErrorMessages);
+//                    
+//                    if (!bError) {
+                        iLinkId = mSettings.linkID;
+//                    }
+                } else {
+                    fnAppendError("Thing (thingID) or Link (linkID) must be specified!");
+                }
+            }
+            
+            if (bError) {
+                throw new IllegalArgumentException( aErrorMessages.join("\n") );
+            }
+            
+            //----------------------------------------------------------------//
+            // Valid Room ID
+            //----------------------------------------------------------------//
+            if (mSettings.roomID !== undefined) {
+                //-- Room ID --//
+                mRoomIDInfo        = IomyRe.validation.isRoomIDValid(mSettings.roomID);
 
-				bError			= !mRoomIDInfo.bIsValid;
-				aErrorMessages	= aErrorMessages.concat(mRoomIDInfo.aErrorMessages);
-				
-				// Throw an exception if the room ID is invalid.
-				if (bError) {
-					throw new IllegalArgumentException( aErrorMessages.join("\n") );
-				} else {
-					iRoomId		= mSettings.roomID;
-				}
-			} else {
+                bError            = !mRoomIDInfo.bIsValid;
+                aErrorMessages    = aErrorMessages.concat(mRoomIDInfo.aErrorMessages);
+                
+                // Throw an exception if the room ID is invalid.
+                if (bError) {
+                    throw new IllegalArgumentException( aErrorMessages.join("\n") );
+                } else {
+                    iRoomId        = mSettings.roomID;
+                }
+            } else {
                 fnAppendError("Room ID (roomID) must be specified!");
             }
-			
-			//--------------------------------------------------------------------//
-			// Check the settings map for two callback functions.
-			//--------------------------------------------------------------------//
-			//-- Success callback --//
-			if (mSettings.onSuccess === undefined) {
-				fnSuccess = function () {};
-			} else {
-				fnSuccess = mSettings.onSuccess;
-			}
+            
+            //--------------------------------------------------------------------//
+            // Check the settings map for two callback functions.
+            //--------------------------------------------------------------------//
+            //-- Success callback --//
+            if (mSettings.onSuccess === undefined) {
+                fnSuccess = function () {};
+            } else {
+                fnSuccess = mSettings.onSuccess;
+            }
 
-			//-- Failure callback --//
-			if (mSettings.onFail === undefined) {
-				fnFail = function () {};
-			} else {
-				fnFail = mSettings.onFail;
-			}
-			
-		} else {
-			throw new MissingSettingsMapException();
-		}
-		
+            //-- Failure callback --//
+            if (mSettings.onFail === undefined) {
+                fnFail = function () {};
+            } else {
+                fnFail = mSettings.onFail;
+            }
+            
+        } else {
+            throw new MissingSettingsMapException();
+        }
+        
         //------------------------------------------------------------//
         // Begin request
         //------------------------------------------------------------//
@@ -278,34 +278,449 @@ $.extend(IomyRe.devices,{
             data : {"Mode" : "ChooseRoom", "Id" : parseInt(iLinkId), "RoomId" : parseInt(iRoomId)},
             
             onSuccess : function (response, data) {
-				try {
-					if (data.Error === false) {
-						fnSuccess();
+                try {
+                    if (data.Error === false) {
+                        fnSuccess();
 
-					} else {
-						fnFail(data.ErrMesg);
-					}
-				} catch (ex) {
-					fnFail(ex.message);
-				}
+                    } else {
+                        fnFail(data.ErrMesg);
+                    }
+                } catch (ex) {
+                    fnFail(ex.message);
+                }
             },
             
             onFail : function (error) {
-				fnFail("Error (HTTP Status "+error.status+"): "+error.responseText);
+                fnFail("Error (HTTP Status "+error.status+"): "+error.responseText);
                 //jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
             }
         });
     },
-	
+    
+    editThing : function (mSettings) {
+        var bError                    = false;
+        var aErrorMessages            = [];
+        var sThingText;
+        var iThingId;
+        var sOldThingText;
+        var iOldRoomID;
+        
+        var bEditingThing;
+        var mThingIDInfo;
+        var mRoomIDInfo;
+        var bChangingRoom;
+
+        var iRoomId;
+        var sRoomText;
+        
+        var fnThingSuccess;
+        var fnThingFail;
+        
+        var fnRoomSuccess;
+        var fnRoomFail;
+        
+        var fnSuccess;
+        var fnWarning;
+        var fnFail;
+        
+        var mThingChangeSettings = {};
+        var mRoomChangeSettings = {};
+        
+        // Lambda function to run if there are errors.
+        var fnAppendError   = function (sErrMesg) {
+            bError = true;
+            aErrorMessages.push(sErrMesg);
+            //jQuery.sap.log.error(sErrMesg);
+        };
+        
+        //--------------------------------------------------------------------//
+        // Read the settings map
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined) {
+            //----------------------------------------------------------------//
+            // REQUIRED: Valid Thing ID
+            //----------------------------------------------------------------//
+            if (mSettings.thingID !== undefined) {
+                mThingIDInfo    = IomyRe.validation.isThingIDValid(mSettings.thingID);
+                
+                bError          = !mThingIDInfo.bIsValid;
+                aErrorMessages  = aErrorMessages.concat(mThingIDInfo.aErrorMessages);
+                
+                if (!bError) {
+                    iThingId = mSettings.thingID;
+                    sOldThingText = IomyRe.common.ThingList["_"+iThingId].DisplayName;
+                }
+            } else {
+                fnAppendError("Thing ID (thingID) must be specified!");
+            }
+            
+            //----------------------------------------------------------------//
+            // REQUIRED: Thing Name
+            //----------------------------------------------------------------//
+            if (mSettings.thingName === undefined) {
+                fnAppendError("Thing Name (thingName) must be specified!");
+            } else {
+                sThingText = mSettings.thingName;
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Valid Room ID
+            //----------------------------------------------------------------//
+            if (mSettings.roomID !== undefined) {
+                mRoomIDInfo = IomyRe.validation.isRoomIDValid(mSettings.roomID);
+                
+                bError            = !mRoomIDInfo.bIsValid;
+                aErrorMessages    = aErrorMessages.concat(mRoomIDInfo.aErrorMessages);
+                
+                if (!bError) {
+                    iRoomId     = mSettings.roomID;
+                    iOldRoomID  = IomyRe.common.ThingList["_"+iThingId].RoomId;
+                }
+            } else {
+                iRoomId = 0;
+            }
+            
+            if (bError) {
+                throw new IllegalArgumentException( aErrorMessages.join("\n") );
+            }
+            
+            //--------------------------------------------------------------------//
+            // Check the settings map for three callback functions.
+            //--------------------------------------------------------------------//
+            //-- Success callback --//
+            if (mSettings.onSuccess === undefined) {
+                fnSuccess = function () {};
+            } else {
+                fnSuccess = mSettings.onSuccess;
+            }
+            
+            //-- Success callback --//
+            if (mSettings.onWarning === undefined) {
+                fnWarning = function () {};
+            } else {
+                fnWarning = mSettings.onWarning;
+            }
+
+            //-- Failure callback --//
+            if (mSettings.onFail === undefined) {
+                fnFail = function () {};
+            } else {
+                fnFail = mSettings.onFail;
+            }
+            
+        } else {
+            fnAppendError("Thing ID (thingID) must be specified!");
+            fnAppendError("Thing Name (thingName) must be specified!");
+            throw new MissingSettingsMapException( aErrorMessages.join("\n") );
+        }
+
+        //--------------------------------------------------------------------//
+        // Has the thing name changed?
+        //--------------------------------------------------------------------//
+        if (sThingText === sOldThingText) {
+            bEditingThing = false;
+        } else {
+            bEditingThing = true;
+        }
+        
+        //--------------------------------------------------------------------//
+        // Check that a different room has actually been changed.
+        //--------------------------------------------------------------------//
+        if (iRoomId == iOldRoomID || iRoomId === 0) {
+            iRoomId         = null;
+            sRoomText       = null;
+            bChangingRoom   = false;
+        } else {
+            sRoomText       = IomyRe.functions.getRoom(iRoomId).RoomName;
+            bChangingRoom   = true;
+        }
+        
+        if (bError === false) {
+            mThingChangeSettings.thingID    = iThingId;
+            mThingChangeSettings.thingName  = sThingText;
+            
+            mRoomChangeSettings.thingID     = iThingId;
+            mRoomChangeSettings.roomID      = iRoomId;
+            
+            //----------------------------------------------------------------//
+            // Create the onSuccess and onFail functions based on what fields
+            // are enabled and/or changed.
+            //----------------------------------------------------------------//
+            if (bEditingThing && (bChangingRoom && iRoomId !== null) ) {
+                
+                //------------------------------------------------------------//
+                // We're editing both the thing name and assigning it to a
+                // room.
+                //------------------------------------------------------------//
+                mThingChangeSettings.successful = true;
+                
+                //------------------------------------------------------------//
+                // Create the success function that will create the callback
+                // functions for the room assignment function.
+                //------------------------------------------------------------//
+                fnThingSuccess = function () {
+                    //--------------------------------------------------------//
+                    // Create the success function that will popup a message,
+                    // indicating complete or partial success.
+                    //--------------------------------------------------------//
+                    mRoomChangeSettings.onSuccess = function () {
+                        IomyRe.common.RefreshCoreVariables({
+                            onSuccess : function () {
+                                var sMessage;
+                                
+                                if (mThingChangeSettings.successful === true) {
+                                    sMessage = "Device renamed to "+sThingText+" and is now located in "+sRoomText;
+                                    IomyRe.common.showMessage({
+                                        text : sMessage,
+                                    });
+                                    
+                                    fnSuccess();
+                                    
+                                } else {
+                                    sMessage = "Device couldn't be renamed to "+sThingText+", but is now located in "+sRoomText;
+                                    
+                                    IomyRe.common.showWarning(sMessage, "", function () {
+                                        fnWarning();
+                                    });
+                                }
+                                
+                                fnSuccess();
+                            },
+                            
+                            onFail : fnThingFail
+                        });
+                    };
+                    
+                    //--------------------------------------------------------//
+                    // Create the success function that will popup a message,
+                    // indicating complete or partial failure.
+                    //--------------------------------------------------------//
+                    mRoomChangeSettings.onFail = function (sErrorMessage) {
+                        IomyRe.common.RefreshCoreVariables({
+                            onSuccess : function () {
+                                var sMessage;
+
+                                if (mThingChangeSettings.successful === true) {
+                                    sMessage = "Device renamed to "+sThingText+", but failed to move device to "+sRoomText;
+
+                                    IomyRe.common.showWarning(sMessage, "", function () {
+                                        fnWarning(sMessage);
+                                    });
+
+                                    jQuery.sap.log.warning(sMessage);
+                                } else {
+                                    sMessage = "Device couldn't be renamed. Failed to move device to "+sRoomText;
+
+                                    IomyRe.common.showError(sMessage, "", function () {
+                                        fnFail();
+                                    });
+
+                                    jQuery.sap.log.error(sMessage);
+                                }
+                            }
+                        });
+                    };
+                    
+                    //-- Call the room assignment function with the correct configuration. --//
+                    IomyRe.devices.AssignDeviceToRoom(mRoomChangeSettings);
+                };
+                
+                //------------------------------------------------------------//
+                // Create the failure function that will report a failure and
+                // then run the success function to proceed to assign a device
+                // to a room
+                //------------------------------------------------------------//
+                fnThingFail = function (sErrMesg) {
+                    jQuery.sap.log.error(sErrMesg);
+                    mThingChangeSettings.successful = false;
+                    fnThingSuccess();
+                };
+                
+                mThingChangeSettings.onSuccess    = fnThingSuccess;
+                mThingChangeSettings.onFail       = fnThingFail;
+                
+                // Run the API to update the device (thing) name
+                try {
+                    IomyRe.devices.editThingName(mThingChangeSettings);
+
+                } catch (e00033) {
+                    jQuery.sap.log.error(e00033.message);
+                }
+            } else {
+                //------------------------------------------------------------//
+                // We're simply changing the name of a thing.
+                //------------------------------------------------------------//
+                if (bEditingThing) {
+                    fnThingFail = function () {
+                        var sMessage = "Device couldn't be renamed.";
+
+                        IomyRe.common.showError(sMessage, "", function () {
+                            fnFail();
+                        });
+
+                        jQuery.sap.log.error(sMessage);
+                    };
+                    
+                    fnThingSuccess = function () {
+                        IomyRe.common.RefreshCoreVariables({
+                            onSuccess : function () {
+                                IomyRe.common.showMessage({
+                                    text : "Device renamed to \""+sThingText+"\"."
+                                });
+                                
+                                fnSuccess();
+                            }
+                        });
+                    };
+                    
+                    mThingChangeSettings.onSuccess    = fnThingSuccess;
+                    mThingChangeSettings.onFail       = fnThingFail;
+                    
+                    IomyRe.devices.editThingName(mThingChangeSettings);
+                }
+                
+                //------------------------------------------------------------//
+                // Or moving a device to another room.
+                //------------------------------------------------------------//
+                if (bChangingRoom && iRoomId !== null) {
+                    fnRoomFail = function (sMessage) {
+                        IomyRe.common.showError(sMessage, "", function () {
+                            fnFail();
+                        });
+                    };
+                    
+                    fnRoomSuccess = function () {
+                        IomyRe.common.RefreshCoreVariables({ 
+                            onSuccess : function () {
+                                IomyRe.common.showMessage({
+                                    text : "Device is now located in "+sRoomText
+                                });
+                                
+                                fnSuccess();
+                            }
+                        });
+                    };
+                    
+                    mRoomChangeSettings.onSuccess    = fnRoomSuccess;
+                    mRoomChangeSettings.onFail       = fnRoomFail;
+                    
+                    IomyRe.devices.AssignDeviceToRoom(mRoomChangeSettings);
+                }
+            }
+            
+        } else {
+            IomyRe.common.showError(aErrorMessages.join("\n\n"));
+            jQuery.sap.log.error(aErrorMessages.join("\n"));
+        }
+    },
+    
+    editThingName : function (mSettings) {
+        var bError                    = false;
+        var aErrorMessages            = [];
+        var iThingId;
+        var sThingName;
+        var mThingIDInfo;
+        var fnSuccess;
+        var fnFail;
+        
+        // Lambda function to run if there are errors.
+        var fnAppendError   = function (sErrMesg) {
+            bError = true;
+            aErrorMessages.push(sErrMesg);
+            //jQuery.sap.log.error(sErrMesg);
+        };
+        
+        //--------------------------------------------------------------------//
+        // Read the settings map
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined) {
+            //----------------------------------------------------------------//
+            // REQUIRED: Valid Thing ID
+            //----------------------------------------------------------------//
+            if (mSettings.thingID !== undefined) {
+                mThingIDInfo = IomyRe.validation.isThingIDValid(mSettings.thingID);
+                
+                bError            = !mThingIDInfo.bIsValid;
+                aErrorMessages    = aErrorMessages.concat(mThingIDInfo.aErrorMessages);
+                
+                if (!bError) {
+                    iThingId = mSettings.thingID;
+                }
+            } else {
+                fnAppendError("Thing ID (thingID) must be specified!");
+            }
+            
+            //----------------------------------------------------------------//
+            // REQUIRED: Thing Name
+            //----------------------------------------------------------------//
+            if (mSettings.thingName === undefined) {
+                fnAppendError("Thing Name (thingName) must be specified!");
+            } else {
+                sThingName = mSettings.thingName;
+            }
+            
+            if (bError) {
+                throw new IllegalArgumentException( aErrorMessages.join("\n") );
+            }
+            
+            //--------------------------------------------------------------------//
+            // Check the settings map for two callback functions.
+            //--------------------------------------------------------------------//
+            //-- Success callback --//
+            if (mSettings.onSuccess === undefined) {
+                fnSuccess = function () {};
+            } else {
+                fnSuccess = mSettings.onSuccess;
+            }
+
+            //-- Failure callback --//
+            if (mSettings.onFail === undefined) {
+                fnFail = function () {};
+            } else {
+                fnFail = mSettings.onFail;
+            }
+            
+        } else {
+            fnAppendError("Thing ID (thingID) must be specified!");
+            fnAppendError("Thing Name (thingName) must be specified!");
+            throw new MissingSettingsMapException( aErrorMessages.join("\n") );
+        }
+        
+        //--------------------------------------------------------------------//
+        // Run the API to change the thing name.
+        //--------------------------------------------------------------------//
+        IomyRe.apiphp.AjaxRequest({
+            "url" : IomyRe.apiphp.APILocation("thing"),
+            "data" : {"Mode" : "EditName", "Id" : iThingId, "Name" : sThingName},
+            "onSuccess" : function (responseType, data) {
+
+                try {
+                    if (data.Error === false) {
+                        fnSuccess();
+                        
+                    } else {
+                        fnFail(data.ErrMesg);
+                    }
+                } catch (e) {
+                    fnFail(e.message);
+                }
+
+            },
+            "onFail" : function (err) {
+                fnFail(err.responseText);
+            }
+        });
+    },
+    
     /**
      * Fetches the ID of a specific page to interact with a particular device.
      * 
      * @param {Number} iThingTypeId             ID of the thing type.
      * @returns {string} Page ID of the appropriate device page.
      */
-	getDevicePageID : function (iThingTypeId) {
-		//-- Zigbee Netvox Smart Plug --//
-		if( iThingTypeId===2 ) {
+    getDevicePageID : function (iThingTypeId) {
+        //-- Zigbee Netvox Smart Plug --//
+        if( iThingTypeId===2 ) {
             return IomyRe.devices.zigbeesmartplug.DevicePageID;
             
         //-- Philips Hue --//
@@ -336,14 +751,14 @@ $.extend(IomyRe.devices,{
         } else if ( iThingTypeId===18) {
             return IomyRe.devices.ipcamera.DevicePageID;
         }
-	},
+    },
     
     GetUITaskList: function( mSettings ) {
-		//------------------------------------//
-		//-- 1.0 - Initialise Variables		--//
-		//------------------------------------//
-		//console.log(JSON.stringify(aDeviceData));
-		var aTasks			= { "High":[], "Low":[] };					//-- ARRAY:			--//
+        //------------------------------------//
+        //-- 1.0 - Initialise Variables        --//
+        //------------------------------------//
+        //console.log(JSON.stringify(aDeviceData));
+        var aTasks            = { "High":[], "Low":[] };                    //-- ARRAY:            --//
         
         var bError          = false;
         var aErrorMessages  = [];
@@ -378,13 +793,13 @@ $.extend(IomyRe.devices,{
             
             throw new MissingSettingsMapException(aErrorMessages.join("\n"));
         }
-		
-		//------------------------------------//
-		//-- 2.0 - Fetch TASKS				--//
-		//------------------------------------//
+        
+        //------------------------------------//
+        //-- 2.0 - Fetch TASKS                --//
+        //------------------------------------//
         
         //-- Zigbee Netvox Smart Plug --//
-		if( mSettings.deviceData.IOs!==undefined ) {
+        if( mSettings.deviceData.IOs!==undefined ) {
             if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.zigbeesmartplug.ThingTypeId ) {
                 aTasks = IomyRe.devices.zigbeesmartplug.GetUITaskList(mSettings);
             }
@@ -397,14 +812,14 @@ $.extend(IomyRe.devices,{
                 aTasks = IomyRe.devices.motionsensor.GetUITaskList(mSettings);
             }
             
-		} else {
+        } else {
             //-- TODO: Write a error message --//
             jQuery.sap.log.error("Device "+mSettings.deviceData.DisplayName+" has no IOs");
         }
         
-		return aTasks;
-	}
-	
+        return aTasks;
+    }
+    
     
 });
 

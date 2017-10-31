@@ -106,7 +106,7 @@ sap.ui.controller("pages.staging.Device", {
         var oView           = this.getView();
         var wList           = oView.byId("DeviceList");
         var bHasDevices     = false;
-        var bEditing        = oController.bEditing;
+//        var bEditing        = oController.bEditing;
         var sPageId         = "";
         
         // Wipe the old list.
@@ -171,7 +171,7 @@ sap.ui.controller("pages.staging.Device", {
                                     })
                                 ],
                                 press : function () {
-                                    if (bEditing) {
+                                    if (oController.bEditing) {
                                         sPageId = "pDeviceForm";
                                     } else {
                                         sPageId = "pTile";
@@ -214,7 +214,7 @@ sap.ui.controller("pages.staging.Device", {
                                     })
                                 ],
                                 press : function () {
-                                    if (bEditing) {
+                                    if (oController.bEditing) {
                                         sPageId = "pDeviceForm";
                                     } else {
                                         sPageId = "pRGBlight";
@@ -255,7 +255,7 @@ sap.ui.controller("pages.staging.Device", {
                                     // If were looking to edit a device, open the form,
                                     // otherwise, open the stream in another app.
                                     //----------------------------------------------------------//
-                                    if (bEditing) {
+                                    if (oController.bEditing) {
                                         IomyRe.common.NavigationChangePage( "pDeviceForm" , { "ThingId": mDevice.DeviceId } , false);
                                         
                                     } else {
@@ -307,7 +307,7 @@ sap.ui.controller("pages.staging.Device", {
                                     })
                                 ],
                                 press : function () {
-                                    if (bEditing) {
+                                    if (oController.bEditing) {
                                         sPageId = "pDeviceForm";
                                     } else {
                                         sPageId = "pMJPEG";
@@ -340,7 +340,7 @@ sap.ui.controller("pages.staging.Device", {
                                     })
                                 ],
                                 press : function () {
-                                    if (bEditing) {
+                                    if (oController.bEditing) {
                                         sPageId = "pDeviceForm";
                                     } else {
                                         sPageId = "pWeatherFeed";
@@ -379,7 +379,7 @@ sap.ui.controller("pages.staging.Device", {
                                     })
                                 ],
                                 press : function () {
-                                    if (bEditing) {
+                                    if (oController.bEditing) {
                                         sPageId = "pDeviceForm";
                                     } else {
                                         sPageId = "pMotionSensor";
