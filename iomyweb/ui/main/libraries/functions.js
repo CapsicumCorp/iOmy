@@ -325,8 +325,8 @@ $.extend(IomyRe.functions, {
             //----------------------------------------------------------------//
             // Report and throw an exception if no UTS is given.
             //----------------------------------------------------------------//
-            jQuery.sap.log.error("IOMy.functions.getLengthOfTimePassedSince() requires a UTS parameter!");
-            throw "IOMy.functions.getLengthOfTimePassedSince() requires a UTS parameter!";
+            jQuery.sap.log.error("IomyRe.functions.getLengthOfTimePassedSince() requires a UTS parameter!");
+            throw "IomyRe.functions.getLengthOfTimePassedSince() requires a UTS parameter!";
             
         } else {
             //----------------------------------------------------------------//
@@ -565,6 +565,46 @@ $.extend(IomyRe.functions, {
         }
         
         return iCount;
+    },
+    
+    getRoom : function (iRoomId, iPremiseId) {
+        var mIDInfo     = IomyRe.validation.isRoomIDValid(iRoomId);
+        var mFoundRoom  = null;
+        
+        if (mIDInfo.bIsValid) {
+            if (iPremiseId !== undefined && iPremiseId !== null) {
+                mFoundRoom = IomyRe.common.RoomsList["_"+iPremiseId]["_"+iRoomId];
+                
+            } else {
+                $.each(IomyRe.common.RoomsList, function (sI, mPremise) {
+                    if (sI !== undefined && sI !== null && mPremise !== undefined && mPremise !== null) {
+                        var bFound = false;
+                        
+                        $.each(mPremise, function (sJ, mRoom) {
+                            if (sJ !== undefined && sJ !== null && mRoom !== undefined && mRoom !== null) {
+                                
+                                if (mRoom.RoomId == iRoomId) {
+                                    mFoundRoom = mRoom;
+                                    bFound = true;
+                                    return false;
+                                }
+                                
+                            }
+                            
+                        });
+                        
+                        if (bFound) {
+                            return false;
+                        }
+                        
+                    }
+                });
+            }
+        } else {
+            throw new RoomNotFoundException();
+        }
+        
+        return mFoundRoom;
     },
     
     /**
