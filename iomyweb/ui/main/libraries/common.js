@@ -299,7 +299,7 @@ $.extend(IomyRe.common,{
                     fnAppendError("Invalid view! Ensure that the object is a UI5 View or Controller.");
                 }
             } else {
-                fnAppendError("'view' must be specified.");
+                oCurrentView = oApp.getCurrentPage();
             }
             
             //----------------------------------------------------------------//
@@ -341,7 +341,8 @@ $.extend(IomyRe.common,{
             }
             
         } else {
-            throw new MissingSettingsMapException("Settings were not given! These settings must include:\n\n* 'view': either the View or Controller of the UI5 page the message should display on.\n* 'text': Message to display.");
+            fnAppendError("'text' was not specified.");
+            throw new MissingSettingsMapException(aErrorMessages.join('\n'));
         }
         
         oCurrentView.expectingMessage = true;
