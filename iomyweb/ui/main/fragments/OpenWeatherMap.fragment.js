@@ -107,14 +107,14 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 						new sap.ui.layout.form.FormElement({
 							label : "",
 							fields: [ 
-								new sap.m.Button ({
+								new sap.m.Button (oView.createId("ButtonSubmit"), {
 									type: sap.m.ButtonType.Accept,
 									text: "Save",
                                     press : function () {
                                         oController.CreateDevice();
                                     }
 								}),
-								new sap.m.Button ({
+								new sap.m.Button (oView.createId("ButtonCancel"), {
 									type: sap.m.ButtonType.Reject,
 									text: "Cancel",
                                     press : function () {
