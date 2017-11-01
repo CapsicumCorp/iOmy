@@ -433,6 +433,28 @@ $.extend(IomyRe.functions, {
     },
     
     /**
+     * Gathers the Conn information from a given link.
+     * 
+     * @param {type} iLinkId        ID of the link to retrieve the information from
+     * @returns {map}               Link Conn Information
+     */
+    getLinkConnInfo : function (iLinkId) {
+        // TODO: Add error checking here.
+        
+        var mLink = IomyRe.common.LinkList["_"+iLinkId];
+        var mLinkConnInfo = {
+            LinkConnId              : mLink.LinkConnId,
+            LinkConnName            : mLink.LinkConnName,
+            LinkConnAddress         : mLink.LinkConnAddress,
+            LinkConnUsername        : mLink.LinkConnUsername,
+            LinkConnPassword        : mLink.LinkConnPassword,
+            LinkConnPort            : mLink.LinkConnPort
+        };
+        
+        return mLinkConnInfo;
+    },
+    
+    /**
      * Gets the link type ID from a given link.
      * 
      * @param {type} iLinkId    Given Link ID
