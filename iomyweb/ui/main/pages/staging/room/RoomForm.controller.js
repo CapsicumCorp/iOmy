@@ -59,6 +59,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 						var sRoomCode = "_"+oController.mPageData.RoomId;
 						var sPremiseCode = "_"+oController.mPageData.PremiseId;
 						oController.mRoomData = IomyRe.common.RoomsList[sPremiseCode][sRoomCode];
+                        
 					} else {
 						oController.mRoomData = {
                             "RoomName"      : "",
@@ -71,12 +72,11 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 					jQuery.sap.log.error("Error with the onBeforeShow 'bEditing' :"+e1.message);
 				}
 				
-				//-- Refresh Nav Buttons --//
-				//MyApp.common.NavigationRefreshButtons( oController );
-				oController.ToggleButtonsAndView( oController, oController.bEditing );
-				
 				//-- Update the Model --//
 				oController.RefreshModel( oController, {} );
+				
+				//-- Refresh Nav Buttons --//
+				oController.ToggleButtonsAndView( oController, oController.bEditing );
 				
 				//-- Defines the Device Type --//
 				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
@@ -144,7 +144,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 						"Floor":            0,
 						"RoomTypeId":       oCurrentFormData.RoomTypeId
 					},
-					onSuccess: $.proxy( function () {
+					onSuccess: $.proxy( function (sType, aData) {
 						try {
 							if( sType==="JSON" && aData.Error===false ) {
 								try {
@@ -303,7 +303,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 				oView.byId("RoomToolbarTitle").setText("Add Room");
 				IomyRe.common.ShowFormFragment( oController, "room.AddRoom", "RoomBlock_Form", "FormContainer" );
 			} else if(bEditing === true) {
-				oView.byId("RoomToolbarTitle").setText("Edit Room");
+				oView.byId("RoomToolbarTitle").setText("Edit " + oController.mRoomData.RoomName);
 				IomyRe.common.ShowFormFragment( oController, "room.EditRoom", "RoomBlock_Form", "FormContainer" );
 			} else {
 				$.sap.log.error("ToggleButtonsAndView: Critcal Error. bEditing set incorrectly:"+bEditing);
