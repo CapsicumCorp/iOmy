@@ -239,12 +239,16 @@ sap.ui.controller("pages.staging.Device", {
                                 number: "Monitoring",
                                 numberUnit: "activity",
                                 attributes : [
-//                                    new sap.m.ObjectAttribute ({
-//                                        text: "link",
-//                                        customContent : new sap.m.Link ({
-//                                            text: "Take Screenshot"
-//                                        })
-//                                    }),
+                                    new sap.m.ObjectAttribute ({
+                                        text: "link",
+                                        customContent : new sap.m.Link ({
+                                            text: "Take Screenshot",
+                                            press : function () {
+                                                IomyRe.common.NavigationChangePage( "pOnvifSnapshot" , { "ThingId": mDevice.DeviceId } , false);
+                                                
+                                            }
+                                        })
+                                    }),
                                     new sap.m.ObjectAttribute ({
                                         text: "Tap to view stream"
                                     })

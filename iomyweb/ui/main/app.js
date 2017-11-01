@@ -145,6 +145,12 @@ var aPages = [
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.device.Mjpeg\" Page!\n"
 	},
 	{
+		"Id":			"pOnvifSnapshot",
+		"Location":		"pages.staging.device.OnvifCamera",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.device.OnvifCamera\" Page!\n"
+	},
+	{
 		"Id":			"pUserForm",
 		"Location":		"pages.staging.user.UserForm",
 		"Type":			"JS",
