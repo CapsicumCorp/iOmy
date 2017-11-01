@@ -31,7 +31,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
     DeviceOptions           : null,
     iThingId                : null,
     
-    bDeviceOptionSelectorDrawn  : false,
+    //bDeviceOptionSelectorDrawn  : false,
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -79,12 +79,23 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     oController.iThingId        = null;
                 }
                 
+                if (oView.byId("ButtonSubmit") !== undefined) {
+                    oView.byId("ButtonSubmit").destroy();
+                }
+                
+                if (oView.byId("ButtonCancel") !== undefined) {
+                    oView.byId("ButtonCancel").destroy();
+                }
+                
+                //oController.bDeviceOptionSelectorDrawn = true;
+                
                 if (oController.bEditExisting) {
                     IomyRe.common.ShowFormFragment( oController, "DeviceFormEdit", "DevTypeBlock", "Block" );
+                    //oController.bDeviceOptionSelectorDrawn = false;
                 } else {
                     IomyRe.common.ShowFormFragment( oController, "DeviceFormAdd", "DevTypeBlock", "Block" );
                     
-                    if (!oController.bDeviceOptionSelectorDrawn) {
+                    //if (!oController.bDeviceOptionSelectorDrawn) {
                         var oSBox = IomyRe.widgets.selectBoxNewDeviceOptions (oView.createId("DevTypeSelect"),{
                             selectedKey : "start",
                             change : function () {
@@ -95,12 +106,10 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                         });
 
                         oView.byId("DeviceTypeFormElement").addField(oSBox);
-
-                        oController.bDeviceOptionSelectorDrawn = true;
                         
                         oView.byId("DevTypeSelect").setSelectedKey("start");
                 
-                    }
+                    //}
                 }
                 
                 oController.DeviceOptions = IomyRe.functions.getNewDeviceOptions();
@@ -280,28 +289,28 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
     },
     
     PrepareRoomListForModel : function (iPremiseId) {
+        var oView               = this.getView();
         var bEditing            = this.bEditExisting;
         var aRoomList           = JSON.parse( JSON.stringify( IomyRe.common.RoomsList["_"+iPremiseId] ) );
         var iRoomCount          = IomyRe.functions.getNumberOfRoomsInPremise(iPremiseId);
         var iUnassignedRoomId   = 0;
-        var bUnassignedOnly     = true;
+        var bUnassignedOnly     = false;
+        var bHasUnassigned      = false;
         
         $.each(aRoomList, function (sI, mRoom) {
             iUnassignedRoomId = mRoom.RoomId;
             
-            if (mRoom.RoomName === "Unassigned" && iRoomCount === 1) {
-                bUnassignedOnly = true;
-            } else {
-                bUnassignedOnly = false;
+            if (mRoom.RoomName === "Unassigned") {
+                if (iRoomCount === 1) {
+                    bUnassignedOnly = true;
+                }
+                
+                bHasUnassigned = true;
             }
             
             return false;
         });
         
-        /*
-         * If there is only room available in a given premise, an empty room list
-         * should be returned. If that's the case, then the 
-         */
         if (bUnassignedOnly) {
             aRoomList = {};
             
@@ -310,9 +319,11 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     "RoomId" : iUnassignedRoomId,
                     "RoomName" : "No rooms configured for premise"
                 };
+            } else {
+                oView.byId("EditThingRoomSelector").setVisible(false);
             }
         } else {
-            if (!bEditing) {
+            if (bHasUnassigned) {
                 delete aRoomList["_"+iUnassignedRoomId];
             }
         }
@@ -619,6 +630,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             
             onSuccess : function () {
                 oView.byId("ButtonSubmit").setEnabled(true);
+                oController.CancelInput();
             },
             
             onWarning : function () {
