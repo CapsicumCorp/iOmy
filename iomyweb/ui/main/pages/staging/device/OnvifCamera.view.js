@@ -134,9 +134,7 @@ sap.ui.jsview("pages.staging.device.OnvifCamera", {
         //==============================================//
         // DRAW DATE, TIME, AND ROOM                    //
         //==============================================//
-        oView.wLocationField = new sap.m.Label({
-            //text : oRoomInfo.RoomName + " in " + oRoomInfo.PremiseName
-        }).addStyleClass("NormalWS");
+        oView.wLocationField = new sap.m.Label({}).addStyleClass("NormalWS");
         
         oView.wSnapshotTimeField = new sap.m.Label({});
         
@@ -169,11 +167,11 @@ sap.ui.jsview("pages.staging.device.OnvifCamera", {
                     ]
                 })
             ]
-        }).addStyleClass("PadAll3px");
+        }).addStyleClass("PadAll3px PadTop15px");
 
         var oVertBox = new sap.m.VBox({
             items : [ oView.wCameraFeed, oInfoBox ]
-        });
+        }).addStyleClass("maxwidth550px HorizontalCenter");
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "OnvifStream",

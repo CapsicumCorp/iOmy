@@ -174,3 +174,9 @@ Copyright: Capsicum Corporation 2015, 2016, 2017
     font-weight: normal;
 	
 }
+
+.CameraThumbnail {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}

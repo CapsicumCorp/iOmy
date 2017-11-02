@@ -59,12 +59,12 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
 */
 	onInit: function() {
 		var oController = this;
-		var thisView = oController.getView();
+		var oView = oController.getView();
         
         // Import the device label functions
         //var LabelFunctions = IomyRe.functions.DeviceLabels;
 		
-		thisView.addEventDelegate({
+		oView.addEventDelegate({
 			// Everything is rendered in this function before rendering.
 			onBeforeShow : function (evt) {
                 
@@ -72,8 +72,10 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
                 oController.oThing = IomyRe.common.ThingList['_'+evt.data.ThingId];
 
                 oController.loadLinkConn(oController.oThing.LinkId);
+                oController.displayRoomLocation();
                 
-                var oRoomInfo = IomyRe.common.RoomsList["_"+oController.oThing.PremiseId]["_"+oController.oThing.RoomId];
+                oView.wSnapshotTimeField.setText("Loading...");
+                
                 //console.log(oController.oThing);
                 //console.log(oController.oThing.DisplayName.toUpperCase());
                 // Add the subheading title widget to the list of labels that display the Thing name.
@@ -136,6 +138,11 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
 //	onExit: function() {
 //
 //	}
+
+    displayRoomLocation : function () {
+        var oController = this;
+        var oView       = this;
+    },
     
     loadLinkConn : function (iLinkId) {
         this.mLinkConnInfo = IomyRe.functions.getLinkConnInfo(iLinkId);
@@ -195,7 +202,7 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
         oController.setPTZButtonsEnabled(false);
         
         IomyRe.devices.onvif.PTZMove({
-            thingID : oController.iID,
+            thingID : oController.oThing.Id,
             profileName : oController.sThumbnailProfileName,
             xpos : iPosX,
             ypos : iPosY,
@@ -261,13 +268,17 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
         var oController = this;
         var oView       = this.getView();
         
+        oView.wSnapshotTimeField.setText("Loading...");
+        
         //---------------------------------------------------//
         // Check that it can find the device before it does anything
         //---------------------------------------------------//
-        IomyRe.devices.onvif.LookupProfiles(oController.oThing.LinkId, 
+        IomyRe.devices.onvif.LookupProfiles({ 
+            linkID : oController.oThing.LinkId,
+            
             // Function if Lookup is successful (Onvif server is attached)
-            function () {
-                var sThumbnailUrl = IomyRe.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+oController.iID;
+            onSuccess : function () {
+                var sThumbnailUrl = IomyRe.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+oController.oThing.Id;
 
                 // Set the CSS rule using the API URL with parameters
                 document.getElementById(oController.createId("CameraThumbnail")).style = "background-image: url("+sThumbnailUrl+")";
@@ -295,7 +306,7 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
             },
             
             // Function if Lookup fails (Onvif server not found)
-            function (response) {
+            onFail : function (response) {
                 jQuery.sap.log.error("Error checking for the Onvif device (onFail): "+IomyRe.devices.onvif.sProfileLookupErrors);
                 oView.wSnapshotTimeField.setText("Failed to load the latest snapshot");
                 
@@ -303,7 +314,7 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
                 // goes back to the same device.
                 oController.bUIDrawn = false;
             }
-        );
+        });
     },
     
     //---------------------------------------------------//
@@ -311,12 +322,13 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
     //---------------------------------------------------//
     
     loadProfile : function() {
-        var oController = this;
-        var aNameWhereClause = [];
-        var sNameWhereClause = "";
-        var aUrlWhereClause = [];
-        var sUrlWhereClause = "";
-        var bCollectingName = true;
+        var oController         = this;
+        var oView               = this.getView();
+        var aNameWhereClause    = [];
+        var sNameWhereClause    = "";
+        var aUrlWhereClause     = [];
+        var sUrlWhereClause     = "";
+        var bCollectingName     = true;
         
         // Prepare the filter statements for both OData requests
         $.each(oController.oThing.IO, function(sI,mIO) {
@@ -359,12 +371,17 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
                     OrderByClause   : [],
 
                     onSuccess : function (type, data) {
+                        var oRoomInfo       = IomyRe.common.RoomsList["_"+oController.oThing.PremiseId]["_"+oController.oThing.RoomId];
+                        var sThumbnailUrl   = IomyRe.apiphp.APILocation("onvifthumbnail")+"?Mode=OpenThingThumbnail&ThingId="+oController.oThing.Id;
+        
+                        
                         if (data.length > 0) {
                             oController.sStreamProfileUrl        = data[0].DATAMEDSTRING_VALUE;
                             oController.sThumbnailProfileUrl     = data[1].DATAMEDSTRING_VALUE;
                         }
                         
-                        var sThumbnailUrl = IomyRe.apiphp.APILocation("onvifthumbnail")+"?Mode=OpenThingThumbnail&ThingId="+oController.iID;
+                        // Display the location of the camera.
+                        oView.wLocationField.setText(oRoomInfo.RoomName + " in " + oRoomInfo.PremiseName);
                     
                         // Set the CSS rule using the API URL with parameters
                         document.getElementById(oController.createId("CameraThumbnail")).style = "background-image: url("+sThumbnailUrl+")";

@@ -177,7 +177,7 @@ $.extend(IomyRe.devices.onvif,{
         //---------------------------------------------------------------//
         if (mSettings !== undefined || mSettings !== null) {
             if (mSettings.linkID === undefined || isNaN(mSettings.linkID)) {
-                throw new IllegalArgumentException("Link ID must be given and be a valid number");
+                throw new IllegalArgumentException("Link ID (linkID) must be given and be a valid number.");
             } else {
                 iLinkId = mSettings.linkID;
             }
@@ -195,7 +195,7 @@ $.extend(IomyRe.devices.onvif,{
             }
             
         } else {
-            throw new MissingSettingsMapException("You must specify the ID of the Onvif Server that contains the profiles.");
+            throw new MissingSettingsMapException("Link ID (linkID) must be given and be a valid number.");
         }
         
         // If all went well...
