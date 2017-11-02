@@ -754,6 +754,13 @@ static int cmdserverlib_register_cmd_listener(cmd_func_ptr_t funcptr) {
   if (cmdserverlib_inuse==0) {
     return -1;
   }
+  //First check if this listener has already been added as since it is a pointer to a fixed function it should only be added once
+  for (auto it=cmdserverlib_cmd_listener_funcs_ptr.begin(); it!=cmdserverlib_cmd_listener_funcs_ptr.end(); ++it) {
+    if (funcptr==*it) {
+      //Return 0 as if the function was still added as it has already been added
+      return 0;
+    }
+  }
   cmdserverlib_cmd_listener_funcs_ptr.push_back(funcptr);
 
   return 0;
@@ -788,6 +795,13 @@ static int cmdserverlib_unregister_cmd_listener(cmd_func_ptr_t funcptr) {
 static int cmdserverlib_register_networkclientclose_listener(networkclientclose_func_ptr_t funcptr) {
   if (cmdserverlib_inuse==0) {
     return -1;
+  }
+  //First check if this listener has already been added as since it is a pointer to a fixed function it should only be added once
+  for (auto it=cmdserverlib_networkclientclose_listener_funcs_ptr.begin(); it!=cmdserverlib_networkclientclose_listener_funcs_ptr.end(); ++it) {
+    if (funcptr==*it) {
+      //Return 0 as if the function was still added as it has already been added
+      return 0;
+    }
   }
   cmdserverlib_networkclientclose_listener_funcs_ptr.push_back(funcptr);
 
