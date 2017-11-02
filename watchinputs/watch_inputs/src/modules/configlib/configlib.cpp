@@ -171,6 +171,7 @@ int configlib_unregister_readcfgfile_post_listener(readcfgfile_post_func_ptr_t f
 int configlib_setcfgfilename(const char *cfgfile);
 int configlib_readcfgfile();
 int configlib_isloaded();
+static int configlib_loadpending();
 char *configlib_getnamevalue_c(const char *block, const char *name);
 
 bool configlib_getnamevalue_cpp(const std::string &block, const std::string &name, std::string &value);
@@ -198,6 +199,16 @@ static configlib_ifaceptrs_ver_1_t configlib_ifaceptrs_ver_1={
   configlib_getnamevalue_c
 };
 
+static configlib_ifaceptrs_ver_2_t configlib_ifaceptrs_ver_2={
+  configlib_register_readcfgfile_post_listener,
+  configlib_unregister_readcfgfile_post_listener,
+  configlib_setcfgfilename,
+  configlib_readcfgfile,
+  configlib_isloaded,
+  configlib_loadpending,
+  configlib_getnamevalue_c
+};
+
 static configlib_ifaceptrs_ver_1_cpp_t configlib_ifaceptrs_ver_1_cpp={
   configlib_register_readcfgfile_post_listener,
   configlib_unregister_readcfgfile_post_listener,
@@ -208,14 +219,33 @@ static configlib_ifaceptrs_ver_1_cpp_t configlib_ifaceptrs_ver_1_cpp={
   configlib_getnamevalue_cpp
 };
 
+static configlib_ifaceptrs_ver_2_cpp_t configlib_ifaceptrs_ver_2_cpp={
+  configlib_register_readcfgfile_post_listener,
+  configlib_unregister_readcfgfile_post_listener,
+  configlib_setcfgfilename,
+  configlib_readcfgfile,
+  configlib_isloaded,
+  configlib_loadpending,
+  configlib_getnamevalue_c,
+  configlib_getnamevalue_cpp
+};
+
 static moduleiface_ver_1_t configlib_ifaces[]={
   {
     &configlib_ifaceptrs_ver_1,
     CONFIGLIBINTERFACE_VER_1
   },
   {
+    &configlib_ifaceptrs_ver_2,
+    CONFIGLIBINTERFACE_VER_2
+  },
+  {
     &configlib_ifaceptrs_ver_1_cpp,
     CONFIGLIBINTERFACECPP_VER_1
+  },
+  {
+    &configlib_ifaceptrs_ver_2_cpp,
+    CONFIGLIBINTERFACECPP_VER_2
   },
   {
     nullptr, 0
