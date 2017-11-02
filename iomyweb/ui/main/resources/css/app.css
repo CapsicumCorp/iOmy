@@ -180,3 +180,8 @@ Copyright: Capsicum Corporation 2015, 2016, 2017
     background-repeat: no-repeat;
     background-position: center;
 }
+
+/* Telnet Output Textarea Height */
+.TelnetOutput.sapMInputBase.sapMTextArea {
+	height: 300px;
+}

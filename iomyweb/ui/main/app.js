@@ -199,6 +199,12 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.RulesList\" Page!\n"
 	},
+	{
+		"Id":			"pTelnet",
+		"Location":		"pages.staging.telnet.Telnet",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.telnet.Telnet\" Page!\n"
+	},
     
 	{
 		"Id":			"pGraphLine",
