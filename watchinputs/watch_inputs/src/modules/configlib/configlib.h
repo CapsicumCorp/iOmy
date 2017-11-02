@@ -44,6 +44,16 @@ typedef struct {
   char *(*getnamevalue)(const char *block, const char *name);
 } configlib_ifaceptrs_ver_1_t;
 
+typedef struct {
+  int (*register_readcfgfile_post_listener)(readcfgfile_post_func_ptr_t funcptr);
+  int (*unregister_readcfgfile_post_listener)(readcfgfile_post_func_ptr_t funcptr);
+  int (*setcfgfilename)(const char *cfgfile);
+  int (*readcfgfile)(void);
+  int (*isloaded)();
+  int (*loadpending)();
+  char *(*getnamevalue)(const char *block, const char *name);
+} configlib_ifaceptrs_ver_2_t;
+
 #ifdef __cplusplus
 }
 #endif
@@ -51,5 +61,6 @@ typedef struct {
 #pragma pack(pop)
 
 #define CONFIGLIBINTERFACE_VER_1 1 //A version number for the configlib interface version
+#define CONFIGLIBINTERFACE_VER_2 2 //A version number for the configlib interface version
 
 #endif

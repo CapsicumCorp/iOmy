@@ -42,7 +42,19 @@ typedef struct {
   bool (*getnamevalue_cpp)(const std::string &block, const std::string &name, std::string &value);
 } configlib_ifaceptrs_ver_1_cpp_t;
 
+typedef struct {
+  int (*register_readcfgfile_post_listener)(readcfgfile_post_func_ptr_t funcptr);
+  int (*unregister_readcfgfile_post_listener)(readcfgfile_post_func_ptr_t funcptr);
+  int (*setcfgfilename)(const char *cfgfile);
+  int (*readcfgfile)(void);
+  int (*isloaded)();
+  int (*loadpending)();
+  char *(*getnamevalue_c)(const char *block, const char *name);
+  bool (*getnamevalue_cpp)(const std::string &block, const std::string &name, std::string &value);
+} configlib_ifaceptrs_ver_2_cpp_t;
+
 #define CONFIGLIBINTERFACECPP_VER_1 1001 //A version number for the configlib interface version
+#define CONFIGLIBINTERFACECPP_VER_2 1002 //A version number for the configlib interface version
 
 #include <boost/config/abi_suffix.hpp>
 
