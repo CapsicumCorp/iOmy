@@ -497,6 +497,7 @@ static void *cmdserverlib_networkClientLoop(void *thread_val) {
   }
   //Command Loop
   while (!cmdserverlib_getneedtoquit()) {
+    cmdserverlib_netputs("> ", dataptr->clientsock, cmdserverlib_getneedtoquit);
     if (cmdserverlib_netgets_with_telnet(dataptr->buffer, BUFFER_SIZE, dataptr->clientsock, dataptr->netgetc_buffer, SMALLBUF_SIZE*sizeof(char), &netgetc_pos, &netgetc_received, cmdserverlib_getneedtoquit, -1) != NULL) {
       len=strlen(dataptr->buffer);
 
@@ -535,6 +536,7 @@ static void *cmdserverlib_networkClientLoop(void *thread_val) {
       break;
     }
   }
+  cmdserverlib_netputs("logout\n", dataptr->clientsock, cmdserverlib_getneedtoquit);
   cmdserverlib_cleanupClientThread((void *) threadslot);
 
   return (void *) 0;
