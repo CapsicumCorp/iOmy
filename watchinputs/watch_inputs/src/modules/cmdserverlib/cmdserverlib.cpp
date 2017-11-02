@@ -30,6 +30,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <sys/socket.h>
 #include <arpa/telnet.h>
 #include <map>
+#include <list>
 #include <string>
 #ifdef __ANDROID__
 #include <jni.h>
@@ -74,11 +75,8 @@ static char needtoquit=0; //Set to 1 when cmdserverlib should exit
 static pthread_t cmdserverlib_thread;
 
 //Lists
-static int cmdserverlib_num_cmd_listener_funcs=0;
-static cmd_func_ptr_t *cmdserverlib_cmd_listener_funcs_ptr; //A list of command listener functions
-
-static int cmdserverlib_num_networkclientclose_listener_funcs=0;
-static networkclientclose_func_ptr_t *cmdserverlib_networkclientclose_listener_funcs_ptr;
+static std::list<cmd_func_ptr_t> cmdserverlib_cmd_listener_funcs_ptr; //A list of command listener functions
+static std::list<networkclientclose_func_ptr_t> cmdserverlib_networkclientclose_listener_funcs_ptr;
 
 //Function Declarations
 static void cmdserverlib_setneedtoquit(int val);
@@ -245,12 +243,12 @@ static int cmdserverlib_processhelpcommand(const char *buffer, int clientsock) {
   NOTE: Don't need to thread lock since listeners are all registered when the program first starts
 */
 static inline int cmdserverlib_call_cmd_listeners(const char *cmdstr, int clientsock) {
-	int i, listener_result;
+	int listener_result;
 	int (*cmdfunc)(const char *cmdstr, int clientsock);
 
 	listener_result=CMDLISTENER_NOTHANDLED;
-  for (i=0; i<cmdserverlib_num_cmd_listener_funcs; i++) {
-    cmdfunc=cmdserverlib_cmd_listener_funcs_ptr[i];
+  for (auto const &it : cmdserverlib_cmd_listener_funcs_ptr) {
+    cmdfunc=it;
     if (cmdfunc) {
 			listener_result=cmdfunc(cmdstr, clientsock);
 			if (listener_result!=CMDLISTENER_NOTHANDLED) {
@@ -292,11 +290,10 @@ static inline int cmdserverlib_call_cmd_listeners(const char *cmdstr, int client
   NOTE: Don't need to thread lock since listeners are all registered when the program first starts
 */
 static inline void cmdserverlib_call_networkclientclose_listeners(int clientsock) {
-  int i;
   void (*networkclientclosefunc)(int clientsock);
 
-  for (i=0; i<cmdserverlib_num_networkclientclose_listener_funcs; i++) {
-    networkclientclosefunc=cmdserverlib_networkclientclose_listener_funcs_ptr[i];
+  for (auto const &it : cmdserverlib_networkclientclose_listener_funcs_ptr) {
+    networkclientclosefunc=it;
     if (networkclientclosefunc) {
       networkclientclosefunc(clientsock);
     }
@@ -684,16 +681,9 @@ static void cmdserverlib_shutdown(void) {
 	}
 	//No longer in use
 	cmdfuncs.clear();
-	if (cmdserverlib_cmd_listener_funcs_ptr) {
-    free(cmdserverlib_cmd_listener_funcs_ptr);
-    cmdserverlib_cmd_listener_funcs_ptr=NULL;
-    cmdserverlib_num_cmd_listener_funcs=0;
-  }
-  if (cmdserverlib_networkclientclose_listener_funcs_ptr) {
-    free(cmdserverlib_networkclientclose_listener_funcs_ptr);
-    cmdserverlib_networkclientclose_listener_funcs_ptr=NULL;
-    cmdserverlib_num_cmd_listener_funcs=0;
-  }
+  cmdserverlib_cmd_listener_funcs_ptr.clear();
+  cmdserverlib_networkclientclose_listener_funcs_ptr.clear();
+
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 }
 
@@ -761,20 +751,10 @@ static int cmdserverlib_register_cmd_longdesc(const char *name, const char *usag
   NOTE: Don't need to search for a free slot since this function should only ever be called once at program startup
 */
 static int cmdserverlib_register_cmd_listener(cmd_func_ptr_t funcptr) {
-  void * *tmpptr;
-
   if (cmdserverlib_inuse==0) {
     return -1;
   }
-  //Expand the array
-  tmpptr=(void * *) realloc(cmdserverlib_cmd_listener_funcs_ptr, (cmdserverlib_num_cmd_listener_funcs+1)*sizeof(void *));
-  if (tmpptr==NULL) {
-    return -1;
-  }
-  cmdserverlib_cmd_listener_funcs_ptr=(cmd_func_ptr_t *) tmpptr;
-
-  cmdserverlib_cmd_listener_funcs_ptr[cmdserverlib_num_cmd_listener_funcs]=funcptr;
-  ++cmdserverlib_num_cmd_listener_funcs;
+  cmdserverlib_cmd_listener_funcs_ptr.push_back(funcptr);
 
   return 0;
 }
@@ -786,23 +766,16 @@ static int cmdserverlib_register_cmd_listener(cmd_func_ptr_t funcptr) {
   //NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
 */
 static int cmdserverlib_unregister_cmd_listener(cmd_func_ptr_t funcptr) {
-  int i, result;
-
   if (cmdserverlib_inuse==0) {
     return -1;
   }
-  for (i=0; i<cmdserverlib_num_cmd_listener_funcs; i++) {
-    if (funcptr==cmdserverlib_cmd_listener_funcs_ptr[i]) {
-      break;
+  for (auto it=cmdserverlib_cmd_listener_funcs_ptr.begin(); it!=cmdserverlib_cmd_listener_funcs_ptr.end(); ++it) {
+    if (funcptr==*it) {
+      cmdserverlib_cmd_listener_funcs_ptr.erase(it);
+      return 0;
     }
   }
-  if (i!=cmdserverlib_num_cmd_listener_funcs) {
-    cmdserverlib_cmd_listener_funcs_ptr[i]=NULL;
-    result=0;
-  } else {
-    result=-1;
-  }
-  return result;
+  return -1;
 }
 
 /*
@@ -813,20 +786,10 @@ static int cmdserverlib_unregister_cmd_listener(cmd_func_ptr_t funcptr) {
   NOTE: Don't need to search for a free slot since this function should only ever be called once at program startup
 */
 static int cmdserverlib_register_networkclientclose_listener(networkclientclose_func_ptr_t funcptr) {
-  void * *tmpptr;
-
   if (cmdserverlib_inuse==0) {
     return -1;
   }
-  //Expand the array
-  tmpptr=(void * *) realloc(cmdserverlib_networkclientclose_listener_funcs_ptr, (cmdserverlib_num_networkclientclose_listener_funcs+1)*sizeof(void *));
-  if (tmpptr==NULL) {
-    return -1;
-  }
-  cmdserverlib_networkclientclose_listener_funcs_ptr=(networkclientclose_func_ptr_t *) tmpptr;
-
-  cmdserverlib_networkclientclose_listener_funcs_ptr[cmdserverlib_num_networkclientclose_listener_funcs]=funcptr;
-  ++cmdserverlib_num_networkclientclose_listener_funcs;
+  cmdserverlib_networkclientclose_listener_funcs_ptr.push_back(funcptr);
 
   return 0;
 }
@@ -838,23 +801,16 @@ static int cmdserverlib_register_networkclientclose_listener(networkclientclose_
   NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
 */
 static int cmdserverlib_unregister_networkclientclose_listener(networkclientclose_func_ptr_t funcptr) {
-  int i, result;
-
   if (cmdserverlib_inuse==0) {
     return -1;
   }
-  for (i=0; i<cmdserverlib_num_networkclientclose_listener_funcs; i++) {
-    if (funcptr==cmdserverlib_networkclientclose_listener_funcs_ptr[i]) {
-      break;
+  for (auto it=cmdserverlib_networkclientclose_listener_funcs_ptr.begin(); it!=cmdserverlib_networkclientclose_listener_funcs_ptr.end(); ++it) {
+    if (funcptr==*it) {
+      cmdserverlib_networkclientclose_listener_funcs_ptr.erase(it);
+      return 0;
     }
   }
-  if (i!=cmdserverlib_num_networkclientclose_listener_funcs) {
-    cmdserverlib_networkclientclose_listener_funcs_ptr[i]=NULL;
-    result=0;
-  } else {
-    result=-1;
-  }
-  return result;
+  return -1;
 }
 
 moduleinfo_ver_generic_t *cmdserverlib_getmoduleinfo() {
