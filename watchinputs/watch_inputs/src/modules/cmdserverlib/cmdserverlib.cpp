@@ -40,6 +40,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "cmdserverlib.h"
 #include "modules/debuglib/debuglib.h"
 #include "modules/commonserverlib/commonserverlib.h"
+#include "modules/configlib/configlib.hpp"
 
 //Result codes that can be returned by a library's http listeners
 
@@ -66,6 +67,7 @@ typedef struct {
   int clientsock;
   char *buffer;
   char *netgetc_buffer;
+  bool istelnetclient; //Set to true if a telnet client is detected
 } cmdserv_clientthreaddata_t;
 
 struct cmdserver_cmdfunc {
@@ -85,6 +87,10 @@ static int cmdserverlib_inuse=0; //Only shutdown when inuse = 0
 
 static char needtoquit=0; //Set to 1 when cmdserverlib should exit
 static pthread_t cmdserverlib_thread;
+
+//Username and password retrieved from config file for the command interface
+static std::string cmdserverlib_username;
+static std::string cmdserverlib_password;
 
 //Lists
 static std::list<cmd_func_ptr_t> cmdserverlib_cmd_listener_funcs_ptr; //A list of command listener functions
@@ -121,6 +127,7 @@ JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_CmdServerLib_jn
 //Module Interface Definitions
 const static int DEBUGLIB_DEPIDX=0;
 const static int COMMONSERVERLIB_DEPIDX=1;
+const static int CONFIGLIB_DEPIDX=2;
 
 static cmdserverlib_ifaceptrs_ver_1_t cmdserverlib_ifaceptrs_ver_1={
   cmdserverlib_netputs,
@@ -170,6 +177,12 @@ static moduledep_ver_1_t cmdserverlib_deps[]={
     "commonserverlib",
     NULL,
     COMMONSERVERLIBINTERFACE_VER_1,
+    1
+  },
+  {
+    "configlib",
+    NULL,
+    CONFIGLIBINTERFACECPP_VER_2,
     1
   },
   {
@@ -362,7 +375,7 @@ static void cmdserverlib_cleanupClientThread(void *val) {
   NOTE: Only some telnet commands are handled at the moment and they are all currently ignored
   Reads at most one less than size characters and adds '\0' after the last character
 */
-static char *cmdserverlib_netgets_with_telnet(char *s, int size, int sock, char *netgetc_buffer, size_t netgetc_bufsize, int *netgetc_pos, int *netgetc_received, int (* const getAbortEarlyfuncptr)(void), int quitpipefd) {
+static char *cmdserverlib_netgets_with_telnet(char *s, int size, int sock, char *netgetc_buffer, size_t netgetc_bufsize, int *netgetc_pos, int *netgetc_received, int (* const getAbortEarlyfuncptr)(void), int quitpipefd, bool *istelnetclient=NULL) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=(commonserverlib_ifaceptrs_ver_1_t *) cmdserverlib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
   int c=EOF;
@@ -380,6 +393,13 @@ static char *cmdserverlib_netgets_with_telnet(char *s, int size, int sock, char 
       break;
     }
     if (!in_telnet_command && c==IAC) {
+      if (istelnetclient) {
+        if (*istelnetclient==false) {
+          debuglibifaceptr->debuglib_printf(1, "%s: Telnet client detected\n", __func__);
+        }
+        //Set the is telnet client flag
+        *istelnetclient=true;
+      }
       //Start of a telnet command
       in_telnet_command=1;
       telnet_command_byte=-1;
@@ -462,10 +482,55 @@ static int cmdserverlib_netputs(const char *s, int sock, int (* const getAbortEa
   return 0;
 }
 
+//Special netputs function for cmd server
+//Converts any form of end-of-line into \r\n to be more complient with Telnet protocol
+static int cmdserverlib_netputs_with_telnet_command(const char *s, int sock, int (* const getAbortEarlyfuncptr)(void)) {
+  size_t len=strlen(s);
+  int sent, pos;
+
+  //Convert the string into telnet form
+  std::string sendstr="";
+  pos=0;
+  while (len > 0) {
+    if ( *(s+pos)=='\r') {
+      //Ignore \r
+      ++pos;
+      --len;
+      continue;
+    } else if ( *(s+pos)=='\n') {
+      //Convert \n into \r\n
+      sendstr+="\r\n";
+    } else {
+      sendstr+=*(s+pos);
+    }
+    ++pos;
+    --len;
+  }
+  //Send the converted string
+  len=strlen(sendstr.c_str());
+  pos=0;
+  while (len > 0) {
+    if (getAbortEarlyfuncptr) {
+      if (getAbortEarlyfuncptr()) {
+        return -2;
+      }
+    }
+    sent = send(sock, (sendstr.c_str()) + pos, len, MSG_NOSIGNAL);
+    if (sent < 0) {
+      //An error occurred while sending
+      return -1;
+    }
+    pos+=sent;
+    len-=sent;
+  }
+  return 0;
+}
+
 //NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
 static void *cmdserverlib_networkClientLoop(void *thread_val) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=(commonserverlib_ifaceptrs_ver_1_t *) cmdserverlib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
+  configlib_ifaceptrs_ver_2_cpp_t *configlibifaceptr=(configlib_ifaceptrs_ver_2_cpp_t *) cmdserverlib_deps[CONFIGLIB_DEPIDX].ifaceptr;
   cmdserv_clientthreaddata_t *dataptr;
   int threadslot;
   int netgetc_pos=0, netgetc_received=0;
@@ -475,6 +540,8 @@ static void *cmdserverlib_networkClientLoop(void *thread_val) {
   threadslot=(long) thread_val;
   dataptr=&gcmdserv_clientthreaddata[threadslot];
 
+  dataptr->istelnetclient=false; //Start in non-telnet mode until a Telnet client is detected
+
   //Allocate buffer space
   dataptr->netgetc_buffer=(char *) malloc(SMALLBUF_SIZE*sizeof(char));
   if (!dataptr->netgetc_buffer) {
@@ -482,6 +549,10 @@ static void *cmdserverlib_networkClientLoop(void *thread_val) {
     cmdserverlib_cleanupClientThread((void *) threadslot);
     return (void *) 1;
   }
+  //First output Telnet setup commands for if the client is a Telnet client
+  const unsigned char strtelnetcmds[]={IAC, DO, TELOPT_SGA, IAC, DO, TELOPT_STATUS, 0};
+  cmdserverlib_netputs_with_telnet_command((const char *) strtelnetcmds, dataptr->clientsock, cmdserverlib_getneedtoquit);
+
   cmdserverlib_netputs("\n"
           "# -------------------------\n"
           "# Watch Inputs Command Tool\n"
@@ -495,10 +566,114 @@ static void *cmdserverlib_networkClientLoop(void *thread_val) {
     cmdserverlib_cleanupClientThread((void *) threadslot);
     return (void *) 1;
   }
+  //If the config file hasn't tried to load at least once we should block logins
+  //  as if it is able to load and has a username and password then login with no
+  //  auth before the config is loaded shouldn't be allowed
+  bool blocklogin=true;
+  bool noauth=true;
+  if (configlibifaceptr->loadpending()==0 && configlibifaceptr->isloaded()) {
+    //The config has been loaded
+    blocklogin=false;
+  }
+  if (configlibifaceptr->loadpending()==1 && !configlibifaceptr->isloaded()) {
+    //The config tried to load but failed so okay to allow login with no password
+    blocklogin=false;
+  }
+  if (blocklogin) {
+    cmdserverlib_netputs("Unable to login as config file not loaded yet\n", dataptr->clientsock, cmdserverlib_getneedtoquit);
+    cmdserverlib_cleanupClientThread((void *) threadslot);
+    return (void *) 1;
+  }
+  if (configlibifaceptr->isloaded()) {
+    bool result, result2;
+    result=configlibifaceptr->getnamevalue_cpp("cmdserver", "username", cmdserverlib_username);
+    result2=configlibifaceptr->getnamevalue_cpp("cmdserver", "password", cmdserverlib_password);
+    if (result && result2) {
+      noauth=false;
+    }
+  }
+  if (!noauth) {
+    bool isauthed=false;
+    int authattempts=0;
+    while (!isauthed && authattempts<3 && !cmdserverlib_getneedtoquit()) {
+      std::string inputusername, inputpassword;
+      authattempts++;
+      cmdserverlib_netputs("Username: ", dataptr->clientsock, cmdserverlib_getneedtoquit);
+      if (cmdserverlib_netgets_with_telnet(dataptr->buffer, BUFFER_SIZE, dataptr->clientsock, dataptr->netgetc_buffer, SMALLBUF_SIZE*sizeof(char), &netgetc_pos, &netgetc_received, cmdserverlib_getneedtoquit, -1, &dataptr->istelnetclient) != NULL) {
+        if (cmdserverlib_getneedtoquit()) {
+          continue;
+        }
+        //Remove trailing newlines at the end of the command
+        len=strlen(dataptr->buffer);
+        while (len>0) {
+          if (dataptr->buffer[len-1]=='\n' || dataptr->buffer[len-1]=='\r') {
+            dataptr->buffer[len-1]=0;
+            --len;
+          } else {
+            //No more whitespace
+            break;
+          }
+        }
+        if (len==0) {
+          //Username can't be empty
+          continue;
+        }
+        inputusername=dataptr->buffer;
+      }
+      cmdserverlib_netputs("Password: ", dataptr->clientsock, cmdserverlib_getneedtoquit);
+
+      //Turn off local echo for password input if Telnet client detection
+      unsigned char strtmp[5];
+      if (dataptr->istelnetclient) {
+        strtmp[0]=IAC;
+        strtmp[1]=WILL;
+        strtmp[2]=TELOPT_ECHO;
+        strtmp[3]=0;
+        cmdserverlib_netputs_with_telnet_command((const char *) strtmp, dataptr->clientsock, cmdserverlib_getneedtoquit);
+      }
+      char *netgets_result=cmdserverlib_netgets_with_telnet(dataptr->buffer, BUFFER_SIZE, dataptr->clientsock, dataptr->netgetc_buffer, SMALLBUF_SIZE*sizeof(char), &netgetc_pos, &netgetc_received, cmdserverlib_getneedtoquit, -1, &dataptr->istelnetclient);
+
+      //Turn on local echo and add a newline if Telnet client detected
+      if (dataptr->istelnetclient) {
+        strtmp[1]=WONT;
+        strtmp[3]='\n';
+        strtmp[4]=0;
+        cmdserverlib_netputs_with_telnet_command((const char *) strtmp, dataptr->clientsock, cmdserverlib_getneedtoquit);
+      }
+      if (netgets_result!=NULL) {
+        if (cmdserverlib_getneedtoquit()) {
+          continue;
+        }
+        //Remove trailing newlines at the end of the command
+        len=strlen(dataptr->buffer);
+        while (len>0) {
+          if (dataptr->buffer[len-1]=='\n' || dataptr->buffer[len-1]=='\r') {
+            dataptr->buffer[len-1]=0;
+            --len;
+          } else {
+            //No more whitespace
+            break;
+          }
+        }
+        //Password can be empty
+        inputpassword=dataptr->buffer;
+      }
+      if (inputusername==cmdserverlib_username && inputpassword==cmdserverlib_password) {
+        isauthed=true;
+      } else {
+        cmdserverlib_netputs("Login incorrect\n", dataptr->clientsock, cmdserverlib_getneedtoquit);
+      }
+    }
+    if (!isauthed) {
+      cmdserverlib_netputs("Authorization failed\n", dataptr->clientsock, cmdserverlib_getneedtoquit);
+      cmdserverlib_cleanupClientThread((void *) threadslot);
+      return (void *) 0;
+    }
+  }
   //Command Loop
   while (!cmdserverlib_getneedtoquit()) {
     cmdserverlib_netputs("> ", dataptr->clientsock, cmdserverlib_getneedtoquit);
-    if (cmdserverlib_netgets_with_telnet(dataptr->buffer, BUFFER_SIZE, dataptr->clientsock, dataptr->netgetc_buffer, SMALLBUF_SIZE*sizeof(char), &netgetc_pos, &netgetc_received, cmdserverlib_getneedtoquit, -1) != NULL) {
+    if (cmdserverlib_netgets_with_telnet(dataptr->buffer, BUFFER_SIZE, dataptr->clientsock, dataptr->netgetc_buffer, SMALLBUF_SIZE*sizeof(char), &netgetc_pos, &netgetc_received, cmdserverlib_getneedtoquit, -1, &dataptr->istelnetclient) != NULL) {
       len=strlen(dataptr->buffer);
 
       //Remove trailing whitespace at the end of the command
