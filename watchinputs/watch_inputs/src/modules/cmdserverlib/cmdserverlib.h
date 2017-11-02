@@ -23,11 +23,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef CMDSERVERLIB_H
 #define CMDSERVERLIB_H
 
-//Result codes that can be returned by a library's http listeners
-#define CMDLISTENER_NOERROR 0 //Return this when the command has been successfully processed
-#define CMDLISTENER_NOTHANDLED 1 //Return this when your listener hasn't handled the command
-#define CMDLISTENER_CMDINVALID 2 //Return this when your listener has handled the command but the command has the incorrect format
-
 typedef int (*cmd_func_ptr_t)(const char *cmdstr, int clientsock);
 typedef void (*networkclientclose_func_ptr_t)(int clientsock);
 
@@ -52,6 +47,29 @@ typedef struct {
   int (*cmdserverlib_unregister_networkclientclose_listener)(networkclientclose_func_ptr_t funcptr);
 } cmdserverlib_ifaceptrs_ver_1_t;
 
+//These lines will be needed at the top of your C or C++ file below the includes
+//  if using interface version >= 2 until interface 1 is removed from this file
+#undef CMDLISTENER_NOERROR
+#undef CMDLISTENER_NOTHANDLED
+#undef CMDLISTENER_CMDINVALID
+
+typedef struct {
+  int (*netputs)(const char *s, int sock, int (* const getAbortEarlyfuncptr)(void));
+  int (*register_cmd_function)(const char *name, const char *description, cmd_func_ptr_t funcptr);
+  int (*register_cmd_longdesc)(const char *name, const char *usage, const char *description, const char *longdesc, cmd_func_ptr_t funcptr);
+  int (*register_cmd_listener)(cmd_func_ptr_t funcptr);
+  int (*unregister_cmd_listener)(cmd_func_ptr_t funcptr);
+
+  //This listener is called just before the network client connection closes
+  int (*register_networkclientclose_listener)(networkclientclose_func_ptr_t funcptr);
+  int (*unregister_networkclientclose_listener)(networkclientclose_func_ptr_t funcptr);
+
+  //Result codes that can be returned by a library's http listeners
+  const int * const CMDLISTENER_NOERROR;
+  const int * const CMDLISTENER_NOTHANDLED;
+  const int * const CMDLISTENER_CMDINVALID;
+} cmdserverlib_ifaceptrs_ver_2_t;
+
 #ifdef __cplusplus
 }
 #endif
@@ -59,5 +77,11 @@ typedef struct {
 #pragma pack(pop)
 
 #define CMDSERVERLIBINTERFACE_VER_1 1 //A version number for the cmdserverlib interface version
+#define CMDSERVERLIBINTERFACE_VER_2 2 //A version number for the cmdserverlib interface version
+
+//Result codes that can be returned by a library's http listeners
+#define CMDLISTENER_NOERROR 0 //Return this when the command has been successfully processed
+#define CMDLISTENER_NOTHANDLED 1 //Return this when your listener hasn't handled the command
+#define CMDLISTENER_CMDINVALID 2 //Return this when your listener has handled the command but the command has the incorrect format
 
 #endif

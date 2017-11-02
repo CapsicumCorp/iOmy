@@ -41,11 +41,23 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "modules/debuglib/debuglib.h"
 #include "modules/commonserverlib/commonserverlib.h"
 
-#define SMALLBUF_SIZE 256
-#define BUFFER_SIZE 4096
-#define DEFAULT_CMD_TCPPORT 64932
-#define MAX_CMDSERV_THREADS 10
-#define INTERFACE_VERSION "000700" /* The Version of the command interface implemented by this library */
+//Result codes that can be returned by a library's http listeners
+
+//The following three values shouldn't be changed until CMDSERVERLIBINTERFACE_VER_1 has been removed
+//Changing them from #define to static const for this internal file
+#undef CMDLISTENER_NOERROR
+#undef CMDLISTENER_NOTHANDLED
+#undef CMDLISTENER_CMDINVALID
+static const int CMDLISTENER_NOERROR=0; //Return this when the command has been successfully processed
+static const int CMDLISTENER_NOTHANDLED=1; //Return this when your listener hasn't handled the command
+static const int CMDLISTENER_CMDINVALID=2; //Return this when your listener has handled the command but the command has the incorrect format
+
+//Other static variables
+static const int SMALLBUF_SIZE=256;
+static const int BUFFER_SIZE=4096;
+static const uint16_t DEFAULT_CMD_TCPPORT=64932;
+static const int MAX_CMDSERV_THREADS=10;
+static const char * const INTERFACE_VERSION="000700"; // The Version of the command interface implemented by this library
 
 typedef struct cmdserver_cmdfunc cmdserver_cmdfunc_t;
 
@@ -107,8 +119,8 @@ JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_CmdServerLib_jn
 }
 
 //Module Interface Definitions
-#define DEBUGLIB_DEPIDX 0
-#define COMMONSERVERLIB_DEPIDX 1
+const static int DEBUGLIB_DEPIDX=0;
+const static int COMMONSERVERLIB_DEPIDX=1;
 
 static cmdserverlib_ifaceptrs_ver_1_t cmdserverlib_ifaceptrs_ver_1={
   cmdserverlib_netputs,
@@ -120,10 +132,27 @@ static cmdserverlib_ifaceptrs_ver_1_t cmdserverlib_ifaceptrs_ver_1={
   cmdserverlib_unregister_networkclientclose_listener
 };
 
+static cmdserverlib_ifaceptrs_ver_2_t cmdserverlib_ifaceptrs_ver_2={
+  cmdserverlib_netputs,
+  cmdserverlib_register_cmd_function,
+  cmdserverlib_register_cmd_longdesc,
+  cmdserverlib_register_cmd_listener,
+  cmdserverlib_unregister_cmd_listener,
+  cmdserverlib_register_networkclientclose_listener,
+  cmdserverlib_unregister_networkclientclose_listener,
+  &CMDLISTENER_NOERROR,
+  &CMDLISTENER_NOTHANDLED,
+  &CMDLISTENER_CMDINVALID
+};
+
 static moduleiface_ver_1_t cmdserverlib_ifaces[]={
   {
     &cmdserverlib_ifaceptrs_ver_1,
     CMDSERVERLIBINTERFACE_VER_1
+  },
+  {
+    &cmdserverlib_ifaceptrs_ver_2,
+    CMDSERVERLIBINTERFACE_VER_2
   },
   {
     nullptr, 0
