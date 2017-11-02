@@ -16,7 +16,8 @@ sap.ui.jsfragment("fragments.rules.AddRule", {
 					label : "Display Name",
 					fields: [ 
 						new sap.m.Input ({
-							value:""
+                            enabled: false,
+							value: "{/Rule/DisplayName}"
 						})
 					]
 				}),
@@ -27,7 +28,8 @@ sap.ui.jsfragment("fragments.rules.AddRule", {
 							valueFormat: "hh:mm",
 							displayFormat: "hh:mm a",
 							placeholder: "Select an On Time",
-						}),
+                            value: "{/Rule/Ontime}"
+						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
@@ -37,28 +39,29 @@ sap.ui.jsfragment("fragments.rules.AddRule", {
 							valueFormat: "hh:mm",
 							displayFormat: "hh:mm a",
 							placeholder: "Select an Off Time",
-						}),
+                            value: "{/Rule/Offtime}"
+						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label: "",
 					fields: [
-						new sap.m.Button ({
-							text: "Save",
+						new sap.m.Button (oView.createId("ButtonSubmit"), {
+							text: "Update",
 							type: sap.m.ButtonType.Accept,
-							//press:   function( oEvent ) {
-							//	oController.UpdateRoomInfoValues( oController );
-							//}
+							press:   function( oEvent ) {
+								oController.saveRule();
+							}
 						}),
-						new sap.m.Button ({
+						new sap.m.Button (oView.createId("ButtonCancel"), {
 							text: "Cancel",
 							type: sap.m.ButtonType.Reject,
-							//press:   function( oEvent ) {
-							//	IomyRe.common.NavigationChangePage( "pRoomList" ,  {"bEditing": true} , false);
-							//}
-						}),
+							press:   function( oEvent ) {
+								IomyRe.common.NavigationChangePage( "pRulesList" ,  {} , false);
+							}
+						})
 					]
-				}),
+				})
 			]
 		});
 							

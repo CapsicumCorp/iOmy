@@ -51,10 +51,10 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
                     oController.bEditing = false;
                 }
 				
-				oController.ToggleButtonsAndView( oController, oController.bEditing );
-				
 				//-- Update the Model --//
-				//oController.RefreshModel( oController, {} );
+				oController.RefreshModel( oController, {} );
+				
+				oController.ToggleButtonsAndView( oController, oController.bEditing );
 				
 				//-- Defines the Device Type --//
 				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
@@ -64,20 +64,39 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
 		
 	},
 	
-	RefreshModel : function( oController, oConfig ) {
+	ToggleControls : function (bEnabled) {
+		var oView       = this.getView();
+		
+		oView.byId("ButtonSubmit").setEnabled(bEnabled);
+		oView.byId("ButtonCancel").setEnabled(bEnabled);
+	},
+    
+    RefreshModel : function( oController, oConfig ) {
 		//------------------------------------------------//
 		//-- Declare Variables                          --//
 		//------------------------------------------------//
-		var oView            = oController.getView();
+		var oView       = oController.getView();
+        var mThing      = IomyRe.common.ThingList["_"+oController.iThingId];
+        var sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
+        var mRule       = IomyRe.rules.RulesList[sSerialCode];
+        
+        if (mRule === undefined) {
+            mRule = {
+                "Type"          : "DeviceTimeRule",
+				"Serial"        : sSerialCode,
+                "Ontime"        : "",
+                "Offtime"       : ""
+            };
+        }
+        
+        mRule.DisplayName = mThing.DisplayName;
 		
 		//------------------------------------------------//
 		//-- Build and Bind Model to the View           --//
 		//------------------------------------------------//
 		oView.setModel( 
 			new sap.ui.model.json.JSONModel({
-				"Premises":           IomyRe.common.PremiseList,
-				"RoomTypes":          IomyRe.common.RoomTypes,
-				"CurrentRoom":        oController.mRoomData
+				"Rule": mRule
 			})
 		);	
 		
@@ -108,5 +127,113 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
 			return false;
 		}
 	},
+    
+    cancelChanges : function () {
+		IomyRe.common.NavigationTriggerBackForward();
+	},
+    
+    saveRule : function () {
+        var me				= this;
+		var bError			= false;
+		var aErrorMessages	= [];
+        var mThing			= IomyRe.common.ThingList["_"+me.iThingId];
+        var sSerialCode		= IomyRe.common.getLink(mThing.LinkId).LinkSerialCode;
+		
+		me.ToggleControls(false);
+        
+		if (me.wOnTime.getDateValue() === null) {
+			bError = true;
+			aErrorMessages.push("Time the device turns on must be given!");
+		}
+		
+		if (me.wOffTime.getDateValue() === null) {
+			bError = true;
+			aErrorMessages.push("Time the device turns off must be given!");
+		}
+		
+		if (!bError) {
+			var mRule = {
+				"Type" : "DeviceTimeRule",
+				"Serial" : sSerialCode,
+				//"Serial" : "009483746873",
+				"Ontime" : IomyRe.time.GetMilitaryTimeFromDate(me.wOnTime.getDateValue()),
+				"Offtime" : IomyRe.time.GetMilitaryTimeFromDate(me.wOffTime.getDateValue()),
+			};
+
+			IomyRe.rules.applyRule({
+				rule : mRule,
+				hubID : 1,
+
+				onSuccess : function () {
+					IomyRe.common.showMessage({
+						text : "Rule for "+mThing.DisplayName+" was successfully applied.",
+						view : me.getView()
+					});
+					
+					me.ToggleControls(true);
+					IomyRe.common.NavigationChangePage( "pRuleDeviceList", {}, true);
+				},
+
+				onFail : function (sError) {
+					IomyRe.common.showError("Rule for "+mThing.DisplayName+" could not be applied.\n\n"+sError, "Error",
+						function () {
+							me.ToggleControls(true);
+						}
+					);
+				}
+			});
+		} else {
+			IomyRe.common.showMessage({
+				text : aErrorMessages.join('\n'),
+				view : me.getView()
+			});
+			
+			me.ToggleControls(true);
+		}
+        
+    },
+    
+    deleteRule : function () {
+        var me          = this;
+        var mThing      = IomyRe.common.ThingList["_"+me.iThingId];
+        var sSerialCode = IomyRe.common.getLink(mThing.LinkId).LinkSerialCode;
+		
+		me.ToggleControls(false);
+        
+        IomyRe.common.showConfirmQuestion("Are you sure you wish to discard this rule?", "",
+            function () {
+				try {
+					IomyRe.rules.discardRule({
+						hubID : 1,
+						Serial : sSerialCode,
+
+						onSuccess : function () {
+							IomyRe.common.showMessage({
+								text : "Rule for "+mThing.DisplayName+" was successfully removed.",
+								view : me.getView()
+							});
+							
+							me.ToggleControls(true);
+							IomyRe.common.NavigationChangePage( "pRuleDeviceList", {}, true);
+						},
+
+						onFail : function (sError) {
+							IomyRe.common.showError("Rule for "+mThing.DisplayName+" could not be removed.\n\n"+sError, "Error",
+								function () {
+									me.ToggleControls(true);
+								}
+							);
+						}
+					});
+				} catch (error) {
+					IomyRe.common.showError("Rule for "+mThing.DisplayName+" could not be removed.\n\n"+error.message, "Error",
+						function () {
+							me.ToggleControls(true);
+						}
+					);
+				}
+            }
+        );
+    }
 
 });
