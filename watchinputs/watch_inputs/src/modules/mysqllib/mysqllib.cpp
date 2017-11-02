@@ -3199,10 +3199,10 @@ int mysqllib_getthingpk(uint64_t serialcode, int32_t hwid, int64_t *thingpk) {
   jmethodID getThingPK_methodid;
   jstring jtmpstr;
   int wasdetached=0;
+  jint thishwid;
 #endif
   int locdbloaded;
   char thisaddr[17];
-  jint thishwid;
   int64_t thisvalue;
 
 #ifdef __ANDROID__
@@ -3210,9 +3210,9 @@ int mysqllib_getthingpk(uint64_t serialcode, int32_t hwid, int64_t *thingpk) {
     return -2;
   }
   getThingPK_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "getThingPK", "(Ljava/lang/String;I)J");
+  thishwid=hwid;
 #endif
   sprintf(thisaddr, "%016" PRIX64, serialcode);
-  thishwid=hwid;
 
   //Lock for database access before checking if database is loaded so we guarantee that the database will stay loaded
   PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
