@@ -18,7 +18,7 @@ sap.ui.jsfragment("fragments.rules.EditRule", {
 					fields: [ 
 						new sap.m.Input ({
                             enabled: false,
-							value: "{/Rule/DisplayName}"
+							value: "{path:'/Rule/Serial', formatter: 'IomyRe.rules.getDeviceDisplayName'}"
 						})
 					]
 				}),

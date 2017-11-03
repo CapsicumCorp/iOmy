@@ -753,6 +753,19 @@ $.extend(IomyRe.devices,{
         }
     },
     
+    getSerialCodeOfDevice : function (iThingId) {
+        var sSerialCode = null;
+        
+        $.each(IomyRe.common.ThingList, function (sI, mThing) {
+            if (mThing.Id == iThingId) {
+                sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
+                return false;
+            }
+        });
+        
+        return sSerialCode;
+    },
+    
     GetUITaskList: function( mSettings ) {
         //------------------------------------//
         //-- 1.0 - Initialise Variables        --//

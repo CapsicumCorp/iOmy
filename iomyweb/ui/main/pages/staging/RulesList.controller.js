@@ -98,6 +98,7 @@ sap.ui.controller("pages.staging.RulesList", {
                 
                 if (mRule !== undefined && mRule !== null) {
                     aRules.push({
+                        "DeviceId"  : mThing.Id,
                         "DeviceName": mThing.DisplayName,
                         "DeviceType": mThing.TypeName,
                         "EventType" : "On",
@@ -105,6 +106,7 @@ sap.ui.controller("pages.staging.RulesList", {
                     });
 
                     aRules.push({
+                        "DeviceId"  : mThing.Id,
                         "DeviceName": mThing.DisplayName,
                         "DeviceType": mThing.TypeName,
                         "EventType" : "Off",

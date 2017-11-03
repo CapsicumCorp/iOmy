@@ -25,6 +25,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 sap.ui.controller("pages.staging.rules.RulesForm", {
 	aFormFragments: 	{},
 	bEditing: false,
+    iThingId: null,
 	
 	
 /**
@@ -40,16 +41,29 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
 		oView.addEventDelegate({
 
 			onBeforeShow: function ( oEvent ) {
-				//-- Store the Current Id --//
-				//oController.iCurrentId = oEvent.data.Id;
 				
 				oController.mPageData = oEvent.data;
                 
                 if (oController.mPageData.bEditing !== undefined && oController.mPageData.bEditing !== null) {
                     oController.bEditing = oController.mPageData.bEditing;
+                    
+                    if (oController.bEditing) {
+                        //-- Store the Current Id --//
+                        if (oController.mPageData.ThingId !== undefined && oController.mPageData.ThingId !== null) {
+                            oController.iThingId = oController.mPageData.ThingId;
+                            
+                        } else {
+                            $.sap.log.error("bEditing was set to true but the ThingId parameter was not given. Add Rule form fragment will be loaded instead.");
+                            oController.bEditing = false;
+                            oController.iThingId = null;
+                        }
+                        
+                    }
                 } else {
                     oController.bEditing = false;
+                    oController.iThingId = null;
                 }
+                
 				
 				//-- Update the Model --//
 				oController.RefreshModel( oController, {} );
@@ -63,8 +77,8 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
 		});
 		
 	},
-	
-	ToggleControls : function (bEnabled) {
+    
+    ToggleControls : function (bEnabled) {
 		var oView       = this.getView();
 		
 		oView.byId("ButtonSubmit").setEnabled(bEnabled);
@@ -76,27 +90,32 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
 		//-- Declare Variables                          --//
 		//------------------------------------------------//
 		var oView       = oController.getView();
-        var mThing      = IomyRe.common.ThingList["_"+oController.iThingId];
-        var sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
-        var mRule       = IomyRe.rules.RulesList[sSerialCode];
+        var mRule;
         
-        if (mRule === undefined) {
+        if (oController.bEditing) {
+            var mThing      = IomyRe.common.ThingList["_"+oController.iThingId];
+            var sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
+
+            mRule = IomyRe.rules.RulesList[sSerialCode];
+            mRule.Ontime = IomyRe.time.GetDateFromMilitaryTime(mRule.Ontime);
+            mRule.Offtime = IomyRe.time.GetDateFromMilitaryTime(mRule.Offtime);
+            
+        } else {
             mRule = {
                 "Type"          : "DeviceTimeRule",
-				"Serial"        : sSerialCode,
-                "Ontime"        : "",
-                "Offtime"       : ""
+                "Serial"        : sSerialCode,
+                "Ontime"        : null,
+                "Offtime"       : null
             };
         }
-        
-        mRule.DisplayName = mThing.DisplayName;
 		
 		//------------------------------------------------//
 		//-- Build and Bind Model to the View           --//
 		//------------------------------------------------//
 		oView.setModel( 
 			new sap.ui.model.json.JSONModel({
-				"Rule": mRule
+				"Rule": mRule,
+                "Devices": IomyRe.rules.loadSupportedDevices()
 			})
 		);	
 		
@@ -133,20 +152,28 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
 	},
     
     saveRule : function () {
-        var me				= this;
-		var bError			= false;
-		var aErrorMessages	= [];
-        var mThing			= IomyRe.common.ThingList["_"+me.iThingId];
-        var sSerialCode		= IomyRe.common.getLink(mThing.LinkId).LinkSerialCode;
-		
-		me.ToggleControls(false);
+        var oController         = this;
+        var oView               = this.getView();
+		var bError              = false;
+		var aErrorMessages      = [];
+        var oCurrentFormData    = oView.getModel().getProperty( "/Rule/" );
+        var mThing;
         
-		if (me.wOnTime.getDateValue() === null) {
+        if (oController.iThingId === null) {
+            mThing = IomyRe.rules.getDeviceUsingSerial(oCurrentFormData.Serial);
+            
+        } else {
+            mThing = IomyRe.common.ThingList["_"+oController.iThingId];
+        }
+		
+		oController.ToggleControls(false);
+        
+		if (oCurrentFormData.Ontime === null) {
 			bError = true;
 			aErrorMessages.push("Time the device turns on must be given!");
 		}
 		
-		if (me.wOffTime.getDateValue() === null) {
+		if (oCurrentFormData.Offtime === null) {
 			bError = true;
 			aErrorMessages.push("Time the device turns off must be given!");
 		}
@@ -154,51 +181,48 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
 		if (!bError) {
 			var mRule = {
 				"Type" : "DeviceTimeRule",
-				"Serial" : sSerialCode,
-				//"Serial" : "009483746873",
-				"Ontime" : IomyRe.time.GetMilitaryTimeFromDate(me.wOnTime.getDateValue()),
-				"Offtime" : IomyRe.time.GetMilitaryTimeFromDate(me.wOffTime.getDateValue()),
+				"Serial" : oCurrentFormData.Serial,
+				"Ontime" : IomyRe.time.GetMilitaryTimeFromDate(oCurrentFormData.Ontime),
+				"Offtime" : IomyRe.time.GetMilitaryTimeFromDate(oCurrentFormData.Offtime),
 			};
 
 			IomyRe.rules.applyRule({
 				rule : mRule,
-				hubID : 1,
+				hubID : IomyRe.functions.getHubConnectedToThing(mThing.Id).HubId,
 
 				onSuccess : function () {
 					IomyRe.common.showMessage({
-						text : "Rule for "+mThing.DisplayName+" was successfully applied.",
-						view : me.getView()
+						text : "Rule for "+mThing.DisplayName+" was successfully applied."
 					});
 					
-					me.ToggleControls(true);
-					IomyRe.common.NavigationChangePage( "pRuleDeviceList", {}, true);
+					oController.ToggleControls(true);
+					IomyRe.common.NavigationChangePage( "pRulesList", {}, true);
 				},
 
 				onFail : function (sError) {
 					IomyRe.common.showError("Rule for "+mThing.DisplayName+" could not be applied.\n\n"+sError, "Error",
 						function () {
-							me.ToggleControls(true);
+							oController.ToggleControls(true);
 						}
 					);
 				}
 			});
 		} else {
 			IomyRe.common.showMessage({
-				text : aErrorMessages.join('\n'),
-				view : me.getView()
+				text : aErrorMessages.join('\n')
 			});
 			
-			me.ToggleControls(true);
+			oController.ToggleControls(true);
 		}
         
     },
     
     deleteRule : function () {
-        var me          = this;
-        var mThing      = IomyRe.common.ThingList["_"+me.iThingId];
+        var oController          = this;
+        var mThing      = IomyRe.common.ThingList["_"+oController.iThingId];
         var sSerialCode = IomyRe.common.getLink(mThing.LinkId).LinkSerialCode;
 		
-		me.ToggleControls(false);
+		oController.ToggleControls(false);
         
         IomyRe.common.showConfirmQuestion("Are you sure you wish to discard this rule?", "",
             function () {
@@ -210,17 +234,17 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
 						onSuccess : function () {
 							IomyRe.common.showMessage({
 								text : "Rule for "+mThing.DisplayName+" was successfully removed.",
-								view : me.getView()
+								view : oController.getView()
 							});
 							
-							me.ToggleControls(true);
+							oController.ToggleControls(true);
 							IomyRe.common.NavigationChangePage( "pRuleDeviceList", {}, true);
 						},
 
 						onFail : function (sError) {
 							IomyRe.common.showError("Rule for "+mThing.DisplayName+" could not be removed.\n\n"+sError, "Error",
 								function () {
-									me.ToggleControls(true);
+									oController.ToggleControls(true);
 								}
 							);
 						}
@@ -228,7 +252,7 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
 				} catch (error) {
 					IomyRe.common.showError("Rule for "+mThing.DisplayName+" could not be removed.\n\n"+error.message, "Error",
 						function () {
-							me.ToggleControls(true);
+							oController.ToggleControls(true);
 						}
 					);
 				}

@@ -65,6 +65,63 @@ $.extend(IomyRe.rules, {
 	},
     
     /**
+     * Loads the list of supported devices that can have rules applied to it.
+     * 
+     * @returns {object}        Associative array of supported devices.
+     */
+    loadSupportedDevices : function () {
+        var aaDevices   = {};
+        
+        $.each(IomyRe.common.ThingList, function (sI, mThing) {
+            if (mThing.TypeId == IomyRe.devices.zigbeesmartplug.ThingTypeId) {
+                aaDevices[sI] = mThing;
+            }
+        });
+        
+        return aaDevices;
+    },
+    
+    getDeviceUsingSerial : function (sSerialCode) {
+        var mDevice = null;
+        
+        $.each(IomyRe.common.ThingList, function (sI, mThing) {
+            var sSerialCodeToCheck = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
+            
+            // If the device is found, grab the display name and terminate the
+            // loop.
+            if (sSerialCodeToCheck === sSerialCode) {
+                mDevice = mThing;
+                return false;
+            }
+        });
+        
+        return mDevice;
+    },
+    
+    /**
+     * Fetch the display name of a device using its serial number.
+     * 
+     * @param {string} sSerialCode          Serial code
+     * @returns {string}                    Display name
+     */
+    getDeviceDisplayName : function (sSerialCode) {
+        var sDisplayName        = "";
+        
+        $.each(IomyRe.common.ThingList, function (sI, mThing) {
+            var sSerialCodeToCheck = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
+            
+            // If the device is found, grab the display name and terminate the
+            // loop.
+            if (sSerialCodeToCheck === sSerialCode) {
+                sDisplayName = mThing.DisplayName;
+                return false;
+            }
+        });
+        
+        return sDisplayName;
+    },
+    
+    /**
      * Loads all of the rules into memory.
      * 
      * Required parameters in mSettings:
@@ -335,6 +392,7 @@ $.extend(IomyRe.rules, {
                         // Run the telnet command to reload the rules file
                         IomyRe.telnet.RunCommand({
                             "command"   : "timerules_reload",
+                            "hubID"     : iHub,
                             "onSuccess" : fnSuccess,
                             "onFail"    : fnFail
                         });

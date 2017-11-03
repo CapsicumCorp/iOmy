@@ -66,9 +66,12 @@ sap.ui.jsview("pages.staging.RulesList", {
 			text: "Edit",
 			type: "Transparent",
 			width: "100%",
-			/*press : function () {
-				IomyRe.common.NavigationChangePage( "pUserList" , {"bPageType": true} , false);
-			}*/
+			press : function (oEvent) {
+				IomyRe.common.NavigationChangePage( "pRulesForm" , {
+                    "bEditing": true,
+                    "ThingId" : oEvent.getSource().getBindingContext().getProperty("DeviceId")
+                }, false);
+			}
 		});
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {

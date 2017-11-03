@@ -5,7 +5,13 @@ sap.ui.jsfragment("fragments.rules.AddRule", {
 		//--------------------------------------------//
 		//-- 1.0 - DECLARE VARIABLES                --//
 		//--------------------------------------------//
-		var oFragContent = null;
+        var oView           = oController.getView();
+		var oFragContent    = null;
+        
+        var oDeviceTemplate = new sap.ui.core.Item({
+            key : "{path: 'Id', formatter: 'IomyRe.devices.getSerialCodeOfDevice'}",
+            text : "{DisplayName}"
+        });
 		
 		//--------------------------------------------//
 		//-- 5.0 - CREATE UI                        --//
@@ -13,12 +19,16 @@ sap.ui.jsfragment("fragments.rules.AddRule", {
 		oFragContent = new sap.ui.layout.form.FormContainer({
 			formElements : [
 				new sap.ui.layout.form.FormElement({
-					label : "Display Name",
-					fields: [ 
-						new sap.m.Input ({
-                            enabled: false,
-							value: "{/Rule/DisplayName}"
-						})
+					//label : "Display Name",
+					label : "Device",
+					fields: [
+                        new sap.m.Select({
+                            selectedKey : "{/Rule/Serial}",
+                            items : {
+                                "path" : "/Devices",
+                                "template" : oDeviceTemplate
+                            }
+                        })
 					]
 				}),
 				new sap.ui.layout.form.FormElement({

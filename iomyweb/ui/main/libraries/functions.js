@@ -298,6 +298,46 @@ $.extend(IomyRe.functions, {
     },
     
     /**
+	 * Retrives the hub that a thing is connected to.
+	 * 
+	 * @param {type} iThingId		ID of the Thing
+	 * @returns {Object}			Map containing the hub that a thing is associated with.
+	 * 
+	 * @throws IllegalArgumentException when the Thing ID is either not given, invalid, or if it refers to a thing that doesn't exist.
+	 */
+	getHubConnectedToThing : function (iThingId) {
+		//--------------------------------------------------------------------//
+		// Variables
+		//--------------------------------------------------------------------//
+		var bError			= true;
+		var aErrorMessages	= [];
+		var mThingIdInfo	= IomyRe.validation.isThingIDValid(iThingId);
+		var mThing;
+		var iCommId;
+		var iHubId;
+		
+		//--------------------------------------------------------------------//
+		// Check Thing ID
+		//--------------------------------------------------------------------//
+		bError = !mThingIdInfo.bIsValid;
+		aErrorMessages = aErrorMessages.concat(mThingIdInfo.aErrorMessages);
+		
+		if (bError) {
+			throw new IllegalArgumentException(aErrorMessages.join("\n"));
+		}
+		
+		//--------------------------------------------------------------------//
+		// Find its Comm ID and Hub ID and get the hub using the Hub ID.
+		//--------------------------------------------------------------------//
+		mThing	= IomyRe.common.ThingList["_"+iThingId];
+		iCommId	= IomyRe.common.LinkList["_"+mThing.LinkId].CommId;
+		iHubId	= IomyRe.common.CommList["_"+iCommId].HubId;
+		
+		return IomyRe.common.HubList["_"+iHubId];
+		
+	},
+    
+    /**
      * Takes a UTS figure and compares it with the UTS figure created as this
      * function executes. The parameters are as follows:
      * 
