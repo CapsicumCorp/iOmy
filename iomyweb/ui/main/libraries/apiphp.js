@@ -122,6 +122,10 @@ $.extend(IomyRe.apiphp,{
 				sReturn = sUrlRestricted+'/php/api_philipshue.php';
 				break;
                 
+            case "light":
+				sReturn = sUrlRestricted+'/php/api_light.php';
+				break;
+                
             case "motionsensor":
 				sReturn = sUrlRestricted+'/php/api_motionsensor.php';
 				break;

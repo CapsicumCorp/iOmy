@@ -26,8 +26,8 @@ IomyRe.devices.csrmesh = new sap.ui.base.Object();
 
 $.extend(IomyRe.devices.csrmesh,{
     
-    LinkTypeId        : 5,
-    ThingTypeId       : 13,
+    LinkTypeId        : 15,
+    ThingTypeId       : 19,
     
     RSHue           : 3901,
     RSSaturation    : 3902,

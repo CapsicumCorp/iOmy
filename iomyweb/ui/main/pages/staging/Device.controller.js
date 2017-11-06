@@ -92,8 +92,12 @@ sap.ui.controller("pages.staging.Device", {
                     "High": []
                 };
                 
-                oController.BuildDeviceListUI();
-                oController.RefreshAjaxDataForUI();
+                IomyRe.common.RefreshCoreVariables({
+                    onSuccess : function () {
+                        oController.BuildDeviceListUI();
+                        oController.RefreshAjaxDataForUI();
+                    }
+                })
             }
         });
             
@@ -140,6 +144,7 @@ sap.ui.controller("pages.staging.Device", {
             // Create the items under that grouping
             //----------------------------------------------------------------//
             $.each(mTypeBlock.Devices, function (sJ, mDevice) {
+                console.log(mDevice.DeviceTypeId);
                 switch (mDevice.DeviceTypeId) {
                     //--------------------------------------------------------//
                     // Zigbee Smart Plug UI Entry
@@ -188,6 +193,49 @@ sap.ui.controller("pages.staging.Device", {
                     // Philips Hue UI Entry
                     //--------------------------------------------------------//
                     case IomyRe.devices.philipshue.ThingTypeId:
+                        
+                        wList.addItem(
+                            new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
+                                title: mDevice.DeviceName,
+                                type: "Active",
+                                number: "Blue",
+                                numberUnit: "hue",
+                                attributes : [
+                                    new sap.m.ObjectAttribute ({
+                                        text: "link",
+                                        customContent : new sap.m.Link ({
+                                            text: "Toggle State",
+                                            press : function () {
+                                                oController.RunSwitch({
+                                                    "thingID" : mDevice.DeviceId,
+                                                    "switchWidget" : this,
+                                                    "statusAttribute" : oView.byId("deviceStatus"+mDevice.DeviceId)
+                                                });
+                                            }
+                                        })
+                                    }),
+                                    new sap.m.ObjectAttribute (oView.createId("deviceStatus"+mDevice.DeviceId), {
+                                        text: "Status: "+(mDevice.DeviceStatus == 1 ? "On" : "Off")
+                                    })
+                                ],
+                                press : function () {
+                                    if (oController.bEditing) {
+                                        sPageId = "pDeviceForm";
+                                    } else {
+                                        sPageId = "pRGBlight";
+                                    }
+                                    
+                                    IomyRe.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId } , false);
+                                }
+                            })
+                        );
+
+                        break;
+                        
+                    //--------------------------------------------------------//
+                    // CSR Mesh Light
+                    //--------------------------------------------------------//
+                    case IomyRe.devices.csrmesh.ThingTypeId:
                         
                         wList.addItem(
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        

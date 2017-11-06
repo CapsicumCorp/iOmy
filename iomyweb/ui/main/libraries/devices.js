@@ -839,6 +839,7 @@ $.extend(IomyRe.devices,{
 
 $.sap.require("IomyRe.devices.zigbeesmartplug");
 $.sap.require("IomyRe.devices.philipshue");
+$.sap.require("IomyRe.devices.csrmesh");
 $.sap.require("IomyRe.devices.onvif");
 $.sap.require("IomyRe.devices.ipcamera");
 $.sap.require("IomyRe.devices.motionsensor");
