@@ -38,7 +38,7 @@ sap.ui.jsfragment("fragments.rules.AddRule", {
 							valueFormat: "hh:mm",
 							displayFormat: "hh:mm a",
 							placeholder: "Select an On Time",
-                            value: "{/Rule/Ontime}"
+                            dateValue: "{/Rule/Ontime}"
 						})
 					]
 				}),
@@ -49,7 +49,7 @@ sap.ui.jsfragment("fragments.rules.AddRule", {
 							valueFormat: "hh:mm",
 							displayFormat: "hh:mm a",
 							placeholder: "Select an Off Time",
-                            value: "{/Rule/Offtime}"
+                            dateValue: "{/Rule/Offtime}"
 						})
 					]
 				}),
