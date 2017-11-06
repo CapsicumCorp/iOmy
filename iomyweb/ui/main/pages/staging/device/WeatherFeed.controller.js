@@ -42,9 +42,8 @@ sap.ui.controller("pages.staging.device.WeatherFeed", {
 				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 				
 				//-- Updates Paramaters & ID's on Load --//
-				//-- Brent to add in logic to update the UI with id's from the Database --//
-                
                 oController.LoadData(oEvent.data.ThingId);
+                oView.byId("ToolbarTitle").setText( IomyRe.common.ThingList["_"+oEvent.data.ThingId].DisplayName );
 			}
 		});		
 	},

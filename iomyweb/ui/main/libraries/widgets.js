@@ -357,7 +357,8 @@ $.extend( IomyRe.widgets, {
 	DeviceToolbar : function (oCurrentController, sDevName) {
 		//----------------------------------------------------//
 		//-- 1.0 - Initialise                               --//
-		//----------------------------------------------------//	
+		//----------------------------------------------------//
+        var oView = oCurrentController.getView();
 		var oToolbar;
 		var oDevTitle;
 		var oTSpacer1;
@@ -366,7 +367,7 @@ $.extend( IomyRe.widgets, {
 		//----------------------------------------------------//
 		//-- 2.0 - Create the Content                       --//
 		//----------------------------------------------------//
-		oDevTitle = new sap.m.Title ({
+		oDevTitle = new sap.m.Title (oView.createId("ToolbarTitle"), {
 			text: sDevName
 		});
 		

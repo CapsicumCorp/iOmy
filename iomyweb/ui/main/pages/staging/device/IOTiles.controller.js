@@ -140,12 +140,14 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 //                            }
 
 							//----------------------------------------------------------------------------//
-							//-- 2.4.1.2 - Store the Current Event Variables                            --//
+							//-- 2.4.1.2 - Store the Current Event Variables and Set The Page Title     --//
 							//----------------------------------------------------------------------------//
 							oController.iCurrentThing = IomyRe.common.ThingList['_'+oEvent.data.ThingId].Id;
 							oController.sCurrentThingName = IomyRe.common.ThingList['_'+oEvent.data.ThingId].DisplayName;
 							
 							oController.iCurrentThingState = IomyRe.common.ThingList['_'+oEvent.data.ThingId].Status;
+                            
+                            oView.byId("ToolbarTitle").setText( oController.sCurrentThingName );
 							
 							//----------------------------------------------------------------------------//
 							//-- 2.4.1.3 - Destroy the specific Tile related objects of this page       --//

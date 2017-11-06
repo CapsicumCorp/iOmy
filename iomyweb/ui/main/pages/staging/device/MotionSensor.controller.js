@@ -41,9 +41,9 @@ sap.ui.controller("pages.staging.device.MotionSensor", {
 				//-- Defines the Screen Type --//
 				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 				
-                oController.LoadCurrentData(oEvent.data.ThingId);
 				//-- Updates Paramaters & ID's on Load --//
-				//-- Brent to add in logic to update the UI with id's from the Database --//
+                oController.LoadCurrentData(oEvent.data.ThingId);
+                oView.byId("ToolbarTitle").setText( IomyRe.common.ThingList["_"+oEvent.data.ThingId].DisplayName );
 			}
 		});
 	},

@@ -48,6 +48,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 if (oEvent.data.ThingId !== undefined && oEvent.data.ThingId !== null) {
                     oController.iThingId = oEvent.data.ThingId;
                     iTypeId = IomyRe.common.ThingList["_"+oEvent.data.ThingId].TypeId;
+                    oView.byId("ToolbarTitle").setText( IomyRe.common.ThingList["_"+oEvent.data.ThingId].DisplayName );
                 }
 				
 				oController.InitialDeviceInfoLoad();

@@ -76,6 +76,8 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
                 
                 oView.wSnapshotTimeField.setText("Loading...");
                 
+                oView.byId("ToolbarTitle").setText( IomyRe.common.ThingList["_"+evt.data.ThingId].DisplayName );
+                
                 //console.log(oController.oThing);
                 //console.log(oController.oThing.DisplayName.toUpperCase());
                 // Add the subheading title widget to the list of labels that display the Thing name.

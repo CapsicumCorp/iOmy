@@ -44,6 +44,8 @@ sap.ui.controller("pages.staging.device.Mjpeg", {
                 //-- Updates Paramaters & ID's on Load --//
                 oView.byId("MJPEG_Img").setSrc("");
                 oController.LoadStream(oEvent.data.ThingId);
+                
+                oView.byId("ToolbarTitle").setText( IomyRe.common.ThingList["_"+oEvent.data.ThingId].DisplayName );
             }
         });
     },
