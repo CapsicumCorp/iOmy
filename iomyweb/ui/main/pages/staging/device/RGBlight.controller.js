@@ -187,12 +187,12 @@ sap.ui.controller("pages.staging.device.RGBlight", {
      * @param {object} oEvent       UI5 Control Event of the calling widget.
      */
     ChangeLightColour : function (oEvent) {
+        var mParameters     = oEvent.getParameters();
         if (mParameters.h === 360) {
             mParameters.h = 0;
         }
         
         var oController     = this;
-        var mParameters     = oEvent.getParameters();
         var iHue            = Math.floor(mParameters.h * this.fHueConversionRate);
         var iSat            = Math.floor(mParameters.s * this.fSaturationConversionRate);
         var iLight          = Math.floor(mParameters.v * this.fLightConversionRate);
