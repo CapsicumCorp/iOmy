@@ -102,6 +102,8 @@ function LookupFunctionConstant( $sValue ) {
 		case "IPCameraLinkTypeId":
 			return 14;
 			
+		case "CSRMeshLinkTypeId":
+			return 15;
 			
 		//----------------//
 		//-- THINGS     --//
@@ -120,6 +122,9 @@ function LookupFunctionConstant( $sValue ) {
 			
 		case "IPCameraMJPEGThingTypeId":
 			return 18;
+			
+		case "LivsmartThingTypeId":
+			return 19;
 			
 		//----------------//
 		//-- RSTYPES    --//
@@ -160,21 +165,12 @@ function LookupFunctionConstant( $sValue ) {
 		case "LightBrightnessRSTypeId":
 			return 3903;
 			
-		case "OnvifStreamProfileRSTypeId":
-			return 3970;
-			
-		case "OnvifStreamUrlRSTypeId":
-			return 3971;
-			
-		case "OnvifThumbnailProfileRSTypeId":
-			return 3972;
-			
-		case "OnvifThumbnailUrlRSTypeId":
-			return 3973;
+		case "StreamProtocolRSTypeId":
+			return 3965;
 			
 		case "StreamNetworkAddressRSTypeId":
 			return 3960;
-		
+			
 		case "StreamNetworkPortRSTypeId":
 			return 3961;
 			
@@ -187,8 +183,20 @@ function LookupFunctionConstant( $sValue ) {
 		case "StreamPathRSTypeId":
 			return 3964;
 			
-		case "StreamProtocolRSTypeId":
-			return 3965;
+		case "OnvifStreamProfileRSTypeId":
+			return 3970;
+			
+		case "OnvifStreamUrlRSTypeId":
+			return 3971;
+			
+		case "OnvifThumbnailProfileRSTypeId":
+			return 3972;
+			
+		case "OnvifThumbnailUrlRSTypeId":
+			return 3973;
+			
+		case "ModeRSTypeId":
+			return 3995;
 			
 		default:
 			return false;
@@ -3992,9 +4000,15 @@ function APICore_UserData( $oDBConnection ) {
 		
 		$aResult = DB_APICore_UserData( $oDBConnection );
 		
+		if( $aResult['Error']===true) {
+			$bError    = true;
+			$sErrMesg .= "Error occurred when attempting to lookup the User Information! \n";
+			$sErrMesg .= $aResult['ErrMesg'];
+		}
+		
 	} catch( Exception $e1 ) {
 		$bError = true;
-		$sErrMesg .= "Critical Error occurred when attempting to lookup the Server Version! \n";
+		$sErrMesg .= "Critical Error occurred when attempting to lookup the User Information! \n";
 		$sErrMesg .= $e1->getMessage();
 	}
 	
