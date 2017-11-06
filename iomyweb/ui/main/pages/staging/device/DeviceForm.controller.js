@@ -89,6 +89,10 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 
                 //oController.bDeviceOptionSelectorDrawn = true;
                 
+                oController.RefreshModel();
+                
+                oController.DeviceOptions = IomyRe.functions.getNewDeviceOptions();
+                
                 if (oController.bEditExisting) {
                     IomyRe.common.ShowFormFragment( oController, "DeviceFormEdit", "DevTypeBlock", "Block" );
                     //oController.bDeviceOptionSelectorDrawn = false;
@@ -112,9 +116,6 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     //}
                 }
                 
-                oController.DeviceOptions = IomyRe.functions.getNewDeviceOptions();
-                
-                oController.RefreshModel();
             }
             
         });
@@ -578,6 +579,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                                     oController.DevTypeToggle(oController, "thingType"+IomyRe.devices.onvif.ThingTypeId);
 
                                 } else {
+                                    oController.DevTypeToggle(oController, oView.byId("DevTypeSelect").getSelectedKey());
                                     //IomyRe.common.NavigationChangePage("pBlock", {}, true);
                                 }
                                 
