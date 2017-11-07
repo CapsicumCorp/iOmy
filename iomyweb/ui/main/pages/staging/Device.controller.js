@@ -144,7 +144,6 @@ sap.ui.controller("pages.staging.Device", {
             // Create the items under that grouping
             //----------------------------------------------------------------//
             $.each(mTypeBlock.Devices, function (sJ, mDevice) {
-                console.log(mDevice.DeviceTypeId);
                 switch (mDevice.DeviceTypeId) {
                     //--------------------------------------------------------//
                     // Zigbee Smart Plug UI Entry

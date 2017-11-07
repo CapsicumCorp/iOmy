@@ -30,6 +30,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
     bZigbeeCommandMenuOpen  : false,
     DeviceOptions           : null,
     iThingId                : null,
+    bNoRooms                : false,
     
     //bDeviceOptionSelectorDrawn  : false,
     
@@ -95,6 +96,10 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 
                 if (oController.bEditExisting) {
                     IomyRe.common.ShowFormFragment( oController, "DeviceFormEdit", "DevTypeBlock", "Block" );
+                    
+                    if (oController.bNoRooms) {
+                        oView.byId("EditThingRoomSelector").setVisible(false);
+                    }
                     //oController.bDeviceOptionSelectorDrawn = false;
                 } else {
                     IomyRe.common.ShowFormFragment( oController, "DeviceFormAdd", "DevTypeBlock", "Block" );
@@ -290,6 +295,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
     },
     
     PrepareRoomListForModel : function (iPremiseId) {
+        var oController         = this;
         var oView               = this.getView();
         var bEditing            = this.bEditExisting;
         var aRoomList           = JSON.parse( JSON.stringify( IomyRe.common.RoomsList["_"+iPremiseId] ) );
@@ -320,9 +326,10 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     "RoomId" : iUnassignedRoomId,
                     "RoomName" : "No rooms configured for premise"
                 };
-            } else {
-                oView.byId("EditThingRoomSelector").setVisible(false);
             }
+            
+            oController.bNoRooms = true;
+            
         } else {
             if (bHasUnassigned) {
                 delete aRoomList["_"+iUnassignedRoomId];
