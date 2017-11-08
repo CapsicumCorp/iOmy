@@ -171,7 +171,10 @@ sap.ui.controller("pages.staging.Device", {
                                         })
                                     }),
                                     new sap.m.ObjectAttribute (oView.createId("deviceStatus"+mDevice.DeviceId), {
-                                        text: "Status: "+(mDevice.DeviceStatus == 1 ? "On" : "Off")
+                                        text: "Status: " + (mDevice.DeviceStatus == 1 ? "On" : "Off")
+                                    }),
+                                    new sap.m.ObjectAttribute (oView.createId("deviceSerial"+mDevice.DeviceId), {
+                                        text: "Serial: " + IomyRe.devices.getSerialCodeOfDevice(mDevice.DeviceId)
                                     })
                                 ],
                                 press : function () {
@@ -215,6 +218,9 @@ sap.ui.controller("pages.staging.Device", {
                                     }),
                                     new sap.m.ObjectAttribute (oView.createId("deviceStatus"+mDevice.DeviceId), {
                                         text: "Status: "+(mDevice.DeviceStatus == 1 ? "On" : "Off")
+                                    }),
+                                    new sap.m.ObjectAttribute (oView.createId("deviceSerial"+mDevice.DeviceId), {
+                                        text: "Serial: " + IomyRe.devices.getSerialCodeOfDevice(mDevice.DeviceId)
                                     })
                                 ],
                                 press : function () {
