@@ -6,6 +6,16 @@ sap.ui.jsfragment("fragments.UserRoomPermissionEdit", {
 		//-- 1.0 - DECLARE VARIABLES                --//
 		//--------------------------------------------//
 		var oFragContent = null;
+        
+        var oItemTemplatePremises = new sap.ui.core.Item({
+			key:  "{Id}",
+			text: "{Name}"
+		});
+        
+        var oItemTemplatePermissionLevels = new sap.ui.core.Item({
+			key:  "{Key}",
+			text: "{Text}"
+		});
 		
 		//--------------------------------------------//
 		//-- 5.0 - CREATE UI                        --//
@@ -16,50 +26,36 @@ sap.ui.jsfragment("fragments.UserRoomPermissionEdit", {
 					label : "Premise",
 					fields: [
 						new sap.m.Select ({
-							items : [
-								new sap.ui.core.Item ({
-									text:"Freshwater Office"
-								}),
-								new sap.ui.core.Item ({
-									text:"etc"
-								}),
-							]
+							items: {
+								path: "/Premises",
+								template: oItemTemplatePremises
+							}
 						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "Room",
 					fields: [
-						new sap.m.Select ({
-							items : [
-								new sap.ui.core.Item ({
-									text:"Reception"
-								}),
-								new sap.ui.core.Item ({
-									text:"etc"
-								}),
-							]
-						})
+						IomyRe.widgets.selectBoxRoom({
+                            selectedKey : "{/NewUser/RoomId}",
+                            template : {
+                                path : "/Rooms",
+                                item : new sap.ui.core.Item({
+                                    key : "{RoomId}",
+                                    text : "{RoomName}"
+                                })
+                            }
+                        })
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "Permission Level",
 					fields: [
-						new sap.m.Select ({
-							items : [
-								new sap.ui.core.Item ({
-									text:"No Access"
-								}),
-								new sap.ui.core.Item ({
-									text:"Read"
-								}),
-								new sap.ui.core.Item ({
-									text:"Read/Write"
-								}),
-								new sap.ui.core.Item ({
-									text:"Room Management, Read/Write"
-								}),
-							]
+                        new sap.m.Select ({
+							items: {
+								path: "/PermLevels",
+								template: oItemTemplatePermissionLevels
+							}
 						})
 					]
 				}),

@@ -25,7 +25,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 sap.ui.controller("pages.staging.user.UserForm", {
 	aFormFragments: 	{},
 	bEditable: false,
-	userID : null,
+	iUserId : null,
 	
 	mxFetchRequests     : new Mutex({ manual : true }), // Mutex with the queue managed by the controller rather than the mutex.
     mxUpdateRequests    : new Mutex({ manual : true }), // Mutex with the queue managed by the controller rather than the mutex.
@@ -68,7 +68,232 @@ sap.ui.controller("pages.staging.user.UserForm", {
 		});
 		
 	},
-	
+    
+    determinePermissionLevel : function (mData) {
+        var iPermLevel;
+        
+        //----------------------------------------------------//
+        // Determine the permission level the current user has
+        //----------------------------------------------------//
+        if (mData.Read === 0) {
+            iPermLevel = 0; // No Access
+
+        } else if (mData.Read === 1) {
+            iPermLevel = 1; // Read-only
+
+            //----------------------------------------------------//
+            // Permission to modify the premise
+            //----------------------------------------------------//
+            if (mData.Write === 1) {
+                iPermLevel = 2; // Read and Write
+
+                if (mData.DataRead === 1) {
+                    iPermLevel = 3; // Device Access and Read/Write
+
+                    if (mData.StateToggle === 1) {
+                        iPermLevel = 4; // Device Management and Read/Write
+                    }
+                }
+            }
+
+        }
+        
+        return iPermLevel;
+    },
+    
+    determineMostCommonPermissionForAllRooms : function (aPermissionLevels) {
+        var me = this;
+        var iMin = null;
+        
+        for (var i = 0; i < aPermissionLevels.length; i++) {
+            if (iMin === null) {
+                iMin = aPermissionLevels[i];
+            } else if (iMin > aPermissionLevels[i]) {
+                iMin = aPermissionLevels[i];
+            }
+        }
+        
+        return iMin;
+    },
+    
+    FetchPermissionsForPremise : function () {
+        var me          = this;
+        var oView       = this.getView();
+        var sUrl        = IOMy.apiphp.APILocation("permissions");
+        var iUser       = me.iUserId;
+        var iPremise;
+        var bLevelOnly;
+        var fnSuccess;
+        var fnFail;
+        
+        //--------------------------------------------------------------------//
+        // Load and display the permissions for the currently selected user.
+        //--------------------------------------------------------------------//
+        IOMy.apiphp.AjaxRequest({
+            url : sUrl,
+            data : {
+                "Mode" : "LookupPremisePerms",
+                "UserId" : iUser,
+                "PremiseId" : iPremise
+            },
+            
+            onSuccess : function (responseType, data) {
+                if (data.Error === false) {
+                    try {
+                        var data = data.Data;
+                        
+                        if (bLevelOnly) {
+                            var iPermLevel;
+
+                            //----------------------------------------------------//
+                            // Determine the permission level the current user has
+                            //----------------------------------------------------//
+                            if (data.Read === 0) {
+                                iPermLevel = 0; // No Access
+
+                            } else if (data.Read === 1) {
+                                iPermLevel = 1; // Read-only
+
+                                //----------------------------------------------------//
+                                // Permission to modify the premise
+                                //----------------------------------------------------//
+                                if (data.Write === 1) {
+                                    iPermLevel = 2; // Read and Write
+
+                                    if (data.RoomAdmin === 1) {
+                                        iPermLevel = 3; // Room Management and Read/Write
+                                    }
+                                }
+
+                            }
+
+                            fnSuccess(iPermLevel);
+                        } else {
+                            fnSuccess(data);
+                        }
+                        
+                    } catch (e) {
+                        var sErrMessage = "There was an error setting the permissions on the screen: "+e.message;
+                        jQuery.sap.log.error(sErrMessage);
+                        
+                        fnFail(sErrMessage);
+                        
+                    }
+                } else {
+                    fnFail(data.ErrMesg);
+                }
+            },
+            
+            onFail : function (response) {
+                var sErrMessage = "There was an error accessing the premise permissions: "+response.responseText;
+                
+                jQuery.sap.log.error(sErrMessage);
+                fnFail(sErrMessage);
+            }
+            
+        });
+    },
+    
+    FetchPermissionsForRoom : function (iRoom) {
+        var oController         = this;
+        var oView               = this.getView();
+        var sUrl                = IOMy.apiphp.APILocation("permissions");
+        var iUser               = oController.fetchUserID();
+        var aPermissionLevels   = [];
+        var fnSuccess;
+        var fnFail;
+        
+        if (iRoom != 0) {
+            //--------------------------------------------------------------------//
+            // Load and display the permissions for the currently selected user.
+            //--------------------------------------------------------------------//
+            IOMy.apiphp.AjaxRequest({
+                url : sUrl,
+                data : {
+                    "Mode" : "LookupRoomPerms",
+                    "UserId" : iUser,
+                    "RoomId" : iRoom
+                },
+
+                onSuccess : function (responseType, data) {
+                    if (data.Error === false) {
+                        try {
+                            var data = data.Data;
+
+                            oController.determinePermissionLevel(data);
+
+                            fnSuccess();
+
+                        } catch (e) {
+                            jQuery.sap.log.error("There was an error setting the permissions on the screen: "+e.message);
+                            fnFail("(BUG IF YOU SEE THIS!)\n"+e.message);
+                        }
+                    } else {
+                        fnFail(data.ErrMesg)
+                    }
+                },
+
+                onFail : function (response) {
+                    jQuery.sap.log.error("There was an error accessing the premise permissions: "+JSON.stringify(response));
+                    fnFail(response.responseText);
+                }
+
+            });
+        } else {
+            
+            $.each(IOMy.common.RoomsList["_"+oController.fetchPremiseID()], function (sI, mRoom) {
+                oController.mxFetchRequests.synchronize({
+                    task : function () {
+                        //--------------------------------------------------------------------//
+                        // Load and display the permissions for the currently selected user.
+                        //--------------------------------------------------------------------//
+                        IOMy.apiphp.AjaxRequest({
+                            url : sUrl,
+                            data : {
+                                "Mode" : "LookupRoomPerms",
+                                "UserId" : iUser,
+                                "RoomId" : mRoom.RoomId
+                            },
+
+                            onSuccess : function (responseType, data) {
+                                if (data.Error === false) {
+                                    try {
+                                        var data = data.Data;
+
+                                        oController.determinePermissionLevel(data);
+                                        
+                                        aPermissionLevels.push(oController.iPermissionLevel);
+
+                                        oController.mxFetchRequests.dequeue();
+
+                                        if (!oController.mxFetchRequests.busy) {
+                                            oController.determineMostCommonPermissionForAllRooms(aPermissionLevels);
+                                            
+                                            fnSuccess();
+                                        }
+
+                                    } catch (e) {
+                                        jQuery.sap.log.error("There was an error setting the permissions on the screen: "+e.message);
+                                        fnFail("(BUG IF YOU SEE THIS!)\n"+e.message);
+                                    }
+                                } else {
+                                    fnFail(data.ErrMesg);
+                                }
+                            },
+
+                            onFail : function (response) {
+                                jQuery.sap.log.error("There was an error accessing the premise permissions: "+JSON.stringify(response));
+                                fnFail(response.responseText);
+                            }
+
+                        });
+                    }
+                });
+            });
+            
+            oController.mxFetchRequests.dequeue();
+        }
+    },	
 	
 	RefreshModel: function( oController, oConfig ) {
 		//------------------------------------------------//
@@ -109,6 +334,24 @@ sap.ui.controller("pages.staging.user.UserForm", {
 		};    
 		var aRoomData = {};
 		var aPremiseData = {};
+        var aPermissionLevels = {
+            "_1" : {
+                "Key" : 1,
+                "Text" : "No Access"
+            },
+            "_2" : {
+                "Key" : 2,
+                "Text" : "Read"
+            },
+            "_3" : {
+                "Key" : 3,
+                "Text" : "Read, Device Toggle"
+            },
+            "_4" : {
+                "Key" : 4,
+                "Text" : "Read/Write"
+            }
+        };
 
 		//------------------------------------------------//
 		//-- Setup "All" in the Premise & Room Array    --//
@@ -123,7 +366,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							RoomName: "All Rooms"
 						};
 					}
-				}catch(e1){
+				} catch(e1){
 					$.sap.log.error("RefreshModel: Critcal Error setting up 'All' in AllRoomsList:"+e1.message);
 					return false;
 				}
@@ -136,10 +379,11 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							Name: "All Premise"
 						};
 					}
-				}catch(e1){
+				} catch(e1){
 					$.sap.log.error("RefreshModel: Critcal Error setting up 'All' in PremiseList:"+e1.message);
 					return false;
 				}
+                
 			} catch(e2) {
 				$.sap.log.error("RefreshModel: Critcal Error:"+e2.message);
 				return false;
@@ -147,9 +391,16 @@ sap.ui.controller("pages.staging.user.UserForm", {
 		} else {
 			if( typeof IomyRe.common.AllRoomsList!=="undefined" ) {
 				aRoomData = JSON.parse(JSON.stringify(IomyRe.common.AllRoomsList ));
+                aRoomData['_0'] = {
+                    RoomId: 0,
+                    RoomName: "All Rooms"
+                };
 			}
 			if( typeof IomyRe.common.PremiseList!=="undefined" ) {
 				aPremiseData = JSON.parse(JSON.stringify(IomyRe.common.PremiseList ));
+			}
+			if( typeof IomyRe.common.UserList["_"+oController.iUserId] !=="undefined" ) {
+				aNewUserData = JSON.parse(JSON.stringify( IomyRe.common.UserList["_"+oController.iUserId] ));
 			}
 		}
 		//------------------------------------------------//
@@ -161,7 +412,8 @@ sap.ui.controller("pages.staging.user.UserForm", {
 			"Timezones":             IomyRe.common.Timezones,
 			"Premise":               aPremiseData,
 			"Rooms":                 aRoomData,
-			"NewUser":               aNewUserData
+			"NewUser":               aNewUserData,
+            "PermLevels":            aPermissionLevels
 		});
 		
 		oModel.setSizeLimit(420);
@@ -251,6 +503,127 @@ sap.ui.controller("pages.staging.user.UserForm", {
 		} catch(e1) {
 			$.sap.log.error("ToggleButtonsAndView: Critcal Error:"+e1.message);
 			return false;
+		}
+	},
+    
+    UpdateRoomPermissions: function (oController, sType, mData ) {
+		var oCurrentFormData = oController.getView().getModel().getProperty("/NewUser/");
+		//-- Premise Permissions Section --//
+		try {
+			if( sType==="JSON" && mData.Error===false ) {
+				try {
+					if(typeof mData.Data.UserId !== "undefined") {
+						var sUserId = mData.Data.UserId;
+						var iUserId = parseInt(sUserId);
+						
+						var iRoomRead = 0;
+						var iRoomDataRead = 0;
+						var iRoomWrite = 0;
+						var iRoomStateToggle = 0;
+						
+						//-- If check to see what permissions need to be passed --//
+						if (oCurrentFormData.PremPermId === 2 ) {
+							//-- Read Access--//
+							iRoomRead = 1;
+							iRoomDataRead = 1;
+							iRoomWrite = 0;
+							iRoomStateToggle = 0;
+							
+						} else if (oCurrentFormData.RoomPremId === 3) {
+							//-- Read / Device Toggle Access--//
+							iRoomRead = 1;
+							iRoomDataRead = 1;
+							iRoomWrite = 0;
+							iRoomStateToggle = 1;
+							
+						} else if (oCurrentFormData.RoomPremId === 4) {
+							//-- Read/Write Access--//
+							iRoomRead = 1;
+							iRoomDataRead = 1;
+							iRoomWrite = 1;
+							iRoomStateToggle = 1;
+							
+						} else {
+							//-- No Access--//
+							iRoomRead = 0;
+							iRoomDataRead = 0;
+							iRoomWrite = 0;
+							iRoomStateToggle = 0;
+						}
+						
+						//-- If Check to see if single Room or all Rooms --//
+						if (oCurrentFormData.RoomId === 0) {
+							$.each(IomyRe.common.AllRoomsList, function (sI, mRoom) {
+								oController.mxUpdateRequests.synchronize({
+									task : function () {
+										IomyRe.apiphp.AjaxRequest({
+											url : IomyRe.apiphp.APILocation("permissions"),
+											data : {
+												"Mode" : "UpdateRoomPerms",
+												"UserId" : iUserId,
+												"RoomId" : mRoom.RoomId,
+												"Data" : "{\"Read\":"+iRoomRead+",\"DataRead\":"+iRoomDataRead+",\"Write\":"+iRoomWrite+",\"StateToggle\":"+iRoomStateToggle+"}"
+											},			
+											onSuccess : function (responseType, data) {
+												// Keep the queue going.
+												oController.mxUpdateRequests.dequeue();
+												
+												// The queue is empty
+												if (!oController.mxUpdateRequests.busy) {
+													IomyRe.common.RefreshCoreVariables({
+														onSuccess : function () {
+															IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
+														}
+													});
+												}
+											},
+											onFail : function (response) {
+												IomyRe.common.showError(response.responseText, "Error",
+													function () {
+														if (oController.mxUpdateRequests.busy) {
+															oController.mxUpdateRequests.dequeue();
+														}
+														
+														if (!oController.mxUpdateRequests.busy) {
+															
+														}
+													}
+												);
+											}
+										});
+									}
+								});
+							});										
+							oController.mxUpdateRequests.dequeue();
+						} else {
+							IomyRe.apiphp.AjaxRequest({
+								url : IomyRe.apiphp.APILocation("permissions"),
+								data : {
+									"Mode" : "UpdateRoomPerms",
+									"UserId" : iUserId,
+									"RoomId" : oCurrentFormData.RoomId,
+									"Data" : "{\"Read\":"+iRoomRead+",\"DataRead\":"+iRoomDataRead+",\"Write\":"+iRoomWrite+",\"StateToggle\":"+iRoomStateToggle+"}"
+								},
+								onSuccess : function (responseType, mData) {
+									IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
+								},
+								onFail : function (response) {
+									jQuery.sap.log.error("There was an error updating the premise permissions: "+JSON.stringify(response));
+								}
+							});
+						}
+					} else {
+						jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success event that was passed as a parameter in the 'RoomForm' controller!");
+					}
+					
+				} catch( e3 ) {
+					jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success event that was passed as a parameter in the 'RoomForm' controller! "+e3.message);
+				}
+			} else {
+				jQuery.sap.log.error("Error with the 'UpdateRoomPerms' successful API result in the 'RoomForm' controller!");
+			}
+		} catch( e2 ) {
+			jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success in the 'RoomForm' controller! "+e2.message);
 		}
 	},
 

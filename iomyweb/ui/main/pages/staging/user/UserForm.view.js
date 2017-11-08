@@ -164,7 +164,7 @@ sap.ui.jsview("pages.staging.user.UserForm", {
 														icon:    "sap-icon://save",
 														visible: false,
 														press:   function( oEvent ) {
-															//oController.UpdateValues( oController );
+															oController.UpdateRoomPermissions();
 															oController.ToggleButtonsAndView( oController, "ShowRoomPermissions" );
 														}
 													}),
@@ -172,7 +172,7 @@ sap.ui.jsview("pages.staging.user.UserForm", {
 														icon:    "sap-icon://cancel",
 														visible: false,
 														press:   function( oEvent ) {
-															//oController.RefreshModel( oController, {} );
+                                                            oController.RefreshModel( oController, {} );
 															oController.ToggleButtonsAndView( oController, "ShowRoomPermissions" );
 														}
 													})
