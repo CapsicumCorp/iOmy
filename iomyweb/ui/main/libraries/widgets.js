@@ -103,23 +103,23 @@ $.extend( IomyRe.widgets, {
 			}	
 		});
 		
-		oSwitchView = new sap.m.OverflowToolbarButton ({
-			layoutData : new sap.m.OverflowToolbarLayoutData({
-				priority : sap.m.OverflowToolbarPriority.High
-			}),
-			icon: "sap-icon://switch-views",
-			type: "Transparent",
-			text: "View By",
-			press: function(oControlEvent) {
-				IomyRe.navigation.GroupMenu(oControlEvent, oView);
-			}	
-		});
+//		oSwitchView = new sap.m.OverflowToolbarButton ({
+//			layoutData : new sap.m.OverflowToolbarLayoutData({
+//				priority : sap.m.OverflowToolbarPriority.High
+//			}),
+//			icon: "sap-icon://switch-views",
+//			type: "Transparent",
+//			text: "View By",
+//			press: function(oControlEvent) {
+//				IomyRe.navigation.GroupMenu(oControlEvent, oView);
+//			}	
+//		});
 		
 		oSettings = new sap.m.Button (oView.createId("openMenu"), {
 			layoutData : new sap.m.OverflowToolbarLayoutData({
 				priority : sap.m.OverflowToolbarPriority.High
 			}),
-			text: "Hi,"+sDisplayName,
+			text: "Hi, "+sDisplayName,
 			type: "Transparent",
 			press: function(oControlEvent) {
 				IomyRe.navigation.UserMenu(oControlEvent, oView);
@@ -175,7 +175,12 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://it-system",
 			text: "Devices",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pDevice" , {} , false);
+                if (oApp.getCurrentPage().getId() === "pDevice") {
+                    oApp.getCurrentPage().getController().bEditing = false;
+
+                } else {
+                    IomyRe.common.NavigationChangePage( "pDevice" , {} , false);
+                }
 			}
 		});
 		
