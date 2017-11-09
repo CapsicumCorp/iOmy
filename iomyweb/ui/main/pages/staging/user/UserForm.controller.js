@@ -53,7 +53,11 @@ sap.ui.controller("pages.staging.user.UserForm", {
 				//MyApp.common.NavigationRefreshButtons( oController );
 				
 				//-- Update the Model --//
-				oController.RefreshModel( oController, {} );
+				oController.FetchPermissionsForPremise({
+                    
+                });
+                
+                oController.RefreshModel( oController, {} );
 				
 				//-- Check the parameters --//
 				oController.ToggleButtonsAndView( oController, "EditUser");
@@ -69,7 +73,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 		
 	},
     
-    determinePermissionLevel : function (mData) {
+    determineRoomPermissionLevel : function (mData) {
         var iPermLevel;
         
         //----------------------------------------------------//
@@ -82,7 +86,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
             iPermLevel = 1; // Read-only
 
             //----------------------------------------------------//
-            // Permission to modify the premise
+            // Permission to modify the room
             //----------------------------------------------------//
             if (mData.Write === 1) {
                 iPermLevel = 2; // Read and Write
@@ -102,7 +106,6 @@ sap.ui.controller("pages.staging.user.UserForm", {
     },
     
     determineMostCommonPermissionForAllRooms : function (aPermissionLevels) {
-        var me = this;
         var iMin = null;
         
         for (var i = 0; i < aPermissionLevels.length; i++) {
@@ -116,20 +119,69 @@ sap.ui.controller("pages.staging.user.UserForm", {
         return iMin;
     },
     
-    FetchPermissionsForPremise : function () {
-        var me          = this;
-        var oView       = this.getView();
-        var sUrl        = IOMy.apiphp.APILocation("permissions");
-        var iUser       = me.iUserId;
+    FetchPermissionsForPremise : function (mSettings) {
+        var oController     = this;
+        var oView           = this.getView();
+        var bError          = false;
+        var sUrl            = IomyRe.apiphp.APILocation("permissions");
+        var aErrorMessages  = [];
+        var iUser;
         var iPremise;
         var bLevelOnly;
         var fnSuccess;
         var fnFail;
         
+        var fnAppendError = function (sErrorMessage) {
+            bError = true;
+            aErrorMessages.push(sErrorMessage);
+        };
+        
+        if (mSettings !== undefined && mSettings !== null) {
+            if (mSettings.premiseID !== undefined && mSettings.premiseID !== null) {
+                iPremise = mSettings.premiseID;
+            } else {
+                fnAppendError("Premise ID (premiseID) must be given when applying permissions to all rooms in a premise.");
+            }
+            
+            if (mSettings.userID !== undefined && mSettings.userID !== null) {
+                iUser = mSettings.userID;
+            } else {
+                fnAppendError("User ID (userID) must be given.");
+            }
+            
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join("\n"));
+            }
+            
+            if (mSettings.levelOnly !== undefined && mSettings.levelOnly !== null) {
+                bLevelOnly = mSettings.levelOnly;
+            } else {
+                bLevelOnly = false;
+            }
+            
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+            } else {
+                fnSuccess = function () {};
+            }
+            
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+            } else {
+                fnFail = function () {};
+            }
+            
+        } else {
+            fnAppendError("Premise ID (premiseID) must be given.");
+            fnAppendError("User ID (userID) must be given.");
+            
+            throw new MissingSettingsMapException(aErrorMessages.join("\n"));
+        }
+        
         //--------------------------------------------------------------------//
         // Load and display the permissions for the currently selected user.
         //--------------------------------------------------------------------//
-        IOMy.apiphp.AjaxRequest({
+        IomyRe.apiphp.AjaxRequest({
             url : sUrl,
             data : {
                 "Mode" : "LookupPremisePerms",
@@ -194,20 +246,80 @@ sap.ui.controller("pages.staging.user.UserForm", {
         });
     },
     
-    FetchPermissionsForRoom : function (iRoom) {
+    FetchPermissionsForRoom : function (mSettings) {
         var oController         = this;
-        var oView               = this.getView();
-        var sUrl                = IOMy.apiphp.APILocation("permissions");
-        var iUser               = oController.fetchUserID();
+        var bError              = false;
+        var sUrl                = IomyRe.apiphp.APILocation("permissions");
+        var aErrorMessages      = [];
         var aPermissionLevels   = [];
+        var iUser;
+        var iPremise;
+        var iRoom;
+        var bLevelOnly;
         var fnSuccess;
         var fnFail;
         
+        var fnAppendError = function (sErrorMessage) {
+            bError = true;
+            aErrorMessages.push(sErrorMessage);
+        };
+        
+        if (mSettings !== undefined && mSettings !== null) {
+            if (mSettings.roomID !== undefined && mSettings.roomID !== null) {
+                iRoom = mSettings.roomID;
+                
+                if (iRoom == 0) {
+                    if (mSettings.premiseID !== undefined && mSettings.premiseID !== null) {
+                        iPremise = mSettings.premiseID;
+                    } else {
+                        fnAppendError("Premise ID (premiseID) must be given when fetching permissions for all rooms in a premise.");
+                    }
+                }
+                
+            } else {
+                fnAppendError("Room ID (roomID) must be given.");
+            }
+            
+            if (mSettings.userID !== undefined && mSettings.userID !== null) {
+                iUser = mSettings.userID;
+            } else {
+                fnAppendError("User ID (userID) must be given.");
+            }
+            
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join("\n"));
+            }
+            
+            if (mSettings.levelOnly !== undefined && mSettings.levelOnly !== null) {
+                bLevelOnly = mSettings.levelOnly;
+            } else {
+                bLevelOnly = false;
+            }
+            
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+            } else {
+                fnSuccess = function () {};
+            }
+            
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+            } else {
+                fnFail = function () {};
+            }
+            
+        } else {
+            fnAppendError("Room ID (roomID) must be given.");
+            fnAppendError("User ID (userID) must be given.");
+            
+            throw new MissingSettingsMapException(aErrorMessages.join("\n"));
+        }
+        
         if (iRoom != 0) {
-            //--------------------------------------------------------------------//
+            //----------------------------------------------------------------//
             // Load and display the permissions for the currently selected user.
-            //--------------------------------------------------------------------//
-            IOMy.apiphp.AjaxRequest({
+            //----------------------------------------------------------------//
+            IomyRe.apiphp.AjaxRequest({
                 url : sUrl,
                 data : {
                     "Mode" : "LookupRoomPerms",
@@ -220,9 +332,13 @@ sap.ui.controller("pages.staging.user.UserForm", {
                         try {
                             var data = data.Data;
 
-                            oController.determinePermissionLevel(data);
+                            if (bLevelOnly) {
+                                var iPermLevel = oController.determineRoomPermissionLevel(data);
 
-                            fnSuccess();
+                                fnSuccess(iPermLevel);
+                            } else {
+                                fnSuccess(data);
+                            }
 
                         } catch (e) {
                             jQuery.sap.log.error("There was an error setting the permissions on the screen: "+e.message);
@@ -241,13 +357,13 @@ sap.ui.controller("pages.staging.user.UserForm", {
             });
         } else {
             
-            $.each(IOMy.common.RoomsList["_"+oController.fetchPremiseID()], function (sI, mRoom) {
+            $.each(IomyRe.common.RoomsList["_"+iPremise], function (sI, mRoom) {
                 oController.mxFetchRequests.synchronize({
                     task : function () {
                         //--------------------------------------------------------------------//
                         // Load and display the permissions for the currently selected user.
                         //--------------------------------------------------------------------//
-                        IOMy.apiphp.AjaxRequest({
+                        IomyRe.apiphp.AjaxRequest({
                             url : sUrl,
                             data : {
                                 "Mode" : "LookupRoomPerms",
@@ -260,16 +376,16 @@ sap.ui.controller("pages.staging.user.UserForm", {
                                     try {
                                         var data = data.Data;
 
-                                        oController.determinePermissionLevel(data);
+                                        var iPermLevel = oController.determineRoomPermissionLevel(data);
                                         
                                         aPermissionLevels.push(oController.iPermissionLevel);
 
                                         oController.mxFetchRequests.dequeue();
 
                                         if (!oController.mxFetchRequests.busy) {
-                                            oController.determineMostCommonPermissionForAllRooms(aPermissionLevels);
+                                            iPermLevel = oController.determineMostCommonPermissionForAllRooms(aPermissionLevels);
                                             
-                                            fnSuccess();
+                                            fnSuccess(iPermLevel);
                                         }
 
                                     } catch (e) {
@@ -401,6 +517,8 @@ sap.ui.controller("pages.staging.user.UserForm", {
 			}
 			if( typeof IomyRe.common.UserList["_"+oController.iUserId] !=="undefined" ) {
 				aNewUserData = JSON.parse(JSON.stringify( IomyRe.common.UserList["_"+oController.iUserId] ));
+                aNewUserData.PremPermId = oConfig.PremPermLevel;
+                aNewUserData.RoomPermId = oConfig.RoomPermId;
 			}
 		}
 		//------------------------------------------------//
