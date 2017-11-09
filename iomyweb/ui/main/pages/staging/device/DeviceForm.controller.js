@@ -331,6 +331,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             oController.bNoRooms = true;
             
         } else {
+            oController.bNoRooms = false;
+            
             if (bHasUnassigned) {
                 delete aRoomList["_"+iUnassignedRoomId];
             }
