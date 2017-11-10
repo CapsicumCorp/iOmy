@@ -95,6 +95,8 @@ AC_ARG_ENABLE([rapidhalib_lockdebug], AS_HELP_STRING([--enable-rapidhalib_lockde
 AC_ARG_ENABLE([rapidhalib_moredebug], AS_HELP_STRING([--enable-rapidhalib_moredebug], [Build with rapidhalib more debugging]), [rapidhalib_moredebug=true])
 AC_ARG_ENABLE([xbeelib_lockdebug], AS_HELP_STRING([--enable-xbeelib_lockdebug], [Build with xbeelib lock debugging]), [xbeelib_lockdebug=true])
 AC_ARG_ENABLE([xbeelib_moredebug], AS_HELP_STRING([--enable-xbeelib_moredebug], [Build with xbeelib more debugging]), [xbeelib_moredebug=true])
+AC_ARG_ENABLE([tizigbeelib_lockdebug], AS_HELP_STRING([--enable-tizigbeelib_lockdebug], [Build with tizigbeelib lock debugging]), [tizigbeelib_lockdebug=true])
+AC_ARG_ENABLE([tizigbeelib_moredebug], AS_HELP_STRING([--enable-tizigbeelib_moredebug], [Build with tizigbeelib more debugging]), [tizigbeelib_moredebug=true])
 AC_ARG_ENABLE([zigbeelib_lockdebug], AS_HELP_STRING([--enable-zigbeelib_lockdebug], [Build with zigbeelib lock debugging]), [zigbeelib_lockdebug=true])
 AC_ARG_ENABLE([zigbeelib_moredebug], AS_HELP_STRING([--enable-zigbeelib_moredebug], [Build with zigbeelib more debugging]), [zigbeelib_moredebug=true])
 AC_ARG_ENABLE([zigbeelib_senddebug], AS_HELP_STRING([--enable-zigbeelib_senddebug], [Build with zigbeelib send debugging]), [zigbeelib_senddebug=true])
@@ -136,6 +138,17 @@ AS_IF([test "x$xbeelib_moredebug" = xtrue], [
   AC_MSG_RESULT([xbeelib more debugging: enabled])
 ], [
   AC_MSG_RESULT([xbeelib more debugging: disabled])
+])
+
+AS_IF([test "x$tizigbeelib_lockdebug" = xtrue], [
+  AC_MSG_RESULT([tizigbeelib lock debugging: enabled])
+], [
+  AC_MSG_RESULT([tizigbeelib lock debugging: disabled])
+])
+AS_IF([test "x$tizigbeelib_moredebug" = xtrue], [
+  AC_MSG_RESULT([tizigbeelib more debugging: enabled])
+], [
+  AC_MSG_RESULT([tizigbeelib more debugging: disabled])
 ])
 
 AS_IF([test "x$zigbeelib_lockdebug" = xtrue], [
@@ -180,6 +193,8 @@ AM_CONDITIONAL([RAPIDHALIB_LOCKDEBUG], [test x$rapidhalib_lockdebug = xtrue])
 AM_CONDITIONAL([RAPIDHALIB_MOREDEBUG], [test x$rapidhalib_moredebug = xtrue])
 AM_CONDITIONAL([XBEELIB_LOCKDEBUG], [test x$xbeelib_lockdebug = xtrue])
 AM_CONDITIONAL([XBEELIB_MOREDEBUG], [test x$xbeelib_moredebug = xtrue])
+AM_CONDITIONAL([TIZIGBEELIB_LOCKDEBUG], [test x$tizigbeelib_lockdebug = xtrue])
+AM_CONDITIONAL([TIZIGBEELIB_MOREDEBUG], [test x$tizigbeelib_moredebug = xtrue])
 AM_CONDITIONAL([ZIGBEELIB_LOCKDEBUG], [test x$zigbeelib_lockdebug = xtrue])
 AM_CONDITIONAL([ZIGBEELIB_MOREDEBUG], [test x$zigbeelib_moredebug = xtrue])
 AM_CONDITIONAL([ZIGBEELIB_SENDDEBUG], [test x$zigbeelib_senddebug = xtrue])
@@ -237,4 +252,5 @@ AS_IF([test "x$MYSQLPLUGIN" = xtrue], [
   AC_CONFIG_FILES([src/modules/mysqllib/Makefile])
 ])
 AC_CONFIG_FILES([src/modules/timeruleslib/Makefile])
+AC_CONFIG_FILES([src/modules/tizigbeelib/Makefile])
 AC_OUTPUT
