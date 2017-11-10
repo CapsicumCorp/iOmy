@@ -2,7 +2,7 @@
 Title: Texas Instruments Z-Stack Library for Watch Inputs
 Author: Matthew Stapleton (Capsicum Corporation) <matthew@capsicumcorp.com>
 Description: Library for communicating with Texas Instruments Z-Stack modules
-Copyright: Capsicum Corporation 2010-2016
+Copyright: Capsicum Corporation 2017
 
 This file is part of Watch Inputs which is part of the iOmy project.
 
@@ -19,6 +19,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
+Some code used from https://github.com/tlaukkan/zigbee4java/commit/695ce7fcc1a5e8f95eb88bd0e3382d9e767e8f39
+  which is under Apache 2.0 license
 */
 
 //NOTE: Only Coordinator has been well tested at the moment
@@ -39,6 +41,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __ANDROID__
 #include <execinfo.h>
 #endif
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -199,7 +202,7 @@ typedef struct {
 
   //These variables need to carry across calls to the receive function
   uint8_t receive_processing_packet, receive_escapechar;
-  uint16_t receive_checksum;
+  uint8_t receive_checksum;
   uint8_t receive_packetlength;
 
   int waiting_for_remotestatus; //-1=Not waiting, other values may indicate the frameid we're waiting for
@@ -407,7 +410,13 @@ static void locktizigbee(void) {
   lockcnt = (long *) pthread_getspecific(lockkey);
   if (lockcnt==nullptr) {
     //Allocate storage for the lock counter and set to 0
-    lockcnt=new long[1];
+    try {
+      lockcnt=new long[1];
+    } catch (std::bad_alloc& e) {
+      const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+      debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Unable to allocate ram for lockcnt\n", __PRETTY_FUNCTION__, pthread_self(), __LINE__);
+      return;
+    }
     *lockcnt=0;
     (void) pthread_setspecific(lockkey, lockcnt);
   }
@@ -553,13 +562,17 @@ static int marktizigbee_notinuse(tizigbeedevice_t& tizigbeedevice) {
   return 0;
 }
 
+//==================
+//Protocol Functions
+//==================
+
 //Send a TI Zigbee API packet
 //packet size is start byte + len byte + 2 cmd bytes + data + checksum byte
 //You allocate 1 additional byte for the checksum at the end when allocating your buffer
 //The buffer should have the first 2 bytes skipped for this function to fill in and bufcnt+1 will also be filled in with the checksum
 //  So your first buffer entry will be buffer+2
 //TI Zigbee length and TI Zigbee header ids should be already set by the caller
-static void __tizigbee_send_api_packet(tizigbeedevice_t& tizigbeedevice, unsigned char *sendbuf) {
+static void __tizigbee_send_api_packet(tizigbeedevice_t& tizigbeedevice, uint8_t *sendbuf) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   int i;//, upto;
   uint8_t packetlen;
@@ -575,31 +588,32 @@ static void __tizigbee_send_api_packet(tizigbeedevice_t& tizigbeedevice, unsigne
   }
   apicmd->frame_start=API_START_BYTE;
 
-  packetlen=apicmd->length+3; //Add start byte + len byte + 1 byte checksum after payload
+  packetlen=apicmd->length+5; //Add start byte + len byte + 2 byte cmd + 1 byte checksum after payload
 
   //Calculate Checksum : Sum of all but start and checksum byte
   checksum=0;
-  for (i=1; i<packetlen-2; i++) {
+  for (i=1; i<packetlen-1; i++) {
     checksum=checksum ^ sendbuf[i]; //Checksum is XOR
   }
   sendbuf[packetlen-1]=checksum;
 
-#ifdef TIZIGBEELIB_MOREDEBUG
+//#ifdef TIZIGBEELIB_MOREDEBUG
   {
+    const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
     int i;
     std::array<char,1024> tmpstr;
 
     tmpstr[0]=0;
     for (i=0; i<packetlen; i++) {
       sprintf(tmpstr.data()+strlen(tmpstr.data()), "%02hhX ", (uint8_t) sendbuf[i]);
-      if (strlen(tmpstr.data()+5>1024) {
+      if (strlen(tmpstr.data()+5)>1024) {
         //Abort if about to overflow the buffer
         break;
       }
     }
     debuglibifaceptr->debuglib_printf(1, "%s: Sending bytes: %s, length=%d\n", __PRETTY_FUNCTION__, tmpstr.data(), packetlen);
   }
-#endif
+//#endif
   //Now send the packet
   //NOTE: No need to lock as the sending function will lock around the send operation
   tizigbeedevice.sendFuncptr(tizigbeedevice.serdevidx, sendbuf, packetlen);
@@ -607,11 +621,115 @@ static void __tizigbee_send_api_packet(tizigbeedevice_t& tizigbeedevice, unsigne
   MOREDEBUG_EXITINGFUNC();
 }
 
+/*
+  Send a special TI Zigbee bootloader get out command
+  Args: tizigbeedevice A pointer to tizigbeedevice structure used to send the serial data
+*/
+static void send_tizigbee_bootloaderGetOut(tizigbeedevice_t& tizigbeedevice) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  uint8_t *apicmd;
+
+#ifdef TIZIGBEELIB_MOREDEBUG
+  debuglibifaceptr->debuglib_printf(1, "Entering %s: thread id: %lu\n", __PRETTY_FUNCTION__, pthread_self());
+#endif
+  //Mark tizigbee in use so we don't try and use the send queue while a TI Zigbee is being removed
+  if (marktizigbee_inuse(tizigbeedevice)<0) {
+    //Failed to mark tizigbee as inuse
+    return;
+  }
+
+  //Fill in the packet details and send the packet
+  apicmd=reinterpret_cast<uint8_t *>(calloc(1, 1));
+  if (!apicmd) {
+    MOREDEBUG_EXITINGFUNC();
+    return;
+  }
+  apicmd[0]=BOOTLOADER_MAGIC_BYTE;
+
+  tizigbeedevice.sendFuncptr(tizigbeedevice.serdevidx, apicmd, 1);
+  marktizigbee_notinuse(tizigbeedevice);
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
+  Send a TI Zigbee simple command
+  Some TI Zigbee commands only consist of the command id so this function handles those
+  Args: tizigbeedevice A pointer to tizigbeedevice structure used to send the serial data
+        cmd 16-byte command id
+*/
+static void send_tizigbee_simple_command(tizigbeedevice_t& tizigbeedevice, uint16_t cmd) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  tizigbee_api_header_t *apicmd;
+
+#ifdef TIZIGBEELIB_MOREDEBUG
+  debuglibifaceptr->debuglib_printf(1, "Entering %s: thread id: %lu With Command: %04" PRIX16 "\n", __PRETTY_FUNCTION__, pthread_self(), cmd);
+#endif
+  //Fill in the packet details and send the packet
+  //NOTE: We do minus 1 as the zigbeepayload value will overlap with the first byte of the zigbee command
+  apicmd=reinterpret_cast<tizigbee_api_header_t *>(calloc(1, sizeof(tizigbee_api_header_t)+1-1));
+  if (!apicmd) {
+    MOREDEBUG_EXITINGFUNC();
+    return;
+  }
+  apicmd->cmd=htons(cmd);
+  apicmd->length=0;
+  __tizigbee_send_api_packet(tizigbeedevice, reinterpret_cast<uint8_t *>(apicmd));
+  free(apicmd);
+
+  MOREDEBUG_EXITINGFUNC();
+}
+
+void send_tizigbee_sys_ping(tizigbeedevice_t& tizigbeedevice) {
+  send_tizigbee_simple_command(tizigbeedevice, SYS_PING);
+}
+
+void send_tizigbee_sys_reset(tizigbeedevice_t& tizigbeedevice, uint8_t reset_type) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  tizigbee_sys_reset_t *apicmd;
+
+#ifdef TIZIGBEELIB_MOREDEBUG
+  debuglibifaceptr->debuglib_printf(1, "Entering %s: thread id: %lu With reset type: %d\n", __PRETTY_FUNCTION__, pthread_self(), reset_type);
+#endif
+  //Fill in the packet details and send the packet
+  apicmd=reinterpret_cast<tizigbee_sys_reset_t *>(calloc(1, sizeof(tizigbee_sys_reset_t)));
+  if (!apicmd) {
+    MOREDEBUG_EXITINGFUNC();
+    return;
+  }
+  apicmd->cmd=htons(SYS_RESET);
+  apicmd->reset_type=reset_type;
+  apicmd->length=1;
+  __tizigbee_send_api_packet(tizigbeedevice, reinterpret_cast<uint8_t *>(apicmd));
+  free(apicmd);
+
+  MOREDEBUG_EXITINGFUNC();
+}
 
 
+/*
+  Process a TI Zigbee API packet
+  Args: tizigbeedevice A pointer to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
+  NOTE: No need to mark tizigbee inuse here as all callers of this function do that already
+*/
+static void process_api_packet(tizigbeedevice_t& tizigbeedevice) {
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  tizigbee_api_response_t *apicmd;
 
+  MOREDEBUG_ENTERINGFUNC();
+  apicmd=reinterpret_cast<tizigbee_api_response_t *>(tizigbeedevice.receivebuf);
 
+  locktizigbee();
+  if (gwaitingforresponse==WAITING_FOR_ANYTHING) {
+    gwaitresult=1;
+  }
+  debuglibifaceptr->debuglib_printf(1, "%s: Received Unknown TI Zigbee packet: 0x%04" PRIX16 " with length: %d\n", __func__, ntohs(apicmd->cmd), apicmd->length);
+  unlocktizigbee();
+  MOREDEBUG_EXITINGFUNC();
+}
 
+//=========================
+//End of Protocol Functions
+//=========================
 
 /*
   Receive raw unprocessed TI Zigbee data from a function that received the data from the TI Zigbee device
@@ -627,6 +745,7 @@ static void receiveraw(int UNUSED(serdevidx), int handlerdevidx, char *buffer, i
   int bufpos=0;
   tizigbeedevice_t *tizigbeedevice; //A pointer to the device that the data was received on
 
+  debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __PRETTY_FUNCTION__);
   MOREDEBUG_ENTERINGFUNC();
 
   locktizigbee();
@@ -681,15 +800,81 @@ static void receiveraw(int UNUSED(serdevidx), int handlerdevidx, char *buffer, i
         break;
       }
     }
-    debuglibifaceptr->debuglib_printf(1, "%s\n", tmpstr);
+    debuglibifaceptr->debuglib_printf(1, "%s\n", tmpstr.data());
   }
 //#endif
 
+
+  //Loop until all waiting serial data has been processed
+  bufpos=0;
+  while (bufpos<bufcnt) {
+    serchar=buffer[bufpos];
+    ++bufpos;
+    if (tizigbeedevice->receivebufcnt==BUFFER_SIZE) {
+      //Throw away invalid data
+      debuglibifaceptr->debuglib_printf(1, "%s: WARNING: Received buffer size limit reached, throwing away %d bytes\n", __PRETTY_FUNCTION__, BUFFER_SIZE);
+      tizigbeedevice->receivebufcnt=0;
+      tizigbeedevice->receive_checksum=0;
+      tizigbeedevice->receive_processing_packet=0;
+      tizigbeedevice->receive_escapechar=0;
+      tizigbeedevice->receive_packetlength=0;
+    }
+    if (!tizigbeedevice->receive_processing_packet && serchar==API_START_BYTE) {
+      //Found the beginning of an API packet
+      tizigbeedevice->receivebufcnt=0;
+      tizigbeedevice->receive_checksum=0;
+      tizigbeedevice->receivebuf[tizigbeedevice->receivebufcnt++]=serchar;
+      tizigbeedevice->receive_processing_packet=1;
+      tizigbeedevice->receive_escapechar=0xff; //Start with large packet length so checks don't stop early
+      continue;
+    }
+    if (tizigbeedevice->receive_processing_packet) {
+      tizigbeedevice->receivebuf[tizigbeedevice->receivebufcnt++]=serchar;
+      if (tizigbeedevice->receivebufcnt-4<=tizigbeedevice->receive_packetlength) {
+        //Checksum everything after the frame start except the last checksum byte
+        tizigbeedevice->receive_checksum^=serchar;
+      }
+      if (tizigbeedevice->receivebufcnt==2) {
+        tizigbeedevice->receive_packetlength=serchar;
+      } else if (tizigbeedevice->receivebufcnt-5==tizigbeedevice->receive_packetlength) {
+        uint16_t checksum;
+
+        tizigbeedevice->receive_processing_packet=0;
+        checksum=tizigbeedevice->receivebuf[tizigbeedevice->receivebufcnt-1];
+        if (tizigbeedevice->receive_checksum!=checksum) {
+          //Invalid checksum so ignore
+          debuglibifaceptr->debuglib_printf(1, "%s: WARNING: Invalid checksum: %02" PRIX8 " received, expecting: %02" PRIX8", TI Zigbee packet length: %d\n", __PRETTY_FUNCTION__, checksum, tizigbeedevice->receive_checksum, tizigbeedevice->receive_packetlength);
+        } else {
+          //A full API Packet has been received and is ready for processing
+
+          //Process the API packet here
+          process_api_packet(*tizigbeedevice);
+          locktizigbee();
+          if (gwaitresult) {
+            sem_post(&gwaitforresponsesem);
+            gwaitresult=0;
+          }
+          unlocktizigbee();
+        }
+        //Ready to process a new packet
+        locktizigbee();
+        tizigbeedevice->receivebufcnt=0;
+        tizigbeedevice->receive_checksum=0;
+        tizigbeedevice->receive_processing_packet=0;
+        tizigbeedevice->receive_escapechar=0;
+        tizigbeedevice->receive_packetlength=0;
+        unlocktizigbee();
+      }
+    } else {
+      //Ignore invalid bytes here
+    }
+  }
   marktizigbee_notinuse(*tizigbeedevice);
   if (tizigbeedevice==&gnewtizigbee) {
     PTHREAD_UNLOCK(&gmutex_initnewtizigbee);
   }
   MOREDEBUG_EXITINGFUNC();
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
 }
 
 
@@ -761,7 +946,7 @@ static int initwaitforresponse(int waitingforresponseid) {
   Send your packet after calling initwaitforresponse and then call this function
   Returns negative value on error or >= 0 on success
 */
-static int waitforresponse() {
+static int waitforresponse(int timeout=TIZIGBEE_DETECT_TIMEOUT) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   int result, lerrno;
   struct timespec waittime;
@@ -770,7 +955,7 @@ static int waitforresponse() {
 
   //Wait 1 second for the result
   clock_gettime(CLOCK_REALTIME, &waittime);
-  waittime.tv_sec+=TIZIGBEE_DETECT_TIMEOUT;
+  waittime.tv_sec+=timeout;
   while ((result=sem_timedwait(&gwaitforresponsesem, &waittime)) == -1 && errno == EINTR)
     continue; /* Restart if interrupted by handler */
   lerrno=errno;
@@ -791,9 +976,78 @@ static int waitforresponse() {
 }
 
 
+/*
+  Detect a TI Zigbee and reset it if necessary
+*/
+static int detect_tizigbee(tizigbeedevice_t& tizigbeedevice, int longdetect) {
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  int detectresult, result;
+  int retrycnt, maxretry;
 
+  if (longdetect) {
+    maxretry=60;
+  } else {
+    maxretry=2;
+  }
+  retrycnt=0;
+  while (retrycnt<maxretry) {
+    result=initwaitforresponse(WAITING_FOR_SYS_RESET_RESPONSE);
+    if (result<0) {
+      debuglibifaceptr->debuglib_printf(1, "Exiting %s line: %d\n", __PRETTY_FUNCTION__, __LINE__);
+      return -1;
+    }
+    //Send Ping Request
+    send_tizigbee_sys_ping(gnewtizigbee);
 
+    //Wait 1 second for the result
+    result=waitforresponse();
+    if (result>=0) {
+      //We got a response
+      break;
+    }
+    if ((longdetect && retrycnt % 4==0) || !longdetect) {
+      //Reset the TI Zigbee module to get it in a known state
+      //Only reset on every 4th retry if longdetect is set
+      debuglibifaceptr->debuglib_printf(1, "%s: Sending the reset command to the TI Zigbee\n", __func__);
 
+      result=initwaitforresponse(WAITING_FOR_SYS_RESET_RESPONSE);
+      if (result<0) {
+        debuglibifaceptr->debuglib_printf(1, "Exiting %s line: %d\n", __PRETTY_FUNCTION__, __LINE__);
+        return -1;
+      }
+      send_tizigbee_sys_reset(gnewtizigbee, RESET_TYPE::SERIAL_BOOTLOADER);
+
+      //Wait 3 seconds for the result
+      result=waitforresponse(3);
+      if (result>=0) {
+        //We got a response
+        break;
+      }
+      //Try bootloader magic packet to exit the bootloader
+      //NOTE: This may cause problems for the TI Zigbee device when in normal mode
+      //result=initwaitforresponse(WAITING_FOR_SYS_RESET_RESPONSE);
+      //if (result<0) {
+      //  debuglibifaceptr->debuglib_printf(1, "Exiting %s line: %d\n", __PRETTY_FUNCTION__, __LINE__);
+      //  return -1;
+      //}
+      //send_tizigbee_bootloaderGetOut(gnewtizigbee);
+
+      //Wait 1 second for the result
+      //result=waitforresponse();
+      //if (result>=0) {
+      //  //We got a response
+      //  break;
+      //}
+    }
+    ++retrycnt;
+  }
+  if (retrycnt>=maxretry) {
+    //Failed to receive the rapidha module info response
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s: Failed to receive TI Zigbee Response\n", __PRETTY_FUNCTION__);
+    return -1;
+  }
+  return 0;
+}
 
 /*
   A function used to check if the handler supports a serial device
@@ -815,6 +1069,14 @@ static int isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx, co
 
   setdetectingdevice(1);
   debuglibifaceptr->debuglib_printf(1, "%s: serial device index=%d\n", __PRETTY_FUNCTION__, serdevidx);
+
+  detectresult=detect_tizigbee(gnewtizigbee, 0);
+  if (detectresult<0) {
+    setdetectingdevice(0);
+    PTHREAD_UNLOCK(&gmutex_detectingdevice);
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s line: %d\n", __PRETTY_FUNCTION__, __LINE__);
+    return -1;
+  }
 
   //Reinit newtizigbee so ready for next new device
   _init_newtizigbee();
@@ -964,7 +1226,12 @@ static int init(void) {
 
   //Allocate storage for the new tizigbee device receive buffers
   if (!gnewtizigbee.receivebuf) {
-    gnewtizigbee.receivebuf=new unsigned char[BUFFER_SIZE];
+    try {
+      gnewtizigbee.receivebuf=new unsigned char[BUFFER_SIZE];
+    } catch (std::bad_alloc& e) {
+      debuglibifaceptr->debuglib_printf(1, "Exiting %s: Not enough ram for receive buffer\n", __PRETTY_FUNCTION__);
+      return -3;
+    }
   }
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
 
