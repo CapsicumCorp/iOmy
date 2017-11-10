@@ -25,7 +25,8 @@ sap.ui.jsfragment("fragments.AddLogin", {
 					label : "Password",
 					fields: [
 						new sap.m.Input ({
-							value:"{/NewUser/Password}"
+							value:"{/NewUser/Password}",
+                            type:"Password"
 						})
 					]
 				}),
@@ -33,7 +34,8 @@ sap.ui.jsfragment("fragments.AddLogin", {
 					label : "Confirm Password",
 					fields: [
 						new sap.m.Input ({
-							value:"{/NewUser/ConfirmPassword}"
+							value:"{/NewUser/ConfirmPassword}",
+                            type:"Password"
 						})
 					]
 				}),

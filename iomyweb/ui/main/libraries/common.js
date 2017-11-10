@@ -264,9 +264,7 @@ $.extend(IomyRe.common,{
     
     /**
      * Displays an information popup with a message. It can call a function once
-     * the user closes the dialog.
-     * 
-     * 
+     * the toast disappears
      * 
      * @param {type} mSettings          Map containing parameters.
      */
@@ -901,7 +899,7 @@ $.extend(IomyRe.common,{
                 "USERSINFO_PK",             "USERSINFO_TITLE",          "USERSINFO_DISPLAYNAME",    
                 "USERS_USERNAME",           "USERSINFO_GIVENNAMES",      "USERSINFO_SURNAMES",
                 "USERSINFO_EMAIL",          "USERSINFO_PHONENUMBER",    "USERSGENDER_PK",
-                "USERS_PK"
+                "USERS_PK",                 "USERS_USERNAME"
             ],
             WhereClause: [],
             OrderByClause: [],
@@ -927,7 +925,8 @@ $.extend(IomyRe.common,{
                     "Email":              aData[0].USERSINFO_EMAIL,
                     "Phone":              aData[0].USERSINFO_PHONENUMBER,
                     "Gender":             aData[0].USERSGENDER_PK,
-                    "UserId":             aData[0].USERS_PK
+                    "UserId":             aData[0].USERS_PK,
+                    "Username":           aData[0].USERS_USERNAME
                 };
                 
                 //-- Update the Timestamp on when the UserInfo was last updated --//

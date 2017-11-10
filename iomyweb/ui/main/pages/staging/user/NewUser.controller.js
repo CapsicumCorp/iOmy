@@ -391,6 +391,9 @@ sap.ui.controller("pages.staging.user.NewUser", {
 												if (!oController.mxUpdateRequests.busy) {
 													IomyRe.common.RefreshCoreVariables({
 														onSuccess : function () {
+                                                            IomyRe.common.showMessage({
+                                                                text : "New iOmy user \""+oCurrentFormData.Username+"\" created."
+                                                            })
 															IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
 														}
 													});

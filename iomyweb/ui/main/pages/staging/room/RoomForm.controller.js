@@ -85,6 +85,13 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 		});
 		
 	},
+    
+    ToggleSubmitCancelButtons : function (bEnabled) {
+        var oView = this.getView();
+        
+        oView.byId("ButtonSubmit").setEnabled(bEnabled);
+        oView.byId("ButtonCancel").setEnabled(bEnabled);
+    },
 	
 	RefreshModel : function( oController, oConfig ) {
 		//------------------------------------------------//
@@ -112,8 +119,11 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 	},
 	
 	UpdateRoomInfoValues: function (oController) {
-		var bError   = false;
-		var sErrMesg = "";
+		var bError          = false;
+        var aErrorMessages  = [];
+		var sErrMesg        = "";
+        
+        oController.ToggleSubmitCancelButtons(false);
 		
 		//------------------------------------------------//
 		//-- STEP 1 - Extract Values from the Model     --//
@@ -149,7 +159,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 							if( sType==="JSON" && aData.Error===false ) {
 								try {
 									//------------------------------------------------//
-									//-- STEP 5 - Update Global LandPackagesList    --//
+									//-- STEP 5 - Update Room List                  --//
 									//------------------------------------------------//
 									IomyRe.common.RetreiveRoomList({
 										onSuccess: $.proxy( function() {
@@ -158,38 +168,53 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 											//------------------------------------------------//
 											oController.RefreshModel( oController, {
 												onSuccess: $.proxy( function() {
-													IomyRe.common.NavigationChangePage( "pRoomList" , {} , false);
+                                                    IomyRe.common.showMessage({
+                                                        text : oCurrentFormData.RoomName + " successfully updated."
+                                                    });
+                                                    
+                                                    oController.ToggleSubmitCancelButtons(true);
+                                                    
+													IomyRe.common.NavigationChangePage( "pRoomList" , {"bEditing" : oController.bEditing} , false);
 												}, oController )
 											});    //-- END RefreshControllerModel (STEP 6) --//
 										}, oController )
 									});    //-- END LandPackagesList (STEP 5) --//
 									
 								} catch( e3 ) {
-									jQuery.sap.log.error("Error with the 'InfoEdit' success event that was passed as a parameter in the 'InfoEdit' controller! "+e3.message);
+									jQuery.sap.log.error(e3.message);
 								}
 							} else {
 								//-- Run the fail event
 								//if( aConfig.onFail ) {
 								//	aConfig.onFail();
 								//}
-								jQuery.sap.log.error("Error with the 'InfoEdit' successful API result in the 'InfoEdit' controller!");
+								jQuery.sap.log.error("Error with the 'RoomEditInfo' successful API result in the 'RoomForm' controller!");
 							}
 						} catch( e2 ) {
-							jQuery.sap.log.error("Error with the 'InfoEdit' success in the 'InfoEdit' controller! "+e2.message);
+							jQuery.sap.log.error("Error with the 'RoomEditInfo' success in the 'RoomForm' controller! "+e2.message);
 						}
 					}),
-					onFail: function () {
+					onFail: function (response) {
 						//if( aConfig.onFail ) {
 						//	aConfig.onFail();
 						//}
-						jQuery.sap.log.error("Error with the 'InfoEdit' API Request when editing a LandPackage in the 'InfoEdit' controller!");
+                        var sErrorMessage = "Error editing a room.\n\n"+response.responseText;
+                        
+						jQuery.sap.log.error(sErrorMessage);
+                        
+                        IomyRe.common.showError( sErrorMessage, "Error", function () {
+                            oController.ToggleSubmitCancelButtons(true);
+                        });
+                        
 					}
 				});
 			} else {
-				IomyRe.common.showError( sErrMesg, "Error" );
+				IomyRe.common.showError("* " + aErrorMessages.join("\n* "), "", function () {
+                    oController.ToggleSubmitCancelButtons(true);
+                });
 			}
 		} catch( e1 ) {
-			jQuery.sap.log.error("Error with the 'InfoEdit' in the 'InfoEdit' controller! "+e1.message);
+			jQuery.sap.log.error("Error with the 'RoomEditInfo' in the 'RoomForm' controller! "+e1.message);
 		}
 	},
 	
@@ -197,6 +222,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 		var bError   = false;
 		var sErrMesg = "";
 		
+        oController.ToggleSubmitCancelButtons(false);
 		//------------------------------------------------//
 		//-- STEP 1 - Extract Values from the Model     --//
 		//------------------------------------------------//
@@ -226,7 +252,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 						"Floor":            1,
 						"RoomTypeId":       oCurrentFormData.RoomTypeId
 					},
-					//-- Mdata = Response from API, sType = What type of response expected --//
+					//-- mData = Response from API, sType = What type of response expected --//
 					onSuccess: function ( sType, mData ) {
 						try {
 							if( sType==="JSON" && mData.Error===false ) {
@@ -245,7 +271,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 											},
 											onSuccess : function (responseType, mPermData) {
 												//------------------------------------------------//
-												//-- STEP 5 - Update Global LandPackagesList    --//
+												//-- STEP 5 - Update Room List                  --//
 												//------------------------------------------------//
 												IomyRe.common.RetreiveRoomList({
 													onSuccess: $.proxy( function() {
@@ -254,6 +280,12 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 														//------------------------------------------------//
 														oController.RefreshModel( oController, {
 															onSuccess: $.proxy( function() {
+                                                                IomyRe.common.showMessage({
+                                                                    text : oCurrentFormData.RoomName + " successfully created."
+                                                                });
+
+                                                                oController.ToggleSubmitCancelButtons(true);
+                                                                
 																IomyRe.common.NavigationChangePage( "pRoomList" , {} , false);
 															}, oController )
 														});    //-- END RefreshControllerModel (STEP 6) --//
@@ -279,15 +311,19 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 							jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success in the 'RoomForm' controller! "+e2.message);
 						}
 					},
-					onFail: function () {
-						//if( aConfig.onFail ) {
-						//	aConfig.onFail();
-						//}
-						jQuery.sap.log.error("Error with the 'UpdateRoomPerms' API Request when inserting Room Permissions in the 'RoomForm' controller!");
+					onFail: function (response) {
+						var sErrorMessage = "Error creating the room:\n\n" + response.responseText;
+                        
+						jQuery.sap.log.error();
+                        IomyRe.common.showError( sErrorMessage, "Error", function () {
+                            oController.ToggleSubmitCancelButtons(true);
+                        });
 					}
 				});
 			} else {
-				IomyRe.common.showError( sErrMesg, "Error" );
+                IomyRe.common.showError("* " + aErrorMessages.join("\n* "), "", function () {
+                    oController.ToggleSubmitCancelButtons(true);
+                });
 			}
 		} catch( e1 ) {
 			jQuery.sap.log.error("Error with 'AddRoom' in the 'RoomForm' controller! "+e1.message);

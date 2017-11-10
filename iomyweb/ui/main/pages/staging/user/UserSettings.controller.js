@@ -41,8 +41,8 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		oView.addEventDelegate({
 
 			onBeforeShow: function ( oEvent ) {
-				//-- Store the Current Id --//
-				//oController.iCurrentId = oEvent.data.Id;
+				//-- Find out if the current user is a premise owner. --//
+                var bIsOwner    = oController.isUserOwner(1);
 				
 				//-- Refresh Nav Buttons --//
 				//MyApp.common.NavigationRefreshButtons( oController );
@@ -50,6 +50,18 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 				
 				//-- Update the Model --//
 				oController.RefreshModel( oController, {} );
+                
+                oView.byId("PageHeader").setObjectTitle(IomyRe.common.UserInfo.Username);
+                
+                if (bIsOwner) {
+                    oView.byId("PageHeader").setObjectSubtitle("Owner");
+                    
+                } else {
+                    oView.byId("PageHeader").setObjectSubtitle("iOmy User");
+                    
+                }
+//                
+//                IomyRe.common.LookupPremisePermissionFromId
 				
 				//-- Check the parameters --//
 				oController.ToggleButtonsAndView( oController, "ShowInfo");
@@ -106,6 +118,20 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 			oConfig.onSuccess();
 		}
 		
+	},
+    
+    isUserOwner: function( iPremiseId ) {
+		if( iPremiseId>=1 ) {
+			var sPremiseCode    = "_"+iPremiseId;
+			var aPremise        = IomyRe.common.PremiseList[sPremiseCode];
+			
+            var iPremiseOwner   = aPremise.PermOwner;
+            
+            return iPremiseOwner === 1;
+            
+		} else {
+			throw new IllegalArgumentException("Premise ID must be greater than 0.");
+		}
 	},
 	
 	UpdateUserInfoValues: function (oController) {
@@ -210,10 +236,6 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		//------------------------------------------------//
 		//-- STEP 2 - Check for Errors                  --//
 		//------------------------------------------------//
-		//if( oCurrentFormData.InclusionId <= 0 ) {
-		//	bError    = true;
-		//	sErrMesg  = "Please choose a valid Inclusion!";
-		//}
 		
 		//------------------------------------------------//
 		//-- STEP 3 - Update Database                   --//
@@ -253,8 +275,8 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 													oController.ToggleButtonsAndView( oController, "ShowAddress" );
 														
 														
-													}, oController )
-												});    //-- END RefreshControllerModel (STEP 6) --//
+                                                }, oController )
+                                            });    //-- END RefreshControllerModel (STEP 6) --//
 										}, oController )
 									});    //-- END LandPackagesList (STEP 5) --//
 									

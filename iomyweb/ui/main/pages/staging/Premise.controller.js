@@ -36,14 +36,7 @@ sap.ui.controller("pages.staging.Premise", {
         
         oView.addEventDelegate({
             onBeforeShow : function (evt) {
-                //----------------------------------------------------//
-                //-- Enable/Disable Navigational Forward Button        --//
-                //----------------------------------------------------//
                 
-                //-- Refresh the Navigational buttons --//
-                //-- IOMy.common.NavigationRefreshButtons( oController ); --//
-                
-                //-- Defines the Device Type --//
                 IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 oController.BuildPremiseListUI();
             }
@@ -77,8 +70,8 @@ sap.ui.controller("pages.staging.Premise", {
                         new sap.m.ObjectAttribute ({
                             text: "Address:"
                         }),
-                        new sap.m.ObjectAttribute ({
-                            text: "7/61 Islander Road, Hervey Bay QLD 4655"
+                        new sap.m.ObjectAttribute (oView.createId("PremiseAddress"+mPremise.Id), {
+                            text: "Loading..."
                         })
 
                     ],
@@ -90,6 +83,83 @@ sap.ui.controller("pages.staging.Premise", {
 
         });
         
+        this.LoadPremiseAddresses();
+    },
+    
+    LoadPremiseAddresses : function () {
+        var oController = this;
         
+        IomyRe.apiodata.AjaxRequest({
+            Url : IomyRe.apiodata.ODataLocation("premiselocation"),
+            Columns : ["PREMISE_PK", "REGION_NAME", "REGION_PK", "LANGUAGE_PK", "LANGUAGE_NAME", 
+                        "PREMISEADDRESS_POSTCODE", "PREMISEADDRESS_SUBREGION",
+                        "TIMEZONE_PK", "TIMEZONE_TZ", "PREMISEADDRESS_LINE1", "PREMISEADDRESS_LINE2",
+                        "PREMISEADDRESS_LINE3", "PREMISEADDRESS_PK"],
+            WhereClause : [],
+            OrderByClause : [],
+
+            onSuccess : function (responseType, data) {
+                var oView       = oController.getView();
+                var iEntries    = data.length;
+                var sAddress    = "";
+                var mEntry;
+                
+                for (var i = 0; i < iEntries; i++) {
+                    mEntry = data[i];
+                    
+                    //--------------------------------------------------------//
+                    // Construct the Address Display String.
+                    //--------------------------------------------------------//
+                    if (mEntry.PREMISEADDRESS_LINE1 !== null && mEntry.PREMISEADDRESS_LINE1 !== "") {
+                        sAddress += mEntry.PREMISEADDRESS_LINE1;
+                    }
+                    
+                    if (mEntry.PREMISEADDRESS_LINE2 !== null && mEntry.PREMISEADDRESS_LINE2 !== "") {
+                        if (sAddress.length > 0) {
+                            sAddress += ", ";
+                        }
+                        
+                        sAddress += mEntry.PREMISEADDRESS_LINE2;
+                    }
+                    
+                    if (mEntry.PREMISEADDRESS_LINE3 !== null && mEntry.PREMISEADDRESS_LINE3 !== "") {
+                        if (sAddress.length > 0) {
+                            sAddress += ", ";
+                        }
+                        
+                        sAddress += mEntry.PREMISEADDRESS_LINE3;
+                    }
+                    
+                    if (mEntry.PREMISEADDRESS_SUBREGION !== null && mEntry.PREMISEADDRESS_SUBREGION !== "") {
+                        if (sAddress.length > 0) {
+                            sAddress += ", ";
+                        }
+                        
+                        sAddress += mEntry.PREMISEADDRESS_SUBREGION;
+                    }
+                    
+                    if (mEntry.PREMISEADDRESS_POSTCODE !== null && mEntry.PREMISEADDRESS_POSTCODE !== "") {
+                        if (sAddress.length > 0) {
+                            sAddress += " ";
+                        }
+                        
+                        sAddress += mEntry.PREMISEADDRESS_POSTCODE;
+                    }
+                    
+                    //--------------------------------------------------------//
+                    // Display the address
+                    //--------------------------------------------------------//
+                    oView.byId("PremiseAddress"+mEntry.PREMISE_PK).setText(sAddress);
+                    
+                    sAddress = "";
+                }
+            },
+            
+            onFail : function (response) {
+                IomyRe.common.showError("There was an unexpected error loading the premise address.");
+                jQuery.sap.log.error(JSON.stringify(response));
+            }
+        });
     }
+    
 });

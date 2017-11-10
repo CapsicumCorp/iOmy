@@ -92,6 +92,15 @@ sap.ui.controller("pages.staging.Device", {
                     "High": []
                 };
                 
+                oView.byId("DeviceList").destroyItems();
+                oView.byId("DeviceList").addItem(
+                    new sap.m.ObjectListItem (oView.createId("loading"), {        
+                        title: "Loading Devices",
+                        type: "Active",
+                        attributes : [],
+                    })
+                );
+                
                 IomyRe.common.RefreshCoreVariables({
                     onSuccess : function () {
                         oController.BuildDeviceListUI();
@@ -113,7 +122,7 @@ sap.ui.controller("pages.staging.Device", {
 //        var bEditing        = oController.bEditing;
         var sPageId         = "";
         
-        // Wipe the old list.
+        // Wipe the loading entry.
         wList.destroyItems();
         
         // Fetch the list from the core variables.

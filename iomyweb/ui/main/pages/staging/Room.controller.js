@@ -118,7 +118,8 @@ sap.ui.controller("pages.staging.Room", {
             // Create the items under that grouping
             //----------------------------------------------------------------//
             $.each(mPremise, function (sJ, mRoom) {
-                var bOmitEntry = false;
+                var bOmitEntry          = false;
+                var bRoomIsUnassigned   = false;
                 var iDeviceCount;
                 var iRoomCount;
                 bHasRooms = true;
@@ -143,6 +144,9 @@ sap.ui.controller("pages.staging.Room", {
                     if (mFirstRoom.RoomName === "Unassigned" && (iDeviceCount === 0 || iRoomCount === 1) ) {
                         bOmitEntry = true;
                         bHasRooms = false;
+                        
+                    } else if (mFirstRoom.RoomName === "Unassigned") {
+                        bRoomIsUnassigned = true;
                     }
                 }
                 
@@ -166,10 +170,18 @@ sap.ui.controller("pages.staging.Room", {
                             ],
                             press : function () {
                                 var mPageDataTemp = oController.mPageData;
+                                var bIsUnassigned = bRoomIsUnassigned;
                                 mPageDataTemp.RoomId = mRoom.RoomId;
                                 mPageDataTemp.PremiseId = mRoom.PremiseId;
                                 
-                                IomyRe.common.NavigationChangePage( oController.sPageId , mPageDataTemp , false);
+                                if (oController.bEditing && !bIsUnassigned) {
+                                    // The user can edit any room except the Unassigned "room".
+                                    IomyRe.common.NavigationChangePage( oController.sPageId , mPageDataTemp , false);
+                                    
+                                } else if (!oController.bEditing) {
+                                    // Otherwise, the user won't be looking to edit, so allow the user access to Unassigned.
+                                    IomyRe.common.NavigationChangePage( oController.sPageId , mPageDataTemp , false);
+                                }
                             }
                         })
                     );

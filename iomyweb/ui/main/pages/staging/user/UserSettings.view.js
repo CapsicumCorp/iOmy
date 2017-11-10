@@ -54,7 +54,7 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 					isObjectIconAlwaysVisible: true,
 					enableLazyLoading: true,
 					showTitleinHeaderContent: true,
-					headerTitle : new sap.uxap.ObjectPageHeader ({
+					headerTitle : new sap.uxap.ObjectPageHeader (oView.createId("PageHeader"), {
 						objectTitle: "Freshwater1",
 						objectShape: sap.uxap.ObjectPageHeaderPictureShape.Circle,
 						objectSubtitle: "Owner / Administrator",

@@ -25,7 +25,8 @@ sap.ui.jsfragment("fragments.DBAuth", {
 					label : "Password",
 					fields: [
 						new sap.m.Input ({
-							value:"{/NewUser/DBPassword}"
+							value:"{/NewUser/DBPassword}",
+                            type:"Password"
 						})
 					]
 				})

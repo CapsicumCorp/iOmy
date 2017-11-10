@@ -44,11 +44,11 @@ $.extend( IomyRe.widgets, {
 		var oSwitchView;				//-- OBJECT:	Stores the UI5 Button that holds the SwitchView Button / Menu	--//
 		var oSettings;					//-- OBJECT:	Stores the UI5 Button that holds the Settings Button / Menu		--//
 		var oToolHeader;				//-- OBJECT:	This variable stores the ToolPage header and is returned.		--//	
-		var sDisplayName;                  //-- String:	This variable stores the Users Displayname.		--//
+		var sDisplayName;               //-- STRING:	This variable stores the Users Displayname.		--//
 		
 		var oView = oCurrentController.getView();  //-- Defines oView based on the Controller that's being passed --//
 
-		sDisplayName = IomyRe.common.UserInfo.Displayname;
+		sDisplayName = IomyRe.common.UserInfo.Displayname || IomyRe.common.UserInfo.Username;
 		
 		//----------------------------------------------------//
 		//-- 2.0 - Create ToolHeader Content                --//
