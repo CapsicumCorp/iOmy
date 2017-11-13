@@ -1230,6 +1230,11 @@ static void csrmeshSyncDevicesWithDatabase(void) {
                 onoffattr->val=onoffattr->dbval;
                 debuglibifaceptr->debuglib_printf(1, "%s: Changing value for device: %08" PRIX32 " Attribute: %s from %d to %d\n", __func__, gcsrmeshdeviceit.second.deviceId, attrit.first.c_str(), onoffattr->prevval, onoffattr->val);
                 csrmeshSetDeviceOnOff(gcsrmeshdeviceit.second.deviceId, onoffattr->val);
+
+                //When turning on the light bulb the color also needs to be resent to the light bulb
+                if (onoffattr->val==1) {
+                  updateColor=true;
+                }
               }
             }
           } else if (typeid(*attrit.second)==typeid(dataintattr)) {
