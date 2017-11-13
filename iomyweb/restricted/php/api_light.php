@@ -234,7 +234,7 @@ if( $bError===false ) {
 				//-- Error Message              --//
 				//--------------------------------//
 				$bError     = true;
-				$iErrCode   = 0201;
+				$iErrCode   = 201;
 				$sErrMesg  .= "Error Code:'0201' \n";
 				$sErrMesg  .= "Problem when looking up the ThingInfo!\n";
 				$sErrMesg  .= $aTempFunctionResult1['ErrMesg'];
@@ -336,7 +336,7 @@ if( $bError===false ) {
 			//------------------------------------------------//
 			} else {
 				$bError    = true;
-				$iErrCode  = 0399;
+				$iErrCode  = 399;
 				$sErrMesg .= "Error Code:'0399' \n";
 				$sErrMesg .= "Problem setting up the PHP Object!\n";
 			}
@@ -349,7 +349,7 @@ if( $bError===false ) {
 				if( $oSpecialPHPObject->bInitialised===false ) {
 					//-- ERROR --//
 					$bError = true;
-					$iErrCode  = 0390;
+					$iErrCode  = 390;
 					$sErrMesg .= "Error Code:'0390' \n";
 					$sErrMesg .= "Problem setting up the PHP Object!\n";
 				}
