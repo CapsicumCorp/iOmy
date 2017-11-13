@@ -759,7 +759,7 @@ void loadCSRMeshInfoFromDatabase(void ) {
     lockbluetoothhwandroid();
     numThings=dblibifaceptr->getThingInfo(linkpk, &thingHwid, &thingOutputHwid, &thingSerialCode, &thingType, &thingName);
     if (numThings>0) {
-      for (int i; i<numThings; i++) {
+      for (int i=0; i<numThings; i++) {
         int32_t hash;
 
         debuglibifaceptr->debuglib_printf(1, "%s: Importing device from database with LinkPK=%" PRId64 ", index=%d, Hwid=%" PRId32", outputhwid=%" PRId32 ", type=%" PRId32 " serialcode=%s, name=%s\n", __func__, linkpk, i, thingHwid[i], thingOutputHwid[i], thingType[i], thingSerialCode[i], thingName[i]);
