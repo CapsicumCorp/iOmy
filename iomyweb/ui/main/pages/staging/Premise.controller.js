@@ -76,7 +76,7 @@ sap.ui.controller("pages.staging.Premise", {
 
                     ],
                     press : function () {
-                        IomyRe.common.NavigationChangePage( "pDevice" , {premiseID : mPremise.Id} , false);
+                        IomyRe.common.NavigationChangePage( "pDevice" , {PremiseId : mPremise.Id} , false);
                     }
                 })
             );

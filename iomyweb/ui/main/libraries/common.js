@@ -2496,6 +2496,11 @@ $.extend(IomyRe.common,{
         
         if (oApp.getPage(sPageName) === null) {
             IomyRe.pages.createPage(sPageName);
+        } else {
+            if (oApp.getPage(sPageName).byId("openMenu") !== undefined) {
+                var sDisplayName = IomyRe.common.UserInfo.Displayname || IomyRe.common.UserInfo.Username;
+                oApp.getPage(sPageName).byId("openMenu").setText("Hi, "+sDisplayName);
+            }
         }
         
         //--------------------------------------------------------------------//
@@ -2505,7 +2510,7 @@ $.extend(IomyRe.common,{
 //        console.log(sap.ui.Device.system.phone);
 //        console.log(sap.ui.Device.system.tablet);
         if (oApp.getCurrentPage().byId("toolPage") !== undefined) {
-            if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === true && !sap.ui.Device.system.desktop) {
+            if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === true && sap.ui.Device.system.phone) {
                 IomyRe.navigation.onSideNavButtonPress(null, oApp.getCurrentPage());
             }
         }

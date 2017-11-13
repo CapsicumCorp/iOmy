@@ -1,6 +1,7 @@
 /*
-Title: Template UI5 Controller
-Author: Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
+Title: Form for either adding or editing devices
+Author: Brent Jarmaine (Capsicum Corporation <brenton@capsicumcorp.com>
+    Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
 Description: Draws either a username and password prompt, or a loading app
     notice for the user to log into iOmy.
 Copyright: Capsicum Corporation 2015, 2016
@@ -672,21 +673,25 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
 		var sOldThingText           = IomyRe.common.ThingList["_"+iThingID].DisplayName;
         var iOldRoomID              = IomyRe.common.ThingList["_"+iThingID].RoomId;
         var oCurrentFormData        = oView.getModel().getProperty( "/CurrentDevice/" );
-        var sThingText				= oView.byId("DeviceName").getValue();
         var iRoomId                 = oCurrentFormData.RoomId;
+        var sThingText;
         
 		var bDifferentThingName     = sOldThingText !== sThingText;
         var bDifferentRoom;
-        
-        if (oController.bNoRooms) {
-            bDifferentRoom = false;
-        } else if (iOldRoomID == 1) {
+            
+        if (iOldRoomID == 1) {
             bDifferentRoom = true;
         } else {
             bDifferentRoom = iOldRoomID != iRoomId;
         }
         
         return (bDifferentThingName || bDifferentRoom);
+    },
+    
+    isOldRoomTheUnassigned : function () {
+        var iOldRoomID              = IomyRe.common.ThingList["_"+this.iThingId].RoomId;
+            
+        return iOldRoomID == 1;
     },
     
     ToggleSubmitButton : function () {

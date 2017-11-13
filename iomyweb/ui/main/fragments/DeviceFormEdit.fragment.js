@@ -75,7 +75,7 @@ sap.ui.jsfragment("fragments.DeviceFormEdit", {
 								new sap.m.Button (oView.createId("ButtonSubmit"), {
 									type: sap.m.ButtonType.Accept,
 									text: "Save",
-                                    enabled: false,
+                                    enabled: oController.isOldRoomTheUnassigned(),
                                     press : function () {
                                         oController.EditDevice();
                                     }

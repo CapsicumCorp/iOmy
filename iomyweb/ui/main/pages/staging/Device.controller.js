@@ -63,18 +63,37 @@ sap.ui.controller("pages.staging.Device", {
         oView.addEventDelegate({
             onBeforeShow : function (evt) {
                 //----------------------------------------------------//
+                // Find the premise ID, if specified, and store it.
+                //----------------------------------------------------//
+                if (evt.data.PremiseId !== undefined && evt.data.PremiseId !== null) {
+                    oController.iLastPremiseId = evt.data.PremiseId;
+                    
+                } else {
+                    oController.iLastPremiseId = null;
+                }
+                
+                //----------------------------------------------------//
                 // Find the room ID, if specified, and store it.
                 //----------------------------------------------------//
                 if (evt.data.RoomId !== undefined && evt.data.RoomId !== null) {
                     oController.iLastRoomId = evt.data.RoomId;
+                    
                 } else {
                     oController.iLastRoomId = null;
+                    
                 }
                 
-                if (evt.data.PremiseId !== undefined && evt.data.PremiseId !== null) {
-                    oController.iLastPremiseId = evt.data.PremiseId;
+                if (oController.iLastPremiseId === null && oController.iLastRoomId === null) {
+                    oView.byId("ToolbarTitle").setText("Device List");
+                    
                 } else {
-                    oController.iLastPremiseId = null;
+                    if (oController.iLastPremiseId !== null) {
+                        oView.byId("ToolbarTitle").setText("Devices in " + IomyRe.common.PremiseList["_"+oController.iLastPremiseId].Name);
+                        
+                    } else if (oController.iLastRoomId !== null) {
+                        oView.byId("ToolbarTitle").setText("Devices in " + IomyRe.functions.getRoom( oController.iLastRoomId ).RoomName);
+                        
+                    }
                 }
                 
                 if (evt.data.bEditing !== undefined && evt.data.bEditing !== null) {
@@ -95,7 +114,7 @@ sap.ui.controller("pages.staging.Device", {
                 oView.byId("DeviceList").destroyItems();
                 oView.byId("DeviceList").addItem(
                     new sap.m.ObjectListItem (oView.createId("loading"), {        
-                        title: "Loading Devices",
+                        title: "Loading Devices...",
                         type: "Active",
                         attributes : [],
                     })
