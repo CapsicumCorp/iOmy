@@ -22,6 +22,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 $.sap.require("sap.ui.unified.ColorPicker");
+
 sap.ui.controller("pages.staging.device.RGBlight", {
     
     fHueConversionRate              : 65535 / 360,  // 65535 (2^16 - 1) is the maximum value the Philips Hue API will accept.
@@ -31,6 +32,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
 	iThingTypeId                    : null,
     
     bFirstRun                       : true,
+    bUsingAdvancedUI                : true,
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -51,6 +53,9 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                     oView.byId("ToolbarTitle").setText( IomyRe.common.ThingList["_"+oEvent.data.ThingId].DisplayName );
                 }
                 
+                oController.iThingTypeId = iTypeId;
+                oController.RGBUiDraw();
+                
                 if (iTypeId == IomyRe.devices.philipshue.ThingTypeId) {
                     oController.InitialDeviceInfoLoad();
                     oController.fHueConversionRate          = 65535 / 360;  // 65535 (2^16 - 1) is the maximum value the Philips Hue API will accept.
@@ -70,10 +75,6 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                     oView.byId("satSlider").setMax(255);
                     oView.byId("briSlider").setMax(255);
                 }
-                
-                oController.iThingTypeId = iTypeId;
-                
-                oController.RGBUiDraw();
 				
 				//-- Defines the Screen Type --//
 				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
@@ -124,6 +125,8 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 oView.byId("WhiteLight_Cont").destroy();
             }
             
+            //this.SwitchToSimpleView();
+            
 			if (mThing.TypeId == IomyRe.devices.philipshue.ThingTypeId) {
 				//$.sap.log.error("RGBUiDraw:" +RGBType);
 			} else if (mThing.TypeId == IomyRe.devices.csrmesh.ThingTypeId) {
@@ -136,6 +139,71 @@ sap.ui.controller("pages.staging.device.RGBlight", {
 		}		
 		
 	},
+    
+    SwitchToSimpleView : function () {
+        var oController = this;
+        var oView       = this.getView();
+        var oContainer  = oView.byId("RGB_Cont");
+        
+        oContainer.destroyContent();
+        
+        if (oController.bUsingAdvancedUI) {
+            oController.bUsingAdvancedUI = false;
+            
+            var iMaxHue, iMaxSaturation, iMaxBrightness;
+            
+            if (oController.iThingTypeId == IomyRe.devices.philipshue.ThingTypeId) {
+                iMaxHue         = 65535;
+                iMaxSaturation  = 144;
+                iMaxBrightness  = 254;
+                
+            } else if (oController.iThingTypeId == IomyRe.devices.csrmesh.ThingTypeId) {
+                iMaxHue         = 360;
+                iMaxSaturation  = 255;
+                iMaxBrightness  = 255;
+            }
+            
+            oContainer.addContent(
+                IomyRe.widgets.LightBulbControlsContainer(oController, {
+                    maxHue          : iMaxHue,
+                    maxSaturation   : iMaxSaturation,
+                    maxBrightness   : iMaxBrightness,
+                    
+                    hue             : 0,
+                    saturation      : 0,
+                    brightness      : 0,
+                    
+                    change : function () {
+                        oController.ChangeLightColour();
+                    },
+                    
+                    liveChange : function () {
+                        var iHue = oView.byId("hueSlider").getValue();
+                        var iSat = oView.byId("satSlider").getValue();
+                        var iBright = oView.byId("briSlider").getValue();
+                    
+                        oController.ChangeColourInBox(iHue, iSat, iBright);
+                    }
+                })
+            );
+        }
+    },
+    
+    SwitchToAdvancedView : function () {
+        var oController = this;
+        var oView       = this.getView();
+        var oContainer  = oView.byId("RGB_Cont");
+        
+        oContainer.destroyContent();
+        
+        if (!oController.bUsingAdvancedUI) {
+            oController.bUsingAdvancedUI = true;
+            
+            oContainer.addContent(IomyRe.widgets.LightBulbColorPicker(oController, {
+                
+            }));
+        }
+    },
     
     /**
      * Loads the information about the currently selected Philips Hue light (colour/hue,
@@ -212,7 +280,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 }
             });
         } catch (e) {
-            jQuery.sap.log.error("There was an error loading the OData services: "+e.message);
+            jQuery.sap.log.error("There was an error loading the OData service: "+e.message);
         }
     },
     
