@@ -73,6 +73,14 @@ Some code used from https://github.com/tlaukkan/zigbee4java/commit/695ce7fcc1a5e
 #include "modules/commonlib/commonlib.h"
 #include "modules/zigbeelib/zigbeelib.h"
 
+//Quick hack to work around problem where Android implements le16toh as letoh16
+//NOTE: Newer versions of Android correctly define le16toh
+#ifdef __ANDROID__
+#ifndef le16toh
+#define le16toh(x) letoh16(x)
+#endif
+#endif
+
 #ifdef DEBUG
 #warning "TIZIGBEELIB_PTHREAD_LOCK and TIZIGBEELIB_PTHREAD_UNLOCK debugging has been enabled"
 #include <errno.h>
@@ -156,8 +164,6 @@ namespace tizigbeelib {
 //Types of packets that can be sent
 static const int BUFFER_SIZE=256;
 
-static const int MAX_DEVICES=10; //Maximum number of devices to allow
-
 static const int TIZIGBEE_DETECT_TIMEOUT=1; //Use 1 second timeout when detecting the device
 
 static const int HA_ENDPOINTID=1; //Some devices don't implement an endpoint for home automation and rely on software for all the handling
@@ -179,9 +185,14 @@ typedef struct {
   //pthread_mutex_t sendmutex; //Locked when we a thread is using the send buffer
   unsigned char *receivebuf;
   int receivebufcnt; //Number of bytes currently being used in the receive buffer
+
+  //Provided by version request
+  uint8_t transportrev;
+  uint8_t product;
   uint8_t firmmaj; //Firmware version
   uint8_t firmmin;
-  uint8_t firmbuild;
+  uint8_t hwrev;
+
   uint8_t network_state; //network state
   uint8_t device_type; //Device Type
   uint8_t cfgstate;
@@ -245,7 +256,7 @@ static pthread_t gmainthread=0;
 static tizigbeedevice_t gnewtizigbee; //Used for new TI Zigbee devices that haven't been fully detected yet
 
 //handler index, tizigbeedevice
-static std::map<int, tizigbeedevice_t> gtizigbeedevices; //A list of detected TI Zigbee devices
+static std::map<int16_t, tizigbeedevice_t> gtizigbeedevices; //A list of detected TI Zigbee devices
 
 //Static Function Declarations
 
@@ -597,6 +608,7 @@ static void __tizigbee_send_api_packet(tizigbeedevice_t& tizigbeedevice, uint8_t
   }
   sendbuf[packetlen-1]=checksum;
 
+  //TODO: Comment out
 //#ifdef TIZIGBEELIB_MOREDEBUG
   {
     const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
@@ -683,6 +695,10 @@ void send_tizigbee_sys_ping(tizigbeedevice_t& tizigbeedevice) {
   send_tizigbee_simple_command(tizigbeedevice, SYS_PING);
 }
 
+void send_tizigbee_sys_version(tizigbeedevice_t& tizigbeedevice) {
+  send_tizigbee_simple_command(tizigbeedevice, SYS_VERSION);
+}
+
 void send_tizigbee_sys_reset(tizigbeedevice_t& tizigbeedevice, uint8_t reset_type) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_sys_reset_t *apicmd;
@@ -705,6 +721,115 @@ void send_tizigbee_sys_reset(tizigbeedevice_t& tizigbeedevice, uint8_t reset_typ
   MOREDEBUG_EXITINGFUNC();
 }
 
+/*
+  Process a TI Zigbee Sys Ping Response
+  Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
+*/
+static void process_sys_ping_response(tizigbeedevice_t& tizigbeedevice) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  tizigbee_sys_ping_response_t *apicmd=reinterpret_cast<tizigbee_sys_ping_response_t *>(tizigbeedevice.receivebuf);
+
+  MOREDEBUG_ENTERINGFUNC();
+  locktizigbee();
+  if (gwaitingforresponse==WAITING_FOR_SYS_PING_RESPONSE) {
+    gwaitresult=1;
+  }
+  uint16_t capabilities=le16toh(apicmd->capabilities);
+  unlocktizigbee();
+
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+
+  debuglibifaceptr->debuglib_printf(1, "%s: TI Zigbee Capabilities (0x%04" PRIX16 "):\n", __PRETTY_FUNCTION__, capabilities);
+  if ((capabilities & CAPABILITIES::MT_CAP_SYS)==CAPABILITIES::MT_CAP_SYS) {
+    debuglibifaceptr->debuglib_printf(1, "%s:   MT_CAP_SYS\n", __PRETTY_FUNCTION__);
+  }
+  if ((capabilities & CAPABILITIES::MT_CAP_MAC)==CAPABILITIES::MT_CAP_MAC) {
+    debuglibifaceptr->debuglib_printf(1, "%s:   MT_CAP_MAC\n", __PRETTY_FUNCTION__);
+  }
+  if ((capabilities & CAPABILITIES::MT_CAP_NWK)==CAPABILITIES::MT_CAP_NWK) {
+    debuglibifaceptr->debuglib_printf(1, "%s:   MT_CAP_NWK\n", __PRETTY_FUNCTION__);
+  }
+  if ((capabilities & CAPABILITIES::MT_CAP_AF)==CAPABILITIES::MT_CAP_AF) {
+    debuglibifaceptr->debuglib_printf(1, "%s:   MT_CAP_AF\n", __PRETTY_FUNCTION__);
+  }
+  if ((capabilities & CAPABILITIES::MT_CAP_ZDO)==CAPABILITIES::MT_CAP_ZDO) {
+    debuglibifaceptr->debuglib_printf(1, "%s:   MT_CAP_ZDO\n", __PRETTY_FUNCTION__);
+  }
+  if ((capabilities & CAPABILITIES::MT_CAP_SAPI)==CAPABILITIES::MT_CAP_SAPI) {
+    debuglibifaceptr->debuglib_printf(1, "%s:   MT_CAP_SAPI\n", __PRETTY_FUNCTION__);
+  }
+  if ((capabilities & CAPABILITIES::MT_CAP_UTIL)==CAPABILITIES::MT_CAP_UTIL) {
+    debuglibifaceptr->debuglib_printf(1, "%s:   MT_CAP_UTIL\n", __PRETTY_FUNCTION__);
+  }
+  if ((capabilities & CAPABILITIES::MT_CAP_DEBUG)==CAPABILITIES::MT_CAP_DEBUG) {
+    debuglibifaceptr->debuglib_printf(1, "%s:   MT_CAP_DEBUG\n", __PRETTY_FUNCTION__);
+  }
+  if ((capabilities & CAPABILITIES::MT_CAP_APP)==CAPABILITIES::MT_CAP_APP) {
+    debuglibifaceptr->debuglib_printf(1, "%s:   MT_CAP_APP\n", __PRETTY_FUNCTION__);
+  }
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
+  Process a TI Zigbee Sys Version Response
+  Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
+*/
+static void process_sys_version_response(tizigbeedevice_t& tizigbeedevice) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  tizigbee_sys_version_response_t *apicmd=reinterpret_cast<tizigbee_sys_version_response_t *>(tizigbeedevice.receivebuf);
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+
+  MOREDEBUG_ENTERINGFUNC();
+  locktizigbee();
+  if (gwaitingforresponse==WAITING_FOR_SYS_VERSION_RESPONSE) {
+    gwaitresult=1;
+  }
+  tizigbeedevice.transportrev=apicmd->transportrev;
+  tizigbeedevice.product=apicmd->product;
+  tizigbeedevice.firmmaj=apicmd->major_firmware_version;
+  tizigbeedevice.firmmin=apicmd->minor_firmware_version;
+  tizigbeedevice.hwrev=apicmd->hwrev;
+  unlocktizigbee();
+
+  debuglibifaceptr->debuglib_printf(1, "%s: TI Zigbee Version Response Info:\n", __PRETTY_FUNCTION__);
+  debuglibifaceptr->debuglib_printf(1, "%s:   Transport Revision: %" PRId8 "\n", __PRETTY_FUNCTION__, apicmd->transportrev);
+  debuglibifaceptr->debuglib_printf(1, "%s:   Product: %" PRId8 "\n", __PRETTY_FUNCTION__, apicmd->product);
+  debuglibifaceptr->debuglib_printf(1, "%s:   Firmware Version: %" PRId8 ".%" PRId8 "\n", __PRETTY_FUNCTION__, apicmd->major_firmware_version, apicmd->minor_firmware_version);
+  debuglibifaceptr->debuglib_printf(1, "%s:   Hardware Revision: %" PRId8 "\n", __PRETTY_FUNCTION__, apicmd->hwrev);
+
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
+  Process a TI Zigbee Sys Reset Response
+  Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
+*/
+static void process_sys_reset_response(tizigbeedevice_t& tizigbeedevice) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  tizigbee_sys_reset_response_t *apicmd=reinterpret_cast<tizigbee_sys_reset_response_t *>(tizigbeedevice.receivebuf);
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+
+  MOREDEBUG_ENTERINGFUNC();
+  locktizigbee();
+  if (gwaitingforresponse==WAITING_FOR_SYS_RESET_RESPONSE) {
+    gwaitresult=1;
+  }
+  tizigbeedevice.transportrev=apicmd->transportrev;
+  tizigbeedevice.product=apicmd->product;
+  tizigbeedevice.firmmaj=apicmd->major_firmware_version;
+  tizigbeedevice.firmmin=apicmd->minor_firmware_version;
+  tizigbeedevice.hwrev=apicmd->hwrev;
+  unlocktizigbee();
+
+  debuglibifaceptr->debuglib_printf(1, "%s: TI Zigbee Reset Response Info:\n", __PRETTY_FUNCTION__);
+  debuglibifaceptr->debuglib_printf(1, "%s:   Reset Reason: %" PRId8 "\n", __PRETTY_FUNCTION__, apicmd->reason);
+  debuglibifaceptr->debuglib_printf(1, "%s:   Transport Revision: %" PRId8 "\n", __PRETTY_FUNCTION__, apicmd->transportrev);
+  debuglibifaceptr->debuglib_printf(1, "%s:   Product: %" PRId8 "\n", __PRETTY_FUNCTION__, apicmd->product);
+  debuglibifaceptr->debuglib_printf(1, "%s:   Firmware Version: %" PRId8 ".%" PRId8 "\n", __PRETTY_FUNCTION__, apicmd->major_firmware_version, apicmd->minor_firmware_version);
+  debuglibifaceptr->debuglib_printf(1, "%s:   Hardware Revision: %" PRId8 "\n", __PRETTY_FUNCTION__, apicmd->hwrev);
+
+  MOREDEBUG_EXITINGFUNC();
+}
 
 /*
   Process a TI Zigbee API packet
@@ -718,11 +843,27 @@ static void process_api_packet(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ENTERINGFUNC();
   apicmd=reinterpret_cast<tizigbee_api_response_t *>(tizigbeedevice.receivebuf);
 
+  //Swap the cmd bytes to host format if necessary so easier to work with
+  apicmd->cmd=ntohs(apicmd->cmd);
+
+  //Goto appropriate frame type processing function
+  switch (apicmd->cmd) {
+    case SYS_PING_RESPONSE:
+      process_sys_ping_response(tizigbeedevice);
+      break;
+    case SYS_VERSION_RESPONSE:
+      process_sys_version_response(tizigbeedevice);
+      break;
+    case SYS_RESET_RESPONSE:
+      process_sys_reset_response(tizigbeedevice);
+      break;
+    default:
+      debuglibifaceptr->debuglib_printf(1, "%s: Received Unknown TI Zigbee packet: 0x%04" PRIX16 " with length: %d\n", __PRETTY_FUNCTION__, apicmd->cmd, apicmd->length);
+  }
   locktizigbee();
   if (gwaitingforresponse==WAITING_FOR_ANYTHING) {
     gwaitresult=1;
   }
-  debuglibifaceptr->debuglib_printf(1, "%s: Received Unknown TI Zigbee packet: 0x%04" PRIX16 " with length: %d\n", __func__, ntohs(apicmd->cmd), apicmd->length);
   unlocktizigbee();
   MOREDEBUG_EXITINGFUNC();
 }
@@ -787,6 +928,7 @@ static void receiveraw(int UNUSED(serdevidx), int handlerdevidx, char *buffer, i
     return;
   }
 
+  //TODO: Comment out
 //#ifdef TIZIGBEELIB_MOREDEBUG
   {
     int i;
@@ -876,10 +1018,6 @@ static void receiveraw(int UNUSED(serdevidx), int handlerdevidx, char *buffer, i
   MOREDEBUG_EXITINGFUNC();
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
 }
-
-
-
-
 
 //Initialise gnewtizigbee values
 //When we copy gnewtizigbee to the tizigbee list, the zigbeedevices pointer will be used by that tizigbee element
@@ -975,7 +1113,6 @@ static int waitforresponse(int timeout=TIZIGBEE_DETECT_TIMEOUT) {
   return 0;
 }
 
-
 /*
   Detect a TI Zigbee and reset it if necessary
 */
@@ -991,7 +1128,7 @@ static int detect_tizigbee(tizigbeedevice_t& tizigbeedevice, int longdetect) {
   }
   retrycnt=0;
   while (retrycnt<maxretry) {
-    result=initwaitforresponse(WAITING_FOR_SYS_RESET_RESPONSE);
+    result=initwaitforresponse(WAITING_FOR_SYS_PING_RESPONSE);
     if (result<0) {
       debuglibifaceptr->debuglib_printf(1, "Exiting %s line: %d\n", __PRETTY_FUNCTION__, __LINE__);
       return -1;
@@ -1046,6 +1183,36 @@ static int detect_tizigbee(tizigbeedevice_t& tizigbeedevice, int longdetect) {
     debuglibifaceptr->debuglib_printf(1, "Exiting %s: Failed to receive TI Zigbee Response\n", __PRETTY_FUNCTION__);
     return -1;
   }
+  result=initwaitforresponse(WAITING_FOR_SYS_VERSION_RESPONSE);
+  if (result<0) {
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s line: %d\n", __PRETTY_FUNCTION__, __LINE__);
+    return -1;
+  }
+  //Send Version Request
+  send_tizigbee_sys_version(gnewtizigbee);
+
+  //Wait 1 second for the result
+  result=waitforresponse();
+  if (result<0) {
+    //We didn't get a response
+    return -1;
+  }
+  locktizigbee();
+  {
+    uint8_t firmmaj, firmmin, hwrev; //TI Zigbee Firmware version
+
+    firmmaj=tizigbeedevice.firmmaj;
+    firmmin=tizigbeedevice.firmmin;
+    hwrev=tizigbeedevice.hwrev;
+
+    debuglibifaceptr->debuglib_printf(1, "%s: Firmware Version: %" PRId8".%" PRId8 "\n", __PRETTY_FUNCTION__, firmmaj, firmmin);
+    debuglibifaceptr->debuglib_printf(1, "%s:   Hardware Revision: %" PRId8 "\n", __PRETTY_FUNCTION__, hwrev);
+  }
+  //NOTE: Always do full reinit at startup so we get an updated view of the device config
+  tizigbeedevice.needreinit=1;
+
+  unlocktizigbee();
+
   return 0;
 }
 
@@ -1077,16 +1244,51 @@ static int isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx, co
     debuglibifaceptr->debuglib_printf(1, "Exiting %s line: %d\n", __PRETTY_FUNCTION__, __LINE__);
     return -1;
   }
+  locktizigbee();
+  //Setup a list entry for the tizigbee device
 
-  //Reinit newtizigbee so ready for next new device
-  _init_newtizigbee();
+  //First search for an empty slot
+  std::map<int16_t, tizigbeedevice_t>::iterator tizigbeeit;
+  for (tizigbeeit=gtizigbeedevices.begin(); tizigbeeit!=gtizigbeedevices.end(); ++tizigbeeit) {
+    if (tizigbeeit->second.removed) {
+      break;
+    }
+  }
+  if (tizigbeeit==gtizigbeedevices.end()) {
+    //Allocate a new item
+    list_numitems=gtizigbeedevices.size();
+  } else {
+    list_numitems=tizigbeeit->first;
+  }
+  //TODO: Remove
+  debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Storing in slot: %" PRId16 "\n", __PRETTY_FUNCTION__, list_numitems);
+
+  //Reset detecting device so receiveraw stops using gnewtizigbee
+  setdetectingdevice(0);
+
+  //If receiveraw is running it will have marked gnewtizigbee in use so we need to wait for it to finish and
+  //  then it will be safe to make an atomic copy of the structure
+  //Also need to unlock tizigbee so receiveraw can lock.  This is okay as this is the only place where new tizigbee devices
+  //  are added
+  unlocktizigbee();
+  PTHREAD_LOCK(&gmutex_initnewtizigbee);
+  gtizigbeedevices[list_numitems]=gnewtizigbee;
+  PTHREAD_UNLOCK(&gmutex_initnewtizigbee);
+  locktizigbee();
+
+  //Allocate new memory for the receive buffer
+  gtizigbeedevices[list_numitems].receivebuf=new unsigned char[BUFFER_SIZE];
+
+  //TODO: Remove
+  debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Num TI Zigbee Devices=%d\n", __PRETTY_FUNCTION__, gtizigbeedevices.size());
+
+  unlocktizigbee();
 
   PTHREAD_UNLOCK(&gmutex_detectingdevice);
 
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
 
-  return -1;
-//  return list_numitems;
+  return list_numitems;
 }
 
 
