@@ -751,14 +751,12 @@ int serial_port_receive_data(void *serialport, char *serbuf, int count) {
       nativeseriallib_unlocknativeserial();
       return -lerrno;
     }
-#ifdef NATIVESERIALLIB_MOREDEBUG
-    if (lerrno!=EAGAIN) {
+    if (lerrno==EAGAIN) {
       //Not really ready to receive data, but just return 0 here
       nativeseriallib_unlocknativeserial();
-      debuglibifaceptr->debuglib_printf(1, "%s: read returned errno: %d\n\n", __func__, lerrno);
+      debuglibifaceptr->debuglib_printf(1, "%s: read returned errno: EAGAIN\n", __func__);
       return 0;
     }
-#endif
 #ifdef NATIVESERIALLIB_MOREDEBUG
     debuglibifaceptr->debuglib_printf(1, "%s: Received serial data from serial port: %s: Length=%d\n\n", __func__, serialportptr->uniqueid, serbufcnt);
 #endif
