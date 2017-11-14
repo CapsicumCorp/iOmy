@@ -288,7 +288,7 @@ $.extend( IomyRe.widgets, {
 		//-- 3.0 - Fill the CSR HBox                        --//
 		//----------------------------------------------------//
 		oCSRHBox = new sap.m.VBox (oView.createId("WhiteLight_Cont"),{
-			width: "71px",
+			width: "80px",
 			height: "100%",
 			items : [
 				oDescLabel, oWhiteLight
@@ -327,6 +327,231 @@ $.extend( IomyRe.widgets, {
 			]
 		});
 		
+		return oScrollContainer;
+	},
+    
+    LightBulbControlsContainer : function (oCurrentController, mSettings) {
+		var oView = oCurrentController.getView();  //-- Defines oView based on the Controller that's being passed --//
+        
+        var iMaxHue,
+            iMaxSaturation,
+            iMaxBrightness;
+        
+        var iCurrentHue,
+            iCurrentSaturation,
+            iCurrentBrightness;
+        
+		var oScrollContainer;
+        
+        var fnHueChange,
+            fnSaturationChange,
+            fnBrightnessChange;
+        
+        var fnHueLiveChange,
+            fnSaturationLiveChange,
+            fnBrightnessLiveChange;
+        
+        var bEnabled;
+        
+        var fnChangeColourBox = function () {
+            
+        };
+        
+        //--------------------------------------------------------------------//
+        // Find the parameters map for the widget
+        //--------------------------------------------------------------------//
+        try {
+            if (mSettings !== undefined || mSettings !== null) {
+                if (mSettings.enabled !== undefined) {
+                    bEnabled = mSettings.enabled;
+                } else {
+                    bEnabled = true;
+                }
+
+                if (mSettings.maxHue) {
+                    iMaxHue = mSettings.maxHue;
+                }
+
+                if (mSettings.maxSaturation) {
+                    iMaxSaturation = mSettings.maxSaturation;
+                }
+
+                if (mSettings.maxBrightness) {
+                    iMaxBrightness = mSettings.maxBrightness;
+                }
+
+                if (mSettings.hue) {
+                    iCurrentHue = mSettings.hue;
+                }
+
+                if (mSettings.saturation) {
+                    iCurrentSaturation = mSettings.saturation;
+                }
+
+                if (mSettings.brightness) {
+                    iCurrentBrightness = mSettings.brightness;
+                }
+
+                if (mSettings.hueChange) {
+                    fnHueChange = mSettings.hueChange;
+                    
+                } else if (mSettings.change) {
+                    fnHueChange = mSettings.change;
+                
+                } else {
+                    fnHueChange = function () {};
+                }
+
+                if (mSettings.saturationChange) {
+                    fnSaturationChange = mSettings.saturationChange;
+                    
+                } else if (mSettings.change) {
+                    fnSaturationChange = mSettings.change;
+                
+                } else {
+                    fnSaturationChange = function () {};
+                }
+
+                if (mSettings.brightnessChange) {
+                    fnBrightnessChange = mSettings.brightnessChange;
+                    
+                } else if (mSettings.change) {
+                    fnBrightnessChange = mSettings.change;
+                
+                } else {
+                    fnBrightnessChange = function () {};
+                }
+
+                if (mSettings.hueLiveChange) {
+                    fnHueLiveChange = mSettings.hueLiveChange;
+                    
+                } else if (mSettings.change) {
+                    fnHueLiveChange = mSettings.liveChange;
+                    
+                } else {
+                    fnHueLiveChange = function () {};
+                }
+
+                if (mSettings.saturationLiveChange) {
+                    fnSaturationLiveChange = mSettings.saturationLiveChange;
+                    
+                } else if (mSettings.change) {
+                    fnSaturationLiveChange = mSettings.liveChange;
+                    
+                } else {
+                    fnSaturationLiveChange = function () {};
+                }
+
+                if (mSettings.brightnessLiveChange) {
+                    fnBrightnessLiveChange = mSettings.brightnessLiveChange;
+                    
+                } else if (mSettings.change) {
+                    fnBrightnessLiveChange = mSettings.liveChange;
+                    
+                } else {
+                    fnBrightnessLiveChange = function () {};
+                }
+
+            }
+        } catch (e) {
+            $.sap.log.error("Error processing settings: "+e.name+": "+e.message);
+            throw e;
+        }
+		
+        try {
+            oScrollContainer = new sap.m.ScrollContainer (oView.createId("RGB_Cont"), {
+                width: "100%",
+                height: "100%",
+                vertical : true,
+                content : [
+                    new sap.ui.layout.form.Form( oView.createId("DevTypeBlock_Form"),{
+                        editable: true,
+                        layout : new sap.ui.layout.form.ResponsiveGridLayout ({
+                            labelSpanXL: 3,
+                            labelSpanL: 3,
+                            labelSpanM: 3,
+                            labelSpanS: 12,
+                            adjustLabelSpan: false,
+                            emptySpanXL: 3,
+                            emptySpanL: 2,
+                            emptySpanM: 0,
+                            emptySpanS: 0,
+                            columnsXL: 1,
+                            columnsL: 1,
+                            columnsM: 1,
+                            columnsS: 1,
+                            singleContainerFullSize: false
+                        }),
+                        toolbar : new sap.m.Toolbar({
+                            content : [
+                                new sap.m.Button ({
+                                    text: "Simple"
+                                }),
+                                new sap.m.Button ({
+                                    text: "Advanced"
+                                })
+                            ]
+                        }).addStyleClass("MarBottom1d0Rem"),
+                        formContainers : [
+                            new sap.ui.layout.form.FormContainer({
+                                formElements : [
+                                    new sap.ui.layout.form.FormElement(oView.createId("ColourBoxCont"), {
+                                        label : "",
+                                        fields: [
+                                            new sap.m.FlexBox(oView.createId("ColourBox"), {
+                                                width : "80px"
+                                            }).addStyleClass("width80px height80px HorizontalCenter")
+                                        ]
+                                    }),
+                                    new sap.ui.layout.form.FormElement({
+                                        label : "Hue",
+                                        fields: [
+                                            new sap.m.Slider(oView.createId("hueSlider"), {
+                                                max         : iMaxHue,
+                                                value       : iCurrentHue,
+                                                enabled     : bEnabled,
+                                                change      : fnHueChange,
+                                                liveChange  : fnHueLiveChange
+                                            }).addStyleClass("width100Percent PhilipsHueSlider LightColourSlider")
+                                        ]
+                                    }),
+                                    new sap.ui.layout.form.FormElement({
+                                        label : "Saturation",
+                                        fields: [
+                                            new sap.m.Slider(oView.createId("satSlider"), {
+                                                max         : iMaxSaturation,
+                                                value       : iCurrentSaturation,
+                                                enabled     : bEnabled,
+                                                change      : fnSaturationChange,
+                                                liveChange  : fnSaturationLiveChange
+                                            }).addStyleClass("width100Percent PhilipsHueSlider")
+                                        ]
+                                    }),
+                                    new sap.ui.layout.form.FormElement({
+                                        label : "Brightness",
+                                        fields: [ 
+                                            new sap.m.Slider(oView.createId("briSlider"), {
+                                                max         : iMaxBrightness,
+                                                value       : iCurrentBrightness,
+                                                enabled     : bEnabled,
+                                                change      : fnBrightnessChange,
+                                                liveChange  : fnBrightnessLiveChange
+                                            }).addStyleClass("width100Percent PhilipsHueSlider")
+                                        ]
+                                    })
+                                ]
+                            })
+                        ]
+                    })
+                ]
+            });
+        } catch (e) {
+            $.sap.log.error("Error drawing widget: "+e.name+": "+e.message);
+            throw e;
+        }
+		
+        //document.getElementById(oView.createId("ColourBox")).style = "background: hsl(35,100%,50%);";
+        
 		return oScrollContainer;
 	},
 	

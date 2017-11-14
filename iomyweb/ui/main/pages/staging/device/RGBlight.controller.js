@@ -57,10 +57,18 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                     oController.fSaturationConversionRate   = 1.44;         // 144 / 100 (100 being the max saturation value)
                     oController.fLightConversionRate        = 2.54;         // 254 / 100 (likewise)
                     
+                    oView.byId("hueSlider").setMax(65535);
+                    oView.byId("satSlider").setMax(144);
+                    oView.byId("briSlider").setMax(254);
+                    
                 } else if (iTypeId == IomyRe.devices.csrmesh.ThingTypeId) {
                     oController.fHueConversionRate          = 1;
                     oController.fSaturationConversionRate   = 2.55;
                     oController.fLightConversionRate        = 2.55;
+                    
+                    oView.byId("hueSlider").setMax(360);
+                    oView.byId("satSlider").setMax(255);
+                    oView.byId("briSlider").setMax(255);
                 }
                 
                 oController.iThingTypeId = iTypeId;
@@ -72,12 +80,38 @@ sap.ui.controller("pages.staging.device.RGBlight", {
 			}
 		});		
 	},
+    
+    ChangeColourInBox : function (iHue, iSat, iBright) {
+        var oController = this;
+        var oView       = this.getView();
+        
+        iHue            = Math.floor(iHue / this.fHueConversionRate);
+        iSat            = Math.floor(iSat / this.fSaturationConversionRate);
+        iBright         = Math.floor(iBright / this.fLightConversionRate) / 2;
+        
+        console.log("H:"+iHue);
+        console.log("S:"+iSat);
+        console.log("B:"+iBright);
+        
+        document.getElementById(oView.createId("ColourBox")).style = "background: hsl("+iHue+","+iSat+"%,"+iBright+"%);";
+    },
+    
+    SetSliderValues : function (iHue, iSat, iBright) {
+        var oView       = this.getView();
+        
+        oView.byId("hueSlider").setValue(iHue);
+        oView.byId("satSlider").setValue(iSat);
+        oView.byId("briSlider").setValue(iBright);
+    },
 	
 	//-- Sets the RGB Color parameters based on static data --//
 	RGBInit: function (sHSV) {
         var oController = this;
 		var oView       = this.getView();
-		oView.byId("CPicker").setColorString(sHSV);
+        
+        if (oView.byId("CPicker") !== undefined) {
+            oView.byId("CPicker").setColorString(sHSV);
+        }
 	},
 		
 	//-- Adds a "WhiteLight" button if the devicetype === "CSR" --//
@@ -147,28 +181,30 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                         // If we're grabbing the HUE value
                         //----------------------------------------------------//
                         if (data[i].RSTYPE_PK === 3901) {
-                            iHue = data[i].CALCEDVALUE / oController.fHueConversionRate;
+                            iHue = data[i].CALCEDVALUE;// / oController.fHueConversionRate;
                         }
                         
                         //----------------------------------------------------//
                         // If we're grabbing the SATURATION value
                         //----------------------------------------------------//
                         if (data[i].RSTYPE_PK === 3902) {
-                            iSaturation = data[i].CALCEDVALUE / oController.fSaturationConversionRate;
+                            iSaturation = data[i].CALCEDVALUE;// / oController.fSaturationConversionRate;
                         }
                         
                         //----------------------------------------------------//
                         // If we're grabbing the BRIGHTNESS value
                         //----------------------------------------------------//
                         if (data[i].RSTYPE_PK === 3903) {
-                            iLight = data[i].CALCEDVALUE / oController.fLightConversionRate;
+                            iLight = data[i].CALCEDVALUE;// / oController.fLightConversionRate;
                         }
                     }
                     
                     //--------------------------------------------------------//
                     // Set the colour on the page
                     //--------------------------------------------------------//
-                    oController.RGBInit("hsv("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")");
+                    //oController.RGBInit("hsv("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")");
+                    oController.ChangeColourInBox(Math.round(iHue), Math.round(iSaturation), Math.round(iLight));
+                    oController.SetSliderValues(iHue, iSaturation, iLight);
                 },
 
                 onFail : function (response) {
@@ -187,12 +223,24 @@ sap.ui.controller("pages.staging.device.RGBlight", {
      * @param {object} oEvent       UI5 Control Event of the calling widget.
      */
     ChangeLightColour : function (oEvent) {
-        var mParameters     = oEvent.getParameters();
+        var oController     = this;
+        var oView           = this.getView();
+        var mParameters;
+        
+        if (oEvent === undefined) {
+            mParameters = {
+                h : oView.byId("hueSlider").getValue() / oController.fHueConversionRate,
+                s : oView.byId("satSlider").getValue() / oController.fSaturationConversionRate,
+                v : oView.byId("briSlider").getValue() / oController.fLightConversionRate
+            };
+        } else {
+            mParameters = oEvent.getParameters();
+        }
+        
         if (mParameters.h === 360) {
             mParameters.h = 0;
         }
         
-        var oController     = this;
         var iHue            = Math.floor(mParameters.h * this.fHueConversionRate);
         var iSat            = Math.floor(mParameters.s * this.fSaturationConversionRate);
         var iLight          = Math.floor(mParameters.v * this.fLightConversionRate);
@@ -205,7 +253,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
             }
         };
         
-        if (!oController.bFirstRun) {
+//        if (!oController.bFirstRun) {
             
             if (iDeviceType == IomyRe.devices.philipshue.ThingTypeId) {
                 mRequestData.url    = IomyRe.apiphp.APILocation("philipshue");
@@ -237,9 +285,9 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 
             }
             
-        } else {
-            oController.bFirstRun = false;
-        }
+//        } else {
+//            oController.bFirstRun = false;
+//        }
     }
 		
 });

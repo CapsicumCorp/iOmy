@@ -185,3 +185,20 @@ Copyright: Capsicum Corporation 2015, 2016, 2017
 .TelnetOutput.sapMInputBase.sapMTextArea {
 	height: 300px;
 }
+
+/*=======================================================*/
+/* Light bulb Colour Slider
+/*=======================================================*/
+.LightColourSlider > .sapMSliderInner {
+	background: url(../../resources/images/smartbulb/ColorBar.png);
+	background-size: 100%;
+	height: 0.5875rem;
+}
+
+.LightColourSlider > .sapMSliderInner > .sapMSliderProgress {
+	background: none;
+}
+
+.LightColourSlider > .sapMSliderInner > .sapMSliderHandle {
+	top: -0.71rem;
+}

@@ -50,10 +50,31 @@ sap.ui.jsview("pages.staging.device.RGBlight", {
 			header : IomyRe.widgets.getToolPageHeader( oController ),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
 			mainContents : [
-				IomyRe.widgets.DeviceToolbar(oController, "Main Office Light"),
-				IomyRe.widgets.RGBContainer(oController, {
-                    change : function (oControlEvent) {
-                        oController.ChangeLightColour(oControlEvent);
+				IomyRe.widgets.DeviceToolbar(oController, ""),
+//				IomyRe.widgets.RGBContainer(oController, {
+//                    change : function (oControlEvent) {
+//                        oController.ChangeLightColour(oControlEvent);
+//                    }
+//                })
+                IomyRe.widgets.LightBulbControlsContainer(oController, {
+                    maxHue          : 65535,
+                    maxSaturation   : 144,
+                    maxBrightness   : 254,
+                    
+                    hue             : 110,
+                    saturation      : 130,
+                    brightness      : 254,
+                    
+                    change : function () {
+                        oController.ChangeLightColour();
+                    },
+                    
+                    liveChange : function () {
+                        var iHue = oView.byId("hueSlider").getValue();
+                        var iSat = oView.byId("satSlider").getValue();
+                        var iBright = oView.byId("briSlider").getValue();
+                    
+                        oController.ChangeColourInBox(iHue, iSat, iBright);
                     }
                 })
 			]
