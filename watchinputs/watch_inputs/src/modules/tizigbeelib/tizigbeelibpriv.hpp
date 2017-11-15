@@ -26,6 +26,7 @@ Xbee info sourced from Digi docs
 #define TIZIGBEELIB_HPP
 
 #include <stdint.h>
+#include "modules/commonlib/commonlib.h"
 
 namespace tizigbeelib {
 
@@ -40,7 +41,13 @@ static const uint16_t SYS_VERSION=0x2102;
 //This command is sent by the tester to the target to reset it
 static const uint16_t SYS_RESET=0x4100;
 
+//Reads current device information
+static const uint16_t ZB_GET_DEVICE_INFO=0x2606;
+
 /* TI Zigbee Command Responses */
+
+//Indicates a device has reset.
+static const uint16_t SYS_RESET_RESPONSE=0x4180;
 
 //Response for SYS_PING
 static const uint16_t SYS_PING_RESPONSE=0x6101;
@@ -48,14 +55,15 @@ static const uint16_t SYS_PING_RESPONSE=0x6101;
 //Response for SYS_VERSION
 static const uint16_t SYS_VERSION_RESPONSE=0x6102;
 
-//Indicates a device has reset.
-static const uint16_t SYS_RESET_RESPONSE=0x4180;
+//Response for ZB_GET_DEVICE_INFO
+static const uint16_t ZB_GET_DEVICE_INFO_RESPONSE=0x6606;
 
 //TI Zigbee Waiting Definitions
 static const int WAITING_FOR_ANYTHING=1; //Waiting for any valid packet
 static const int WAITING_FOR_SYS_PING_RESPONSE=2;
 static const int WAITING_FOR_SYS_VERSION_RESPONSE=3;
 static const int WAITING_FOR_SYS_RESET_RESPONSE=4;
+static const int WAITING_FOR_ZB_DEVICE_INFO_RESPONSE=5;
 
 //TI Zigbee Reset Types
 namespace RESET_TYPE {
@@ -100,8 +108,39 @@ namespace CAPABILITIES {
   static const uint16_t NONE = 0;
 }
 
+/// <name>TI.ZPI2.ZB_GET_DEVICE_INFO.DEV_INFO_TYPE</name>
+/// <summary>Reset type</summary>
+namespace DEV_INFO_TYPE {
+  /// <name>TI.ZPI2.ZB_GET_DEVICE_INFO.DEV_INFO_TYPE.CHANNEL</name>
+  /// <summary>Reset type</summary>
+  static const uint8_t CHANNEL = 5;
+  /// <name>TI.ZPI2.ZB_GET_DEVICE_INFO.DEV_INFO_TYPE.EXT_PAN_ID</name>
+  /// <summary>Reset type</summary>
+  static const uint8_t EXT_PAN_ID = 7;
+  /// <name>TI.ZPI2.ZB_GET_DEVICE_INFO.DEV_INFO_TYPE.IEEE_ADDR</name>
+  /// <summary>Reset type</summary>
+  static const uint8_t IEEE_ADDR = 1;
+  /// <name>TI.ZPI2.ZB_GET_DEVICE_INFO.DEV_INFO_TYPE.PAN_ID</name>
+  /// <summary>Reset type</summary>
+  static const uint8_t PAN_ID = 6;
+  /// <name>TI.ZPI2.ZB_GET_DEVICE_INFO.DEV_INFO_TYPE.PARENT_IEEE_ADDR</name>
+  /// <summary>Reset type</summary>
+  static const uint8_t PARENT_IEEE_ADDR = 4;
+  /// <name>TI.ZPI2.ZB_GET_DEVICE_INFO.DEV_INFO_TYPE.PARENT_SHORT_ADDR</name>
+  /// <summary>Reset type</summary>
+  static const uint8_t PARENT_SHORT_ADDR = 3;
+  /// <name>TI.ZPI2.ZB_GET_DEVICE_INFO.DEV_INFO_TYPE.SHORT_ADDR</name>
+  /// <summary>Reset type</summary>
+  static const uint8_t SHORT_ADDR = 2;
+  /// <name>TI.ZPI2.ZB_GET_DEVICE_INFO.DEV_INFO_TYPE.STATE</name>
+  /// <summary>Reset type</summary>
+  static const uint8_t STATE = 0;
+}
+
 //TI Zigbee Other Definitions
-static const uint8_t BOOTLOADER_MAGIC_BYTE=0xFE;
+static const uint8_t BOOTLOADER_MAGIC_BYTE1=0xFE;
+static const uint8_t BOOTLOADER_MAGIC_BYTE2=0x07;
+static const uint8_t BOOTLOADER_MAGIC_BYTE3=0xEF;
 
 //TI Zigbee Structures
 
@@ -123,6 +162,15 @@ typedef struct {
   uint8_t checksum;
 } __attribute__((packed)) tizigbee_sys_reset_t;
 
+//ZB_GET_DEVICE_INFO api packet
+typedef struct {
+  uint8_t frame_start; //Always set to 0xFE
+  uint8_t length; //Length=1
+  uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
+  uint8_t devinfotype; //Type of device info to retrieve
+  uint8_t checksum;
+} __attribute__((packed)) tizigbee_zb_get_device_info_t;
+
 typedef struct {
   uint8_t frame_start; //Always set to 0xFE
   uint8_t length; //Number of bytes in the payload
@@ -135,6 +183,7 @@ typedef struct {
   uint8_t length; //Number of bytes in the payload
   uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
   uint16_t capabilities; //First byte is LSB, second byte is MSB
+  uint8_t checksum;
 } __attribute__((packed)) tizigbee_sys_ping_response_t;
 
 typedef struct {
@@ -146,6 +195,7 @@ typedef struct {
   uint8_t major_firmware_version;
   uint8_t minor_firmware_version;
   uint8_t hwrev; //Hardware Revision
+  uint8_t checksum;
 } __attribute__((packed)) tizigbee_sys_version_response_t;
 
 typedef struct {
@@ -158,7 +208,18 @@ typedef struct {
   uint8_t major_firmware_version;
   uint8_t minor_firmware_version;
   uint8_t hwrev; //Hardware Revision
+  uint8_t checksum;
 } __attribute__((packed)) tizigbee_sys_reset_response_t;
+
+//ZB_GET_DEVICE_INFO api packet
+typedef struct {
+  uint8_t frame_start; //Always set to 0xFE
+  uint8_t length; //Length=1
+  uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
+  uint8_t devinfotype; //Type of device info in this response
+  multitypeval_t devinfo;
+  uint8_t checksum;
+} __attribute__((packed)) tizigbee_zb_get_device_info_response_t;
 
 } //End of namespace
 
