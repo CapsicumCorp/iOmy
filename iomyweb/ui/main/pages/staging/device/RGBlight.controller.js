@@ -32,7 +32,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
 	iThingTypeId                    : null,
     
     bFirstRun                       : true,
-    bUsingAdvancedUI                : true,
+    bUsingAdvancedUI                : false,
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -106,12 +106,19 @@ sap.ui.controller("pages.staging.device.RGBlight", {
     },
 	
 	//-- Sets the RGB Color parameters based on static data --//
-	RGBInit: function (sHSV) {
-        var oController = this;
-		var oView       = this.getView();
+	RGBInit: function (iHue, iSaturation, iLight) {
+        var oController     = this;
+		var oView           = this.getView();
+        var sColourString;
+        
+        iHue            = Math.floor(iHue / this.fHueConversionRate);
+        iSaturation     = Math.floor(iSaturation / this.fSaturationConversionRate);
+        iLight          = Math.floor(iLight / this.fLightConversionRate) / 2;
+        
+        sColourString   = "hsv("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")";
         
         if (oView.byId("CPicker") !== undefined) {
-            oView.byId("CPicker").setColorString(sHSV);
+            oView.byId("CPicker").setColorString(sColourString);
         }
 	},
 		
@@ -141,9 +148,10 @@ sap.ui.controller("pages.staging.device.RGBlight", {
 	},
     
     SwitchToSimpleView : function () {
-        var oController = this;
-        var oView       = this.getView();
-        var oContainer  = oView.byId("RGB_Cont");
+        var oController     = this;
+        var oView           = this.getView();
+        var oContainer      = oView.byId("RGB_Cont");
+        var mSliderValues   = IomyRe.functions.convertRGBToHSL(oView.byId("CPicker").getColorString());
         
         oContainer.destroyContent();
         
@@ -169,9 +177,13 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                     maxSaturation   : iMaxSaturation,
                     maxBrightness   : iMaxBrightness,
                     
-                    hue             : 0,
-                    saturation      : 0,
-                    brightness      : 0,
+                    hue             : mSliderValues.hue * this.fHueConversionRate,
+                    saturation      : mSliderValues.saturation * this.fSaturationConversionRate,
+                    brightness      : mSliderValues.light * this.fLightConversionRate,
+                    
+                    advancedViewPress : function () {
+                        oController.SwitchToAdvancedView();
+                    },
                     
                     change : function () {
                         oController.ChangeLightColour();
@@ -186,6 +198,8 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                     }
                 })
             );
+        
+            oController.ChangeColourInBox(mSliderValues.hue, mSliderValues.saturation, mSliderValues.light);
         }
     },
     
@@ -193,6 +207,13 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var oController = this;
         var oView       = this.getView();
         var oContainer  = oView.byId("RGB_Cont");
+        var iHue = oView.byId("hueSlider").getValue();
+        var iSat = oView.byId("satSlider").getValue();
+        var iBright = oView.byId("briSlider").getValue();
+        
+        iHue    = Math.floor(iHue / this.fHueConversionRate);
+        iSat    = Math.floor(iSat / this.fSaturationConversionRate);
+        iBright = Math.floor(iBright / this.fLightConversionRate);
         
         oContainer.destroyContent();
         
@@ -200,7 +221,15 @@ sap.ui.controller("pages.staging.device.RGBlight", {
             oController.bUsingAdvancedUI = true;
             
             oContainer.addContent(IomyRe.widgets.LightBulbColorPicker(oController, {
+                colorString : "hsv("+iHue+","+iSat+","+iBright+")",
                 
+                simpleViewPress : function () {
+                    oController.SwitchToSimpleView();
+                },
+                
+                change : function (oEvent) {
+                    oController.ChangeLightColour(oEvent);
+                },
             }));
         }
     },
@@ -212,6 +241,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
      */
     InitialDeviceInfoLoad : function () {
         var oController = this;
+        var oView       = this.getView();
         //--------------------------------------------------------------------//
         // Acquire the thing's IOs and construct the query strings.
         //--------------------------------------------------------------------//
@@ -270,9 +300,12 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                     //--------------------------------------------------------//
                     // Set the colour on the page
                     //--------------------------------------------------------//
-                    //oController.RGBInit("hsv("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")");
-                    oController.ChangeColourInBox(Math.round(iHue), Math.round(iSaturation), Math.round(iLight));
-                    oController.SetSliderValues(iHue, iSaturation, iLight);
+                    if (oController.bUsingAdvancedUI) {
+                        oController.RGBInit("hsv("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")");
+                    } else {
+                        oController.ChangeColourInBox(Math.round(iHue), Math.round(iSaturation), Math.round(iLight));
+                        oController.SetSliderValues(iHue, iSaturation, iLight);
+                    }
                 },
 
                 onFail : function (response) {

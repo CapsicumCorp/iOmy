@@ -307,17 +307,66 @@ $.extend( IomyRe.widgets, {
 	//-- Scroll Container for the "RGB" colorpicker --//
 	LightBulbColorPicker : function (oCurrentController, mSettings) {
 		var oView = oCurrentController.getView();  //-- Defines oView based on the Controller that's being passed --//
+        var oForm;
+        
+        var fnSimplePress = function () {};
         
         //--------------------------------------------------------------------//
         // Find the parameters map for the widget
         //--------------------------------------------------------------------//
-        if (mSettings === undefined || mSettings === null) {
+        if (mSettings !== undefined && mSettings !== null) {
+            if (mSettings.simpleViewPress) {
+                fnSimplePress = mSettings.simpleViewPress;
+
+            }
+            
+        } else {
             mSettings = {};
         }
         
         mSettings.mode = sap.ui.unified.ColorPickerMode.HSV;
+        
+        oForm = new sap.ui.layout.form.Form( oView.createId("DevTypeBlock_Form"),{
+            editable: true,
+            layout : new sap.ui.layout.form.ResponsiveGridLayout ({
+                labelSpanXL: 3,
+                labelSpanL: 3,
+                labelSpanM: 3,
+                labelSpanS: 12,
+                adjustLabelSpan: false,
+                emptySpanXL: 3,
+                emptySpanL: 2,
+                emptySpanM: 0,
+                emptySpanS: 0,
+                columnsXL: 1,
+                columnsL: 1,
+                columnsM: 1,
+                columnsS: 1,
+                singleContainerFullSize: false
+            }),
+            toolbar : new sap.m.Toolbar({
+                content : [
+                    new sap.m.Button ({
+                        text: "Simple",
+                        press: fnSimplePress
+                    })
+                ]
+            }).addStyleClass("MarBottom1d0Rem"),
+            formContainers : [
+                new sap.ui.layout.form.FormContainer({
+                    formElements : [
+                        new sap.ui.layout.form.FormElement(oView.createId("ColourBoxCont"), {
+                            label : "",
+                            fields: [
+                                new sap.ui.unified.ColorPicker (oView.createId("CPicker"), mSettings).addStyleClass("ElementChildCenter PadTop2d0Rem")
+                            ]
+                        })
+                    ]
+                })                
+            ]
+        });
 		
-		return new sap.ui.unified.ColorPicker (oView.createId("CPicker"), mSettings).addStyleClass("ElementChildCenter PadTop2d0Rem");
+		return oForm
 	},
     
     LightBulbControlsContainer : function (oCurrentController, mSettings) {
@@ -332,6 +381,8 @@ $.extend( IomyRe.widgets, {
             iCurrentBrightness;
         
 		var oForm;
+        
+        var fnAdvancedPress;
         
         var fnHueChange,
             fnSaturationChange,
@@ -379,6 +430,13 @@ $.extend( IomyRe.widgets, {
 
                 if (mSettings.brightness) {
                     iCurrentBrightness = mSettings.brightness;
+                }
+                
+                if (mSettings.advancedViewPress) {
+                    fnAdvancedPress = mSettings.advancedViewPress;
+                    
+                } else {
+                    fnAdvancedPress = function () {};
                 }
 
                 if (mSettings.hueChange) {
@@ -469,10 +527,8 @@ $.extend( IomyRe.widgets, {
                 toolbar : new sap.m.Toolbar({
                     content : [
                         new sap.m.Button ({
-                            text: "Simple"
-                        }),
-                        new sap.m.Button ({
-                            text: "Advanced"
+                            text: "Advanced",
+                            press: fnAdvancedPress
                         })
                     ]
                 }).addStyleClass("MarBottom1d0Rem"),
@@ -482,9 +538,19 @@ $.extend( IomyRe.widgets, {
                             new sap.ui.layout.form.FormElement(oView.createId("ColourBoxCont"), {
                                 label : "",
                                 fields: [
-                                    new sap.m.FlexBox(oView.createId("ColourBox"), {
-                                        width : "80px"
-                                    }).addStyleClass("width80px height80px HorizontalCenter")
+                                    new sap.ui.core.HTML({
+                                        content : "<div id=\""+oView.createId("ColourBox")+"\" class=\"width80px height80px HorizontalCenter\" style=\"background: hsl("+iCurrentHue+","+iCurrentSaturation+"%,"+iCurrentBrightness+"%);\" ></div>",
+                                        afterRendering : function () {
+                                            document.getElementById(oView.createId("ColourBox")).style = "background: hsl("+iCurrentHue+","+iCurrentSaturation+"%,"+iCurrentBrightness+"%);";
+                                        }
+                                    }),
+//                                    new sap.m.FlexBox(oView.createId("ColourBox"), {
+//                                        width : "80px",
+//                                        
+//                                        afterRendering : function () {
+//                                            document.getElementById(oView.createId("ColourBox")).style = "background: hsl("+iCurrentHue+","+iCurrentSaturation+"%,"+iCurrentBrightness+"%);";
+//                                        }
+//                                    }).addStyleClass("width80px height80px HorizontalCenter")
                                 ]
                             }),
                             new sap.ui.layout.form.FormElement({

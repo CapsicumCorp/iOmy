@@ -97,6 +97,95 @@ $.extend(IomyRe.functions, {
     },
     
     /**
+     * Extracts the HSL values out of a RGB colour string.
+     * 
+     * Used this guide for the forumla: https://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
+     * 
+     * @param {type} sColorString
+     * @returns {undefined}
+     */
+    convertRGBToHSL : function (sColorString) {
+        var aFigures;
+        var fRed;
+        var fGreen;
+        var fBlue;
+        
+        var fMin, fMax;
+        
+        var iHue;
+        var iSat;
+        var iLight;
+        
+        //--------------------------------------------------------------------//
+        // First check that the colour string is given.
+        //--------------------------------------------------------------------//
+        if (!sColorString) {
+            throw new MissingArgumentException("RGB Colour String must be specified!");
+        }
+        
+        //--------------------------------------------------------------------//
+        // Next begin removing the unwanted characters "rgb(" and ")"
+        //--------------------------------------------------------------------//
+        sColorString = sColorString.replace("rgb(", "");
+        sColorString = sColorString.replace(")", "");
+        
+        //--------------------------------------------------------------------//
+        // Split the figures into three in an array and fetch the values in
+        // decimal format, that is, divided by 255.
+        //--------------------------------------------------------------------//
+        aFigures = sColorString.split(",");
+        
+        fRed    = aFigures[0] / 255;
+        fGreen  = aFigures[1] / 255;
+        fBlue   = aFigures[2] / 255;
+        
+        //--------------------------------------------------------------------//
+        // Determine which of the three numbers is the minimum and maximum.
+        //--------------------------------------------------------------------//
+        fMin = Math.min( fRed, fGreen, fBlue );
+        fMax = Math.max( fRed, fGreen, fBlue );
+        
+        //--------------------------------------------------------------------//
+        // Find the luminace figure.
+        //--------------------------------------------------------------------//
+        iLight = Math.round((fMin + fMax)/2) * 100;
+        
+        //--------------------------------------------------------------------//
+        // Find the saturation
+        //--------------------------------------------------------------------//
+        if (iLight < 50) {
+            iSat = Math.round((fMax - fMin) / (fMax + fMin)) * 100;
+            
+        } else if (iLight > 50) {
+            iSat = Math.round((fMax - fMin) / (2 - fMax - fMin)) * 100;
+            
+        }
+        
+        //--------------------------------------------------------------------//
+        // Find the hue
+        //--------------------------------------------------------------------//
+        if (fMax === fRed) {
+            iHue = Math.round(((fGreen - fBlue) / (fMax - fMin)) * 60);
+            
+        } else if (fMax === fGreen) {
+            iHue = Math.round((2 + (fBlue - fRed) / (fMax - fMin)) * 60);
+            
+        } else if (fMax === fBlue) {
+            iHue = Math.round((4 + (fRed - fGreen) / (fMax - fMin)) * 60);
+            
+        }
+        
+        //--------------------------------------------------------------------//
+        // Return the figures.
+        //--------------------------------------------------------------------//
+        return {
+            "hue"           : iHue,
+            "saturation"    : iSat,
+            "light"         : iLight
+        };
+    },
+    
+    /**
      * Retrives the hub that a thing is connected to.
      * 
      * @param {type} iThingId        ID of the Thing
