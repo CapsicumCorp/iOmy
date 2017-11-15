@@ -172,7 +172,7 @@ sap.ui.controller("pages.staging.Room", {
                                 var mPageDataTemp = oController.mPageData;
                                 var bIsUnassigned = bRoomIsUnassigned;
                                 mPageDataTemp.RoomId = mRoom.RoomId;
-                                //mPageDataTemp.PremiseId = mRoom.PremiseId;
+                                mPageDataTemp.PremiseId = mRoom.PremiseId;
                                 
                                 if (oController.bEditing && !bIsUnassigned) {
                                     // The user can edit any room except the Unassigned "room".

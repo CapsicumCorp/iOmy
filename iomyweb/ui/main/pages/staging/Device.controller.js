@@ -86,6 +86,10 @@ sap.ui.controller("pages.staging.Device", {
                 if (oController.iLastPremiseId === null && oController.iLastRoomId === null) {
                     oView.byId("ToolbarTitle").setText("Device List");
                     
+                } else if (oController.iLastPremiseId !== null && oController.iLastRoomId !== null) {
+                    // If both the Premise ID and Room ID are given, use the room ID.
+                    oView.byId("ToolbarTitle").setText("Devices in " + IomyRe.functions.getRoom( oController.iLastRoomId ).RoomName);
+                    
                 } else {
                     if (oController.iLastPremiseId !== null) {
                         oView.byId("ToolbarTitle").setText("Devices in " + IomyRe.common.PremiseList["_"+oController.iLastPremiseId].Name);
