@@ -55,6 +55,10 @@ $.extend(IomyRe.apiphp,{
 				sReturn = sUrlPublic+'/php/checkSession.php';
 				break;
 				
+			case "colorbox":
+				sReturn = sUrlPublic+'/php/api_colorbox.php';
+				break;
+				
 			//--------------------------------//
 			//-- Restricted APIs        --//
 			//--------------------------------//
