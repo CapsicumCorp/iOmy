@@ -221,6 +221,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 	InsertRoomInfoValues: function (oController) {
 		var bError   = false;
 		var sErrMesg = "";
+        var aErrorMessages = [];
 		
         oController.ToggleSubmitCancelButtons(false);
 		//------------------------------------------------//

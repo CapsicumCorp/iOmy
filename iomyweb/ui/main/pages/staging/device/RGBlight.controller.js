@@ -88,13 +88,13 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         
         iHue            = Math.floor(iHue / this.fHueConversionRate);
         iSat            = Math.floor(iSat / this.fSaturationConversionRate);
-        iBright         = Math.floor(iBright / this.fLightConversionRate) / 2;
+        iBright         = Math.floor((iBright / this.fLightConversionRate) / 2);
         
         console.log("H:"+iHue);
         console.log("S:"+iSat);
         console.log("B:"+iBright);
         
-        document.getElementById(oView.createId("ColourBox")).style = "background: hsl("+iHue+","+iSat+"%,"+iBright+"%);";
+        oView.byId("ColourBox").setSrc(IomyRe.apiphp.APILocation("colorbox")+"?Mode=HSL&H="+iHue+"&S="+iSat+"&L="+iBright);
     },
     
     SetSliderValues : function (iHue, iSat, iBright) {
@@ -152,6 +152,8 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var oView           = this.getView();
         var oContainer      = oView.byId("RGB_Cont");
         var mSliderValues   = IomyRe.functions.convertRGBToHSL(oView.byId("CPicker").getColorString());
+        
+        console.log(mSliderValues);
         
         oContainer.destroyContent();
         

@@ -538,16 +538,16 @@ $.extend( IomyRe.widgets, {
                             new sap.ui.layout.form.FormElement(oView.createId("ColourBoxCont"), {
                                 label : "",
                                 fields: [
-//                                    new sap.m.Image({
-//                                        densityAware : false,
-//                                        src : IomyRe.apiphp.APILocation("colorbox")+"?Mode=RGB&R=255&G=80&B=0"
-//                                    }).addStyleClass("width80px height80px HorizontalCenter")
-                                    new sap.ui.core.HTML({
-                                        content : "<div id=\""+oView.createId("ColourBox")+"\" class=\"width80px height80px HorizontalCenter\" style=\"background: hsl("+iCurrentHue+","+iCurrentSaturation+"%,"+iCurrentBrightness+"%);\" ></div>",
-                                        afterRendering : function () {
-                                            document.getElementById(oView.createId("ColourBox")).style = "background: hsl("+iCurrentHue+","+iCurrentSaturation+"%,"+iCurrentBrightness+"%);";
-                                        }
-                                    }),
+                                    new sap.m.Image(oView.createId("ColourBox"), {
+                                        densityAware : false,
+                                        src : IomyRe.apiphp.APILocation("colorbox")+"?Mode=RGB&H="+180+"&S="+100+"&L="+50
+                                    }).addStyleClass("width80px height80px HorizontalCenter")
+//                                    new sap.ui.core.HTML({
+//                                        content : "<div id=\""+oView.createId("ColourBox")+"\" class=\"width80px height80px HorizontalCenter\" style=\"background: hsl("+iCurrentHue+","+iCurrentSaturation+"%,"+iCurrentBrightness+"%);\" ></div>",
+//                                        afterRendering : function () {
+//                                            document.getElementById(oView.createId("ColourBox")).style = "background: hsl("+iCurrentHue+","+iCurrentSaturation+"%,"+iCurrentBrightness+"%);";
+//                                        }
+//                                    }),
 //                                    new sap.m.FlexBox(oView.createId("ColourBox"), {
 //                                        width : "80px",
 //                                        

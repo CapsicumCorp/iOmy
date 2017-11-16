@@ -43,8 +43,8 @@ $iRed                       = 50;
 $iGreen                     = 255;
 $iBlue                      = 50;
 $iHue                       = 0;
-$iSaturation                = 0;
-$iLuminace                  = 50;
+$fSaturation                = 0;
+$fLuminance                 = 0.5;
 
 $sPostMode                  = "";           //-- STRING:        Used to store which Mode the API should function in. --//
 
@@ -145,33 +145,79 @@ if( $bError===false ) {
 			try {
 				
                 //-- Red --//
-                if( isset( $_GET['R'] )) {
-                    $iHue = $_GET['R'];
+                if( isset( $_GET['H'] )) {
+                    $iHue = $_GET['H'];
                 } else {
-                    $iHue = 50;
+                    $iHue = 0;
                 }
 
                 //-- Green --//
-                if( isset( $_GET['G'] )) {
-                    $iSaturation = $_GET['G'] / 100;
+                if( isset( $_GET['S'] )) {
+                    $fSaturation = $_GET['S'] / 100;
                 } else {
-                    $iSaturation = 255;
+                    $fSaturation = 0;
                 }
 
                 //-- Blue --//
-                if( isset( $_GET['B'] )) {
-                    $iLuminace = $_GET['B'] / 100;
+                if( isset( $_GET['L'] )) {
+                    $fLuminance = $_GET['L'] / 100;
                 } else {
-                    $iLuminace = 50;
+                    $fLuminance = 0.5;
                 }
                 
                 //============================================================//
                 // Calculate the RGB Values
                 //============================================================//
-                if ($iHue === 0 && $iSaturation === 0) {
-                    $iRed   = $iLuminace * 255;
-                    $iGreen = $iLuminace * 255;
-                    $iBlue  = $iLuminace * 255;
+                if ($fSaturation == 0) {
+                    //--------------------------------------------------------//
+                    // No saturation means it's grey so all the RGB values are
+                    // the same.
+                    //--------------------------------------------------------//
+                    $iProduct = round($fLuminance * 255);
+                    
+                    $iRed   = $iProduct;
+                    $iGreen = $iProduct;
+                    $iBlue  = $iProduct;
+                    
+                } else {
+                    //--------------------------------------------------------//
+                    // The code for calculating RGB from HSV came from
+                    // https://gist.github.com/brandonheyer/5254516
+                    //--------------------------------------------------------//
+                    $iRed; 
+                    $iGreen; 
+                    $iBlue;
+                    $c = ( 1 - abs( 2 * $fLuminance - 1 ) ) * $fSaturation;
+                    $x = $c * ( 1 - abs( fmod( ( $iHue / 60 ), 2 ) - 1 ) );
+                    $m = $fLuminance - ( $c / 2 );
+                    if ( $iHue < 60 ) {
+                        $iRed = $c;
+                        $iGreen = $x;
+                        $iBlue = 0;
+                    } else if ( $iHue < 120 ) {
+                        $iRed = $x;
+                        $iGreen = $c;
+                        $iBlue = 0;			
+                    } else if ( $iHue < 180 ) {
+                        $iRed = 0;
+                        $iGreen = $c;
+                        $iBlue = $x;					
+                    } else if ( $iHue < 240 ) {
+                        $iRed = 0;
+                        $iGreen = $x;
+                        $iBlue = $c;
+                    } else if ( $iHue < 300 ) {
+                        $iRed = $x;
+                        $iGreen = 0;
+                        $iBlue = $c;
+                    } else {
+                        $iRed = $c;
+                        $iGreen = 0;
+                        $iBlue = $x;
+                    }
+                    $iRed = floor( ( $iRed + $m ) * 255 );
+                    $iGreen = floor( ( $iGreen + $m ) * 255);
+                    $iBlue = floor( ( $iBlue + $m ) * 255);
                 }
                 
 			} catch( Exception $e1400) {
@@ -198,7 +244,7 @@ if( $bError===false ) {
 
 
 $t      = false;
-
+$bDebug = false;
 
 if ($t) {
     $sT = '21f90401000001002c00000000010001000002024c01003b';
@@ -206,7 +252,28 @@ if ($t) {
     $sT = '2c00000000010001000002024c01003b';
 }
 
-header('Content-Type: image/gif');
-header('Content-Length: ' . 8 * (4.375 + $t));
-echo pack( 'H32CCCH*', '47494638396101000100900100ffffff', $iRed, $iGreen, $iBlue, $sT );
+if (isset($_GET["Debug"])) {
+    if ($_GET["Debug"] == 1) {
+        $bDebug = true;
+    } else {
+        $bDebug = false;
+    }
+}
+
+if ($bDebug) {
+    echo "<pre>";
+    var_dump($iRed);
+    var_dump($iGreen);
+    var_dump($iBlue);
+    
+    echo "</pre>";
+    
+} else {
+
+    header('Content-Type: image/gif');
+    header('Content-Length: ' . 8 * (4.375 + $t));
+    echo pack( 'H32CCCH*', '47494638396101000100900100ffffff', $iRed, $iGreen, $iBlue, $sT );
+}
+
+//-- The End --//
 ?>
