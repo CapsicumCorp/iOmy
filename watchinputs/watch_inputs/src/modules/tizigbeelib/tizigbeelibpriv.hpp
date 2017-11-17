@@ -69,6 +69,15 @@ static const uint16_t ZDO_STARTUP_FROM_APP_SRSP=0x6540;
 //This command is generated to request a Management LQI Request
 static const uint16_t ZDO_MGMT_LQI_REQ = 0x2531;
 static const uint16_t ZDO_MGMT_LQI_REQ_SRSP = 0x6531;
+static const uint16_t ZDO_MGMT_LQI_RSP = 0x45b1;
+
+//This command is generated to request a Management Join Request
+static const uint16_t ZDO_MGMT_PERMIT_JOIN_REQ = 0x2536;
+static const uint16_t ZDO_MGMT_PERMIT_JOIN_REQ_SRSP = 0x6536;
+static const uint16_t ZDO_MGMT_PERMIT_JOIN_RSP = 0x45b6;
+
+//This callback message contains a ZDO cluster response
+static const uint16_t ZDO_MSG_CB_INCOMING = 0x45ff;
 
 //TI Zigbee Waiting Definitions
 enum class WAITING_FOR {
@@ -361,6 +370,18 @@ typedef struct {
   uint8_t checksum;
 } __attribute__((packed)) tizigbee_zdo_mgmt_lqi_req_t;
 
+//ZDO_MGMT_PERMIT_JOIN_REQ api packet
+typedef struct {
+  uint8_t frame_start; //Always set to 0xFE
+  uint8_t length; //Length=1
+  uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
+  uint8_t addrmode; //0x02 - Address 16 bit, 0x0F - Broadcast
+  uint16_t netaddr; //LSB, MSB
+  uint8_t duration; //Specifies the time that joining should be enabled (in seconds) or 0xFF to enable permanently
+  uint8_t trust_center_significance; //If set to 1 and remote is a trust center, the command affects the trust center authentication policy, otherwise it has no effect
+  uint8_t checksum;
+} __attribute__((packed)) tizigbee_zdo_mgmt_permit_join_req_t;
+
 typedef struct {
   uint8_t frame_start; //Always set to 0xFE
   uint8_t length; //Number of bytes in the payload
@@ -461,14 +482,21 @@ typedef struct {
   uint8_t length; //Number of bytes in the payload
   uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
   uint8_t status; //The result of the command (0=Success)
-} __attribute__((packed)) tizigbee_zdo_msg_cb_register_srsp_t;
+} __attribute__((packed)) tizigbee_zdo_generic_srsp_t;
 
 typedef struct {
   uint8_t frame_start; //Always set to 0xFE
   uint8_t length; //Number of bytes in the payload
   uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
-  uint8_t status; //The result of the command
-} __attribute__((packed)) tizigbee_zdo_startup_from_app_srsp_t;
+  uint16_t srcnetaddr; //LSB, MSB
+  uint8_t wasBroadcast;
+  uint16_t clusterid; //LSB, MSB
+  uint8_t securityUse;
+  uint8_t seqnumber;
+  uint16_t destnetaddr; //LSB, MSB
+  uint8_t status; //status from remote Zigbee device
+  uint8_t zigbeepayload; //Rest of zigbee data
+} __attribute__((packed)) tizigbee_zdo_msg_cb_incoming_t;
 
 } //End of namespace
 

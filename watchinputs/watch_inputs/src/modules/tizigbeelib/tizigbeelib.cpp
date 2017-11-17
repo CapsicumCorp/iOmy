@@ -21,6 +21,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 Some code used from https://github.com/tlaukkan/zigbee4java/commit/695ce7fcc1a5e8f95eb88bd0e3382d9e767e8f39
   which is under Apache 2.0 license
+
+Baud rate seems to be ignored on the TI Z-Stack firmware as it uses cdc_acm usb interface
+
 */
 
 //NOTE: Only Coordinator has been well tested at the moment
@@ -896,6 +899,26 @@ static void send_zigbee_zdo_management_neighbor_table_request(tizigbeedevice_t& 
   MOREDEBUG_EXITINGFUNC();
 }
 
+static void send_zigbee_zdo_management_permit_joining_request(tizigbeedevice_t& tizigbeedevice, zdo_general_request_t *zdocmd) {
+  tizigbee_zdo_mgmt_permit_join_req_t apicmd;
+  zigbee_zdo_management_permit_joining_request *zigbeepayload=reinterpret_cast<zigbee_zdo_management_permit_joining_request *>(&(zdocmd->zigbeepayload));
+
+  //Fill in the packet details and send the packet
+  apicmd.cmd=htons(ZDO_MGMT_PERMIT_JOIN_REQ);
+  apicmd.length=sizeof(tizigbee_zdo_mgmt_permit_join_req_t)-5;
+  if (zdocmd->netaddr==0xFFFF) {
+    apicmd.addrmode=0x0F;
+  } else {
+    apicmd.addrmode=0x02;
+  }
+  apicmd.netaddr=zdocmd->netaddr;
+  apicmd.duration=zigbeepayload->duration;
+  apicmd.trust_center_significance=zigbeepayload->trust_center_significance;
+  __tizigbee_send_api_packet(tizigbeedevice, reinterpret_cast<uint8_t *>(&apicmd));
+
+  MOREDEBUG_EXITINGFUNC();
+}
+
 /*
   Send a TI Zigbee Zigbee ZDO
   Arguments:
@@ -913,6 +936,9 @@ static void send_zigbee_zdo(void *localzigbeedevice, zdo_general_request_t *zdoc
   switch (zdocmd->clusterid) {
     case ZIGBEE_ZDO_MANAGEMENT_NEIGHBOR_TABLE_REQUEST:
       send_zigbee_zdo_management_neighbor_table_request(tizigbeedevice, zdocmd);
+      break;
+    case ZIGBEE_ZDO_MANAGEMENT_PERMIT_JOINING_REQUEST:
+      send_zigbee_zdo_management_permit_joining_request(tizigbeedevice, zdocmd);
       break;
     default:
       debuglibifaceptr->debuglib_printf(1, "%s: Unsupported ZDO Cluster: %04" PRIX16 " in send request for TI Zigbee %016" PRIX64 " to device: %04" PRIX16 "\n", __PRETTY_FUNCTION__, zdocmd->clusterid, tizigbeedevice.addr, zdocmd->netaddr);
@@ -1189,7 +1215,7 @@ static void process_zb_read_configuration_response(tizigbeedevice_t& tizigbeedev
 */
 static void process_zdo_msg_cb_register_srsp(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_zdo_msg_cb_register_srsp_t *apicmd=reinterpret_cast<tizigbee_zdo_msg_cb_register_srsp_t *>(tizigbeedevice.receivebuf);
+  tizigbee_zdo_generic_srsp_t *apicmd=reinterpret_cast<tizigbee_zdo_generic_srsp_t *>(tizigbeedevice.receivebuf);
 
   MOREDEBUG_ENTERINGFUNC();
   locktizigbee();
@@ -1212,7 +1238,7 @@ static void process_zdo_msg_cb_register_srsp(tizigbeedevice_t& tizigbeedevice) {
 */
 static void process_zdo_startup_from_app_srsp(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_zdo_startup_from_app_srsp_t *apicmd=reinterpret_cast<tizigbee_zdo_startup_from_app_srsp_t *>(tizigbeedevice.receivebuf);
+  tizigbee_zdo_generic_srsp_t *apicmd=reinterpret_cast<tizigbee_zdo_generic_srsp_t *>(tizigbeedevice.receivebuf);
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
   MOREDEBUG_ENTERINGFUNC();
@@ -1239,6 +1265,82 @@ static void process_zdo_startup_from_app_srsp(tizigbeedevice_t& tizigbeedevice) 
     default:
       debuglibifaceptr->debuglib_printf(1, "%s: Unexpected response state for ZDO_STARTUP_FROM_APP: %" PRId8 "\n", __PRETTY_FUNCTION__, apicmd->status);
   }
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
+  Process a TI Zigbee ZB ZDO Generic Status Response
+  Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
+*/
+static void process_zdo_generic_srsp(tizigbeedevice_t& tizigbeedevice) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  tizigbee_zdo_generic_srsp_t *apicmd=reinterpret_cast<tizigbee_zdo_generic_srsp_t *>(tizigbeedevice.receivebuf);
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  const zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=reinterpret_cast<const zigbeelib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1));
+  int zigbeelibindex;
+
+  MOREDEBUG_ENTERINGFUNC();
+
+  if (apicmd->status!=SUCCESS) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Error: 0x%02" PRIX8 " for ZDO TI Command: 0x%" PRIX16 "\n", __PRETTY_FUNCTION__, apicmd->status, apicmd->cmd & 0x3FFF);
+  }
+  //TODO: The only time we get to see the seqnumber from the TI is ZDO_MSG_CB_INCOMING but we may
+  //  be able to figure out how to use that for calling process_zdo_seqnumber
+  locktizigbee();
+  zigbeelibindex=tizigbeedevice.zigbeelibindex;
+  unlocktizigbee();
+  if (zigbeelibindex>=0 && zigbeelibifaceptr) {
+    long tizigbeelocked=0, zigbeelocked=0;
+    zigbeelibifaceptr->process_zdo_send_status(zigbeelibindex, apicmd->status, nullptr, &tizigbeelocked, &zigbeelocked);
+  }
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
+  Process a TI Zigbee ZB ZDO Message CB Incoming Response
+  Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
+*/
+static void process_zdo_msg_cb_incoming(tizigbeedevice_t& tizigbeedevice) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  const zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=reinterpret_cast<const zigbeelib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1));
+  tizigbee_zdo_msg_cb_incoming_t *apicmd=reinterpret_cast<tizigbee_zdo_msg_cb_incoming_t *>(tizigbeedevice.receivebuf);
+  zigbee_zdo_response_header_t *zdocmd;
+  int zigbeelibindex;
+  uint16_t srcnetaddr, clusterid, profileid;
+  uint8_t seqnumber;
+  uint8_t zigbeelength;
+
+  MOREDEBUG_ENTERINGFUNC();
+
+  //debuglibifaceptr->debuglib_printf(1, "%s: Received Response Source Netaddr: %04" PRIX16 ", Was Broadcast: %d, clusterid: %04" PRIX16 " securityuse: %d, Sequence Number: %02" PRIX8 " Dest NetAddr: %04" PRIX16 "\n", __PRETTY_FUNCTION__, le16toh(apicmd->srcnetaddr), apicmd->wasBroadcast, le16toh(apicmd->clusterid), apicmd->securityUse, apicmd->seqnumber, le16toh(apicmd->destnetaddr));
+
+  zdocmd=(zigbee_zdo_response_header_t *) &apicmd->srcnetaddr;
+
+  srcnetaddr=le16toh(apicmd->srcnetaddr);
+  clusterid=le16toh(apicmd->clusterid);
+  profileid=ZIGBEE_ZDO_PROFILE; //ZDO packets are always in the ZDO profile
+  zigbeelength=apicmd->length-8;
+  seqnumber=apicmd->seqnumber;
+
+  //Copy the zigbee payload into the generic Zigbee ZDO Response structure
+  memmove(&(zdocmd->status), &(apicmd->status), zigbeelength);
+
+  //Now copy the remaining values
+  zdocmd->srcnetaddr=srcnetaddr;
+  zdocmd->clusterid=clusterid;
+  zdocmd->profileid=profileid;
+  zdocmd->zigbeelength=zigbeelength;
+  zdocmd->seqnumber=seqnumber;
+
+  locktizigbee();
+  zigbeelibindex=tizigbeedevice.zigbeelibindex;
+  unlocktizigbee();
+  if (zigbeelibindex>=0 && zigbeelibifaceptr) {
+    long tizigbeelocked=0, zigbeelocked=0;
+    zigbeelibifaceptr->process_zdo_response_received(zigbeelibindex, zdocmd, &tizigbeelocked, &zigbeelocked);
+  }
+
   MOREDEBUG_EXITINGFUNC();
 }
 
@@ -1279,6 +1381,18 @@ static void process_api_packet(tizigbeedevice_t& tizigbeedevice) {
       break;
     case ZDO_STARTUP_FROM_APP_SRSP:
       process_zdo_startup_from_app_srsp(tizigbeedevice);
+      break;
+    case ZDO_MGMT_LQI_REQ_SRSP:
+    case ZDO_MGMT_PERMIT_JOIN_REQ_SRSP:
+      process_zdo_generic_srsp(tizigbeedevice);
+      break;
+    case ZDO_MSG_CB_INCOMING:
+      process_zdo_msg_cb_incoming(tizigbeedevice);
+      break;
+    //We don't need to handle these as ZDO_MSG_CB_INCOMING contains more detailed info that the Zigbee library can process
+    case ZDO_MGMT_LQI_RSP:
+    case ZDO_MGMT_PERMIT_JOIN_RSP:
+      //Do nothing
       break;
     default:
       debuglibifaceptr->debuglib_printf(1, "%s: Received Unknown TI Zigbee packet: 0x%04" PRIX16 " with length: %d\n", __PRETTY_FUNCTION__, apicmd->cmd, apicmd->length);
@@ -1759,13 +1873,21 @@ static int isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx, co
   //Also need to unlock tizigbee so receiveraw can lock.  This is okay as this is the only place where new tizigbee devices
   //  are added
   unlocktizigbee();
+
+  //First allocate ram for buffers so we can abort if allocation fails
+  unsigned char *receivebuftmp;
+  try {
+    receivebuftmp=new unsigned char[BUFFER_SIZE];
+  } catch (std::bad_alloc& e) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Failed to allocate ram for the receive buffer\n", __PRETTY_FUNCTION__);
+    return -1;
+  }
   PTHREAD_LOCK(&gmutex_initnewtizigbee);
   gtizigbeedevices[list_numitems]=gnewtizigbee;
   PTHREAD_UNLOCK(&gmutex_initnewtizigbee);
   locktizigbee();
 
-  //Allocate new memory for the receive buffer
-  gtizigbeedevices[list_numitems].receivebuf=new unsigned char[BUFFER_SIZE];
+  gtizigbeedevices[list_numitems].receivebuf=receivebuftmp;
 
   //TODO: Remove
   debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Num TI Zigbee Devices=%d\n", __PRETTY_FUNCTION__, gtizigbeedevices.size());
