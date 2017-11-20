@@ -119,6 +119,48 @@ $.extend(IomyRe.common,{
     ThingListLastUpdate:            new Date(),
 
     //============================================//
+    //== OTHER USERS AND PERMISSIONS            ==//
+    //============================================//
+    PermLevelsPremise:              {
+    	"_1": {
+            "Id":   1,
+            "Name": "No Access"
+        },
+        "_2": {
+            "Id":   2,
+            "Name": "Read"
+        },
+        "_3": {
+            "Id":   3,
+            "Name": "Read and Write"
+        },
+        "_4": {
+            "Id":   4,
+            "Name": "Premise Management, Read and Write"
+        },
+    },
+    PermLevelsDevice:              {
+        "_1": {
+            "Id":   1,
+            "Name": "No Access"
+        },
+        "_2": {
+            "Id":   2,
+            "Name": "Read"
+        },
+        "_3": {
+            "Id":   3,
+            "Name": "Read, Device Toggle"
+        },
+        "_4": {
+            "Id":   4,
+            "Name": "Read/Write"
+        }
+    },
+    
+    
+    
+    //============================================//
     //== Navigational Variables                    ==//
     //============================================//
     NavPagesNavigationArray         : [],            //-- ARRAY:            This array holds the list of Pages (and Parameters).    --//
