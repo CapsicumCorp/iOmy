@@ -39,12 +39,12 @@ if( !defined('SITE_BASE') ) {
 $bError                     = false;        //-- BOOLEAN:       Used to indicate if an error has been caught. --//
 $sErrMesg                   = "";           //-- STRING:        Used to store the error message after an error has been caught. --//
 $aResult                    = array();      //-- ARRAY:         Used to store the results. --//
-$iRed                       = 50;
-$iGreen                     = 255;
-$iBlue                      = 50;
-$iHue                       = 0;
-$fSaturation                = 0;
-$fLuminance                 = 0.5;
+$iRed                       = 50;           //-- NUMBER:        Stores the Red value. --//
+$iGreen                     = 255;          //-- NUMBER:        Stores the Green value. --//
+$iBlue                      = 50;           //-- NUMBER:        Stores the Blue value. --//
+$iHue                       = 0;            //-- NUMBER:        Stores the Hue value for processing. --//
+$fSaturation                = 0;            //-- NUMBER:        Stores the Saturation value for processing. --//
+$fLuminance                 = 0.5;          //-- NUMBER:        Stores the Luminance value for processing. --//
 
 $sPostMode                  = "";           //-- STRING:        Used to store which Mode the API should function in. --//
 
@@ -97,6 +97,130 @@ if($bError===false) {
 		$sErrMesg .= "eg. \n \"RGB\" or \"HSL\" \n\n";
 		//sErrMesg .= e0011.message;
 	}
+}
+
+//====================================================================//
+//== 4.0 - PREPARATION FOR MAIN SECTION                             ==//
+//====================================================================//
+if ( $bError === false ) {
+    if ($sPostMode === "RGB") {
+        //-- Red --//
+        if( isset( $_GET['R'] )) {
+            if (is_numeric($_GET['R'])) {
+                $iRed = $_GET['R'];
+                
+                if ($iRed < 0 || $iRed > 255) {
+                    $bError      = true;
+                    $sErrMesg   .= "R value must be between 0 - 255.\n";
+                }
+                
+            } else {
+                $bError      = true;
+                $sErrMesg   .= "R value contains non-numeric characters. Should be between 0 - 255.\n";
+            }
+        } else {
+            $bError      = true;
+            $sErrMesg   .= "R value must be specified. (0 - 255)\n";
+        }
+
+        //-- Green --//
+        if( isset( $_GET['G'] )) {
+            if (is_numeric($_GET['G'])) {
+                $iGreen = $_GET['G'];
+                
+                if ($iGreen < 0 || $iGreen > 255) {
+                    $bError      = true;
+                    $sErrMesg   .= "G value must be between 0 - 255.\n";
+                }
+                
+            } else {
+                $bError      = true;
+                $sErrMesg   .= "G value contains non-numeric characters. Should be between 0 - 255.\n";
+            }
+        } else {
+            $bError      = true;
+            $sErrMesg   .= "G value must be specified. (0 - 255)\n";
+        }
+
+        //-- Blue --//
+        if( isset( $_GET['B'] )) {
+            if (is_numeric($_GET['B'])) {
+                $iBlue = $_GET['B'];
+                
+                if ($iBlue < 0 || $iBlue > 255) {
+                    $bError      = true;
+                    $sErrMesg   .= "B value must be between 0 - 255.\n";
+                }
+                
+            } else {
+                $bError      = true;
+                $sErrMesg   .= "B value contains non-numeric characters. Should be between 0 - 255.\n";
+            }
+        } else {
+            $bError      = true;
+            $sErrMesg   .= "B value must be specified. (0 - 255)\n";
+        }
+        
+    } else if ($sPostMode === "HSL") {
+        $vFigureToCheck;
+        
+        //-- Hue --//
+        if( isset( $_GET['H'] )) {
+            if (is_numeric($_GET['H'])) {
+                $vFigureToCheck = $_GET['H'];
+                
+                if ($vFigureToCheck < 0 || $vFigureToCheck > 360) {
+                    $bError      = true;
+                    $sErrMesg   .= "H value must be between 0 - 360.\n";
+                }
+                
+            } else {
+                $bError      = true;
+                $sErrMesg   .= "H value contains non-numeric characters. Should be between 0 - 360.\n";
+            }
+        } else {
+            $bError      = true;
+            $sErrMesg   .= "H value must be specified. (0 - 360)\n";
+        }
+
+        //-- Saturation --//
+        if( isset( $_GET['S'] )) {
+            if (is_numeric($_GET['S'])) {
+                $vFigureToCheck = $_GET['S'];
+                
+                if ($vFigureToCheck < 0 || $vFigureToCheck > 100) {
+                    $bError      = true;
+                    $sErrMesg   .= "S value must be between 0 - 100.\n";
+                }
+                
+            } else {
+                $bError      = true;
+                $sErrMesg   .= "S value contains non-numeric characters. Should be between 0 - 100.\n";
+            }
+        } else {
+            $bError      = true;
+            $sErrMesg   .= "S value must be specified. (0 - 100)\n";
+        }
+
+        //-- Luminance --//
+        if( isset( $_GET['L'] )) {
+            if (is_numeric($_GET['L'])) {
+                $vFigureToCheck = $_GET['L'];
+                
+                if ($vFigureToCheck < 0 || $vFigureToCheck > 100) {
+                    $bError      = true;
+                    $sErrMesg   .= "L value must be between 0 - 100.\n";
+                }
+                
+            } else {
+                $bError      = true;
+                $sErrMesg   .= "L value contains non-numeric characters. Should be between 0 - 100.\n";
+            }
+        } else {
+            $bError      = true;
+            $sErrMesg   .= "L value must be specified. (0 - 100)\n";
+        }
+    }
 }
 
 //====================================================================//
@@ -166,7 +290,7 @@ if( $bError===false ) {
                 }
                 
                 //============================================================//
-                // Calculate the RGB Values
+                // Find the RGB Values
                 //============================================================//
                 if ($fSaturation == 0) {
                     //--------------------------------------------------------//
@@ -260,19 +384,50 @@ if (isset($_GET["Debug"])) {
     }
 }
 
-if ($bDebug) {
-    echo "<pre>";
-    var_dump($iRed);
-    var_dump($iGreen);
-    var_dump($iBlue);
-    
-    echo "</pre>";
+if ($bError) {
+    //-- Set the Page to Plain Text on Error. Note this can be changed to "text/html" or "application/json" --//
+	header('Content-Type: text/plain');
+	if( $bError===false ) {
+		//-- The aResult array has become undefined due to corruption of the array --//
+		$sOutput = "Error Code:'0002'!\n No Result";
+	
+	} else if( $sErrMesg===null || $sErrMesg===false || $sErrMesg==="" ) {
+		//-- The Error Message has been corrupted --//
+		$sOutput  = "Error Code:'0003'!\n Critical Error has occured!\n Undefinable Error Message\n";
+	
+	} else if( $sErrMesg!=false ) {
+		//-- Output the Error Message --//
+		$sOutput  = $sErrMesg;
+		
+	} else {
+		//-- Error Message is blank --//
+		$sOutput  = "Error Code:'0004'!\n Critical Error has occured!";
+	}
+	
+	try {
+		//-- Text Error Message --//
+		echo $sOutput;	
+		
+	} catch( Exception $e0005 ) {
+		//-- Failsafe Error Message --//
+		echo "Error Code:'0005'!\n Critical Error has occured!";
+	}
     
 } else {
+        if ($bDebug) {
+        echo "<pre>";
+        var_dump($iRed);
+        var_dump($iGreen);
+        var_dump($iBlue);
 
-    header('Content-Type: image/gif');
-    header('Content-Length: ' . 8 * (4.375 + $t));
-    echo pack( 'H32CCCH*', '47494638396101000100900100ffffff', $iRed, $iGreen, $iBlue, $sT );
+        echo "</pre>";
+
+    } else {
+
+        header('Content-Type: image/gif');
+        header('Content-Length: ' . 8 * (4.375 + $t));
+        echo pack( 'H32CCCH*', '47494638396101000100900100ffffff', $iRed, $iGreen, $iBlue, $sT );
+    }
 }
 
 //-- The End --//
