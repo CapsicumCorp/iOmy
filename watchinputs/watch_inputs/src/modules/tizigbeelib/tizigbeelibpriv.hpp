@@ -76,6 +76,16 @@ static const uint16_t ZDO_MGMT_PERMIT_JOIN_REQ = 0x2536;
 static const uint16_t ZDO_MGMT_PERMIT_JOIN_REQ_SRSP = 0x6536;
 static const uint16_t ZDO_MGMT_PERMIT_JOIN_RSP = 0x45b6;
 
+//This command is generated to request an End Device Announce
+static const uint16_t ZDO_END_DEVICE_ANNCE = 0x250a;
+static const uint16_t ZDO_END_DEVICE_ANNCE_IND = 0x45c1;
+
+//ZDO leave indication
+static const uint16_t ZDO_LEAVE_IND = 0x45c9;
+
+//ZDO Trust Center end device announce indication
+static const uint16_t ZDO_TC_DEVICE_IND = 0x45ca;
+
 //This callback message contains a ZDO cluster response
 static const uint16_t ZDO_MSG_CB_INCOMING = 0x45ff;
 
@@ -92,6 +102,12 @@ enum class WAITING_FOR {
   ZDO_MSG_CB_REGISTER_SRESPONSE,
   ZDO_STARTUP_FROM_APP_SRESPONSE
 };
+
+// Dongle startup options
+namespace STARTOPT {
+  static const uint8_t CLEAR_CONFIG = 0x01;
+  static const uint8_t CLEAR_STATE = 0x02;
+}
 
 //TI Zigbee Reset Types
 namespace RESET_TYPE {
@@ -307,6 +323,10 @@ namespace STATUS {
 
 //TI Zigbee Structures
 
+//---------------
+//Request Packets
+//---------------
+
 //This header is present in every TI Zigbee api packet
 //LSB 1-byte Checksum follows the payload and is the sum of all values from primary header to end of payload
 typedef struct {
@@ -341,6 +361,61 @@ typedef struct {
   uint8_t devinfotype; //Type of device info to retrieve
   uint8_t checksum;
 } __attribute__((packed)) tizigbee_zb_get_device_info_t;
+
+//ZB_WRITE_CONFIGURATION api packet
+typedef struct {
+  uint8_t frame_start; //Always set to 0xFE
+  uint8_t length;
+  uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
+  uint8_t configid;
+  uint8_t vallen; //Length of value
+  uint8_t value;
+  uint8_t checksum;
+} __attribute__((packed)) tizigbee_zb_write_configuration_req_8bit_t;
+
+//ZB_WRITE_CONFIGURATION api packet
+typedef struct {
+  uint8_t frame_start; //Always set to 0xFE
+  uint8_t length;
+  uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
+  uint8_t configid;
+  uint8_t vallen; //Length of value
+  uint16_t value; //LSB, MSB
+  uint8_t checksum;
+} __attribute__((packed)) tizigbee_zb_write_configuration_req_16bit_t;
+
+//ZB_WRITE_CONFIGURATION api packet
+typedef struct {
+  uint8_t frame_start; //Always set to 0xFE
+  uint8_t length;
+  uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
+  uint8_t configid;
+  uint8_t vallen; //Length of value
+  uint32_t value; //LSB, MSB
+  uint8_t checksum;
+} __attribute__((packed)) tizigbee_zb_write_configuration_req_32bit_t;
+
+//ZB_WRITE_CONFIGURATION api packet
+typedef struct {
+  uint8_t frame_start; //Always set to 0xFE
+  uint8_t length;
+  uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
+  uint8_t configid;
+  uint8_t vallen; //Length of value
+  uint64_t value; //LSB, MSB
+  uint8_t checksum;
+} __attribute__((packed)) tizigbee_zb_write_configuration_req_64bit_t;
+
+//ZB_WRITE_CONFIGURATION api packet
+typedef struct {
+  uint8_t frame_start; //Always set to 0xFE
+  uint8_t length;
+  uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
+  uint8_t configid;
+  uint8_t vallen; //Length of value
+  uint8_t value[8]; //LSB, MSB
+  uint8_t checksum;
+} __attribute__((packed)) tizigbee_zb_write_configuration_req_8byte_t;
 
 //ZDO_MSG_CB_REGISTER api packet
 typedef struct {
@@ -381,6 +456,10 @@ typedef struct {
   uint8_t trust_center_significance; //If set to 1 and remote is a trust center, the command affects the trust center authentication policy, otherwise it has no effect
   uint8_t checksum;
 } __attribute__((packed)) tizigbee_zdo_mgmt_permit_join_req_t;
+
+//----------------
+//Response Packets
+//----------------
 
 typedef struct {
   uint8_t frame_start; //Always set to 0xFE
@@ -444,6 +523,15 @@ typedef struct {
   uint8_t checksum;
 } __attribute__((packed)) tizigbee_zb_read_configuration_response_t;
 
+//ZB_WRITE_CONFIGURATION_RESPONSE api packet
+typedef struct {
+  uint8_t frame_start; //Always set to 0xFE
+  uint8_t length; //Number of bytes in the payload
+  uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
+  uint8_t status; //The result of the write operation (0=Success)
+  uint8_t checksum;
+} __attribute__((packed)) tizigbee_zb_write_configuration_response_t;
+
 typedef struct {
   uint8_t frame_start; //Always set to 0xFE
   uint8_t length; //Number of bytes in the payload
@@ -462,7 +550,7 @@ typedef struct {
   uint8_t status; //The result of the read operation (0=Success)
   uint8_t configid; //The identifier of the property that was read
   uint8_t proplen; //The length of the property
-  uint8_t networkKey[16]; //The network key being used
+  uint8_t networkKey[16]; //LSB, MSB: The network key being used
   uint8_t checksum;
 } __attribute__((packed)) tizigbee_zb_read_configuration_response_nv_precfgkey_t;
 
@@ -481,8 +569,41 @@ typedef struct {
   uint8_t frame_start; //Always set to 0xFE
   uint8_t length; //Number of bytes in the payload
   uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
+  uint8_t status; //The result of the read operation (0=Success)
+  uint8_t configid; //The identifier of the property that was read
+  uint8_t proplen; //The length of the property
+  uint8_t securityMode;
+  uint8_t checksum;
+} __attribute__((packed)) tizigbee_zb_read_configuration_response_nv_security_mode_t;
+
+typedef struct {
+  uint8_t frame_start; //Always set to 0xFE
+  uint8_t length; //Number of bytes in the payload
+  uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
   uint8_t status; //The result of the command (0=Success)
 } __attribute__((packed)) tizigbee_zdo_generic_srsp_t;
+
+//ZDO_LEAVE_IND
+typedef struct {
+  uint8_t frame_start; //Always set to 0xFE
+  uint8_t length; //Number of bytes in the payload
+  uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
+  uint16_t srcnetaddr; //LSB, MSB : Network Address of the remote Zigbee device
+  uint64_t addr; //LSB, MSB : 64-bit IEEE Address of the remote Zigbee device
+  uint16_t netaddr; //LSB, MSB : IS this the Zigbee coordinator/router device that connected the end device?
+  uint8_t checksum;
+} __attribute__((packed)) tizigbee_zdo_leave_ind_t;
+
+//ZDO_TC_DEVICE_IND
+typedef struct {
+  uint8_t frame_start; //Always set to 0xFE
+  uint8_t length; //Number of bytes in the payload
+  uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
+  uint16_t srcnetaddr; //LSB, MSB : Network Address of the remote Zigbee device
+  uint64_t addr; //LSB, MSB : 64-bit IEEE Address of the remote Zigbee device
+  uint16_t netaddr; //LSB, MSB : IS this the Zigbee coordinator/router device that connected the end device?
+  uint8_t checksum;
+} __attribute__((packed)) tizigbee_zdo_tc_device_ind_t;
 
 typedef struct {
   uint8_t frame_start; //Always set to 0xFE
