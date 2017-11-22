@@ -165,7 +165,27 @@ sap.ui.jsview("pages.staging.Block", {
 											]
 										}),
 									]
-								}),						
+								}),
+								new sap.ui.layout.BlockLayoutRow ({
+									content : [ 
+										new sap.ui.layout.BlockLayoutCell ({
+											content : [
+												new sap.ui.layout.VerticalLayout ({
+													width: "100%",
+													content : [
+														new sap.m.Link ({
+															text : "FFMPEG",
+															emphasized : true,
+															press : function () {
+																IomyRe.common.NavigationChangePage( "pFFMPEG" , {} , false);
+															}
+														}).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
+													]
+												})
+											]
+										}),
+									]
+								}),				
 							],
 						})
 					]

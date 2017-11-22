@@ -236,6 +236,12 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.rules.RulesForm\" Page!\n"
 	},
+	{
+		"Id":			"pFFMPEG",
+		"Location":		"pages.staging.FFMPEG",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.FFMPEG\" Page!\n"
+	},
 
 ];
 
