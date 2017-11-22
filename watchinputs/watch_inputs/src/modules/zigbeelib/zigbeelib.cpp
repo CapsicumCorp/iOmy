@@ -3282,7 +3282,7 @@ void zigbeelib_send_zigbee_zdo_match_descriptor_request(int localzigbeeindex, ui
   //Step the the location for the output cluster id list
   zigbeeclusters=(zigbee_zdo_node_clusters_t *) (((uint8_t *) zigbeeclusters)+1+numiclusters*2);
 
-  zigbeeclusters->numclusters=numiclusters;
+  zigbeeclusters->numclusters=numoclusters;
   for (i=0; i<numoclusters; ++i) {
     zigbeeclusters->clusters[i]=htole16(oclusters[i]);
   }
