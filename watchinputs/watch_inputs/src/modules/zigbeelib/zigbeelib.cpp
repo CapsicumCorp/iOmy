@@ -5960,6 +5960,7 @@ void zigbeelib_get_zigbee_next_endpoint_info(int localzigbeeindex, uint64_t addr
   Returns: A CMDLISTENER definition depending on the result
 */
 STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=(commonserverlib_ifaceptrs_ver_1_t *) zigbeelib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
   char tmpstrbuf[50];
 	std::string tmpstring;
