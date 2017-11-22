@@ -57,7 +57,6 @@ require_once SITE_BASE.'/restricted/libraries/http_post.php';
 //== 2.0 - Retrieve POST                                            ==//
 //====================================================================//
 
-
 //----------------------------------------------------//
 //-- 2.1 - Fetch the Parameters                     --//
 //----------------------------------------------------//
@@ -304,44 +303,67 @@ if( $bError===false ) {
                     $iBlue  = $iProduct;
                     
                 } else {
+                    //--------------------------------------------------------------------------------------//
+                    // Functionality based on example found at http://hsl2rgb.nichabi.com/php-function.php
+                    //--------------------------------------------------------------------------------------//
+                    
                     //--------------------------------------------------------//
-                    // The code for calculating RGB from HSV came from
-                    // https://gist.github.com/brandonheyer/5254516
+                    // Process the Hue for calculation
                     //--------------------------------------------------------//
-                    $iRed; 
-                    $iGreen; 
-                    $iBlue;
-                    $c = ( 1 - abs( 2 * $fLuminance - 1 ) ) * $fSaturation;
-                    $x = $c * ( 1 - abs( fmod( ( $iHue / 60 ), 2 ) - 1 ) );
-                    $m = $fLuminance - ( $c / 2 );
-                    if ( $iHue < 60 ) {
-                        $iRed = $c;
-                        $iGreen = $x;
-                        $iBlue = 0;
-                    } else if ( $iHue < 120 ) {
-                        $iRed = $x;
-                        $iGreen = $c;
-                        $iBlue = 0;			
-                    } else if ( $iHue < 180 ) {
-                        $iRed = 0;
-                        $iGreen = $c;
-                        $iBlue = $x;					
-                    } else if ( $iHue < 240 ) {
-                        $iRed = 0;
-                        $iGreen = $x;
-                        $iBlue = $c;
-                    } else if ( $iHue < 300 ) {
-                        $iRed = $x;
-                        $iGreen = 0;
-                        $iBlue = $c;
-                    } else {
-                        $iRed = $c;
-                        $iGreen = 0;
-                        $iBlue = $x;
+                    $iHue /= 60;
+                    if ($iHue < 0) {
+                        $iHue = 6 - fmod(-$iHue, 6);
                     }
-                    $iRed = floor( ( $iRed + $m ) * 255 );
-                    $iGreen = floor( ( $iGreen + $m ) * 255);
-                    $iBlue = floor( ( $iBlue + $m ) * 255);
+                    $iHue = fmod($iHue, 6);
+
+                    //--------------------------------------------------------//
+                    // Get the Chroma and the X value
+                    //--------------------------------------------------------//
+                    $fChroma = (1 - abs((2 * $fLuminance) - 1)) * $fSaturation;
+                    $fX = $fChroma * (1 - abs(fmod($iHue, 2) - 1));
+
+                    //--------------------------------------------------------//
+                    // Find the points on the RGB cube.
+                    //--------------------------------------------------------//
+                    if ($iHue < 1) {
+                        $iRed   = $fChroma;
+                        $iGreen = $fX;
+                        $iBlue  = 0;
+                        
+                    } elseif ($iHue < 2) {
+                        $iRed   = $fX;
+                        $iGreen = $fChroma;
+                        $iBlue  = 0;
+                        
+                    } elseif ($iHue < 3) {
+                        $iRed   = 0;
+                        $iGreen = $fChroma;
+                        $iBlue  = $fX;
+                        
+                    } elseif ($iHue < 4) {
+                        $iRed   = 0;
+                        $iGreen = $fX;
+                        $iBlue  = $fChroma;
+                        
+                    } elseif ($iHue < 5) {
+                        $iRed   = $fX;
+                        $iGreen = 0;
+                        $iBlue  = $fChroma;
+                        
+                    } else {
+                        $iRed   = $fChroma;
+                        $iGreen = 0;
+                        $iBlue  = $fX;
+                        
+                    }
+
+                    //--------------------------------------------------------//
+                    // Find the individual RGB values to match brightness.
+                    //--------------------------------------------------------//
+                    $m      = $fLuminance - $fChroma / 2;
+                    $iRed   = round(($iRed + $m) * 255);
+                    $iGreen = round(($iGreen + $m) * 255);
+                    $iBlue  = round(($iBlue + $m) * 255);
                 }
                 
 			} catch( Exception $e1400) {
@@ -414,7 +436,7 @@ if ($bError) {
 	}
     
 } else {
-        if ($bDebug) {
+    if ($bDebug) {
         echo "<pre>";
         var_dump($iRed);
         var_dump($iGreen);
@@ -424,7 +446,7 @@ if ($bError) {
 
     } else {
 
-        header('Content-Type: image/gif');
+        header('Content-Type: image/png');
         header('Content-Length: ' . 8 * (4.375 + $t));
         echo pack( 'H32CCCH*', '47494638396101000100900100ffffff', $iRed, $iGreen, $iBlue, $sT );
     }
