@@ -2671,43 +2671,64 @@ void zigbeelib_process_send_status(int localzigbeeindex, uint8_t packettype, uin
     return;
   }
   i=-1;
-  if (seqnumber) {
-    if (localzigbeedeviceptr->sendqueue_items[ localzigbeedeviceptr->sendqueuelastitemsentidx ].inuse && localzigbeedeviceptr->sendqueue_items[ localzigbeedeviceptr->sendqueuelastitemsentidx ].packettype==packettype && localzigbeedeviceptr->sendqueue_items[ localzigbeedeviceptr->sendqueuelastitemsentidx ].sent) {
+
+  if (localzigbeedeviceptr->sendqueue_items[ localzigbeedeviceptr->sendqueuelastitemsentidx ].inuse && localzigbeedeviceptr->sendqueue_items[ localzigbeedeviceptr->sendqueuelastitemsentidx ].packettype==packettype && localzigbeedeviceptr->sendqueue_items[ localzigbeedeviceptr->sendqueuelastitemsentidx ].sent) {
+    //Checking the most recent send queue index item as it has been sent
+    if (seqnumber) {
       if (localzigbeedeviceptr->sendqueue_items[ localzigbeedeviceptr->sendqueuelastitemsentidx ].haveseqnumber && localzigbeedeviceptr->sendqueue_items[ localzigbeedeviceptr->sendqueuelastitemsentidx ].seqnumber==*seqnumber) {
-        i=localzigbeedeviceptr->sendqueuelastitemsentidx;
-      } else if (localzigbeedeviceptr->sendqueue_items[ localzigbeedeviceptr->sendqueuelastitemsentidx ].waitingforsendstatus) {
+        //The most recent packet already has a sequence number and send status has one too
+        //  so we can match on that
         i=localzigbeedeviceptr->sendqueuelastitemsentidx;
       }
     }
     if (i==-1) {
-      for (i=0; i<MAX_SEND_QUEUE_ITEMS; i++) {
-        if (localzigbeedeviceptr->sendqueue_items[i].inuse && localzigbeedeviceptr->sendqueue_items[i].packettype==packettype && localzigbeedeviceptr->sendqueue_items[ localzigbeedeviceptr->sendqueuelastitemsentidx ].sent) {
+      if (localzigbeedeviceptr->sendqueue_items[ localzigbeedeviceptr->sendqueuelastitemsentidx ].waitingforsendstatus) {
+        //Can't match on sequence number, but still set to check this item as we are waiting for send status
+        i=localzigbeedeviceptr->sendqueuelastitemsentidx;
+      }
+    }
+  }
+  if (i==-1) {
+    for (i=0; i<MAX_SEND_QUEUE_ITEMS; i++) {
+      //Check the entire queue for packets that have been sent
+      if (localzigbeedeviceptr->sendqueue_items[i].inuse && localzigbeedeviceptr->sendqueue_items[i].packettype==packettype && localzigbeedeviceptr->sendqueue_items[ localzigbeedeviceptr->sendqueuelastitemsentidx ].sent) {
+        if (seqnumber) {
           if (localzigbeedeviceptr->sendqueue_items[i].haveseqnumber && localzigbeedeviceptr->sendqueue_items[i].seqnumber==*seqnumber) {
-            break;
-          } else if (localzigbeedeviceptr->sendqueue_items[i].waitingforsendstatus) {
+            //This packet already has a sequence number and send status has one too
+            //  so we can match on that
             break;
           }
         }
-      }
-      if (i==MAX_SEND_QUEUE_ITEMS) {
-        i=-1;
+        if (localzigbeedeviceptr->sendqueue_items[i].waitingforsendstatus) {
+          //Can't match on sequence number, but still set to check this item as we are waiting for send status
+          break;
+        }
       }
     }
-    if (status!=0) {
-      if (i>=0) {
-        //Remove the packet as it failed to send
-        //TODO: Implement retries
+    if (i==MAX_SEND_QUEUE_ITEMS) {
+      i=-1;
+    }
+  }
+  if (status!=0) {
+    if (i>=0) {
+      //Remove the packet as it failed to send
+      //TODO: Implement retries
 #ifdef ZIGBEELIB_SENDDEBUG
-				debuglibifaceptr->debuglib_printf(1, "%s: Removing packet from send queue due to status=%d, index=%d, sequence number: %d\n", __func__, (unsigned) status, i, *seqnumber);
-        __zigbeelib_send_queue_remove_packet(localzigbeeindex, i, localzigbeelocked, zigbeelocked);
-#endif
+      if (seqnumber) {
+        debuglibifaceptr->debuglib_printf(1, "%s: Removing packet from send queue due to status=%d, index=%d, sequence number: %d\n", __func__, (unsigned) status, i, *seqnumber);
+      } else {
+        debuglibifaceptr->debuglib_printf(1, "%s: Removing packet from send queue due to status=%d, index=%d, sequence number: N/A\n", __func__, (unsigned) status, i);
       }
-    } else {
-      if (i>=0) {
-        if (!localzigbeedeviceptr->sendqueue_items[i].waitingforresponse) {
-          //Can remove the packet now as we are waiting for a response from the device
-          __zigbeelib_send_queue_remove_packet(localzigbeeindex, i, localzigbeelocked, zigbeelocked);
-        } else {
+#endif
+      __zigbeelib_send_queue_remove_packet(localzigbeeindex, i, localzigbeelocked, zigbeelocked);
+    }
+  } else {
+    if (i>=0) {
+      if (!localzigbeedeviceptr->sendqueue_items[i].waitingforresponse) {
+        //Can remove the packet now as we are waiting for a response from the device
+        __zigbeelib_send_queue_remove_packet(localzigbeeindex, i, localzigbeelocked, zigbeelocked);
+      } else {
+        if (seqnumber) {
 #ifdef ZIGBEELIB_SENDDEBUG
           debuglibifaceptr->debuglib_printf(1, "%s: Adding sequence number to packet in send queue, index=%d, sequence number: %d\n", __func__, i, *seqnumber);
 #endif
