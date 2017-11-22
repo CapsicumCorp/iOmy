@@ -180,48 +180,49 @@ static const uint8_t API_START_BYTE=0xFE;
 // The dongle will automatically pickup a random, not conflicting PAN ID
 static const uint16_t AUTO_PANID = 0xffff;
 
-typedef struct {
-  char removed; //This device has been removed so is free to be reused by a new device
-  char needtoremove; //This device has been scheduled for removal so functions should stop using it
-  long inuse; //This device is currently in use, increment before using and decrement when finished using, 0=available for reuse
-  int serdevidx;
-  int (*sendFuncptr)(int serdevidx, const void *buf, size_t count);
-  int zigbeelibindex;
-  int haendpoint;
-  int haendpointregistered; //1=The HA Endpoint has been registered with the Zigbee library
+class tizigbeedevice_t {
+public:
+  char removed=0; //This device has been removed so is free to be reused by a new device
+  char needtoremove=0; //This device has been scheduled for removal so functions should stop using it
+  long inuse=0; //This device is currently in use, increment before using and decrement when finished using, 0=available for reuse
+  int serdevidx=-1;
+  int (*sendFuncptr)(int serdevidx, const void *buf, size_t count)=nullptr;
+  int zigbeelibindex=-1;
+  int haendpoint=HA_ENDPOINTID;
+  int haendpointregistered=0; //1=The HA Endpoint has been registered with the Zigbee library
   //pthread_mutex_t sendmutex; //Locked when we a thread is using the send buffer
-  unsigned char *receivebuf;
-  int receivebufcnt; //Number of bytes currently being used in the receive buffer
+  std::array<unsigned char, BUFFER_SIZE> receivebuf;
+  int receivebufcnt=0; //Number of bytes currently being used in the receive buffer
 
   //Provided by SYS_PING
-  uint16_t capabilities;
+  uint16_t capabilities=0;
 
   //Provided by version request
-  uint8_t transportrev;
-  uint8_t product;
-  uint8_t firmmaj; //Firmware version
-  uint8_t firmmin;
-  uint8_t hwrev;
+  uint8_t transportrev=0;
+  uint8_t product=0;
+  uint8_t firmmaj=0; //Firmware version
+  uint8_t firmmin=0;
+  uint8_t hwrev=0;
 
   //TODO: Using these?
-  uint8_t network_state; //network state
-  uint8_t cfgstate;
+  uint8_t network_state=0; //network state
+  uint8_t cfgstate=0;
 
-  uint8_t device_type; //Device Type: 0=Coordinator, 1=Router, 2=End Device
-  bool zdo_cluster_registered; //True=ZDO Clusters have been registered
-  uint8_t zdo_zigbee_startup_status; //0=Inited with existing network, 1=Inited with new or reset network, 2=Init failed, else unknown
+  uint8_t device_type=0; //Device Type: 0=Coordinator, 1=Router, 2=End Device
+  bool zdo_cluster_registered=0; //True=ZDO Clusters have been registered
+  uint8_t zdo_zigbee_startup_status=0; //0=Inited with existing network, 1=Inited with new or reset network, 2=Init failed, else unknown
 
-  uint8_t channel;
-  uint16_t netaddr;
-  uint16_t panid;
-  uint64_t extpanid;
-  uint64_t addr; //64-bit IEEE address of the device
+  uint8_t channel=0;
+  uint16_t netaddr=0;
+  uint16_t panid=0;
+  uint64_t extpanid=0;
+  uint64_t addr=0; //64-bit IEEE address of the device
 
-  uint8_t networkKey[16];
-  bool distributeNetworkKey; //True=Distribute network key in clear
+  std::array<uint8_t, 16> networkKey;
+  bool distributeNetworkKey=false; //True=Distribute network key in clear
 
-  uint8_t waitingforresponse; //Set to 1 every time we send a remote Zigbee packet via this device
-  uint8_t needreinit; //We have scheduled full reinitialisation of this device
+  uint8_t waitingforresponse=0; //Set to 1 every time we send a remote Zigbee packet via this device
+  uint8_t needreinit=0; //We have scheduled full reinitialisation of this device
                       //1=Init as Coordinator
                       //2=Init as Router
                       //3=Init as Non-Sleepy End Device
@@ -232,17 +233,22 @@ typedef struct {
   uint32_t formNetworkChanMask=0x0; //The channel mask to use when forming the network
   uint8_t write_config_status=0;
 
-  uint8_t reportingsupported; //>= 1.5.3 supports attribute reports
-  uint8_t manureportingsupported; //>= 1.5.6 supports manufacturer attribute reports
+  uint8_t reportingsupported=0; //>= 1.5.3 supports attribute reports
+  uint8_t manureportingsupported=0; //>= 1.5.6 supports manufacturer attribute reports
 
   //These variables need to carry across calls to the receive function
-  uint8_t receive_processing_packet, receive_escapechar;
-  uint8_t receive_checksum;
-  uint8_t receive_packetlength;
+  uint8_t receive_processing_packet=0, receive_escapechar=0;
+  uint8_t receive_checksum=0;
+  uint8_t receive_packetlength=0;
 
-  int waiting_for_remotestatus; //-1=Not waiting, other values may indicate the frameid we're waiting for
-  int waiting_for_remotequeueidx; //Index if the item in the send queue of the packet we are waiting for a response from
-} tizigbeedevice_t;
+  int waiting_for_remotestatus=-1; //-1=Not waiting, other values may indicate the frameid we're waiting for
+  int waiting_for_remotequeueidx=0; //Index if the item in the send queue of the packet we are waiting for a response from
+
+  tizigbeedevice_t() {
+    receivebuf.fill(0);
+    networkKey.fill(0);
+  };
+};
 
 
 #ifdef DEBUG
@@ -1027,7 +1033,7 @@ static void send_zigbee_zdo(void *localzigbeedevice, zdo_general_request_t *zdoc
 */
 static void process_sys_ping_response(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_sys_ping_response_t *apicmd=reinterpret_cast<tizigbee_sys_ping_response_t *>(tizigbeedevice.receivebuf);
+  tizigbee_sys_ping_response_t *apicmd=reinterpret_cast<tizigbee_sys_ping_response_t *>(tizigbeedevice.receivebuf.data());
 
   MOREDEBUG_ENTERINGFUNC();
   locktizigbee();
@@ -1078,7 +1084,7 @@ static void process_sys_ping_response(tizigbeedevice_t& tizigbeedevice) {
 */
 static void process_sys_version_response(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_sys_version_response_t *apicmd=reinterpret_cast<tizigbee_sys_version_response_t *>(tizigbeedevice.receivebuf);
+  tizigbee_sys_version_response_t *apicmd=reinterpret_cast<tizigbee_sys_version_response_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
   MOREDEBUG_ENTERINGFUNC();
@@ -1108,7 +1114,7 @@ static void process_sys_version_response(tizigbeedevice_t& tizigbeedevice) {
 */
 static void process_sys_reset_response(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_sys_reset_response_t *apicmd=reinterpret_cast<tizigbee_sys_reset_response_t *>(tizigbeedevice.receivebuf);
+  tizigbee_sys_reset_response_t *apicmd=reinterpret_cast<tizigbee_sys_reset_response_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
   MOREDEBUG_ENTERINGFUNC();
@@ -1139,7 +1145,7 @@ static void process_sys_reset_response(tizigbeedevice_t& tizigbeedevice) {
 */
 static void process_zb_device_info_response(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_zb_get_device_info_response_t *apicmd=reinterpret_cast<tizigbee_zb_get_device_info_response_t *>(tizigbeedevice.receivebuf);
+  tizigbee_zb_get_device_info_response_t *apicmd=reinterpret_cast<tizigbee_zb_get_device_info_response_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
   MOREDEBUG_ENTERINGFUNC();
@@ -1201,7 +1207,7 @@ static void process_zb_device_info_response(tizigbeedevice_t& tizigbeedevice) {
 */
 static void process_zb_read_configuration_response_nv_logical_type(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_zb_read_configuration_response_nv_logical_type_t *apicmd=reinterpret_cast<tizigbee_zb_read_configuration_response_nv_logical_type_t *>(tizigbeedevice.receivebuf);
+  tizigbee_zb_read_configuration_response_nv_logical_type_t *apicmd=reinterpret_cast<tizigbee_zb_read_configuration_response_nv_logical_type_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
   tizigbeedevice.device_type=apicmd->NetworkMode;
@@ -1214,13 +1220,13 @@ static void process_zb_read_configuration_response_nv_logical_type(tizigbeedevic
 */
 static void process_zb_read_configuration_response_nv_precfgkey(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_zb_read_configuration_response_nv_precfgkey_t *apicmd=reinterpret_cast<tizigbee_zb_read_configuration_response_nv_precfgkey_t *>(tizigbeedevice.receivebuf);
+  tizigbee_zb_read_configuration_response_nv_precfgkey_t *apicmd=reinterpret_cast<tizigbee_zb_read_configuration_response_nv_precfgkey_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
-  memcpy(tizigbeedevice.networkKey, apicmd->networkKey, sizeof(tizigbeedevice.networkKey));
+  memcpy(tizigbeedevice.networkKey.data(), apicmd->networkKey, sizeof(tizigbeedevice.networkKey));
 
   std::string strtmp="0x";
-  for (unsigned i=0; i<sizeof(tizigbeedevice.networkKey); i++) {
+  for (unsigned i=0; i<tizigbeedevice.networkKey.size(); i++) {
     char hextmp[3];
     sprintf(hextmp, "%02" PRIX8, apicmd->networkKey[i]);
     strtmp+=hextmp;
@@ -1234,7 +1240,7 @@ static void process_zb_read_configuration_response_nv_precfgkey(tizigbeedevice_t
 */
 static void process_zb_read_configuration_response_nv_precfgkeys_enable(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_zb_read_configuration_response_nv_precfgkeys_enable_t *apicmd=reinterpret_cast<tizigbee_zb_read_configuration_response_nv_precfgkeys_enable_t *>(tizigbeedevice.receivebuf);
+  tizigbee_zb_read_configuration_response_nv_precfgkeys_enable_t *apicmd=reinterpret_cast<tizigbee_zb_read_configuration_response_nv_precfgkeys_enable_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
   if (apicmd->distributeNetworkKey==1) {
@@ -1252,7 +1258,7 @@ static void process_zb_read_configuration_response_nv_precfgkeys_enable(tizigbee
 */
 static void process_zb_read_configuration_response_nv_security_mode(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_zb_read_configuration_response_nv_security_mode_t *apicmd=reinterpret_cast<tizigbee_zb_read_configuration_response_nv_security_mode_t *>(tizigbeedevice.receivebuf);
+  tizigbee_zb_read_configuration_response_nv_security_mode_t *apicmd=reinterpret_cast<tizigbee_zb_read_configuration_response_nv_security_mode_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
   debuglibifaceptr->debuglib_printf(1, "%s:   Security Mode: %" PRId8 "\n", __PRETTY_FUNCTION__, apicmd->securityMode);
@@ -1264,7 +1270,7 @@ static void process_zb_read_configuration_response_nv_security_mode(tizigbeedevi
 */
 static void process_zb_read_configuration_response(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_zb_read_configuration_response_t *apicmd=reinterpret_cast<tizigbee_zb_read_configuration_response_t *>(tizigbeedevice.receivebuf);
+  tizigbee_zb_read_configuration_response_t *apicmd=reinterpret_cast<tizigbee_zb_read_configuration_response_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
   MOREDEBUG_ENTERINGFUNC();
@@ -1305,7 +1311,7 @@ static void process_zb_read_configuration_response(tizigbeedevice_t& tizigbeedev
 */
 static void process_zb_write_configuration_response(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_zb_write_configuration_response_t *apicmd=reinterpret_cast<tizigbee_zb_write_configuration_response_t *>(tizigbeedevice.receivebuf);
+  tizigbee_zb_write_configuration_response_t *apicmd=reinterpret_cast<tizigbee_zb_write_configuration_response_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
   MOREDEBUG_ENTERINGFUNC();
@@ -1331,7 +1337,7 @@ static void process_zb_write_configuration_response(tizigbeedevice_t& tizigbeede
 */
 static void process_zdo_msg_cb_register_srsp(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_zdo_generic_srsp_t *apicmd=reinterpret_cast<tizigbee_zdo_generic_srsp_t *>(tizigbeedevice.receivebuf);
+  tizigbee_zdo_generic_srsp_t *apicmd=reinterpret_cast<tizigbee_zdo_generic_srsp_t *>(tizigbeedevice.receivebuf.data());
 
   MOREDEBUG_ENTERINGFUNC();
   locktizigbee();
@@ -1354,7 +1360,7 @@ static void process_zdo_msg_cb_register_srsp(tizigbeedevice_t& tizigbeedevice) {
 */
 static void process_zdo_startup_from_app_srsp(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_zdo_generic_srsp_t *apicmd=reinterpret_cast<tizigbee_zdo_generic_srsp_t *>(tizigbeedevice.receivebuf);
+  tizigbee_zdo_generic_srsp_t *apicmd=reinterpret_cast<tizigbee_zdo_generic_srsp_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
   MOREDEBUG_ENTERINGFUNC();
@@ -1390,7 +1396,7 @@ static void process_zdo_startup_from_app_srsp(tizigbeedevice_t& tizigbeedevice) 
 */
 static void process_zdo_generic_srsp(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_zdo_generic_srsp_t *apicmd=reinterpret_cast<tizigbee_zdo_generic_srsp_t *>(tizigbeedevice.receivebuf);
+  tizigbee_zdo_generic_srsp_t *apicmd=reinterpret_cast<tizigbee_zdo_generic_srsp_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
   const zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=reinterpret_cast<const zigbeelib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1));
   int zigbeelibindex;
@@ -1418,7 +1424,7 @@ static void process_zdo_generic_srsp(tizigbeedevice_t& tizigbeedevice) {
 */
 static void process_zdo_leave_ind(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_zdo_leave_ind_t *apicmd=reinterpret_cast<tizigbee_zdo_leave_ind_t *>(tizigbeedevice.receivebuf);
+  tizigbee_zdo_leave_ind_t *apicmd=reinterpret_cast<tizigbee_zdo_leave_ind_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
   MOREDEBUG_ENTERINGFUNC();
@@ -1434,7 +1440,7 @@ static void process_zdo_leave_ind(tizigbeedevice_t& tizigbeedevice) {
 */
 static void process_zdo_tc_device_ind(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_zdo_tc_device_ind_t *apicmd=reinterpret_cast<tizigbee_zdo_tc_device_ind_t *>(tizigbeedevice.receivebuf);
+  tizigbee_zdo_tc_device_ind_t *apicmd=reinterpret_cast<tizigbee_zdo_tc_device_ind_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
   MOREDEBUG_ENTERINGFUNC();
@@ -1452,7 +1458,7 @@ static void process_zdo_msg_cb_incoming(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
   const zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=reinterpret_cast<const zigbeelib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1));
-  tizigbee_zdo_msg_cb_incoming_t *apicmd=reinterpret_cast<tizigbee_zdo_msg_cb_incoming_t *>(tizigbeedevice.receivebuf);
+  tizigbee_zdo_msg_cb_incoming_t *apicmd=reinterpret_cast<tizigbee_zdo_msg_cb_incoming_t *>(tizigbeedevice.receivebuf.data());
   zigbee_zdo_response_header_t *zdocmd;
   int zigbeelibindex;
   uint16_t srcnetaddr, clusterid, profileid;
@@ -1502,7 +1508,7 @@ static void process_api_packet(tizigbeedevice_t& tizigbeedevice) {
   tizigbee_api_response_t *apicmd;
 
   MOREDEBUG_ENTERINGFUNC();
-  apicmd=reinterpret_cast<tizigbee_api_response_t *>(tizigbeedevice.receivebuf);
+  apicmd=reinterpret_cast<tizigbee_api_response_t *>(tizigbeedevice.receivebuf.data());
 
   //Swap the cmd bytes to host format if necessary so easier to work with
   apicmd->cmd=ntohs(apicmd->cmd);
@@ -1611,17 +1617,6 @@ static void receiveraw(int UNUSED(serdevidx), int handlerdevidx, char *buffer, i
     return;
   }
   unlocktizigbee();
-  if (tizigbeedevice->receivebuf==nullptr) {
-    marktizigbee_notinuse(*tizigbeedevice);
-    if (tizigbeedevice==&gnewtizigbee) {
-      PTHREAD_UNLOCK(&gmutex_initnewtizigbee);
-    }
-    //Not ready to receive data yet ; This should never happen since the detect function will allocate space before
-    //  the receive thread is switched from newtizigbee lib to the tizigbeelib list element
-    debuglibifaceptr->debuglib_printf(1, "%s: BUG: Received data before buffer space allocated\n", __PRETTY_FUNCTION__);
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
 
   //TODO: Comment out
 //#ifdef TIZIGBEELIB_MOREDEBUG
@@ -1745,27 +1740,13 @@ static int find_tizigbee_device(uint64_t addr) {
 //  so we shouldn't free it here just set it back to NULL.
 static void _init_newtizigbee(void) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  unsigned char *receivebuf;
 
   MOREDEBUG_ENTERINGFUNC();
 
   //Wait for other threads to finish using gnewtizigbee first
   PTHREAD_LOCK(&gmutex_initnewtizigbee);
 
-  //Backup sendmutex, and receivebuf
-  receivebuf=gnewtizigbee.receivebuf;
-
-  //Clear newtizigbee
-  memset(&gnewtizigbee, 0, sizeof(tizigbeedevice_t));
-
-  //Restore sendmutex, and receivebuf
-  gnewtizigbee.receivebuf=receivebuf;
-
-  //Set new non-zero initial values
-  gnewtizigbee.serdevidx=-1;
-  gnewtizigbee.zigbeelibindex=-1;
-  gnewtizigbee.haendpoint=HA_ENDPOINTID;
-  gnewtizigbee.waiting_for_remotestatus=-1;
+  gnewtizigbee=tizigbeedevice_t();
 
   PTHREAD_UNLOCK(&gmutex_initnewtizigbee);
 
@@ -2145,20 +2126,10 @@ static int isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx, co
   //  are added
   unlocktizigbee();
 
-  //First allocate ram for buffers so we can abort if allocation fails
-  unsigned char *receivebuftmp;
-  try {
-    receivebuftmp=new unsigned char[BUFFER_SIZE];
-  } catch (std::bad_alloc& e) {
-    debuglibifaceptr->debuglib_printf(1, "%s: Failed to allocate ram for the receive buffer\n", __PRETTY_FUNCTION__);
-    return -1;
-  }
   PTHREAD_LOCK(&gmutex_initnewtizigbee);
   gtizigbeedevices[list_numitems]=gnewtizigbee;
   PTHREAD_UNLOCK(&gmutex_initnewtizigbee);
   locktizigbee();
-
-  gtizigbeedevices[list_numitems].receivebuf=receivebuftmp;
 
   //TODO: Remove
   debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Num TI Zigbee Devices=%d\n", __PRETTY_FUNCTION__, gtizigbeedevices.size());
@@ -2407,10 +2378,6 @@ static int serial_device_removed(int serdevidx) {
   //Remove the TI Zigbee from ram
   index=tizigbeeit->first; //So we can refer to the index later on
 
-  if (tizigbeedeviceptr->receivebuf) {
-    delete[] tizigbeedeviceptr->receivebuf;
-    tizigbeedeviceptr->receivebuf=NULL;
-  }
   //We can remove the TI Zigbee as it isn't in use
   debuglibifaceptr->debuglib_printf(1, "%s: TI Zigbee %016" PRIX64 " at index: %" PRId16 " has now been removed\n", __PRETTY_FUNCTION__, tizigbeedeviceptr->addr, index);
 
@@ -2826,15 +2793,6 @@ static int init(void) {
 
   _init_newtizigbee();
 
-  //Allocate storage for the new tizigbee device receive buffers
-  if (!gnewtizigbee.receivebuf) {
-    try {
-      gnewtizigbee.receivebuf=new unsigned char[BUFFER_SIZE];
-    } catch (std::bad_alloc& e) {
-      debuglibifaceptr->debuglib_printf(1, "Exiting %s: Not enough ram for receive buffer\n", __PRETTY_FUNCTION__);
-      return -3;
-    }
-  }
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
 
   return 0;
@@ -2867,17 +2825,7 @@ static void shutdown(void) {
   gshuttingdown=0;
 
   //Free allocated memory
-  for (auto& it : gtizigbeedevices) {
-    if (it.second.receivebuf) {
-      delete[] it.second.receivebuf;
-      it.second.receivebuf=nullptr;
-    }
-  }
   gtizigbeedevices.clear();
-  if (gnewtizigbee.receivebuf) {
-    delete[] gnewtizigbee.receivebuf;
-    gnewtizigbee.receivebuf=nullptr;
-  }
   sem_destroy(&gmainthreadsleepsem);
 
 #ifdef DEBUG
