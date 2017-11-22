@@ -146,7 +146,7 @@ sap.ui.controller("pages.staging.user.UserList", {
 				}
 				
                 aUsers.push({
-                    "UserId" : oConfig.data[i].UserId,
+                    "UserId" : oConfig.data[i].Id,
                     "Username": oConfig.data[i].Username,
                     "FirstName": oConfig.data[i].Givennames,
                     "LastName" : oConfig.data[i].Surnames,
@@ -173,6 +173,22 @@ sap.ui.controller("pages.staging.user.UserList", {
         } else {
             throw new MissingArgumentException("User data is required. This is obtained from the users API to list all users.");
         }
-	}
+	},
+    
+    GetSelectedUsers : function () {
+        var oController         = this;
+        var oView               = oController.getView();
+        var oTable              = oView.byId("UsersTable");
+        var aRows               = oTable.getRows();
+        var aSelectedIndices    = oTable.getSelectedIndices();
+        var aSelectedRows       = [];
+        var aUserList           = oView.getModel().getProperty("/UserList");
+        
+        for (var i = 0; i < aSelectedIndices.length; i++) {
+            aSelectedRows.push(aUserList[aSelectedIndices[i]].UserId);
+        }
+        
+        console.log(aSelectedRows);
+    }
 
 });

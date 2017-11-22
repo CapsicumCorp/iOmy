@@ -83,8 +83,11 @@ sap.ui.jsview("pages.staging.user.UserList", {
 			header : IomyRe.widgets.getToolPageHeader(oController),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
 			mainContents: [ 
-				new sap.ui.table.Table ({
+				new sap.ui.table.Table (oView.createId("UsersTable"), {
 					rows: "{/UserList}",
+                    rowSelectionChange : function () {
+                        oController.GetSelectedUsers();
+                    },
 					extension : [
 						new sap.m.Toolbar ({
 							selectionMode:"MultiToggle",
@@ -148,7 +151,7 @@ sap.ui.jsview("pages.staging.user.UserList", {
 						new sap.ui.table.Column ({
 							width: "11rem",
 							label : new sap.m.Label({ 
-								text:"Status" 
+								text:"Editing" 
 							}),
 							template : oColEdit
 						}),
