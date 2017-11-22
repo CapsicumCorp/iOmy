@@ -111,10 +111,13 @@ $.extend(IomyRe.functions, {
         var fBlue;
         
         var fMin, fMax;
+        var fDifference;
         
         var iHue;
         var iSat;
         var iLight;
+        
+        console.log(sColorString);
         
         //--------------------------------------------------------------------//
         // First check that the colour string is given.
@@ -135,6 +138,8 @@ $.extend(IomyRe.functions, {
         //--------------------------------------------------------------------//
         aFigures = sColorString.split(",");
         
+        console.log(aFigures);
+        
         fRed    = aFigures[0] / 255;
         fGreen  = aFigures[1] / 255;
         fBlue   = aFigures[2] / 255;
@@ -145,19 +150,21 @@ $.extend(IomyRe.functions, {
         fMin = Math.min( fRed, fGreen, fBlue );
         fMax = Math.max( fRed, fGreen, fBlue );
         
+        fDifference = fMax - fMin;
+        
         //--------------------------------------------------------------------//
-        // Find the luminace figure.
+        // Find the luminance figure.
         //--------------------------------------------------------------------//
-        iLight = Math.round((fMin + fMax)/2) * 100;
+        iLight = ((fMin + fMax)/2);
         
         //--------------------------------------------------------------------//
         // Find the saturation
         //--------------------------------------------------------------------//
-        if (iLight < 50) {
-            iSat = Math.round((fMax - fMin) / (fMax + fMin)) * 100;
+        if (iLight <= 0.5) {
+            iSat = ((fDifference / (fMax + fMin)));
             
-        } else if (iLight > 50) {
-            iSat = Math.round((fMax - fMin) / (2 - fMax - fMin)) * 100;
+        } else {
+            iSat = ((fDifference / (2 - fMax - fMin)));
             
         }
         
@@ -165,15 +172,28 @@ $.extend(IomyRe.functions, {
         // Find the hue
         //--------------------------------------------------------------------//
         if (fMax === fRed) {
-            iHue = Math.round(((fGreen - fBlue) / (fMax - fMin)) * 60);
+            iHue = (fGreen - fBlue) / fDifference;
             
         } else if (fMax === fGreen) {
-            iHue = Math.round((2 + (fBlue - fRed) / (fMax - fMin)) * 60);
+            iHue = 2 + (fBlue - fRed) / fDifference;
             
         } else if (fMax === fBlue) {
-            iHue = Math.round((4 + (fRed - fGreen) / (fMax - fMin)) * 60);
+            iHue = 4 + (fRed - fGreen) / fDifference;
             
         }
+        
+        iHue /= 6;
+        
+        //--------------------------------------------------------------------//
+        // Round off the figures.
+        //--------------------------------------------------------------------//
+        iHue = Math.round(iHue * 360);
+        iSat = Math.round(iSat * 100);
+        iLight = Math.round(iLight * 100);
+        
+        console.log(iHue);
+        console.log(iSat);
+        console.log(iLight);
         
         //--------------------------------------------------------------------//
         // Return the figures.

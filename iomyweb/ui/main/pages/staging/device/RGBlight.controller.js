@@ -54,26 +54,22 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 }
                 
                 oController.iThingTypeId = iTypeId;
+                if (oController.bUsingAdvancedUI) {
+                    oController.SwitchToSimpleView();
+                } else {
+                    oController.InitialDeviceInfoLoad();
+                }
                 oController.RGBUiDraw();
                 
                 if (iTypeId == IomyRe.devices.philipshue.ThingTypeId) {
-                    oController.InitialDeviceInfoLoad();
                     oController.fHueConversionRate          = 65535 / 360;  // 65535 (2^16 - 1) is the maximum value the Philips Hue API will accept.
                     oController.fSaturationConversionRate   = 1.44;         // 144 / 100 (100 being the max saturation value)
                     oController.fLightConversionRate        = 2.54;         // 254 / 100 (likewise)
-                    
-                    oView.byId("hueSlider").setMax(65535);
-                    oView.byId("satSlider").setMax(144);
-                    oView.byId("briSlider").setMax(254);
                     
                 } else if (iTypeId == IomyRe.devices.csrmesh.ThingTypeId) {
                     oController.fHueConversionRate          = 1;
                     oController.fSaturationConversionRate   = 2.55;
                     oController.fLightConversionRate        = 2.55;
-                    
-                    oView.byId("hueSlider").setMax(360);
-                    oView.byId("satSlider").setMax(255);
-                    oView.byId("briSlider").setMax(255);
                 }
 				
 				//-- Defines the Screen Type --//
@@ -86,15 +82,11 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var oController = this;
         var oView       = this.getView();
         
-        iHue            = Math.floor(iHue / this.fHueConversionRate);
-        iSat            = Math.floor(iSat / this.fSaturationConversionRate);
-        iBright         = Math.floor((iBright / this.fLightConversionRate) / 2);
-        
         console.log("H:"+iHue);
         console.log("S:"+iSat);
-        console.log("B:"+iBright);
+        console.log("L:"+iBright);
         
-        oView.byId("ColourBox").setSrc(IomyRe.apiphp.APILocation("colorbox")+"?Mode=HSL&H="+iHue+"&S="+iSat+"&L="+iBright);
+        oView.byId("ColourBox").setSrc(IomyRe.apiphp.APILocation("colorbox")+"?Mode=HSL&H="+iHue+"&S="+iSat+"&L="+(iBright/2));
     },
     
     SetSliderValues : function (iHue, iSat, iBright) {
@@ -105,7 +97,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         oView.byId("briSlider").setValue(iBright);
     },
 	
-	//-- Sets the RGB Color parameters based on static data --//
+	//-- Sets the RGB Color parameters based on data from the database --//
 	RGBInit: function (iHue, iSaturation, iLight) {
         var oController     = this;
 		var oView           = this.getView();
@@ -113,7 +105,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         
         iHue            = Math.floor(iHue / this.fHueConversionRate);
         iSaturation     = Math.floor(iSaturation / this.fSaturationConversionRate);
-        iLight          = Math.floor(iLight / this.fLightConversionRate) / 2;
+        iLight          = Math.floor(iLight / this.fLightConversionRate);
         
         sColourString   = "hsv("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")";
         
@@ -151,39 +143,27 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var oController     = this;
         var oView           = this.getView();
         var oContainer      = oView.byId("RGB_Cont");
-        var mSliderValues   = IomyRe.functions.convertRGBToHSL(oView.byId("CPicker").getColorString());
+        //var mSliderValues   = IomyRe.functions.convertRGBToHSL(oView.byId("CPicker").getColorString());
         
-        console.log(mSliderValues);
+        //console.log(mSliderValues);
         
         oContainer.destroyContent();
         
         if (oController.bUsingAdvancedUI) {
             oController.bUsingAdvancedUI = false;
             
-            var iMaxHue, iMaxSaturation, iMaxBrightness;
-            
-            if (oController.iThingTypeId == IomyRe.devices.philipshue.ThingTypeId) {
-                iMaxHue         = 65535;
-                iMaxSaturation  = 144;
-                iMaxBrightness  = 254;
-                
-            } else if (oController.iThingTypeId == IomyRe.devices.csrmesh.ThingTypeId) {
-                iMaxHue         = 360;
-                iMaxSaturation  = 255;
-                iMaxBrightness  = 255;
-            }
+//            console.log(mSliderValues.hue * this.fHueConversionRate);
+//            console.log(mSliderValues.saturation * this.fSaturationConversionRate);
+//            console.log(mSliderValues.light * this.fLightConversionRate);
             
             oContainer.addContent(
                 IomyRe.widgets.LightBulbControlsContainer(oController, {
-                    maxHue          : iMaxHue,
-                    maxSaturation   : iMaxSaturation,
-                    maxBrightness   : iMaxBrightness,
-                    
-                    hue             : mSliderValues.hue * this.fHueConversionRate,
-                    saturation      : mSliderValues.saturation * this.fSaturationConversionRate,
-                    brightness      : mSliderValues.light * this.fLightConversionRate,
+                    hue             : 0,//mSliderValues.hue,
+                    saturation      : 0,//mSliderValues.saturation,
+                    brightness      : 0,//mSliderValues.light * 2,
                     
                     advancedViewPress : function () {
+                        oView.byId("ViewSwitchButton").setEnabled(false);
                         oController.SwitchToAdvancedView();
                     },
                     
@@ -201,7 +181,15 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 })
             );
         
-            oController.ChangeColourInBox(mSliderValues.hue, mSliderValues.saturation, mSliderValues.light);
+            oController.RGBUiDraw();
+        
+//            oController.ChangeColourInBox(
+//                oView.byId("hueSlider").getValue(),
+//                oView.byId("satSlider").getValue(),
+//                oView.byId("briSlider").getValue()
+//            );
+
+            oController.InitialDeviceInfoLoad();
         }
     },
     
@@ -213,9 +201,9 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var iSat = oView.byId("satSlider").getValue();
         var iBright = oView.byId("briSlider").getValue();
         
-        iHue    = Math.floor(iHue / this.fHueConversionRate);
-        iSat    = Math.floor(iSat / this.fSaturationConversionRate);
-        iBright = Math.floor(iBright / this.fLightConversionRate);
+        console.log(oView.byId("hueSlider").getValue());
+        console.log(oView.byId("satSlider").getValue());
+        console.log(oView.byId("briSlider").getValue());
         
         oContainer.destroyContent();
         
@@ -226,6 +214,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 colorString : "hsv("+iHue+","+iSat+","+iBright+")",
                 
                 simpleViewPress : function () {
+                    oView.byId("ViewSwitchButton").setEnabled(false);
                     oController.SwitchToSimpleView();
                 },
                 
@@ -233,6 +222,8 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                     oController.ChangeLightColour(oEvent);
                 },
             }));
+            
+            oController.RGBUiDraw();
         }
     },
     
@@ -250,12 +241,75 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var mIOs        = IomyRe.common.ThingList["_"+this.iThingId].IO;
         var aIOFilter   = [];
         
+        if (oView.byId("ViewSwitchButton") !== undefined) {
+            oView.byId("ViewSwitchButton").setEnabled(false);
+        }
+        
         try {
             $.each(mIOs, function (sI, aIO) {
                 if (sI !== undefined && sI !== null && aIO !== undefined && aIO !== null) {
                     aIOFilter.push("IO_PK eq "+aIO.Id);
                 }
             });
+            
+//            $.each(mIOs, function (sI, aIO) {
+//                if (sI !== undefined && sI !== null && aIO !== undefined && aIO !== null) {
+//                    IomyRe.apiodata.AjaxRequest({
+//                        Url : IomyRe.apiodata.ODataLocation("dataint"),
+//                        Columns : ["CALCEDVALUE","UTS","RSTYPE_PK"],
+//                        WhereClause : ["THING_PK eq "+oController.iThingId, "IO_PK eq "+aIO.Id],
+//                        OrderByClause : ["UTS desc"],
+//                        limit : 1,
+//                        format : 'json',
+//
+//                        onSuccess : function (response, data) {
+//                            if (data.length > 0) {
+//                                data = data[0];
+//                                
+//                                var iHue;
+//                                var iSaturation;
+//                                var iLight;
+//                                
+//                                //console.log(JSON.stringify(data));
+//                                //----------------------------------------------------//
+//                                // If we're grabbing the HUE value
+//                                //----------------------------------------------------//
+//                                if (data.RSTYPE_PK === 3901) {
+//                                    iHue = Math.round(data.CALCEDVALUE / oController.fHueConversionRate);
+//                                }
+//
+//                                //----------------------------------------------------//
+//                                // If we're grabbing the SATURATION value
+//                                //----------------------------------------------------//
+//                                if (data.RSTYPE_PK === 3902) {
+//                                    iSaturation = Math.round(data.CALCEDVALUE / oController.fSaturationConversionRate);
+//                                }
+//
+//                                //----------------------------------------------------//
+//                                // If we're grabbing the BRIGHTNESS value
+//                                //----------------------------------------------------//
+//                                if (data.RSTYPE_PK === 3903) {
+//                                    iLight = Math.round(data.CALCEDVALUE / oController.fLightConversionRate);
+//                                }
+//                            }
+//
+//                            //--------------------------------------------------------//
+//                            // Set the colour on the page
+//                            //--------------------------------------------------------//
+//                            if (oController.bUsingAdvancedUI === true) {
+//                                oController.RGBInit("hsv("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")");
+//                            } else {
+//                                oController.ChangeColourInBox(Math.round(iHue), Math.round(iSaturation), Math.round(iLight));
+//                                oController.SetSliderValues(iHue, iSaturation, iLight);
+//                            }
+//                        },
+//
+//                        onFail : function (response) {
+//                            jQuery.sap.log.error("Error Code 9300: There was a fatal error loading current device information: "+JSON.stringify(response));
+//                        }
+//                    });
+//                }
+//            });
             
             IomyRe.apiodata.AjaxRequest({
                 Url : IomyRe.apiodata.ODataLocation("dataint"),
@@ -271,47 +325,72 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 format : 'json',
 
                 onSuccess : function (response, data) {
-                    var iHue;
-                    var iSaturation;
-                    var iLight;
+                    var iHue        = null;
+                    var iSaturation = null;
+                    var iLight      = null;
                     
                     for (var i = 0; i < data.length; i++) {
                         //console.log(JSON.stringify(data));
                         //----------------------------------------------------//
                         // If we're grabbing the HUE value
                         //----------------------------------------------------//
-                        if (data[i].RSTYPE_PK === 3901) {
-                            iHue = data[i].CALCEDVALUE;// / oController.fHueConversionRate;
+                        if (data[i].RSTYPE_PK === 3901 && iHue === null) {
+                            iHue = Math.round(data[i].CALCEDVALUE / oController.fHueConversionRate);
                         }
                         
                         //----------------------------------------------------//
                         // If we're grabbing the SATURATION value
                         //----------------------------------------------------//
-                        if (data[i].RSTYPE_PK === 3902) {
-                            iSaturation = data[i].CALCEDVALUE;// / oController.fSaturationConversionRate;
+                        if (data[i].RSTYPE_PK === 3902 && iSaturation === null) {
+                            iSaturation = Math.round(data[i].CALCEDVALUE / oController.fSaturationConversionRate);
                         }
                         
                         //----------------------------------------------------//
                         // If we're grabbing the BRIGHTNESS value
                         //----------------------------------------------------//
-                        if (data[i].RSTYPE_PK === 3903) {
-                            iLight = data[i].CALCEDVALUE;// / oController.fLightConversionRate;
+                        if (data[i].RSTYPE_PK === 3903 && iLight === null) {
+                            iLight = Math.round(data[i].CALCEDVALUE / oController.fLightConversionRate);
+                        }
+                        
+                        //----------------------------------------------------//
+                        // If we already have what we need, we can finish the
+                        // loop.
+                        //----------------------------------------------------//
+                        if (iHue !== null && iSaturation !== null && iLight !== null) {
+                            break;
+                        } else {
+                            //-----------------------------------------------------//
+                            // Otherwise, if we've finished processing the data and
+                            // we don't have all of it, then increase the limit and
+                            // run the request again.
+                            //-----------------------------------------------------//
+                            if (i === data.length - 1) {
+                                this.Limit += 3;
+                                
+                                IomyRe.apiodata.AjaxRequest(this);
+                            }
                         }
                     }
                     
+                    console.log("H:"+iHue);
+                    console.log("S:"+iSaturation);
+                    console.log("L:"+iLight);
                     //--------------------------------------------------------//
                     // Set the colour on the page
                     //--------------------------------------------------------//
-                    if (oController.bUsingAdvancedUI) {
+                    if (oController.bUsingAdvancedUI === true) {
                         oController.RGBInit("hsv("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")");
                     } else {
                         oController.ChangeColourInBox(Math.round(iHue), Math.round(iSaturation), Math.round(iLight));
                         oController.SetSliderValues(iHue, iSaturation, iLight);
                     }
+                    
+                    oView.byId("ViewSwitchButton").setEnabled(true);
                 },
 
                 onFail : function (response) {
                     jQuery.sap.log.error("Error Code 9300: There was a fatal error loading current device information: "+JSON.stringify(response));
+                    oView.byId("ViewSwitchButton").setEnabled(true);
                 }
             });
         } catch (e) {
@@ -332,9 +411,9 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         
         if (oEvent === undefined) {
             mParameters = {
-                h : oView.byId("hueSlider").getValue() / oController.fHueConversionRate,
-                s : oView.byId("satSlider").getValue() / oController.fSaturationConversionRate,
-                v : oView.byId("briSlider").getValue() / oController.fLightConversionRate
+                h : oView.byId("hueSlider").getValue(),// / oController.fHueConversionRate,
+                s : oView.byId("satSlider").getValue(),// / oController.fSaturationConversionRate,
+                v : oView.byId("briSlider").getValue(),// / oController.fLightConversionRate
             };
         } else {
             mParameters = oEvent.getParameters();
@@ -348,6 +427,10 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var iSat            = Math.floor(mParameters.s * this.fSaturationConversionRate);
         var iLight          = Math.floor(mParameters.v * this.fLightConversionRate);
         var iDeviceType     = IomyRe.common.ThingList["_"+this.iThingId].TypeId;
+        
+        console.log("H:"+iHue);
+        console.log("S:"+iSat);
+        console.log("L:"+iLight);
         
         var mRequestData    = {
             "method" : "POST",

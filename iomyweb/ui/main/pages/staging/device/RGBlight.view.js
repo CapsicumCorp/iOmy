@@ -57,10 +57,6 @@ sap.ui.jsview("pages.staging.device.RGBlight", {
                     vertical : true,
                     content : [
                         IomyRe.widgets.LightBulbControlsContainer(oController, {
-                            maxHue          : 0,
-                            maxSaturation   : 0,
-                            maxBrightness   : 0,
-
                             hue             : 0,
                             saturation      : 0,
                             brightness      : 0,
