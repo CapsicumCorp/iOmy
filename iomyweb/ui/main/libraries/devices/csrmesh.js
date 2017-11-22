@@ -32,4 +32,107 @@ $.extend(IomyRe.devices.csrmesh,{
     RSHue           : 3901,
     RSSaturation    : 3902,
     RSBrightness    : 3903,
+    
+    turnOnWhiteLight : function (mSettings) {
+        var bError              = false;
+        var aErrorMessages      = [];
+        var iThingId;
+        var fnSuccess;
+        var fnFail;
+        
+        //--------------------------------------------------------------------//
+        // Process the settings map. TODO: Write a function for processing the
+        // most common parameters.
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined && mSettings !== null) {
+            //----------------------------------------------------------------//
+            // Check that the Thing ID is given and that it's valid.
+            //----------------------------------------------------------------//
+            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
+                iThingId = mSettings.thingID;
+                
+                var mThingIDInfo = IomyRe.validation.isThingIDValid(iThingId);
+                
+                bError          = !mThingIDInfo.bIsValid;
+                aErrorMessages  = mThingIDInfo.aErrorMessages;
+                
+                if (bError) {
+                    throw new ThingIDNotValidException(aErrorMessages.join('\n'));
+                }
+                
+            } else {
+                throw new MissingArgumentException("Thing ID (thingID) must be specified.");
+            }
+            
+            //----------------------------------------------------------------//
+            // Find the success callback function.
+            //----------------------------------------------------------------//
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+            } else {
+                fnSuccess = function () {};
+            }
+            
+            //----------------------------------------------------------------//
+            // Find the failure callback function.
+            //----------------------------------------------------------------//
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+            } else {
+                fnFail = function () {};
+            }
+            
+        } else {
+            throw new MissingSettingsMapException("Thing ID (thingID) must be specified.");
+        }
+        
+        //--------------------------------------------------------------------//
+        // Run the request to "whiten" the light bulb. This is until white light
+        // support is fully supported.
+        //--------------------------------------------------------------------//
+        IomyRe.apiphp.AjaxRequest({
+            "url"     : IomyRe.apiphp.APILocation("light"),
+            "method"  : "POST",
+            "data"    : {
+                "Mode" : "ChangeColorBrightness",
+                "ThingId" : iThingId,
+                "Data" : JSON.stringify({
+                    "NewValue" : {
+                        "Hue" : 180,
+                        "Saturation" : 0,
+                        "Brightness" : 255
+                    }
+                })
+            },
+            
+            "onSuccess" : function (type, data) {
+                fnSuccess(type, data);
+            },
+            
+            "onFail" : function (response) {
+                fnFail(response);
+            }
+        });
+        
+//        IomyRe.apiphp.AjaxRequest({
+//            url: IomyRe.apiphp.APILocation("statechange"),
+//            type: "POST",
+//            data: { 
+//                "Mode":"ThingToggleStatus", 
+//                "Id": iThingId
+//            },
+//            onFail : function(response) {
+//                
+//                fnFail(response.responseText);
+//                
+//            },
+//            onSuccess : function( type, data ) {
+//                this.onSuccess = function (type, data) {
+//                    fnSuccess(type, data);
+//                };
+//                
+//                IomyRe.apiphp.AjaxRequest(this);
+//            }
+//        });
+    }
 });

@@ -116,8 +116,9 @@ sap.ui.controller("pages.staging.device.RGBlight", {
 		
 	//-- Adds a "WhiteLight" button if the devicetype === "CSR" --//
 	RGBUiDraw: function () {
-		var oView       = this.getView();
-        var mThing      = IomyRe.common.ThingList["_"+this.iThingId];
+        var oController = this;
+		var oView       = oController.getView();
+        var mThing      = IomyRe.common.ThingList["_"+oController.iThingId];
 		
 		try {
             if (oView.byId("WhiteLight_Cont") !== undefined) {
@@ -129,7 +130,13 @@ sap.ui.controller("pages.staging.device.RGBlight", {
 			if (mThing.TypeId == IomyRe.devices.philipshue.ThingTypeId) {
 				//$.sap.log.error("RGBUiDraw:" +RGBType);
 			} else if (mThing.TypeId == IomyRe.devices.csrmesh.ThingTypeId) {
-				oView.byId("RGB_Cont").addContent(IomyRe.widgets.CSRbutton(this));
+				oView.byId("RGB_Cont").addContent(
+                    IomyRe.widgets.CSRbutton(oController, function (oEvent) {
+                        IomyRe.devices.csrmesh.turnOnWhiteLight({
+                            thingID : oController.iThingId
+                        });
+                    })
+                );
 			}		
 		} catch(e1) {
 			$.sap.log.error("RGBUiDraw: Critcal Error."+e1.message);
@@ -251,65 +258,6 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                     aIOFilter.push("IO_PK eq "+aIO.Id);
                 }
             });
-            
-//            $.each(mIOs, function (sI, aIO) {
-//                if (sI !== undefined && sI !== null && aIO !== undefined && aIO !== null) {
-//                    IomyRe.apiodata.AjaxRequest({
-//                        Url : IomyRe.apiodata.ODataLocation("dataint"),
-//                        Columns : ["CALCEDVALUE","UTS","RSTYPE_PK"],
-//                        WhereClause : ["THING_PK eq "+oController.iThingId, "IO_PK eq "+aIO.Id],
-//                        OrderByClause : ["UTS desc"],
-//                        limit : 1,
-//                        format : 'json',
-//
-//                        onSuccess : function (response, data) {
-//                            if (data.length > 0) {
-//                                data = data[0];
-//                                
-//                                var iHue;
-//                                var iSaturation;
-//                                var iLight;
-//                                
-//                                //console.log(JSON.stringify(data));
-//                                //----------------------------------------------------//
-//                                // If we're grabbing the HUE value
-//                                //----------------------------------------------------//
-//                                if (data.RSTYPE_PK === 3901) {
-//                                    iHue = Math.round(data.CALCEDVALUE / oController.fHueConversionRate);
-//                                }
-//
-//                                //----------------------------------------------------//
-//                                // If we're grabbing the SATURATION value
-//                                //----------------------------------------------------//
-//                                if (data.RSTYPE_PK === 3902) {
-//                                    iSaturation = Math.round(data.CALCEDVALUE / oController.fSaturationConversionRate);
-//                                }
-//
-//                                //----------------------------------------------------//
-//                                // If we're grabbing the BRIGHTNESS value
-//                                //----------------------------------------------------//
-//                                if (data.RSTYPE_PK === 3903) {
-//                                    iLight = Math.round(data.CALCEDVALUE / oController.fLightConversionRate);
-//                                }
-//                            }
-//
-//                            //--------------------------------------------------------//
-//                            // Set the colour on the page
-//                            //--------------------------------------------------------//
-//                            if (oController.bUsingAdvancedUI === true) {
-//                                oController.RGBInit("hsv("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")");
-//                            } else {
-//                                oController.ChangeColourInBox(Math.round(iHue), Math.round(iSaturation), Math.round(iLight));
-//                                oController.SetSliderValues(iHue, iSaturation, iLight);
-//                            }
-//                        },
-//
-//                        onFail : function (response) {
-//                            jQuery.sap.log.error("Error Code 9300: There was a fatal error loading current device information: "+JSON.stringify(response));
-//                        }
-//                    });
-//                }
-//            });
             
             IomyRe.apiodata.AjaxRequest({
                 Url : IomyRe.apiodata.ODataLocation("dataint"),

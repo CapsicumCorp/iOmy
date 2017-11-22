@@ -262,36 +262,31 @@ $.extend( IomyRe.widgets, {
 	},
 	
 	//-- CSR Button for the "Day Light Mode" button --//
-	CSRbutton : function (oCurrentController) {
+	CSRbutton : function (oCurrentController, fnPress) {
 		//----------------------------------------------------//
 		//-- 1.0 - Initialise                               --//
 		//----------------------------------------------------//		
 		
 		var oView = oCurrentController.getView();  //-- Defines oView based on the Controller that's being passed --//
-		var oDescLabel;
 		var oWhiteLight;
 		var oCSRHBox;
 		
 		//----------------------------------------------------//
 		//-- 2.0 - Create the Hbox Content                  --//
 		//----------------------------------------------------//
-		oWhiteLight = new sap.m.Switch ({
-			
-		});
-		
-		oDescLabel = new sap.m.Label ({
-			text: "Day Light Mode",
-			
+		oWhiteLight = new sap.m.Button ({
+			text: "White Light",
+            press : fnPress
 		});
 		
 		//----------------------------------------------------//
 		//-- 3.0 - Fill the CSR HBox                        --//
 		//----------------------------------------------------//
 		oCSRHBox = new sap.m.VBox (oView.createId("WhiteLight_Cont"),{
-			width: "80px",
+			width: "85px",
 			height: "100%",
 			items : [
-				oDescLabel, oWhiteLight
+				oWhiteLight
 			]
 		}).addStyleClass("ElementCenter");
 		
