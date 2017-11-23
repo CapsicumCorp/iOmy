@@ -173,7 +173,7 @@ static const int HA_ENDPOINTID=1; //Some devices don't implement an endpoint for
 
 static const int CONNECT_STATUS_POLL_INTERVAL=60; //Poll the connection info every 60 seconds
 
-static const int MAX_PACKETS_IN_TRANSIT=5;
+static const int PACKET_TIMEOUT=10; //How long to wait for a response from a device
 
 static const uint8_t API_START_BYTE=0xFE;
 
@@ -204,12 +204,16 @@ public:
   uint8_t firmmin=0;
   uint8_t hwrev=0;
 
+  uint8_t network_state=ZDO_STARTUP_STATUS::DEV_HOLD; //Current Network State: See ZDO_STARTUP_STATUS
+
+  uint8_t join_mode_state=JOIN_MODE_STATE::ENABLED; //TI Firmware defaults to enabled so matched it here at startup
+
   //TODO: Using these?
-  uint8_t network_state=0; //network state
   uint8_t cfgstate=0;
 
   uint8_t device_type=0; //Device Type: 0=Coordinator, 1=Router, 2=End Device
-  bool zdo_cluster_registered=0; //True=ZDO Clusters have been registered
+  bool zcl_cluster_registered=false; //True=ZCL Clusters have been registered
+  bool zdo_cluster_registered=false; //True=ZDO Clusters have been registered
   uint8_t zdo_zigbee_startup_status=0; //0=Inited with existing network, 1=Inited with new or reset network, 2=Init failed, else unknown
 
   uint8_t channel=0;
@@ -235,6 +239,14 @@ public:
 
   uint8_t reportingsupported=0; //>= 1.5.3 supports attribute reports
   uint8_t manureportingsupported=0; //>= 1.5.6 supports manufacturer attribute reports
+
+  //Zigby data
+  bool waiting_for_response=false;
+  uint8_t last_packetsendtype=0;
+  time_t last_packetsendtime=0; //The timestamp of the last time a ZDO or ZCL packet was sent
+  uint16_t last_packet_netaddr=0x0000;
+  uint16_t last_packet_cluster=0x0000;
+  uint8_t last_packet_seqnumber=0;
 
   //These variables need to carry across calls to the receive function
   uint8_t receive_processing_packet=0, receive_escapechar=0;
@@ -295,7 +307,9 @@ static bool gneedmoreinfo=false; //Set to false when a device needs more info to
 //Function Declarations
 static int marktizigbee_inuse(void *localzigbeedevice, long *localzigbeelocked);
 static int marktizigbee_notinuse(void *localzigbeedevice, long *UNUSED(localzigbeelocked));
+static int connected_to_network(void *localzigbeedevice, long *tizigbeelocked);
 static void send_zigbee_zdo(void *localzigbeedevice, zdo_general_request_t *zdocmd, int expect_response, char rxonidle, long *localzigbeelocked, long *zigbeelocked);
+static void send_zigbee_zcl(void *localzigbeedevice, zcl_general_request_t *zclcmd, int expect_response, char rxonidle, long *localzigbeelocked, long *zigbeelocked);
 static void receiveraw(int UNUSED(serdevidx), int handlerdevidx, char *buffer, int bufcnt);
 static int isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx, const void *buf, size_t count));
 static int serial_device_removed(int serdevidx);
@@ -378,17 +392,11 @@ static zigbeelib_localzigbeedevice_iface_ver_1_t gtizigbeelib_localzigbeedevice_
   nullptr,
   nullptr,
   send_zigbee_zdo,
+  send_zigbee_zcl,
   nullptr,
   nullptr,
   nullptr,
-  nullptr,
-  nullptr
-/*  .send_zigbee_zdo=__rapidhalib_send_zigbee_zdo_new,
-  .send_zigbee_zcl=__rapidhalib_send_zigbee_zcl_new,
-  .send_zigbee_zcl_multi_attribute_read=NULL,
-  .send_multi_attribute_read_with_manufacturer_request=NULL,
-  .zigbee_permit_join=rapidhalib_send_rapidha_network_comissioning_permit_join,
-  .localzigbeedevice_connected_to_network=rapidhalib_rapidha_connected_to_network,*/
+  connected_to_network
 };
 
 //Find a pointer to module interface pointer
@@ -674,6 +682,25 @@ static int marktizigbee_notinuse(void *localzigbeedevice, long *UNUSED(localzigb
   return marktizigbee_notinuse(*reinterpret_cast<tizigbeedevice_t *>(localzigbeedevice));
 }
 
+//Check if the TI Zigbee module is connected to a network
+//Returns 1 if connected or 0 if not
+static int connected_to_network(void *localzigbeedevice, long *tizigbeelocked) {
+  tizigbeedevice_t& tizigbeedevice=*reinterpret_cast<tizigbeedevice_t *>(localzigbeedevice);
+  int val;
+  uint8_t network_state;
+
+  locktizigbee();
+  network_state=tizigbeedevice.network_state;
+  unlocktizigbee();
+
+  if (network_state!=ZDO_STARTUP_STATUS::DEV_ZB_COORD && network_state!=ZDO_STARTUP_STATUS::DEV_ROUTER && network_state!=ZDO_STARTUP_STATUS::DEV_END_DEVICE) {
+    val=0;
+  } else {
+    val=1;
+  }
+  return val;
+}
+
 /*
   Return a string for the TI Zigbee device type value
   Args: device_type The device type value
@@ -702,6 +729,39 @@ static const char *get_device_type_string(uint8_t device_type) {
 //==================
 //Protocol Functions
 //==================
+
+static uint8_t gzigbee_seqnumber=0;
+
+static uint8_t zigbee_get_next_seqnumber() {
+  uint8_t val;
+
+  locktizigbee();
+  val=gzigbee_seqnumber++;
+  if (gzigbee_seqnumber==128) {
+    gzigbee_seqnumber=0;
+  }
+  unlocktizigbee();
+
+  return val;
+}
+
+static unsigned char zigbee_get_seqnumber() {
+  uint8_t val;
+
+  locktizigbee();
+  val=gzigbee_seqnumber;
+  unlocktizigbee();
+
+  return val;
+}
+
+static void zigbee_set_seqnumber(uint8_t zigbee_seqnumber) {
+  uint8_t val;
+
+  locktizigbee();
+  gzigbee_seqnumber=zigbee_seqnumber;
+  unlocktizigbee();
+}
 
 //Send a TI Zigbee API packet
 //packet size is start byte + len byte + 2 cmd bytes + data + checksum byte
@@ -899,9 +959,61 @@ static void send_tizigbee_zdo_startup_from_app(tizigbeedevice_t& tizigbeedevice,
   send_tizigbee_simple_command(tizigbeedevice, ZDO_STARTUP_FROM_APP, start_delay);
 }
 
+//Just fixed register set at the moment
+static void send_tizigbee_af_register(tizigbeedevice_t& tizigbeedevice) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  tizigbee_af_register_t *apicmd;
+  zigbee_zdo_node_clusters_t *zigbeeclusters;
+
+  MOREDEBUG_ENTERINGFUNC();
+
+  uint8_t numiclusters=0;
+  uint8_t numoclusters=0;
+  uint16_t iclusters[0], oclusters[0];
+
+  //Allocate ram for the request as the packet size is dynamic
+  try {
+    apicmd=reinterpret_cast<tizigbee_af_register_t *>(new uint8_t[sizeof(tizigbee_af_register_t)+numiclusters*2+1+numoclusters*2+1-1]);
+  } catch (std::bad_alloc& e) {
+    //Failed to alloc ram for the zigbee command
+    MOREDEBUG_EXITINGFUNC();
+    return;
+  }
+  //Fill in the packet details and send the packet
+  apicmd->cmd=htons(AF_REGISTER);
+  apicmd->length=sizeof(tizigbee_af_register_t)+1+numiclusters*2+1+numoclusters*2-1-5;
+  apicmd->endpoint=HA_ENDPOINTID;
+  apicmd->profileid=ZIGBEE_HOME_AUTOMATION_PROFILE;
+  apicmd->devid=ZIGBEE_DEVICEID_HA_COMBINED_INTERFACE;
+  apicmd->devver=1;
+  apicmd->zero=0;
+
+  zigbeeclusters=reinterpret_cast<zigbee_zdo_node_clusters_t *>(&(apicmd->clusterlist));
+  zigbeeclusters->numclusters=numiclusters;
+  for (int i=0; i<numiclusters; ++i) {
+    zigbeeclusters->clusters[i]=htole16(iclusters[i]);
+  }
+  //Step the the location for the output cluster id list
+  zigbeeclusters=reinterpret_cast<zigbee_zdo_node_clusters_t *>(((uint8_t *) zigbeeclusters)+1+numiclusters*2);
+
+  zigbeeclusters->numclusters=numoclusters;
+  for (int i=0; i<numoclusters; ++i) {
+    zigbeeclusters->clusters[i]=htole16(oclusters[i]);
+  }
+
+  __tizigbee_send_api_packet(tizigbeedevice, reinterpret_cast<uint8_t *>(apicmd));
+
+  delete[] apicmd;
+
+  MOREDEBUG_EXITINGFUNC();
+}
+
 //Using function overloading for different non-array value sizes
 static void send_tizigbee_zb_write_configuration(tizigbeedevice_t& tizigbeedevice, uint8_t configid, uint8_t value) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zb_write_configuration_req_8bit_t apicmd;
+
+  MOREDEBUG_ENTERINGFUNC();
 
   //Fill in the packet details and send the packet
   apicmd.cmd=htons(ZB_WRITE_CONFIGURATION);
@@ -914,7 +1026,10 @@ static void send_tizigbee_zb_write_configuration(tizigbeedevice_t& tizigbeedevic
   MOREDEBUG_EXITINGFUNC();
 }
 static void send_tizigbee_zb_write_configuration(tizigbeedevice_t& tizigbeedevice, uint8_t configid, uint16_t value) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zb_write_configuration_req_16bit_t apicmd;
+
+  MOREDEBUG_ENTERINGFUNC();
 
   //Fill in the packet details and send the packet
   apicmd.cmd=htons(ZB_WRITE_CONFIGURATION);
@@ -927,7 +1042,10 @@ static void send_tizigbee_zb_write_configuration(tizigbeedevice_t& tizigbeedevic
   MOREDEBUG_EXITINGFUNC();
 }
 static void send_tizigbee_zb_write_configuration(tizigbeedevice_t& tizigbeedevice, uint8_t configid, uint32_t value) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zb_write_configuration_req_32bit_t apicmd;
+
+  MOREDEBUG_ENTERINGFUNC();
 
   //Fill in the packet details and send the packet
   apicmd.cmd=htons(ZB_WRITE_CONFIGURATION);
@@ -940,7 +1058,10 @@ static void send_tizigbee_zb_write_configuration(tizigbeedevice_t& tizigbeedevic
   MOREDEBUG_EXITINGFUNC();
 }
 static void send_tizigbee_zb_write_configuration(tizigbeedevice_t& tizigbeedevice, uint8_t configid, uint64_t value) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zb_write_configuration_req_64bit_t apicmd;
+
+  MOREDEBUG_ENTERINGFUNC();
 
   //Fill in the packet details and send the packet
   apicmd.cmd=htons(ZB_WRITE_CONFIGURATION);
@@ -953,7 +1074,10 @@ static void send_tizigbee_zb_write_configuration(tizigbeedevice_t& tizigbeedevic
   MOREDEBUG_EXITINGFUNC();
 }
 static void send_tizigbee_zb_write_configuration(tizigbeedevice_t& tizigbeedevice, uint8_t configid, uint8_t value[8]) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zb_write_configuration_req_8byte_t apicmd;
+
+  MOREDEBUG_ENTERINGFUNC();
 
   //Fill in the packet details and send the packet
   apicmd.cmd=htons(ZB_WRITE_CONFIGURATION);
@@ -966,36 +1090,21 @@ static void send_tizigbee_zb_write_configuration(tizigbeedevice_t& tizigbeedevic
   MOREDEBUG_EXITINGFUNC();
 }
 
-static void send_zigbee_zdo_management_neighbor_table_request(tizigbeedevice_t& tizigbeedevice, zdo_general_request_t *zdocmd) {
-  tizigbee_zdo_mgmt_lqi_req_t apicmd;
-  zigbee_zdo_management_neighbor_table_request *zigbeepayload=reinterpret_cast<zigbee_zdo_management_neighbor_table_request *>(&(zdocmd->zigbeepayload));
-
-  //Fill in the packet details and send the packet
-  apicmd.cmd=htons(ZDO_MGMT_LQI_REQ);
-  apicmd.length=3;
-  apicmd.netaddr=zdocmd->netaddr;
-  apicmd.start_index=zigbeepayload->start_index;
-  __tizigbee_send_api_packet(tizigbeedevice, reinterpret_cast<uint8_t *>(&apicmd));
-
-  MOREDEBUG_EXITINGFUNC();
-}
-
-static void send_zigbee_zdo_management_permit_joining_request(tizigbeedevice_t& tizigbeedevice, zdo_general_request_t *zdocmd) {
+static void zdo_disable_zigbee_join_mode(tizigbeedevice_t& tizigbeedevice) {
   tizigbee_zdo_mgmt_permit_join_req_t apicmd;
-  zigbee_zdo_management_permit_joining_request *zigbeepayload=reinterpret_cast<zigbee_zdo_management_permit_joining_request *>(&(zdocmd->zigbeepayload));
 
   //Fill in the packet details and send the packet
   apicmd.cmd=htons(ZDO_MGMT_PERMIT_JOIN_REQ);
   apicmd.length=sizeof(tizigbee_zdo_mgmt_permit_join_req_t)-5;
-  if (zdocmd->netaddr==0xFFFF) {
-    apicmd.addrmode=0x0F;
-  } else {
-    apicmd.addrmode=0x02;
-  }
-  apicmd.netaddr=zdocmd->netaddr;
-  apicmd.duration=zigbeepayload->duration;
-  apicmd.trust_center_significance=zigbeepayload->trust_center_significance;
+  apicmd.addrmode=0x02;
+  apicmd.netaddr=tizigbeedevice.netaddr;
+  apicmd.duration=0; //0 = join disabled.  0xff = join enabled. 0x01-0xfe = number of seconds to permit joining
+  apicmd.trust_center_significance=0;
   __tizigbee_send_api_packet(tizigbeedevice, reinterpret_cast<uint8_t *>(&apicmd));
+
+  locktizigbee();
+  tizigbeedevice.join_mode_state=JOIN_MODE_STATE::DISABLED;
+  unlocktizigbee();
 
   MOREDEBUG_EXITINGFUNC();
 }
@@ -1010,20 +1119,131 @@ static void send_zigbee_zdo_management_permit_joining_request(tizigbeedevice_t& 
 */
 static void send_zigbee_zdo(void *localzigbeedevice, zdo_general_request_t *zdocmd, int expect_response, char rxonidle, long *localzigbeelocked, long *zigbeelocked) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  const zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=reinterpret_cast<const zigbeelib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1));
   tizigbeedevice_t& tizigbeedevice=*reinterpret_cast<tizigbeedevice_t *>(localzigbeedevice);
+  tizigbee_zdo_send_data_t *apicmd;
 
-  //TI Zigbee uses separate command for every ZDO command
-  switch (zdocmd->clusterid) {
-    case ZIGBEE_ZDO_MANAGEMENT_NEIGHBOR_TABLE_REQUEST:
-      send_zigbee_zdo_management_neighbor_table_request(tizigbeedevice, zdocmd);
-      break;
-    case ZIGBEE_ZDO_MANAGEMENT_PERMIT_JOINING_REQUEST:
-      send_zigbee_zdo_management_permit_joining_request(tizigbeedevice, zdocmd);
-      break;
-    default:
-      debuglibifaceptr->debuglib_printf(1, "%s: Unsupported ZDO Cluster: %04" PRIX16 " in send request for TI Zigbee %016" PRIX64 " to device: %04" PRIX16 "\n", __PRETTY_FUNCTION__, zdocmd->clusterid, tizigbeedevice.addr, zdocmd->netaddr);
+  MOREDEBUG_ENTERINGFUNC();
+
+  //Allocate ram for the request as the packet size is dynamic
+  try {
+    apicmd=reinterpret_cast<tizigbee_zdo_send_data_t *>(new uint8_t[sizeof(tizigbee_zdo_send_data_t)+zdocmd->zigbeelength-1]);
+  } catch (std::bad_alloc& e) {
+    //Failed to alloc ram for the zigbee command
+    MOREDEBUG_EXITINGFUNC();
+    return;
   }
+  //Fill in the packet details and send the packet
+  apicmd->cmd=htons(ZDO_SEND_DATA);
+  apicmd->length=sizeof(tizigbee_zdo_send_data_t)+zdocmd->zigbeelength-1-5;
+  apicmd->destnetaddr=zdocmd->netaddr;
+  apicmd->seqnumber=zigbee_get_next_seqnumber();
+  apicmd->clusterid=zdocmd->clusterid;
+  apicmd->zigbeelength=zdocmd->zigbeelength;
+  memcpy(&apicmd->zigbeepayload, &zdocmd->zigbeepayload, zdocmd->zigbeelength);
+
+  locktizigbee();
+  int zigbeelibindex=tizigbeedevice.zigbeelibindex;
+  if (expect_response) {
+    tizigbeedevice.waiting_for_response=true;
+  }
+  struct timespec curtime;
+  clock_gettime(CLOCK_REALTIME, &curtime);
+  tizigbeedevice.last_packetsendtype=ZIGBEE_ZIGBEE_ZDO;
+  tizigbeedevice.last_packet_netaddr=apicmd->destnetaddr;
+  tizigbeedevice.last_packet_cluster=apicmd->clusterid;
+  tizigbeedevice.last_packet_seqnumber=apicmd->seqnumber;
+  tizigbeedevice.last_packetsendtime=curtime.tv_sec;
+  unlocktizigbee();
+  if (zigbeelibindex>=0 && zigbeelibifaceptr) {
+    long tizigbeelocked=0, zigbeelocked=0;
+    zigbeelibifaceptr->process_zdo_seqnumber(zigbeelibindex, zdocmd->netaddr, apicmd->seqnumber, &tizigbeelocked, &zigbeelocked);
+  }
+  __tizigbee_send_api_packet(tizigbeedevice, reinterpret_cast<uint8_t *>(apicmd));
+
+  delete[] apicmd;
+
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
+  Send a TI Zigbee Zigbee ZCL
+  Arguments:
+    localzigbeedevice A pointer to tizigbeedevice structure used to send the serial data
+    zmdcmd The ZCL packet to send
+    expect_response: 1=Ask for a response from the remote device, 0=Don't wait for a response from the remote device
+    rxonidle: 0=The device we are sending to is sleepy so increase timeouts if possible, 1=The device we are sending to is not sleepy
+*/
+static void send_zigbee_zcl(void *localzigbeedevice, zcl_general_request_t *zclcmd, int expect_response, char rxonidle, long *localzigbeelocked, long *zigbeelocked) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=static_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  const zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=static_cast<const zigbeelib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1));
+  tizigbeedevice_t& tizigbeedevice=*static_cast<tizigbeedevice_t *>(localzigbeedevice);
+  tizigbee_af_data_request_t *apicmd;
+  tizigbee_zcl_general_request_t *tizclcmd;
+  tizigbee_zcl_general_request_with_manu_t *tizclcmdwithmanu;
+
+  MOREDEBUG_ENTERINGFUNC();
+
+  //Allocate ram for the request as the packet size is dynamic
+  try {
+    apicmd=reinterpret_cast<tizigbee_af_data_request_t *>(new uint8_t[sizeof(tizigbee_af_data_request_t)+sizeof(tizigbee_zcl_general_request_with_manu_t)+zclcmd->zigbeelength-2]);
+  } catch (std::bad_alloc& e) {
+    //Failed to alloc ram for the zigbee command
+    MOREDEBUG_EXITINGFUNC();
+    return;
+  }
+  debuglibifaceptr->debuglib_printf(1, "%s: TI Zigbee ZCL Len=%d, Zigbee ZCL Len=%d\n", __PRETTY_FUNCTION__, sizeof(tizigbee_af_data_request_t)+sizeof(tizigbee_zcl_general_request_with_manu_t)+zclcmd->zigbeelength-2, zclcmd->zigbeelength);
+
+  tizclcmd=reinterpret_cast<tizigbee_zcl_general_request_t *>(&apicmd->zigbeepayload);
+  tizclcmdwithmanu=reinterpret_cast<tizigbee_zcl_general_request_with_manu_t *>(&apicmd->zigbeepayload);
+
+  //Fill in the packet details and send the packet
+  apicmd->cmd=htons(AF_DATA_REQUEST);
+  apicmd->netaddr=zclcmd->netaddr;
+  apicmd->destendpoint=zclcmd->destendpnt;
+  apicmd->srcendpoint=zclcmd->srcendpnt;
+  apicmd->clusterid=zclcmd->clusterid;
+  apicmd->seqnumber=zigbee_get_next_seqnumber();
+  apicmd->options=0;
+  apicmd->radius=0x1E;
+  apicmd->zigbeelength=sizeof(tizigbee_zcl_general_request_t)+zclcmd->zigbeelength-1;
+
+  if ((zclcmd->frame_control & 0x4)!=0x4) {
+    apicmd->length=sizeof(tizigbee_af_data_request_t)+sizeof(tizigbee_zcl_general_request_t)+zclcmd->zigbeelength-2-5;
+    tizclcmd->frame_control=zclcmd->frame_control;
+    tizclcmd->seqnumber=zigbee_get_seqnumber()-1;
+    tizclcmd->cmdid=zclcmd->cmdid;
+    memcpy(&tizclcmd->zigbeepayload, &zclcmd->zigbeepayload, zclcmd->zigbeelength);
+  } else {
+    apicmd->length=sizeof(tizigbee_af_data_request_t)+sizeof(tizigbee_zcl_general_request_with_manu_t)+zclcmd->zigbeelength-2-5;
+    tizclcmdwithmanu->frame_control=zclcmd->frame_control;
+    tizclcmdwithmanu->manu=zclcmd->manu;
+    tizclcmdwithmanu->seqnumber=zigbee_get_seqnumber()-1;
+    tizclcmdwithmanu->cmdid=zclcmd->cmdid;
+    memcpy(&tizclcmdwithmanu->zigbeepayload, &zclcmd->zigbeepayload, zclcmd->zigbeelength);
+  }
+  locktizigbee();
+  int zigbeelibindex=tizigbeedevice.zigbeelibindex;
+  if (expect_response) {
+    tizigbeedevice.waiting_for_response=true;
+  }
+  struct timespec curtime;
+  clock_gettime(CLOCK_REALTIME, &curtime);
+  tizigbeedevice.last_packetsendtype=ZIGBEE_ZIGBEE_ZCL_GENERAL;
+  tizigbeedevice.last_packet_netaddr=apicmd->netaddr;
+  tizigbeedevice.last_packet_cluster=apicmd->clusterid;
+  tizigbeedevice.last_packet_seqnumber=apicmd->seqnumber;
+  tizigbeedevice.last_packetsendtime=curtime.tv_sec;
+  unlocktizigbee();
+  if (zigbeelibindex>=0 && zigbeelibifaceptr) {
+    long tizigbeelocked=0, zigbeelocked=0;
+    zigbeelibifaceptr->process_zcl_seqnumber(zigbeelibindex, zclcmd->netaddr, apicmd->seqnumber, &tizigbeelocked, &zigbeelocked);
+  }
+  __tizigbee_send_api_packet(tizigbeedevice, reinterpret_cast<uint8_t *>(apicmd));
+
+  delete[] apicmd;
+
   MOREDEBUG_EXITINGFUNC();
 }
 
@@ -1332,6 +1552,29 @@ static void process_zb_write_configuration_response(tizigbeedevice_t& tizigbeede
 }
 
 /*
+  Process a TI Zigbee AF Register System Response
+  Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
+*/
+static void process_af_register_srsp(tizigbeedevice_t& tizigbeedevice) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  tizigbee_zdo_generic_srsp_t *apicmd=reinterpret_cast<tizigbee_zdo_generic_srsp_t *>(tizigbeedevice.receivebuf.data());
+
+  MOREDEBUG_ENTERINGFUNC();
+  locktizigbee();
+  if (gwaitingforresponse==WAITING_FOR::AF_REGISTER_SRESPONSE) {
+    gwaitresult=1;
+  }
+  if (apicmd->status==SUCCESS || apicmd->status==ZApsDuplicateEntry) {
+    tizigbeedevice.zcl_cluster_registered=true;
+  } else {
+    tizigbeedevice.zcl_cluster_registered=false;
+  }
+  //NOTE: We unlock down here so callers waiting for the response don't start acting on the result until the full result has been handled
+  unlocktizigbee();
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
   Process a TI Zigbee ZB ZDO Message CB Register System Response
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
@@ -1419,6 +1662,30 @@ static void process_zdo_generic_srsp(tizigbeedevice_t& tizigbeedevice) {
 }
 
 /*
+  Process a TI Zigbee ZB ZDO State Change Indication
+  Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
+*/
+static void process_zdo_state_change_ind(tizigbeedevice_t& tizigbeedevice) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  tizigbee_zdo_state_change_ind_t *apicmd=reinterpret_cast<tizigbee_zdo_state_change_ind_t *>(tizigbeedevice.receivebuf.data());
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+
+  MOREDEBUG_ENTERINGFUNC();
+
+  locktizigbee();
+  tizigbeedevice.network_state=apicmd->status;
+  unlocktizigbee();
+
+  debuglibifaceptr->debuglib_printf(1, "%s: Received a ZDO State Change Indication with status: %02" PRIX8 "\n", __PRETTY_FUNCTION__, apicmd->status);
+
+  if (apicmd->status==ZDO_STARTUP_STATUS::DEV_ZB_COORD || apicmd->status==ZDO_STARTUP_STATUS::DEV_ROUTER || apicmd->status==ZDO_STARTUP_STATUS::DEV_END_DEVICE) {
+    //Wakeup the main thread as the TI is ready for Zigbee now
+    sem_post(&gmainthreadsleepsem);
+  }
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
   Process a TI Zigbee ZB ZDO Leaving Indication
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
@@ -1446,6 +1713,24 @@ static void process_zdo_tc_device_ind(tizigbeedevice_t& tizigbeedevice) {
   MOREDEBUG_ENTERINGFUNC();
 
   debuglibifaceptr->debuglib_printf(1, "%s: Received a ZDO Trust Center Device Announce Indication with Zigbee IEEE Address: %016" PRIX64 " and Network Address: %04" PRIX16 " from Network Address: %04" PRIX16 "\n", __PRETTY_FUNCTION__, apicmd->addr, apicmd->srcnetaddr, apicmd->netaddr);
+
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
+  Process a TI Zigbee ZB ZDO Permit Join Indication
+  Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
+  NOTE: Not much is known about this response from TI firmware apart from it always returns value: 0 when
+    the temp join timer expires
+*/
+static void process_zdo_permit_join_ind(tizigbeedevice_t& tizigbeedevice) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  tizigbee_zdo_permit_join_ind_t *apicmd=reinterpret_cast<tizigbee_zdo_permit_join_ind_t *>(tizigbeedevice.receivebuf.data());
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+
+  MOREDEBUG_ENTERINGFUNC();
+
+  debuglibifaceptr->debuglib_printf(1, "%s: Temp Join is no longer enabled\n", __PRETTY_FUNCTION__);
 
   MOREDEBUG_EXITINGFUNC();
 }
@@ -1489,12 +1774,182 @@ static void process_zdo_msg_cb_incoming(tizigbeedevice_t& tizigbeedevice) {
 
   locktizigbee();
   zigbeelibindex=tizigbeedevice.zigbeelibindex;
+  uint16_t netaddr=tizigbeedevice.netaddr;
+  tizigbeedevice.waiting_for_response=false;
   unlocktizigbee();
   if (zigbeelibindex>=0 && zigbeelibifaceptr) {
     long tizigbeelocked=0, zigbeelocked=0;
+
     zigbeelibifaceptr->process_zdo_response_received(zigbeelibindex, zdocmd, &tizigbeelocked, &zigbeelocked);
   }
 
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
+  Process a TI Zigbee AF Incoming Message Response
+  Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
+*/
+static void process_af_incoming_msg(tizigbeedevice_t& tizigbeedevice) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=static_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  const zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=static_cast<const zigbeelib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1));
+  tizigbee_af_incoming_msg_t *apicmd=reinterpret_cast<tizigbee_af_incoming_msg_t *>(tizigbeedevice.receivebuf.data());
+  tizigbee_zcl_general_request_t *tizclcmd;
+  tizigbee_zcl_general_request_with_manu_t *tizclcmdwithmanu;
+  zigbee_zcl_command_with_manu_t *zclcmd;
+  int zigbeelibindex;
+
+  MOREDEBUG_ENTERINGFUNC();
+
+  //debuglibifaceptr->debuglib_printf(1, "%s: Received Response Source Netaddr: %04" PRIX16 ", Was Broadcast: %d, clusterid: %04" PRIX16 " securityuse: %d, Sequence Number: %02" PRIX8 " Dest NetAddr: %04" PRIX16 "\n", __PRETTY_FUNCTION__, le16toh(apicmd->srcnetaddr), apicmd->wasBroadcast, le16toh(apicmd->clusterid), apicmd->securityUse, apicmd->seqnumber, le16toh(apicmd->destnetaddr));
+
+  //Allocate ram for the request as the packet size is dynamic
+  tizclcmd=reinterpret_cast<tizigbee_zcl_general_request_t *>(&apicmd->zigbeepayload);
+  tizclcmdwithmanu=reinterpret_cast<tizigbee_zcl_general_request_with_manu_t *>(&apicmd->zigbeepayload);
+
+  uint8_t zcllen;
+  uint8_t zclzigbeelen;
+  if ((tizclcmd->frame_control & 0x4)!=0x4) {
+    //NOTE: The last 3 zigbee payload bytes seem to be srcnetaddr and an unknown byte value
+    zclzigbeelen=apicmd->zigbeelength-3;
+    zcllen=sizeof(zigbee_zcl_command_with_manu_t)+zclzigbeelen-1;
+  } else {
+    //NOTE: The last 3 zigbee payload bytes seem to be srcnetaddr and an unknown byte value
+    zclzigbeelen=apicmd->zigbeelength-2-3;
+    zcllen=sizeof(zigbee_zcl_command_with_manu_t)+zclzigbeelen-1;
+  }
+  try {
+    zclcmd=reinterpret_cast<zigbee_zcl_command_with_manu_t *>(new uint8_t[zcllen]);
+  } catch (std::bad_alloc& e) {
+    //Failed to alloc ram for the zigbee command
+    MOREDEBUG_EXITINGFUNC();
+    return;
+  }
+
+  zclcmd->srcnetaddr=le16toh(apicmd->srcnetaddr);
+  zclcmd->srcendpnt=apicmd->srcendpoint;
+  zclcmd->destendpnt=apicmd->destendpoint;
+  zclcmd->clusterid=le16toh(apicmd->clusterid);
+  zclcmd->frame_control=tizclcmd->frame_control;
+  zclcmd->zigbeelength=zclzigbeelen;
+  if ((tizclcmd->frame_control & 0x4)!=0x4) {
+    zclcmd->seqnumber=tizclcmd->seqnumber;
+    zclcmd->cmdid=tizclcmd->cmdid;
+    memcpy(&zclcmd->zigbeepayload, &tizclcmd->zigbeepayload, zclzigbeelen);
+  } else {
+    zclcmd->manu=tizclcmdwithmanu->manu;
+    zclcmd->seqnumber=tizclcmdwithmanu->seqnumber;
+    zclcmd->cmdid=tizclcmdwithmanu->cmdid;
+    memcpy(&zclcmd->zigbeepayload, &tizclcmdwithmanu->zigbeepayload, zclzigbeelen);
+  }
+  locktizigbee();
+  zigbeelibindex=tizigbeedevice.zigbeelibindex;
+  tizigbeedevice.waiting_for_response=false;
+  unlocktizigbee();
+  if (zigbeelibindex>=0 && zigbeelibifaceptr) {
+    long tizigbeelocked=0, zigbeelocked=0;
+
+    zigbeelibifaceptr->process_zcl_response_received(zigbeelibindex, zclcmd, &tizigbeelocked, &zigbeelocked);
+  }
+  delete[] zclcmd;
+
+  MOREDEBUG_EXITINGFUNC();
+}
+
+
+
+
+/*
+  Process a TI Zigbee ZDO Send Status
+  Args: tizigbeedevice A pointer to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
+*/
+static void process_zdo_send_status(tizigbeedevice_t& tizigbeedevice) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  const zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=reinterpret_cast<const zigbeelib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1));
+  const tizigbee_zdo_generic_srsp_t *apicmd=reinterpret_cast<const tizigbee_zdo_generic_srsp_t *>(tizigbeedevice.receivebuf.data());
+
+  MOREDEBUG_ENTERINGFUNC();
+
+  locktizigbee();
+  int zigbeelibindex=tizigbeedevice.zigbeelibindex;
+  if (apicmd->status!=0) {
+    tizigbeedevice.waiting_for_response=false;
+  }
+  unlocktizigbee();
+  if (zigbeelibindex>=0 && zigbeelibifaceptr) {
+    long tizigbeelocked=0, zigbeelocked=0;
+
+    //Need to subtract one here as the sequence number was incremented after sending the packet
+    uint8_t seqnumber=zigbee_get_seqnumber()-1;
+
+    zigbeelibifaceptr->process_zdo_send_status(zigbeelibindex, apicmd->status, &seqnumber, &tizigbeelocked, &zigbeelocked);
+  }
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
+  Process a TI Zigbee ZCL Send Status
+  Args: tizigbeedevice A pointer to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
+*/
+static void process_zcl_send_status(tizigbeedevice_t& tizigbeedevice) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  const zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=static_cast<const zigbeelib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1));
+  const tizigbee_af_data_srsp_t *apicmd=reinterpret_cast<const tizigbee_af_data_srsp_t *>(tizigbeedevice.receivebuf.data());
+
+  MOREDEBUG_ENTERINGFUNC();
+
+  locktizigbee();
+  int zigbeelibindex=tizigbeedevice.zigbeelibindex;
+  if (apicmd->status!=0) {
+    tizigbeedevice.waiting_for_response=false;
+  }
+  unlocktizigbee();
+  if (zigbeelibindex>=0 && zigbeelibifaceptr) {
+    long tizigbeelocked=0, zigbeelocked=0;
+
+    //Need to subtract one here as the sequence number was incremented after sending the packet
+    uint8_t seqnumber=zigbee_get_seqnumber()-1;
+
+    zigbeelibifaceptr->process_zcl_send_status(zigbeelibindex, apicmd->status, &seqnumber, &tizigbeelocked, &zigbeelocked);
+  }
+  MOREDEBUG_EXITINGFUNC();
+}
+
+/*
+  Process a TI Zigbee Response Timeout
+  Args: tizigbeedevice A pointer to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
+*/
+static void process_response_timeout(tizigbeedevice_t& tizigbeedevice) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=static_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  const zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=static_cast<const zigbeelib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1));
+
+  MOREDEBUG_ENTERINGFUNC();
+
+  locktizigbee();
+  int zigbeelibindex=tizigbeedevice.zigbeelibindex;
+  uint8_t packet_type=tizigbeedevice.last_packetsendtype;
+  uint16_t destnetaddr=tizigbeedevice.last_packet_netaddr;
+  uint16_t cluster=tizigbeedevice.last_packet_cluster;
+  uint8_t seqnumber=tizigbeedevice.last_packet_seqnumber;
+  tizigbeedevice.waiting_for_response=false;
+  unlocktizigbee();
+
+  if (packet_type==ZIGBEE_ZIGBEE_ZDO) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Received ZDO Timeout for destination: %04hX, Cluster: %04hX, Sequence Number: %02hhX\n", __func__, destnetaddr, cluster, seqnumber);
+  } else if (packet_type==ZIGBEE_ZIGBEE_ZCL_GENERAL) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Received ZCL Timeout for destination: %04hX, Cluster: %04hX, Sequence Number: %02hhX\n", __func__, destnetaddr, cluster, seqnumber);
+  }
+  if (zigbeelibindex>=0 && zigbeelibifaceptr) {
+    long tizigbeelocked=0, zigbeelocked=0;
+
+    if (packet_type==ZIGBEE_ZIGBEE_ZDO) {
+      zigbeelibifaceptr->process_zdo_response_timeout(zigbeelibindex, destnetaddr, cluster, &seqnumber, &tizigbeelocked, &zigbeelocked);
+    } else if (packet_type==ZIGBEE_ZIGBEE_ZCL_GENERAL) {
+      zigbeelibifaceptr->process_zcl_response_timeout(zigbeelibindex, destnetaddr, cluster, &seqnumber, &tizigbeelocked, &zigbeelocked);
+    }
+  }
   MOREDEBUG_EXITINGFUNC();
 }
 
@@ -1533,15 +1988,26 @@ static void process_api_packet(tizigbeedevice_t& tizigbeedevice) {
     case ZB_WRITE_CONFIGURATION_RESPONSE:
       process_zb_write_configuration_response(tizigbeedevice);
       break;
+    case AF_REGISTER_SRSP:
+      process_af_register_srsp(tizigbeedevice);
+      break;
     case ZDO_MSG_CB_REGISTER_SRSP:
       process_zdo_msg_cb_register_srsp(tizigbeedevice);
       break;
     case ZDO_STARTUP_FROM_APP_SRSP:
       process_zdo_startup_from_app_srsp(tizigbeedevice);
       break;
+    case ZDO_IEEE_ADDR_REQ_SRSP:
+    case ZDO_MATCH_DESC_REQ_SRSP:
     case ZDO_MGMT_LQI_REQ_SRSP:
     case ZDO_MGMT_PERMIT_JOIN_REQ_SRSP:
       process_zdo_generic_srsp(tizigbeedevice);
+      break;
+    case ZDO_STATE_CHANGE_IND:
+      process_zdo_state_change_ind(tizigbeedevice);
+      break;
+    case ZDO_SRC_RTG_IND:
+      //TODO: Implement displaying info for this
       break;
     case ZDO_LEAVE_IND:
       process_zdo_leave_ind(tizigbeedevice);
@@ -1549,14 +2015,31 @@ static void process_api_packet(tizigbeedevice_t& tizigbeedevice) {
     case ZDO_TC_DEVICE_IND:
       process_zdo_tc_device_ind(tizigbeedevice);
       break;
+    case ZDO_PERMIT_JOIN_IND:
+      process_zdo_permit_join_ind(tizigbeedevice);
+      break;
     case ZDO_MSG_CB_INCOMING:
       process_zdo_msg_cb_incoming(tizigbeedevice);
       break;
-    //We don't need to handle these as ZDO_MSG_CB_INCOMING contains more detailed info that the Zigbee library can process
+    case ZDO_IEEE_ADDR_RSP:
+    case ZDO_MATCH_DESC_RSP:
     case ZDO_MGMT_LQI_RSP:
     case ZDO_MGMT_PERMIT_JOIN_RSP:
+    case ZDO_SEND_DATA_SRSP:
+      process_zdo_send_status(tizigbeedevice);
+      break;
     case ZDO_END_DEVICE_ANNCE_IND:
       //Do nothing
+      break;
+    case AF_DATA_SRSP:
+      process_zcl_send_status(tizigbeedevice);
+      break;
+    case AF_DATA_CONFIRM:
+      //Just use generic send status for now
+      process_zcl_send_status(tizigbeedevice);
+      break;
+    case AF_INCOMING_MSG:
+      process_af_incoming_msg(tizigbeedevice);
       break;
     default:
       debuglibifaceptr->debuglib_printf(1, "%s: Received Unknown TI Zigbee packet: 0x%04" PRIX16 " with length: %d\n", __PRETTY_FUNCTION__, apicmd->cmd, apicmd->length);
@@ -1988,8 +2471,8 @@ static int detect_tizigbee(tizigbeedevice_t& tizigbeedevice, int longdetect) {
       }
       send_tizigbee_sys_reset(gnewtizigbee, RESET_TYPE::SERIAL_BOOTLOADER);
 
-      //Wait 2 seconds for the result
-      result=waitforresponse(2);
+      //Wait 4 seconds for the result
+      result=waitforresponse(4);
       if (result>=0) {
         //We got a response
         break;
@@ -2405,10 +2888,9 @@ static void doFormNetwork(tizigbeedevice_t& tizigbeedevice, uint32_t formNetwork
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __PRETTY_FUNCTION__);
 
-  //Set form network to false straight away so the user has to specify again even if we fail to form
+  //NOTE: We keep need form network set until form network succeeds as sometimes it doesn't fully complete the first time
   locktizigbee();
   addr=tizigbeedevice.addr;
-  tizigbeedevice.needFormNetwork=false;
   unlocktizigbee();
 
   //First clear configuration and state
@@ -2431,7 +2913,7 @@ static void doFormNetwork(tizigbeedevice_t& tizigbeedevice, uint32_t formNetwork
   send_tizigbee_sys_reset(gnewtizigbee, RESET_TYPE::SERIAL_BOOTLOADER);
 
   //Wait 2 seconds for the result
-  result=waitforresponse(2);
+  result=waitforresponse(4);
   if (result<0) {
     //We didn't get a response
     debuglibifaceptr->debuglib_printf(1, "Exiting %s line: %d\n", __PRETTY_FUNCTION__, __LINE__);
@@ -2450,13 +2932,16 @@ static void doFormNetwork(tizigbeedevice_t& tizigbeedevice, uint32_t formNetwork
     return;
   }
   //Set Security Mode to 1
-  if (!tizigbee_zb_write_configuration_with_wait(tizigbeedevice, CONFIG_ID::ZCD_NV_SECURITY_MODE, (uint8_t) 1)) {
+  if (!tizigbee_zb_write_configuration_with_wait(tizigbeedevice, CONFIG_ID::ZCD_NV_SECURITY_MODE, (uint8_t) 4)) {
     return;
   }
 
   //Need reinit as the network has changed
   locktizigbee();
   tizigbeedevice.needreinit=1;
+  tizigbeedevice.needFormNetwork=false;
+  tizigbeedevice.network_state=ZDO_STARTUP_STATUS::DEV_HOLD;
+  tizigbeedevice.join_mode_state=JOIN_MODE_STATE::ENABLED;
   unlocktizigbee();
 
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
@@ -2475,6 +2960,30 @@ static void doreinit(tizigbeedevice_t& tizigbeedevice) {
   unlocktizigbee();
 
   //Start the Zigbee Network
+  result=initwaitforresponse(WAITING_FOR::AF_REGISTER_SRESPONSE);
+  if (result<0) {
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s line: %d\n", __PRETTY_FUNCTION__, __LINE__);
+    return;
+  }
+  send_tizigbee_af_register(tizigbeedevice);
+
+  //Wait 1 second for the result
+  result=waitforresponse();
+  if (result<0) {
+    //We didn't get a response
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s line: %d\n", __PRETTY_FUNCTION__, __LINE__);
+    return;
+  }
+  locktizigbee();
+  bool zcl_cluster_registered=tizigbeedevice.zcl_cluster_registered;
+  unlocktizigbee();
+  if (zcl_cluster_registered) {
+    debuglibifaceptr->debuglib_printf(1, "%s: ZCL Clusters Registered for TI Zigbee: %016" PRIX64 "\n", __PRETTY_FUNCTION__, addr);
+  } else {
+    debuglibifaceptr->debuglib_printf(1, "%s: Failed to register ZCL Clusters for TI Zigbee: %016" PRIX64 "\n", __PRETTY_FUNCTION__, addr);
+    return;
+  }
+
   result=initwaitforresponse(WAITING_FOR::ZDO_MSG_CB_REGISTER_SRESPONSE);
   if (result<0) {
     debuglibifaceptr->debuglib_printf(1, "Exiting %s line: %d\n", __PRETTY_FUNCTION__, __LINE__);
@@ -2496,6 +3005,7 @@ static void doreinit(tizigbeedevice_t& tizigbeedevice) {
     debuglibifaceptr->debuglib_printf(1, "%s: ZDO Clusters Registered for TI Zigbee: %016" PRIX64 "\n", __PRETTY_FUNCTION__, addr);
   } else {
     debuglibifaceptr->debuglib_printf(1, "%s: Failed to register ZDO Clusters for TI Zigbee: %016" PRIX64 "\n", __PRETTY_FUNCTION__, addr);
+    return;
   }
   result=initwaitforresponse(WAITING_FOR::ZDO_STARTUP_FROM_APP_SRESPONSE);
   if (result<0) {
@@ -2617,6 +3127,19 @@ static void refresh_tizigbee_data(void) {
       }
     }
     locktizigbee();
+    uint8_t network_state=tizigbeedeviceptr->network_state;
+    unlocktizigbee();
+    if (network_state!=ZDO_STARTUP_STATUS::DEV_ZB_COORD && network_state!=ZDO_STARTUP_STATUS::DEV_ROUTER && network_state!=ZDO_STARTUP_STATUS::DEV_END_DEVICE) {
+      debuglibifaceptr->debuglib_printf(1, "%s: TI Zigbee: %016" PRIX64 " isn't fully started yet\n", __PRETTY_FUNCTION__, tizigbeedeviceptr->addr);
+      marktizigbee_notinuse(*tizigbeedeviceptr);
+      continue;
+    }
+    locktizigbee();
+
+    //Make sure Temp Join mode is disabled as the TI Firmware defaults to always enabled
+    if (tizigbeedeviceptr->join_mode_state==JOIN_MODE_STATE::ENABLED) {
+      zdo_disable_zigbee_join_mode(*tizigbeedeviceptr);
+    }
     localzigbeedevice.addr=tizigbeedeviceptr->addr;
     localzigbeedevice.deviceptr=tizigbeedeviceptr;
     if (tizigbeedeviceptr->zigbeelibindex<0 && zigbeelibifaceptr) {
@@ -2650,6 +3173,17 @@ static void refresh_tizigbee_data(void) {
         }
       }
     }
+    locktizigbee();
+    bool waiting_for_response=tizigbeedeviceptr->waiting_for_response;
+    time_t last_packetsendtime=tizigbeedeviceptr->last_packetsendtime;
+    unlocktizigbee();
+    if (waiting_for_response) {
+      struct timespec curtime;
+      clock_gettime(CLOCK_REALTIME, &curtime);
+      if (last_packetsendtime+PACKET_TIMEOUT<curtime.tv_sec) {
+        process_response_timeout(*tizigbeedeviceptr);
+      }
+    }
     marktizigbee_notinuse(*tizigbeedeviceptr);
   }
   if (needmoreinfo) {
@@ -2677,16 +3211,11 @@ static void *mainloop(void *UNUSED(val)) {
     if (getneedtoquit()) {
       break;
     }
-    if (getneedmoreinfo()) {
-      //Sleep for one second but reset needmoreinfo so next time we might sleep for a while
-      semwaittime.tv_sec+=1;
-      semwaittime.tv_nsec=0;
-      setneedmoreinfo(false);
-    } else {
-      //Sleep for a while
-      semwaittime.tv_sec+=10;
-      semwaittime.tv_nsec=0;
-    }
+    //Only sleep for one second as we need to handle timeouts ourselves
+    semwaittime.tv_sec+=1;
+    semwaittime.tv_nsec=0;
+    setneedmoreinfo(false);
+
 #ifdef TIZIGBEELIB_MOREDEBUG
     debuglibifaceptr->debuglib_printf(1, "%s: Sleeping\n", __PRETTY_FUNCTION__);
 #endif
