@@ -94,11 +94,19 @@ sap.ui.jsview("pages.staging.user.UserList", {
 							content : [
 								new sap.m.Button ({
 									text: "Enable",
-									type: sap.m.ButtonType.Accept
+									type: sap.m.ButtonType.Accept,
+                                    
+                                    press : function () {
+                                        oController.EnableSelectedUsers();
+                                    }
 								}),
 								new sap.m.Button({
 									text: "Disable",
-									type: sap.m.ButtonType.Reject
+									type: sap.m.ButtonType.Reject,
+                                    
+                                    press : function () {
+                                        oController.DisableSelectedUsers();
+                                    }
 								}),
 								new sap.m.ToolbarSpacer({}),
 								new sap.m.ToolbarSpacer({}),

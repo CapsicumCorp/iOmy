@@ -40,7 +40,7 @@ sap.ui.jsfragment("fragments.AddUserAddress", {
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Street Address:",
+					label : "Street Address",
 					fields: [
 						new sap.m.Input ({
 							value:"{/NewUser/AddressLine1}"
@@ -48,7 +48,7 @@ sap.ui.jsfragment("fragments.AddUserAddress", {
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Unit Number (if applicable):",
+					label : "Unit Number (if applicable)",
 					fields: [
 						new sap.m.Input ({
 							value:"{/NewUser/AddressLine2}"

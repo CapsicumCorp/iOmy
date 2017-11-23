@@ -139,7 +139,7 @@ sap.ui.controller("pages.staging.user.UserList", {
             //------------------------------------------------//
             for (var i = 0; i < oConfig.data.length; i++) {
 				
-				if (oConfig.data[i].UserState === 0 || oConfig.data[i].UserState === '0' ) {
+				if (oConfig.data[i].State === 0 || oConfig.data[i].State === '0' ) {
 					sUserState = "Disabled";
 				} else {
 					sUserState = "Enabled";
@@ -185,10 +185,141 @@ sap.ui.controller("pages.staging.user.UserList", {
         var aUserList           = oView.getModel().getProperty("/UserList");
         
         for (var i = 0; i < aSelectedIndices.length; i++) {
-            aSelectedRows.push(aUserList[aSelectedIndices[i]].UserId);
+            aSelectedRows.push(aUserList[aSelectedIndices[i]]);
         }
         
         console.log(aSelectedRows);
+        
+        return aSelectedRows;
+    },
+    
+    EnableSelectedUsers : function () {
+        var oController         = this;
+        var oView               = oController.getView();
+        var aSelectedUsers      = oController.GetSelectedUsers();
+        var aRequests           = [];
+        var oAjaxQueue;
+        
+        for (var i = 0; i < aSelectedUsers.length; i++) {
+            if (aSelectedUsers[i].Status === "Disabled") {
+                aRequests.push({
+                    "library" : "PHP",
+                    "url" : IomyRe.apiphp.APILocation("users"),
+                    "data" : {
+                        "Mode" : "ChangeUserState",
+                        "Data" : JSON.stringify({
+                            "UserId" : aSelectedUsers[i].UserId,
+                            "NewState" : 1
+                        })
+                    }
+                });
+            }
+        }
+        
+        oAjaxQueue = new AjaxRequestQueue({
+            requests                : aRequests,
+            concurrentRequests      : 2,
+            
+            onSuccess : function () {
+                var sMessage    = "";
+                
+                if (aRequests.length === 1) {
+                    sMessage = "1 user enabled.";
+                } else {
+                    sMessage = aRequests.length + " users enabled.";
+                }
+                
+                IomyRe.common.showMessage({
+                    text : sMessage
+                });
+                
+                oController.GetListOfUsers();
+            },
+            
+            onWarning : function () {
+                IomyRe.common.showWarning("Could not enable all users.", "");
+            },
+            
+            onFail : function () {
+                IomyRe.common.showError("Failed to enable any users.", "");
+            }
+            
+        });
+        
+    },
+    
+    DisableSelectedUsers : function () {
+        var oController         = this;
+        var oView               = oController.getView();
+        var aSelectedUsers      = oController.GetSelectedUsers();
+        var aRequests           = [];
+        var oAjaxQueue;
+        
+        //--------------------------------------------------------------------//
+        // Prepare the request for each selected user. Three conditions must be
+        // met: 1. The user must NOT be the owner (first user), 2. The user
+        // cannot be currently logged in, and 3. The user should be enabled.
+        //--------------------------------------------------------------------//
+        for (var i = 0; i < aSelectedUsers.length; i++) {
+            if (aSelectedUsers[i].UserId !== 1 && aSelectedUsers[i].UserId !== 2) {
+                
+                if (aSelectedUsers[i].UserId == IomyRe.common.UserInfo.UserId) {
+                    IomyRe.common.showWarning("Unable to disable yourself while logged in.", "Still logged in");
+                    
+                } else {
+                    if (aSelectedUsers[i].Status === "Enabled") {
+                        aRequests.push({
+                            "library" : "PHP",
+                            "url" : IomyRe.apiphp.APILocation("users"),
+                            "data" : {
+                                "Mode" : "ChangeUserState",
+                                "Data" : JSON.stringify({
+                                    "UserId" : aSelectedUsers[i].UserId,
+                                    "NewState" : 0
+                                })
+                            }
+                        });
+                    }
+                }
+            } else {
+                IomyRe.common.showWarning("Cannot disable the owner.", "iOmy Owner");
+            }
+        }
+        
+        //--------------------------------------------------------------------//
+        // Put the requests in a queue. Run two at a time. Report the findings.
+        // TODO: Use more informative error messages.
+        //--------------------------------------------------------------------//
+        oAjaxQueue = new AjaxRequestQueue({
+            requests                : aRequests,
+            concurrentRequests      : 2,
+            
+            onSuccess : function () {
+                var sMessage    = "";
+                
+                if (aRequests.length === 1) {
+                    sMessage = "1 user disabled.";
+                } else {
+                    sMessage = aRequests.length + " users disabled.";
+                }
+                
+                IomyRe.common.showMessage({
+                    text : sMessage
+                });
+                
+                oController.GetListOfUsers();
+            },
+            
+            onWarning : function () {
+                IomyRe.common.showWarning("Could not disable all users.", "");
+            },
+            
+            onFail : function () {
+                IomyRe.common.showError("Failed to disable any users.", "");
+            }
+            
+        });
+        
     }
 
 });
