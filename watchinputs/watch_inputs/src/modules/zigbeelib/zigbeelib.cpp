@@ -4266,22 +4266,18 @@ void zigbeelib_generic_process_zigbee_zdo_simple_descriptor_response(int localzi
 
   debuglibifaceptr->debuglib_printf(1, "%s:   Number of Input Clusters=%u\n", __func__, iclusters->numclusters);
   pos=33;
-  if (iclusters->numclusters>0) {
-    zigbeeendpointit->second.iclusters.clear();
-    for (i=0; i<iclusters->numclusters; i++) {
-      zigbeeendpointit->second.iclusters[ iclusters->clusters[i] ].id=iclusters->clusters[i];
-      debuglibifaceptr->debuglib_printf(1, "%s:   Input Cluster: %s (%04" PRIX16 ")\n", __func__, zigbeelib_get_zigbee_clusterid_string(iclusters->clusters[i]).c_str(), iclusters->clusters[i]);
-    }
-    pos+=(iclusters->numclusters*2);
+  zigbeeendpointit->second.iclusters.clear();
+  for (i=0; i<iclusters->numclusters; i++) {
+    zigbeeendpointit->second.iclusters[ iclusters->clusters[i] ].id=iclusters->clusters[i];
+    debuglibifaceptr->debuglib_printf(1, "%s:   Input Cluster: %s (%04" PRIX16 ")\n", __func__, zigbeelib_get_zigbee_clusterid_string(iclusters->clusters[i]).c_str(), iclusters->clusters[i]);
   }
+  pos+=(iclusters->numclusters*2);
   debuglibifaceptr->debuglib_printf(1, "%s:   Number of Output Clusters=%u\n", __func__, oclusters->numclusters);
   ++pos;
-  if (oclusters->numclusters>0) {
-    zigbeeendpointit->second.oclusters.clear();
-    for (i=0; i<oclusters->numclusters; i++) {
-      zigbeeendpointit->second.oclusters[ oclusters->clusters[i] ].id=oclusters->clusters[i];
-      debuglibifaceptr->debuglib_printf(1, "%s:   Output Cluster: %s (%04" PRIX16 ")\n", __func__, zigbeelib_get_zigbee_clusterid_string(oclusters->clusters[i]).c_str(), oclusters->clusters[i]);
-    }
+  zigbeeendpointit->second.oclusters.clear();
+  for (i=0; i<oclusters->numclusters; i++) {
+    zigbeeendpointit->second.oclusters[ oclusters->clusters[i] ].id=oclusters->clusters[i];
+    debuglibifaceptr->debuglib_printf(1, "%s:   Output Cluster: %s (%04" PRIX16 ")\n", __func__, zigbeelib_get_zigbee_clusterid_string(oclusters->clusters[i]).c_str(), oclusters->clusters[i]);
   }
   zigbeelib_lockzigbee(zigbeelocked);
   zigbeeendpointit->second.numiclusters=iclusters->numclusters;
