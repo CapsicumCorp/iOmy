@@ -51,10 +51,8 @@ $.extend(IomyRe.functions, {
             }
             
         }
+        var aDevicesInAlphabeticalOrder = [];
         
-        //--------------------------------------------------------------------//
-        // Construct the Device List using any filters specified.
-        //--------------------------------------------------------------------//
         $.each( IomyRe.common.ThingList, function( sIndex, mThing ) {
 
             //-- Check to make sure the Device is defined (Best to do this for each result from a foreach) --//
@@ -73,6 +71,33 @@ $.extend(IomyRe.functions, {
                         };
                     }
 
+                    aDevicesInAlphabeticalOrder.push(mThing);
+                }
+            }
+        });
+        
+        aDevicesInAlphabeticalOrder.sort(
+            function (a, b) {
+                var sA = a.DisplayName.toLowerCase();
+                var sB = b.DisplayName.toLowerCase();
+                
+                if (sA === sB) {
+                    return 0;
+                } else {
+                    return sA > sB ? 1 : -1;
+                }
+            }
+        );
+        
+        //--------------------------------------------------------------------//
+        // Construct the Device List using any filters specified.
+        //--------------------------------------------------------------------//
+        $.each( aDevicesInAlphabeticalOrder, function( sIndex, mThing ) {
+
+            //-- Check to make sure the Device is defined (Best to do this for each result from a foreach) --//
+            if ( mThing!==undefined ) {
+
+                if ((iPremiseId === 0 || iPremiseId == mThing.PremiseId) && (iRoomId === 0 || iRoomId == mThing.RoomId)) {
                     //--------------------------------------------//
                     //-- Add the Devices into the Grouping        --//
                     //--------------------------------------------//
@@ -117,7 +142,7 @@ $.extend(IomyRe.functions, {
         var iSat;
         var iLight;
         
-        console.log(sColorString);
+        //console.log(sColorString);
         
         //--------------------------------------------------------------------//
         // First check that the colour string is given.
@@ -191,9 +216,9 @@ $.extend(IomyRe.functions, {
         iSat = Math.round(iSat * 100);
         iLight = Math.round(iLight * 100);
         
-        console.log(iHue);
-        console.log(iSat);
-        console.log(iLight);
+//        console.log(iHue);
+//        console.log(iSat);
+//        console.log(iLight);
         
         //--------------------------------------------------------------------//
         // Return the figures.
