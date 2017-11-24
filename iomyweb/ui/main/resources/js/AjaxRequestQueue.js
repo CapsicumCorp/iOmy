@@ -164,7 +164,7 @@ AjaxRequestQueue.prototype._run = function () {
     // Go through each queue and take out request data and run them.
     //------------------------------------------------------------------------//
     $.each(self._requestQueues, function (sQueue, aRequests) {
-        var mRequestData        = aRequests.pop();
+        var mRequestData        = aRequests.shift();
         var mRequestParameters  = {};
         
         if (mRequestData) {
