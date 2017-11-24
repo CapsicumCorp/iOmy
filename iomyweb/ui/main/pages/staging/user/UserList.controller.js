@@ -188,8 +188,6 @@ sap.ui.controller("pages.staging.user.UserList", {
             aSelectedRows.push(aUserList[aSelectedIndices[i]]);
         }
         
-        console.log(aSelectedRows);
-        
         return aSelectedRows;
     },
     
@@ -200,6 +198,10 @@ sap.ui.controller("pages.staging.user.UserList", {
         var aRequests           = [];
         var oAjaxQueue;
         
+        //--------------------------------------------------------------------//
+        // Prepare the request for each selected user if they're not already
+        // enabled.
+        //--------------------------------------------------------------------//
         for (var i = 0; i < aSelectedUsers.length; i++) {
             if (aSelectedUsers[i].Status === "Disabled") {
                 aRequests.push({

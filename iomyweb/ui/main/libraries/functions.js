@@ -673,7 +673,7 @@ $.extend(IomyRe.functions, {
                 mDeviceType.LinkTypeId === IomyRe.devices.ipcamera.LinkTypeId)
             {
                 structOptions["linkType"+mDeviceType.LinkTypeId] = {
-                    "Id"        : mDeviceType.LinkTypeId,
+                    "Id"          : mDeviceType.LinkTypeId,
                     "Name"        : mDeviceType.LinkTypeName,
                     "Type"        : "link"
                 };
@@ -685,7 +685,7 @@ $.extend(IomyRe.functions, {
         // Add the onvif camera option
         //--------------------------------------------------------------------//
         structOptions["thingType"+IomyRe.devices.onvif.ThingTypeId] = {
-            "Id"        : IomyRe.devices.onvif.ThingTypeId,
+            "Id"          : IomyRe.devices.onvif.ThingTypeId,
             "Name"        : "Onvif Stream",
             "Type"        : "thing"
         };
@@ -772,7 +772,7 @@ $.extend(IomyRe.functions, {
                 });
             }
         } else {
-            throw new RoomNotFoundException();
+            throw new IllegalArgumentException(mIDInfo.aErrorMessages.join('\n'));
         }
         
         return mFoundRoom;

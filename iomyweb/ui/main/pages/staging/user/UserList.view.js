@@ -85,9 +85,6 @@ sap.ui.jsview("pages.staging.user.UserList", {
 			mainContents: [ 
 				new sap.ui.table.Table (oView.createId("UsersTable"), {
 					rows: "{/UserList}",
-                    rowSelectionChange : function () {
-                        oController.GetSelectedUsers();
-                    },
 					extension : [
 						new sap.m.Toolbar ({
 							selectionMode:"MultiToggle",

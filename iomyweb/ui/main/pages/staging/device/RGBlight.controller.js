@@ -195,7 +195,8 @@ sap.ui.controller("pages.staging.device.RGBlight", {
 //                oView.byId("satSlider").getValue(),
 //                oView.byId("briSlider").getValue()
 //            );
-
+            
+            //-- Load the slider data. --//
             oController.InitialDeviceInfoLoad();
         }
     },
@@ -204,19 +205,23 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var oController = this;
         var oView       = this.getView();
         var oContainer  = oView.byId("RGB_Cont");
-        var iHue = oView.byId("hueSlider").getValue();
-        var iSat = oView.byId("satSlider").getValue();
-        var iBright = oView.byId("briSlider").getValue();
+        var iHue        = oView.byId("hueSlider").getValue();
+        var iSat        = oView.byId("satSlider").getValue();
+        var iBright     = oView.byId("briSlider").getValue();
         
-        console.log(oView.byId("hueSlider").getValue());
-        console.log(oView.byId("satSlider").getValue());
-        console.log(oView.byId("briSlider").getValue());
+//        console.log(oView.byId("hueSlider").getValue());
+//        console.log(oView.byId("satSlider").getValue());
+//        console.log(oView.byId("briSlider").getValue());
         
+        // Clear the simple view.
         oContainer.destroyContent();
         
         if (!oController.bUsingAdvancedUI) {
             oController.bUsingAdvancedUI = true;
             
+            //----------------------------------------------------------------//
+            // Create the Colour Picker.
+            //----------------------------------------------------------------//
             oContainer.addContent(IomyRe.widgets.LightBulbColorPicker(oController, {
                 colorString : "hsv("+iHue+","+iSat+","+iBright+")",
                 
@@ -265,8 +270,6 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 WhereClause : [
                     "THING_PK eq "+oController.iThingId,
                     "("+aIOFilter.join(" or ")+")",
-
-                    //"RSTYPE_PK eq "+3901+" or RSTYPE_PK eq "+3902+" or RSTYPE_PK eq "+3903
                 ],
                 OrderByClause : ["UTS desc"],
                 Limit : 3,
@@ -320,9 +323,9 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                         }
                     }
                     
-                    console.log("H:"+iHue);
-                    console.log("S:"+iSaturation);
-                    console.log("L:"+iLight);
+//                    console.log("H:"+iHue);
+//                    console.log("S:"+iSaturation);
+//                    console.log("L:"+iLight);
                     //--------------------------------------------------------//
                     // Set the colour on the page
                     //--------------------------------------------------------//

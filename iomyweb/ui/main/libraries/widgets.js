@@ -405,25 +405,37 @@ $.extend( IomyRe.widgets, {
                 } else {
                     bEnabled = true;
                 }
-
+                
+                //------------------------------------------------------------//
+                // Initial Hue figure
+                //------------------------------------------------------------//
                 if (mSettings.hue !== undefined && mSettings.hue !== null) {
                     iCurrentHue = mSettings.hue;
                 } else {
                     fnAppendError("Current hue must be specified.");
                 }
 
+                //------------------------------------------------------------//
+                // Initial Saturation figure
+                //------------------------------------------------------------//
                 if (mSettings.saturation !== undefined && mSettings.saturation !== null) {
                     iCurrentSaturation = mSettings.saturation;
                 } else {
                     fnAppendError("Current saturation must be specified.");
                 }
 
+                //------------------------------------------------------------//
+                // Initial Luminance figure
+                //------------------------------------------------------------//
                 if (mSettings.brightness !== undefined && mSettings.brightness !== null) {
                     iCurrentBrightness = mSettings.brightness;
                 } else {
                     fnAppendError("Current brightness must be specified.");
                 }
                 
+                //------------------------------------------------------------//
+                // Function to run for advanced view switch.
+                //------------------------------------------------------------//
                 if (mSettings.advancedViewPress !== undefined && mSettings.advancedViewPress !== null) {
                     fnAdvancedPress = mSettings.advancedViewPress;
                     
@@ -431,6 +443,11 @@ $.extend( IomyRe.widgets, {
                     fnAdvancedPress = function () {};
                 }
 
+                //------------------------------------------------------------//
+                // Find out if a function unique to the Hue slider is specified.
+                // If not find a generic 'change' event for all sliders.
+                // Otherwise, do nothing.
+                //------------------------------------------------------------//
                 if (mSettings.hueChange !== undefined && mSettings.hueChange !== null) {
                     fnHueChange = mSettings.hueChange;
                     
@@ -441,6 +458,11 @@ $.extend( IomyRe.widgets, {
                     fnHueChange = function () {};
                 }
 
+                //------------------------------------------------------------//
+                // Find out if a function unique to the Saturation slider is
+                // specified. If not find a generic 'change' event for all
+                // sliders. Otherwise, do nothing.
+                //------------------------------------------------------------//
                 if (mSettings.saturationChange !== undefined && mSettings.saturationChange !== null) {
                     fnSaturationChange = mSettings.saturationChange;
                     
@@ -451,6 +473,11 @@ $.extend( IomyRe.widgets, {
                     fnSaturationChange = function () {};
                 }
 
+                //------------------------------------------------------------//
+                // Find out if a function unique to the Brightness slider is
+                // specified. If not find a generic 'change' event for all
+                // sliders. Otherwise, do nothing.
+                //------------------------------------------------------------//
                 if (mSettings.brightnessChange !== undefined && mSettings.brightnessChange !== null) {
                     fnBrightnessChange = mSettings.brightnessChange;
                     
@@ -461,6 +488,11 @@ $.extend( IomyRe.widgets, {
                     fnBrightnessChange = function () {};
                 }
 
+                //------------------------------------------------------------//
+                // Find out if a function unique to the Hue slider is specified.
+                // If not find a generic 'liveChange' event for all sliders.
+                // Otherwise, do nothing.
+                //------------------------------------------------------------//
                 if (mSettings.hueLiveChange !== undefined && mSettings.hueLiveChange !== null) {
                     fnHueLiveChange = mSettings.hueLiveChange;
                     
@@ -471,6 +503,11 @@ $.extend( IomyRe.widgets, {
                     fnHueLiveChange = function () {};
                 }
 
+                //------------------------------------------------------------//
+                // Find out if a function unique to the Saturation slider is
+                // specified. If not find a generic 'liveChange' event for all
+                // sliders. Otherwise, do nothing.
+                //------------------------------------------------------------//
                 if (mSettings.saturationLiveChange !== undefined && mSettings.saturationLiveChange !== null) {
                     fnSaturationLiveChange = mSettings.saturationLiveChange;
                     
@@ -481,6 +518,11 @@ $.extend( IomyRe.widgets, {
                     fnSaturationLiveChange = function () {};
                 }
 
+                //------------------------------------------------------------//
+                // Find out if a function unique to the Brightness slider is
+                // specified. If not find a generic 'liveChange' event for all
+                // sliders. Otherwise, do nothing.
+                //------------------------------------------------------------//
                 if (mSettings.brightnessLiveChange !== undefined && mSettings.brightnessLiveChange !== null) {
                     fnBrightnessLiveChange = mSettings.brightnessLiveChange;
                     
@@ -599,16 +641,6 @@ $.extend( IomyRe.widgets, {
             $.sap.log.error("Error drawing widget: "+e.name+": "+e.message);
             throw e;
         }
-		
-        console.log(oView.byId("hueSlider").getMax());
-        console.log(oView.byId("satSlider").getMax());
-        console.log(oView.byId("briSlider").getMax());
-        
-        console.log(oView.byId("hueSlider").getValue());
-        console.log(oView.byId("satSlider").getValue());
-        console.log(oView.byId("briSlider").getValue());
-        
-        //document.getElementById(oView.createId("ColourBox")).style = "background: hsl(35,100%,50%);";
         
 		return oForm;
 	},

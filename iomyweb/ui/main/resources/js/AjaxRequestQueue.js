@@ -85,7 +85,11 @@ function AjaxRequestQueue(mSettings) {
         }
         
     } else {
-        
+        this._requests              = [];
+        this._concurrentRequests    = 1;
+        this._onSuccess             = function () {};
+        this._onWarning             = function () {};
+        this._onFail                = function () {};
     }
     
     //--------------------------------------------------------------------//
@@ -101,7 +105,7 @@ function AjaxRequestQueue(mSettings) {
     }
     
     //--------------------------------------------------------------------//
-    // Process the requests
+    // Process any requests.
     //--------------------------------------------------------------------//
     for (var i = 0; i < this._requests.length; i++) {
         this.addRequest(this._requests[i]);
@@ -118,6 +122,12 @@ AjaxRequestQueue.prototype.getNumberOfRequests = function () {
     return iCount;
 };
 
+/**
+ * Adds a request to a queue. If the request queue isn't already running, it
+ * will trigger the AJAX request.
+ * 
+ * @param {type} mRequestData           Object containg request parameters
+ */
 AjaxRequestQueue.prototype.addRequest = function (mRequestData) {
     //------------------------------------------------------------------------//
     // Take the request and put it in the appropriate queue.
@@ -128,24 +138,41 @@ AjaxRequestQueue.prototype.addRequest = function (mRequestData) {
         this._run();
     }
 
+    //------------------------------------------------------------------------//
     // Show that we should use the next queue if there are multiple
     // queues.
+    //------------------------------------------------------------------------//
     if (this._concurrentRequests > 1) {
         this._currentQueue = this._currentQueue % this._concurrentRequests;
     }
     
 };
 
+/**
+ * Successively executes requests in one or more queues. After all of the
+ * requests are completed, one of the callback functions will be executed
+ * depending on how many requests succeeded, and how many failed.
+ * 
+ * @private
+ */
 AjaxRequestQueue.prototype._run = function () {
     var self                = this;
     var iCompletedQueues    = false;
     self._running           = true;
     
+    //------------------------------------------------------------------------//
+    // Go through each queue and take out request data and run them.
+    //------------------------------------------------------------------------//
     $.each(self._requestQueues, function (sQueue, aRequests) {
         var mRequestData        = aRequests.pop();
         var mRequestParameters  = {};
         
         if (mRequestData) {
+            //----------------------------------------------------------------//
+            // Copy the request data so that the success and failure callbacks
+            // can be modified to increment either the success or error counter,
+            // and run the next set of requests in the queue.
+            //----------------------------------------------------------------//
             mRequestParameters = JSON.parse( JSON.stringify(mRequestData) );
 
             mRequestParameters.onSuccess = function (type, data) {
@@ -173,6 +200,7 @@ AjaxRequestQueue.prototype._run = function () {
             } else if (mRequestData.library === "OData") {
                 IomyRe.apiodata.AjaxRequest(mRequestParameters);
             } else {
+                // TODO: A generic AJAX request should be made here without any reference to PHP or OData APIs necessarily.
                 $.sap.log.error("Specified library must be either \"PHP\" or \"OData\". Ignoring request.\n\n"+JSON.stringify(mRequestData));
             }
         } else {
@@ -180,8 +208,15 @@ AjaxRequestQueue.prototype._run = function () {
         }
     });
     
+    //------------------------------------------------------------------------//
+    // All of the requests have been completed, take action based on the success
+    // and error counts.
+    //------------------------------------------------------------------------//
     if (iCompletedQueues === self._concurrentRequests) {
-        this._running = false;
+        this._running       = false;
+        this._currentQueue  = 0;
+        
+        // TODO: A simple data structure needs to be returned to the programmer via these three callback functions.
         
         if (self._errors === 0 && self._successes > 0) {
             self._onSuccess();
