@@ -154,8 +154,13 @@ sap.ui.controller("pages.staging.user.NewUser", {
 	},
 	
 	InsertNewUserInfo: function (oController) {
-		var bError   = false;
-		var sErrMesg = "";
+		var bError          = false;
+		var aErrorMessages  = [];
+        
+        var fnAppendError   = function (sErrorMessage) {
+            bError = true;
+            aErrorMessages.push(sErrorMessage);
+        }
 		
 		//------------------------------------------------//
 		//-- STEP 1 - Extract Values from the Model     --//
@@ -166,6 +171,88 @@ sap.ui.controller("pages.staging.user.NewUser", {
 		//-- STEP 2 - Check for Errors                  --//
 		//------------------------------------------------//
 		var sDate = oCurrentFormData.DOB.getFullYear()+'-'+(oCurrentFormData.DOB.getMonth()+1)+'-'+oCurrentFormData.DOB.getDate();
+        
+        var sUsername               = oCurrentFormData.Username;
+        var sPassword               = oCurrentFormData.Password;
+        var sConfirmPassword        = oCurrentFormData.ConfirmPassword;
+        var dDOB                    = oCurrentFormData.DOB;
+        var sDBUser                 = oCurrentFormData.DBUser;
+        var sDBPassword             = oCurrentFormData.DBPassword;
+        
+        //--------------------------------------------------------------------//
+        // Check the username (required)
+        //--------------------------------------------------------------------//
+        if (sUsername !== "") {
+            //-- Found the username, make sure it's not one of the blacklisted ones. --//
+            var sLowerCaseUsername = sUsername.toLowerCase();
+
+            if (sLowerCaseUsername === "admin" || sLowerCaseUsername === "root" ||
+                    sLowerCaseUsername === "administrator" || sLowerCaseUsername === "sys" ||
+                    sLowerCaseUsername === "manager")
+            {
+                fnAppendError("Username must not be any variation of 'admin', 'administrator', 'manager', 'sys', or 'root.");
+            }
+        } else {
+            fnAppendError("Username is required.");
+        }
+        
+        //--------------------------------------------------------------------//
+        // Find the password
+        //--------------------------------------------------------------------//
+        if (sPassword !== "") {
+            //----------------------------------------------------------------//
+            // Make sure it's a secure password.
+            //----------------------------------------------------------------//
+            var mPasswordInfo = IomyRe.validation.isPasswordSecure(sPassword);
+            
+            if (!mPasswordInfo.bIsValid) {
+                aErrorMessages = aErrorMessages.concat(mPasswordInfo.aErrorMessages);
+            }
+            
+        } else {
+            fnAppendError("Password is required");
+        }
+		
+        //--------------------------------------------------------------------//
+        // Confirm the password
+        //--------------------------------------------------------------------//
+        if (sConfirmPassword !== "") {
+            if (sPassword === "") {
+                fnAppendError("Password is required");
+                
+            } else if (sPassword !== sConfirmPassword) {
+                fnAppendError("Passwords don't match.");
+            }
+            
+        } else {
+            fnAppendError("Please confirm your password.");
+        }
+        
+        //--------------------------------------------------------------------//
+        // Make sure both the database username and password are there.
+        //--------------------------------------------------------------------//
+        if (sDBUser === "") {
+            fnAppendError("Database Username is required.");
+        }
+        
+        if (sDBPassword === "") {
+            fnAppendError("Database Password is required.");
+        }
+        
+        //--------------------------------------------------------------------//
+        // Validate the date of birth
+        //--------------------------------------------------------------------//
+//        if (dDOB !== "") {
+//            var mDOBValidationInfo = IOMy.validation.isDOBValid(dDOB);
+//            
+//            if (mDOBValidationInfo.bIsValid === false) {
+//                aLogErrors.push(mDOBValidationInfo.aErrorMessages.join("\n"));
+//            }
+//            
+//            if (mDOBValidationInfo.date !== null) {
+//                dDOB = IOMy.functions.getTimestampString(mDOBValidationInfo.date, "yyyy-mm-dd", false);
+//            }
+//        }
 		
 		//------------------------------------------------//
 		//-- STEP 3 - Update Database                   --//
@@ -318,7 +405,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
 					}
 				});
 			} else {
-				IomyRe.common.showError( sErrMesg, "Error" );
+				IomyRe.common.showError( aErrorMessages.join("\n\n"), "Error" );
 			}
 		} catch( e1 ) {
 			jQuery.sap.log.error("Error with 'AddRoom' in the 'RoomForm' controller! "+e1.message);

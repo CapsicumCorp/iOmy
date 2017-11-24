@@ -132,6 +132,16 @@ public class NewUser extends AppCompatActivity {
         if (installWizard.ownerUsername.length() == 0) {
             valid = false;
             this.installWizard.validationErrorMessages.add("Username must be filled out.");
+        } else {
+            // Has the user attempted to use 'admin' or 'root' as their username.
+            String lowerCaseUsername = installWizard.ownerUsername.toLowerCase();
+            if (lowerCaseUsername.equals("admin") || lowerCaseUsername.equals("root") ||
+                    lowerCaseUsername.equals("administrator") || lowerCaseUsername.equals("sys") ||
+                    lowerCaseUsername.equals("manager"))
+            {
+                valid = false;
+                this.installWizard.validationErrorMessages.add("Username must not be any variation of 'admin', 'administrator', 'manager', 'sys', or 'root.");
+            }
         }
 
         // Run the password check
@@ -140,7 +150,7 @@ public class NewUser extends AppCompatActivity {
             installWizard.validationErrorMessages.add("Password must be entered.");
         }
 
-        valid = installWizard.isValidPassword(installWizard.ownerPassword);
+        valid = valid && installWizard.isValidPassword(installWizard.ownerPassword);
         if (valid) {
             Log.v("New User", "Valid");
         } else {
