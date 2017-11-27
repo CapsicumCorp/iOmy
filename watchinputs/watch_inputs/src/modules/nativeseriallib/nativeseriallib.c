@@ -604,7 +604,7 @@ static int nativeseriallib_serial_port_reset(void *serialport) {
   fd=serialportptr->fd;
 
   //Drop both RTS and DTR for 100 milliseconds and raise again
-  controlbits=TIOCM_DTR|TIOCM_RTS;
+  controlbits=TIOCM_DTR|TIOCM_RTS|TIOCM_CTS;
   ioctl(fd, TIOCMBIC, &controlbits);
   usleep(100000);
   ioctl(fd, TIOCMBIS, &controlbits);
