@@ -128,19 +128,36 @@ public class NewUser extends AppCompatActivity {
     public boolean isValidData() {
         boolean valid = true;
 
+        // Clear the error log
+        this.installWizard.validationErrorMessages.clear();
+
         // Does the username exist?
-        if (installWizard.ownerUsername.length() == 0) {
+        if (installWizard.ownerUsername.trim().length() == 0) {
             valid = false;
             this.installWizard.validationErrorMessages.add("Username must be filled out.");
+
+        } else if (installWizard.ownerUsername.trim().length() == 1) {
+            valid = false;
+            this.installWizard.validationErrorMessages.add("Username must be longer than a single character.");
+
         } else {
             // Has the user attempted to use 'admin' or 'root' as their username.
             String lowerCaseUsername = installWizard.ownerUsername.toLowerCase();
+
             if (lowerCaseUsername.equals("admin") || lowerCaseUsername.equals("root") ||
                     lowerCaseUsername.equals("administrator") || lowerCaseUsername.equals("sys") ||
                     lowerCaseUsername.equals("manager"))
             {
                 valid = false;
                 this.installWizard.validationErrorMessages.add("Username must not be any variation of 'admin', 'administrator', 'manager', 'sys', or 'root.");
+
+            } else {
+                // Make sure there are no invalid characters in the username.
+                Log.d("Given Username", installWizard.ownerUsername.replaceAll("[a-zA-Z0-9]", ""));
+                if (installWizard.ownerUsername.replaceAll("[a-zA-Z0-9]", "").length() > 0) {
+                    valid = false;
+                    this.installWizard.validationErrorMessages.add("Username should contain only numbers and letters.");
+                }
             }
         }
 
@@ -150,7 +167,7 @@ public class NewUser extends AppCompatActivity {
             installWizard.validationErrorMessages.add("Password must be entered.");
         }
 
-        valid = valid && installWizard.isValidPassword(installWizard.ownerPassword);
+        valid = installWizard.isValidPassword(installWizard.ownerPassword) && valid;
         if (valid) {
             Log.v("New User", "Valid");
         } else {

@@ -139,6 +139,14 @@ public class WebServerSetupDB extends AppCompatActivity {
         if (this.installWizard.databaseSchema.length() == 0) {
             valid = false;
             this.installWizard.validationErrorMessages.add("You must specify a database name for iOmy to use.");
+        } else {
+            String dbSchema = this.installWizard.databaseSchema.toLowerCase();
+            if (dbSchema.equals("information_schema") || dbSchema.equals("mysql") ||
+                    dbSchema.equals("test") || dbSchema.equals("tmp") || dbSchema.equals("temp"))
+            {
+                valid = false;
+                this.installWizard.validationErrorMessages.add("'"+this.installWizard.databaseSchema+"' is a reserved word.");
+            }
         }
 
         return valid;

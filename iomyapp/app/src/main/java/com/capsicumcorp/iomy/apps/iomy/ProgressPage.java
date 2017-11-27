@@ -26,7 +26,9 @@ package com.capsicumcorp.iomy.apps.iomy;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -114,16 +116,48 @@ public class ProgressPage extends AppCompatActivity {
         boolean firstrunval=Settings.getRunFirstRunWizard(this);
         boolean demoMode=Settings.getDemoModeEnabled(this);
 
-        if (firstrunval) {
-            //Use the title of whatever the caller of ProgressPage used as the first run step that has completed
-            Settings.setFirstRunWizardStepCompleted(this, this.getTitle().toString());
-            this.installWizard.summonNextPage(this, this.installWizard.PROCEED);
-        } else {
-            if (demoMode) {
-                this.installWizard.summonDemoWarning(this);
+        if (installWizard.apiErrorMessages.size() == 0) {
+            if (firstrunval) {
+                //Use the title of whatever the caller of ProgressPage used as the first run step that has completed
+                Settings.setFirstRunWizardStepCompleted(this, this.getTitle().toString());
+                this.installWizard.summonNextPage(this, this.installWizard.PROCEED);
             } else {
-                this.installWizard.loadIOMy(this);
+                if (demoMode) {
+                    this.installWizard.summonDemoWarning(this);
+                } else {
+                    this.installWizard.loadIOMy(this);
+                }
             }
+        } else {
+            String errorMessage = "";
+
+            for (int i = 0; i < installWizard.apiErrorMessages.size(); i++) {
+                errorMessage += installWizard.apiErrorMessages.get(i);
+                if (i < installWizard.apiErrorMessages.size() - 1) {
+                    errorMessage += "\n\n";
+                }
+            }
+
+            //----------------------------------------------------------------------------//
+            // Create an alert dialog box
+            //----------------------------------------------------------------------------//
+            AlertDialog.Builder confirmationDialogBuilder = new AlertDialog.Builder(this);
+
+            //----------------------------------------------------------------------------//
+            // Set the properties
+            //----------------------------------------------------------------------------//
+            confirmationDialogBuilder.setMessage(errorMessage);
+            confirmationDialogBuilder.setNeutralButton("OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,
+                                            int id) {
+                            dialog.cancel();
+                        }
+                    }
+            );
+
+            AlertDialog confirmationDialog = confirmationDialogBuilder.create();
+            confirmationDialog.show();
         }
     }
 
