@@ -96,7 +96,7 @@ sap.ui.jsview("pages.staging.premise.PremiseForm", {
 														visible: false,
 														press:   function( oEvent ) {
 															//oController.UpdateValues( oController );
-															oController.ToggleButtonsAndView( oController, "ShowInfo" );
+                                                            oController.SubmitPremiseInformation();
 														}
 													}),
 													new sap.m.Button( oView.createId("InfoBlock_BtnCancel"), {
@@ -159,7 +159,7 @@ sap.ui.jsview("pages.staging.premise.PremiseForm", {
 														visible: false,
 														press:   function( oEvent ) {
 															//oController.UpdateValues( oController );
-															oController.ToggleButtonsAndView( oController, "ShowAddress" );
+															oController.SubmitPremiseAddress();
 														}
 													}),
 													new sap.m.Button( oView.createId("AddrBlock_BtnCancel"), {

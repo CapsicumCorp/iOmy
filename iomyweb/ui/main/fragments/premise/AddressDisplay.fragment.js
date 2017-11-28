@@ -25,7 +25,7 @@ sap.ui.jsfragment("fragments.premise.AddressDisplay", {
 					label : "Street Address",
 					fields: [
 						new sap.m.Text ({
-							text:"12 Water Street"
+							text:"{/Address/AddressLine1}"
 						})
 					]
 				}),
@@ -33,7 +33,7 @@ sap.ui.jsfragment("fragments.premise.AddressDisplay", {
 					label : "Unit Number (if applicable)",
 					fields: [
 						new sap.m.Text ({
-							text:"Unit 15"
+							text:"{/Address/AddressLine2}"
 						})
 					]
 				}),
@@ -41,7 +41,7 @@ sap.ui.jsfragment("fragments.premise.AddressDisplay", {
 					label : "City / Suburb",
 					fields: [
 						new sap.m.Text ({
-							text:""
+							text:"{/Address/AddressLine3}"
 						})
 					]
 				}),
@@ -49,7 +49,7 @@ sap.ui.jsfragment("fragments.premise.AddressDisplay", {
 					label : "State / Province",
 					fields: [
 						new sap.m.Text ({
-							text: "Queensland"
+							text: "{/Address/Subregion}"
 						}),
 					]
 				}),
@@ -57,7 +57,7 @@ sap.ui.jsfragment("fragments.premise.AddressDisplay", {
 					label : "Post Code / Zip Code",
 					fields: [
 						new sap.m.Text ({
-							text: "4655"
+							text: "{/Address/PostCode}"
 						}),
 					]
 				}),
@@ -65,7 +65,7 @@ sap.ui.jsfragment("fragments.premise.AddressDisplay", {
 					label : "Country / Region",
 					fields: [
 						new sap.m.Text ({
-							text: "Australia"
+							text: "{/Address/RegionName}"
 						}),
 					]
 				}),
@@ -73,7 +73,7 @@ sap.ui.jsfragment("fragments.premise.AddressDisplay", {
 					label : "Timezone",
 					fields: [
 						new sap.m.Text ({
-							text: "Australia/Brisbane"
+							text: "{/Address/TimezoneName}"
 						}),
 					]
 				}),

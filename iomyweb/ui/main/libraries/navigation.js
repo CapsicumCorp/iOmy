@@ -154,7 +154,7 @@ $.extend( IomyRe.navigation, {
 						text: "Edit Premise",
 						type: sap.m.ButtonType.Transparent,
 						press : function () {
-							IomyRe.common.NavigationChangePage( "pPremiseForm" , {} , false);
+							IomyRe.common.NavigationChangePage( "pPremiseForm" , {"PremiseId" : 1} , false);
 						}
 					}),
 					new sap.m.Button ({

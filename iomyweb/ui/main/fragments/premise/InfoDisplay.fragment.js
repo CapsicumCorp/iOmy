@@ -17,7 +17,7 @@ sap.ui.jsfragment("fragments.premise.InfoDisplay", {
 					label : "Name",
 					fields: [
 						new sap.m.Text ({
-							text: "Freshwater Home"
+							text: "{/Information/Name}"
 						})
 					]
 				}),
@@ -25,7 +25,7 @@ sap.ui.jsfragment("fragments.premise.InfoDisplay", {
 					label : "Description",
 					fields: [
 						new sap.m.Text ({
-							text: "No Place Like It!"
+							text: "{/Information/Desc}"
 						})
 					]
 				}),
@@ -33,7 +33,7 @@ sap.ui.jsfragment("fragments.premise.InfoDisplay", {
 					label : "Bedrooms",
 					fields: [
 						new sap.m.Text ({
-							text: "5+"
+							text: "{/Information/BedroomCount}"
 						})
 					]
 				}),
@@ -41,7 +41,7 @@ sap.ui.jsfragment("fragments.premise.InfoDisplay", {
 					label : "Floors",
 					fields: [
 						new sap.m.Text ({
-							text: "2"
+							text: "{/Information/FloorCount}"
 						})
 					]
 				}),
@@ -49,7 +49,7 @@ sap.ui.jsfragment("fragments.premise.InfoDisplay", {
 					label : "Occupants",
 					fields: [
 						new sap.m.Text ({
-							text: "5+"
+							text: "{/Information/OccupantCount}"
 						})
 					]
 				}),
@@ -57,7 +57,7 @@ sap.ui.jsfragment("fragments.premise.InfoDisplay", {
 					label : "Rooms",
 					fields: [
 						new sap.m.Text ({
-							text: "10+"
+							text: "{/Information/RoomCount}"
 						})
 					]
 				}),

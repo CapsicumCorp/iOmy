@@ -14,30 +14,32 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 		oFragContent = new sap.ui.layout.form.FormContainer({
 			formElements : [
 				new sap.ui.layout.form.FormElement({
-					label : "Language:",
+					label : "Language",
 					fields: [
 						new sap.m.Select ({
-							items : [
-								new sap.ui.core.Item ({
-									text:"English"
-								}),
-								new sap.ui.core.Item ({
-									text:"etc"
-								}),
-							]
+                            selectedKey : "{/Address/LanguageId}",
+							items : {
+                                path : "/Options/Languages",
+                                template : new sap.ui.core.Item({
+                                    key : "{LanguageId}",
+                                    text : "{LanguageName}"
+                                })
+                            }
 						})
 					]
 				}),new sap.ui.layout.form.FormElement({
-					label : "Street Address:",
+					label : "Street Address",
 					fields: [
 						new sap.m.Input ({
+                            value : "{/Address/AddressLine1}"
 						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Unit Number (if applicable):",
+					label : "Unit Number (if applicable)",
 					fields: [
 						new sap.m.Input ({
+                            value : "{/Address/AddressLine2}"
 						})
 					]
 				}),
@@ -45,7 +47,7 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 					label : "City / Suburb",
 					fields: [
 						new sap.m.Input ({
-							text:""
+                            value : "{/Address/AddressLine3}"
 						})
 					]
 				}),
@@ -53,28 +55,30 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 					label : "State / Province",
 					fields: [
 						new sap.m.Input ({
-						}),
+                            value : "{/Address/Subregion}"
+						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "Post Code / Zip Code",
 					fields: [
 						new sap.m.Input ({
-						}),
+                            value : "{/Address/PostCode}"
+						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "Country / Region",
 					fields: [
 						new sap.m.Select ({
-							items : [
-								new sap.ui.core.Item ({
-									text:"Australia"
-								}),
-								new sap.ui.core.Item ({
-									text:"etc"
-								}),
-							]
+							selectedKey : "{/Address/RegionId}",
+							items : {
+                                path : "/Options/Regions",
+                                template : new sap.ui.core.Item({
+                                    key : "{RegionId}",
+                                    text : "{RegionName}"
+                                })
+                            }
 						})
 					]
 				}),
@@ -82,14 +86,14 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 					label : "Timezone",
 					fields: [
 						new sap.m.Select ({
-							items : [
-								new sap.ui.core.Item ({
-									text:"Australia/Brisbane"
-								}),
-								new sap.ui.core.Item ({
-									text:"etc"
-								}),
-							]
+							selectedKey : "{/Address/TimezoneId}",
+							items : {
+                                path : "/Options/Timezones",
+                                template : new sap.ui.core.Item({
+                                    key : "{TimezoneId}",
+                                    text : "{TimezoneName}"
+                                })
+                            }
 						})
 					]
 				})
