@@ -2,7 +2,7 @@
 Title: Ajax Request Queue Object
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Object specifically for sequentially running AJAX requests using
-    one or multiple queues.
+    one or multiple queues. STILL IN DEVELOPMENT. Works for single queues.
 Copyright: Capsicum Corporation 2017
 
 This file is part of iOmy.
@@ -26,6 +26,7 @@ function AjaxRequestQueue(mSettings) {
     var bError                  = false;
     var aErrorMessages          = [];
     var aRequests               = [];
+    var bExecuteNow             = true;
     
     //------------------------------------------------------------------------//
     // Declare the properties of this object.
@@ -44,17 +45,29 @@ function AjaxRequestQueue(mSettings) {
         //--------------------------------------------------------------------//
         // Look for the request queue. An empty array is the default.
         //--------------------------------------------------------------------//
-        if (mSettings.requests !== undefined || mSettings.requests !== null) {
+        if (mSettings.requests !== undefined && mSettings.requests !== null) {
             this._requests = mSettings.requests;
         }
         
         //--------------------------------------------------------------------//
         // Find out how many requests can be made at a time. Default is one.
         //--------------------------------------------------------------------//
-        if (mSettings.concurrentRequests !== undefined || mSettings.concurrentRequests !== null) {
+        if (mSettings.concurrentRequests !== undefined && mSettings.concurrentRequests !== null) {
             this._concurrentRequests = mSettings.concurrentRequests;
         } else {
             this._concurrentRequests = 1;
+        }
+        
+        //--------------------------------------------------------------------//
+        // Determine whether we execute the requests now, or have the programmer
+        // decide. Default is true.
+        //--------------------------------------------------------------------//
+        if (mSettings.executeNow !== undefined && mSettings.executeNow !== null) {
+            bExecuteNow = mSettings.concurrentRequests;
+            
+            if (typeof bExecuteNow !== "boolean") {
+                $.sap.log.error("WARNING: 'executeNow' is not a boolean ('"+typeof bExecuteNow+"' given). Will default to true.");
+            }
         }
         
         //----------------------------------------------------------------//
@@ -110,6 +123,13 @@ function AjaxRequestQueue(mSettings) {
     for (var i = 0; i < this._requests.length; i++) {
         this.addRequest(this._requests[i]);
     }
+    
+    //--------------------------------------------------------------------//
+    // If the requests are to be run right away, run them.
+    //--------------------------------------------------------------------//
+    if (bExecuteNow) {
+        this._run();
+    }
 }
 
 AjaxRequestQueue.prototype.getNumberOfRequests = function () {
@@ -133,19 +153,21 @@ AjaxRequestQueue.prototype.addRequest = function (mRequestData) {
     // Take the request and put it in the appropriate queue.
     //------------------------------------------------------------------------//
     this._requestQueues["_"+this._currentQueue].push( mRequestData );
-    
-    if (!this._running) {
-        this._run();
-    }
 
     //------------------------------------------------------------------------//
     // Show that we should use the next queue if there are multiple
     // queues.
     //------------------------------------------------------------------------//
     if (this._concurrentRequests > 1) {
-        this._currentQueue = this._currentQueue % this._concurrentRequests;
+        this._currentQueue = ++this._currentQueue % this._concurrentRequests;
     }
     
+};
+
+AjaxRequestQueue.prototype.execute = function () {
+    if (!this._running) {
+        this._run();
+    }
 };
 
 /**
@@ -161,60 +183,12 @@ AjaxRequestQueue.prototype._run = function () {
     self._running           = true;
     
     //------------------------------------------------------------------------//
-    // Go through each queue and take out request data and run them.
-    //------------------------------------------------------------------------//
-    $.each(self._requestQueues, function (sQueue, aRequests) {
-        var mRequestData        = aRequests.shift();
-        var mRequestParameters  = {};
-        
-        if (mRequestData) {
-            //----------------------------------------------------------------//
-            // Copy the request data so that the success and failure callbacks
-            // can be modified to increment either the success or error counter,
-            // and run the next set of requests in the queue.
-            //----------------------------------------------------------------//
-            mRequestParameters = JSON.parse( JSON.stringify(mRequestData) );
-
-            mRequestParameters.onSuccess = function (type, data) {
-                self._successes++;
-                
-                if (mRequestData.onSuccess !== undefined) {
-                    mRequestData.onSuccess(type, data);
-                }
-
-                self._run();
-            };
-
-            mRequestParameters.onFail = function (response) {
-                self._errors++;
-
-                if (mRequestData.onFail !== undefined) {
-                    mRequestData.onFail(response);
-                }
-
-                self._run();
-            };
-            
-            if (mRequestData.library === "PHP") {
-                IomyRe.apiphp.AjaxRequest(mRequestParameters);
-            } else if (mRequestData.library === "OData") {
-                IomyRe.apiodata.AjaxRequest(mRequestParameters);
-            } else {
-                // TODO: A generic AJAX request should be made here without any reference to PHP or OData APIs necessarily.
-                $.sap.log.error("Specified library must be either \"PHP\" or \"OData\". Ignoring request.\n\n"+JSON.stringify(mRequestData));
-            }
-        } else {
-            iCompletedQueues++;
-        }
-    });
-    
-    //------------------------------------------------------------------------//
     // All of the requests have been completed, take action based on the success
     // and error counts.
     //------------------------------------------------------------------------//
-    if (iCompletedQueues === self._concurrentRequests) {
-        this._running       = false;
-        this._currentQueue  = 0;
+    if (self.getNumberOfRequests() === 0) {
+        self._running       = false;
+        self._currentQueue  = 0;
         
         // TODO: A simple data structure needs to be returned to the programmer via these three callback functions.
         
@@ -227,5 +201,51 @@ AjaxRequestQueue.prototype._run = function () {
         } else {
             self._onFail();
         }
+    } else {
+        //------------------------------------------------------------------------//
+        // Otherwise go through each queue and take out request data and run them.
+        //------------------------------------------------------------------------//
+        $.each(self._requestQueues, function (sQueue, aRequests) {
+            var mRequestData        = aRequests.shift();
+            var mRequestParameters  = {};
+
+            if (mRequestData) {
+                //----------------------------------------------------------------//
+                // Copy the request data so that the success and failure callbacks
+                // can be modified to increment either the success or error counter,
+                // and run the next set of requests in the queue.
+                //----------------------------------------------------------------//
+                mRequestParameters = JSON.parse( JSON.stringify(mRequestData) );
+
+                mRequestParameters.onSuccess = function (type, data) {
+                    self._successes++;
+
+                    if (mRequestData.onSuccess !== undefined) {
+                        mRequestData.onSuccess(type, data);
+                    }
+
+                    self._run();
+                };
+
+                mRequestParameters.onFail = function (response) {
+                    self._errors++;
+
+                    if (mRequestData.onFail !== undefined) {
+                        mRequestData.onFail(response);
+                    }
+
+                    self._run();
+                };
+
+                if (mRequestData.library.toLowerCase() === "php") {
+                    IomyRe.apiphp.AjaxRequest(mRequestParameters);
+                } else if (mRequestData.library.toLowerCase() === "odata") {
+                    IomyRe.apiodata.AjaxRequest(mRequestParameters);
+                } else {
+                    // TODO: A generic AJAX request should be made here without any reference to PHP or OData APIs necessarily.
+                    $.sap.log.error("Specified library must be either \"PHP\" or \"OData\". Ignoring request.\n\n"+JSON.stringify(mRequestData));
+                }
+            }
+        });
     }
 };
