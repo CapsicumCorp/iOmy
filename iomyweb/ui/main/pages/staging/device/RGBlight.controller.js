@@ -86,7 +86,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         console.log("S:"+iSat);
         console.log("L:"+iBright);
         
-        oView.byId("ColourBox").setSrc(IomyRe.apiphp.APILocation("colorbox")+"?Mode=HSL&H="+iHue+"&S="+iSat+"&L="+(iBright/2));
+        oView.byId("ColourBox").setSrc(IomyRe.apiphp.APILocation("colorbox")+"?Mode=HSL&H="+iHue+"&S="+iSat+"&L="+Math.floor(iBright/2));
     },
     
     SetSliderValues : function (iHue, iSat, iBright) {

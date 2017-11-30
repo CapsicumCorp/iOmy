@@ -23,42 +23,42 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 $.sap.require("sap.ui.table.Table");
 sap.ui.controller("pages.staging.user.UserList", {
-	sMode:              "Show",
-	aFormFragments: 	{},
-	
-	
-	
+    sMode:              "Show",
+    aFormFragments:     {},
+    
+    
+    
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
 * @memberOf pages.template.Template
 */
 
-	onInit: function() {
-		var oController = this;			//-- SCOPE: Allows subfunctions to access the current scope --//
-		var oView = this.getView();
-		
-		oView.addEventDelegate({
+    onInit: function() {
+        var oController = this;            //-- SCOPE: Allows subfunctions to access the current scope --//
+        var oView = this.getView();
+        
+        oView.addEventDelegate({
 
-			onBeforeShow: function ( oEvent ) {
-				//-- Store the Current Id --//
-				//oController.iCurrentId = oEvent.data.Id;
-				
-				//-- Refresh Nav Buttons --//
-				//MyApp.common.NavigationRefreshButtons( oController );
-				
-				//-- Update the Model --//
-				//oController.RefreshModel( oController, {} );
-				
-				//-- Check the parameters --//
-				oController.GetListOfUsers();
-				//-- Defines the Device Type --//
-				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
-			}
-			
-		});
-		
-	},
+            onBeforeShow: function ( oEvent ) {
+                //-- Store the Current Id --//
+                //oController.iCurrentId = oEvent.data.Id;
+                
+                //-- Refresh Nav Buttons --//
+                //MyApp.common.NavigationRefreshButtons( oController );
+                
+                //-- Update the Model --//
+                //oController.RefreshModel( oController, {} );
+                
+                //-- Check the parameters --//
+                oController.GetListOfUsers();
+                //-- Defines the Device Type --//
+                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+            }
+            
+        });
+        
+    },
     
     GetListOfUsers : function() {
         var oController = this;
@@ -124,27 +124,27 @@ sap.ui.controller("pages.staging.user.UserList", {
         
     },
     
-	RefreshModel: function( oController, oConfig ) {
-		//------------------------------------------------//
-		//-- Declare Variables                          --//
-		//------------------------------------------------//
-		var oView           = oController.getView();
+    RefreshModel: function( oController, oConfig ) {
+        //------------------------------------------------//
+        //-- Declare Variables                          --//
+        //------------------------------------------------//
+        var oView           = oController.getView();
         var aUsers          = [];
         var sUserState      = "";
-		
+        
         if (oConfig.data) {
             
             //------------------------------------------------//
             //-- Create the user list for the model         --//
             //------------------------------------------------//
             for (var i = 0; i < oConfig.data.length; i++) {
-				
-				if (oConfig.data[i].State === 0 || oConfig.data[i].State === '0' ) {
-					sUserState = "Disabled";
-				} else {
-					sUserState = "Enabled";
-				}
-				
+                
+                if (oConfig.data[i].State === 0 || oConfig.data[i].State === '0' ) {
+                    sUserState = "Disabled";
+                } else {
+                    sUserState = "Enabled";
+                }
+                
                 aUsers.push({
                     "UserId" : oConfig.data[i].Id,
                     "Username": oConfig.data[i].Username,
@@ -173,7 +173,7 @@ sap.ui.controller("pages.staging.user.UserList", {
         } else {
             throw new MissingArgumentException("User data is required. This is obtained from the users API to list all users.");
         }
-	},
+    },
     
     GetSelectedUsers : function () {
         var oController         = this;
@@ -220,7 +220,7 @@ sap.ui.controller("pages.staging.user.UserList", {
         
         oAjaxQueue = new AjaxRequestQueue({
             requests                : aRequests,
-            concurrentRequests      : 2,
+            concurrentRequests      : 1,
             
             onSuccess : function () {
                 var sMessage    = "";

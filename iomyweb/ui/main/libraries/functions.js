@@ -29,9 +29,10 @@ $.extend(IomyRe.functions, {
     
     
     createDeviceListData : function (mSettings) {
-        var aaDeviceList            = {};
-        var iPremiseId              = 0;
-        var iRoomId                 = 0;
+        var aaDeviceList                = {};
+        var iPremiseId                  = 0;
+        var iRoomId                     = 0;
+        var aDevicesInAlphabeticalOrder = [];
         
         //--------------------------------------------------------------------//
         // Look for any specified filters and apply them.
@@ -51,7 +52,6 @@ $.extend(IomyRe.functions, {
             }
             
         }
-        var aDevicesInAlphabeticalOrder = [];
         
         $.each( IomyRe.common.ThingList, function( sIndex, mThing ) {
 
@@ -83,8 +83,10 @@ $.extend(IomyRe.functions, {
                 
                 if (sA === sB) {
                     return 0;
-                } else {
-                    return sA > sB ? 1 : -1;
+                } else if (sA > sB) {
+                    return 1;
+                } else if (sA < sB) {
+                    return -1;
                 }
             }
         );
@@ -126,8 +128,8 @@ $.extend(IomyRe.functions, {
      * 
      * Used this guide for the forumla: https://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
      * 
-     * @param {type} sColorString
-     * @returns {undefined}
+     * @param {type} sColorString       RGB colour string (e.g. 'rgb(120,33,10)')
+     * @returns {object}                Map containing the HSL values.
      */
     convertRGBToHSL : function (sColorString) {
         var aFigures;
@@ -162,8 +164,6 @@ $.extend(IomyRe.functions, {
         // decimal format, that is, divided by 255.
         //--------------------------------------------------------------------//
         aFigures = sColorString.split(",");
-        
-        console.log(aFigures);
         
         fRed    = aFigures[0] / 255;
         fGreen  = aFigures[1] / 255;

@@ -2389,6 +2389,7 @@ $.extend(IomyRe.common,{
 			var iRoomRead              = aRoom.PermDeviceRead;             
             var iRoomWrite             = aRoom.PermWrite;            
             var iRoomStateToggle       = aRoom.PermStateToggle;
+            var sPermissionText        = "";
             
             if (iRoomRead === 0) {          
                 sPermissionText = "No Access";            
