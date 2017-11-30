@@ -152,6 +152,12 @@ public class ProgressPage extends AppCompatActivity {
                         public void onClick(DialogInterface dialog,
                                             int id) {
                             dialog.cancel();
+
+                            // Clear the error log
+                            installWizard.apiErrorMessages.clear();
+
+                            // Close the activity
+                            me.finish();
                         }
                     }
             );
@@ -235,10 +241,13 @@ public class ProgressPage extends AppCompatActivity {
         return new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                String errorMessage = "";
+
                 Log.v(requestName, error.toString()+"");
                 // If a timeout occurs, show a dialog
                 if (error.toString() == "com.android.volley.TimeoutError") {
-                    Log.e(requestName, "Connection Timed Out: Server not accessible");
+                    errorMessage = "Connection Timed Out: Server not accessible";
+                    Log.e(requestName, errorMessage);
 //                    NotificationCompat.Builder mBuilder =
 //                            new NotificationCompat.Builder(getApplicationContext())
 //                                    .setSmallIcon(android.R.drawable.stat_notify_error)
@@ -259,12 +268,13 @@ public class ProgressPage extends AppCompatActivity {
                             .build();
                     errNotice.notify();
                 } else if (error.toString() == "com.android.volley.NoConnectionError") {
-                    Log.e(requestName, "Connection Timed Out: Server not accessible");
+                    errorMessage = "No Connection: Server not accessible";
+                    Log.e(requestName, errorMessage);
                     NotificationCompat.Builder mBuilder =
                             new NotificationCompat.Builder(getApplicationContext())
                                     .setSmallIcon(android.R.drawable.stat_notify_error)
-                                    .setContentTitle("Timeout Error")
-                                    .setContentText("Connection Timed Out");
+                                    .setContentTitle("No Connection Error")
+                                    .setContentText("Cannot find a connection");
 
                     // Sets an ID for the notification
                     int mNotificationId = 001;
@@ -273,6 +283,7 @@ public class ProgressPage extends AppCompatActivity {
                     // Builds the notification and issues it.
                     mNotifyMgr.notify(mNotificationId, mBuilder.build());
                 } else {
+                    errorMessage = "An unexpected error has occurred:\n\nHTTP Code: " + error.networkResponse.statusCode;
                     Log.e(requestName, "Unknown Error Occurred");
                     Log.e(requestName, error.toString());
                     NotificationCompat.Builder mBuilder =
@@ -289,8 +300,30 @@ public class ProgressPage extends AppCompatActivity {
                     mNotifyMgr.notify(mNotificationId, mBuilder.build());
                 }
 
-                // Close the activity
-                me.finish();
+                //----------------------------------------------------------------------------//
+                // Create an alert dialog box
+                //----------------------------------------------------------------------------//
+                AlertDialog.Builder confirmationDialogBuilder = new AlertDialog.Builder(me);
+
+                //----------------------------------------------------------------------------//
+                // Set the properties
+                //----------------------------------------------------------------------------//
+                confirmationDialogBuilder.setMessage(errorMessage);
+                confirmationDialogBuilder.setNeutralButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                                int id) {
+
+                                dialog.cancel();
+
+                                // Close the activity
+                                me.finish();
+                            }
+                        }
+                );
+
+                AlertDialog confirmationDialog = confirmationDialogBuilder.create();
+                confirmationDialog.show();
 
                 //----------------------------------------------------------------------//
                 // Apply the request filter to specify no filter so that all pending requests
