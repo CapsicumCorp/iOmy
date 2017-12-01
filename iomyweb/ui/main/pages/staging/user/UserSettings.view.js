@@ -264,15 +264,14 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 														icon:    "sap-icon://edit",
 														type:    "Transparent",
 														press:   function() {
-															oController.ToggleButtonsAndView( oController, "EditRoomPermissions" );
+                                                            oController.FetchUserRoomPermissions();
 														}
 													}),
 													new sap.m.Button( oView.createId("UserRoomPermissionsBlock_BtnSave"), {
 														icon:    "sap-icon://save",
 														visible: false,
 														press:   function( oEvent ) {
-															//oController.UpdateValues( oController );
-															oController.ToggleButtonsAndView( oController, "ShowRoomPermissions" );
+															oController.UpdateUserRoomPermissions();
 														}
 													}),
 													new sap.m.Button( oView.createId("UserRoomPermissionsBlock_BtnCancel"), {

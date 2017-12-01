@@ -1,6 +1,7 @@
 /*
 Title: Template UI5 Controller
 Author: Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
+    Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Draws either a username and password prompt, or a loading app
     notice for the user to log into iOmy.
 Copyright: Capsicum Corporation 2015, 2016
@@ -83,6 +84,12 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		//------------------------------------------------//
 		var oView            = oController.getView();
 		var aUserData = {};
+        var aRoomData = JSON.parse(JSON.stringify(IomyRe.common.AllRoomsList))
+        
+        aRoomData['_0'] = {
+            RoomId: "0",
+            RoomName: "All Rooms"
+        };
 		
 		//------------------------------------------------//
 		//-- Setup New UserData Array                --//
@@ -101,16 +108,40 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 			"Regions":               IomyRe.common.Regions,
 			"Languages":             IomyRe.common.Languages,
 			"Timezones":             IomyRe.common.Timezones,
-			"Premise":               IomyRe.common.PremiseList,
+			"Premises":              IomyRe.common.PremiseList,
 			"Rooms":                 IomyRe.common.AllRoomsList,
-			"UserInfo":              aUserData
+            "RoomOptions":           aRoomData,
+			"UserInfo":              aUserData,
+            
+            "RoomPermInfo": {
+                "CurrentLevel"  : 2,
+                "RoomId"        : 0,
+                "PremiseId"     : 1
+            },
+            
+            "PermLevels":            {
+               "_1" : {
+                    "Key" : 1,
+                    "Text" : "No Access"
+                },
+                "_2" : {
+                    "Key" : 2,
+                    "Text" : "Read"
+                },
+                "_3" : {
+                    "Key" : 3,
+                    "Text" : "Read, Device Toggle"
+                },
+                "_4" : {
+                    "Key" : 4,
+                    "Text" : "Read/Write"
+                }
+            }
 		});
 		
 		oModel.setSizeLimit(420);
 		oView.setModel( oModel );	
 		
-		
-		//oController.UpdateVisibleInclusions( oController );
 		//------------------------------------------------//
 		//-- Trigger the onSuccess Event                --//
 		//------------------------------------------------//
@@ -147,10 +178,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		//------------------------------------------------//
 		//-- STEP 2 - Check for Errors                  --//
 		//------------------------------------------------//
-		//if( oCurrentFormData.InclusionId <= 0 ) {
-		//	bError    = true;
-		//	sErrMesg  = "Please choose a valid Inclusion!";
-		//}
+		
 		
 		//------------------------------------------------//
 		//-- STEP 3 - Update Database                   --//
@@ -308,6 +336,120 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 			jQuery.sap.log.error("Error with the 'AddressEdit' in the 'AddressEdit' controller! "+e1.message);
 		}
 	},
+    
+    ToggleRoomPermissionControls : function (bEnabled) {
+        var oView = this.getView();
+        
+        if (oView.byId("SelectPremise") !== undefined) {
+            oView.byId("SelectPremise").setEnabled(bEnabled);
+        }
+        
+        if (oView.byId("SelectRoom") !== undefined) {
+            oView.byId("SelectRoom").setEnabled(bEnabled);
+        }
+        
+        if (oView.byId("SelectCurrentLevel") !== undefined) {
+            oView.byId("SelectCurrentLevel").setEnabled(bEnabled);
+        }
+    },
+    
+    DisplayRoomPermissions : function (iLevel) {
+        var oController     = this;
+        var oView           = this.getView();
+        var oModel          = JSON.parse(oView.getModel().getJSON());
+        
+        oModel.RoomPermInfo.CurrentLevel = iLevel;
+        
+        oView.setModel( new sap.ui.model.json.JSONModel(oModel) );
+    },
+    
+    FetchUserRoomPermissions : function () {
+        var oController     = this;
+        var oView           = this.getView();
+        var oFormData       = oView.getModel();
+        var iRoomId         = oFormData.getProperty("/RoomPermInfo/RoomId");
+        var iPremiseId      = oFormData.getProperty("/RoomPermInfo/PremiseId");
+        
+        //oController.ToggleRoomPermissionControls(false);
+        
+        IomyRe.functions.permissions.fetchRoomPermissions({
+            userID          : IomyRe.common.UserInfo.UserId,
+            roomID          : iRoomId,
+            premiseID       : iPremiseId,
+            
+            onSuccess : function (iLevel) {
+                console.log(iLevel);
+                
+                oController.DisplayRoomPermissions(iLevel);
+                oController.ToggleButtonsAndView( oController, "EditRoomPermissions" );
+                
+                oController.ToggleRoomPermissionControls(true);
+            },
+            
+            onWarning : function (iLevel, sErrors) {
+                IomyRe.common.showWarning(sErrors, "Unable to retrieve for some rooms.");
+                
+                console.log(iLevel);
+                
+                oController.DisplayRoomPermissions(iLevel);
+                oController.ToggleButtonsAndView( oController, "EditRoomPermissions" );
+                
+                //oController.ToggleRoomPermissionControls(true);
+            },
+            
+            onFail : function (sErrors) {
+                IomyRe.common.showError(sErrors, "Failed to retrieve room permissions.");
+                
+                //oController.ToggleRoomPermissionControls(true);
+            }
+        });
+    },
+    
+    UpdateUserRoomPermissions : function () {
+        var oController     = this;
+        var oView           = this.getView();
+        var oFormData       = oView.getModel();
+        var iLevel          = oFormData.getProperty("/RoomPermInfo/CurrentLevel");
+        var iRoomId         = oFormData.getProperty("/RoomPermInfo/RoomId");
+        var iPremiseId      = oFormData.getProperty("/RoomPermInfo/PremiseId");
+        
+        //oController.ToggleRoomPermissionControls(false);
+        
+        IomyRe.functions.permissions.updateRoomPermissions({
+            level           : parseInt(iLevel),
+            userID          : IomyRe.common.UserInfo.UserId,
+            roomID          : iRoomId,
+            premiseID       : iPremiseId,
+            
+            onSuccess : function () {
+                IomyRe.common.RefreshCoreVariables({
+                    
+                    onSuccess : function () {
+                        IomyRe.common.showMessage({
+                            "text" : "Updated permissions successfully"
+                        });
+                        
+                        oController.RefreshModel( oController, {} );
+                        oController.ToggleButtonsAndView( oController, "ShowRoomPermissions" );
+                        
+                    }
+                    
+                });
+            },
+            
+            onWarning : function (sErrors) {
+                IomyRe.common.showWarning(sErrors, "Unable to update for some rooms.");
+                
+                //oController.ToggleRoomPermissionControls(true);
+            },
+            
+            onFail : function (sErrors) {
+                IomyRe.common.showError(sErrors, "Failed to update room permissions.");
+                
+                //oController.ToggleRoomPermissionControls(true);
+            }
+        });
+    },
 	
 	ToggleButtonsAndView: function ( oController, sMode ) {
 		var oView = this.getView();

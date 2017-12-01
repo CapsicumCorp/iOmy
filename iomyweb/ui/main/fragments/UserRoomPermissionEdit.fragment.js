@@ -5,12 +5,18 @@ sap.ui.jsfragment("fragments.UserRoomPermissionEdit", {
 		//--------------------------------------------//
 		//-- 1.0 - DECLARE VARIABLES                --//
 		//--------------------------------------------//
-		var oFragContent = null;
+		var oFragContent    = null;
+        var oView           = oController.getView();
         
         var oItemTemplatePremises = new sap.ui.core.Item({
 			key:  "{Id}",
 			text: "{Name}"
 		});
+        
+        var oItemTemplateRooms = new sap.ui.core.Item({
+            key : "{RoomId}",
+            text : "{RoomName}"
+        });
         
         var oItemTemplatePermissionLevels = new sap.ui.core.Item({
 			key:  "{Key}",
@@ -25,7 +31,8 @@ sap.ui.jsfragment("fragments.UserRoomPermissionEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Premise",
 					fields: [
-						new sap.m.Select ({
+						new sap.m.Select (oView.createId("SelectPremise"), {
+                            selectedKey : "{/RoomPermInfo/PremiseId}",
 							items: {
 								path: "/Premises",
 								template: oItemTemplatePremises
@@ -36,14 +43,15 @@ sap.ui.jsfragment("fragments.UserRoomPermissionEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Room",
 					fields: [
-						IomyRe.widgets.selectBoxRoom({
-                            selectedKey : "{/NewUser/RoomId}",
-                            template : {
-                                path : "/Rooms",
-                                item : new sap.ui.core.Item({
-                                    key : "{RoomId}",
-                                    text : "{RoomName}"
-                                })
+						new sap.m.Select(oView.createId("SelectRoom"), {
+                            selectedKey : "{/RoomPermInfo/RoomId}",
+                            items : {
+                                path : "/RoomOptions",
+                                template : oItemTemplateRooms
+                            },
+                            
+                            change : function () {
+                                oController.FetchUserRoomPermissions();
                             }
                         })
 					]
@@ -51,7 +59,8 @@ sap.ui.jsfragment("fragments.UserRoomPermissionEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Permission Level",
 					fields: [
-                        new sap.m.Select ({
+                        new sap.m.Select (oView.createId("SelectCurrentLevel"), {
+                            selectedKey : "{/RoomPermInfo/CurrentLevel}",
 							items: {
 								path: "/PermLevels",
 								template: oItemTemplatePermissionLevels
