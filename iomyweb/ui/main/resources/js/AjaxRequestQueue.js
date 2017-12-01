@@ -2,7 +2,7 @@
 Title: Ajax Request Queue Object
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: Object specifically for sequentially running AJAX requests using
-    one or multiple queues. STILL IN DEVELOPMENT. Works for single queues.
+    one or multiple queues.
 Copyright: Capsicum Corporation 2017
 
 This file is part of iOmy.
@@ -22,6 +22,24 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+/**
+ * An object that executes AJAX requests in a sequence. Can also be used to
+ * run concurrent requests.
+ * 
+ * Here are the parameters:
+ * 
+ * new AjaxRequestQueue({
+ *     requests : [],              An array of request data (JS Objects) that will be taken and executed (default = []).
+ *     concurrentRequests : 1,     Number requests to run at a time (default = 1).
+ *     executeNow : true,          Specifies whether to execute after the object is created or not (default = true).
+ *     onSuccess : function () {}, A function to run if all of the requests executed successfully. Optional.
+ *     onWarning : function () {}, A function to run if some requests executed successfully but others generated errors. Optional.
+ *     onFail : function () {}     A function to run if all of the requests failed. Optional.
+ * });
+ * 
+ * @param {type} mSettings                  Map containing parameters.
+ * @returns {AjaxRequestQueue}
+ */
 function AjaxRequestQueue(mSettings) {
     var bError                  = false;
     var aErrorMessages          = [];
