@@ -164,10 +164,34 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 			throw new IllegalArgumentException("Premise ID must be greater than 0.");
 		}
 	},
+    
+    ToggleInformationControls : function (bEnabled) {
+        var oView = this.getView();
+        
+        oView.byId("InputGivenNames").setEnabled(bEnabled);
+        oView.byId("InputSurname").setEnabled(bEnabled);
+        oView.byId("InputDisplayName").setEnabled(bEnabled);
+        oView.byId("InputEmail").setEnabled(bEnabled);
+        oView.byId("InputMobile").setEnabled(bEnabled);
+    },
+    
+    ToggleAddressControls : function (bEnabled) {
+        var oView = this.getView();
+        
+        oView.byId("SelectLanguage").setEnabled(bEnabled);
+        oView.byId("InputAddressLine1").setEnabled(bEnabled);
+        oView.byId("InputAddressLine2").setEnabled(bEnabled);
+        oView.byId("InputAddressLine3").setEnabled(bEnabled);
+        oView.byId("InputSubregion").setEnabled(bEnabled);
+        oView.byId("InputPostCode").setEnabled(bEnabled);
+        oView.byId("SelectRegion").setEnabled(bEnabled);
+        oView.byId("SelectTimezone").setEnabled(bEnabled);
+    },
 	
-	UpdateUserInfoValues: function (oController) {
-		var bError   = false;
-		var sErrMesg = "";
+	UpdateUserInfoValues: function () {
+        var oController = this;
+		var bError      = false;
+		var sErrMesg    = "";
 		
 		//------------------------------------------------//
 		//-- STEP 1 - Extract Values from the Model     --//
@@ -179,6 +203,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		//-- STEP 2 - Check for Errors                  --//
 		//------------------------------------------------//
 		
+        oController.ToggleInformationControls(false);
 		
 		//------------------------------------------------//
 		//-- STEP 3 - Update Database                   --//
@@ -214,6 +239,10 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 													//------------------------------------------------//
 													//-- STEP 8 - Load the Display Fragment         --//
 													//------------------------------------------------//
+                                                    IomyRe.common.showMessage({
+                                                        text : "User Information successfully updated."
+                                                    });
+                                                    
 													oController.ToggleButtonsAndView( oController, "ShowInfo" );
 														
 														
@@ -241,25 +270,36 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 						//	aConfig.onFail();
 						//}
 						jQuery.sap.log.error("Error with the 'UpdateUserInfoValues' API Request when editing a LandPackage in the 'UserSettings' controller!");
+                        oController.ToggleInformationControls(true);
 					}
 				});
 			} else {
-				IomyRe.common.showError( sErrMesg, "Error" );
+				IomyRe.common.showError( sErrMesg, "Error", function () {
+                    oController.ToggleInformationControls(true);
+                });
 			}
 		} catch( e1 ) {
-			jQuery.sap.log.error("Error with'UpdateUserInfoValues' in the 'UserSettings' controller! "+e1.message);
+            var sErrorMesg = "Error with'UpdateUserInfoValues' in the 'UserSettings' controller! "+e1.message;
+            
+			jQuery.sap.log.error(sErrorMesg);
+            IomyRe.common.showError( sErrorMesg, "Error", function () {
+                oController.ToggleInformationControls(true);
+            });
 		}
 	},
 	
-	UpdateUserAddressValues: function (oController) {
-		var bError   = false;
-		var sErrMesg = "";
+	UpdateUserAddressValues: function () {
+        var oController = this;
+		var bError      = false;
+		var sErrMesg    = "";
 		
 		//------------------------------------------------//
 		//-- STEP 1 - Extract Values from the Model     --//
 		//------------------------------------------------//
 		var oCurrentFormData = oController.getView().getModel().getProperty("/UserInfo/");
 		//var oTest = oController.getView().getModel();
+        
+        oController.ToggleAddressControls(false);
 		
 		//------------------------------------------------//
 		//-- STEP 2 - Check for Errors                  --//
@@ -310,6 +350,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 									
 								} catch( e3 ) {
 									jQuery.sap.log.error("Error with the 'AddressEdit' success event that was passed as a parameter in the 'AddressEdit' controller! "+e3.message);
+                                    oController.ToggleAddressControls(true);
 								}
 							} else {
 								//-- Run the fail event
@@ -317,9 +358,11 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 								//	aConfig.onFail();
 								//}
 								jQuery.sap.log.error("Error with the 'AddressEdit' successful API result in the 'AddressEdit' controller!");
+                                oController.ToggleAddressControls(true);
 							}
 						} catch( e2 ) {
 							jQuery.sap.log.error("Error with the 'AddressEdit' success in the 'AddressEdit' controller! "+e2.message);
+                            oController.ToggleAddressControls(true);
 						}
 					},
 					onFail: function () {
@@ -327,13 +370,17 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 						//	aConfig.onFail();
 						//}
 						jQuery.sap.log.error("Error with the 'AddressEdit' API Request when editing a LandPackage in the 'AddressEdit' controller!");
+                        oController.ToggleAddressControls(true);
 					}
 				});
 			} else {
-				IomyRe.common.showError( sErrMesg, "Error" );
+				IomyRe.common.showError( sErrMesg, "Error", function () {
+                    oController.ToggleAddressControls(true);
+                });
 			}
 		} catch( e1 ) {
 			jQuery.sap.log.error("Error with the 'AddressEdit' in the 'AddressEdit' controller! "+e1.message);
+            oController.ToggleAddressControls(true);
 		}
 	},
     
@@ -370,7 +417,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
         var iRoomId         = oFormData.getProperty("/RoomPermInfo/RoomId");
         var iPremiseId      = oFormData.getProperty("/RoomPermInfo/PremiseId");
         
-        //oController.ToggleRoomPermissionControls(false);
+        oController.ToggleRoomPermissionControls(false);
         
         IomyRe.functions.permissions.fetchRoomPermissions({
             userID          : IomyRe.common.UserInfo.UserId,
@@ -378,7 +425,6 @@ sap.ui.controller("pages.staging.user.UserSettings", {
             premiseID       : iPremiseId,
             
             onSuccess : function (iLevel) {
-                console.log(iLevel);
                 
                 oController.DisplayRoomPermissions(iLevel);
                 oController.ToggleButtonsAndView( oController, "EditRoomPermissions" );
@@ -394,13 +440,13 @@ sap.ui.controller("pages.staging.user.UserSettings", {
                 oController.DisplayRoomPermissions(iLevel);
                 oController.ToggleButtonsAndView( oController, "EditRoomPermissions" );
                 
-                //oController.ToggleRoomPermissionControls(true);
+                oController.ToggleRoomPermissionControls(true);
             },
             
             onFail : function (sErrors) {
                 IomyRe.common.showError(sErrors, "Failed to retrieve room permissions.");
                 
-                //oController.ToggleRoomPermissionControls(true);
+                oController.ToggleRoomPermissionControls(true);
             }
         });
     },
@@ -413,7 +459,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
         var iRoomId         = oFormData.getProperty("/RoomPermInfo/RoomId");
         var iPremiseId      = oFormData.getProperty("/RoomPermInfo/PremiseId");
         
-        //oController.ToggleRoomPermissionControls(false);
+        oController.ToggleRoomPermissionControls(false);
         
         IomyRe.functions.permissions.updateRoomPermissions({
             level           : parseInt(iLevel),
@@ -440,13 +486,13 @@ sap.ui.controller("pages.staging.user.UserSettings", {
             onWarning : function (sErrors) {
                 IomyRe.common.showWarning(sErrors, "Unable to update for some rooms.");
                 
-                //oController.ToggleRoomPermissionControls(true);
+                oController.ToggleRoomPermissionControls(true);
             },
             
             onFail : function (sErrors) {
                 IomyRe.common.showError(sErrors, "Failed to update room permissions.");
                 
-                //oController.ToggleRoomPermissionControls(true);
+                oController.ToggleRoomPermissionControls(true);
             }
         });
     },

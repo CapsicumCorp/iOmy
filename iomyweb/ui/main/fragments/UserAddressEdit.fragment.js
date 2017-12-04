@@ -6,6 +6,7 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 		//-- 1.0 - DECLARE VARIABLES                --//
 		//--------------------------------------------//
 		var oFragContent = null;
+        var oView        = oController.getView();
 		
 		var oItemTemplateTimezones = new sap.ui.core.Item({
 			key:  "{TimezoneId}",
@@ -30,7 +31,7 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Language",
 					fields: [
-						new sap.m.Select ({
+						new sap.m.Select (oView.createId("SelectLanguage"), {
 							selectedKey: "{/UserInfo/LanguageId}",
 							items: {
 								path: "/Languages",
@@ -42,7 +43,7 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Street Address:",
 					fields: [
-						new sap.m.Input ({
+						new sap.m.Input (oView.createId("InputAddressLine1"), {
 							value:"{/UserInfo/AddressLine1}"
 						})
 					]
@@ -50,7 +51,7 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Unit Number (if applicable):",
 					fields: [
-						new sap.m.Input ({
+						new sap.m.Input (oView.createId("InputAddressLine2"), {
 							value:"{/UserInfo/AddressLine2}"
 						})
 					]
@@ -58,7 +59,7 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "City / Suburb",
 					fields: [
-						new sap.m.Input ({
+						new sap.m.Input (oView.createId("InputAddressLine3"), {
 							value:"{/UserInfo/AddressLine3}"
 						})
 					]
@@ -66,7 +67,7 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "State / Province",
 					fields: [
-						new sap.m.Input ({
+						new sap.m.Input (oView.createId("InputSubregion"), {
 							value: "{/UserInfo/SubRegion}"
 						}),
 					]
@@ -74,7 +75,7 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Post Code / Zip Code",
 					fields: [
-						new sap.m.Input ({
+						new sap.m.Input (oView.createId("InputPostCode"), {
 							value: "{/UserInfo/Postcode}"
 						}),
 					]
@@ -82,7 +83,7 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Country / Region",
 					fields: [
-						new sap.m.Select ({
+						new sap.m.Select (oView.createId("SelectRegion"), {
 							selectedKey: "{/UserInfo/RegionId}",
 							items: {
 								path: "/Regions",
@@ -94,7 +95,7 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Timezone",
 					fields: [
-						new sap.m.Select ({
+						new sap.m.Select (oView.createId("SelectTimezone"), {
 							selectedKey: "{/UserInfo/TimezoneId}",
 							items: {
 								path: "/Timezones",
