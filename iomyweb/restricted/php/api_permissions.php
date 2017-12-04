@@ -95,7 +95,12 @@ if($bError===false) {
 		//-- NOTE: Valid modes are going to be "UpdatePremisePerms", "UpdateRoomPerms" --//
 		
 		//-- Verify that the mode is supported --//
-		if( $sPostMode!=="UpdatePremisePerms" && $sPostMode!=="UpdateRoomPerms" && $sPostMode!=="LookupPremisePerms" && $sPostMode!=="LookupRoomPerms" && $sPostMode!=="LookupUsersForPremisePerms" && $sPostMode!=="LookupUsersForRoomPerms" ) {
+		if( 
+			$sPostMode!=="UpdatePremisePerms"         && $sPostMode!=="UpdateRoomPerms"            && 
+			$sPostMode!=="LookupPremisePerms"         && $sPostMode!=="LookupRoomPerms"            && 
+			$sPostMode!=="LookupUsersForPremisePerms" && $sPostMode!=="LookupUsersForRoomPerms"    && 
+			$sPostMode!=="AdminUserPremisePerms"      && $sPostMode!=="AdminUserRoomPerms"         
+		) {
 			$bError = true;
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
@@ -116,7 +121,11 @@ if($bError===false) {
 	//-- 2.2.2 - Retrieve the "UserId"                  --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="UpdatePremisePerms" || $sPostMode==="UpdateRoomPerms" || $sPostMode==="LookupPremisePerms" || $sPostMode==="LookupRoomPerms" ) {
+		if( 
+			$sPostMode==="UpdatePremisePerms"    || $sPostMode==="UpdateRoomPerms"       || 
+			$sPostMode==="LookupPremisePerms"    || $sPostMode==="LookupRoomPerms"       || 
+			$sPostMode==="AdminUserPremisePerms" || $sPostMode==="AdminUserRoomPerms"
+		) {
 			try {
 				//-- Retrieve the "UserId" --//
 				$iPostUserId = $aHTTPData["UserId"];
@@ -275,13 +284,24 @@ if( $bError===false ) {
 		//================================================================//
 		//== 5.3 - MODE: Lookup Permissions                             ==//
 		//================================================================//
-		} else if( $sPostMode==="LookupPremisePerms" || $sPostMode==="LookupRoomPerms" ) {
+		} else if( 
+			$sPostMode==="LookupPremisePerms"    || $sPostMode==="LookupRoomPerms"       || 
+			$sPostMode==="AdminUserPremisePerms" || $sPostMode==="AdminUserRoomPerms"    
+		) {
 			try {
 				
-				if( $sPostMode==="LookupPremisePerms" ) {
+				if( $sPostMode==="AdminUserPremisePerms" ){
+					$aResult = LookupUserAllPremisePermissions( $iPostUserId );
+					
+				} else if ( $sPostMode==="AdminUserRoomPerms" ) {
+					$aResult = LookupUserAllRoomPermissions( $iPostUserId );
+					
+				} else if( $sPostMode==="LookupPremisePerms" ) {
 					$aResult = LookupUserPremisePermissions( $iPostUserId, $iPostPremiseId );
+					
 				} else {
 					$aResult = LookupUserRoomPermissions( $iPostUserId, $iPostRoomId );
+					
 				}
 				
 				
@@ -311,6 +331,9 @@ if( $bError===false ) {
 				$sErrMesg .= "Internal API Error! \n";
 				$sErrMesg .= $e4400->getMessage();
 			}
+			
+			
+			
 			
 		//================================================================//
 		//== Unsupported Mode                                           ==//

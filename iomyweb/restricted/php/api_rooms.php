@@ -94,7 +94,7 @@ if($bError===false) {
 		//-- NOTE: Valid modes are going to be "EditInfo", "AddRoom", "DeleteRoom", "" --//
 		
 		//-- Verify that the mode is supported --//
-		if( $sPostMode!=="AddRoom" && $sPostMode!=="EditInfo" && $sPostMode!=="DeleteRoom" ) {
+		if( $sPostMode!=="AddRoom" && $sPostMode!=="EditInfo" && $sPostMode!=="DeleteRoom" && $sPostMode!=="AdminRoomList" ) {
 			$bError = true;
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
@@ -477,13 +477,37 @@ if( $bError===false ) {
 						$sErrMesg .= "Your user doesn't have sufficient privilege to change the Room Info! \n";
 					}
 				}
+				
 			} catch( Exception $e3400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
 				$sErrMesg .= "Error Code:'3400' \n";
 				$sErrMesg .= $e3400->getMessage();
 			}
-
+			
+			
+		//================================================================//
+		//== 5.5 - MODE: Admin Room List                                ==//
+		//================================================================//
+		} else if( $sPostMode==="AdminRoomList" ) {
+			try {
+				$aResult = SpecialGetAllRooms();
+				
+				if( $aResult["Error"]===true ) {
+					//-- Display an Error Message --//
+					$bError = true;
+					$sErrMesg .= "Error Code:'5401' \n";
+					$sErrMesg .= "Internal API Error! \n";
+					$sErrMesg .= $aResult["ErrMesg"];
+				}
+				
+			} catch( Exception $e3400 ) {
+				//-- Display an Error Message --//
+				$bError    = true;
+				$sErrMesg .= "Error Code:'3400' \n";
+				$sErrMesg .= $e3400->getMessage();
+			}
+				
 		//================================================================//
 		//== Unsupported Mode                                           ==//
 		//================================================================//

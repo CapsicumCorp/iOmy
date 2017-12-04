@@ -901,6 +901,204 @@ function LookupUserPremisePermissions( $iUserId, $iPremiseId ) {
 	}
 }
 
+function LookupUserAllPremisePermissions( $iUserId ) {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError                 = false;        //-- BOOLEAN:   --//
+	$iErrCode               = 0;            //-- INTEGER:   --//
+	$sErrMesg               = "";           //-- STRING:    --//
+	$aResult                = array();      //-- ARRAY:     --//
+	$iOwnerPerm             = 0;            //-- INTEGER:   --//
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	try {
+		
+		//--------------------------------------------------------//
+		//-- 5.2 - Check if the Current User is the Owner       --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aUserServerPerms = GetUserServerPermissions();
+			if( $aUserServerPerms['Error']===false ) {
+				if( $aUserServerPerms['Data']['PermServerAddUser']!==1 ) {
+					$bError    = true;
+					$iErrCode  = 1;
+					$sErrMesg .= "Insufficient permissions!\n";
+					$sErrMesg .= "Your user doesn't appear to have the \"AddUser\" server permission needed to perform this operation.";
+					//var_dump($aPremiseResults);
+				}
+				
+			} else {
+				$bError    = true;
+				$iErrCode  = 2;
+				$sErrMesg .= "Internal API Error! \n";
+				$sErrMesg .= $aPremiseResults['ErrMesg'];
+			}
+		}
+		
+		//--------------------------------------------------------//
+		//-- 5.3 - Check if the User has a permissions entry    --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aPermissionsResult = dbSpecialOtherUsersAllPremisePermissions( $iUserId );
+			
+			//-- IF An error occurred in the results --//
+			if( $aPermissionsResult['Error']===true ) {
+				//-- IF No results found --//
+				$bError    = true;
+				$iErrCode  = 3;
+				$sErrMesg .= "Unexpected error fetching Premise Permissions!\n";
+				$sErrMesg .= "Check with your iOmy Administrator on if there is a version mismatch!\n";
+				
+			} else {
+				//-- Extract the Permissions Id --//
+				foreach( $aPermissionsResult['Data'] as $aPremPerm ) {
+					if( $aPremPerm['PremiseId']>=1 ) {
+						$aTemp = array(
+							"PremiseId"   => $aPremPerm['PremiseId'],
+							"PremiseName" => $aPremPerm['PremiseName'],
+						);
+						
+						//-- OWNER --//
+						if( $aPremPerm['PermOwner']===null || $aPremPerm['PermOwner']===false ) {
+							$aTemp["PermOwner"] = 0;
+						} else {
+							$aTemp["PermOwner"] = $aPremPerm['PermOwner'];
+						}
+						//-- ROOM ADMIN --//
+						if( $aPremPerm['PermRoomAdmin']===null || $aPremPerm['PermRoomAdmin']===false ) {
+							$aTemp["PermRoomAdmin"] = 0;
+						} else {
+							$aTemp["PermRoomAdmin"] = $aPremPerm['PermRoomAdmin'];
+						}
+						//-- WRITE --//
+						if( $aPremPerm['PermWrite']===null || $aPremPerm['PermWrite']===false ) {
+							$aTemp["PermWrite"] = 0;
+						} else {
+							$aTemp["PermWrite"] = $aPremPerm['PermWrite'];
+						}
+						//-- READ --//
+						if( $aPremPerm['PermRead']===null || $aPremPerm['PermRead']===false ) {
+							$aTemp["PermRead"] = 0;
+						} else {
+							$aTemp["PermRead"] = $aPremPerm['PermRead'];
+						}
+					}
+					
+					//-- Create the Results --//
+					$aResult[] = $aTemp;
+				
+				}
+			}
+		}
+	} catch( Exception $e0001 ) {
+		$bError    = true;
+		$iErrCode  = 0;
+		$sErrMesg .= "Internal API Error! \n";
+		$sErrMesg .= $e0001->getMessage();
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>$aResult );
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+function LookupUserAllRoomPermissions( $iUserId ) {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError                 = false;        //-- BOOLEAN:   --//
+	$iErrCode               = 0;            //-- INTEGER:   --//
+	$sErrMesg               = "";           //-- STRING:    --//
+	$aResult                = array();      //-- ARRAY:     --//
+	$iOwnerPerm             = 0;            //-- INTEGER:   --//
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	try {
+		
+		//--------------------------------------------------------//
+		//-- 5.2 - Check if the Current User is the Owner       --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aUserServerPerms = GetUserServerPermissions();
+			if( $aUserServerPerms['Error']===false ) {
+				if( $aUserServerPerms['Data']['PermServerAddUser']!==1 ) {
+					$bError    = true;
+					$iErrCode  = 1;
+					$sErrMesg .= "Insufficient permissions!\n";
+					$sErrMesg .= "Your user doesn't appear to have the \"AddUser\" server permission needed to perform this operation.";
+					//var_dump($aPremiseResults);
+				}
+				
+			} else {
+				$bError    = true;
+				$iErrCode  = 2;
+				$sErrMesg .= "Internal API Error! \n";
+				$sErrMesg .= $aPremiseResults['ErrMesg'];
+			}
+		}
+		
+		//--------------------------------------------------------//
+		//-- 5.3 - Check if the User has a permissions entry    --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			$aPermissionsResult = dbSpecialOtherUsersAllRoomPermissions( $iUserId );
+			
+			//-- IF An error occurred in the results --//
+			if( $aPermissionsResult['Error']===true ) {
+				$bError    = true;
+				$iErrCode  = 3;
+				$sErrMesg .= "Unexpected error fetching Room Permissions!\n";
+				$sErrMesg .= "Check with your iOmy Administrator on if there is a version mismatch!\n";
+				
+			} else {
+				//-- Extract the Permissions Id --//
+				foreach( $aPermissionsResult['Data'] as $aPremPerm ) {
+					if( $aPremPerm['RoomId']>=1 ) {
+						//-- Create the Results --//
+						$aResult[] = array(
+							"RoomId"          => $aPremPerm['RoomId'],
+							"RoomName"        => $aPremPerm['RoomName'],
+							"PremiseId"       => $aPremPerm['RoomPremiseId'],
+							"PermWrite"       => $aPremPerm['PermWrite'],
+							"PermStateToggle" => $aPremPerm['PermStateToggle'],
+							"PermDataRead"    => $aPremPerm['PermDataRead'],
+							"PermRead"        => $aPremPerm['PermRead']
+						);
+					}
+				}
+			}
+		}
+	} catch( Exception $e0001 ) {
+		$bError    = true;
+		$iErrCode  = 0;
+		$sErrMesg .= "Internal API Error! \n";
+		$sErrMesg .= $e0001->getMessage();
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS --//
+		return array( "Error"=>false, "Data"=>$aResult );
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
 
 function SpecialLookupUsersForPremisePerms( $iPremiseId ) {
 	//-- TODO: The functions that gets used by this may need to be put in object to secure against misuse --//
@@ -1006,7 +1204,6 @@ function UpdateUserPremisePermissions( $iUserId, $iPremiseId, $aDesiredPermissio
 	//-- 5.0 - Begin                                            --//
 	//------------------------------------------------------------//
 	try {
-		
 		//--------------------------------------------------------//
 		//-- 5.2 - Check if the Current User is the Owner       --//
 		//--------------------------------------------------------//
@@ -1135,7 +1332,7 @@ function UpdateUserPremisePermissions( $iUserId, $iPremiseId, $aDesiredPermissio
 				$bError    = true;
 				$iErrCode  = 5;
 				$sErrMesg .= "No compatible desired changes present! \n";
-				var_dump( $aDesiredPermissions );
+				//var_dump( $aDesiredPermissions );
 			}
 			
 			
@@ -1168,7 +1365,6 @@ function UpdateUserPremisePermissions( $iUserId, $iPremiseId, $aDesiredPermissio
 				$aResult = dbUpdateUserPremisePermissions( $iPremisePermId, $iNewPermRoomAdmin, $iNewPermWrite, $iNewPermStateToggle, $iNewPermRead );
 			}
 		}
-		
 	} catch( Exception $e0001 ) {
 		$bError    = true;
 		$iErrCode  = 0;
@@ -1206,7 +1402,6 @@ function SpecialLookupUsersForRoomPerms( $iPremiseId ) {
 	//-- 5.0 - Begin                                            --//
 	//------------------------------------------------------------//
 	try {
-		
 		//--------------------------------------------------------//
 		//-- 5.2 - Check if the Current User is a RoomAdmin     --//
 		//--------------------------------------------------------//
@@ -1246,7 +1441,6 @@ function SpecialLookupUsersForRoomPerms( $iPremiseId ) {
 				$sErrMesg .= $aResult['ErrMesg'];
 			}
 		}
-		
 		
 	} catch( Exception $e0001 ) {
 		$bError    = true;
@@ -2017,8 +2211,81 @@ function ChangePremiseInfo( $aPremiseInfo, $sPostInfoOccupants, $sPostInfoBedroo
 	}
 }
 
+
+
+function SpecialGetAllPremises() {
+	//------------------------------------------------//
+	//-- 1.0 - Initialise                           --//
+	//------------------------------------------------//
+	$bError           = false;            //-- BOOLEAN:       Used to indicate if at least one error has been caught.     --//
+	$sErrMesg         = "";               //-- STRING:        Stores the error message when an error is caught.           --//
+	$aResult          = array();          //-- ARRAY:         Stores the result of this function if no errors occur.      --//
+	$aUserServerPerms = array();          //-- ARRAY:         --//
+	
+	
+	//------------------------------------------------//
+	//-- 2.0 - Main                                 --//
+	//------------------------------------------------//
+	try {
+		
+		//-- Check if the User has Add User Permissions --//
+		$aUserServerPerms = GetUserServerPermissions();
+		
+		
+		if( $aUserServerPerms['Error']===false ) {
+			//-- Check if the variable is set --//
+			if( isset($aUserServerPerms['Data']['PermServerAddUser']) ) {
+				if( $aUserServerPerms['Data']['PermServerAddUser']===1 ) {
+					
+					//-- Update the User State --//
+					$aResult = dbSpecialGetAllPremises();
+					
+					if( $aResult["Error"]===true ) {
+						$bError = true;
+						$sErrMesg .= "Error occurred when attempting to lookup the premise list! \n";
+						$sErrMesg .= $aResult["ErrMesg"];
+					}
+					
+				} else {
+					//-- ERROR: User doesn't have permission --//
+					$bError    = true;
+					$sErrMesg .= "The user doesn't seem to have permission to lookup the premise list.\n";
+				}
+				
+			} else {
+				//-- ERROR: Can not see the correct permission --//
+				$bError    = true;
+				$sErrMesg .= "Unexpected error when looking up the current user's permissions to lookup the premise list.\n";
+			}
+		} else {
+			//-- ERROR:  --//
+			$bError    = true;
+			$sErrMesg .= "Problem looking up the current user's server permissions.\n";
+			$sErrMesg .= $aUserServerPermissions['ErrMesg'];
+		}
+		
+	} catch( Exception $e1 ) {
+		$bError = true;
+		$sErrMesg .= "Critical Error occurred when attempting to lookup the premise list! \n";
+		$sErrMesg .= $e1->getMessage();
+	}
+	
+	
+	//------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message  --//
+	//------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+		
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+		
+	}
+}
 //========================================================================================================================//
-//== #6.0# - Rooms Functions																							==//
+//== #6.0# - Rooms Functions                                                                                            ==//
 //========================================================================================================================//
 function GetRoomInfoFromRoomId( $iRoomId ) {
 	//------------------------------------------------------------//
@@ -2302,6 +2569,79 @@ function WatchInputsGetFirstRoomIdFromPremiseId( $iPremiseId ) {
 	return $aResult;
 }
 
+
+
+function SpecialGetAllRooms() {
+	//------------------------------------------------//
+	//-- 1.0 - Initialise                           --//
+	//------------------------------------------------//
+	$bError           = false;            //-- BOOLEAN:       Used to indicate if at least one error has been caught.     --//
+	$sErrMesg         = "";               //-- STRING:        Stores the error message when an error is caught.           --//
+	$aResult          = array();          //-- ARRAY:         Stores the result of this function if no errors occur.      --//
+	$aUserServerPerms = array();          //-- ARRAY:         --//
+	
+	
+	//------------------------------------------------//
+	//-- 2.0 - Main                                 --//
+	//------------------------------------------------//
+	try {
+		
+		//-- Check if the User has Add User Permissions --//
+		$aUserServerPerms = GetUserServerPermissions();
+		
+		
+		if( $aUserServerPerms['Error']===false ) {
+			//-- Check if the variable is set --//
+			if( isset($aUserServerPerms['Data']['PermServerAddUser']) ) {
+				if( $aUserServerPerms['Data']['PermServerAddUser']===1 ) {
+					
+					//-- Update the User State --//
+					$aResult = dbSpecialGetAllRooms();
+					
+					if( $aResult["Error"]===true ) {
+						$bError = true;
+						$sErrMesg .= "Error occurred when attempting to lookup the room list! \n";
+						$sErrMesg .= $aResult["ErrMesg"];
+					}
+					
+				} else {
+					//-- ERROR: User doesn't have permission --//
+					$bError    = true;
+					$sErrMesg .= "The user doesn't seem to have permission to lookup the room list.\n";
+				}
+				
+			} else {
+				//-- ERROR: Can not see the correct permission --//
+				$bError    = true;
+				$sErrMesg .= "Unexpected error when looking up the current user's permissions to lookup the room list.\n";
+			}
+		} else {
+			//-- ERROR:  --//
+			$bError    = true;
+			$sErrMesg .= "Problem looking up the current user's server permissions.\n";
+			$sErrMesg .= $aUserServerPermissions['ErrMesg'];
+		}
+		
+	} catch( Exception $e1 ) {
+		$bError = true;
+		$sErrMesg .= "Critical Error occurred when attempting to lookup the room list! \n";
+		$sErrMesg .= $e1->getMessage();
+	}
+	
+	
+	//------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message  --//
+	//------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+		
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+		
+	}
+}
 
 //========================================================================================================================//
 //== #7.0# - Hub Functions                                                                                              ==//

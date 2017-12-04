@@ -106,7 +106,7 @@ if($bError===false) {
 		//-- NOTE: Valid modes are going to be "EditName", "EditDesc", "EditPremiseAddress" & "EditPremiseInfo" --//
 		
 		//-- Verify that the mode is supported --//
-		if( $sPostMode!=="EditName" && $sPostMode!=="EditDesc" && $sPostMode!=="EditPremiseAddress" && $sPostMode!=="EditPremiseInfo" ) {
+		if( $sPostMode!=="EditName" && $sPostMode!=="EditDesc" && $sPostMode!=="EditPremiseAddress" && $sPostMode!=="EditPremiseInfo" && $sPostMode!=="AdminPremiseList" ) {
 			$bError = true;
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
@@ -128,23 +128,25 @@ if($bError===false) {
 	//-- 2.2.2 - Retrieve Premise "Id"                  --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		try {
-			//-- Retrieve the "IOId" --//
-			$iPostId = $aHTTPData["Id"];
-			
-			if( $iPostId===false ) {
+		if( $sPostMode!=="AdminPremiseList" ) {
+			try {
+				//-- Retrieve the "IOId" --//
+				$iPostId = $aHTTPData["Id"];
+				
+				if( $iPostId===false ) {
+					$bError = true;
+					$sErrMesg .= "Error Code:'0103' \n";
+					$sErrMesg .= "Non numeric \"Id\" parameter! \n";
+					$sErrMesg .= "Please use a valid \"Id\" parameter\n";
+					$sErrMesg .= "eg. \n 1, 2, 3 \n\n";
+				}
+			} catch( Exception $e0104 ) {
 				$bError = true;
-				$sErrMesg .= "Error Code:'0103' \n";
-				$sErrMesg .= "Non numeric \"Id\" parameter! \n";
+				$sErrMesg .= "Error Code:'0104' \n";
+				$sErrMesg .= "Incorrect \"Id\" parameter!\n";
 				$sErrMesg .= "Please use a valid \"Id\" parameter\n";
 				$sErrMesg .= "eg. \n 1, 2, 3 \n\n";
 			}
-		} catch( Exception $e0104 ) {
-			$bError = true;
-			$sErrMesg .= "Error Code:'0104' \n";
-			$sErrMesg .= "Incorrect \"Id\" parameter!\n";
-			$sErrMesg .= "Please use a valid \"Id\" parameter\n";
-			$sErrMesg .= "eg. \n 1, 2, 3 \n\n";
 		}
 	}
 	
@@ -707,6 +709,30 @@ if( $bError===false ) {
 				//-- Display an Error Message --//
 				$bError    = true;
 				$sErrMesg .= "Error Code:'4400' \n";
+				$sErrMesg .= $e4400->getMessage();
+			}
+			
+			
+		//================================================================//
+		//== 5.5 - MODE: Edit Premise Info                              ==//
+		//================================================================//
+		} else if( $sPostMode==="AdminPremiseList" ) {
+			try {
+				$aResult = SpecialGetAllPremises();
+				
+				if( $aResult["Error"]===true ) {
+					//-- Display an Error Message --//
+					$bError = true;
+					$sErrMesg .= "Error Code:'5401' \n";
+					$sErrMesg .= "Internal API Error! \n";
+					$sErrMesg .= $aResult["ErrMesg"];
+				}
+				
+				
+			} catch( Exception $e4400 ) {
+				//-- Display an Error Message --//
+				$bError    = true;
+				$sErrMesg .= "Error Code:'5400' \n";
 				$sErrMesg .= $e4400->getMessage();
 			}
 		//================================================================//
