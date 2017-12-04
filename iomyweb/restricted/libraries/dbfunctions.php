@@ -1009,7 +1009,7 @@ function dbGetAllUsers() {
 			array( "Name"=>"Username",                  "type"=>"STR" ),
 			array( "Name"=>"State",                     "type"=>"INT" ),
 			array( "Name"=>"InfoId",                    "type"=>"INT" ),
-			array( "Name"=>"Title",                     "type"=>"INT" ),
+			array( "Name"=>"Title",                     "type"=>"STR" ),
 			array( "Name"=>"GenderId",                  "type"=>"INT" ),
 			array( "Name"=>"Givennames",                "type"=>"STR" ),
 			array( "Name"=>"Surnames",                  "type"=>"STR" ),
