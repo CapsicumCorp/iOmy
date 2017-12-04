@@ -122,39 +122,48 @@ $.extend(IomyRe.common,{
     //== OTHER USERS AND PERMISSIONS            ==//
     //============================================//
     PermLevelsPremise:              {
-    	"_1": {
-            "Id":   1,
+        "_0": {
+            "Id":   0,
             "Name": "No Access"
         },
-        "_2": {
-            "Id":   2,
-            "Name": "Read"
-        },
-        "_3": {
-            "Id":   3,
-            "Name": "Read and Write"
-        },
-        "_4": {
-            "Id":   4,
-            "Name": "Premise Management, Read and Write"
-        },
-    },
-    PermLevelsDevice:              {
         "_1": {
             "Id":   1,
-            "Name": "No Access"
+            "Name": "Read Only"
         },
         "_2": {
             "Id":   2,
-            "Name": "Read"
+            "Name": "Read and Write"
         },
         "_3": {
             "Id":   3,
-            "Name": "Read, Device Toggle"
+            "Name": "Premise Management"
         },
         "_4": {
             "Id":   4,
-            "Name": "Read/Write"
+            "Name": "Premise Administrator (Hidden Premise)"
+        },
+        "_5": {
+            "Id":   5,
+            //"Name": "Premise Administrator (Visible Premise)"
+            "Name": "Premise Administrator"
+        }
+    },
+    PermLevelsRoom:              {
+        "_0": {
+            "Id":   0,
+            "Name": "No Access"
+        },
+        "_1": {
+            "Id":   1,
+            "Name": "Read Only"
+        },
+        "_2": {
+            "Id":   2,
+            "Name": "Read & Device Toggle"
+        },
+        "_3": {
+            "Id":   3,
+            "Name": "Full Access"
         }
     },
     
@@ -2444,7 +2453,119 @@ $.extend(IomyRe.common,{
 			return false;
 		}
 	},
-    
+	
+	
+	//================================================================//
+	//== Lookup and Format Permissions functions                    ==//
+	//================================================================//
+	LookupPremPermLevelName: function ( iPermLevel ) {
+		var sKey = "_"+iPermLevel;
+		
+		if( typeof IomyRe.common.PermLevelsPremise[sKey]!=="undefined" ) {
+			return IomyRe.common.PermLevelsPremise[sKey].Name;
+		} else {
+			return "Error has occurred!";
+		}
+	},
+	
+	LookupPremPermLevelEditable: function ( iPermLevel ) {
+		if( iPermLevel>=4 ) {
+			return false;
+		} else {
+			return true;
+		}
+	},
+	
+	LookupPremisePermLevelFromPermissions: function ( mPremise ) {
+		if( mPremise.PremiseId>=1 ) {
+			var iPremPermLevel = 0;
+			
+			var iPremiseRead          = mPremise.PermRead;
+			var iPremiseWrite         = mPremise.PermWrite;
+			var iPremiseOwner         = mPremise.PermOwner;
+			var iPremiseRoomAdmin     = mPremise.PermRoomAdmin;
+			
+			//------------------------------------//
+			//-- Premise Adminstrator Access    --//
+			//------------------------------------//
+			if ( iPremiseOwner===1 ) {
+				if( iPremiseRead===1 ) {
+					//-- Premise Administrator with Premise Visible --//
+					iPremPermLevel = 5;
+				} else {
+					//-- Premise Administrator with Premise Hidden --//
+					iPremPermLevel = 4;
+				}
+				
+			//------------------------------------//
+			//-- Regular User Access            --//
+			//------------------------------------//
+			} else  {
+				if ( iPremiseRoomAdmin===1 ) {
+					//-- Premise Room Manager --//
+					iPremPermLevel = 3;
+				} else if ( iPremiseWrite===1 ) {
+					//-- Premise Read and Write access --//
+					iPremPermLevel = 2;
+				} else if ( iPremiseRead===1 ) {
+					//-- Premise Read access --//
+					iPremPermLevel = 1;
+				} else {
+					//-- No Access --//
+					iPremPermLevel = 0;
+				}
+			}
+			
+			return iPremPermLevel;
+			
+		} else {
+			return 0;
+		}
+		
+	},
+	
+	LookupRoomPermLevelName: function ( iPermLevel ) {
+		var sKey = "_"+iPermLevel;
+		
+		if( typeof IomyRe.common.PermLevelsRoom[sKey]!=="undefined" ) {
+			return IomyRe.common.PermLevelsRoom[sKey].Name;
+		} else {
+			return "Error has occurred!";
+		}
+	},
+	
+	LookupRoomPermLevelFromPermissions: function ( mRoom ) {
+		if( mRoom.RoomId>=1 ) {
+			var iRoomPermLevel = 0;
+			
+			var iRoomRead             = mRoom.PermRead;
+			var iRoomWrite            = mRoom.PermWrite;
+			var iRoomStateToggle      = mRoom.PermStateToggle;
+			
+			//------------------------------------//
+			//-- Premise Adminstrator Access    --//
+			//------------------------------------//
+			if ( iRoomWrite===1 ) {
+				//-- Premise Room Manager --//
+				iRoomPermLevel = 3;
+			} else if ( iRoomStateToggle===1 ) {
+				//-- Premise Read and Write access --//
+				iRoomPermLevel = 2;
+			} else if ( iRoomRead===1 ) {
+				//-- Premise Read access --//
+				iRoomPermLevel = 1;
+			} else {
+				//-- No Access --//
+				iRoomPermLevel = 0;
+			}
+			
+			return iRoomPermLevel;
+			
+		} else {
+			return 0;
+		}
+	},
+	
     //============================================//
     //== NAVIGATION FUNCTIONS                    ==//
     //============================================//

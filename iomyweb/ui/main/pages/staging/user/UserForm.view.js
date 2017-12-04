@@ -22,7 +22,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-sap.ui.jsview("pages.staging.user.UserForm", {
+sap.ui.jsview( "pages.staging.user.UserForm", {
 	
 	/*************************************************************************************************** 
 	** 1.0 - Controller Declaration
@@ -31,7 +31,7 @@ sap.ui.jsview("pages.staging.user.UserForm", {
 	* In the case that it is not implemented, or that "null" is returned, this View does not have a Controller.
 	* @memberOf pages.staging.UserSettings
 	****************************************************************************************************/ 
-	getControllerName : function() {
+	getControllerName: function() {
 		return "pages.staging.user.UserForm";
 	},
 
@@ -42,156 +42,26 @@ sap.ui.jsview("pages.staging.user.UserForm", {
 	* Since the Controller is given to this method, its event handlers can be attached right away. 
 	* @memberOf pages.staging.UserSettings
 	****************************************************************************************************/ 
-	createContent : function(oController) {
+	createContent: function( oController ) {
 		var oView = this;
 		
-        return new sap.tnt.ToolPage(oView.createId("toolPage"), {
-			title: "User Settings",
-			header : IomyRe.widgets.getToolPageHeader(oController),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
-			mainContents: [ 
-				new sap.uxap.ObjectPageLayout (oView.createId("ObjectPageLayout"), {
+		return new sap.tnt.ToolPage( oView.createId("toolPage"), {
+			title:  "User Settings",
+			header:  IomyRe.widgets.getToolPageHeader( oController ),
+			sideContent : IomyRe.widgets.getToolPageSideContent( oController ),
+			mainContents: [
+				new sap.uxap.ObjectPageLayout( oView.createId( "ObjectPageLayout" ), {
 					isObjectIconAlwaysVisible: true,
 					enableLazyLoading: true,
 					showTitleinHeaderContent: true,
-					sections : [
-						IomyRe.widgets.UserForm(oController, "Login", "LoginBlock", "LoginBlock_Form", true , "Login Details"),
-						IomyRe.widgets.UserForm(oController, "DBAuth", "DBAuthBlock", "DBAuthBlock_Form", true , "Database Authentication"),
-						IomyRe.widgets.UserForm(oController, "Info", "InfoBlock", "InfoBlock_Form", false , "Information"),
-						IomyRe.widgets.UserForm(oController, "Address", "AddrBlock", "AddrBlock_Form", false , "Address"),
-						new sap.uxap.ObjectPageSection(oView.createId("PremPermissions"), {
-							showTitle: false,
-							title: "Premise Permissions",
-							subSections : [
-								new sap.uxap.ObjectPageSubSection(oView.createId("PremPermBlock"), {
-									blocks : [
-										new sap.ui.layout.form.Form( oView.createId("PremPermBlock_Form"),{
-											editable: false,
-											layout : new sap.ui.layout.form.ResponsiveGridLayout ({
-												labelSpanXL: 3,
-												labelSpanL: 3,
-												labelSpanM: 3,
-												labelSpanS: 12,
-												adjustLabelSpan: false,
-												emptySpanXL: 3,
-												emptySpanL: 2,
-												emptySpanM: 0,
-												emptySpanS: 0,
-												columnsXL: 1,
-												columnsL: 1,
-												columnsM: 1,
-												columnsS: 1,
-												singleContainerFullSize: false
-											}),
-											toolbar : new sap.m.Toolbar({
-												content : [
-													new sap.m.Title ({
-														text: "Premise Permissions",
-													}),
-													new sap.m.ToolbarSpacer ({}),
-													new sap.m.Button ( oView.createId("PremPermBlock_BtnEdit"), {
-														icon:    "sap-icon://edit",
-														type:    "Transparent",
-														press:   function() {
-															oController.ToggleButtonsAndView( oController, "EditPremPermissions" );
-														}
-													}),
-													new sap.m.Button( oView.createId("PremPermBlock_BtnSave"), {
-														icon:    "sap-icon://save",
-														visible: false,
-														press:   function( oEvent ) {
-															//oController.UpdateValues( oController );
-															oController.ToggleButtonsAndView( oController, "ShowPremPermissions" );
-														}
-													}),
-													new sap.m.Button( oView.createId("PremPermBlock_BtnCancel"), {
-														icon:    "sap-icon://cancel",
-														visible: false,
-														press:   function( oEvent ) {
-															//oController.RefreshModel( oController, {} );
-															oController.ToggleButtonsAndView( oController, "ShowPremPermissions" );
-														}
-													})
-												]
-											}).addStyleClass("MarBottom1d0Rem"),
-											formContainers : [
-											
-											]
-										})
-									]									
-									
-								})
-							]
-						}),
-						new sap.uxap.ObjectPageSection(oView.createId("RoomPerm"), {
-							showTitle: false,
-							title: "Room Permissions",
-							subSections : [
-								new sap.uxap.ObjectPageSubSection(oView.createId("RoomPermBlock"), {
-									blocks : [
-										new sap.ui.layout.form.Form( oView.createId("RoomPermBlock_Form"),{
-											editable: false,
-											layout : new sap.ui.layout.form.ResponsiveGridLayout ({
-												labelSpanXL: 3,
-												labelSpanL: 3,
-												labelSpanM: 3,
-												labelSpanS: 12,
-												adjustLabelSpan: false,
-												emptySpanXL: 3,
-												emptySpanL: 2,
-												emptySpanM: 0,
-												emptySpanS: 0,
-												columnsXL: 1,
-												columnsL: 1,
-												columnsM: 1,
-												columnsS: 1,
-												singleContainerFullSize: false
-											}),
-											toolbar : new sap.m.Toolbar({
-												content : [
-													new sap.m.Title ({
-														text: "Room Permissions",
-													}),
-													new sap.m.ToolbarSpacer ({}),
-													new sap.m.Button ( oView.createId("RoomPermBlock_BtnEdit"), {
-														icon:    "sap-icon://edit",
-														type:    "Transparent",
-														press:   function() {
-															oController.ToggleButtonsAndView( oController, "EditRoomPermissions" );
-														}
-													}),
-													new sap.m.Button( oView.createId("RoomPermBlock_BtnSave"), {
-														icon:    "sap-icon://save",
-														visible: false,
-														press:   function( oEvent ) {
-															oController.UpdateRoomPermissions();
-															oController.ToggleButtonsAndView( oController, "ShowRoomPermissions" );
-														}
-													}),
-													new sap.m.Button( oView.createId("RoomPermBlock_BtnCancel"), {
-														icon:    "sap-icon://cancel",
-														visible: false,
-														press:   function( oEvent ) {
-                                                            oController.RefreshModel( oController, {} );
-															oController.ToggleButtonsAndView( oController, "ShowRoomPermissions" );
-														}
-													})
-												]
-											}).addStyleClass("MarBottom1d0Rem"),
-											formContainers : [
-											
-											]
-										})
-									]									
-									
-								})
-							]
-						})
-						
+					sections: [ 
+						oController.CreateUIFormSection( oController, { "Prefix":"UserInfo",    "Title":"User Info" }),
+						oController.CreateUIFormSection( oController, { "Prefix":"UserAddress", "Title":"User Address" }),
+						oController.CreateUIFormSection( oController, { "Prefix":"PremPerm",    "Title":"Premise Permissions" }),
+						oController.CreateUIFormSection( oController, { "Prefix":"RoomPerm",    "Title":"Room Permissions" })
 					]
-					
 				}).addStyleClass("")
 			]
-		}).addStyleClass("MainBackground");
+		}).addStyleClass( "MainBackground" );
 	}
 });
