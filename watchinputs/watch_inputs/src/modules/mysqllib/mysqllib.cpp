@@ -142,7 +142,7 @@ static int dbschemaver=0; //We detect the version based on which prepared statem
 
 #ifndef __ANDROID__
 static MYSQL *conn=nullptr;
-static MYSQL_STMT *preparedstmt[20];
+static MYSQL_STMT *preparedstmt[sizeof(mysqllib_stmts)/sizeof(char *)];
 #endif
 
 #ifdef DEBUG
