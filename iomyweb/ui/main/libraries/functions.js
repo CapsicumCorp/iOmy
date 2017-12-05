@@ -979,6 +979,12 @@ $.extend(IomyRe.functions, {
             };
         },
         
+        isUserRoomAdminForPremise : function (iPremiseId) {
+            var iRoomAdmin = IomyRe.common.PremiseList["_"+iPremiseId].PermRoomAdmin;
+            
+            return iRoomAdmin === 1;
+        },
+        
         fetchRoomPermissions : function (mSettings) {
             var self                = this;               // REMEMBER: 'this' refers to IomyRe.functions.permissions. NOT IomyRe.functions!
             var bError              = false;
@@ -1037,23 +1043,14 @@ $.extend(IomyRe.functions, {
 
                             if (!mPremiseIDInfo.bIsValid) {
                                 aErrorMessages = aErrorMessages.concat(mPremiseIDInfo.aErrorMessages);
+                            } else {
+                                //-- Check that the user has room administration privileges for this premise. --//
+                                if (!self.isUserRoomAdminForPremise(iPremiseId)) {
+                                    fnAppendError("Room administration privileges are required to modify permissions for each room in the premise.");
+                                }
                             }
                         } else {
                             fnAppendError(sNoPremiseIDMessage);
-                        }
-                        
-                        //------------------------------------------------------------//
-                        // Check that the warning callback is provided. If so, make
-                        // sure that a function was given.
-                        //------------------------------------------------------------//
-                        if (mSettings.onWarning !== undefined && mSettings.onWarning !== null) {
-                            fnWarning = mSettings.onWarning;
-
-                            if (typeof fnWarning !== "function") {
-                                fnAppendError("Warning callback function is not a valid function. Received a "+typeof fnWarning);
-                            }
-                        } else {
-                            fnWarning = function () {};
                         }
                         
                     } else {
@@ -1083,6 +1080,20 @@ $.extend(IomyRe.functions, {
                     }
                 } else {
                     fnSuccess = function () {};
+                }
+                        
+                //------------------------------------------------------------//
+                // Check that the warning callback is provided. If so, make
+                // sure that a function was given.
+                //------------------------------------------------------------//
+                if (mSettings.onWarning !== undefined && mSettings.onWarning !== null) {
+                    fnWarning = mSettings.onWarning;
+
+                    if (typeof fnWarning !== "function") {
+                        fnAppendError("Warning callback function is not a valid function. Received a "+typeof fnWarning);
+                    }
+                } else {
+                    fnWarning = function () {};
                 }
                 
                 //------------------------------------------------------------//
@@ -1205,11 +1216,11 @@ $.extend(IomyRe.functions, {
                     concurrentRequests  : 2,
                     
                     onSuccess : function () {
+                        var iLevel = self.getMostCommonPermissionForAllRooms(aPermissionLevels);
+                        
                         if (aErrorMessages.length > 0) {
-                            this.onWarning();
+                            fnWarning(iLevel, aErrorMessages.join('\n'));
                         } else {
-                            var iLevel = self.getMostCommonPermissionForAllRooms(aPermissionLevels);
-                            
                             fnSuccess(iLevel);
                         }
                     },
@@ -1301,20 +1312,6 @@ $.extend(IomyRe.functions, {
                             fnAppendError(sNoPremiseIDMessage);
                         }
                         
-                        //------------------------------------------------------------//
-                        // Check that the warning callback is provided. If so, make
-                        // sure that a function was given.
-                        //------------------------------------------------------------//
-                        if (mSettings.onWarning !== undefined && mSettings.onWarning !== null) {
-                            fnWarning = mSettings.onWarning;
-
-                            if (typeof fnWarning !== "function") {
-                                fnAppendError("Warning callback function is not a valid function. Received a "+typeof fnWarning);
-                            }
-                        } else {
-                            fnWarning = function () {};
-                        }
-                        
                     } else {
                         //------------------------------------------------------------//
                         // Otherwise, validate the room ID.
@@ -1351,6 +1348,20 @@ $.extend(IomyRe.functions, {
                     }
                 } else {
                     fnSuccess = function () {};
+                }
+                
+                //------------------------------------------------------------//
+                // Check that the warning callback is provided. If so, make
+                // sure that a function was given.
+                //------------------------------------------------------------//
+                if (mSettings.onWarning !== undefined && mSettings.onWarning !== null) {
+                    fnWarning = mSettings.onWarning;
+
+                    if (typeof fnWarning !== "function") {
+                        fnAppendError("Warning callback function is not a valid function. Received a "+typeof fnWarning);
+                    }
+                } else {
+                    fnWarning = function () {};
                 }
                 
                 //------------------------------------------------------------//
@@ -1455,7 +1466,7 @@ $.extend(IomyRe.functions, {
                     
                     onSuccess : function () {
                         if (aErrorMessages.length > 0) {
-                            this.onWarning();
+                            fnWarning(aErrorMessages.join('\n'));
                         } else {
                             fnSuccess();
                         }

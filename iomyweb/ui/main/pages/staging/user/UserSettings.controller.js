@@ -190,6 +190,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 	
 	UpdateUserInfoValues: function () {
         var oController = this;
+        var oView       = this.getView();
 		var bError      = false;
 		var sErrMesg    = "";
 		
@@ -242,6 +243,11 @@ sap.ui.controller("pages.staging.user.UserSettings", {
                                                     IomyRe.common.showMessage({
                                                         text : "User Information successfully updated."
                                                     });
+                                                    
+                                                    if (oView.byId("openMenu") !== undefined) {
+                                                        var sDisplayName = IomyRe.common.UserInfo.Displayname || IomyRe.common.UserInfo.Username;
+                                                        oView.byId("openMenu").setText("Hi, "+sDisplayName);
+                                                    }
                                                     
 													oController.ToggleButtonsAndView( oController, "ShowInfo" );
 														
@@ -419,36 +425,43 @@ sap.ui.controller("pages.staging.user.UserSettings", {
         
         oController.ToggleRoomPermissionControls(false);
         
-        IomyRe.functions.permissions.fetchRoomPermissions({
-            userID          : IomyRe.common.UserInfo.UserId,
-            roomID          : iRoomId,
-            premiseID       : iPremiseId,
+        try {
+            IomyRe.functions.permissions.fetchRoomPermissions({
+                userID          : IomyRe.common.UserInfo.UserId,
+                roomID          : iRoomId,
+                premiseID       : iPremiseId,
+
+                onSuccess : function (iLevel) {
+
+                    oController.DisplayRoomPermissions(iLevel);
+                    oController.ToggleButtonsAndView( oController, "EditRoomPermissions" );
+
+                    oController.ToggleRoomPermissionControls(true);
+                },
+
+                onWarning : function (iLevel, sErrors) {
+                    IomyRe.common.showWarning(sErrors, "Unable to find permissions for some rooms.");
+
+                    console.log(iLevel);
+
+                    oController.DisplayRoomPermissions(iLevel);
+                    oController.ToggleButtonsAndView( oController, "EditRoomPermissions" );
+
+                    oController.ToggleRoomPermissionControls(true);
+                },
+
+                onFail : function (sErrors) {
+                    IomyRe.common.showError(sErrors, "Failed to retrieve room permissions.");
+
+                    oController.ToggleRoomPermissionControls(true);
+                }
+            });
             
-            onSuccess : function (iLevel) {
-                
-                oController.DisplayRoomPermissions(iLevel);
-                oController.ToggleButtonsAndView( oController, "EditRoomPermissions" );
-                
+        } catch (e) {
+            IomyRe.common.showError(e.message, "Error", function () {
                 oController.ToggleRoomPermissionControls(true);
-            },
-            
-            onWarning : function (iLevel, sErrors) {
-                IomyRe.common.showWarning(sErrors, "Unable to retrieve for some rooms.");
-                
-                console.log(iLevel);
-                
-                oController.DisplayRoomPermissions(iLevel);
-                oController.ToggleButtonsAndView( oController, "EditRoomPermissions" );
-                
-                oController.ToggleRoomPermissionControls(true);
-            },
-            
-            onFail : function (sErrors) {
-                IomyRe.common.showError(sErrors, "Failed to retrieve room permissions.");
-                
-                oController.ToggleRoomPermissionControls(true);
-            }
-        });
+            });
+        }
     },
     
     UpdateUserRoomPermissions : function () {
@@ -461,40 +474,47 @@ sap.ui.controller("pages.staging.user.UserSettings", {
         
         oController.ToggleRoomPermissionControls(false);
         
-        IomyRe.functions.permissions.updateRoomPermissions({
-            level           : parseInt(iLevel),
-            userID          : IomyRe.common.UserInfo.UserId,
-            roomID          : iRoomId,
-            premiseID       : iPremiseId,
+        try {
+            IomyRe.functions.permissions.updateRoomPermissions({
+                level           : parseInt(iLevel),
+                userID          : IomyRe.common.UserInfo.UserId,
+                roomID          : iRoomId,
+                premiseID       : iPremiseId,
+
+                onSuccess : function () {
+                    IomyRe.common.RefreshCoreVariables({
+
+                        onSuccess : function () {
+                            IomyRe.common.showMessage({
+                                "text" : "Updated permissions successfully"
+                            });
+
+                            oController.RefreshModel( oController, {} );
+                            oController.ToggleButtonsAndView( oController, "ShowRoomPermissions" );
+
+                        }
+
+                    });
+                },
+
+                onWarning : function (sErrors) {
+                    IomyRe.common.showWarning(sErrors, "Unable to update for some rooms.");
+
+                    oController.ToggleRoomPermissionControls(true);
+                },
+
+                onFail : function (sErrors) {
+                    IomyRe.common.showError(sErrors, "Failed to update room permissions.");
+
+                    oController.ToggleRoomPermissionControls(true);
+                }
+            });
             
-            onSuccess : function () {
-                IomyRe.common.RefreshCoreVariables({
-                    
-                    onSuccess : function () {
-                        IomyRe.common.showMessage({
-                            "text" : "Updated permissions successfully"
-                        });
-                        
-                        oController.RefreshModel( oController, {} );
-                        oController.ToggleButtonsAndView( oController, "ShowRoomPermissions" );
-                        
-                    }
-                    
-                });
-            },
-            
-            onWarning : function (sErrors) {
-                IomyRe.common.showWarning(sErrors, "Unable to update for some rooms.");
-                
+        } catch (e) {
+            IomyRe.common.showError(e.message, "Invalid input", function () {
                 oController.ToggleRoomPermissionControls(true);
-            },
-            
-            onFail : function (sErrors) {
-                IomyRe.common.showError(sErrors, "Failed to update room permissions.");
-                
-                oController.ToggleRoomPermissionControls(true);
-            }
-        });
+            });
+        }
     },
 	
 	ToggleButtonsAndView: function ( oController, sMode ) {

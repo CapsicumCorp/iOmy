@@ -22,7 +22,7 @@ sap.ui.jsfragment("fragments.UserPremisePermissionDisplay", {
 		//--------------------------------------------//
 		oFragContent = new sap.ui.layout.form.FormContainer({
 			formElements : {
-				path: "/Premise",
+				path: "/Premises",
 				template: oItemTemplatePremise
 			}
 		});	

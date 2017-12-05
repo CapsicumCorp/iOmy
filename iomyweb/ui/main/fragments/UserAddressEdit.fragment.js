@@ -41,7 +41,7 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Street Address:",
+					label : "Street Address",
 					fields: [
 						new sap.m.Input (oView.createId("InputAddressLine1"), {
 							value:"{/UserInfo/AddressLine1}"
@@ -49,7 +49,7 @@ sap.ui.jsfragment("fragments.UserAddressEdit", {
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Unit Number (if applicable):",
+					label : "Unit Number (if applicable)",
 					fields: [
 						new sap.m.Input (oView.createId("InputAddressLine2"), {
 							value:"{/UserInfo/AddressLine2}"

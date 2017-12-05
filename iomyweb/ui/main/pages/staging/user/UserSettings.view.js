@@ -218,11 +218,11 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 												]
 											}).addStyleClass("MarBottom1d0Rem"),
 											formContainers : [
-												new sap.ui.layout.form.FormContainer(oView.createId("PremPBlock_FormContainer"),{
-													formElements : [
-														
-													]
-												})
+//												new sap.ui.layout.form.FormContainer(oView.createId("PremPBlock_FormContainer"),{
+//													formElements : [
+//														
+//													]
+//												})
 											]
 										})
 									]									
