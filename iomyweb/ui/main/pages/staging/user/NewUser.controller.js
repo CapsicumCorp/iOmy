@@ -57,6 +57,13 @@ sap.ui.controller("pages.staging.user.NewUser", {
 		});
 		
 	},
+    
+    ToggleSubmitCancelButtons : function (bEnabled) {
+        var oView = this.getView();
+        
+        oView.byId("SubmitButton").setEnabled(bEnabled);
+        oView.byId("CancelButton").setEnabled(bEnabled);
+    },
 	
 	
 	RefreshModel: function( oController, oConfig ) {
@@ -178,6 +185,8 @@ sap.ui.controller("pages.staging.user.NewUser", {
         var dDOB                    = oCurrentFormData.DOB;
         var sDBUser                 = oCurrentFormData.DBUser;
         var sDBPassword             = oCurrentFormData.DBPassword;
+        
+        oController.ToggleSubmitCancelButtons(false);
         
         //--------------------------------------------------------------------//
         // Check the username (required)
@@ -480,7 +489,9 @@ sap.ui.controller("pages.staging.user.NewUser", {
 														onSuccess : function () {
                                                             IomyRe.common.showMessage({
                                                                 text : "New iOmy user \""+oCurrentFormData.Username+"\" created."
-                                                            })
+                                                            });
+                                                            
+                                                            oController.ToggleSubmitCancelButtons(true);
 															IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
 														}
 													});
@@ -494,7 +505,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
 														}
 														
 														if (!oController.mxUpdateRequests.busy) {
-															
+															oController.ToggleSubmitCancelButtons(true);
 														}
 													}
 												);
@@ -514,6 +525,11 @@ sap.ui.controller("pages.staging.user.NewUser", {
 									"Data" : "{\"Read\":"+iRoomRead+",\"DataRead\":"+iRoomDataRead+",\"Write\":"+iRoomWrite+",\"StateToggle\":"+iRoomStateToggle+"}"
 								},
 								onSuccess : function (responseType, mData) {
+                                    IomyRe.common.showMessage({
+                                        text : "New iOmy user \""+oCurrentFormData.Username+"\" created."
+                                    });
+
+                                    oController.ToggleSubmitCancelButtons(true);
 									IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
 								},
 								onFail : function (response) {
