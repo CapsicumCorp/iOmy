@@ -55,11 +55,73 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 					enableLazyLoading: true,
 					showTitleinHeaderContent: true,
 					headerTitle : new sap.uxap.ObjectPageHeader (oView.createId("PageHeader"), {
-						objectTitle: "Freshwater1",
+						objectTitle: "",
 						objectShape: sap.uxap.ObjectPageHeaderPictureShape.Circle,
-						objectSubtitle: "Owner / Administrator",
+						objectSubtitle: "",
 					}),
 					sections : [
+						new sap.uxap.ObjectPageSection(oView.createId("Password"), {
+							showTitle: false,
+							title: "Password",
+							subSections : [
+								new sap.uxap.ObjectPageSubSection(oView.createId("PasswordBlock"), {
+									blocks : [
+										new sap.ui.layout.form.Form( oView.createId("PasswordBlock_Form"),{
+											editable: false,
+											layout : new sap.ui.layout.form.ResponsiveGridLayout ({
+												labelSpanXL: 3,
+												labelSpanL: 3,
+												labelSpanM: 3,
+												labelSpanS: 12,
+												adjustLabelSpan: false,
+												emptySpanXL: 3,
+												emptySpanL: 2,
+												emptySpanM: 0,
+												emptySpanS: 0,
+												columnsXL: 1,
+												columnsL: 1,
+												columnsM: 1,
+												columnsS: 1,
+												singleContainerFullSize: false
+											}),
+											toolbar : new sap.m.Toolbar({
+												content : [
+													new sap.m.Title ({
+														text: "Password"
+													}),
+													new sap.m.ToolbarSpacer ({}),
+													new sap.m.Button ( oView.createId("PasswordBlock_BtnEdit"), {
+														icon:    "sap-icon://edit",
+														type:    "Transparent",
+														press:   function() {
+															oController.ToggleButtonsAndView( oController, "EditPassword" );
+														}
+													}),
+													new sap.m.Button( oView.createId("PasswordBlock_BtnSave"), {
+														icon:    "sap-icon://save",
+														visible: false,
+														press:   function( oEvent ) {
+															oController.UpdateUserPassword();
+														}
+													}),
+													new sap.m.Button( oView.createId("PasswordBlock_BtnCancel"), {
+														icon:    "sap-icon://cancel",
+														visible: false,
+														press:   function( oEvent ) {
+                                                            oController.RefreshModel(oController, {});
+															oController.ToggleButtonsAndView( oController, "ShowPassword" );
+														}
+													})
+												]
+											}).addStyleClass("MarBottom1d0Rem"),
+											formContainers : [
+											
+											]
+										})
+									]
+								})
+							]
+						}),
 						new sap.uxap.ObjectPageSection(oView.createId("Info"), {
 							showTitle: false,
 							title: "Information",
@@ -109,7 +171,7 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 														icon:    "sap-icon://cancel",
 														visible: false,
 														press:   function( oEvent ) {
-															//oController.RefreshModel( oController, {} );
+															oController.RefreshModel( oController, {} );
 															oController.ToggleButtonsAndView( oController, "ShowInfo" );
 														}
 													})
@@ -165,14 +227,13 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 														visible: false,
 														press:   function( oEvent ) {
 															oController.UpdateUserAddressValues( oController );
-															//oController.ToggleButtonsAndView( oController, "ShowAddress" );
 														}
 													}),
 													new sap.m.Button( oView.createId("AddrBlock_BtnCancel"), {
 														icon:    "sap-icon://cancel",
 														visible: false,
 														press:   function( oEvent ) {
-															//oController.RefreshModel( oController, {} );
+															oController.RefreshModel( oController, {} );
 															oController.ToggleButtonsAndView( oController, "ShowAddress" );
 														}
 													})
@@ -218,11 +279,7 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 												]
 											}).addStyleClass("MarBottom1d0Rem"),
 											formContainers : [
-//												new sap.ui.layout.form.FormContainer(oView.createId("PremPBlock_FormContainer"),{
-//													formElements : [
-//														
-//													]
-//												})
+                                                
 											]
 										})
 									]									
@@ -278,7 +335,7 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 														icon:    "sap-icon://cancel",
 														visible: false,
 														press:   function( oEvent ) {
-															//oController.RefreshModel( oController, {} );
+															oController.RefreshModel( oController, {} );
 															oController.ToggleButtonsAndView( oController, "ShowRoomPermissions" );
 														}
 													})

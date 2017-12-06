@@ -45,9 +45,6 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 				//-- Find out if the current user is a premise owner. --//
                 var bIsOwner    = oController.isUserOwner(1);
 				
-				//-- Refresh Nav Buttons --//
-				//MyApp.common.NavigationRefreshButtons( oController );
-				
 				
 				//-- Update the Model --//
 				oController.RefreshModel( oController, {} );
@@ -61,10 +58,9 @@ sap.ui.controller("pages.staging.user.UserSettings", {
                     oView.byId("PageHeader").setObjectSubtitle("iOmy User");
                     
                 }
-//                
-//                IomyRe.common.LookupPremisePermissionFromId
 				
 				//-- Check the parameters --//
+				oController.ToggleButtonsAndView( oController, "ShowPassword");
 				oController.ToggleButtonsAndView( oController, "ShowInfo");
 				oController.ToggleButtonsAndView( oController, "ShowAddress");
 				oController.ToggleButtonsAndView( oController, "ShowPremPermissions");
@@ -98,9 +94,6 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 			aUserData = JSON.parse(JSON.stringify(IomyRe.common.UserInfo ));
 		}
 		
-		//oController.aVisibleHouses     = MyApp.common.VisibleHouseTypes();	
-		//oController.aVisibleInclusions = MyApp.common.VisibleInclusionsForHouseType( oController.aVisibleHouses[0].Id );
-		
 		//------------------------------------------------//
 		//-- Build and Bind Model to the View           --//
 		//------------------------------------------------//
@@ -112,6 +105,11 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 			"Rooms":                 IomyRe.common.AllRoomsList,
             "RoomOptions":           aRoomData,
 			"UserInfo":              aUserData,
+            "Password":              {
+                OldPassword         : "",
+                NewPassword         : "",
+                ConfirmPassword     : ""
+            },
             
             "RoomPermInfo": {
                 "CurrentLevel"  : 2,
@@ -164,6 +162,14 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 			throw new IllegalArgumentException("Premise ID must be greater than 0.");
 		}
 	},
+    
+    TogglePasswordControls : function (bEnabled) {
+        var oView = this.getView();
+        
+        oView.byId("InputOldPassword").setEnabled(bEnabled);
+        oView.byId("InputNewPassword").setEnabled(bEnabled);
+        oView.byId("InputConfirmPassword").setEnabled(bEnabled);;
+    },
     
     ToggleInformationControls : function (bEnabled) {
         var oView = this.getView();
@@ -303,7 +309,6 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		//-- STEP 1 - Extract Values from the Model     --//
 		//------------------------------------------------//
 		var oCurrentFormData = oController.getView().getModel().getProperty("/UserInfo/");
-		//var oTest = oController.getView().getModel();
         
         oController.ToggleAddressControls(false);
 		
@@ -390,6 +395,183 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		}
 	},
     
+    UpdateUserPassword : function () {
+        var oController         = this;
+        var oView               = this.getView();
+        var oFormData           = oView.getModel().getProperty("/Password/");
+        
+        oController.TogglePasswordControls(false);
+        
+        try {
+            oController.changeUserPassword({
+                oldPassword         : oFormData.OldPassword,
+                newPassword         : oFormData.NewPassword,
+                confirmNewPassword  : oFormData.ConfirmPassword,
+                
+                onSuccess : function () {
+                    IomyRe.common.showMessage({
+                        text : "Log back in to continue using iOmy."
+                    });
+                    
+                    oController.TogglePasswordControls(true);
+                    IomyRe.common.Logout();
+                },
+                
+                onFail : function (sError) {
+                    IomyRe.common.showError(sError, "Update failed",
+                        function () {
+                            oController.TogglePasswordControls(true);
+                        }
+                    );
+                }
+            });
+        } catch (e) {
+            IomyRe.common.showError(e.message, "Invalid Input",
+                function () {
+                    oController.TogglePasswordControls(true);
+                }
+            );
+        }
+    },
+    
+    changeUserPassword : function (mSettings) {
+        var bError          = false;
+        var aErrorMessages  = [];
+        var iUserId         = IomyRe.common.UserInfo.UserId;
+        var fnSuccess       = function () {};
+        var fnFail          = function () {};
+        var sOldPassword;
+        var sNewPassword;
+        var sConfirmPassword;
+
+        var sMissingOldPasswordMessage  = "You must enter your current password first.";
+        var sMissingNewPasswordMessage  = "A new password is required.";
+        var sMissingConfirmationMessage = "You must enter the new password twice to confirm that it's correct.";
+        
+        var sDifferentPasswordsMessage  = "Passwords don't match.";
+        
+        var fnAppendError = function (sErrorMessage) {
+            bError = true;
+            aErrorMessages.push(sErrorMessage);
+        };
+
+        //--------------------------------------------------------------------//
+        // Process the settings map for passwords given.
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined && mSettings !== null) {
+            //----------------------------------------------------------------//
+            // Find the current user's password.
+            //----------------------------------------------------------------//
+            if (mSettings.oldPassword !== undefined && mSettings.oldPassword !== null &&
+                    mSettings.oldPassword !== "")
+            {
+                sOldPassword = mSettings.oldPassword;
+            } else {
+                fnAppendError(sMissingOldPasswordMessage);
+            }
+            
+            //----------------------------------------------------------------//
+            // Find the new password and check that it is secure.
+            //----------------------------------------------------------------//
+            if (mSettings.newPassword !== undefined && mSettings.newPassword !== null &&
+                    mSettings.newPassword !== "") 
+            {
+                sNewPassword = mSettings.newPassword;
+                
+                var mPasswordInfo = IomyRe.validation.isPasswordSecure(sNewPassword);
+                
+                if (!mPasswordInfo.bIsValid) {
+                    bError = true;
+                    aErrorMessages = aErrorMessages.concat(mPasswordInfo.aErrorMessages);
+                }
+                
+                //----------------------------------------------------------------//
+                // Find that the password was entered twice and that it is the same
+                // as the first password.
+                //----------------------------------------------------------------//
+                if (mSettings.confirmNewPassword !== undefined && mSettings.confirmNewPassword !== null &&
+                        mSettings.confirmNewPassword !== "")
+                {
+                    sConfirmPassword = mSettings.confirmNewPassword;
+                    
+                    if (sNewPassword !== sConfirmPassword) {
+                        fnAppendError(sDifferentPasswordsMessage);
+                    }
+                } else {
+                    fnAppendError(sMissingConfirmationMessage);
+                }
+                
+            } else {
+                fnAppendError(sMissingNewPasswordMessage);
+            }
+            
+            //----------------------------------------------------------------//
+            // Find the success callback function.
+            //----------------------------------------------------------------//
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+                
+                if (typeof fnSuccess !== "function") {
+                    fnAppendError("The success callback given is not a function. '"+typeof fnSuccess+"' variable was given.");
+                }
+            }
+            
+            //----------------------------------------------------------------//
+            // Find the failure callback function.
+            //----------------------------------------------------------------//
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+                
+                if (typeof fnFail !== "function") {
+                    fnAppendError("The failure callback given is not a function. '"+typeof fnFail+"' variable was given.");
+                }
+            }
+            
+            //----------------------------------------------------------------//
+            // Any errors? Throw an exception.
+            //----------------------------------------------------------------//
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join('\n'));
+            }
+            
+        } else {
+            fnAppendError(sMissingOldPasswordMessage);
+            fnAppendError(sMissingNewPasswordMessage);
+            fnAppendError(sMissingConfirmationMessage);
+            
+            throw new MissingSettingsMapException(aErrorMessages.join('\n'));
+        }
+
+        //--------------------------------------------------------------------//
+        // Run the API to update the user's password.
+        //--------------------------------------------------------------------//
+        try {
+            IomyRe.apiphp.AjaxRequest({
+                url : IomyRe.apiphp.APILocation("users"),
+                data : {
+                    "Mode" : "EditPassword", "Id" : iUserId,
+                    "OldPassword" : sOldPassword, "NewPassword" : sNewPassword
+                },
+                onSuccess : function (type, data) {
+                    try {
+                        if (data.Error !== true) {
+                            fnSuccess();
+                        } else {
+                            fnFail(data.ErrMesg);
+                        }
+                    } catch (e) {
+                        fnFail(e.name + ": " + e.message);
+                    }
+                },
+                onFail : function (response) {
+                    fnFail(response.responseText);
+                }
+            });
+        } catch (e) {
+            fnFail(e.name + ": " + e.message);
+        }
+    },
+    
     ToggleRoomPermissionControls : function (bEnabled) {
         var oView = this.getView();
         
@@ -441,8 +623,6 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 
                 onWarning : function (iLevel, sErrors) {
                     IomyRe.common.showWarning(sErrors, "Unable to find permissions for some rooms.");
-
-                    console.log(iLevel);
 
                     oController.DisplayRoomPermissions(iLevel);
                     oController.ToggleButtonsAndView( oController, "EditRoomPermissions" );
@@ -523,6 +703,22 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		//console.log(sMode);
 		try {	
 			switch(sMode) {
+				case "ShowPassword":
+					//-- Show Password (not quite showing the password though) --//
+					oView.byId("PasswordBlock_BtnEdit").setVisible( true );
+					oView.byId("PasswordBlock_BtnSave").setVisible( false );
+					oView.byId("PasswordBlock_BtnCancel").setVisible( false );
+					IomyRe.forms.ToggleFormMode(oController, "PasswordBlock_Form", false);
+					IomyRe.common.ShowFormFragment( oController, "UserPasswordDisplay", "PasswordBlock_Form", "FormContainer" );
+				break;
+				case "EditPassword":
+					//-- Edit Password --//
+					oView.byId("PasswordBlock_BtnEdit").setVisible( false );
+					oView.byId("PasswordBlock_BtnSave").setVisible( true );
+					oView.byId("PasswordBlock_BtnCancel").setVisible( true );
+					IomyRe.forms.ToggleFormMode(oController, "PasswordBlock_Form", true);
+					IomyRe.common.ShowFormFragment( oController, "UserPasswordEdit", "PasswordBlock_Form", "FormContainer" );
+				break;
 				case "ShowInfo":
 					//-- Show Info --//
 					oView.byId("InfoBlock_BtnEdit").setVisible( true );
@@ -584,6 +780,6 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 			$.sap.log.error("ToggleButtonsAndView: Critcal Error:"+e1.message);
 			return false;
 		}
-	},
+	}
 
 });
