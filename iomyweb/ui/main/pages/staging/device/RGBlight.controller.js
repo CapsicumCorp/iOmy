@@ -31,7 +31,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
 	iThingId                        : null,
 	iThingTypeId                    : null,
     
-    bFirstRun                       : true,
+    bAdvancedFirstRun               : true,
     bUsingAdvancedUI                : false,
     
 /**
@@ -218,6 +218,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         
         if (!oController.bUsingAdvancedUI) {
             oController.bUsingAdvancedUI = true;
+            oController.bAdvancedFirstRun = true;
             
             //----------------------------------------------------------------//
             // Create the Colour Picker.
@@ -273,6 +274,8 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 ],
                 OrderByClause : ["UTS desc"],
                 Limit : 3,
+                RetryLimit : 5,
+                Retries : 0,
                 format : 'json',
 
                 onSuccess : function (response, data) {
@@ -317,8 +320,11 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                             //-----------------------------------------------------//
                             if (i === data.length - 1) {
                                 this.Limit += 3;
+                                this.Retries++;
                                 
-                                IomyRe.apiodata.AjaxRequest(this);
+                                if (this.Retries < this.RetryLimit) {
+                                    IomyRe.apiodata.AjaxRequest(this);
+                                }
                             }
                         }
                     }
@@ -340,8 +346,14 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 },
 
                 onFail : function (response) {
+                    
+                    IomyRe.common.showError(response.responseText, "Error loading information",
+                        function () {
+                            oView.byId("ViewSwitchButton").setEnabled(true);
+                        }
+                    );
+                    
                     jQuery.sap.log.error("Error Code 9300: There was a fatal error loading current device information: "+JSON.stringify(response));
-                    oView.byId("ViewSwitchButton").setEnabled(true);
                 }
             });
         } catch (e) {
@@ -379,9 +391,9 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var iLight          = Math.floor(mParameters.v * this.fLightConversionRate);
         var iDeviceType     = IomyRe.common.ThingList["_"+this.iThingId].TypeId;
         
-        console.log("H:"+iHue);
-        console.log("S:"+iSat);
-        console.log("L:"+iLight);
+//        console.log("H:"+iHue);
+//        console.log("S:"+iSat);
+//        console.log("L:"+iLight);
         
         var mRequestData    = {
             "method" : "POST",
@@ -390,7 +402,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
             }
         };
         
-//        if (!oController.bFirstRun) {
+        if (!oController.bAdvancedFirstRun) {
             
             if (iDeviceType == IomyRe.devices.philipshue.ThingTypeId) {
                 mRequestData.url    = IomyRe.apiphp.APILocation("philipshue");
@@ -422,9 +434,9 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 
             }
             
-//        } else {
-//            oController.bFirstRun = false;
-//        }
+        } else {
+            oController.bAdvancedFirstRun = false;
+        }
     }
 		
 });
