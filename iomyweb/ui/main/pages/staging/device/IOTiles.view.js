@@ -49,121 +49,23 @@ sap.ui.jsview("pages.staging.device.IOTiles", {
 			title: "Device Tile View",
 			header : IomyRe.widgets.getToolPageHeader( oController ),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
-			mainContents: [ 
-				IomyRe.widgets.DeviceToolbar(oController, "Tile View"),
-				new sap.ui.layout.HorizontalLayout ( oView.createId("TileContainer"), {
-					allowWrapping : true,
-					content: [
-						/*
-						new sap.m.GenericTile({
-							header: "Toggle State",
-							frameType: "OneByOne",
-							Size: "Auto",
-							tileContent: [ 
-								new sap.m.TileContent ({
-									content: [
-										new sap.m.NumericContent ({
-											value: "On",
-										})
-									]
-								})
-							]
-						}).addStyleClass("MarAll0d5Rem"),
-						new sap.m.GenericTile({
-							header: "kW Use",
-							frameType: "OneByOne",
-							Size: "Auto",
-							tileContent: [ 
-								new sap.m.TileContent ({
-									unit: "kW",
-									content: [
-										new sap.m.NumericContent ({
-											value: "0.088",
-										})
-									]
-								})
-							]
-						}).addStyleClass("MarAll0d5Rem"),
-						new sap.m.GenericTile({
-							header: "Volts",
-							frameType: "OneByOne",
-							Size: "Auto",
-							tileContent: [ 
-								new sap.m.TileContent ({
-									unit: "V",
-									content: [
-										new sap.m.NumericContent ({
-											value: "239",
-										})
-									]
-								})
-							]
-						}).addStyleClass("MarAll0d5Rem"),
-						new sap.m.GenericTile({
-							header: "Amps",
-							frameType: "OneByOne",
-							Size: "Auto",
-							tileContent: [ 
-								new sap.m.TileContent ({
-									unit: "AMP",
-									content: [
-										new sap.m.NumericContent ({
-											value: "0.377",
-										})
-									]
-								})
-							]
-						}).addStyleClass("MarAll0d5Rem"),
-						new sap.m.GenericTile({
-							header: "Total kWh Use",
-							frameType: "OneByOne",
-							Size: "Auto",
-							tileContent: [ 
-								new sap.m.TileContent ({
-									unit: "kWh",
-									content: [
-										new sap.m.NumericContent ({
-											value: "0",
-										})
-									]
-								})
-							]
-						}).addStyleClass("MarAll0d5Rem"),
-						*/
-					],
-				}).addStyleClass("PadAll0d75Rem"),
+			mainContents: [
+                new sap.m.ScrollContainer ({
+                    width: "100%",
+                    height: "100%",
+                    vertical : true,
+                    content : [
+                        IomyRe.widgets.DeviceToolbar(oController, "Tile View"),
+                        new sap.ui.layout.HorizontalLayout ( oView.createId("TileContainer"), {
+                            allowWrapping : true,
+                            content: [
+
+                            ],
+                        }).addStyleClass("PadAll0d75Rem")
+                    ]
+                })
 			],
 		}).addStyleClass("MainBackground");
-		
-		/*
-		return new sap.m.Page( oView.createId("page"), {
-			title: "Home",
-			content: [ 
-				
-			],
-			footer : new sap.m.Bar ({
-				contentLeft : [
-						new sap.m.Button ({
-							text: "Help",
-							press : function () {
-								IomyRe.common.NavigationChangePage( "pJobSearch", {} , false);
-							}
-						}),
-
-					],
-				contentRight : [
-						new sap.m.Image ({
-							layoutData : new sap.m.OverflowToolbarLayoutData({
-								priority : sap.m.OverflowToolbarPriority.NeverOverflow
-							}),
-							width: "120px",
-							height: "28px",
-							src: "../iomy_redesign/resources/images/capcorplogo.png",
-						}),
-					]
-			}),
-		}).setShowHeader(false).addStyleClass("MainBackground");
-		*/
 	}
 
 });
