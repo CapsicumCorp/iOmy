@@ -6,7 +6,7 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 		//-- 1.0 - DECLARE VARIABLES                --//
 		//--------------------------------------------//
 		var oFragContent = null;
-		
+		var oView        = oController.getView();
 		
 		//--------------------------------------------//
 		//-- 5.0 - CREATE UI                        --//
@@ -16,7 +16,7 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Language",
 					fields: [
-						new sap.m.Select ({
+						new sap.m.Select (oView.createId("SelectLanguageId"), {
                             selectedKey : "{/Address/LanguageId}",
 							items : {
                                 path : "/Options/Languages",
@@ -30,7 +30,7 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 				}),new sap.ui.layout.form.FormElement({
 					label : "Street Address",
 					fields: [
-						new sap.m.Input ({
+						new sap.m.Input (oView.createId("InputAddressLine1"), {
                             value : "{/Address/AddressLine1}"
 						})
 					]
@@ -38,7 +38,7 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Unit Number (if applicable)",
 					fields: [
-						new sap.m.Input ({
+						new sap.m.Input (oView.createId("InputAddressLine2"), {
                             value : "{/Address/AddressLine2}"
 						})
 					]
@@ -46,7 +46,7 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "City / Suburb",
 					fields: [
-						new sap.m.Input ({
+						new sap.m.Input (oView.createId("InputAddressLine3"), {
                             value : "{/Address/AddressLine3}"
 						})
 					]
@@ -54,7 +54,7 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "State / Province",
 					fields: [
-						new sap.m.Input ({
+						new sap.m.Input (oView.createId("InputSubregion"), {
                             value : "{/Address/Subregion}"
 						})
 					]
@@ -62,7 +62,7 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Post Code / Zip Code",
 					fields: [
-						new sap.m.Input ({
+						new sap.m.Input (oView.createId("InputPostCode"), {
                             value : "{/Address/PostCode}"
 						})
 					]
@@ -70,7 +70,7 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Country / Region",
 					fields: [
-						new sap.m.Select ({
+						new sap.m.Select (oView.createId("SelectRegionId"), {
 							selectedKey : "{/Address/RegionId}",
 							items : {
                                 path : "/Options/Regions",
@@ -85,7 +85,7 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Timezone",
 					fields: [
-						new sap.m.Select ({
+						new sap.m.Select (oView.createId("SelectTimezoneId"), {
 							selectedKey : "{/Address/TimezoneId}",
 							items : {
                                 path : "/Options/Timezones",

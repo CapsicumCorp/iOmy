@@ -70,8 +70,45 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
         
     },
     
-    loadLocaleInfo : function () {
+    TogglePremiseInfoControls : function (bEnabled) {
+        var oView           = this.getView();
+        var oPremiseObject  = oView.getModel().getProperty("/Information/");
+        
+        $.each(oPremiseObject, function (sKey) {
+            if (oView.byId("Select"+sKey) !== undefined) {
+                oView.byId("Select"+sKey).setEnabled(bEnabled);
+            }
+            
+            if (oView.byId("Input"+sKey) !== undefined) {
+                oView.byId("Input"+sKey).setEnabled(bEnabled);
+            }
+        });
+    },
+    
+    TogglePremiseAddressControls : function (bEnabled) {
+        var oView           = this.getView();
+        var oPremiseObject  = oView.getModel().getProperty("/Address/");
+        
+        $.each(oPremiseObject, function (sKey) {
+            if (oView.byId("Select"+sKey) !== undefined) {
+                oView.byId("Select"+sKey).setEnabled(bEnabled);
+            }
+            
+            if (oView.byId("Input"+sKey) !== undefined) {
+                oView.byId("Input"+sKey).setEnabled(bEnabled);
+            }
+        });
+    },
+    
+    loadLocaleInfo : function (mSettings) {
         var oController = this;
+        var fnComplete = function () {};
+        
+        if (mSettings !== undefined && mSettings !== null) {
+            if (mSettings.onComplete !== undefined && mSettings.onComplete !== null) {
+                fnComplete = mSettings.onComplete;
+            }
+        }
         
         IomyRe.apiodata.AjaxRequest({
             Url : IomyRe.apiodata.ODataLocation("premiselocation"),
@@ -100,12 +137,14 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
                 };
                 
                 oController.RefreshModel();
+                fnComplete();
             },
             
             onFail : function (response) {
                 IomyRe.common.showError(response.responseText, "Failed to load premise address",
                     function () {
                         oController.RefreshModel();
+                        fnComplete();
                     }
                 );
             
@@ -117,7 +156,7 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
     RefreshModel : function () {
         var oController = this;
         var oView       = oController.getView();
-        var mPremise    = IomyRe.common.PremiseList["_"+oController.iPremiseId];
+        var mPremise    = JSON.parse( JSON.stringify(IomyRe.common.PremiseList["_"+oController.iPremiseId]) );
         
         oView.setModel(
             new sap.ui.model.json.JSONModel({
@@ -190,6 +229,8 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
         var oView               = oController.getView();
         var oFormData           = oView.getModel().getProperty("/Information/");
         
+        oController.TogglePremiseInfoControls(false);
+        
         oController.editPremiseInformation({
             premiseID       : oController.iPremiseId,
             name            : oFormData.Name,
@@ -207,19 +248,27 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
                             text : "Premise Information successfully updated."
                         });
 
-                        oController.ToggleButtonsAndView( oController, "ShowInfo" );
                         oController.RefreshModel();
+                        oController.ToggleButtonsAndView( oController, "ShowInfo" );
                     }
                     
                 });
             },
             
             onWarning : function (sErrMessage) {
-                IomyRe.common.showWarning(sErrMessage, "Some fields couldn't be updated");
+                IomyRe.common.showWarning(sErrMessage, "Some fields couldn't be updated",
+                    function () {
+                        oController.TogglePremiseInfoControls(true);
+                    }
+                );
             },
             
             onFail : function (sErrMessage) {
-                IomyRe.common.showError(sErrMessage, "Failed to update premise");
+                IomyRe.common.showError(sErrMessage, "Failed to update premise",
+                    function () {
+                        oController.TogglePremiseInfoControls(true);
+                    }
+                );
             }
         });
     },
@@ -228,6 +277,8 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
         var oController         = this;
         var oView               = oController.getView();
         var oFormData           = oView.getModel().getProperty("/Address/");
+        
+        oController.TogglePremiseAddressControls(false);
         
         oController.editPremiseAddress({
             premiseID           : oController.iPremiseId,
@@ -256,7 +307,11 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
             },
             
             onFail : function (sErrMessage) {
-                IomyRe.common.showError(sErrMessage, "Failed to update premise address");
+                IomyRe.common.showError(sErrMessage, "Failed to update premise address",
+                    function () {
+                        oController.TogglePremiseAddressControls(true);
+                    }
+                );
             }
         });
     },
@@ -487,10 +542,14 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
         //--------------------------------------------------------------------//
         oRequestQueue = new AjaxRequestQueue({
             requests            : aRequests,
-            concurrentRequests  : 1,
+            concurrentRequests  : 3,
             
             onSuccess   : function () {
-                fnSuccess();
+                if (aErrorMessages.length > 0) {
+                    fnWarning(aErrorMessages.join('\n'));
+                } else {
+                    fnSuccess();
+                }
             },
             
             onWarning   : function () {
@@ -522,7 +581,7 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
         var fnSuccess               = function () {};
         var fnFail                  = function () {};
         
-        var sMissingIDError             = "Premise ID must be specified (premiseID).";
+        var sMissingIDError         = "Premise ID must be specified (premiseID).";
         
         var fnAppendError = function (sErrorMessage) {
             bError = true;
@@ -649,11 +708,15 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
                 "AddressTimezone" : iTimezoneId,
                 "AddressLanguage" : iLanguageId
             },
-            onSuccess : function () {
-                fnSuccess();
+            onSuccess : function (type, data) {
+                if (data.Error !== true) {
+                    fnSuccess();
+                } else {
+                    fnFail(data.ErrMesg);
+                }
             },
             onFail : function (response) {
-                fnFail();
+                fnFail(response.responseText);
             }
         });
     }
