@@ -98,9 +98,13 @@ $.extend(IomyRe.devices.csrmesh,{
                 "ThingId" : iThingId,
                 "Data" : JSON.stringify({
                     "NewValue" : {
-                        "Hue" : 180,
-                        "Saturation" : 0,
-                        "Brightness" : 255
+                        //-- HEX: #EFE96B --//
+                        "Hue" : Math.round(0.1591 * 360),
+                        "Saturation" : Math.round(55.23 * 2.55),
+                        "Brightness" : Math.round(93.73 * 2.55)
+//                        "Hue" : 180,
+//                        "Saturation" : 0,
+//                        "Brightness" : 255
                     }
                 })
             },
