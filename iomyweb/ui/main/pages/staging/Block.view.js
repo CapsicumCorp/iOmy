@@ -50,147 +50,154 @@ sap.ui.jsview("pages.staging.Block", {
 			header : IomyRe.widgets.getToolPageHeader( oController ),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
 			mainContents: [ 
-					new sap.ui.layout.VerticalLayout ({
-					width: "100%",
-					content: [
-						new sap.ui.layout.BlockLayout ({
-							background: sap.ui.layout.BlockBackgroundType.Dashboard,
-							content: [
-								new sap.ui.layout.BlockLayoutRow ({
-									content : [ 
-										new sap.ui.layout.BlockLayoutCell ({
-											content : [
-												new sap.ui.layout.VerticalLayout ({
-													width: "100%",
-													content : [
-														new sap.m.Link ({
-															text : "Devices",
-															emphasized : true,
-															press : function () {
-																IomyRe.common.NavigationChangePage( "pDevice" , {} , false);
-															}
-														}).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
-													]
-												})
-											]
-										}),
-										new sap.ui.layout.BlockLayoutCell ({
-											content : [
-												new sap.ui.layout.VerticalLayout ({
-													width: "100%",
-													content : [
-														new sap.m.Link ({
-															text : "Premise",
-															emphasized : true,
-															press : function () {
-																IomyRe.common.NavigationChangePage( "pPremise" , {} , false);
-															}
-														}).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
-													]
-												})
-											]
-										}),
-		
-									]
-								}),
-								new sap.ui.layout.BlockLayoutRow ({
-									content : [ 
-										new sap.ui.layout.BlockLayoutCell ({
-											content : [
-												new sap.ui.layout.VerticalLayout ({
-													width: "100%",
-													content : [
-														new sap.m.Link ({
-															text : "Rooms",
-															emphasized : true,
-															press : function () {
-																IomyRe.common.NavigationChangePage( "pRoomList" , {bEditing: false} , false);
-															}
-														}).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
-													]
-												})
-											]
-										}),
-										new sap.ui.layout.BlockLayoutCell ({
-											content : [
-												new sap.ui.layout.VerticalLayout ({
-													width: "100%",
-													content : [
-														new sap.m.Link ({
-															text : "Users",
-															emphasized : true,
-															press : function () {
-																IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
-															}
-														}).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
-													]
-												})
-											]
-											
-										})
-									]
-								}),
-								new sap.ui.layout.BlockLayoutRow ({
-									content : [ 
-										new sap.ui.layout.BlockLayoutCell ({
-											content : [
-												new sap.ui.layout.VerticalLayout ({
-													width: "100%",
-													content : [
-														new sap.m.Link ({
-															text : "Rules",
-															emphasized : true,
-															press : function () {
-																IomyRe.common.NavigationChangePage( "pRulesList" , {} , false);
-															}
-														}).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
-													]
-												})
-											]
-										}),
-										new sap.ui.layout.BlockLayoutCell ({
-											content : [
-												new sap.ui.layout.VerticalLayout ({
-													width: "100%",
-													content : [
-														new sap.m.Link ({
-															text : "Advanced",
-															emphasized : true,
-															press : function () {
-																IomyRe.common.NavigationChangePage( "pTelnet" , {} , false);
-															}
-														}).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
-													]
-												})
-											]
-										}),
-									]
-								}),
-								new sap.ui.layout.BlockLayoutRow ({
-									content : [ 
-										new sap.ui.layout.BlockLayoutCell ({
-											content : [
-												new sap.ui.layout.VerticalLayout ({
-													width: "100%",
-													content : [
-														new sap.m.Link ({
-															text : "FFMPEG",
-															emphasized : true,
-															press : function () {
-																IomyRe.common.NavigationChangePage( "pFFMPEG" , {} , false);
-															}
-														}).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
-													]
-												})
-											]
-										}),
-									]
-								}),				
-							],
-						})
-					]
-				}).addStyleClass(""),
-			],
+                new sap.m.ScrollContainer ({
+                    width: "100%",
+                    height: "100%",
+                    vertical : true,
+                    content : [
+                        new sap.ui.layout.VerticalLayout ({
+                            width: "100%",
+                            content: [
+                                new sap.ui.layout.BlockLayout ({
+                                    background: sap.ui.layout.BlockBackgroundType.Dashboard,
+                                    content: [
+                                        new sap.ui.layout.BlockLayoutRow ({
+                                            content : [ 
+                                                new sap.ui.layout.BlockLayoutCell ({
+                                                    content : [
+                                                        new sap.ui.layout.VerticalLayout ({
+                                                            width: "100%",
+                                                            content : [
+                                                                new sap.m.Link ({
+                                                                    text : "Devices",
+                                                                    emphasized : true,
+                                                                    press : function () {
+                                                                        IomyRe.common.NavigationChangePage( "pDevice" , {} , false);
+                                                                    }
+                                                                }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
+                                                            ]
+                                                        })
+                                                    ]
+                                                }),
+                                                new sap.ui.layout.BlockLayoutCell ({
+                                                    content : [
+                                                        new sap.ui.layout.VerticalLayout ({
+                                                            width: "100%",
+                                                            content : [
+                                                                new sap.m.Link ({
+                                                                    text : "Premise",
+                                                                    emphasized : true,
+                                                                    press : function () {
+                                                                        IomyRe.common.NavigationChangePage( "pPremise" , {} , false);
+                                                                    }
+                                                                }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
+                                                            ]
+                                                        })
+                                                    ]
+                                                }),
+
+                                            ]
+                                        }),
+                                        new sap.ui.layout.BlockLayoutRow ({
+                                            content : [ 
+                                                new sap.ui.layout.BlockLayoutCell ({
+                                                    content : [
+                                                        new sap.ui.layout.VerticalLayout ({
+                                                            width: "100%",
+                                                            content : [
+                                                                new sap.m.Link ({
+                                                                    text : "Rooms",
+                                                                    emphasized : true,
+                                                                    press : function () {
+                                                                        IomyRe.common.NavigationChangePage( "pRoomList" , {bEditing: false} , false);
+                                                                    }
+                                                                }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
+                                                            ]
+                                                        })
+                                                    ]
+                                                }),
+                                                new sap.ui.layout.BlockLayoutCell ({
+                                                    content : [
+                                                        new sap.ui.layout.VerticalLayout ({
+                                                            width: "100%",
+                                                            content : [
+                                                                new sap.m.Link ({
+                                                                    text : "Users",
+                                                                    emphasized : true,
+                                                                    press : function () {
+                                                                        IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
+                                                                    }
+                                                                }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
+                                                            ]
+                                                        })
+                                                    ]
+
+                                                })
+                                            ]
+                                        }),
+                                        new sap.ui.layout.BlockLayoutRow ({
+                                            content : [ 
+                                                new sap.ui.layout.BlockLayoutCell ({
+                                                    content : [
+                                                        new sap.ui.layout.VerticalLayout ({
+                                                            width: "100%",
+                                                            content : [
+                                                                new sap.m.Link ({
+                                                                    text : "Rules",
+                                                                    emphasized : true,
+                                                                    press : function () {
+                                                                        IomyRe.common.NavigationChangePage( "pRulesList" , {} , false);
+                                                                    }
+                                                                }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
+                                                            ]
+                                                        })
+                                                    ]
+                                                }),
+                                                new sap.ui.layout.BlockLayoutCell ({
+                                                    content : [
+                                                        new sap.ui.layout.VerticalLayout ({
+                                                            width: "100%",
+                                                            content : [
+                                                                new sap.m.Link ({
+                                                                    text : "Advanced",
+                                                                    emphasized : true,
+                                                                    press : function () {
+                                                                        IomyRe.common.NavigationChangePage( "pTelnet" , {} , false);
+                                                                    }
+                                                                }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
+                                                            ]
+                                                        })
+                                                    ]
+                                                }),
+                                            ]
+                                        }),
+                                        new sap.ui.layout.BlockLayoutRow ({
+                                            content : [ 
+                                                new sap.ui.layout.BlockLayoutCell ({
+                                                    content : [
+                                                        new sap.ui.layout.VerticalLayout ({
+                                                            width: "100%",
+                                                            content : [
+                                                                new sap.m.Link ({
+                                                                    text : "FFMPEG",
+                                                                    emphasized : true,
+                                                                    press : function () {
+                                                                        IomyRe.common.NavigationChangePage( "pFFMPEG" , {} , false);
+                                                                    }
+                                                                }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk")
+                                                            ]
+                                                        })
+                                                    ]
+                                                })
+                                            ]
+                                        })		
+                                    ]
+                                })
+                            ]
+                        }).addStyleClass("")
+                    ]
+                })
+			]
 		}).addStyleClass("MainBackground");
 	}
 });
