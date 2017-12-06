@@ -84,7 +84,7 @@ sap.ui.controller("pages.staging.Device", {
                 }
                 
                 if (oController.iLastPremiseId === null && oController.iLastRoomId === null) {
-                    oView.byId("ToolbarTitle").setText("Device List");
+                    oView.byId("ToolbarTitle").setText("Devices");
                     
                 } else if (oController.iLastPremiseId !== null && oController.iLastRoomId !== null) {
                     // If both the Premise ID and Room ID are given, use the room ID.
@@ -105,6 +105,8 @@ sap.ui.controller("pages.staging.Device", {
                 } else {
                     oController.bEditing = false;
                 }
+                
+                oController.IndicateWhetherInEditModeOrNot();
                 
                 //-- Defines the Device Type --//
                 IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
@@ -134,6 +136,21 @@ sap.ui.controller("pages.staging.Device", {
         });
             
         
+    },
+    
+    IndicateWhetherInEditModeOrNot : function () {
+        var oController = this;
+        var oView       = this.getView();
+        var sTitle      = oView.byId("ToolbarTitle").getText();
+        
+        if (oController.bEditing) {
+            oView.byId("ToolbarTitle").setText( "Edit " + sTitle );
+        } else {
+            if (sTitle.indexOf("Edit ") === 0) {
+                sTitle = sTitle.replace("Edit ", "");
+                oView.byId("ToolbarTitle").setText(sTitle);
+            }
+        }
     },
     
     

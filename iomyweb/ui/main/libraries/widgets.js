@@ -177,10 +177,11 @@ $.extend( IomyRe.widgets, {
 			select : function () {
                 if (oApp.getCurrentPage().getId() === "pDevice") {
                     oApp.getCurrentPage().getController().bEditing = false;
+                    oApp.getCurrentPage().getController().IndicateWhetherInEditModeOrNot();
 
-                } else {
+                } //else {
                     IomyRe.common.NavigationChangePage( "pDevice" , {} , false);
-                }
+                //}
 			}
 		});
 		
