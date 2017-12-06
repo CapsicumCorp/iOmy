@@ -50,12 +50,12 @@ sap.ui.jsview("pages.staging.device.RGBlight", {
 			header : IomyRe.widgets.getToolPageHeader( oController ),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
 			mainContents : [
-				IomyRe.widgets.DeviceToolbar(oController, ""),
 				new sap.m.ScrollContainer (oView.createId("RGB_Cont"), {
                     width: "100%",
                     height: "100%",
                     vertical : true,
                     content : [
+                        IomyRe.widgets.DeviceToolbar(oController, ""),
                         IomyRe.widgets.LightBulbControlsContainer(oController, {
                             hue             : 0,
                             saturation      : 0,

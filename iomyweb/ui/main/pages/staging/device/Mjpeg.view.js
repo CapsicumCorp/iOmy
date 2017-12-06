@@ -50,16 +50,23 @@ sap.ui.jsview("pages.staging.device.Mjpeg", {
 			header : IomyRe.widgets.getToolPageHeader( oController ),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
 			mainContents : [
-				IomyRe.widgets.DeviceToolbar(oController, "Main Office Camera"),
-				IomyRe.widgets.MJPEGCont(oController, {
-                    densityAware : false,
-                    
-                    error : function () {
-                        if (this.getSrc() !== "") {
-                            IomyRe.common.showError("Ensure that the connection settings are correct and that the device is online.", "Stream Not Available");
-                        }
-                    }
-                })
+                new sap.m.ScrollContainer ({
+					width: "100%",
+					height: "100%",
+					vertical : true,
+					content : [
+                        IomyRe.widgets.DeviceToolbar(oController, "Main Office Camera"),
+                        IomyRe.widgets.MJPEGCont(oController, {
+                            densityAware : false,
+
+                            error : function () {
+                                if (this.getSrc() !== "") {
+                                    IomyRe.common.showError("Ensure that the connection settings are correct and that the device is online.", "Stream Not Available");
+                                }
+                            }
+                        })
+					]
+				})
 			]
 		}).addStyleClass("MainBackground");
 	}
