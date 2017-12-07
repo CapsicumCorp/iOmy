@@ -83,6 +83,8 @@ $.extend(IomyRe.devices,{
         var fnSuccess;
         var fnFail;
         
+        var sThingIDMissing = "Thing ID must be given.";
+        
         //--------------------------------------------------------------------//
         // Fetch the Thing ID and the onSuccess and onFail callbacks.
         //--------------------------------------------------------------------//
@@ -97,7 +99,7 @@ $.extend(IomyRe.devices,{
                 }
                 
             } else {
-                throw new MissingArgumentException("Thing ID must be given.");
+                throw new MissingArgumentException(sThingIDMissing);
             }
             
             if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
@@ -113,7 +115,7 @@ $.extend(IomyRe.devices,{
             }
             
         } else {
-            throw new MissingSettingsMapException("Thing ID must be given.");
+            throw new MissingSettingsMapException(sThingIDMissing);
         }
 
         //--------------------------------------------------------------------//
@@ -831,6 +833,190 @@ $.extend(IomyRe.devices,{
         }
         
         return aTasks;
+    },
+    
+    loadLightBulbInformation : function (mSettings) {
+        var bError              = false;
+        var aErrorMessages      = [];
+        var aIOFilter           = [];
+        var iThingId;
+        var iTypeId;
+        var mThing;
+        var mIOs;
+        
+        var fHueConversionRate;
+        var fSaturationConversionRate;
+        var fLightConversionRate;
+        
+        var sThingIDMissing         = "Thing ID (thingID) must be given.";
+        
+        var fnSuccess   = function () {};
+        var fnFail      = function () {};
+        
+        var fnAppendError = function (sErrMessage) {
+            bError          = true;
+            aErrorMessages  = sErrMessage;
+        };
+        
+        //--------------------------------------------------------------------//
+        // Process the parameter map
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined && mSettings !== null) {
+            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
+                iThingId = mSettings.thingID;
+                
+                var mInfo = IomyRe.validation.isThingIDValid(iThingId);
+                
+                if (mInfo.bIsValid) {
+                    mThing  = IomyRe.common.ThingList["_"+iThingId];
+                    iTypeId = mThing.TypeId;
+                    
+                    if (iTypeId !== IomyRe.devices.philipshue.ThingTypeId && iTypeId !== IomyRe.devices.csrmesh.ThingTypeId) {
+                        fnAppendError("Device given is not a light bulb.");
+                    }
+                    
+                } else {
+                    bError = true;
+                    aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
+                }
+            } else {
+                fnAppendError(sThingIDMissing);
+            }
+            
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+                
+                if (typeof fnSuccess !== "function") {
+                    fnAppendError("Success callback is not a function. Found '"+typeof fnSuccess+"' instead.");
+                }
+            }
+            
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+                
+                if (typeof fnFail !== "function") {
+                    fnAppendError("Failure callback is not a function. Found '"+typeof fnFail+"' instead.");
+                }
+            }
+            
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join("\n\n"));
+            }
+            
+        } else {
+            fnAppendError(sThingIDMissing);
+            
+            throw new MissingSettingsMapException(aErrorMessages.join("\n\n"));
+        }
+        
+        //--------------------------------------------------------------------//
+        // Acquire the thing and its IOs
+        //--------------------------------------------------------------------//
+        mThing      = IomyRe.common.ThingList["_"+iThingId];
+        mIOs        = mThing.IO;
+        
+        //--------------------------------------------------------------------//
+        // Determine the conversion rates as the figures from the database will
+        // need to be converted for use with each light bulb type.
+        //--------------------------------------------------------------------//
+        if (mThing.TypeId == IomyRe.devices.philipshue.ThingTypeId) {
+            fHueConversionRate          = 65535 / 360;  // 65535 (2^16 - 1) is the maximum value the Philips Hue API will accept.
+            fSaturationConversionRate   = 1.44;         // 144 / 100 (100 being the max saturation value)
+            fLightConversionRate        = 2.54;         // 254 / 100 (likewise)
+
+        } else if (mThing.TypeId == IomyRe.devices.csrmesh.ThingTypeId) {
+            fHueConversionRate          = 1;
+            fSaturationConversionRate   = 2.55;
+            fLightConversionRate        = 2.55;
+        }
+        
+        try {
+            $.each(mIOs, function (sI, aIO) {
+                if (sI !== undefined && sI !== null && aIO !== undefined && aIO !== null) {
+                    aIOFilter.push("IO_PK eq "+aIO.Id);
+                }
+            });
+            
+            IomyRe.apiodata.AjaxRequest({
+                Url : IomyRe.apiodata.ODataLocation("dataint"),
+                Columns : ["CALCEDVALUE","UTS","RSTYPE_PK","IO_PK"],
+                WhereClause : [
+                    "THING_PK eq "+iThingId,
+                    "("+aIOFilter.join(" or ")+")",
+                ],
+                OrderByClause : ["UTS desc"],
+                Limit : 3,
+                RetryLimit : 5,
+                Retries : 0,
+                format : 'json',
+
+                onSuccess : function (response, data) {
+                    var iHue        = null;
+                    var iSaturation = null;
+                    var iLight      = null;
+                    
+                    for (var i = 0; i < data.length; i++) {
+                        //console.log(JSON.stringify(data));
+                        //----------------------------------------------------//
+                        // If we're grabbing the HUE value
+                        //----------------------------------------------------//
+                        if (data[i].RSTYPE_PK === 3901 && iHue === null) {
+                            iHue = Math.round(data[i].CALCEDVALUE / fHueConversionRate);
+                        }
+                        
+                        //----------------------------------------------------//
+                        // If we're grabbing the SATURATION value
+                        //----------------------------------------------------//
+                        if (data[i].RSTYPE_PK === 3902 && iSaturation === null) {
+                            iSaturation = Math.round(data[i].CALCEDVALUE / fSaturationConversionRate);
+                        }
+                        
+                        //----------------------------------------------------//
+                        // If we're grabbing the LUMINANCE value
+                        //----------------------------------------------------//
+                        if (data[i].RSTYPE_PK === 3903 && iLight === null) {
+                            iLight = Math.round(data[i].CALCEDVALUE / fLightConversionRate);
+                        }
+                        
+                        //----------------------------------------------------//
+                        // If we already have what we need, we can finish the
+                        // loop.
+                        //----------------------------------------------------//
+                        if (iHue !== null && iSaturation !== null && iLight !== null) {
+                            break;
+                        } else {
+                            //-----------------------------------------------------//
+                            // Otherwise, if we've finished processing the data and
+                            // we don't have all of it, then increase the limit and
+                            // run the request again. Do this up to 5 times before
+                            // giving up.
+                            //-----------------------------------------------------//
+                            if (i === data.length - 1) {
+                                this.Limit += 3;
+                                this.Retries++;
+                                
+                                if (this.Retries < this.RetryLimit) {
+                                    IomyRe.apiodata.AjaxRequest(this);
+                                    return;
+                                } else {
+                                    fnFail("Failed to find all of the data for "+mThing.DisplayName+".");
+                                }
+                            }
+                        }
+                    }
+                    
+                    fnSuccess(iHue, iSaturation, iLight);
+                },
+
+                onFail : function (response) {
+                    jQuery.sap.log.error("Error Code 9300: There was a fatal error loading current device information: "+JSON.stringify(response));
+                    fnFail(response.responseText);
+                }
+            });
+        } catch (e) {
+            jQuery.sap.log.error("There was an error loading the OData service: "+e.message);
+            fnFail(e.name + ": " + e.message);
+        }
     }
     
     
