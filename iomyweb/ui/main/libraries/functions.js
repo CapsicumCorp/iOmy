@@ -231,6 +231,192 @@ $.extend(IomyRe.functions, {
     },
     
     /**
+     * Converts HSL values to RGB values.
+     * 
+     * Based on the code found here: http://hsl2rgb.nichabi.com/javascript-function.php
+     * 
+     * @param {type} iHue       Hue
+     * @param {type} iSat       Saturation
+     * @param {type} iLight     Luminance
+     * @returns {object}        RGB values
+     */
+    convertHSLToRGB : function (iHue, iSat, iLight) {
+        var fSaturation;
+        var fLuminance;
+        var fChroma;
+        var fX;
+        var iRed;
+        var iGreen;
+        var iBlue;
+        var fM;
+        var mValues;
+
+        //--------------------------------------------------------//
+        // Process the Hue for calculation.
+        //--------------------------------------------------------//
+        iHue /= 60;
+        if (iHue < 0) {
+            iHue = 6 - (-iHue % 6);
+        }
+        iHue = iHue % 6;
+        
+        //--------------------------------------------------------//
+        // Process the saturation and luminance.
+        //--------------------------------------------------------//
+        fSaturation = Math.max(0, Math.min(1, iSat / 100));
+        fLuminance  = Math.max(0, Math.min(1, iLight / 100));
+
+        //--------------------------------------------------------//
+        // Get the Chroma and the X value.
+        //--------------------------------------------------------//
+        fChroma = (1 - Math.abs((2 * fLuminance) - 1)) * fSaturation;
+        fX = fChroma * (1 - Math.abs((iHue % 2) - 1));
+
+        //--------------------------------------------------------//
+        // Find the points on the RGB cube.
+        //--------------------------------------------------------//
+        if (iHue < 1) {
+            iRed   = fChroma;
+            iGreen = fX;
+            iBlue  = 0;
+
+        } else if (iHue < 2) {
+            iRed   = fX;
+            iGreen = fChroma;
+            iBlue  = 0;
+
+        } else if (iHue < 3) {
+            iRed   = 0;
+            iGreen = fChroma;
+            iBlue  = fX;
+
+        } else if (iHue < 4) {
+            iRed   = 0;
+            iGreen = fX;
+            iBlue  = fChroma;
+
+        } else if (iHue < 5) {
+            iRed   = fX;
+            iGreen = 0;
+            iBlue  = fChroma;
+
+        } else {
+            iRed   = fChroma;
+            iGreen = 0;
+            iBlue  = fX;
+
+        }
+
+        //--------------------------------------------------------//
+        // Find the individual RGB values to match brightness.
+        //--------------------------------------------------------//
+        fM      = fLuminance - fChroma / 2;
+        iRed    = Math.round((iRed + fM) * 255);
+        iGreen  = Math.round((iGreen + fM) * 255);
+        iBlue   = Math.round((iBlue + fM) * 255);
+        
+        mValues = {
+            red     : iRed,
+            green   : iGreen,
+            blue    : iBlue
+        };
+        
+        return mValues;
+    },
+    
+    /**
+     * Takes a set of RGB values and converts them to hexadecminal notation.
+     * 
+     * @param {type} mSettings      Map containing the red, green, and blue values.
+     * @returns {String}            Hex value
+     */
+    convertRGBToHex : function (mSettings) {
+        var bError          = false;
+        var aErrorMessages  = [];
+        var sHexString      = "";
+        
+        var sRedValueMissing    = "Red value is missing.";
+        var sGreenValueMissing  = "Green value is missing.";
+        var sBlueValueMissing   = "Blue value is missing.";
+        
+        var fnAppendError = function (sErrorMessages) {
+            bError = true;
+            aErrorMessages.push(sErrorMessages);
+        };
+        
+        
+        if (mSettings !== undefined && mSettings !== null) {
+            if (mSettings.red === undefined || mSettings.red === null) {
+                fnAppendError(sRedValueMissing);
+            }
+            
+            if (mSettings.green === undefined || mSettings.green === null) {
+                fnAppendError(sGreenValueMissing);
+            }
+            
+            if (mSettings.blue === undefined || mSettings.blue === null) {
+                fnAppendError(sBlueValueMissing);
+            }
+            
+            if (bError) {
+                throw new MissingArgumentException(aErrorMessages.join('\n\n'));
+            }
+        } else {
+            fnAppendError(sRedValueMissing);
+            fnAppendError(sGreenValueMissing);
+            fnAppendError(sBlueValueMissing);
+            
+            throw new MissingSettingsMapException(aErrorMessages.join('\n\n'));
+        }
+        
+        $.each(mSettings, function (sI, iColourValue) {
+            var iResult     = iColourValue;
+            var sCharString = "";
+            var vRemainder;
+            var mHexLetters = {
+                "_10" : "A",
+                "_11" : "B",
+                "_12" : "C",
+                "_13" : "D",
+                "_14" : "E",
+                "_15" : "F"
+            };
+            
+            while (iResult > 0) {
+                vRemainder  = iResult % 16;
+                iResult     = (iResult - vRemainder) / 16;
+
+                if (vRemainder > 9) {
+                    vRemainder = mHexLetters["_"+vRemainder];
+                }
+                
+                sCharString = vRemainder + sCharString;
+            }
+            
+            if (sCharString.length < 2) {
+                sCharString = '0' + sCharString;
+            }
+            
+            sHexString += sCharString;
+            
+        });
+        
+        return sHexString;
+    },
+    
+    /**
+     * Converts HSL values to a HEX string.
+     * 
+     * @param {type} iHue       Hue
+     * @param {type} iSat       Saturation
+     * @param {type} iLight     Luminance
+     * @returns {object}        RGB values
+     */
+    convertHSLToHex : function (iHue, iSat, iLight) {
+        return this.convertRGBToHex(this.convertHSLToRGB(iHue, iSat, iLight));
+    },
+    
+    /**
      * Retrives the hub that a thing is connected to.
      * 
      * @param {type} iThingId        ID of the Thing
