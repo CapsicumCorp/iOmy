@@ -146,37 +146,37 @@ $.extend( IomyRe.navigation, {
                                 oApp.getCurrentPage().getController().bEditing = true;
                                 oApp.getCurrentPage().getController().IndicateWhetherInEditModeOrNot();
                                 
-                            } //else {
-                                IomyRe.common.NavigationChangePage( "pDevice" , {"bEditing": true} , false);
-                            //}
+                            }
+                            
+                            IomyRe.common.NavigationChangePage( "pDevice" , {"bEditing": true} , true);
 						}
 					}),	
 					new sap.m.Button ({
 						text: "Edit Premise",
 						type: sap.m.ButtonType.Transparent,
 						press : function () {
-							IomyRe.common.NavigationChangePage( "pPremiseForm" , {"PremiseId" : 1} , false);
+							IomyRe.common.NavigationChangePage( "pPremiseForm" , {"PremiseId" : 1} , true);
 						}
 					}),
 					new sap.m.Button ({
 						text: "Edit Room",
 						type: sap.m.ButtonType.Transparent,
 						press : function () {
-							IomyRe.common.NavigationChangePage( "pRoomList" ,  {"bEditing": true} , false);
+							IomyRe.common.NavigationChangePage( "pRoomList" ,  {"bEditing": true} , true);
 						}
 					}),
 					new sap.m.Button ({
 						text: "Edit Rule",
 						type: sap.m.ButtonType.Transparent,
 						press : function () {
-							IomyRe.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": true} , false);
+							IomyRe.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": true} , true);
 						}
 					}),
 					new sap.m.Button ({
 						text: "Edit User",
 						type: sap.m.ButtonType.Transparent,
 						press : function () {
-							IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
+							IomyRe.common.NavigationChangePage( "pUserList" , {} , true);
 						}
 					}),
 				],

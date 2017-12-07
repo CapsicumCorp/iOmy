@@ -167,7 +167,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://home",
 			text: "Home",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pBlock" , {} , false);
+				IomyRe.common.NavigationChangePage( "pBlock" , {} , true);
 			}
 		});
 		
@@ -180,7 +180,7 @@ $.extend( IomyRe.widgets, {
                     oApp.getCurrentPage().getController().IndicateWhetherInEditModeOrNot();
 
                 } //else {
-                    IomyRe.common.NavigationChangePage( "pDevice" , {} , false);
+                    IomyRe.common.NavigationChangePage( "pDevice" , {} , true);
                 //}
 			}
 		});
@@ -189,7 +189,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://building",
 			text: "Premise",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pPremise" , {} , false);
+				IomyRe.common.NavigationChangePage( "pPremise" , {} , true);
 			}
 		});
 		
@@ -197,7 +197,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://idea-wall",
 			text: "Room",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pRoomList" , {bEditing: false} , false);
+				IomyRe.common.NavigationChangePage( "pRoomList" , {bEditing: false} , true);
 			}
 		});
 		
@@ -205,7 +205,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://add-activity",
 			text: "Rules",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pRulesList" , {} , false);
+				IomyRe.common.NavigationChangePage( "pRulesList" , {} , true);
 			}
 		});
 		
@@ -213,7 +213,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://family-protection",
 			text: "Users",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
+				IomyRe.common.NavigationChangePage( "pUserList" , {} , true);
 			}
 		});
 		
@@ -221,7 +221,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://chain-link",
 			text: "Important Links",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pUserForm" , {} , false);
+				IomyRe.common.NavigationChangePage( "pUserForm" , {} , true);
 			}
 		});
 		
@@ -229,7 +229,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://compare",
 			text: "Legal Information",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "" , {} , false);
+				IomyRe.common.NavigationChangePage( "" , {} , true);
 			}
 		});
 		
