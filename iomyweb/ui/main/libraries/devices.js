@@ -827,12 +827,106 @@ $.extend(IomyRe.devices,{
                 aTasks = IomyRe.devices.motionsensor.GetUITaskList(mSettings);
             }
             
+            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.philipshue.ThingTypeId ) {
+                aTasks = IomyRe.devices.philipshue.GetUITaskList(mSettings);
+            }
+            
+            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.csrmesh.ThingTypeId ) {
+                aTasks = IomyRe.devices.csrmesh.GetUITaskList(mSettings);
+            }
+            
         } else {
             //-- TODO: Write a error message --//
             jQuery.sap.log.error("Device "+mSettings.deviceData.DisplayName+" has no IOs");
         }
         
         return aTasks;
+    },
+    
+    getHexOfLightColour : function (mSettings) {
+        var bError              = false;
+        var aErrorMessages      = [];
+        var iThingId;
+        var iTypeId;
+        
+        var sThingIDMissing         = "Thing ID (thingID) must be given.";
+        
+        var fnSuccess   = function () {};
+        var fnFail      = function () {};
+        
+        var fnAppendError = function (sErrMessage) {
+            bError          = true;
+            aErrorMessages  = sErrMessage;
+        };
+        
+        //--------------------------------------------------------------------//
+        // Process the parameter map
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined && mSettings !== null) {
+            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
+                iThingId = mSettings.thingID;
+                
+                var mInfo = IomyRe.validation.isThingIDValid(iThingId);
+                
+                if (mInfo.bIsValid) {
+                    iTypeId  = IomyRe.common.ThingList["_"+iThingId].TypeId;
+                    
+                    if (iTypeId !== IomyRe.devices.philipshue.ThingTypeId && iTypeId !== IomyRe.devices.csrmesh.ThingTypeId) {
+                        fnAppendError("Device given is not a light bulb.");
+                    }
+                    
+                } else {
+                    bError = true;
+                    aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
+                }
+            } else {
+                fnAppendError(sThingIDMissing);
+            }
+            
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+                
+                if (typeof fnSuccess !== "function") {
+                    fnAppendError("Success callback is not a function. Found '"+typeof fnSuccess+"' instead.");
+                }
+            }
+            
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+                
+                if (typeof fnFail !== "function") {
+                    fnAppendError("Failure callback is not a function. Found '"+typeof fnFail+"' instead.");
+                }
+            }
+            
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join("\n\n"));
+            }
+            
+        } else {
+            fnAppendError(sThingIDMissing);
+            
+            throw new MissingSettingsMapException(aErrorMessages.join("\n\n"));
+        }
+        
+        try {
+            
+            IomyRe.devices.loadLightBulbInformation({
+                thingID : iThingId,
+
+                onSuccess : function (iHue, iSaturation, iLight) {
+                    var sHexString = IomyRe.functions.convertHSLToHex(iHue, iSaturation, iLight);
+                    
+                    fnSuccess(sHexString);
+                },
+
+                onFail : function (sErrorMessage) {
+                    fnFail(sErrorMessage);
+                }
+            });
+        } catch (e) {
+            jQuery.sap.log.error("There was an error loading the OData service: "+e.message);
+        }
     },
     
     loadLightBulbInformation : function (mSettings) {

@@ -142,5 +142,27 @@ $.extend(IomyRe.devices.csrmesh,{
 //                IomyRe.apiphp.AjaxRequest(this);
 //            }
 //        });
+    },
+    
+    GetUITaskList: function( mSettings ) {
+        //------------------------------------//
+        //-- 1.0 - Initialise Variables        --//
+        //------------------------------------//
+        var oModule         = this;
+        var aTasks          = { "High":[], "Low":[] };                    //-- ARRAY:            --//
+        
+        
+        aTasks.High.push({
+            "Type":"Function", 
+            "Execute": function () {
+                IomyRe.devices.getHexOfLightColour({
+                    thingID     : mSettings.deviceData.DeviceId,
+                    onSuccess   : mSettings.onSuccess,
+                    onFail      : mSettings.onFail
+                });
+            }
+        });
+        
+        return aTasks;
     }
 });

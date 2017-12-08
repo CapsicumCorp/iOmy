@@ -117,21 +117,7 @@ sap.ui.controller("pages.staging.Device", {
                     "High": []
                 };
                 
-                oView.byId("DeviceList").destroyItems();
-                oView.byId("DeviceList").addItem(
-                    new sap.m.ObjectListItem (oView.createId("loading"), {        
-                        title: "Loading Devices...",
-                        type: "Active",
-                        attributes : [],
-                    })
-                );
-                
-                IomyRe.common.RefreshCoreVariables({
-                    onSuccess : function () {
-                        oController.BuildDeviceListUI();
-                        oController.RefreshAjaxDataForUI();
-                    }
-                })
+                oController.InitialiseDeviceList();
             }
         });
             
@@ -159,6 +145,31 @@ sap.ui.controller("pages.staging.Device", {
         }
     },
     
+    ClearFilters : function () {
+        this.iLastRoomId    = null;
+        this.iLastPremiseId = null;
+    },
+    
+    InitialiseDeviceList : function () {
+        var oController = this;
+        var oView       = this.getView();
+        
+        oView.byId("DeviceList").destroyItems();
+        oView.byId("DeviceList").addItem(
+            new sap.m.ObjectListItem (oView.createId("loading"), {        
+                title: "Loading Devices...",
+                type: "Active",
+                attributes : [],
+            })
+        );
+        
+        IomyRe.common.RefreshCoreVariables({
+            onSuccess : function () {
+                oController.BuildDeviceListUI();
+                oController.RefreshAjaxDataForUI();
+            }
+        });
+    },
     
     BuildDeviceListUI : function () {
         var oController     = this;
@@ -255,8 +266,8 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "Blue",
-                                numberUnit: "hue",
+                                number: "",
+                                numberUnit: "Current Colour",
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
                                         text: "link",
@@ -301,8 +312,8 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "Blue",
-                                numberUnit: "hue",
+                                number: "",
+                                numberUnit: "Current Colour",
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
                                         text: "link",
@@ -679,6 +690,34 @@ sap.ui.controller("pages.staging.Device", {
                         };
                     }
                 }
+                
+//                if (IomyRe.devices.philipshue !== undefined) {
+                    //--------------------------------------------------------//
+                    // For motion sensors, create functions to display
+                    // information on the device entry.
+                    //--------------------------------------------------------//
+                    if (aDevice.DeviceTypeId == IomyRe.devices.philipshue.ThingTypeId ||
+                        aDevice.DeviceTypeId == IomyRe.devices.csrmesh.ThingTypeId)
+                    {
+                        mTaskListSettings.onSuccess = function (sHexString) {
+                            oView.byId(sPrefix).setNumber("#"+sHexString);
+                            
+                            //-- Update the Last Ajax Request Date --//
+                            oController.dLastAjaxUpdate    = new Date();
+                            //-- Recursively check for more Tasks --//
+                            oController.RecursiveLoadAjaxData();
+                        };
+                        
+                        mTaskListSettings.onFail = function (sErrMessage) {
+                            $.sap.log.error(sErrMessage);
+                            
+                            oView.byId(sPrefix).setNumber("N/A");
+                            
+                            //-- Recursively check for more Tasks --//
+                            oController.RecursiveLoadAjaxData();
+                        };
+                    }
+//                }
                 
                 //-- Add the Tasks to populate the UI --//
                 //console.log(JSON.stringify(aDevice));
