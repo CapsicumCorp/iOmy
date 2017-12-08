@@ -46,7 +46,7 @@ sap.ui.jsview("pages.staging.Room", {
 		var oView = this;
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
-			title: "Room List",
+			title: "Rooms",
 			header : IomyRe.widgets.getToolPageHeader( oController ),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
 			mainContents: [ 
@@ -55,7 +55,7 @@ sap.ui.jsview("pages.staging.Room", {
 					height: "100%",
 					vertical : true,
 					content : [
-						IomyRe.widgets.DeviceToolbar(oController, "Room List"),
+						IomyRe.widgets.DeviceToolbar(oController, "Rooms"),
 						new sap.m.List (oView.createId("RoomList"), {
 							mode: sap.m.ListMode.None,
 							items: []

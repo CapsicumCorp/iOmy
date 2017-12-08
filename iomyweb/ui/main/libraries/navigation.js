@@ -162,6 +162,12 @@ $.extend( IomyRe.navigation, {
 						text: "Edit Room",
 						type: sap.m.ButtonType.Transparent,
 						press : function () {
+                            if (oApp.getCurrentPage().getId() === "pRoomList") {
+                                oApp.getCurrentPage().getController().bEditing = true;
+                                oApp.getCurrentPage().getController().IndicateWhetherInEditModeOrNot();
+                                
+                            }
+                            
 							IomyRe.common.NavigationChangePage( "pRoomList" ,  {"bEditing": true} , true);
 						}
 					}),

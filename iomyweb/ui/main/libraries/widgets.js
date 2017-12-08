@@ -197,7 +197,13 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://idea-wall",
 			text: "Rooms",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pRoomList" , {bEditing: false} , true);
+				if (oApp.getCurrentPage().getId() === "pRoomList") {
+                    oApp.getCurrentPage().getController().bEditing = false;
+                    oApp.getCurrentPage().getController().IndicateWhetherInEditModeOrNot();
+
+                }
+                
+                IomyRe.common.NavigationChangePage( "pRoomList" , {bEditing: false} , true);
 			}
 		});
 		

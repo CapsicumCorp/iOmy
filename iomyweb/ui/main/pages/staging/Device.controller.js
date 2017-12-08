@@ -138,11 +138,16 @@ sap.ui.controller("pages.staging.Device", {
         
     },
     
+    /**
+     * Changes the title of the page to indicate whether the list is to be used
+     * for accessing or editing devices.
+     */
     IndicateWhetherInEditModeOrNot : function () {
         var oController = this;
         var oView       = this.getView();
         var sTitle      = oView.byId("ToolbarTitle").getText();
         
+        //-- Either prefix "Edit " or remove it --//
         if (oController.bEditing) {
             oView.byId("ToolbarTitle").setText( "Edit " + sTitle );
         } else {

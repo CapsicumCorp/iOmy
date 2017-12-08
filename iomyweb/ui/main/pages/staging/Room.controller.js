@@ -58,14 +58,15 @@ sap.ui.controller("pages.staging.Room", {
                     return false;
                 }
                 
+                //-- Reset the title text. --//
+                oView.byId("ToolbarTitle").setText("Rooms");
+                
                 //-- If check to determinate the destination after selecting a room --//
                 try {
                     if (oController.bEditing === false) {
-                        oController.sPageId = "pDevice";
                         oController.mPageData = {};
                         
                     } else if(oController.bEditing === true) {
-                        oController.sPageId = "pRoomForm";
                         oController.mPageData = {
                             bEditing : oController.bEditing
                         };
@@ -76,6 +77,9 @@ sap.ui.controller("pages.staging.Room", {
                     $.sap.log.error("onBeforeShow: bEditing Critcal Error:"+e1.message);
                     return false;
                 }
+                
+                oController.IndicateWhetherInEditModeOrNot();
+                
                 //-- Defines the Device Type --//
                 IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
@@ -84,6 +88,26 @@ sap.ui.controller("pages.staging.Room", {
         });
             
         
+    },
+    
+    /**
+     * Changes the title of the page to indicate whether the list is to be used
+     * for accessing or editing devices.
+     */
+    IndicateWhetherInEditModeOrNot : function () {
+        var oController = this;
+        var oView       = this.getView();
+        var sTitle      = oView.byId("ToolbarTitle").getText();
+        
+        //-- Either prefix "Edit " or remove it --//
+        if (oController.bEditing) {
+            oView.byId("ToolbarTitle").setText( "Edit " + sTitle );
+        } else {
+            if (sTitle.indexOf("Edit ") === 0) {
+                sTitle = sTitle.replace("Edit ", "");
+                oView.byId("ToolbarTitle").setText(sTitle);
+            }
+        }
     },
 
     BuildRoomListUI : function () {
@@ -169,19 +193,23 @@ sap.ui.controller("pages.staging.Room", {
                                 })
                             ],
                             press : function () {
-                                var mPageDataTemp = oController.mPageData;
+                                var mPageDataTemp = {};
                                 var bIsUnassigned = bRoomIsUnassigned;
+                                
                                 mPageDataTemp.RoomId = mRoom.RoomId;
                                 mPageDataTemp.PremiseId = mRoom.PremiseId;
                                 
                                 if (oController.bEditing && !bIsUnassigned) {
                                     // The user can edit any room except the Unassigned "room".
-                                    IomyRe.common.NavigationChangePage( oController.sPageId , mPageDataTemp , false);
+                                    
+                                    mPageDataTemp.bEditing = true;
+                                    IomyRe.common.NavigationChangePage( "pRoomForm" , mPageDataTemp , false);
                                     
                                 } else if (!oController.bEditing) {
                                     // Otherwise, the user won't be looking to edit, so allow the user access to Unassigned.
-                                    IomyRe.common.NavigationChangePage( oController.sPageId , mPageDataTemp , false);
+                                    IomyRe.common.NavigationChangePage( "pDevice" , mPageDataTemp, false);
                                 }
+                                
                             }
                         })
                     );
