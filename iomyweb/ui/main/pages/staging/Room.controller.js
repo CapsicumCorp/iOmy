@@ -99,14 +99,15 @@ sap.ui.controller("pages.staging.Room", {
         var oView       = this.getView();
         var sTitle      = oView.byId("ToolbarTitle").getText();
         
-        //-- Either prefix "Edit " or remove it --//
+        //-- Remove the "Edit " prefix --//
+        if (sTitle.indexOf("Edit ") === 0) {
+            sTitle = sTitle.replace("Edit ", "");
+            oView.byId("ToolbarTitle").setText(sTitle);
+        }
+        
+        //-- If we're editing add the prefix "Edit ". --//
         if (oController.bEditing) {
             oView.byId("ToolbarTitle").setText( "Edit " + sTitle );
-        } else {
-            if (sTitle.indexOf("Edit ") === 0) {
-                sTitle = sTitle.replace("Edit ", "");
-                oView.byId("ToolbarTitle").setText(sTitle);
-            }
         }
     },
 
