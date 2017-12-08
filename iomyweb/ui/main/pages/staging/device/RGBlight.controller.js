@@ -128,7 +128,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
 			} else if (mThing.TypeId == IomyRe.devices.csrmesh.ThingTypeId) {
 				oView.byId("RGB_Cont").addContent(
                     IomyRe.widgets.CSRbutton(oController, function (oEvent) {
-                        var oSrc = oView.byId("WhiteLight_Cont");
+                        var oSrc = oView.byId("ButtonWhiteLight");
                         oSrc.setEnabled(false);
                         
                         IomyRe.devices.csrmesh.turnOnWhiteLight({
@@ -149,7 +149,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                     })
                 );
             
-                oView.byId("WhiteLight_Cont").setEnabled(false);
+                oView.byId("ButtonWhiteLight").setEnabled(false);
 			}		
 		} catch(e1) {
 			$.sap.log.error("RGBUiDraw: Critcal Error."+e1.message);
@@ -250,6 +250,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
             }));
             
             oController.RGBUiDraw();
+            oView.byId("ButtonWhiteLight").setEnabled(true);
         }
     },
     
@@ -284,8 +285,8 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                     
                     oView.byId("ViewSwitchButton").setEnabled(true);
                     
-                    if (oView.byId("WhiteLight_Cont") !== undefined) {
-                        oView.byId("WhiteLight_Cont").setEnabled(true);
+                    if (oView.byId("ButtonWhiteLight") !== undefined) {
+                        oView.byId("ButtonWhiteLight").setEnabled(true);
                     }
                 },
 

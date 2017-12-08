@@ -281,7 +281,7 @@ $.extend( IomyRe.widgets, {
 		//----------------------------------------------------//
 		//-- 2.0 - Create the Hbox Content                  --//
 		//----------------------------------------------------//
-		oWhiteLight = new sap.m.Button ({
+		oWhiteLight = new sap.m.Button (oView.createId("ButtonWhiteLight"),{
 			text: "White Light",
             press : fnPress
 		});
