@@ -2674,7 +2674,14 @@ $.extend(IomyRe.common,{
 //        console.log(sap.ui.Device.system.phone);
 //        console.log(sap.ui.Device.system.tablet);
         if (oApp.getCurrentPage().byId("toolPage") !== undefined) {
-            if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === true && sap.ui.Device.system.phone) {
+            if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === true &&
+                sap.ui.Device.system.phone) 
+            {
+                IomyRe.navigation.onSideNavButtonPress(null, oApp.getCurrentPage());
+                
+            } else if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === false &&
+                sap.ui.Device.system.desktop && oApp.getCurrentPage().getId() !== sPageName )
+            {
                 IomyRe.navigation.onSideNavButtonPress(null, oApp.getCurrentPage());
             }
         }
