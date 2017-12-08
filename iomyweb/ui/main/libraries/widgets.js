@@ -179,9 +179,9 @@ $.extend( IomyRe.widgets, {
                     oApp.getCurrentPage().getController().bEditing = false;
                     oApp.getCurrentPage().getController().IndicateWhetherInEditModeOrNot();
 
-                } //else {
-                    IomyRe.common.NavigationChangePage( "pDevice" , {} , true);
-                //}
+                }
+                
+                IomyRe.common.NavigationChangePage( "pDevice" , {} , true);
 			}
 		});
 		
@@ -195,7 +195,7 @@ $.extend( IomyRe.widgets, {
 		
 		oNavRoom = new sap.tnt.NavigationListItem ({
 			icon: "sap-icon://idea-wall",
-			text: "Room",
+			text: "Rooms",
 			select : function () {
 				IomyRe.common.NavigationChangePage( "pRoomList" , {bEditing: false} , true);
 			}
@@ -354,7 +354,7 @@ $.extend( IomyRe.widgets, {
                         new sap.ui.layout.form.FormElement(oView.createId("ColourBoxCont"), {
                             label : "",
                             fields: [
-                                new sap.ui.unified.ColorPicker (oView.createId("CPicker"), mSettings).addStyleClass("ElementChildCenter PadTop2d0Rem")
+                                new sap.ui.unified.ColorPicker (oView.createId("CPicker"), mSettings).addStyleClass("LightBulbColourPicker ElementChildCenter PadTop2d0Rem")
                             ]
                         })
                     ]
@@ -591,7 +591,7 @@ $.extend( IomyRe.widgets, {
                                         items : [
                                             new sap.m.Image(oView.createId("ColourBox"), {
                                                 densityAware : false,
-                                                src : IomyRe.apiphp.APILocation("colorbox")+"?Mode=HSL&H="+iCurrentHue+"&S="+iCurrentSaturation+"&L="+Math.floor(iCurrentBrightness)
+                                                src : IomyRe.apiphp.APILocation("colorbox")+"?Mode=HSL&H="+iCurrentHue+"&S="+iCurrentSaturation+"&L="+Math.floor(iCurrentBrightness / 2)
                                             }).addStyleClass("width80px height80px HorizontalCenter")
                                         ]
                                     })

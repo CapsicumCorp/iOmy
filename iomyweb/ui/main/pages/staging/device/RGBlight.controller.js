@@ -82,10 +82,6 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var oController = this;
         var oView       = this.getView();
         
-        console.log("H:"+iHue);
-        console.log("S:"+iSat);
-        console.log("L:"+iBright);
-        
         oView.byId("ColourBox").setSrc(IomyRe.apiphp.APILocation("colorbox")+"?Mode=HSL&H="+iHue+"&S="+iSat+"&L="+Math.floor(iBright/2));
     },
     
@@ -132,11 +128,28 @@ sap.ui.controller("pages.staging.device.RGBlight", {
 			} else if (mThing.TypeId == IomyRe.devices.csrmesh.ThingTypeId) {
 				oView.byId("RGB_Cont").addContent(
                     IomyRe.widgets.CSRbutton(oController, function (oEvent) {
+                        var oSrc = oView.byId("WhiteLight_Cont");
+                        oSrc.setEnabled(false);
+                        
                         IomyRe.devices.csrmesh.turnOnWhiteLight({
-                            thingID : oController.iThingId
+                            thingID : oController.iThingId,
+                            
+                            onSuccess : function () {
+                                oSrc.setEnabled(true);
+                            },
+                            
+                            onFail : function (sErrorMessage) {
+                                IomyRe.common.showError(sErrorMessage, "Failed to set 'White Light'",
+                                    function () {
+                                        oSrc.setEnabled(true);
+                                    }
+                                );
+                            }
                         });
                     })
                 );
+            
+                oView.byId("WhiteLight_Cont").setEnabled(false);
 			}		
 		} catch(e1) {
 			$.sap.log.error("RGBUiDraw: Critcal Error."+e1.message);
@@ -165,9 +178,9 @@ sap.ui.controller("pages.staging.device.RGBlight", {
             
             oContainer.addContent(
                 IomyRe.widgets.LightBulbControlsContainer(oController, {
-                    hue             : 0,//mSliderValues.hue,
-                    saturation      : 0,//mSliderValues.saturation,
-                    brightness      : 0,//mSliderValues.light * 2,
+                    hue             : 180,//mSliderValues.hue,
+                    saturation      : 100,//mSliderValues.saturation,
+                    brightness      : 100,//mSliderValues.light * 2,
                     
                     advancedViewPress : function () {
                         oView.byId("ViewSwitchButton").setEnabled(false);
@@ -248,90 +261,17 @@ sap.ui.controller("pages.staging.device.RGBlight", {
     InitialDeviceInfoLoad : function () {
         var oController = this;
         var oView       = this.getView();
-        //--------------------------------------------------------------------//
-        // Acquire the thing's IOs and construct the query strings.
-        //--------------------------------------------------------------------//
-        var mIOs        = IomyRe.common.ThingList["_"+this.iThingId].IO;
-        var aIOFilter   = [];
         
         if (oView.byId("ViewSwitchButton") !== undefined) {
             oView.byId("ViewSwitchButton").setEnabled(false);
         }
         
         try {
-            $.each(mIOs, function (sI, aIO) {
-                if (sI !== undefined && sI !== null && aIO !== undefined && aIO !== null) {
-                    aIOFilter.push("IO_PK eq "+aIO.Id);
-                }
-            });
             
-            IomyRe.apiodata.AjaxRequest({
-                Url : IomyRe.apiodata.ODataLocation("dataint"),
-                Columns : ["CALCEDVALUE","UTS","RSTYPE_PK","IO_PK"],
-                WhereClause : [
-                    "THING_PK eq "+oController.iThingId,
-                    "("+aIOFilter.join(" or ")+")",
-                ],
-                OrderByClause : ["UTS desc"],
-                Limit : 3,
-                RetryLimit : 5,
-                Retries : 0,
-                format : 'json',
+            IomyRe.devices.loadLightBulbInformation({
+                thingID : oController.iThingId,
 
-                onSuccess : function (response, data) {
-                    var iHue        = null;
-                    var iSaturation = null;
-                    var iLight      = null;
-                    
-                    for (var i = 0; i < data.length; i++) {
-                        //console.log(JSON.stringify(data));
-                        //----------------------------------------------------//
-                        // If we're grabbing the HUE value
-                        //----------------------------------------------------//
-                        if (data[i].RSTYPE_PK === 3901 && iHue === null) {
-                            iHue = Math.round(data[i].CALCEDVALUE / oController.fHueConversionRate);
-                        }
-                        
-                        //----------------------------------------------------//
-                        // If we're grabbing the SATURATION value
-                        //----------------------------------------------------//
-                        if (data[i].RSTYPE_PK === 3902 && iSaturation === null) {
-                            iSaturation = Math.round(data[i].CALCEDVALUE / oController.fSaturationConversionRate);
-                        }
-                        
-                        //----------------------------------------------------//
-                        // If we're grabbing the BRIGHTNESS value
-                        //----------------------------------------------------//
-                        if (data[i].RSTYPE_PK === 3903 && iLight === null) {
-                            iLight = Math.round(data[i].CALCEDVALUE / oController.fLightConversionRate);
-                        }
-                        
-                        //----------------------------------------------------//
-                        // If we already have what we need, we can finish the
-                        // loop.
-                        //----------------------------------------------------//
-                        if (iHue !== null && iSaturation !== null && iLight !== null) {
-                            break;
-                        } else {
-                            //-----------------------------------------------------//
-                            // Otherwise, if we've finished processing the data and
-                            // we don't have all of it, then increase the limit and
-                            // run the request again.
-                            //-----------------------------------------------------//
-                            if (i === data.length - 1) {
-                                this.Limit += 3;
-                                this.Retries++;
-                                
-                                if (this.Retries < this.RetryLimit) {
-                                    IomyRe.apiodata.AjaxRequest(this);
-                                }
-                            }
-                        }
-                    }
-                    
-//                    console.log("H:"+iHue);
-//                    console.log("S:"+iSaturation);
-//                    console.log("L:"+iLight);
+                onSuccess : function (iHue, iSaturation, iLight) {
                     //--------------------------------------------------------//
                     // Set the colour on the page
                     //--------------------------------------------------------//
@@ -343,17 +283,21 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                     }
                     
                     oView.byId("ViewSwitchButton").setEnabled(true);
+                    
+                    if (oView.byId("WhiteLight_Cont") !== undefined) {
+                        oView.byId("WhiteLight_Cont").setEnabled(true);
+                    }
                 },
 
-                onFail : function (response) {
+                onFail : function (sErrorMessage) {
                     
-                    IomyRe.common.showError(response.responseText, "Error loading information",
+                    IomyRe.common.showError(sErrorMessage, "Error loading information",
                         function () {
                             oView.byId("ViewSwitchButton").setEnabled(true);
                         }
                     );
                     
-                    jQuery.sap.log.error("Error Code 9300: There was a fatal error loading current device information: "+JSON.stringify(response));
+                    jQuery.sap.log.error("Error Code 9300: There was a fatal error loading current device information: "+sErrorMessage);
                 }
             });
         } catch (e) {
@@ -390,10 +334,6 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var iSat            = Math.floor(mParameters.s * this.fSaturationConversionRate);
         var iLight          = Math.floor(mParameters.v * this.fLightConversionRate);
         var iDeviceType     = IomyRe.common.ThingList["_"+this.iThingId].TypeId;
-        
-//        console.log("H:"+iHue);
-//        console.log("S:"+iSat);
-//        console.log("L:"+iLight);
         
         var mRequestData    = {
             "method" : "POST",

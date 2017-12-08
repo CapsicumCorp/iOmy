@@ -110,7 +110,11 @@ $.extend(IomyRe.devices.csrmesh,{
             },
             
             "onSuccess" : function (type, data) {
-                fnSuccess(type, data);
+                if (data.Error !== true) {
+                    fnSuccess();
+                } else {
+                    fnFail(data.ErrMesg);
+                }
             },
             
             "onFail" : function (response) {

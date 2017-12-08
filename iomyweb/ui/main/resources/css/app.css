@@ -202,3 +202,10 @@ Copyright: Capsicum Corporation 2015, 2016, 2017
 .LightColourSlider > .sapMSliderInner > .sapMSliderHandle {
 	top: -0.71rem;
 }
+
+/*=======================================================*/
+/* Light bulb Colour Picker (Hiding the Opacity Slider)
+/*=======================================================*/
+.LightBulbColourPicker > .sapUnifiedColorPicker > div > .sapUiColorPicker-ColorPickerAlphaSlider {
+    display: none;
+}

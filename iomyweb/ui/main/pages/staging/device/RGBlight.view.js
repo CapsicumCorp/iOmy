@@ -50,32 +50,40 @@ sap.ui.jsview("pages.staging.device.RGBlight", {
 			header : IomyRe.widgets.getToolPageHeader( oController ),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
 			mainContents : [
-				new sap.m.ScrollContainer (oView.createId("RGB_Cont"), {
+				new sap.m.ScrollContainer ({
                     width: "100%",
                     height: "100%",
                     vertical : true,
                     content : [
                         IomyRe.widgets.DeviceToolbar(oController, ""),
-                        IomyRe.widgets.LightBulbControlsContainer(oController, {
-                            hue             : 0,
-                            saturation      : 0,
-                            brightness      : 0,
+                        
+                        new sap.m.ScrollContainer(oView.createId("RGB_Cont"), {
+                            width: "100%",
+                            height: "100%",
+                            vertical : true,
+                            content : [
+                                IomyRe.widgets.LightBulbControlsContainer(oController, {
+                                    hue             : 180,
+                                    saturation      : 100,
+                                    brightness      : 100,
 
-                            advancedViewPress : function () {
-                                oController.SwitchToAdvancedView();
-                            },
+                                    advancedViewPress : function () {
+                                        oController.SwitchToAdvancedView();
+                                    },
 
-                            change : function () {
-                                oController.ChangeLightColour();
-                            },
+                                    change : function () {
+                                        oController.ChangeLightColour();
+                                    },
 
-                            liveChange : function () {
-                                var iHue = oView.byId("hueSlider").getValue();
-                                var iSat = oView.byId("satSlider").getValue();
-                                var iBright = oView.byId("briSlider").getValue();
+                                    liveChange : function () {
+                                        var iHue = oView.byId("hueSlider").getValue();
+                                        var iSat = oView.byId("satSlider").getValue();
+                                        var iBright = oView.byId("briSlider").getValue();
 
-                                oController.ChangeColourInBox(iHue, iSat, iBright);
-                            }
+                                        oController.ChangeColourInBox(iHue, iSat, iBright);
+                                    }
+                                })
+                            ]
                         })
                     ]
                 }),
