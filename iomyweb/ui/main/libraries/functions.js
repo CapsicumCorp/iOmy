@@ -123,16 +123,44 @@ $.extend(IomyRe.functions, {
         return aaDeviceList;
     },
     
+    extractRGBValuesFromString : function (sColourString) {
+        var aFigures;
+        
+        //--------------------------------------------------------------------//
+        // First check that the colour string is given.
+        //--------------------------------------------------------------------//
+        if (!sColourString) {
+            throw new MissingArgumentException("RGB Colour String must be specified!");
+        }
+        
+        //--------------------------------------------------------------------//
+        // Next begin removing the unwanted characters "rgb(" and ")"
+        //--------------------------------------------------------------------//
+        sColourString = sColourString.replace("rgb(", "");
+        sColourString = sColourString.replace(")", "");
+        
+        //--------------------------------------------------------------------//
+        // Split the figures into three in an array and fetch the values in
+        // decimal format, that is, divided by 255.
+        //--------------------------------------------------------------------//
+        aFigures = sColourString.split(",");
+        
+        return {
+            red     : aFigures[0],
+            green   : aFigures[1],
+            blue    : aFigures[2]
+        };
+    },
+    
     /**
      * Extracts the HSL values out of a RGB colour string.
      * 
-     * Used this guide for the forumla: https://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
+     * Based on this code: http://rgb2hsl.nichabi.com/javascript-function.php
      * 
      * @param {type} sColorString       RGB colour string (e.g. 'rgb(120,33,10)')
      * @returns {object}                Map containing the HSL values.
      */
-    convertRGBToHSL : function (sColorString) {
-        var aFigures;
+    convertRGBToHSL : function (iRed, iGreen, iBlue) {
         var fRed;
         var fGreen;
         var fBlue;
@@ -144,30 +172,9 @@ $.extend(IomyRe.functions, {
         var iSat;
         var iLight;
         
-        //console.log(sColorString);
-        
-        //--------------------------------------------------------------------//
-        // First check that the colour string is given.
-        //--------------------------------------------------------------------//
-        if (!sColorString) {
-            throw new MissingArgumentException("RGB Colour String must be specified!");
-        }
-        
-        //--------------------------------------------------------------------//
-        // Next begin removing the unwanted characters "rgb(" and ")"
-        //--------------------------------------------------------------------//
-        sColorString = sColorString.replace("rgb(", "");
-        sColorString = sColorString.replace(")", "");
-        
-        //--------------------------------------------------------------------//
-        // Split the figures into three in an array and fetch the values in
-        // decimal format, that is, divided by 255.
-        //--------------------------------------------------------------------//
-        aFigures = sColorString.split(",");
-        
-        fRed    = aFigures[0] / 255;
-        fGreen  = aFigures[1] / 255;
-        fBlue   = aFigures[2] / 255;
+        fRed    = iRed / 255;
+        fGreen  = iGreen / 255;
+        fBlue   = iBlue / 255;
         
         //--------------------------------------------------------------------//
         // Determine which of the three numbers is the minimum and maximum.
@@ -185,29 +192,24 @@ $.extend(IomyRe.functions, {
         //--------------------------------------------------------------------//
         // Find the saturation
         //--------------------------------------------------------------------//
-        if (iLight <= 0.5) {
-            iSat = ((fDifference / (fMax + fMin)));
-            
+        if (fMax === fMin) {
+            iHue = iSat = 0;
         } else {
-            iSat = ((fDifference / (2 - fMax - fMin)));
-            
+            fDifference = fMax - fMin;
+            iSat = iLight > 0.5 ? fDifference / (2 - fMax - fMin) : fDifference / (fMax + fMin);
+            switch (fMax) {
+                case fRed:
+                    iHue = (fGreen - fBlue) / fDifference + (fGreen < fBlue ? 6 : 0);
+                    break;
+                case fGreen:
+                    iHue = (fBlue - fRed) / fDifference + 2;
+                    break;
+                case fBlue:
+                    iHue = (fRed - fGreen) / fDifference + 4;
+                    break;
+            }
+            iHue /= 6;
         }
-        
-        //--------------------------------------------------------------------//
-        // Find the hue
-        //--------------------------------------------------------------------//
-        if (fMax === fRed) {
-            iHue = (fGreen - fBlue) / fDifference;
-            
-        } else if (fMax === fGreen) {
-            iHue = 2 + (fBlue - fRed) / fDifference;
-            
-        } else if (fMax === fBlue) {
-            iHue = 4 + (fRed - fGreen) / fDifference;
-            
-        }
-        
-        iHue /= 6;
         
         //--------------------------------------------------------------------//
         // Round off the figures.
@@ -250,13 +252,25 @@ $.extend(IomyRe.functions, {
         var iBlue;
         var fM;
         var mValues;
+        
+        if (!isFinite(iHue)) {
+            iHue = 0;
+        }
+        
+        if (!isFinite(iSat)) {
+            iSat = 0;
+        }
+        
+        if (!isFinite(iLight)) {
+            iLight = 0;
+        }
 
         //--------------------------------------------------------//
         // Process the Hue for calculation.
         //--------------------------------------------------------//
         iHue /= 60;
         if (iHue < 0) {
-            iHue = 6 - (-iHue % 6);
+            iHue = 6 - ((0-iHue) % 6);
         }
         iHue = iHue % 6;
         
@@ -382,19 +396,24 @@ $.extend(IomyRe.functions, {
                 "_15" : "F"
             };
             
-            while (iResult > 0) {
-                vRemainder  = iResult % 16;
-                iResult     = (iResult - vRemainder) / 16;
-
-                if (vRemainder > 9) {
-                    vRemainder = mHexLetters["_"+vRemainder];
-                }
+            if (iResult === 0) {
+                sHexString += "00";
                 
-                sCharString = vRemainder + sCharString;
-            }
-            
-            if (sCharString.length < 2) {
-                sCharString = '0' + sCharString;
+            } else {
+                while (iResult > 0) {
+                    vRemainder  = iResult % 16;
+                    iResult     = (iResult - vRemainder) / 16;
+
+                    if (vRemainder > 9) {
+                        vRemainder = mHexLetters["_"+vRemainder];
+                    }
+
+                    sCharString = vRemainder + sCharString;
+                }
+
+                if (sCharString.length < 2) {
+                    sCharString = '0' + sCharString;
+                }
             }
             
             sHexString += sCharString;

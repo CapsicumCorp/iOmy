@@ -139,7 +139,7 @@ $.extend(IomyRe.devices,{
                         IomyRe.common.ThingList["_"+iThingId].Status = aAjaxData.ThingStatus;
                     }
 
-                    fnSuccess(IomyRe.common.ThingList["_"+iThingId].Status);
+                    fnSuccess(aAjaxData.ThingStatus);
                 } else {
                     fnFail(aAjaxData.ErrMesg);
                 }
@@ -187,7 +187,7 @@ $.extend(IomyRe.devices,{
         var me                = this; // Capture the scope of the current controller
         var bError            = false;
         var aErrorMessages    = [];
-        var sUrl            = IomyRe.apiphp.APILocation("link");
+        var sUrl              = IomyRe.apiphp.APILocation("link");
         var iLinkId;
         var iRoomId;
         var mDeviceIDInfo;
@@ -915,7 +915,8 @@ $.extend(IomyRe.devices,{
                 thingID : iThingId,
 
                 onSuccess : function (iHue, iSaturation, iLight) {
-                    var sHexString = IomyRe.functions.convertHSLToHex(iHue, iSaturation, iLight);
+                    
+                    var sHexString = IomyRe.functions.convertHSLToHex(iHue, iSaturation, Math.floor(iLight / 2));
                     
                     fnSuccess(sHexString);
                 },
@@ -1091,7 +1092,7 @@ $.extend(IomyRe.devices,{
                                 
                                 if (this.Retries < this.RetryLimit) {
                                     IomyRe.apiodata.AjaxRequest(this);
-                                    return;
+                                    //return;
                                 } else {
                                     fnFail("Failed to find all of the data for "+mThing.DisplayName+".");
                                 }
