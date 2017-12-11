@@ -94,10 +94,10 @@ try {
 				$aResult = GetCurrentUserDetails();
 				
 				//-- Debugging --//
-				var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
-				echo "\n";
-				var_dump($aResult);
-				echo "\n";
+				//var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
+				//echo "\n";
+				//var_dump($aResult);
+				//echo "\n";
 					
 				//----------------------------//
 				//-- Check for errors       --//
