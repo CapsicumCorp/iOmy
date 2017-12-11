@@ -511,7 +511,7 @@ function dbGetCurrentUserDetails() {
 	if($bError===false) {
 		$aReturn = array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
-		$aReturn = array( "Error"=>true, "ErrMesg"=>"UserAddressInfo: ".$sErrMesg );
+		$aReturn = array( "Error"=>true, "ErrMesg"=>"UserDetails: ".$sErrMesg );
 	}
 	return $aReturn;
 }
