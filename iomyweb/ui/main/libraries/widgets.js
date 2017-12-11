@@ -178,7 +178,7 @@ $.extend( IomyRe.widgets, {
                 if (oApp.getCurrentPage().getId() === "pDevice") {
                     oApp.getCurrentPage().getController().bEditing = false;
                     oApp.getCurrentPage().getController().IndicateWhetherInEditModeOrNot();
-
+                    
                 }
                 
                 IomyRe.common.NavigationChangePage( "pDevice" , {} , true);
@@ -392,6 +392,8 @@ $.extend( IomyRe.widgets, {
             fnSaturationLiveChange,
             fnBrightnessLiveChange;
         
+        var fnSwitchChange;
+        
         var bEnabled;
         
         var fnAppendError = function (sErrMessage) {
@@ -411,6 +413,16 @@ $.extend( IomyRe.widgets, {
                     bEnabled = mSettings.enabled;
                 } else {
                     bEnabled = true;
+                }
+                
+                //------------------------------------------------------------//
+                // Switch button event
+                //------------------------------------------------------------//
+                if (mSettings.switchChange !== undefined && mSettings.switchChange !== null) {
+                    fnSwitchChange = mSettings.switchChange;
+                    
+                } else {
+                    fnSwitchChange = function () {};
                 }
                 
                 //------------------------------------------------------------//
@@ -545,6 +557,7 @@ $.extend( IomyRe.widgets, {
                 }
 
             } else {
+                fnAppendError("ID of the light bulb.should be given for the switch functionality.");
                 fnAppendError("Current hue must be specified.");
                 fnAppendError("Current saturation must be specified.");
                 fnAppendError("Current brightness must be specified.");
@@ -555,10 +568,6 @@ $.extend( IomyRe.widgets, {
             $.sap.log.error("Error processing settings: "+e.name+": "+e.message);
             throw e;
         }
-        
-//        console.log(iCurrentHue);
-//        console.log(iCurrentSaturation);
-//        console.log(iCurrentBrightness);
 		
         try {
             oForm = new sap.ui.layout.form.Form( oView.createId("DevTypeBlock_Form"),{
@@ -593,14 +602,20 @@ $.extend( IomyRe.widgets, {
                             new sap.ui.layout.form.FormElement(oView.createId("ColourBoxCont"), {
                                 label : "",
                                 fields: [
-                                    new sap.m.VBox({
+                                    new sap.m.HBox({
+                                        width : "",
                                         items : [
                                             new sap.m.Image(oView.createId("ColourBox"), {
                                                 densityAware : false,
                                                 src : IomyRe.apiphp.APILocation("colorbox")+"?Mode=HSL&H="+iCurrentHue+"&S="+iCurrentSaturation+"&L="+Math.floor(iCurrentBrightness / 2)
-                                            }).addStyleClass("width80px height80px HorizontalCenter")
+                                            }).addStyleClass("width80px height80px"),
+
+                                            new sap.m.Switch (oView.createId("LightSwitch"), {
+                                                text: "",
+                                                change: fnSwitchChange
+                                            }).addStyleClass("MarLeft15px MarTop14px")
                                         ]
-                                    })
+                                    }).addStyleClass("MarLeft17px")
                                 ]
                             }),
                             new sap.ui.layout.form.FormElement({

@@ -70,6 +70,10 @@ sap.ui.jsview("pages.staging.device.RGBlight", {
                                     advancedViewPress : function () {
                                         oController.SwitchToAdvancedView();
                                     },
+                                    
+                                    switchChange : function () {
+                                        oController.RunLightSwitch();
+                                    },
 
                                     change : function () {
                                         oController.ChangeLightColour();

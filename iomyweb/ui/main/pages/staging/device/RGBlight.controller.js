@@ -93,10 +93,19 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         oView.byId("briSlider").setValue(iBright);
     },
 	
+    ToggleSliders : function (bEnabled) {
+        var oView = this.getView();
+        
+        oView.byId("hueSlider").setEnabled(bEnabled);
+        oView.byId("satSlider").setEnabled(bEnabled);
+        oView.byId("briSlider").setEnabled(bEnabled);
+    },
+    
 	//-- Sets the RGB Color parameters based on data from the database --//
 	RGBInit: function (iHue, iSaturation, iLight) {
         var oController     = this;
 		var oView           = this.getView();
+        var iDeviceState    = IomyRe.common.ThingList["_"+oController.iThingId].Status;
         var sColourString;
         
         iHue            = Math.floor(iHue / this.fHueConversionRate);
@@ -106,6 +115,9 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         sColourString   = "hsv("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")";
         
         if (oView.byId("CPicker") !== undefined) {
+            oView.byId("CPicker").setEnabled(iDeviceState == 1);
+            
+            oView.byId("WhiteLight_Cont").setEnabled(iDeviceState == 1);
             oView.byId("CPicker").setColorString(sColourString);
         }
 	},
@@ -121,27 +133,37 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 oView.byId("WhiteLight_Cont").destroy();
             }
             
-            //this.SwitchToSimpleView();
-            
 			if (mThing.TypeId == IomyRe.devices.philipshue.ThingTypeId) {
-				//$.sap.log.error("RGBUiDraw:" +RGBType);
+				
 			} else if (mThing.TypeId == IomyRe.devices.csrmesh.ThingTypeId) {
 				oView.byId("RGB_Cont").addContent(
                     IomyRe.widgets.CSRbutton(oController, function (oEvent) {
                         var oSrc = oView.byId("ButtonWhiteLight");
                         oSrc.setEnabled(false);
                         
+                        if (!oController.bUsingAdvancedUI) {
+                            oController.ToggleSliders(false);
+                        }
+                        
                         IomyRe.devices.csrmesh.turnOnWhiteLight({
                             thingID : oController.iThingId,
                             
                             onSuccess : function () {
                                 oSrc.setEnabled(true);
+                                
+                                if (!oController.bUsingAdvancedUI) {
+                                    oController.ToggleSliders(true);
+                                }
                             },
                             
                             onFail : function (sErrorMessage) {
                                 IomyRe.common.showError(sErrorMessage, "Failed to set 'White Light'",
                                     function () {
                                         oSrc.setEnabled(true);
+                                        
+                                        if (!oController.bUsingAdvancedUI) {
+                                            oController.ToggleSliders(true);
+                                        }
                                     }
                                 );
                             }
@@ -172,19 +194,19 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         if (oController.bUsingAdvancedUI) {
             oController.bUsingAdvancedUI = false;
             
-//            console.log(mSliderValues.hue * this.fHueConversionRate);
-//            console.log(mSliderValues.saturation * this.fSaturationConversionRate);
-//            console.log(mSliderValues.light * this.fLightConversionRate);
-            
             oContainer.addContent(
                 IomyRe.widgets.LightBulbControlsContainer(oController, {
-                    hue             : 180,//mSliderValues.hue,
-                    saturation      : 100,//mSliderValues.saturation,
-                    brightness      : 100,//mSliderValues.light * 2,
+                    hue             : 180,
+                    saturation      : 100,
+                    brightness      : 100,
                     
                     advancedViewPress : function () {
                         oView.byId("ViewSwitchButton").setEnabled(false);
                         oController.SwitchToAdvancedView();
+                    },
+                    
+                    switchChange : function () {
+                        oController.RunLightSwitch();
                     },
                     
                     change : function () {
@@ -202,12 +224,6 @@ sap.ui.controller("pages.staging.device.RGBlight", {
             );
         
             oController.RGBUiDraw();
-        
-//            oController.ChangeColourInBox(
-//                oView.byId("hueSlider").getValue(),
-//                oView.byId("satSlider").getValue(),
-//                oView.byId("briSlider").getValue()
-//            );
             
             //-- Load the slider data. --//
             oController.InitialDeviceInfoLoad();
@@ -215,16 +231,12 @@ sap.ui.controller("pages.staging.device.RGBlight", {
     },
     
     SwitchToAdvancedView : function () {
-        var oController = this;
-        var oView       = this.getView();
-        var oContainer  = oView.byId("RGB_Cont");
-        var iHue        = oView.byId("hueSlider").getValue();
-        var iSat        = oView.byId("satSlider").getValue();
-        var iBright     = oView.byId("briSlider").getValue();
-        
-//        console.log(oView.byId("hueSlider").getValue());
-//        console.log(oView.byId("satSlider").getValue());
-//        console.log(oView.byId("briSlider").getValue());
+        var oController     = this;
+        var oView           = this.getView();
+        var oContainer      = oView.byId("RGB_Cont");
+        var iHue            = oView.byId("hueSlider").getValue();
+        var iSat            = oView.byId("satSlider").getValue();
+        var iBright         = oView.byId("briSlider").getValue();
         
         // Clear the simple view.
         oContainer.destroyContent();
@@ -246,11 +258,14 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 
                 change : function (oEvent) {
                     oController.ChangeLightColour(oEvent);
-                },
+                }
             }));
             
             oController.RGBUiDraw();
-            oView.byId("ButtonWhiteLight").setEnabled(true);
+            
+            if (oView.byId("ButtonWhiteLight") !== undefined) {
+                oView.byId("ButtonWhiteLight").setEnabled(true);
+            }
         }
     },
     
@@ -263,9 +278,13 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var oController = this;
         var oView       = this.getView();
         
+        oController.ToggleSliders(false);
+        
         if (oView.byId("ViewSwitchButton") !== undefined) {
             oView.byId("ViewSwitchButton").setEnabled(false);
         }
+        
+        oView.byId("LightSwitch").setEnabled(false);
         
         try {
             
@@ -273,8 +292,10 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 thingID : oController.iThingId,
 
                 onSuccess : function (iHue, iSaturation, iLight) {
+                    var iDeviceState = IomyRe.common.ThingList["_"+oController.iThingId].Status;
+                    
                     //--------------------------------------------------------//
-                    // Set the colour on the page
+                    // Set the colour on the page.
                     //--------------------------------------------------------//
                     if (oController.bUsingAdvancedUI === true) {
                         oController.RGBInit("hsv("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")");
@@ -283,7 +304,19 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                         oController.SetSliderValues(iHue, iSaturation, iLight);
                     }
                     
+                    //--------------------------------------------------------//
+                    // Show the current on/off state on the switch.
+                    //--------------------------------------------------------//
+                    if (iDeviceState == 1) {
+                        oView.byId("LightSwitch").setState(true);
+                        
+                    } else {
+                        oView.byId("LightSwitch").setState(false);
+                    }
+                    
+                    oView.byId("LightSwitch").setEnabled(true);
                     oView.byId("ViewSwitchButton").setEnabled(true);
+                    oController.ToggleSliders(true);
                     
                     if (oView.byId("ButtonWhiteLight") !== undefined) {
                         oView.byId("ButtonWhiteLight").setEnabled(true);
@@ -294,6 +327,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                     
                     IomyRe.common.showError(sErrorMessage, "Error loading information",
                         function () {
+                            oView.byId("LightSwitch").setEnabled(true);
                             oView.byId("ViewSwitchButton").setEnabled(true);
                         }
                     );
@@ -304,6 +338,39 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         } catch (e) {
             jQuery.sap.log.error("There was an error loading the OData service: "+e.message);
         }
+    },
+    
+    RunLightSwitch : function () {
+        var oController = this;
+        var oView       = this.getView();
+        var oSwitch     = oView.byId("LightSwitch");
+        
+        oSwitch.setEnabled(false);
+        
+        IomyRe.devices.RunSwitch({
+            thingID : oController.iThingId,
+
+            onSuccess : function (iNewState) {
+                
+                if (iNewState === 1) {
+                    oSwitch.setState(true);
+                    oController.ChangeLightColour();
+                } else {
+                    oSwitch.setState(false);
+                }
+                
+                oSwitch.setEnabled(true);
+            },
+
+            onFail : function (sErrorMessage) {
+                IomyRe.common.showError(sErrorMessage, "Failed to run the switch",
+                    function () {
+                        oSwitch.setState( !oSwitch.getState() );
+                        oSwitch.setEnabled(true);
+                    }
+                );
+            }
+        });
     },
     
     /**
