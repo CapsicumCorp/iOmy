@@ -127,38 +127,37 @@ sap.ui.controller("pages.staging.user.UserForm", {
 																	
 																},
 																onFail: function() {
-																	
+																	IomyRe.common.showError("Problem refreshing the Model", "Edit Other User Page");
 																}
 															}); //-- END Refresh Model --//
 														},
 														onFail: function() {
-															
+															IomyRe.common.showError("Problem Refreshing User Room Permissions", "Edit Other User Page");
 														}
 													}); //-- END Room Permissions --//
 												},
 												onFail: function() {
-													
+													IomyRe.common.showError("Problem Refreshing User Premise Permissions", "Edit Other User Page");
 												}
 											}); //-- END Premise Permissions --//
 											
-											},
+										},
 										onFail: function() {
-											
+											IomyRe.common.showError("Problem Refreshing Room List", "Edit Other User Page");
 										}
 									}); //-- END Room List --//
 								},
 								onFail: function() {
-									
+									IomyRe.common.showError("Problem Refreshing Premise List", "Edit Other User Page");
 								}
 							}); //-- END Premise List --//
 						},
 						onFail: function() {
-							
+							IomyRe.common.showError("Problem Refreshing User Information", "Edit Other User Page");
 						}
 					}); //-- END User Information --//
 				} catch( e001 ) {
-					
-					
+					IomyRe.common.showError("Critical Error: Problem setting up the \"Edit Other User\" page!", "Edit Other User Page");
 				}
 			}
 		});
@@ -203,6 +202,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 									} catch( e0003 ) {
 										//-- Error with the onSuccess Event --//
 										$.sap.log.error("Critical Error in the RefreshUserInfo onSuccess event on the UserForm page!");
+										
 									}
 								}
 							} else {
@@ -844,7 +844,6 @@ sap.ui.controller("pages.staging.user.UserForm", {
 				//----------------------------------------//
 				return true;
 			}
-		
 		} catch(e1) {
 			$.sap.log.error("UpdateSelectablePremisePerms: Critcal Error:"+e1.message);
 			return false;
@@ -899,6 +898,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 				return true;
 			}
 		} catch(e1) {
+			IomyRe.common.showError("Critical Error: Problem when trying prepare a list of valid room permissions for the desired room", "Edit Other User Page");
 			$.sap.log.error("UpdateSelectableRoomPerms: Critcal Error:"+e1.message);
 			return false;
 		}
@@ -952,7 +952,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 		return true;
 	},
 	
-
+	
 	
 	//========================================================//
 	//== 4.1 - Create UI5 Form Section                      ==//
@@ -1063,6 +1063,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 		
 	},
 	
+	
 	//========================================================//
 	//== 5.2 - Update the Premise Permissions               ==//
 	//========================================================//
@@ -1124,27 +1125,47 @@ sap.ui.controller("pages.staging.user.UserForm", {
 											}); //-- END Refresh Model --//
 										},
 										onFail: function() {
+											//------------------------------------------------//
+											//-- ERROR: User Information                    --//
+											//------------------------------------------------//
+											IomyRe.common.showError("Problem refreshing the User Information after updating the new User Information!", "Edit Other User Page");
 											
 										}
 									}); //-- END Room Permissions --//
 								} catch( e3 ) {
+									//------------------------------------------------//
+									//-- CRITICAL ERROR: Refreshing UserData        --//
+									//------------------------------------------------//
+									IomyRe.common.showError("Critical Error has occurred when refreshing the User Information after updating the new User Information!", "Edit Other User Page");
 									jQuery.sap.log.error("Error with the 'UpdateUserInfoValues' success event that was passed as a parameter in the 'UserForm' controller! "+e3.message);
 								}
 							} else {
-								jQuery.sap.log.error("Error with the 'UpdateUserInfoValues' successful API result in the 'UserForm' controller!");
+								//------------------------------------------------//
+								//-- ERROR: Invalid JSON                        --//
+								//------------------------------------------------//
+
+								IomyRe.common.showError("Problem refreshing the User Information after updating the new User Information! The API did not return valid JSON.", "Edit Other User Page");
 							}
 						} catch( e2 ) {
+							//------------------------------------------------//
+							//-- CRITICAL ERROR: JSON issue                 --//
+							//------------------------------------------------//
+							IomyRe.common.showError("Critical Error has occurred when updating the User Information! Problem understanding the API Success array.", "Edit Other User Page");
 							jQuery.sap.log.error("Error with the 'UpdateUserInfoValues' success in the 'UserForm' controller! "+e2.message);
 						}
 					},
 					onFail: function () {
-						jQuery.sap.log.error("Error with the 'UpdateUserInfoValues' API Request when editing a LandPackage in the 'UserForm' controller!");
+						//------------------------------------------------//
+						//-- ERROR: API ONFAIL Event                    --//
+						//------------------------------------------------//
+						IomyRe.common.showError("Error when updating the User Information! API has returned an error", "Edit Other User Page");
 					}
 				});
 			} else {
 				IomyRe.common.showError( sErrMesg, "Error" );
 			}
 		} catch( e1 ) {
+			
 			jQuery.sap.log.error("Error with'UpdateUserInfoValues' in the 'UserForm' controller! "+e1.message);
 		}
 	},
@@ -1211,21 +1232,42 @@ sap.ui.controller("pages.staging.user.UserForm", {
 											}); //-- END Refresh Model --//
 										},
 										onFail: function() {
-											
+											//------------------------------------------------//
+											//-- ERROR: User Information                    --//
+											//------------------------------------------------//
+											IomyRe.common.showError("Problem refreshing the User Information after updating the new User Address!", "Edit Other User Page");
 										}
 									}); //-- END Room Permissions --//
 								} catch( e3 ) {
+									//------------------------------------------------//
+									//-- CRITICAL ERROR: Refreshing UserData        --//
+									//------------------------------------------------//
+									IomyRe.common.showError("Critical Error has occurred when refreshing the User Information after updating the new User Address!", "Edit Other User Page");
 									jQuery.sap.log.error("Error with the 'UpdateUserAddressValues' success event that was passed as a parameter in the 'UserForm' controller! "+e3.message);
+									
 								}
 							} else {
-								jQuery.sap.log.error("Error with the 'UpdateUserAddressValues' successful API result in the 'UserForm' controller!");
+								//------------------------------------------------//
+								//-- ERROR: Invalid JSON                        --//
+								//------------------------------------------------//
+								IomyRe.common.showError("Problem refreshing the User Information after updating the new User Address! The API did not return valid JSON.", "Edit Other User Page");
+								
 							}
 						} catch( e2 ) {
+							//------------------------------------------------//
+							//-- CRITICAL ERROR: JSON issue                 --//
+							//------------------------------------------------//
+							IomyRe.common.showError("Critical Error has occurred when updating the User Address! Problem understanding the API Success array.", "Edit Other User Page");
 							jQuery.sap.log.error("Error with the 'UpdateUserAddressValues' success in the 'UserForm' controller! "+e2.message);
 						}
 					},
 					onFail: function () {
+						//------------------------------------------------//
+						//-- ERROR: API ONFAIL Event                    --//
+						//------------------------------------------------//
+						IomyRe.common.showError("Error when updating the User Address! API has returned an error", "Edit Other User Page");
 						jQuery.sap.log.error("Error with the 'UpdateUserAddressValues' API Request when editing a LandPackage in the 'UserForm' controller!");
+						
 					}
 				});
 			} else {
@@ -1233,6 +1275,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 			}
 		} catch( e1 ) {
 			jQuery.sap.log.error("Error with the 'UpdateUserAddressValues' in the 'UserForm' controller! "+e1.message);
+			
 		}
 	},
 	
@@ -1273,6 +1316,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 			} else if( iPermLevel>=4 ) {
 				//-- Invalid PermissionLevel --//
 				IomyRe.common.showError("The desired permission level can not be changed", "Error" );
+				
 				
 			} else {
 				//------------------------------------------------//
@@ -1352,24 +1396,34 @@ sap.ui.controller("pages.staging.user.UserForm", {
 											}); //-- END Refresh Model --//
 										},
 										onFail: function() {
-										
+											//------------------------------------------------//
+											//-- ERROR: User Premise Permissions            --//
+											//------------------------------------------------//
+											IomyRe.common.showError( sErrMesg+"Error has occurred when refreshing the Premise Permissions after updating the new User Premise Permissions!", "Edit Other User Page");
 										}
 									}); //-- END Premise Permissions --//
 								}
 							} catch( e3 ) {
+								//------------------------------------------------//
+								//-- CRITICAL ERROR: User Premise Permissions   --//
+								//------------------------------------------------//
 								IomyRe.common.showError( sErrMesg+"Critical Error with the 'UpdatePremisePerms' success in the 'UserForm' controller!", "Error" );
 							}
 						},
 						onFail : function (response) {
+							//------------------------------------------------//
+							//-- ERROR: Updating the User Prem Permissions  --//
+							//------------------------------------------------//
 							IomyRe.common.showError(response.responseText, "Error", function() {} );
 						}
 					});
 				} else {
-					
+					//------------------------------------------------//
+					//-- ERROR: Updating the User Prem Permissions  --//
+					//------------------------------------------------//
+					IomyRe.common.showError("Error when updating the User Premise Permissions! API has returned an error", "Edit Other User Page");
 				}
-				
 			}
-			
 		} catch( e2 ) {
 			jQuery.sap.log.error("Error with the 'UpdatePremisePerms' success in the 'UserForm' controller! "+e2.message);
 		}
@@ -1392,7 +1446,6 @@ sap.ui.controller("pages.staging.user.UserForm", {
 			var iPermStateToggle = 0;
 			var iPermWrite       = 0;
 			
-			
 			//------------------------------------------------//
 			//-- Quick Validation Check                     --//
 			//------------------------------------------------//
@@ -1410,7 +1463,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 				
 			} else {
 				//------------------------------------------------//
-				//-- Convert PermissionLevel                    --//
+				//-- Convert Permission Level                   --//
 				//------------------------------------------------//
 				switch( iPermLevel ) {
 					//-- Full Access --//
@@ -1455,7 +1508,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					onSuccess: function ( sType, mData ) {
 						
 						try {
-							var sErrMesg = "Error editing the Roomm Permissions!\n\n";
+							var sErrMesg = "Error editing the Room Permissions!\n\n";
 						
 							if( sType!=="JSON" ) {
 								IomyRe.common.showError( sErrMesg+"API didn't return a JSON response.", "Error"  );
@@ -1486,15 +1539,24 @@ sap.ui.controller("pages.staging.user.UserForm", {
 										}); //-- END Refresh Model --//
 									},
 									onFail: function() {
-										
+										//------------------------------------------------//
+										//-- ERROR: User Room Permissions               --//
+										//------------------------------------------------//
+										IomyRe.common.showError( sErrMesg+"Error has occurred when refreshing the Room Permissions after updating the new User Room Permissions!", "Edit Other User Page");
 									}
 								}); //-- END Room Permissions --//
 							}
 						} catch( e3 ) {
+							//------------------------------------------------//
+							//-- CRITICAL ERROR: User Room permissions      --//
+							//------------------------------------------------//
 							IomyRe.common.showError( sErrMesg+"Critical Error with the 'UpdateRoomPerms' success in the 'UserForm' controller!", "Error" );
 						}
 					},
 					onFail : function (response) {
+						//------------------------------------------------//
+						//-- ERROR: Updating the Room Permissions       --//
+						//------------------------------------------------//
 						IomyRe.common.showError(response.responseText, "Error", function () {} );
 					}
 				});
@@ -1503,5 +1565,4 @@ sap.ui.controller("pages.staging.user.UserForm", {
 			jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success in the 'UserForm' controller! "+e2.message);
 		}
 	}
-
 });
