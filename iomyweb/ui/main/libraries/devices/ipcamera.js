@@ -623,6 +623,26 @@ $.extend(IomyRe.devices.ipcamera,{
         });
         
         oRPopover.openBy(oCallingButton);
+    },
+    
+    GetUITaskList : function (mSettings) {
+        //------------------------------------//
+        //-- 1.0 - Initialise Variables        --//
+        //------------------------------------//
+        var oModule         = this;
+        var aTasks          = { "High":[], "Low":[] };
+        
+        aTasks.High.push({
+            "Type":"Function", 
+            "Execute": function () {
+                IomyRe.devices.pingDevice({
+                    thingID     : mSettings.deviceData.DeviceId,
+                    onComplete  : mSettings.onComplete
+                });
+            }
+        });
+        
+        return aTasks;
     }
     
 });

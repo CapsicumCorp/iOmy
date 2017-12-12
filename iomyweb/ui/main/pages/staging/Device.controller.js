@@ -210,6 +210,8 @@ sap.ui.controller("pages.staging.Device", {
             // Create the items under that grouping
             //----------------------------------------------------------------//
             $.each(mTypeBlock.Devices, function (sJ, mDevice) {
+                var iState = IomyRe.common.ThingList["_"+mDevice.DeviceId];
+                
                 switch (mDevice.DeviceTypeId) {
                     //--------------------------------------------------------//
                     // Zigbee Smart Plug UI Entry
@@ -355,8 +357,8 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "Monitoring",
-                                numberUnit: "activity",
+                                number: "...",
+                                numberUnit: IomyRe.devices.getDeviceAddress(mDevice.DeviceId),
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
                                         text: "link",
@@ -413,8 +415,8 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "Monitoring",
-                                numberUnit: "activity",
+                                number: "...",
+                                numberUnit: IomyRe.devices.getDeviceAddress(mDevice.DeviceId),
                                 attributes : [
 //                                    new sap.m.ObjectAttribute ({
 //                                        text: "link",
@@ -422,12 +424,12 @@ sap.ui.controller("pages.staging.Device", {
 //                                            text: "Take Screenshot"
 //                                        })
 //                                    }),
-                                    new sap.m.ObjectAttribute ({
-                                        text: "link",
-                                        customContent : new sap.m.Link ({
-                                            text: "Record"
-                                        })
-                                    })
+//                                    new sap.m.ObjectAttribute ({
+//                                        text: "link",
+//                                        customContent : new sap.m.Link ({
+//                                            text: "Record"
+//                                        })
+//                                    })
                                 ],
                                 press : function () {
                                     if (oController.bEditing) {
@@ -692,31 +694,47 @@ sap.ui.controller("pages.staging.Device", {
                 }
                 
 //                if (IomyRe.devices.philipshue !== undefined) {
-                    //--------------------------------------------------------//
-                    // For motion sensors, create functions to display
-                    // information on the device entry.
-                    //--------------------------------------------------------//
-                    if (aDevice.DeviceTypeId == IomyRe.devices.philipshue.ThingTypeId ||
-                        aDevice.DeviceTypeId == IomyRe.devices.csrmesh.ThingTypeId)
-                    {
-                        mTaskListSettings.onSuccess = function (sHexString) {
-                            oView.byId(sPrefix).setNumber("#"+sHexString);
-                            
-                            //-- Update the Last Ajax Request Date --//
-                            oController.dLastAjaxUpdate    = new Date();
-                            //-- Recursively check for more Tasks --//
-                            oController.RecursiveLoadAjaxData();
-                        };
-                        
-                        mTaskListSettings.onFail = function (sErrMessage) {
-                            $.sap.log.error(sErrMessage);
-                            
-                            oView.byId(sPrefix).setNumber("N/A");
-                            
-                            //-- Recursively check for more Tasks --//
-                            oController.RecursiveLoadAjaxData();
-                        };
-                    }
+                //--------------------------------------------------------//
+                // For light bulbs show the hex code of the bulb's colour.
+                //--------------------------------------------------------//
+                if (aDevice.DeviceTypeId == IomyRe.devices.philipshue.ThingTypeId ||
+                    aDevice.DeviceTypeId == IomyRe.devices.csrmesh.ThingTypeId)
+                {
+                    mTaskListSettings.onSuccess = function (sHexString) {
+                        oView.byId(sPrefix).setNumber("#"+sHexString);
+
+                        //-- Update the Last Ajax Request Date --//
+                        oController.dLastAjaxUpdate    = new Date();
+                        //-- Recursively check for more Tasks --//
+                        oController.RecursiveLoadAjaxData();
+                    };
+
+                    mTaskListSettings.onFail = function (sErrMessage) {
+                        $.sap.log.error(sErrMessage);
+
+                        oView.byId(sPrefix).setNumber("N/A");
+
+                        //-- Recursively check for more Tasks --//
+                        oController.RecursiveLoadAjaxData();
+                    };
+                }
+                
+                //--------------------------------------------------------//
+                // For cameras show the IP address and whether it's online
+                // or not.
+                //--------------------------------------------------------//
+                if (aDevice.DeviceTypeId == IomyRe.devices.ipcamera.ThingTypeId ||
+                    aDevice.DeviceTypeId == IomyRe.devices.onvif.ThingTypeId)
+                {
+                    mTaskListSettings.onComplete = function (sResult) {
+                        oView.byId(sPrefix).setNumber(sResult);
+
+                        //-- Update the Last Ajax Request Date --//
+                        oController.dLastAjaxUpdate    = new Date();
+                        //-- Recursively check for more Tasks --//
+                        oController.RecursiveLoadAjaxData();
+                    };;
+                }
 //                }
                 
                 //-- Add the Tasks to populate the UI --//
