@@ -813,7 +813,6 @@ $.extend(IomyRe.devices,{
         //-- 2.0 - Fetch TASKS                --//
         //------------------------------------//
         
-        //-- Zigbee Netvox Smart Plug --//
         if( mSettings.deviceData.IOs!==undefined ) {
             if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.zigbeesmartplug.ThingTypeId ) {
                 aTasks = IomyRe.devices.zigbeesmartplug.GetUITaskList(mSettings);
@@ -833,6 +832,14 @@ $.extend(IomyRe.devices,{
             
             if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.csrmesh.ThingTypeId ) {
                 aTasks = IomyRe.devices.csrmesh.GetUITaskList(mSettings);
+            }
+            
+            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.ipcamera.ThingTypeId ) {
+                aTasks = IomyRe.devices.ipcamera.GetUITaskList(mSettings);
+            }
+            
+            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.onvif.ThingTypeId ) {
+                aTasks = IomyRe.devices.onvif.GetUITaskList(mSettings);
             }
             
         } else {
@@ -1112,8 +1119,91 @@ $.extend(IomyRe.devices,{
             jQuery.sap.log.error("There was an error loading the OData service: "+e.message);
             fnFail(e.name + ": " + e.message);
         }
-    }
+    },
     
+    getDeviceAddress : function (iThingId) {
+        var iLinkId         = IomyRe.common.ThingList["_"+iThingId].LinkId;
+        
+        return IomyRe.common.LinkList["_"+iLinkId].LinkConnAddress;
+    },
+    
+    pingDevice : function (mSettings) {
+        var iThingId        = 0;
+        
+        var fnResult        = function () {};
+        var sThingIDMissing = "Thing ID must be given (thingID).";
+        
+        //--------------------------------------------------------------------//
+        // Find and validate the thing ID and a callback function if given.
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined && mSettings !== null) {
+            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
+                iThingId = mSettings.thingID;
+                
+                var mInfo = IomyRe.validation.isThingIDValid(iThingId);
+                
+                if (!mInfo.bIsValid) {
+                    throw new ThingIDNotValidException(mInfo.aErrorMessages.join("\n\n"));
+                }
+            } else {
+                throw new MissingArgumentException(sThingIDMissing)
+            }
+            
+            if (mSettings.onComplete !== undefined && mSettings.onComplete !== null) {
+                fnResult = mSettings.onComplete;
+                
+                if (typeof fnResult !== "function") {
+                    throw new IllegalArgumentException("'onComplete' is not a function. Received "+typeof fnResult);
+                }
+            }
+            
+        } else {
+            throw new MissingSettingsMapException(sThingIDMissing);
+        }
+        
+        //--------------------------------------------------------------------//
+        // Prepare the request.
+        //--------------------------------------------------------------------//
+        try {
+            $.ajax("http://"+this.getDeviceAddress(iThingId), {
+                crossDomain:            true,
+                type:                   "POST",
+                
+                beforeSend : function (xhr) {
+                    xhr.onreadystatechange = function() {
+                        if (this.status == 404) {
+                           fnResult("Offline");
+                        }
+                    };
+                },
+
+                statusCode: {
+                    404: function() {
+                        fnResult("Offline");
+                    }
+                },
+
+                success : function () {
+                    fnResult("Online");
+                },
+
+                error : function(err) {
+                    if (err.status == '403' || err.status == '401') {
+                        fnResult("Inaccessible");
+                    } else {
+                        fnResult("Offline");
+
+                        if (err.status == '500') {
+                            //-- BUGGER, BUGGER, BUGGER IT! --//
+                            $.sap.log.error("A HTTP 500 error occurred! Check the web server logs.");
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            fnResult("Offline");
+        }
+    }
     
 });
 
