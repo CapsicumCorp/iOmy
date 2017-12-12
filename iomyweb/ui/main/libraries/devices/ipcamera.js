@@ -47,60 +47,28 @@ $.extend(IomyRe.devices.ipcamera,{
     LinkTypeId          : 14,
     ThingTypeId         : 18,
     
-    DevicePageID : "pDeviceMPEGStream",
-    
     loadCameraInformation : function(mSettings) {
         var me                = this;
         var bError            = false;
         var aErrorMessages    = [];
+        var aRequests         = [];
         var iNetAddrIO        = 0;
         var iNetPortIO        = 0;
         var iUsernameIO       = 0;
         var iPasswordIO       = 0;
         var iPathIO           = 0;
         var iProtocolIO       = 0;
+        var mData             = {};
         var iThingId;
         var sUrl;
         var mThingIdInfo;
         var mThing;
         var fnSuccess;
+        var fnWarning;
         var fnFail;
         
         //-- Variables to handle the concurrent calls to the OData service. --//
         var aConfigs        = [];
-        var fnUpdateCounter = function () {
-            me.ODataCallsToMake--;
-            if (me.ODataCallsToMake === 0) {
-                var mThing                    = IomyRe.common.ThingList["_"+iThingId];
-                var bAuthenticationRequired   = false;
-                var mData        = {
-                    Hub        : IomyRe.functions.getHubConnectedToThing(mThing.Id).HubId
-                };
-                
-                //------------------------------------------------------------//
-                // Begin gathering connection data.
-                //------------------------------------------------------------//
-                if ( (me.urlUsername !== undefined && me.urlUsername !== null) &&
-                     (me.urlPassword !== undefined && me.urlPassword !== null) )
-                {
-                    bAuthenticationRequired = true;
-                }
-                
-                me.runningODataCalls = false;
-                me.ODataCallsToMake = 6;
-                
-                mData.Protocol                    = me.urlProtocol;
-                mData.Address                     = me.urlAddress;
-                mData.Port                        = me.urlPort;
-                mData.Path                        = me.urlPath;
-                mData.Username                    = me.urlUsername;
-                mData.Password                    = me.urlPassword;
-                mData.AuthenticationRequired      = bAuthenticationRequired;
-                
-                //-- Run the success callback with the connection settings. --//
-                fnSuccess(mData);
-            }
-        };
         
         //--------------------------------------------------------------------//
         // Check that all the parameters are there
@@ -110,8 +78,8 @@ $.extend(IomyRe.devices.ipcamera,{
             // REQUIRED: Find the hub ID
             //----------------------------------------------------------------//
             mThingIdInfo    = IomyRe.validation.isThingIDValid(mSettings.thingID);
-            bError            = !mThingIdInfo.bIsValid;
-            aErrorMessages    = mThingIdInfo.aErrorMessages;
+            bError          = !mThingIdInfo.bIsValid;
+            aErrorMessages  = mThingIdInfo.aErrorMessages;
             
             //----------------------------------------------------------------//
             // Check for errors and throw an exception if there are errors.
@@ -129,6 +97,15 @@ $.extend(IomyRe.devices.ipcamera,{
                 fnSuccess = function () {};
             } else {
                 fnSuccess = mSettings.onSuccess;
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onWarning callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onWarning === undefined) {
+                fnWarning = function () {};
+            } else {
+                fnWarning = mSettings.onWarning;
             }
             
             //----------------------------------------------------------------//
@@ -150,6 +127,27 @@ $.extend(IomyRe.devices.ipcamera,{
         if (bError) {
             throw new ThingIDNotValidException(aErrorMessages.join("\n"));
         }
+        
+        var oAjaxRequestQueue = new AjaxRequestQueue({
+            executeNow              : false,
+            concurrentRequests      : 4,
+            
+            onSuccess : function () {
+                if (aErrorMessages.length > 0) {
+                    fnWarning(aErrorMessages.join("\n\n"));
+                } else {
+                    fnSuccess(mData);
+                }
+            },
+            
+            onWarning : function () {
+                fnWarning(aErrorMessages.join("\n\n"));
+            },
+            
+            onFail : function () {
+                fnFail(aErrorMessages.join("\n\n"));
+            }
+        });
         
         //--------------------------------------------------------------------//
         // Fetch the IO for the stream URL
@@ -188,73 +186,55 @@ $.extend(IomyRe.devices.ipcamera,{
         }
         
         //--------------------------------------------------------------------//
-        // Run a request to fetch the URL
+        // Prepare the requests.
         //--------------------------------------------------------------------//
         sUrl = IomyRe.apiodata.ODataLocation("datashortstring");
         
         aConfigs = [
-            
             {
                 "ID" : iNetAddrIO,
                 "onSuccess" : function (response, data) {
-                    me.urlAddress = data[0].CALCEDVALUE;
-                    
-                    //-- Update the remaining call count --//
-                    fnUpdateCounter();
+                    mData.address = data[0].CALCEDVALUE;
                 }
             },
             {
                 "ID" : iNetPortIO,
                 "onSuccess" : function (response, data) {
-                    me.urlPort = data[0].CALCEDVALUE;
-                    
-                    //-- Update the remaining call count --//
-                    fnUpdateCounter();
+                    mData.port = data[0].CALCEDVALUE;
                 }
             },
             {
                 "ID" : iProtocolIO,
                 "onSuccess" : function (response, data) {
-                    me.urlProtocol = data[0].CALCEDVALUE;
-                    
-                    //-- Update the remaining call count --//
-                    fnUpdateCounter();
+                    mData.protocol = data[0].CALCEDVALUE;
                 }
             },
             {
                 "ID" : iPathIO,
                 "onSuccess" : function (response, data) {
-                    me.urlPath = data[0].CALCEDVALUE;
-                    
-                    //-- Update the remaining call count --//
-                    fnUpdateCounter();
+                    mData.path = data[0].CALCEDVALUE;
                 }
             },
             {
                 "ID" : iUsernameIO,
                 "onSuccess" : function (response, data) {
-                    me.urlUsername = data[0].CALCEDVALUE;
-                    
-                    //-- Update the remaining call count --//
-                    fnUpdateCounter();
+                    mData.username = data[0].CALCEDVALUE;
                 }
             },
             {
                 "ID" : iPasswordIO,
                 "onSuccess" : function (response, data) {
-                    me.urlPassword = data[0].CALCEDVALUE;
-                    
-                    //-- Update the remaining call count --//
-                    fnUpdateCounter();
+                    mData.password = data[0].CALCEDVALUE;
                 }
             }
             
         ];
         
-        me.runningODataCalls = true;
-        
+        //--------------------------------------------------------------------//
+        // Compile the list of requests
+        //--------------------------------------------------------------------//
         for (var i = 0; i < aConfigs.length; i++) {
-            IomyRe.apiodata.AjaxRequest({
+            oAjaxRequestQueue.addRequest({
                 Url              : sUrl,
                 Columns          : ["CALCEDVALUE"],
                 WhereClause      : ["IO_PK eq " + aConfigs[i].ID],
@@ -268,6 +248,11 @@ $.extend(IomyRe.devices.ipcamera,{
                 }
             });
         }
+        
+        //--------------------------------------------------------------------//
+        // Run them
+        //--------------------------------------------------------------------//
+        oAjaxRequestQueue.execute();
     },
     
     /**

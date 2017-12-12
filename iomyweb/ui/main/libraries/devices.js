@@ -1123,8 +1123,10 @@ $.extend(IomyRe.devices,{
     
     getDeviceAddress : function (iThingId) {
         var iLinkId         = IomyRe.common.ThingList["_"+iThingId].LinkId;
+        var sAddress        = IomyRe.common.LinkList["_"+iLinkId].LinkConnAddress;
+        var sPort           = IomyRe.common.LinkList["_"+iLinkId].LinkConnPort;
         
-        return IomyRe.common.LinkList["_"+iLinkId].LinkConnAddress;
+        return sAddress + ":" + sPort;
     },
     
     pingDevice : function (mSettings) {
