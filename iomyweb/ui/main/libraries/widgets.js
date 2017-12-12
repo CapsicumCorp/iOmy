@@ -1,5 +1,5 @@
 /*
-Title: IOMy Page Widgets
+Title: IomyRe Page Widgets
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: A function to create a complete sap.m.Page for all activities
     (pages).
@@ -798,6 +798,98 @@ $.extend( IomyRe.widgets, {
 		return oPageSection;
 	},
     
+    //------------------------------------------------------------------------//
+    // Onvif Stream Dialog
+    //------------------------------------------------------------------------//
+    showOnvifStreamPopup : function (mSettings) {
+        var bError          = false;
+        var aErrorMessages  = [];
+        var iThingId;
+        var sUrl;
+        
+        //-- Error Messages --//
+        var sURLMissingError        = "URL must be given.";
+        var sThingIDMissingError    = "Thing ID must be given (thingID).";
+        
+        var fnAppendError = function (sErrorMessage) {
+            bError = true;
+            aErrorMessages.push(sErrorMessage);
+        };
+        
+        //--------------------------------------------------------------------//
+        // Find the URL and the device ID.
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined && mSettings !== null) {
+            
+            //----------------------------------------------------------------//
+            // Check that the ID is there and is a valid device.
+            //----------------------------------------------------------------//
+            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
+                iThingId = mSettings.thingID;
+                
+                var mInfo = IomyRe.validation.isThingIDValid(iThingId);
+                
+                if (!mInfo.bIsValid) {
+                    bError = true;
+                    aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages.join("\n\n"));
+                }
+            } else {
+                fnAppendError(sThingIDMissingError)
+            }
+            
+            //----------------------------------------------------------------//
+            // Check that the URL is there.
+            //----------------------------------------------------------------//
+            if (mSettings.url !== undefined && mSettings.url !== null) {
+                sUrl = mSettings.url;
+                
+            } else {
+                fnAppendError(sURLMissingError)
+            }
+            
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join("\n\n"));
+            }
+            
+        } else {
+            fnAppendError(sURLMissingError);
+            fnAppendError(sThingIDMissingError);
+            
+            throw new MissingSettingsMapException(aErrorMessages.join("\n\n"));
+        }
+        
+        //--------------------------------------------------------------------//
+        // Draw the popup.
+        //--------------------------------------------------------------------//
+        var oDialog = new sap.m.Dialog({
+            title : IomyRe.common.ThingList["_"+iThingId].DisplayName,
+            content : [
+                new sap.m.Label({
+                    text : "URL (copy if unable to play stream)"
+                }),
+                new sap.m.Input({
+                    value : sUrl
+                }),
+                
+                new sap.m.Button ({
+                    type: sap.m.ButtonType.Accept,
+                    text: "Play Stream",
+                    press : function () {
+                        window.open(sUrl);
+                    }
+                }).addStyleClass("width50Percent"),
+                new sap.m.Button ({
+                    type: sap.m.ButtonType.Reject,
+                    text: "Cancel",
+                    press : function () {
+                        oDialog.close();
+                    }
+                }).addStyleClass("width50Percent")
+            ]
+        });
+        
+        oDialog.open();
+    },
     
     //------------------------------------------------------------------------//
     // The select boxes

@@ -376,9 +376,10 @@ sap.ui.controller("pages.staging.Device", {
                                 ],
                                 
                                 press : function () {
+                                    
                                     //----------------------------------------------------------//
                                     // If were looking to edit a device, open the form,
-                                    // otherwise, open the stream in another app.
+                                    // otherwise, open the stream popup
                                     //----------------------------------------------------------//
                                     if (oController.bEditing) {
                                         IomyRe.common.NavigationChangePage( "pDeviceForm" , { "ThingId": mDevice.DeviceId } , false);
@@ -389,7 +390,10 @@ sap.ui.controller("pages.staging.Device", {
                                                 ThingId : mDevice.DeviceId,
 
                                                 onSuccess : function(sUrl) {
-                                                    window.open(sUrl);
+                                                    IomyRe.widgets.showOnvifStreamPopup({
+                                                        thingID         : mDevice.DeviceId,
+                                                        url             : sUrl
+                                                    });
                                                 },
 
                                                 onFail : function (response) {
