@@ -51,14 +51,20 @@ $.extend(IomyRe.devices.ipcamera,{
         var me                = this;
         var bError            = false;
         var aErrorMessages    = [];
-        var aRequests         = [];
         var iNetAddrIO        = 0;
         var iNetPortIO        = 0;
         var iUsernameIO       = 0;
         var iPasswordIO       = 0;
         var iPathIO           = 0;
         var iProtocolIO       = 0;
-        var mData             = {};
+        var mData             = {
+            address     : "",
+            port        : "",
+            protocol    : "",
+            username    : "",
+            password    : "",
+            path        : ""
+        };
         var iThingId;
         var sUrl;
         var mThingIdInfo;
@@ -128,20 +134,23 @@ $.extend(IomyRe.devices.ipcamera,{
             throw new ThingIDNotValidException(aErrorMessages.join("\n"));
         }
         
+        //-- Put the hub ID into the data. --//
+        mData.hubID = IomyRe.functions.getHubConnectedToThing(iThingId).HubId;
+        
         var oAjaxRequestQueue = new AjaxRequestQueue({
             executeNow              : false,
             concurrentRequests      : 4,
             
             onSuccess : function () {
                 if (aErrorMessages.length > 0) {
-                    fnWarning(aErrorMessages.join("\n\n"));
+                    fnWarning(mData, aErrorMessages.join("\n\n"));
                 } else {
                     fnSuccess(mData);
                 }
             },
             
             onWarning : function () {
-                fnWarning(aErrorMessages.join("\n\n"));
+                fnWarning(mData, aErrorMessages.join("\n\n"));
             },
             
             onFail : function () {
@@ -235,6 +244,7 @@ $.extend(IomyRe.devices.ipcamera,{
         //--------------------------------------------------------------------//
         for (var i = 0; i < aConfigs.length; i++) {
             oAjaxRequestQueue.addRequest({
+                library          : "odata",
                 Url              : sUrl,
                 Columns          : ["CALCEDVALUE"],
                 WhereClause      : ["IO_PK eq " + aConfigs[i].ID],
@@ -364,8 +374,9 @@ $.extend(IomyRe.devices.ipcamera,{
         var bError                       = false;
         var aErrorMessages               = [];
         var sMode                        = "";
-        var sAPIDataString               = "";
+        var mAPIDataString               = {};
         var iThingId;
+        var iLinkName;
         var bEditing;
         var sFileType;
         var iHubId;
@@ -515,25 +526,52 @@ $.extend(IomyRe.devices.ipcamera,{
                 throw new IllegalArgumentException("* "+aErrorMessages.join("\n* "));
             }
         } else {
-            throw new MissingSettingsMapException("No settings were provided. The file type, hub ID, IP address, port and video path are required. Device ID is also required if editing. (BUG IF YOU SEE THIS!)");
+            fnAppendError("File type must be specified.");
+            fnAppendError("Hub ID must be specified.");
+            fnAppendError("IP Address must be specified!");
+            fnAppendError("Path to the stream must be specified.");
+            
+            throw new MissingSettingsMapException("* "+aErrorMessages.join("\n* "));
         }
+        
+        var mThing  = IomyRe.common.ThingList["_"+iThingId];
+        iLinkName   = IomyRe.common.LinkList["_"+mThing.LinkId].LinkName;
         
         //----------------------------------------------------------------//
         // Prepare the 'Data' parameter string.
         //----------------------------------------------------------------//
         if (bEditing) {
-            sMode = "Mode=EditIPCamera&ThingId="+iThingId;
+            mAPIDataString.Mode = "EditIPCamera";
+            mAPIDataString.ThingId = iThingId;
+            //sMode = "Mode=EditIPCamera&ThingId="+iThingId;
         } else {
-            sMode = "Mode=AddNewIPCamera";
+            mAPIDataString.Mode = "AddNewIPCamera";
+            //sMode = "Mode=AddNewIPCamera";
         }
 
-        sAPIDataString += sMode+"&IPCamType="+sFileType+"&HubId="+iHubId;
-        sAPIDataString += "&Data={\"NetworkAddress\":\""+sIPAddress+"\",\"NetworkPort\":\""+sIPPort+"\",\"Protocol\":\""+sProtocol+"\",\"Path\":\""+sStreamPath+"\"";
+//        mAPIDataString += sMode+"&IPCamType="+sFileType+"&HubId="+iHubId;
+//        mAPIDataString += "&Data={\"NetworkAddress\":\""+sIPAddress+"\",\"NetworkPort\":\""+sIPPort+"\",\"Protocol\":\""+sProtocol+"\",\"Path\":\""+sStreamPath+"\"";
 
 //            if (bAuthenticationRequired) {
-//                sAPIDataString += ",\"Username\":\""+sUsername+"\",\"Password\":\""+sPassword+"\"";
+//                mAPIDataString += ",\"Username\":\""+sUsername+"\",\"Password\":\""+sPassword+"\"";
 //            }
-        sAPIDataString += "}";
+//        mAPIDataString += "}";
+        
+        mAPIDataString.IPCamType = sFileType;
+        mAPIDataString.HubId = iHubId;
+        mAPIDataString.Data = JSON.stringify({
+            NetworkAddress  : sIPAddress,
+            NetworkPort     : sIPPort,
+            Protocol        : sProtocol,
+            Path            : sStreamPath,
+            LinkName        : iLinkName,
+            DisplayName     : mThing.DisplayName
+        });
+        
+//            if (bAuthenticationRequired) {
+//                mAPIDataString.Username = sUsername;
+//                mAPIDataString.Password = sPassword;
+//            }
 
         //----------------------------------------------------------------//
         // Run the request
@@ -541,7 +579,7 @@ $.extend(IomyRe.devices.ipcamera,{
         IomyRe.apiphp.AjaxRequest({
             "url"        : IomyRe.apiphp.APILocation("ipcamera"),
             "type"        : "POST",
-            "data"        : sAPIDataString,
+            "data"        : mAPIDataString,
 
             "onSuccess"    : function (responseType, data) {
                 try {

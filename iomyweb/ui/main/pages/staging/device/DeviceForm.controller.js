@@ -31,6 +31,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
     bZigbeeCommandMenuOpen  : false,
     DeviceOptions           : null,
     iThingId                : null,
+    iThingTypeId            : null,
     bNoRooms                : false,
     
     //bDeviceOptionSelectorDrawn  : false,
@@ -81,6 +82,14 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     oController.iThingId        = null;
                 }
                 
+                if (oView.byId("DeviceName") !== undefined) {
+                    oView.byId("DeviceName").destroy();
+                }
+                
+                if (oView.byId("EditThingRoomSelector") !== undefined) {
+                    oView.byId("EditThingRoomSelector").destroy();
+                }
+                
                 if (oView.byId("ButtonSubmit") !== undefined) {
                     oView.byId("ButtonSubmit").destroy();
                 }
@@ -96,13 +105,29 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 oController.DeviceOptions = IomyRe.functions.getNewDeviceOptions();
                 
                 if (oController.bEditExisting) {
-                    IomyRe.common.ShowFormFragment( oController, "DeviceFormEdit", "DevTypeBlock", "Block" );
+                    oController.iThingTypeId = IomyRe.common.ThingList["_"+oController.iThingId].TypeId;
+                    
+                    console.log(oController.iThingTypeId);
+                    
+                    if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                        oView.byId("DevType").setVisible( false );
+                        oView.byId("DevSettings").setVisible( true );
+                        IomyRe.common.ShowFormFragment( oController, "DeviceFormEditIPCamera", "DevSettingsBlock", "Block" );
+                    } else {
+                        oView.byId("DevType").setVisible( true );
+                        oView.byId("DevSettings").setVisible( false );
+                        IomyRe.common.ShowFormFragment( oController, "DeviceFormEdit", "DevTypeBlock", "Block" );
+                    }
                     
                     if (oController.bNoRooms) {
                         oView.byId("EditThingRoomSelector").setVisible(false);
                     }
+                    
                     //oController.bDeviceOptionSelectorDrawn = false;
                 } else {
+                    oView.byId("DevType").setVisible( true );
+                    oController.iThingTypeId = null;
+                    
                     IomyRe.common.ShowFormFragment( oController, "DeviceFormAdd", "DevTypeBlock", "Block" );
                     
                     //if (!oController.bDeviceOptionSelectorDrawn) {
@@ -125,10 +150,6 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             }
             
         });
-        
-    },
-    
-    onBeforeRendering : function () {
         
     },
     
@@ -155,6 +176,22 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         oView.byId("SelectStreamProfile").setEnabled(bEnabled);
         oView.byId("SelectThumbnailProfile").setEnabled(bEnabled);
         oView.byId("ButtonSubmit").setEnabled(bEnabled);
+    },
+    
+    ToggleEditIPWebcamControls : function (bEnabled) {
+        var oView = this.getView();
+        
+        oView.byId("DeviceName").setEnabled(bEnabled);
+        oView.byId("SelectRoom").setEnabled(bEnabled);
+        oView.byId("InputCamType").setEnabled(bEnabled);
+        oView.byId("InputIPProtocol").setEnabled(bEnabled);
+        oView.byId("InputIPAddress").setEnabled(bEnabled);
+        oView.byId("InputIPPort").setEnabled(bEnabled);
+        oView.byId("InputPath").setEnabled(bEnabled);
+        oView.byId("InputUsername").setEnabled(bEnabled);
+        oView.byId("InputPassword").setEnabled(bEnabled);
+        
+        this.ToggleSubmitCancelButtons(bEnabled);
     },
     
     DevTypeToggle : function ( oController, sDevType) {
@@ -277,6 +314,19 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             }
         };
         
+        var fnComplete = function () {
+            oView.setModel( 
+                new sap.ui.model.json.JSONModel(oJSON)
+            );
+
+            //------------------------------------------------//
+            //-- Trigger the onSuccess Event                --//
+            //------------------------------------------------//
+            if( oConfig.onSuccess ) {
+                oConfig.onSuccess();
+            }
+        };
+        
         if (oController.bEditExisting) {
             var oCurrentDevice = JSON.parse( JSON.stringify( IomyRe.common.ThingList["_"+oController.iThingId] ) );
             
@@ -284,17 +334,62 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 "ThingName" : oCurrentDevice.DisplayName,
                 "RoomId"    : oCurrentDevice.RoomId
             };
-        }
-        
-        oView.setModel( 
-            new sap.ui.model.json.JSONModel(oJSON)
-        );
-        
-        //------------------------------------------------//
-        //-- Trigger the onSuccess Event                --//
-        //------------------------------------------------//
-        if( oConfig.onSuccess ) {
-            oConfig.onSuccess();
+            
+            //----------------------------------------------------------------//
+            // If editing an IP Webcam, load the connection information as 
+            // well.
+            //----------------------------------------------------------------//
+            if (oCurrentDevice.TypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                
+                var fnSetData = function (mData) {
+                    oJSON.CurrentDevice.HubId       = mData.hubID;
+                    
+                    oJSON.CurrentDevice.Protocol    = mData.protocol;
+                    oJSON.CurrentDevice.IPAddress   = mData.address;
+                    oJSON.CurrentDevice.IPPort      = mData.port;
+
+                    oJSON.CurrentDevice.Path        = mData.path;
+                    oJSON.CurrentDevice.Username    = mData.username;
+                    oJSON.CurrentDevice.Password    = mData.password;
+                };
+                
+                IomyRe.devices.ipcamera.loadCameraInformation({
+                    thingID : oController.iThingId,
+                    
+                    onSuccess : function (mData) {
+                        fnSetData(mData);
+                        
+                        fnComplete();
+                        oController.ToggleEditIPWebcamControls(true);
+                    },
+                    
+                    onWarning : function (mData, sErrorMessage) {
+                        fnSetData(mData);
+                        
+                        IomyRe.common.showWarning(sErrorMessage, "Failed to load some data",
+                            function () {
+                                fnComplete();
+                                oController.ToggleEditIPWebcamControls(true);
+                            }
+                        );
+                    },
+                    
+                    onFail : function (sErrorMessage) {
+                        IomyRe.common.showError(sErrorMessage, "Failed to load data",
+                            function () {
+                                fnComplete();
+                                oController.ToggleEditIPWebcamControls(true);
+                            }
+                        );
+                    }
+                });
+                
+            } else {
+                fnComplete();
+            }
+            
+        } else {
+            fnComplete();
         }
         
     },
@@ -649,28 +744,56 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         
         if (oController.areThereChanges()) {
             oController.ToggleSubmitCancelButtons(false);
+            
+            if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                oController.ToggleEditIPWebcamControls(false);
+            }
 
             //--------------------------------------------------------------------//
             // Run the request to edit an existing device.
             //--------------------------------------------------------------------//
-            IomyRe.devices.editThing({
-                thingID     : oController.iThingId,
-                thingName   : oCurrentFormData.ThingName,
-                roomID      : oCurrentFormData.RoomId,
+            try {
+                IomyRe.devices.editThing({
+                    thingID     : oController.iThingId,
+                    thingName   : oCurrentFormData.ThingName,
+                    roomID      : oCurrentFormData.RoomId,
 
-                onSuccess : function () {
-                    oController.ToggleSubmitCancelButtons(true);
-                    oController.CancelInput();
-                },
+                    onSuccess : function () {
+                        if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                            oController.SubmitIPWebcamData();
+                        } else {
+                            oController.ToggleSubmitCancelButtons(true);
+                            oController.ToggleEditIPWebcamControls(true);
+                            oController.CancelInput();
+                        }
+                    },
 
-                onWarning : function () {
-                    oController.ToggleSubmitCancelButtons(true);
-                },
+                    onWarning : function () {
+                        oController.ToggleEditIPWebcamControls(true);
+                    },
 
-                onFail : function () {
-                    oController.ToggleSubmitCancelButtons(true);
-                }
-            });
+                    onFail : function () {
+                        oController.ToggleEditIPWebcamControls(true);
+                    }
+                });
+            } catch (e) {
+                IomyRe.common.showError(e.message, "Invalid Input",
+                    function () {
+                        oController.ToggleSubmitCancelButtons(true);
+                        
+                        if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                            oController.ToggleEditIPWebcamControls(true);
+                        }
+                    }
+                );
+            }
+        } else {
+            if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                oController.ToggleEditIPWebcamControls(false);
+                oController.SubmitIPWebcamData();
+            } else {
+                oController.ToggleSubmitCancelButtons(true);
+            }
         }
     },
     
@@ -694,6 +817,60 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         }
         
         return (bDifferentThingName || bDifferentRoom);
+    },
+    
+    SubmitIPWebcamData : function () {
+        var oController         = this;
+        var oView               = this.getView();
+        var oCurrentFormData    = oView.getModel().getProperty( "/CurrentDevice/" );
+        
+        try {
+            if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                IomyRe.devices.ipcamera.submitWebcamInformation({
+                    thingID             : oController.iThingId,
+                    
+                    hubID               : oCurrentFormData.HubId,
+                    ipAddress           : oCurrentFormData.IPAddress,
+                    ipPort              : oCurrentFormData.IPPort,
+                    streamPath          : oCurrentFormData.Path,
+                    protocol            : oCurrentFormData.Protocol,
+                    fileType            : "MJPEG",
+                    
+                    editing : true,
+
+                    onSuccess : function () {
+                        IomyRe.common.RefreshCoreVariables({
+                            onSuccess : function () {
+                                oController.RefreshModel();
+                                
+                                IomyRe.common.showMessage({
+                                    text : "IP Webcam updated."
+                                });
+
+                                oController.ToggleEditIPWebcamControls(true);
+                                oController.CancelInput();
+                            }
+                        })
+                    },
+
+                    onFail : function (sErrorMessage) {
+                        IomyRe.common.showError(sErrorMessage, "Failed to update settings",
+                            function () {
+                                oController.ToggleEditIPWebcamControls(true);
+                            }
+                        );
+                    }
+                });
+
+            }
+
+        } catch (e) {
+            IomyRe.common.showError(e.message, "Failed to update settings",
+                function () {
+                    oController.ToggleSubmitCancelButtons(true);
+                }
+            );
+        }
     },
     
     isOldRoomTheUnassigned : function () {

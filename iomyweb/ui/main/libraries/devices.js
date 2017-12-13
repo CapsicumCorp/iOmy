@@ -548,6 +548,10 @@ $.extend(IomyRe.devices,{
                 } catch (e00033) {
                     jQuery.sap.log.error(e00033.message);
                 }
+            } else if (!bEditingThing && !(bChangingRoom && iRoomId !== null)) {
+                //-- Skip this step and run the success callback --//
+                fnSuccess();
+                
             } else {
                 //------------------------------------------------------------//
                 // We're simply changing the name of a thing.
@@ -922,7 +926,8 @@ $.extend(IomyRe.devices,{
                 thingID : iThingId,
 
                 onSuccess : function (iHue, iSaturation, iLight) {
-                    
+                    // FIXME: Someone needs to write code to convert from HSV to HSL.
+                    // The examples I found simply do not work, and I don't know why.
                     var sHexString = IomyRe.functions.convertHSLToHex(iHue, iSaturation, Math.floor(iLight / 2));
                     
                     fnSuccess(sHexString);
