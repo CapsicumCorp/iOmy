@@ -357,8 +357,8 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "...",
-                                numberUnit: IomyRe.devices.getDeviceAddress(mDevice.DeviceId),
+                                number: "",
+                                numberUnit: "",//IomyRe.devices.getDeviceAddress(mDevice.DeviceId),
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
                                         text: "link",
@@ -419,9 +419,12 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "...",
-                                numberUnit: IomyRe.devices.getDeviceAddress(mDevice.DeviceId),
+                                number: "",
+                                numberUnit: "",//IomyRe.devices.getDeviceAddress(mDevice.DeviceId),
                                 attributes : [
+                                    new sap.m.ObjectAttribute ({
+                                        text: "Tap to view stream"
+                                    })
 //                                    new sap.m.ObjectAttribute ({
 //                                        text: "link",
 //                                        customContent : new sap.m.Link ({
@@ -697,7 +700,6 @@ sap.ui.controller("pages.staging.Device", {
                     }
                 }
                 
-//                if (IomyRe.devices.philipshue !== undefined) {
                 //--------------------------------------------------------//
                 // For light bulbs show the hex code of the bulb's colour.
                 //--------------------------------------------------------//
@@ -727,18 +729,17 @@ sap.ui.controller("pages.staging.Device", {
                 // For cameras show the IP address and whether it's online
                 // or not.
                 //--------------------------------------------------------//
-                if (aDevice.DeviceTypeId == IomyRe.devices.ipcamera.ThingTypeId ||
-                    aDevice.DeviceTypeId == IomyRe.devices.onvif.ThingTypeId)
-                {
-                    mTaskListSettings.onComplete = function (sResult) {
-                        oView.byId(sPrefix).setNumber(sResult);
-
-                        //-- Update the Last Ajax Request Date --//
-                        oController.dLastAjaxUpdate    = new Date();
-                        //-- Recursively check for more Tasks --//
-                        oController.RecursiveLoadAjaxData();
-                    };;
-                }
+//                if (aDevice.DeviceTypeId == IomyRe.devices.ipcamera.ThingTypeId ||
+//                    aDevice.DeviceTypeId == IomyRe.devices.onvif.ThingTypeId)
+//                {
+//                    mTaskListSettings.onComplete = function (sResult) {
+//                        oView.byId(sPrefix).setNumber(sResult);
+//
+//                        //-- Update the Last Ajax Request Date --//
+//                        oController.dLastAjaxUpdate    = new Date();
+//                        //-- Recursively check for more Tasks --//
+//                        oController.RecursiveLoadAjaxData();
+//                    };
 //                }
                 
                 //-- Add the Tasks to populate the UI --//
@@ -784,26 +785,35 @@ sap.ui.controller("pages.staging.Device", {
         var oController        = this;            //-- SCOPE:        Binds the current controller scope for subfunctions                    --//
         var aTask            = {};            //-- ARRAY:        This will hold a task that has being pulled from the task list --//
 
-        if (IomyRe.common.bSessionTerminated === false) {
-            //-- Check the Length of the array to see if there is any jobs to do --//
-            if( oController.aAjaxTasks.High.length > 0 ) {
-                //-- Pull a task from the array --//
-                aTask = oController.aAjaxTasks.High.pop();
-                oController.RunAjaxTask(aTask);
-
-            } else if( oController.aAjaxTasks.Mid.length > 0 ) {
-                //-- Pull a task from the array --//
-                aTask = oController.aAjaxTasks.Mid.pop();
-                oController.RunAjaxTask(aTask);
-
-            } else {
-                if( oController.aAjaxTasks.Low.length > 0 ) {
+        if (oApp.getCurrentPage().getId() === "pDevice") {
+            if (IomyRe.common.bSessionTerminated === false) {
+                //-- Check the Length of the array to see if there is any jobs to do --//
+                if( oController.aAjaxTasks.High.length > 0 ) {
                     //-- Pull a task from the array --//
-                    aTask = oController.aAjaxTasks.Low.pop();
+                    aTask = oController.aAjaxTasks.High.pop();
                     oController.RunAjaxTask(aTask);
 
+                } else if( oController.aAjaxTasks.Mid.length > 0 ) {
+                    //-- Pull a task from the array --//
+                    aTask = oController.aAjaxTasks.Mid.pop();
+                    oController.RunAjaxTask(aTask);
+
+                } else {
+                    if( oController.aAjaxTasks.Low.length > 0 ) {
+                        //-- Pull a task from the array --//
+                        aTask = oController.aAjaxTasks.Low.pop();
+                        oController.RunAjaxTask(aTask);
+
+                    }
                 }
             }
+        } else {
+            //-- The user is no longer on the device page so no need to load anymore information --//
+            oController.aAjaxTasks = { 
+                "Low": [],
+                "Mid": [],
+                "High": []
+            };
         }
     },
     
