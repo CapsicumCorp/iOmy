@@ -838,13 +838,13 @@ $.extend(IomyRe.devices,{
                 aTasks = IomyRe.devices.csrmesh.GetUITaskList(mSettings);
             }
             
-            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.ipcamera.ThingTypeId ) {
-                aTasks = IomyRe.devices.ipcamera.GetUITaskList(mSettings);
-            }
-            
-            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.onvif.ThingTypeId ) {
-                aTasks = IomyRe.devices.onvif.GetUITaskList(mSettings);
-            }
+//            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.ipcamera.ThingTypeId ) {
+//                aTasks = IomyRe.devices.ipcamera.GetUITaskList(mSettings);
+//            }
+//            
+//            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.onvif.ThingTypeId ) {
+//                aTasks = IomyRe.devices.onvif.GetUITaskList(mSettings);
+//            }
             
         } else {
             //-- TODO: Write a error message --//

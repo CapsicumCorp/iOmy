@@ -268,7 +268,7 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "",
+                                number: "Loading ...",
                                 numberUnit: "Current Colour",
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
@@ -314,7 +314,7 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "",
+                                number: "Loading ...",
                                 numberUnit: "Current Colour",
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
@@ -782,8 +782,8 @@ sap.ui.controller("pages.staging.Device", {
     //== RECURSIVE AJAX LOADER                            ==//
     //====================================================//
     RecursiveLoadAjaxData: function() {
-        var oController        = this;            //-- SCOPE:        Binds the current controller scope for subfunctions                    --//
-        var aTask            = {};            //-- ARRAY:        This will hold a task that has being pulled from the task list --//
+        var oController     = this;          //-- SCOPE:        Binds the current controller scope for subfunctions                    --//
+        var aTask           = {};            //-- ARRAY:        This will hold a task that has being pulled from the task list --//
 
         if (oApp.getCurrentPage().getId() === "pDevice") {
             if (IomyRe.common.bSessionTerminated === false) {
