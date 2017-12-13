@@ -458,7 +458,7 @@ if( $bError===false ) {
 								$sErrMesg .= "Internal API Error! \n";
 								$sErrMesg .= $aResult["ErrMesg"];
 								
-								echo "\n".json_encode( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
+								//echo "\n".json_encode( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
 								//var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
 							} else {
 								//-------------------------------------------//
