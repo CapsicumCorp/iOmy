@@ -312,8 +312,19 @@ AjaxRequestQueue.prototype._run = function (sQueueIndex) {
             } else if (mRequestData.library.toLowerCase() === "odata") {
                 IomyRe.apiodata.AjaxRequest(mRequestParameters);
             } else {
-                // TODO: A generic AJAX request should be made here without any reference to PHP or OData APIs necessarily.
-                $.sap.log.error("Specified library must be either \"PHP\" or \"OData\". Ignoring request.\n\n"+JSON.stringify(mRequestData));
+//                if (mRequestData.library !== undefined && mRequestData.library !== null) {
+//                    if (typeof mRequestData.library === "object") {
+//                        try {
+//                            mRequestData.library.AjaxRequest(mRequestParameters);
+//                        } catch (e) {
+//                            $.sap.log.error("Invalid module parsed: "+e.message);
+//                        }
+//                    } else {
+//
+//                    }
+//                } else {
+                    $.ajax(mRequestData);
+                //}
             }
         }
     }
