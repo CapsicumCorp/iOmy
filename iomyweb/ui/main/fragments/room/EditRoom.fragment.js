@@ -70,6 +70,13 @@ sap.ui.jsfragment("fragments.room.EditRoom", {
 								IomyRe.common.NavigationChangePage( "pRoomList" ,  {"bEditing": true} , false);
 							}
 						}),
+						new sap.m.Button (oView.createId("ButtonDelete"), {
+							text: "Delete",
+							type: sap.m.ButtonType.Reject,
+							press:   function( oEvent ) {
+								oController.DeleteRoomInfoValues();
+							}
+						})
 					]
 				}),
 			]

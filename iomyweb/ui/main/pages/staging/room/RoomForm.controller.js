@@ -54,7 +54,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
                     oController.bEditing = false;
                 }
                 
-                oController.loadRoomForm()
+                oController.loadRoomForm();
 			}
 			
 		});
@@ -115,9 +115,9 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 		//------------------------------------------------//
 		oView.setModel( 
 			new sap.ui.model.json.JSONModel({
-				"Premises":           IomyRe.common.PremiseList,
-				"RoomTypes":          IomyRe.common.RoomTypes,
-				"CurrentRoom":          oController.mRoomData
+				"Premises":           JSON.parse(JSON.stringify(IomyRe.common.PremiseList)),
+				"RoomTypes":          JSON.parse(JSON.stringify(IomyRe.common.RoomTypes)),
+				"CurrentRoom":        JSON.parse(JSON.stringify(oController.mRoomData))
 			})
 		);	
 		
@@ -132,7 +132,6 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 	UpdateRoomInfoValues: function (oController) {
 		var bError          = false;
         var aErrorMessages  = [];
-		var sErrMesg        = "";
         
         oController.ToggleSubmitCancelButtons(false);
 		
@@ -140,15 +139,14 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 		//-- STEP 1 - Extract Values from the Model     --//
 		//------------------------------------------------//
 		var oCurrentFormData = oController.getView().getModel().getProperty("/CurrentRoom/");
-		//var oTest = oController.getView().getModel();
 		
 		//------------------------------------------------//
 		//-- STEP 2 - Check for Errors                  --//
 		//------------------------------------------------//
-		//if( oCurrentFormData.InclusionId <= 0 ) {
-		//	bError    = true;
-		//	sErrMesg  = "Please choose a valid Inclusion!";
-		//}
+		if (oCurrentFormData.RoomName === "") {
+            bError = true;
+            aErrorMessages.push("Please specify a name for the room.");
+        }
 		
 		//------------------------------------------------//
 		//-- STEP 3 - Update Database                   --//
@@ -220,7 +218,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 					}
 				});
 			} else {
-				IomyRe.common.showError("* " + aErrorMessages.join("\n* "), "", function () {
+				IomyRe.common.showError(aErrorMessages.join("\n"), "No name", function () {
                     oController.ToggleSubmitCancelButtons(true);
                 });
 			}
@@ -231,7 +229,6 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 	
 	InsertRoomInfoValues: function (oController) {
 		var bError   = false;
-		var sErrMesg = "";
         var aErrorMessages = [];
 		
         oController.ToggleSubmitCancelButtons(false);
@@ -244,10 +241,10 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 		//------------------------------------------------//
 		//-- STEP 2 - Check for Errors                  --//
 		//------------------------------------------------//
-		//if( oCurrentFormData.InclusionId <= 0 ) {
-		//	bError    = true;
-		//	sErrMesg  = "Please choose a valid Inclusion!";
-		//}
+		if (oCurrentFormData.RoomName === "") {
+            bError = true;
+            aErrorMessages.push("Please specify a name for the room.");
+        }
 		
 		//------------------------------------------------//
 		//-- STEP 3 - Update Database                   --//
@@ -333,7 +330,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 					}
 				});
 			} else {
-                IomyRe.common.showError("* " + aErrorMessages.join("\n* "), "", function () {
+                IomyRe.common.showError(aErrorMessages.join("\n"), "No name", function () {
                     oController.ToggleSubmitCancelButtons(true);
                 });
 			}
@@ -342,6 +339,86 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 		}
 	},
     
+    DeleteRoomInfoValues : function () {
+        var oController     = this;
+        var oView           = this.getView();
+        var iNumOfDevices   = IomyRe.functions.getNumberOfDevicesInRoom(oController.mRoomData.RoomId);
+        var sDialogTitle;
+        
+        oController.ToggleSubmitCancelButtons(false);
+        
+        if (iNumOfDevices > 0) {
+            var sErrMessage = "There ";
+
+            if (iNumOfDevices === 1) {
+                sErrMessage += "is "+iNumOfDevices+" device";
+            } else {
+                sErrMessage += "are "+iNumOfDevices+" devices";
+            }
+
+            sErrMessage += " still assigned to this room.\n\n";
+            sErrMessage += "Move the devices from this room before deleting it.";
+
+            IomyRe.common.showError(sErrMessage, "Error",
+                function () {
+                    oController.ToggleSubmitCancelButtons(true);
+                }
+            );
+
+        }
+
+        //-- Ask the user to confirm the deletion first. --//
+        IomyRe.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
+            function (oAction) {
+                if (oAction === sap.m.MessageBox.Action.OK) {
+                    try {
+                        oController.deleteRoom({
+                            roomID      : oController.mRoomData.RoomId,
+                            
+                            onSuccess   : function () {
+                                IomyRe.common.showMessage({
+                                    text : oController.mRoomData.RoomName + " successfully removed."
+                                });
+                                
+                                oController.ToggleSubmitCancelButtons(true);
+                                IomyRe.common.NavigationChangePage( "pRoomList" , {"bEditing" : oController.bEditing} , false);
+                            },
+                            
+                            onFail : function (sErrorMessage) {
+                                IomyRe.common.showError(sErrorMessage, "Error",
+                                    function () {
+                                        oController.ToggleSubmitCancelButtons(true);
+                                    }
+                                );
+                            }
+                        });
+
+                    } catch (err) {
+
+                        if (err.name === "DevicesStillInRoomException") {
+                            sDialogTitle = "Devices still assigned";
+
+                        } else if (err.name === "AttemptToDeleteOnlyRoomException") {
+                            // NOTE: This is probably not needed anymore with the way the "Unassigned" pseudo-room works.
+                            sDialogTitle = "Only room registered";
+
+                        }
+
+                        IomyRe.common.showError(err.message, sDialogTitle,
+                            function () {
+                                oController.ToggleSubmitCancelButtons(true);
+                            }
+                        );
+
+                    }
+                    
+                } else {
+                    oController.ToggleSubmitCancelButtons(true);
+                }
+            }
+        );
+    },
+	
 	ToggleButtonsAndView: function ( oController, bEditing ) {
 		var oView = this.getView();
 		
@@ -351,7 +428,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 				oView.byId("RoomToolbarTitle").setText("Add Room");
 				IomyRe.common.ShowFormFragment( oController, "room.AddRoom", "RoomBlock_Form", "FormContainer" );
 			} else if(bEditing === true) {
-				oView.byId("RoomToolbarTitle").setText("Edit " + oController.mRoomData.RoomName);
+				oView.byId("RoomToolbarTitle").setText("Edit Room");
 				IomyRe.common.ShowFormFragment( oController, "room.EditRoom", "RoomBlock_Form", "FormContainer" );
 			} else {
 				$.sap.log.error("ToggleButtonsAndView: Critcal Error. bEditing set incorrectly:"+bEditing);
@@ -362,4 +439,154 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 		}
 	},
     
+    /**
+     * Deletes a given room from the user and takes any further action specified
+     * by a given function if one is specified.
+     * 
+     * Throws an exception when either the room ID is not valid or if the API
+     * to delete a room could not be called.
+     * 
+     * @param {type} iRoomId        ID of the room to remove
+     * @param {type} fnCallback     Function to run once done. (OPTIONAL)
+     */
+    deleteRoom : function (mSettings) {
+        //--------------------------------------------------------------------//
+        // Variables
+        //--------------------------------------------------------------------//
+        var bError                  = false;
+        var aErrorMessages          = [];
+        var iNumOfRooms             = 0;
+        var iRoomId;
+        
+        var sRoomIDMissing  = "ID of the room to delete must be given (roomID).";
+        
+        var fnSuccess   = function () {};
+        var fnFail      = function () {};
+        
+        var fnAppendError = function (sErrorMessage) {
+            bError = true;
+            aErrorMessages.push(sErrorMessage);
+        };
+        
+        //--------------------------------------------------------------------//
+        // Process the parameters.
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined && mSettings !== null) {
+            
+            //--------------------------------------------------------------------//
+            // Check that the room ID is given and is of a valid room that has no
+            // devices.
+            //--------------------------------------------------------------------//
+            if (mSettings.roomID !== undefined && mSettings.roomID !== null) {
+                iRoomId = mSettings.roomID;
+                
+                var mRoomIDResult = IomyRe.validation.isRoomIDValid(iRoomId);
+                var iNumOfDevices = IomyRe.functions.getNumberOfDevicesInRoom(iRoomId);
+                
+                if (mRoomIDResult.bIsValid) {
+                    //--------------------------------------------------------------------//
+                    // If there are any devices still attached, these will need to be
+                    // removed first. Throw an exception.
+                    //--------------------------------------------------------------------//
+                    if (iNumOfDevices > 0) {
+                        var sErrMessage = "There ";
+
+                        if (iNumOfDevices === 1) {
+                            sErrMessage += "is "+iNumOfDevices+" device";
+                        } else {
+                            sErrMessage += "are "+iNumOfDevices+" devices";
+                        }
+
+                        sErrMessage += " still assigned to this room.\n\n";
+                        sErrMessage += "Remove the devices from this room before deleting it.";
+
+                        jQuery.sap.log.error(sErrMessage);
+                        fnAppendError(sErrMessage);
+
+                        throw new DevicesStillInRoomException(sErrMessage);
+
+                    }
+                    
+                } else {
+                    bError = true;
+                    aErrorMessages = aErrorMessages.concat(mRoomIDResult.aErrorMessages);
+                    
+                    throw new IllegalArgumentException(aErrorMessages.join('\n\n'));
+                }
+                
+            } else {
+                fnAppendError(sRoomIDMissing);
+                
+                throw new MissingArgumentException(aErrorMessages.join('\n\n'));
+            }
+            
+            //--------------------------------------------------------------------//
+            // Grab the success callback.
+            //--------------------------------------------------------------------//
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+                
+                if (typeof fnSuccess !== "function") {
+                    fnAppendError("'onSuccess' callback is not a function. Received " + typeof fnSuccess);
+                }
+            }
+            
+            //--------------------------------------------------------------------//
+            // Grab the failure callback.
+            //--------------------------------------------------------------------//
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+                
+                if (typeof fnFail !== "function") {
+                    fnAppendError("'onFail' callback is not a function. Received " + typeof fnFail);
+                }
+            }
+            
+        } else {
+            fnAppendError(sRoomIDMissing)
+        }
+        
+//        //--------------------------------------------------------------------//
+//        // If this room is the only one registered in iOmy, it should not be
+//        // deleted.
+//        //--------------------------------------------------------------------//
+//        iNumOfRooms             = IomyRe.functions.getNumberOfRooms(true); // TRUE to include the "Unassigned" room.
+//        if (iNumOfRooms === 1) {
+//            sErrMessage = "This is the only room left in iOmy! You need at least "+
+//                    "one room to assign new devices to. This room will not be deleted " +
+//                    "until you create another one.";
+//            
+//            jQuery.sap.log.error(sErrMessage);
+//            
+//            throw new AttemptToDeleteOnlyRoomException(sErrMessage);
+//        }
+        
+        //--------------------------------------------------------------------//
+        // Run the API Ajax request to delete the room.
+        //--------------------------------------------------------------------//
+        try {
+            IomyRe.apiphp.AjaxRequest({
+                url: IomyRe.apiphp.APILocation("rooms"),
+                data : {"Mode" : "DeleteRoom", "Id" : iRoomId},
+
+                onSuccess : function () {
+                    try {
+                        IomyRe.common.RefreshCoreVariables({
+                            onSuccess : fnSuccess
+                        });
+                    } catch (e) {
+                        fnFail(e.name + ": " + e.message);
+                    }
+                },
+
+                onFail : function (response) {
+                    //jQuery.sap.log.error(oRoomToDelete.RoomName+" could not be removed.\n" + response.ErrMesg);
+                    fnFail(response.responseText);
+                }
+            });
+        } catch (e) {
+            fnFail(e.name + ": " + e.message);
+        }
+    }
+
 });

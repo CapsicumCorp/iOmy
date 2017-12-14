@@ -2,6 +2,7 @@
 Title: Common functions and variables Module
 Authors: 
     Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
+    Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
     Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
 Description: 
 Copyright: Capsicum Corporation 2015, 2016, 2017
@@ -455,6 +456,23 @@ $.extend(IomyRe.common,{
                 onClose: callbackFn,
                 styleClass : cssClass,
                 actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO]
+            }
+        );
+    },
+    
+    // Confirm Question for Sign Out
+    showConfirmQuestion : function( sMessage, sTitle, fnCallback, sCssClass ){
+        //-- Defaults --//
+        var callbackFn = fnCallback || function(){};
+        var cssClass = sCssClass || "";
+        
+        // open a fully configured message box
+        sap.m.MessageBox.confirm(
+            sMessage,
+            {
+                title: sTitle,
+                onClose: callbackFn,
+                styleClass : cssClass
             }
         );
     },
