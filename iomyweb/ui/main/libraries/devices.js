@@ -360,7 +360,7 @@ $.extend(IomyRe.devices,{
             // REQUIRED: Thing Name
             //----------------------------------------------------------------//
             if (mSettings.thingName === undefined) {
-                fnAppendError("Thing Name (thingName) must be specified!");
+                fnAppendError("New Thing Name (thingName) must be specified!");
             } else {
                 sThingText = mSettings.thingName;
             }
@@ -412,7 +412,7 @@ $.extend(IomyRe.devices,{
             
         } else {
             fnAppendError("Thing ID (thingID) must be specified!");
-            fnAppendError("Thing Name (thingName) must be specified!");
+            fnAppendError("New Thing Name (thingName) must be specified!");
             throw new MissingSettingsMapException( aErrorMessages.join("\n") );
         }
 
@@ -438,184 +438,188 @@ $.extend(IomyRe.devices,{
         }
         
         if (bError === false) {
-            mThingChangeSettings.thingID    = iThingId;
-            mThingChangeSettings.thingName  = sThingText;
-            
-            mRoomChangeSettings.thingID     = iThingId;
-            mRoomChangeSettings.roomID      = iRoomId;
-            
-            //----------------------------------------------------------------//
-            // Create the onSuccess and onFail functions based on what fields
-            // are enabled and/or changed.
-            //----------------------------------------------------------------//
-            if (bEditingThing && (bChangingRoom && iRoomId !== null) ) {
-                
-                //------------------------------------------------------------//
-                // We're editing both the thing name and assigning it to a
-                // room.
-                //------------------------------------------------------------//
-                mThingChangeSettings.successful = true;
-                
-                //------------------------------------------------------------//
-                // Create the success function that will create the callback
-                // functions for the room assignment function.
-                //------------------------------------------------------------//
-                fnThingSuccess = function () {
-                    //--------------------------------------------------------//
-                    // Create the success function that will popup a message,
-                    // indicating complete or partial success.
-                    //--------------------------------------------------------//
-                    mRoomChangeSettings.onSuccess = function () {
-                        IomyRe.common.RefreshCoreVariables({
-                            onSuccess : function () {
-                                var sMessage;
-                                
-                                if (mThingChangeSettings.successful === true) {
-                                    sMessage = "Device renamed to "+sThingText+" and is now located in "+sRoomText;
-                                    IomyRe.common.showMessage({
-                                        text : sMessage,
-                                    });
-                                    
-                                    fnSuccess();
-                                    
-                                } else {
-                                    sMessage = "Device couldn't be renamed to "+sThingText+", but is now located in "+sRoomText;
-                                    
-                                    IomyRe.common.showWarning(sMessage, "", function () {
-                                        fnWarning();
-                                    });
-                                }
-                                
-                                fnSuccess();
-                            },
-                            
-                            onFail : fnThingFail
-                        });
-                    };
-                    
-                    //--------------------------------------------------------//
-                    // Create the success function that will popup a message,
-                    // indicating complete or partial failure.
-                    //--------------------------------------------------------//
-                    mRoomChangeSettings.onFail = function (sErrorMessage) {
-                        IomyRe.common.RefreshCoreVariables({
-                            onSuccess : function () {
-                                var sMessage;
+            try {
+                mThingChangeSettings.thingID    = iThingId;
+                mThingChangeSettings.thingName  = sThingText;
 
-                                if (mThingChangeSettings.successful === true) {
-                                    sMessage = "Device renamed to "+sThingText+", but failed to move device to "+sRoomText;
+                mRoomChangeSettings.thingID     = iThingId;
+                mRoomChangeSettings.roomID      = iRoomId;
 
-                                    IomyRe.common.showWarning(sMessage, "", function () {
-                                        fnWarning(sMessage);
-                                    });
+                //----------------------------------------------------------------//
+                // Create the onSuccess and onFail functions based on what fields
+                // are enabled and/or changed.
+                //----------------------------------------------------------------//
+                if (bEditingThing && (bChangingRoom && iRoomId !== null) ) {
 
-                                    jQuery.sap.log.warning(sMessage);
-                                } else {
-                                    sMessage = "Device couldn't be renamed. Failed to move device to "+sRoomText;
+                    //------------------------------------------------------------//
+                    // We're editing both the thing name and assigning it to a
+                    // room.
+                    //------------------------------------------------------------//
+                    mThingChangeSettings.successful = true;
 
-                                    IomyRe.common.showError(sMessage, "", function () {
-                                        fnFail();
-                                    });
-
-                                    jQuery.sap.log.error(sMessage);
-                                }
-                            }
-                        });
-                    };
-                    
-                    //-- Call the room assignment function with the correct configuration. --//
-                    IomyRe.devices.AssignDeviceToRoom(mRoomChangeSettings);
-                };
-                
-                //------------------------------------------------------------//
-                // Create the failure function that will report a failure and
-                // then run the success function to proceed to assign a device
-                // to a room
-                //------------------------------------------------------------//
-                fnThingFail = function (sErrMesg) {
-                    jQuery.sap.log.error(sErrMesg);
-                    mThingChangeSettings.successful = false;
-                    fnThingSuccess();
-                };
-                
-                mThingChangeSettings.onSuccess    = fnThingSuccess;
-                mThingChangeSettings.onFail       = fnThingFail;
-                
-                // Run the API to update the device (thing) name
-                try {
-                    IomyRe.devices.editThingName(mThingChangeSettings);
-
-                } catch (e00033) {
-                    jQuery.sap.log.error(e00033.message);
-                }
-            } else if (!bEditingThing && !(bChangingRoom && iRoomId !== null)) {
-                //-- Skip this step and run the success callback --//
-                fnSuccess();
-                
-            } else {
-                //------------------------------------------------------------//
-                // We're simply changing the name of a thing.
-                //------------------------------------------------------------//
-                if (bEditingThing) {
-                    fnThingFail = function () {
-                        var sMessage = "Device couldn't be renamed.";
-
-                        IomyRe.common.showError(sMessage, "", function () {
-                            fnFail();
-                        });
-
-                        jQuery.sap.log.error(sMessage);
-                    };
-                    
+                    //------------------------------------------------------------//
+                    // Create the success function that will create the callback
+                    // functions for the room assignment function.
+                    //------------------------------------------------------------//
                     fnThingSuccess = function () {
-                        IomyRe.common.RefreshCoreVariables({
-                            onSuccess : function () {
-                                IomyRe.common.showMessage({
-                                    text : "Device renamed to \""+sThingText+"\"."
-                                });
-                                
-                                fnSuccess();
-                            }
-                        });
+                        //--------------------------------------------------------//
+                        // Create the success function that will popup a message,
+                        // indicating complete or partial success.
+                        //--------------------------------------------------------//
+                        mRoomChangeSettings.onSuccess = function () {
+                            IomyRe.common.RefreshCoreVariables({
+                                onSuccess : function () {
+                                    var sMessage;
+
+                                    if (mThingChangeSettings.successful === true) {
+                                        sMessage = "Device renamed to "+sThingText+" and is now located in "+sRoomText;
+                                        IomyRe.common.showMessage({
+                                            text : sMessage,
+                                        });
+
+                                        fnSuccess();
+
+                                    } else {
+                                        sMessage = "Device couldn't be renamed to "+sThingText+", but is now located in "+sRoomText;
+
+                                        IomyRe.common.showWarning(sMessage, "", function () {
+                                            fnWarning();
+                                        });
+                                    }
+
+                                    fnSuccess();
+                                },
+
+                                onFail : fnThingFail
+                            });
+                        };
+
+                        //--------------------------------------------------------//
+                        // Create the success function that will popup a message,
+                        // indicating complete or partial failure.
+                        //--------------------------------------------------------//
+                        mRoomChangeSettings.onFail = function (sErrorMessage) {
+                            IomyRe.common.RefreshCoreVariables({
+                                onSuccess : function () {
+                                    var sMessage;
+
+                                    if (mThingChangeSettings.successful === true) {
+                                        sMessage = "Device renamed to "+sThingText+", but failed to move device to "+sRoomText;
+
+                                        IomyRe.common.showWarning(sMessage, "", function () {
+                                            fnWarning(sMessage);
+                                        });
+
+                                        jQuery.sap.log.warning(sMessage);
+                                    } else {
+                                        sMessage = "Device couldn't be renamed. Failed to move device to "+sRoomText;
+
+                                        IomyRe.common.showError(sMessage, "", function () {
+                                            fnFail();
+                                        });
+
+                                        jQuery.sap.log.error(sMessage);
+                                    }
+                                }
+                            });
+                        };
+
+                        //-- Call the room assignment function with the correct configuration. --//
+                        IomyRe.devices.AssignDeviceToRoom(mRoomChangeSettings);
                     };
-                    
+
+                    //------------------------------------------------------------//
+                    // Create the failure function that will report a failure and
+                    // then run the success function to proceed to assign a device
+                    // to a room
+                    //------------------------------------------------------------//
+                    fnThingFail = function (sErrMesg) {
+                        jQuery.sap.log.error(sErrMesg);
+                        mThingChangeSettings.successful = false;
+                        fnThingSuccess();
+                    };
+
                     mThingChangeSettings.onSuccess    = fnThingSuccess;
                     mThingChangeSettings.onFail       = fnThingFail;
-                    
-                    IomyRe.devices.editThingName(mThingChangeSettings);
+
+                    // Run the API to update the device (thing) name
+                    try {
+                        IomyRe.devices.editThingName(mThingChangeSettings);
+
+                    } catch (e00033) {
+                        jQuery.sap.log.error(e00033.message);
+                    }
+                } else if (!bEditingThing && !(bChangingRoom && iRoomId !== null)) {
+                    //-- Skip this step and run the success callback --//
+                    fnSuccess();
+
+                } else {
+                    //------------------------------------------------------------//
+                    // We're simply changing the name of a thing.
+                    //------------------------------------------------------------//
+                    if (bEditingThing) {
+                        fnThingFail = function () {
+                            var sMessage = "Device couldn't be renamed.";
+
+                            IomyRe.common.showError(sMessage, "", function () {
+                                fnFail();
+                            });
+
+                            jQuery.sap.log.error(sMessage);
+                        };
+
+                        fnThingSuccess = function () {
+                            IomyRe.common.RefreshCoreVariables({
+                                onSuccess : function () {
+                                    IomyRe.common.showMessage({
+                                        text : "Device renamed to \""+sThingText+"\"."
+                                    });
+
+                                    fnSuccess();
+                                }
+                            });
+                        };
+
+                        mThingChangeSettings.onSuccess    = fnThingSuccess;
+                        mThingChangeSettings.onFail       = fnThingFail;
+
+                        IomyRe.devices.editThingName(mThingChangeSettings);
+                    }
+
+                    //------------------------------------------------------------//
+                    // Or moving a device to another room.
+                    //------------------------------------------------------------//
+                    if (bChangingRoom && iRoomId !== null) {
+                        fnRoomFail = function (sMessage) {
+                            IomyRe.common.showError(sMessage, "", function () {
+                                fnFail();
+                            });
+                        };
+
+                        fnRoomSuccess = function () {
+                            IomyRe.common.RefreshCoreVariables({ 
+                                onSuccess : function () {
+                                    IomyRe.common.showMessage({
+                                        text : "Device is now located in "+sRoomText
+                                    });
+
+                                    fnSuccess();
+                                }
+                            });
+                        };
+
+                        mRoomChangeSettings.onSuccess    = fnRoomSuccess;
+                        mRoomChangeSettings.onFail       = fnRoomFail;
+
+                        IomyRe.devices.AssignDeviceToRoom(mRoomChangeSettings);
+                    }
                 }
-                
-                //------------------------------------------------------------//
-                // Or moving a device to another room.
-                //------------------------------------------------------------//
-                if (bChangingRoom && iRoomId !== null) {
-                    fnRoomFail = function (sMessage) {
-                        IomyRe.common.showError(sMessage, "", function () {
-                            fnFail();
-                        });
-                    };
-                    
-                    fnRoomSuccess = function () {
-                        IomyRe.common.RefreshCoreVariables({ 
-                            onSuccess : function () {
-                                IomyRe.common.showMessage({
-                                    text : "Device is now located in "+sRoomText
-                                });
-                                
-                                fnSuccess();
-                            }
-                        });
-                    };
-                    
-                    mRoomChangeSettings.onSuccess    = fnRoomSuccess;
-                    mRoomChangeSettings.onFail       = fnRoomFail;
-                    
-                    IomyRe.devices.AssignDeviceToRoom(mRoomChangeSettings);
-                }
+            } catch (e) {
+                IomyRe.common.showError(e.name + ": " + e.message, "Error");
             }
             
         } else {
-            IomyRe.common.showError(aErrorMessages.join("\n\n"));
+            IomyRe.common.showError(aErrorMessages.join("\n\n"), "");
             jQuery.sap.log.error(aErrorMessages.join("\n"));
         }
     },

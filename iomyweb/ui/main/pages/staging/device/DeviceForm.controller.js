@@ -770,7 +770,6 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                             oController.SubmitIPWebcamData();
                         } else {
                             oController.ToggleSubmitCancelButtons(true);
-                            oController.ToggleEditIPWebcamControls(true);
                             oController.CancelInput();
                         }
                     },
