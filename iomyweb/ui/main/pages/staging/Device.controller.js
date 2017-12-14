@@ -62,66 +62,73 @@ sap.ui.controller("pages.staging.Device", {
         
         oView.addEventDelegate({
             onBeforeShow : function (evt) {
-                //----------------------------------------------------//
-                // Find the premise ID, if specified, and store it.
-                //----------------------------------------------------//
-                if (evt.data.PremiseId !== undefined && evt.data.PremiseId !== null) {
-                    oController.iLastPremiseId = evt.data.PremiseId;
-                    
-                } else {
-                    oController.iLastPremiseId = null;
-                }
-                
-                //----------------------------------------------------//
-                // Find the room ID, if specified, and store it.
-                //----------------------------------------------------//
-                if (evt.data.RoomId !== undefined && evt.data.RoomId !== null) {
-                    oController.iLastRoomId = evt.data.RoomId;
-                    
-                } else {
-                    oController.iLastRoomId = null;
-                    
-                }
-                
-                if (oController.iLastPremiseId === null && oController.iLastRoomId === null) {
-                    oView.byId("ToolbarTitle").setText("Devices");
-                    
-                } else if (oController.iLastPremiseId !== null && oController.iLastRoomId !== null) {
-                    // If both the Premise ID and Room ID are given, use the room ID.
-                    oView.byId("ToolbarTitle").setText("Devices in " + IomyRe.functions.getRoom( oController.iLastRoomId ).RoomName);
-                    
-                } else {
-                    if (oController.iLastPremiseId !== null) {
-                        oView.byId("ToolbarTitle").setText("Devices in " + IomyRe.common.PremiseList["_"+oController.iLastPremiseId].Name);
-                        
-                    } else if (oController.iLastRoomId !== null) {
-                        oView.byId("ToolbarTitle").setText("Devices in " + IomyRe.functions.getRoom( oController.iLastRoomId ).RoomName);
-                        
-                    }
-                }
-                
-                if (evt.data.bEditing !== undefined && evt.data.bEditing !== null) {
-                    oController.bEditing = evt.data.bEditing;
-                } else {
-                    oController.bEditing = false;
-                }
-                
-                oController.IndicateWhetherInEditModeOrNot();
-                
-                //-- Defines the Device Type --//
-                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
-                
-                oController.aAjaxTasks = { 
-                    "Low": [],
-                    "Mid": [],
-                    "High": []
-                };
-                
-                oController.InitialiseDeviceList();
+                oController.RefreshPage(evt.data);
             }
         });
             
         
+    },
+    
+    RefreshPage : function (mData) {
+        var oController = this;            //-- SCOPE: Allows subfunctions to access the current scope --//
+        var oView = this.getView();
+        
+        //----------------------------------------------------//
+        // Find the premise ID, if specified, and store it.
+        //----------------------------------------------------//
+        if (mData.PremiseId !== undefined && mData.PremiseId !== null) {
+            oController.iLastPremiseId = mData.PremiseId;
+
+        } else {
+            oController.iLastPremiseId = null;
+        }
+
+        //----------------------------------------------------//
+        // Find the room ID, if specified, and store it.
+        //----------------------------------------------------//
+        if (mData.RoomId !== undefined && mData.RoomId !== null) {
+            oController.iLastRoomId = mData.RoomId;
+
+        } else {
+            oController.iLastRoomId = null;
+
+        }
+
+        if (oController.iLastPremiseId === null && oController.iLastRoomId === null) {
+            oView.byId("ToolbarTitle").setText("Devices");
+
+        } else if (oController.iLastPremiseId !== null && oController.iLastRoomId !== null) {
+            // If both the Premise ID and Room ID are given, use the room ID.
+            oView.byId("ToolbarTitle").setText("Devices in " + IomyRe.functions.getRoom( oController.iLastRoomId ).RoomName);
+
+        } else {
+            if (oController.iLastPremiseId !== null) {
+                oView.byId("ToolbarTitle").setText("Devices in " + IomyRe.common.PremiseList["_"+oController.iLastPremiseId].Name);
+
+            } else if (oController.iLastRoomId !== null) {
+                oView.byId("ToolbarTitle").setText("Devices in " + IomyRe.functions.getRoom( oController.iLastRoomId ).RoomName);
+
+            }
+        }
+
+        if (mData.bEditing !== undefined && mData.bEditing !== null) {
+            oController.bEditing = mData.bEditing;
+        } else {
+            oController.bEditing = false;
+        }
+
+        oController.IndicateWhetherInEditModeOrNot();
+
+        //-- Defines the Device Type --//
+        IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+
+        oController.aAjaxTasks = { 
+            "Low": [],
+            "Mid": [],
+            "High": []
+        };
+
+        oController.InitialiseDeviceList();
     },
     
     /**
@@ -136,7 +143,12 @@ sap.ui.controller("pages.staging.Device", {
         //-- Remove the "Edit " prefix --//
         if (sTitle.indexOf("Edit ") === 0) {
             sTitle = sTitle.replace("Edit ", "");
-            oView.byId("ToolbarTitle").setText(sTitle);
+            
+            if (oController.iLastPremiseId === null && oController.iLastRoomId === null) {
+                oView.byId("ToolbarTitle").setText("Devices");
+            } else {
+                oView.byId("ToolbarTitle").setText(sTitle);
+            }
         }
         
         //-- If we're editing add the prefix "Edit ". --//
@@ -268,7 +280,7 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "Loading ...",
+                                number: "Loading...",
                                 numberUnit: "Current Colour",
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
@@ -314,7 +326,7 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "Loading ...",
+                                number: "Loading...",
                                 numberUnit: "Current Colour",
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
@@ -650,26 +662,30 @@ sap.ui.controller("pages.staging.Device", {
                     //--------------------------------------------------------//
                     if (aDevice.DeviceTypeId == IomyRe.devices.weatherfeed.ThingTypeId) {
                         mTaskListSettings.onSuccess = function (data) {
-                            oView.byId(sPrefix).setNumber(data.Temperature.Value.toFixed(1) + data.Temperature.UomName);
-                            
-                            oView.byId("humidity"+aDevice.DeviceId).setText("Humidity: " + data.Humidity.Value + data.Humidity.UomName);
-                            oView.byId("outside"+aDevice.DeviceId).setText("Outside: " + data.Condition.Value);
-                            
-                            //-- Update the Last Ajax Request Date --//
-                            oController.dLastAjaxUpdate    = new Date();
-                            //-- Recursively check for more Tasks --//
-                            oController.RecursiveLoadAjaxData();
+                            if (oView.byId(sPrefix) !== undefined) {
+                                oView.byId(sPrefix).setNumber(data.Temperature.Value.toFixed(1) + data.Temperature.UomName);
+
+                                oView.byId("humidity"+aDevice.DeviceId).setText("Humidity: " + data.Humidity.Value + data.Humidity.UomName);
+                                oView.byId("outside"+aDevice.DeviceId).setText("Outside: " + data.Condition.Value);
+
+                                //-- Update the Last Ajax Request Date --//
+                                oController.dLastAjaxUpdate    = new Date();
+                                //-- Recursively check for more Tasks --//
+                                oController.RecursiveLoadAjaxData();
+                            }
                         };
                         
                         mTaskListSettings.onFail = function (sErrMessage) {
                             $.sap.log.error(sErrMessage);
                             
-                            oView.byId(sPrefix).setNumber("N/A");
-                            
-                            oView.byId("humidity"+aDevice.DeviceId).setText("Failed to load data");
-                            
-                            //-- Recursively check for more Tasks --//
-                            oController.RecursiveLoadAjaxData();
+                            if (oView.byId(sPrefix) !== undefined) {
+                                oView.byId(sPrefix).setNumber("N/A");
+
+                                oView.byId("humidity"+aDevice.DeviceId).setText("Failed to load data");
+
+                                //-- Recursively check for more Tasks --//
+                                oController.RecursiveLoadAjaxData();
+                            }
                         };
                     }
                 }
@@ -681,21 +697,25 @@ sap.ui.controller("pages.staging.Device", {
                     //--------------------------------------------------------//
                     if (aDevice.DeviceTypeId == IomyRe.devices.motionsensor.ThingTypeId) {
                         mTaskListSettings.onSuccess = function (data) {
-                            oView.byId(sPrefix).setNumberUnit(data.HumanReadable.UTS);
-                            
-                            //-- Update the Last Ajax Request Date --//
-                            oController.dLastAjaxUpdate    = new Date();
-                            //-- Recursively check for more Tasks --//
-                            oController.RecursiveLoadAjaxData();
+                            if (oView.byId(sPrefix) !== undefined) {
+                                oView.byId(sPrefix).setNumberUnit(data.HumanReadable.UTS);
+
+                                //-- Update the Last Ajax Request Date --//
+                                oController.dLastAjaxUpdate    = new Date();
+                                //-- Recursively check for more Tasks --//
+                                oController.RecursiveLoadAjaxData();
+                            }
                         };
                         
                         mTaskListSettings.onFail = function (sErrMessage) {
                             $.sap.log.error(sErrMessage);
                             
-                            oView.byId(sPrefix).setNumberUnit("N/A");
-                            
-                            //-- Recursively check for more Tasks --//
-                            oController.RecursiveLoadAjaxData();
+                            if (oView.byId(sPrefix) !== undefined) {
+                                oView.byId(sPrefix).setNumberUnit("N/A");
+
+                                //-- Recursively check for more Tasks --//
+                                oController.RecursiveLoadAjaxData();
+                            }
                         };
                     }
                 }
@@ -707,21 +727,25 @@ sap.ui.controller("pages.staging.Device", {
                     aDevice.DeviceTypeId == IomyRe.devices.csrmesh.ThingTypeId)
                 {
                     mTaskListSettings.onSuccess = function (sHexString) {
-                        oView.byId(sPrefix).setNumber("#"+sHexString);
+                        if (oView.byId(sPrefix) !== undefined) {
+                            oView.byId(sPrefix).setNumber("#"+sHexString);
 
-                        //-- Update the Last Ajax Request Date --//
-                        oController.dLastAjaxUpdate    = new Date();
-                        //-- Recursively check for more Tasks --//
-                        oController.RecursiveLoadAjaxData();
+                            //-- Update the Last Ajax Request Date --//
+                            oController.dLastAjaxUpdate    = new Date();
+                            //-- Recursively check for more Tasks --//
+                            oController.RecursiveLoadAjaxData();
+                        }
                     };
 
                     mTaskListSettings.onFail = function (sErrMessage) {
                         $.sap.log.error(sErrMessage);
 
-                        oView.byId(sPrefix).setNumber("N/A");
+                        if (oView.byId(sPrefix) !== undefined) {
+                            oView.byId(sPrefix).setNumber("N/A");
 
-                        //-- Recursively check for more Tasks --//
-                        oController.RecursiveLoadAjaxData();
+                            //-- Recursively check for more Tasks --//
+                            oController.RecursiveLoadAjaxData();
+                        }
                     };
                 }
                 

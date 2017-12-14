@@ -54,43 +54,54 @@ sap.ui.controller("pages.staging.room.RoomForm", {
                     oController.bEditing = false;
                 }
                 
-				try {
-					if (oController.bEditing === true) {
-						var sRoomCode = "_"+oController.mPageData.RoomId;
-						var sPremiseCode = "_"+oController.mPageData.PremiseId;
-						oController.mRoomData = IomyRe.common.RoomsList[sPremiseCode][sRoomCode];
-                        
-					} else {
-						oController.mRoomData = {
-                            "RoomName"      : "",
-                            "RoomDesc"      : "",
-                            "PremiseId"     : "",
-                            "RoomTypeId"    : ""
-                        };
-					}
-				} catch(e1) {
-					jQuery.sap.log.error("Error with the onBeforeShow 'bEditing' :"+e1.message);
-				}
-				
-				//-- Update the Model --//
-				oController.RefreshModel( oController, {} );
-				
-				//-- Refresh Nav Buttons --//
-				oController.ToggleButtonsAndView( oController, oController.bEditing );
-				
-				//-- Defines the Device Type --//
-				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                oController.loadRoomForm()
 			}
 			
 		});
 		
 	},
     
+    loadRoomForm : function () {
+        var oController = this;			//-- SCOPE: Allows subfunctions to access the current scope --//
+		var oView = this.getView();
+        
+        try {
+            if (oController.bEditing === true) {
+                var sRoomCode = "_"+oController.mPageData.RoomId;
+                var sPremiseCode = "_"+oController.mPageData.PremiseId;
+                oController.mRoomData = IomyRe.common.RoomsList[sPremiseCode][sRoomCode];
+
+            } else {
+                oController.mRoomData = {
+                    "RoomName"      : "",
+                    "RoomDesc"      : "",
+                    "PremiseId"     : "",
+                    "RoomTypeId"    : ""
+                };
+            }
+        } catch(e1) {
+            jQuery.sap.log.error("Error with the onBeforeShow 'bEditing' :"+e1.message);
+        }
+
+        //-- Update the Model --//
+        oController.RefreshModel( oController, {} );
+
+        //-- Refresh Nav Buttons --//
+        oController.ToggleButtonsAndView( oController, oController.bEditing );
+
+        //-- Defines the Device Type --//
+        IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+    },
+    
     ToggleSubmitCancelButtons : function (bEnabled) {
         var oView = this.getView();
         
         oView.byId("ButtonSubmit").setEnabled(bEnabled);
         oView.byId("ButtonCancel").setEnabled(bEnabled);
+        
+        if (oView.byId("ButtonDelete") !== undefined) {
+            oView.byId("ButtonDelete").setEnabled(bEnabled);
+        }
     },
 	
 	RefreshModel : function( oController, oConfig ) {
@@ -330,7 +341,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 			jQuery.sap.log.error("Error with 'AddRoom' in the 'RoomForm' controller! "+e1.message);
 		}
 	},
-	
+    
 	ToggleButtonsAndView: function ( oController, bEditing ) {
 		var oView = this.getView();
 		
@@ -350,5 +361,5 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 			return false;
 		}
 	},
-
+    
 });

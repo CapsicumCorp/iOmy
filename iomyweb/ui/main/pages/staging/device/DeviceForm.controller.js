@@ -82,75 +82,82 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     oController.iThingId        = null;
                 }
                 
-                if (oView.byId("DeviceName") !== undefined) {
-                    oView.byId("DeviceName").destroy();
-                }
-                
-                if (oView.byId("EditThingRoomSelector") !== undefined) {
-                    oView.byId("EditThingRoomSelector").destroy();
-                }
-                
-                if (oView.byId("ButtonSubmit") !== undefined) {
-                    oView.byId("ButtonSubmit").destroy();
-                }
-                
-                if (oView.byId("ButtonCancel") !== undefined) {
-                    oView.byId("ButtonCancel").destroy();
-                }
-                
-                //oController.bDeviceOptionSelectorDrawn = true;
-                
-                oController.RefreshModel();
-                
-                oController.DeviceOptions = IomyRe.functions.getNewDeviceOptions();
-                
-                if (oController.bEditExisting) {
-                    oController.iThingTypeId = IomyRe.common.ThingList["_"+oController.iThingId].TypeId;
-                    
-                    console.log(oController.iThingTypeId);
-                    
-                    if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
-                        oView.byId("DevType").setVisible( false );
-                        oView.byId("DevSettings").setVisible( true );
-                        IomyRe.common.ShowFormFragment( oController, "DeviceFormEditIPCamera", "DevSettingsBlock", "Block" );
-                    } else {
-                        oView.byId("DevType").setVisible( true );
-                        oView.byId("DevSettings").setVisible( false );
-                        IomyRe.common.ShowFormFragment( oController, "DeviceFormEdit", "DevTypeBlock", "Block" );
-                    }
-                    
-                    if (oController.bNoRooms) {
-                        oView.byId("EditThingRoomSelector").setVisible(false);
-                    }
-                    
-                    //oController.bDeviceOptionSelectorDrawn = false;
-                } else {
-                    oView.byId("DevType").setVisible( true );
-                    oController.iThingTypeId = null;
-                    
-                    IomyRe.common.ShowFormFragment( oController, "DeviceFormAdd", "DevTypeBlock", "Block" );
-                    
-                    //if (!oController.bDeviceOptionSelectorDrawn) {
-                        var oSBox = IomyRe.widgets.selectBoxNewDeviceOptions (oView.createId("DevTypeSelect"),{
-                            selectedKey : "start",
-                            change : function () {
-                                var DevTypeSelect = this;
-                                var sDevType = DevTypeSelect.getSelectedKey();
-                                oController.DevTypeToggle(oController, sDevType);
-                            }
-                        });
-
-                        oView.byId("DeviceTypeFormElement").addField(oSBox);
-                        
-                        oView.byId("DevTypeSelect").setSelectedKey("start");
-                
-                    //}
-                }
-                
+                oController.loadDeviceForm();
             }
             
         });
         
+    },
+    
+    loadDeviceForm : function () {
+        var oController = this;            //-- SCOPE: Allows subfunctions to access the current scope --//
+        var oView = this.getView();
+        
+        if (oView.byId("DeviceName") !== undefined) {
+            oView.byId("DeviceName").destroy();
+        }
+
+        if (oView.byId("EditThingRoomSelector") !== undefined) {
+            oView.byId("EditThingRoomSelector").destroy();
+        }
+
+        if (oView.byId("ButtonSubmit") !== undefined) {
+            oView.byId("ButtonSubmit").destroy();
+        }
+
+        if (oView.byId("ButtonCancel") !== undefined) {
+            oView.byId("ButtonCancel").destroy();
+        }
+
+        //oController.bDeviceOptionSelectorDrawn = true;
+
+        oController.RefreshModel();
+
+        oController.DeviceOptions = IomyRe.functions.getNewDeviceOptions();
+
+        if (oController.bEditExisting) {
+            oController.iThingTypeId = IomyRe.common.ThingList["_"+oController.iThingId].TypeId;
+
+            console.log(oController.iThingTypeId);
+
+            if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                oView.byId("DevType").setVisible( false );
+                oView.byId("DevSettings").setVisible( true );
+                IomyRe.common.ShowFormFragment( oController, "DeviceFormEditIPCamera", "DevSettingsBlock", "Block" );
+            } else {
+                oView.byId("DevType").setVisible( true );
+                oView.byId("DevSettings").setVisible( false );
+                IomyRe.common.ShowFormFragment( oController, "DeviceFormEdit", "DevTypeBlock", "Block" );
+            }
+
+            if (oController.bNoRooms) {
+                oView.byId("EditThingRoomSelector").setVisible(false);
+            }
+
+            //oController.bDeviceOptionSelectorDrawn = false;
+        } else {
+            oView.byId("DevType").setVisible( true );
+            oView.byId("DevSettings").setVisible( false );
+            oController.iThingTypeId = null;
+
+            IomyRe.common.ShowFormFragment( oController, "DeviceFormAdd", "DevTypeBlock", "Block" );
+
+            //if (!oController.bDeviceOptionSelectorDrawn) {
+                var oSBox = IomyRe.widgets.selectBoxNewDeviceOptions (oView.createId("DevTypeSelect"),{
+                    selectedKey : "start",
+                    change : function () {
+                        var DevTypeSelect = this;
+                        var sDevType = DevTypeSelect.getSelectedKey();
+                        oController.DevTypeToggle(oController, sDevType);
+                    }
+                });
+
+                oView.byId("DeviceTypeFormElement").addField(oSBox);
+
+                oView.byId("DevTypeSelect").setSelectedKey("start");
+
+            //}
+        }
     },
     
     ToggleZigbeeControls : function (bEnabled) {

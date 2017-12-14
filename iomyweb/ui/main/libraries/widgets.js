@@ -178,12 +178,7 @@ $.extend( IomyRe.widgets, {
                 if (oApp.getCurrentPage().getId() === "pDevice") {
                     var oController = oApp.getCurrentPage().getController();
                     
-                    oController.bEditing = false;
-                    oController.IndicateWhetherInEditModeOrNot();
-                    
-                    oController.ClearFilters();
-                    
-                    oController.InitialiseDeviceList();
+                    oController.RefreshPage({});
                 }
                 
                 IomyRe.common.NavigationChangePage( "pDevice" , {} , true);
