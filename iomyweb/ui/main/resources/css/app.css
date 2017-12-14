@@ -175,10 +175,24 @@ Copyright: Capsicum Corporation 2015, 2016, 2017
 	
 }
 
+/*=======================================================*/
+/* Onvif thumbnail page.
+/*=======================================================*/
 .CameraThumbnail {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+}
+
+.CameraPTZButton > .sapMBtnInner {
+    background: none;
+    border: none;
+    color: white;
+    text-shadow: 0 0 0.355rem black;
+}
+
+.CameraPTZButton > .sapMBtnInner > .sapMBtnIcon {
+    color: white;
 }
 
 /* Telnet Output Textarea Height */

@@ -77,36 +77,6 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
                 oView.wSnapshotTimeField.setText("Loading...");
                 
                 oView.byId("ToolbarTitle").setText( IomyRe.common.ThingList["_"+evt.data.ThingId].DisplayName );
-                
-                //console.log(oController.oThing);
-                //console.log(oController.oThing.DisplayName.toUpperCase());
-                // Add the subheading title widget to the list of labels that display the Thing name.
-//                LabelFunctions.addThingLabelWidget(oController.oThing.Id,
-//                    {
-//                        widgetID : oController.createId("NavSubHead_Title"),
-//                        uppercase : true
-//                    }
-//                );
-                
-                // Boolean for determining if a different camera to the previous
-                // one is accessed.
-//                var bNowForDifferentCamera = oController.iID !== evt.data.ThingId;
-//                var bUpdated = oController.UTSLastUpdate !== IomyRe.common.ThingList["_"+evt.data.ThingId].UILastUpdate;
-//                
-//                // Decide whether the page needs to be reloaded.
-//                if (bNowForDifferentCamera || bUpdated ) {
-//                    oController.bUIDrawn = false;
-//                }
-//                
-//                if (!oController.bUIDrawn) {
-//                    // Store the ID and the last update timestamp.
-//                    oController.iID = oController.oThing.Id;
-//                    oController.UTSLastUpdate = oController.oThing.UILastUpdate;
-//
-//                    // Wipe out the old instance of the UI and redraw the page.
-//                    oController.DestroyUI();
-//                    oController.DrawUI();
-//                }
 
                 oController.loadProfile();
 			}
