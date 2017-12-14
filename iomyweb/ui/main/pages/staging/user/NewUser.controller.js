@@ -245,7 +245,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
         }
         
         if (sDBPassword === "") {
-            fnAppendError("Database Password is required.");
+            fnAppendError("Database Password is required. Find this by opening the iOmy app on the device it is running on, swipe from the left side of the screen, and select 'Settings'. It will be located in under 'MySQL Root Password' entry in the settings page.");
         }
         
         //--------------------------------------------------------------------//
