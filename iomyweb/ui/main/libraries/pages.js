@@ -107,9 +107,9 @@ $.extend(IomyRe.pages,{
 				// If there's a help message for this page, enable the help
 				// button.
 				//------------------------------------------------------------//
-//				if (IomyRe.help.PageInformation[sID] !== undefined) {
-//					oApp.getPage(sID).byId("helpButton").setEnabled(true);
-//				}
+                if (aPageData.Help !== undefined) {
+                    IomyRe.help.PageInformation[sID] = aPageData.Help;
+                }
 
 			} catch (ex) {
 				jQuery.sap.log.error( sErMesg + ex.message );

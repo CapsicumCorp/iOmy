@@ -228,9 +228,14 @@ $.extend( IomyRe.navigation, {
                             IomyRe.common.NavigationChangePage( "pUserSettings" , {} , false);
                         }
                     }),
-                    new sap.m.Button({
+                    new sap.m.Button(oView.createId("helpButton"), {
                         text: 'Help',
                         type: sap.m.ButtonType.Transparent,
+                        enabled: IomyRe.help.PageInformation[oView.getId()] !== undefined,
+                        
+                        press : function () {
+                            IomyRe.common.showInformation( IomyRe.help.PageInformation[oView.getId()], "Help" );
+                        }
                     }),
                     new sap.m.Button({
                         text: 'Logout',

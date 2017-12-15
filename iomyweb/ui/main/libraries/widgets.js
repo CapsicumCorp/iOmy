@@ -1,6 +1,8 @@
 /*
 Title: IomyRe Page Widgets
-Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+Author: 
+    Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+    Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
 Description: A function to create a complete sap.m.Page for all activities
     (pages).
 Copyright: Capsicum Corporation 2016, 2017

@@ -2,6 +2,7 @@
 Title: App loader
 Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
 Modified: Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
+    Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: 
 Copyright: Capsicum Corporation 2017
 */
@@ -39,6 +40,9 @@ $.sap.require("IomyRe.pages");
 $.sap.registerModulePath('IomyRe.telnet', sModuleInitialBuildLocation+'libraries/telnet');
 $.sap.require("IomyRe.telnet");
 
+$.sap.registerModulePath('IomyRe.help', sModuleInitialBuildLocation+'libraries/help');
+$.sap.require("IomyRe.help");
+
 $.sap.registerModulePath('IomyRe.time', sModuleInitialBuildLocation+'libraries/time');
 $.sap.require("IomyRe.time");
 
@@ -66,7 +70,7 @@ jQuery.sap.registerResourcePath("pages", sLocalResources);
 //Sets up the fragements location
 jQuery.sap.registerResourcePath("fragments", sModuleInitialBuildLocation+"fragments");
 
-// TODO: Perhaps use the user's language settings instead of that of the webview.
+// TODO: Use the user's language settings instead of that of the webview.
 var language = navigator.language;
 var oApp = new sap.m.App("oApp");
 	
@@ -241,7 +245,7 @@ var aPages = [
 		"Location":		"pages.staging.FFMPEG",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.FFMPEG\" Page!\n"
-	},
+	}
 
 ];
 
