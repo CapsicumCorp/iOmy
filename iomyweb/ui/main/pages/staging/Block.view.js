@@ -23,33 +23,33 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.jsview("pages.staging.Block", {
-	
-	/*************************************************************************************************** 
-	** 1.0 - Controller Declaration
-	**************************************************************************************************** 
-	* Specifies the Controller belonging to this View. 
-	* In the case that it is not implemented, or that "null" is returned, this View does not have a Controller.
-	* @memberOf pages.staging.Block
-	****************************************************************************************************/ 
-	getControllerName : function() {
-		return "pages.staging.Block";
-	},
+    
+    /*************************************************************************************************** 
+    ** 1.0 - Controller Declaration
+    **************************************************************************************************** 
+    * Specifies the Controller belonging to this View. 
+    * In the case that it is not implemented, or that "null" is returned, this View does not have a Controller.
+    * @memberOf pages.staging.Block
+    ****************************************************************************************************/ 
+    getControllerName : function() {
+        return "pages.staging.Block";
+    },
 
-	/*************************************************************************************************** 
-	** 2.0 - Content Creation
-	**************************************************************************************************** 
-	* Is initially called once after the Controller has been instantiated. It is the place where the UI is constructed. 
-	* Since the Controller is given to this method, its event handlers can be attached right away. 
-	* @memberOf pages.staging.Block
-	****************************************************************************************************/ 
-	createContent : function(oController) {
-		var oView = this;
-		
+    /*************************************************************************************************** 
+    ** 2.0 - Content Creation
+    **************************************************************************************************** 
+    * Is initially called once after the Controller has been instantiated. It is the place where the UI is constructed. 
+    * Since the Controller is given to this method, its event handlers can be attached right away. 
+    * @memberOf pages.staging.Block
+    ****************************************************************************************************/ 
+    createContent : function(oController) {
+        var oView = this;
+        
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
-			title: "Home",
-			header : IomyRe.widgets.getToolPageHeader( oController ),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
-			mainContents: [ 
+            title: "Home",
+            header : IomyRe.widgets.getToolPageHeader( oController ),
+            sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+            mainContents: [ 
                 new sap.m.ScrollContainer ({
                     width: "100%",
                     height: "100%",
@@ -171,33 +171,33 @@ sap.ui.jsview("pages.staging.Block", {
                                                 }),
                                             ]
                                         }),
-                                        new sap.ui.layout.BlockLayoutRow ({
-                                            content : [ 
-                                                new sap.ui.layout.BlockLayoutCell ({
-                                                    content : [
-                                                        new sap.ui.layout.VerticalLayout ({
-                                                            width: "100%",
-                                                            content : [
-                                                                new sap.m.Link ({
-                                                                    text : "FFMPEG",
-                                                                    emphasized : true,
-                                                                    press : function () {
-                                                                        IomyRe.common.NavigationChangePage( "pFFMPEG" , {} , false);
-                                                                    }
-                                                                }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk")
-                                                            ]
-                                                        })
-                                                    ]
-                                                })
-                                            ]
-                                        })		
+//                                        new sap.ui.layout.BlockLayoutRow ({
+//                                            content : [ 
+//                                                new sap.ui.layout.BlockLayoutCell ({
+//                                                    content : [
+//                                                        new sap.ui.layout.VerticalLayout ({
+//                                                            width: "100%",
+//                                                            content : [
+//                                                                new sap.m.Link ({
+//                                                                    text : "FFMPEG",
+//                                                                    emphasized : true,
+//                                                                    press : function () {
+//                                                                        IomyRe.common.NavigationChangePage( "pFFMPEG" , {} , false);
+//                                                                    }
+//                                                                }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk")
+//                                                            ]
+//                                                        })
+//                                                    ]
+//                                                })
+//                                            ]
+//                                        })
                                     ]
                                 })
                             ]
                         }).addStyleClass("")
                     ]
                 })
-			]
-		}).addStyleClass("MainBackground");
-	}
+            ]
+        }).addStyleClass("MainBackground");
+    }
 });
