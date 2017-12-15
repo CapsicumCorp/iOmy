@@ -425,6 +425,24 @@ $.extend(IomyRe.common,{
 
     },
     
+    showInformation : function( sMessage, sTitle, fnCallback, sCssClass ){
+        //-- --//
+        var callbackFn = fnCallback || function(){};
+        var cssClass   = sCssClass || "";
+        
+        // open a fully configured message box
+        sap.m.MessageBox.show(
+            sMessage,
+            {
+                icon: sap.m.MessageBox.Icon.INFORMATION,
+                title: sTitle,
+                actions: sap.m.MessageBox.Action.CLOSE,
+                onClose: fnCallback,
+                styleClass: cssClass
+            }
+        );
+    },
+    
     showWarning : function( sMessage, sTitle, fnCallback, sCssClass ){
         //-- --//
         var callbackFn = fnCallback || function(){};
