@@ -254,7 +254,8 @@ $.extend( IomyRe.widgets, {
 				items : [
 					oNavHome, oNavDevices, oNavPremise, oNavRoom, oNavRules, oNavUsers
 				]
-			}),
+			})
+/* ,
 			fixedItem : new sap.tnt.NavigationList ({
 				items : [
 					oNavLinks, oNavLegal
@@ -265,6 +266,7 @@ $.extend( IomyRe.widgets, {
 					
 				]
 			})
+*/
 		});
 		
 		//----------------------------------------------------//
