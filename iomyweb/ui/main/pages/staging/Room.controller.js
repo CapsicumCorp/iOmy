@@ -83,6 +83,8 @@ sap.ui.controller("pages.staging.Room", {
                 //-- Defines the Device Type --//
                 IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
+                oController.RefreshModel();
+                
                 oController.BuildRoomListUI();
             }
         });
@@ -109,6 +111,24 @@ sap.ui.controller("pages.staging.Room", {
         if (oController.bEditing) {
             oView.byId("ToolbarTitle").setText( "Edit " + sTitle );
         }
+    },
+    
+    RefreshModel : function () {
+        var oController = this;
+        var oView       = this.getView();
+        var oJSON       = {};
+        
+        if (oController.bEditing) {
+            oJSON.UnassignedTapInstructions = "";
+            oJSON.RoomTapInstructions = "Tap to edit details";
+        } else {
+            oJSON.UnassignedTapInstructions = "Tap to view devices";
+            oJSON.RoomTapInstructions = "Tap to view devices";
+        }
+        
+        oView.setModel( 
+            new sap.ui.model.json.JSONModel(oJSON)
+        );
     },
 
     BuildRoomListUI : function () {
@@ -147,6 +167,7 @@ sap.ui.controller("pages.staging.Room", {
                 var bRoomIsUnassigned   = false;
                 var iDeviceCount;
                 var iRoomCount;
+                var sModelReference;
                 bHasRooms = true;
                 
                 
@@ -175,6 +196,12 @@ sap.ui.controller("pages.staging.Room", {
                     }
                 }
                 
+                if (bRoomIsUnassigned) {
+                    sModelReference = "{/UnassignedTapInstructions}";
+                } else {
+                    sModelReference = "{/RoomTapInstructions}";
+                }
+                
                 if (!bOmitEntry) {
                     wList.addItem(
                         new sap.m.ObjectListItem (oView.createId("entry"+mRoom.RoomId), {        
@@ -183,14 +210,17 @@ sap.ui.controller("pages.staging.Room", {
                             number: IomyRe.functions.getNumberOfDevicesInRoom(mRoom.RoomId),
                             numberUnit: "Devices",
                             attributes : [
+//                                new sap.m.ObjectAttribute ({
+//                                    text: "link",
+//                                    customContent : new sap.m.Link ({
+//                                        text: "Toggle Room State"
+//                                    })
+//                                }),
+//                                new sap.m.ObjectAttribute ({
+//                                    text: "Status: On"
+//                                })
                                 new sap.m.ObjectAttribute ({
-                                    text: "link",
-                                    customContent : new sap.m.Link ({
-                                        text: "Toggle Room State"
-                                    })
-                                }),
-                                new sap.m.ObjectAttribute ({
-                                    text: "Status: On"
+                                    text: sModelReference
                                 })
                             ],
                             press : function () {

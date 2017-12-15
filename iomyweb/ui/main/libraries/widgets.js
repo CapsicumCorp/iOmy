@@ -200,8 +200,11 @@ $.extend( IomyRe.widgets, {
 			text: "Rooms",
 			select : function () {
 				if (oApp.getCurrentPage().getId() === "pRoomList") {
-                    oApp.getCurrentPage().getController().bEditing = false;
-                    oApp.getCurrentPage().getController().IndicateWhetherInEditModeOrNot();
+                    var oController = oApp.getCurrentPage().getController();
+                    
+                    oController.bEditing = false;
+                    oController.IndicateWhetherInEditModeOrNot();
+                    oController.RefreshModel()
 
                 }
                 

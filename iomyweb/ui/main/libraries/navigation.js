@@ -161,8 +161,11 @@ $.extend( IomyRe.navigation, {
                         type: sap.m.ButtonType.Transparent,
                         press : function () {
                             if (oApp.getCurrentPage().getId() === "pDevice") {
-                                oApp.getCurrentPage().getController().bEditing = true;
-                                oApp.getCurrentPage().getController().IndicateWhetherInEditModeOrNot();
+                                var oController = oApp.getCurrentPage().getController();
+                                
+                                oController.bEditing = true;
+                                oController.IndicateWhetherInEditModeOrNot();
+                                oController.RefreshModel();
                                 
                             }
                             
@@ -181,8 +184,11 @@ $.extend( IomyRe.navigation, {
                         type: sap.m.ButtonType.Transparent,
                         press : function () {
                             if (oApp.getCurrentPage().getId() === "pRoomList") {
-                                oApp.getCurrentPage().getController().bEditing = true;
-                                oApp.getCurrentPage().getController().IndicateWhetherInEditModeOrNot();
+                                var oController = oApp.getCurrentPage().getController();
+                                
+                                oController.bEditing = true;
+                                oController.IndicateWhetherInEditModeOrNot();
+                                oController.RefreshModel()
                                 
                             }
                             

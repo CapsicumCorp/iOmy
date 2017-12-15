@@ -127,6 +127,8 @@ sap.ui.controller("pages.staging.Device", {
             "Mid": [],
             "High": []
         };
+        
+        oController.RefreshModel();
 
         oController.InitialiseDeviceList();
     },
@@ -160,6 +162,22 @@ sap.ui.controller("pages.staging.Device", {
     ClearFilters : function () {
         this.iLastRoomId    = null;
         this.iLastPremiseId = null;
+    },
+    
+    RefreshModel : function () {
+        var oController = this;
+        var oView       = this.getView();
+        var oJSON       = {};
+        
+        if (oController.bEditing) {
+            oJSON.CameraTapInstructions = "Tap to edit details";
+        } else {
+            oJSON.CameraTapInstructions = "Tap to view stream";
+        }
+        
+        oView.setModel( 
+            new sap.ui.model.json.JSONModel(oJSON)
+        );
     },
     
     InitialiseDeviceList : function () {
@@ -383,7 +401,7 @@ sap.ui.controller("pages.staging.Device", {
                                         })
                                     }),
                                     new sap.m.ObjectAttribute ({
-                                        text: "Tap to view stream"
+                                        text: "{/CameraTapInstructions}"
                                     })
                                 ],
                                 
@@ -435,7 +453,7 @@ sap.ui.controller("pages.staging.Device", {
                                 numberUnit: "",//IomyRe.devices.getDeviceAddress(mDevice.DeviceId),
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
-                                        text: "Tap to view stream"
+                                        text: "{/CameraTapInstructions}"
                                     })
 //                                    new sap.m.ObjectAttribute ({
 //                                        text: "link",
