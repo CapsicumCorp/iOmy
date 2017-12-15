@@ -34,6 +34,9 @@ sap.ui.controller("pages.staging.device.RGBlight", {
     bAdvancedFirstRun               : true,
     bUsingAdvancedUI                : false,
     
+    
+    
+    
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
@@ -82,7 +85,8 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var oController = this;
         var oView       = this.getView();
         
-        oView.byId("ColourBox").setSrc(IomyRe.apiphp.APILocation("colorbox")+"?Mode=HSL&H="+iHue+"&S="+iSat+"&L="+Math.floor(iBright/2));
+        //oView.byId("ColourBox").setSrc(IomyRe.apiphp.APILocation("colorbox")+"?Mode=HSL&H="+iHue+"&S="+iSat+"&L="+Math.floor(iBright/2));
+        oView.byId("ColourBox").setSrc(IomyRe.apiphp.APILocation("colorbox")+"?Mode=HSL&H="+iHue+"&S="+iSat+"&L="+iBright);
     },
     
     SetSliderValues : function (iHue, iSat, iBright) {
@@ -185,7 +189,8 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var oController     = this;
         var oView           = this.getView();
         var oContainer      = oView.byId("RGB_Cont");
-        //var mSliderValues   = IomyRe.functions.convertRGBToHSL(oView.byId("CPicker").getColorString());
+        var mRGBColors      = oView.byId("CPicker").getRGB();
+        var mSliderValues   = IomyRe.functions.convertRGBToHSL( mRGBColors.r, mRGBColors.g, mRGBColors.b );
         
         //console.log(mSliderValues);
         
@@ -196,9 +201,9 @@ sap.ui.controller("pages.staging.device.RGBlight", {
             
             oContainer.addContent(
                 IomyRe.widgets.LightBulbControlsContainer(oController, {
-                    hue             : 180,
-                    saturation      : 100,
-                    brightness      : 100,
+                    hue             : mSliderValues.hue,
+                    saturation      : mSliderValues.saturation,
+                    brightness      : mSliderValues.light,
                     
                     advancedViewPress : function () {
                         oView.byId("ViewSwitchButton").setEnabled(false);
@@ -237,6 +242,30 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var iHue            = oView.byId("hueSlider").getValue();
         var iSat            = oView.byId("satSlider").getValue();
         var iBright         = oView.byId("briSlider").getValue();
+        var mNormalHSL      = {};
+        var mRGB            = {};
+        var iRed            = 0;
+        var iGreen          = 0;
+        var iBlue           = 0;
+        
+        
+        //----------------------------------------------------------------//
+        //-- Calculate the RGB Values 
+        //----------------------------------------------------------------//
+        
+        //-- Convert HSL from "Simple Slider" to "Normal" --//
+        //mNormalHSL = IomyRe.functions.convertHSL( "SimpleSlider", "Normal", oController.iThingTypeId, iHue, iSat, iBright );
+        
+        //if( mNormalHSL.Error===false ) {
+            //-- Calculate RGB Values from the HSL values --//
+            mRGB = IomyRe.functions.convertHSLToRGB( iHue, iSat, iBright );
+            
+            iRed   = mRGB.red;
+            iGreen = mRGB.green;
+            iBlue  = mRGB.blue;
+            
+        //}
+        
         
         // Clear the simple view.
         oContainer.destroyContent();
@@ -249,7 +278,8 @@ sap.ui.controller("pages.staging.device.RGBlight", {
             // Create the Colour Picker.
             //----------------------------------------------------------------//
             oContainer.addContent(IomyRe.widgets.LightBulbColorPicker(oController, {
-                colorString : "hsv("+iHue+","+iSat+","+iBright+")",
+                //colorString : "hsv("+iHue+","+iSat+","+iBright+")",
+                colorString : "rgb("+iRed+","+iGreen+","+iBlue+")",
                 
                 simpleViewPress : function () {
                     oView.byId("ViewSwitchButton").setEnabled(false);
@@ -263,7 +293,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
             
             oController.RGBUiDraw();
             
-            if (oView.byId("ButtonWhiteLight") !== undefined) {
+            if(oView.byId("ButtonWhiteLight") !== undefined) {
                 oView.byId("ButtonWhiteLight").setEnabled(true);
             }
         }
@@ -294,14 +324,22 @@ sap.ui.controller("pages.staging.device.RGBlight", {
                 onSuccess : function (iHue, iSaturation, iLight) {
                     var iDeviceState = IomyRe.common.ThingList["_"+oController.iThingId].Status;
                     
+                    
                     //--------------------------------------------------------//
                     // Set the colour on the page.
                     //--------------------------------------------------------//
                     if (oController.bUsingAdvancedUI === true) {
-                        oController.RGBInit("hsv("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")");
+                        //oController.RGBInit("hsv("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")");
+                        oController.RGBInit( iHue, iSaturation, iLight );
                     } else {
-                        oController.ChangeColourInBox(Math.round(iHue), Math.round(iSaturation), Math.round(iLight));
-                        oController.SetSliderValues(iHue, iSaturation, iLight);
+                        //oController.ChangeColourInBox(Math.round(iHue), Math.round(iSaturation), Math.round(iLight));
+                        var mNewHSL = IomyRe.functions.convertHSL( "Normal", "SimpleSlider", oController.iThingTypeId, iHue, iSaturation, iLight );
+                        
+                        if( mNewHSL.Error===false ) {
+                            oController.SetSliderValues( mNewHSL.Hue, mNewHSL.Sat, mNewHSL.Lig );
+                            //oController.ChangeColourInBox( Math.round(iHue), Math.round( iSaturation / 2.55 ), Math.round( iLight / 2.55 ));
+                            oController.ChangeColourInBox( mNewHSL.Hue, mNewHSL.Sat, mNewHSL.Lig );
+                        }
                     }
                     
                     //--------------------------------------------------------//
@@ -373,6 +411,7 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         });
     },
     
+    
     /**
      * Event function that is called whenever the colour values have changed in
      * the colour picker.
@@ -384,24 +423,53 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var oView           = this.getView();
         var mParameters;
         
+        var mNewHSL         = {};
+        var iNewHue         = 0;
+        var iNewSat         = 0;
+        var iNewLig         = 0;
+        
+        
         if (oEvent === undefined) {
-            mParameters = {
-                h : oView.byId("hueSlider").getValue(),// / oController.fHueConversionRate,
-                s : oView.byId("satSlider").getValue(),// / oController.fSaturationConversionRate,
-                v : oView.byId("briSlider").getValue(),// / oController.fLightConversionRate
-            };
+            //mParameters = {
+            //    h : oView.byId("hueSlider").getValue(),// / oController.fHueConversionRate,
+            //    s : oView.byId("satSlider").getValue(),// / oController.fSaturationConversionRate,
+            //    v : oView.byId("briSlider").getValue(),// / oController.fLightConversionRate
+            //};
+            
+            mNewHSL = IomyRe.functions.convertHSL( "SimpleSlider", "DB", oController.iThingTypeId, oView.byId("hueSlider").getValue(), oView.byId("satSlider").getValue(), oView.byId("briSlider").getValue() );
+            if( mNewHSL.Error===false ) {
+                iNewHue = mNewHSL.Hue;
+                iNewSat = mNewHSL.Sat;
+                iNewLig = mNewHSL.Lig;
+            }
+            
         } else {
+            //----------------------------------------------------------------------------------------//
+            //-- TODO: This seems to be triggered when the User goes from "Simple" to "Advanced"    --//
+            //--     This will need to be looked at down the track                                  --//
+            //----------------------------------------------------------------------------------------//
+            
             mParameters = oEvent.getParameters();
+            
+            var mNewHSLTemp = IomyRe.functions.convertRGBToHSL255( mParameters.r, mParameters.g, mParameters.b );
+            
+            mNewHSL = IomyRe.functions.convertHSL( "Normal", "DB", oController.iThingTypeId, mNewHSLTemp.hue, mNewHSLTemp.saturation, mNewHSLTemp.light );
+            if( mNewHSL.Error===false ) {
+                iNewHue = mNewHSL.Hue;
+                iNewSat = mNewHSL.Sat;
+                iNewLig = mNewHSL.Lig;
+            }
         }
         
+        /*
         if (mParameters.h === 360) {
             mParameters.h = 0;
         }
-        
         var iHue            = Math.floor(mParameters.h * this.fHueConversionRate);
         var iSat            = Math.floor(mParameters.s * this.fSaturationConversionRate);
         var iLight          = Math.floor(mParameters.v * this.fLightConversionRate);
         var iDeviceType     = IomyRe.common.ThingList["_"+this.iThingId].TypeId;
+        */
         
         var mRequestData    = {
             "method" : "POST",
@@ -410,30 +478,39 @@ sap.ui.controller("pages.staging.device.RGBlight", {
             }
         };
         
+
         if (!oController.bAdvancedFirstRun) {
             
-            if (iDeviceType == IomyRe.devices.philipshue.ThingTypeId) {
+            //if (iDeviceType == IomyRe.devices.philipshue.ThingTypeId) {
+            if (oController.iThingTypeId == IomyRe.devices.philipshue.ThingTypeId) {
                 mRequestData.url    = IomyRe.apiphp.APILocation("philipshue");
                 mRequestData.data   = {
                     "Mode" : "ChangeHueSatLig",
                     "ThingId" : oController.iThingId,
-                    "Hue" : iHue,
-                    "Saturation" : iSat,
-                    "Brightness" : iLight
+                    //"Hue" : iHue,
+                    //"Saturation" : iSat,
+                    //"Brightness" : iLight
+                    "Hue":        iNewHue,
+                    "Saturation": iNewSat,
+                    "Brightness": iNewLig
                 };
                 
                 IomyRe.apiphp.AjaxRequest(mRequestData);
                 
-            } else if (iDeviceType == IomyRe.devices.csrmesh.ThingTypeId) {
+            //} else if (iDeviceType == IomyRe.devices.csrmesh.ThingTypeId) {
+            } else if(oController.iThingTypeId == IomyRe.devices.csrmesh.ThingTypeId) {
                 mRequestData.url    = IomyRe.apiphp.APILocation("light");
                 mRequestData.data   = {
                     "Mode" : "ChangeColorBrightness",
                     "ThingId" : oController.iThingId,
                     "Data" : JSON.stringify({
                         "NewValue" : {
-                            "Hue" : iHue,
-                            "Saturation" : iSat,
-                            "Brightness" : iLight
+                            //"Hue" : iHue,
+                            //"Saturation" : iSat,
+                            //"Brightness" : iLight
+                            "Hue":        iNewHue,
+                            "Saturation": iNewSat,
+                            "Brightness": iNewLig
                         }
                     })
                 };

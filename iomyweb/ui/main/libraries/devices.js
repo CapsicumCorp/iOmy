@@ -932,7 +932,8 @@ $.extend(IomyRe.devices,{
                 onSuccess : function (iHue, iSaturation, iLight) {
                     // FIXME: Someone needs to write code to convert from HSV to HSL.
                     // The examples I found simply do not work, and I don't know why.
-                    var sHexString = IomyRe.functions.convertHSLToHex(iHue, iSaturation, Math.floor(iLight / 2));
+                    //var sHexString = IomyRe.functions.convertHSLToHex(iHue, iSaturation, Math.floor(iLight / 2));
+                    var sHexString = IomyRe.functions.convertHSL255ToHex( iHue, iSaturation, iLight );
                     
                     fnSuccess(sHexString);
                 },
@@ -1030,16 +1031,16 @@ $.extend(IomyRe.devices,{
         // Determine the conversion rates as the figures from the database will
         // need to be converted for use with each light bulb type.
         //--------------------------------------------------------------------//
-        if (mThing.TypeId == IomyRe.devices.philipshue.ThingTypeId) {
-            fHueConversionRate          = 65535 / 360;  // 65535 (2^16 - 1) is the maximum value the Philips Hue API will accept.
-            fSaturationConversionRate   = 1.44;         // 144 / 100 (100 being the max saturation value)
-            fLightConversionRate        = 2.54;         // 254 / 100 (likewise)
+        //if (mThing.TypeId == IomyRe.devices.philipshue.ThingTypeId) {
+        //    fHueConversionRate          = 65535 / 360;  // 65535 (2^16 - 1) is the maximum value the Philips Hue API will accept.
+        //    fSaturationConversionRate   = 1.44;         // 144 / 100 (100 being the max saturation value)
+        //    fLightConversionRate        = 2.54;         // 254 / 100 (likewise)
 
-        } else if (mThing.TypeId == IomyRe.devices.csrmesh.ThingTypeId) {
-            fHueConversionRate          = 1;
-            fSaturationConversionRate   = 2.55;
-            fLightConversionRate        = 2.55;
-        }
+        //} else if (mThing.TypeId == IomyRe.devices.csrmesh.ThingTypeId) {
+        //    fHueConversionRate          = 1;
+        //    fSaturationConversionRate   = 2.55;
+        //    fLightConversionRate        = 2.55;
+        //}
         
         try {
             $.each(mIOs, function (sI, aIO) {
@@ -1072,21 +1073,24 @@ $.extend(IomyRe.devices,{
                         // If we're grabbing the HUE value
                         //----------------------------------------------------//
                         if (data[i].RSTYPE_PK === 3901 && iHue === null) {
-                            iHue = Math.round(data[i].CALCEDVALUE / fHueConversionRate);
+                            //iHue = Math.round(data[i].CALCEDVALUE / fHueConversionRate);
+                            iHue = data[i].CALCEDVALUE;
                         }
                         
                         //----------------------------------------------------//
                         // If we're grabbing the SATURATION value
                         //----------------------------------------------------//
                         if (data[i].RSTYPE_PK === 3902 && iSaturation === null) {
-                            iSaturation = Math.round(data[i].CALCEDVALUE / fSaturationConversionRate);
+                            //iSaturation = Math.round(data[i].CALCEDVALUE / fSaturationConversionRate);
+                            iSaturation = data[i].CALCEDVALUE;
                         }
                         
                         //----------------------------------------------------//
                         // If we're grabbing the LUMINANCE value
                         //----------------------------------------------------//
                         if (data[i].RSTYPE_PK === 3903 && iLight === null) {
-                            iLight = Math.round(data[i].CALCEDVALUE / fLightConversionRate);
+                            //iLight = Math.round(data[i].CALCEDVALUE / fLightConversionRate);
+                            iLight = data[i].CALCEDVALUE;
                         }
                         
                         //----------------------------------------------------//
@@ -1116,7 +1120,17 @@ $.extend(IomyRe.devices,{
                         }
                     }
                     
-                    fnSuccess(iHue, iSaturation, iLight);
+                    
+                    //----------------------------------------------------//
+                    //-- Convert the Values                             --//
+                    //----------------------------------------------------//
+                    var mConvertedHSL = IomyRe.functions.convertHSL( "DB", "Normal", mThing.TypeId, iHue, iSaturation, iLight );
+                    
+                    if( mConvertedHSL.Error===false ) {
+                        fnSuccess( mConvertedHSL.Hue, mConvertedHSL.Sat, mConvertedHSL.Lig );
+                    } else {
+                        fnFail("Failed to convert HSL data! "+mConvertedHSL.ErrMesg+".");
+                    }
                 },
 
                 onFail : function (response) {

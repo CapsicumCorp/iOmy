@@ -326,7 +326,7 @@ $.extend( IomyRe.widgets, {
             mSettings = {};
         }
         
-        mSettings.mode = sap.ui.unified.ColorPickerMode.HSV;
+        mSettings.mode = sap.ui.unified.ColorPickerMode.HSL;
         
         oForm = new sap.ui.layout.form.Form( oView.createId("DevTypeBlock_Form"),{
             editable: true,

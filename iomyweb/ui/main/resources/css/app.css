@@ -223,3 +223,12 @@ Copyright: Capsicum Corporation 2015, 2016, 2017
 .LightBulbColourPicker > .sapUnifiedColorPicker > div > .sapUiColorPicker-ColorPickerAlphaSlider {
     display: none;
 }
+
+.hideForHSV.sapUiColorPicker-RBRow {
+    display: none;
+}
+
+/* To hide the Alpha Channel in the colour picker */
+.sapUiColorPicker-ColorPickerLastColumn> div:nth-child(4) {
+    display: none;
+}

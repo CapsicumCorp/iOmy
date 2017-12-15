@@ -232,6 +232,73 @@ $.extend(IomyRe.functions, {
         };
     },
     
+    convertRGBToHSL255 : function (iOldRed, iOldGreen, iOldBlue) {
+        var fOldRed;
+        var fOldGreen;
+        var fOldBlue;
+        
+        var fMin, fMax;
+        var fDifference;
+        
+        var iNewHue;
+        var iNewSat;
+        var iNewLight;
+        
+        fOldRed    = iOldRed / 255;
+        fOldGreen  = iOldGreen / 255;
+        fOldBlue   = iOldBlue / 255;
+        
+        //--------------------------------------------------------------------//
+        // Determine which of the three numbers is the minimum and maximum.
+        //--------------------------------------------------------------------//
+        fMin = Math.min( fOldRed, fOldGreen, fOldBlue );
+        fMax = Math.max( fOldRed, fOldGreen, fOldBlue );
+        
+        fDifference = fMax - fMin;
+        
+        //--------------------------------------------------------------------//
+        // Find the luminance figure.
+        //--------------------------------------------------------------------//
+        iNewLight = ((fMin + fMax)/2);
+        
+        //--------------------------------------------------------------------//
+        // Find the saturation
+        //--------------------------------------------------------------------//
+        if (fMax === fMin) {
+            iNewHue = iNewSat = 0;
+        } else {
+            fDifference = fMax - fMin;
+            iNewSat = iNewLight > 0.5 ? fDifference / (2 - fMax - fMin) : fDifference / (fMax + fMin);
+            switch (fMax) {
+                case fOldRed:
+                    iNewHue = (fOldGreen - fOldBlue) / fDifference + (fOldGreen < fOldBlue ? 6 : 0);
+                    break;
+                case fOldGreen:
+                    iNewHue = (fOldBlue - fOldRed) / fDifference + 2;
+                    break;
+                case fOldBlue:
+                    iNewHue = (fOldRed - fOldGreen) / fDifference + 4;
+                    break;
+            }
+            iNewHue /= 6;
+        }
+        
+        //--------------------------------------------------------------------//
+        // Round off the figures.
+        //--------------------------------------------------------------------//
+        iNewHue = Math.round(iNewHue * 360);
+        iNewSat = Math.round(iNewSat * 255);
+        iNewLight = Math.round(iNewLight * 255);
+        
+        //--------------------------------------------------------------------//
+        // Return the figures.
+        //--------------------------------------------------------------------//
+        return {
+            "hue"           : iNewHue,
+            "saturation"    : iNewSat,
+            "light"         : iNewLight
+        };
+    },
     /**
      * Converts HSL values to RGB values.
      * 
@@ -338,6 +405,109 @@ $.extend(IomyRe.functions, {
         return mValues;
     },
     
+    convertHSL255ToRGB : function (iHue, iSat, iLight) {
+        //--------------------------------------------//
+        //-- Variables used only in calculations    --//
+        //--------------------------------------------//
+        var fSaturation;
+        var fLuminance;
+        var fChroma;
+        var fX;
+        var fM;
+        var iTempR = 0;
+        var iTempG = 0;
+        var iTempB = 0;
+        
+        //--------------------------------------------//
+        //-- For Final Results                      --//
+        //--------------------------------------------//
+        var iRed;
+        var iGreen;
+        var iBlue;
+        var mValues;
+        
+        
+        if (!isFinite(iHue)) {
+            iHue = 0;
+        }
+        
+        if (!isFinite(iSat)) {
+            iSat = 0;
+        }
+        
+        if (!isFinite(iLight)) {
+            iLight = 0;
+        }
+
+        //--------------------------------------------------------//
+        // Process the Hue for calculation.
+        //--------------------------------------------------------//
+        var iRealHue   = Math.abs( iHue ) % 360;
+        var iHueHexant = Math.floor( iRealHue / 60 );
+        //--------------------------------------------------------//
+        // Process the saturation and luminance.
+        //--------------------------------------------------------//
+        
+        fSaturation = Math.max(0, Math.min(1, iSat / 255));
+        fLuminance  = Math.max(0, Math.min(1, iLight / 255));
+        
+        //--------------------------------------------------------//
+        // Get the Chroma and the X value.
+        //--------------------------------------------------------//
+        fChroma = (1 - Math.abs((2 * fLuminance) - 1)) * fSaturation;
+        fX = fChroma * (1 - Math.abs((iHueHexant % 2) - 1));
+        fM = fLuminance - ( fChroma / 2 );
+        
+        //--------------------------------------------------------//
+        //-- Generate the Hexant Values                         --//
+        //--------------------------------------------------------//
+        switch( iHueHexant ) {
+            case 0:
+                iTempR = fChroma;
+                iTempG = fX;
+                iTempB = 0;
+                break;
+            case 1:
+                iTempR = fX;
+                iTempG = fChroma;
+                iTempB = 0;
+                break;
+            case 2:
+                iTempR = 0;
+                iTempG = fChroma;
+                iTempB = fX;
+                break;
+            case 3:
+                iTempR = 0;
+                iTempG = fX;
+                iTempB = fChroma;
+                break;
+            case 4:
+                iTempR = fX;
+                iTempG = 0;
+                iTempB = fChroma;
+                break;
+            default:
+                iTempR = fChroma;
+                iTempG = 0;
+                iTempB = fX;
+                break;
+        }
+        
+        //-- Calculate the RGB values --//
+        iRed   = Math.floor( ( iTempR+fM ) * 255 );
+        iGreen = Math.floor( ( iTempG+fM ) * 255 );
+        iBlue  = Math.floor( ( iTempB+fM ) * 255 );
+        
+        mValues = {
+            red     : iRed,
+            green   : iGreen,
+            blue    : iBlue
+        };
+        
+        return mValues;
+    },
+    
     /**
      * Takes a set of RGB values and converts them to hexadecminal notation.
      * 
@@ -434,6 +604,220 @@ $.extend(IomyRe.functions, {
     convertHSLToHex : function (iHue, iSat, iLight) {
         return this.convertRGBToHex(this.convertHSLToRGB(iHue, iSat, iLight));
     },
+    
+    convertHSL255ToHex : function (iHue, iSat, iLight) {
+        return this.convertRGBToHex(this.convertHSL255ToRGB(iHue, iSat, iLight));
+    },
+    
+    
+    convertHSL: function( sFromType, sToType, iThingType, iOldHue, iOldSat, iOldLig ) {
+        //------------------------------------//
+        //-- 1.0 - DECLARE VARIABLES        --//
+        //------------------------------------//
+        var bError       = false;
+        var sErrMesg     = "";
+        var fHueConvRate = null;
+        var fSatConvRate = null;
+        var fLigConvRate = null;
+        
+        
+        //------------------------------------------------------------//
+        //-- NOTE: The Simple Slider heavily rounds values          --//
+        //--     The values returned from the conversion are very   --//
+        //-- likely different from the values used to make the      --//
+        //-- simple slider values due to the how much rounding is   --//
+        //-- done for the simple slider conversion                  --//
+        //------------------------------------------------------------//
+        
+        
+        try {
+            //------------------------------------//
+            //-- 3.0 - ERROR CHECKING           --//
+            //------------------------------------//
+            if( iThingType!=IomyRe.devices.philipshue.ThingTypeId && iThingType!=IomyRe.devices.csrmesh.ThingTypeId ) {
+                bError   = true;
+                sErrMesg = "Unsupported ThingType Id! ThingTypeId="+iThingType;
+            } 
+            
+            //------------------------------------//
+            //-- 4.0 - LOOKUP CONVERTRATE       --//
+            //------------------------------------//
+            if( bError===false ) {
+                if( sFromType==="DB" ) {
+                    //------------------------------------//
+                    //-- DB -> Normal                   --//
+                    //------------------------------------//
+                    if( sToType==="Normal" ) {
+                        if( iThingType == IomyRe.devices.philipshue.ThingTypeId) {
+                            fHueConvRate   = 360 / 65535;      // 65535 (2^16 - 1) is the maximum value the Philips Hue API will accept.
+                            fSatConvRate   = 254 / 255;
+                            fLigConvRate   = 254 / 255;
+                            
+                        } else if ( iThingType == IomyRe.devices.csrmesh.ThingTypeId) {
+                            fHueConvRate   = 1;
+                            fSatConvRate   = 1;
+                            fLigConvRate   = 1;
+                            
+                        }
+                    } else {
+                        //-- ERROR: --//
+                        bError   = true;
+                        sErrMesg = "Unsupported From->To Combination!";
+                        
+                    }
+                    
+                } else if( sFromType==="Normal" ) {
+                    //------------------------------------//
+                    //-- Normal -> DB                   --//
+                    //------------------------------------//
+                    if( sToType==="DB" ) {
+                        if( iThingType == IomyRe.devices.philipshue.ThingTypeId ) {
+                            fHueConvRate   = 65535 / 360 ;      // 65535 (2^16 - 1) is the maximum value the Philips Hue API will accept.
+                            fSatConvRate   = 254 / 255;
+                            fLigConvRate   = 254 / 255;
+                            
+                        } else if( iThingType == IomyRe.devices.csrmesh.ThingTypeId ) {
+                            fHueConvRate   = 1;
+                            fSatConvRate   = 1;
+                            fLigConvRate   = 1;
+                        }
+                    //------------------------------------//
+                    //-- Normal -> Simple Slider        --//
+                    //------------------------------------//
+                    } else if( sToType==="SimpleSlider" ) {
+                        fHueConvRate   = 1;
+                        fSatConvRate   = 100 / 255;
+                        fLigConvRate   = 100 / 255;
+                        
+                    //------------------------------------//
+                    //-- Normal -> Adv Slider           --//
+                    //------------------------------------//
+                    } else if ( sToType==="AdvancedSlider") {
+                        fHueConvRate   = 1;
+                        fSatConvRate   = 100 / 255;
+                        fLigConvRate   = 100 / 255;
+                        
+                    } else {
+                        //-- ERROR: --//
+                        bError   = true;
+                        sErrMesg = "Unsupported From->To Combination!";
+                        
+                    }
+                    
+                } else if( sFromType==="SimpleSlider" ) {
+                    //------------------------------------//
+                    //-- Simple Slider -> DB            --//
+                    //------------------------------------//
+                    if( sToType==="DB" ) {
+                        if( iThingType == IomyRe.devices.philipshue.ThingTypeId ) {
+                            fHueConvRate   = 65535 / 360;      // 65535 (2^16 - 1) is the maximum value the Philips Hue API will accept.
+                            fSatConvRate   = 254 / 100 ;
+                            fLigConvRate   = 254 / 100 ;
+                            
+                        } else if( iThingType == IomyRe.devices.csrmesh.ThingTypeId ) {
+                            fHueConvRate   = 1;
+                            fSatConvRate   = 1;
+                            fLigConvRate   = 1;
+                            
+                        }
+                        
+                    //------------------------------------//
+                    //-- Simple Slider -> Normal        --//
+                    //------------------------------------//
+                    } else if( sToType==="Normal" ) {
+                        fHueConvRate   = 1;
+                        fSatConvRate   = 255 / 100;
+                        fLigConvRate   = 255 / 100;
+                        
+                    //------------------------------------//
+                    //-- Simple Slider -> Adv Slider    --//
+                    //------------------------------------//
+                    } else if( sToType==="AdvancedSlider" ) {
+                        fHueConvRate   = 1;
+                        fSatConvRate   = 1;
+                        fLigConvRate   = 1;
+                        
+                    } else {
+                        //-- ERROR: --//
+                        bError   = true;
+                        sErrMesg = "Unsupported From->To Combination!";
+                        
+                    }
+                    
+                } else if( sFromType==="AdvancedSlider" ) {
+                    //------------------------------------//
+                    //-- Adv Slider -> DB               --//
+                    //------------------------------------//
+                    if( sToType==="DB" ) {
+                        if( iThingType == IomyRe.devices.philipshue.ThingTypeId ) {
+                            fHueConvRate   = 65535 / 360;      // 65535 (2^16 - 1) is the maximum value the Philips Hue API will accept.
+                            fSatConvRate   = 254 / 100;
+                            fLigConvRate   = 254 / 100;
+                            
+                        } else if( iThingType == IomyRe.devices.csrmesh.ThingTypeId ) {
+                            fHueConvRate   = 1;
+                            fSatConvRate   = 1;
+                            fLigConvRate   = 1;
+                            
+                        }
+                    //------------------------------------//
+                    //-- Adv Slider -> Normal           --//
+                    //------------------------------------//
+                    } else if ( sToType==="Normal") {
+                        fHueConvRate   = 1;
+                        fSatConvRate   = 1;
+                        fLigConvRate   = 1;
+                        
+                    } else {
+                        //-- ERROR: --//
+                        bError   = true;
+                        sErrMesg = "Unsupported From->To Combination!";
+                    }
+                } else {
+                    //-- ERROR: --//
+                    bError   = true;
+                    sErrMesg = "Unsupported From->To Combination!";
+                    
+                }
+            }
+            
+            //------------------------------------//
+            //-- 5.0 - CONVERT THE VALUES       --//
+            //------------------------------------//
+            if( bError===false ) {
+                var iNewHue = Math.round( iOldHue * fHueConvRate );
+                var iNewSat = Math.round( iOldSat * fSatConvRate );
+                var iNewLig = Math.round( iOldLig * fLigConvRate );
+                
+            }
+            
+            
+            //------------------------------------//
+            //-- 9.0 - RETURN THE RESULTS       --//
+            //------------------------------------//
+            if( bError===false ) {
+                return {
+                    "Error": false,
+                    "Hue":   iNewHue,
+                    "Sat":   iNewSat,
+                    "Lig":   iNewLig
+                };
+                
+            } else {
+                return {
+                    "Error":   true,
+                    "ErrMesg": "Critical Error: Problem Converting HSL Values! "+sErrMesg
+                };
+                
+            }
+        } catch( e01 ) {
+            return {
+                "Error":   true,
+                "ErrMesg": "Critical Error: Problem Converting HSL Values"
+            };
+        }
+    },
+    
     
     /**
      * Retrives the hub that a thing is connected to.
