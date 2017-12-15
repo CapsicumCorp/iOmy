@@ -71,7 +71,9 @@ sap.ui.controller("pages.staging.device.Mjpeg", {
             },
 
             onFail : function (sErrorMessage) {
-                IomyRe.common.showError(sErrorMessage, "Stream Not Available");
+                if (oApp.getCurrentPage().getId() === oView.getId()) {
+                    IomyRe.common.showError(sErrorMessage, "Stream Not Available");
+                }
             }
         });
     }

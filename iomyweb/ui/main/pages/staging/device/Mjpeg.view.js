@@ -60,7 +60,7 @@ sap.ui.jsview("pages.staging.device.Mjpeg", {
                             densityAware : false,
 
                             error : function () {
-                                if (this.getSrc() !== "") {
+                                if (this.getSrc() !== "" && oApp.getCurrentPage().getId() === oView.getId()) {
                                     IomyRe.common.showError("Ensure that the connection settings are correct and that the device is online.", "Stream Not Available");
                                 }
                             }
