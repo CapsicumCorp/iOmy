@@ -135,7 +135,7 @@ sap.ui.jsview("pages.staging.user.UserList", {
                                 }),
                                 new sap.ui.table.Column ({
                                     label : new sap.m.Label({ 
-                                        text:"First Name" 
+                                        text:"Given Names" 
                                     }),
                                     template : oColFName
                                 }),
