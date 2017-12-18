@@ -240,7 +240,15 @@ $.extend( IomyRe.navigation, {
                         enabled: IomyRe.help.PageInformation[oView.getId()] !== undefined,
                         
                         press : function () {
-                            IomyRe.common.showInformation( IomyRe.help.PageInformation[oView.getId()], "Help" );
+                            try {
+                                if (typeof IomyRe.help.PageInformation[oView.getId()] !== "undefined") {
+                                    IomyRe.common.showInformation( IomyRe.help.PageInformation[oView.getId()], "Help" );   
+                                } else {
+                                     $.sap.log.error(" Help: no help message exists for this page");
+                                }
+                            } catch(e2) {
+                                $.sap.log.error(" Help: Critical Error, occured when looking up page help"+e2.message);
+                            }
                         }
                     }),
                     new sap.m.Button({

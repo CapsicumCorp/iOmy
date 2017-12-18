@@ -49,7 +49,7 @@ sap.ui.jsview("pages.staging.telnet.Telnet", {
 		var oView = this;
 		
 		oView.wTextAreaOutput = new sap.m.TextArea(oView.createId("telnetOutput"), {
-			editable : false
+			editable : false,
 		}).addStyleClass("width100Percent TelnetOutput");
 		
 		oView.wInputTelnetCommand = new sap.m.Input ({
@@ -115,46 +115,49 @@ sap.ui.jsview("pages.staging.telnet.Telnet", {
 			header : IomyRe.widgets.getToolPageHeader( oController ),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
 			mainContents : [
-				IomyRe.widgets.DeviceToolbar(oController, "Telnet Console"),
-                
-				//-- Main Panel --//
-                new sap.m.Panel ({
-                    backgroundDesign: "Transparent",
-                    content : [
-                        new sap.m.VBox({
-                            layoutData : new sap.m.FlexItemData({
-                                growFactor : 1
-                            }),
-                            items : [
-                                // Put the telnet output area
-                                oView.wTextAreaOutput,
-
-                                new sap.m.Label ({
-                                    text : "Enter command:"
-                                }),
-                                new sap.m.HBox({
-                                    layoutData : new sap.m.FlexItemData({
-                                        growFactor : 1
-                                    }),
-                                    items : [
-                                        oView.wInputTelnetCommand,
-                                        oView.wBtnExecuteCommand
-                                    ]
-                                }).addStyleClass(""),
-                                new sap.m.HBox({
-                                    layoutData : new sap.m.FlexItemData({
-                                        growFactor : 1
-                                    }),
-                                    items : [
-                                        oView.wToggleShowDebug,
-                                        oView.wBtnCheckLink,
-                                        oView.wBtnListDevices
-                                    ]
-                                }).addStyleClass("TextCenter")
-                            ]
-                        }).addStyleClass("PadLeft7px PadRight7px")
-                    ]
-                }).addStyleClass("PadBottom10px PanelNoPadding UserInputForm")
+				
+				new sap.m.ScrollContainer({
+					vertical: true,
+					height: "100%",
+					content : [
+						IomyRe.widgets.DeviceToolbar(oController, "Telnet Console"),
+						// Put the telnet output area
+						new sap.m.VBox ({
+							layoutData : new sap.m.FlexItemData({
+								growFactor : 1
+							}),
+							items : [
+								oView.wTextAreaOutput
+							]
+						}),				
+						new sap.m.VBox ({
+							items: [
+								new sap.m.Label ({
+									text : "Enter command:"
+								}),
+								new sap.m.HBox({
+									layoutData : new sap.m.FlexItemData({
+										growFactor : 1
+									}),
+									items : [
+										oView.wInputTelnetCommand,
+										oView.wBtnExecuteCommand
+									]
+								}).addStyleClass(""),
+								new sap.m.HBox({
+									layoutData : new sap.m.FlexItemData({
+										growFactor : 1
+									}),
+									items : [
+										oView.wToggleShowDebug,
+										oView.wBtnCheckLink,
+										oView.wBtnListDevices
+									]
+								}).addStyleClass("TextCenter")
+							]
+						})					
+					]
+				}).addStyleClass("")
 			]
 		}).addStyleClass("MainBackground");
 	}

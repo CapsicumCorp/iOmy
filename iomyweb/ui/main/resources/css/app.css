@@ -18,6 +18,14 @@ Copyright: Capsicum Corporation 2015, 2016, 2017
 /* == #1.0# Base Classes                                                           == */
 /* ================================================================================== */
 
+.ChildFlexGrow > * {
+	flex-grow: 1 !important;
+}
+
+.ChildTextCenter > * {
+	text-align: center;
+}
+
 /* ================================================================================== */
 /* == #2.0# - Andrew Common Classes                                                == */
 /* ================================================================================== */
@@ -197,7 +205,10 @@ Copyright: Capsicum Corporation 2015, 2016, 2017
 
 /* Telnet Output Textarea Height */
 .TelnetOutput.sapMInputBase.sapMTextArea {
-	height: 300px;
+	min-height: 300px;
+	height: 65vh;
+    padding-left: 7px;
+    padding-right: 7px;
 }
 
 /*=======================================================*/

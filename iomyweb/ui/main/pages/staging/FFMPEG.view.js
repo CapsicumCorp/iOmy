@@ -49,16 +49,70 @@ sap.ui.jsview("pages.staging.FFMPEG", {
 			title: "Home",
 			header : IomyRe.widgets.getToolPageHeader( oController ),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
-			mainContents: [ 
-					new sap.m.HBox ({ 
-					width: "100%",
-					items: [
-						new sap.ui.core.HTML({
-							 preferDOM: true,
-							content: "<iframe height='272px' width='640px' scrolling='no' src='resources/video/test.html'></iframe>"
+			mainContents: [
+				new sap.m.ScrollContainer({
+					vertical: true,
+					horizontal: false,
+					height: "100%",
+					content : [
+						IomyRe.widgets.DeviceToolbar(oController, "FFMPEG"),
+						new sap.m.ScrollContainer({
+							vertical: true,
+							width: "100%",
+							content: [
+								new sap.m.VBox ({
+									items : [
+										new sap.ui.core.HTML({
+											preferDOM: true,
+										   content: "<iframe height='300px' width='700' scrolling='no' frameborder='0' src='resources/video/test.html'></iframe>"
+										}),
+									]
+								}).addStyleClass("ChildFlexGrow ChildTextCenter"),
+							]
+						}),
+						new sap.m.FlexBox ({
+							layoutData : new sap.m.FlexItemData({
+								growFactor : 1
+							}),
+							items: [
+								new sap.m.VBox ({
+									width: "200px",
+									items: [
+										new sap.m.Button ({
+											height: "50px",
+											width: "200px",
+											text: "^"
+										}),
+										new sap.m.HBox ({
+											items : [
+												new sap.m.Button ({
+													height: "50px",
+													width: "50px",
+													text: "<"
+												}),
+												new sap.m.Button ({
+													height: "50px",
+													width: "90px",
+													text:"Center"
+												}).addStyleClass("MarLeft5px MarRight5px"),
+												new sap.m.Button ({
+													height: "50px",
+													width: "50px",
+													text: ">"
+												}),
+											]
+										}),
+										new sap.m.Button ({
+											height: "50px",
+											width: "200px",
+											text: "v"
+										}),
+									]
+								}).addStyleClass("ElementCenter"),
+							]
 						})
 					]
-				}).addStyleClass(""),
+				})
 			],
 		}).addStyleClass("MainBackground");
 	}
