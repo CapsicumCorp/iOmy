@@ -2703,7 +2703,7 @@ $.extend(IomyRe.common,{
                 oApp.getPage(sPageName).byId("openMenu").setText("Hi, "+sDisplayName);
             }
             
-            IOMy.help.addHelpMessage(sPageName);
+            IomyRe.help.addHelpMessage(sPageName);
         }
         
         //--------------------------------------------------------------------//

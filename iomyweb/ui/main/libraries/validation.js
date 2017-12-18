@@ -457,9 +457,9 @@ $.extend(IomyRe.validation, {
             //-------------------------------------------------//
             var aThreeDots = sIPAddress.match(/\./g);
 
-            if (aThreeDots === null || aThreeDots.length !== 3) {
+            if (aThreeDots === null || aThreeDots.length !== 3 || sIPAddress.charAt(0) === '.' || sIPAddress.charAt( sIPAddress.length - 1 ) === '.') {
                 bError = true; // No. FAIL!
-                aErrorMessages.push("There must be only 4 parts separated by dots ('.') in an IPv4 address.");
+                aErrorMessages.push("IP Address: There must be only 4 parts separated by dots ('.') in an IPv4 address.");
             }
 
             //---------------------------------------------------------//
@@ -479,16 +479,16 @@ $.extend(IomyRe.validation, {
 
                 if (aIPAddressParts[i].length > 1 && aIPAddressParts[i].charAt(0) === "0") {
                     bError = true;
-                    aErrorMessages.push("One of the numbers start with '0'.");
+                    aErrorMessages.push("IP Address: One of the numbers start with '0'.");
                 }
 
                 if (bIPAddressFormatError === true) {
                     bError = true;
-                    aErrorMessages.push("One of the numbers contains invalid characters.");
+                    aErrorMessages.push("IP Address: One of the numbers contains invalid characters.");
                     break;
                 } else if (parseInt(aIPAddressParts[i]) < 0 || parseInt(aIPAddressParts[i]) > 255) {
                     bError = true;
-                    aErrorMessages.push("One of the numbers is greater than 255 or a negative number.");
+                    aErrorMessages.push("IP Address: One of the numbers is greater than 255 or a negative number.");
                     break;
                 }
             }
@@ -529,7 +529,7 @@ $.extend(IomyRe.validation, {
 
             if (aInvalidChars !== null) {
                 bError = true;
-                aErrorMessages.push("The port contains invalid character(s).");
+                aErrorMessages.push("IP Port: The port contains invalid character(s).");
             }
         }
         
@@ -982,15 +982,58 @@ $.extend(IomyRe.validation, {
         return mResults;
     },
     
+    validateEditIPWebCamForm : function (mData) {
+        var self            = this;
+        var bError          = false;
+        var aErrorMessages  = [];
+        
+        var fnAppendError = function (sErrorMessages) {
+            bError = true;
+            aErrorMessages.push(sErrorMessages);
+        };
+        
+        //-- Protocol (e.g. http) --//
+        if (mData.Protocol === undefined || mData.Protocol === null ||
+            mData.Protocol === "")
+        {
+            fnAppendError("URL protocol is required.");
+        }
+        
+        //-- IP Address --//
+        var mInfo = self.isIPv4AddressValid(mData.IPAddress);
+
+        if (!mInfo.bValid) {
+            bError = true;
+            aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
+        }
+        
+        //-- IP Port --//
+        mInfo = self.isIPv4PortValid(mData.IPPort);
+
+        if (!mInfo.bValid) {
+            bError = true;
+            aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
+        }
+
+        //-- Stream Path --//
+        if (mData.Path === undefined || mData.Path === null ||
+            mData.Path === "")
+        {
+            fnAppendError("Stream path is required.");
+        }
+        
+        return {
+            bIsValid : !bError,
+            aErrorMessages : aErrorMessages
+        };
+    },
+    
     validateNewDeviceData : function (sDeviceType, mData) {
         var self            = this;
         var bError          = false;
         var aErrorMessages  = [];
-        var bIsValid        = false;
         
         var sDisplayNameMissing = "Display name is required.";
-        var sIPAddressMissing   = "IP Address must be entered in";
-        var sIPPortMissing      = "IP Port must be entered in";
         
         var fnAppendError = function (sErrorMessages) {
             bError = true;

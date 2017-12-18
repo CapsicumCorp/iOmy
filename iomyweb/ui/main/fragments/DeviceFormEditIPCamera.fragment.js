@@ -140,7 +140,7 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
 								new sap.m.Button (oView.createId("ButtonSubmit"), {
 									type: sap.m.ButtonType.Accept,
 									text: "Save",
-                                    enabled: true,
+                                    enabled: false,
                                     press : function () {
                                         oController.EditDevice();
                                     }

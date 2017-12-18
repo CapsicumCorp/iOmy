@@ -118,8 +118,6 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         if (oController.bEditExisting) {
             oController.iThingTypeId = IomyRe.common.ThingList["_"+oController.iThingId].TypeId;
 
-            console.log(oController.iThingTypeId);
-
             if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
                 oView.byId("DevType").setVisible( false );
                 oView.byId("DevSettings").setVisible( true );
@@ -359,6 +357,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     oJSON.CurrentDevice.Username    = mData.username;
                     oJSON.CurrentDevice.Password    = mData.password;
                 };
+                
+                fnComplete(); // Just to wipe the old data.
                 
                 IomyRe.devices.ipcamera.loadCameraInformation({
                     thingID : oController.iThingId,
@@ -846,6 +846,12 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         var oCurrentFormData    = oView.getModel().getProperty( "/CurrentDevice/" );
         
         try {
+            var mInputInfo = IomyRe.validation.validateEditIPWebCamForm(oCurrentFormData);
+            
+            if (!mInputInfo.bIsValid) {
+                throw new IllegalArgumentException(mInputInfo.aErrorMessages.join("\n\n"));
+            }
+            
             if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
                 IomyRe.devices.ipcamera.submitWebcamInformation({
                     thingID             : oController.iThingId,
@@ -888,7 +894,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         } catch (e) {
             IomyRe.common.showError(e.message, "Failed to update settings",
                 function () {
-                    oController.ToggleSubmitCancelButtons(true);
+                    oController.ToggleEditIPWebcamControls(true);
                 }
             );
         }
@@ -1025,7 +1031,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             
             onSuccess : function (result) {
                 
-                console.log(JSON.stringify(result));
+                //console.log(JSON.stringify(result));
                 
                 var oLogContents = oView.byId("TelnetOutput").getValue();
                 
