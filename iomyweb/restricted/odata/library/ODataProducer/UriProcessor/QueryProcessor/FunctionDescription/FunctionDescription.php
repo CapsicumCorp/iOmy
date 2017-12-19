@@ -48,7 +48,7 @@ use ODataProducer\Providers\Metadata\Type\DateTime;
 use ODataProducer\Providers\Metadata\Type\Int32;
 use ODataProducer\Providers\Metadata\Type\CharArray;
 use ODataProducer\Providers\Metadata\Type\Boolean;
-use ODataProducer\Providers\Metadata\Type\Void;
+use ODataProducer\Providers\Metadata\Type\Void1;
 use ODataProducer\Providers\Metadata\Type\Binary;
 use ODataProducer\Providers\Metadata\Type\IType;
 use ODataProducer\UriProcessor\QueryProcessor\ExpressionParser\Expressions\ExpressionType;

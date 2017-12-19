@@ -34,7 +34,7 @@
 namespace ODataProducer\Providers\Metadata\Type;
 use ODataProducer\Common\NotImplementedException;
 /**
- * Type to represent Void
+ * Type to represent Void1
  * 
  * @category  ODataPHPProd
  * @package   ODataProducer_Providers_Metadata_Type
@@ -44,7 +44,7 @@ use ODataProducer\Common\NotImplementedException;
  * @version   GIT: 1.2
  * @link      https://github.com/MSOpenTech/odataphpprod
  */
-class Void implements IType
+class Void1 implements IType
 {
     /**
      * Gets the type code
@@ -54,7 +54,7 @@ class Void implements IType
      */
     public function getTypeCode()
     {
-        return TypeCode::VOID;
+        return TypeCode::VOID1;
     }
 
     /**
@@ -67,7 +67,7 @@ class Void implements IType
      */
     public function isCompatibleWith(IType $type)
     {
-        return ($type->getTypeCode() == TypeCode::VOID);
+        return ($type->getTypeCode() == TypeCode::VOID1);
     }
 
     /**
